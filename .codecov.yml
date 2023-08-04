@@ -30,6 +30,9 @@ flags:
   migrator:
     paths:
       - migration/migrator
+  submitty_daemon_jobs:
+    paths:
+      - sbin/submitty_daemon_jobs
 
 comment:
   layout: "reach, diff, flags"

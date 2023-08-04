@@ -6,7 +6,7 @@ print_extraLines(out, cats)
   newline printed at the end
 
 print_extraSpaces(out, cats)
-  print out with everything correct excpet that every line has an extra
+  print out with everything correct except that every line has an extra
   space printed out at the end
 
 print_lineOrder(out, cats)
@@ -19,7 +19,7 @@ print_frontSpacing(out, cats)
 
 print_columnSpacing(out, cats)
   print out where everything is correct except that the spacing
-  betwen the first and second column is wrong
+  between the first and second column is wrong
 
 print_spacingOff(out, cats)
   print out where all information is correct and correctly sorted
@@ -53,7 +53,7 @@ print_extraSpaces(out, cats)
             highlighted in pale yellow (a bit hard to see)
   myersDiffbyLinebyWord: expected since it's supposed to compare by word
   myersDiffbyLine: kind of unexpected. Expected to get some points since the lines
-            only had extra spaces at the end of the line. Also, diff comparision
+            only had extra spaces at the end of the line. Also, diff comparison
             didn't seem to show the extra space in yellow at the end of the lines
             (just a block of red)
   myersDiffbyLineNoWhite: expected since it's supposed to ignore whitespace
@@ -75,7 +75,7 @@ print_lineOrder(out, cats)
 
 print_frontSpacing(out, cats)
   15/21      myersDiffbyLinebyChar and myersDiffbyLine gave 1 point
-             myersDiffbyLinebyWord adn myersDiffbyLineNo white gave full points
+             myersDiffbyLinebyWord and myersDiffbyLineNo white gave full points
   myersDiffbyLinebyChar: expected - picky
   myersDiffbyLinebyWord: expected since it compares by word
   myesrDiffbyLine: kind of expected at this point in testing, still not satisfied with
@@ -116,7 +116,7 @@ print_spellingOff(out, cats)
   myersDiffbyLinebyWord: expected
   myersDiffbyLine: expected
   myersDiffbyLineNoWhite: expected
-  *note: myersDiffbyLine and myersDiffbyLineNoWhite don't hightlight the exact
+  *note: myersDiffbyLine and myersDiffbyLineNoWhite don't highlight the exact
          differences - they just show blocks of red
 
 

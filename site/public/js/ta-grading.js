@@ -16,7 +16,7 @@ let panelElements = [
   { str: "student_info", icon: ".grading_toolbar .fa-user"},
   { str: "peer_info", icon: ".grading_toolbar .fa-users"},
   { str: "discussion_browser", icon: ".grading_toolbar .fa-comment-alt"},
-  { str: "regrade_info", icon: ".grading_toolbar .grade_inquiry_icon"},
+  { str: "grade_inquiry_info", icon: ".grading_toolbar .grade_inquiry_icon"},
   { str: "notebook-view", icon: ".grading_toolbar .fas fa-book-open"}
 ];
 
@@ -48,9 +48,9 @@ let settingsCallbacks = {
   "general-setting-arrow-function": changeStudentArrowTooltips,
   "general-setting-navigate-assigned-students-only": function(value) {
     if (value == 'true') {
-      document.cookie = "view=assigned; path=/;";
+      Cookies.set('view', 'assigned', { path: '/' });
     } else {
-      document.cookie = "view=all; path=/;";
+      Cookies.set('view', 'all', { path: '/' });
     }
   }
 }
@@ -506,7 +506,7 @@ function adjustGradingPanelHeader () {
       height += $(this).outerHeight(true);
     }
   });
-  
+
   document.querySelector('.panels-container').style.height = "calc(100% - " + (height) + "px)";
 }
 
@@ -514,15 +514,15 @@ function onAjaxInit() {}
 
 function readCookies(){
 
-  let silent_edit_enabled = document.cookie.replace(/(?:(?:^|.*;\s*)silent_edit_enabled\s*\=\s*([^;]*).*$)|^.*$/, "$1") === 'true';
+  const silent_edit_enabled = Cookies.get('silent_edit_enabled') || '';
 
-  let autoscroll = document.cookie.replace(/(?:(?:^|.*;\s*)autoscroll\s*\=\s*([^;]*).*$)|^.*$/, "$1");
-  let opened_mark = document.cookie.replace(/(?:(?:^|.*;\s*)opened_mark\s*\=\s*([^;]*).*$)|^.*$/, "$1");
-  let scroll_pixel = document.cookie.replace(/(?:(?:^|.*;\s*)scroll_pixel\s*\=\s*([^;]*).*$)|^.*$/, "$1");
+  const autoscroll = Cookies.get('autoscroll') || '';
+  const opened_mark = Cookies.get('opened_mark') || '';
+  const scroll_pixel = Cookies.get('scroll_pixel') || '';
 
-  let testcases = document.cookie.replace(/(?:(?:^|.*;\s*)testcases\s*\=\s*([^;]*).*$)|^.*$/, "$1");
+  const testcases = Cookies.get('testcases') || '';
 
-  let files = document.cookie.replace(/(?:(?:^|.*;\s*)files\s*\=\s*([^;]*).*$)|^.*$/, "$1");
+  const files = Cookies.get('files') || '';
 
   $('#silent-edit-id').prop('checked', silent_edit_enabled);
 
@@ -572,9 +572,9 @@ function readCookies(){
 }
 
 function updateCookies(){
-  document.cookie = "silent_edit_enabled=" + isSilentEditModeEnabled() + "; path=/;";
+  Cookies.set('silent_edit_enabled', isSilentEditModeEnabled(), { path: '/' });
   let autoscroll = $('#autoscroll_id').is(":checked") ? "on" : "off";
-  document.cookie = "autoscroll=" + autoscroll + "; path=/;";
+  Cookies.set('autoscroll', autoscroll, { path: '/' });
 
   let files = [];
   $('#file-container').children().each(function() {
@@ -583,9 +583,9 @@ function updateCookies(){
     });
   });
   files = JSON.stringify(files);
-  document.cookie = "files=" + files + "; path=/;";
 
-  document.cookie = "cookie_version=" + cookie_version + "; path=/;";
+  Cookies.set('files', files, { path: '/' });
+  Cookies.set('cookie_version', cookie_version, { path: '/' });
 }
 
 //-----------------------------------------------------------------------------
@@ -593,7 +593,7 @@ function updateCookies(){
 function gotoMainPage() {
 
   let window_location = $("#main-page")[0].dataset.href
-
+  
   if (getGradeableId() !== '') {
     closeAllComponents(true).then(function () {
       window.location = window_location;
@@ -722,7 +722,7 @@ function resetSinglePanelLayout() {
   // Remove the full-left-column view (if it's currently present or is in-view) as it's meant for two-panel-mode only
   $(".two-panel-item.two-panel-left, .two-panel-drag-bar").removeClass("active");
 
-  // remove the left bottom sectin and its drag bar
+  // remove the left bottom section and its drag bar
   $(".panel-item-section.left-bottom, .panel-item-section.right-bottom, .panel-item-section-drag-bar").removeClass("active");
 
   const leftTopPanelId = taLayoutDet.currentTwoPanels.leftTop;
@@ -899,7 +899,7 @@ function togglePanelLayoutModes(forceVal = false) {
     $("#two-panel-exchange-btn").addClass("active");
     $(".panel-item-section.left-bottom, .panel-item-section.right-bottom, .panel-item-section-drag-bar").removeClass("active");
     $(".two-panel-item.two-panel-left, .two-panel-drag-bar").addClass("active");
-    
+
     taLayoutDet.currentActivePanels = {
       leftTop: true,
       leftBottom: false,
@@ -919,7 +919,7 @@ function togglePanelLayoutModes(forceVal = false) {
       rightTop: true,
       rightBottom: false,
     }
-  
+
     if (taLayoutDet.dividedColName === "RIGHT") {
       $(".panel-item-section.left-bottom, .panel-item-section-drag-bar.panel-item-left-drag").removeClass("active");
       $(".panel-item-section.right-bottom, .panel-item-section-drag-bar.panel-item-right-drag").addClass("active");
@@ -936,7 +936,7 @@ function togglePanelLayoutModes(forceVal = false) {
   } else if (+taLayoutDet.numOfPanelsEnabled === 4 && !isMobileView) {
     twoPanelCont.addClass("active");
     $(".two-panel-item.two-panel-left, .two-panel-drag-bar").addClass("active");
-    
+
     taLayoutDet.currentActivePanels = {
       leftTop: true,
       leftBottom: true,
@@ -990,7 +990,7 @@ function updatePanelLayoutModes () {
     const panel_type = taLayoutDet.currentTwoPanels[panel];
     //get panel corresponding with the layout position
     const layout_panel = $(`${panelsBucket[`${panel}Selector`]}`);
-    //get panel corresponsing with what the user selected to use for this spot (autograding, rubric, etc)
+    //get panel corresponding with what the user selected to use for this spot (autograding, rubric, etc)
     const dom_panel = document.getElementById(`${panel_type}`);
     if (dom_panel) {
       $(layout_panel).append(dom_panel);
@@ -1048,7 +1048,7 @@ registerKeyHandler({name: "Toggle Student Information Panel", code: "KeyS"}, fun
   updateCookies();
 });
 registerKeyHandler({name: "Toggle Grade Inquiry Panel", code: "KeyX"}, function() {
-  $('#regrade_info_btn button').trigger('click');
+  $('#grade_inquiry_info_btn button').trigger('click');
   updateCookies();
 });
 registerKeyHandler({name: "Toggle Discussion Panel", code: "KeyD"}, function() {
@@ -1198,7 +1198,7 @@ function checkOpenComponentMark(index) {
 function openAll(click_class, class_modifier) {
 
   let toClose = $("#div_viewer_" + $("." + click_class + class_modifier).attr("data-viewer_id")).hasClass("open");
-  
+
   $("#submission_browser").find("." + click_class + class_modifier).each(function(){
     // Check that the file is not a PDF before clicking on it
     let viewerID = $(this).attr("data-viewer_id");
@@ -1433,7 +1433,7 @@ function resizeImageIFrame(imageTarget, iFrameTarget) {
     boundsHeight = iFrameBody[0].scrollHeight;
     let height = 500;
     if (iFrameTarget.css("max-height").length !== 0 && parseInt(iFrameTarget.css("max-height")) >= 0) {
-      height = parseInt(iFrameTarget.css("max-height"));      
+      height = parseInt(iFrameTarget.css("max-height"));
     }
     if (boundsHeight > height) {
       iFrameBody.css("overflow-y", "");
@@ -1448,7 +1448,7 @@ function resizeImageIFrame(imageTarget, iFrameTarget) {
 function imageRotateIcons(iframe) {
   let iframeTarget = $('iframe#' + iframe);
   let contentType = iframeTarget.contents().get(0).contentType;
-  
+
   if (contentType != undefined && contentType.startsWith('image')) {
     if (iframeTarget.attr("id").endsWith("_full_panel_iframe")) {
       let imageRotateBar = iframeTarget.parent().parent().parent().find(".image-rotate-bar").first();
@@ -1466,12 +1466,12 @@ function imageRotateIcons(iframe) {
                               <a class="image-rotate-icon-cw" onclick="rotateImage('${iframeTarget.attr('src')}', 'cw')">
                               <i class="fas fa-redo" title="Rotate image clockwise"></i></a>
                               </div>`);
-      
+
       if (sessionStorage.getItem("image-rotate-" + iframeTarget.attr("src"))) {
         rotateImage(iframeTarget.attr("src"), "none");
       }
     }
-    
+
   }
 }
 
@@ -1508,7 +1508,7 @@ function openFrame(html_file, url_file, num, pdf_full_panel=true, panel="submiss
       let targetHeight = iframe.hasClass("full_panel") ? 1200 : 500;
       let frameHtml = `
         <iframe id="${iframeId}" onload="resizeFrame('${iframeId}', ${targetHeight}, ${forceFull}); imageRotateIcons('${iframeId}');"
-                src="${display_file_url}?dir=${encodeURIComponent(directory)}&file=${encodeURIComponent(html_file)}&path=${encodeURIComponent(url_file)}&ta_grading=true"
+                src="${display_file_url}?dir=${encodeURIComponent(directory)}&file=${encodeURIComponent(html_file)}&path=${encodeURIComponent(url_file)}&ta_grading=true&gradeable_id=${$("#submission_browser").data("gradeable-id")}"
                 width="95%">
         </iframe>
       `;
@@ -1531,7 +1531,7 @@ function openFrame(html_file, url_file, num, pdf_full_panel=true, panel="submiss
   return false;
 }
 
-let fileFullPanelOptions = {
+const fileFullPanelOptions = {
   submission: { //Main viewer (submission panel)
     viewer: "#viewer",
     fileView: "#file-view",
@@ -1580,6 +1580,8 @@ function viewFileFullPanel(name, path, page_num = 0, panel="submission") {
 }
 
 function loadPDF(name, path, page_num, panel="submission") {
+  // Store the file name of the last opened file for scrolling when switching between students
+  localStorage.setItem("ta-grading-files-full-view-last-opened", name);
   let extension = name.split('.').pop();
   if (fileFullPanelOptions[panel]["pdf"] && extension == "pdf") {
     let gradeable_id = document.getElementById(fileFullPanelOptions[panel]["panel"].substring(1)).dataset.gradeableId;
@@ -1603,6 +1605,7 @@ function loadPDF(name, path, page_num, panel="submission") {
     });
   }
   else {
+    $(fileFullPanelOptions[panel]["pdfAnnotationBar"]).hide();
     $(fileFullPanelOptions[panel]["saveStatus"]).hide();
     $(fileFullPanelOptions[panel]["fileContent"]).append("<div id=\"file_viewer_" + fileFullPanelOptions[panel]["fullPanel"] + "\" class=\"full_panel\" data-file_name=\"\" data-file_url=\"\"></div>");
     $("#file_viewer_" + fileFullPanelOptions[panel]["fullPanel"]).empty();
@@ -1667,7 +1670,7 @@ function uploadAttachment() {
         dataType: "json",
         success: function(data) {
           if (!("status" in data) || data["status"] !== "success") {
-            alert("An error has occured trying to upload the attachment: " + data["message"]);
+            alert("An error has occurred trying to upload the attachment: " + data["message"]);
           } else {
             let renderedData = Twig.twig({
               ref: "Attachments"
@@ -1695,7 +1698,7 @@ function uploadAttachment() {
           fileInput.prop("disabled", false);
         },
         error: function(jqXHR, textStatus, errorThrown) {
-          alert("An error has occured trying to upload the attachment: " + errorThrown);
+          alert("An error has occurred trying to upload the attachment: " + errorThrown);
           fileInput[0].value = "";
           fileInput.prop("disabled", false);
         }
@@ -1722,7 +1725,7 @@ function deleteAttachment(target, file_name) {
       dataType: "json",
       success: function(data) {
         if (!("status" in data) || data["status"] !== "success") {
-          alert("An error has occured trying to delete the attachment: " + data["message"]);
+          alert("An error has occurred trying to delete the attachment: " + data["message"]);
         } else {
           $(target).parent().parent().remove();
           let userAttachmentList = $("#attachments-list").children().first();
@@ -1736,8 +1739,13 @@ function deleteAttachment(target, file_name) {
         }
       },
       error: function(jqXHR, textStatus, errorThrown) {
-        alert("An error has occured trying to upload the attachment: " + errorThrown);
+        alert("An error has occurred trying to upload the attachment: " + errorThrown);
       }
     });
   }
 }
+$(document).ready(function() {
+  $('#posts_list').css('min-width', '-webkit-fill-available');
+  generateCodeMirrorBlocks(document);
+  loadAllInlineImages(true);
+});

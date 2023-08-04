@@ -28,7 +28,7 @@
 
         {# List team members #}
         {% for teammate in members %}
-            <span>&emsp;{{ teammate.getDisplayedFirstName() }} {{ teammate.getDisplayedLastName() }} ({{ teammate.getId() }}) - {{ teammate.getEmail() }}</span> <br />
+            <span>&emsp;{{ teammate.getDisplayedGivenName() }} {{ teammate.getDisplayedFamilyName() }} ({{ teammate.getId() }}) - {{ teammate.getEmail() }}</span> <br />
         {% endfor %}
 
         {# Team invitations status #}
@@ -63,6 +63,10 @@
             <br />
             </span>
             <br />
+            {% if git_auth_token_required %}
+                <span>Note: Your school requires that you use Authentication Tokens.</span><br>
+            {% endif %}
+            <a href="{{ git_auth_token_url }}" class="btn btn-primary">Create and Manage Authentication Tokens</a>
         {% endif %}
         {# /Repository status #}
 
@@ -148,15 +152,16 @@
     </div>
     <script>
         var textarea = document.querySelector('textarea');
-        textarea.addEventListener('keydown', autosize);
+        if (textarea) {
+            textarea.addEventListener('keydown', autosize);
 
-        function autosize(){
-            var el = this;
-            setTimeout(function(){
-                el.style.height = el.scrollHeight + 'px';
-            },0);
+            function autosize(){
+                var el = this;
+                setTimeout(function(){
+                    el.style.height = el.scrollHeight + 'px';
+                },0);
+            }
         }
-
     </script>
 {% endif %}
 {# /Edit/create team box #}
@@ -187,8 +192,8 @@
                     {% for user_details in seekers %}
                         <tr>
                             <td>{{ loop.index }}</td>
-                            <td>{{ user_details.getDisplayedFirstName() }}</td>
-                            <td>{{ user_details.getDisplayedLastName() }}</td>
+                            <td>{{ user_details.getDisplayedGivenName() }}</td>
+                            <td>{{ user_details.getDisplayedFamilyName() }}</td>
                             <td>{{ user_details.getId() }}</td>
                             <td>{{ user_details.getEmail() }}</td>
                             {% if seeking_enabled %}

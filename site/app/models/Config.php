@@ -15,8 +15,8 @@ use app\libraries\FileUtils;
  * the database. We also allow for using this to write back to the variables within the database
  * (but not the variables in the files).
  *
- * @method string getSemester()
- * @method string getCourse()
+ * @method string|null getTerm()
+ * @method string|null getCourse()
  * @method string getBaseUrl()
  * @method string getVcsUrl()
  * @method string getCgiUrl()
@@ -35,6 +35,8 @@ use app\libraries\FileUtils;
  * @method string getAuthentication()
  * @method array getLdapOptions()
  * @method void setLdapOptions(array $options)
+ * @method array getSamlOptions()
+ * @method void setSamlOptions(array $options)
  * @method \DateTimeZone getTimezone()
  * @method setTimezone(\DateTimeZone $timezone)
  * @method string getUploadMessage()
@@ -45,12 +47,10 @@ use app\libraries\FileUtils;
  * @method string getInstitutionName()
  * @method string getInstitutionHomepage()
  * @method string getCourseCodeRequirements()
- * @method string getUsernameChangeText()
  * @method bool isForumEnabled()
  * @method string getForumCreateThreadMessage()
- * @method bool isRegradeEnabled()
  * @method bool isEmailEnabled()
- * @method string getRegradeMessage()
+ * @method string getGradeInquiryMessage()
  * @method string getVcsBaseUrl()
  * @method string getSysAdminEmail()
  * @method string getSysAdminUrl()
@@ -68,7 +68,7 @@ use app\libraries\FileUtils;
  * @method bool isQueueEnabled()
  * @method bool isSeekMessageEnabled()
  * @method bool isPollsEnabled()
- * @method void setSemester(string $semester)
+ * @method void setTerm(string $term)
  * @method void setCourse(string $course)
  * @method void setCoursePath(string $course_path)
  * @method void setSubmittyPath(string $submitty_path)
@@ -91,8 +91,8 @@ class Config extends AbstractModel {
      */
     protected $debug = false;
 
-    /** @prop @var string contains the semester to use, generally from the $_REQUEST['semester'] global */
-    protected $semester;
+    /** @prop @var string contains the term to use, generally from the $_REQUEST['semester'] global */
+    protected $term;
     /** @prop @var string contains the course to use, generally from the $_REQUEST['course'] global */
     protected $course;
 
@@ -127,6 +127,8 @@ class Config extends AbstractModel {
      * @var array
      **/
     protected $ldap_options = [];
+    /** @prop @var array */
+    protected $saml_options = [];
     /** @prop @var DateTimeZone */
     protected $timezone;
     /** @var string */
@@ -238,10 +240,8 @@ class Config extends AbstractModel {
     protected $forum_enabled;
     /** @prop @var string */
     protected $forum_create_thread_message;
-    /** @prop @var bool */
-    protected $regrade_enabled;
     /** @prop @var string */
-    protected $regrade_message;
+    protected $grade_inquiry_message;
     /** @prop @var bool */
     protected $seating_only_for_instructor;
     /** @prop @var string|null */
@@ -329,6 +329,14 @@ class Config extends AbstractModel {
             foreach (['url', 'uid', 'bind_dn'] as $key) {
                 if (!isset($this->ldap_options[$key])) {
                     throw new ConfigException("Missing config value for ldap options: {$key}");
+                }
+            }
+        }
+        $this->saml_options = $authentication_json['saml_options'];
+        if ($this->authentication === 'SamlAuthentication') {
+            foreach (['name', 'username_attribute'] as $key) {
+                if (!isset($this->saml_options[$key])) {
+                    throw new ConfigException("Missing config value for saml options: {$key}");
                 }
             }
         }
@@ -462,7 +470,7 @@ class Config extends AbstractModel {
     }
 
     public function loadCourseJson($semester, $course, $course_json_path) {
-        $this->semester = $semester;
+        $this->term = $semester;
         $this->course = $course;
         $this->course_path = FileUtils::joinPaths($this->getSubmittyPath(), "courses", $semester, $course);
 
@@ -479,19 +487,27 @@ class Config extends AbstractModel {
             throw new ConfigException("Missing config section 'database_details' in json file");
         }
 
-        $this->course_database_params = array_merge($this->submitty_database_params, $this->course_json['database_details']);
+        $database_json = FileUtils::readJsonFile(FileUtils::joinPaths($this->config_path, 'database.json'));
+
+        $this->course_database_params = [
+            'dbname' => $this->course_json['database_details']['dbname'],
+            'host' => $database_json['database_host'],
+            'port' => $database_json['database_port'],
+            'username' => $database_json['database_course_user'],
+            'password' => $database_json['database_course_password']
+        ];
 
         $array = [
             'course_name', 'course_home_url', 'default_hw_late_days', 'default_student_late_days',
             'zero_rubric_grades', 'upload_message', 'display_rainbow_grades_summary',
             'display_custom_message', 'room_seating_gradeable_id', 'course_email', 'vcs_base_url', 'vcs_type',
-            'private_repository', 'forum_enabled', 'forum_create_thread_message', 'regrade_enabled', 'seating_only_for_instructor',
-            'regrade_message', 'auto_rainbow_grades', 'queue_enabled', 'queue_message', 'polls_enabled', 'queue_announcement_message', 'seek_message_enabled', 'seek_message_instructions'
+            'private_repository', 'forum_enabled', 'forum_create_thread_message', 'seating_only_for_instructor',
+            'grade_inquiry_message', 'auto_rainbow_grades', 'queue_enabled', 'queue_message', 'polls_enabled', 'queue_announcement_message', 'seek_message_enabled', 'seek_message_instructions'
         ];
         $this->setConfigValues($this->course_json, 'course_details', $array);
 
         if (empty($this->vcs_base_url)) {
-            $this->vcs_base_url = $this->vcs_url . $this->semester . '/' . $this->course;
+            $this->vcs_base_url = $this->vcs_url . $this->term . '/' . $this->course;
         }
 
         $this->vcs_base_url = rtrim($this->vcs_base_url, "/") . "/";
@@ -512,7 +528,6 @@ class Config extends AbstractModel {
             'display_rainbow_grades_summary',
             'display_custom_message',
             'forum_enabled',
-            'regrade_enabled',
             'seating_only_for_instructor',
             'queue_enabled',
             'polls_enabled',

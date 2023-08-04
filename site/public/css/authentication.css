@@ -46,3 +46,7 @@
         width: auto;
     }
 }
+
+#saml-login {
+    color: var(--btn-text-white);
+}

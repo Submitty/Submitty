@@ -6,7 +6,7 @@ Macros
 {% macro display_graders(graders, reg_sections) %}
     {% for grader in graders %}
         <tr>
-            <th scope="row" class="grader-name">{{ grader.getDisplayedFirstName() ~ " " ~ grader.getDisplayedLastName() ~ "(" ~ grader.getId() ~ ")" }}</th>
+            <th scope="row" class="grader-name">{{ grader.getDisplayedGivenName() ~ " " ~ grader.getDisplayedFamilyName() ~ "(" ~ grader.getId() ~ ")" }}</th>
             <td>
 				<label>
 					<span class="screen-reader">Can {{ grader.getId() }} grade all sections</span>

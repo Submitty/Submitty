@@ -68,7 +68,7 @@ class OfficeHoursQueueController extends AbstractController {
         $regex_pattern = isset($_POST['regex']) ? trim($_POST['regex']) : '';
         if ($this->core->getQueries()->openQueue($queue_code, $token, $regex_pattern, $require_contact_info)) {
             $this->core->addSuccessMessage("New queue added");
-            Logger::logQueueActivity($this->core->getConfig()->getSemester(), $this->core->getDisplayedCourseName(), $queue_code, "CREATED");
+            Logger::logQueueActivity($this->core->getConfig()->getTerm(), $this->core->getDisplayedCourseName(), $queue_code, "CREATED");
         }
         else {
             $this->core->addErrorMessage("Unable to add queue. Make sure you have a unique queue name");
@@ -195,20 +195,17 @@ class OfficeHoursQueueController extends AbstractController {
      * @return RedirectResponse
      */
     public function switchQueue($queue_code) {
-        //do all error checking before leaving previous queue
-        if (empty($_POST['user_id'])) {
-            $this->core->addErrorMessage("Missing user id");
-            return new RedirectResponse($this->core->buildCourseUrl(['office_hours_queue']));
-        }
+        $user_id = $this->core->getUser()->getId();
 
+        //do all error checking before leaving previous queue
         //make sure they are already in a queue first
-        if (!$this->core->getQueries()->alreadyInAQueue($_POST['user_id'])) {
+        if (!$this->core->getQueries()->alreadyInAQueue($user_id)) {
             $this->core->addErrorMessage("You aren't in a queue");
             return new RedirectResponse($this->core->buildCourseUrl(['office_hours_queue']));
         }
 
         //get the time they joined the previous queue
-        $time_in = $this->core->getQueries()->getTimeJoinedQueue($_POST['user_id'], $queue_code);
+        $time_in = $this->core->getQueries()->getTimeJoinedQueue($user_id, $queue_code);
         $token = $_POST['token'];
         $new_queue_code = $_POST['code'];
 
@@ -251,10 +248,10 @@ class OfficeHoursQueueController extends AbstractController {
 
 
         //remove them from current queue
-        $this->core->getQueries()->removeUserFromQueue($_POST['user_id'], 'self', $queue_code);
+        $this->core->getQueries()->removeUserFromQueue($user_id, 'self', $queue_code);
 
         //add to new queue
-        $this->core->getQueries()->addToQueue($validated_code, $this->core->getUser()->getId(), $_POST['name'], $contact_info, $time_in);
+        $this->core->getQueries()->addToQueue($validated_code, $user_id, $_POST['name'], $contact_info, $time_in);
         $this->sendSocketMessage(['type' => 'queue_update']);
         $this->core->addSuccessMessage("Added to queue");
         return new RedirectResponse($this->core->buildCourseUrl(['office_hours_queue']));
@@ -388,7 +385,7 @@ class OfficeHoursQueueController extends AbstractController {
             );
         }
 
-        Logger::logQueueActivity($this->core->getConfig()->getSemester(), $this->core->getDisplayedCourseName(), $queue_code, "EMPTIED");
+        Logger::logQueueActivity($this->core->getConfig()->getTerm(), $this->core->getDisplayedCourseName(), $queue_code, "EMPTIED");
         $this->core->getQueries()->emptyQueue($queue_code);
         $this->core->addSuccessMessage("Queue emptied");
         $this->sendSocketMessage(['type' => 'full_update']);
@@ -415,7 +412,7 @@ class OfficeHoursQueueController extends AbstractController {
                 new RedirectResponse($this->core->buildCourseUrl(['office_hours_queue']))
             );
         }
-        Logger::logQueueActivity($this->core->getConfig()->getSemester(), $this->core->getDisplayedCourseName(), $queue_code, $_POST['queue_state'] === "1" ? 'CLOSED' : 'OPENED');
+        Logger::logQueueActivity($this->core->getConfig()->getTerm(), $this->core->getDisplayedCourseName(), $queue_code, $_POST['queue_state'] === "1" ? 'CLOSED' : 'OPENED');
         $this->core->getQueries()->toggleQueue($queue_code, $_POST['queue_state']);
         $this->core->addSuccessMessage(($_POST['queue_state'] === "1" ? 'Closed' : 'Opened') . ' queue: "' . $queue_code . '"');
         $this->sendSocketMessage(['type' => 'toggle_queue']);
@@ -708,7 +705,7 @@ class OfficeHoursQueueController extends AbstractController {
      */
     private function sendSocketMessage(array $msg_array): void {
         $msg_array['user_id'] = $this->core->getUser()->getId();
-        $msg_array['page'] = $this->core->getConfig()->getSemester() . '-' . $this->core->getConfig()->getCourse() . "-office_hours_queue";
+        $msg_array['page'] = $this->core->getConfig()->getTerm() . '-' . $this->core->getConfig()->getCourse() . "-office_hours_queue";
         try {
             $client = new Client($this->core);
             $client->json_send($msg_array);

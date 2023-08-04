@@ -79,9 +79,9 @@ def main():
     select = users_table.select().where(users_table.c.user_id == bindparam('user_id'))
     user = connection.execute(select, user_id=user_id).fetchone()
     defaults = {
-        'user_firstname': None,
-        'user_preferred_firstname': None,
-        'user_lastname': None,
+        'user_givenname': None,
+        'user_preferred_givenname': None,
+        'user_familyname': None,
         'user_email': None
     }
     if user is not None:
@@ -91,19 +91,19 @@ def main():
         )
         defaults = user
 
-    firstname = get_input('User firstname', defaults['user_firstname'])
+    givenname = get_input('User givenname', defaults['user_givenname'])
     preferred = get_input(
         'User preferred name',
-        defaults['user_preferred_firstname'],
+        defaults['user_preferred_givenname'],
         True
     )
-    lastname = get_input('User lastname', defaults['user_lastname'])
+    familyname = get_input('User familyname', defaults['user_familyname'])
     email = get_input('User email', defaults['user_email'], True)
 
     update = {
-        'user_firstname': firstname,
-        'user_preferred_firstname': preferred,
-        'user_lastname': lastname,
+        'user_givenname': givenname,
+        'user_preferred_givenname': preferred,
+        'user_familyname': familyname,
         'user_email': email
     }
 

@@ -17,17 +17,16 @@ class GlobalView extends AbstractView {
             }
         }
 
-        $course_name = ucwords(strtolower($this->core->getFullCourseName()));
-        // We assume that if there is no page breadcrumb (only course), we are on gradeables
-        if ($course_name == ucwords(strtolower($page_name))) {
-            $page_name = "Gradeables";
-        }
-
         $page_title = "Submitty";
         if ($this->core->getUser() === null) {
             $page_title = "Login";
         }
         elseif ($this->core->getConfig()->isCourseLoaded()) {
+            $course_name = ucwords(strtolower($this->core->getFullCourseName()));
+            // We assume that if there is no page breadcrumb (only course), we are on gradeables
+            if ($course_name === ucwords(strtolower($page_name))) {
+                $page_name = "Gradeables";
+            }
             $page_title = $page_name . " - " . $course_name;
         }
         elseif (!empty($page_name) && $page_name !== "Submitty") {
@@ -42,7 +41,7 @@ class GlobalView extends AbstractView {
             "page_title" => $page_title,
             "sidebar_buttons" => $sidebar_buttons,
             "breadcrumbs" => $breadcrumbs,
-            "user_first_name" => $this->core->getUser() ? $this->core->getUser()->getDisplayedFirstName() : "",
+            "user_given_name" => $this->core->getUser() ? $this->core->getUser()->getDisplayedGivenName() : "",
             "base_url" => $this->core->getConfig()->getBaseUrl(),
             "course_url" => $this->core->buildCourseUrl(),
             "websocket_port" => $this->core->getConfig()->getWebsocketPort(),
@@ -57,10 +56,12 @@ class GlobalView extends AbstractView {
             "sysadmin_email" => $this->core->getConfig()->getSysAdminEmail(),
             "collapse_sidebar" => array_key_exists('collapse_sidebar', $_COOKIE) && $_COOKIE['collapse_sidebar'] === 'true',
             "content_only" => $content_only,
+            "manifast_path" => $this->core->getOutput()->getManifastPath(),
+            "service_worker_path" => $this->core->getOutput()->getServiceWorkerPath()
         ]);
     }
 
-    public function footer($runtime, $wrapper_urls, $footer_links, $content_only) {
+    public function footer($runtime, $wrapper_urls, $footer_links, $content_only, bool $performance_warning) {
         return $this->core->getOutput()->renderTwigTemplate("GlobalFooter.twig", [
             "runtime" => $runtime,
             "wrapper_enabled" => $this->core->getConfig()->wrapperEnabled(),
@@ -73,6 +74,7 @@ class GlobalView extends AbstractView {
             "footer_links" => $footer_links,
             "module_js" => $this->output->getModuleJs(),
             "content_only" => $content_only,
+            "performance_warning" => $performance_warning
         ]);
     }
 }

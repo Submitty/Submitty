@@ -4,19 +4,29 @@
 <head>
     <title>{{ page_title }}</title>
     <link rel="shortcut icon" href="{{ base_url }}img/favicon.ico" type="image/x-icon" />
-
+    <link rel="manifest" href="{{ manifast_path }}">
+    <script type="module" src="{{ service_worker_path }}"></script>
     <script>
         window.baseUrl = "{{ base_url }}";
         window.courseUrl = "{{ course_url }}";
         window.csrfToken = "{{ csrf_token }}";
         window.websocketPort = {{ websocket_port }};
+
+        if ("serviceWorker" in navigator) {
+            window.addEventListener("load", () => {
+                navigator.serviceWorker
+                    .register("{{ service_worker_path }}")
+                    .then(res => console.log("service worker registered"))
+                    .catch(err => console.log("service worker not registered", err))
+            })
+        }
     </script>
 
     {% for css_ref in css %}
     <link rel='stylesheet' type='text/css' href='{{ css_ref }}' />
     {% endfor %}
 
-    {# TODO, eventually this wont need an if statement and will work on every page #}
+    {# TODO, eventually this won't need an if statement and will work on every page #}
     {% if use_mobile_viewport %}
       <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no" />
     {% endif %}
@@ -101,7 +111,7 @@
     {% endif %}
 
 </head>
-<body data-base-url="{{ base_url }}" data-course-url="{{ course_url }}" data-csrf-token="{{ csrf_token }}" onload="if (onAjaxInit) { onAjaxInit(); }">
+<body data-base-url="{{ base_url }}" data-course-url="{{ course_url }}" data-csrf-token="{{ csrf_token }}" onload="if (onAjaxInit) { onAjaxInit(); }" data-user-tz-off="{{ core.getUser().getUTCOffset() ?? "NONE" }}">
 <a id="skip-nav" class="skip-btn" href="#main">Skip to main content</a>
     {% if not content_only %}
         {% if wrapper_urls['top_bar.html'] is defined %}
@@ -235,15 +245,21 @@
             Manually reload this page to see updates.{% if sysadmin_email is not empty %} Notify the
             sysadmin at <a href='mailto:{{ sysadmin_email }}'>{{ sysadmin_email }}</a>.{% endif %}
         </div>
+        <div class="system-message warning" id="performance-warning-system-message" style="display: none;">
+            <span id="performance-warning-system-message-text"></span>
+            <i id="close-performance-warning-system-message" class="fa fa-times" style="padding: 4px; cursor: pointer;"></i>
+        </div>
         <div id='messages'>
             <!-- If the below <div> definition changes, update the design in server.js in displayMessage function -->
             {% for message in messages %}
-                <div id='{{ message.type }}-{{ message.key }}' class="inner-message alert alert-{{ message.type }}">
+                <div id='{{ message.type }}-{{ message.key }}' class="inner-message alert alert-{{ message.type }}" data-testid="popup-message">
                     <span>
                         {% if message.type == "error" %}
                         <i class="fas fa-times-circle"></i>
-                        {% else %}
+                        {% elseif message.type == "success" %}
                         <i class="fas fa-check-circle"></i>
+                        {% else %}
+                        <i class="fas fa-circle-exclamation"></i>
                         {% endif %}
                         {{ message.error | nl2br }}
                     </span>
@@ -253,7 +269,7 @@
         </div>
         <div id="wrapper">
             {% if not content_only and sidebar_buttons|length > 0 %}
-                <aside class="{{collapse_sidebar?'collapsed':''}}">
+                <aside data-testid="sidebar" class="{{collapse_sidebar?'collapsed':''}}">
                     <ul>
                         {% for button in sidebar_buttons %}
                             {{ self.render_sidebar_button(button, false) }}

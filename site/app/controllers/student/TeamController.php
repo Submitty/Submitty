@@ -67,7 +67,7 @@ class TeamController extends AbstractController {
 
         if ($gradeable->isVcs()) {
             $config = $this->core->getConfig();
-            AdminGradeableController::enqueueGenerateRepos($config->getSemester(), $config->getCourse(), $gradeable_id);
+            AdminGradeableController::enqueueGenerateRepos($config->getTerm(), $config->getCourse(), $gradeable_id);
         }
 
         $this->core->redirect($return_url);
@@ -177,7 +177,7 @@ class TeamController extends AbstractController {
 
         if ($invited_user->getRegistrationSection() === null) {
             // If a student with this id is in the null section...
-            // (make this look the same as a non-existant student so as not to
+            // (make this look the same as a non-existent student so as not to
             // reveal information about dropped students)
             $this->core->addErrorMessage("User {$invite_id} does not exist");
             $this->core->redirect($return_url);

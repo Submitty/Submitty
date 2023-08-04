@@ -9,6 +9,7 @@ use app\models\User;
 
 class GlobalController extends AbstractController {
     public function header() {
+        $this->core->getOutput()->addServiceWorker();
         $wrapper_files = $this->core->getConfig()->getWrapperFiles();
         $wrapper_urls = array_map(function ($file) {
             return $this->core->buildCourseUrl(['read_file']) . '?' . http_build_query([
@@ -83,7 +84,7 @@ class GlobalController extends AbstractController {
 
         $sidebar_buttons[] = new NavButton($this->core, [
             "href" => $this->core->buildUrl(['authentication', 'logout']),
-            "title" => "Logout " . $this->core->getUser()->getDisplayedFirstName(),
+            "title" => "Logout " . $this->core->getUser()->getDisplayedGivenName(),
             "id" => "logout",
             "icon" => "fa-power-off"
         ]);
@@ -166,12 +167,12 @@ class GlobalController extends AbstractController {
 
         $course_path = $this->core->getConfig()->getCoursePath();
         $course_materials_path = $course_path . "/uploads/course_materials";
-        $any_files = FileUtils::getAllFiles($course_materials_path);
-        if ($this->core->getUser()->accessAdmin() || !empty($any_files)) {
+        $empty = FileUtils::isEmptyDir($course_materials_path);
+        if ($this->core->getUser()->accessAdmin() || !($empty)) {
             $sidebar_buttons[] = new NavButton($this->core, [
                 "href" => $this->core->buildCourseUrl(['course_materials']),
                 "title" => "Course Materials",
-                "icon" => "fa-copy"
+                "icon" => "fa-file"
             ]);
         }
 
@@ -376,21 +377,20 @@ class GlobalController extends AbstractController {
             "title" => "My Courses",
             "icon" => "fa-book-reader"
         ]);
+
         $sidebar_buttons[] = new NavButton($this->core, [
             "href" => $this->core->buildUrl(['user_profile']),
             "title" => "My Profile",
             "icon" => "fa-user"
         ]);
 
-        if ($this->core->getConfig()->isDebug()) {
-            $sidebar_buttons[] = new Button($this->core, [
-                "href" => $this->core->buildUrl(['calendar']),
-                "title" => "Calendar",
-                "class" => "nav-row",
-                "id" => "nav-sidebar-calendar",
-                "icon" => "fa-calendar"
-            ]);
-        }
+        $sidebar_buttons[] = new Button($this->core, [
+            "href" => $this->core->buildUrl(['calendar']),
+            "title" => "Calendar",
+            "class" => "nav-row",
+            "id" => "nav-sidebar-calendar",
+            "icon" => "fa-calendar"
+        ]);
 
         $is_instructor = !empty($this->core->getQueries()->getInstructorLevelAccessCourse($this->core->getUser()->getId()));
         // Create the line for all faculties, superusers, and instructors
@@ -448,6 +448,12 @@ class GlobalController extends AbstractController {
                 "title" => "Email Status",
                 "icon" => "fas fa-mail-bulk"
             ]);
+
+            $sidebar_buttons[] = new NavButton($this->core, [
+                "href" => $this->core->buildUrl(['superuser', 'saml']),
+                "title" => "SAML Management",
+                "icon" => "fas fa-user-lock"
+            ]);
         }
 
         // --------------------------------------------------------------------------
@@ -477,7 +483,7 @@ class GlobalController extends AbstractController {
                 break;
             case 11:
                 //November (Thanksgiving)
-                //last week of Novemeber
+                //last week of November
                 $tgt_date = date('Y-W-n', strtotime("fourth Thursday of November $year"));
                 if ($tgt_date === $now->format('Y-W-n')) {
                     $duck_img = 'moorthy_duck/11-november.svg';
@@ -579,8 +585,10 @@ class GlobalController extends AbstractController {
             $footer_links[] =  ["title" => "Email Admin", "url" => $this->core->getConfig()->getSysAdminEmail(), "is_email" => true];
         }
 
+        $performance_warning = $this->core->getConfig()->isDebug() && $this->core->hasDBPerformanceWarning();
+
         $runtime = $this->core->getOutput()->getRunTime();
-        return $this->core->getOutput()->renderTemplate('Global', 'footer', $runtime, $wrapper_urls, $footer_links, $content_only);
+        return $this->core->getOutput()->renderTemplate('Global', 'footer', $runtime, $wrapper_urls, $footer_links, $content_only, $performance_warning);
     }
 
     private function routeEquals(string $a, string $b) {

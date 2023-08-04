@@ -141,7 +141,7 @@ class Notebook extends AbstractModel {
         }
         else {
             // Else something unexpected happened
-            throw new \InvalidArgumentException("An error occured parsing notebook data.\n" .
+            throw new \InvalidArgumentException("An error occurred parsing notebook data.\n" .
                 "Markdown configuration may only specify one of 'markdown_string' or 'markdown_file'");
         }
     }
@@ -234,14 +234,14 @@ class Notebook extends AbstractModel {
      * Get the data from the student's most recent submission
      *
      * @param string $filename Name of the file to collect the data out of
-     * @param string $version which version to get from
+     * @param int $version which version to get from
      * @param string $student_id id of which user to collect data from
      * @throws AuthorizationException if the user lacks permissions to read the submissions file
      * @throws FileNotFoundException if file with passed filename could not be found
      * @throws IOException if there was an error reading contents from the file
      * @return string if successful returns the contents of a students most recent submission
      */
-    private function getRecentSubmissionContents(string $filename, string $version, string $student_id): string {
+    private function getRecentSubmissionContents(string $filename, int $version, string $student_id): string {
 
         // Get items in path to student's submission folder
         $course_path = $this->core->getConfig()->getCoursePath();
@@ -253,7 +253,7 @@ class Notebook extends AbstractModel {
             'submissions',
             $gradable_dir,
             $student_id,
-            $version,
+            strval($version),
             $filename
         );
 
@@ -273,7 +273,7 @@ class Notebook extends AbstractModel {
         // Read file contents into string
         $file_contents = file_get_contents($complete_file_path);
 
-        // If file_contents is False an error has occured
+        // If file_contents is False an error has occurred
         if ($file_contents === false) {
             throw new IOException("An error occurred retrieving submission contents.");
         }

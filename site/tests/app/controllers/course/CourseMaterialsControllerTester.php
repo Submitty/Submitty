@@ -85,13 +85,6 @@ class CourseMaterialsControllerTester extends BaseUnitTest {
     }
 
     public function buildCourseMaterial(string $name): CourseMaterial {
-        $details = [
-            'path' => $this->upload_path . $name,
-            'hidden_from_students' => false,
-            'priority' => 0,
-            'release_date' => $this->core->getDateTimeNow(),
-            'type' => 0
-        ];
         $course_material = new CourseMaterial(
             CourseMaterial::FILE,
             $this->upload_path . $name,
@@ -128,8 +121,9 @@ class CourseMaterialsControllerTester extends BaseUnitTest {
         $repository = $this->createMock(EntityRepository::class);
         $repository
             ->expects($this->once())
-            ->method('findOneBy')
-            ->willReturn(null);
+            ->method('findBy')
+            ->with(['path' => [$this->upload_path . "/" .  $name]])
+            ->willReturn([]);
         $this->core->getCourseEntityManager()
             ->expects($this->once())
             ->method('getRepository')
@@ -180,19 +174,45 @@ class CourseMaterialsControllerTester extends BaseUnitTest {
         $this->core->getCourseEntityManager()
             ->expects($this->exactly(8))
             ->method('persist')
-            ->withConsecutive([$course_materials[0]], [$course_materials[1]], [$course_materials[2]], [$course_materials[3]]);
+            ->willReturnCallback(function () use ($course_materials, &$i) {
+                switch ($i) {
+                    case 0:
+                        return $course_materials[0];
+                    case 1:
+                        return $course_materials[1];
+                    case 2:
+                        return $course_materials[2];
+                    case 3:
+                        return $course_materials[3];
+                }
+                $i++;
+            });
 
         $this->core->getCourseEntityManager()
             ->expects($this->once())
             ->method('flush');
 
+        $zipfile_name = 'foo.zip';
         $repository = $this->createMock(EntityRepository::class);
         $repository
-            ->expects($this->exactly(19))
+            ->expects($this->exactly(2))
+            ->method('findBy')
+            ->withConsecutive(
+                [['path' => [$this->upload_path . "/$zipfile_name"]]],
+                [['path' => [
+                    $this->upload_path . $this->config['course_path'] . '/test0.txt',
+                    $this->upload_path . $this->config['course_path'] . '/test1.txt',
+                    $this->upload_path . $this->config['course_path'] . '/lev0/test0.txt',
+                    $this->upload_path . $this->config['course_path'] . '/lev0/test1.txt']
+                ]]
+            )
+            ->willReturnOnConsecutiveCalls([], []);
+        $repository
+            ->expects($this->exactly(14))
             ->method('findOneBy')
             ->willReturn(null);
         $this->core->getCourseEntityManager()
-            ->expects($this->exactly(19))
+            ->expects($this->exactly(16))
             ->method('getRepository')
             ->with(CourseMaterial::class)
             ->willReturn($repository);
@@ -202,7 +222,7 @@ class CourseMaterialsControllerTester extends BaseUnitTest {
         $_FILES = [];
         $_POST['expand_zip'] = 'on';
         //create a zip file of depth = 2 with 2 files in each level.
-        $fake_files = $this->buildFakeZipFile('foo.zip', 1, 2, 2);
+        $fake_files = $this->buildFakeZipFile($zipfile_name, 1, 2, 2);
         $_POST['requested_path'] = '';
         $_POST['hide_from_students'] = false;
         $_POST['sort_priority'] = 0;
@@ -252,10 +272,15 @@ class CourseMaterialsControllerTester extends BaseUnitTest {
 
         $repository = $this->createMock(EntityRepository::class);
         $repository
-            ->expects($this->exactly(2))
+            ->expects($this->once())
+            ->method('findBy')
+            ->with(['path' => [$this->upload_path . "/" . $name]])
+            ->willReturn([]);
+        $repository
+            ->expects($this->once())
             ->method('findOneBy')
-            ->withConsecutive([['path' => $this->upload_path . "/" . $name]], [['id' => $course_material->getId()]])
-            ->willReturnOnConsecutiveCalls(null, $course_material);
+            ->with(['id' => $course_material->getId()])
+            ->willReturn($course_material);
         $repository
             ->expects($this->once())
             ->method('findAll')
@@ -313,10 +338,15 @@ class CourseMaterialsControllerTester extends BaseUnitTest {
 
         $repository = $this->createMock(EntityRepository::class);
         $repository
-            ->expects($this->exactly(2))
+            ->expects($this->once())
+            ->method('findBy')
+            ->with(['path' => [$this->upload_path . "/" . $name]])
+            ->willReturn([]);
+        $repository
+            ->expects($this->once())
             ->method('findOneBy')
-            ->withConsecutive([['path' => $this->upload_path . "/" . $name]], [['id' => $course_material->getId()]])
-            ->willReturnOnConsecutiveCalls(null, $course_material);
+            ->with(['id' => $course_material->getId()])
+            ->willReturn($course_material);
         $this->core->getCourseEntityManager()
             ->expects($this->exactly(2))
             ->method('getRepository')
@@ -379,16 +409,17 @@ class CourseMaterialsControllerTester extends BaseUnitTest {
 
         $repository = $this->createMock(EntityRepository::class);
         $repository
-            ->expects($this->exactly(2))
-            ->method('findOneBy')
-            ->withConsecutive([['path' => $this->upload_path . "/" . $name]], [['id' => $course_material->getId()]])
-            ->willReturnOnConsecutiveCalls(null, $course_material);
+            ->expects($this->once())
+            ->method('findBy')
+            ->with(['path' => [$this->upload_path . "/" .  $name]])
+            ->willReturn([]);
         $repository
             ->expects($this->once())
-            ->method('findAll')
-            ->willReturn([$course_material]);
+            ->method('findOneBy')
+            ->with(['id' => $course_material->getId()])
+            ->willReturn($course_material);
         $this->core->getCourseEntityManager()
-            ->expects($this->exactly(3))
+            ->expects($this->exactly(2))
             ->method('getRepository')
             ->with(CourseMaterial::class)
             ->willReturn($repository);
@@ -446,10 +477,31 @@ class CourseMaterialsControllerTester extends BaseUnitTest {
 
         $repository = $this->createMock(EntityRepository::class);
         $repository
-            ->expects($this->exactly(3))
+            ->expects($this->once())
+            ->method('findBy')
+            ->with(['path' => [$this->upload_path . "/foo/foo2/$name"]])
+            ->willReturn([]);
+        $repository
+            ->expects($this->exactly(2))
             ->method('findOneBy')
-            ->withConsecutive([['path' => $this->upload_path . '/foo/foo2/foo.txt']], [['path' => $this->upload_path . "/foo/foo2"]], [['path' => $this->upload_path . "/foo"]])
-            ->willReturnOnConsecutiveCalls(null, $course_material, $course_material);
+            ->with($this->callback(function ($value) {
+                switch (true) {
+                    case $value == ['path' => $this->upload_path . "/foo/foo2"]:
+                        return true;
+                    case $value == ['path' => $this->upload_path . "/foo"]:
+                        return true;
+                    default:
+                        return false;
+                }
+            }))
+            ->will($this->returnCallback(function ($value) use ($course_material) {
+                switch (true) {
+                    case $value == ['path' => $this->upload_path . "/foo/foo2"]:
+                        return $course_material;
+                    case $value == ['path' => $this->upload_path . "/foo"]:
+                        return $course_material;
+                }
+            }));
         $this->core->getCourseEntityManager()
             ->expects($this->exactly(3))
             ->method('getRepository')

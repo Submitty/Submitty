@@ -51,7 +51,7 @@ class HomePageController extends AbstractController {
         if ($as_instructor) {
             foreach (['archived_courses', 'unarchived_courses'] as $var) {
                 $$var = array_filter($$var, function (Course $course) use ($user_id) {
-                    return $this->core->getQueries()->checkIsInstructorInCourse($user_id, $course->getTitle(), $course->getSemester());
+                    return $this->core->getQueries()->checkIsInstructorInCourse($user_id, $course->getTitle(), $course->getTerm());
                 });
             }
         }
@@ -144,8 +144,8 @@ class HomePageController extends AbstractController {
             );
         }
 
-        $semester = $_POST['course_semester'];
-        $course_title = strtolower($_POST['course_title']);
+        $semester = trim($_POST['course_semester']);
+        $course_title = trim(strtolower($_POST['course_title']));
         $head_instructor = $_POST['head_instructor'];
 
         if ($user->getAccessLevel() === User::LEVEL_FACULTY && $head_instructor !== $user->getId()) {
@@ -318,6 +318,12 @@ class HomePageController extends AbstractController {
      * @return MultiResponse
      */
     public function addNewTerm() {
+        if (!$this->core->getUser()->isSuperUser()) {
+            return new MultiResponse(
+                JsonResponse::getFailResponse("You don't have access to this endpoint."),
+                new WebResponse("Error", "errorPage", "You don't have access to this page.")
+            );
+        }
         $response = new MultiResponse();
         if (isset($_POST['term_id']) && isset($_POST['term_name']) && isset($_POST['start_date']) && isset($_POST['end_date'])) {
             $term_id = $_POST['term_id'];

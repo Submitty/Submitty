@@ -2,11 +2,13 @@
     <header>
         <h1>Manage Students</h1>
         <div class="btn-wrapper">
+            <a id="toggle-columns" href="javascript:toggleColumnsForm()" class="btn btn-primary">Toggle Columns</a>
             <a href="javascript:newDownloadForm()" class="btn btn-primary">Download Users</a>
             <a href="javascript:newClassListForm()" class="btn btn-primary">Upload Classlist</a>
             <a href="javascript:newStudentForm()" class="btn btn-primary">New Student</a>
         </div>
     </header>
+
     {# This is a data table #}
     {% if sections|length > 0 %}
         <table id="student-table" class="table table-striped mobile-table directory-table">
@@ -14,21 +16,48 @@
             <thead>
                 <tr>
                     <th>#</th>
-                    <th>Registration Section</th>
-                    <th>User ID</th>
-                    <th>First Name</th>
-                    <th>Last Name</th>
-                    <th>Rotating Section</th>
-                    <th>UTC Offset / Time Zone</th>
-                    <th>View Grades</th>
-                    <th>Edit Student</th>
-                    <th>Delete Student</th>
+                    {% if active_student_columns[0] %}
+                        <th>Registration Section</th>
+                    {% endif %}
+                    {% if active_student_columns[1] %}
+                        <th style="text-align:left;">User ID</th>
+                    {% endif %}
+                    {% if active_student_columns[2] %}
+                        <th style="text-align:left;">First Name</th>
+                    {% endif %}
+                    {% if active_student_columns[3] %}
+                        <th style="text-align:left;">Last Name</th>
+                    {% endif %}
+                    {% if active_student_columns[4] %}
+                        <th style="text-align:left;">Pronouns</th>
+                    {% endif %}
+                    {% if active_student_columns[5] %}
+                        <th>Rotating Section</th>
+                    {% endif %}
+                    {% if active_student_columns[6] %}
+                        <th>UTC Offset / Time Zone</th>
+                    {% endif %}
+                    {% if active_student_columns[7] %}
+                        <th>View Grades</th>
+                    {% endif %}
+                    {% if active_student_columns[8] %}
+                        <th>Late Days</th>
+                    {% endif %}
+                    {% if active_student_columns[9] %}
+                        <th>Registration Type</th>
+                    {% endif %}
+                    {% if active_student_columns[10] %}
+                        <th>Edit Student</th>
+                    {% endif %}
+                    {% if active_student_columns[11] %}
+                        <th>Delete Student</th>
+                    {% endif %}
                 </tr>
             </thead>
             {% for registration, students in sections %}
                 <tbody id="section-{{ registration }}">
                     <tr class="info">
-                        <th class="section-break" colspan="10">Students Enrolled in Registration Section {{ registration }}</td>
+                        <th class="section-break" colspan="13">Students Enrolled in Registration Section {{ registration }}</td>
                     </tr>
                     {% for student in students %}
                         {% set class = "" %}
@@ -37,29 +66,62 @@
                         {% endif %}
                         <tr id="user-{{ student.getId() }}" class="{{ class }}">
                             <td></td>
-                            <td>
-                                {{ registration }}
-                                {% if  student.getRegistrationSubsection is not empty %}
-                                     -  {{ student.getRegistrationSubsection }}
-                                {% endif %}
-                                {% if student.isManualRegistration() %}
-                                    <i class="fas fa-hammer" title="Manually Registered"></i>
-                                {% endif %}
-                            </td>
-                            <td class="align-left">{{ student.getId() }}</td>
-                            <td class="align-left">{{ student.getDisplayedFirstName() }}</td>
-                            <td class="align-left">{{ student.getDisplayedLastName() }}</td>
-                            <td>{{ student.getRotatingSection() ?? "NULL" }}</td>
-                            <td>{{ formatted_tzs[student.getId()] }}</td>
-                            <td>
-                                <form method="post" action="{{ view_grades_url }}">
-                                    <input type="hidden" name="csrf_token" value="{{ csrf_token }}"/>
-                                    <input type="hidden" name="student_id" value="{{ student.getId() }}"/>
-                                    <a onclick="$(this).parent().submit();"><i class="fas fa-chart-line"></i></a>
-                                </form>
-                            </td>
-                            <td><a href="javascript:editUserForm('{{ student.getId() }}');" aria-label="edit user {{student.getDisplayedFirstName()}} {{student.getDisplayedLastName()}}"><i class="fas fa-pencil-alt"></i></a></td>
-                            <td><a href="javascript:deleteUserForm('{{ student.getId() }}', '{{ student.getDisplayedFirstName() }}', '{{ student.getDisplayedLastName() }}');" aria-label="delete student {{ student.getDisplayedFirstName() }} {{ student.getDisplayedLastName() }}"><i class="fas fa-trash"></i></a></td>
+                            {% if active_student_columns[0] %}
+                                <td class="td-registration-section">
+                                    {{ registration }}
+                                    {% if  student.getRegistrationSubsection is not empty %}
+                                        -  {{ student.getRegistrationSubsection }}
+                                    {% endif %}
+                                    {% if student.isManualRegistration() %}
+                                        <i class="fas fa-hammer" title="Manually Registered"></i>
+                                    {% endif %}
+                                </td>
+                            {% endif %}
+                            {% if active_student_columns[1] %}
+                                <td class="align-left td-student-id">{{ student.getId() }}</td>
+                            {% endif %}
+                            {% if active_student_columns[2] %}
+                                <td class="align-left td-given-name">{{ student.getDisplayedGivenName() }}</td>
+                            {% endif %}
+                            {% if active_student_columns[3] %}
+                                <td class="align-left td-family-name">{{ student.getDisplayedFamilyName() }}</td>
+                            {% endif %}
+                            {% if active_student_columns[4] %}
+                                <td class="align-left td-pronouns">{{ student.getPronouns() }}</td>
+                            {% endif %}
+                            {% if active_student_columns[5] %}
+                                <td class="td-rotating-section">{{ student.getRotatingSection() ?? "NULL" }}</td>
+                            {% endif %}
+                            {% if active_student_columns[6] %}
+                                <td class="td-manual-registration">{{ formatted_tzs[student.getId()] }}</td>
+                            {% endif %}
+                            {% if active_student_columns[7] %}
+                                <td class="td-view-grades">
+                                    <form method="post" action="{{ view_grades_url }}">
+                                        <input type="hidden" name="csrf_token" value="{{ csrf_token }}"/>
+                                        <input type="hidden" name="student_id" value="{{ student.getId() }}"/>
+                                        <a onclick="$(this).parent().submit();"><i class="fas fa-chart-line"></i></a>
+                                    </form>
+                                </td>
+                            {% endif %}
+                            {% if active_student_columns[8] %}
+                                <td class="td-late-days">
+                                    <form method="get" action="{{ view_latedays_url }}">
+                                        <input type="hidden" name="csrf_token" value="{{ csrf_token }}"/>
+                                        <input type="hidden" name="student_id" value="{{ student.getId() }}"/>
+                                        <a onclick="$(this).parent().submit();"><i class="fa fa-calendar"></i></a>
+                                    </form>
+                                </td>
+                            {% endif %}
+                            {% if active_student_columns[9] %}
+                                <td class="td-registration-type">{{ student.getRegistrationType() }}</td>
+                            {% endif %}
+                            {% if active_student_columns[10] %}
+                                <td class="td-edit-student"><a href="javascript:editUserForm('{{ student.getId() }}');" aria-label="edit user {{student.getDisplayedGivenName()}} {{student.getDisplayedFamilyName()}}"><i class="fas fa-pencil-alt"></i></a></td>
+                            {% endif %}
+                            {% if active_student_columns[11] %}
+                                <td class="td-delete-student"><a href="javascript:deleteUserForm('{{ student.getId() }}', '{{ student.getDisplayedGivenName() }}', '{{ student.getDisplayedFamilyName() }}');" aria-label="delete student {{ student.getDisplayedGivenName() }} {{ student.getDisplayedFamilyName() }}"><i class="fas fa-trash"></i></a></td>
+                            {% endif %}
                         </tr>
                     {% endfor %}
                 </tbody>
@@ -70,6 +132,7 @@
     {% endif %}
 </div>
 {% include('admin/users/UserForm.twig') %}
+{% include('admin/users/ToggleManageStudentsColumns.twig') %}
 {% include('admin/users/ClassListForm.twig') %}
 {% include('admin/users/DownloadForm.twig') with { 'code': 'user' } %}
 {% include('admin/users/DeleteUserForm.twig') %}

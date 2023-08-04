@@ -8,23 +8,25 @@ use app\libraries\FileUtils;
 /**
  * Class Course
  * Holds basic information about courses. Used on homepage.
- * @method string getSemester()
- * @method string getSemesterName()
+ * @method string getTerm()
+ * @method string getTermName()
  * @method string getTitle()
  * @method string getDisplayName()
  * @method int getUserGroup()
  */
 class Course extends AbstractModel {
-    /** @property string $semester the semester (or term) code in which the course is taking place. */
-    protected $semester;
-    /** @property string $semester_name the name of the semester (or term). aka "Long Semester". */
-    protected $semester_name;
+    /** @property string $term the term's code in which the course is taking place. */
+    protected $term;
+    /** @property string $term_name the name of the term. aka "Long Term". */
+    protected $term_name;
     /** @property string $title the proper title of the course. */
     protected $title;
     /** @property string $display_name the display name of the course. */
     protected $display_name;
     /** @property int $user_group used to rank courses in homepage view. */
     protected $user_group;
+    /** @property string $registration_section for homepage view */
+    protected $registration_section;
 
     /**
      * Course constructor.
@@ -34,18 +36,19 @@ class Course extends AbstractModel {
     public function __construct(Core $core, $details) {
         parent::__construct($core);
 
-        $this->semester = $details['semester'];
-        $this->semester_name = $details['term_name'];
+        $this->term = $details['semester'];
+        $this->term_name = $details['term_name'];
         $this->title = $details['course'];
         $this->display_name = "";
         $this->user_group = $details['user_group'] ?? 3;
+        $this->registration_section = $details['registration_section'] ?? null;
     }
 
     public function loadDisplayName() {
         $course_json_path = FileUtils::joinPaths(
             $this->core->getConfig()->getSubmittyPath(),
             "courses",
-            $this->semester,
+            $this->term,
             $this->title,
             "config",
             "config.json"
@@ -60,8 +63,8 @@ class Course extends AbstractModel {
         return false;
     }
 
-    public function getLongSemester() {
-        return $this->semester_name;
+    public function getLongTerm() {
+        return $this->term_name;
     }
 
     public function getCapitalizedTitle() {
@@ -70,11 +73,12 @@ class Course extends AbstractModel {
 
     public function getCourseInfo() {
         return [
-            "semester" => $this->semester,
+            "semester" => $this->term,
             "title" => $this->title,
             "display_name" => $this->display_name,
-            "display_semester" => $this->semester_name,
-            "user_group" => $this->user_group
+            "display_semester" => $this->term_name,
+            "user_group" => $this->user_group,
+            "registration_section" => $this->registration_section
         ];
     }
 }

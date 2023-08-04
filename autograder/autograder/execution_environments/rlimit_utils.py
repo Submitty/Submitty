@@ -38,7 +38,7 @@ rlimit_to_ulimit_mapping = {
 
 
 def build_ulimit_argument(resource_limits, container_image):
-    """Build --ulimit arguemtns for a particular gradeable."""
+    """Build --ulimit arguments for a particular gradeable."""
     arguments = []
     client = docker.from_env()
 

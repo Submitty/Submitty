@@ -10,19 +10,19 @@ class SimpleGradeOverriddenUser extends AbstractModel {
 
     /** @prop @var string The id of this user which should be a unique identifier (ex: RCS ID at RPI) */
     protected $id;
-    /** @prop @var string The first name of the user */
-    protected $legal_first_name;
-    /** @prop @var string The preferred first name of the user if exists */
-    protected $preferred_first_name = "";
-    /** @prop @var  string The name to be displayed by the system (either preferred last name or legal first name) */
-    protected $displayed_first_name;
-    /** @prop @var string The last name of the user */
-    protected $legal_last_name;
-    /** @prop @var string The preferred last name of the user if exists */
-    protected $preferred_last_name;
-    /** @prop @var  string The name to be displayed by the system (either preferred last name or legal last name) */
-    protected $displayed_last_name;
-    /** @prop @var  integer The overrided marks */
+    /** @prop @var string The given name of the user */
+    protected $legal_given_name;
+    /** @prop @var string The preferred given name of the user if exists */
+    protected $preferred_given_name = "";
+    /** @prop @var  string The name to be displayed by the system (either preferred given name or legal given name) */
+    protected $displayed_given_name;
+    /** @prop @var string The family name of the user */
+    protected $legal_family_name;
+    /** @prop @var string The preferred family name of the user if exists */
+    protected $preferred_family_name;
+    /** @prop @var  string The name to be displayed by the system (either preferred family name or legal family name) */
+    protected $displayed_family_name;
+    /** @prop @var  integer The overridden marks */
     protected $marks;
     /** @prop @var  string The comment to be displayed */
     protected $comment;
@@ -39,22 +39,22 @@ class SimpleGradeOverriddenUser extends AbstractModel {
 
         $this->loaded = true;
         $this->id = $details['user_id'];
-        $this->legal_first_name = $details['user_firstname'];
-        if (isset($details['user_preferred_firstname']) && $details['user_preferred_firstname'] !== "") {
-            $this->preferred_first_name = $details['user_preferred_firstname'];
-            $this->displayed_first_name = $details['user_preferred_firstname'];
+        $this->legal_given_name = $details['user_givenname'];
+        if (isset($details['user_preferred_givenname']) && $details['user_preferred_givenname'] !== "") {
+            $this->preferred_given_name = $details['user_preferred_givenname'];
+            $this->displayed_given_name = $details['user_preferred_givenname'];
         }
         else {
-            $this->displayed_first_name = $details['user_firstname'];
+            $this->displayed_given_name = $details['user_givenname'];
         }
 
-        $this->legal_last_name = $details['user_lastname'];
-        if (isset($details['user_preferred_lastname']) && $details['user_preferred_lastname'] !== "") {
-            $this->preferred_last_name = $details['user_preferred_lastname'];
-            $this->displayed_last_name = $details['user_preferred_lastname'];
+        $this->legal_family_name = $details['user_familyname'];
+        if (isset($details['user_preferred_familyname']) && $details['user_preferred_familyname'] !== "") {
+            $this->preferred_family_name = $details['user_preferred_familyname'];
+            $this->displayed_family_name = $details['user_preferred_familyname'];
         }
         else {
-            $this->displayed_last_name = $details['user_lastname'];
+            $this->displayed_family_name = $details['user_familyname'];
         }
 
         if (isset($details['marks'])) {

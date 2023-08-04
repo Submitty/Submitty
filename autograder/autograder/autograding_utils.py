@@ -174,15 +174,22 @@ def just_write_grade_history(json_file, assignment_deadline, submission_time, se
 #
 # ==================================================================================
 
+CONTAINER_NAME_WIDTH = 30
+CONTAINER_ID_WIDTH = 10
+EVENT_MESSAGE_WIDTH = 30
+EVENT_DURATION_WIDTH = 10
 
-def log_container_meta(log_path, event="", name="", container="", time=0):
-    """ Given a log file, create or append container meta data to a log file. """
+
+def log_container(log_path, event="", name="", container="", time=0.0):
+    """ Given a log file, create or append container details. """
 
     now = dateutils.get_current_time()
-    easy_to_read_date = dateutils.write_submitty_date(now, True)
-    time_unit = "sec"
-    parts = (easy_to_read_date, name, container, event, f"{time:.3f}", time_unit)
-    write_to_log(log_path, ' | '.join(parts))
+    timestamp = dateutils.write_submitty_date(now, True)
+    c_name = f'{name:<{CONTAINER_NAME_WIDTH}}'
+    c_id = f'{container:<{CONTAINER_ID_WIDTH}}'
+    event_msg = f'{event:<{EVENT_MESSAGE_WIDTH}}'
+    time_str = f'{f"{time:.3f}sec":>{EVENT_DURATION_WIDTH}}'
+    write_to_log(log_path, ' | '.join((timestamp, c_name, c_id, event_msg, time_str)))
 
 
 def write_to_log(log_path, message):
@@ -434,7 +441,10 @@ def archive_autograding_results(
         if os.path.exists(user_assignment_access_filename):
             with open(user_assignment_access_filename, 'r') as access_file:
                 obj = json.load(access_file)
-                first_access_string = obj[0]["timestamp"]
+                # can be empty if the student never clicks on the page and the
+                # instructor makes a submission for the student
+                if len(obj):
+                    first_access_string = obj[0]["timestamp"]
 
     history_file_tmp = os.path.join(tmp_submission, "history.json")
     history_file = os.path.join(tmp_results, "history.json")
@@ -707,6 +717,8 @@ def pattern_copy(what, patterns, source, target, tmp_logs):
         print(what, " pattern copy ", patterns, " from ", source, " -> ", target, file=f)
         for pattern in patterns:
             for my_file in glob.glob(os.path.join(source, pattern), recursive=True):
+                if (os.path.islink(my_file)):
+                    continue
                 if (os.path.isfile(my_file)):
                     # grab the matched name
                     relpath = os.path.relpath(my_file, source)

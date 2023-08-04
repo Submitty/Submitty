@@ -34,7 +34,7 @@ class GradeOverrideController extends AbstractController {
         $users = $this->core->getQueries()->getUsersWithOverriddenGrades($gradeable_id);
         $user_table = [];
         foreach ($users as $user) {
-            $user_table[] = ['user_id' => $user->getId(),'user_firstname' => $user->getDisplayedFirstName(), 'user_lastname' => $user->getDisplayedLastName(), 'marks' => $user->getMarks(), 'comment' => $user->getComment()];
+            $user_table[] = ['user_id' => $user->getId(),'user_givenname' => $user->getDisplayedGivenName(), 'user_familyname' => $user->getDisplayedFamilyName(), 'marks' => $user->getMarks(), 'comment' => $user->getComment()];
         }
         return $this->core->getOutput()->renderJsonSuccess([
             'gradeable_id' => $gradeable_id,

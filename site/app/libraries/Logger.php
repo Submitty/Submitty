@@ -102,7 +102,7 @@ class Logger {
      * Writes a message to a logfile (named for current date) assuming that we've defined the $log_path variable
      *
      * We log a message as well as the calling URI if available. It's saved to $log_path/yyyymmdd.txt
-     * (yyyy is year, mm is month dd is day) with each log entry seperated by bunch of "=-".
+     * (yyyy is year, mm is month dd is day) with each log entry separated by bunch of "=-".
      *
      * @param int $level message level
      *     0. Debug
@@ -145,7 +145,7 @@ class Logger {
         }
         $log_message .= str_repeat("=-", 30) . "=" . "\n";
 
-        // Appends to the file using a locking mechanism, and supressing any potential error from this
+        // Appends to the file using a locking mechanism, and suppressing any potential error from this
         @file_put_contents(FileUtils::joinPaths(static::$log_path, 'site_errors', "{$filename}.log"), $log_message, FILE_APPEND | LOCK_EX);
     }
 
@@ -178,7 +178,7 @@ class Logger {
      * This writes a one line message to the _access log file which we use to monitor what pages a user goes
      * to (through a central point in the public/index.php file). This logs things in the fashion of:
      *
-     * Timestamp | User ID | IP Adress | Action | User Agent
+     * Timestamp | User ID | IP Address | Action | User Agent
      *
      * where action is defined broadly as the page they're accessing and any other relevant information
      * (so gradeable id for when they're submitting).

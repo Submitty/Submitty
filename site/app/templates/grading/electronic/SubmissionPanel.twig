@@ -1,8 +1,15 @@
-<div id="submission_browser" class="rubric_panel" data-gradeable-id="{{gradeable_id}}" data-anon-submitter-id="{{anon_submitter_id}}">
+<div id="submission_browser"  class="rubric_panel" data-gradeable-id="{{gradeable_id}}" data-anon-submitter-id="{{anon_submitter_id}}">
     <div >
         <div id="directory_view">
             <span style="line-height: 40px;">
+                {% if not student_grader %}
                 <span class="grading_label">Submissions and Results Browser</span>
+                {% endif %}
+                
+                {% if student_grader %}
+                <span class="grading_label">Submissions Browser</span>
+                {% endif %}
+
                 <button class="btn btn-default expand-button" data-linked-type="submissions" data-clicked-state="wasntClicked" id="toggleSubmissionButton">Open/Close Submissions</button>
 
                 {# check if there are vcs files, if yes display the toggle button, else don't display it #}
@@ -10,7 +17,9 @@
                     <button class="btn btn-default expand-button" data-linked-type="checkout" data-clicked-state="wasntClicked"  id="togglCheckoutButton">Open/Close Checkout</button>
                 {% endif %}
 
-                <button class="btn btn-default expand-button" data-linked-type="results" data-clicked-state="wasntClicked"  id="toggleResultButton">Open/Close Results</button>
+                {% if not student_grader %}
+                    <button class="btn btn-default expand-button" data-linked-type="results" data-clicked-state="wasntClicked"  id="toggleResultButton">Open/Close Results</button>
+                {% endif %}
 
                 <script>
                     $(document).ready(function(){
@@ -87,7 +96,7 @@
 {% macro display_dir(dir, contents, id, indent, title) %}
     <div>
         <div class="div-viewer">
-            <a class='openAllDiv openAllDiv{{ title }} openable-element-{{ title }} key_to_click' id='{{ dir }}' onclick='openDiv("{{ id }}"); updateCookies();' data-viewer_id="{{ id }}">
+            <a data-testid="folders" class='openAllDiv openAllDiv{{ title }} openable-element-{{ title }} key_to_click' id='{{ dir }}' onclick='openDiv("{{ id }}"); updateCookies();' data-viewer_id="{{ id }}">
                 <span class="fas fa-folder open-all-folder" style='vertical-align:text-top;'></span>
                 {{ dir }}
             </a>

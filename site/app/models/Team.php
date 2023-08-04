@@ -57,7 +57,7 @@ class Team extends AbstractModel {
         $this->invited_users = [];
         foreach ($details['users'] as $user_details) {
             //If we have user details, get user objects
-            if (array_key_exists('anon_id', $user_details)) {
+            if (array_key_exists('user_id', $user_details)) {
                 $user = new User($core, $user_details);
             }
             else {
@@ -93,8 +93,8 @@ class Team extends AbstractModel {
             do {
                 $random = "";
                 for ($i = 0; $i < 15; $i++) {
-                    // this throws an exception if there's no avaiable source for generating
-                    // random exists, but that shouldn't happen on our targetted endpoints (Ubuntu/Debian)
+                    // this throws an exception if there's no available source for generating
+                    // random exists, but that shouldn't happen on our targeted endpoints (Ubuntu/Debian)
                     // so just ignore this fact
                     /** @noinspection PhpUnhandledExceptionInspection */
                     $random .= $alpha[random_int(0, $alpha_length)];

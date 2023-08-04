@@ -34,6 +34,6 @@ class LateControllerTester extends BaseUnitTest {
 
         $this->assertMethodCalled('getUsersWithLateDays');
         $this->assertMethodCalled('getAllUsers');
-        $this->assertInstanceOf(WebResponse::class, $response->web_response);
+        $this->assertInstanceOf(WebResponse::class, $response);
     }
 }

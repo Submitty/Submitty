@@ -1,7 +1,8 @@
 <script>
-  var title = "Darrin 330"
+  var title = "Amos Eaton 215"
   note_left = ""
   note_right = "seat 1 is on the right, when facing the screen"
+  note_right2 = "note: 1 person per table"
 
   var config = {{ seating_config|raw }};
 </script>
@@ -22,7 +23,7 @@
   <script>
     var seats = {
         // counting every chair (including ones that might be broken)
-	"middle" : [12,12,12,12,12,12,12,12,12,12,12,12,12],
+	"middle" : [12,12,12,12],
     }
     var used = {};
 
@@ -119,7 +120,7 @@
 
       // Draw row
       ctx.beginPath();
-      var center_y = BASE_ROW_START + 20 * row
+      var center_y = BASE_ROW_START + 40 * row
       var width_half = width / 2.0;
       ctx.strokeStyle = color;
       ctx.lineWidth = BASE_ROW_HEIGHT;
@@ -251,10 +252,10 @@
     ctx.textAlign = "center";
 
     var EXPANDED = expand_config(config);
-    var BASE_NUM_ROWS = 13
+    var BASE_NUM_ROWS = 4
     var BASE_ROW_START = 140
     var BASE_ROW_CENTER = document.getElementById("diagram").offsetWidth / 2.0;
-    var BASE_ROW_HEIGHT = 6
+    var BASE_ROW_HEIGHT = 11
     var BASE_ROW_COLOR = "grey"
     var BASE_POINT_RADIUS = 7
 
@@ -274,6 +275,7 @@
     ctx.font = "bold 12pt sans-serif";
     ctx.fillStyle = "#333333";
     ctx.fillText(note_right, 625, 50);
+    ctx.fillText(note_right2, 625, 80);
 
     // Render front of room legend
     ctx.font = "italic 10pt sans-serif";

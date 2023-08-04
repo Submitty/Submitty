@@ -1,0 +1,22 @@
+{
+    // 1 mb maximum submission size
+    "max_submission_size" : 1000000,
+    "assignment_message" : "Please upload.pdf files",
+
+    "autograding" : {
+        "submission_to_compilation" : [ "*.pdf" ],
+        "submission_to_runner" : [ "*.pdf" ],
+        "submission_to_validation" : [ "*.pdf" ]
+    },
+    
+    "testcases" : [ 
+
+        {
+            "type" : "FileCheck",
+            "title" : "Submitted .pdf files",
+            "actual_file" : "*.pdf",
+            "points" : 1
+        }
+
+    ]
+}

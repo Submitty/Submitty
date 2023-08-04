@@ -79,7 +79,7 @@ class NotificationController extends AbstractController {
         $metadata = $this->core->getQueries()->getNotificationInfoById($user_id, $nid)['metadata'];
         if (!$seen) {
             $thread_id = Notification::getThreadIdIfExists($metadata);
-            $this->core->getQueries()->markNotificationAsSeen($user_id, $nid, $thread_id);
+            $this->core->getQueries()->markNotificationAsSeen($user_id, intval($nid), $thread_id);
         }
         return MultiResponse::RedirectOnlyResponse(
             new RedirectResponse(Notification::getUrl($this->core, $metadata))
@@ -92,7 +92,7 @@ class NotificationController extends AbstractController {
      * @return MultiResponse
      */
     public function markNotificationAsSeen($nid) {
-        $this->core->getQueries()->markNotificationAsSeen($this->core->getUser()->getId(), $nid);
+        $this->core->getQueries()->markNotificationAsSeen($this->core->getUser()->getId(), intval($nid));
         return MultiResponse::RedirectOnlyResponse(
             new RedirectResponse($this->core->buildCourseUrl(['notifications']))
         );

@@ -1,6 +1,6 @@
 """
 NEW FEATURES:
-  1. Score ouptut is now dumped to validation_results.json
+  1. Score output is now dumped to validation_results.json
   2. Custom instructor log lines can now be dumped to validation_logfile.txt
 
 This file presents an example of a python custom validator for use in your Submitty assignment.

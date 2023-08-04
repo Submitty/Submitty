@@ -1,0 +1,74 @@
+{
+    "testcases" : [
+        {
+            "title" : "Count TS Python static analysis",
+            // count the number of comments
+            "command" : [ "submitty_count_ts -l py node = *.py",
+                          // counting * in code: use escape sequence to because * is a wildcard
+                          "submitty_count_ts -l py node \\\\* *.py",
+                          "submitty_count_ts -l py call print *.py",
+                          "submitty_count_ts -l py function area *.py",
+                          "submitty_count_ts -l py identifier width *.py"],
+            "points" : 5,
+            "validation" : [
+                {
+                    // Grade by comparing the contents of a file to a given integer.
+                    "method" : "intComparison",
+                    // Use the output of the second command.
+                    "actual_file" : "STDOUT_0.txt",
+                    "description" : "Number of assignments",
+                    // The method by which to compare the output of "submitty_count_ts"
+                    "comparison" : "ge",
+                    // The integer against which to compare.
+                    "term" : 3,
+                    // Message to the student.
+                    "failure_message" : "Re-read the problem instructions.",
+                    // Only display a message if the test failed.
+                    "show_message" : "on_failure",
+                    // Hide the student/instructor comparison.
+                    "show_actual" : "never"
+                },
+                {
+                    "method" : "intComparison",
+                    "actual_file" : "STDOUT_1.txt",
+                    "description" : "Number of multiplications",
+                    "comparison" : "ge",
+                    "term" : 2,
+                    "failure_message" : "Re-read the problem instructions.",
+                    "show_message" : "on_failure",
+                    "show_actual" : "never"
+                },
+                {
+                    "method" : "intComparison",
+                    "actual_file" : "STDOUT_2.txt",
+                    "description" : "Number of calls to print",
+                    "comparison" : "eq",
+                    "term" : 1,
+                    "failure_message" : "Re-read the problem instructions.",
+                    "show_message" : "on_failure",
+                    "show_actual" : "never"
+                },
+                {
+                    "method" : "intComparison",
+                    "actual_file" : "STDOUT_3.txt",
+                    "description" : "Number of functions defined named 'area'",
+                    "comparison" : "eq",
+                    "term" : 1,
+                    "failure_message" : "Re-read the problem instructions.",
+                    "show_message" : "on_failure",
+                    "show_actual" : "never"
+                },
+                {
+                    "method" : "intComparison",
+                    "actual_file" : "STDOUT_4.txt",
+                    "description" : "Number of uses of identifier 'width'",
+                    "comparison" : "ge",
+                    "term" : 1,
+                    "failure_message" : "Re-read the problem instructions.",
+                    "show_message" : "on_failure",
+                    "show_actual" : "never"
+                }
+            ]
+        }
+    ]
+}

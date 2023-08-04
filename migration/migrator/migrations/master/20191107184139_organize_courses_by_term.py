@@ -21,7 +21,7 @@ def up(config, database):
         :type suggested_date: String
         :param msg: message to user asking for date.
         :type msg: String
-        :return: validated date recieved from user
+        :return: validated date received from user
         :rtype: String
         """
         while True:

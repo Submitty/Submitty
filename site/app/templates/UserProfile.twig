@@ -7,15 +7,15 @@
             <div class="user-img-cont">
                 {% set image = user.getDisplayImage() %}
                 {% if image is not null %}
-                    {{ base64_image(image.getImageBase64MaxDimension(250), image.getMimeType(), '%s %s'|format(user.getDisplayedFirstName(), user.getDisplayedLastName())) }}
+                    {{ base64_image(image.getImageBase64MaxDimension(250), image.getMimeType(), '%s %s'|format(user.getDisplayedGivenName(), user.getDisplayedFamilyName())) }}
                 {% else %}
                     <span class="center-img-tag">N/A</span>
                 {% endif %}
             </div>
             <span class="edit-user-img">
-                <a class="icon" tabindex="0" href="javascript:showUpdateProfilePhotoForm()" aria-label="Edit user profile photo" title="Edit user profile photo">
+                <button class="icon" data-testid="upload-photo-button" tabindex="0" onclick="showUpdateProfilePhotoForm()" aria-label="Edit user profile photo" title="Edit user profile photo">
                     <i class="fas fa-upload"></i> Upload profile photo
-                </a>
+                </button>
             </span>
             <span class="red-message" id="flagged-message" data-flagged="{{ user.getDisplayImageState }}">Your preferred image was flagged as inappropriate.</span>
         </div>
@@ -25,7 +25,7 @@
                     <span>Basic Information</span>
                 </div>
                 <div class="user-info">
-                    <div class="flex-row" id="username-row">
+                    <div class="flex-row" id="username-row" data-testid="username-row">
                         <span class="label">
                             Username:
                         </span>
@@ -33,23 +33,51 @@
                             {{ user.getId() }}
                         </span>
                     </div>
-                    <div class="flex-row" id="firstname-row">
+                    <div class="flex-row" id="givenname-row" data-testid="givenname-row">
                         <span class="label">
                             First Name:
                         </span>
                         <button class="icon" tabindex="0" onclick="showUpdatePrefNameForm()" aria-label="Edit user preferred name" title="Edit user preferred name">
-                            <i class="fas fa-pencil-alt"></i> {{ user.getDisplayedFirstName() }}
+                            <i class="fas fa-pencil-alt"></i> {{ user.getDisplayedGivenName() }}
                         </button>
                     </div>
-                    <div class="flex-row" id="lastname-row">
+                    <div class="flex-row" id="familyname-row" data-testid="familyname-row">
                         <span class="label">
                             Last Name:
                         </span>
                         <button class="icon" tabindex="0" onclick="showUpdatePrefNameForm()" aria-label="Edit user preferred name" title="Edit user preferred name">
-                            <i class="fas fa-pencil-alt"></i> {{ user.getDisplayedLastName() }}
+                            <i class="fas fa-pencil-alt"></i> {{ user.getDisplayedFamilyName() }}
                         </button>
                     </div>
-                    <div class="flex-row" id="email-row">
+                    <div class="flex-row" id="last-initial-format-row" data-testid="last-initial-format-row">
+                        <span class="label">
+                            Abbreviated Name:
+                        </span>
+                        <button class="icon" tabindex="0" onclick="showUpdateLastInitialFormatForm()" aria-label="Edit user last initial format" title="Edit user last initial format">
+                            <i class="fas fa-pencil-alt"></i> {{ user.getDisplayAbbreviatedName() }}
+                        </button>
+                    </div>
+                    <div class="flex-row" id="pronouns-row" data-testid="pronouns-row">
+                        <span class="label">
+                            Pronouns:
+                        </span>
+                        <button id='pronouns_val' class="icon" tabindex="0" onclick="showUpdatePronounsForm()" aria-label="Edit user pronouns" title="Edit user pronouns">
+                            <i class="fas fa-pencil-alt"></i> {{ user.getPronouns() }}
+                        </button>
+                    </div>
+                    <div class="flex-row" id="pronouns-display-row">
+                        <span class="label">
+                            Display Pronouns in Discussion Forum:
+                        </span>
+                        <button id='display_pronouns_val' class="icon" tabindex="0" onclick="showUpdatePronounsForm()" aria-label="Edit user pronouns" title="Edit user pronouns">
+                            {% if user.getDisplayPronouns() %}
+                                <i class="fas fa-pencil-alt"></i> True
+                            {% else %}
+                                <i class="fas fa-pencil-alt"></i> False
+                            {% endif %}
+                        </button>
+                    </div>
+                    <div class="flex-row" id="email-row" data-testid="email-row">
                         <span class="label">
                             Primary Email:
                         </span>
@@ -89,9 +117,9 @@
                                 Change Password:
                             </span>
                             <span>
-                                <a class="icon" tabindex="0" href="javascript:showUpdatePasswordForm()" aria-label="Change password" title="Change password">
+                                <button class="icon" tabindex="0" onclick="showUpdatePasswordForm()" aria-label="Change password" title="Change password">
                                     <i class="fas fa-pencil-alt"></i>
-                                </a>
+                                </button>
                             </span>
                         </div>
                     {% endif %}
@@ -111,7 +139,7 @@
                 <div class="user-info">
                     <div class="flex-row-col">
                         <label for="time_zone_drop_down">Select Timezone: </label>
-                        <select id="time_zone_drop_down"></select>
+                        <select id="time_zone_drop_down" data-testid="time-zone-dropdown"></select>
                     </div>
                 </div>
             </div>
@@ -122,7 +150,7 @@
                 <div class="user-info">
                     <div class="flex-row-col">
                         <label for="theme_change_select">Choose a color theme</label>
-                        <select id="theme_change_select" class="form-control" aria-label="Change Submitty's Theme">
+                        <select id="theme_change_select" class="form-control" aria-label="Change Submitty's Theme" data-testid="theme-change-dropdown>
                             <option value="system">Follow Device Theme</option>
                             <option value="system_black">Follow Device Theme (Black)</option>
                             <option value="light">Light Mode</option>
@@ -132,12 +160,29 @@
                     </div>
                 </div>
             </div>
+            <div>
+                <span class="option-alt" id="browser-support">Submitty supports an installable Progressive Web App (PWA) which requires Chrome, see <a href="https://support.google.com/chrome/answer/9658361">here</a> for installation instructions</span>
+                <button class="addpwa btn btn-primary">Install App</button>
+                <span class="option-alt" id="pwa-uninstall-lable">The Submitty Progressive Web App (PWA) has already been installed, see <a href="https://support.google.com/chrome/answer/9658361">here</a> to uninstall it</span>
+            </div>
+            <div class="flex-row-col">
+                <button class="btn btn-primary" id="auth-tokens-btn" onclick="location.href='authentication_tokens';">
+                    <i class="fa fa-key"></i>
+                    Authentication Tokens
+                </button>
+                <button class="btn btn-primary" onclick="location.href='manage_sessions';">
+                    <i class="fa fa-user-shield"></i>
+                    Manage Sessions
+                </button>
+            </div>
         </div>
     </div>
 </div>
 {% include 'EditNameForm.twig' %}
+{% include 'EditLastInitialFormatForm.twig' %}
 {% include 'EditProfilePhotoForm.twig' %}
 {% include 'EditSecondaryEmailForm.twig' %}
+{% include 'EditPronounsForm.twig' %}
 {% if show_change_password %}
     {% include 'ChangePasswordForm.twig' %}
 {% endif %}

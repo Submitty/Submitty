@@ -10,13 +10,13 @@
     padding-left: 20px;
 }
 
+/* stylelint-disable-next-line no-descending-specificity */
 #details-table tbody.details-content td {
     text-align: center;
 }
 
 .expand-icon,
 .collapse-icon {
-    display: none;
     position: absolute;
     transform: translate(50%, -50%);
     font-size: 1rem;
@@ -82,6 +82,7 @@
     width: 100%;
     flex-direction: row;
     justify-self: flex-end;
+    /* stylelint-disable-next-line declaration-block-no-redundant-longhand-properties */
     flex-wrap: wrap;
     justify-content: space-between;
     margin: 10px 0;
@@ -101,6 +102,17 @@
 #details-table#details-table td::before {
     font-size: 1rem;
     color: var(--text-black);
+}
+
+.panel-head-active .expand-icon,
+.collapse-icon {
+    display: inline;
+}
+
+/* stylelint-disable-next-line no-descending-specificity */
+.panel-head-active .collapse-icon,
+.expand-icon {
+    display: none;
 }
 
 @media (max-width: 950px) {
@@ -127,6 +139,7 @@
         border: 0;
     }
 
+    /* stylelint-disable-next-line no-descending-specificity */
     #details-table tr {
         margin-top: 1em;
         background: none !important;
@@ -148,16 +161,6 @@
         color: white;
     }
 
-    .panel-head-active .expand-icon,
-    .collapse-icon {
-        display: inline;
-    }
-
-    .panel-head-active .collapse-icon,
-    .expand-icon {
-        display: none;
-    }
-
     #details-table .details-content td:nth-of-type(1) { display: none; }
 
     /*
@@ -166,10 +169,12 @@
         #details-table td:nth-of-type(2):before { content: "User ID"; }
      */
 
+    /* stylelint-disable-next-line no-descending-specificity */
     #details-table tr:nth-child(even) td {
         background: var(--standard-hover-light-gray);
     }
 
+    /* stylelint-disable-next-line no-descending-specificity */
     #details-table tr:nth-child(odd) td {
         background: var(--standard-light-gray);
     }
@@ -197,6 +202,7 @@
         cursor: pointer;
     }
 
+    /* stylelint-disable-next-line no-descending-specificity */
     #details-table .empty-info-header tr td {
         display: block;
         background: none;
@@ -298,16 +304,23 @@
 
     #details-table td:nth-of-type(1) { display: table-cell; }
 
-    #details-table tbody.details-content {
-        display: contents !important;
+    #details-table .details-info-header {
+        cursor: pointer;
+        position: relative;
+    }
+
+    #details-table .details-info-header:not(.panel-head-active) tr:last-of-type > td {
+        border-bottom: 1px solid var(--standard-hover-light-gray);
     }
 }
 
+/* stylelint-disable-next-line selector-class-pattern */
 .randomize_cancel_btn {
     float: left;
 }
 
+/* stylelint-disable-next-line selector-class-pattern */
 .gradeable_message li {
-    margin-left:30px;
-    margin-bottom:10px;
+    margin-left: 30px;
+    margin-bottom: 10px;
 }

@@ -15,7 +15,7 @@ use app\libraries\FileUtils;
  * This class is a PHP representation of a customization.json file as used in RainbowGrades and provides means
  * to update its fields.
  *
- * When adding to data to any property, the appropriate setter must be used as they preform additional validation.
+ * When adding to data to any property, the appropriate setter must be used as they perform additional validation.
  */
 class RainbowCustomizationJSON extends AbstractModel {
     protected $core;
@@ -27,7 +27,7 @@ class RainbowCustomizationJSON extends AbstractModel {
     private $benchmark_percent;         // Init in constructor
     private $gradeables = [];
 
-    const allowed_display = ['instructor_notes', 'grade_summary', 'grade_details', 'iclicker', 'final_grade',
+    const allowed_display = ['instructor_notes', 'grade_summary', 'grade_details', 'final_grade',
         'exam_seating', 'display_rank_to_individual', 'display_benchmark', 'benchmark_percent', 'section', 'messages',
         'final_cutoff', 'manual_grade', 'warning'];
 

@@ -1,7 +1,7 @@
 /* exported initializeResizablePanels */
 
 /**
- * callback attached to run after the initialization of resizeable panels
+ * callback attached to run after the initialization of resizable panels
  *
  * @callback resizeCallback
  * @param {string} updatedVal updated width/height after the user is done with resizing
@@ -29,7 +29,7 @@ function initializeResizablePanels (panelSel, dragBarSel, isHorizontalResize= fa
     // Width of left side
     const mouseDownHandler = (e) => {
         // Get the current mouse position
-        if (e.type == 'touchstart') {
+        if (e.type === 'touchstart') {
             e = e.touches[0];
         }
         xPos = e.clientX;
@@ -65,7 +65,7 @@ function initializeResizablePanels (panelSel, dragBarSel, isHorizontalResize= fa
     };
 
     const mouseMoveHandler = (e) => {
-        if (e.type == 'touchmove') {
+        if (e.type === 'touchmove') {
             e = e.touches[0];
         }
         let updateValue;

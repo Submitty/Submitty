@@ -16,6 +16,8 @@ use app\libraries\routers\AccessControl;
 use app\libraries\Utils;
 use app\models\gradeable\Gradeable;
 use app\models\gradeable\GradedGradeable;
+use app\models\gradeable\LateDayInfo;
+use app\models\User;
 use app\models\GradingOrder;
 use Symfony\Component\Routing\Annotation\Route;
 use app\models\notebook\SubmissionCodeBox;
@@ -114,7 +116,7 @@ class SubmissionController extends AbstractController {
             return $verify_permissions;
         }
 
-        if ($gradeable->isLocked($this->core->getUser()->getId())) {
+        if ($gradeable->isLocked($this->core->getUser()->getId()) && $this->core->getUser()->accessGrading() === false) {
             $this->core->addErrorMessage('You have not unlocked this gradeable yet');
             $this->core->redirect($this->core->buildCourseUrl());
             return ['error' => true, 'message' => 'You have not completed the pre-requisite gradeable'];
@@ -122,7 +124,7 @@ class SubmissionController extends AbstractController {
 
         // Attempt to put the version number to be in bounds of the gradeable
         $version = intval($gradeable_version ?? 0);
-        if ($version < 1 || $version > ($graded_gradeable !== null ? $graded_gradeable->getAutoGradedGradeable()->getHighestVersion() : 0)) {
+        if ($version < 1 || $version > ($graded_gradeable !== null ? $graded_gradeable->getAutoGradedGradeable()->getHighestVersion() : 0) || (!$this->core->getUser()->accessGrading() && !$gradeable->isStudentSubmit())) {
             $version = $graded_gradeable !== null ? $graded_gradeable->getAutoGradedGradeable()->getActiveVersion() : 0;
         }
 
@@ -132,7 +134,7 @@ class SubmissionController extends AbstractController {
         Logger::logAccess(
             $this->core->getUser()->getId(),
             $_COOKIE['submitty_token'],
-            "{$this->core->getConfig()->getSemester()}:{$this->core->getConfig()->getCourse()}:load_page:{$gradeable->getId()}"
+            "{$this->core->getConfig()->getTerm()}:{$this->core->getConfig()->getCourse()}:load_page:{$gradeable->getId()}"
         );
         $user_id = $this->core->getUser()->getId();
         $team_id = null;
@@ -429,7 +431,7 @@ class SubmissionController extends AbstractController {
         // use pdf_check.cgi to check that # of pages is valid and split
         // also get the cover image and name for each pdf appropriately
 
-        $semester = $this->core->getConfig()->getSemester();
+        $semester = $this->core->getConfig()->getTerm();
         $course = $this->core->getConfig()->getCourse();
         $use_ocr = $this->core->getConfig()->checkFeatureFlagEnabled('submitty_ocr') && $_POST['use_ocr'] === "true";
 
@@ -490,7 +492,7 @@ class SubmissionController extends AbstractController {
     /**
      * Function for uploading a split item that already exists to the server.
      * The file already exists in uploads/split_pdf/gradeable_id/timestamp folder. This should be called via AJAX, saving the result
-     * to the json_buffer of the Output object, returning a true or false on whether or not it suceeded or not.
+     * to the json_buffer of the Output object, returning a true or false on whether or not it succeeded or not.
      * Has overlap with ajaxUploadSubmission
      *
      * @AccessControl(role="FULL_ACCESS_GRADER")
@@ -664,7 +666,7 @@ class SubmissionController extends AbstractController {
                 $image_num = count($matches) > 0 ? intval(reset($matches)) : -1;
 
                 if (!$clobber && strpos($image_name, "_page_") !== false && $image_num >= 0) {
-                    $file_base_name = "upload_version_"  . $old_version . "_page_" . $image_num . "." . $image_extension;
+                    $file_base_name = ".upload_version_"  . $old_version . "_page_" . $image_num . "." . $image_extension;
                 }
 
                 $move_here = FileUtils::joinPaths($version_path, $file_base_name);
@@ -687,7 +689,7 @@ class SubmissionController extends AbstractController {
         $i = 1;
         foreach ($image_files as $image) {
             // copy over the uploaded image
-            if (!@copy($image, FileUtils::joinPaths($version_path, "upload_page_" . $i . "." . $image_extension))) {
+            if (!@copy($image, FileUtils::joinPaths($version_path, ".upload_page_" . sprintf("%02d", $i) . "." . $image_extension))) {
                 return $this->uploadResult("Failed to copy uploaded image {$image} to current submission.", false);
             }
             if (!@unlink($image)) {
@@ -753,11 +755,11 @@ class SubmissionController extends AbstractController {
             "filepath" => $uploaded_file
         ];
 
-        if (FileUtils::writeJsonFile(FileUtils::joinPaths($version_path, "bulk_upload_data.json"), $bulk_upload_data) === false) {
+        if (FileUtils::writeJsonFile(FileUtils::joinPaths($version_path, ".bulk_upload_data.json"), $bulk_upload_data) === false) {
             return $this->uploadResult("Failed to create bulk upload file for this submission.", false);
         }
 
-        $queue_file = [$this->core->getConfig()->getSemester(), $this->core->getConfig()->getCourse(),
+        $queue_file = [$this->core->getConfig()->getTerm(), $this->core->getConfig()->getCourse(),
             $gradeable->getId(), $who_id, $new_version];
         $queue_file = FileUtils::joinPaths(
             $this->core->getConfig()->getSubmittyPath(),
@@ -768,7 +770,7 @@ class SubmissionController extends AbstractController {
         $vcs_checkout = isset($_REQUEST['vcs_checkout']) ? $_REQUEST['vcs_checkout'] === "true" : false;
 
         // create json file...
-        $queue_data = ["semester" => $this->core->getConfig()->getSemester(),
+        $queue_data = ["semester" => $this->core->getConfig()->getTerm(),
             "course" => $this->core->getConfig()->getCourse(),
             "gradeable" => $gradeable->getId(),
             "required_capabilities" => $gradeable->getAutogradingConfig()->getRequiredCapabilities(),
@@ -797,7 +799,7 @@ class SubmissionController extends AbstractController {
 
     /**
      * Function for deleting a split item from the uploads/split_pdf/gradeable_id/timestamp folder. This should be called via AJAX,
-     * saving the result to the json_buffer of the Output object, returning a true or false on whether or not it suceeded or not.
+     * saving the result to the json_buffer of the Output object, returning a true or false on whether or not it succeeded or not.
      *
      * @AccessControl(role="FULL_ACCESS_GRADER")
      * @Route("/courses/{_semester}/{_course}/gradeable/{gradeable_id}/split_pdf/delete", methods={"POST"})
@@ -967,7 +969,7 @@ class SubmissionController extends AbstractController {
                     $active_version = $g->getAutoGradedGradeable()->getActiveVersion();
                 }
                 //create file name
-                $queue_file_helper = [$this->core->getConfig()->getSemester(), $this->core->getConfig()->getCourse(),
+                $queue_file_helper = [$this->core->getConfig()->getTerm(), $this->core->getConfig()->getCourse(),
                     $gradeable_id, $who_id, $active_version];
                 $queue_file_helper = implode("__", $queue_file_helper);
                 $queue_file = FileUtils::joinPaths(
@@ -984,10 +986,10 @@ class SubmissionController extends AbstractController {
                     "queue_time" => $this->core->getDateTimeNow()->format("Y-m-d H:i:sO"),
                     'regrade' => true,
                     "required_capabilities" => $gradeable->getAutogradingConfig()->getRequiredCapabilities(),
-                    "semester" => $this->core->getConfig()->getSemester(),
+                    "semester" => $this->core->getConfig()->getTerm(),
                     "team" => $team_id,
                     "user" => $user_id,
-                    "vcs_checkout" => false,
+                    "vcs_checkout" => $gradeable->isVcs(),
                     "version" => $active_version,
                     "who" => $who_id
                 ];
@@ -1010,7 +1012,7 @@ class SubmissionController extends AbstractController {
 
     /**
      * Function for uploading a submission to the server. This should be called via AJAX, saving the result
-     * to the json_buffer of the Output object, returning a true or false on whether or not it suceeded or not.
+     * to the json_buffer of the Output object, returning a true or false on whether or not it succeeded or not.
      *
      * @Route("/courses/{_semester}/{_course}/gradeable/{gradeable_id}/upload", methods={"POST"})
      * @return array
@@ -1069,7 +1071,7 @@ class SubmissionController extends AbstractController {
             return $this->uploadResult($msg, false);
         }
 
-        if ($gradeable->isLocked($user_id)) {
+        if ($gradeable->isLocked($user_id) && !$this->core->getUser()->accessGrading()) {
             return $this->uploadResult("Gradeable is locked for you.", false);
         }
 
@@ -1418,9 +1420,9 @@ class SubmissionController extends AbstractController {
         }
         else {
             $vcs_base_url = $this->core->getConfig()->getVcsBaseUrl();
-            $vcs_path = $gradeable->getVcsSubdirectory();
+            $vcs_path = $gradeable->getVcsPartialPath();
 
-            if ($gradeable->getVcsHostType() == 0 || $gradeable->getVcsHostType() == 1) {
+            if ($gradeable->getVcsHostType() === 0 || $gradeable->getVcsHostType() === 1 || $gradeable->getVcsHostType() === 4) {
                 $vcs_path = str_replace("{\$gradeable_id}", $gradeable_id, $vcs_path);
                 $vcs_path = str_replace("{\$user_id}", $who_id, $vcs_path);
                 $vcs_path = str_replace("{\$team_id}", $who_id, $vcs_path);
@@ -1431,7 +1433,7 @@ class SubmissionController extends AbstractController {
             if ($vcs_base_url == "" && $vcs_path == "") {
                 if ($repo_id == "") {
                     // FIXME: commented out for now to pass Travis.
-                    // SubmissionControllerTests needs to be rewriten for proper VCS uploads.
+                    // SubmissionControllerTests needs to be rewritten for proper VCS uploads.
                     // return $this->uploadResult("repository url input cannot be blank.", false);
                 }
                 $vcs_full_path = $repo_id;
@@ -1543,7 +1545,7 @@ class SubmissionController extends AbstractController {
         }
 
 
-        $queue_file_helper = [$this->core->getConfig()->getSemester(), $this->core->getConfig()->getCourse(),
+        $queue_file_helper = [$this->core->getConfig()->getTerm(), $this->core->getConfig()->getCourse(),
             $gradeable->getId(), $who_id, $new_version];
         $queue_file_helper = implode("__", $queue_file_helper);
         $queue_file = FileUtils::joinPaths(
@@ -1563,7 +1565,7 @@ class SubmissionController extends AbstractController {
 
         // create json file...
         $queue_data = [
-            "semester" => $this->core->getConfig()->getSemester(),
+            "semester" => $this->core->getConfig()->getTerm(),
             "course" => $this->core->getConfig()->getCourse(),
             "gradeable" => $gradeable->getId(),
             "required_capabilities" => $gradeable->getAutogradingConfig()->getRequiredCapabilities(),
@@ -1598,18 +1600,80 @@ class SubmissionController extends AbstractController {
         Logger::logAccess(
             $this->core->getUser()->getId(),
             $_COOKIE['submitty_token'],
-            "{$this->core->getConfig()->getSemester()}:{$this->core->getConfig()->getCourse()}:submission:{$gradeable->getId()}"
+            "{$this->core->getConfig()->getTerm()}:{$this->core->getConfig()->getCourse()}:submission:{$gradeable->getId()}"
         );
         if ($gradeable->isTeamAssignment()) {
+            // Get previous late day information for all team members
+            $previous_submission_ldi = LateDayInfo::fromSubmitter($this->core, $graded_gradeable->getSubmitter(), $graded_gradeable);
+
             $this->core->getQueries()->insertVersionDetails($gradeable->getId(), null, $team_id, $new_version, $current_time);
-            $team_members = $graded_gradeable->getSubmitter()->getTeam()->getMembers();
+            $team_members = $graded_gradeable->getSubmitter()->getTeam()->getMemberUsers();
 
             // notify other team members that a submission has been made
             $metadata = json_encode(['url' => $this->core->buildCourseUrl(['gradeable',$gradeable_id])]);
             $subject = "Team Member Submission: " . $graded_gradeable->getGradeable()->getTitle();
             $content = "A team member, $original_user_id, submitted in the gradeable, " . $graded_gradeable->getGradeable()->getTitle();
-            $event = ['component' => 'team', 'metadata' => $metadata, 'subject' => $subject, 'content' => $content, 'type' => 'team_member_submission', 'sender_id' => $original_user_id];
-            $this->core->getNotificationFactory()->onTeamEvent($event, $team_members);
+
+            // Create User compare function
+            $compare_user = function (User $usera, User $userb) {
+                if ($usera->getId() === $userb->getId()) {
+                    return 0;
+                }
+                return -1;
+            };
+
+            // Gather all members who have a BAD status as a result of the new submission
+            $bad_members = array_filter($team_members, function ($member) use ($graded_gradeable, $previous_submission_ldi) {
+                $new_submission_ldi = LateDayInfo::fromUser($this->core, $member, $graded_gradeable);
+
+                // Find the number
+                $member_ldi = $previous_submission_ldi[$member->getId()];
+                $previous_status = $member_ldi !== null ? $member_ldi->getStatus() : 0;
+
+                return ($new_submission_ldi !== null && $new_submission_ldi->getStatus() === LateDayInfo::STATUS_BAD && $previous_status !== LateDayInfo::STATUS_BAD);
+            });
+            $team_members = array_udiff($team_members, $bad_members, $compare_user);
+
+            // Gather all members who have been chared more late days as a result of the new submission
+            $changed_members = array_filter($team_members, function ($member) use ($graded_gradeable, $previous_submission_ldi) {
+                $new_submission_ldi = LateDayInfo::fromUser($this->core, $member, $graded_gradeable);
+
+                // Find the number
+                $member_ldi = $previous_submission_ldi[$member->getId()];
+                $previous_days_charged = $member_ldi !== null ? $member_ldi->getLateDaysCharged() : 0;
+
+                return ($new_submission_ldi !== null && $new_submission_ldi->getLateDaysCharged() > $previous_days_charged);
+            });
+            $team_members = array_udiff($team_members, $bad_members, $compare_user);
+
+            $notifications = [
+                'bad_submissions' => [
+                    'members' => $bad_members,
+                    'extra_message' => '. This submission was submitted too late and you do not have sufficient late days. Your grade for this assignment will be recorded as a zero.'
+                ],
+                'new_charges' => [
+                    'members' => $changed_members,
+                    'extra_message' => '. This submission is late and you have been charged at least one extra late day.'
+                ],
+                'default' => [
+                    'members' => $team_members,
+                    'extra_message' => ''
+                ]
+            ];
+
+            foreach ($notifications as $notification) {
+                if (count($notification['members']) === 0) {
+                    continue;
+                }
+
+                $members = array_map(function ($member) {
+                    return $member->getId();
+                }, $notification['members']);
+
+                $extra_message = $notification['extra_message'];
+                $event = ['component' => 'team', 'metadata' => $metadata, 'subject' => $subject, 'content' => $content . $extra_message, 'type' => 'team_member_submission', 'sender_id' => $original_user_id];
+                $this->core->getNotificationFactory()->onTeamEvent($event, array_values($members));
+            }
         }
         else {
             $this->core->getQueries()->insertVersionDetails($gradeable->getId(), $user_id, null, $new_version, $current_time);
@@ -1771,8 +1835,6 @@ class SubmissionController extends AbstractController {
 
         // FIXME: Add this kind of operation to the graded gradeable saving query
 
-        // TO DO: Update late day cache for version change
-        $late_day_status = null;
         if ($gradeable->isTeamAssignment()) {
             $this->core->getQueries()->updateActiveVersion($gradeable->getId(), null, $submitter_id, $version);
         }
@@ -1797,7 +1859,7 @@ class SubmissionController extends AbstractController {
                 $graded_gradeable->getGradeableId(),
                 'grading',
                 'grade'
-            ]) . '?' . http_build_query(['who_id' => $who, 'gradeable_version' => $new_version]);
+            ]) . '?' . http_build_query(['who_id' => $graded_gradeable->getSubmitter()->getAnonId($graded_gradeable->getGradeableId()), 'gradeable_version' => $new_version]);
         }
 
         return new MultiResponse(
@@ -1871,6 +1933,7 @@ class SubmissionController extends AbstractController {
 
     /**
      * @Route("/courses/{_semester}/{_course}/gradeable/{gradeable_id}/bulk_stats")
+     * @AccessControl(role="FULL_ACCESS_GRADER")
      */
     public function showBulkStats($gradeable_id) {
         $course_path = $this->core->getConfig()->getCoursePath();
@@ -1884,17 +1947,20 @@ class SubmissionController extends AbstractController {
             }
             $files = scandir($user_path);
             $num_files = count($files) - 3;
-            $json_path = $user_path . "/" . $num_files . "/bulk_upload_data.json";
+            $json_path = FileUtils::joinPaths($user_path, $num_files, ".bulk_upload_data.json");
             if (!file_exists($json_path)) {
-                continue;
+                $json_path = FileUtils::joinPaths($user_path, $num_files, "bulk_upload_data.json");
+                if (!file_exists($json_path)) {
+                    continue;
+                }
             }
             $user = $this->core->getQueries()->getUserById($user_id_arr[$i]);
             if ($user === null) {
                 continue;
             }
             $file_contents = FileUtils::readJsonFile($json_path);
-            $users[$user_id_arr[$i]]["first_name"] = $user->getDisplayedFirstName();
-            $users[$user_id_arr[$i]]["last_name"] = $user->getDisplayedLastName();
+            $users[$user_id_arr[$i]]["given_name"] = $user->getDisplayedGivenName();
+            $users[$user_id_arr[$i]]["family_name"] = $user->getDisplayedFamilyName();
             $users[$user_id_arr[$i]]['upload_time'] = $file_contents['upload_timestamp'];
             $users[$user_id_arr[$i]]['submit_time'] = $file_contents['submit_timestamp'];
             $users[$user_id_arr[$i]]['file'] = $file_contents['filepath'];

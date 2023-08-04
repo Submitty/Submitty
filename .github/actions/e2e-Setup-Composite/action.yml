@@ -1,0 +1,197 @@
+name: 'SetUpForE2e'
+descriptions: 'Uses the composite action to copy and set up our e2e Selenium and cypress tests'
+
+env:
+  PGPASSWORD: submitty_dbuser
+  PHP_USER: submitty_php
+  PHP_GROUP: submitty_php
+  CGI_USER: submitty_cgi
+  SUBMITTY_DATA_DIR: /var/local/submitty
+  SUBMITTY_INSTALL_DIR: /usr/local/submitty
+  SUBMITTY_REPOSITORY: /usr/local/submitty/GIT_CHECKOUT/Submitty
+  POSTGRES_HOST: localhost
+  PHP_VER: 8.1
+  NODE_VERSION: 16
+  PYTHON_VERSION: 3.8
+
+runs:
+  using: "composite"
+  steps:
+    - uses: actions/checkout@v3
+      with:
+        path: SUBMITTY_CPY/
+    - name: Copy Repo
+      run: |
+        # have to copy first, absolute paths not supported by actions/checkout@v3
+          sudo mkdir -p ${SUBMITTY_INSTALL_DIR}/GIT_CHECKOUT/Submitty
+          sudo cp -R SUBMITTY_CPY/. ${SUBMITTY_INSTALL_DIR}/GIT_CHECKOUT/Submitty
+          sudo chmod -R a+rwx  ${SUBMITTY_INSTALL_DIR}
+          sudo chmod -R a+rwx /tmp/
+      shell: bash
+    - uses: actions/setup-python@v4
+      with:
+        python-version: ${{ env.PYTHON_VERSION }}
+    - uses: shivammathur/setup-php@2.24.0
+      with:
+        php-version: ${{ env.PHP_VER }}
+        extensions: imagick, ldap
+
+    - name: Set Timezone
+      run: |
+        sudo timedatectl set-timezone America/New_York
+      shell: bash
+
+    - name: Cache pip
+      uses: actions/cache@v3
+      with:
+        path: ~/.cache/pip
+        key: ${{ runner.os }}-${{ github.job }}-pip-${{ hashFiles('**/system_requirements.txt') }}
+        restore-keys: |
+          ${{ runner.os }}-${{ github.job }}-pip-
+
+    - name: Install Test-specific python dependencies
+      run: |
+        # Install for local
+        python3 -m pip install --upgrade pip setuptools wheel
+        pip3 -V
+        pip3 install selenium websocket_client
+        # Install globally
+        sudo python3 -m pip install --upgrade pip setuptools wheel
+        sudo pip3 -V
+      shell: bash
+    - name: Install python dependencies
+      run: |
+        # Install for local
+        pip3 install -r ${SUBMITTY_REPOSITORY}/.setup/pip/system_requirements.txt
+        # Install globally
+        sudo pip3 install -r ${SUBMITTY_REPOSITORY}/.setup/pip/system_requirements.txt
+      shell: bash
+    - name: Get composer cache dir
+      id: composer-cache
+      run: |
+        cd ${SUBMITTY_INSTALL_DIR}/GIT_CHECKOUT/Submitty/site
+        echo "dir=$(composer config cache-files-dir)" >> $GITHUB_OUTPUT
+      shell: bash
+    - name: Install composer Cache
+      uses: actions/cache@v3
+      with:
+        path: ${{ steps.composer-cache.outputs.dir }}
+        key: ${{ runner.os }}-php-composer-${{ hashFiles('**/composer.lock') }}
+        restore-keys: |
+          ${{ runner.os }}-php-composer-
+
+    - name: Install PHP dependencies
+      run: |
+        cd  ${SUBMITTY_INSTALL_DIR}/GIT_CHECKOUT/Submitty/site
+        composer install --prefer-dist
+      shell: bash
+
+    - name: Install Submitty python utils
+      run: |
+        cd ${SUBMITTY_REPOSITORY}/python_submitty_utils
+        pip3 install .
+        pip3 show submitty_utils
+        umask 022
+        sudo -H pip3 install .
+        sudo pip3 show submitty_utils
+      shell: bash
+
+    - name: Create Database and default users
+      run: |
+        PGPASSWORD=${PGPASSWORD} psql -d postgres -h localhost -U postgres -c "CREATE ROLE submitty_dbuser WITH SUPERUSER CREATEDB CREATEROLE LOGIN PASSWORD 'submitty_dbuser'"
+        PGPASSWORD=${PGPASSWORD} psql -d postgres -h localhost -U postgres -c "CREATE ROLE submitty_course_dbuser WITH LOGIN PASSWORD 'submitty_course_dbuser'"
+        PGPASSWORD=${PGPASSWORD} psql -d postgres -h localhost -U submitty_dbuser -c "CREATE DATABASE submitty"
+      shell: bash
+
+    - name: Install apt-get packages
+      run: |
+        sudo apt-get update
+        sudo apt-get install libseccomp-dev
+        sudo apt-get install libboost-all-dev
+        sudo apt-get install apache2
+        sudo apt-get install apache2-suexec-custom
+        sudo apt-get install libapache2-mod-authnz-external
+        sudo apt-get install libapache2-mod-authz-unixgroup
+        sudo apt-get install libapache2-mod-wsgi-py3
+        sudo apt-get install nginx
+        sudo apt-get install php${PHP_VER}-fpm
+        sudo apt-get install poppler-utils
+        sudo apt-get install valgrind
+        sudo apt-get install moreutils
+      shell: bash
+
+    - name: Install third party dependencies
+      run: |
+        cd $SUBMITTY_REPOSITORY
+        sudo -E env "PATH=$PATH" bash .setup/testing/autograder.sh
+      shell: bash
+
+    - name: Configure Test suite
+      run: |
+        cd $SUBMITTY_REPOSITORY
+        sudo -E env "PATH=$PATH" bash .setup/testing/setup.sh
+        sudo jq '. |= . + {"verified_submitty_admin_user": "submitty-admin"}' /usr/local/submitty/config/submitty_users.json \
+          | sudo sponge /usr/local/submitty/config/submitty_users.json
+        sudo chown root:submitty_daemonphp /usr/local/submitty/config/submitty_users.json
+        sudo chmod 440 /usr/local/submitty/config/submitty_users.json
+      shell: bash
+
+    - name: Setup ldap
+      run: |
+        cd $SUBMITTY_REPOSITORY
+        sudo -E env "PATH=$PATH" bash .setup/testing/setup_ldap.sh
+      shell: bash
+
+    - name: Set up sample course
+      run: sudo -E env "PATH=$PATH" python3 /usr/local/submitty/GIT_CHECKOUT/Submitty/.setup/bin/setup_sample_courses.py --no_grading sample
+      shell: bash
+
+    - name: Set up test suite
+      run: |
+        cd $SUBMITTY_REPOSITORY
+        sudo -E env "PATH=$PATH" bash .setup/testing/setup_test_suite.sh
+      shell: bash
+
+    - name: Set up apache
+      run: |
+        cd $SUBMITTY_REPOSITORY
+        sudo a2enmod include rewrite actions cgi alias headers suexec authnz_external headers proxy_fcgi proxy_http proxy_wstunnel
+        sudo cp .setup/php-fpm/pool.d/submitty.conf /etc/php/$PHP_VER/fpm/php-fpm.conf
+        sudo mkdir -p /run/php
+        sudo chown www-data:www-data /run/php
+        sudo chmod 755 /run/php
+        sudo a2dissite 000-default
+        sudo rm -rf /etc/apache2/sites-available/*
+        sudo rm -rf /etc/apache2/sites-enabled/*
+        sudo cp -f .setup/apache/submitty.conf /etc/apache2/sites-available/submitty.conf
+        sudo sed -e "s/Require host __your_domain__/Require all granted/g" --in-place /etc/apache2/sites-available/submitty.conf
+        sudo cp .setup/apache/www-data /etc/apache2/suexec/www-data
+        sudo chmod 0640 /etc/apache2/suexec/www-data
+        sudo a2ensite submitty
+        sudo bash -c 'echo "export PATH=$PATH" >> /etc/apache2/envvars'
+        sudo apache2ctl -t
+        sudo service php${PHP_VER}-fpm restart
+        sudo service apache2 restart
+      shell: bash
+
+    - name: Set up nginx
+      run: |
+        cd $SUBMITTY_REPOSITORY
+        sudo mkdir /etc/systemd/system/nginx.service.d
+        sudo printf "[Service]\nExecStartPost=/bin/sleep 0.1\n" | sudo tee /etc/systemd/system/nginx.service.d/override.conf
+        sudo systemctl daemon-reload
+        sudo rm -rf /etc/nginx/sites-available/*
+        sudo rm -rf /etc/nginx/sites-enabled/*
+        sudo cp -f .setup/nginx/submitty.conf /etc/nginx/sites-available/submitty.conf
+        sudo chmod 644 /etc/nginx/sites-available/submitty.conf
+        sudo ln -s /etc/nginx/sites-available/submitty.conf /etc/nginx/sites-enabled/submitty.conf
+        sudo service nginx restart
+      shell: bash
+
+    - name: Run git tests
+      run: |
+        cd $SUBMITTY_REPOSITORY
+        SEMESTER=$(python3 -c 'from datetime import datetime; today = datetime.today(); semester = ("s" if today.month < 7 else "f") + str(today.year)[-2:]; print(semester)')
+        sudo python3 /usr/local/submitty/bin/generate_repos.py ${SEMESTER} sample open_homework
+        bash tests/git_test.sh
+      shell: bash

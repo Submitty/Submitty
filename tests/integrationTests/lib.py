@@ -612,7 +612,7 @@ class TestcaseWrapper:
 
 
     ###################################################################################
-    # Helper function for json_diff. Recursivly removes keys from input_dict.
+    # Helper function for json_diff. Recursively removes keys from input_dict.
     # Credit: Olivier Melançon.
     # https://stackoverflow.com/a/49103013
     def dict_sweep(self, input_dict, keys):

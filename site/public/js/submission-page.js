@@ -1,5 +1,6 @@
 /* exported openActionsPopup */
 /* exported initializeTimer */
+/* exported checkDeadline */
 function openActionsPopup(popup_css, element_id) {
     let elem_html = `<link rel="stylesheet" type="text/css" href="${popup_css}" />`;
     elem_html += document.getElementById(element_id).innerHTML;
@@ -38,7 +39,16 @@ function syncWithServer(criticalSync) {
         contentType: false,
         success: function(res) {
             lastTime = Date.now();
-            const response = JSON.parse(res);
+            let response = {};
+
+            try {
+                response = JSON.parse(res);
+            }
+            catch (err) {
+                handleSyncError(err);
+                return;
+            }
+
             ticks_till_update = 600000;
             if (response.status === 'success') {
                 const { data } = response;
@@ -65,24 +75,49 @@ function syncWithServer(criticalSync) {
                 displayErrorMessage('Something went wrong while starting the timer');
             }
         },
-        error: function (err) {
-            ticks_till_update = 600000;
-            console.log(err);
-            if (!criticalSync) {
-                updateTime();
-            }
-            else {
-                if (document.getElementById('gradeable-time-remaining-text') !== null) {
-                    document.getElementById('gradeable-time-remaining-text').textContent = 'Timer Error. Please refresh to restart.';
-                }
-                if (user_deadline !== 0) {
-                    if (document.getElementById('time-remaining-text') !== null) {
-                        document.getElementById('time-remaining-text').textContent = 'Timer Error. Please refresh to restart.';
-                    }
-                }
-            }
+        error: (err) => {
+            handleSyncError(err);
         },
     });
+
+    function handleSyncError(err) {
+        ticks_till_update = 600000;
+        console.log(err);
+        if (!criticalSync) {
+            updateTime();
+        }
+        else {
+            if (document.getElementById('gradeable-time-remaining-text') !== null) {
+                document.getElementById('gradeable-time-remaining-text').textContent = 'Timer Error. Please refresh to restart.';
+            }
+            if (user_deadline !== 0) {
+                if (document.getElementById('time-remaining-text') !== null) {
+                    document.getElementById('time-remaining-text').textContent = 'Timer Error. Please refresh to restart.';
+                }
+            }
+        }
+    }
+}
+function checkDeadline() {
+
+    if (Math.abs(Date.now() - lastTime) > 5000) {
+        //we need to sync back up
+        syncWithServer(true);
+    }
+    if (ticks_till_update <= 0) {
+        syncWithServer(false);
+    }
+    else {
+        curTime += (Date.now()-lastTime);
+        const time = Math.abs(Math.floor((curTime - deadline) / 1000));
+        const days = Math.floor(time / (3600 * 24));
+        if (document.getElementById('gradeable-time-remaining-text') !== null) {
+            if (curTime > deadline) {
+                return 1+days;
+            }
+        }
+    }
+    return 0;
 }
 
 function updateTime() {

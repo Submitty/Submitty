@@ -126,7 +126,7 @@ class Notification extends AbstractModel {
     }
 
     /**
-     * Trim long $message upto 40 character and filter newline
+     * Trim long $message up to 40 character and filter newline
      *
      * @param string $message
      * @return string the trimmed message

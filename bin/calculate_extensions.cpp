@@ -17,7 +17,6 @@
 
 #include "boost/filesystem/operations.hpp"
 #include "boost/filesystem/path.hpp"
-
 #include "boost/date_time/gregorian/gregorian.hpp"
 
 

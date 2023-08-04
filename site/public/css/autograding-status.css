@@ -20,3 +20,36 @@
 #course-table td:nth-of-type(3)::before { content: "Gradeable Id"; }
 #course-table td:nth-of-type(4)::before { content: "Interactive"; }
 #course-table td:nth-of-type(5)::before { content: "Regrade"; }
+
+.stack-trace {
+    width: 100%;
+    height: fit-content;
+    white-space: normal;
+}
+
+.stack-trace-info {
+    width: 100%;
+    overflow-y: scroll;
+    height: 100vh;
+    padding: 1em;
+    background-color: var(--code-box-background-light-gray);
+    color: var(--code-box-font-color-dark-gray);
+}
+
+div.stack-trace-wrapper {
+    list-style-type: none;
+    border-bottom: 1px solid gray;
+}
+
+div.stack-trace-wrapper > .tab {
+    color: var(--text-black);
+    padding: 0.5em 1em;
+    border-radius: 6px 6px 0 0;
+    text-decoration: none;
+    display: inline-block;
+}
+
+div.stack-trace-wrapper > .active-tab {
+    background-color: var(--submitty-logo-blue);
+    color: var(--btn-text-white);
+}

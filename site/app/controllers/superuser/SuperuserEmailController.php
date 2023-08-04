@@ -50,7 +50,7 @@ class SuperuserEmailController extends AbstractController {
             return JsonResponse::getFailResponse("Email subject is empty.");
         }
         else {
-            // Because AJAX stringifies everthing
+            // Because AJAX stringifies everything
             $email_instructor =  isset($_POST['email_instructor']) && $_POST['email_instructor'] == "true";
             $email_full_access = isset($_POST['email_full_access']) && $_POST['email_full_access'] == "true";
             $email_limited_access = isset($_POST['email_limited_access']) && $_POST['email_limited_access'] == "true";

@@ -2,7 +2,12 @@
 {% block popup_id %}edit-username-form{% endblock %}
 {% block title %}Edit Preferred Names{% endblock %}
 {% block body %}
-    <p class="std-margin">{{ change_name_text }}</p>
+    <p class="std-margin">Submitty welcomes individuals of all ages, backgrounds, citizenships, 
+    disabilities, sex, education, ethnicities, family statuses, genders, gender identities, 
+    geographical locations, languages, military experience, political views, races, religions, 
+    sexual orientations, socioeconomic statuses, and work experiences. In an effort to create 
+    an inclusive environment, you may specify a preferred name to be used instead of what was 
+    provided on the registration roster.</p>
     <p class="std-margin">
         Your instructor and the system administrators reserve the right to remove
         a preferred name if it contains inappropriate or offensive language,
@@ -12,20 +17,20 @@
         <input id="user-preferred-name-csrf" type="hidden" name="csrf_token" value="{{ csrf_token }}" />
         <h2>My Preferred Name</h2>
         <div class="edit_user_row">
-            <label for="user-firstname-change">Preferred First / Given Name:&emsp;</label>
+            <label for="user-givenname-change">Preferred First / Given Name:&emsp;</label>
             <input type="text"
-                   name="user_firstname_change"
-                   value="{{ user_first }}"
-                   id="user-firstname-change"
-                   data-current-name="{{ user_first }}"/>
+                   name="user_givenname_change"
+                   value="{{ user_given }}"
+                   id="user-givenname-change"
+                   data-current-name="{{ user_given }}"/>
         </div>
         <div class="edit_user_row">
-            <label for="user-lastname-change">Preferred Last / Family Name:&emsp;</label>
+            <label for="user-familyname-change">Preferred Last / Family Name:&emsp;</label>
             <input type="text"
-                   name="user_lastname_change"
-                   value="{{ user_last }}"
-                   id="user-lastname-change"
-                   data-current-name="{{ user_last }}"/>
+                   name="user_familyname_change"
+                   value="{{ user_family }}"
+                   id="user-familyname-change"
+                   data-current-name="{{ user_family }}"/>
         </div>
     </div>
 {% endblock %}

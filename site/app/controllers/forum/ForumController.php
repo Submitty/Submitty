@@ -173,6 +173,12 @@ class ForumController extends AbstractController {
         $result = [];
         if (!empty($_POST["newCategory"])) {
             $category = trim($_POST["newCategory"]);
+            if ($this->core->getUser()->accessAdmin() && !empty($_POST["visibleDate"])) {
+                $visibleDate = DateUtils::parseDateTime($_POST['visibleDate'], $this->core->getUser()->getUsableTimeZone());
+            }
+            else {
+                $visibleDate = null;
+            }
             if ($this->isValidCategories(-1, [$category])) {
                 return $this->core->getOutput()->renderJsonFail("That category already exists.");
             }
@@ -181,7 +187,7 @@ class ForumController extends AbstractController {
                     return $this->core->getOutput()->renderJsonFail("Category name is more than 50 characters.");
                 }
                 else {
-                    $newCategoryId = $this->core->getQueries()->addNewCategory($category, $_POST["rank"]);
+                    $newCategoryId = $this->core->getQueries()->addNewCategory($category, $_POST["rank"], $visibleDate);
                     $result["new_id"] = $newCategoryId["category_id"];
                 }
             }
@@ -236,6 +242,7 @@ class ForumController extends AbstractController {
         $category_id = $_POST["category_id"];
         $category_desc = null;
         $category_color = null;
+        $category_visible_date = null;
 
         if (!empty($_POST["category_desc"])) {
             $category_desc = trim($_POST["category_desc"]);
@@ -252,8 +259,20 @@ class ForumController extends AbstractController {
                 return $this->core->getOutput()->renderJsonFail("Given category color is not allowed.");
             }
         }
+        if (!empty($_POST["visibleDate"]) && $this->core->getUser()->accessAdmin()) {
+            if ($_POST["visibleDate"] === "    ") {
+                $category_visible_date = "";
+            }
+            else {
+                $category_visible_date = DateUtils::parseDateTime($_POST['visibleDate'], $this->core->getUser()->getUsableTimeZone());
+                //ASSUME NO ISSUE
+            }
+        }
+        else {
+            $category_visible_date = null;
+        }
 
-        $this->core->getQueries()->editCategory($category_id, $category_desc, $category_color);
+        $this->core->getQueries()->editCategory($category_id, $category_desc, $category_color, $category_visible_date);
         return $this->core->getOutput()->renderJsonSuccess();
     }
 
@@ -326,7 +345,7 @@ class ForumController extends AbstractController {
         foreach ($_POST["cat"] as $category_id) {
             $categories_ids[] = (int) $category_id;
         }
-        if (empty($thread_title) || empty($thread_post_content)) {
+        if (strlen($thread_title) === 0 || strlen($thread_post_content) === 0) {
             $this->core->addErrorMessage("One of the fields was empty or bad. Please re-submit your thread.");
             $result['next_page'] = $this->core->buildCourseUrl(['forum', 'threads', 'new']);
         }
@@ -451,11 +470,11 @@ class ForumController extends AbstractController {
 
         $markdown = !empty($_POST['markdown_status']);
 
-        setcookie("markdown_enabled", ($markdown ? 1 : 0), time() + (86400 * 30), "/");
+        setcookie("markdown_enabled", strval($markdown ? 1 : 0), time() + (86400 * 30), "/");
 
         $display_option = (!empty($_POST["display_option"])) ? htmlentities($_POST["display_option"], ENT_QUOTES | ENT_HTML5, 'UTF-8') : "tree";
         $anon = (isset($_POST["Anon"]) && $_POST["Anon"] == "Anon") ? 1 : 0;
-        if (empty($post_content) || empty($thread_id)) {
+        if (strlen($post_content) === 0 || strlen($thread_id) === 0) {
             $this->core->addErrorMessage("There was an error submitting your post. Please re-submit your post.");
             $result['next_page'] = $this->core->buildCourseUrl(['forum', 'threads']);
         }
@@ -467,7 +486,7 @@ class ForumController extends AbstractController {
             $this->core->addErrorMessage("There was an error submitting your post. Parent post doesn't exist in given thread.");
             $result['next_page'] = $this->core->buildCourseUrl(['forum', 'threads']);
         }
-        elseif ($this->core->getQueries()->isThreadLocked($thread_id) && !$this->core->getUser()->accessAdmin()) {
+        elseif ($this->core->getQueries()->isThreadLocked(intval($thread_id)) && !$this->core->getUser()->accessAdmin()) {
             $this->core->addErrorMessage("Thread is locked.");
             $result['next_page'] = $this->core->buildCourseUrl(['forum', 'threads', $thread_id]);
         }
@@ -494,7 +513,7 @@ class ForumController extends AbstractController {
                 }
 
                 $full_course_name = $this->core->getFullCourseName();
-                $thread_title = $this->core->getQueries()->getThread($thread_id)['title'];
+                $thread_title = $this->core->getQueries()->getThread(intval($thread_id))['title'];
                 $parent_post = $this->core->getQueries()->getPost($parent_id);
                 $parent_post_content = $parent_post['content'];
 
@@ -573,6 +592,12 @@ class ForumController extends AbstractController {
 
         if (!$this->core->getAccess()->canI("forum.modify_post", ['post_author' => $post['author_user_id']])) {
                 return $this->core->getOutput()->renderJsonFail('You do not have permissions to do that.');
+        }
+        if (isset($_POST['thread_id']) && $post['thread_id'] !== intval($_POST['thread_id'])) {
+            return $this->core->getOutput()->renderJsonFail("You do not have permission to do that.");
+        }
+        if (isset($_POST['edit_thread_id']) && $post['thread_id'] !== intval($_POST['edit_thread_id'])) {
+            return $this->core->getOutput()->renderJsonFail("You do not have permission to do that.");
         }
         if (!empty($_POST['edit_thread_id']) && $this->core->getQueries()->isThreadLocked($_POST['edit_thread_id']) && !$this->core->getUser()->accessAdmin()) {
             return $this->core->getOutput()->renderJsonFail('Thread is locked');
@@ -917,7 +942,19 @@ class ForumController extends AbstractController {
      */
     public function getSingleThread() {
         $thread_id = $_POST['thread_id'];
+        // Checks if thread id is empty. If so, render "fail" json response case informing that thread id is empty.
+        if (empty($thread_id)) {
+            return $this->core->getOutput()->renderJsonFail("Invalid thread id (EMPTY ID)");
+        }
+        // Checks if thread id is not an integer value. If so, render "fail" json response case informing that thread id is not an integer value.
+        if (!(is_int($thread_id) || ctype_digit($_POST['thread_id']))) {
+            return $this->core->getOutput()->renderJsonFail("Invalid thread id (NON-INTEGER ID)");
+        }
         $thread = $this->core->getQueries()->getThread($thread_id);
+        // Checks if no threads were found. If so, render "fail" json response case informing that the no threads were found with the given ID.
+        if (!(count($thread) > 0)) {
+            return $this->core->getOutput()->renderJsonFail("Invalid thread id (NON-EXISTENT ID)");
+        }
         $categories_ids = $this->core->getQueries()->getCategoriesIdForThread($thread_id);
         $show_deleted = $this->showDeleted();
         $currentCourse = $this->core->getConfig()->getCourse();
@@ -1127,7 +1164,7 @@ class ForumController extends AbstractController {
         // Fetch additional information
         foreach ($output as &$_post) {
             $emptyUser = empty($_post['user']);
-            $_post['user_info'] = $emptyUser ? ['first_name' => 'Anonymous', 'last_name' => '', 'email' => ''] : $this->core->getQueries()->getDisplayUserInfoFromUserId($_post['user']);
+            $_post['user_info'] = $emptyUser ? ['given_name' => 'Anonymous', 'family_name' => '', 'email' => '', 'pronouns' => '', 'display_pronouns' => false ] : $this->core->getQueries()->getDisplayUserInfoFromUserId($_post['user']);
             $_post['is_staff_post'] = $emptyUser ? false : $this->core->getQueries()->isStaffPost($_post['user']);
         }
         return $this->core->getOutput()->renderJsonSuccess($output);
@@ -1186,8 +1223,8 @@ class ForumController extends AbstractController {
             if (!isset($users[$user])) {
                 $users[$user] = [];
                 $u = $this->core->getQueries()->getSubmittyUser($user);
-                $users[$user]["first_name"] = htmlspecialchars($u -> getDisplayedFirstName());
-                $users[$user]["last_name"] = htmlspecialchars($u -> getDisplayedLastName());
+                $users[$user]["given_name"] = htmlspecialchars($u -> getDisplayedGivenName());
+                $users[$user]["family_name"] = htmlspecialchars($u -> getDisplayedFamilyName());
                 $users[$user]["posts"] = [];
                 $users[$user]["id"] = [];
                 $users[$user]["timestamps"] = [];

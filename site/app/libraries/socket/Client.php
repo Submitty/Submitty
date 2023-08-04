@@ -9,7 +9,15 @@ use WebSocket;
 
 class Client extends WebSocket\Client {
     public function __construct(Core $core) {
-        parent::__construct('ws://127.0.0.1:41983/', [
+        $url = parse_url($core->getConfig()->getBaseUrl());
+        $uri = sprintf(
+            '%s://%s:%d/ws',
+            str_replace('http', 'ws', $url['scheme']),
+            $url['host'],
+            $core->getConfig()->getWebsocketPort()
+        );
+
+        parent::__construct($uri, [
             'headers' => [
                 'Session-Secret' => $core->getConfig()->getSecretSession()
             ]

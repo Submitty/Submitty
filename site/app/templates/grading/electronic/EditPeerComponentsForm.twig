@@ -7,7 +7,7 @@
 		Select the student whose marks you want to clear 
 		</br> WARNING this will remove all of the peer grading done by this student:
 		</br>
-		** WIP: Editting and deletion of individual components**
+		** WIP: Editing and deletion of individual components**
 	</span>
 	<select id = "edit-peer-select" onChange = "changeCurrentPeer()">
 		{% for peer in peers %}
@@ -37,7 +37,8 @@
 			        {% for mark in component.marks %}
 		                <div class="row">
 		                    <div class="col-no-gutters indicator">
-		                    	{% if peer_details.marks_assigned is defined and mark in peer_details.marks_assigned[component.id][peer] %}
+		                    	{% if peer_details.marks_assigned is defined and 
+		                    		peer_details.marks_assigned[component.id][peer] is defined and mark in peer_details.marks_assigned[component.id][peer] %}
 		                        	<i class="far fa-check-square fa-1g"></i>
 		                        {% else %}
 		                        	<i class="far fa-square fa-1g"></i>

@@ -327,7 +327,7 @@
     var BASE_ROW_CENTER = document.getElementById("diagram").offsetWidth / 2.0;
     var BASE_ROW_HEIGHT = 6
     var BASE_ROW_COLOR = "grey"
-    var BASE_POINT_RADIUS = 7
+    var BASE_POINT_RADIUS = 0
 
     var DRAW_ROW_BLACK_DOTS = false;
     var DRAW_ROW_CENTER_LABELS = false;
@@ -339,11 +339,11 @@
     // Render left note
     ctx.font = "bold 12pt sans-serif";
     ctx.fillStyle = "#d000d0";
-    ctx.fillText(note_left1, 130, 50);
+    //ctx.fillText(note_left1, 130, 50);
 
     ctx.font = "bold 12pt sans-serif";
     ctx.fillStyle = "#d000d0";
-    ctx.fillText(note_left2, 130, 70);
+    //ctx.fillText(note_left2, 130, 70);
 
     // Render right note
     ctx.font = "bold 12pt sans-serif";
@@ -372,7 +372,7 @@
     // Draw WALKWAY row label
     row = 6;
     message = "WALKWAY";
-    ctx.font = "bold 20pt sans-serif";
+    ctx.font = "bold 15pt sans-serif";
 
     var center_x = BASE_ROW_CENTER;
     var center_y = BASE_ROW_START + 20 * row

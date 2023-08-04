@@ -216,7 +216,7 @@ def insert_into_database(config, semester, course, gradeable_id, user_id, team_i
 def get_testcases(config, semester, course, g_id, notebook_data):
     """
     Get all the testcases for a homework from its build json file. This should have a 1-to-1
-    correspondance with the testcases that come from the results.json file.
+    correspondence with the testcases that come from the results.json file.
 
     :param semester:
     :param course:
@@ -247,7 +247,6 @@ def get_testcases(config, semester, course, g_id, notebook_data):
             testcase_specs += item_dict['testcases']
 
     testcases = []
-    print(json.dumps(testcase_specs, indent=4))
     for testcase in testcase_specs:
         testcases.append({
                 'hidden': testcase.get('hidden', False),

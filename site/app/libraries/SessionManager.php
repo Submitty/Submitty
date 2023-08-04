@@ -2,6 +2,11 @@
 
 namespace app\libraries;
 
+use app\entities\Session;
+use app\repositories\SessionRepository;
+use DateInterval;
+use DateTime;
+
 /**
  * Class SessionManager
  *
@@ -11,12 +16,17 @@ namespace app\libraries;
  * they logged in.
  */
 class SessionManager {
+    const SESSION_EXPIRATION = "2 weeks";
+
     /**
      * @var Core
      */
     private $core;
 
-    private $session = [];
+    /**
+     * @var Session|null
+     */
+    private $session = null;
 
     /**
      * SessionManager constructor.
@@ -28,40 +38,70 @@ class SessionManager {
     }
 
     /**
-     * Given a session id, grab the assiociated row from the database returning false if
+     * Given a session id, grab the associated row from the database returning false if
      * no such row exists or returning true if the row does exist. If the row exists, additionally
      * update when it'll expire by 24 hours
      *
      * @return bool|string
      */
     public function getSession(string $session_id) {
-        $this->core->getQueries()->removeExpiredSessions();
-        $this->session = $this->core->getQueries()->getSession($session_id);
+        $em = $this->core->getSubmittyEntityManager();
+        /** @var SessionRepository $repo */
+        $repo =  $em->getRepository(Session::class);
+        $this->session = $repo->getActiveSessionById($session_id);
         if (empty($this->session)) {
             return false;
         }
-        $this->core->getQueries()->updateSessionExpiration($session_id);
 
-        return $this->session['user_id'];
+        // Only refresh the session once per day
+        if ($this->shouldSessionBeUpdated()) {
+            $this->session->updateSessionExpiration($this->core->getDateTimeNow());
+            $em->flush();
+        }
+
+        return $this->session->getUserId();
+    }
+
+    /**
+     * Sessions should only be updated once per day to reduce load on the server.
+     * Check whether a day has passed since we last updated this session
+     */
+    public function shouldSessionBeUpdated(): bool {
+        $day_before_expiration = (new DateTime())->add(DateInterval::createFromDateString(self::SESSION_EXPIRATION))->sub(DateInterval::createFromDateString('1 day'));
+        return $this->session->getSessionExpires() < $day_before_expiration;
     }
 
     /**
      * Create a new session for the user
-     *
-     * @return string
+     * @param array<string, string> $user_agent
      */
-    public function newSession(string $user_id): string {
-        if (!isset($this->session['session_id'])) {
-            $this->session['session_id'] = Utils::generateRandomString();
-            $this->session['user_id'] = $user_id;
-            $this->session['csrf_token'] = Utils::generateRandomString();
-            $this->core->getQueries()->newSession(
-                $this->session['session_id'],
-                $this->session['user_id'],
-                $this->session['csrf_token']
+    public function newSession(string $user_id, array $user_agent): string {
+        if (empty($this->session)) {
+            $this->session = new Session(
+                Utils::generateRandomString(),
+                $user_id,
+                Utils::generateRandomString(),
+                $this->core->getDateTimeNow()->add(\DateInterval::createFromDateString(SessionManager::SESSION_EXPIRATION)),
+                $this->core->getDateTimeNow(),
+                $user_agent
             );
+            $em = $this->core->getSubmittyEntityManager();
+            $em->persist($this->session);
+            $em->flush();
         }
-        return $this->session['session_id'];
+        return $this->session->getSessionId();
+    }
+
+    /**
+     * Get the session id of the currently loaded session otherwise return false
+     *
+     * @return string|bool
+     */
+    public function getCurrentSessionId() {
+        if (isset($this->session)) {
+            return $this->session->getSessionId();
+        }
+        return false;
     }
 
     /**
@@ -71,9 +111,12 @@ class SessionManager {
      * @return bool
      */
     public function removeCurrentSession(): bool {
-        if (isset($this->session['session_id'])) {
-            $this->core->getQueries()->removeSessionById($this->session['session_id']);
-            $this->session = [];
+        if (isset($this->session)) {
+            $em = $this->core->getSubmittyEntityManager();
+            $session = $em->getReference(Session::class, $this->session->getSessionId());
+            $em->remove($session);
+            $em->flush();
+            $this->session = null;
             return true;
         }
         return false;
@@ -86,8 +129,8 @@ class SessionManager {
      * @return bool|string
      */
     public function getCsrfToken() {
-        if (isset($this->session['csrf_token'])) {
-            return $this->session['csrf_token'];
+        if (isset($this->session)) {
+            return $this->session->getCsrfToken();
         }
         return false;
     }

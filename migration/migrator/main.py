@@ -10,7 +10,7 @@ from typing import Set
 
 from sqlalchemy.exc import OperationalError
 
-from . import db, get_dir_path, get_migrations_path, get_environments
+from . import db, get_dir_path, get_migrations_path, get_triggers_path, get_environments
 from .dumper import dump_database
 from .loader import load_module, load_migrations
 
@@ -225,9 +225,32 @@ def handle_migration(args):
                 raise SystemExit(
                     f"Migrator Error:  Could not find courses directory: {course_dir}"
                 )
-            for semester in sorted(os.listdir(str(course_dir))):
-                courses = sorted(os.listdir(os.path.join(str(course_dir), semester)))
-                for course in courses:
+
+            database_config = deepcopy(args.config.database)
+            database_config['dbname'] = 'submitty'
+            try:
+                database = db.Database(database_config, 'master')
+            except OperationalError:
+                raise SystemExit(
+                    'Submitty Database Migration Error:  '
+                    'Database does not exist for master for courses'
+                )
+
+            courses = {}
+            for course in database.execute(
+                'SELECT * FROM courses WHERE status=1 OR status=2 ORDER BY semester, course'
+            ):
+                if course['semester'] not in courses:
+                    courses[course['semester']] = []
+                courses[course['semester']].append(course['course'])
+            database.close()
+
+            for semester in courses:
+                for course in courses[semester]:
+                    if not Path(course_dir, semester, course).exists():
+                        raise SystemExit(
+                            f'Migrator Error:  Could not find directory for {semester} {course}'
+                        )
                     loop_args = deepcopy(args)
                     cond1 = loop_args.choose_course is not None
                     cond2 = [semester, course] != loop_args.choose_course
@@ -249,20 +272,18 @@ def handle_migration(args):
                         )
                         database.close()
                     except OperationalError:
-                        # NOTE: Do not fail on missing database.
-                        # Older archived courses may not have a valid
-                        # or active database associated with their
-                        # filesystem.  (Old course submission files
-                        # are useful for plagiarism detection.)
-                        print(
-                            "Submitty Database Migration WARNING:  "
+                        raise SystemExit(
+                            "Submitty Database Migration Error:  "
                             "Database does not exist for "
                             "semester={} course={}".format(semester, course)
                         )
-                        continue
     for missing_migration in all_missing_migrations:
         if missing_migration.exists():
             missing_migration.unlink()
+
+    print('Loading trigger functions...', end='')
+    load_triggers(args, False)
+    print('DONE')
 
 
 def migrate_environment(database, environment, args, all_missing_migrations):
@@ -453,3 +474,73 @@ def dump(args):
         semester = f"{'s' if today.month < 7 else 'f'}{str(today.year)[-2:]}"
         dump_database(f'submitty_{semester}_sample', data_dir / 'course_tables.sql')
         print('DONE')
+
+
+def load_triggers(args, output=True):
+    for environment in args.environments:
+        if environment not in ('master', 'course'):
+            continue
+
+        trigger_dir = get_triggers_path() / environment
+        sql = [(f, f.read_text()) for f in trigger_dir.iterdir()
+               if f.is_file() and f.suffix == '.sql']
+
+        if len(sql) == 0:
+            if output:
+                print('Loading trigger functions to {}...DONE'.format(environment))
+            continue
+
+        db_config = deepcopy(args.config.database)
+        db_config['dbname'] = 'submitty'
+        try:
+            masterdb = db.Database(db_config, 'master')
+        except OperationalError as exc:
+            raise SystemExit(
+                '\n' * (not output) +  # make sure to appear on new line
+                'Error connecting to master database:\n  {}'.format(str(exc.orig).split('\n')[0])
+            )
+
+        if environment == 'master':
+            if output:
+                print('Loading trigger functions to master...')
+            for file, data in sql:
+                if output:
+                    print('  ' + file.stem)
+                masterdb.execute(data)
+            masterdb.commit()
+            masterdb.close()
+            if output:
+                print('DONE')
+
+        elif environment == 'course':
+            courses = masterdb.execute(
+                'SELECT * FROM courses WHERE status=1 OR status=2 ORDER BY semester, course;'
+            ).all()
+            masterdb.close()
+            first_err = True  # make sure first error appears on new line
+            for course in courses:
+                db_config = deepcopy(args.config.database)
+                db_config['dbname'] = 'submitty_{}_{}'.format(course['semester'], course['course'])
+                try:
+                    coursedb = db.Database(db_config, 'course')
+                except OperationalError as exc:
+                    if not output and first_err:
+                        print()
+                        first_err = False
+                    print('Failed to connect to course db \'{}\'\n  Error: {}'.format(
+                        db_config['dbname'],
+                        str(exc.orig).split('\n')[0]
+                    ))
+                    continue
+
+                if output:
+                    print('Loading trigger functions to {}.{}...'
+                          .format(course['semester'], course['course']))
+                for file, data in sql:
+                    if output:
+                        print('  ' + file.stem)
+                    coursedb.execute(data)
+                coursedb.commit()
+                coursedb.close()
+                if output:
+                    print('DONE')

@@ -20,8 +20,8 @@ for file in file_list:
                 student_rcs = line[1]
                 student_name = line[0]
                 student_tmp = student_name.rsplit(' ', 1)
-                student_first_name = student_tmp[0]
-                student_last_name = student_tmp[1]
+                student_given_name = student_tmp[0]
+                student_family_name = student_tmp[1]
                 #obtain the zones from verify.py, not used right now
                 #student_assigned_zone = assigned_dict[student_rcs]
                 student_grade = float(line[4])
@@ -40,8 +40,8 @@ for file in file_list:
                     student_actual_zone = 'UNASSIGNED'
 
                 temp_array.append('%s' % (student_rcs))
-                temp_array.append('%s' % (student_first_name))
-                temp_array.append('%s' % (student_last_name))
+                temp_array.append('%s' % (student_given_name))
+                temp_array.append('%s' % (student_family_name))
                 #10 is the index in which the csv starts listing grades
                 temp_array += [line[i + 10].strip() for i in range(len(line) - 10)]
                 temp_array.append('%s' % (student_grade))

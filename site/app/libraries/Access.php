@@ -64,6 +64,11 @@ class Access {
      * Only applies to students
      */
     const CHECK_STUDENT_SUBMIT = 1 << 16 | self::REQUIRE_ARG_GRADEABLE | self::REQUIRE_ARG_VERSION;
+    /**
+     * Checks that students are allowed to view and download submission files for the given gradeable
+     * Only applies to students
+     */
+    const CHECK_STUDENT_DOWNLOAD = 1 << 17 | self::REQUIRE_ARG_GRADEABLE | self::REQUIRE_ARG_VERSION;
 
     /** Check that the course status is such that the user can view the course */
     const CHECK_COURSE_STATUS           = 1 << 18;
@@ -89,6 +94,12 @@ class Access {
     const ALLOW_MIN_FULL_ACCESS_GRADER    = self::ALLOW_INSTRUCTOR | self::ALLOW_FULL_ACCESS_GRADER;
     const ALLOW_MIN_INSTRUCTOR            = self::ALLOW_INSTRUCTOR;
     const DENY_ALL                        = -1;
+
+    const ACCESS_LEVELS = [
+        User::LEVEL_USER        => "User",
+        User::LEVEL_FACULTY     => "Faculty",
+        User::LEVEL_SUPERUSER   => "Superuser"
+    ];
 
     /**
      * @var Core
@@ -142,7 +153,7 @@ class Access {
         $this->permissions["grading.electronic.verify_all"] = self::CHECK_CSRF | self::ALLOW_MIN_FULL_ACCESS_GRADER;
         $this->permissions["grading.electronic.silent_edit"] = self::ALLOW_MIN_INSTRUCTOR;
         $this->permissions["grading.electronic.export_components"] = self::ALLOW_MIN_INSTRUCTOR; // this doesn't need to be instructor, but they're the only ones who will do this
-        $this->permissions["grading.electronic.grade_inquiry"] = self::ALLOW_MIN_STUDENT | self::CHECK_GRADING_SECTION_GRADER | self::ALLOW_SELF_GRADEABLE;
+        $this->permissions["grading.electronic.grade_inquiry"] = self::ALLOW_MIN_STUDENT | self::CHECK_GRADING_SECTION_GRADER | self::ALLOW_SELF_GRADEABLE | self::ALLOW_LIMITED_ACCESS_GRADER;
 
         $this->permissions["autograding.load_checks"] = self::ALLOW_MIN_STUDENT | self::CHECK_GRADING_SECTION_GRADER | self::CHECK_PEER_ASSIGNMENT_STUDENT | self::ALLOW_SELF_GRADEABLE;
         $this->permissions["autograding.show_hidden_cases"] = self::ALLOW_MIN_LIMITED_ACCESS_GRADER | self::CHECK_GRADEABLE_MIN_GROUP | self::CHECK_GRADING_SECTION_GRADER;
@@ -173,7 +184,7 @@ class Access {
         $this->permissions["path.read.forum_attachments"] = self::ALLOW_MIN_STUDENT;
         $this->permissions["path.read.results"] = self::ALLOW_MIN_LIMITED_ACCESS_GRADER | self::CHECK_GRADEABLE_MIN_GROUP | self::CHECK_GRADING_SECTION_GRADER | self::CHECK_HAS_SUBMISSION;
         $this->permissions["path.read.results_public"] = self::ALLOW_MIN_STUDENT | self::CHECK_GRADEABLE_MIN_GROUP | self::CHECK_GRADING_SECTION_GRADER | self::CHECK_PEER_ASSIGNMENT_STUDENT | self::ALLOW_SELF_GRADEABLE | self::CHECK_HAS_SUBMISSION | self::CHECK_STUDENT_VIEW | self::CHECK_STUDENT_SUBMIT;
-        $this->permissions["path.read.submissions"] = self::ALLOW_MIN_STUDENT | self::CHECK_GRADEABLE_MIN_GROUP | self::CHECK_GRADING_SECTION_GRADER | self::CHECK_PEER_ASSIGNMENT_STUDENT | self::ALLOW_SELF_GRADEABLE | self::CHECK_HAS_SUBMISSION | self::CHECK_STUDENT_VIEW | self::CHECK_STUDENT_SUBMIT;
+        $this->permissions["path.read.submissions"] = self::ALLOW_MIN_STUDENT | self::CHECK_GRADEABLE_MIN_GROUP | self::CHECK_GRADING_SECTION_GRADER | self::CHECK_PEER_ASSIGNMENT_STUDENT | self::ALLOW_SELF_GRADEABLE | self::CHECK_HAS_SUBMISSION | self::CHECK_STUDENT_VIEW | self::CHECK_STUDENT_DOWNLOAD;
         $this->permissions["path.read.attachments"] = self::ALLOW_MIN_STUDENT | self::CHECK_GRADEABLE_MIN_GROUP | self::CHECK_GRADING_SECTION_GRADER | self::CHECK_PEER_ASSIGNMENT_STUDENT | self::ALLOW_SELF_GRADEABLE | self::CHECK_HAS_SUBMISSION | self::CHECK_STUDENT_VIEW;
 
         $this->permissions["path.read.rainbow_grades"] = self::ALLOW_INSTRUCTOR | self::CHECK_FILE_DIRECTORY | self::CHECK_FILE_EXISTS;
@@ -424,7 +435,7 @@ class Access {
                         !($group === User::GROUP_FULL_ACCESS_GRADER && !$gradeable->isTaGrading())
                         &&
                         //Students are allowed to see this if its a peer graded assignment
-                        !((($group === User::GROUP_STUDENT && $gradeable->hasPeerComponent()) || $group === User::GROUP_LIMITED_ACCESS_GRADER) && $gradeable->getGradeStartDate() <= $this->core->getDateTimeNow())
+                        !(($group === User::GROUP_STUDENT && $gradeable->hasPeerComponent()) && $gradeable->getGradeStartDate() <= $this->core->getDateTimeNow())
                     ) {
                         //Otherwise, you're not allowed
                         $grading_checks = false;
@@ -458,7 +469,7 @@ class Access {
 
             if ($grading_checks && self::checkBits($checks, self::CHECK_PEER_ASSIGNMENT_STUDENT) && $group === User::GROUP_STUDENT) {
                 //Check their peer assignment
-                if (!$this->isGradeableInStudentPeerAssignment($gradeable, $user)) {
+                if (!$this->isGradedGradeableInPeerAssignment($gradeable, $graded_gradeable, $user)) {
                     $grading_checks = false;
                 }
             }
@@ -482,6 +493,11 @@ class Access {
             if ($group === User::GROUP_STUDENT) {
                 if (self::checkBits($checks, self::CHECK_STUDENT_VIEW)) {
                     if (!$gradeable->isStudentView()) {
+                        return false;
+                    }
+                }
+                if (self::checkBits($checks, self::CHECK_STUDENT_DOWNLOAD)) {
+                    if (!$gradeable->canStudentDownload()) {
                         return false;
                     }
                 }
@@ -530,7 +546,7 @@ class Access {
                 return false;
             }
             elseif (!file_exists($path)) {
-                //checks for the existense of path which is asked for
+                //checks for the existence of path which is asked for
                 return false;
             }
 
@@ -638,27 +654,50 @@ class Access {
     }
 
     /**
-     * Check if a Gradeable is in a user's peer grading assignment
-     * @param Gradeable $gradeable Gradeable to be peer graded
+     * Check if a graded-gradeable is in a user's peer grading assignment
+     * If graded-gradeable is null, then simply check if the grader has any peer grading assignment for this gradeable
+     *
+     * @param Gradeable|null $gradeable Gradeable to be peer graded
+     * @param GradedGradeable|null $graded_gradeable Graded-gradeable to be peer graded
      * @param User $user User doing the peer grading
      * @return bool
      */
-    public function isGradeableInStudentPeerAssignment($gradeable, User $user) {
-        if ($gradeable === null) {
+    public function isGradedGradeableInPeerAssignment(?Gradeable $gradeable, ?GradedGradeable $graded_gradeable, User $user) {
+        if ($gradeable === null && $graded_gradeable === null) {
             return false;
+        }
+
+        $any_peer = true;
+
+        if ($graded_gradeable !== null) {
+            $any_peer = false;
+            if ($gradeable === null) {
+                $gradeable = $graded_gradeable->getGradeable();
+            }
         }
 
         if (!$gradeable->hasPeerComponent()) {
             return false;
         }
         else {
-            /*
-            * When this check is run, the submitter of a gradeable is set to the grader, even on master.
-            * This means the in_array will always be false. Hence the return true so that peer grading is even possible.
-            */
-            //$user_ids_to_grade = $this->core->getQueries()->getPeerAssignment($gradeable->getId(), $user->getId());
-            //return in_array($graded_gradeable->getSubmitter()->getId(), $user_ids_to_grade);
-            return true;
+            $user_ids_to_grade = $this->core->getQueries()->getPeerAssignment($gradeable->getId(), $user->getId());
+            if ($any_peer) {
+                if (empty($user_ids_to_grade)) {
+                    return false;
+                }
+                return true;
+            }
+            $submitter = $graded_gradeable->getSubmitter();
+            if ($submitter->isTeam()) {
+                $team_members = $submitter->getTeam()->getMemberUserIds();
+                foreach ($user_ids_to_grade as $user_to_grade) {
+                    if (in_array($user_to_grade, $team_members)) {
+                        return true;
+                    }
+                }
+                return false;
+            }
+            return in_array($graded_gradeable->getSubmitter()->getId(), $user_ids_to_grade);
         }
     }
 
@@ -733,6 +772,9 @@ class Access {
 
         //Get the real path
         $path = $this->resolveDirPath($dir, $path);
+        if ($path === false) {
+            return false;
+        }
         $relative_path = substr($path, strlen($info["base"]) + 1);
 
         //If it doesn't exist we can't read it
@@ -779,10 +821,12 @@ class Access {
                         $args["gradeable"] = $this->core->getQueries()->getGradeableConfig($value);
                     }
                     $hidden_files = $args["gradeable"]->getHiddenFiles();
-                    foreach (explode(",", $hidden_files) as $file_regex) {
-                        $file_regex = trim($file_regex);
-                        if (fnmatch($file_regex, $subpart_values[count($subpart_values) - 1]) && $this->core->getUser()->getGroup() > 3) {
-                            return false;
+                    if ($hidden_files !== null) {
+                        foreach (explode(",", $hidden_files) as $file_regex) {
+                            $file_regex = trim($file_regex);
+                            if (fnmatch($file_regex, $subpart_values[count($subpart_values) - 1]) && $this->core->getUser()->getGroup() > 3) {
+                                return false;
+                            }
                         }
                     }
                     break;
@@ -841,7 +885,7 @@ class Access {
      * Resolve relative (and absolute) file paths for a directory
      * @param string $dir Directory name
      * @param string $path
-     * @return bool|string Absolute path of the file in that directory
+     * @return bool|string Absolute path of the file in that directory or false if unsafe
      */
     public function resolveDirPath(string $dir, string $path) {
         if ($this->directories === null) {
@@ -856,7 +900,10 @@ class Access {
         $orig_parts = explode(DIRECTORY_SEPARATOR, $path);
         $parts = [];
         foreach ($orig_parts as $part) {
-            if ($part !== ".." && $part !== ".") {
+            if ($part === "..") {
+                return false;
+            }
+            if ($part !== ".") {
                 $parts[] = $part;
             }
         }

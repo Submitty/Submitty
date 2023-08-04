@@ -29,6 +29,7 @@
     --hover-focus-info-blue: #31b0d5;
     --hover-active-all-info-blue: #269abc;
     --default-white: #ffffff;
+    --default-black: #000000;
     --always-default-white: #ffffff;
     --badge-backgroud-red: #ff0000;
     --dark-badge-background-red: #ad3937;
@@ -46,6 +47,9 @@
     --alert-info-blue: #3a87ad;
     --alert-background-blue: #d9edf7;
     --alert-border-blue: #bce8f1;
+    --alert-warning-yellow: #d09404;
+    --alert-background-warning-yellow: #fff3cd;
+    --alert-border-yellow: #f2e3b5;
     --alert-invalid-entry-pink: #ffdddd;
     --standard-pale-blue-gray: #e8f0f7;
     --btn-standard-pale-blue-gray: #e8f0f7;
@@ -122,14 +126,17 @@
     --disabled-dropdown: #888888;
     --focus-dropdown: #f5f5f5;
 
+
     /* text and fonts */
     --text-black: #000000; /* use only on white/background-blue */
     --text-white: #ffffff; /* use on all colors */
     --btn-text-white: #ffffff;
     --btn-text-black: #000000;
     --btn-default-text: #2e2e2e;
+    --deleted-color: #000000;
 
     /* discussion forum */
+    --deleted-and-unviewed-thread: #acc0d7;
     --viewed-discussion-post-blue: #e8f0f7;
     --deleted-discussion-post-grey: #dcdcdc;
     --important-post: #ffd700; /* is also for star color */
@@ -212,16 +219,20 @@
 
 [data-black_mode="black"][data-theme="dark"] {
     --default-white: #000000;
+    --deleted-and-unviewed-thread: #939494;
     --background-blue: #000000;
+    --default-black: #ffffff;
 }
 
 [data-theme="dark"] {
     /* might wanna change blue borders/hover text/sidebar text to submitty blue
       buttons, primarily but also can be used for notifications/anything
       that requires this color scheme */
+    --deleted-and-unviewed-thread: #939494;
     --standard-lightskyblue: #0975b9;
     --standard-mediumorchid: #b240ce;
     --default-white: #36393f;
+    --default-black: #ffffff;
     --always-default-white: #ffffff;
     --badge-backgroud-red: #ff0000;
     --error-alert-dark-red: #ff7a7a;
@@ -257,6 +268,7 @@
     --hover-dropdown: #f5f5f5;
     --disabled-dropdown: #888888;
     --focus-dropdown: #f5f5f5;
+
 
     /* text and fonts */
     --text-black: #ffffff; /* use only on white/background-blue */

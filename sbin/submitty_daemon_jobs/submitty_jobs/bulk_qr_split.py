@@ -10,7 +10,7 @@ from . import submitty_ocr as scanner
 
 # try importing required modules
 try:
-    from PyPDF2 import PdfFileReader, PdfFileWriter
+    from PyPDF2 import PdfReader, PdfWriter
     from pdf2image import convert_from_bytes
     import pyzbar.pyzbar as pyzbar
     from pyzbar.pyzbar import ZBarSymbol
@@ -33,19 +33,20 @@ def main(args):
 
     try:
         os.chdir(split_path)
-        pdfPages = PdfFileReader(filename)
-        pdf_writer = PdfFileWriter()
+        pdfPages = PdfReader(filename, strict=False)
+        pdf_writer = PdfWriter()
         i = id_index = 0
         page_count = 1
         prev_file = data = "BLANK"
         output = {"filename": filename, "is_qr": True, "use_ocr": use_ocr}
         json_file = os.path.join(split_path, "decoded.json")
 
-        for page_number in range(pdfPages.numPages):
+        for page_number in range(len(pdfPages.pages)):
             # convert pdf to series of images for scanning
-            page = convert_from_bytes(
-                open(filename, 'rb').read(),
-                first_page=page_number+1, last_page=page_number+2)[0]
+            with open(filename, 'rb') as open_file:
+                page = convert_from_bytes(
+                    open_file.read(),
+                    first_page=page_number+1, last_page=page_number+2)[0]
 
             # increase contrast of image for better QR decoding
             cv_img = numpy.array(page)
@@ -109,17 +110,18 @@ def main(args):
                         pdf_writer.write(out)
 
                 # start a new pdf and grab the cover
-                cover_writer = PdfFileWriter()
-                pdf_writer = PdfFileWriter()
-                cover_writer.addPage(pdfPages.getPage(i))
-                pdf_writer.addPage(pdfPages.getPage(i))
+                cover_writer = PdfWriter()
+                pdf_writer = PdfWriter()
+                cover_writer.add_page(pdfPages.pages[i])
+                pdf_writer.add_page(pdfPages.pages[i])
 
                 # save cover
                 with open(cover_filename, 'wb') as out:
                     cover_writer.write(out)
 
                 # save cover image
-                page.save('{}.jpg'.format(cover_filename[:-4]), "JPEG", quality=100)
+                page.save('{}.jpg'.format(cover_filename[:-4]),
+                          "JPEG", quality=20, optimize=True)
 
                 id_index += 1
                 page_count = 1
@@ -127,7 +129,7 @@ def main(args):
 
                 # save page as image, start indexing at 1
                 page.save(prev_file[:-4] + '_' + str(page_count).zfill(3) + '.jpg',
-                          "JPEG", quality=100)
+                          "JPEG", quality=20, optimize=True)
 
             else:
                 # the first pdf page doesn't have a qr code
@@ -141,21 +143,22 @@ def main(args):
                     output[output_filename]['id'] = "BLANK"
                     prev_file = output_filename
                     id_index += 1
-                    cover_writer = PdfFileWriter()
+                    cover_writer = PdfWriter()
                     # save cover
-                    cover_writer.addPage(pdfPages.getPage(i))
+                    cover_writer.add_page(pdfPages.pages[i])
                     with open(cover_filename, 'wb') as out:
                         cover_writer.write(out)
 
                     # save cover image
-                    page.save('{}.jpg'.format(cover_filename[:-4]), "JPEG", quality=100)
+                    page.save('{}.jpg'.format(cover_filename[:-4]),
+                              "JPEG", quality=20, optimize=True)
 
                 # add pages to current split_pdf
                 page_count += 1
-                pdf_writer.addPage(pdfPages.getPage(i))
+                pdf_writer.add_page(pdfPages.pages[i])
                 # save page as image, start indexing at 1
                 page.save(prev_file[:-4] + '_' + str(page_count).zfill(3) + '.jpg',
-                          "JPEG", quality=100)
+                          "JPEG", quality=20, optimize=True)
 
             i += 1
 

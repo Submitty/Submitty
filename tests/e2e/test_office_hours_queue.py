@@ -107,7 +107,7 @@ class TestOfficeHoursQueue(BaseTestCase):
         self.assertEqual(True, self.verifyElementMissing('id', ['announcement']))
 
         self.switchToUser('student')
-        # Students should not be able to see any of theses elements
+        # Students should not be able to see any of these elements
         self.assertEqual(True, self.verifyElementMissing('class', ['help_btn','finish_helping_btn','remove_from_queue_btn','queue_restore_btn','close_queue_btn','empty_queue_btn']))
         self.assertEqual(True, self.verifyElementMissing('id', ['toggle_filter_settings', 'new_queue_code', 'new-queue-token', 'new_queue_rand_token', 'open_new_queue_btn']))
 

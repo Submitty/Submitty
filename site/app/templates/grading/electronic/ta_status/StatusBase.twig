@@ -140,7 +140,7 @@
     {# Top buttons #}
     <div style="margin-top: 20px; vertical-align:bottom;">
         {% if graded_percentage != -1 or core.getUser().accessFullGrading() or peer %}
-            <a class="btn btn-primary" style="float: left"
+            <a class="btn btn-primary" data-testid="Grading Index" style="float: left"
                 href="{{ details_url }}">
 
                 Grading Index
@@ -158,11 +158,12 @@
         {% endif %}
     </div>
 
-    {% if not peer %}
+        {% if not peer %}
         <a class="btn btn-default" style="float: right" onclick="showStatusFilterForm()">
             Edit Filters
         </a>
     {% endif %}
+
     {# /Top Button #}
 </div>
 
@@ -337,28 +338,48 @@
 
         if (limited) {
             if (download_option == "all") {
-                $("#zip_link").attr("href", download_zip_url);
+                $("#zip_link_limited").attr("href", download_zip_url);
             }
             else {
-                $("#zip_link").attr("href", download_zip_url + "?type=limited_" + download_option);
+                $("#zip_link_limited").attr("href", download_zip_url + "?type=limited_" + download_option);
             }
         }
         else {
-            $("#zip_link").attr("href", download_zip_url + "?type=" + download_option);
+            $("#zip_link_full").attr("href", download_zip_url + "?type=" + download_option);
         }
     }
 
-    function updateFilters() {
-        var filters = {{ filters|json_encode|replace({"'": "&#39;"})|raw}};
-
-        for (var filter_id in filters) {
-            var filter_id_name = filter_id.replace("_", "-");
-            var cookie_name = "include_" + filter_id.replace('-', '_');
-        
-            var check = document.getElementById("toggle-filter-"+filter_id_name);
-            document.cookie = cookie_name + (check.checked ? "=true;" : "=false;");
+    function filter_overriden_grades() {
+        var override_status = '{{ include_grade_override }}';
+        if (override_status == 'omit') {
+            document.cookie = "include_grade_override=include;";
         }
+        else {
+            document.cookie = "include_grade_override=omit;";
+        }
+    }
 
+    function filter_bad_grades() {
+        var bad_submissions_status = '{{ include_bad_submissions }}';
+        if (bad_submissions_status == 'omit') {
+            document.cookie = "include_bad_submissions=include;";
+        }
+        else {
+            document.cookie = "include_bad_submissions=omit;";
+        }
+    }
+
+    function filter_null_section() {
+        var bad_submissions_status = '{{ include_null_section }}';
+        if (bad_submissions_status == 'omit') {
+            document.cookie = "include_null_section=include;";
+        }
+        else {
+            document.cookie = "include_null_section=omit;";
+        }
+    }    
+
+    function applyfilters() {
         location.reload();
     }
 
@@ -368,7 +389,6 @@
         form.css("display", "block");
         form.find('.form-body').scrollTop(0);
     }
-    
-</script>
 
+</script>
 {% include 'grading/electronic/ta_status/StatusFilterModal.twig' %}
