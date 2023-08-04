@@ -43,7 +43,6 @@ class ElectronicGraderView extends AbstractView {
      * @param array<string, int> $graders_of_inquiries
      * @param bool $show_warnings
      * @param int $submissions_in_queue
-     * @param int $anon_status
      * @return string
      */
     public function statusPage(
