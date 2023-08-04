@@ -35,10 +35,6 @@ class BannerController extends AbstractController {
      */
     public function ajaxUploadBannerFiles(): JsonResponse {
         $upload_path = FileUtils::joinPaths($this->core->getConfig()->getSubmittyPath(), "banner_images");
-
-
-        $extra_name = $_POST['extra_name'];
-
         if (isset($_POST['release_time'])) {
             $release_date = DateUtils::parseDateTime($_POST['release_time'], $this->core->getDateTimeNow()->getTimezone());
         }
@@ -60,7 +56,7 @@ class BannerController extends AbstractController {
         $uploaded_files = $_FILES["files1"];
         $count_item = count($uploaded_files["name"]);
 
-        if ($count_itm > 2) {
+        if ($count_item > 2) {
             return JsonResponse::getErrorResponse("Can't have more than two banners submitted.");
         }
 
@@ -75,7 +71,7 @@ class BannerController extends AbstractController {
                 return JsonResponse::getErrorResponse("Failed to create a new folder for the current year.");
             }
         }
-
+        $extra_name = $_POST['extra_name'];
         for ($j = 0; $j < $count_item; $j++) {
             // for some reason why I try to simply use a condition to compare two strings, I always get false?!? So I have to loop through each character now
             $all_match = true;
