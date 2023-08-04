@@ -1071,7 +1071,7 @@ VALUES (?,?,?,?,?,?)",
      * @param string|null $course
      */
     public function updateUser(User $user, $semester = null, $course = null) {
-        $params = [$user->getNumericId(), $user->getPronouns(), $user->getLegalGivenName(), $user->getPreferredGivenName(),
+        $params = [$user->getNumericId(), $user->getPronouns(), $user->getDisplayPronouns(), $user->getLegalGivenName(), $user->getPreferredGivenName(),
                        $user->getLegalFamilyName(), $user->getPreferredFamilyName(), $user->getLastInitialFormat(), $user->getEmail(),
                        $user->getSecondaryEmail(), $this->submitty_db->convertBoolean($user->getEmailBoth()),
                        $this->submitty_db->convertBoolean($user->isUserUpdated()),
@@ -1093,7 +1093,7 @@ VALUES (?,?,?,?,?,?)",
             "
 UPDATE users
 SET
-  user_numeric_id=?, user_pronouns=?, user_givenname=?, user_preferred_givenname=?,
+  user_numeric_id=?, user_pronouns=?, display_pronouns=?, user_givenname=?, user_preferred_givenname=?,
   user_familyname=?, user_preferred_familyname=?, user_last_initial_format=?,
   user_email=?, user_email_secondary=?, user_email_secondary_notify=?,
   user_updated=?, instructor_updated=?{$extra}
@@ -1699,11 +1699,59 @@ WHERE semester=? AND course=? AND user_id=?",
         $query = "SELECT user_id, max(since_timestamp) FROM late_days GROUP BY user_id";
         $this->course_db->query($query);
         $return = [];
+    }
 
-        foreach ($this->course_db->rows() as $row) {
-            $return[$row['user_id']] = new \DateTime($row['max']);
+    /**
+     * Get the latest valid versrion for a gradeable (good or late status)
+     * @param GradedGradeable $gg
+     * @param string $submitter_id
+     */
+    public function getLatestValidGradeableVersion(GradedGradeable $gg, string $submitter_id, int $late_days_remaining): int {
+        $params = [$gg->getGradeableId(), $submitter_id, $late_days_remaining];
+        $query = "SELECT
+                    egd.g_version
+                FROM electronic_gradeable eg
+                JOIN electronic_gradeable_data egd
+                ON eg.g_id=egd.g_id
+				LEFT JOIN teams t
+					ON t.team_id=egd.team_id
+				LEFT JOIN users u
+					ON u.user_id=t.user_id
+					OR u.user_id=egd.user_id
+                LEFT JOIN late_day_exceptions lde
+                ON lde.g_id=eg.g_id AND lde.user_id=u.user_id
+                WHERE eg.g_id=?
+                AND (CASE WHEN eg.eg_team_assignment IS TRUE THEN egd.team_id
+                    ELSE egd.user_id
+                    END)=?
+                AND (
+                    SELECT late_day_status
+                    FROM get_late_day_info_from_previous(
+                        calculate_submission_days_late(egd.submission_time, eg.eg_submission_due_date),
+                        eg.eg_late_days,
+                        COALESCE(lde.late_day_exceptions, 0),
+                        ?
+                    )
+                ) != 3";
+        $this->course_db->query($query, $params);
+
+
+        $version = 0;
+// Get gradeable version where all submitters have a good status
+        if ($gg->getGradeable()->isTeamAssignment()) {
+            // Check if all members have a valid instance
+            if ($this->course_db->getRowCount() === count($gg->getSubmitter()->getTeam()->getMemberUsers())) {
+                foreach ($this->course_db->rows() as $row) {
+                    // minimum between the current $version and the current row's g_version, ensuring that $version will hold the minimum value after the loop is completed.
+                    $version = ($version === 0) ? $row['g_version'] : min($version, $row['g_version']);
+                }
+            }
         }
-        return $return;
+        else {
+            $version = $this->course_db->row()['g_version'] ?? 0;
+        }
+
+        return $version;
     }
 
     /**
@@ -4741,12 +4789,15 @@ AND gc_id IN (
     }
 
     public function getDisplayUserInfoFromUserId($user_id) {
-        $this->course_db->query("SELECT user_givenname, user_preferred_givenname, user_familyname, user_preferred_familyname, user_email FROM users WHERE user_id = ?", [$user_id]);
+        $this->course_db->query("SELECT user_givenname, user_preferred_givenname, user_familyname, user_preferred_familyname, user_email, user_pronouns, display_pronouns FROM users WHERE user_id = ?", [$user_id]);
         $name_rows = $this->course_db->rows()[0];
         $ar = [];
         $ar["given_name"] = (empty($name_rows["user_preferred_givenname"])) ? $name_rows["user_givenname"]      : $name_rows["user_preferred_givenname"];
         $ar["family_name"]  = (empty($name_rows["user_preferred_familyname"]))  ? " " . $name_rows["user_familyname"] : " " . $name_rows["user_preferred_familyname"];
         $ar["user_email"] = $name_rows["user_email"];
+        $ar["pronouns"] = $name_rows["user_pronouns"];
+        $ar["display_pronouns"] = $name_rows["display_pronouns"];
+
         return $ar;
     }
 
@@ -7045,8 +7096,8 @@ AND gc_id IN (
 
     public function getCurrentQueue() {
         $query = "
-        SELECT ROW_NUMBER() 
-            OVER (ORDER BY time_in ASC), 
+        SELECT ROW_NUMBER()
+            OVER (ORDER BY time_in ASC),
                 queue.*,
                 helper.user_givenname AS helper_givenname,
                 helper.user_preferred_givenname AS helper_preferred_givenname,
@@ -7069,7 +7120,7 @@ AND gc_id IN (
           AS h1
           ON queue.user_id = h1.uid AND queue_code = h1.qc
           WHERE current_state IN ('waiting','being_helped')
-          ORDER BY ROW_NUMBER 
+          ORDER BY ROW_NUMBER
         ";
         $this->course_db->query($query, [$this->core->getDateTimeNow()->format('Y-m-d')]);
         return $this->course_db->rows();
@@ -7103,7 +7154,7 @@ AND gc_id IN (
                 remover.user_pronouns AS remover_pronouns,
                 h1.helped_today,
                 h.times_helped
-            FROM    queue 
+            FROM    queue
             LEFT JOIN users helper ON helper.user_id = queue.help_started_by
             LEFT JOIN users remover ON remover.user_id = queue.removed_by
             LEFT JOIN (
@@ -7206,8 +7257,8 @@ AND gc_id IN (
     }
 
     public function getStarType(string $user_id, string $queue_code): string {
-        $this->course_db->query("SELECT star_type FROM queue WHERE user_id = ? 
-            AND UPPER(TRIM(queue_code)) = UPPER(TRIM(?)) 
+        $this->course_db->query("SELECT star_type FROM queue WHERE user_id = ?
+            AND UPPER(TRIM(queue_code)) = UPPER(TRIM(?))
             ORDER BY entry_id DESC LIMIT 1", [$user_id, $queue_code]);
 
         return $this->course_db->row()['star_type'];
@@ -7781,6 +7832,7 @@ WHERE current_state IN
               u.user_preferred_givenname,
               u.user_familyname,
               u.user_pronouns,
+              u.display_pronouns,
               u.user_preferred_familyname,
               u.user_email,
               u.user_email_secondary,
@@ -7869,6 +7921,7 @@ WHERE current_state IN
               gcd.array_grader_user_givenname,
               gcd.array_grader_user_preferred_givenname,
               gcd.array_grader_user_pronouns,
+              gcd.array_grader_display_pronouns,
               gcd.array_grader_user_familyname,
               gcd.array_grader_user_email,
               gcd.array_grader_user_email_secondary,
@@ -7886,6 +7939,7 @@ WHERE current_state IN
               gcd.array_verifier_user_givenname,
               gcd.array_verifier_user_preferred_givenname,
               gcd.array_verifier_user_pronouns,
+              gcd.array_verifier_display_pronouns,
               gcd.array_verifier_user_familyname,
               gcd.array_verifier_user_email,
               gcd.array_verifier_user_email_secondary,
@@ -7961,6 +8015,7 @@ WHERE current_state IN
                   json_agg(ug.user_givenname) AS array_grader_user_givenname,
                   json_agg(ug.user_preferred_givenname) AS array_grader_user_preferred_givenname,
                   json_agg(ug.user_pronouns) AS array_grader_user_pronouns,
+                  json_agg(ug.display_pronouns) AS array_grader_display_pronouns,
                   json_agg(ug.user_familyname) AS array_grader_user_familyname,
                   json_agg(ug.user_email) AS array_grader_user_email,
                   json_agg(ug.user_email_secondary) AS array_grader_user_email_secondary,
@@ -7976,6 +8031,7 @@ WHERE current_state IN
                   json_agg(uv.user_givenname) AS array_verifier_user_givenname,
                   json_agg(uv.user_preferred_givenname) AS array_verifier_user_preferred_givenname,
                   json_agg(uv.user_pronouns) AS array_verifier_user_pronouns,
+                  json_agg(uv.display_pronouns) AS array_verifier_display_pronouns,
                   json_agg(uv.user_familyname) AS array_verifier_user_familyname,
                   json_agg(uv.user_email) AS array_verifier_user_email,
                   json_agg(uv.user_email_secondary) AS array_verifier_user_email_secondary,
@@ -8151,6 +8207,7 @@ WHERE current_state IN
                 'user_givenname',
                 'user_preferred_givenname',
                 'user_pronouns',
+                'display_pronouns',
                 'user_familyname',
                 'user_email',
                 'user_email_secondary',

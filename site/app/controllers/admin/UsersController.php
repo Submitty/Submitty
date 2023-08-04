@@ -58,6 +58,7 @@ class UsersController extends AbstractController {
                 'given_name' => $student->getDisplayedGivenName(),
                 'family_name' => $student->getDisplayedFamilyName(),
                 'pronouns' => $student->getPronouns(),
+                'display_pronouns' => $student->getDisplayPronouns(),
                 'user_id' => $student->getId(),
                 'email' => $student->getEmail(),
                 'secondary_email' => $student->getSecondaryEmail(),
@@ -140,6 +141,7 @@ class UsersController extends AbstractController {
                 'given_name' => $grader->getDisplayedGivenName(),
                 'family_name' => $grader->getDisplayedFamilyName(),
                 'pronouns' => $grader->getPronouns(),
+                'display_pronouns' => $grader->getDisplayPronouns(),
                 'user_id' => $grader->getId(),
                 'email' => $grader->getEmail(),
                 'secondary_email' => $grader->getSecondaryEmail(),
@@ -222,6 +224,7 @@ class UsersController extends AbstractController {
             'user_preferred_givenname' => $user->getPreferredGivenName(),
             'user_preferred_familyname' => $user->getPreferredFamilyName(),
             'user_pronouns' => $user->getPronouns(),
+            'user_display_pronouns' => $user->getDisplayPronouns(),
             'user_email' => $user->getEmail(),
             'user_email_secondary' => $user->getSecondaryEmail(),
             'user_group' => $user->getGroup(),
@@ -257,6 +260,7 @@ class UsersController extends AbstractController {
                 'user_preferred_givenname' => $user->getPreferredGivenName() ?? '',
                 'user_preferred_familyname' => $user->getPreferredFamilyName() ?? '',
                 'user_pronouns' => $user->getPronouns() ?? '',
+                'display_pronoun' => $user->getDisplayPronouns(),
                 'user_email' => $user->getEmail(),
                 'user_email_secondary' => $user->getSecondaryEmail(),
                 'user_group' => $user->getGroup(),
@@ -349,6 +353,8 @@ class UsersController extends AbstractController {
         }
 
         $user->setPronouns(trim($_POST['user_pronouns']));
+
+        $user->setDisplayPronouns($_POST['display_pronouns']);
 
         $user->setEmail(trim($_POST['user_email']));
 
