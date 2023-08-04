@@ -9,6 +9,7 @@ use app\models\CalendarInfo;
 use app\models\User;
 use app\views\AbstractView;
 use app\views\NavigationView;
+use app\models\Course;
 
 class CalendarView extends AbstractView {
     /**
@@ -16,7 +17,7 @@ class CalendarView extends AbstractView {
      * calendar by their given date. Then it shows a series of tables to list all items.
      *
      * @param CalendarInfo $info the information used to fill the calendar
-     * @param array $courses the courses that will be shown
+     * @param array<Course> $courses the courses that will be shown
      * @return string
      * @see NavigationView::gradeableSections
      */
