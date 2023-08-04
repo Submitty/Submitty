@@ -400,8 +400,10 @@ class RainbowCustomization extends AbstractModel {
      *
      * Get a multidimensional array that contains not only a list of usable display options but also which ones
      * are in use (in the customization.json)
+     *
+     * @return array<int, array<string, bool|string>> multidimensional array of display option data
      */
-    public function getDisplay():array {
+    public function getDisplay(): array {
         // Get allowed benchmarks
         $display = RainbowCustomizationJSON::allowed_display;
         $retArray = [];

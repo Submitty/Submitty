@@ -74,6 +74,7 @@ class RainbowCustomizationJSON extends AbstractModel {
 
     /**
      * Gets an array of display
+     * @return array<string> The display benchmarks
      */
     public function getDisplay(): array {
         return $this->display;
@@ -177,7 +178,6 @@ class RainbowCustomizationJSON extends AbstractModel {
 
         if (!in_array($display, $this->display)) {
             $this->display[] = $display;
-
         }
     }
 
