@@ -99,7 +99,9 @@ class ElectronicGraderView extends AbstractView {
         $this->core->getOutput()->addVendorJs(FileUtils::joinPaths('plotly', 'plotly.js'));
 
         foreach ($sections as $key => $section) {
-            if ($key === "NULL") {
+            // If we allow NULL sections, use any.
+            // If not, make sure $key is not NULL
+            if ($key === "NULL" && (!array_key_exists('include_null_section', $_COOKIE) || $_COOKIE['include_null_section'] === 'omit')) {
                 continue;
             }
             $graded += $section['graded_components'];
@@ -220,7 +222,6 @@ class ElectronicGraderView extends AbstractView {
                 $section['graded'] = round($section['graded_components'] / $non_zero_non_peer_components_count, 1);
                 $section['total'] = $section['total_components'];
                 $section['non_late_graded'] = round($section['non_late_graded_components'] / $non_zero_non_peer_components_count, 1);
-                echo("\n");
                 $section['non_late_total'] = $section['non_late_total_components'];// / $non_zero_non_peer_components_count;
 
                 if ($section['total_components'] == 0) {
@@ -294,7 +295,6 @@ class ElectronicGraderView extends AbstractView {
                 $no_rotating_sections = $valid_teams_or_students === 0;
             }
         }
-
         $details_url = $this->core->buildCourseUrl(['gradeable', $gradeable->getId(), 'grading', 'details']);
         $this->core->getOutput()->addInternalCss('admin-gradeable.css');
         return $this->core->getOutput()->renderTwigTemplate("grading/electronic/ta_status/StatusBase.twig", [
@@ -357,6 +357,7 @@ class ElectronicGraderView extends AbstractView {
             "histograms" => $histogram_data,
             "include_grade_override" => array_key_exists('include_grade_override', $_COOKIE) ? $_COOKIE['include_grade_override'] : 'omit',
             "include_bad_submissions" => array_key_exists('include_bad_submissions', $_COOKIE) ? $_COOKIE['include_bad_submissions'] : 'omit',
+            "include_null_section" => array_key_exists('include_null_section', $_COOKIE) ? $_COOKIE['include_null_section'] : 'omit',
             "warnings" => $warnings,
             "submissions_in_queue" => $submissions_in_queue,
             "can_manage_teams" => $this->core->getAccess()->canI('grading.electronic.show_edit_teams', ["gradeable" => $gradeable])
@@ -579,16 +580,36 @@ HTML;
             }
         }
 
+        // Generate late days
+        $this->core->getQueries()->generateLateDayCacheForUsers($gradeable->getId());
+        // TO DO: Add bulk LateDays creation from database
 
         //Convert rows into sections and prepare extra row info for things that
         // are too messy to calculate in the template.
         $sections = [];
         foreach ($graded_gradeables as $row) {
             //Extra info for the template
+
+            $late_day_info = $this->core->getQueries()->getLateDayInfoForSubmitterGradeable($row->getSubmitter(), $row);
+            $on_time_submission = true;
+            if ($late_day_info !== null) {
+                if (!$gradeable->isTeamAssignment()) {
+                    $on_time_submission = $late_day_info->isOnTimeSubmission();
+                }
+                else { //A Team gradeable submission is bad only when all team members have a bad submission
+                    foreach ($late_day_info as $member_submission) {
+                        if (!$member_submission->isOnTimeSubmission()) {
+                            $on_time_submission = false;
+                            break;
+                        }
+                    }
+                }
+            }
+
             $info = [
                 "graded_gradeable" => $row,
+                "on_time_submission" => $on_time_submission
             ];
-
             if ($peer) {
                 $section_title = "PEER STUDENT GRADER";
             }
@@ -877,6 +898,7 @@ HTML;
             "message_warning" => $message_warning,
             "overrides" => $overrides,
             "anon_ids" => $anon_ids
+
         ]);
     }
 
