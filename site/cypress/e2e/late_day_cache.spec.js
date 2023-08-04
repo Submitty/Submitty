@@ -219,7 +219,7 @@ describe('Test cases involving late day cache updates', () => {
                         .should('exist');
 
                     // Update expected late days remaining
-                    if (status == 'Late') {
+                    if (status === 'Late') {
                         late_days_remaining[user_id] -= late_users[user_id];
                     }
 
@@ -634,7 +634,7 @@ describe('Test cases involving late day cache updates', () => {
             let finished = false;
             cy.intercept({ url: buildUrl(['sample', 'gradeable', g_id, 'build_status']) }, req => {
                 req.on('response', (res) => {
-                    finished = finished || (JSON.parse(res.body).data == true);
+                    finished = finished || (JSON.parse(res.body).data === true);
                 });
             });
 
