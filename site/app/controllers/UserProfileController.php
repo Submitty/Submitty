@@ -107,14 +107,17 @@ class UserProfileController extends AbstractController {
         $user = $this->core->getUser();
         if (isset($_POST['pronouns'])) {
             $newPronouns = trim($_POST['pronouns']);
+            $newDisplayPronouns = filter_var($_POST['pronouns-forum-display'], FILTER_VALIDATE_BOOLEAN);
             //validPronouns() checks for valid option
             if ($user->validateUserData('user_pronouns', $newPronouns) === true) {
                 $user->setPronouns($newPronouns);
+                $user->setDisplayPronouns($newDisplayPronouns);
                 $user->setUserUpdated(true);
                 $this->core->getQueries()->updateUser($user);
                 return JsonResponse::getSuccessResponse([
                     'message' => "Pronouns updated successfully",
-                    'pronouns' => $newPronouns
+                    'pronouns' => $newPronouns,
+                    'display_pronouns' => $newDisplayPronouns,
                 ]);
             }
             else {

@@ -58,6 +58,7 @@ void allow_system_calls(scmp_filter_ctx sc, const std::set<std::string> &categor
   // RESTRICTED : PROCESS_CONTROL_NEW_PROCESS_THREAD
   if (categories.find("PROCESS_CONTROL_NEW_PROCESS_THREAD") != categories.end()) {
     ALLOW_SYSCALL(clone);
+    ALLOW_SYSCALL(clone3);
     ALLOW_SYSCALL(execve);
 #if __NR_execveat
     ALLOW_SYSCALL(execveat);
@@ -290,6 +291,7 @@ void allow_system_calls(scmp_filter_ctx sc, const std::set<std::string> &categor
     ALLOW_SYSCALL(lsetxattr);
     ALLOW_SYSCALL(removexattr);
     ALLOW_SYSCALL(setxattr);
+    ALLOW_SYSCALL(statx);
   }
 
   // RESTRICTED : FILE_MANAGEMENT_RARE
@@ -471,6 +473,7 @@ void allow_system_calls(scmp_filter_ctx sc, const std::set<std::string> &categor
     ALLOW_SYSCALL(bdflush);
     ALLOW_SYSCALL(break);
     ALLOW_SYSCALL(faccessat);
+    ALLOW_SYSCALL(faccessat2);
     ALLOW_SYSCALL(fallocate);
     ALLOW_SYSCALL(fanotify_init);
     ALLOW_SYSCALL(fanotify_mark);

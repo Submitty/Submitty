@@ -3,5 +3,6 @@
     "config_path": "CONFIG_PATH",
     "date_due": "2022-10-06 23:59:59-0700",
     "upload_type": "repository",
-    "subdirectory": "homework_01"
+    "subdirectory": "",
+    "vcs_partial_path": "homework_01"
 }

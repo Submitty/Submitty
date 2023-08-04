@@ -39,155 +39,56 @@ extern const int CPU_TO_WALLCLOCK_TIME_BUFFER;  // defined in default_config.h
 
 #define SUBMITTY_INSTALL_DIRECTORY  std::string("__INSTALL__FILLIN__SUBMITTY_INSTALL_DIR__")
 
+extern const std::string GLOBAL_allowed_autograding_commands_default_string;  // defined in allowed_autograding_commands.cpp
+extern const std::string GLOBAL_allowed_autograding_commands_custom_string;  // defined in allowed_autograding_commands.cpp
 
 // =====================================================================================
 // =====================================================================================
 
-
-bool system_program(const std::string &program, std::string &full_path_executable, const bool running_in_docker) {
-
-  std::map<std::string,std::string> allowed_system_programs = {
-
-    // Basic System Utilities (for debugging)
-    { "ls",                      "/bin/ls", },
-    { "time",                    "/usr/bin/time" },
-    { "mv",                      "/bin/mv" },
-    { "cp",                      "/bin/cp" },
-    { "chmod",                   "/bin/chmod" },
-    { "find",                    "/usr/bin/find" },
-    { "cat",                     "/bin/cat" },
-    { "compare",                 "/usr/bin/compare" }, //image magick!
-    { "mogrify",                 "/usr/bin/mogrify" }, //image magick!
-    { "convert",                 "/usr/bin/convert" }, //image magick!
-    { "wkhtmltoimage",           "/usr/bin/wkhtmltoimage" },
-    { "wkhtmltopdf",             "/usr/bin/wkhtmltopdf" },
-    { "xvfb-run",                "/xvfb-run" },   // allow htmltoimage and htmltopdf to run headless
-    { "cut",                     "/usr/bin/cut" },
-    { "sort",                    "/usr/bin/sort" },
-    { "grep",                    "/bin/grep" },
-    { "sed",                     "/bin/sed" },
-    { "awk",                     "/usr/bin/awk" },
-    { "pwd",                     "/bin/pwd" },
-    { "env",                     "/usr/bin/env" },
-    { "pdftotext",               "/usr/bin/pdftotext" },
-    { "pdflatex",                "/usr/bin/pdflatex" },
-    { "wc",                      "/usr/bin/wc" },
-    { "head",                    "/usr/bin/head" },
-    { "tail",                    "/usr/bin/tail" },
-    { "uniq",                    "/usr/bin/uniq" },
-    { "echo",                    "/bin/echo" },
-
-    // Submitty Analysis Tools
-    { "submitty_count",          SUBMITTY_INSTALL_DIRECTORY+"/SubmittyAnalysisTools/count" },
-    { "commonast", 		 SUBMITTY_INSTALL_DIRECTORY+"/SubmittyAnalysisTools/commonast.py"},
-
-    // Submitty Analysis ToolsTS
-    { "submitty_count_ts",          SUBMITTY_INSTALL_DIRECTORY+"/SubmittyAnalysisToolsTS/build/submitty_count_ts" },
-    { "submitty_diagnostics_ts", 		 SUBMITTY_INSTALL_DIRECTORY+"/SubmittyAnalysisToolsTS/build/submitty_diagnostics_ts"},
-
-    // for Computer Science I
-    { "python",                  "/usr/bin/python" },
-    { "python2",                 "/usr/bin/python2" },
-    { "python2.7",               "/usr/bin/python2.7" },
-    { "python3",                 "/usr/bin/python3" },
-    { "python3.5",               "/usr/bin/python3.5" },
-    { "python3.6",               "/usr/bin/python3.6" },
-    { "pylint",                  "/usr/local/bin/pylint" },
-    { "pytest",                  "/usr/local/bin/pytest" },
-
-    // for Data Structures
-    { "g++",                     "/usr/bin/g++" },
-    { "clang++",                 "/usr/bin/clang++" },
-    { "clang-format",            "/usr/bin/clang-format" },
-    { "drmemory",                SUBMITTY_INSTALL_DIRECTORY+"/drmemory/bin64/drmemory" },
-    { "valgrind",                "/usr/bin/valgrind" },
-
-    // for Computer Organization
-    { "spim",                    "/usr/bin/spim" },
-    { "clang",                   "/usr/bin/clang" },
-    { "gdb",                     "/usr/bin/gdb" },
-
-    // for Principles of Software
-    { "java",                    "/usr/bin/java" },
-    { "javac",                   "/usr/bin/javac" },
-    { "mono",                    "/usr/bin/mono" },   // should put more checks here, only run with "mono dafny/Dafny.exe "
-
-    // for Operating Systems
-    { "gcc",                     "/usr/bin/gcc" },
-    { "strings",                 "/usr/bin/strings" },
-
-    // for Programming Languages
-    { "swipl",                   "/usr/bin/swipl" },
-    { "plt-r5rs",                "/usr/bin/plt-r5rs" },
-    { "ozc",                     "/usr/bin/ozc" },
-    { "ozengine",                "/usr/bin/ozengine" },
-
-    // for Program Analysis course
-    { "ghc",                     "/usr/bin/ghc" },
-    { "ocaml",                   "/usr/bin/ocaml" },
-    { "ocamllex",                "/usr/bin/ocamllex" },
-    { "ocamlyacc",               "/usr/bin/ocamlyacc" },
-    { "z3",                      SUBMITTY_INSTALL_DIRECTORY+"/tools/z3" },
-
-    // for Cmake & Make
-    { "cmake",                   "/usr/bin/cmake" },
-    { "make",                    "/usr/bin/make" },
-
-    // for Network Programming
-    { "timeout",                 "/usr/bin/timeout" },
-    { "mpicc.openmpi",           "/usr/bin/mpicc.openmpi" },
-    { "mpirun.openmpi",          "/usr/bin/mpirun.openmpi" },
-    { "mpirun",                  "/usr/local/mpich-3.2/bin/mpirun"},
-    { "mpicc",                   "/usr/local/mpich-3.2/bin/mpicc"},
-    { "expect",                  "/usr/bin/expect" },
-    { "sleep",                   "/bin/sleep" },
-
-    // for Distributed Systems
-    { "script",                  "/usr/bin/script" },
-
-    // for LLVM / Compiler class
-    { "lex",                     "/usr/bin/lex" },
-    { "flex",                    "/usr/bin/flex" },
-    { "yacc",                    "/usr/bin/yacc" },
-    { "bison",                   "/usr/bin/bison" },
-
-    // for graphics/window interaction
-    { "scrot",                   "/usr/bin/scrot"}, //screenshot utility
-    { "xdotool",                 "/usr/bin/xdotool"}, //keyboard/mouse input
-    { "wmctrl",                  "/usr/bin/wmctrl"}, //bring window into focus
-    { "xwininfo",                "/usr/bin/xwininfo"}, // get info about window
-
-    // for Debugging
-    { "strace",                  "/usr/bin/strace" },
-
-    //Matlab
-    { "matlab",                  "/usr/local/bin/matlab" }
-
-  };
-
-  if(running_in_docker){
-    allowed_system_programs.insert({"bash", "/bin/bash"});
-    allowed_system_programs.insert({"php",  "/usr/bin/php"});
+bool command_available_in_env(const nlohmann::json &program_object, const bool &running_in_docker) {
+  bool onlyDocker = program_object.value("onlyDocker", false);
+  if (!running_in_docker && onlyDocker) {
+    return false;
   }
-  // find full path name
-  std::map<std::string,std::string>::const_iterator itr = allowed_system_programs.find(program);
-  if (itr != allowed_system_programs.end()) {
-    full_path_executable = itr->second;
-    return true;
-  }
-
-  // did they already use the full path name?
-  for (itr = allowed_system_programs.begin(); itr != allowed_system_programs.end(); itr++) {
-    if (itr->second == program) {
-      full_path_executable = program;
-      return true;
-    }
-  }
-
-  // not an allowed system program
-  return false;
+  return true;
 }
 
+bool system_program(const std::string &program, std::string &full_path_executable, const bool running_in_docker)
+{
+  // parse GLOBAL_allowed_autograding_commands_default_string into allowed_autograding_commands
+  // ignore_comment flag set in parse function to ignore comments
+  nlohmann::json allowed_autograding_commands =
+    nlohmann::json::parse(GLOBAL_allowed_autograding_commands_default_string, nullptr, true, true);
+
+  if (!GLOBAL_allowed_autograding_commands_custom_string.empty()) {
+    nlohmann::json allowed_autograding_commands_custom =
+      nlohmann::json::parse(GLOBAL_allowed_autograding_commands_custom_string, nullptr, true, true);
+    allowed_autograding_commands.update(allowed_autograding_commands_custom);
+  }
+
+  if (program.length() > 0 && program[0] == '/') {
+    for (auto& entry : allowed_autograding_commands.items()) {
+      nlohmann::json program_obj = entry.value();
+      if (program_obj["path"] == program) {
+        if (command_available_in_env(program_obj, running_in_docker)) {
+          full_path_executable = program;
+          return true;
+        }
+        return false;
+      }
+    }
+  }
+  else {
+    if (allowed_autograding_commands.contains(program)) {
+      nlohmann::json program_obj = allowed_autograding_commands[program];
+      if (command_available_in_env(program_obj, running_in_docker)) {
+        full_path_executable = program_obj["path"];
+        return true;
+      }
+    }
+  }
+  return false;
+}
 
 std::set<std::string> get_compiled_executables(const nlohmann::json &whole_config) {
   std::set<std::string> answer;
@@ -715,7 +616,7 @@ void parse_command_line(const std::string &cmd,
       // because we don't want to run in interactive mode and wait for it to time out!
     } else if (my_args.size() > 1) {
       // a common student error is to submit multiple .py files where
-      // only one is expected and we want to run 'python *.py'
+      // only one is expected and we want to run 'python3 *.py'
       int python_file_count = 0;
       for (int i = 0; i < my_args.size(); i++) {
         unsigned int pos = my_args[i].find(".py");
@@ -1034,35 +935,17 @@ int exec_this_command(const std::string &cmd, std::ofstream &logfile, const nloh
   if (my_path != NULL) {
     // std::cout << "WARNING: PATH NOT EMPTY, PATH= " << (my_path ? my_path : "<empty>") << std::endl;
   }
-  setenv("PATH", "/usr/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/sbin:/bin", 1);
+
+  /*************************************************
+  *
+  * SET ENVIROMENT VARIABLES
+  *
+  **************************************************/
+  set_environment_variables(whole_config.value("environment_variables",nlohmann::json()));
 
   my_path = getenv("PATH");
 
   // std::cout << "PATH post= " << (my_path ? my_path : "<empty>") << std::endl;
-
-  // set the locale so that special characters (e.g., the copyright
-  // symbol) are not interpreted as ascii
-  setenv("LC_ALL", "en_US.UTF-8", 1);
-
-
-  // Set a default for OpenMP desired threads
-  // Can be overridden by student to be higher or lower.
-  // Instructor still controls the RLIMIT_NPROC max threads.
-  // (without this, default desired threads may be based on the system specs)
-  setenv("OMP_NUM_THREADS","4",1);
-
-
-  // Set an environment variable to override the defaults for the
-  // initial java virtual machine heap (xms) and maximum virtual
-  // machine heap.
-  setenv("JAVA_TOOL_OPTIONS","-Xms128m -Xmx256m",1);
-  // NOTE: Instructors can still override this setting with the
-  // command line.  E.g.,
-  //    java -Xms128m -Xmx256m -cp . MyProgram
-
-
-  // Haskell compiler needs a home environment variable (but it can be anything)
-  setenv("HOME","/tmp",1);
 
 
   // print this out here (before losing our output)

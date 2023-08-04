@@ -35,7 +35,7 @@
     width: 90%;
 }
 
-@media (width >= 541px) {
+@media (min-width: 541px) {
     #grade-report-cont.content {
         padding: 30px;
         margin: 30px;
@@ -46,7 +46,7 @@
     }
 }
 
-@media (width >= 780px) {
+@media (min-width: 780px) {
     .card {
         padding: 24px 0;
         text-align: left;
