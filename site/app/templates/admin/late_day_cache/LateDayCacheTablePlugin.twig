@@ -8,10 +8,7 @@
                 User ID
             </th>
             <th>
-                First Name
-            </th>
-            <th>
-                Last Name
+                Preferred Name
             </th>
             <th>
                 Initial
@@ -40,11 +37,8 @@
                 <td data-before-content="Student ID">
                     {{ student.getId() }}
                 </td>
-                <td data-before-content="First Name">
-                    {{ student.getDisplayedFirstName() }}
-                </td>
-                <td data-before-content="Last Name">
-                    {{ student.getDisplayedLastName() }}
+                <td data-before-content="Name">
+                    {{ student.getDisplayedGivenName() }}
                 </td>
                 <td data-before-content="Initial Late Days">
                     {{ initial_late_days }}
