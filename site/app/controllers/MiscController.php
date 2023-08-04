@@ -410,13 +410,19 @@ class MiscController extends AbstractController {
             $zip_file_name = $gradeable_id . "_" . $user_id . "_v" . $version . ".zip";
         }
 
+        /*
         $options = new \ZipStream\Option\Archive();
         $options->setSendHttpHeaders(true);
         $options->setEnableZip64(false);
+        */
 
         //TODO: In here for notebooks remove the server-generated answers
         // create a new zipstream object
-        $zip_stream = new \ZipStream\ZipStream($zip_file_name, $options);
+        $zip_stream = new \ZipStream\ZipStream(
+            outputName: $zip_file_name, 
+            sendHttpHeaders: true,
+            enableZip64: false,
+        );
         foreach ($folder_names as $folder_name) {
             $path = FileUtils::joinPaths($gradeable_path, $folder_name, $gradeable->getId(), $graded_gradeable->getSubmitter()->getId(), $version);
             if (is_dir($path)) {
