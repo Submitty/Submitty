@@ -212,11 +212,10 @@ class CourseMaterialsController extends AbstractController {
 
         // create a new zipstream object
         $zip_stream = new \ZipStream\ZipStream(
-            outputName: $zip_file_name, 
+            outputName: $zip_file_name,
             sendHttpHeaders: true,
             enableZip64: false,
         );
-        
 
         foreach ($files as $name => $file) {
             if (!$file->isDir()) {

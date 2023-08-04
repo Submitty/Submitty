@@ -413,7 +413,7 @@ class MiscController extends AbstractController {
         //TODO: In here for notebooks remove the server-generated answers
         // create a new zipstream object
         $zip_stream = new \ZipStream\ZipStream(
-            outputName: $zip_file_name, 
+            outputName: $zip_file_name,
             sendHttpHeaders: true,
             enableZip64: false,
         );
@@ -477,7 +477,7 @@ class MiscController extends AbstractController {
 
         // create a new zipstream object
         $zip_stream = new \ZipStream\ZipStream(
-            outputName: $zip_file_name, 
+            outputName: $zip_file_name,
             sendHttpHeaders: true,
             enableZip64: false,
         );
