@@ -54,7 +54,7 @@
     "@types/jest": "^29.5.1",
     "@types/jquery": "^3.5.16",
     "@types/jquery.are-you-sure": "^0.0.31",
-    "@types/jqueryui": "^1.12.16",
+    "@types/jqueryui": "^1.12.17",
     "@types/twig": "^1.12.9",
     "@typescript-eslint/eslint-plugin": "^5.59.7",
     "@typescript-eslint/parser": "^5.59.8",
