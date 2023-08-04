@@ -49,7 +49,7 @@ def main():
 
         data = OrderedDict()
         data['ip_addr'] = str(ip)
-        data['base_port'] = args.base_port + i
+        data['ssh_port'] = args.base_port + i
         workers[f'worker-{i}'] = data
 
     with open(workerfile, 'w') as file:
