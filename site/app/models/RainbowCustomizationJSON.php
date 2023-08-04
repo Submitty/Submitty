@@ -74,10 +74,8 @@ class RainbowCustomizationJSON extends AbstractModel {
 
     /**
      * Gets an array of display
-     *
-     * @return array The display
      */
-    public function getDisplay() {
+    public function getDisplay(): array {
         return $this->display;
     }
 
