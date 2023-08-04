@@ -1378,7 +1378,7 @@ HTML;
      * @param int $display_version
      * @return string by reference
      */
-    public function renderSubmissionPanel(GradedGradeable $graded_gradeable, int $display_version, $blind_grader) {
+    public function renderSubmissionPanel(GradedGradeable $graded_gradeable, int $display_version, bool $blind_grader) {
         $add_files = function (&$files, $new_files, $start_dir_name, $graded_gradeable) {
             $files[$start_dir_name] = [];
             $hidden_files = $graded_gradeable->getGradeable()->getHiddenFiles();
