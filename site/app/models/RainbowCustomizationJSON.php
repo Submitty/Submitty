@@ -28,7 +28,7 @@ class RainbowCustomizationJSON extends AbstractModel {
     private $gradeables = [];
 
     const allowed_display = ['instructor_notes', 'grade_summary', 'grade_details', 'iclicker', 'final_grade',
-        'exam_seating', 'display_rank_to_individual', 'display_benchmark', 'benchmark_percent', 'section', 'messages',
+        'exam_seating', 'display_benchmark', 'benchmark_percent', 'section', 'messages',
         'final_cutoff', 'manual_grade', 'warning'];
 
     const allowed_display_benchmarks = ["average", "stddev", "perfect", "lowest_a-", "lowest_b-", "lowest_c-",
@@ -179,6 +179,7 @@ class RainbowCustomizationJSON extends AbstractModel {
 
         if (!in_array($display, $this->display)) {
             $this->display[] = $display;
+
         }
     }
 
