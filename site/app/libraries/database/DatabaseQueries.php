@@ -2561,7 +2561,7 @@ ORDER BY g.sections_rotating_id, g.user_id",
      * @return array
      */
     public function getRegistrationSections() {
-        $this->course_db->query("SELECT * FROM sections_registration ORDER BY SUBSTRING(sections_registration_id, '^[^0-9]*'), CAST(SUBSTRING(sections_registration_id, '[0-9]+') AS NUMERIC), SUBSTRING(sections_registration_id, '[^0-9]*$');");
+        $this->course_db->query("SELECT * FROM sections_registration ORDER BY SUBSTRING(sections_registration_id, '^[^0-9]*'), CAST(SUBSTRING(sections_registration_id, '[0-9]+') AS NUMERIC), SUBSTRING(sections_registration_id, '[^0-9]*$')");
         return $this->course_db->rows();
     }
 
