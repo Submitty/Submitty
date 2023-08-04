@@ -59,6 +59,7 @@ def main():
         data['ssh_port'] = args.base_port + i
         workers[f'worker-{i}'] = data
 
+    os.makedirs(os.path.dirname(workerfile), exist_ok=True)
     with open(workerfile, 'w') as file:
         json.dump(workers, file, indent=4)
 
