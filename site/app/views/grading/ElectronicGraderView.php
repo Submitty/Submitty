@@ -22,7 +22,7 @@ class ElectronicGraderView extends AbstractView {
     private $user_id_to_User_cache = [];
 
     /**
-     * @var int 
+     * @var int
      */
     public $anon_status = 0;
 
