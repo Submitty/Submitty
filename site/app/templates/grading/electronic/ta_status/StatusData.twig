@@ -35,13 +35,14 @@
                         <b>Current percentage of TA grading done:</b> {{ graded_total }} / {{ total_students_submitted }} ({{ total_grading_percentage }}%)
                     {% else %}
                         <br/>
-                        {% if   include_bad_submissions == 'include'  %}
-                            <b>Students who have submitted:</b>  {{ submitted_total }} / {{ total_submissions }} ({{ submitted_percentage }}%)
+                        {% if include_bad_submissions == 'include'  %}
+
+                            <b>Students who have submitted:</b> {{ submitted_total }} / {{ total_submissions }} ({{ submitted_percentage }}%)
                             <br/>
                             <br/>
                             <b>Current percentage of TA grading done:</b> {{ graded_total }} / {{ submitted_total }} ({{ total_grading_percentage }}%)
                         {% else %}
-                            <b>Students who have submitted on time:</b><p id="submissions-on-time">  {{ non_late_submitted_total }} / {{ total_submissions }} ({{ non_late_submitted_percentage }}%)</p>
+                            <b>Students who have submitted on time:</b> {{ non_late_submitted_total }} / {{ total_submissions }} ({{ non_late_submitted_percentage }}%)
                             <br/>
                             <br/>
                             <b>Current percentage of TA grading done:</b> {{ non_late_graded_total }} / {{ non_late_submitted_total }} ({{ non_late_total_grading_percentage }}%)
@@ -63,9 +64,17 @@
                     {% for key, section in sections %}
                         {% if key != "peer_stu_grad"%}
                                 {% if include_bad_submissions  == 'include'  %}
-                                Section {{ key }}: {{ section.graded }} / {{ section.total }} ({{ section.percentage }}%)<br />
-                            {% else %}
-                                Section {{ key }}: {{ section.non_late_graded }} / {{ section.non_late_total }} ({{ section.non_late_percentage }}%)<br />
+                                    {% if key == "NULL" and include_null_section != 'include' %}
+                                        {# Skip rendering this section #}
+                                     {% else %}
+                                        Section {{ key }}: {{ section.graded }} / {{ section.total }} ({{ section.percentage }}%)<br />
+                                    {% endif %}
+                                {% else %}
+                                    {% if key == "NULL" and include_null_section != 'include' %}
+                                        {# Skip rendering this section #}
+                                     {% else %}
+                                        Section {{ key }}: {{ section.non_late_graded }} / {{ section.non_late_total }} ({{ section.non_late_percentage }}%)<br />
+                                    {% endif %}    
                             {% endif %}
                         {% endif %}
                     {% endfor %}
@@ -111,6 +120,14 @@
                 <br/>
                 <br/>
                 <p><b>Number of unresolved grade inquiries:</b> {{ grade_inquiries }}</p>
+                <br/>
+                <p><b>Number of unresolved grade inquiries per grader</b></p>
+                <div style="margin-left: 20px">
+                {% for key, value in graders_of_inquiries %}
+                    <p>{{ key }}: {{ value }} </p>
+                {% endfor %}
+                </div>
+                <br/>
                 {% if grade_inquiry_per_component_allowed %}
                     {% for component in component_averages %}
                         <p><b>Number of unresolved grade inquiries for {{ component.getTitle() }}:</b> {{ component.getActiveGradeInquiryCount() }} </p>
@@ -119,7 +136,7 @@
             {% endif %}
             {# LEFT CHUNK #}
         </div>
-        <div class = "box col-md-6" id = "right-grading-stats">
+        <div class = "box col-md-6">
             {# RIGHT CHUNK#}
 
             {# Should Be visible if gradeable contains peer components, non-peer components or both #}

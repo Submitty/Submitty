@@ -5356,11 +5356,6 @@ parameters:
 			path: app/libraries/database/DatabaseQueries.php
 
 		-
-			message: "#^Method app\\\\libraries\\\\database\\\\DatabaseQueries\\:\\:getAverageForGradeable\\(\\) has parameter \\$override with no type specified\\.$#"
-			count: 1
-			path: app/libraries/database/DatabaseQueries.php
-
-		-
 			message: "#^Method app\\\\libraries\\\\database\\\\DatabaseQueries\\:\\:getAverageForGradeable\\(\\) has parameter \\$section_key with no type specified\\.$#"
 			count: 1
 			path: app/libraries/database/DatabaseQueries.php
@@ -13842,11 +13837,6 @@ parameters:
 			path: app/views/grading/ElectronicGraderView.php
 
 		-
-			message: "#^Method app\\\\views\\\\grading\\\\ElectronicGraderView\\:\\:hwGradingPage\\(\\) has parameter \\$rollbackSubmission with no type specified\\.$#"
-			count: 1
-			path: app/views/grading/ElectronicGraderView.php
-
-		-
 			message: "#^Method app\\\\views\\\\grading\\\\ElectronicGraderView\\:\\:hwGradingPage\\(\\) has parameter \\$solution_ta_notes with no value type specified in iterable type array\\.$#"
 			count: 1
 			path: app/views/grading/ElectronicGraderView.php
@@ -13967,27 +13957,7 @@ parameters:
 			path: app/views/grading/ElectronicGraderView.php
 
 		-
-			message: "#^Method app\\\\views\\\\grading\\\\ElectronicGraderView\\:\\:statusPage\\(\\) has no return type specified\\.$#"
-			count: 1
-			path: app/views/grading/ElectronicGraderView.php
-
-		-
-			message: "#^Method app\\\\views\\\\grading\\\\ElectronicGraderView\\:\\:statusPage\\(\\) has parameter \\$autograded_average with no type specified\\.$#"
-			count: 1
-			path: app/views/grading/ElectronicGraderView.php
-
-		-
-			message: "#^Method app\\\\views\\\\grading\\\\ElectronicGraderView\\:\\:statusPage\\(\\) has parameter \\$component_averages with no value type specified in iterable type array\\.$#"
-			count: 1
-			path: app/views/grading/ElectronicGraderView.php
-
-		-
 			message: "#^Method app\\\\views\\\\grading\\\\ElectronicGraderView\\:\\:statusPage\\(\\) has parameter \\$histogram_data with no type specified\\.$#"
-			count: 1
-			path: app/views/grading/ElectronicGraderView.php
-
-		-
-			message: "#^Method app\\\\views\\\\grading\\\\ElectronicGraderView\\:\\:statusPage\\(\\) has parameter \\$overall_average with no type specified\\.$#"
 			count: 1
 			path: app/views/grading/ElectronicGraderView.php
 
