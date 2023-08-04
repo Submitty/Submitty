@@ -114,7 +114,7 @@ $(function () {
       localStorage.setItem(storageCode, this.value);
       if(settingsCallbacks && settingsCallbacks.hasOwnProperty(storageCode)) {
         settingsCallbacks[storageCode](this.value);
-        if(this.value != "inquiry") {
+        if(this.value != "active-inquiry") {
           //if user change setting to non-grade inquiry option, change the inquiry_status to off and set inquiry_only to off in grading index page
           localStorage.setItem('inquiry_status','off');
           localStorage.setItem('inquiry_only','off');
@@ -202,7 +202,7 @@ $(function () {
 function changeStudentArrowTooltips(data) {
   let inquiry_status = localStorage.getItem('inquiry_status');
   if (inquiry_status === 'on'){
-    data = 'inquiry';
+    data = 'active-inquiry';
   }
   let component_id = NO_COMPONENT_ID;
   switch(data) {
@@ -628,7 +628,7 @@ function gotoPrevStudent() {
 
   let inquiry_status = localStorage.getItem('inquiry_status');
   if (inquiry_status === 'on'){
-    filter = 'inquiry';
+    filter = 'active-inquiry';
   }
 
   let selector = "#prev-student";
@@ -680,7 +680,7 @@ function gotoNextStudent() {
 
   let inquiry_status = localStorage.getItem('inquiry_status');
   if (inquiry_status === 'on'){
-    filter = 'inquiry';
+    filter = 'active-inquiry';
   }
   
   let selector = "#next-student";

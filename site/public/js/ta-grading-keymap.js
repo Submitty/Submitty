@@ -194,7 +194,7 @@ function loadTAGradingSettingData() {
             }
             var inquiry = localStorage.getItem('inquiry_status');
             if (inquiry === 'on') {
-                settingsData[i].values[x].currValue =  "inquiry";   
+                settingsData[i].values[x].currValue =  "active-inquiry";   
             }
             else{
                 
