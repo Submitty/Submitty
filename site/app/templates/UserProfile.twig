@@ -65,6 +65,18 @@
                             <i class="fas fa-pencil-alt"></i> {{ user.getPronouns() }}
                         </button>
                     </div>
+                    <div class="flex-row" id="pronouns-display-row">
+                        <span class="label">
+                            Display Pronouns in Discussion Forum:
+                        </span>
+                        <button id='display_pronouns_val' class="icon" tabindex="0" onclick="showUpdatePronounsForm()" aria-label="Edit user pronouns" title="Edit user pronouns">
+                            {% if user.getDisplayPronouns() %}
+                                <i class="fas fa-pencil-alt"></i> True
+                            {% else %}
+                                <i class="fas fa-pencil-alt"></i> False
+                            {% endif %}
+                        </button>
+                    </div>
                     <div class="flex-row" id="email-row" data-testid="email-row">
                         <span class="label">
                             Primary Email:

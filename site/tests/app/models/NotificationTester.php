@@ -26,6 +26,7 @@ class NotificationTester extends \PHPUnit\Framework\TestCase {
             'user_givenname' => 'Tester',
             'user_familyname' => 'Test',
             'user_pronouns' => '',
+            'display_pronouns' => false,
             'user_email' => null,
             'user_email_secondary' => '',
             'user_email_secondary_notify' => false,
