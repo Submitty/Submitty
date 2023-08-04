@@ -59,6 +59,11 @@ class BannerController extends AbstractController {
 
         $uploaded_files = $_FILES["files1"];
         $count_item = count($uploaded_files["name"]);
+
+        if ($count_itm > 2) {
+            return JsonResponse::getErrorResponse("Can't have more than two banners submitted.");
+        }
+
         $specificPath = $close_date->format("Y");
         $full_path = FileUtils::joinPaths($upload_path, $specificPath);
 
@@ -72,8 +77,33 @@ class BannerController extends AbstractController {
         }
 
         for ($j = 0; $j < $count_item; $j++) {
+            // for some reason why I try to simply use a condition to compare two strings, I always get false?!? So I have to loop through each character now
+            $all_match = true;
+            for ($i = 0; $i < strlen($uploaded_files['name'][$j]); $i++) {
+                if (strlen($uploaded_files['name'][$j]) != strlen($extra_name)) {
+                    $all_match = false;
+                    break;
+                }
+
+                if ($uploaded_files['name'][$j][$i] != $extra_name[$i]) {
+                    $all_match = false;
+                    break;
+                }
+            }
+
+
             if (is_uploaded_file($uploaded_files["tmp_name"][$j])) {
                 $dst = FileUtils::joinPaths($full_path, $uploaded_files["name"][$j]);
+
+                if (!$all_match) {
+                    [$width, $height] = getimagesize($uploaded_files["tmp_name"][$j]);
+
+
+                    if ($width !== 800 || $height !== 70) {
+                        return JsonResponse::getErrorResponse("File dimensions must be 800x70 pixels.");
+                    }                   
+                }
+
                 if (strlen($dst) > 255) {
                     return JsonResponse::getErrorResponse("Path cannot have a string length of more than 255 chars.");
                 }
@@ -90,19 +120,6 @@ class BannerController extends AbstractController {
                 return JsonResponse::getErrorResponse("Failed to delete the uploaded file '{$uploaded_files['name'][$j]}' from temporary storage.");
             }
 
-            // for some reason why I try to simply use a condition to compare two strings, I always get false?!? So I have to loop through each character now
-            $all_match = true;
-            for ($i = 0; $i < strlen($uploaded_files['name'][$j]); $i++) {
-                if (strlen($uploaded_files['name'][$j]) != strlen($extra_name)) {
-                    $all_match = false;
-                    break;
-                }
-
-                if ($uploaded_files['name'][$j][$i] != $extra_name[$i]) {
-                    $all_match = false;
-                    break;
-                }
-            }
 
             if ($all_match) {
                 continue;
