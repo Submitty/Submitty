@@ -1034,37 +1034,10 @@ class HomeworkView extends AbstractView {
 
             $files = $version_instance->getFiles();
 
-            /*
+            
             $notebook_data = null;
-            $hidefiles = [];
-            if ($autograding_config->isNotebookGradeable()) {
-                $notebook_model = $autograding_config->getUserSpecificNotebook($this->core->getUser()->getId());
-
-                $notebook = $notebook_model->getNotebook();
-                if ($graded_gradeable !== null) {
-                    $notebook_data = $notebook_model->getMostRecentNotebookSubmissions(
-                        $graded_gradeable->getAutoGradedGradeable()->getHighestVersion(),
-                        $notebook,
-                        $this->core->getUser()->getId(),
-                        $version_instance->getVersion(),
-                        $graded_gradeable->getGradeableId()
-                    );
-                }
-                foreach ($notebook_data as $note) {
-                    if (array_key_exists('filename', $note)) {
-                        array_push($hidefiles, $note['filename']);
-                    }
-                }
-            }
-            */
-            $downloadable_files = [];
-            foreach (array_merge($files['submissions'], $files['checkout']) as $current_file) {
-                $file_path = $current_file->getRealPath();
-                
-            }
-
+            
             $param = array_merge($param, [
-                'notebook' => $hidefiles,
                 'submission_time' => DateUtils::dateTimeToString($version_instance->getSubmissionTime()),
                 'days_late' => $version_instance->getDaysLate(),
                 'num_autogrades' => $version_instance->getHistoryCount(),

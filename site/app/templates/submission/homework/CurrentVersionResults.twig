@@ -10,7 +10,7 @@
     <div class="row">
         <div class="box col-md-6" id="submitted-files">
             {% for file in files %}
-                {% if not (file.name in notebook) %}
+                {% if (file.relative_name|split('/'))|length == 1 %}
                     <div class="flex-row">
                         <span>
                             {{ file.relative_name }} ({{ (file.size / 1024) | number_format(2) | default(-1) }}kb)
