@@ -18,13 +18,15 @@ use app\views\AbstractView;
 use app\libraries\NumberUtils;
 use app\libraries\CodeMirrorUtils;
 
-/**
- * @var int
- */
-public $anon_status = 0;
+
 
 class ElectronicGraderView extends AbstractView {
     private $user_id_to_User_cache = [];
+
+    /**
+     * @var int 
+     */
+    public $anon_status = 0;
 
     /**
      * @param Gradeable $gradeable
@@ -41,6 +43,7 @@ class ElectronicGraderView extends AbstractView {
      * @param array<string, int> $graders_of_inquiries
      * @param bool $show_warnings
      * @param int $submissions_in_queue
+     * @param int $anon_status
      * @return string
      */
     public function statusPage(
