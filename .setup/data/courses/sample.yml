@@ -1128,11 +1128,11 @@ gradeables:
 
   - g_id: late_allowed_homework
     components:
-    - gc_lower_clamp: 0
-      gc_default: 5
-      gc_max_value: 5
-      gc_upper_clamp: 5
-      gc_title: Question 1
+      - gc_lower_clamp: 0
+        gc_default: 5
+        gc_max_value: 5
+        gc_upper_clamp: 5
+        gc_title: Question 1
     eg_submission_due_date: 1972-01-01 03:59:59
     eg_submission_open_date: 1971-01-01 03:59:59
     g_grade_due_date: 9998-12-31 23:59:59
@@ -1150,11 +1150,11 @@ gradeables:
 
   - g_id: late_allowed_homework_2
     components:
-    - gc_lower_clamp: 0
-      gc_default: 5
-      gc_max_value: 5
-      gc_upper_clamp: 5
-      gc_title: Question 1
+      - gc_lower_clamp: 0
+        gc_default: 5
+        gc_max_value: 5
+        gc_upper_clamp: 5
+        gc_title: Question 1
     eg_submission_due_date: 1972-01-01 11:59:59
     eg_submission_open_date: 1971-01-01 11:59:59
     g_grade_due_date: 9998-12-31 23:59:59
