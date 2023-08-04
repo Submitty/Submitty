@@ -527,7 +527,6 @@ class RainbowCustomization extends AbstractModel {
             }
         }
 
-
         if (isset($form_json->display)) {
             foreach ($form_json->display as $display_option) {
                 $this->RCJSON->addDisplay($display_option);
