@@ -1011,7 +1011,7 @@ class ForumThreadView extends AbstractView {
             $reply_level = 1;
         }
 
-        if ($post["author_user_group"] <= User::GROUP_FULL_ACCESS_GRADER) {
+        if (isset($post["author_user_group"]) && $post["author_user_group"] <= User::GROUP_FULL_ACCESS_GRADER) {
             $visible_username = $given_name . " " . $family_name;
         }
 
