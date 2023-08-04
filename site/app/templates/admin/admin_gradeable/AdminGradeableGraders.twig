@@ -46,7 +46,7 @@ Form
 
 <label for="minimum_grading_group">What is the lowest privileged user group that can grade this?</label>
     <a class="fa-question-circle" target=_blank aria-label="Help for grading user groups" href="http://submitty.org/instructor/create_edit_gradeable#grading-user-groups"></a>
-<select name="min_grading_group" id="minimum_grading_group" class="int_val" style="width:180px;">
+<select name="min_grading_group" id="minimum_grading_group" data-testid="minimum_grading_group" class="int_val" style="width:180px;">
     {% for num, role in grading_groups %}
         <option value="{{ num }}" {{ gradeable.getMinGradingGroup() == num ? 'selected' : '' }}>{{ role }}</option>
     {% endfor %}
@@ -58,13 +58,13 @@ Form
         How should graders be assigned to grade this item?
         <a class="fa-question-circle" target=_blank aria-label="Help for grading by registration or rotating section" href="http://submitty.org/instructor/create_edit_gradeable#grading-by-registration-section-or-rotating-section"></a>
     </legend>
-	<input type="radio" name="grader_assignment_method" value="2" id="all_access"
+	<input type="radio" name="grader_assignment_method" value="2" data-testname="grader_assignment_method" id="all_access"
         {{ (gradeable.getGraderAssignmentMethod() == 2) ? 'checked' : '' }}> <label for="all_access">All Access Grading</label>
 
-    <input type="radio" name="grader_assignment_method" value="1" id="registration_section"
+    <input type="radio" name="grader_assignment_method" value="1" data-testname="grader_assignment_method" id="registration_section"
         {{ (gradeable.getGraderAssignmentMethod() == 1 or action == "new") ? 'checked' : '' }}> <label for="registration_section">Registration Section</label>
 
-    <input type='radio' name="grader_assignment_method" value="0" id="rotating_section"
+    <input type='radio' name="grader_assignment_method" value="0" data-testname="grader_assignment_method" id="rotating_section"
         {{ (gradeable.getGraderAssignmentMethod() == 0) ? 'checked' : '' }}> <label for="rotating_section">Rotating Section</label>
 </fieldset>
 <br />

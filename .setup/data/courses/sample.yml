@@ -7,1814 +7,1979 @@ no_rotating_students: 15
 unregistered_students: 15
 make_customization: true
 gradeables:
-- g_id: future_peer_grading
-  g_title: Future Peer Homework
-  gradeable_config: python_simple_homework
-  eg_peer_grading: true
-  components:
-  - gc_lower_clamp: 0
-    gc_is_peer: true
-    gc_default: 2
-    gc_max_value: 2
-    gc_upper_clamp: 2
-    gc_title: Read Me
-    marks:
-      - gcm_note: Full Credit
-        gcm_points: 0
-      - gcm_note: Minor errors in Read Me
-        gcm_points: -1
-      - gcm_note: Major errors in Read Me or Read Me missing
-        gcm_points: -2
-  - gc_lower_clamp: 0
-    gc_default: 5
-    gc_is_peer: true
-    gc_max_value: 5
-    gc_upper_clamp: 5
-    gc_title: Coding Style
-    marks:
-      - gcm_note: Full Credit
-        gcm_points: 0
-      - gcm_note: Code is unreadable
-        gcm_points: -5
-      - gcm_note: Code is very difficult to understand
-        gcm_points: -3
-      - gcm_note: Code is difficult to understand
-        gcm_points: -1
-  - gc_lower_clamp: 0
-    gc_default: 5
-    gc_max_value: 5
-    gc_upper_clamp: 5
-    gc_is_peer: true
-    gc_title: Documentation
-    marks:
-      - gcm_note: Full Credit
-        gcm_points: 0
-      - gcm_note: No documentation
-        gcm_points: -5
-      - gcm_note: Very little documentation or documentation makes no sense
-        gcm_points: -3
-      - gcm_note: Way too much documentation and/or documentation makes no sense
-        gcm_points: -1
-  - gc_lower_clamp: 0
-    gc_default: 0
-    gc_max_value: 0
-    gc_upper_clamp: 5
-    gc_title: Extra Credit
-    marks: 
-      - gcm_note: No Credit
-        gcm_points: 0
-      - gcm_note: Extra credit done poorly
-        gcm_points: 2
-      - gcm_note: Extra credit is acceptable
-        gcm_points: 5
-  g_ta_view_start_date: 9994-12-31 23:59:59
-  eg_submission_open_date: 9995-12-31 23:59:59
-  eg_submission_due_date: 9996-12-31 23:59:59
-  g_grade_start_date: 9997-12-31 23:59:59
-  g_grade_due_date: 9998-12-31 23:59:59
-  g_grade_released_date: 9998-12-31 23:59:59
-  eg_grade_inquiry_start_date: 9999-01-01 23:59:59
-  eg_grade_inquiry_due_date: 9999-01-06 23:59:59
-  eg_has_due_date: true
-  eg_has_release_date: true
-  g_bucket: homework
+  - g_id: future_peer_grading
+    g_title: Future Peer Homework
+    gradeable_config: python_simple_homework
+    eg_peer_grading: true
+    components:
+      - gc_lower_clamp: 0
+        gc_is_peer: true
+        gc_default: 2
+        gc_max_value: 2
+        gc_upper_clamp: 2
+        gc_title: Read Me
+        marks:
+          - gcm_note: Full Credit
+            gcm_points: 0
+          - gcm_note: Minor errors in Read Me
+            gcm_points: -1
+          - gcm_note: Major errors in Read Me or Read Me missing
+            gcm_points: -2
+      - gc_lower_clamp: 0
+        gc_default: 5
+        gc_is_peer: true
+        gc_max_value: 5
+        gc_upper_clamp: 5
+        gc_title: Coding Style
+        marks:
+          - gcm_note: Full Credit
+            gcm_points: 0
+          - gcm_note: Code is unreadable
+            gcm_points: -5
+          - gcm_note: Code is very difficult to understand
+            gcm_points: -3
+          - gcm_note: Code is difficult to understand
+            gcm_points: -1
+      - gc_lower_clamp: 0
+        gc_default: 5
+        gc_max_value: 5
+        gc_upper_clamp: 5
+        gc_is_peer: true
+        gc_title: Documentation
+        marks:
+          - gcm_note: Full Credit
+            gcm_points: 0
+          - gcm_note: No documentation
+            gcm_points: -5
+          - gcm_note: Very little documentation or documentation makes no sense
+            gcm_points: -3
+          - gcm_note: Way too much documentation and/or documentation makes no sense
+            gcm_points: -1
+      - gc_lower_clamp: 0
+        gc_default: 0
+        gc_max_value: 0
+        gc_upper_clamp: 5
+        gc_title: Extra Credit
+        marks:
+          - gcm_note: No Credit
+            gcm_points: 0
+          - gcm_note: Extra credit done poorly
+            gcm_points: 2
+          - gcm_note: Extra credit is acceptable
+            gcm_points: 5
+    g_ta_view_start_date: 9994-12-31 23:59:59
+    eg_submission_open_date: 9995-12-31 23:59:59
+    eg_submission_due_date: 9996-12-31 23:59:59
+    g_grade_start_date: 9997-12-31 23:59:59
+    g_grade_due_date: 9998-12-31 23:59:59
+    g_grade_released_date: 9998-12-31 23:59:59
+    eg_grade_inquiry_start_date: 9999-01-01 23:59:59
+    eg_grade_inquiry_due_date: 9999-01-06 23:59:59
+    eg_has_due_date: true
+    eg_has_release_date: true
+    g_bucket: homework
 
-- g_id: future_no_tas_homework
-  g_title: Future (No TAs) Homework
-  gradeable_config: python_simple_homework
-  components:
-  - gc_lower_clamp: 0
-    gc_default: 2
-    gc_max_value: 2
-    gc_upper_clamp: 2
-    gc_title: Read Me
-    marks:
-      - gcm_note: Full Credit
-        gcm_points: 0
-      - gcm_note: Minor errors in Read Me
-        gcm_points: -1
-      - gcm_note: Major errors in Read Me or Read Me missing
-        gcm_points: -2
-  - gc_lower_clamp: 0
-    gc_default: 5
-    gc_max_value: 5
-    gc_upper_clamp: 5
-    gc_title: Coding Style
-    marks:
-      - gcm_note: Full Credit
-        gcm_points: 0
-      - gcm_note: Code is unreadable
-        gcm_points: -5
-      - gcm_note: Code is very difficult to understand
-        gcm_points: -3
-      - gcm_note: Code is difficult to understand
-        gcm_points: -1
-  - gc_lower_clamp: 0
-    gc_default: 5
-    gc_max_value: 5
-    gc_upper_clamp: 5
-    gc_title: Documentation
-    marks:
-      - gcm_note: Full Credit
-        gcm_points: 0
-      - gcm_note: No documentation
-        gcm_points: -5
-      - gcm_note: Very little documentation or documentation makes no sense
-        gcm_points: -3
-      - gcm_note: Way too much documentation and/or documentation makes no sense
-        gcm_points: -1
-  - gc_lower_clamp: 0
-    gc_default: 0
-    gc_max_value: 0
-    gc_upper_clamp: 5
-    gc_title: Extra Credit
-    marks: 
-      - gcm_note: No Credit
-        gcm_points: 0
-      - gcm_note: Extra credit done poorly
-        gcm_points: 2
-      - gcm_note: Extra credit is acceptable
-        gcm_points: 5
-  g_ta_view_start_date: 9994-12-31 23:59:59
-  eg_submission_open_date: 9995-12-31 23:59:59
-  eg_submission_due_date: 9996-12-31 23:59:59
-  g_grade_start_date: 9997-12-31 23:59:59
-  g_grade_due_date: 9998-12-31 23:59:59
-  g_grade_released_date: 9998-12-31 23:59:59
-  eg_grade_inquiry_start_date: 9999-01-01 23:59:59
-  eg_grade_inquiry_due_date: 9999-01-06 23:59:59
-  eg_has_due_date: true
-  eg_has_release_date: true
-  g_bucket: homework
+  - g_id: future_no_tas_homework
+    g_title: Future (No TAs) Homework
+    gradeable_config: python_simple_homework
+    components:
+      - gc_lower_clamp: 0
+        gc_default: 2
+        gc_max_value: 2
+        gc_upper_clamp: 2
+        gc_title: Read Me
+        marks:
+          - gcm_note: Full Credit
+            gcm_points: 0
+          - gcm_note: Minor errors in Read Me
+            gcm_points: -1
+          - gcm_note: Major errors in Read Me or Read Me missing
+            gcm_points: -2
+      - gc_lower_clamp: 0
+        gc_default: 5
+        gc_max_value: 5
+        gc_upper_clamp: 5
+        gc_title: Coding Style
+        marks:
+          - gcm_note: Full Credit
+            gcm_points: 0
+          - gcm_note: Code is unreadable
+            gcm_points: -5
+          - gcm_note: Code is very difficult to understand
+            gcm_points: -3
+          - gcm_note: Code is difficult to understand
+            gcm_points: -1
+      - gc_lower_clamp: 0
+        gc_default: 5
+        gc_max_value: 5
+        gc_upper_clamp: 5
+        gc_title: Documentation
+        marks:
+          - gcm_note: Full Credit
+            gcm_points: 0
+          - gcm_note: No documentation
+            gcm_points: -5
+          - gcm_note: Very little documentation or documentation makes no sense
+            gcm_points: -3
+          - gcm_note: Way too much documentation and/or documentation makes no sense
+            gcm_points: -1
+      - gc_lower_clamp: 0
+        gc_default: 0
+        gc_max_value: 0
+        gc_upper_clamp: 5
+        gc_title: Extra Credit
+        marks:
+          - gcm_note: No Credit
+            gcm_points: 0
+          - gcm_note: Extra credit done poorly
+            gcm_points: 2
+          - gcm_note: Extra credit is acceptable
+            gcm_points: 5
+    g_ta_view_start_date: 9994-12-31 23:59:59
+    eg_submission_open_date: 9995-12-31 23:59:59
+    eg_submission_due_date: 9996-12-31 23:59:59
+    g_grade_start_date: 9997-12-31 23:59:59
+    g_grade_due_date: 9998-12-31 23:59:59
+    g_grade_released_date: 9998-12-31 23:59:59
+    eg_grade_inquiry_start_date: 9999-01-01 23:59:59
+    eg_grade_inquiry_due_date: 9999-01-06 23:59:59
+    eg_has_due_date: true
+    eg_has_release_date: true
+    g_bucket: homework
 
-- g_id: future_tas_homework
-  components:
-  - gc_lower_clamp: 0
-    gc_default: 2
-    gc_max_value: 2
-    gc_upper_clamp: 2
-    gc_title: Read Me
-    marks:
-      - gcm_note: Full Credit
-        gcm_points: 0
-      - gcm_note: Minor errors in Read Me
-        gcm_points: -1
-      - gcm_note: Major errors in Read Me or Read Me missing
-        gcm_points: -2
-  - gc_lower_clamp: 0
-    gc_default: 5
-    gc_max_value: 5
-    gc_upper_clamp: 5
-    gc_title: Coding Style
-    marks:
-      - gcm_note: Full Credit
-        gcm_points: 0
-      - gcm_note: Code is unreadable
-        gcm_points: -5
-      - gcm_note: Code is very difficult to understand
-        gcm_points: -3
-      - gcm_note: Code is difficult to understand
-        gcm_points: -1
-  - gc_lower_clamp: 0
-    gc_default: 5
-    gc_max_value: 5
-    gc_upper_clamp: 5
-    gc_title: Documentation
-    marks:
-      - gcm_note: Full Credit
-        gcm_points: 0
-      - gcm_note: No documentation
-        gcm_points: -5
-      - gcm_note: Very little documentation or documentation makes no sense
-        gcm_points: -3
-      - gcm_note: Way too much documentation and/or documentation makes no sense
-        gcm_points: -1
-  - gc_lower_clamp: 0
-    gc_default: 0
-    gc_max_value: 0
-    gc_upper_clamp: 5
-    gc_title: Extra Credit
-    marks: 
-      - gcm_note: No Credit
-        gcm_points: 0
-      - gcm_note: Extra credit done poorly
-        gcm_points: 2
-      - gcm_note: Extra credit is acceptable
-        gcm_points: 5
-  eg_submission_due_date: 9996-12-31 23:59:59
-  eg_submission_open_date: 9995-12-31 23:59:59
-  g_grade_due_date: 9998-12-31 23:59:59
-  g_grade_released_date: 9998-12-31 23:59:59
-  g_grade_start_date: 9997-12-31 23:59:59
-  g_ta_view_start_date: 1970-01-01 23:59:59
-  eg_grade_inquiry_start_date: 9999-01-01 23:59:59
-  eg_grade_inquiry_due_date: 9999-01-06 23:59:59
-  eg_has_due_date: true
-  eg_has_release_date: true
-  g_title: Future (TAs) Homework
-  gradeable_config: python_simple_homework
-  g_bucket: homework
+  - g_id: future_tas_homework
+    components:
+      - gc_lower_clamp: 0
+        gc_default: 2
+        gc_max_value: 2
+        gc_upper_clamp: 2
+        gc_title: Read Me
+        marks:
+          - gcm_note: Full Credit
+            gcm_points: 0
+          - gcm_note: Minor errors in Read Me
+            gcm_points: -1
+          - gcm_note: Major errors in Read Me or Read Me missing
+            gcm_points: -2
+      - gc_lower_clamp: 0
+        gc_default: 5
+        gc_max_value: 5
+        gc_upper_clamp: 5
+        gc_title: Coding Style
+        marks:
+          - gcm_note: Full Credit
+            gcm_points: 0
+          - gcm_note: Code is unreadable
+            gcm_points: -5
+          - gcm_note: Code is very difficult to understand
+            gcm_points: -3
+          - gcm_note: Code is difficult to understand
+            gcm_points: -1
+      - gc_lower_clamp: 0
+        gc_default: 5
+        gc_max_value: 5
+        gc_upper_clamp: 5
+        gc_title: Documentation
+        marks:
+          - gcm_note: Full Credit
+            gcm_points: 0
+          - gcm_note: No documentation
+            gcm_points: -5
+          - gcm_note: Very little documentation or documentation makes no sense
+            gcm_points: -3
+          - gcm_note: Way too much documentation and/or documentation makes no sense
+            gcm_points: -1
+      - gc_lower_clamp: 0
+        gc_default: 0
+        gc_max_value: 0
+        gc_upper_clamp: 5
+        gc_title: Extra Credit
+        marks:
+          - gcm_note: No Credit
+            gcm_points: 0
+          - gcm_note: Extra credit done poorly
+            gcm_points: 2
+          - gcm_note: Extra credit is acceptable
+            gcm_points: 5
+    eg_submission_due_date: 9996-12-31 23:59:59
+    eg_submission_open_date: 9995-12-31 23:59:59
+    g_grade_due_date: 9998-12-31 23:59:59
+    g_grade_released_date: 9998-12-31 23:59:59
+    g_grade_start_date: 9997-12-31 23:59:59
+    g_ta_view_start_date: 1970-01-01 23:59:59
+    eg_grade_inquiry_start_date: 9999-01-01 23:59:59
+    eg_grade_inquiry_due_date: 9999-01-06 23:59:59
+    eg_has_due_date: true
+    eg_has_release_date: true
+    g_title: Future (TAs) Homework
+    gradeable_config: python_simple_homework
+    g_bucket: homework
 
-- g_id: bulk_upload_test
-  g_title: Bulk Upload Scanned Exam
-  gradeable_config: pdf_exam
-  components:
-  - gc_lower_clamp: 0
-    gc_default: 5
-    gc_max_value: 5
-    gc_upper_clamp: 5
-    gc_title: Question 1
-    marks:
-      - gcm_note: Full Credit
-        gcm_points : 0
-      - gcm_note: Question 1 Mark 1
-        gcm_points : -5
-  g_ta_view_start_date: 9994-12-31 23:59:59
-  eg_submission_open_date: 9995-12-31 23:59:59
-  eg_submission_due_date: 9996-12-31 23:59:59
-  g_grade_start_date: 9997-12-31 23:59:59
-  g_grade_due_date: 9998-12-31 23:59:59
-  g_grade_released_date: 9998-12-31 23:59:59
-  eg_grade_inquiry_start_date: 9999-01-01 23:59:59
-  eg_grade_inquiry_due_date: 9999-01-06 23:59:59
-  eg_has_due_date: true
-  eg_has_release_date: true
-  g_bucket: homework
-  eg_bulk_test: true
+  - g_id: bulk_upload_test
+    g_title: Bulk Upload Scanned Exam
+    gradeable_config: pdf_exam
+    components:
+      - gc_lower_clamp: 0
+        gc_default: 5
+        gc_max_value: 5
+        gc_upper_clamp: 5
+        gc_title: Question 1
+        marks:
+          - gcm_note: Full Credit
+            gcm_points: 0
+          - gcm_note: Question 1 Mark 1
+            gcm_points: -5
+    g_ta_view_start_date: 9994-12-31 23:59:59
+    eg_submission_open_date: 9995-12-31 23:59:59
+    eg_submission_due_date: 9996-12-31 23:59:59
+    g_grade_start_date: 9997-12-31 23:59:59
+    g_grade_due_date: 9998-12-31 23:59:59
+    g_grade_released_date: 9998-12-31 23:59:59
+    eg_grade_inquiry_start_date: 9999-01-01 23:59:59
+    eg_grade_inquiry_due_date: 9999-01-06 23:59:59
+    eg_has_due_date: true
+    eg_has_release_date: true
+    g_bucket: homework
+    eg_bulk_test: true
 
-- g_id: open_peer_homework
-  eg_peer_grading: true
-  components:
-  - gc_lower_clamp: 0
-    gc_is_peer: true
-    gc_default: 2
-    gc_max_value: 2
-    gc_upper_clamp: 2
-    gc_title: Read Me
-    marks:
-      - gcm_note: Full Credit
-        gcm_points: 0
-      - gcm_note: Minor errors in Read Me
-        gcm_points: -1
-      - gcm_note: Major errors in Read Me or Read Me missing
-        gcm_points: -2
-  - gc_lower_clamp: 0
-    gc_default: 5
-    gc_is_peer: true
-    gc_max_value: 5
-    gc_upper_clamp: 5
-    gc_title: Coding Style
-    marks:
-      - gcm_note: Full Credit
-        gcm_points: 0
-      - gcm_note: Code is unreadable
-        gcm_points: -5
-      - gcm_note: Code is very difficult to understand
-        gcm_points: -3
-      - gcm_note: Code is difficult to understand
-        gcm_points: -1
-  - gc_lower_clamp: 0
-    gc_default: 5
-    gc_is_peer: true
-    gc_max_value: 5
-    gc_upper_clamp: 5
-    gc_title: Documentation
-    marks:
-      - gcm_note: Full Credit
-        gcm_points: 0
-      - gcm_note: No documentation
-        gcm_points: -5
-      - gcm_note: Very little documentation or documentation makes no sense
-        gcm_points: -3
-      - gcm_note: Way too much documentation and/or documentation makes no sense
-        gcm_points: -1
-  - gc_lower_clamp: 0
-    gc_default: 0
-    gc_max_value: 0
-    gc_upper_clamp: 5
-    gc_title: Extra Credit
-    marks: 
-      - gcm_note: No Credit
-        gcm_points: 0
-      - gcm_note: Extra credit done poorly
-        gcm_points: 2
-      - gcm_note: Extra credit is acceptable
-        gcm_points: 5
-  eg_submission_due_date: 9996-12-31 23:59:59
-  eg_submission_open_date: 1971-01-01 23:59:59
-  g_grade_due_date: 9998-12-31 23:59:59
-  g_grade_released_date: 9998-12-31 23:59:59
-  g_grade_start_date: 9997-12-31 23:59:59
-  g_ta_view_start_date: 1970-01-01 23:59:59
-  eg_grade_inquiry_start_date: 9999-01-01 23:59:59
-  eg_grade_inquiry_due_date: 9999-01-06 23:59:59
-  eg_has_due_date: true
-  eg_has_release_date: true
-  g_title: Open Peer Homework
-  gradeable_config: python_simple_homework
-  g_bucket: homework
+  - g_id: open_peer_homework
+    eg_peer_grading: true
+    components:
+      - gc_lower_clamp: 0
+        gc_is_peer: true
+        gc_default: 2
+        gc_max_value: 2
+        gc_upper_clamp: 2
+        gc_title: Read Me
+        marks:
+          - gcm_note: Full Credit
+            gcm_points: 0
+          - gcm_note: Minor errors in Read Me
+            gcm_points: -1
+          - gcm_note: Major errors in Read Me or Read Me missing
+            gcm_points: -2
+      - gc_lower_clamp: 0
+        gc_default: 5
+        gc_is_peer: true
+        gc_max_value: 5
+        gc_upper_clamp: 5
+        gc_title: Coding Style
+        marks:
+          - gcm_note: Full Credit
+            gcm_points: 0
+          - gcm_note: Code is unreadable
+            gcm_points: -5
+          - gcm_note: Code is very difficult to understand
+            gcm_points: -3
+          - gcm_note: Code is difficult to understand
+            gcm_points: -1
+      - gc_lower_clamp: 0
+        gc_default: 5
+        gc_is_peer: true
+        gc_max_value: 5
+        gc_upper_clamp: 5
+        gc_title: Documentation
+        marks:
+          - gcm_note: Full Credit
+            gcm_points: 0
+          - gcm_note: No documentation
+            gcm_points: -5
+          - gcm_note: Very little documentation or documentation makes no sense
+            gcm_points: -3
+          - gcm_note: Way too much documentation and/or documentation makes no sense
+            gcm_points: -1
+      - gc_lower_clamp: 0
+        gc_default: 0
+        gc_max_value: 0
+        gc_upper_clamp: 5
+        gc_title: Extra Credit
+        marks:
+          - gcm_note: No Credit
+            gcm_points: 0
+          - gcm_note: Extra credit done poorly
+            gcm_points: 2
+          - gcm_note: Extra credit is acceptable
+            gcm_points: 5
+    eg_submission_due_date: 9996-12-31 23:59:59
+    eg_submission_open_date: 1971-01-01 23:59:59
+    g_grade_due_date: 9998-12-31 23:59:59
+    g_grade_released_date: 9998-12-31 23:59:59
+    g_grade_start_date: 9997-12-31 23:59:59
+    g_ta_view_start_date: 1970-01-01 23:59:59
+    eg_grade_inquiry_start_date: 9999-01-01 23:59:59
+    eg_grade_inquiry_due_date: 9999-01-06 23:59:59
+    eg_has_due_date: true
+    eg_has_release_date: true
+    g_title: Open Peer Homework
+    gradeable_config: python_simple_homework
+    g_bucket: homework
 
-- g_id: open_homework
-  components:
-  - gc_lower_clamp: 0
-    gc_default: 2
-    gc_max_value: 2
-    gc_upper_clamp: 2
-    gc_title: Read Me
-    marks:
-      - gcm_note: Full Credit
-        gcm_points: 0
-      - gcm_note: Minor errors in Read Me
-        gcm_points: -1
-      - gcm_note: Major errors in Read Me or Read Me missing
-        gcm_points: -2
-  - gc_lower_clamp: 0
-    gc_default: 5
-    gc_max_value: 5
-    gc_upper_clamp: 5
-    gc_title: Coding Style
-    marks:
-      - gcm_note: Full Credit
-        gcm_points: 0
-      - gcm_note: Code is unreadable
-        gcm_points: -5
-      - gcm_note: Code is very difficult to understand
-        gcm_points: -3
-      - gcm_note: Code is difficult to understand
-        gcm_points: -1
-  - gc_lower_clamp: 0
-    gc_default: 5
-    gc_max_value: 5
-    gc_upper_clamp: 5
-    gc_title: Documentation
-    marks:
-      - gcm_note: Full Credit
-        gcm_points: 0
-      - gcm_note: No documentation
-        gcm_points: -5
-      - gcm_note: Very little documentation or documentation makes no sense
-        gcm_points: -3
-      - gcm_note: Way too much documentation and/or documentation makes no sense
-        gcm_points: -1
-  - gc_lower_clamp: 0
-    gc_default: 0
-    gc_max_value: 0
-    gc_upper_clamp: 5
-    gc_title: Extra Credit
-    marks: 
-      - gcm_note: No Credit
-        gcm_points: 0
-      - gcm_note: Extra credit done poorly
-        gcm_points: 2
-      - gcm_note: Extra credit is acceptable
-        gcm_points: 5
-  eg_submission_due_date: 9996-12-31 23:59:59
-  eg_submission_open_date: 1971-01-01 23:59:59
-  g_grade_due_date: 9998-12-31 23:59:59
-  g_grade_released_date: 9998-12-31 23:59:59
-  g_grade_start_date: 9997-12-31 23:59:59
-  g_ta_view_start_date: 1970-01-01 23:59:59
-  eg_grade_inquiry_start_date: 9999-01-01 23:59:59
-  eg_grade_inquiry_due_date: 9999-01-06 23:59:59
-  eg_has_due_date: true
-  eg_has_release_date: true
-  g_title: Open Homework
-  gradeable_config: python_simple_homework
-  g_bucket: homework
+  - g_id: open_homework
+    components:
+      - gc_lower_clamp: 0
+        gc_default: 2
+        gc_max_value: 2
+        gc_upper_clamp: 2
+        gc_title: Read Me
+        marks:
+          - gcm_note: Full Credit
+            gcm_points: 0
+          - gcm_note: Minor errors in Read Me
+            gcm_points: -1
+          - gcm_note: Major errors in Read Me or Read Me missing
+            gcm_points: -2
+      - gc_lower_clamp: 0
+        gc_default: 5
+        gc_max_value: 5
+        gc_upper_clamp: 5
+        gc_title: Coding Style
+        marks:
+          - gcm_note: Full Credit
+            gcm_points: 0
+          - gcm_note: Code is unreadable
+            gcm_points: -5
+          - gcm_note: Code is very difficult to understand
+            gcm_points: -3
+          - gcm_note: Code is difficult to understand
+            gcm_points: -1
+      - gc_lower_clamp: 0
+        gc_default: 5
+        gc_max_value: 5
+        gc_upper_clamp: 5
+        gc_title: Documentation
+        marks:
+          - gcm_note: Full Credit
+            gcm_points: 0
+          - gcm_note: No documentation
+            gcm_points: -5
+          - gcm_note: Very little documentation or documentation makes no sense
+            gcm_points: -3
+          - gcm_note: Way too much documentation and/or documentation makes no sense
+            gcm_points: -1
+      - gc_lower_clamp: 0
+        gc_default: 0
+        gc_max_value: 0
+        gc_upper_clamp: 5
+        gc_title: Extra Credit
+        marks:
+          - gcm_note: No Credit
+            gcm_points: 0
+          - gcm_note: Extra credit done poorly
+            gcm_points: 2
+          - gcm_note: Extra credit is acceptable
+            gcm_points: 5
+    eg_submission_due_date: 9996-12-31 23:59:59
+    eg_submission_open_date: 1971-01-01 23:59:59
+    g_grade_due_date: 9998-12-31 23:59:59
+    g_grade_released_date: 9998-12-31 23:59:59
+    g_grade_start_date: 9997-12-31 23:59:59
+    g_ta_view_start_date: 1970-01-01 23:59:59
+    eg_grade_inquiry_start_date: 9999-01-01 23:59:59
+    eg_grade_inquiry_due_date: 9999-01-06 23:59:59
+    eg_has_due_date: true
+    eg_has_release_date: true
+    g_title: Open Homework
+    gradeable_config: python_simple_homework
+    g_bucket: homework
 
-- g_id: open_team_homework
-  components:
-  - gc_lower_clamp: 0
-    gc_default: 2
-    gc_max_value: 2
-    gc_upper_clamp: 2
-    gc_title: Read Me
-    marks:
-      - gcm_note: Full Credit
-        gcm_points: 0
-      - gcm_note: Minor errors in Read Me
-        gcm_points: -1
-      - gcm_note: Major errors in Read Me or Read Me missing
-        gcm_points: -2
-  - gc_lower_clamp: 0
-    gc_default: 5
-    gc_max_value: 5
-    gc_upper_clamp: 5
-    gc_title: Coding Style
-    marks:
-      - gcm_note: Full Credit
-        gcm_points: 0
-      - gcm_note: Code is unreadable
-        gcm_points: -5
-      - gcm_note: Code is very difficult to understand
-        gcm_points: -3
-      - gcm_note: Code is difficult to understand
-        gcm_points: -1
-  - gc_lower_clamp: 0
-    gc_default: 5
-    gc_max_value: 5
-    gc_upper_clamp: 5
-    gc_title: Documentation
-    marks:
-      - gcm_note: Full Credit
-        gcm_points: 0
-      - gcm_note: No documentation
-        gcm_points: -5
-      - gcm_note: Very little documentation or documentation makes no sense
-        gcm_points: -3
-      - gcm_note: Way too much documentation and/or documentation makes no sense
-        gcm_points: -1
-  - gc_lower_clamp: 0
-    gc_default: 0
-    gc_max_value: 0
-    gc_upper_clamp: 5
-    gc_title: Extra Credit
-    marks: 
-      - gcm_note: No Credit
-        gcm_points: 0
-      - gcm_note: Extra credit done poorly
-        gcm_points: 2
-      - gcm_note: Extra credit is acceptable
-        gcm_points: 5
-  eg_submission_due_date: 9996-12-31 23:59:59
-  eg_submission_open_date: 1971-01-01 23:59:59
-  g_grade_due_date: 9998-12-31 23:59:59
-  g_grade_released_date: 9998-12-31 23:59:59
-  g_grade_start_date: 9997-12-31 23:59:59
-  eg_grade_inquiry_start_date: 9999-01-01 23:59:59
-  eg_grade_inquiry_due_date: 9999-01-06 23:59:59
-  eg_has_due_date: true
-  eg_has_release_date: true
-  eg_team_assignment: true
-  eg_max_team_size: 3
-  g_ta_view_start_date: 1970-01-01 23:59:59
-  g_title: Open Team Homework
-  gradeable_config: python_simple_homework
-  g_bucket: homework
+  - g_id: open_team_homework
+    components:
+      - gc_lower_clamp: 0
+        gc_default: 2
+        gc_max_value: 2
+        gc_upper_clamp: 2
+        gc_title: Read Me
+        marks:
+          - gcm_note: Full Credit
+            gcm_points: 0
+          - gcm_note: Minor errors in Read Me
+            gcm_points: -1
+          - gcm_note: Major errors in Read Me or Read Me missing
+            gcm_points: -2
+      - gc_lower_clamp: 0
+        gc_default: 5
+        gc_max_value: 5
+        gc_upper_clamp: 5
+        gc_title: Coding Style
+        marks:
+          - gcm_note: Full Credit
+            gcm_points: 0
+          - gcm_note: Code is unreadable
+            gcm_points: -5
+          - gcm_note: Code is very difficult to understand
+            gcm_points: -3
+          - gcm_note: Code is difficult to understand
+            gcm_points: -1
+      - gc_lower_clamp: 0
+        gc_default: 5
+        gc_max_value: 5
+        gc_upper_clamp: 5
+        gc_title: Documentation
+        marks:
+          - gcm_note: Full Credit
+            gcm_points: 0
+          - gcm_note: No documentation
+            gcm_points: -5
+          - gcm_note: Very little documentation or documentation makes no sense
+            gcm_points: -3
+          - gcm_note: Way too much documentation and/or documentation makes no sense
+            gcm_points: -1
+      - gc_lower_clamp: 0
+        gc_default: 0
+        gc_max_value: 0
+        gc_upper_clamp: 5
+        gc_title: Extra Credit
+        marks:
+          - gcm_note: No Credit
+            gcm_points: 0
+          - gcm_note: Extra credit done poorly
+            gcm_points: 2
+          - gcm_note: Extra credit is acceptable
+            gcm_points: 5
+    eg_submission_due_date: 9996-12-31 23:59:59
+    eg_submission_open_date: 1971-01-01 23:59:59
+    g_grade_due_date: 9998-12-31 23:59:59
+    g_grade_released_date: 9998-12-31 23:59:59
+    g_grade_start_date: 9997-12-31 23:59:59
+    eg_grade_inquiry_start_date: 9999-01-01 23:59:59
+    eg_grade_inquiry_due_date: 9999-01-06 23:59:59
+    eg_has_due_date: true
+    eg_has_release_date: true
+    eg_team_assignment: true
+    eg_max_team_size: 3
+    g_ta_view_start_date: 1970-01-01 23:59:59
+    g_title: Open Team Homework
+    gradeable_config: python_simple_homework
+    g_bucket: homework
 
-- g_id: no_due_date_no_release
-  components:
-  - gc_lower_clamp: 0
-    gc_default: 2
-    gc_max_value: 2
-    gc_upper_clamp: 2
-    gc_title: Component
-    marks:
-      - gcm_note: Full Credit
-        gcm_points: 0
-  eg_submission_due_date: 9997-12-31 23:59:59
-  eg_submission_open_date: 1971-01-01 23:59:59
-  eg_has_due_date: false
-  eg_has_release_date: false
-  g_grade_due_date: 9998-12-31 23:59:59
-  g_grade_released_date: 9999-01-01 23:59:59
-  g_grade_start_date: 9997-12-31 23:59:59
-  eg_grade_inquiry_start_date: 9999-01-01 23:59:59
-  eg_grade_inquiry_due_date: 9999-01-06 23:59:59
-  g_ta_view_start_date: 1970-01-01 23:59:59
-  g_title: No Due Date, No Release Date
-  gradeable_config: python_simple_homework
-  g_bucket: homework
+  - g_id: no_due_date_no_release
+    components:
+      - gc_lower_clamp: 0
+        gc_default: 2
+        gc_max_value: 2
+        gc_upper_clamp: 2
+        gc_title: Component
+        marks:
+          - gcm_note: Full Credit
+            gcm_points: 0
+    eg_submission_due_date: 9997-12-31 23:59:59
+    eg_submission_open_date: 1971-01-01 23:59:59
+    eg_has_due_date: false
+    eg_has_release_date: false
+    g_grade_due_date: 9998-12-31 23:59:59
+    g_grade_released_date: 9999-01-01 23:59:59
+    g_grade_start_date: 9997-12-31 23:59:59
+    eg_grade_inquiry_start_date: 9999-01-01 23:59:59
+    eg_grade_inquiry_due_date: 9999-01-06 23:59:59
+    g_ta_view_start_date: 1970-01-01 23:59:59
+    g_title: No Due Date, No Release Date
+    gradeable_config: python_simple_homework
+    g_bucket: homework
 
-- g_id: grading_team_homework
-  components:
-  - gc_lower_clamp: 0
-    gc_default: 2
-    gc_max_value: 2
-    gc_upper_clamp: 2
-    gc_title: Read Me
-    marks:
-      - gcm_note: Full Credit
-        gcm_points: 0
-      - gcm_note: Minor errors in Read Me
-        gcm_points: -1
-      - gcm_note: Major errors in Read Me or Read Me missing
-        gcm_points: -2
-  - gc_lower_clamp: 0
-    gc_default: 5
-    gc_max_value: 5
-    gc_upper_clamp: 5
-    gc_title: Coding Style
-    marks:
-      - gcm_note: Full Credit
-        gcm_points: 0
-      - gcm_note: Code is unreadable
-        gcm_points: -5
-      - gcm_note: Code is very difficult to understand
-        gcm_points: -3
-      - gcm_note: Code is difficult to understand
-        gcm_points: -1
-  - gc_lower_clamp: 0
-    gc_default: 5
-    gc_max_value: 5
-    gc_upper_clamp: 5
-    gc_title: Documentation
-    marks:
-      - gcm_note: Full Credit
-        gcm_points: 0
-      - gcm_note: No documentation
-        gcm_points: -5
-      - gcm_note: Very little documentation or documentation makes no sense
-        gcm_points: -3
-      - gcm_note: Way too much documentation and/or documentation makes no sense
-        gcm_points: -1
-  - gc_lower_clamp: 0
-    gc_default: 0
-    gc_max_value: 0
-    gc_upper_clamp: 5
-    gc_title: Extra Credit
-    marks: 
-      - gcm_note: No Credit
-        gcm_points: 0
-      - gcm_note: Extra credit done poorly
-        gcm_points: 2
-      - gcm_note: Extra credit is acceptable
-        gcm_points: 5
-  eg_submission_due_date: 1972-01-01 23:59:59
-  eg_submission_open_date: 1971-01-01 23:59:59
-  g_grade_due_date: 9998-12-31 23:59:59
-  g_grade_released_date: 9998-12-31 23:59:59
-  g_grade_start_date: 1973-01-01 23:59:59
-  eg_grade_inquiry_start_date: 9999-01-01 23:59:59
-  eg_grade_inquiry_due_date: 9999-01-06 23:59:59
-  eg_has_due_date: true
-  eg_has_release_date: true
-  eg_team_assignment: true
-  eg_max_team_size: 3
-  g_ta_view_start_date: 1970-01-01 23:59:59
-  g_title: Grading Team Homework
-  gradeable_config: python_simple_homework
-  g_bucket: homework
+  - g_id: open_vcs_homework
+    components:
+      - gc_lower_clamp: 0
+        gc_default: 2
+        gc_max_value: 2
+        gc_upper_clamp: 2
+        gc_title: Read Me
+        marks:
+          - gcm_note: Full Credit
+            gcm_points: 0
+          - gcm_note: Minor errors in Read Me
+            gcm_points: -1
+          - gcm_note: Major errors in Read Me or Read Me missing
+            gcm_points: -2
+      - gc_lower_clamp: 0
+        gc_default: 5
+        gc_max_value: 5
+        gc_upper_clamp: 5
+        gc_title: Coding Style
+        marks:
+          - gcm_note: Full Credit
+            gcm_points: 0
+          - gcm_note: Code is unreadable
+            gcm_points: -5
+          - gcm_note: Code is very difficult to understand
+            gcm_points: -3
+          - gcm_note: Code is difficult to understand
+            gcm_points: -1
+      - gc_lower_clamp: 0
+        gc_default: 5
+        gc_max_value: 5
+        gc_upper_clamp: 5
+        gc_title: Documentation
+        marks:
+          - gcm_note: Full Credit
+            gcm_points: 0
+          - gcm_note: No documentation
+            gcm_points: -5
+          - gcm_note: Very little documentation or documentation makes no sense
+            gcm_points: -3
+          - gcm_note: Way too much documentation and/or documentation makes no sense
+            gcm_points: -1
+      - gc_lower_clamp: 0
+        gc_default: 0
+        gc_max_value: 0
+        gc_upper_clamp: 5
+        gc_title: Extra Credit
+        marks:
+          - gcm_note: No Credit
+            gcm_points: 0
+          - gcm_note: Extra credit done poorly
+            gcm_points: 2
+          - gcm_note: Extra credit is acceptable
+            gcm_points: 5
+    eg_submission_due_date: 9996-12-31 23:59:59
+    eg_submission_open_date: 1971-01-01 23:59:59
+    g_grade_due_date: 9998-12-31 23:59:59
+    g_grade_released_date: 9998-12-31 23:59:59
+    g_grade_start_date: 9997-12-31 23:59:59
+    eg_grade_inquiry_start_date: 9999-01-01 23:59:59
+    eg_grade_inquiry_due_date: 9999-01-06 23:59:59
+    g_ta_view_start_date: 1970-01-01 23:59:59
+    eg_is_repository: true
+    eg_vcs_partial_path: "{$gradeable_id}/{$user_id}"
+    eg_using_subdirectory: false
+    eg_vcs_subdirectory: ""
+    g_title: Open VCS Homework
+    gradeable_config: vcs_submissions
+    g_bucket: homework
 
-- g_id: grading_only_peer_team_homework
-  eg_peer_grading: true
-  components:
-  - gc_lower_clamp: 0
-    gc_is_peer: true
-    gc_default: 2
-    gc_max_value: 2
-    gc_upper_clamp: 2
-    gc_title: Read Me
-    marks:
-      - gcm_note: Full Credit
-        gcm_points: 0
-      - gcm_note: Minor errors in Read Me
-        gcm_points: -1
-      - gcm_note: Major errors in Read Me or Read Me missing
-        gcm_points: -2
-  - gc_lower_clamp: 0
-    gc_default: 5
-    gc_is_peer: true
-    gc_max_value: 5
-    gc_upper_clamp: 5
-    gc_title: Coding Style
-    marks:
-      - gcm_note: Full Credit
-        gcm_points: 0
-      - gcm_note: Code is unreadable
-        gcm_points: -5
-      - gcm_note: Code is very difficult to understand
-        gcm_points: -3
-      - gcm_note: Code is difficult to understand
-        gcm_points: -1
-  - gc_lower_clamp: 0
-    gc_default: 5
-    gc_is_peer: true
-    gc_max_value: 5
-    gc_upper_clamp: 5
-    gc_title: Documentation
-    marks:
-      - gcm_note: Full Credit
-        gcm_points: 0
-      - gcm_note: No documentation
-        gcm_points: -5
-      - gcm_note: Very little documentation or documentation makes no sense
-        gcm_points: -3
-      - gcm_note: Way too much documentation and/or documentation makes no sense
-        gcm_points: -1
-  - gc_lower_clamp: 0
-    gc_default: 0
-    gc_is_peer: true
-    gc_max_value: 0
-    gc_upper_clamp: 5
-    gc_title: Extra Credit
-    marks: 
-      - gcm_note: No Credit
-        gcm_points: 0
-      - gcm_note: Extra credit done poorly
-        gcm_points: 2
-      - gcm_note: Extra credit is acceptable
-        gcm_points: 5
-  eg_submission_due_date: 1972-01-01 23:59:59
-  eg_submission_open_date: 1971-01-01 23:59:59
-  g_grade_due_date: 9998-12-31 23:59:59
-  g_grade_released_date: 9998-12-31 23:59:59
-  g_grade_start_date: 1973-01-01 23:59:59
-  eg_grade_inquiry_start_date: 9999-01-01 23:59:59
-  eg_grade_inquiry_due_date: 9999-01-06 23:59:59
-  eg_has_due_date: true
-  eg_has_release_date: true
-  eg_team_assignment: true
-  eg_max_team_size: 3
-  g_ta_view_start_date: 1970-01-01 23:59:59
-  g_title: Closed Peer Team Homework
-  gradeable_config: python_simple_homework
-  g_bucket: homework
+  - g_id: subdirectory_vcs_homework
+    components:
+      - gc_lower_clamp: 0
+        gc_default: 2
+        gc_max_value: 2
+        gc_upper_clamp: 2
+        gc_title: Read Me
+        marks:
+          - gcm_note: Full Credit
+            gcm_points: 0
+          - gcm_note: Minor errors in Read Me
+            gcm_points: -1
+          - gcm_note: Major errors in Read Me or Read Me missing
+            gcm_points: -2
+      - gc_lower_clamp: 0
+        gc_default: 5
+        gc_max_value: 5
+        gc_upper_clamp: 5
+        gc_title: Coding Style
+        marks:
+          - gcm_note: Full Credit
+            gcm_points: 0
+          - gcm_note: Code is unreadable
+            gcm_points: -5
+          - gcm_note: Code is very difficult to understand
+            gcm_points: -3
+          - gcm_note: Code is difficult to understand
+            gcm_points: -1
+      - gc_lower_clamp: 0
+        gc_default: 5
+        gc_max_value: 5
+        gc_upper_clamp: 5
+        gc_title: Documentation
+        marks:
+          - gcm_note: Full Credit
+            gcm_points: 0
+          - gcm_note: No documentation
+            gcm_points: -5
+          - gcm_note: Very little documentation or documentation makes no sense
+            gcm_points: -3
+          - gcm_note: Way too much documentation and/or documentation makes no sense
+            gcm_points: -1
+      - gc_lower_clamp: 0
+        gc_default: 0
+        gc_max_value: 0
+        gc_upper_clamp: 5
+        gc_title: Extra Credit
+        marks:
+          - gcm_note: No Credit
+            gcm_points: 0
+          - gcm_note: Extra credit done poorly
+            gcm_points: 2
+          - gcm_note: Extra credit is acceptable
+            gcm_points: 5
+    eg_submission_due_date: 9996-12-31 23:59:59
+    eg_submission_open_date: 1971-01-01 23:59:59
+    g_grade_due_date: 9998-12-31 23:59:59
+    g_grade_released_date: 9998-12-31 23:59:59
+    g_grade_start_date: 9997-12-31 23:59:59
+    eg_grade_inquiry_start_date: 9999-01-01 23:59:59
+    eg_grade_inquiry_due_date: 9999-01-06 23:59:59
+    g_ta_view_start_date: 1970-01-01 23:59:59
+    eg_is_repository: true
+    eg_vcs_partial_path: "{$gradeable_id}/{$user_id}"
+    eg_using_subdirectory: true
+    eg_vcs_subdirectory: "src"
+    g_title: Subdirectory VCS Homework
+    gradeable_config: vcs_submissions
+    g_bucket: homework
 
-- g_id: closed_peer_team_homework
-  eg_peer_grading: true
-  components:
-  - gc_lower_clamp: 0
-    gc_default: 2
-    gc_is_peer: true
-    gc_max_value: 2
-    gc_upper_clamp: 2
-    gc_title: Read Me
-    marks:
-      - gcm_note: Full Credit
-        gcm_points: 0
-      - gcm_note: Minor errors in Read Me
-        gcm_points: -1
-      - gcm_note: Major errors in Read Me or Read Me missing
-        gcm_points: -2
-  - gc_lower_clamp: 0
-    gc_default: 5
-    gc_is_peer: true
-    gc_max_value: 5
-    gc_upper_clamp: 5
-    gc_title: Coding Style
-    marks:
-      - gcm_note: Full Credit
-        gcm_points: 0
-      - gcm_note: Code is unreadable
-        gcm_points: -5
-      - gcm_note: Code is very difficult to understand
-        gcm_points: -3
-      - gcm_note: Code is difficult to understand
-        gcm_points: -1
-  - gc_lower_clamp: 0
-    gc_default: 5
-    gc_is_peer: true
-    gc_max_value: 5
-    gc_upper_clamp: 5
-    gc_title: Documentation
-    marks:
-      - gcm_note: Full Credit
-        gcm_points: 0
-      - gcm_note: No documentation
-        gcm_points: -5
-      - gcm_note: Very little documentation or documentation makes no sense
-        gcm_points: -3
-      - gcm_note: Way too much documentation and/or documentation makes no sense
-        gcm_points: -1
-  - gc_lower_clamp: 0
-    gc_default: 0
-    gc_max_value: 0
-    gc_upper_clamp: 5
-    gc_title: Extra Credit
-    marks: 
-      - gcm_note: No Credit
-        gcm_points: 0
-      - gcm_note: Extra credit done poorly
-        gcm_points: 2
-      - gcm_note: Extra credit is acceptable
-        gcm_points: 5
-  eg_submission_due_date: 1972-01-01 23:59:59
-  eg_submission_open_date: 1971-01-01 23:59:59
-  g_grade_due_date: 9998-12-31 23:59:59
-  g_grade_released_date: 9998-12-31 23:59:59
-  eg_grade_inquiry_start_date: 9999-01-01 23:59:59
-  eg_grade_inquiry_due_date: 9999-01-06 23:59:59
-  eg_has_due_date: true
-  eg_has_release_date: true
-  g_grade_start_date: 9997-12-31 23:59:59
-  eg_team_assignment: true
-  eg_max_team_size: 3
-  g_ta_view_start_date: 1970-01-01 23:59:59
-  g_title: Closed Peer Team Homework
-  gradeable_config: cpp_hidden_tests
-  g_bucket: homework
+  - g_id: grading_team_homework
+    components:
+      - gc_lower_clamp: 0
+        gc_default: 2
+        gc_max_value: 2
+        gc_upper_clamp: 2
+        gc_title: Read Me
+        marks:
+          - gcm_note: Full Credit
+            gcm_points: 0
+          - gcm_note: Minor errors in Read Me
+            gcm_points: -1
+          - gcm_note: Major errors in Read Me or Read Me missing
+            gcm_points: -2
+      - gc_lower_clamp: 0
+        gc_default: 5
+        gc_max_value: 5
+        gc_upper_clamp: 5
+        gc_title: Coding Style
+        marks:
+          - gcm_note: Full Credit
+            gcm_points: 0
+          - gcm_note: Code is unreadable
+            gcm_points: -5
+          - gcm_note: Code is very difficult to understand
+            gcm_points: -3
+          - gcm_note: Code is difficult to understand
+            gcm_points: -1
+      - gc_lower_clamp: 0
+        gc_default: 5
+        gc_max_value: 5
+        gc_upper_clamp: 5
+        gc_title: Documentation
+        marks:
+          - gcm_note: Full Credit
+            gcm_points: 0
+          - gcm_note: No documentation
+            gcm_points: -5
+          - gcm_note: Very little documentation or documentation makes no sense
+            gcm_points: -3
+          - gcm_note: Way too much documentation and/or documentation makes no sense
+            gcm_points: -1
+      - gc_lower_clamp: 0
+        gc_default: 0
+        gc_max_value: 0
+        gc_upper_clamp: 5
+        gc_title: Extra Credit
+        marks:
+          - gcm_note: No Credit
+            gcm_points: 0
+          - gcm_note: Extra credit done poorly
+            gcm_points: 2
+          - gcm_note: Extra credit is acceptable
+            gcm_points: 5
+    eg_submission_due_date: 1972-01-01 23:59:59
+    eg_submission_open_date: 1971-01-01 23:59:59
+    g_grade_due_date: 9998-12-31 23:59:59
+    g_grade_released_date: 9998-12-31 23:59:59
+    g_grade_start_date: 1973-01-01 23:59:59
+    eg_grade_inquiry_start_date: 9999-01-01 23:59:59
+    eg_grade_inquiry_due_date: 9999-01-06 23:59:59
+    eg_has_due_date: true
+    eg_has_release_date: true
+    eg_team_assignment: true
+    eg_max_team_size: 3
+    g_ta_view_start_date: 1970-01-01 23:59:59
+    g_title: Grading Team Homework
+    gradeable_config: python_simple_homework
+    g_bucket: homework
 
-- g_id: grading_pdf_peer_homework
-  eg_peer_grading: true
-  components:
-  - gc_lower_clamp: 0
-    gc_is_peer: true
-    gc_default: 2
-    gc_max_value: 2
-    gc_upper_clamp: 2
-    gc_title: Read Me
-    marks:
-      - gcm_note: Full Credit
-        gcm_points: 0
-      - gcm_note: Minor errors in Read Me
-        gcm_points: -1
-      - gcm_note: Major errors in Read Me or Read Me missing
-        gcm_points: -2
-  - gc_lower_clamp: 0
-    gc_default: 5
-    gc_is_peer: true
-    gc_max_value: 5
-    gc_upper_clamp: 5
-    gc_title: Coding Style
-    marks:
-      - gcm_note: Full Credit
-        gcm_points: 0
-      - gcm_note: Code is unreadable
-        gcm_points: -5
-      - gcm_note: Code is very difficult to understand
-        gcm_points: -3
-      - gcm_note: Code is difficult to understand
-        gcm_points: -1
-  - gc_lower_clamp: 0
-    gc_default: 5
-    gc_is_peer: true
-    gc_max_value: 5
-    gc_upper_clamp: 5
-    gc_title: Documentation
-    marks:
-      - gcm_note: Full Credit
-        gcm_points: 0
-      - gcm_note: No documentation
-        gcm_points: -5
-      - gcm_note: Very little documentation or documentation makes no sense
-        gcm_points: -3
-      - gcm_note: Way too much documentation and/or documentation makes no sense
-        gcm_points: -1
-  - gc_lower_clamp: 0
-    gc_default: 0
-    gc_is_peer: true
-    gc_max_value: 0
-    gc_upper_clamp: 5
-    gc_title: Extra Credit
-    marks: 
-      - gcm_note: No Credit
-        gcm_points: 0
-      - gcm_note: Extra credit done poorly
-        gcm_points: 2
-      - gcm_note: Extra credit is acceptable
-        gcm_points: 5
-  eg_submission_due_date: 1972-01-01 23:59:59
-  eg_submission_open_date: 1971-01-01 23:59:59
-  g_grade_due_date: 1974-01-01 23:59:59
-  g_grade_released_date: 1974-01-01 23:59:59
-  eg_grade_inquiry_start_date: 1974-01-08 23:59:59
-  eg_grade_inquiry_due_date: 1974-01-13 23:59:59
-  eg_has_due_date: true
-  eg_has_release_date: true
-  g_grade_start_date: 1973-01-01 23:59:59
-  g_ta_view_start_date: 1970-01-01 23:59:59
-  g_title: Released Peer PDF Homework
-  gradeable_config: multiple_pdf_annotations
-  g_bucket: homework
-  g_grader_assignment_method: 2
-  eg_annotated_pdf: true
-  
-- g_id: grading_pdf_peer_team_homework
-  eg_peer_grading: true
-  components:
-  - gc_lower_clamp: 0
-    gc_is_peer: true
-    gc_default: 2
-    gc_max_value: 2
-    gc_upper_clamp: 2
-    gc_title: Read Me
-    marks:
-      - gcm_note: Full Credit
-        gcm_points: 0
-      - gcm_note: Minor errors in Read Me
-        gcm_points: -1
-      - gcm_note: Major errors in Read Me or Read Me missing
-        gcm_points: -2
-  - gc_lower_clamp: 0
-    gc_default: 5
-    gc_is_peer: true
-    gc_max_value: 5
-    gc_upper_clamp: 5
-    gc_title: Coding Style
-    marks:
-      - gcm_note: Full Credit
-        gcm_points: 0
-      - gcm_note: Code is unreadable
-        gcm_points: -5
-      - gcm_note: Code is very difficult to understand
-        gcm_points: -3
-      - gcm_note: Code is difficult to understand
-        gcm_points: -1
-  - gc_lower_clamp: 0
-    gc_default: 5
-    gc_is_peer: true
-    gc_max_value: 5
-    gc_upper_clamp: 5
-    gc_title: Documentation
-    marks:
-      - gcm_note: Full Credit
-        gcm_points: 0
-      - gcm_note: No documentation
-        gcm_points: -5
-      - gcm_note: Very little documentation or documentation makes no sense
-        gcm_points: -3
-      - gcm_note: Way too much documentation and/or documentation makes no sense
-        gcm_points: -1
-  - gc_lower_clamp: 0
-    gc_default: 0
-    gc_is_peer: true
-    gc_max_value: 0
-    gc_upper_clamp: 5
-    gc_title: Extra Credit
-    marks: 
-      - gcm_note: No Credit
-        gcm_points: 0
-      - gcm_note: Extra credit done poorly
-        gcm_points: 2
-      - gcm_note: Extra credit is acceptable
-        gcm_points: 5
-  eg_submission_due_date: 1972-01-01 23:59:59
-  eg_submission_open_date: 1971-01-01 23:59:59
-  g_grade_due_date: 1974-01-01 23:59:59
-  g_grade_released_date: 1974-01-01 23:59:59
-  eg_grade_inquiry_start_date: 1974-01-08 23:59:59
-  eg_grade_inquiry_due_date: 1974-01-13 23:59:59
-  eg_has_due_date: true
-  eg_has_release_date: true
-  eg_team_assignment: true
-  eg_max_team_size: 3
-  g_grade_start_date: 1973-01-01 23:59:59
-  g_ta_view_start_date: 1970-01-01 23:59:59
-  g_title: Released Peer Team PDF Homework
-  gradeable_config: multiple_pdf_annotations
-  g_bucket: homework
-  g_grader_assignment_method: 2
-  eg_annotated_pdf: true
+  - g_id: grading_only_peer_team_homework
+    eg_peer_grading: true
+    components:
+      - gc_lower_clamp: 0
+        gc_is_peer: true
+        gc_default: 2
+        gc_max_value: 2
+        gc_upper_clamp: 2
+        gc_title: Read Me
+        marks:
+          - gcm_note: Full Credit
+            gcm_points: 0
+          - gcm_note: Minor errors in Read Me
+            gcm_points: -1
+          - gcm_note: Major errors in Read Me or Read Me missing
+            gcm_points: -2
+      - gc_lower_clamp: 0
+        gc_default: 5
+        gc_is_peer: true
+        gc_max_value: 5
+        gc_upper_clamp: 5
+        gc_title: Coding Style
+        marks:
+          - gcm_note: Full Credit
+            gcm_points: 0
+          - gcm_note: Code is unreadable
+            gcm_points: -5
+          - gcm_note: Code is very difficult to understand
+            gcm_points: -3
+          - gcm_note: Code is difficult to understand
+            gcm_points: -1
+      - gc_lower_clamp: 0
+        gc_default: 5
+        gc_is_peer: true
+        gc_max_value: 5
+        gc_upper_clamp: 5
+        gc_title: Documentation
+        marks:
+          - gcm_note: Full Credit
+            gcm_points: 0
+          - gcm_note: No documentation
+            gcm_points: -5
+          - gcm_note: Very little documentation or documentation makes no sense
+            gcm_points: -3
+          - gcm_note: Way too much documentation and/or documentation makes no sense
+            gcm_points: -1
+      - gc_lower_clamp: 0
+        gc_default: 0
+        gc_is_peer: true
+        gc_max_value: 0
+        gc_upper_clamp: 5
+        gc_title: Extra Credit
+        marks:
+          - gcm_note: No Credit
+            gcm_points: 0
+          - gcm_note: Extra credit done poorly
+            gcm_points: 2
+          - gcm_note: Extra credit is acceptable
+            gcm_points: 5
+    eg_submission_due_date: 1972-01-01 23:59:59
+    eg_submission_open_date: 1971-01-01 23:59:59
+    g_grade_due_date: 9998-12-31 23:59:59
+    g_grade_released_date: 9998-12-31 23:59:59
+    g_grade_start_date: 1973-01-01 23:59:59
+    eg_grade_inquiry_start_date: 9999-01-01 23:59:59
+    eg_grade_inquiry_due_date: 9999-01-06 23:59:59
+    eg_has_due_date: true
+    eg_has_release_date: true
+    eg_team_assignment: true
+    eg_max_team_size: 3
+    g_ta_view_start_date: 1970-01-01 23:59:59
+    g_title: Closed Peer Team Homework
+    gradeable_config: python_simple_homework
+    g_bucket: homework
 
-- g_id: closed_team_homework
-  eg_peer_grading: true
-  components:
-  - gc_lower_clamp: 0
-    gc_default: 2
-    gc_max_value: 2
-    gc_upper_clamp: 2
-    gc_title: Read Me
-    marks:
-      - gcm_note: Full Credit
-        gcm_points: 0
-      - gcm_note: Minor errors in Read Me
-        gcm_points: -1
-      - gcm_note: Major errors in Read Me or Read Me missing
-        gcm_points: -2
-  - gc_lower_clamp: 0
-    gc_default: 5
-    gc_max_value: 5
-    gc_upper_clamp: 5
-    gc_title: Coding Style
-    marks:
-      - gcm_note: Full Credit
-        gcm_points: 0
-      - gcm_note: Code is unreadable
-        gcm_points: -5
-      - gcm_note: Code is very difficult to understand
-        gcm_points: -3
-      - gcm_note: Code is difficult to understand
-        gcm_points: -1
-  - gc_lower_clamp: 0
-    gc_default: 5
-    gc_max_value: 5
-    gc_upper_clamp: 5
-    gc_title: Documentation
-    marks:
-      - gcm_note: Full Credit
-        gcm_points: 0
-      - gcm_note: No documentation
-        gcm_points: -5
-      - gcm_note: Very little documentation or documentation makes no sense
-        gcm_points: -3
-      - gcm_note: Way too much documentation and/or documentation makes no sense
-        gcm_points: -1
-  - gc_lower_clamp: 0
-    gc_default: 0
-    gc_max_value: 0
-    gc_upper_clamp: 5
-    gc_title: Extra Credit
-    marks: 
-      - gcm_note: No Credit
-        gcm_points: 0
-      - gcm_note: Extra credit done poorly
-        gcm_points: 2
-      - gcm_note: Extra credit is acceptable
-        gcm_points: 5
-  eg_submission_due_date: 1972-01-01 23:59:59
-  eg_submission_open_date: 1971-01-01 23:59:59
-  g_grade_due_date: 9998-12-31 23:59:59
-  g_grade_released_date: 9998-12-31 23:59:59
-  eg_grade_inquiry_start_date: 9999-01-01 23:59:59
-  eg_grade_inquiry_due_date: 9999-01-06 23:59:59
-  eg_has_due_date: true
-  eg_has_release_date: true
-  g_grade_start_date: 9997-12-31 23:59:59
-  eg_team_assignment: true
-  eg_max_team_size: 3
-  g_ta_view_start_date: 1970-01-01 23:59:59
-  g_title: Closed Team Homework
-  gradeable_config: cpp_hidden_tests
-  g_bucket: homework
+  - g_id: closed_peer_team_homework
+    eg_peer_grading: true
+    components:
+      - gc_lower_clamp: 0
+        gc_default: 2
+        gc_is_peer: true
+        gc_max_value: 2
+        gc_upper_clamp: 2
+        gc_title: Read Me
+        marks:
+          - gcm_note: Full Credit
+            gcm_points: 0
+          - gcm_note: Minor errors in Read Me
+            gcm_points: -1
+          - gcm_note: Major errors in Read Me or Read Me missing
+            gcm_points: -2
+      - gc_lower_clamp: 0
+        gc_default: 5
+        gc_is_peer: true
+        gc_max_value: 5
+        gc_upper_clamp: 5
+        gc_title: Coding Style
+        marks:
+          - gcm_note: Full Credit
+            gcm_points: 0
+          - gcm_note: Code is unreadable
+            gcm_points: -5
+          - gcm_note: Code is very difficult to understand
+            gcm_points: -3
+          - gcm_note: Code is difficult to understand
+            gcm_points: -1
+      - gc_lower_clamp: 0
+        gc_default: 5
+        gc_is_peer: true
+        gc_max_value: 5
+        gc_upper_clamp: 5
+        gc_title: Documentation
+        marks:
+          - gcm_note: Full Credit
+            gcm_points: 0
+          - gcm_note: No documentation
+            gcm_points: -5
+          - gcm_note: Very little documentation or documentation makes no sense
+            gcm_points: -3
+          - gcm_note: Way too much documentation and/or documentation makes no sense
+            gcm_points: -1
+      - gc_lower_clamp: 0
+        gc_default: 0
+        gc_max_value: 0
+        gc_upper_clamp: 5
+        gc_title: Extra Credit
+        marks:
+          - gcm_note: No Credit
+            gcm_points: 0
+          - gcm_note: Extra credit done poorly
+            gcm_points: 2
+          - gcm_note: Extra credit is acceptable
+            gcm_points: 5
+    eg_submission_due_date: 1972-01-01 23:59:59
+    eg_submission_open_date: 1971-01-01 23:59:59
+    g_grade_due_date: 9998-12-31 23:59:59
+    g_grade_released_date: 9998-12-31 23:59:59
+    eg_grade_inquiry_start_date: 9999-01-01 23:59:59
+    eg_grade_inquiry_due_date: 9999-01-06 23:59:59
+    eg_has_due_date: true
+    eg_has_release_date: true
+    g_grade_start_date: 9997-12-31 23:59:59
+    eg_team_assignment: true
+    eg_max_team_size: 3
+    g_ta_view_start_date: 1970-01-01 23:59:59
+    g_title: Closed Peer Team Homework
+    gradeable_config: cpp_hidden_tests
+    g_bucket: homework
 
-- g_id: closed_homework
-  components:
-  - gc_lower_clamp: 0
-    gc_default: 2
-    gc_max_value: 2
-    gc_upper_clamp: 2
-    gc_title: Read Me
-    marks:
-      - gcm_note: Full Credit
-        gcm_points: 0
-      - gcm_note: Minor errors in Read Me
-        gcm_points: -1
-      - gcm_note: Major errors in Read Me or Read Me missing
-        gcm_points: -2
-  - gc_lower_clamp: 0
-    gc_default: 5
-    gc_max_value: 5
-    gc_upper_clamp: 5
-    gc_title: Coding Style
-    marks:
-      - gcm_note: Full Credit
-        gcm_points: 0
-      - gcm_note: Code is unreadable
-        gcm_points: -5
-      - gcm_note: Code is very difficult to understand
-        gcm_points: -3
-      - gcm_note: Code is difficult to understand
-        gcm_points: -1
-  - gc_lower_clamp: 0
-    gc_default: 5
-    gc_max_value: 5
-    gc_upper_clamp: 5
-    gc_title: Documentation
-    marks:
-      - gcm_note: Full Credit
-        gcm_points: 0
-      - gcm_note: No documentation
-        gcm_points: -5
-      - gcm_note: Very little documentation or documentation makes no sense
-        gcm_points: -3
-      - gcm_note: Way too much documentation and/or documentation makes no sense
-        gcm_points: -1
-  - gc_lower_clamp: 0
-    gc_default: 0
-    gc_max_value: 0
-    gc_upper_clamp: 5
-    gc_title: Extra Credit
-    marks: 
-      - gcm_note: No Credit
-        gcm_points: 0
-      - gcm_note: Extra credit done poorly
-        gcm_points: 2
-      - gcm_note: Extra credit is acceptable
-        gcm_points: 5
-  eg_submission_due_date: 1972-01-01 23:59:59
-  eg_submission_open_date: 1971-01-01 23:59:59
-  g_grade_due_date: 9998-12-31 23:59:59
-  g_grade_released_date: 9998-12-31 23:59:59
-  eg_grade_inquiry_start_date: 9999-01-01 23:59:59
-  eg_grade_inquiry_due_date: 9999-01-06 23:59:59
-  eg_has_due_date: true
-  eg_has_release_date: true
-  g_grade_start_date: 9997-12-31 23:59:59
-  g_ta_view_start_date: 1970-01-01 23:59:59
-  g_title: Closed Homework
-  gradeable_config: python_simple_homework
-  g_bucket: homework
+  - g_id: grading_pdf_peer_homework
+    eg_peer_grading: true
+    components:
+      - gc_lower_clamp: 0
+        gc_is_peer: true
+        gc_default: 2
+        gc_max_value: 2
+        gc_upper_clamp: 2
+        gc_title: Read Me
+        marks:
+          - gcm_note: Full Credit
+            gcm_points: 0
+          - gcm_note: Minor errors in Read Me
+            gcm_points: -1
+          - gcm_note: Major errors in Read Me or Read Me missing
+            gcm_points: -2
+      - gc_lower_clamp: 0
+        gc_default: 5
+        gc_is_peer: true
+        gc_max_value: 5
+        gc_upper_clamp: 5
+        gc_title: Coding Style
+        marks:
+          - gcm_note: Full Credit
+            gcm_points: 0
+          - gcm_note: Code is unreadable
+            gcm_points: -5
+          - gcm_note: Code is very difficult to understand
+            gcm_points: -3
+          - gcm_note: Code is difficult to understand
+            gcm_points: -1
+      - gc_lower_clamp: 0
+        gc_default: 5
+        gc_is_peer: true
+        gc_max_value: 5
+        gc_upper_clamp: 5
+        gc_title: Documentation
+        marks:
+          - gcm_note: Full Credit
+            gcm_points: 0
+          - gcm_note: No documentation
+            gcm_points: -5
+          - gcm_note: Very little documentation or documentation makes no sense
+            gcm_points: -3
+          - gcm_note: Way too much documentation and/or documentation makes no sense
+            gcm_points: -1
+      - gc_lower_clamp: 0
+        gc_default: 0
+        gc_is_peer: true
+        gc_max_value: 0
+        gc_upper_clamp: 5
+        gc_title: Extra Credit
+        marks:
+          - gcm_note: No Credit
+            gcm_points: 0
+          - gcm_note: Extra credit done poorly
+            gcm_points: 2
+          - gcm_note: Extra credit is acceptable
+            gcm_points: 5
+    eg_submission_due_date: 1972-01-01 23:59:59
+    eg_submission_open_date: 1971-01-01 23:59:59
+    g_grade_due_date: 1974-01-01 23:59:59
+    g_grade_released_date: 1974-01-01 23:59:59
+    eg_grade_inquiry_start_date: 1974-01-08 23:59:59
+    eg_grade_inquiry_due_date: 1974-01-13 23:59:59
+    eg_has_due_date: true
+    eg_has_release_date: true
+    g_grade_start_date: 1973-01-01 23:59:59
+    g_ta_view_start_date: 1970-01-01 23:59:59
+    g_title: Released Peer PDF Homework
+    gradeable_config: multiple_pdf_annotations
+    g_bucket: homework
+    g_grader_assignment_method: 2
+    eg_annotated_pdf: true
 
-- g_id: grading_homework
-  components:
-  - gc_lower_clamp: 0
-    gc_default: 2
-    gc_max_value: 2
-    gc_upper_clamp: 2
-    gc_title: Read Me
-    marks:
-      - gcm_note: Full Credit
-        gcm_points: 0
-      - gcm_note: Minor errors in Read Me
-        gcm_points: -1
-      - gcm_note: Major errors in Read Me or Read Me missing
-        gcm_points: -2
-  - gc_lower_clamp: 0
-    gc_default: 5
-    gc_max_value: 5
-    gc_upper_clamp: 5
-    gc_title: Coding Style
-    marks:
-      - gcm_note: Full Credit
-        gcm_points: 0
-      - gcm_note: Code is unreadable
-        gcm_points: -5
-      - gcm_note: Code is very difficult to understand
-        gcm_points: -3
-      - gcm_note: Code is difficult to understand
-        gcm_points: -1
-  - gc_lower_clamp: 0
-    gc_default: 5
-    gc_max_value: 5
-    gc_upper_clamp: 5
-    gc_title: Documentation
-    marks:
-      - gcm_note: Full Credit
-        gcm_points: 0
-      - gcm_note: No documentation
-        gcm_points: -5
-      - gcm_note: Very little documentation or documentation makes no sense
-        gcm_points: -3
-      - gcm_note: Way too much documentation and/or documentation makes no sense
-        gcm_points: -1
-  - gc_lower_clamp: 0
-    gc_default: 0
-    gc_max_value: 0
-    gc_upper_clamp: 5
-    gc_title: Extra Credit
-    marks: 
-      - gcm_note: No Credit
-        gcm_points: 0
-      - gcm_note: Extra credit done poorly
-        gcm_points: 2
-      - gcm_note: Extra credit is acceptable
-        gcm_points: 5
-  eg_submission_due_date: 1972-01-01 23:59:59
-  eg_submission_open_date: 1971-01-01 23:59:59
-  g_grade_due_date: 9998-12-31 23:59:59
-  g_grade_released_date: 9998-12-31 23:59:59
-  eg_grade_inquiry_start_date: 9999-01-01 23:59:59
-  eg_grade_inquiry_due_date: 9999-01-06 23:59:59
-  eg_has_due_date: true
-  eg_has_release_date: true
-  g_grade_start_date: 1973-01-01 23:59:59
-  g_ta_view_start_date: 1970-01-01 23:59:59
-  g_title: Grading Homework
-  gradeable_config: python_simple_homework
-  g_bucket: homework
+  - g_id: grading_pdf_peer_team_homework
+    eg_peer_grading: true
+    components:
+      - gc_lower_clamp: 0
+        gc_is_peer: true
+        gc_default: 2
+        gc_max_value: 2
+        gc_upper_clamp: 2
+        gc_title: Read Me
+        marks:
+          - gcm_note: Full Credit
+            gcm_points: 0
+          - gcm_note: Minor errors in Read Me
+            gcm_points: -1
+          - gcm_note: Major errors in Read Me or Read Me missing
+            gcm_points: -2
+      - gc_lower_clamp: 0
+        gc_default: 5
+        gc_is_peer: true
+        gc_max_value: 5
+        gc_upper_clamp: 5
+        gc_title: Coding Style
+        marks:
+          - gcm_note: Full Credit
+            gcm_points: 0
+          - gcm_note: Code is unreadable
+            gcm_points: -5
+          - gcm_note: Code is very difficult to understand
+            gcm_points: -3
+          - gcm_note: Code is difficult to understand
+            gcm_points: -1
+      - gc_lower_clamp: 0
+        gc_default: 5
+        gc_is_peer: true
+        gc_max_value: 5
+        gc_upper_clamp: 5
+        gc_title: Documentation
+        marks:
+          - gcm_note: Full Credit
+            gcm_points: 0
+          - gcm_note: No documentation
+            gcm_points: -5
+          - gcm_note: Very little documentation or documentation makes no sense
+            gcm_points: -3
+          - gcm_note: Way too much documentation and/or documentation makes no sense
+            gcm_points: -1
+      - gc_lower_clamp: 0
+        gc_default: 0
+        gc_is_peer: true
+        gc_max_value: 0
+        gc_upper_clamp: 5
+        gc_title: Extra Credit
+        marks:
+          - gcm_note: No Credit
+            gcm_points: 0
+          - gcm_note: Extra credit done poorly
+            gcm_points: 2
+          - gcm_note: Extra credit is acceptable
+            gcm_points: 5
+    eg_submission_due_date: 1972-01-01 23:59:59
+    eg_submission_open_date: 1971-01-01 23:59:59
+    g_grade_due_date: 1974-01-01 23:59:59
+    g_grade_released_date: 1974-01-01 23:59:59
+    eg_grade_inquiry_start_date: 1974-01-08 23:59:59
+    eg_grade_inquiry_due_date: 1974-01-13 23:59:59
+    eg_has_due_date: true
+    eg_has_release_date: true
+    eg_team_assignment: true
+    eg_max_team_size: 3
+    g_grade_start_date: 1973-01-01 23:59:59
+    g_ta_view_start_date: 1970-01-01 23:59:59
+    g_title: Released Peer Team PDF Homework
+    gradeable_config: multiple_pdf_annotations
+    g_bucket: homework
+    g_grader_assignment_method: 2
+    eg_annotated_pdf: true
 
-- g_id: grades_released_homework
-  components:
-  - gc_lower_clamp: 0
-    gc_default: 5
-    gc_max_value: 5
-    gc_upper_clamp: 5
-    gc_title: Question 1
-  - gc_is_extra_credit: true
-    gc_lower_clamp: 0
-    gc_default: 5
-    gc_max_value: 5
-    gc_upper_clamp: 5
-    gc_title: Question 2
-  eg_submission_due_date: 1972-01-01 23:59:59
-  eg_submission_open_date: 1971-01-01 23:59:59
-  g_grade_due_date: 1974-01-01 23:59:59
-  g_grade_released_date: 1974-01-01 23:59:59
-  eg_grade_inquiry_start_date: 1974-01-01 23:59:59
-  eg_grade_inquiry_due_date: 1974-01-08 23:59:59
-  eg_has_due_date: true
-  eg_has_release_date: true
-  g_grade_start_date: 1973-01-01 23:59:59
-  g_ta_view_start_date: 1970-01-01 23:59:59
-  g_title: Grades Released Homework
-  gradeable_config: python_simple_homework
-  g_bucket: homework
+  - g_id: closed_team_homework
+    eg_peer_grading: true
+    components:
+      - gc_lower_clamp: 0
+        gc_default: 2
+        gc_max_value: 2
+        gc_upper_clamp: 2
+        gc_title: Read Me
+        marks:
+          - gcm_note: Full Credit
+            gcm_points: 0
+          - gcm_note: Minor errors in Read Me
+            gcm_points: -1
+          - gcm_note: Major errors in Read Me or Read Me missing
+            gcm_points: -2
+      - gc_lower_clamp: 0
+        gc_default: 5
+        gc_max_value: 5
+        gc_upper_clamp: 5
+        gc_title: Coding Style
+        marks:
+          - gcm_note: Full Credit
+            gcm_points: 0
+          - gcm_note: Code is unreadable
+            gcm_points: -5
+          - gcm_note: Code is very difficult to understand
+            gcm_points: -3
+          - gcm_note: Code is difficult to understand
+            gcm_points: -1
+      - gc_lower_clamp: 0
+        gc_default: 5
+        gc_max_value: 5
+        gc_upper_clamp: 5
+        gc_title: Documentation
+        marks:
+          - gcm_note: Full Credit
+            gcm_points: 0
+          - gcm_note: No documentation
+            gcm_points: -5
+          - gcm_note: Very little documentation or documentation makes no sense
+            gcm_points: -3
+          - gcm_note: Way too much documentation and/or documentation makes no sense
+            gcm_points: -1
+      - gc_lower_clamp: 0
+        gc_default: 0
+        gc_max_value: 0
+        gc_upper_clamp: 5
+        gc_title: Extra Credit
+        marks:
+          - gcm_note: No Credit
+            gcm_points: 0
+          - gcm_note: Extra credit done poorly
+            gcm_points: 2
+          - gcm_note: Extra credit is acceptable
+            gcm_points: 5
+    eg_submission_due_date: 1972-01-01 23:59:59
+    eg_submission_open_date: 1971-01-01 23:59:59
+    g_grade_due_date: 9998-12-31 23:59:59
+    g_grade_released_date: 9998-12-31 23:59:59
+    eg_grade_inquiry_start_date: 9999-01-01 23:59:59
+    eg_grade_inquiry_due_date: 9999-01-06 23:59:59
+    eg_has_due_date: true
+    eg_has_release_date: true
+    g_grade_start_date: 9997-12-31 23:59:59
+    eg_team_assignment: true
+    eg_max_team_size: 3
+    g_ta_view_start_date: 1970-01-01 23:59:59
+    g_title: Closed Team Homework
+    gradeable_config: cpp_hidden_tests
+    g_bucket: homework
 
-- g_id: future_no_tas_lab
-  components:
-  - gc_title: Question 1
-    gc_lower_clamp: 0
-    gc_default: 0
-    gc_max_value: 1
-    gc_upper_clamp: 1
-  - gc_title: Question 2
-    gc_lower_clamp: 0
-    gc_default: 0
-    gc_max_value: 0
-    gc_upper_clamp: 1
-  g_grade_due_date: 9998-12-31 23:59:59
-  g_grade_released_date: 9998-12-31 23:59:59
-  g_grade_start_date: 9997-12-31 23:59:59
-  g_ta_view_start_date: 9996-12-31 23:59:59
-  g_title: Future (No TAs) Lab
-  g_type: 1
-  g_bucket: lab
+  - g_id: closed_homework
+    components:
+      - gc_lower_clamp: 0
+        gc_default: 2
+        gc_max_value: 2
+        gc_upper_clamp: 2
+        gc_title: Read Me
+        marks:
+          - gcm_note: Full Credit
+            gcm_points: 0
+          - gcm_note: Minor errors in Read Me
+            gcm_points: -1
+          - gcm_note: Major errors in Read Me or Read Me missing
+            gcm_points: -2
+      - gc_lower_clamp: 0
+        gc_default: 5
+        gc_max_value: 5
+        gc_upper_clamp: 5
+        gc_title: Coding Style
+        marks:
+          - gcm_note: Full Credit
+            gcm_points: 0
+          - gcm_note: Code is unreadable
+            gcm_points: -5
+          - gcm_note: Code is very difficult to understand
+            gcm_points: -3
+          - gcm_note: Code is difficult to understand
+            gcm_points: -1
+      - gc_lower_clamp: 0
+        gc_default: 5
+        gc_max_value: 5
+        gc_upper_clamp: 5
+        gc_title: Documentation
+        marks:
+          - gcm_note: Full Credit
+            gcm_points: 0
+          - gcm_note: No documentation
+            gcm_points: -5
+          - gcm_note: Very little documentation or documentation makes no sense
+            gcm_points: -3
+          - gcm_note: Way too much documentation and/or documentation makes no sense
+            gcm_points: -1
+      - gc_lower_clamp: 0
+        gc_default: 0
+        gc_max_value: 0
+        gc_upper_clamp: 5
+        gc_title: Extra Credit
+        marks:
+          - gcm_note: No Credit
+            gcm_points: 0
+          - gcm_note: Extra credit done poorly
+            gcm_points: 2
+          - gcm_note: Extra credit is acceptable
+            gcm_points: 5
+    eg_submission_due_date: 1972-01-01 23:59:59
+    eg_submission_open_date: 1971-01-01 23:59:59
+    g_grade_due_date: 9998-12-31 23:59:59
+    g_grade_released_date: 9998-12-31 23:59:59
+    eg_grade_inquiry_start_date: 9999-01-01 23:59:59
+    eg_grade_inquiry_due_date: 9999-01-06 23:59:59
+    eg_has_due_date: true
+    eg_has_release_date: true
+    g_grade_start_date: 9997-12-31 23:59:59
+    g_ta_view_start_date: 1970-01-01 23:59:59
+    g_title: Closed Homework
+    gradeable_config: python_simple_homework
+    g_bucket: homework
 
-- g_id: future_tas_lab
-  components:
-  - gc_title: Question 1
-    gc_lower_clamp: 0
-    gc_default: 0
-    gc_max_value: 1
-    gc_upper_clamp: 1
-  - gc_title: Question 2
-    gc_lower_clamp: 0
-    gc_default: 0
-    gc_max_value: 0
-    gc_upper_clamp: 1
-  g_grade_due_date: 9998-12-31 23:59:59
-  g_grade_released_date: 9998-12-31 23:59:59
-  g_grade_start_date: 9997-12-31 23:59:59
-  g_ta_view_start_date: 1970-01-01 23:59:59
-  g_title: Future (TAs) Lab
-  g_type: 1
-  g_bucket: lab
+  - g_id: grading_homework
+    components:
+      - gc_lower_clamp: 0
+        gc_default: 2
+        gc_max_value: 2
+        gc_upper_clamp: 2
+        gc_title: Read Me
+        marks:
+          - gcm_note: Full Credit
+            gcm_points: 0
+          - gcm_note: Minor errors in Read Me
+            gcm_points: -1
+          - gcm_note: Major errors in Read Me or Read Me missing
+            gcm_points: -2
+      - gc_lower_clamp: 0
+        gc_default: 5
+        gc_max_value: 5
+        gc_upper_clamp: 5
+        gc_title: Coding Style
+        marks:
+          - gcm_note: Full Credit
+            gcm_points: 0
+          - gcm_note: Code is unreadable
+            gcm_points: -5
+          - gcm_note: Code is very difficult to understand
+            gcm_points: -3
+          - gcm_note: Code is difficult to understand
+            gcm_points: -1
+      - gc_lower_clamp: 0
+        gc_default: 5
+        gc_max_value: 5
+        gc_upper_clamp: 5
+        gc_title: Documentation
+        marks:
+          - gcm_note: Full Credit
+            gcm_points: 0
+          - gcm_note: No documentation
+            gcm_points: -5
+          - gcm_note: Very little documentation or documentation makes no sense
+            gcm_points: -3
+          - gcm_note: Way too much documentation and/or documentation makes no sense
+            gcm_points: -1
+      - gc_lower_clamp: 0
+        gc_default: 0
+        gc_max_value: 0
+        gc_upper_clamp: 5
+        gc_title: Extra Credit
+        marks:
+          - gcm_note: No Credit
+            gcm_points: 0
+          - gcm_note: Extra credit done poorly
+            gcm_points: 2
+          - gcm_note: Extra credit is acceptable
+            gcm_points: 5
+    eg_submission_due_date: 1972-01-01 23:59:59
+    eg_submission_open_date: 1971-01-01 23:59:59
+    g_grade_due_date: 9998-12-31 23:59:59
+    g_grade_released_date: 9998-12-31 23:59:59
+    eg_grade_inquiry_start_date: 9999-01-01 23:59:59
+    eg_grade_inquiry_due_date: 9999-01-06 23:59:59
+    eg_has_due_date: true
+    eg_has_release_date: true
+    g_grade_start_date: 1973-01-01 23:59:59
+    g_ta_view_start_date: 1970-01-01 23:59:59
+    g_title: Grading Homework
+    gradeable_config: python_simple_homework
+    g_bucket: homework
 
-- g_id: grading_lab
-  components:
-  - gc_title: Question 1
-    gc_lower_clamp: 0
-    gc_default: 0
-    gc_max_value: 1
-    gc_upper_clamp: 1
-  - gc_title: Question 2
-    gc_lower_clamp: 0
-    gc_default: 0
-    gc_max_value: 0
-    gc_upper_clamp: 1
-  g_grade_due_date: 9998-12-31 23:59:59
-  g_grade_released_date: 9998-12-31 23:59:59
-  g_grade_start_date: 1971-01-01 23:59:59
-  g_ta_view_start_date: 1970-01-01 23:59:59
-  g_title: Grading Lab
-  g_type: 1
-  g_bucket: lab
+  - g_id: grades_released_homework
+    components:
+      - gc_lower_clamp: 0
+        gc_default: 5
+        gc_max_value: 5
+        gc_upper_clamp: 5
+        gc_title: Question 1
+      - gc_is_extra_credit: true
+        gc_lower_clamp: 0
+        gc_default: 5
+        gc_max_value: 5
+        gc_upper_clamp: 5
+        gc_title: Question 2
+    eg_submission_due_date: 1972-01-01 23:59:59
+    eg_submission_open_date: 1971-01-01 23:59:59
+    g_grade_due_date: 1974-01-01 23:59:59
+    g_grade_released_date: 1974-01-01 23:59:59
+    eg_grade_inquiry_start_date: 1974-01-01 23:59:59
+    eg_grade_inquiry_due_date: 1974-01-08 23:59:59
+    eg_has_due_date: true
+    eg_has_release_date: true
+    g_grade_start_date: 1973-01-01 23:59:59
+    g_ta_view_start_date: 1970-01-01 23:59:59
+    g_title: Grades Released Homework
+    gradeable_config: python_simple_homework
+    g_bucket: homework
 
-- g_id: grading_lab_rotating
-  components:
-  - gc_title: Question 1
-    gc_lower_clamp: 0
-    gc_default: 0
-    gc_max_value: 1
-    gc_upper_clamp: 1
-  - gc_title: Question 2
-    gc_lower_clamp: 0
-    gc_default: 0
-    gc_max_value: 0
-    gc_upper_clamp: 1
-  g_grade_due_date: 9998-12-31 23:59:59
-  g_grade_released_date: 9998-12-31 23:59:59
-  g_grade_start_date: 1971-01-01 23:59:59
-  g_ta_view_start_date: 1970-01-01 23:59:59
-  g_title: Grading Lab (Rotating Sections)
-  g_type: 1
-  g_bucket: lab
-  g_grader_assignment_method: 0
+  - g_id: future_no_tas_lab
+    components:
+      - gc_title: Question 1
+        gc_lower_clamp: 0
+        gc_default: 0
+        gc_max_value: 1
+        gc_upper_clamp: 1
+      - gc_title: Question 2
+        gc_lower_clamp: 0
+        gc_default: 0
+        gc_max_value: 0
+        gc_upper_clamp: 1
+    g_grade_due_date: 9998-12-31 23:59:59
+    g_grade_released_date: 9998-12-31 23:59:59
+    g_grade_start_date: 9997-12-31 23:59:59
+    g_ta_view_start_date: 9996-12-31 23:59:59
+    g_title: Future (No TAs) Lab
+    g_type: 1
+    g_bucket: lab
 
-- g_id: grades_released_lab
-  components:
-  - gc_title: Question 1
-    gc_lower_clamp: 0
-    gc_default: 0
-    gc_max_value: 1
-    gc_upper_clamp: 1
-  - gc_title: Question 2
-    gc_lower_clamp: 0
-    gc_default: 0
-    gc_max_value: 0
-    gc_upper_clamp: 1
-  g_grade_due_date: 1972-01-01 23:59:59
-  g_grade_released_date: 1972-01-01 23:59:59
-  g_grade_start_date: 1971-01-01 23:59:59
-  g_ta_view_start_date: 1970-01-01 23:59:59
-  g_title: Grades Released Lab
-  g_type: 1
-  g_bucket: lab
+  - g_id: future_tas_lab
+    components:
+      - gc_title: Question 1
+        gc_lower_clamp: 0
+        gc_default: 0
+        gc_max_value: 1
+        gc_upper_clamp: 1
+      - gc_title: Question 2
+        gc_lower_clamp: 0
+        gc_default: 0
+        gc_max_value: 0
+        gc_upper_clamp: 1
+    g_grade_due_date: 9998-12-31 23:59:59
+    g_grade_released_date: 9998-12-31 23:59:59
+    g_grade_start_date: 9997-12-31 23:59:59
+    g_ta_view_start_date: 1970-01-01 23:59:59
+    g_title: Future (TAs) Lab
+    g_type: 1
+    g_bucket: lab
 
-- g_id: future_no_tas_test
-  components:
-  - gc_lower_clamp: 0
-    gc_default: 0
-    gc_max_value: 0
-    gc_upper_clamp: 5
-    gc_title: Question 1
-  - gc_lower_clamp: 0
-    gc_default: 0
-    gc_max_value: 5
-    gc_upper_clamp: 5
-    gc_title: Question 2
-  - gc_is_text: true
-    gc_title: Text 1
-  g_grade_due_date: 9998-12-31 23:59:59
-  g_grade_released_date: 9998-12-31 23:59:59
-  g_grade_start_date: 9997-12-31 23:59:59
-  g_ta_view_start_date: 9996-12-31 23:59:59
-  g_title: Future (No TAs) Test
-  g_type: 2
-  g_bucket: test
+  - g_id: grading_lab
+    components:
+      - gc_title: Question 1
+        gc_lower_clamp: 0
+        gc_default: 0
+        gc_max_value: 1
+        gc_upper_clamp: 1
+      - gc_title: Question 2
+        gc_lower_clamp: 0
+        gc_default: 0
+        gc_max_value: 0
+        gc_upper_clamp: 1
+    g_grade_due_date: 9998-12-31 23:59:59
+    g_grade_released_date: 9998-12-31 23:59:59
+    g_grade_start_date: 1971-01-01 23:59:59
+    g_ta_view_start_date: 1970-01-01 23:59:59
+    g_title: Grading Lab
+    g_type: 1
+    g_bucket: lab
 
-- g_id: future_tas_test
-  components:
-  - gc_lower_clamp: 0
-    gc_default: 0
-    gc_max_value: 0
-    gc_upper_clamp: 5
-    gc_title: Question 1
-  - gc_lower_clamp: 0
-    gc_default: 0
-    gc_max_value: 5
-    gc_upper_clamp: 5
-    gc_title: Question 2
-  - gc_is_text: true
-    gc_title: Text 1
-  g_grade_due_date: 9998-12-31 23:59:59
-  g_grade_released_date: 9998-12-31 23:59:59
-  g_grade_start_date: 9997-12-31 23:59:59
-  g_ta_view_start_date: 1970-01-01 23:59:59
-  g_title: Future (TAs) Test
-  g_type: 2
-  g_bucket: test
+  - g_id: grading_lab_rotating
+    components:
+      - gc_title: Question 1
+        gc_lower_clamp: 0
+        gc_default: 0
+        gc_max_value: 1
+        gc_upper_clamp: 1
+      - gc_title: Question 2
+        gc_lower_clamp: 0
+        gc_default: 0
+        gc_max_value: 0
+        gc_upper_clamp: 1
+    g_grade_due_date: 9998-12-31 23:59:59
+    g_grade_released_date: 9998-12-31 23:59:59
+    g_grade_start_date: 1971-01-01 23:59:59
+    g_ta_view_start_date: 1970-01-01 23:59:59
+    g_title: Grading Lab (Rotating Sections)
+    g_type: 1
+    g_bucket: lab
+    g_grader_assignment_method: 0
 
-- g_id: grading_test
-  components:
-  - gc_lower_clamp: 0
-    gc_default: 0
-    gc_max_value: 0
-    gc_upper_clamp: 5
-    gc_title: Question 1
-  - gc_lower_clamp: 0
-    gc_default: 0
-    gc_max_value: 5
-    gc_upper_clamp: 5
-    gc_title: Question 2
-  - gc_is_text: true
-    gc_title: Text 1
-  g_grade_due_date: 9998-12-31 23:59:59
-  g_grade_released_date: 9998-12-31 23:59:59
-  g_grade_start_date: 1971-01-01 23:59:59
-  g_ta_view_start_date: 1970-01-01 23:59:59
-  g_title: Grading Test
-  g_type: 2
-  g_bucket: test
+  - g_id: grades_released_lab
+    components:
+      - gc_title: Question 1
+        gc_lower_clamp: 0
+        gc_default: 0
+        gc_max_value: 1
+        gc_upper_clamp: 1
+      - gc_title: Question 2
+        gc_lower_clamp: 0
+        gc_default: 0
+        gc_max_value: 0
+        gc_upper_clamp: 1
+    g_grade_due_date: 1972-01-01 23:59:59
+    g_grade_released_date: 1972-01-01 23:59:59
+    g_grade_start_date: 1971-01-01 23:59:59
+    g_ta_view_start_date: 1970-01-01 23:59:59
+    g_title: Grades Released Lab
+    g_type: 1
+    g_bucket: lab
 
-- g_id: grading_test_rotating
-  components:
-  - gc_lower_clamp: 0
-    gc_default: 0
-    gc_max_value: 0
-    gc_upper_clamp: 5
-    gc_title: Question 1
-  - gc_lower_clamp: 0
-    gc_default: 0
-    gc_max_value: 5
-    gc_upper_clamp: 5
-    gc_title: Question 2
-  - gc_is_text: true
-    gc_title: Text 1
-  g_grade_due_date: 9998-12-31 23:59:59
-  g_grade_released_date: 9998-12-31 23:59:59
-  g_grade_start_date: 1971-01-01 23:59:59
-  g_ta_view_start_date: 1970-01-01 23:59:59
-  g_title: Grading Test (Rotating Sections)
-  g_type: 2
-  g_bucket: test
-  g_grader_assignment_method: 0
+  - g_id: future_no_tas_test
+    components:
+      - gc_lower_clamp: 0
+        gc_default: 0
+        gc_max_value: 0
+        gc_upper_clamp: 5
+        gc_title: Question 1
+      - gc_lower_clamp: 0
+        gc_default: 0
+        gc_max_value: 5
+        gc_upper_clamp: 5
+        gc_title: Question 2
+      - gc_is_text: true
+        gc_title: Text 1
+    g_grade_due_date: 9998-12-31 23:59:59
+    g_grade_released_date: 9998-12-31 23:59:59
+    g_grade_start_date: 9997-12-31 23:59:59
+    g_ta_view_start_date: 9996-12-31 23:59:59
+    g_title: Future (No TAs) Test
+    g_type: 2
+    g_bucket: test
 
-- g_id: grades_released_test
-  components:
-  - gc_lower_clamp: 0
-    gc_default: 0
-    gc_max_value: 0
-    gc_upper_clamp: 5
-    gc_title: Question 1
-  - gc_lower_clamp: 0
-    gc_default: 0
-    gc_max_value: 5
-    gc_upper_clamp: 5
-    gc_title: Question 2
-  - gc_is_text: true
-    gc_title: Text 1
-  g_grade_due_date: 1972-01-01 23:59:59
-  g_grade_released_date: 1972-01-01 23:59:59
-  g_grade_start_date: 1971-01-01 23:59:59
-  g_ta_view_start_date: 1970-01-01 23:59:59
-  g_title: Grades Released Test
-  g_type: 2
-  g_bucket: test
+  - g_id: notebook_filesubmission
+    gradeable_config: notebook_filesubmission
+    components:
+      - gc_lower_clamp: 0
+        gc_default: 5
+        gc_max_value: 5
+        gc_upper_clamp: 5
+        gc_title: Question 1
+        marks:
+          - gcm_note: Full Credit
+            gcm_points: 0
+          - gcm_note: Question 1 Mark 1
+            gcm_points: -5
+    g_ta_view_start_date: -2 days
+    eg_submission_open_date: -1 days
+    eg_submission_due_date: +1000 days
+    g_grade_start_date: +1005 days
+    g_grade_due_date: +1010 days
+    g_grade_released_date: +1010 days
+    eg_grade_inquiry_start_date: +1012 days
+    eg_grade_inquiry_due_date: +1015 days
+    eg_has_due_date: true
+    eg_has_release_date: true
+    eg_max_random_submissions: 0
 
-- g_id: grades_released_homework_onlyta
-  components:
-  - gc_lower_clamp: 0
-    gc_default: 5
-    gc_max_value: 5
-    gc_upper_clamp: 5
-    gc_title: Question 1
-    marks:
-      - gcm_note: Full Credit
-        gcm_points: 0
-  eg_submission_due_date: 1972-01-01 23:59:59
-  eg_submission_open_date: 1971-01-01 23:59:59
-  g_grade_due_date: 1974-01-01 23:59:59
-  g_grade_released_date: 1974-01-01 23:59:59
-  eg_grade_inquiry_start_date: 1974-01-02 23:59:59
-  eg_grade_inquiry_due_date: 1974-01-08 23:59:59
-  eg_has_due_date: true
-  eg_has_release_date: true
-  g_grade_start_date: 1973-01-01 23:59:59
-  g_ta_view_start_date: 1970-01-01 23:59:59
-  g_title: TA Grade Only Homework (Upload Only)
-  gradeable_config: upload_only
-  g_bucket: homework
+  - g_id: future_tas_test
+    components:
+      - gc_lower_clamp: 0
+        gc_default: 0
+        gc_max_value: 0
+        gc_upper_clamp: 5
+        gc_title: Question 1
+      - gc_lower_clamp: 0
+        gc_default: 0
+        gc_max_value: 5
+        gc_upper_clamp: 5
+        gc_title: Question 2
+      - gc_is_text: true
+        gc_title: Text 1
+    g_grade_due_date: 9998-12-31 23:59:59
+    g_grade_released_date: 9998-12-31 23:59:59
+    g_grade_start_date: 9997-12-31 23:59:59
+    g_ta_view_start_date: 1970-01-01 23:59:59
+    g_title: Future (TAs) Test
+    g_type: 2
+    g_bucket: test
 
-# For no autograding, still need components, but also need eg_use_ta_grading flag
-- g_id: grades_released_homework_onlyauto
-  components:
-  - gc_lower_clamp: 0
-    gc_default: 2
-    gc_max_value: 2
-    gc_upper_clamp: 2
-    gc_title: Read Me
-    marks:
-      - gcm_note: Full Credit
-        gcm_points: 0
-      - gcm_note: Minor errors in Read Me
-        gcm_points: -1
-      - gcm_note: Major errors in Read Me or Read Me missing
-        gcm_points: -2
-  - gc_lower_clamp: 0
-    gc_default: 5
-    gc_max_value: 5
-    gc_upper_clamp: 5
-    gc_title: Coding Style
-    marks:
-      - gcm_note: Full Credit
-        gcm_points: 0
-      - gcm_note: Code is unreadable
-        gcm_points: -5
-      - gcm_note: Code is very difficult to understand
-        gcm_points: -3
-      - gcm_note: Code is difficult to understand
-        gcm_points: -1
-  - gc_lower_clamp: 0
-    gc_default: 5
-    gc_max_value: 5
-    gc_upper_clamp: 5
-    gc_title: Documentation
-    marks:
-      - gcm_note: Full Credit
-        gcm_points: 0
-      - gcm_note: No documentation
-        gcm_points: -5
-      - gcm_note: Very little documentation or documentation makes no sense
-        gcm_points: -3
-      - gcm_note: Way too much documentation and/or documentation makes no sense
-        gcm_points: -1
-  - gc_lower_clamp: 0
-    gc_default: 0
-    gc_max_value: 0
-    gc_upper_clamp: 5
-    gc_title: Extra Credit
-    marks: 
-      - gcm_note: No Credit
-        gcm_points: 0
-      - gcm_note: Extra credit done poorly
-        gcm_points: 2
-      - gcm_note: Extra credit is acceptable
-        gcm_points: 5
-  eg_submission_due_date: 1972-01-01 23:59:59
-  eg_submission_open_date: 1971-01-01 23:59:59
-  g_grade_due_date: 1974-01-01 23:59:59
-  g_grade_released_date: 1974-01-01 23:59:59
-  eg_grade_inquiry_start_date: 1974-01-02 23:59:59
-  eg_grade_inquiry_due_date: 1974-01-08 23:59:59
-  eg_has_due_date: true
-  eg_has_release_date: true
-  g_grade_start_date: 1973-01-01 23:59:59
-  g_ta_view_start_date: 1970-01-01 23:59:59
-  g_title: Autograde Only Homework (Simple Python)
-  gradeable_config: 01_simple_python
-  eg_use_ta_grading: False
-  g_bucket: homework
+  - g_id: grading_test
+    components:
+      - gc_lower_clamp: 0
+        gc_default: 0
+        gc_max_value: 0
+        gc_upper_clamp: 5
+        gc_title: Question 1
+      - gc_lower_clamp: 0
+        gc_default: 0
+        gc_max_value: 5
+        gc_upper_clamp: 5
+        gc_title: Question 2
+      - gc_is_text: true
+        gc_title: Text 1
+    g_grade_due_date: 9998-12-31 23:59:59
+    g_grade_released_date: 9998-12-31 23:59:59
+    g_grade_start_date: 1971-01-01 23:59:59
+    g_ta_view_start_date: 1970-01-01 23:59:59
+    g_title: Grading Test
+    g_type: 2
+    g_bucket: test
 
-- g_id: grades_released_homework_autota
-  components:
-  - gc_lower_clamp: 0
-    gc_default: 2
-    gc_max_value: 2
-    gc_upper_clamp: 2
-    gc_title: Read Me
-    marks:
-      - gcm_note: Full Credit
-        gcm_points: 0
-      - gcm_note: Minor errors in Read Me
-        gcm_points: -1
-      - gcm_note: Major errors in Read Me or Read Me missing
-        gcm_points: -2
-  - gc_lower_clamp: 0
-    gc_default: 5
-    gc_max_value: 5
-    gc_upper_clamp: 5
-    gc_title: Coding Style
-    marks:
-      - gcm_note: Full Credit
-        gcm_points: 0
-      - gcm_note: Code is unreadable
-        gcm_points: -5
-      - gcm_note: Code is very difficult to understand
-        gcm_points: -3
-      - gcm_note: Code is difficult to understand
-        gcm_points: -1
-  - gc_lower_clamp: 0
-    gc_default: 5
-    gc_max_value: 5
-    gc_upper_clamp: 5
-    gc_title: Documentation
-    marks:
-      - gcm_note: Full Credit
-        gcm_points: 0
-      - gcm_note: No documentation
-        gcm_points: -5
-      - gcm_note: Very little documentation or documentation makes no sense
-        gcm_points: -3
-      - gcm_note: Way too much documentation and/or documentation makes no sense
-        gcm_points: -1
-  - gc_lower_clamp: 0
-    gc_default: 0
-    gc_max_value: 0
-    gc_upper_clamp: 5
-    gc_title: Extra Credit
-    marks: 
-      - gcm_note: No Credit
-        gcm_points: 0
-      - gcm_note: Extra credit done poorly
-        gcm_points: 2
-      - gcm_note: Extra credit is acceptable
-        gcm_points: 5
-  eg_submission_due_date: 1972-01-01 23:59:59
-  eg_submission_open_date: 1971-01-01 23:59:59
-  g_grade_due_date: 1974-01-01 23:59:59
-  g_grade_released_date: 1974-01-01 23:59:59
-  eg_grade_inquiry_start_date: 1974-01-02 23:59:59
-  eg_grade_inquiry_due_date: 1974-01-08 23:59:59
-  eg_has_due_date: true
-  eg_has_release_date: true
-  g_grade_start_date: 1973-01-01 23:59:59
-  g_ta_view_start_date: 1970-01-01 23:59:59
-  g_title: Autograde and TA Homework (C System Calls)
-  gradeable_config: 12_system_calls
-  g_bucket: homework
+  - g_id: grading_test_rotating
+    components:
+      - gc_lower_clamp: 0
+        gc_default: 0
+        gc_max_value: 0
+        gc_upper_clamp: 5
+        gc_title: Question 1
+      - gc_lower_clamp: 0
+        gc_default: 0
+        gc_max_value: 5
+        gc_upper_clamp: 5
+        gc_title: Question 2
+      - gc_is_text: true
+        gc_title: Text 1
+    g_grade_due_date: 9998-12-31 23:59:59
+    g_grade_released_date: 9998-12-31 23:59:59
+    g_grade_start_date: 1971-01-01 23:59:59
+    g_ta_view_start_date: 1970-01-01 23:59:59
+    g_title: Grading Test (Rotating Sections)
+    g_type: 2
+    g_bucket: test
+    g_grader_assignment_method: 0
 
-- g_id: grades_released_homework_autohiddenEC
-  components:
-  - gc_lower_clamp: 0
-    gc_default: 2
-    gc_max_value: 2
-    gc_upper_clamp: 2
-    gc_title: Read Me
-    marks:
-      - gcm_note: Full Credit
-        gcm_points: 0
-      - gcm_note: Minor errors in Read Me
-        gcm_points: -1
-      - gcm_note: Major errors in Read Me or Read Me missing
-        gcm_points: -2
-  - gc_lower_clamp: 0
-    gc_default: 5
-    gc_max_value: 5
-    gc_upper_clamp: 5
-    gc_title: Coding Style
-    marks:
-      - gcm_note: Full Credit
-        gcm_points: 0
-      - gcm_note: Code is unreadable
-        gcm_points: -5
-      - gcm_note: Code is very difficult to understand
-        gcm_points: -3
-      - gcm_note: Code is difficult to understand
-        gcm_points: -1
-  - gc_lower_clamp: 0
-    gc_default: 5
-    gc_max_value: 5
-    gc_upper_clamp: 5
-    gc_title: Documentation
-    marks:
-      - gcm_note: Full Credit
-        gcm_points: 0
-      - gcm_note: No documentation
-        gcm_points: -5
-      - gcm_note: Very little documentation or documentation makes no sense
-        gcm_points: -3
-      - gcm_note: Way too much documentation and/or documentation makes no sense
-        gcm_points: -1
-  - gc_lower_clamp: 0
-    gc_default: 0
-    gc_max_value: 0
-    gc_upper_clamp: 5
-    gc_title: Extra Credit
-    marks: 
-      - gcm_note: No Credit
-        gcm_points: 0
-      - gcm_note: Extra credit done poorly
-        gcm_points: 2
-      - gcm_note: Extra credit is acceptable
-        gcm_points: 5
-  eg_submission_due_date: 1972-01-01 23:59:59
-  eg_submission_open_date: 1971-01-01 23:59:59
-  g_grade_due_date: 1974-01-01 23:59:59
-  g_grade_released_date: 1974-01-01 23:59:59
-  eg_grade_inquiry_start_date: 1974-01-02 23:59:59
-  eg_grade_inquiry_due_date: 1974-01-08 23:59:59
-  eg_has_due_date: true
-  eg_has_release_date: true
-  g_grade_start_date: 1973-01-01 23:59:59
-  g_ta_view_start_date: 1970-01-01 23:59:59
-  g_title: Autograder Hidden and Extra Credit (C++ Hidden Tests)
-  gradeable_config: cpp_hidden_tests
-  g_bucket: homework
+  - g_id: grades_released_test
+    components:
+      - gc_lower_clamp: 0
+        gc_default: 0
+        gc_max_value: 0
+        gc_upper_clamp: 5
+        gc_title: Question 1
+      - gc_lower_clamp: 0
+        gc_default: 0
+        gc_max_value: 5
+        gc_upper_clamp: 5
+        gc_title: Question 2
+      - gc_is_text: true
+        gc_title: Text 1
+    g_grade_due_date: 1972-01-01 23:59:59
+    g_grade_released_date: 1972-01-01 23:59:59
+    g_grade_start_date: 1971-01-01 23:59:59
+    g_ta_view_start_date: 1970-01-01 23:59:59
+    g_title: Grades Released Test
+    g_type: 2
+    g_bucket: test
 
-- g_id: grading_homework_pdf
-  components:
-  - gc_lower_clamp: 0
-    gc_default: 2
-    gc_max_value: 2
-    gc_upper_clamp: 2
-    gc_title: Read Me
-    marks:
-      - gcm_note: Full Credit
-        gcm_points: 0
-      - gcm_note: Minor errors in Read Me
-        gcm_points: -1
-      - gcm_note: Major errors in Read Me or Read Me missing
-        gcm_points: -2
-  - gc_lower_clamp: 0
-    gc_default: 5
-    gc_max_value: 5
-    gc_upper_clamp: 5
-    gc_title: Coding Style
-    marks:
-      - gcm_note: Full Credit
-        gcm_points: 0
-      - gcm_note: Code is unreadable
-        gcm_points: -5
-      - gcm_note: Code is very difficult to understand
-        gcm_points: -3
-      - gcm_note: Code is difficult to understand
-        gcm_points: -1
-  - gc_lower_clamp: 0
-    gc_default: 5
-    gc_max_value: 5
-    gc_upper_clamp: 5
-    gc_title: Documentation
-    marks:
-      - gcm_note: Full Credit
-        gcm_points: 0
-      - gcm_note: No documentation
-        gcm_points: -5
-      - gcm_note: Very little documentation or documentation makes no sense
-        gcm_points: -3
-      - gcm_note: Way too much documentation and/or documentation makes no sense
-        gcm_points: -1
-  - gc_lower_clamp: 0
-    gc_default: 0
-    gc_max_value: 0
-    gc_upper_clamp: 5
-    gc_title: Extra Credit
-    marks: 
-      - gcm_note: No Credit
-        gcm_points: 0
-      - gcm_note: Extra credit done poorly
-        gcm_points: 2
-      - gcm_note: Extra credit is acceptable
-        gcm_points: 5
-  eg_submission_due_date: 1972-01-01 23:59:59
-  eg_submission_open_date: 1971-01-01 23:59:59
-  g_grade_due_date: 9998-12-31 23:59:59
-  g_grade_released_date: 9998-12-31 23:59:59
-  eg_grade_inquiry_start_date: 9999-01-01 23:59:59
-  eg_grade_inquiry_due_date: 9999-01-06 23:59:59
-  eg_has_due_date: true
-  eg_has_release_date: true
-  g_grade_start_date: 1973-01-01 23:59:59
-  g_ta_view_start_date: 1970-01-01 23:59:59
-  g_title: Grading Homework PDF
-  gradeable_config: pdf_word_count
-  g_bucket: homework
+  - g_id: grades_released_homework_onlyta
+    components:
+      - gc_lower_clamp: 0
+        gc_default: 5
+        gc_max_value: 5
+        gc_upper_clamp: 5
+        gc_title: Question 1
+        marks:
+          - gcm_note: Full Credit
+            gcm_points: 0
+    eg_submission_due_date: 1972-01-01 23:59:59
+    eg_submission_open_date: 1971-01-01 23:59:59
+    g_grade_due_date: 1974-01-01 23:59:59
+    g_grade_released_date: 1974-01-01 23:59:59
+    eg_grade_inquiry_start_date: 1974-01-02 23:59:59
+    eg_grade_inquiry_due_date: 1974-01-08 23:59:59
+    eg_has_due_date: true
+    eg_has_release_date: true
+    g_grade_start_date: 1973-01-01 23:59:59
+    g_ta_view_start_date: 1970-01-01 23:59:59
+    g_title: TA Grade Only Homework (Upload Only)
+    gradeable_config: upload_only
+    g_bucket: homework
 
-- g_id: grading_homework_team_pdf
-  components:
-  - gc_lower_clamp: 0
-    gc_default: 2
-    gc_max_value: 2
-    gc_upper_clamp: 2
-    gc_title: Read Me
-    marks:
-      - gcm_note: Full Credit
-        gcm_points: 0
-      - gcm_note: Minor errors in Read Me
-        gcm_points: -1
-      - gcm_note: Major errors in Read Me or Read Me missing
-        gcm_points: -2
-  - gc_lower_clamp: 0
-    gc_default: 5
-    gc_max_value: 5
-    gc_upper_clamp: 5
-    gc_title: Coding Style
-    marks:
-      - gcm_note: Full Credit
-        gcm_points: 0
-      - gcm_note: Code is unreadable
-        gcm_points: -5
-      - gcm_note: Code is very difficult to understand
-        gcm_points: -3
-      - gcm_note: Code is difficult to understand
-        gcm_points: -1
-  - gc_lower_clamp: 0
-    gc_default: 5
-    gc_max_value: 5
-    gc_upper_clamp: 5
-    gc_title: Documentation
-    marks:
-      - gcm_note: Full Credit
-        gcm_points: 0
-      - gcm_note: No documentation
-        gcm_points: -5
-      - gcm_note: Very little documentation or documentation makes no sense
-        gcm_points: -3
-      - gcm_note: Way too much documentation and/or documentation makes no sense
-        gcm_points: -1
-  - gc_lower_clamp: 0
-    gc_default: 0
-    gc_max_value: 0
-    gc_upper_clamp: 5
-    gc_title: Extra Credit
-    marks: 
-      - gcm_note: No Credit
-        gcm_points: 0
-      - gcm_note: Extra credit done poorly
-        gcm_points: 2
-      - gcm_note: Extra credit is acceptable
-        gcm_points: 5
-  eg_submission_due_date: 1972-01-01 23:59:59
-  eg_submission_open_date: 1971-01-01 23:59:59
-  g_grade_due_date: 9998-12-31 23:59:59
-  g_grade_released_date: 9998-12-31 23:59:59
-  eg_grade_inquiry_start_date: 9999-01-01 23:59:59
-  eg_grade_inquiry_due_date: 9999-01-06 23:59:59
-  eg_has_due_date: true
-  eg_has_release_date: true
-  eg_team_assignment: true
-  eg_max_team_size: 3
-  g_grade_start_date: 1973-01-01 23:59:59
-  g_ta_view_start_date: 1970-01-01 23:59:59
-  g_title: Grading Homework Team PDF
-  gradeable_config: pdf_word_count
-  g_bucket: homework
-  g_grader_assignment_method: 0
+  # For no autograding, still need components, but also need eg_use_ta_grading flag
+  - g_id: grades_released_homework_onlyauto
+    components:
+      - gc_lower_clamp: 0
+        gc_default: 2
+        gc_max_value: 2
+        gc_upper_clamp: 2
+        gc_title: Read Me
+        marks:
+          - gcm_note: Full Credit
+            gcm_points: 0
+          - gcm_note: Minor errors in Read Me
+            gcm_points: -1
+          - gcm_note: Major errors in Read Me or Read Me missing
+            gcm_points: -2
+      - gc_lower_clamp: 0
+        gc_default: 5
+        gc_max_value: 5
+        gc_upper_clamp: 5
+        gc_title: Coding Style
+        marks:
+          - gcm_note: Full Credit
+            gcm_points: 0
+          - gcm_note: Code is unreadable
+            gcm_points: -5
+          - gcm_note: Code is very difficult to understand
+            gcm_points: -3
+          - gcm_note: Code is difficult to understand
+            gcm_points: -1
+      - gc_lower_clamp: 0
+        gc_default: 5
+        gc_max_value: 5
+        gc_upper_clamp: 5
+        gc_title: Documentation
+        marks:
+          - gcm_note: Full Credit
+            gcm_points: 0
+          - gcm_note: No documentation
+            gcm_points: -5
+          - gcm_note: Very little documentation or documentation makes no sense
+            gcm_points: -3
+          - gcm_note: Way too much documentation and/or documentation makes no sense
+            gcm_points: -1
+      - gc_lower_clamp: 0
+        gc_default: 0
+        gc_max_value: 0
+        gc_upper_clamp: 5
+        gc_title: Extra Credit
+        marks:
+          - gcm_note: No Credit
+            gcm_points: 0
+          - gcm_note: Extra credit done poorly
+            gcm_points: 2
+          - gcm_note: Extra credit is acceptable
+            gcm_points: 5
+    eg_submission_due_date: 1972-01-01 23:59:59
+    eg_submission_open_date: 1971-01-01 23:59:59
+    g_grade_due_date: 1974-01-01 23:59:59
+    g_grade_released_date: 1974-01-01 23:59:59
+    eg_grade_inquiry_start_date: 1974-01-02 23:59:59
+    eg_grade_inquiry_due_date: 1974-01-08 23:59:59
+    eg_has_due_date: true
+    eg_has_release_date: true
+    g_grade_start_date: 1973-01-01 23:59:59
+    g_ta_view_start_date: 1970-01-01 23:59:59
+    g_title: Autograde Only Homework (Simple Python)
+    gradeable_config: 01_simple_python
+    eg_use_ta_grading: False
+    g_bucket: homework
 
-- g_id: grades_released_homework_onlytaEC
-  components:
-  - gc_lower_clamp: 0
-    gc_default: 2
-    gc_max_value: 2
-    gc_upper_clamp: 2
-    gc_title: Read Me
-    marks:
-      - gcm_note: Full Credit
-        gcm_points: 0
-      - gcm_note: Minor errors in Read Me
-        gcm_points: -1
-      - gcm_note: Major errors in Read Me or Read Me missing
-        gcm_points: -2
-  - gc_lower_clamp: 0
-    gc_default: 5
-    gc_max_value: 5
-    gc_upper_clamp: 5
-    gc_title: Coding Style
-    marks:
-      - gcm_note: Full Credit
-        gcm_points: 0
-      - gcm_note: Code is unreadable
-        gcm_points: -5
-      - gcm_note: Code is very difficult to understand
-        gcm_points: -3
-      - gcm_note: Code is difficult to understand
-        gcm_points: -1
-  - gc_lower_clamp: 0
-    gc_default: 5
-    gc_max_value: 5
-    gc_upper_clamp: 5
-    gc_title: Documentation
-    marks:
-      - gcm_note: Full Credit
-        gcm_points: 0
-      - gcm_note: No documentation
-        gcm_points: -5
-      - gcm_note: Very little documentation or documentation makes no sense
-        gcm_points: -3
-      - gcm_note: Way too much documentation and/or documentation makes no sense
-        gcm_points: -1
-  - gc_lower_clamp: 0
-    gc_default: 0
-    gc_max_value: 0
-    gc_upper_clamp: 5
-    gc_title: Extra Credit
-    marks: 
-      - gcm_note: No Credit
-        gcm_points: 0
-      - gcm_note: Extra credit done poorly
-        gcm_points: 2
-      - gcm_note: Extra credit is acceptable
-        gcm_points: 5
-  eg_submission_due_date: 1972-01-01 23:59:59
-  eg_submission_open_date: 1971-01-01 23:59:59
-  g_grade_due_date: 1974-01-01 23:59:59
-  g_grade_released_date: 1974-01-01 23:59:59
-  eg_grade_inquiry_start_date: 1974-01-02 23:59:59
-  eg_grade_inquiry_due_date: 1974-01-08 23:59:59
-  eg_has_due_date: true
-  eg_has_release_date: true
-  g_grade_start_date: 1973-01-01 23:59:59
-  g_ta_view_start_date: 1970-01-01 23:59:59
-  g_title: TA Only w/ Extra Credit (Upload Only)
-  gradeable_config: upload_only
-  g_bucket: homework
+  - g_id: grades_released_homework_autota
+    components:
+      - gc_lower_clamp: 0
+        gc_default: 2
+        gc_max_value: 2
+        gc_upper_clamp: 2
+        gc_title: Read Me
+        marks:
+          - gcm_note: Full Credit
+            gcm_points: 0
+          - gcm_note: Minor errors in Read Me
+            gcm_points: -1
+          - gcm_note: Major errors in Read Me or Read Me missing
+            gcm_points: -2
+      - gc_lower_clamp: 0
+        gc_default: 5
+        gc_max_value: 5
+        gc_upper_clamp: 5
+        gc_title: Coding Style
+        marks:
+          - gcm_note: Full Credit
+            gcm_points: 0
+          - gcm_note: Code is unreadable
+            gcm_points: -5
+          - gcm_note: Code is very difficult to understand
+            gcm_points: -3
+          - gcm_note: Code is difficult to understand
+            gcm_points: -1
+      - gc_lower_clamp: 0
+        gc_default: 5
+        gc_max_value: 5
+        gc_upper_clamp: 5
+        gc_title: Documentation
+        marks:
+          - gcm_note: Full Credit
+            gcm_points: 0
+          - gcm_note: No documentation
+            gcm_points: -5
+          - gcm_note: Very little documentation or documentation makes no sense
+            gcm_points: -3
+          - gcm_note: Way too much documentation and/or documentation makes no sense
+            gcm_points: -1
+      - gc_lower_clamp: 0
+        gc_default: 0
+        gc_max_value: 0
+        gc_upper_clamp: 5
+        gc_title: Extra Credit
+        marks:
+          - gcm_note: No Credit
+            gcm_points: 0
+          - gcm_note: Extra credit done poorly
+            gcm_points: 2
+          - gcm_note: Extra credit is acceptable
+            gcm_points: 5
+    eg_submission_due_date: 1972-01-01 23:59:59
+    eg_submission_open_date: 1971-01-01 23:59:59
+    g_grade_due_date: 1974-01-01 23:59:59
+    g_grade_released_date: 1974-01-01 23:59:59
+    eg_grade_inquiry_start_date: 1974-01-02 23:59:59
+    eg_grade_inquiry_due_date: 1974-01-08 23:59:59
+    eg_has_due_date: true
+    eg_has_release_date: true
+    g_grade_start_date: 1973-01-01 23:59:59
+    g_ta_view_start_date: 1970-01-01 23:59:59
+    g_title: Autograde and TA Homework (C System Calls)
+    gradeable_config: 12_system_calls
+    g_bucket: homework
 
-- g_id: grades_released_homework_onlytaPenalty
-  components:
-  - gc_lower_clamp: 0
-    gc_default: 2
-    gc_max_value: 2
-    gc_upper_clamp: 2
-    gc_title: Read Me
-    marks:
-      - gcm_note: Full Credit
-        gcm_points: 0
-      - gcm_note: Minor errors in Read Me
-        gcm_points: -1
-      - gcm_note: Major errors in Read Me or Read Me missing
-        gcm_points: -2
-  - gc_lower_clamp: 0
-    gc_default: 5
-    gc_max_value: 5
-    gc_upper_clamp: 5
-    gc_title: Coding Style
-    marks:
-      - gcm_note: Full Credit
-        gcm_points: 0
-      - gcm_note: Code is unreadable
-        gcm_points: -5
-      - gcm_note: Code is very difficult to understand
-        gcm_points: -3
-      - gcm_note: Code is difficult to understand
-        gcm_points: -1
-  - gc_lower_clamp: 0
-    gc_default: 5
-    gc_max_value: 5
-    gc_upper_clamp: 5
-    gc_title: Documentation
-    marks:
-      - gcm_note: Full Credit
-        gcm_points: 0
-      - gcm_note: No documentation
-        gcm_points: -5
-      - gcm_note: Very little documentation or documentation makes no sense
-        gcm_points: -3
-      - gcm_note: Way too much documentation and/or documentation makes no sense
-        gcm_points: -1
-  - gc_lower_clamp: 0
-    gc_default: 0
-    gc_max_value: 0
-    gc_upper_clamp: 5
-    gc_title: Extra Credit
-    marks: 
-      - gcm_note: No Credit
-        gcm_points: 0
-      - gcm_note: Extra credit done poorly
-        gcm_points: 2
-      - gcm_note: Extra credit is acceptable
-        gcm_points: 5
-  eg_submission_due_date: 1972-01-01 23:59:59
-  eg_submission_open_date: 1971-01-01 23:59:59
-  g_grade_due_date: 1974-01-01 23:59:59
-  g_grade_released_date: 1974-01-01 23:59:59
-  eg_grade_inquiry_start_date: 1974-01-02 23:59:59
-  eg_grade_inquiry_due_date: 1974-01-08 23:59:59
-  eg_has_due_date: true
-  eg_has_release_date: true
-  g_grade_start_date: 1973-01-01 23:59:59
-  g_ta_view_start_date: 1970-01-01 23:59:59
-  g_title: TA Only w/ Penalty (Upload Only)
-  gradeable_config: upload_only
-  g_bucket: homework
+  - g_id: grades_released_homework_autohiddenEC
+    components:
+      - gc_lower_clamp: 0
+        gc_default: 2
+        gc_max_value: 2
+        gc_upper_clamp: 2
+        gc_title: Read Me
+        marks:
+          - gcm_note: Full Credit
+            gcm_points: 0
+          - gcm_note: Minor errors in Read Me
+            gcm_points: -1
+          - gcm_note: Major errors in Read Me or Read Me missing
+            gcm_points: -2
+      - gc_lower_clamp: 0
+        gc_default: 5
+        gc_max_value: 5
+        gc_upper_clamp: 5
+        gc_title: Coding Style
+        marks:
+          - gcm_note: Full Credit
+            gcm_points: 0
+          - gcm_note: Code is unreadable
+            gcm_points: -5
+          - gcm_note: Code is very difficult to understand
+            gcm_points: -3
+          - gcm_note: Code is difficult to understand
+            gcm_points: -1
+      - gc_lower_clamp: 0
+        gc_default: 5
+        gc_max_value: 5
+        gc_upper_clamp: 5
+        gc_title: Documentation
+        marks:
+          - gcm_note: Full Credit
+            gcm_points: 0
+          - gcm_note: No documentation
+            gcm_points: -5
+          - gcm_note: Very little documentation or documentation makes no sense
+            gcm_points: -3
+          - gcm_note: Way too much documentation and/or documentation makes no sense
+            gcm_points: -1
+      - gc_lower_clamp: 0
+        gc_default: 0
+        gc_max_value: 0
+        gc_upper_clamp: 5
+        gc_title: Extra Credit
+        marks:
+          - gcm_note: No Credit
+            gcm_points: 0
+          - gcm_note: Extra credit done poorly
+            gcm_points: 2
+          - gcm_note: Extra credit is acceptable
+            gcm_points: 5
+    eg_submission_due_date: 1972-01-01 23:59:59
+    eg_submission_open_date: 1971-01-01 23:59:59
+    g_grade_due_date: 1974-01-01 23:59:59
+    g_grade_released_date: 1974-01-01 23:59:59
+    eg_grade_inquiry_start_date: 1974-01-02 23:59:59
+    eg_grade_inquiry_due_date: 1974-01-08 23:59:59
+    eg_has_due_date: true
+    eg_has_release_date: true
+    g_grade_start_date: 1973-01-01 23:59:59
+    g_ta_view_start_date: 1970-01-01 23:59:59
+    g_title: Autograder Hidden and Extra Credit (C++ Hidden Tests)
+    gradeable_config: cpp_hidden_tests
+    g_bucket: homework
 
-- gradeable_config: leaderboard
-  components:
-  - gc_lower_clamp: 0
-    gc_default: 11
-    gc_max_value: 11
-    gc_upper_clamp: 11
-    gc_title: Question 1
-    marks:
-      - gcm_note: Full Credit
-        gcm_points : 0
-  g_ta_view_start_date: 1970-01-01 23:59:59
-  eg_submission_open_date: 1971-01-01 23:59:59
-  eg_submission_due_date: 9996-12-31 23:59:59
-  g_grade_start_date: 9997-12-31 23:59:59
-  g_grade_due_date: 9998-12-31 23:59:59
-  g_grade_released_date: 9998-12-31 23:59:59
-  eg_grade_inquiry_start_date: 9999-01-01 23:59:59
-  eg_grade_inquiry_due_date: 9999-01-06 23:59:59
-  eg_has_due_date: true
-  eg_has_release_date: true
+  - g_id: grading_homework_pdf
+    components:
+      - gc_lower_clamp: 0
+        gc_default: 2
+        gc_max_value: 2
+        gc_upper_clamp: 2
+        gc_title: Read Me
+        marks:
+          - gcm_note: Full Credit
+            gcm_points: 0
+          - gcm_note: Minor errors in Read Me
+            gcm_points: -1
+          - gcm_note: Major errors in Read Me or Read Me missing
+            gcm_points: -2
+      - gc_lower_clamp: 0
+        gc_default: 5
+        gc_max_value: 5
+        gc_upper_clamp: 5
+        gc_title: Coding Style
+        marks:
+          - gcm_note: Full Credit
+            gcm_points: 0
+          - gcm_note: Code is unreadable
+            gcm_points: -5
+          - gcm_note: Code is very difficult to understand
+            gcm_points: -3
+          - gcm_note: Code is difficult to understand
+            gcm_points: -1
+      - gc_lower_clamp: 0
+        gc_default: 5
+        gc_max_value: 5
+        gc_upper_clamp: 5
+        gc_title: Documentation
+        marks:
+          - gcm_note: Full Credit
+            gcm_points: 0
+          - gcm_note: No documentation
+            gcm_points: -5
+          - gcm_note: Very little documentation or documentation makes no sense
+            gcm_points: -3
+          - gcm_note: Way too much documentation and/or documentation makes no sense
+            gcm_points: -1
+      - gc_lower_clamp: 0
+        gc_default: 0
+        gc_max_value: 0
+        gc_upper_clamp: 5
+        gc_title: Extra Credit
+        marks:
+          - gcm_note: No Credit
+            gcm_points: 0
+          - gcm_note: Extra credit done poorly
+            gcm_points: 2
+          - gcm_note: Extra credit is acceptable
+            gcm_points: 5
+    eg_submission_due_date: 1972-01-01 23:59:59
+    eg_submission_open_date: 1971-01-01 23:59:59
+    g_grade_due_date: 9998-12-31 23:59:59
+    g_grade_released_date: 9998-12-31 23:59:59
+    eg_grade_inquiry_start_date: 9999-01-01 23:59:59
+    eg_grade_inquiry_due_date: 9999-01-06 23:59:59
+    eg_has_due_date: true
+    eg_has_release_date: true
+    g_grade_start_date: 1973-01-01 23:59:59
+    g_ta_view_start_date: 1970-01-01 23:59:59
+    g_title: Grading Homework PDF
+    gradeable_config: pdf_word_count
+    g_bucket: homework
+
+  - g_id: grading_homework_team_pdf
+    components:
+      - gc_lower_clamp: 0
+        gc_default: 2
+        gc_max_value: 2
+        gc_upper_clamp: 2
+        gc_title: Read Me
+        marks:
+          - gcm_note: Full Credit
+            gcm_points: 0
+          - gcm_note: Minor errors in Read Me
+            gcm_points: -1
+          - gcm_note: Major errors in Read Me or Read Me missing
+            gcm_points: -2
+      - gc_lower_clamp: 0
+        gc_default: 5
+        gc_max_value: 5
+        gc_upper_clamp: 5
+        gc_title: Coding Style
+        marks:
+          - gcm_note: Full Credit
+            gcm_points: 0
+          - gcm_note: Code is unreadable
+            gcm_points: -5
+          - gcm_note: Code is very difficult to understand
+            gcm_points: -3
+          - gcm_note: Code is difficult to understand
+            gcm_points: -1
+      - gc_lower_clamp: 0
+        gc_default: 5
+        gc_max_value: 5
+        gc_upper_clamp: 5
+        gc_title: Documentation
+        marks:
+          - gcm_note: Full Credit
+            gcm_points: 0
+          - gcm_note: No documentation
+            gcm_points: -5
+          - gcm_note: Very little documentation or documentation makes no sense
+            gcm_points: -3
+          - gcm_note: Way too much documentation and/or documentation makes no sense
+            gcm_points: -1
+      - gc_lower_clamp: 0
+        gc_default: 0
+        gc_max_value: 0
+        gc_upper_clamp: 5
+        gc_title: Extra Credit
+        marks:
+          - gcm_note: No Credit
+            gcm_points: 0
+          - gcm_note: Extra credit done poorly
+            gcm_points: 2
+          - gcm_note: Extra credit is acceptable
+            gcm_points: 5
+    eg_submission_due_date: 1972-01-01 23:59:59
+    eg_submission_open_date: 1971-01-01 23:59:59
+    g_grade_due_date: 9998-12-31 23:59:59
+    g_grade_released_date: 9998-12-31 23:59:59
+    eg_grade_inquiry_start_date: 9999-01-01 23:59:59
+    eg_grade_inquiry_due_date: 9999-01-06 23:59:59
+    eg_has_due_date: true
+    eg_has_release_date: true
+    eg_team_assignment: true
+    eg_max_team_size: 3
+    g_grade_start_date: 1973-01-01 23:59:59
+    g_ta_view_start_date: 1970-01-01 23:59:59
+    g_title: Grading Homework Team PDF
+    gradeable_config: pdf_word_count
+    g_bucket: homework
+    g_grader_assignment_method: 0
+
+  - g_id: grades_released_homework_onlytaEC
+    components:
+      - gc_lower_clamp: 0
+        gc_default: 2
+        gc_max_value: 2
+        gc_upper_clamp: 2
+        gc_title: Read Me
+        marks:
+          - gcm_note: Full Credit
+            gcm_points: 0
+          - gcm_note: Minor errors in Read Me
+            gcm_points: -1
+          - gcm_note: Major errors in Read Me or Read Me missing
+            gcm_points: -2
+      - gc_lower_clamp: 0
+        gc_default: 5
+        gc_max_value: 5
+        gc_upper_clamp: 5
+        gc_title: Coding Style
+        marks:
+          - gcm_note: Full Credit
+            gcm_points: 0
+          - gcm_note: Code is unreadable
+            gcm_points: -5
+          - gcm_note: Code is very difficult to understand
+            gcm_points: -3
+          - gcm_note: Code is difficult to understand
+            gcm_points: -1
+      - gc_lower_clamp: 0
+        gc_default: 5
+        gc_max_value: 5
+        gc_upper_clamp: 5
+        gc_title: Documentation
+        marks:
+          - gcm_note: Full Credit
+            gcm_points: 0
+          - gcm_note: No documentation
+            gcm_points: -5
+          - gcm_note: Very little documentation or documentation makes no sense
+            gcm_points: -3
+          - gcm_note: Way too much documentation and/or documentation makes no sense
+            gcm_points: -1
+      - gc_lower_clamp: 0
+        gc_default: 0
+        gc_max_value: 0
+        gc_upper_clamp: 5
+        gc_title: Extra Credit
+        marks:
+          - gcm_note: No Credit
+            gcm_points: 0
+          - gcm_note: Extra credit done poorly
+            gcm_points: 2
+          - gcm_note: Extra credit is acceptable
+            gcm_points: 5
+    eg_submission_due_date: 1972-01-01 23:59:59
+    eg_submission_open_date: 1971-01-01 23:59:59
+    g_grade_due_date: 1974-01-01 23:59:59
+    g_grade_released_date: 1974-01-01 23:59:59
+    eg_grade_inquiry_start_date: 1974-01-02 23:59:59
+    eg_grade_inquiry_due_date: 1974-01-08 23:59:59
+    eg_has_due_date: true
+    eg_has_release_date: true
+    g_grade_start_date: 1973-01-01 23:59:59
+    g_ta_view_start_date: 1970-01-01 23:59:59
+    g_title: TA Only w/ Extra Credit (Upload Only)
+    gradeable_config: upload_only
+    g_bucket: homework
+
+  - g_id: grades_released_homework_onlytaPenalty
+    components:
+      - gc_lower_clamp: 0
+        gc_default: 2
+        gc_max_value: 2
+        gc_upper_clamp: 2
+        gc_title: Read Me
+        marks:
+          - gcm_note: Full Credit
+            gcm_points: 0
+          - gcm_note: Minor errors in Read Me
+            gcm_points: -1
+          - gcm_note: Major errors in Read Me or Read Me missing
+            gcm_points: -2
+      - gc_lower_clamp: 0
+        gc_default: 5
+        gc_max_value: 5
+        gc_upper_clamp: 5
+        gc_title: Coding Style
+        marks:
+          - gcm_note: Full Credit
+            gcm_points: 0
+          - gcm_note: Code is unreadable
+            gcm_points: -5
+          - gcm_note: Code is very difficult to understand
+            gcm_points: -3
+          - gcm_note: Code is difficult to understand
+            gcm_points: -1
+      - gc_lower_clamp: 0
+        gc_default: 5
+        gc_max_value: 5
+        gc_upper_clamp: 5
+        gc_title: Documentation
+        marks:
+          - gcm_note: Full Credit
+            gcm_points: 0
+          - gcm_note: No documentation
+            gcm_points: -5
+          - gcm_note: Very little documentation or documentation makes no sense
+            gcm_points: -3
+          - gcm_note: Way too much documentation and/or documentation makes no sense
+            gcm_points: -1
+      - gc_lower_clamp: 0
+        gc_default: 0
+        gc_max_value: 0
+        gc_upper_clamp: 5
+        gc_title: Extra Credit
+        marks:
+          - gcm_note: No Credit
+            gcm_points: 0
+          - gcm_note: Extra credit done poorly
+            gcm_points: 2
+          - gcm_note: Extra credit is acceptable
+            gcm_points: 5
+    eg_submission_due_date: 1972-01-01 23:59:59
+    eg_submission_open_date: 1971-01-01 23:59:59
+    g_grade_due_date: 1974-01-01 23:59:59
+    g_grade_released_date: 1974-01-01 23:59:59
+    eg_grade_inquiry_start_date: 1974-01-02 23:59:59
+    eg_grade_inquiry_due_date: 1974-01-08 23:59:59
+    eg_has_due_date: true
+    eg_has_release_date: true
+    g_grade_start_date: 1973-01-01 23:59:59
+    g_ta_view_start_date: 1970-01-01 23:59:59
+    g_title: TA Only w/ Penalty (Upload Only)
+    gradeable_config: upload_only
+    g_bucket: homework
+
+  - gradeable_config: leaderboard
+    components:
+      - gc_lower_clamp: 0
+        gc_default: 11
+        gc_max_value: 11
+        gc_upper_clamp: 11
+        gc_title: Question 1
+        marks:
+          - gcm_note: Full Credit
+            gcm_points: 0
+    g_ta_view_start_date: 1970-01-01 23:59:59
+    eg_submission_open_date: 1971-01-01 23:59:59
+    eg_submission_due_date: 9996-12-31 23:59:59
+    g_grade_start_date: 9997-12-31 23:59:59
+    g_grade_due_date: 9998-12-31 23:59:59
+    g_grade_released_date: 9998-12-31 23:59:59
+    eg_grade_inquiry_start_date: 9999-01-01 23:59:59
+    eg_grade_inquiry_due_date: 9999-01-06 23:59:59
+    eg_has_due_date: true
+    eg_has_release_date: true

@@ -23,6 +23,8 @@ class EmailTester extends \PHPUnit\Framework\TestCase {
             'user_givenname' => 'Tester',
             'user_preferred_givenname' => 'Test',
             'user_familyname' => 'Person',
+            'user_pronouns' => '',
+            'display_pronouns' => false,
             'user_email' => null,
             'user_email_secondary' => '',
             'user_email_secondary_notify' => false

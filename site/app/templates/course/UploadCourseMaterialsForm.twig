@@ -13,7 +13,12 @@
                 e.g. "optional/subdirectory" makes the full path:<br />
                 {{ base_course_material_path }}/optional/subdirectory
             </span>
-            <input type="text" id="input-provide-full-path" class="full-width" name="eg_config_path" value="" placeholder="optional/subdirectory"/>
+            <input type="text" id="input-provide-full-path" class="full-width" name="eg_config_path" value="" placeholder="optional/subdirectory" list="folder_paths"/>
+            <datalist id="folder_paths">
+                {% for folder_path in folder_paths %}
+                    <option value="{{ folder_path }}">
+                {% endfor %}
+            </datalist>
         </label>
         <fieldset>
             <legend class="black-message">
@@ -42,11 +47,11 @@
             {% endfor %}
             </div>
         </fieldset>
-        <label id="upload_dt">
+        <label id="upload_dt" style="pointer-events:none;">
             <span>
                 <strong>Choose a time to release the files being uploaded:</strong>
             </span>
-            <input id="upload_picker" class="date_picker" type="text" size="26" value='9998-01-01 00:00:00'><br>
+            <input id="upload_picker" class="date_picker" type="text" size="26" value='9998-01-01 00:00:00' style="pointer-events:auto;"><br>
             <span><em>Note: Everyone with grading access will be able to view all the materials irrespective of the release date/time.</em></span>
         </label>
         <label>
@@ -98,7 +103,7 @@
           <span>
             <label>
               Title for URL:
-              <input id="url_title" type="text" class="full-width"/>
+              <input id="title" type="text" class="full-width"/>
             </label>
             <label>
               URL:
@@ -108,8 +113,8 @@
         </div>
     </div>
     <script>
-        function makeSubmission(expandZip, hideFromStudents, cmPath, requestedPath, cmTime, sort, sections, sections_lock) {
-            handleUploadCourseMaterials("{{ csrf_token }}", expandZip, hideFromStudents, cmPath, requestedPath, cmTime, sort, sections, sections_lock);
+        function makeSubmission(expandZip, hideFromStudents, cmPath, requestedPath, cmTime, sort, sections, sections_lock, overwrite_all) {
+            handleUploadCourseMaterials("{{ csrf_token }}", expandZip, hideFromStudents, cmPath, requestedPath, cmTime, sort, sections, sections_lock, overwrite_all);
         }
         $(function() {
             $("#submit-materials").click(function(e){ // Submit button
@@ -142,7 +147,9 @@
                     const cmPath = document.getElementById('cm_path').innerHTML;
                     const requestedPath = document.getElementById("input-provide-full-path").value;
                     const sections_lock = document.getElementById('all_Sections_Showing_yes').checked === true;
-                    makeSubmission(expandZip, hideFromStudents, cmPath, requestedPath, cmTime, sort, sections, sections_lock);
+                    const overwrite_input = document.body.querySelector('input[name=overwrite-all]');
+                    overwrite_all = overwrite_input ? (document.body.querySelector('input[name=overwrite-all]').value === 'true') : null;
+                    makeSubmission(expandZip, hideFromStudents, cmPath, requestedPath, cmTime, sort, sections, sections_lock, overwrite_all);
                 }
                 else {
                     alert("Select at least one section");
@@ -150,7 +157,7 @@
                 e.stopPropagation();
             });
         });
-        flatpickr('#upload_picker', {
+        const upload_fp = flatpickr('#upload_picker', {
                     plugins: [ShortcutButtonsPlugin(
                         {
                             button: [
@@ -188,6 +195,7 @@
                             }
                         }
                     )],
+                    appendTo: document.getElementById('upload-course-materials-form'),
                     allowInput: true,
                     enableTime: true,
                     enableSeconds: true,
@@ -198,6 +206,9 @@
                       fp.calendarContainer.childNodes[2].childNodes[4].firstChild.setAttribute('aria-label', 'Seconds');
                     }
                     });
+    $('.form-body').on('scroll', function() {
+        upload_fp._positionCalendar();
+    });
     </script>
     <script>
         createArray(1);

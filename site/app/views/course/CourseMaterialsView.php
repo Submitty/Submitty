@@ -22,6 +22,7 @@ class CourseMaterialsView extends AbstractView {
         $directories = [];
         $directory_priorities = [];
         $seen = [];
+        $folder_visibilities = [];
         $folder_ids = [];
         $links = [];
         $base_view_url = $this->core->buildCourseUrl(['course_material']);
@@ -50,20 +51,20 @@ class CourseMaterialsView extends AbstractView {
             $dir_count_a = substr_count($rel_path_a, "/");
             $dir_count_b = substr_count($rel_path_b, "/");
             if ($dir_count_a > $dir_count_b) {
-                return true;
+                return 1;
             }
             elseif ($dir_count_a < $dir_count_b) {
-                return false;
+                return -1;
             }
             else {
                 if ($a->getPriority() > $b->getPriority()) {
-                    return true;
+                    return 1;
                 }
                 elseif ($a->getPriority() < $b->getPriority()) {
-                    return false;
+                    return -1;
                 }
                 else {
-                    return $a->getPath() > $b->getPath();
+                    return $a->getPath() > $b->getPath() ? 1 : -1;
                 }
             }
         };
@@ -94,7 +95,7 @@ class CourseMaterialsView extends AbstractView {
             $dirs = explode("/", $rel_path);
             $file_name = array_pop($dirs);
             if ($course_material->isLink()) {
-                $file_name = $course_material->getUrlTitle() . $course_material->getPath();
+                $file_name = $course_material->getTitle() . $course_material->getPath();
             }
             $path_to_place = &$final_structure;
             $path = "";
@@ -135,6 +136,10 @@ class CourseMaterialsView extends AbstractView {
 
         $this->setSeen($final_structure, $seen, $base_course_material_path);
 
+        $this->setFolderVisibilities($final_structure, $folder_visibilities);
+
+        $folder_paths = $this->compileAllFolderPaths($final_structure);
+
         return $this->core->getOutput()->renderTwigTemplate("course/CourseMaterials.twig", [
             "user_group" => $this->core->getUser()->getGroup(),
             "user_section" => $this->core->getUser()->getRegistrationSection(),
@@ -142,6 +147,7 @@ class CourseMaterialsView extends AbstractView {
             "csrf_token" => $this->core->getCsrfToken(),
             "display_file_url" => $this->core->buildCourseUrl(['display_file']),
             "seen" => $seen,
+            "folder_visibilities" => $folder_visibilities,
             "base_course_material_path" => $base_course_material_path,
             "directory_priorities" => $directory_priorities,
             "material_list" => $course_materials_db,
@@ -149,7 +155,8 @@ class CourseMaterialsView extends AbstractView {
             "date_format" => $this->core->getConfig()->getDateTimeFormat()->getFormat('date_time_picker'),
             "course_materials" => $final_structure,
             "folder_ids" => $folder_ids,
-            "links" => $links
+            "links" => $links,
+            "folder_paths" => $folder_paths
         ]);
     }
 
@@ -191,5 +198,92 @@ class CourseMaterialsView extends AbstractView {
             }
         }
         return $has_unseen;
+    }
+
+    /**
+     * Recurses through folders and decides whether they should appear to students.
+     *
+     * @param array $course_materials - Dictionary: path name => CourseMaterial.
+     * @param array $folder_visibilities -  Dictionary: path name => bool. True if visible to students, false if not.
+     */
+    private function setFolderVisibilities(array $course_materials, array &$folder_visibilities): void {
+        foreach ($course_materials as $path => $course_material) {
+            if (is_array($course_material)) {
+                // Found root-level folder; this folder could be invisible
+                $this->setFolderVisibilitiesR($course_material, $folder_visibilities, "root/$path");
+            }
+        }
+    }
+
+    /**
+     * Recurses through folders and decides whether they should appear to students.
+     *
+     * @param array $course_materials - Dictionary: path name => CourseMaterial.
+     * @param array $folder_visibilities - Dictionary: path name => bool. True if visible to students, false if not.
+     * @param string $current_path - Path to the folder that $course_materials represents.
+     */
+    private function setFolderVisibilitiesR(array $course_materials, array &$folder_visibilities, string $current_path): void {
+        $cur_visibility = false;
+        foreach ($course_materials as $name => $course_material) {
+            if (is_array($course_material)) {
+                // Material is actually folder
+                $sub_path = "$current_path/$name";
+
+                $this->setFolderVisibilitiesR($course_material, $folder_visibilities, $sub_path);
+
+                // At least one file visible in this folder
+                if ($folder_visibilities[$sub_path]) {
+                    $cur_visibility = true;
+                }
+            }
+            else {
+                // Material is file
+                if (!$course_material->isHiddenFromStudents()) {
+                    $cur_visibility = true;
+                }
+            }
+        }
+
+        $folder_visibilities[$current_path] = $cur_visibility;
+    }
+
+    /**
+     * Recurses through folders and compiles an array of all the paths to folders.
+     *
+     * @param array<mixed> $course_materials - Dictionary: path name => CourseMaterial.
+     * @return array<string> List of folders paths.
+     */
+    private function compileAllFolderPaths(array $course_materials): array {
+        $folder_paths = [];
+        $this->compileAllFolderPathsR($course_materials, $folder_paths, "");
+        return $folder_paths;
+    }
+
+    /**
+     * Recurses through folders and compiles an array of all the paths to folders.
+     * Helper recursive function.
+     *
+     * @param array<mixed> $course_materials - Dictionary: path name => CourseMaterial.
+     * @param array<string>  $folder_paths - List we append
+     * @param string $full_path - Current path we are examining files in.
+     */
+    private function compileAllFolderPathsR(
+        array $course_materials,
+        array &$folder_paths,
+        string $full_path
+    ): void {
+        foreach ($course_materials as $name => $course_material) {
+            if (is_array($course_material)) {
+                $inner_full_path = "";
+                if (empty($full_path)) {
+                    $inner_full_path = $name;
+                }
+                else {
+                    $inner_full_path = $full_path . '/' . $name;
+                }
+                array_push($folder_paths, $inner_full_path);
+                $this->compileAllFolderPathsR($course_material, $folder_paths, $inner_full_path);
+            }
+        }
     }
 }

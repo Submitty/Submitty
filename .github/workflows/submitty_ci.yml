@@ -1,6 +1,11 @@
 name: Submitty CI
 
-on: [push, pull_request]
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+  workflow_dispatch:
 
 env:
   PGPASSWORD: submitty_dbuser
@@ -11,595 +16,434 @@ env:
   SUBMITTY_INSTALL_DIR: /usr/local/submitty
   SUBMITTY_REPOSITORY: /usr/local/submitty/GIT_CHECKOUT/Submitty
   POSTGRES_HOST: localhost
-  PHP_VER: 7.4
+  PHP_VER: 8.1
   NODE_VERSION: 16
   PYTHON_VERSION: 3.8
 
+concurrency:
+  # If this is a PR, cancel all previously running jobs on source branch
+  group: ${{ github.head_ref || github.run_id }}
+  cancel-in-progress: true
+
+
 jobs:
-    css-lint:
-        runs-on: ubuntu-20.04
-        defaults:
-            run:
-                working-directory: site
-        steps:
-            - uses: actions/checkout@v3
-            - uses: actions/setup-node@v3
-              with:
-                node-version: ${{ env.NODE_VERSION }}
-            - name: Cache Node Modules
-              uses: actions/cache@v3
-              with:
-                  path: ~/.npm
-                  key: ${{ runner.os }}-cache-node-modules-${{ hashFiles('**/package-lock.json') }}
-                  restore-keys: |
-                       ${{ runner.os }}-cache-node-modules-
-            - run: npm install
-            - name: Run stylelint
-              run: npm run css-stylelint
-
-
-    js-lint:
-        runs-on: ubuntu-20.04
-        defaults:
-            run:
-                working-directory: site
-        steps:
-            - uses: actions/checkout@v3
-            - uses: actions/setup-node@v3
-              with:
-                node-version: ${{ env.NODE_VERSION }}
-            - name: Cache Node Modules
-              uses: actions/cache@v3
-              with:
-                  path: ~/.npm
-                  key: ${{ runner.os }}-cache-node-modules-${{ hashFiles('**/package-lock.json') }}
-                  restore-keys: |
-                       ${{ runner.os }}-cache-node-modules-
-            - run: npm install
-            - name: Run eslint
-              run: npm run eslint
-            - name: Run npm build (tsc and esbuild)
-              run: npm run build
-
-
-    js-unit:
-        runs-on: ubuntu-20.04
-        defaults:
-            run:
-                working-directory: site
-        steps:
-            - uses: actions/checkout@v3
-            - uses: actions/setup-node@v3
-              with:
-                node-version: ${{ env.NODE_VERSION }}
-            - name: Cache Node Modules
-              uses: actions/cache@v3
-              with:
-                  path: ~/.npm
-                  key: ${{ runner.os }}-cache-node-modules-${{ hashFiles('**/package-lock.json') }}
-                  restore-keys: |
-                      ${{ runner.os }}-cache-node-modules-
-            - run: npm install
-            - run: npm run test
-            - name: Upload Coverage
-              uses: codecov/codecov-action@v1
-              with:
-                  files: site/tests/report/jest/clover.xml
-                  flags: js
-
-
-    php-lint:
-        runs-on: ubuntu-20.04
-        defaults:
-            run:
-                working-directory: site
-        steps:
-            - uses: actions/checkout@v3
-            - uses: shivammathur/setup-php@2.24.0
-              with:
-                php-version: ${{ env.PHP_VER }}
-            - name: Cache Composer
-              id: composer-cache
-              run: echo "dir=$(composer config cache-files-dir)" >> $GITHUB_OUTPUT
-            - name: Install Composer
-              uses: actions/cache@v3
-              with:
-                  path: ${{ steps.composer-cache.outputs.dir }}
-                  key: ${{ runner.os }}-composer-${{ hashFiles('**/composer.lock') }}
-                  restore-keys: |
-                      ${{ runner.os }}-composer-
-
-            - name: Install dependencies
-              run: composer install --prefer-dist --dev
-            - name: Check syntax
-              run: find -L . -path ./vendor -prune -o -name '*.php' -print0 | xargs -0 -n 1 -P 4 php -l
-            - name: Lint PHP code
-              run: |
-                  php vendor/bin/phpcs --version
-                  php vendor/bin/phpcs
-            - name: Static analysis
-              run: |
-                  php vendor/bin/phpstan  --version
-                  php vendor/bin/phpstan analyze app public/index.php socket/index.php
-
-
-    php-unit:
-      runs-on: ubuntu-20.04
-      defaults:
-          run:
-              working-directory: site
-      steps:
-          - uses: actions/checkout@v3
-          - uses: shivammathur/setup-php@2.24.0
-            with:
-              php-version: ${{ env.PHP_VER }}
-              extensions: imagick
-              coverage: pcov
-          - name: Cache Composer
-            id: composer-cache
-            run: echo "dir=$(composer config cache-files-dir)" >> $GITHUB_OUTPUT
-          - name: Install Composer
-            uses: actions/cache@v3
-            with:
-                path: ${{ steps.composer-cache.outputs.dir }}
-                key: ${{ runner.os }}-composer-${{ hashFiles('**/composer.lock') }}
-                restore-keys: |
-                    ${{ runner.os }}-composer-
-          - name: Install dependencies
-            run: composer install --prefer-dist --dev
-          - name: Run php unit tests
-            run : php vendor/bin/phpunit
-          - name: Upload Coverage
-            uses: codecov/codecov-action@v1
-            with:
-              files: site/tests/report/clover.xml
-              flags: php
-
-
-    python-lint:
-      runs-on: ubuntu-20.04
-      steps:
-        - uses: actions/checkout@v3
-        - uses: actions/setup-python@v4
-          with:
-            python-version: ${{ env.PYTHON_VERSION }}
-        - name: Cache Pip
-          uses: actions/cache@v3
-          with:
-            path: ~/.cache/pip
-            key: ${{ runner.os }}-${{ github.job }}-pip-${{ github.sha }}
-            restore-keys: |
-                ${{ runner.os }}-${{ github.job }}-pip-
-        - name: Install python libraries
-          run : |
-            python3 -m pip install --upgrade pip
-            python3 -m pip install flake8 flake8-bugbear
-        - name: Run python linting
-          run : python3 -m flake8
-
-
-    python-unit:
-      runs-on: ubuntu-20.04
-      steps:
-        - uses: actions/checkout@v3
-        - uses: actions/setup-python@v4
-          with:
-            python-version: ${{ env.PYTHON_VERSION }}
-        - name: Cache Pip
-          uses: actions/cache@v3
-          with:
-            path: ~/.cache/pip
-            key: ${{ runner.os }}-${{ github.job }}-pip-${{ hashFiles('**/system_requirements.txt') }}
-            restore-keys: |
-                ${{ runner.os }}-${{ github.job }}-pip-
-        - name: Install python libraries
-          run : |
-            python3 -m pip install -r .setup/pip/system_requirements.txt
-            python3 -m pip install coverage # Testing util.
-
-        # Submitty utils install & unit testing, must be put before auto grader
-        # testing as auto grader depends on submitty utils to function.
-        - name: Run python_submitty_utils python unit tests
-          working-directory: python_submitty_utils
-          run : |
-            pip3 install .
-            coverage run -m unittest discover
-            coverage xml
-        - name: Upload submitty python utils Coverage
-          uses: codecov/codecov-action@v1
-          with:
-            files: python_submitty_utils/coverage.xml
-            flags: python_submitty_utils
-
-        # Migrator unit test
-        - name: Run migrator python unit tests
-          working-directory: migration
-          run : |
-            coverage run -m unittest discover
-            coverage xml
-        - name: Upload migrator Coverage
-          uses: codecov/codecov-action@v1
-          with:
-            files: migration/coverage.xml
-            flags: migrator
-
-        # Auto grader unit test
-        - name: Run autograder python unit tests
-          working-directory: autograder
-          run : |
-            coverage run -m unittest discover
-            coverage xml
-        - name: Upload autograder Coverage
-          uses: codecov/codecov-action@v1
-          with:
-            files: autograder/coverage.xml
-            flags: autograder
-
-        #submitty_daemon_jobs unit tests
-        - name: Install bulk upload dependencies
-          run: |
-            sudo apt-get install -y poppler-utils
-            sudo apt-get install -y libzbar0
-
-        - name: Run bulk upload unit tests
-          working-directory: sbin/submitty_daemon_jobs
-          run : |
-            coverage run -m unittest discover tests -t .
-            coverage xml -i
-
-        - name: Upload submitty_daemon_jobs Coverage
-          uses: codecov/codecov-action@v1
-          with:
-            files: sbin/submitty_daemon_jobs/coverage.xml
-            flags: submitty_daemon_jobs
-
-
-    shellcheck:
-      name: ShellCheck
-      runs-on: ubuntu-20.04
-      steps:
-        - uses: actions/checkout@v3
-        - name: install ShellCheck
-          run: sudo apt-get install -y shellcheck
-        - name: Run ShellCheck
-          run: python3 run_shellcheck.py  # Uses the default Python installed with Ubuntu
-
-
-    e2e:
-        needs:
-          - js-lint
-          - js-unit
-          - php-lint
-          - php-unit
-          - python-lint
-          - python-unit
-          - css-lint
-          - shellcheck
-        runs-on: ubuntu-20.04
-        services:
-          postgres:
-            image: postgres
-            env:
-              POSTGRES_PASSWORD: submitty_dbuser
-              POSTGRES_USER: postgres
-              TZ: America/New_York
-            options: >-
-              --health-cmd pg_isready
-              --health-interval 10s
-              --health-timeout 5s
-              --health-retries 5
-            ports:
-              - 5432:5432
-
-        steps:
-          - name: Cancel Previous Runs
-            uses: styfle/cancel-workflow-action@0.11.0
-            with:
-              access_token: ${{ github.token }}
-          - uses: actions/checkout@v3
-            with:
-              path: SUBMITTY_CPY/
-          - name: Copy Repo
-            run: |
-              # have to copy first, absolute paths not supported by actions/checkout@v3
-                sudo mkdir -p ${SUBMITTY_INSTALL_DIR}/GIT_CHECKOUT/Submitty
-                sudo cp -R SUBMITTY_CPY/. ${SUBMITTY_INSTALL_DIR}/GIT_CHECKOUT/Submitty
-                sudo chmod -R a+rwx  ${SUBMITTY_INSTALL_DIR}
-                sudo chmod -R a+rwx /tmp/
-
-          - uses: actions/setup-python@v4
-            with:
-              python-version: ${{ env.PYTHON_VERSION }}
-          - uses: shivammathur/setup-php@2.24.0
-            with:
-              php-version: ${{ env.PHP_VER }}
-              extensions: imagick, ldap
-
-          - name: Set Timezone
-            run: |
-              sudo timedatectl set-timezone America/New_York
-
-          - name: Cache pip
-            uses: actions/cache@v3
-            with:
-              path: ~/.cache/pip
-              key: ${{ runner.os }}-${{ github.job }}-pip-${{ hashFiles('**/system_requirements.txt') }}
-              restore-keys: |
-                ${{ runner.os }}-${{ github.job }}-pip-
-
-          - name: Install Test-specific python dependencies
-            run: |
-              # Install for local
-              python3 -m pip install --upgrade pip setuptools wheel
-              pip3 -V
-              pip3 install selenium websocket_client
-              # Install globally
-              sudo python3 -m pip install --upgrade pip setuptools wheel
-              sudo pip3 -V
-
-          - name: Install python dependencies
-            run: |
-              # Install for local
-              pip3 install -r ${SUBMITTY_REPOSITORY}/.setup/pip/system_requirements.txt
-              # Install globally
-              sudo pip3 install -r ${SUBMITTY_REPOSITORY}/.setup/pip/system_requirements.txt
-
-          - name: Get composer cache dir
-            id: composer-cache
-            run: |
-              cd ${SUBMITTY_INSTALL_DIR}/GIT_CHECKOUT/Submitty/site
-              echo "dir=$(composer config cache-files-dir)" >> $GITHUB_OUTPUT
-          - name: Install composer Cache
-            uses: actions/cache@v3
-            with:
-              path: ${{ steps.composer-cache.outputs.dir }}
-              key: ${{ runner.os }}-php-composer-${{ hashFiles('**/composer.lock') }}
-              restore-keys: |
-                ${{ runner.os }}-php-composer-
-
-          - name: Install PHP dependencies
-            run: |
-              cd  ${SUBMITTY_INSTALL_DIR}/GIT_CHECKOUT/Submitty/site
-              composer install --prefer-dist
-
-          - name: Install Submitty python utils
-            run: |
-              cd ${SUBMITTY_REPOSITORY}/python_submitty_utils
-              pip3 install .
-              pip3 show submitty_utils
-              umask 022
-              sudo -H pip3 install .
-              sudo pip3 show submitty_utils
-
-          - name: Install accessibility checker
-            run: |
-              wget https://github.com/validator/validator/releases/download/20.3.16/vnu.jar_20.3.16.zip
-              unzip vnu.jar_20.3.16.zip
-              sudo mv dist/vnu.jar /usr/bin/
-
-          - name: Create Database and default users
-            run: |
-              PGPASSWORD=${PGPASSWORD} psql -d postgres -h localhost -U postgres -c "CREATE ROLE submitty_dbuser WITH SUPERUSER CREATEDB CREATEROLE LOGIN PASSWORD 'submitty_dbuser'"
-              PGPASSWORD=${PGPASSWORD} psql -d postgres -h localhost -U postgres -c "CREATE ROLE submitty_course_dbuser WITH LOGIN PASSWORD 'submitty_course_dbuser'"
-              PGPASSWORD=${PGPASSWORD} psql -d postgres -h localhost -U submitty_dbuser -c "CREATE DATABASE submitty"
-
-          - name: Install apt-get packages
-            run: |
-              sudo apt-get update
-              sudo apt-get install libseccomp-dev
-              sudo apt-get install libboost-all-dev
-              sudo apt-get install apache2
-              sudo apt-get install apache2-suexec-custom
-              sudo apt-get install libapache2-mod-authnz-external
-              sudo apt-get install libapache2-mod-authz-unixgroup
-              sudo apt-get install libapache2-mod-wsgi-py3
-              sudo apt-get install nginx
-              sudo apt-get install php${PHP_VER}-fpm
-              sudo apt-get install poppler-utils
-              sudo apt-get install valgrind
-              sudo apt-get install moreutils
-
-          - name: Install third party dependencies
-            run: |
-              cd $SUBMITTY_REPOSITORY
-              sudo -E env "PATH=$PATH" bash .setup/testing/autograder.sh
-
-          - name: Configure Test suite
-            run: |
-              cd $SUBMITTY_REPOSITORY
-              sudo -E env "PATH=$PATH" bash .setup/testing/setup.sh
-              sudo jq '. |= . + {"verified_submitty_admin_user": "submitty-admin"}' /usr/local/submitty/config/submitty_users.json \
-                | sudo sponge /usr/local/submitty/config/submitty_users.json
-              sudo chown root:submitty_daemonphp /usr/local/submitty/config/submitty_users.json
-              sudo chmod 440 /usr/local/submitty/config/submitty_users.json
-
-          - name: Setup ldap
-            run: |
-              cd $SUBMITTY_REPOSITORY
-              sudo -E env "PATH=$PATH" bash .setup/testing/setup_ldap.sh
-
-          - name: Set up sample course
-            run:  sudo -E env "PATH=$PATH" python3 /usr/local/submitty/GIT_CHECKOUT/Submitty/.setup/bin/setup_sample_courses.py --no_grading sample
-
-          - name: Set up test suite
-            run: |
-              cd $SUBMITTY_REPOSITORY
-              sudo -E env "PATH=$PATH" bash .setup/testing/setup_test_suite.sh
-
-          - name: Set up apache
-            run: |
-              cd $SUBMITTY_REPOSITORY
-              sudo a2enmod include rewrite actions cgi alias headers suexec authnz_external headers proxy_fcgi proxy_http proxy_wstunnel
-              sudo cp .setup/php-fpm/pool.d/submitty.conf /etc/php/$PHP_VER/fpm/php-fpm.conf
-              sudo mkdir -p /run/php
-              sudo chown www-data:www-data /run/php
-              sudo chmod 755 /run/php
-              sudo a2dissite 000-default
-              sudo rm -rf /etc/apache2/sites-available/*
-              sudo rm -rf /etc/apache2/sites-enabled/*
-              sudo cp -f .setup/apache/submitty.conf /etc/apache2/sites-available/submitty.conf
-              sudo sed -e "s/Require host __your_domain__/Require all granted/g" --in-place /etc/apache2/sites-available/submitty.conf
-              sudo cp .setup/apache/www-data /etc/apache2/suexec/www-data
-              sudo chmod 0640 /etc/apache2/suexec/www-data
-              sudo a2ensite submitty
-              sudo bash -c 'echo "export PATH=$PATH" >> /etc/apache2/envvars'
-              sudo apache2ctl -t
-              sudo service php${PHP_VER}-fpm restart
-              sudo service apache2 restart
-
-          - name: Set up nginx
-            run: |
-              cd $SUBMITTY_REPOSITORY
-              sudo mkdir /etc/systemd/system/nginx.service.d
-              sudo printf "[Service]\nExecStartPost=/bin/sleep 0.1\n" | sudo tee /etc/systemd/system/nginx.service.d/override.conf
-              sudo systemctl daemon-reload
-              sudo rm -rf /etc/nginx/sites-available/*
-              sudo rm -rf /etc/nginx/sites-enabled/*
-              sudo cp -f .setup/nginx/submitty.conf /etc/nginx/sites-available/submitty.conf
-              sudo chmod 644 /etc/nginx/sites-available/submitty.conf
-              sudo ln -s /etc/nginx/sites-available/submitty.conf /etc/nginx/sites-enabled/submitty.conf
-              sudo service nginx restart
-
-          - name: Run git tests
-            run: |
-              cd $SUBMITTY_REPOSITORY
-              SEMESTER=$(python3 -c 'from datetime import datetime; today = datetime.today(); semester = ("s" if today.month < 7 else "f") + str(today.year)[-2:]; print(semester)')
-              sudo python3 /usr/local/submitty/bin/generate_repos.py ${SEMESTER} sample open_homework
-              bash tests/git_test.sh
-
-          - uses: nanasess/setup-chromedriver@master
-          - name: Setup chromedriver
-            run: |
-              sudo systemctl restart submitty_autograding_worker
-              sudo systemctl restart submitty_autograding_shipper
-              export DISPLAY=:99
-              chromedriver --url-base=/wd/hub &
-
-          - name: Run selenium e2e tests with pam auth
-            run: |
-              pushd ${SUBMITTY_REPOSITORY}
-              echo "Authentication Method => $(sudo jq -r ".authentication_method" /usr/local/submitty/config/database.json)"
-              TEST_URL="http://localhost" python3 -m unittest discover -v --start-directory tests
-              sudo bash tests/test_site_error_log.sh
-
-          # TODO: Remove this block after upgrading jsPDF
-          - name: Cache Node Modules
-            uses: actions/cache@v3
-            with:
-              path: ~/.npm
-              key: ${{ runner.os }}-cache-node-modules-dev-${{ hashFiles('**/package-lock.json') }}
-              restore-keys: |
-                 ${{ runner.os }}-cache-node-modules-dev
-
-          - name: Install node dependencies
-            working-directory: ${{env.SUBMITTY_REPOSITORY}}/site
-            run: |
-              npm install file-saver --save
-              npm install --production=false
-
-          - name: Run API tests
-            working-directory: ${{env.SUBMITTY_REPOSITORY}}/site
-            run: npm run test:api
-            env:
-              BASE_URL: http://localhost
-
-          - name: Run cypress e2e tests with pam auth
-            uses: cypress-io/github-action@v5
-            with:
-              config: baseUrl=http://localhost
-              working-directory: ${{env.SUBMITTY_REPOSITORY}}/site
-              browser: chrome
-              headless: true
-              env: run_area=CI
-
-          - name: Stop autograding services
-            run: |
-              sudo systemctl stop submitty_autograding_worker
-              sudo systemctl stop submitty_autograding_shipper
-
-          - name: Run autograding status test
-            uses: cypress-io/github-action@v5
-            with:
-              config: baseUrl=http://localhost
-              spec: cypress/e2e/autograding_status_1.spec.js
-              working-directory: ${{env.SUBMITTY_REPOSITORY}}/site
-              browser: chrome
-              headless: true
-              env: autograding_shipper_off=True
-
-          - name: Restart autograding shipper
-            run: |
-              sudo systemctl restart submitty_autograding_shipper
-
-          - name: Run autograding status test
-            uses: cypress-io/github-action@v5
-            with:
-              config: baseUrl=http://localhost
-              spec: cypress/e2e/autograding_status_2.spec.js
-              working-directory: ${{env.SUBMITTY_REPOSITORY}}/site
-              browser: chrome
-              headless: true
-              env: autograding_shipper_off=True
-
-          - name: Restart autograding worker
-            run: |
-              sudo systemctl restart submitty_autograding_worker
-
-          - name: Switch to database auth
-            run:  sudo sed -ie "s/Pam/Database/g" ${SUBMITTY_INSTALL_DIR}/config/authentication.json
-
-          - name: Run cypress e2e login tests with database auth
-            uses: cypress-io/github-action@v5
-            with:
-              config: baseUrl=http://localhost
-              spec: cypress/e2e/login.spec.js
-              working-directory: ${{env.SUBMITTY_REPOSITORY}}/site
-              browser: chrome
-              headless: true
-
-          - name: Switch to LDAP auth
-            run:  sudo sed -ie "s/Database/Ldap/g" ${SUBMITTY_INSTALL_DIR}/config/authentication.json
-
-          - name: Run cypress e2e login tests with LDAP auth
-            uses: cypress-io/github-action@v5
-            with:
-              config: baseUrl=http://localhost
-              spec: cypress/e2e/login.spec.js
-              working-directory: ${{env.SUBMITTY_REPOSITORY}}/site
-              browser: chrome
-              headless: true
-
-          - name: Setup SAML
-            run: |
-              cd $SUBMITTY_REPOSITORY
-              sudo -E env "PATH=$PATH" bash .setup/testing/setup_saml.sh
-
-          - name: Switch to SAML auth
-            run:  sudo sed -ie "s/Ldap/Saml/g" ${SUBMITTY_INSTALL_DIR}/config/authentication.json
-
-          - name: Run cypress e2e login tests with SAML auth
-            uses: cypress-io/github-action@v5
-            with:
-              config: baseUrl=http://localhost,chromeWebSecurity=false
-              spec: cypress/e2e/login.spec.js
-              working-directory: ${{env.SUBMITTY_REPOSITORY}}/site
-              browser: chrome
-              headless: true
-
-          - uses: actions/upload-artifact@v3
-            if: failure()
-            with:
-              name: cypress-screenshots
-              path: ${{env.SUBMITTY_REPOSITORY}}/site/cypress/screenshots
-          - uses: actions/upload-artifact@v3
-            if: failure()
-            with:
-              name: cypress-videos
-              path: ${{env.SUBMITTY_REPOSITORY}}/site/cypress/videos
-
-          - name: Check for site errors
-            working-directory: ${{ env.SUBMITTY_REPOSITORY }}
-            run: sudo bash tests/test_site_error_log.sh
-
-          - name: Run integration tests
-            run: sudo -E env "PATH=$PATH" python3 /usr/local/submitty/test_suite/integrationTests/run.py
+  css-lint:
+    runs-on: ubuntu-22.04
+    defaults:
+      run:
+        working-directory: site
+    steps:
+      - uses: actions/checkout@v3
+      - uses: actions/setup-node@v3
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+      - name: Cache Node Modules
+        uses: actions/cache@v3
+        with:
+          path: ~/.npm
+          key: ${{ runner.os }}-cache-node-modules-${{ hashFiles('**/package-lock.json') }}
+          restore-keys: |
+                ${{ runner.os }}-cache-node-modules-
+      - run: npm install
+      - name: Run stylelint
+        run: npm run css-stylelint
+
+
+  js-lint:
+    runs-on: ubuntu-22.04
+    defaults:
+      run:
+        working-directory: site
+    steps:
+      - uses: actions/checkout@v3
+      - uses: actions/setup-node@v3
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+      - name: Cache Node Modules
+        uses: actions/cache@v3
+        with:
+          path: ~/.npm
+          key: ${{ runner.os }}-cache-node-modules-${{ hashFiles('**/package-lock.json') }}
+          restore-keys: |
+                ${{ runner.os }}-cache-node-modules-
+      - run: npm install
+      - name: Run eslint
+        run: npm run eslint
+      - name: Run npm build (tsc and esbuild)
+        run: npm run build
+
+
+  js-unit:
+    runs-on: ubuntu-22.04
+    defaults:
+      run:
+        working-directory: site
+    steps:
+      - uses: actions/checkout@v3
+      - uses: actions/setup-node@v3
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+      - name: Cache Node Modules
+        uses: actions/cache@v3
+        with:
+          path: ~/.npm
+          key: ${{ runner.os }}-cache-node-modules-${{ hashFiles('**/package-lock.json') }}
+          restore-keys: |
+              ${{ runner.os }}-cache-node-modules-
+      - run: npm install
+      - run: npm run test
+      - name: Upload Coverage
+        uses: codecov/codecov-action@v3
+        with:
+          files: site/tests/report/jest/clover.xml
+          flags: js
+
+
+  php-lint:
+    runs-on: ubuntu-22.04
+    defaults:
+      run:
+        working-directory: site
+    steps:
+      - uses: actions/checkout@v3
+      - uses: shivammathur/setup-php@2.25.5
+        with:
+          php-version: ${{ env.PHP_VER }}
+      - name: Cache Composer
+        id: composer-cache
+        run: echo "dir=$(composer config cache-files-dir)" >> $GITHUB_OUTPUT
+      - name: Install Composer
+        uses: actions/cache@v3
+        with:
+          path: ${{ steps.composer-cache.outputs.dir }}
+          key: ${{ runner.os }}-composer-${{ hashFiles('**/composer.lock') }}
+          restore-keys: |
+              ${{ runner.os }}-composer-
+
+      - name: Install dependencies
+        run: composer install --prefer-dist --dev
+      - name: Check syntax
+        run: find -L . -path ./vendor -prune -o -name '*.php' -print0 | xargs -0 -n 1 -P 4 php -l
+      - name: Lint PHP code
+        run: |
+            php vendor/bin/phpcs --version
+            php vendor/bin/phpcs
+      - name: Static analysis
+        run: |
+            php vendor/bin/phpstan  --version
+            php vendor/bin/phpstan analyze app public/index.php socket/index.php
+
+
+  php-unit:
+    runs-on: ubuntu-22.04
+    defaults:
+      run:
+        working-directory: site
+    steps:
+      - uses: actions/checkout@v3
+      - uses: shivammathur/setup-php@2.25.5
+        with:
+          php-version: ${{ env.PHP_VER }}
+          extensions: imagick
+          coverage: pcov
+      - name: Cache Composer
+        id: composer-cache
+        run: echo "dir=$(composer config cache-files-dir)" >> $GITHUB_OUTPUT
+      - name: Install Composer
+        uses: actions/cache@v3
+        with:
+          path: ${{ steps.composer-cache.outputs.dir }}
+          key: ${{ runner.os }}-composer-${{ hashFiles('**/composer.lock') }}
+          restore-keys: |
+              ${{ runner.os }}-composer-
+      - name: Install dependencies
+        run: composer install --prefer-dist --dev
+      - name: Run php unit tests
+        run: php vendor/bin/phpunit
+      - name: Upload Coverage
+        uses: codecov/codecov-action@v3
+        with:
+          files: site/tests/report/clover.xml
+          flags: php
+
+
+  python-lint:
+    runs-on: ubuntu-22.04
+    steps:
+      - uses: actions/checkout@v3
+      - uses: actions/setup-python@v4
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+      - name: Cache Pip
+        uses: actions/cache@v3
+        with:
+          path: ~/.cache/pip
+          key: ${{ runner.os }}-${{ github.job }}-pip-${{ github.sha }}
+          restore-keys: |
+              ${{ runner.os }}-${{ github.job }}-pip-
+      - name: Install python libraries
+        run: |
+          python3 -m pip install --upgrade pip
+          python3 -m pip install flake8 flake8-bugbear
+      - name: Run python linting
+        run: python3 -m flake8
+
+
+  python-unit:
+    runs-on: ubuntu-22.04
+    steps:
+      - uses: actions/checkout@v3
+      - uses: actions/setup-python@v4
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+      - name: Cache Pip
+        uses: actions/cache@v3
+        with:
+          path: ~/.cache/pip
+          key: ${{ runner.os }}-${{ github.job }}-pip-${{ hashFiles('**/system_requirements.txt') }}
+          restore-keys: |
+              ${{ runner.os }}-${{ github.job }}-pip-
+      - name: Install python libraries
+        run: |
+          python3 -m pip install -r .setup/pip/system_requirements.txt
+          python3 -m pip install coverage # Testing util.
+
+      # Submitty utils install & unit testing, must be put before auto grader
+      # testing as auto grader depends on submitty utils to function.
+      - name: Run python_submitty_utils python unit tests
+        working-directory: python_submitty_utils
+        run: |
+          pip3 install .
+          coverage run -m unittest discover
+          coverage xml
+      - name: Upload submitty python utils Coverage
+        uses: codecov/codecov-action@v3
+        with:
+          files: python_submitty_utils/coverage.xml
+          flags: python_submitty_utils
+
+      # Migrator unit test
+      - name: Run migrator python unit tests
+        working-directory: migration
+        run: |
+          coverage run -m unittest discover
+          coverage xml
+      - name: Upload migrator Coverage
+        uses: codecov/codecov-action@v3
+        with:
+          files: migration/coverage.xml
+          flags: migrator
+
+      # Auto grader unit test
+      - name: Run autograder python unit tests
+        working-directory: autograder
+        run: |
+          coverage run -m unittest discover
+          coverage xml
+      - name: Upload autograder Coverage
+        uses: codecov/codecov-action@v3
+        with:
+          files: autograder/coverage.xml
+          flags: autograder
+
+      #  submitty_daemon_jobs unit tests
+      - name: Install bulk upload dependencies
+        run: |
+          sudo apt-get install -y poppler-utils
+          sudo apt-get install -y libzbar0
+
+      - name: Run bulk upload unit tests
+        working-directory: sbin/submitty_daemon_jobs
+        run: |
+          coverage run -m unittest discover tests -t .
+          coverage xml -i
+
+      - name: Upload submitty_daemon_jobs Coverage
+        uses: codecov/codecov-action@v3
+        with:
+          files: sbin/submitty_daemon_jobs/coverage.xml
+          flags: submitty_daemon_jobs
+
+  yaml-lint:
+    name: yaml-lint
+    runs-on: ubuntu-22.04
+    steps:
+      - uses: actions/checkout@v3
+      - name: install yamllint
+        run: sudo apt-get install -y yamllint
+      - name: Run yamllint
+        run: yamllint .
+
+
+  shellcheck:
+    name: ShellCheck
+    runs-on: ubuntu-22.04
+    steps:
+      - uses: actions/checkout@v3
+      - name: install ShellCheck
+        run: sudo apt-get install -y shellcheck
+      - name: Run ShellCheck
+        run: python3 run_shellcheck.py  # Uses the default Python installed with Ubuntu
+
+
+  e2eCypress:
+    runs-on: ubuntu-22.04
+    services:
+      postgres:
+        image: postgres
+        env:
+          POSTGRES_PASSWORD: submitty_dbuser
+          POSTGRES_USER: postgres
+          TZ: America/New_York
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+        ports:
+          - 5432:5432
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+      - uses: ./.github/actions/e2e-Setup-Composite
+      # TODO: Remove this block after upgrading jsPDF
+      - name: Cache Node Modules
+        uses: actions/cache@v3
+        with:
+          path: ~/.npm
+          key: ${{ runner.os }}-cache-node-modules-dev-${{ hashFiles('**/package-lock.json') }}
+          restore-keys: |
+              ${{ runner.os }}-cache-node-modules-dev
+
+      - name: Install node dependencies
+        working-directory: ${{env.SUBMITTY_REPOSITORY}}/site
+        run: |
+          npm install file-saver --save
+          npm install --production=false
+
+      - name: Run API tests
+        working-directory: ${{env.SUBMITTY_REPOSITORY}}/site
+        run: npm run test:api
+        env:
+          BASE_URL: http://localhost
+
+      - name: Run cypress e2e tests with pam auth
+        uses: cypress-io/github-action@v5
+        with:
+          config: baseUrl=http://localhost
+          working-directory: ${{env.SUBMITTY_REPOSITORY}}/site
+          browser: chrome
+          env: run_area=CI
+
+      - name: Stop autograding services
+        run: |
+          sudo systemctl stop submitty_autograding_worker
+          sudo systemctl stop submitty_autograding_shipper
+
+      - name: Run autograding status test
+        uses: cypress-io/github-action@v5
+        with:
+          config: baseUrl=http://localhost
+          spec: cypress/e2e/autograding_status_1.spec.js
+          working-directory: ${{env.SUBMITTY_REPOSITORY}}/site
+          browser: chrome
+          env: autograding_shipper_off=True
+
+      - name: Restart autograding shipper
+        run: |
+          sudo systemctl restart submitty_autograding_shipper
+
+      - name: Run autograding status test
+        uses: cypress-io/github-action@v5
+        with:
+          config: baseUrl=http://localhost
+          spec: cypress/e2e/autograding_status_2.spec.js
+          working-directory: ${{env.SUBMITTY_REPOSITORY}}/site
+          browser: chrome
+          env: autograding_shipper_off=True
+
+      - name: Restart autograding worker
+        run: |
+          sudo systemctl restart submitty_autograding_worker
+
+      - name: Switch to database auth
+        run: sudo sed -ie "s/Pam/Database/g" ${SUBMITTY_INSTALL_DIR}/config/authentication.json
+
+      - name: Run cypress e2e login tests with database auth
+        uses: cypress-io/github-action@v5
+        with:
+          config: baseUrl=http://localhost
+          spec: cypress/e2e/login.spec.js
+          working-directory: ${{env.SUBMITTY_REPOSITORY}}/site
+          browser: chrome
+
+      - name: Switch to LDAP auth
+        run: sudo sed -ie "s/Database/Ldap/g" ${SUBMITTY_INSTALL_DIR}/config/authentication.json
+
+      - name: Run cypress e2e login tests with LDAP auth
+        uses: cypress-io/github-action@v5
+        with:
+          config: baseUrl=http://localhost
+          spec: cypress/e2e/login.spec.js
+          working-directory: ${{env.SUBMITTY_REPOSITORY}}/site
+          browser: chrome
+
+      - name: Setup SAML
+        run: |
+          cd $SUBMITTY_REPOSITORY
+          sudo -E env "PATH=$PATH" bash .setup/testing/setup_saml.sh
+
+      - name: Switch to SAML auth
+        run: sudo sed -ie "s/Ldap/Saml/g" ${SUBMITTY_INSTALL_DIR}/config/authentication.json
+
+      - name: Run cypress e2e login tests with SAML auth
+        uses: cypress-io/github-action@v5
+        with:
+          config: baseUrl=http://localhost,chromeWebSecurity=false
+          spec: cypress/e2e/login.spec.js
+          working-directory: ${{env.SUBMITTY_REPOSITORY}}/site
+          browser: chrome
+
+      - uses: actions/upload-artifact@v3
+        if: failure()
+        with:
+          name: cypress-screenshots
+          path: ${{env.SUBMITTY_REPOSITORY}}/site/cypress/screenshots
+      - uses: actions/upload-artifact@v3
+        if: failure()
+        with:
+          name: cypress-videos
+          path: ${{env.SUBMITTY_REPOSITORY}}/site/cypress/videos
+
+      - name: Check for site errors
+        working-directory: ${{ env.SUBMITTY_REPOSITORY }}
+        run: sudo bash tests/test_site_error_log.sh
+
+
+  e2eIntegrationTests:
+    runs-on: ubuntu-22.04
+    # Postgres should not be needed for the integration tests.
+    # But unfortunately Configure test suite seems to use it at the moment, and
+    # Configure test suite seems to be necessary for the Integration tests
+    services:
+      postgres:
+        image: postgres
+        env:
+          POSTGRES_PASSWORD: submitty_dbuser
+          POSTGRES_USER: postgres
+          TZ: America/New_York
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+        ports:
+          - 5432:5432
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+      - uses: ./.github/actions/e2e-Setup-Composite
+      - name: Run integration tests
+        run: sudo -E env "PATH=$PATH" python3 /usr/local/submitty/test_suite/integrationTests/run.py

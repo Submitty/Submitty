@@ -40,7 +40,6 @@ class UserProfileController extends AbstractController {
                 ['UserProfile'],
                 'showUserProfile',
                 $this->core->getUser(),
-                $this->core->getConfig()->getUsernameChangeText(),
                 $this->core->getAuthentication() instanceof DatabaseAuthentication,
                 $this->core->getCsrfToken()
             )
@@ -101,13 +100,42 @@ class UserProfileController extends AbstractController {
 
 
     /**
+     * @Route("/user_profile/change_pronouns", methods={"POST"})
+     * @return JsonResponse
+     */
+    public function changePronouns() {
+        $user = $this->core->getUser();
+        if (isset($_POST['pronouns'])) {
+            $newPronouns = trim($_POST['pronouns']);
+            $newDisplayPronouns = filter_var($_POST['pronouns-forum-display'], FILTER_VALIDATE_BOOLEAN);
+            //validPronouns() checks for valid option
+            if ($user->validateUserData('user_pronouns', $newPronouns) === true) {
+                $user->setPronouns($newPronouns);
+                $user->setDisplayPronouns($newDisplayPronouns);
+                $user->setUserUpdated(true);
+                $this->core->getQueries()->updateUser($user);
+                return JsonResponse::getSuccessResponse([
+                    'message' => "Pronouns updated successfully",
+                    'pronouns' => $newPronouns,
+                    'display_pronouns' => $newDisplayPronouns,
+                ]);
+            }
+            else {
+                return JsonResponse::getErrorResponse("Pronouns are not valid");
+            }
+        }
+        else {
+            return JsonResponse::getErrorResponse("Pronouns does not exist");
+        }
+    }
+
+    /**
      * @Route("/user_profile/change_preferred_names", methods={"POST"})
      * @return JsonResponse
-     * @throws \ImagickException
      */
     public function changeUserName() {
         $user = $this->core->getUser();
-        if (empty($_POST['user_givenname_change']) && empty($_POST['user_familyname_change'])) {
+        if (isset($_POST['given_name']) && isset($_POST['family_name']) && !empty($_POST['given_name']) && !empty($_POST['family_name'])) {
             $newGivenName = trim($_POST['given_name']);
             $newFamilyName = trim($_POST['family_name']);
 
@@ -131,6 +159,34 @@ class UserProfileController extends AbstractController {
         else {
             return JsonResponse::getErrorResponse('Preferred names cannot be empty!');
         }
+    }
+
+    /**
+     * @Route("/user_profile/update_last_initial_format", methods={"POST"})
+     * @return JsonResponse
+     */
+    public function updateLastInitialFormat() {
+        $user = $this->core->getUser();
+        if (isset($_POST['format'])) {
+            $newVal = intval($_POST['format']);
+            // Handle the case where intval returns zero due to an invalid string
+            if ($newVal !== 0 || $_POST['format'] === '0' || $_POST['format'] === 0) {
+                try {
+                    $user->setLastInitialFormat($newVal);
+                    $user->setUserUpdated(true);
+                    $this->core->getQueries()->updateUser($user);
+                    return JsonResponse::getSuccessResponse([
+                        'message' => "Last initial format successfully updated!",
+                        'format' => $user->getLastInitialFormat(),
+                        'display_format' => $user->getDisplayLastInitialFormat(),
+                        'new_abbreviated_name' => $user->getDisplayAbbreviatedName()
+                    ]);
+                }
+                catch (\InvalidArgumentException $e) {
+                }
+            }
+        }
+        return JsonResponse::getErrorResponse("Invalid option for last initial format!");
     }
 
     /**

@@ -73,6 +73,8 @@ class SubmissionControllerTester extends BaseUnitTest {
             'user_id' => 'testUser',
             'user_givenname' => 'Test',
             'user_familyname' => 'Person',
+            'user_pronouns' => '',
+            'display_pronouns' => false,
             'user_email' => '',
             'user_email_secondary' => '',
             'user_email_secondary_notify' => false,
@@ -81,7 +83,7 @@ class SubmissionControllerTester extends BaseUnitTest {
 
         $config = new Config($this->core);
         $config->setDebug(true);
-        $config->setSemester($this->config['semester']);
+        $config->setTerm($this->config['semester']);
         $config->setCourse($this->config['course']);
         $config->setCoursePath($this->config['course_path']);
         $config->setSubmittyPath($this->config['tmp_path']);
@@ -157,7 +159,9 @@ class SubmissionControllerTester extends BaseUnitTest {
             'syllabus_bucket' => 'homework',
             'autograding_config_path' => '/path/to/autograding',
             'vcs' => false,
+            'using_subdirectory' => false,
             'vcs_subdirectory' => '',
+            'vcs_partial_path' => '',
             'vcs_host_type' => -1,
             'team_assignment' => false,
             'team_size_max' => 1,
@@ -172,7 +176,7 @@ class SubmissionControllerTester extends BaseUnitTest {
             'peer_grade_set' => false,
             'late_submission_allowed' => true,
             'precision' => 0.5,
-            'regrade_allowed' => true,
+            'grade_inquiry_allowed' => true,
             'grade_inquiry_per_component_allowed' => true,
             'discussion_based' => false,
             'discussion_thread_ids' => '',
@@ -1234,7 +1238,7 @@ class SubmissionControllerTester extends BaseUnitTest {
         $return = $controller->ajaxUploadSubmission('test');
 
         $this->assertTrue($return['status'] == 'fail');
-        $this->assertEquals("Could not properly unpack zip file. Error message: Invalid or uninitialized Zip object.", $return['message']);
+        $this->assertEquals("The tmp file 'broken.zip' was not properly uploaded.", $return['message']);
         $this->assertFalse($return['status'] == 'success');
     }
 

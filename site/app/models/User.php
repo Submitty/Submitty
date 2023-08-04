@@ -24,6 +24,11 @@ use Egulias\EmailValidator\Validation\RFCValidation;
  * @method string getPreferredFamilyName()  Get the preferred family name of the loaded user
  * @method string getDisplayedFamilyName()  Returns the preferred family name if one exists and is not null or blank,
  *                                        otherwise return the legal family name field for the user.
+ * @method string getPronouns() Returns the pronouns of the loaded user
+ * @method bool getDisplayPronouns() Returns the display pronoun variable of loaded user
+ * @method void setPronouns(string $pronouns)
+ * @method void setDisplayPronouns(bool $display_pronouns)
+ * @method int getLastInitialFormat()
  * @method string getEmail()
  * @method void setEmail(string $email)
  * @method string getSecondaryEmail()
@@ -35,6 +40,8 @@ use Egulias\EmailValidator\Validation\RFCValidation;
  * @method void setGroup(integer $group)
  * @method void setRegistrationType(string $type)
  * @method string getRegistrationSection()
+ * @method string getCourseSectionId()
+ * @method void setCourseSectionId(string $Id)
  * @method int getRotatingSection()
  * @method string getRegistrationType()
  * @method void setManualRegistration(bool $flag)
@@ -73,12 +80,17 @@ class User extends AbstractModel {
     /** Profile image quota of 50 images exhausted */
     const PROFILE_IMG_QUOTA_EXHAUSTED = 2;
 
+    /**
+     * Last initial display formats
+     */
+    const LAST_INITIAL_FORMATS = [ "Single", "Multi", "Hyphen-Multi", "None" ];
+
     /** @prop @var bool Is this user actually loaded (else you cannot access the other member variables) */
     protected $loaded = false;
 
-    /** @prop @var string The id of this user which should be a unique identifier (ex: RCS ID at RPI) */
+    /** @prop @var string The id of this user which should be a unique identifier */
     protected $id;
-    /** @prop @var string Alternate ID for a user, such as a campus assigned ID (ex: RIN at RPI) */
+    /** @prop @var string Alternate ID for a user, such as a campus assigned ID */
     protected $numeric_id = null;
     /**
      * @prop
@@ -98,6 +110,12 @@ class User extends AbstractModel {
     protected $preferred_family_name = "";
     /** @prop @var  string The family name to be displayed by the system (either family name or preferred family name) */
     protected $displayed_family_name;
+    /** @prop @var string The pronouns of the user */
+    protected $pronouns = "";
+    /** @prop @var bool The display pronouns option of the user */
+    protected bool $display_pronouns = false;
+    /** @prop @var int The display format for the last initial of the user */
+    protected $last_initial_format = 0;
     /** @prop @var string The primary email of the user */
     protected $email;
     /** @prop @var string The secondary email of the user */
@@ -108,8 +126,12 @@ class User extends AbstractModel {
     protected $group;
     /** @prop @var int The access level of the user (ex: superuser, faculty, user) */
     protected $access_level;
+    /** @prop @var bool Should the user only have one active session at a time? */
+    protected bool $enforce_single_session;
     /** @prop @var string What is the registration section that the user was assigned to for the course */
     protected $registration_section = null;
+    /** @prop @var string Unique id for course section */
+    protected $course_section_id = null;
     /** @prop @var int What is the assigned rotating section for the user */
     protected $rotating_section = null;
     /** @var string Appropriate time zone string from DateUtils::getAvailableTimeZones() */
@@ -182,9 +204,20 @@ class User extends AbstractModel {
             $this->setPreferredGivenName($details['user_preferred_givenname']);
         }
 
+        $this->setPronouns($details['user_pronouns']);
+
+        if (isset($details['display_pronouns'])) {
+            $this->setDisplayPronouns($details['display_pronouns']);
+        }
+
         $this->setLegalFamilyName($details['user_familyname']);
         if (isset($details['user_preferred_familyname'])) {
             $this->setPreferredFamilyName($details['user_preferred_familyname']);
+        }
+
+        $this->last_initial_format = isset($details['user_last_initial_format']) ? intval($details['user_last_initial_format']) : 0;
+        if ($this->last_initial_format < 0 || $this->last_initial_format > 3) {
+            $this->last_initial_format = 0;
         }
 
         $this->email = $details['user_email'];
@@ -198,7 +231,7 @@ class User extends AbstractModel {
         if ($this->access_level > 3 || $this->access_level < 1) {
             $this->access_level = 3;
         }
-
+        $this->enforce_single_session = isset($details['enforce_single_session']) && $details['enforce_single_session'] === true;
         $this->user_updated = isset($details['user_updated']) && $details['user_updated'] === true;
         $this->instructor_updated = isset($details['instructor_updated']) && $details['instructor_updated'] === true;
 
@@ -206,6 +239,7 @@ class User extends AbstractModel {
         $this->notification_settings = self::constructNotificationSettings($details);
 
         $this->registration_section = isset($details['registration_section']) ? $details['registration_section'] : null;
+        $this->course_section_id = isset($details['course_section_id']) ? $details['course_section_id'] : null;
         $this->rotating_section = isset($details['rotating_section']) ? intval($details['rotating_section']) : null;
         $this->manual_registration = isset($details['manual_registration']) && $details['manual_registration'] === true;
         if (isset($details['grading_registration_sections'])) {
@@ -239,6 +273,19 @@ class User extends AbstractModel {
         }
         else {
             return $ret;
+        }
+    }
+
+    /**
+     * set true or false to variable display_pronouns
+     * @param bool $new_display_pronouns new display_pronouns option
+     */
+    public function setDisplayPronouns(?bool $new_display_pronouns): void {
+        if ($new_display_pronouns === null) {
+            $this->display_pronouns = false;
+        }
+        else {
+            $this->display_pronouns = $new_display_pronouns;
         }
     }
 
@@ -405,6 +452,13 @@ class User extends AbstractModel {
         $this->setDisplayedFamilyName();
     }
 
+    public function setLastInitialFormat(int $format) {
+        if ($format < 0 || $format > 3) {
+            throw new \InvalidArgumentException("Invalid format value specified");
+        }
+        $this->last_initial_format = $format;
+    }
+
     public function getNotificationSettings() {
         return $this->notification_settings; //either receives it or not
     }
@@ -443,8 +497,46 @@ class User extends AbstractModel {
         return $this->getDisplayedGivenName() . ' ' . $this->getDisplayedFamilyName();
     }
 
-    public function getDisplayAbbreviatedName(): string {
-        return $this->getDisplayedGivenName() . ' ' . substr($this->getDisplayedFamilyName(), 0, 1) . '.';
+    public function getDisplayAbbreviatedName(int $last_initial_format = -1): string {
+        if ($last_initial_format < 0) {
+            $last_initial_format = $this->getLastInitialFormat();
+        }
+        $last_initial = ' ';
+        $family_name = $this->getDisplayedFamilyName();
+        $format_name = self::LAST_INITIAL_FORMATS[$last_initial_format];
+        switch ($format_name) {
+            case 'Multi':
+                $spaced = preg_split('/\s+/', $family_name, -1, PREG_SPLIT_NO_EMPTY);
+                foreach ($spaced as $part) {
+                    $last_initial .= $part[0] . '.';
+                }
+                break;
+            case 'Hyphen-Multi':
+                $spaced = preg_split('/\s+/', $family_name, -1, PREG_SPLIT_NO_EMPTY);
+                foreach ($spaced as $part) {
+                    $dashed = explode('-', $part);
+                    $l = array_map(fn(string $part) => $part[0], $dashed);
+                    $last_initial .= implode('-', $l) . '.';
+                }
+                break;
+            case 'None':
+                $last_initial = '';
+                break;
+            default:
+                $last_initial .= $family_name[0] . '.';
+                break;
+        }
+        return $this->getDisplayedGivenName() . $last_initial;
+    }
+
+    public function getDisplayLastInitialFormat(int $format = -1): string {
+        if ($format < 0) {
+            $format = $this->last_initial_format;
+        }
+        if ($format < 0 || $format > count(self::LAST_INITIAL_FORMATS)) {
+            return '';
+        }
+        return self::LAST_INITIAL_FORMATS[$format];
     }
 
     public function setRegistrationSection($section) {
@@ -507,15 +599,23 @@ class User extends AbstractModel {
 
         switch ($field) {
             case 'user_id':
-                 //Username / user_id must contain only lowercase alpha, numbers, underscores, hyphens
+                 //Username / user_id must contain only lowercase alpha,
+                 //numbers, underscores, hyphens
                 return preg_match("~^[a-z0-9_\-]+$~", $data) === 1;
             case 'user_legal_givenname':
             case 'user_legal_familyname':
-                //Given and family name must be alpha characters, latin chars, white-space, or certain punctuation.
+                //Given and family name must be alpha characters, latin chars,
+                //white-space, or certain punctuation.
                 return preg_match("~^[a-zA-ZÀ-ÖØ-Ýà-öø-ÿ'`\-\.\(\) ]+$~", $data) === 1;
+            case 'user_pronouns':
+                //pronouns may be "", alpha chars, latin chars, white-space,
+                //certain punctuation AND between 0 and 30 chars.
+                return preg_match("~^[a-zA-ZÀ-ÖØ-Ýà-öø-ÿ'`\-\.\(\)\\\/ ]{0,30}$~", $data) === 1;
             case 'user_preferred_givenname':
             case 'user_preferred_familyname':
-                //Preferred given and family name may be "", alpha chars, latin chars, white-space, certain punctuation AND between 0 and 30 chars.
+                //Preferred given and family name may be "", alpha chars,
+                //latin chars, white-space,
+                //certain punctuation AND between 0 and 30 chars.
                 return preg_match("~^[a-zA-ZÀ-ÖØ-Ýà-öø-ÿ'`\-\.\(\) ]{0,30}$~", $data) === 1;
             case 'user_email':
             case 'user_email_secondary':
@@ -533,6 +633,9 @@ class User extends AbstractModel {
             case 'registration_section':
                 //Registration section must contain only alpha (upper and lower permitted), numbers, underscores, hyphens.
                 //"NULL" registration section should be validated as a datatype, not as a string.
+                return preg_match("~^(?!^null$)[a-z0-9_\-]+$~i", $data) === 1 || is_null($data);
+            case 'course_section_id':
+                //Course Section Id section must contain only alpha (upper and lower permitted), numbers, underscores, hyphens.
                 return preg_match("~^(?!^null$)[a-z0-9_\-]+$~i", $data) === 1 || is_null($data);
             case 'grading_assignments':
                 // Grading assignments must be comma-separated registration sections (containing only alpha, numbers, underscores or hyphens).

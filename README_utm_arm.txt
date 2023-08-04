@@ -203,7 +203,7 @@ On an M1 Mac laptop, we cannot use virtual box, so follow these instructions ins
 
     On the guest machine:
 
-    sudo bash /usr/local/submitty/GIT_CHECKOUT/Submitty/.setup/install_system.sh --vagrant
+    sudo bash /usr/local/submitty/GIT_CHECKOUT/Submitty/.setup/install_system.sh --utm
 
     Hopefully it completes without error or network problems... if you
     have errors, you can try to re-run the above command.  However, if

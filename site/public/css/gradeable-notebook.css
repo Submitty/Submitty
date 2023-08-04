@@ -125,4 +125,63 @@ img {
 .notebook .markdown {
     max-width: 700px;
 }
+
 /* stylelint-enable selector-class-pattern */
+@media print {
+    @page{
+        size: auto;
+        margin: 0;
+        break-inside: avoid;
+    }
+    
+    gradeable-time-remaining-text{
+        display: none;
+    }
+
+    .content{
+        margin: 2;
+        padding: 0;
+    }
+
+    .content:not(#gradeable-submission-cont){
+        display: none;
+        margin: 0;
+        padding: 0;
+    }
+
+    .submit-gradeable{
+        display: none;
+    }
+
+    aside, .flex-row.shadow {
+        display: none;
+    }
+
+    #printing{
+        display: none;
+    }
+
+    #gradeable-time-remaining-text{
+        display: none;
+    }
+
+    h1{
+        font-size: 25px;
+    }
+
+    h2{
+        font-size: 21px;
+    }
+
+    p{
+        font-size: 16px;
+    }
+    
+    performance-warning-system-message-text{
+        display: none;
+    }
+
+    .mc-clear, .mc-recent, .codebox-clear-reset{
+        display: none;
+    }
+}
