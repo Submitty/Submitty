@@ -1478,7 +1478,6 @@ end of styles used in the admin gradeable page
 }
 
 .required::placeholder { color: var(--error-alert-dark-red); }
-.required::placeholder { color: var(--error-alert-dark-red); }
 
 /* stylelint-disable-next-line selector-class-pattern */
 .required_type {
