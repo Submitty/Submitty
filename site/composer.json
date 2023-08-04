@@ -21,6 +21,7 @@
   },
   "require": {
     "aptoma/twig-markdown": "3.4.1",
+    "browscap/browscap-php": "7.2.0",
     "cboden/ratchet": "0.4.4",
     "doctrine/annotations": "1.14.3",
     "doctrine/dbal": "2.13.9",
@@ -32,11 +33,11 @@
     "onelogin/php-saml": "4.1.0",
     "php-ds/php-ds": "1.4.1",
     "ramsey/uuid": "4.2.3",
-    "symfony/cache": "5.4.23",
+    "symfony/cache": "6.3.1",
     "symfony/config": "5.4.21",
-    "symfony/http-foundation": "5.4.24",
+    "symfony/http-foundation": "6.3.1",
     "symfony/polyfill-php80": "1.27.0",
-    "symfony/routing": "5.4.22",
+    "symfony/routing": "6.1.11",
     "textalk/websocket": "1.6.3",
     "twig/twig": "3.6.1"
   },

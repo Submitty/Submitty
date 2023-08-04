@@ -195,12 +195,3 @@ runs:
         sudo python3 /usr/local/submitty/bin/generate_repos.py ${SEMESTER} sample open_homework
         bash tests/git_test.sh
       shell: bash
-
-    - uses: nanasess/setup-chromedriver@master
-    - name: Setup chromedriver
-      run: |
-        sudo systemctl restart submitty_autograding_worker
-        sudo systemctl restart submitty_autograding_shipper
-        export DISPLAY=:99
-        chromedriver --url-base=/wd/hub &
-      shell: bash
