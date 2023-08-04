@@ -1699,11 +1699,59 @@ WHERE semester=? AND course=? AND user_id=?",
         $query = "SELECT user_id, max(since_timestamp) FROM late_days GROUP BY user_id";
         $this->course_db->query($query);
         $return = [];
+    }
 
-        foreach ($this->course_db->rows() as $row) {
-            $return[$row['user_id']] = new \DateTime($row['max']);
+    /**
+     * Get the latest valid versrion for a gradeable (good or late status)
+     * @param GradedGradeable $gg
+     * @param string $submitter_id
+     */
+    public function getLatestValidGradeableVersion(GradedGradeable $gg, string $submitter_id, int $late_days_remaining): int {
+        $params = [$gg->getGradeableId(), $submitter_id, $late_days_remaining];
+        $query = "SELECT
+                    egd.g_version
+                FROM electronic_gradeable eg
+                JOIN electronic_gradeable_data egd
+                ON eg.g_id=egd.g_id
+				LEFT JOIN teams t
+					ON t.team_id=egd.team_id
+				LEFT JOIN users u
+					ON u.user_id=t.user_id
+					OR u.user_id=egd.user_id
+                LEFT JOIN late_day_exceptions lde
+                ON lde.g_id=eg.g_id AND lde.user_id=u.user_id
+                WHERE eg.g_id=?
+                AND (CASE WHEN eg.eg_team_assignment IS TRUE THEN egd.team_id
+                    ELSE egd.user_id
+                    END)=?
+                AND (
+                    SELECT late_day_status
+                    FROM get_late_day_info_from_previous(
+                        calculate_submission_days_late(egd.submission_time, eg.eg_submission_due_date),
+                        eg.eg_late_days,
+                        COALESCE(lde.late_day_exceptions, 0),
+                        ?
+                    )
+                ) != 3";
+        $this->course_db->query($query, $params);
+
+
+        $version = 0;
+// Get gradeable version where all submitters have a good status
+        if ($gg->getGradeable()->isTeamAssignment()) {
+            // Check if all members have a valid instance
+            if ($this->course_db->getRowCount() === count($gg->getSubmitter()->getTeam()->getMemberUsers())) {
+                foreach ($this->course_db->rows() as $row) {
+                    // minimum between the current $version and the current row's g_version, ensuring that $version will hold the minimum value after the loop is completed.
+                    $version = ($version === 0) ? $row['g_version'] : min($version, $row['g_version']);
+                }
+            }
         }
-        return $return;
+        else {
+            $version = $this->course_db->row()['g_version'] ?? 0;
+        }
+
+        return $version;
     }
 
     /**
