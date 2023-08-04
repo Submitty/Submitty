@@ -18,8 +18,6 @@ use app\views\AbstractView;
 use app\libraries\NumberUtils;
 use app\libraries\CodeMirrorUtils;
 
-
-
 class ElectronicGraderView extends AbstractView {
     private $user_id_to_User_cache = [];
 
