@@ -1,6 +1,7 @@
 #!/usr/bin/python3
 
 import argparse
+import glob
 import ipaddress
 import json
 import os
@@ -26,11 +27,17 @@ def get_args():
 def main():
     args = get_args()
     workers = OrderedDict()
-    workerfile = os.path.join(os.path.dirname(os.path.realpath(__file__)),
-                              '.vagrant', 'workers.json')
+    rootdir = os.path.dirname(os.path.realpath(__file__))
+    workerfile = os.path.join(rootdir, '.vagrant', 'workers')
+
+    if len(glob.glob(os.path.join(rootdir, '.vagrant', 'machines', '*', '*', 'action_provision'))):
+        if input("Warning: There are existing vagrant machines in this project that may conflict"
+                 " with new configuration. Are you sure you would like to proceed? [y/N] "
+                 )[0].lower() != 'y':
+            return
 
     if os.path.isfile(workerfile):
-        if input('Overwrite existing worker configuration? [y/N] ').lower() != 'y':
+        if input('Overwrite existing worker configuration? [y/N] ')[0].lower() != 'y':
             return
 
     ips = cast(Union[ipaddress.IPv4Network, ipaddress.IPv6Network], args.ip_range).hosts()
