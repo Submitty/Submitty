@@ -5,6 +5,7 @@ import ipaddress
 import json
 import os
 from collections import OrderedDict
+from typing import Union, cast
 
 
 def get_args():
@@ -32,13 +33,20 @@ def main():
         if input('Overwrite existing worker configuration? [y/N] ').lower() != 'y':
             return
 
-    ips = args.ip_range.hosts()
+    ips = cast(Union[ipaddress.IPv4Network, ipaddress.IPv6Network], args.ip_range).hosts()
     if isinstance(ips, list):
         ips = iter(ips)
+
     for i in range(1, args.num+1):
         ip = next(ips, None)
+        while (ip is not None
+               and (ip.is_reserved or isinstance(ip, ipaddress.IPv4Address)
+                    and str(ip).endswith('.1'))):
+            ip = next(ips, None)
+ 
         if ip is None:
             raise IndexError("IP range insufficient for requested number of workers")
+
         data = OrderedDict()
         data['ip_addr'] = str(ip)
         data['base_port'] = args.base_port + i
