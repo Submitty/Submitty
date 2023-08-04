@@ -5356,11 +5356,6 @@ parameters:
 			path: app/libraries/database/DatabaseQueries.php
 
 		-
-			message: "#^Method app\\\\libraries\\\\database\\\\DatabaseQueries\\:\\:getAverageForGradeable\\(\\) has parameter \\$override with no type specified\\.$#"
-			count: 1
-			path: app/libraries/database/DatabaseQueries.php
-
-		-
 			message: "#^Method app\\\\libraries\\\\database\\\\DatabaseQueries\\:\\:getAverageForGradeable\\(\\) has parameter \\$section_key with no type specified\\.$#"
 			count: 1
 			path: app/libraries/database/DatabaseQueries.php
