@@ -634,7 +634,7 @@ class User extends AbstractModel {
                 //Registration section must contain only alpha (upper and lower permitted), numbers, underscores, hyphens.
                 // AND between 0 and 20 chars.
                 //"NULL" registration section should be validated as a datatype, not as a string.
-                return (preg_match("~^(?!^null$)[a-z0-9_\-]{1,20}$~i", $data) === 1 || is_null($data));
+                return preg_match("~^(?!^null$)[a-z0-9_\-]{1,20}$~i", $data) === 1 || is_null($data);
             case 'course_section_id':
                 //Course Section Id section must contain only alpha (upper and lower permitted), numbers, underscores, hyphens.
                 return preg_match("~^(?!^null$)[a-z0-9_\-]+$~i", $data) === 1 || is_null($data);
