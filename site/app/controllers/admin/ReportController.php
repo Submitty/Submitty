@@ -13,6 +13,7 @@ use app\libraries\response\JsonResponse;
 use app\libraries\response\RedirectResponse;
 use app\libraries\response\WebResponse;
 use app\libraries\PollUtils;
+use app\libraries\Utils;
 use app\models\gradeable\AutoGradedGradeable;
 use app\models\gradeable\Gradeable;
 use app\models\gradeable\GradedGradeable;
@@ -615,8 +616,11 @@ class ReportController extends AbstractController {
         else {
             $this->core->getOutput()->addInternalJs('rainbow-customization.js');
             $this->core->getOutput()->addInternalCss('rainbow-customization.css');
-
             $this->core->getOutput()->addBreadcrumb('Rainbow Grades Customization');
+            $students = $this->core->getQueries()->getAllUsers();
+            $student_full = Utils::getAutoFillData($students);
+            $this->core->getOutput()->enableMobileViewport();
+            $gradeables = $this->core->getQueries()->getAllGradeablesIdsAndTitles();
 
             // Print the form
             $this->core->getOutput()->renderTwigOutput('admin/RainbowCustomization.twig', [
@@ -630,6 +634,8 @@ class ReportController extends AbstractController {
                 'sections_and_labels' => (array) $customization->getSectionsAndLabels(),
                 'bucket_percentages' => $customization->getBucketPercentages(),
                 'messages' => $customization->getMessages(),
+                "gradeables" => $gradeables,
+                "student_full" => $student_full,
                 'per_gradeable_curves' => $customization->getPerGradeableCurves(),
                 'limited_functionality_mode' => !$this->core->getQueries()->checkIsInstructorInCourse(
                     $this->core->getConfig()->getVerifiedSubmittyAdminUser(),
