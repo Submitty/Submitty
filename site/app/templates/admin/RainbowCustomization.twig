@@ -81,6 +81,48 @@
                     {% endfor %}
                 </div>
             </div>
+            <div id="plagiarism" class="customization_item">
+                <h2>Plagiarism</h2>
+                <input type="hidden" name="csrf_token" value="{{ csrfToken }}" />
+                <input type="hidden" name="option" value="-1" />
+                <div class="option">
+                    <label for="user_id">
+                        <span>Student ID:</span>
+                        <input class="option-input" type="text" name="user_id" id="user_id">
+                    </label>
+                    <label for="g_id" class="option">Select Gradeable:</label>
+                    <select name="g_id" id="g_id">
+                        <option disabled selected value> -- select an option -- </option>
+                        {% for index, value in gradeables %}
+                            <option value="{{value['g_id']}}" >{{ value['g_title'] }}</option>
+                        {% endfor %}
+                    </select>
+                    <label for="penalty">
+                        <span>Penalty:</span>
+                        <input class="option-input" type="text" name="marks" id="marks">
+                    </label>
+                    <button type="submit" class="btn btn-primary" onclick="addToTable()">
+                        <i class="fas fa-plus"></i>
+                    </button>
+                    {# This is a data table #}
+                    <table id="plagiarism-table" class="table table-striped table-bordered persist-area mobile-table">
+                        <caption id="title"></caption>
+                        <thead>
+                        <tr>
+                            <th>Student ID</th>
+                            <th>Gradeable</th>
+                            <th>Penalty</th>
+                            <th>Delete</th>
+                        </tr>
+                        </thead>
+                        <tbody id="table-body">
+                        <!-- Table rows will be added dynamically here -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+
             <div id="gradeables" class="customization_item">
                 <h2>Gradeables</h2>
                 <div id="gradeables_collapse" class="collapsible_area">
@@ -190,11 +232,131 @@ To remove a curve simply blank all boxes."></i>
     </div>
 
     <script>
+        function addToTable() {
+            // Get the values from the form fields
+            var studentID = document.getElementById("user_id").value.trim();
+            var gradeable = document.getElementById("g_id").value.trim();
+            var penalty = document.getElementById("marks").value.trim();
+
+            // Check for empty fields
+            if (studentID === "" || gradeable === "" || penalty === "") {
+                alert("Please fill in all the fields.");
+                return;
+            }
+            if (penalty > 1 || penalty < 0){
+                alert("penalty must be between 0 - 1");
+                return;
+            }
+            var tableData = [];
+
+            // Check for duplicate entries
+            var tableBody = document.getElementById("table-body");
+            var rows = tableBody.getElementsByTagName("tr");
+            for (var i = 0; i < rows.length; i++) {
+                var row = rows[i];
+                var rowData = {
+                    studentID: row.cells[0].innerHTML,
+                    gradeable: row.cells[1].innerHTML,
+                    penalty: row.cells[2].innerHTML
+                };
+                tableData.push(rowData);
+
+                var existingStudentID = row.cells[0].innerHTML;
+                var existingGradeable = row.cells[1].innerHTML;
+
+                if (studentID === existingStudentID && gradeable === existingGradeable) {
+                    alert("Entry with the same Student ID and Gradeable already exists.");
+                    return;
+                }
+            }
+            tableData.push(newRowData);
+
+            // Convert the array to JSON string
+            var jsonData = JSON.stringify(tableData);
+
+            // Create a new row for the table
+            var newRow = tableBody.insertRow();
+
+            // Insert cells into the new row and set their content
+            var cellStudentID = newRow.insertCell();
+            cellStudentID.innerHTML = studentID;
+
+            var cellGradeable = newRow.insertCell();
+            cellGradeable.innerHTML = gradeable;
+
+            var cellPenalty = newRow.insertCell();
+            cellPenalty.innerHTML = penalty;
+
+            var cellDelete = newRow.insertCell();
+            cellDelete.innerHTML = '<a onclick="deleteRow(this)"><i class="fas fa-trash"></i></a>';
+
+            // Clear the form fields after adding to the table
+            document.getElementById("user_id").value = '';
+            document.getElementById("g_id").value = '';
+            document.getElementById("marks").value = '';
+        }
+
+        function deleteRow(button) {
+            // Get the row containing the clicked Delete button
+            var row = button.parentNode.parentNode;
+            // Remove the row from the table
+            row.parentNode.removeChild(row);
+        }
+    </script>
+
+
+
+
+    <script>
+        function addRow() {
+            const container = document.getElementById('dynamicRowsContainer');
+
+            const newRow = document.createElement('div');
+            newRow.classList.add('option');
+
+            newRow.innerHTML = `
+            <label for="user_id">
+                <span>Student ID:</span>
+                <input class="option-input" type="text" name="user_id" id="user_id">
+            </label>
+            <label for="g_id" class="option-title">Select Gradeable:</label>
+            <select name="g_id" id="g_id">
+                <option disabled selected value> -- select an option -- </option>
+                {% for index, value in gradeables %}
+                <option value="{{value['g_id']}}" >{{ value['g_title'] }}</option>
+                {% endfor %}
+            </select>
+            <label for="marks">
+                <span>Penalty:</span>
+                <input class="option-input" type="text" name="marks" id="marks">
+            </label>
+            <button type="button" class="btn btn-primary key_to_click" tabindex="0" style="margin-top: 10px" onclick="addRow()">
+                +
+            </button>
+            <button type="button" class="btn btn-primary key_to_click" tabindex="0" style="margin-top: 10px" onclick="removeRow(this)">
+                -
+            </button>
+        `;
+
+            container.appendChild(newRow);
+        }
+
+        function removeRow(button) {
+            const container = document.getElementById('dynamicRowsContainer');
+            container.removeChild(button.parentNode);
+        }
+
+
+
         $('.gradeable-li-info .tooltip').on('mouseenter', function(){
             const gradeable = $(this).closest('.gradeable-li');
             const override = gradeable.find('.override');
             const gradeable_id = override.attr('id');
             $(`#override-${gradeable_id}`).html(override.val());
+        });
+
+        $("#user_id").autocomplete({
+            source: {{ student_full|raw }}
         });
 
         var old_index;
