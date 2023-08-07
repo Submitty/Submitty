@@ -189,9 +189,11 @@
       <div>
       {% set imgName = "{{imageData.name}}" %}
 
-        {% if imageData.type != "link" %}
+        {% if imageData.type == "png" %}
             {% set extraStuff = "data:image/png;base64," ~ imageData.extra_info %}
             <img id="club-banners_" class="club-banners {{imageData.name}}" src="data:imgName/png;base64,{{ imageData.data }}" onclick="newShowImage('{{extraStuff}}', '{{imageData.type}}' )" />
+        {% elseif imageData.type == "none" %}
+            <img id="club-banners_" class="club-banners {{imageData.name}}" src="data:imgName/png;base64,{{ imageData.data }}" />
         {% else %}
             {% set extraStuff = imageData.extra_info %}
             <a href="{{ extraStuff }}" target="_blank">

@@ -61,19 +61,22 @@ class GlobalView extends AbstractView {
                 continue;
             }
 
+            if (strlen($banner->getExtraInfo()) == 0) {
+                $images_data_array[] = [
+                    "name" => $banner->getName(),
+                    "data" => base64_encode(file_get_contents($pathName)),
+                    "type" => "none",
+                    "extra_info" => $banner->getExtraInfo()
+                ];
+                continue;
+            }
             $extraPathName = FileUtils::joinPaths($this->core->getConfig()->getSubmittyPath(), "banner_images", $banner->getClosingDate()->format('Y'), $banner->getExtraInfo());
 
-            if (strpos($banner->getExtraInfo(), "pdf") !== false) {
-                $type = "pdf";
-            }
-            else {
-                $type = "image";
-            }
+            $type = "image";
 
 
             $extraFile = "";
             if (is_file($extraPathName)) {
-                $type = "link";
                 $extraFile = base64_encode(file_get_contents($extraPathName));
             }
 
