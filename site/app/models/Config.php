@@ -369,7 +369,6 @@ class Config extends AbstractModel {
             $this->timezone = new \DateTimeZone($submitty_json['timezone']);
         }
 
-
         if (isset($submitty_json['institution_name'])) {
             $this->institution_name = $submitty_json['institution_name'];
         }

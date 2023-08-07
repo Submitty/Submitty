@@ -88,6 +88,7 @@ class Core {
     /** @var bool */
     private $testing = false;
 
+
     /**
      * Core constructor.
      *
