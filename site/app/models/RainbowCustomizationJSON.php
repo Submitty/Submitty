@@ -26,6 +26,7 @@ class RainbowCustomizationJSON extends AbstractModel {
     private $display = [];
     private $benchmark_percent;         // Init in constructor
     private $gradeables = [];
+    private $plagiarism = [];
 
     const allowed_display = ['instructor_notes', 'grade_summary', 'grade_details', 'final_grade',
         'exam_seating', 'display_rank_to_individual', 'display_benchmark', 'benchmark_percent', 'section', 'messages',
@@ -52,6 +53,16 @@ class RainbowCustomizationJSON extends AbstractModel {
     public function getGradeables() {
         return $this->gradeables;
     }
+
+    /**
+     * Get gradeable buckets array
+     *
+     * @return array
+     */
+    public function getPlagiarism() {
+        return $this->plagiarism;
+    }
+
 
     /**
      * Gets an array of display benchmarks
@@ -153,6 +164,10 @@ class RainbowCustomizationJSON extends AbstractModel {
         if (isset($json->gradeables)) {
             $this->gradeables = $json->gradeables;
         }
+
+        if (isset($json->plagiarism)) {
+            $this->plagiarism = $json->plagiarism;
+        }
     }
 
     /**
@@ -249,6 +264,25 @@ class RainbowCustomizationJSON extends AbstractModel {
 
         $this->messages[] = $message;
     }
+
+
+    /**
+     * Add plagiarism entry to existing array
+     *
+     * @param array $plagiarismEntry
+     */
+    public function addPlagiarismEntry(array $plagiarismEntry) {
+        // Validation of this item will be better handled when schema validation is complete, until then just make
+        // sure gradeable is not empty
+        foreach ($plagiarismEntry as $field => $value) {
+            if (empty($value)) {
+                throw new BadArgumentException(ucfirst($field) . ' may not be empty.');
+            }
+        }
+
+        $this->plagiarism[] = $plagiarismEntry;
+    }
+
 
     /**
      * Save the contents in this objects properties to the customization.json for the current course
