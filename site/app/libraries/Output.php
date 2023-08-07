@@ -147,7 +147,8 @@ HTML;
             }));
         }
 
-        $environment = Environment::createCommonMarkEnvironment();
+        $config = [];
+        $environment = new Environment($config);
         $environment->addExtension(new AutolinkExtension());
         $environment->addExtension(new TableExtension());
         $environment->addBlockRenderer(FencedCode::class, new CustomFencedCodeRenderer());
