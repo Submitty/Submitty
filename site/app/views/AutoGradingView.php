@@ -311,7 +311,7 @@ class AutoGradingView extends AbstractView {
                 if ($gradeable->isTeamAssignment()) {
                     $anon_id = $this->core->getQueries()->getTeamAnonId($user_id)[$user_id];
                 }
-                else{
+                else {
                     $anon_id = $this->core->getQueries()->getAnonId($user_id, $g_id)[$user_id];
                 }
                 $anon_path = $anon_path . "/" . $anon_id;
