@@ -32,8 +32,8 @@ Required Input:
         {% if edit_marks_enabled %}
             <input id="mark-editor-{{ mark.id }}"
                    type="number"
-                   onchange="onMarkPointsChange(this),changeMarkColor(this,document.getElementById('mark-editor-{{ mark.id }}').getAttribute('overall'))"
-                   onmouseup="onMarkPointsChange(this),changeMarkColor(this,document.getElementById('mark-editor-{{ mark.id }}').getAttribute('overall'))"
+                   onchange="onMarkPointsChange(this),changeMarkColor(this,document.getElementById('mark-editor-{{ mark.id }}').getAttribute('title'))"
+                   onmouseup="onMarkPointsChange(this),changeMarkColor(this,document.getElementById('mark-editor-{{ mark.id }}').getAttribute('title'))"
                    step="{{ precision }}"
                    aria-label="mark value"
                    value="{{ mark.points|round(decimal_precision) }}"
@@ -42,8 +42,8 @@ Required Input:
                 {% if first_mark %}
                     var overall_title = "{{ mark.title  }}";
                 {% endif %}
-                document.getElementById("mark-editor-{{ mark.id }}").setAttribute("overall",overall_title);
-                if(document.getElementById("mark-editor-{{ mark.id }}").getAttribute("overall")=="Full Credit"){
+                document.getElementById("mark-editor-{{ mark.id }}").setAttribute("title",overall_title);
+                if(document.getElementById("mark-editor-{{ mark.id }}").getAttribute("title")=="Full Credit"){
                     {% if mark.points > 0 %}
                         document.getElementById("mark-editor-{{ mark.id }}").style.backgroundColor="var(--standard-vibrant-yellow)";
                     {% else %}
