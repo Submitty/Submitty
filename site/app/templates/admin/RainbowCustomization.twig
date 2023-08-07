@@ -87,10 +87,10 @@
                 <input type="hidden" name="option" value="-1" />
                 <div class="option">
                     <label for="user_id">
-                        <span>Student ID:</span>
+                        <span>USER ID:</span>
                         <input class="option-input" type="text" name="user_id" id="user_id">
                     </label>
-                    <label for="g_id" class="option">Select Gradeable:</label>
+                    <label for="g_id" class="option">Gradeable:</label>
                     <select name="g_id" id="g_id">
                         <option disabled selected value> -- select an option -- </option>
                         {% for index, value in gradeables %}
@@ -109,7 +109,7 @@
                         <caption id="title"></caption>
                         <thead>
                         <tr>
-                            <th>Student ID</th>
+                            <th>USER ID</th>
                             <th>Gradeable</th>
                             <th>Penalty</th>
                             <th>Delete</th>
@@ -234,12 +234,12 @@ To remove a curve simply blank all boxes."></i>
     <script>
         function addToTable() {
             // Get the values from the form fields
-            var studentID = document.getElementById("user_id").value.trim();
+            var USERID = document.getElementById("user_id").value.trim();
             var gradeable = document.getElementById("g_id").value.trim();
             var penalty = document.getElementById("marks").value.trim();
 
             // Check for empty fields
-            if (studentID === "" || gradeable === "" || penalty === "") {
+            if (USERID === "" || gradeable === "" || penalty === "") {
                 alert("Please fill in all the fields.");
                 return;
             }
@@ -247,6 +247,13 @@ To remove a curve simply blank all boxes."></i>
                 alert("penalty must be between 0 - 1");
                 return;
             }
+
+            var newRowData = {
+                user: USERID,
+                gradeable: gradeable,
+                penalty: penalty
+            };
+
             var tableData = [];
 
             // Check for duplicate entries
@@ -255,16 +262,16 @@ To remove a curve simply blank all boxes."></i>
             for (var i = 0; i < rows.length; i++) {
                 var row = rows[i];
                 var rowData = {
-                    studentID: row.cells[0].innerHTML,
+                    user: row.cells[0].innerHTML,
                     gradeable: row.cells[1].innerHTML,
                     penalty: row.cells[2].innerHTML
                 };
                 tableData.push(rowData);
 
-                var existingStudentID = row.cells[0].innerHTML;
+                var existingUSERID = row.cells[0].innerHTML;
                 var existingGradeable = row.cells[1].innerHTML;
 
-                if (studentID === existingStudentID && gradeable === existingGradeable) {
+                if (USERID === existingUSERID && gradeable === existingGradeable) {
                     alert("Entry with the same Student ID and Gradeable already exists.");
                     return;
                 }
@@ -278,8 +285,8 @@ To remove a curve simply blank all boxes."></i>
             var newRow = tableBody.insertRow();
 
             // Insert cells into the new row and set their content
-            var cellStudentID = newRow.insertCell();
-            cellStudentID.innerHTML = studentID;
+            var cellUSERID = newRow.insertCell();
+            cellUSERID.innerHTML = USERID;
 
             var cellGradeable = newRow.insertCell();
             cellGradeable.innerHTML = gradeable;
