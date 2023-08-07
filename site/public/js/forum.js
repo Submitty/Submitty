@@ -280,12 +280,7 @@ function socketNewOrEditPostHandler(post_id, reply_level, post_box_id=null, edit
         url: buildCourseUrl(['forum', 'posts', 'single']),
         data: {'post_id': post_id, 'reply_level': reply_level, 'post_box_id': post_box_id, 'edit': edit, 'csrf_token': window.csrfToken},
         success: function (response) {
-            let start_parse_index;
             try {
-                start_parse_index = response.indexOf('"status": "success"');
-                if (start_parse_index !==-1) {
-                    response = `{\n\t ${response.substring(start_parse_index)}`;
-                }
                 const new_post = JSON.parse(response).data;
                 const forum_display_setting = Cookies.get('forum_display_option');
                 if (!edit) {
@@ -380,7 +375,6 @@ function socketNewOrEditThreadHandler(thread_id, edit=false) {
         success: function (response) {
             try {
                 const new_thread = JSON.parse(response).data;
-
                 if (!edit) {
                     if ($(new_thread).find('.thread-announcement').length !== 0) {
                         const last_bookmarked_announcement = $('.thread-announcement').siblings('.thread-favorite').last().parent().parent();

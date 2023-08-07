@@ -35,11 +35,11 @@ class HomeworkView extends AbstractView {
         $this->core->getOutput()->addInternalCss('table.css');
 
         // The number of days late this gradeable would be if submitted now (including exceptions)
-        $days_past_deadline = 0;
+        $late_day_exceptions = 0;
         $version_instance = null;
         if ($graded_gradeable !== null) {
             $version_instance = $graded_gradeable->getAutoGradedGradeable()->getAutoGradedVersions()[$display_version] ?? null;
-            $days_past_deadline = max(0, $gradeable->getWouldBeDaysLate() - $graded_gradeable->getLateDayException($this->core->getUser()));
+            $late_day_exceptions = max(0, $graded_gradeable->getLateDayException($this->core->getUser()));
         }
 
         $is_admin = $this->core->getAccess()->canI('admin.wrapper', []);
@@ -64,10 +64,10 @@ class HomeworkView extends AbstractView {
             $late_days = LateDays::fromUser($this->core, $this->core->getUser());
             // showing submission if user is a grader or student can submit
             if ($this->core->getUser()->accessGrading()) {
-                $return .= $this->renderSubmitBox($late_days, $gradeable, $graded_gradeable, $version_instance, $days_past_deadline);
+                $return .= $this->renderSubmitBox($late_days, $gradeable, $graded_gradeable, $version_instance, $late_day_exceptions);
             }
             elseif ($gradeable->isStudentSubmit()) {
-                $return .= $this->renderSubmitBox($late_days, $gradeable, $graded_gradeable, $version_instance, $days_past_deadline, $gradeable->canStudentSubmit());
+                $return .= $this->renderSubmitBox($late_days, $gradeable, $graded_gradeable, $version_instance, $late_day_exceptions, $gradeable->canStudentSubmit());
             }
         }
         catch (NotebookException $e) {
@@ -179,7 +179,6 @@ class HomeworkView extends AbstractView {
         $active_days_charged = $late_day_info !== null ? $late_day_info->getLateDaysCharged() : $active_days_late - $extensions;
         $late_day_budget = $late_day_info !== null ? $late_day_info->getLateDaysRemaining() :  $late_days_remaining;
 
-        $would_be_days_late = $gradeable->getWouldBeDaysLate();
         $late_days_allowed = $gradeable->getLateDays();
 
         $error = false;
@@ -301,11 +300,11 @@ class HomeworkView extends AbstractView {
      * @param Gradeable $gradeable
      * @param GradedGradeable|null $graded_gradeable
      * @param AutoGradedVersion|null $version_instance
-     * @param int $days_past_deadline
+     * @param int $late_day_exceptions
      * @param bool $canStudentSubmit
      * @return string
      */
-    private function renderSubmitBox(LateDays $late_days, Gradeable $gradeable, $graded_gradeable, $version_instance, int $days_past_deadline, bool $canStudentSubmit = true): string {
+    private function renderSubmitBox(LateDays $late_days, Gradeable $gradeable, $graded_gradeable, $version_instance, int $late_day_exceptions, bool $canStudentSubmit = true): string {
         $student_page = $gradeable->isStudentPdfUpload();
         $students_full = [];
         $output = "";
@@ -350,16 +349,15 @@ class HomeworkView extends AbstractView {
             $this->core->getOutput()->addInternalJs('autosave-utils.js');
         }
         $this->core->getOutput()->addInternalJs('submission-page.js');
-        $would_be_days_late = $gradeable->getWouldBeDaysLate();
         $late_day_info = $late_days->getLateDayInfoByGradeable($gradeable);
         $charged_late_days =  $late_day_info !== null ? $late_day_info->getLateDaysCharged() : 0;
         $remaining_late_days_for_gradeable = $late_day_info !== null ? $late_day_info->getLateDaysRemaining() : 0;
+        $gradeable_status = $late_day_info !== null ? $late_day_info->getStatus() : 0;
         $active_version_instance = null;
         if ($graded_gradeable !== null) {
             $active_version_instance = $graded_gradeable->getAutoGradedGradeable()->getActiveVersionInstance();
         }
         $active_days_late =  $active_version_instance !== null ? $active_version_instance->getDaysLate() : 0;
-        $days_to_be_charged = $would_be_days_late - $active_days_late;
         $old_files = [];
         $display_version = 0;
 
@@ -450,10 +448,9 @@ class HomeworkView extends AbstractView {
 
         // Grab all team member late day information
         $team_ldi = ($graded_gradeable !== null && $my_team !== null) ? LateDayInfo::fromSubmitter($this->core, $graded_gradeable->getSubmitter(), $graded_gradeable) : null;
-        $min_team_would_be_late_days_remaining = $team_ldi !== null ? min(array_map(function ($ldi) use ($would_be_days_late) {
+        $min_team_member_late_days = $team_ldi !== null ? min(array_map(function ($ldi) {
             if ($ldi !== null) {
-                $days_to_be_charged = $would_be_days_late - $ldi->getDaysLate();
-                return $ldi->getLateDaysRemaining() - $days_to_be_charged;
+                return $ldi->getLateDaysRemaining();
             }
             else {
                 return 0;
@@ -511,7 +508,7 @@ class HomeworkView extends AbstractView {
                && $gradeable->getAutogradingConfig()->getGradeableMessage() !== '',
             'gradeable_message' => $gradeable->getAutogradingConfig()->getGradeableMessage(),
             'allowed_late_days' => $gradeable->getLateDays(),
-            'min_team_would_be_late_days_remaining' => $min_team_would_be_late_days_remaining,
+            'min_team_member_late_days' => $min_team_member_late_days,
             'num_inputs' => isset($notebook_inputs) ? count($notebook_inputs) : 0,
             'max_submissions' => $gradeable->getAutogradingConfig()->getMaxSubmissions(),
             'display_version' => $display_version,
@@ -520,11 +517,17 @@ class HomeworkView extends AbstractView {
             'students_full' => $students_full,
             'student_id' => $student_id,
             'numberUtils' => new class () {
+                /**
+                 * @return array<int,int>
+                 */
                 public function getRandomIndices(int $array_length, string $student_id, string $gradeable_id): array {
                     return NumberUtils::getRandomIndices($array_length, '' . $student_id . $gradeable_id);
                 }
             },
-            'days_past_deadline' => $days_past_deadline,
+            'late_day_exceptions' => $late_day_exceptions,
+            'team_ldi' => $team_ldi,
+            'is_team_assignment' => $gradeable->isTeamAssignment(),
+            'gradeable_status' => $gradeable_status,
             'charged_late_days' => $charged_late_days,
             'remaining_late_days_for_gradeable' => $remaining_late_days_for_gradeable,
             'old_files' => $old_files,
@@ -535,7 +538,6 @@ class HomeworkView extends AbstractView {
             'upload_message' => $this->core->getConfig()->getUploadMessage(),
             "csrf_token" => $this->core->getCsrfToken(),
             'has_overridden_grades' => $has_overridden_grades,
-            'days_to_be_charged' => $days_to_be_charged,
             'max_file_size' => Utils::returnBytes(ini_get('upload_max_filesize')),
             'max_post_size' => Utils::returnBytes(ini_get('post_max_size')),
             'max_file_uploads' => ini_get('max_file_uploads'),
@@ -713,7 +715,7 @@ class HomeworkView extends AbstractView {
                            'matches' => $matches ];
         }
 
-        $semester = $this->core->getConfig()->getSemester();
+        $semester = $this->core->getConfig()->getTerm();
         $course = $this->core->getConfig()->getCourse();
         $gradeable_id = $_REQUEST['gradeable_id'] ?? '';
         return $this->core->getOutput()->renderTwigTemplate('submission/homework/BulkUploadBox.twig', [
@@ -1032,7 +1034,29 @@ class HomeworkView extends AbstractView {
 
             $files = $version_instance->getFiles();
 
+            $notebook_data = null;
+            $hidefiles = [];
+            if ($autograding_config->isNotebookGradeable()) {
+                $notebook_model = $autograding_config->getUserSpecificNotebook($this->core->getUser()->getId());
+
+                $notebook = $notebook_model->getNotebook();
+                if ($graded_gradeable !== null) {
+                    $notebook_data = $notebook_model->getMostRecentNotebookSubmissions(
+                        $graded_gradeable->getAutoGradedGradeable()->getHighestVersion(),
+                        $notebook,
+                        $this->core->getUser()->getId(),
+                        $version_instance->getVersion(),
+                        $graded_gradeable->getGradeableId()
+                    );
+                }
+                foreach ($notebook_data as $note) {
+                    if (array_key_exists('filename', $note)) {
+                        array_push($hidefiles, $note['filename']);
+                    }
+                }
+            }
             $param = array_merge($param, [
+                'notebook' => $hidefiles,
                 'submission_time' => DateUtils::dateTimeToString($version_instance->getSubmissionTime()),
                 'days_late' => $version_instance->getDaysLate(),
                 'num_autogrades' => $version_instance->getHistoryCount(),
@@ -1095,7 +1119,7 @@ class HomeworkView extends AbstractView {
             'failed_file' => $failed_file,
             'file_length' => $file_count,
             'gradeable_id' => $gradeable->getId(),
-            'student_download' => $gradeable->canStudentDownload(),
+            'student_download' => !$gradeable->isVcs() && $gradeable->canStudentDownload(),
             'hide_test_details' => $gradeable->getAutogradingConfig()->getHideTestDetails(),
             'has_manual_grading' => $gradeable->isTaGrading(),
             'incomplete_autograding' => $version_instance !== null ? !$version_instance->isAutogradingComplete() : false,
@@ -1115,9 +1139,8 @@ class HomeworkView extends AbstractView {
             'allowed_late_days' => $gradeable->getLateDays(),
             'ta_grades_released' => $gradeable->isTaGradeReleased(),
             'is_vcs' => $gradeable->isVcs(),
-            'can_download' => $can_download,
-            'can_change_submissions' => $this->core->getUser()->accessGrading() || $gradeable->isStudentSubmit(),
-            'can_see_all_versions' => $this->core->getUser()->accessGrading() || $gradeable->isStudentSubmit(),
+            'can_change_submissions' => $gradeable->isStudentSubmit(),
+            'can_see_all_versions' => $gradeable->isStudentSubmit(),
             'active_same_as_graded' => $active_same_as_graded,
             'ta_grades_incomplete' => $gradeable->isTaGrading() && $gradeable->isTaGradeReleased() && !$graded_gradeable->isTaGradingComplete(),
             'csrf_token' => $this->core->getCsrfToken(),

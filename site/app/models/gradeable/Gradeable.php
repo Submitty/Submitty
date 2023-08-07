@@ -99,7 +99,6 @@ use app\controllers\admin\AdminGradeableController;
  * @method int getInstructorBlind()
  * @method bool getAllowCustomMarks()
  * @method void setAllowCustomMarks($allow_custom_marks)
- * @method bool hasLeaderboard()
  */
 class Gradeable extends AbstractModel {
     /* Enum range for grader_assignment_method */
@@ -1598,7 +1597,7 @@ class Gradeable extends AbstractModel {
                 $submission_path = FileUtils::joinPaths(
                     $this->core->getConfig()->getSubmittyPath(),
                     'courses',
-                    $this->core->getConfig()->getSemester(),
+                    $this->core->getConfig()->getTerm(),
                     $this->core->getConfig()->getCourse(),
                     'submissions',
                     $this->getId()
@@ -2173,7 +2172,7 @@ class Gradeable extends AbstractModel {
 
         if ($this->isVcs()) {
             $config = $this->core->getConfig();
-            AdminGradeableController::enqueueGenerateRepos($config->getSemester(), $config->getCourse(), $gradeable_id);
+            AdminGradeableController::enqueueGenerateRepos($config->getTerm(), $config->getCourse(), $gradeable_id);
         }
     }
 
@@ -2237,7 +2236,7 @@ class Gradeable extends AbstractModel {
      * @return int
      */
     public function getWouldBeDaysLate() {
-        return max(0, $this->hasDueDate() ? DateUtils::calculateDayDiff($this->getSubmissionDueDate(), null) : 0);
+        return max(0, $this->hasDueDate() ? DateUtils::calculateDayDiff($this->getSubmissionDueDate()) : 0);
     }
 
     /**
@@ -2336,7 +2335,10 @@ class Gradeable extends AbstractModel {
      *
      * @return int Number of minutes allowed
      */
-    public function getUserAllowedTime(User $user): ?int {
+    public function getUserAllowedTime(?User $user): ?int {
+        if ($user === null) {
+            return null;
+        }
         if ($this->allowed_minutes === null) {
             return null;
         }
