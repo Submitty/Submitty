@@ -24,9 +24,9 @@ CREATE OR REPLACE FUNCTION public.sync_user() RETURNS trigger
                 RAISE LOG USING MESSAGE = 'PREFERRED_NAME DATA UPDATE', DETAIL = preferred_name_change_details;
             END IF;
             -- Propagate UPDATE to course DBs
-            FOR course_row IN SELECT semester, course FROM courses_users WHERE user_id=NEW.user_id LOOP
-                RAISE NOTICE 'Semester: %, Course: %', course_row.semester, course_row.course;
-                db_conn := format('dbname=submitty_%s_%s', course_row.semester, course_row.course);
+            FOR course_row IN SELECT term, course FROM courses_users WHERE user_id=NEW.user_id LOOP
+                RAISE NOTICE 'Term: %, Course: %', course_row.term, course_row.course;
+                db_conn := format('dbname=submitty_%s_%s', course_row.term, course_row.course);
                 query_string := 'UPDATE users SET '
                     || 'user_numeric_id=' || quote_nullable(NEW.user_numeric_id) || ', '
                     || 'user_pronouns=' || quote_literal(NEW.user_pronouns) || ', '
