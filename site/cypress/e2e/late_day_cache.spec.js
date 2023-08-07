@@ -89,8 +89,7 @@ describe('Test cases involving late day cache updates', () => {
             it('should check students who have used too many late days for assignment', () => {
                 cy.visit(['sample', 'gradeable', g_id, 'grading', 'details']);
                 cy.login('instructor');
-
-                cy.get('a').contains('View All').click();
+                cy.get('button#view-sections').click();
 
                 // Grab rows of students with late submissions (not NULL registration)
                 cy.get('table')
