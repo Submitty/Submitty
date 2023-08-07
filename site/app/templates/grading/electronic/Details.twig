@@ -264,6 +264,8 @@
                 {{ _self.render_column_team_edit(context, section, graded_gradeable, index, info.team_edit_onclick, column, info.edited_past_lock_date) }}
             {% elseif column.function == "team_id" %}
                 {{ _self.render_column_team_id(context, section, graded_gradeable, index, info, column) }}
+            {% elseif column.function == "team_id_anon" %}
+                {{ _self.render_column_team_id_anon(context, section, graded_gradeable, index, info, column, anon_ids) }}
             {% elseif column.function == "team_name" %}
                 {{ _self.render_column_team_name(context, section, graded_gradeable, index, info, column) }}
             {% elseif column.function == "team_members" %}
@@ -313,6 +315,8 @@
             {% elseif column.function == "team_edit" %}
                 {{ _self.render_column_team_edit(context, section, null, index, new_team_onclick, column, edited_past_lock_date) }}
             {% elseif column.function == "team_id" %}
+                <td></td>
+             {% elseif column.function == "team_id_anon" %}
                 <td></td>
             {% elseif column.function == "team_name" %}
                 <td></td>
@@ -571,6 +575,12 @@
         {% if graded_gradeable.getGradeable().isTeamAssignment() %}
             {{ graded_gradeable.getSubmitter.getId() }}
         {% endif %}
+    </td>
+{% endmacro %}
+{# Anonymous Team ID #}
+{% macro render_column_team_id_anon(context, section, graded_gradeable, index, info, column, anon_ids) %}
+    <td>
+        {{anon_ids[graded_gradeable.getSubmitter().getId()]}}
     </td>
 {% endmacro %}
 

@@ -498,6 +498,7 @@ HTML;
         if ($peer || $anon_mode) {
             if ($gradeable->isTeamAssignment()) {
                 if ($gradeable->getPeerBlind() === Gradeable::DOUBLE_BLIND_GRADING || $anon_mode) {
+                    $columns[] = ["width" => "10%", "title" => "Team ID",     "function" => "team_id_anon"];
                     $columns[] = ["width" => "30%", "title" => "Team Members",     "function" => "team_members_anon"];
                 }
                 else {
@@ -945,7 +946,6 @@ HTML;
         // WIP: Replace this logic when there is a definitive way to get my peer-ness
         // If this is a peer gradeable but I am not allowed to view the peer panel, then I must be a peer.
         if ($gradeable->hasPeerComponent()) {
-            $anon_mode = false;
             if ($this->core->getUser()->getGroup() !== 4) {
                 $isPeerPanel = true;
                 $isStudentInfoPanel = true;
