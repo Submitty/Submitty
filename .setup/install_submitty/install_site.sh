@@ -169,7 +169,7 @@ fi
 mkdir -p ${SUBMITTY_INSTALL_DIR}/site/cache/lang
 
 # load lang files
-php "${SUBMITTY_INSTALL_DIR}/sbin/load_lang.php" "${SUBMITTY_INSTALL_DIR}/site/lang" "${SUBMITTY_INSTALL_DIR}/site/cache/lang"
+php "${SUBMITTY_INSTALL_DIR}/sbin/load_lang.php" "${SUBMITTY_REPOSITORY}/../Localization/lang" "${SUBMITTY_INSTALL_DIR}/site/cache/lang"
 
 if [ -d "${SUBMITTY_INSTALL_DIR}/site/public/mjs" ]; then
     rm -r "${SUBMITTY_INSTALL_DIR}/site/public/mjs"
