@@ -90,11 +90,16 @@
                                 ><i class="fas fa-edit"></i></span>
                             {% endif %}
                         {% endif %}
-                        <strong class="post_user_id">{{ thread.author_info.name }}</strong>
+                        <strong class="post_user_id">{{ thread.author_info.name}}</strong>
+                        {% if thread.author_info.pronouns and thread.author_info.display_pronouns and thread.author_info.name != "Anonymous" %}
+                            ({{thread.author_info.pronouns}})
+                        {% endif %}
+
                     </span>
                 </div>
             {% endif %}
         </div>
     </a>
+
 
 {% endfor %}
