@@ -253,6 +253,7 @@ footer .footer-separator {
     border: none;
     color: white;
     cursor: pointer;
+    padding: 0.5rem;
     background-color: rgba(0 0 0 / 50%);
     border-radius: 50%;
 }
@@ -261,10 +262,12 @@ footer .footer-separator {
 
 .prev-button {
     left: 10px;
+    border-radius: 0% 50% 50% 0%;
 }
 
 .next-button {
     right: 10px;
+    border-radius: 50% 0% 0% 50%;
 }
 
 

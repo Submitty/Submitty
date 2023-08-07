@@ -189,7 +189,7 @@
       <div>
       {% set imgName = "{{imageData.name}}" %}
 
-        {% if imageData.type == "png" %}
+        {% if imageData.type == "image" %}
             {% set extraStuff = "data:image/png;base64," ~ imageData.extra_info %}
             <img id="club-banners_" class="club-banners {{imageData.name}}" src="data:imgName/png;base64,{{ imageData.data }}" onclick="newShowImage('{{extraStuff}}', '{{imageData.type}}' )" />
         {% elseif imageData.type == "none" %}
@@ -217,7 +217,8 @@
                 <div style="display: flex">
 
 <button class="speech-bubble" id="speech-bubble" onclick = "showBanners()">
-  Click Me!
+  Click Me!  <br />
+  See cool campus events!
 </button >
 
                     <span id="duckdiv" style="position: relative">
@@ -381,6 +382,13 @@
     bannerElement.style.display = 'none';
     bannerElement.style.width = "1%";
 
+    if (hiddenImages.length == images.length) {
+        document.getElementById("speech-bubble").style.display = "none";
+    }
+    else {
+        document.getElementById("speech-bubble").style.display = "block";
+    }
+
     var currentImages = [];
     for (var i = 0; i < images.length; i++) {
         var className = images[i].className.split(' ')[1];
@@ -415,28 +423,33 @@
     }
 
     function changeImage(n) {
-      console.log(currentImages);
-      var originalIndex = currentImageIndex;
+        console.log(currentImages);
+        var originalIndex = currentImageIndex;
 
 
-      if (currentImageIndex >= 0 && currentImageIndex < currentImages.length) {
-        currentImages[currentImageIndex].classList.remove("active");
-      }
-      currentImageIndex += n;
-      if (currentImageIndex < 0) {
-        currentImageIndex = currentImages.length - 1;
-      } else if (currentImageIndex >= currentImages.length) {
-        currentImageIndex = 0;
-      }
+        if (currentImageIndex >= 0 && currentImageIndex < currentImages.length) {
+            currentImages[currentImageIndex].classList.remove("active");
+        }
 
-      currentImages[currentImageIndex].classList.add("active");
+
+        currentImageIndex += n;
+        if (currentImageIndex < 0) {
+            currentImageIndex = currentImages.length - 1;
+        } else if (currentImageIndex >= currentImages.length) {
+            currentImageIndex = 0;
+        }
+
+        currentImages[currentImageIndex].classList.add("active");
     }
 
 
 
 
     function removeImage(button) {
-        alert(`You are removing this image from display`);
+        var result = confirm(`Are you sure you want to remove this image from display? You can see this banner again if you remove your cookies`);
+        if (!result) {
+            return;
+        }
         image = currentImages[currentImageIndex];
         var className = image.className.split(' ')[1]; 
         var hiddenImages = getHiddenImages();
