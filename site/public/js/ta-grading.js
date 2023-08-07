@@ -116,12 +116,10 @@ $(function () {
         settingsCallbacks[storageCode](this.value);
         if(this.value != "active-inquiry") {
           //if user change setting to non-grade inquiry option, change the inquiry_status to off and set inquiry_only to off in grading index page
-          localStorage.setItem('inquiry_status','off');
-          localStorage.setItem('inquiry_only','off');
+          Cookies.set('inquiry_status', 'off');
         }
         else {
-          localStorage.setItem('inquiry_status','on');
-          localStorage.setItem('inquiry_only','on');
+          Cookies.set('inquiry_status', 'on');
         }
       }
     }
@@ -622,15 +620,21 @@ function gotoMainPage() {
 }
 
 function gotoPrevStudent() {
-
-  let filter = localStorage.getItem("general-setting-arrow-function") || "default";
+  let filter;
   let navigate_assigned_students_only = localStorage.getItem("general-setting-navigate-assigned-students-only") !== "false";
 
-  let inquiry_status = localStorage.getItem('inquiry_status');
+  let inquiry_status = Cookies.get('inquiry_status');
   if (inquiry_status === 'on'){
-    filter = 'active-inquiry';
+    filter = "active-inquiry";
   }
-
+  else{
+    if (localStorage.getItem("general-setting-arrow-function") != "active-inquiry"){
+      filter = localStorage.getItem("general-setting-arrow-function") || "default";
+    }
+    else{
+      filter = "default";
+    }
+  }
   let selector = "#prev-student";
   let window_location = $(selector)[0].dataset.href + "&filter=" + filter;
 
@@ -674,15 +678,21 @@ function gotoPrevStudent() {
 }
 
 function gotoNextStudent() {
-
-  let filter = localStorage.getItem("general-setting-arrow-function") || "default";
+  let filter;
   let navigate_assigned_students_only = localStorage.getItem("general-setting-navigate-assigned-students-only") !== "false";
 
-  let inquiry_status = localStorage.getItem('inquiry_status');
+  let inquiry_status = Cookies.get('inquiry_status');
   if (inquiry_status === 'on'){
-    filter = 'active-inquiry';
+    filter = "active-inquiry";
   }
-  
+  else{
+    if (localStorage.getItem("general-setting-arrow-function") != "active-inquiry"){
+      filter = localStorage.getItem("general-setting-arrow-function") || "default";
+    }
+    else{
+      filter = "default";
+    }
+  }
   let selector = "#next-student";
   let window_location = $(selector)[0].dataset.href + "&filter=" + filter;
 

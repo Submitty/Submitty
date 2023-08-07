@@ -51,8 +51,8 @@
                 </button>
                 {% endif %}
                 {% if grade_inquiry_only_button %}
-                <button id="inquiryButton" class="btn btn-default" onclick="change_inquiry()">
-                    {{ inquiry_only ? "Grade Inquiry Only: Off" : "Grade Inquiry Only: On" }}
+                <button class="btn btn-default" id="inquiryButton" onclick="change_inquiry()">
+                    {{ inquiry_status ? "Grade Inquiry Only: Off" : "Grade Inquiry Only: On" }}
                 </button>
                 {% endif %}
             </div>
@@ -62,8 +62,8 @@
     <script>
         window.onload = function() {
             var button = document.getElementById('inquiryButton');
-            var status = Cookies.get('inquiry_status') === 'on';
-            if (status) {
+            status = Cookies.get('inquiry_status')
+            if (status === 'on') {
                 grade_inquiry_only();
                 button.innerHTML = "Grade Inquiry Only: On";
             } else {
@@ -760,21 +760,21 @@
 
     function change_inquiry() {
         var button = document.getElementById('inquiryButton');
-        var status = Cookies.get('inquiry_only');
+        var status = Cookies.get('inquiry_status');
         if(status === 'on') {
-            Cookies.set('inquiry_only', 'off');
+            status = 'off'
+        }
+        else{
+            status = 'on';
+        }
+        if(status === 'on') {
             Cookies.set('inquiry_status', 'on');
             var inquiry = Cookies.get('inquiry_status');
-            localStorage.setItem('inquiry_only',status);
-            localStorage.setItem('inquiry_status',inquiry);
             grade_inquiry_only();
             button.innerHTML = "Grade Inquiry Only: On";
         } else {
-            Cookies.set('inquiry_only', 'on');
             Cookies.set('inquiry_status', 'off');
             var inquiry = Cookies.get('inquiry_status');
-            localStorage.setItem('inquiry_only',status);
-            localStorage.setItem('inquiry_status',inquiry);
             reverse_inquiry_only();
             button.innerHTML = "Grade Inquiry Only: Off";
         }
