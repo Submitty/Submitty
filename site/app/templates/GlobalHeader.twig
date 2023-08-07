@@ -413,9 +413,13 @@
     }
 
     function changeImage(n) {
+      console.log(currentImages);
       var originalIndex = currentImageIndex;
 
-      currentImages[currentImageIndex].classList.remove("active");
+
+      if (currentImageIndex >= 0 && currentImageIndex < currentImages.length) {
+        currentImages[currentImageIndex].classList.remove("active");
+      }
       currentImageIndex += n;
       if (currentImageIndex < 0) {
         currentImageIndex = currentImages.length - 1;
@@ -436,12 +440,13 @@
         var hiddenImages = getHiddenImages();
         var imageIndex = hiddenImages.indexOf(className);
         if (imageIndex === -1) {
-            image.style.display = 'none'; 
+            currentImages[currentImageIndex].classList.remove("active");
             hiddenImages.push(className);  
             currentImages.splice(currentImageIndex, 1);
         } 
         setCookie('hiddenImages', JSON.stringify(hiddenImages));
         changeImage(0);
+
     }
 
     function getHiddenImages() {
