@@ -930,6 +930,13 @@ class Gradeable extends AbstractModel {
         return $this->student_download;
     }
 
+    /**
+     * Determines if a specific file can be downloaded by a student (Used to determine access for zip download)
+     * @param int $version which version of the gradeable is this file in?
+     * @param string $file_path the path of the file that client is trying to download
+     * @param string $root_path the root path of the gradeable files
+     * @return bool
+     */
     public function canStudentDownloadFile(int $version, string $file_path, string $root_path): bool {
         if (!$this->student_download) {
             return false;
