@@ -12322,6 +12322,11 @@ parameters:
 			path: app/views/AutoGradingView.php
 
 		-
+			message: "#^Method app\\\\views\\\\AutoGradingView\\:\\:convertToAnonPath\\(\\) has parameter \\$gradeable with no type specified\\.$#"
+			count: 1
+			path: app/views/AutoGradingView.php
+			
+		-
 			message: "#^Method app\\\\views\\\\AutoGradingView\\:\\:convertToAnonPath\\(\\) has parameter \\$g_id with no type specified\\.$#"
 			count: 1
 			path: app/views/AutoGradingView.php
