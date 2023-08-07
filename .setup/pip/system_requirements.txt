@@ -12,7 +12,7 @@
 opencv-python-headless==4.6.0.66
 
 # jsonschema & jsonref & pytz & tzlocal
-pytz==2022.7.1 # Submitty-util specific.
+pytz==2023.3 # Submitty-util specific.
 
 
 python-pam==2.0.2
@@ -30,7 +30,7 @@ tzlocal==2.1
 PyPDF2==2.4.1
 distro==1.8.0
 jsonschema==3.2.0
-jsonref==0.2
+jsonref==1.1.0
 docker==6.1.2
 urllib3==2.0.3
 

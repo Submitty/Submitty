@@ -19,6 +19,7 @@ CREATE OR REPLACE FUNCTION public.sync_courses_user() RETURNS trigger
                         user_id,
                         user_numeric_id,
                         user_pronouns,
+                        display_pronouns,
                         user_givenname,
                         user_preferred_givenname,
                         user_familyname,
@@ -34,11 +35,13 @@ CREATE OR REPLACE FUNCTION public.sync_courses_user() RETURNS trigger
                         user_group,
                         registration_section,
                         registration_type,
-                        manual_registration
+                        manual_registration,
+                        display_name_order
                     ) VALUES ('
                         || quote_literal(user_row.user_id) || ', '
                         || quote_nullable(user_row.user_numeric_id) || ', ' 
                         || quote_literal(user_row.user_pronouns) || ', ' 
+                        || quote_literal(user_row.display_pronouns) || ', '
                         || quote_literal(user_row.user_givenname) || ', ' 
                         || quote_nullable(user_row.user_preferred_givenname) || ', ' 
                         || quote_literal(user_row.user_familyname) || ', '
@@ -54,7 +57,8 @@ CREATE OR REPLACE FUNCTION public.sync_courses_user() RETURNS trigger
                         || NEW.user_group || ', ' 
                         || quote_nullable(NEW.registration_section) || ', ' 
                         || quote_literal(NEW.registration_type) || ', '
-                        || NEW.manual_registration
+                        || NEW.manual_registration || ', '
+                        || quote_literal(user_row.display_name_order)
                     || ')';
                     IF query_string IS NULL THEN
                         RAISE EXCEPTION 'query_string error in trigger function sync_courses_user() when doing INSERT';
