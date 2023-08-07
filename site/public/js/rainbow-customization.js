@@ -259,6 +259,28 @@ function getGradeableBuckets() {
     return gradeables;
 }
 
+function getPlagiarism() {
+    const plagiarismData = [];
+
+    const tableBody = document.getElementById('table-body');
+    const rows = tableBody.getElementsByTagName('tr');
+
+    for (let i = 0; i < rows.length; i++) {
+        const row = rows[i];
+        const user = row.cells[0].innerHTML;
+        const gradeable = row.cells[1].innerHTML;
+        const penalty = parseFloat(row.cells[2].innerHTML);
+
+        plagiarismData.push({
+            user: user,
+            gradeable: gradeable,
+            penalty: penalty
+        });
+    }
+
+    return plagiarismData;
+}
+
 function getMessages() {
     const messages = [];
 
@@ -313,6 +335,7 @@ function buildJSON() {
         'section' : getSection(),
         'gradeables' : getGradeableBuckets(),
         'messages' : getMessages(),
+        'plagiarism' : getPlagiarism(),
     };
 
     ret = JSON.stringify(ret);
