@@ -60,7 +60,8 @@ class BannerController extends AbstractController {
             if ($count_item !== 1) {
                 return JsonResponse::getErrorResponse("You can only have one banner submitted.");
             }
-        } else {
+        }
+        else {
             if ($count_item > 2) {
                 return JsonResponse::getErrorResponse("Can't have more than two banners submitted.");
             }
@@ -103,7 +104,7 @@ class BannerController extends AbstractController {
 
                     if ($width !== 800 || $height !== 70) {
                         return JsonResponse::getErrorResponse("File dimensions must be 800x70 pixels.");
-                    }                   
+                    }
                 }
 
                 if (strlen($dst) > 255) {
