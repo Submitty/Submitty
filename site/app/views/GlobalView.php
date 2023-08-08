@@ -54,6 +54,7 @@ class GlobalView extends AbstractView {
             if (strpos($banner->getExtraInfo(), "http") !== false) {
                 $images_data_array[] = [
                     "name" => $banner->getName(),
+                    "id" => $banner->getId(),
                     "data" => base64_encode(file_get_contents($pathName)),
                     "type" => "link",
                     "extra_info" => $banner->getExtraInfo()
@@ -64,6 +65,7 @@ class GlobalView extends AbstractView {
             if (strlen($banner->getExtraInfo()) == 0) {
                 $images_data_array[] = [
                     "name" => $banner->getName(),
+                    "id" => $banner->getId(),
                     "data" => base64_encode(file_get_contents($pathName)),
                     "type" => "none",
                     "extra_info" => $banner->getExtraInfo()
@@ -82,6 +84,7 @@ class GlobalView extends AbstractView {
 
             $images_data_array[] = [
                 "name" => $banner->getName(),
+                "id" => $banner->getId(),
                 "data" => base64_encode(file_get_contents($pathName)),
                 "type" => $type,
                 "extra_info" => $extraFile
