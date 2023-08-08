@@ -28,7 +28,7 @@ def main():
     args = get_args()
     workers = OrderedDict()
     rootdir = os.path.dirname(os.path.realpath(__file__))
-    workerfile = os.path.join(rootdir, '.vagrant', 'workers')
+    workerfile = os.path.join(rootdir, '.vagrant', 'workers.json')
 
     if len(glob.glob(os.path.join(rootdir, '.vagrant', 'machines', '*', '*', 'action_provision'))):
         if input("Warning: There are existing vagrant machines in this project that may conflict"
