@@ -7677,11 +7677,6 @@ parameters:
 			path: app/models/CalendarInfo.php
 
 		-
-			message: "#^Method app\\\\models\\\\CalendarInfo\\:\\:getItemsByDate\\(\\) return type has no value type specified in iterable type array\\.$#"
-			count: 1
-			path: app/models/CalendarInfo.php
-
-		-
 			message: "#^Method app\\\\models\\\\CalendarInfo\\:\\:getItemsBySections\\(\\) return type has no value type specified in iterable type array\\.$#"
 			count: 1
 			path: app/models/CalendarInfo.php
@@ -13778,6 +13773,16 @@ parameters:
 
 		-
 			message: "#^Method app\\\\views\\\\grading\\\\ElectronicGraderView\\:\\:detailsPage\\(\\) has parameter \\$anon_mode with no type specified\\.$#"
+			count: 1
+			path: app/views/grading/ElectronicGraderView.php
+
+		-
+			message: "#^Method app\\\\views\\\\grading\\\\ElectronicGraderView\\:\\:detailsPage\\(\\) has parameter \\$inquiry_status with no type specified\\.$#"
+			count: 1
+			path: app/views/grading/ElectronicGraderView.php
+			
+		-
+			message: "#^Method app\\\\views\\\\grading\\\\ElectronicGraderView\\:\\:detailsPage\\(\\) has parameter \\$inquiry_only with no type specified\\.$#"
 			count: 1
 			path: app/views/grading/ElectronicGraderView.php
 
