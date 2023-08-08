@@ -274,25 +274,36 @@ footer .footer-separator {
 /* Styling for the speech bubble */
 .speech-bubble {
     position: relative;
-    display: inline-block;
+    background-color: #FFFFFF;
+    color: #000000;
+    border: 2px solid #000000;
+    border-radius: 15px;
+    left: -10px;
+    padding: 10px;
+    top: 7px;
+    font-size: 16px;
+}
+
+.triangle {
+    width: 0;
+    height: 0;
+    background-color: transparent;
+    border-left: 5px solid transparent;
+    border-right: 5px solid transparent;
+    border-top: 15px solid #000000; /* Use the same background color as the circle */
+    position: relative;
+    top: -35px;
+    left: 195px;
+    transform: rotate(-90deg);
+}
+
+/* Styling for the speech pointer (triangle) on the right */
+.speech-bubble::after {
+    position: relative;
     background-color: #FFFFFF;
     color: #000000;
     border: 2px solid #000000;
     border-radius: 15px;
     padding: 10px;
     font-size: 16px;
-}
-
-/* Styling for the speech pointer (triangle) on the right */
-.speech-bubble::after {
-    content: '';
-    position: absolute;
-    top: 50%;
-    right: -20px; /* Adjust the distance from the right side */
-    width: 0;
-    height: 0;
-    border-style: solid;
-    border-width: 10px 0 10px 20px;
-    border-color: transparent transparent transparent #FFFFFF; /* White triangle */
-    transform: translateY(-50%);
 }

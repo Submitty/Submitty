@@ -215,11 +215,13 @@
 
 
                 <div style="display: flex">
-
+<div class= "speech-bubble-container" id= "speech-bubble-container">
 <button class="speech-bubble" id="speech-bubble" onclick = "showBanners()">
   Click Me!  <br />
   See cool campus events!
 </button >
+<div class="triangle" id="triangle"></div>
+</div>
 
                     <span id="duckdiv" style="position: relative">
                     {% if not enable_banner %}
@@ -383,10 +385,10 @@
     bannerElement.style.width = "1%";
 
     if (hiddenImages.length == images.length) {
-        document.getElementById("speech-bubble").style.display = "none";
+        document.getElementById("speech-bubble-container").style.display = "none";
     }
     else {
-        document.getElementById("speech-bubble").style.display = "block";
+        document.getElementById("speech-bubble-container").style.display = "block";
     }
 
     var currentImages = [];
@@ -402,10 +404,10 @@
 
 
     if (currentImages.length >0 ) {
-        document.getElementById("speech-bubble").style.display = 'block';
+        document.getElementById("speech-bubble-container").style.display = 'block';
     }
     else {
-        document.getElementById("speech-bubble").style.display = 'none';
+        document.getElementById("speech-bubble-container").style.display = 'none';
     }
 
     function showBanners() {
@@ -414,11 +416,15 @@
             currentImages[currentImageIndex].classList.add("active");
             bannerElement.style.width = "100%";
             bannerElement.style.display = "block";
+            document.getElementById("triangle").style.left = "71px";
+            document.getElementById("triangle").style.top = "-107px";
         } 
         else {
             currentImages[currentImageIndex].classList.remove("active");
             bannerElement.style.width = "1%";
             bannerElement.style.display = "none";
+            document.getElementById("triangle").style.left = "195px";
+            document.getElementById("triangle").style.top = "-35px";
         }
     }
 
