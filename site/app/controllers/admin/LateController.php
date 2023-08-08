@@ -64,7 +64,7 @@ class LateController extends AbstractController {
     public function flushLateDayCache() {
         $this->core->getQueries()->flushAllLateDayCache();
         $this->core->addSuccessMessage("Late day cache flushed!");
-        return new RedirectResponse($this->core->buildCourseUrl(['late_day_cache']));
+        return new RedirectResponse($this->core->buildCourseUrl(['bulk_late_days']));
     }
 
     /**

@@ -584,8 +584,6 @@ class ElectronicGraderController extends AbstractController {
         $total_users_who_submitted = [];
         $graders_of_inquiries = [];
 
-        // Assure late day cache is calculated
-        $this->core->getQueries()->generateLateDayCacheForUsers();
         $section_key = ($gradeable->isGradeByRegistration() ? 'registration_section' : 'rotating_section');
         $grade_inquiries = $this->core->getQueries()->getNumberGradeInquiries($gradeable_id, $gradeable->isGradeInquiryPerComponentAllowed());
         $graders_of_inquiries = $this->core->getQueries()->getGraderofGradeInquiry($gradeable_id, $gradeable->isGradeInquiryPerComponentAllowed());
@@ -1739,8 +1737,6 @@ class ElectronicGraderController extends AbstractController {
         $non_late_total_submitted = 0;
         $non_late_graded = 0;
 
-        // Assure late day cache is calculated
-        $this->core->getQueries()->generateLateDayCacheForUsers();
         $section_key = ($gradeable->isGradeByRegistration() ? 'registration_section' : 'rotating_section');
         if ($peer) {
             $total = $gradeable->getPeerGradeSet();
