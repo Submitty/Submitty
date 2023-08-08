@@ -38,7 +38,8 @@ class LocalizeTest extends \PHPUnit\Framework\TestCase {
                         if (isset($loc[$part])) {
                             $this->assertIsArray($loc[$part], "Conflicting key '" . $match['key'] . "' found in " . $file['name']);
                             $loc = &$loc[$part];
-                        } else {
+                        }
+                        else {
                             $loc[$part] = [];
                             $loc = &$loc[$part];
                         }
@@ -52,7 +53,7 @@ class LocalizeTest extends \PHPUnit\Framework\TestCase {
                 }
             }
         }
-        
+
         return $data;
     }
 
