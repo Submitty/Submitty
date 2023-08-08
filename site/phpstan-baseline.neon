@@ -7677,11 +7677,6 @@ parameters:
 			path: app/models/CalendarInfo.php
 
 		-
-			message: "#^Method app\\\\models\\\\CalendarInfo\\:\\:getItemsByDate\\(\\) return type has no value type specified in iterable type array\\.$#"
-			count: 1
-			path: app/models/CalendarInfo.php
-
-		-
 			message: "#^Method app\\\\models\\\\CalendarInfo\\:\\:getItemsBySections\\(\\) return type has no value type specified in iterable type array\\.$#"
 			count: 1
 			path: app/models/CalendarInfo.php
