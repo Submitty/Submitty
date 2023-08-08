@@ -102,6 +102,7 @@ CREATE FUNCTION public.sync_courses_user() RETURNS trigger
                         user_id,
                         user_numeric_id,
                         user_pronouns,
+                        display_pronouns,
                         user_givenname,
                         user_preferred_givenname,
                         user_familyname,
@@ -123,6 +124,7 @@ CREATE FUNCTION public.sync_courses_user() RETURNS trigger
                         || quote_literal(user_row.user_id) || ', '
                         || quote_nullable(user_row.user_numeric_id) || ', ' 
                         || quote_literal(user_row.user_pronouns) || ', ' 
+                        || quote_literal(user_row.display_pronouns) || ', '
                         || quote_literal(user_row.user_givenname) || ', ' 
                         || quote_nullable(user_row.user_preferred_givenname) || ', ' 
                         || quote_literal(user_row.user_familyname) || ', '
@@ -340,6 +342,7 @@ CREATE FUNCTION public.sync_user() RETURNS trigger
                 query_string := 'UPDATE users SET '
                     || 'user_numeric_id=' || quote_nullable(NEW.user_numeric_id) || ', '
                     || 'user_pronouns=' || quote_literal(NEW.user_pronouns) || ', '
+                    || 'display_pronouns=' || quote_literal(NEW.display_pronouns) || ', '
                     || 'user_givenname=' || quote_literal(NEW.user_givenname) || ', '
                     || 'user_preferred_givenname=' || quote_nullable(NEW.user_preferred_givenname) || ', '
                     || 'user_familyname=' || quote_literal(NEW.user_familyname) || ', '
@@ -610,6 +613,7 @@ CREATE TABLE public.users (
     user_last_initial_format integer DEFAULT 0 NOT NULL,
     enforce_single_session boolean DEFAULT false,
     display_name_order character varying(255) DEFAULT 'GIVEN_F'::character varying NOT NULL,
+    display_pronouns boolean DEFAULT false,
     CONSTRAINT users_user_access_level_check CHECK (((user_access_level >= 1) AND (user_access_level <= 3))),
     CONSTRAINT users_user_last_initial_format_check CHECK (((user_last_initial_format >= 0) AND (user_last_initial_format <= 3)))
 );

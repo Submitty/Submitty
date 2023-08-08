@@ -25,7 +25,9 @@ use Egulias\EmailValidator\Validation\RFCValidation;
  * @method string getDisplayedFamilyName()  Returns the preferred family name if one exists and is not null or blank,
  *                                        otherwise return the legal family name field for the user.
  * @method string getPronouns() Returns the pronouns of the loaded user
+ * @method bool getDisplayPronouns() Returns the display pronoun variable of loaded user
  * @method void setPronouns(string $pronouns)
+ * @method void setDisplayPronouns(bool $display_pronouns)
  * @method int getLastInitialFormat()
  * @method string getEmail()
  * @method void setEmail(string $email)
@@ -110,6 +112,8 @@ class User extends AbstractModel {
     protected $displayed_family_name;
     /** @prop @var string The pronouns of the user */
     protected $pronouns = "";
+    /** @prop @var bool The display pronouns option of the user */
+    protected bool $display_pronouns = false;
     /** @prop @var int The display format for the last initial of the user */
     protected $last_initial_format = 0;
     /** @prop @var string The primary email of the user */
@@ -202,6 +206,10 @@ class User extends AbstractModel {
 
         $this->setPronouns($details['user_pronouns']);
 
+        if (isset($details['display_pronouns'])) {
+            $this->setDisplayPronouns($details['display_pronouns']);
+        }
+
         $this->setLegalFamilyName($details['user_familyname']);
         if (isset($details['user_preferred_familyname'])) {
             $this->setPreferredFamilyName($details['user_preferred_familyname']);
@@ -265,6 +273,19 @@ class User extends AbstractModel {
         }
         else {
             return $ret;
+        }
+    }
+
+    /**
+     * set true or false to variable display_pronouns
+     * @param bool $new_display_pronouns new display_pronouns option
+     */
+    public function setDisplayPronouns(?bool $new_display_pronouns): void {
+        if ($new_display_pronouns === null) {
+            $this->display_pronouns = false;
+        }
+        else {
+            $this->display_pronouns = $new_display_pronouns;
         }
     }
 
@@ -611,8 +632,9 @@ class User extends AbstractModel {
                 return preg_match("~^[1-4]{1}$~", $data) === 1;
             case 'registration_section':
                 //Registration section must contain only alpha (upper and lower permitted), numbers, underscores, hyphens.
+                // AND between 0 and 20 chars.
                 //"NULL" registration section should be validated as a datatype, not as a string.
-                return preg_match("~^(?!^null$)[a-z0-9_\-]+$~i", $data) === 1 || is_null($data);
+                return preg_match("~^(?!^null$)[a-z0-9_\-]{1,20}$~i", $data) === 1 || is_null($data);
             case 'course_section_id':
                 //Course Section Id section must contain only alpha (upper and lower permitted), numbers, underscores, hyphens.
                 return preg_match("~^(?!^null$)[a-z0-9_\-]+$~i", $data) === 1 || is_null($data);
