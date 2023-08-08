@@ -198,10 +198,17 @@ $(function () {
 });
 
 function changeStudentArrowTooltips(data) {
-  let inquiry_status = localStorage.getItem('inquiry_status');
+  let inquiry_status = Cookies.get('inquiry_status');
   if (inquiry_status === 'on'){
-    data = 'active-inquiry';
+    data = "active-inquiry";
   }
+  else{
+    if(data === "active-inquiry") {
+      data = "default";
+    }
+  }
+  console.log(inquiry_status);
+  console.log(data);
   let component_id = NO_COMPONENT_ID;
   switch(data) {
     case "ungraded":
@@ -271,6 +278,7 @@ let orig_toggleComponent = window.toggleComponent;
 window.toggleComponent = function(component_id, saveChanges) {
   let ret = orig_toggleComponent(component_id, saveChanges);
   return ret.then(function() {
+    console.log(localStorage.getItem('general-setting-arrow-function'));
     changeStudentArrowTooltips(localStorage.getItem('general-setting-arrow-function') || "default");
   });
 }
