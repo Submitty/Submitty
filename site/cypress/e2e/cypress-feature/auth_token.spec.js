@@ -1,4 +1,4 @@
-import {getCurrentSemester} from '../support/utils';
+import {getCurrentSemester} from '../../support/utils';
 
 describe('Test cases revolving around authentication tokens', () => {
     beforeEach(() => {
