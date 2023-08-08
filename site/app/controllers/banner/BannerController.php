@@ -55,9 +55,15 @@ class BannerController extends AbstractController {
 
         $uploaded_files = $_FILES["files1"];
         $count_item = count($uploaded_files["name"]);
-
-        if ($count_item > 2) {
-            return JsonResponse::getErrorResponse("Can't have more than two banners submitted.");
+        $extra_name = $_POST['extra_name'];
+        if (empty($extra_name) || strpos($extra_name, 'http') !== false) {
+            if ($count_item !== 1) {
+                return JsonResponse::getErrorResponse("You can only have one banner submitted.");
+            }
+        } else {
+            if ($count_item > 2) {
+                return JsonResponse::getErrorResponse("Can't have more than two banners submitted.");
+            }
         }
 
         $specificPath = $close_date->format("Y");
@@ -71,7 +77,7 @@ class BannerController extends AbstractController {
                 return JsonResponse::getErrorResponse("Failed to create a new folder for the current year.");
             }
         }
-        $extra_name = $_POST['extra_name'];
+
         for ($j = 0; $j < $count_item; $j++) {
             // for some reason why I try to simply use a condition to compare two strings, I always get false?!? So I have to loop through each character now
             $all_match = true;
