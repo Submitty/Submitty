@@ -246,6 +246,7 @@ class MiscController extends AbstractController {
             if ($cm !== null) {
                 $dir = 'course_materials';
                 $path = $cm->getPath();
+                $title = $cm->getTitle();
             }
         }
 
@@ -271,7 +272,12 @@ class MiscController extends AbstractController {
             CourseMaterialsUtils::insertCourseMaterialAccess($this->core, $path);
         }
 
-        $filename = pathinfo($path, PATHINFO_BASENAME);
+        if (isset($title) && $title !== "") {
+            $filename = $title;
+        }
+        else {
+            $filename = pathinfo($path, PATHINFO_BASENAME);
+        }
         $this->core->getOutput()->useHeader(false);
         $this->core->getOutput()->useFooter(false);
         header('Content-Type: application/octet-stream');
@@ -408,7 +414,6 @@ class MiscController extends AbstractController {
         $options->setSendHttpHeaders(true);
         $options->setEnableZip64(false);
 
-        //TODO: In here for notebooks remove the server-generated answers
         // create a new zipstream object
         $zip_stream = new \ZipStream\ZipStream($zip_file_name, $options);
         foreach ($folder_names as $folder_name) {
@@ -426,7 +431,19 @@ class MiscController extends AbstractController {
                     }
                     $file_path = $file->getRealPath();
                     $relative_path = substr($file_path, strlen($path) + 1);
-                    if ($this->core->getAccess()->canI("path.read", ["dir" => $folder_name, "path" => $file_path, "gradeable" => $gradeable, "graded_gradeable" => $graded_gradeable, "gradeable_version" => $gradeable_version->getVersion()])) {
+                    if (
+                        $this->core->getAccess()->canI(
+                            "path.read",
+                            [
+                                "dir" => $folder_name,
+                                "path" => $file_path,
+                                "gradeable" => $gradeable,
+                                "graded_gradeable" => $graded_gradeable,
+                                "gradeable_version" => $gradeable_version->getVersion(),
+                                "root_path" => $path
+                            ]
+                        )
+                    ) {
                         $zip_stream->addFileFromPath(FileUtils::joinPaths($folder_name, $relative_path), $file_path);
                     }
                 }

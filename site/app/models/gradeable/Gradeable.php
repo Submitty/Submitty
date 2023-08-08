@@ -931,6 +931,54 @@ class Gradeable extends AbstractModel {
     }
 
     /**
+     * Determines if a specific file can be downloaded by a student (Used to determine access for zip download)
+     * @param int $version which version of the gradeable is this file in?
+     * @param string $file_path the path of the file that client is trying to download
+     * @param string $root_path the root path of the gradeable files
+     * @return bool
+     */
+    public function canStudentDownloadFile(int $version, string $file_path, string $root_path): bool {
+        if (!$this->student_download) {
+            return false;
+        }
+        //get the folder it is contained in
+        $path_array = explode("/", $file_path);
+        $outside_folder = $path_array[count($path_array) - 2];
+        $file_name = $path_array[count($path_array) - 1];
+        //Automatically remove these special files
+        if (
+            $file_name === ".submit.timestamp"
+            || $file_name === ".submit.notebook"
+            || $file_name === ".user_assignment_access.json"
+        ) {
+            return false;
+        }
+
+        $autograding_config = $this->getAutogradingConfig();
+        if ($autograding_config->isNotebookGradeable()) {
+            //Get notebook data to get list of notebook filenames
+            $notebook_model = $autograding_config->getUserSpecificNotebook($this->core->getUser()->getId());
+            $notebook = $notebook_model->getNotebook();
+            $notebook_data = $notebook_model->getMostRecentNotebookSubmissions(
+                $version,
+                $notebook,
+                $this->core->getUser()->getId(),
+                $version,
+                $this->getId()
+            );
+
+            //get the root folder
+            $root_path_array = explode("/", $root_path);
+            $root_folder = $path_array[count($root_path_array) - 1];
+            //all notebook generated submissions reside in the root folder
+            if ($outside_folder === $root_folder) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    /**
      * Gets if this gradeable is defined as a "bulk upload" gradeable (if students are only allowed to view it after
      * grades are released)
      * @return bool
@@ -2335,7 +2383,10 @@ class Gradeable extends AbstractModel {
      *
      * @return int Number of minutes allowed
      */
-    public function getUserAllowedTime(User $user): ?int {
+    public function getUserAllowedTime(?User $user): ?int {
+        if ($user === null) {
+            return null;
+        }
         if ($this->allowed_minutes === null) {
             return null;
         }
