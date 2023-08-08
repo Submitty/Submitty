@@ -410,7 +410,6 @@ class MiscController extends AbstractController {
             $zip_file_name = $gradeable_id . "_" . $user_id . "_v" . $version . ".zip";
         }
 
-        //TODO: In here for notebooks remove the server-generated answers
         // create a new zipstream object
         $zip_stream = new \ZipStream\ZipStream(
             outputName: $zip_file_name,
@@ -432,7 +431,19 @@ class MiscController extends AbstractController {
                     }
                     $file_path = $file->getRealPath();
                     $relative_path = substr($file_path, strlen($path) + 1);
-                    if ($this->core->getAccess()->canI("path.read", ["dir" => $folder_name, "path" => $file_path, "gradeable" => $gradeable, "graded_gradeable" => $graded_gradeable, "gradeable_version" => $gradeable_version->getVersion()])) {
+                    if (
+                        $this->core->getAccess()->canI(
+                            "path.read",
+                            [
+                                "dir" => $folder_name,
+                                "path" => $file_path,
+                                "gradeable" => $gradeable,
+                                "graded_gradeable" => $graded_gradeable,
+                                "gradeable_version" => $gradeable_version->getVersion(),
+                                "root_path" => $path
+                            ]
+                        )
+                    ) {
                         $zip_stream->addFileFromPath(FileUtils::joinPaths($folder_name, $relative_path), $file_path);
                     }
                 }
