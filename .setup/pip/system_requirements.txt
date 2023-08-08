@@ -27,7 +27,7 @@ xlsx2csv==0.8.1
 pause==0.3
 paramiko==3.3.1
 tzlocal==2.1
-PyPDF2==2.4.1
+PyPDF2==3.0.1
 distro==1.8.0
 jsonschema==3.2.0
 jsonref==1.1.0
