@@ -1,4 +1,4 @@
-import {getCurrentSemester} from '../support/utils.js';
+import {getCurrentSemester} from '../../support/utils.js';
 
 function validate_navigation_page_sections(sections) {
     const section_keys = Object.keys(sections);
