@@ -269,19 +269,19 @@ class RainbowCustomizationJSON extends AbstractModel {
     /**
      * Add plagiarism entry to existing array
      *
-     * @param array $plagiarismEntry
+     * @param object $plagiarismEntry
      */
-    public function addPlagiarismEntry(array $plagiarismEntry) {
+    public function addPlagiarismEntry(object $plagiarismEntry) {
         // Validation of this item will be better handled when schema validation is complete, until then just make
         // sure gradeable is not empty
-        foreach ($plagiarismEntry as $field => $value) {
-            if (empty($value)) {
-                throw new BadArgumentException(ucfirst($field) . ' may not be empty.');
-            }
+        $emptyObject = (object) [];
+        if ($plagiarismEntry == $emptyObject) {
+            throw new BadArgumentException('Gradeable may not be empty.');
         }
 
         $this->plagiarism[] = $plagiarismEntry;
     }
+
 
 
     /**
