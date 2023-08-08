@@ -580,6 +580,9 @@ HTML;
             }
         }
 
+        // Generate late days
+        $this->core->getQueries()->generateLateDayCacheForUsers();
+
         //Convert rows into sections and prepare extra row info for things that
         // are too messy to calculate in the template.
         $sections = [];
