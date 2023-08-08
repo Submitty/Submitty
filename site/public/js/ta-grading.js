@@ -203,6 +203,8 @@ function changeStudentArrowTooltips(data) {
     data = "active-inquiry";
   }
   else{
+    //if inquiry_status is off, and data equals active inquiry means the user set setting to active-inquiry manually
+    //and need to set back to default since user also manually changed inquiry_status to off.
     if(data === "active-inquiry") {
       data = "default";
     }
