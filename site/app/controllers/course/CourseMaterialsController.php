@@ -210,12 +210,12 @@ class CourseMaterialsController extends AbstractController {
             \RecursiveIteratorIterator::LEAVES_ONLY
         );
 
-        $options = new \ZipStream\Option\Archive();
-        $options->setSendHttpHeaders(true);
-        $options->setEnableZip64(false);
-
         // create a new zipstream object
-        $zip_stream = new \ZipStream\ZipStream($zip_file_name, $options);
+        $zip_stream = new \ZipStream\ZipStream(
+            outputName: $zip_file_name,
+            sendHttpHeaders: true,
+            enableZip64: false,
+        );
 
         foreach ($files as $name => $file) {
             if (!$file->isDir()) {
