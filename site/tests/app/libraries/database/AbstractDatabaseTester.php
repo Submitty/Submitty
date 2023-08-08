@@ -338,7 +338,7 @@ SELECT * FROM test ORDER BY pid");
         $database->disconnect();
     }
 
-    public function booleanConverts() {
+    public static function booleanConverts() {
         return [
             [true, 1],
             [1, 0],

@@ -8,7 +8,7 @@ use app\models\Button;
 use PHPStan\Testing\PHPStanTestCase;
 
 class ModelClassExtensionTester extends PHPStanTestCase {
-    public function methodDataProvider() {
+    public static function methodDataProvider() {
         return [
             [Button::class, 'getOnclick', true],
             [Button::class, 'setOnclick', true],

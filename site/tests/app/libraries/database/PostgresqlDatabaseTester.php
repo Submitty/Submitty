@@ -25,7 +25,7 @@ class PostgresqlDatabaseTester extends \PHPUnit\Framework\TestCase {
         $this->assertEquals('pgsql:host=/var/run/postgresql', $database->getDSN());
     }
 
-    public function arrayData() {
+    public static function arrayData() {
         return [
             ['{}', []],
             ['{{}, {}}', [[],[]]],
@@ -134,7 +134,7 @@ class PostgresqlDatabaseTester extends \PHPUnit\Framework\TestCase {
         $this->assertEquals([null, null, null], $database->fromDatabaseToPHPArray('{null, NULL, NuLl}'));
     }
 
-    public function booleanConverts() {
+    public static function booleanConverts() {
         return [
             [true, 'true'],
             [1, 'false'],

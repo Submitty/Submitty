@@ -157,7 +157,7 @@ class BaseUnitTest extends \PHPUnit\Framework\TestCase {
         /** @var Output&\PHPUnit\Framework\MockObject\MockObject $output */
         $output = $this->getMockBuilder(Output::class)
             ->setConstructorArgs([$core])
-            ->onlyMethods(['addBreadcrumb'])
+            ->setMethods(['addBreadcrumb'])
             ->getMock();
         $output->method('addBreadcrumb')->willReturn(true);
         $output->disableRender();
@@ -194,6 +194,7 @@ class BaseUnitTest extends \PHPUnit\Framework\TestCase {
             $reflection = new \ReflectionClass($class);
             $methods = [];
             $matches = [];
+            $magic_methods =[];
             preg_match_all("/@method.* (.*)\(.*\)/", $reflection->getDocComment(), $matches);
             foreach ($matches[1] as $match) {
                 if (strlen($match) > 0) {
@@ -205,7 +206,7 @@ class BaseUnitTest extends \PHPUnit\Framework\TestCase {
                     $methods[] = $method->getName();
                 }
             }
-            $builder->onlyMethods(array_unique($methods));
+            $builder->setMethods(array_unique($methods));
             static::$mock_builders[$class] = $builder;
         }
         return static::$mock_builders[$class]->getMock();

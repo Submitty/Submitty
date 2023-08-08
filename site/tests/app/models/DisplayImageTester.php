@@ -96,7 +96,7 @@ class DisplayImageTester extends BaseUnitTest {
         $this->assertEquals($display_image->getImageBase64(), $test_image_base64);
     }
 
-    public function getImageBase64ResizeProvider(): array {
+    public static function getImageBase64ResizeProvider(): array {
         return [
             [null, null],
             [200, null],
@@ -161,7 +161,7 @@ class DisplayImageTester extends BaseUnitTest {
         );
     }
 
-    public function saveUserImageProvider(): array {
+    public static function saveUserImageProvider(): array {
         $meta = explode('.', self::TEST_IMAGE);
         $file_name = $meta[0];
         $file_extension = $meta[1];

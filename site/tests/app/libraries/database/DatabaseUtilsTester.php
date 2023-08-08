@@ -7,7 +7,7 @@ namespace tests\app\libraries\database;
 use app\libraries\database\DatabaseUtils;
 
 class DatabaseUtilsTester extends \PHPUnit\Framework\TestCase {
-    public function formatQueryProvider(): array {
+    public static function formatQueryProvider(): array {
         return [
             ['SELECT * FROM foo', [], 'SELECT * FROM foo'],
             ['SELECT * FROM foo WHERE id = ?', [1], 'SELECT * FROM foo WHERE id = 1'],

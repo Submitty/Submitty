@@ -13,7 +13,7 @@ class AccessControlTester extends BaseUnitTest {
 
     private $course = 'test_course';
 
-    public function data() {
+    public static function data() {
         $course_prefix = "/courses/{$this->semester}/{$this->course}";
         return [
             [$course_prefix . '/gradeable/open_homework/update', "GET", [], User::GROUP_INSTRUCTOR],
@@ -136,7 +136,7 @@ class AccessControlTester extends BaseUnitTest {
         $access->setRole('INVALID_ROLE');
     }
 
-    public function accessRoleProvider() {
+    public static function accessRoleProvider() {
         return [["INSTRUCTOR"], ["FULL_ACCESS_GRADER"], ["LIMITED_ACCESS_GRADER"], ["STUDENT"]];
     }
 
