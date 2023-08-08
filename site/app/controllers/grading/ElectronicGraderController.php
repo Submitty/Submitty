@@ -1740,7 +1740,6 @@ class ElectronicGraderController extends AbstractController {
         $non_late_graded = 0;
 
         // Assure late day cache is calculated
-        $this->core->getQueries()->generateLateDayCacheForUsers();
         $section_key = ($gradeable->isGradeByRegistration() ? 'registration_section' : 'rotating_section');
         if ($peer) {
             $total = $gradeable->getPeerGradeSet();
