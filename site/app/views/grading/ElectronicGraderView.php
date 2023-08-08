@@ -1192,8 +1192,10 @@ HTML;
     public function renderNavigationBar(GradedGradeable $graded_gradeable, float $progress, bool $peer, $sort, $direction, $from, $limited_access_blind, $anon_mode, $blind_grading) {
         $gradeable = $graded_gradeable->getGradeable();
         $isBlind = false;
-        if ($this->core->getUser()->getGroup() == USER::GROUP_LIMITED_ACCESS_GRADER
-            && $gradeable->getLimitedAccessBlind() == 2) {
+        if (
+            $this->core->getUser()->getGroup() == User::GROUP_LIMITED_ACCESS_GRADER
+            && $gradeable->getLimitedAccessBlind() == 2
+        ) {
             $isBlind = true;
         }
         $home_url = $this->core->buildCourseUrl(['gradeable', $graded_gradeable->getGradeableId(), 'grading', 'details']) . '?' . http_build_query(['sort' => $sort, 'direction' => $direction]);
