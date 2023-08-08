@@ -196,6 +196,10 @@ else
 
 fi
 
+INSTALL_SYS_DIR=$(mktemp -d)
+chmod 777 "${INSTALL_SYS_DIR}"
+pushd "${INSTALL_SYS_DIR}" > /dev/null
+
 COURSE_BUILDERS_GROUP=submitty_course_builders
 DB_USER=submitty_dbuser
 DATABASE_PASSWORD=submitty_dbuser
@@ -464,7 +468,7 @@ if [ ${WORKER} == 0 ]; then
         # a2ensite git
 
         sed -i '25s/^/\#/' /etc/pam.d/common-password
-        sed -i '26s/pam_unix.so obscure use_authtok try_first_pass sha512/pam_unix.so obscure minlen=1 sha512/' /etc/pam.d/common-password
+        sed -i '26s/pam_unix.so obscure use_authtok try_first_pass yescrypt/pam_unix.so obscure minlen=1 yescrypt/' /etc/pam.d/common-password
 
         # Create folder and give permissions to PHP user for xdebug profiling
         mkdir -p ${SUBMITTY_REPOSITORY}/.vagrant/Ubuntu/profiler
@@ -476,12 +480,12 @@ if [ ${WORKER} == 0 ]; then
         # In case you reprovision without wiping the drive, don't paste this twice
         if [ -z $(grep 'xdebug\.remote_enable' /etc/php/${PHP_VERSION}/mods-available/xdebug.ini) ]
         then
-            # Tell it to send requests to our host on port 9000 (PhpStorm default)
+            # Tell it to send requests to our host on port 9003 (PhpStorm default)
             cat << EOF >> /etc/php/${PHP_VERSION}/mods-available/xdebug.ini
-[xdebug]
-xdebug.remote_enable=1
-xdebug.remote_port=9000
-xdebug.remote_connect_back=1
+xdebug.start_with_request=trigger
+xdebug.client_port=9003
+xdebug.discover_client_host=true
+xdebug.mode=debug
 EOF
         fi
 
@@ -489,9 +493,9 @@ EOF
         then
             # Allow remote profiling and upload outputs to the shared folder
             cat << EOF >> /etc/php/${PHP_VERSION}/mods-available/xdebug.ini
-xdebug.profiler_enable_trigger=1
-xdebug.profiler_output_dir=${SUBMITTY_REPOSITORY}/.vagrant/Ubuntu/profiler
+xdebug.output_dir=${SUBMITTY_REPOSITORY}/.vagrant/Ubuntu/profiler
 EOF
+            sed -i -e "s/xdebug.mode=debug/xdebug.mode=debug,profile/g" /etc/php/${PHP_VERSION}/mods-available/xdebug.ini
         fi
     fi
 
@@ -532,7 +536,7 @@ EOF
     # being that we do not disable phpinfo() on the vagrant machine as it's not a function that could be used for
     # development of some feature, but it is useful for seeing information that could help debug something going wrong
     # with our version of PHP.
-    DISABLED_FUNCTIONS="popen,pclose,proc_open,chmod,php_real_logo_guid,php_egg_logo_guid,php_ini_scanned_files,"
+    DISABLED_FUNCTIONS="popen,pclose,proc_open,php_real_logo_guid,php_egg_logo_guid,php_ini_scanned_files,"
     DISABLED_FUNCTIONS+="php_ini_loaded_file,readlink,symlink,link,set_file_buffer,proc_close,proc_terminate,"
     DISABLED_FUNCTIONS+="proc_get_status,proc_nice,getmyuid,getmygid,getmyinode,putenv,get_current_user,"
     DISABLED_FUNCTIONS+="magic_quotes_runtime,set_magic_quotes_runtime,import_request_variables,ini_alter,"
@@ -847,6 +851,9 @@ if [ ${WORKER} == 0 ]; then
     python3 ${SUBMITTY_INSTALL_DIR}/.setup/bin/init_auto_rainbow.py
 
 fi
+
+popd > /dev/null
+rm -rf "${INSTALL_SYS_DIR}"
 
 
 echo "

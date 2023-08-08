@@ -45,7 +45,6 @@ class CalendarView extends AbstractView {
         $this->core->getOutput()->addInternalCss('table.css');
         $this->core->getOutput()->enableMobileViewport();
         $this->core->getOutput()->addBreadcrumb($in_course ? "Course Calendar" : "Calendar");
-
         return $this->core->getOutput()->renderTwigTemplate("calendar/Calendar.twig", [
             "show_table" => $show_table,
             "view_year" => $year,          // the year that the calendar is viewing
@@ -60,6 +59,7 @@ class CalendarView extends AbstractView {
             "in_course" => $in_course,
             "is_instructor" => $this->core->getUser()->getGroup() === User::GROUP_INSTRUCTOR,
             "colors" => $info->getColors(),
+            "instructor_courses" => $this->core->getQueries()->getInstructorLevelUnarchivedCourses($this->core->getUser()->getId()),
             "view_cookie" => isset($_COOKIE['view']) ? $_COOKIE['view'] : "month"
         ]);
     }

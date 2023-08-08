@@ -279,7 +279,7 @@ div.calendar-submit {
 div.calendar-submit label { text-align: "right"; }
 div.calendar-submit label::after { content: ":"; }
 
-@media (width <= 800px) {
+@media (max-width: 800px) {
     #calendar-list {
         margin: 0;
     }

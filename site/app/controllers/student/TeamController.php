@@ -67,7 +67,7 @@ class TeamController extends AbstractController {
 
         if ($gradeable->isVcs()) {
             $config = $this->core->getConfig();
-            AdminGradeableController::enqueueGenerateRepos($config->getSemester(), $config->getCourse(), $gradeable_id);
+            AdminGradeableController::enqueueGenerateRepos($config->getTerm(), $config->getCourse(), $gradeable_id);
         }
 
         $this->core->redirect($return_url);

@@ -16,7 +16,7 @@ let panelElements = [
   { str: "student_info", icon: ".grading_toolbar .fa-user"},
   { str: "peer_info", icon: ".grading_toolbar .fa-users"},
   { str: "discussion_browser", icon: ".grading_toolbar .fa-comment-alt"},
-  { str: "regrade_info", icon: ".grading_toolbar .grade_inquiry_icon"},
+  { str: "grade_inquiry_info", icon: ".grading_toolbar .grade_inquiry_icon"},
   { str: "notebook-view", icon: ".grading_toolbar .fas fa-book-open"}
 ];
 
@@ -593,7 +593,7 @@ function updateCookies(){
 function gotoMainPage() {
 
   let window_location = $("#main-page")[0].dataset.href
-
+  
   if (getGradeableId() !== '') {
     closeAllComponents(true).then(function () {
       window.location = window_location;
@@ -1048,7 +1048,7 @@ registerKeyHandler({name: "Toggle Student Information Panel", code: "KeyS"}, fun
   updateCookies();
 });
 registerKeyHandler({name: "Toggle Grade Inquiry Panel", code: "KeyX"}, function() {
-  $('#regrade_info_btn button').trigger('click');
+  $('#grade_inquiry_info_btn button').trigger('click');
   updateCookies();
 });
 registerKeyHandler({name: "Toggle Discussion Panel", code: "KeyD"}, function() {

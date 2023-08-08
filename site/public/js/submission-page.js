@@ -1,5 +1,6 @@
 /* exported openActionsPopup */
 /* exported initializeTimer */
+/* exported checkDeadline */
 function openActionsPopup(popup_css, element_id) {
     let elem_html = `<link rel="stylesheet" type="text/css" href="${popup_css}" />`;
     elem_html += document.getElementById(element_id).innerHTML;
@@ -96,6 +97,27 @@ function syncWithServer(criticalSync) {
             }
         }
     }
+}
+function checkDeadline() {
+
+    if (Math.abs(Date.now() - lastTime) > 5000) {
+        //we need to sync back up
+        syncWithServer(true);
+    }
+    if (ticks_till_update <= 0) {
+        syncWithServer(false);
+    }
+    else {
+        curTime += (Date.now()-lastTime);
+        const time = Math.abs(Math.floor((curTime - deadline) / 1000));
+        const days = Math.floor(time / (3600 * 24));
+        if (document.getElementById('gradeable-time-remaining-text') !== null) {
+            if (curTime > deadline) {
+                return 1+days;
+            }
+        }
+    }
+    return 0;
 }
 
 function updateTime() {
