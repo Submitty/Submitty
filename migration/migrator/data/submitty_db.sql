@@ -419,6 +419,16 @@ CREATE TABLE public.courses_users (
 
 
 --
+-- Name: docker_image; Type: TABLE; Schema: public; Owner: -
+--
+
+CREATE TABLE public.docker_image (
+    image_name character varying NOT NULL,
+    user_id character varying NOT NULL
+);
+
+
+--
 -- Name: emails; Type: TABLE; Schema: public; Owner: -
 --
 

@@ -1,9 +1,11 @@
-/* exported collapseSection, addImage, updateImage */
+/* exported collapseSection, confirmationdialog, removeImage, addImage, updateImage */
 /**
 * toggles visibility of a content sections on the Docker UI
 * @param {string} id of the section to toggle
 * @param {string} btn_id id of the button calling this function
 */
+
+
 function collapseSection(id,btn_id) {
     const tgt = document.getElementById(id);
     const btn = document.getElementById(btn_id);
@@ -62,6 +64,40 @@ function addFieldOnChange() {
         $('#send-button').attr('disabled',false);
         $('#docker-warning').css('display', 'none');
     }
+}
+
+function confirmationdialog(url,id,capability) {
+    if (confirm(`Are you sure you want to remove ${id} image?`)) {
+        removeImage(url,id,capability);
+    }
+}
+
+function removeImage(url,id,capability) {
+    $.ajax({
+        url: url,
+        type: 'POST',
+        data: {
+            'image': id,
+            'capability': capability,
+            // eslint-disable-next-line no-undef
+            csrf_token: csrfToken,
+        },
+        success: function(data) {
+            const json = JSON.parse(data);
+            if (json.status === 'success') {
+                // eslint-disable-next-line no-undef
+                displaySuccessMessage(json.data);
+            }
+            else {
+                // eslint-disable-next-line no-undef
+                displayErrorMessage(json.message);
+            }
+        },
+        error: function(err) {
+            console.error(err);
+            window.alert('Something went wrong. Please try again.');
+        },
+    });
 }
 
 function addImage(url) {

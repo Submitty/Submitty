@@ -93,6 +93,7 @@
                 <th>Created</th>
                 <th>Alias</th>
                 <th>Capabilities Containing This Image</th>
+                <th>Remove</th>
             </tr>
         </thead>
         <tbody>
@@ -142,10 +143,16 @@
                         <span class="badge badge-{{ capability_to_color[capability] }}">{{capability}}</span>
                     {% endfor %}
                 </td>
+                {% for capability in value %}
+                <td>
+                <button class="send-button btn btn-default" id="{{ key }}" onclick=confirmationdialog("{{admin_url}}/remove_image",id,'{{capability}}')>Remove</button>
+                </td>
+                {% endfor %}
             </tr>
         {% endfor %}
         </tbody>
     </table>
+    
 </div>
 
 {% if no_image_capabilities | length > 0 %}

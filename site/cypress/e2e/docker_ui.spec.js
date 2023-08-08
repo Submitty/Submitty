@@ -172,4 +172,20 @@ describe('Docker UI Test', () => {
             .should('have.text', 'submitty/python:2.7 found on DockerHub' +
                     ' and queued to be added!');
     });
+
+    it('Should be able to remove image', () => {
+        cy.reload();
+        // Remove the image
+        cy.get('table.table.table-striped.docker-table.mobile-table')
+            .contains('td', 'submitty/python:2.7')
+            .parent('tr')
+            .find('td')
+            .eq(7)
+            .should('be.visible', { timeout: 10000 })
+            .click();
+        // Confirm dialog return true
+        cy.on('window:confirm', () => true);
+        cy.get('.alert-success')
+            .should('have.text', 'submitty/python:2.7 removed from docker images!');
+    });
 });
