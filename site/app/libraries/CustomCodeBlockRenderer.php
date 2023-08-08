@@ -2,20 +2,21 @@
 
 namespace app\libraries;
 
-use League\CommonMark\Block\Element\AbstractBlock;
-use League\CommonMark\Block\Renderer\BlockRendererInterface;
-use League\CommonMark\ElementRendererInterface;
+use League\CommonMark\Renderer\NodeRendererInterface;
+use League\CommonMark\Renderer\ChildNodeRendererInterface;
+use Extension\CommonMark\Renderer\Block\FencedCodeRenderer;
+use League\CommonMark\Node\Node;
 use League\CommonMark\HtmlElement;
 
-class CustomCodeBlockRenderer implements BlockRendererInterface {
-    /** @var \League\CommonMark\Block\Renderer\IndentedCodeRenderer|\League\CommonMark\Block\Renderer\FencedCodeRenderer */
+class CustomCodeBlockRenderer implements NodeRendererInterface {
+    /** @var \League\CommonMark\Extension\CommonMark\Renderer\Block\IndentedCodeRenderer|Extension\CommonMark\Renderer\Block\FencedCodeRenderer */
     protected $baseRenderer;
 
     public function __construct($baseRenderer) {
         $this->baseRenderer = new $baseRenderer(['default']);
     }
 
-    public function render(AbstractBlock $block, ElementRendererInterface $htmlRenderer, bool $inTightList = false) {
+    public function render(Node $block, ChildNodeRendererInterface $htmlRenderer, bool $inTightList = false) {
         $element = $this->baseRenderer->render($block, $htmlRenderer, $inTightList);
         $num_lines = substr_count($element->getContents(), "\n");
         return new HtmlElement('div', ["style" => "position: relative;"], $this->addLineNumbers($element, $num_lines));

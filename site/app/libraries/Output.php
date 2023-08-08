@@ -12,8 +12,8 @@ use League\CommonMark\Extension\Table\TableExtension;
 use League\CommonMark\Block\Element\FencedCode;
 use League\CommonMark\Block\Element\IndentedCode;
 use League\CommonMark\Inline\Element\Code;
-use League\CommonMark\CommonMarkConverter;
-use League\CommonMark\Environment;
+use League\CommonMark\MarkdownConverter;
+use League\CommonMark\Environment\Environment;
 use app\libraries\CustomCodeInlineRenderer;
 use Aptoma\Twig\Extension\MarkdownEngine\PHPLeagueCommonMarkEngine;
 use Aptoma\Twig\Extension\MarkdownExtension;
@@ -147,16 +147,16 @@ HTML;
             }));
         }
 
-        $config = [];
+        $config = ['html_input' => 'escape', 'allow_unsafe_links' => false, 'max_nesting_level' => 10];
         $environment = new Environment($config);
         $environment->addExtension(new AutolinkExtension());
         $environment->addExtension(new TableExtension());
-        $environment->addBlockRenderer(FencedCode::class, new CustomFencedCodeRenderer());
-        $environment->addBlockRenderer(IndentedCode::class, new CustomIndentedCodeRenderer());
-        $environment->addInlineRenderer(Code::class, new CustomCodeInlineRenderer());
+        $environment->addRenderer(FencedCode::class, new CustomFencedCodeRenderer());
+        $environment->addRenderer(IndentedCode::class, new CustomIndentedCodeRenderer());
+        $environment->addRenderer(Code::class, new CustomCodeInlineRenderer());
         $environment->mergeConfig([]);
 
-        $converter = new CommonMarkConverter(['html_input' => 'escape', 'allow_unsafe_links' => false, 'max_nesting_level' => 10], $environment);
+        $converter = new MarkdownConverter($environment);
         $engine = new PHPLeagueCommonMarkEngine($converter);
         $this->twig->addExtension(new MarkdownExtension($engine));
     }
