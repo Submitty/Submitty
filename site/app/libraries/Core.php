@@ -938,9 +938,9 @@ class Core {
     /**
      * Get the lang data for the current locale.
      *
-     * @return array|null
+     * @return array<mixed>|null
      */
-    public function getLang() {
+    public function getLang(): array|null {
         if ($this->config !== null) {
             return $this->config->getLocale()->getLangData();
         }

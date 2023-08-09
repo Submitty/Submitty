@@ -118,12 +118,9 @@ class Output {
         $this->twig->addFunction(new \Twig\TwigFunction("localize", function ($key, $default, $vals = []) {
             $config = $this->core->getConfig();
             if ($config) {
-                $locale = $config->getLocale();
-                if ($locale) {
-                    $val = $locale->fetchKey($key, $vals);
-                    if ($val) {
-                        return $val;
-                    }
+                $val = $config->getLocale()->fetchKey($key, $vals);
+                if ($val) {
+                    return $val;
                 }
             }
 
