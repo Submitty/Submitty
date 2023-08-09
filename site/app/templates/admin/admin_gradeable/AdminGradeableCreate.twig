@@ -224,11 +224,11 @@
 
             <div id="repository">
                 <fieldset>
-                    <legend>VCS Repository Details (select one)</legend>
+                    <legend><a target=_blank href="https://submitty.org/instructor/assignment_preparation/submission_version_control">VCS Repository Details (select one) <i style="font-style:normal;" class="fa-question-circle"></i></a></legend>
                     <div>
                         <input type='radio' id="vcs_radio_submitty_hosted" name="vcs_radio_buttons" value="submitty-hosted"
                             {{ action == 'new' or (action != 'new' and gradeable.getVcsHostType() == 0) ? 'checked' : '' }}
-                            {{ action != 'new' and action != 'template' ? 'disabled' : '' }}> <label for="vcs_radio_submitty_hosted">Submitty hosted – single gradeable repository</label>
+                            {{ action != 'new' and action != 'template' ? 'disabled' : '' }}> <label for="vcs_radio_submitty_hosted">Submitty hosted & created – single gradeable repository</label>
                         <div id="vcs_submitty_url_content" style="margin-left: 5%">
                             <kbd>{{ vcs_base_url }}&#123;&#36;gradeable_id&#125;&#47;</kbd>
                             <kbd class="team_no">&#123;&#36;user_id&#125;</kbd>
@@ -238,7 +238,7 @@
                     <div class="team_no">
                         <input type='radio' id="vcs_radio_submitty_hosted_set_url" name="vcs_radio_buttons" value="submitty-hosted-url"
                             {{ action != 'new' and gradeable.getVcsHostType() == 1 ? 'checked' : '' }}
-                            {{ action != 'new' and action != 'template' ? 'disabled' : '' }}> <label for="vcs_radio_submitty_hosted_set_url">Submitty hosted – choose repository name (can be used for multiple gradeables)</label>
+                            {{ action != 'new' and action != 'template' ? 'disabled' : '' }}> <label for="vcs_radio_submitty_hosted_set_url">Submitty hosted & created – choose repository name (can be used for multiple gradeables)</label>
 
                         <div id="vcs_submitty_set_url_content" style="margin-left: 5%">
                             {% if action == 'new' or action == 'template' %}
@@ -258,41 +258,52 @@
 
                     <input type='radio' id="vcs_radio_private_github" name="vcs_radio_buttons" value="private-github"
                         {{ action != 'new' and gradeable.getVcsHostType() == 3 ? 'checked' : '' }}
-                        {{ action != 'new' and action != 'template' ? 'disabled' : '' }}> <label for="vcs_radio_private_github">Externally hosted - private repository, students will provide URL (NOTE: INCOMPLETE -- DO NOT USE)</label>
-
-                </fieldset>
-
-            <div id="subdirectory-settings-container">
-                {% if action == 'new' or action == 'template' %}
-                    {# (VPAT) fieldset/legend needed for subdirectory radio group #}
-                    <fieldset><legend>Are the student's files for this gradeable expected to 
-                    be in a specific subdirectory of their VCS repository?</legend>
-                {% else %}
-                    {% if gradeable.getVcsSubdirectory() != '' %}
-                    Path to students files within the repository: <input style='width: 30%' type='text' name="vcs_subdirectory" id="vcs_subdirectory" class="auto_save"
-                                    aria-label="repository name" value="{{ gradeable.getVcsSubdirectory() }}" /><br />
-                    {% endif %}
-                {% endif %}
-                <div style="{{ action == 'edit' ? 'display:none' : '' }}">
-                    <input type="radio" id="subdir_yes_radio" name="subdirectory_gradeable" value="true"
-                            {{ action != 'new' and (gradeable.getVcsSubdirectory() != '') ? 'checked' : '' }}/> <label for="subdir_yes_radio">Yes</label>
-
-                    <input type="radio" id="subdir_no_radio" name="subdirectory_gradeable" value ="false"
-                            {{ action == 'new' ? 'checked' :  '' }}/> <label for="subdir_no_radio">No</label>
-                </div>
-                {# (VPAT) Closes fieldset for subdirectory radio group #}
-                </fieldset>
+                        {{ action != 'new' and action != 'template' ? 'disabled' : '' }}> <label for="vcs_radio_private_github">Externally hosted - private repository, students will provide URL (NOTE: access/permissions implementation incomplete -- DO NOT USE)</label>
                 
-            </div>
-            <div class="subdirectory_yes" id="subdir_yes">
-               {% if action == 'new' %}
-                <label for="vcs_subdirectory">What is the path to the 
-                    student's files within the VCS repository?
-                    <input style='width: 30%' type='text' name="vcs_subdirectory" id="vcs_subdirectory" class="required auto_save" placeholder="(Required)"
-                                    aria-label="repository name" value="{{ action != 'new' ? gradeable.getVcsSubdirectory() : '' }}" required /><br />
+                    <div class="team_no">
+                        <input type='radio' id="vcs_radio_self_hosted_set_url" name="vcs_radio_buttons" value="self-hosted"
+                            {{ action != 'new' and gradeable.getVcsHostType() == 4 ? 'checked' : '' }}
+                            {{ action != 'new' and action != 'template' ? 'disabled' : '' }}> <label for="vcs_radio_self_hosted_set_url">Externally hosted - private repository, instructor set URL, instructor or sysadmin must create repository</label>
+
+                        <div id="vcs_self_set_url_content" style="margin-left: 5%">
+                            {% if action == 'new' or action == 'template' %}
+                                <label for="external_repo">What is the URL to the repository? </label>
+                            <input style='width: 80%' type='text' name="external_repo" id="external_repo" class="required auto_save"
+                                    aria-label="repository name" value="{{ vcs_partial_path == '' ? vcs_base_url : vcs_partial_path }}" required/><br />
+                            {% else %}
+                                <kbd id="vcs_url">{{ vcs_partial_path }}</kbd>
+                            {% endif %}  
+                        </div>	     					    
+                    </div>
+
+                </fieldset>
+
+                <div id="subdirectory-settings-container" class="subdirectory">
+                        {# (VPAT) fieldset/legend needed for subdirectory radio group #}
+                    <div>
+                        <fieldset><legend>Are the student's files for this gradeable expected to 
+                        be in a specific subdirectory of their VCS repository?</legend>
+                        
+                            <input type="radio" id="subdir_yes_radio" name="using_subdirectory" value="true" class="bool_val auto_save" 
+                                    {{ action != 'new' and using_subdirectory ? 'checked' : '' }}/> <label for="subdir_yes_radio">Yes</label>
+                            <input type="radio" id="subdir_no_radio" name="using_subdirectory" value="false" class="bool_val auto_save" 
+                                    {{ action == 'new' or (action == 'edit' and  not using_subdirectory) ? 'checked' :  '' }} /> <label for="subdir_no_radio">No</label>
+                        {# (VPAT) Closes fieldset for subdirectory radio group #}
+                        </fieldset>    
+                    </div>
+                    
+                </div>
+
+                <div class="subdirectory_yes" id="subdir_yes">
+                    {% if action == 'new' or action == 'template' %}
+                    What is the path to students files within the VCS repository:
+                    {% else %}
+                    Path to students files within the VCS repository:
+                    {% endif %}
+                    <input style='width: 30%' type='text' name="vcs_subdirectory" id="vcs_subdirectory_input" class="required auto_save" placeholder="(Required)"
+                                        aria-label="repository name" value="{{ vcs_subdirectory }}" required/><br />
                     <em>Note: all other files & directories in the repository will be discarded from the checkout before grading begins.</em></label>
-                {% endif %}
-            </div>
+                </div>
             </div>
         </div>
     </div>
@@ -447,11 +458,11 @@
     function onSubdirectoryChange() {
         if($('#subdir_yes_radio').is(':checked')) {
             disableElementChildren('.subdirectory_yes', false);
-            $('#vcs_subdirectory').prop('required', true);
+            $('#vcs_subdirectory_input').prop('required', true);
         }
         else {
             disableElementChildren('.subdirectory_yes', true);
-            $('#vcs_subdirectory').prop('required', false);
+            $('#vcs_subdirectory_input').prop('required', false);
         }
     }
 
@@ -492,6 +503,7 @@
     function onVCSTypeChange() {
         disableElementChildren('[id=vcs_submitty_set_url_content]', true);
         disableElementChildren('[id=vcs_submitty_url_content]', true);
+        disableElementChildren('[id=vcs_self_set_url_content]', true);
 
         if($('#vcs_radio_submitty_hosted').is(':checked')) {
             disableElementChildren('#vcs_submitty_url_content', false);
@@ -503,6 +515,14 @@
         }
         else {
             $('#vcs_path').prop('required', false);
+        }
+        
+        if($('#vcs_radio_self_hosted_set_url').is(':checked')) {
+            disableElementChildren('#vcs_self_set_url_content', false);
+            $('#vcs_self_url').prop('required', true);
+        }
+        else {
+            $('#vcs_self_url').prop('required', false);
         }
     }
 
@@ -598,7 +618,6 @@
             }
         }
 
-
         // Hide team settings if it isn't a electronic gradeable
         onGradeableTypeChange();
         $('[name="type"]').change(onGradeableTypeChange);
@@ -609,7 +628,7 @@
 
         // Hide the subdirectory field if not selected
         onSubdirectoryChange();
-        $('[name="subdirectory_gradeable"]').change(onSubdirectoryChange);
+        $('[name="using_subdirectory"]').change(onSubdirectoryChange);
 
         // Hide VCS settings depending on different radio buttons
         onVCSTypeChange();

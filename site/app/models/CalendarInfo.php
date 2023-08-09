@@ -75,7 +75,7 @@ class CalendarInfo extends AbstractModel {
         $i = 1;
         /** @var Course $course */
         foreach ($courses as $course) {
-            $info->colors[$course->getSemester() . $course->getTitle()] = "var(--category-color-$i)";
+            $info->colors[$course->getTerm() . $course->getTitle()] = "var(--category-color-$i)";
             if ($i < 21) {
                 $i++;
             }
@@ -145,13 +145,13 @@ class CalendarInfo extends AbstractModel {
                     'title' => htmlspecialchars($cal_item->getText()),
                     'status' => $cal_item->getTypeString(),
                     'course' => $course->getTitle(),
-                    'semester' => $course->getSemester(),
+                    'semester' => $course->getTerm(),
                     'icon' => '',
                     'url' => '',
                     'show_due' => false,
                     'submission' => '',
                     'status_note' => '',
-                    'color' => $info->colors[$course->getSemester() . $course->getTitle()],
+                    'color' => $info->colors[$course->getTerm() . $course->getTitle()],
                     'type' => 'item',
                     'date' => $date,
                     'id' => $cal_item->getId()
@@ -165,7 +165,17 @@ class CalendarInfo extends AbstractModel {
         return $info;
     }
 
+    /**
+     * @return array<string, array<string,bool|string>>>
+     */
     public function getItemsByDate(): array {
+        return $this->items_by_date;
+    }
+
+    /**
+     * @return array<string, array<string,bool|string>>>
+     */
+    public function getItemsByDateInCourses(): array {
         return $this->items_by_date;
     }
 

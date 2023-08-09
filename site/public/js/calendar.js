@@ -1,4 +1,4 @@
-/* exported prevMonth, nextMonth, loadCalendar, loadFullCalendar, editCalendarItemForm, deleteCalendarItem, openNewItemModal */
+/* exported prevMonth, nextMonth, loadCalendar, loadFullCalendar, editCalendarItemForm, deleteCalendarItem, openNewItemModal, openOptionsModal, updateCalendarFilters */
 /* global curr_day, curr_month, curr_year, gradeables_by_date, instructor_courses, buildUrl */
 /* global csrfToken */
 
@@ -676,6 +676,9 @@ function loadCalendar(month_, year_, day_, type) {
     else {
         calendar.appendChild(generateCalendarOfMonthWeek(year_, month_, day_));
     }
+    Cookies.set('calendar_year', year_);
+    Cookies.set('calendar_month', month_);
+    Cookies.set('calendar_day', day_);
 }
 
 /**
@@ -693,4 +696,47 @@ function loadFullCalendar(start, end, semester_name) {
 
 function openNewItemModal() {
     $('#new-calendar-item-form').css('display', 'block');
+}
+
+function openOptionsModal() {
+    $('#calendar-options-form').css('display', 'block');
+    checkProperOptions();
+}
+
+//checks proper tick marks in modal
+function checkProperOptions() {
+    const showAll = loadShowAllCoursesCookie();
+    if (showAll) { //if show all is true, tick off show all
+        document.getElementById('filter-courses-menu').value = 'show all';
+    }
+    else { //if show all if false, select a specific course
+        document.getElementById('filter-courses-menu').value = loadCurrentCourseCookie();
+    }
+}
+
+function loadShowAllCoursesCookie() {
+    const cookie = Cookies.get('calendar_show_all');
+    return cookie === '1' ? true : false;
+}
+
+function loadCurrentCourseCookie() {
+    return Cookies.get('calendar_course');
+}
+
+function updateCalendarFilters() {
+    saveFilterValues();
+    location.reload();
+}
+
+//Fix this
+function saveFilterValues() {
+    //Courses Filter
+    const courses_val = document.getElementById('filter-courses-menu').value;
+    if (courses_val === 'show all') {
+        Cookies.set('calendar_show_all', '1', { expires: 365 });
+    }
+    else {
+        Cookies.set('calendar_show_all', '0', { expires: 365 });
+        Cookies.set('calendar_course', courses_val, { expires: 365 });
+    }
 }

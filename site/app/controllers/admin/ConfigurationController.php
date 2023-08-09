@@ -62,7 +62,7 @@ class ConfigurationController extends AbstractController {
             $admin_in_course =  $this->core->getQueries()->checkIsInstructorInCourse(
                 $this->core->getConfig()->getVerifiedSubmittyAdminUser(),
                 $this->core->getConfig()->getCourse(),
-                $this->core->getConfig()->getSemester()
+                $this->core->getConfig()->getTerm()
             );
         }
 

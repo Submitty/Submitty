@@ -46,6 +46,8 @@ use app\controllers\admin\AdminGradeableController;
  * @method void setVcs($use_vcs)
  * @method string getVcsSubdirectory()
  * @method void setVcsSubdirectory($subdirectory)
+ * @method void setUsingSubdirectory($using_subdirectory)
+ * @method bool isUsingSubdirectory()
  * @method void setVcsPartialPath($vcs_partial_path)
  * @method string getVcsPartialPath()
  * @method int getVcsHostType()
@@ -97,7 +99,6 @@ use app\controllers\admin\AdminGradeableController;
  * @method int getInstructorBlind()
  * @method bool getAllowCustomMarks()
  * @method void setAllowCustomMarks($allow_custom_marks)
- * @method bool hasLeaderboard()
  */
 class Gradeable extends AbstractModel {
     /* Enum range for grader_assignment_method */
@@ -174,6 +175,8 @@ class Gradeable extends AbstractModel {
     protected $autograding_config_path = "";
     /** @prop @var bool If the gradeable is using vcs upload (true) or manual upload (false) */
     protected $vcs = false;
+    /** @prop @var bool If the gradeable is using a VCS subdirectory within the repository */
+    protected $using_subdirectory = false;
     /** @prop @var string The subdirectory within the VCS repository for this gradeable */
     protected $vcs_subdirectory = "";
     /** @prop @var string The path to the repository from the base url */
@@ -293,6 +296,7 @@ class Gradeable extends AbstractModel {
             $this->setAutogradingConfigPath($details['autograding_config_path'], true);
             $this->setVcs($details['vcs']);
             $this->setVcsSubdirectory($details['vcs_subdirectory']);
+            $this->setUsingSubdirectory($details['using_subdirectory']);
             $this->setVcsPartialPath($details['vcs_partial_path']);
             $this->setVcsHostType($details['vcs_host_type']);
             $this->setTeamAssignmentInternal($details['team_assignment']);
@@ -924,6 +928,54 @@ class Gradeable extends AbstractModel {
      */
     public function canStudentDownload() {
         return $this->student_download;
+    }
+
+    /**
+     * Determines if a specific file can be downloaded by a student (Used to determine access for zip download)
+     * @param int $version which version of the gradeable is this file in?
+     * @param string $file_path the path of the file that client is trying to download
+     * @param string $root_path the root path of the gradeable files
+     * @return bool
+     */
+    public function canStudentDownloadFile(int $version, string $file_path, string $root_path): bool {
+        if (!$this->student_download) {
+            return false;
+        }
+        //get the folder it is contained in
+        $path_array = explode("/", $file_path);
+        $outside_folder = $path_array[count($path_array) - 2];
+        $file_name = $path_array[count($path_array) - 1];
+        //Automatically remove these special files
+        if (
+            $file_name === ".submit.timestamp"
+            || $file_name === ".submit.notebook"
+            || $file_name === ".user_assignment_access.json"
+        ) {
+            return false;
+        }
+
+        $autograding_config = $this->getAutogradingConfig();
+        if ($autograding_config->isNotebookGradeable()) {
+            //Get notebook data to get list of notebook filenames
+            $notebook_model = $autograding_config->getUserSpecificNotebook($this->core->getUser()->getId());
+            $notebook = $notebook_model->getNotebook();
+            $notebook_data = $notebook_model->getMostRecentNotebookSubmissions(
+                $version,
+                $notebook,
+                $this->core->getUser()->getId(),
+                $version,
+                $this->getId()
+            );
+
+            //get the root folder
+            $root_path_array = explode("/", $root_path);
+            $root_folder = $path_array[count($root_path_array) - 1];
+            //all notebook generated submissions reside in the root folder
+            if ($outside_folder === $root_folder) {
+                return false;
+            }
+        }
+        return true;
     }
 
     /**
@@ -1593,7 +1645,7 @@ class Gradeable extends AbstractModel {
                 $submission_path = FileUtils::joinPaths(
                     $this->core->getConfig()->getSubmittyPath(),
                     'courses',
-                    $this->core->getConfig()->getSemester(),
+                    $this->core->getConfig()->getTerm(),
                     $this->core->getConfig()->getCourse(),
                     'submissions',
                     $this->getId()
@@ -2168,7 +2220,7 @@ class Gradeable extends AbstractModel {
 
         if ($this->isVcs()) {
             $config = $this->core->getConfig();
-            AdminGradeableController::enqueueGenerateRepos($config->getSemester(), $config->getCourse(), $gradeable_id);
+            AdminGradeableController::enqueueGenerateRepos($config->getTerm(), $config->getCourse(), $gradeable_id);
         }
     }
 
@@ -2232,7 +2284,7 @@ class Gradeable extends AbstractModel {
      * @return int
      */
     public function getWouldBeDaysLate() {
-        return max(0, $this->hasDueDate() ? DateUtils::calculateDayDiff($this->getSubmissionDueDate(), null) : 0);
+        return max(0, $this->hasDueDate() ? DateUtils::calculateDayDiff($this->getSubmissionDueDate()) : 0);
     }
 
     /**
@@ -2331,7 +2383,10 @@ class Gradeable extends AbstractModel {
      *
      * @return int Number of minutes allowed
      */
-    public function getUserAllowedTime(User $user): ?int {
+    public function getUserAllowedTime(?User $user): ?int {
+        if ($user === null) {
+            return null;
+        }
         if ($this->allowed_minutes === null) {
             return null;
         }

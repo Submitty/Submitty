@@ -5,23 +5,26 @@
 {% endif %}
 
 {# Submitted files #}
-{% if student_download == true or core.getUser().accessGrading() %}
+{% if student_download or core.getUser().accessGrading() %}
     <h4>Submitted Files</h4>
     <div class="row">
         <div class="box col-md-6" id="submitted-files">
             {% for file in files %}
-                <div class="flex-row">
-                    <span>
-                        {{ file.relative_name }} ({{ (file.size / 1024) | number_format(2) | default(-1) }}kb)
-                    </span>
-                {# download icon if student can download files #}
-                {% if can_download %}
-                    <button class = 'btn btn-primary key_to_click' onclick='downloadFile("{{ file.path|url_encode }}", "submissions")' aria-label="Download {{file.relative_name}}"> Download
-                        <i class="fas fa-download" title="Download the file"></i></button>
+                {# In a notebook, files in the root directory are server-generated. If not a notebook, all files can be seen #}
+                {% if (is_notebook and (file.relative_name|split('/'))|length > 1) or (not is_notebook) %}
+                    <div class="flex-row">
+                        <span>
+                            {{ file.relative_name }} ({{ (file.size / 1024) | number_format(2) | default(-1) }}kb)
+                        </span>
+                    {# download icon if student can download files #}
+                    {% if student_download %}
+                        <button class = 'btn btn-primary key_to_click' onclick='downloadFile("{{ file.path|url_encode }}", "submissions")' aria-label="Download {{file.relative_name}}"> Download
+                            <i class="fas fa-download" title="Download the file"></i></button>
+                    {% endif %}
+                    </div>
                 {% endif %}
-                 </div>
             {% endfor %}
-            {% if can_download and files|length > 1 %}
+            {% if student_download and files|length > 1 %}
                 <br />
                 <div class="flex-row">
                     <span>Download all files:</span>

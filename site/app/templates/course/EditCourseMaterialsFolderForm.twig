@@ -2,6 +2,7 @@
 {% block popup_id %}edit-course-materials-folder-form{% endblock %}
 {% block title %}Edit Course Material Folder{% endblock %}
 {% block body %}
+    {{ add_twig_module_js('courseMaterials/upload.js') }}
     <div id="material-folder-edit-form" class="flex-col flex-col-space" data-directory = "Check">
         <p>NOTE: Sorting rank will edit the rank of the folder only.</p>
         <label>
@@ -97,7 +98,7 @@
                 sectionsEdit = null;
                 partialSections = null;
             }
-            handleEditCourseMaterials("{{ csrf_token }}", hideFromStudents, id, sectionsEdit, partialSections, cmTime, sort, sections_lock, fullUpdate, null, null);
+            handleEditCourseMaterials("{{ csrf_token }}", hideFromStudents, id, sectionsEdit, partialSections, cmTime, sort, sections_lock, fullUpdate, null, null, null, null);
         };
 
         function enableFullUpdate() {

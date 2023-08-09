@@ -11,11 +11,17 @@ use app\libraries\database\DatabaseQueries;
 use app\libraries\database\DatabaseUtils;
 use app\models\Config;
 use app\models\User;
+use app\entities\Session;
+use app\repositories\SessionRepository;
 use Doctrine\DBAL\Logging\DebugStack;
 use Doctrine\ORM\EntityManager;
 use Doctrine\ORM\ORMSetup;
+use Symfony\Component\Cache\Adapter\FilesystemAdapter;
 use Symfony\Component\Cache\Adapter\PhpFilesAdapter;
+use Symfony\Component\Cache\Psr16Cache;
 use Symfony\Component\HttpFoundation\Request;
+use Psr\Log\NullLogger;
+use BrowscapPHP\Browscap;
 
 /**
  * Class Core
@@ -310,8 +316,12 @@ class Core {
         }
 
         foreach ($ignore_list as $regex) {
-            $regex = str_replace("<semester>", $this->getConfig()->getSemester(), $regex);
-            $regex = str_replace("<course>", $this->getConfig()->getCourse(), $regex);
+            if ($this->getConfig()->getTerm() !== null) {
+                $regex = str_replace("<term>", $this->getConfig()->getTerm(), $regex);
+            }
+            if ($this->getConfig()->getCourse() !== null) {
+                $regex = str_replace("<course>", $this->getConfig()->getCourse(), $regex);
+            }
             $regex = str_replace("<gradeable>", "[A-Za-z0-9\\-\\_]+", $regex);
             if (preg_match("#^" . $regex . "(\?.*)?$#", $_SERVER['REQUEST_URI']) === 1) {
                 return; // this route matches an ignore rule
@@ -334,7 +344,7 @@ class Core {
         }
 
         $this->grading_queue = new GradingQueue(
-            $this->config->getSemester(),
+            $this->config->getTerm(),
             $this->config->getCourse(),
             $this->config->getSubmittyPath()
         );
@@ -481,6 +491,19 @@ class Core {
     }
 
     /**
+     * Get the session id of the current session otherwise return false
+     *
+     * @return string|bool
+     */
+    public function getCurrentSessionId() {
+        $session_id = $this->session_manager->getCurrentSessionId();
+        if ($session_id) {
+            return $session_id;
+        }
+        return false;
+    }
+
+    /**
      * Remove the currently loaded session within the session manager, returning bool
      * on whether this was done or not
      *
@@ -532,9 +555,43 @@ class Core {
         try {
             if ($this->authentication->authenticate()) {
                 $user_id = $this->authentication->getUserId();
+                // Get information about user's browser
+                try {
+                    $path = FileUtils::joinPaths(
+                        $this->getConfig()->getSubmittyInstallPath(),
+                        'site',
+                        'vendor',
+                        'browscap',
+                        'browscap-php',
+                        'resources'
+                    );
+                    $fs_adapter = new FilesystemAdapter("", 0, $path);
+                    $cache = new Psr16Cache($fs_adapter);
+                    $logger = new NullLogger();
+                    $bc = new Browscap($cache, $logger);
+                    $browser_info = $bc->getBrowser();
+                    $browser_info = [
+                        'browser' => $browser_info->browser,
+                        'version' => $browser_info->version,
+                        'platform' => $browser_info->platform,
+                    ];
+                }
+                catch (\Exception $e) {
+                    $browser_info = [
+                        'browser' => 'Unknown',
+                        'version' => '',
+                        'platform' => 'Unknown',
+                    ];
+                }
+                $new_session_id = $this->session_manager->newSession($user_id, $browser_info);
+                if ($this->database_queries->getSingleSessionSetting($user_id)) {
+                    /** @var SessionRepository $repo */
+                    $repo = $this->getSubmittyEntityManager()->getRepository(Session::class);
+                    $repo->removeUserSessionsExcept($user_id, $new_session_id);
+                }
                 // Set the cookie to last for 7 days
                 $token = TokenManager::generateSessionToken(
-                    $this->session_manager->newSession($user_id),
+                    $new_session_id,
                     $user_id,
                     $persistent_cookie
                 );
@@ -642,7 +699,7 @@ class Core {
      * @return string
      */
     public function buildCourseUrl($parts = []) {
-        array_unshift($parts, "courses", $this->getConfig()->getSemester(), $this->getConfig()->getCourse());
+        array_unshift($parts, "courses", $this->getConfig()->getTerm(), $this->getConfig()->getCourse());
         return $this->buildUrl($parts);
     }
 
@@ -699,8 +756,8 @@ class Core {
     }
 
     public function getFullSemester() {
-        $semester = $this->getConfig()->getSemester();
-        if ($this->getConfig()->getSemester() !== "") {
+        $semester = $this->getConfig()->getTerm();
+        if ($this->getConfig()->getTerm() !== "") {
             $arr1 = str_split($semester);
             $semester = "";
             if ($arr1[0] == "f") {
