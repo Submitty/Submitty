@@ -2,6 +2,7 @@ import re
 import tzlocal
 from datetime import datetime, timedelta
 
+
 def get_timezone():
     """
     Grab the system timezone, should generally only be used when we don't have any
@@ -21,6 +22,7 @@ def get_current_time():
     """
     return datetime.now(get_timezone())
 
+
 def write_submitty_date(d=None, milliseconds=False):
     """
     Converts a datetime object to a string with a timezone. If the datetime object
@@ -37,7 +39,7 @@ def write_submitty_date(d=None, milliseconds=False):
             f"Invalid type. Expected datetime or datetime string, got {type(d)}."
         )
     if d.tzinfo is None:
-        d = get_timezone().localize(d)
+        d.astimezone(get_timezone())
 
     if milliseconds:
         mlsec = d.strftime("%f")[0:3]
@@ -67,7 +69,7 @@ def read_submitty_date(s):
             # hoping to find no timezone
             without_timezone = datetime.strptime(thedatetime, '%Y-%m-%d %H:%M:%S')
             my_timezone = get_timezone()
-            with_timezone = my_timezone.localize(without_timezone)
+            with_timezone = without_timezone.astimezone(my_timezone)
         except ValueError:
             try:
                 # hoping to find timezone -04
