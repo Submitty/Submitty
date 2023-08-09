@@ -504,7 +504,7 @@ CREATE FUNCTION public.gradeable_version_change() RETURNS trigger
             user_id = CASE WHEN TG_OP = 'DELETE' THEN OLD.user_id ELSE NEW.user_id END;
             team_id = CASE WHEN TG_OP = 'DELETE' THEN OLD.team_id ELSE NEW.team_id END;
             
-            --- Remove all lade day cache for all gradeables past this submission die date
+            --- Remove all lade day cache for all gradeables past this submission due date
             --- for every user associated with the gradeable
             DELETE FROM late_day_cache ldc
             WHERE late_day_date >= (SELECT eg.eg_submission_due_date 
@@ -655,7 +655,8 @@ CREATE TABLE public.categories_list (
     category_id integer NOT NULL,
     category_desc character varying NOT NULL,
     rank integer,
-    color character varying DEFAULT '#000080'::character varying NOT NULL
+    color character varying DEFAULT '#000080'::character varying NOT NULL,
+    visible_date date
 );
 
 
@@ -691,7 +692,7 @@ CREATE TABLE public.course_materials (
     hidden_from_students boolean,
     priority double precision NOT NULL,
     url text,
-    url_title character varying(255)
+    title character varying(255)
 );
 
 
@@ -794,6 +795,7 @@ CREATE TABLE public.electronic_gradeable (
     eg_depends_on_points integer,
     eg_has_release_date boolean DEFAULT true NOT NULL,
     eg_vcs_subdirectory character varying(1024) DEFAULT ''::character varying NOT NULL,
+    eg_using_subdirectory boolean DEFAULT false NOT NULL,
     CONSTRAINT eg_grade_inquiry_allowed_true CHECK (((eg_grade_inquiry_allowed IS TRUE) OR (eg_grade_inquiry_per_component_allowed IS FALSE))),
     CONSTRAINT eg_grade_inquiry_due_date_max CHECK ((eg_grade_inquiry_due_date <= '9999-03-01 00:00:00-05'::timestamp with time zone)),
     CONSTRAINT eg_grade_inquiry_start_date_max CHECK ((eg_grade_inquiry_start_date <= '9999-03-01 00:00:00-05'::timestamp with time zone)),
@@ -1804,6 +1806,8 @@ CREATE TABLE public.users (
     registration_type character varying(255) DEFAULT 'graded'::character varying,
     user_pronouns character varying(255) DEFAULT ''::character varying,
     user_last_initial_format integer DEFAULT 0 NOT NULL,
+    display_name_order character varying(255) DEFAULT 'GIVEN_F'::character varying NOT NULL,
+    display_pronouns boolean DEFAULT false,
     CONSTRAINT check_registration_type CHECK (((registration_type)::text = ANY (ARRAY[('graded'::character varying)::text, ('audit'::character varying)::text, ('withdrawn'::character varying)::text, ('staff'::character varying)::text]))),
     CONSTRAINT users_user_group_check CHECK (((user_group >= 1) AND (user_group <= 4))),
     CONSTRAINT users_user_last_initial_format_check CHECK (((user_last_initial_format >= 0) AND (user_last_initial_format <= 3)))

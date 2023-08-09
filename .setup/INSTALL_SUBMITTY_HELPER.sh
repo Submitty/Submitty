@@ -164,7 +164,9 @@ fi
 
 echo -e "Install python_submitty_utils"
 
-pushd "${SUBMITTY_REPOSITORY}/python_submitty_utils"
+rsync -rtz "${SUBMITTY_REPOSITORY}/python_submitty_utils" "${SUBMITTY_INSTALL_DIR}"
+pushd "${SUBMITTY_INSTALL_DIR}/python_submitty_utils"
+
 pip3 install .
 # Setting the permissions are necessary as pip uses the umask of the user/system, which
 # affects the other permissions (which ideally should be o+rx, but Submitty sets it to o-rwx).
@@ -453,6 +455,28 @@ echo -e "Copy the grading code"
 # copy the files from the repo
 rsync -rtz "${SUBMITTY_REPOSITORY}/grading" "${SUBMITTY_INSTALL_DIR}/src"
 
+# copy the allowed_autograding_commands_default.json to config
+rsync -tz "${SUBMITTY_REPOSITORY}/grading/allowed_autograding_commands_default.json" "${SUBMITTY_INSTALL_DIR}/config"
+
+# replace filling variables
+sed -i -e "s|__INSTALL__FILLIN__SUBMITTY_INSTALL_DIR__|$SUBMITTY_INSTALL_DIR|g" "${SUBMITTY_INSTALL_DIR}/config/allowed_autograding_commands_default.json"
+
+# # change permissions of allowed_autograding_commands_default.json
+chown "root":"root" "${SUBMITTY_INSTALL_DIR}/config/allowed_autograding_commands_default.json"
+chmod 644 "${SUBMITTY_INSTALL_DIR}/config/allowed_autograding_commands_default.json"
+
+# create allowed_autograding_commands_custom.json if doesnt exist
+if [[ ! -e "${SUBMITTY_INSTALL_DIR}/config/allowed_autograding_commands_custom.json" ]]; then
+    rsync -tz "${SUBMITTY_REPOSITORY}/grading/allowed_autograding_commands_custom.json" "${SUBMITTY_INSTALL_DIR}/config"
+fi
+
+# replace filling variables
+sed -i -e "s|__INSTALL__FILLIN__SUBMITTY_INSTALL_DIR__|$SUBMITTY_INSTALL_DIR|g" "${SUBMITTY_INSTALL_DIR}/config/allowed_autograding_commands_custom.json"
+
+# # change permissions of allowed_autograding_commands_custom.json
+chown "root":"root" "${SUBMITTY_INSTALL_DIR}/config/allowed_autograding_commands_custom.json"
+chmod 644 "${SUBMITTY_INSTALL_DIR}/config/allowed_autograding_commands_custom.json"
+
 #replace necessary variables
 array=( Sample_CMakeLists.txt CMakeLists.txt system_call_check.cpp seccomp_functions.cpp execute.cpp )
 for i in "${array[@]}"; do
@@ -504,7 +528,8 @@ fi
 ########################################################################################################################
 # BUILD JUNIT TEST RUNNER (.java file) if Java is installed on the machine
 
-if [ -x "$(command -v javac)" ]; then
+if [ -x "$(command -v javac)" ] &&
+   [ -d ${SUBMITTY_INSTALL_DIR}/java_tools/JUnit ]; then
     echo -e "Build the junit test runner"
 
     # copy the file from the repo
@@ -529,6 +554,8 @@ if [ -x "$(command -v javac)" ]; then
     # fix all java_tools permissions
     chown -R "root:${COURSE_BUILDERS_GROUP}" "${SUBMITTY_INSTALL_DIR}/java_tools"
     chmod -R 755                             "${SUBMITTY_INSTALL_DIR}/java_tools"
+else
+    echo -e "Skipping build of the junit test runner"
 fi
 
 
@@ -563,6 +590,7 @@ g++ "${GRADINGCODE}/main_configure.cpp" \
     "${GRADINGCODE}/execute_limits.cpp" \
     "${GRADINGCODE}/seccomp_functions.cpp" \
     "${GRADINGCODE}/empty_custom_function.cpp" \
+    "${GRADINGCODE}/allowed_autograding_commands.cpp" \
     "-I${JSONCODE}" \
     -pthread -std=c++11 -lseccomp -o "${SUBMITTY_INSTALL_DIR}/bin/configure.out"
 
@@ -622,7 +650,7 @@ popd > /dev/null
 ################################################################################################################
 # COPY THE 1.0 Grading Website if not in worker mode
 if [ "${WORKER}" == 0 ]; then
-    bash "${SUBMITTY_REPOSITORY}/.setup/install_submitty/install_site.sh"
+    bash "${SUBMITTY_REPOSITORY}/.setup/install_submitty/install_site.sh" browscap
 fi
 
 ################################################################################################################

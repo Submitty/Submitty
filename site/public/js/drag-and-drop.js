@@ -911,7 +911,10 @@ function handleRegrade(versions_used, csrf_token, gradeable_id, user_id, regrade
 }
 
 /**
- * @param days_late
+ * @param remaining_late_days_for_gradeable
+ * @param charged_late_days
+ * @param days_past_deadline
+ * @param late_day_exceptions
  * @param late_days_allowed
  * @param versions_used
  * @param versions_allowed
@@ -924,9 +927,9 @@ function handleRegrade(versions_used, csrf_token, gradeable_id, user_id, regrade
  * @param num_components
  * @param merge_previous
  */
-function handleSubmission(days_late, days_to_be_charged,late_days_allowed, versions_used, versions_allowed, csrf_token, vcs_checkout, num_inputs, gradeable_id, user_id, git_user_id, git_repo_id, student_page, num_components, merge_previous=false, clobber=false, viewing_inactive_version = false) {
+function handleSubmission(gradeable_status, remaining_late_days_for_gradeable, charged_late_days, days_past_deadline, late_day_exceptions, late_days_allowed, is_team_assignment, min_team_member_late_days, versions_used, versions_allowed, csrf_token, vcs_checkout, num_inputs, gradeable_id, user_id, git_user_id, git_repo_id, student_page, num_components, merge_previous=false, clobber=false, viewing_inactive_version = false) {
     $('#submit').prop('disabled', true);
-    const submit_url = `${buildCourseUrl(['gradeable', gradeable_id, 'upload'])}?merge=${merge_previous}&clobber=${clobber}`;
+    const submit_url = `${buildCourseUrl(['gradeable', gradeable_id, 'upload'])}?merge=${merge_previous.toString()}&clobber=${clobber.toString()}`;
     const return_url = buildCourseUrl(['gradeable', gradeable_id]);
     let message = '';
     // check versions used
@@ -937,18 +940,36 @@ function handleSubmission(days_late, days_to_be_charged,late_days_allowed, versi
             return;
         }
     }
-    // check due date
-    if (days_late > 0 && days_late <= late_days_allowed && days_to_be_charged > 0) {
-        message = `Your submission will be ${days_late} day(s) late. Are you sure you want to use ${days_to_be_charged} late day(s)?`;
-        if (!confirm(message)) {
-            $('#submit').prop('disabled', false);
-            return;
+
+    let late_warning_seen = false;
+
+    const days_to_be_charged = Math.max(0,days_past_deadline-late_day_exceptions);
+    // gradeable_status == 3 is a bad submission (too many late days used) and therefore no need to show a warning message anymore
+
+    if ( days_past_deadline > 0 && gradeable_status !== 3 ) {
+
+        /* days_to_be_charged !== charged_late_days will make sure that both messages won't appear multiple times if it already appeared once and the user made a submission */
+
+        if ( days_to_be_charged <= late_days_allowed && remaining_late_days_for_gradeable > 0  && days_to_be_charged !== charged_late_days && days_to_be_charged > 0) {
+            message = `Your submission will be ${days_past_deadline} day(s) late. Are you sure you want to use ${days_to_be_charged} late day(s)?`;
+            if (!confirm(message)) {
+                $('#submit').prop('disabled', false);
+                return;
+            }
+        }
+        else if ( ( days_to_be_charged > late_days_allowed || remaining_late_days_for_gradeable === 0 )  && days_to_be_charged !== charged_late_days  && days_to_be_charged>0  ) {
+            late_warning_seen = true;
+            message = `Your submission will be ${days_past_deadline} days late. You are not supposed to submit unless you have an excused absence. Are you sure you want to continue?`;
+            if (!confirm(message)) {
+                $('#submit').prop('disabled', false);
+                return;
+            }
         }
     }
-    else if (days_late > 0 && days_late > late_days_allowed) {
-        message = `Your submission will be ${days_late} days late. You are not supposed to submit unless you have an excused absence. Are you sure you want to continue?`;
+    // check team date
+    if (!late_warning_seen && is_team_assignment && min_team_member_late_days - days_to_be_charged + charged_late_days < 0) {
+        message = 'There is at least 1 member on your team that does not have enough late days for this submission. This will result in them receiving a marked grade of zero. Are you sure you want to continue?';
         if (!confirm(message)) {
-            $('#submit').prop('disabled', false);
             return;
         }
     }
@@ -1226,9 +1247,14 @@ function handleUploadCourseMaterials(csrf_token, expand_zip, hide_from_students,
     let linkToBeAdded = false;
 
     if ($('#url_selection').is(':visible')) {
-        if ($('#url_title').val() !== '' && $('#url_url').val() !== '' ) {
+        if ($('#title').val() !== '' && $('#url_url').val() !== '' && window.isValidFileName($('#title').val())) {
             linkToBeAdded = true;
-            formData.append('url_title', $('#url_title').val());
+
+            let title = $('#title').val();
+            formData.append('original_title', title);
+            title = encodeURIComponent(`link-${title}`);
+
+            formData.append('title', title);
             formData.append('url_url', $('#url_url').val());
         }
     }
@@ -1274,7 +1300,7 @@ function handleUploadCourseMaterials(csrf_token, expand_zip, hide_from_students,
 /**
  * @param csrf_token
  */
-function handleEditCourseMaterials(csrf_token, hide_from_students, id, sectionsEdit, partialSections, cmTime, sortPriority, sections_lock, folderUpdate, link_url, link_title, overwrite) {
+function handleEditCourseMaterials(csrf_token, hide_from_students, id, sectionsEdit, partialSections, cmTime, sortPriority, sections_lock, folderUpdate, link_url, title, overwrite, file_path) {
     const edit_url = buildCourseUrl(['course_materials', 'edit']);
     const return_url = buildCourseUrl(['course_materials']);
     const formData = new FormData();
@@ -1311,9 +1337,27 @@ function handleEditCourseMaterials(csrf_token, hide_from_students, id, sectionsE
     if (link_url !== null) {
         formData.append('link_url', link_url);
     }
-    if (link_title !== null) {
-        formData.append('link_title', link_title);
+
+    if (file_path !== null && file_path !== '') {
+        const file_name = file_path.split('/').pop();
+        if (link_url !== null) {
+            const lastSlashIndex = file_path.lastIndexOf('/');
+            const new_file_name = encodeURIComponent(`link-${file_path.substring(lastSlashIndex + 1)}`);
+            file_path = `${file_path.substring(0, lastSlashIndex + 1)}${new_file_name}`;
+        }
+        if (window.isValidFileName(file_name)) {
+            formData.append('file_path', file_path);
+        }
     }
+
+    if (title !== null && window.isValidFileName(title)) {
+        formData.append('original_title', title);
+        if (link_url !== null) {
+            title = encodeURIComponent(`link-${title}`);
+        }
+        formData.append('title', title);
+    }
+
     if (overwrite !== null) {
         formData.append('overwrite', overwrite);
     }
@@ -1341,6 +1385,9 @@ function handleEditCourseMaterials(csrf_token, hide_from_students, id, sectionsE
                 else {
                     if (link_url !== null && jsondata['message'].indexOf('Name clash') !== -1) {
                         newOverwriteCourseMaterialForm(jsondata['data'], true, true);
+                    }
+                    else if (jsondata['message'].indexOf('Name clash') !== -1) {
+                        newOverwriteCourseMaterialForm(jsondata['data'], false, true);
                     }
                     else {
                         alert(jsondata['message']);
