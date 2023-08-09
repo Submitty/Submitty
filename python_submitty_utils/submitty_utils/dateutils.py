@@ -39,7 +39,7 @@ def write_submitty_date(d=None, milliseconds=False):
             f"Invalid type. Expected datetime or datetime string, got {type(d)}."
         )
     if d.tzinfo is None:
-        d.astimezone(get_timezone())
+        d = get_timezone().localize(d)
 
     if milliseconds:
         mlsec = d.strftime("%f")[0:3]
@@ -69,7 +69,7 @@ def read_submitty_date(s):
             # hoping to find no timezone
             without_timezone = datetime.strptime(thedatetime, '%Y-%m-%d %H:%M:%S')
             my_timezone = get_timezone()
-            with_timezone = without_timezone.astimezone(my_timezone)
+            with_timezone = my_timezone.localize(without_timezone)
         except ValueError:
             try:
                 # hoping to find timezone -04
