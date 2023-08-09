@@ -362,7 +362,7 @@ class User extends AbstractModel {
 
     /**
      * Update the user's preferred locale.
-     * 
+     *
      * @param string $locale The desired new locale, must be one of Core::getSupportedLocales()
      * @return bool Whether or not the operation was successful
      */

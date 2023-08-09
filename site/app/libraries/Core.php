@@ -949,7 +949,7 @@ class Core {
 
     /**
      * Gets a list of supported locales.
-     * 
+     *
      * @return array|null
      */
     public function getSupportedLocales() {

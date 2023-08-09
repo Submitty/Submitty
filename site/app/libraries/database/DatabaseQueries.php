@@ -139,7 +139,7 @@ class DatabaseQueries {
 
     /**
      * Update a user's preferred locale in the master database.
-     * 
+     *
      * @param User $user The user object to modify
      * @param string $locale The locale string to set it to, must be one of Core::getSupportedLocales()
      * @return bool Whether the operation was successful
