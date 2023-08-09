@@ -1,6 +1,6 @@
 <div class="content">
     <h1>
-        My Profile
+    {{ localize('phrases.Profile'), "My Profile" }}
     </h1>
     <div class="user-info-wrapper">
         <div id="user-card-img">
@@ -22,12 +22,14 @@
         <div id="user-card">
             <div class="user-info-cont">
                 <div class="user-info-title" id="basic_info">
-                    <span>Basic Information</span>
+                    <span>
+                    {{ localize('phrases.Information'), "Basic Information" }}
+                    </span>
                 </div>
                 <div class="user-info">
                     <div class="flex-row" id="username-row" data-testid="username-row">
                         <span class="label">
-                            Username:
+                        {{ localize('phrases.Username'), "Username:" }}
                         </span>
                         <span class="value">
                             {{ user.getId() }}
@@ -35,7 +37,7 @@
                     </div>
                     <div class="flex-row" id="givenname-row" data-testid="givenname-row">
                         <span class="label">
-                            First Name:
+                        {{ localize('phrases.FirstName'), "First Name:" }}
                         </span>
                         <button class="icon" tabindex="0" onclick="showUpdatePrefNameForm()" aria-label="Edit user preferred name" title="Edit user preferred name">
                             <i class="fas fa-pencil-alt"></i> {{ user.getDisplayedGivenName() }}
@@ -43,7 +45,7 @@
                     </div>
                     <div class="flex-row" id="familyname-row" data-testid="familyname-row">
                         <span class="label">
-                            Last Name:
+                        {{ localize('phrases.LastName'), "Last Name:" }}
                         </span>
                         <button class="icon" tabindex="0" onclick="showUpdatePrefNameForm()" aria-label="Edit user preferred name" title="Edit user preferred name">
                             <i class="fas fa-pencil-alt"></i> {{ user.getDisplayedFamilyName() }}
@@ -51,7 +53,7 @@
                     </div>
                     <div class="flex-row" id="last-initial-format-row" data-testid="last-initial-format-row">
                         <span class="label">
-                            Abbreviated Name:
+                            {{ localize('phrases.AbbreviatedName'), "Abbreviated Name:" }}
                         </span>
                         <button class="icon" tabindex="0" onclick="showUpdateLastInitialFormatForm()" aria-label="Edit user last initial format" title="Edit user last initial format">
                             <i class="fas fa-pencil-alt"></i> {{ user.getDisplayAbbreviatedName() }}
@@ -59,7 +61,7 @@
                     </div>
                     <div class="flex-row" id="pronouns-row" data-testid="pronouns-row">
                         <span class="label">
-                            Pronouns:
+                             {{ localize('phrases.Pronouns'), "Pronouns:" }}
                         </span>
                         <button id='pronouns_val' class="icon" tabindex="0" onclick="showUpdatePronounsForm()" aria-label="Edit user pronouns" title="Edit user pronouns">
                             <i class="fas fa-pencil-alt"></i> {{ user.getPronouns() }}
@@ -67,7 +69,7 @@
                     </div>
                     <div class="flex-row" id="pronouns-display-row">
                         <span class="label">
-                            Display Pronouns in Discussion Forum:
+                            {{ localize('phrases.PronounsForum'), "Display Pronouns in Discussion Forum:" }}
                         </span>
                         <button id='display_pronouns_val' class="icon" tabindex="0" onclick="showUpdatePronounsForm()" aria-label="Edit user pronouns" title="Edit user pronouns">
                             {% if user.getDisplayPronouns() %}
@@ -79,7 +81,7 @@
                     </div>
                     <div class="flex-row" id="email-row" data-testid="email-row">
                         <span class="label">
-                            Primary Email:
+                            {{ localize('phrases.PrimaryEmail'), "Primary Email:" }}
                         </span>
                         <span class="value">
                             {{ user.getEmail() }}
@@ -87,7 +89,7 @@
                     </div>
                     <div class="flex-row" id="secondary-email-row">
                         <span class="label">
-                            Secondary Email:
+                            {{ localize('phrases.SecondaryEmail'), "Secondary Email:" }}
                         </span>
                         <button class="icon" tabindex="0" onclick="showUpdateSecondaryEmailForm()" aria-label="Edit user secondary email" title="Edit user secondary email">
                             <i class="fas fa-pencil-alt"></i> {{ user.getSecondaryEmail() }}
@@ -95,7 +97,7 @@
                     </div>
                     <div class="flex-row" id="secondary-email-notify-row">
                         <span class="label">
-                            Send Email to Secondary Address:
+                            {{ localize('phrases.SendEmail'), "Send Email to Secondary Address:" }}
                         </span>
                         <button class="icon" tabindex="0" onclick="showUpdateSecondaryEmailForm()" aria-label="Edit user secondary email" title="Edit user secondary email">
                             <i class="fas fa-pencil-alt"></i> {% if user.getEmailBoth() %}True{% else %}False{% endif %}
@@ -104,7 +106,7 @@
                     {% if display_access_level %}
                         <div class="flex-row" id="access-row">
                             <span class="label">
-                                Access Level:
+                                {{ localize('phrases.AccessLevel'), "Access Level:" }}
                             </span>
                             <span class="value">
                                 {{ access_level }}
