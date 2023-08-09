@@ -24,7 +24,8 @@ abstract class AbstractModel {
     /** @var Core */
     protected $core;
 
-    /** @prop @var bool flag on whether this model has been changed or not by the application layer */
+    /** @prop
+     * @var bool flag on whether this model has been changed or not by the application layer */
     protected $modified = false;
 
     public function __construct(Core $core) {
