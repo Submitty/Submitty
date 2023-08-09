@@ -12,11 +12,11 @@ use app\libraries\FileUtils;
  * on the site frontend.
  */
 class Locale extends AbstractModel {
-    /** @prop @var string */
-    private $name;
+    /** @var string */
+    private string $name;
 
-    /** @prop @var array */
-    private $lang_data = [];
+    /** @var array<mixed> */
+    private array $lang_data = [];
 
     public function __construct(Core $core, string $lang_path, string $name) {
         parent::__construct($core);
@@ -36,10 +36,14 @@ class Locale extends AbstractModel {
         return $this->name;
     }
 
+    /** @return array<mixed> */
     public function getLangData(): array {
         return $this->lang_data;
     }
 
+    /**
+     * @param array<string> $vals
+     */
     public function fetchKey(string $key, array $vals = []): ?string {
         preg_match_all('/\w+/', $key, $parts, PREG_PATTERN_ORDER);
 
