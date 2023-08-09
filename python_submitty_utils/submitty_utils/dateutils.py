@@ -120,7 +120,7 @@ def parse_datetime(date_string):
         pass
 
     try:
-        return get_timezone().localize(
+        return tzlocal.get_localzone().localize(
             datetime.strptime(date_string, '%Y-%m-%d %H:%M:%S')
         )
         return
