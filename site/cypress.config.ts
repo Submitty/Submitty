@@ -14,5 +14,6 @@ export default defineConfig({
     },
     baseUrl: 'http://localhost:1511',
     specPattern: 'cypress/e2e/**/*.spec.js',
+    projectId: 'es51qa'
   },
 })

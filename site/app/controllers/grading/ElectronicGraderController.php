@@ -905,7 +905,6 @@ class ElectronicGraderController extends AbstractController {
         // Limited grader does not have "View All" option
         // If nothing to grade, Instructor will see all sections
         $view_all = isset($_COOKIE['view']) && $_COOKIE['view'] === 'all';
-
         $gradeable = $this->tryGetGradeable($gradeable_id);
         if ($gradeable === false) {
             $this->core->addErrorMessage('Invalid Gradeable!');
@@ -925,6 +924,8 @@ class ElectronicGraderController extends AbstractController {
             $this->core->redirect($this->core->buildCourseUrl());
         }
         $anon_mode = isset($_COOKIE['anon_mode']) && $_COOKIE['anon_mode'] === 'on';
+        $inquiry_only = isset($_COOKIE['inquiry_only']) && $_COOKIE['inquiry_only'] === 'on';
+        $inquiry_status = isset($_COOKIE['inquiry_status']) && $_COOKIE['inquiry_status'] === 'on';
         $sort = isset($_COOKIE['sort']) ? $_COOKIE['sort'] : 'id';
         $direction = isset($_COOKIE['direction']) ? $_COOKIE['direction'] : 'ASC';
 
@@ -1026,7 +1027,7 @@ class ElectronicGraderController extends AbstractController {
             }
         }
 
-        $this->core->getOutput()->renderOutput(['grading', 'ElectronicGrader'], 'detailsPage', $gradeable, $graded_gradeables, $teamless_users, $graders, $empty_teams, $show_all_sections_button, $show_import_teams_button, $show_export_teams_button, $show_edit_teams, $past_grade_start_date, $view_all, $sort, $direction, $anon_mode, $overrides, $anon_ids);
+        $this->core->getOutput()->renderOutput(['grading', 'ElectronicGrader'], 'detailsPage', $gradeable, $graded_gradeables, $teamless_users, $graders, $empty_teams, $show_all_sections_button, $show_import_teams_button, $show_export_teams_button, $show_edit_teams, $past_grade_start_date, $view_all, $sort, $direction, $anon_mode, $overrides, $anon_ids, $inquiry_only, $inquiry_status);
 
         if ($show_edit_teams) {
             $all_reg_sections = $this->core->getQueries()->getRegistrationSections();
