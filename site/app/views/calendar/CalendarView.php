@@ -37,11 +37,13 @@ class CalendarView extends AbstractView {
             $year = (int) date("Y");
         }
 
-        //Create list of courses and their term
+        //Create list of courses and their term and get color
         $formatted_courses = [];
+        $course_colors = [];
         foreach ($courses as $course) {
             $course_string = sprintf("%s %s", $course->getTitle(), $course->getTerm());
             array_push($formatted_courses, $course_string);
+            array_push($course_colors, $_COOKIE['calendar_color_' . $course->getTerm() . $course->getTitle()]);
         }
 
         $this->core->getOutput()->addInternalCss("navigation.css");
@@ -70,7 +72,8 @@ class CalendarView extends AbstractView {
             "colors" => $info->getColors(),
             "instructor_courses" => $this->core->getQueries()->getInstructorLevelUnarchivedCourses($this->core->getUser()->getId()),
             "view_cookie" => isset($_COOKIE['view']) ? $_COOKIE['view'] : "month",
-            "course_names" => $formatted_courses
+            "course_names" => $formatted_courses,
+            "course_colors" => $course_colors
         ]);
     }
 }

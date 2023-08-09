@@ -11,6 +11,16 @@
         <option value="{{course}}">{{course}}</option>
         {% endfor %}
     </select>
+    <h2>Colors</h2>
+        {#
+        {% for course in course_names %}
+        <label for="{{course}}-color">{{course}}</label>
+        <input type="color"
+            value="{{ course_colors[loop.index] }}"
+            id="color-change-{{course}}">
+        {% endfor %}
+        #}
+        {{ dump(course_colors) }}
 {% endblock %}
 {% block buttons %}
     {{ block('close_button') }}
