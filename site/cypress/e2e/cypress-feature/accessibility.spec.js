@@ -1,4 +1,4 @@
-import { getCurrentSemester } from '../support/utils.js';
+import { getCurrentSemester } from '../../support/utils.js';
 
 import vnu from 'vnu-jar';
 
