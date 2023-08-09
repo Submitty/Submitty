@@ -120,16 +120,21 @@ def parse_datetime(date_string):
         pass
 
     try:
-        datetime.strptime(date_string, '%Y-%m-%d %H:%M:%S').astimezone(get_timezone())
+        return get_timezone().localize(
+            datetime.strptime(date_string, '%Y-%m-%d %H:%M:%S')
+        )
+        return
     except ValueError:
         pass
 
     try:
-        datetime.strptime(date_string, '%Y-%m-%d').replace(
+        return get_timezone().localize(
+            datetime.strptime(date_string, '%Y-%m-%d').replace(
                 hour=23,
                 minute=59,
                 second=59,
-            ).astimezone(get_timezone())
+            )
+        )
     except ValueError:
         pass
 
