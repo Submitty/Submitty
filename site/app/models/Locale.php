@@ -12,10 +12,12 @@ use app\libraries\FileUtils;
  * on the site frontend.
  */
 class Locale extends AbstractModel {
-    /** @var string */
+    /** @prop
+     * @var string */
     private string $name;
 
-    /** @var array<mixed> */
+    /** @prop
+     * @var array<mixed> */
     private array $lang_data = [];
 
     public function __construct(Core $core, string $lang_path, string $name) {

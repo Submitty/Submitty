@@ -133,10 +133,10 @@ class Config extends AbstractModel {
     protected $timezone;
     /** @var string */
     protected $default_timezone = 'America/New_York';
-    /** @var Locale */
+    /** @prop @var Locale */
     protected Locale $locale;
-    /** @var string */
-    protected $default_locale = 'en_US';
+    /** @prop @var string */
+    protected string $default_locale = 'en_US';
     /** @prop @var string */
     protected $submitty_path;
     /** @prop @var string */
