@@ -2,7 +2,6 @@ import re
 import tzlocal
 from datetime import datetime, timedelta
 
-
 def get_timezone():
     """
     Grab the system timezone, should generally only be used when we don't have any
@@ -21,7 +20,6 @@ def get_current_time():
     :return:
     """
     return datetime.now(get_timezone())
-
 
 def write_submitty_date(d=None, milliseconds=False):
     """
@@ -120,21 +118,16 @@ def parse_datetime(date_string):
         pass
 
     try:
-        return get_timezone().localize(
-            datetime.strptime(date_string, '%Y-%m-%d %H:%M:%S')
-        )
-        return
+        datetime.strptime(date_string, '%Y-%m-%d %H:%M:%S').astimezone(get_timezone())
     except ValueError:
         pass
 
     try:
-        return get_timezone().localize(
-            datetime.strptime(date_string, '%Y-%m-%d').replace(
+        datetime.strptime(date_string, '%Y-%m-%d').replace(
                 hour=23,
                 minute=59,
                 second=59,
-            )
-        )
+            ).astimezone(get_timezone())
     except ValueError:
         pass
 
