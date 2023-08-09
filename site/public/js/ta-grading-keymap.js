@@ -192,8 +192,19 @@ function loadTAGradingSettingData() {
             if(typeof(settingsData[i].values[x].options) === "function") {
                 settingsData[i].values[x].options = settingsData[i].values[x].options();
             }
-
-            settingsData[i].values[x].currValue = localStorage.getItem(settingsData[i].values[x].storageCode);
+            var inquiry = Cookies.get('inquiry_status');
+            if (inquiry === 'on') {
+                settingsData[i].values[x].currValue =  "active-inquiry";   
+            }
+            else{
+                
+                if (localStorage.getItem(settingsData[i].values[x].storageCode) != "default" && localStorage.getItem(settingsData[i].values[x].storageCode) != "active-inquiry") {
+                    settingsData[i].values[x].currValue = localStorage.getItem(settingsData[i].values[x].storageCode);
+                }
+                else{
+                    settingsData[i].values[x].currValue = "default";
+                }
+            }
             if(settingsData[i].values[x].currValue === null) {
                 localStorage.setItem(settingsData[i].values[x].storageCode, settingsData[i].values[x].options[settingsData[i].values[x].default]);
                 settingsData[i].values[x].currValue = settingsData[i].values[x].options[settingsData[i].values[x].default];
