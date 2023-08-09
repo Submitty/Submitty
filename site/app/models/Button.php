@@ -81,7 +81,7 @@ class Button extends AbstractModel {
     /** @prop
      * @var string|null $icon */
     protected $icon;
-     /** @prop
+    /** @prop
      * @var string|null $prefix */
     protected $prefix;
 
