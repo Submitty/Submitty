@@ -60,7 +60,6 @@ function createArray(num_parts) {
             previous_files.push([]);
             label_array.push([]);
         }
-        console.log(file_array);
     }
 }
 
