@@ -101,11 +101,13 @@ describe('Test cases involving late day cache updates', () => {
                     .not(':contains(NULL)')
                     .filter(':contains(Too Many Days Late)')
                     .each((row) => {
-                        if (++maximum_students == 6 ) return false;
-                        cy.wrap(row).children().eq(2).then((user_id) => { 
+                        if (++maximum_students === 6 ) {
+                            return false;
+                        }
+                        cy.wrap(row).children().eq(2).then((user_id) => {
                             const id = user_id.text().trim();
                             all_late_users[g_id][id] = null;
-                            all_user_ids.push(id);   
+                            all_user_ids.push(id);
                         });
                     });
             });
@@ -294,7 +296,7 @@ describe('Test cases involving late day cache updates', () => {
                         .find('a')
                         .contains('Submit')
                         .click();
-                        cy.wait(3000);
+                    cy.wait(3000);
                     late_day_exception[g_id][user_id] = days;
                 }
             }
