@@ -1,7 +1,7 @@
 <?php
 
 namespace app\views\admin;
-
+use app\models\User;
 use app\views\AbstractView;
 use app\libraries\Utils;
 use app\libraries\FileUtils;
