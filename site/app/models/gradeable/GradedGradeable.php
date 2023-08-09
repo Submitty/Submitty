@@ -20,22 +20,22 @@ use app\models\User;
 class GradedGradeable extends AbstractModel {
     /** @var Gradeable Reference to gradeable */
     private $gradeable = null;
-    /** @prop @var string Id of the gradeable this grade is attached to */
+    /** @var string Id of the gradeable this grade is attached to */
     protected $gradeable_id = "";
 
-    /** @prop @var Submitter The submitter who received this graded gradeable */
+    /** @var Submitter The submitter who received this graded gradeable */
     protected $submitter = null;
-    /** @prop @var TaGradedGradeable|null The TA Grading info or null if it doesn't exist  */
+    /** @var TaGradedGradeable|null The TA Grading info or null if it doesn't exist  */
     protected $ta_graded_gradeable = null;
-    /** @prop @var AutoGradedGradeable The Autograding info */
+    /** @var AutoGradedGradeable The Autograding info */
     protected $auto_graded_gradeable = null;
-    /** @prop @var array The grade inquiries for this submitter/gradeable  */
+    /** @var array The grade inquiries for this submitter/gradeable  */
     protected $grade_inquiries = [];
 
-    /** @prop @var array The late day exceptions indexed by user id */
+    /** @var array The late day exceptions indexed by user id */
     protected $late_day_exceptions = [];
 
-    /** @prop @var bool|null|SimpleGradeOverriddenUser Does this graded gradeable have overridden grades */
+    /** @var bool|null|SimpleGradeOverriddenUser Does this graded gradeable have overridden grades */
     protected $overridden_grades = false;
 
     /**

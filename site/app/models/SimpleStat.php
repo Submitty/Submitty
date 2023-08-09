@@ -20,25 +20,25 @@ use app\libraries\Core;
 
  */
 class SimpleStat extends AbstractModel {
-    /** @prop @var bool is this a component */
+    /** @var bool is this a component */
     protected $component = true;
-    /** @prop @var string Title of gradeable or component */
+    /** @var string Title of gradeable or component */
     protected $title = "";
-    /** @prop @var float Maximum value of gradeable or component*/
+    /** @var float Maximum value of gradeable or component*/
     protected $max_value = 0;
-    /** @prop @var int Order for components to be shown in */
+    /** @var int Order for components to be shown in */
     protected $order = -1;
-    /** @prop @var float Average grade */
+    /** @var float Average grade */
     protected $average_score = 0;
-    /** @prop @var float Standard deviation*/
+    /** @var float Standard deviation*/
     protected $standard_deviation = 0;
-    /** @prop @var int number of people graded(completely graded)*/
+    /** @var int number of people graded(completely graded)*/
     protected $count = 0;
-    /** @prop @var number of active grade inquiries for given grading component*/
+    /** @var number of active grade inquiries for given grading component*/
     protected $active_grade_inquiry_count = 0;
-    /** @prop @var bool Does this component use peer grading*/
+    /** @var bool Does this component use peer grading*/
     protected $is_peer_component = null;
-    /** @prop @var array Grader information for these stats*/
+    /** @var array Grader information for these stats*/
     protected $grader_info = null;
 
     public function __construct(Core $core, $details = []) {

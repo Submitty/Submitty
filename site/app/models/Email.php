@@ -16,11 +16,11 @@ use app\libraries\Core;
  * @method string   getUserId()
  */
 class Email extends AbstractModel {
-    /** @prop @var string Subject line of email */
+    /** @var string Subject line of email */
     protected $subject;
-    /** @prop @var string Body of email */
+    /** @var string Body of email */
     protected $body;
-    /** @prop @var string user name */
+    /** @var string user name */
     protected $user_id;
 
 

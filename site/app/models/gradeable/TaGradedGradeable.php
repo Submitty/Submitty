@@ -18,19 +18,19 @@ use FilesystemIterator;
  * @method \DateTime|null getUserViewedDate()
  */
 class TaGradedGradeable extends AbstractModel {
-    /** @prop @var GradedGradeable A reference to the graded gradeable this Ta grade belongs to */
+    /** @var GradedGradeable A reference to the graded gradeable this Ta grade belongs to */
     private $graded_gradeable = null;
-    /** @prop @var int The id of this gradeable data */
+    /** @var int The id of this gradeable data */
     protected $id = 0;
-    /** @prop @var string[] indexed by user_id. Overall comment made by each grader. */
+    /** @var string[] indexed by user_id. Overall comment made by each grader. */
     protected $overall_comments = [];
-    /** @prop @var \DateTime|null The date the user viewed their grade */
+    /** @var \DateTime|null The date the user viewed their grade */
     protected $user_viewed_date = null;
-    /** @prop @var GradedComponentContainer[] The GradedComponentContainers, indexed by component id */
+    /** @var GradedComponentContainer[] The GradedComponentContainers, indexed by component id */
     private $graded_component_containers = [];
-    /** @prop @var GradedComponent[] The components that have been marked for deletion */
+    /** @var GradedComponent[] The components that have been marked for deletion */
     private $deleted_graded_components = [];
-    /** @prop @var array[] The list of attachments indexed by user_id, ["name" => name, "path" => path] for each */
+    /** @var array[] The list of attachments indexed by user_id, ["name" => name, "path" => path] for each */
     private $attachments = [];
 
 

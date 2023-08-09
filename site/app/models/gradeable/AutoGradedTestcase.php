@@ -16,16 +16,16 @@ use app\models\GradeableAutocheck;
  * @method GradeableAutocheck[] getAutochecks()
  */
 class AutoGradedTestcase extends AbstractModel {
-    /** @prop @var AutogradingTestcase The reference to the testcase this grade is for */
+    /** @var AutogradingTestcase The reference to the testcase this grade is for */
     private $testcase = null;
-    /** @prop @var float The number points the submitter earned for this testcase */
+    /** @var float The number points the submitter earned for this testcase */
     protected $points = 0.0;
-    /** @prop @var bool If the user can view these results */
+    /** @var bool If the user can view these results */
     protected $view = true;
-    /** @prop @var string The message to show the user for this testcase */
+    /** @var string The message to show the user for this testcase */
     protected $message = '';
 
-    /** @prop @var GradeableAutocheck[] */
+    /** @var GradeableAutocheck[] */
     protected $autochecks = [];
 
     public function __construct(Core $core, AutogradingTestcase $testcase, $results_path, $results_public_path, array $details) {

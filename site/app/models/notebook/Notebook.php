@@ -20,17 +20,17 @@ use app\exceptions\IOException;
  */
 
 class Notebook extends AbstractModel {
-    /** @prop @var array parsed notebook from the config */
+    /** @var array parsed notebook from the config */
     protected $notebook;
-    /** @prop @var array notebook elements that can hold user input */
+    /** @var array notebook elements that can hold user input */
     protected $inputs = [];
-    /** @prop @var string parsed notebook from the config */
+    /** @var string parsed notebook from the config */
     protected $gradeable_id;
-    /** @prop @var array of image names and their locations */
+    /** @var array of image names and their locations */
     protected $image_paths;
-    /** @prop @var array of file_submission notebook cells */
+    /** @var array of file_submission notebook cells */
     protected $file_submissions = [];
-    /** @prop @var array of items. **/
+    /** @var array of items. **/
     protected $item_pool = [];
 
 

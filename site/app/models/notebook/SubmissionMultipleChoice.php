@@ -11,11 +11,11 @@ use app\models\notebook\AbstractNotebookInput;
  * @method array getChoices()
  */
 class SubmissionMultipleChoice extends AbstractNotebookInput {
-    /** @prop @var bool Whether or not the MC is multiselect */
+    /** @var bool Whether or not the MC is multiselect */
     protected $allow_multiple;
-    /** @prop @var bool Whether or not the options inside MC will be Randomized */
+    /** @var bool Whether or not the options inside MC will be Randomized */
     protected $randomize_order;
-    /** @prop @var array The collection of options for the MC */
+    /** @var array The collection of options for the MC */
     protected $choices;
 
     public function __construct(Core $core, array $details) {

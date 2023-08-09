@@ -22,18 +22,18 @@ use app\libraries\NumberUtils;
 class Mark extends AbstractModel {
     /** @var Component Reference to the component this belongs to */
     private $component = null;
-    /** @prop @var int The course-wide unique numeric id of this mark */
+    /** @var int The course-wide unique numeric id of this mark */
     protected $id = -1;
-    /** @prop @var float The number of points this mark will add to the score (negative for deductions) */
+    /** @var float The number of points this mark will add to the score (negative for deductions) */
     protected $points = 0;
-    /** @prop @var string The description of this mark (aka why a student would lose/gain these points) */
+    /** @var string The description of this mark (aka why a student would lose/gain these points) */
     protected $title = "";
-    /** @prop @var int The order of the mark within the component */
+    /** @var int The order of the mark within the component */
     protected $order = 0;
-    /** @prop @var bool If the student should be able to see this mark */
+    /** @var bool If the student should be able to see this mark */
     protected $publish = false;
 
-    /** @prop @var bool If any submitters have received this mark */
+    /** @var bool If any submitters have received this mark */
     private $any_receivers = false;
 
     /**

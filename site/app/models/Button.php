@@ -38,36 +38,36 @@ use app\libraries\Core;
  * @method void setIcon(string|null $icon)
  */
 class Button extends AbstractModel {
-    /** @prop @var string|null $title */
+    /** @var string|null $title */
     protected $title;
-    /** @prop @var string|null $subtitle */
+    /** @var string|null $subtitle */
     protected $subtitle;
-    /** @prop @var \DateTime|null A DateTime object representing the time for this Button.  For example if this was a
+    /** @var \DateTime|null A DateTime object representing the time for this Button.  For example if this was a
      * grade button then $date may represent the date and time grading begins or ends */
     protected $date;
-    /** @prop @var string|null $href */
+    /** @var string|null $href */
     protected $href;
-    /** @prop @var string|null $onclick */
+    /** @var string|null $onclick */
     protected $onclick;
-    /** @prop @var string $class */
+    /** @var string $class */
     protected $class;
-    /** @prop @var string|null $id */
+    /** @var string|null $id */
     protected $id;
-    /** @prop @var bool $disabled */
+    /** @var bool $disabled */
     protected $disabled;
-    /** @prop @var string $prerequisite */
+    /** @var string $prerequisite */
     protected $prerequisite;
-    /** @prop @var float|null $progress */
+    /** @var float|null $progress */
     protected $progress;
-    /** @prop @var bool $title_on_hover */
+    /** @var bool $title_on_hover */
     protected $title_on_hover;
-    /** @prop @var string|null $aria_label */
+    /** @var string|null $aria_label */
     protected $aria_label;
-    /** @prop @var string|null $badge */
+    /** @var string|null $badge */
     protected $badge;
-    /** @prop @var string|null $icon */
+    /** @var string|null $icon */
     protected $icon;
-     /** @prop @var string|null $prefix */
+     /** @var string|null $prefix */
     protected $prefix;
 
     /**

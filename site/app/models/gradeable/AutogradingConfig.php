@@ -37,67 +37,67 @@ use app\models\notebook\Notebook;
  * @method void setDisplayTestcaseRuntimeMemory()
  */
 class AutogradingConfig extends AbstractModel {
-    /** @prop @var string The id of the gradeable associated with this config */
+    /** @var string The id of the gradeable associated with this config */
     protected $gradeable_id;
-    /** @prop @var int The maximum allowed size (in bytes) of a submission */
+    /** @var int The maximum allowed size (in bytes) of a submission */
     protected $max_submission_size;
-    /** @prop @var int The maximum number of submissions allowed */
+    /** @var int The maximum number of submissions allowed */
     protected $max_submissions;
-    /** @prop @var string A message to show the user above the file upload box */
+    /** @var string A message to show the user above the file upload box */
     protected $gradeable_message;
-    /** @prop @var bool Indicates if list of test should be shown at the bottom of the page */
+    /** @var bool Indicates if list of test should be shown at the bottom of the page */
     protected $hide_test_details;
-    /** @prop @var string Any additional requirements for worker machine (i.e. "extra_ram")  */
+    /** @var string Any additional requirements for worker machine (i.e. "extra_ram")  */
     protected $required_capabilities;
-    /** @prop @var int The number of seconds allowed for autograding */
+    /** @var int The number of seconds allowed for autograding */
     protected $max_possible_grading_time = -1;
 
-    /** @prop @var string[] The names of different upload bins on the submission page (1-indexed) */
+    /** @var string[] The names of different upload bins on the submission page (1-indexed) */
     protected $part_names = [];
-    /** @prop @var bool Variable representing if only one of the available parts can be used for submission */
+    /** @var bool Variable representing if only one of the available parts can be used for submission */
     protected $one_part_only;
 
-    /** @prop @var array Array of notebook objects */
+    /** @var array Array of notebook objects */
     protected $notebook_config = [];
-    /** @prop @var array Cut-down information about autograding test cases*/
+    /** @var array Cut-down information about autograding test cases*/
     private $base_testcases = [];
 
-    /** @prop @var LeaderboardConfig[] General info about leaderboards*/
+    /** @var LeaderboardConfig[] General info about leaderboards*/
     protected $leaderboards = [];
-    /** @prop @var bool Show the memory and runtime of the autograding for testcases */
+    /** @var bool Show the memory and runtime of the autograding for testcases */
     protected $display_testcase_runtime_memory = false;
 
     /* Properties if early submission incentive enabled */
-    /** @prop @var bool If there is an early submission incentive */
+    /** @var bool If there is an early submission incentive */
     private $early_submission_incentive = false;
-    /** @prop @var string The message given to describe the early submission */
+    /** @var string The message given to describe the early submission */
     protected $early_submission_message = '';
-    /** @prop @var int The minimum number days early to receive the early submission incentive */
+    /** @var int The minimum number days early to receive the early submission incentive */
     protected $early_submission_minimum_days_early = 0;
-    /** @prop @var int The minimum number of points required to receive the early submission incentive */
+    /** @var int The minimum number of points required to receive the early submission incentive */
     protected $early_submission_minimum_points = 0;
-    /** @prop @var AutogradingTestcase[] The test cases for which the points must be earned to satisfy the incentive */
+    /** @var AutogradingTestcase[] The test cases for which the points must be earned to satisfy the incentive */
     protected $early_submission_test_cases = [];
-    /** @prop @var bool */
+    /** @var bool */
     protected $notebook_gradeable = false;
 
     /* Property if load message alert is enabled */
-    /** @prop @var bool If there is a message to show on Gradeable load */
+    /** @var bool If there is a message to show on Gradeable load */
     private $load_gradeable_message_enabled = false;
-    /** @prop @var string The message to show to the user before letting them go to the gradeable */
+    /** @var string The message to show to the user before letting them go to the gradeable */
     protected $load_gradeable_message = '';
-    /** @prop @var bool If the message should only be shown to the user if they haven't opened the gradeable yet */
+    /** @var bool If the message should only be shown to the user if they haven't opened the gradeable yet */
     protected $load_gradeable_message_first_time_only = false;
 
     /* Properties accumulated from the AutogradingTestcases */
 
-    /** @prop @var int Total number of non-hidden non-extra-credit ('normal') points for all test cases */
+    /** @var int Total number of non-hidden non-extra-credit ('normal') points for all test cases */
     protected $total_non_hidden_non_extra_credit = 0;
-    /** @prop @var int Total number of non-hidden extra-credit points for all test cases */
+    /** @var int Total number of non-hidden extra-credit points for all test cases */
     protected $total_non_hidden_extra_credit = 0;
-    /** @prop @var int Total number of hidden non-extra-credit points for all test cases */
+    /** @var int Total number of hidden non-extra-credit points for all test cases */
     protected $total_hidden_non_extra_credit = 0;
-    /** @prop @var int Total number of hidden extra-credit points for all test cases */
+    /** @var int Total number of hidden extra-credit points for all test cases */
     protected $total_hidden_extra_credit = 0;
 
 

@@ -19,9 +19,9 @@ use app\models\User;
 class LateDays extends AbstractModel {
     /** @var User|null The user to whom this data belongs */
     private $user = null;
-    /** @prop @var LateDayInfo[] The late day info of each gradeable, indexed by gradeable id */
+    /** @var LateDayInfo[] The late day info of each gradeable, indexed by gradeable id */
     protected $late_day_info = [];
-    /** @prop @var array All entries for the user in the `late_days` table */
+    /** @var array All entries for the user in the `late_days` table */
     protected $late_days_updates = [];
 
     /**

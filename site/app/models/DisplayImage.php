@@ -36,10 +36,10 @@ class DisplayImage extends AbstractModel {
      */
     const IMG_MAX_DIMENSION = 500;
 
-    /** @prop @var string The file path to the selected image */
+    /** @var string The file path to the selected image */
     protected $path;
 
-    /** @prop @var string The image mime type */
+    /** @var string The image mime type */
     protected $mime_type;
 
     /**

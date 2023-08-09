@@ -42,42 +42,42 @@ use app\libraries\NumberUtils;
 class Component extends AbstractModel {
     /** @var Gradeable Reference to the gradeable this belongs to */
     private $gradeable = null;
-    /** @prop @var int The course-wide unique numeric id of this component */
+    /** @var int The course-wide unique numeric id of this component */
     protected $id = 0;
-    /** @prop @var string The title of this component */
+    /** @var string The title of this component */
     protected $title = "";
-    /** @prop @var string The comment only visible to the TA/manual grader */
+    /** @var string The comment only visible to the TA/manual grader */
     protected $ta_comment = "";
-    /** @prop @var string The comment visible to the student */
+    /** @var string The comment visible to the student */
     protected $student_comment = "";
-    /** @prop @var int The minimum points this component can contribute to the score (can be negative) */
+    /** @var int The minimum points this component can contribute to the score (can be negative) */
     protected $lower_clamp = 0;
-    /** @prop @var int The number of points this component is worth with no marks */
+    /** @var int The number of points this component is worth with no marks */
     protected $default = 0;
-    /** @prop @var int The full value of this component without extra credit */
+    /** @var int The full value of this component without extra credit */
     protected $max_value = 0;
-    /** @prop @var int The maximum number of points this component can contribute to the score (can be > $max_value) */
+    /** @var int The maximum number of points this component can contribute to the score (can be > $max_value) */
     protected $upper_clamp = 0;
-    /** @prop @var bool If this is a text component (true) or a numeric component (false) for numeric/text components */
+    /** @var bool If this is a text component (true) or a numeric component (false) for numeric/text components */
     protected $text = false;
-    /** @prop @var bool If this is a peer grading component */
+    /** @var bool If this is a peer grading component */
     protected $peer_component = false;
-    /** @prop @var int The order of this component in the gradeable */
+    /** @var int The order of this component in the gradeable */
     protected $order = -1;
-    /** @prop @var int The pdf page this component will reside in */
+    /** @var int The pdf page this component will reside in */
     protected $page = -1;
 
-    /** @prop @var bool Whether this component is linked to some itempool or not */
+    /** @var bool Whether this component is linked to some itempool or not */
     protected $is_itempool_linked = false;
-    /** @prop @var string Name of the itempool item if it is linked to itempool else empty string */
+    /** @var string Name of the itempool item if it is linked to itempool else empty string */
     protected $itempool = "";
 
-    /** @prop @var Mark[] All possible common marks that can be assigned to this component */
+    /** @var Mark[] All possible common marks that can be assigned to this component */
     protected $marks = [];
 
-    /** @prop @var Mark[] Array of marks loaded from the database */
+    /** @var Mark[] Array of marks loaded from the database */
     private $db_marks = [];
-    /** @prop @var bool If any submitters have grades for this component */
+    /** @var bool If any submitters have grades for this component */
     private $any_grades = false;
 
     /** @var int Pass to setPage to indicate student-assigned pdf page */

@@ -29,7 +29,7 @@ class GradedComponent extends AbstractModel {
     private $component = null;
     /** @var TaGradedGradeable Reference to TaGradedGradeable this component belongs to */
     private $ta_graded_gradeable = null;
-    /** @prop @var string Id of the component this grade is attached to */
+    /** @var string Id of the component this grade is attached to */
     protected $component_id = 0;
 
     /** @var bool If the component is peer */
@@ -41,29 +41,29 @@ class GradedComponent extends AbstractModel {
     /** @var Mark[] References to the marks this graded component received */
     private $marks = [];
 
-    /** @prop @var int[] The mark ids the submitter received for this component */
+    /** @var int[] The mark ids the submitter received for this component */
     protected $mark_ids = [];
-    /** @prop @var int[]|null The mark ids the submitter received for this component as reflected in the db */
+    /** @var int[]|null The mark ids the submitter received for this component as reflected in the db */
     private $db_mark_ids = null;
 
-    /** @prop @var bool True if the marks array was modified after construction */
+    /** @var bool True if the marks array was modified after construction */
     protected $marks_modified = false;
 
-    /** @prop @var float The score for this component (or custom mark point value) */
+    /** @var float The score for this component (or custom mark point value) */
     protected $score = 0.0;
-    /** @prop @var string The comment on this mark / custom mark description */
+    /** @var string The comment on this mark / custom mark description */
     protected $comment = "";
-    /** @prop @var string The Id of the grader who most recently updated the component's grade */
+    /** @var string The Id of the grader who most recently updated the component's grade */
     protected $grader_id = "";
-    /** @prop @var int The submission version this grade is for */
+    /** @var int The submission version this grade is for */
     protected $graded_version = 0;
-    /** @prop @var \DateTime The time which this grade was most recently updated */
+    /** @var \DateTime The time which this grade was most recently updated */
     protected $grade_time = null;
     /** @var User The verifier of this component */
     protected $verifier = null;
-    /** @prop @var string The Id of the verifier who verified the grade */
+    /** @var string The Id of the verifier who verified the grade */
     protected $verifier_id = "";
-    /** @prop @var \DateTime The time which this grade was verified */
+    /** @var \DateTime The time which this grade was verified */
     protected $verify_time = null;
 
     /**
