@@ -126,13 +126,11 @@ def parse_datetime(date_string):
         pass
 
     try:
-        return get_timezone().localize(
-            datetime.strptime(date_string, '%Y-%m-%d').replace(
+        return datetime.strptime(date_string, '%Y-%m-%d').replace(
                 hour=23,
                 minute=59,
                 second=59,
-            )
-        )
+            ).replace(tzinfo=tzlocal.get_localzone())
     except ValueError:
         pass
 
