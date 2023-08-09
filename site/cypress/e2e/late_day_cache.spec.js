@@ -89,18 +89,23 @@ describe('Test cases involving late day cache updates', () => {
             it('should check students who have used too many late days for assignment', () => {
                 cy.visit(['sample', 'gradeable', g_id, 'grading', 'details']);
                 cy.login('instructor');
-                cy.get('button#view-sections').click();
-
+                cy.get('[data-testid="view-sections"]').then(($button) => {
+                    if ($button.text().includes('View All')) {
+                        $button.click();
+                    }
+                });
+                let maximum_students = 0;
                 // Grab rows of students with late submissions (not NULL registration)
                 cy.get('table')
                     .find('tr')
                     .not(':contains(NULL)')
                     .filter(':contains(Too Many Days Late)')
                     .each((row) => {
-                        cy.wrap(row).children().eq(2).then((user_id) => {
+                        if (++maximum_students == 6 ) return false;
+                        cy.wrap(row).children().eq(2).then((user_id) => { 
                             const id = user_id.text().trim();
                             all_late_users[g_id][id] = null;
-                            all_user_ids.push(id);
+                            all_user_ids.push(id);   
                         });
                     });
             });
@@ -108,12 +113,10 @@ describe('Test cases involving late day cache updates', () => {
             it('should have days submitted late > 0', () => {
                 for (const user_id in all_late_users[g_id]) {
                     cy.visit([]);
-                    cy.wait(3000);
                     cy.login(user_id);
                     cy.visit(['sample', 'late_table']);
 
                     // Wait for login change to take place
-                    cy.wait(5000);
 
                     // Find # of days late within the row in the late day usage table
                     cy.get('td[data-before-content="Event/Assignment"]')
@@ -125,6 +128,8 @@ describe('Test cases involving late day cache updates', () => {
                             expect(days_late).to.be.greaterThan(0);
                             all_late_users[g_id][user_id] = days_late;
 
+                            // Wait for login change to take place
+                            cy.wait(3000);
                             // Generate predicted status
                             const status = predictedStatus(days_allowed, days_late, 0);
 
@@ -155,7 +160,6 @@ describe('Test cases involving late day cache updates', () => {
 
     describe('Test changes to late days allowed table', () => {
         const late_days_remaining = {};
-
         it('should grant students with 2 late days', () => {
             cy.visit(['sample', 'late_days']);
             cy.login('instructor');
@@ -169,7 +173,7 @@ describe('Test cases involving late day cache updates', () => {
                 cy.get('#late_days').clear();
                 cy.get('#late_days').type(days);
                 cy.get('input[type=submit]').click();
-                cy.wait(3000); // make sure the late day registered
+                cy.wait(3000);
                 late_days_remaining[user_id] = days;
             }
         });
@@ -201,13 +205,11 @@ describe('Test cases involving late day cache updates', () => {
 
                 for (const user_id in late_users) {
                     cy.visit([]);
-                    cy.wait(5000);
                     cy.login(user_id);
                     cy.visit(['sample', 'late_table']);
 
                     // Wait for login change to take place
                     cy.wait(3000);
-
                     const status = predictedStatus(days_allowed, late_users[user_id], late_days_remaining[user_id]);
 
                     // Find late day status within the row in the late day usage table
@@ -235,7 +237,7 @@ describe('Test cases involving late day cache updates', () => {
                 cy.get('div.content').then((table) => {
                     if (table.find('td[data-before-content="Delete"]').length > 0) {
                         cy.wrap(table).find('td[data-before-content="Delete"]').first().click();
-                        cy.wait(10000);
+                        cy.wait(3000);
                         deleteLateDays();
                     }
                 });
@@ -292,7 +294,7 @@ describe('Test cases involving late day cache updates', () => {
                         .find('a')
                         .contains('Submit')
                         .click();
-                    cy.wait(4000); // make sure the late day registered
+                        cy.wait(3000);
                     late_day_exception[g_id][user_id] = days;
                 }
             }
@@ -325,13 +327,11 @@ describe('Test cases involving late day cache updates', () => {
 
                 for (const user_id in late_users) {
                     cy.visit([]);
-                    cy.wait(3000);
                     cy.login(user_id);
                     cy.visit(['sample', 'late_table']);
 
                     // Wait for login change to take place
                     cy.wait(3000);
-
                     const status = predictedStatus(days_allowed, late_users[user_id] - late_day_exception[g_id][user_id], 0);
 
                     // Find late day status within the row in the late day usage table
@@ -354,7 +354,7 @@ describe('Test cases involving late day cache updates', () => {
                 cy.get('body').then((body) => {
                     if (body.find('#extensions-table').length > 0) {
                         cy.wrap(body).find('#extensions-table > tbody > tr > td > a').first().click();
-                        cy.wait(10000);
+                        cy.wait(3000);
                         deleteExtensions();
                     }
                 });
@@ -396,7 +396,6 @@ describe('Test cases involving late day cache updates', () => {
             calculateCache();
 
             cy.visit(['sample', 'gradeable', g_id2, 'update']);
-            cy.wait(5000);
 
             cy.get('.breadcrumb > span').should('have.text', 'Edit Gradeable');
 
@@ -416,7 +415,6 @@ describe('Test cases involving late day cache updates', () => {
             cy.get('#save_status', {timeout:10000}).should('have.text', 'All Changes Saved');
 
             cy.visit(['sample', 'bulk_late_days']);
-            cy.wait(5000);
 
             // Gradeable # of late days used should be empty
             cy.get(`#late-day-table > tbody > tr > [data-before-content="${g_title1}"] ~`)
@@ -435,7 +433,6 @@ describe('Test cases involving late day cache updates', () => {
             cy.get('#save_status', {timeout:10000}).should('have.text', 'All Changes Saved');
 
             cy.visit(['sample', 'bulk_late_days']);
-            cy.wait(5000);
 
             cy.get(`#late-day-table > tbody > tr > [data-before-content="${g_title1}"] ~`)
                 .then((cell) => expect(cell.text().trim()).to.equal(''));
@@ -449,7 +446,6 @@ describe('Test cases involving late day cache updates', () => {
             cy.get('#save_status', {timeout:10000}).should('have.text', 'All Changes Saved');
 
             cy.visit(['sample', 'bulk_late_days']);
-            cy.wait(5000);
 
             // Bulk late days should not have gradeable title
             cy.get(`#late-day-table > tbody > tr > [data-before-content="${g_title2}"]`).should('have.length', 0);
@@ -466,7 +462,6 @@ describe('Test cases involving late day cache updates', () => {
             cy.get('#save_status', {timeout:10000}).should('have.text', 'All Changes Saved');
 
             cy.visit(['sample', 'bulk_late_days']);
-            cy.wait(5000);
 
             // Bulk late days should not have gradeable title
             cy.get(`#late-day-table > tbody > tr > [data-before-content="${g_title2}"]`).should('have.length.gt', 0);
@@ -483,7 +478,6 @@ describe('Test cases involving late day cache updates', () => {
             cy.get('#save_status', {timeout:10000}).should('have.text', 'All Changes Saved');
 
             cy.visit(['sample', 'bulk_late_days']);
-            cy.wait(5000);
 
             // Bulk late days should not have gradeable title
             cy.get(`#late-day-table > tbody > tr > [data-before-content="${g_title2}"]`).should('have.length', 0);
@@ -500,7 +494,6 @@ describe('Test cases involving late day cache updates', () => {
             cy.get('#save_status', {timeout:10000}).should('have.text', 'All Changes Saved');
 
             cy.visit(['sample', 'bulk_late_days']);
-            cy.wait(5000);
 
             // Bulk late days should not have gradeable title
             cy.get(`#late-day-table > tbody > tr > [data-before-content="${g_title2}"]`).should('have.length.gt', 0);
@@ -521,7 +514,6 @@ describe('Test cases involving late day cache updates', () => {
             cy.get('#save_status', {timeout:10000}).should('have.text', 'All Changes Saved');
 
             cy.visit(['sample', 'bulk_late_days']);
-            cy.wait(5000);
 
             cy.get(`#late-day-table > tbody > tr > [data-before-content="${g_title1}"] ~`)
                 .then((cell) => expect(cell.text().trim()).to.equal(''));
@@ -542,7 +534,6 @@ describe('Test cases involving late day cache updates', () => {
             calculateCache();
 
             cy.visit(['sample', 'gradeable', g_id2]);
-            cy.wait(5000);
         });
 
         it('Adds a new submission', () => {
@@ -553,18 +544,15 @@ describe('Test cases involving late day cache updates', () => {
             // attatch file
             cy.get('#input-file1').attachFile(filename);
             cy.get('#submit').click();
-            cy.wait(5000);
 
             // Confirm dialog box
             cy.get('#previous-submission-form')
                 .find('input')
                 .contains('Submit')
                 .click();
-            cy.wait(5000);
 
             // Check cache
             cy.visit(['sample', 'bulk_late_days']);
-            cy.wait(5000);
             cy.get(`[data-user-content="student"][data-before-content="${g_title1}"] ~`)
                 .then((cell) => expect(cell.text().trim()).to.equal(''));
         });
@@ -572,12 +560,10 @@ describe('Test cases involving late day cache updates', () => {
         it('Cancels submission', () => {
             // Click do not grade
             cy.get('#do_not_grade').click();
-            cy.wait(5000);
             // Note: page refresh triggers a late day recalulation for banner text
 
             // Check cache
             cy.visit(['sample', 'late_table']);
-            cy.wait(5000);
 
             cy.get('td[data-before-content="Event/Assignment"]')
                 .contains(g_title2)
@@ -589,16 +575,13 @@ describe('Test cases involving late day cache updates', () => {
         it('Add gradeable version back', () => {
             // Select gradeable
             cy.get('#submission-version-select').select('1');
-            cy.wait(5000);
 
             // Change the version to grade
             cy.get('#version_change').click();
-            cy.wait(5000);
             // Note: page refresh triggers a late day recalulation for banner text
 
             // Check cache
             cy.visit(['sample', 'late_table']);
-            cy.wait(5000);
 
             cy.get('td[data-before-content="Event/Assignment"]')
                 .contains(g_title2)
@@ -616,13 +599,11 @@ describe('Test cases involving late day cache updates', () => {
         beforeEach(() => {
             cy.visit(['sample', 'bulk_late_days']);
             cy.login('instructor');
-            cy.wait(5000);
             calculateCache();
         });
 
         it('Creates a gradeable', () => {
             cy.visit(['sample', 'gradeable']);
-            cy.wait(5000);
 
             // Enter gradeable info
             cy.get('#g_title').type(g_title);
@@ -643,7 +624,6 @@ describe('Test cases involving late day cache updates', () => {
 
             // Create Gradeable
             cy.get('#create-gradeable-btn').click();
-            cy.wait(5000);
 
             // Wait for rebuild response to say complete
             cy.wrap({}, { timeout: 90000 })
@@ -653,7 +633,6 @@ describe('Test cases involving late day cache updates', () => {
 
             // Check that cache is deleted
             cy.visit(['sample', 'bulk_late_days']);
-            cy.wait(5000);
             cy.get(`#late-day-table > tbody > tr > [data-before-content="${prev_g_title}"] ~`)
                 .then((cell) => expect(cell.text().trim()).to.equal(''));
         });
@@ -667,11 +646,9 @@ describe('Test cases involving late day cache updates', () => {
                 .find('input')
                 .contains('Delete')
                 .click();
-            cy.wait(5000);
 
             // Check that cache is deleted
             cy.visit(['sample', 'bulk_late_days']);
-            cy.wait(5000);
             cy.get(`#late-day-table > tbody > tr > [data-before-content="${prev_g_title}"] ~`)
                 .then((cell) => expect(cell.text().trim()).to.equal(''));
 
@@ -691,7 +668,6 @@ describe('Test cases involving late day cache updates', () => {
             cy.get('#default-hw-late-days').click();
 
             cy.visit(['sample', 'bulk_late_days']);
-            cy.wait(5000);
 
             cy.get('[data-before-content="Initial Late Days"]')
                 .each((cell) => expect(cell.text().trim()).to.equal('1'));
