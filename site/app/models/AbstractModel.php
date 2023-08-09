@@ -99,7 +99,7 @@ abstract class AbstractModel {
                         'read_only' => true,
                     ];
                 }
-                elseif (preg_match("/ @(prop|property)[\s]/", $doc_comment) === 1) {
+                elseif (preg_match("/ @prop[\s]/", $doc_comment) === 1) {
                     static::$properties[$class_name][$prop_name] = [];
                 }
 
