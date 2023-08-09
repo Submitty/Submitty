@@ -192,8 +192,10 @@ class TestDateUtils(TestCase):
         )
 
     def test_parse_datetime_invalid_format(self):
+        invalid_datetime_str = 'invalid datetime'
+        
         with self.assertRaises(ValueError) as cm:
-            dateutils.parse_datetime('invalid datetime')
+            dateutils.parse_datetime(invalid_datetime_str)
 
         self.assertEqual(
             'Invalid string for date parsing: invalid datetime',
