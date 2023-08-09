@@ -26,7 +26,7 @@ watchdog==2.3.0
 xlsx2csv==0.8.1
 pause==0.3
 paramiko==2.11.0
-tzlocal==2.1
+tzlocal==5.0.1
 PyPDF2==3.0.1
 distro==1.8.0
 jsonschema==4.19.0
