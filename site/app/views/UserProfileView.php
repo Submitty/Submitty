@@ -46,6 +46,7 @@ class UserProfileView extends AbstractView {
         $supported_locales = $this->core->getSupportedLocales() ?? [];
         $locale_names = array_map(fn(string $locale): string => \Locale::getDisplayName($locale, $curr_locale), $supported_locales);
         $supported_locales = array_combine($supported_locales, $locale_names);
+        $default_locale_name = \Locale::getDisplayName($this->core->getConfig()->getDefaultLocaleName(), $curr_locale);
 
         return $this->output->renderTwigTemplate('UserProfile.twig', [
             "user" => $user,
@@ -61,7 +62,8 @@ class UserProfileView extends AbstractView {
             'available_time_zones' => implode(',', DateUtils::getOrderedTZWithUTCOffset()),
             'user_time_zone_with_offset' => $user_time_zone_with_offset,
             'user_utc_offset' => $user_utc_offset,
-            'supported_locales' => $supported_locales
+            'supported_locales' => $supported_locales,
+            'default_locale_name' => $default_locale_name
         ]);
     }
 }

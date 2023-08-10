@@ -152,10 +152,11 @@
                 <div class="user-info">
                     <div class="flex-row-col">
                         <label for="pref_locale_select">Choose a locale:</label>
+                        {% set user_locale = user.getPreferredLocale() %}
                         <select id="pref_locale_select">
-                            <option value="0">-- Default --</option>
+                            <option value="0">[Default] | {{ default_locale_name }}</option>
                             {% for locale, locale_name in supported_locales %}
-                            <option value="{{ locale }}" {% if locale == core.config.locale.name %}selected{% endif %}>{{ locale_name }}</option>
+                            <option value="{{ locale }}" {% if locale == user_locale %}selected{% endif %}>{{ locale_name }}</option>
                             {% endfor %}
                         </select>
                     </div>
@@ -168,7 +169,7 @@
                 <div class="user-info">
                     <div class="flex-row-col">
                         <label for="theme_change_select">Choose a color theme</label>
-                        <select id="theme_change_select" class="form-control" aria-label="Change Submitty's Theme" data-testid="theme-change-dropdown>
+                        <select id="theme_change_select" class="form-control" aria-label="Change Submitty's Theme" data-testid="theme-change-dropdown">
                             <option value="system">Follow Device Theme</option>
                             <option value="system_black">Follow Device Theme (Black)</option>
                             <option value="light">Light Mode</option>
