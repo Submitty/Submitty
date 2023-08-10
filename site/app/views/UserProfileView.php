@@ -44,9 +44,9 @@ class UserProfileView extends AbstractView {
 
         $curr_locale = $this->core->getConfig()->getLocale()->getName();
         $supported_locales = $this->core->getSupportedLocales() ?? [];
-        $locale_names = array_map(fn(string $locale): string => \Locale::getDisplayName($locale, $curr_locale), $supported_locales);
+        $locale_names = array_map(fn(string $locale): string => mb_convert_case(\Locale::getDisplayName($locale, $curr_locale), MB_CASE_TITLE, 'UTF-8'), $supported_locales);
         $supported_locales = array_combine($supported_locales, $locale_names);
-        $default_locale_name = \Locale::getDisplayName($this->core->getConfig()->getDefaultLocaleName(), $curr_locale);
+        $default_locale_name = mb_convert_case(\Locale::getDisplayName($this->core->getConfig()->getDefaultLocaleName(), $curr_locale), MB_CASE_TITLE, 'UTF-8');
 
         return $this->output->renderTwigTemplate('UserProfile.twig', [
             "user" => $user,
