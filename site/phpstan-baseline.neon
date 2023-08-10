@@ -2766,7 +2766,7 @@ parameters:
 			path: app/entities/email/EmailEntity.php
 
 		-
-			message: "#^Property app\\\\entities\\\\email\\\\EmailEntity\\:\\:\\$semester is never written, only read\\.$#"
+			message: "#^Property app\\\\entities\\\\email\\\\EmailEntity\\:\\:\\$term is never written, only read\\.$#"
 			count: 1
 			path: app/entities/email/EmailEntity.php
 
