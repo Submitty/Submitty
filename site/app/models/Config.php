@@ -477,11 +477,10 @@ class Config extends AbstractModel {
         }
 
         if (isset($submitty_json['default_locale'])) {
-            $this->locale = new Locale($this->core, FileUtils::joinPaths($this->submitty_install_path, "site", "cache", "lang"), $submitty_json['default_locale']);
+            $this->default_locale = $submitty_json['default_locale'];
         }
-        elseif (!isset($this->locale)) {
-            $this->locale = new Locale($this->core, FileUtils::joinPaths($this->submitty_install_path, "site", "cache", "lang"), $this->default_locale);
-        }
+
+        $this->locale = new Locale($this->core, FileUtils::joinPaths($this->submitty_install_path, "site", "cache", "lang"), $this->default_locale);
     }
 
     public function loadCourseJson($semester, $course, $course_json_path) {
