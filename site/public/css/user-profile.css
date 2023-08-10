@@ -93,7 +93,7 @@
 
 .user-info .tip-note {
     font-size: 14px;
-    color: rgb(87, 119, 207);
+    color: var(--standard-medium-blue);
     display: block;
 }
 
