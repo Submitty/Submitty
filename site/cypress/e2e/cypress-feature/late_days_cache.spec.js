@@ -114,7 +114,6 @@ describe('Test cases involving late day cache updates', () => {
 
             it('should have days submitted late > 0', () => {
                 for (const user_id in all_late_users[g_id]) {
-                    cy.visit([]);
                     cy.login(user_id);
                     cy.visit(['sample', 'late_table']);
 
@@ -206,7 +205,6 @@ describe('Test cases involving late day cache updates', () => {
                 const late_users = all_late_users[g_id];
 
                 for (const user_id in late_users) {
-                    cy.visit([]);
                     cy.login(user_id);
                     cy.visit(['sample', 'late_table']);
 
@@ -328,7 +326,6 @@ describe('Test cases involving late day cache updates', () => {
                 const late_users = all_late_users[g_id];
 
                 for (const user_id in late_users) {
-                    cy.visit([]);
                     cy.login(user_id);
                     cy.visit(['sample', 'late_table']);
 
