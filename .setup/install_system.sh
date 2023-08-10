@@ -64,31 +64,31 @@ export UTM=0
 export VAGRANT=0
 export NO_SUBMISSIONS=0
 export WORKER=0
-export WORKER_PAIR=0
 
 # Read through the flags passed to the script reading them in and setting
 # appropriate bash variables, breaking out of this once we hit something we
 # don't recognize as a flag
+echo ""
+echo "Running setup:"
 while :; do
     case $1 in
         --utm)
             export UTM=1
             export DEV_VM=1
+            echo "utm"
             ;;
         --vagrant)
             export VAGRANT=1
             export DEV_VM=1
+            echo "vagrant"
             ;;
         --worker)
             export WORKER=1
+            echo "worker"
             ;;
         --no_submissions)
             export NO_SUBMISSIONS=1
-            echo 'no_submissions'
-            ;;
-        --worker-pair)
-            export WORKER_PAIR=1
-            echo "worker_pair"
+            echo "no_submissions"
             ;;
         *) # No more options, so break out of the loop.
             break
@@ -319,12 +319,17 @@ fi
 
 if ! cut -d ':' -f 1 /etc/passwd | grep -q ${DAEMON_USER} ; then
     useradd -m -c "First Last,RoomNumber,WorkPhone,HomePhone" "${DAEMON_USER}"
-    if [ ${WORKER_PAIR} == 1 ]; then
+    if [ ${WORKER} == 0 ] && [ ${DEV_VM} == 1 ] && [ -f ${SUBMITTY_REPOSITORY}/.vagrant/workers.json ]; then
         echo -e "attempting to create ssh key for submitty_daemon..."
         su submitty_daemon -c "cd ~/"
         su submitty_daemon -c "ssh-keygen -b 2048 -t rsa -f ~/.ssh/id_rsa -q -N ''"
         su submitty_daemon -c "echo 'successfully created ssh key'"
-        su submitty_daemon -c "sshpass -p 'submitty' ssh-copy-id -i ~/.ssh/id_rsa.pub -o StrictHostKeyChecking=no submitty@192.168.56.21"
+
+        while read -r IP
+        do
+            su submitty_daemon -c "sshpass -p 'submitty' ssh-copy-id -i ~/.ssh/id_rsa.pub -o StrictHostKeyChecking=no submitty@${IP}"
+        done <<< "$(jq -r ".[].ip_addr" "${SUBMITTY_REPOSITORY}/.vagrant/workers.json")"
+        echo "DONE"
     fi
 fi
 
@@ -688,7 +693,7 @@ submitty@vagrant
 do-not-reply@vagrant
 localhost
 25
-" | python3 ${SUBMITTY_REPOSITORY}/.setup/CONFIGURE_SUBMITTY.py --debug --setup-for-sample-courses --websocket-port ${WEBSOCKET_PORT} --worker-pair ${WORKER_PAIR}
+" | python3 ${SUBMITTY_REPOSITORY}/.setup/CONFIGURE_SUBMITTY.py --debug --setup-for-sample-courses --websocket-port ${WEBSOCKET_PORT}
 
         # Set these manually as they're not asked about during CONFIGURE_SUBMITTY.py
         sed -i -e 's/"url": ""/"url": "ldap:\/\/localhost"/g' ${SUBMITTY_INSTALL_DIR}/config/authentication.json
