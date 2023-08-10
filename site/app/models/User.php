@@ -136,8 +136,8 @@ class User extends AbstractModel {
     protected $rotating_section = null;
     /** @var string Appropriate time zone string from DateUtils::getAvailableTimeZones() */
     protected $time_zone;
-    /** @var string The name of the preferred locale */
-    protected $preferred_locale;
+    /** @var string|null The name of the preferred locale */
+    protected $preferred_locale = null;
     /** @prop @var string What is the registration subsection that the user was assigned to for the course */
     protected $registration_subsection = "";
     /** @prop @var string What is the registration type of the user (graded, audit, withdrawn, staff) for the course */
@@ -356,7 +356,7 @@ class User extends AbstractModel {
     /**
      * Get the user's preferred locale.
      */
-    public function getPreferredLocale(): string {
+    public function getPreferredLocale(): string|null {
         return $this->preferred_locale;
     }
 
@@ -366,8 +366,8 @@ class User extends AbstractModel {
      * @param string $locale The desired new locale, must be one of Core::getSupportedLocales()
      * @return bool Whether or not the operation was successful
      */
-    public function setPreferredLocale(string $locale): bool {
-        if (in_array($locale, $this->core->getSupportedLocales())) {
+    public function setPreferredLocale(string|null $locale): bool {
+        if (is_null($locale) || in_array($locale, $this->core->getSupportedLocales())) {
             $success = $this->core->getQueries()->updateSubmittyUserPreferredLocale($this, $locale);
             if ($success) {
                 $this->preferred_locale = $locale;
