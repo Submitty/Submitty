@@ -459,7 +459,8 @@ $(document).ready(() => {
             },
             success: function(response) {
                 if (response.status === 'success') {
-                    displaySuccessMessage('User locale updated successfully! Refresh the page to see changes.');
+                    displaySuccessMessage('User locale updated successfully!');
+                    location.reload();
                 }
                 else {
                     console.log(response);
