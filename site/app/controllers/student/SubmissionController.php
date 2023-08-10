@@ -134,7 +134,7 @@ class SubmissionController extends AbstractController {
         Logger::logAccess(
             $this->core->getUser()->getId(),
             $_COOKIE['submitty_token'],
-            "{$this->core->getConfig()->getSemester()}:{$this->core->getConfig()->getCourse()}:load_page:{$gradeable->getId()}"
+            "{$this->core->getConfig()->getTerm()}:{$this->core->getConfig()->getCourse()}:load_page:{$gradeable->getId()}"
         );
         $user_id = $this->core->getUser()->getId();
         $team_id = null;
@@ -431,7 +431,7 @@ class SubmissionController extends AbstractController {
         // use pdf_check.cgi to check that # of pages is valid and split
         // also get the cover image and name for each pdf appropriately
 
-        $semester = $this->core->getConfig()->getSemester();
+        $semester = $this->core->getConfig()->getTerm();
         $course = $this->core->getConfig()->getCourse();
         $use_ocr = $this->core->getConfig()->checkFeatureFlagEnabled('submitty_ocr') && $_POST['use_ocr'] === "true";
 
@@ -759,7 +759,7 @@ class SubmissionController extends AbstractController {
             return $this->uploadResult("Failed to create bulk upload file for this submission.", false);
         }
 
-        $queue_file = [$this->core->getConfig()->getSemester(), $this->core->getConfig()->getCourse(),
+        $queue_file = [$this->core->getConfig()->getTerm(), $this->core->getConfig()->getCourse(),
             $gradeable->getId(), $who_id, $new_version];
         $queue_file = FileUtils::joinPaths(
             $this->core->getConfig()->getSubmittyPath(),
@@ -770,7 +770,7 @@ class SubmissionController extends AbstractController {
         $vcs_checkout = isset($_REQUEST['vcs_checkout']) ? $_REQUEST['vcs_checkout'] === "true" : false;
 
         // create json file...
-        $queue_data = ["semester" => $this->core->getConfig()->getSemester(),
+        $queue_data = ["semester" => $this->core->getConfig()->getTerm(),
             "course" => $this->core->getConfig()->getCourse(),
             "gradeable" => $gradeable->getId(),
             "required_capabilities" => $gradeable->getAutogradingConfig()->getRequiredCapabilities(),
@@ -969,7 +969,7 @@ class SubmissionController extends AbstractController {
                     $active_version = $g->getAutoGradedGradeable()->getActiveVersion();
                 }
                 //create file name
-                $queue_file_helper = [$this->core->getConfig()->getSemester(), $this->core->getConfig()->getCourse(),
+                $queue_file_helper = [$this->core->getConfig()->getTerm(), $this->core->getConfig()->getCourse(),
                     $gradeable_id, $who_id, $active_version];
                 $queue_file_helper = implode("__", $queue_file_helper);
                 $queue_file = FileUtils::joinPaths(
@@ -986,7 +986,7 @@ class SubmissionController extends AbstractController {
                     "queue_time" => $this->core->getDateTimeNow()->format("Y-m-d H:i:sO"),
                     'regrade' => true,
                     "required_capabilities" => $gradeable->getAutogradingConfig()->getRequiredCapabilities(),
-                    "semester" => $this->core->getConfig()->getSemester(),
+                    "semester" => $this->core->getConfig()->getTerm(),
                     "team" => $team_id,
                     "user" => $user_id,
                     "vcs_checkout" => $gradeable->isVcs(),
@@ -1545,7 +1545,7 @@ class SubmissionController extends AbstractController {
         }
 
 
-        $queue_file_helper = [$this->core->getConfig()->getSemester(), $this->core->getConfig()->getCourse(),
+        $queue_file_helper = [$this->core->getConfig()->getTerm(), $this->core->getConfig()->getCourse(),
             $gradeable->getId(), $who_id, $new_version];
         $queue_file_helper = implode("__", $queue_file_helper);
         $queue_file = FileUtils::joinPaths(
@@ -1565,7 +1565,7 @@ class SubmissionController extends AbstractController {
 
         // create json file...
         $queue_data = [
-            "semester" => $this->core->getConfig()->getSemester(),
+            "semester" => $this->core->getConfig()->getTerm(),
             "course" => $this->core->getConfig()->getCourse(),
             "gradeable" => $gradeable->getId(),
             "required_capabilities" => $gradeable->getAutogradingConfig()->getRequiredCapabilities(),
@@ -1600,7 +1600,7 @@ class SubmissionController extends AbstractController {
         Logger::logAccess(
             $this->core->getUser()->getId(),
             $_COOKIE['submitty_token'],
-            "{$this->core->getConfig()->getSemester()}:{$this->core->getConfig()->getCourse()}:submission:{$gradeable->getId()}"
+            "{$this->core->getConfig()->getTerm()}:{$this->core->getConfig()->getCourse()}:submission:{$gradeable->getId()}"
         );
         if ($gradeable->isTeamAssignment()) {
             // Get previous late day information for all team members
@@ -1630,7 +1630,7 @@ class SubmissionController extends AbstractController {
                 $member_ldi = $previous_submission_ldi[$member->getId()];
                 $previous_status = $member_ldi !== null ? $member_ldi->getStatus() : 0;
 
-                return ($new_submission_ldi->getStatus() === LateDayInfo::STATUS_BAD && $previous_status !== LateDayInfo::STATUS_BAD);
+                return ($new_submission_ldi !== null && $new_submission_ldi->getStatus() === LateDayInfo::STATUS_BAD && $previous_status !== LateDayInfo::STATUS_BAD);
             });
             $team_members = array_udiff($team_members, $bad_members, $compare_user);
 
@@ -1642,7 +1642,7 @@ class SubmissionController extends AbstractController {
                 $member_ldi = $previous_submission_ldi[$member->getId()];
                 $previous_days_charged = $member_ldi !== null ? $member_ldi->getLateDaysCharged() : 0;
 
-                return ($new_submission_ldi->getLateDaysCharged() > $previous_days_charged);
+                return ($new_submission_ldi !== null && $new_submission_ldi->getLateDaysCharged() > $previous_days_charged);
             });
             $team_members = array_udiff($team_members, $bad_members, $compare_user);
 

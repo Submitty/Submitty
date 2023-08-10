@@ -43,6 +43,7 @@ class ConfigTester extends \PHPUnit\Framework\TestCase {
         $this->config_path = FileUtils::joinPaths($this->temp_dir, 'config');
         $course_path = FileUtils::joinPaths($this->temp_dir, "courses", "s17", "csci0000");
         $log_path = FileUtils::joinPaths($this->temp_dir, "logs");
+        $lang_path = FileUtils::joinPaths($this->temp_dir, "site", "cache", "lang");
 
         FileUtils::createDir($this->config_path);
         FileUtils::createDir($course_path, true, 0777);
@@ -52,6 +53,9 @@ class ConfigTester extends \PHPUnit\Framework\TestCase {
         FileUtils::createDir(FileUtils::joinPaths($log_path, 'autograding'));
         FileUtils::createDir(FileUtils::joinPaths($log_path, 'site_errors'));
         FileUtils::createDir(FileUtils::joinPaths($log_path, 'ta_grading'));
+
+        FileUtils::createDir($lang_path, true);
+        FileUtils::writeFile(FileUtils::joinPaths($lang_path, "default.php"), "<?php\nreturn [ \"key\" => \"val\" ];\n");
 
         $config = [
             "authentication_method" => "PamAuthentication",
@@ -90,7 +94,8 @@ class ConfigTester extends \PHPUnit\Framework\TestCase {
             "course_code_requirements" => "Please follow your school's convention for course code.",
             "institution_homepage" => "https://rpi.edu",
             'system_message' => "Some system message",
-            "duck_special_effects" => false
+            "duck_special_effects" => false,
+            "default_locale" => "default",
         ];
         $config = array_replace($config, $extra);
         FileUtils::writeJsonFile(FileUtils::joinPaths($this->config_path, "submitty.json"), $config);
@@ -183,7 +188,7 @@ class ConfigTester extends \PHPUnit\Framework\TestCase {
         $config->loadCourseJson("s17", "csci0000", $course_json_path);
 
         $this->assertFalse($config->isDebug());
-        $this->assertEquals("s17", $config->getSemester());
+        $this->assertEquals("s17", $config->getTerm());
         $this->assertEquals("csci0000", $config->getCourse());
         $this->assertEquals("http://example.com/", $config->getBaseUrl());
         $this->assertEquals("http://example.com/cgi-bin/", $config->getCgiUrl());
@@ -239,9 +244,12 @@ class ConfigTester extends \PHPUnit\Framework\TestCase {
         $this->assertFalse($config->displayRoomSeating());
         $this->assertEquals('LIW0RT5XAxOn2xjVY6rrLTcb6iacl4IDNRyPw58M0Kn0haQbHtNvPfK18xpvpD93', $config->getSecretSession());
 
+        $this->assertEquals("default", $config->getLocale()->getName());
+        $this->assertEquals([ "key" => "val" ], $config->getLocale()->getLangData());
+
         $expected = [
             'debug' => false,
-            'semester' => 's17',
+            'term' => 's17',
             'course' => 'csci0000',
             'base_url' => 'http://example.com/',
             'cgi_url' => 'http://example.com/cgi-bin/',
@@ -337,7 +345,9 @@ class ConfigTester extends \PHPUnit\Framework\TestCase {
             'polls_enabled'                  => false,
             'feature_flags' => [],
             'submitty_install_path' => $this->temp_dir,
-            'date_time_format' => ['modified' => false]
+            'date_time_format' => ['modified' => false],
+            "default_locale" => "en_US",
+            "locale" => ['modified' => false],
         ];
         $actual = $config->toArray();
 

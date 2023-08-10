@@ -489,6 +489,11 @@ class Access {
                 return false;
             }
 
+            //Make sure notebook generated files can't be accessed
+            if (self::checkBits($checks, self::CHECK_STUDENT_DOWNLOAD) && array_key_exists("root_path", $args)) {
+                return $gradeable->canStudentDownloadFile($args["gradeable_version"], $args["path"], $args["root_path"]);
+            }
+
             //As these are not grading-related they can return false immediately
             if ($group === User::GROUP_STUDENT) {
                 if (self::checkBits($checks, self::CHECK_STUDENT_VIEW)) {
@@ -821,10 +826,12 @@ class Access {
                         $args["gradeable"] = $this->core->getQueries()->getGradeableConfig($value);
                     }
                     $hidden_files = $args["gradeable"]->getHiddenFiles();
-                    foreach (explode(",", $hidden_files) as $file_regex) {
-                        $file_regex = trim($file_regex);
-                        if (fnmatch($file_regex, $subpart_values[count($subpart_values) - 1]) && $this->core->getUser()->getGroup() > 3) {
-                            return false;
+                    if ($hidden_files !== null) {
+                        foreach (explode(",", $hidden_files) as $file_regex) {
+                            $file_regex = trim($file_regex);
+                            if (fnmatch($file_regex, $subpart_values[count($subpart_values) - 1]) && $this->core->getUser()->getGroup() > 3) {
+                                return false;
+                            }
                         }
                     }
                     break;
