@@ -63,7 +63,7 @@ describe('Docker UI Test', () => {
         }, 10000);
 
         // Updated time should not be "Unknown"
-        cy.get('div.content').find('p').eq(1)
+        cy.get(':nth-child(1) > p')
             .should('not.contain.text', 'Unknown');
         // Updated OS info should not be empty
         cy.get('.machine-table > tbody:nth-child(1) > tr:nth-child(3) > td:nth-child(3)')
