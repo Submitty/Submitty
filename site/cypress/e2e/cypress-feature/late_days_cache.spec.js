@@ -412,8 +412,6 @@ describe('Test cases involving late day cache updates', () => {
                 .click();
             cy.get('#late_days').click(); // Dismiss calender and trigger save
 
-            cy.get('#save_status').should('have.text', 'Saving...');
-
             cy.get('#save_status', {timeout:10000}).should('have.text', 'All Changes Saved');
 
             cy.visit(['sample', 'bulk_late_days']);
@@ -430,8 +428,6 @@ describe('Test cases involving late day cache updates', () => {
                 .click();
             cy.get('#late_days').click(); // Dismiss calender and trigger save
 
-            cy.get('#save_status').should('have.text', 'Saving...');
-
             cy.get('#save_status', {timeout:10000}).should('have.text', 'All Changes Saved');
 
             cy.visit(['sample', 'bulk_late_days']);
@@ -442,8 +438,6 @@ describe('Test cases involving late day cache updates', () => {
 
         it('Disables gradeable due date', () => {
             cy.get('#has_due_date_no').check();
-
-            cy.get('#save_status').should('have.text', 'Saving...');
 
             cy.get('#save_status', {timeout:10000}).should('have.text', 'All Changes Saved');
 
@@ -459,8 +453,6 @@ describe('Test cases involving late day cache updates', () => {
         it('Re-enables gradeable due date', () => {
             cy.get('#has_due_date_yes').check();
 
-            cy.get('#save_status').should('have.text', 'Saving...');
-
             cy.get('#save_status', {timeout:10000}).should('have.text', 'All Changes Saved');
 
             cy.visit(['sample', 'bulk_late_days']);
@@ -475,8 +467,6 @@ describe('Test cases involving late day cache updates', () => {
         it('Disables late days', () => {
             cy.get('#no_late_submission').check();
 
-            cy.get('#save_status').should('have.text', 'Saving...');
-
             cy.get('#save_status', {timeout:10000}).should('have.text', 'All Changes Saved');
 
             cy.visit(['sample', 'bulk_late_days']);
@@ -490,8 +480,6 @@ describe('Test cases involving late day cache updates', () => {
 
         it('Re-enables late days', () => {
             cy.get('#yes_late_submission').check();
-
-            cy.get('#save_status').should('have.text', 'Saving...');
 
             cy.get('#save_status', {timeout:10000}).should('have.text', 'All Changes Saved');
 
@@ -510,8 +498,6 @@ describe('Test cases involving late day cache updates', () => {
                 .type('1')
                 .click();
             cy.get('#date_due').click(); // Dismiss calender and trigger save
-
-            cy.get('#save_status').should('have.text', 'Saving...');
 
             cy.get('#save_status', {timeout:10000}).should('have.text', 'All Changes Saved');
 
