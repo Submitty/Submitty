@@ -77,7 +77,7 @@ class UserProfileController extends AbstractController {
 
     /**
      * @Route("/user_profile/set_pref_locale", methods={"POST"})
-     * @return MultiResponse
+     * @return JsonResponse
      */
     public function setPrefLocale() {
         if (isset($_POST['locale'])) {
