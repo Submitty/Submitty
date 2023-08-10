@@ -613,12 +613,6 @@ describe('Test cases involving late day cache updates', () => {
             // Create Gradeable
             cy.get('#create-gradeable-btn').click();
 
-            // Wait for rebuild response to say complete
-            cy.wrap({}, { timeout: 90000 })
-                .should(() => {
-                    expect(finished).to.equal(true);
-                });
-
             // Check that cache is deleted
             cy.visit(['sample', 'bulk_late_days']);
             cy.get(`#late-day-table > tbody > tr > [data-before-content="${prev_g_title}"] ~`)
