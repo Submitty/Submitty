@@ -153,7 +153,7 @@
                     <div class="flex-row-col">
                         <label for="pref_locale_select">Choose a locale:</label>
                         <select id="pref_locale_select">
-                            <option value="">-- Default --</option>
+                            <option value="0">-- Default --</option>
                             {% for locale, locale_name in supported_locales %}
                             <option value="{{ locale }}" {% if locale == core.config.locale.name %}selected{% endif %}>{{ locale_name }}</option>
                             {% endfor %}
