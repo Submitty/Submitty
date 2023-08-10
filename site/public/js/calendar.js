@@ -728,7 +728,6 @@ function updateCalendarFilters() {
     location.reload();
 }
 
-//Fix this
 function saveFilterValues() {
     //Courses Filter
     const courses_val = document.getElementById('filter-courses-menu').value;
@@ -739,4 +738,12 @@ function saveFilterValues() {
         Cookies.set('calendar_show_all', '0', { expires: 365 });
         Cookies.set('calendar_course', courses_val, { expires: 365 });
     }
+}
+
+//Adds Color to Legend
+function colorLegend() {
+    $('.legend-color').each( function () {
+        console.log($(this).attr('name'));
+        $(this).css('background-color', Cookies.get(`calendar_color_${$(this).attr('name')}`));
+    });
 }

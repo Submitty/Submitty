@@ -25,6 +25,10 @@
         }
         // Load the calendar to the correct day
         loadCalendar(cookie_month, cookie_year, cookie_day, type);
+        //Color the legend
+        if ({{show_legend}} === 1) {
+            colorLegend();
+        }
     });
 
     function changeView(x) {
@@ -118,7 +122,20 @@
             {% endif %}
         </div>
     {% endif %}
+
+    {# Legend #}
+    {% if show_legend == 1 %}
+    <h2>Legend</h2>
+    <div class="cal-legend">
+        {% for course in course_names %}
+        <div name="{{course|replace({' ':''})}}" class="legend-color"></div><label for="{{course}}-color">{{course}}</label>
+        {% endfor %}
+    </div>
+    {% endif %}
+
 </div>
+
+
 
 {{ include('calendar/NewCalendarItem.twig') }}
 {{ include('calendar/EditCalendarItem.twig') }}

@@ -285,6 +285,17 @@ div.filter-courses-menu {
     line-height: 1.5;
 }
 
+/* Calendar Legend */
+div.cal-legend {
+    border: 1px solid black;
+}
+div.legend-color {
+    width: 1rem;
+    height: 1rem;
+    border: 1px solid black;
+    border-radius: 50%;
+}
+
 @media (max-width: 800px) {
     #calendar-list {
         margin: 0;
