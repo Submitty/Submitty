@@ -93,19 +93,18 @@
 </div>
 
 {% macro renderButton(button, date_format) %}
+
     {% if button is null %}
         <div class="button-placeholder"></div>
     {% else %}
-        <a class="{{ button.getClass() }}{{ (button.getTitle() == 'Edit' or button.getTitle() == 'Delete') and has_build_error ? 'edit-build-error' : '' }} {% if button.hasOnclick() %} key_to_click {% endif %}" tabindex="0"
+        <a class="{{ button.getClass() }}{{ (button.getTitle() == 'Edit' or button.getTitle() == 'Delete') and has_build_error ? 'edit-build-error' : '' }} {% if button.hasOnclick() %} key_to_click {% endif %}{% if button.isDisabled() %} disabled{% endif %}" tabindex="0"
             {% if button.isDisabled() %}
                 {% if core.getUser().accessFullGrading() %}
-                    disabled
                     {% set str1 = 'Students are expected to satisfactorily complete ' %}
                     {% set str2 = ' before they may access this gradeable.  Click OK to bypass this requirement.'%}
                     onclick="confirmBypass('{{ str1 ~ button.getPrerequisite() ~ str2 }}', '{{ button.getHref() }}' );"
                     title='Please complete {{ button.getPrerequisite()}} first'
                 {% else %}
-                    disabled
                     onclick="alert('Please complete {{ button.getPrerequisite()}} first' )"
                     title='Please complete {{ button.getPrerequisite()}} first' 
                 {% endif %}

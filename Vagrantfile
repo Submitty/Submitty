@@ -7,8 +7,6 @@
 #   NO_SUBMISSIONS=1 vagrant up
 #       or
 #   EXTRA=rpi vagrant up
-#       or
-#   WORKER_PAIR=1 vagrant up
 #
 #
 # If you want to override the default image used for the virtual machines, you can set the
@@ -32,40 +30,44 @@
 $stdout.sync = true
 $stderr.sync = true
 
-extra_command = ''
-autostart_worker = false
-if ENV.has_key?('NO_SUBMISSIONS')
-    extra_command << '--no_submissions '
-end
-if ENV.has_key?('EXTRA')
-    extra_command << ENV['EXTRA']
-end
-if ENV.has_key?('WORKER_PAIR')
-    autostart_worker = true
-    extra_command << '--worker-pair '
-end
+require 'json'
 
-$script = <<SCRIPT
-GIT_PATH=/usr/local/submitty/GIT_CHECKOUT/Submitty
-DISTRO=$(lsb_release -si | tr '[:upper:]' '[:lower:]')
-VERSION=$(lsb_release -sr | tr '[:upper:]' '[:lower:]')
-bash ${GIT_PATH}/.setup/vagrant/setup_vagrant.sh #{extra_command} 2>&1 | tee ${GIT_PATH}/.vagrant/install_${DISTRO}_${VERSION}.log
+def gen_script(machine_name, worker: false)
+  no_submissions = !ENV.fetch('NO_SUBMISSIONS', '').empty?
+  extra = ENV.fetch('EXTRA', '')
+
+  setup_cmd = 'bash ${GIT_PATH}/.setup/'
+  if worker
+    setup_cmd += 'install_worker.sh'
+  else
+    setup_cmd += 'vagrant/setup_vagrant.sh'
+    if no_submissions
+      setup_cmd += ' --no_submissions'
+    end
+  end
+  unless extra.empty?
+    setup_cmd += " #{extra}"
+  end
+  setup_cmd += " 2>&1 | tee ${GIT_PATH}/.vagrant/logs/#{machine_name}.log"
+
+  script = <<SCRIPT
+    GIT_PATH=/usr/local/submitty/GIT_CHECKOUT/Submitty
+    DISTRO=$(lsb_release -si | tr '[:upper:]' '[:lower:]')
+    VERSION=$(lsb_release -sr | tr '[:upper:]' '[:lower:]')
+    mkdir -p ${GIT_PATH}/.vagrant/logs
+    #{setup_cmd}
 SCRIPT
 
-$worker_script = <<SCRIPT
-GIT_PATH=/usr/local/submitty/GIT_CHECKOUT/Submitty
-DISTRO=$(lsb_release -si | tr '[:upper:]' '[:lower:]')
-VERSION=$(lsb_release -sr | tr '[:upper:]' '[:lower:]')
-bash ${GIT_PATH}/.setup/install_worker.sh #{extra_command} 2>&1 | tee ${GIT_PATH}/.vagrant/install_worker.log
-SCRIPT
+  return script
+end
 
 base_boxes = Hash[]
 
 # Should all be base Ubuntu boxes that use the same version
-base_boxes.default         = "bento/ubuntu-20.04"
-base_boxes[:arm_parallels] = "bento/ubuntu-20.04-arm64"
-base_boxes[:libvirt]       = "generic/ubuntu2004"
-base_boxes[:arm_mac_qemu]  = "perk/ubuntu-20.04-arm64"
+base_boxes.default         = "bento/ubuntu-22.04"
+base_boxes[:arm_bento]     = "bento/ubuntu-22.04-arm64"
+base_boxes[:libvirt]       = "generic/ubuntu2204"
+base_boxes[:arm_mac_qemu]  = "perk/ubuntu-2204-arm64"
 
 def mount_folders(config, mount_options)
   # ideally we would use submitty_daemon or something as the owner/group, but since that user doesn't exist
@@ -83,6 +85,15 @@ def mount_folders(config, mount_options)
       config.vm.synced_folder repo_path, "/usr/local/submitty/GIT_CHECKOUT/" + repo, owner: owner, group: group, mount_options: mount_options, smb_host: '10.0.2.2', smb_username: `whoami`.chomp
     end
   }
+end
+
+def get_workers()
+  worker_file = File.join(__dir__, '.vagrant', 'workers.json')
+  if File.file?(worker_file)
+    return JSON.parse(File.read(worker_file), symbolize_names: true)
+  else
+    return Hash[]
+  end
 end
 
 Vagrant.configure(2) do |config|
@@ -108,22 +119,22 @@ Vagrant.configure(2) do |config|
   # that one) as well as making sure all non-primary ones have "autostart: false" set
   # so that when we do "vagrant up", it doesn't spin up those machines.
 
-  config.vm.define 'submitty-worker', autostart: autostart_worker do |ubuntu|
-    # If this IP address changes, it must be changed in install_system.sh and
-    # CONFIGURE_SUBMITTY.py to allow the ssh connection
-    ubuntu.vm.network "private_network", ip: "192.168.56.21"
-    ubuntu.vm.network 'forwarded_port', guest: 22, host: 2220, id: 'ssh'
-    ubuntu.vm.provision 'shell', inline: $worker_script
+  get_workers.map do |worker_name, data|
+    config.vm.define worker_name do |ubuntu|
+      ubuntu.vm.network 'private_network', ip: data[:ip_addr]
+      ubuntu.vm.network 'forwarded_port', guest: 22, host: data[:ssh_port], id: 'ssh'
+      ubuntu.vm.provision 'shell', inline: gen_script(worker_name, worker: true)
+    end
   end
 
-  # Our primary development target, RPI uses it as of Fall 2021
-  config.vm.define 'ubuntu-20.04', primary: true do |ubuntu|
+  vm_name = 'ubuntu-22.04'
+  config.vm.define vm_name, primary: true do |ubuntu|
     ubuntu.vm.network 'forwarded_port', guest: 1511, host: ENV.fetch('VM_PORT_SITE', 1511)
     ubuntu.vm.network 'forwarded_port', guest: 8443, host: ENV.fetch('VM_PORT_WS',   8443)
     ubuntu.vm.network 'forwarded_port', guest: 5432, host: ENV.fetch('VM_PORT_DB',  16442)
     ubuntu.vm.network 'forwarded_port', guest: 7000, host: ENV.fetch('VM_PORT_SAML', 7000)
     ubuntu.vm.network 'forwarded_port', guest:   22, host: ENV.fetch('VM_PORT_SSH',  2222), id: 'ssh'
-    ubuntu.vm.provision 'shell', inline: $script
+    ubuntu.vm.provision 'shell', inline: gen_script(vm_name)
   end
 
   config.vm.provider 'virtualbox' do |vb, override|
@@ -168,7 +179,7 @@ Vagrant.configure(2) do |config|
   config.vm.provider "parallels" do |prl, override|
     unless custom_box
       if (arm || apple_silicon)
-        override.vm.box = base_boxes[:arm_parallels]
+        override.vm.box = base_boxes[:arm_bento]
       end
     end
 
@@ -179,6 +190,11 @@ Vagrant.configure(2) do |config|
   end
 
   config.vm.provider "vmware_desktop" do |vmware, override|
+    unless custom_box
+      if (arm || apple_silicon)
+        override.vm.box = base_boxes[:arm_bento]
+      end
+    end
     vmware.vmx["memsize"] = "2048"
     vmware.vmx["numvcpus"] = "2"
 
