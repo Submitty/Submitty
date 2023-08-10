@@ -13782,6 +13782,16 @@ parameters:
 			path: app/views/grading/ElectronicGraderView.php
 
 		-
+			message: "#^Method app\\\\views\\\\grading\\\\ElectronicGraderView\\:\\:detailsPage\\(\\) has parameter \\$inquiry_status with no type specified\\.$#"
+			count: 1
+			path: app/views/grading/ElectronicGraderView.php
+			
+		-
+			message: "#^Method app\\\\views\\\\grading\\\\ElectronicGraderView\\:\\:detailsPage\\(\\) has parameter \\$inquiry_only with no type specified\\.$#"
+			count: 1
+			path: app/views/grading/ElectronicGraderView.php
+
+		-
 			message: "#^Method app\\\\views\\\\grading\\\\ElectronicGraderView\\:\\:detailsPage\\(\\) has parameter \\$direction with no type specified\\.$#"
 			count: 1
 			path: app/views/grading/ElectronicGraderView.php
