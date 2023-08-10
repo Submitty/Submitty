@@ -34,6 +34,8 @@ class GlobalView extends AbstractView {
             $page_title = $page_name;
         }
 
+        $html_lang = str_replace('_', '-', $this->core->getConfig()->getLocale()->getName());
+
         return $this->core->getOutput()->renderTwigTemplate("GlobalHeader.twig", [
             "messages" => $messages,
             "css" => $css,
@@ -57,7 +59,8 @@ class GlobalView extends AbstractView {
             "collapse_sidebar" => array_key_exists('collapse_sidebar', $_COOKIE) && $_COOKIE['collapse_sidebar'] === 'true',
             "content_only" => $content_only,
             "manifast_path" => $this->core->getOutput()->getManifastPath(),
-            "service_worker_path" => $this->core->getOutput()->getServiceWorkerPath()
+            "service_worker_path" => $this->core->getOutput()->getServiceWorkerPath(),
+            "html_lang" => $html_lang
         ]);
     }
 

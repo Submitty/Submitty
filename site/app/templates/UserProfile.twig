@@ -1,6 +1,6 @@
 <div class="content">
     <h1>
-        My Profile
+    {{ localize('My_Profile.My_Profile', "My Profile") }}
     </h1>
     <div class="user-info-wrapper">
         <div id="user-card-img">
@@ -22,12 +22,14 @@
         <div id="user-card">
             <div class="user-info-cont">
                 <div class="user-info-title" id="basic_info">
-                    <span>Basic Information</span>
+                    <span>
+                    {{ localize('My_Profile.Basic_Information', "Basic Information" )}}
+                    </span>
                 </div>
                 <div class="user-info">
                     <div class="flex-row" id="username-row" data-testid="username-row">
                         <span class="label">
-                            Username:
+                        {{ localize('My_Profile.Username', "Username" )}}:
                         </span>
                         <span class="value">
                             {{ user.getId() }}
@@ -35,7 +37,7 @@
                     </div>
                     <div class="flex-row" id="givenname-row" data-testid="givenname-row">
                         <span class="label">
-                            First Name:
+                        {{ localize('My_Profile.First_Name', "First Name" )}}:
                         </span>
                         <button class="icon" tabindex="0" onclick="showUpdatePrefNameForm()" aria-label="Edit user preferred name" title="Edit user preferred name">
                             <i class="fas fa-pencil-alt"></i> {{ user.getDisplayedGivenName() }}
@@ -43,7 +45,7 @@
                     </div>
                     <div class="flex-row" id="familyname-row" data-testid="familyname-row">
                         <span class="label">
-                            Last Name:
+                        {{ localize('My_Profile.Last_Name', "Last Name" )}}:
                         </span>
                         <button class="icon" tabindex="0" onclick="showUpdatePrefNameForm()" aria-label="Edit user preferred name" title="Edit user preferred name">
                             <i class="fas fa-pencil-alt"></i> {{ user.getDisplayedFamilyName() }}
@@ -51,7 +53,7 @@
                     </div>
                     <div class="flex-row" id="last-initial-format-row" data-testid="last-initial-format-row">
                         <span class="label">
-                            Abbreviated Name:
+                            {{ localize('My_Profile.Abbreviated_Name', "Abbreviated Name") }}:
                         </span>
                         <button class="icon" tabindex="0" onclick="showUpdateLastInitialFormatForm()" aria-label="Edit user last initial format" title="Edit user last initial format">
                             <i class="fas fa-pencil-alt"></i> {{ user.getDisplayAbbreviatedName() }}
@@ -59,15 +61,27 @@
                     </div>
                     <div class="flex-row" id="pronouns-row" data-testid="pronouns-row">
                         <span class="label">
-                            Pronouns:
+                             {{ localize('My_Profile.Pronouns', "Pronouns" )}}:
                         </span>
                         <button id='pronouns_val' class="icon" tabindex="0" onclick="showUpdatePronounsForm()" aria-label="Edit user pronouns" title="Edit user pronouns">
                             <i class="fas fa-pencil-alt"></i> {{ user.getPronouns() }}
                         </button>
                     </div>
+                    <div class="flex-row" id="pronouns-display-row">
+                        <span class="label">
+                            {{ localize('My_Profile.Pronouns_Forum', "Display Pronouns in Discussion Forum" )}}:
+                        </span>
+                        <button id='display_pronouns_val' class="icon" tabindex="0" onclick="showUpdatePronounsForm()" aria-label="Edit user pronouns" title="Edit user pronouns">
+                            {% if user.getDisplayPronouns() %}
+                                <i class="fas fa-pencil-alt"></i> True
+                            {% else %}
+                                <i class="fas fa-pencil-alt"></i> False
+                            {% endif %}
+                        </button>
+                    </div>
                     <div class="flex-row" id="email-row" data-testid="email-row">
                         <span class="label">
-                            Primary Email:
+                            {{ localize('My_Profile.Primary_Email', "Primary Email" )}}:
                         </span>
                         <span class="value">
                             {{ user.getEmail() }}
@@ -75,7 +89,7 @@
                     </div>
                     <div class="flex-row" id="secondary-email-row">
                         <span class="label">
-                            Secondary Email:
+                            {{ localize('My_Profile.Secondary_Email', "Secondary Email" )}}:
                         </span>
                         <button class="icon" tabindex="0" onclick="showUpdateSecondaryEmailForm()" aria-label="Edit user secondary email" title="Edit user secondary email">
                             <i class="fas fa-pencil-alt"></i> {{ user.getSecondaryEmail() }}
@@ -83,7 +97,7 @@
                     </div>
                     <div class="flex-row" id="secondary-email-notify-row">
                         <span class="label">
-                            Send Email to Secondary Address:
+                            {{ localize('My_Profile.Send_Email', "Send Email to Secondary Address" )}}:
                         </span>
                         <button class="icon" tabindex="0" onclick="showUpdateSecondaryEmailForm()" aria-label="Edit user secondary email" title="Edit user secondary email">
                             <i class="fas fa-pencil-alt"></i> {% if user.getEmailBoth() %}True{% else %}False{% endif %}
@@ -92,7 +106,7 @@
                     {% if display_access_level %}
                         <div class="flex-row" id="access-row">
                             <span class="label">
-                                Access Level:
+                                {{ localize('My_Profile.Access_Level', "Access Level" )}}:
                             </span>
                             <span class="value">
                                 {{ access_level }}
@@ -138,7 +152,7 @@
                 <div class="user-info">
                     <div class="flex-row-col">
                         <label for="theme_change_select">Choose a color theme</label>
-                        <select id="theme_change_select" class="form-control" aria-label="Change Submitty's Theme" data-testid="theme-change-dropdown>
+                        <select id="theme_change_select" class="form-control" aria-label="Change Submitty's Theme" data-testid="theme-change-dropdown">
                             <option value="system">Follow Device Theme</option>
                             <option value="system_black">Follow Device Theme (Black)</option>
                             <option value="light">Light Mode</option>

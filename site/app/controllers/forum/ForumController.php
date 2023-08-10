@@ -1164,7 +1164,7 @@ class ForumController extends AbstractController {
         // Fetch additional information
         foreach ($output as &$_post) {
             $emptyUser = empty($_post['user']);
-            $_post['user_info'] = $emptyUser ? ['given_name' => 'Anonymous', 'family_name' => '', 'email' => ''] : $this->core->getQueries()->getDisplayUserInfoFromUserId($_post['user']);
+            $_post['user_info'] = $emptyUser ? ['given_name' => 'Anonymous', 'family_name' => '', 'email' => '', 'pronouns' => '', 'display_pronouns' => false ] : $this->core->getQueries()->getDisplayUserInfoFromUserId($_post['user']);
             $_post['is_staff_post'] = $emptyUser ? false : $this->core->getQueries()->isStaffPost($_post['user']);
         }
         return $this->core->getOutput()->renderJsonSuccess($output);

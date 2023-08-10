@@ -19,6 +19,8 @@ use app\libraries\NumberUtils;
 use app\libraries\CodeMirrorUtils;
 
 class ElectronicGraderView extends AbstractView {
+    private $user_id_to_User_cache = [];
+
     /**
      * @param Gradeable $gradeable
      * @param array[] $sections
@@ -31,13 +33,11 @@ class ElectronicGraderView extends AbstractView {
      * @param int $viewed_grade
      * @param string $section_type
      * @param int $grade_inquiries
+     * @param array<string, int> $graders_of_inquiries
      * @param bool $show_warnings
      * @param int $submissions_in_queue
      * @return string
      */
-
-    private $user_id_to_User_cache = [];
-
     public function statusPage(
         Gradeable $gradeable,
         array $sections,
@@ -54,6 +54,7 @@ class ElectronicGraderView extends AbstractView {
         int $viewed_grade,
         string $section_type,
         int $grade_inquiries,
+        array $graders_of_inquiries,
         bool $show_warnings,
         int $submissions_in_queue
     ) {
@@ -98,7 +99,9 @@ class ElectronicGraderView extends AbstractView {
         $this->core->getOutput()->addVendorJs(FileUtils::joinPaths('plotly', 'plotly.js'));
 
         foreach ($sections as $key => $section) {
-            if ($key === "NULL") {
+            // If we allow NULL sections, use any.
+            // If not, make sure $key is not NULL
+            if ($key === "NULL" && (!array_key_exists('include_null_section', $_COOKIE) || $_COOKIE['include_null_section'] === 'omit')) {
                 continue;
             }
             $graded += $section['graded_components'];
@@ -219,7 +222,6 @@ class ElectronicGraderView extends AbstractView {
                 $section['graded'] = round($section['graded_components'] / $non_zero_non_peer_components_count, 1);
                 $section['total'] = $section['total_components'];
                 $section['non_late_graded'] = round($section['non_late_graded_components'] / $non_zero_non_peer_components_count, 1);
-                echo("\n");
                 $section['non_late_total'] = $section['non_late_total_components'];// / $non_zero_non_peer_components_count;
 
                 if ($section['total_components'] == 0) {
@@ -293,7 +295,6 @@ class ElectronicGraderView extends AbstractView {
                 $no_rotating_sections = $valid_teams_or_students === 0;
             }
         }
-
         $details_url = $this->core->buildCourseUrl(['gradeable', $gradeable->getId(), 'grading', 'details']);
         $this->core->getOutput()->addInternalCss('admin-gradeable.css');
         return $this->core->getOutput()->renderTwigTemplate("grading/electronic/ta_status/StatusBase.twig", [
@@ -346,15 +347,17 @@ class ElectronicGraderView extends AbstractView {
             "total_students_submitted" => $total_students_submitted,
             "individual_viewed_percent" => $individual_viewed_percent ?? 0,
             "grade_inquiries" => $grade_inquiries,
+            "graders_of_inquiries" => $graders_of_inquiries,
             "download_zip_url" => $this->core->buildCourseUrl(['gradeable', $gradeable->getId(), 'grading', 'download_zip']),
             "bulk_stats_url" => $this->core->buildCourseUrl(['gradeable', $gradeable->getId(), 'bulk_stats']),
             "details_url" => $details_url,
             "grade_url" => $this->core->buildCourseUrl(['gradeable', $gradeable->getId(), 'grading', 'grade']),
-            "grade_inquiry_allowed" => false,
+            "grade_inquiry_allowed" => $gradeable->isGradeInquiryAllowed(),
             "grade_inquiry_per_component_allowed" => $gradeable->isGradeInquiryPerComponentAllowed(),
             "histograms" => $histogram_data,
             "include_grade_override" => array_key_exists('include_grade_override', $_COOKIE) ? $_COOKIE['include_grade_override'] : 'omit',
             "include_bad_submissions" => array_key_exists('include_bad_submissions', $_COOKIE) ? $_COOKIE['include_bad_submissions'] : 'omit',
+            "include_null_section" => array_key_exists('include_null_section', $_COOKIE) ? $_COOKIE['include_null_section'] : 'omit',
             "warnings" => $warnings,
             "submissions_in_queue" => $submissions_in_queue,
             "can_manage_teams" => $this->core->getAccess()->canI('grading.electronic.show_edit_teams', ["gradeable" => $gradeable])
@@ -478,7 +481,7 @@ HTML;
      * @param bool $show_edit_teams
      * @return string
      */
-    public function detailsPage(Gradeable $gradeable, $graded_gradeables, $teamless_users, $graders, $empty_teams, $show_all_sections_button, $show_import_teams_button, $show_export_teams_button, $show_edit_teams, $past_grade_start_date, $view_all, $sort, $direction, $anon_mode, $overrides, $anon_ids) {
+    public function detailsPage(Gradeable $gradeable, $graded_gradeables, $teamless_users, $graders, $empty_teams, $show_all_sections_button, $show_import_teams_button, $show_export_teams_button, $show_edit_teams, $past_grade_start_date, $view_all, $sort, $direction, $anon_mode, $overrides, $anon_ids, $inquiry_only, $inquiry_status) {
         $collapsed_sections = isset($_COOKIE['collapsed_sections']) ? json_decode(rawurldecode($_COOKIE['collapsed_sections'])) : [];
 
         $peer = false;
@@ -577,16 +580,36 @@ HTML;
             }
         }
 
+        // Generate late days
+        $this->core->getQueries()->generateLateDayCacheForUsers($gradeable->getId());
+        // TO DO: Add bulk LateDays creation from database
 
         //Convert rows into sections and prepare extra row info for things that
         // are too messy to calculate in the template.
         $sections = [];
         foreach ($graded_gradeables as $row) {
             //Extra info for the template
+
+            $late_day_info = $this->core->getQueries()->getLateDayInfoForSubmitterGradeable($row->getSubmitter(), $row);
+            $on_time_submission = true;
+            if ($late_day_info !== null) {
+                if (!$gradeable->isTeamAssignment()) {
+                    $on_time_submission = $late_day_info->isOnTimeSubmission();
+                }
+                else { //A Team gradeable submission is bad only when all team members have a bad submission
+                    foreach ($late_day_info as $member_submission) {
+                        if (!$member_submission->isOnTimeSubmission()) {
+                            $on_time_submission = false;
+                            break;
+                        }
+                    }
+                }
+            }
+
             $info = [
                 "graded_gradeable" => $row,
+                "on_time_submission" => $on_time_submission
             ];
-
             if ($peer) {
                 $section_title = "PEER STUDENT GRADER";
             }
@@ -847,8 +870,11 @@ HTML;
             "team_gradeable_view_history" => $team_gradeable_view_history,
             "view_all" => $view_all,
             "anon_mode" => $anon_mode,
+            "inquiry_only" => $inquiry_only,
+            "inquiry_status" => $inquiry_status,
             "toggle_anon_button" => ($this->core->getUser()->getGroup() == User::GROUP_INSTRUCTOR || $this->core->getUser()->getGroup() == User::GROUP_FULL_ACCESS_GRADER),
             "show_all_sections_button" => $show_all_sections_button,
+            'grade_inquiry_only_button' => ($this->core->getUser()->getGroup() == User::GROUP_INSTRUCTOR || $this->core->getUser()->getGroup() == User::GROUP_FULL_ACCESS_GRADER || $this->core->getUser()->getGroup() == User::GROUP_LIMITED_ACCESS_GRADER),
             "show_import_teams_button" => $show_import_teams_button,
             "show_export_teams_button" => $show_export_teams_button,
             "past_grade_start_date" => $past_grade_start_date,
@@ -875,6 +901,7 @@ HTML;
             "message_warning" => $message_warning,
             "overrides" => $overrides,
             "anon_ids" => $anon_ids
+
         ]);
     }
 
@@ -910,7 +937,7 @@ HTML;
 
     //The student not in section variable indicates that an full access grader is viewing a student that is not in their
     //assigned section. canViewWholeGradeable determines whether hidden testcases can be viewed.
-    public function hwGradingPage(Gradeable $gradeable, GradedGradeable $graded_gradeable, int $display_version, float $progress, bool $show_hidden_cases, bool $can_inquiry, bool $can_verify, bool $show_verify_all, bool $show_silent_edit, int $late_status, $rollbackSubmission, $sort, $direction, $from, array $solution_ta_notes, array $submitter_itempool_map, $anon_mode, $blind_grading) {
+    public function hwGradingPage(Gradeable $gradeable, GradedGradeable $graded_gradeable, int $display_version, float $progress, bool $show_hidden_cases, bool $can_inquiry, bool $can_verify, bool $show_verify_all, bool $show_silent_edit, int $late_status, int $rollback_submission, $sort, $direction, $from, array $solution_ta_notes, array $submitter_itempool_map, $anon_mode, $blind_grading) {
         $this->core->getOutput()->addInternalCss('admin-gradeable.css');
         $this->core->getOutput()->addInternalCss('ta-grading.css');
         $isPeerPanel = false;
@@ -978,25 +1005,31 @@ HTML;
                 ];
             }
         }
-        elseif ($late_status === LateDayInfo::STATUS_LATE) {
+        elseif ($late_status != LateDayInfo::STATUS_GOOD && $late_status != LateDayInfo::STATUS_LATE && $rollback_submission > 0) {
             $error_message = [
-                "color" => "var(--standard-creamsicle-orange)", // fire engine red
-                "message" => "Late Submission"
+                "color" => "var(--standard-creamsicle-orange)",
+                "message" => "Bad Submission (Rollback to valid submission - Version #" . $rollback_submission . ")"
             ];
         }
-        elseif ($late_status === LateDayInfo::STATUS_BAD) {
-            if ($rollbackSubmission === -1) {
+        elseif ($late_status != LateDayInfo::STATUS_GOOD && $late_status != LateDayInfo::STATUS_LATE) {
+            if ($gradeable->isTeamAssignment()) {
                 $error_message = [
-                    "color" => "var(--standard-red-orange)", // fire engine red
-                    "message" => "Bad Submission (no valid submission available)"
+                    "color" => "var(--standard-red-orange)",
+                    "message" => "Bad Submission (At least 1 team member has no valid submission)"
                 ];
             }
             else {
                 $error_message = [
                     "color" => "var(--standard-red-orange)", // fire engine red
-                    "message" => "Bad Submission (submitter has valid submission - Version #" . $rollbackSubmission . ")"
+                    "message" => "Bad Submission (No valid submission available)"
                 ];
             }
+        }
+        elseif ($late_status === LateDayInfo::STATUS_LATE) {
+            $error_message = [
+                "color" => "var(--standard-medium-orange)", // fire engine red
+                "message" => "Late Submission (Using one or more late days)"
+            ];
         }
         elseif ($graded_gradeable->getAutoGradedGradeable()->hasSubmission() && count($display_version_instance->getFiles()["submissions"]) > 1 && $gradeable->isBulkUpload()) {
             $pattern1 = "upload.pdf";
