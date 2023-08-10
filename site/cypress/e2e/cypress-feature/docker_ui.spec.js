@@ -55,7 +55,7 @@ describe('Docker UI Test', () => {
 
         // Allow the system to update the info and reload
         cy.waitAndReloadUntil(() => {
-            return cy.get('.machine-table > tbody:nth-child(1) > tr:nth-child(3) > td:nth-child(4)')
+            return cy.get('[data-testid="docker_version"]')
                 .invoke('text')
                 .then((text) => {
                     return text !== 'Error';
@@ -63,13 +63,13 @@ describe('Docker UI Test', () => {
         }, 10000);
 
         // Updated time should not be "Unknown"
-        cy.get(':nth-child(1) > p')
+        cy.get('[data-testid="systemwide_info"]')
             .should('not.contain.text', 'Unknown');
         // Updated OS info should not be empty
-        cy.get('.machine-table > tbody:nth-child(1) > tr:nth-child(3) > td:nth-child(3)')
+        cy.get('[data-testid="system_info"]')
             .should('not.be.empty');
         // Updated docker version should not be "Error"
-        cy.get('.machine-table > tbody:nth-child(1) > tr:nth-child(3) > td:nth-child(4)')
+        cy.get('[data-testid="docker_version"]')
             .should('not.contain.text', 'Error');
     });
 

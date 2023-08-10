@@ -165,7 +165,17 @@ class CalendarInfo extends AbstractModel {
         return $info;
     }
 
+    /**
+     * @return array<string, array<string,bool|string>>>
+     */
     public function getItemsByDate(): array {
+        return $this->items_by_date;
+    }
+
+    /**
+     * @return array<string, array<string,bool|string>>>
+     */
+    public function getItemsByDateInCourses(): array {
         return $this->items_by_date;
     }
 
