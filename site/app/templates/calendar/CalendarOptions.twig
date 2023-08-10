@@ -1,0 +1,18 @@
+{% extends 'generic/Popup.twig' %}
+{% block popup_id %}calendar-options-form{% endblock %}
+{% block title %}Calendar Options{% endblock %}
+{% block body %}
+    <label for="filter-courses-menu">Select Course: </label>
+    <select name="filter-courses-menu" id="filter-courses-menu">
+        {% if course_names|length > 1 %}
+        <option value="show all">All Courses</option>
+        {% endif %}
+        {% for course in course_names %}
+        <option value="{{course}}">{{course}}</option>
+        {% endfor %}
+    </select>
+{% endblock %}
+{% block buttons %}
+    {{ block('close_button') }}
+    <input name="submit" class="btn btn-primary key_to_click" type="submit" value="Submit" onclick="updateCalendarFilters()"/>
+{% endblock %}
