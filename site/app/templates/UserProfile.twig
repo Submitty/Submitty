@@ -147,7 +147,7 @@
             </div>
             <div class="user-info-cont">
                 <div class="user-info-title">
-                    <span>Preferred Locale:</span>
+                    <span>Preferred Locale (Language/Region):</span>
                 </div>
                 <div class="user-info">
                     <div class="flex-row-col">
@@ -160,6 +160,9 @@
                             {% endfor %}
                         </select>
                     </div>
+                    {% if user_locale != 'en_US' and user_locale != '' %}
+                    <span class="tip-note" style="text-align: right; margin-left: 25%;">Note: Support for languages other than English is incomplete and a heavy work in progress. If you would like to contribute to translation, see our guidelines <a href="#">here</a>.</span>
+                    {% endif %}
                 </div>
             </div>
             <div class="user-info-cont">

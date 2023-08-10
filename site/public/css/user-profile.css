@@ -91,6 +91,12 @@
     margin: 0;
 }
 
+.user-info .tip-note {
+    font-size: 14px;
+    color: rgb(87, 119, 207);
+    display: block;
+}
+
 .flex-row-col label,
 .flex-row-col select {
     flex: 1;
