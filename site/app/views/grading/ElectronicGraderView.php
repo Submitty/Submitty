@@ -495,9 +495,15 @@ HTML;
         $columns = [];
         $columns[]             = ["width" => "2%",  "title" => "",                 "function" => "index"];
         $columns[]             = ["width" => "8%",  "title" => "Section",          "function" => "section"];
-        if ($peer || $anon_mode) {
+
+        $team_and_anon = ($this->core->getUser()->getGroup() === User::GROUP_LIMITED_ACCESS_GRADER &&
+            $gradeable->getLimitedAccessBlind() === 2);
+
+        if ($peer || $anon_mode || $team_and_anon) {
             if ($gradeable->isTeamAssignment()) {
-                if ($gradeable->getPeerBlind() === Gradeable::DOUBLE_BLIND_GRADING || $anon_mode) {
+                $peer_and_anon = ($this->core->getUser()->getGroup() === User::GROUP_STUDENT &&
+                    $gradeable->getPeerBlind() === Gradeable::DOUBLE_BLIND_GRADING);
+                if ($team_and_anon || $peer_and_anon || $anon_mode) {
                     $columns[] = ["width" => "30%", "title" => "Team Members",     "function" => "team_members_anon"];
                 }
                 else {
