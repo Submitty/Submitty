@@ -429,7 +429,7 @@ class RainbowCustomization extends AbstractModel {
      * @return array<string>  array of display description
      */
     public function getDisplayDescription(): array {
-        return RainbowCustomizationJSON::allowed_display_description;;
+        return RainbowCustomizationJSON::allowed_display_description;
     }
 
     /**
