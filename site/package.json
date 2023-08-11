@@ -57,7 +57,7 @@
     "@types/jqueryui": "^1.12.17",
     "@types/twig": "^1.12.9",
     "@typescript-eslint/eslint-plugin": "^5.59.7",
-    "@typescript-eslint/parser": "^5.59.8",
+    "@typescript-eslint/parser": "^5.62.0",
     "babel-jest": "^29.4.3",
     "cypress": "^12.17.3",
     "cypress-file-upload": "^5.0.8",
