@@ -8,7 +8,7 @@
     <label for="calendar-course">Course</label>
     <select id="calendar-course" name="course">
     {% for one_course in instructor_courses %}
-        <option value="{{ one_course.semester ~ ' ' ~ one_course.course }}">{{ one_course.semester }} {{ one_course.course }}</option>
+        <option value="{{ one_course.term ~ ' ' ~ one_course.course }}">{{ one_course.term }} {{ one_course.course }}</option>
     {% endfor %}
     </select><br>
     <label for="calendar-item-type">Message Type</label>
