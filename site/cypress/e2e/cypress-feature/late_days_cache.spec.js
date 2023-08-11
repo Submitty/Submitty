@@ -133,13 +133,12 @@ describe('Test cases involving late day cache updates', () => {
             cy.login('instructor');
 
             for (const user_id of all_user_ids) {
-                const days = 2;
                 // update the number of late days
                 cy.get('#user_id').type(user_id);
                 cy.get('#datestamp').type('1972-01-01', {force: true});
                 cy.get('#user_id').click(); // dismiss the calendar view
                 cy.get('#late_days').clear();
-                cy.get('#late_days').type(days);
+                cy.get('#late_days').type(2);
                 cy.get('input[type=submit]').click();
                 if (user_id !== 'harbel') {
                     cy.wait(2000);
@@ -377,7 +376,7 @@ describe('Test cases involving late day cache updates', () => {
 
             cy.get('td[data-before-content="Event/Assignment"]')
                 .contains('Late Allowed Homework')
-                .siblings('td[data-before-content='Status']')
+                .siblings('td[data-before-content="Status"]')
                 .contains('Cancelled Submission')
                 .should('exist');
         });
