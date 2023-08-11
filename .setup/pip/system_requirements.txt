@@ -34,9 +34,6 @@ jsonref==1.1.0
 docker==6.1.2
 urllib3==2.0.4
 
-# Python3 implementation of python-clang bindings (may not work < 6.0)
-clang==14.0
-
 # Python libraries for QR bulk upload
 pyzbar==0.1.9
 pdf2image==1.16.3
