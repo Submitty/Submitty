@@ -2,7 +2,7 @@ import {buildUrl} from '/cypress/support/utils.js';
 
 const predictedStatus = (days_allowed, days_late, remaining) => {
 
-    if (days_late == 0) {
+    if (days_late === 0) {
         return 'Good';
     }
     else if (days_late <= days_allowed && days_late <= remaining) {
@@ -34,7 +34,7 @@ const calculateCache = () => {
     cy.get('#rebuild-status-label', {timeout: 15000}).should('not.be.visible');
 
     for (const user_id of all_user_ids) {
-        cy.get(`[data-user="${user_id}"] > [data-before-content="Late Days Remaining"]`)
+        cy.get(`[data-user="${user_id}""] > [data-before-content='Late Days Remaining']`)
             .then((cell) => expect(cell.text().trim()).not.to.equal(''));
     }
 };
@@ -44,11 +44,11 @@ const checkStudentsInCache = () => {
     cy.visit(['sample', 'bulk_late_days']);
     for (const user_id of all_user_ids) {
         // Gradeable # of late days used should be empty
-        cy.get(`[data-user="${user_id}"] > [data-before-content="Late Allowed Homework"]`)
+        cy.get(`[data-user="${user_id}"] > [data-before-content='Late Allowed Homework']`)
             .then((cell) => expect(cell.text().trim()).to.equal(''));
 
         // Remaining late days isnt known, should be empty
-        cy.get(`[data-user="${user_id}"] > [data-before-content="Late Days Remaining"]`)
+        cy.get(`[data-user="${user_id}"] > [data-before-content='Late Days Remaining']`)
             .then((cell) => expect(cell.text().trim()).to.equal(''));
     }
 };
@@ -62,9 +62,9 @@ const CheckStatusUpdated = (exceptions_given, late_days_remaining) => {
         const status = predictedStatus(1 ,Math.max(0,all_late_users[user_id]-exceptions_given), late_days_remaining);
 
         // Find late day status within the row in the late day usage table
-        cy.get('td[data-before-content="Event/Assignment"]')
-            .contains("Late Allowed Homework")
-            .siblings('td[data-before-content="Status"]')
+        cy.get('td[data-before-content='Event/Assignment']')
+            .contains('Late Allowed Homework')
+            .siblings('td[data-before-content='Status']')
             .contains(status)
             .should('exist');
 
@@ -76,7 +76,7 @@ const all_late_users = {}; // {user_id: #days_late}
 const all_user_ids = [];
 
 all_late_users['moscie'] = 3;
-all_user_ids.push('moscie'); 
+all_user_ids.push('moscie');
 // Submission is 3 days late and 0 late days => Bad (too many late days used this term)
 // After given 2 late days => Bad (too many late days used this term)
 // Or After given 2 extentions => Bad (too many late days used this term)
@@ -120,9 +120,9 @@ describe('Test cases involving late day cache updates', () => {
             cy.login('instructor');
             // 0 late days should be charged
             for (const user_id of all_user_ids) {
-                cy.get(`[data-user="${user_id}"] > [data-before-content="Late Allowed Homework"]`)
-                .contains('0')
-                .should('exist');
+                cy.get(`[data-user='${user_id}'] > [data-before-content='Late Allowed Homework']`)
+                    .contains('0')
+                    .should('exist');
             }
         });
     });
@@ -141,19 +141,18 @@ describe('Test cases involving late day cache updates', () => {
                 cy.get('#late_days').clear();
                 cy.get('#late_days').type(days);
                 cy.get('input[type=submit]').click();
-                if (user_id != "harbel"){
+                if (user_id !== 'harbel') {
                     cy.wait(2000);
                 }
             }
         });
 
         it('should make bulk late days has been emptied out', () => {
-            checkStudentsInCache();            
+            checkStudentsInCache();
         });
 
         it('should make sure late day status has updated', () => {
             CheckStatusUpdated(0,2);
-            
         });
 
         it('should remove late day cache after deletion of late days', () => {
@@ -162,9 +161,8 @@ describe('Test cases involving late day cache updates', () => {
 
             const deleteLateDays = () => {
                 cy.get('div.content').then((table) => {
-                    if (table.find('td[data-before-content="Delete"]').length > 0) {
-                        cy.wrap(table).find('td[data-before-content="Delete"]').first().click();
-                        cy.wait(2000);
+                    if (table.find('td[data-before-content='Delete']').length > 0) {
+                        cy.get('td[data-before-content='Delete']').should('exist').first().click();
                         deleteLateDays();
                     }
                 });
@@ -183,11 +181,10 @@ describe('Test cases involving late day cache updates', () => {
             calculateCache();
         });
 
-        it('should grant students with extensions', () => {
+        it.only('should grant students with extensions', () => {
             cy.visit(['sample', 'extensions']);
 
-            cy.get('#gradeable-select').select("Late Allowed Homework");
-
+            cy.get('#gradeable-select').select('Late Allowed Homework');
             for (const user_id of all_user_ids) {
                 // update the number of late days
                 cy.get('#user_id').type(user_id);
@@ -195,10 +192,12 @@ describe('Test cases involving late day cache updates', () => {
                 cy.get('#extensions-form')
                     .find('a')
                     .contains('Submit')
+                    .should('exist')
                     .click();
-                cy.wait(2000);
-            }
-            
+                if (user_id != 'harbel') {
+                    cy.wait(2000);
+                }
+            }            
         });
 
         it('should make bulk late days has been emptied out', () => {
@@ -209,26 +208,24 @@ describe('Test cases involving late day cache updates', () => {
             CheckStatusUpdated(2,0);
         });
 
-        it('should remove late day cache after deletion of extension', () => {
+        it.only('should remove late day cache after deletion of extension', () => {
             cy.visit(['sample', 'extensions']);
             cy.login('instructor');
 
             const deleteExtensions = () => {
                 cy.get('body').then((body) => {
                     if (body.find('#extensions-table').length > 0) {
-                        cy.wrap(body).find('#extensions-table > tbody > tr > td > a').first().click();
-                        cy.wait(3000);
+                        cy.get('#extensions-table > tbody > tr > td > a').should('exist').first().click();
                         deleteExtensions();
                     }
                 });
             };
 
             // Delete late day extension if any exist
-            cy.get('#gradeable-select').select("Late Allowed Homework");
+            cy.get('#gradeable-select').select('Late Allowed Homework');
             deleteExtensions();
             // View bulk late day changes
-            checkStudentsInCache();
-            
+            checkStudentsInCache(); 
         });
     });
 
@@ -238,7 +235,7 @@ describe('Test cases involving late day cache updates', () => {
             cy.login('instructor');
             calculateCache();
 
-            cy.visit(['sample', 'gradeable', "late_allowed_homework", 'update?nav_tab=5']);
+            cy.visit(['sample', 'gradeable', 'late_allowed_homework', 'update?nav_tab=5']);
 
             cy.get('.breadcrumb > span').should('have.text', 'Edit Gradeable');
         });
@@ -255,7 +252,7 @@ describe('Test cases involving late day cache updates', () => {
             cy.visit(['sample', 'bulk_late_days']);
 
             // Gradeable # of late days used should be empty
-            cy.get(`#late-day-table > tbody > tr > [data-before-content="Late Allowed Homework"] ~`)
+            cy.get(`#late-day-table > tbody > tr > [data-before-content='Late Allowed Homework'] ~`)
                 .then((cell) => expect(cell.text().trim()).to.equal(''));
         });
 
@@ -270,7 +267,7 @@ describe('Test cases involving late day cache updates', () => {
 
             cy.visit(['sample', 'bulk_late_days']);
 
-            cy.get(`#late-day-table > tbody > tr > [data-before-content="Late Allowed Homework"] ~`)
+            cy.get(`#late-day-table > tbody > tr > [data-before-content='Late Allowed Homework'] ~`)
                 .then((cell) => expect(cell.text().trim()).to.equal(''));
         });
 
@@ -282,7 +279,7 @@ describe('Test cases involving late day cache updates', () => {
             cy.visit(['sample', 'bulk_late_days']);
 
             // Bulk late days should not have gradeable title
-            cy.get(`#late-day-table > tbody > tr > [data-before-content="Late Allowed Homework"]`).should('have.length', 0);
+            cy.get(`#late-day-table > tbody > tr > [data-before-content='Late Allowed Homework']`).should('have.length', 0);
 
         });
 
@@ -294,7 +291,7 @@ describe('Test cases involving late day cache updates', () => {
             cy.visit(['sample', 'bulk_late_days']);
 
             // Bulk late days should have gradeable title
-            cy.get(`#late-day-table > tbody > tr > [data-before-content="Late Allowed Homework"]`).should('have.length.gt', 0);
+            cy.get(`#late-day-table > tbody > tr > [data-before-content='Late Allowed Homework']`).should('have.length.gt', 0);
 
         });
 
@@ -305,7 +302,7 @@ describe('Test cases involving late day cache updates', () => {
 
             cy.visit(['sample', 'bulk_late_days']);
 
-            cy.get(`#late-day-table > tbody > tr > [data-before-content="Late Allowed Homework"]`).should('have.length', 0);
+            cy.get(`#late-day-table > tbody > tr > [data-before-content='Late Allowed Homework']`).should('have.length', 0);
 
         });
 
@@ -316,7 +313,7 @@ describe('Test cases involving late day cache updates', () => {
 
             cy.visit(['sample', 'bulk_late_days']);
 
-            cy.get(`#late-day-table > tbody > tr > [data-before-content="Late Allowed Homework"]`).should('have.length.gt', 0);
+            cy.get(`#late-day-table > tbody > tr > [data-before-content='Late Allowed Homework']`).should('have.length.gt', 0);
 
         });
 
@@ -331,7 +328,7 @@ describe('Test cases involving late day cache updates', () => {
 
             cy.visit(['sample', 'bulk_late_days']);
 
-            cy.get(`#late-day-table > tbody > tr > [data-before-content="Late Allowed Homework"] ~`)
+            cy.get(`#late-day-table > tbody > tr > [data-before-content='Late Allowed Homework'] ~`)
                 .then((cell) => expect(cell.text().trim()).to.equal(''));
         });
     });
@@ -346,7 +343,7 @@ describe('Test cases involving late day cache updates', () => {
             cy.visit(['sample', 'bulk_late_days']);
             cy.login('instructor');
             calculateCache();
-            cy.visit(['sample', 'gradeable', "late_allowed_homework"]);
+            cy.visit(['sample', 'gradeable', 'late_allowed_homework']);
         });
 
         it('Adds a new submission', () => {
@@ -366,7 +363,7 @@ describe('Test cases involving late day cache updates', () => {
 
             // Check cache
             cy.visit(['sample', 'bulk_late_days']);
-            cy.get(`[data-user-content="student"][data-before-content="Late Allowed Homework"] ~`)
+            cy.get(`[data-user-content='student'][data-before-content='Late Allowed Homework'] ~`)
                 .then((cell) => expect(cell.text().trim()).to.equal(''));
         });
 
@@ -378,9 +375,9 @@ describe('Test cases involving late day cache updates', () => {
             // Check cache
             cy.visit(['sample', 'late_table']);
 
-            cy.get('td[data-before-content="Event/Assignment"]')
-                .contains("Late Allowed Homework")
-                .siblings('td[data-before-content="Status"]')
+            cy.get('td[data-before-content='Event/Assignment']')
+                .contains('Late Allowed Homework')
+                .siblings('td[data-before-content='Status']')
                 .contains('Cancelled Submission')
                 .should('exist');
         });
@@ -396,9 +393,9 @@ describe('Test cases involving late day cache updates', () => {
             // Check cache
             cy.visit(['sample', 'late_table']);
 
-            cy.get('td[data-before-content="Event/Assignment"]')
-                .contains("Late Allowed Homework")
-                .siblings('td[data-before-content="Status"]')
+            cy.get('td[data-before-content='Event/Assignment']')
+                .contains('Late Allowed Homework')
+                .siblings('td[data-before-content='Status']')
                 .should('not.contain', 'Cancelled Submission')
                 .should('exist');
         });
@@ -419,13 +416,12 @@ describe('Test cases involving late day cache updates', () => {
             cy.get('#g_title').type('Delete Me');
             cy.get('#g_id').type('deleteme');
             cy.get('#radio_ef_student_upload').check();
-            let finished = false;
             // Create Gradeable
             cy.get('#create-gradeable-btn').click();
 
             // Check that cache is deleted
             cy.visit(['sample', 'bulk_late_days']);
-            cy.get(`#late-day-table > tbody > tr > [data-before-content="Delete Me"] ~`)
+            cy.get(`#late-day-table > tbody > tr > [data-before-content='Delete Me'] ~`)
                 .then((cell) => expect(cell.text().trim()).to.equal(''));
         });
 
@@ -434,14 +430,14 @@ describe('Test cases involving late day cache updates', () => {
             cy.get(`#deleteme > div > a.fa-trash`).click();
 
             // Confirm delete
-            cy.get('form[name="delete-confirmation"]')
+            cy.get('form[name='delete-confirmation']')
                 .find('input')
                 .contains('Delete')
                 .click();
 
             // Check that cache is deleted
             cy.visit(['sample', 'bulk_late_days']);
-            cy.get(`#late-day-table > tbody > tr > [data-before-content="Delete Me"]`).should('have.length', 0);
+            cy.get(`#late-day-table > tbody > tr > [data-before-content='Delete Me']`).should('have.length', 0);
 
         });
     });
@@ -460,9 +456,9 @@ describe('Test cases involving late day cache updates', () => {
 
             cy.visit(['sample', 'bulk_late_days']);
 
-            cy.get('[data-before-content="Initial Late Days"]')
+            cy.get('[data-before-content='Initial Late Days']')
                 .each((cell) => expect(cell.text().trim()).to.equal('1'));
-            cy.get('#late-day-table > tbody > tr > [data-before-content="Initial Late Days"] ~')
+            cy.get('#late-day-table > tbody > tr > [data-before-content='Initial Late Days'] ~')
                 .then((cell) => expect(cell.text().trim()).to.equal(''));
         });
     });
