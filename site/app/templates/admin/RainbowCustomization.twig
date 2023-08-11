@@ -37,7 +37,8 @@
                             {% set description = display_description[counter] %}
                             <p>
                                 <input type="checkbox" id="display_{{ display_option.id }}" name="display" value="{{ display_option.id }}"
-                                       {% if display_option.isUsed == true %}checked{% endif %}>
+                                       {% if display_option.isUsed == true %}checked{% endif %}
+                                >
                                 <label  style="margin-right: 50px; display: inline-block; width: 100px;" for="display_{{ display_option.id }}">{{ display_option.id }}</label>
                                 <span style="margin-right: 10px; display: inline-block;"><em>{{ description | raw }}</em></span>
                             </p>
