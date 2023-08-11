@@ -1367,11 +1367,6 @@ parameters:
 			path: app/controllers/course/CourseMaterialsController.php
 
 		-
-			message: "#^Strict comparison using \\=\\=\\= between array\\<int, app\\\\entities\\\\course\\\\CourseMaterial\\> and null will always evaluate to false\\.$#"
-			count: 1
-			path: app/controllers/course/CourseMaterialsController.php
-
-		-
 			message: "#^Method app\\\\controllers\\\\forum\\\\ForumController\\:\\:addNewCategory\\(\\) has no return type specified\\.$#"
 			count: 1
 			path: app/controllers/forum/ForumController.php
@@ -2711,6 +2706,16 @@ parameters:
 			path: app/controllers/superuser/SuperuserEmailController.php
 
 		-
+			message: "#^Property app\\\\entities\\\\Session\\:\\:\\$session_created type mapping mismatch\\: property can contain DateTime\\|null but database expects DateTimeInterface\\.$#"
+			count: 1
+			path: app/entities/Session.php
+
+		-
+			message: "#^Property app\\\\entities\\\\VcsAuthToken\\:\\:\\$expiration type mapping mismatch\\: property can contain DateTime\\|null but database expects DateTimeInterface\\.$#"
+			count: 1
+			path: app/entities/VcsAuthToken.php
+
+		-
 			message: "#^Method app\\\\entities\\\\course\\\\CourseMaterial\\:\\:getSections\\(\\) return type with generic interface Doctrine\\\\Common\\\\Collections\\\\Collection does not specify its types\\: TKey, T$#"
 			count: 1
 			path: app/entities/course/CourseMaterial.php
@@ -2724,6 +2729,11 @@ parameters:
 			message: "#^Property app\\\\entities\\\\course\\\\CourseMaterial\\:\\:\\$sections with generic interface Doctrine\\\\Common\\\\Collections\\\\Collection does not specify its types\\: TKey, T$#"
 			count: 1
 			path: app/entities/course/CourseMaterial.php
+
+		-
+			message: "#^Property app\\\\entities\\\\course\\\\CourseMaterialAccess\\:\\:\\$course_material type mapping mismatch\\: database can contain app\\\\entities\\\\course\\\\CourseMaterial\\|null but property expects app\\\\entities\\\\course\\\\CourseMaterial\\.$#"
+			count: 1
+			path: app/entities/course/CourseMaterialAccess.php
 
 		-
 			message: "#^Method app\\\\entities\\\\db\\\\Table\\:\\:getColumns\\(\\) return type with generic interface Doctrine\\\\Common\\\\Collections\\\\Collection does not specify its types\\: TKey, T$#"
@@ -2757,11 +2767,6 @@ parameters:
 
 		-
 			message: "#^Property app\\\\entities\\\\email\\\\EmailEntity\\:\\:\\$error is never written, only read\\.$#"
-			count: 1
-			path: app/entities/email/EmailEntity.php
-
-		-
-			message: "#^Property app\\\\entities\\\\email\\\\EmailEntity\\:\\:\\$id is unused\\.$#"
 			count: 1
 			path: app/entities/email/EmailEntity.php
 
@@ -2896,7 +2901,17 @@ parameters:
 			path: app/entities/plagiarism/PlagiarismConfig.php
 
 		-
+			message: "#^Property app\\\\entities\\\\plagiarism\\\\PlagiarismConfig\\:\\:\\$ignore_submissions type mapping mismatch\\: property can contain array but database expects array\\<string\\>\\.$#"
+			count: 1
+			path: app/entities/plagiarism/PlagiarismConfig.php
+
+		-
 			message: "#^Property app\\\\entities\\\\plagiarism\\\\PlagiarismConfig\\:\\:\\$other_gradeable_paths type has no value type specified in iterable type array\\.$#"
+			count: 1
+			path: app/entities/plagiarism/PlagiarismConfig.php
+
+		-
+			message: "#^Property app\\\\entities\\\\plagiarism\\\\PlagiarismConfig\\:\\:\\$other_gradeable_paths type mapping mismatch\\: property can contain array but database expects array\\<string\\>\\.$#"
 			count: 1
 			path: app/entities/plagiarism/PlagiarismConfig.php
 
@@ -2911,12 +2926,17 @@ parameters:
 			path: app/entities/plagiarism/PlagiarismConfig.php
 
 		-
-			message: "#^Method app\\\\entities\\\\poll\\\\Option\\:\\:getUserResponses\\(\\) return type with generic interface Doctrine\\\\Common\\\\Collections\\\\Collection does not specify its types\\: TKey, T$#"
+			message: "#^Property app\\\\entities\\\\plagiarism\\\\PlagiarismConfig\\:\\:\\$regex type mapping mismatch\\: property can contain array but database expects array\\<string\\>\\.$#"
 			count: 1
-			path: app/entities/poll/Option.php
+			path: app/entities/plagiarism/PlagiarismConfig.php
 
 		-
-			message: "#^Property app\\\\entities\\\\poll\\\\Option\\:\\:\\$id is never written, only read\\.$#"
+			message: "#^Property app\\\\entities\\\\plagiarism\\\\PlagiarismRunAccess\\:\\:\\$lichen_run type mapping mismatch\\: database can contain app\\\\entities\\\\plagiarism\\\\PlagiarismConfig\\|null but property expects app\\\\entities\\\\plagiarism\\\\PlagiarismConfig\\.$#"
+			count: 1
+			path: app/entities/plagiarism/PlagiarismRunAccess.php
+
+		-
+			message: "#^Method app\\\\entities\\\\poll\\\\Option\\:\\:getUserResponses\\(\\) return type with generic interface Doctrine\\\\Common\\\\Collections\\\\Collection does not specify its types\\: TKey, T$#"
 			count: 1
 			path: app/entities/poll/Option.php
 
@@ -2947,11 +2967,6 @@ parameters:
 
 		-
 			message: "#^Property app\\\\entities\\\\poll\\\\Poll\\:\\:\\$id has no type specified\\.$#"
-			count: 1
-			path: app/entities/poll/Poll.php
-
-		-
-			message: "#^Property app\\\\entities\\\\poll\\\\Poll\\:\\:\\$id is never written, only read\\.$#"
 			count: 1
 			path: app/entities/poll/Poll.php
 
@@ -2999,11 +3014,6 @@ parameters:
 			message: "#^Property app\\\\entities\\\\poll\\\\Poll\\:\\:\\$status has no type specified\\.$#"
 			count: 1
 			path: app/entities/poll/Poll.php
-
-		-
-			message: "#^Property app\\\\entities\\\\poll\\\\Response\\:\\:\\$id is never written, only read\\.$#"
-			count: 1
-			path: app/entities/poll/Response.php
 
 		-
 			message: "#^Method app\\\\exceptions\\\\BaseException\\:\\:__construct\\(\\) has parameter \\$details with no value type specified in iterable type array\\.$#"
@@ -10522,22 +10532,22 @@ parameters:
 			path: app/models/notebook/UserSpecificNotebook.php
 
 		-
-			message: "#^Class app\\\\repositories\\\\SessionRepository extends generic class Doctrine\\\\ORM\\\\EntityRepository but does not specify its types\\: T$#"
+			message: "#^Class app\\\\repositories\\\\SessionRepository extends generic class Doctrine\\\\ORM\\\\EntityRepository but does not specify its types\\: TEntityClass$#"
 			count: 1
 			path: app/repositories/SessionRepository.php
 
 		-
-			message: "#^Class app\\\\repositories\\\\VcsAuthTokenRepository extends generic class Doctrine\\\\ORM\\\\EntityRepository but does not specify its types\\: T$#"
+			message: "#^Class app\\\\repositories\\\\VcsAuthTokenRepository extends generic class Doctrine\\\\ORM\\\\EntityRepository but does not specify its types\\: TEntityClass$#"
 			count: 1
 			path: app/repositories/VcsAuthTokenRepository.php
 
 		-
-			message: "#^Class app\\\\repositories\\\\course\\\\CourseMaterialRepository extends generic class Doctrine\\\\ORM\\\\EntityRepository but does not specify its types\\: T$#"
+			message: "#^Class app\\\\repositories\\\\course\\\\CourseMaterialRepository extends generic class Doctrine\\\\ORM\\\\EntityRepository but does not specify its types\\: TEntityClass$#"
 			count: 1
 			path: app/repositories/course/CourseMaterialRepository.php
 
 		-
-			message: "#^Class app\\\\repositories\\\\email\\\\EmailRepository extends generic class Doctrine\\\\ORM\\\\EntityRepository but does not specify its types\\: T$#"
+			message: "#^Class app\\\\repositories\\\\email\\\\EmailRepository extends generic class Doctrine\\\\ORM\\\\EntityRepository but does not specify its types\\: TEntityClass$#"
 			count: 1
 			path: app/repositories/email/EmailRepository.php
 
@@ -10587,7 +10597,7 @@ parameters:
 			path: app/repositories/email/EmailRepository.php
 
 		-
-			message: "#^Class app\\\\repositories\\\\poll\\\\OptionRepository extends generic class Doctrine\\\\ORM\\\\EntityRepository but does not specify its types\\: T$#"
+			message: "#^Class app\\\\repositories\\\\poll\\\\OptionRepository extends generic class Doctrine\\\\ORM\\\\EntityRepository but does not specify its types\\: TEntityClass$#"
 			count: 1
 			path: app/repositories/poll/OptionRepository.php
 
@@ -10597,7 +10607,7 @@ parameters:
 			path: app/repositories/poll/OptionRepository.php
 
 		-
-			message: "#^Class app\\\\repositories\\\\poll\\\\PollRepository extends generic class Doctrine\\\\ORM\\\\EntityRepository but does not specify its types\\: T$#"
+			message: "#^Class app\\\\repositories\\\\poll\\\\PollRepository extends generic class Doctrine\\\\ORM\\\\EntityRepository but does not specify its types\\: TEntityClass$#"
 			count: 1
 			path: app/repositories/poll/PollRepository.php
 
