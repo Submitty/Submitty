@@ -375,7 +375,7 @@ describe('Test cases involving late day cache updates', () => {
             // Check cache
             cy.visit(['sample', 'late_table']);
 
-            cy.get('td[data-before-content='Event/Assignment']')
+            cy.get('td[data-before-content="Event/Assignment"]')
                 .contains('Late Allowed Homework')
                 .siblings('td[data-before-content='Status']')
                 .contains('Cancelled Submission')
@@ -430,7 +430,7 @@ describe('Test cases involving late day cache updates', () => {
             cy.get(`#deleteme > div > a.fa-trash`).click();
 
             // Confirm delete
-            cy.get('form[name='delete-confirmation']')
+            cy.get('form[name="delete-confirmation"]')
                 .find('input')
                 .contains('Delete')
                 .click();
