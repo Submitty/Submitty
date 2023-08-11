@@ -146,6 +146,12 @@ class Config extends AbstractModel {
     /** @var string */
     protected $default_timezone = 'America/New_York';
     /** @prop
+     * @var Locale */
+    protected $locale;
+    /** @prop
+     * @var string */
+    protected $default_locale = 'en_US';
+    /** @prop
      * @var string */
     protected $submitty_path;
     /** @prop
@@ -348,6 +354,10 @@ class Config extends AbstractModel {
         // For now this will be set to 'MDY', and configured as a property of the Config class
         // Eventually this should be moved to the User class and configured on a per-user basis
         $this->date_time_format = new DateTimeFormat($this->core, 'MDY');
+
+        if ($this->submitty_install_path) {
+            $this->locale = new Locale($this->core, FileUtils::joinPaths($this->submitty_install_path, "site", "cache", "lang"), $this->default_locale);
+        }
     }
 
     public function loadMasterConfigs($config_path) {
@@ -524,6 +534,13 @@ class Config extends AbstractModel {
 
             $this->php_user = $users_json['php_user'];
         }
+
+        if (isset($submitty_json['default_locale'])) {
+            $this->locale = new Locale($this->core, FileUtils::joinPaths($this->submitty_install_path, "site", "cache", "lang"), $submitty_json['default_locale']);
+        }
+        elseif (!isset($this->locale)) {
+            $this->locale = new Locale($this->core, FileUtils::joinPaths($this->submitty_install_path, "site", "cache", "lang"), $this->default_locale);
+        }
     }
 
     public function loadCourseJson($semester, $course, $course_json_path) {
@@ -698,5 +715,9 @@ class Config extends AbstractModel {
                 isset($this->feature_flags[$flag])
                 && $this->feature_flags[$flag] === true
             );
+    }
+
+    public function getLocale(): Locale {
+        return $this->locale;
     }
 }
