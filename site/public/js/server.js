@@ -1396,11 +1396,11 @@ $.fn.isInViewport = function() {                                        // jQuer
 
 function checkSidebarCollapse() {
     if ($(document.body).width() < 1150) {
-        Cookies.set('collapse_sidebar', 'true', { path: '/' });
+        Cookies.set('collapse_sidebar', 'true', { path: '/', sameSite: 'None' });
         $("aside").toggleClass("collapsed", true);
     }
     else{
-        Cookies.set('collapse_sidebar', 'false', { path: '/' });
+        Cookies.set('collapse_sidebar', 'false', { path: '/', sameSite: 'None' });
         $("aside").toggleClass("collapsed", false);
     }
 }
@@ -1449,7 +1449,7 @@ function toggleSidebar() {
     const sidebar = $("aside");
     const shown = sidebar.hasClass("collapsed");
 
-    Cookies.set('collapse_sidebar', !shown, { path: '/' });
+    Cookies.set('collapse_sidebar', !shown, { path: '/', sameSite: 'None' });
     sidebar.toggleClass("collapsed", !shown);
 }
 
