@@ -1,4 +1,4 @@
-import { getCurrentSemester } from '../support/utils.js';
+import { getCurrentSemester } from '../../support/utils.js';
 
 const currentSemester = getCurrentSemester();
 
@@ -6,12 +6,12 @@ function sidebarContains(title, extension, header = title) {
     cy.get('[data-testid="sidebar"]').contains(title).should('have.attr', 'href').and('contain', extension);
     cy.visit(extension);
     cy.get('#main > .content').should('contain', header);
+    cy.get('#main > .content').should('not.contain', 'Server Error');
 }
 
 function baseSidebar() {
     sidebarContains('My Courses', '/home');
     sidebarContains('My Profile', '/user_profile');
-    sidebarContains('Authentication Tokens', '/authentication_tokens');
     sidebarContains('Calendar', '/calendar');
     cy.get('[data-testid="sidebar"]').contains('Collapse Sidebar').should('exist');
     cy.get('[data-testid="sidebar"]').contains('Logout').should('exist');

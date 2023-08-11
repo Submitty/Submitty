@@ -1487,7 +1487,8 @@ class Course(object):
                               endorsed_by=postData[7],
                               resolved = True if postData[8] == "t" else False,
                               type=postData[9],
-                              has_attachment=True if postData[10] != "f" else False)
+                              has_attachment=True if postData[10] != "f" else False,
+                              render_markdown=True if postData[11] == "t" else False)
 
     def add_sample_polls_data(self):
         # set sample course to have polls enabled by default

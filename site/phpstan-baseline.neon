@@ -1367,6 +1367,11 @@ parameters:
 			path: app/controllers/course/CourseMaterialsController.php
 
 		-
+			message: "#^Strict comparison using \\=\\=\\= between array\\<int, app\\\\entities\\\\course\\\\CourseMaterial\\> and null will always evaluate to false\\.$#"
+			count: 1
+			path: app/controllers/course/CourseMaterialsController.php
+
+		-
 			message: "#^Method app\\\\controllers\\\\forum\\\\ForumController\\:\\:addNewCategory\\(\\) has no return type specified\\.$#"
 			count: 1
 			path: app/controllers/forum/ForumController.php
@@ -2342,21 +2347,6 @@ parameters:
 			path: app/controllers/grading/SimpleGraderController.php
 
 		-
-			message: "#^Method app\\\\controllers\\\\grading\\\\popup_refactor\\\\RubricGraderController\\:\\:createMainRubricGraderPage\\(\\) has no return type specified\\.$#"
-			count: 1
-			path: app/controllers/grading/popup_refactor/RubricGraderController.php
-
-		-
-			message: "#^Method app\\\\controllers\\\\grading\\\\popup_refactor\\\\RubricGraderController\\:\\:setCurrentGradeable\\(\\) has no return type specified\\.$#"
-			count: 1
-			path: app/controllers/grading/popup_refactor/RubricGraderController.php
-
-		-
-			message: "#^Method app\\\\controllers\\\\grading\\\\popup_refactor\\\\RubricGraderController\\:\\:setMemberVariables\\(\\) has no return type specified\\.$#"
-			count: 1
-			path: app/controllers/grading/popup_refactor/RubricGraderController.php
-
-		-
 			message: "#^Method app\\\\controllers\\\\pdf\\\\PDFController\\:\\:showGraderPDFEmbedded\\(\\) has no return type specified\\.$#"
 			count: 1
 			path: app/controllers/pdf/PDFController.php
@@ -2721,11 +2711,6 @@ parameters:
 			path: app/controllers/superuser/SuperuserEmailController.php
 
 		-
-			message: "#^Property app\\\\entities\\\\VcsAuthToken\\:\\:\\$expiration type mapping mismatch\\: property can contain DateTime\\|null but database expects DateTimeInterface\\.$#"
-			count: 1
-			path: app/entities/VcsAuthToken.php
-
-		-
 			message: "#^Method app\\\\entities\\\\course\\\\CourseMaterial\\:\\:getSections\\(\\) return type with generic interface Doctrine\\\\Common\\\\Collections\\\\Collection does not specify its types\\: TKey, T$#"
 			count: 1
 			path: app/entities/course/CourseMaterial.php
@@ -2739,11 +2724,6 @@ parameters:
 			message: "#^Property app\\\\entities\\\\course\\\\CourseMaterial\\:\\:\\$sections with generic interface Doctrine\\\\Common\\\\Collections\\\\Collection does not specify its types\\: TKey, T$#"
 			count: 1
 			path: app/entities/course/CourseMaterial.php
-
-		-
-			message: "#^Property app\\\\entities\\\\course\\\\CourseMaterialAccess\\:\\:\\$course_material type mapping mismatch\\: database can contain app\\\\entities\\\\course\\\\CourseMaterial\\|null but property expects app\\\\entities\\\\course\\\\CourseMaterial\\.$#"
-			count: 1
-			path: app/entities/course/CourseMaterialAccess.php
 
 		-
 			message: "#^Method app\\\\entities\\\\db\\\\Table\\:\\:getColumns\\(\\) return type with generic interface Doctrine\\\\Common\\\\Collections\\\\Collection does not specify its types\\: TKey, T$#"
@@ -2777,6 +2757,11 @@ parameters:
 
 		-
 			message: "#^Property app\\\\entities\\\\email\\\\EmailEntity\\:\\:\\$error is never written, only read\\.$#"
+			count: 1
+			path: app/entities/email/EmailEntity.php
+
+		-
+			message: "#^Property app\\\\entities\\\\email\\\\EmailEntity\\:\\:\\$id is unused\\.$#"
 			count: 1
 			path: app/entities/email/EmailEntity.php
 
@@ -2911,17 +2896,7 @@ parameters:
 			path: app/entities/plagiarism/PlagiarismConfig.php
 
 		-
-			message: "#^Property app\\\\entities\\\\plagiarism\\\\PlagiarismConfig\\:\\:\\$ignore_submissions type mapping mismatch\\: property can contain array but database expects array\\<string\\>\\.$#"
-			count: 1
-			path: app/entities/plagiarism/PlagiarismConfig.php
-
-		-
 			message: "#^Property app\\\\entities\\\\plagiarism\\\\PlagiarismConfig\\:\\:\\$other_gradeable_paths type has no value type specified in iterable type array\\.$#"
-			count: 1
-			path: app/entities/plagiarism/PlagiarismConfig.php
-
-		-
-			message: "#^Property app\\\\entities\\\\plagiarism\\\\PlagiarismConfig\\:\\:\\$other_gradeable_paths type mapping mismatch\\: property can contain array but database expects array\\<string\\>\\.$#"
 			count: 1
 			path: app/entities/plagiarism/PlagiarismConfig.php
 
@@ -2936,17 +2911,12 @@ parameters:
 			path: app/entities/plagiarism/PlagiarismConfig.php
 
 		-
-			message: "#^Property app\\\\entities\\\\plagiarism\\\\PlagiarismConfig\\:\\:\\$regex type mapping mismatch\\: property can contain array but database expects array\\<string\\>\\.$#"
-			count: 1
-			path: app/entities/plagiarism/PlagiarismConfig.php
-
-		-
-			message: "#^Property app\\\\entities\\\\plagiarism\\\\PlagiarismRunAccess\\:\\:\\$lichen_run type mapping mismatch\\: database can contain app\\\\entities\\\\plagiarism\\\\PlagiarismConfig\\|null but property expects app\\\\entities\\\\plagiarism\\\\PlagiarismConfig\\.$#"
-			count: 1
-			path: app/entities/plagiarism/PlagiarismRunAccess.php
-
-		-
 			message: "#^Method app\\\\entities\\\\poll\\\\Option\\:\\:getUserResponses\\(\\) return type with generic interface Doctrine\\\\Common\\\\Collections\\\\Collection does not specify its types\\: TKey, T$#"
+			count: 1
+			path: app/entities/poll/Option.php
+
+		-
+			message: "#^Property app\\\\entities\\\\poll\\\\Option\\:\\:\\$id is never written, only read\\.$#"
 			count: 1
 			path: app/entities/poll/Option.php
 
@@ -2977,6 +2947,11 @@ parameters:
 
 		-
 			message: "#^Property app\\\\entities\\\\poll\\\\Poll\\:\\:\\$id has no type specified\\.$#"
+			count: 1
+			path: app/entities/poll/Poll.php
+
+		-
+			message: "#^Property app\\\\entities\\\\poll\\\\Poll\\:\\:\\$id is never written, only read\\.$#"
 			count: 1
 			path: app/entities/poll/Poll.php
 
@@ -3024,6 +2999,11 @@ parameters:
 			message: "#^Property app\\\\entities\\\\poll\\\\Poll\\:\\:\\$status has no type specified\\.$#"
 			count: 1
 			path: app/entities/poll/Poll.php
+
+		-
+			message: "#^Property app\\\\entities\\\\poll\\\\Response\\:\\:\\$id is never written, only read\\.$#"
+			count: 1
+			path: app/entities/poll/Response.php
 
 		-
 			message: "#^Method app\\\\exceptions\\\\BaseException\\:\\:__construct\\(\\) has parameter \\$details with no value type specified in iterable type array\\.$#"
@@ -4231,11 +4211,6 @@ parameters:
 			path: app/libraries/SamlSettings.php
 
 		-
-			message: "#^Property app\\\\libraries\\\\SessionManager\\:\\:\\$session has no type specified\\.$#"
-			count: 1
-			path: app/libraries/SessionManager.php
-
-		-
 			message: "#^Method app\\\\libraries\\\\TokenManager\\:\\:generateSessionToken\\(\\) has parameter \\$persistent with no type specified\\.$#"
 			count: 1
 			path: app/libraries/TokenManager.php
@@ -5381,11 +5356,6 @@ parameters:
 			path: app/libraries/database/DatabaseQueries.php
 
 		-
-			message: "#^Method app\\\\libraries\\\\database\\\\DatabaseQueries\\:\\:getAverageForGradeable\\(\\) has parameter \\$override with no type specified\\.$#"
-			count: 1
-			path: app/libraries/database/DatabaseQueries.php
-
-		-
 			message: "#^Method app\\\\libraries\\\\database\\\\DatabaseQueries\\:\\:getAverageForGradeable\\(\\) has parameter \\$section_key with no type specified\\.$#"
 			count: 1
 			path: app/libraries/database/DatabaseQueries.php
@@ -6271,11 +6241,6 @@ parameters:
 			path: app/libraries/database/DatabaseQueries.php
 
 		-
-			message: "#^Method app\\\\libraries\\\\database\\\\DatabaseQueries\\:\\:getSession\\(\\) return type has no value type specified in iterable type array\\.$#"
-			count: 1
-			path: app/libraries/database/DatabaseQueries.php
-
-		-
 			message: "#^Method app\\\\libraries\\\\database\\\\DatabaseQueries\\:\\:getSimilarNumericIdMatches\\(\\) return type has no value type specified in iterable type array\\.$#"
 			count: 1
 			path: app/libraries/database/DatabaseQueries.php
@@ -6851,11 +6816,6 @@ parameters:
 			path: app/libraries/database/DatabaseQueries.php
 
 		-
-			message: "#^Method app\\\\libraries\\\\database\\\\DatabaseQueries\\:\\:newSession\\(\\) has no return type specified\\.$#"
-			count: 1
-			path: app/libraries/database/DatabaseQueries.php
-
-		-
 			message: "#^Method app\\\\libraries\\\\database\\\\DatabaseQueries\\:\\:openQueue\\(\\) has no return type specified\\.$#"
 			count: 1
 			path: app/libraries/database/DatabaseQueries.php
@@ -6912,11 +6872,6 @@ parameters:
 
 		-
 			message: "#^Method app\\\\libraries\\\\database\\\\DatabaseQueries\\:\\:removePeerAssignmentsForGrader\\(\\) has no return type specified\\.$#"
-			count: 1
-			path: app/libraries/database/DatabaseQueries.php
-
-		-
-			message: "#^Method app\\\\libraries\\\\database\\\\DatabaseQueries\\:\\:removeSessionById\\(\\) has no return type specified\\.$#"
 			count: 1
 			path: app/libraries/database/DatabaseQueries.php
 
@@ -7192,11 +7147,6 @@ parameters:
 
 		-
 			message: "#^Method app\\\\libraries\\\\database\\\\DatabaseQueries\\:\\:updateSeekingTeamMessageById\\(\\) has no return type specified\\.$#"
-			count: 1
-			path: app/libraries/database/DatabaseQueries.php
-
-		-
-			message: "#^Method app\\\\libraries\\\\database\\\\DatabaseQueries\\:\\:updateSessionExpiration\\(\\) has no return type specified\\.$#"
 			count: 1
 			path: app/libraries/database/DatabaseQueries.php
 
@@ -7723,11 +7673,6 @@ parameters:
 
 		-
 			message: "#^Method app\\\\models\\\\CalendarInfo\\:\\:getColors\\(\\) return type has no value type specified in iterable type array\\.$#"
-			count: 1
-			path: app/models/CalendarInfo.php
-
-		-
-			message: "#^Method app\\\\models\\\\CalendarInfo\\:\\:getItemsByDate\\(\\) return type has no value type specified in iterable type array\\.$#"
 			count: 1
 			path: app/models/CalendarInfo.php
 
@@ -12237,17 +12182,22 @@ parameters:
 			path: app/models/notebook/UserSpecificNotebook.php
 
 		-
-			message: "#^Class app\\\\repositories\\\\VcsAuthTokenRepository extends generic class Doctrine\\\\ORM\\\\EntityRepository but does not specify its types\\: TEntityClass$#"
+			message: "#^Class app\\\\repositories\\\\SessionRepository extends generic class Doctrine\\\\ORM\\\\EntityRepository but does not specify its types\\: T$#"
+			count: 1
+			path: app/repositories/SessionRepository.php
+
+		-
+			message: "#^Class app\\\\repositories\\\\VcsAuthTokenRepository extends generic class Doctrine\\\\ORM\\\\EntityRepository but does not specify its types\\: T$#"
 			count: 1
 			path: app/repositories/VcsAuthTokenRepository.php
 
 		-
-			message: "#^Class app\\\\repositories\\\\course\\\\CourseMaterialRepository extends generic class Doctrine\\\\ORM\\\\EntityRepository but does not specify its types\\: TEntityClass$#"
+			message: "#^Class app\\\\repositories\\\\course\\\\CourseMaterialRepository extends generic class Doctrine\\\\ORM\\\\EntityRepository but does not specify its types\\: T$#"
 			count: 1
 			path: app/repositories/course/CourseMaterialRepository.php
 
 		-
-			message: "#^Class app\\\\repositories\\\\email\\\\EmailRepository extends generic class Doctrine\\\\ORM\\\\EntityRepository but does not specify its types\\: TEntityClass$#"
+			message: "#^Class app\\\\repositories\\\\email\\\\EmailRepository extends generic class Doctrine\\\\ORM\\\\EntityRepository but does not specify its types\\: T$#"
 			count: 1
 			path: app/repositories/email/EmailRepository.php
 
@@ -12297,7 +12247,7 @@ parameters:
 			path: app/repositories/email/EmailRepository.php
 
 		-
-			message: "#^Class app\\\\repositories\\\\poll\\\\OptionRepository extends generic class Doctrine\\\\ORM\\\\EntityRepository but does not specify its types\\: TEntityClass$#"
+			message: "#^Class app\\\\repositories\\\\poll\\\\OptionRepository extends generic class Doctrine\\\\ORM\\\\EntityRepository but does not specify its types\\: T$#"
 			count: 1
 			path: app/repositories/poll/OptionRepository.php
 
@@ -12307,7 +12257,7 @@ parameters:
 			path: app/repositories/poll/OptionRepository.php
 
 		-
-			message: "#^Class app\\\\repositories\\\\poll\\\\PollRepository extends generic class Doctrine\\\\ORM\\\\EntityRepository but does not specify its types\\: TEntityClass$#"
+			message: "#^Class app\\\\repositories\\\\poll\\\\PollRepository extends generic class Doctrine\\\\ORM\\\\EntityRepository but does not specify its types\\: T$#"
 			count: 1
 			path: app/repositories/poll/PollRepository.php
 
@@ -13827,6 +13777,16 @@ parameters:
 			path: app/views/grading/ElectronicGraderView.php
 
 		-
+			message: "#^Method app\\\\views\\\\grading\\\\ElectronicGraderView\\:\\:detailsPage\\(\\) has parameter \\$inquiry_status with no type specified\\.$#"
+			count: 1
+			path: app/views/grading/ElectronicGraderView.php
+			
+		-
+			message: "#^Method app\\\\views\\\\grading\\\\ElectronicGraderView\\:\\:detailsPage\\(\\) has parameter \\$inquiry_only with no type specified\\.$#"
+			count: 1
+			path: app/views/grading/ElectronicGraderView.php
+
+		-
 			message: "#^Method app\\\\views\\\\grading\\\\ElectronicGraderView\\:\\:detailsPage\\(\\) has parameter \\$direction with no type specified\\.$#"
 			count: 1
 			path: app/views/grading/ElectronicGraderView.php
@@ -13878,11 +13838,6 @@ parameters:
 
 		-
 			message: "#^Method app\\\\views\\\\grading\\\\ElectronicGraderView\\:\\:hwGradingPage\\(\\) has parameter \\$from with no type specified\\.$#"
-			count: 1
-			path: app/views/grading/ElectronicGraderView.php
-
-		-
-			message: "#^Method app\\\\views\\\\grading\\\\ElectronicGraderView\\:\\:hwGradingPage\\(\\) has parameter \\$rollbackSubmission with no type specified\\.$#"
 			count: 1
 			path: app/views/grading/ElectronicGraderView.php
 
@@ -14007,27 +13962,7 @@ parameters:
 			path: app/views/grading/ElectronicGraderView.php
 
 		-
-			message: "#^Method app\\\\views\\\\grading\\\\ElectronicGraderView\\:\\:statusPage\\(\\) has no return type specified\\.$#"
-			count: 1
-			path: app/views/grading/ElectronicGraderView.php
-
-		-
-			message: "#^Method app\\\\views\\\\grading\\\\ElectronicGraderView\\:\\:statusPage\\(\\) has parameter \\$autograded_average with no type specified\\.$#"
-			count: 1
-			path: app/views/grading/ElectronicGraderView.php
-
-		-
-			message: "#^Method app\\\\views\\\\grading\\\\ElectronicGraderView\\:\\:statusPage\\(\\) has parameter \\$component_averages with no value type specified in iterable type array\\.$#"
-			count: 1
-			path: app/views/grading/ElectronicGraderView.php
-
-		-
 			message: "#^Method app\\\\views\\\\grading\\\\ElectronicGraderView\\:\\:statusPage\\(\\) has parameter \\$histogram_data with no type specified\\.$#"
-			count: 1
-			path: app/views/grading/ElectronicGraderView.php
-
-		-
-			message: "#^Method app\\\\views\\\\grading\\\\ElectronicGraderView\\:\\:statusPage\\(\\) has parameter \\$overall_average with no type specified\\.$#"
 			count: 1
 			path: app/views/grading/ElectronicGraderView.php
 
@@ -14097,21 +14032,6 @@ parameters:
 			path: app/views/grading/SimpleGraderView.php
 
 		-
-			message: "#^Method app\\\\views\\\\grading\\\\popup_refactor\\\\RubricGraderView\\:\\:createBreadcrumbHeader\\(\\) has no return type specified\\.$#"
-			count: 1
-			path: app/views/grading/popup_refactor/RubricGraderView.php
-
-		-
-			message: "#^Method app\\\\views\\\\grading\\\\popup_refactor\\\\RubricGraderView\\:\\:createRubricGradeableView\\(\\) has no return type specified\\.$#"
-			count: 1
-			path: app/views/grading/popup_refactor/RubricGraderView.php
-
-		-
-			message: "#^Method app\\\\views\\\\grading\\\\popup_refactor\\\\RubricGraderView\\:\\:setMemberVariables\\(\\) has no return type specified\\.$#"
-			count: 1
-			path: app/views/grading/popup_refactor/RubricGraderView.php
-
-		-
 			message: "#^Method app\\\\views\\\\submission\\\\HomeworkView\\:\\:removeLowConfidenceDigits\\(\\) has no return type specified\\.$#"
 			count: 1
 			path: app/views/submission/HomeworkView.php
@@ -14133,11 +14053,6 @@ parameters:
 
 		-
 			message: "#^Method app\\\\views\\\\submission\\\\HomeworkView\\:\\:renderSubmissionsClosedBox\\(\\) has no return type specified\\.$#"
-			count: 1
-			path: app/views/submission/HomeworkView.php
-
-		-
-			message: "#^Method class@anonymous/app/views/submission/HomeworkView\\.php\\:522\\:\\:getRandomIndices\\(\\) return type has no value type specified in iterable type array\\.$#"
 			count: 1
 			path: app/views/submission/HomeworkView.php
 
