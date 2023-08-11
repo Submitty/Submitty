@@ -425,6 +425,15 @@ class RainbowCustomization extends AbstractModel {
     }
 
     /**
+     * Get display description
+     * @return array<string>  array of display description
+     */
+    public function getDisplayDescription(): array {
+        $retArray = RainbowCustomizationJSON::allowed_display_description;
+        return $retArray;
+    }
+
+    /**
      * Get section ids and labels
      *
      * If no customization.json file exists then this function will generate defaults
