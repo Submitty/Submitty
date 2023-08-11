@@ -138,6 +138,17 @@ class DatabaseQueries {
     }
 
     /**
+     * Update a user's preferred locale in the master database.
+     *
+     * @param User $user The user object to modify
+     * @param string $locale The locale string to set it to, must be one of Core::getSupportedLocales()
+     * @return bool Whether the operation was successful
+     */
+    public function updateSubmittyUserPreferredLocale(User $user, string|null $locale): bool {
+        return $this->submitty_db->query("UPDATE users SET user_preferred_locale=? WHERE user_id=?", [$locale, $user->getId()]);
+    }
+
+    /**
      * Gets a user from the database given a user_id.
      *
      * @param string $user_id

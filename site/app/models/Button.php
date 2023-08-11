@@ -38,36 +38,51 @@ use app\libraries\Core;
  * @method void setIcon(string|null $icon)
  */
 class Button extends AbstractModel {
-    /** @prop @var string|null $title */
+    /** @prop
+     * @var string|null $title */
     protected $title;
-    /** @prop @var string|null $subtitle */
+    /** @prop
+     * @var string|null $subtitle */
     protected $subtitle;
-    /** @prop @var \DateTime|null A DateTime object representing the time for this Button.  For example if this was a
+    /** @prop
+     * @var \DateTime|null A DateTime object representing the time for this Button.  For example if this was a
      * grade button then $date may represent the date and time grading begins or ends */
     protected $date;
-    /** @prop @var string|null $href */
+    /** @prop
+     * @var string|null $href */
     protected $href;
-    /** @prop @var string|null $onclick */
+    /** @prop
+     * @var string|null $onclick */
     protected $onclick;
-    /** @prop @var string $class */
+    /** @prop
+     * @var string $class */
     protected $class;
-    /** @prop @var string|null $id */
+    /** @prop
+     * @var string|null $id */
     protected $id;
-    /** @prop @var bool $disabled */
+    /** @prop
+     * @var bool $disabled */
     protected $disabled;
-    /** @prop @var string $prerequisite */
+    /** @prop
+     * @var string $prerequisite */
     protected $prerequisite;
-    /** @prop @var float|null $progress */
+    /** @prop
+     * @var float|null $progress */
     protected $progress;
-    /** @prop @var bool $title_on_hover */
+    /** @prop
+     * @var bool $title_on_hover */
     protected $title_on_hover;
-    /** @prop @var string|null $aria_label */
+    /** @prop
+     * @var string|null $aria_label */
     protected $aria_label;
-    /** @prop @var string|null $badge */
+    /** @prop
+     * @var string|null $badge */
     protected $badge;
-    /** @prop @var string|null $icon */
+    /** @prop
+     * @var string|null $icon */
     protected $icon;
-     /** @prop @var string|null $prefix */
+    /** @prop
+     * @var string|null $prefix */
     protected $prefix;
 
     /**

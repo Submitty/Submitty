@@ -23,7 +23,8 @@ class GradedComponentContainer extends AbstractModel {
     /** @var TaGradedGradeable The TaGradedGradeable all grades belong to */
     private $ta_graded_gradeable = null;
 
-    /** @prop @var GradedComponent[] The graded components for this Component */
+    /** @prop
+     * @var GradedComponent[] The graded components for this Component */
     protected $graded_components = [];
 
     /**
