@@ -46,6 +46,7 @@
     "php-mock/php-mock-phpunit": "2.7.2",
     "phpstan/phpstan": "1.10.28",
     "phpstan/phpstan-deprecation-rules": "1.1.4",
+    "phpstan/phpstan-doctrine": "1.3.42",
     "phpunit/phpunit": "9.6.9",
     "submitty/php-codesniffer": "2.5.0"
   },
