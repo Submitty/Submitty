@@ -1367,11 +1367,6 @@ parameters:
 			path: app/controllers/course/CourseMaterialsController.php
 
 		-
-			message: "#^Strict comparison using \\=\\=\\= between array\\<int, app\\\\entities\\\\course\\\\CourseMaterial\\> and null will always evaluate to false\\.$#"
-			count: 1
-			path: app/controllers/course/CourseMaterialsController.php
-
-		-
 			message: "#^Method app\\\\controllers\\\\forum\\\\ForumController\\:\\:addNewCategory\\(\\) has no return type specified\\.$#"
 			count: 1
 			path: app/controllers/forum/ForumController.php
@@ -2711,6 +2706,16 @@ parameters:
 			path: app/controllers/superuser/SuperuserEmailController.php
 
 		-
+			message: "#^Property app\\\\entities\\\\Session\\:\\:\\$session_created type mapping mismatch\\: property can contain DateTime\\|null but database expects DateTimeInterface\\.$#"
+			count: 1
+			path: app/entities/Session.php
+
+		-
+			message: "#^Property app\\\\entities\\\\VcsAuthToken\\:\\:\\$expiration type mapping mismatch\\: property can contain DateTime\\|null but database expects DateTimeInterface\\.$#"
+			count: 1
+			path: app/entities/VcsAuthToken.php
+
+		-
 			message: "#^Method app\\\\entities\\\\course\\\\CourseMaterial\\:\\:getSections\\(\\) return type with generic interface Doctrine\\\\Common\\\\Collections\\\\Collection does not specify its types\\: TKey, T$#"
 			count: 1
 			path: app/entities/course/CourseMaterial.php
@@ -2724,6 +2729,11 @@ parameters:
 			message: "#^Property app\\\\entities\\\\course\\\\CourseMaterial\\:\\:\\$sections with generic interface Doctrine\\\\Common\\\\Collections\\\\Collection does not specify its types\\: TKey, T$#"
 			count: 1
 			path: app/entities/course/CourseMaterial.php
+
+		-
+			message: "#^Property app\\\\entities\\\\course\\\\CourseMaterialAccess\\:\\:\\$course_material type mapping mismatch\\: database can contain app\\\\entities\\\\course\\\\CourseMaterial\\|null but property expects app\\\\entities\\\\course\\\\CourseMaterial\\.$#"
+			count: 1
+			path: app/entities/course/CourseMaterialAccess.php
 
 		-
 			message: "#^Method app\\\\entities\\\\db\\\\Table\\:\\:getColumns\\(\\) return type with generic interface Doctrine\\\\Common\\\\Collections\\\\Collection does not specify its types\\: TKey, T$#"
@@ -2757,11 +2767,6 @@ parameters:
 
 		-
 			message: "#^Property app\\\\entities\\\\email\\\\EmailEntity\\:\\:\\$error is never written, only read\\.$#"
-			count: 1
-			path: app/entities/email/EmailEntity.php
-
-		-
-			message: "#^Property app\\\\entities\\\\email\\\\EmailEntity\\:\\:\\$id is unused\\.$#"
 			count: 1
 			path: app/entities/email/EmailEntity.php
 
@@ -2896,7 +2901,17 @@ parameters:
 			path: app/entities/plagiarism/PlagiarismConfig.php
 
 		-
+			message: "#^Property app\\\\entities\\\\plagiarism\\\\PlagiarismConfig\\:\\:\\$ignore_submissions type mapping mismatch\\: property can contain array but database expects array\\<string\\>\\.$#"
+			count: 1
+			path: app/entities/plagiarism/PlagiarismConfig.php
+
+		-
 			message: "#^Property app\\\\entities\\\\plagiarism\\\\PlagiarismConfig\\:\\:\\$other_gradeable_paths type has no value type specified in iterable type array\\.$#"
+			count: 1
+			path: app/entities/plagiarism/PlagiarismConfig.php
+
+		-
+			message: "#^Property app\\\\entities\\\\plagiarism\\\\PlagiarismConfig\\:\\:\\$other_gradeable_paths type mapping mismatch\\: property can contain array but database expects array\\<string\\>\\.$#"
 			count: 1
 			path: app/entities/plagiarism/PlagiarismConfig.php
 
@@ -2911,12 +2926,17 @@ parameters:
 			path: app/entities/plagiarism/PlagiarismConfig.php
 
 		-
-			message: "#^Method app\\\\entities\\\\poll\\\\Option\\:\\:getUserResponses\\(\\) return type with generic interface Doctrine\\\\Common\\\\Collections\\\\Collection does not specify its types\\: TKey, T$#"
+			message: "#^Property app\\\\entities\\\\plagiarism\\\\PlagiarismConfig\\:\\:\\$regex type mapping mismatch\\: property can contain array but database expects array\\<string\\>\\.$#"
 			count: 1
-			path: app/entities/poll/Option.php
+			path: app/entities/plagiarism/PlagiarismConfig.php
 
 		-
-			message: "#^Property app\\\\entities\\\\poll\\\\Option\\:\\:\\$id is never written, only read\\.$#"
+			message: "#^Property app\\\\entities\\\\plagiarism\\\\PlagiarismRunAccess\\:\\:\\$lichen_run type mapping mismatch\\: database can contain app\\\\entities\\\\plagiarism\\\\PlagiarismConfig\\|null but property expects app\\\\entities\\\\plagiarism\\\\PlagiarismConfig\\.$#"
+			count: 1
+			path: app/entities/plagiarism/PlagiarismRunAccess.php
+
+		-
+			message: "#^Method app\\\\entities\\\\poll\\\\Option\\:\\:getUserResponses\\(\\) return type with generic interface Doctrine\\\\Common\\\\Collections\\\\Collection does not specify its types\\: TKey, T$#"
 			count: 1
 			path: app/entities/poll/Option.php
 
@@ -2947,11 +2967,6 @@ parameters:
 
 		-
 			message: "#^Property app\\\\entities\\\\poll\\\\Poll\\:\\:\\$id has no type specified\\.$#"
-			count: 1
-			path: app/entities/poll/Poll.php
-
-		-
-			message: "#^Property app\\\\entities\\\\poll\\\\Poll\\:\\:\\$id is never written, only read\\.$#"
 			count: 1
 			path: app/entities/poll/Poll.php
 
@@ -2999,11 +3014,6 @@ parameters:
 			message: "#^Property app\\\\entities\\\\poll\\\\Poll\\:\\:\\$status has no type specified\\.$#"
 			count: 1
 			path: app/entities/poll/Poll.php
-
-		-
-			message: "#^Property app\\\\entities\\\\poll\\\\Response\\:\\:\\$id is never written, only read\\.$#"
-			count: 1
-			path: app/entities/poll/Response.php
 
 		-
 			message: "#^Method app\\\\exceptions\\\\BaseException\\:\\:__construct\\(\\) has parameter \\$details with no value type specified in iterable type array\\.$#"
@@ -7552,11 +7562,6 @@ parameters:
 			path: app/models/AbstractModel.php
 
 		-
-			message: "#^Property app\\\\models\\\\AbstractModel\\:\\:\\$modified has no type specified\\.$#"
-			count: 1
-			path: app/models/AbstractModel.php
-
-		-
 			message: "#^Property app\\\\models\\\\AbstractModel\\:\\:\\$properties has no type specified\\.$#"
 			count: 1
 			path: app/models/AbstractModel.php
@@ -7572,102 +7577,17 @@ parameters:
 			path: app/models/Breadcrumb.php
 
 		-
-			message: "#^Property app\\\\models\\\\Breadcrumb\\:\\:\\$external_url has no type specified\\.$#"
+			message: "#^Property app\\\\models\\\\Breadcrumb\\:\\:\\$external_url \\(string\\|null\\) does not accept default value of type false\\.$#"
 			count: 1
 			path: app/models/Breadcrumb.php
 
 		-
-			message: "#^Property app\\\\models\\\\Breadcrumb\\:\\:\\$title has no type specified\\.$#"
-			count: 1
-			path: app/models/Breadcrumb.php
-
-		-
-			message: "#^Property app\\\\models\\\\Breadcrumb\\:\\:\\$url has no type specified\\.$#"
-			count: 1
-			path: app/models/Breadcrumb.php
-
-		-
-			message: "#^Property app\\\\models\\\\Breadcrumb\\:\\:\\$use_as_heading has no type specified\\.$#"
+			message: "#^Property app\\\\models\\\\Breadcrumb\\:\\:\\$use_as_heading \\(string\\|null\\) does not accept default value of type false\\.$#"
 			count: 1
 			path: app/models/Breadcrumb.php
 
 		-
 			message: "#^Method app\\\\models\\\\Button\\:\\:__construct\\(\\) has parameter \\$details with no value type specified in iterable type array\\.$#"
-			count: 1
-			path: app/models/Button.php
-
-		-
-			message: "#^Property app\\\\models\\\\Button\\:\\:\\$aria_label has no type specified\\.$#"
-			count: 1
-			path: app/models/Button.php
-
-		-
-			message: "#^Property app\\\\models\\\\Button\\:\\:\\$badge has no type specified\\.$#"
-			count: 1
-			path: app/models/Button.php
-
-		-
-			message: "#^Property app\\\\models\\\\Button\\:\\:\\$class has no type specified\\.$#"
-			count: 1
-			path: app/models/Button.php
-
-		-
-			message: "#^Property app\\\\models\\\\Button\\:\\:\\$date has no type specified\\.$#"
-			count: 1
-			path: app/models/Button.php
-
-		-
-			message: "#^Property app\\\\models\\\\Button\\:\\:\\$disabled has no type specified\\.$#"
-			count: 1
-			path: app/models/Button.php
-
-		-
-			message: "#^Property app\\\\models\\\\Button\\:\\:\\$href has no type specified\\.$#"
-			count: 1
-			path: app/models/Button.php
-
-		-
-			message: "#^Property app\\\\models\\\\Button\\:\\:\\$icon has no type specified\\.$#"
-			count: 1
-			path: app/models/Button.php
-
-		-
-			message: "#^Property app\\\\models\\\\Button\\:\\:\\$id has no type specified\\.$#"
-			count: 1
-			path: app/models/Button.php
-
-		-
-			message: "#^Property app\\\\models\\\\Button\\:\\:\\$onclick has no type specified\\.$#"
-			count: 1
-			path: app/models/Button.php
-
-		-
-			message: "#^Property app\\\\models\\\\Button\\:\\:\\$prefix has no type specified\\.$#"
-			count: 1
-			path: app/models/Button.php
-
-		-
-			message: "#^Property app\\\\models\\\\Button\\:\\:\\$prerequisite has no type specified\\.$#"
-			count: 1
-			path: app/models/Button.php
-
-		-
-			message: "#^Property app\\\\models\\\\Button\\:\\:\\$progress has no type specified\\.$#"
-			count: 1
-			path: app/models/Button.php
-
-		-
-			message: "#^Property app\\\\models\\\\Button\\:\\:\\$subtitle has no type specified\\.$#"
-			count: 1
-			path: app/models/Button.php
-
-		-
-			message: "#^Property app\\\\models\\\\Button\\:\\:\\$title has no type specified\\.$#"
-			count: 1
-			path: app/models/Button.php
-
-		-
-			message: "#^Property app\\\\models\\\\Button\\:\\:\\$title_on_hover has no type specified\\.$#"
 			count: 1
 			path: app/models/Button.php
 
@@ -7782,147 +7702,22 @@ parameters:
 			path: app/models/Config.php
 
 		-
-			message: "#^Property app\\\\models\\\\Config\\:\\:\\$authentication has no type specified\\.$#"
+			message: "#^Property app\\\\models\\\\Config\\:\\:\\$course_database_params type has no value type specified in iterable type array\\.$#"
 			count: 1
 			path: app/models/Config.php
 
 		-
-			message: "#^Property app\\\\models\\\\Config\\:\\:\\$auto_rainbow_grades has no type specified\\.$#"
+			message: "#^Property app\\\\models\\\\Config\\:\\:\\$course_json type has no value type specified in iterable type array\\.$#"
 			count: 1
 			path: app/models/Config.php
 
 		-
-			message: "#^Property app\\\\models\\\\Config\\:\\:\\$base_url has no type specified\\.$#"
+			message: "#^Property app\\\\models\\\\Config\\:\\:\\$feature_flags type has no value type specified in iterable type array\\.$#"
 			count: 1
 			path: app/models/Config.php
 
 		-
-			message: "#^Property app\\\\models\\\\Config\\:\\:\\$cgi_tmp_path has no type specified\\.$#"
-			count: 1
-			path: app/models/Config.php
-
-		-
-			message: "#^Property app\\\\models\\\\Config\\:\\:\\$cgi_url has no type specified\\.$#"
-			count: 1
-			path: app/models/Config.php
-
-		-
-			message: "#^Property app\\\\models\\\\Config\\:\\:\\$config_path has no type specified\\.$#"
-			count: 1
-			path: app/models/Config.php
-
-		-
-			message: "#^Property app\\\\models\\\\Config\\:\\:\\$course has no type specified\\.$#"
-			count: 1
-			path: app/models/Config.php
-
-		-
-			message: "#^Property app\\\\models\\\\Config\\:\\:\\$course_database_params has no type specified\\.$#"
-			count: 1
-			path: app/models/Config.php
-
-		-
-			message: "#^Property app\\\\models\\\\Config\\:\\:\\$course_email has no type specified\\.$#"
-			count: 1
-			path: app/models/Config.php
-
-		-
-			message: "#^Property app\\\\models\\\\Config\\:\\:\\$course_home_url has no type specified\\.$#"
-			count: 1
-			path: app/models/Config.php
-
-		-
-			message: "#^Property app\\\\models\\\\Config\\:\\:\\$course_json has no type specified\\.$#"
-			count: 1
-			path: app/models/Config.php
-
-		-
-			message: "#^Property app\\\\models\\\\Config\\:\\:\\$course_json_path has no type specified\\.$#"
-			count: 1
-			path: app/models/Config.php
-
-		-
-			message: "#^Property app\\\\models\\\\Config\\:\\:\\$course_name has no type specified\\.$#"
-			count: 1
-			path: app/models/Config.php
-
-		-
-			message: "#^Property app\\\\models\\\\Config\\:\\:\\$course_path has no type specified\\.$#"
-			count: 1
-			path: app/models/Config.php
-
-		-
-			message: "#^Property app\\\\models\\\\Config\\:\\:\\$database_driver has no type specified\\.$#"
-			count: 1
-			path: app/models/Config.php
-
-		-
-			message: "#^Property app\\\\models\\\\Config\\:\\:\\$date_time_format has no type specified\\.$#"
-			count: 1
-			path: app/models/Config.php
-
-		-
-			message: "#^Property app\\\\models\\\\Config\\:\\:\\$default_hw_late_days has no type specified\\.$#"
-			count: 1
-			path: app/models/Config.php
-
-		-
-			message: "#^Property app\\\\models\\\\Config\\:\\:\\$default_student_late_days has no type specified\\.$#"
-			count: 1
-			path: app/models/Config.php
-
-		-
-			message: "#^Property app\\\\models\\\\Config\\:\\:\\$display_custom_message has no type specified\\.$#"
-			count: 1
-			path: app/models/Config.php
-
-		-
-			message: "#^Property app\\\\models\\\\Config\\:\\:\\$display_rainbow_grades_summary has no type specified\\.$#"
-			count: 1
-			path: app/models/Config.php
-
-		-
-			message: "#^Property app\\\\models\\\\Config\\:\\:\\$duck_banner_enabled has no type specified\\.$#"
-			count: 1
-			path: app/models/Config.php
-
-		-
-			message: "#^Property app\\\\models\\\\Config\\:\\:\\$email_enabled has no type specified\\.$#"
-			count: 1
-			path: app/models/Config.php
-
-		-
-			message: "#^Property app\\\\models\\\\Config\\:\\:\\$feature_flags has no type specified\\.$#"
-			count: 1
-			path: app/models/Config.php
-
-		-
-			message: "#^Property app\\\\models\\\\Config\\:\\:\\$forum_create_thread_message has no type specified\\.$#"
-			count: 1
-			path: app/models/Config.php
-
-		-
-			message: "#^Property app\\\\models\\\\Config\\:\\:\\$forum_enabled has no type specified\\.$#"
-			count: 1
-			path: app/models/Config.php
-
-		-
-			message: "#^Property app\\\\models\\\\Config\\:\\:\\$grade_inquiry_message has no type specified\\.$#"
-			count: 1
-			path: app/models/Config.php
-
-		-
-			message: "#^Property app\\\\models\\\\Config\\:\\:\\$hidden_details has no type specified\\.$#"
-			count: 1
-			path: app/models/Config.php
-
-		-
-			message: "#^Property app\\\\models\\\\Config\\:\\:\\$latest_commit has no type specified\\.$#"
-			count: 1
-			path: app/models/Config.php
-
-		-
-			message: "#^Property app\\\\models\\\\Config\\:\\:\\$latest_tag has no type specified\\.$#"
+			message: "#^Property app\\\\models\\\\Config\\:\\:\\$hidden_details type has no value type specified in iterable type array\\.$#"
 			count: 1
 			path: app/models/Config.php
 
@@ -7932,142 +7727,27 @@ parameters:
 			path: app/models/Config.php
 
 		-
-			message: "#^Property app\\\\models\\\\Config\\:\\:\\$log_exceptions has no type specified\\.$#"
+			message: "#^Property app\\\\models\\\\Config\\:\\:\\$saml_options type has no value type specified in iterable type array\\.$#"
 			count: 1
 			path: app/models/Config.php
 
 		-
-			message: "#^Property app\\\\models\\\\Config\\:\\:\\$php_user has no type specified\\.$#"
+			message: "#^Property app\\\\models\\\\Config\\:\\:\\$submitty_database_params type has no value type specified in iterable type array\\.$#"
 			count: 1
 			path: app/models/Config.php
 
 		-
-			message: "#^Property app\\\\models\\\\Config\\:\\:\\$polls_enabled has no type specified\\.$#"
+			message: "#^Property app\\\\models\\\\Config\\:\\:\\$timezone \\(app\\\\models\\\\DateTimeZone\\) does not accept DateTimeZone\\.$#"
+			count: 2
+			path: app/models/Config.php
+
+		-
+			message: "#^Property app\\\\models\\\\Config\\:\\:\\$timezone has unknown class app\\\\models\\\\DateTimeZone as its type\\.$#"
 			count: 1
 			path: app/models/Config.php
 
 		-
-			message: "#^Property app\\\\models\\\\Config\\:\\:\\$private_repository has no type specified\\.$#"
-			count: 1
-			path: app/models/Config.php
-
-		-
-			message: "#^Property app\\\\models\\\\Config\\:\\:\\$queue_announcement_message has no type specified\\.$#"
-			count: 1
-			path: app/models/Config.php
-
-		-
-			message: "#^Property app\\\\models\\\\Config\\:\\:\\$queue_enabled has no type specified\\.$#"
-			count: 1
-			path: app/models/Config.php
-
-		-
-			message: "#^Property app\\\\models\\\\Config\\:\\:\\$queue_message has no type specified\\.$#"
-			count: 1
-			path: app/models/Config.php
-
-		-
-			message: "#^Property app\\\\models\\\\Config\\:\\:\\$room_seating_gradeable_id has no type specified\\.$#"
-			count: 1
-			path: app/models/Config.php
-
-		-
-			message: "#^Property app\\\\models\\\\Config\\:\\:\\$saml_options has no type specified\\.$#"
-			count: 1
-			path: app/models/Config.php
-
-		-
-			message: "#^Property app\\\\models\\\\Config\\:\\:\\$seating_only_for_instructor has no type specified\\.$#"
-			count: 1
-			path: app/models/Config.php
-
-		-
-			message: "#^Property app\\\\models\\\\Config\\:\\:\\$secret_session has no type specified\\.$#"
-			count: 1
-			path: app/models/Config.php
-
-		-
-			message: "#^Property app\\\\models\\\\Config\\:\\:\\$seek_message_enabled has no type specified\\.$#"
-			count: 1
-			path: app/models/Config.php
-
-		-
-			message: "#^Property app\\\\models\\\\Config\\:\\:\\$seek_message_instructions has no type specified\\.$#"
-			count: 1
-			path: app/models/Config.php
-
-		-
-			message: "#^Property app\\\\models\\\\Config\\:\\:\\$submitty_database_params has no type specified\\.$#"
-			count: 1
-			path: app/models/Config.php
-
-		-
-			message: "#^Property app\\\\models\\\\Config\\:\\:\\$submitty_install_path has no type specified\\.$#"
-			count: 1
-			path: app/models/Config.php
-
-		-
-			message: "#^Property app\\\\models\\\\Config\\:\\:\\$submitty_log_path has no type specified\\.$#"
-			count: 1
-			path: app/models/Config.php
-
-		-
-			message: "#^Property app\\\\models\\\\Config\\:\\:\\$submitty_path has no type specified\\.$#"
-			count: 1
-			path: app/models/Config.php
-
-		-
-			message: "#^Property app\\\\models\\\\Config\\:\\:\\$system_message has no type specified\\.$#"
-			count: 1
-			path: app/models/Config.php
-
-		-
-			message: "#^Property app\\\\models\\\\Config\\:\\:\\$term has no type specified\\.$#"
-			count: 1
-			path: app/models/Config.php
-
-		-
-			message: "#^Property app\\\\models\\\\Config\\:\\:\\$timezone has no type specified\\.$#"
-			count: 1
-			path: app/models/Config.php
-
-		-
-			message: "#^Property app\\\\models\\\\Config\\:\\:\\$upload_message has no type specified\\.$#"
-			count: 1
-			path: app/models/Config.php
-
-		-
-			message: "#^Property app\\\\models\\\\Config\\:\\:\\$vcs_base_url has no type specified\\.$#"
-			count: 1
-			path: app/models/Config.php
-
-		-
-			message: "#^Property app\\\\models\\\\Config\\:\\:\\$vcs_type has no type specified\\.$#"
-			count: 1
-			path: app/models/Config.php
-
-		-
-			message: "#^Property app\\\\models\\\\Config\\:\\:\\$vcs_url has no type specified\\.$#"
-			count: 1
-			path: app/models/Config.php
-
-		-
-			message: "#^Property app\\\\models\\\\Config\\:\\:\\$verified_submitty_admin_user has no type specified\\.$#"
-			count: 1
-			path: app/models/Config.php
-
-		-
-			message: "#^Property app\\\\models\\\\Config\\:\\:\\$websocket_port has no type specified\\.$#"
-			count: 1
-			path: app/models/Config.php
-
-		-
-			message: "#^Property app\\\\models\\\\Config\\:\\:\\$wrapper_files has no type specified\\.$#"
-			count: 1
-			path: app/models/Config.php
-
-		-
-			message: "#^Property app\\\\models\\\\Config\\:\\:\\$zero_rubric_grades has no type specified\\.$#"
+			message: "#^Property app\\\\models\\\\Config\\:\\:\\$wrapper_files type has no value type specified in iterable type array\\.$#"
 			count: 1
 			path: app/models/Config.php
 
@@ -8102,62 +7782,7 @@ parameters:
 			path: app/models/Course.php
 
 		-
-			message: "#^Property app\\\\models\\\\Course\\:\\:\\$display_name has no type specified\\.$#"
-			count: 1
-			path: app/models/Course.php
-
-		-
-			message: "#^Property app\\\\models\\\\Course\\:\\:\\$registration_section has no type specified\\.$#"
-			count: 1
-			path: app/models/Course.php
-
-		-
-			message: "#^Property app\\\\models\\\\Course\\:\\:\\$term has no type specified\\.$#"
-			count: 1
-			path: app/models/Course.php
-
-		-
-			message: "#^Property app\\\\models\\\\Course\\:\\:\\$term_name has no type specified\\.$#"
-			count: 1
-			path: app/models/Course.php
-
-		-
-			message: "#^Property app\\\\models\\\\Course\\:\\:\\$title has no type specified\\.$#"
-			count: 1
-			path: app/models/Course.php
-
-		-
-			message: "#^Property app\\\\models\\\\Course\\:\\:\\$user_group has no type specified\\.$#"
-			count: 1
-			path: app/models/Course.php
-
-		-
-			message: "#^Property app\\\\models\\\\DisplayImage\\:\\:\\$mime_type has no type specified\\.$#"
-			count: 1
-			path: app/models/DisplayImage.php
-
-		-
-			message: "#^Property app\\\\models\\\\DisplayImage\\:\\:\\$path has no type specified\\.$#"
-			count: 1
-			path: app/models/DisplayImage.php
-
-		-
 			message: "#^Method app\\\\models\\\\Email\\:\\:__construct\\(\\) has parameter \\$details with no value type specified in iterable type array\\.$#"
-			count: 1
-			path: app/models/Email.php
-
-		-
-			message: "#^Property app\\\\models\\\\Email\\:\\:\\$body has no type specified\\.$#"
-			count: 1
-			path: app/models/Email.php
-
-		-
-			message: "#^Property app\\\\models\\\\Email\\:\\:\\$subject has no type specified\\.$#"
-			count: 1
-			path: app/models/Email.php
-
-		-
-			message: "#^Property app\\\\models\\\\Email\\:\\:\\$user_id has no type specified\\.$#"
 			count: 1
 			path: app/models/Email.php
 
@@ -8167,27 +7792,12 @@ parameters:
 			path: app/models/GradeableAutocheck.php
 
 		-
-			message: "#^Property app\\\\models\\\\GradeableAutocheck\\:\\:\\$description has no type specified\\.$#"
-			count: 1
+			message: "#^Property app\\\\models\\\\GradeableAutocheck\\:\\:\\$index \\(string\\) does not accept int\\.$#"
+			count: 2
 			path: app/models/GradeableAutocheck.php
 
 		-
-			message: "#^Property app\\\\models\\\\GradeableAutocheck\\:\\:\\$display_as_sequence_diagram has no type specified\\.$#"
-			count: 1
-			path: app/models/GradeableAutocheck.php
-
-		-
-			message: "#^Property app\\\\models\\\\GradeableAutocheck\\:\\:\\$index has no type specified\\.$#"
-			count: 1
-			path: app/models/GradeableAutocheck.php
-
-		-
-			message: "#^Property app\\\\models\\\\GradeableAutocheck\\:\\:\\$messages has no type specified\\.$#"
-			count: 1
-			path: app/models/GradeableAutocheck.php
-
-		-
-			message: "#^Property app\\\\models\\\\GradeableAutocheck\\:\\:\\$public has no type specified\\.$#"
+			message: "#^Property app\\\\models\\\\GradeableAutocheck\\:\\:\\$messages type has no value type specified in iterable type array\\.$#"
 			count: 1
 			path: app/models/GradeableAutocheck.php
 
@@ -8247,31 +7857,6 @@ parameters:
 			path: app/models/GradingSection.php
 
 		-
-			message: "#^Property app\\\\models\\\\GradingSection\\:\\:\\$graders has no type specified\\.$#"
-			count: 1
-			path: app/models/GradingSection.php
-
-		-
-			message: "#^Property app\\\\models\\\\GradingSection\\:\\:\\$name has no type specified\\.$#"
-			count: 1
-			path: app/models/GradingSection.php
-
-		-
-			message: "#^Property app\\\\models\\\\GradingSection\\:\\:\\$registration has no type specified\\.$#"
-			count: 1
-			path: app/models/GradingSection.php
-
-		-
-			message: "#^Property app\\\\models\\\\GradingSection\\:\\:\\$teams has no type specified\\.$#"
-			count: 1
-			path: app/models/GradingSection.php
-
-		-
-			message: "#^Property app\\\\models\\\\GradingSection\\:\\:\\$users has no type specified\\.$#"
-			count: 1
-			path: app/models/GradingSection.php
-
-		-
 			message: "#^Method app\\\\models\\\\NavButton\\:\\:__construct\\(\\) has parameter \\$details with no value type specified in iterable type array\\.$#"
 			count: 1
 			path: app/models/NavButton.php
@@ -8302,67 +7887,7 @@ parameters:
 			path: app/models/Notification.php
 
 		-
-			message: "#^Property app\\\\models\\\\Notification\\:\\:\\$component has no type specified\\.$#"
-			count: 1
-			path: app/models/Notification.php
-
-		-
-			message: "#^Property app\\\\models\\\\Notification\\:\\:\\$created_at has no type specified\\.$#"
-			count: 1
-			path: app/models/Notification.php
-
-		-
-			message: "#^Property app\\\\models\\\\Notification\\:\\:\\$current_user has no type specified\\.$#"
-			count: 1
-			path: app/models/Notification.php
-
-		-
-			message: "#^Property app\\\\models\\\\Notification\\:\\:\\$elapsed_time has no type specified\\.$#"
-			count: 1
-			path: app/models/Notification.php
-
-		-
-			message: "#^Property app\\\\models\\\\Notification\\:\\:\\$id has no type specified\\.$#"
-			count: 1
-			path: app/models/Notification.php
-
-		-
-			message: "#^Property app\\\\models\\\\Notification\\:\\:\\$notify_content has no type specified\\.$#"
-			count: 1
-			path: app/models/Notification.php
-
-		-
-			message: "#^Property app\\\\models\\\\Notification\\:\\:\\$notify_metadata has no type specified\\.$#"
-			count: 1
-			path: app/models/Notification.php
-
-		-
-			message: "#^Property app\\\\models\\\\Notification\\:\\:\\$notify_not_to_source has no type specified\\.$#"
-			count: 1
-			path: app/models/Notification.php
-
-		-
-			message: "#^Property app\\\\models\\\\Notification\\:\\:\\$notify_source has no type specified\\.$#"
-			count: 1
-			path: app/models/Notification.php
-
-		-
-			message: "#^Property app\\\\models\\\\Notification\\:\\:\\$notify_target has no type specified\\.$#"
-			count: 1
-			path: app/models/Notification.php
-
-		-
-			message: "#^Property app\\\\models\\\\Notification\\:\\:\\$seen has no type specified\\.$#"
-			count: 1
-			path: app/models/Notification.php
-
-		-
-			message: "#^Property app\\\\models\\\\Notification\\:\\:\\$type has no type specified\\.$#"
-			count: 1
-			path: app/models/Notification.php
-
-		-
-			message: "#^Property app\\\\models\\\\Notification\\:\\:\\$view_only has no type specified\\.$#"
+			message: "#^Property app\\\\models\\\\Notification\\:\\:\\$elapsed_time has unknown class app\\\\models\\\\real as its type\\.$#"
 			count: 1
 			path: app/models/Notification.php
 
@@ -8747,27 +8272,12 @@ parameters:
 			path: app/models/OfficeHoursQueueModel.php
 
 		-
-			message: "#^Property app\\\\models\\\\QueueItem\\:\\:\\$elapsed_time has no type specified\\.$#"
+			message: "#^Property app\\\\models\\\\QueueItem\\:\\:\\$grading_queue_obj type has no value type specified in iterable type array\\.$#"
 			count: 1
 			path: app/models/QueueItem.php
 
 		-
-			message: "#^Property app\\\\models\\\\QueueItem\\:\\:\\$grading_queue_obj has no type specified\\.$#"
-			count: 1
-			path: app/models/QueueItem.php
-
-		-
-			message: "#^Property app\\\\models\\\\QueueItem\\:\\:\\$queue_obj has no type specified\\.$#"
-			count: 1
-			path: app/models/QueueItem.php
-
-		-
-			message: "#^Property app\\\\models\\\\QueueItem\\:\\:\\$regrade has no type specified\\.$#"
-			count: 1
-			path: app/models/QueueItem.php
-
-		-
-			message: "#^Property app\\\\models\\\\QueueItem\\:\\:\\$start_time has no type specified\\.$#"
+			message: "#^Property app\\\\models\\\\QueueItem\\:\\:\\$queue_obj type has no value type specified in iterable type array\\.$#"
 			count: 1
 			path: app/models/QueueItem.php
 
@@ -8987,54 +8497,9 @@ parameters:
 			path: app/models/SimpleGradeOverriddenUser.php
 
 		-
-			message: "#^Property app\\\\models\\\\SimpleGradeOverriddenUser\\:\\:\\$comment has no type specified\\.$#"
+			message: "#^Call to method format\\(\\) on an unknown class app\\\\models\\\\date\\.$#"
 			count: 1
-			path: app/models/SimpleGradeOverriddenUser.php
-
-		-
-			message: "#^Property app\\\\models\\\\SimpleGradeOverriddenUser\\:\\:\\$displayed_family_name has no type specified\\.$#"
-			count: 1
-			path: app/models/SimpleGradeOverriddenUser.php
-
-		-
-			message: "#^Property app\\\\models\\\\SimpleGradeOverriddenUser\\:\\:\\$displayed_given_name has no type specified\\.$#"
-			count: 1
-			path: app/models/SimpleGradeOverriddenUser.php
-
-		-
-			message: "#^Property app\\\\models\\\\SimpleGradeOverriddenUser\\:\\:\\$id has no type specified\\.$#"
-			count: 1
-			path: app/models/SimpleGradeOverriddenUser.php
-
-		-
-			message: "#^Property app\\\\models\\\\SimpleGradeOverriddenUser\\:\\:\\$legal_family_name has no type specified\\.$#"
-			count: 1
-			path: app/models/SimpleGradeOverriddenUser.php
-
-		-
-			message: "#^Property app\\\\models\\\\SimpleGradeOverriddenUser\\:\\:\\$legal_given_name has no type specified\\.$#"
-			count: 1
-			path: app/models/SimpleGradeOverriddenUser.php
-
-		-
-			message: "#^Property app\\\\models\\\\SimpleGradeOverriddenUser\\:\\:\\$loaded has no type specified\\.$#"
-			count: 1
-			path: app/models/SimpleGradeOverriddenUser.php
-
-		-
-			message: "#^Property app\\\\models\\\\SimpleGradeOverriddenUser\\:\\:\\$marks has no type specified\\.$#"
-			count: 1
-			path: app/models/SimpleGradeOverriddenUser.php
-
-		-
-			message: "#^Property app\\\\models\\\\SimpleGradeOverriddenUser\\:\\:\\$preferred_family_name has no type specified\\.$#"
-			count: 1
-			path: app/models/SimpleGradeOverriddenUser.php
-
-		-
-			message: "#^Property app\\\\models\\\\SimpleGradeOverriddenUser\\:\\:\\$preferred_given_name has no type specified\\.$#"
-			count: 1
-			path: app/models/SimpleGradeOverriddenUser.php
+			path: app/models/SimpleLateUser.php
 
 		-
 			message: "#^Method app\\\\models\\\\SimpleLateUser\\:\\:__construct\\(\\) has parameter \\$details with no value type specified in iterable type array\\.$#"
@@ -9047,57 +8512,12 @@ parameters:
 			path: app/models/SimpleLateUser.php
 
 		-
-			message: "#^Property app\\\\models\\\\SimpleLateUser\\:\\:\\$allowed_late_days has no type specified\\.$#"
+			message: "#^Property app\\\\models\\\\SimpleLateUser\\:\\:\\$since_timestamp \\(app\\\\models\\\\date\\) does not accept DateTime\\.$#"
 			count: 1
 			path: app/models/SimpleLateUser.php
 
 		-
-			message: "#^Property app\\\\models\\\\SimpleLateUser\\:\\:\\$displayed_family_name has no type specified\\.$#"
-			count: 1
-			path: app/models/SimpleLateUser.php
-
-		-
-			message: "#^Property app\\\\models\\\\SimpleLateUser\\:\\:\\$displayed_given_name has no type specified\\.$#"
-			count: 1
-			path: app/models/SimpleLateUser.php
-
-		-
-			message: "#^Property app\\\\models\\\\SimpleLateUser\\:\\:\\$id has no type specified\\.$#"
-			count: 1
-			path: app/models/SimpleLateUser.php
-
-		-
-			message: "#^Property app\\\\models\\\\SimpleLateUser\\:\\:\\$late_day_exceptions has no type specified\\.$#"
-			count: 1
-			path: app/models/SimpleLateUser.php
-
-		-
-			message: "#^Property app\\\\models\\\\SimpleLateUser\\:\\:\\$legal_family_name has no type specified\\.$#"
-			count: 1
-			path: app/models/SimpleLateUser.php
-
-		-
-			message: "#^Property app\\\\models\\\\SimpleLateUser\\:\\:\\$legal_given_name has no type specified\\.$#"
-			count: 1
-			path: app/models/SimpleLateUser.php
-
-		-
-			message: "#^Property app\\\\models\\\\SimpleLateUser\\:\\:\\$loaded has no type specified\\.$#"
-			count: 1
-			path: app/models/SimpleLateUser.php
-
-		-
-			message: "#^Property app\\\\models\\\\SimpleLateUser\\:\\:\\$preferred_family_name has no type specified\\.$#"
-			count: 1
-			path: app/models/SimpleLateUser.php
-
-		-
-			message: "#^Property app\\\\models\\\\SimpleLateUser\\:\\:\\$preferred_given_name has no type specified\\.$#"
-			count: 1
-			path: app/models/SimpleLateUser.php
-
-		-
-			message: "#^Property app\\\\models\\\\SimpleLateUser\\:\\:\\$since_timestamp has no type specified\\.$#"
+			message: "#^Property app\\\\models\\\\SimpleLateUser\\:\\:\\$since_timestamp has unknown class app\\\\models\\\\date as its type\\.$#"
 			count: 1
 			path: app/models/SimpleLateUser.php
 
@@ -9107,52 +8527,7 @@ parameters:
 			path: app/models/SimpleStat.php
 
 		-
-			message: "#^Property app\\\\models\\\\SimpleStat\\:\\:\\$active_grade_inquiry_count has no type specified\\.$#"
-			count: 1
-			path: app/models/SimpleStat.php
-
-		-
-			message: "#^Property app\\\\models\\\\SimpleStat\\:\\:\\$average_score has no type specified\\.$#"
-			count: 1
-			path: app/models/SimpleStat.php
-
-		-
-			message: "#^Property app\\\\models\\\\SimpleStat\\:\\:\\$component has no type specified\\.$#"
-			count: 1
-			path: app/models/SimpleStat.php
-
-		-
-			message: "#^Property app\\\\models\\\\SimpleStat\\:\\:\\$count has no type specified\\.$#"
-			count: 1
-			path: app/models/SimpleStat.php
-
-		-
-			message: "#^Property app\\\\models\\\\SimpleStat\\:\\:\\$grader_info has no type specified\\.$#"
-			count: 1
-			path: app/models/SimpleStat.php
-
-		-
-			message: "#^Property app\\\\models\\\\SimpleStat\\:\\:\\$is_peer_component has no type specified\\.$#"
-			count: 1
-			path: app/models/SimpleStat.php
-
-		-
-			message: "#^Property app\\\\models\\\\SimpleStat\\:\\:\\$max_value has no type specified\\.$#"
-			count: 1
-			path: app/models/SimpleStat.php
-
-		-
-			message: "#^Property app\\\\models\\\\SimpleStat\\:\\:\\$order has no type specified\\.$#"
-			count: 1
-			path: app/models/SimpleStat.php
-
-		-
-			message: "#^Property app\\\\models\\\\SimpleStat\\:\\:\\$standard_deviation has no type specified\\.$#"
-			count: 1
-			path: app/models/SimpleStat.php
-
-		-
-			message: "#^Property app\\\\models\\\\SimpleStat\\:\\:\\$title has no type specified\\.$#"
+			message: "#^Property app\\\\models\\\\SimpleStat\\:\\:\\$grader_info type has no value type specified in iterable type array\\.$#"
 			count: 1
 			path: app/models/SimpleStat.php
 
@@ -9172,52 +8547,12 @@ parameters:
 			path: app/models/Team.php
 
 		-
+			message: "#^Method app\\\\models\\\\Team\\:\\:getRegistrationSection\\(\\) should return int but returns string\\.$#"
+			count: 1
+			path: app/models/Team.php
+
+		-
 			message: "#^Property app\\\\models\\\\Team\\:\\:\\$assignment_settings type has no value type specified in iterable type array\\.$#"
-			count: 1
-			path: app/models/Team.php
-
-		-
-			message: "#^Property app\\\\models\\\\Team\\:\\:\\$id has no type specified\\.$#"
-			count: 1
-			path: app/models/Team.php
-
-		-
-			message: "#^Property app\\\\models\\\\Team\\:\\:\\$invited_user_ids has no type specified\\.$#"
-			count: 1
-			path: app/models/Team.php
-
-		-
-			message: "#^Property app\\\\models\\\\Team\\:\\:\\$invited_users has no type specified\\.$#"
-			count: 1
-			path: app/models/Team.php
-
-		-
-			message: "#^Property app\\\\models\\\\Team\\:\\:\\$member_list has no type specified\\.$#"
-			count: 1
-			path: app/models/Team.php
-
-		-
-			message: "#^Property app\\\\models\\\\Team\\:\\:\\$member_user_ids has no type specified\\.$#"
-			count: 1
-			path: app/models/Team.php
-
-		-
-			message: "#^Property app\\\\models\\\\Team\\:\\:\\$member_users has no type specified\\.$#"
-			count: 1
-			path: app/models/Team.php
-
-		-
-			message: "#^Property app\\\\models\\\\Team\\:\\:\\$registration_section has no type specified\\.$#"
-			count: 1
-			path: app/models/Team.php
-
-		-
-			message: "#^Property app\\\\models\\\\Team\\:\\:\\$rotating_section has no type specified\\.$#"
-			count: 1
-			path: app/models/Team.php
-
-		-
-			message: "#^Property app\\\\models\\\\Team\\:\\:\\$team_name has no type specified\\.$#"
 			count: 1
 			path: app/models/Team.php
 
@@ -9372,127 +8707,17 @@ parameters:
 			path: app/models/User.php
 
 		-
-			message: "#^Property app\\\\models\\\\User\\:\\:\\$access_level has no type specified\\.$#"
-			count: 1
-			path: app/models/User.php
-
-		-
 			message: "#^Property app\\\\models\\\\User\\:\\:\\$anon_id_by_gradeable type has no value type specified in iterable type array\\.$#"
 			count: 1
 			path: app/models/User.php
 
 		-
-			message: "#^Property app\\\\models\\\\User\\:\\:\\$course_section_id has no type specified\\.$#"
+			message: "#^Property app\\\\models\\\\User\\:\\:\\$grading_registration_sections type has no value type specified in iterable type array\\.$#"
 			count: 1
 			path: app/models/User.php
 
 		-
-			message: "#^Property app\\\\models\\\\User\\:\\:\\$display_image_state has no type specified\\.$#"
-			count: 1
-			path: app/models/User.php
-
-		-
-			message: "#^Property app\\\\models\\\\User\\:\\:\\$displayed_family_name has no type specified\\.$#"
-			count: 1
-			path: app/models/User.php
-
-		-
-			message: "#^Property app\\\\models\\\\User\\:\\:\\$displayed_given_name has no type specified\\.$#"
-			count: 1
-			path: app/models/User.php
-
-		-
-			message: "#^Property app\\\\models\\\\User\\:\\:\\$email has no type specified\\.$#"
-			count: 1
-			path: app/models/User.php
-
-		-
-			message: "#^Property app\\\\models\\\\User\\:\\:\\$email_both has no type specified\\.$#"
-			count: 1
-			path: app/models/User.php
-
-		-
-			message: "#^Property app\\\\models\\\\User\\:\\:\\$grading_registration_sections has no type specified\\.$#"
-			count: 1
-			path: app/models/User.php
-
-		-
-			message: "#^Property app\\\\models\\\\User\\:\\:\\$group has no type specified\\.$#"
-			count: 1
-			path: app/models/User.php
-
-		-
-			message: "#^Property app\\\\models\\\\User\\:\\:\\$id has no type specified\\.$#"
-			count: 1
-			path: app/models/User.php
-
-		-
-			message: "#^Property app\\\\models\\\\User\\:\\:\\$last_initial_format has no type specified\\.$#"
-			count: 1
-			path: app/models/User.php
-
-		-
-			message: "#^Property app\\\\models\\\\User\\:\\:\\$legal_family_name has no type specified\\.$#"
-			count: 1
-			path: app/models/User.php
-
-		-
-			message: "#^Property app\\\\models\\\\User\\:\\:\\$legal_given_name has no type specified\\.$#"
-			count: 1
-			path: app/models/User.php
-
-		-
-			message: "#^Property app\\\\models\\\\User\\:\\:\\$loaded has no type specified\\.$#"
-			count: 1
-			path: app/models/User.php
-
-		-
-			message: "#^Property app\\\\models\\\\User\\:\\:\\$notification_settings has no type specified\\.$#"
-			count: 1
-			path: app/models/User.php
-
-		-
-			message: "#^Property app\\\\models\\\\User\\:\\:\\$numeric_id has no type specified\\.$#"
-			count: 1
-			path: app/models/User.php
-
-		-
-			message: "#^Property app\\\\models\\\\User\\:\\:\\$preferred_family_name has no type specified\\.$#"
-			count: 1
-			path: app/models/User.php
-
-		-
-			message: "#^Property app\\\\models\\\\User\\:\\:\\$preferred_given_name has no type specified\\.$#"
-			count: 1
-			path: app/models/User.php
-
-		-
-			message: "#^Property app\\\\models\\\\User\\:\\:\\$pronouns has no type specified\\.$#"
-			count: 1
-			path: app/models/User.php
-
-		-
-			message: "#^Property app\\\\models\\\\User\\:\\:\\$registration_section has no type specified\\.$#"
-			count: 1
-			path: app/models/User.php
-
-		-
-			message: "#^Property app\\\\models\\\\User\\:\\:\\$registration_subsection has no type specified\\.$#"
-			count: 1
-			path: app/models/User.php
-
-		-
-			message: "#^Property app\\\\models\\\\User\\:\\:\\$registration_type has no type specified\\.$#"
-			count: 1
-			path: app/models/User.php
-
-		-
-			message: "#^Property app\\\\models\\\\User\\:\\:\\$rotating_section has no type specified\\.$#"
-			count: 1
-			path: app/models/User.php
-
-		-
-			message: "#^Property app\\\\models\\\\User\\:\\:\\$secondary_email has no type specified\\.$#"
+			message: "#^Property app\\\\models\\\\User\\:\\:\\$notification_settings type has no value type specified in iterable type array\\.$#"
 			count: 1
 			path: app/models/User.php
 
@@ -9513,21 +8738,6 @@ parameters:
 
 		-
 			message: "#^Method app\\\\models\\\\gradeable\\\\AutoGradedGradeable\\:\\:toArray\\(\\) return type has no value type specified in iterable type array\\.$#"
-			count: 1
-			path: app/models/gradeable/AutoGradedGradeable.php
-
-		-
-			message: "#^Property app\\\\models\\\\gradeable\\\\AutoGradedGradeable\\:\\:\\$active_version has no type specified\\.$#"
-			count: 1
-			path: app/models/gradeable/AutoGradedGradeable.php
-
-		-
-			message: "#^Property app\\\\models\\\\gradeable\\\\AutoGradedGradeable\\:\\:\\$auto_graded_versions has no type specified\\.$#"
-			count: 1
-			path: app/models/gradeable/AutoGradedGradeable.php
-
-		-
-			message: "#^Property app\\\\models\\\\gradeable\\\\AutoGradedGradeable\\:\\:\\$graded_gradeable has no type specified\\.$#"
 			count: 1
 			path: app/models/gradeable/AutoGradedGradeable.php
 
@@ -9587,34 +8797,14 @@ parameters:
 			path: app/models/gradeable/AutoGradedTestcase.php
 
 		-
-			message: "#^Property app\\\\models\\\\gradeable\\\\AutoGradedTestcase\\:\\:\\$autochecks has no type specified\\.$#"
-			count: 1
-			path: app/models/gradeable/AutoGradedTestcase.php
-
-		-
-			message: "#^Property app\\\\models\\\\gradeable\\\\AutoGradedTestcase\\:\\:\\$message has no type specified\\.$#"
-			count: 1
-			path: app/models/gradeable/AutoGradedTestcase.php
-
-		-
-			message: "#^Property app\\\\models\\\\gradeable\\\\AutoGradedTestcase\\:\\:\\$points has no type specified\\.$#"
-			count: 1
-			path: app/models/gradeable/AutoGradedTestcase.php
-
-		-
-			message: "#^Property app\\\\models\\\\gradeable\\\\AutoGradedTestcase\\:\\:\\$testcase has no type specified\\.$#"
-			count: 1
-			path: app/models/gradeable/AutoGradedTestcase.php
-
-		-
-			message: "#^Property app\\\\models\\\\gradeable\\\\AutoGradedTestcase\\:\\:\\$view has no type specified\\.$#"
-			count: 1
-			path: app/models/gradeable/AutoGradedTestcase.php
-
-		-
 			message: "#^Strict comparison using \\=\\=\\= between app\\\\models\\\\gradeable\\\\AutogradingTestcase and null will always evaluate to false\\.$#"
 			count: 1
 			path: app/models/gradeable/AutoGradedTestcase.php
+
+		-
+			message: "#^Call to function is_null\\(\\) with array\\<app\\\\models\\\\gradeable\\\\AutoGradedTestcase\\> will always evaluate to false\\.$#"
+			count: 1
+			path: app/models/gradeable/AutoGradedVersion.php
 
 		-
 			message: "#^Else branch is unreachable because previous condition is always true\\.$#"
@@ -9632,7 +8822,17 @@ parameters:
 			path: app/models/gradeable/AutoGradedVersion.php
 
 		-
+			message: "#^Method app\\\\models\\\\gradeable\\\\AutoGradedVersion\\:\\:getHiddenPoints\\(\\) should return int but returns float\\.$#"
+			count: 1
+			path: app/models/gradeable/AutoGradedVersion.php
+
+		-
 			message: "#^Method app\\\\models\\\\gradeable\\\\AutoGradedVersion\\:\\:getMetaFiles\\(\\) return type has no value type specified in iterable type array\\.$#"
+			count: 1
+			path: app/models/gradeable/AutoGradedVersion.php
+
+		-
+			message: "#^Method app\\\\models\\\\gradeable\\\\AutoGradedVersion\\:\\:getNonHiddenPoints\\(\\) should return int but returns float\\.$#"
 			count: 1
 			path: app/models/gradeable/AutoGradedVersion.php
 
@@ -9772,77 +8972,17 @@ parameters:
 			path: app/models/gradeable/AutoGradedVersion.php
 
 		-
-			message: "#^Property app\\\\models\\\\gradeable\\\\AutoGradedVersion\\:\\:\\$autograder_machine has no type specified\\.$#"
+			message: "#^Property app\\\\models\\\\gradeable\\\\AutoGradedVersion\\:\\:\\$files type has no value type specified in iterable type array\\.$#"
 			count: 1
 			path: app/models/gradeable/AutoGradedVersion.php
 
 		-
-			message: "#^Property app\\\\models\\\\gradeable\\\\AutoGradedVersion\\:\\:\\$autograding_complete has no type specified\\.$#"
+			message: "#^Property app\\\\models\\\\gradeable\\\\AutoGradedVersion\\:\\:\\$results_files type has no value type specified in iterable type array\\.$#"
 			count: 1
 			path: app/models/gradeable/AutoGradedVersion.php
 
 		-
-			message: "#^Property app\\\\models\\\\gradeable\\\\AutoGradedVersion\\:\\:\\$early_incentive_points has no type specified\\.$#"
-			count: 1
-			path: app/models/gradeable/AutoGradedVersion.php
-
-		-
-			message: "#^Property app\\\\models\\\\gradeable\\\\AutoGradedVersion\\:\\:\\$files has no type specified\\.$#"
-			count: 1
-			path: app/models/gradeable/AutoGradedVersion.php
-
-		-
-			message: "#^Property app\\\\models\\\\gradeable\\\\AutoGradedVersion\\:\\:\\$graded_testcases has no type specified\\.$#"
-			count: 1
-			path: app/models/gradeable/AutoGradedVersion.php
-
-		-
-			message: "#^Property app\\\\models\\\\gradeable\\\\AutoGradedVersion\\:\\:\\$hidden_extra_credit has no type specified\\.$#"
-			count: 1
-			path: app/models/gradeable/AutoGradedVersion.php
-
-		-
-			message: "#^Property app\\\\models\\\\gradeable\\\\AutoGradedVersion\\:\\:\\$hidden_non_extra_credit has no type specified\\.$#"
-			count: 1
-			path: app/models/gradeable/AutoGradedVersion.php
-
-		-
-			message: "#^Property app\\\\models\\\\gradeable\\\\AutoGradedVersion\\:\\:\\$meta_files has no type specified\\.$#"
-			count: 1
-			path: app/models/gradeable/AutoGradedVersion.php
-
-		-
-			message: "#^Property app\\\\models\\\\gradeable\\\\AutoGradedVersion\\:\\:\\$non_hidden_extra_credit has no type specified\\.$#"
-			count: 1
-			path: app/models/gradeable/AutoGradedVersion.php
-
-		-
-			message: "#^Property app\\\\models\\\\gradeable\\\\AutoGradedVersion\\:\\:\\$non_hidden_non_extra_credit has no type specified\\.$#"
-			count: 1
-			path: app/models/gradeable/AutoGradedVersion.php
-
-		-
-			message: "#^Property app\\\\models\\\\gradeable\\\\AutoGradedVersion\\:\\:\\$queue_position has no type specified\\.$#"
-			count: 1
-			path: app/models/gradeable/AutoGradedVersion.php
-
-		-
-			message: "#^Property app\\\\models\\\\gradeable\\\\AutoGradedVersion\\:\\:\\$results_files has no type specified\\.$#"
-			count: 1
-			path: app/models/gradeable/AutoGradedVersion.php
-
-		-
-			message: "#^Property app\\\\models\\\\gradeable\\\\AutoGradedVersion\\:\\:\\$results_public_files has no type specified\\.$#"
-			count: 1
-			path: app/models/gradeable/AutoGradedVersion.php
-
-		-
-			message: "#^Property app\\\\models\\\\gradeable\\\\AutoGradedVersion\\:\\:\\$submission_time has no type specified\\.$#"
-			count: 1
-			path: app/models/gradeable/AutoGradedVersion.php
-
-		-
-			message: "#^Property app\\\\models\\\\gradeable\\\\AutoGradedVersion\\:\\:\\$version has no type specified\\.$#"
+			message: "#^Property app\\\\models\\\\gradeable\\\\AutoGradedVersion\\:\\:\\$results_public_files type has no value type specified in iterable type array\\.$#"
 			count: 1
 			path: app/models/gradeable/AutoGradedVersion.php
 
@@ -9932,52 +9072,7 @@ parameters:
 			path: app/models/gradeable/AutoGradedVersionHistory.php
 
 		-
-			message: "#^Property app\\\\models\\\\gradeable\\\\AutoGradedVersionHistory\\:\\:\\$access_duration has no type specified\\.$#"
-			count: 1
-			path: app/models/gradeable/AutoGradedVersionHistory.php
-
-		-
-			message: "#^Property app\\\\models\\\\gradeable\\\\AutoGradedVersionHistory\\:\\:\\$batch_regrade has no type specified\\.$#"
-			count: 1
-			path: app/models/gradeable/AutoGradedVersionHistory.php
-
-		-
-			message: "#^Property app\\\\models\\\\gradeable\\\\AutoGradedVersionHistory\\:\\:\\$first_access_time has no type specified\\.$#"
-			count: 1
-			path: app/models/gradeable/AutoGradedVersionHistory.php
-
-		-
-			message: "#^Property app\\\\models\\\\gradeable\\\\AutoGradedVersionHistory\\:\\:\\$grade_time has no type specified\\.$#"
-			count: 1
-			path: app/models/gradeable/AutoGradedVersionHistory.php
-
-		-
-			message: "#^Property app\\\\models\\\\gradeable\\\\AutoGradedVersionHistory\\:\\:\\$grading_began has no type specified\\.$#"
-			count: 1
-			path: app/models/gradeable/AutoGradedVersionHistory.php
-
-		-
-			message: "#^Property app\\\\models\\\\gradeable\\\\AutoGradedVersionHistory\\:\\:\\$grading_finished has no type specified\\.$#"
-			count: 1
-			path: app/models/gradeable/AutoGradedVersionHistory.php
-
-		-
-			message: "#^Property app\\\\models\\\\gradeable\\\\AutoGradedVersionHistory\\:\\:\\$queue_time has no type specified\\.$#"
-			count: 1
-			path: app/models/gradeable/AutoGradedVersionHistory.php
-
-		-
-			message: "#^Property app\\\\models\\\\gradeable\\\\AutoGradedVersionHistory\\:\\:\\$submission_time has no type specified\\.$#"
-			count: 1
-			path: app/models/gradeable/AutoGradedVersionHistory.php
-
-		-
-			message: "#^Property app\\\\models\\\\gradeable\\\\AutoGradedVersionHistory\\:\\:\\$vcs_revision has no type specified\\.$#"
-			count: 1
-			path: app/models/gradeable/AutoGradedVersionHistory.php
-
-		-
-			message: "#^Property app\\\\models\\\\gradeable\\\\AutoGradedVersionHistory\\:\\:\\$wait_time has no type specified\\.$#"
+			message: "#^Property app\\\\models\\\\gradeable\\\\AutoGradedVersionHistory\\:\\:\\$first_access_time \\(DateTime\\) does not accept null\\.$#"
 			count: 1
 			path: app/models/gradeable/AutoGradedVersionHistory.php
 
@@ -10092,132 +9187,17 @@ parameters:
 			path: app/models/gradeable/AutogradingConfig.php
 
 		-
-			message: "#^Property app\\\\models\\\\gradeable\\\\AutogradingConfig\\:\\:\\$base_testcases has no type specified\\.$#"
+			message: "#^Property app\\\\models\\\\gradeable\\\\AutogradingConfig\\:\\:\\$base_testcases type has no value type specified in iterable type array\\.$#"
 			count: 1
 			path: app/models/gradeable/AutogradingConfig.php
 
 		-
-			message: "#^Property app\\\\models\\\\gradeable\\\\AutogradingConfig\\:\\:\\$display_testcase_runtime_memory has no type specified\\.$#"
+			message: "#^Property app\\\\models\\\\gradeable\\\\AutogradingConfig\\:\\:\\$max_submission_size \\(int\\) does not accept float\\.$#"
 			count: 1
 			path: app/models/gradeable/AutogradingConfig.php
 
 		-
-			message: "#^Property app\\\\models\\\\gradeable\\\\AutogradingConfig\\:\\:\\$early_submission_incentive has no type specified\\.$#"
-			count: 1
-			path: app/models/gradeable/AutogradingConfig.php
-
-		-
-			message: "#^Property app\\\\models\\\\gradeable\\\\AutogradingConfig\\:\\:\\$early_submission_message has no type specified\\.$#"
-			count: 1
-			path: app/models/gradeable/AutogradingConfig.php
-
-		-
-			message: "#^Property app\\\\models\\\\gradeable\\\\AutogradingConfig\\:\\:\\$early_submission_minimum_days_early has no type specified\\.$#"
-			count: 1
-			path: app/models/gradeable/AutogradingConfig.php
-
-		-
-			message: "#^Property app\\\\models\\\\gradeable\\\\AutogradingConfig\\:\\:\\$early_submission_minimum_points has no type specified\\.$#"
-			count: 1
-			path: app/models/gradeable/AutogradingConfig.php
-
-		-
-			message: "#^Property app\\\\models\\\\gradeable\\\\AutogradingConfig\\:\\:\\$early_submission_test_cases has no type specified\\.$#"
-			count: 1
-			path: app/models/gradeable/AutogradingConfig.php
-
-		-
-			message: "#^Property app\\\\models\\\\gradeable\\\\AutogradingConfig\\:\\:\\$gradeable_id has no type specified\\.$#"
-			count: 1
-			path: app/models/gradeable/AutogradingConfig.php
-
-		-
-			message: "#^Property app\\\\models\\\\gradeable\\\\AutogradingConfig\\:\\:\\$gradeable_message has no type specified\\.$#"
-			count: 1
-			path: app/models/gradeable/AutogradingConfig.php
-
-		-
-			message: "#^Property app\\\\models\\\\gradeable\\\\AutogradingConfig\\:\\:\\$hide_test_details has no type specified\\.$#"
-			count: 1
-			path: app/models/gradeable/AutogradingConfig.php
-
-		-
-			message: "#^Property app\\\\models\\\\gradeable\\\\AutogradingConfig\\:\\:\\$leaderboards has no type specified\\.$#"
-			count: 1
-			path: app/models/gradeable/AutogradingConfig.php
-
-		-
-			message: "#^Property app\\\\models\\\\gradeable\\\\AutogradingConfig\\:\\:\\$load_gradeable_message has no type specified\\.$#"
-			count: 1
-			path: app/models/gradeable/AutogradingConfig.php
-
-		-
-			message: "#^Property app\\\\models\\\\gradeable\\\\AutogradingConfig\\:\\:\\$load_gradeable_message_enabled has no type specified\\.$#"
-			count: 1
-			path: app/models/gradeable/AutogradingConfig.php
-
-		-
-			message: "#^Property app\\\\models\\\\gradeable\\\\AutogradingConfig\\:\\:\\$load_gradeable_message_first_time_only has no type specified\\.$#"
-			count: 1
-			path: app/models/gradeable/AutogradingConfig.php
-
-		-
-			message: "#^Property app\\\\models\\\\gradeable\\\\AutogradingConfig\\:\\:\\$max_possible_grading_time has no type specified\\.$#"
-			count: 1
-			path: app/models/gradeable/AutogradingConfig.php
-
-		-
-			message: "#^Property app\\\\models\\\\gradeable\\\\AutogradingConfig\\:\\:\\$max_submission_size has no type specified\\.$#"
-			count: 1
-			path: app/models/gradeable/AutogradingConfig.php
-
-		-
-			message: "#^Property app\\\\models\\\\gradeable\\\\AutogradingConfig\\:\\:\\$max_submissions has no type specified\\.$#"
-			count: 1
-			path: app/models/gradeable/AutogradingConfig.php
-
-		-
-			message: "#^Property app\\\\models\\\\gradeable\\\\AutogradingConfig\\:\\:\\$notebook_config has no type specified\\.$#"
-			count: 1
-			path: app/models/gradeable/AutogradingConfig.php
-
-		-
-			message: "#^Property app\\\\models\\\\gradeable\\\\AutogradingConfig\\:\\:\\$notebook_gradeable has no type specified\\.$#"
-			count: 1
-			path: app/models/gradeable/AutogradingConfig.php
-
-		-
-			message: "#^Property app\\\\models\\\\gradeable\\\\AutogradingConfig\\:\\:\\$one_part_only has no type specified\\.$#"
-			count: 1
-			path: app/models/gradeable/AutogradingConfig.php
-
-		-
-			message: "#^Property app\\\\models\\\\gradeable\\\\AutogradingConfig\\:\\:\\$part_names has no type specified\\.$#"
-			count: 1
-			path: app/models/gradeable/AutogradingConfig.php
-
-		-
-			message: "#^Property app\\\\models\\\\gradeable\\\\AutogradingConfig\\:\\:\\$required_capabilities has no type specified\\.$#"
-			count: 1
-			path: app/models/gradeable/AutogradingConfig.php
-
-		-
-			message: "#^Property app\\\\models\\\\gradeable\\\\AutogradingConfig\\:\\:\\$total_hidden_extra_credit has no type specified\\.$#"
-			count: 1
-			path: app/models/gradeable/AutogradingConfig.php
-
-		-
-			message: "#^Property app\\\\models\\\\gradeable\\\\AutogradingConfig\\:\\:\\$total_hidden_non_extra_credit has no type specified\\.$#"
-			count: 1
-			path: app/models/gradeable/AutogradingConfig.php
-
-		-
-			message: "#^Property app\\\\models\\\\gradeable\\\\AutogradingConfig\\:\\:\\$total_non_hidden_extra_credit has no type specified\\.$#"
-			count: 1
-			path: app/models/gradeable/AutogradingConfig.php
-
-		-
-			message: "#^Property app\\\\models\\\\gradeable\\\\AutogradingConfig\\:\\:\\$total_non_hidden_non_extra_credit has no type specified\\.$#"
+			message: "#^Property app\\\\models\\\\gradeable\\\\AutogradingConfig\\:\\:\\$notebook_config type has no value type specified in iterable type array\\.$#"
 			count: 1
 			path: app/models/gradeable/AutogradingConfig.php
 
@@ -10272,62 +9252,17 @@ parameters:
 			path: app/models/gradeable/AutogradingTestcase.php
 
 		-
-			message: "#^Property app\\\\models\\\\gradeable\\\\AutogradingTestcase\\:\\:\\$details has no type specified\\.$#"
+			message: "#^Property app\\\\models\\\\gradeable\\\\AutogradingTestcase\\:\\:\\$dispatcher_actions type has no value type specified in iterable type array\\.$#"
 			count: 1
 			path: app/models/gradeable/AutogradingTestcase.php
 
 		-
-			message: "#^Property app\\\\models\\\\gradeable\\\\AutogradingTestcase\\:\\:\\$dispatcher_actions has no type specified\\.$#"
+			message: "#^Property app\\\\models\\\\gradeable\\\\AutogradingTestcase\\:\\:\\$graphics_actions type has no value type specified in iterable type array\\.$#"
 			count: 1
 			path: app/models/gradeable/AutogradingTestcase.php
 
 		-
-			message: "#^Property app\\\\models\\\\gradeable\\\\AutogradingTestcase\\:\\:\\$extra_credit has no type specified\\.$#"
-			count: 1
-			path: app/models/gradeable/AutogradingTestcase.php
-
-		-
-			message: "#^Property app\\\\models\\\\gradeable\\\\AutogradingTestcase\\:\\:\\$graphics_actions has no type specified\\.$#"
-			count: 1
-			path: app/models/gradeable/AutogradingTestcase.php
-
-		-
-			message: "#^Property app\\\\models\\\\gradeable\\\\AutogradingTestcase\\:\\:\\$hidden has no type specified\\.$#"
-			count: 1
-			path: app/models/gradeable/AutogradingTestcase.php
-
-		-
-			message: "#^Property app\\\\models\\\\gradeable\\\\AutogradingTestcase\\:\\:\\$index has no type specified\\.$#"
-			count: 1
-			path: app/models/gradeable/AutogradingTestcase.php
-
-		-
-			message: "#^Property app\\\\models\\\\gradeable\\\\AutogradingTestcase\\:\\:\\$name has no type specified\\.$#"
-			count: 1
-			path: app/models/gradeable/AutogradingTestcase.php
-
-		-
-			message: "#^Property app\\\\models\\\\gradeable\\\\AutogradingTestcase\\:\\:\\$points has no type specified\\.$#"
-			count: 1
-			path: app/models/gradeable/AutogradingTestcase.php
-
-		-
-			message: "#^Property app\\\\models\\\\gradeable\\\\AutogradingTestcase\\:\\:\\$publish_actions has no type specified\\.$#"
-			count: 1
-			path: app/models/gradeable/AutogradingTestcase.php
-
-		-
-			message: "#^Property app\\\\models\\\\gradeable\\\\AutogradingTestcase\\:\\:\\$release_hidden_details has no type specified\\.$#"
-			count: 1
-			path: app/models/gradeable/AutogradingTestcase.php
-
-		-
-			message: "#^Property app\\\\models\\\\gradeable\\\\AutogradingTestcase\\:\\:\\$testcase_label has no type specified\\.$#"
-			count: 1
-			path: app/models/gradeable/AutogradingTestcase.php
-
-		-
-			message: "#^Property app\\\\models\\\\gradeable\\\\AutogradingTestcase\\:\\:\\$view_testcase_message has no type specified\\.$#"
+			message: "#^Property app\\\\models\\\\gradeable\\\\AutogradingTestcase\\:\\:\\$index \\(string\\) does not accept int\\.$#"
 			count: 1
 			path: app/models/gradeable/AutogradingTestcase.php
 
@@ -10512,87 +9447,22 @@ parameters:
 			path: app/models/gradeable/Component.php
 
 		-
-			message: "#^Property app\\\\models\\\\gradeable\\\\Component\\:\\:\\$any_grades has no type specified\\.$#"
+			message: "#^Property app\\\\models\\\\gradeable\\\\Component\\:\\:\\$default \\(int\\) does not accept float\\.$#"
 			count: 1
 			path: app/models/gradeable/Component.php
 
 		-
-			message: "#^Property app\\\\models\\\\gradeable\\\\Component\\:\\:\\$db_marks has no type specified\\.$#"
+			message: "#^Property app\\\\models\\\\gradeable\\\\Component\\:\\:\\$lower_clamp \\(int\\) does not accept float\\.$#"
 			count: 1
 			path: app/models/gradeable/Component.php
 
 		-
-			message: "#^Property app\\\\models\\\\gradeable\\\\Component\\:\\:\\$default has no type specified\\.$#"
+			message: "#^Property app\\\\models\\\\gradeable\\\\Component\\:\\:\\$max_value \\(int\\) does not accept float\\.$#"
 			count: 1
 			path: app/models/gradeable/Component.php
 
 		-
-			message: "#^Property app\\\\models\\\\gradeable\\\\Component\\:\\:\\$id has no type specified\\.$#"
-			count: 1
-			path: app/models/gradeable/Component.php
-
-		-
-			message: "#^Property app\\\\models\\\\gradeable\\\\Component\\:\\:\\$is_itempool_linked has no type specified\\.$#"
-			count: 1
-			path: app/models/gradeable/Component.php
-
-		-
-			message: "#^Property app\\\\models\\\\gradeable\\\\Component\\:\\:\\$itempool has no type specified\\.$#"
-			count: 1
-			path: app/models/gradeable/Component.php
-
-		-
-			message: "#^Property app\\\\models\\\\gradeable\\\\Component\\:\\:\\$lower_clamp has no type specified\\.$#"
-			count: 1
-			path: app/models/gradeable/Component.php
-
-		-
-			message: "#^Property app\\\\models\\\\gradeable\\\\Component\\:\\:\\$marks has no type specified\\.$#"
-			count: 1
-			path: app/models/gradeable/Component.php
-
-		-
-			message: "#^Property app\\\\models\\\\gradeable\\\\Component\\:\\:\\$max_value has no type specified\\.$#"
-			count: 1
-			path: app/models/gradeable/Component.php
-
-		-
-			message: "#^Property app\\\\models\\\\gradeable\\\\Component\\:\\:\\$order has no type specified\\.$#"
-			count: 1
-			path: app/models/gradeable/Component.php
-
-		-
-			message: "#^Property app\\\\models\\\\gradeable\\\\Component\\:\\:\\$page has no type specified\\.$#"
-			count: 1
-			path: app/models/gradeable/Component.php
-
-		-
-			message: "#^Property app\\\\models\\\\gradeable\\\\Component\\:\\:\\$peer_component has no type specified\\.$#"
-			count: 1
-			path: app/models/gradeable/Component.php
-
-		-
-			message: "#^Property app\\\\models\\\\gradeable\\\\Component\\:\\:\\$student_comment has no type specified\\.$#"
-			count: 1
-			path: app/models/gradeable/Component.php
-
-		-
-			message: "#^Property app\\\\models\\\\gradeable\\\\Component\\:\\:\\$ta_comment has no type specified\\.$#"
-			count: 1
-			path: app/models/gradeable/Component.php
-
-		-
-			message: "#^Property app\\\\models\\\\gradeable\\\\Component\\:\\:\\$text has no type specified\\.$#"
-			count: 1
-			path: app/models/gradeable/Component.php
-
-		-
-			message: "#^Property app\\\\models\\\\gradeable\\\\Component\\:\\:\\$title has no type specified\\.$#"
-			count: 1
-			path: app/models/gradeable/Component.php
-
-		-
-			message: "#^Property app\\\\models\\\\gradeable\\\\Component\\:\\:\\$upper_clamp has no type specified\\.$#"
+			message: "#^Property app\\\\models\\\\gradeable\\\\Component\\:\\:\\$upper_clamp \\(int\\) does not accept float\\.$#"
 			count: 1
 			path: app/models/gradeable/Component.php
 
@@ -10618,21 +9488,6 @@ parameters:
 
 		-
 			message: "#^Method app\\\\models\\\\gradeable\\\\GradeInquiry\\:\\:setStatus\\(\\) has no return type specified\\.$#"
-			count: 1
-			path: app/models/gradeable/GradeInquiry.php
-
-		-
-			message: "#^Property app\\\\models\\\\gradeable\\\\GradeInquiry\\:\\:\\$gc_id has no type specified\\.$#"
-			count: 1
-			path: app/models/gradeable/GradeInquiry.php
-
-		-
-			message: "#^Property app\\\\models\\\\gradeable\\\\GradeInquiry\\:\\:\\$status has no type specified\\.$#"
-			count: 1
-			path: app/models/gradeable/GradeInquiry.php
-
-		-
-			message: "#^Property app\\\\models\\\\gradeable\\\\GradeInquiry\\:\\:\\$timestamp has no type specified\\.$#"
 			count: 1
 			path: app/models/gradeable/GradeInquiry.php
 
@@ -10992,192 +9847,47 @@ parameters:
 			path: app/models/gradeable/Gradeable.php
 
 		-
-			message: "#^Property app\\\\models\\\\gradeable\\\\Gradeable\\:\\:\\$active_grade_inquiries_count has no type specified\\.$#"
+			message: "#^Property app\\\\models\\\\gradeable\\\\Gradeable\\:\\:\\$active_grade_inquiries_count \\(bool\\) does not accept default value of type int\\.$#"
 			count: 1
 			path: app/models/gradeable/Gradeable.php
 
 		-
-			message: "#^Property app\\\\models\\\\gradeable\\\\Gradeable\\:\\:\\$allow_custom_marks has no type specified\\.$#"
+			message: "#^Property app\\\\models\\\\gradeable\\\\Gradeable\\:\\:\\$active_grade_inquiries_count \\(bool\\) does not accept int\\.$#"
 			count: 1
 			path: app/models/gradeable/Gradeable.php
 
 		-
-			message: "#^Property app\\\\models\\\\gradeable\\\\Gradeable\\:\\:\\$allowed_minutes has no type specified\\.$#"
+			message: "#^Property app\\\\models\\\\gradeable\\\\Gradeable\\:\\:\\$allowed_minutes_overrides type has no value type specified in iterable type array\\.$#"
 			count: 1
 			path: app/models/gradeable/Gradeable.php
 
 		-
-			message: "#^Property app\\\\models\\\\gradeable\\\\Gradeable\\:\\:\\$allowed_minutes_overrides has no type specified\\.$#"
+			message: "#^Property app\\\\models\\\\gradeable\\\\Gradeable\\:\\:\\$instructor_blind \\(bool\\) does not accept default value of type int\\.$#"
 			count: 1
 			path: app/models/gradeable/Gradeable.php
 
 		-
-			message: "#^Property app\\\\models\\\\gradeable\\\\Gradeable\\:\\:\\$any_build_errors has no type specified\\.$#"
+			message: "#^Property app\\\\models\\\\gradeable\\\\Gradeable\\:\\:\\$late_days \\(int\\) does not accept DateTime\\.$#"
 			count: 1
 			path: app/models/gradeable/Gradeable.php
 
 		-
-			message: "#^Property app\\\\models\\\\gradeable\\\\Gradeable\\:\\:\\$any_manual_grades has no type specified\\.$#"
+			message: "#^Property app\\\\models\\\\gradeable\\\\Gradeable\\:\\:\\$limited_access_blind \\(bool\\) does not accept default value of type int\\.$#"
 			count: 1
 			path: app/models/gradeable/Gradeable.php
 
 		-
-			message: "#^Property app\\\\models\\\\gradeable\\\\Gradeable\\:\\:\\$any_submissions has no type specified\\.$#"
+			message: "#^Property app\\\\models\\\\gradeable\\\\Gradeable\\:\\:\\$peer_blind \\(bool\\) does not accept default value of type int\\.$#"
 			count: 1
 			path: app/models/gradeable/Gradeable.php
 
 		-
-			message: "#^Property app\\\\models\\\\gradeable\\\\Gradeable\\:\\:\\$autograding_config has no type specified\\.$#"
+			message: "#^Property app\\\\models\\\\gradeable\\\\Gradeable\\:\\:\\$peer_grading_pairs type has no value type specified in iterable type array\\.$#"
 			count: 1
 			path: app/models/gradeable/Gradeable.php
 
 		-
-			message: "#^Property app\\\\models\\\\gradeable\\\\Gradeable\\:\\:\\$autograding_config_path has no type specified\\.$#"
-			count: 1
-			path: app/models/gradeable/Gradeable.php
-
-		-
-			message: "#^Property app\\\\models\\\\gradeable\\\\Gradeable\\:\\:\\$components has no type specified\\.$#"
-			count: 1
-			path: app/models/gradeable/Gradeable.php
-
-		-
-			message: "#^Property app\\\\models\\\\gradeable\\\\Gradeable\\:\\:\\$db_components has no type specified\\.$#"
-			count: 1
-			path: app/models/gradeable/Gradeable.php
-
-		-
-			message: "#^Property app\\\\models\\\\gradeable\\\\Gradeable\\:\\:\\$depends_on has no type specified\\.$#"
-			count: 1
-			path: app/models/gradeable/Gradeable.php
-
-		-
-			message: "#^Property app\\\\models\\\\gradeable\\\\Gradeable\\:\\:\\$depends_on_points has no type specified\\.$#"
-			count: 1
-			path: app/models/gradeable/Gradeable.php
-
-		-
-			message: "#^Property app\\\\models\\\\gradeable\\\\Gradeable\\:\\:\\$discussion_based has no type specified\\.$#"
-			count: 1
-			path: app/models/gradeable/Gradeable.php
-
-		-
-			message: "#^Property app\\\\models\\\\gradeable\\\\Gradeable\\:\\:\\$discussion_thread_id has no type specified\\.$#"
-			count: 1
-			path: app/models/gradeable/Gradeable.php
-
-		-
-			message: "#^Property app\\\\models\\\\gradeable\\\\Gradeable\\:\\:\\$grade_due_date has no type specified\\.$#"
-			count: 1
-			path: app/models/gradeable/Gradeable.php
-
-		-
-			message: "#^Property app\\\\models\\\\gradeable\\\\Gradeable\\:\\:\\$grade_inquiry_allowed has no type specified\\.$#"
-			count: 1
-			path: app/models/gradeable/Gradeable.php
-
-		-
-			message: "#^Property app\\\\models\\\\gradeable\\\\Gradeable\\:\\:\\$grade_inquiry_due_date has no type specified\\.$#"
-			count: 1
-			path: app/models/gradeable/Gradeable.php
-
-		-
-			message: "#^Property app\\\\models\\\\gradeable\\\\Gradeable\\:\\:\\$grade_inquiry_per_component_allowed has no type specified\\.$#"
-			count: 1
-			path: app/models/gradeable/Gradeable.php
-
-		-
-			message: "#^Property app\\\\models\\\\gradeable\\\\Gradeable\\:\\:\\$grade_inquiry_start_date has no type specified\\.$#"
-			count: 1
-			path: app/models/gradeable/Gradeable.php
-
-		-
-			message: "#^Property app\\\\models\\\\gradeable\\\\Gradeable\\:\\:\\$grade_released_date has no type specified\\.$#"
-			count: 1
-			path: app/models/gradeable/Gradeable.php
-
-		-
-			message: "#^Property app\\\\models\\\\gradeable\\\\Gradeable\\:\\:\\$grade_start_date has no type specified\\.$#"
-			count: 1
-			path: app/models/gradeable/Gradeable.php
-
-		-
-			message: "#^Property app\\\\models\\\\gradeable\\\\Gradeable\\:\\:\\$grader_assignment_method has no type specified\\.$#"
-			count: 1
-			path: app/models/gradeable/Gradeable.php
-
-		-
-			message: "#^Property app\\\\models\\\\gradeable\\\\Gradeable\\:\\:\\$has_due_date has no type specified\\.$#"
-			count: 1
-			path: app/models/gradeable/Gradeable.php
-
-		-
-			message: "#^Property app\\\\models\\\\gradeable\\\\Gradeable\\:\\:\\$has_release_date has no type specified\\.$#"
-			count: 1
-			path: app/models/gradeable/Gradeable.php
-
-		-
-			message: "#^Property app\\\\models\\\\gradeable\\\\Gradeable\\:\\:\\$hidden_files has no type specified\\.$#"
-			count: 1
-			path: app/models/gradeable/Gradeable.php
-
-		-
-			message: "#^Property app\\\\models\\\\gradeable\\\\Gradeable\\:\\:\\$id has no type specified\\.$#"
-			count: 1
-			path: app/models/gradeable/Gradeable.php
-
-		-
-			message: "#^Property app\\\\models\\\\gradeable\\\\Gradeable\\:\\:\\$instructions_url has no type specified\\.$#"
-			count: 1
-			path: app/models/gradeable/Gradeable.php
-
-		-
-			message: "#^Property app\\\\models\\\\gradeable\\\\Gradeable\\:\\:\\$instructor_blind has no type specified\\.$#"
-			count: 1
-			path: app/models/gradeable/Gradeable.php
-
-		-
-			message: "#^Property app\\\\models\\\\gradeable\\\\Gradeable\\:\\:\\$late_days has no type specified\\.$#"
-			count: 1
-			path: app/models/gradeable/Gradeable.php
-
-		-
-			message: "#^Property app\\\\models\\\\gradeable\\\\Gradeable\\:\\:\\$late_submission_allowed has no type specified\\.$#"
-			count: 1
-			path: app/models/gradeable/Gradeable.php
-
-		-
-			message: "#^Property app\\\\models\\\\gradeable\\\\Gradeable\\:\\:\\$limited_access_blind has no type specified\\.$#"
-			count: 1
-			path: app/models/gradeable/Gradeable.php
-
-		-
-			message: "#^Property app\\\\models\\\\gradeable\\\\Gradeable\\:\\:\\$min_grading_group has no type specified\\.$#"
-			count: 1
-			path: app/models/gradeable/Gradeable.php
-
-		-
-			message: "#^Property app\\\\models\\\\gradeable\\\\Gradeable\\:\\:\\$peer_blind has no type specified\\.$#"
-			count: 1
-			path: app/models/gradeable/Gradeable.php
-
-		-
-			message: "#^Property app\\\\models\\\\gradeable\\\\Gradeable\\:\\:\\$peer_grade_set has no type specified\\.$#"
-			count: 1
-			path: app/models/gradeable/Gradeable.php
-
-		-
-			message: "#^Property app\\\\models\\\\gradeable\\\\Gradeable\\:\\:\\$peer_grading_pairs has no type specified\\.$#"
-			count: 1
-			path: app/models/gradeable/Gradeable.php
-
-		-
-			message: "#^Property app\\\\models\\\\gradeable\\\\Gradeable\\:\\:\\$precision has no type specified\\.$#"
-			count: 1
-			path: app/models/gradeable/Gradeable.php
-
-		-
-			message: "#^Property app\\\\models\\\\gradeable\\\\Gradeable\\:\\:\\$rotating_grader_sections has no type specified\\.$#"
+			message: "#^Property app\\\\models\\\\gradeable\\\\Gradeable\\:\\:\\$rotating_grader_sections \\(array\\<array\\<string\\>\\>\\) does not accept array\\<array\\<int\\<0, max\\>, int\\<1, max\\>\\>\\>\\.$#"
 			count: 1
 			path: app/models/gradeable/Gradeable.php
 
@@ -11187,112 +9897,7 @@ parameters:
 			path: app/models/gradeable/Gradeable.php
 
 		-
-			message: "#^Property app\\\\models\\\\gradeable\\\\Gradeable\\:\\:\\$split_pdf_files has no type specified\\.$#"
-			count: 1
-			path: app/models/gradeable/Gradeable.php
-
-		-
-			message: "#^Property app\\\\models\\\\gradeable\\\\Gradeable\\:\\:\\$student_download has no type specified\\.$#"
-			count: 1
-			path: app/models/gradeable/Gradeable.php
-
-		-
-			message: "#^Property app\\\\models\\\\gradeable\\\\Gradeable\\:\\:\\$student_submit has no type specified\\.$#"
-			count: 1
-			path: app/models/gradeable/Gradeable.php
-
-		-
-			message: "#^Property app\\\\models\\\\gradeable\\\\Gradeable\\:\\:\\$student_view has no type specified\\.$#"
-			count: 1
-			path: app/models/gradeable/Gradeable.php
-
-		-
-			message: "#^Property app\\\\models\\\\gradeable\\\\Gradeable\\:\\:\\$student_view_after_grades has no type specified\\.$#"
-			count: 1
-			path: app/models/gradeable/Gradeable.php
-
-		-
-			message: "#^Property app\\\\models\\\\gradeable\\\\Gradeable\\:\\:\\$submission_due_date has no type specified\\.$#"
-			count: 1
-			path: app/models/gradeable/Gradeable.php
-
-		-
-			message: "#^Property app\\\\models\\\\gradeable\\\\Gradeable\\:\\:\\$submission_open_date has no type specified\\.$#"
-			count: 1
-			path: app/models/gradeable/Gradeable.php
-
-		-
-			message: "#^Property app\\\\models\\\\gradeable\\\\Gradeable\\:\\:\\$syllabus_bucket has no type specified\\.$#"
-			count: 1
-			path: app/models/gradeable/Gradeable.php
-
-		-
-			message: "#^Property app\\\\models\\\\gradeable\\\\Gradeable\\:\\:\\$ta_grading has no type specified\\.$#"
-			count: 1
-			path: app/models/gradeable/Gradeable.php
-
-		-
-			message: "#^Property app\\\\models\\\\gradeable\\\\Gradeable\\:\\:\\$ta_instructions has no type specified\\.$#"
-			count: 1
-			path: app/models/gradeable/Gradeable.php
-
-		-
-			message: "#^Property app\\\\models\\\\gradeable\\\\Gradeable\\:\\:\\$ta_view_start_date has no type specified\\.$#"
-			count: 1
-			path: app/models/gradeable/Gradeable.php
-
-		-
-			message: "#^Property app\\\\models\\\\gradeable\\\\Gradeable\\:\\:\\$team_assignment has no type specified\\.$#"
-			count: 1
-			path: app/models/gradeable/Gradeable.php
-
-		-
-			message: "#^Property app\\\\models\\\\gradeable\\\\Gradeable\\:\\:\\$team_lock_date has no type specified\\.$#"
-			count: 1
-			path: app/models/gradeable/Gradeable.php
-
-		-
-			message: "#^Property app\\\\models\\\\gradeable\\\\Gradeable\\:\\:\\$team_size_max has no type specified\\.$#"
-			count: 1
-			path: app/models/gradeable/Gradeable.php
-
-		-
-			message: "#^Property app\\\\models\\\\gradeable\\\\Gradeable\\:\\:\\$teams has no type specified\\.$#"
-			count: 1
-			path: app/models/gradeable/Gradeable.php
-
-		-
-			message: "#^Property app\\\\models\\\\gradeable\\\\Gradeable\\:\\:\\$title has no type specified\\.$#"
-			count: 1
-			path: app/models/gradeable/Gradeable.php
-
-		-
-			message: "#^Property app\\\\models\\\\gradeable\\\\Gradeable\\:\\:\\$type has no type specified\\.$#"
-			count: 1
-			path: app/models/gradeable/Gradeable.php
-
-		-
-			message: "#^Property app\\\\models\\\\gradeable\\\\Gradeable\\:\\:\\$using_subdirectory has no type specified\\.$#"
-			count: 1
-			path: app/models/gradeable/Gradeable.php
-
-		-
-			message: "#^Property app\\\\models\\\\gradeable\\\\Gradeable\\:\\:\\$vcs has no type specified\\.$#"
-			count: 1
-			path: app/models/gradeable/Gradeable.php
-
-		-
-			message: "#^Property app\\\\models\\\\gradeable\\\\Gradeable\\:\\:\\$vcs_host_type has no type specified\\.$#"
-			count: 1
-			path: app/models/gradeable/Gradeable.php
-
-		-
-			message: "#^Property app\\\\models\\\\gradeable\\\\Gradeable\\:\\:\\$vcs_partial_path has no type specified\\.$#"
-			count: 1
-			path: app/models/gradeable/Gradeable.php
-
-		-
-			message: "#^Property app\\\\models\\\\gradeable\\\\Gradeable\\:\\:\\$vcs_subdirectory has no type specified\\.$#"
+			message: "#^Property app\\\\models\\\\gradeable\\\\Gradeable\\:\\:\\$split_pdf_files type has no value type specified in iterable type array\\.$#"
 			count: 1
 			path: app/models/gradeable/Gradeable.php
 
@@ -11300,41 +9905,6 @@ parameters:
 			message: "#^Result of && is always true\\.$#"
 			count: 1
 			path: app/models/gradeable/Gradeable.php
-
-		-
-			message: "#^Property app\\\\models\\\\gradeable\\\\GradeableList\\:\\:\\$beta_gradeables has no type specified\\.$#"
-			count: 1
-			path: app/models/gradeable/GradeableList.php
-
-		-
-			message: "#^Property app\\\\models\\\\gradeable\\\\GradeableList\\:\\:\\$closed_gradeables has no type specified\\.$#"
-			count: 1
-			path: app/models/gradeable/GradeableList.php
-
-		-
-			message: "#^Property app\\\\models\\\\gradeable\\\\GradeableList\\:\\:\\$future_gradeables has no type specified\\.$#"
-			count: 1
-			path: app/models/gradeable/GradeableList.php
-
-		-
-			message: "#^Property app\\\\models\\\\gradeable\\\\GradeableList\\:\\:\\$graded_gradeables has no type specified\\.$#"
-			count: 1
-			path: app/models/gradeable/GradeableList.php
-
-		-
-			message: "#^Property app\\\\models\\\\gradeable\\\\GradeableList\\:\\:\\$grading_gradeables has no type specified\\.$#"
-			count: 1
-			path: app/models/gradeable/GradeableList.php
-
-		-
-			message: "#^Property app\\\\models\\\\gradeable\\\\GradeableList\\:\\:\\$open_gradeables has no type specified\\.$#"
-			count: 1
-			path: app/models/gradeable/GradeableList.php
-
-		-
-			message: "#^Property app\\\\models\\\\gradeable\\\\GradeableList\\:\\:\\$user has no type specified\\.$#"
-			count: 1
-			path: app/models/gradeable/GradeableList.php
 
 		-
 			message: "#^Method app\\\\models\\\\gradeable\\\\GradeableUtils\\:\\:getAllGradeableListFromUserId\\(\\) has parameter \\$calendar_messages with no value type specified in iterable type array\\.$#"
@@ -11427,57 +9997,17 @@ parameters:
 			path: app/models/gradeable/GradedComponent.php
 
 		-
-			message: "#^Property app\\\\models\\\\gradeable\\\\GradedComponent\\:\\:\\$comment has no type specified\\.$#"
+			message: "#^Property app\\\\models\\\\gradeable\\\\GradedComponent\\:\\:\\$component_id \\(string\\) does not accept default value of type int\\.$#"
 			count: 1
 			path: app/models/gradeable/GradedComponent.php
 
 		-
-			message: "#^Property app\\\\models\\\\gradeable\\\\GradedComponent\\:\\:\\$component_id has no type specified\\.$#"
+			message: "#^Property app\\\\models\\\\gradeable\\\\GradedComponent\\:\\:\\$grade_time \\(DateTime\\) does not accept null\\.$#"
 			count: 1
 			path: app/models/gradeable/GradedComponent.php
 
 		-
-			message: "#^Property app\\\\models\\\\gradeable\\\\GradedComponent\\:\\:\\$db_mark_ids has no type specified\\.$#"
-			count: 1
-			path: app/models/gradeable/GradedComponent.php
-
-		-
-			message: "#^Property app\\\\models\\\\gradeable\\\\GradedComponent\\:\\:\\$grade_time has no type specified\\.$#"
-			count: 1
-			path: app/models/gradeable/GradedComponent.php
-
-		-
-			message: "#^Property app\\\\models\\\\gradeable\\\\GradedComponent\\:\\:\\$graded_version has no type specified\\.$#"
-			count: 1
-			path: app/models/gradeable/GradedComponent.php
-
-		-
-			message: "#^Property app\\\\models\\\\gradeable\\\\GradedComponent\\:\\:\\$grader_id has no type specified\\.$#"
-			count: 1
-			path: app/models/gradeable/GradedComponent.php
-
-		-
-			message: "#^Property app\\\\models\\\\gradeable\\\\GradedComponent\\:\\:\\$mark_ids has no type specified\\.$#"
-			count: 1
-			path: app/models/gradeable/GradedComponent.php
-
-		-
-			message: "#^Property app\\\\models\\\\gradeable\\\\GradedComponent\\:\\:\\$marks_modified has no type specified\\.$#"
-			count: 1
-			path: app/models/gradeable/GradedComponent.php
-
-		-
-			message: "#^Property app\\\\models\\\\gradeable\\\\GradedComponent\\:\\:\\$score has no type specified\\.$#"
-			count: 1
-			path: app/models/gradeable/GradedComponent.php
-
-		-
-			message: "#^Property app\\\\models\\\\gradeable\\\\GradedComponent\\:\\:\\$verifier_id has no type specified\\.$#"
-			count: 1
-			path: app/models/gradeable/GradedComponent.php
-
-		-
-			message: "#^Property app\\\\models\\\\gradeable\\\\GradedComponent\\:\\:\\$verify_time has no type specified\\.$#"
+			message: "#^Property app\\\\models\\\\gradeable\\\\GradedComponent\\:\\:\\$verify_time \\(DateTime\\) does not accept null\\.$#"
 			count: 1
 			path: app/models/gradeable/GradedComponent.php
 
@@ -11512,9 +10042,14 @@ parameters:
 			path: app/models/gradeable/GradedComponentContainer.php
 
 		-
-			message: "#^Property app\\\\models\\\\gradeable\\\\GradedComponentContainer\\:\\:\\$graded_components has no type specified\\.$#"
+			message: "#^Cannot call method getComment\\(\\) on app\\\\models\\\\gradeable\\\\SimpleGradeOverriddenUser\\|bool\\.$#"
 			count: 1
-			path: app/models/gradeable/GradedComponentContainer.php
+			path: app/models/gradeable/GradedGradeable.php
+
+		-
+			message: "#^Cannot call method getMarks\\(\\) on app\\\\models\\\\gradeable\\\\SimpleGradeOverriddenUser\\|bool\\.$#"
+			count: 1
+			path: app/models/gradeable/GradedGradeable.php
 
 		-
 			message: "#^Method app\\\\models\\\\gradeable\\\\GradedGradeable\\:\\:__construct\\(\\) has parameter \\$details with no value type specified in iterable type array\\.$#"
@@ -11582,37 +10117,22 @@ parameters:
 			path: app/models/gradeable/GradedGradeable.php
 
 		-
-			message: "#^Property app\\\\models\\\\gradeable\\\\GradedGradeable\\:\\:\\$auto_graded_gradeable has no type specified\\.$#"
+			message: "#^Property app\\\\models\\\\gradeable\\\\GradedGradeable\\:\\:\\$grade_inquiries type has no value type specified in iterable type array\\.$#"
 			count: 1
 			path: app/models/gradeable/GradedGradeable.php
 
 		-
-			message: "#^Property app\\\\models\\\\gradeable\\\\GradedGradeable\\:\\:\\$grade_inquiries has no type specified\\.$#"
+			message: "#^Property app\\\\models\\\\gradeable\\\\GradedGradeable\\:\\:\\$late_day_exceptions type has no value type specified in iterable type array\\.$#"
 			count: 1
 			path: app/models/gradeable/GradedGradeable.php
 
 		-
-			message: "#^Property app\\\\models\\\\gradeable\\\\GradedGradeable\\:\\:\\$gradeable_id has no type specified\\.$#"
+			message: "#^Property app\\\\models\\\\gradeable\\\\GradedGradeable\\:\\:\\$overridden_grades \\(app\\\\models\\\\gradeable\\\\SimpleGradeOverriddenUser\\|bool\\|null\\) does not accept app\\\\models\\\\SimpleGradeOverriddenUser\\|null\\.$#"
 			count: 1
 			path: app/models/gradeable/GradedGradeable.php
 
 		-
-			message: "#^Property app\\\\models\\\\gradeable\\\\GradedGradeable\\:\\:\\$late_day_exceptions has no type specified\\.$#"
-			count: 1
-			path: app/models/gradeable/GradedGradeable.php
-
-		-
-			message: "#^Property app\\\\models\\\\gradeable\\\\GradedGradeable\\:\\:\\$overridden_grades has no type specified\\.$#"
-			count: 1
-			path: app/models/gradeable/GradedGradeable.php
-
-		-
-			message: "#^Property app\\\\models\\\\gradeable\\\\GradedGradeable\\:\\:\\$submitter has no type specified\\.$#"
-			count: 1
-			path: app/models/gradeable/GradedGradeable.php
-
-		-
-			message: "#^Property app\\\\models\\\\gradeable\\\\GradedGradeable\\:\\:\\$ta_graded_gradeable has no type specified\\.$#"
+			message: "#^Property app\\\\models\\\\gradeable\\\\GradedGradeable\\:\\:\\$overridden_grades has unknown class app\\\\models\\\\gradeable\\\\SimpleGradeOverriddenUser as its type\\.$#"
 			count: 1
 			path: app/models/gradeable/GradedGradeable.php
 
@@ -11652,51 +10172,6 @@ parameters:
 			path: app/models/gradeable/LateDayInfo.php
 
 		-
-			message: "#^Property app\\\\models\\\\gradeable\\\\LateDayInfo\\:\\:\\$has_late_day_info has no type specified\\.$#"
-			count: 1
-			path: app/models/gradeable/LateDayInfo.php
-
-		-
-			message: "#^Property app\\\\models\\\\gradeable\\\\LateDayInfo\\:\\:\\$has_submission has no type specified\\.$#"
-			count: 1
-			path: app/models/gradeable/LateDayInfo.php
-
-		-
-			message: "#^Property app\\\\models\\\\gradeable\\\\LateDayInfo\\:\\:\\$id has no type specified\\.$#"
-			count: 1
-			path: app/models/gradeable/LateDayInfo.php
-
-		-
-			message: "#^Property app\\\\models\\\\gradeable\\\\LateDayInfo\\:\\:\\$late_day_date has no type specified\\.$#"
-			count: 1
-			path: app/models/gradeable/LateDayInfo.php
-
-		-
-			message: "#^Property app\\\\models\\\\gradeable\\\\LateDayInfo\\:\\:\\$late_day_exceptions has no type specified\\.$#"
-			count: 1
-			path: app/models/gradeable/LateDayInfo.php
-
-		-
-			message: "#^Property app\\\\models\\\\gradeable\\\\LateDayInfo\\:\\:\\$late_days_allowed has no type specified\\.$#"
-			count: 1
-			path: app/models/gradeable/LateDayInfo.php
-
-		-
-			message: "#^Property app\\\\models\\\\gradeable\\\\LateDayInfo\\:\\:\\$late_days_change has no type specified\\.$#"
-			count: 1
-			path: app/models/gradeable/LateDayInfo.php
-
-		-
-			message: "#^Property app\\\\models\\\\gradeable\\\\LateDayInfo\\:\\:\\$late_days_remaining has no type specified\\.$#"
-			count: 1
-			path: app/models/gradeable/LateDayInfo.php
-
-		-
-			message: "#^Property app\\\\models\\\\gradeable\\\\LateDayInfo\\:\\:\\$submission_days_late has no type specified\\.$#"
-			count: 1
-			path: app/models/gradeable/LateDayInfo.php
-
-		-
 			message: "#^Method app\\\\models\\\\gradeable\\\\LateDays\\:\\:__construct\\(\\) has parameter \\$late_day_updates with no value type specified in iterable type array\\.$#"
 			count: 1
 			path: app/models/gradeable/LateDays.php
@@ -11707,37 +10182,12 @@ parameters:
 			path: app/models/gradeable/LateDays.php
 
 		-
-			message: "#^Property app\\\\models\\\\gradeable\\\\LateDays\\:\\:\\$late_day_info has no type specified\\.$#"
-			count: 1
-			path: app/models/gradeable/LateDays.php
-
-		-
-			message: "#^Property app\\\\models\\\\gradeable\\\\LateDays\\:\\:\\$late_days_updates has no type specified\\.$#"
+			message: "#^Property app\\\\models\\\\gradeable\\\\LateDays\\:\\:\\$late_days_updates type has no value type specified in iterable type array\\.$#"
 			count: 1
 			path: app/models/gradeable/LateDays.php
 
 		-
 			message: "#^Method app\\\\models\\\\gradeable\\\\LeaderboardConfig\\:\\:__construct\\(\\) has parameter \\$details with no value type specified in iterable type array\\.$#"
-			count: 1
-			path: app/models/gradeable/LeaderboardConfig.php
-
-		-
-			message: "#^Property app\\\\models\\\\gradeable\\\\LeaderboardConfig\\:\\:\\$description has no type specified\\.$#"
-			count: 1
-			path: app/models/gradeable/LeaderboardConfig.php
-
-		-
-			message: "#^Property app\\\\models\\\\gradeable\\\\LeaderboardConfig\\:\\:\\$tag has no type specified\\.$#"
-			count: 1
-			path: app/models/gradeable/LeaderboardConfig.php
-
-		-
-			message: "#^Property app\\\\models\\\\gradeable\\\\LeaderboardConfig\\:\\:\\$title has no type specified\\.$#"
-			count: 1
-			path: app/models/gradeable/LeaderboardConfig.php
-
-		-
-			message: "#^Property app\\\\models\\\\gradeable\\\\LeaderboardConfig\\:\\:\\$top_visible_students has no type specified\\.$#"
 			count: 1
 			path: app/models/gradeable/LeaderboardConfig.php
 
@@ -11773,36 +10223,6 @@ parameters:
 
 		-
 			message: "#^Method app\\\\models\\\\gradeable\\\\Mark\\:\\:setPoints\\(\\) has no return type specified\\.$#"
-			count: 1
-			path: app/models/gradeable/Mark.php
-
-		-
-			message: "#^Property app\\\\models\\\\gradeable\\\\Mark\\:\\:\\$any_receivers has no type specified\\.$#"
-			count: 1
-			path: app/models/gradeable/Mark.php
-
-		-
-			message: "#^Property app\\\\models\\\\gradeable\\\\Mark\\:\\:\\$id has no type specified\\.$#"
-			count: 1
-			path: app/models/gradeable/Mark.php
-
-		-
-			message: "#^Property app\\\\models\\\\gradeable\\\\Mark\\:\\:\\$order has no type specified\\.$#"
-			count: 1
-			path: app/models/gradeable/Mark.php
-
-		-
-			message: "#^Property app\\\\models\\\\gradeable\\\\Mark\\:\\:\\$points has no type specified\\.$#"
-			count: 1
-			path: app/models/gradeable/Mark.php
-
-		-
-			message: "#^Property app\\\\models\\\\gradeable\\\\Mark\\:\\:\\$publish has no type specified\\.$#"
-			count: 1
-			path: app/models/gradeable/Mark.php
-
-		-
-			message: "#^Property app\\\\models\\\\gradeable\\\\Mark\\:\\:\\$title has no type specified\\.$#"
 			count: 1
 			path: app/models/gradeable/Mark.php
 
@@ -11947,37 +10367,7 @@ parameters:
 			path: app/models/gradeable/TaGradedGradeable.php
 
 		-
-			message: "#^Property app\\\\models\\\\gradeable\\\\TaGradedGradeable\\:\\:\\$attachments has no type specified\\.$#"
-			count: 1
-			path: app/models/gradeable/TaGradedGradeable.php
-
-		-
-			message: "#^Property app\\\\models\\\\gradeable\\\\TaGradedGradeable\\:\\:\\$deleted_graded_components has no type specified\\.$#"
-			count: 1
-			path: app/models/gradeable/TaGradedGradeable.php
-
-		-
-			message: "#^Property app\\\\models\\\\gradeable\\\\TaGradedGradeable\\:\\:\\$graded_component_containers has no type specified\\.$#"
-			count: 1
-			path: app/models/gradeable/TaGradedGradeable.php
-
-		-
-			message: "#^Property app\\\\models\\\\gradeable\\\\TaGradedGradeable\\:\\:\\$graded_gradeable has no type specified\\.$#"
-			count: 1
-			path: app/models/gradeable/TaGradedGradeable.php
-
-		-
-			message: "#^Property app\\\\models\\\\gradeable\\\\TaGradedGradeable\\:\\:\\$id has no type specified\\.$#"
-			count: 1
-			path: app/models/gradeable/TaGradedGradeable.php
-
-		-
-			message: "#^Property app\\\\models\\\\gradeable\\\\TaGradedGradeable\\:\\:\\$overall_comments has no type specified\\.$#"
-			count: 1
-			path: app/models/gradeable/TaGradedGradeable.php
-
-		-
-			message: "#^Property app\\\\models\\\\gradeable\\\\TaGradedGradeable\\:\\:\\$user_viewed_date has no type specified\\.$#"
+			message: "#^Property app\\\\models\\\\gradeable\\\\TaGradedGradeable\\:\\:\\$attachments type has no value type specified in iterable type array\\.$#"
 			count: 1
 			path: app/models/gradeable/TaGradedGradeable.php
 
@@ -11998,11 +10388,6 @@ parameters:
 
 		-
 			message: "#^Method app\\\\models\\\\notebook\\\\AbstractNotebookInput\\:\\:__construct\\(\\) has parameter \\$details with no value type specified in iterable type array\\.$#"
-			count: 1
-			path: app/models/notebook/AbstractNotebookInput.php
-
-		-
-			message: "#^Property app\\\\models\\\\notebook\\\\AbstractNotebookInput\\:\\:\\$file_name has no type specified\\.$#"
 			count: 1
 			path: app/models/notebook/AbstractNotebookInput.php
 
@@ -12047,32 +10432,27 @@ parameters:
 			path: app/models/notebook/Notebook.php
 
 		-
-			message: "#^Property app\\\\models\\\\notebook\\\\Notebook\\:\\:\\$file_submissions has no type specified\\.$#"
+			message: "#^Property app\\\\models\\\\notebook\\\\Notebook\\:\\:\\$file_submissions type has no value type specified in iterable type array\\.$#"
 			count: 1
 			path: app/models/notebook/Notebook.php
 
 		-
-			message: "#^Property app\\\\models\\\\notebook\\\\Notebook\\:\\:\\$gradeable_id has no type specified\\.$#"
+			message: "#^Property app\\\\models\\\\notebook\\\\Notebook\\:\\:\\$image_paths type has no value type specified in iterable type array\\.$#"
 			count: 1
 			path: app/models/notebook/Notebook.php
 
 		-
-			message: "#^Property app\\\\models\\\\notebook\\\\Notebook\\:\\:\\$image_paths has no type specified\\.$#"
+			message: "#^Property app\\\\models\\\\notebook\\\\Notebook\\:\\:\\$inputs type has no value type specified in iterable type array\\.$#"
 			count: 1
 			path: app/models/notebook/Notebook.php
 
 		-
-			message: "#^Property app\\\\models\\\\notebook\\\\Notebook\\:\\:\\$inputs has no type specified\\.$#"
+			message: "#^Property app\\\\models\\\\notebook\\\\Notebook\\:\\:\\$item_pool type has no value type specified in iterable type array\\.$#"
 			count: 1
 			path: app/models/notebook/Notebook.php
 
 		-
-			message: "#^Property app\\\\models\\\\notebook\\\\Notebook\\:\\:\\$item_pool has no type specified\\.$#"
-			count: 1
-			path: app/models/notebook/Notebook.php
-
-		-
-			message: "#^Property app\\\\models\\\\notebook\\\\Notebook\\:\\:\\$notebook has no type specified\\.$#"
+			message: "#^Property app\\\\models\\\\notebook\\\\Notebook\\:\\:\\$notebook type has no value type specified in iterable type array\\.$#"
 			count: 1
 			path: app/models/notebook/Notebook.php
 
@@ -12082,37 +10462,12 @@ parameters:
 			path: app/models/notebook/SubmissionCodeBox.php
 
 		-
-			message: "#^Property app\\\\models\\\\notebook\\\\SubmissionCodeBox\\:\\:\\$codeMirrorMode has no type specified\\.$#"
-			count: 1
-			path: app/models/notebook/SubmissionCodeBox.php
-
-		-
-			message: "#^Property app\\\\models\\\\notebook\\\\SubmissionCodeBox\\:\\:\\$language has no type specified\\.$#"
-			count: 1
-			path: app/models/notebook/SubmissionCodeBox.php
-
-		-
-			message: "#^Property app\\\\models\\\\notebook\\\\SubmissionCodeBox\\:\\:\\$row_count has no type specified\\.$#"
-			count: 1
-			path: app/models/notebook/SubmissionCodeBox.php
-
-		-
 			message: "#^Method app\\\\models\\\\notebook\\\\SubmissionMultipleChoice\\:\\:__construct\\(\\) has parameter \\$details with no value type specified in iterable type array\\.$#"
 			count: 1
 			path: app/models/notebook/SubmissionMultipleChoice.php
 
 		-
-			message: "#^Property app\\\\models\\\\notebook\\\\SubmissionMultipleChoice\\:\\:\\$allow_multiple has no type specified\\.$#"
-			count: 1
-			path: app/models/notebook/SubmissionMultipleChoice.php
-
-		-
-			message: "#^Property app\\\\models\\\\notebook\\\\SubmissionMultipleChoice\\:\\:\\$choices has no type specified\\.$#"
-			count: 1
-			path: app/models/notebook/SubmissionMultipleChoice.php
-
-		-
-			message: "#^Property app\\\\models\\\\notebook\\\\SubmissionMultipleChoice\\:\\:\\$randomize_order has no type specified\\.$#"
+			message: "#^Property app\\\\models\\\\notebook\\\\SubmissionMultipleChoice\\:\\:\\$choices type has no value type specified in iterable type array\\.$#"
 			count: 1
 			path: app/models/notebook/SubmissionMultipleChoice.php
 
@@ -12147,27 +10502,27 @@ parameters:
 			path: app/models/notebook/UserSpecificNotebook.php
 
 		-
-			message: "#^Property app\\\\models\\\\notebook\\\\UserSpecificNotebook\\:\\:\\$hashes has no type specified\\.$#"
+			message: "#^Property app\\\\models\\\\notebook\\\\UserSpecificNotebook\\:\\:\\$hashes type has no value type specified in iterable type array\\.$#"
 			count: 1
 			path: app/models/notebook/UserSpecificNotebook.php
 
 		-
-			message: "#^Property app\\\\models\\\\notebook\\\\UserSpecificNotebook\\:\\:\\$item_pool has no type specified\\.$#"
+			message: "#^Property app\\\\models\\\\notebook\\\\UserSpecificNotebook\\:\\:\\$item_pool type has no value type specified in iterable type array\\.$#"
 			count: 1
 			path: app/models/notebook/UserSpecificNotebook.php
 
 		-
-			message: "#^Property app\\\\models\\\\notebook\\\\UserSpecificNotebook\\:\\:\\$notebook_config has no type specified\\.$#"
+			message: "#^Property app\\\\models\\\\notebook\\\\UserSpecificNotebook\\:\\:\\$notebook_config type has no value type specified in iterable type array\\.$#"
 			count: 1
 			path: app/models/notebook/UserSpecificNotebook.php
 
 		-
-			message: "#^Property app\\\\models\\\\notebook\\\\UserSpecificNotebook\\:\\:\\$selected_questions has no type specified\\.$#"
+			message: "#^Property app\\\\models\\\\notebook\\\\UserSpecificNotebook\\:\\:\\$selected_questions type has no value type specified in iterable type array\\.$#"
 			count: 1
 			path: app/models/notebook/UserSpecificNotebook.php
 
 		-
-			message: "#^Property app\\\\models\\\\notebook\\\\UserSpecificNotebook\\:\\:\\$test_cases has no type specified\\.$#"
+			message: "#^Property app\\\\models\\\\notebook\\\\UserSpecificNotebook\\:\\:\\$test_cases type has no value type specified in iterable type array\\.$#"
 			count: 1
 			path: app/models/notebook/UserSpecificNotebook.php
 
@@ -12177,27 +10532,22 @@ parameters:
 			path: app/models/notebook/UserSpecificNotebook.php
 
 		-
-			message: "#^Property app\\\\models\\\\notebook\\\\UserSpecificNotebook\\:\\:\\$warning has no type specified\\.$#"
-			count: 1
-			path: app/models/notebook/UserSpecificNotebook.php
-
-		-
-			message: "#^Class app\\\\repositories\\\\SessionRepository extends generic class Doctrine\\\\ORM\\\\EntityRepository but does not specify its types\\: T$#"
+			message: "#^Class app\\\\repositories\\\\SessionRepository extends generic class Doctrine\\\\ORM\\\\EntityRepository but does not specify its types\\: TEntityClass$#"
 			count: 1
 			path: app/repositories/SessionRepository.php
 
 		-
-			message: "#^Class app\\\\repositories\\\\VcsAuthTokenRepository extends generic class Doctrine\\\\ORM\\\\EntityRepository but does not specify its types\\: T$#"
+			message: "#^Class app\\\\repositories\\\\VcsAuthTokenRepository extends generic class Doctrine\\\\ORM\\\\EntityRepository but does not specify its types\\: TEntityClass$#"
 			count: 1
 			path: app/repositories/VcsAuthTokenRepository.php
 
 		-
-			message: "#^Class app\\\\repositories\\\\course\\\\CourseMaterialRepository extends generic class Doctrine\\\\ORM\\\\EntityRepository but does not specify its types\\: T$#"
+			message: "#^Class app\\\\repositories\\\\course\\\\CourseMaterialRepository extends generic class Doctrine\\\\ORM\\\\EntityRepository but does not specify its types\\: TEntityClass$#"
 			count: 1
 			path: app/repositories/course/CourseMaterialRepository.php
 
 		-
-			message: "#^Class app\\\\repositories\\\\email\\\\EmailRepository extends generic class Doctrine\\\\ORM\\\\EntityRepository but does not specify its types\\: T$#"
+			message: "#^Class app\\\\repositories\\\\email\\\\EmailRepository extends generic class Doctrine\\\\ORM\\\\EntityRepository but does not specify its types\\: TEntityClass$#"
 			count: 1
 			path: app/repositories/email/EmailRepository.php
 
@@ -12247,7 +10597,7 @@ parameters:
 			path: app/repositories/email/EmailRepository.php
 
 		-
-			message: "#^Class app\\\\repositories\\\\poll\\\\OptionRepository extends generic class Doctrine\\\\ORM\\\\EntityRepository but does not specify its types\\: T$#"
+			message: "#^Class app\\\\repositories\\\\poll\\\\OptionRepository extends generic class Doctrine\\\\ORM\\\\EntityRepository but does not specify its types\\: TEntityClass$#"
 			count: 1
 			path: app/repositories/poll/OptionRepository.php
 
@@ -12257,7 +10607,7 @@ parameters:
 			path: app/repositories/poll/OptionRepository.php
 
 		-
-			message: "#^Class app\\\\repositories\\\\poll\\\\PollRepository extends generic class Doctrine\\\\ORM\\\\EntityRepository but does not specify its types\\: T$#"
+			message: "#^Class app\\\\repositories\\\\poll\\\\PollRepository extends generic class Doctrine\\\\ORM\\\\EntityRepository but does not specify its types\\: TEntityClass$#"
 			count: 1
 			path: app/repositories/poll/PollRepository.php
 
@@ -13788,6 +12138,16 @@ parameters:
 
 		-
 			message: "#^Method app\\\\views\\\\grading\\\\ElectronicGraderView\\:\\:detailsPage\\(\\) has parameter \\$graders with no value type specified in iterable type array\\.$#"
+			count: 1
+			path: app/views/grading/ElectronicGraderView.php
+
+		-
+			message: "#^Method app\\\\views\\\\grading\\\\ElectronicGraderView\\:\\:detailsPage\\(\\) has parameter \\$inquiry_only with no type specified\\.$#"
+			count: 1
+			path: app/views/grading/ElectronicGraderView.php
+
+		-
+			message: "#^Method app\\\\views\\\\grading\\\\ElectronicGraderView\\:\\:detailsPage\\(\\) has parameter \\$inquiry_status with no type specified\\.$#"
 			count: 1
 			path: app/views/grading/ElectronicGraderView.php
 
