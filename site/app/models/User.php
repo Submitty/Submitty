@@ -136,6 +136,8 @@ class User extends AbstractModel {
     protected $rotating_section = null;
     /** @var string Appropriate time zone string from DateUtils::getAvailableTimeZones() */
     protected $time_zone;
+    /** @var string|null The name of the preferred locale */
+    protected $preferred_locale = null;
     /** @prop @var string What is the registration subsection that the user was assigned to for the course */
     protected $registration_subsection = "";
     /** @prop @var string What is the registration type of the user (graded, audit, withdrawn, staff) for the course */
@@ -252,6 +254,11 @@ class User extends AbstractModel {
 
         $this->time_zone = $details['time_zone'] ?? 'NOT_SET/NOT_SET';
 
+        if (isset($details['user_preferred_locale'])) {
+            $this->preferred_locale = $details['user_preferred_locale'];
+            $this->core->getConfig()->setLocale($this->preferred_locale);
+        }
+
         if (isset($details['registration_subsection'])) {
             $this->setRegistrationSubsection($details['registration_subsection']);
         }
@@ -343,6 +350,31 @@ class User extends AbstractModel {
      */
     public function getNiceFormatTimeZone(): string {
         return $this->time_zone === 'NOT_SET/NOT_SET' ? 'NOT SET' : $this->time_zone;
+    }
+
+
+    /**
+     * Get the user's preferred locale.
+     */
+    public function getPreferredLocale(): string|null {
+        return $this->preferred_locale;
+    }
+
+    /**
+     * Update the user's preferred locale.
+     *
+     * @param string $locale The desired new locale, must be one of Core::getSupportedLocales()
+     * @return bool Whether or not the operation was successful
+     */
+    public function setPreferredLocale(string|null $locale): bool {
+        if (is_null($locale) || in_array($locale, $this->core->getSupportedLocales())) {
+            $success = $this->core->getQueries()->updateSubmittyUserPreferredLocale($this, $locale);
+            if ($success) {
+                $this->preferred_locale = $locale;
+                return true;
+            }
+        }
+        return false;
     }
 
 
