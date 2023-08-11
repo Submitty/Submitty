@@ -180,7 +180,7 @@ describe('Test cases involving late day cache updates', () => {
             calculateCache();
         });
 
-        it.only('should grant students with extensions', () => {
+        it('should grant students with extensions', () => {
             cy.visit(['sample', 'extensions']);
 
             cy.get('#gradeable-select').select('Late Allowed Homework');
@@ -207,7 +207,7 @@ describe('Test cases involving late day cache updates', () => {
             CheckStatusUpdated(2,0);
         });
 
-        it.only('should remove late day cache after deletion of extension', () => {
+        it('should remove late day cache after deletion of extension', () => {
             cy.visit(['sample', 'extensions']);
             cy.login('instructor');
 
@@ -362,7 +362,7 @@ describe('Test cases involving late day cache updates', () => {
 
             // Check cache
             cy.visit(['sample', 'bulk_late_days']);
-            cy.get('[data-user-content='student'][data-before-content="Late Allowed Homework"] ~')
+            cy.get('[data-user-content="student"][data-before-content="Late Allowed Homework"] ~')
                 .then((cell) => expect(cell.text().trim()).to.equal(''));
         });
 
