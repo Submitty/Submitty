@@ -91,17 +91,22 @@ class Config extends AbstractModel {
      */
     protected $debug = false;
 
-    /** @prop @var string contains the term to use, generally from the $_REQUEST['semester'] global */
+    /** @prop
+     * @var string contains the term to use, generally from the $_REQUEST['semester'] global */
     protected $term;
-    /** @prop @var string contains the course to use, generally from the $_REQUEST['course'] global */
+    /** @prop
+     * @var string contains the course to use, generally from the $_REQUEST['course'] global */
     protected $course;
 
-    /** @prop @var string path on the filesystem that points to the course data directory */
+    /** @prop
+     * @var string path on the filesystem that points to the course data directory */
     protected $config_path;
-    /** @prop @var string path to the json file that contains all the course specific settings */
+    /** @prop
+     * @var string path to the json file that contains all the course specific settings */
     protected $course_json_path;
 
-    /** @prop @var array */
+    /** @prop
+     * @var array */
     protected $course_json = [];
 
     /**
@@ -112,43 +117,58 @@ class Config extends AbstractModel {
     protected $course_loaded = false;
 
     /*** MASTER CONFIG ***/
-    /** @prop @var string */
+    /** @prop
+     * @var string */
     protected $base_url;
-    /** @prop @var string */
+    /** @prop
+     * @var string */
     protected $vcs_url;
-    /** @prop @var string */
+    /** @prop
+     * @var string */
     protected $cgi_url;
-    /** @prop @var int */
+    /** @prop
+     * @var int */
     protected $websocket_port = 8443;
-    /** @prop @var string */
+    /** @prop
+     * @var string */
     protected $authentication;
     /**
      * @prop
      * @var array
      **/
     protected $ldap_options = [];
-    /** @prop @var array */
+    /** @prop
+     * @var array */
     protected $saml_options = [];
-    /** @prop @var DateTimeZone */
+    /** @prop
+     * @var DateTimeZone */
     protected $timezone;
     /** @var string */
     protected $default_timezone = 'America/New_York';
-    /** @prop @var Locale */
-    protected Locale $locale;
-    /** @prop @var string */
-    protected string $default_locale = 'en_US';
-    /** @prop @var string */
+    /** @prop
+     * @var Locale */
+    protected $locale;
+    /** @prop
+     * @var string */
+    protected $default_locale = 'en_US';
+    /** @prop
+     * @var string */
     protected $submitty_path;
-    /** @prop @var string */
+    /** @prop
+     * @var string */
     protected $course_path;
-    /** @prop @var string */
+    /** @prop
+     * @var string */
     protected $submitty_log_path;
-    /** @prop @var bool */
+    /** @prop
+     * @var bool */
     protected $log_exceptions;
-    /** @prop @var string */
+    /** @prop
+     * @var string */
     protected $cgi_tmp_path;
 
-    /** @prop @var string */
+    /** @prop
+     * @var string */
     protected $database_driver = "pgsql";
 
     /**
@@ -193,94 +213,133 @@ class Config extends AbstractModel {
      */
     protected $sys_admin_url = "";
 
-    /** @prop @var string Text shown to all users for system announcement */
+    /** @prop
+     * @var string Text shown to all users for system announcement */
     protected $system_message = '';
 
-    /** @prop @var array */
+    /** @prop
+     * @var array */
     protected $submitty_database_params = [];
 
-    /** @prop @var array */
+    /** @prop
+     * @var array */
     protected $course_database_params = [];
 
-    /** @prop @var array */
+    /** @prop
+     * @var array */
     protected $wrapper_files = [];
 
-    /** @prop @var bool */
+    /** @prop
+     * @var bool */
     protected $email_enabled;
 
-    /** @prop @var string */
+    /** @prop
+     * @var string */
     protected $latest_tag;
-    /** @prop @var string */
+    /** @prop
+     * @var string */
     protected $latest_commit;
 
-    /** @prop @var string */
+    /** @prop
+     * @var string */
     protected $course_name;
-    /** @prop @var string */
+    /** @prop
+     * @var string */
     protected $course_home_url;
-    /** @prop @var int */
+    /** @prop
+     * @var int */
     protected $default_hw_late_days;
-    /** @prop @var int */
+    /** @prop
+     * @var int */
     protected $default_student_late_days;
-    /** @prop @var bool */
+    /** @prop
+     * @var bool */
     protected $zero_rubric_grades;
 
-    /** @prop @var string */
+    /** @prop
+     * @var string */
     protected $upload_message;
-    /** @prop @var bool */
+    /** @prop
+     * @var bool */
     protected $display_rainbow_grades_summary;
-    /** @prop @var bool */
+    /** @prop
+     * @var bool */
     protected $display_custom_message;
-    /** @prop @var string*/
+    /** @prop
+     * @var string*/
     protected $course_email;
-    /** @prop @var string */
+    /** @prop
+     * @var string */
     protected $vcs_base_url;
-    /** @prop @var string */
+    /** @prop
+     * @var string */
     protected $vcs_type;
-    /** @prop @var string */
+    /** @prop
+     * @var string */
     protected $private_repository;
-    /** @prop @var array */
+    /** @prop
+     * @var array */
     protected $hidden_details;
-    /** @prop @var bool */
+    /** @prop
+     * @var bool */
     protected $forum_enabled;
-    /** @prop @var string */
+    /** @prop
+     * @var string */
     protected $forum_create_thread_message;
-    /** @prop @var string */
+    /** @prop
+     * @var string */
     protected $grade_inquiry_message;
-    /** @prop @var bool */
+    /** @prop
+     * @var bool */
     protected $seating_only_for_instructor;
-    /** @prop @var string|null */
+    /** @prop
+     * @var string|null */
     protected $room_seating_gradeable_id;
-    /** @prop @var bool */
+    /** @prop
+     * @var bool */
     protected $auto_rainbow_grades;
-    /** @prop @var string */
+    /** @prop
+     * @var string */
     protected $secret_session;
-    /** @prop-read @var string|null */
+    /** @prop-read
+     * @var string|null */
     protected $verified_submitty_admin_user = null;
-    /** @prop @var bool */
+    /** @prop
+     * @var bool */
     protected $queue_enabled;
-    /** @prop @var bool */
+    /** @prop
+     * @var bool */
     protected $seek_message_enabled;
-    /** @prop @var string */
+    /** @prop
+     * @var string */
     protected $queue_message;
-    /** @prop @var string */
+    /** @prop
+     * @var string */
     protected $seek_message_instructions;
-    /** @prop @var string */
+    /** @prop
+     * @var string */
     protected $queue_announcement_message;
-    /** @prop @var string */
+    /** @prop
+     * @var string */
     protected $submitty_install_path;
-    /** @prop @var bool */
+    /** @prop
+     * @var bool */
     protected $duck_banner_enabled;
-    /** @prop @var bool */
+    /** @prop
+     * @var bool */
     protected $polls_enabled;
 
 
-    /** @prop-read @var array */
+    /** @prop-read
+     * @var array */
     protected $feature_flags = [];
 
-    /** @prop @var DateTimeFormat */
+    /** @prop
+     * @var DateTimeFormat */
     protected $date_time_format;
 
-    /** @prop @var string */
+    /** @prop
+     * @var string */
     protected $php_user;
 
     /**
