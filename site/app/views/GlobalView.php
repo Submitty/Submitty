@@ -95,6 +95,7 @@ class GlobalView extends AbstractView {
         // ---------------------------
 
 
+        $html_lang = str_replace('_', '-', $this->core->getConfig()->getLocale()->getName());
 
         return $this->core->getOutput()->renderTwigTemplate("GlobalHeader.twig", [
             "messages" => $messages,
@@ -122,6 +123,7 @@ class GlobalView extends AbstractView {
             "service_worker_path" => $this->core->getOutput()->getServiceWorkerPath(),
             "imageDataArray" => $images_data_array,
             "errorImageData" => $error_image_data,
+            "html_lang" => $html_lang
         ]);
     }
 
