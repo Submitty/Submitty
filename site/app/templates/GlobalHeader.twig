@@ -180,7 +180,20 @@
                         {% endfor %}
                     </div>
                 </div>
+    <style>
+        @keyframes slide {
+            0% { transform: translateX(100%); }
+            100% { transform: translateX(-100%); }
+        }
+        
+        #banner {
+            animation: slide 20s linear; 
+        }
 
+        #duckdiv {
+            animation: slide 20s linear;
+        }
+    </style>
 
 <div class="banner" id = "banner">
 {% set image_found = false %}
@@ -201,11 +214,6 @@
             </a>
         {% endif %}
 
-
-
-
-
-        <button class="delete-button" onclick="removeImage(this)">x</button>
       </div>
   {% endfor %}
   <button class="prev-button" onclick="changeImage(-1)">&#10094;</button>
