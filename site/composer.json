@@ -32,7 +32,7 @@
     "maennchen/zipstream-php": "3.1.0",
     "onelogin/php-saml": "4.1.0",
     "php-ds/php-ds": "1.4.1",
-    "ramsey/uuid": "4.2.3",
+    "ramsey/uuid": "4.7.4",
     "symfony/cache": "6.3.2",
     "symfony/config": "6.3.2",
     "symfony/http-foundation": "6.3.2",
