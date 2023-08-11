@@ -518,6 +518,10 @@ $(document).ready(() => {
 
     });
 
+    $("input[name*='display']").change(() => {
+        displayChangeDetectedMessage();
+    });
+
     // Register change handlers to update the status message when form inputs change
     $("input[name*='display_benchmarks']").change(() => {
         displayChangeDetectedMessage();
