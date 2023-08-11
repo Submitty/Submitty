@@ -34,7 +34,7 @@ const calculateCache = () => {
     cy.get('#rebuild-status-label', {timeout: 15000}).should('not.be.visible');
 
     for (const user_id of all_user_ids) {
-        cy.get(`[data-user="${user_id}""] > [data-before-content="Late Days Remaining"]`)
+        cy.get(`[data-user="${user_id}"] > [data-before-content="Late Days Remaining"]`)
             .then((cell) => expect(cell.text().trim()).not.to.equal(''));
     }
 };
@@ -161,7 +161,8 @@ describe('Test cases involving late day cache updates', () => {
             const deleteLateDays = () => {
                 cy.get('div.content').then((table) => {
                     if (table.find('td[data-before-content="Delete"]').length > 0) {
-                        cy.get('td[data-before-content="Delete"]').should('exist').first().click();
+                        cy.get('td[data-before-content="Delete"]').as('deleteButton').should('exist');
+                        cy.get('@deleteButton').first().click();
                         deleteLateDays();
                     }
                 });
@@ -214,7 +215,8 @@ describe('Test cases involving late day cache updates', () => {
             const deleteExtensions = () => {
                 cy.get('body').then((body) => {
                     if (body.find('#extensions-table').length > 0) {
-                        cy.get('#extensions-table > tbody > tr > td > a').should('exist').first().click();
+                        cy.get('#extensions-table > tbody > tr > td > a').should('exist');
+                        cy.get('@deleteButton').first().click();
                         deleteExtensions();
                     }
                 });
