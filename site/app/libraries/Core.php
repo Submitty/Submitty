@@ -956,7 +956,7 @@ class Core {
         if ($this->config !== null) {
             FileUtils::getDirContents(FileUtils::joinPaths($this->config->getSubmittyInstallPath(), "site", "cache", "lang"), $files);
             if (empty($files)) {
-                return array();
+                return [];
             }
             $files = array_filter($files, fn(string $file): bool => str_ends_with($file, ".php"));
             $files = array_map(function (string $file) {
