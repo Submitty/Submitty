@@ -934,4 +934,16 @@ class Core {
 
         return $logged_in;
     }
+
+    /**
+     * Get the lang data for the current locale.
+     *
+     * @return array<mixed>|null
+     */
+    public function getLang(): array|null {
+        if ($this->config !== null) {
+            return $this->config->getLocale()->getLangData();
+        }
+        return null;
+    }
 }
