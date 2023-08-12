@@ -41,17 +41,15 @@ class Option {
 
     /**
      * @ORM\ManyToOne(targetEntity="\app\entities\poll\Poll",inversedBy="options")
-     * @ORM\JoinColumn(name="poll_id", referencedColumnName="poll_id")
+     * @ORM\JoinColumn(name="poll_id", referencedColumnName="poll_id", nullable=false)
      * @var Poll
      */
     private $poll;
 
     /**
      * @ORM\OneToMany(targetEntity="\app\entities\poll\Response",mappedBy="option")
-     * @ORM\JoinColumns({
-     * @ORM\JoinColumn(name="option_id", referencedColumnName="option_id"),
-     * })
-     * @var Collection
+     * @ORM\JoinColumn(name="option_id", referencedColumnName="option_id")
+     * @var Collection<Response>
      */
     private $user_responses;
 

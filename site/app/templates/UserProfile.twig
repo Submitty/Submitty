@@ -14,7 +14,7 @@
             </div>
             <span class="edit-user-img">
                 <button class="icon" data-testid="upload-photo-button" tabindex="0" onclick="showUpdateProfilePhotoForm()" aria-label="Edit user profile photo" title="Edit user profile photo">
-                    <i class="fas fa-upload"></i> Upload profile photo
+                    <i class="fas fa-upload"></i> {{ localize('My_Profile.Upload_profile_photo', "Upload profile photo") }}
                 </button>
             </span>
             <span class="red-message" id="flagged-message" data-flagged="{{ user.getDisplayImageState }}">Your preferred image was flagged as inappropriate.</span>
@@ -133,7 +133,7 @@
                          data-user_time_zone="{{ user_time_zone_with_offset }}"
                          data-available_time_zones="{{ available_time_zones }}"
                    >Time Zone (<span id="utc_offset_stub">UTC Offset <span id="user_utc_offset">{{ user_utc_offset }}</span></span>):
-                       <a target=_blank href="https://submitty.org/student#how-can-i-specify-my-local-timezone" aria-label="How can I specify my local timezone">
+                       <a target="_blank" href="https://submitty.org/student/account/local_timezone" aria-label="How can I specify my local timezone?">
                            <i style="font-style:normal;" class="fa-question-circle"></i>
                        </a>
                    </span>
@@ -143,6 +143,30 @@
                         <label for="time_zone_drop_down">Select Timezone: </label>
                         <select id="time_zone_drop_down" data-testid="time-zone-dropdown"></select>
                     </div>
+                </div>
+            </div>
+            <div class="user-info-cont">
+                <div class="user-info-title">
+                    <span>Preferred Locale (Language/Region):
+                        <a target="_blank" href="https://submitty.org/developer/development_instructions/localization" aria-label="How can I contribute to Language Translation?">
+                            <i style="font-style:normal;" class="fa-question-circle"></i>
+                        </a>
+                    </span>
+                </div>
+                <div class="user-info">
+                    <div class="flex-row-col">
+                        <label for="pref_locale_select">Choose a locale:</label>
+                        {% set user_locale = user.getPreferredLocale() %}
+                        <select id="pref_locale_select">
+                            <option value="0">[Default] | {{ default_locale_name }}</option>
+                            {% for locale, locale_name in supported_locales %}
+                            <option value="{{ locale }}" {% if locale == user_locale %}selected{% endif %}>{{ locale_name }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    {% if user_locale != 'en_US' and user_locale != '' %}
+                    <div class="tip-note" style="text-align: right; margin-left: 25%;">Note: Support for languages other than English is currently incomplete. If you would like to contribute to translation, see our guidelines <a href="https://submitty.org/developer/development_instructions/localization">here</a>.</div>
+                    {% endif %}
                 </div>
             </div>
             <div class="user-info-cont">
