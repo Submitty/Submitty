@@ -19,23 +19,28 @@ use app\models\gradeable\Submitter;
 class GradingSection extends AbstractModel {
     /**
      * If this is a registration section (false for rotating)
-     * @prop @var bool
+     * @prop
+     * @var bool
      */
     protected $registration;
     /**
-     * @prop @var string|null
+     * @prop
+     * @var string|null
      */
     protected $name;
     /**
-     * @prop @var User[]
+     * @prop
+     * @var User[]
      */
     protected $graders;
     /**
-     * @prop @var User[]
+     * @prop
+     * @var User[]
      */
     protected $users;
     /**
-     * @prop @var Team[]
+     * @prop
+     * @var Team[]
      */
     protected $teams;
 
