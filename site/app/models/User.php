@@ -85,12 +85,15 @@ class User extends AbstractModel {
      */
     const LAST_INITIAL_FORMATS = [ "Single", "Multi", "Hyphen-Multi", "None" ];
 
-    /** @prop @var bool Is this user actually loaded (else you cannot access the other member variables) */
+    /** @prop
+     * @var bool Is this user actually loaded (else you cannot access the other member variables) */
     protected $loaded = false;
 
-    /** @prop @var string The id of this user which should be a unique identifier */
+    /** @prop
+     * @var string The id of this user which should be a unique identifier */
     protected $id;
-    /** @prop @var string Alternate ID for a user, such as a campus assigned ID */
+    /** @prop
+     * @var string Alternate ID for a user, such as a campus assigned ID */
     protected $numeric_id = null;
     /**
      * @prop
@@ -98,47 +101,70 @@ class User extends AbstractModel {
      * @link http://php.net/manual/en/function.password-hash.php
      */
     protected $password = null;
-    /** @prop @var string The given name of the user */
+    /** @prop
+     * @var string The given name of the user */
     protected $legal_given_name;
-    /** @prop @var string The preferred given name of the user */
+    /** @prop
+     * @var string The preferred given name of the user */
     protected $preferred_given_name = "";
-    /** @prop @var  string The given name to be displayed by the system (either given name or preferred given name) */
+    /** @prop
+     * @var  string The given name to be displayed by the system (either given name or preferred given name) */
     protected $displayed_given_name;
-    /** @prop @var string The family name of the user */
+    /** @prop
+     * @var string The family name of the user */
     protected $legal_family_name;
-    /** @prop @var string The preferred family name of the user */
+    /** @prop
+     * @var string The preferred family name of the user */
     protected $preferred_family_name = "";
-    /** @prop @var  string The family name to be displayed by the system (either family name or preferred family name) */
+    /** @prop
+     * @var  string The family name to be displayed by the system (either family name or preferred family name) */
     protected $displayed_family_name;
-    /** @prop @var string The pronouns of the user */
+    /** @prop
+     * @var string The pronouns of the user */
     protected $pronouns = "";
-    /** @prop @var bool The display pronouns option of the user */
+    /** @prop
+     * @var bool The display pronouns option of the user */
     protected bool $display_pronouns = false;
-    /** @prop @var int The display format for the last initial of the user */
+    /** @prop
+     * @var int The display format for the last initial of the user */
     protected $last_initial_format = 0;
-    /** @prop @var string The primary email of the user */
+    /** @prop
+     * @var string The primary email of the user */
     protected $email;
-    /** @prop @var string The secondary email of the user */
+    /** @prop
+     * @var string The secondary email of the user */
     protected $secondary_email;
-    /** @prop @var string Determines whether or not user chose to receive emails to secondary email */
+    /** @prop
+     * @var string Determines whether or not user chose to receive emails to secondary email */
     protected $email_both;
-    /** @prop @var int The group of the user, used for access controls (ex: student, instructor, etc.) */
+    /** @prop
+     * @var int The group of the user, used for access controls (ex: student, instructor, etc.) */
     protected $group;
-    /** @prop @var int The access level of the user (ex: superuser, faculty, user) */
+    /** @prop
+     * @var int The access level of the user (ex: superuser, faculty, user) */
     protected $access_level;
-    /** @prop @var bool Should the user only have one active session at a time? */
+    /** @prop
+     * @var bool Should the user only have one active session at a time? */
     protected bool $enforce_single_session;
-    /** @prop @var string What is the registration section that the user was assigned to for the course */
+    /** @prop
+     * @var string What is the registration section that the user was assigned to for the course */
     protected $registration_section = null;
-    /** @prop @var string Unique id for course section */
+    /** @prop
+     * @var string Unique id for course section */
     protected $course_section_id = null;
-    /** @prop @var int What is the assigned rotating section for the user */
+    /** @prop
+     * @var int What is the assigned rotating section for the user */
     protected $rotating_section = null;
     /** @var string Appropriate time zone string from DateUtils::getAvailableTimeZones() */
     protected $time_zone;
-    /** @prop @var string What is the registration subsection that the user was assigned to for the course */
+    /** @prop
+     * @var string|null The name of the preferred locale */
+    protected $preferred_locale = null;
+    /** @prop
+     * @var string What is the registration subsection that the user was assigned to for the course */
     protected $registration_subsection = "";
-    /** @prop @var string What is the registration type of the user (graded, audit, withdrawn, staff) for the course */
+    /** @prop
+     * @var string What is the registration type of the user (graded, audit, withdrawn, staff) for the course */
     protected $registration_type;
 
     /**
@@ -165,13 +191,16 @@ class User extends AbstractModel {
      */
     protected $instructor_updated = false;
 
-    /** @prop @var array */
+    /** @prop
+     * @var array */
     protected $grading_registration_sections = [];
 
-    /** @prop @var array */
+    /** @prop
+     * @var array */
     protected $notification_settings = [];
 
-    /** @prop @var string The display_image_state string which can be used to instantiate a DisplayImage object */
+    /** @prop
+     * @var string The display_image_state string which can be used to instantiate a DisplayImage object */
     protected $display_image_state;
 
     /** @var array A cache of [gradeable id] => [anon id] */
@@ -251,6 +280,11 @@ class User extends AbstractModel {
         }
 
         $this->time_zone = $details['time_zone'] ?? 'NOT_SET/NOT_SET';
+
+        if (isset($details['user_preferred_locale'])) {
+            $this->preferred_locale = $details['user_preferred_locale'];
+            $this->core->getConfig()->setLocale($this->preferred_locale);
+        }
 
         if (isset($details['registration_subsection'])) {
             $this->setRegistrationSubsection($details['registration_subsection']);
@@ -343,6 +377,31 @@ class User extends AbstractModel {
      */
     public function getNiceFormatTimeZone(): string {
         return $this->time_zone === 'NOT_SET/NOT_SET' ? 'NOT SET' : $this->time_zone;
+    }
+
+
+    /**
+     * Get the user's preferred locale.
+     */
+    public function getPreferredLocale(): string|null {
+        return $this->preferred_locale;
+    }
+
+    /**
+     * Update the user's preferred locale.
+     *
+     * @param string $locale The desired new locale, must be one of Core::getSupportedLocales()
+     * @return bool Whether or not the operation was successful
+     */
+    public function setPreferredLocale(string|null $locale): bool {
+        if (is_null($locale) || in_array($locale, $this->core->getSupportedLocales())) {
+            $success = $this->core->getQueries()->updateSubmittyUserPreferredLocale($this, $locale);
+            if ($success) {
+                $this->preferred_locale = $locale;
+                return true;
+            }
+        }
+        return false;
     }
 
 

@@ -25,13 +25,17 @@ use app\libraries\Core;
  * @method string|null getExternalUrl()
  */
 class Breadcrumb extends AbstractModel {
-    /** @prop string */
+    /** @prop
+     * @var string */
     protected $title;
-    /** @prop string|null */
+    /** @prop
+     * @var string|null */
     protected $url = null;
-    /** @prop string|null */
+    /** @prop
+     * @var string|null */
     protected $external_url = false;
-    /** @prop string|null */
+    /** @prop
+     * @var string|null */
     protected $use_as_heading = false;
 
 

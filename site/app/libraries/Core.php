@@ -934,4 +934,37 @@ class Core {
 
         return $logged_in;
     }
+
+    /**
+     * Get the lang data for the current locale.
+     *
+     * @return array<mixed>|null
+     */
+    public function getLang(): array|null {
+        if ($this->config !== null) {
+            return $this->config->getLocale()->getLangData();
+        }
+        return null;
+    }
+
+    /**
+     * Gets a list of supported locales.
+     *
+     * @return array<string>|null
+     */
+    public function getSupportedLocales() {
+        if ($this->config !== null) {
+            FileUtils::getDirContents(FileUtils::joinPaths($this->config->getSubmittyInstallPath(), "site", "cache", "lang"), $files);
+            if (empty($files)) {
+                return [];
+            }
+            $files = array_filter($files, fn(string $file): bool => str_ends_with($file, ".php"));
+            $files = array_map(function (string $file) {
+                $parts = explode(DIRECTORY_SEPARATOR, $file);
+                return substr(end($parts), 0, -4);
+            }, $files);
+            return $files;
+        }
+        return null;
+    }
 }

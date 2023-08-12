@@ -281,6 +281,9 @@ else:
     TIMEZONE = get_input('What timezone should Submitty use? (for a full list of supported timezones see http://php.net/manual/en/timezones.php)', defaults['timezone'])
     print()
 
+    DEFAULT_LOCALE = get_input('What default language should the Submitty site use?', 'en_US')
+    print()
+
     SUBMISSION_URL = get_input('What is the url for submission? (ex: http://192.168.56.101 or '
                                'https://submitty.cs.rpi.edu)', defaults['submission_url']).rstrip('/')
     print()
@@ -426,6 +429,7 @@ else:
     config['database_course_user'] = DATABASE_COURSE_USER
     config['database_course_password'] = DATABASE_COURSE_PASSWORD
     config['timezone'] = TIMEZONE
+    config['default_locale'] = DEFAULT_LOCALE
 
     config['authentication_method'] = AUTHENTICATION_METHOD
     config['vcs_url'] = VCS_URL
@@ -618,6 +622,7 @@ if not args.worker:
     config['institution_name'] = INSTITUTION_NAME
     config['institution_homepage'] = INSTITUTION_HOMEPAGE
     config['timezone'] = TIMEZONE
+    config['default_locale'] = DEFAULT_LOCALE
     config['duck_special_effects'] = False
 
 config['worker'] = True if args.worker == 1 else False
