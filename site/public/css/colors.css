@@ -325,3 +325,28 @@
     --code-box-background-light-gray: #282c34;
     --code-box-font-color-dark-gray: #abb2bf;
 }
+
+/* Dark Theme Versions of Colors */
+:root[data-theme="dark"] {
+    /* For categorizing objects */
+    --category-color-1: #52375f;
+    --category-color-2: #3e531b;
+    --category-color-3: #3e531b;
+    --category-color-4: #3e531b;
+    --category-color-5: #3e531b;
+    --category-color-6: #3e531b;
+    --category-color-7: #3e531b;
+    --category-color-8: #98a3cd;
+    --category-color-9: #8ac78e;
+    --category-color-10: #b39b61;
+    --category-color-11: #6eb9aa;
+    --category-color-12: #b4be79;
+    --category-color-13: #94a2cc;
+    --category-color-14: #80be79;
+    --category-color-15: #b48b64;
+    --category-color-16: #b9b26e;
+    --category-color-17: #83a0c3;
+    --category-color-18: #ada5d4;
+    --category-color-19: #e57fcf;
+    --category-color-20: #c0c246;
+}
