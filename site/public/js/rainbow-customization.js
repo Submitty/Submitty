@@ -274,10 +274,9 @@ function getPlagiarism() {
         plagiarismData.push({
             user: user,
             gradeable: gradeable,
-            penalty: penalty
+            penalty: penalty,
         });
     }
-    console.log("plagiarismData:", plagiarismData); // Debug log
 
     return plagiarismData;
 }
@@ -340,7 +339,6 @@ function buildJSON() {
     };
 
     ret = JSON.stringify(ret);
-    console.log("return:", ret); // Debug log
     return ret;
 }
 
@@ -397,21 +395,12 @@ function ajaxUpdateJSON(successCallback, errorCallback) {
 
         // eslint-disable-next-line no-undef
         const url = buildCourseUrl(['reports', 'rainbow_grades_customization']);
-        console.log("URL:", url); // Debug log
-
-        const requestData = {json_string: buildJSON(), csrf_token: csrfToken};
-        console.log("Request Data:", requestData); // Debug log
-
-        $.ajax({
+        $.getJSON({
             type: 'POST',
             url: url,
+            // eslint-disable-next-line no-undef
             data: {json_string: buildJSON(), csrf_token: csrfToken},
             success: function (response) {
-                console.log("Response:", response); // Debug log
-                // Additional logging for debugging
-                console.log("Response status:", response.status);
-                console.log("Response data:", response.data);
-
                 if (response.status === 'success') {
                     $('#save_status').html('Generating rainbow grades, please wait...');
 
@@ -437,8 +426,6 @@ function ajaxUpdateJSON(successCallback, errorCallback) {
         $('#save_status').html(err);
     }
 }
-// This function attempts to create a new customization.json server-side based on form input
-// eslint-disable-next-line no-unused-vars
 
 
 function displayChangeDetectedMessage() {
