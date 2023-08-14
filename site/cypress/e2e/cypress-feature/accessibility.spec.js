@@ -80,7 +80,7 @@ describe('Test cases for the site\'s adherence to accessibility guidelines', () 
             cy.get('html:root').eq(0).invoke('prop', 'outerHTML').then(content => {
                 cy.writeFile('cypress/tmp/doc.html', `<!DOCTYPE html>\n${content}`, 'utf8').then(() => {
                     cy.exec(`java -jar "${vnu}" --format json cypress/tmp/doc.html`, { failOnNonZeroExit: false }).then(result => {
-                        console.log(result.stderr)
+                        console.log(result.stderr);
                         const output = JSON.parse(result.stderr);
 
                         const foundErrorMessages = [];
