@@ -313,7 +313,7 @@ class CourseMaterialsController extends AbstractController {
         $courseMaterials = $this->core->getCourseEntityManager()->getRepository(CourseMaterial::class)
             ->findAll();
 
-        if ($courseMaterial === null || $courseMaterials === null) {
+        if ($courseMaterial === null || empty($courseMaterials)) {
             $has_error = true;
         }
         else {

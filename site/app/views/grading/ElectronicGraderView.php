@@ -495,9 +495,15 @@ HTML;
         $columns = [];
         $columns[]             = ["width" => "2%",  "title" => "",                 "function" => "index"];
         $columns[]             = ["width" => "8%",  "title" => "Section",          "function" => "section"];
-        if ($peer || $anon_mode) {
+
+        $team_and_anon = ($this->core->getUser()->getGroup() === User::GROUP_LIMITED_ACCESS_GRADER &&
+            $gradeable->getLimitedAccessBlind() === 2);
+
+        if ($peer || $anon_mode || $team_and_anon) {
             if ($gradeable->isTeamAssignment()) {
-                if ($gradeable->getPeerBlind() === Gradeable::DOUBLE_BLIND_GRADING || $anon_mode) {
+                $peer_and_anon = ($this->core->getUser()->getGroup() === User::GROUP_STUDENT &&
+                    $gradeable->getPeerBlind() === Gradeable::DOUBLE_BLIND_GRADING);
+                if ($team_and_anon || $peer_and_anon || $anon_mode) {
                     $columns[] = ["width" => "30%", "title" => "Team Members",     "function" => "team_members_anon"];
                 }
                 else {
@@ -1094,7 +1100,7 @@ HTML;
 
 
         $return .= $this->core->getOutput()->renderTemplate(['grading', 'ElectronicGrader'], 'renderAutogradingPanel', $display_version_instance, $show_hidden_cases, $ta_grading, $graded_gradeable);
-        $return .= $this->core->getOutput()->renderTemplate(['grading', 'ElectronicGrader'], 'renderSubmissionPanel', $graded_gradeable, $display_version);
+        $return .= $this->core->getOutput()->renderTemplate(['grading', 'ElectronicGrader'], 'renderSubmissionPanel', $graded_gradeable, $display_version, $limimted_access_blind);
         //If TA grading isn't enabled, the rubric won't actually show up, but the template should be rendered anyway to prevent errors, as the code references the rubric panel
         $return .= $this->core->getOutput()->renderTemplate(['grading', 'ElectronicGrader'], 'renderRubricPanel', $graded_gradeable, $display_version, $can_verify, $show_verify_all, $show_silent_edit, $is_peer_grader);
         $return .= $this->core->getOutput()->renderTemplate(['grading', 'ElectronicGrader'], 'renderSolutionTaNotesPanel', $gradeable, $solution_ta_notes, $submitter_itempool_map);
@@ -1195,7 +1201,10 @@ HTML;
     public function renderNavigationBar(GradedGradeable $graded_gradeable, float $progress, bool $peer, $sort, $direction, $from, $limited_access_blind, $anon_mode, $blind_grading) {
         $gradeable = $graded_gradeable->getGradeable();
         $isBlind = false;
-        if ($gradeable->getLimitedAccessBlind() == 2) {
+        if (
+            $this->core->getUser()->getGroup() == User::GROUP_LIMITED_ACCESS_GRADER
+            && $gradeable->getLimitedAccessBlind() == 2
+        ) {
             $isBlind = true;
         }
         $home_url = $this->core->buildCourseUrl(['gradeable', $graded_gradeable->getGradeableId(), 'grading', 'details']) . '?' . http_build_query(['sort' => $sort, 'direction' => $direction]);
@@ -1375,7 +1384,7 @@ HTML;
      * @param int $display_version
      * @return string by reference
      */
-    public function renderSubmissionPanel(GradedGradeable $graded_gradeable, int $display_version) {
+    public function renderSubmissionPanel(GradedGradeable $graded_gradeable, int $display_version, bool $blind_grader) {
         $add_files = function (&$files, $new_files, $start_dir_name, $graded_gradeable) {
             $files[$start_dir_name] = [];
             $hidden_files = $graded_gradeable->getGradeable()->getHiddenFiles();
@@ -1445,6 +1454,7 @@ HTML;
             "gradeable_id" => $graded_gradeable->getGradeableId(),
             "submitter_id" => $submitter_id,
             "student_grader" => $student_grader,
+            "blind_grader" => $blind_grader,
             "anon_submitter_id" => $anon_submitter_id,
             "has_vcs_files" => $isVcs,
             "user_ids" => $user_ids,
