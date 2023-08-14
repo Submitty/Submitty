@@ -77,7 +77,7 @@
         {% if show_legend == 1 %}
         <div class="cal-legend">
             {% for course in course_names %}
-            <div name="{{course|replace({' ':''})}}" class="legend-color"></div><label for="{{course}}-color" class="legend-label">{{course}}</label>
+            <div name="{{course|replace({' ':''})}}" class="legend-color"></div><p for="{{course|replace({' ':''})}}-color" class="legend-label">{{course}}</p>
             {% endfor %}
         </div>
         {% endif %}

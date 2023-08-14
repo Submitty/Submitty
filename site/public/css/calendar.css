@@ -301,9 +301,9 @@ div.legend-color {
     border-radius: 4px;
 }
 
-label.legend-label {
-    padding-left: 0.2rem;
-    padding-right: 0.5rem;
+.legend-label {
+    padding-left: 0.3rem;
+    padding-right: 1rem;
 }
 
 @media (max-width: 800px) {
