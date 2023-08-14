@@ -17,20 +17,12 @@ describe('Test cases for grading stats', () => {
             text.should('contain', 'Teams who have submitted: 27 / 36 (75%)');
             text.should('contain', 'Section 1: 2 / 4 (50.0%)');
             cy.get('[data-testid="Grading Index"]').click();
-            cy.wait(2000);
             cy.get('[data-testid="view-sections"]').then(($button) => {
                 if ($button.text().includes('View All')) {
                     $button.click();
                 }
             });
-            cy.get('table')
-                .find('tr')
-                .not(':contains(NULL)')
-                .filter(':contains(Too Many Days Late)')
-                .each((row) => {
-                    cy.wrap(row).children().eq(2).then((user_id) => {
-                    });
-                });
+            cy.scrollTo('bottom', { duration: 20000 })
         });
 
         it(`${user} view should be accurate for grades.`, () => {
@@ -45,20 +37,12 @@ describe('Test cases for grading stats', () => {
             text.should('contain', 'Current percentage of TA grading done: 33 / 68 (48.5%)');
             text.should('contain', 'Section 1: 4 / 9 (44.4%)');
             cy.get('[data-testid="Grading Index"]').click();
-            cy.wait(2000);
             cy.get('[data-testid="view-sections"]').then(($button) => {
                 if ($button.text().includes('View All')) {
                     $button.click();
                 }
             });
-            cy.get('table')
-                .find('tr')
-                .not(':contains(NULL)')
-                .filter(':contains(Too Many Days Late)')
-                .each((row) => {
-                    cy.wrap(row).children().eq(2).then((user_id) => {
-                    });
-                });
+            cy.scrollTo('bottom', { duration: 20000 })
         });
 
         it(`${user} viewshould be accurate for released grades.`, () => {
@@ -74,20 +58,12 @@ describe('Test cases for grading stats', () => {
             text.should('contain', 'Section 1: 10 / 10 (100.0%)');
             text.should('contain', 'Number of students who have viewed their grade: 49 / 71 (69.0%)');
             cy.get('[data-testid="Grading Index"]').click();
-            cy.wait(2000);
             cy.get('[data-testid="view-sections"]').then(($button) => {
                 if ($button.text().includes('View All')) {
                     $button.click();
                 }
             });
-            cy.get('table')
-                .find('tr')
-                .not(':contains(NULL)')
-                .filter(':contains(Too Many Days Late)')
-                .each((row) => {
-                    cy.wrap(row).children().eq(2).then((user_id) => {
-                    });
-                });
+            cy.scrollTo('bottom', { duration: 20000 })
         });
     });
 });
