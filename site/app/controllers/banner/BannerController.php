@@ -57,6 +57,11 @@ class BannerController extends AbstractController {
         $uploaded_files = $_FILES["files1"];
         $count_item = count($uploaded_files["name"]);
         $extra_name = $_POST['extra_name'];
+
+        if ($extra_name == "..") {
+            return JsonResponse::getErrorResponse("invalid name");
+        }
+
         if (empty($extra_name) || strpos($extra_name, 'http') !== false) {
             if ($count_item !== 1) {
                 return JsonResponse::getErrorResponse("You can only have one banner submitted.");
@@ -81,6 +86,10 @@ class BannerController extends AbstractController {
         }
 
         for ($j = 0; $j < $count_item; $j++) {
+            if ($uploaded_files['name'][$j] == "..") {
+                return JsonResponse::getErrorResponse("invalid name");
+            }
+            
             // for some reason why I try to simply use a condition to compare two strings, I always get false?!? So I have to loop through each character now
             $all_match = true;
             for ($i = 0; $i < strlen($uploaded_files['name'][$j]); $i++) {
