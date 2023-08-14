@@ -388,57 +388,6 @@ function checkAutoRGStatus() {
 }
 
 
-// function ajaxUpdateJSON(successCallback, errorCallback) {
-//
-//     try {
-//         $('#save_status').html('Saving...');
-//
-//         // eslint-disable-next-line no-undef
-//         const url = buildCourseUrl(['reports', 'rainbow_grades_customization']);
-//         console.log("URL:", url); // Debug log
-//
-//         const requestData = {json_string: buildJSON(), csrf_token: csrfToken};
-//         console.log("Request Data:", requestData); // Debug log
-//
-//         $.ajax({
-//             type: 'POST',
-//             url: url,
-//             data: {json_string: buildJSON(), csrf_token: csrfToken},
-//             success: function (response) {
-//                 console.log("Response:", response); // Debug log
-//                 // Additional logging for debugging
-//                 console.log("Response status:", response.status);
-//                 console.log("Response data:", response.data);
-//
-//                 if (response.status === 'success') {
-//                     $('#save_status').html('Generating rainbow grades, please wait...');
-//
-//                     // Call the server to see if auto_rainbow_grades has completed
-//                     checkAutoRGStatus();
-//                     //successCallback(response.data);
-//                 }
-//                 else if (response.status === 'fail') {
-//                     $('#save_status').html('A failure occurred saving customization data');
-//                     //errorCallback(response.message, response.data);
-//                 }
-//                 else {
-//                     $('#save_status').html('Internal Server Error');
-//                     console.error(response.message);
-//                 }
-//             },
-//             error: function (response) {
-//                 console.error(`Failed to parse response from server: ${response}`);
-//             },
-//         });
-//     }
-//     catch (err) {
-//         $('#save_status').html(err);
-//     }
-// }
-// This function attempts to create a new customization.json server-side based on form input
-// eslint-disable-next-line no-unused-vars
-
-
 //This function attempts to create a new customization.json server-side based on form input
 // eslint-disable-next-line no-unused-vars
 function ajaxUpdateJSON(successCallback, errorCallback) {
@@ -448,16 +397,15 @@ function ajaxUpdateJSON(successCallback, errorCallback) {
 
         // eslint-disable-next-line no-undef
         const url = buildCourseUrl(['reports', 'rainbow_grades_customization']);
+        console.log("URL:", url); // Debug log
 
         const requestData = {json_string: buildJSON(), csrf_token: csrfToken};
-        console.log("Request Data:", requestData);
+        console.log("Request Data:", requestData); // Debug log
 
-        $.getJSON({
+        $.ajax({
             type: 'POST',
             url: url,
-            // eslint-disable-next-line no-undef
-            // data: {json_string: buildJSON(), csrf_token: csrfToken},
-            data: requestData,
+            data: {json_string: buildJSON(), csrf_token: csrfToken},
             success: function (response) {
                 console.log("Response:", response); // Debug log
                 // Additional logging for debugging
@@ -481,10 +429,6 @@ function ajaxUpdateJSON(successCallback, errorCallback) {
                 }
             },
             error: function (response) {
-                console.log("Response:", response); // Debug log
-                // Additional logging for debugging
-                console.log("Response status:", response.status);
-                console.log("Response data:", response.data);
                 console.error(`Failed to parse response from server: ${response}`);
             },
         });
@@ -492,8 +436,10 @@ function ajaxUpdateJSON(successCallback, errorCallback) {
     catch (err) {
         $('#save_status').html(err);
     }
-
 }
+// This function attempts to create a new customization.json server-side based on form input
+// eslint-disable-next-line no-unused-vars
+
 
 function displayChangeDetectedMessage() {
     $('#save_status').html('Changes detected, press "Save Changes" to save them.');
@@ -609,6 +555,11 @@ $(document).ready(() => {
     $('.sections_and_labels').on('change keyup paste', () => {
         displayChangeDetectedMessage();
     });
+    // plagiarism option-input
+    $('.option-input').on('change keyup paste', () => {
+        displayChangeDetectedMessage();
+    });
+
 
     // https://stackoverflow.com/questions/15657686/jquery-event-detect-changes-to-the-html-text-of-a-div
     // More Details https://developer.mozilla.org/en-US/docs/Web/API/MutationObserver
