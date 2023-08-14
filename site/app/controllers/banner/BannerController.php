@@ -24,7 +24,8 @@ class BannerController extends AbstractController {
      * @see BannerView::showBanner
      */
     public function viewBanner(): WebResponse {
-        return new WebResponse(BannerView::class, 'showBanner');
+        $bannerImages = $this->core->getSubmittyEntityManager()->getRepository(BannerImage::class) ->findall();
+        return new WebResponse(BannerView::class, 'showBanner', $bannerImages);
         //EVEN WHEN I REPLACE BannerView::class with 'app\views\banner\BannerView', webresponse still treats the parameter as 'app\\controllers\\Banner\\BannerView'
     }
 
@@ -135,8 +136,8 @@ class BannerController extends AbstractController {
                 $release_date,
                 $close_date
             );
-            $this->core->getBannerEntityManager()->persist($banner_image);
-            $this->core->getBannerEntityManager()->flush();
+            $this->core->getSubmittyEntityManager()->persist($banner_image);
+            $this->core->getSubmittyEntityManager()->flush();
         }
 
         return JsonResponse::getSuccessResponse("Successfully uploaded!");
@@ -147,7 +148,7 @@ class BannerController extends AbstractController {
      */
     public function ajaxDeleteBannerFiles(): JsonResponse {
 
-        $entity_manager = $this->core->getBannerEntityManager();
+        $entity_manager = $this->core->getSubmittyEntityManager();
 
         $banner_repository = $entity_manager->getRepository(BannerImage::class);
 

@@ -50,9 +50,6 @@ class Core {
     /** @var EntityManager */
     private $course_entity_manager;
 
-    /** @var EntityManager */
-    private $banner_entity_manager;
-
     /** @var DebugStack */
     private $course_debug_stack;
 
@@ -226,7 +223,6 @@ class Core {
         $this->setQueries($this->database_factory->getQueries($this));
         $this->submitty_debug_stack = $this->config->isDebug() ? new DebugStack() : null;
         $this->submitty_entity_manager = $this->createEntityManager($this->submitty_db, $this->submitty_debug_stack);
-        $this->banner_entity_manager = $this->createEntityManager($this->submitty_db, $this->submitty_debug_stack);
     }
 
     public function setMasterDatabase(AbstractDatabase $database): void {
@@ -271,16 +267,6 @@ class Core {
     public function getCourseEntityManager(): EntityManager {
         return $this->course_entity_manager;
     }
-
-
-    public function setBannerEntityManager(EntityManager $entity_manager): void {
-        $this->banner_entity_manager = $entity_manager;
-    }
-
-    public function getBannerEntityManager(): EntityManager {
-        return $this->banner_entity_manager;
-    }
-
 
     public function getCourseQueries(): array {
         if (!$this->config->isDebug() || !$this->course_db) {
@@ -957,6 +943,27 @@ class Core {
     public function getLang(): array|null {
         if ($this->config !== null) {
             return $this->config->getLocale()->getLangData();
+        }
+        return null;
+    }
+
+    /**
+     * Gets a list of supported locales.
+     *
+     * @return array<string>|null
+     */
+    public function getSupportedLocales() {
+        if ($this->config !== null) {
+            FileUtils::getDirContents(FileUtils::joinPaths($this->config->getSubmittyInstallPath(), "site", "cache", "lang"), $files);
+            if (empty($files)) {
+                return [];
+            }
+            $files = array_filter($files, fn(string $file): bool => str_ends_with($file, ".php"));
+            $files = array_map(function (string $file) {
+                $parts = explode(DIRECTORY_SEPARATOR, $file);
+                return substr(end($parts), 0, -4);
+            }, $files);
+            return $files;
         }
         return null;
     }

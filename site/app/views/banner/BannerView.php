@@ -15,7 +15,7 @@ class BannerView extends AbstractView {
      * calendar by their given date. Then it shows a series of tables to list all items.
      *
      */
-    public function showBanner(): string {
+    public function showBanner(array $bannerImages): string {
         $this->core->getOutput()->addInternalCss(FileUtils::joinPaths('fileinput.css'));
 
         $this->core->getOutput()->addVendorJs(FileUtils::joinPaths('flatpickr', 'flatpickr.min.js'));
@@ -24,8 +24,6 @@ class BannerView extends AbstractView {
         $this->core->getOutput()->addVendorCss(FileUtils::joinPaths('flatpickr', 'plugins', 'shortcutButtons', 'themes', 'light.min.css'));
 
         $this->core->getOutput()->addInternalJs("drag-and-drop.js");
-
-        $bannerImages = $this->core->getBannerEntityManager()->getRepository(BannerImage::class) ->findall();
 
         return $this->core->getOutput()->renderTwigTemplate("banner/Banner.twig", [
             "csrf_token" => $this->core->getCsrfToken(),
