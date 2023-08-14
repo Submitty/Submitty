@@ -292,6 +292,12 @@ div.options-colors {
 /* Calendar Legend */
 div.cal-legend {
     display: flex;
+    margin-top: 0.3rem;
+    padding: 0.3rem;
+    border-radius: 4px 4px 0px 0px;
+    border: 1px solid black;
+    border-bottom: none;
+    background-color: var(--standard-hover-light-gray);
 }
 
 div.legend-color {

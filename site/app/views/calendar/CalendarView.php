@@ -48,14 +48,14 @@ class CalendarView extends AbstractView {
 
         //Set course color options
         $course_colors = [];
-        $course_colors["MAROON"]   = "#800000";
-        $course_colors["OLIVE"]    = "#808000";
-        $course_colors["GREEN"]    = "#008000";
-        $course_colors["TEAL"]     = "#008080";
-        $course_colors["NAVY"]     = "#000080";
-        $course_colors["PURPLE"]   = "#800080";
-        $course_colors["GRAY"]     = "#808080";
-        $course_colors["BLACK"]    = "#000000";
+        $course_colors["RED"]       = "var(--category-color-1)";
+        $course_colors["ORANGE"]    = "var(--category-color-2)";
+        $course_colors["GREEN"]     = "var(--category-color-3)";
+        $course_colors["BLUE"]      = "var(--category-color-4)";
+        $course_colors["INDIGO"]    = "var(--category-color-5)";
+        $course_colors["VIOLET"]    = "var(--category-color-6)";
+        $course_colors["PINK"]      = "var(--category-color-7)";
+        $course_colors["PURPLE"]    = "var(--category-color-8)";
 
         //Get if legend will be displayed
         $show_legend = (isset($_COOKIE['show_legend']))  ?  (int) $_COOKIE['show_legend'] : 1;
