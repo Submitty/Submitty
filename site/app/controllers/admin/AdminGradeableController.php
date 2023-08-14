@@ -1385,7 +1385,7 @@ class AdminGradeableController extends AbstractController {
         $queued_filename = $this->core->getConfig()->getTerm() . '__' . $this->core->getConfig()->getCourse() . '__' . $gradeable_id . '.json';
         $rebuilding_filename = 'PROCESSING_' . $this->core->getConfig()->getTerm() . '__' . $this->core->getConfig()->getCourse() . '__' . $gradeable_id . '.json';
         $queued_path = FileUtils::joinPaths($this->core->getConfig()->getSubmittyPath(), 'daemon_job_queue', $queued_filename);
-        $rebuilding_path = FileUtils::joinPaths($this->core->getConfig()->getSubmittyPath(), 'daemon_job_queue', $rebuilding_filename);
+        $rebuilding_path = FileUtils::joinPaths($this->core->getConfig()->getSubmittyPath(), 'daemon_job_queue', $rebuilding_filename); // test comment
 
         if (is_file($rebuilding_path)) {
             $status = 'processing';
