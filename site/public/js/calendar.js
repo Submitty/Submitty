@@ -1,4 +1,4 @@
-/* exported prevMonth, nextMonth, loadCalendar, loadFullCalendar, editCalendarItemForm, deleteCalendarItem, openNewItemModal, openOptionsModal, updateCalendarOptions */
+/* exported prevMonth, nextMonth, loadCalendar, loadFullCalendar, editCalendarItemForm, deleteCalendarItem, openNewItemModal, openOptionsModal, updateCalendarOptions, colorLegend */
 /* global curr_day, curr_month, curr_year, gradeables_by_date, instructor_courses, buildUrl */
 /* global csrfToken */
 
@@ -752,7 +752,7 @@ function saveOptions() {
     });
     //Legend
     const legend_val = document.getElementById('show-legend-box').checked;
-    if (legend_val) {;
+    if (legend_val) {
         Cookies.set('show_legend', '1', { expires: 365 });
     }
     else {

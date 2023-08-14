@@ -75,17 +75,16 @@ class CalendarInfo extends AbstractModel {
         $i = 1;
         /** @var Course $course */
         foreach ($courses as $course) {
-            if (isset($_COOKIE['calendar_color_' . $course->getTitle(). $course->getTerm()])) { //Check if color cookie exists
-                $info->colors[$course->getTerm() . $course->getTitle()] = $_COOKIE['calendar_color_' . $course->getTitle(). $course->getTerm()];
+            if (isset($_COOKIE['calendar_color_' . $course->getTitle() . $course->getTerm()])) { //Check if color cookie exists
+                $info->colors[$course->getTerm() . $course->getTitle()] = $_COOKIE['calendar_color_' . $course->getTitle() . $course->getTerm()];
             }
             else { //Cookie not set, generate one as default
                 $info->colors[$course->getTerm() . $course->getTitle()] = "var(--category-color-$i)";
-                setcookie('calendar_color_' . $course->getTitle(). $course->getTerm(), "var(--category-color-$i)", time() + 3600);
+                setcookie('calendar_color_' . $course->getTitle() . $course->getTerm(), "var(--category-color-$i)", time() + 3600);
                 if ($i < 21) {
                     $i++;
                 }
             }
-
         }
 
         // Get the gradeables from the GradeableList and group them by section
