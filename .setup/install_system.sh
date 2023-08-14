@@ -36,6 +36,7 @@ fi
 # PATHS
 CURRENT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 SUBMITTY_REPOSITORY=/usr/local/submitty/GIT_CHECKOUT/Submitty
+RAINBOWGRADES_REPOSITORY=/usr/local/submitty/GIT_CHECKOUT/RainbowGrades
 LICHEN_REPOSITORY=/usr/local/submitty/GIT_CHECKOUT/Lichen
 SUBMITTY_INSTALL_DIR=/usr/local/submitty
 SUBMITTY_DATA_DIR=/var/local/submitty
@@ -133,7 +134,7 @@ The vagrant box comes with some handy aliases:
     ntp_sync                     - Re-syncs NTP in case of time drift
 
 Saved variables:
-    SUBMITTY_REPOSITORY, LICHEN_REPOSITORY,
+    SUBMITTY_REPOSITORY, LICHEN_REPOSITORY, RAINBOWGRADES_REPOSITORY,
     SUBMITTY_INSTALL_DIR, SUBMITTY_DATA_DIR,
     DAEMON_USER, DAEMON_GROUP, PHP_USER, PHP_GROUP,
     CGI_USER, CGI_GROUP, DAEMONPHP_GROUP, DAEMONCGI_GROUP
@@ -144,6 +145,7 @@ echo -e "
 
 # Convinence stuff for Submitty
 export SUBMITTY_REPOSITORY=${SUBMITTY_REPOSITORY}
+export RAINBOWGRADES_REPOSITORY=${RAINBOWGRADES_REPOSITORY}
 export LICHEN_REPOSITORY=${LICHEN_REPOSITORY}
 export SUBMITTY_INSTALL_DIR=${SUBMITTY_INSTALL_DIR}
 export SUBMITTY_DATA_DIR=${SUBMITTY_DATA_DIR}
@@ -338,6 +340,12 @@ usermod -a -G "${DAEMONPHP_GROUP}" "${DAEMON_USER}"
 usermod -a -G "${DAEMONCGI_GROUP}" "${DAEMON_USER}"
 
 echo -e "\n# set by the .setup/install_system.sh script\numask 027" >> /home/${DAEMON_USER}/.profile
+
+# Add RainbowGrades repo as safe directory for GIT
+gitconfig_path="/home/${DAEMON_USER}/.gitconfig"
+gitconfig_content="[safe]
+    directory = ${RAINBOWGRADES_REPOSITORY}"
+echo "$gitconfig_content" > "$gitconfig_path"
 
 usermod -a -G docker "${DAEMON_USER}"
 
