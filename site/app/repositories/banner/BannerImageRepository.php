@@ -12,7 +12,7 @@ class BannerImageRepository extends EntityRepository {
     public function getValidBannerImages(): array {
         $currentDate = new \DateTime();
 
-        $dql = 'SELECT b FROM app\entities\banner\BannerImage b WHERE b.release_date <= :currentDate AND :currentDate <= b.closing_date';
+        $dql = 'SELECT b FROM app\entities\banner\BannerImage b WHERE b.release_date <= :currentDate AND :currentDate <= b.closing_date ORDER BY b.release_date DESC';
         
         return $this->_em->createQuery($dql)
             ->setParameter('currentDate', $currentDate)
