@@ -15,7 +15,7 @@
     <div class="options-colors">
         {% for course in course_names %}
         <div class="class-color-field">
-            <label for="{{course}}-color">{{course}}</label>
+            <label for="color-{{course|replace({' ':''})}}">{{course}}</label>
             <select aria-label="Course Color Picker" class='course-color-picker' style="color: white;font-size: 14px;height: 18px;padding: 0px;" id="color-{{course|replace({' ':''})}}">
                 {% for color_name, color_code in color_options %}
                     <option value="{{ color_code }}" style="color: white;background-color: {{ color_code }};">{{ color_name }}</option>
@@ -24,7 +24,7 @@
         </div>
         {% endfor %}
         <div>
-            <label for="show-legend-box">Show Legend<label>
+            <label for="show-legend-box">Show Legend</label>
             <input type="checkbox" id="show-legend-box" {% if show_legend %}checked{% endif %}>
         </div>
     </div>
