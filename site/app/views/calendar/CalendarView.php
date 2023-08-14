@@ -46,8 +46,19 @@ class CalendarView extends AbstractView {
             array_push($formatted_courses, $course_string);
         }
 
+        //Set course color options
+        $course_colors = [];
+        $course_colors["MAROON"]   = "#800000";
+        $course_colors["OLIVE"]    = "#808000";
+        $course_colors["GREEN"]    = "#008000";
+        $course_colors["TEAL"]     = "#008080";
+        $course_colors["NAVY"]     = "#000080";
+        $course_colors["PURPLE"]   = "#800080";
+        $course_colors["GRAY"]     = "#808080";
+        $course_colors["BLACK"]    = "#000000";
+
         //Get if legend will be displayed
-        $show_legend = (isset($_COOKIE['show_legend']))  ?  (int) $_COOKIE['show_legend'] : 0;
+        $show_legend = (isset($_COOKIE['show_legend']))  ?  (int) $_COOKIE['show_legend'] : 1;
 
         $this->core->getOutput()->addInternalCss("navigation.css");
         $this->core->getOutput()->addInternalCss('calendar.css');
@@ -76,7 +87,8 @@ class CalendarView extends AbstractView {
             "instructor_courses" => $this->core->getQueries()->getInstructorLevelUnarchivedCourses($this->core->getUser()->getId()),
             "view_cookie" => isset($_COOKIE['view']) ? $_COOKIE['view'] : "month",
             "course_names" => $formatted_courses,
-            "show_legend" => $show_legend
+            "show_legend" => $show_legend,
+            "color_options" => $course_colors,
         ]);
     }
 }

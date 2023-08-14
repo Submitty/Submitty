@@ -1,4 +1,4 @@
-/* exported prevMonth, nextMonth, loadCalendar, loadFullCalendar, editCalendarItemForm, deleteCalendarItem, openNewItemModal, openOptionsModal, updateCalendarFilters */
+/* exported prevMonth, nextMonth, loadCalendar, loadFullCalendar, editCalendarItemForm, deleteCalendarItem, openNewItemModal, openOptionsModal, updateCalendarOptions */
 /* global curr_day, curr_month, curr_year, gradeables_by_date, instructor_courses, buildUrl */
 /* global csrfToken */
 
@@ -723,12 +723,12 @@ function loadCurrentCourseCookie() {
     return Cookies.get('calendar_course');
 }
 
-function updateCalendarFilters() {
-    saveFilterValues();
+function updateCalendarOptions() {
+    saveOptions();
     location.reload();
 }
 
-function saveFilterValues() {
+function saveOptions() {
     //Courses Filter
     const courses_val = document.getElementById('filter-courses-menu').value;
     if (courses_val === 'show all') {
@@ -737,6 +737,19 @@ function saveFilterValues() {
     else {
         Cookies.set('calendar_show_all', '0', { expires: 365 });
         Cookies.set('calendar_course', courses_val, { expires: 365 });
+    }
+    //Course Colors
+    $('.course-color-picker').each(function() {
+        const cname = `calendar_color_${$(this).attr('id').slice(6)}`;
+        Cookies.set(cname, $(this).val(), { expires: 365 });
+    });
+    //Legend
+    const legend_val = document.getElementById('show-legend-box').checked;
+    if (legend_val) {
+        Cookies.set('show_legend', '1', { expires: 365 });
+    }
+    else {
+        Cookies.set('show_legend', '0', { expires: 365 });
     }
 }
 

@@ -73,6 +73,15 @@
                 </select>
         </div>
 
+        {# Legend #}
+        {% if show_legend == 1 %}
+        <div class="cal-legend">
+            {% for course in course_names %}
+            <div name="{{course|replace({' ':''})}}" class="legend-color"></div><label for="{{course}}-color" class="legend-label">{{course}}</label>
+            {% endfor %}
+        </div>
+        {% endif %}
+
         <div class="calendar" style='margin-bottom: 20px;' id="full-calendar">
             {# Replace by js function call #}
         </div>
@@ -122,17 +131,6 @@
             {% endif %}
         </div>
     {% endif %}
-
-    {# Legend #}
-    {% if show_legend == 1 %}
-    <h2>Legend</h2>
-    <div class="cal-legend">
-        {% for course in course_names %}
-        <div name="{{course|replace({' ':''})}}" class="legend-color"></div><label for="{{course}}-color">{{course}}</label>
-        {% endfor %}
-    </div>
-    {% endif %}
-
 </div>
 
 
