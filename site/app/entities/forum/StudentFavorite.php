@@ -18,7 +18,7 @@ class StudentFavorite {
 
     /**
      * @ORM\ManyToOne(targetEntity="\app\entities\forum\Thread")
-     * @ORM\JoinColumn(name="thread_id", referencedColumnName="id")
+     * @ORM\JoinColumn(name="thread_id", referencedColumnName="id", nullable=false)
      * @var Thread
      */
     protected $thread;

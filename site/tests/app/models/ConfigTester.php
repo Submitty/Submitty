@@ -346,7 +346,7 @@ class ConfigTester extends \PHPUnit\Framework\TestCase {
             'feature_flags' => [],
             'submitty_install_path' => $this->temp_dir,
             'date_time_format' => ['modified' => false],
-            "default_locale" => "en_US",
+            "default_locale" => "default",
             "locale" => ['modified' => false],
         ];
         $actual = $config->toArray();
