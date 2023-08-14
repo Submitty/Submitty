@@ -43,7 +43,7 @@
             <br />
             {# Files #}
             <div class="inner-container open" id="file-container" style="padding-top: 10px;">
-                {{ _self.display_files(submissions, "s", 0, "submissions") }}
+                {{ _self.display_files(submissions, "s", 0, "submissions", blind_grader) }}
                 {% if has_vcs_files %} {# if there are checkout files, then display folder, otherwise don't #}
                     {{ _self.display_files(checkout, "c", 0, "checkout") }}
                 {% endif %}
@@ -80,7 +80,7 @@
 {% endmacro %}
 
 {% macro display_file(dir, path, id, indent, title, blind_grader) %}
-    {% if not (blind_grader and dir == 'queue_file.json') %}
+    {% if not (blind_grader and (dir == 'queue_file.json' or dir == '.user_assignment_access.json')) %}
     <div>
         <div class="file-viewer">
             <a class='openAllFile{{ title }} openable-element-{{ title }} key_to_click' file-url="{{ path|url_encode }}" onclick='openFrame("{{ dir|url_encode|e('js') }}", "{{ path|url_encode|e('js') }}", "{{ id }}"); updateCookies();' data-viewer_id="{{ id }}">
