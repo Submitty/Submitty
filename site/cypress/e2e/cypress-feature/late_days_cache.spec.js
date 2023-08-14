@@ -192,7 +192,7 @@ describe('Test cases involving late day cache updates', () => {
                     .contains('Submit')
                     .should('exist')
                     .click();
-                  cy.wait(2000);
+                cy.wait(2000);
             }
         });
 
