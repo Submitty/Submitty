@@ -140,9 +140,7 @@ describe('Test cases involving late day cache updates', () => {
                 cy.get('#late_days').clear();
                 cy.get('#late_days').type(2);
                 cy.get('input[type=submit]').click();
-                if (user_id !== 'harbel') {
-                    cy.wait(2000);
-                }
+                cy.wait(2000);
             }
         });
 
@@ -161,8 +159,8 @@ describe('Test cases involving late day cache updates', () => {
             const deleteLateDays = () => {
                 cy.get('div.content').then((table) => {
                     if (table.find('td[data-before-content="Delete"]').length > 0) {
-                        cy.get('td[data-before-content="Delete"]').as('deleteButton').should('exist');
-                        cy.get('@deleteButton').first().click();
+                        cy.wrap(table).find('td[data-before-content="Delete"]').first().click();
+                        cy.wait(2000);
                         deleteLateDays();
                     }
                 });
@@ -194,9 +192,7 @@ describe('Test cases involving late day cache updates', () => {
                     .contains('Submit')
                     .should('exist')
                     .click();
-                if (user_id !== 'harbel') {
-                    cy.wait(2000);
-                }
+                  cy.wait(2000);
             }
         });
 
@@ -215,8 +211,8 @@ describe('Test cases involving late day cache updates', () => {
             const deleteExtensions = () => {
                 cy.get('body').then((body) => {
                     if (body.find('#extensions-table').length > 0) {
-                        cy.get('#extensions-table > tbody > tr > td > a').should('exist');
-                        cy.get('@deleteButton').first().click();
+                        cy.wrap(body).find('#extensions-table > tbody > tr > td > a').first().click();
+                        cy.wait(2000);
                         deleteExtensions();
                     }
                 });
@@ -260,7 +256,7 @@ describe('Test cases involving late day cache updates', () => {
         it('Changes gradeable due date back', () => {
             cy.get('#date_due')
                 .clear()
-                .type('1972-01-01 11:59:59')
+                .type('1972-01-01 03:59:59')
                 .click();
             cy.get('#late_days').click(); // Dismiss calender and trigger save
 
