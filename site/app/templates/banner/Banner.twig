@@ -9,6 +9,7 @@
 {% for bannerImage in banners %}
     {% set imageName = bannerImage.getName() %}
     {% set imagePath = bannerImage.getPath() %}
+    {% set id = bannerImage.getId() %}
     {% set description = bannerImage.getExtraInfo() %}
     {% set releaseDate = bannerImage.getReleaseDate().format('Y-m-d') %}
     {% set closeDate = bannerImage.getClosingDate().format('Y-m-d') %}
@@ -24,6 +25,7 @@
 		</div>
         <p> {{ imagePath}} </p>
         <p>{{ description }}</p>
+        <p> Id: {{id}} </p>
         <p>Release Date: {{ releaseDate|date('Y-m-d') }}</p>
         <p>Close Date: {{ closeDate|date('Y-m-d') }}</p>
     </div>
