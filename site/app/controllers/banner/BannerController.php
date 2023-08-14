@@ -74,10 +74,29 @@ class BannerController extends AbstractController {
         }
 
         $specificPath = $close_date->format("Y");
-        $full_path = FileUtils::joinPaths($upload_path, $specificPath);
+        $actual_banner_name = "";
+
+        for ($j = 0; $j < $count_item; $j++) {
+            if ($uploaded_files['name'][$j] == "..") {
+                return JsonResponse::getErrorResponse("invalid name");
+            }
+
+            if ($uploaded_files['name'][$j] != $extra_name) {
+                $actual_banner_name = $uploaded_files['name'][$j];
+            }
+
+        }
+
+        $banner_image = new BannerImage(
+            $specificPath,
+            $actual_banner_name,
+            $extra_name,
+            $release_date,
+            $close_date
+        );
 
 
-
+        $full_path = FileUtils::joinPaths($upload_path, $specificPath, $actual_banner_name . $banner_image->getId() );
         if (!is_dir($full_path)) {
             // Create a new folder for the current month
             if (!mkdir($full_path, 0755, true)) {
@@ -91,17 +110,9 @@ class BannerController extends AbstractController {
             }
             
             // for some reason why I try to simply use a condition to compare two strings, I always get false?!? So I have to loop through each character now
-            $all_match = true;
-            for ($i = 0; $i < strlen($uploaded_files['name'][$j]); $i++) {
-                if (strlen($uploaded_files['name'][$j]) != strlen($extra_name)) {
-                    $all_match = false;
-                    break;
-                }
-
-                if ($uploaded_files['name'][$j][$i] != $extra_name[$i]) {
-                    $all_match = false;
-                    break;
-                }
+            $all_match = false;
+            if ($uploaded_files['name'][$j] == $extra_name) {
+                $all_match = true;
             }
 
 
@@ -112,7 +123,7 @@ class BannerController extends AbstractController {
                     [$width, $height] = getimagesize($uploaded_files["tmp_name"][$j]);
 
 
-                    if ($width !== 800 || $height !== 70) {
+                    if ($width !== 800 || $height > 70) {
                         return JsonResponse::getErrorResponse("File dimensions must be 800x70 pixels.");
                     }
                 }
@@ -137,14 +148,6 @@ class BannerController extends AbstractController {
             if ($all_match) {
                 continue;
             }
-
-            $banner_image = new BannerImage(
-                $specificPath,
-                $uploaded_files["name"][$j],
-                $extra_name,
-                $release_date,
-                $close_date
-            );
             $this->core->getSubmittyEntityManager()->persist($banner_image);
             $this->core->getSubmittyEntityManager()->flush();
         }
