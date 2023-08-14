@@ -95,7 +95,7 @@ use app\controllers\admin\AdminGradeableController;
  * @method int getLimitedAccessBlind()
  * @method void setPeerBlind($peer_blind)
  * @method int getPeerBlind()
- * @method void setInstructorBlind($peer_blind)
+ * @method void setInstructorBlind($instructor_blind)
  * @method int getInstructorBlind()
  * @method bool getAllowCustomMarks()
  * @method void setAllowCustomMarks($allow_custom_marks)
@@ -350,6 +350,9 @@ class Gradeable extends AbstractModel {
 
         if (array_key_exists('limited_access_blind', $details)) {
             $this->setLimitedAccessBlind($details['limited_access_blind']);
+        }
+        if (array_key_exists('instructor_blind', $details)) {
+            $this->setInstructorBlind($details['instructor_blind']);
         }
 
         if ($this->getType() === GradeableType::ELECTRONIC_FILE) {
