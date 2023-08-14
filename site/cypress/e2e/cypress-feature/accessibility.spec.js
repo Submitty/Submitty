@@ -3,7 +3,6 @@
 import { getCurrentSemester } from '../../support/utils.js';
 
 import vnu from 'vnu-jar';
-const path = require('path');
 
 const semester = getCurrentSemester();
 const course = 'sample';
