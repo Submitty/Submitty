@@ -700,11 +700,12 @@ function openNewItemModal() {
 
 function openOptionsModal() {
     $('#calendar-options-form').css('display', 'block');
-    checkProperOptions();
+    setOptionsValues();
 }
 
 //checks proper tick marks in modal
-function checkProperOptions() {
+function setOptionsValues() {
+    //Courses filter
     const showAll = loadShowAllCoursesCookie();
     if (showAll) { //if show all is true, tick off show all
         document.getElementById('filter-courses-menu').value = 'show all';
@@ -712,6 +713,12 @@ function checkProperOptions() {
     else { //if show all if false, select a specific course
         document.getElementById('filter-courses-menu').value = loadCurrentCourseCookie();
     }
+    //Course Colors
+    $('.course-color-picker').each(function() {
+        const selected_color = Cookies.get(`calendar_color_${$(this).attr('id').slice(6)}`);
+        $(this).css('background-color', selected_color);
+        $(this).val(selected_color);
+    });
 }
 
 function loadShowAllCoursesCookie() {
@@ -745,7 +752,7 @@ function saveOptions() {
     });
     //Legend
     const legend_val = document.getElementById('show-legend-box').checked;
-    if (legend_val) {
+    if (legend_val) {;
         Cookies.set('show_legend', '1', { expires: 365 });
     }
     else {
@@ -756,7 +763,6 @@ function saveOptions() {
 //Adds Color to Legend
 function colorLegend() {
     $('.legend-color').each( function () {
-        console.log($(this).attr('name'));
         $(this).css('background-color', Cookies.get(`calendar_color_${$(this).attr('name')}`));
     });
 }
