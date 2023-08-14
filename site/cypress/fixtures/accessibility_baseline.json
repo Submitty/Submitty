@@ -16,7 +16,6 @@
         "Attribute “unselectable” not allowed on element “ul” at this point.",
         "Attribute “maxlength” is only allowed when the input type is “email”, “password”, “search”, “tel”, “text”, or “url”."
     ],
-    "/courses/{}/{}/gradeable/open_homework/grading/status": [],
     "/courses/{}/{}/gradeable/open_homework/bulk_stats": [],
     "/courses/{}/{}/gradeable/open_homework/grading/details": [],
     "/courses/{}/{}/gradeable/open_homework": [
