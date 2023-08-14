@@ -957,6 +957,7 @@ class AdminGradeableController extends AbstractController {
                 'late_submission_allowed' => true,
                 'hidden_files' => "",
                 'limited_access_blind' => 1,
+                'instructor_blind' => 1,
                 'peer_blind' => 3,
                 'depends_on' => null,
                 'depends_on_points' => null,
@@ -1385,7 +1386,7 @@ class AdminGradeableController extends AbstractController {
         $queued_filename = $this->core->getConfig()->getTerm() . '__' . $this->core->getConfig()->getCourse() . '__' . $gradeable_id . '.json';
         $rebuilding_filename = 'PROCESSING_' . $this->core->getConfig()->getTerm() . '__' . $this->core->getConfig()->getCourse() . '__' . $gradeable_id . '.json';
         $queued_path = FileUtils::joinPaths($this->core->getConfig()->getSubmittyPath(), 'daemon_job_queue', $queued_filename);
-        $rebuilding_path = FileUtils::joinPaths($this->core->getConfig()->getSubmittyPath(), 'daemon_job_queue', $rebuilding_filename); // test comment
+        $rebuilding_path = FileUtils::joinPaths($this->core->getConfig()->getSubmittyPath(), 'daemon_job_queue', $rebuilding_filename);
 
         if (is_file($rebuilding_path)) {
             $status = 'processing';
