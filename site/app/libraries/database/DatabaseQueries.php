@@ -5484,8 +5484,23 @@ AND gc_id IN (
      * This allows graders to still respond to by component inquiries if in no-component mode.
      */
     public function convertInquiryComponentId($gradeable) {
-        $this->course_db->query("UPDATE grade_inquiries SET gc_id=NULL WHERE id IN (SELECT a.id FROM (SELECT DISTINCT ON (t.user_id) user_id, t.id FROM (SELECT * FROM grade_inquiries ORDER BY id) t WHERE t.g_id=?) a);", [$gradeable->getId()]);
+        $this->course_db->query("UPDATE grade_inquiries
+                                        SET gc_id = NULL
+                                        WHERE id IN (
+                                            SELECT a.id
+                                            FROM (
+                                                SELECT DISTINCT ON (t.user_id) user_id, t.id
+                                                FROM (
+                                                    SELECT *
+                                                    FROM grade_inquiries
+                                                    ORDER BY id
+                                                ) t
+                                                WHERE t.g_id = ?
+                                            ) a
+                                        );
+", [$gradeable->getId()]);
     }
+
 
     /**
      * This is used to revert non-component inquiries back to by-component inquiries
