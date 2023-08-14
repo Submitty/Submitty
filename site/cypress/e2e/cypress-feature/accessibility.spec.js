@@ -1,4 +1,4 @@
-// Note: This test requires you have Java and JDK installed and added to your path.
+// Note: This test requires you have Java and JDK installed on your machine as well as added to your path if on Windows.
 
 import { getCurrentSemester } from '../../support/utils.js';
 
