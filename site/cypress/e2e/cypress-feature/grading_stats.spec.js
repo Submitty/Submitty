@@ -1,5 +1,5 @@
 describe('Test cases for grading stats', () => {
-    ['instructor','ta','grader'].forEach((user) => {
+    ['ta','grader'].forEach((user) => {
         beforeEach(() => {
             cy.login(user);
             cy.visit(['sample']);
@@ -101,4 +101,38 @@ describe('Test cases for grading stats', () => {
             cy.scrollTo('bottom', { duration: 20000 });
         });
     });
+    it(`instructor view should be accurate for teams.`, () => {
+            cy.login('instructor');
+            cy.visit(['sample','gradeable','grading_team_homework','grading','status']);
+            cy.wait(5000);
+            cy.scrollTo('bottom', { duration: 5000 });
+            cy.scrollTo('top', { duration: 10000 });
+
+            cy.get('#filters').click();
+            cy.get('#bad_submissions').click();
+            cy.get('#apply_button').click();
+            cy.wait(5000);
+            cy.scrollTo('bottom', { duration: 5000 });
+            cy.scrollTo('top', { duration: 10000 });
+
+            const text = cy.get('#left-grading-stats');
+            text.should('contain', 'Students on a team: 101/101 (100%)');
+            text.should('contain', 'Number of teams: 36');
+            text.should('contain', 'Teams who have submitted: 27 / 36 (75%)');
+            text.should('contain', 'Section 1: 2 / 4 (50.0%)');
+            cy.get('#filters').click();
+            cy.get('#bad_submissions').click();
+            cy.get('#apply_button').click();
+            cy.wait(5000);
+            cy.scrollTo('bottom', { duration: 5000 });
+            cy.scrollTo('top', { duration: 10000 });
+
+            cy.get('[data-testid="Grading Index"]').click();
+            cy.get('[data-testid="view-sections"]').then(($button) => {
+                if ($button.text().includes('View All')) {
+                    $button.click();
+                }
+            });
+            cy.scrollTo('bottom', { duration: 20000 });
+        });
 });
