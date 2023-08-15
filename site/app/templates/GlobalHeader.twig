@@ -360,8 +360,6 @@
     {% endif %}
 {% endmacro %}
 
-<nav id = "place-banners-here" class="flex-row shadow">
-</nav>
 
 <style>
 
@@ -404,6 +402,7 @@
         document.getElementById("speech-bubble-container").style.display = 'none';
     }
 
+    images = currentImages.concat(seenImages);
 
     function showBanners() {
         var bannerElement = document.getElementById("banner");
@@ -418,22 +417,15 @@
                 seenImages.push(currentImages[0]);
                 setCookie('hiddenImages', JSON.stringify(hiddenImages));  
                 var duckdivElement = document.getElementById("duckdiv");
-                bannerElement.style.animation = "slide 20s linear";
+                bannerElement.style.animation = "slide 2s linear forwards";
                 document.getElementById("triangle").style.display = "none";
                 document.getElementById("speech-bubble").style.display = "none";
             
 
                 bannerElement.addEventListener("animationend", function() {
 
-                bannerElement.style.animation = "";
-                currentImages[currentImageIndex].classList.remove("active");
 
-                currentImages.splice(currentImageIndex, 1);
-                if (currentImageIndex == currentImages.length) {
-                    currentImageIndex = 0;
-                }
-                bannerElement.style.width = "1%";
-                bannerElement.style.display = "none";
+                currentImages.splice(0, 1);
 
                 if (currentImages.length > 0 ) {
                     document.getElementById("triangle").style.display = "block";
@@ -443,13 +435,13 @@
                             }, { once: true });
             }
             else {
-                var placeBannersHere = document.getElementById("place-banners-here");
-                placeBannersHere.appendChild(bannerElement);
-                seenImages[currentImageIndex].classList.add("active");
+                currentImages[currentImageIndex].classList.add("active");
             }
-        } 
+            images = currentImages.concat(seenImages);
+        }
         else {
-            seenImages[currentImageIndex].classList.remove("active");
+            images[currentImageIndex].classList.remove("active");
+            seenImages[seenImages.length-1].remove("active");
             bannerElement.style.width = "1%";
             bannerElement.style.display = "none";
         }
@@ -458,22 +450,24 @@
     }
 
     function changeImage(n) {
+        console.log("attempting here");
         var originalIndex = currentImageIndex;
 
 
-        if (currentImageIndex >= 0 && currentImageIndex < seenImages.length) {
-            seenImages[currentImageIndex].classList.remove("active");
+        if (currentImageIndex >= 0 && currentImageIndex < images.length) {
+            images[currentImageIndex].classList.remove("active");
+            seenImages[seenImages.length-1].classList.remove("active"); //for new images that are moved over
         }
 
 
         currentImageIndex += n;
         if (currentImageIndex < 0) {
-            currentImageIndex = seenImages.length - 1;
-        } else if (currentImageIndex >= seenImages.length) {
+            currentImageIndex = images.length - 1;
+        } else if (currentImageIndex >= images.length) {
             currentImageIndex = 0;
         }
 
-        seenImages[currentImageIndex].classList.add("active");
+        images[currentImageIndex].classList.add("active");
     }
 
 
