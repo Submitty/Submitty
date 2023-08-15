@@ -36,7 +36,11 @@ class BannerImage {
      * @var string
      */
     protected $name;
-
+    /**
+     * @ORM\Column(type="string")
+     * @var string
+     */
+    protected $folder_name;
     /**
      * @ORM\Column(type="string")
      * @var string
@@ -50,12 +54,13 @@ class BannerImage {
 
 
 
-    public function __construct(string $path, string $name, string $extra_info_name, \DateTime $release_date, \DateTime $close_date) {
+    public function __construct(string $path, string $name, string $extra_info_name, \DateTime $release_date, \DateTime $close_date, string $folder_name) {
         $this->setReleaseDate($release_date);
         $this->setClosingDate($close_date);
         $this->setName($name);
         $this->setExtraInfo($extra_info_name);
         $this->setPath($path);
+        $this->setFolderName($folder_name);
     }
 
     public function getId(): int {
@@ -69,7 +74,13 @@ class BannerImage {
     public function getPath(): string {
         return $this->path_date;
     }
+    public function setFolderName(string $folder_name): void {
+        $this->folder_name = $folder_name;
+    }
 
+    public function getFolderName(): string {
+        return $this->folder_name;
+    }
     public function setReleaseDate(\DateTime $release_date): void {
         // Convert the DateTime object to a string in the correct format
         $this->release_date = $release_date;

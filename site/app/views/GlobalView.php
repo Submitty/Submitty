@@ -44,7 +44,7 @@ class GlobalView extends AbstractView {
         $currentDate = new \DateTime();
         foreach ($bannerImages as $banner) {
             //FUTURE MIGHT NEED TO FIX SO WE ADD MID PATH
-            $pathName = FileUtils::joinPaths($this->core->getConfig()->getSubmittyPath(), "banner_images", $banner->getClosingDate()->format('Y'), $banner->getName() . "Folder", $banner->getName());
+            $pathName = FileUtils::joinPaths($this->core->getConfig()->getSubmittyPath(), "banner_images", $banner->getClosingDate()->format('Y'), $banner->getFolderName(), $banner->getName());
 
             if (strpos($banner->getExtraInfo(), "http") !== false) {
                 $images_data_array[] = [

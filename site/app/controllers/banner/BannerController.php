@@ -86,13 +86,18 @@ class BannerController extends AbstractController {
             }
         }
 
-        $next_id = $this->core->getSubmittyEntityManager()->getRepository(BannerImage::class) ->getLastBannerImageId() + 1;
-        $full_path = FileUtils::joinPaths($upload_path, $specificPath, $actual_banner_name . "Folder");
+        $currentDate = new \DateTime();
+        $folder_made_name = $actual_banner_name . "Folder" . $currentDate->format('Y-m-d_H-i-s');
+
+        $full_path = FileUtils::joinPaths($upload_path, $specificPath, $folder_made_name);
         if (!is_dir($full_path)) {
             // Create a new folder for the current month
             if (!mkdir($full_path, 0755, true)) {
                 return JsonResponse::getErrorResponse("Failed to create a new folder for the current year.");
             }
+        }
+        else {
+            return JsonResponse::getErrorResponse("Please wait a few minutes before uploading, you are matching another uploaded file");
         }
 
         for ($j = 0; $j < $count_item; $j++) {
@@ -142,7 +147,8 @@ class BannerController extends AbstractController {
                 $actual_banner_name,
                 $extra_name,
                 $release_date,
-                $close_date
+                $close_date, 
+                $folder_made_name
             );
             $this->core->getSubmittyEntityManager()->persist($banner_image);
             $this->core->getSubmittyEntityManager()->flush();
@@ -175,7 +181,7 @@ class BannerController extends AbstractController {
         $folder_name = $_POST['path'];
         $banner_name = $_POST['name'];
 
-        $full_path = FileUtils::joinPaths($full_path, $folder_name, $banner_name . "Folder", $banner_name);
+        $full_path = FileUtils::joinPaths($full_path, $folder_name, $banner_item->getFolderName(), $banner_name);
 
 
         if (is_file($full_path)) {
@@ -183,6 +189,11 @@ class BannerController extends AbstractController {
             if (!unlink($full_path)) {
                 return JsonResponse::getErrorResponse("Failed to delete the file.");
             }
+            // Maybe implemement later to get rid of the folder, i dunno?
+            // $folder_path = FileUtils::joinPaths($full_path, $banner_item->getFolderName());
+            // if (is_dir($folder_path)) {
+            //     FileUtils::deleteDir($folder_path); 
+            // }
         }
         else {
             return JsonResponse::getErrorResponse("File not found.");
