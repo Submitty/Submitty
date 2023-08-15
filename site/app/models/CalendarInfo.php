@@ -81,7 +81,10 @@ class CalendarInfo extends AbstractModel {
             else { //Cookie not set, generate one as default
                 $info->colors[$course->getTerm() . $course->getTitle()] = "var(--category-color-$i)";
                 setcookie('calendar_color_' . $course->getTitle() . $course->getTerm(), "var(--category-color-$i)", time() + 3600);
-                $i = (($i + 1) % 8) + 1;
+                $i = $i + 1;
+                if ($i > 8) {
+                    $i = 1;
+                }
             }
         }
 
