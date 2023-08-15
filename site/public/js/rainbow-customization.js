@@ -374,7 +374,7 @@ function checkAutoRGStatus() {
             }
             else {
 
-                $('#save_status').html('Internal Server Error for sure');
+                $('#save_status').html('Internal Server Error');
                 console.log(response);
 
             }
