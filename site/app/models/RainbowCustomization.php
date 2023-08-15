@@ -468,33 +468,14 @@ class RainbowCustomization extends AbstractModel {
      * @return array multidimensional array of plagiarism data
      */
     public function getPlagiarism() {
-        // Get allowed plagiarism data
-        $retArray = [];
 
         // If json file available then collect used plagiarism data from that, else get empty array
         !is_null($this->RCJSON) ?
             $usedPlagiarismData = $this->RCJSON->getPlagiarism() :
             $usedPlagiarismData = [];
 
-        // Add data into retArray
-//        foreach ($usedPlagiarismData as $plagiarismData) {
-//            $user = $plagiarismData['user'];
-//            $gradeable = $plagiarismData['gradeable'];
-//            $penalty = $plagiarismData['penalty'];
-//
-//
-//            // Add plagiarism data to return array
-//            $retArray[] = [
-//                'user' => $user,
-//                'gradeable' => $gradeable,
-//                'penalty' => $penalty
-//            ];
-//        }
+        return $usedPlagiarismData;
 
-        $retArray = $usedPlagiarismData;
-        print_r("jaeseok_kag");
-        print_r($retArray);
-        return $retArray;
     }
 
 
@@ -539,8 +520,6 @@ class RainbowCustomization extends AbstractModel {
 
         if (isset($form_json->plagiarism)) {
             foreach ($form_json->plagiarism as $plagiarism_single) {
-//                print_r($plagiarism_single);
-//                print_r("jaeseok");
                 $this->RCJSON->addPlagiarismEntry($plagiarism_single);
             }
         }
