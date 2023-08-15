@@ -13,7 +13,6 @@ class BannerImageRepository extends EntityRepository {
         $currentDate = new \DateTime();
 
         $dql = 'SELECT b FROM app\entities\banner\BannerImage b WHERE b.release_date <= :currentDate AND :currentDate <= b.closing_date ORDER BY b.release_date DESC';
-        
         return $this->_em->createQuery($dql)
             ->setParameter('currentDate', $currentDate)
             ->getResult();
@@ -22,8 +21,7 @@ class BannerImageRepository extends EntityRepository {
      * @return int
      */
     public function getLastBannerImageId(): int {
-        $dql = 'SELECT b.id FROM app\entities\banner\BannerImage b WHERE b.release_date <= :currentDate AND :currentDate <= b.closing_date ORDER BY b.id DESC';
-        
+        $dql = 'SELECT b.id FROM app\entities\banner\BannerImage b WHERE b.release_date <= :currentDate AND :currentDate <= b.closing_date ORDER BY b.id DESC';        
         $query = $this->_em->createQuery($dql)
             ->setParameter('currentDate', new \DateTime())
             ->setMaxResults(1);

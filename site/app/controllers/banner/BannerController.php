@@ -84,7 +84,6 @@ class BannerController extends AbstractController {
             if ($uploaded_files['name'][$j] != $extra_name) {
                 $actual_banner_name = $uploaded_files['name'][$j];
             }
-
         }
 
         $next_id = $this->core->getSubmittyEntityManager()->getRepository(BannerImage::class) ->getLastBannerImageId() + 1;
@@ -100,7 +99,6 @@ class BannerController extends AbstractController {
             if ($uploaded_files['name'][$j] == "..") {
                 return JsonResponse::getErrorResponse("invalid name");
             }
-            
             $all_match = false;
             if ($uploaded_files['name'][$j] == $extra_name) {
                 $all_match = true;
@@ -186,7 +184,7 @@ class BannerController extends AbstractController {
         $entity_manager->remove($banner_item);
         $entity_manager->flush();
 
-        $full_path = FileUtils::joinPaths($this->core->getConfig()->getSubmittyPath(), "banner_images", );
+        $full_path = FileUtils::joinPaths($this->core->getConfig()->getSubmittyPath(), "banner_images");
 
         $folder_name = $_POST['path'];
         $banner_name = $_POST['name'];
