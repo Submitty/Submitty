@@ -87,16 +87,8 @@ class BannerController extends AbstractController {
 
         }
 
-        $banner_image = new BannerImage(
-            $specificPath,
-            $actual_banner_name,
-            $extra_name,
-            $release_date,
-            $close_date
-        );
-
-
-        $full_path = FileUtils::joinPaths($upload_path, $specificPath, $actual_banner_name . $banner_image->getId() );
+        $next_id = $this->core->getSubmittyEntityManager()->getRepository(BannerImage::class) ->getLastBannerImageId() + 1;
+        $full_path = FileUtils::joinPaths($upload_path, $specificPath, $actual_banner_name . "Folder");
         if (!is_dir($full_path)) {
             // Create a new folder for the current month
             if (!mkdir($full_path, 0755, true)) {
@@ -148,6 +140,13 @@ class BannerController extends AbstractController {
             if ($all_match) {
                 continue;
             }
+            $banner_image = new BannerImage(
+                $specificPath,
+                $actual_banner_name,
+                $extra_name,
+                $release_date,
+                $close_date
+            );
             $this->core->getSubmittyEntityManager()->persist($banner_image);
             $this->core->getSubmittyEntityManager()->flush();
         }
@@ -174,12 +173,12 @@ class BannerController extends AbstractController {
         $entity_manager->remove($banner_item);
         $entity_manager->flush();
 
-        $full_path = FileUtils::joinPaths($this->core->getConfig()->getSubmittyPath(), "banner_images");
+        $full_path = FileUtils::joinPaths($this->core->getConfig()->getSubmittyPath(), "banner_images", );
 
         $folder_name = $_POST['path'];
         $banner_name = $_POST['name'];
 
-        $full_path = FileUtils::joinPaths($full_path, $folder_name, $banner_name);
+        $full_path = FileUtils::joinPaths($full_path, $folder_name, $banner_name . "Folder", $banner_name);
 
 
         if (is_file($full_path)) {
