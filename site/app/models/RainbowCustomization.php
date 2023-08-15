@@ -460,10 +460,7 @@ class RainbowCustomization extends AbstractModel {
 
 
     /**
-     * Get plagiarism data
-     *
-     * Get a multidimensional array that contains not only a list of usable plagiarism data but also which ones
-     * are in use (in the customization.json)
+     * Get plagiarism from json file if there is any
      *
      * @return array multidimensional array of plagiarism data
      */

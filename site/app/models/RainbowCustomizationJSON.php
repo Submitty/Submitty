@@ -55,7 +55,7 @@ class RainbowCustomizationJSON extends AbstractModel {
     }
 
     /**
-     * Get gradeable buckets array
+     * Get array of plagiarism
      *
      * @return array
      */
