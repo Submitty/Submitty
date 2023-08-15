@@ -294,7 +294,7 @@ div.cal-option-area {
 }
 
 h2.cal-options-section-head {
-    margin-top: 0rem;
+    margin-top: 0;
 }
 
 label.course-color-label {
@@ -302,7 +302,7 @@ label.course-color-label {
 }
 
 .line-break {
-    margin-bottom: 0rem;
+    margin-bottom: 0;
     margin-top:0.3rem;
 }
 
@@ -311,7 +311,7 @@ div.cal-legend {
     display: flex;
     margin-top: 0.3rem;
     padding: 0.3rem;
-    border-radius: 4px 4px 0px 0px;
+    border-radius: 4px 4px 0 0;
     border: 1px solid black;
     border-bottom: none;
     background-color: var(--standard-hover-light-gray);

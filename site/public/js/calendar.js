@@ -704,7 +704,7 @@ function openOptionsModal() {
     //Make color dropdowns change colors when values are changed
     $('.course-color-picker').on('change', function () {
         $(this).css('background-color', $(this).val());
-    })
+    });
 }
 
 //checks proper tick marks in modal
