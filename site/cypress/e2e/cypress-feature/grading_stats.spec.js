@@ -5,13 +5,17 @@ describe('Test cases for grading stats', () => {
             cy.visit(['sample']);
         });
         it(`${user} view should be accurate for teams.`, () => {
-            cy.get('a[href*="/sample/gradeable/grading_team_homework/grading/details"]').click();
-            cy.get('a[href*="/sample/gradeable/grading_team_homework/grading/status"]').click();
-            cy.scrollTo('bottom', { duration: 5000 })
+            cy.visit(['sample','gradeable','grading_team_homework','grading','status']);
+            cy.wait(5000);
+            cy.scrollTo('bottom', { duration: 5000 });
+            cy.scrollTo('top', { duration: 10000 });
+
             cy.get('#filters').click();
             cy.get('#bad_submissions').click();
             cy.get('#apply_button').click();
-            cy.scrollTo('bottom', { duration: 5000 })
+            cy.wait(5000);
+            cy.scrollTo('bottom', { duration: 5000 });
+            cy.scrollTo('top', { duration: 10000 });
 
             const text = cy.get('#left-grading-stats');
             text.should('contain', 'Students on a team: 101/101 (100%)');
@@ -21,7 +25,9 @@ describe('Test cases for grading stats', () => {
             cy.get('#filters').click();
             cy.get('#bad_submissions').click();
             cy.get('#apply_button').click();
-            cy.scrollTo('bottom', { duration: 5000 })
+            cy.wait(5000);
+            cy.scrollTo('bottom', { duration: 5000 });
+            cy.scrollTo('top', { duration: 10000 });
 
             cy.get('[data-testid="Grading Index"]').click();
             cy.get('[data-testid="view-sections"]').then(($button) => {
@@ -29,17 +35,20 @@ describe('Test cases for grading stats', () => {
                     $button.click();
                 }
             });
-            cy.scrollTo('bottom', { duration: 20000 })
+            cy.scrollTo('bottom', { duration: 20000 });
         });
 
         it(`${user} view should be accurate for grades.`, () => {
-            cy.get('a[href*="/sample/gradeable/grading_homework/grading/details"]').click();
-            cy.get('a[href*="/sample/gradeable/grading_homework/grading/status"]').click();
-            cy.scrollTo('bottom', { duration: 5000 })
+            cy.visit(['sample','gradeable','grading_homework','grading','status']);
+            cy.wait(5000);
+            cy.scrollTo('bottom', { duration: 5000 });
+            cy.scrollTo('top', { duration: 10000 });
             cy.get('#filters').click();
             cy.get('#bad_submissions').click();
             cy.get('#apply_button').click();
-            cy.scrollTo('bottom', { duration: 5000 })
+            cy.wait(5000);
+            cy.scrollTo('bottom', { duration: 5000 });
+            cy.scrollTo('top', { duration: 10000 });
             const text = cy.get('#left-grading-stats').should('exist');
             text.should('contain', 'Students who have submitted: 68 / 101 (67.3%)');
             text.should('contain', 'Current percentage of TA grading done: 33 / 68 (48.5%)');
@@ -47,7 +56,9 @@ describe('Test cases for grading stats', () => {
             cy.get('#filters').click();
             cy.get('#bad_submissions').click();
             cy.get('#apply_button').click();
-            cy.scrollTo('bottom', { duration: 5000 })
+            cy.wait(5000);
+            cy.scrollTo('bottom', { duration: 5000 });
+            cy.scrollTo('top', { duration: 10000 });
 
             cy.get('[data-testid="Grading Index"]').click();
             cy.get('[data-testid="view-sections"]').then(($button) => {
@@ -55,17 +66,20 @@ describe('Test cases for grading stats', () => {
                     $button.click();
                 }
             });
-            cy.scrollTo('bottom', { duration: 20000 })
+            cy.scrollTo('bottom', { duration: 20000 });
         });
 
         it(`${user} viewshould be accurate for released grades.`, () => {
-            cy.get('a[href*="/sample/gradeable/grades_released_homework/grading/details"]').click();
-            cy.get('a[href*="/sample/gradeable/grades_released_homework/grading/status"]').click();
-            cy.scrollTo('bottom', { duration: 5000 })
+            cy.visit(['sample','gradeable','grades_released_homework','grading','status']);
+            cy.wait(5000);
+            cy.scrollTo('bottom', { duration: 5000 });
+            cy.scrollTo('top', { duration: 10000 });
             cy.get('#filters').click();
             cy.get('#bad_submissions').click();
             cy.get('#apply_button').click();
-            cy.scrollTo('bottom', { duration: 5000 })
+            cy.wait(5000);
+            cy.scrollTo('bottom', { duration: 5000 });
+            cy.scrollTo('top', { duration: 10000 });
             const text = cy.get('#left-grading-stats');
             text.should('contain', 'Students who have submitted: 71 / 101 (70.3%)');
             text.should('contain', 'Current percentage of TA grading done: 71 / 71 (100.0%)');
@@ -74,7 +88,9 @@ describe('Test cases for grading stats', () => {
             cy.get('#filters').click();
             cy.get('#bad_submissions').click();
             cy.get('#apply_button').click();
-            cy.scrollTo('bottom', { duration: 5000 })
+            cy.wait(5000);
+            cy.scrollTo('bottom', { duration: 5000 });
+            cy.scrollTo('top', { duration: 10000 });
 
             cy.get('[data-testid="Grading Index"]').click();
             cy.get('[data-testid="view-sections"]').then(($button) => {
@@ -82,7 +98,7 @@ describe('Test cases for grading stats', () => {
                     $button.click();
                 }
             });
-            cy.scrollTo('bottom', { duration: 20000 })
+            cy.scrollTo('bottom', { duration: 20000 });
         });
     });
 });
