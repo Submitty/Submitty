@@ -3,6 +3,7 @@
 namespace app\entities;
 
 use app\libraries\DateUtils;
+use DateTime;
 use Doctrine\ORM\Mapping as ORM;
 
 /**
@@ -40,11 +41,11 @@ class VcsAuthToken {
 
     /**
      * @ORM\Column(type="datetimetz")
-     * @var ?\DateTime
+     * @var DateTime|null
      */
     protected $expiration;
 
-    public function __construct(string $user_id, string $token, string $name, ?\DateTime $expiration) {
+    public function __construct(string $user_id, string $token, string $name, ?DateTime $expiration) {
         $this->user_id = $user_id;
         $this->token = $token;
         $this->name = $name;
