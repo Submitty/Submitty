@@ -126,7 +126,14 @@
                         </tr>
                         </thead>
                         <tbody id="table-body">
-                        <!-- Table rows will be added dynamically here -->
+                        {% for entry in plagiarism %}
+                            <tr>
+                                <td>{{ entry.user }}</td>
+                                <td>{{ entry.gradeable }}</td>
+                                <td>{{ entry.penalty }}</td>
+                                <td><a onclick="deleteRow(this)"><i class="fas fa-trash"></i></a></td>
+                            </tr>
+                        {% endfor %}
                         </tbody>
                     </table>
                 </div>
@@ -242,8 +249,8 @@ To remove a curve simply blank all boxes."></i>
     </div>
 
     <script>
+
         function addToTable() {
-            // Get the values from the form fields
             var USERID = document.getElementById("user_id").value.trim();
             var gradeable = document.getElementById("g_id").value.trim();
             var penalty = document.getElementById("marks").value.trim();
@@ -253,6 +260,7 @@ To remove a curve simply blank all boxes."></i>
                 alert("Please fill in all the fields.");
                 return;
             }
+            // Check for penalty
             if (penalty > 1 || penalty < 0){
                 alert("penalty must be between 0 - 1");
                 return;
@@ -288,13 +296,9 @@ To remove a curve simply blank all boxes."></i>
             }
             tableData.push(newRowData);
 
-            // Convert the array to JSON string
             var jsonData = JSON.stringify(tableData);
-
-            // Create a new row for the table
             var newRow = tableBody.insertRow();
 
-            // Insert cells into the new row and set their content
             var cellUSERID = newRow.insertCell();
             cellUSERID.innerHTML = USERID;
 
@@ -307,16 +311,14 @@ To remove a curve simply blank all boxes."></i>
             var cellDelete = newRow.insertCell();
             cellDelete.innerHTML = '<a onclick="deleteRow(this)"><i class="fas fa-trash"></i></a>';
 
-            // Clear the form fields after adding to the table
+            // Clear the form fields
             document.getElementById("user_id").value = '';
             document.getElementById("g_id").value = '';
             document.getElementById("marks").value = '';
         }
 
         function deleteRow(button) {
-            // Get the row containing the clicked Delete button
             var row = button.parentNode.parentNode;
-            // Remove the row from the table
             row.parentNode.removeChild(row);
         }
     </script>
@@ -325,46 +327,6 @@ To remove a curve simply blank all boxes."></i>
 
 
     <script>
-        function addRow() {
-            const container = document.getElementById('dynamicRowsContainer');
-
-            const newRow = document.createElement('div');
-            newRow.classList.add('option');
-
-            newRow.innerHTML = `
-            <label for="user_id">
-                <span>Student ID:</span>
-                <input class="option-input" type="text" name="user_id" id="user_id">
-            </label>
-            <label for="g_id" class="option-title">Select Gradeable:</label>
-            <select name="g_id" id="g_id">
-                <option disabled selected value> -- select an option -- </option>
-                {% for index, value in gradeables %}
-                <option value="{{value['g_id']}}" >{{ value['g_title'] }}</option>
-                {% endfor %}
-            </select>
-            <label for="marks">
-                <span>Penalty:</span>
-                <input class="option-input" type="text" name="marks" id="marks">
-            </label>
-            <button type="button" class="btn btn-primary key_to_click" tabindex="0" style="margin-top: 10px" onclick="addRow()">
-                +
-            </button>
-            <button type="button" class="btn btn-primary key_to_click" tabindex="0" style="margin-top: 10px" onclick="removeRow(this)">
-                -
-            </button>
-        `;
-
-            container.appendChild(newRow);
-        }
-
-        function removeRow(button) {
-            const container = document.getElementById('dynamicRowsContainer');
-            container.removeChild(button.parentNode);
-        }
-
-
-
         $('.gradeable-li-info .tooltip').on('mouseenter', function(){
             const gradeable = $(this).closest('.gradeable-li');
             const override = gradeable.find('.override');
