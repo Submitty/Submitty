@@ -5484,8 +5484,23 @@ AND gc_id IN (
      * This allows graders to still respond to by component inquiries if in no-component mode.
      */
     public function convertInquiryComponentId($gradeable) {
-        $this->course_db->query("UPDATE grade_inquiries SET gc_id=NULL WHERE id IN (SELECT a.id FROM (SELECT DISTINCT ON (t.user_id) user_id, t.id FROM (SELECT * FROM grade_inquiries ORDER BY id) t WHERE t.g_id=?) a);", [$gradeable->getId()]);
+        $this->course_db->query("UPDATE grade_inquiries
+                                        SET gc_id = NULL
+                                        WHERE id IN (
+                                            SELECT a.id
+                                            FROM (
+                                                SELECT DISTINCT ON (t.user_id) user_id, t.id
+                                                FROM (
+                                                    SELECT *
+                                                    FROM grade_inquiries
+                                                    ORDER BY id
+                                                ) t
+                                                WHERE t.g_id = ?
+                                            ) a
+                                        );
+", [$gradeable->getId()]);
     }
+
 
     /**
      * This is used to revert non-component inquiries back to by-component inquiries
@@ -5650,6 +5665,7 @@ AND gc_id IN (
                   eg_student_view_after_grades as student_view_after_grades,
                   eg_student_download AS student_download,
                   eg_student_submit AS student_submit,
+                  eg_instructor_blind AS instructor_blind,
                   eg_limited_access_blind AS limited_access_blind,
                   eg_peer_blind AS peer_blind,
                   eg_submission_open_date AS submission_open_date,
@@ -6511,6 +6527,7 @@ AND gc_id IN (
                     $gradeable->getLateDays(),
                     $gradeable->isLateSubmissionAllowed(),
                     $gradeable->getPrecision(),
+                    $gradeable->getInstructorBlind(),
                     $gradeable->getLimitedAccessBlind(),
                     $gradeable->getPeerBlind(),
                     DateUtils::dateTimeToString($gradeable->getGradeInquiryStartDate()),
@@ -6548,6 +6565,7 @@ AND gc_id IN (
                       eg_late_days=?,
                       eg_allow_late_submission=?,
                       eg_precision=?,
+                      eg_instructor_blind=?,
                       eg_limited_access_blind=?,
                       eg_peer_blind=?,
                       eg_grade_inquiry_start_date=?,
