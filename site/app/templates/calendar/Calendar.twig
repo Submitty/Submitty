@@ -5,13 +5,46 @@
     const curr_year = {{ curr_year }};
     const curr_month = {{ curr_month }};
     const curr_day = {{ curr_day }};
-    const isGlobal = {% if not in_course %}true{% else %}false{% endif %};
-    const isInstructor = {% if is_instructor %}true{% else %}false{% endif %};
+    const instructor_courses = {{ instructor_courses|json_encode|raw }};
 
-    window.addEventListener("load", function () {
-        loadCalendar({{ view_month }}, {{ view_year }});
+    $( document ).ready(function() {
+        // Get value of the type dropdown
+        const type = $("#calendar-item-type-edit").val();
+        // Get cookie for curr the viewed day, month, and year
+        cookie_year = parseInt(Cookies.get('calendar_year'));
+        cookie_month = parseInt(Cookies.get('calendar_month'));
+        cookie_day = parseInt(Cookies.get('calendar_day'));
+        if (isNaN(cookie_year)) {
+            cookie_year = curr_year;
+        }
+        if (isNaN(cookie_month)) {
+            cookie_month = curr_month;
+        }
+        if (isNaN(cookie_day)) {
+            cookie_day = curr_day;
+        }
+        // Load the calendar to the correct day
+        loadCalendar(cookie_month, cookie_year, cookie_day, type);
     });
 
+    function changeView(x) {
+        Cookies.set('view',x.value);
+
+        cookie_year = parseInt(Cookies.get('calendar_year'));
+        cookie_month = parseInt(Cookies.get('calendar_month'));
+        cookie_day = parseInt(Cookies.get('calendar_day'));
+        if (isNaN(cookie_year)) {
+            cookie_year = view_year;
+        }
+        if (isNaN(cookie_month)) {
+            cookie_month = view_month;
+        }
+        if (isNaN(cookie_day)) {
+            cookie_day = view_day;
+        }
+        // Load the calendar to the correct day
+        loadCalendar(cookie_month, cookie_year, cookie_day, x.value);
+    }
 </script>
 
 
@@ -20,14 +53,23 @@
     <h1>Calendar</h1>
     <div class="cal-content">
         <div class="cal-toolbar">
-            {% if in_course and is_instructor %}
+            {% if instructor_courses|length > 0 %}
                 <button type="button" onclick="openNewItemModal()" class="btn btn-primary">
                     <i class="fas fa-plus"></i> New Item
                 </button>
             {% endif %}
+
+                <button type="button" onclick="openOptionsModal()" class="btn btn-primary">
+                    <i class="fas fa-sliders"></i> Options
+                </button>
+                <select id="calendar-item-type-edit" name="type" onchange="changeView(this);">
+                    <option value="month" {% if (view_cookie is defined) and view_cookie == "month" %} selected {% endif %}>Month</option>
+                    <option value="two_week" {% if (view_cookie is defined)  and view_cookie == "two_week" %} selected {% endif %}>Two Week</option>
+                    <option value="one_week" {% if (view_cookie is defined)  and view_cookie == "one_week" %} selected {% endif %}>One Week</option>
+                </select>
         </div>
 
-        <div class="calendar" style='margin-bottom: 20px' id="full-calendar">
+        <div class="calendar" style='margin-bottom: 20px;' id="full-calendar">
             {# Replace by js function call #}
         </div>
     </div>
@@ -80,3 +122,4 @@
 
 {{ include('calendar/NewCalendarItem.twig') }}
 {{ include('calendar/EditCalendarItem.twig') }}
+{{ include('calendar/CalendarOptions.twig') }}

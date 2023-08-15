@@ -102,8 +102,8 @@ function updatePollVisible(pollid, base_url) {
 }
 
 function updateDropdownStates(curr_state, cookie_key) {
-    const expiration_string = new Date(new Date().getFullYear(), new Date().getMonth(), new Date().getDate()+7).toISOString();
-    document.cookie = `${cookie_key}=${!curr_state}; expires=${expiration_string}; path=/`;
+    const expiration_date = new Date(new Date().getFullYear(), new Date().getMonth(), new Date().getDate()+7);
+    Cookies.set(cookie_key, !curr_state, { expires: expiration_date, path: '/' });
 }
 
 function importPolls() {

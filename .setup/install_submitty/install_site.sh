@@ -64,6 +64,13 @@ PHP_GROUP=${PHP_USER}
 CGI_USER=$(jq -r '.cgi_user' ${CONF_DIR}/submitty_users.json)
 CGI_GROUP=${CGI_USER}
 
+for arg in "$@"
+do
+    if [ "$arg" == "browscap" ]; then
+        BROWSCAP=true
+    fi
+done
+
 mkdir -p ${SUBMITTY_INSTALL_DIR}/site/public
 
 pushd /tmp > /dev/null
@@ -154,6 +161,16 @@ mkdir -p ${SUBMITTY_INSTALL_DIR}/site/cache/doctrine-proxy
 # create doctrine proxy classes
 php "${SUBMITTY_INSTALL_DIR}/sbin/doctrine.php" "orm:generate-proxies"
 
+# clear old lang cache
+if [ -d "${SUBMITTY_INSTALL_DIR}/site/cache/lang" ]; then
+    rm -rf "${SUBMITTY_INSTALL_DIR}/site/cache/lang"
+fi
+# create lang cache directory
+mkdir -p ${SUBMITTY_INSTALL_DIR}/site/cache/lang
+
+# load lang files
+php "${SUBMITTY_INSTALL_DIR}/sbin/load_lang.php" "${SUBMITTY_REPOSITORY}/../Localization/lang" "${SUBMITTY_INSTALL_DIR}/site/cache/lang"
+
 if [ -d "${SUBMITTY_INSTALL_DIR}/site/public/mjs" ]; then
     rm -r "${SUBMITTY_INSTALL_DIR}/site/public/mjs"
 fi
@@ -209,8 +226,17 @@ else
     su - ${PHP_USER} -c "composer dump-autoload -d \"${SUBMITTY_INSTALL_DIR}/site\" --optimize --no-dev"
     chown -R ${PHP_USER}:${PHP_USER} ${SUBMITTY_INSTALL_DIR}/site/vendor/composer
 fi
+
 find ${SUBMITTY_INSTALL_DIR}/site/vendor -type d -exec chmod 551 {} \;
 find ${SUBMITTY_INSTALL_DIR}/site/vendor -type f -exec chmod 440 {} \;
+
+if [[ "${CI}" != true && "${BROWSCAP}" = true ]]; then
+    echo -e "Checking for and fetching latest browscap.ini if needed"
+    # browscap.ini is needed for users' browser identification, this information is shown on session management page
+    # fetch and convert browscap.ini to cache, may take some time on initial setup or if there's an update
+    ${SUBMITTY_INSTALL_DIR}/sbin/update_browscap.php
+    chown -R ${PHP_USER}:${PHP_USER} ${SUBMITTY_INSTALL_DIR}/site/vendor/browscap/browscap-php/resources
+fi
 
 NODE_FOLDER=${SUBMITTY_INSTALL_DIR}/site/node_modules
 
@@ -306,10 +332,9 @@ if echo "{$result}" | grep -E -q "package(-lock)?.json"; then
     # plotly
     mkdir ${VENDOR_FOLDER}/plotly
     cp ${NODE_FOLDER}/plotly.js-dist/plotly.js ${VENDOR_FOLDER}/plotly
-
+    # mermaid
     mkdir ${VENDOR_FOLDER}/mermaid
     cp ${NODE_FOLDER}/mermaid/dist/*.min.* ${VENDOR_FOLDER}/mermaid
-
     # pdf-annotate.js
     cp -R "${NODE_FOLDER}/@submitty/pdf-annotate.js/dist" ${VENDOR_FOLDER}/pdf-annotate.js
     # twig.js
@@ -322,6 +347,9 @@ if echo "{$result}" | grep -E -q "package(-lock)?.json"; then
     # highlight.js
     mkdir ${VENDOR_FOLDER}/highlight.js
     cp ${NODE_FOLDER}/@highlightjs/cdn-assets/highlight.min.js ${VENDOR_FOLDER}/highlight.js/
+    # js-cookie
+    mkdir ${VENDOR_FOLDER}/js-cookie
+    cp ${NODE_FOLDER}/js-cookie/dist/js.cookie.min.js ${VENDOR_FOLDER}/js-cookie
 
     find ${NODE_FOLDER} -type d -exec chmod 551 {} \;
     find ${NODE_FOLDER} -type f -exec chmod 440 {} \;

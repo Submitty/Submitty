@@ -10,6 +10,7 @@ use app\libraries\response\MultiResponse;
 use app\libraries\response\JsonResponse;
 use app\libraries\response\WebResponse;
 use Symfony\Component\Routing\Annotation\Route;
+use app\models\gradeable\LateDays;
 
 /**
  * Class LateController
@@ -278,6 +279,29 @@ class LateController extends AbstractController {
                 return MultiResponse::JsonOnlyResponse(JsonResponse::getSuccessResponse());
             }
         }
+    }
+
+    /**
+     * @AccessControl(role="INSTRUCTOR")
+     * @Route("/courses/{_semester}/{_course}/users/view_latedays", methods={"GET"})
+     * @return RedirectResponse|WebResponse
+     **/
+    public function viewStudentLatedays() {
+        if (!isset($_GET['student_id'])) {
+            $this->core->addErrorMessage("No student ID provided");
+            return new RedirectResponse($this->core->buildCourseUrl(['users']));
+        }
+        $student_id = $_GET['student_id'];
+        $user = $this->core->getQueries()->getUserById($student_id);
+        if ($user === null) {
+            $this->core->addErrorMessage("Invalid Student ID \"" . $_GET['student_id'] . "\"");
+            return new RedirectResponse($this->core->buildCourseUrl(['users']));
+        }
+        return new WebResponse(
+            'LateDaysTable',
+            'showLateTabletoInstructor',
+            LateDays::fromUser($this->core, $user)
+        );
     }
 
     /**

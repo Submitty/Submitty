@@ -16,7 +16,7 @@ let panelElements = [
   { str: "student_info", icon: ".grading_toolbar .fa-user"},
   { str: "peer_info", icon: ".grading_toolbar .fa-users"},
   { str: "discussion_browser", icon: ".grading_toolbar .fa-comment-alt"},
-  { str: "regrade_info", icon: ".grading_toolbar .grade_inquiry_icon"},
+  { str: "grade_inquiry_info", icon: ".grading_toolbar .grade_inquiry_icon"},
   { str: "notebook-view", icon: ".grading_toolbar .fas fa-book-open"}
 ];
 
@@ -48,9 +48,9 @@ let settingsCallbacks = {
   "general-setting-arrow-function": changeStudentArrowTooltips,
   "general-setting-navigate-assigned-students-only": function(value) {
     if (value == 'true') {
-      document.cookie = "view=assigned; path=/;";
+      Cookies.set('view', 'assigned', { path: '/' });
     } else {
-      document.cookie = "view=all; path=/;";
+      Cookies.set('view', 'all', { path: '/' });
     }
   }
 }
@@ -114,6 +114,13 @@ $(function () {
       localStorage.setItem(storageCode, this.value);
       if(settingsCallbacks && settingsCallbacks.hasOwnProperty(storageCode)) {
         settingsCallbacks[storageCode](this.value);
+        if(this.value != "active-inquiry") {
+          //if user change setting to non-grade inquiry option, change the inquiry_status to off and set inquiry_only to off in grading index page
+          Cookies.set('inquiry_status', 'off');
+        }
+        else {
+          Cookies.set('inquiry_status', 'on');
+        }
       }
     }
   })
@@ -191,6 +198,19 @@ $(function () {
 });
 
 function changeStudentArrowTooltips(data) {
+  let inquiry_status = Cookies.get('inquiry_status');
+  if (inquiry_status === 'on'){
+    data = "active-inquiry";
+  }
+  else{
+    //if inquiry_status is off, and data equals active inquiry means the user set setting to active-inquiry manually
+    //and need to set back to default since user also manually changed inquiry_status to off.
+    if(data === "active-inquiry") {
+      data = "default";
+    }
+  }
+  console.log(inquiry_status);
+  console.log(data);
   let component_id = NO_COMPONENT_ID;
   switch(data) {
     case "ungraded":
@@ -260,6 +280,7 @@ let orig_toggleComponent = window.toggleComponent;
 window.toggleComponent = function(component_id, saveChanges) {
   let ret = orig_toggleComponent(component_id, saveChanges);
   return ret.then(function() {
+    console.log(localStorage.getItem('general-setting-arrow-function'));
     changeStudentArrowTooltips(localStorage.getItem('general-setting-arrow-function') || "default");
   });
 }
@@ -514,15 +535,15 @@ function onAjaxInit() {}
 
 function readCookies(){
 
-  let silent_edit_enabled = document.cookie.replace(/(?:(?:^|.*;\s*)silent_edit_enabled\s*\=\s*([^;]*).*$)|^.*$/, "$1") === 'true';
+  const silent_edit_enabled = Cookies.get('silent_edit_enabled') || '';
 
-  let autoscroll = document.cookie.replace(/(?:(?:^|.*;\s*)autoscroll\s*\=\s*([^;]*).*$)|^.*$/, "$1");
-  let opened_mark = document.cookie.replace(/(?:(?:^|.*;\s*)opened_mark\s*\=\s*([^;]*).*$)|^.*$/, "$1");
-  let scroll_pixel = document.cookie.replace(/(?:(?:^|.*;\s*)scroll_pixel\s*\=\s*([^;]*).*$)|^.*$/, "$1");
+  const autoscroll = Cookies.get('autoscroll') || '';
+  const opened_mark = Cookies.get('opened_mark') || '';
+  const scroll_pixel = Cookies.get('scroll_pixel') || '';
 
-  let testcases = document.cookie.replace(/(?:(?:^|.*;\s*)testcases\s*\=\s*([^;]*).*$)|^.*$/, "$1");
+  const testcases = Cookies.get('testcases') || '';
 
-  let files = document.cookie.replace(/(?:(?:^|.*;\s*)files\s*\=\s*([^;]*).*$)|^.*$/, "$1");
+  const files = Cookies.get('files') || '';
 
   $('#silent-edit-id').prop('checked', silent_edit_enabled);
 
@@ -572,9 +593,9 @@ function readCookies(){
 }
 
 function updateCookies(){
-  document.cookie = "silent_edit_enabled=" + isSilentEditModeEnabled() + "; path=/;";
+  Cookies.set('silent_edit_enabled', isSilentEditModeEnabled(), { path: '/' });
   let autoscroll = $('#autoscroll_id').is(":checked") ? "on" : "off";
-  document.cookie = "autoscroll=" + autoscroll + "; path=/;";
+  Cookies.set('autoscroll', autoscroll, { path: '/' });
 
   let files = [];
   $('#file-container').children().each(function() {
@@ -583,9 +604,9 @@ function updateCookies(){
     });
   });
   files = JSON.stringify(files);
-  document.cookie = "files=" + files + "; path=/;";
 
-  document.cookie = "cookie_version=" + cookie_version + "; path=/;";
+  Cookies.set('files', files, { path: '/' });
+  Cookies.set('cookie_version', cookie_version, { path: '/' });
 }
 
 //-----------------------------------------------------------------------------
@@ -593,7 +614,7 @@ function updateCookies(){
 function gotoMainPage() {
 
   let window_location = $("#main-page")[0].dataset.href
-
+  
   if (getGradeableId() !== '') {
     closeAllComponents(true).then(function () {
       window.location = window_location;
@@ -609,10 +630,21 @@ function gotoMainPage() {
 }
 
 function gotoPrevStudent() {
-
-  let filter = localStorage.getItem("general-setting-arrow-function") || "default";
+  let filter;
   let navigate_assigned_students_only = localStorage.getItem("general-setting-navigate-assigned-students-only") !== "false";
 
+  let inquiry_status = Cookies.get('inquiry_status');
+  if (inquiry_status === 'on'){
+    filter = "active-inquiry";
+  }
+  else{
+    if (localStorage.getItem("general-setting-arrow-function") != "active-inquiry"){
+      filter = localStorage.getItem("general-setting-arrow-function") || "default";
+    }
+    else{
+      filter = "default";
+    }
+  }
   let selector = "#prev-student";
   let window_location = $(selector)[0].dataset.href + "&filter=" + filter;
 
@@ -656,10 +688,21 @@ function gotoPrevStudent() {
 }
 
 function gotoNextStudent() {
-
-  let filter = localStorage.getItem("general-setting-arrow-function") || "default";
+  let filter;
   let navigate_assigned_students_only = localStorage.getItem("general-setting-navigate-assigned-students-only") !== "false";
 
+  let inquiry_status = Cookies.get('inquiry_status');
+  if (inquiry_status === 'on'){
+    filter = "active-inquiry";
+  }
+  else{
+    if (localStorage.getItem("general-setting-arrow-function") != "active-inquiry"){
+      filter = localStorage.getItem("general-setting-arrow-function") || "default";
+    }
+    else{
+      filter = "default";
+    }
+  }
   let selector = "#next-student";
   let window_location = $(selector)[0].dataset.href + "&filter=" + filter;
 
@@ -1048,7 +1091,7 @@ registerKeyHandler({name: "Toggle Student Information Panel", code: "KeyS"}, fun
   updateCookies();
 });
 registerKeyHandler({name: "Toggle Grade Inquiry Panel", code: "KeyX"}, function() {
-  $('#regrade_info_btn button').trigger('click');
+  $('#grade_inquiry_info_btn button').trigger('click');
   updateCookies();
 });
 registerKeyHandler({name: "Toggle Discussion Panel", code: "KeyD"}, function() {

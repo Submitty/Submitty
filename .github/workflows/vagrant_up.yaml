@@ -10,14 +10,7 @@ permissions:
 
 jobs:
   vagrant-up:
-    runs-on: macos-10.15
-
-    strategy:
-      matrix:
-        include:
-          - image: ubuntu-20.04
-            port: 1511
-      fail-fast: false
+    runs-on: macos-latest
 
     steps:
       - uses: actions/checkout@v3
@@ -25,6 +18,6 @@ jobs:
       # attempting to mount the shared folder. The guest and host guest additions
       # versions are close enough that we are fine without it.
       # - run: vagrant plugin install vagrant-vbguest
-      - run: NO_SUBMISSIONS=1 vagrant up ${{ matrix.image }}
+      - run: NO_SUBMISSIONS=1 vagrant up ubuntu-22.04
       - name: Validate image
-        run: curl --show-error --fail --include http://localhost:${{ matrix.port }}
+        run: curl --show-error --fail --include http://localhost:1511

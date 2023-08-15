@@ -36,7 +36,7 @@
 
             <div class="action-btn-cont">
                 {% if show_all_sections_button %}
-                <button class="btn btn-default" onclick="changeSections()">
+                <button class="btn btn-default" data-testid="view-sections" onclick="changeSections()">
                     {{ view_all ? "View Your Sections" : "View All" }}
                 </button>
                 {% endif %}
@@ -46,13 +46,33 @@
                 </a>
                 {% if toggle_anon_button %}
                 <button class="btn btn-default" id="toggle-anon-button"
-                    onclick="changeAnon()">
-                    {{ anon_mode ? "Disable Anon Mode" : "Enable Anon Mode" }}
+                    onclick="changeAnon('{{ gradeable.getId() }}')">
+                    {{ anon_mode ? "Disable Anonymous Mode" : "Enable Anonymous Mode" }}
+                </button>
+                {% endif %}
+                {% if grade_inquiry_only_button %}
+                <button class="btn btn-default" id="inquiryButton" onclick="change_inquiry()">
+                    {{ inquiry_status ? "Grade Inquiry Only: Off" : "Grade Inquiry Only: On" }}
                 </button>
                 {% endif %}
             </div>
         </div>
     </div>
+    {% if grade_inquiry_only_button %}
+    <script>
+        window.onload = function() {
+            var button = document.getElementById('inquiryButton');
+            status = Cookies.get('inquiry_status')
+            if (status === 'on') {
+                grade_inquiry_only();
+                button.innerHTML = "Grade Inquiry Only: On";
+            } else {
+                reverse_inquiry_only();
+                button.innerHTML = "Grade Inquiry Only: Off";
+            }
+        }
+    </script>
+    {% endif %}
     {% if not is_student %}
         <a href="{{ stats_url }}" class="btn btn-primary">Grading Stats</a>
     {% endif %}
@@ -70,8 +90,8 @@
             </div>
         </div>
     {% endif %}
-    <button type="button" class="btn btn-primary" onclick="expandAllSections()">Expand All Sections</button>
     <button type="button" class="btn btn-primary" onclick="collapseAllSections()">Collapse All Sections</button>
+    <button type="button" class="btn btn-primary" onclick="expandAllSections()">Expand All Sections</button>
     {% if message is not empty %}
     <div class="details-warning-box{% if message_warning %} details-warning-highlight{% else %} details-warning-neutral{% endif %}">
         {{ message }}
@@ -114,7 +134,7 @@
     </div>
 
     {# This is a data table #}
-    <table id="details-table" class="table table-striped table-bordered persist-area table-text-left" data-details-base-path="{{ details_base_path }}">
+    <table id="details-table" data-testid="details-table" class="table table-striped table-bordered persist-area table-text-left" data-details-base-path="{{ details_base_path }}">
         <caption />
         {# Table header #}
         <thead>
@@ -232,7 +252,7 @@
 </div>
 
 {% macro render_student(context, section, graded_gradeable, index, info, columns, team_gradeable_view_history, overrides, anon_ids) %}
-    <tr
+    <tr data-testid="grade-table"
         {% if not graded_gradeable.getSubmitter().isTeam() and graded_gradeable.getSubmitter().getUser().accessGrading() %}
             style='background: #7bd0f7;'
         {% endif %}
@@ -434,18 +454,28 @@
 {# Grading Button #}
 {% macro render_column_grading(context, section, graded_gradeable, index, info, column, overrides, anon_ids) %}
     {% set badge_count = 0 %}
-    {% if  graded_gradeable.getSubmitter().getId() in overrides %}
+
+    {% if graded_gradeable.getSubmitter().getId() in overrides %}
         {% set contents = "Overridden" %}
         {% set btn_class = "btn-default" %}
+
+
     {% elseif not graded_gradeable.getAutoGradedGradeable().hasSubmission() %}
         {% set contents = "No Submission" %}
         {% set btn_class = "btn-default" %}
+
     {% elseif graded_gradeable.getAutoGradedGradeable().getActiveVersion() == 0 %}
         {% set contents = "Cancelled Submission" %}
         {% set btn_class = "btn-default" %}
+
+    {% elseif info.on_time_submission == false %}
+        {% set contents = "Too Many Days Late" %}
+        {% set btn_class = "btn-danger" %}
+
     {% elseif graded_gradeable.getGradeable().isTaGrading() %}
-        {% set contents = "Grade" %}
-        {% set btn_class = "btn-primary" %}
+            {% set contents = "Grade" %}
+            {% set btn_class = "btn-primary" %}
+
         {% if graded_gradeable.getOrCreateTaGradedGradeable().anyGrades() %}
             {% if graded_gradeable.getTaGradedGradeable().hasVersionConflict() %}
                 {% set contents = "Version Conflict" %}
@@ -467,13 +497,13 @@
         {% set contents = "View" %}
         {% set btn_class = "btn-primary" %}
     {% endif %}
-    {% if graded_gradeable.hasActiveRegradeRequest() %}
+    {% if graded_gradeable.hasActiveGradeInquiry() %}
         {% set contents = contents ~ " + Grade Inquiry" %}
         {% set btn_class = "btn-danger" %}
         {% set badge_count = graded_gradeable.getActiveGradeInquiryCount()  %}
     {%  endif %}
     <td style="text-align: center;">
-        <a class="btn {{ btn_class }}" href="{{ context.grade_url }}?who_id={{ anon_ids[graded_gradeable.getSubmitter().getId()] }}&sort={{ context.sort }}&direction={{ context.direction }}">
+        <a data-testid="grade-button" {% if graded_gradeable.hasActiveGradeInquiry() %}data-grade-inquiry="true"{% endif %} class="btn {{ btn_class }}" href="{{ context.grade_url }}?who_id={{ anon_ids[graded_gradeable.getSubmitter().getId()] }}&sort={{ context.sort }}&direction={{ context.direction }}">
             {{ contents }}
             {% if badge_count > 0 and graded_gradeable.getGradeable().isGradeInquiryPerComponentAllowed()%}
                 <span class="notification-badge">{{ badge_count }}</span>
@@ -517,13 +547,13 @@
         {% set contents = "View" %}
         {% set btn_class = "btn-primary" %}
     {% endif %}
-    {% if graded_gradeable.hasActiveRegradeRequest() %}
+    {% if graded_gradeable.hasActiveGradeInquiry() %}
         {% set contents = contents ~ " + Grade Inquiry" %}
         {% set btn_class = "btn-danger" %}
         {% set badge_count = graded_gradeable.getActiveGradeInquiryCount()  %}
     {%  endif %}
-    <td>
-        <a class="btn {{ btn_class }}" href="{{ context.grade_url }}?who_id={{ anon_ids[graded_gradeable.getSubmitter().getId()] }}&sort={{ context.sort }}&direction={{ context.direction }}">
+    <td style="text-align: center;">
+        <a data-testid="grade-button" {% if graded_gradeable.hasActiveGradeInquiry() %}data-grade-inquiry="true"{% endif %} class="btn {{ btn_class }}" href="{{ context.grade_url }}?who_id={{ anon_ids[graded_gradeable.getSubmitter().getId()] }}&sort={{ context.sort }}&direction={{ context.direction }}">
             {{ contents }}
             {% if badge_count is defined and badge_count > 0 and graded_gradeable.getGradeable().isGradeInquiryPerComponentAllowed()%}
                 <span class="notification-badge">{{ badge_count }}</span>
@@ -602,6 +632,7 @@
 
 {# Total Point Summary #}
 {% macro render_column_total(context, section, graded_gradeable, index, info, column) %}
+
     {% set box_background = (graded_gradeable.getAutoGradedGradeable().getActiveVersionInstance() is not null and graded_gradeable.getAutoGradedGradeable().getActiveVersionInstance().getDaysLate() > graded_gradeable.getGradeable().getLateDays()) ? "late-box" : "" %}
 
     {# todo: this is a lot of math for the view, we should move this into the Gradeable model #}
@@ -706,39 +737,63 @@
     function changeSections() {
         const status = {{ view_all ? 1 : 0 }};
         if (status) {
-            document.cookie = 'view=assigned; path=/;';
+            Cookies.set('view', 'assigned', { path: '/' });
             localStorage.setItem("general-setting-navigate-assigned-students-only", "true");
         } else {
-            document.cookie = 'view=all; path=/;';
+            Cookies.set('view', 'all', { path: '/' });
             localStorage.setItem("general-setting-navigate-assigned-students-only", "false");
         }
         location.reload();
     }
 
-    function changeAnon() {
+    function changeAnon(gradeable_id) {
+        Cookies.set(`default_anon_mode_${gradeable_id}_override`, 'on');
         const status = {{ anon_mode ? 1 : 0}};
         if (status) {
-            document.cookie = 'anon_mode=off;';
+            Cookies.set(`anon_mode_${gradeable_id}`, 'off');
         }
         else {
-            document.cookie = 'anon_mode=on;';
+            Cookies.set(`anon_mode_${gradeable_id}`, 'on');
         }
         location.reload();
     }
 
+    function change_inquiry() {
+        var button = document.getElementById('inquiryButton');
+        var status = Cookies.get('inquiry_status');
+        if(status === 'on') {
+            status = 'off'
+        }
+        else{
+            status = 'on';
+        }
+        if(status === 'on') {
+            Cookies.set('inquiry_status', 'on');
+            var inquiry = Cookies.get('inquiry_status');
+            grade_inquiry_only();
+            button.innerHTML = "Grade Inquiry Only: On";
+        } else {
+            Cookies.set('inquiry_status', 'off');
+            var inquiry = Cookies.get('inquiry_status');
+            reverse_inquiry_only();
+            button.innerHTML = "Grade Inquiry Only: Off";
+        }
+    }
+
+    
     function changeSortOrder() {
         if ({{ sort == 'random' ? "true" : "false" }}) {
-            document.cookie = 'sort=id;';
+            Cookies.set('sort', 'id');
         }
         else {
-            document.cookie = 'sort=random;';
+            Cookies.set('sort', 'random');
         }
         location.reload();
     }
 
     function sortTableByColumn(sort_type = 'id', direction) {
-        document.cookie = `sort=${sort_type}`;
-        document.cookie = `direction=${direction}`;
+        Cookies.set('sort', sort_type);
+        Cookies.set('direction', direction);
         location.reload();
     }
 

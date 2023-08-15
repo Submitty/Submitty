@@ -43,6 +43,7 @@ class ConfigTester extends \PHPUnit\Framework\TestCase {
         $this->config_path = FileUtils::joinPaths($this->temp_dir, 'config');
         $course_path = FileUtils::joinPaths($this->temp_dir, "courses", "s17", "csci0000");
         $log_path = FileUtils::joinPaths($this->temp_dir, "logs");
+        $lang_path = FileUtils::joinPaths($this->temp_dir, "site", "cache", "lang");
 
         FileUtils::createDir($this->config_path);
         FileUtils::createDir($course_path, true, 0777);
@@ -52,6 +53,9 @@ class ConfigTester extends \PHPUnit\Framework\TestCase {
         FileUtils::createDir(FileUtils::joinPaths($log_path, 'autograding'));
         FileUtils::createDir(FileUtils::joinPaths($log_path, 'site_errors'));
         FileUtils::createDir(FileUtils::joinPaths($log_path, 'ta_grading'));
+
+        FileUtils::createDir($lang_path, true);
+        FileUtils::writeFile(FileUtils::joinPaths($lang_path, "default.php"), "<?php\nreturn [ \"key\" => \"val\" ];\n");
 
         $config = [
             "authentication_method" => "PamAuthentication",
@@ -90,7 +94,8 @@ class ConfigTester extends \PHPUnit\Framework\TestCase {
             "course_code_requirements" => "Please follow your school's convention for course code.",
             "institution_homepage" => "https://rpi.edu",
             'system_message' => "Some system message",
-            "duck_special_effects" => false
+            "duck_special_effects" => false,
+            "default_locale" => "default",
         ];
         $config = array_replace($config, $extra);
         FileUtils::writeJsonFile(FileUtils::joinPaths($this->config_path, "submitty.json"), $config);
@@ -121,9 +126,8 @@ class ConfigTester extends \PHPUnit\Framework\TestCase {
                 'private_repository' => '',
                 'forum_enabled' => true,
                 'forum_create_thread_message' => '',
-                'regrade_enabled' => false,
                 'seating_only_for_instructor' => false,
-                'regrade_message' => 'Warning: Frivolous grade inquiries may lead to grade deductions or lost late days',
+                'grade_inquiry_message' => 'Warning: Frivolous grade inquiries may lead to grade deductions or lost late days',
                 'room_seating_gradeable_id' => "",
                 'auto_rainbow_grades' => false,
                 'queue_enabled' => true,
@@ -184,7 +188,7 @@ class ConfigTester extends \PHPUnit\Framework\TestCase {
         $config->loadCourseJson("s17", "csci0000", $course_json_path);
 
         $this->assertFalse($config->isDebug());
-        $this->assertEquals("s17", $config->getSemester());
+        $this->assertEquals("s17", $config->getTerm());
         $this->assertEquals("csci0000", $config->getCourse());
         $this->assertEquals("http://example.com/", $config->getBaseUrl());
         $this->assertEquals("http://example.com/cgi-bin/", $config->getCgiUrl());
@@ -240,9 +244,12 @@ class ConfigTester extends \PHPUnit\Framework\TestCase {
         $this->assertFalse($config->displayRoomSeating());
         $this->assertEquals('LIW0RT5XAxOn2xjVY6rrLTcb6iacl4IDNRyPw58M0Kn0haQbHtNvPfK18xpvpD93', $config->getSecretSession());
 
+        $this->assertEquals("default", $config->getLocale()->getName());
+        $this->assertEquals([ "key" => "val" ], $config->getLocale()->getLangData());
+
         $expected = [
             'debug' => false,
-            'semester' => 's17',
+            'term' => 's17',
             'course' => 'csci0000',
             'base_url' => 'http://example.com/',
             'cgi_url' => 'http://example.com/cgi-bin/',
@@ -275,7 +282,7 @@ class ConfigTester extends \PHPUnit\Framework\TestCase {
             'vcs_type' => 'git',
             'modified' => false,
             'hidden_details' => null,
-            'regrade_message' => 'Warning: Frivolous grade inquiries may lead to grade deductions or lost late days',
+            'grade_inquiry_message' => 'Warning: Frivolous grade inquiries may lead to grade deductions or lost late days',
             'course_json' => [
                 'database_details' => [
                     'dbname' => 'submitty_s17_csci0000'
@@ -295,9 +302,8 @@ class ConfigTester extends \PHPUnit\Framework\TestCase {
                     'private_repository' => '',
                     'forum_enabled' => true,
                     'forum_create_thread_message' => '',
-                    'regrade_enabled' => false,
                     'seating_only_for_instructor' => false,
-                    'regrade_message' => 'Warning: Frivolous grade inquiries may lead to grade deductions or lost late days',
+                    'grade_inquiry_message' => 'Warning: Frivolous grade inquiries may lead to grade deductions or lost late days',
                     'room_seating_gradeable_id' => "",
                     'auto_rainbow_grades' => false,
                     'queue_enabled' => true,
@@ -317,7 +323,6 @@ class ConfigTester extends \PHPUnit\Framework\TestCase {
             "sys_admin_email" => "admin@example.com",
             "sys_admin_url" => "https://example.com/admin",
             'private_repository' => '',
-            'regrade_enabled' => false,
             'seating_only_for_instructor' => false,
             'room_seating_gradeable_id' => '',
             'username_change_text' => 'Submitty welcomes all students.',
@@ -340,7 +345,9 @@ class ConfigTester extends \PHPUnit\Framework\TestCase {
             'polls_enabled'                  => false,
             'feature_flags' => [],
             'submitty_install_path' => $this->temp_dir,
-            'date_time_format' => ['modified' => false]
+            'date_time_format' => ['modified' => false],
+            "default_locale" => "default",
+            "locale" => ['modified' => false],
         ];
         $actual = $config->toArray();
 
@@ -513,8 +520,8 @@ class ConfigTester extends \PHPUnit\Framework\TestCase {
                 'course_name', 'course_home_url', 'default_hw_late_days', 'default_student_late_days',
                 'zero_rubric_grades', 'upload_message', 'display_rainbow_grades_summary',
                 'display_custom_message', 'course_email', 'vcs_base_url', 'vcs_type', 'private_repository',
-                'forum_enabled', 'forum_create_thread_message', 'regrade_enabled', 'seating_only_for_instructor',
-                'regrade_message', 'room_seating_gradeable_id', 'queue_enabled', 'queue_message',
+                'forum_enabled', 'forum_create_thread_message', 'seating_only_for_instructor',
+                'grade_inquiry_message', 'room_seating_gradeable_id', 'queue_enabled', 'queue_message',
                 'queue_announcement_message', 'polls_enabled', 'seek_message_enabled', 'seek_message_instructions'
             ],
         ];

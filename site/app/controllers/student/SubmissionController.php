@@ -16,6 +16,8 @@ use app\libraries\routers\AccessControl;
 use app\libraries\Utils;
 use app\models\gradeable\Gradeable;
 use app\models\gradeable\GradedGradeable;
+use app\models\gradeable\LateDayInfo;
+use app\models\User;
 use app\models\GradingOrder;
 use Symfony\Component\Routing\Annotation\Route;
 use app\models\notebook\SubmissionCodeBox;
@@ -132,7 +134,7 @@ class SubmissionController extends AbstractController {
         Logger::logAccess(
             $this->core->getUser()->getId(),
             $_COOKIE['submitty_token'],
-            "{$this->core->getConfig()->getSemester()}:{$this->core->getConfig()->getCourse()}:load_page:{$gradeable->getId()}"
+            "{$this->core->getConfig()->getTerm()}:{$this->core->getConfig()->getCourse()}:load_page:{$gradeable->getId()}"
         );
         $user_id = $this->core->getUser()->getId();
         $team_id = null;
@@ -429,7 +431,7 @@ class SubmissionController extends AbstractController {
         // use pdf_check.cgi to check that # of pages is valid and split
         // also get the cover image and name for each pdf appropriately
 
-        $semester = $this->core->getConfig()->getSemester();
+        $semester = $this->core->getConfig()->getTerm();
         $course = $this->core->getConfig()->getCourse();
         $use_ocr = $this->core->getConfig()->checkFeatureFlagEnabled('submitty_ocr') && $_POST['use_ocr'] === "true";
 
@@ -757,7 +759,7 @@ class SubmissionController extends AbstractController {
             return $this->uploadResult("Failed to create bulk upload file for this submission.", false);
         }
 
-        $queue_file = [$this->core->getConfig()->getSemester(), $this->core->getConfig()->getCourse(),
+        $queue_file = [$this->core->getConfig()->getTerm(), $this->core->getConfig()->getCourse(),
             $gradeable->getId(), $who_id, $new_version];
         $queue_file = FileUtils::joinPaths(
             $this->core->getConfig()->getSubmittyPath(),
@@ -768,7 +770,7 @@ class SubmissionController extends AbstractController {
         $vcs_checkout = isset($_REQUEST['vcs_checkout']) ? $_REQUEST['vcs_checkout'] === "true" : false;
 
         // create json file...
-        $queue_data = ["semester" => $this->core->getConfig()->getSemester(),
+        $queue_data = ["semester" => $this->core->getConfig()->getTerm(),
             "course" => $this->core->getConfig()->getCourse(),
             "gradeable" => $gradeable->getId(),
             "required_capabilities" => $gradeable->getAutogradingConfig()->getRequiredCapabilities(),
@@ -967,7 +969,7 @@ class SubmissionController extends AbstractController {
                     $active_version = $g->getAutoGradedGradeable()->getActiveVersion();
                 }
                 //create file name
-                $queue_file_helper = [$this->core->getConfig()->getSemester(), $this->core->getConfig()->getCourse(),
+                $queue_file_helper = [$this->core->getConfig()->getTerm(), $this->core->getConfig()->getCourse(),
                     $gradeable_id, $who_id, $active_version];
                 $queue_file_helper = implode("__", $queue_file_helper);
                 $queue_file = FileUtils::joinPaths(
@@ -984,7 +986,7 @@ class SubmissionController extends AbstractController {
                     "queue_time" => $this->core->getDateTimeNow()->format("Y-m-d H:i:sO"),
                     'regrade' => true,
                     "required_capabilities" => $gradeable->getAutogradingConfig()->getRequiredCapabilities(),
-                    "semester" => $this->core->getConfig()->getSemester(),
+                    "semester" => $this->core->getConfig()->getTerm(),
                     "team" => $team_id,
                     "user" => $user_id,
                     "vcs_checkout" => $gradeable->isVcs(),
@@ -1418,9 +1420,9 @@ class SubmissionController extends AbstractController {
         }
         else {
             $vcs_base_url = $this->core->getConfig()->getVcsBaseUrl();
-            $vcs_path = $gradeable->getVcsSubdirectory();
+            $vcs_path = $gradeable->getVcsPartialPath();
 
-            if ($gradeable->getVcsHostType() == 0 || $gradeable->getVcsHostType() == 1) {
+            if ($gradeable->getVcsHostType() === 0 || $gradeable->getVcsHostType() === 1 || $gradeable->getVcsHostType() === 4) {
                 $vcs_path = str_replace("{\$gradeable_id}", $gradeable_id, $vcs_path);
                 $vcs_path = str_replace("{\$user_id}", $who_id, $vcs_path);
                 $vcs_path = str_replace("{\$team_id}", $who_id, $vcs_path);
@@ -1543,7 +1545,7 @@ class SubmissionController extends AbstractController {
         }
 
 
-        $queue_file_helper = [$this->core->getConfig()->getSemester(), $this->core->getConfig()->getCourse(),
+        $queue_file_helper = [$this->core->getConfig()->getTerm(), $this->core->getConfig()->getCourse(),
             $gradeable->getId(), $who_id, $new_version];
         $queue_file_helper = implode("__", $queue_file_helper);
         $queue_file = FileUtils::joinPaths(
@@ -1563,7 +1565,7 @@ class SubmissionController extends AbstractController {
 
         // create json file...
         $queue_data = [
-            "semester" => $this->core->getConfig()->getSemester(),
+            "semester" => $this->core->getConfig()->getTerm(),
             "course" => $this->core->getConfig()->getCourse(),
             "gradeable" => $gradeable->getId(),
             "required_capabilities" => $gradeable->getAutogradingConfig()->getRequiredCapabilities(),
@@ -1598,18 +1600,80 @@ class SubmissionController extends AbstractController {
         Logger::logAccess(
             $this->core->getUser()->getId(),
             $_COOKIE['submitty_token'],
-            "{$this->core->getConfig()->getSemester()}:{$this->core->getConfig()->getCourse()}:submission:{$gradeable->getId()}"
+            "{$this->core->getConfig()->getTerm()}:{$this->core->getConfig()->getCourse()}:submission:{$gradeable->getId()}"
         );
         if ($gradeable->isTeamAssignment()) {
+            // Get previous late day information for all team members
+            $previous_submission_ldi = LateDayInfo::fromSubmitter($this->core, $graded_gradeable->getSubmitter(), $graded_gradeable);
+
             $this->core->getQueries()->insertVersionDetails($gradeable->getId(), null, $team_id, $new_version, $current_time);
-            $team_members = $graded_gradeable->getSubmitter()->getTeam()->getMembers();
+            $team_members = $graded_gradeable->getSubmitter()->getTeam()->getMemberUsers();
 
             // notify other team members that a submission has been made
             $metadata = json_encode(['url' => $this->core->buildCourseUrl(['gradeable',$gradeable_id])]);
             $subject = "Team Member Submission: " . $graded_gradeable->getGradeable()->getTitle();
             $content = "A team member, $original_user_id, submitted in the gradeable, " . $graded_gradeable->getGradeable()->getTitle();
-            $event = ['component' => 'team', 'metadata' => $metadata, 'subject' => $subject, 'content' => $content, 'type' => 'team_member_submission', 'sender_id' => $original_user_id];
-            $this->core->getNotificationFactory()->onTeamEvent($event, $team_members);
+
+            // Create User compare function
+            $compare_user = function (User $usera, User $userb) {
+                if ($usera->getId() === $userb->getId()) {
+                    return 0;
+                }
+                return -1;
+            };
+
+            // Gather all members who have a BAD status as a result of the new submission
+            $bad_members = array_filter($team_members, function ($member) use ($graded_gradeable, $previous_submission_ldi) {
+                $new_submission_ldi = LateDayInfo::fromUser($this->core, $member, $graded_gradeable);
+
+                // Find the number
+                $member_ldi = $previous_submission_ldi[$member->getId()];
+                $previous_status = $member_ldi !== null ? $member_ldi->getStatus() : 0;
+
+                return ($new_submission_ldi !== null && $new_submission_ldi->getStatus() === LateDayInfo::STATUS_BAD && $previous_status !== LateDayInfo::STATUS_BAD);
+            });
+            $team_members = array_udiff($team_members, $bad_members, $compare_user);
+
+            // Gather all members who have been chared more late days as a result of the new submission
+            $changed_members = array_filter($team_members, function ($member) use ($graded_gradeable, $previous_submission_ldi) {
+                $new_submission_ldi = LateDayInfo::fromUser($this->core, $member, $graded_gradeable);
+
+                // Find the number
+                $member_ldi = $previous_submission_ldi[$member->getId()];
+                $previous_days_charged = $member_ldi !== null ? $member_ldi->getLateDaysCharged() : 0;
+
+                return ($new_submission_ldi !== null && $new_submission_ldi->getLateDaysCharged() > $previous_days_charged);
+            });
+            $team_members = array_udiff($team_members, $bad_members, $compare_user);
+
+            $notifications = [
+                'bad_submissions' => [
+                    'members' => $bad_members,
+                    'extra_message' => '. This submission was submitted too late and you do not have sufficient late days. Your grade for this assignment will be recorded as a zero.'
+                ],
+                'new_charges' => [
+                    'members' => $changed_members,
+                    'extra_message' => '. This submission is late and you have been charged at least one extra late day.'
+                ],
+                'default' => [
+                    'members' => $team_members,
+                    'extra_message' => ''
+                ]
+            ];
+
+            foreach ($notifications as $notification) {
+                if (count($notification['members']) === 0) {
+                    continue;
+                }
+
+                $members = array_map(function ($member) {
+                    return $member->getId();
+                }, $notification['members']);
+
+                $extra_message = $notification['extra_message'];
+                $event = ['component' => 'team', 'metadata' => $metadata, 'subject' => $subject, 'content' => $content . $extra_message, 'type' => 'team_member_submission', 'sender_id' => $original_user_id];
+                $this->core->getNotificationFactory()->onTeamEvent($event, array_values($members));
+            }
         }
         else {
             $this->core->getQueries()->insertVersionDetails($gradeable->getId(), $user_id, null, $new_version, $current_time);
@@ -1771,8 +1835,6 @@ class SubmissionController extends AbstractController {
 
         // FIXME: Add this kind of operation to the graded gradeable saving query
 
-        // TO DO: Update late day cache for version change
-        $late_day_status = null;
         if ($gradeable->isTeamAssignment()) {
             $this->core->getQueries()->updateActiveVersion($gradeable->getId(), null, $submitter_id, $version);
         }

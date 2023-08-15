@@ -167,8 +167,8 @@ class GlobalController extends AbstractController {
 
         $course_path = $this->core->getConfig()->getCoursePath();
         $course_materials_path = $course_path . "/uploads/course_materials";
-        $any_files = FileUtils::getAllFiles($course_materials_path);
-        if ($this->core->getUser()->accessAdmin() || !empty($any_files)) {
+        $empty = FileUtils::isEmptyDir($course_materials_path);
+        if ($this->core->getUser()->accessAdmin() || !($empty)) {
             $sidebar_buttons[] = new NavButton($this->core, [
                 "href" => $this->core->buildCourseUrl(['course_materials']),
                 "title" => "Course Materials",
@@ -370,16 +370,11 @@ class GlobalController extends AbstractController {
             "title" => "My Courses",
             "icon" => "fa-book-reader"
         ]);
+
         $sidebar_buttons[] = new NavButton($this->core, [
             "href" => $this->core->buildUrl(['user_profile']),
             "title" => "My Profile",
             "icon" => "fa-user"
-        ]);
-
-        $sidebar_buttons[] = new NavButton($this->core, [
-            "href" => $this->core->buildUrl(['authentication_tokens']),
-            "title" => "Authentication Tokens",
-            "icon" => "fa-key"
         ]);
 
         $sidebar_buttons[] = new Button($this->core, [

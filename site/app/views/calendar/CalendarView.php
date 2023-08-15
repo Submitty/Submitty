@@ -9,6 +9,7 @@ use app\models\CalendarInfo;
 use app\models\User;
 use app\views\AbstractView;
 use app\views\NavigationView;
+use app\models\Course;
 
 class CalendarView extends AbstractView {
     /**
@@ -16,10 +17,11 @@ class CalendarView extends AbstractView {
      * calendar by their given date. Then it shows a series of tables to list all items.
      *
      * @param CalendarInfo $info the information used to fill the calendar
+     * @param array<Course> $courses the courses that will be shown
      * @return string
      * @see NavigationView::gradeableSections
      */
-    public function showCalendar(CalendarInfo $info, bool $in_course = false): string {
+    public function showCalendar(CalendarInfo $info, array $courses, bool $in_course = false): string {
 
         $year = (isset($_GET['year']) && $_GET['year'] != "")  ?  (int) $_GET['year']  : (int) date("Y");
         $month = (isset($_GET['month']) && $_GET['month'] != "") ?  (int) $_GET['month'] : (int) date("n");
@@ -35,6 +37,13 @@ class CalendarView extends AbstractView {
             $year = (int) date("Y");
         }
 
+        //Create list of courses and their term
+        $formatted_courses = [];
+        foreach ($courses as $course) {
+            $course_string = sprintf("%s %s", $course->getTitle(), $course->getTerm());
+            array_push($formatted_courses, $course_string);
+        }
+
         $this->core->getOutput()->addInternalCss("navigation.css");
         $this->core->getOutput()->addInternalCss('calendar.css');
         $this->core->getOutput()->addInternalJs('calendar.js');
@@ -45,7 +54,6 @@ class CalendarView extends AbstractView {
         $this->core->getOutput()->addInternalCss('table.css');
         $this->core->getOutput()->enableMobileViewport();
         $this->core->getOutput()->addBreadcrumb($in_course ? "Course Calendar" : "Calendar");
-
         return $this->core->getOutput()->renderTwigTemplate("calendar/Calendar.twig", [
             "show_table" => $show_table,
             "view_year" => $year,          // the year that the calendar is viewing
@@ -54,12 +62,15 @@ class CalendarView extends AbstractView {
             "curr_month" => date("n"), // the current month
             "curr_day" => date("d"),   // the current date
             'date_format' => $this->core->getConfig()->getDateTimeFormat()->getFormat('gradeable'),
-            "gradeables_by_date" => $info->getItemsByDate(),
+            "gradeables_by_date" => $info->getItemsByDateInCourses(),
             "gradeables_by_section" => $info->getItemsBySections(),
             "empty_message" => $info->getEmptyMessage(),
             "in_course" => $in_course,
             "is_instructor" => $this->core->getUser()->getGroup() === User::GROUP_INSTRUCTOR,
-            "colors" => $info->getColors()
+            "colors" => $info->getColors(),
+            "instructor_courses" => $this->core->getQueries()->getInstructorLevelUnarchivedCourses($this->core->getUser()->getId()),
+            "view_cookie" => isset($_COOKIE['view']) ? $_COOKIE['view'] : "month",
+            "course_names" => $formatted_courses
         ]);
     }
 }

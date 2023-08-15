@@ -1,16 +1,11 @@
 /* global courseUrl */
-/* exported gradeableMessageAgree, gradeableMessageCancel, showGradeableMessage, hideGradeableMessage, expandAllSections, collapseAllSections */
+/* exported gradeableMessageAgree, gradeableMessageCancel, showGradeableMessage, hideGradeableMessage, expandAllSections, collapseAllSections, grade_inquiry_only, reverse_inquiry_only*/
 const MOBILE_BREAKPOINT = 951;
 
 let collapseItems;
 $(document).ready(() => {
-    const collapsedSections = document.cookie.replace(/(?:(?:^|.*;\s*)collapsed_sections\s*=\s*([^;]*).*$)|^.*$/, '$1');
-    if (collapsedSections === '') {
-        collapseItems = new Set();
-    }
-    else {
-        collapseItems = new Set(JSON.parse(decodeURIComponent(document.cookie.replace(/(?:(?:^|.*;\s*)collapsed_sections\s*=\s*([^;]*).*$)|^.*$/, '$1'))));
-    }
+    const collapsedSections = Cookies.get('collapsed_sections');
+    collapseItems = new Set(collapsedSections && JSON.parse(collapsedSections));
 
     // Attach the collapsible panel on details-table
     const ANIMATION_DURATION = 600;
@@ -93,7 +88,7 @@ function hideGradeableMessage() {
 }
 
 function updateCollapsedSections() {
-    document.cookie = `collapsed_sections=${encodeURIComponent(JSON.stringify([...collapseItems]))};path=${$('#details-table').attr('data-details-base-path')}`;
+    Cookies.set('collapsed_sections', JSON.stringify([...collapseItems]), { path: $('#details-table').attr('data-details-base-path') });
 }
 
 function expandAllSections() {
@@ -113,4 +108,22 @@ function collapseAllSections() {
         collapseItems.add($(this).attr('data-section-id'));
     });
     updateCollapsedSections();
+}
+
+function grade_inquiry_only() {
+    $('[data-testid=grade-button]').each(function() {
+        const hasGradeInquiry = typeof $(this).attr('data-grade-inquiry') !== 'undefined';
+        if (!hasGradeInquiry) {
+            $(this).closest('[data-testid="grade-table"]').hide();  // hide gradeable items without active inquiries
+        }
+        else {
+            $(this).closest('[data-testid="grade-table"]').show();  // show gradeable items with active inquiries
+        }
+    });
+}
+
+function reverse_inquiry_only() {
+    $('[data-testid=grade-button]').each(function() {
+        $(this).closest('[data-testid="grade-table"]').show();  // show all gradeable items
+    });
 }
