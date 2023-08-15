@@ -381,6 +381,7 @@ CREATE TABLE public.banner_images (
     id integer NOT NULL,
     path_date character varying(255) NOT NULL,
     name character varying(255) NOT NULL,
+    folder_name character varying(255) NOT NULL,
     extra_info character varying(255),
     release_date timestamp(6) without time zone,
     closing_date timestamp(6) without time zone
@@ -614,6 +615,7 @@ CREATE TABLE public.users (
     enforce_single_session boolean DEFAULT false,
     display_name_order character varying(255) DEFAULT 'GIVEN_F'::character varying NOT NULL,
     display_pronouns boolean DEFAULT false,
+    user_preferred_locale character varying,
     CONSTRAINT users_user_access_level_check CHECK (((user_access_level >= 1) AND (user_access_level <= 3))),
     CONSTRAINT users_user_last_initial_format_check CHECK (((user_last_initial_format >= 0) AND (user_last_initial_format <= 3)))
 );
