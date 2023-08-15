@@ -148,6 +148,20 @@ class BannerController extends AbstractController {
             );
             $this->core->getSubmittyEntityManager()->persist($banner_image);
             $this->core->getSubmittyEntityManager()->flush();
+
+
+            echo $banner_image->getId();
+            $banner_image_id = $banner_image->getId();
+
+            // Rename the folder to include the ID
+            $new_folder_name = $actual_banner_name . "Folder" . $banner_image_id;
+            $new_full_path = FileUtils::joinPaths($upload_path, $specificPath, $new_folder_name);
+
+            // Rename the folder
+            if (!rename($full_path, $new_full_path)) {
+                return JsonResponse::getErrorResponse("Failed to rename the folder for the banner image.");
+            }
+
         }
 
         return JsonResponse::getSuccessResponse("Successfully uploaded!");
@@ -177,7 +191,7 @@ class BannerController extends AbstractController {
         $folder_name = $_POST['path'];
         $banner_name = $_POST['name'];
 
-        $full_path = FileUtils::joinPaths($full_path, $folder_name, $banner_name . "Folder", $banner_name);
+        $full_path = FileUtils::joinPaths($full_path, $folder_name, $banner_name . "Folder" . $banner_item->getId(), $banner_name);
 
 
         if (is_file($full_path)) {
