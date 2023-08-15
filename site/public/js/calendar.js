@@ -701,6 +701,10 @@ function openNewItemModal() {
 function openOptionsModal() {
     $('#calendar-options-form').css('display', 'block');
     setOptionsValues();
+    //Make color dropdowns change colors when values are changed
+    $('.course-color-picker').on('change', function () {
+        $(this).css('background-color', $(this).val());
+    })
 }
 
 //checks proper tick marks in modal
@@ -766,3 +770,4 @@ function colorLegend() {
         $(this).css('background-color', Cookies.get(`calendar_color_${$(this).attr('name')}`));
     });
 }
+

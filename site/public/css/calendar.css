@@ -289,6 +289,23 @@ div.options-colors {
     display: grid;
 }
 
+div.cal-option-area {
+    margin-top: 0.3rem;
+}
+
+h2.cal-options-section-head {
+    margin-top: 0rem;
+}
+
+label.course-color-label {
+    margin-right: 0.2rem;
+}
+
+.line-break {
+    margin-bottom: 0rem;
+    margin-top:0.3rem;
+}
+
 /* Calendar Legend */
 div.cal-legend {
     display: flex;
