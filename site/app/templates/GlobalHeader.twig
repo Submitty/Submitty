@@ -407,33 +407,25 @@
 
     function showBanners() {
         var bannerElement = document.getElementById("banner");
-        console.log(seenImages);
-        console.log("--------------------------------");
-        console.log(currentImages);
         if (bannerElement.style.display === "none") {
             bannerElement.style.width = "100%";
             bannerElement.style.display = "block";
-            document.getElementById("triangle").style.left = "71px";
-            document.getElementById("triangle").style.top = "-107px";
 
             if (currentImages.length > 0) {
                 currentImages[0].classList.add("active");
+                var className = currentImages[0].className.split(' ')[1]
                 hiddenImages.push(className);
                 seenImages.push(currentImages[0]);
                 setCookie('hiddenImages', JSON.stringify(hiddenImages));  
                 var duckdivElement = document.getElementById("duckdiv");
                 bannerElement.style.animation = "slide 20s linear";
-                duckdivElement.style.animation = "slide 20s linear"; 
-                if (currentImages.length == 1) {
-                    document.getElementById("triangle").style.display = "none";
-                    document.getElementById("speech-bubble").style.display = "none";
-                }
+                document.getElementById("triangle").style.display = "none";
+                document.getElementById("speech-bubble").style.display = "none";
             
 
                 bannerElement.addEventListener("animationend", function() {
 
-                bannerElement.style.animation = ""; 
-                duckdivElement.style.animation = "";
+                bannerElement.style.animation = "";
                 currentImages[currentImageIndex].classList.remove("active");
 
                 currentImages.splice(currentImageIndex, 1);
@@ -442,8 +434,11 @@
                 }
                 bannerElement.style.width = "1%";
                 bannerElement.style.display = "none";
-                document.getElementById("triangle").style.left = "195px";
-                document.getElementById("triangle").style.top = "-35px";
+
+                if (currentImages.length > 0 ) {
+                    document.getElementById("triangle").style.display = "block";
+                    document.getElementById("speech-bubble").style.display = "block";
+                }
 
                             }, { once: true });
             }
@@ -457,8 +452,6 @@
             seenImages[currentImageIndex].classList.remove("active");
             bannerElement.style.width = "1%";
             bannerElement.style.display = "none";
-            document.getElementById("triangle").style.left = "195px";
-            document.getElementById("triangle").style.top = "-35px";
         }
 
 

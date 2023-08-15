@@ -101,7 +101,6 @@ class BannerController extends AbstractController {
                 return JsonResponse::getErrorResponse("invalid name");
             }
             
-            // for some reason why I try to simply use a condition to compare two strings, I always get false?!? So I have to loop through each character now
             $all_match = false;
             if ($uploaded_files['name'][$j] == $extra_name) {
                 $all_match = true;
