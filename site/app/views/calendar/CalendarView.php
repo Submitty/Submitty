@@ -89,6 +89,8 @@ class CalendarView extends AbstractView {
             "course_names" => $formatted_courses,
             "show_legend" => $show_legend,
             "color_options" => $course_colors,
+            "show_all_cookie" => isset($_COOKIE['calendar_show_all']) ? $_COOKIE['calendar_show_all'] : 1,
+            "calendar_course_cookie" => isset($_COOKIE['calendar_course']) ? $_COOKIE['calendar_course'] : $formatted_courses[0],
         ]);
     }
 }

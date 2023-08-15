@@ -76,9 +76,13 @@
         {# Legend #}
         {% if show_legend == 1 %}
         <div class="cal-legend">
-            {% for course in course_names %}
-            <div name="{{course|replace({' ':''})}}" class="legend-color"></div><p for="{{course|replace({' ':''})}}-color" class="legend-label">{{course}}</p>
-            {% endfor %}
+            {% if show_all_cookie == 1 %}
+                {% for course in course_names %}
+                <div name="{{course|replace({' ':''})}}" class="legend-color"></div><p for="{{course|replace({' ':''})}}-color" class="legend-label">{{course}}</p>
+                {% endfor %}
+            {% else %}
+                <div name="{{calendar_course_cookie|replace({' ':''})}}" class="legend-color"></div><p for="{{calendar_course_cookie|replace({' ':''})}}-color" class="legend-label">{{calendar_course_cookie}}</p>
+            {% endif %}
         </div>
         {% endif %}
 
