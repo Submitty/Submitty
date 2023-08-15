@@ -20,7 +20,7 @@
                     Include Grade Overrides
                 </td>
                 <td>
-                    <input type="checkbox" id="grade_override" class="toggle-filter-checkbox" aria-label="Toggle Include Grade Override" id="toggle-filter-include-grade-override" {% if include_grade_override == 'include' %} checked {% endif %} onclick="filter_overriden_grades()" />
+                    <input type="checkbox" class="toggle-filter-checkbox" aria-label="Toggle Include Grade Override" id="toggle-filter-include-grade-override" {% if include_grade_override == 'include' %} checked {% endif %} onclick="filter_overriden_grades()" />
                 </td>
             </tr>
 
@@ -29,7 +29,7 @@
                     Include Bad Submissions (too many late days used)
                 </td>
                 <td>
-                    <input type="checkbox" id="bad_submissions" class="toggle-filter-checkbox" aria-label="Toggle Include Bad Submissions" id="toggle-filter-include-bad-submissions" {% if include_bad_submissions == 'include' %} checked {% endif %} onclick="filter_bad_grades()" />
+                    <input type="checkbox" class="toggle-filter-checkbox" aria-label="Toggle Include Bad Submissions" id="toggle-filter-include-bad-submissions" {% if include_bad_submissions == 'include' %} checked {% endif %} onclick="filter_bad_grades()" />
                 </td>
             </tr>
 
@@ -38,7 +38,7 @@
                     Include Null Section
                 </td>
                 <td>
-                    <input type="checkbox" id="null_section" class="toggle-filter-checkbox" aria-label="Toggle Include Null Section" id="toggle-filter-include-null-section" {% if include_null_section == 'include' %} checked {% endif %} onclick="filter_null_section()" />
+                    <input type="checkbox" class="toggle-filter-checkbox" aria-label="Toggle Include Null Section" id="toggle-filter-include-null-section" {% if include_null_section == 'include' %} checked {% endif %} onclick="filter_null_section()" />
                 </td>
             </tr> 
 
@@ -47,7 +47,7 @@
 {% endblock %}
 {% block buttons %}
     {{ block('close_button') }}
-    <button class="btn btn-primary" id = "apply_button" onclick="applyfilters()">
+    <button class="btn btn-primary" onclick="applyfilters()">
         Apply
     </button>
 {% endblock %}
