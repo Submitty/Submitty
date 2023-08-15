@@ -228,21 +228,6 @@
                                 tabindex="0"
                         />
 
-<div class="banner" id = "moving-banner">
-
-  {% for imageData in imageDataArray %}
-      <div>
-      {% set imgName = "{{imageData.name}}" %}
-            <img id="club-banners_moving" class="club-banners-moving {{imageData.name}}_{{imageData.id}}" src="data:imgName/png;base64,{{ imageData.data }}" />
-
-      </div>
-  {% endfor %}
-</div>
-
-
-
-
-
                     {% if not enable_banner %}
                     </a>
                     {% endif %}
@@ -375,6 +360,8 @@
     {% endif %}
 {% endmacro %}
 
+<nav id = "place-banners-here" class="flex-row shadow">
+</nav>
 
 <style>
 
@@ -419,50 +406,52 @@
 
 
     function showBanners() {
-        if (currentImages.length >0 ) {
-            var newImages = document.getElementsByClassName('club-banners-moving ');
-            var className = currentImages[0].className.split(' ')[1];
-
-            for (var i = 0; i < newImages.length; i++) {
-                var elementClassNames = newImages[i].className.split(' ');
-                if (elementClassNames.includes(className)) {
-                    newImages[i].classList.add("active");
-                    currentImages[0].classList.remove("active");
-                    hiddenImages.push(className);
-                    setCookie('hiddenImages', JSON.stringify(hiddenImages));
-                }
-            }
-
-
-            var bannerElement = document.getElementById("moving-banner");
-            console.log(bannerElement);
-            var duckdivElement = document.getElementById("duckdiv");
-
-            bannerElement.style.animation = "slide 20s linear";
-            duckdivElement.style.animation = "slide 20s linear";
-
-
-            bannerElement.style.width = "100%";
-            bannerElement.style.display = "block";
-            duckdivElement.style.display = "block"; // Show duckdiv
-            document.getElementById("triangle").style.display = "none";
-            document.getElementById("speech-bubble").style.display = "none";
-
-
-            bannerElement.addEventListener("animationend", function() {
-                            currentImages[currentImageIndex].classList.remove("active"); // Remove the class
-                        }, { once: true }); 
-            return;
-        }
-
         var bannerElement = document.getElementById("banner");
         console.log(seenImages);
+        console.log("--------------------------------");
+        console.log(currentImages);
         if (bannerElement.style.display === "none") {
-            seenImages[currentImageIndex].classList.add("active");
             bannerElement.style.width = "100%";
             bannerElement.style.display = "block";
             document.getElementById("triangle").style.left = "71px";
             document.getElementById("triangle").style.top = "-107px";
+
+            if (currentImages.length > 0) {
+                currentImages[0].classList.add("active");
+                hiddenImages.push(className);
+                seenImages.push(currentImages[0]);
+                setCookie('hiddenImages', JSON.stringify(hiddenImages));  
+                var duckdivElement = document.getElementById("duckdiv");
+                bannerElement.style.animation = "slide 20s linear";
+                duckdivElement.style.animation = "slide 20s linear"; 
+                if (currentImages.length == 1) {
+                    document.getElementById("triangle").style.display = "none";
+                    document.getElementById("speech-bubble").style.display = "none";
+                }
+            
+
+                bannerElement.addEventListener("animationend", function() {
+
+                bannerElement.style.animation = ""; 
+                duckdivElement.style.animation = "";
+                currentImages[currentImageIndex].classList.remove("active");
+
+                currentImages.splice(currentImageIndex, 1);
+                if (currentImageIndex == currentImages.length) {
+                    currentImageIndex = 0;
+                }
+                bannerElement.style.width = "1%";
+                bannerElement.style.display = "none";
+                document.getElementById("triangle").style.left = "195px";
+                document.getElementById("triangle").style.top = "-35px";
+
+                            }, { once: true });
+            }
+            else {
+                var placeBannersHere = document.getElementById("place-banners-here");
+                placeBannersHere.appendChild(bannerElement);
+                seenImages[currentImageIndex].classList.add("active");
+            }
         } 
         else {
             seenImages[currentImageIndex].classList.remove("active");
@@ -479,19 +468,19 @@
         var originalIndex = currentImageIndex;
 
 
-        if (currentImageIndex >= 0 && currentImageIndex < currentImages.length) {
-            currentImages[currentImageIndex].classList.remove("active");
+        if (currentImageIndex >= 0 && currentImageIndex < seenImages.length) {
+            seenImages[currentImageIndex].classList.remove("active");
         }
 
 
         currentImageIndex += n;
         if (currentImageIndex < 0) {
-            currentImageIndex = currentImages.length - 1;
-        } else if (currentImageIndex >= currentImages.length) {
+            currentImageIndex = seenImages.length - 1;
+        } else if (currentImageIndex >= seenImages.length) {
             currentImageIndex = 0;
         }
 
-        currentImages[currentImageIndex].classList.add("active");
+        seenImages[currentImageIndex].classList.add("active");
     }
 
 
