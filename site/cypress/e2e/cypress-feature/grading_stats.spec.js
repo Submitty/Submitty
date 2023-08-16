@@ -7,7 +7,7 @@ const ApplyFilter = (toggle_bad_submissions,toggle_null_section) => {
         cy.get('#toggle-filter-include-null-section').click();
     }
     //Apply Button
-    cy.get('button.btn.btn-primary').click();
+    cy.get('#apply_changes').click();
 };
 
 describe('Test cases for grading stats', () => {
