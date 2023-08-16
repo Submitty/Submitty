@@ -1,12 +1,10 @@
 #!/bin/bash
 
-# Store the current directory
+
 current_dir=$(pwd)
 
-# Change to the desired directory
 cd /usr/local/submitty/GIT_CHECKOUT/Submitty/site
 
-# Run your command
 submitty_test() {
     if [ "$1" == "php_stan" ]; then
         php vendor/bin/phpstan analyze app public/index.php socket/index.php "${@:2}"
@@ -41,8 +39,5 @@ elif [ "$1" == "php_lint_stan" ] || [ "$1" == "php_stan_lint" ]; then
     fi
 }
 
-# Call the submitty_test function
 submitty_test "$@"
-
-# Change back to the original directory
 cd "$current_dir"
