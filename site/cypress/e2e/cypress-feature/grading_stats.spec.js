@@ -1,13 +1,13 @@
 const ApplyFilter = (toggle_bad_submissions,toggle_null_section) => {
     cy.get('a.edit-filters-button').click();
     if (toggle_bad_submissions) {
-        cy.get("#toggle-filter-include-bad-submissions").click();
+        cy.get('#toggle-filter-include-bad-submissions').click();
     }
     if (toggle_null_section) {
-        cy.get("#toggle-filter-include-null-section").click();
+        cy.get('#toggle-filter-include-null-section').click();
     }
     //Apply Button
-    cy.get("button.btn.btn-primary").click();
+    cy.get('button.btn.btn-primary').click();
 };
 
 describe('Test cases for grading stats', () => {
