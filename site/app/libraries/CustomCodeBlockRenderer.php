@@ -6,7 +6,8 @@ use League\CommonMark\Renderer\NodeRendererInterface;
 use League\CommonMark\Renderer\ChildNodeRendererInterface;
 use Extension\CommonMark\Renderer\Block\FencedCodeRenderer;
 use League\CommonMark\Node\Node;
-use League\CommonMark\HtmlElement;
+use League\CommonMark\Util\HtmlElement;
+use League\CommonMark\Renderer\HtmlRenderer;
 
 class CustomCodeBlockRenderer implements NodeRendererInterface {
     /** @var \League\CommonMark\Extension\CommonMark\Renderer\Block\IndentedCodeRenderer|Extension\CommonMark\Renderer\Block\FencedCodeRenderer */

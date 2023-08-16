@@ -9,11 +9,12 @@ use app\models\Breadcrumb;
 use app\views\ErrorView;
 use League\CommonMark\Extension\Autolink\AutolinkExtension;
 use League\CommonMark\Extension\Table\TableExtension;
-use League\CommonMark\Block\Element\FencedCode;
-use League\CommonMark\Block\Element\IndentedCode;
-use League\CommonMark\Inline\Element\Code;
+use League\CommonMark\Extension\CommonMark\Node\Inline\Code;
 use League\CommonMark\MarkdownConverter;
 use League\CommonMark\Environment\Environment;
+use League\CommonMark\Extension\CommonMark\CommonMarkCoreExtension;
+use League\CommonMark\Extension\CommonMark\Node\Block\FencedCode;
+use League\CommonMark\Extension\CommonMark\Node\Block\IndentedCode;
 use app\libraries\CustomCodeInlineRenderer;
 use Aptoma\Twig\Extension\MarkdownEngine\PHPLeagueCommonMarkEngine;
 use Aptoma\Twig\Extension\MarkdownExtension;
@@ -147,7 +148,11 @@ HTML;
             }));
         }
 
-        $config = ['html_input' => 'escape', 'allow_unsafe_links' => false, 'max_nesting_level' => 10];
+        $config = [
+            'html_input' => 'escape',
+            'allow_unsafe_links' => false,
+            'max_nesting_level' => 10
+        ];
         $environment = new Environment($config);
         $environment->addExtension(new AutolinkExtension());
         $environment->addExtension(new TableExtension());
