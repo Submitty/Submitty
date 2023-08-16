@@ -3,7 +3,12 @@
 
 current_dir=$(pwd)
 
-cd /usr/local/submitty/GIT_CHECKOUT/Submitty/site
+cd /usr/local/submitty/GIT_CHECKOUT/Submitty/site || {
+    echo "Failed to change to the Submitty/site directory.
+    Please check if you have /usr/local/submitty/GIT_CHECKOUT/Submitty/site and valid permission"
+    exit 1
+}
+
 
 submitty_test() {
     if [ "$1" == "php_stan" ]; then
@@ -40,4 +45,7 @@ elif [ "$1" == "php_lint_stan" ] || [ "$1" == "php_stan_lint" ]; then
 }
 
 submitty_test "$@"
-cd "$current_dir"
+cd "$current_dir"  || {
+                      echo "Failed to return to current directory check if you have valid permission"
+                      exit 1
+                  }
