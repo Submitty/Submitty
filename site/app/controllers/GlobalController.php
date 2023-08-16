@@ -284,11 +284,6 @@ class GlobalController extends AbstractController {
                 "title" => "Gradebook",
                 "icon" => "fa-book-reader"
             ]);
-            $sidebar_buttons[] = new NavButton($this->core, [
-                "href" => $this->core->buildCourseUrl(['autograding_status']),
-                "title" => "Autograding Status",
-                "icon" => "fa-server"
-            ]);
         }
 
         // --------------------------------------------------------------------------
