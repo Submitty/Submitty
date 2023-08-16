@@ -26,7 +26,10 @@ class RainbowCustomizationJSON extends AbstractModel {
     private $display = [];
     private $benchmark_percent;         // Init in constructor
     private $gradeables = [];
-    private $plagiarism = [];
+    /**
+     * @var object[]
+     */
+    private array $plagiarism = [];
 
     const allowed_display = ['instructor_notes', 'grade_summary', 'grade_details', 'final_grade',
         'exam_seating', 'display_rank_to_individual', 'display_benchmark', 'benchmark_percent', 'section', 'messages',
@@ -57,9 +60,9 @@ class RainbowCustomizationJSON extends AbstractModel {
     /**
      * Get array of plagiarism
      *
-     * @return array
+     * @return array<mixed>
      */
-    public function getPlagiarism() {
+    public function getPlagiarism(): array {
         return $this->plagiarism;
     }
 
@@ -271,9 +274,7 @@ class RainbowCustomizationJSON extends AbstractModel {
      *
      * @param object $plagiarismEntry
      */
-    public function addPlagiarismEntry(object $plagiarismEntry) {
-        // Validation of this item will be better handled when schema validation is complete, until then just make
-        // sure gradeable is not empty
+    public function addPlagiarismEntry(object $plagiarismEntry): void {
         $emptyObject = (object) [];
         if ($plagiarismEntry == $emptyObject) {
             throw new BadArgumentException('Gradeable may not be empty.');
