@@ -333,7 +333,7 @@ if ! cut -d ':' -f 1 /etc/passwd | grep -q ${DAEMON_USER} ; then
     fi
 fi
 
-# The VCS directores (/var/local/submitty/vcs) are owfned by root:$DAEMONCGI_GROUP
+# The VCS directories (/var/local/submitty/vcs) are owned by root:$DAEMONCGI_GROUP
 usermod -a -G "${DAEMONPHP_GROUP}" "${DAEMON_USER}"
 usermod -a -G "${DAEMONCGI_GROUP}" "${DAEMON_USER}"
 
