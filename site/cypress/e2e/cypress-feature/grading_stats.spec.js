@@ -6,6 +6,10 @@ describe('Test cases for grading stats', () => {
 
         it(`${user} view should be accurate for teams.`, () => {
             cy.visit(['sample','gradeable','grading_team_homework','grading','status']);
+            cy.get('a.edit-filters-button').click();
+            cy.get("#toggle-filter-include-grade-override").click();
+            cy.get("button.btn.btn-primary").click();
+
             cy.get('#left-grading-stats').as('on_time_submissions');
             cy.get('@on_time_submissions').should('contain', 'Students on a team: 101/101 (100%)');
             cy.get('@on_time_submissions').should('contain', 'Number of teams: 36');
