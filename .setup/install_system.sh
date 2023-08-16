@@ -168,6 +168,7 @@ alias submitty_code_watcher='python3 /usr/local/submitty/GIT_CHECKOUT/Submitty/.
 alias submitty_restart_autograding='systemctl restart submitty_autograding_shipper && systemctl restart submitty_autograding_worker'
 alias submitty_restart_websocket='systemctl restart submitty_websocket_server'
 alias submitty_restart_services='submitty_restart_autograding && submitty_restart_websocket && systemctl restart submitty_daemon_jobs_handler && systemctl restart nullsmtpd'
+alias submitty_test='bash /usr/local/submitty/GIT_CHECKOUT/Submitty/.setup/SUBMITTY_TEST.sh'
 alias migrator='python3 ${SUBMITTY_REPOSITORY}/migration/run_migrator.py -c ${SUBMITTY_INSTALL_DIR}/config'
 alias vagrant_info='cat /etc/motd'
 alias ntp_sync='service ntp stop && ntpd -gq && service ntp start'
