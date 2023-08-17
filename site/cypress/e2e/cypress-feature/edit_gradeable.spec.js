@@ -24,6 +24,11 @@ describe('Tests cases revolving around modifying gradeables', () => {
         }
     };
 
+    const logoutLogin = ((user, url) => {
+        cy.logout();
+        cy.login(user);
+        cy.visit(url);
+    });
 
     it('Should test settings page 0-2', () => {
 
@@ -147,48 +152,30 @@ describe('Tests cases revolving around modifying gradeables', () => {
         cy.get('#page_1_nav').click();
         cy.get('#no_student_view').click();
         //student should not be able to see open_peer_homework
-        cy.logout();
-        cy.login('student');
-        cy.visit('sample');
+        logoutLogin('student', ['sample']);
         cy.get('#open_peer_homework').should('not.exist');
 
-        cy.logout();
-        cy.login('instructor');
-        cy.visit(['sample', 'gradeable', 'open_peer_homework', 'update']);
+        logoutLogin('instructor', ['sample', 'gradeable', 'open_peer_homework', 'update']);
         cy.get('#page_1_nav').click();
         cy.get('#no_student_view_after_grades').click();
 
-        cy.logout();
-        cy.login('student');
-        cy.visit(['sample', 'gradeable', 'open_peer_homework']);
-
+        logoutLogin('student', ['sample', 'gradeable', 'open_peer_homework']);
+        
         cy.get('#upload1').should('not.exist');
         cy.get('#submission-version-select').should('not.exist');
         cy.contains('Submissions are no longer being accepted for this assignment').should('exist');
 
         //Makes sure we can undo the setting change
-        cy.logout();
-        cy.login('instructor');
-        cy.visit(['sample', 'gradeable', 'open_peer_homework', 'update']);
+        logoutLogin('instructor', ['sample', 'gradeable', 'open_peer_homework', 'update']);
         cy.get('#page_1_nav').click();
         cy.get('#yes_student_download').click();
         cy.get('#yes_student_submit').click();
 
-        cy.logout();
-        cy.login('student');
-        cy.visit(['sample', 'gradeable', 'open_peer_homework']);
+        logoutLogin('student', ['sample', 'gradeable', 'open_peer_homework']);
         cy.get('#upload1').should('exist');
         cy.get('#submission-version-select').should('exist');
         cy.contains('Submissions are no longer being accepted for this assignment').should('not.exist');
         cy.contains('No submissions for this assignment.').should('not.exist');
-
-    });
-
-    const logoutLogin = ((user) => {
-        cy.logout();
-        cy.login(user);
-        cy.visit(['sample']);
-        cy.get('[title="Please complete Autograde and TA Homework (C System Calls) first"]').click();
     });
 
     it('Should test locking the gradeable', () => {
@@ -204,20 +191,20 @@ describe('Tests cases revolving around modifying gradeables', () => {
         cy.get('#gradeable-lock-points').type('10');
 
         ['instructor', 'ta'].forEach((user) => {
-            logoutLogin(user);
+            logoutLogin(user, ['sample']);
             cy.on('window:confirm', () => true);
+            cy.get('[title="Please complete Autograde and TA Homework (C System Calls) first"]').click();
             cy.get('#upload1').should('exist');
         });
 
         ['student', 'grader'].forEach((user) => {
-            logoutLogin(user);
+            logoutLogin(user, ['sample']);
+            cy.get('[title="Please complete Autograde and TA Homework (C System Calls) first"]').click();
             cy.get('#upload1').should('not.exist');
         });
 
 
-        cy.logout();
-        cy.login('instructor');
-        cy.visit(['sample', 'gradeable', 'open_peer_homework', 'update']);
+        logoutLogin('instructor', ['sample', 'gradeable', 'open_peer_homework', 'update']);
         cy.get('#page_1_nav').click();
         cy.get('#gradeable-lock').select('');
 
@@ -234,21 +221,16 @@ describe('Tests cases revolving around modifying gradeables', () => {
         cy.get('body').click(0, 0);
         cy.get('#save_status').should('have.text', 'All Changes Saved');
 
-        cy.logout();
-        cy.login('student');
-        cy.visit(['sample']);
+        logoutLogin('student', ['sample'])
         cy.get('#gradeables-content').should('not.contain.text', 'Open Peer Homework');
 
-        ['grader', 'ta'].forEach((user) => {
-            cy.logout();
-            cy.login(user);
-            cy.visit(['sample']);
-            cy.get('#gradeables-content').should('contain.text', 'Open Peer Homework');
-        });
+        logoutLogin('ta', ['sample']);
+        cy.get('#gradeables-content').should('contain.text', 'Open Peer Homework');
 
-        cy.logout();
-        cy.login('instructor');
-        cy.visit(['sample', 'gradeable', 'open_peer_homework', 'update?nav_tab=5']);
+        logoutLogin('grader', ['sample']);
+        cy.get('#gradeables-content').should('contain.text', 'Open Peer Homework');
+
+        logoutLogin('instructor', ['sample', 'gradeable', 'open_peer_homework', 'update?nav_tab=5']);
 
         cy.get('#date_ta_view').clear();
         cy.get('#date_ta_view').type(future_date);
@@ -262,15 +244,11 @@ describe('Tests cases revolving around modifying gradeables', () => {
         cy.get('#save_status').should('have.text', 'All Changes Saved');
 
         ['student', 'grader', 'ta'].forEach((user) => {
-            cy.logout();
-            cy.login(user);
-            cy.visit(['sample']);
+            logoutLogin(user, ['sample']);
             cy.get('#gradeables-content').should('contain.text', 'Open Peer Homework');
         });
 
-        cy.logout();
-        cy.login('instructor');
-        cy.visit(['sample', 'gradeable', 'open_peer_homework', 'update?nav_tab=5']);
+        logoutLogin('instructor', ['sample', 'gradeable', 'open_peer_homework', 'update?nav_tab=5']);
 
         cy.get('#date_submit').clear();
         cy.get('#date_submit').type(future_date);
@@ -278,13 +256,10 @@ describe('Tests cases revolving around modifying gradeables', () => {
 
         cy.get('#date_due').type(past_date);
         ['student', 'grader', 'ta'].forEach((user) => {
-            cy.logout();
-            cy.login(user);
+            logoutLogin(user, ['sample', 'gradeable', 'open_peer_homework']);
         });
 
-        cy.logout();
-        cy.login('instructor');
-        cy.visit(['sample', 'gradeable', 'open_peer_homework', 'update?nav_tab=5']);
+        logoutLogin('instructor', ['sample', 'gradeable', 'open_peer_homework', 'update?nav_tab=5']);
 
         cy.get('#date_due').clear();
         cy.get('#date_due').type(future_date);
@@ -293,13 +268,10 @@ describe('Tests cases revolving around modifying gradeables', () => {
         cy.get('#date_grade').clear();
         cy.get('#date_grade').type(past_date);
         ['student', 'grader', 'ta'].forEach((user) => {
-            cy.logout();
-            cy.login(user);
+            logoutLogin(user, ['sample', 'gradeable', 'open_peer_homework']);
         });
 
-        cy.logout();
-        cy.login('instructor');
-        cy.visit(['sample', 'gradeable', 'open_peer_homework', 'update?nav_tab=5']);
+        logoutLogin('instructor', ['sample', 'gradeable', 'open_peer_homework', 'update?nav_tab=5']);
 
         cy.get('#date_grade').clear();
         cy.get('#date_grade').type(future_date);
@@ -307,24 +279,18 @@ describe('Tests cases revolving around modifying gradeables', () => {
 
         cy.get('#date_grade_due').type(past_date);
         ['student', 'grader', 'ta'].forEach((user) => {
-            cy.logout();
-            cy.login(user);
+            logoutLogin(user, ['sample', 'gradeable', 'open_peer_homework']);
         });
 
-        cy.logout();
-        cy.login('instructor');
-        cy.visit(['sample', 'gradeable', 'open_peer_homework', 'update?nav_tab=5']);
+        logoutLogin('instructor', ['sample', 'gradeable', 'open_peer_homework', 'update?nav_tab=5']);
 
         cy.get('#date_grade_due').clear();
         cy.get('#date_grade_due').type(future_date);
         ['student', 'grader', 'ta'].forEach((user) => {
-            cy.logout();
-            cy.login(user);
+            logoutLogin(user, ['sample', 'gradeable', 'open_peer_homework']);
         });
 
-        cy.logout();
-        cy.login('instructor');
-        cy.visit(['sample', 'gradeable', 'open_peer_homework', 'update?nav_tab=5']);
+        logoutLogin('instructor', ['sample', 'gradeable', 'open_peer_homework', 'update?nav_tab=5']);
 
         cy.get('#date_grade_due').type(past_date);
 
