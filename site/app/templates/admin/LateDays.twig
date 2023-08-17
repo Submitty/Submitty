@@ -79,7 +79,7 @@
                         <td data-before-content="Last Name" class="align-left">{{ user.getDisplayedFamilyName() }}</td>
                         <td data-before-content="Total Allowed Late Days">{{ user.getAllowedLateDays() }}</td>
                         <td data-before-content="Effective Date">{{ user.getSinceTimestamp() }}</td>
-                        <td data-before-content="Delete">
+                        <td id="Delete">
                             <a
                                 aria-label='Delete late days for {{ user.getId() }} on {{ user.getSinceTimestamp() }}'
                                 href="javascript:deleteLateDays('{{ user.getId() }}', '{{ user.getSinceTimestamp() }}');"

@@ -36,7 +36,7 @@
     <tbody>
         {% set index = 0 %}
         {% for student in students %}
-            <tr id="row-{{ index }}" data-user="{{ student.getId() }}" data-row="{{ index }}">
+            <tr id="row-{{ index }}" USER_ID="{{ student.getId() }}" data-row="{{ index }}">
                 <td data-before-content="Student ID">
                     {{ student.getId() }}
                 </td>
@@ -46,7 +46,7 @@
                  <td data-before-content="Last Name">
                     {{ student.getDisplayedFamilyName() }}
                 </td>
-                <td data-before-content="Initial Late Days">
+                <td initial_ld_id="Initial Late Days">
                     {{ initial_late_days }}
                 </td>
 
@@ -56,7 +56,7 @@
                 {% for title in late_day_cache_header %}
                     {% set title = title.timestamp is defined ? title|date('Y-m-d') : title %}
 
-                    <td data-before-content="{{ title }}" data-user-content="{{ student.getId() }}">
+                    <td header_id="{{ title }}" USER_ID-content="{{ student.getId() }}">
                         {% if user_cache is defined and user_cache[title] is defined %}
                             {% set curr_cache = user_cache[title] %}
                             {{ ((curr_cache.late_days_change > 0) ? '+' : '') ~ curr_cache.late_days_change }}
@@ -69,13 +69,13 @@
                 
                 {% if last_title is null %}
                     {# If there are no late day events yet #}
-                    <td data-before-content="Late Days Remaining"> {{ initial_late_days }} </td>
+                    <td ld_id="Late Days Remaining"> {{ initial_late_days }} </td>
                 {% elseif user_cache[last_title] is defined %}
                     {# If we have cache data for the last event, we have cache data for all events #}
-                    <td data-before-content="Late Days Remaining"> {{ user_cache[last_title].late_days_remaining }} </td>
+                    <td ld_id="Late Days Remaining"> {{ user_cache[last_title].late_days_remaining }} </td>
                 {% else %}
                     {# Else put cache is incomplete, leave value blank #}
-                    <td data-before-content="Late Days Remaining"> </td>
+                    <td ld_id="Late Days Remaining"> </td>
                 {% endif %}
             </tr>
         {% endfor %}
