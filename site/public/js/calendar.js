@@ -140,6 +140,9 @@ function generateCalendarItem(item) {
     if (item['status'] === 'ann') {
         element.style.setProperty('border-color', item['color']);
     }
+    if (item['status'] === 'text' || item['status'] === 'ann') {
+        element.style.setProperty('background-color', item['color']);
+    }
     if (exists) {
         element.style.setProperty('cursor','pointer');
     }
