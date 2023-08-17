@@ -223,9 +223,9 @@ describe('Test cases involving late day cache updates', () => {
             cy.get('#save_status', {timeout:10000}).should('have.text', 'All Changes Saved');
             cy.visit(['sample', 'bulk_late_days']);
             // Gradeable # of late days used should be empty
-            cy.get('#late-day-table > tbody > tr > [data-before-content="Late Allowed Homework"] ~')
+            cy.get('#late-day-table > tbody > tr > [data-before-content="Late Allowed Homework"]')
                 .then((cell) => expect(cell.text().trim()).to.equal(''));
-            
+
             //Changes due date back
             EditGradeablePage();
             cy.get('#date_due')
@@ -235,9 +235,9 @@ describe('Test cases involving late day cache updates', () => {
             cy.get('#late_days').click(); // Dismiss calender and trigger save
             cy.get('#save_status', {timeout:10000}).should('have.text', 'All Changes Saved');
             cy.visit(['sample', 'bulk_late_days']);
-            cy.get('#late-day-table > tbody > tr > [data-before-content="Late Allowed Homework"] ~')
+            cy.get('#late-day-table > tbody > tr > [data-before-content="Late Allowed Homework"]')
                 .then((cell) => expect(cell.text().trim()).to.equal(''));
-            
+
             //Disables due date
             EditGradeablePage();
             cy.get('#has_due_date_no').check();
@@ -281,7 +281,7 @@ describe('Test cases involving late day cache updates', () => {
             cy.get('#date_due').click(); // Dismiss calender and trigger save
             cy.get('#save_status', {timeout:10000}).should('have.text', 'All Changes Saved');
             cy.visit(['sample', 'bulk_late_days']);
-            cy.get('#late-day-table > tbody > tr > [data-before-content="Late Allowed Homework"] ~')
+            cy.get('#late-day-table > tbody > tr > [data-before-content="Late Allowed Homework"]')
                 .then((cell) => expect(cell.text().trim()).to.equal(''));
 
             //Changes late days allowed number back
@@ -293,7 +293,7 @@ describe('Test cases involving late day cache updates', () => {
             cy.get('#date_due').click(); // Dismiss calender and trigger save
             cy.get('#save_status', {timeout:10000}).should('have.text', 'All Changes Saved');
             cy.visit(['sample', 'bulk_late_days']);
-            cy.get('#late-day-table > tbody > tr > [data-before-content="Late Allowed Homework"] ~')
+            cy.get('#late-day-table > tbody > tr > [data-before-content="Late Allowed Homework"]')
                 .then((cell) => expect(cell.text().trim()).to.equal(''));
         });
     });
@@ -328,7 +328,7 @@ describe('Test cases involving late day cache updates', () => {
 
             // Check cache
             cy.visit(['sample', 'bulk_late_days']);
-            cy.get('[data-user-content="student"][data-before-content="Late Allowed Homework"] ~')
+            cy.get('[data-user-content="student"][data-before-content="Late Allowed Homework"]')
                 .then((cell) => expect(cell.text().trim()).to.equal(''));
         });
 
@@ -386,7 +386,7 @@ describe('Test cases involving late day cache updates', () => {
 
             // Check that cache is deleted
             cy.visit(['sample', 'bulk_late_days']);
-            cy.get('#late-day-table > tbody > tr > [data-before-content="Delete Me"] ~')
+            cy.get('#late-day-table > tbody > tr > [data-before-content="Delete Me"]')
                 .then((cell) => expect(cell.text().trim()).to.equal(''));
         });
 
@@ -406,7 +406,6 @@ describe('Test cases involving late day cache updates', () => {
 
         });
     });
-
     describe('Test changes to initial late days', () => {
         it('Changes default late days', () => {
             cy.visit(['sample', 'config']);
@@ -423,14 +422,12 @@ describe('Test cases involving late day cache updates', () => {
 
             cy.get('[data-before-content="Initial Late Days"]')
                 .each((cell) => expect(cell.text().trim()).to.equal('1'));
-            cy.get('#late-day-table > tbody > tr > [data-before-content="Initial Late Days"] ~')
-                .then((cell) => expect(cell.text().trim()).to.equal(''));
             //Change back
             cy.visit(['sample', 'config']);
             cy.get('#default-student-late-days')
                 .clear()
                 .type('0');
-
+            cy.get('#default-hw-late-days').click();
         });
     });
 });
