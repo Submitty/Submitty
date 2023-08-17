@@ -37,6 +37,7 @@
             {% set id = 'id="curr-status"' %}
         {% endif %}
         {% set placeholder = late_day_info.isLateDayUpdate() ? empty_late_day : 'N/A' %}
+
         <tr class={{class}}>
             <td data-before-content="Event/Assignment" class="align-left">{{ late_day_info.getEventTitle() }}</td>
             <td data-before-content="Event/Assignment Date">{{ late_day_info.getLateDayEventTime()|date('m/d/Y') }}</td>

@@ -300,10 +300,6 @@ describe('Test cases involving late day cache updates', () => {
 
     describe('Test changes to gradeable versions', () => {
 
-        before(() => {
-            cy.writeFile('cypress/fixtures/submission.txt', 'test');
-        });
-
         beforeEach(() => {
             cy.visit(['sample', 'bulk_late_days']);
             cy.login('instructor');
@@ -317,7 +313,7 @@ describe('Test cases involving late day cache updates', () => {
             cy.get('#user_id').type('student');
 
             // attatch file
-            cy.get('#input-file1').attachFile('submission.txt');
+            cy.get('#input-file1').attachFile('file1.txt');
             cy.get('#submit').click();
 
             // Confirm dialog box
