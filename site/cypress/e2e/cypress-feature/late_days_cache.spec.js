@@ -120,7 +120,7 @@ describe('Test cases involving late day cache updates', () => {
             cy.login('instructor');
             // 0 late days should be charged
             for (const user_id of all_user_ids) {
-                    cy.get(`[USER_ID="${user_id}"] > [header_id="Late Allowed Homework"]`)
+                cy.get(`[USER_ID="${user_id}"] > [header_id="Late Allowed Homework"]`)
                     .contains('0')
                     .should('exist');
             }
@@ -139,11 +139,11 @@ describe('Test cases involving late day cache updates', () => {
 
             // Check cache
             cy.visit(['sample', 'bulk_late_days']);
-            cy.get(`[USER_ID="instructor"] > [header_id="Late Allowed Homework"]`)
+            cy.get(`[USER_ID='instructor'] > [header_id='Late Allowed Homework']`)
                 .contains('0')
                 .should('exist');
 
-            //Change Gradeable Version back to valid 
+            //Change Gradeable Version back to valid
             cy.visit(['sample', 'gradeable', 'late_allowed_homework']);
             cy.get('#submission-version-select').select('3');
             // Change the version to grade
@@ -170,7 +170,7 @@ describe('Test cases involving late day cache updates', () => {
             cy.logout();
             CheckStatusUpdated(0,2);
             //Adding late days represents a timestamp, which is a new entry in the cache
-            //Should check that there a new header with the title of the datestamp 
+            //Should check that there a new header with the title of the datestamp
             cy.login('instructor');
             cy.visit(['sample', 'bulk_late_days']);
             cy.get('#late-day-table > tbody > tr > [header_id="1972-01-01"]').should('have.length.gt', 0);
