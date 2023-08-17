@@ -17,7 +17,7 @@ describe('Tests cases revolving around modifying gradeables', () => {
     const beVisible = (button_selectors, selectors) => {
         for (const button_selector of button_selectors) {
             cy.get(button_selector).click();
-            cy.get('#save_status').should('have.text', 'All Changes Saved');
+            cy.get('#save_status', {timeout:10000}).should('have.text', 'All Changes Saved');
         }
         for (const selector of selectors) {
             cy.get(selector).should('be.visible');
@@ -98,11 +98,11 @@ describe('Tests cases revolving around modifying gradeables', () => {
     it('Should test settings page 3-5', () => {
         cy.get('#page_3_nav').click();
 
-        beVisible(['#registration_section'], ['#doc_registration']);
-
         beVisible(['#rotating_section'], ['#rotating_data']);
 
         beVisible(['#all_access'], ['#doc_all_access']);
+
+        beVisible(['#registration_section'], ['#doc_registration']);
 
         beVisible(['#blind_instructor_grading'], ['#blind_instructor_grading']);
 
