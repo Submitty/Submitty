@@ -220,7 +220,6 @@ a.cal-gradeable-status-text:focus {
 
 /** Announcement **/
 a.cal-gradeable-status-ann {
-    color: #218ffd!important;  /* This color is from DS website */
     padding: 0;
     font-style: italic;
     border-style: solid;
@@ -229,7 +228,6 @@ a.cal-gradeable-status-ann {
 }
 
 a.cal-gradeable-status-ann:hover {
-    color: #218ffd;
     padding: 0;
     font-style: italic;
     cursor: default;
@@ -238,7 +236,6 @@ a.cal-gradeable-status-ann:hover {
 }
 
 a.cal-gradeable-status-ann:focus {
-    color: #218ffd;
     padding: 0;
     font-style: italic;
     border: none;

@@ -137,9 +137,6 @@ function generateCalendarItem(item) {
     if (item['show_due']) {
         element.style.setProperty('background-color', item['color']);
     }
-    if (item['status'] === 'ann') {
-        element.style.setProperty('border-color', item['color']);
-    }
     if (item['status'] === 'text' || item['status'] === 'ann') {
         element.style.setProperty('background-color', item['color']);
     }
