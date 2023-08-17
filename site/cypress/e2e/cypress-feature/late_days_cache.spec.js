@@ -114,7 +114,7 @@ describe('Test cases involving late day cache updates', () => {
         });
     });
 
-    describe('Test students with late submissions', () => {
+    describe('Test late submissions', () => {
         it('should have 0 late days used on bulk late days table', () => {
             cy.visit(['sample', 'bulk_late_days']);
             cy.login('instructor');
@@ -124,6 +124,30 @@ describe('Test cases involving late day cache updates', () => {
                     .contains('0')
                     .should('exist');
             }
+        });
+        it('Adds a new late submission', () => {
+            cy.login('instructor');
+            cy.visit(['sample', 'gradeable', 'late_allowed_homework']);
+            const testfile = 'cypress/fixtures/file1.txt';
+            // Make a new submission
+            cy.get('#startnew').click();
+            cy.get('#upload1').selectFile(testfile,{action: 'drag-drop'});
+            cy.waitPageChange(() => {
+                cy.get('#submit').click();
+            });
+            cy.get('#submitted-files > div').contains('file1.txt');
+
+            // Check cache
+            cy.visit(['sample', 'bulk_late_days']);
+            cy.get(`[USER_ID="instructor"] > [header_id="Late Allowed Homework"]`)
+                .contains('0')
+                .should('exist');
+
+            //Change Gradeable Version back to valid 
+            cy.visit(['sample', 'gradeable', 'late_allowed_homework']);
+            cy.get('#submission-version-select').select('3');
+            // Change the version to grade
+            cy.get('#version_change').click();
         });
     });
 
@@ -145,9 +169,13 @@ describe('Test cases involving late day cache updates', () => {
             checkStudentsInCache();
             cy.logout();
             CheckStatusUpdated(0,2);
-            cy.visit(['sample', 'late_days']);
+            //Adding late days represents a timestamp, which is a new entry in the cache
+            //Should check that there a new header with the title of the datestamp 
             cy.login('instructor');
+            cy.visit(['sample', 'bulk_late_days']);
+            cy.get('#late-day-table > tbody > tr > [header_id="1972-01-01"]').should('have.length.gt', 0);
 
+            cy.visit(['sample', 'late_days']);
             const deleteLateDays = () => {
                 cy.get('div.content').then((table) => {
                     if (table.find('#Delete').length > 0) {
@@ -161,6 +189,11 @@ describe('Test cases involving late day cache updates', () => {
             deleteLateDays();
             // View bulk late day changes
             checkStudentsInCache();
+            //Now since the latedays are gone, the header should be gone
+            cy.login('instructor');
+            cy.visit(['sample', 'bulk_late_days']);
+            cy.get('#late-day-table > tbody > tr > [header_id="1972-01-01"]').should('have.length', 0);
+
         });
     });
 
@@ -298,110 +331,6 @@ describe('Test cases involving late day cache updates', () => {
         });
     });
 
-    describe('Test changes to gradeable versions', () => {
-
-        beforeEach(() => {
-            cy.visit(['sample', 'bulk_late_days']);
-            cy.login('instructor');
-            calculateCache();
-            cy.visit(['sample', 'gradeable', 'late_allowed_homework']);
-        });
-
-        it('Adds a new submission', () => {
-            // Make student submission
-            cy.get('#radio-student').check();
-            cy.get('#user_id').type('student');
-
-            // attatch file
-            cy.get('#input-file1').attachFile('file1.txt');
-            cy.get('#submit').click();
-
-            // Confirm dialog box
-            cy.get('#previous-submission-form')
-                .find('input')
-                .contains('Submit')
-                .click();
-
-            // Check cache
-            cy.visit(['sample', 'bulk_late_days']);
-            cy.get('[USER_ID-content="student"][header_id="Late Allowed Homework"]')
-                .then((cell) => expect(cell.text().trim()).to.equal(''));
-        });
-
-        it('Cancels submission', () => {
-            // Click do not grade
-            cy.get('#do_not_grade').click();
-            // Note: page refresh triggers a late day recalulation for banner text
-
-            // Check cache
-            cy.visit(['sample', 'late_table']);
-
-            cy.get('td[data-before-content="Event/Assignment"]')
-                .contains('Late Allowed Homework')
-                .siblings('td[data-before-content="Status"]')
-                .contains('Cancelled Submission')
-                .should('exist');
-        });
-
-        it('Add gradeable version back', () => {
-            // Select gradeable
-            cy.get('#submission-version-select').select('1');
-
-            // Change the version to grade
-            cy.get('#version_change').click();
-            // Note: page refresh triggers a late day recalulation for banner text
-
-            // Check cache
-            cy.visit(['sample', 'late_table']);
-
-            cy.get('td[data-before-content="Event/Assignment"]')
-                .contains('Late Allowed Homework')
-                .siblings('td[data-before-content="Status"]')
-                .should('not.contain', 'Cancelled Submission')
-                .should('exist');
-        });
-    });
-
-    describe('Test gradable creation/deletion', () => {
-
-        beforeEach(() => {
-            cy.visit(['sample', 'bulk_late_days']);
-            cy.login('instructor');
-            calculateCache();
-        });
-
-        it('Creates a gradeable', () => {
-            cy.visit(['sample', 'gradeable']);
-
-            // Enter gradeable info
-            cy.get('#g_title').type('Delete Me');
-            cy.get('#g_id').type('deleteme');
-            cy.get('#radio_ef_student_upload').check();
-            // Create Gradeable
-            cy.get('#create-gradeable-btn').click();
-
-            // Check that cache is deleted
-            cy.visit(['sample', 'bulk_late_days']);
-            cy.get('#late-day-table > tbody > tr > [header_id="Delete Me"]')
-                .then((cell) => expect(cell.text().trim()).to.equal(''));
-        });
-
-        it('Deletes a gradeable', () => {
-            cy.visit(['sample']);
-            cy.get('#deleteme > div > a.fa-trash').click();
-
-            // Confirm delete
-            cy.get('form[name="delete-confirmation"]')
-                .find('input')
-                .contains('Delete')
-                .click();
-
-            // Check that cache is deleted
-            cy.visit(['sample', 'bulk_late_days']);
-            cy.get('#late-day-table > tbody > tr > [header_id="Delete Me"]').should('have.length', 0);
-
-        });
-    });
     describe('Test changes to initial late days', () => {
         it('Changes default late days', () => {
             cy.visit(['sample', 'config']);
@@ -426,4 +355,5 @@ describe('Test cases involving late day cache updates', () => {
             cy.get('#default-hw-late-days').click();
         });
     });
+
 });
