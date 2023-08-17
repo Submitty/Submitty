@@ -184,7 +184,7 @@ describe('Tests cases revolving around modifying gradeables', () => {
 
     });
 
-    const logoutLogin = (() => {
+    const logoutLogin = ((user) => {
         cy.logout();
         cy.login(user);
         cy.visit(['sample']);
@@ -204,12 +204,13 @@ describe('Tests cases revolving around modifying gradeables', () => {
         cy.get('#gradeable-lock-points').type('10');
 
         ['instructor', 'ta'].forEach((user) => {
-            logoutLogin();
+            logoutLogin(user);
             cy.on('window:confirm', () => true);
             cy.get('#upload1').should('exist');
         });
+
         ['student', 'grader'].forEach((user) => {
-            logoutLogin();
+            logoutLogin(user);
             cy.get('#upload1').should('not.exist');
         });
 
@@ -222,7 +223,7 @@ describe('Tests cases revolving around modifying gradeables', () => {
 
     });
 
-    it.only('Should test the dates page', () => {
+    it('Should test the dates page', () => {
         const future_date = '9994-12-31 23:59:59';
         const past_date = '1970-10-10 23:59:59';
         cy.get('#page_5_nav').click();
@@ -247,20 +248,19 @@ describe('Tests cases revolving around modifying gradeables', () => {
 
         cy.logout();
         cy.login('instructor');
-
         cy.visit(['sample', 'gradeable', 'open_peer_homework', 'update?nav_tab=5']);
 
         cy.get('#date_ta_view').clear();
         cy.get('#date_ta_view').type(future_date);
         //clicks out of the calendar
         cy.get('body').click(0, 0);
-        cy.get('#save_status').should('have.text', 'All Changes Saved');    
-        
+        cy.get('#save_status').should('have.text', 'All Changes Saved');
+
         cy.get('#date_submit').clear();
         cy.get('#date_submit').type(past_date);
         cy.get('body').click(0, 0);
         cy.get('#save_status').should('have.text', 'All Changes Saved');
-        
+
         ['student', 'grader', 'ta'].forEach((user) => {
             cy.logout();
             cy.login(user);
