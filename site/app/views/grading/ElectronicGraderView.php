@@ -481,7 +481,7 @@ HTML;
      * @param bool $show_edit_teams
      * @return string
      */
-    public function detailsPage(Gradeable $gradeable, $graded_gradeables, $teamless_users, $graders, $empty_teams, $show_all_sections_button, $show_import_teams_button, $show_export_teams_button, $show_edit_teams, $past_grade_start_date, $view_all, $sort, $direction, $anon_mode, $overrides, $anon_ids, $inquiry_only, $inquiry_status) {
+    public function detailsPage(Gradeable $gradeable, $graded_gradeables, $teamless_users, $graders, $empty_teams, $show_all_sections_button, $show_import_teams_button, $show_export_teams_button, $show_edit_teams, $past_grade_start_date, $view_all, $sort, $direction, $anon_mode, $overrides, $anon_ids, $inquiry_status) {
         $collapsed_sections = isset($_COOKIE['collapsed_sections']) ? json_decode(rawurldecode($_COOKIE['collapsed_sections'])) : [];
 
         $peer = false;
@@ -501,6 +501,9 @@ HTML;
 
         if ($peer || $anon_mode || $team_and_anon) {
             if ($gradeable->isTeamAssignment()) {
+                if ($gradeable->getPeerBlind() === Gradeable::DOUBLE_BLIND_GRADING || $anon_mode) {
+                    $columns[] = ["width" => "10%", "title" => "Team ID",     "function" => "team_id_anon"];
+                }
                 $peer_and_anon = ($this->core->getUser()->getGroup() === User::GROUP_STUDENT &&
                     $gradeable->getPeerBlind() === Gradeable::DOUBLE_BLIND_GRADING);
                 if ($team_and_anon || $peer_and_anon || $anon_mode) {
@@ -874,7 +877,6 @@ HTML;
             "team_gradeable_view_history" => $team_gradeable_view_history,
             "view_all" => $view_all,
             "anon_mode" => $anon_mode,
-            "inquiry_only" => $inquiry_only,
             "inquiry_status" => $inquiry_status,
             "toggle_anon_button" => ($this->core->getUser()->getGroup() == User::GROUP_INSTRUCTOR || $this->core->getUser()->getGroup() == User::GROUP_FULL_ACCESS_GRADER),
             "show_all_sections_button" => $show_all_sections_button,
@@ -952,7 +954,6 @@ HTML;
         // WIP: Replace this logic when there is a definitive way to get my peer-ness
         // If this is a peer gradeable but I am not allowed to view the peer panel, then I must be a peer.
         if ($gradeable->hasPeerComponent()) {
-            $anon_mode = false;
             if ($this->core->getUser()->getGroup() !== 4) {
                 $isPeerPanel = true;
                 $isStudentInfoPanel = true;
