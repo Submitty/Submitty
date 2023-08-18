@@ -30,3 +30,4 @@
   7 | 29 | aphacker | tree: 10, chrono: 11, alpha: 6 | 2018-04-03 20:49:03.281828-04 | f | f | | f | 0 | f | f
   8 | -1 | instructor | The file attached contains the secret phrase. Decode it to earn extra credit. | 2018-05-23 20:49:03.281828-04 | f | f | | f | 0 | Secret.png | f
   8 | 31 | bitdiddle | I think I know the answer | 2018-05-23 21:49:03.281828-04 | f | f | | f | 0 | Answer.png | f
+  9 | -1 | instructor | markdown examples\n# h1\n## h2\n### h3\n#### h4\n##### h5\n###### h6\nAlt h1\n=====\nalt h2\n-----\n[Link](https://google.com)```c++\ncout << "code block";\n```\n\nthis is `inline-code`.\nlist:\n* hi\n* hello\n1. One\n2. Two\n\r1. Indent\n\r3. Indent\n3. Three\n_italics_ and *italics*\n__bold__ and **bold**\n___bold and italic___ and ***bold and italic***\n | 2023-08-18 10:50:07-04 | f | f | | f | 0 | f | t
