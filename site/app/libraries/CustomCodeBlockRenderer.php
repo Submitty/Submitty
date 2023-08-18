@@ -18,8 +18,8 @@ class CustomCodeBlockRenderer implements NodeRendererInterface {
     }
 
     public function render(Node $block, ChildNodeRendererInterface $htmlRenderer, bool $inTightList = false) {
-        $element = $this->baseRenderer->render($block, $htmlRenderer, $inTightList);
-        $num_lines = substr_count($element->getContents(), "\n");
+        $element = $this->baseRenderer->render($block, $htmlRenderer);
+        $num_lines = substr_count($element, "\n");
         return new HtmlElement('div', ["style" => "position: relative;"], $this->addLineNumbers($element, $num_lines));
     }
 

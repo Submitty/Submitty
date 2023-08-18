@@ -159,7 +159,7 @@ HTML;
         $environment->addExtension(new TableExtension());
         $environment->addRenderer(FencedCode::class, new CustomFencedCodeRenderer());
         $environment->addRenderer(IndentedCode::class, new CustomIndentedCodeRenderer());
-        $environment->addRenderer(Code::class, new CustomCodeInlineRenderer());
+        $environment->addRenderer(Code::class, new CustomCodeInlineRenderer()); //Inline renderer
         $environment->mergeConfig([]);
 
         $converter = new CommonMarkConverter($config);
