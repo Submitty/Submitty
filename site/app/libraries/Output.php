@@ -157,10 +157,9 @@ HTML;
         $environment = new Environment($config);
         $environment->addExtension(new AutolinkExtension());
         $environment->addExtension(new TableExtension());
-        $environment->addRenderer(FencedCode::class, new CustomFencedCodeRenderer());
-        $environment->addRenderer(IndentedCode::class, new CustomIndentedCodeRenderer());
-        $environment->addRenderer(Code::class, new CustomCodeInlineRenderer()); //Inline renderer
-        $environment->mergeConfig([]);
+        //$environment->addRenderer(FencedCode::class, new CustomFencedCodeRenderer());
+        //$environment->addRenderer(IndentedCode::class, new CustomIndentedCodeRenderer());
+        //$environment->addRenderer(Code::class, new CustomCodeInlineRenderer()); //Inline renderer
 
         $converter = new CommonMarkConverter($config);
         $engine = new PHPLeagueCommonMarkEngine($converter);
