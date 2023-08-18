@@ -301,7 +301,7 @@ class MiscController extends AbstractController {
         $autograde = $graded_gradeable->getAutoGradedGradeable()->getAutoGradedVersionInstance($version);
         $file_path = null;
         $testcase = $autograde->getTestcases()[$test_case - 1];
-        if (!$testcase->getTestcase()->isHidden() && $testcase->hasAutochecks()) {
+        if ($testcase->hasAutochecks()) {
             foreach ($testcase->getAutochecks() as $autocheck) {
                 $path = explode('/', $autocheck->getDiffViewer()->getActualFilename());
                 $actual_file_name = array_pop($path);

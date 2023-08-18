@@ -101,6 +101,18 @@ function UpdateVisibilityBuckets() {
     });
 }
 
+function getDisplay() {
+    // Collect display
+    const display = [];
+
+    $.each($("input[name='display']:checked"), function() {
+        display.push($(this).val());
+    });
+
+    return display;
+}
+
+
 function getSection() {
     // Collect sections and labels
     const sections = {};
@@ -330,6 +342,7 @@ function buildJSON() {
 
     // Build the overall json
     let ret = {
+        'display': getDisplay(),
         'display_benchmark': getDisplayBenchmark(),
         'benchmark_percent': getBenchmarkPercent(),
         'section' : getSection(),
@@ -528,6 +541,10 @@ $(document).ready(() => {
             setInputsVisibility(this);
         });
 
+    });
+
+    $("input[name*='display']").change(() => {
+        displayChangeDetectedMessage();
     });
 
     // Register change handlers to update the status message when form inputs change
