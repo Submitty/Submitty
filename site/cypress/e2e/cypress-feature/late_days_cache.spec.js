@@ -101,7 +101,7 @@ describe('Test cases involving late day cache updates', () => {
         it('should not allow access', () => {
             cy.visit(['sample', 'bulk_late_days']);
             cy.login('student');
-            cy.get('.content').contains("You don't have access to this page");
+            cy.get('.content').should('contain', "You don't have access to this page");
         });
     });
 
@@ -109,7 +109,7 @@ describe('Test cases involving late day cache updates', () => {
         it('should load properly', () => {
             cy.visit(['sample', 'bulk_late_days']);
             cy.login('instructor');
-            cy.get('#late-day-table');
+            cy.get('#late-day-table').should('exist');
             calculateCache();
         });
     });
@@ -135,7 +135,7 @@ describe('Test cases involving late day cache updates', () => {
             cy.waitPageChange(() => {
                 cy.get('#submit').click();
             });
-            cy.get('#submitted-files > div').contains('file1.txt');
+            cy.get('#submitted-files > div').should('contain', 'file1.txt');
 
             // Check cache
             cy.visit(['sample', 'bulk_late_days']);
