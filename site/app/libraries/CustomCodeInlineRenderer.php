@@ -3,6 +3,7 @@
 namespace app\libraries;
 
 use League\CommonMark\Node\Inline\AbstractInline;
+use League\CommonMark\Node\Node;
 use League\CommonMark\Renderer\NodeRendererInterface;
 use League\CommonMark\Renderer\ChildNodeRendererInterface;
 use League\CommonMark\Util\HtmlElement;
@@ -17,7 +18,7 @@ class CustomCodeInlineRenderer implements NodeRendererInterface {
         $this->baseRenderer = new CodeRenderer();
     }
 
-    public function render(AbstractInline $inline, NodeRendererInterface $htmlRenderer) {
+    public function render(Node $inline, ChildNodeRendererInterface $htmlRenderer) {
         $element = $this->baseRenderer->render($inline, $htmlRenderer);
         $attrs = [
             "class" => "inline-code"

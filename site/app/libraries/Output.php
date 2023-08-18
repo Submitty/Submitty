@@ -17,6 +17,7 @@ use League\CommonMark\Extension\CommonMark\Node\Block\FencedCode;
 use League\CommonMark\Extension\CommonMark\Node\Block\IndentedCode;
 use app\libraries\CustomCodeInlineRenderer;
 use Aptoma\Twig\Extension\MarkdownEngine\PHPLeagueCommonMarkEngine;
+use League\CommonMark\CommonMarkConverter;
 use Aptoma\Twig\Extension\MarkdownExtension;
 use Ds\Set;
 
@@ -161,7 +162,7 @@ HTML;
         $environment->addRenderer(Code::class, new CustomCodeInlineRenderer());
         $environment->mergeConfig([]);
 
-        $converter = new MarkdownConverter($environment);
+        $converter = new CommonMarkConverter($config);
         $engine = new PHPLeagueCommonMarkEngine($converter);
         $this->twig->addExtension(new MarkdownExtension($engine));
     }
