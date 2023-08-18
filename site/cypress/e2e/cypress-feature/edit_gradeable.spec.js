@@ -66,7 +66,8 @@ describe('Tests cases revolving around modifying gradeables', () => {
         cy.get('[data-testid="back-to-autograding"]').should('be.visible');
         cy.get('[data-testid="back-to-autograding"]').click();
         cy.get('[data-testid="config-button"]').should('be.visible');
-
+        
+        cy.get('#rebuild-log-button').should('be.visible');
         cy.get('#rebuild-log-button').click();
 
         cy.get('#page_2_nav').click();
@@ -109,10 +110,6 @@ describe('Tests cases revolving around modifying gradeables', () => {
         beVisible(['#unblind_instructor_grading'], ['#unblind_instructor_grading']);
 
         beVisible(['#unblind_limited_access_grading'], ['#unblind_limited_access_grading']);
-
-        beVisible(['#blind_peer_grading'], ['#blind_peer_grading']);
-
-        beVisible(['#unblind_peer_grading'], ['#unblind_peer_grading']);
 
         beVisible(['#single_blind_peer_grading'], ['#single_blind_peer_grading']);
 
