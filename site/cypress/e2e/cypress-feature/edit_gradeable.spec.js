@@ -66,7 +66,7 @@ describe('Tests cases revolving around modifying gradeables', () => {
         cy.get('[data-testid="back-to-autograding"]').should('be.visible');
         cy.get('[data-testid="back-to-autograding"]').click();
         cy.get('[data-testid="config-button"]').should('be.visible');
-        
+
         cy.get('#rebuild-log-button').should('be.visible');
         cy.get('#rebuild-log-button').click();
 
@@ -157,7 +157,7 @@ describe('Tests cases revolving around modifying gradeables', () => {
         cy.get('#no_student_view_after_grades').click();
 
         logoutLogin('student', ['sample', 'gradeable', 'open_peer_homework']);
-        
+
         cy.get('#upload1').should('not.exist');
         cy.get('#submission-version-select').should('not.exist');
         cy.contains('Submissions are no longer being accepted for this assignment').should('exist');
@@ -218,7 +218,7 @@ describe('Tests cases revolving around modifying gradeables', () => {
         cy.get('body').click(0, 0);
         cy.get('#save_status').should('have.text', 'All Changes Saved');
 
-        logoutLogin('student', ['sample'])
+        logoutLogin('student', ['sample']);
         cy.get('#gradeables-content').should('not.contain.text', 'Open Peer Homework');
 
         logoutLogin('ta', ['sample']);
