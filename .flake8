@@ -17,7 +17,6 @@ exclude=
     bin/left_right_parse.py,
     bin/make_assignments_txt_file.py,
     bin/make_generated_output.py,
-    bin/read_iclicker_ids.py,
     bin/regrade.py,
     grading/python/submitty_router.py,
     grading/json_syntax_checker.py,
