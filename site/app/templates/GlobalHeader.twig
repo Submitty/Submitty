@@ -181,7 +181,7 @@
                     </div>
                 </div>
 
-
+<div id = "moving-unit" position: relative; display: inline-block; vertical-align: top;>
 <div class="banner" id = "banner">
 {% set image_found = false %}
 
@@ -209,7 +209,7 @@
 
 
 
-                <div style="display: flex">
+<div style="display: flex">
 <div class= "speech-bubble-container" id= "speech-bubble-container">
 <button class="speech-bubble" id="speech-bubble" onclick = "showBanners()">
   Click Me!  <br />
@@ -218,7 +218,7 @@
 <div class="triangle" id="triangle"></div>
 </div>
 
-                    <span id="duckdiv" style="position: relative">
+                    <span id="duckdiv" style="position: relative; display: inline-block; vertical-align: top;">
                         <img id="moorthy-duck"
                                 src="{{ base_url }}/img/{{ duck_img }}"
                                 alt="Moorthy - Submitty's Duck Mascot!"
@@ -248,6 +248,7 @@
                         </a>
                     </span>
                 </div>
+</div>
                 {# assuming that if sidebar_buttons only has len 2 it contains logout and collapse (on index page only) #}
                 {% if sidebar_buttons|length > 2 %}
                     <button id="menu-button" class="black-btn">
@@ -366,7 +367,7 @@
 
 </style>
 <script>
-
+    
 
     var currentImageIndex = 0;
     var hiddenImages = getHiddenImages();
@@ -416,9 +417,9 @@
                 hiddenImages.push(className);
                 seenImages.push(currentImages[0]);
                 setCookie('hiddenImages', JSON.stringify(hiddenImages));  
-                var duckdivElement = document.getElementById("duckdiv");
-                bannerElement.style.animation = "slide 2s linear forwards";
-                duckdivElement.style.animation = "slide 2s linear forwards";
+                var duckdivElement = document.getElementById("moorthy-duck");
+                duckdivElement.style.right = "800px";
+                document.getElementById("moving-unit").style.animation = "slide 2s linear forwards";
                 document.getElementById("triangle").style.display = "none";
                 document.getElementById("speech-bubble").style.display = "none";
             
