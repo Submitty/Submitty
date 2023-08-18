@@ -44,7 +44,7 @@ const checkStudentsInCache = () => {
     cy.visit(['sample', 'bulk_late_days']);
     for (const user_id of all_user_ids) {
         // Gradeable # of late days used should be empty
-        cy.get(`[USER_ID="${user_id}"] > [header_id="Late Allowed Homework"]`)
+        cy.get(`[USER_ID="${user_id}"] > [id="Late Allowed Homework"]`)
             .then((cell) => expect(cell.text().trim()).to.equal(''));
 
         // Remaining late days isnt known, should be empty
@@ -120,7 +120,7 @@ describe('Test cases involving late day cache updates', () => {
             cy.login('instructor');
             // 0 late days should be charged
             for (const user_id of all_user_ids) {
-                cy.get(`[USER_ID="${user_id}"] > [header_id="Late Allowed Homework"]`)
+                cy.get(`[USER_ID="${user_id}"] > [id="Late Allowed Homework"]`)
                     .contains('0')
                     .should('exist');
             }
@@ -139,15 +139,9 @@ describe('Test cases involving late day cache updates', () => {
 
             // Check cache
             cy.visit(['sample', 'bulk_late_days']);
-            cy.get(`[USER_ID='instructor'] > [header_id='Late Allowed Homework']`)
+            cy.get(`[USER_ID=instructor] > [id='Late Allowed Homework']`)
                 .contains('0')
                 .should('exist');
-
-            //Change Gradeable Version back to valid
-            cy.visit(['sample', 'gradeable', 'late_allowed_homework']);
-            cy.get('#submission-version-select').select('3');
-            // Change the version to grade
-            cy.get('#version_change').click();
         });
     });
 
@@ -173,7 +167,7 @@ describe('Test cases involving late day cache updates', () => {
             //Should check that there a new header with the title of the datestamp
             cy.login('instructor');
             cy.visit(['sample', 'bulk_late_days']);
-            cy.get('#late-day-table > tbody > tr > [header_id="1972-01-01"]').should('have.length.gt', 0);
+            cy.get('#1972-01-01').should('have.length.gt', 0);
 
             cy.visit(['sample', 'late_days']);
             const deleteLateDays = () => {
@@ -192,7 +186,7 @@ describe('Test cases involving late day cache updates', () => {
             //Now since the latedays are gone, the header should be gone
             cy.login('instructor');
             cy.visit(['sample', 'bulk_late_days']);
-            cy.get('#late-day-table > tbody > tr > [header_id="1972-01-01"]').should('have.length', 0);
+            cy.get('#1972-01-01').should('have.length', 0);
 
         });
     });
@@ -256,8 +250,7 @@ describe('Test cases involving late day cache updates', () => {
             cy.get('#save_status', {timeout:10000}).should('have.text', 'All Changes Saved');
             cy.visit(['sample', 'bulk_late_days']);
             // Gradeable # of late days used should be empty
-            cy.get('#late-day-table > tbody > tr > [header_id="Late Allowed Homework"]')
-                .then((cell) => expect(cell.text().trim()).to.equal(''));
+            cy.get(`[id='Late Allowed Homework']`).then((cell) => expect(cell.text().trim()).to.equal(''));
 
             //Changes due date back
             EditGradeablePage();
@@ -268,8 +261,7 @@ describe('Test cases involving late day cache updates', () => {
             cy.get('#late_days').click(); // Dismiss calender and trigger save
             cy.get('#save_status', {timeout:10000}).should('have.text', 'All Changes Saved');
             cy.visit(['sample', 'bulk_late_days']);
-            cy.get('#late-day-table > tbody > tr > [header_id="Late Allowed Homework"]')
-                .then((cell) => expect(cell.text().trim()).to.equal(''));
+            cy.get(`[id='Late Allowed Homework']`).then((cell) => expect(cell.text().trim()).to.equal(''));
 
             //Disables due date
             EditGradeablePage();
@@ -277,7 +269,7 @@ describe('Test cases involving late day cache updates', () => {
             cy.get('#save_status', {timeout:10000}).should('have.text', 'All Changes Saved');
             cy.visit(['sample', 'bulk_late_days']);
             // Bulk late days should not have gradeable title
-            cy.get('#late-day-table > tbody > tr > [header_id="Late Allowed Homework"]').should('have.length', 0);
+            cy.get(`[id='Late Allowed Homework']`).should('have.length', 0);
 
             //Re-enables due date
             EditGradeablePage();
@@ -285,7 +277,7 @@ describe('Test cases involving late day cache updates', () => {
             cy.get('#save_status', {timeout:10000}).should('have.text', 'All Changes Saved');
             cy.visit(['sample', 'bulk_late_days']);
             // Bulk late days should have gradeable title
-            cy.get('#late-day-table > tbody > tr > [header_id="Late Allowed Homework"]').should('have.length.gt', 0);
+            cy.get(`[id='Late Allowed Homework']`).should('have.length.gt', 0);
 
         });
 
@@ -296,14 +288,14 @@ describe('Test cases involving late day cache updates', () => {
             cy.get('#no_late_submission').check();
             cy.get('#save_status', {timeout:10000}).should('have.text', 'All Changes Saved');
             cy.visit(['sample', 'bulk_late_days']);
-            cy.get('#late-day-table > tbody > tr > [header_id="Late Allowed Homework"]').should('have.length', 0);
+            cy.get(`[id='Late Allowed Homework']`).should('have.length', 0);
 
             //Re-enables late days allowed
             EditGradeablePage();
             cy.get('#yes_late_submission').check();
             cy.get('#save_status', {timeout:10000}).should('have.text', 'All Changes Saved');
             cy.visit(['sample', 'bulk_late_days']);
-            cy.get('#late-day-table > tbody > tr > [header_id="Late Allowed Homework"]').should('have.length.gt', 0);
+            cy.get(`[id='Late Allowed Homework']`).should('have.length.gt', 0);
 
             //Changes late days allowed number
             EditGradeablePage();
@@ -314,8 +306,7 @@ describe('Test cases involving late day cache updates', () => {
             cy.get('#date_due').click(); // Dismiss calender and trigger save
             cy.get('#save_status', {timeout:10000}).should('have.text', 'All Changes Saved');
             cy.visit(['sample', 'bulk_late_days']);
-            cy.get('#late-day-table > tbody > tr > [header_id="Late Allowed Homework"]')
-                .then((cell) => expect(cell.text().trim()).to.equal(''));
+            cy.get(`[id='Late Allowed Homework']`).then((cell) => expect(cell.text().trim()).to.equal(''));
 
             //Changes late days allowed number back
             EditGradeablePage();
@@ -326,8 +317,7 @@ describe('Test cases involving late day cache updates', () => {
             cy.get('#date_due').click(); // Dismiss calender and trigger save
             cy.get('#save_status', {timeout:10000}).should('have.text', 'All Changes Saved');
             cy.visit(['sample', 'bulk_late_days']);
-            cy.get('#late-day-table > tbody > tr > [header_id="Late Allowed Homework"]')
-                .then((cell) => expect(cell.text().trim()).to.equal(''));
+            cy.get(`[id='Late Allowed Homework']`).then((cell) => expect(cell.text().trim()).to.equal(''));
         });
     });
 

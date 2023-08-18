@@ -20,6 +20,7 @@
             {% for title in late_day_cache_header %}
                 <th>
                     {% if title.timestamp is defined %}
+
                         {{ title|date('m/d/Y') }}
                     {% else %}
                         {{ title }}
@@ -56,7 +57,7 @@
                 {% for title in late_day_cache_header %}
                     {% set title = title.timestamp is defined ? title|date('Y-m-d') : title %}
 
-                    <td header_id="{{ title }}" USER_ID-content="{{ student.getId() }}">
+                    <td id="{{ title }}" USER_ID-content="{{ student.getId() }}">
                         {% if user_cache is defined and user_cache[title] is defined %}
                             {% set curr_cache = user_cache[title] %}
                             {{ ((curr_cache.late_days_change > 0) ? '+' : '') ~ curr_cache.late_days_change }}
