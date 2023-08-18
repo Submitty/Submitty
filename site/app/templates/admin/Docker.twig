@@ -139,7 +139,7 @@
                 </td>
                 <td>
                     {% for capability in value %}
-                        <span class="badge badge-{{ capability_to_color[capability] % 12 }}">{{capability}}</span>
+                        <span class="badge badge-{{ capability_to_color[capability] % 8 + 1 }}">{{capability}}</span>
                     {% endfor %}
                 </td>
             </tr>
