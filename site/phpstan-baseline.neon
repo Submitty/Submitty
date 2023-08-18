@@ -10667,6 +10667,11 @@ parameters:
 			path: app/views/AutoGradingView.php
 
 		-
+			message: "#^Method app\\\\views\\\\AutoGradingView\\:\\:convertToAnonPath\\(\\) has parameter \\$gradeable with no type specified\\.$#"
+			count: 1
+			path: app/views/AutoGradingView.php
+			
+		-
 			message: "#^Method app\\\\views\\\\AutoGradingView\\:\\:convertToAnonPath\\(\\) has parameter \\$g_id with no type specified\\.$#"
 			count: 1
 			path: app/views/AutoGradingView.php
@@ -12118,11 +12123,6 @@ parameters:
 
 		-
 			message: "#^Method app\\\\views\\\\grading\\\\ElectronicGraderView\\:\\:detailsPage\\(\\) has parameter \\$graders with no value type specified in iterable type array\\.$#"
-			count: 1
-			path: app/views/grading/ElectronicGraderView.php
-
-		-
-			message: "#^Method app\\\\views\\\\grading\\\\ElectronicGraderView\\:\\:detailsPage\\(\\) has parameter \\$inquiry_only with no type specified\\.$#"
 			count: 1
 			path: app/views/grading/ElectronicGraderView.php
 
