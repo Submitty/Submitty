@@ -202,14 +202,22 @@ describe('Tests cases revolving around modifying gradeables', () => {
 
     });
 
-    it('Should test the dates page', () => {
+    it.only('Should test the dates page', () => {
         const future_date = '9994-12-31 23:59:59';
         const past_date = '1970-10-10 23:59:59';
         cy.get('#page_5_nav').click();
+
+        logoutLogin('student', ['sample']);
+        cy.get('#gradeables-content').should('contain.text', 'Open Peer Homework');
+
+        logoutLogin('instructor', ['sample', 'gradeable', 'open_peer_homework', 'update?nav_tab=5']);
+        
+        cy.get('#has_due_date_yes').click();
         cy.get('#has_release_date_yes').click();
 
         cy.get('#date_ta_view').clear();
         cy.get('#date_ta_view').type(past_date);
+
         cy.get('body').click(0, 0);
         cy.get('#save_status').should('have.text', 'All Changes Saved');
 
