@@ -115,7 +115,7 @@ $(function () {
       if(settingsCallbacks && settingsCallbacks.hasOwnProperty(storageCode)) {
         settingsCallbacks[storageCode](this.value);
         if(this.value != "active-inquiry") {
-          //if user change setting to non-grade inquiry option, change the inquiry_status to off and set inquiry_only to off in grading index page
+          //if user change setting to non-grade inquiry option, change the inquiry_status to off and set inquiry_status to off in grading index page
           Cookies.set('inquiry_status', 'off');
         }
         else {
