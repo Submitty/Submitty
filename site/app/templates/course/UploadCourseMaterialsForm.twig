@@ -52,7 +52,7 @@
                 <strong>Choose a time to release the files being uploaded:</strong>
             </span>
             <input id="upload_picker" class="date_picker" type="text" size="26" value='9998-01-01 00:00:00' style="pointer-events:auto;"><br>
-            <span><em>Note: Everyone with grading access will be able to view all the materials irrespective of the release date/time.</em></span>
+            <span><em><strong>Note:</strong> Everyone with grading access will be able to view all the materials irrespective of the release date/time.</em></span>
         </label>
         <label>
             <span>
@@ -63,7 +63,8 @@
         <label>
             <input id="hide-materials-checkbox" type="checkbox" value="off">
             Hide from Students<br>
-            <em>Note: Hidden course materials are omitted from the course materials directory listing; however, these materials can still be accessed via the URL.</em>
+            <em><strong>Note:</strong> Hidden course materials are omitted from the course materials directory listing; however, these materials can still be accessed via the URL. </em> <br>
+            <em>These materials will always be available to course staff (full & limited access graders), regardless of release date. </em>
         </label>
         <input type="hidden" name="csrf_token" value="{{ csrf_token }}" />
         <fieldset>
