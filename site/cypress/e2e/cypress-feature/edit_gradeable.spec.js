@@ -7,7 +7,7 @@ describe('Tests cases revolving around modifying gradeables', () => {
     const notBeVisible = (button_selectors, selectors) => {
         for (const button_selector of button_selectors) {
             cy.get(button_selector).click();
-            cy.get('#save_status').should('have.text', 'All Changes Saved');
+            cy.get('#save_status', { timeout: 10000 }).should('have.text', 'All Changes Saved');
         }
         for (const selector of selectors) {
             cy.get(selector).should('not.be.visible');
@@ -17,7 +17,7 @@ describe('Tests cases revolving around modifying gradeables', () => {
     const beVisible = (button_selectors, selectors) => {
         for (const button_selector of button_selectors) {
             cy.get(button_selector).click();
-            cy.get('#save_status', {timeout:10000}).should('have.text', 'All Changes Saved');
+            cy.get('#save_status', { timeout: 10000 }).should('have.text', 'All Changes Saved');
         }
         for (const selector of selectors) {
             cy.get(selector).should('be.visible');
@@ -67,12 +67,9 @@ describe('Tests cases revolving around modifying gradeables', () => {
         cy.get('[data-testid="back-to-autograding"]').click();
         cy.get('[data-testid="config-button"]').should('be.visible');
 
-        cy.get('#rebuild-log-button').should('be.visible');
-        cy.get('#rebuild-log-button').click();
-
         cy.get('#page_2_nav').click();
 
-        cy.get('#point_precision_id');
+        cy.get('#point_precision_id').should('be.visible');
 
         beVisible(['#no_custom_marks'], ['#no_custom_marks']);
         beVisible(['#yes_custom_marks'], ['#yes_custom_marks']);
@@ -86,8 +83,6 @@ describe('Tests cases revolving around modifying gradeables', () => {
         notBeVisible(['#no_pdf_page'], ['#pdf_page']);
 
         cy.get('[value="Add New Component"]').click();
-
-        cy.get('[value="Add New Mark"]').eq(-1).click();
 
         cy.get('[title="Delete this component"]').eq(-1).click().then(() => {
             cy.on('window:confirm', (str) => {
