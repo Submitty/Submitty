@@ -106,6 +106,9 @@ date_default_timezone_set($core->getConfig()->getTimezone()->getName());
 // Stops clickjacking on all pages
 header('X-Frame-Options: SAMEORIGIN');
 
+// Prevents pages from being embedded in an iframe
+header('Content-Security-Policy: frame-ancestors \'none\'');
+
 // We only want to show notices and warnings in debug mode, as otherwise errors are important
 ini_set('display_errors', '1');
 if ($core->getConfig()->isDebug()) {
