@@ -1,3 +1,8 @@
+/* Add a line separator after the prime heading */
+#autograding-status-table thead tr:first-child th {
+    border-bottom: 2px solid var(--text-black);
+}
+
 .right-boarder {
     border-right: 1px solid var(--text-black);
 }
@@ -20,6 +25,11 @@
 #course-table td:nth-of-type(3)::before { content: "Gradeable Id"; }
 #course-table td:nth-of-type(4)::before { content: "Interactive"; }
 #course-table td:nth-of-type(5)::before { content: "Regrade"; }
+
+#autograding-status-table th,
+#autograding-status-table td {
+    border-right: 1px solid var(--text-black);
+}
 
 .stack-trace {
     width: 100%;
