@@ -136,9 +136,7 @@ class ConfigurationController extends AbstractController {
                     JsonResponse::getFailResponse('Value must be less than or equal to 10000')
                 );
             }
-            
-            $entry = intval($entry);
-            
+            $entry = intval($entry);   
         }
         elseif (
             in_array(
