@@ -106,6 +106,9 @@ date_default_timezone_set($core->getConfig()->getTimezone()->getName());
 // Stops clickjacking on all pages
 header('X-Frame-Options: SAMEORIGIN');
 
+// Stops pages from loading when they detect content-sniffing attacks
+header('X-Content-Type-Options: nosniff');
+
 // We only want to show notices and warnings in debug mode, as otherwise errors are important
 ini_set('display_errors', '1');
 if ($core->getConfig()->isDebug()) {
