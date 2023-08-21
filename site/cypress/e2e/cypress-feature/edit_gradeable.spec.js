@@ -202,7 +202,7 @@ describe('Tests cases revolving around modifying gradeables', () => {
 
     });
 
-    it.only('Should test the dates page', () => {
+    it('Should test the dates page', () => {
         const future_date = '9994-12-31 23:59:59';
         const past_date = '1970-10-10 23:59:59';
         cy.get('#page_5_nav').click();
