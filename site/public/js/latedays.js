@@ -132,7 +132,7 @@ function updateCacheBuildStatus(url, confirm_message, status) {
 // eslint-disable-next-line no-unused-vars
 function calculateLateDayCache() {
     // eslint-disable-next-line no-undef
-    const url = buildCourseUrl(['late_days_forensics', 'calculate']);
+    const url = buildCourseUrl(['bulk_late_days', 'calculate']);
     const confirm_message = 'Are you sure you want to recalculate the cache? Calculating the remaining late day information for every user may take a while.';
     const status = 'Recaclulating...';
     updateCacheBuildStatus(url, confirm_message, status);
@@ -141,7 +141,7 @@ function calculateLateDayCache() {
 // eslint-disable-next-line no-unused-vars
 function flushLateDayCache() {
     // eslint-disable-next-line no-undef
-    const url = buildCourseUrl(['late_days_forensics', 'flush']);
+    const url = buildCourseUrl(['bulk_late_days', 'flush']);
     const confirm_message = 'Are you sure you want to flush the cache? This will remove the late day cache for every user.';
     const status = 'Flushing...';
     updateCacheBuildStatus(url, confirm_message, status);

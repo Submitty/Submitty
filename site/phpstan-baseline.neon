@@ -11347,21 +11347,6 @@ parameters:
 			path: app/views/admin/GradeableView.php
 
 		-
-			message: "#^Method app\\\\views\\\\admin\\\\LateDayView\\:\\:displayLateDayForesnics\\(\\) has no return type specified\\.$#"
-			count: 1
-			path: app/views/admin/LateDayView.php
-
-		-
-			message: "#^Method app\\\\views\\\\admin\\\\LateDayView\\:\\:displayLateDayForesnics\\(\\) has parameter \\$initial_late_days with no type specified\\.$#"
-			count: 1
-			path: app/views/admin/LateDayView.php
-
-		-
-			message: "#^Method app\\\\views\\\\admin\\\\LateDayView\\:\\:displayLateDayForesnics\\(\\) has parameter \\$students with no type specified\\.$#"
-			count: 1
-			path: app/views/admin/LateDayView.php
-
-		-
 			message: "#^Method app\\\\views\\\\admin\\\\LateDayView\\:\\:displayLateDays\\(\\) has no return type specified\\.$#"
 			count: 1
 			path: app/views/admin/LateDayView.php
