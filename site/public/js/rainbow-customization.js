@@ -293,6 +293,78 @@ function getPlagiarism() {
     return plagiarismData;
 }
 
+// eslint-disable-next-line no-unused-vars
+function addToTable() {
+    const USERID = document.getElementById('user_id').value.trim();
+    const gradeable = document.getElementById('g_id').value.trim();
+    const penalty = document.getElementById('marks').value.trim();
+
+    // Check for empty fields
+    if (USERID === '' || gradeable === '' || penalty === '') {
+        alert('Please fill in all the fields fyi.');
+        return;
+    }
+    // Check for penalty
+    if (penalty > 1 || penalty < 0) {
+        alert('penalty must be between 0 - 1');
+        return;
+    }
+
+    const newRowData = {
+        user: USERID,
+        gradeable: gradeable,
+        penalty: penalty,
+    };
+
+    const tableData = [];
+
+    // Check for duplicate entries
+    const tableBody = document.getElementById('table-body');
+    const rows = tableBody.getElementsByTagName('tr');
+    for (let i = 0; i < rows.length; i++) {
+        const row = rows[i];
+        const rowData = {
+            user: row.cells[0].innerHTML,
+            gradeable: row.cells[1].innerHTML,
+            penalty: row.cells[2].innerHTML,
+        };
+        tableData.push(rowData);
+
+        const existingUSERID = row.cells[0].innerHTML;
+        const existingGradeable = row.cells[1].innerHTML;
+
+        if (USERID === existingUSERID && gradeable === existingGradeable) {
+            alert('Entry with the same Student ID and Gradeable already exists.');
+            return;
+        }
+    }
+    tableData.push(newRowData);
+    const newRow = tableBody.insertRow();
+
+    const cellUSERID = newRow.insertCell();
+    cellUSERID.innerHTML = USERID;
+
+    const cellGradeable = newRow.insertCell();
+    cellGradeable.innerHTML = gradeable;
+
+    const cellPenalty = newRow.insertCell();
+    cellPenalty.innerHTML = penalty;
+
+    const cellDelete = newRow.insertCell();
+    cellDelete.innerHTML = '<a onclick="deleteRow(this)"><i class="fas fa-trash"></i></a>';
+
+    // Clear the form fields
+    document.getElementById('user_id').value = '';
+    document.getElementById('g_id').value = '';
+    document.getElementById('marks').value = '';
+}
+
+// eslint-disable-next-line no-unused-vars
+function deleteRow(button) {
+    const row = button.parentNode.parentNode;
+    row.parentNode.removeChild(row);
+}
+
 function getMessages() {
     const messages = [];
 
