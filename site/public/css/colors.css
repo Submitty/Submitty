@@ -181,14 +181,14 @@
     --simple-save-error-red: #da4f49;
 
     /* For categorizing objects */
-    --category-color-1: #c3a2d2;
-    --category-color-2: #99b270;
-    --category-color-3: #cd98aa;
-    --category-color-4: #6bb88f;
-    --category-color-5: #c8938d;
-    --category-color-6: #6b9fb8;
-    --category-color-7: #c39e83;
-    --category-color-8: #98a3cd;
+    --category-color-1: #F44336;
+    --category-color-2: #FF9800;
+    --category-color-3: #4CAF50;
+    --category-color-4: #4FC3F7;
+    --category-color-5: #7986CB;
+    --category-color-6: #B39DDB;
+    --category-color-7: #F8BBD0;
+    --category-color-8: #CE93D8;
     --category-color-9: #8ac78e;
     --category-color-10: #b39b61;
     --category-color-11: #6eb9aa;
@@ -324,4 +324,29 @@
     --viewed-content: #50535a;
     --code-box-background-light-gray: #282c34;
     --code-box-font-color-dark-gray: #abb2bf;
+}
+
+/* Dark Theme Versions of Colors */
+:root[data-theme="dark"] {
+    /* For categorizing objects */
+    --category-color-1: #B71C1C;
+    --category-color-2: #BF360C;
+    --category-color-3: #1B5E20;
+    --category-color-4: #1565C0;
+    --category-color-5: #1A237E;
+    --category-color-6: #673AB7;
+    --category-color-7: #D81B60;
+    --category-color-8: #9C27B0;
+    --category-color-9: #8ac78e;
+    --category-color-10: #b39b61;
+    --category-color-11: #6eb9aa;
+    --category-color-12: #b4be79;
+    --category-color-13: #94a2cc;
+    --category-color-14: #80be79;
+    --category-color-15: #b48b64;
+    --category-color-16: #b9b26e;
+    --category-color-17: #83a0c3;
+    --category-color-18: #ada5d4;
+    --category-color-19: #e57fcf;
+    --category-color-20: #c0c246;
 }
