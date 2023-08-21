@@ -10,13 +10,6 @@ describe('Tests cases revolving around gradeable access and submition', () => {
 
             cy.visit(['sample','gradeable','open_homework']);
 
-            if (user === 'instructor') {
-                cy.get('#submit').should('be.disabled');
-                //clicks on useMostRecentSubmission
-                //When the element useMostRecentSubmission changes to button change this to a button
-                cy.get('#gradeable-submission-cont > a').click();
-            }
-
             //Makes sure the clear button is not disabled by adding a file
             cy.get('#upload1').selectFile(testfile1,{action: 'drag-drop'});
             cy.get('#startnew').click();
@@ -42,7 +35,6 @@ describe('Tests cases revolving around gradeable access and submition', () => {
             cy.get('#submitted-files > div').contains('span','file1.txt');
             cy.get('#submitted-files > div').contains('span','file2.txt');
             cy.get('#submitted-files > div').contains('Download all files:');
-
             // Commented out to pass cypress in CI -- FIXME
             // cy.get('[aria-label="Download file1.txt"]').click();
             // cy.readFile('cypress/downloads/file1.txt').should('eq','a\n');
