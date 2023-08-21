@@ -106,6 +106,9 @@ date_default_timezone_set($core->getConfig()->getTimezone()->getName());
 // Stops clickjacking on all pages
 header('X-Frame-Options: SAMEORIGIN');
 
+// Prevents pages from being embedded in an iframe
+header('Content-Security-Policy: frame-ancestors \'none\'');
+
 // Prevent intermediaries from caching the resource
 header('Cache-Control: private');
 
