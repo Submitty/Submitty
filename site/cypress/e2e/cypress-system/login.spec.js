@@ -1,4 +1,4 @@
-import { buildUrl } from '../support/utils.js';
+import { buildUrl } from '../../support/utils.js';
 
 function loginViaUI(username = 'instructor') {
     cy.get('body')

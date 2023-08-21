@@ -10,20 +10,44 @@
     $( document ).ready(function() {
         // Get value of the type dropdown
         const type = $("#calendar-item-type-edit").val();
-        loadCalendar(curr_month, curr_year, curr_day, type);
+        // Get cookie for curr the viewed day, month, and year
+        cookie_year = parseInt(Cookies.get('calendar_year'));
+        cookie_month = parseInt(Cookies.get('calendar_month'));
+        cookie_day = parseInt(Cookies.get('calendar_day'));
+        if (isNaN(cookie_year)) {
+            cookie_year = curr_year;
+        }
+        if (isNaN(cookie_month)) {
+            cookie_month = curr_month;
+        }
+        if (isNaN(cookie_day)) {
+            cookie_day = curr_day;
+        }
+        // Load the calendar to the correct day
+        loadCalendar(cookie_month, cookie_year, cookie_day, type);
+        //Color the legend
+        if ({{show_legend}} === 1) {
+            colorLegend();
+        }
     });
 
     function changeView(x) {
-        if (x.value === "month") {
-            document.cookie = "view=month";
+        Cookies.set('view',x.value);
+
+        cookie_year = parseInt(Cookies.get('calendar_year'));
+        cookie_month = parseInt(Cookies.get('calendar_month'));
+        cookie_day = parseInt(Cookies.get('calendar_day'));
+        if (isNaN(cookie_year)) {
+            cookie_year = view_year;
         }
-        else if (x.value === "two_week") {
-            document.cookie = "view=two_week";
+        if (isNaN(cookie_month)) {
+            cookie_month = view_month;
         }
-        else if (x.value === "one_week") {
-            document.cookie = "view=one_week";
+        if (isNaN(cookie_day)) {
+            cookie_day = view_day;
         }
-        loadCalendar({{ view_month }}, {{ view_year }}, {{ curr_day }}, x.value);
+        // Load the calendar to the correct day
+        loadCalendar(cookie_month, cookie_year, cookie_day, x.value);
     }
 </script>
 
@@ -38,13 +62,29 @@
                     <i class="fas fa-plus"></i> New Item
                 </button>
             {% endif %}
-            
+
+                <button type="button" onclick="openOptionsModal()" class="btn btn-primary">
+                    <i class="fas fa-sliders"></i> Options
+                </button>
                 <select id="calendar-item-type-edit" name="type" onchange="changeView(this);">
                     <option value="month" {% if (view_cookie is defined) and view_cookie == "month" %} selected {% endif %}>Month</option>
                     <option value="two_week" {% if (view_cookie is defined)  and view_cookie == "two_week" %} selected {% endif %}>Two Week</option>
                     <option value="one_week" {% if (view_cookie is defined)  and view_cookie == "one_week" %} selected {% endif %}>One Week</option>
                 </select>
         </div>
+
+        {# Legend #}
+        {% if show_legend == 1 %}
+        <div class="cal-legend">
+            {% if show_all_cookie == 1 %}
+                {% for course in course_names %}
+                <div name="{{course|replace({' ':''})}}" class="legend-color"></div><p for="{{course|replace({' ':''})}}-color" class="legend-label">{{course}}</p>
+                {% endfor %}
+            {% else %}
+                <div name="{{calendar_course_cookie|replace({' ':''})}}" class="legend-color"></div><p for="{{calendar_course_cookie|replace({' ':''})}}-color" class="legend-label">{{calendar_course_cookie}}</p>
+            {% endif %}
+        </div>
+        {% endif %}
 
         <div class="calendar" style='margin-bottom: 20px;' id="full-calendar">
             {# Replace by js function call #}
@@ -97,5 +137,8 @@
     {% endif %}
 </div>
 
+
+
 {{ include('calendar/NewCalendarItem.twig') }}
 {{ include('calendar/EditCalendarItem.twig') }}
+{{ include('calendar/CalendarOptions.twig') }}

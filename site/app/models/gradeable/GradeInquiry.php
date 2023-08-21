@@ -20,11 +20,14 @@ class GradeInquiry extends AbstractModel {
 
     /** @var int The unique Id of this grade inquiry */
     private $id = 0;
-    /** @prop @var \DateTime The timestamp (readonly) of most recent update to $status */
+    /** @prop
+     * @var \DateTime The timestamp (readonly) of most recent update to $status */
     protected $timestamp = null;
-    /** @prop @var int The status of the grade inquiry */
+    /** @prop
+     * @var int The status of the grade inquiry */
     protected $status = self::STATUS_RESOLVED;
-    /** @prop @var int|null The gradeable component that this grade inquiry is referencing */
+    /** @prop
+     * @var int|null The gradeable component that this grade inquiry is referencing */
     protected $gc_id = null;
 
 
