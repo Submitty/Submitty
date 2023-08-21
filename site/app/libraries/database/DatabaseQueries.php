@@ -5500,9 +5500,9 @@ AND gc_id IN (
         $this->course_db->query("
             UPDATE grade_inquiries
             SET gc_id = (
-                SELECT gid.gc_id
-                FROM grade_inquiry_discussion gid
-                WHERE grade_inquiries.id = gid.grade_inquiry_id
+                SELECT gc_id
+                FROM grade_inquiry_discussion
+                WHERE grade_inquiries.g_id = CAST(grade_inquiry_discussion.grade_inquiry_id AS VARCHAR)
             )
             WHERE
                 grade_inquiries.gc_id IS NULL
