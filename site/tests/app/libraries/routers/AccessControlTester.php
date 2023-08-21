@@ -13,7 +13,8 @@ class AccessControlTester extends BaseUnitTest {
 
     private $course = 'test_course';
 
-    public static function data() {
+    // This needs to be static for PHPunit deprecation, however $this-> cannot be used. 
+    public /*static*/ function data() {
         $course_prefix = "/courses/{$this->semester}/{$this->course}";
         return [
             [$course_prefix . '/gradeable/open_homework/update', "GET", [], User::GROUP_INSTRUCTOR],
