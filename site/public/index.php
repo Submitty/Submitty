@@ -109,6 +109,9 @@ header('X-Frame-Options: SAMEORIGIN');
 // Prevents pages from being embedded in an iframe
 header('Content-Security-Policy: frame-ancestors \'none\'');
 
+// Prevent intermediaries from caching the resource
+header('Cache-Control: private');
+
 // We only want to show notices and warnings in debug mode, as otherwise errors are important
 ini_set('display_errors', '1');
 if ($core->getConfig()->isDebug()) {
