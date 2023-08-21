@@ -161,7 +161,8 @@ class DisplayImageTester extends BaseUnitTest {
         );
     }
 
-    public static function saveUserImageProvider(): array {
+    // Needs to be static, but $this can't be used in static functions, FIXME
+    public /*static*/ function saveUserImageProvider(): array {
         $meta = explode('.', self::TEST_IMAGE);
         $file_name = $meta[0];
         $file_extension = $meta[1];

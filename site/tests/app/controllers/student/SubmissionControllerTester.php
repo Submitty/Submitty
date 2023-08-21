@@ -19,7 +19,6 @@ use app\models\gradeable\Gradeable;
 use app\models\gradeable\GradedGradeable;
 use app\models\gradeable\Submitter;
 use app\models\gradeable\TaGradedGradeable;
-use PHPUnit\Util\Test;
 use tests\BaseUnitTest;
 use tests\utils\NullOutput;
 
@@ -96,24 +95,25 @@ class SubmissionControllerTester extends BaseUnitTest {
         $max_size = 1000000; // 1 MB
 
         if (empty(static::$annotations)) {
-            $registry = Registry::getInstance();
             $className = (get_class($this));
             $methodName =  $this->getName();
             if ($methodName !== null) {
                 try {
                     static::$annotations =  [
-                        'method' => $registry->forMethod($className, $methodName)->symbolAnnotations(),
-                        'class'  => $registry->forClassName($className)->symbolAnnotations(),
+                        'method' => $methodName,
+                        'class'  => $className,
                     ];
-                } catch (Exception $methodNotFound) {
+                } 
+                catch (Exception $methodNotFound) {
                     // ignored
                 }
             }
-    
+            else {
             static::$annotations =  [
                 'method' => null,
-                'class'  => $registry->forClassName($className)->symbolAnnotations(),
+                'class'  => $className,
             ];
+            }
         }
         if (isset(static::$annotations['method']['highestVersion'][0])) {
             $highest_version = intval(static::$annotations['method']['highestVersion'][0]);
