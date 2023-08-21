@@ -1,9 +1,14 @@
-import { getCurrentSemester } from '../support/utils.js';
+// Note: This test requires you have Java and JDK installed on your machine as well as added to your path if on Windows.
+
+import { getCurrentSemester } from '../../support/utils.js';
 
 import vnu from 'vnu-jar';
 
 const semester = getCurrentSemester();
 const course = 'sample';
+
+// Remove command is different on Windows.
+const rm_command = Cypress.platform === 'win32' ? 'rd /s /q cypress\\tmp' : 'rm -r cypress/tmp';
 
 const urls = [
     '/home',
@@ -57,7 +62,7 @@ describe('Test cases for the site\'s adherence to accessibility guidelines', () 
             baseline = new Map(Object.entries(data));
         });
 
-        cy.exec('rm -r cypress/tmp', { failOnNonZeroExit: false });
+        cy.exec(rm_command, { failOnNonZeroExit: false });
     });
 
     beforeEach(() => {
@@ -66,7 +71,7 @@ describe('Test cases for the site\'s adherence to accessibility guidelines', () 
     });
 
     afterEach(() => {
-        cy.exec('rm -r cypress/tmp');
+        cy.exec(rm_command);
     });
 
     for (const url of urls) {
@@ -75,6 +80,7 @@ describe('Test cases for the site\'s adherence to accessibility guidelines', () 
             cy.get('html:root').eq(0).invoke('prop', 'outerHTML').then(content => {
                 cy.writeFile('cypress/tmp/doc.html', `<!DOCTYPE html>\n${content}`, 'utf8').then(() => {
                     cy.exec(`java -jar "${vnu}" --format json cypress/tmp/doc.html`, { failOnNonZeroExit: false }).then(result => {
+                        console.log(result.stderr);
                         const output = JSON.parse(result.stderr);
 
                         const foundErrorMessages = [];

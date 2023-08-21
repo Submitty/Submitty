@@ -1,4 +1,4 @@
-import {getCurrentSemester} from '../support/utils.js';
+import {getCurrentSemester} from '../../support/utils.js';
 
 function validate_navigation_page_sections(sections) {
     const section_keys = Object.keys(sections);
@@ -24,7 +24,7 @@ describe('navigation page', () => {
             future: 5,
             beta: 3,
             open: 8,
-            closed: 3,
+            closed: 4,
             items_being_graded: 9,
             graded: 11,
         };
@@ -118,7 +118,7 @@ describe('navigation page', () => {
         const sections = {
             beta: 3,
             open: 8,
-            closed: 3,
+            closed: 4,
             items_being_graded: 9,
             graded: 11,
         };
@@ -134,7 +134,7 @@ describe('navigation page', () => {
 
         const sections = {
             open: 8,
-            closed: 3,
+            closed: 4,
             items_being_graded: 5,
             graded: 9,
         };

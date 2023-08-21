@@ -164,6 +164,7 @@ class UserTester extends \PHPUnit\Framework\TestCase {
             'preferred_given_name' => "",
             'preferred_family_name' => "",
             'numeric_id' => '123456789',
+            'preferred_locale' => null,
             'registration_section' => 1,
             'registration_type' => 'staff',
             'course_section_id' => null,
@@ -192,7 +193,7 @@ class UserTester extends \PHPUnit\Framework\TestCase {
                 'team_member_submission_email' => true,
                 'self_notification_email' => false
             ],
-            'registration_subsection' => null,
+            'registration_subsection' => '',
             'enforce_single_session' => false
         ];
         $this->assertEquals($expected, $actual);
