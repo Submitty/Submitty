@@ -112,7 +112,7 @@ describe('Test cases involving the late days allowed page', () => {
             cy.visit(['sample', 'late_days']);
 
             // delete the late day
-            cy.get('#late-day-table > tbody > tr > :nth-child(6)').click();
+            cy.get('#Delete').click();
             cy.wait(1000); // make sure the late day removal was registered
 
             // assert that the table is now empty
