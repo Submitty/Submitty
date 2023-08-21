@@ -103,17 +103,17 @@ class SubmissionControllerTester extends BaseUnitTest {
                         'method' => $methodName,
                         'class'  => $className,
                     ];
-                } 
+                }
                 catch (Exception $methodNotFound) {
                     // ignored
                 }
             }
-            else {
+
             static::$annotations =  [
                 'method' => null,
                 'class'  => $className,
             ];
-            }
+
         }
         if (isset(static::$annotations['method']['highestVersion'][0])) {
             $highest_version = intval(static::$annotations['method']['highestVersion'][0]);
