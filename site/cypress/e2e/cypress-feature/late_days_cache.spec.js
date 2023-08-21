@@ -40,7 +40,6 @@ const calculateCache = () => {
 };
 
 const checkStudentsInCache = () => {
-    cy.login('instructor');
     cy.visit(['sample', 'bulk_late_days']);
     for (const user_id of all_user_ids) {
         // Gradeable # of late days used should be empty
@@ -184,7 +183,6 @@ describe('Test cases involving late day cache updates', () => {
             // View bulk late day changes
             checkStudentsInCache();
             //Now since the latedays are gone, the header should be gone
-            cy.login('instructor');
             cy.visit(['sample', 'bulk_late_days']);
             cy.get('#1972-01-01').should('have.length', 0);
 
