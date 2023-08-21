@@ -170,7 +170,7 @@ describe('Tests cases revolving around modifying gradeables', () => {
         cy.contains('No submissions for this assignment.').should('not.exist');
     });
 
-    it('Should test locking the gradeable', () => {
+    it.only('Should test locking the gradeable', () => {
         //testing
         cy.get('#page_1_nav').click();
         //Locking the gradeable
@@ -181,20 +181,15 @@ describe('Tests cases revolving around modifying gradeables', () => {
         //Relocks the gradeable
         cy.get('#gradeable-lock').select('Autograde and TA Homework (C System Calls) [ grades_released_homework_autota ]');
         cy.get('#gradeable-lock-points').type('10');
+        cy.get('body').click(0, 0);
 
-        ['instructor', 'ta'].forEach((user) => {
+        ['instructor', 'ta', 'grader', 'student'].forEach((user) => {
             logoutLogin(user, ['sample']);
-            cy.on('window:confirm', () => true);
-            cy.get('[title="Please complete Autograde and TA Homework (C System Calls) first"]').click();
-            cy.get('#upload1').should('exist');
+            cy.get('[title="Please complete Autograde and TA Homework (C System Calls) first"]').should('have.class', 'disabled');
         });
 
-        ['student', 'grader'].forEach((user) => {
-            logoutLogin(user, ['sample']);
-            cy.get('[title="Please complete Autograde and TA Homework (C System Calls) first"]').click();
-            cy.get('#upload1').should('not.exist');
-        });
-
+        cy.visit('sample', 'gradeable', 'open_peer_homework');
+        cy.get('.content').should('contain.text', 'open_peer_homework is not a valid electronic submission gradeable. Contact your instructor if you think this is an error.');
 
         logoutLogin('instructor', ['sample', 'gradeable', 'open_peer_homework', 'update']);
         cy.get('#page_1_nav').click();
