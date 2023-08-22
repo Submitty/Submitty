@@ -96,7 +96,7 @@ class ConfigurationController extends AbstractController {
     /**
      * @Route("/api/courses/{_semester}/{_course}/config", methods={"POST"})
      * @Route("/courses/{_semester}/{_course}/config", methods={"POST"})
-     * @return MultiResponse|JsonResponse
+     * @return MultiResponse
      */
     public function updateConfiguration(): MultiResponse {
         if (!isset($_POST['name'])) {
@@ -132,7 +132,9 @@ class ConfigurationController extends AbstractController {
                 );
             }
             if ($entry > 10000) {
-                return JsonResponse::getFailResponse('Value must be less than or equal to 10000');
+                return MultiResponse::JsonOnlyResponse(
+                    JsonResponse::getFailResponse('Value must be less than or equal to 10000')
+                );
             }
             $entry = intval($entry);
         }
