@@ -19,6 +19,7 @@ class CustomCodeInlineRenderer implements NodeRendererInterface {
     }
 
     public function render(Node $inline, ChildNodeRendererInterface $htmlRenderer) {
+        setcookie("inline","0");
         $element = $this->baseRenderer->render($inline, $htmlRenderer);
         $attrs = [
             "class" => "inline-code hljs"

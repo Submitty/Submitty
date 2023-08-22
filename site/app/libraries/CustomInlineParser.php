@@ -9,13 +9,18 @@ use League\CommonMark\Parser\Inline\InlineParserInterface;
 use League\CommonMark\Parser\Inline\InlineParserMatch;
 use League\CommonMark\Parser\InlineParserContext;
 
-class TwitterHandleParser implements InlineParserInterface {
+class CustomInlineParser implements InlineParserInterface {
 
     public function getMatchDefinition(): InlineParserMatch {
         return InlineParserMatch::regex(`(.*?)`);
     }
 
     public function parse(InlineParserContext $inlineContext): bool {
+
+        //Add classes for inline code
+        [$content] = $inlineContext->getSubMatches();
+
+        $inlineContext->getContainer()->appendChild(new Link("https://google.com"));
 
         return true;
     }
