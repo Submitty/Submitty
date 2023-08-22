@@ -1406,8 +1406,6 @@ function checkSidebarCollapse() {
 }
 
 function updateTheme(){
-            console.log("is it happening1");
-
   let choice = $("#theme_change_select option:selected").val();
   if(choice === "system_black"){
     localStorage.removeItem("theme");
@@ -1427,10 +1425,7 @@ function updateTheme(){
   detectColorScheme();
 }
 $(document).ready(function() {
-    console.log("is it happening2");
   if(localStorage.getItem("theme")){
-        console.log("does it exist");
-
       if(localStorage.getItem("theme") === "dark"){
         if(localStorage.getItem("black_mode") === "black"){
           $("#theme_change_select").val("dark_black");
@@ -1441,7 +1436,6 @@ $(document).ready(function() {
         $("#theme_change_select").val("light");
       }
   }else{
-
     if(localStorage.getItem("black_mode") === "black"){
       $("#theme_change_select").val("system_black");
     }else{

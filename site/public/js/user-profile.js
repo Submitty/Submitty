@@ -371,8 +371,6 @@ $(document).ready(() => {
         location.reload();
     });
 
-    // Set the selected option based on stored preference
-
     $('#theme_change_select').change(() => {
         // eslint-disable-next-line no-undef
         updateTheme();
