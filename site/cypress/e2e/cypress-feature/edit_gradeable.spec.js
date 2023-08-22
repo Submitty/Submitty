@@ -245,8 +245,14 @@ describe('Tests cases revolving around modifying gradeables', () => {
         cy.get('#date_submit').clear();
         cy.get('#date_submit').type(future_date);
         cy.get('body').click(0, 0);
+        cy.get('#date_submit').should('have.text', future_date);
+        
 
         cy.get('#date_due').type(past_date);
+        cy.get('body').click(0, 0);
+        cy.get('#date_due').should('have.text', past_date);
+
+
         ['student', 'grader', 'ta'].forEach((user) => {
             logoutLogin(user, ['sample']);
             cy.get('#gradeables-content').should('not.contain.text', 'Open Peer Homework');
@@ -257,9 +263,13 @@ describe('Tests cases revolving around modifying gradeables', () => {
         cy.get('#date_due').clear();
         cy.get('#date_due').type(future_date);
         cy.get('body').click(0, 0);
+        cy.get('#date_due').should('have.text', future_date);
 
         cy.get('#date_grade').clear();
         cy.get('#date_grade').type(past_date);
+        cy.get('body').click(0, 0);
+        cy.get('#date_grade').should('have.text', past_date);
+
         ['student', 'grader', 'ta'].forEach((user) => {
             logoutLogin(user, ['sample', 'gradeable', 'open_peer_homework']);
         });
@@ -269,8 +279,14 @@ describe('Tests cases revolving around modifying gradeables', () => {
         cy.get('#date_grade').clear();
         cy.get('#date_grade').type(future_date);
         cy.get('body').click(0, 0);
+        cy.get('#date_grade').should('have.text', future_date);
+
 
         cy.get('#date_grade_due').type(past_date);
+        cy.get('body').click(0, 0);
+        cy.get('#date_grade_due').should('have.text', past_date);
+
+
         ['student', 'grader', 'ta'].forEach((user) => {
             logoutLogin(user, ['sample', 'gradeable', 'open_peer_homework']);
         });
@@ -279,6 +295,9 @@ describe('Tests cases revolving around modifying gradeables', () => {
 
         cy.get('#date_grade_due').clear();
         cy.get('#date_grade_due').type(future_date);
+        cy.get('body').click(0, 0);
+        cy.get('#date_grade_due').should('have.text', future_date);
+
         ['student', 'grader', 'ta'].forEach((user) => {
             logoutLogin(user, ['sample', 'gradeable', 'open_peer_homework']);
         });
@@ -286,6 +305,8 @@ describe('Tests cases revolving around modifying gradeables', () => {
         logoutLogin('instructor', ['sample', 'gradeable', 'open_peer_homework', 'update?nav_tab=5']);
 
         cy.get('#date_grade_due').type(past_date);
+        cy.get('body').click(0, 0);
+        cy.get('#date_grade_due').should('have.text', past_date);
 
     });
 });
