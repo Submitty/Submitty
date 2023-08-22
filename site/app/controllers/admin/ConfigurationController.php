@@ -132,9 +132,7 @@ class ConfigurationController extends AbstractController {
                 );
             }
             if ($entry > 10000) {
-                return MultiResponse::JsonOnlyResponse(
-                    JsonResponse::getFailResponse('Value must be less than or equal to 10000')
-                );
+                return JsonResponse::getFailResponse('Value must be less than or equal to 10000');
             }
             $entry = intval($entry);
         }

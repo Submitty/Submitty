@@ -936,6 +936,14 @@ parameters:
 			path: app/controllers/admin/AutogradingConfigController.php
 
 		-
+			message: """
+				#^Call to deprecated method JsonOnlyResponse\\(\\) of class app\\\\libraries\\\\response\\\\MultiResponse\\:
+				should not be used, just return JsonResponse directly$#
+			"""
+			count: 9
+			path: app/controllers/admin/ConfigurationController.php
+
+		-
 			message: "#^Method app\\\\controllers\\\\admin\\\\ConfigurationController\\:\\:getGradeableSeatingOptions\\(\\) return type has no value type specified in iterable type array\\.$#"
 			count: 1
 			path: app/controllers/admin/ConfigurationController.php
