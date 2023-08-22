@@ -208,10 +208,11 @@ describe('Tests cases revolving around modifying gradeables', () => {
 
         cy.get('#date_ta_view').clear();
         cy.get('#date_ta_view').type(past_date);
-
+        
         cy.get('body').click(0, 0);
         cy.get('#save_status').should('have.text', 'All Changes Saved');
-
+        cy.get('#date_ta_view').should('have.text', past_date);
+        
         ['student', 'grader', 'ta'].forEach((user) => {
             logoutLogin(user, ['sample']);
             cy.get('#gradeables-content').should('contain.text', 'Open Peer Homework');
@@ -224,11 +225,13 @@ describe('Tests cases revolving around modifying gradeables', () => {
         //clicks out of the calendar
         cy.get('body').click(0, 0);
         cy.get('#save_status').should('have.text', 'All Changes Saved');
+        cy.get('#date_ta_view').should('have.text', future_date);
 
         cy.get('#date_submit').clear();
         cy.get('#date_submit').type(past_date);
         cy.get('body').click(0, 0);
         cy.get('#save_status').should('have.text', 'All Changes Saved');
+        cy.get('#date_submit').should('have.text', past_date);
 
         ['student', 'grader', 'ta'].forEach((user) => {
             logoutLogin(user, ['sample']);
