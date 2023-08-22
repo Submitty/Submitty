@@ -367,6 +367,7 @@ function previewUserLastInitialFormat() {
 $(document).ready(() => {
 
     $('#sidebar_preference_select').change(() => {
+        // eslint-disable-next-line no-undef
         updateSidebarPreference();
         location.reload();
     });
