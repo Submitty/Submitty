@@ -8,7 +8,6 @@ window.addEventListener("resize", function(){
 
 var mobileHomeLink = null;
 var desktopHomeLink = null;
-let automatic_manual = null;
 document.addEventListener("DOMContentLoaded", function() {
   loadInBreadcrumbLinks();
   adjustBreadcrumbLinks();
@@ -1453,29 +1452,9 @@ $(document).ready(function() {
 
 
 function updateSidebarPreference() {
-    let choice = $("#sidebar_preference_select option:selected").val();
-
+    let collapse_preference = $("#sidebar_preference_select option:selected").val();
     // Update local storage with the selected preference
-    localStorage.setItem("sidebar_preference", choice);
-
-    if (choice === "automatic") {
-                automatic_manual = "automatic";
-        console.log(" sidebar preference selected: automatic");
-    } else {
-                        automatic_manual = "manual";
-
-        console.log(" sidebar preference selected: manual");
-    }
-}
-
-
-function setInitialSidebarPreference() {
-    // Check local storage for previously selected preference
-    let storedPreference = localStorage.getItem("sidebar_preference");
-    // Set the dropdown to the stored preference if available
-    if (storedPreference) {
-        $("#sidebar_preference_select").val(storedPreference);
-    }
+    localStorage.setItem("sidebar_preference", collapse_preference);
 }
 
 //Called from the DOM collapse button, toggle collapsed and save to localStorage
@@ -1487,19 +1466,7 @@ function toggleSidebar() {
 }
 
 $(document).ready(function() {
-
-  if(localStorage.getItem("sidebar_preference")){
-      if(localStorage.getItem("sidebar_preference") === "automatic"){
-        automatic_manual = "automatic";
-        $("#sidebar_preference_select").val("automatic");
-    }
-        else{
-            automatic_manual = "manual";
-          $("#sidebar_preference_select").val("manual");
-        }
-    }
     //Collapsed sidebar tooltips with content depending on state of sidebar
-
     $('[data-toggle="tooltip"]').tooltip({
         position: { my: "right+0 bottom+0" },
         content: function () {
@@ -1514,7 +1481,16 @@ $(document).ready(function() {
             }
         }
     });
-    window.addEventListener("resize", checkSidebarCollapse);
+
+    if (localStorage.getItem("sidebar_preference")) {
+        if(localStorage.getItem("sidebar_preference") === "automatic") {
+            $("#sidebar_preference_select").val("automatic");
+            window.addEventListener("resize", checkSidebarCollapse);
+        }
+        else {
+            $("#sidebar_preference_select").val("manual");
+        }
+    }
 });
 
 function checkBulkProgress(gradeable_id){

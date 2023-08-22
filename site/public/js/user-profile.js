@@ -368,14 +368,20 @@ $(document).ready(() => {
 
     $('#sidebar_preference_select').change(() => {
         updateSidebarPreference();
+        location.reload();
     });
 
     // Set the selected option based on stored preference
-    setInitialSidebarPreference();
 
     $('#theme_change_select').change(() => {
         // eslint-disable-next-line no-undef
         updateTheme();
+        if (JSON.parse(localStorage.getItem('rainbow-mode')) === true) {
+            $(document.body).find('#rainbow-mode').remove();
+            localStorage.removeItem('rainbow-mode');
+            const theme_picker = $('#theme_change_select');
+            theme_picker.find('[value="rainbow"]').remove();
+        }
     });
 
     if (JSON.parse(localStorage.getItem('rainbow-mode')) === true) {
