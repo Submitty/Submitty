@@ -96,7 +96,7 @@ class ConfigurationController extends AbstractController {
     /**
      * @Route("/api/courses/{_semester}/{_course}/config", methods={"POST"})
      * @Route("/courses/{_semester}/{_course}/config", methods={"POST"})
-     * @return MultiResponse
+     * @return MultiResponse|JsonResponse
      */
     public function updateConfiguration(): MultiResponse {
         if (!isset($_POST['name'])) {
