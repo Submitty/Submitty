@@ -8,6 +8,7 @@ window.addEventListener("resize", function(){
 
 var mobileHomeLink = null;
 var desktopHomeLink = null;
+let automatic_manual = null;
 document.addEventListener("DOMContentLoaded", function() {
   loadInBreadcrumbLinks();
   adjustBreadcrumbLinks();
@@ -1406,6 +1407,8 @@ function checkSidebarCollapse() {
 }
 
 function updateTheme(){
+            console.log("is it happening1");
+
   let choice = $("#theme_change_select option:selected").val();
   if(choice === "system_black"){
     localStorage.removeItem("theme");
@@ -1425,7 +1428,10 @@ function updateTheme(){
   detectColorScheme();
 }
 $(document).ready(function() {
+    console.log("is it happening2");
   if(localStorage.getItem("theme")){
+        console.log("does it exist");
+
       if(localStorage.getItem("theme") === "dark"){
         if(localStorage.getItem("black_mode") === "black"){
           $("#theme_change_select").val("dark_black");
@@ -1436,6 +1442,7 @@ $(document).ready(function() {
         $("#theme_change_select").val("light");
       }
   }else{
+
     if(localStorage.getItem("black_mode") === "black"){
       $("#theme_change_select").val("system_black");
     }else{
@@ -1444,17 +1451,55 @@ $(document).ready(function() {
   }
 });
 
+
+function updateSidebarPreference() {
+    let choice = $("#sidebar_preference_select option:selected").val();
+
+    // Update local storage with the selected preference
+    localStorage.setItem("sidebar_preference", choice);
+
+    if (choice === "automatic") {
+                automatic_manual = "automatic";
+        console.log(" sidebar preference selected: automatic");
+    } else {
+                        automatic_manual = "manual";
+
+        console.log(" sidebar preference selected: manual");
+    }
+}
+
+
+function setInitialSidebarPreference() {
+    // Check local storage for previously selected preference
+    let storedPreference = localStorage.getItem("sidebar_preference");
+    // Set the dropdown to the stored preference if available
+    if (storedPreference) {
+        $("#sidebar_preference_select").val(storedPreference);
+    }
+}
+
 //Called from the DOM collapse button, toggle collapsed and save to localStorage
 function toggleSidebar() {
     const sidebar = $("aside");
     const shown = sidebar.hasClass("collapsed");
-
     Cookies.set('collapse_sidebar', !shown, { path: '/' });
     sidebar.toggleClass("collapsed", !shown);
 }
 
 $(document).ready(function() {
+
+  if(localStorage.getItem("sidebar_preference")){
+      if(localStorage.getItem("sidebar_preference") === "automatic"){
+        automatic_manual = "automatic";
+        $("#sidebar_preference_select").val("automatic");
+    }
+        else{
+            automatic_manual = "manual";
+          $("#sidebar_preference_select").val("manual");
+        }
+    }
     //Collapsed sidebar tooltips with content depending on state of sidebar
+
     $('[data-toggle="tooltip"]').tooltip({
         position: { my: "right+0 bottom+0" },
         content: function () {
@@ -1469,7 +1514,6 @@ $(document).ready(function() {
             }
         }
     });
-
     window.addEventListener("resize", checkSidebarCollapse);
 });
 

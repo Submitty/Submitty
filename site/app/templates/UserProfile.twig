@@ -186,7 +186,20 @@
                     </div>
                 </div>
             </div>
-            <div>
+<div class="user-info-cont">
+    <div class="user-info-title">
+        <span>Sidebar Preference:</span>
+    </div>
+    <div class="user-info">
+        <div class="flex-row-col">
+            <label for="sidebar_preference_select">Choose a sidebar preference</label>
+            <select id="sidebar_preference_select" class="form-control" aria-label="Change Sidebar Preference" data-testid="sidebar-preference-dropdown">
+                <option value="automatic">Automatic</option>
+                <option value="manual">Manual</option>
+            </select>
+        </div>
+    </div>
+</div>            <div>
                 <span class="option-alt" id="browser-support">Submitty supports an installable Progressive Web App (PWA) which requires Chrome, see <a href="https://support.google.com/chrome/answer/9658361">here</a> for installation instructions</span>
                 <button class="addpwa btn btn-primary">Install App</button>
                 <span class="option-alt" id="pwa-uninstall-lable">The Submitty Progressive Web App (PWA) has already been installed, see <a href="https://support.google.com/chrome/answer/9658361">here</a> to uninstall it</span>
@@ -204,6 +217,13 @@
         </div>
     </div>
 </div>
+<script>
+    // Set the default value to "automatic" when the page loads
+    $(document).ready(function() {
+        $("#sidebar_preferrence").val("automatic");
+    });
+</script>
+
 {% include 'EditNameForm.twig' %}
 {% include 'EditLastInitialFormatForm.twig' %}
 {% include 'EditProfilePhotoForm.twig' %}
