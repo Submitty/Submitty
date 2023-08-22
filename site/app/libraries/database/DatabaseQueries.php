@@ -1474,32 +1474,19 @@ WHERE semester=? AND course=? AND user_id=?",
     }
 
     /**
-     * Calculates the remaining cache for all the users. If a g_id is procided,
-     * it will only calculate the cache for the uses who DO NOT already have
-     * late day cache calculated
+     * Generate and update the late day cache for all of the students in the course
      */
-    public function generateLateDayCacheForUsers(string $g_id = null): void {
+    public function generateLateDayCacheForUsers(): void {
         $default_late_days = $this->core->getConfig()->getDefaultStudentLateDays();
-        $params = [$g_id, $default_late_days];
-
-        $query = "WITH existing_cache AS (
-                    SELECT DISTINCT user_id
-                    FROM late_day_cache
-                    WHERE g_id=?
-                )
-                (SELECT (cache_row).* 
-                FROM 
-                    (SELECT
-                        public.calculate_remaining_cache_for_user(users.user_id::text, ?) as cache_row
-                    FROM 
-                        users
-                        LEFT JOIN existing_cache
-                        ON existing_cache.user_id = users.user_id
-                    WHERE 
-                        existing_cache.user_id IS NULL
-                    ) calculated_cache
-                );";
-
+        $params = [$default_late_days];
+        $query = "INSERT INTO late_day_cache 
+                    (SELECT (cache_row).*
+                         FROM 
+                        (SELECT
+                            public.calculate_remaining_cache_for_user(user_id::text, ?) as cache_row
+                        FROM users
+                        ) calculated_cache
+                    )";
         $this->course_db->query($query, $params);
     }
 
@@ -5484,8 +5471,23 @@ AND gc_id IN (
      * This allows graders to still respond to by component inquiries if in no-component mode.
      */
     public function convertInquiryComponentId($gradeable) {
-        $this->course_db->query("UPDATE grade_inquiries SET gc_id=NULL WHERE id IN (SELECT a.id FROM (SELECT DISTINCT ON (t.user_id) user_id, t.id FROM (SELECT * FROM grade_inquiries ORDER BY id) t WHERE t.g_id=?) a);", [$gradeable->getId()]);
+        $this->course_db->query("UPDATE grade_inquiries
+                                        SET gc_id = NULL
+                                        WHERE id IN (
+                                            SELECT a.id
+                                            FROM (
+                                                SELECT DISTINCT ON (t.user_id) user_id, t.id
+                                                FROM (
+                                                    SELECT *
+                                                    FROM grade_inquiries
+                                                    ORDER BY id
+                                                ) t
+                                                WHERE t.g_id = ?
+                                            ) a
+                                        );
+", [$gradeable->getId()]);
     }
+
 
     /**
      * This is used to revert non-component inquiries back to by-component inquiries
@@ -5650,6 +5652,7 @@ AND gc_id IN (
                   eg_student_view_after_grades as student_view_after_grades,
                   eg_student_download AS student_download,
                   eg_student_submit AS student_submit,
+                  eg_instructor_blind AS instructor_blind,
                   eg_limited_access_blind AS limited_access_blind,
                   eg_peer_blind AS peer_blind,
                   eg_submission_open_date AS submission_open_date,
@@ -6511,6 +6514,7 @@ AND gc_id IN (
                     $gradeable->getLateDays(),
                     $gradeable->isLateSubmissionAllowed(),
                     $gradeable->getPrecision(),
+                    $gradeable->getInstructorBlind(),
                     $gradeable->getLimitedAccessBlind(),
                     $gradeable->getPeerBlind(),
                     DateUtils::dateTimeToString($gradeable->getGradeInquiryStartDate()),
@@ -6548,6 +6552,7 @@ AND gc_id IN (
                       eg_late_days=?,
                       eg_allow_late_submission=?,
                       eg_precision=?,
+                      eg_instructor_blind=?,
                       eg_limited_access_blind=?,
                       eg_peer_blind=?,
                       eg_grade_inquiry_start_date=?,

@@ -95,7 +95,7 @@ use app\controllers\admin\AdminGradeableController;
  * @method int getLimitedAccessBlind()
  * @method void setPeerBlind($peer_blind)
  * @method int getPeerBlind()
- * @method void setInstructorBlind($peer_blind)
+ * @method void setInstructorBlind($instructor_blind)
  * @method int getInstructorBlind()
  * @method bool getAllowCustomMarks()
  * @method void setAllowCustomMarks($allow_custom_marks)
@@ -350,6 +350,9 @@ class Gradeable extends AbstractModel {
 
         if (array_key_exists('limited_access_blind', $details)) {
             $this->setLimitedAccessBlind($details['limited_access_blind']);
+        }
+        if (array_key_exists('instructor_blind', $details)) {
+            $this->setInstructorBlind($details['instructor_blind']);
         }
 
         if ($this->getType() === GradeableType::ELECTRONIC_FILE) {
@@ -2404,8 +2407,6 @@ class Gradeable extends AbstractModel {
                 FileUtils::joinPaths($install_dir, 'more_autograding_examples/upload_only_100mb/config')],
             ['PROVIDED: bulk scanned pdf exam (200 mb maximum total student file submission)',
                 FileUtils::joinPaths($install_dir, 'more_autograding_examples/pdf_exam/config')],
-            ['PROVIDED: iclicker_upload (for collecting student iclicker IDs)',
-                FileUtils::joinPaths($install_dir, 'more_autograding_examples/iclicker_upload/config')],
             ['PROVIDED: left_right_exam_seating (for collecting student handedness for exam seating assignment)',
                 FileUtils::joinPaths($install_dir, 'more_autograding_examples/left_right_exam_seating/config')],
             ['PROVIDED: test_notes_upload (expects single file, 2 mb maximum, 2-page pdf student submission)',
