@@ -22,6 +22,7 @@ class UserTester extends \PHPUnit\Framework\TestCase {
             'user_familyname' => "Tester",
             'user_preferred_familyname' => null,
             'user_pronouns' => '',
+            'display_pronouns' => false,
             'user_email' => "test@example.com",
             'user_email_secondary' => "test@exampletwo.com",
             'user_email_secondary_notify' => false,
@@ -63,6 +64,7 @@ class UserTester extends \PHPUnit\Framework\TestCase {
             'user_familyname' => "Tester",
             'user_preferred_familyname' => "Bunyan",
             'user_pronouns' => '',
+            'display_pronouns' => false,
             'user_email' => "test@example.com",
             'user_email_secondary' => "test@exampletwo.com",
             'user_email_secondary_notify' => false,
@@ -96,6 +98,7 @@ class UserTester extends \PHPUnit\Framework\TestCase {
             'user_familyname' => "Tester",
             'user_preferred_familyname' => null,
             'user_pronouns' => '',
+            'display_pronouns' => false,
             'user_email' => "test@example.com",
             'user_email_secondary' => "test@exampletwo.com",
             'user_email_secondary_notify' => false,
@@ -124,6 +127,7 @@ class UserTester extends \PHPUnit\Framework\TestCase {
             'user_familyname' => "Tester",
             'user_preferred_familyname' => null,
             'user_pronouns' => '',
+            'display_pronouns' => false,
             'user_email' => "test@example.com",
             'user_email_secondary' => "test@exampletwo.com",
             'user_email_secondary_notify' => false,
@@ -144,6 +148,7 @@ class UserTester extends \PHPUnit\Framework\TestCase {
             'displayed_given_name' => 'User',
             'displayed_family_name' => 'Tester',
             'pronouns' => '',
+            'display_pronouns' => false,
             'email' => 'test@example.com',
             'secondary_email' => "test@exampletwo.com",
             'email_both' => false,
@@ -159,6 +164,7 @@ class UserTester extends \PHPUnit\Framework\TestCase {
             'preferred_given_name' => "",
             'preferred_family_name' => "",
             'numeric_id' => '123456789',
+            'preferred_locale' => null,
             'registration_section' => 1,
             'registration_type' => 'staff',
             'course_section_id' => null,
@@ -187,7 +193,8 @@ class UserTester extends \PHPUnit\Framework\TestCase {
                 'team_member_submission_email' => true,
                 'self_notification_email' => false
             ],
-            'registration_subsection' => null
+            'registration_subsection' => '',
+            'enforce_single_session' => false
         ];
         $this->assertEquals($expected, $actual);
     }
@@ -204,6 +211,7 @@ class UserTester extends \PHPUnit\Framework\TestCase {
             'user_givenname' => 'test',
             'user_familyname' => 'test',
             'user_pronouns' => '',
+            'display_pronouns' => false,
             'user_email' => 'user@email.com',
             'user_email_secondary' => "test@exampletwo.com",
             'user_email_secondary_notify' => false,
@@ -218,6 +226,7 @@ class UserTester extends \PHPUnit\Framework\TestCase {
             'user_givenname' => 'test',
             'user_familyname' => 'test',
             'user_pronouns' => '',
+            'display_pronouns' => false,
             'user_email' => 'user@email.com',
             'user_email_secondary' => "test@exampletwo.com",
             'user_email_secondary_notify' => false,
@@ -234,6 +243,7 @@ class UserTester extends \PHPUnit\Framework\TestCase {
                 'user_givenname' => 'John',
                 'user_familyname' => 'Smith-Jones Warren',
                 'user_pronouns' => '',
+                'display_pronouns' => false,
                 'user_email' => 'user@email.com',
                 'user_email_secondary' => 'test@exampletwo.com',
                 'user_email_secondary_notify' => false,

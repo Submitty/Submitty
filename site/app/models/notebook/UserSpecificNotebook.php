@@ -16,17 +16,23 @@ use app\libraries\FileUtils;
  */
 
 class UserSpecificNotebook extends Notebook {
-    /** @prop @var array array of items where the notebook selects from */
+    /** @prop
+     * @var array array of items where the notebook selects from */
     protected $item_pool = [];
-    /** @prop @var array testcases config */
+    /** @prop
+     * @var array testcases config */
     protected $test_cases = [];
-    /** @prop @var array hashes generated for student's notebook */
+    /** @prop
+     * @var array hashes generated for student's notebook */
     protected $hashes = [];
-    /** @prop @var array of item_pool names selected */
+    /** @prop
+     * @var array of item_pool names selected */
     protected $selected_questions = [];
-    /** @prop @var string warning if this notebook has potentially overlapping questions picked */
+    /** @prop
+     * @var string warning if this notebook has potentially overlapping questions picked */
     protected $warning = null;
-    /** @prop @var array containing description of this notebook */
+    /** @prop
+     * @var array containing description of this notebook */
     protected $notebook_config;
 
     private $user_id;

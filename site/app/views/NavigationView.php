@@ -92,17 +92,25 @@ class NavigationView extends AbstractView {
             //If statement seems redundant, but will help in case we ever decouple the is_file check from $display_custom_message
             if ($display_custom_message && is_file($message_file_path)) {
                 $message_json = json_decode(file_get_contents($message_file_path));
-                if (property_exists($message_json, 'special_message')) {
-                    $message_file_details = $message_json->special_message;
+                if ($message_json == null) {
+                    $display_custom_message = false;
+                }
+                else {
+                    if (property_exists($message_json, 'special_message')) {
+                        $message_file_details = $message_json->special_message;
 
-                    //If any fields are missing, treat this as though we just didn't have a message for this user.
-                    if (!property_exists($message_file_details, 'title') || !property_exists($message_file_details, 'description') || !property_exists($message_file_details, 'filename')) {
-                        $display_custom_message = false;
-                        $messsage_file_details = null;
+                        //If any fields are missing, treat this as though we just didn't have a message for this user.
+                        if (!property_exists($message_file_details, 'title') || !property_exists($message_file_details, 'description') || !property_exists($message_file_details, 'filename')) {
+                            $display_custom_message = false;
+                            $messsage_file_details = null;
+                        }
                     }
                 }
             }
         }
+
+
+
 
 
         // ======================================================================================
@@ -231,7 +239,6 @@ class NavigationView extends AbstractView {
         $buttons = [];
         $buttons[] = $this->hasTeamButton($gradeable) ? NavigationView::getTeamButton($this->core, $gradeable, $graded_gradeable) : null;
         $buttons[] = $this->hasSubmitButton($gradeable) ? NavigationView::getSubmitButton($this->core, $gradeable, $graded_gradeable, $list_section, $submit_everyone) : null;
-
         if ($this->hasGradeButton($gradeable)) {
             $buttons[] = $this->getGradeButton($gradeable, $list_section);
         }
@@ -576,21 +583,14 @@ class NavigationView extends AbstractView {
         else {
             // This means either the user isn't on a team
             if ($gradeable->isTeamAssignment()) {
-                // team assignment, no team
-                if (!$submit_everyone) {
-                    $title = "MUST BE ON A TEAM TO SUBMIT";
-                    $disabled = true;
-                }
+                $title = "MUST BE ON A TEAM TO SUBMIT";
+                $disabled = true;
                 if ($list_section > GradeableList::OPEN) {
                     $class = "btn-danger";
-                    if ($submit_everyone) {
-                        // team assignment, no team
-                        $title = "OVERDUE SUBMISSION";
-                        $disabled = false;
-                    }
                 }
             }
         }
+
         $prerequisite = '';
         if ($gradeable->isLocked($core->getUser()->getId())) {
             $disabled = true;

@@ -74,6 +74,7 @@ class SubmissionControllerTester extends BaseUnitTest {
             'user_givenname' => 'Test',
             'user_familyname' => 'Person',
             'user_pronouns' => '',
+            'display_pronouns' => false,
             'user_email' => '',
             'user_email_secondary' => '',
             'user_email_secondary_notify' => false,
@@ -1237,7 +1238,7 @@ class SubmissionControllerTester extends BaseUnitTest {
         $return = $controller->ajaxUploadSubmission('test');
 
         $this->assertTrue($return['status'] == 'fail');
-        $this->assertEquals("Could not properly unpack zip file. Error message: Invalid or uninitialized Zip object.", $return['message']);
+        $this->assertEquals("The tmp file 'broken.zip' was not properly uploaded.", $return['message']);
         $this->assertFalse($return['status'] == 'success');
     }
 

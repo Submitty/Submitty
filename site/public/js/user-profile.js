@@ -91,20 +91,25 @@ function clearPronounsBox() {
     pronounsInput.value = '';
 }
 
+//update user pronouns and display pronouns option
 function updateUserPronouns(e) {
+    //update user pronouns
     e.preventDefault();
     const pronouns = $('#user-pronouns-change');
+    const forumDisplay = $('#pronouns-forum-display');
     pronounsLastVal = pronouns.val();
-    if (pronouns.data('current-pronouns') === pronouns.val()) {
+    if (pronouns.data('current-pronouns') === pronouns.val() && pronouns.data('pronouns-forum-display') === forumDisplay.val()) {
         // eslint-disable-next-line no-undef
         displayErrorMessage('No changes detected to update pronouns!');
         $('#edit-pronouns-form').hide();
     }
     else {
         const data = new FormData();
+        const isForumDisplayChecked = forumDisplay.prop('checked');
         // eslint-disable-next-line no-undef
         data.append('csrf_token', csrfToken);
         data.append('pronouns', pronouns.val());
+        data.append('pronouns-forum-display', isForumDisplayChecked);
         // eslint-disable-next-line no-undef
         const url = buildUrl(['user_profile', 'change_pronouns']);
         $.ajax({
@@ -114,14 +119,19 @@ function updateUserPronouns(e) {
             processData: false,
             contentType: false,
             success: function(res) {
+                console.log(res);
                 const response = JSON.parse(res);
                 if (response.status === 'success') {
                     const {data} = response;
                     // eslint-disable-next-line no-undef
                     displaySuccessMessage(data.message);
                     const icon = '<i class="fas fa-pencil-alt"></i>';
-                    // update the pronouns
+                    // update the pronouns and display (true or false)
                     $('#pronouns_val').html(`${icon} ${data.pronouns}`);
+                    const isForumDisplayCheckedString = String(isForumDisplayChecked);
+                    const capitalizedString = isForumDisplayCheckedString.charAt(0).toUpperCase() + isForumDisplayCheckedString.slice(1);
+                    $('#display_pronouns_val').html(`${icon} ${capitalizedString}`);
+
                     // update the data attributes
                     pronouns.data('current-pronouns', data.pronouns);
                     $('#edit-pronouns-form').hide();
@@ -137,6 +147,7 @@ function updateUserPronouns(e) {
             },
         });
     }
+
 }
 
 function updateUserPreferredNames () {
@@ -435,4 +446,32 @@ $(document).ready(() => {
     // Set time zone drop down boxes to the user's time zone (only after other JS has finished loading)
     const user_time_zone =  $('#time_zone_selector_label').data('user_time_zone');
     $(`[value="${user_time_zone}"]`).prop('selected', true);
+
+
+    $('#pref_locale_select').on('change', function() {
+        $.getJSON({
+            type: 'POST',
+            url: buildUrl(['user_profile', 'set_pref_locale']),
+            data: {
+                // eslint-disable-next-line no-undef
+                csrf_token: csrfToken,
+                locale: $(this).val(),
+            },
+            success: function(response) {
+                if (response.status === 'success') {
+                    displaySuccessMessage('User locale updated successfully!');
+                    location.reload();
+                }
+                else {
+                    console.log(response);
+                    displayErrorMessage('Failed to update user locale!');
+                }
+            },
+            error: function(response) {
+                console.error('Failed to parse response from server!');
+                displayErrorMessage('Failed to parse response from server!');
+                console.log(response);
+            },
+        });
+    });
 });

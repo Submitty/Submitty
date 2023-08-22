@@ -91,6 +91,12 @@
     margin: 0;
 }
 
+.user-info .tip-note {
+    font-size: 14px;
+    color: var(--standard-medium-blue);
+    display: block;
+}
+
 .flex-row-col label,
 .flex-row-col select {
     flex: 1;
@@ -141,5 +147,9 @@
 @media (max-width: 541px) {
     .flex-row-col {
         flex-direction: column;
+    }
+
+    #auth-tokens-btn {
+        margin-bottom: 10px;
     }
 }

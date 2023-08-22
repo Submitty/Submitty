@@ -2,7 +2,14 @@
     <div >
         <div id="directory_view">
             <span style="line-height: 40px;">
+                {% if not student_grader %}
                 <span class="grading_label">Submissions and Results Browser</span>
+                {% endif %}
+                
+                {% if student_grader %}
+                <span class="grading_label">Submissions Browser</span>
+                {% endif %}
+
                 <button class="btn btn-default expand-button" data-linked-type="submissions" data-clicked-state="wasntClicked" id="toggleSubmissionButton">Open/Close Submissions</button>
 
                 {# check if there are vcs files, if yes display the toggle button, else don't display it #}
@@ -10,7 +17,9 @@
                     <button class="btn btn-default expand-button" data-linked-type="checkout" data-clicked-state="wasntClicked"  id="togglCheckoutButton">Open/Close Checkout</button>
                 {% endif %}
 
-                <button class="btn btn-default expand-button" data-linked-type="results" data-clicked-state="wasntClicked"  id="toggleResultButton">Open/Close Results</button>
+                {% if not student_grader %}
+                    <button class="btn btn-default expand-button" data-linked-type="results" data-clicked-state="wasntClicked"  id="toggleResultButton">Open/Close Results</button>
+                {% endif %}
 
                 <script>
                     $(document).ready(function(){
@@ -34,12 +43,12 @@
             <br />
             {# Files #}
             <div class="inner-container open" id="file-container" style="padding-top: 10px;">
-                {{ _self.display_files(submissions, "s", 0, "submissions") }}
+                {{ _self.display_files(submissions, "s", 0, "submissions", blind_grader) }}
                 {% if has_vcs_files %} {# if there are checkout files, then display folder, otherwise don't #}
                     {{ _self.display_files(checkout, "c", 0, "checkout") }}
                 {% endif %}
                 {% if not student_grader %}
-                    {{ _self.display_files(results, "r", 0, "results") }}
+                    {{ _self.display_files(results, "r", 0, "results", blind_grader) }}
                     {{ _self.display_files(results_public, "rp", 0, "results_public") }}
                 {% endif %}
             </div>
@@ -58,19 +67,20 @@
     </div>
 </div>
 
-{% macro display_files(files, id, indent, title) %}
+{% macro display_files(files, id, indent, title, blind_grader) %}
     {# Files on top #}
     {% for dir, path in files|filter((path,dir) => path is not iterable) %}
-        {{ _self.display_file(dir, path, id ~ "f" ~ loop.index, indent, title) }}
+        {{ _self.display_file(dir, path, id ~ "f" ~ loop.index, indent, title, blind_grader) }}
     {% endfor %}
 
     {# Directories underneath #}
     {% for dir, path in files|filter((path,dir) => path is iterable) %}
-        {{ _self.display_dir(dir, path, id ~ "d" ~ loop.index, indent, title) }}
+        {{ _self.display_dir(dir, path, id ~ "d" ~ loop.index, indent, title, blind_grader) }}
     {% endfor %}
 {% endmacro %}
 
-{% macro display_file(dir, path, id, indent, title) %}
+{% macro display_file(dir, path, id, indent, title, blind_grader) %}
+    {% if not (blind_grader and (dir == 'queue_file.json' or dir == '.user_assignment_access.json')) %}
     <div>
         <div class="file-viewer">
             <a class='openAllFile{{ title }} openable-element-{{ title }} key_to_click' file-url="{{ path|url_encode }}" onclick='openFrame("{{ dir|url_encode|e('js') }}", "{{ path|url_encode|e('js') }}", "{{ id }}"); updateCookies();' data-viewer_id="{{ id }}">
@@ -82,12 +92,13 @@
         </div>
         <div id="file_viewer_{{ id }}" style="margin-left:{{ indent * -15 }}px" data-file_name="{{ dir }}" data-file_url="{{ path }}"></div>
     </div>
+    {% endif %}
 {% endmacro %}
 
-{% macro display_dir(dir, contents, id, indent, title) %}
+{% macro display_dir(dir, contents, id, indent, title, blind_grader) %}
     <div>
         <div class="div-viewer">
-            <a class='openAllDiv openAllDiv{{ title }} openable-element-{{ title }} key_to_click' id='{{ dir }}' onclick='openDiv("{{ id }}"); updateCookies();' data-viewer_id="{{ id }}">
+            <a data-testid="folders" class='openAllDiv openAllDiv{{ title }} openable-element-{{ title }} key_to_click' id='{{ dir }}' onclick='openDiv("{{ id }}"); updateCookies();' data-viewer_id="{{ id }}">
                 <span class="fas fa-folder open-all-folder" style='vertical-align:text-top;'></span>
                 {{ dir }}
             </a>
@@ -96,7 +107,7 @@
         <div id='div_viewer_{{ id }}' style='margin-left:15px; display: none' data-file_name="{{ dir }}">
 
             {# Recurse #}
-            {{ _self.display_files(contents, id, indent + 1, title) }}
+            {{ _self.display_files(contents, id, indent + 1, title, blind_grader) }}
 
         </div>
     </div>

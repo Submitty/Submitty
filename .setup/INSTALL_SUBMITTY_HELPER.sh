@@ -164,7 +164,9 @@ fi
 
 echo -e "Install python_submitty_utils"
 
-pushd "${SUBMITTY_REPOSITORY}/python_submitty_utils"
+rsync -rtz "${SUBMITTY_REPOSITORY}/python_submitty_utils" "${SUBMITTY_INSTALL_DIR}"
+pushd "${SUBMITTY_INSTALL_DIR}/python_submitty_utils"
+
 pip3 install .
 # Setting the permissions are necessary as pip uses the umask of the user/system, which
 # affects the other permissions (which ideally should be o+rx, but Submitty sets it to o-rwx).
@@ -526,7 +528,8 @@ fi
 ########################################################################################################################
 # BUILD JUNIT TEST RUNNER (.java file) if Java is installed on the machine
 
-if [ -x "$(command -v javac)" ]; then
+if [ -x "$(command -v javac)" ] &&
+   [ -d ${SUBMITTY_INSTALL_DIR}/java_tools/JUnit ]; then
     echo -e "Build the junit test runner"
 
     # copy the file from the repo
@@ -551,6 +554,8 @@ if [ -x "$(command -v javac)" ]; then
     # fix all java_tools permissions
     chown -R "root:${COURSE_BUILDERS_GROUP}" "${SUBMITTY_INSTALL_DIR}/java_tools"
     chmod -R 755                             "${SUBMITTY_INSTALL_DIR}/java_tools"
+else
+    echo -e "Skipping build of the junit test runner"
 fi
 
 
@@ -645,7 +650,7 @@ popd > /dev/null
 ################################################################################################################
 # COPY THE 1.0 Grading Website if not in worker mode
 if [ "${WORKER}" == 0 ]; then
-    bash "${SUBMITTY_REPOSITORY}/.setup/install_submitty/install_site.sh"
+    bash "${SUBMITTY_REPOSITORY}/.setup/install_submitty/install_site.sh" browscap
 fi
 
 ################################################################################################################

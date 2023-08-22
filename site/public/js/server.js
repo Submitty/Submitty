@@ -358,9 +358,9 @@ function newEditCourseMaterialsForm(tag) {
     let this_hide_from_students = $(tag).data('hidden-state');
     let release_time = $(tag).data('release-time');
     let is_link = $(tag).data('is-link');
-    let link_title = $(tag).data('link-title');
+    let title = $(tag).data('title');
     let link_url = $(tag).data('link-url');
-
+    let file_path = $(tag).data('path');
     let form = $("#edit-course-materials-form");
 
     let element = document.getElementById("edit-picker");
@@ -393,32 +393,57 @@ function newEditCourseMaterialsForm(tag) {
         $("#all-sections-showing-yes", form).prop('checked',false);
         $("#all-sections-showing-no", form).prop('checked',true);
     }
-    const title_label = $("#edit-url-title-label", form);
+    const title_label = $("#edit-title-label", form);
     const url_label = $("#edit-url-url-label", form);
+    const path = $("#new-file-name");
+    path.val(file_path.substring(1));
+    const titleVal = $("#edit-title");
+    title_label.css('display', 'block');
     if (is_link === 1) {
-        title_label.css('display', 'block');
+        titleVal.val(title.replace('link-',''));
+        path.val(decodeURIComponent(file_path.substring(file_path.indexOf("course_materials/") + 17).replace('link-','')));
         url_label.css('display', 'block');
-        const title = $("#edit-url-title");
-        title.prop('disabled', false);
-        title.val(link_title);
         const url = $("#edit-url-url");
         url.prop('disabled', false);
         url.val(link_url);
     }
     else {
-        if (title_label.css('display') !== 'none') {
-            title_label.css('display', 'none');
-        }
+        titleVal.val(file_path.substring(file_path.lastIndexOf("/") + 1));
         if (url_label.css('display') !== 'none') {
             url_label.css('display', 'none');
         }
     }
+
+    editFilePathRecommendations();
+
     $("#material-edit-form", form).attr('data-id', id);
     $("#edit-picker", form).attr('value', release_time);
     $("#edit-sort", form).attr('value', dir);
     $('#overwrite-materials-flag').remove();
     form.css("display", "block");
     captureTabInModal("edit-course-materials-form");
+}
+
+/**
+ * Edits the suggested options for the Edit Course Materials Popup so that
+ * they use the current file name.
+ */
+function editFilePathRecommendations() {
+    const fileNameInput = $("#edit-title");
+    const fileName = fileNameInput.val();
+
+    // Get options
+    const dataList = $("#change_folder_paths");
+    const optionsArray = dataList.find('option').map(function () {return $(this);}).get();
+
+    optionsArray.forEach((option) => {
+        const optionString = option.val();
+        const lastSlash = optionString.lastIndexOf('/');
+        const currentOptionMinusFile = optionString.substring(0, lastSlash);
+
+        const newOption = `${currentOptionMinusFile}/${fileName}`;
+        option.val(newOption);
+    })
 }
 
 var lastActiveElement = null;

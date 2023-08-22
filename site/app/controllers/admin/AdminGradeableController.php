@@ -956,6 +956,7 @@ class AdminGradeableController extends AbstractController {
                 'peer_grade_set' => 0,
                 'late_submission_allowed' => true,
                 'hidden_files' => "",
+                'instructor_blind' => 1,
                 'limited_access_blind' => 1,
                 'peer_blind' => 3,
                 'depends_on' => null,
@@ -1188,6 +1189,10 @@ class AdminGradeableController extends AbstractController {
 
             if ($prop === 'grade_inquiry_per_component_allowed' && $post_val === false && $gradeable->isGradeInquiryPerComponentAllowed()) {
                 $this->core->getQueries()->convertInquiryComponentId($gradeable);
+            }
+
+            if ($prop === 'grade_inquiry_per_component_allowed' && $post_val === true && !$gradeable->isGradeInquiryPerComponentAllowed()) {
+                $this->core->getQueries()->revertInquiryComponentId($gradeable);
             }
 
             // Try to set the property

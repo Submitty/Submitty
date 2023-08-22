@@ -98,10 +98,53 @@ CREATE FUNCTION public.sync_courses_user() RETURNS trigger
                 IF (TG_OP = 'INSERT') THEN
                     -- FULL data sync on INSERT of a new user record.
                     SELECT * INTO user_row FROM users WHERE user_id=NEW.user_id;
-                    query_string := 'INSERT INTO users (user_id, user_pronouns, user_numeric_id, user_givenname, user_preferred_givenname, user_familyname, user_preferred_familyname, user_last_initial_format, user_email, user_email_secondary, user_email_secondary_notify, user_updated, instructor_updated, user_group, registration_section, registration_type, manual_registration) ' ||
-                            'VALUES (' || quote_literal(user_row.user_id) || ', ' || quote_literal(user_row.user_pronouns) || ', ' || quote_nullable(user_row.user_numeric_id) || ', ' || quote_literal(user_row.user_givenname) || ', ' || quote_nullable(user_row.user_preferred_givenname) || ', ' || quote_literal(user_row.user_familyname) || ', ' ||
-                            '' || quote_nullable(user_row.user_preferred_familyname) || ', ' || quote_literal(user_row.user_last_initial_format) || ', ' || quote_literal(user_row.user_email) || ', ' || quote_literal(user_row.user_email_secondary) || ', ' || quote_literal(user_row.user_email_secondary_notify) || ', ' || quote_literal(user_row.user_updated) || ', ' ||
-                            '' || quote_literal(user_row.instructor_updated) || ', ' || NEW.user_group || ', ' || quote_nullable(NEW.registration_section) || ', ' || quote_literal(NEW.registration_type) || ', ' || NEW.manual_registration || ')';
+                    query_string := 'INSERT INTO users (
+                        user_id,
+                        user_numeric_id,
+                        user_pronouns,
+                        display_pronouns,
+                        user_givenname,
+                        user_preferred_givenname,
+                        user_familyname,
+                        user_preferred_familyname,
+                        user_last_initial_format,
+                        user_email,
+                        user_email_secondary,
+                        user_email_secondary_notify,
+                        time_zone,
+                        user_preferred_locale,
+                        display_image_state,
+                        user_updated,
+                        instructor_updated,
+                        user_group,
+                        registration_section,
+                        registration_type,
+                        manual_registration,
+                        display_name_order
+                    ) VALUES ('
+                        || quote_literal(user_row.user_id) || ', '
+                        || quote_nullable(user_row.user_numeric_id) || ', ' 
+                        || quote_literal(user_row.user_pronouns) || ', ' 
+                        || quote_literal(user_row.display_pronouns) || ', '
+                        || quote_literal(user_row.user_givenname) || ', ' 
+                        || quote_nullable(user_row.user_preferred_givenname) || ', ' 
+                        || quote_literal(user_row.user_familyname) || ', '
+                        || quote_nullable(user_row.user_preferred_familyname) || ', ' 
+                        || quote_literal(user_row.user_last_initial_format) || ', ' 
+                        || quote_literal(user_row.user_email) || ', ' 
+                        || quote_literal(user_row.user_email_secondary) || ', ' 
+                        || quote_literal(user_row.user_email_secondary_notify) || ', ' 
+                        || quote_literal(user_row.time_zone) || ', '
+                        || quote_nullable(user_row.user_preferred_locale) || ', '
+                        || quote_literal(user_row.display_image_state) || ', '
+                        || quote_literal(user_row.user_updated) || ', '
+                        || quote_literal(user_row.instructor_updated) || ', '
+                        || NEW.user_group || ', ' 
+                        || quote_nullable(NEW.registration_section) || ', ' 
+                        || quote_literal(NEW.registration_type) || ', '
+                        || NEW.manual_registration || ', '
+                        || quote_literal(user_row.display_name_order)
+                    || ')';
                     IF query_string IS NULL THEN
                         RAISE EXCEPTION 'query_string error in trigger function sync_courses_user() when doing INSERT';
                     END IF;
@@ -110,7 +153,13 @@ CREATE FUNCTION public.sync_courses_user() RETURNS trigger
                     -- User update on registration_section
                     -- CASE clause ensures user's rotating section is set NULL when
                     -- registration is updated to NULL.  (e.g. student has dropped)
-                    query_string = 'UPDATE users SET user_group=' || NEW.user_group || ', registration_section=' || quote_nullable(NEW.registration_section) || ', rotating_section=' || CASE WHEN NEW.registration_section IS NULL THEN 'null' ELSE 'rotating_section' END || ', registration_type=' || quote_literal(NEW.registration_type) || ', manual_registration=' || NEW.manual_registration || ' WHERE user_id=' || QUOTE_LITERAL(NEW.user_id);
+                    query_string = 'UPDATE users SET '
+                        || 'user_group=' || NEW.user_group || ', '
+                        || 'registration_section=' || quote_nullable(NEW.registration_section) || ', '
+                        || 'rotating_section=' || CASE WHEN NEW.registration_section IS NULL THEN 'null' ELSE 'rotating_section' END || ', '
+                        || 'registration_type=' || quote_literal(NEW.registration_type) || ', '
+                        || 'manual_registration=' || NEW.manual_registration
+                    || ' WHERE user_id=' || quote_literal(NEW.user_id);
                     IF query_string IS NULL THEN
                         RAISE EXCEPTION 'query_string error in trigger function sync_courses_user() when doing UPDATE';
                     END IF;
@@ -292,7 +341,25 @@ CREATE FUNCTION public.sync_user() RETURNS trigger
             FOR course_row IN SELECT semester, course FROM courses_users WHERE user_id=NEW.user_id LOOP
                 RAISE NOTICE 'Semester: %, Course: %', course_row.semester, course_row.course;
                 db_conn := format('dbname=submitty_%s_%s', course_row.semester, course_row.course);
-                query_string := 'UPDATE users SET user_numeric_id=' || quote_nullable(NEW.user_numeric_id) || ', user_pronouns=' || quote_literal(NEW.user_pronouns) || ', user_givenname=' || quote_literal(NEW.user_givenname) || ', user_preferred_givenname=' || quote_nullable(NEW.user_preferred_givenname) || ', user_familyname=' || quote_literal(NEW.user_familyname) || ', user_preferred_familyname=' || quote_nullable(NEW.user_preferred_familyname) || ', user_last_initial_format=' || quote_literal(NEW.user_last_initial_format) || ', user_email=' || quote_literal(NEW.user_email) || ', user_email_secondary=' || quote_literal(NEW.user_email_secondary) || ',user_email_secondary_notify=' || quote_literal(NEW.user_email_secondary_notify) || ', time_zone=' || quote_literal(NEW.time_zone)  || ', display_image_state=' || quote_literal(NEW.display_image_state)  || ', user_updated=' || quote_literal(NEW.user_updated) || ', instructor_updated=' || quote_literal(NEW.instructor_updated) || ' WHERE user_id=' || quote_literal(NEW.user_id);
+                query_string := 'UPDATE users SET '
+                    || 'user_numeric_id=' || quote_nullable(NEW.user_numeric_id) || ', '
+                    || 'user_pronouns=' || quote_literal(NEW.user_pronouns) || ', '
+                    || 'display_pronouns=' || quote_literal(NEW.display_pronouns) || ', '
+                    || 'user_givenname=' || quote_literal(NEW.user_givenname) || ', '
+                    || 'user_preferred_givenname=' || quote_nullable(NEW.user_preferred_givenname) || ', '
+                    || 'user_familyname=' || quote_literal(NEW.user_familyname) || ', '
+                    || 'user_preferred_familyname=' || quote_nullable(NEW.user_preferred_familyname) || ', '
+                    || 'user_last_initial_format=' || quote_literal(NEW.user_last_initial_format) || ', '
+                    || 'user_email=' || quote_literal(NEW.user_email) || ', '
+                    || 'user_email_secondary=' || quote_literal(NEW.user_email_secondary) || ', '
+                    || 'user_email_secondary_notify=' || quote_literal(NEW.user_email_secondary_notify) || ', '
+                    || 'time_zone=' || quote_literal(NEW.time_zone) || ', '
+                    || 'user_preferred_locale=' || quote_nullable(NEW.user_preferred_locale) || ', '
+                    || 'display_image_state=' || quote_literal(NEW.display_image_state) || ', '
+                    || 'display_name_order=' || quote_literal(NEW.display_name_order)  || ', '
+                    || 'user_updated=' || quote_literal(NEW.user_updated) || ', '
+                    || 'instructor_updated=' || quote_literal(NEW.instructor_updated)
+                || ' WHERE user_id=' || quote_literal(NEW.user_id);
                 -- Need to make sure that query_string was set properly as dblink_exec will happily take a null and then do nothing
                 IF query_string IS NULL THEN
                     RAISE EXCEPTION 'query_string error in trigger function sync_user()';
@@ -467,7 +534,11 @@ CREATE TABLE public.sessions (
     session_id character varying(255) NOT NULL,
     user_id character varying(255) NOT NULL,
     csrf_token character varying(255) NOT NULL,
-    session_expires timestamp(6) with time zone NOT NULL
+    session_expires timestamp(0) with time zone NOT NULL,
+    session_created timestamp(0) with time zone DEFAULT NULL::timestamp with time zone,
+    browser_name character varying(50) DEFAULT 'Unknown'::character varying,
+    browser_version character varying(15) DEFAULT ''::character varying,
+    platform character varying(50) DEFAULT 'Unknown'::character varying
 );
 
 
@@ -509,6 +580,10 @@ CREATE TABLE public.users (
     user_email_secondary_notify boolean DEFAULT false,
     user_pronouns character varying(255) DEFAULT ''::character varying,
     user_last_initial_format integer DEFAULT 0 NOT NULL,
+    enforce_single_session boolean DEFAULT false,
+    display_name_order character varying(255) DEFAULT 'GIVEN_F'::character varying NOT NULL,
+    display_pronouns boolean DEFAULT false,
+    user_preferred_locale character varying,
     CONSTRAINT users_user_access_level_check CHECK (((user_access_level >= 1) AND (user_access_level <= 3))),
     CONSTRAINT users_user_last_initial_format_check CHECK (((user_last_initial_format >= 0) AND (user_last_initial_format <= 3)))
 );

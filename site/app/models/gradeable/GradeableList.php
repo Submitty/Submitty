@@ -33,7 +33,8 @@ class GradeableList extends AbstractModel {
     const GRADING = 4;
     const GRADED  = 5;
 
-    /** @prop @var User */
+    /** @prop
+     * @var User */
     protected $user;
 
     /**
@@ -46,17 +47,23 @@ class GradeableList extends AbstractModel {
      * All elements of $this->gradeables should fall into one of the following six lists. There should
      * be no overlap between them.
      */
-    /** @prop @var \app\models\gradeable\Gradeable[] These are gradeables which are only viewable by admin users */
+    /** @prop
+     * @var \app\models\gradeable\Gradeable[] These are gradeables which are only viewable by admin users */
     protected $future_gradeables = [];
-    /** @prop @var \app\models\gradeable\Gradeable[] These are gradeables which are only viewable by admin & TA users */
+    /** @prop
+     * @var \app\models\gradeable\Gradeable[] These are gradeables which are only viewable by admin & TA users */
     protected $beta_gradeables = [];
-    /** @prop @var \app\models\gradeable\Gradeable[] */
+    /** @prop
+     * @var \app\models\gradeable\Gradeable[] */
     protected $open_gradeables = [];
-    /** @prop @var \app\models\gradeable\Gradeable[] */
+    /** @prop
+     * @var \app\models\gradeable\Gradeable[] */
     protected $closed_gradeables = [];
-    /** @prop @var \app\models\gradeable\Gradeable[] */
+    /** @prop
+     * @var \app\models\gradeable\Gradeable[] */
     protected $grading_gradeables = [];
-    /** @prop @var \app\models\gradeable\Gradeable[] */
+    /** @prop
+     * @var \app\models\gradeable\Gradeable[] */
     protected $graded_gradeables = [];
 
     /**

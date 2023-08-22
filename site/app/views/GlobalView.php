@@ -17,23 +17,24 @@ class GlobalView extends AbstractView {
             }
         }
 
-        $course_name = ucwords(strtolower($this->core->getFullCourseName()));
-        // We assume that if there is no page breadcrumb (only course), we are on gradeables
-        if ($course_name == ucwords(strtolower($page_name))) {
-            $page_name = "Gradeables";
-        }
-
         $page_title = "Submitty";
         if ($this->core->getUser() === null) {
             $page_title = "Login";
         }
         elseif ($this->core->getConfig()->isCourseLoaded()) {
+            $course_name = ucwords(strtolower($this->core->getFullCourseName()));
+            // We assume that if there is no page breadcrumb (only course), we are on gradeables
+            if ($course_name === ucwords(strtolower($page_name))) {
+                $page_name = "Gradeables";
+            }
             $page_title = $page_name . " - " . $course_name;
         }
         elseif (!empty($page_name) && $page_name !== "Submitty") {
             // $page_name !== "Submitty" is needed so we dont end up with pages with the title "Submitty Submitty"
             $page_title = $page_name;
         }
+
+        $html_lang = str_replace('_', '-', $this->core->getConfig()->getLocale()->getName());
 
         return $this->core->getOutput()->renderTwigTemplate("GlobalHeader.twig", [
             "messages" => $messages,
@@ -58,7 +59,8 @@ class GlobalView extends AbstractView {
             "collapse_sidebar" => array_key_exists('collapse_sidebar', $_COOKIE) && $_COOKIE['collapse_sidebar'] === 'true',
             "content_only" => $content_only,
             "manifast_path" => $this->core->getOutput()->getManifastPath(),
-            "service_worker_path" => $this->core->getOutput()->getServiceWorkerPath()
+            "service_worker_path" => $this->core->getOutput()->getServiceWorkerPath(),
+            "html_lang" => $html_lang
         ]);
     }
 

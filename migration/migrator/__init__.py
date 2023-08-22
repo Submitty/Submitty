@@ -6,6 +6,7 @@ from pathlib import Path
 VERSION = "2.1.0"
 DIR_PATH = Path(__file__).parent.resolve()
 MIGRATIONS_PATH = DIR_PATH / 'migrations'
+TRIGGERS_PATH = DIR_PATH / 'triggers'
 ENVIRONMENTS = ['master', 'system', 'course']
 
 
@@ -17,6 +18,11 @@ def get_dir_path():
 def get_migrations_path():
     """Return the set migration path."""
     return MIGRATIONS_PATH
+
+
+def get_triggers_path():
+    """Return the set triggers path."""
+    return TRIGGERS_PATH
 
 
 def get_all_environments():
