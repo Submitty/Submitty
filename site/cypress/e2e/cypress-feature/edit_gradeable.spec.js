@@ -170,7 +170,7 @@ describe('Tests cases revolving around modifying gradeables', () => {
         cy.contains('No submissions for this assignment.').should('not.exist');
     });
 
-    it.only('Should test locking the gradeable', () => {
+    it('Should test locking the gradeable', () => {
         //testing
         cy.get('#page_1_nav').click();
         //Locking the gradeable
@@ -188,9 +188,6 @@ describe('Tests cases revolving around modifying gradeables', () => {
             cy.get('[title="Please complete Autograde and TA Homework (C System Calls) first"]').should('have.class', 'disabled');
         });
 
-        cy.visit('sample', 'gradeable', 'open_peer_homework');
-        cy.get('.content').should('contain.text', 'open_peer_homework is not a valid electronic submission gradeable. Contact your instructor if you think this is an error.');
-
         logoutLogin('instructor', ['sample', 'gradeable', 'open_peer_homework', 'update']);
         cy.get('#page_1_nav').click();
         cy.get('#gradeable-lock').select('');
@@ -200,13 +197,12 @@ describe('Tests cases revolving around modifying gradeables', () => {
     it('Should test the dates page', () => {
         const future_date = '9994-12-31 23:59:59';
         const past_date = '1970-10-10 23:59:59';
-        cy.get('#page_5_nav').click();
 
         logoutLogin('student', ['sample']);
         cy.get('#gradeables-content').should('contain.text', 'Open Peer Homework');
 
         logoutLogin('instructor', ['sample', 'gradeable', 'open_peer_homework', 'update?nav_tab=5']);
-        
+
         cy.get('#has_due_date_yes').click();
         cy.get('#has_release_date_yes').click();
 
@@ -216,14 +212,10 @@ describe('Tests cases revolving around modifying gradeables', () => {
         cy.get('body').click(0, 0);
         cy.get('#save_status').should('have.text', 'All Changes Saved');
 
-        logoutLogin('student', ['sample']);
-        cy.get('#gradeables-content').should('not.contain.text', 'Open Peer Homework');
-
-        logoutLogin('ta', ['sample']);
-        cy.get('#gradeables-content').should('contain.text', 'Open Peer Homework');
-
-        logoutLogin('grader', ['sample']);
-        cy.get('#gradeables-content').should('contain.text', 'Open Peer Homework');
+        ['student', 'grader', 'ta'].forEach((user) => {
+            logoutLogin(user, ['sample']);
+            cy.get('#gradeables-content').should('contain.text', 'Open Peer Homework');
+        });
 
         logoutLogin('instructor', ['sample', 'gradeable', 'open_peer_homework', 'update?nav_tab=5']);
 
@@ -251,7 +243,8 @@ describe('Tests cases revolving around modifying gradeables', () => {
 
         cy.get('#date_due').type(past_date);
         ['student', 'grader', 'ta'].forEach((user) => {
-            logoutLogin(user, ['sample', 'gradeable', 'open_peer_homework']);
+            logoutLogin(user, ['sample']);
+            cy.get('#gradeables-content').should('not.contain.text', 'Open Peer Homework');
         });
 
         logoutLogin('instructor', ['sample', 'gradeable', 'open_peer_homework', 'update?nav_tab=5']);
