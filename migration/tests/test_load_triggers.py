@@ -83,7 +83,7 @@ class TestLoadTriggers(unittest.TestCase):
             num_courses = random.randint(3, 9)
             mock_instances = [Mock() for _ in range(0, num_courses+2)]
             mock_instances[0].execute.return_value.all.return_value = [
-                {'semester': 's{}'.format(i), 'course': 'c{}'.format(i)}
+                {'term': 's{}'.format(i), 'course': 'c{}'.format(i)}
                 for i in range(0, num_courses)
             ]
 
@@ -199,11 +199,11 @@ class TestLoadTriggers(unittest.TestCase):
             masterdb = Mock()
             masterdb.execute.return_value.all.return_value = [
                 {
-                    'semester': 'my_semester_1',
+                    'term': 'my_semester_1',
                     'course': 'my_course_1'
                 },
                 {
-                    'semester': 'my_semester_2',
+                    'term': 'my_semester_2',
                     'course': 'my_course_2'
                 }
             ]
