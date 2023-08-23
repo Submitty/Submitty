@@ -370,12 +370,12 @@ mkdir -p "${SUBMITTY_INSTALL_DIR}/site/incremental_build"
 chgrp "${PHP_USER}" "${SUBMITTY_INSTALL_DIR}/site/incremental_build"
 
 echo "Running esbuild"
-chmod a+x ${NODE_FOLDER}/esbuild/bin/esbuild
+chmod a+x ${NODE_FOLDER}/vite/bin/vite.js
 chmod a+x ${NODE_FOLDER}/typescript/bin/tsc
 chmod g+w "${SUBMITTY_INSTALL_DIR}/site/incremental_build"
 chmod -R u+w "${SUBMITTY_INSTALL_DIR}/site/incremental_build"
-su - ${PHP_USER} -c "cd ${SUBMITTY_INSTALL_DIR}/site && npm vite build"
-chmod a-x ${NODE_FOLDER}/esbuild/bin/esbuild
+su - ${PHP_USER} -c "cd ${SUBMITTY_INSTALL_DIR}/site && vite build"
+chmod a-x ${NODE_FOLDER}/vite/bin/vite.js
 chmod a-x ${NODE_FOLDER}/typescript/bin/tsc
 chmod g-w "${SUBMITTY_INSTALL_DIR}/site/incremental_build"
 chmod -R u-w "${SUBMITTY_INSTALL_DIR}/site/incremental_build"
