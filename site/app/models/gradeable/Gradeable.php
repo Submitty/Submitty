@@ -2407,8 +2407,6 @@ class Gradeable extends AbstractModel {
                 FileUtils::joinPaths($install_dir, 'more_autograding_examples/upload_only_100mb/config')],
             ['PROVIDED: bulk scanned pdf exam (200 mb maximum total student file submission)',
                 FileUtils::joinPaths($install_dir, 'more_autograding_examples/pdf_exam/config')],
-            ['PROVIDED: iclicker_upload (for collecting student iclicker IDs)',
-                FileUtils::joinPaths($install_dir, 'more_autograding_examples/iclicker_upload/config')],
             ['PROVIDED: left_right_exam_seating (for collecting student handedness for exam seating assignment)',
                 FileUtils::joinPaths($install_dir, 'more_autograding_examples/left_right_exam_seating/config')],
             ['PROVIDED: test_notes_upload (expects single file, 2 mb maximum, 2-page pdf student submission)',
