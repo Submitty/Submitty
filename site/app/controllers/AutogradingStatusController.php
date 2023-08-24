@@ -83,7 +83,7 @@ class AutogradingStatusController extends AbstractController {
         $course = [];
         $courses_full = $this->core->getQueries()->getInstructorLevelAccessCourse($this->core->getUser()->getId());
         foreach ($courses_full as $row) {
-            $course[] = $row["semester"] . " " . $row["course"];
+            $course[] = $row["term"] . " " . $row["course"];
         }
         foreach ($info["ongoing_job_info"] as &$i) {
             foreach ($i as &$job) {

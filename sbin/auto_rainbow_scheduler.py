@@ -100,7 +100,7 @@ def find_all_unarchived_courses():
     result = db.execute(select([courses_table]).where(courses_table.c.status == 1))
 
     for row in result:
-        semester = row.semester
+        semester = row.term
         course = row.course
         process_course(semester, course)
 
