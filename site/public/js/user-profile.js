@@ -371,6 +371,14 @@ $(document).ready(() => {
         updateSidebarPreference();
         location.reload();
     });
+    if (localStorage.getItem("sidebar_preference")) {
+        if(localStorage.getItem("sidebar_preference") === "automatic") {
+            CollapseSidebarNarrowView();
+        }
+        else {
+            AlwaysExpandSidebar();
+        }
+    }
 
     $('#theme_change_select').change(() => {
         // eslint-disable-next-line no-undef

@@ -12,7 +12,6 @@ document.addEventListener("DOMContentLoaded", function() {
   loadInBreadcrumbLinks();
   adjustBreadcrumbLinks();
 });
-
 function loadInBreadcrumbLinks(){
   mobileHomeLink = mobileHomeLink !== null ? mobileHomeLink : $("#home-button").attr('href');
   desktopHomeLink = desktopHomeLink !== null ? desktopHomeLink : $("#desktop_home_link").attr('href');
@@ -1394,7 +1393,7 @@ $.fn.isInViewport = function() {                                        // jQuer
     return elementTop > viewportTop && elementBottom < viewportBottom;
 };
 
-function checkSidebarCollapse() {
+function CollapseSidebarNarrowView() {
     if ($(document.body).width() < 1150) {
         Cookies.set('collapse_sidebar', 'true', { path: '/' });
         $("aside").toggleClass("collapsed", true);
@@ -1403,6 +1402,11 @@ function checkSidebarCollapse() {
         Cookies.set('collapse_sidebar', 'false', { path: '/' });
         $("aside").toggleClass("collapsed", false);
     }
+}
+
+function AlwaysExpandSidebar() {
+    Cookies.set('collapse_sidebar', 'false', { path: '/' });
+    $("aside").toggleClass("collapsed", false);
 }
 
 function updateTheme(){
@@ -1479,10 +1483,11 @@ $(document).ready(function() {
     if (localStorage.getItem("sidebar_preference")) {
         if(localStorage.getItem("sidebar_preference") === "automatic") {
             $("#sidebar_preference_select").val("automatic");
-            window.addEventListener("resize", checkSidebarCollapse);
+            window.addEventListener("resize", CollapseSidebarNarrowView);
         }
         else {
             $("#sidebar_preference_select").val("manual");
+            window.addEventListener("resize", AlwaysExpandSidebar);
         }
     }
 });
