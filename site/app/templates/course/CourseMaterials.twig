@@ -171,7 +171,6 @@
                 {% if user_group == 1 %}
                     <a class="key_to_click" tabindex="0" onclick='newEditCourseMaterialsFolderForm(this)' data-id="{{ folder_ids[folder_path] }}" data-priority="{{ directory_priorities[folder_path] }}"> <i class="fas fa-pencil-alt black-btn" aria-hidden="true" style="font-size: 16px; margin: 5px;"></i></a>
                     <a class="key_to_click" tabindex="0" onclick='newDeleteCourseMaterialForm("{{ folder_ids[folder_path]  }}", "{{ name }}", "{{ id }}");'> <i class="fas fa-trash" aria-hidden="true" style="font-size: 16px; margin: 5px;"></i></a>
-                    <a class="key_to_click" tabindex="0" onclick='newCourseMaterialCalendarForm("{{ folder_ids[folder_path]  }}", "{{ name }}", "{{ id }}");'> <i class="fas fa-calendar" aria-hidden="true" style="font-size: 16px; margin: 5px;"></i></a>
                     <a onclick='setFolderRelease("{{ folder_path }}","","{{ id }}","{{ folder_ids[folder_path] }}")' class="btn btn-primary key_to_click" tabindex="0">Set Folder Release Date</a>
                 {% endif %}
                 {% if not seen[folder_path] %}
@@ -362,7 +361,6 @@
 {% include 'course/UploadCourseMaterialsForm.twig' with {reg_sections: reg_sections} %}
 {% include 'course/EditCourseMaterialsForm.twig' %}
 {% include 'course/EditCourseMaterialsFolderForm.twig' %}
-{% include 'course/CourseMaterialCalendarForm.twig' %}
 {% include('course/DeleteCourseMaterialForm.twig') %}
 {% include 'course/OverwriteCourseMaterialForm.twig' %}
 {% include('course/SetAllReleaseForm.twig') %}

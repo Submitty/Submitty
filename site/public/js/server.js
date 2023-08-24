@@ -276,6 +276,27 @@ function newUploadCourseMaterialsForm() {
     $('.popup-form').css('display', 'none');
     var form = $("#upload-course-materials-form");
 
+    //Calendar Form
+    const settings_divs = ['#new-cal-gradeable-div', '#new-cal-date-div'];
+    settings_divs.forEach(cur_div => {
+        if (!cur_div.includes($('#new-show-menu').val())) {
+            $(cur_div).css('display','none');
+        }
+        else {
+            $(cur_div).css('display','block');
+        }
+    });
+    $('#new-show-menu').on('change', function () {
+        settings_divs.forEach(cur_div => {
+            if (!cur_div.includes($(this).val())) {
+                $(cur_div).css('display','none');
+            }
+            else {
+                $(cur_div).css('display','block');
+            }
+        });
+    });
+
     $('[name="existing-file-list"]', form).html('');
     $('[name="existing-file-list"]', form).append('<b>'+JSON.stringify(files)+'</b>');
 
@@ -343,6 +364,27 @@ function newEditCourseMaterialsFolderForm(tag) {
             showSections();
         }
     }
+
+    //Calendar Form
+    const settings_divs = ['#folder-cal-gradeable-div', '#folder-cal-date-div'];
+    settings_divs.forEach(cur_div => {
+        if (!cur_div.includes($('#folder-show-menu').val())) {
+            $(cur_div).css('display','none');
+        }
+        else {
+            $(cur_div).css('display','block');
+        }
+    });
+    $('#folder-show-menu').on('change', function () {
+        settings_divs.forEach(cur_div => {
+            if (!cur_div.includes($(this).val())) {
+                $(cur_div).css('display','none');
+            }
+            else {
+                $(cur_div).css('display','block');
+            }
+        });
+    });
 
     $('#material-folder-edit-form', form).attr('data-id', id);
     $('#edit-folder-sort', form).attr('value', dir);
@@ -413,6 +455,27 @@ function newEditCourseMaterialsForm(tag) {
             url_label.css('display', 'none');
         }
     }
+
+    //Course Materials In Calendar Script
+    const settings_divs = ['#cal-gradeable-div', '#cal-date-div'];
+    settings_divs.forEach(cur_div => {
+        if (!cur_div.includes($('#show-menu').val())) {
+            $(cur_div).css('display','none');
+        }
+        else {
+            $(cur_div).css('display','block');
+        }
+    });
+    $('#show-menu').on('change', function () {
+        settings_divs.forEach(cur_div => {
+            if (!cur_div.includes($(this).val())) {
+                $(cur_div).css('display','none');
+            }
+            else {
+                $(cur_div).css('display','block');
+            }
+        });
+    });
 
     editFilePathRecommendations();
 
