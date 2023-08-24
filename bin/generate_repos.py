@@ -145,8 +145,8 @@ connection = engine.connect()
 metadata = MetaData(bind=engine)
 
 courses_table = Table('courses', metadata, autoload=True)
-select = courses_table.select().where(courses_table.c.semester == bindparam('semester')).where(courses_table.c.course == bindparam('course'))
-course = connection.execute(select, semester=args.semester, course=args.course).fetchone()
+select = courses_table.select().where(courses_table.c.term == bindparam('term')).where(courses_table.c.course == bindparam('course'))
+course = connection.execute(select, term=args.semester, course=args.course).fetchone()
 
 if course is None:
     raise SystemExit("Semester '{}' and Course '{}' not found".format(args.semester, args.course))
@@ -231,8 +231,8 @@ if is_team:
 
 else:
     users_table = Table('courses_users', metadata, autoload=True)
-    select = users_table.select().where(users_table.c.semester == bindparam('semester')).where(users_table.c.course == bindparam('course')).order_by(users_table.c.user_id)
-    users = connection.execute(select, semester=args.semester, course=args.course)
+    select = users_table.select().where(users_table.c.term == bindparam('term')).where(users_table.c.course == bindparam('course')).order_by(users_table.c.user_id)
+    users = connection.execute(select, term=args.semester, course=args.course)
 
     for user in users:
         create_or_update_repo(os.path.join(vcs_course, args.repo_name, user.user_id), subdirectory, course_git_autograding_branch)
