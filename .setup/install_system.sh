@@ -346,6 +346,7 @@ gitconfig_path="/home/${DAEMON_USER}/.gitconfig"
 gitconfig_content="[safe]
     directory = ${RAINBOWGRADES_REPOSITORY}"
 echo "$gitconfig_content" > "$gitconfig_path"
+sudo chown "${DAEMON_USER}:${DAEMON_USER}" "$gitconfig_path"
 
 usermod -a -G docker "${DAEMON_USER}"
 
