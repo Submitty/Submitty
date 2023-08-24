@@ -1393,7 +1393,7 @@ $.fn.isInViewport = function() {                                        // jQuer
     return elementTop > viewportTop && elementBottom < viewportBottom;
 };
 
-function CollapseSidebarNarrowView() {
+function CollapseSidebarOnNarrowView() {
     if ($(document.body).width() < 1150) {
         Cookies.set('collapse_sidebar', 'true', { path: '/' });
         $("aside").toggleClass("collapsed", true);
@@ -1404,7 +1404,7 @@ function CollapseSidebarNarrowView() {
     }
 }
 
-function AlwaysExpandSidebar() {
+function DisableAutomaticCollapse() {
     Cookies.set('collapse_sidebar', 'false', { path: '/' });
     $("aside").toggleClass("collapsed", false);
 }
@@ -1450,9 +1450,9 @@ $(document).ready(function() {
 
 
 function updateSidebarPreference() {
-    let collapse_preference = $("#sidebar_preference_select option:selected").val();
+    let collapse_preference = $("#desktop_sidebar_preference option:selected").val();
     // Update local storage with the selected preference
-    localStorage.setItem("sidebar_preference", collapse_preference);
+    localStorage.setItem("desktop-sidebar-preference", collapse_preference);
 }
 
 //Called from the DOM collapse button, toggle collapsed and save to localStorage
@@ -1480,14 +1480,14 @@ $(document).ready(function() {
         }
     });
 
-    if (localStorage.getItem("sidebar_preference")) {
-        if(localStorage.getItem("sidebar_preference") === "automatic") {
-            $("#sidebar_preference_select").val("automatic");
-            window.addEventListener("resize", CollapseSidebarNarrowView);
+    if (localStorage.getItem("desktop-sidebar-preference")) {
+        if(localStorage.getItem("desktop-sidebar-preference") === "automatic") {
+            $("#desktop_sidebar_preference").val("automatic");
+            window.addEventListener("resize", CollapseSidebarOnNarrowView);
         }
         else {
-            $("#sidebar_preference_select").val("manual");
-            window.addEventListener("resize", AlwaysExpandSidebar);
+            $("#desktop_sidebar_preference").val("manual");
+            window.addEventListener("resize", DisableAutomaticCollapse);
         }
     }
 });

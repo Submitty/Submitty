@@ -366,17 +366,17 @@ function previewUserLastInitialFormat() {
 
 $(document).ready(() => {
 
-    $('#sidebar_preference_select').change(() => {
+    $('#desktop_sidebar_preference').change(() => {
         // eslint-disable-next-line no-undef
         updateSidebarPreference();
         location.reload();
     });
-    if (localStorage.getItem("sidebar_preference")) {
-        if(localStorage.getItem("sidebar_preference") === "automatic") {
-            CollapseSidebarNarrowView();
+    if (localStorage.getItem("desktop-sidebar-preference")) {
+        if(localStorage.getItem("desktop-sidebar-preference") === "automatic") {
+            CollapseSidebarOnNarrowView();
         }
         else {
-            AlwaysExpandSidebar();
+            DisableAutomaticCollapse();
         }
     }
 
