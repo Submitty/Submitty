@@ -63,10 +63,10 @@ def main():
     if registration_section and not registration_section.isdigit():
         registration_section = None
     select = courses_table.select().where(and_(
-        courses_table.c.semester == bindparam('semester'),
+        courses_table.c.term == bindparam('term'),
         courses_table.c.course == bindparam('course')
     ))
-    row = connection.execute(select, semester=semester, course=course).fetchone()
+    row = connection.execute(select, term=semester, course=course).fetchone()
     # course does not exist, so just skip this argument
     if row is None:
         print("Course does not exist.", file=sys.stderr)
@@ -75,14 +75,14 @@ def main():
     courses_u_table = Table('courses_users', metadata, autoload=True)
     select = courses_u_table.select().where(and_(
         and_(
-            courses_u_table.c.semester == bindparam('semester'),
+            courses_u_table.c.term == bindparam('term'),
             courses_u_table.c.course == bindparam('course')
         ),
         courses_u_table.c.user_id == bindparam('user_id')
     ))
     row = connection.execute(
         select,
-        semester=semester,
+        term=semester,
         course=course,
         user_id=user_id
     ).fetchone()
@@ -92,7 +92,7 @@ def main():
         connection.execute(
             query,
             user_id=user_id,
-            semester=semester,
+            term=semester,
             course=course,
             user_group=1,
             registration_section=registration_section
