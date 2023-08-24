@@ -5503,6 +5503,7 @@ AND gc_id IN (
                 SELECT gid.gc_id
                 FROM grade_inquiry_discussion gid
                 WHERE grade_inquiries.id = gid.grade_inquiry_id
+                LIMIT 1
             )
             WHERE
                 grade_inquiries.gc_id IS NULL
