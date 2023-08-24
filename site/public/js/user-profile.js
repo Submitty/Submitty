@@ -371,11 +371,13 @@ $(document).ready(() => {
         updateSidebarPreference();
         location.reload();
     });
-    if (localStorage.getItem("desktop-sidebar-preference")) {
-        if(localStorage.getItem("desktop-sidebar-preference") === "automatic") {
+    if (localStorage.getItem('desktop-sidebar-preference')) {
+        if (localStorage.getItem('desktop-sidebar-preference') === 'automatic') {
+            // eslint-disable-next-line no-undef
             CollapseSidebarOnNarrowView();
         }
         else {
+            // eslint-disable-next-line no-undef
             DisableAutomaticCollapse();
         }
     }
