@@ -26,7 +26,6 @@
             </div>
             <div id="save_status_log"></div>
         </div>
-
         <div id="list_wrapper">
             <div id="display" class="customization_item">
                 <fieldset>
@@ -35,13 +34,13 @@
                         {% set counter = 0 %}
                         {% for display_option in display %}
                             {% set description = display_description[counter] %}
-                            <p>
+                            <div style="display: table;">
                                 <input type="checkbox" id="display_{{ display_option.id }}" name="display" value="{{ display_option.id }}"
                                        {% if display_option.isUsed == true %}checked{% endif %}
                                 >
-                                <label  style="margin-right: 50px; display: inline-block; width: 100px;" for="display_{{ display_option.id }}">{{ display_option.id }}</label>
-                                <span style="margin-right: 10px; display: inline-block;"><em>{{ description | raw }}</em></span>
-                            </p>
+                                <label style="display: table-cell; width: 150px;" for="display_{{ display_option.id }}">{{ display_option.id }}</label>
+                                <span style=" display: table-cell;"><em>{{ description | raw }}</em></span>
+                            </div>
                             {% set counter = counter + 1 %}
                         {% endfor %}
                     </div>

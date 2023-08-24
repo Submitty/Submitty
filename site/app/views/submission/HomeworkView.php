@@ -1096,7 +1096,7 @@ class HomeworkView extends AbstractView {
 
         $param = array_merge($param, [
             'failed_file' => $failed_file,
-            'file_length' => $file_count,
+            'file_count' => $file_count,
             'gradeable_id' => $gradeable->getId(),
             'student_download' => !$gradeable->isVcs() && $gradeable->canStudentDownload(),
             'hide_test_details' => $gradeable->getAutogradingConfig()->getHideTestDetails(),

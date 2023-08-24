@@ -44,15 +44,15 @@ def main():
     submitty_metadata = MetaData(bind=submitty_engine)
     email_table = Table('emails', submitty_metadata, autoload=True)
 
-    courses = list(submitty_conn.execute("SELECT semester, course FROM courses"))
+    courses = list(submitty_conn.execute("SELECT term, course FROM courses"))
     users = {}
 
     for course in courses:
-        users[course.course + ' ' + course.semester] = list(submitty_conn.execute(
+        users[course.course + ' ' + course.term] = list(submitty_conn.execute(
             "SELECT DISTINCT users.user_id, users.user_email FROM users INNER JOIN courses_users\
             ON courses_users.user_id = users.user_id\
-            WHERE courses_users.semester = '{}'\
-            AND courses_users.course = '{}'".format(course.semester, course.course)))
+            WHERE courses_users.term = '{}'\
+            AND courses_users.course = '{}'".format(course.term, course.course)))
     users["superuser"] = list(submitty_conn.execute(
         "SELECT DISTINCT user_id, user_email FROM users")
     )
@@ -75,13 +75,13 @@ def main():
                     body=email["body"],
                     created=email["created"],
                     email_address=email["email_address"],
-                    semester=email["semester"],
+                    term=email["term"],
                     course=email["course"]
                 )
         # course email
         else:
             course = courses[course_selected]
-            emails = generateRandomCourseEmail(users[course.course + ' ' + course.semester], course)
+            emails = generateRandomCourseEmail(users[course.course + ' ' + course.term], course)
             for email in emails:
                 submitty_conn.execute(
                     email_table.insert(),
@@ -90,7 +90,7 @@ def main():
                     body=email["body"],
                     created=email["created"],
                     email_address=email["email_address"],
-                    semester=email["semester"],
+                    term=email["term"],
                     course=email["course"]
                 )
 
@@ -110,7 +110,7 @@ def generateRandomSuperuserEmail(recipients):
                 "body": body,
                 "created": now,
                 "email_address": recipient.user_email,
-                "semester": None,
+                "term": None,
                 "course": None
             }
         )
@@ -132,7 +132,7 @@ def generateRandomCourseEmail(recipients, course):
                 "body": body,
                 "created": now,
                 "email_address": recipient.user_email,
-                "semester": course.semester,
+                "term": course.term,
                 "course": course.course
             }
         )
