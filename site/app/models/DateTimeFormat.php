@@ -24,13 +24,13 @@ class DateTimeFormat extends AbstractModel {
     // Internationalized DateTime formatting strings
     const DATE_FORMATS = [
         'MDY' => [
-            'gradeable' => 'm/d/Y @ h:i A T',
-            'gradeable_with_seconds' => 'm/d/Y @ h:i:s A T',
+            'gradeable' => 'd/m/Y @ h:i A T',
+            'gradeable_with_seconds' => 'd/m/Y @ h:i:s A T',
             'forum' => 'n/j g:i A',
             'notification' => 'n/j g:i A',
             'solution_ta_notes' => 'j/n g:i A',
             'office_hours_queue' => 'g:i A',
-            'date_time_picker' => 'Y-m-d H:i:s',
+            'date_time_picker' => 'd-m-Y H:i:s',
             'late_days_allowed' => 'm/d/Y'
         ],
         'DMY' => [
@@ -40,8 +40,8 @@ class DateTimeFormat extends AbstractModel {
             'notification' => 'j/n g:i A',
             'solution_ta_notes' => 'j/n g:i A',
             'office_hours_queue' => 'g:i A',
-            'date_time_picker' => 'Y-m-d H:i:s',
-            'late_days_allowed' => 'm/d/Y h:i:s A T'
+            'date_time_picker' => 'd-m-Y H:i:s',
+            'late_days_allowed' => 'd/m/Y h:i:s A T'
         ]
     ];
 
