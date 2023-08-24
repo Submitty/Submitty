@@ -42,7 +42,7 @@ class Course extends AbstractModel {
     public function __construct(Core $core, $details) {
         parent::__construct($core);
 
-        $this->term = $details['semester'];
+        $this->term = $details['term'];
         $this->term_name = $details['term_name'];
         $this->title = $details['course'];
         $this->display_name = "";
