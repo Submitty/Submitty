@@ -157,7 +157,9 @@ class CourseMaterialsView extends AbstractView {
             "course_materials" => $final_structure,
             "folder_ids" => $folder_ids,
             "links" => $links,
-            "folder_paths" => $folder_paths
+            "folder_paths" => $folder_paths,
+            "gradeables" => $this->core->getQueries()->getAllElectronicGradeablesIds(),
+            "current_gradeable" => null,
         ]);
     }
 

@@ -68,7 +68,9 @@
     </div>
     <hr>
     {% include "course/CourseMaterialsCalendarMenu.twig" with {
-        "div_class": 'edit-cm-folder-cal-menu'
+        "div_class": 'edit-cm-folder-cal-menu',
+        "gradeables" : gradeables,
+        "current_gradeable" : current_gradeable,
     } only %}
     <script>
         function submitFolderEdit(fullUpdate){ // Submit button
