@@ -55,16 +55,18 @@ describe('Tests cases revolving around modifying gradeables', () => {
         beVisible(['#no_grade_inquiry_per_component_allowed'], ['#gi_component_enable_container']);
         notBeVisible(['#no_discussion'], ['.discussion_id_wrapper']);
 
-
         notBeVisible(['#page_1_nav', '#no_student_view'], ['#student_download_view', '#student_submit_view']);
         beVisible(['#no_student_view_after_grades'], ['#student_download_view', '#student_submit_view']);
-
 
         beVisible(['#yes_student_download'], ['#student_download_view']);
         beVisible(['#no_student_download'], ['#student_download_view']);
 
         beVisible(['#yes_student_submit'], ['#student_submit_view']);
         beVisible(['#no_student_submit'], ['#student_submit_view']);
+        // This can be removed once the datepicker bug gets fixed,
+        // submission date cannot be changed sometimes when this is set to no.
+        beVisible(['#yes_student_submit'], ['#student_submit_view']);
+
         notBeVisible(['#no_student_view'], ['#student_download_view', '#student_submit_view']);
 
         cy.get('#gradeable-lock').contains('Select prerequisite gradeable (Off)');
