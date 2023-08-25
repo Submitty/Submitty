@@ -145,8 +145,8 @@ class CalendarController extends AbstractController {
         $instructor_courses = $this->core->getQueries()->getInstructorLevelUnarchivedCourses($this->core->getUser()->getId());
         $exists = false;
         foreach ($instructor_courses as $course) {
-            if ($set_course === ($course['semester'] . ' ' . $course['course'])) {
-                $this->core->loadCourseConfig($course['semester'], $course['course']);
+            if ($set_course === ($course['term'] . ' ' . $course['course'])) {
+                $this->core->loadCourseConfig($course['term'], $course['course']);
                 $this->core->loadCourseDatabase();
                 $this->core->getCourseEntityManager()->persist($calendar_item);
                 $this->core->getCourseEntityManager()->flush();
@@ -221,8 +221,8 @@ class CalendarController extends AbstractController {
         $instructor_courses = $this->core->getQueries()->getInstructorLevelUnarchivedCourses($this->core->getUser()->getId());
 
         foreach ($instructor_courses as $course) {
-            if (($semester === $course['semester']) && ($InputCourse === $course['course'])) {
-                $this->core->loadCourseConfig($course['semester'], $course['course']);
+            if (($semester === $course['term']) && ($InputCourse === $course['course'])) {
+                $this->core->loadCourseConfig($course['term'], $course['course']);
                 $this->core->loadCourseDatabase();
                 $calendar_item = $this->core->getCourseEntityManager()->getRepository(CalendarItem::class)
                     ->findOneBy(['id' => $id]);
@@ -275,7 +275,7 @@ class CalendarController extends AbstractController {
         $instructor_courses = $this->core->getQueries()->getInstructorLevelUnarchivedCourses($this->core->getUser()->getId());
         $exists = false;
         foreach ($instructor_courses as $currCourse) {
-            if ($currCourse['semester'] === $semester && $currCourse['course'] === $course) {
+            if ($currCourse['term'] === $semester && $currCourse['course'] === $course) {
                 $exists = true;
                 break;
             }
