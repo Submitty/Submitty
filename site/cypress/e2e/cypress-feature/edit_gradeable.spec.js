@@ -204,14 +204,14 @@ describe('Tests cases revolving around modifying gradeables', () => {
 
     });
 
-    it.only('Should test the dates page', () => {
+    it('Should test the dates page', () => {
         const future_date = '9994-12-31 23:59:59';
         const past_date = '1970-10-10 23:59:59';
 
         cy.get('#page_5_nav').click();
+
         updateDates('#date_ta_view', past_date, 'All Changes Saved');
         updateDates('#date_submit', past_date, 'All Changes Saved');
-
         // Should start out as viewable by student
         logoutLogin('student', ['sample']);
         cy.get('#gradeables-content').should('contain.text', 'Open Peer Homework');
@@ -250,8 +250,6 @@ describe('Tests cases revolving around modifying gradeables', () => {
 
         logoutLogin('instructor', ['sample', 'gradeable', 'open_peer_homework', 'update?nav_tab=5']);
 
-        updateDates('#date_submit', future_date, 'All Changes Saved');
-
         // This should not be allowed, its before the submission open date
         updateDates('#date_due', past_date, 'Some Changes Failed!');
         // Reset to old date
@@ -265,7 +263,7 @@ describe('Tests cases revolving around modifying gradeables', () => {
         // This should not be allowed, its before the due date
         updateDates('#date_grade_due', past_date, 'Some Changes Failed!');
         // Reset to valid date
-        updateDates('#date_grade_due', future_date, 'Some Changes Failed!');
+        updateDates('#date_grade_due', future_date, 'All Changes Saved');
 
         // Should all be allowed
         updateDates('#date_ta_view', past_date, 'All Changes Saved');
