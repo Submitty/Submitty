@@ -19,8 +19,45 @@
 </div>
 <script>
     flatpickr('.date_picker', {
+            plugins: [ShortcutButtonsPlugin(
+                        {
+                            button: [
+                                {
+                                    label: "Beginning of time"
+                                },
+                                {
+                                    label: "Now"
+                                },
+                                {
+                                    label: "Tomorrow"
+                                },
+                                {
+                                    label: "End of time"
+                                }
+                            ],
+                            onClick: (index, fp) => {
+                                let date;
+                                switch (index) {
+                                    case 0:
+                                        date = new Date("1001-01-01 00:00:00");
+                                        break;
+                                    case 1:
+                                        date = new Date();
+                                        break;
+                                    case 2:
+                                        date = new Date();
+                                        date.setDate(date.getDate() + 1);
+                                        break;
+                                    case 3:
+                                        date = new Date("9998-01-01 00:00:00");
+                                        break;
+                                }
+                                fp.setDate(date);
+                            }
+                        }
+                    )],
             allowInput: true,
-            dateFormat: "Y-m-d",
+            dateFormat: "Y-m-d H:i:S",
             onReady: (a, b, fp) => {
                 fp.calendarContainer.firstChild.childNodes[1].firstChild.firstChild.setAttribute('aria-label', 'Month');
             }
