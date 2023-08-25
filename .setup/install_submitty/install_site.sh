@@ -38,11 +38,11 @@ set_permissions () {
     esac
 }
 
-set_mjs_permission () {
+set_js_permission () {
     for file in $1/*; do
         if [ -d "$file" ]; then
             chmod 551 $file
-            set_mjs_permission $file
+            set_js_permission $file
         else
             set_permissions $file
         fi
@@ -177,6 +177,9 @@ fi
 # create output dir for esbuild
 mkdir -p ${SUBMITTY_INSTALL_DIR}/site/public/mjs
 
+# create output dir for vite
+mkdir -p ${SUBMITTY_INSTALL_DIR}/site/public/vite_js
+
 # Update ownership to PHP_USER for affected files and folders
 chown ${PHP_USER}:${PHP_GROUP} ${SUBMITTY_INSTALL_DIR}/site
 for entry in "${result_array[@]}"; do
@@ -191,6 +194,7 @@ chown -R ${PHP_USER}:${PHP_GROUP} ${SUBMITTY_INSTALL_DIR}/site/cache
 find ${SUBMITTY_INSTALL_DIR}/site/cgi-bin -exec chown ${CGI_USER}:${CGI_GROUP} {} \;
 
 chown ${PHP_USER}:${PHP_GROUP} ${SUBMITTY_INSTALL_DIR}/site/public/mjs
+chown ${PHP_USER}:${PHP_GROUP} ${SUBMITTY_INSTALL_DIR}/site/public/vite_js
 
 # set the mask for composer so that it'll run properly and be able to delete/modify
 # files under it
@@ -381,10 +385,19 @@ chmod g-w "${SUBMITTY_INSTALL_DIR}/site/incremental_build"
 chmod -R u-w "${SUBMITTY_INSTALL_DIR}/site/incremental_build"
 
 chmod 551 ${SUBMITTY_INSTALL_DIR}/site/public/mjs
-set_mjs_permission ${SUBMITTY_INSTALL_DIR}/site/public/mjs
+set_js_permission ${SUBMITTY_INSTALL_DIR}/site/public/mjs
 
 # cache needs to be writable
 find ${SUBMITTY_INSTALL_DIR}/site/cache -type d -exec chmod u+w {} \;
+
+echo "Running vite"
+chmod a+x /usr/lib/node_modules/vite/bin/vite.js
+su - ${PHP_USER} -c "cd ${SUBMITTY_INSTALL_DIR}/site && npm run vite-build"
+
+echo "meow"
+
+chmod 551 ${SUBMITTY_INSTALL_DIR}/site/public/vite_js
+set_js_permission ${SUBMITTY_INSTALL_DIR}/site/public/vite_js
 
 # reload PHP-FPM before we re-enable website, but only if PHP-FPM is actually being used
 # as expected (Travis for example will fail here otherwise).
