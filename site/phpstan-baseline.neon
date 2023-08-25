@@ -940,7 +940,7 @@ parameters:
 				#^Call to deprecated method JsonOnlyResponse\\(\\) of class app\\\\libraries\\\\response\\\\MultiResponse\\:
 				should not be used, just return JsonResponse directly$#
 			"""
-			count: 9
+			count: 10
 			path: app/controllers/admin/ConfigurationController.php
 
 		-
@@ -993,7 +993,7 @@ parameters:
 				#^Call to deprecated method JsonOnlyResponse\\(\\) of class app\\\\libraries\\\\response\\\\MultiResponse\\:
 				should not be used, just return JsonResponse directly$#
 			"""
-			count: 18
+			count: 19
 			path: app/controllers/admin/LateController.php
 
 		-
