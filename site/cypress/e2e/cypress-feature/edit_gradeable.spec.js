@@ -66,7 +66,7 @@ describe('Tests cases revolving around modifying gradeables', () => {
         // This can be removed once the datepicker bug gets fixed,
         // submission date cannot be changed sometimes when this is set to no.
         beVisible(['#yes_student_submit'], ['#student_submit_view']);
-
+        
         notBeVisible(['#no_student_view'], ['#student_download_view', '#student_submit_view']);
 
         cy.get('#gradeable-lock').contains('Select prerequisite gradeable (Off)');
@@ -272,5 +272,10 @@ describe('Tests cases revolving around modifying gradeables', () => {
         updateDates('#date_grade', past_date, 'All Changes Saved');
         updateDates('#date_grade_due', past_date, 'All Changes Saved');
 
+        updateDates('#date_due', future_date, 'All Changes Saved');
+        updateDates('#date_grade', future_date, 'All Changes Saved');
+        updateDates('#date_grade_due', future_date, 'All Changes Saved');
+        updateDates('#date_ta_view', future_date, 'All Changes Saved');
+        updateDates('#date_submit', future_date, 'All Changes Saved');
     });
 });
