@@ -208,9 +208,12 @@ describe('Tests cases revolving around modifying gradeables', () => {
         const future_date = '9994-12-31 23:59:59';
         const past_date = '1970-10-10 23:59:59';
 
+        updateDates('#date_ta_view', past_date, 'All Changes Saved');
+        updateDates('#date_submit', past_date, 'All Changes Saved');
+
         // Should start out as viewable by student
         logoutLogin('student', ['sample']);
-        cy.get('#gradeables-content').should('not.contain.text', 'Open Peer Homework');
+        cy.get('#gradeables-content').should('contain.text', 'Open Peer Homework');
 
         logoutLogin('instructor', ['sample', 'gradeable', 'open_peer_homework', 'update?nav_tab=5']);
 
