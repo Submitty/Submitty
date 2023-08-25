@@ -152,9 +152,9 @@ function displayCloseSubmissionsWarning(form_action,gradeable_name) {
     form.find('.form-body').scrollTop(0);
 }
 
-function newDeleteCourseMaterialForm(id, file_name) {
-    let url = buildCourseUrl(["course_materials", "delete"]) + "?id=" + id;
-    var current_y_offset = window.pageYOffset;
+function newDeleteCourseMaterialForm(id, file_name, str_id = null) {
+    const url = buildCourseUrl(["course_materials", "delete"]) + "?id=" + id;
+    const current_y_offset = window.pageYOffset;
     Cookies.set('jumpToScrollPosition', current_y_offset);
 
     const cm_ids = (Cookies.get('cm_data') || '').split('|').filter(n=>n.length);
@@ -181,8 +181,31 @@ function newDeleteCourseMaterialForm(id, file_name) {
     Cookies.set('cm_data', cm_ids.join('|'));
 
     $('.popup-form').css('display', 'none');
-    var form = $("#delete-course-material-form");
-    $('.delete-course-material-message', form).text(file_name);
+    const form = $("#delete-course-material-form");
+    const deleteMessageElement = form.find('.delete-course-material-message')[0];
+    deleteMessageElement.innerHTML = '';
+
+    const cm_message = document.createElement('b');
+    cm_message.textContent = file_name;
+
+    if (str_id !== null) {
+        const files_or_links = $(`[id^=file_viewer_${str_id}]`);
+        const num_of_links = files_or_links.filter(function () {
+            return (($(this).siblings('.file-viewer').children('a[data-is-link="1"]').length) === 1);
+        }).length;
+        const num_of_files = files_or_links.length - num_of_links;
+        const file_s = (num_of_files > 1) ? 's' : '';
+        const link_s = (num_of_links > 1) ? 's' : '';
+        const num_links_txt = (num_of_links === 0) ? '</em>)' : ` and <b>${num_of_links}</b> link${link_s}</em>)`;
+
+        const emElement = document.createElement('em');
+        emElement.innerHTML = ` (<b>contains ${num_of_files}</b> file${file_s}` + num_links_txt;
+
+        cm_message.appendChild(emElement);
+    }
+
+    deleteMessageElement.appendChild(cm_message);
+
     $('[name="delete-confirmation"]', form).attr('action', url);
     form.css("display", "block");
     captureTabInModal("delete-course-material-form");
@@ -335,9 +358,9 @@ function newEditCourseMaterialsForm(tag) {
     let this_hide_from_students = $(tag).data('hidden-state');
     let release_time = $(tag).data('release-time');
     let is_link = $(tag).data('is-link');
-    let link_title = $(tag).data('link-title');
+    let title = $(tag).data('title');
     let link_url = $(tag).data('link-url');
-
+    let file_path = $(tag).data('path');
     let form = $("#edit-course-materials-form");
 
     let element = document.getElementById("edit-picker");
@@ -370,32 +393,57 @@ function newEditCourseMaterialsForm(tag) {
         $("#all-sections-showing-yes", form).prop('checked',false);
         $("#all-sections-showing-no", form).prop('checked',true);
     }
-    const title_label = $("#edit-url-title-label", form);
+    const title_label = $("#edit-title-label", form);
     const url_label = $("#edit-url-url-label", form);
+    const path = $("#new-file-name");
+    path.val(file_path.substring(1));
+    const titleVal = $("#edit-title");
+    title_label.css('display', 'block');
     if (is_link === 1) {
-        title_label.css('display', 'block');
+        titleVal.val(title.replace('link-',''));
+        path.val(decodeURIComponent(file_path.substring(file_path.indexOf("course_materials/") + 17).replace('link-','')));
         url_label.css('display', 'block');
-        const title = $("#edit-url-title");
-        title.prop('disabled', false);
-        title.val(link_title);
         const url = $("#edit-url-url");
         url.prop('disabled', false);
         url.val(link_url);
     }
     else {
-        if (title_label.css('display') !== 'none') {
-            title_label.css('display', 'none');
-        }
+        titleVal.val(file_path.substring(file_path.lastIndexOf("/") + 1));
         if (url_label.css('display') !== 'none') {
             url_label.css('display', 'none');
         }
     }
+
+    editFilePathRecommendations();
+
     $("#material-edit-form", form).attr('data-id', id);
     $("#edit-picker", form).attr('value', release_time);
     $("#edit-sort", form).attr('value', dir);
     $('#overwrite-materials-flag').remove();
     form.css("display", "block");
     captureTabInModal("edit-course-materials-form");
+}
+
+/**
+ * Edits the suggested options for the Edit Course Materials Popup so that
+ * they use the current file name.
+ */
+function editFilePathRecommendations() {
+    const fileNameInput = $("#edit-title");
+    const fileName = fileNameInput.val();
+
+    // Get options
+    const dataList = $("#change_folder_paths");
+    const optionsArray = dataList.find('option').map(function () {return $(this);}).get();
+
+    optionsArray.forEach((option) => {
+        const optionString = option.val();
+        const lastSlash = optionString.lastIndexOf('/');
+        const currentOptionMinusFile = optionString.substring(0, lastSlash);
+
+        const newOption = `${currentOptionMinusFile}/${fileName}`;
+        option.val(newOption);
+    })
 }
 
 var lastActiveElement = null;
@@ -810,23 +858,6 @@ function openDiv(id) {
     return false;
 }
 
-function openDivForCourseMaterials(num) {
-    var elem = $('#div_viewer_' + num);
-    if (elem.hasClass('open')) {
-        elem.hide();
-        elem.removeClass('open');
-        $($($(elem.parent().children()[0]).children()[0]).children()[0]).removeClass('fa-folder-open').addClass('fa-folder');
-        return 'closed';
-    }
-    else {
-        elem.show();
-        elem.addClass('open');
-        $($($(elem.parent().children()[0]).children()[0]).children()[0]).removeClass('fa-folder').addClass('fa-folder-open');
-        return 'open';
-    }
-    return false;
-}
-
 function markViewed(ids, redirect) {
     let data = new FormData();
     data.append("ids", ids);
@@ -840,36 +871,39 @@ function markViewed(ids, redirect) {
     });
 }
 
-function closeDivForCourseMaterials(num) {
-    var elem = $('#div_viewer_' + num);
-    elem.hide();
-    elem.removeClass('open');
-    $($($(elem.parent().children()[0]).children()[0]).children()[0]).removeClass('fa-folder-open').addClass('fa-folder');
-    return 'closed';
-
-
-}
-function openAllDivForCourseMaterials() {
-    var elem = $("[id ^= 'div_viewer_']");
-    if (elem.hasClass('open')) {
+function toggleCMFolder(id, open) {
+    const elem = $('#div_viewer_' + id);
+    if (typeof open === 'undefined') {
+        open = !elem.hasClass('open');
+    }
+    if (!open) {
         elem.hide();
         elem.removeClass('open');
-        for (let i = 0; i < elem.length; i++) {
-          const ele_each = elem[i];
-          $($($($(ele_each).parent().children()[0]).children()[0]).children()[0]).removeClass('fa-folder-open').addClass('fa-folder');
-        }
-        return 'closed';
+        elem.prev().find('.open-all-folder').removeClass('fa-folder-open').addClass('fa-folder');
+    } else {
+        elem.show();
+        elem.addClass('open');
+        elem.prev().find('.open-all-folder').removeClass('fa-folder').addClass('fa-folder-open');
+    }
+    return open;
+}
+
+function toggleCMFolders(open) {
+    const elem = $('[id^="div_viewer_"]');
+    if (typeof open === 'undefined') {
+        open = !elem.hasClass('open');
+    }
+    if (!open) {
+        elem.hide();
+        elem.removeClass('open');
+        elem.prev().find('.open-all-folder').removeClass('fa-folder-open').addClass('fa-folder');
     }
     else {
         elem.show();
         elem.addClass('open');
-        for (let i = 0; i < elem.length; i++) {
-          const ele_each = elem[i];
-          $($($($(ele_each).parent().children()[0]).children()[0]).children()[0]).removeClass('fa-folder').addClass('fa-folder-open');
-        }
-        return 'open';
+        elem.prev().find('.open-all-folder').removeClass('fa-folder').addClass('fa-folder-open');
     }
-    return false;
+    return open;
 }
 
 function openUrl(url) {
@@ -1265,16 +1299,6 @@ function deleteOverriddenGrades(user_id, g_id) {
     return false;
 }
 
-function toggleRegradeRequests(){
-    var element = document.getElementById("regradeBoxSection");
-    if (element.style.display === 'block') {
-        element.style.display = 'none';
-    }
-    else {
-        element.style.display = 'block';
-    }
-
-}
 /**
   * Taken from: https://stackoverflow.com/questions/1787322/htmlspecialchars-equivalent-in-javascript
   */

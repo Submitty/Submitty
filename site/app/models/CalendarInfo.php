@@ -38,7 +38,7 @@ class CalendarInfo extends AbstractModel {
     /**
      * @see GradeableList for constant integers used as keys
      * @var array<int, array>
-     * the structure of the array is a integer as key, and value
+     * the structure of the array is an integer as key, and value
      * contains an array with a structure of
      * "title"      => string (title shown at the top of the table),
      * "subtitle"   => string (title shown at the top of the table, if any. Can be empty),
@@ -75,9 +75,16 @@ class CalendarInfo extends AbstractModel {
         $i = 1;
         /** @var Course $course */
         foreach ($courses as $course) {
-            $info->colors[$course->getSemester() . $course->getTitle()] = "var(--category-color-$i)";
-            if ($i < 21) {
-                $i++;
+            if (isset($_COOKIE['calendar_color_' . $course->getTitle() . $course->getTerm()])) { //Check if color cookie exists
+                $info->colors[$course->getTerm() . $course->getTitle()] = $_COOKIE['calendar_color_' . $course->getTitle() . $course->getTerm()];
+            }
+            else { //Cookie not set, generate one as default
+                $info->colors[$course->getTerm() . $course->getTitle()] = "var(--category-color-$i)";
+                setcookie('calendar_color_' . $course->getTitle() . $course->getTerm(), "var(--category-color-$i)", time() + 3600);
+                $i = $i + 1;
+                if ($i > 8) {
+                    $i = 1;
+                }
             }
         }
 
@@ -144,14 +151,17 @@ class CalendarInfo extends AbstractModel {
                 $curItem = [
                     'title' => htmlspecialchars($cal_item->getText()),
                     'status' => $cal_item->getTypeString(),
-                    'course' => $course,
+                    'course' => $course->getTitle(),
+                    'semester' => $course->getTerm(),
                     'icon' => '',
                     'url' => '',
                     'show_due' => false,
                     'submission' => '',
                     'status_note' => '',
-                    'color' => $info->colors[$course->getSemester() . $course->getTitle()],
-                    'type' => 'item'
+                    'color' => $info->colors[$course->getTerm() . $course->getTitle()],
+                    'type' => 'item',
+                    'date' => $date,
+                    'id' => $cal_item->getId()
                 ];
                 $info->items_by_date[$date][] = $curItem;
             }
@@ -162,7 +172,17 @@ class CalendarInfo extends AbstractModel {
         return $info;
     }
 
+    /**
+     * @return array<string, array<string,bool|string>>>
+     */
     public function getItemsByDate(): array {
+        return $this->items_by_date;
+    }
+
+    /**
+     * @return array<string, array<string,bool|string>>>
+     */
+    public function getItemsByDateInCourses(): array {
         return $this->items_by_date;
     }
 

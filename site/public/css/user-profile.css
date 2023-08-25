@@ -91,6 +91,12 @@
     margin: 0;
 }
 
+.user-info .tip-note {
+    font-size: 14px;
+    color: var(--standard-medium-blue);
+    display: block;
+}
+
 .flex-row-col label,
 .flex-row-col select {
     flex: 1;
@@ -125,7 +131,7 @@
     color: var(--external-link-blue);
 }
 
-@media (width <= 401px) {
+@media (max-width: 401px) {
     .content {
         margin: 10px 0 0;
     }
@@ -138,8 +144,12 @@
     /* stylelint-enable selector-id-pattern */
 }
 
-@media (width <= 541px) {
+@media (max-width: 541px) {
     .flex-row-col {
         flex-direction: column;
+    }
+
+    #auth-tokens-btn {
+        margin-bottom: 10px;
     }
 }

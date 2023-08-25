@@ -97,7 +97,16 @@
                 {% endif %}
             </div>
         {% endif %}
-
+        {% if (failed_file != '' or (file_count == 0 and not incomplete_autograding)) and is_vcs %}
+        <div id="error-message" class="red-message">
+            <b>Warning: The submitted repository is empty.</b><br/>
+            {% if failed_file != '' %}
+                <b>{{ failed_file|nl2br }}</b>
+            {% else %}
+                If you have made changes to your repository, make sure you commit and push them.
+            {% endif %}
+        </div>
+        {% endif %}
         {% if active_version != 0 or display_version != 0 %}
             {% include 'submission/homework/CurrentVersionResults.twig' %}
         {% endif %}

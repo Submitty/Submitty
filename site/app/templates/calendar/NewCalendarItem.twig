@@ -3,24 +3,23 @@
 {% block title %}New Calendar Item{% endblock %}
 {% block body %}
     <p class="std-margin">
-        Please select the type of item, when it should be, and the text it should display.
+        Please select the course, type of item, when it should be, and the text it should display.
     </p>
-
-    <div class="calendar-submit">
-        <label for="calendar-item-type">Message Type</label>
-        <select id="calendar-item-type" name="type">
-            <option value="note">Note</option>
-            <option value="announcement">Announcement</option>
-            <option value="important">Important</option>
-        </select>
-
-        <label for="edit-picker">Date</label>
-        <input id="edit-picker" class="edit-picker" type="text" name="date">
-
-        <label for="calendar-item-text">Message Text</label>
-        <textarea id="calendar-item-text" name="text" rows="5" cols="64"></textarea>
-    </div>
-    
+    <label for="calendar-course">Course</label>
+    <select id="calendar-course" name="course">
+    {% for one_course in instructor_courses %}
+        <option value="{{ one_course.term ~ ' ' ~ one_course.course }}">{{ one_course.term }} {{ one_course.course }}</option>
+    {% endfor %}
+    </select><br>
+    <label for="calendar-item-type">Message Type</label>
+    <select id="calendar-item-type" name="type">
+        <option value="text">Note</option>
+        <option value="ann">Announcement</option>
+    </select><br>
+    <label for="calendar-item-text">Message Text</label>
+    <input type="text" id="calendar-item-text" name="text"><br>
+    <label for="edit-picker">Date</label>
+    <input id="edit-picker" class="edit-picker" type="text" name="date">
     <input hidden name="csrf_token" value="{{ core.getCsrfToken() }}">
     <script>
         flatpickr('.edit-picker', {
@@ -52,7 +51,7 @@
     </script>
 {% endblock %}
 {% block form %}
-    <form method="post" action="calendar/items/new">
+    <form method="post" action="/calendar/items/new">
         {{ parent() }}
     </form>
 {% endblock %}

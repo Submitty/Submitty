@@ -1,0 +1,53 @@
+{% extends 'generic/Popup.twig' %}
+{% block popup_id %}edit-status-filter-form{% endblock %}
+{% block title %}Edit Stats Filter{% endblock %}
+{% block body %}
+    <p class="std-margin">
+    Modify/Filter output for the student grading statistics
+    </p>
+
+    <table class="table table-striped" style="width:100%;">
+        <thead>
+            <tr>
+                <th scope="col" style="text-align: left;"> Filter </th>
+                <th scope="col">Include?</th>
+            </tr>
+        </thead>
+
+        <tbody>
+            <tr>
+                <td style="text-align: left;">
+                    Include Grade Overrides
+                </td>
+                <td>
+                    <input type="checkbox" class="toggle-filter-checkbox" aria-label="Toggle Include Grade Override" id="toggle-filter-include-grade-override" {% if include_grade_override == 'include' %} checked {% endif %} onclick="filter_overriden_grades()" />
+                </td>
+            </tr>
+
+            <tr>
+                <td style="text-align: left;">
+                    Include Bad Submissions (too many late days used)
+                </td>
+                <td>
+                    <input type="checkbox" class="toggle-filter-checkbox" aria-label="Toggle Include Bad Submissions" id="toggle-filter-include-bad-submissions" {% if include_bad_submissions == 'include' %} checked {% endif %} onclick="filter_bad_grades()" />
+                </td>
+            </tr>
+
+           <tr>
+                <td style="text-align: left;">
+                    Include Null Section
+                </td>
+                <td>
+                    <input type="checkbox" class="toggle-filter-checkbox" aria-label="Toggle Include Null Section" id="toggle-filter-include-null-section" {% if include_null_section == 'include' %} checked {% endif %} onclick="filter_null_section()" />
+                </td>
+            </tr> 
+
+        </tbody>
+    </table>
+{% endblock %}
+{% block buttons %}
+    {{ block('close_button') }}
+    <button class="btn btn-primary" id = "apply_changes" onclick="applyfilters()">
+        Apply
+    </button>
+{% endblock %}

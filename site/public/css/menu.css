@@ -107,7 +107,7 @@
     align-items: center;
 }
 
-@media (width >= 541px) {
+@media (min-width: 541px) {
     #menu-button,
     #mobile-menu,
     #menu-overlay {

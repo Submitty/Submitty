@@ -1477,7 +1477,6 @@ end of styles used in the admin gradeable page
     color: var(--badge-backgroud-red);
 }
 
-.required:placeholder { color: var(--error-alert-dark-red); }
 .required::placeholder { color: var(--error-alert-dark-red); }
 
 /* stylelint-disable-next-line selector-class-pattern */
@@ -1876,7 +1875,7 @@ header > * {
     color: var(--standard-light-medium-gray);
 }
 
-@media (width <= 541px) {
+@media (max-width: 541px) {
     .content {
         padding: 30px 15px;
     }
@@ -1890,7 +1889,7 @@ header > * {
     }
 }
 
-@media (width >= 541px) {
+@media (min-width: 541px) {
     .content {
         margin: 30px;
         max-height: none;
@@ -1901,7 +1900,7 @@ header > * {
     }
 }
 
-@media (width >= 768px) {
+@media (min-width: 768px) {
     .btn-wrapper {
         width: max-content;
     }
