@@ -17,3 +17,12 @@
         <input id="associated-date" class="date_picker flatpickr-input" type="text">
     </div>
 </div>
+<script>
+    flatpickr('.date_picker', {
+            allowInput: true,
+            dateFormat: "Y-m-d",
+            onReady: (a, b, fp) => {
+                fp.calendarContainer.firstChild.childNodes[1].firstChild.firstChild.setAttribute('aria-label', 'Month');
+            }
+        });
+</script>
