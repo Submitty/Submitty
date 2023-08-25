@@ -940,7 +940,7 @@ parameters:
 				#^Call to deprecated method JsonOnlyResponse\\(\\) of class app\\\\libraries\\\\response\\\\MultiResponse\\:
 				should not be used, just return JsonResponse directly$#
 			"""
-			count: 9
+			count: 10
 			path: app/controllers/admin/ConfigurationController.php
 
 		-
@@ -993,7 +993,7 @@ parameters:
 				#^Call to deprecated method JsonOnlyResponse\\(\\) of class app\\\\libraries\\\\response\\\\MultiResponse\\:
 				should not be used, just return JsonResponse directly$#
 			"""
-			count: 18
+			count: 19
 			path: app/controllers/admin/LateController.php
 
 		-
@@ -2771,7 +2771,7 @@ parameters:
 			path: app/entities/email/EmailEntity.php
 
 		-
-			message: "#^Property app\\\\entities\\\\email\\\\EmailEntity\\:\\:\\$semester is never written, only read\\.$#"
+			message: "#^Property app\\\\entities\\\\email\\\\EmailEntity\\:\\:\\$term is never written, only read\\.$#"
 			count: 1
 			path: app/entities/email/EmailEntity.php
 
@@ -10667,6 +10667,11 @@ parameters:
 			path: app/views/AutoGradingView.php
 
 		-
+			message: "#^Method app\\\\views\\\\AutoGradingView\\:\\:convertToAnonPath\\(\\) has parameter \\$gradeable with no type specified\\.$#"
+			count: 1
+			path: app/views/AutoGradingView.php
+			
+		-
 			message: "#^Method app\\\\views\\\\AutoGradingView\\:\\:convertToAnonPath\\(\\) has parameter \\$g_id with no type specified\\.$#"
 			count: 1
 			path: app/views/AutoGradingView.php
@@ -11340,21 +11345,6 @@ parameters:
 			message: "#^Method app\\\\views\\\\admin\\\\GradeableView\\:\\:uploadConfigForm\\(\\) has parameter \\$target_dir with no type specified\\.$#"
 			count: 1
 			path: app/views/admin/GradeableView.php
-
-		-
-			message: "#^Method app\\\\views\\\\admin\\\\LateDayView\\:\\:displayLateDayForesnics\\(\\) has no return type specified\\.$#"
-			count: 1
-			path: app/views/admin/LateDayView.php
-
-		-
-			message: "#^Method app\\\\views\\\\admin\\\\LateDayView\\:\\:displayLateDayForesnics\\(\\) has parameter \\$initial_late_days with no type specified\\.$#"
-			count: 1
-			path: app/views/admin/LateDayView.php
-
-		-
-			message: "#^Method app\\\\views\\\\admin\\\\LateDayView\\:\\:displayLateDayForesnics\\(\\) has parameter \\$students with no type specified\\.$#"
-			count: 1
-			path: app/views/admin/LateDayView.php
 
 		-
 			message: "#^Method app\\\\views\\\\admin\\\\LateDayView\\:\\:displayLateDays\\(\\) has no return type specified\\.$#"
@@ -12133,11 +12123,6 @@ parameters:
 
 		-
 			message: "#^Method app\\\\views\\\\grading\\\\ElectronicGraderView\\:\\:detailsPage\\(\\) has parameter \\$graders with no value type specified in iterable type array\\.$#"
-			count: 1
-			path: app/views/grading/ElectronicGraderView.php
-
-		-
-			message: "#^Method app\\\\views\\\\grading\\\\ElectronicGraderView\\:\\:detailsPage\\(\\) has parameter \\$inquiry_only with no type specified\\.$#"
 			count: 1
 			path: app/views/grading/ElectronicGraderView.php
 
