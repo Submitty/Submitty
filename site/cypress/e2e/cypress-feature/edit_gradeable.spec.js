@@ -30,6 +30,14 @@ describe('Tests cases revolving around modifying gradeables', () => {
         cy.visit(url);
     });
 
+    const updateDates = ((inputSelector, date, saveText) => {
+        cy.get(inputSelector).clear();
+        cy.get(inputSelector).type(date);
+        //clicks out of the calendar
+        cy.get('body').click(0, 0);
+        cy.get('#save_status').should('have.text', saveText);
+    });
+
     it('Should test settings page 0-2', () => {
 
         notBeVisible(['#no_ta_grade'], ['#discussion_grading_enable_container', '#grade_inquiry_enable_container']);
@@ -194,24 +202,22 @@ describe('Tests cases revolving around modifying gradeables', () => {
 
     });
 
-    it('Should test the dates page', () => {
+    it.only('Should test the dates page', () => {
         const future_date = '9994-12-31 23:59:59';
         const past_date = '1970-10-10 23:59:59';
 
+        // Should start out as viewable by student
         logoutLogin('student', ['sample']);
         cy.get('#gradeables-content').should('contain.text', 'Open Peer Homework');
 
         logoutLogin('instructor', ['sample', 'gradeable', 'open_peer_homework', 'update?nav_tab=5']);
 
+        // Select yes due date, and yes release date
         cy.get('#has_due_date_yes').click();
+
         cy.get('#has_release_date_yes').click();
 
-        cy.get('#date_ta_view').clear();
-        cy.get('#date_ta_view').type(past_date);
-
-        cy.get('body').click(0, 0);
-        cy.get('#save_status').should('have.text', 'All Changes Saved');
-
+        // The gradeable should be visible to everyone
         ['student', 'grader', 'ta'].forEach((user) => {
             logoutLogin(user, ['sample']);
             cy.get('#gradeables-content').should('contain.text', 'Open Peer Homework');
@@ -219,68 +225,46 @@ describe('Tests cases revolving around modifying gradeables', () => {
 
         logoutLogin('instructor', ['sample', 'gradeable', 'open_peer_homework', 'update?nav_tab=5']);
 
-        cy.get('#date_ta_view').clear();
-        cy.get('#date_ta_view').type(future_date);
-        //clicks out of the calendar
-        cy.get('body').click(0, 0);
-        cy.get('#save_status').should('have.text', 'All Changes Saved');
+        // This should not be allowed, its after the submission open date
+        updateDates('#date_ta_view', future_date, 'Some Changes Failed!');
+        // Reset to old date
+        updateDates('#date_ta_view', past_date, 'All Changes Saved');
 
-        cy.get('#date_submit').clear();
-        cy.get('#date_submit').type(past_date);
-        cy.get('body').click(0, 0);
-        cy.get('#save_status').should('have.text', 'All Changes Saved');
+        // Make the submit date the future date
+        updateDates('#date_submit', future_date, 'All Changes Saved');
 
-        ['student', 'grader', 'ta'].forEach((user) => {
+        // Gradeable should not be visible to students, but visible to TA and graders
+        ['ta', 'grader'].forEach((user) => {
             logoutLogin(user, ['sample']);
             cy.get('#gradeables-content').should('contain.text', 'Open Peer Homework');
         });
 
-        logoutLogin('instructor', ['sample', 'gradeable', 'open_peer_homework', 'update?nav_tab=5']);
-
-        cy.get('#date_submit').clear();
-        cy.get('#date_submit').type(future_date);
-        cy.get('body').click(0, 0);
-
-        cy.get('#date_due').type(past_date);
-        ['student', 'grader', 'ta'].forEach((user) => {
-            logoutLogin(user, ['sample']);
-            cy.get('#gradeables-content').should('not.contain.text', 'Open Peer Homework');
-        });
+        logoutLogin('student', ['sample']);
+        cy.get('#gradeables-content').should('not.contain.text', 'Open Peer Homework');
 
         logoutLogin('instructor', ['sample', 'gradeable', 'open_peer_homework', 'update?nav_tab=5']);
 
-        cy.get('#date_due').clear();
-        cy.get('#date_due').type(future_date);
-        cy.get('body').click(0, 0);
+        updateDates('#date_submit', future_date, 'All Changes Saved');
 
-        cy.get('#date_grade').clear();
-        cy.get('#date_grade').type(past_date);
-        ['student', 'grader', 'ta'].forEach((user) => {
-            logoutLogin(user, ['sample', 'gradeable', 'open_peer_homework']);
-        });
+        // This should not be allowed, its before the submission open date
+        updateDates('#date_due', past_date, 'Some Changes Failed!');
+        // Reset to old date
+        updateDates('#date_due', future_date, 'All Changes Saved');
 
-        logoutLogin('instructor', ['sample', 'gradeable', 'open_peer_homework', 'update?nav_tab=5']);
+        // This should not be allowed, its before the due date
+        updateDates('#date_grade', past_date, 'Some Changes Failed!');
+        // Reset to valid date
+        updateDates('#date_grade', future_date, 'All Changes Saved');
 
-        cy.get('#date_grade').clear();
-        cy.get('#date_grade').type(future_date);
-        cy.get('body').click(0, 0);
+        // This should not be allowed, its before the due date
+        updateDates('#date_grade_due', past_date, 'Some Changes Failed!');
+        // Reset to valid date
+        updateDates('#date_grade_due', future_date, 'Some Changes Failed!');
 
-        cy.get('#date_grade_due').type(past_date);
-        ['student', 'grader', 'ta'].forEach((user) => {
-            logoutLogin(user, ['sample', 'gradeable', 'open_peer_homework']);
-        });
-
-        logoutLogin('instructor', ['sample', 'gradeable', 'open_peer_homework', 'update?nav_tab=5']);
-
-        cy.get('#date_grade_due').clear();
-        cy.get('#date_grade_due').type(future_date);
-        ['student', 'grader', 'ta'].forEach((user) => {
-            logoutLogin(user, ['sample', 'gradeable', 'open_peer_homework']);
-        });
-
-        logoutLogin('instructor', ['sample', 'gradeable', 'open_peer_homework', 'update?nav_tab=5']);
-
-        cy.get('#date_grade_due').type(past_date);
-
+        // Should all be allowed
+        updateDates('#date_submit', past_date, 'All Changes Saved');
+        updateDates('#date_due', past_date, 'All Changes Saved');
+        updateDates('#date_grade', past_date, 'All Changes Saved');
+        updateDates('#date_grade_due', future_date, 'All Changes Saved');
     });
 });
