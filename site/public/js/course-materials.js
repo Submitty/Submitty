@@ -1,41 +1,27 @@
+const settings_divs = ['#cal-gradeable-div', '#cal-date-div'];
 
-
-
-function newCourseMaterialCalendarForm(id, file_name, str_id = null) {
-    console.log(id);
-    console.log(file_name);
-    console.log(str_id);
-
-    const form = $('#course-material-calendar-form');
-    form.css('display', 'block');
-    
-    const settings_divs = ['#cal-gradeable-div', '#cal-date-div'];
-    settings_divs.forEach(cur_div => {
-        if (!cur_div.includes($('#show-menu').val())) {
-            $(cur_div).css('display','none');
-        }
-        else {
-            $(cur_div).css('display','block');
-        }
-    });
-    $('#show-menu').on('change', function () {
+function setCalendarMenuValues(div_class) {
+    //First sets the proper values
+    $(`.${div_class} #show-menu`).each(function () {
         settings_divs.forEach(cur_div => {
             if (!cur_div.includes($(this).val())) {
-                $(cur_div).css('display','none');
+                $(`.${div_class} ${cur_div}`).css('display','none');
             }
             else {
-                $(cur_div).css('display','block');
+                $(`.${div_class} ${cur_div}`).css('display','block');
             }
         });
     });
-}
 
-function showSettingsDivs() {
-    console.log($(this));
-    const settings_divs = ['#cal-gradeable-div', '#cal-date-div'];
-    settings_divs.forEach(cur_div => {
-        if (!cur_div.includes($(this).val())) {
-            $(cur_div).css('display','none');
-        }
+    //jquery function to update all calendar menu boxes
+    $(`.${div_class} #show-menu`).on('change', function () {
+        settings_divs.forEach(cur_div => {
+            if (!cur_div.includes($(this).val())) {
+                $(`.${div_class} ${cur_div}`).css('display','none');
+            }
+            else {
+                $(`.${div_class} ${cur_div}`).css('display','block');
+            }
+        });
     });
 }
