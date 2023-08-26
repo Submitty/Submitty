@@ -35,13 +35,56 @@ class CalendarController extends AbstractController {
         $calendar_messages = [];
 
         $courses = $this->core->getQueries()->getCourseForUserId($user->getId());
+        $filtered_courses = [];
 
-        $gradeables_of_user = GradeableUtils::getAllGradeableListFromUserId($this->core, $user, $courses, $calendar_messages);
+        //If there arent any courses, don't filter
+        if (count($courses) != 0) {
+            //Check if should see all courses
+            $show_all_courses = '1';
+            if (isset($_COOKIE['calendar_show_all'])) { //Check if show_all cookie exists
+                $show_all_courses = $_COOKIE['calendar_show_all'];
+            }
+            else { //No cookie, create cookie
+                setcookie('calendar_show_all', '1', time() + (10 * 365 * 24 * 60 * 60));
+                $show_all_courses = '1';
+            }
+
+            if ($show_all_courses === '1') {
+                $filtered_courses = $courses;
+            }
+            else {
+                //If can't see all courses, see specific course
+                if (isset($_COOKIE['calendar_course'])) { //if cookie exists, find matching course
+                    $found_course = false;
+                    foreach ($courses as $course) {
+                        $course_string = sprintf("%s %s", $course->getTitle(), $course->getTerm());
+                        if ($course_string === $_COOKIE['calendar_course']) {
+                            $found_course = true;
+                            array_push($filtered_courses, $course);
+                            break;
+                        }
+                    }
+                    if (!$found_course) { //If can't find course, default to first course
+                        $course_cookie_value = sprintf("%s %s", $courses[0]->getTitle(), $courses[0]->getTerm());
+                        setcookie('calendar_course', $course_cookie_value, time() + (10 * 365 * 24 * 60 * 60));
+                        array_push($filtered_courses, $courses[0]);
+                    }
+                }
+                else { //if cookie doesn't exist, choose first course
+                    $course_cookie_value = sprintf("%s %s", $courses[0]->getTitle(), $courses[0]->getTerm());
+                    setcookie('calendar_course', $course_cookie_value, time() + (10 * 365 * 24 * 60 * 60));
+                    array_push($filtered_courses, $courses[0]);
+                }
+            }
+        }
+
+        $gradeables_of_user = GradeableUtils::getAllGradeableListFromUserId($this->core, $user, $filtered_courses, $calendar_messages);
 
         return new WebResponse(
             CalendarView::class,
             'showCalendar',
-            CalendarInfo::loadGradeableCalendarInfo($this->core, $gradeables_of_user, $courses, $calendar_messages)
+            CalendarInfo::loadGradeableCalendarInfo($this->core, $gradeables_of_user, $filtered_courses, $calendar_messages),
+            $courses
         );
     }
 
@@ -102,8 +145,8 @@ class CalendarController extends AbstractController {
         $instructor_courses = $this->core->getQueries()->getInstructorLevelUnarchivedCourses($this->core->getUser()->getId());
         $exists = false;
         foreach ($instructor_courses as $course) {
-            if ($set_course === ($course['semester'] . ' ' . $course['course'])) {
-                $this->core->loadCourseConfig($course['semester'], $course['course']);
+            if ($set_course === ($course['term'] . ' ' . $course['course'])) {
+                $this->core->loadCourseConfig($course['term'], $course['course']);
                 $this->core->loadCourseDatabase();
                 $this->core->getCourseEntityManager()->persist($calendar_item);
                 $this->core->getCourseEntityManager()->flush();
@@ -178,8 +221,8 @@ class CalendarController extends AbstractController {
         $instructor_courses = $this->core->getQueries()->getInstructorLevelUnarchivedCourses($this->core->getUser()->getId());
 
         foreach ($instructor_courses as $course) {
-            if (($semester === $course['semester']) && ($InputCourse === $course['course'])) {
-                $this->core->loadCourseConfig($course['semester'], $course['course']);
+            if (($semester === $course['term']) && ($InputCourse === $course['course'])) {
+                $this->core->loadCourseConfig($course['term'], $course['course']);
                 $this->core->loadCourseDatabase();
                 $calendar_item = $this->core->getCourseEntityManager()->getRepository(CalendarItem::class)
                     ->findOneBy(['id' => $id]);
@@ -232,7 +275,7 @@ class CalendarController extends AbstractController {
         $instructor_courses = $this->core->getQueries()->getInstructorLevelUnarchivedCourses($this->core->getUser()->getId());
         $exists = false;
         foreach ($instructor_courses as $currCourse) {
-            if ($currCourse['semester'] === $semester && $currCourse['course'] === $course) {
+            if ($currCourse['term'] === $semester && $currCourse['course'] === $course) {
                 $exists = true;
                 break;
             }

@@ -885,7 +885,7 @@ class Course(object):
         print("(tables loaded)...")
         for section in range(1, self.registration_sections+1):
             print("Create section {}".format(section))
-            submitty_conn.execute(table.insert(), semester=self.semester, course=self.code, registration_section_id=str(section))
+            submitty_conn.execute(table.insert(), term=self.semester, course=self.code, registration_section_id=str(section))
 
         print("Creating rotating sections ", end="")
         table = Table("sections_rotating", self.metadata, autoload=True)
@@ -915,7 +915,7 @@ class Course(object):
             # just need to add a row in courses_users which will put a
             # a row in the course specific DB, and off we go.
             submitty_conn.execute(submitty_users.insert(),
-                                  semester=self.semester,
+                                  term=self.semester,
                                   course=self.code,
                                   user_id=user.get_detail(self.code, "id"),
                                   user_group=user.get_detail(self.code, "group"),
@@ -1487,7 +1487,8 @@ class Course(object):
                               endorsed_by=postData[7],
                               resolved = True if postData[8] == "t" else False,
                               type=postData[9],
-                              has_attachment=True if postData[10] != "f" else False)
+                              has_attachment=True if postData[10] != "f" else False,
+                              render_markdown=True if postData[11] == "t" else False)
 
     def add_sample_polls_data(self):
         # set sample course to have polls enabled by default

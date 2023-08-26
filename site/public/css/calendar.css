@@ -220,7 +220,6 @@ a.cal-gradeable-status-text:focus {
 
 /** Announcement **/
 a.cal-gradeable-status-ann {
-    color: #218ffd!important;  /* This color is from DS website */
     padding: 0;
     font-style: italic;
     border-style: solid;
@@ -229,7 +228,6 @@ a.cal-gradeable-status-ann {
 }
 
 a.cal-gradeable-status-ann:hover {
-    color: #218ffd;
     padding: 0;
     font-style: italic;
     cursor: default;
@@ -238,7 +236,6 @@ a.cal-gradeable-status-ann:hover {
 }
 
 a.cal-gradeable-status-ann:focus {
-    color: #218ffd;
     padding: 0;
     font-style: italic;
     border: none;
@@ -278,6 +275,56 @@ div.calendar-submit {
 }
 div.calendar-submit label { text-align: "right"; }
 div.calendar-submit label::after { content: ":"; }
+
+/* Calendar Options Menu */
+div.filter-courses-menu {
+    display: inline-grid;
+    line-height: 1.5;
+}
+
+div.options-colors {
+    display: grid;
+}
+
+div.cal-option-area {
+    margin-top: 0.3rem;
+}
+
+h2.cal-options-section-head {
+    margin-top: 0;
+}
+
+label.course-color-label {
+    margin-right: 0.2rem;
+}
+
+.line-break {
+    margin-bottom: 0;
+    margin-top:0.3rem;
+}
+
+/* Calendar Legend */
+div.cal-legend {
+    display: flex;
+    margin-top: 0.3rem;
+    padding: 0.3rem;
+    border-radius: 4px 4px 0 0;
+    border: 1px solid black;
+    border-bottom: none;
+    background-color: var(--standard-hover-light-gray);
+}
+
+div.legend-color {
+    width: 1rem;
+    height: 1rem;
+    border: 1px solid black;
+    border-radius: 4px;
+}
+
+.legend-label {
+    padding-left: 0.3rem;
+    padding-right: 1rem;
+}
 
 @media (max-width: 800px) {
     #calendar-list {

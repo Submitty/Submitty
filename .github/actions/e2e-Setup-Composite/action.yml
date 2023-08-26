@@ -12,7 +12,7 @@ env:
   POSTGRES_HOST: localhost
   PHP_VER: 8.1
   NODE_VERSION: 16
-  PYTHON_VERSION: 3.8
+  PYTHON_VERSION: "3.10"
 
 runs:
   using: "composite"
@@ -194,13 +194,4 @@ runs:
         SEMESTER=$(python3 -c 'from datetime import datetime; today = datetime.today(); semester = ("s" if today.month < 7 else "f") + str(today.year)[-2:]; print(semester)')
         sudo python3 /usr/local/submitty/bin/generate_repos.py ${SEMESTER} sample open_homework
         bash tests/git_test.sh
-      shell: bash
-
-    - uses: nanasess/setup-chromedriver@master
-    - name: Setup chromedriver
-      run: |
-        sudo systemctl restart submitty_autograding_worker
-        sudo systemctl restart submitty_autograding_shipper
-        export DISPLAY=:99
-        chromedriver --url-base=/wd/hub &
       shell: bash

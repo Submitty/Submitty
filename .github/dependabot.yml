@@ -3,10 +3,7 @@ updates:
   - package-ecosystem: "composer"
     directory: "/site"
     schedule:
-      interval: "weekly"
-      day: "monday"
-      time: "10:00"
-    open-pull-requests-limit: 15
+      interval: "monthly"
     labels:
       - dependencies
     versioning-strategy: increase
@@ -16,10 +13,7 @@ updates:
   - package-ecosystem: "npm"
     directory: "/site"
     schedule:
-      interval: "weekly"
-      day: "monday"
-      time: "10:00"
-    open-pull-requests-limit: 15
+      interval: "monthly"
     labels:
       - dependencies
     commit-message:
@@ -28,10 +22,7 @@ updates:
   - package-ecosystem: pip
     directory: "/.setup/pip/"
     schedule:
-      interval: "weekly"
-      day: "monday"
-      time: "10:00"
-    open-pull-requests-limit: 15
+      interval: "monthly"
     labels:
       - dependencies
     commit-message:
@@ -39,10 +30,7 @@ updates:
   - package-ecosystem: "github-actions"
     directory: "/"
     schedule:
-      interval: "weekly"
-      day: "monday"
-      time: "10:00"
-    open-pull-requests-limit: 15
+      interval: "monthly"
     labels:
       - dependencies
     commit-message:
@@ -50,10 +38,7 @@ updates:
   - package-ecosystem: "github-actions"
     directory: "/actions/e2e-Setup-Composite"
     schedule:
-      interval: "weekly"
-      day: "monday"
-      time: "10:00"
-    open-pull-requests-limit: 15
+      interval: "monthly"
     labels:
       - dependencies
     commit-message:

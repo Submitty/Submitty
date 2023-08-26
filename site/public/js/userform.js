@@ -9,11 +9,12 @@ $("#edit-user-form").ready(function() {
                 autoCompleteOnUserId(json);
             });
 
-            $('[name="user_id"]', form).autocomplete({
-                appendTo: form,
-                source: Object.keys(json),
-                change: () => $('[name="user_id"]').change()
-            });
+            const dataList = $('#possible_users');
+            dataList.innerHTML = '';
+            const user_ids = Object.keys(json);
+            user_ids.forEach((user_id) => {
+                dataList.append(`<option value='${user_id}'>`);
+            })
 
             $(":text",$("#edit-user-form")).change(checkValidEntries);
         },
@@ -75,7 +76,7 @@ function newUserForm() {
 
 /**
  * Opens modal with initial settings for edit user form.
- * 
+ *
  * @param {string} user_id
  */
 function editUserForm(user_id) {
@@ -243,7 +244,7 @@ function autoCompleteOnUserId(user_information) {
 
 /**
  * Fill in the given user's information on the edit user modal initial display.
- * 
+ *
  * @param {array} user
  */
 function completeUserFormInformation(user) {
@@ -256,6 +257,8 @@ function completeUserFormInformation(user) {
     $('[name="user_preferred_givenname"]').change();
     $('[name="user_pronouns"]', form).val(user['user_pronouns']);
     $('[name="user_pronouns"]').change();
+    $('[name="user_display_pronouns"]', form).val(user['user_display_pronouns']);
+    $('[name="user_display_pronouns"]').change();
     $('[name="user_familyname"]', form).val(user['user_familyname']);
     $('[name="user_familyname"]').change();
     $('[name="user_preferred_familyname"]', form).val(user['user_preferred_familyname']);
