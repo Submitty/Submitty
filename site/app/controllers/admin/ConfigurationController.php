@@ -131,6 +131,11 @@ class ConfigurationController extends AbstractController {
                     JsonResponse::getFailResponse('Must enter a number for this field')
                 );
             }
+            if ($entry > 10000) {
+                return MultiResponse::JsonOnlyResponse(
+                    JsonResponse::getFailResponse('Value must be less than or equal to 10000')
+                );
+            }
             $entry = intval($entry);
         }
         elseif (
