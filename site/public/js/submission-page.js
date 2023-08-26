@@ -1,6 +1,8 @@
 /* exported openActionsPopup */
 /* exported initializeTimer */
 /* exported checkDeadline */
+/* exported gettwister */
+
 function openActionsPopup(popup_css, element_id) {
     let elem_html = `<link rel="stylesheet" type="text/css" href="${popup_css}" />`;
     elem_html += document.getElementById(element_id).innerHTML;
@@ -23,6 +25,9 @@ let ticks_till_update = 600000;
 let popUpTimerStarted = false;
 let isTimed = false;
 
+function gettwister() {
+    return 1000000000;
+}
 function initializeTimer(gradeableID, is_timed) {
     gradeable_id = gradeableID;
     isTimed = is_timed;
