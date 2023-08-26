@@ -126,6 +126,13 @@ class LateController extends AbstractController {
                     JsonResponse::getFailResponse($error)
                 );
             }
+            if (((!isset($_POST['late_days'])) || $_POST['late_days'] == "" || $_POST['late_days'] > 2147483647)) {
+                $error = "Late Days must be within the range of integer values";
+                $this->core->addErrorMessage($error);
+                return MultiResponse::JsonOnlyResponse(
+                    JsonResponse::getFailResponse($error)
+                );
+            }
 
             $date_time = DateUtils::parseDateTime($_POST['datestamp'], $this->core->getUser()->getUsableTimeZone());
 

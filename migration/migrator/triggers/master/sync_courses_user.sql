@@ -10,7 +10,7 @@ CREATE OR REPLACE FUNCTION public.sync_courses_user() RETURNS trigger
                 db_conn varchar;
                 query_string text;
             BEGIN
-                db_conn := format('dbname=submitty_%s_%s', NEW.semester, NEW.course);
+                db_conn := format('dbname=submitty_%s_%s', NEW.term, NEW.course);
 
                 IF (TG_OP = 'INSERT') THEN
                     -- FULL data sync on INSERT of a new user record.
