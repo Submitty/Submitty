@@ -185,7 +185,7 @@ class AutoGradedVersion extends AbstractModel {
             }
         }
     }
-    public function getDockerErrorFileExist() {
+    public function getDockerErrorFileExist(): bool {
         $course_path = $this->core->getConfig()->getCoursePath();
         $gradeable = $this->graded_gradeable->getGradeable();
         $submitter_id = $this->graded_gradeable->getSubmitter()->getId();
@@ -204,7 +204,7 @@ class AutoGradedVersion extends AbstractModel {
 
         return file_exists($filepath);
     }
-    public function getDockerErrorFileData() {
+    public function getDockerErrorFileData(): ?array {
         $course_path = $this->core->getConfig()->getCoursePath();
         $gradeable = $this->graded_gradeable->getGradeable();
         $submitter_id = $this->graded_gradeable->getSubmitter()->getId();
