@@ -228,7 +228,7 @@
                             Drag your file(s) here or click to open file browser
                         {% endif %}
                     </h2>
-                    <input type="file" name="files" id="input-file{{ loop.index }}" class="hide" onchange="addFilesFromInput({{ loop.index }})" multiple aria-label="Select Files to upload"
+                    <input data-testid="select-files" type="file" name="files" id="input-file{{ loop.index }}" class="hide" onchange="addFilesFromInput({{ loop.index }})" multiple aria-label="Select Files to upload"
                             {% if viewing_inactive_version %}
                                 disabled="disabled"
                             {% endif %}/>
