@@ -27,9 +27,7 @@ date
 
 # generate ASSIGNMENTS.txt
 $SUBMITTY_INSTALL_DIR/bin/make_assignments_txt_file.py $MY_COURSE_DIR/config/form $MY_COURSE_DIR/ASSIGNMENTS.txt $@
-echo "finding dockers"
-sed -i 's/\r//g' $SUBMITTY_INSTALL_DIR/bin/get_docker_images.py 
-$SUBMITTY_INSTALL_DIR/bin/get_docker_images.py 
+
 # pull in the homeworks from an auto-generated file
 . $MY_COURSE_DIR/ASSIGNMENTS.txt
 

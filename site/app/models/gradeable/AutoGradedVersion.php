@@ -183,6 +183,50 @@ class AutoGradedVersion extends AbstractModel {
             }
         }
     }
+    public function getDockerErrorFileExist(){
+        $course_path = $this->core->getConfig()->getCoursePath();
+        $gradeable = $this->graded_gradeable->getGradeable();
+        $submitter_id = $this->graded_gradeable->getSubmitter()->getId();
+        $gradeable_id = $gradeable->getId();
+        $gradeable_version = $this->graded_gradeable->getAutoGradedGradeable()->getActiveVersion();
+
+        $filepath = FileUtils::joinPaths(
+            $this->core->getConfig()->getCoursePath(),
+            "results",
+            $gradeable_id,
+            $submitter_id,
+            $gradeable_version,
+            "logs",
+            "docker_error.json"
+        );
+
+        return file_exists($filepath);
+    }
+    public function getDockerErrorFileData(){
+        $course_path = $this->core->getConfig()->getCoursePath();
+        $gradeable = $this->graded_gradeable->getGradeable();
+        $submitter_id = $this->graded_gradeable->getSubmitter()->getId();
+        $gradeable_id = $gradeable->getId();
+        $gradeable_version = $this->graded_gradeable->getAutoGradedGradeable()->getActiveVersion();
+
+        $filepath = FileUtils::joinPaths(
+            $this->core->getConfig()->getCoursePath(),
+            "results",
+            $gradeable_id,
+            $submitter_id,
+            $gradeable_version,
+            "logs",
+            "docker_error.json"
+        );
+        if (file_exists($filepath)) {
+            $json_content = file_get_contents($filepath);
+            $json_data = json_decode($json_content, true);
+            
+            return $json_data !== null ? $json_data : null;
+        }
+    
+        return null;
+    }
 
     public function getTestcaseMessages() {
         $this->loadTestcases();

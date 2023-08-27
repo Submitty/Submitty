@@ -110,10 +110,30 @@ class Container():
                     name=self.full_name
                 )
         except docker.errors.ImageNotFound:
+            
+            docker_error_path=os.path.join("/".join(self.directory.split("/")[:-3]),'TMP_SUBMISSION','tmp_logs')
+            docker_error_data = {
+                "image": f'{self.image}',
+                "machine": f'{self.full_name.split("_")[0]}',
+                "error": f'ERROR: The image {self.image} is not available on {self.full_name}'
+            }
+            with open(os.path.join(docker_error_path, "docker_error.json"), "w") as json_file:
+                json.dump(docker_error_data, json_file, indent=4)
+
             self.log_function(f'ERROR: The image {self.image} is not available on this worker')
             client.close()
             raise
         except Exception:
+
+            docker_error_path=os.path.join("/".join(self.directory.split("/")[:-3]),'TMP_SUBMISSION','tmp_logs')
+            docker_error_data = {
+                "image": f'{self.image}',
+                "machine": f'{self.full_name.split("_")[0]}',
+                "error": f'ERROR: could not create container {self.full_name}'
+            }
+            with open(os.path.join(docker_error_path, "docker_error.json"), "w") as json_file:
+                json.dump(docker_error_data, json_file, indent=4)
+
             self.log_function(f'ERROR: could not create container {self.full_name}')
             client.close()
             raise
