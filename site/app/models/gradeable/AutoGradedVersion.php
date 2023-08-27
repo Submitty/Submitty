@@ -204,6 +204,9 @@ class AutoGradedVersion extends AbstractModel {
 
         return file_exists($filepath);
     }
+    /**
+     * @return array|null An array with specific keys and values, or null if the file doesn't exist
+     */
     public function getDockerErrorFileData(): ?array {
         $course_path = $this->core->getConfig()->getCoursePath();
         $gradeable = $this->graded_gradeable->getGradeable();
