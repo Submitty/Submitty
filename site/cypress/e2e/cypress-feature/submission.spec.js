@@ -81,6 +81,6 @@ describe('Test Normal Upload', () => {
         cy.get('#do_not_grade').click();
         cy.get('.red-message').should('contain.text', 'NOT GRADE THIS ASSIGNMENT');
         
-        cy.get('#submission-version-select').select(8);
+        cy.get('#submission-version-select').select(2);
     });
 });
