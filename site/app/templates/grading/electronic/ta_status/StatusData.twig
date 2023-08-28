@@ -132,7 +132,9 @@
                     <br/>
                 {% if grade_inquiry_per_component_allowed %}
                     {% for component in component_averages %}
-                        <p><b>Number of unresolved grade inquiries for {{ component.getTitle() }}:</b> {{ component.getActiveGradeInquiryCount() }} </p>
+                        {% if  component.getActiveGradeInquiryCount() > 0 %}
+                            <p><b>Number of unresolved grade inquiries for {{ component.getTitle() }}:</b> {{ component.getActiveGradeInquiryCount() }} </p>
+                        {% endif %}
                     {% endfor %}
                 {% endif %}
             {% endif %}
