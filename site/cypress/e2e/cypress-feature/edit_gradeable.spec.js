@@ -45,7 +45,7 @@ describe('Tests cases revolving around modifying gradeables', () => {
     after(() => {
         cy.login('instructor');
         cy.visit(['sample', 'gradeable', 'open_peer_homework', 'update?nav_tab=5']);
-        
+
         updateDates('#date_ta_view', past_date, '');
         updateDates('#date_submit', past_date, '');
         updateDates('#date_due', future_date, 'All Changes Saved');
