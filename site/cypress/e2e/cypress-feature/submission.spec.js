@@ -70,7 +70,7 @@ describe('Test Normal Upload', () => {
     });
 
     it('drag and drop upload of multiple files', () => {
-        const filePaths = ['../more_autograding_examples/pdf_word_count/submissions/b.txt', '../more_autograding_examples/pdf_word_count/submissions/c.txt'];
+        const filePaths = ['../more_autograding_examples/file_check/submissions/b.txt', '../more_autograding_examples/file_check/submissions/c.txt'];
         makeSubmission(filePaths, true);
     });
 
