@@ -28,10 +28,10 @@ function makeSubmission(filePaths, dragAndDrop) {
         }
     });
     if (dragAndDrop) {
-        cy.get(`[data-testid="select-files"]`).selectFile(filePaths, { action: 'drag-drop', force: true });
+        cy.get('[data-testid="select-files"]').selectFile(filePaths, { action: 'drag-drop', force: true });
     }
     else {
-        cy.get(`[data-testid="select-files"]`).selectFile(filePaths, { force: true });
+        cy.get('[data-testid="select-files"]').selectFile(filePaths, { force: true });
     }
     // checks the alert message exist (we are not checking the exact msg) on clicking submit button, since there are two alerts on click() they can have 2 msg
     cy.on('window:confirm', (msg) => {
@@ -80,7 +80,7 @@ describe('Test Normal Upload', () => {
         cy.get('#submission-version-select').should('contain.text', 'GRADE THIS VERSION');
         cy.get('#do_not_grade').click();
         cy.get('.red-message').should('contain.text', 'NOT GRADE THIS ASSIGNMENT');
-        
+
         cy.get('#submission-version-select').select(2);
     });
 });

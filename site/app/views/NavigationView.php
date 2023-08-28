@@ -597,7 +597,6 @@ class NavigationView extends AbstractView {
             $title = "LOCKED";
             $prerequisite = $gradeable->getPrerequisite();
         }
-        $gradeable_submit = $gradeable->getId() . "_submit";
         return new Button($core, [
             "title" => $title,
             "subtitle" => $date_text,
@@ -605,7 +604,7 @@ class NavigationView extends AbstractView {
             "href" => $href,
             "progress" => $progress,
             "disabled" => $disabled,
-            "class" => "btn {$class} btn-nav btn-nav-submit $gradeable_submit",
+            "class" => "btn {$class} btn-nav btn-nav-submit",
             "name" => "submit-btn",
             "prerequisite" => $prerequisite
         ]);
