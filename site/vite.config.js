@@ -1,7 +1,8 @@
 export default {
   build: {
-    outDir: "public/vite-public/vite-js",
-
+    outDir: "public/vite-js",
+    minify: true,
+    sourcemap: true,
     rollupOptions: {
       input: "vite-ts/hello_world.ts"
     },
