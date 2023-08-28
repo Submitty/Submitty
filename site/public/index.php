@@ -110,7 +110,7 @@ header('X-Frame-Options: SAMEORIGIN');
 header('X-Content-Type-Options: nosniff');
 
 // Prevents pages from being embedded in an iframe
-header("Content-Security-Policy: frame-ancestors 'self';");
+header('Content-Security-Policy: frame-ancestors \'self\'');
 
 // Prevent intermediaries from caching the resource
 header('Cache-Control: private');
