@@ -597,6 +597,7 @@ class NavigationView extends AbstractView {
             $title = "LOCKED";
             $prerequisite = $gradeable->getPrerequisite();
         }
+
         return new Button($core, [
             "title" => $title,
             "subtitle" => $date_text,
