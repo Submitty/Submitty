@@ -1,4 +1,4 @@
-
+console.log("hisss");
 export default {
   build: {
     outDir: "public/js",

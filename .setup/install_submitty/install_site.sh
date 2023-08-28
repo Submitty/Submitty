@@ -391,7 +391,7 @@ set_js_permission ${SUBMITTY_INSTALL_DIR}/site/public/mjs
 find ${SUBMITTY_INSTALL_DIR}/site/cache -type d -exec chmod u+w {} \;
 
 echo "Running vite"
-chmod a+x /usr/lib/node_modules/vite/bin/vite.js
+chmod a+x ${NODE_FOLDER}/vite/bin/vite.js
 su - ${PHP_USER} -c "cd ${SUBMITTY_INSTALL_DIR}/site && npm run vite-build"
 
 echo "meow"
