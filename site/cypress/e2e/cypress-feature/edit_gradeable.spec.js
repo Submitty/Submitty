@@ -48,9 +48,10 @@ describe('Tests cases revolving around modifying gradeables', () => {
 
         updateDates('#date_ta_view', past_date, '');
         updateDates('#date_submit', past_date, '');
-        updateDates('#date_due', future_date, 'All Changes Saved');
-        updateDates('#date_grade', future_date, 'All Changes Saved');
         updateDates('#date_grade_due', future_date, 'All Changes Saved');
+        updateDates('#date_grade', future_date, 'All Changes Saved');
+        updateDates('#date_due', future_date, 'All Changes Saved');
+
     });
 
     it('Should test settings page 0-2', () => {
@@ -219,7 +220,7 @@ describe('Tests cases revolving around modifying gradeables', () => {
 
     });
 
-    it.only('Should test the dates page', () => {
+    it('Should test the dates page', () => {
         cy.get('#page_5_nav').click();
 
         updateDates('#date_ta_view', past_date, 'All Changes Saved');
