@@ -2,26 +2,23 @@ const tests = [
     {
         name: 'Normal uploading a single file',
         filePaths: ['../more_autograding_examples/file_check/submissions/a.txt'],
-        dragAndDrop: false
-    }
-    ,
+        dragAndDrop: false,
+    },
     {
         name: 'Drag and drop uploading a single file',
         filePaths: ['../more_autograding_examples/file_check/submissions/b.txt'],
-        dragAndDrop: true
-    }
-    ,
+        dragAndDrop: true,
+    },
     {
         name: 'Normal uploading multiple files',
         filePaths: ['../more_autograding_examples/file_check/submissions/a.txt', '../more_autograding_examples/file_check/submissions/b.txt'],
-        dragAndDrop: false
-    }
-    ,
+        dragAndDrop: false,
+    },
     {
         name: 'Drag and drop uploading multiple files',
         filePaths: ['../more_autograding_examples/file_check/submissions/b.txt', '../more_autograding_examples/file_check/submissions/c.txt'],
-        dragAndDrop: true
-    }
+        dragAndDrop: true,
+    },
 ];
 
 
@@ -77,7 +74,6 @@ describe('Test Uploading Files', () => {
         cy.get('#submission-version-select').should('contain.text', 'GRADE THIS VERSION');
         cy.get('#do_not_grade').click();
         cy.get('.red-message').should('contain.text', 'NOT GRADE THIS ASSIGNMENT');
-
         cy.get('#submission-version-select').select(2);
     });
 });
