@@ -1,41 +1,56 @@
+const future_date = '9994-12-31 23:59:59';
+const past_date = '1970-10-10 23:59:59';
+
+const notBeVisible = (button_selectors, selectors) => {
+    for (const button_selector of button_selectors) {
+        cy.get(button_selector).click();
+        cy.get('#save_status', { timeout: 10000 }).should('have.text', 'All Changes Saved');
+    }
+    for (const selector of selectors) {
+        cy.get(selector).should('not.be.visible');
+    }
+};
+
+const beVisible = (button_selectors, selectors) => {
+    for (const button_selector of button_selectors) {
+        cy.get(button_selector).click();
+        cy.get('#save_status', { timeout: 10000 }).should('have.text', 'All Changes Saved');
+    }
+    for (const selector of selectors) {
+        cy.get(selector).should('be.visible');
+    }
+};
+
+const logoutLogin = ((user, url) => {
+    cy.logout();
+    cy.login(user);
+    cy.visit(url);
+});
+
+const updateDates = ((inputSelector, date, saveText) => {
+    cy.get(inputSelector).clear();
+    cy.get(inputSelector).type(date);
+    //clicks out of the calendar
+    cy.get('body').click(0, 0);
+    cy.get('#save_status').should('have.text', saveText);
+});
+
+
 describe('Tests cases revolving around modifying gradeables', () => {
     beforeEach(() => {
         cy.login('instructor');
         cy.visit(['sample', 'gradeable', 'open_peer_homework', 'update']);
     });
 
-    const notBeVisible = (button_selectors, selectors) => {
-        for (const button_selector of button_selectors) {
-            cy.get(button_selector).click();
-            cy.get('#save_status', { timeout: 10000 }).should('have.text', 'All Changes Saved');
-        }
-        for (const selector of selectors) {
-            cy.get(selector).should('not.be.visible');
-        }
-    };
-
-    const beVisible = (button_selectors, selectors) => {
-        for (const button_selector of button_selectors) {
-            cy.get(button_selector).click();
-            cy.get('#save_status', { timeout: 10000 }).should('have.text', 'All Changes Saved');
-        }
-        for (const selector of selectors) {
-            cy.get(selector).should('be.visible');
-        }
-    };
-
-    const logoutLogin = ((user, url) => {
-        cy.logout();
-        cy.login(user);
-        cy.visit(url);
-    });
-
-    const updateDates = ((inputSelector, date, saveText) => {
-        cy.get(inputSelector).clear();
-        cy.get(inputSelector).type(date);
-        //clicks out of the calendar
-        cy.get('body').click(0, 0);
-        cy.get('#save_status').should('have.text', saveText);
+    after(() => {
+        cy.login('instructor');
+        cy.visit(['sample', 'gradeable', 'open_peer_homework', 'update?nav_tab=5']);
+        
+        updateDates('#date_ta_view', past_date, '');
+        updateDates('#date_submit', past_date, '');
+        updateDates('#date_due', future_date, 'All Changes Saved');
+        updateDates('#date_grade', future_date, 'All Changes Saved');
+        updateDates('#date_grade_due', future_date, 'All Changes Saved');
     });
 
     it('Should test settings page 0-2', () => {
@@ -204,10 +219,7 @@ describe('Tests cases revolving around modifying gradeables', () => {
 
     });
 
-    it('Should test the dates page', () => {
-        const future_date = '9994-12-31 23:59:59';
-        const past_date = '1970-10-10 23:59:59';
-
+    it.only('Should test the dates page', () => {
         cy.get('#page_5_nav').click();
 
         updateDates('#date_ta_view', past_date, 'All Changes Saved');
