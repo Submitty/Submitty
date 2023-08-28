@@ -366,6 +366,22 @@ function previewUserLastInitialFormat() {
 
 $(document).ready(() => {
 
+    $('#desktop_sidebar_preference').change(() => {
+        // eslint-disable-next-line no-undef
+        updateSidebarPreference();
+        location.reload();
+    });
+    if (localStorage.getItem('desktop-sidebar-preference')) {
+        if (localStorage.getItem('desktop-sidebar-preference') === 'automatic') {
+            // eslint-disable-next-line no-undef
+            CollapseSidebarOnNarrowView();
+        }
+        else {
+            // eslint-disable-next-line no-undef
+            DisableAutomaticCollapse();
+        }
+    }
+
     $('#theme_change_select').change(() => {
         // eslint-disable-next-line no-undef
         updateTheme();
