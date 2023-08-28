@@ -1,11 +1,10 @@
-console.log("hisss");
 export default {
   build: {
-    outDir: "public/js",
-    
+    outDir: "public/vite-public/vite-js",
 
     rollupOptions: {
       input: "vite-ts/hello_world.ts"
     },
-  }
+  },
+  publicDir: 'public/vite-public/'
 };
