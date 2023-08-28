@@ -12,7 +12,6 @@ document.addEventListener("DOMContentLoaded", function() {
   loadInBreadcrumbLinks();
   adjustBreadcrumbLinks();
 });
-
 function loadInBreadcrumbLinks(){
   mobileHomeLink = mobileHomeLink !== null ? mobileHomeLink : $("#home-button").attr('href');
   desktopHomeLink = desktopHomeLink !== null ? desktopHomeLink : $("#desktop_home_link").attr('href');
@@ -1394,7 +1393,7 @@ $.fn.isInViewport = function() {                                        // jQuer
     return elementTop > viewportTop && elementBottom < viewportBottom;
 };
 
-function checkSidebarCollapse() {
+function CollapseSidebarOnNarrowView() {
     if ($(document.body).width() < 1150) {
         Cookies.set('collapse_sidebar', 'true', { path: '/' });
         $("aside").toggleClass("collapsed", true);
@@ -1403,6 +1402,11 @@ function checkSidebarCollapse() {
         Cookies.set('collapse_sidebar', 'false', { path: '/' });
         $("aside").toggleClass("collapsed", false);
     }
+}
+
+function DisableAutomaticCollapse() {
+    Cookies.set('collapse_sidebar', 'false', { path: '/' });
+    $("aside").toggleClass("collapsed", false);
 }
 
 function updateTheme(){
@@ -1444,11 +1448,17 @@ $(document).ready(function() {
   }
 });
 
+
+function updateSidebarPreference() {
+    let collapse_preference = $("#desktop_sidebar_preference option:selected").val();
+    // Update local storage with the selected preference
+    localStorage.setItem("desktop-sidebar-preference", collapse_preference);
+}
+
 //Called from the DOM collapse button, toggle collapsed and save to localStorage
 function toggleSidebar() {
     const sidebar = $("aside");
     const shown = sidebar.hasClass("collapsed");
-
     Cookies.set('collapse_sidebar', !shown, { path: '/' });
     sidebar.toggleClass("collapsed", !shown);
 }
@@ -1470,7 +1480,16 @@ $(document).ready(function() {
         }
     });
 
-    window.addEventListener("resize", checkSidebarCollapse);
+    if (localStorage.getItem("desktop-sidebar-preference")) {
+        if(localStorage.getItem("desktop-sidebar-preference") === "automatic") {
+            $("#desktop_sidebar_preference").val("automatic");
+            window.addEventListener("resize", CollapseSidebarOnNarrowView);
+        }
+        else {
+            $("#desktop_sidebar_preference").val("manual");
+            window.addEventListener("resize", DisableAutomaticCollapse);
+        }
+    }
 });
 
 function checkBulkProgress(gradeable_id){
