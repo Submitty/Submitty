@@ -487,8 +487,7 @@ jobs:
           name: cypress-videos
           path: ${{env.SUBMITTY_REPOSITORY}}/site/cypress/videos
 
-    
-  
+
   Cypress-Feature:
     runs-on: ubuntu-22.04
     strategy:
@@ -555,7 +554,7 @@ jobs:
           name: cypress-videos
           path: ${{env.SUBMITTY_REPOSITORY}}/site/cypress/videos
 
-  
+
   Cypress-Gradeable:
     runs-on: ubuntu-22.04
     strategy:
@@ -622,7 +621,7 @@ jobs:
           name: cypress-videos
           path: ${{env.SUBMITTY_REPOSITORY}}/site/cypress/videos
 
-  
+
   Cypress-UI:
     runs-on: ubuntu-22.04
     strategy:
