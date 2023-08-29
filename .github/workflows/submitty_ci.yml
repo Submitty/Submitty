@@ -323,6 +323,14 @@ jobs:
           npm install file-saver --save
           npm install --production=false
 
+      - name: Run accessibility test
+        uses: cypress-io/github-action@v5
+        with:
+          config: baseUrl=http://localhost
+          spec: cypress/e2e/cypress-system/accessibility.spec.js
+          working-directory: ${{env.SUBMITTY_REPOSITORY}}/site
+          browser: chrome
+
       - name: Run API tests
         working-directory: ${{env.SUBMITTY_REPOSITORY}}/site
         run: npm run test:api
