@@ -396,8 +396,6 @@
         }
         // otherwise, this is a regular submission of the uploaded files
         else if (user_id == "") {
-    const submissionDiv = $('<div id="submission-message">');
-    $('body').append(submissionDiv); // Add the div to the DOM
             handleSubmission(
                 {{ gradeable_status }},
                 {{ remaining_late_days_for_gradeable }},
@@ -422,12 +420,8 @@
                 clobber,
                 {{ viewing_inactive_version }}
             );
-
         }
         else {
-    const submissionDiv = $('<div id="submission-message">');
-    $('body').append(submissionDiv); // Add the div to the DOM
-
             handleSubmission(
                 {{ gradeable_status }},
                 {{ remaining_late_days_for_gradeable }},
@@ -452,7 +446,6 @@
                 clobber,
                 {{ viewing_inactive_version }}
             );
-
         }
     }
     $(function() {

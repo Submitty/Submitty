@@ -942,8 +942,6 @@ function handleSubmission(gradeable_status, remaining_late_days_for_gradeable, c
     }
 
     let late_warning_seen = false;
-    const submissionMessageElement = document.getElementById('submission-message');
-    submissionMessageElement.textContent = message;
 
     const days_to_be_charged = Math.max(0,days_past_deadline-late_day_exceptions);
     // gradeable_status == 3 is a bad submission (too many late days used) and therefore no need to show a warning message anymore
