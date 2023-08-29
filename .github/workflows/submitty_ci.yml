@@ -531,7 +531,7 @@ jobs:
         with:
           config: baseUrl=http://localhost
           working-directory: ${{env.SUBMITTY_REPOSITORY}}/site
-          spec: cypress/e2e/Cypress-Feature/*
+          spec: cypress/e2e/cypress-feature/*
           browser: chrome
           env: run_area=CI
         env:
