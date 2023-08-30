@@ -59,7 +59,10 @@ class OfficeHoursQueueController extends AbstractController {
         if ($token !== null) {
             preg_match_all($re, $token, $matches_token, PREG_SET_ORDER, 0);
         }
-        if (count($matches_code) !== 1 || count($matches_token) !== 1) {
+        if (
+            is_array($matches_code) && count($matches_code) !== 1
+            ||  is_array($matches_token) && count($matches_token) !== 1
+        ) {
             $this->core->addErrorMessage('Queue name and secret code must only contain letters, numbers, spaces, "_", and "-"');
             return MultiResponse::RedirectOnlyResponse(
                 new RedirectResponse($this->core->buildCourseUrl(['office_hours_queue']))
