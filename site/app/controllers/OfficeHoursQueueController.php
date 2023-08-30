@@ -61,7 +61,7 @@ class OfficeHoursQueueController extends AbstractController {
         }
         if (
             is_array($matches_code) && count($matches_code) !== 1
-            ||  is_array($matches_token) && count($matches_token) !== 1
+            || is_array($matches_token) && count($matches_token) !== 1
         ) {
             $this->core->addErrorMessage('Queue name and secret code must only contain letters, numbers, spaces, "_", and "-"');
             return MultiResponse::RedirectOnlyResponse(
