@@ -17,7 +17,7 @@ def up(config, database, semester, course):
     database.execute("""
         UPDATE course_materials
         SET release_date =  make_timestamptz(1900, 1, 1, 0, 0, 0, 'America/New_York')
-        WHERE EXTRACT(year FROM release_date) < 2000;
+        WHERE EXTRACT(year FROM release_date) < 1900;
     """)
 
 
