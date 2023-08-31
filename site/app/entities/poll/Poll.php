@@ -4,69 +4,59 @@ declare(strict_types=1);
 
 namespace app\entities\poll;
 
+use app\repositories\poll\PollRepository;
+use DateTime;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
+use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
 
-/**
- * @ORM\Entity(repositoryClass="app\repositories\poll\PollRepository")
- * @ORM\Table(name="polls")
- */
+#[ORM\Entity(repositoryClass: PollRepository::class)]
+#[ORM\Table(name: "polls")]
 class Poll {
-    /**
-     * @ORM\Id
-     * @ORM\GeneratedValue
-     * @ORM\Column(name="poll_id",type="integer")
-     */
+    #[ORM\Id]
+    #[ORM\Column(name: "poll_id", type: Types::INTEGER)]
+    #[ORM\GeneratedValue]
     private $id;
 
-    /** @ORM\Column(name="name",type="text") */
+    #[ORM\Column(name: "name", type: Types::TEXT)]
     private $name;
 
-    /** @ORM\Column(type="text") */
+    #[ORM\Column(type: Types::TEXT)]
     private $question;
 
-    /** @ORM\Column(type="text") */
+    #[ORM\Column(type: Types::TEXT)]
     private $status;
 
-    /**
-     * @ORM\Column(type="date")
-     * @var \DateTime
-     */
-    private $release_date;
+    #[ORM\Column(type: Types::DATE_MUTABLE)]
+    private DateTime $release_date;
 
-    /** @ORM\Column(type="text",nullable=true) */
+    #[ORM\Column(type: Types::TEXT, nullable: true)]
     private $image_path;
 
-    /**
-     * @ORM\Column(type="string")
-     */
+    #[ORM\Column(type: Types::STRING)]
     private $question_type;
 
-    /**
-     * @ORM\Column(type="string")
-     */
+    #[ORM\Column(type: Types::STRING)]
     private $release_histogram;
 
-    /**
-     * @ORM\Column(type="string")
-     */
+    #[ORM\Column(type: Types::STRING)]
     private $release_answer;
 
     /**
-     * @ORM\OneToMany(targetEntity="\app\entities\poll\Option",mappedBy="poll",orphanRemoval=true)
-     * @ORM\JoinColumn(name="poll_id", referencedColumnName="poll_id")
-     * @ORM\OrderBy({"order_id" = "ASC"})
      * @var Collection<Option>
      */
-    private $options;
+    #[ORM\OneToMany(mappedBy: "poll", targetEntity: Option::class, orphanRemoval: true)]
+    #[ORM\JoinColumn(name: "poll_id", referencedColumnName: "poll_id")]
+    #[ORM\OrderBy(["order_id" => "ASC"])]
+    private Collection $options;
 
     /**
-     * @ORM\OneToMany(targetEntity="\app\entities\poll\Response",mappedBy="poll")
-     * @ORM\JoinColumn(name="poll_id", referencedColumnName="poll_id")
      * @var Collection<Response>
      */
-    private $responses;
+    #[ORM\OneToMany(mappedBy: "poll", targetEntity: Response::class)]
+    #[ORM\JoinColumn(name: "poll_id", referencedColumnName: "poll_id")]
+    private Collection $responses;
 
     public function __construct(string $name, string $question, string $question_type, \DateTime $release_date, string $release_histogram, string $release_answer, string $image_path = null) {
         $this->setName($name);
