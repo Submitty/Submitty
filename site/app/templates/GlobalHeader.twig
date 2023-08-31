@@ -187,6 +187,7 @@
 
 <div style="display: flex">
 
+{% if user_given_name != "" %}
 <div class= "speech-bubble-container" id= "speech-bubble-container">
 <button class="speech-bubble" id="speech-bubble" onclick = "showBanners()">
   Click Me!  <br />
@@ -195,13 +196,17 @@
 <div class="triangle" id="triangle"></div>
 </div>
 
+{% endif %}
+
                     <span id="duckdiv" style="position: relative; display: inline-block; vertical-align: top;">
                         <img id="moorthy-duck"
                                 src="{{ base_url }}/img/{{ duck_img }}"
                                 alt="Moorthy - Submitty's Duck Mascot!"
                                 height="80"
                                 class="key_to_click"
-                                onclick = "showBanners();"
+                                {% if user_given_name != "" %}
+                                    onclick="showBanners();"
+                                {% endif %}
                                 tabindex="0"
                         />
 
