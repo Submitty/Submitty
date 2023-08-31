@@ -209,8 +209,6 @@ footer .footer-separator {
 
 .banner {
     position: relative;
-    width: 100%;
-    height: auto;
     overflow: hidden;
     margin-left: 50px;
     margin-right: 50px;
@@ -224,8 +222,6 @@ footer .footer-separator {
 
 .banner img {
     display: none;
-    width: 100%;
-    height: 100%;
     object-fit: cover;
     border-style: double;
     border-width: 5px;
