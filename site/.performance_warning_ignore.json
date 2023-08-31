@@ -4,6 +4,8 @@
   "/courses/<term>/<course>/autograding_config",
   "/courses/<term>/<course>/gradeable",
   "/courses/<term>/<course>/gradeable/<gradeable>",
+  "/courses/<term>/<course>/gradeable/<gradeable>/components/save_pages",
+  "/courses/<term>/<course>/gradeable/<gradeable>/RandomizePeers",
   "/courses/<term>/<course>/gradeable/<gradeable>/graders",
   "/courses/<term>/<course>/gradeable/<gradeable>/encode_pdf",
   "/courses/<term>/<course>/gradeable/<gradeable>/rubric",
