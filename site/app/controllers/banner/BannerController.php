@@ -147,7 +147,7 @@ class BannerController extends AbstractController {
                 $actual_banner_name,
                 $extra_name,
                 $release_date,
-                $close_date, 
+                $close_date,
                 $folder_made_name
             );
             $this->core->getSubmittyEntityManager()->persist($banner_image);
@@ -192,7 +192,7 @@ class BannerController extends AbstractController {
             // Maybe implemement later to get rid of the folder, i dunno?
             // $folder_path = FileUtils::joinPaths($full_path, $banner_item->getFolderName());
             // if (is_dir($folder_path)) {
-            //     FileUtils::deleteDir($folder_path); 
+            //     FileUtils::deleteDir($folder_path);
             // }
         }
         else {
