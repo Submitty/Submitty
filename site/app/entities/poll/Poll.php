@@ -17,31 +17,31 @@ class Poll {
     #[ORM\Id]
     #[ORM\Column(name: "poll_id", type: Types::INTEGER)]
     #[ORM\GeneratedValue]
-    private $id;
+    protected $id;
 
     #[ORM\Column(name: "name", type: Types::TEXT)]
-    private $name;
+    protected $name;
 
     #[ORM\Column(type: Types::TEXT)]
-    private $question;
+    protected $question;
 
     #[ORM\Column(type: Types::TEXT)]
-    private $status;
+    protected $status;
 
     #[ORM\Column(type: Types::DATE_MUTABLE)]
-    private DateTime $release_date;
+    protected DateTime $release_date;
 
     #[ORM\Column(type: Types::TEXT, nullable: true)]
-    private $image_path;
+    protected $image_path;
 
     #[ORM\Column(type: Types::STRING)]
-    private $question_type;
+    protected $question_type;
 
     #[ORM\Column(type: Types::STRING)]
-    private $release_histogram;
+    protected $release_histogram;
 
     #[ORM\Column(type: Types::STRING)]
-    private $release_answer;
+    protected $release_answer;
 
     /**
      * @var Collection<Option>
@@ -49,14 +49,14 @@ class Poll {
     #[ORM\OneToMany(mappedBy: "poll", targetEntity: Option::class, orphanRemoval: true)]
     #[ORM\JoinColumn(name: "poll_id", referencedColumnName: "poll_id")]
     #[ORM\OrderBy(["order_id" => "ASC"])]
-    private Collection $options;
+    protected Collection $options;
 
     /**
      * @var Collection<Response>
      */
     #[ORM\OneToMany(mappedBy: "poll", targetEntity: Response::class)]
     #[ORM\JoinColumn(name: "poll_id", referencedColumnName: "poll_id")]
-    private Collection $responses;
+    protected Collection $responses;
 
     public function __construct(string $name, string $question, string $question_type, \DateTime $release_date, string $release_histogram, string $release_answer, string $image_path = null) {
         $this->setName($name);

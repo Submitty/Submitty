@@ -36,7 +36,7 @@ class Column {
     #[ORM\JoinColumn(name: "table_catalog", referencedColumnName: "table_catalog")]
     #[ORM\JoinColumn(name: "table_schema", referencedColumnName: "table_schema")]
     #[ORM\JoinColumn(name: "table_name", referencedColumnName: "table_name")]
-    protected Table $table;
+    protected ?Table $table;
 
     public function __construct() {
         throw new \RuntimeException("Cannot create new information_schema.column");

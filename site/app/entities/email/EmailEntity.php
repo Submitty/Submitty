@@ -13,34 +13,38 @@ class EmailEntity {
     #[ORM\Id]
     #[ORM\Column(type: Types::INTEGER)]
     #[ORM\GeneratedValue]
-    private int $id;
+    protected int $id;
 
     #[ORM\Column(type: Types::STRING)]
-    private string $user_id;
+    protected string $user_id;
 
     #[ORM\Column(type: Types::TEXT)]
-    private string $subject;
+    protected string $subject;
 
     #[ORM\Column(type: Types::TEXT)]
-    private string $body;
+    protected string $body;
 
     #[ORM\Column(type: Types::DATETIME_MUTABLE)]
-    private DateTime $created;
+    protected DateTime $created;
 
     #[ORM\Column(type: Types::DATETIME_MUTABLE)]
-    private DateTime $sent;
+    protected DateTime $sent;
 
     #[ORM\Column(type: Types::STRING)]
-    private string $error;
+    protected string $error;
 
     #[ORM\Column(type: Types::STRING, length: 255)]
-    private string $email_address;
+    protected string $email_address;
 
     #[ORM\Column(type: Types::STRING)]
-    private string $term;
+    protected string $term;
 
     #[ORM\Column(type: Types::STRING)]
-    private string $course;
+    protected string $course;
+
+    public function getId(): int {
+        return $this->id;
+    }
 
     /**
      * @return string

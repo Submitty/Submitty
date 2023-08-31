@@ -16,27 +16,27 @@ class Option {
     #[ORM\Id]
     #[ORM\Column(name: "option_id", type: Types::INTEGER)]
     #[ORM\GeneratedValue]
-    private int $id;
+    protected int $id;
 
     #[ORM\Column(name: "order_id", type: Types::INTEGER)]
-    private int $order_id;
+    protected int $order_id;
 
     #[ORM\Column(name: "response", type: Types::TEXT)]
-    private string $response;
+    protected string $response;
 
     #[ORM\Column(name: "correct", type: Types::BOOLEAN)]
-    private bool $correct;
+    protected bool $correct;
 
     #[ORM\ManyToOne(targetEntity: Poll::class, inversedBy: "options")]
     #[ORM\JoinColumn(name: "poll_id", referencedColumnName: "poll_id", nullable: false)]
-    private Poll $poll;
+    protected Poll $poll;
 
     /**
      * @var Collection<Response>
      */
     #[ORM\OneToMany(mappedBy: "option", targetEntity: Response::class)]
     #[ORM\JoinColumn(name: "option_id", referencedColumnName: "option_id")]
-    private Collection $user_responses;
+    protected Collection $user_responses;
 
     public function __construct(int $order_id, string $response, bool $is_correct) {
         $this->setOrderId($order_id);

@@ -29,7 +29,7 @@ class VcsAuthToken {
     #[ORM\Column(type: Types::STRING)]
     protected string $name;
 
-    #[ORM\Column(type: Types::DATETIMETZ_MUTABLE)]
+    #[ORM\Column(type: Types::DATETIMETZ_MUTABLE, nullable: true)]
     protected ?DateTime $expiration;
 
     public function __construct(string $user_id, string $token, string $name, ?DateTime $expiration) {

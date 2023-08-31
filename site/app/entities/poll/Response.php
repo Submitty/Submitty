@@ -13,18 +13,18 @@ class Response {
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column(type: Types::INTEGER)]
-    private int $id;
+    protected int $id;
 
     #[ORM\Column(type: Types::TEXT)]
-    private string $student_id;
+    protected string $student_id;
 
     #[ORM\ManyToOne(targetEntity: Poll::class, inversedBy: "responses")]
     #[ORM\JoinColumn(name: "poll_id", referencedColumnName: "poll_id", nullable: false)]
-    private Poll $poll;
+    protected Poll $poll;
 
     #[ORM\ManyToOne(targetEntity: Option::class, fetch: "EAGER", inversedBy: "user_responses")]
     #[ORM\JoinColumn(name: "option_id", referencedColumnName: "option_id", nullable: false)]
-    private Option $option;
+    protected Option $option;
 
     public function __construct(string $student_id) {
         $this->setStudentId($student_id);
