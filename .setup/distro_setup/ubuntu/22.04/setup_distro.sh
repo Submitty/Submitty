@@ -74,7 +74,7 @@ jq libseccomp-dev libseccomp2 seccomp junit flex bison poppler-utils
 apt-get install -qqy ninja-build
 
 # NodeJS
-(umask 0022 && curl -sL https://deb.nodesource.com/setup_16.x | bash -)
+(umask 0022 && curl -sL https://deb.nodesource.com/setup_18.x | bash -)
 apt-get install -y nodejs
 
 #CMAKE
