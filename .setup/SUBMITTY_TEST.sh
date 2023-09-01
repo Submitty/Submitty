@@ -1,49 +1,41 @@
 #!/bin/bash
 
-
 pushd /usr/local/submitty/GIT_CHECKOUT/Submitty/site || {
     echo "Failed to change to the Submitty/site directory.
     Please check if you have /usr/local/submitty/GIT_CHECKOUT/Submitty/site and valid permission"
     exit 1
+} > /dev/null
+
+run_php_stan() {
+    php vendor/bin/phpstan analyze app public/index.php socket/index.php "${@:2}"
 }
 
+run_php_cs() {
+    php vendor/bin/phpcs --extensions=php ./app
+}
 
 submitty_test() {
-    if [ "$1" == "php_stan" ]; then
-        php vendor/bin/phpstan analyze app public/index.php socket/index.php "${@:2}"
-    elif [ "$1" == "php_lint" ]; then
-        php vendor/bin/phpcs --extensions=php ./app
-elif [ "$1" == "php_lint_stan" ] || [ "$1" == "php_stan_lint" ]; then
-        php vendor/bin/phpcs --extensions=php ./app
-        php vendor/bin/phpstan analyze app public/index.php socket/index.php "${@:2}"
-    elif [ "$1" == "js_lint" ]; then
-        npm run eslint
-    elif [ "$1" == "css_lint" ]; then
-        npm run css-stylelint
-    elif [ "$1" == "all" ]; then
-        php vendor/bin/phpstan analyze app public/index.php socket/index.php
-        php vendor/bin/phpcs --extensions=php ./app
-        npm run eslint
-        npm run css-stylelint
+    if [ "$1" == "php-stan" ]; then
+        run_php_stan "$@"
+    elif [ "$1" == "php-cs" ]; then
+        run_php_cs
+    elif [ "$1" == "php-lint" ]; then
+        run_php_cs
+        run_php_stan "$@"
     elif [ "$1" == "help" ]; then
-        echo "php_stan: php static analysis
-                        handy additional options examples
-                        php_stan --memory-limit=4G
-                        php_stan --generate-baseline
-              php_lint: php linting
-              js_lint : javascript linting
-              css_lint: css linting
-              php_lint_stan: php linting and static analysis
-              all: php_stan, php_lint, js_lint, css_lint"
+        echo "php-stan: php static analysis [option: --memory-limit=4G, --generate-baseline ...]
+              php-cs  : php CodeSniffer
+              php-lint: php-cs & php-stan"
     else
         echo "Unknown test type: $1
-            use php_stan, php_lint, js_lint, css_lint
+            use php-stan, php-cs, php-lint
             or help for detail"
     fi
 }
 
 submitty_test "$@"
-popd  || {
-                      echo "Failed to return to current directory check if you have valid permission"
-                      exit 1
-                  }
+
+popd || {
+    echo "Failed to return to the previous directory. Check if you have valid permission."
+    exit 1
+} > /dev/null
