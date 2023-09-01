@@ -112,7 +112,12 @@ class CourseMaterialsControllerTester extends BaseUnitTest {
         $this->core->getCourseEntityManager()
             ->expects($this->once())
             ->method('persist')
-            ->with($course_material);
+            ->with($this->callback(
+                function(CourseMaterial $c) use ($course_material) {
+                    $c->setId(0);
+                    return $c == $course_material;
+                }
+            ));
 
         $this->core->getCourseEntityManager()
             ->expects($this->once())
@@ -264,7 +269,12 @@ class CourseMaterialsControllerTester extends BaseUnitTest {
         $this->core->getCourseEntityManager()
             ->expects($this->once())
             ->method('persist')
-            ->with($course_material);
+            ->with($this->callback(
+                function(CourseMaterial $c) use ($course_material) {
+                    $c->setId(0);
+                    return $c == $course_material;
+                }
+            ));
 
         $this->core->getCourseEntityManager()
             ->expects($this->exactly(2))
@@ -330,7 +340,12 @@ class CourseMaterialsControllerTester extends BaseUnitTest {
         $this->core->getCourseEntityManager()
             ->expects($this->once())
             ->method('persist')
-            ->with($course_material);
+            ->with($this->callback(
+                function(CourseMaterial $c) use ($course_material) {
+                    $c->setId(0);
+                    return $c == $course_material;
+                }
+            ));
 
         $this->core->getCourseEntityManager()
             ->expects($this->exactly(2))
@@ -401,7 +416,12 @@ class CourseMaterialsControllerTester extends BaseUnitTest {
         $this->core->getCourseEntityManager()
             ->expects($this->once())
             ->method('persist')
-            ->with($course_material);
+            ->with($this->callback(
+                function(CourseMaterial $c) use ($course_material) {
+                    $c->setId(0);
+                    return $c == $course_material;
+                }
+            ));
 
         $this->core->getCourseEntityManager()
             ->expects($this->exactly(2))
@@ -469,7 +489,12 @@ class CourseMaterialsControllerTester extends BaseUnitTest {
         $this->core->getCourseEntityManager()
             ->expects($this->once())
             ->method('persist')
-            ->with($course_material);
+            ->with($this->callback(
+                function(CourseMaterial $c) use ($course_material) {
+                    $c->setId(0);
+                    return $c == $course_material;
+                }
+            ));
 
         $this->core->getCourseEntityManager()
             ->expects($this->once())
