@@ -113,7 +113,7 @@ class CourseMaterialsControllerTester extends BaseUnitTest {
             ->expects($this->once())
             ->method('persist')
             ->with($this->callback(
-                function(CourseMaterial $c) use ($course_material) {
+                function (CourseMaterial $c) use ($course_material) {
                     $c->setId(0);
                     return $c == $course_material;
                 }
@@ -270,7 +270,7 @@ class CourseMaterialsControllerTester extends BaseUnitTest {
             ->expects($this->once())
             ->method('persist')
             ->with($this->callback(
-                function(CourseMaterial $c) use ($course_material) {
+                function (CourseMaterial $c) use ($course_material) {
                     $c->setId(0);
                     return $c == $course_material;
                 }
@@ -341,7 +341,7 @@ class CourseMaterialsControllerTester extends BaseUnitTest {
             ->expects($this->once())
             ->method('persist')
             ->with($this->callback(
-                function(CourseMaterial $c) use ($course_material) {
+                function (CourseMaterial $c) use ($course_material) {
                     $c->setId(0);
                     return $c == $course_material;
                 }
@@ -417,7 +417,7 @@ class CourseMaterialsControllerTester extends BaseUnitTest {
             ->expects($this->once())
             ->method('persist')
             ->with($this->callback(
-                function(CourseMaterial $c) use ($course_material) {
+                function (CourseMaterial $c) use ($course_material) {
                     $c->setId(0);
                     return $c == $course_material;
                 }
@@ -490,7 +490,7 @@ class CourseMaterialsControllerTester extends BaseUnitTest {
             ->expects($this->once())
             ->method('persist')
             ->with($this->callback(
-                function(CourseMaterial $c) use ($course_material) {
+                function (CourseMaterial $c) use ($course_material) {
                     $c->setId(0);
                     return $c == $course_material;
                 }
