@@ -2711,11 +2711,6 @@ parameters:
 			path: app/entities/Session.php
 
 		-
-			message: "#^Property app\\\\entities\\\\VcsAuthToken\\:\\:\\$expiration type mapping mismatch\\: property can contain DateTime\\|null but database expects DateTimeInterface\\.$#"
-			count: 1
-			path: app/entities/VcsAuthToken.php
-
-		-
 			message: "#^Method app\\\\entities\\\\course\\\\CourseMaterial\\:\\:getSections\\(\\) return type with generic interface Doctrine\\\\Common\\\\Collections\\\\Collection does not specify its types\\: TKey, T$#"
 			count: 1
 			path: app/entities/course/CourseMaterial.php
@@ -2744,51 +2739,6 @@ parameters:
 			message: "#^Property app\\\\entities\\\\db\\\\Table\\:\\:\\$columns with generic interface Doctrine\\\\Common\\\\Collections\\\\Collection does not specify its types\\: TKey, T$#"
 			count: 1
 			path: app/entities/db/Table.php
-
-		-
-			message: "#^Property app\\\\entities\\\\email\\\\EmailEntity\\:\\:\\$body is never written, only read\\.$#"
-			count: 1
-			path: app/entities/email/EmailEntity.php
-
-		-
-			message: "#^Property app\\\\entities\\\\email\\\\EmailEntity\\:\\:\\$course is never written, only read\\.$#"
-			count: 1
-			path: app/entities/email/EmailEntity.php
-
-		-
-			message: "#^Property app\\\\entities\\\\email\\\\EmailEntity\\:\\:\\$created is never written, only read\\.$#"
-			count: 1
-			path: app/entities/email/EmailEntity.php
-
-		-
-			message: "#^Property app\\\\entities\\\\email\\\\EmailEntity\\:\\:\\$email_address is never written, only read\\.$#"
-			count: 1
-			path: app/entities/email/EmailEntity.php
-
-		-
-			message: "#^Property app\\\\entities\\\\email\\\\EmailEntity\\:\\:\\$error is never written, only read\\.$#"
-			count: 1
-			path: app/entities/email/EmailEntity.php
-
-		-
-			message: "#^Property app\\\\entities\\\\email\\\\EmailEntity\\:\\:\\$term is never written, only read\\.$#"
-			count: 1
-			path: app/entities/email/EmailEntity.php
-
-		-
-			message: "#^Property app\\\\entities\\\\email\\\\EmailEntity\\:\\:\\$sent is never written, only read\\.$#"
-			count: 1
-			path: app/entities/email/EmailEntity.php
-
-		-
-			message: "#^Property app\\\\entities\\\\email\\\\EmailEntity\\:\\:\\$subject is never written, only read\\.$#"
-			count: 1
-			path: app/entities/email/EmailEntity.php
-
-		-
-			message: "#^Property app\\\\entities\\\\email\\\\EmailEntity\\:\\:\\$user_id is never written, only read\\.$#"
-			count: 1
-			path: app/entities/email/EmailEntity.php
 
 		-
 			message: "#^Property app\\\\entities\\\\forum\\\\Category\\:\\:\\$threads with generic interface Doctrine\\\\Common\\\\Collections\\\\Collection does not specify its types\\: TKey, T$#"

@@ -4,82 +4,73 @@ declare(strict_types=1);
 
 namespace app\entities\course;
 
+use app\repositories\course\CourseMaterialRepository;
+use DateTime;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
+use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
 
 /**
  * Class CourseMaterial
  * @package app\entities
- * @ORM\Entity(repositoryClass="\app\repositories\course\CourseMaterialRepository")
- * @ORM\Table(name="course_materials")
  */
+#[ORM\Entity(repositoryClass: CourseMaterialRepository::class)]
+#[ORM\Table(name: "course_materials")]
 class CourseMaterial {
     const FILE = 0;
     const LINK = 1;
     const DIR = 2;
 
-    /**
-     * @ORM\Id
-     * @ORM\Column(type="integer")
-     * @ORM\GeneratedValue(strategy="AUTO")
-     * @var integer
-     */
-    protected $id;
+    #[ORM\Id]
+    #[ORM\Column(type: Types::INTEGER)]
+    #[ORM\GeneratedValue(strategy: "AUTO")]
+    protected int $id;
+
+    #[ORM\Column(type: Types::STRING)]
+    protected string $path;
+
+    #[ORM\Column(type: Types::SMALLINT)]
+    protected int $type;
+
+    #[ORM\Column(type: Types::DATETIMETZ_MUTABLE)]
+    protected DateTime $release_date;
+
+    #[ORM\Column(type: Types::BOOLEAN)]
+    protected bool $hidden_from_students;
+
+    #[ORM\Column(type: Types::FLOAT)]
+    protected float $priority;
 
     /**
-     * @ORM\Column(type="string")
-     * @var string
-     */
-    protected $path;
-
-    /**
-     * @ORM\Column(type="smallint")
-     * @var int
-     */
-    protected $type;
-
-    /**
-     * @ORM\Column(type="datetimetz")
-     * @var \DateTime
-     */
-    protected $release_date;
-
-    /**
-     * @ORM\Column(type="boolean")
-     * @var boolean
-     */
-    protected $hidden_from_students;
-
-    /**
-     * @ORM\Column(type="float")
-     * @var float
-     */
-    protected $priority;
-
-    /**
-     * @ORM\OneToMany(targetEntity="\app\entities\course\CourseMaterialAccess", mappedBy="course_material", fetch="EAGER", cascade={"persist"}, orphanRemoval=true)
      * @var Collection<CourseMaterialAccess>
      */
-    protected $accesses;
+    #[ORM\OneToMany(
+        mappedBy: "course_material",
+        targetEntity: CourseMaterialAccess::class,
+        cascade: ["persist"],
+        fetch: "EAGER",
+        orphanRemoval: true
+    )]
+    protected Collection $accesses;
 
     /**
-     * @ORM\OneToMany(targetEntity="\app\entities\course\CourseMaterialSection", mappedBy="course_material", fetch="EAGER", cascade={"persist"}, orphanRemoval=true)
      * @var Collection<CourseMaterialSection>
      */
-    protected $sections;
+    #[ORM\OneToMany(
+        mappedBy: "course_material",
+        targetEntity: CourseMaterialSection::class,
+        cascade: ["persist"],
+        fetch: "EAGER",
+        orphanRemoval: true
+    )]
+    protected Collection $sections;
 
-    /**
-     * @ORM\Column(type="string")
-     * @var string
-     */
-    protected $url;
+    #[ORM\Column(type: Types::STRING, nullable: true)]
+    protected ?string $url;
 
-    /**
-     * @ORM\Column(type="string")
-     * @var string
-     */
-    protected $title;
+    #[ORM\Column(type: Types::STRING, nullable: true)]
+    protected ?string $title;
 
     public function __construct(int $type, string $path, \DateTime $release_date, bool $hidden_from_students, float $priority, ?string $url, ?string $title) {
         $this->setType($type);
