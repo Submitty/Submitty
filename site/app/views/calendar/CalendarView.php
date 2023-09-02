@@ -37,12 +37,28 @@ class CalendarView extends AbstractView {
             $year = (int) date("Y");
         }
 
-        //Create list of courses and their term
+        //Create list of courses and their term and get color
         $formatted_courses = [];
+        $unformatted_courses = [];
+        //$course_colors = [];
         foreach ($courses as $course) {
             $course_string = sprintf("%s %s", $course->getTitle(), $course->getTerm());
             array_push($formatted_courses, $course_string);
         }
+
+        //Set course color options
+        $course_colors = [];
+        $course_colors["RED"]       = "var(--category-color-1)";
+        $course_colors["ORANGE"]    = "var(--category-color-2)";
+        $course_colors["GREEN"]     = "var(--category-color-3)";
+        $course_colors["BLUE"]      = "var(--category-color-4)";
+        $course_colors["INDIGO"]    = "var(--category-color-5)";
+        $course_colors["VIOLET"]    = "var(--category-color-6)";
+        $course_colors["PINK"]      = "var(--category-color-7)";
+        $course_colors["PURPLE"]    = "var(--category-color-8)";
+
+        //Get if legend will be displayed
+        $show_legend = (isset($_COOKIE['show_legend']))  ?  (int) $_COOKIE['show_legend'] : 1;
 
         $this->core->getOutput()->addInternalCss("navigation.css");
         $this->core->getOutput()->addInternalCss('calendar.css');
@@ -70,7 +86,11 @@ class CalendarView extends AbstractView {
             "colors" => $info->getColors(),
             "instructor_courses" => $this->core->getQueries()->getInstructorLevelUnarchivedCourses($this->core->getUser()->getId()),
             "view_cookie" => isset($_COOKIE['view']) ? $_COOKIE['view'] : "month",
-            "course_names" => $formatted_courses
+            "course_names" => $formatted_courses,
+            "show_legend" => $show_legend,
+            "color_options" => $course_colors,
+            "show_all_cookie" => isset($_COOKIE['calendar_show_all']) ? $_COOKIE['calendar_show_all'] : 1,
+            "calendar_course_cookie" => isset($_COOKIE['calendar_course']) ? $_COOKIE['calendar_course'] : $formatted_courses[0],
         ]);
     }
 }

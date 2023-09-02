@@ -366,6 +366,22 @@ function previewUserLastInitialFormat() {
 
 $(document).ready(() => {
 
+    $('#desktop_sidebar_preference').change(() => {
+        // eslint-disable-next-line no-undef
+        updateSidebarPreference();
+        location.reload();
+    });
+    if (localStorage.getItem('desktop-sidebar-preference')) {
+        if (localStorage.getItem('desktop-sidebar-preference') === 'automatic') {
+            // eslint-disable-next-line no-undef
+            CollapseSidebarOnNarrowView();
+        }
+        else {
+            // eslint-disable-next-line no-undef
+            DisableAutomaticCollapse();
+        }
+    }
+
     $('#theme_change_select').change(() => {
         // eslint-disable-next-line no-undef
         updateTheme();
@@ -446,4 +462,32 @@ $(document).ready(() => {
     // Set time zone drop down boxes to the user's time zone (only after other JS has finished loading)
     const user_time_zone =  $('#time_zone_selector_label').data('user_time_zone');
     $(`[value="${user_time_zone}"]`).prop('selected', true);
+
+
+    $('#pref_locale_select').on('change', function() {
+        $.getJSON({
+            type: 'POST',
+            url: buildUrl(['user_profile', 'set_pref_locale']),
+            data: {
+                // eslint-disable-next-line no-undef
+                csrf_token: csrfToken,
+                locale: $(this).val(),
+            },
+            success: function(response) {
+                if (response.status === 'success') {
+                    displaySuccessMessage('User locale updated successfully!');
+                    location.reload();
+                }
+                else {
+                    console.log(response);
+                    displayErrorMessage('Failed to update user locale!');
+                }
+            },
+            error: function(response) {
+                console.error('Failed to parse response from server!');
+                displayErrorMessage('Failed to parse response from server!');
+                console.log(response);
+            },
+        });
+    });
 });

@@ -18,7 +18,7 @@ env:
   POSTGRES_HOST: localhost
   PHP_VER: 8.1
   NODE_VERSION: 16
-  PYTHON_VERSION: 3.8
+  PYTHON_VERSION: "3.10"
 
 concurrency:
   # If this is a PR, cancel all previously running jobs on source branch
