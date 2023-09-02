@@ -284,11 +284,6 @@ class GlobalController extends AbstractController {
                 "title" => "Gradebook",
                 "icon" => "fa-book-reader"
             ]);
-            $sidebar_buttons[] = new NavButton($this->core, [
-                "href" => $this->core->buildCourseUrl(['autograding_status']),
-                "title" => "Autograding Status",
-                "icon" => "fa-server"
-            ]);
         }
 
         // --------------------------------------------------------------------------
@@ -311,6 +306,13 @@ class GlobalController extends AbstractController {
                 "id" => "nav-sidebar-extensions",
                 "icon" => "fa-calendar-plus"
             ]);
+            if ($this->core->getConfig()->checkFeatureFlagEnabled('late_day_cache_display')) {
+                $sidebar_buttons[] = new NavButton($this->core, [
+                    "href" => $this->core->buildCourseUrl(['bulk_late_days']),
+                    "title" => "Bulk Late Days",
+                    "icon" => "fa-calendar-alt"
+                ]);
+            }
             $sidebar_buttons[] = new NavButton($this->core, [
                 "href" => $this->core->buildCourseUrl(['grade_override']),
                 "title" => "Grade Override",

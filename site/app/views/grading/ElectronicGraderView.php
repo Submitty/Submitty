@@ -486,7 +486,7 @@ HTML;
      * @param bool $show_edit_teams
      * @return string
      */
-    public function detailsPage(Gradeable $gradeable, $graded_gradeables, $teamless_users, $graders, $empty_teams, $show_all_sections_button, $show_import_teams_button, $show_export_teams_button, $show_edit_teams, $past_grade_start_date, $view_all, $sort, $direction, $anon_mode, $overrides, $anon_ids, $inquiry_only, $inquiry_status) {
+    public function detailsPage(Gradeable $gradeable, $graded_gradeables, $teamless_users, $graders, $empty_teams, $show_all_sections_button, $show_import_teams_button, $show_export_teams_button, $show_edit_teams, $past_grade_start_date, $view_all, $sort, $direction, $anon_mode, $overrides, $anon_ids, $inquiry_status) {
         $collapsed_sections = isset($_COOKIE['collapsed_sections']) ? json_decode(rawurldecode($_COOKIE['collapsed_sections'])) : [];
 
         $peer = false;
@@ -500,9 +500,18 @@ HTML;
         $columns = [];
         $columns[]             = ["width" => "2%",  "title" => "",                 "function" => "index"];
         $columns[]             = ["width" => "8%",  "title" => "Section",          "function" => "section"];
-        if ($peer || $anon_mode) {
+
+        $team_and_anon = ($this->core->getUser()->getGroup() === User::GROUP_LIMITED_ACCESS_GRADER &&
+            $gradeable->getLimitedAccessBlind() === 2);
+
+        if ($peer || $anon_mode || $team_and_anon) {
             if ($gradeable->isTeamAssignment()) {
                 if ($gradeable->getPeerBlind() === Gradeable::DOUBLE_BLIND_GRADING || $anon_mode) {
+                    $columns[] = ["width" => "10%", "title" => "Team ID",     "function" => "team_id_anon"];
+                }
+                $peer_and_anon = ($this->core->getUser()->getGroup() === User::GROUP_STUDENT &&
+                    $gradeable->getPeerBlind() === Gradeable::DOUBLE_BLIND_GRADING);
+                if ($team_and_anon || $peer_and_anon || $anon_mode) {
                     $columns[] = ["width" => "30%", "title" => "Team Members",     "function" => "team_members_anon"];
                 }
                 else {
@@ -586,9 +595,7 @@ HTML;
         }
 
         // Generate late days
-        $this->core->getQueries()->generateLateDayCacheForUsers($gradeable->getId());
-        // TO DO: Add bulk LateDays creation from database
-
+        $this->core->getQueries()->generateLateDayCacheForUsers();
         //Convert rows into sections and prepare extra row info for things that
         // are too messy to calculate in the template.
         $sections = [];
@@ -875,7 +882,6 @@ HTML;
             "team_gradeable_view_history" => $team_gradeable_view_history,
             "view_all" => $view_all,
             "anon_mode" => $anon_mode,
-            "inquiry_only" => $inquiry_only,
             "inquiry_status" => $inquiry_status,
             "toggle_anon_button" => ($this->core->getUser()->getGroup() == User::GROUP_INSTRUCTOR || $this->core->getUser()->getGroup() == User::GROUP_FULL_ACCESS_GRADER),
             "show_all_sections_button" => $show_all_sections_button,
@@ -953,7 +959,6 @@ HTML;
         // WIP: Replace this logic when there is a definitive way to get my peer-ness
         // If this is a peer gradeable but I am not allowed to view the peer panel, then I must be a peer.
         if ($gradeable->hasPeerComponent()) {
-            $anon_mode = false;
             if ($this->core->getUser()->getGroup() !== 4) {
                 $isPeerPanel = true;
                 $isStudentInfoPanel = true;
@@ -1099,7 +1104,7 @@ HTML;
 
 
         $return .= $this->core->getOutput()->renderTemplate(['grading', 'ElectronicGrader'], 'renderAutogradingPanel', $display_version_instance, $show_hidden_cases, $ta_grading, $graded_gradeable);
-        $return .= $this->core->getOutput()->renderTemplate(['grading', 'ElectronicGrader'], 'renderSubmissionPanel', $graded_gradeable, $display_version, ($this->core->getUser()->getGroup() == User::GROUP_LIMITED_ACCESS_GRADER && $gradeable->getLimitedAccessBlind() == 2));
+        $return .= $this->core->getOutput()->renderTemplate(['grading', 'ElectronicGrader'], 'renderSubmissionPanel', $graded_gradeable, $display_version, $limimted_access_blind);
         //If TA grading isn't enabled, the rubric won't actually show up, but the template should be rendered anyway to prevent errors, as the code references the rubric panel
         $return .= $this->core->getOutput()->renderTemplate(['grading', 'ElectronicGrader'], 'renderRubricPanel', $graded_gradeable, $display_version, $can_verify, $show_verify_all, $show_silent_edit, $is_peer_grader);
         $return .= $this->core->getOutput()->renderTemplate(['grading', 'ElectronicGrader'], 'renderSolutionTaNotesPanel', $gradeable, $solution_ta_notes, $submitter_itempool_map);
@@ -1201,7 +1206,10 @@ HTML;
         $gradeable = $graded_gradeable->getGradeable();
         $this->anon_status = $anon_mode;
         $isBlind = false;
-        if ($gradeable->getLimitedAccessBlind() == 2) {
+        if (
+            $this->core->getUser()->getGroup() == User::GROUP_LIMITED_ACCESS_GRADER
+            && $gradeable->getLimitedAccessBlind() == 2
+        ) {
             $isBlind = true;
         }
         $home_url = $this->core->buildCourseUrl(['gradeable', $graded_gradeable->getGradeableId(), 'grading', 'details']) . '?' . http_build_query(['sort' => $sort, 'direction' => $direction]);
