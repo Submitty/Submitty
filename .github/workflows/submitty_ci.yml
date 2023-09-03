@@ -287,7 +287,7 @@ jobs:
         run: python3 run_shellcheck.py  # Uses the default Python installed with Ubuntu
 
 
-  Cypress (System):
+  Cypress-System:
     runs-on: ubuntu-22.04
     services:
       postgres:
