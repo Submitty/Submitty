@@ -129,27 +129,27 @@ runs:
     - name: Configure Test suite
       run: |
         cd $SUBMITTY_REPOSITORY
-        sudo -E env "PATH=$PATH" bash .setup/testing/setup.sh
-        sudo jq '. |= . + {"verified_submitty_admin_user": "submitty-admin"}' /usr/local/submitty/config/submitty_users.json \
+        time sudo -E env "PATH=$PATH" bash .setup/testing/setup.sh
+        time sudo jq '. |= . + {"verified_submitty_admin_user": "submitty-admin"}' /usr/local/submitty/config/submitty_users.json \
           | sudo sponge /usr/local/submitty/config/submitty_users.json
-        sudo chown root:submitty_daemonphp /usr/local/submitty/config/submitty_users.json
-        sudo chmod 440 /usr/local/submitty/config/submitty_users.json
+        time sudo chown root:submitty_daemonphp /usr/local/submitty/config/submitty_users.json
+        time sudo chmod 440 /usr/local/submitty/config/submitty_users.json
       shell: bash
 
     - name: Setup ldap
       run: |
         cd $SUBMITTY_REPOSITORY
-        sudo -E env "PATH=$PATH" bash .setup/testing/setup_ldap.sh
+        time sudo -E env "PATH=$PATH" bash .setup/testing/setup_ldap.sh
       shell: bash
 
     - name: Set up sample course
-      run: sudo -E env "PATH=$PATH" python3 /usr/local/submitty/GIT_CHECKOUT/Submitty/.setup/bin/setup_sample_courses.py --no_grading sample
+      run: time sudo -E env "PATH=$PATH" python3 /usr/local/submitty/GIT_CHECKOUT/Submitty/.setup/bin/setup_sample_courses.py --no_grading sample
       shell: bash
 
     - name: Set up test suite
       run: |
         cd $SUBMITTY_REPOSITORY
-        sudo -E env "PATH=$PATH" bash .setup/testing/setup_test_suite.sh
+        time sudo -E env "PATH=$PATH" bash .setup/testing/setup_test_suite.sh
       shell: bash
 
     - name: Set up apache
