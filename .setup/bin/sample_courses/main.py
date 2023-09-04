@@ -4,7 +4,7 @@ Setup script that reads in the users.yml and courses.yml files in the ../data di
 creates the users and courses for the system. This is primarily used by Vagrant and Travis to
 figure the environments easily, but it could be run pretty much anywhere, unless the courses
 already exist as else the system will probably fail.
-
+# flake8: noqa
 Usage: ./setup_sample_courses.py
        ./setup_sample_courses.py [course [course]]
        ./setup_sample_courses.py --help

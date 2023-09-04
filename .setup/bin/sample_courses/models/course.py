@@ -1,4 +1,4 @@
-
+# flake8: noqa
 from __future__ import print_function, division
 from datetime import datetime, timedelta
 from shutil import copyfile

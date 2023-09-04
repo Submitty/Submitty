@@ -1,3 +1,4 @@
+# flake8: noqa
 from ruamel.yaml import YAML
 from submitty_utils import dateutils
 import argparse
@@ -61,6 +62,7 @@ VCS_FOLDER = os.path.join(SUBMITTY_DATA_DIR, 'vcs', 'git')
 
 DB_ONLY = args.db_only
 NO_SUBMISSIONS = args.no_submissions
+print("No submmissions",NO_SUBMISSIONS,flush=True)
 NO_GRADING = args.no_grading
 
 NOW = dateutils.get_current_time()

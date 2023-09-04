@@ -1,3 +1,10 @@
+"""
+This file contains functions that are independent of other functions and this file
+should not import functions from other files in Utils package. 
+This is done to avoid circular imports.
+"""
+
+# flake8: noqa
 import json
 import os
 import random

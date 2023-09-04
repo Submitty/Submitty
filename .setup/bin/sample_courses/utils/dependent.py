@@ -1,4 +1,15 @@
+"""
+This file contains functions that are dependent on other functions in Utils
+and other files in the package Utils should not import functions from here. 
+This is done to avoid circular imports.
 
+This file contains an:
+    import from create_or_generate with functions:
+        add_to_group
+        commit_submission_to_repo
+"""
+
+# flake8: noqa
 import os
 from tempfile import TemporaryDirectory
 

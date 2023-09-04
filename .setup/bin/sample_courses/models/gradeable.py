@@ -1,4 +1,4 @@
-
+# flake8: noqa
 from __future__ import print_function, division
 from collections import OrderedDict
 import hashlib
