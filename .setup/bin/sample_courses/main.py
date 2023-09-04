@@ -57,8 +57,8 @@ from sqlalchemy import create_engine, Table, MetaData, bindparam, select, join, 
 
 # if you need to modify any global variables, change this to import file as name
 from sample_courses import *
-from utils import *
-from models import *
+from sample_courses.utils import *
+from sample_courses.models import *
 
 def main():
     """
