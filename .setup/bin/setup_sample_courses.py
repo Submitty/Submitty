@@ -1,4 +1,4 @@
-from sample_courses import main
+from sample_courses.main import main
 
 
 if __name__ == "__main__":

@@ -1,7 +1,9 @@
 from pathlib import Path
 import random
 from sample_courses import *
-from utils import generate_random_user_id, generate_pronouns, user_exists, add_to_group
+from sample_courses.utils.create_or_generate import generate_random_user_id, generate_pronouns
+from sample_courses.utils.checks import user_exists
+from sample_courses.utils.dependent import add_to_group
 
 
 def generate_random_marks(default_value, max_value):
