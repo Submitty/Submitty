@@ -1,11 +1,12 @@
 """
-This file contains all the global constant variables that are used 
+Contains all the global constant variables that are used 
 throughout the sample courses.
 None of the variables should be changed after they are set here.
 If you ever want to change the global variables in another file,
-you have to use import sample_courses and not from sample_courses import *
+you have to use import sample_courses and not from sample_courses import *,
+but its highly unrecommended.
 
-To prevent cicurlar imports, don't import any files from this directory and if
+To prevent cicurlar imports, don't import any files in this package and if
 you need to import something then use import sample_courses.filename not from 
 sample_courses.filename import *
 """

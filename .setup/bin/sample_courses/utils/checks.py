@@ -1,4 +1,4 @@
-# flake8: noqa
+
 import pwd
 import grp
 

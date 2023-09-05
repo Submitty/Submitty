@@ -1,4 +1,4 @@
-# flake8: noqa
+
 from pathlib import Path
 import random
 from sample_courses import *

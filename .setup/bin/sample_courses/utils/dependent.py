@@ -1,6 +1,6 @@
 """
 This file contains functions that are dependent on other functions in Utils
-and other files in the package Utils should not import functions from here. 
+and the functions in this file should not be used in any other files in Utils.
 This is done to avoid circular imports.
 
 This file contains an:
@@ -9,7 +9,7 @@ This file contains an:
         commit_submission_to_repo
 """
 
-# flake8: noqa
+
 import os
 from tempfile import TemporaryDirectory
 
