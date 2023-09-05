@@ -1,6 +1,13 @@
 <div class="content">
     You don't have access to this course. <br />
     This is <b>{{course_name}}</b> for <b>{{semester}}</b>. <br/>
-    If you think this is a mistake, please contact your instructor to gain access. <br/>
-    click <a href = "{{main_url}}"> here </a> to back to homepage and see your courses list.
+    If you think this is a mistake,
+    {% if ability_to_readd %}
+        you may <a href = "{{ main_course_url }}" onclick="rejoinCourse({{ readd_url }})"> here </a>
+        to readd yourself temporarily to the course. <br/>
+        Your instructor will be notified and can then choose to keep you in the course.
+    {% else %}
+        please contact your instructor to gain access. <br/>
+        Click <a href = "{{main_url}}"> here </a> to back to homepage and see your courses list.
+    {% endif %}
 </div>
