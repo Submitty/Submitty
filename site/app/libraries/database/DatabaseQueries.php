@@ -2497,13 +2497,12 @@ SELECT COUNT(*) from gradeable_component where g_id=?
 
         // Check if we want to include late (bad) submissions into the average
         if ($bad_submissions != 'include' && $bad_submission_count > 0) {
-            if ($is_team) {
-                $bad_submissions_condition = "LEFT JOIN late_day_cache AS ldc ON ldc.{$user_or_team_id} = {$u_or_t}.{$user_or_team_id} AND ldc.g_id=gc.g_id AND (ldc.submission_days_late = 0 OR ldc.late_days_change != 0)";
-            }
-            else {
-                $bad_submissions_condition = "INNER JOIN late_day_cache AS ldc ON ldc.{$user_or_team_id} = {$u_or_t}.{$user_or_team_id} AND ldc.g_id=gc.g_id AND 
-                    (ldc.submission_days_late = 0 OR ldc.late_days_change != 0)";
-            }
+            $bad_submissions_condition = "INNER JOIN(
+                SELECT DISTINCT ldc.{$user_or_team_id}
+                FROM late_day_cache AS ldc
+                WHERE ldc.g_id=? AND ( submission_days_late = 0 OR ldc.late_days_change != 0 
+              ) )AS ldc ON ldc.{$user_or_team_id}={$u_or_t}.{$user_or_team_id}";
+            $params = [$g_id,$g_id, $count];
         }
 
         // Check if we want to combine grade overridden marks within averages
