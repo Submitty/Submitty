@@ -37,7 +37,7 @@ $(document).ready(() => {
                             date = new Date();
                             break;
                         case 1:
-                            date = new Date("9998-01-01");
+                            date = new Date('9998-01-01');
                             break;
                     }
                     fp.setDate(date, true);
