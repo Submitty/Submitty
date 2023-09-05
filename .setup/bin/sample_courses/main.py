@@ -40,8 +40,8 @@ import random
 
 from sqlalchemy import create_engine, Table, MetaData
 
-# if you need to modify any global variables, change this to import file as name
 from sample_courses import *
+
 from sample_courses.utils import (
     load_data_yaml,
     get_php_db_password
@@ -58,20 +58,6 @@ def main():
     and then sets us up to run the create methods for the users and courses.
     """
 
-    if not os.path.isdir(SUBMITTY_INSTALL_DIR):
-        raise SystemError(f"The following directory does not exist: {SUBMITTY_INSTALL_DIR}")
-    if not os.path.isdir(SUBMITTY_DATA_DIR):
-        raise SystemError(f"The following directory does not exist: {SUBMITTY_DATA_DIR}")
-    for directory in ["courses"]:
-        if not os.path.isdir(os.path.join(SUBMITTY_DATA_DIR, directory)):
-            raise SystemError("The following directory does not exist: " + os.path.join(
-                SUBMITTY_DATA_DIR, directory))
-    with open(os.path.join(SUBMITTY_INSTALL_DIR, "config", "database.json")) as database_config:
-        database_config_json = json.load(database_config)
-        DB_USER = database_config_json["database_user"]
-        DB_HOST = database_config_json["database_host"]
-        DB_PORT = database_config_json["database_port"]
-        DB_PASS = database_config_json["database_password"]
     use_courses = args.course
 
     # We have to stop all running daemon grading and jobs handling

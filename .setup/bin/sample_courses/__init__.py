@@ -1,7 +1,20 @@
+"""
+This file contains all the global constant variables that are used 
+throughout the sample courses.
+None of the variables should be changed after they are set here.
+If you ever want to change the global variables in another file,
+you have to use import sample_courses and not from sample_courses import *
+
+To prevent cicurlar imports, don't import any files from this directory and if
+you need to import something then use import sample_courses.filename not from 
+sample_courses.filename import *
+"""
+
 # flake8: noqa
 from ruamel.yaml import YAML
 from submitty_utils import dateutils
 import argparse
+import json
 
 import os
 
@@ -42,17 +55,34 @@ CURRENT_PATH = os.path.dirname(os.path.realpath(__file__))
 SETUP_DATA_PATH = os.path.join(CURRENT_PATH, "..", "..", "data")
 
 args = parse_args()
-# Default values, will be overwritten in `main()` if corresponding arguments are supplied
+
 SUBMITTY_INSTALL_DIR = args.install_dir
 SUBMITTY_DATA_DIR = args.data_dir
 SUBMITTY_REPOSITORY = os.path.join(SUBMITTY_INSTALL_DIR, "GIT_CHECKOUT/Submitty")
 MORE_EXAMPLES_DIR = os.path.join(SUBMITTY_INSTALL_DIR, "more_autograding_examples")
 TUTORIAL_DIR = os.path.join(SUBMITTY_INSTALL_DIR, "GIT_CHECKOUT/Tutorial", "examples")
 
-DB_HOST = "localhost"
-DB_PORT = 5432
-DB_USER = "submitty_dbuser"
-DB_PASS = "submitty_dbuser"
+DB_HOST:str = "localhost"
+DB_PORT:int = 5432
+DB_USER:str = "submitty_dbuser"
+DB_PASS:str = "submitty_dbuser"
+
+if not os.path.isdir(SUBMITTY_INSTALL_DIR):
+    raise SystemError(f"The following directory does not exist: {SUBMITTY_INSTALL_DIR}")
+if not os.path.isdir(SUBMITTY_DATA_DIR):
+    raise SystemError(f"The following directory does not exist: {SUBMITTY_DATA_DIR}")
+for directory in ["courses"]:
+    if not os.path.isdir(os.path.join(SUBMITTY_DATA_DIR, directory)):
+        raise SystemError("The following directory does not exist: " + os.path.join(
+            SUBMITTY_DATA_DIR, directory))
+    
+with open(os.path.join(SUBMITTY_INSTALL_DIR, "config", "database.json")) as database_config:
+    database_config_json = json.load(database_config)
+    
+    DB_USER = database_config_json["database_user"]
+    DB_HOST = database_config_json["database_host"]
+    DB_PORT = database_config_json["database_port"]
+    DB_PASS = database_config_json["database_password"]
 
 # used for constructing the url to clone repos for vcs gradeables
 # with open(os.path.join(SUBMITTY_INSTALL_DIR, "config", "submitty.json")) as submitty_config:
@@ -62,7 +92,6 @@ VCS_FOLDER = os.path.join(SUBMITTY_DATA_DIR, 'vcs', 'git')
 
 DB_ONLY = args.db_only
 NO_SUBMISSIONS = args.no_submissions
-print("No submmissions",NO_SUBMISSIONS,flush=True)
 NO_GRADING = args.no_grading
 
 NOW = dateutils.get_current_time()
