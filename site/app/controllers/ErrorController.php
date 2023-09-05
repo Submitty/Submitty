@@ -50,4 +50,15 @@ class ErrorController extends AbstractController {
         return false;
     }
 
+    /**
+     * @Route("/courses/{_semester}/{_course}/rejoin_course")
+     */
+    public function rejoinCourse() {
+        if (!$this->canRejoinCourse())
+            return;
+
+        $user_id = $this->core->getUser()->getId();
+        $this->core->getQueries()->removeUserFromNullSection($user_id);
+    }
+
 }
