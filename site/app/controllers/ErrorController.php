@@ -6,6 +6,7 @@ use app\controllers\AbstractController;
 use app\libraries\Core;
 use app\libraries\DateUtils;
 use Symfony\Component\Routing\Annotation\Route;
+use app\libraries\response\JsonResponse;
 
 class ErrorController extends AbstractController {
 
@@ -50,6 +51,14 @@ class ErrorController extends AbstractController {
         return false;
     }
 
+    private function console_log($output, $with_script_tags = true) {
+        $js_code = 'console.log(' . json_encode($output, JSON_HEX_TAG) . ');';
+        if ($with_script_tags) {
+            $js_code = '<script>' . $js_code . '</script>';
+        }
+        echo $js_code;
+    }
+
     /**
      * @Route("/courses/{_semester}/{_course}/rejoin_course")
      */
@@ -59,6 +68,9 @@ class ErrorController extends AbstractController {
 
         $user_id = $this->core->getUser()->getId();
         $this->core->getQueries()->removeUserFromNullSection($user_id);
+        return JsonResponse::getSuccessResponse([
+            "Success" => "Yes!!!!!!!!!!!"
+        ]);
     }
 
 }

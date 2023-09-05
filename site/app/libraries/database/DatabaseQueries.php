@@ -1810,7 +1810,7 @@ WHERE term=? AND course=? AND user_id=?",
             SET registration_section = (
                 SELECT sections_registration_id
                 FROM sections_registration
-                LIMTT 1
+                LIMIT 1
             )
             WHERE user_id=?;
         ";
