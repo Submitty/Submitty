@@ -423,6 +423,21 @@ SQL;
     }
 
     /**
+     * Returns the date of the current term's start date.
+     * @param string The start date of the current term.
+     */
+    public function getCurrentTermStartDate(): string {
+        $this->submitty_db->query("
+            SELECT start_date
+            FROM terms
+            ORDER BY start_date DESC
+            LIMIT 1
+        ");
+        $timestamp = $this->submitty_db->rows()[0]['start_date'];
+        return DateUtils::convertTimeStamp($this->core->getUser(), $timestamp, 'Y-m-d H:i:s');
+    }
+
+    /**
      * @param string $term_id
      * @param string $term_name
      * @param \DateTime $start_date
@@ -8637,6 +8652,29 @@ SQL;
             [$g_id, $team_id]
         );
         return $this->course_db->rows();
+    }
+
+    /**
+     * Returns the last time a particular user accessed any gradeable in the current course.
+     * @param string $user_id The user we are querying.
+     * @return string Date if the student ever accessed the course,
+     *   "Never accessed a gradeable" otherwise.
+     */
+    public function getMostRecentGradeableAccessForUser(string $user_id): string {
+        $this->course_db->query("
+            SELECT timestamp
+            FROM gradeable_access where user_id=?
+            ORDER BY timestamp desc
+            LIMIT 1",
+            [$user_id]
+        );
+        $response = $this->course_db->rows();
+        if (empty($response)) {
+            return "Never accessed a gradeable";
+        }
+
+        $timestamp = $response[0]['timestamp'];
+        return DateUtils::convertTimeStamp($this->core->getUser(), $timestamp, 'Y-m-d H:i:s');
     }
 
     public function getUserGroups(string $user_id): array {
