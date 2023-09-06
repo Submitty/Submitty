@@ -16,8 +16,8 @@
             <input type="text" id="input-provide-full-path" class="full-width" name="eg_config_path" value="" placeholder="optional/subdirectory" list="folder_paths"/>
             <datalist id="folder_paths">
                 {% for folder_path in folder_paths %}
-                    <option value="{{ folder_path }}">
-                {% endfor %}
+                <option value="{{ folder_path }}">
+                    {% endfor %}
             </datalist>
         </label>
         <fieldset>
@@ -39,12 +39,12 @@
             </script>
             <br>
             <div id = "show_Some_Section_Selection" class= "show-some-section-selection" style="display: none">
-            {% for section in reg_sections %}
-                <div class = "reg-section-item">
-                    <input id="section-upload-{{section['sections_registration_id']}}" type="checkbox" value="off"/>
-                    <label for="section-upload-{{section['sections_registration_id']}}">Section{{ section['sections_registration_id'] }}</label>
-                </div>
-            {% endfor %}
+                {% for section in reg_sections %}
+                    <div class = "reg-section-item">
+                        <input id="section-upload-{{section['sections_registration_id']}}" type="checkbox" value="off"/>
+                        <label for="section-upload-{{section['sections_registration_id']}}">Section{{ section['sections_registration_id'] }}</label>
+                    </div>
+                {% endfor %}
             </div>
         </fieldset>
         <label id="upload_dt" style="pointer-events:none;">
@@ -81,24 +81,24 @@
             </label>
         </fieldset>
         <div id="file_selection">
-          <label>
-              <input id="expand-zip-checkbox" type="checkbox" value="off"/>
-              Unzip zip files (Note: If checked, will replace all folders/files)
-          </label>
-          <div id="upload-boxes">
-              {# upload1 and input-file1 required for drag-and-drop.js #}
-              <div id="upload1" class="file-input">
-                <label class="label key_to_click" for="input-file1" tabindex="0">"Drag your file(s) here or click to open file browser"</label>
-                <input type="file" name="files" id="input-file1" onchange="addFilesFromInput(1,false)" multiple />
-                <table class="file-upload-table" id="file-upload-table-1">
-                  <tr style="background:transparent; display:none;">
-                    <th>File Name:</th>
-                    <th>Size:</th>
-                  </tr>
-                </table>
+            <label>
+                <input id="expand-zip-checkbox" type="checkbox" value="off"/>
+                Unzip zip files (Note: If checked, will replace all folders/files)
+            </label>
+            <div id="upload-boxes">
+                {# upload1 and input-file1 required for drag-and-drop.js #}
+                <div id="upload1" class="file-input">
+                    <label class="label key_to_click" for="input-file1" tabindex="0">"Drag your file(s) here or click to open file browser"</label>
+                    <input type="file" name="files" id="input-file1" onchange="addFilesFromInput(1,false)" multiple />
+                    <table class="file-upload-table" id="file-upload-table-1">
+                        <tr style="background:transparent; display:none;">
+                            <th>File Name:</th>
+                            <th>Size:</th>
+                        </tr>
+                    </table>
+                </div>
             </div>
-          </div>
-          <p>Total files cannot exceed 10 mb or 10240 kb.</p>
+            <p>Total files cannot exceed 10 mb or 10240 kb.</p>
         </div>
         <div id="url_selection" style="display: none;">
           <span>
@@ -159,55 +159,57 @@
             });
         });
         const upload_fp = flatpickr('#upload_picker', {
-                    plugins: [ShortcutButtonsPlugin(
+            plugins: [ShortcutButtonsPlugin(
+                {
+                    button: [
                         {
-                            button: [
-                                {
-                                    label: "Beginning of time"
-                                },
-                                {
-                                    label: "Now"
-                                },
-                                {
-                                    label: "Tomorrow"
-                                },
-                                {
-                                    label: "End of time"
-                                }
-                            ],
-                            onClick: (index, fp) => {
-                                let date;
-                                switch (index) {
-                                    case 0:
-                                        date = new Date("1900-01-01 00:00:00");
-                                        break;
-                                    case 1:
-                                        date = new Date();
-                                        break;
-                                    case 2:
-                                        date = new Date();
-                                        date.setDate(date.getDate() + 1);
-                                        break;
-                                    case 3:
-                                        date = new Date("9998-01-01 00:00:00");
-                                        break;
-                                }
-                                fp.setDate(date);
-                            }
+                            label: "Beginning of time"
+                        },
+                        {
+                            label: "Now"
+                        },
+                        {
+                            label: "Tomorrow"
+                        },
+                        {
+                            label: "End of time"
                         }
-                    )],
-                    appendTo: document.getElementById('upload-course-materials-form'),
-                    allowInput: true,
-                    enableTime: true,
-                    enableSeconds: true,
-                    time_24hr: true,
-                    dateFormat: "Y-m-d H:i:S",
-                    onReady: (a, b, fp) => {
-                      fp.calendarContainer.firstChild.childNodes[1].firstChild.firstChild.setAttribute('aria-label', 'Month');
-                      fp.calendarContainer.childNodes[2].childNodes[4].firstChild.setAttribute('aria-label', 'Seconds');
+                    ],
+                    onClick: (index, upload_fp) => {
+                        let date;
+                        switch (index) {
+                            case 0:
+                                date = new Date("1900-01-01 00:00:00");
+                                break;
+                            case 1:
+                                date = new Date();
+                                break;
+                            case 2:
+                                date = new Date();
+                                date.setDate(date.getDate() + 1);
+                                break;
+                            case 3:
+                                date = new Date("9998-01-01 00:00:00");
+                                break;
+                        }
+                        upload_fp.setDate(date);
                     }
-                    });
-
+                }
+            )],
+            appendTo: document.getElementById('upload-course-materials-form'),
+            allowInput: true,
+            enableTime: true,
+            enableSeconds: true,
+            time_24hr: true,
+            dateFormat: "Y-m-d H:i:S",
+            onReady: (a, b, upload_fp) => {
+                upload_fp.calendarContainer.firstChild.childNodes[1].firstChild.firstChild.setAttribute('aria-label', 'Month');
+                upload_fp.calendarContainer.childNodes[2].childNodes[4].firstChild.setAttribute('aria-label', 'Seconds');
+            }
+        });
+        $('.form-body').on('scroll', function() {
+            upload_fp._positionCalendar();
+        });
     </script>
     <script>
         createArray(1);

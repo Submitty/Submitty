@@ -17,9 +17,9 @@
                 }
             </script>
         </label>
-    <br/>
-    <br/>
-    <input name="release_date" id="date_to_release" class="date_picker" type="text" size="26" value='9998-01-01 00:00:00' data-fp=" " onChange="getNewDateTime('date_to_release')"/>
+        <br/>
+        <br/>
+        <input name="release_date" id="date_to_release" class="date_picker" type="text" size="26" value='9998-01-01 00:00:00' data-fp=" " onChange="getNewDateTime('date_to_release')"/>
     </div>
     <script>
 
@@ -66,56 +66,58 @@
             });
         }
 
-
-        const release_date_folder_fp = flatpickr("#date_to_release", {
-                    plugins: [ShortcutButtonsPlugin(
+        const release_folder_fp = flatpickr("#date_to_release", {
+            plugins: [ShortcutButtonsPlugin(
+                {
+                    button: [
                         {
-                            button: [
-                                {
-                                    label: "Beginning of time"
-                                },
-                                {
-                                    label: "Now"
-                                },
-                                {
-                                    label: "Tomorrow"
-                                },
-                                {
-                                    label: "End of time"
-                                }
-                            ],
-                            onClick: (index, fp) => {
-                                let date;
-                                switch (index) {
-                                    case 0:
-                                        date = new Date("1001-01-01 00:00:00");
-                                        break;
-                                    case 1:
-                                        date = new Date();
-                                        break;
-                                    case 2:
-                                        date = new Date();
-                                        date.setDate(date.getDate() + 1);
-                                        break;
-                                    case 3:
-                                        date = new Date("9998-01-01 00:00:00");
-                                        break;
-                                }
-                                fp.setDate(date);
-                            }
+                            label: "Beginning of time"
+                        },
+                        {
+                            label: "Now"
+                        },
+                        {
+                            label: "Tomorrow"
+                        },
+                        {
+                            label: "End of time"
                         }
-                    )],
-                    appendTo: document.getElementById('set-folder-release-form'),
-                    allowInput: true,
-                    enableTime: true,
-                    enableSeconds: true,
-                    time_24hr: true,
-                    dateFormat: "Y-m-d H:i:S",
-                    onReady: (a, b, fp) => {
-                      fp.calendarContainer.firstChild.childNodes[1].firstChild.firstChild.setAttribute('aria-label', 'Month');
-                      fp.calendarContainer.childNodes[2].childNodes[4].firstChild.setAttribute('aria-label', 'Seconds');
+                    ],
+                    onClick: (index, release_folder_fp) => {
+                        let date;
+                        switch (index) {
+                            case 0:
+                                date = new Date("1900-01-01 00:00:00");
+                                break;
+                            case 1:
+                                date = new Date();
+                                break;
+                            case 2:
+                                date = new Date();
+                                date.setDate(date.getDate() + 1);
+                                break;
+                            case 3:
+                                date = new Date("9998-01-01 00:00:00");
+                                break;
+                        }
+                        release_folder_fp.setDate(date);
                     }
-                    });
+                }
+            )],
+            appendTo: document.getElementById('set-folder-release-form'),
+            allowInput: true,
+            enableTime: true,
+            enableSeconds: true,
+            time_24hr: true,
+            dateFormat: "Y-m-d H:i:S",
+            onReady: (a, b, release_folder_fp) => {
+                release_folder_fp.calendarContainer.firstChild.childNodes[1].firstChild.firstChild.setAttribute('aria-label', 'Month');
+                release_folder_fp.calendarContainer.childNodes[2].childNodes[4].firstChild.setAttribute('aria-label', 'Seconds');
+            }
+        });
+        $('.form-body').on('scroll', function() {
+           release_folder_fp._positionCalendar();
+        });
     </script>
 
 {% endblock %}
