@@ -5,6 +5,7 @@ namespace app\controllers;
 use app\controllers\AbstractController;
 use app\libraries\Core;
 use app\libraries\DateUtils;
+use app\libraries\response\RedirectResponse;
 use Symfony\Component\Routing\Annotation\Route;
 use app\libraries\response\JsonResponse;
 
@@ -60,7 +61,7 @@ class ErrorController extends AbstractController {
     }
 
     /**
-     * @Route("/courses/{_semester}/{_course}/rejoin_course")
+     * @Route("/courses/{_semester}/{_course}/rejoin_course", methods={"POST"})
      */
     public function rejoinCourse() {
         if (!$this->canRejoinCourse())
@@ -69,7 +70,7 @@ class ErrorController extends AbstractController {
         $user_id = $this->core->getUser()->getId();
         $this->core->getQueries()->removeUserFromNullSection($user_id);
         return JsonResponse::getSuccessResponse([
-            "Success" => "Yes!!!!!!!!!!!"
+            "message" => "YESSSS"
         ]);
     }
 
