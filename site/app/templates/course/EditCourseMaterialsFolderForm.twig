@@ -27,12 +27,12 @@
             </label>
             <br>
             <div id = "show-some-section-selection-folder-edit" class= "show-some-section-selection" style="display: none">
-                {% for section in reg_sections %}
-                    <div class = "reg-section-item">
-                        <input id="section-folder-edit-{{section['sections_registration_id']}}" type="checkbox" value="off" onchange="enableFullUpdate()"/>
-                        <label for="section-folder-edit-{{section['sections_registration_id']}}">Section {{ section['sections_registration_id'] }}</label>
-                    </div>
-                {% endfor %}
+            {% for section in reg_sections %}
+                <div class = "reg-section-item">
+                    <input id="section-folder-edit-{{section['sections_registration_id']}}" type="checkbox" value="off" onchange="enableFullUpdate()"/>
+                    <label for="section-folder-edit-{{section['sections_registration_id']}}">Section {{ section['sections_registration_id'] }}</label>
+                </div>
+            {% endfor %}
             </div>
             <script>
                 function toggleRegistrationSectionsFolderEdit(){
@@ -116,45 +116,45 @@
 
         let edit_folder_fp = flatpickr('.edit-folder-picker', {
             plugins: [ShortcutButtonsPlugin(
-                {
-                    button: [
-                        {
-                            label: "Beginning of time"
-                        },
-                        {
-                            label: "Now"
-                        },
-                        {
-                            label: "Tomorrow"
-                        },
-                        {
-                            label: "End of time"
-                        }
+                    {
+                        button: [
+                            {
+                                label: "Beginning of time"
+                            },
+                            {
+                                label: "Now"
+                            },
+                            {
+                                label: "Tomorrow"
+                            },
+                            {
+                                label: "End of time"
+                            }
 
-                    ],
-                    onClick: (index, edit_folder_fp) => {
-                        let date;
-                        switch (index) {
-                            case 0:
-                                date = new Date("1900-01-01 00:00:00");
-                                break;
-                            case 1:
-                                date = new Date();
-                                break;
-                            case 2:
-                                date = new Date();
-                                date.setDate(date.getDate() + 1);
-                                break;
-                            case 3:
-                                date = new Date("9998-01-01 00:00:00");
-                                break;
+                        ],
+                        onClick: (index, edit_folder_fp) => {
+                            let date;
+                            switch (index) {
+                                case 0:
+                                    date = new Date("1900-01-01 00:00:00");
+                                    break;
+                                case 1:
+                                    date = new Date();
+                                    break;
+                                case 2:
+                                    date = new Date();
+                                    date.setDate(date.getDate() + 1);
+                                    break;
+                                case 3:
+                                    date = new Date("9998-01-01 00:00:00");
+                                    break;
+                            }
+                            edit_folder_fp.setDate(date);
                         }
-                        edit_folder_fp.setDate(date);
                     }
-                }
             )],
             appendTo: document.getElementById('edit-course-materials-folder-form'),
-            position: "above left",
+            position: "above right",
             allowInput: true,
             enableTime: true,
             enableSeconds: true,
@@ -165,9 +165,9 @@
                 edit_folder_fp.calendarContainer.childNodes[2].childNodes[4].firstChild.setAttribute('aria-label', 'Seconds');
             }
         });
-        $('.form-body').on('scroll', function() {
-            edit_folder_fp._positionCalendar();
-        });
+    $('.form-body').on('scroll', function() {
+        edit_folder_fp._positionCalendar();
+    });
     </script>
 {% endblock %}
 {% block buttons %}

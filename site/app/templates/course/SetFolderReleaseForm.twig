@@ -6,6 +6,7 @@
 
 
     <div style="margin: auto; text-align: center;">
+    <br/>
         <label for="date_to_release">
             <b>Change the release date for all contents in <span id="release_title" data-path="" ></span>: </b>
             <script>
@@ -17,9 +18,9 @@
                 }
             </script>
         </label>
-        <br/>
-        <br/>
-        <input name="release_date" id="date_to_release" class="date_picker" type="text" size="26" value='9998-01-01 00:00:00' data-fp=" " onChange="getNewDateTime('date_to_release')"/>
+    <br/><br/>
+    <input name="release_date" id="date_to_release" class="date_picker" type="text" size="26" value='9998-01-01 00:00:00' data-fp=" " onChange="getNewDateTime('date_to_release')"/>
+    <br/><br/>
     </div>
     <script>
 
@@ -66,58 +67,59 @@
             });
         }
 
-        const release_folder_fp = flatpickr("#date_to_release", {
-            plugins: [ShortcutButtonsPlugin(
-                {
-                    button: [
+
+        const folder_release_fp = flatpickr("#date_to_release", {
+                    plugins: [ShortcutButtonsPlugin(
                         {
-                            label: "Beginning of time"
-                        },
-                        {
-                            label: "Now"
-                        },
-                        {
-                            label: "Tomorrow"
-                        },
-                        {
-                            label: "End of time"
+                            button: [
+                                {
+                                    label: "Beginning of time"
+                                },
+                                {
+                                    label: "Now"
+                                },
+                                {
+                                    label: "Tomorrow"
+                                },
+                                {
+                                    label: "End of time"
+                                }
+                            ],
+                            onClick: (index, folder_release_fp) => {
+                                let date;
+                                switch (index) {
+                                    case 0:
+                                        date = new Date("1900-01-01 00:00:00");
+                                        break;
+                                    case 1:
+                                        date = new Date();
+                                        break;
+                                    case 2:
+                                        date = new Date();
+                                        date.setDate(date.getDate() + 1);
+                                        break;
+                                    case 3:
+                                        date = new Date("9998-01-01 00:00:00");
+                                        break;
+                                }
+                                folder_release_fp.setDate(date);
+                            }
                         }
-                    ],
-                    onClick: (index, release_folder_fp) => {
-                        let date;
-                        switch (index) {
-                            case 0:
-                                date = new Date("1900-01-01 00:00:00");
-                                break;
-                            case 1:
-                                date = new Date();
-                                break;
-                            case 2:
-                                date = new Date();
-                                date.setDate(date.getDate() + 1);
-                                break;
-                            case 3:
-                                date = new Date("9998-01-01 00:00:00");
-                                break;
-                        }
-                        release_folder_fp.setDate(date);
+                    )],
+                    appendTo: document.getElementById('set-folder-release-form'),
+                    allowInput: true,
+                    enableTime: true,
+                    enableSeconds: true,
+                    time_24hr: true,
+                    dateFormat: "Y-m-d H:i:S",
+                    onReady: (a, b, folder_release_fp) => {
+                      folder_release_fp.calendarContainer.firstChild.childNodes[1].firstChild.firstChild.setAttribute('aria-label', 'Month');
+                      folder_release_fp.calendarContainer.childNodes[2].childNodes[4].firstChild.setAttribute('aria-label', 'Seconds');
                     }
-                }
-            )],
-            appendTo: document.getElementById('set-folder-release-form'),
-            allowInput: true,
-            enableTime: true,
-            enableSeconds: true,
-            time_24hr: true,
-            dateFormat: "Y-m-d H:i:S",
-            onReady: (a, b, release_folder_fp) => {
-                release_folder_fp.calendarContainer.firstChild.childNodes[1].firstChild.firstChild.setAttribute('aria-label', 'Month');
-                release_folder_fp.calendarContainer.childNodes[2].childNodes[4].firstChild.setAttribute('aria-label', 'Seconds');
-            }
-        });
-        $('.form-body').on('scroll', function() {
-           release_folder_fp._positionCalendar();
-        });
+                    });
+    $('.form-body').on('scroll', function() {
+        folder_release_fp._positionCalendar();
+    });
     </script>
 
 {% endblock %}
