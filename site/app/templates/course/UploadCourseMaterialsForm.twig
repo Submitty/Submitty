@@ -203,12 +203,12 @@
                     time_24hr: true,
                     dateFormat: "Y-m-d H:i:S",
                     onReady: (a, b,  upload_fp) => {
-                       upload_fp.calendarContainer.firstChild.childNodes[1].firstChild.firstChild.setAttribute('aria-label', 'Month');
-                       upload_fp.calendarContainer.childNodes[2].childNodes[4].firstChild.setAttribute('aria-label', 'Seconds');
+                      upload_fp.calendarContainer.firstChild.childNodes[1].firstChild.firstChild.setAttribute('aria-label', 'Month');
+                      upload_fp.calendarContainer.childNodes[2].childNodes[4].firstChild.setAttribute('aria-label', 'Seconds');
                     }
                     });
     $('.form-body').on('scroll', function() {
-        upload_fp._positionCalendar();
+      upload_fp._positionCalendar();
     });
     </script>
     <script>
