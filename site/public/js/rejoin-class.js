@@ -9,8 +9,6 @@ async function rejoinCourse(readd_url) {
         'csrf_token': csrfToken
     },
     success: function(data) {
-        console.log("We're in the success block.");
-        console.log(data["message"]);
     	return true;
     },
     error: function(e) {

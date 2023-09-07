@@ -52,14 +52,6 @@ class ErrorController extends AbstractController {
         return false;
     }
 
-    private function console_log($output, $with_script_tags = true) {
-        $js_code = 'console.log(' . json_encode($output, JSON_HEX_TAG) . ');';
-        if ($with_script_tags) {
-            $js_code = '<script>' . $js_code . '</script>';
-        }
-        echo $js_code;
-    }
-
     /**
      * @Route("/courses/{_semester}/{_course}/rejoin_course", methods={"POST"})
      */
@@ -68,10 +60,26 @@ class ErrorController extends AbstractController {
             return;
 
         $user_id = $this->core->getUser()->getId();
-        $this->core->getQueries()->removeUserFromNullSection($user_id);
-        return JsonResponse::getSuccessResponse([
-            "message" => "YESSSS"
-        ]);
+        $joined_section = $this->core->getQueries()->removeUserFromNullSection($user_id);
+
+        $this->sendRejoinedStudentEmail($joined_section);
+        return JsonResponse::getSuccessResponse();
+    }
+
+
+    private function sendRejoinedStudentEmail($joined_section) {
+        $user_id = $this->core->getUser()->getId();
+        $course = $this->course->getConfig()->getCourse();
+
+        $subject = "User Rejoin: $user_id of $course";
+        $body = <<<EMAIL
+            The student $user_id, who had been automatically removed from the course $course,
+            has readded themselves in section $joined_section.
+
+            Please move them to their appropiate section. If this rejoin was a mistake,
+            you may move the student to the Null section.
+        EMAIL;
+        //$details = 
     }
 
 }
