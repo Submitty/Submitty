@@ -47,10 +47,10 @@ class CalendarView extends AbstractView {
             array_push($formatted_courses, $course_string);
         }
         foreach ($courses as $course) {
-            if($course->getDisplayName()){
+            if ($course->getDisplayName()) {
                 $name_string = sprintf("%s %s", $course->getDisplayName(), $course->getTerm());
             }
-            else{
+            else {
                 $name_string = sprintf("%s %s", $course->getTitle(), $course->getTerm());
             }
             array_push($display_names, $name_string);
