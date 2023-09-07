@@ -301,7 +301,7 @@ function addToTable() {
 
     // Check for empty fields
     if (USERID === '' || gradeable === '' || penalty === '') {
-        alert('Please fill in all the fields fyi.');
+        alert('Please fill in all the fields.');
         return;
     }
     // Check for penalty
