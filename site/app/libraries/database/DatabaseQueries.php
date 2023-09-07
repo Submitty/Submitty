@@ -1805,16 +1805,21 @@ WHERE term=? AND course=? AND user_id=?",
      * @param string $user_id User to move to Section 1
      */
     public function removeUserFromNullSection($user_id) {
-        $query = "
+        $new_section_query = "
+            SELECT sections_registration_id
+            FROM sections_registration
+            LIMIT 1
+        ";
+        $this->course_db->query($new_section_query);
+        $new_section = $this->course_db->rows()[0];
+
+        $remove_query = "
             UPDATE users
-            SET registration_section = (
-                SELECT sections_registration_id
-                FROM sections_registration
-                LIMIT 1
-            )
+            SET registration_section=?
             WHERE user_id=?;
         ";
-        $this->course_db->query($query, [$user_id]);
+        $this->course_db->query($remove_query, [$new_section, $user_id]);
+        return $new_section;
     }
 
     public function getTotalUserCountByGradingSections($sections, $section_key) {

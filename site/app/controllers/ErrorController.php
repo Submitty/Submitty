@@ -8,6 +8,7 @@ use app\libraries\DateUtils;
 use app\libraries\response\RedirectResponse;
 use Symfony\Component\Routing\Annotation\Route;
 use app\libraries\response\JsonResponse;
+use app\models\Email;
 
 class ErrorController extends AbstractController {
 
@@ -79,7 +80,11 @@ class ErrorController extends AbstractController {
             Please move them to their appropiate section. If this rejoin was a mistake,
             you may move the student to the Null section.
         EMAIL;
-        //$details = 
+
+        $instructor_id = $this->core->getQueries()->getActiveUserIds(true, false, false, false, false)[0];
+        $details = ["subject" => $subject, "body" => $body, "to_user_id" => $instructor_id];
+        $email = new Email($this->core, $details)''
+        $this->core->getNotificationFactory()->sendEmails($emails);
     }
 
 }
