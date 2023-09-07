@@ -1808,10 +1808,10 @@ WHERE term=? AND course=? AND user_id=?",
         $new_section_query = "
             SELECT sections_registration_id
             FROM sections_registration
-            LIMIT 1
+            LIMIT 1;
         ";
         $this->course_db->query($new_section_query);
-        $new_section = $this->course_db->rows()[0];
+        $new_section = $this->course_db->row()['sections_registration_id'];
 
         $remove_query = "
             UPDATE users

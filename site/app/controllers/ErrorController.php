@@ -17,6 +17,7 @@ class ErrorController extends AbstractController {
      * @Route("/courses/{_semester}/{_course}/no_access")
      */
     public function noAccess() {
+        $this->rejoinCourse();
         $this->core->getOutput()->renderOutput(
             'Error',
             'noAccessCourse',
@@ -70,7 +71,7 @@ class ErrorController extends AbstractController {
 
     private function sendRejoinedStudentEmail($joined_section) {
         $user_id = $this->core->getUser()->getId();
-        $course = $this->course->getConfig()->getCourse();
+        $course = $this->core->getConfig()->getCourse();
 
         $subject = "User Rejoin: $user_id of $course";
         $body = <<<EMAIL
@@ -83,7 +84,7 @@ class ErrorController extends AbstractController {
 
         $instructor_id = $this->core->getQueries()->getActiveUserIds(true, false, false, false, false)[0];
         $details = ["subject" => $subject, "body" => $body, "to_user_id" => $instructor_id];
-        $email = new Email($this->core, $details)''
+        $emails = [new Email($this->core, $details)];
         $this->core->getNotificationFactory()->sendEmails($emails);
     }
 
