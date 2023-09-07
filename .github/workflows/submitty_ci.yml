@@ -477,10 +477,6 @@ jobs:
           spec: cypress/e2e/Cypress-${{matrix.containers}}/*
           browser: chrome
           env: run_area=CI
-        env:
-          CYPRESS_RECORD_KEY: ${{ secrets.CYPRESS_RECORD_KEY }}
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          COMMIT_INFO_MESSAGE: ${{github.event.pull_request.title}}
 
       - name: Check for site errors
         working-directory: ${{ env.SUBMITTY_REPOSITORY }}
