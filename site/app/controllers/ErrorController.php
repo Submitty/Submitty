@@ -41,7 +41,7 @@ class ErrorController extends AbstractController {
         $user_id = $user->getId();
         $most_recent_access = $this->core->getQueries()->getMostRecentGradeableAccessForUser($user_id);
         // If removed from course within last 3 days, can readd self.
-        if (DateUtils::calculateDayDiff($most_recent_access) <= 3) {
+        if ($most_recent_access !== "Never accessed a gradeable" &&& DateUtils::calculateDayDiff($most_recent_access) <= 3) {
             return true;
         }
 
