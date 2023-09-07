@@ -6,7 +6,7 @@ use app\libraries\FileUtils;
 use Doctrine\ORM\EntityManager;
 use Doctrine\ORM\ORMSetup;
 
-$config = ORMSetup::createAnnotationMetadataConfiguration([FileUtils::joinPaths(__DIR__, '..', '..', 'site', 'app', 'entities')], true);
+$config = ORMSetup::createAttributeMetadataConfiguration([FileUtils::joinPaths(__DIR__, '..', '..', 'site', 'app', 'entities')], true);
 $conn = [
     'driver' => 'pdo_sqlite',
     'serverVersion' => '14.2'
