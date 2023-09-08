@@ -215,15 +215,6 @@ source ${CURRENT_DIR}/distro_setup/setup_distro.sh
 
 bash "${SUBMITTY_REPOSITORY}/.setup/update_system.sh"
 
-
-#################################################################
-# Node Package Setup
-####################
-# NOTE: with umask 0027, the npm packages end up with the wrong permissions.
-# (this happens if we re-run install_system on an existing installation).
-# So let's manually set the umask just for this call.
-(umask 0022 && npm install -g npm)
-
 #################################################################
 # STACK SETUP
 #################
