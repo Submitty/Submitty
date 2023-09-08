@@ -227,7 +227,7 @@ class AutoGradedVersion extends AbstractModel {
             $json_content = file_get_contents($filepath);
             $json_data = json_decode($json_content, true);
 
-            return $json_data !== null ? $json_data : null;
+            return $json_data;
         }
         return null;
     }
