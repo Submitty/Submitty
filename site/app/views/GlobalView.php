@@ -3,7 +3,6 @@
 namespace app\views;
 
 use app\libraries\FileUtils;
-use app\entities\banner\BannerImage;
 
 class GlobalView extends AbstractView {
     /**
