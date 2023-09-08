@@ -756,6 +756,20 @@ function toggleDiv(id) {
     return true;
 }
 
+function loadAttempt() {
+    const params = new URLSearchParams(window.location.search);
+    const loadAttempt = Number(params.get("loadAttempt") ?? "0");
+    if (loadAttempt < 3) {
+        params.set("loadAttempt", loadAttempt + 1);
+        window.location.search = params.toString();
+    }
+}
+
+function showIncentiveMessage() {
+    console.log("saumya from server incentive");
+    console.log($("#incentive_message"));
+    $("#incentive_message").show();
+}
 
 function checkRefreshPage(url) {
     setTimeout(function() {
