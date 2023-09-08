@@ -59,7 +59,7 @@ class ErrorController extends AbstractController {
      */
     public function rejoinCourse() {
         if (!$this->canRejoinCourse())
-            return;
+            return JsonResponse::getFailResponse();
 
         $user_id = $this->core->getUser()->getId();
         $joined_section = $this->core->getQueries()->removeUserFromNullSection($user_id);
@@ -82,9 +82,15 @@ class ErrorController extends AbstractController {
             you may move the student to the Null section.
         EMAIL;
 
-        $instructor_id = $this->core->getQueries()->getActiveUserIds(true, false, false, false, false)[0];
-        $details = ["subject" => $subject, "body" => $body, "to_user_id" => $instructor_id];
-        $emails = [new Email($this->core, $details)];
+        $instructor_ids = $this->core->getQueries()->getActiveUserIds(true, false, false, false, false);
+        $emails = [];
+        $details = ["subject" => $subject, "body" => $body];
+        foreach ($instructor_ids as $instructor_id {
+            $details["to_user_id"] = $instructor_id;
+            $email = new Email($this->core, $details);
+            $emails.array_push($email);
+        }
+
         $this->core->getNotificationFactory()->sendEmails($emails);
     }
 
