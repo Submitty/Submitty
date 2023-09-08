@@ -6,7 +6,7 @@ use app\libraries\FileUtils;
 
 class GlobalView extends AbstractView {
     /**
-     * @param array<BannerImages> $bannerImages
+     * @param array<BannerImage> $bannerImages
      */
     public function header($breadcrumbs, $wrapper_urls, $sidebar_buttons, $notifications_info, $css, $js, $duck_img, $page_name, $content_only, array $bannerImages) {
         $messages = [];
