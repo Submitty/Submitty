@@ -15,20 +15,20 @@ run_php_cs() {
 }
 
 submitty_test() {
-    if [ "$1" == "php-stan" ]; then
+    if [ "$1" == "phpstan" ]; then
         run_php_stan "$@"
-    elif [ "$1" == "php-cs" ]; then
+    elif [ "$1" == "phpcs" ]; then
         run_php_cs
     elif [ "$1" == "php-lint" ]; then
         run_php_cs
         run_php_stan "$@"
     elif [ "$1" == "help" ]; then
-        echo "php-stan: php static analysis [option: --memory-limit=4G, --generate-baseline ...]
-              php-cs  : php CodeSniffer
-              php-lint: php-cs & php-stan"
+        echo "phpstan: php static analysis [option: --memory-limit=4G, --generate-baseline ...]
+              phpcs  : php CodeSniffer
+              php-lint: phpcs & phpstan"
     else
         echo "Unknown test type: $1
-            use php-stan, php-cs, php-lint
+            use phpstan, phpcs, php-lint
             or help for detail"
     fi
 }
