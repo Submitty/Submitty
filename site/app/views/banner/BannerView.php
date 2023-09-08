@@ -10,6 +10,7 @@ use app\views\AbstractView;
 class BannerView extends AbstractView {
     /**
      * This function shows a calendar with arbitrary items. It first shows a calendar view that list all items on
+     * @param array<BannerImages> $bannerImages
      * @return string
      * calendar by their given date. Then it shows a series of tables to list all items.
      *
