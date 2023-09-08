@@ -304,9 +304,10 @@ function addToTable() {
         alert('Please fill in all the fields.');
         return;
     }
+
     // Check for penalty
     if (penalty > 1 || penalty < 0) {
-        alert('penalty must be between 0 - 1');
+        alert('Penalty must be between 0 - 1');
         return;
     }
 
@@ -316,42 +317,40 @@ function addToTable() {
         penalty: penalty,
     };
 
-    const tableData = [];
+    const tableBody = document.getElementById('table-body');
 
     // Check for duplicate entries
-    const tableBody = document.getElementById('table-body');
     const rows = tableBody.getElementsByTagName('tr');
     for (let i = 0; i < rows.length; i++) {
         const row = rows[i];
-        const rowData = {
-            user: row.cells[0].innerHTML,
-            gradeable: row.cells[1].innerHTML,
-            penalty: row.cells[2].innerHTML,
-        };
-        tableData.push(rowData);
-
-        const existingUSERID = row.cells[0].innerHTML;
-        const existingGradeable = row.cells[1].innerHTML;
+        const existingUSERID = row.cells[0].textContent.trim();
+        const existingGradeable = row.cells[1].textContent.trim();
 
         if (USERID === existingUSERID && gradeable === existingGradeable) {
             alert('Entry with the same Student ID and Gradeable already exists.');
             return;
         }
     }
-    tableData.push(newRowData);
+
+    // Create a new row and cells
     const newRow = tableBody.insertRow();
 
     const cellUSERID = newRow.insertCell();
-    cellUSERID.innerHTML = USERID;
+    cellUSERID.textContent = USERID;
 
     const cellGradeable = newRow.insertCell();
-    cellGradeable.innerHTML = gradeable;
+    cellGradeable.textContent = gradeable;
 
     const cellPenalty = newRow.insertCell();
-    cellPenalty.innerHTML = penalty;
+    cellPenalty.textContent = penalty;
 
     const cellDelete = newRow.insertCell();
-    cellDelete.innerHTML = '<a onclick="deleteRow(this)"><i class="fas fa-trash"></i></a>';
+    const deleteLink = document.createElement('a');
+    deleteLink.innerHTML = '<i class="fas fa-trash"></i>';
+    deleteLink.onclick = function () {
+        deleteRow(this);
+    };
+    cellDelete.appendChild(deleteLink);
 
     // Clear the form fields
     document.getElementById('user_id').value = '';
