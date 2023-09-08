@@ -7,6 +7,7 @@ use app\models\Button;
 use app\models\NavButton;
 use app\models\User;
 use app\entities\banner\BannerImage;
+use app\repositories\banner\BannerImageRepository;
 
 class GlobalController extends AbstractController {
     public function header() {
@@ -61,7 +62,9 @@ class GlobalController extends AbstractController {
 
         $now = $this->core->getDateTimeNow();
         $duck_img = $this->getDuckImage($now);
-        $bannerImages = $this->core->getSubmittyEntityManager()->getRepository(BannerImage::class) ->getValidBannerImages();
+        /** @var BannerImageRepository $repo  */
+        $repo = $this->core->getSubmittyEntityManager()->getRepository(BannerImage::class);
+        $bannerImages = $repo->getValidBannerImages();
 
         return $this->core->getOutput()->renderTemplate('Global', 'header', $breadcrumbs, $wrapper_urls, $sidebar_buttons, $unread_notifications_count, $css->toArray(), $js->toArray(), $duck_img, $page_name, $content_only, $bannerImages);
     }
