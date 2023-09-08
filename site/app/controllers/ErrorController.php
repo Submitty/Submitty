@@ -88,7 +88,7 @@ class ErrorController extends AbstractController {
         foreach ($instructor_ids as $instructor_id {
             $details["to_user_id"] = $instructor_id;
             $email = new Email($this->core, $details);
-            $emails.array_push($email);
+            $emails->array_push($email);
         }
 
         $this->core->getNotificationFactory()->sendEmails($emails);
