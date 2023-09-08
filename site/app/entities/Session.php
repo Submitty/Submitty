@@ -4,64 +4,43 @@ declare(strict_types=1);
 
 namespace app\entities;
 
+use app\repositories\SessionRepository;
+use DateTime;
+use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
 use app\libraries\SessionManager;
 
 /**
  * Class Session
  * @package app\entities
- * @ORM\Entity(repositoryClass="\app\repositories\SessionRepository")
- * @ORM\Table(name="sessions")
  */
+#[ORM\Entity(repositoryClass: SessionRepository::class)]
+#[ORM\Table(name: "sessions")]
 class Session {
-    /**
-     * @ORM\Id
-     * @ORM\Column(type="string")
-     * @var string
-     */
-    private $session_id;
+    #[ORM\Id]
+    #[ORM\Column(type: Types::STRING)]
+    private string $session_id;
 
-    /**
-     * @ORM\Column(type="string")
-     * @var string
-     */
-    private $user_id;
+    #[ORM\Column(type: Types::STRING)]
+    private string $user_id;
 
-    /**
-     * @ORM\Column(type="string")
-     * @var string
-     */
-    private $csrf_token;
+    #[ORM\Column(type: Types::STRING)]
+    private string $csrf_token;
 
-    /**
-     * @ORM\Column(type="datetimetz")
-     * @var \DateTime
-     */
-    private $session_expires;
+    #[ORM\Column(type: Types::DATETIMETZ_MUTABLE)]
+    private DateTime $session_expires;
 
-    /**
-     * @ORM\Column(type="datetimetz")
-     * @var \DateTime | null
-     */
-    private $session_created;
+    #[ORM\Column(type: Types::DATETIMETZ_MUTABLE)]
+    private ?DateTime $session_created;
 
-    /**
-     * @ORM\Column(type="string")
-     * @var string
-     */
-    private $browser_name;
+    #[ORM\Column(type: Types::STRING)]
+    private string $browser_name;
 
-    /**
-     * @ORM\Column(type="string")
-     * @var string
-     */
-    private $browser_version;
+    #[ORM\Column(type: Types::STRING)]
+    private string $browser_version;
 
-    /**
-     * @ORM\Column(type="string")
-     * @var string
-     */
-    private $platform;
+    #[ORM\Column(type: Types::STRING)]
+    private string $platform;
 
     /**
      * @param array<string, string> $user_agent
