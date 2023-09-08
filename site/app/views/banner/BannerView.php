@@ -6,6 +6,7 @@ namespace app\views\banner;
 
 use app\libraries\FileUtils;
 use app\views\AbstractView;
+use app\entities\banner\BannerImages;
 
 class BannerView extends AbstractView {
     /**
