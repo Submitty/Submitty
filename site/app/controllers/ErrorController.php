@@ -41,7 +41,7 @@ class ErrorController extends AbstractController {
         $user_id = $user->getId();
         $most_recent_access = $this->core->getQueries()->getMostRecentGradeableAccessForUser($user_id);
         // If removed from course within last 3 days, can readd self.
-        if ($most_recent_access !== "Never accessed a gradeable" &&& DateUtils::calculateDayDiff($most_recent_access) <= 3) {
+        if ($most_recent_access !== "Never accessed a gradeable" && DateUtils::calculateDayDiff($most_recent_access) <= 3) {
             return true;
         }
 
@@ -85,10 +85,10 @@ class ErrorController extends AbstractController {
         $instructor_ids = $this->core->getQueries()->getActiveUserIds(true, false, false, false, false);
         $emails = [];
         $details = ["subject" => $subject, "body" => $body];
-        foreach ($instructor_ids as $instructor_id {
+        foreach ($instructor_ids as $instructor_id) {
             $details["to_user_id"] = $instructor_id;
             $email = new Email($this->core, $details);
-            $emails->array_push($email);
+            array_push($emails, $email);
         }
 
         $this->core->getNotificationFactory()->sendEmails($emails);
