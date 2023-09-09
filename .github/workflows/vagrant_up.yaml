@@ -18,14 +18,11 @@ jobs:
       # attempting to mount the shared folder. The guest and host guest additions
       # versions are close enough that we are fine without it.
       # - run: vagrant plugin install vagrant-vbguest
-      # - run: NO_SUBMISSIONS=1 vagrant up ubuntu-22.04
-      # - name: Validate image
-      #   run: curl --show-error --fail --include http://localhost:1511
+      - run: NO_SUBMISSIONS=1 vagrant up ubuntu-22.04
+      - name: Validate image
+        run: curl --show-error --fail --include http://localhost:1511
 
-      - name: failed step
-        run: |
-          exit 1
-      - name: Send mail
+      - name: Send email if failed
         if: failure()
         uses: dawidd6/action-send-mail@v2
         with:
@@ -33,14 +30,7 @@ jobs:
           server_port: 465
           username: ${{secrets.MAIL_USERNAME}}
           password: ${{secrets.MAIL_PASSWORD}}
-          subject: Github Actions job result
-          # Literal body:
-          body: Build job of ${{github.repository}} Failed!
-          # Read file contents as body:
-          # body: file://README.md
-          to: reapernsgaming@gmail.com
-          from: Github action # <user@example.com>
-          # Optional content type (defaults to text/plain):
-          # content_type: text/html
-          # Optional attachments:
-          # attachments: attachments.zip,git.diff,./dist/static/main.js
+          subject: Github Actions Vagrant Up job has failed
+          body: Vagrant Up job has failed on main. 
+          to: ${{ secrets.EMAIL_LIST }}
+          from: Github Actions
