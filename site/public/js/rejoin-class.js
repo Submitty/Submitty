@@ -1,7 +1,5 @@
 
 async function rejoinCourse(readd_url) {
-    console.log(readd_url);
-    console.log(csrfToken);
 	$.ajax({
     type: "POST",    
     url: readd_url,
