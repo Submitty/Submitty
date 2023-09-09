@@ -28,8 +28,8 @@ jobs:
         with:
           server_address: smtp.gmail.com
           server_port: 465
-          username: ${{secrets.MAIL_USERNAME}}
-          password: ${{secrets.MAIL_PASSWORD}}
+          username: ${{secrets.EMAIL_USERNAME}}
+          password: ${{secrets.EMAIL_PASSWORD}}
           subject: Github Actions Vagrant Up job has failed
           body: Vagrant Up job has failed on main. 
           to: ${{ secrets.EMAIL_LIST }}
