@@ -17,7 +17,6 @@ class ErrorController extends AbstractController {
      * @Route("/courses/{_semester}/{_course}/no_access")
      */
     public function noAccess() {
-        $this->rejoinCourse();
         $this->core->getOutput()->renderOutput(
             'Error',
             'noAccessCourse',
@@ -61,10 +60,18 @@ class ErrorController extends AbstractController {
         if (!$this->canRejoinCourse())
             return JsonResponse::getFailResponse();
 
-        $user_id = $this->core->getUser()->getId();
-        $joined_section = $this->core->getQueries()->removeUserFromNullSection($user_id);
+        $term = $this->core->getConfig()->getTerm();
+        $course = $this->core->getConfig()->getCourse();
 
-        $this->sendRejoinedStudentEmail($joined_section);
+        $sections = $this->core->getQueries()->getRegistrationSections();
+        $first_section = $sections[0]["sections_registration_id"];
+
+        $user = $this->core->getUser();
+        $user->setRegistrationSection($first_section);
+
+        $this->core->getQueries()->updateUser($user, $term, $course);
+
+        $this->sendRejoinedStudentEmail($first_section);
         return JsonResponse::getSuccessResponse();
     }
 
