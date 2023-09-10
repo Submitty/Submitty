@@ -25,12 +25,8 @@ Adam Tuhacek 2023-current
 Yanli Wang 2023-current  
 Kerui (Ray) Wu 2023-current  
 Bairong Zhang 2023-current  
-Jody Sunray 2022-current  
 Ryon Chan 2022-current  
 Kasja Arnold 2022-current  
-Bowen (Evan) Shi 2022-current  
-Jiarui (Jerry) Lu 2022-current  
-Thomas Kozlowski 2022-current  
 William Allen, 2021-current  
 Shelly Belsky, 2021-current  
 Christopher Reed, 2021-current  
@@ -45,6 +41,10 @@ Peter Bailie 2014-current
 David Goldschmidt 2014-current  
 Konstantin Kuzmin 2018-current  
 Preston Carman 2019-current  
+Jody Sunray 2022-2023  
+Bowen (Evan) Shi 2022-2023  
+Jiarui (Jerry) Lu 2022-2023  
+Thomas Kozlowski 2022-2023  
 Akshat Batra, 2022, Google Summer of Code 2022  
 Madhur Jain, 2022, Google Summer of Code 2022  
 Poorna Gunathilaka, 2022, Google Summer of Code 2022  
