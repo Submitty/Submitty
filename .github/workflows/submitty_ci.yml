@@ -323,6 +323,14 @@ jobs:
           npm install file-saver --save
           npm install --production=false
 
+      - name: Run accessibility test
+        uses: cypress-io/github-action@v5
+        with:
+          config: baseUrl=http://localhost
+          spec: cypress/e2e/cypress-system/accessibility.spec.js
+          working-directory: ${{env.SUBMITTY_REPOSITORY}}/site
+          browser: chrome
+
       - name: Run API tests
         working-directory: ${{env.SUBMITTY_REPOSITORY}}/site
         run: npm run test:api
@@ -421,14 +429,12 @@ jobs:
         working-directory: ${{ env.SUBMITTY_REPOSITORY }}
         run: sudo bash tests/test_site_error_log.sh
 
-  Cypress-Feature:
+  Cypress:
     runs-on: ubuntu-22.04
     strategy:
-      # don't fail the entire matrix on failure
       fail-fast: false
       matrix:
-        # run copies of the current job in parallel
-        containers: [1, 2, 3, 4]
+        containers: ["Gradeable", "Admin", "UI", "Feature"]
     services:
       postgres:
         image: postgres
@@ -468,19 +474,24 @@ jobs:
         with:
           config: baseUrl=http://localhost
           working-directory: ${{env.SUBMITTY_REPOSITORY}}/site
-          spec: cypress/e2e/cypress-feature/*
+          spec: cypress/e2e/Cypress-${{matrix.containers}}/*
           browser: chrome
           env: run_area=CI
-          record: true
-          parallel: true  # Runs test in parallel using settings above
-        env:
-          CYPRESS_RECORD_KEY: ${{ secrets.CYPRESS_RECORD_KEY }}
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          COMMIT_INFO_MESSAGE: ${{github.event.pull_request.title}}
 
       - name: Check for site errors
         working-directory: ${{ env.SUBMITTY_REPOSITORY }}
         run: sudo bash tests/test_site_error_log.sh
+
+      - uses: actions/upload-artifact@v3
+        if: failure()
+        with:
+          name: cypress-screenshots
+          path: ${{env.SUBMITTY_REPOSITORY}}/site/cypress/screenshots
+      - uses: actions/upload-artifact@v3
+        if: failure()
+        with:
+          name: cypress-videos
+          path: ${{env.SUBMITTY_REPOSITORY}}/site/cypress/videos
 
 
   Integration:
