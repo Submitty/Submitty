@@ -383,11 +383,15 @@
     bannerElement.style.display = 'none';
     bannerElement.style.width = "1%";
 
-    if (hiddenImages.length == images.length) {
-        document.getElementById("speech-bubble-container").style.display = "none";
-    }
-    else {
-        document.getElementById("speech-bubble-container").style.display = "block";
+    var bubble = document.getElementById("speech-bubble-container");
+    if (bubble != null) {
+        if (hiddenImages.length == images.length) {
+
+            bubble.style.display = "none";
+        }
+        else {
+            bubble.style.display = "block";
+        }
     }
 
     var currentImages = [];
@@ -401,13 +405,6 @@
         }
     }
 
-
-    if (currentImages.length >0 ) {
-        document.getElementById("speech-bubble-container").style.display = 'block';
-    }
-    else {
-        document.getElementById("speech-bubble-container").style.display = 'none';
-    }
 
     images = currentImages.concat(seenImages);
 
@@ -464,7 +461,6 @@
     }
 
     function changeImage(n) {
-        console.log("attempting here");
         var originalIndex = currentImageIndex;
 
 
