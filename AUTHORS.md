@@ -5,11 +5,11 @@ Evan Maicus 2016-current
 
 ## Developers  
 
-Saumya Borwankar, 2023, Google Summer of Code 2023
+Saumya Borwankar, 2023, Google Summer of Code 2023  
 Musaab Imran, 2023, Google Summer of Code 2023  
 Cameron Peterson, 2023, Google Summer of Code 2023  
 Youssef Hassan 2023-current  
-Nia Heermance 2023-current
+Nia Heermance 2023-current  
 Eden Bendheim 2023-current  
 Jason Chen 2023-current  
 Anson Decker 2023-current  
