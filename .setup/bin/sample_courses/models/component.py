@@ -1,9 +1,6 @@
 
 from __future__ import print_function, division
 
-import os.path
-import random
-
 # if you need to modify any global variables, change this to import file as name
 from sample_courses import *
 

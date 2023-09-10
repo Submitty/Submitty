@@ -32,8 +32,10 @@ from sample_courses.utils.create_or_generate import (
     create_pdf_annotations
     )
 from sample_courses.models.gradeable import Gradeable
+from sample_courses.models.course.course_create import Create_Course
+from sample_courses.models.course.course_utils import Course_utils
 
-class Course(object):
+class Course(Create_Course,Course_utils):
     """
     Object to represent the courses loaded from the courses.json file as well as the list of
     users that are needed for this particular course (which is a list of User objects).

@@ -7,20 +7,6 @@ from sample_courses.utils.checks import user_exists
 from sample_courses.utils.dependent import add_to_group
 
 
-def generate_random_marks(default_value, max_value):
-    with open(os.path.join(SETUP_DATA_PATH, "random", "marks.yml")) as f:
-        marks_yml = yaml.load(f)
-    if default_value == max_value and default_value > 0:
-        key = "count_down"
-    else:
-        key = "count_up"
-    marks = []
-    mark_list = random.choice(marks_yml[key])
-    for i in range(len(mark_list)):
-        marks.append(Mark(mark_list[i], i))
-    return marks
-
-
 class Mark(object):
     def __init__(self, mark, order):
         self.note = mark["gcm_note"]
@@ -39,67 +25,18 @@ class Mark(object):
         res = conn.execute(ins)
         self.key = res.inserted_primary_key[0]
 
-
-def generate_random_users(total, real_users):
-    """
-
-    :param total:
-    :param real_users:
-    :return:
-    :rtype: list[User]
-    """
-    with open(
-        os.path.join(SETUP_DATA_PATH, "random", "familyNames.txt")
-    ) as family_file, open(
-        os.path.join(SETUP_DATA_PATH, "random", "maleGivenNames.txt")
-    ) as male_file, open(
-        os.path.join(SETUP_DATA_PATH, "random", "womenGivenNames.txt")
-    ) as woman_file:
-        family_names = family_file.read().strip().split()
-        male_names = male_file.read().strip().split()
-        women_names = woman_file.read().strip().split()
-
-    users = []
-    user_ids = []
-    anon_ids = []
-    with open(
-        os.path.join(SETUP_DATA_PATH, "random_users.txt"), "w"
-    ) as random_users_file:
-        for i in range(total):
-            if random.random() < 0.5:
-                given_name = random.choice(male_names)
-            else:
-                given_name = random.choice(women_names)
-            family_name = random.choice(family_names)
-            user_id = family_name.replace("'", "")[:5] + given_name[0]
-            user_id = user_id.lower()
-            anon_id = generate_random_user_id(15)
-            # create a binary string for the numeric ID
-            numeric_id = "{0:09b}".format(i)
-            while user_id in user_ids or user_id in real_users:
-                if user_id[-1].isdigit():
-                    user_id = user_id[:-1] + str(int(user_id[-1]) + 1)
-                else:
-                    user_id = user_id + "1"
-            if anon_id in anon_ids:
-                anon_id = generate_random_user_id()
-            new_user = User(
-                {
-                    "user_id": user_id,
-                    "user_numeric_id": numeric_id,
-                    "user_givenname": given_name,
-                    "user_familyname": family_name,
-                    "user_pronouns": generate_pronouns(),
-                    "user_group": 4,
-                    "courses": dict(),
-                }
-            )
-            new_user.create()
-            user_ids.append(user_id)
-            users.append(new_user)
-            anon_ids.append(anon_id)
-            random_users_file.write(user_id + "\n")
-    return users
+def generate_random_marks(default_value, max_value):
+    with open(os.path.join(SETUP_DATA_PATH, "random", "marks.yml")) as f:
+        marks_yml = yaml.load(f)
+    if default_value == max_value and default_value > 0:
+        key = "count_down"
+    else:
+        key = "count_up"
+    marks = []
+    mark_list = random.choice(marks_yml[key])
+    for i in range(len(mark_list)):
+        marks.append(Mark(mark_list[i], i))
+    return marks
 
 
 class User(object):
@@ -261,3 +198,65 @@ shadowWarning: 0"""
             return self.__dict__[detail]
         else:
             return None
+
+
+def generate_random_users(total, real_users):
+    """
+
+    :param total:
+    :param real_users:
+    :return:
+    :rtype: list[User]
+    """
+    with open(
+        os.path.join(SETUP_DATA_PATH, "random", "familyNames.txt")
+    ) as family_file, open(
+        os.path.join(SETUP_DATA_PATH, "random", "maleGivenNames.txt")
+    ) as male_file, open(
+        os.path.join(SETUP_DATA_PATH, "random", "womenGivenNames.txt")
+    ) as woman_file:
+        family_names = family_file.read().strip().split()
+        male_names = male_file.read().strip().split()
+        women_names = woman_file.read().strip().split()
+
+    users = []
+    user_ids = []
+    anon_ids = []
+    with open(
+        os.path.join(SETUP_DATA_PATH, "random_users.txt"), "w"
+    ) as random_users_file:
+        for i in range(total):
+            if random.random() < 0.5:
+                given_name = random.choice(male_names)
+            else:
+                given_name = random.choice(women_names)
+            family_name = random.choice(family_names)
+            user_id = family_name.replace("'", "")[:5] + given_name[0]
+            user_id = user_id.lower()
+            anon_id = generate_random_user_id(15)
+            # create a binary string for the numeric ID
+            numeric_id = "{0:09b}".format(i)
+            while user_id in user_ids or user_id in real_users:
+                if user_id[-1].isdigit():
+                    user_id = user_id[:-1] + str(int(user_id[-1]) + 1)
+                else:
+                    user_id = user_id + "1"
+            if anon_id in anon_ids:
+                anon_id = generate_random_user_id()
+            new_user = User(
+                {
+                    "user_id": user_id,
+                    "user_numeric_id": numeric_id,
+                    "user_givenname": given_name,
+                    "user_familyname": family_name,
+                    "user_pronouns": generate_pronouns(),
+                    "user_group": 4,
+                    "courses": dict(),
+                }
+            )
+            new_user.create()
+            user_ids.append(user_id)
+            users.append(new_user)
+            anon_ids.append(anon_id)
+            random_users_file.write(user_id + "\n")
+    return users
