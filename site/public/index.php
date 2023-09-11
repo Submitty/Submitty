@@ -115,6 +115,12 @@ header('Content-Security-Policy: frame-ancestors \'self\'');
 // Prevent intermediaries from caching the resource
 header('Cache-Control: private');
 
+// Set the cross-origin embedder policy to prevent the browser from loading the page if it is not CORS safe
+header('Cross-Origin-Embedder-Policy: credentialless');
+
+// Set the cross-origin opener policy to prevent the browser from sharing state with the page if it is not CORS safe
++header('Cross-Origin-Opener-Policy: same-origin');
+
 // We only want to show notices and warnings in debug mode, as otherwise errors are important
 ini_set('display_errors', '1');
 if ($core->getConfig()->isDebug()) {
