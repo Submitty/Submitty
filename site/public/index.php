@@ -119,7 +119,7 @@ header('Cache-Control: private');
 header('Cross-Origin-Embedder-Policy: credentialless');
 
 // Set the cross-origin opener policy to prevent the browser from sharing state with the page if it is not CORS safe
-+header('Cross-Origin-Opener-Policy: same-origin');
+header('Cross-Origin-Opener-Policy: same-origin');
 
 // We only want to show notices and warnings in debug mode, as otherwise errors are important
 ini_set('display_errors', '1');
