@@ -1,7 +1,6 @@
 # flake8: noqa
 from __future__ import print_function, division
-from datetime import datetime, timedelta
-from shutil import copyfile
+from datetime import timedelta
 import hashlib
 import json
 import os
@@ -14,7 +13,7 @@ import random
 from tempfile import TemporaryDirectory
 from submitty_utils import dateutils
 
-from sqlalchemy import create_engine, Table, MetaData, bindparam, select, join, func
+from sqlalchemy import create_engine, Table, MetaData, bindparam, select
 
 from sample_courses import *
 from sample_courses.utils import (
@@ -32,10 +31,11 @@ from sample_courses.utils.create_or_generate import (
     create_pdf_annotations
     )
 from sample_courses.models.gradeable import Gradeable
-from sample_courses.models.course.course_create import Create_Course
+from sample_courses.models.course.course_generate_utils import Course_generate_utils
 from sample_courses.models.course.course_utils import Course_utils
+from sample_courses.models.course.course_data import Course_data
 
-class Course(Create_Course,Course_utils):
+class Course(Course_generate_utils, Course_utils, Course_data):
     """
     Object to represent the courses loaded from the courses.json file as well as the list of
     users that are needed for this particular course (which is a list of User objects).
@@ -48,25 +48,32 @@ class Course(Create_Course,Course_utils):
         users
         max_random_submissions
     """
-    def __init__(self, course):
-        self.semester = get_current_semester()
+    def __init__(self, course) -> None:
+        # Using super() to call the contructor will only run the first init in the parent class
+        # Nothing is currently running in the init of both of these classes
+        # but if anything is placed in the init of these classes then it will run
+        Course_utils.__init__(self)
+        Course_data.__init__(self)
+        Course_generate_utils.__init__(self)
+
+        self.semester: str = get_current_semester()
         self.code = course['code']
         self.instructor = course['instructor']
-        self.gradeables = []
-        self.make_customization = False
+        self.gradeables: list = []
+        self.make_customization: bool = False
         ids = []
         if 'gradeables' in course:
             for gradeable in course['gradeables']:
                 self.gradeables.append(Gradeable(gradeable))
                 assert self.gradeables[-1].id not in ids
                 ids.append(self.gradeables[-1].id)
-        self.users = []
-        self.registration_sections = 10
-        self.rotating_sections = 5
-        self.registered_students = 50
-        self.no_registration_students = 10
-        self.no_rotating_students = 10
-        self.unregistered_students = 10
+        self.users: list = []
+        self.registration_sections: int = 10
+        self.rotating_sections: int = 5
+        self.registered_students: int = 50
+        self.no_registration_students: int = 10
+        self.no_rotating_students: int = 10
+        self.unregistered_students: int = 10
         if 'registration_sections' in course:
             self.registration_sections = course['registration_sections']
         if 'rotating_sections' in course:
@@ -593,454 +600,3 @@ class Course(Create_Course,Course_utils):
             client = docker.from_env()
             client.images.pull('submitty/tutorial:tutorial_18')
             client.images.pull('submitty/tutorial:database_client')
-
-    def check_rotating(self, users):
-        for gradeable in self.gradeables:
-            for grading_rotating in gradeable.grading_rotating:
-                string = "Invalid user_id {} for rotating section for gradeable {}".format(
-                    grading_rotating['user_id'], gradeable.id)
-                if grading_rotating['user_id'] not in users:
-                    raise ValueError(string)
-
-    def getForumDataFromFile(self, filename):
-        forum_path = os.path.join(SETUP_DATA_PATH, "forum")
-        forum_data = []
-        for line in open(os.path.join(forum_path, filename)):
-            l = [x.replace("\\n", "\n").strip() for x in line.split("|")]
-            if(len(line) > 1):
-                forum_data.append(l)
-        return forum_data
-
-    def make_sample_teams(self, gradeable):
-        """
-        arg: any team gradeable
-
-        This function adds teams to the database and gradeable.
-
-        return: A json object filled with team information
-        """
-        assert gradeable.team_assignment
-        json_team_history = {}
-        gradeable_teams_table = Table("gradeable_teams", self.metadata, autoload=True)
-        teams_table = Table("teams", self.metadata, autoload=True)
-        ucounter = self.conn.execute(select([func.count()]).select_from(gradeable_teams_table)).scalar()
-        anon_team_ids = []
-        for user in self.users:
-            #the unique team id is made up of 5 digits, an underline, and the team creater's userid.
-            #example: 00001_aphacker
-            unique_team_id = str(ucounter).zfill(5)+"_"+user.get_detail(self.code, "id")
-            #also need to create and save the anonymous team id
-            anon_team_id = generate_random_user_id(15)
-            if anon_team_id in anon_team_ids:
-                anon_team_id = generate_random_user_id()
-            reg_section = user.get_detail(self.code, "registration_section")
-            if reg_section is None:
-                continue
-            # The teams are created based on the order of the users. As soon as the number of teamates
-            # exceeds the max team size, then a new team will be created within the same registration section
-            print("Adding team for " + unique_team_id + " in gradeable " + gradeable.id)
-            # adding json data for team history
-            teams_registration = select([gradeable_teams_table]).where(
-                (gradeable_teams_table.c['registration_section'] == str(reg_section)) &
-                (gradeable_teams_table.c['g_id'] == gradeable.id))
-            res = self.conn.execute(teams_registration)
-            added = False
-            if res.rowcount != 0:
-                # If the registration has a team already, join it
-                for team_in_section in res:
-                    members_in_team = select([teams_table]).where(
-                        teams_table.c['team_id'] == team_in_section['team_id'])
-                    res = self.conn.execute(members_in_team)
-                    if res.rowcount < gradeable.max_team_size:
-                        self.conn.execute(teams_table.insert(),
-                                    team_id=team_in_section['team_id'],
-                                    user_id=user.get_detail(self.code, "id"),
-                                    state=1)
-                        json_team_history[team_in_section['team_id']].append({"action": "admin_create",
-                                                             "time": dateutils.write_submitty_date(gradeable.submission_open_date),
-                                                             "admin_user": "instructor",
-                                                             "added_user": user.get_detail(self.code, "id")})
-                        added = True
-            if not added:
-                # if the team the user tried to join is full, make a new team
-                self.conn.execute(gradeable_teams_table.insert(),
-                             team_id=unique_team_id,
-                             anon_id=anon_team_id,
-                             g_id=gradeable.id,
-                             registration_section=str(reg_section),
-                             rotating_section=str(random.randint(1, self.rotating_sections)))
-                self.conn.execute(teams_table.insert(),
-                             team_id=unique_team_id,
-                             user_id=user.get_detail(self.code, "id"),
-                             state=1)
-                json_team_history[unique_team_id] = [{"action": "admin_create",
-                                                      "time": dateutils.write_submitty_date(gradeable.submission_open_date),
-                                                      "admin_user": "instructor",
-                                                      "first_user": user.get_detail(self.code, "id")}]
-                ucounter += 1
-            res.close()
-            anon_team_ids.append(anon_team_id);
-        return json_team_history
-
-    def add_sample_forum_data(self):
-        # set sample course to have forum enabled by default
-        course_json_file = os.path.join(self.course_path, 'config', 'config.json')
-        with open(course_json_file, 'r+') as open_file:
-            course_json = json.load(open_file)
-            course_json['course_details']['forum_enabled'] = True
-            open_file.seek(0)
-            open_file.truncate()
-            json.dump(course_json, open_file, indent=2)
-
-        f_data = (self.getForumDataFromFile('posts.txt'), self.getForumDataFromFile('threads.txt'), self.getForumDataFromFile('categories.txt'))
-        forum_threads = Table("threads", self.metadata, autoload=True)
-        forum_posts = Table("posts", self.metadata, autoload=True)
-        forum_cat_list = Table("categories_list", self.metadata, autoload=True)
-        forum_thread_cat = Table("thread_categories", self.metadata, autoload=True)
-
-        for catData in f_data[2]:
-            self.conn.execute(forum_cat_list.insert(), category_desc=catData[0], rank=catData[1], color=catData[2])
-
-        for thread_id, threadData in enumerate(f_data[1], start = 1):
-            self.conn.execute(forum_threads.insert(),
-                              title=threadData[0],
-                              created_by=threadData[1],
-                              pinned=True if threadData[2] == "t" else False,
-                              deleted=True if threadData[3] == "t" else False,
-                              merged_thread_id=threadData[4],
-                              merged_post_id=threadData[5],
-                              is_visible=True if threadData[6] == "t" else False)
-            self.conn.execute(forum_thread_cat.insert(), thread_id=thread_id, category_id=threadData[7])
-        counter = 1
-        for postData in f_data[0]:
-            if(postData[10] != "f" and postData[10] != ""):
-                # In posts.txt, if the 10th column is f or empty, then no attachment is added. If anything else is in the column, then it will be treated as the file name.
-                attachment_path = os.path.join(self.course_path, "forum_attachments", str(postData[0]), str(counter))
-                os.makedirs(attachment_path)
-                os.system("chown -R submitty_php:sample_tas_www {}".format(os.path.join(self.course_path, "forum_attachments", str(postData[0]))))
-                copyfile(os.path.join(SETUP_DATA_PATH, "forum", "attachments", postData[10]), os.path.join(attachment_path, postData[10]))
-            counter += 1
-            self.conn.execute(forum_posts.insert(),
-                              thread_id=postData[0],
-                              parent_id=postData[1],
-                              author_user_id=postData[2],
-                              content=postData[3],
-                              timestamp=postData[4],
-                              anonymous=True if postData[5] == "t" else False,
-                              deleted=True if postData[6] == "t" else False,
-                              endorsed_by=postData[7],
-                              resolved = True if postData[8] == "t" else False,
-                              type=postData[9],
-                              has_attachment=True if postData[10] != "f" else False,
-                              render_markdown=True if postData[11] == "t" else False)
-
-    def add_sample_polls_data(self):
-        # set sample course to have polls enabled by default
-        course_json_file = os.path.join(self.course_path, 'config', 'config.json')
-        with open(course_json_file, 'r+') as open_file:
-            course_json = json.load(open_file)
-            course_json['course_details']['polls_enabled'] = True
-            open_file.seek(0)
-            open_file.truncate()
-            json.dump(course_json, open_file, indent=2)
-
-        # load the sample polls from input file
-        polls_data_path = os.path.join(SETUP_DATA_PATH, "polls", "polls_data.json")
-        with open(polls_data_path, 'r') as polls_file:
-            polls_data = json.load(polls_file)
-
-        # set some values that depend on current time
-        polls_data[0]["image_path"] = self.course_path + polls_data[0]["image_path"]
-        polls_data[2]["release_date"] = f"{datetime.today().date()}"
-
-        # add attached image
-        image_dir = os.path.dirname(polls_data[0]["image_path"])
-        if os.path.isdir(image_dir):
-            shutil.rmtree(image_dir)
-
-        os.makedirs(image_dir)
-        os.system(f"chown -R submitty_php:sample_tas_www {image_dir}")
-        copyfile(os.path.join(SETUP_DATA_PATH, "polls", "sea_animals.png"), polls_data[0]["image_path"])
-
-        # add polls to DB
-        polls_table = Table("polls", self.metadata, autoload=True)
-        poll_options_table = Table("poll_options", self.metadata, autoload=True)
-        poll_responses_table = Table("poll_responses", self.metadata, autoload=True)
-
-        for poll in polls_data:
-            self.conn.execute(polls_table.insert(),
-                              name=poll["name"],
-                              question=poll["question"],
-                              status=poll["status"],
-                              release_date=poll["release_date"],
-                              image_path=poll["image_path"],
-                              question_type=poll["question_type"],
-                              release_histogram=poll["release_histogram"])
-            for i in range(len(poll["responses"])):
-                self.conn.execute(poll_options_table.insert(),
-                                  order_id=i,
-                                  poll_id=poll["id"],
-                                  response=poll["responses"][i],
-                                  correct=(i in poll["correct_responses"]))
-
-        # generate responses to the polls
-        poll_responses_data = []
-        # poll1: for each self.users make a random number (0-5) of responses
-        poll1_response_ids = list(range(len(polls_data[0]['responses'])))
-        for user in self.users:
-            random_responses = random.sample(poll1_response_ids, random.randint(0, len(polls_data[0]['responses'])))
-            for response_id in random_responses:
-                poll_responses_data.append({
-                    "poll_id": polls_data[0]["id"],
-                    "student_id": user.id,
-                    "option_id": response_id+1
-                })
-        # poll2: take a large portion of self.users and make each submit one random response
-        for user in self.users:
-            if random.random() < 0.8:
-                poll_responses_data.append({
-                    "poll_id": polls_data[1]["id"],
-                    "student_id": user.id,
-                    "option_id": random.randint(1, len(polls_data[1]['responses'])) + len(polls_data[0]['responses']) # Must offset by number of options for poll 1
-                })
-
-        # add responses to DB
-        for response in poll_responses_data:
-            self.conn.execute(poll_responses_table.insert(),
-                              poll_id=response["poll_id"],
-                              student_id=response["student_id"],
-                              option_id=response["option_id"])
-
-    def add_sample_queue_data(self):
-        # load the sample polls from input file
-        queue_data_path = os.path.join(SETUP_DATA_PATH, "queue", "queue_data.json")
-        with open(queue_data_path, 'r') as queue_file:
-            queue_data = json.load(queue_file)
-
-        # set sample course to have office hours queue enabled by default
-        course_json_file = os.path.join(self.course_path, 'config', 'config.json')
-        with open(course_json_file, 'r+') as open_file:
-            course_json = json.load(open_file)
-            course_json['course_details']['queue_enabled'] = True
-            course_json['course_details']['queue_message'] = queue_data["queue_message"]
-            course_json['course_details']['queue_announcement_message'] = queue_data["queue_announcement_message"]
-            open_file.seek(0)
-            open_file.truncate()
-            json.dump(course_json, open_file, indent=2)
-
-        # generate values that depend on current date and time
-        # helped for the first time today, done --- LAB queue
-        queue_data["queue_entries"][0]["time_in"] = datetime.now() - timedelta(minutes=25)
-        queue_data["queue_entries"][0]["time_out"] = datetime.now() - timedelta(minutes=19)
-        queue_data["queue_entries"][0]["time_help_start"] = datetime.now() - timedelta(minutes=24)
-        # helped, done --- LAB queue
-        queue_data["queue_entries"][1]["time_in"] = datetime.now() - timedelta(minutes=24)
-        queue_data["queue_entries"][1]["time_out"] = datetime.now() - timedelta(minutes=15)
-        queue_data["queue_entries"][1]["time_help_start"] = datetime.now() - timedelta(minutes=23)
-        # removed by self --- LAB queue
-        queue_data["queue_entries"][2]["time_in"] = datetime.now() - timedelta(minutes=22)
-        queue_data["queue_entries"][2]["time_out"] = datetime.now() - timedelta(minutes=21)
-        # being helped --- HW queue
-        queue_data["queue_entries"][3]["time_in"] = datetime.now() - timedelta(minutes=23)
-        queue_data["queue_entries"][3]["time_help_start"] = datetime.now() - timedelta(minutes=14)
-        # waiting for help for second time today --- LAB queue
-        queue_data["queue_entries"][4]["time_in"] = datetime.now() - timedelta(minutes=21)
-        queue_data["queue_entries"][4]["last_time_in_queue"] = queue_data["queue_entries"][0]["time_in"]
-        # paused --- HW queue
-        queue_data["queue_entries"][5]["time_in"] = datetime.now() - timedelta(minutes=20)
-        queue_data["queue_entries"][5]["time_paused_start"] = datetime.now() - timedelta(minutes=18)
-        # wait for the first time --- HW queue
-        queue_data["queue_entries"][6]["time_in"] = datetime.now() - timedelta(minutes=15)
-        # waiting for help for second time this week --- LAB queue
-        queue_data["queue_entries"][7]["time_in"] = datetime.now() - timedelta(minutes=10)
-        queue_data["queue_entries"][7]["last_time_in_queue"] = datetime.now() - timedelta(days=1, minutes=30)
-
-        queues_table = Table("queue_settings", self.metadata, autoload=True)
-        queue_entries_table = Table("queue", self.metadata, autoload=True)
-
-        # make two sample queues
-        self.conn.execute(queues_table.insert(),
-                          open=True,
-                          code="Lab Help",
-                          token="lab")
-        self.conn.execute(queues_table.insert(),
-                          open=True,
-                          code="Homework Debugging",
-                          token="hw_debug")
-
-        # add, help, remove, pause, etc. students in the queue
-        for queue_entry in queue_data["queue_entries"]:
-            self.conn.execute(queue_entries_table.insert(),
-                              current_state=queue_entry["current_state"],
-                              removal_type=queue_entry["removal_type"],
-                              queue_code=queue_entry["queue_code"],
-                              user_id=queue_entry["user_id"],
-                              name=queue_entry["name"],
-                              time_in=queue_entry["time_in"],
-                              time_out=queue_entry["time_out"],
-                              added_by=queue_entry["added_by"],
-                              help_started_by=queue_entry["help_started_by"],
-                              removed_by=queue_entry["removed_by"],
-                              contact_info=queue_entry["contact_info"],
-                              last_time_in_queue=queue_entry["last_time_in_queue"],
-                              time_help_start=queue_entry["time_help_start"],
-                              paused=queue_entry["paused"],
-                              time_paused=queue_entry["time_paused"],
-                              time_paused_start=queue_entry["time_paused_start"])
-
-    def make_course_json(self):
-        """
-        This function generates customization_sample.json in case it has changed from the provided version in the test suite
-        within the Submitty repository. Ideally this function will be pulled out and made independent, or better yet when
-        the code for the web interface is done, that will become the preferred route and this function can be retired.
-
-        Keeping this function after the web interface would mean we have another place where we need to update code anytime
-        the expected format of customization.json changes.
-
-        Right now the code uses the Gradeable and Component classes, so to avoid code duplication the function lives inside
-        setup_sample_courses.py
-
-        :return:
-        """
-
-        course_id = self.code
-
-        # Reseed to minimize the situations under which customization.json changes
-        m = hashlib.md5()
-        m.update(bytes(course_id, "utf-8"))
-        random.seed(int(m.hexdigest(), 16))
-
-        # Would be great if we could install directly to test_suite, but
-        # currently the test uses "clean" which will blow away test_suite
-        customization_path = os.path.join(SUBMITTY_INSTALL_DIR, ".setup")
-        print("Generating customization_{}.json".format(course_id))
-
-        gradeables = {}
-        gradeables_json_output = {}
-
-        # Create gradeables by syllabus bucket
-        for gradeable in self.gradeables:
-            if gradeable.syllabus_bucket not in gradeables:
-                gradeables[gradeable.syllabus_bucket] = []
-            gradeables[gradeable.syllabus_bucket].append(gradeable)
-
-        # Randomly generate the impact of each bucket on the overall grade
-        gradeables_percentages = []
-        gradeable_percentage_left = 100 - len(gradeables)
-        for i in range(len(gradeables)):
-            gradeables_percentages.append(random.randint(1, max(1, gradeable_percentage_left)) + 1)
-            gradeable_percentage_left -= (gradeables_percentages[-1] - 1)
-        if gradeable_percentage_left > 0:
-            gradeables_percentages[-1] += gradeable_percentage_left
-
-        # Compute totals and write out each syllabus bucket in the "gradeables" field of customization.json
-        bucket_no = 0
-
-        # for bucket,g_list in gradeables.items():
-        for bucket in sorted(gradeables.keys()):
-            g_list = gradeables[bucket]
-            bucket_json = {"type": bucket, "count": len(g_list), "percent": 0.01*gradeables_percentages[bucket_no],
-                           "ids" : []}
-
-            g_list.sort(key=lambda x: x.id)
-
-            # Manually total up the non-penalty non-extra-credit max scores, and decide which gradeables are 'released'
-            for gradeable in g_list:
-                use_ta_grading = gradeable.use_ta_grading
-                g_type = gradeable.type
-                components = gradeable.components
-                g_id = gradeable.id
-                max_auto = 0
-                max_ta = 0
-
-                print_grades = True if g_type != 0 or (gradeable.submission_open_date < NOW) else False
-                release_grades = (gradeable.has_release_date is True) and (gradeable.grade_released_date < NOW)
-
-                gradeable_config_dir = os.path.join(SUBMITTY_DATA_DIR, "courses", get_current_semester(), "sample",
-                                                    "config", "complete_config")
-
-                # For electronic gradeables there is a config file - read through to get the total
-                if os.path.isdir(gradeable_config_dir):
-                    gradeable_config = os.path.join(gradeable_config_dir, "complete_config_" + g_id + ".json")
-                    if os.path.isfile(gradeable_config):
-                        try:
-                            with open(gradeable_config, 'r') as gradeable_config_file:
-                                gradeable_json = json.load(gradeable_config_file)
-
-                                # Not every config has AUTO_POINTS, so have to parse through test cases
-                                # Add points to max if not extra credit, and points>0 (not penalty)
-                                if "testcases" in gradeable_json:
-                                    for test_case in gradeable_json["testcases"]:
-                                        if "extra_credit" in test_case:
-                                            continue
-                                        if "points" in test_case and test_case["points"] > 0:
-                                            max_auto += test_case["points"]
-                        except EnvironmentError:
-                            print("Failed to load JSON")
-
-                # For non-electronic gradeables, or electronic gradeables with TA grading, read through components
-                if use_ta_grading or g_type != 0:
-                    for component in components:
-                        if component.max_value >0:
-                            max_ta += component.max_value
-
-                # Add the specific associative array for this gradeable in customization.json to the output string
-                max_points = max_auto + max_ta
-                if print_grades:
-                    bucket_json["ids"].append({"id": g_id, "max": max_points})
-                    if not release_grades:
-                        bucket_json["ids"][-1]["released"] = False
-
-            # Close the bucket's array in customization.json
-            if "gradeables" not in gradeables_json_output:
-                gradeables_json_output["gradeables"] = []
-            gradeables_json_output["gradeables"].append(bucket_json)
-            bucket_no += 1
-
-        # Generate the section labels
-        section_ta_mapping = {}
-        for section in range(1, self.registration_sections + 1):
-            section_ta_mapping[section] = []
-        for user in self.users:
-            if user.get_detail(course_id, "grading_registration_section") is not None:
-                grading_registration_sections = str(user.get_detail(course_id, "grading_registration_section"))
-                grading_registration_sections = [int(x) for x in grading_registration_sections.split(",")]
-                for section in grading_registration_sections:
-                    section_ta_mapping[section].append(user.id)
-
-        for section in section_ta_mapping:
-            if len(section_ta_mapping[section]) == 0:
-                section_ta_mapping[section] = "TBA"
-            else:
-                section_ta_mapping[section] = ", ".join(section_ta_mapping[section])
-
-        # Construct the rest of the JSON dictionary
-        benchmarks = ["a-", "b-", "c-", "d"]
-        gradeables_json_output["display"] = ["instructor_notes", "grade_summary", "grade_details"]
-        gradeables_json_output["display_benchmark"] = ["average", "stddev", "perfect"]
-        gradeables_json_output["benchmark_percent"] = {}
-        for i in range(len(benchmarks)):
-            gradeables_json_output["display_benchmark"].append("lowest_" + benchmarks[i])
-            gradeables_json_output["benchmark_percent"]["lowest_" + benchmarks[i]] = 0.9 - (0.1 * i)
-
-        gradeables_json_output["section"] = section_ta_mapping
-        messages = ["<b>{} Course</b>".format(course_id),
-                    "Note: Please be patient with data entry/grade corrections for the most recent "
-                    "lab, homework, and test.",
-                    "Please contact your graduate lab TA if a grade remains missing or incorrect for more than a week."]
-        gradeables_json_output["messages"] = messages
-
-        # Attempt to write the customization.json file
-        try:
-            with open(os.path.join(customization_path, "customization_" + course_id + ".json"), 'w') as customization_file:
-                customization_file.write("/*\n"
-                                         "This JSON is based on the automatically generated customization for\n"
-                                         "the development course \"{}\" as of {}.\n"
-                                         "It is intended as a simple example, with additional documentation online.\n"
-                                         "*/\n".format(course_id,NOW.strftime("%Y-%m-%d %H:%M:%S%z")))
-            json.dump(gradeables_json_output,
-                      open(os.path.join(customization_path, "customization_" + course_id + ".json"), 'a'),indent=2)
-        except EnvironmentError as e:
-            print("Failed to write to customization file: {}".format(e))
-
-        print("Wrote customization_{}.json".format(course_id))
