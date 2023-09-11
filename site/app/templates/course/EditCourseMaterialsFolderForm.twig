@@ -132,7 +132,7 @@
                             }
 
                         ],
-                        onClick: (index, fp) => {
+                        onClick: (index, edit_folder_fp) => {
                             let date;
                             switch (index) {
                                 case 0:
@@ -149,7 +149,7 @@
                                     date = new Date("9998-01-01 00:00:00");
                                     break;
                             }
-                            fp.setDate(date);
+                            edit_folder_fp.setDate(date);
                         }
                     }
             )],
@@ -160,9 +160,9 @@
             enableSeconds: true,
             time_24hr: true,
             dateFormat: "Y-m-d H:i:S",
-            onReady: (a, b, fp) => {
-                fp.calendarContainer.firstChild.childNodes[1].firstChild.firstChild.setAttribute('aria-label', 'Month');
-                fp.calendarContainer.childNodes[2].childNodes[4].firstChild.setAttribute('aria-label', 'Seconds');
+            onReady: (a, b, edit_folder_fp) => {
+                edit_folder_fp.calendarContainer.firstChild.childNodes[1].firstChild.firstChild.setAttribute('aria-label', 'Month');
+                edit_folder_fp.calendarContainer.childNodes[2].childNodes[4].firstChild.setAttribute('aria-label', 'Seconds');
             }
         });
     $('.form-body').on('scroll', function() {

@@ -1,8 +1,8 @@
 {# This is the control shown/hidden #}
-<div class="popup-form" id="{% block popup_id %}#popup-form{% endblock %}" style="display: none;" onclick="{{ block('close_click_action') }}">
+<div class="popup-form" id="{% block popup_id %}#popup-form{% endblock %}" style="display: none;">
     {% block form %}
         {# This lets us center the window #}
-        <div class="popup-box">
+        <div class="popup-box" onclick="{{ block('close_click_action') }}">
             {# Actual displayed window #}
             <div class="popup-window" onclick="event.stopPropagation()" data-testid="popup-window">
                 {% block title_panel %}
