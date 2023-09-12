@@ -121,6 +121,9 @@ header('Cross-Origin-Embedder-Policy: credentialless');
 // Set the cross-origin opener policy to prevent the browser from sharing state with the page if it is not CORS safe
 header('Cross-Origin-Opener-Policy: same-origin');
 
+// Set the referrer policy to strict-origin-when-cross-origin to prevent the browser from sending the full URL
+header('Referrer-Policy: strict-origin-when-cross-origin');
+
 // We only want to show notices and warnings in debug mode, as otherwise errors are important
 ini_set('display_errors', '1');
 if ($core->getConfig()->isDebug()) {
