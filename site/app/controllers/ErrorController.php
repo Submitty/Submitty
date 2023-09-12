@@ -80,7 +80,7 @@ class ErrorController extends AbstractController {
     }
 
 
-    private function sendRejoinedStudentEmail($joined_section) {
+    private function sendRejoinedStudentEmail($joined_section): void {
         $user_id = $this->core->getUser()->getId();
         $course = $this->core->getConfig()->getCourse();
 

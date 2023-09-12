@@ -237,7 +237,7 @@ class DatabaseQueries {
     }
 
     /**
-     * Returns an array of the activity a student has 
+     * Returns an array of the activity a student has
      */
     public function getAttendanceInfoOneStudent(string $user_id): array {
         $this->course_db->query("
@@ -294,13 +294,13 @@ class DatabaseQueries {
 
         return array_map(
             function ($element) {
-                if (is_null($element))
-                    return Null;
+                if (is_null($element)) {
+                    return null;
+                }
                 return DateUtils::convertTimeStamp($this->core->getUser(), $element, 'Y-m-d H:i:s');
             },
             $response
         );
-
     }
 
     /**
@@ -5383,9 +5383,7 @@ AND gc_id IN (
         $this->submitty_db->query("
                 SELECT user_id
                 FROM courses_users WHERE user_id=? and course=?;
-            ", [$user_id, $course]
-        );
-
+            ", [$user_id, $course]);
         $row = $this->submitty_db->row();
         return count($row) > 0;
     }
