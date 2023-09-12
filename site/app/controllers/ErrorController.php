@@ -38,15 +38,18 @@ class ErrorController extends AbstractController {
         }
 
         $user_id = $user->getId();
-        $most_recent_access = $this->core->getQueries()->getMostRecentGradeableAccessForUser($user_id);
-        // If removed from course within last 3 days, can readd self.
-        if ($most_recent_access !== "Never accessed a gradeable" && DateUtils::calculateDayDiff($most_recent_access) <= 3) {
-            return true;
+        $acceses = $this->core->getQueries()->getAttendanceInfoOneStudent($user_id);
+        foreach ($acceses as $access_place => $timestamp) {
+            if (is_null($timestamp))
+                continue;
+            if (DateUtils::calculateDayDiff($timestamp) <= 3) {
+                return true;
+            }
         }
 
         $term_start_date = $this->core->getQueries()->getCurrentTermStartDate();
-        // If never accessed course but is within first two weeks of term, can readd self.
-        if (DateUtils::calculateDayDiff($most_recent_access, $term_start_date) <= 14) {
+        // If never accessed course but today is within first two weeks of term, can readd self.
+        if (DateUtils::calculateDayDiff(DateUtils::getDateTimeNow(), $term_start_date) <= 14) {
             return true;
         }
 

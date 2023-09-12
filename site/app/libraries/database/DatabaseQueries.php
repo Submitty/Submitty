@@ -237,6 +237,74 @@ class DatabaseQueries {
     }
 
     /**
+     * Returns an array of the activity a student has 
+     */
+    public function getAttendanceInfoOneStudent(string $user_id): array {
+        $this->course_db->query("
+            WITH
+                Input (user_id) AS (VALUES (?)),
+                Gradeable_Access AS
+                    (SELECT timestamp, user_id
+                    FROM gradeable_access where user_id = (table Input)
+                    ORDER BY timestamp desc
+                    LIMIT 1),
+                Gradeable_Submission AS
+                    (SELECT submission_time, user_id
+                    FROM electronic_gradeable_data where user_id = (table Input)
+                    ORDER BY submission_time desc
+                    LIMIT 1),
+                Forum_View AS 
+                    (SELECT timestamp, user_id
+                    FROM viewed_responses where user_id = (table Input)
+                    ORDER BY timestamp desc
+                    LIMIT 1),
+                Forum_Post AS
+                    (SELECT timestamp, author_user_id
+                    FROM posts where author_user_id = (table Input)
+                    ORDER BY timestamp desc
+                    LIMIT 1),
+                Queue_Join AS
+                    (SELECT time_in, user_id
+                    FROM queue where user_id = (table Input)
+                    ORDER BY time_in desc
+                    LIMIT 1),
+                Course_Materials_Access AS
+                    (SELECT timestamp, user_id
+                    FROM course_materials_access where user_id = (table Input)
+                    ORDER BY timestamp desc
+                    LIMIT 1)
+            SELECT
+                Gradeable_Access.timestamp as gradeable_access,
+                Gradeable_Submission.submission_time as gradeable_submission,
+                Forum_View.timestamp as forum_view,
+                Forum_Post.timestamp as forum_post,
+                Queue_Join.time_in as queue_join,
+                Course_Materials_Access.timestamp as course_materials_access
+            FROM
+                Input
+            LEFT JOIN Gradeable_Access on Input.user_id = Gradeable_Access.user_id
+            LEFT JOIN Gradeable_Submission on Input.user_id = Gradeable_Submission.user_id
+            LEFT JOIN Forum_View on Input.user_id = Forum_View.user_id
+            LEFT JOIN Forum_Post on Input.user_id = Forum_Post.author_user_id
+            LEFT JOIN Queue_Join on Input.user_id = Queue_Join.user_id
+            LEFT JOIN Course_Materials_Access on Input.user_id = Course_Materials_Access.user_id;
+        ", [$user_id]);
+
+        $response = $this->course_db->rows();
+        $timestamp_strings = $response[0];
+
+        return array_map(
+            function ($element) {
+                if (is_null($element))
+                    return Null;
+                return DateUtils::convertTimeStamp($this->core->getUser(), $element, 'Y-m-d H:i:s');
+            },
+            $timestamp_strings
+        );
+
+    }
+
+    /**
      * given a string with missing digits, get all similar numeric ids
      * should be given as '1_234_567' where '_' are positions to fill in
      *
@@ -8652,29 +8720,6 @@ SQL;
             [$g_id, $team_id]
         );
         return $this->course_db->rows();
-    }
-
-    /**
-     * Returns the last time a particular user accessed any gradeable in the current course.
-     * @param string $user_id The user we are querying.
-     * @return string Date if the student ever accessed the course,
-     *   "Never accessed a gradeable" otherwise.
-     */
-    public function getMostRecentGradeableAccessForUser(string $user_id): string {
-        $this->course_db->query("
-            SELECT timestamp
-            FROM gradeable_access where user_id=?
-            ORDER BY timestamp desc
-            LIMIT 1",
-            [$user_id]
-        );
-        $response = $this->course_db->rows();
-        if (empty($response)) {
-            return "Never accessed a gradeable";
-        }
-
-        $timestamp = $response[0]['timestamp'];
-        return DateUtils::convertTimeStamp($this->core->getUser(), $timestamp, 'Y-m-d H:i:s');
     }
 
     public function getUserGroups(string $user_id): array {
