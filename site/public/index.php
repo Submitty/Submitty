@@ -115,6 +115,12 @@ header('Content-Security-Policy: frame-ancestors \'self\'');
 // Prevent intermediaries from caching the resource
 header('Cache-Control: private');
 
+// Set the cross-origin embedder policy to prevent the browser from loading the page if it is not CORS safe
+header('Cross-Origin-Embedder-Policy: credentialless');
+
+// Set the cross-origin opener policy to prevent the browser from sharing state with the page if it is not CORS safe
+header('Cross-Origin-Opener-Policy: same-origin');
+
 // Set the referrer policy to strict-origin-when-cross-origin to prevent the browser from sending the full URL
 header('Referrer-Policy: strict-origin-when-cross-origin');
 
