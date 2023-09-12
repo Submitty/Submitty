@@ -212,8 +212,8 @@ class Access {
 
         $this->permissions["admin.wrapper"] = self::ALLOW_MIN_INSTRUCTOR;
 
-        $this->permissions['path.read.banner_images'] = self::ALLOW_MIN_STUDENT;
-        $this->permissions['path.write.banner_images'] = self::ALLOW_MIN_INSTRUCTOR;
+        $this->permissions['path.read.community_events'] = self::ALLOW_MIN_STUDENT;
+        $this->permissions['path.write.community_events'] = self::ALLOW_MIN_INSTRUCTOR;
     }
 
     /**
@@ -246,8 +246,8 @@ class Access {
             ]
         ];
 
-        $this->directories["banner_images"] = [
-            "base" => $this->core->getConfig()->getSubmittyPath() . "/banner_images",
+        $this->directories["community_events"] = [
+            "base" => $this->core->getConfig()->getSubmittyPath() . "/community_events",
             "subparts" => [],
             "permissions" => [
                 "path.read" => "path.read.submissions",

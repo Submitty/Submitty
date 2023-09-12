@@ -35,7 +35,7 @@ class BannerController extends AbstractController {
      * @Route("/banner/upload", methods={"POST"})
      */
     public function ajaxUploadBannerFiles(): JsonResponse {
-        $upload_path = FileUtils::joinPaths($this->core->getConfig()->getSubmittyPath(), "banner_images");
+        $upload_path = FileUtils::joinPaths($this->core->getConfig()->getSubmittyPath(), "community_events");
         if (isset($_POST['release_time'])) {
             $release_date = DateUtils::parseDateTime($_POST['release_time'], $this->core->getDateTimeNow()->getTimezone());
         }
@@ -176,7 +176,7 @@ class BannerController extends AbstractController {
         $entity_manager->remove($banner_item);
         $entity_manager->flush();
 
-        $full_path = FileUtils::joinPaths($this->core->getConfig()->getSubmittyPath(), "banner_images");
+        $full_path = FileUtils::joinPaths($this->core->getConfig()->getSubmittyPath(), "community_events");
 
         $folder_name = $_POST['path'];
         $banner_name = $_POST['name'];

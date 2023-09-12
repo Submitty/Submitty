@@ -377,10 +377,10 @@ SET default_tablespace = '';
 
 
 --
--- Name: banner_images; Type: TABLE; Schema: public; Owner: -
+-- Name: community_events; Type: TABLE; Schema: public; Owner: -
 --
 
-CREATE TABLE public.banner_images (
+CREATE TABLE public.community_events (
     id integer NOT NULL,
     path_date character varying(255) NOT NULL,
     name character varying(255) NOT NULL,
@@ -392,10 +392,10 @@ CREATE TABLE public.banner_images (
 
 
 --
--- Name: banner_images_id_seq; Type: SEQUENCE; Schema: public; Owner: -
+-- Name: community_events_id_seq; Type: SEQUENCE; Schema: public; Owner: -
 --
 
-CREATE SEQUENCE public.banner_images_id_seq
+CREATE SEQUENCE public.community_events_id_seq
     AS integer
     START WITH 1
     INCREMENT BY 1
@@ -405,10 +405,10 @@ CREATE SEQUENCE public.banner_images_id_seq
 
 
 --
--- Name: banner_images_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: -
+-- Name: community_events_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: -
 --
 
-ALTER SEQUENCE public.banner_images_id_seq OWNED BY public.banner_images.id;
+ALTER SEQUENCE public.community_events_id_seq OWNED BY public.community_events.id;
 
 
 --
@@ -658,10 +658,10 @@ ALTER SEQUENCE public.vcs_auth_tokens_id_seq OWNED BY public.vcs_auth_tokens.id;
 
 
 --
--- Name: banner_images id; Type: DEFAULT; Schema: public; Owner: -
+-- Name: community_events id; Type: DEFAULT; Schema: public; Owner: -
 --
 
-ALTER TABLE ONLY public.banner_images ALTER COLUMN id SET DEFAULT nextval('public.banner_images_id_seq'::regclass);
+ALTER TABLE ONLY public.community_events ALTER COLUMN id SET DEFAULT nextval('public.community_events_id_seq'::regclass);
 
 
 --
@@ -686,11 +686,11 @@ ALTER TABLE ONLY public.vcs_auth_tokens ALTER COLUMN id SET DEFAULT nextval('pub
 
 
 --
--- Name: banner_images banner_images_pkey; Type: CONSTRAINT; Schema: public; Owner: -
+-- Name: community_events community_events_pkey; Type: CONSTRAINT; Schema: public; Owner: -
 --
 
-ALTER TABLE ONLY public.banner_images
-    ADD CONSTRAINT banner_images_pkey PRIMARY KEY (id);
+ALTER TABLE ONLY public.community_events
+    ADD CONSTRAINT community_events_pkey PRIMARY KEY (id);
 
 
 --

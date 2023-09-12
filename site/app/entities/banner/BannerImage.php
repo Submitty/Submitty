@@ -10,7 +10,7 @@ use Doctrine\ORM\Mapping as ORM;
  * Class BannerImage
  * @package app\entities
  * @ORM\Entity(repositoryClass="\app\repositories\banner\BannerImageRepository")
- * @ORM\Table(name="banner_images")
+ * @ORM\Table(name="community_events")
  */
 class BannerImage {
     /**
