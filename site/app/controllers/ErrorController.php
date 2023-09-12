@@ -45,14 +45,14 @@ class ErrorController extends AbstractController {
             if (is_null($timestamp)) {
                 continue;
             }
-            if (DateUtils::calculateDayDiff($timestamp) <= 3) {
+            if (abs(DateUtils::calculateDayDiff($timestamp)) <= 3) {
                 return true;
             }
         }
 
         $term_start_date = $this->core->getQueries()->getCurrentTermStartDate();
         // If never accessed course but today is within first two weeks of term, can readd self.
-        if (abs(DateUtils::calculateDayDiff(DateUtils::getDateTimeNow(), $term_start_date)) <= 14) {
+        if (abs(DateUtils::calculateDayDiff($term_start_date)) <= 14) {
             return true;
         }
 
