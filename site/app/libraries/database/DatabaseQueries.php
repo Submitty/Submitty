@@ -243,7 +243,7 @@ class DatabaseQueries {
      * @param string $user_id Name of user.
      * @return array The timestamps of activity in this course.
      */
-    public function getAttendanceInfoOneStudent(string $user_id): array {
+    public function getAttendanceInfoOneStudent(string $user_id): array(DateTime|null) {
         $this->course_db->query("
             WITH
                 Input (user_id) AS (VALUES (?)),
