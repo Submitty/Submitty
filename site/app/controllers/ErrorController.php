@@ -94,13 +94,17 @@ class ErrorController extends AbstractController {
      * @return void
      */
     private function sendRejoinedStudentEmail($joined_section): void {
-        $user_id = $this->core->getUser()->getId();
-        $course = $this->core->getConfig()->getCourse();
+        $user = $this->core->getUser();
+        $user_id = $user->getId();
+        $first_name = $user->getPreferredGivenName();
+        $last_name = $user->getPreferredFamilyName();
 
-        $subject = "User Rejoin: $user_id of $course";
+        $course = ucwords($this->core->getConfig()->getCourse());
+
+        $subject = "User Rejoin: $first_name $last_name ($user_id) of $course";
         $body = <<<EMAIL
-            The student $user_id, who had been automatically removed from the course $course,
-            has readded themselves in section $joined_section.
+            The student $first_name $last_name ($user_id), who had been automatically removed
+            from the course $course, has readded themselves in section $joined_section.
 
             Please move them to their appropiate section. If this rejoin was a mistake,
             you may move the student to the Null section.
