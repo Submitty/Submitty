@@ -8,7 +8,7 @@ use Symfony\Component\Routing\Annotation\Route;
 use app\libraries\response\JsonResponse;
 use app\models\Email;
 
-class ErrorController extends AbstractController {
+class SelfRejoinController extends AbstractController {
     /**
      * @Route("/courses/{_semester}/{_course}/no_access")
      *
@@ -89,7 +89,7 @@ class ErrorController extends AbstractController {
 
     /**
      * Sends emails to instructors that a student readded themselves to the course.
-     * 
+     *
      * @param string $joined_section The section that the student has rejoined.
      * @return void
      */
