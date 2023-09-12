@@ -115,6 +115,9 @@ header('Content-Security-Policy: frame-ancestors \'self\'');
 // Prevent intermediaries from caching the resource
 header('Cache-Control: private');
 
+// Set the referrer policy to strict-origin-when-cross-origin to prevent the browser from sending the full URL
+header('Referrer-Policy: strict-origin-when-cross-origin');
+
 // We only want to show notices and warnings in debug mode, as otherwise errors are important
 ini_set('display_errors', '1');
 if ($core->getConfig()->isDebug()) {
