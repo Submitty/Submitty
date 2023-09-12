@@ -96,8 +96,8 @@ class ErrorController extends AbstractController {
     private function sendRejoinedStudentEmail($joined_section): void {
         $user = $this->core->getUser();
         $user_id = $user->getId();
-        $first_name = $user->getPreferredGivenName();
-        $last_name = $user->getPreferredFamilyName();
+        $first_name = $user->getPreferredGivenName() ?? $user->getLegalGivenName();
+        $last_name = $user->getPreferredFamilyName() ?? $user->getLegalFamilyName();
 
         $course = ucwords($this->core->getConfig()->getCourse());
 
