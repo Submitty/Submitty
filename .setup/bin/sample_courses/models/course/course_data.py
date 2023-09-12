@@ -2,7 +2,7 @@
 import os
 import json
 import random
-from shutil import copyfile,shutil
+from shutil import copyfile, rmtree
 from datetime import datetime, timedelta
 
 from sqlalchemy import Table
@@ -132,7 +132,7 @@ class Course_data():
         # add attached image
         image_dir = os.path.dirname(polls_data[0]["image_path"])
         if os.path.isdir(image_dir):
-            shutil.rmtree(image_dir)
+            rmtree(image_dir)
 
         os.makedirs(image_dir)
         os.system(f"chown -R submitty_php:sample_tas_www {image_dir}")
