@@ -3,17 +3,13 @@
 namespace app\controllers;
 
 use app\controllers\AbstractController;
-use app\libraries\Core;
 use app\libraries\DateUtils;
-use app\libraries\response\RedirectResponse;
 use Symfony\Component\Routing\Annotation\Route;
 use app\libraries\response\JsonResponse;
 use app\models\Email;
 
 class ErrorController extends AbstractController {
-
-
-	/**
+    /**
      * @Route("/courses/{_semester}/{_course}/no_access")
      */
     public function noAccess() {
@@ -25,7 +21,7 @@ class ErrorController extends AbstractController {
         );
     }
 
-    /** 
+    /**
      * Returns if the user is allowed to self-readd to a course after being dropped.
      * @param bool True if can readd, false otherwise.
      */
@@ -43,8 +39,9 @@ class ErrorController extends AbstractController {
 
         $acceses = $this->core->getQueries()->getAttendanceInfoOneStudent($user_id);
         foreach ($acceses as $access_place => $timestamp) {
-            if (is_null($timestamp))
+            if (is_null($timestamp)) {
                 continue;
+            }
             if (DateUtils::calculateDayDiff($timestamp) <= 3) {
                 return true;
             }
@@ -63,8 +60,9 @@ class ErrorController extends AbstractController {
      * @Route("/courses/{_semester}/{_course}/rejoin_course", methods={"POST"})
      */
     public function rejoinCourse() {
-        if (!$this->canRejoinCourse())
+        if (!$this->canRejoinCourse()) {
             return JsonResponse::getFailResponse();
+        }
 
         $term = $this->core->getConfig()->getTerm();
         $course = $this->core->getConfig()->getCourse();
@@ -106,5 +104,4 @@ class ErrorController extends AbstractController {
 
         $this->core->getNotificationFactory()->sendEmails($emails);
     }
-
 }
