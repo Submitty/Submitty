@@ -290,8 +290,7 @@ class DatabaseQueries {
             LEFT JOIN Course_Materials_Access on Input.user_id = Course_Materials_Access.user_id;
         ", [$user_id]);
 
-        $response = $this->course_db->rows();
-        $timestamp_strings = $response[0];
+        $response = $this->course_db->row();
 
         return array_map(
             function ($element) {
@@ -299,7 +298,7 @@ class DatabaseQueries {
                     return Null;
                 return DateUtils::convertTimeStamp($this->core->getUser(), $element, 'Y-m-d H:i:s');
             },
-            $timestamp_strings
+            $response
         );
 
     }
