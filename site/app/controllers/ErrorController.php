@@ -11,8 +11,11 @@ use app\models\Email;
 class ErrorController extends AbstractController {
     /**
      * @Route("/courses/{_semester}/{_course}/no_access")
+     *
+     * Creates the No Access page that gives the student a chance to rejoin
+     * if they meet the right conditions.
      */
-    public function noAccess() {
+    public function noAccess(): void {
         $this->core->getOutput()->renderOutput(
             'Error',
             'noAccessCourse',
@@ -23,7 +26,7 @@ class ErrorController extends AbstractController {
 
     /**
      * Returns if the user is allowed to self-readd to a course after being dropped.
-     * @param bool True if can readd, false otherwise.
+     * @return bool True if can readd, false otherwise.
      */
     private function canRejoinCourse() {
         $user = $this->core->getUser();
@@ -58,10 +61,14 @@ class ErrorController extends AbstractController {
 
     /**
      * @Route("/courses/{_semester}/{_course}/rejoin_course", methods={"POST"})
+     *
+     * @return void Successful response if the student meets the conditions to rejoin the course.
      */
-    public function rejoinCourse() {
+    public function rejoinCourse(): JsonResponse {
         if (!$this->canRejoinCourse()) {
-            return JsonResponse::getFailResponse();
+            return JsonResponse::getFailResponse(
+                "This student does not meet the conditions to rejoin."
+            );
         }
 
         $term = $this->core->getConfig()->getTerm();
@@ -80,6 +87,12 @@ class ErrorController extends AbstractController {
     }
 
 
+    /**
+     * Sends emails to instructors that a student readded themselves to the course.
+     * 
+     * @param string $joined_section The section that the student has rejoined.
+     * @return void
+     */
     private function sendRejoinedStudentEmail($joined_section): void {
         $user_id = $this->core->getUser()->getId();
         $course = $this->core->getConfig()->getCourse();
