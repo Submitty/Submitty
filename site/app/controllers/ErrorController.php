@@ -98,11 +98,11 @@ class ErrorController extends AbstractController {
         $user_id = $user->getId();
         $first_name = $user->getPreferredGivenName();
         if (empty($first_name)) {
-            $user->getLegalGivenName();
+            $first_name = $user->getLegalGivenName();
         }
         $last_name = $user->getPreferredFamilyName();
         if (empty($last_name)) {
-            $user->getLegalFamilyName();
+            $last_name = $user->getLegalFamilyName();
         }
 
         $course = ucwords($this->core->getConfig()->getCourse());
