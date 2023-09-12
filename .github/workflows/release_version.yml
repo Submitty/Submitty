@@ -1,0 +1,24 @@
+name: Release Submitty Version
+
+on:
+  push:
+    tags:
+      -*
+
+permissions:
+  contents: read
+
+jobs:
+  vagrant-up:
+    runs-on: macos-latest
+
+    steps:
+      - uses: actions/checkout@v3
+      - run: NO_SUBMISSIONS=1 vagrant up ubuntu-22.04
+      - name: Validate image
+        run: curl --show-error --fail --include http://localhost:1511
+      - name: Save to cloud
+        run: |
+            vagrant package --output submitty.box
+            bash ./.setup/vagrant_cloud.sh ${{ secrets.VAGRANT_CLOUD_TOKEN }} reapernsgaming Submitty ${{ github.event.release.tag_name }}
+            bash ./.setup/vagrant_cloud.sh ${{ secrets.VAGRANT_CLOUD_TOKEN }} reapernsgaming Submitty_Dev ${{ github.event.release.tag_name }}.001
