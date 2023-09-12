@@ -2,13 +2,17 @@
 VAGRANT_CLOUD_TOKEN=$1
 VAGRANT_USERNAME=$2
 VAGRANT_BOX=$3
+VAGRANT_CLOUD_VERSION=$4
 
+if [ -z "$VAGRANT_CLOUD_VERSION" ]
+then
 VAGRANT_CLOUD_VERSION=$(curl \
   --request GET \
   --header "Authorization: Bearer $VAGRANT_CLOUD_TOKEN" \
   https://app.vagrantup.com/api/v1/box/"$VAGRANT_USERNAME"/"$VAGRANT_BOX" | \
   python3 -c \
   'import json,sys;obj=json.load(sys.stdin);version=obj["versions"][0]["version"].split(".");version[3]=str(int(version[3])+1).zfill(3);print(".".join(version))')
+fi
 
 curl \
   --request POST \
