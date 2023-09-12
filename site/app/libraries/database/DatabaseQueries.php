@@ -5379,6 +5379,18 @@ AND gc_id IN (
         );
     }
 
+    public function wasStudentEverInCourse($user_id): bool {
+        $course = $this->core->getConfig()->getCourse();
+        $this->submitty_db->query("
+                SELECT user_id
+                FROM courses_users WHERE user_id=? and course=?;
+            ", [$user_id, $course]
+        );
+
+        $row = $this->submitty_db->row();
+        return count($row) > 0;
+    }
+
     /**
      * Determines if a course is 'active' or if it was dropped.
      *

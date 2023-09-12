@@ -31,13 +31,16 @@ class ErrorController extends AbstractController {
      */
     private function canRejoinCourse() {
         $user = $this->core->getUser();
+        $user_id = $user->getId();
 
         // If manually removed from course, this was probably intentional removal.
-        if ($user->isManualRegistration()) {
+        if (
+            $user->isManualRegistration()
+            || !$this->core->getQueries()->wasStudentEverInCourse($user_id)
+        ) {
             return false;
         }
 
-        $user_id = $user->getId();
         $acceses = $this->core->getQueries()->getAttendanceInfoOneStudent($user_id);
         foreach ($acceses as $access_place => $timestamp) {
             if (is_null($timestamp))
