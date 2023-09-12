@@ -1,10 +1,10 @@
 
 async function rejoinCourse(readd_url) {
     $.ajax({
-        type: "POST",
+        type: 'POST',
         url: readd_url,
         data: {
-                'csrf_token': csrfToken
-        }
+            'csrf_token': csrfToken,
+        },
     });
 }
