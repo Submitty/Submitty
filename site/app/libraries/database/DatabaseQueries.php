@@ -241,9 +241,9 @@ class DatabaseQueries {
      * The order is: gradeable access, gradeable submission, forum view, forum post,
      *   queue join, and course material access.
      * @param string $user_id Name of user.
-     * @return array The timestamps of activity in this course.
+     * @return array(DateTime|null) The timestamps of activity in this course.
      */
-    public function getAttendanceInfoOneStudent(string $user_id): array(DateTime|null) {
+    public function getAttendanceInfoOneStudent(string $user_id): array {
         $this->course_db->query("
             WITH
                 Input (user_id) AS (VALUES (?)),
