@@ -2171,7 +2171,7 @@ ORDER BY {$u_or_t}.{$section_key}",
         return $return;
     }
 
-    public function getAverageComponentScores($g_id, $section_key, $is_team, string $override, string $bad_submissions, string $null_section) {
+    public function getAverageComponentScores($g_id, $section_key, $is_team, string $bad_submissions, string $null_section) {
         $u_or_t = "u";
         $users_or_teams = "users";
         $user_or_team_id = "user_id";
@@ -2268,22 +2268,54 @@ ORDER BY gc_order
         return $return;
     }
 
-    public function getAverageGraderScores($g_id, $gc_id, $section_key, $is_team) {
+    public function getAverageGraderScores($g_id, $gc_id, $section_key, $is_team, string $bad_submissions, string $null_section) {
         $u_or_t = "u";
         $users_or_teams = "users";
         $user_or_team_id = "user_id";
+        $null_section_condition = "";
+        $bad_submissions_condition = "";
+        $bad_submission_count = 0;
+        $params = [$gc_id, $g_id, $g_id, $g_id];
         if ($is_team) {
             $u_or_t = "t";
             $users_or_teams = "gradeable_teams";
             $user_or_team_id = "team_id";
         }
+        if ($null_section != 'include') {
+            $null_section_condition = "AND {$u_or_t}.{$section_key} IS NOT NULL";
+        }
+            $this->course_db->query(
+                "SELECT COUNT(*) as cnt
+                FROM gradeable_component AS gc, {$users_or_teams} AS {$u_or_t}
+                WHERE gc.g_id=? {$null_section_condition}
+                AND EXISTS (
+                    SELECT 1
+                    FROM late_day_cache AS ldc
+                    WHERE ldc.{$user_or_team_id} = {$u_or_t}.{$user_or_team_id}
+                    AND ldc.g_id=gc.g_id
+                    AND ldc.submission_days_late > ldc.late_day_exceptions
+                    AND ldc.late_days_change = 0
+        )",
+                [$g_id]
+            );
+            $bad_submission_count = $this->course_db->row()['cnt'];
+
+        // Check if we want to include late (bad) submissions into the average
+        if ($bad_submissions != 'include' && $bad_submission_count > 0) {
+            $bad_submissions_condition = "INNER JOIN(
+                SELECT DISTINCT ldc.{$user_or_team_id}
+                FROM late_day_cache AS ldc
+                WHERE ldc.g_id=? AND ( submission_days_late = 0 OR ldc.late_days_change != 0 
+              ) )AS ldc ON ldc.{$user_or_team_id}={$u_or_t}.{$user_or_team_id}";
+            $params[] = $g_id;
+        }
         $return = [];
         $this->course_db->query("
 SELECT gcd_grader_id, gc_order, round(AVG(comp_score),2) AS avg_comp_score, round(stddev_pop(comp_score),2) AS std_dev, COUNT(*) FROM(
   SELECT gcd_grader_id, gc_order,
-  CASE WHEN (gc_default + sum_points + gcd_score) >= gc_upper_clamp THEN gc_upper_clamp
-  WHEN (gc_default + sum_points + gcd_score) <= gc_lower_clamp THEN gc_lower_clamp
-  ELSE (sum_points + gcd_score) END AS comp_score FROM(
+  CASE WHEN (gc_default + sum_points + gcd_score) > gc_upper_clamp THEN gc_upper_clamp
+  WHEN (gc_default + sum_points + gcd_score) < gc_lower_clamp THEN gc_lower_clamp
+  ELSE (gc_default + sum_points + gcd_score) END AS comp_score FROM(
     SELECT gcd_grader_id, gc_order, gc_lower_clamp, gc_default, gc_upper_clamp,
     CASE WHEN sum_points IS NULL THEN 0 ELSE sum_points END AS sum_points, gcd_score
     FROM gradeable_component_data AS gcd
@@ -2310,12 +2342,13 @@ SELECT gcd_grader_id, gc_order, round(AVG(comp_score),2) AS avg_comp_score, roun
       FROM electronic_gradeable_version AS egv
       WHERE egv.g_id=? AND egv.active_version>0
     ) AS egv ON egv.{$user_or_team_id}={$u_or_t}.{$user_or_team_id}
-    WHERE g_id=? AND {$u_or_t}.{$section_key} IS NOT NULL
+    {$bad_submissions_condition}
+    WHERE g_id=? {$null_section_condition}
   )AS parts_of_comp
 )AS comp
 GROUP BY gcd_grader_id, gc_order
 ORDER BY gc_order
-        ", [$gc_id, $g_id, $g_id, $g_id]);
+        ", $params);
 
         foreach ($this->course_db->rows() as $row) {
             // add grader average
