@@ -27,8 +27,8 @@ class EmailEntity {
     #[ORM\Column(type: Types::DATETIME_MUTABLE)]
     protected DateTime $created;
 
-    #[ORM\Column(type: Types::DATETIME_MUTABLE)]
-    protected DateTime $sent;
+    #[ORM\Column(type: Types::DATETIME_MUTABLE, nullable: true)]
+    protected ?DateTime $sent;
 
     #[ORM\Column(type: Types::STRING)]
     protected string $error;
