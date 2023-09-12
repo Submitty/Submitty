@@ -62,7 +62,8 @@ class SelfRejoinController extends AbstractController {
     /**
      * @Route("/courses/{_semester}/{_course}/rejoin_course", methods={"POST"})
      *
-     * @return void Successful response if the student meets the conditions to rejoin the course.
+     * @return JsonResponse Successful response if the student meets the conditions
+     * to rejoin the course.
      */
     public function rejoinCourse(): JsonResponse {
         if (!$this->canRejoinCourse()) {
