@@ -14,6 +14,7 @@ class SelfRejoinController extends AbstractController {
      *
      * Creates the No Access page that gives the student a chance to rejoin
      * if they meet the right conditions.
+     * @return void
      */
     public function noAccess(): void {
         $this->core->getOutput()->renderOutput(
