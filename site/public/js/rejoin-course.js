@@ -2,7 +2,7 @@
 /* global csrfToken */
 
 /**
- * rejoin-class.js
+ * rejoin-course.js
  * Functions for students self-readding themselves to courses when conditions are met.
  */
 
