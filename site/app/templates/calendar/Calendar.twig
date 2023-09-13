@@ -68,23 +68,23 @@
                 </button>
                 <select id="calendar-item-type-edit" name="type" onchange="changeView(this);">
                     <option value="month" {% if (view_cookie is defined) and view_cookie == "month" %} selected {% endif %}>Month</option>
-                    <option value="two_week" {% if (view_cookie is defined)  and view_cookie == "two_week" %} selected {% endif %}>Two Week</option>
-                    <option value="one_week" {% if (view_cookie is defined)  and view_cookie == "one_week" %} selected {% endif %}>One Week</option>
+                    <option value="two_week" {% if (view_cookie is defined) and view_cookie == "two_week" %} selected {% endif %}>Two Week</option>
+                    <option value="one_week" {% if (view_cookie is defined) and view_cookie == "one_week" %} selected {% endif %}>One Week</option>
                 </select>
         </div>
 
         {# Legend #}
-        {% if show_legend == 1 %}
         <div class="cal-legend">
             {% if show_all_cookie == 1 %}
-                {% for course in course_names %}
-                <div name="{{course|replace({' ':''})}}" class="legend-color"></div><p for="{{course|replace({' ':''})}}-color" class="legend-label">{{course}}</p>
+                {% for item in course_names %}
+                <div name="{{item.course|replace({' ':''})}}" class="legend-color" onclick="openOptionsModal()" style="cursor: pointer;"></div>
+                <p for="{{item.course|replace({' ':''})}}-color" style="cursor: pointer;" onclick="show_current('{{item.course}},{{item.name}}')" class="legend-label">{{item.name}}</p>
                 {% endfor %}
             {% else %}
-                <div name="{{calendar_course_cookie|replace({' ':''})}}" class="legend-color"></div><p for="{{calendar_course_cookie|replace({' ':''})}}-color" class="legend-label">{{calendar_course_cookie}}</p>
+                <div name="{{calendar_course_cookie|replace({' ':''})}}" class="legend-color" onclick="openOptionsModal()" style="cursor: pointer;"></div>
+                <p for="{{calendar_course_cookie|replace({' ':''})}}-color" style="cursor: pointer;" onclick="show_current('{{"show all"}},{{""}}')" class="legend-label">{{display_name_cookie}}</p>
             {% endif %}
         </div>
-        {% endif %}
 
         <div class="calendar" style='margin-bottom: 20px;' id="full-calendar">
             {# Replace by js function call #}
