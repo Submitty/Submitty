@@ -17,6 +17,8 @@ class SelfRejoinController extends AbstractController {
      * @return void
      */
     public function noAccess(): void {
+        print("helllllllllllllo!!!");
+        $this->sendRejoinedStudentEmail();
         $this->core->getOutput()->renderOutput(
             'Error',
             'noAccessCourse',
@@ -126,6 +128,16 @@ class SelfRejoinController extends AbstractController {
         $details = ["subject" => $subject, "body" => $body];
         foreach ($instructor_ids as $instructor_id) {
             $details["to_user_id"] = $instructor_id;
+            $email = new Email($this->core, $details);
+            array_push($emails, $email);
+        }
+        $sysadamin_email = $this->core->getConfig()->getSysAdminEmail();
+        print("hello!");
+            if (!empty($sysadamin_email)) {
+            unset($details["to_user_id"]);
+            $details["email_address"] = $sysadamin_email;
+            print($sysadamin_email);
+            print("meow!");
             $email = new Email($this->core, $details);
             array_push($emails, $email);
         }
