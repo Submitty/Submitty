@@ -42,3 +42,4 @@ class Course_utils(object):
             if(len(line) > 1):
                 forum_data.append(l)
         return forum_data
+

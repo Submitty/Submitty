@@ -29,8 +29,13 @@ from sample_courses.models.course.global_var import Table_var
 
 
 class Course_create_gradeables:
-
+    """
+    Object that contain functions that adds gradables to the database
+    Used as an helper to the Course Class
+    """
+    
     def __init__(self):
+        # Anything that needs to be initialized goes here
         pass
 
     def add_gradeables(self, table_var: Table_var):

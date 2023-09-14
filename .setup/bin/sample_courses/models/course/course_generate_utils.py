@@ -16,7 +16,7 @@ from sample_courses.models.course.course_data import Course_data
 
 class Course_generate_utils(Course_utils,Course_data):
     """
-    
+    Object that contains functions that are used to generate the course 
     """
     # global vars that are instantiated in Class course
     # This is only to type define the global vars to make it easier to debug using

@@ -1,3 +1,8 @@
+"""
+Contains the Component class, which represents a component of a gradeable.
+Contains function:
+- create()
+"""
 
 from __future__ import print_function, division
 

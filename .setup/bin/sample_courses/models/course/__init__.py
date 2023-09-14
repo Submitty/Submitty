@@ -1,17 +1,13 @@
 # flake8: noqa
 from __future__ import print_function, division
-from datetime import timedelta
 import hashlib
 import json
 import os
 import random
-import shutil
-import subprocess
 import os.path
 import docker
 import random
-from tempfile import TemporaryDirectory
-from submitty_utils import dateutils
+
 
 from sqlalchemy import create_engine, Table, MetaData, bindparam
 
@@ -45,11 +41,12 @@ class Course(Course_generate_utils,Course_create_gradeables, Course_utils, Cours
         # Using super() to call the contructor will only run the first init in the parent class
         # Nothing is currently running in the init of both of these classes
         # but if anything is placed in the init of these classes then it will run
-        Course_utils.__init__(self)
-        Course_data.__init__(self)
         Course_generate_utils.__init__(self)
         Course_create_gradeables.__init__(self)
+        Course_data.__init__(self)
+        Course_utils.__init__(self)
 
+        #Sets the global values (Should be placed in course_utils)
         self.semester: str = get_current_semester()
         self.code = course['code']
         self.instructor = course['instructor']
