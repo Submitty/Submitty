@@ -14,21 +14,32 @@ use app\libraries\Core;
  * @method string   getSubject()
  * @method string   getBody()
  * @method string   getUserId()
+ * @method string   getEmail()
  */
 class Email extends AbstractModel {
     /** @prop
-     * @var string Subject line of email */
+     * @var string Subject line of email
+     * */
     protected $subject;
     /** @prop
-     * @var string Body of email */
+     * @var string Body of email
+     * */
     protected $body;
     /** @prop
-     * @var string user name */
+     * @var string username of student.
+     * Alternative option to providing an email address.
+     */
     protected $user_id;
+    /** @prop
+     * @var string Email address.
+     * Alternative option to providing a user_id.
+     */
+    protected $email_address;
 
 
   /**
    * Email constructor.
+   * details must contain a subject, a body, and a user id or email address to send to.
    *
    * @param Core  $core
    * @param array $details
@@ -39,7 +50,12 @@ class Email extends AbstractModel {
         if (count($details) == 0) {
             return;
         }
-        $this->setUserId($details["to_user_id"]);
+        if (array_key_exists("to_user_id", $details)) {
+            $this->setUserId($details["to_user_id"]);
+        }
+        else {
+            $this->setEmailAddress($details["email_address"]);
+        }
         $this->setSubject($this->formatSubject($details["subject"]));
 
         $this->setBody($this->formatBody(
