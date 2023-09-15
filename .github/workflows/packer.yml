@@ -1,0 +1,21 @@
+name: Packer
+
+on:
+  workflow_dispatch:
+
+jobs:
+  packer:
+    runs-on: macos-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+      - name: Install Packer
+        run: |
+          brew tap hashicorp/tap
+          brew install hashicorp/tap/packer
+      - name: Validate
+        run: |
+          packer validate packer/submitty-main.json
+      - name: Build
+        run: |
+          packer build packer/submitty-main.json

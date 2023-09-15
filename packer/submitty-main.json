@@ -1,0 +1,54 @@
+{
+    "builders": [
+        {
+            "type": "virtualbox-iso",
+            "guest_os_type": "Ubuntu_64",
+            "iso_url": "https://releases.ubuntu.com/jammy/ubuntu-22.04.3-live-server-amd64.iso",
+            "iso_checksum": "sha256:a4acfda10b18da50e2ec50ccaf860d7f20b389df8765611142305c0e911d16fd",
+            "ssh_username": "ubuntu",
+            "ssh_password": "ubuntu",
+            "ssh_port": 22,
+            "ssh_wait_timeout": "10m",
+            "shutdown_command": "echo 'packer' | sudo -S shutdown -P now",
+            "headless": true,
+            "vboxmanage": [
+                [
+                    "modifyvm",
+                    "{{.Name}}",
+                    "--memory",
+                    "2048"
+                ],
+                [
+                    "modifyvm",
+                    "{{.Name}}",
+                    "--cpus",
+                    "2"
+                ]
+            ],
+            "boot_command": [
+                "<esc><esc><enter><wait>",
+                "/install/vmlinuz noapic ",
+                "file=/floppy/preseed.cfg ",
+                "debian-installer=en_US auto locale=en_US kbd-chooser/method=us ",
+                "hostname=ubuntu ",
+                "fb=false debconf/frontend=noninteractive ",
+                "keyboard-configuration/modelcode=SKIP keyboard-configuration/layout=USA ",
+                "keyboard-configuration/variant=USA console-setup/ask_detect=false ",
+                "initrd=/install/initrd.gz -- <enter>"
+            ],
+            "boot_wait": "10s"
+        }
+    ],
+    "provisioners": [
+        {
+            "type": "shell",
+            "script": "./provisioner.sh"
+        }
+    ],
+    "post-processors": [
+        {
+            "type": "vagrant",
+            "output": "build/vb.box"
+        }
+    ]
+}
