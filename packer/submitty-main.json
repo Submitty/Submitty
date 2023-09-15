@@ -33,7 +33,6 @@
               "set gfxpayload=keep<enter><wait>",
               "linux /casper/vmlinuz quiet ",
               "autoinstall ds=nocloud-net;s=http://{{ .HTTPIP }}:{{ .HTTPPort }}/ ",
-              "cloud-init-url=http://{{ .HTTPIP }}:{{ .HTTPPort }}/cloud-config.yaml ",
               "---<enter><wait>",
               "initrd /casper/initrd<wait><enter><wait>",
               "boot<enter><wait>"
