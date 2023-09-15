@@ -225,6 +225,10 @@
                     </span>
 <div class="banner" id = "banner">
 {% set image_found = false %}
+        
+<script>
+console.log(imageDataArray);
+</script>
 
   {% for imageData in imageDataArray %}
       <div>
@@ -383,16 +387,7 @@
     bannerElement.style.display = 'none';
     bannerElement.style.width = "1%";
 
-    var bubble = document.getElementById("speech-bubble-container");
-    if (bubble != null) {
-        if (hiddenImages.length == images.length) {
 
-            bubble.style.display = "none";
-        }
-        else {
-            bubble.style.display = "block";
-        }
-    }
 
     var currentImages = [];
     for (var i = 0; i < images.length; i++) {
@@ -405,7 +400,16 @@
         }
     }
 
+    var bubble = document.getElementById("speech-bubble-container");
+    if (bubble != null) {
+        if (currentImages.length == 0) {
 
+            bubble.style.display = "none";
+        }
+        else {
+            bubble.style.display = "block";
+        }
+    }
     images = currentImages.concat(seenImages);
 
     function showBanners() {

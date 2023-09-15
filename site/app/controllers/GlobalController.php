@@ -414,7 +414,7 @@ class GlobalController extends AbstractController {
 
             $sidebar_buttons[] = new NavButton($this->core, [
                 "href" => $this->core->buildUrl(['banner']),
-                "title" => "Banner Images",
+                "title" => "Community Events",
                 "icon" => "fa-paper-plane"
             ]);
 

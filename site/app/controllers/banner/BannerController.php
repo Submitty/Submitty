@@ -21,12 +21,11 @@ class BannerController extends AbstractController {
      *
      * @return WebResponse
      * @see GlobalController::prep_user_sidebar
-     * @see BannerView::showBanner
+     * @see BannerView::showEventBanners
      */
-    public function viewBanner(): WebResponse {
-        $bannerImages = $this->core->getSubmittyEntityManager()->getRepository(BannerImage::class) ->findall();
-        return new WebResponse(BannerView::class, 'showBanner', $bannerImages);
-        //EVEN WHEN I REPLACE BannerView::class with 'app\views\banner\BannerView', webresponse still treats the parameter as 'app\\controllers\\Banner\\BannerView'
+    public function viewCommunityEvents(): WebResponse {
+        $communityEventBanners = $this->core->getSubmittyEntityManager()->getRepository(BannerImage::class) ->findall();
+        return new WebResponse(BannerView::class, 'showEventBanners', $communityEventBanners);
     }
 
 
@@ -34,7 +33,7 @@ class BannerController extends AbstractController {
     /**
      * @Route("/banner/upload", methods={"POST"})
      */
-    public function ajaxUploadBannerFiles(): JsonResponse {
+    public function ajaxUploadEventFiles(): JsonResponse {
         $upload_path = FileUtils::joinPaths($this->core->getConfig()->getSubmittyPath(), "community_events");
         if (isset($_POST['release_time'])) {
             $release_date = DateUtils::parseDateTime($_POST['release_time'], $this->core->getDateTimeNow()->getTimezone());
@@ -142,7 +141,7 @@ class BannerController extends AbstractController {
             if ($all_match) {
                 continue;
             }
-            $banner_image = new BannerImage(
+            $community_event_image = new BannerImage(
                 $specificPath,
                 $actual_banner_name,
                 $extra_name,
@@ -150,7 +149,7 @@ class BannerController extends AbstractController {
                 $close_date,
                 $folder_made_name
             );
-            $this->core->getSubmittyEntityManager()->persist($banner_image);
+            $this->core->getSubmittyEntityManager()->persist($community_event_image);
             $this->core->getSubmittyEntityManager()->flush();
         }
 
@@ -160,28 +159,28 @@ class BannerController extends AbstractController {
     /**
      * @Route("/banner/delete", methods={"POST"})
      */
-    public function ajaxDeleteBannerFiles(): JsonResponse {
+    public function ajaxDeleteEventFiles(): JsonResponse {
 
         $entity_manager = $this->core->getSubmittyEntityManager();
 
-        $banner_repository = $entity_manager->getRepository(BannerImage::class);
+        $event_repository = $entity_manager->getRepository(BannerImage::class);
 
-        $banner_items = $banner_repository->findBy(['name' => $_POST['name'] ]);
-        if (empty($banner_items)) {
+        $event_items = $event_repository->findBy(['name' => $_POST['name'] ]);
+        if (empty($event_items)) {
             $error_message = "Banner item with name '" . $_POST['name'] . "' not found in the database.";
             return JsonResponse::getErrorResponse($error_message);
         }
 
-        $banner_item = $banner_items[0];
-        $entity_manager->remove($banner_item);
+        $event_item = $event_items[0];
+        $entity_manager->remove($event_item);
         $entity_manager->flush();
 
         $full_path = FileUtils::joinPaths($this->core->getConfig()->getSubmittyPath(), "community_events");
 
         $folder_name = $_POST['path'];
-        $banner_name = $_POST['name'];
+        $event_name = $_POST['name'];
 
-        $full_path = FileUtils::joinPaths($full_path, $folder_name, $banner_item->getFolderName(), $banner_name);
+        $full_path = FileUtils::joinPaths($full_path, $folder_name, $event_item->getFolderName(), $event_name);
 
 
         if (is_file($full_path)) {

@@ -7,9 +7,9 @@ use app\entities\banner\BannerImage;
 
 class GlobalView extends AbstractView {
     /**
-     * @param array<BannerImage> $bannerImages
+     * @param array<BannerImage> $eventBannerImages
      */
-    public function header($breadcrumbs, $wrapper_urls, $sidebar_buttons, $notifications_info, $css, $js, $duck_img, $page_name, $content_only, array $bannerImages) {
+    public function header($breadcrumbs, $wrapper_urls, $sidebar_buttons, $notifications_info, $css, $js, $duck_img, $page_name, $content_only, array $eventBannerImages) {
         $messages = [];
         foreach (['error', 'notice', 'success'] as $type) {
             foreach ($_SESSION['messages'][$type] as $key => $error) {
@@ -46,7 +46,7 @@ class GlobalView extends AbstractView {
         //NEW WAY -----------------------------------
 
         $currentDate = new \DateTime();
-        foreach ($bannerImages as $banner) {
+        foreach ($eventBannerImages as $banner) {
             //FUTURE MIGHT NEED TO FIX SO WE ADD MID PATH
             $pathName = FileUtils::joinPaths($this->core->getConfig()->getSubmittyPath(), "community_events", $banner->getClosingDate()->format('Y'), $banner->getFolderName(), $banner->getName());
 
