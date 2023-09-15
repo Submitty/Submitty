@@ -6,10 +6,10 @@
             "iso_url": "https://releases.ubuntu.com/jammy/ubuntu-22.04.3-live-server-amd64.iso",
             "iso_checksum": "sha256:a4acfda10b18da50e2ec50ccaf860d7f20b389df8765611142305c0e911d16fd",
             "ssh_username": "ubuntu",
-            "ssh_password": "",
+            "ssh_password": "ubuntu",
             "ssh_port": 22,
             "ssh_wait_timeout": "10m",
-            "shutdown_command": "echo 'packer' | sudo -S shutdown -P now",
+            "shutdown_command": "echo 'ubuntu' | sudo -S shutdown -P now",
             "headless": true,
             "vboxmanage": [
                 [
@@ -25,12 +25,16 @@
                     "2"
                 ]
             ],
+            "http_directory": "http",
+            "http_port_min": 9001,
+            "http_port_max": 9999,
             "boot_command": [
                 "<esc><esc><enter><wait>",
                 "/install/vmlinuz noapic ",
-                "file=/floppy/preseed.cfg ",
+                "autoinstall ds=nocloud-net;s=http://{{ .HTTPIP }}:{{ .HTTPPort }}/ ",
+                "cloud-init-url=http://{{ .HTTPIP }}:{{ .HTTPPort }}/cloud-config.yaml ",
                 "debian-installer=en_US auto locale=en_US kbd-chooser/method=us ",
-                "hostname=ubuntu ",
+                "hostname=submitty-main ",
                 "fb=false debconf/frontend=noninteractive ",
                 "keyboard-configuration/modelcode=SKIP keyboard-configuration/layout=USA ",
                 "keyboard-configuration/variant=USA console-setup/ask_detect=false ",
@@ -42,7 +46,7 @@
     "provisioners": [
         {
             "type": "shell",
-            "script": "./provisioner.sh"
+            "script": "provisioner.sh"
         }
     ],
     "post-processors": [
