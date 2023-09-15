@@ -377,6 +377,41 @@ SET default_tablespace = '';
 
 
 --
+-- Name: banner_images; Type: TABLE; Schema: public; Owner: -
+--
+
+CREATE TABLE public.banner_images (
+    id integer NOT NULL,
+    path_date character varying(255) NOT NULL,
+    name character varying(255) NOT NULL,
+    folder_name character varying(255) NOT NULL,
+    extra_info character varying(255),
+    release_date timestamp(6) without time zone,
+    closing_date timestamp(6) without time zone
+);
+
+
+--
+-- Name: banner_images_id_seq; Type: SEQUENCE; Schema: public; Owner: -
+--
+
+CREATE SEQUENCE public.banner_images_id_seq
+    AS integer
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+--
+-- Name: banner_images_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: -
+--
+
+ALTER SEQUENCE public.banner_images_id_seq OWNED BY public.banner_images.id;
+
+
+--
 -- Name: community_events; Type: TABLE; Schema: public; Owner: -
 --
 
@@ -658,6 +693,13 @@ ALTER SEQUENCE public.vcs_auth_tokens_id_seq OWNED BY public.vcs_auth_tokens.id;
 
 
 --
+-- Name: banner_images id; Type: DEFAULT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.banner_images ALTER COLUMN id SET DEFAULT nextval('public.banner_images_id_seq'::regclass);
+
+
+--
 -- Name: community_events id; Type: DEFAULT; Schema: public; Owner: -
 --
 
@@ -683,6 +725,14 @@ ALTER TABLE ONLY public.saml_mapped_users ALTER COLUMN id SET DEFAULT nextval('p
 --
 
 ALTER TABLE ONLY public.vcs_auth_tokens ALTER COLUMN id SET DEFAULT nextval('public.vcs_auth_tokens_id_seq'::regclass);
+
+
+--
+-- Name: banner_images banner_images_pkey; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.banner_images
+    ADD CONSTRAINT banner_images_pkey PRIMARY KEY (id);
 
 
 --
