@@ -19,4 +19,5 @@ jobs:
           packer validate submitty-main.json
       - name: Build
         run: |
+          cd packer
           packer build submitty-main.json
