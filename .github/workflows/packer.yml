@@ -19,4 +19,4 @@ jobs:
           packer validate packer/submitty-main.json
       - name: Build
         run: |
-          packer build packer/submitty-main.json
+          packer build submitty-main.json
