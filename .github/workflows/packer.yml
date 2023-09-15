@@ -16,7 +16,7 @@ jobs:
       - name: Validate
         run: |
           cd packer
-          packer validate packer/submitty-main.json
+          packer validate submitty-main.json
       - name: Build
         run: |
           packer build submitty-main.json
