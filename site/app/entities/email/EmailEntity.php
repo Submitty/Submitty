@@ -18,6 +18,9 @@ class EmailEntity {
     #[ORM\Column(type: Types::STRING)]
     protected string $user_id;
 
+    #[ORM\Column(type: Types::STRING)]
+    protected string $to_name;
+
     #[ORM\Column(type: Types::TEXT)]
     protected string $subject;
 
@@ -51,6 +54,13 @@ class EmailEntity {
      */
     public function getUserId(): string {
         return $this->user_id;
+    }
+
+    /**
+     * @return string
+     */
+    public function getToName(): string {
+        return $this->to_name;
     }
 
     public function getSubject(): string {

@@ -27,24 +27,28 @@ class Email extends AbstractModel {
     protected $body;
     /** @prop
      * @var string username of student.
-     * Alternative option to providing an email address.
+     * Alternative option to providing an email address and to_name.
      */
     protected $user_id;
     /** @prop
      * @var string Email address.
-     * Alternative option to providing a user_id.
+     * Alternative option to providing a user_id. Should use to_name as well.
      */
     protected $email_address;
+    /** @prop
+     * @var string Name of who we're sending to.
+     * Alternative option to providing a user_id.
+     */
+    protected $to_name;
 
 
-  /**
-   * Email constructor.
-   * details must contain a subject, a body, and a user id or email address to send to.
-   *
-   * @param Core  $core
-   * @param array $details
-   */
-
+    /**
+     * Email constructor.
+     * details must contain a subject, a body, and a user id or email address to send to.
+     *
+     * @param Core  $core
+     * @param array $details
+     */
     public function __construct(Core $core, array $details = []) {
         parent::__construct($core);
         if (count($details) == 0) {
@@ -55,6 +59,7 @@ class Email extends AbstractModel {
         }
         else {
             $this->setEmailAddress($details["email_address"]);
+            $this->setToName($details["to_name"]);
         }
         $this->setSubject($this->formatSubject($details["subject"]));
 
