@@ -15,6 +15,7 @@ jobs:
           brew install hashicorp/tap/packer
       - name: Validate
         run: |
+          cd packer
           packer validate packer/submitty-main.json
       - name: Build
         run: |
