@@ -6,7 +6,7 @@
             "iso_url": "https://releases.ubuntu.com/jammy/ubuntu-22.04.3-live-server-amd64.iso",
             "iso_checksum": "sha256:a4acfda10b18da50e2ec50ccaf860d7f20b389df8765611142305c0e911d16fd",
             "ssh_username": "ubuntu",
-            "ssh_password": "ubuntu",
+            "ssh_password": "",
             "ssh_port": 22,
             "ssh_wait_timeout": "10m",
             "shutdown_command": "echo 'packer' | sudo -S shutdown -P now",
