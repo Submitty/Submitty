@@ -181,6 +181,7 @@ class Course_create:
         os.system("mkdir -p {}".format(os.path.join(self.course_path, "submissions")))
         os.system('chown submitty_php:{}_tas_www {}'.format(self.code, os.path.join(self.course_path, 'submissions')))
 
+        self.add_gradeables();
         self.conn.close()
         submitty_conn.close()
         os.environ['PGPASSWORD'] = ""
