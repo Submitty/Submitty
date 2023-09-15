@@ -9,9 +9,9 @@ from sqlalchemy import Table
 
 from sample_courses import SETUP_DATA_PATH
 
-class Course_data():
+class Course_data:
     """
-    
+    Contains functions that add/create data to the course
     """
     # global vars that are instantiated in Class course
     # This is only to type define the global vars to make it easier to debug using

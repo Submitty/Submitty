@@ -2,16 +2,16 @@
 import os
 from sample_courses import SETUP_DATA_PATH
 
-class Course_utils(object):
+class Course_utils:
     """
-    
+    Contains basic course utils functions
     """
     # global vars that are instantiated in Class course
     # This is only to type define the global vars to make it easier to debug using
     # intellisense
     semester:str
-    # code:dict idk type
-    # instructor:dict idk type
+    # code:dict type unkown
+    # instructor:dict type unkown
     gradeables:list
     make_customization:bool
     users: list
