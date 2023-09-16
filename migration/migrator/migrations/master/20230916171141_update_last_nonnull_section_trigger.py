@@ -14,9 +14,9 @@ def up(config, database):
         ALTER TABLE courses_users
         ADD COLUMN previous_registration_section VARCHAR;
 
-        CREATE TRIGGER before_update_store_previous_nonnull_section
+        CREATE TRIGGER before_update_update_last_nonnull_section
         BEFORE UPDATE ON public.courses_users
-        FOR EACH ROW EXECUTE PROCEDURE public.store_previous_nonnull_section();
+        FOR EACH ROW EXECUTE PROCEDURE public.update_last_nonnull_section();
     """)
 
 
@@ -30,5 +30,5 @@ def down(config, database):
     :type database: migrator.db.Database
     """
     database.execute("""
-        DROP TRIGGER IF EXISTS before_update_store_previous_nonnull_section;
+        DROP TRIGGER IF EXISTS before_update_update_last_nonnull_section;
     """)
