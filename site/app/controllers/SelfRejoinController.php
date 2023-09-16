@@ -131,7 +131,7 @@ class SelfRejoinController extends AbstractController {
             array_push($emails, $email);
         }
         $sysadamin_email = $this->core->getConfig()->getSysAdminEmail();
-            if (!empty($sysadamin_email)) {
+        if (!empty($sysadamin_email)) {
             unset($details["to_user_id"]);
             $details["email_address"] = $sysadamin_email;
             $details["to_name"] = "Sysadmin";
