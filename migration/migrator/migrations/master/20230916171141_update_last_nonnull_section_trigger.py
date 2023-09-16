@@ -12,7 +12,7 @@ def up(config, database):
     """
     database.execute("""
         ALTER TABLE courses_users
-        ADD COLUMN previous_registration_section VARCHAR;
+        ADD COLUMN last_nonnull_registration_section VARCHAR;
 
         CREATE TRIGGER before_update_update_last_nonnull_section
         BEFORE UPDATE ON public.courses_users

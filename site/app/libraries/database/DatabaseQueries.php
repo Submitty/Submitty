@@ -1871,6 +1871,15 @@ WHERE term=? AND course=? AND user_id=?",
         return $return;
     }
 
+    public function getLastNonnullRegistrationSection($user_id, $course) {
+        $this->submitty_db->querry("
+            SELECT last_nonnull_registration_section
+            FROM courses_users
+            WHERE user_id=? and course=? and term=?;
+        ");
+        
+    }
+
     public function getTotalUserCountByGradingSections($sections, $section_key) {
         $return = [];
         $params = [];
