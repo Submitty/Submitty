@@ -11,22 +11,19 @@ def up(config, database):
     :type database: migrator.db.Database
     """
     database.execute("""
-        BEGIN;
-            ALTER TABLE emails
-            ADD COLUMN to_name VARCHAR;
-        COMMIT;
-        BEGIN;
-            ALTER TABLE emails
-            ALTER COLUMN user_id DROP NOT NULL;
-        COMMIT;
-        BEGIN;
-            ALTER TABLE emails
-            ADD CONSTRAINT name_or_email CHECK (
-                (user_id is NOT NULL)
-                <>
-                (to_name is NOT NULL)
-            );
-        COMMIT;
+        ALTER TABLE emails
+        ADD COLUMN to_name VARCHAR;
+
+        --- Now user_id null if to_name used instead.
+        ALTER TABLE emails
+        ALTER COLUMN user_id DROP NOT NULL;
+
+        ALTER TABLE emails
+        ADD CONSTRAINT name_or_email CHECK (
+            (user_id is NOT NULL)
+            <>
+            (to_name is NOT NULL)
+        );
     """);
 
 def down(config, database):
