@@ -64,6 +64,7 @@ export UTM=0
 export VAGRANT=0
 export NO_SUBMISSIONS=0
 export WORKER=0
+export USE_JSON=0
 
 # Read through the flags passed to the script reading them in and setting
 # appropriate bash variables, breaking out of this once we hit something we
@@ -89,6 +90,10 @@ while :; do
         --no_submissions)
             export NO_SUBMISSIONS=1
             echo "no_submissions"
+            ;;
+        --use_json)
+            export USE_JSON=1
+            echo "use_json"
             ;;
         *) # No more options, so break out of the loop.
             break
@@ -652,7 +657,9 @@ echo Beginning Submitty Setup
 if [ ${WORKER} == 1 ]; then
     echo "Running configure submitty in worker mode"
     if [ ${DEV_VM} == 1 ]; then
-        echo "submitty" | python3 ${SUBMITTY_REPOSITORY}/.setup/CONFIGURE_SUBMITTY.py --worker
+        echo "submitty" | python3 ${SUBMITTY_REPOSITORY}/.setup/CONFIGURE_SUBMITTY.py --worker --use-json
+    elif [ ${USE_JSON} == 1]; then
+        python3 ${SUBMITTY_REPOSITORY}/.setup/CONFIGURE_SUBMITTY.py --worker --use-json
     else
         python3 ${SUBMITTY_REPOSITORY}/.setup/CONFIGURE_SUBMITTY.py --worker
     fi
@@ -663,34 +670,13 @@ else
         if [ -z "${SUBMISSION_URL}" ]; then
             SUBMISSION_URL='http://192.168.56.101'
         fi
-        echo -e "/var/run/postgresql
-${DB_USER}
-${DATABASE_PASSWORD}
-${DB_COURSE_USER}
-${DB_COURSE_PASSWORD}
-America/New_York
-en_US
-${SUBMISSION_URL}
-
-
-sysadmin@example.com
-https://example.com
-1
-submitty-admin
-y
-
-
-submitty@vagrant
-do-not-reply@vagrant
-localhost
-25
-" | python3 ${SUBMITTY_REPOSITORY}/.setup/CONFIGURE_SUBMITTY.py --debug --setup-for-sample-courses --websocket-port ${WEBSOCKET_PORT}
+        python3 ${SUBMITTY_REPOSITORY}/.setup/CONFIGURE_SUBMITTY.py --debug --setup-for-sample-courses --websocket-port ${WEBSOCKET_PORT}
 
         # Set these manually as they're not asked about during CONFIGURE_SUBMITTY.py
         sed -i -e 's/"url": ""/"url": "ldap:\/\/localhost"/g' ${SUBMITTY_INSTALL_DIR}/config/authentication.json
         sed -i -e 's/"uid": ""/"uid": "uid"/g' ${SUBMITTY_INSTALL_DIR}/config/authentication.json
         sed -i -e 's/"bind_dn": ""/"bind_dn": "ou=users,dc=vagrant,dc=local"/g' ${SUBMITTY_INSTALL_DIR}/config/authentication.json
-    else
+    elif [ ${USE_JSON} == 1]; then
         python3 ${SUBMITTY_REPOSITORY}/.setup/CONFIGURE_SUBMITTY.py
     fi
 fi

@@ -1,0 +1,37 @@
+{
+    "database_host": "localhost",
+    "database_port": 5432,
+    "database_user": "submitty_dbuser",
+    "database_course_user": "submitty_course_dbuser",
+    "database_password": "submitty_dbuser",
+    "database_course_password": "submitty_dbuser",
+    "submission_url": "192.168.56.101",
+    "supervisor_user": "submitty",
+    "vcs_url": "",
+    "authentication_method": "authentication",
+    "institution_name": "My Institution",
+    "institution_homepage": "www.myinstitution.org",
+    "timezone": "America/New York",
+    "language": "en_US",
+    "submitty_admin_username": "submitty",
+    "email_notifications": false,
+    "email_user": "",
+    "email_password": "",
+    "email_sender": "submitty@myuniversity.edu",
+    "email_reply_to": "submitty_do_not_reply@myuniversity.edu",
+    "email_server_hostname": "mail.myuniversity.edu",
+    "email_server_port": 25,
+    "email_internal_domain": "example.com",
+    "course_code_requirements": "Please follow your school's convention for course code.",
+    "sys_admin_email": "submitty_do_not_reply@example.com",
+    "sys_admin_url": "https://example.com",
+    "ldap_options": {
+        "url": "",
+        "uid": "",
+        "bind_dn": ""
+    },
+    "saml_options": {
+        "name": "",
+        "username_attribute": ""
+    }
+}
