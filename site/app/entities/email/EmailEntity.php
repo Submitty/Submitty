@@ -94,4 +94,12 @@ class EmailEntity {
     public function getCourse(): ?string {
         return $this->course;
     }
+
+    /**
+     * Returns true if this email was sent to a submitty user.
+     * @return bool True if the email is to a submitty user.
+     */
+    public function isToSubmittyUser(): bool {
+        return empty($this->to_name);
+    }
 }
