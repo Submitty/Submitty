@@ -11,6 +11,9 @@ def up(config, database):
     :type database: migrator.db.Database
     """
     database.execute("""
+        ALTER TABLE courses_users
+        ADD COLUMN previous_registration_section VARCHAR;
+
         CREATE TRIGGER before_update_store_previous_nonnull_section
         BEFORE UPDATE ON public.courses_users
         FOR EACH ROW EXECUTE PROCEDURE public.store_previous_nonnull_section();
