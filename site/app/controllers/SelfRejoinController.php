@@ -88,7 +88,7 @@ class SelfRejoinController extends AbstractController {
                 $user_id,
                 $term,
                 $course
-        );
+            );
         $user->setRegistrationSection($to_join_section);
 
         $this->core->getQueries()->updateUser($user, $term, $course);
