@@ -54,8 +54,8 @@ class SimpleStat extends AbstractModel {
     public function __construct(Core $core, $details = []) {
         parent::__construct($core);
         if (isset($details['gc_id'])) {
-            $bad_submissions_cookie = array_key_exists('include_bad_submissions', $_COOKIE) ? $_COOKIE['include_bad_submissions'] : 'omit';
-            $null_section_cookie = array_key_exists('include_null_section', $_COOKIE) ? $_COOKIE['include_null_section'] : 'omit';
+            $bad_submissions_cookie = $_COOKIE['include_bad_submissions'] ?? 'omit';
+            $null_section_cookie = $_COOKIE['include_null_section'] ?? 'omit';
             $this->component = true;
             $this->title = $details['gc_title'];
             $this->max_value = $details['gc_max_value'];
