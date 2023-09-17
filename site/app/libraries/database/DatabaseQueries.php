@@ -5386,9 +5386,15 @@ AND gc_id IN (
      * Returns true if the student was ever in the course,
      * even if they are in the null section now.
      * @param string $user_id The name of the user.
+     * @param string $course The course we're looking at.
+     * @param string $term The term we're looking t.
      * @return bool True if the student was ever in the course, false otherwise.
      */
-    public function wasStudentEverInCourse($user_id, $course, $term): bool {
+    public function wasStudentEverInCourse(
+        string $user_id,
+        string $course,
+        string $term
+    ): bool {
         $this->submitty_db->query("
                 SELECT user_id
                 FROM courses_users
