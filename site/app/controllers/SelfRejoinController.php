@@ -33,10 +33,14 @@ class SelfRejoinController extends AbstractController {
         $user = $this->core->getUser();
         $user_id = $user->getId();
 
+        $course = $this->core->getConfig()->getCourse();
+        $term = $this->core->getConfig()->getTerm();
+
         // If manually removed from course, this was probably intentional removal.
         if (
             $user->isManualRegistration()
-            || !$this->core->getQueries()->wasStudentEverInCourse($user_id)
+            || !$this->core->getQueries()->
+                wasStudentEverInCourse($user_id, $course, $term)
         ) {
             return false;
         }
