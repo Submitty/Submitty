@@ -652,11 +652,12 @@ fi
 # SUBMITTY SETUP
 #################
 echo Beginning Submitty Setup
-
+SETTINGS_DIR=${SUBMITTY_INSTALL_DIR}/settings
 #If in worker mode, run configure with --worker option.
 if [ ${WORKER} == 1 ]; then
     echo "Running configure submitty in worker mode"
     if [ ${DEV_VM} == 1 ]; then
+        # Use pre-configured JSON file for settings
         echo "submitty" | python3 ${SUBMITTY_REPOSITORY}/.setup/CONFIGURE_SUBMITTY.py --worker --use-json
     elif [ ${USE_JSON} == 1]; then
         python3 ${SUBMITTY_REPOSITORY}/.setup/CONFIGURE_SUBMITTY.py --worker --use-json
@@ -670,14 +671,14 @@ else
         if [ -z "${SUBMISSION_URL}" ]; then
             SUBMISSION_URL='http://192.168.56.101'
         fi
-        python3 ${SUBMITTY_REPOSITORY}/.setup/CONFIGURE_SUBMITTY.py --debug --setup-for-sample-courses --websocket-port ${WEBSOCKET_PORT}
+        python3 ${SUBMITTY_REPOSITORY}/.setup/CONFIGURE_SUBMITTY.py --debug --use-json --setup-for-sample-courses --websocket-port ${WEBSOCKET_PORT} 
 
         # Set these manually as they're not asked about during CONFIGURE_SUBMITTY.py
         sed -i -e 's/"url": ""/"url": "ldap:\/\/localhost"/g' ${SUBMITTY_INSTALL_DIR}/config/authentication.json
         sed -i -e 's/"uid": ""/"uid": "uid"/g' ${SUBMITTY_INSTALL_DIR}/config/authentication.json
         sed -i -e 's/"bind_dn": ""/"bind_dn": "ou=users,dc=vagrant,dc=local"/g' ${SUBMITTY_INSTALL_DIR}/config/authentication.json
     elif [ ${USE_JSON} == 1]; then
-        python3 ${SUBMITTY_REPOSITORY}/.setup/CONFIGURE_SUBMITTY.py
+        python3 ${SUBMITTY_REPOSITORY}/.setup/CONFIGURE_SUBMITTY.py --use-json
     fi
 fi
 

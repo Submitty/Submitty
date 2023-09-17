@@ -68,7 +68,7 @@ parser.add_argument('--worker', action='store_true', default=False, help='Config
 parser.add_argument('--install-dir', default='/usr/local/submitty', help='Set the install directory for Submitty')
 parser.add_argument('--data-dir', default='/var/local/submitty', help='Set the data directory for Submitty')
 parser.add_argument('--websocket-port', default=8443, type=int, help='Port to use for websocket')
-parser.add_argument('--config-path', default='', help='Path to preconfigured JSON file to use for Submitty settings')
+parser.add_argument('--use-json', action='store_true', default=False, help='Use a preconfigured JSON file to use for Submitty settings')
 
 args = parser.parse_args()
 
@@ -160,8 +160,116 @@ CONFIG_INSTALL_DIR = os.path.join(SUBMITTY_INSTALL_DIR, 'config')
 SUBMITTY_ADMIN_JSON = os.path.join(CONFIG_INSTALL_DIR, 'submitty_admin.json')
 EMAIL_JSON = os.path.join(CONFIG_INSTALL_DIR, 'email.json')
 AUTHENTICATION_JSON = os.path.join(CONFIG_INSTALL_DIR, 'authentication.json')
+SUBMITTY_SETTINGS_JSON = os.path.join(CONFIG_INSTALL_DIR, 'submitty_settings.json')
 
 ##############################################################################
+# Setup ${SUBMITTY_INSTALL_DIR}/config
+
+DATABASE_JSON = os.path.join(CONFIG_INSTALL_DIR, 'database.json')
+SUBMITTY_JSON = os.path.join(CONFIG_INSTALL_DIR, 'submitty.json')
+SUBMITTY_USERS_JSON = os.path.join(CONFIG_INSTALL_DIR, 'submitty_users.json')
+WORKERS_JSON = os.path.join(CONFIG_INSTALL_DIR, 'autograding_workers.json')
+CONTAINERS_JSON = os.path.join(CONFIG_INSTALL_DIR, 'autograding_containers.json')
+SECRETS_PHP_JSON = os.path.join(CONFIG_INSTALL_DIR, 'secrets_submitty_php.json')
+
+#Rescue the autograding_workers and _containers files if they exist.
+rescued = list()
+tmp_folder = tempfile.mkdtemp()
+if not args.worker:
+    for full_file_name, file_name in [(WORKERS_JSON, 'autograding_workers.json'), (CONTAINERS_JSON, 'autograding_containers.json')]:
+        if os.path.isfile(full_file_name):
+            #make a tmp folder and copy autograding workers to it
+            tmp_file = os.path.join(tmp_folder, file_name)
+            shutil.move(full_file_name, tmp_file)
+            rescued.append((full_file_name, tmp_file))
+
+IGNORED_FILES_AND_DIRS = ['saml', 'login.md']
+
+if os.path.isdir(CONFIG_INSTALL_DIR):
+    for file in os.scandir(CONFIG_INSTALL_DIR):
+        if file.name not in IGNORED_FILES_AND_DIRS:
+            if file.is_file():
+                os.remove(os.path.join(CONFIG_INSTALL_DIR, file.name))
+            else:
+                os.rmdir(os.path.join(CONFIG_INSTALL_DIR, file.name))
+elif os.path.exists(CONFIG_INSTALL_DIR):
+    os.remove(CONFIG_INSTALL_DIR)
+os.makedirs(CONFIG_INSTALL_DIR, exist_ok=True)
+shutil.chown(CONFIG_INSTALL_DIR, 'root', COURSE_BUILDERS_GROUP)
+os.chmod(CONFIG_INSTALL_DIR, 0o755)
+
+# Finish rescuing files.
+for full_file_name, tmp_file_name in rescued:
+    #copy autograding workers back
+    shutil.move(tmp_file_name, full_file_name)
+    #make sure the permissions are correct.
+    shutil.chown(full_file_name, 'root', DAEMON_GID)
+    os.chmod(full_file_name, 0o660)
+
+#remove the tmp folder
+os.removedirs(tmp_folder)
+
+##############################################################################
+# WRITE CONFIG FILES IN ${SUBMITTY_INSTALL_DIR}/config
+
+if not args.worker:
+    if not os.path.isfile(WORKERS_JSON):
+        capabilities = ["default"]
+        if args.setup_for_sample_courses:
+            capabilities.extend(["cpp", "python", "et-cetera", "notebook"])
+
+        worker_dict = {
+            "primary": {
+                "capabilities": capabilities,
+                "address": "localhost",
+                "username": "",
+                "num_autograding_workers": NUM_GRADING_SCHEDULER_WORKERS,
+                "enabled" : True
+            }
+        }
+
+        vagrant_workers_json = os.path.join(SUBMITTY_REPOSITORY, '.vagrant', 'workers.json')
+        if os.path.isfile(vagrant_workers_json):
+            with open(vagrant_workers_json) as f:
+                vagrant_workers = json.load(f, object_hook=OrderedDict)
+ 
+            for worker, data in vagrant_workers.items():
+                worker_dict[worker] = {
+                    "capabilities": capabilities,
+                    "address": data["ip_addr"],
+                    "username": "submitty",
+                    "num_autograding_workers": NUM_GRADING_SCHEDULER_WORKERS,
+                    "enabled": True
+                }
+
+        with open(WORKERS_JSON, 'w') as workers_file:
+            json.dump(worker_dict, workers_file, indent=4)
+
+    if not os.path.isfile(CONTAINERS_JSON):
+        container_dict = {
+            "default": [
+                          "submitty/clang:6.0",
+                          "submitty/autograding-default:latest",
+                          "submitty/java:11",
+                          "submitty/python:3.6",
+                          "submittyrpi/csci1200:default"
+                       ]
+        }
+
+        with open(CONTAINERS_JSON, 'w') as container_file:
+            json.dump(container_dict, container_file, indent=4)
+
+    for file in [WORKERS_JSON, CONTAINERS_JSON]:
+      os.chmod(file, 0o660)
+
+    shutil.chown(WORKERS_JSON, PHP_USER, DAEMON_GID)
+    shutil.chown(CONTAINERS_JSON, group=DAEMONPHP_GROUP)
+
+if args.use_json:
+    shutil.copy(os.path.join(SUBMITTY_REPOSITORY, '.setup/data/default_settings.json'), os.path.join(CONFIG_INSTALL_DIR, 'submitty_settings.json'))
+
+####################################################################
+
 
 authentication_methods = [
     'PamAuthentication',
@@ -241,16 +349,18 @@ if DEBUGGING_ENABLED:
 if args.worker:
     print("CONFIGURING SUBMITTY AS A WORKER !!")
 
-if args.config-json != "":
+if args.use_json:
     print('Using preconfigured json file')
-    config = json.load(args.config-json)
+    print()
+    # Assumes file exists
+    with open(SUBMITTY_SETTINGS_JSON) as submitty_settings_json:
+        config = json.load(submitty_settings_json)
     if args.worker:
         SUPERVISOR_USER = config["supervisor_user"]
     else:
         DATABASE_HOST = config['database_host']
         if not os.path.isdir(DATABASE_HOST):
             DATABASE_PORT = config['database_port']
-            print()
         else:
             DATABASE_PORT = config['database_port']
             DATABASE_USER = config['database_user']
@@ -534,108 +644,6 @@ with open(CONFIGURATION_JSON, 'w') as json_file:
 
 os.chmod(CONFIGURATION_JSON, 0o500)
 
-##############################################################################
-# Setup ${SUBMITTY_INSTALL_DIR}/config
-
-DATABASE_JSON = os.path.join(CONFIG_INSTALL_DIR, 'database.json')
-SUBMITTY_JSON = os.path.join(CONFIG_INSTALL_DIR, 'submitty.json')
-SUBMITTY_USERS_JSON = os.path.join(CONFIG_INSTALL_DIR, 'submitty_users.json')
-WORKERS_JSON = os.path.join(CONFIG_INSTALL_DIR, 'autograding_workers.json')
-CONTAINERS_JSON = os.path.join(CONFIG_INSTALL_DIR, 'autograding_containers.json')
-SECRETS_PHP_JSON = os.path.join(CONFIG_INSTALL_DIR, 'secrets_submitty_php.json')
-
-#Rescue the autograding_workers and _containers files if they exist.
-rescued = list()
-tmp_folder = tempfile.mkdtemp()
-if not args.worker:
-    for full_file_name, file_name in [(WORKERS_JSON, 'autograding_workers.json'), (CONTAINERS_JSON, 'autograding_containers.json')]:
-        if os.path.isfile(full_file_name):
-            #make a tmp folder and copy autograding workers to it
-            tmp_file = os.path.join(tmp_folder, file_name)
-            shutil.move(full_file_name, tmp_file)
-            rescued.append((full_file_name, tmp_file))
-
-IGNORED_FILES_AND_DIRS = ['saml', 'login.md']
-
-if os.path.isdir(CONFIG_INSTALL_DIR):
-    for file in os.scandir(CONFIG_INSTALL_DIR):
-        if file.name not in IGNORED_FILES_AND_DIRS:
-            if file.is_file():
-                os.remove(os.path.join(CONFIG_INSTALL_DIR, file.name))
-            else:
-                os.rmdir(os.path.join(CONFIG_INSTALL_DIR, file.name))
-elif os.path.exists(CONFIG_INSTALL_DIR):
-    os.remove(CONFIG_INSTALL_DIR)
-os.makedirs(CONFIG_INSTALL_DIR, exist_ok=True)
-shutil.chown(CONFIG_INSTALL_DIR, 'root', COURSE_BUILDERS_GROUP)
-os.chmod(CONFIG_INSTALL_DIR, 0o755)
-
-# Finish rescuing files.
-for full_file_name, tmp_file_name in rescued:
-    #copy autograding workers back
-    shutil.move(tmp_file_name, full_file_name)
-    #make sure the permissions are correct.
-    shutil.chown(full_file_name, 'root', DAEMON_GID)
-    os.chmod(full_file_name, 0o660)
-
-#remove the tmp folder
-os.removedirs(tmp_folder)
-
-##############################################################################
-# WRITE CONFIG FILES IN ${SUBMITTY_INSTALL_DIR}/config
-
-if not args.worker:
-    if not os.path.isfile(WORKERS_JSON):
-        capabilities = ["default"]
-        if args.setup_for_sample_courses:
-            capabilities.extend(["cpp", "python", "et-cetera", "notebook"])
-
-        worker_dict = {
-            "primary": {
-                "capabilities": capabilities,
-                "address": "localhost",
-                "username": "",
-                "num_autograding_workers": NUM_GRADING_SCHEDULER_WORKERS,
-                "enabled" : True
-            }
-        }
-
-        vagrant_workers_json = os.path.join(SUBMITTY_REPOSITORY, '.vagrant', 'workers.json')
-        if os.path.isfile(vagrant_workers_json):
-            with open(vagrant_workers_json) as f:
-                vagrant_workers = json.load(f, object_hook=OrderedDict)
- 
-            for worker, data in vagrant_workers.items():
-                worker_dict[worker] = {
-                    "capabilities": capabilities,
-                    "address": data["ip_addr"],
-                    "username": "submitty",
-                    "num_autograding_workers": NUM_GRADING_SCHEDULER_WORKERS,
-                    "enabled": True
-                }
-
-        with open(WORKERS_JSON, 'w') as workers_file:
-            json.dump(worker_dict, workers_file, indent=4)
-
-    if not os.path.isfile(CONTAINERS_JSON):
-        container_dict = {
-            "default": [
-                          "submitty/clang:6.0",
-                          "submitty/autograding-default:latest",
-                          "submitty/java:11",
-                          "submitty/python:3.6",
-                          "submittyrpi/csci1200:default"
-                       ]
-        }
-
-        with open(CONTAINERS_JSON, 'w') as container_file:
-            json.dump(container_dict, container_file, indent=4)
-
-    for file in [WORKERS_JSON, CONTAINERS_JSON]:
-      os.chmod(file, 0o660)
-
-    shutil.chown(WORKERS_JSON, PHP_USER, DAEMON_GID)
-    shutil.chown(CONTAINERS_JSON, group=DAEMONPHP_GROUP)
 
 ##############################################################################
 # Write database json
