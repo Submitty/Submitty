@@ -1,5 +1,5 @@
 --
--- Name: store_previous_nonull_section(); Type: FUNCTION; Schema: public; Owner: -
+-- Name: update_last_nonnull_section(); Type: FUNCTION; Schema: public; Owner: -
 --
 
 CREATE OR REPLACE FUNCTION public.update_last_nonnull_section() RETURNS trigger

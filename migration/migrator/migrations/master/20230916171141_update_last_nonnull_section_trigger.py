@@ -14,9 +14,9 @@ def up(config, database):
         ALTER TABLE courses_users
         ADD COLUMN last_nonnull_registration_section VARCHAR;
 
-        CREATE TRIGGER before_update_update_last_nonnull_section
+        CREATE TRIGGER before_update_courses_update_last_nonnull_section
         BEFORE UPDATE ON public.courses_users
-        FOR EACH ROW EXECUTE PROCEDURE public.update_last_nonnull_section();
+        FOR EACH ROW EXECUTE PROCEDURE update_last_nonnull_section();
     """)
 
 
