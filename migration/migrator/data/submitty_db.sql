@@ -373,6 +373,23 @@ CREATE FUNCTION public.sync_user() RETURNS trigger
         $$;
 
 
+--
+-- Name: update_last_nonnull_section(); Type: FUNCTION; Schema: public; Owner: -
+--
+
+CREATE FUNCTION public.update_last_nonnull_section() RETURNS trigger
+    LANGUAGE plpgsql
+    AS $$
+BEGIN
+	IF (NEW.registration_section IS NOT NULL AND OLD.registration_section IS NULL)
+		OR (NEW.registration_section != OLD.registration_section) THEN
+		NEW.last_nonnull_registration_section := NEW.registration_section;
+	END IF;
+	RETURN NEW;
+END;
+$$;
+
+
 SET default_tablespace = '';
 
 
@@ -416,6 +433,7 @@ CREATE TABLE public.courses_users (
     registration_section character varying(255),
     registration_type character varying(255) DEFAULT 'graded'::character varying,
     manual_registration boolean DEFAULT false,
+    last_nonnull_registration_section character varying,
     CONSTRAINT check_registration_type CHECK (((registration_type)::text = ANY (ARRAY[('graded'::character varying)::text, ('audit'::character varying)::text, ('withdrawn'::character varying)::text, ('staff'::character varying)::text]))),
     CONSTRAINT users_user_group_check CHECK (((user_group >= 1) AND (user_group <= 4)))
 );
@@ -767,6 +785,13 @@ CREATE TRIGGER after_delete_sync_delete_user_cleanup AFTER DELETE ON public.cour
 --
 
 CREATE TRIGGER before_delete_sync_delete_user BEFORE DELETE ON public.courses_users FOR EACH ROW EXECUTE PROCEDURE public.sync_delete_user();
+
+
+--
+-- Name: courses_users before_update_courses_update_last_nonnull_section; Type: TRIGGER; Schema: public; Owner: -
+--
+
+CREATE TRIGGER before_update_courses_update_last_nonnull_section BEFORE UPDATE ON public.courses_users FOR EACH ROW EXECUTE PROCEDURE public.update_last_nonnull_section();
 
 
 --
