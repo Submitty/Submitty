@@ -17,7 +17,7 @@ env:
   SUBMITTY_REPOSITORY: /usr/local/submitty/GIT_CHECKOUT/Submitty
   POSTGRES_HOST: localhost
   PHP_VER: 8.1
-  NODE_VERSION: 16
+  NODE_VERSION: 20
   PYTHON_VERSION: "3.10"
 
 concurrency:
