@@ -5397,12 +5397,12 @@ AND gc_id IN (
      * @param string $user_id The name of the user.
      * @return bool True if the student was ever in the course, false otherwise.
      */
-    public function wasStudentEverInCourse($user_id): bool {
-        $course = $this->core->getConfig()->getCourse();
+    public function wasStudentEverInCourse($user_id, $course, $term): bool {
         $this->submitty_db->query("
                 SELECT user_id
-                FROM courses_users WHERE user_id=? and course=?;
-            ", [$user_id, $course]);
+                FROM courses_users
+                WHERE user_id=? and course=? and term=?;
+            ", [$user_id, $course, $term]);
         $row = $this->submitty_db->row();
         return count($row) > 0;
     }
