@@ -1871,15 +1871,6 @@ WHERE term=? AND course=? AND user_id=?",
         return $return;
     }
 
-    public function getLastNonnullRegistrationSection($user_id, $course) {
-        $this->submitty_db->querry("
-            SELECT last_nonnull_registration_section
-            FROM courses_users
-            WHERE user_id=? and course=? and term=?;
-        ");
-        
-    }
-
     public function getTotalUserCountByGradingSections($sections, $section_key) {
         $return = [];
         $params = [];
@@ -5405,6 +5396,31 @@ AND gc_id IN (
             ", [$user_id, $course, $term]);
         $row = $this->submitty_db->row();
         return count($row) > 0;
+    }
+
+    /**
+     * Returns the last non-null registration section the student was in.
+     * Make sure student was ever registered in the course by calling
+     * wasStudentEverInCourse() first.
+     *
+     * @param string $user_id The name of the user we're querying.
+     * @param string $course The course we are looking in.
+     * @param string $term The term we are looking at.
+     * @return string The registration section the student was last in.
+     *   If the student is currently registered, the current registration
+     *   section is returned.
+     */
+    public function getLastNonnullRegistrationSection(
+        string $user_id,
+        string $term,
+        string $course
+    ): string {
+        $this->submitty_db->query("
+            SELECT last_nonnull_registration_section
+            FROM courses_users
+            WHERE user_id=? and term=? and course=?;
+        ", [$user_id, $term, $course]);
+        return $this->submitty_db->row()["last_nonnull_registration_section"];
     }
 
     /**
