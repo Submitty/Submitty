@@ -20,4 +20,13 @@ def up(config):
         print("Failed to write .gitconfig entry or change ownership.")
 
 def down(config):
-    pass
+    DAEMON_USER = config.submitty_users['daemon_user']
+    gitconfig_path = f"/home/{DAEMON_USER}/.gitconfig"
+
+    try:
+        if os.path.exists(gitconfig_path):
+            os.remove(gitconfig_path)
+
+    except Exception as e:
+        print("Error:", e)
+        print("Failed to remove .gitconfig entry.")
