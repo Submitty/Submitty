@@ -35,18 +35,21 @@ require 'json'
 def gen_script(machine_name, worker: false)
   no_submissions = !ENV.fetch('NO_SUBMISSIONS', '').empty?
   extra = ENV.fetch('EXTRA', '')
-
-  setup_cmd = 'bash ${GIT_PATH}/.setup/'
-  if worker
-    setup_cmd += 'install_worker.sh'
-  else
-    setup_cmd += 'vagrant/setup_vagrant.sh'
-    if no_submissions
-      setup_cmd += ' --no_submissions'
+  custom_box = ENV.fetch('VAGRANT_BOX', '')
+  setup_cmd = ''
+  unless custom_box.include?('Submitty')
+    setup_cmd = 'bash ${GIT_PATH}/.setup/'
+    if worker
+      setup_cmd += 'install_worker.sh'
+    else
+      setup_cmd += 'vagrant/setup_vagrant.sh'
+      if no_submissions
+        setup_cmd += ' --no_submissions'
+      end
     end
-  end
-  unless extra.empty?
-    setup_cmd += " #{extra}"
+    unless extra.empty?
+      setup_cmd += " #{extra}"
+    end
   end
   setup_cmd += " 2>&1 | tee ${GIT_PATH}/.vagrant/logs/#{machine_name}.log"
 
