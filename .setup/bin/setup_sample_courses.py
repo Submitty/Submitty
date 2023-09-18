@@ -223,5 +223,6 @@ def main():
         os.system(f"{SUBMITTY_INSTALL_DIR}/bin/regrade.py --no_input {SUBMITTY_DATA_DIR}/courses/")
 
 
+
 if __name__ == "__main__":
     main()
