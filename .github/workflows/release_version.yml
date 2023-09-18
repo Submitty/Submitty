@@ -20,5 +20,4 @@ jobs:
       - name: Save to cloud
         run: |
             vagrant package --output submitty.box
-            bash ./.setup/vagrant_cloud.sh ${{ secrets.VAGRANT_CLOUD_TOKEN }} reapernsgaming Submitty ${{ github.event.release.tag_name }}
-            bash ./.setup/vagrant_cloud.sh ${{ secrets.VAGRANT_CLOUD_TOKEN }} reapernsgaming Submitty_Dev ${{ github.event.release.tag_name }}.001
+            bash ./.setup/vagrant_cloud.sh ${{ secrets.VAGRANT_CLOUD_TOKEN }} reapernsgaming Submitty ${{ github.event.release.tag_name }}.001
