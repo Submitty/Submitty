@@ -46,18 +46,13 @@ class CalendarView extends AbstractView {
             $course_string = sprintf("%s %s", $course->getTitle(), $course->getTerm());
             array_push($formatted_courses, $course_string);
         }
-        foreach ($courses as $course) {
-            if ($course->getDisplayName()) {
-                $name_string = sprintf("%s %s", $course->getDisplayName(), $course->getTerm());
-            }
-            else {
-                $name_string = sprintf("%s %s", $course->getTitle(), $course->getTerm());
-            }
-            array_push($display_names, $name_string);
-        }
-        $combinedArray = [];
-        foreach (array_map(null, $formatted_courses, $display_names) as [$course, $name]) {
-            $combinedArray[] = ['course' => $course, 'name' => $name];
+        $Course_name = [];
+        foreach ($courses as $index => $course) {
+            $nameString = $course->getDisplayName() ? 
+                        sprintf("%s %s", $course->getDisplayName(), $course->getTerm()) : 
+                        sprintf("%s %s", $course->getTitle(), $course->getTerm());
+
+            $Course_name[] = ['course' => $formatted_courses[$index], 'name' => $nameString];
         }
 
         //Set course color options
@@ -100,7 +95,7 @@ class CalendarView extends AbstractView {
             "colors" => $info->getColors(),
             "instructor_courses" => $this->core->getQueries()->getInstructorLevelUnarchivedCourses($this->core->getUser()->getId()),
             "view_cookie" => isset($_COOKIE['view']) ? $_COOKIE['view'] : "month",
-            "course_names" => $combinedArray,
+            "course_names" => $Course_name,
             "show_legend" => $show_legend,
             "color_options" => $course_colors,
             "show_all_cookie" => isset($_COOKIE['calendar_show_all']) ? $_COOKIE['calendar_show_all'] : 1,
