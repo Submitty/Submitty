@@ -12,7 +12,10 @@ VAGRANT_CLOUD_VERSION=$(curl \
   https://app.vagrantup.com/api/v1/box/"$VAGRANT_USERNAME"/"$VAGRANT_BOX" | \
   python3 -c \
   'import json,sys;obj=json.load(sys.stdin);version=obj["versions"][0]["version"].split(".");version[3]=str(int(version[3])+1).zfill(3);print(".".join(version))')
+else
+VAGRANT_CLOUD_VERSION="${VAGRANT_CLOUD_VERSION:1}"
 fi
+
 
 curl \
   --request POST \
