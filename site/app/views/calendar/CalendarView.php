@@ -52,7 +52,10 @@ class CalendarView extends AbstractView {
                         sprintf("%s %s", $course->getDisplayName(), $course->getTerm()) :
                         sprintf("%s %s", $course->getTitle(), $course->getTerm());
 
-            $courseWithName[] = ['course' => $formatted_courses[$index], 'name' => $nameString];
+            $courseWithName[] = [
+                'course' => $formatted_courses[$index],
+                'name' => $nameString,
+            ];
         }
 
         //Set course color options
