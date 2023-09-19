@@ -48,13 +48,12 @@ class CalendarView extends AbstractView {
         }
         $courseWithName = [];
         foreach ($courses as $index => $course) {
-            $nameString = $course->getDisplayName() ?
-                        ($course->getDisplayName() . " " . $course->getTerm()) :
-                        ($course->getTitle() . " " . $course->getTerm());
+            $displayName = $course->getDisplayName();
+            $nameString = ($displayName !== '' ? $displayName : $course->getTitle()) . $course->getTerm();
 
             $courseWithName[] = [
-                'course' => $formatted_courses[$index],
-                'name' => $nameString,
+                'course_name' => $formatted_courses[$index],
+                'display_name' => $nameString,
             ];
         }
 
