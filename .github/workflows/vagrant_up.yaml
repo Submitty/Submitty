@@ -21,3 +21,11 @@ jobs:
       - run: NO_SUBMISSIONS=1 vagrant up ubuntu-22.04
       - name: Validate image
         run: curl --show-error --fail --include http://localhost:1511
+      - name: Save image
+        run: vagrant package --output submitty.box
+      - name: Publish image
+        run: |
+           vagrant cloud auth login --token ${{ secrets.VAGRANT_CLOUD_TOKEN }}
+           vagrant cloud publish mybox 0.0.1 virtualbox submitty.box --force --private
+           vagrant cloud auth logout
+        
