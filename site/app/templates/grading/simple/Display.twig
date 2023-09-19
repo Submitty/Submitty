@@ -14,6 +14,17 @@
     {% endif %}
 
     <div class="column-wrapper" style="margin: 1em 0;">
+        <div id="checkpoint-fixed" class="column-wrapper">
+            {% include "grading/simple/StudentSearch.twig" %}
+        </div>
+
+        <div>
+            <button class="btn btn-primary key_to_click" tabindex="0" id="settings-btn" onclick='showSettings()'>Settings/Hotkeys</button>
+            <button class="btn btn-primary key_to_click" tabindex="0" id="simple-stats-btn" onclick='showSimpleGraderStats("{{ action }}")'>View Statistics</button>
+        </div>
+    </div>
+
+    <div class="column-wrapper" style="margin: 1em 0;">
             {% if action == 'lab' %}
                 <ul id="details-legend" class="table-bordered">
                     <li>
