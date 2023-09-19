@@ -5,7 +5,7 @@ namespace app\controllers;
 use app\controllers\AbstractController;
 use app\libraries\DateUtils;
 use Symfony\Component\Routing\Annotation\Route;
-use app\libraries\response\JsonResponse;
+use app\libraries\response\RedirectResponse;
 use app\models\Email;
 
 class SelfRejoinController extends AbstractController {
@@ -67,14 +67,13 @@ class SelfRejoinController extends AbstractController {
     /**
      * @Route("/courses/{_semester}/{_course}/rejoin_course", methods={"POST"})
      *
-     * @return JsonResponse Successful response if the student meets the conditions
-     * to rejoin the course.
+     * @return RedirectResponse Course url if the student met the conditions to be readded.
      */
-    public function rejoinCourse(): JsonResponse {
+    public function rejoinCourse(): RedirectResponse {
+        $course_url = $this->core->buildCourseUrl();
+
         if (!$this->canRejoinCourse()) {
-            return JsonResponse::getFailResponse(
-                "This student does not meet the conditions to rejoin."
-            );
+            return new RedirectResponse("$course_url/no_access");
         }
 
         $term = $this->core->getConfig()->getTerm();
@@ -94,7 +93,7 @@ class SelfRejoinController extends AbstractController {
         $this->core->getQueries()->updateUser($user, $term, $course);
 
         $this->sendRejoinedStudentEmail($to_join_section);
-        return JsonResponse::getSuccessResponse();
+        return new RedirectResponse($course_url);
     }
 
 

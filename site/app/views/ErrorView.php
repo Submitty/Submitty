@@ -37,14 +37,13 @@ class ErrorView extends AbstractView {
      * @return string The Twig HTML for this page.
      */
     public function noAccessCourse(bool $can_rejoin_course, string $readd_url): string {
-        $this->core->getOutput()->addInternalJs('rejoin-course.js');
         return $this->core->getOutput()->renderTwigTemplate("error/NoAccessCourse.twig", [
             "course_name" => $this->core->getDisplayedCourseName(),
             "semester" => $this->core->getFullSemester(),
             "main_url" => $this->core->getConfig()->getBaseUrl(),
             "ability_to_readd" => $can_rejoin_course,
-            "main_course_url" => $this->core->buildCourseUrl(),
-            "readd_url" => $readd_url
+            "readd_url" => $readd_url,
+            "csrf_token" => $this->core->getCsrfToken()
         ]);
     }
 
