@@ -26,6 +26,6 @@ jobs:
       - name: Publish image
         run: |
            vagrant cloud auth login --token ${{ secrets.VAGRANT_CLOUD_TOKEN }}
-           vagrant cloud publish mybox 0.0.1 virtualbox submitty.box --force --private
+           vagrant cloud publish grand/mybox 0.0.1 virtualbox submitty.box --force --private
            vagrant cloud auth logout
         
