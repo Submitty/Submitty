@@ -43,20 +43,21 @@ class CalendarView extends AbstractView {
         $display_names = [];
         //$course_colors = [];
         foreach ($courses as $course) {
-            $course_string = sprintf("%s %s", $course->getTitle(), $course->getTerm());
+            $course_string = $course->getTitle() . " " . $course->getTerm();
             array_push($formatted_courses, $course_string);
         }
         $courseWithName = [];
         foreach ($courses as $index => $course) {
             $nameString = $course->getDisplayName() ?
-                        sprintf("%s %s", $course->getDisplayName(), $course->getTerm()) :
-                        sprintf("%s %s", $course->getTitle(), $course->getTerm());
+                        ($course->getDisplayName() . " " . $course->getTerm()) :
+                        ($course->getTitle() . " " . $course->getTerm());
 
             $courseWithName[] = [
                 'course' => $formatted_courses[$index],
                 'name' => $nameString,
             ];
         }
+
 
         //Set course color options
         $course_colors = [];
