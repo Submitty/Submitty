@@ -2177,7 +2177,6 @@ ORDER BY {$u_or_t}.{$section_key}",
         $user_or_team_id = "user_id";
         $null_section_condition = "";
         $bad_submissions_condition = "";
-        $bad_submission_count = 0;
         $params = [$g_id, $g_id, $g_id, $g_id];
         if ($is_team) {
             $u_or_t = "t";
@@ -2189,24 +2188,8 @@ ORDER BY {$u_or_t}.{$section_key}",
         if ($null_section !== 'include') {
             $null_section_condition = "AND {$u_or_t}.{$section_key} IS NOT NULL";
         }
-            $this->course_db->query(
-                "SELECT COUNT(*) as cnt
-                FROM gradeable_component AS gc, {$users_or_teams} AS {$u_or_t}
-                WHERE gc.g_id=? {$null_section_condition}
-                AND EXISTS (
-                    SELECT 1
-                    FROM late_day_cache AS ldc
-                    WHERE ldc.{$user_or_team_id} = {$u_or_t}.{$user_or_team_id}
-                    AND ldc.g_id=gc.g_id
-                    AND ldc.submission_days_late > ldc.late_day_exceptions
-                    AND ldc.late_days_change = 0
-        )",
-                [$g_id]
-            );
-            $bad_submission_count = $this->course_db->row()['cnt'];
-
         // Check if we want to include late (bad) submissions into the average
-        if ($bad_submissions !== 'include' && $bad_submission_count > 0) {
+        if ($bad_submissions !== 'include') {
             $bad_submissions_condition = "INNER JOIN(
                 SELECT DISTINCT ldc.{$user_or_team_id}
                 FROM late_day_cache AS ldc
@@ -2274,7 +2257,6 @@ ORDER BY gc_order
         $user_or_team_id = "user_id";
         $null_section_condition = "";
         $bad_submissions_condition = "";
-        $bad_submission_count = 0;
         $params = [$gc_id, $g_id, $g_id, $g_id];
         if ($is_team) {
             $u_or_t = "t";
@@ -2284,24 +2266,8 @@ ORDER BY gc_order
         if ($null_section !== 'include') {
             $null_section_condition = "AND {$u_or_t}.{$section_key} IS NOT NULL";
         }
-            $this->course_db->query(
-                "SELECT COUNT(*) as cnt
-                FROM gradeable_component AS gc, {$users_or_teams} AS {$u_or_t}
-                WHERE gc.g_id=? {$null_section_condition}
-                AND EXISTS (
-                    SELECT 1
-                    FROM late_day_cache AS ldc
-                    WHERE ldc.{$user_or_team_id} = {$u_or_t}.{$user_or_team_id}
-                    AND ldc.g_id=gc.g_id
-                    AND ldc.submission_days_late > ldc.late_day_exceptions
-                    AND ldc.late_days_change = 0
-        )",
-                [$g_id]
-            );
-            $bad_submission_count = $this->course_db->row()['cnt'];
-
         // Check if we want to include late (bad) submissions into the average
-        if ($bad_submissions !== 'include' && $bad_submission_count > 0) {
+        if ($bad_submissions !== 'include') {
             $bad_submissions_condition = "INNER JOIN(
                 SELECT DISTINCT ldc.{$user_or_team_id}
                 FROM late_day_cache AS ldc
@@ -2363,10 +2329,9 @@ ORDER BY gc_order
         $u_or_t = "u";
         $users_or_teams = "users";
         $user_or_team_id = "user_id";
-        $bad_submission_count = 0;
         $bad_submissions_condition = '';
         $null_section_condition = '';
-
+        $params = [$g_id];
         if ($is_team) {
             $u_or_t = "t";
             $users_or_teams = "gradeable_teams";
@@ -2376,31 +2341,13 @@ ORDER BY gc_order
             $null_section_condition = "AND {$u_or_t}.{$section_key} IS NOT NULL";
         }
 
-            $this->course_db->query(
-                "SELECT COUNT(*) as cnt
-                FROM gradeable_component AS gc, {$users_or_teams} AS {$u_or_t}
-                WHERE gc.g_id=? {$null_section_condition}
-                AND EXISTS (
-                    SELECT 1
-                    FROM late_day_cache AS ldc
-                    WHERE ldc.{$user_or_team_id} = {$u_or_t}.{$user_or_team_id}
-                    AND ldc.g_id=gc.g_id
-                    AND ldc.submission_days_late > ldc.late_day_exceptions
-                    AND ldc.late_days_change = 0
-        )",
-                [$g_id]
-            );
-            $bad_submission_count = $this->course_db->row()['cnt'];
-
-        if ($bad_submissions !== 'include' && $bad_submission_count > 0) {
-            $bad_submissions_condition = "AND NOT EXISTS (
-                SELECT 1
+        if ($bad_submissions !== 'include') {
+            $bad_submissions_condition = "INNER JOIN(
+                SELECT DISTINCT ldc.{$user_or_team_id}
                 FROM late_day_cache AS ldc
-                WHERE ldc.{$user_or_team_id} = {$u_or_t}.{$user_or_team_id}
-                AND ldc.g_id = egd.g_id
-                AND ldc.submission_days_late > ldc.late_day_exceptions
-                AND ldc.late_days_change = 0
-            )";
+                WHERE ldc.g_id=? AND ( submission_days_late = 0 OR ldc.late_days_change != 0 
+              ) )AS ldc ON ldc.{$user_or_team_id}={$u_or_t}.{$user_or_team_id}";
+            $params[] = $g_id;
         }
 
         $this->course_db->query("
@@ -2415,10 +2362,11 @@ SELECT round((AVG(score)),2) AS avg_score, round(stddev_pop(score), 2) AS std_de
          WHERE active_version > 0
       ) AS egv
       ON egd.g_id=egv.g_id AND egd.{$user_or_team_id}=egv.{$user_or_team_id}
-      WHERE egd.g_version=egv.active_version AND egd.g_id=? {$null_section_condition} {$bad_submissions_condition}
+      {$bad_submissions_condition}
+      WHERE egd.g_version=egv.active_version AND egd.g_id=? {$null_section_condition}
    )g
 ) as individual;
-          ", [$g_id]);
+          ", $params);
         return ($this->course_db->getRowCount() > 0) ? new SimpleStat($this->core, $this->course_db->rows()[0]) : null;
     }
 
@@ -2481,7 +2429,6 @@ SELECT COUNT(*) from gradeable_component where g_id=?
         $u_or_t = "u";
         $users_or_teams = "users";
         $user_or_team_id = "user_id";
-        $bad_submission_count = 0;
         $exclude = '';
         $include = '';
         $null_section_condition = '';
@@ -2512,24 +2459,8 @@ SELECT COUNT(*) from gradeable_component where g_id=?
             $null_section_condition = "AND {$u_or_t}.{$section_key} IS NOT NULL";
         }
 
-            $this->course_db->query(
-                "SELECT COUNT(*) as cnt
-                FROM gradeable_component AS gc, {$users_or_teams} AS {$u_or_t}
-                WHERE gc.g_id=? {$null_section_condition}
-                AND EXISTS (
-                    SELECT 1
-                    FROM late_day_cache AS ldc
-                    WHERE ldc.{$user_or_team_id} = {$u_or_t}.{$user_or_team_id}
-                    AND ldc.g_id=gc.g_id
-                    AND ldc.submission_days_late > ldc.late_day_exceptions
-                    AND ldc.late_days_change = 0
-                )",
-                [$g_id]
-            );
-            $bad_submission_count = $this->course_db->row()['cnt'];
-
         // Check if we want to include late (bad) submissions into the average
-        if ($bad_submissions !== 'include' && $bad_submission_count > 0) {
+        if ($bad_submissions !== 'include') {
             $bad_submissions_condition = "INNER JOIN(
                 SELECT DISTINCT ldc.{$user_or_team_id}
                 FROM late_day_cache AS ldc
