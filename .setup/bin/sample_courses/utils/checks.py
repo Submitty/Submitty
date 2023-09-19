@@ -2,6 +2,7 @@
 import pwd
 import grp
 
+
 def user_exists(user):
     """
     Checks to see if the user exists on the linux file system. We can use this to delete a user

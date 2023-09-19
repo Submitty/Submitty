@@ -12,7 +12,8 @@ import shutil
 import subprocess
 from datetime import datetime
 
-from sample_courses import *
+from sample_courses import SUBMITTY_DATA_DIR, SETUP_DATA_PATH, yaml
+
 
 def get_random_text_from_file(filename):
     line = ""

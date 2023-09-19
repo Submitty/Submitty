@@ -1,32 +1,29 @@
 
-import grp
 import json
 import os
-import pwd
 import random
 import shutil
 import string
-import subprocess
 import uuid
-from datetime import datetime
-from tempfile import TemporaryDirectory
 
-from sample_courses import *
 from sample_courses.utils import get_random_text_from_file
 from sample_courses.utils.checks import group_exists
 
 
 def create_gradeable_submission(src, dst):
     """
-    Given a source and a destination, copy the files from the source to the destination. First, before
-    copying, we check if the source is a directory, if it is, then we zip the contents of this to a temp
-    zip file (stored in /tmp) and store the path to this newly created zip as our new source.
+    Given a source and a destination, copy the files from the source to the destination. First,
+    before copying, we check if the source is a directory, if it is, then we zip the contents of
+    this to a temp zip file (stored in /tmp) and store the path to this newly created zip as
+    our new source.
 
-    At this point, (for all uploads), we check if our source is a zip (by just checking file extension is
-    a .zip), then we will extract the contents of the source (using Shutil) to the destination, else we
-    just do a simple copy operation of the source file to the destination location.
+    At this point, (for all uploads), we check if our source is a zip (by just checking file
+    extension is a .zip), then we will extract the contents of the source (using Shutil) to
+    the destination, else we just do a simple copy operation of the source file to the
+    destination location.
 
-    At this point, if we created a zip file (as part of that first step), we remove it from the /tmp directory.
+    At this point, if we created a zip file (as part of that first step),
+    we remove it from the /tmp directory.
 
     :param src: path of the file or directory we want to use for this submission
     :type src: str
@@ -47,9 +44,12 @@ def create_gradeable_submission(src, dst):
     if zip_dst is not None and isinstance(zip_dst, str):
         os.remove(zip_dst)
 
+
 def create_pdf_annotations(file_name, file_path, src, dst, grader_id):
     """
-    Specifically designed helper function that copies a annotation from the source to the destination.
+    Specifically designed helper function that copies a annotation from the
+    source to the destination.
+
     The source annotation need to be modified to reflect:
         the file that the annotations belongs to
         the grader that is responsible for the annotation
@@ -73,7 +73,8 @@ def create_pdf_annotations(file_name, file_path, src, dst, grader_id):
             annotation['userId'] = grader_id
 
     with open(os.path.join(dst, file_name), 'w') as f:
-        json.dump(annotation_json, f, indent = 2)
+        json.dump(annotation_json, f, indent=2)
+
 
 def create_group(group):
     """
@@ -87,8 +88,10 @@ def create_group(group):
     if group == "sudo":
         return
 
+
 def generate_random_user_id(length=15):
-    return ''.join(random.choice(string.ascii_lowercase + string.ascii_uppercase + string.digits) for _ in range(length))
+    return ''.join(random.choice(string.ascii_lowercase + string.ascii_uppercase
+                                 + string.digits) for _ in range(length))
 
 
 def generate_random_ta_comment():
@@ -102,10 +105,12 @@ def generate_random_ta_note():
 def generate_random_student_note():
     return get_random_text_from_file('StudentNote.txt')
 
+
 def generate_pronouns():
     pronoun_num = random.random()
-    if pronoun_num <= .05: 
-        pronoun_list = ["Ze/Zir","Xe/Xem", "Ne/Nem", "Vi/Vir", "Ne/Nir" "Nix/Nix", "Xy/Xyr", "Zhe/Zhim"]
+    if pronoun_num <= .05:
+        pronoun_list = ["Ze/Zir", "Xe/Xem", "Ne/Nem", "Vi/Vir",
+                        "Ne/Nir" "Nix/Nix", "Xy/Xyr", "Zhe/Zhim"]
         return random.choice(pronoun_list)
     elif pronoun_num <= .30:
         return ""
@@ -113,7 +118,9 @@ def generate_pronouns():
         return "She/Her"
     elif pronoun_num <= .70:
         return "They/Them"
-    else: return "He/Him"
+    else:
+        return "He/Him"
+
 
 def generate_versions_to_submit(num=3, original_value=3):
     if num == 1:

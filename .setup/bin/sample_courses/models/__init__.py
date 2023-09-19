@@ -27,6 +27,7 @@ class Mark(object):
         res = conn.execute(ins)
         self.key = res.inserted_primary_key[0]
 
+
 def generate_random_marks(default_value, max_value):
     with open(os.path.join(SETUP_DATA_PATH, "random", "marks.yml")) as f:
         marks_yml = yaml.load(f)
@@ -204,7 +205,6 @@ shadowWarning: 0"""
 
 def generate_random_users(total, real_users):
     """
-
     :param total:
     :param real_users:
     :return:
