@@ -23,6 +23,7 @@ jobs:
       - name: Validate image
         run: curl --show-error --fail --include http://localhost:1511
       - name: Acquire Job ID
+        if: failure()
         id: get-job-id
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
