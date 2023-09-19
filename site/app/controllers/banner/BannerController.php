@@ -116,8 +116,11 @@ class BannerController extends AbstractController {
                     [$width, $height] = getimagesize($uploaded_files["tmp_name"][$j]);
 
 
-                    if ($width !== 800 || $height > 70) {
-                        return JsonResponse::getErrorResponse("File dimensions must be 800x70 pixels.");
+                    if ($width > 800 || $height > 70) {
+                        return JsonResponse::getErrorResponse("File dimensions must be no more than 800x70 pixels.");
+                    }
+                    if ($width < 200 || $height < 10) {
+                        return JsonResponse::getErrorResponse("File dimensions must be no less than 200x10 pixels.");
                     }
                 }
 
