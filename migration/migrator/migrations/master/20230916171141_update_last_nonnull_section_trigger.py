@@ -26,6 +26,25 @@ def up(config, database):
         CREATE TRIGGER before_update_courses_update_last_nonnull_section
         BEFORE UPDATE ON public.courses_users
         FOR EACH ROW EXECUTE PROCEDURE update_last_nonnull_section();
+
+        UPDATE courses_users
+        SET last_nonnull_registration_section= (
+            CASE
+                WHEN courses_users.registration_section IS NOT NULL
+                    THEN courses_users.registration_section
+                ELSE (
+                    SELECT course_section_id
+                    FROM courses_registration_sections
+                    WHERE courses_registration_sections.course = courses_users.course
+                    ORDER BY course_section_id ASC
+                    LIMIT 1
+                )
+            END
+        );
+
+        ALTER TABLE courses_users
+        ALTER COLUMN last_nonnull_registration_section
+        SET NOT NULL;
     """)
 
 
