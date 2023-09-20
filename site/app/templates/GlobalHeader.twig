@@ -418,6 +418,7 @@
             setCookie('display', "yes");
             bannerElement.style.width = "100%";
             bannerElement.style.display = "block";
+            document.getElementById("breadcrumbs").style.flexWrap = "inherit";
 
             if (currentImages.length > 0) {
                 currentImages[0].classList.add("active");
@@ -451,6 +452,7 @@
         }
         else {
             setCookie('display', "no");
+            document.getElementById("breadcrumbs").style.flexWrap = "wrap";
             images[currentImageIndex].classList.remove("active");
             currentImageIndex ++;
             if (currentImageIndex < 0) {
