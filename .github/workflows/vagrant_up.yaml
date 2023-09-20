@@ -14,14 +14,27 @@ jobs:
 
     steps:
       - uses: actions/checkout@v3
+      - name: Get latest version
+        id: get-version
+        run: |
+          TAG=$(git describe --tags --abbrev=0)
+          if ! [[ $TAG =~ ^v[0-9]{2}\.[0-9]{2}\.[0-9]{2}$ ]]; then
+            echo "Invalid tag name: '$TAG'"
+            exit 1
+          fi
+          echo "version=${TAG:1}" >> $GITHUB_OUTPUT
       # Installing this is skipped in CI as using it was causing some corruption in
       # attempting to mount the shared folder. The guest and host guest additions
       # versions are close enough that we are fine without it.
       # - run: vagrant plugin install vagrant-vbguest
-      - run: NO_SUBMISSIONS=1 vagrant up ubuntu-22.04
+      - name: Vagrant Up
+        run: NO_SUBMISSIONS=1 vagrant up
       - name: Validate image
         run: curl --show-error --fail --include http://localhost:1511
-      - name: Save to cloud
+      - name: Save image
+        run: vagrant package --output submitty.box  
+      - name: Publish image
         run: |
-            vagrant package --output submitty.box
-            bash ./.setup/vagrant_cloud.sh ${{ secrets.VAGRANT_CLOUD_TOKEN }} reapernsgaming Submitty
+          vagrant cloud auth login --token ${{ secrets.VAGRANT_CLOUD_TOKEN }}
+          vagrant cloud publish submitty/ubuntu22-dev ${{ steps.get-version.outputs.version }}.$(date +"%y%m%d%H%M") virtualbox submitty.box --force
+          vagrant cloud auth logout
