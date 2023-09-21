@@ -27,16 +27,16 @@ def up(config, database):
         BEFORE UPDATE ON public.courses_users
         FOR EACH ROW EXECUTE PROCEDURE update_last_nonnull_section();
 
-        UPDATE courses_users
-        SET last_nonnull_registration_section= (
+        UPDATE courses_users cu
+        SET last_nonnull_registration_section=(
             CASE
-                WHEN courses_users.registration_section IS NOT NULL
-                    THEN courses_users.registration_section
+                WHEN cu.registration_section IS NOT NULL
+                    THEN cu.registration_section
                 ELSE (
-                    SELECT course_section_id
-                    FROM courses_registration_sections
-                    WHERE courses_registration_sections.course = courses_users.course
-                    ORDER BY course_section_id ASC
+                    SELECT registration_section_id
+                    FROM courses_registration_sections crs
+                    WHERE crs.course = cu.course
+                    ORDER BY registration_section_id ASC
                     LIMIT 1
                 )
             END
