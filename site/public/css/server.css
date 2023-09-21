@@ -250,7 +250,7 @@ table a {
 }
 
 table tr.table-header {
-    border-bottom: 1px solid black;
+    border-bottom: 1px solid var(--default-black);
 }
 
 .table {
@@ -265,7 +265,7 @@ table tr.table-header {
 }
 
 .table tr {
-    border-top: 1px solid #dddddd;
+    border-top: 1px solid var(--standard-light-gray);
 }
 
 .table-bordered {
