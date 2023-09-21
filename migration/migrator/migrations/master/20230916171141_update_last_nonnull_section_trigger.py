@@ -11,9 +11,10 @@ def up(config, database):
     :type database: migrator.db.Database
     """
     database.execute("""
-        ALTER TABLE courses_users
+        ALTER TABLE courses_users -- Create column
         ADD COLUMN last_nonnull_registration_section VARCHAR;
 
+        -- Create empty trigger function that is replaced by new trigger function file
         CREATE OR REPLACE FUNCTION public.update_last_nonnull_section()
             RETURNS trigger
             LANGUAGE plpgsql
@@ -23,10 +24,13 @@ def up(config, database):
         END;
         $$;
 
+        -- Attatch trigger function
         CREATE TRIGGER before_update_courses_update_last_nonnull_section
         BEFORE UPDATE ON public.courses_users
         FOR EACH ROW EXECUTE PROCEDURE update_last_nonnull_section();
 
+        -- Set existing users' last nonnull registration section.
+        -- Choose top section if in null as we have no other information.
         UPDATE courses_users cu
         SET last_nonnull_registration_section=(
             CASE
@@ -42,6 +46,8 @@ def up(config, database):
             END
         );
 
+        -- Now that we updated users,can set last_nonnull_registration_section
+        -- to have not null constraint.
         ALTER TABLE courses_users
         ALTER COLUMN last_nonnull_registration_section
         SET NOT NULL;
