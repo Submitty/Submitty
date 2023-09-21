@@ -911,6 +911,9 @@ class Course(object):
                 rot_section = None
             if reg_section is not None:
                 reg_section=str(reg_section)
+            last_section = reg_section
+            if last_section is None:
+                last_section = 1
             # We already have a row in submitty.users for this user,
             # just need to add a row in courses_users which will put a
             # a row in the course specific DB, and off we go.
@@ -920,7 +923,7 @@ class Course(object):
                                   user_id=user.get_detail(self.code, "id"),
                                   user_group=user.get_detail(self.code, "group"),
                                   registration_section=reg_section,
-                                  last_nonnull_registration_section=reg_section,
+                                  last_nonnull_registration_section=last_section,
                                   manual_registration=user.get_detail(self.code, "manual"))
             update = users_table.update(values={
                 users_table.c.rotating_section: bindparam('rotating_section')
