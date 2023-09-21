@@ -21,7 +21,7 @@ def up(config, database):
         ALTER TABLE emails
         ADD CONSTRAINT name_or_email CHECK (
             (user_id is NOT NULL)
-            <>
+            or
             (to_name is NOT NULL)
         );
     """);
