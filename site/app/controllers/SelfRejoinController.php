@@ -88,7 +88,11 @@ class SelfRejoinController extends AbstractController {
                 $term,
                 $course
             );
+        $to_join_rotating_section = $this->core->getQueries()->
+            getLastNonnullRotatingSection($user_id);
+            
         $user->setRegistrationSection($to_join_section);
+        $user->setRotatingSection($to_join_rotating_section);
 
         $this->core->getQueries()->updateUser($user, $term, $course);
 

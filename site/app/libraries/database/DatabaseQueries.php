@@ -5446,6 +5446,21 @@ AND gc_id IN (
     }
 
     /**
+     * Returns the last non-null rotating section the student was in.
+     *
+     * @param string $user_id The name of the user we're querying.
+     * @return string|null The rotating section the student was last in.
+     */
+    public function getLastNonnullRotatingSection(string $user_id): string|null {
+        $this->course_db->query("
+            SELECT last_nonnull_rotating_section
+            FROM users
+            WHERE user_id=?;
+        ", [$user_id]);
+        return $this->course_db->row()["last_nonnull_rotating_section"];
+    }
+
+    /**
      * Determines if a course is 'active' or if it was dropped.
      *
      * This is used to filter out courses displayed on the home screen, for when
