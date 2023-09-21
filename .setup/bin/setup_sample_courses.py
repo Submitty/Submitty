@@ -920,6 +920,7 @@ class Course(object):
                                   user_id=user.get_detail(self.code, "id"),
                                   user_group=user.get_detail(self.code, "group"),
                                   registration_section=reg_section,
+                                  last_nonnull_registration_section=reg_section,
                                   manual_registration=user.get_detail(self.code, "manual"))
             update = users_table.update(values={
                 users_table.c.rotating_section: bindparam('rotating_section')
