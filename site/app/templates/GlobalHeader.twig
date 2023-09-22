@@ -250,14 +250,15 @@
   <button class="prev-button" onclick="changeImage(-1)">&#10094;</button>
   <button class="next-button" onclick="changeImage(1)">&#10095;</button>
 </div>
-                    <span>
-                        <a class="flex-col" id="logo-box" href="http://submitty.org" target="_blank" aria-label="Visit submitty dot org">
+
+                </div>
+</div>
+                    <span style = "position: absolute right: -500px"> <a class="flex-col" id="logo-box" href="http://submitty.org" target="_blank" aria-label="Visit submitty dot org">
                             <img id="logo-submitty" src="{{ base_url }}/img/submitty_logo.png" alt="Submitty Logo">
                             <img id="logo-submitty-light" src="{{ base_url }}/img/submitty_logo_white.png" alt="Submitty Logo">
                         </a>
                     </span>
-                </div>
-</div>
+
                 {# assuming that if sidebar_buttons only has len 2 it contains logout and collapse (on index page only) #}
                 {% if sidebar_buttons|length > 2 %}
                     <button id="menu-button" class="black-btn">

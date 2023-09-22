@@ -157,6 +157,7 @@ footer .footer-separator {
 
     #logo-box {
         display: block;
+        z-index: 0;
     }
 
     #logo-submitty,

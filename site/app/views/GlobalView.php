@@ -49,7 +49,6 @@ class GlobalView extends AbstractView {
         foreach ($eventBannerImages as $banner) {
             //FUTURE MIGHT NEED TO FIX SO WE ADD MID PATH
             $pathName = FileUtils::joinPaths($this->core->getConfig()->getSubmittyPath(), "community_events", $banner->getClosingDate()->format('Y'), $banner->getFolderName(), $banner->getName());
-
             if (strpos($banner->getExtraInfo(), "http") !== false) {
                 $images_data_array[] = [
                     "name" => $banner->getName(),
@@ -71,8 +70,7 @@ class GlobalView extends AbstractView {
                 ];
                 continue;
             }
-            $extraPathName = FileUtils::joinPaths($this->core->getConfig()->getSubmittyPath(), "community_events", $banner->getClosingDate()->format('Y'), $banner->getName() . "Folder", $banner->getExtraInfo());
-
+            $extraPathName = FileUtils::joinPaths($this->core->getConfig()->getSubmittyPath(), "community_events", $banner->getClosingDate()->format('Y'), $banner->getFolderName(), $banner->getExtraInfo());
             $type = "image";
 
 
