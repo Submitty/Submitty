@@ -76,9 +76,10 @@
         {# Legend #}
         <div class="cal-legend">
             {% if show_all_cookie == 1 %}
-                {% for item in course_names %}
-                <div name="{{item.course|replace({' ':''})}}" class="legend-color" onclick="openOptionsModal()" style="cursor: pointer;"></div>
-                <p for="{{item.course|replace({' ':''})}}-color" style="cursor: pointer;" onclick="show_current('{{item.course}},{{item.name}}')" class="legend-label">{{item.name}}</p>
+                {% for course in course_names %}
+                <div name="{{course.course_name|replace({' ':''})}}" class="legend-color" onclick="openOptionsModal()" style="cursor: pointer;"></div>
+                <p for="{{course.course_name|replace({' ':''})}}-color" style="cursor: pointer;" onclick="show_current('{{course.course_name}},{{course.display_name}}')" class="legend-label">{{course.display_name}}}</p>
+
                 {% endfor %}
             {% else %}
                 <div name="{{calendar_course_cookie|replace({' ':''})}}" class="legend-color" onclick="openOptionsModal()" style="cursor: pointer;"></div>
