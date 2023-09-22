@@ -134,7 +134,7 @@ def construct_mail_client():
 
 def get_email_queue(db):
     """Get an active queue of internal emails waiting to be sent."""
-    query = """SELECT id, user_id, to_name email_address, subject, body FROM emails
+    query = """SELECT id, user_id, to_name, email_address, subject, body FROM emails
     WHERE email_address SIMILAR TO :format AND sent is NULL AND
     error = '' ORDER BY id LIMIT 100;"""
     domain_format = '%@(%.' + EMAIL_INTERNAL_DOMAIN + '|' + EMAIL_INTERNAL_DOMAIN + ')'

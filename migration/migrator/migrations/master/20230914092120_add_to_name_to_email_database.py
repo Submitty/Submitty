@@ -21,7 +21,7 @@ def up(config, database):
             <>
             (to_name is NOT NULL)
         );
-    """);
+    """)
 
 def down(config, database):
     """
