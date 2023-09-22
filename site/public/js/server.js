@@ -766,8 +766,6 @@ function loadAttempt() {
 }
 
 function showIncentiveMessage() {
-    console.log("saumya from server incentive");
-    console.log($("#incentive_message"));
     $("#incentive_message").show();
 }
 
