@@ -11,13 +11,13 @@ you need to import something then use import sample_courses.filename not from
 sample_courses.filename import *
 """
 
-# flake8: noqa
 from ruamel.yaml import YAML
 from submitty_utils import dateutils
 import argparse
 import json
 
 import os
+
 
 def parse_args():
     """
@@ -49,7 +49,6 @@ def parse_args():
     return parser.parse_args()
 
 # Start of global variables
-
 yaml = YAML(typ='safe')
 
 CURRENT_PATH = os.path.dirname(os.path.realpath(__file__))
