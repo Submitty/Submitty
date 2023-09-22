@@ -51,11 +51,11 @@ describe('Tests cases abut changing user pronouns', () => {
         }
 
         //change display option back
-        cy.get('#pronouns-forum-display').then(($checkbox) => {
+        cy.get('#pronouns-forum-display').then(()=> {
             if (oldDisplay) {
-                $checkbox.check();
+                cy.get('#pronouns-forum-display');
             } else {
-                $checkbox.uncheck();
+                cy.get('#pronouns-forum-display');
             }
         });
         
@@ -66,10 +66,10 @@ describe('Tests cases abut changing user pronouns', () => {
             cy.get('#pronouns_val').contains(oldPronouns);
         }
         if (oldDisplay) {
-            cy.get('#pronouns-forum-display').check().should('be.checked')
+            cy.get('#pronouns-forum-display').check().should('be.checked');
         }
-        else{
-            cy.get('#pronouns-forum-display').check().should('not.be.checked')
+        else {
+            cy.get('#pronouns-forum-display').check().should('not.be.checked');
         }
     });
 
