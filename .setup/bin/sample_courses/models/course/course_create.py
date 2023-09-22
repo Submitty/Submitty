@@ -1,6 +1,6 @@
 """
-Convert this into course_create.py
-And then make Course() just into a init class
+None of the functions should be imported here directly, but from
+the class Course
 """
 from __future__ import print_function, division
 import hashlib

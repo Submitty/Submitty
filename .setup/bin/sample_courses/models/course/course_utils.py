@@ -1,4 +1,7 @@
-
+"""
+None of the functions should be imported here directly, but from
+the class Course
+"""
 import os
 from sample_courses import SETUP_DATA_PATH
 

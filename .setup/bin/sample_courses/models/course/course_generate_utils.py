@@ -1,5 +1,4 @@
 """
-Contains Create_Course class that inheits Course_utils and Course_data class
 None of the functions should be imported here directly, but from
 the class Course
 """
@@ -14,7 +13,7 @@ from sample_courses.utils.create_or_generate import generate_random_user_id
 from sample_courses.models.course.course_utils import Course_utils
 from sample_courses.models.course.course_data import Course_data
 
-class Course_generate_utils(Course_utils,Course_data):
+class Course_generate_utils:
     """
     Object that contains functions that are used to generate the course 
     """
@@ -34,10 +33,12 @@ class Course_generate_utils(Course_utils,Course_data):
     no_rotating_students: int
     unregistered_students: int
 
+
     def __init__(self):
         # Anything that needs to be initialized goes here
         pass
-    
+
+
     def make_course_json(self):
         """
         This function generates customization_sample.json in case it has changed from the provided version in the test suite
@@ -266,4 +267,3 @@ class Course_generate_utils(Course_utils,Course_data):
             res.close()
             anon_team_ids.append(anon_team_id);
         return json_team_history
-

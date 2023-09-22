@@ -1,5 +1,6 @@
 """
-Contain all the global variables and init 
+Contain all the global variables and init
+Only import this class
 """
 from sqlalchemy import Table
 
@@ -80,5 +81,3 @@ class Course(Course_create,Course_generate_utils,Course_create_gradeables, Cours
             self.unregistered_students = course['unregistered_students']
         if 'make_customization' in course:
             self.make_customization = course['make_customization']
-        
-        

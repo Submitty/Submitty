@@ -1,4 +1,7 @@
-
+"""
+None of the functions should be imported here directly, but from
+the class Course
+"""
 from __future__ import print_function, division
 from datetime import timedelta
 import hashlib
@@ -47,6 +50,7 @@ class Course_create_gradeables:
     def __init__(self):
         # Anything that needs to be initialized goes here
         pass
+
 
     def add_gradeables(self):
         anon_ids = {}
@@ -370,7 +374,7 @@ class Course_create_gradeables:
                             grade_time = gradeable.grade_start_date.strftime("%Y-%m-%d %H:%M:%S%z")
                             self.conn.execute(self.gradeable_component_data.insert(), gc_id=component.key, gd_id=gd_id,
                                          gcd_score=score, gcd_component_comment="", gcd_grader_id=self.instructor.id, gcd_grade_time=grade_time, gcd_graded_version=-1)
-        
+
         # This segment adds the sample data for features in the sample course only
         if self.code == 'sample':
             self.add_sample_forum_data()
