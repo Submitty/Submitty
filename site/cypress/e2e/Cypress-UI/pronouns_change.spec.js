@@ -11,7 +11,6 @@ describe('Tests cases abut changing user pronouns', () => {
 
         //open pronouns form
         cy.get('#pronouns_val').click();
-        cy.wait(1000); // waits for 1000 milliseconds
         cy.get('#user-pronouns-change').as('e');
 
         //save old pronouns
@@ -34,7 +33,6 @@ describe('Tests cases abut changing user pronouns', () => {
         cy.get('#pronouns_val').contains('They/Them');
         cy.get('#pronouns-forum-display').check().should('be.checked');
 
-        cy.wait(500);
         cy.logout();
 
     });
@@ -44,7 +42,6 @@ describe('Tests cases abut changing user pronouns', () => {
         cy.visit('/user_profile');
         cy.login('student');
 
-        cy.wait(1000);
         //change back to old pronouns
         cy.get('#pronouns_val').click();
 
@@ -56,12 +53,12 @@ describe('Tests cases abut changing user pronouns', () => {
         //change display option back
         cy.get('#pronouns-forum-display').then(($checkbox) => {
             if (oldDisplay) {
-                cy.get('#pronouns-forum-display').check();
-            }
-            else {
-                cy.get('#pronouns-forum-display').uncheck();
+                $checkbox.check();
+            } else {
+                $checkbox.uncheck();
             }
         });
+        
         cy.get('#edit-pronouns-submit').first().click();
 
         //ensure pronouns and display option changed on page
@@ -113,17 +110,15 @@ describe('Tests cases abut changing user pronouns', () => {
         cy.get('.create-post-head').should('contain', 'Test pronouns display');
         cy.get('.post_user_pronouns').should('contain', 'They/Them');
         
-        //verify pronouns is also shown in overall fourm page
+        //verify pronouns is shown in overall fourm page
         cy.get('#nav-sidebar-forum').click();
         cy.get('.thread-list-item').should('contain', 'Test pronouns display');
-        
         cy.contains('Test pronouns display').find('.post_user_pronouns').should('contain','They/Them');
         cy.contains('Test pronouns display').find('.post_user_pronouns').click();
         
-        //comment on the thread
+        //comment on the thread, verify pronouns is shown
         cy.get('.create-post-head').should('contain', 'Test pronouns display');
         cy.get('#reply_box_2').type('my pronouns is They/Them{ctrl}{enter}');
-        cy.wait(1000); // waits for 1000 milliseconds
         cy.contains('Submit Reply to All').click();
         cy.get('#posts_list').should('contain', 'my pronouns is They/Them');
         cy.get('.post_user_pronouns').should('contain', 'They/Them');
@@ -132,6 +127,8 @@ describe('Tests cases abut changing user pronouns', () => {
         cy.get('.thread-left-cont > .thread-list-item').contains('Test pronouns display').click();
         cy.get('.first_post > .post-action-container > .delete-post-button').click();
         cy.get('.thread-left-cont > .thread-list-item').contains('Test pronouns display').should('not.exist');
+
+
     });
 
 });
