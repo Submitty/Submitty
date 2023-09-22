@@ -75,14 +75,55 @@
                 <br />
             {% endif %}
 
-            {% if action == 'lab' and core.getUser().accessFullGrading() %}
-                <label for="show-graders" class="column-wrapper">Show Graders
-                    <input type="checkbox" id="show-graders">
-                </label>
-                <label for="show-dates" class="column-wrapper">Show Dates Graded
-                    <input type="checkbox" id="show-dates">
-                </label>
-            {% endif %}
+    {% if action == 'lab' and core.getUser().accessFullGrading() %}
+    <label for="show-graders" class="column-wrapper">Show Graders
+        <input type="checkbox" id="show-graders">
+    </label>
+    <label for="show-dates" class="column-wrapper">Show Dates Graded
+        <input type="checkbox" id="show-dates">
+    </label>
+
+    <!-- Include JavaScript to set the cookie -->
+    <script>
+        // Get the checkbox element
+        // Get the checkbox element
+        const showGradersCheckbox = document.getElementById('show-graders');
+        const showDatesGradedCheckbox = document.getElementById('show-dates');
+        // Check if the 'show_grader' cookie is set
+        if (Cookies.get('show_grader') === 'true') {
+            // If 'show_grader' is 'true', check the checkbox
+            showGradersCheckbox.checked = true;
+            $('.simple-grade-grader').css('display', 'block');
+        }
+
+        else {
+            // If 'show_grader' is not 'true' or not set, uncheck the checkbox
+            showGradersCheckbox.checked = false;
+            $('.simple-grade-grader').css('display', 'none');
+        }
+
+        if (Cookies.get('show_dates') === 'true') {
+            showDatesGradedCheckbox.checked = true;
+            const changeEvent = new Event('change');
+            checkbox.dispatchEvent(changeEvent);
+        }
+
+        else{
+            showDatesGradedCheckbox.checked = false;
+        }
+        // Add an event listener to update the cookie when the checkbox is clicked
+        showGradersCheckbox.addEventListener('click', () => {
+            // Set a cookie named 'show_grader' with a value of 'true' when checked
+            // or 'false' when unchecked
+            Cookies.set('show_grader', showGradersCheckbox.checked);
+        });
+
+        showDatesGradedCheckbox.addEventListener('click', () => {
+            Cookies.set('show_dates', showDatesGradedCheckbox.checked);
+        });
+    </script>
+{% endif %}
+
         </div>
     </div>
 
