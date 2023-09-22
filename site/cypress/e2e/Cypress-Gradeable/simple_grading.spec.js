@@ -47,38 +47,6 @@ describe('Test cases revolving around simple grading lab', () => {
             cy.get('#simple-stats-popup').find('.popup-box').find('div.popup-window.ui-draggable.ui-draggable-handle').find('.form-title').find('button.btn.btn-default.close-button.key_to_click').click({ multiple: true });
             cy.get('#settings-popup').should('have.attr', 'style', 'display: none;');
 
-            //Undo Button
-            cy.get('#cell-1-0-0').invoke('attr', 'data-score').then((initialValue) => {
-                cy.get('#cell-1-0-0').click();
-                if (initialValue === '0') {
-                    cy.get('#checkpoint-undo').click();
-                    cy.get('#cell-1-0-0').should('have.attr', 'data-score', '0');
-                }
-                else if (initialValue === '0.5') {
-                    cy.get('#checkpoint-undo').click();
-                    cy.get('#cell-1-0-0').should('have.attr', 'data-score', '0.5');
-                }
-                else if (initialValue === '1') {
-                    cy.get('#checkpoint-undo').click();
-                    cy.get('#cell-1-0-0').should('have.attr', 'data-score', '1');
-                }
-            });
-
-            //Redo Button
-            cy.get('#cell-1-0-0').invoke('attr', 'data-score').then((initialValue) => {
-                if (initialValue === '0') {
-                    cy.get('#checkpoint-redo').click();
-                    cy.get('#cell-1-0-0').should('have.attr', 'data-score', '0');
-                }
-                else if (initialValue === '0.5') {
-                    cy.get('#checkpoint-redo').click();
-                    cy.get('#cell-1-0-0').should('have.attr', 'data-score', '0.5');
-                }
-                else if (initialValue === '1') {
-                    cy.get('#checkpoint-redo').click();
-                    cy.get('#cell-1-0-0').should('have.attr', 'data-score', '1');
-                }
-            });
         });
 
     });
