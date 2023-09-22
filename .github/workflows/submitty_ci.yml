@@ -17,7 +17,7 @@ env:
   SUBMITTY_REPOSITORY: /usr/local/submitty/GIT_CHECKOUT/Submitty
   POSTGRES_HOST: localhost
   PHP_VER: 8.1
-  NODE_VERSION: 16
+  NODE_VERSION: 20
   PYTHON_VERSION: "3.10"
 
 concurrency:
@@ -323,6 +323,14 @@ jobs:
           npm install file-saver --save
           npm install --production=false
 
+      - name: Run accessibility test
+        uses: cypress-io/github-action@v6
+        with:
+          config: baseUrl=http://localhost
+          spec: cypress/e2e/cypress-system/accessibility.spec.js
+          working-directory: ${{env.SUBMITTY_REPOSITORY}}/site
+          browser: chrome
+
       - name: Run API tests
         working-directory: ${{env.SUBMITTY_REPOSITORY}}/site
         run: npm run test:api
@@ -335,7 +343,7 @@ jobs:
           sudo systemctl stop submitty_autograding_shipper
 
       - name: Run autograding status test
-        uses: cypress-io/github-action@v5
+        uses: cypress-io/github-action@v6
         with:
           config: baseUrl=http://localhost
           spec: cypress/e2e/cypress-system/autograding_status_1.spec.js
@@ -348,7 +356,7 @@ jobs:
           sudo systemctl restart submitty_autograding_shipper
 
       - name: Run autograding status test
-        uses: cypress-io/github-action@v5
+        uses: cypress-io/github-action@v6
         with:
           config: baseUrl=http://localhost
           spec: cypress/e2e/cypress-system/autograding_status_2.spec.js
@@ -361,7 +369,7 @@ jobs:
           sudo systemctl restart submitty_autograding_worker
 
       - name: Run cypress e2e login tests with PAM auth
-        uses: cypress-io/github-action@v5
+        uses: cypress-io/github-action@v6
         with:
           config: baseUrl=http://localhost,chromeWebSecurity=false
           spec: cypress/e2e/cypress-system/login.spec.js
@@ -372,7 +380,7 @@ jobs:
         run: sudo sed -ie "s/Pam/Database/g" ${SUBMITTY_INSTALL_DIR}/config/authentication.json
 
       - name: Run cypress e2e login tests with database auth
-        uses: cypress-io/github-action@v5
+        uses: cypress-io/github-action@v6
         with:
           config: baseUrl=http://localhost
           spec: cypress/e2e/cypress-system/login.spec.js
@@ -383,7 +391,7 @@ jobs:
         run: sudo sed -ie "s/Database/Ldap/g" ${SUBMITTY_INSTALL_DIR}/config/authentication.json
 
       - name: Run cypress e2e login tests with LDAP auth
-        uses: cypress-io/github-action@v5
+        uses: cypress-io/github-action@v6
         with:
           config: baseUrl=http://localhost
           spec: cypress/e2e/cypress-system/login.spec.js
@@ -399,7 +407,7 @@ jobs:
         run: sudo sed -ie "s/Ldap/Saml/g" ${SUBMITTY_INSTALL_DIR}/config/authentication.json
 
       - name: Run cypress e2e login tests with SAML auth
-        uses: cypress-io/github-action@v5
+        uses: cypress-io/github-action@v6
         with:
           config: baseUrl=http://localhost,chromeWebSecurity=false
           spec: cypress/e2e/cypress-system/login.spec.js
@@ -421,14 +429,12 @@ jobs:
         working-directory: ${{ env.SUBMITTY_REPOSITORY }}
         run: sudo bash tests/test_site_error_log.sh
 
-  Cypress-Feature:
+  Cypress:
     runs-on: ubuntu-22.04
     strategy:
-      # don't fail the entire matrix on failure
       fail-fast: false
       matrix:
-        # run copies of the current job in parallel
-        containers: [1, 2, 3, 4]
+        containers: ["Gradeable", "Admin", "UI", "Feature"]
     services:
       postgres:
         image: postgres
@@ -464,23 +470,28 @@ jobs:
           npm install --production=false
 
       - name: Run cypress e2e tests with pam auth
-        uses: cypress-io/github-action@v5
+        uses: cypress-io/github-action@v6
         with:
           config: baseUrl=http://localhost
           working-directory: ${{env.SUBMITTY_REPOSITORY}}/site
-          spec: cypress/e2e/cypress-feature/*
+          spec: cypress/e2e/Cypress-${{matrix.containers}}/*
           browser: chrome
           env: run_area=CI
-          record: true
-          parallel: true  # Runs test in parallel using settings above
-        env:
-          CYPRESS_RECORD_KEY: ${{ secrets.CYPRESS_RECORD_KEY }}
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          COMMIT_INFO_MESSAGE: ${{github.event.pull_request.title}}
 
       - name: Check for site errors
         working-directory: ${{ env.SUBMITTY_REPOSITORY }}
         run: sudo bash tests/test_site_error_log.sh
+
+      - uses: actions/upload-artifact@v3
+        if: failure()
+        with:
+          name: cypress-screenshots
+          path: ${{env.SUBMITTY_REPOSITORY}}/site/cypress/screenshots
+      - uses: actions/upload-artifact@v3
+        if: failure()
+        with:
+          name: cypress-videos
+          path: ${{env.SUBMITTY_REPOSITORY}}/site/cypress/videos
 
 
   Integration:

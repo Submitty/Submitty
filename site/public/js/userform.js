@@ -9,11 +9,12 @@ $("#edit-user-form").ready(function() {
                 autoCompleteOnUserId(json);
             });
 
-            $('[name="user_id"]', form).autocomplete({
-                appendTo: form,
-                source: Object.keys(json),
-                change: () => $('[name="user_id"]').change()
-            });
+            const dataList = $('#possible_users');
+            dataList.innerHTML = '';
+            const user_ids = Object.keys(json);
+            user_ids.forEach((user_id) => {
+                dataList.append(`<option value='${user_id}'>`);
+            })
 
             $(":text",$("#edit-user-form")).change(checkValidEntries);
         },
