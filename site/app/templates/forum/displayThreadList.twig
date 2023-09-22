@@ -92,7 +92,7 @@
                         {% endif %}
                         <strong class="post_user_id">{{ thread.author_info.name}}</strong>
                         {% if thread.author_info.pronouns and thread.author_info.display_pronouns and thread.author_info.name != "Anonymous" %}
-                            ({{thread.author_info.pronouns}})
+                            <strong class="post_user_pronouns">({{thread.author_info.pronouns}})</strong>
                         {% endif %}
 
                     </span>
