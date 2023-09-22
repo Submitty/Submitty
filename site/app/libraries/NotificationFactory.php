@@ -234,6 +234,16 @@ class NotificationFactory {
         $current_user = $this->core->getUser();
         $flattened_emails = [];
         foreach ($emails as $email) {
+            if (!empty($email->getEmailAddress())) {
+                $flattened_emails[] = $email->getSubject();
+                $flattened_emails[] = $email->getBody();
+                $flattened_emails[] = null;
+                $flattened_emails[] = $email->getToName();
+                $flattened_emails[] = $email->getEmailAddress();
+                $flattened_emails[] = $this->core->getConfig()->getTerm();
+                $flattened_emails[] = $this->core->getConfig()->getCourse();
+                continue;
+            }
             // check if user is in the null section
             if (!$skip_check && !$this->core->getQueries()->checkStudentActiveInCourse($email->getUserId(), $this->core->getConfig()->getCourse(), $this->core->getConfig()->getTerm())) {
                 continue;
@@ -244,6 +254,7 @@ class NotificationFactory {
                     $flattened_emails[] = $email->getSubject();
                     $flattened_emails[] = $email->getBody();
                     $flattened_emails[] = $email->getUserId();
+                    $flattened_emails[] = null;
                     $flattened_emails[] = $user->getSecondaryEmail();
                     $flattened_emails[] = $this->core->getConfig()->getTerm();
                     $flattened_emails[] = $this->core->getConfig()->getCourse();
@@ -251,6 +262,7 @@ class NotificationFactory {
                 $flattened_emails[] = $email->getSubject();
                 $flattened_emails[] = $email->getBody();
                 $flattened_emails[] = $email->getUserId();
+                $flattened_emails[] = null;
                 $flattened_emails[] = $user->getEmail();
                 $flattened_emails[] = $this->core->getConfig()->getTerm();
                 $flattened_emails[] = $this->core->getConfig()->getCourse();

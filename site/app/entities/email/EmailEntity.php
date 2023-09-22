@@ -18,6 +18,9 @@ class EmailEntity {
     #[ORM\Column(type: Types::STRING)]
     protected string $user_id;
 
+    #[ORM\Column(type: Types::STRING)]
+    protected string $to_name;
+
     #[ORM\Column(type: Types::TEXT)]
     protected string $subject;
 
@@ -53,6 +56,13 @@ class EmailEntity {
         return $this->user_id;
     }
 
+    /**
+     * @return string
+     */
+    public function getToName(): string {
+        return $this->to_name;
+    }
+
     public function getSubject(): string {
         return $this->subject;
     }
@@ -83,5 +93,13 @@ class EmailEntity {
 
     public function getCourse(): ?string {
         return $this->course;
+    }
+
+    /**
+     * Returns true if this email was sent to a submitty user.
+     * @return bool True if the email is to a submitty user.
+     */
+    public function isToSubmittyUser(): bool {
+        return empty($this->to_name);
     }
 }

@@ -99,6 +99,7 @@ class SelfRejoinController extends AbstractController {
      * @return void
      */
     private function sendRejoinedStudentEmail($joined_section): void {
+        print("meow!!");
         $user = $this->core->getUser();
         $user_id = $user->getId();
         $first_name = $user->getPreferredGivenName();
@@ -126,6 +127,14 @@ class SelfRejoinController extends AbstractController {
         $details = ["subject" => $subject, "body" => $body];
         foreach ($instructor_ids as $instructor_id) {
             $details["to_user_id"] = $instructor_id;
+            $email = new Email($this->core, $details);
+            array_push($emails, $email);
+        }
+        $sysadamin_email = $this->core->getConfig()->getSysAdminEmail();
+        if (!empty($sysadamin_email)) {
+            unset($details["to_user_id"]);
+            $details["email_address"] = $sysadamin_email;
+            $details["to_name"] = "Sysadmin";
             $email = new Email($this->core, $details);
             array_push($emails, $email);
         }
