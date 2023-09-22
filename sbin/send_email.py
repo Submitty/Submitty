@@ -230,7 +230,7 @@ def send_email():
         if email_data["send_to"] == "":
             store_error(email_data["id"], db, metadata, "WARNING: empty email address")
             e = "[{}] WARNING: empty email address for recipient {}".format(
-            str(datetime.datetime.now()), name)
+                str(datetime.datetime.now()), name)
             LOG_FILE.write(e+"\n")
             continue
 
