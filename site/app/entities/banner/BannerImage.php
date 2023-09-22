@@ -4,52 +4,39 @@ declare(strict_types=1);
 
 namespace app\entities\banner;
 
+
+use app\repositories\banner\BannerImageRepository;
+use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
 
 /**
  * Class BannerImage
  * @package app\entities
- * @ORM\Entity(repositoryClass="\app\repositories\banner\BannerImageRepository")
- * @ORM\Table(name="community_events")
  */
+#[ORM\Entity(repositoryClass: BannerImageRepository::class)]
+#[ORM\Table(name: "community_events")]
 class BannerImage {
-    /**
-     * @ORM\Id
-     * @ORM\Column(type="integer")
-     * @ORM\GeneratedValue(strategy="AUTO")
-     * @var integer
-     */
+    #[ORM\Id]
+    #[ORM\Column(type: Types::INTEGER)]
+    #[ORM\GeneratedValue(strategy: "AUTO")]
     protected $id;
-    /**
-     * @ORM\Column(type="datetime", precision=6)
-     * @var \DateTime
-     */
+    
+    #[ORM\Column(type: Types::DATETIME_MUTABLE, precision: 6)]
     protected $release_date;
 
-    /**
-     * @ORM\Column(type="datetime", precision=6)
-     * @var \DateTime
-     */
+    #[ORM\Column(type: Types::DATETIME_MUTABLE, precision: 6)]
     protected $closing_date;
-    /**
-     * @ORM\Column(type="string")
-     * @var string
-     */
+    
+    #[ORM\Column(type: Types::STRING)]
     protected $name;
-    /**
-     * @ORM\Column(type="string")
-     * @var string
-     */
+
+    #[ORM\Column(type: Types::STRING)]
     protected $folder_name;
-    /**
-     * @ORM\Column(type="string")
-     * @var string
-     */
+
+    #[ORM\Column(type: Types::STRING)]
     protected $path_date;
-    /**
-     * @ORM\Column(type="string")
-     * @var string
-     */
+
+    #[ORM\Column(type: Types::STRING)]
     protected $extra_info;
 
 
