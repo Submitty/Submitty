@@ -70,10 +70,10 @@ class SelfRejoinController extends AbstractController {
      * @return RedirectResponse Course url if the student met the conditions to be readded.
      */
     public function rejoinCourse(): RedirectResponse {
-        $course_url = $this->core->buildCourseUrl();
 
         if (!$this->canRejoinCourse()) {
-            return new RedirectResponse("$course_url/no_access");
+            $this->core->addErrorMessage("You do not meet the conditions to rejoin.");
+            return new RedirectResponse($this->core->buildCourseUrl(["no_access"]));
         }
 
         $term = $this->core->getConfig()->getTerm();
@@ -88,7 +88,7 @@ class SelfRejoinController extends AbstractController {
         $this->core->getQueries()->updateUser($user, $term, $course);
 
         $this->sendRejoinedStudentEmail($first_section);
-        return new RedirectResponse($course_url);
+        return new RedirectResponse($this->core->buildCourseUrl());
     }
 
 
