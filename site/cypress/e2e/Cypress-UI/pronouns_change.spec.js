@@ -31,7 +31,7 @@ describe('Tests cases abut changing user pronouns', () => {
 
         //ensure pronouns and display option changed on page
         cy.get('#pronouns_val').contains('They/Them');
-        cy.get('#pronouns-forum-display').check().should('be.checked');
+        cy.get('#display_pronouns_val').contains('True');
 
         cy.logout();
 
@@ -53,24 +53,24 @@ describe('Tests cases abut changing user pronouns', () => {
         //change display option back
         cy.get('#pronouns-forum-display').then(() => {
             if (oldDisplay) {
-                cy.get('#pronouns-forum-display');
+                cy.get('#pronouns-forum-display').check();
             }
             else {
-                cy.get('#pronouns-forum-display');
+                cy.get('#pronouns-forum-display').uncheck();
             }
         });
 
-        cy.get('#edit-pronouns-submit').first().click();
+        cy.get('#edit-pronouns-submit').click();
 
         //ensure pronouns and display option changed on page
         if (oldPronouns !== '') {
             cy.get('#pronouns_val').contains(oldPronouns);
         }
         if (oldDisplay) {
-            cy.get('#pronouns-forum-display').check().should('be.checked');
+            cy.get('#display_pronouns_val').contains('True');
         }
         else {
-            cy.get('#pronouns-forum-display').check().should('not.be.checked');
+            cy.get('#display_pronouns_val').contains('False');
         }
     });
 
