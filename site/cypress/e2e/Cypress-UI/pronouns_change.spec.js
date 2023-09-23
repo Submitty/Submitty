@@ -127,7 +127,7 @@ describe('Tests cases abut changing user pronouns', () => {
         cy.get('.first_post > .post-action-container > .delete-post-button').click();
         cy.get('.thread-left-cont > .thread-list-item').contains('Test pronouns display').should('not.exist');
 
-        //create thread 
+        //create thread anonymously
         cy.get('[title="Create Thread"]').click();
         cy.get('#title').type('Test Anonymous thread, should not show pronouns');
         cy.get('.thread_post_content').type('My pronouns is');
@@ -138,14 +138,14 @@ describe('Tests cases abut changing user pronouns', () => {
         cy.get('.post_user_id').should('contain', 'Anonymous');
         cy.get('.post_user_pronouns').should('not.exist');
 
-        //verify pronouns is shown in overall fourm page
+        //verify pronouns is not shown in overall fourm page
         cy.get('#nav-sidebar-forum').click();
         cy.get('.thread-list-item').should('contain', 'Test Anonymous thread, should not show pronouns');
         cy.contains('Test Anonymous thread, should not show pronouns').find('.post_user_id').should('contain','Anonymous');
         cy.contains('Test Anonymous thread, should not show pronouns').find('.post_user_pronouns').should('not.be.exist');
         cy.contains('Test Anonymous thread, should not show pronouns').find('.post_user_id').click();
 
-        //comment on the thread, verify pronouns is shown
+        //comment on the thread anonymously, verify pronouns is not shown
         cy.get('.create-post-head').should('contain', 'Test Anonymous thread, should not show pronouns');
         cy.get('.thread-anon-checkbox').filter(':visible').click();
         cy.get('#reply_box_2').type('I can not see your pronouns{ctrl}{enter}');
