@@ -175,11 +175,11 @@
                                     label: "End of time"
                                 }
                             ],
-                            onClick: (index, fp) => {
+                            onClick: (index, upload_fp) => {
                                 let date;
                                 switch (index) {
                                     case 0:
-                                        date = new Date("1001-01-01 00:00:00");
+                                        date = new Date("1900-01-01 00:00:00");
                                         break;
                                     case 1:
                                         date = new Date();
@@ -192,7 +192,7 @@
                                         date = new Date("9998-01-01 00:00:00");
                                         break;
                                 }
-                                fp.setDate(date);
+                                upload_fp.setDate(date);
                             }
                         }
                     )],
@@ -202,9 +202,9 @@
                     enableSeconds: true,
                     time_24hr: true,
                     dateFormat: "Y-m-d H:i:S",
-                    onReady: (a, b, fp) => {
-                      fp.calendarContainer.firstChild.childNodes[1].firstChild.firstChild.setAttribute('aria-label', 'Month');
-                      fp.calendarContainer.childNodes[2].childNodes[4].firstChild.setAttribute('aria-label', 'Seconds');
+                    onReady: (a, b, upload_fp) => {
+                      upload_fp.calendarContainer.firstChild.childNodes[1].firstChild.firstChild.setAttribute('aria-label', 'Month');
+                      upload_fp.calendarContainer.childNodes[2].childNodes[4].firstChild.setAttribute('aria-label', 'Seconds');
                     }
                     });
     $('.form-body').on('scroll', function() {

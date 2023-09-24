@@ -2497,13 +2497,12 @@ SELECT COUNT(*) from gradeable_component where g_id=?
 
         // Check if we want to include late (bad) submissions into the average
         if ($bad_submissions != 'include' && $bad_submission_count > 0) {
-            if ($is_team) {
-                $bad_submissions_condition = "LEFT JOIN late_day_cache AS ldc ON ldc.{$user_or_team_id} = {$u_or_t}.{$user_or_team_id} AND ldc.g_id=gc.g_id AND (ldc.submission_days_late = 0 OR ldc.late_days_change != 0)";
-            }
-            else {
-                $bad_submissions_condition = "INNER JOIN late_day_cache AS ldc ON ldc.{$user_or_team_id} = {$u_or_t}.{$user_or_team_id} AND ldc.g_id=gc.g_id AND 
-                    (ldc.submission_days_late = 0 OR ldc.late_days_change != 0)";
-            }
+            $bad_submissions_condition = "INNER JOIN(
+                SELECT DISTINCT ldc.{$user_or_team_id}
+                FROM late_day_cache AS ldc
+                WHERE ldc.g_id=? AND ( submission_days_late = 0 OR ldc.late_days_change != 0 
+              ) )AS ldc ON ldc.{$user_or_team_id}={$u_or_t}.{$user_or_team_id}";
+            $params = [$g_id,$g_id, $count];
         }
 
         // Check if we want to combine grade overridden marks within averages
@@ -4511,7 +4510,23 @@ SQL;
      */
     public function getPeerFeedbackForUser($gradeable_id, $user_id, $anon = false) {
         if ($anon) {
-            $this->course_db->query("SELECT ga.anon_id AS grader_id, p.user_id, p.feedback FROM peer_feedback p INNER JOIN gradeable_anon ga ON ga.user_id=p.grader_id WHERE p.g_id = ? AND p.user_id = ? ORDER BY p.grader_id", [$gradeable_id, $user_id]);
+            $this->course_db->query("
+            SELECT
+                ga.anon_id AS grader_id,
+                p.user_id,
+                p.feedback
+            FROM
+                peer_feedback p
+            INNER JOIN
+                gradeable_anon ga
+            ON
+                ga.user_id = p.grader_id
+            WHERE
+                p.g_id = ?
+                AND p.user_id = ?
+            ORDER BY
+                p.grader_id;
+            ", [$gradeable_id, $user_id]);
         }
         else {
             $this->course_db->query("SELECT grader_id, user_id, feedback FROM peer_feedback WHERE g_id = ? AND user_id = ? ORDER BY grader_id", [$gradeable_id, $user_id]);
