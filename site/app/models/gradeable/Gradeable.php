@@ -2169,7 +2169,7 @@ class Gradeable extends AbstractModel {
 
         $sections = [];
         foreach ($section_names as $section_name) {
-            $sections[] = new GradingSection($this->core, $this->isGradeByRegistration(), $section_name, $graders[$section_name] ?? [], $users[$section_name] ?? null, $teams[$section_name] ?? null);
+            $sections[] = new GradingSection($this->core, $this->isGradeByRegistration(), $section_name, $graders[$section_name] ?? [], $users[$section_name] ?? [], $teams[$section_name] ?? []);
         }
 
         return $sections;
