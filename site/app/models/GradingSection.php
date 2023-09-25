@@ -44,6 +44,14 @@ class GradingSection extends AbstractModel {
      */
     protected $teams;
 
+    /**
+     * @param Core $core
+     * @param bool $registration
+     * @param $name
+     * @param array<User> $graders
+     * @param array<User> $users
+     * @param array<Team> $teams
+     */
     public function __construct(Core $core, bool $registration, $name, array $graders, array $users, array $teams) {
         parent::__construct($core);
         $this->registration = $registration;
