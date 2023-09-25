@@ -78,6 +78,7 @@ use app\controllers\admin\AdminGradeableController;
  * @method void setDependsOn($depends_on)
  * @method int getDependsOnPoints()
  * @method void setDependsOnPoints($depends_on_points)
+ * @method void setAnyManualGrades($any_manual_grades)
  * @method bool isGradeInquiryAllowed()
  * @method bool isGradeInquiryPerComponentAllowed()
  * @method void setGradeInquiryPerComponentAllowed($is_grade_inquiry_per_component)
@@ -153,7 +154,7 @@ class Gradeable extends AbstractModel {
 
     /** @prop
      * @var bool If any manual grades have been entered for this gradeable */
-    private $any_manual_grades = null;
+    protected $any_manual_grades = null;
     /** @prop
      * @var bool If any submissions exist */
     private $any_submissions = null;
@@ -340,6 +341,7 @@ class Gradeable extends AbstractModel {
         $this->setMinGradingGroup($details['min_grading_group']);
         $this->setSyllabusBucket($details['syllabus_bucket']);
         $this->setTaInstructions($details['ta_instructions']);
+        $this->setAnyManualGrades($details['any_manual_grades']);
         if (array_key_exists('peer_graders_list', $details)) {
             $this->setPeerGradersList($details['peer_graders_list']);
         }
@@ -1671,6 +1673,9 @@ class Gradeable extends AbstractModel {
      * @return Team[]
      */
     public function getTeams() {
+        if ($this->team_assignment === false) {
+            return [];
+        }
         if ($this->teams === null) {
             $this->teams = $this->core->getQueries()->getTeamsByGradeableId($this->getId());
         }
