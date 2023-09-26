@@ -65,7 +65,6 @@ class HomePageController extends AbstractController {
                 return $SelfRejoinTester->canRejoinCourse($user_id, $course->getTitle(), $course->getTerm());
             }
         );
-        
 
         $callback = function (Course $course) {
             return $course->getCourseInfo();
