@@ -4675,16 +4675,23 @@ SQL;
      * Instructors may access all of their courses
      * Inactive courses may only be accessed by the instructor
      *
-     * @param  string $user_id
-     * @param  bool   $archived
+     * If $dropped is true, we return null section courses as well.
+     *
+     * @param  string $user_id  User Id of user we're getting courses for.
+     * @param  bool   $archived True if we want archived courses.
+     * @param  bool   $dropped  True if we want null section courses.
      * @return Course[] archived courses (and their details) accessible by $user_id
      */
-    public function getCourseForUserId($user_id, bool $archived = false): array {
+    public function getCourseForUserId($user_id, bool $archived = false, bool $dropped = false): array {
         if ($archived) {
-            $extra = "AND c.status=2 AND u.user_group=1";
+            $include_archived = "AND c.status=2 AND u.user_group=1";
         }
         else {
-            $extra = "AND c.status=1";
+            $include_archived = "AND c.status=1";
+        }
+        $force_nonnull = "";
+        if ($dropped) {
+            $force_nonnull = "NOT";
         }
 
         $query = <<<SQL
@@ -4692,7 +4699,7 @@ SELECT t.name AS term_name, u.term, u.course, u.user_group, u.registration_secti
 FROM courses_users u
 INNER JOIN courses c ON u.course=c.course AND u.term=c.term
 INNER JOIN terms t ON u.term=t.term_id
-WHERE u.user_id=? ${extra} AND (u.registration_section IS NOT NULL OR u.user_group<>4)
+WHERE u.user_id=? ${include_archived} AND ${force_nonnull} (u.registration_section IS NULL AND u.user_group=4)
 ORDER BY u.user_group ASC, t.start_date DESC, u.course ASC
 SQL;
         $this->submitty_db->query($query, [$user_id]);

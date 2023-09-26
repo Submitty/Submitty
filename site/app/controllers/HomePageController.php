@@ -47,6 +47,7 @@ class HomePageController extends AbstractController {
 
         $unarchived_courses = $this->core->getQueries()->getCourseForUserId($user_id);
         $archived_courses = $this->core->getQueries()->getCourseForUserId($user_id, true);
+        $dropped_courses = $this->core->getQueries()->getCourseForUserId($user_id, false, true);
 
         if ($as_instructor) {
             foreach (['archived_courses', 'unarchived_courses'] as $var) {
@@ -110,6 +111,7 @@ class HomePageController extends AbstractController {
                 'showHomePage',
                 $this->core->getUser(),
                 $courses["data"]["unarchived_courses"],
+                $courses["data"]["dropped_courses"],
                 $courses["data"]["archived_courses"]
             )
         );
