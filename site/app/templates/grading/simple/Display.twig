@@ -75,15 +75,14 @@
                 <br />
             {% endif %}
 
-    {% if action == 'lab' and core.getUser().accessFullGrading() %}
-    <label for="show-graders" class="column-wrapper">Show Graders
-        <input type="checkbox" id="show-graders">
-    </label>
-    <label for="show-dates" class="column-wrapper">Show Dates Graded
-        <input type="checkbox" id="show-dates">
-    </label>
-
-    
+            {% if action == 'lab' and core.getUser().accessFullGrading() %}
+                <label for="show-graders" class="column-wrapper">Show Graders
+                    <input type="checkbox" id="show-graders">
+                </label>
+                <label for="show-dates" class="column-wrapper">Show Dates Graded
+                    <input type="checkbox" id="show-dates">
+                </label>
+            {% endif %}
 {% endif %}
 
         </div>
