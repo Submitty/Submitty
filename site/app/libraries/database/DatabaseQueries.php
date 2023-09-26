@@ -4697,7 +4697,7 @@ SELECT t.name AS term_name, u.term, u.course, u.user_group, u.registration_secti
 FROM courses_users u
 INNER JOIN courses c ON u.course=c.course AND u.term=c.term
 INNER JOIN terms t ON u.term=t.term_id
-WHERE u.user_id=? ${include_archived} AND ${force_nonnull} (u.registration_section IS NULL AND u.user_group=4)
+WHERE u.user_id=? ${include_archived} AND ${force_nonnull} (u.registration_section IS NOT NULL OR u.user_group<>4)
 ORDER BY u.user_group ASC, t.start_date DESC, u.course ASC
 SQL;
         $this->submitty_db->query($query, [$user_id]);

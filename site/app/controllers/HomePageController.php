@@ -49,6 +49,9 @@ class HomePageController extends AbstractController {
         $unarchived_courses = $this->core->getQueries()->getCourseForUserId($user_id);
         $archived_courses = $this->core->getQueries()->getCourseForUserId($user_id, true);
         $dropped_courses = $this->core->getQueries()->getCourseForUserId($user_id, false, true);
+        foreach ($dropped_courses as $course) {
+            print($course->getTitle());
+        }
         // Fix queries.
 
         if ($as_instructor) {

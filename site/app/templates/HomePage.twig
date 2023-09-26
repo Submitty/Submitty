@@ -8,10 +8,12 @@
                 {% set course_type = "Archived " %}
             {% endif %}
             <h1>My {{ course_type }}Courses</h1>
+            {% set courses_in_category = false %}
             {% for rank in ranks %}
                 <h2>As {{ rank.title }}</h2>
                 {% set display_semester = '' %}
                 {% for course in rank.courses %}
+                    {% set courses_in_category = true %}
                     {% if display_semester != course.display_semester %}
                         {% if display_semester != '' %}
                             </ul>
@@ -39,7 +41,9 @@
                 {% endif %}
             {% endfor %}
         {% endif %}
-        <br>
-        <br>
+        {% if courses_in_category %}
+            <br>
+            <br>
+        {% endif %}
     {% endfor %}
 </div>
