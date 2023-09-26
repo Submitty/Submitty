@@ -17,15 +17,16 @@
         <th scope="col">#</th>
         <th scope="col">Name</th>
         <th scope="col">Queue</th>
-        <th scope="col">Time Entered</th>
-        <th scope="col">Time In Queue</th>
-        <th scope="col">Time Helped</th>
-        <th scope="col">Times Helped Today WOW</th>
-        <th scope="col">Times Helped this week</th>
-        <th scope="col" class="mobile-hide">Helped Started By</th>
+        
+        <th scope="col"> <a href ="#" onclick = "sortTable('TimeEntered')">Time Entered</a></th>
+        <th scope="col"> <a href ="#" onclick = "sortTable('TimeInQueue')">Time In Queue</a></th>
+        <th scope="col"> <a href ="#" onclick = "sortTable('TimeHelped')">Time Helped</a></th>
+        <th scope="col"> <a href ="#" onclick = "sortTable('TimeTimesHelpedToday')">Times Helped Today</a></th>
+        <th scope="col"> <a href ="#" onclick = "sortTable('TimeHelpedPerWeek')">Times Helped this week</a></th>
+        <th scope="col"> <a href ="#" onclick = "sortTable('Helped Started By')">Helped Started By</a></th>
+
         <th scope="col" class="mobile-hide">Removed By</th>
-        <th scope="col"> <a href ="#" onclick = "sortTable('name')">Name</a></th>
-        <th scope="col"> <a href ="#" onclick = "sortTable('Queue')">Queue</a></th>
+
         {% if viewer.isGrader() %}
           <th scope="col">Restore</th>
         {% endif %}
