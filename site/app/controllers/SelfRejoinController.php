@@ -33,10 +33,10 @@ class SelfRejoinController extends AbstractController {
     /**
      * Returns if the user is allowed to self-readd to a course after being dropped.
      * This function can be called from a non-coure context.
-     * 
+     *
      * @return bool True if can readd, false otherwise.
      */
-    public function canRejoinCourse(String $user_id, string $course, string $term): bool {
+    public function canRejoinCourse(string $user_id, string $course, string $term): bool {
         $user = $this->core->getUser();
         if ($user_id !== $user->getId()) {
             $user = $this->core->getQueries()->getUserById($user_id);
@@ -44,7 +44,8 @@ class SelfRejoinController extends AbstractController {
 
         $reload_previous_course = false;
         $config = $this->core->getConfig();
-        if (!$config->isCourseLoaded()
+        if (
+            !$config->isCourseLoaded()
             || $config->getCourse() !== $course
             || $config->getTerm() !== $term
         ) {
@@ -108,7 +109,6 @@ class SelfRejoinController extends AbstractController {
         }
 
         return false;
-
     }
 
     /**
