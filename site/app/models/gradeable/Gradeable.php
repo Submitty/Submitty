@@ -2044,11 +2044,11 @@ class Gradeable extends AbstractModel {
                         $teams[$teamToAdd->getId()] = $this->core->getQueries()->getTeamByGradeableAndUser($this->getId(), $u->getId());
                     }
                 }
-                $g_section = new GradingSection($this->core, false, -1, [$user], null, $teams);
+                $g_section = new GradingSection($this->core, false, -1, [$user], [], $teams);
                 return [$g_section];
             }
             $users = $this->core->getQueries()->getUsersById($this->core->getQueries()->getPeerAssignment($this->getId(), $user->getId()));
-            $g_section = new GradingSection($this->core, false, -1, [$user], $users, null);
+            $g_section = new GradingSection($this->core, false, -1, [$user], $users, []);
             return [$g_section];
         }
         else {
@@ -2113,8 +2113,8 @@ class Gradeable extends AbstractModel {
                     $this->isGradeByRegistration(),
                     $section_name,
                     $graders[$section_name] ?? [],
-                    $users[$section_name] ?? null,
-                    $teams[$section_name] ?? null
+                    $users[$section_name] ?? [],
+                    $teams[$section_name] ?? []
                 );
             }
 
