@@ -1,65 +1,97 @@
-describe('Test cases involving the files panel', () => {
+describe("Test cases involving the files panel", () => {
+    // Constants for repeated values
+    const studentName = "Evie McCullough (mccule)";
+    const submissionNumber = "Submission Number: 2 / 3";
+
     beforeEach(() => {
-        cy.visit(['sample', 'gradeable', 'grading_homework', 'grading', 'details']);
-        cy.login('instructor');
-        cy.get('.btn').contains('View All').click();
-        cy.get('#details-table').contains('mccule').siblings().eq(6).click();
-        cy.get('#student_info_btn').click();
+        cy.visit([
+            "sample",
+            "gradeable",
+            "grading_homework",
+            "grading",
+            "details",
+        ]);
+        cy.login("instructor");
+        cy.get(".btn").contains("View All").click();
+        cy.get("#details-table").contains("mccule").siblings().eq(6).click();
+        cy.get("#student_info_btn").click();
+        cy.get(".rubric-title").as("rubricTitle"); // Alias for rubric title
+        cy.get("#submission-version-select").as("versionSelect"); // Alias for version select
     });
 
-    it('test cancelling and reinstating assignment', () => {
-        cy.get('.rubric-title').should('contain', 'Evie McCullough (mccule)');
-        cy.get('.rubric-title').should('contain', 'Submission Number: 2 / 3');
+    it("should correctly cancel and reinstate an assignment", () => {
+        cy.get("@rubricTitle").should("contain", studentName);
+        cy.get("@rubricTitle").should("contain", submissionNumber);
 
-        cy.get('#submission-version-select').children().should('have.length', 3);
-        cy.get('#submission-version-select').find(':selected').should('contain', 'Version #2');
-        cy.get('#submission-version-select').find(':selected').should('contain', 'GRADE THIS VERSION');
-        cy.get('[value="Grade This Version"]').should('not.exist');
+        cy.get("@versionSelect").children().should("have.length", 3);
+        cy.get("@versionSelect")
+            .find(":selected")
+            .should("contain", "Version #2");
+        cy.get("@versionSelect")
+            .find(":selected")
+            .should("contain", "GRADE THIS VERSION");
+        cy.get('[value="Grade This Version"]').should("not.exist");
 
         cy.get('[value="Cancel Student Submission"]').click();
-        cy.get('#bar_banner').should('contain', 'Cancelled Submission');
-        cy.get('[value="Cancel Student Submission"]').should('not.exist');
-        cy.get('[value="Grade This Version"]').should('not.exist');
-        cy.get('.rubric-title').should('contain', 'Evie McCullough (mccule)');
-        cy.get('.rubric-title').should('contain', 'Submission Number: 0 / 3');
+        cy.get("#bar_banner").should("contain", "Cancelled Submission");
+        cy.get('[value="Cancel Student Submission"]').should("not.exist");
+        cy.get('[value="Grade This Version"]').should("not.exist");
+        cy.get("@rubricTitle").should("contain", studentName);
+        cy.get("@rubricTitle").should("contain", "Submission Number: 0 / 3");
 
-        cy.get('#submission-version-select').select('Version #2');
-        cy.get('[value="Cancel Student Submission"]').should('not.exist');
+        cy.get("@versionSelect").select("Version #2");
+        cy.get('[value="Cancel Student Submission"]').should("not.exist");
         cy.get('[value="Grade This Version"]').click();
-        cy.get('#submission-version-select').find(':selected').should('contain', 'Version #2');
-        cy.get('#submission-version-select').find(':selected').should('contain', 'GRADE THIS VERSION');
-        cy.get('[value="Grade This Version"]').should('not.exist');
+        cy.get("@versionSelect")
+            .find(":selected")
+            .should("contain", "Version #2");
+        cy.get("@versionSelect")
+            .find(":selected")
+            .should("contain", "GRADE THIS VERSION");
+        cy.get('[value="Grade This Version"]').should("not.exist");
 
-        cy.get('.rubric-title').should('contain', 'Evie McCullough (mccule)');
-        cy.get('.rubric-title').should('contain', 'Submission Number: 2 / 3');
+        cy.get("@rubricTitle").should("contain", studentName);
+        cy.get("@rubricTitle").should("contain", submissionNumber);
     });
 
-    it('test switching versions', () => {
-        cy.get('.rubric-title').should('contain', 'Evie McCullough (mccule)');
-        cy.get('.rubric-title').should('contain', 'Submission Number: 2 / 3');
+    it("should correctly switch between different versions", () => {
+        cy.get("@rubricTitle").should("contain", studentName);
+        cy.get("@rubricTitle").should("contain", submissionNumber);
 
-        cy.get('#submission-version-select').find(':selected').should('contain', 'Version #2');
-        cy.get('#submission-version-select').find(':selected').should('contain', 'GRADE THIS VERSION');
-        cy.get('[value="Grade This Version"]').should('not.exist');
+        cy.get("@versionSelect")
+            .find(":selected")
+            .should("contain", "Version #2");
+        cy.get("@versionSelect")
+            .find(":selected")
+            .should("contain", "GRADE THIS VERSION");
+        cy.get('[value="Grade This Version"]').should("not.exist");
 
-        cy.get('#submission-version-select').select('Version #1');
-        cy.get('.rubric-title').should('contain', 'Evie McCullough (mccule)');
-        cy.get('.rubric-title').should('contain', 'Submission Number: 2 / 3');
-        cy.get('[value="Cancel Student Submission"]').should('not.exist');
+        cy.get("@versionSelect").select("Version #1");
+        cy.get("@rubricTitle").should("contain", studentName);
+        cy.get("@rubricTitle").should("contain", submissionNumber);
+        cy.get('[value="Cancel Student Submission"]').should("not.exist");
         cy.get('[value="Grade This Version"]').click();
-        cy.get('.rubric-title').should('contain', 'Evie McCullough (mccule)');
-        cy.get('.rubric-title').should('contain', 'Submission Number: 1 / 3');
-        cy.get('#submission-version-select').find(':selected').should('contain', 'Version #1');
-        cy.get('#submission-version-select').find(':selected').should('contain', 'GRADE THIS VERSION');
+        cy.get("@rubricTitle").should("contain", studentName);
+        cy.get("@rubricTitle").should("contain", "Submission Number: 1 / 3");
+        cy.get("@versionSelect")
+            .find(":selected")
+            .should("contain", "Version #1");
+        cy.get("@versionSelect")
+            .find(":selected")
+            .should("contain", "GRADE THIS VERSION");
 
-        cy.get('#submission-version-select').select('Version #2');
-        cy.get('[value="Cancel Student Submission"]').should('not.exist');
+        cy.get("@versionSelect").select("Version #2");
+        cy.get('[value="Cancel Student Submission"]').should("not.exist");
         cy.get('[value="Grade This Version"]').click();
-        cy.get('#submission-version-select').find(':selected').should('contain', 'Version #2');
-        cy.get('#submission-version-select').find(':selected').should('contain', 'GRADE THIS VERSION');
-        cy.get('[value="Grade This Version"]').should('not.exist');
+        cy.get("@versionSelect")
+            .find(":selected")
+            .should("contain", "Version #2");
+        cy.get("@versionSelect")
+            .find(":selected")
+            .should("contain", "GRADE THIS VERSION");
+        cy.get('[value="Grade This Version"]').should("not.exist");
 
-        cy.get('.rubric-title').should('contain', 'Evie McCullough (mccule)');
-        cy.get('.rubric-title').should('contain', 'Submission Number: 2 / 3');
+        cy.get("@rubricTitle").should("contain", studentName);
+        cy.get("@rubricTitle").should("contain", submissionNumber);
     });
 });
