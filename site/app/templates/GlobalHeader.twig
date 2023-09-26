@@ -430,39 +430,23 @@
                 var duckdivElement = document.getElementById("moorthy-duck");
                 var wholeBannerElement = document.getElementById("banner");
                 var movingUnit = document.getElementById("moving-unit");
-
-
-
-            var duck = document.getElementById("duckdiv");
-            var banner = wholeBannerElement;
-            banner.style.display = "block";
-            document.getElementById('moorthy-duck').onclick = null;
-            var pos = 5;
-            var id = setInterval(frame, 5);
-            function frame() {
-                if (screen.width - pos <= -350) {
-                    clearInterval(id);
-                    banner.style.display = "none";
-                    duck.style.right = -280 + 'px';
-
-                    resetDriver();
-                }
-                else {
-                  pos++;
-                  duck.style.right = pos + 'px';
-                }
-            }
-
-
-
-
-
-
+                movingUnit.style.animation = "slide 2s linear forwards";
                 document.getElementById("triangle").style.display = "none";
                 document.getElementById("speech-bubble").style.display = "none";
             
-            }
 
+                bannerElement.addEventListener("animationend", function() {
+
+
+                currentImages.splice(0, 1);
+
+                if (currentImages.length > 0 ) {
+                    document.getElementById("triangle").style.display = "block";
+                    document.getElementById("speech-bubble").style.display = "block";
+                }
+
+                            }, { once: true });
+            }
             else {
                 images[currentImageIndex].classList.add("active");
             }
