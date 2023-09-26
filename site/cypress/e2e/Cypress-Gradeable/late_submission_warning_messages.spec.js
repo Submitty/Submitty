@@ -53,11 +53,10 @@ const giveExtentions = (gradeable_name) => {
     cy.get('#extensions-form')
         .find('a')
         .contains('Submit')
-        .should('exist')
         .click();
     if (gradeable_name.includes('_team')) {
-        cy.get('#more_extension_popup',{timeout:20000}).should('exist');
-        cy.get('#apply-to-all').as('btn').click();
+        cy.get('#more_extension_popup',{timeout:20000});
+        cy.get('#apply-to-all').click();
     }
 };
 
@@ -130,15 +129,13 @@ describe('Test warning messages for non team gradeable', () => {
         cy.get('#create-gradeable-btn').click();
 
         //Date page, input 2 old dates for opening dates (Ta and students)
-        cy.get('#page_5_nav').should('exist').click();
+        cy.get('#page_5_nav').click();
         cy.get('#date_ta_view')
-            .should('exist')
             .clear()
             .type('1992-06-15')
             .type('{enter}');
         cy.get('#save_status', {timeout:20000}).should('have.text', 'All Changes Saved');
         cy.get('#date_submit')
-            .should('exist')
             .clear()
             .type('2004-12-18')
             .type('{enter}');
@@ -150,7 +147,6 @@ describe('Test warning messages for non team gradeable', () => {
         cy.login('instructor');
         cy.visit(['sample', 'gradeable',gradeable,'update?nav_tab=5']);
         cy.get('#date_due')
-            .should('exist')
             .clear()
             .type(getCurrentTime())
             .type('{enter}');
@@ -172,7 +168,6 @@ describe('Test warning messages for non team gradeable', () => {
             .type('{enter}');
         cy.get('#save_status', {timeout:20000}).should('have.text', 'All Changes Saved');
         cy.get('#date_due')
-            .should('exist')
             .clear()
             .type(getCurrentTime())
             .type('{enter}');
@@ -187,7 +182,6 @@ describe('Test warning messages for non team gradeable', () => {
         giveLateDays(getCurrentTime(),'student');
         cy.visit(['sample', 'gradeable',gradeable,'update?nav_tab=5']);
         cy.get('#date_due')
-            .should('exist')
             .clear()
             .type(getCurrentTime())
             .type('{enter}');
@@ -208,7 +202,6 @@ describe('Test warning messages for non team gradeable', () => {
         cy.get('#save_status', {timeout:20000}).should('have.text', 'All Changes Saved');
 
         cy.get('#date_due')
-            .should('exist')
             .clear()
             .type(getCurrentTime())
             .type('{enter}');
@@ -217,7 +210,7 @@ describe('Test warning messages for non team gradeable', () => {
         SubmitAndCheckMessage('non_team','upload_file2','invalid_1_day_late');
         cy.login('student');
         cy.visit(['sample', 'gradeable', gradeable]);
-        cy.get('#do_not_grade').should('exist').click();
+        cy.get('#do_not_grade').click();
     });
 
     it('should show a confirmation message for the first submission', () => {
@@ -233,7 +226,6 @@ describe('Test warning messages for non team gradeable', () => {
             .type('{enter}');
         cy.get('#save_status', {timeout:20000}).should('have.text', 'All Changes Saved');
         cy.get('#date_due')
-            .should('exist')
             .clear()
             .type(getCurrentTime('threeDaysAgo'))
             .type('{enter}');
@@ -250,7 +242,7 @@ describe('Test warning messages for non team gradeable', () => {
         SubmitAndCheckMessage('non_team','upload_file2','invalid_4_days_late');
         cy.login('instructor');
         cy.visit(['sample', 'gradeable',gradeable,'update?nav_tab=5']);
-        cy.get('#no_late_submission').should('exist').click(); //disable late submissions
+        cy.get('#no_late_submission').click(); //disable late submissions
         cy.get('#save_status', {timeout:20000}).should('have.text', 'All Changes Saved');
     });
 });
@@ -264,21 +256,19 @@ describe('Test warning messages for team gradeable', () => {
         cy.get('#g_title').type(team_gradeable);
         cy.get('#g_id').type(team_gradeable);
         cy.get('#radio_ef_student_upload').check().click();
-        cy.get('#team_yes_radio',{timeout:20000}).should('exist').check().click();
+        cy.get('#team_yes_radio',{timeout:20000}).check().click();
         // Create Gradeable
         cy.get('#create-gradeable-btn').click();
 
         //Date page
-        cy.get('#page_5_nav').should('exist').click();
+        cy.get('#page_5_nav').click();
         cy.get('#date_ta_view')
-            .should('exist')
             .clear()
             .type('1992-06-15')
             .type('{enter}');
         cy.get('#save_status', {timeout:20000}).should('have.text', 'All Changes Saved');
 
         cy.get('#date_submit')
-            .should('exist')
             .clear()
             .type('2004-12-18')
             .type('{enter}');
@@ -293,7 +283,7 @@ describe('Test warning messages for team gradeable', () => {
         cy.login('student');
         cy.visit(['sample', 'gradeable',team_gradeable,'team']);
         cy.get('#create_new_team').click();
-        cy.get('#invite_id').should('exist').type('aphacker').type('{enter}');
+        cy.get('#invite_id').type('aphacker').type('{enter}');
         cy.logout();
         cy.login('aphacker');
         cy.visit(['sample', 'gradeable',team_gradeable,'team']);
@@ -309,7 +299,6 @@ describe('Test warning messages for team gradeable', () => {
         giveLateDays(getCurrentTime('threeDaysAgo'),'aphacker',2);
         cy.visit(['sample', 'gradeable',team_gradeable,'update?nav_tab=5']);
         cy.get('#date_due')
-            .should('exist')
             .clear()
             .type(getCurrentTime('threeDaysAgo'))
             .type('{enter}');
@@ -330,7 +319,7 @@ describe('Test warning messages for team gradeable', () => {
         //Disable late submissions for team gradeable
         cy.login('instructor');
         cy.visit(['sample', 'gradeable',team_gradeable,'update?nav_tab=5']);
-        cy.get('#no_late_submission').should('exist').click();
+        cy.get('#no_late_submission').click();
         cy.get('#save_status', {timeout:20000}).should('have.text', 'All Changes Saved');
         //Delete all late days
         cy.visit(['sample', 'late_days']);
@@ -351,8 +340,8 @@ describe('Test warning messages for team gradeable', () => {
         cy.get('body').then((body) => {
             if (body.find('#extensions-table').length > 0) {
                 cy.wrap(body).find('#Delete').first().click();
-                cy.get('#more_extension_popup',{timeout:20000}).should('exist');
-                cy.get('#apply-to-all').as('btn').click();
+                cy.get('#more_extension_popup',{timeout:20000});
+                cy.get('#apply-to-all').click();
             }
         });
         cy.get('#gradeable-select').select(gradeable);
