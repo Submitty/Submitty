@@ -7777,22 +7777,7 @@ parameters:
 			path: app/models/GradingOrder.php
 
 		-
-			message: "#^Method app\\\\models\\\\GradingSection\\:\\:__construct\\(\\) has parameter \\$graders with no type specified\\.$#"
-			count: 1
-			path: app/models/GradingSection.php
-
-		-
 			message: "#^Method app\\\\models\\\\GradingSection\\:\\:__construct\\(\\) has parameter \\$name with no type specified\\.$#"
-			count: 1
-			path: app/models/GradingSection.php
-
-		-
-			message: "#^Method app\\\\models\\\\GradingSection\\:\\:__construct\\(\\) has parameter \\$teams with no type specified\\.$#"
-			count: 1
-			path: app/models/GradingSection.php
-
-		-
-			message: "#^Method app\\\\models\\\\GradingSection\\:\\:__construct\\(\\) has parameter \\$users with no type specified\\.$#"
 			count: 1
 			path: app/models/GradingSection.php
 
