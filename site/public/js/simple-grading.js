@@ -393,33 +393,34 @@ function setupCheckboxCells() {
 
     if (Cookies.get('show_grader') === 'true') {
         $('.simple-grade-grader').css('display', 'block');
-    }
+        showGradersCheckbox.prop('checked', true); 
+    } 
+
     if (Cookies.get('show_dates') === 'true') {
         $('.simple-grade-date').css('display', 'block');
-    }
+        showDatesGradedCheckbox.prop('checked', true); 
+    } 
 
-    // show all the hidden grades when this checkbox is clicked
+    // show all the hidden grades when showGradersCheckbox is clicked
     showGradersCheckbox.on('change', function() {
         if ($(this).is(':checked')) {
             $('.simple-grade-grader').css('display', 'block');
-        } 
-        else {
+        } else {
             $('.simple-grade-grader').css('display', 'none');
         }
         Cookies.set('show_grader', showGradersCheckbox.is(':checked'));
     });
 
-    // show all the hidden dates when that checkbox is clicked
+    // show all the hidden dates when showDatesGradedCheckbox is clicked
     showDatesGradedCheckbox.on('change', function() {
         if ($(this).is(':checked')) {
             $('.simple-grade-date').css('display', 'block');
-        } 
-        else {
+        } else {
             $('.simple-grade-date').css('display', 'none');
         }
         Cookies.set('show_dates', showDatesGradedCheckbox.is(':checked'));
     });
-    
+
     // initialize undo/redo
     const g_id = $('tr#row-0').data('gradeable');
     const history = getCheckpointHistory(g_id);
@@ -431,6 +432,7 @@ function setupCheckboxCells() {
         }
     }
 }
+
 
 function setupNumericTextCells() {
     $('.cell-grade').change(function() {
