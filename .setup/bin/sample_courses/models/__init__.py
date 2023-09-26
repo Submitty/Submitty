@@ -159,6 +159,7 @@ class User(object):
         self.set_password()
 
     def create_non_ssh(self):
+        # Change this to f strings
         print("Creating user {}...".format(self.id))
         os.system(
             "useradd --home /tmp -c 'AUTH ONLY account' "
