@@ -4683,11 +4683,9 @@ SQL;
      * @return Course[] archived courses (and their details) accessible by $user_id
      */
     public function getCourseForUserId($user_id, bool $archived = false, bool $dropped = false): array {
+        $include_archived = "AND c.status=1";
         if ($archived) {
             $include_archived = "AND c.status=2 AND u.user_group=1";
-        }
-        else {
-            $include_archived = "AND c.status=1";
         }
         $force_nonnull = "";
         if ($dropped) {

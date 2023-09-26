@@ -27,15 +27,54 @@ class SelfRejoinController extends AbstractController {
 
     /**
      * Returns if the user is allowed to self-readd to a course after being dropped.
+     * This function can be called from a non-coure context.
+     * 
      * @return bool True if can readd, false otherwise.
      */
-    private function canRejoinCourse() {
+    public function canRejoinCourse(String $user_id, string $course, string $term): bool {
         $user = $this->core->getUser();
+        if ($user_id !== $user->getId()) {
+            $user = $this->core->getQueries()->getUserById($user_id);
+        }
+
+        $config = $this->core->getConfig();
+        if (!$config->isCourseLoaded()
+            || $this->config->getCourse !== $course
+            || $this->config->getTerm() !== $term) {
+            // We need to store the current course's name if there is a current course
+            // so we can reload it at the end of the function
+            // to avoid state change.
+            $reload_previous_course = $config->isCourseLoaded();
+            if ($reload_previous_course) {
+                $previous_course_name = $config->getCourse();
+                $previous_course_term = $config->getTerm();
+            }
+
+            $this->core->loadCourseConfig($term, $course);
+            $this->core->loadCourseDatabase();
+        }
+
+        // Wrap logic in helper so that we can then clean up afterwards.
+        $answer = $this->canRejoinCourseHelper($user, $course, $term);
+
+        if ($reload_previous_course) {
+            $this->core->loadCourseConfig($previous_course_term, $previous_course_name);
+            $this->core->loadCourseDatabase();
+        }
+        return $answer;
+    }
+
+    /**
+     * Actually determines the answer for canRejoinCourse.
+     * Should only be called by canRejoinCourse.
+     *
+     * @param User $user User we're investigating
+     * @param string $course Course we're checking if we can rejoin
+     * @param string $term Term the course is in.
+     * @return bool True if we can rejoin the course.
+     */
+    private function canRejoinCourseHelper(User $user, string $course, string $term): bool {
         $user_id = $user->getId();
-
-        $course = $this->core->getConfig()->getCourse();
-        $term = $this->core->getConfig()->getTerm();
-
         // If manually removed from course, this was probably intentional removal.
         if (
             $user->isManualRegistration()
@@ -62,6 +101,7 @@ class SelfRejoinController extends AbstractController {
         }
 
         return false;
+
     }
 
     /**

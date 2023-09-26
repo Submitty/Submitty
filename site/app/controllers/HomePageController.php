@@ -10,6 +10,7 @@ use app\libraries\response\MultiResponse;
 use app\libraries\response\WebResponse;
 use app\libraries\response\JsonResponse;
 use Symfony\Component\Routing\Annotation\Route;
+use app\controllers\SelfRejoinController;
 
 /**
  * Class HomePageController
@@ -57,6 +58,15 @@ class HomePageController extends AbstractController {
             }
         }
 
+        $SelfRejoinTester = new SelfRejoinController();
+        $dropped_courses = array_filter(
+            $dropped_courses,
+            function (Course $course) use ($SelfRejoinTester, $user_id) {
+                return $SelfRejoinTester->$canRejoinCourse($user_id, $course->getTitle(), $course->getTerm());
+            }
+        );
+        
+
         $callback = function (Course $course) {
             return $course->getCourseInfo();
         };
@@ -64,7 +74,8 @@ class HomePageController extends AbstractController {
         return MultiResponse::JsonOnlyResponse(
             JsonResponse::getSuccessResponse([
                 "unarchived_courses" => array_map($callback, $unarchived_courses),
-                "archived_courses" => array_map($callback, $archived_courses)
+                "archived_courses" => array_map($callback, $archived_courses),
+                "dropped_courses" => array_map($callback, $dropped_courses)
             ])
         );
     }
