@@ -1111,20 +1111,10 @@ div.full-height {
     pointer-events: none;
 }
 
-/*
+
 .rainbow {
-    background:
-        linear-gradient(
-            135deg,
-            rgb(255 0 0 / 30%),
-            rgb(255 255 0 / 30%),
-            rgb(0 255 0 / 30%),
-            rgb(0 255 155 / 30%),
-            rgb(0 0 255 / 30%),
-            rgb(255 0 255 / 30%),
-            rgb(255 0 0 / 30%)
-        );
-} */
+    background: var(--rainbow-gradient);
+}
 
 .thumbnail {
     width: 100px;

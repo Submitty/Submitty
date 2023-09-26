@@ -209,6 +209,18 @@
     --category-color-19: #e57fcf;
     --category-color-20: #c0c246;
 
+    /* rainbow */
+    --rainbow-gradient: linear-gradient(
+        135deg,
+        rgb(255 0 0 / 30%),
+        rgb(255 255 0 / 30%),
+        rgb(0 255 0 / 30%),
+        rgb(0 255 155 / 30%),
+        rgb(0 0 255 / 30%),
+        rgb(255 0 255 / 30%),
+        rgb(255 0 0 / 30%)
+    );
+
     /* other */
     --box-shadow-very-transparent: #00000020;
     --box-shadow-slightly-transparent: #00000030;
