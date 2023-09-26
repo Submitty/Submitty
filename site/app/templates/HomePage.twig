@@ -1,7 +1,13 @@
 <div id="courses" class="content">
     {% for ranks in statuses %}
         {% if loop.index == 1 or ranks|length > 0 %}
-            <h1>My {{ loop.index == 1 ? "" : "Archived " }}Courses</h1>
+            {% set course_type = "" %}
+            {% if loop.index == 2 %}
+                {% set course_type = "Recently Dropped " %}
+            {% elseif loop.index == 3 %}
+                {% set course_type = "Archived " %}
+            {% endif %}
+            <h1>My {{ course_type }}Courses</h1>
             {% for rank in ranks %}
                 <h2>As {{ rank.title }}</h2>
                 {% set display_semester = '' %}
@@ -33,5 +39,7 @@
                 {% endif %}
             {% endfor %}
         {% endif %}
+        <br>
+        <br>
     {% endfor %}
 </div>

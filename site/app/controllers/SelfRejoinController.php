@@ -7,6 +7,7 @@ use app\libraries\DateUtils;
 use Symfony\Component\Routing\Annotation\Route;
 use app\libraries\response\RedirectResponse;
 use app\models\Email;
+use app\models\User;
 
 class SelfRejoinController extends AbstractController {
     /**
@@ -17,10 +18,14 @@ class SelfRejoinController extends AbstractController {
      * @return void
      */
     public function noAccess(): void {
+        $user_id = $this->core->getUser()->getId();
+        $course = $this->core->getConfig()->getCourse();
+        $term = $this->core->getConfig()->getTerm();
+
         $this->core->getOutput()->renderOutput(
             'Error',
             'noAccessCourse',
-            $this->canRejoinCourse(),
+            $this->canRejoinCourse($user_id, $course, $term),
             $this->core->buildCourseUrl(["rejoin_course"])
         );
     }
@@ -37,10 +42,12 @@ class SelfRejoinController extends AbstractController {
             $user = $this->core->getQueries()->getUserById($user_id);
         }
 
+        $reload_previous_course = false;
         $config = $this->core->getConfig();
         if (!$config->isCourseLoaded()
-            || $this->config->getCourse !== $course
-            || $this->config->getTerm() !== $term) {
+            || $config->getCourse() !== $course
+            || $config->getTerm() !== $term
+        ) {
             // We need to store the current course's name if there is a current course
             // so we can reload it at the end of the function
             // to avoid state change.
@@ -112,15 +119,15 @@ class SelfRejoinController extends AbstractController {
     public function rejoinCourse(): RedirectResponse {
         $course_url = $this->core->buildCourseUrl();
 
-        if (!$this->canRejoinCourse()) {
-            return new RedirectResponse("$course_url/no_access");
-        }
-
         $term = $this->core->getConfig()->getTerm();
         $course = $this->core->getConfig()->getCourse();
 
         $user = $this->core->getUser();
         $user_id = $user->getId();
+
+        if (!$this->canRejoinCourse($user_id, $course, $term)) {
+            return new RedirectResponse("$course_url/no_access");
+        }
 
         $to_join_section = $this->core->getQueries()->
             getLastNonnullRegistrationSection(

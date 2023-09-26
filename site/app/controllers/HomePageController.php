@@ -49,6 +49,7 @@ class HomePageController extends AbstractController {
         $unarchived_courses = $this->core->getQueries()->getCourseForUserId($user_id);
         $archived_courses = $this->core->getQueries()->getCourseForUserId($user_id, true);
         $dropped_courses = $this->core->getQueries()->getCourseForUserId($user_id, false, true);
+        // Fix queries.
 
         if ($as_instructor) {
             foreach (['archived_courses', 'unarchived_courses'] as $var) {
@@ -58,11 +59,11 @@ class HomePageController extends AbstractController {
             }
         }
 
-        $SelfRejoinTester = new SelfRejoinController();
+        $SelfRejoinTester = new SelfRejoinController($this->core);
         $dropped_courses = array_filter(
             $dropped_courses,
             function (Course $course) use ($SelfRejoinTester, $user_id) {
-                return $SelfRejoinTester->$canRejoinCourse($user_id, $course->getTitle(), $course->getTerm());
+                return $SelfRejoinTester->canRejoinCourse($user_id, $course->getTitle(), $course->getTerm());
             }
         );
         

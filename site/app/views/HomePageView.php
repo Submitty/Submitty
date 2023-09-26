@@ -8,22 +8,23 @@ class HomePageView extends AbstractView {
     /**
      * @param User $user
      * @param array $unarchived_courses
+     * @param array $dropped_courses
      * @param array $archived_courses
      */
     public function showHomePage(
         User $user,
         array $unarchived_courses,
+        array $dropped_courses,
         array $archived_courses
     ) {
         $statuses = [];
-        $course_types = [$unarchived_courses, $archived_courses];
+        $course_types = [$unarchived_courses, $dropped_courses, $archived_courses];
         $rank_titles = [
             User::GROUP_INSTRUCTOR              => "Instructor:",
             User::GROUP_FULL_ACCESS_GRADER      => "Full Access Grader:",
             User::GROUP_LIMITED_ACCESS_GRADER   => "Grader:",
             User::GROUP_STUDENT                 => "Student:"
         ];
-
         foreach ($course_types as $course_type) {
             $ranks = [];
 
