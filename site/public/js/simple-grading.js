@@ -433,7 +433,6 @@ function setupCheckboxCells() {
     }
 }
 
-
 function setupNumericTextCells() {
     $('.cell-grade').change(function() {
         let elem = $(this);
