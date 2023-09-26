@@ -4,7 +4,6 @@ Only import this class
 """
 from sqlalchemy import Table
 
-from sample_courses.models.course.course_create import Course_create
 from sample_courses.utils import get_current_semester
 from sample_courses.models.gradeable import Gradeable
 from sample_courses.models.course.course_create import Course_create
@@ -13,7 +12,9 @@ from sample_courses.models.course.course_create_gradeables import Course_create_
 from sample_courses.models.course.course_utils import Course_utils
 from sample_courses.models.course.course_data import Course_data
 
-class Course(Course_create,Course_generate_utils,Course_create_gradeables, Course_utils, Course_data):
+
+class Course(Course_create, Course_generate_utils, Course_create_gradeables,
+             Course_utils, Course_data):
     """
     Object to represent the courses loaded from the courses.json file as well as the list of
     users that are needed for this particular course (which is a list of User objects).
@@ -36,7 +37,7 @@ class Course(Course_create,Course_generate_utils,Course_create_gradeables, Cours
         Course_data.__init__(self)
         Course_utils.__init__(self)
 
-        #Sets the global values
+        # Sets the global values
         self.gradeable_table: Table
         self.electronic_table: Table
         self.peer_assign: Table

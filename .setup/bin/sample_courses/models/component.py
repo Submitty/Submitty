@@ -9,7 +9,7 @@ from __future__ import print_function, division
 # if you need to modify any global variables, change this to import file as name
 from sample_courses import *
 
-from sample_courses.models import generate_random_marks,Mark
+from sample_courses.models import generate_random_marks, Mark
 
 class Component(object):
     def __init__(self, component, order):

@@ -4,7 +4,7 @@ Setup script that reads in the users.yml and courses.yml files in the ../data di
 creates the users and courses for the system. This is primarily used by Vagrant and Travis to
 figure the environments easily, but it could be run pretty much anywhere, unless the courses
 already exist as else the system will probably fail.
-# flake8: noqa
+
 Usage: ./setup_sample_courses.py
        ./setup_sample_courses.py [course [course]]
        ./setup_sample_courses.py --help
@@ -14,7 +14,7 @@ specified (which is useful for something like Travis where we don't need the "de
 just the ones used for testing.)
 
 Note about editing:
-If you make changes that use/alter random number generation, you may need to 
+If you make changes that use/alter random number generation, you may need to
 edit the following files:
     Peer Review:
         students.txt
@@ -24,23 +24,27 @@ edit the following files:
     Discussion Forum:
         threads.txt
         posts.txt
-        
-These files are manually written for a given set of users (the set is predetermined due to 
-the random's seed staying the same). If you make any changes that affects the contents of the 
+
+These files are manually written for a given set of users (the set is predetermined due to
+the random's seed staying the same). If you make any changes that affects the contents of the
 set these files will be outdated and result in failure of recreate_sample_courses.
 """
 from __future__ import print_function, division
 from datetime import datetime
 import glob
-import json
 import os
-import random
 import os.path
 import random
 
 from sqlalchemy import create_engine, Table, MetaData
 
-from sample_courses import *
+from sample_courses import (
+    args, SUBMITTY_INSTALL_DIR,
+    DB_HOST, DB_PORT,
+    DB_USER, DB_PASS,
+    NOW, NO_GRADING,
+    SUBMITTY_DATA_DIR
+)
 
 from sample_courses.utils import (
     load_data_yaml,
@@ -51,6 +55,7 @@ from sample_courses.utils.create_or_generate import create_group
 
 from sample_courses.models import User
 from sample_courses.models.course import Course
+
 
 def main():
     """
@@ -76,7 +81,8 @@ def main():
     users = {}  # dict[str, User]
     for course_file in sorted(glob.iglob(os.path.join(args.courses_path, '*.yml'))):
         # only create the plagiarism course if we have a local LichenTestData repo
-        if os.path.basename(course_file) == "plagiarism.yml" and not os.path.isdir(os.path.join(SUBMITTY_INSTALL_DIR, "GIT_CHECKOUT", "LichenTestData")):
+        if os.path.basename(course_file) == "plagiarism.yml" and not os.path.isdir(
+                os.path.join(SUBMITTY_INSTALL_DIR, "GIT_CHECKOUT", "LichenTestData")):
             continue
 
         course_json = load_data_yaml(course_file)
@@ -89,8 +95,10 @@ def main():
 
     for user_file in sorted(glob.iglob(os.path.join(args.users_path, '*.yml'))):
         user = User(load_data_yaml(user_file))
-        if user.id in ['submitty_php', 'submitty_daemon', 'submitty_cgi', 'submitty_dbuser', 'vagrant', 'postgres'] or \
+        if user.id in ['submitty_php', 'submitty_daemon', 'submitty_cgi',
+                       'submitty_dbuser', 'vagrant', 'postgres'] or \
                 user.id.startswith("untrusted"):
+
             continue
         user.create()
         users[user.id] = user
@@ -111,8 +119,8 @@ def main():
     for course_id in sorted(courses.keys()):
         course = courses[course_id]
         tmp = course.registered_students + course.unregistered_students + \
-              course.no_rotating_students + \
-              course.no_registration_students
+            course.no_rotating_students + course.no_registration_students
+
         extra_students = max(tmp, extra_students)
     extra_students = generate_random_users(extra_students, users)
 
@@ -125,7 +133,7 @@ def main():
         user = users[user_id]
         submitty_conn.execute(user_table.insert(),
                               user_id=user.id,
-                              user_numeric_id = user.numeric_id,
+                              user_numeric_id=user.numeric_id,
                               user_password=get_php_db_password(user.password),
                               user_givenname=user.givenname,
                               user_preferred_givenname=user.preferred_givenname,
@@ -153,22 +161,22 @@ def main():
     today = datetime.today()
     year = str(today.year)
     if today.month < 7:
-        term_id    = "s" + year[-2:]
-        term_name  = "Spring " + year
+        term_id = "s" + year[-2:]
+        term_name = "Spring " + year
         term_start = "01/02/" + year
-        term_end   = "06/30/" + year
+        term_end = "06/30/" + year
     else:
-        term_id    = "f" + year[-2:]
-        term_name  = "Fall " + year
+        term_id = "f" + year[-2:]
+        term_name = "Fall " + year
         term_start = "07/01/" + year
-        term_end   = "12/23/" + year
+        term_end = "12/23/" + year
 
     terms_table = Table("terms", submitty_metadata, autoload=True)
     submitty_conn.execute(terms_table.insert(),
-                          term_id    = term_id,
-                          name       = term_name,
-                          start_date = term_start,
-                          end_date   = term_end)
+                          term_id=term_id,
+                          name=term_name,
+                          start_date=term_start,
+                          end_date=term_end)
 
     submitty_conn.close()
 
@@ -181,24 +189,28 @@ def main():
         for i in range(course.registered_students):
             reg_section = (i % course.registration_sections) + 1
             rot_section = (i % course.rotating_sections) + 1
-            students[key].courses[course.code] = {"registration_section": reg_section, "rotating_section": rot_section}
+            students[key].courses[course.code] = {"registration_section": reg_section,
+                                                  "rotating_section": rot_section}
             course.users.append(students[key])
             key += 1
 
         for i in range(course.no_rotating_students):
             reg_section = (i % course.registration_sections) + 1
-            students[key].courses[course.code] = {"registration_section": reg_section, "rotating_section": None}
+            students[key].courses[course.code] = {"registration_section": reg_section,
+                                                  "rotating_section": None}
             course.users.append(students[key])
             key += 1
 
         for i in range(course.no_registration_students):
             rot_section = (i % course.rotating_sections) + 1
-            students[key].courses[course.code] = {"registration_section": None, "rotating_section": rot_section}
+            students[key].courses[course.code] = {"registration_section": None,
+                                                  "rotating_section": rot_section}
             course.users.append(students[key])
             key += 1
 
-        for i in range(course.unregistered_students):
-            students[key].courses[course.code] = {"registration_section": None, "rotating_section": None}
+        for _ in range(course.unregistered_students):
+            students[key].courses[course.code] = {"registration_section": None,
+                                                  "rotating_section": None}
             course.users.append(students[key])
             key += 1
 
@@ -221,7 +233,6 @@ def main():
     if not NO_GRADING:
         # queue up all of the newly created submissions to grade!
         os.system(f"{SUBMITTY_INSTALL_DIR}/bin/regrade.py --no_input {SUBMITTY_DATA_DIR}/courses/")
-
 
 
 if __name__ == "__main__":
