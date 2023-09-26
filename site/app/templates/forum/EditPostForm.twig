@@ -19,6 +19,7 @@
         "show_expiration" : true,
         "submit_label": "Update Post",
         "categories" : categories,
+        "show_upload_attachment": true,
     } %}
     <script>
         $("#thread_form").submit(function() {
@@ -29,6 +30,7 @@
         });
         document.querySelector('.popup-box').onclick = null;
     </script>
+    {#<button class="btn btn-primary" onclick="uploadAttachment()">Upload Attacfasdfskdfhsakfhsdhment</button>#}
 {% endblock %}
 {% block form %}
     <form id="thread_form" method="post" action="{{ edit_url }}">
