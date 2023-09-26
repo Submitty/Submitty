@@ -1,6 +1,6 @@
 <div id="queue_history">
   <br>
-  <h2>Today's History Arnav
+  <h2>Today's History
     {% if viewer.getFullHistory() %}
       <a id="view_history_button" role="button" class="btn btn-default" href="{{base_url}}?full_history=false">
         View Limited History
@@ -17,13 +17,14 @@
         <th scope="col">#</th>
         <th scope="col">Name</th>
         <th scope="col">Queue</th>
+
+        <th scope="col"> <a href ="#" onclick = "sortTable(3)">Time Entered</a></th>
+        <th scope="col"> <a href ="#" onclick = "sortTable(4)">Time In Queue</a></th>
+        <th scope="col"> <a href ="#" onclick = "sortTable(5)">Time Helped</a></th>
+        <th scope="col"> <a href ="#" onclick = "sortTable(6)">Times Helped Today</a></th>
+        <th scope="col"> <a href ="#" onclick = "sortTable(7)">Times Helped this week</a></th>
+        <th scope="col"> <a href ="#" onclick = "sortTable(8)">Helped Started By</a></th>
         
-        <th scope="col"> <a href ="#" onclick = "sortTable('TimeEntered')">Time Entered</a></th>
-        <th scope="col"> <a href ="#" onclick = "sortTable('TimeInQueue')">Time In Queue</a></th>
-        <th scope="col"> <a href ="#" onclick = "sortTable('TimeHelped')">Time Helped</a></th>
-        <th scope="col"> <a href ="#" onclick = "sortTable('TimeTimesHelpedToday')">Times Helped Today</a></th>
-        <th scope="col"> <a href ="#" onclick = "sortTable('TimeHelpedPerWeek')">Times Helped this week</a></th>
-        <th scope="col"> <a href ="#" onclick = "sortTable('Helped Started By')">Helped Started By</a></th>
 
         <th scope="col" class="mobile-hide">Removed By</th>
 
@@ -87,3 +88,31 @@
     </tbody>
   </table>
 </div>
+
+<script>
+  function sortTable(column){
+    var table, rows, switch, i, x, shouldSwitch;
+    table = document.querySelector("table");
+    switch = true;
+  
+  while (swtich){
+    switching = false;
+    rows = table.rows;
+    for (i = 1; i < (rows.length - 1); i++) {
+        shouldSwitch = false;
+        x = rows[i].getElementsByTagName("td")[column].textContent;
+        y = rows[i + 1].getElementsByTagName("td")[column].textContent;
+
+        if (x.toLowerCase() > y.toLowerCase()) {
+          shouldSwitch= true;
+          break;
+        }
+      }
+
+      if (shouldSwitch) {
+        rows[i].parentNode.insertBefore(rows[i + 1], rows[i]);
+        switching = true;
+      }
+    }
+  }
+</script>
