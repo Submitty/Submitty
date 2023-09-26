@@ -429,11 +429,11 @@
                 var duckdivElement = document.getElementById("moorthy-duck");
                 var wholeBannerElement = document.getElementById("banner");
                 var movingUnit = document.getElementById("moving-unit");
+                duckdivElement.style.animation = "rocking 2s linear infinite";
                 setTimeout(function() {
                     bannerElement.style.width = "100%";
                     bannerElement.style.display = "block";
                     movingUnit.style.animation = "slide 2s linear forwards";
-                    duckdivElement.style.animation = "rocking 2s linear infinite";
                 }, 500);
                 document.getElementById("triangle").style.display = "none";
                 document.getElementById("speech-bubble").style.display = "none";
