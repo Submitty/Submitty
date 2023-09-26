@@ -43,6 +43,8 @@ class SelfRejoinController extends AbstractController {
         }
 
         $reload_previous_course = false;
+        $previous_course_name = "";
+        $previous_course_term = "";
         $config = $this->core->getConfig();
         if (
             !$config->isCourseLoaded()
@@ -53,8 +55,6 @@ class SelfRejoinController extends AbstractController {
             // so we can reload it at the end of the function
             // to avoid state change.
             $reload_previous_course = $config->isCourseLoaded();
-            $previous_course_name = "";
-            $previous_course_term = "";
             if ($reload_previous_course) {
                 $previous_course_name = $config->getCourse();
                 $previous_course_term = $config->getTerm();
