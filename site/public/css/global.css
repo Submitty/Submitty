@@ -308,3 +308,15 @@ footer .footer-separator {
     padding: 10px;
     font-size: 16px;
 }
+
+@keyframes rocking {
+  0% {
+    transform: rotateZ(-10deg);
+  }
+  50% {
+    transform: rotateZ(10deg);
+  }
+  100% {
+    transform: rotateZ(-10deg);
+  }
+}

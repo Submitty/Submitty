@@ -417,8 +417,7 @@
         var bannerElement = document.getElementById("banner");
         if (bannerElement.style.display === "none") {
             setCookie('display', "yes");
-            bannerElement.style.width = "100%";
-            bannerElement.style.display = "block";
+
             document.getElementById("breadcrumbs").style.flexWrap = "inherit";
 
             if (currentImages.length > 0) {
@@ -430,7 +429,12 @@
                 var duckdivElement = document.getElementById("moorthy-duck");
                 var wholeBannerElement = document.getElementById("banner");
                 var movingUnit = document.getElementById("moving-unit");
-                movingUnit.style.animation = "slide 2s linear forwards";
+                setTimeout(function() {
+                    bannerElement.style.width = "100%";
+                    bannerElement.style.display = "block";
+                    movingUnit.style.animation = "slide 2s linear forwards";
+                    duckdivElement.style.animation = "rocking 2s linear infinite";
+                }, 500);
                 document.getElementById("triangle").style.display = "none";
                 document.getElementById("speech-bubble").style.display = "none";
             
@@ -448,6 +452,8 @@
                             }, { once: true });
             }
             else {
+                bannerElement.style.width = "100%";
+                bannerElement.style.display = "block";
                 images[currentImageIndex].classList.add("active");
             }
         }
