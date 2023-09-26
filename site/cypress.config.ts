@@ -1,6 +1,7 @@
 import { defineConfig } from 'cypress'
 
 export default defineConfig({
+  video: true,
   pageLoadTimeout: 120000,
   retries: {
     runMode: 2,
