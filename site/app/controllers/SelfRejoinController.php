@@ -99,7 +99,6 @@ class SelfRejoinController extends AbstractController {
      * @return void
      */
     private function sendRejoinedStudentEmail($joined_section): void {
-        print("meow!!");
         $user = $this->core->getUser();
         $user_id = $user->getId();
         $first_name = $user->getPreferredGivenName();
