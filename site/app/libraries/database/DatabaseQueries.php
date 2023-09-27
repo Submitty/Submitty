@@ -5385,6 +5385,46 @@ AND gc_id IN (
     }
 
     /**
+     * Returns the last non-null registration section the student was in.
+     * Make sure student was ever registered in the course by calling
+     * wasStudentEverInCourse() first.
+     *
+     * @param string $user_id The name of the user we're querying.
+     * @param string $course The course we are looking in.
+     * @param string $term The term we are looking at.
+     * @return string The registration section the student was last in.
+     *   If the student is currently registered, the current registration
+     *   section is returned.
+     */
+    public function getLastNonnullRegistrationSection(
+        string $user_id,
+        string $term,
+        string $course
+    ): string {
+        $this->submitty_db->query("
+            SELECT last_nonnull_registration_section
+            FROM courses_users
+            WHERE user_id=? and term=? and course=?;
+        ", [$user_id, $term, $course]);
+        return $this->submitty_db->row()["last_nonnull_registration_section"];
+    }
+
+    /**
+     * Returns the last non-null rotating section the student was in.
+     *
+     * @param string $user_id The name of the user we're querying.
+     * @return string|null The rotating section the student was last in.
+     */
+    public function getLastNonnullRotatingSection(string $user_id): string|null {
+        $this->course_db->query("
+            SELECT last_nonnull_rotating_section
+            FROM users
+            WHERE user_id=?;
+        ", [$user_id]);
+        return $this->course_db->row()["last_nonnull_rotating_section"];
+    }
+
+    /**
      * Determines if a course is 'active' or if it was dropped.
      *
      * This is used to filter out courses displayed on the home screen, for when
