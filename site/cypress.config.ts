@@ -29,7 +29,7 @@ export default defineConfig({
           }
         )
         
-      return require('./cypress/plugins/index.js')(on, config)
+      return require('./cypress/plugins/index.js', 'fs')(on, config)
     },
     baseUrl: 'http://localhost:1511',
     specPattern: 'cypress/e2e/**/*.spec.js',
