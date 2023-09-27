@@ -23,7 +23,7 @@ class UsersView extends AbstractView {
         array $reg_sections,
         array $rot_sections,
         array $can_rejoin_in_null,
-        array $download_info, 
+        array $download_info,
         array $formatted_tzs,
         bool $use_database = false,
         string $active_student_columns = '1-1-1-1-1-1-1-1-1-1-1-1'
