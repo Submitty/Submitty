@@ -109,6 +109,9 @@ class Course_create:
             reg_section = user.get_detail(self.code, "registration_section")
             if reg_section is not None and reg_section > self.registration_sections:
                 reg_section = None
+            last_section = reg_section
+            if last_section is None:
+                last_section = 1
             rot_section = user.get_detail(self.code, "rotating_section")
             if rot_section is not None and rot_section > self.rotating_sections:
                 rot_section = None
@@ -123,6 +126,7 @@ class Course_create:
                                   user_id=user.get_detail(self.code, "id"),
                                   user_group=user.get_detail(self.code, "group"),
                                   registration_section=reg_section,
+                                  last_nonnull_registration_section=last_section,
                                   manual_registration=user.get_detail(self.code, "manual"))
             update = users_table.update(values={
                 users_table.c.rotating_section: bindparam('rotating_section')
