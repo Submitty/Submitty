@@ -445,7 +445,7 @@ CREATE TABLE public.courses_users (
 
 CREATE TABLE public.emails (
     id bigint NOT NULL,
-    user_id character varying NOT NULL,
+    user_id character varying,
     subject text NOT NULL,
     body text NOT NULL,
     created timestamp without time zone NOT NULL,
@@ -453,7 +453,9 @@ CREATE TABLE public.emails (
     error character varying DEFAULT ''::character varying NOT NULL,
     email_address character varying(255) DEFAULT ''::character varying NOT NULL,
     term character varying,
-    course character varying
+    course character varying,
+    to_name character varying,
+    CONSTRAINT name_or_email CHECK (((user_id IS NOT NULL) <> (to_name IS NOT NULL)))
 );
 
 
