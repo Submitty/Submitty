@@ -17,6 +17,7 @@ use Symfony\Component\Routing\Annotation\Route;
 //Enable us to throw, catch, and handle exceptions as needed.
 use app\exceptions\ValidationException;
 use app\exceptions\DatabaseException;
+use app\controllers\SelfRejoinController;
 
 /**
  * Class UsersController
@@ -83,6 +84,24 @@ class UsersController extends AbstractController {
             }
         }
 
+        $can_rejoin_in_null = [];
+        $self_rejoin_tester = new SelfRejoinController($this->core);
+        $course = $this->core->getConfig()->getCourse();
+        $term = $this->core->getConfig()->getTerm();
+        foreach ($sorted_students['NULL'] as $student) {
+            $user_id = $student->getId();
+            if (
+                $user_id !== null
+                && $student->getGroup() === USER::GROUP_STUDENT
+                && $self_rejoin_tester->canRejoinCourse($user_id, $course, $term)
+            ) {
+                $can_rejoin_in_null[$user_id] = true;
+            }
+            else {
+                $can_rejoin_in_null[$user_id] = false;
+            }
+        }
+
         return new MultiResponse(
             JsonResponse::getSuccessResponse($download_info),
             new WebResponse(
@@ -91,6 +110,7 @@ class UsersController extends AbstractController {
                 $sorted_students,
                 $this->core->getQueries()->getRegistrationSections(),
                 $this->core->getQueries()->getRotatingSections(),
+                $can_rejoin_in_null,
                 $download_info,
                 $formatted_tzs,
                 $this->core->getAuthentication() instanceof DatabaseAuthentication,

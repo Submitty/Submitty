@@ -58,11 +58,11 @@ class HomePageController extends AbstractController {
             }
         }
 
-        $SelfRejoinTester = new SelfRejoinController($this->core);
+        $self_rejoin_tester = new SelfRejoinController($this->core);
         $dropped_courses = array_filter(
             $dropped_courses,
-            function (Course $course) use ($SelfRejoinTester, $user_id) {
-                return $SelfRejoinTester->canRejoinCourse($user_id, $course->getTitle(), $course->getTerm());
+            function (Course $course) use ($self_rejoin_tester, $user_id) {
+                return $self_rejoin_tester->canRejoinCourse($user_id, $course->getTitle(), $course->getTerm());
             }
         );
 
