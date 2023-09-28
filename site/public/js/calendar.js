@@ -98,6 +98,31 @@ function dateToStr(year, month, day) {
 }
 
 /**
+ * This function returns a slightly darker color than the color variable name passed. 
+ * 
+ * @param colorstr : string a string representing the color to darken
+ * @returns {string} a string that represents a slightly darker.
+ */
+function darken(colorstr) {
+    if (typeof colorstr !== "string") {
+        return colorstr;
+    }
+    else {
+        let hexcodestr = window.getComputedStyle(document.documentElement).getPropertyValue(colorstr.slice(4, -1)).toLowerCase();
+        let darkerstr = hexcodestr.split('');
+        for(let i = 1; i < hexcodestr.length; i++) {
+            if ((hexcodestr[i] > 'a' && hexcodestr[i] <= 'f') || (hexcodestr[i] > '0' && hexcodestr[i] <= '9')) {
+                darkerstr[i] = String.fromCharCode(hexcodestr.charCodeAt(i) - 1);
+            }
+            else if (hexcodestr[i] == 'a') {
+                darkerstr[i] = '9';
+            }
+        }
+        return darkerstr.join("");
+    }
+}
+
+/**
  * Create a HTML element that contains the calendar item (button/link/text).
  *
  * @param item : array the calendar item
@@ -146,6 +171,13 @@ function generateCalendarItem(item) {
     element.title = tooltip;
     if (link !== '') {
         element.href = link;
+        // TODO: override background color with darker shade when hovered.
+        element.addEventListener("mouseover", function(){
+            element.style.setProperty('background-color', darken(item['color']));
+        })
+        element.addEventListener("mouseout", function(){
+            element.style.setProperty('background-color', item['color']);
+        })
     }
     if (onclick !== '' && exists) {
         if (!item['show_due']) {
