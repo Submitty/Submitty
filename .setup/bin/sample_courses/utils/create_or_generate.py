@@ -10,7 +10,7 @@ from sample_courses.utils import get_random_text_from_file
 from sample_courses.utils.checks import group_exists
 
 
-def create_gradeable_submission(src, dst):
+def create_gradeable_submission(src: str, dst: str) -> None:
     """
     Given a source and a destination, copy the files from the source to the destination. First,
     before copying, we check if the source is a directory, if it is, then we zip the contents of
@@ -32,8 +32,8 @@ def create_gradeable_submission(src, dst):
     """
     zip_dst = None
     if os.path.isdir(src):
-        zip_dst = os.path.join("/tmp", str(uuid.uuid4()))
-        zip_dst = shutil.make_archive(zip_dst, 'zip', src)
+        zip_dst: str = os.path.join("/tmp", str(uuid.uuid4()))
+        zip_dst: str = shutil.make_archive(zip_dst, 'zip', src)
         src = zip_dst
 
     if src[-3:] == "zip":
@@ -45,7 +45,7 @@ def create_gradeable_submission(src, dst):
         os.remove(zip_dst)
 
 
-def create_pdf_annotations(file_name, file_path, src, dst, grader_id):
+def create_pdf_annotations(file_name: str, file_path: str, src: str, dst: str, grader_id) -> None:
     """
     Specifically designed helper function that copies a annotation from the
     source to the destination.
@@ -55,15 +55,10 @@ def create_pdf_annotations(file_name, file_path, src, dst, grader_id):
         the grader that is responsible for the annotation
 
     :param file_name: encoded file name
-    :type src: str
     :param file_path: anonymous file path
-    :type src: str
     :param src: path of the file or directory we want to use for this annotation
-    :type src: str
     :param dst: path to the folder where we should copy the annotation to
-    :type src: str
     :param grader_id: grader of the annotation
-    :type src: str
     """
     with open(src, 'r') as open_file:
         annotation_json = json.load(open_file)
@@ -76,7 +71,7 @@ def create_pdf_annotations(file_name, file_path, src, dst, grader_id):
         json.dump(annotation_json, f, indent=2)
 
 
-def create_group(group):
+def create_group(group) -> None:
     """
     Creates the group on the system, adding some base users to the group as well that are necessary
     for the system to function and are not defined within the users.yml file.
@@ -89,16 +84,16 @@ def create_group(group):
         return
 
 
-def generate_random_user_id(length=15):
+def generate_random_user_id(length: int=15) -> str:
     return ''.join(random.choice(string.ascii_lowercase + string.ascii_uppercase
                                  + string.digits) for _ in range(length))
 
 
-def generate_random_ta_comment():
+def generate_random_ta_comment() -> str:
     return get_random_text_from_file('TAComment.txt')
 
 
-def generate_random_ta_note():
+def generate_random_ta_note() -> str:
     return get_random_text_from_file('TANote.txt')
 
 
@@ -106,7 +101,7 @@ def generate_random_student_note():
     return get_random_text_from_file('StudentNote.txt')
 
 
-def generate_pronouns():
+def generate_pronouns() -> str:
     pronoun_num = random.random()
     if pronoun_num <= .05:
         pronoun_list = ["Ze/Zir", "Xe/Xem", "Ne/Nem", "Vi/Vir",

@@ -10,14 +10,14 @@ from sample_courses.utils.dependent import add_to_group
 
 
 class Mark(object):
-    def __init__(self, mark, order):
+    def __init__(self, mark, order) -> None:
         self.note = mark["gcm_note"]
         self.points = mark["gcm_points"]
         self.order = order
         self.grader = "instructor"
         self.key = None
 
-    def create(self, gc_id, conn, table):
+    def create(self, gc_id, conn, table) -> None:
         ins = table.insert().values(
             gc_id=gc_id,
             gcm_points=self.points,
@@ -28,7 +28,7 @@ class Mark(object):
         self.key = res.inserted_primary_key[0]
 
 
-def generate_random_marks(default_value, max_value):
+def generate_random_marks(default_value, max_value) -> list:
     with open(os.path.join(SETUP_DATA_PATH, "random", "marks.yml")) as f:
         marks_yml = yaml.load(f)
     if default_value == max_value and default_value > 0:
@@ -65,7 +65,7 @@ class User(object):
         courses
     """
 
-    def __init__(self, user):
+    def __init__(self, user) -> None:
         self.id = user["user_id"]
         self.numeric_id = user["user_numeric_id"]
         self.password = self.id
@@ -136,7 +136,7 @@ class User(object):
         if "user_password" in user:
             self.password = user["user_password"]
 
-    def create(self, force_ssh=False):
+    def create(self, force_ssh=False) -> None:
         if not DB_ONLY and not user_exists(self.id):
             if self.group > 2 and not force_ssh:
                 self.create_non_ssh()
@@ -149,7 +149,7 @@ class User(object):
         if self.sudo:
             add_to_group("sudo", self.id)
 
-    def create_ssh(self):
+    def create_ssh(self) -> None:
         print("Creating user {}...".format(self.id))
         os.system(
             "useradd -m -c 'First Last,RoomNumber,WorkPhone,HomePhone' {}".format(
@@ -158,7 +158,7 @@ class User(object):
         )
         self.set_password()
 
-    def create_non_ssh(self):
+    def create_non_ssh(self) -> None:
         # Change this to f strings
         print("Creating user {}...".format(self.id))
         os.system(
@@ -167,7 +167,7 @@ class User(object):
         )
         self.set_password()
 
-    def create_ldap(self):
+    def create_ldap(self) -> None:
         print(f"Creating LDAP user {self.id}...")
         path = Path("/tmp", self.id)
         path.write_text(
@@ -187,7 +187,7 @@ shadowWarning: 0"""
         )
         path.unlink()
 
-    def set_password(self):
+    def set_password(self) -> None:
         print("Setting password for user {}...".format(self.id))
         os.system("echo {}:{} | chpasswd".format(self.id, self.password))
 
@@ -204,7 +204,7 @@ shadowWarning: 0"""
             return None
 
 
-def generate_random_users(total, real_users):
+def generate_random_users(total, real_users) -> list:
     """
     :param total:
     :param real_users:

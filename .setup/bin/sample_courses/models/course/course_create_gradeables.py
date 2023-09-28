@@ -52,7 +52,7 @@ class Course_create_gradeables:
         pass
 
 
-    def add_gradeables(self):
+    def add_gradeables(self) -> None:
         anon_ids = {}
         for gradeable in self.gradeables:
             #create gradeable specific anonymous ids for users

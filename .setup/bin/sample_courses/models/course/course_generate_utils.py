@@ -39,7 +39,7 @@ class Course_generate_utils:
         pass
 
 
-    def make_course_json(self):
+    def make_course_json(self) -> None:
         """
         This function generates customization_sample.json in case it has changed from the provided version in the test suite
         within the Submitty repository. Ideally this function will be pulled out and made independent, or better yet when

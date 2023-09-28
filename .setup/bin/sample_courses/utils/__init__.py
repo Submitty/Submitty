@@ -16,7 +16,7 @@ from sample_courses import SUBMITTY_DATA_DIR, SETUP_DATA_PATH, yaml
 
 
 def get_random_text_from_file(filename):
-    line = ""
+    line: str = ""
     with open(os.path.join(SETUP_DATA_PATH, 'random', filename)) as comment:
         line = next(comment)
         for num, alternate_line in enumerate(comment):
@@ -32,7 +32,7 @@ def load_data_json(file_name):
     :param file_name: name of file to load
     :return: parsed JSON structure from loaded file
     """
-    file_path = os.path.join(SETUP_DATA_PATH, file_name)
+    file_path: str = os.path.join(SETUP_DATA_PATH, file_name)
     if not os.path.isfile(file_path):
         raise IOError("Missing the json file .setup/data/{}".format(file_name))
     with open(file_path) as open_file:
@@ -76,8 +76,8 @@ def get_current_semester():
     F. The next two characters are the last two digits in the current year.
     :return:
     """
-    today = datetime.today()
-    semester = "f" + str(today.year)[-2:]
+    today: datetime = datetime.today()
+    semester: str = "f" + str(today.year)[-2:]
     if today.month < 7:
         semester = "s" + str(today.year)[-2:]
     return semester

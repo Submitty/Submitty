@@ -29,7 +29,7 @@ class Course_utils:
         # Anything that needs to be initialized goes here
         pass
 
-    def check_rotating(self, users):
+    def check_rotating(self, users) -> None:
         for gradeable in self.gradeables:
             for grading_rotating in gradeable.grading_rotating:
                 string = "Invalid user_id {} for rotating section for gradeable {}".format(
@@ -37,7 +37,7 @@ class Course_utils:
                 if grading_rotating['user_id'] not in users:
                     raise ValueError(string)
                 
-    def getForumDataFromFile(self, filename):
+    def getForumDataFromFile(self, filename) -> None:
         forum_path = os.path.join(SETUP_DATA_PATH, "forum")
         forum_data = []
         for line in open(os.path.join(forum_path, filename)):

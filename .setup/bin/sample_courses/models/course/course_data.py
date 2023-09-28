@@ -36,7 +36,7 @@ class Course_data:
         # Anything that needs to be initialized goes here
         pass
     
-    def add_sample_queue_data(self):
+    def add_sample_queue_data(self) -> None:
         # load the sample polls from input file
         queue_data_path = os.path.join(SETUP_DATA_PATH, "queue", "queue_data.json")
         with open(queue_data_path, 'r') as queue_file:
@@ -113,7 +113,7 @@ class Course_data:
                               time_paused=queue_entry["time_paused"],
                               time_paused_start=queue_entry["time_paused_start"])
 
-    def add_sample_polls_data(self):
+    def add_sample_polls_data(self) -> None:
         # set sample course to have polls enabled by default
         course_json_file = os.path.join(self.course_path, 'config', 'config.json')
         with open(course_json_file, 'r+') as open_file:
@@ -190,7 +190,7 @@ class Course_data:
                               student_id=response["student_id"],
                               option_id=response["option_id"])
 
-    def add_sample_forum_data(self):
+    def add_sample_forum_data(self) -> None:
         # set sample course to have forum enabled by default
         course_json_file = os.path.join(self.course_path, 'config', 'config.json')
         with open(course_json_file, 'r+') as open_file:

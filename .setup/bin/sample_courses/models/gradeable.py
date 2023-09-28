@@ -30,7 +30,7 @@ class Gradeable(object):
         id
         type
     """
-    def __init__(self, gradeable):
+    def __init__(self, gradeable) -> None:
         self.id = ""
         self.gradeable_config = None
         self.config_path = None
@@ -252,7 +252,7 @@ class Gradeable(object):
             i -= 1
             self.components.append(Component(component, i+1))
 
-    def create(self, conn, gradeable_table, electronic_table, peer_assign, reg_table, component_table, mark_table):
+    def create(self, conn, gradeable_table, electronic_table, peer_assign, reg_table, component_table, mark_table) -> None:
         conn.execute(gradeable_table.insert(), g_id=self.id, g_title=self.title,
                      g_instructions_url=self.instructions_url,
                      g_overall_ta_instructions=self.overall_ta_instructions,
@@ -383,7 +383,7 @@ class Gradeable(object):
 
         return form_json
 
-    def get_gradeable_type_text(self):
+    def get_gradeable_type_text(self) -> str:
         if self.type == 0:
             return "Electronic File"
         elif self.type == 1:
@@ -391,13 +391,13 @@ class Gradeable(object):
         else:
             return "Numeric"
 
-    def get_submission_type(self):
+    def get_submission_type(self) -> str:
         if self.grade_by_registration:
             return "reg_section"
         else:
             return "rotating-section"
 
-    def get_upload_type(self):
+    def get_upload_type(self) -> str:
         if self.is_repository:
             return "Repository"
         else:
