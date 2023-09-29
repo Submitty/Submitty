@@ -17,15 +17,26 @@
         <th scope="col">#</th>
         <th scope="col">Name</th>
         <th scope="col">Queue</th>
+        <th scope="col">Time Entered</th>
+        <th scope="col">Time In Queue</th>
+        <th scope="col">Time Helped</th>
+        <th scope="col">Times Helped Today</th>
+        <th scope="col">Times Helped this week</th>
+        {% set sortState = "<script>sortStateTimeEntered</script>" %}
 
-        <th scope="col"> <a href ="#" onclick = "sortTable(3)">Time Entered</a></th>
-        <th scope="col"> <a href ="#" onclick = "sortTable(4)">Time In Queue</a></th>
-        <th scope="col"> <a href ="#" onclick = "sortTable(5)">Time Helped</a></th>
-        <th scope="col"> <a href ="#" onclick = "sortTable(6)">Times Helped Today</a></th>
-        <th scope="col"> <a href ="#" onclick = "sortTable(7)">Times Helped this week</a></th>
-        <th scope="col"> <a href ="#" onclick = "sortTable(8)">Helped Started By</a></th>
-        
-
+       {# <th scope="col"> <a href ="#" onclick = "sortTable(8)">Helped Started By</a></th>#}
+        <th scope="col">
+            <a href="#" onclick="toggleSort('HelpStartedBy')">Helped Started By
+                <span id="sortIndicator"></span>
+                {% if sortState == 'up' %}
+                    {#sort up#}
+                    {{viewer.getPastQueue(sortState)}}
+                {% elseif sortState == 'down' %}
+                    {{viewer.getPastQueue(sortState)}}
+                    {#sort down#}    
+                {% endif %}
+            </a>
+        </th>
         <th scope="col" class="mobile-hide">Removed By</th>
 
         {% if viewer.isGrader() %}
@@ -35,7 +46,7 @@
     </thead>
     <tbody>
       {% set history_count = 0 %}
-      {% for entry in viewer.getPastQueue() %}
+      {% for entry in viewer.getPastQueue(sortState) %}
         {% if (history_count < 25 or viewer.getFullHistory()) and (viewer.isGrader() or entry['user_id'] == viewer.getUserId()) %}
           {% set history_count = history_count + 1 %}
           <tr class="queue_history_{{entry['queue_code']}} queue_history_row">
@@ -90,29 +101,25 @@
 </div>
 
 <script>
-  function sortTable(column){
-    var table, rows, switch, i, x, shouldSwitch;
-    table = document.querySelector("table");
-    switch = true;
-  
-  while (swtich){
-    switching = false;
-    rows = table.rows;
-    for (i = 1; i < (rows.length - 1); i++) {
-        shouldSwitch = false;
-        x = rows[i].getElementsByTagName("td")[column].textContent;
-        y = rows[i + 1].getElementsByTagName("td")[column].textContent;
+var sortStateTimeEntered = "off";
 
-        if (x.toLowerCase() > y.toLowerCase()) {
-          shouldSwitch= true;
-          break;
+function toggleSort(column) {
+    var sortIndicator = document.getElementById("sortIndicator");
+    
+    if (column == 'HelpStartedBy') {
+        if (sortStateTimeEntered == "off") {
+            sortStateTimeEntered = "up";
+            sortIndicator.innerText = "▲";
+            // Add logic for sorting 'Time Entered' in ascending order here
+        } else if (sortStateTimeEntered == "up") {
+            sortStateTimeEntered = "down";
+            sortIndicator.innerText = "▼";
+            // Add logic for sorting 'Time Entered' in descending order here
+        } else if (sortStateTimeEntered == "down") {
+            sortStateTimeEntered = "off";
+            sortIndicator.innerText = ""; // Reset to down arrow for off state
+            // Add logic for turning off sorting here
         }
-      }
-
-      if (shouldSwitch) {
-        rows[i].parentNode.insertBefore(rows[i + 1], rows[i]);
-        switching = true;
-      }
     }
-  }
+}
 </script>

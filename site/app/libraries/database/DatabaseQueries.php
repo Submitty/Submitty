@@ -7153,61 +7153,162 @@ AND gc_id IN (
         $this->course_db->query($query, [$this->core->getDateTimeNow()->format('Y-m-d')]);
         return $this->course_db->rows();
     }
-
-    public function getPastQueue() {
-
-        $query = "
-        SELECT Row_number()
-            OVER (ORDER BY time_out DESC, time_in DESC),
-                queue.*,
-                helper.user_givenname AS helper_givenname,
-                helper.user_preferred_givenname AS helper_preferred_givenname,
-                helper.user_familyname AS helper_familyname,
-                helper.user_preferred_familyname AS helper_preferred_familyname,
-                helper.user_id AS helper_id,
-                helper.user_email AS helper_email,
-                helper.user_email_secondary AS helper_email_secondary,
-                helper.user_email_secondary_notify AS helper_email_secondary_notify,
-                helper.user_group AS helper_group,
-                helper.user_pronouns AS helper_pronouns,
-                remover.user_givenname AS remover_givenname,
-                remover.user_preferred_givenname AS remover_preferred_givenname,
-                remover.user_familyname AS remover_familyname,
-                remover.user_preferred_familyname AS remover_preferred_familyname,
-                remover.user_id AS remover_id,
-                remover.user_email AS remover_email,
-                remover.user_email_secondary AS remover_email_secondary,
-                remover.user_email_secondary_notify AS remover_email_secondary_notify,
-                remover.user_group AS remover_group,
-                remover.user_pronouns AS remover_pronouns,
-                h1.helped_today,
-                h.times_helped
-            FROM    queue
-            LEFT JOIN users helper ON helper.user_id = queue.help_started_by
-            LEFT JOIN users remover ON remover.user_id = queue.removed_by
-            LEFT JOIN (
-              SELECT user_id as uid, COUNT(user_id) AS times_helped
-              FROM queue
-              WHERE extract(WEEK from time_in) = extract(WEEK from ?::DATE) AND (removal_type = 'helped' OR removal_type = 'self_helped')
-              GROUP BY user_id
-            )
-            AS h
-            ON queue.user_id = h.uid
-            LEFT JOIN (
-              SELECT user_id as uid, queue_code as qc, COUNT(queue_code) AS helped_today
-              FROM queue WHERE time_in > ? AND (removal_type = 'helped' OR removal_type = 'self_helped')
-              GROUP BY user_id, queue_code
-            )
-            AS h1
-            ON queue.user_id = h1.uid AND queue.queue_code = h1.qc
-            WHERE time_in > ? AND current_state IN ('done')
-            ORDER BY row_number
-        ";
+//Make it pass in a paramater where if "Name" then sort by name. 
+//If "order" then keep it nomal
+    public function getPastQueue($parameter = 'off') {
+        if ($parameter == "off"){
+            $query = "
+            SELECT Row_number()
+                OVER (ORDER BY time_out DESC, time_in DESC),
+                    queue.*,
+                    helper.user_givenname AS helper_givenname,
+                    helper.user_preferred_givenname AS helper_preferred_givenname,
+                    helper.user_familyname AS helper_familyname,
+                    helper.user_preferred_familyname AS helper_preferred_familyname,
+                    helper.user_id AS helper_id,
+                    helper.user_email AS helper_email,
+                    helper.user_email_secondary AS helper_email_secondary,
+                    helper.user_email_secondary_notify AS helper_email_secondary_notify,
+                    helper.user_group AS helper_group,
+                    helper.user_pronouns AS helper_pronouns,
+                    remover.user_givenname AS remover_givenname,
+                    remover.user_preferred_givenname AS remover_preferred_givenname,
+                    remover.user_familyname AS remover_familyname,
+                    remover.user_preferred_familyname AS remover_preferred_familyname,
+                    remover.user_id AS remover_id,
+                    remover.user_email AS remover_email,
+                    remover.user_email_secondary AS remover_email_secondary,
+                    remover.user_email_secondary_notify AS remover_email_secondary_notify,
+                    remover.user_group AS remover_group,
+                    remover.user_pronouns AS remover_pronouns,
+                    h1.helped_today,
+                    h.times_helped
+                FROM    queue
+                LEFT JOIN users helper ON helper.user_id = queue.help_started_by
+                LEFT JOIN users remover ON remover.user_id = queue.removed_by
+                LEFT JOIN (
+                  SELECT user_id as uid, COUNT(user_id) AS times_helped
+                  FROM queue
+                  WHERE extract(WEEK from time_in) = extract(WEEK from ?::DATE) AND (removal_type = 'helped' OR removal_type = 'self_helped')
+                  GROUP BY user_id
+                )
+                AS h
+                ON queue.user_id = h.uid
+                LEFT JOIN (
+                  SELECT user_id as uid, queue_code as qc, COUNT(queue_code) AS helped_today
+                  FROM queue WHERE time_in > ? AND (removal_type = 'helped' OR removal_type = 'self_helped')
+                  GROUP BY user_id, queue_code
+                )
+                AS h1
+                ON queue.user_id = h1.uid AND queue.queue_code = h1.qc
+                WHERE time_in > ? AND current_state IN ('done')
+                ORDER BY row_number
+            ";
+        }
+        elseif($parameter == "up"){
+            $query = "
+            SELECT Row_number()
+                OVER (ORDER BY time_out DESC, time_in DESC),
+                    queue.*,
+                    helper.user_givenname AS helper_givenname,
+                    helper.user_preferred_givenname AS helper_preferred_givenname,
+                    helper.user_familyname AS helper_familyname,
+                    helper.user_preferred_familyname AS helper_preferred_familyname,
+                    helper.user_id AS helper_id,
+                    helper.user_email AS helper_email,
+                    helper.user_email_secondary AS helper_email_secondary,
+                    helper.user_email_secondary_notify AS helper_email_secondary_notify,
+                    helper.user_group AS helper_group,
+                    helper.user_pronouns AS helper_pronouns,
+                    remover.user_givenname AS remover_givenname,
+                    remover.user_preferred_givenname AS remover_preferred_givenname,
+                    remover.user_familyname AS remover_familyname,
+                    remover.user_preferred_familyname AS remover_preferred_familyname,
+                    remover.user_id AS remover_id,
+                    remover.user_email AS remover_email,
+                    remover.user_email_secondary AS remover_email_secondary,
+                    remover.user_email_secondary_notify AS remover_email_secondary_notify,
+                    remover.user_group AS remover_group,
+                    remover.user_pronouns AS remover_pronouns,
+                    h1.helped_today,
+                    h.times_helped
+                FROM    queue
+                LEFT JOIN users helper ON helper.user_id = queue.help_started_by
+                LEFT JOIN users remover ON remover.user_id = queue.removed_by
+                LEFT JOIN (
+                  SELECT user_id as uid, COUNT(user_id) AS times_helped
+                  FROM queue
+                  WHERE extract(WEEK from time_in) = extract(WEEK from ?::DATE) AND (removal_type = 'helped' OR removal_type = 'self_helped')
+                  GROUP BY user_id
+                )
+                AS h
+                ON queue.user_id = h.uid
+                LEFT JOIN (
+                  SELECT user_id as uid, queue_code as qc, COUNT(queue_code) AS helped_today
+                  FROM queue WHERE time_in > ? AND (removal_type = 'helped' OR removal_type = 'self_helped')
+                  GROUP BY user_id, queue_code
+                )
+                AS h1
+                ON queue.user_id = h1.uid AND queue.queue_code = h1.qc
+                WHERE time_in > ? AND current_state IN ('done')
+                ORDER BY helped
+            ";
+        }
+        elseif($parameter == "down"){
+            $query = "
+            SELECT Row_number()
+                OVER (ORDER BY time_out DESC, time_in DESC),
+                    queue.*,
+                    helper.user_givenname AS helper_givenname,
+                    helper.user_preferred_givenname AS helper_preferred_givenname,
+                    helper.user_familyname AS helper_familyname,
+                    helper.user_preferred_familyname AS helper_preferred_familyname,
+                    helper.user_id AS helper_id,
+                    helper.user_email AS helper_email,
+                    helper.user_email_secondary AS helper_email_secondary,
+                    helper.user_email_secondary_notify AS helper_email_secondary_notify,
+                    helper.user_group AS helper_group,
+                    helper.user_pronouns AS helper_pronouns,
+                    remover.user_givenname AS remover_givenname,
+                    remover.user_preferred_givenname AS remover_preferred_givenname,
+                    remover.user_familyname AS remover_familyname,
+                    remover.user_preferred_familyname AS remover_preferred_familyname,
+                    remover.user_id AS remover_id,
+                    remover.user_email AS remover_email,
+                    remover.user_email_secondary AS remover_email_secondary,
+                    remover.user_email_secondary_notify AS remover_email_secondary_notify,
+                    remover.user_group AS remover_group,
+                    remover.user_pronouns AS remover_pronouns,
+                    h1.helped_today,
+                    h.times_helped
+                FROM    queue
+                LEFT JOIN users helper ON helper.user_id = queue.help_started_by
+                LEFT JOIN users remover ON remover.user_id = queue.removed_by
+                LEFT JOIN (
+                  SELECT user_id as uid, COUNT(user_id) AS times_helped
+                  FROM queue
+                  WHERE extract(WEEK from time_in) = extract(WEEK from ?::DATE) AND (removal_type = 'helped' OR removal_type = 'self_helped')
+                  GROUP BY user_id
+                )
+                AS h
+                ON queue.user_id = h.uid
+                LEFT JOIN (
+                  SELECT user_id as uid, queue_code as qc, COUNT(queue_code) AS helped_today
+                  FROM queue WHERE time_in > ? AND (removal_type = 'helped' OR removal_type = 'self_helped')
+                  GROUP BY user_id, queue_code
+                )
+                AS h1
+                ON queue.user_id = h1.uid AND queue.queue_code = h1.qc
+                WHERE time_in > ? AND current_state IN ('done')
+                ORDER BY helped DESC
+            ";
+        }
+        
         $current_date = $this->core->getDateTimeNow()->format('Y-m-d');
         $this->course_db->query($query, [$current_date, $current_date, $current_date]);
+
         return $this->course_db->rows();
     }
-
 
     public function isAnyQueueOpen() {
         $this->course_db->query("SELECT COUNT(*) AS num_open FROM queue_settings WHERE open = true");
