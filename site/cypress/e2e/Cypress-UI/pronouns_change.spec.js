@@ -31,7 +31,8 @@ describe('Tests cases abut changing user pronouns', () => {
         cy.login('student');
 
         //change back to old pronouns
-        cy.get('@pronounsVal').click();
+        cy.get('#pronouns_val').as('pronounsVal').click();
+        cy.get('#user-pronouns-change').as('pronounsInput');
         cy.get('button[aria-label="Clear pronoun input"]').click(); //clear input using trash can
         if (oldPronouns !== '') {
             cy.get('@pronounsInput').type(oldPronouns);
