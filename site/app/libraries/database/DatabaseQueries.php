@@ -494,16 +494,16 @@ SQL;
     }
 
     /**
-     * Returns th provided term's start date.
-     * @param string Id of term we are checking.
-     * @return string The start date of the term.
+     * Returns the date of the current term's start date.
+     * @return string The start date of the current term.
      */
-    public function getTermStartDate($term): string {
+    public function getCurrentTermStartDate(): string {
         $this->submitty_db->query("
             SELECT start_date
             FROM terms
-            WHERE term_id=?
-        ", [$term]);
+            ORDER BY start_date DESC
+            LIMIT 1
+        ");
         $timestamp = $this->submitty_db->rows()[0]['start_date'];
         return DateUtils::convertTimeStamp($this->core->getUser(), $timestamp, 'Y-m-d H:i:s');
     }

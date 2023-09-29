@@ -17,7 +17,6 @@ use app\libraries\FileUtils;
  *
  * @method string|null getTerm()
  * @method string|null getCourse()
- * @method string|null getTermStart()
  * @method string getBaseUrl()
  * @method string getVcsUrl()
  * @method string getCgiUrl()
@@ -71,7 +70,6 @@ use app\libraries\FileUtils;
  * @method bool isPollsEnabled()
  * @method void setTerm(string $term)
  * @method void setCourse(string $course)
- * @method void setTermStart()
  * @method void setCoursePath(string $course_path)
  * @method void setSubmittyPath(string $submitty_path)
  * @method void setDebug(bool $debug)
@@ -99,10 +97,6 @@ class Config extends AbstractModel {
     /** @prop
      * @var string contains the course to use, generally from the $_REQUEST['course'] global */
     protected $course;
-
-    /** @prop
-     * @var string Timestamp of when the current term started */
-    protected $term_start;
 
     /** @prop
      * @var string path on the filesystem that points to the course data directory */
@@ -549,10 +543,6 @@ class Config extends AbstractModel {
     }
 
     public function loadCourseJson($semester, $course, $course_json_path) {
-        if ($this->term === null || $this->term != $semester) {
-            $this->term_start = $this->core->getQueries()->getTermStartDate($semester);
-        }
-
         $this->term = $semester;
         $this->course = $course;
         $this->course_path = FileUtils::joinPaths($this->getSubmittyPath(), "courses", $semester, $course);
