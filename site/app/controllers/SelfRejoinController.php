@@ -104,7 +104,7 @@ class SelfRejoinController extends AbstractController {
             }
         }
 
-        $term_start_date = $this->core->getQueries()->getCurrentTermStartDate();
+        $term_start_date = $this->core->getConfig()->getTermStart();
         // If never accessed course but today is within first two weeks of term, can readd self.
         if (abs(DateUtils::calculateDayDiff($term_start_date)) <= 14) {
             return true;
