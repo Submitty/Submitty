@@ -100,8 +100,8 @@ function dateToStr(year, month, day) {
 /**
  * This function returns a slightly darker color than the color variable name passed. 
  * 
- * @param colorstr : string a string representing the color to darken
- * @returns {string} a string that represents a slightly darker.
+ * @param colorstr : string the color to darken in the form "var(--color-name)"
+ * @returns {string} a hex code for a slightly darker shade
  */
 function darken(colorstr) {
     if (typeof colorstr !== "string") {
@@ -171,7 +171,6 @@ function generateCalendarItem(item) {
     element.title = tooltip;
     if (link !== '') {
         element.href = link;
-        // TODO: override background color with darker shade when hovered.
         element.addEventListener("mouseover", function(){
             element.style.setProperty('background-color', darken(item['color']));
         })
