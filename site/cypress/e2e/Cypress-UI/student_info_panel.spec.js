@@ -9,7 +9,7 @@ describe('Test cases involving the files panel', () => {
         cy.get('.btn').contains('View All').click();
         cy.get('#details-table').contains('mccule').siblings().eq(6).click();
         cy.get('#student_info_btn').click();
-        cy.get('@rubricTitle').as('rubricTitle'); // Alias for rubric title
+        cy.get('.rubric-title').as('rubricTitle'); // Alias for rubric title
         cy.get('#submission-version-select').as('versionSelect'); // Alias for version select
     });
 
