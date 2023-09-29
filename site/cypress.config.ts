@@ -1,7 +1,7 @@
 import { defineConfig } from 'cypress'
 export default defineConfig({
   video: true,
-  videoCompression: 15,
+  videoCompression: 32,
   pageLoadTimeout: 120000,
   retries: {
     runMode: 2,
