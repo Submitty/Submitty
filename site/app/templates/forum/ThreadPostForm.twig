@@ -143,7 +143,7 @@
             {# uploadID and input-file + Index required for drag-and-drop.js #}
             <div class="upload_attachment_box cursor-pointer key_to_click" id="upload{{ post_box_id }}">
                 <div id="file_input_label_{{post_box_id}}" class="btn btn-default" tabindex="0">
-                  <label for="input-file{{ post_box_id }}">Upload Attachment</label>
+                  <label for="input-file{{ post_box_id }}">Upload Attachmenttttttttttttt</label>
                 </div>
                 <input type="file" accept="image/*" id="input-file{{ post_box_id }}" style="display: none;" onchange="addFilesFromInput({{ post_box_id }});testAndGetAttachments({{ post_box_id }}, true);" multiple />
                 <br>
@@ -151,7 +151,7 @@
             </div>
         </div>
         <br style="margin-right:1rem;">
-
+        
         {% if attachment_script is defined and attachment_script %}
             {# To be executed at last attachment box #}
             <script>
@@ -205,9 +205,36 @@
         {% endif %}
 
         {% if show_upload_attachment is defined and show_upload_attachment %}
-        <a onclick="uploadImageAttachments('div.upload_attachment_box')" class="btn btn-default" tabindex="0">Upload Attachment</a>
-        {% endif %}
+            <div class="inline-block">
+                <div class="upload_edit_attachment_box cursor-pointer key_to_click" id="upload{{ post_box_id }}">
+                    <div id="file_input_label_{{post_box_id}}" class="btn btn-default" tabindex="0">
+                    <label for="input-file{{ post_box_id }}">Upload</label>
+                    </div>
+                    <input type="file" accept="image/*" id="input-file{{ post_box_id }}" style="display: none;" onchange="addFilesFromInput({{ post_box_id }});testAndGetAttachments({{ post_box_id }}, true);" multiple />
+                    <br>
+                    <table class="file-upload-table" id="file-upload-table-{{ post_box_id }}"><th style="display:none">Files:</th></table>
+                </div>
+            </div>
+            <br style="margin-right:1rem;">
 
+            {% if show_upload_attachment is defined and show_upload_attachment %}
+                {# To be executed at last attachment box #}
+                <script>
+                    $(function() {
+                        uploadImageAttachments('div.upload_edit_attachment_box');
+
+                        // Attachments on Create Thread
+                        var part = "{{ post_box_id }}";
+                        initializeDragAndDrop();
+                        createArray(part);
+                        $(".upload_edit_attachment_box").each(function() {
+                            this.addEventListener("click", clicked_on_box, false);
+                        });
+                    });
+                </script>
+            {% endif %}
+            
+        {% endif %}
         <input type="submit" name="post" value="{{ submit_label }}" class="btn btn-primary inline-block" />
 
         {% if thread_resolve_state is defined and thread_resolve_state == 1 and show_unresolve %}
