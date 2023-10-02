@@ -234,7 +234,7 @@ class NotificationFactory {
         $current_user = $this->core->getUser();
         $flattened_emails = [];
         foreach ($emails as $email) {
-            if (!empty($email->getEmailAddress())) {
+            if ($email->getEmailAddress() !== null && $email->getEmailAddress() !== '') {
                 $flattened_emails[] = $email->getSubject();
                 $flattened_emails[] = $email->getBody();
                 $flattened_emails[] = null;

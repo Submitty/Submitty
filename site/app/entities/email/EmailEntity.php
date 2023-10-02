@@ -50,6 +50,8 @@ class EmailEntity {
     }
 
     /**
+     * The user_id of the person this is email is sent to.
+     * Used if to_name is null.
      * @return string
      */
     public function getUserId(): string {
@@ -57,6 +59,8 @@ class EmailEntity {
     }
 
     /**
+     * The name of the person this is email is sent to.
+     * Used if user_id is null.
      * @return string
      */
     public function getToName(): string {

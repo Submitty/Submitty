@@ -127,15 +127,15 @@ class SelfRejoinController extends AbstractController {
         foreach ($instructor_ids as $instructor_id) {
             $details["to_user_id"] = $instructor_id;
             $email = new Email($this->core, $details);
-            array_push($emails, $email);
+            $emails[] = $email;
         }
         $sysadamin_email = $this->core->getConfig()->getSysAdminEmail();
-        if (!empty($sysadamin_email)) {
+        if (!$sysadamin_email !== null && $sysadamin_email !== "") {
             unset($details["to_user_id"]);
             $details["email_address"] = $sysadamin_email;
             $details["to_name"] = "Sysadmin";
             $email = new Email($this->core, $details);
-            array_push($emails, $email);
+            $emails[] = $email;
         }
 
         $this->core->getNotificationFactory()->sendEmails($emails);

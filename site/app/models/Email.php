@@ -53,7 +53,7 @@ class Email extends AbstractModel {
         if (count($details) == 0) {
             return;
         }
-        if (array_key_exists("to_user_id", $details)) {
+        if (isset($details["to_user_id"])) {
             $this->setUserId($details["to_user_id"]);
         }
         else {
