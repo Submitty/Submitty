@@ -237,6 +237,77 @@ class DatabaseQueries {
     }
 
     /**
+     * Returns an array of the most recent activity a student has done in the course.
+     * The order is: gradeable access, gradeable submission, forum view, forum post,
+     *   queue join, and course material access.
+     * @param string $user_id Name of user.
+     * @return array<string|null> The timestamps of activity in this course.
+     */
+    public function getAttendanceInfoOneStudent(string $user_id): array {
+        $this->course_db->query("
+            WITH
+                Input (user_id) AS (VALUES (?)),
+                Gradeable_Access AS
+                    (SELECT timestamp, user_id
+                    FROM gradeable_access where user_id = (table Input)
+                    ORDER BY timestamp desc
+                    LIMIT 1),
+                Gradeable_Submission AS
+                    (SELECT submission_time, user_id
+                    FROM electronic_gradeable_data where user_id = (table Input)
+                    ORDER BY submission_time desc
+                    LIMIT 1),
+                Forum_View AS 
+                    (SELECT timestamp, user_id
+                    FROM viewed_responses where user_id = (table Input)
+                    ORDER BY timestamp desc
+                    LIMIT 1),
+                Forum_Post AS
+                    (SELECT timestamp, author_user_id
+                    FROM posts where author_user_id = (table Input)
+                    ORDER BY timestamp desc
+                    LIMIT 1),
+                Queue_Join AS
+                    (SELECT time_in, user_id
+                    FROM queue where user_id = (table Input)
+                    ORDER BY time_in desc
+                    LIMIT 1),
+                Course_Materials_Access AS
+                    (SELECT timestamp, user_id
+                    FROM course_materials_access where user_id = (table Input)
+                    ORDER BY timestamp desc
+                    LIMIT 1)
+            SELECT
+                Gradeable_Access.timestamp as gradeable_access,
+                Gradeable_Submission.submission_time as gradeable_submission,
+                Forum_View.timestamp as forum_view,
+                Forum_Post.timestamp as forum_post,
+                Queue_Join.time_in as queue_join,
+                Course_Materials_Access.timestamp as course_materials_access
+            FROM
+                Input
+            LEFT JOIN Gradeable_Access on Input.user_id = Gradeable_Access.user_id
+            LEFT JOIN Gradeable_Submission on Input.user_id = Gradeable_Submission.user_id
+            LEFT JOIN Forum_View on Input.user_id = Forum_View.user_id
+            LEFT JOIN Forum_Post on Input.user_id = Forum_Post.author_user_id
+            LEFT JOIN Queue_Join on Input.user_id = Queue_Join.user_id
+            LEFT JOIN Course_Materials_Access on Input.user_id = Course_Materials_Access.user_id;
+        ", [$user_id]);
+
+        $response = $this->course_db->row();
+
+        return array_map(
+            function ($element) {
+                if (is_null($element)) {
+                    return null;
+                }
+                return DateUtils::convertTimeStamp($this->core->getUser(), $element, 'Y-m-d H:i:s');
+            },
+            $response
+        );
+    }
+
+    /**
      * given a string with missing digits, get all similar numeric ids
      * should be given as '1_234_567' where '_' are positions to fill in
      *
@@ -420,6 +491,21 @@ SQL;
             $return[] = $row['term_id'];
         }
         return $return;
+    }
+
+    /**
+     * Returns the date of the current term's start date.
+     * @return string The start date of the current term.
+     */
+    public function getCurrentTermStartDate(): string {
+        $this->submitty_db->query("
+            SELECT start_date
+            FROM terms
+            ORDER BY start_date DESC
+            LIMIT 1
+        ");
+        $timestamp = $this->submitty_db->rows()[0]['start_date'];
+        return DateUtils::convertTimeStamp($this->core->getUser(), $timestamp, 'Y-m-d H:i:s');
     }
 
     /**
@@ -5277,6 +5363,28 @@ AND gc_id IN (
     }
 
     /**
+     * Returns true if the student was ever in the course,
+     * even if they are in the null section now.
+     * @param string $user_id The name of the user.
+     * @param string $course The course we're looking at.
+     * @param string $term The term we're looking t.
+     * @return bool True if the student was ever in the course, false otherwise.
+     */
+    public function wasStudentEverInCourse(
+        string $user_id,
+        string $course,
+        string $term
+    ): bool {
+        $this->submitty_db->query("
+                SELECT user_id
+                FROM courses_users
+                WHERE user_id=? and course=? and term=?;
+            ", [$user_id, $course, $term]);
+        $row = $this->submitty_db->row();
+        return count($row) > 0;
+    }
+
+    /**
      * Determines if a course is 'active' or if it was dropped.
      *
      * This is used to filter out courses displayed on the home screen, for when
@@ -5606,7 +5714,8 @@ AND gc_id IN (
               eg.*,
               gamo.*,
               gc.*,
-              (SELECT COUNT(*) AS cnt FROM grade_inquiries WHERE g_id=g.g_id AND status = -1) AS active_grade_inquiries_count
+              (SELECT COUNT(*) AS cnt FROM grade_inquiries WHERE g_id=g.g_id AND status = -1) AS active_grade_inquiries_count,
+              (SELECT EXISTS (SELECT 1 FROM gradeable_data WHERE g_id=g.g_id)) AS any_manual_grades
             FROM gradeable g
               LEFT JOIN (
                 SELECT

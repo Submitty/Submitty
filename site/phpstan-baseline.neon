@@ -396,11 +396,6 @@ parameters:
 			path: app/controllers/NavigationController.php
 
 		-
-			message: "#^Method app\\\\controllers\\\\NavigationController\\:\\:noAccess\\(\\) has no return type specified\\.$#"
-			count: 1
-			path: app/controllers/NavigationController.php
-
-		-
 			message: """
 				#^Call to deprecated method JsonOnlyResponse\\(\\) of class app\\\\libraries\\\\response\\\\MultiResponse\\:
 				should not be used, just return JsonResponse directly$#
@@ -10668,11 +10663,6 @@ parameters:
 
 		-
 			message: "#^Method app\\\\views\\\\ErrorView\\:\\:genericError\\(\\) has parameter \\$error_messages with no value type specified in iterable type array\\.$#"
-			count: 1
-			path: app/views/ErrorView.php
-
-		-
-			message: "#^Method app\\\\views\\\\ErrorView\\:\\:noAccessCourse\\(\\) has no return type specified\\.$#"
 			count: 1
 			path: app/views/ErrorView.php
 
