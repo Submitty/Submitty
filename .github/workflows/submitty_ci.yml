@@ -452,7 +452,7 @@ jobs:
 
     steps:
       - name: Delete huge unnecessary tools folder
-        run: rm -rf /opt/hostedtoolcache  
+        run: rm -rf /opt/hostedtoolcache
       - name: Checkout repository
         uses: actions/checkout@v3
       - uses: ./.github/actions/e2e-Setup-Composite
@@ -470,7 +470,8 @@ jobs:
         run: |
           npm install file-saver --save
           npm install --production=false
-
+      - name: Display disk usage
+        run: df -H
       - name: Run cypress e2e tests with pam auth
         uses: cypress-io/github-action@v6
         with:
