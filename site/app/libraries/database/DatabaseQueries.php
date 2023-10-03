@@ -2259,13 +2259,13 @@ ORDER BY {$u_or_t}.{$section_key}",
     /**
      * Gets the number of bad (late) graded submissions associated with this gradeable.
      *
-     * @param  int $g_id gradeable id we are looking up
+     * @param  string $g_id gradeable id we are looking up
      * @param  string $section_key key we are basing grading sections off of
      * @param  boolean $is_team true if the gradeable is a team assignment
      * @param  string $null_section to check if we look in the null section or not
      * @return int the number of bad submissions
      */
-    private function getBadSubmissionsCount(int $g_id, string $section_key, bool $is_team, string $null_section): int {
+    private function getBadSubmissionsCount(string $g_id, string $section_key, bool $is_team, string $null_section): int {
         $u_or_t = "u";
         $users_or_teams = "users";
         $user_or_team_id = "user_id";
@@ -2296,7 +2296,7 @@ ORDER BY {$u_or_t}.{$section_key}",
         return $this->course_db->row()['cnt'];
     }
 
-    public function getAverageComponentScores(int $g_id, string $section_key, bool $is_team, string $bad_submissions, string $null_section) {
+    public function getAverageComponentScores(string $g_id, string $section_key, bool $is_team, string $bad_submissions, string $null_section) {
         $u_or_t = "u";
         $users_or_teams = "users";
         $user_or_team_id = "user_id";
@@ -2392,7 +2392,7 @@ ORDER BY gc_order
             $null_section_condition = "AND {$u_or_t}.{$section_key} IS NOT NULL";
         }
         // Check if we want to include late (bad) submissions into the average
-        if ($bad_submissions !== 'include' && $this->getBadSubmissionsCount(intval($g_id), $section_key, $is_team, $null_section) > 0) {
+        if ($bad_submissions !== 'include' && $this->getBadSubmissionsCount($g_id, $section_key, $is_team, $null_section) > 0) {
             $bad_submissions_condition = "INNER JOIN(
                 SELECT DISTINCT ldc.{$user_or_team_id}
                 FROM late_day_cache AS ldc
@@ -2449,7 +2449,7 @@ ORDER BY gc_order
         return $return;
     }
 
-    public function getAverageAutogradedScores(int $g_id, string $section_key, bool $is_team, string $bad_submissions, string $null_section) {
+    public function getAverageAutogradedScores(string $g_id, string $section_key, bool $is_team, string $bad_submissions, string $null_section) {
 
         $u_or_t = "u";
         $users_or_teams = "users";
@@ -2548,7 +2548,7 @@ SELECT COUNT(*) from gradeable_component where g_id=?
         return new SimpleStat($this->core, $this->course_db->rows()[0]);
     }
 
-    public function getAverageForGradeable(int $g_id, string $section_key, bool $is_team, string $override, string $bad_submissions, string $null_section) {
+    public function getAverageForGradeable(string $g_id, string $section_key, bool $is_team, string $override, string $bad_submissions, string $null_section) {
 
         $u_or_t = "u";
         $users_or_teams = "users";
