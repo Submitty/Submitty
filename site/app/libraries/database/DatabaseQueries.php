@@ -2270,7 +2270,6 @@ ORDER BY {$u_or_t}.{$section_key}",
         $users_or_teams = "users";
         $user_or_team_id = "user_id";
         $null_section_condition = "";
-        $bad_submission_count = 0;
         if ($is_team) {
             $u_or_t = "t";
             $users_or_teams = "gradeable_teams";
@@ -2294,8 +2293,7 @@ ORDER BY {$u_or_t}.{$section_key}",
             )",
             [$g_id]
         );
-        $bad_submission_count = $this->course_db->row()['cnt'];
-        return $bad_submission_count;
+        return $this->course_db->row()['cnt'];
     }
 
     public function getAverageComponentScores($g_id, $section_key, $is_team, string $bad_submissions, string $null_section) {
@@ -2316,7 +2314,7 @@ ORDER BY {$u_or_t}.{$section_key}",
             $null_section_condition = "AND {$u_or_t}.{$section_key} IS NOT NULL";
         }
         // Check if we want to include late (bad) submissions into the average
-        if ($bad_submissions !== 'include' && $this->getBadSubmissionsCount($g_id, $section_key, $is_team,$null_section) > 0) {
+        if ($bad_submissions !== 'include' && $this->getBadSubmissionsCount($g_id, $section_key, $is_team, $null_section) > 0) {
             $bad_submissions_condition = "INNER JOIN(
                 SELECT DISTINCT ldc.{$user_or_team_id}
                 FROM late_day_cache AS ldc
@@ -2394,7 +2392,7 @@ ORDER BY gc_order
             $null_section_condition = "AND {$u_or_t}.{$section_key} IS NOT NULL";
         }
         // Check if we want to include late (bad) submissions into the average
-        if ($bad_submissions !== 'include' && $this->getBadSubmissionsCount($g_id, $section_key, $is_team,$null_section) > 0) {
+        if ($bad_submissions !== 'include' && $this->getBadSubmissionsCount($g_id, $section_key, $is_team, $null_section) > 0) {
             $bad_submissions_condition = "INNER JOIN(
                 SELECT DISTINCT ldc.{$user_or_team_id}
                 FROM late_day_cache AS ldc
@@ -2467,7 +2465,7 @@ ORDER BY gc_order
         if ($null_section !== 'include') {
             $null_section_condition = "AND {$u_or_t}.{$section_key} IS NOT NULL";
         }
-        if ($bad_submissions !== 'include' && $this->getBadSubmissionsCount($g_id, $section_key, $is_team,$null_section) > 0) {
+        if ($bad_submissions !== 'include' && $this->getBadSubmissionsCount($g_id, $section_key, $is_team, $null_section) > 0) {
             $bad_submissions_condition = "INNER JOIN(
                 SELECT DISTINCT ldc.{$user_or_team_id}
                 FROM late_day_cache AS ldc
@@ -2585,7 +2583,7 @@ SELECT COUNT(*) from gradeable_component where g_id=?
         }
 
         // Check if we want to include late (bad) submissions into the average
-        if ($bad_submissions !== 'include' && $this->getBadSubmissionsCount($g_id, $section_key, $is_team,$null_section) > 0) {
+        if ($bad_submissions !== 'include' && $this->getBadSubmissionsCount($g_id, $section_key, $is_team, $null_section) > 0) {
             $bad_submissions_condition = "INNER JOIN(
                 SELECT DISTINCT ldc.{$user_or_team_id}
                 FROM late_day_cache AS ldc
