@@ -59,7 +59,8 @@ class Email extends AbstractModel {
         else {
             $this->setEmailAddress($details["email_address"]);
             $this->setToName($details["to_name"]);
-        }        $this->setSubject($this->formatSubject($details["subject"]));
+        }
+        $this->setSubject($this->formatSubject($details["subject"]));
         $this->setBody($this->formatBody(
             $details["body"],
             $details['relevant_url'] ?? null,
