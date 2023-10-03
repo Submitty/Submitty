@@ -2376,7 +2376,7 @@ ORDER BY gc_order
         return $return;
     }
 
-    public function getAverageGraderScores(int $g_id, int $gc_id, string $section_key, bool $is_team, string $bad_submissions, string $null_section) {
+    public function getAverageGraderScores(string $g_id, int $gc_id, string $section_key, bool $is_team, string $bad_submissions, string $null_section) {
         $u_or_t = "u";
         $users_or_teams = "users";
         $user_or_team_id = "user_id";
