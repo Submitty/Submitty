@@ -293,8 +293,8 @@ footer .footer-separator {
     border-right: 5px solid transparent;
     border-top: 15px solid #000000; /* Use the same background color as the circle */
     position: relative;
-    top: -21px;
-    left: 95px;
+    top: -15px;
+    left: 50px;
     transform: rotate(-90deg);
 }
 

@@ -190,8 +190,7 @@
 {% if user_given_name != "" %}
 <div class= "speech-bubble-container" id= "speech-bubble-container">
 <button class="speech-bubble" id="speech-bubble" onclick = "showBanners()">
-  Click Me!  <br />
-  See cool campus events!
+  New Event!
 </button >
 <div class="triangle" id="triangle"></div>
 </div>
@@ -459,6 +458,10 @@
         }
         else {
             setCookie('display', "no");
+            var duckdivElement = document.getElementById("moorthy-duck");
+            duckdivElement.style.animation = "none";
+
+            duckdivElement.style.transform = "rotate(0deg)";
             document.getElementById("breadcrumbs").style.flexWrap = "wrap";
             images[currentImageIndex].classList.remove("active");
             currentImageIndex ++;
