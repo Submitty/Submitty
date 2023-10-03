@@ -451,6 +451,8 @@ jobs:
           - 5432:5432
 
     steps:
+      - name: Delete huge unnecessary tools folder
+        run: rm -rf /opt/hostedtoolcache  
       - name: Checkout repository
         uses: actions/checkout@v3
       - uses: ./.github/actions/e2e-Setup-Composite
