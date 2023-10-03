@@ -2265,7 +2265,7 @@ ORDER BY {$u_or_t}.{$section_key}",
      * @param  string $null_section to check if we look in the null section or not
      * @return int the number of bad submissions
      */
-    private function getBadSubmissionsCount(int $g_id, string $section_key, bool $is_team, string $null_section) {
+    private function getBadSubmissionsCount(int $g_id, string $section_key, bool $is_team, string $null_section): int {
         $u_or_t = "u";
         $users_or_teams = "users";
         $user_or_team_id = "user_id";
@@ -2392,7 +2392,7 @@ ORDER BY gc_order
             $null_section_condition = "AND {$u_or_t}.{$section_key} IS NOT NULL";
         }
         // Check if we want to include late (bad) submissions into the average
-        if ($bad_submissions !== 'include' && $this->getBadSubmissionsCount($g_id, $section_key, $is_team, $null_section) > 0) {
+        if ($bad_submissions !== 'include' && $this->getBadSubmissionsCount(intval($g_id), $section_key, $is_team, $null_section) > 0) {
             $bad_submissions_condition = "INNER JOIN(
                 SELECT DISTINCT ldc.{$user_or_team_id}
                 FROM late_day_cache AS ldc
