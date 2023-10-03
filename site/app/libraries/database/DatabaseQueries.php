@@ -2385,7 +2385,7 @@ ORDER BY gc_order
         );
         $bad_submission_count = $this->course_db->row()['cnt'];
         // Check if we want to include late (bad) submissions into the average
-        if ($bad_submissions !== 'include' && $bad_submission_count>0) {
+        if ($bad_submissions !== 'include' && $bad_submission_count > 0) {
             $bad_submissions_condition = "INNER JOIN(
                 SELECT DISTINCT ldc.{$user_or_team_id}
                 FROM late_day_cache AS ldc
@@ -2474,7 +2474,7 @@ ORDER BY gc_order
             [$g_id]
         );
         $bad_submission_count = $this->course_db->row()['cnt'];
-        if ($bad_submissions !== 'include' && $bad_submission_count>0) {
+        if ($bad_submissions !== 'include' && $bad_submission_count > 0) {
             $bad_submissions_condition = "INNER JOIN(
                 SELECT DISTINCT ldc.{$user_or_team_id}
                 FROM late_day_cache AS ldc
