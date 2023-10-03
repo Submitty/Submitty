@@ -448,7 +448,7 @@ const nlohmann::json TestCase::get_test_case_limits() const {
 
     adjust_test_case_limits(_test_case_limits,RLIMIT_RSS,1000*1000*1000);  // 1 GB
 
-    adjust_test_case_limits(_test_case_limits,RLIMIT_STACK,290*1000*1000);  // 290 MB
+    adjust_test_case_limits(_test_case_limits,RLIMIT_STACK,200*1000*1000);  // 200 MB
     adjust_test_case_limits(_test_case_limits,RLIMIT_DATA,2147*1000*1000);  // 2.1 GB (nearly max integer)
   }
 
