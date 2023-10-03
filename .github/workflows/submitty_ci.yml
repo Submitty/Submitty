@@ -408,7 +408,8 @@ jobs:
         run: |
           cd $SUBMITTY_REPOSITORY
           sudo -E env "PATH=$PATH" bash .setup/testing/setup_saml.sh
-
+      - name: Display disk usage
+        run: df -H
       - name: Switch to SAML auth
         run: sudo sed -ie "s/Ldap/Saml/g" ${SUBMITTY_INSTALL_DIR}/config/authentication.json
 
