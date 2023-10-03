@@ -11,19 +11,14 @@ const testFormOpening = (rowId, formId) => {
 };
 
 const getVisibleData = () => {
-    cy.get('#givenname-row > button').invoke('text').as('givenName');
-    cy.get('#familyname-row > button').invoke('text').as('familyName');
-    cy.get('#pronouns-row > button').invoke('text').as('pronouns');
-    cy.get('#secondary-email-row > button').invoke('text').as('secondaryEmail');
+    const data = {};
 
-    return cy.wrap(null).then(() => {
-        return {
-            givenName: Cypress._.trim(this.givenName),
-            familyName: Cypress._.trim(this.familyName),
-            pronouns: Cypress._.trim(this.pronouns),
-            secondaryEmail: Cypress._.trim(this.secondaryEmail),
-        };
-    });
+    cy.get('#givenname-row > button').invoke('text').then(text => data.givenName = text.trim());
+    cy.get('#familyname-row > button').invoke('text').then(text => data.familyName = text.trim());
+    cy.get('#pronouns-row > button').invoke('text').then(text => data.pronouns = text.trim());
+    cy.get('#secondary-email-row > button').invoke('text').then(text => data.secondaryEmail = text.trim());
+
+    return data;
 };
 
 const testModification = (formId, cb) => {
@@ -147,21 +142,17 @@ describe('Test cases revolving around user profile page', () => {
     });
 
     it('Should test the modifying of the values', () => {
-        getVisibleData().then((data) => {
-            priorUserData = data;
-        });
+        priorUserData = getVisibleData();
 
         fillData(newUserData);
 
-        getVisibleData().then((updatedData) => {
-            cy.wrap(updatedData).should('deep.equal', newUserData);
-        });
+        const updatedData = getVisibleData();
+        cy.wrap(updatedData).should('deep.equal', newUserData);
     });
 
     it('Should persist on refresh', () => {
-        getVisibleData().then((userData) => {
-            cy.wrap(userData).should('deep.equal', newUserData);
-        });
+        const userData = getVisibleData();
+        cy.wrap(userData).should('deep.equal', newUserData);
     });
 
     after(() => {
@@ -170,8 +161,7 @@ describe('Test cases revolving around user profile page', () => {
 
         fillData(priorUserData);
 
-        getVisibleData().then((revertedData) => {
-            cy.wrap(revertedData).should('deep.equal', priorUserData);
-        });
+        const revertedData = getVisibleData();
+        cy.wrap(revertedData).should('deep.equal', priorUserData);
     });
 });
