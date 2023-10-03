@@ -33,7 +33,7 @@ def up(config, database, semester, course):
         BEFORE UPDATE ON public.users
         FOR EACH ROW EXECUTE PROCEDURE update_last_nonnull_rotating_section();
 
-        -- Set existing users' last nonnull rotating section.
+        -- Set each existing user's last nonnull rotating section.
         -- Choose top section if in null as we have no other information.
         UPDATE users us
         SET last_nonnull_rotating_section=(
