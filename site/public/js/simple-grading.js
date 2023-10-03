@@ -405,7 +405,7 @@ function setupCheckboxCells() {
     showGradersCheckbox.on('change', function() {
         if ($(this).is(':checked')) {
             $('.simple-grade-grader').css('display', 'block');
-        } 
+        }
         else {
             $('.simple-grade-grader').css('display', 'none');
         }
@@ -416,7 +416,7 @@ function setupCheckboxCells() {
     showDatesGradedCheckbox.on('change', function() {
         if ($(this).is(':checked')) {
             $('.simple-grade-date').css('display', 'block');
-        } 
+        }
         else {
             $('.simple-grade-date').css('display', 'none');
         }
