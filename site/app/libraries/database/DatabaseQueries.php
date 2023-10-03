@@ -2265,7 +2265,7 @@ ORDER BY {$u_or_t}.{$section_key}",
      * @param  string $null_section to check if we look in the null section or not
      * @return int the number of bad submissions
      */
-    private function getBadSubmissionsCount(int $g_id, string $section_key, boolean $is_team, string $null_section) {
+    private function getBadSubmissionsCount(int $g_id, string $section_key, bool $is_team, string $null_section) {
         $u_or_t = "u";
         $users_or_teams = "users";
         $user_or_team_id = "user_id";
@@ -2296,7 +2296,7 @@ ORDER BY {$u_or_t}.{$section_key}",
         return $this->course_db->row()['cnt'];
     }
 
-    public function getAverageComponentScores(int $g_id, string $section_key, boolean $is_team, string $bad_submissions, string $null_section) {
+    public function getAverageComponentScores(int $g_id, string $section_key, bool $is_team, string $bad_submissions, string $null_section) {
         $u_or_t = "u";
         $users_or_teams = "users";
         $user_or_team_id = "user_id";
@@ -2376,7 +2376,7 @@ ORDER BY gc_order
         return $return;
     }
 
-    public function getAverageGraderScores(int $g_id, int $gc_id, string $section_key, boolean $is_team, string $bad_submissions, string $null_section) {
+    public function getAverageGraderScores(int $g_id, int $gc_id, string $section_key, bool $is_team, string $bad_submissions, string $null_section) {
         $u_or_t = "u";
         $users_or_teams = "users";
         $user_or_team_id = "user_id";
@@ -2449,7 +2449,7 @@ ORDER BY gc_order
         return $return;
     }
 
-    public function getAverageAutogradedScores(int $g_id, string $section_key, boolean $is_team, string $bad_submissions, string $null_section) {
+    public function getAverageAutogradedScores(int $g_id, string $section_key, bool $is_team, string $bad_submissions, string $null_section) {
 
         $u_or_t = "u";
         $users_or_teams = "users";
@@ -2548,7 +2548,7 @@ SELECT COUNT(*) from gradeable_component where g_id=?
         return new SimpleStat($this->core, $this->course_db->rows()[0]);
     }
 
-    public function getAverageForGradeable(int $g_id, string $section_key, boolean $is_team, string $override, string $bad_submissions, string $null_section) {
+    public function getAverageForGradeable(int $g_id, string $section_key, bool $is_team, string $override, string $bad_submissions, string $null_section) {
 
         $u_or_t = "u";
         $users_or_teams = "users";
