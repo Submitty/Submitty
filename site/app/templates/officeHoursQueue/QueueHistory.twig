@@ -30,10 +30,10 @@
                 <span id="sortIndicator"></span>
                 {% if sortState == 'up' %}
                     {#sort up#}
-                    {{viewer.getPastQueue(sortState)}}
+                    {{viewer.getPastQueue('up')}}
                 {% elseif sortState == 'down' %}
-                    {{viewer.getPastQueue(sortState)}}
-                    {#sort down#}    
+                    {{viewer.getPastQueue('down')}}
+                    {#sort down#}   
                 {% endif %}
             </a>
         </th>
@@ -46,6 +46,7 @@
     </thead>
     <tbody>
       {% set history_count = 0 %}
+      {% set sortState = "<script>sortStateTimeEntered</script>" %}
       {% for entry in viewer.getPastQueue(sortState) %}
         {% if (history_count < 25 or viewer.getFullHistory()) and (viewer.isGrader() or entry['user_id'] == viewer.getUserId()) %}
           {% set history_count = history_count + 1 %}

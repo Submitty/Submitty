@@ -7202,7 +7202,7 @@ AND gc_id IN (
                 AS h1
                 ON queue.user_id = h1.uid AND queue.queue_code = h1.qc
                 WHERE time_in > ? AND current_state IN ('done')
-                ORDER BY row_number
+                ORDER BY helper.user_id
             ";
         }
         elseif($parameter == "up"){
@@ -7251,7 +7251,7 @@ AND gc_id IN (
                 AS h1
                 ON queue.user_id = h1.uid AND queue.queue_code = h1.qc
                 WHERE time_in > ? AND current_state IN ('done')
-                ORDER BY helped
+                ORDER BY ROW_NUMBER
             ";
         }
         elseif($parameter == "down"){
@@ -7300,7 +7300,7 @@ AND gc_id IN (
                 AS h1
                 ON queue.user_id = h1.uid AND queue.queue_code = h1.qc
                 WHERE time_in > ? AND current_state IN ('done')
-                ORDER BY helped DESC
+                ORDER BY helper.user_id DESC
             ";
         }
         
