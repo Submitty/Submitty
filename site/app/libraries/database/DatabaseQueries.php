@@ -5389,7 +5389,7 @@ AND gc_id IN (
      * If a student was ever not in the null section, then if they are in the null
      * section now, this value is guaranteed to be nonnull as their previous section
      * would be outside the null section.
-     * 
+     *
      * If the previous registration section was deleted or renamed, then this function
      * returns the top registration section of the course.
      *
@@ -5443,7 +5443,7 @@ AND gc_id IN (
      * Returns the previous rotating section the student was in.
      * If the student was ever in a rotating section, this value is guaranteed
      * to be nonnull if the student currently has a null rotating section.
-     * 
+     *
      * If the previous rotating section was deleted or renamed, then this function
      * returns the top rotating section of the course.
      *
