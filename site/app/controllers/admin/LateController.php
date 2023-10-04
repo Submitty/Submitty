@@ -187,7 +187,7 @@ class LateController extends AbstractController {
             }
             else {
                 for ($i = 0; $i < count($data); $i++) {
-                    $this->core->getQueries()->updateExtensions($data[$i][0], $data[$i][1], $data[$i][2]);
+                    $this->core->getQueries()->updateExtensions($data[$i][0], $data[$i][1], $data[$i][2], $data[$i][3]);
                 }
                 return MultiResponse::JsonOnlyResponse(JsonResponse::getSuccessResponse());
             }
@@ -226,6 +226,13 @@ class LateController extends AbstractController {
                     JsonResponse::getFailResponse($error)
                 );
             }
+            $reason_for_extension = null;
+            if (isset($_POST['reason_for_exception']) && $_POST['reason_for_exception']!='') {
+                $reason_for_exception = $_POST['reason_for_exception'];
+            }
+            else {
+                $reason_for_exception = 'unspecified';
+            }
 
             $users_with_exceptions = $this->core->getQueries()->getUsersWithExtensions($_POST['g_id']);
             $simple_late_user = null;
@@ -245,18 +252,19 @@ class LateController extends AbstractController {
             }
 
             $team = $this->core->getQueries()->getTeamByGradeableAndUser($_POST['g_id'], $_POST['user_id']);
+            
             //0 is for single submission, 1 is for team submission
             $option = isset($_POST['option']) ? $_POST['option'] : -1;
             if ($team != null && $team->getSize() > 1) {
                 if ($option == 0) {
-                    $this->core->getQueries()->updateExtensions($_POST['user_id'], $_POST['g_id'], $late_days);
+                    $this->core->getQueries()->updateExtensions($_POST['user_id'], $_POST['g_id'], $late_days, $reason_for_exception);
                     $this->core->addSuccessMessage("Extensions have been updated");
                     return MultiResponse::JsonOnlyResponse(JsonResponse::getSuccessResponse());
                 }
                 elseif ($option == 1) {
                     $team_member_ids = explode(", ", $team->getMemberList());
                     for ($i = 0; $i < count($team_member_ids); $i++) {
-                        $this->core->getQueries()->updateExtensions($team_member_ids[$i], $_POST['g_id'], $late_days);
+                        $this->core->getQueries()->updateExtensions($team_member_ids[$i], $_POST['g_id'], $late_days, $reason_for_exception);
                     }
                     $this->core->addSuccessMessage("Extensions have been updated");
                     return MultiResponse::JsonOnlyResponse(JsonResponse::getSuccessResponse());
@@ -278,7 +286,7 @@ class LateController extends AbstractController {
                 }
             }
             else {
-                $this->core->getQueries()->updateExtensions($_POST['user_id'], $_POST['g_id'], $late_days);
+                $this->core->getQueries()->updateExtensions($_POST['user_id'], $_POST['g_id'], $late_days, $reason_for_exception);
                 $this->core->addSuccessMessage("Extensions have been updated");
                 return MultiResponse::JsonOnlyResponse(JsonResponse::getSuccessResponse());
             }
@@ -315,7 +323,7 @@ class LateController extends AbstractController {
         $users = $this->core->getQueries()->getUsersWithLateDays();
         $user_table = [];
         foreach ($users as $user) {
-            $user_table[] = ['user_id' => $user->getId(),'user_givenname' => $user->getDisplayedGivenName(), 'user_familyname' => $user->getDisplayedFamilyName(), 'late_days' => $user->getAllowedLateDays(), 'datestamp' => $user->getSinceTimestamp(), 'late_day_exceptions' => $user->getLateDayExceptions()];
+            $user_table[] = ['user_id' => $user->getId(),'user_givenname' => $user->getDisplayedGivenName(), 'user_familyname' => $user->getDisplayedFamilyName(), 'late_days' => $user->getAllowedLateDays(), 'datestamp' => $user->getSinceTimestamp(), 'late_day_exceptions' => $user->getLateDayExceptions(), 'reason_for_exception' => $user->getReasonForException()];
         }
         return MultiResponse::JsonOnlyResponse(
             JsonResponse::getSuccessResponse(['users' => $user_table])
@@ -326,10 +334,11 @@ class LateController extends AbstractController {
      * Given a path to an uploaded CSV file, parse and validate it, creating an array of data from the CSV information.
      * The function returns an array with two keys:
      *      success: boolean, true if CSV was properly validated and parsed
-     *      error: string, why the CSV failed to validate and parse
+     *      error: string, why the CSV failed to validate and pars
      */
     private function parseAndValidateCsv(string $csv_file, array &$data, string $type): array {
-        //Validate file MIME type (needs to be "text/plain")
+        
+        //Validate file MIME type (needs to be "text/plain")F
         $file_info = finfo_open(FILEINFO_MIME_TYPE);
         $mime_type = finfo_file($file_info, $_FILES['csv_upload']['tmp_name']);
         finfo_close($file_info);
@@ -358,14 +367,13 @@ class LateController extends AbstractController {
             $fields = array_map(function ($k) {
                 return trim($k);
             }, $fields);
-
-            //Each row has three fields
-            if (count($fields) !== 3) {
-                $data = null;
-                return [
-                    "success" => false,
-                    "error" => "Row {$row_number} did not have 3 columns",
-                ];
+            //All rows have 3 fields except for exceptions, which can have 3 or 4 rows.
+            if (count($fields) !== 3 && !($type == 'extension' && count($fields) == 4)) {
+                    $data = null;
+                    return [
+                        "success" => false,
+                        "error" => "Row {$row_number} did not have 3 columns",
+                    ];
             }
             //$fields[0]: Verify student exists in class (check by student user ID)
             if ($this->core->getQueries()->getUserById($fields[0]) === null) {
@@ -399,6 +407,10 @@ class LateController extends AbstractController {
                     "success" => false,
                     "error" => "Third column must be an integer greater or equal to zero, got '{$fields[2]}' on row {$row_number}",
                 ];
+            }
+            //$fields[3] must be added if not already to extensions to represent the reason for extension .
+            if ($type == "extension" && count($fields) == 3) {
+                $fields[] = 'unspecified';
             }
             //Fields information seems okay.  Push fields onto data array.
             $data[] = $fields;

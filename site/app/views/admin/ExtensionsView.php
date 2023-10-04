@@ -31,7 +31,8 @@ class ExtensionsView extends AbstractView {
             $current_exceptions[] = ['user_id' => $user->getId(),
                                           'user_givenname' => $user->getDisplayedGivenName(),
                                           'user_familyname' => $user->getDisplayedFamilyName(),
-                                          'late_day_exceptions' => $user->getLateDayExceptions()];
+                                          'late_day_exceptions' => $user->getLateDayExceptions(),
+                                          'reason_for_exception' => $user->getReasonForException()];
         }
         if (empty($current_exceptions)) {
             $current_exceptions = null;

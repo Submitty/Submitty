@@ -43,12 +43,16 @@
                 Or Pick a New Due Date:
                 <input name="late_calendar" id="late-calendar" class="option-input" type="text" autocomplete="off" onchange="setLateDays()">
             </label>
+            <label for="reason_for_exception">
+                Reason for Extension:
+                <input name="reason_for_exception" id="reason_for_exception" clas="option-input" type="text">
+            </label>
             <a class="btn btn-primary" href="javascript:updateHomeworkExtension()">Submit</a>
         </fieldset>
         <fieldset>
             <legend class="option-title" id="csv-upload-title">Multiple Student Entry Via CSV Upload</legend>
             <label for="csv-upload" id="csv-upload-format">
-                Do not use column headers. CSV must be of the following form: student_id, gradeable_id, days_of_extension
+                Do not use column headers. CSV must be of the following form: student_id, gradeable_id, days_of_extension, reason_for_extension
             </label>
             <input type="file" name="csv_upload" id="csv-upload" aria-labelledby="csv-upload-title csv-upload-format" onchange="updateHomeworkExtension()">
         </fieldset>
@@ -71,6 +75,7 @@
                     <th>First Name</th>
                     <th>Last Name</th>
                     <th>Number of Days of Extension</th>
+                    <th>Reason for Extension</th>
                     <th>Delete</th>
                 </tr>
             </thead>
@@ -81,6 +86,7 @@
                         <td class="align-left">{{ user.user_givenname }}</td>
                         <td class="align-left">{{ user.user_familyname }}</td>
                         <td>{{ user.late_day_exceptions }}</td>
+                        <td>{{ user.reason_for_exception }}</td>
                         <td>
                             <a
                                 id="Delete"
