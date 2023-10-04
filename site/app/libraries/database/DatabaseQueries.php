@@ -5476,7 +5476,7 @@ AND gc_id IN (
             LIMIT 1;
         ");
         $response = $this->course_db->row();
-        if (!empty($response)) {
+        if (!empty($response["sections_rotating_id"])) {
             return $response["sections_rotating_id"];
         }
         else {
