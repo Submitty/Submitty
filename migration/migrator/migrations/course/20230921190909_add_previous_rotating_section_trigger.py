@@ -16,7 +16,7 @@ def up(config, database, semester, course):
     """
     database.execute("""
         ALTER TABLE users -- Create column
-        ADD COLUMN previous_rotating_section VARCHAR;
+        ADD COLUMN previous_rotating_section INTEGER;
 
         -- Create empty trigger function that is replaced by new trigger function file
         CREATE OR REPLACE FUNCTION public.update_previous_rotating_section()

@@ -89,7 +89,7 @@ class SelfRejoinController extends AbstractController {
                 $course
             );
         $to_join_rotating_section = $this->core->getQueries()->
-            getPreviousRotatingSection($user_id);
+            getPreviousRotatingSection($user_id); // TODO ADD REJOIN DEFAULT IF INVALID
 
         $user->setRegistrationSection($to_join_section);
         if ($to_join_rotating_section !== null) {
