@@ -5463,7 +5463,7 @@ AND gc_id IN (
             FROM sections_rotating
             WHERE sections_rotating_id = ?;
         ", [$previous_section]);
-        if (!empty($this->course_db->row())) {
+        if ($this->course_db->getRowCount() > 0) {
             // Rotating section still valid, time to return!
             return $previous_section;
         }
@@ -5475,9 +5475,8 @@ AND gc_id IN (
             ORDER BY sections_rotating_id ASC
             LIMIT 1;
         ");
-        $response = $this->course_db->row();
-        if (count($response) !== 0) {
-            return $response["sections_rotating_id"];
+        if ($this->course_db->getRowCount() > 0) {
+            return $this->course_db->row()["sections_rotating_id"];
         }
         else {
             return null; // Course has no rotating sections.
