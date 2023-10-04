@@ -5385,43 +5385,44 @@ AND gc_id IN (
     }
 
     /**
-     * Returns the last non-null registration section the student was in.
-     * Make sure student was ever registered in the course by calling
-     * wasStudentEverInCourse() first.
+     * Returns the previous registration section the student was in.
+     * If a student was ever not in the null section, then if they are in the null
+     * section now, this value is guaranteed to be nonnull as their previous section
+     * would be outside the null section.
      *
      * @param string $user_id The name of the user we're querying.
      * @param string $course The course we are looking in.
      * @param string $term The term we are looking at.
-     * @return string The registration section the student was last in.
-     *   If the student is currently registered, the current registration
-     *   section is returned.
+     * @return string The previous section the student was in.
      */
-    public function getLastNonnullRegistrationSection(
+    public function getPreviousRegistrationSection(
         string $user_id,
         string $term,
         string $course
-    ): string {
+    ): string|null {
         $this->submitty_db->query("
-            SELECT last_nonnull_registration_section
+            SELECT previous_registration_section
             FROM courses_users
             WHERE user_id=? and term=? and course=?;
         ", [$user_id, $term, $course]);
-        return $this->submitty_db->row()["last_nonnull_registration_section"];
+        return $this->submitty_db->row()["previous_registration_section"];
     }
 
     /**
-     * Returns the last non-null rotating section the student was in.
+     * Returns the previous rotating section the student was in.
+     * If the student was ever in a rotating section, this value is guaranteed
+     * to be nonnull if the student currently has a null rotating section.
      *
      * @param string $user_id The name of the user we're querying.
      * @return string|null The rotating section the student was last in.
      */
-    public function getLastNonnullRotatingSection(string $user_id): string|null {
+    public function getPreviousRotatingSection(string $user_id): string|null {
         $this->course_db->query("
-            SELECT last_nonnull_rotating_section
+            SELECT previous_rotating_section
             FROM users
             WHERE user_id=?;
         ", [$user_id]);
-        return $this->course_db->row()["last_nonnull_rotating_section"];
+        return $this->course_db->row()["previous_rotating_section"];
     }
 
     /**

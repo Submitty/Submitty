@@ -16,10 +16,10 @@ def up(config, database, semester, course):
     """
     database.execute("""
         ALTER TABLE users -- Create column
-        ADD COLUMN last_nonnull_rotating_section VARCHAR;
+        ADD COLUMN previous_rotating_section VARCHAR;
 
         -- Create empty trigger function that is replaced by new trigger function file
-        CREATE OR REPLACE FUNCTION public.update_last_nonnull_rotating_section()
+        CREATE OR REPLACE FUNCTION public.update_previous_rotating_section()
             RETURNS trigger
             LANGUAGE plpgsql
             AS $$
@@ -29,27 +29,9 @@ def up(config, database, semester, course):
         $$;
 
         -- Attatch trigger function
-        CREATE TRIGGER before_update_users_update_last_nonnull_rotating_section
+        CREATE TRIGGER before_update_users_update_previous_rotating_section
         BEFORE UPDATE ON public.users
-        FOR EACH ROW EXECUTE PROCEDURE update_last_nonnull_rotating_section();
-
-        -- Set each existing user's last nonnull rotating section.
-        -- Choose top section if in null as we have no other information.
-        UPDATE users us
-        SET last_nonnull_rotating_section=(
-            CASE
-                WHEN us.rotating_section IS NOT NULL
-                    THEN us.rotating_section
-                ELSE (
-                    SELECT sections_rotating_id
-                    FROM sections_rotating
-                    ORDER BY sections_rotating_id ASC
-                    LIMIT 1
-                )
-            END
-        );
-
-        -- No nonnull constraint on rotating_section as its possible no rotating sections.
+        FOR EACH ROW EXECUTE PROCEDURE update_previous_rotating_section();
     """)
 
 
@@ -68,9 +50,9 @@ def down(config, database, semester, course):
     """
     database.execute("""
         ALTER TABLE users
-        DROP COLUMN last_nonnull_rotating_section;
+        DROP COLUMN previous_rotating_section;
 
         DROP TRIGGER IF EXISTS
-            before_update_users_update_last_nonnull_rotating_section
+            before_update_users_update_previous_rotating_section
             ON users;
     """)

@@ -95,8 +95,7 @@ def main():
             term=semester,
             course=course,
             user_group=1,
-            registration_section=registration_section,
-            last_nonnull_registration_section=registration_section
+            registration_section=registration_section
         )
     else:
         query = courses_u_table.update(values={
