@@ -4425,7 +4425,6 @@ SQL;
                 [$user_id, $g_id, $days, $reason]
             );
         }
-        
     }
 
     /**

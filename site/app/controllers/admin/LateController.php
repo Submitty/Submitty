@@ -252,7 +252,6 @@ class LateController extends AbstractController {
             }
 
             $team = $this->core->getQueries()->getTeamByGradeableAndUser($_POST['g_id'], $_POST['user_id']);
-            
             //0 is for single submission, 1 is for team submission
             $option = isset($_POST['option']) ? $_POST['option'] : -1;
             if ($team != null && $team->getSize() > 1) {
@@ -323,7 +322,7 @@ class LateController extends AbstractController {
         $users = $this->core->getQueries()->getUsersWithLateDays();
         $user_table = [];
         foreach ($users as $user) {
-            $user_table[] = ['user_id' => $user->getId(),'user_givenname' => $user->getDisplayedGivenName(), 'user_familyname' => $user->getDisplayedFamilyName(), 'late_days' => $user->getAllowedLateDays(), 'datestamp' => $user->getSinceTimestamp(), 'late_day_exceptions' => $user->getLateDayExceptions(), 'reason_for_exception' => $user->getReasonForException()];
+            $user_table[] = ['user_id' => $user->getId(),'user_givenname' => $user->getDisplayedGivenName(), 'user_familyname' => $user->getDisplayedFamilyName(), 'late_days' => $user->getAllowedLateDays(), 'datestamp' => $user->getSinceTimestamp(), 'late_day_exceptions' => $user->getLateDayExceptions()];
         }
         return MultiResponse::JsonOnlyResponse(
             JsonResponse::getSuccessResponse(['users' => $user_table])
@@ -334,11 +333,10 @@ class LateController extends AbstractController {
      * Given a path to an uploaded CSV file, parse and validate it, creating an array of data from the CSV information.
      * The function returns an array with two keys:
      *      success: boolean, true if CSV was properly validated and parsed
-     *      error: string, why the CSV failed to validate and pars
+     *      error: string, why the CSV failed to validate and parse
      */
     private function parseAndValidateCsv(string $csv_file, array &$data, string $type): array {
-        
-        //Validate file MIME type (needs to be "text/plain")F
+        //Validate file MIME type (needs to be "text/plain")
         $file_info = finfo_open(FILEINFO_MIME_TYPE);
         $mime_type = finfo_file($file_info, $_FILES['csv_upload']['tmp_name']);
         finfo_close($file_info);
@@ -369,11 +367,11 @@ class LateController extends AbstractController {
             }, $fields);
             //All rows have 3 fields except for exceptions, which can have 3 or 4 rows.
             if (count($fields) !== 3 && !($type == 'extension' && count($fields) == 4)) {
-                    $data = null;
-                    return [
-                        "success" => false,
-                        "error" => "Row {$row_number} did not have 3 columns",
-                    ];
+                $data = null;
+                return [
+                    "success" => false,
+                    "error" => "Row {$row_number} did not have 3 columns",
+                ];
             }
             //$fields[0]: Verify student exists in class (check by student user ID)
             if ($this->core->getQueries()->getUserById($fields[0]) === null) {
