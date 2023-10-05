@@ -362,8 +362,8 @@ class ForumController extends AbstractController {
                 // Good Attachment
                 $attachment_name = "";
                 if($hasGoodAttachment[0] == 1) {
-                    for ($i = 0; $i < count($_FILES[$file_post]["name"]); $i++) {
-                        $attachment_name = $attachment_name . " " . basename($_FILES[$file_post]["name"][$i]);
+                    for ($i = 0; $i < count($_FILES['file_input']["name"]); $i++) {
+                        $attachment_name = $attachment_name . "\n" . basename($_FILES['file_input']["name"][$i]);
                     }
                 }
                 $result = $this->core->getQueries()->createThread($markdown, $current_user_id, $thread_title, $thread_post_content, $anon, $pinned, $thread_status, $hasGoodAttachment[0], $attachment_name, $categories_ids, $lock_thread_date, $expiration, $announcement);
@@ -505,7 +505,7 @@ class ForumController extends AbstractController {
                 $attachment_name = "";
                 if($hasGoodAttachment[0] == 1) {
                     for ($i = 0; $i < count($_FILES[$file_post]["name"]); $i++) {
-                        $attachment_name = $attachment_name . " " . basename($_FILES[$file_post]["name"][$i]);
+                        $attachment_name = $attachment_name . "\n" . basename($_FILES[$file_post]["name"][$i]);
                     }
                 }
 
