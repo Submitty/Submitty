@@ -406,7 +406,7 @@ class LateController extends AbstractController {
                     "error" => "Third column must be an integer greater or equal to zero, got '{$fields[2]}' on row {$row_number}",
                 ];
             }
-            //$fields[3] must be added if not already to extensions to represent the reason for extension .
+            //$fields[3] must be added if not present to extensions to represent the reason for extension .
             if ($type == "extension" && count($fields) == 3) {
                 $fields[] = 'unspecified';
             }
