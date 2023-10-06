@@ -847,7 +847,9 @@ CREATE TABLE public.forum_posts_history (
     post_id integer NOT NULL,
     edit_author character varying NOT NULL,
     content text NOT NULL,
-    edit_timestamp timestamp(0) with time zone NOT NULL
+    edit_timestamp timestamp(0) with time zone NOT NULL,
+    has_attachment boolean DEFAULT false,
+    attachment_name character varying(255) DEFAULT ''::character varying
 );
 
 
@@ -1536,7 +1538,8 @@ CREATE TABLE public.posts (
     endorsed_by character varying,
     type integer NOT NULL,
     has_attachment boolean NOT NULL,
-    render_markdown boolean DEFAULT false NOT NULL
+    render_markdown boolean DEFAULT false NOT NULL,
+    attachment_name character varying(255) DEFAULT ''::character varying
 );
 
 

@@ -360,7 +360,13 @@ class ForumController extends AbstractController {
             }
             else {
                 // Good Attachment
-                $result = $this->core->getQueries()->createThread($markdown, $current_user_id, $thread_title, $thread_post_content, $anon, $pinned, $thread_status, $hasGoodAttachment[0], $categories_ids, $lock_thread_date, $expiration, $announcement);
+                $attachment_name = "";
+                if($hasGoodAttachment[0] == 1) {
+                    for ($i = 0; $i < count($_FILES['file_input']["name"]); $i++) {
+                        $attachment_name = $attachment_name . "\n" . basename($_FILES['file_input']["name"][$i]);
+                    }
+                }
+                $result = $this->core->getQueries()->createThread($markdown, $current_user_id, $thread_title, $thread_post_content, $anon, $pinned, $thread_status, $hasGoodAttachment[0], $attachment_name, $categories_ids, $lock_thread_date, $expiration, $announcement);
                 $thread_id = $result["thread_id"];
                 $post_id = $result["post_id"];
 
@@ -496,7 +502,14 @@ class ForumController extends AbstractController {
                 $result['next_page'] = $hasGoodAttachment[1];
             }
             else {
-                $post_id = $this->core->getQueries()->createPost($current_user_id, $post_content, $thread_id, $anon, 0, false, $hasGoodAttachment[0], $markdown, $parent_id);
+                $attachment_name = "";
+                if($hasGoodAttachment[0] == 1) {
+                    for ($i = 0; $i < count($_FILES[$file_post]["name"]); $i++) {
+                        $attachment_name = $attachment_name . "\n" . basename($_FILES[$file_post]["name"][$i]);
+                    }
+                }
+
+                $post_id = $this->core->getQueries()->createPost($current_user_id, $post_content, $thread_id, $anon, 0, false, $hasGoodAttachment[0], $markdown, $attachment_name, $parent_id);
                 $thread_dir = FileUtils::joinPaths(FileUtils::joinPaths($this->core->getConfig()->getCoursePath(), "forum_attachments"), $thread_id);
 
                 if (!is_dir($thread_dir)) {
