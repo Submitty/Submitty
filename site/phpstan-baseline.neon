@@ -396,11 +396,6 @@ parameters:
 			path: app/controllers/NavigationController.php
 
 		-
-			message: "#^Method app\\\\controllers\\\\NavigationController\\:\\:noAccess\\(\\) has no return type specified\\.$#"
-			count: 1
-			path: app/controllers/NavigationController.php
-
-		-
 			message: """
 				#^Call to deprecated method JsonOnlyResponse\\(\\) of class app\\\\libraries\\\\response\\\\MultiResponse\\:
 				should not be used, just return JsonResponse directly$#
@@ -5266,37 +5261,7 @@ parameters:
 			path: app/libraries/database/DatabaseQueries.php
 
 		-
-			message: "#^Method app\\\\libraries\\\\database\\\\DatabaseQueries\\:\\:getAverageAutogradedScores\\(\\) has parameter \\$g_id with no type specified\\.$#"
-			count: 1
-			path: app/libraries/database/DatabaseQueries.php
-
-		-
-			message: "#^Method app\\\\libraries\\\\database\\\\DatabaseQueries\\:\\:getAverageAutogradedScores\\(\\) has parameter \\$is_team with no type specified\\.$#"
-			count: 1
-			path: app/libraries/database/DatabaseQueries.php
-
-		-
-			message: "#^Method app\\\\libraries\\\\database\\\\DatabaseQueries\\:\\:getAverageAutogradedScores\\(\\) has parameter \\$section_key with no type specified\\.$#"
-			count: 1
-			path: app/libraries/database/DatabaseQueries.php
-
-		-
 			message: "#^Method app\\\\libraries\\\\database\\\\DatabaseQueries\\:\\:getAverageComponentScores\\(\\) has no return type specified\\.$#"
-			count: 1
-			path: app/libraries/database/DatabaseQueries.php
-
-		-
-			message: "#^Method app\\\\libraries\\\\database\\\\DatabaseQueries\\:\\:getAverageComponentScores\\(\\) has parameter \\$g_id with no type specified\\.$#"
-			count: 1
-			path: app/libraries/database/DatabaseQueries.php
-
-		-
-			message: "#^Method app\\\\libraries\\\\database\\\\DatabaseQueries\\:\\:getAverageComponentScores\\(\\) has parameter \\$is_team with no type specified\\.$#"
-			count: 1
-			path: app/libraries/database/DatabaseQueries.php
-
-		-
-			message: "#^Method app\\\\libraries\\\\database\\\\DatabaseQueries\\:\\:getAverageComponentScores\\(\\) has parameter \\$section_key with no type specified\\.$#"
 			count: 1
 			path: app/libraries/database/DatabaseQueries.php
 
@@ -5306,42 +5271,7 @@ parameters:
 			path: app/libraries/database/DatabaseQueries.php
 
 		-
-			message: "#^Method app\\\\libraries\\\\database\\\\DatabaseQueries\\:\\:getAverageForGradeable\\(\\) has parameter \\$g_id with no type specified\\.$#"
-			count: 1
-			path: app/libraries/database/DatabaseQueries.php
-
-		-
-			message: "#^Method app\\\\libraries\\\\database\\\\DatabaseQueries\\:\\:getAverageForGradeable\\(\\) has parameter \\$is_team with no type specified\\.$#"
-			count: 1
-			path: app/libraries/database/DatabaseQueries.php
-
-		-
-			message: "#^Method app\\\\libraries\\\\database\\\\DatabaseQueries\\:\\:getAverageForGradeable\\(\\) has parameter \\$section_key with no type specified\\.$#"
-			count: 1
-			path: app/libraries/database/DatabaseQueries.php
-
-		-
 			message: "#^Method app\\\\libraries\\\\database\\\\DatabaseQueries\\:\\:getAverageGraderScores\\(\\) has no return type specified\\.$#"
-			count: 1
-			path: app/libraries/database/DatabaseQueries.php
-
-		-
-			message: "#^Method app\\\\libraries\\\\database\\\\DatabaseQueries\\:\\:getAverageGraderScores\\(\\) has parameter \\$g_id with no type specified\\.$#"
-			count: 1
-			path: app/libraries/database/DatabaseQueries.php
-
-		-
-			message: "#^Method app\\\\libraries\\\\database\\\\DatabaseQueries\\:\\:getAverageGraderScores\\(\\) has parameter \\$gc_id with no type specified\\.$#"
-			count: 1
-			path: app/libraries/database/DatabaseQueries.php
-
-		-
-			message: "#^Method app\\\\libraries\\\\database\\\\DatabaseQueries\\:\\:getAverageGraderScores\\(\\) has parameter \\$is_team with no type specified\\.$#"
-			count: 1
-			path: app/libraries/database/DatabaseQueries.php
-
-		-
-			message: "#^Method app\\\\libraries\\\\database\\\\DatabaseQueries\\:\\:getAverageGraderScores\\(\\) has parameter \\$section_key with no type specified\\.$#"
 			count: 1
 			path: app/libraries/database/DatabaseQueries.php
 
@@ -7777,22 +7707,7 @@ parameters:
 			path: app/models/GradingOrder.php
 
 		-
-			message: "#^Method app\\\\models\\\\GradingSection\\:\\:__construct\\(\\) has parameter \\$graders with no type specified\\.$#"
-			count: 1
-			path: app/models/GradingSection.php
-
-		-
 			message: "#^Method app\\\\models\\\\GradingSection\\:\\:__construct\\(\\) has parameter \\$name with no type specified\\.$#"
-			count: 1
-			path: app/models/GradingSection.php
-
-		-
-			message: "#^Method app\\\\models\\\\GradingSection\\:\\:__construct\\(\\) has parameter \\$teams with no type specified\\.$#"
-			count: 1
-			path: app/models/GradingSection.php
-
-		-
-			message: "#^Method app\\\\models\\\\GradingSection\\:\\:__construct\\(\\) has parameter \\$users with no type specified\\.$#"
 			count: 1
 			path: app/models/GradingSection.php
 
@@ -10683,11 +10598,6 @@ parameters:
 
 		-
 			message: "#^Method app\\\\views\\\\ErrorView\\:\\:genericError\\(\\) has parameter \\$error_messages with no value type specified in iterable type array\\.$#"
-			count: 1
-			path: app/views/ErrorView.php
-
-		-
-			message: "#^Method app\\\\views\\\\ErrorView\\:\\:noAccessCourse\\(\\) has no return type specified\\.$#"
 			count: 1
 			path: app/views/ErrorView.php
 

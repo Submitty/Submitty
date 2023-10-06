@@ -13,7 +13,7 @@ jobs:
     runs-on: macos-latest
 
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
       # Installing this is skipped in CI as using it was causing some corruption in
       # attempting to mount the shared folder. The guest and host guest additions
       # versions are close enough that we are fine without it.
@@ -22,6 +22,7 @@ jobs:
       - name: Validate image
         run: curl --show-error --fail --include http://localhost:1511
       - name: Acquire Job ID
+        if: failure()
         id: get-job-id
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
