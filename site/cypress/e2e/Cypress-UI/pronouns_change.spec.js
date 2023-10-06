@@ -93,10 +93,6 @@ describe('Tests cases abut changing user pronouns', () => {
         cy.get('.post_box').should('contain', 'my pronouns is They/Them');
         cy.get('.post_user_pronouns').should('contain', 'They/Them');
 
-        //remove thread
-        //cy.get('.first_post > .post-action-container > .delete-post-button').click();
-        //cy.get('.thread-left-cont > .thread-list-item').contains('Test pronouns display').should('not.exist');
-
         //create thread anonymously
         cy.get('[title="Create Thread"]').click();
         cy.get('#title').type('Test Anonymous thread, should not show pronouns');
@@ -144,9 +140,6 @@ describe('Tests cases abut changing user pronouns', () => {
         cy.get('.post_user_pronouns').should('not.exist');
         cy.get('.first_post').find('.fa-trash').click();
         cy.contains('Test Anonymous thread, should not show pronouns').should('not.exist');
-        //cy.get('.first_post > .post-action-container > .delete-post-button').click();
-        //cy.get('.thread-left-cont > .thread-list-item').contains('Test Anonymous thread, should not show pronouns').should('not.exist');
-
     });
 
 });
