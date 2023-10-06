@@ -445,10 +445,10 @@ def prepare_job(
     obj = packer_unpacker.load_queue_file_obj(config, JOB_ID, next_directory, next_to_grade)
     if "generate_output" not in obj:
         partial_path = os.path.join(obj["gradeable"], obj["who"], str(obj["version"]))
-        item_name = os.path.join(obj["semester"], obj["course"], "submissions", partial_path)
+        item_name = os.path.join(obj["term"], obj["course"], "submissions", partial_path)
     elif obj["generate_output"]:
         item_name = os.path.join(
-            obj["semester"], obj["course"], "generated_output", obj["gradeable"]
+            obj["term"], obj["course"], "generated_output", obj["gradeable"]
         )
     is_batch = "regrade" in obj and obj["regrade"]
     config.logger.log_message(
@@ -480,9 +480,9 @@ def unpack_job(
     obj = packer_unpacker.load_queue_file_obj(config, JOB_ID, next_directory, next_to_grade)
     if "generate_output" not in obj:
         partial_path = os.path.join(obj["gradeable"], obj["who"], str(obj["version"]))
-        item_name = os.path.join(obj["semester"], obj["course"], "submissions", partial_path)
+        item_name = os.path.join(obj["term"], obj["course"], "submissions", partial_path)
     elif obj["generate_output"]:
-        item_name = os.path.join(obj["semester"], obj["course"], "generated_output")
+        item_name = os.path.join(obj["term"], obj["course"], "generated_output")
     is_batch = "regrade" in obj and obj["regrade"]
 
     # Address is either localhost or a string of the form user@host
@@ -804,7 +804,7 @@ def checkout_vcs_repo(config, my_file):
     course_dir = os.path.join(
         config.submitty['submitty_data_dir'],
         "courses",
-        obj["semester"],
+        obj["term"],
         obj["course"]
     )
     checkout_path = os.path.join(course_dir, "checkout", partial_path)
@@ -824,7 +824,7 @@ def checkout_vcs_repo(config, my_file):
     vcs_info = packer_unpacker.get_vcs_info(
         config,
         config.submitty['submitty_data_dir'],
-        obj["semester"], obj["course"], obj["gradeable"], obj["who"], obj["team"]
+        obj["term"], obj["course"], obj["gradeable"], obj["who"], obj["team"]
     )
     (is_vcs, vcs_type, vcs_base_url, vcs_partial_path,
      using_subdirectory, vcs_subdirectory) = vcs_info
@@ -1368,12 +1368,12 @@ def try_short_circuit(config: dict, queue_file: str) -> bool:
     with open(queue_file) as fd:
         queue_obj = json.load(fd)
 
-    gradeable_id = f"{queue_obj['semester']}/{queue_obj['course']}/{queue_obj['gradeable']}"
+    gradeable_id = f"{queue_obj['term']}/{queue_obj['course']}/{queue_obj['gradeable']}"
 
     course_path = os.path.join(
         config.submitty['submitty_data_dir'],
         'courses',
-        queue_obj['semester'],
+        queue_obj['term'],
         queue_obj['course']
     )
 

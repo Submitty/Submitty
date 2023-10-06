@@ -174,12 +174,12 @@ def prepare_autograding_and_submission_zip(
     course_dir = os.path.join(
         config.submitty['submitty_data_dir'],
         'courses',
-        obj["semester"],
+        obj["term"],
         obj["course"]
     )
     if "generate_output" not in obj:
         partial_path = os.path.join(obj["gradeable"], obj["who"], str(obj["version"]))
-        item_name = os.path.join(obj["semester"], obj["course"], "submissions", partial_path)
+        item_name = os.path.join(obj["term"], obj["course"], "submissions", partial_path)
         submission_path = os.path.join(config.submitty['submitty_data_dir'], "courses", item_name)
         if not os.path.isdir(submission_path):
             config.logger.log_message(
@@ -192,7 +192,7 @@ def prepare_autograding_and_submission_zip(
          using_subdirectory, vcs_subdirectory) = get_vcs_info(
             config,
             config.submitty['submitty_data_dir'],
-            obj["semester"],
+            obj["term"],
             obj["course"],
             obj["gradeable"],
             obj["who"],
@@ -201,7 +201,7 @@ def prepare_autograding_and_submission_zip(
 
     elif obj["generate_output"]:
         item_name = os.path.join(
-            obj["semester"],
+            obj["term"],
             obj["course"],
             "generated_output",
             obj["gradeable"]
@@ -347,7 +347,7 @@ def prepare_autograding_and_submission_zip(
         json.dump(obj, outfile, sort_keys=True, indent=4, separators=(',', ': '))
 
     user_assignment_settings_json = os.path.join(
-        config.submitty['submitty_data_dir'], "courses", obj["semester"], obj["course"],
+        config.submitty['submitty_data_dir'], "courses", obj["term"], obj["course"],
         "submissions", obj["gradeable"], obj["who"], "user_assignment_settings.json")
 
     if os.path.exists(user_assignment_settings_json):
@@ -389,7 +389,7 @@ def unpack_grading_results_zip(config, which_machine, which_untrusted, my_result
     course_dir = os.path.join(
         config.submitty['submitty_data_dir'],
         "courses",
-        queue_obj["semester"],
+        queue_obj["term"],
         queue_obj["course"]
     )
     if "generate_output" not in queue_obj:
@@ -399,7 +399,7 @@ def unpack_grading_results_zip(config, which_machine, which_untrusted, my_result
             str(queue_obj["version"])
         )
         item_name = os.path.join(
-            queue_obj["semester"],
+            queue_obj["term"],
             queue_obj["course"],
             "submissions",
             partial_path
@@ -408,7 +408,7 @@ def unpack_grading_results_zip(config, which_machine, which_untrusted, my_result
         results_public_path = os.path.join(course_dir, "results_public", partial_path)
     elif queue_obj["generate_output"]:
         item_name = os.path.join(
-            queue_obj["semester"],
+            queue_obj["term"],
             queue_obj["course"],
             "generated_output",
             queue_obj["gradeable"]
@@ -438,7 +438,7 @@ def unpack_grading_results_zip(config, which_machine, which_untrusted, my_result
         try:
             insert_database_version_data.insert_into_database(
                 config,
-                queue_obj["semester"],
+                queue_obj["term"],
                 queue_obj["course"],
                 queue_obj["gradeable"],
                 queue_obj["user"],
