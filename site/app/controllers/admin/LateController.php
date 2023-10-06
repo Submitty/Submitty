@@ -365,7 +365,8 @@ class LateController extends AbstractController {
             $fields = array_map(function ($k) {
                 return trim($k);
             }, $fields);
-            //All rows have 3 fields except for exceptions, which can have 3 or 4 rows.
+
+            //All types have 3 fields except for exceptions, which can have 3 or 4 rows.
             if (count($fields) !== 3 && !($type == 'extension' && count($fields) == 4)) {
                 $data = null;
                 return [
@@ -406,7 +407,7 @@ class LateController extends AbstractController {
                     "error" => "Third column must be an integer greater or equal to zero, got '{$fields[2]}' on row {$row_number}",
                 ];
             }
-            //$fields[3] must be added if not present to extensions to represent the reason for extension .
+            //$fields[3] added if not present to extension type. Allows for backwards compatibility.
             if ($type == "extension" && count($fields) == 3) {
                 $fields[] = 'unspecified';
             }
