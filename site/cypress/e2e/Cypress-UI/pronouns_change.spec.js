@@ -1,9 +1,5 @@
 
 describe('Tests cases abut changing user pronouns', () => {
-
-    let oldPronouns = '';
-    let oldDisplay;
-
     //Set the stage by saving old pronouns and setting a desired pronoun to look for
     before(() => {
         cy.visit('/user_profile');
@@ -12,16 +8,6 @@ describe('Tests cases abut changing user pronouns', () => {
         //open pronouns form
         cy.get('#pronouns_val').click();
         cy.get('#user-pronouns-change').as('e');
-
-        //save old pronouns
-        cy.get('@e').then(($pronounsInput) => {
-            oldPronouns = $pronounsInput.val();
-        });
-
-        //save old display option
-        cy.get('#pronouns-forum-display').invoke('prop', 'checked').then((checked) => {
-            oldDisplay = checked;
-        });
 
         //type in new pronouns and check display in forum option
         cy.get('button[aria-label="Clear pronoun input"]').click(); //clear input using trash can
@@ -45,33 +31,17 @@ describe('Tests cases abut changing user pronouns', () => {
         //change back to old pronouns
         cy.get('#pronouns_val').click();
 
+        //set to default
         cy.get('button[aria-label="Clear pronoun input"]').click(); //clear input using trash can
-        if (oldPronouns !== '') {
-            cy.get('#user-pronouns-change').type(oldPronouns);
-        }
 
-        //change display option back
-        cy.get('#pronouns-forum-display').then(() => {
-            if (oldDisplay) {
-                cy.get('#pronouns-forum-display').check();
-            }
-            else {
-                cy.get('#pronouns-forum-display').uncheck();
-            }
-        });
+        //set to false
+        cy.get('#pronouns-forum-display').uncheck();
 
         cy.get('#edit-pronouns-submit').click();
 
         //ensure pronouns and display option changed on page
-        if (oldPronouns !== '') {
-            cy.get('#pronouns_val').contains(oldPronouns);
-        }
-        if (oldDisplay) {
-            cy.get('#display_pronouns_val').contains('True');
-        }
-        else {
-            cy.get('#display_pronouns_val').contains('False');
-        }
+        cy.get('#pronouns_val').should('have.text', ' ');
+        cy.get('#display_pronouns_val').contains('False');
     });
 
     it('Verifies changed pronouns as instructor in Manage Students', () => {
@@ -124,8 +94,8 @@ describe('Tests cases abut changing user pronouns', () => {
         cy.get('.post_user_pronouns').should('contain', 'They/Them');
 
         //remove thread
-        cy.get('.first_post > .post-action-container > .delete-post-button').click();
-        cy.get('.thread-left-cont > .thread-list-item').contains('Test pronouns display').should('not.exist');
+        //cy.get('.first_post > .post-action-container > .delete-post-button').click();
+        //cy.get('.thread-left-cont > .thread-list-item').contains('Test pronouns display').should('not.exist');
 
         //create thread anonymously
         cy.get('[title="Create Thread"]').click();
@@ -154,9 +124,28 @@ describe('Tests cases abut changing user pronouns', () => {
         cy.get('.post_user_id').should('contain', 'Anonymous');
         cy.get('.post_user_pronouns').should('not.exist');
 
-        //remove thread
-        cy.get('.first_post > .post-action-container > .delete-post-button').click();
-        cy.get('.thread-left-cont > .thread-list-item').contains('Test Anonymous thread, should not show pronouns').should('not.exist');
+        //login as instructor, verify if pronouns is displayed
+        cy.logout();
+        cy.visit(['sample','forum']);
+        cy.login('instructor');
+
+        //verify pronouns exist and remove thread
+        cy.contains('Test pronouns display').find('.post_user_pronouns').should('contain','They/Them');
+        cy.contains('Test pronouns display').find('.post_user_pronouns').click();
+        cy.get('.post_user_pronouns').should('contain', 'They/Them');
+        cy.get('.first_post').find('.fa-trash').click();
+        cy.contains('Test pronouns display').should('not.exist');
+
+        //verify pronouns do not exist (post thread Anonymously) and remove thread
+        cy.contains('Test Anonymous thread, should not show pronouns').find('.post_user_id').should('contain','Anonymous');
+        cy.contains('Test Anonymous thread, should not show pronouns').find('.post_user_pronouns').should('not.be.exist');
+        cy.contains('Test Anonymous thread, should not show pronouns').find('.post_user_id').click();
+        cy.get('.post_user_id').should('contain', 'Anonymous');
+        cy.get('.post_user_pronouns').should('not.exist');
+        cy.get('.first_post').find('.fa-trash').click();
+        cy.contains('Test Anonymous thread, should not show pronouns').should('not.exist');
+        //cy.get('.first_post > .post-action-container > .delete-post-button').click();
+        //cy.get('.thread-left-cont > .thread-list-item').contains('Test Anonymous thread, should not show pronouns').should('not.exist');
 
     });
 
