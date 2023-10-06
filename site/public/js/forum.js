@@ -859,6 +859,7 @@ function showEditPostForm(post_id, thread_id, shouldEditThread, render_markdown,
             const lines = post_content.split(/\r|\r\n|\n/).length;
             const anon = json.anon;
             const change_anon = json.change_anon;
+            const img_urls = json.img_urls;
             // eslint-disable-next-line no-undef
             const user_id = escapeSpecialChars(json.user);
             let time = Date.parse(json.post_time);
