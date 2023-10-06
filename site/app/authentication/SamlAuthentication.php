@@ -110,7 +110,8 @@ class SamlAuthentication extends AbstractAuthentication {
         unset($_SESSION['AuthnRequestID']);
         try {
             $this->auth->processResponse($request_id);
-        } catch (Error|ValidationError) {
+        }
+        catch (Error | ValidationError) {
             $this->core->addErrorMessage("Invalid request. Please try again.");
             return false;
         }
