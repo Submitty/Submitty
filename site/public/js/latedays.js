@@ -1,4 +1,4 @@
-const { DateTime } = require("luxon");
+const DateTime = require('luxon');
 
 function calculateLateDays(inputDate) {
     const select_menu = document.getElementById('g_id');
@@ -6,10 +6,12 @@ function calculateLateDays(inputDate) {
         alert('Please select a gradeable first!');
         return;
     }
+    
     const due_date_value = select_menu.options[select_menu.selectedIndex].getAttribute('data-due-date');
     const new_due_date = DateTime.fromISO(inputDate);
     const old_due_date = DateTime.fromISO(due_date_value);
     const diff = Math.max(0, new_due_date.diff(old_due_date, 'days').days);
+    console.log("HERHEHEHRHEHR" + due_date_value, new_due_date, old_due_date, diff);
     document.getElementById('late_days').value = diff;
 }
 
