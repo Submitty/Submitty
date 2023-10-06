@@ -176,6 +176,48 @@ class OfficeHoursQueueModel extends AbstractModel {
         $s = $diff % 60;
         return $h . "h " . $m . "m " . $s . "s";
     }
+    //more function to deal with the raw information
+    public function getEWaitingTimeHelperHour($time_out, $time_helped, $time_in, $removal_type){
+        if (in_array($removal_type, ['helped','self_helped'])) {
+            $diff = strtotime($time_helped) - strtotime($time_in);
+        }
+        else {
+            $diff = strtotime($time_out) - strtotime($time_in);
+        }
+        $h = intval($diff / 3600) % 24;
+        // $m = intval($diff / 60) % 60;
+        // $s = $diff % 60;
+        return $h;
+    }
+    public function getEWaitingTimeHelperMin($time_out, $time_helped, $time_in, $removal_type){
+        if (in_array($removal_type, ['helped','self_helped'])) {
+            $diff = strtotime($time_helped) - strtotime($time_in);
+        }
+        else {
+            $diff = strtotime($time_out) - strtotime($time_in);
+        }
+        // $h = intval($diff / 3600) % 24;
+        $m = intval($diff / 60) % 60;
+        // $s = $diff % 60;
+        return $m;
+    }
+    public function getEWaitingTimeHelperSec($time_out, $time_helped, $time_in, $removal_type){
+        if (in_array($removal_type, ['helped','self_helped'])) {
+            $diff = strtotime($time_helped) - strtotime($time_in);
+        }
+        else {
+            $diff = strtotime($time_out) - strtotime($time_in);
+        }
+        // $h = intval($diff / 3600) % 24;
+        // $m = intval($diff / 60) % 60;
+        $s = $diff % 60;
+        return $s;
+    }
+    //my idea: using three different function to get the total wating of the hour mins and secs, 
+    //track how many people in the queue,(make sure if not yet being help before could have a prio)
+    //only traking the people with less helped times.
+    //and the location of the student needs help
+    //then output the 
 
     //gets the number of people ahead of you in the queue.
     //If no queue_code is passed it assumes you want the total number in all queues

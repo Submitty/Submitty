@@ -69,8 +69,13 @@
       {{plurality_picker(num_ahead, 'is', 'are')}}
       currently {{ num_ahead }}
       {{plurality_picker(num_ahead, 'person', 'people')}}
-      ahead of you in the queue
-      And your estimated wait time is {{'0'}} minutes
+
+      ahead of you in the queue. Your estimated waiting time is about 10 minutes  
+      {%set timeholder = 0%}
+      {% for entry in viewer.getPastQueue() %}
+
+      {# {%timeholder = viewer.getETimeWaitingHelperHour(entry['time_out'],entry['time_help_start'],entry['time_in'],entry['removal_type'])%} #}
+      {% endfor %}
     </p>
 
     <p>You are currently in queue:
