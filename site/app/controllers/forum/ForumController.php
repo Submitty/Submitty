@@ -1204,11 +1204,11 @@ class ForumController extends AbstractController {
                 $output['markdown'] = $result['render_markdown'];
 
                 $urls = [];
-                $thread_dir = FileUtils::joinPaths(FileUtils::joinPaths($this->core->getConfig()->getCoursePath(), "forum_attachments"), $thread_id);
+                $thread_dir = FileUtils::joinPaths(FileUtils::joinPaths($this->core->getConfig()->getCoursePath(), "forum_attachments"), $result["thread_id"]);
                 $post_dir = FileUtils::joinPaths($thread_dir, $post_id);
                 $filenames = explode("\n", $result["attachment_name"]);
                 foreach ($filenames as $filename) {
-                    $urls[$filename] = $this->core->buildCourseUrl(['display_file']) . '?dir=forum_attachments&path=' . $post_dir . $filename;
+                    if ($filename != "") $urls[$filename] = $this->core->buildCourseUrl(['display_file']) . '?dir=forum_attachments&path=' . $post_dir . $filename;
                 }
 
                 $output['img_urls'] = $urls;

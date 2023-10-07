@@ -901,6 +901,35 @@ function showEditPostForm(post_id, thread_id, shouldEditThread, render_markdown,
                 $('#markdown_toggle_').removeClass('markdown-active');
                 $('#markdown_buttons_').hide();
             }
+            
+            if(Object.keys(img_urls).length > 0) {
+                $("#display-existing-attachments").css('display', 'block')
+                const img_table = $("#existing-attachment-table");
+                for (let img in img_urls) {
+                    img_table.find('tbody')
+                        .append($('<tr>')
+                            .attr('class', 'file-label')
+                            .append($('<td>')
+                                .append($('<img>')
+                                    .attr('src', img_urls[img])
+                                    .attr('class', 'thumbnail')
+                                    .attr('alt', img)
+                                )
+                            )
+                            .append($('<td>')
+                                .text(img)
+                            )
+                            .append($('<td>')
+                                .attr('class', 'file-trash')
+                                .append($('<i>')
+                                    .attr('class', 'fas fa-trash custom-focus')
+                                    .attr('tabindex', "0")
+                                    .attr('aria-label', 'Remove ' + img)
+                                )
+                            )
+                        );
+                }
+            }
 
             // If first post of thread
             if (shouldEditThread) {

@@ -289,6 +289,12 @@
     margin-left: 15px;
 }
 
+#display-existing-attachments {
+    display: none;
+    float: none;
+    overflow: hidden;
+}
+
 .create-thread-title {
     margin-left: 15px;
     margin-bottom: 10px;
