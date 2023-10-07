@@ -990,6 +990,8 @@ function cancelEditPostForum() {
     $('#edit-user-post').css('display', 'none');
     $(this).closest('.thread-post-form').find('[name=thread_post_content]').val('');
     $('#title').val('');
+
+    $('#existing-attachment-table').find('tbody').empty();
 }
 
 // eslint-disable-next-line no-unused-vars
