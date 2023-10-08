@@ -1388,11 +1388,10 @@ def try_short_circuit(config: dict, queue_file: str) -> bool:
     will return False, signaling to the caller that this job should be graded
     normally.
     """
-    
+
     with open(queue_file) as fd:
         queue_obj = json.load(fd)
 
-    
     # REMOVE THIS After a few patches as this ensures backwards compatibility
     term_or_semester = None
     if "term" in queue_obj:
