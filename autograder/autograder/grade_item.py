@@ -329,10 +329,16 @@ def grade_from_zip(
         gradeable_config_obj = json.load(infile)
     is_vcs = gradeable_config_obj["upload_type"] == "repository"
 
+    # REMOVE THIS After a few patches as this ensures backwards compatibility
+    term_or_semester = None
+    if "term" in queue_obj:
+        term_or_semester = "term"
+    else:
+        term_or_semester = "semester"
     if "generate_output" in queue_obj and queue_obj["generate_output"]:
         ''' Cache the results when there are solution commands be no input generation commands'''
         item_name = os.path.join(
-            queue_obj["term"],
+            queue_obj[term_or_semester],
             queue_obj["course"],
             "generated_output",
             queue_obj["gradeable"]
@@ -373,7 +379,7 @@ def grade_from_zip(
             submission_string = submission_time_file.read().rstrip()
 
         item_name = os.path.join(
-            queue_obj["term"],
+            queue_obj[term_or_semester],
             queue_obj["course"],
             "submissions",
             queue_obj["gradeable"],
