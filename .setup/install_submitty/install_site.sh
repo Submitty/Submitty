@@ -262,6 +262,7 @@ if echo "{$result}" | grep -E -q "package(-lock)?.json"; then
 
     chown -R ${PHP_USER}:${PHP_USER} ${NODE_FOLDER}
 
+    #
     echo "Copy NPM packages into place"
     # clean out the old install so we don't leave anything behind
     rm -rf ${VENDOR_FOLDER}
@@ -288,6 +289,9 @@ if echo "{$result}" | grep -E -q "package(-lock)?.json"; then
     mkdir ${VENDOR_FOLDER}/codemirror-spell-checker
     cp ${NODE_FOLDER}/codemirror-spell-checker/dist/spell-checker.min.js ${VENDOR_FOLDER}/codemirror-spell-checker
     cp ${NODE_FOLDER}/codemirror-spell-checker/dist/spell-checker.min.css ${VENDOR_FOLDER}/codemirror-spell-checker
+    #luxon
+    mkdir ${VENDOR_FOLDER}/luxon
+    cp ${NODE_FOLDER}/luxon/build/global/luxon.js ${VENDOR_FOLDER}/luxon
     #codemirror6
     mkdir ${VENDOR_FOLDER}/codemirror6
     mkdir ${VENDOR_FOLDER}/codemirror6/view
