@@ -2,7 +2,7 @@ import { defineConfig } from 'cypress'
 import * as fs from 'fs'
 
 export default defineConfig({
-  video: true,
+ // video: true,
   pageLoadTimeout: 120000,
   retries: {
     runMode: 2,
