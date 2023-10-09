@@ -505,7 +505,8 @@ class ForumController extends AbstractController {
                 $attachment_name = "";
                 if($hasGoodAttachment[0] == 1) {
                     for ($i = 0; $i < count($_FILES[$file_post]["name"]); $i++) {
-                        $attachment_name = $attachment_name . "\n" . basename($_FILES[$file_post]["name"][$i]);
+                        if($attachment_name == "") $attachment_name = basename($_FILES[$file_post]["name"][$i]);
+                        else $attachment_name = $attachment_name . "\n" . basename($_FILES[$file_post]["name"][$i]);
                     }
                 }
 
@@ -892,7 +893,17 @@ class ForumController extends AbstractController {
 
             $markdown = !empty($_POST['markdown_status']);
 
-            return $this->core->getQueries()->editPost($original_creator, $current_user, $post_id, $new_post_content, $anon, $markdown);
+            $current_attachments = explode("\n", $original_post['attachment_name']);
+            if (isset($_POST['deleted_attachments'])) {
+                foreach($_POST['deleted_attachments'] as $img) {
+                    if(($key = array_search($img, $current_attachments)) !== false) unset($current_attachments[$key]);
+                }
+            }
+            $attachment_name = "";
+            if(!empty($current_attachments)) $attachment_name = implode("\n", $current_attachments);
+            $has_attachment = ($attachment_name == "") ? 0 : 1;
+
+            return $this->core->getQueries()->editPost($original_creator, $current_user, $post_id, $new_post_content, $anon, $markdown, $has_attachment, $attachment_name);
         }
         return null;
     }
@@ -1207,8 +1218,9 @@ class ForumController extends AbstractController {
                 $thread_dir = FileUtils::joinPaths(FileUtils::joinPaths($this->core->getConfig()->getCoursePath(), "forum_attachments"), $result["thread_id"]);
                 $post_dir = FileUtils::joinPaths($thread_dir, $post_id);
                 $filenames = explode("\n", $result["attachment_name"]);
+                if ($filenames[0] == "") unset($filenames[0]);
                 foreach ($filenames as $filename) {
-                    if ($filename != "") $urls[$filename] = $this->core->buildCourseUrl(['display_file']) . '?dir=forum_attachments&path=' . $post_dir . "/" . $filename;
+                    $urls[$filename] = $this->core->buildCourseUrl(['display_file']) . '?dir=forum_attachments&path=' . $post_dir . "/" . $filename;
                 }
 
                 $output['img_urls'] = $urls;

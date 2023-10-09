@@ -924,6 +924,7 @@ function showEditPostForm(post_id, thread_id, shouldEditThread, render_markdown,
                                 .append($('<a>')
                                     .attr('class', 'btn btn-default')
                                     .attr('onclick', 'markForDeletion(this)')
+                                    .attr('name', 'delete_' + img)
                                     .append($('<i>')
                                         .attr('class', 'fas fa-trash custom-focus')
                                         .attr('id', 'Remove-' + img)
@@ -982,13 +983,10 @@ function showEditPostForm(post_id, thread_id, shouldEditThread, render_markdown,
     });
 }
 function markForDeletion(ele) {
-    console.log(ele);
-    //$(ele).find('i').attr('style', 'var(--error-alert-dark-red)');
     $(ele).attr('class', 'btn btn-danger');
     $(ele).attr('onclick', 'unMarkForDeletion(this)');
 }
 function unMarkForDeletion(ele) {
-    //$(ele).find('i').attr('style', 'var(--text-black)');
     $(ele).attr('class', 'btn btn-default');
     $(ele).attr('onclick', 'markForDeletion(this)');
 }
@@ -2239,6 +2237,16 @@ function forumFilterBar() {
     $('#forum_filter_bar').toggle();
 }
 
+function getDeletedAttachments() {
+    const deleted_attachments = [];
+    $('#existing-attachment-table').find('a').each(function() {
+        if($(this).attr('class') == 'btn btn-danger') {
+            deleted_attachments.push($(this).attr('name').substr(7));
+        }
+    });
+    return deleted_attachments;
+}
+
 function updateThread(e) {
     // Only proceed if its full forum page
     // eslint-disable-next-line no-undef
@@ -2262,6 +2270,7 @@ function updateThread(e) {
         expirationDate: $('input#expirationDate').val(),
         cat,
         markdown_status: parseInt($('input#markdown_input_').val()),
+        deleted_attachments: getDeletedAttachments(),
     };
 
     $.ajax({

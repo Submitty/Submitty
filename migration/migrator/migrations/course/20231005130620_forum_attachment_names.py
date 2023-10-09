@@ -31,7 +31,10 @@ def up(config, database, semester, course):
         attachment_name = ""
         all_imgs = os.listdir(img_path)
         for img in all_imgs:
-            attachment_name = attachment_name + "\n" + img
+            if attachment_name == "":
+                attachment_name = img
+            else:
+                attachment_name = attachment_name + "\n" + img
         database.execute(f"""
                          UPDATE posts SET attachment_name = '{attachment_name}' WHERE id = {post_id};
                          UPDATE forum_posts_history SET has_attachment = true, attachment_name = '{attachment_name}' WHERE post_id = {post_id};
