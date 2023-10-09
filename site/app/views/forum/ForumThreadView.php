@@ -888,6 +888,47 @@ class ForumThreadView extends AbstractView {
                 "current_user_posted" => $thread["current_user_posted"]
             ];
 
+            $post_attachment = ["exist" => false];
+
+            if ($first_post["has_attachment"]) {
+                $post_attachment["exist"] = true;
+
+                $post_dir = FileUtils::joinPaths($thread_dir, $first_post["id"]);
+                $files = FileUtils::getAllFiles($post_dir);
+
+                $post_attachment["files"] = [];
+
+                $attachment_num_files = count($files);
+                $attachment_id = "attachments_{$first_post['id']}";
+                $attachment_button_id = "button_attachments_{$first_post['id']}";
+                $attachment_file_count = 0;
+                $attachment_encoded_data = [];
+
+                foreach ($files as $file) {
+                    $path = rawurlencode($file['path']);
+                    $name = rawurlencode($file['name']);
+                    $url = $this->core->buildCourseUrl(['display_file']) . '?dir=forum_attachments&path=' . $path;
+
+                    $post_attachment["files"][] = [
+                        "file_viewer_id" => "file_viewer_" . $first_post['id'] . "_" . $attachment_file_count
+                    ];
+
+                    $attachment_encoded_data[] = [$url, $first_post['id'] . '_' . $attachment_file_count, $name];
+
+                    $attachment_file_count++;
+                    $GLOBALS['totalAttachments']++;
+                }
+
+                $attachment_encoded_data[] = $attachment_id;
+
+                $post_attachment["params"] = [
+                    "well_id"   => $attachment_id,
+                    "button_id" => $attachment_button_id,
+                    "num_files" => $attachment_num_files,
+                    "encoded_data" => json_encode($attachment_encoded_data)
+                ];
+            }
+
             if ($is_full_page) {
                 $user_info = $this->core->getQueries()->getDisplayUserInfoFromUserId($first_post["author_user_id"]);
                 $email = trim($user_info["user_email"]);
@@ -917,7 +958,9 @@ class ForumThreadView extends AbstractView {
                     "is_anon" => $first_post["anonymous"],
                     "render_markdown" => $first_post["render_markdown"],
                     "author_info" => $author_info,
-                    "deleted" => $first_post['deleted']
+                    "deleted" => $first_post['deleted'],
+                    "has_attachment" => $first_post['has_attachment'],
+                    "post_attachment" => $post_attachment,
                 ]);
             }
 //            var_dump($first_post);
