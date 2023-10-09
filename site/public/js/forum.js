@@ -902,39 +902,8 @@ function showEditPostForm(post_id, thread_id, shouldEditThread, render_markdown,
                 $('#markdown_buttons_').hide();
             }
             
-            if(Object.keys(img_urls).length > 0) {
-                $("#display-existing-attachments").css('display', 'block')
-                const img_table = $("#existing-attachment-table");
-                for (let img in img_urls) {
-                    img_table.find('tbody')
-                        .append($('<tr>')
-                            .attr('class', 'file-label')
-                            .append($('<td>')
-                                .append($('<img>')
-                                    .attr('src', img_urls[img])
-                                    .attr('class', 'thumbnail')
-                                    .attr('alt', img)
-                                )
-                            )
-                            .append($('<td>')
-                                .text(img)
-                            )
-                            .append($('<td>')
-                                .attr('class', 'file-trash')
-                                .append($('<a>')
-                                    .attr('class', 'btn btn-default')
-                                    .attr('onclick', 'markForDeletion(this)')
-                                    .attr('name', 'delete_' + img)
-                                    .append($('<i>')
-                                        .attr('class', 'fas fa-trash custom-focus')
-                                        .attr('id', 'Remove-' + img)
-                                        .attr('tabindex', "0")
-                                        .attr('aria-label', 'Remove ' + img)
-                                    )
-                                )
-                            )
-                        );
-                }
+            if (Object.keys(img_urls).length > 0) {
+                $("#display-attachments-" + post_id).css('display', 'block');
             }
 
             // If first post of thread
@@ -985,10 +954,12 @@ function showEditPostForm(post_id, thread_id, shouldEditThread, render_markdown,
 function markForDeletion(ele) {
     $(ele).attr('class', 'btn btn-danger');
     $(ele).attr('onclick', 'unMarkForDeletion(this)');
+    $(ele).text('Keep');
 }
 function unMarkForDeletion(ele) {
     $(ele).attr('class', 'btn btn-default');
     $(ele).attr('onclick', 'markForDeletion(this)');
+    $(ele).text('Delete')
 }
 
 // eslint-disable-next-line no-unused-vars
@@ -1005,7 +976,8 @@ function cancelEditPostForum() {
     $(this).closest('.thread-post-form').find('[name=thread_post_content]').val('');
     $('#title').val('');
 
-    $('#existing-attachment-table').find('tbody').empty();
+    //$('#existing-attachment-table').find('tbody').empty();
+    $('.display-existing-attachments').css('display', 'none');
 }
 
 // eslint-disable-next-line no-unused-vars

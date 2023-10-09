@@ -161,6 +161,7 @@ class ForumThreadView extends AbstractView {
         $threadExists = $this->core->getQueries()->threadExists();
         $filteredThreadExists = (count($threadsHead) > 0);
         $currentThread = -1;
+        $GLOBALS['totalAttachments'] = 0;
         $currentCategoriesIds = [];
         $show_deleted_thread_title = null;
         $currentCourse = $this->core->getConfig()->getCourse();
@@ -445,6 +446,7 @@ class ForumThreadView extends AbstractView {
         $first_post_id = 1;
 
         $post_data = [];
+        $GLOBALS['totalAttachments'] = 0;
 
         $csrf_token = $this->core->getCsrfToken();
 
@@ -655,6 +657,7 @@ class ForumThreadView extends AbstractView {
         $activeThreadAnnouncements = [];
         $activeThreadTitle = "";
         $activeThread = [];
+        $GLOBALS['totalAttachments'] = 0;
         $thread_content =  $this->displayThreadList($threads, false, $activeThreadAnnouncements, $activeThreadTitle, $activeThread, null, $category_ids, false, true);
         $categories = $this->core->getQueries()->getCategories();
         $current_course = $this->core->getConfig()->getCourse();
@@ -893,6 +896,7 @@ class ForumThreadView extends AbstractView {
             if ($first_post["has_attachment"]) {
                 $post_attachment["exist"] = true;
 
+                $thread_dir = FileUtils::joinPaths(FileUtils::joinPaths($this->core->getConfig()->getCoursePath(), "forum_attachments"), $thread['id']);
                 $post_dir = FileUtils::joinPaths($thread_dir, $first_post["id"]);
                 $files = FileUtils::getAllFiles($post_dir);
 
@@ -925,7 +929,8 @@ class ForumThreadView extends AbstractView {
                     "well_id"   => $attachment_id,
                     "button_id" => $attachment_button_id,
                     "num_files" => $attachment_num_files,
-                    "encoded_data" => json_encode($attachment_encoded_data)
+                    "encoded_data" => json_encode($attachment_encoded_data),
+                    "unencoded_data" => $attachment_encoded_data,
                 ];
             }
 
@@ -1225,7 +1230,8 @@ class ForumThreadView extends AbstractView {
                 "well_id"   => $attachment_id,
                 "button_id" => $attachment_button_id,
                 "num_files" => $attachment_num_files,
-                "encoded_data" => json_encode($attachment_encoded_data)
+                "encoded_data" => json_encode($attachment_encoded_data),
+                "unencoded_data" => $attachment_encoded_data,
             ];
         }
 
