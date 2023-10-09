@@ -770,7 +770,7 @@ class SubmissionController extends AbstractController {
         $vcs_checkout = isset($_REQUEST['vcs_checkout']) ? $_REQUEST['vcs_checkout'] === "true" : false;
 
         // create json file...
-        $queue_data = ["semester" => $this->core->getConfig()->getTerm(),
+        $queue_data = ["term" => $this->core->getConfig()->getTerm(),
             "course" => $this->core->getConfig()->getCourse(),
             "gradeable" => $gradeable->getId(),
             "required_capabilities" => $gradeable->getAutogradingConfig()->getRequiredCapabilities(),
@@ -986,7 +986,7 @@ class SubmissionController extends AbstractController {
                     "queue_time" => $this->core->getDateTimeNow()->format("Y-m-d H:i:sO"),
                     'regrade' => true,
                     "required_capabilities" => $gradeable->getAutogradingConfig()->getRequiredCapabilities(),
-                    "semester" => $this->core->getConfig()->getTerm(),
+                    "term" => $this->core->getConfig()->getTerm(),
                     "team" => $team_id,
                     "user" => $user_id,
                     "vcs_checkout" => $gradeable->isVcs(),
@@ -1565,7 +1565,7 @@ class SubmissionController extends AbstractController {
 
         // create json file...
         $queue_data = [
-            "semester" => $this->core->getConfig()->getTerm(),
+            "term" => $this->core->getConfig()->getTerm(),
             "course" => $this->core->getConfig()->getCourse(),
             "gradeable" => $gradeable->getId(),
             "required_capabilities" => $gradeable->getAutogradingConfig()->getRequiredCapabilities(),
