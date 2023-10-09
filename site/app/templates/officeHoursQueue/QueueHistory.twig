@@ -22,19 +22,17 @@
         <th scope="col">Time Helped</th>
         <th scope="col">Times Helped Today</th>
         <th scope="col">Times Helped this week</th>
-        {% set sortState = "<script>sortStateTimeEntered</script>" %}
+
+
+      {#onclick="changeAnon('{{ gradeable.getId() }}')">
+                    {{ anon_mode ? "Disable Anonymous Mode" : "Enable Anonymous Mode" }}}
+
+
 
        {# <th scope="col"> <a href ="#" onclick = "sortTable(8)">Helped Started By</a></th>#}
         <th scope="col">
             <a href="#" onclick="toggleSort('HelpStartedBy')">Helped Started By
                 <span id="sortIndicator"></span>
-                {% if sortState == 'up' %}
-                    {#sort up#}
-                    {{viewer.getPastQueue('up')}}
-                {% elseif sortState == 'down' %}
-                    {{viewer.getPastQueue('down')}}
-                    {#sort down#}   
-                {% endif %}
             </a>
         </th>
         <th scope="col" class="mobile-hide">Removed By</th>
@@ -46,8 +44,7 @@
     </thead>
     <tbody>
       {% set history_count = 0 %}
-      {% set sortState = "<script>sortStateTimeEntered</script>" %}
-      {% for entry in viewer.getPastQueue(sortState) %}
+      {% for entry in viewer.getPastQueue() %}
         {% if (history_count < 25 or viewer.getFullHistory()) and (viewer.isGrader() or entry['user_id'] == viewer.getUserId()) %}
           {% set history_count = history_count + 1 %}
           <tr class="queue_history_{{entry['queue_code']}} queue_history_row">
@@ -102,8 +99,38 @@
 </div>
 
 <script>
+
 var sortStateTimeEntered = "off";
 
+function toggleSort(column) {//per click actions handler
+    var sortIndicator = document.getElementById("sortIndicator");
+    console.log("Hello world!")
+    
+    if (column == 'HelpStartedBy') {
+        if (sortStateTimeEntered == "off") {
+            sortStateTimeEntered = "up";
+            sortIndicator.innerText = "▲";
+            Cookies.set('sortStateTimeEntered', 'up'); // Save to cookie
+            //console.log(Cookies.get('sortStateTimeEntered'))
+
+            // Add logic for sorting 'Time Entered' in ascending order here
+        } else if (sortStateTimeEntered == "up") {
+            sortStateTimeEntered = "down";
+            sortIndicator.innerText = "▼";
+            Cookies.set('sortStateTimeEntered', 'down'); // Save to cookie
+            
+            // Add logic for sorting 'Time Entered' in descending order here
+        } else if (sortStateTimeEntered == "down") {
+            sortStateTimeEntered = "off";
+            sortIndicator.innerText = ""; // Reset to down arrow for off state
+            Cookies.set('sortStateTimeEntered', 'off'); // Save to cookie
+
+            // Add logic for turning off sorting here
+        }
+    }
+}
+
+{#
 function toggleSort(column) {
     var sortIndicator = document.getElementById("sortIndicator");
     
@@ -123,4 +150,28 @@ function toggleSort(column) {
         }
     }
 }
+{#
+Cookies.set(`default_anon_mode_${gradeable_id}_override`, 'off');
+function changeAnon(gradeable_id) {
+    Cookies.set(`default_anon_mode_${gradeable_id}_override`, 'off');
+    
+    const status = {{ 
+        if (anon_mode === true) {
+            return 'up';
+        } else if (anon_mode === false) {
+            return 'down';
+        } else {
+            return 'off';
+        }
+    }};
+    
+    if (status === 'up') {
+        Cookies.set(`anon_mode_${gradeable_id}`, 'up');
+    } else if (status === 'down') {
+        Cookies.set(`anon_mode_${gradeable_id}`, 'down');
+    } else {
+        Cookies.set(`anon_mode_${gradeable_id}`, 'off');
+    }
+    location.reload();
+} #}
 </script>
