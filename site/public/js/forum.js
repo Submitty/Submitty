@@ -921,10 +921,15 @@ function showEditPostForm(post_id, thread_id, shouldEditThread, render_markdown,
                             )
                             .append($('<td>')
                                 .attr('class', 'file-trash')
-                                .append($('<i>')
-                                    .attr('class', 'fas fa-trash custom-focus')
-                                    .attr('tabindex', "0")
-                                    .attr('aria-label', 'Remove ' + img)
+                                .append($('<a>')
+                                    .attr('class', 'btn btn-default')
+                                    .attr('onclick', 'markForDeletion(this)')
+                                    .append($('<i>')
+                                        .attr('class', 'fas fa-trash custom-focus')
+                                        .attr('id', 'Remove-' + img)
+                                        .attr('tabindex', "0")
+                                        .attr('aria-label', 'Remove ' + img)
+                                    )
                                 )
                             )
                         );
@@ -975,6 +980,17 @@ function showEditPostForm(post_id, thread_id, shouldEditThread, render_markdown,
             window.alert('Something went wrong while trying to edit the post. Please try again.');
         },
     });
+}
+function markForDeletion(ele) {
+    console.log(ele);
+    //$(ele).find('i').attr('style', 'var(--error-alert-dark-red)');
+    $(ele).attr('class', 'btn btn-danger');
+    $(ele).attr('onclick', 'unMarkForDeletion(this)');
+}
+function unMarkForDeletion(ele) {
+    //$(ele).find('i').attr('style', 'var(--text-black)');
+    $(ele).attr('class', 'btn btn-default');
+    $(ele).attr('onclick', 'markForDeletion(this)');
 }
 
 // eslint-disable-next-line no-unused-vars
