@@ -111,18 +111,17 @@ function collapseAllSections() {
 }
 
 function grade_inquiry_only() {
+    location.reload();
     $('[data-testid=grade-button]').each(function() {
         const hasGradeInquiry = typeof $(this).attr('data-grade-inquiry') !== 'undefined';
         if (!hasGradeInquiry) {
             $(this).closest('[data-testid="grade-table"]').hide();  // hide gradeable items without active inquiries
         }
-        else {
-            $(this).closest('[data-testid="grade-table"]').show();  // show gradeable items with active inquiries
-        }
     });
 }
 
 function reverse_inquiry_only() {
+    location.reload();
     $('[data-testid=grade-button]').each(function() {
         $(this).closest('[data-testid="grade-table"]').show();  // show all gradeable items
     });

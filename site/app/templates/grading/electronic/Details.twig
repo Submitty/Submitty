@@ -64,14 +64,23 @@
             var button = document.getElementById('inquiryButton');
             status = Cookies.get('inquiry_status')
             if (status === 'on') {
-                grade_inquiry_only();
+                $('[data-testid=grade-button]').each(function() {
+                    const hasGradeInquiry = typeof $(this).attr('data-grade-inquiry') !== 'undefined';
+                    if (!hasGradeInquiry) {
+                        $(this).closest('[data-testid="grade-table"]').hide();  // hide gradeable items without active inquiries
+                    }
+                });
                 button.innerHTML = "Grade Inquiry Only: On";
-            } else {
-                reverse_inquiry_only();
-                button.innerHTML = "Grade Inquiry Only: Off";
+            } 
+            else {
+                $('[data-testid=grade-button]').each(function() {
+                        $(this).closest('[data-testid="grade-table"]').show();  // show all gradeable items
+                    });
+                    button.innerHTML = "Grade Inquiry Only: Off";
             }
         }
     </script>
+    
     {% endif %}
     {% if not is_student %}
         <a href="{{ stats_url }}" class="btn btn-primary">Grading Stats</a>
