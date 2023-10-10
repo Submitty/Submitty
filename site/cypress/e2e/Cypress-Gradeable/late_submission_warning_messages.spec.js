@@ -1,15 +1,17 @@
-const getCurrentTime = (deadline_in_past = '') => {
+const getCurrentTime = (time_travel = '') => {
     //Return current time in a specific format (EST timezone)
     const now = new Date();
-    if (deadline_in_past === 'threeDaysAgo') {
+    if (time_travel === 'threeDaysAgo') {
         now.setDate(now.getDate() - 3);
-        //we need to put the seconds a bit ahead in order to be able
+    }
+    else if (time_travel === 'twoDaysAgo') {
+        now.setDate(now.getDate() - 2);
+    }
+    else if (time_travel === 'few_seconds_future') {
+        //set the seconds a bit ahead in order to be able
         //to see the countdown in the submission portal and make sure
         //there is no need for reloading the page
-        now.setSeconds(now.getSeconds() + 15);
-    }
-    else {
-        now.setSeconds(now.getSeconds() + 5);
+        now.setSeconds(now.getSeconds() + 10);
     }
     const year = now.getFullYear();
     const month = String(now.getMonth() + 1).padStart(2, '0');
@@ -148,7 +150,7 @@ describe('Test warning messages for non team gradeable', () => {
         cy.visit(['sample', 'gradeable',gradeable,'update?nav_tab=5']);
         cy.get('#date_due')
             .clear()
-            .type(getCurrentTime())
+            .type(getCurrentTime('few_seconds_future'))
             .type('{enter}');
         cy.get('#save_status', {timeout:20000}).should('have.text', 'All Changes Saved');
         cy.logout();
@@ -215,7 +217,7 @@ describe('Test warning messages for non team gradeable', () => {
 
     it('should show a confirmation message for the first submission', () => {
         //Part 1/2 of a test case
-        //The first submission will be done 3 days after the due date and use 2 valid late days
+        //The first submission will be done 2 days after the due date and use 2 valid late days
         cy.login('instructor');
         giveExtentions(gradeable);
         giveLateDays(getCurrentTime('threeDaysAgo'),'student'); //Give valid late days (the current ones are after the original due date)
@@ -227,7 +229,7 @@ describe('Test warning messages for non team gradeable', () => {
         cy.get('#save_status', {timeout:20000}).should('have.text', 'All Changes Saved');
         cy.get('#date_due')
             .clear()
-            .type(getCurrentTime('threeDaysAgo'))
+            .type(getCurrentTime('twoDaysAgo'))
             .type('{enter}');
         cy.get('#save_status', {timeout:20000}).should('have.text', 'All Changes Saved');
         cy.logout();
@@ -237,8 +239,14 @@ describe('Test warning messages for non team gradeable', () => {
         /*Part 2/2 of a test case
         This submission is invalid because the late days remaining are earned at the extention date,
         not the original due date.*/
-        cy.login('student');
-        cy.wait(5000);//to avoid flakyness and to make sure 4 days have passed (since in getcurrenttime(), there is an extra 5 seconds)
+        cy.login('instructor');
+        cy.visit(['sample', 'gradeable',gradeable,'update?nav_tab=5']);
+        cy.get('#date_due')
+            .clear()
+            .type(getCurrentTime('threeDaysAgo'))
+            .type('{enter}');
+        cy.get('#save_status', {timeout:20000}).should('have.text', 'All Changes Saved');
+        cy.logout();
         SubmitAndCheckMessage('non_team','upload_file2','invalid_4_days_late');
         cy.login('instructor');
         cy.visit(['sample', 'gradeable',gradeable,'update?nav_tab=5']);
@@ -292,7 +300,7 @@ describe('Test warning messages for team gradeable', () => {
 
     it('should show a confirmation message for the first submission', () => {
         //Part 1/2 of a test case
-        //The first submission will be done 3 days after the due date and use 2 valid late days for each team member
+        //The first submission will be done 2 days after the due date and use 2 valid late days for each team member
         cy.login('instructor');
         giveExtentions(team_gradeable);
         giveLateDays(getCurrentTime('threeDaysAgo'),'student',3); //this is important for part 2/2
@@ -300,18 +308,24 @@ describe('Test warning messages for team gradeable', () => {
         cy.visit(['sample', 'gradeable',team_gradeable,'update?nav_tab=5']);
         cy.get('#date_due')
             .clear()
-            .type(getCurrentTime('threeDaysAgo'))
+            .type(getCurrentTime('twoDaysAgo'))
             .type('{enter}');
         cy.get('#save_status', {timeout:20000}).should('have.text', 'All Changes Saved');
         cy.logout();
         SubmitAndCheckMessage('team','upload_file1','valid_usage','2_days_late+extention');
     });
     it('should show team warning message for the second submission ', () => {
-        /* Second submission happens after 4 days have passed. For student, it will be a valid submission,
+        /* Second submission happens after 3 days have passed. For student, it will be a valid submission,
         so student will see a confirmation message first. However since aphacker doesn't have enough late days,
         student will see a second warning message saying that aphacker will have a bad submission.*/
-        cy.login('student');
-        cy.wait(5000); //to avoid flakyness and to make sure 4 days have passed
+        cy.login('instructor');
+        cy.visit(['sample', 'gradeable',team_gradeable,'update?nav_tab=5']);
+        cy.get('#date_due')
+            .clear()
+            .type(getCurrentTime('threeDaysAgo'))
+            .type('{enter}');
+        cy.get('#save_status', {timeout:20000}).should('have.text', 'All Changes Saved');
+        cy.logout();
         SubmitAndCheckMessage('team','upload_file2','both_messages','both_messages');
     });
 
