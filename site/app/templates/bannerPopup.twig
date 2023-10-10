@@ -1,0 +1,13 @@
+{% extends 'generic/Popup.twig' %}
+{% block popup_id %}show-banner{% endblock %}
+{% block title %}New Event Happening!{% endblock %}
+{% block body %}
+    <input type="hidden" name="csrf_token" value="ok" />
+
+
+    <img id= "theImage" src = "#" />
+
+{% endblock %}
+{% block buttons %}
+    {{ block('close_button') }}
+{% endblock %}

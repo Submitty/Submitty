@@ -250,46 +250,6 @@ function newOverwriteCourseMaterialForm(clashing_names, is_link, is_edit_form) {
     form.find('.form-body').scrollTop(0);
 }
 
-function newShowImage(information, type) {
-
-    //deal with links
-    if (type === "link") {
-        // For "link" type, open the provided link in a new tab directly
-        window.location.href = information;
-        return;
-    }
-
-
-
-
-    // Create a new popup
-    var popup = window.open("", "_blank", "width=800,height=600");
-
-    // Hide existing popup-forms
-    $('.popup-form').css('display', 'none');
-
-    // Create a new form element
-    var form = $('<form>').addClass('popup-form');
-
-    if (type === "pdf") {
-        // For "pdf" type, create an <embed> element to display the PDF content
-        var pdfEmbed = $('<embed>').attr({
-            'src': information,
-            'width': '100%',
-            'height': '100%',
-            'type': 'application/pdf'
-        }).appendTo(form);
-    } else {
-        // For other types, assume "information" is an image URL
-        var img = $('<img>').attr('src', information).appendTo(form);
-    }
-
-    // Append the form to the popup
-    form.appendTo(popup.document.body);
-
-    // Display the popup
-    popup.focus();
-}
 
 
 
@@ -346,6 +306,25 @@ function newUploadBanner() {
     form.find('.form-body').scrollTop(0);
     $('[name="upload"]', form).val(null);
 }
+
+
+function newShowImage(information, type) {
+    if (type === "link") {
+        // For "link" type, open the provided link in a new tab directly
+        window.location.href = information;
+        return;
+    }
+
+
+    let form = $('#show-banner');
+
+    form.css("display", "block");
+
+
+    $('#theImage', form).attr('src', information);
+    captureTabInModal("show-banner");
+}
+
 
 
 function newEditCourseMaterialsFolderForm(tag) {
@@ -545,6 +524,7 @@ function captureTabInModal(formName, resetFocus=true){
             releaseTabFromModal(formName);
         }
     });
+    console.log(form[0]);
     observer.observe(form[0], { attributes: true, childList: true });
 }
 
