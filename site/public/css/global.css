@@ -50,6 +50,11 @@ nav a > i.f {
     margin-right: 0;
 }
 
+#menu-header {
+    justify-content: center; /* Center horizontally */
+    align-items: center; /* Center vertically */
+}
+
 #breadcrumbs {
     display: flex;
     width: 1px;
@@ -94,6 +99,12 @@ nav a > i.f {
     position: absolute;
     top: 0;
     right: 0;
+    z-index: 0;
+}
+
+#moving-unit {
+    z-index: 90;
+    transform: translateX(-150%);
 }
 
 .system-message {

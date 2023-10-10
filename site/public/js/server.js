@@ -251,11 +251,16 @@ function newOverwriteCourseMaterialForm(clashing_names, is_link, is_edit_form) {
 }
 
 function newShowImage(information, type) {
+
+    //deal with links
     if (type === "link") {
         // For "link" type, open the provided link in a new tab directly
         window.location.href = information;
         return;
     }
+
+
+
 
     // Create a new popup
     var popup = window.open("", "_blank", "width=800,height=600");

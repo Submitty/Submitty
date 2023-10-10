@@ -181,21 +181,21 @@
                     </div>
                 </div>
 
-<div id = "moving-unit" position: relative; display: flex; vertical-align: top;>
+<div id = "moving-unit" justify-content: center; align-items: center; display: flex; vertical-align: top;>
 
 
 
-<div style="display: flex">
+    <div style="display: flex">
 
-{% if user_given_name != "" %}
-<div class= "speech-bubble-container" id= "speech-bubble-container">
-<button class="speech-bubble" id="speech-bubble" onclick = "showBanners()">
-  New Event!
-</button >
-<div class="triangle" id="triangle"></div>
-</div>
+        {% if user_given_name != "" %}
+        <div class= "speech-bubble-container" id= "speech-bubble-container">
+        <button class="speech-bubble" id="speech-bubble" onclick = "showBanners()">
+          New Event!
+        </button >
+        <div class="triangle" id="triangle"></div>
+        </div>
 
-{% endif %}
+        {% endif %}
 
                     <span id="duckdiv" style="position: relative; display: inline-block; vertical-align: top;">
                         <img id="moorthy-duck"
@@ -218,40 +218,41 @@
                             src="{{ base_url }}/img/submitty-banner.png"
                             alt="Happy Submitty Week!"
                             height="70"
-                            style="position:absolute;right: -380px; top:6px;display:none;"
+                            style="position:absolute; top:6px;display:none;"
                     />
                     {% endif %}
                     </span>
-<div class="banner" id = "banner">
-{% set image_found = false %}
-        
+        <div class="banner" id = "banner">
+            {% set image_found = false %}
+            
 
 
-  {% for imageData in imageDataArray %}
-      <div>
-      {% set imgName = "{{imageData.name}}" %}
+            {% for imageData in imageDataArray %}
+              <div>
+              {% set imgName = "{{imageData.name}}" %}
 
-        {% if imageData.type == "image" %}
-            {% set extraStuff = "data:image/png;base64," ~ imageData.extra_info %}
-            <img id="club-banners_" class="club-banners {{imageData.name}}_{{imageData.id}}" src="data:imgName/png;base64,{{ imageData.data }}" onclick="newShowImage('{{extraStuff}}', '{{imageData.type}}' )" />
-        {% elseif imageData.type == "none" %}
-            <img id="club-banners_" class="club-banners {{imageData.name}}_{{imageData.id}}" src="data:imgName/png;base64,{{ imageData.data }}" />
-        {% else %}
-            {% set extraStuff = imageData.extra_info %}
-            <a href="{{ extraStuff }}" target="_blank">
-            <img id="club-banners_" class="club-banners {{imageData.name}}_{{imageData.id}}" src="data:imgName/png;base64,{{ imageData.data }}" />
-            </a>
-        {% endif %}
-        <button class="delete-button" onclick="showBanners()">x</button>
+                {% if imageData.type == "image" %}
+                    {% set extraStuff = "data:image/png;base64," ~ imageData.extra_info %}
+                    <img id="club-banners_" class="club-banners {{imageData.name}}_{{imageData.id}}" src="data:imgName/png;base64,{{ imageData.data }}" onclick="newShowImage('{{extraStuff}}', '{{imageData.type}}' )" />
+                {% elseif imageData.type == "none" %}
+                    <img id="club-banners_" class="club-banners {{imageData.name}}_{{imageData.id}}" src="data:imgName/png;base64,{{ imageData.data }}" />
+                {% else %}
+                    {% set extraStuff = imageData.extra_info %}
+                    <a href="{{ extraStuff }}" target="_blank">
+                    <img id="club-banners_" class="club-banners {{imageData.name}}_{{imageData.id}}" src="data:imgName/png;base64,{{ imageData.data }}" />
+                    </a>
+                {% endif %}
+                <button class="delete-button" onclick="showBanners()">x</button>
 
-      </div>
-  {% endfor %}
-  <button class="prev-button" onclick="changeImage(-1)">&#10094;</button>
-  <button class="next-button" onclick="changeImage(1)">&#10095;</button>
+              </div>
+            {% endfor %}
+            <button class="prev-button" onclick="changeImage(-1)">&#10094;</button>
+            <button class="next-button" onclick="changeImage(1)">&#10095;</button>
+        </div>
+
+    </div>
 </div>
 
-                </div>
-</div>
                     <span style = "position: absolute right: -500px"> <a class="flex-col" id="logo-box" href="http://submitty.org" target="_blank" aria-label="Visit submitty dot org">
                             <img id="logo-submitty" src="{{ base_url }}/img/submitty_logo.png" alt="Submitty Logo">
                             <img id="logo-submitty-light" src="{{ base_url }}/img/submitty_logo_white.png" alt="Submitty Logo">
@@ -410,6 +411,10 @@
         }
     }
     images = currentImages.concat(seenImages);
+
+    console.log(images);
+    console.log("ok");
+
     if (getCookie("display") === "yes") showBanners();
 
     function showBanners() {
@@ -420,7 +425,7 @@
             document.getElementById("breadcrumbs").style.flexWrap = "inherit";
 
             if (currentImages.length > 0) {
-                currentImages[0].classList.add("active");
+                images[0].classList.add("active");
                 var className = currentImages[0].className.split(' ')[1]
                 hiddenImages.push(className);
                 seenImages.push(currentImages[0]);
@@ -443,6 +448,13 @@
 
                 currentImages.splice(0, 1);
 
+
+                seenImages.push(currentImages[0]);
+
+                currentImageIndex = images.length -1;
+
+                images = currentImages.concat(seenImages);
+
                 if (currentImages.length > 0 ) {
                     document.getElementById("triangle").style.display = "block";
                     document.getElementById("speech-bubble").style.display = "block";
@@ -454,6 +466,7 @@
                 bannerElement.style.width = "100%";
                 bannerElement.style.display = "block";
                 images[currentImageIndex].classList.add("active");
+
             }
         }
         else {
@@ -479,6 +492,9 @@
     }
 
     function changeImage(n) {
+
+        console.log("hi");
+        console.log(images);
         var originalIndex = currentImageIndex;
 
 
