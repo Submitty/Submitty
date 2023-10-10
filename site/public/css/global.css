@@ -104,7 +104,8 @@ nav a > i.f {
 
 #moving-unit {
     z-index: 90;
-    transform: translateX(-150%);
+    position: fixed;
+    right: 20%;
 }
 
 .system-message {

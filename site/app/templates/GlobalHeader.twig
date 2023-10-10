@@ -128,7 +128,7 @@
     <div id="submitty-body" class="flex-col">
         {% if not content_only %}
             <div id="mobile-menu">
-                <div id="menu-header" class="flex-row">
+                <div id="menu-header" class="flex-row" >
                 <a href="{{ base_url }}" aria-label="Go to Submitty Home"><span class="mobile-title">Submitty</span></a>
                     <button id="menu-exit"><span class="screen-reader">Close Menu</span><i class="fas fa-times"></i></button>
                 </div>
@@ -145,7 +145,7 @@
                 </ul>
             </div>
             <div id="menu-overlay"></div>
-            <nav class="flex-row shadow">
+            <nav class="flex-row shadow" style="min-height: 80px;">
                 <div id="nav-links">
                     <a id="home-button"
                         class="black-btn"
@@ -181,7 +181,7 @@
                     </div>
                 </div>
 
-<div id = "moving-unit" justify-content: center; align-items: center; display: flex; vertical-align: top;>
+<div id = "moving-unit" style="justify-content: center; align-items: center; display: flex; vertical-align: top;">
 
 
 
@@ -418,6 +418,7 @@
     if (getCookie("display") === "yes") showBanners();
 
     function showBanners() {
+        var movingUnit = document.getElementById("moving-unit");
         var bannerElement = document.getElementById("banner");
         if (bannerElement.style.display === "none") {
             setCookie('display', "yes");
@@ -432,11 +433,11 @@
                 setCookie('hiddenImages', JSON.stringify(hiddenImages));  
                 var duckdivElement = document.getElementById("moorthy-duck");
                 var wholeBannerElement = document.getElementById("banner");
-                var movingUnit = document.getElementById("moving-unit");
                 duckdivElement.style.animation = "rocking 2s linear infinite";
                 setTimeout(function() {
                     bannerElement.style.width = "100%";
                     bannerElement.style.display = "block";
+                    movingUnit.style.left = "10%";
                     movingUnit.style.animation = "slide 2s linear forwards";
                 }, 500);
                 document.getElementById("triangle").style.display = "none";
@@ -472,6 +473,7 @@
         else {
             setCookie('display', "no");
             var duckdivElement = document.getElementById("moorthy-duck");
+            movingUnit.style.animation = "none";
             duckdivElement.style.animation = "none";
 
             duckdivElement.style.transform = "rotate(0deg)";
@@ -486,6 +488,8 @@
             
             bannerElement.style.width = "1%";
             bannerElement.style.display = "none";
+            movingUnit.style.left = ""
+            movingUnit.style.right = "20%";
         }
 
 
@@ -541,6 +545,7 @@
         }
         return null;
     }
+
 
 </script>
 
