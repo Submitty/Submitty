@@ -1,4 +1,4 @@
-var DateTime = luxon.DateTime;
+const DateTime = luxon.DateTime;
 
 function calculateLateDays(inputDate) {
     const select_menu = document.getElementById('g_id');

@@ -289,9 +289,6 @@ if echo "{$result}" | grep -E -q "package(-lock)?.json"; then
     mkdir ${VENDOR_FOLDER}/codemirror-spell-checker
     cp ${NODE_FOLDER}/codemirror-spell-checker/dist/spell-checker.min.js ${VENDOR_FOLDER}/codemirror-spell-checker
     cp ${NODE_FOLDER}/codemirror-spell-checker/dist/spell-checker.min.css ${VENDOR_FOLDER}/codemirror-spell-checker
-    #luxon
-    mkdir ${VENDOR_FOLDER}/luxon
-    cp ${NODE_FOLDER}/luxon/build/global/luxon.js ${VENDOR_FOLDER}/luxon
     #codemirror6
     mkdir ${VENDOR_FOLDER}/codemirror6
     mkdir ${VENDOR_FOLDER}/codemirror6/view
@@ -326,6 +323,9 @@ if echo "{$result}" | grep -E -q "package(-lock)?.json"; then
     mkdir ${VENDOR_FOLDER}/jquery-ui
     cp ${NODE_FOLDER}/jquery-ui-dist/*.min.* ${VENDOR_FOLDER}/jquery-ui
     cp -R ${NODE_FOLDER}/jquery-ui-dist/images ${VENDOR_FOLDER}/jquery-ui/
+    #luxon
+    mkdir ${VENDOR_FOLDER}/luxon
+    cp ${NODE_FOLDER}/luxon/build/global/luxon.js ${VENDOR_FOLDER}/luxon
     # pdfjs
     mkdir ${VENDOR_FOLDER}/pdfjs
     cp ${NODE_FOLDER}/pdfjs-dist/build/pdf.min.js ${VENDOR_FOLDER}/pdfjs
