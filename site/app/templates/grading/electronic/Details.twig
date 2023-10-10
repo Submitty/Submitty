@@ -94,7 +94,7 @@
     <button type="button" class="btn btn-primary" onclick="expandAllSections()">Expand All Sections</button>
     {% if message is not empty %}
     <div class="details-warning-box{% if message_warning %} details-warning-highlight{% else %} details-warning-neutral{% endif %}">
-        {{ message }}
+        {{ message|nl2br }}
     </div>
     {% endif %}
     <div class="details-action-box">
