@@ -463,8 +463,13 @@ jobs:
           - 5432:5432
 
     steps:
-      - name: Delete huge unnecessary tools folder
-        run: rm -rf /opt/hostedtoolcache
+       - name: Delete huge unnecessary tools folder
+        run: |
+          rm -rf /opt/hostedtoolcache
+          rm -rf /usr/share/dotnet
+          rm -rf /opt/ghc
+          rm -rf "/usr/local/share/boost"
+          rm -rf "$AGENT_TOOLSDIRECTORY"
       - name: Checkout repository
         uses: actions/checkout@v3
       - uses: ./.github/actions/e2e-Setup-Composite
@@ -530,6 +535,13 @@ jobs:
           - 5432:5432
 
     steps:
+     - name: Delete huge unnecessary tools folder
+        run: |
+          rm -rf /opt/hostedtoolcache
+          rm -rf /usr/share/dotnet
+          rm -rf /opt/ghc
+          rm -rf "/usr/local/share/boost"
+          rm -rf "$AGENT_TOOLSDIRECTORY"
       - name: Checkout repository
         uses: actions/checkout@v3
       - uses: ./.github/actions/e2e-Setup-Composite
