@@ -1,3 +1,4 @@
+/* global luxon */
 const DateTime = luxon.DateTime;
 
 function calculateLateDays(inputDate) {
