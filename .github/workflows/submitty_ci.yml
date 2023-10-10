@@ -305,17 +305,15 @@ jobs:
           - 5432:5432
 
     steps:
-      - name: Display disk usage
-        run: df -H
-      - name: Delete huge unnecessary tools folder
+      - name: Delete huge unnecessary folders, and clean apt cache
         run: |
           rm -rf /opt/hostedtoolcache
           rm -rf /usr/share/dotnet
           rm -rf /opt/ghc
           rm -rf "/usr/local/share/boost"
           rm -rf "$AGENT_TOOLSDIRECTORY"
-      - name: Display disk usage
-        run: df -H
+          sudo apt-get clean
+
       - name: Checkout repository
         uses: actions/checkout@v4
       - uses: ./.github/actions/e2e-Setup-Composite
@@ -413,8 +411,7 @@ jobs:
         run: |
           cd $SUBMITTY_REPOSITORY
           sudo -E env "PATH=$PATH" bash .setup/testing/setup_saml.sh
-      - name: Display disk usage
-        run: df -H
+
       - name: Switch to SAML auth
         run: sudo sed -ie "s/Ldap/Saml/g" ${SUBMITTY_INSTALL_DIR}/config/authentication.json
 
@@ -463,13 +460,14 @@ jobs:
           - 5432:5432
 
     steps:
-      - name: Delete huge unnecessary tools folder
+      - name: Delete huge unnecessary folders, and clean apt cache
         run: |
           rm -rf /opt/hostedtoolcache
           rm -rf /usr/share/dotnet
           rm -rf /opt/ghc
           rm -rf "/usr/local/share/boost"
           rm -rf "$AGENT_TOOLSDIRECTORY"
+          sudo apt-get clean
       - name: Checkout repository
         uses: actions/checkout@v4
       - uses: ./.github/actions/e2e-Setup-Composite
@@ -487,8 +485,7 @@ jobs:
         run: |
           npm install file-saver --save
           npm install --production=false
-      - name: Display disk usage
-        run: df -H
+
       - name: Run cypress e2e tests with pam auth
         uses: cypress-io/github-action@v6
         with:
@@ -535,18 +532,16 @@ jobs:
           - 5432:5432
 
     steps:
-      - name: Delete huge unnecessary tools folder
+      - name: Delete huge unnecessary folders, and clean apt cache
         run: |
           rm -rf /opt/hostedtoolcache
           rm -rf /usr/share/dotnet
           rm -rf /opt/ghc
           rm -rf "/usr/local/share/boost"
           rm -rf "$AGENT_TOOLSDIRECTORY"
+          sudo apt-get clean
       - name: Checkout repository
         uses: actions/checkout@v4
       - uses: ./.github/actions/e2e-Setup-Composite
       - name: Run integration tests
         run: sudo -E env "PATH=$PATH" python3 /usr/local/submitty/test_suite/integrationTests/run.py
-      - name: Show disk usage
-        if: failure()
-        run: df -H
