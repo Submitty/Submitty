@@ -24,6 +24,7 @@ def up(config, database):
             name VARCHAR(255) NOT NULL,
             folder_name VARCHAR(255) NOT NULL,
             extra_info VARCHAR(255),
+            link_name VARCHAR(255),
             release_date timestamp(6),
             closing_date timestamp(6)
         )

@@ -38,13 +38,41 @@
         </label>
 
             <label class = "radio" for="image_selection_radio">
-                <input id="url_selection_radio" name="course_material_type" type="radio" onchange="$('#file_selection').hide();$('#url_selection').show(); $('#url_link_address').hide();$('#extra_name').show();file=true;">
+                <input id="url_selection_radio" name="course_material_type" type="checkbox" onchange="imageSelectionUpdate();">
                 Image
             </label>
             <label class = "radio" for="url_selection_radio">
-                <input id="url_selection_radio" name="course_material_type" type="radio" onchange="$('#file_selection').hide();$('#url_selection').show();$('#extra_name').hide();$('#url_link_address').show();file=false;">
+                <input id="url_selection_radio" name="course_material_type" type="checkbox" onchange="urlSelectionUpdate();">
                 External URL
             </label>
+
+
+            <script>
+            function imageSelectionUpdate() {
+                if (image === true) {
+                    image = false;
+                    $('#extra_name').show();
+
+                }
+                else {
+                    image = true;
+                    $('#extra_name').hide();
+                }
+            }
+
+            function urlSelectionUpdate() {
+                if (url === true) {
+                    url = false;
+                    $('#url_link_address').show();
+
+                }
+                else {
+                    url = true;
+                    $('#url_link_address').hide();
+                }
+            }   
+
+            </script>
 
 
         <br>
@@ -73,17 +101,20 @@
 
 
     <script>
-        var file = true;
+        var image = false;
+        var url = false;
 
         $('#url_link_address').hide();
         $('#extra_name').hide();
         function makeSubmission() {
             var releaseTime = document.getElementById("release_date").value;
             var closeTime = document.getElementById("closing_date").value;
-            var extraName = document.getElementById("input-provide-name").value;
-            var linkName = document.getElementById("input-provide-url").value;
-            var valueToPass = (file === false) ? linkName : extraName;
-            handleUploadBanner("{{ csrf_token }}", closeTime, releaseTime, valueToPass);
+
+            var extraName = "";
+            if (image === true) extraName = document.getElementById("input-provide-name").value;
+            var linkName = "";
+            if (url === true) linkName = document.getElementById("input-provide-url").value;
+            handleUploadBanner("{{ csrf_token }}", closeTime, releaseTime, extraName, linkName);
         }
         $(function() {
             $("#submit-banner").click(function(e){ // Submit button

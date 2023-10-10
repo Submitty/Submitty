@@ -386,6 +386,7 @@ CREATE TABLE public.banner_images (
     name character varying(255) NOT NULL,
     folder_name character varying(255) NOT NULL,
     extra_info character varying(255),
+    link_name character varying(255),
     release_date timestamp(6) without time zone,
     closing_date timestamp(6) without time zone
 );

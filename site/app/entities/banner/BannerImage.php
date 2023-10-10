@@ -39,16 +39,22 @@ class BannerImage {
     #[ORM\Column(type: Types::STRING)]
     protected $extra_info;
 
+    #[ORM\Column(type: Types::STRING)]
+    protected $link_name;
 
 
-    public function __construct(string $path, string $name, string $extra_info_name, \DateTime $release_date, \DateTime $close_date, string $folder_name) {
+
+    public function __construct(string $path, string $name, string $extra_info_name, 
+        string $link_url_name, \DateTime $release_date, \DateTime $close_date, string $folder_name) {
         $this->setReleaseDate($release_date);
         $this->setClosingDate($close_date);
         $this->setName($name);
         $this->setExtraInfo($extra_info_name);
+        $this->setLinkName($link_url_name);
         $this->setPath($path);
         $this->setFolderName($folder_name);
     }
+
 
     public function getId(): int {
         return $this->id;
@@ -99,5 +105,11 @@ class BannerImage {
     }
     public function getExtraInfo(): string {
         return $this->extra_info;
+    }
+    public function setLinkName(string $name): void {
+        $this->link_name = $name;
+    }
+    public function getLinkName(): string {
+        return $this->link_name;
     }
 }

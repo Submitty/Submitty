@@ -56,12 +56,13 @@ class BannerController extends AbstractController {
         $uploaded_files = $_FILES["files1"];
         $count_item = count($uploaded_files["name"]);
         $extra_name = $_POST['extra_name'];
+        $link_name = $_POST['link_name'];
 
-        if ($extra_name == "..") {
+        if ($extra_name == ".." || $link_name == "..") {
             return JsonResponse::getErrorResponse("invalid name");
         }
 
-        if (empty($extra_name) || strpos($extra_name, 'http') !== false) {
+        if (empty($extra_name) !== false) {
             if ($count_item !== 1) {
                 return JsonResponse::getErrorResponse("You can only have one banner submitted.");
             }
@@ -71,6 +72,15 @@ class BannerController extends AbstractController {
                 return JsonResponse::getErrorResponse("Can't have more than two banners submitted.");
             }
         }
+
+
+        $headers = @get_headers($link_name);
+        
+        if ($headers && strpos($headers[0], '200 OK') === false && $link_name != "") {
+            return JsonResponse::getErrorResponse("Invalid link");
+        }
+
+
 
         $specificPath = $close_date->format("Y");
         $actual_banner_name = "";
@@ -148,6 +158,7 @@ class BannerController extends AbstractController {
                 $specificPath,
                 $actual_banner_name,
                 $extra_name,
+                $link_name,
                 $release_date,
                 $close_date,
                 $folder_made_name

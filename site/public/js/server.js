@@ -308,12 +308,7 @@ function newUploadBanner() {
 }
 
 
-function newShowImage(information, type) {
-    if (type === "link") {
-        // For "link" type, open the provided link in a new tab directly
-        window.location.href = information;
-        return;
-    }
+function newShowImage(information, extraLink = null) {
 
 
     let form = $('#show-banner');
@@ -322,6 +317,8 @@ function newShowImage(information, type) {
 
 
     $('#theImage', form).attr('src', information);
+    $('#linking', form).attr('href', extraLink);
+
     captureTabInModal("show-banner");
 }
 
