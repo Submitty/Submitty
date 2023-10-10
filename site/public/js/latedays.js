@@ -7,7 +7,7 @@ function calculateLateDays(inputDate) {
         alert('Please select a gradeable first!');
         return;
     }
-    
+
     const due_date_value = select_menu.options[select_menu.selectedIndex].getAttribute('data-due-date');
     const new_due_date = DateTime.fromISO(inputDate);
     const old_due_date = DateTime.fromISO(due_date_value);
