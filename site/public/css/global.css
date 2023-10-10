@@ -88,8 +88,12 @@ nav a > i.f {
     text-decoration: none;
 }
 
+
 #logo-box {
     display: none;
+    position: absolute;
+    top: 0;
+    right: 0;
 }
 
 .system-message {
