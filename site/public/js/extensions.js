@@ -14,11 +14,11 @@ $(document).ready(() => {
     // https://stackoverflow.com/a/30021059
     $('#reason-for-exception').select2({
         tags: true,
-        theme: "bootstrap-5",
+        theme: 'bootstrap-5',
         createTag: (params) => ({
             id: params.term,
-            text: params.term
-        })
+            text: params.term,
+        }),
     });
 });
 

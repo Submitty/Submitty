@@ -40,7 +40,7 @@ class ExtensionsView extends AbstractView {
         if (empty($current_exceptions)) {
             $current_exceptions = null;
         }
-        $reasons = array("illness", "interview", "travel", "personal issue");
+        $reasons = ["illness", "interview", "travel", "personal issue"];
 
         return $this->core->getOutput()->renderTwigTemplate("admin/Extensions.twig", [
             "gradeables" => $gradeables,
