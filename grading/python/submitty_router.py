@@ -13,6 +13,7 @@ from datetime import timedelta
 import threading 
 import time
 import html
+import cchardet
 
 class submitty_router():
   '''
@@ -75,7 +76,36 @@ class submitty_router():
   # All messages will be passed through this function for optional decoding 
   # to string
   def sequence_diagram_message_preprocess(self, message):
-    return message
+    """
+    Preprocess a message for sequence diagram, attempting to decode it 
+    to a human-readable string.
+
+    Parameters:
+    - message(str): The message to be preprocessed.
+
+    Returns:
+    - result(str): The preprocessed message.
+    """
+    result = message
+    encoding_prediction = cchardet.detect(message)
+    confidence_threshold = 0.8
+    
+    if encoding_prediction['confidence'] > confidence_threshold:
+      try:
+        result = message.decode(encoding_prediction['encoding'])
+      except UnicodeDecodeError as e:
+        self.log(f"Error decoding message: {str(e)}")
+      except Exception as e:
+        self.log(f"Unexpected error during decoding: {str(e)}")
+    else:
+      self.log(f"Low confidence ({encoding_prediction['confidence']}) in detected encoding ({encoding_prediction['encoding']}). Using default decoding.")
+      try:
+        result = message.decode('utf-8', errors='replace')
+      except UnicodeDecodeError as e:
+        self.log(f"Error decoding message with default encoding (UTF-8): {str(e)}")
+      except Exception as e:
+        self.log(f"Unexpected error during decoding (UTF-8): {str(e)}")
+    return result
 
   def write_sequence_file(self, obj, status, message_type):
     append_write = 'a' if os.path.exists(self.sequence_diagram_file) else 'w'
