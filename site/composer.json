@@ -26,8 +26,8 @@
     "doctrine/annotations": "1.14.3",
     "doctrine/dbal": "2.13.9",
     "doctrine/orm": "2.16.2",
-    "egulias/email-validator": "3.2.6",
-    "lcobucci/jwt": "4.3.0",
+    "egulias/email-validator": "4.0.1",
+    "lcobucci/jwt": "5.0.0",
     "league/commonmark": "1.6.7",
     "maennchen/zipstream-php": "3.1.0",
     "onelogin/php-saml": "4.1.0",
@@ -52,7 +52,7 @@
   },
   "scripts": {
     "test": "phpunit",
-    "lint": "phpcs",
+    "lint": "phpcs --extensions=php ./app",
     "static-analysis": "phpstan analyze app public/index.php socket/index.php"
   }
 }
