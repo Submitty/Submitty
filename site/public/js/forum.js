@@ -86,8 +86,8 @@ function checkNumFilesForumUpload(input, post_id) {
 }
 
 function uploadImageAttachments(attachment_box) {
-    const observer = new MutationObserver(function(e) {
-        if (e[0].addedNodes.length == 0 || e[0].addedNodes[0].className == 'thumbnail') {
+    const observer = new MutationObserver((e) => {
+        if (e[0].addedNodes.length === 0 || e[0].addedNodes[0].className === 'thumbnail') {
             return;
         }
         // eslint-disable-next-line no-undef
@@ -114,9 +114,10 @@ function uploadImageAttachments(attachment_box) {
     });
     $(attachment_box).each(function() {
         observer.observe($(this)[0], {
-            childList : true, 
+            childList : true,
             subtree: true,
-    })});
+        });
+    });
 }
 
 function testAndGetAttachments(post_box_id, dynamic_check) {
