@@ -134,7 +134,7 @@ class SelfRejoinController extends AbstractController {
             $last_name = $user->getLegalFamilyName();
         }
 
-        $course = ucwords($this->core->getConfig()->getCourse());
+        $course = $this->core->getConfig()->getCourse();
         $term = $this->core->getConfig()->getTerm();
 
         $subject = "User Rejoin: $first_name $last_name ($user_id) of $term $course";
