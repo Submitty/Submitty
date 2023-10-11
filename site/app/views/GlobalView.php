@@ -50,31 +50,18 @@ class GlobalView extends AbstractView {
             //FUTURE MIGHT NEED TO FIX SO WE ADD MID PATH
             $semiPath = FileUtils::joinPaths($this->core->getConfig()->getSubmittyPath(), "community_events", $banner->getClosingDate()->format('Y'), $banner->getFolderName());
             $pathName = FileUtils::joinPaths($semiPath, $banner->getName());
-
+            $extraPathName = FileUtils::joinPaths($semiPath, $banner->getExtraInfo());
             if (!is_file($extraPathName)) {
                 $images_data_array[] = [
                     "name" => $banner->getName(),
                     "id" => $banner->getId(),
                     "data" => base64_encode(file_get_contents($pathName)),
-                    "type" => "link",
                     "extra_info" => "",
                     "link_name" => $banner->getLinkName()
                 ];
-            }
-
-
-            if (strlen($banner->getExtraInfo()) == 0) {
-                $images_data_array[] = [
-                    "name" => $banner->getName(),
-                    "id" => $banner->getId(),
-                    "data" => base64_encode(file_get_contents($pathName)),
-                    "type" => "none",
-                    "extra_info" => $banner->getExtraInfo()
-                ];
                 continue;
             }
-            $extraPathName = FileUtils::joinPaths($semiPath, $banner->getExtraInfo());
-            $type = "image";
+
 
 
             $extraFile = "";
@@ -86,8 +73,8 @@ class GlobalView extends AbstractView {
                 "name" => $banner->getName(),
                 "id" => $banner->getId(),
                 "data" => base64_encode(file_get_contents($pathName)),
-                "type" => $type,
-                "extra_info" => $extraFile
+                "extra_info" => $extraFile,
+                "link_name" => $banner->getLinkName()
             ];
         }
 
