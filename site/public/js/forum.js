@@ -86,15 +86,18 @@ function checkNumFilesForumUpload(input, post_id) {
 }
 
 function uploadImageAttachments(attachment_box) {
-    $(attachment_box).on('DOMNodeInserted',(e) => {
+    const observer = new MutationObserver(function(e) {
+        if (e[0].addedNodes.length == 0 || e[0].addedNodes[0].className == 'thumbnail') {
+            return;
+        }
         // eslint-disable-next-line no-undef
-        const part = get_part_number(e);
+        const part = get_part_number(e[0]);
         if (isNaN(parseInt(part))) {
             return;
         }
-        const target = $(e.target);
+        const target = $(e[0].target).find('tr')[$(e[0].target).find('tr').length - 1];
         let file_object = null;
-        const filename = target.attr('fname');
+        const filename = $(target).attr('fname');
         // eslint-disable-next-line no-undef
         for (let j = 0; j < file_array[part-1].length; j++) {
             // eslint-disable-next-line no-undef
@@ -109,6 +112,11 @@ function uploadImageAttachments(attachment_box) {
         $(image).css('background-image', `url(${window.URL.createObjectURL(file_object)})`);
         target.prepend(image);
     });
+    $(attachment_box).each(function() {
+        observer.observe($(this)[0], {
+            childList : true, 
+            subtree: true,
+    })});
 }
 
 function testAndGetAttachments(post_box_id, dynamic_check) {
