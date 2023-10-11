@@ -23,7 +23,15 @@ describe('Test cases involving the files panel', () => {
         cy.login('instructor');
         cy.get('.btn').contains('View All').click();
         cy.get('#details-table').contains('mccule').siblings().eq(6).click();
-        cy.get('#submission_browser_btn').click();
+
+        cy.get('#two-panel-mode-btn').click();
+        cy.get('[onclick="changePanelsLayout(1, false)"]').click();
+        cy.reload()
+        cy.get('#submission_browser').then(($panel) => {
+            if (!$panel.hasClass('active')) {
+                cy.get('#submission_browser_btn').click();
+            }
+        })
     });
 
     it('test the open/close submissions and results buttons', () => {
