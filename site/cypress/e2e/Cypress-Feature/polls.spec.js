@@ -6,20 +6,40 @@
  */
 
 describe('Test cases revolving around polls functionality', () => {
+    function openPolls(dropdown_name, table_name) {
+        cy.get(table_name).then(($table) => {
+            if (!$table.hasClass('active')) {
+                cy.get(dropdown_name).click();
+            }
+        });
+        cy.get(table_name).should('be.visible');
+    }
+
+     function closePolls(dropdown_name, table_name) {
+        cy.get(table_name).then(($table) => {
+            if ($table.hasClass('active')) {
+                cy.get(dropdown_name).click();
+            }
+        });
+        cy.get(table_name).should('not.be.visible');
+    }
+
     it('Should verify the default settings and functionality of the dropdown bars', () => {
         // log in from instructor account
         cy.visit(['sample', 'polls']);
         cy.login();
 
-        // verify the today's and tomorrow's sections are open by default
-        cy.get('#today-table').should('be.visible');
-        cy.get('#tomorrow-table').should('be.visible');
+        // Setup default poll toggling if not already there.
+        openPolls('#today-table-dropdown', '#today-table');
+        openPolls('#tomorrow-table-dropdown', '#tomorrow-table');
         cy.get('#today-table-dropdown').click();
         cy.get('#today-table').should('not.be.visible');
         cy.get('#tomorrow-table-dropdown').click();
         cy.get('#tomorrow-table').should('not.be.visible');
 
-        // verify that old and future sections are not
+
+        closePolls('#old-table-dropdown', '#older-table');
+        closePolls('#future-table-dropdown', '#future-table');
         cy.get('#old-table-dropdown').click();
         cy.get('#older-table').should('be.visible');
         cy.get('#future-table-dropdown').click();

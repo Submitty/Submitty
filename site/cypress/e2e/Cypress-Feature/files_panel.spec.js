@@ -31,7 +31,7 @@ describe('Test cases involving the files panel', () => {
             if (!$panel.hasClass('active')) {
                 cy.get('#submission_browser_btn').click();
             }
-        })
+        });
     });
 
     it('test the open/close submissions and results buttons', () => {
