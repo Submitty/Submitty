@@ -135,11 +135,12 @@ class SelfRejoinController extends AbstractController {
         }
 
         $course = ucwords($this->core->getConfig()->getCourse());
+        $term = $this->core->getConfig()->getTerm();
 
-        $subject = "User Rejoin: $first_name $last_name ($user_id) of $course";
+        $subject = "User Rejoin: $first_name $last_name ($user_id) of $term $course";
         $body = <<<EMAIL
             The student $first_name $last_name ($user_id), who had been automatically removed
-            from the course $course, has readded themselves in section $joined_section.
+            from the course $course of term $term, has readded themselves in section $joined_section.
 
             Please move them to their appropiate section. If this rejoin was a mistake,
             you may move the student to the Null section.
