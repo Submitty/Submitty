@@ -24,6 +24,7 @@ jobs:
           fi
           echo "version=${TAG:1}" >> $GITHUB_OUTPUT
       - name: Acquire Job ID
+        if: failure()
         id: get-job-id
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
