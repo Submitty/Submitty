@@ -237,6 +237,77 @@ class DatabaseQueries {
     }
 
     /**
+     * Returns an array of the most recent activity a student has done in the course.
+     * The order is: gradeable access, gradeable submission, forum view, forum post,
+     *   queue join, and course material access.
+     * @param string $user_id Name of user.
+     * @return array<string|null> The timestamps of activity in this course.
+     */
+    public function getAttendanceInfoOneStudent(string $user_id): array {
+        $this->course_db->query("
+            WITH
+                Input (user_id) AS (VALUES (?)),
+                Gradeable_Access AS
+                    (SELECT timestamp, user_id
+                    FROM gradeable_access where user_id = (table Input)
+                    ORDER BY timestamp desc
+                    LIMIT 1),
+                Gradeable_Submission AS
+                    (SELECT submission_time, user_id
+                    FROM electronic_gradeable_data where user_id = (table Input)
+                    ORDER BY submission_time desc
+                    LIMIT 1),
+                Forum_View AS 
+                    (SELECT timestamp, user_id
+                    FROM viewed_responses where user_id = (table Input)
+                    ORDER BY timestamp desc
+                    LIMIT 1),
+                Forum_Post AS
+                    (SELECT timestamp, author_user_id
+                    FROM posts where author_user_id = (table Input)
+                    ORDER BY timestamp desc
+                    LIMIT 1),
+                Queue_Join AS
+                    (SELECT time_in, user_id
+                    FROM queue where user_id = (table Input)
+                    ORDER BY time_in desc
+                    LIMIT 1),
+                Course_Materials_Access AS
+                    (SELECT timestamp, user_id
+                    FROM course_materials_access where user_id = (table Input)
+                    ORDER BY timestamp desc
+                    LIMIT 1)
+            SELECT
+                Gradeable_Access.timestamp as gradeable_access,
+                Gradeable_Submission.submission_time as gradeable_submission,
+                Forum_View.timestamp as forum_view,
+                Forum_Post.timestamp as forum_post,
+                Queue_Join.time_in as queue_join,
+                Course_Materials_Access.timestamp as course_materials_access
+            FROM
+                Input
+            LEFT JOIN Gradeable_Access on Input.user_id = Gradeable_Access.user_id
+            LEFT JOIN Gradeable_Submission on Input.user_id = Gradeable_Submission.user_id
+            LEFT JOIN Forum_View on Input.user_id = Forum_View.user_id
+            LEFT JOIN Forum_Post on Input.user_id = Forum_Post.author_user_id
+            LEFT JOIN Queue_Join on Input.user_id = Queue_Join.user_id
+            LEFT JOIN Course_Materials_Access on Input.user_id = Course_Materials_Access.user_id;
+        ", [$user_id]);
+
+        $response = $this->course_db->row();
+
+        return array_map(
+            function ($element) {
+                if (is_null($element)) {
+                    return null;
+                }
+                return DateUtils::convertTimeStamp($this->core->getUser(), $element, 'Y-m-d H:i:s');
+            },
+            $response
+        );
+    }
+
+    /**
      * given a string with missing digits, get all similar numeric ids
      * should be given as '1_234_567' where '_' are positions to fill in
      *
@@ -420,6 +491,21 @@ SQL;
             $return[] = $row['term_id'];
         }
         return $return;
+    }
+
+    /**
+     * Returns the date of the current term's start date.
+     * @return string The start date of the current term.
+     */
+    public function getCurrentTermStartDate(): string {
+        $this->submitty_db->query("
+            SELECT start_date
+            FROM terms
+            ORDER BY start_date DESC
+            LIMIT 1
+        ");
+        $timestamp = $this->submitty_db->rows()[0]['start_date'];
+        return DateUtils::convertTimeStamp($this->core->getUser(), $timestamp, 'Y-m-d H:i:s');
     }
 
     /**
@@ -2170,8 +2256,47 @@ ORDER BY {$u_or_t}.{$section_key}",
 
         return $return;
     }
+    /**
+     * Gets the number of bad (late) graded submissions associated with this gradeable.
+     *
+     * @param  string $g_id gradeable id we are looking up
+     * @param  string $section_key key we are basing grading sections off of
+     * @param  boolean $is_team true if the gradeable is a team assignment
+     * @param  string $null_section to check if we look in the null section or not
+     * @return int the number of bad submissions
+     */
+    private function getBadSubmissionsCount(string $g_id, string $section_key, bool $is_team, string $null_section): int {
+        $u_or_t = "u";
+        $users_or_teams = "users";
+        $user_or_team_id = "user_id";
+        $null_section_condition = "";
+        if ($is_team) {
+            $u_or_t = "t";
+            $users_or_teams = "gradeable_teams";
+            $user_or_team_id = "team_id";
+        }
 
-    public function getAverageComponentScores($g_id, $section_key, $is_team, string $bad_submissions, string $null_section) {
+        if ($null_section !== 'include') {
+            $null_section_condition = "AND {$u_or_t}.{$section_key} IS NOT NULL";
+        }
+        $this->course_db->query(
+            "SELECT COUNT(*) as cnt
+            FROM gradeable_component AS gc, {$users_or_teams} AS {$u_or_t}
+            WHERE gc.g_id=? {$null_section_condition}
+            AND EXISTS (
+                SELECT 1
+                FROM late_day_cache AS ldc
+                WHERE ldc.{$user_or_team_id} = {$u_or_t}.{$user_or_team_id}
+                AND ldc.g_id=gc.g_id
+                AND ldc.submission_days_late > ldc.late_day_exceptions
+                AND ldc.late_days_change = 0
+            )",
+            [$g_id]
+        );
+        return $this->course_db->row()['cnt'];
+    }
+
+    public function getAverageComponentScores(string $g_id, string $section_key, bool $is_team, string $bad_submissions, string $null_section) {
         $u_or_t = "u";
         $users_or_teams = "users";
         $user_or_team_id = "user_id";
@@ -2189,7 +2314,7 @@ ORDER BY {$u_or_t}.{$section_key}",
             $null_section_condition = "AND {$u_or_t}.{$section_key} IS NOT NULL";
         }
         // Check if we want to include late (bad) submissions into the average
-        if ($bad_submissions !== 'include') {
+        if ($bad_submissions !== 'include' && $this->getBadSubmissionsCount($g_id, $section_key, $is_team, $null_section) > 0) {
             $bad_submissions_condition = "INNER JOIN(
                 SELECT DISTINCT ldc.{$user_or_team_id}
                 FROM late_day_cache AS ldc
@@ -2251,7 +2376,7 @@ ORDER BY gc_order
         return $return;
     }
 
-    public function getAverageGraderScores($g_id, $gc_id, $section_key, $is_team, string $bad_submissions, string $null_section) {
+    public function getAverageGraderScores(string $g_id, int $gc_id, string $section_key, bool $is_team, string $bad_submissions, string $null_section) {
         $u_or_t = "u";
         $users_or_teams = "users";
         $user_or_team_id = "user_id";
@@ -2267,7 +2392,7 @@ ORDER BY gc_order
             $null_section_condition = "AND {$u_or_t}.{$section_key} IS NOT NULL";
         }
         // Check if we want to include late (bad) submissions into the average
-        if ($bad_submissions !== 'include') {
+        if ($bad_submissions !== 'include' && $this->getBadSubmissionsCount($g_id, $section_key, $is_team, $null_section) > 0) {
             $bad_submissions_condition = "INNER JOIN(
                 SELECT DISTINCT ldc.{$user_or_team_id}
                 FROM late_day_cache AS ldc
@@ -2324,7 +2449,7 @@ ORDER BY gc_order
         return $return;
     }
 
-    public function getAverageAutogradedScores($g_id, $section_key, $is_team, string $bad_submissions, string $null_section) {
+    public function getAverageAutogradedScores(string $g_id, string $section_key, bool $is_team, string $bad_submissions, string $null_section) {
 
         $u_or_t = "u";
         $users_or_teams = "users";
@@ -2340,8 +2465,7 @@ ORDER BY gc_order
         if ($null_section !== 'include') {
             $null_section_condition = "AND {$u_or_t}.{$section_key} IS NOT NULL";
         }
-
-        if ($bad_submissions !== 'include') {
+        if ($bad_submissions !== 'include' && $this->getBadSubmissionsCount($g_id, $section_key, $is_team, $null_section) > 0) {
             $bad_submissions_condition = "INNER JOIN(
                 SELECT DISTINCT ldc.{$user_or_team_id}
                 FROM late_day_cache AS ldc
@@ -2424,7 +2548,7 @@ SELECT COUNT(*) from gradeable_component where g_id=?
         return new SimpleStat($this->core, $this->course_db->rows()[0]);
     }
 
-    public function getAverageForGradeable($g_id, $section_key, $is_team, string $override, string $bad_submissions, string $null_section) {
+    public function getAverageForGradeable(string $g_id, string $section_key, bool $is_team, string $override, string $bad_submissions, string $null_section) {
 
         $u_or_t = "u";
         $users_or_teams = "users";
@@ -2433,7 +2557,6 @@ SELECT COUNT(*) from gradeable_component where g_id=?
         $include = '';
         $null_section_condition = '';
         $bad_submissions_condition = '';
-
         if ($is_team) {
             $u_or_t = "t";
             $users_or_teams = "gradeable_teams";
@@ -2460,7 +2583,7 @@ SELECT COUNT(*) from gradeable_component where g_id=?
         }
 
         // Check if we want to include late (bad) submissions into the average
-        if ($bad_submissions !== 'include') {
+        if ($bad_submissions !== 'include' && $this->getBadSubmissionsCount($g_id, $section_key, $is_team, $null_section) > 0) {
             $bad_submissions_condition = "INNER JOIN(
                 SELECT DISTINCT ldc.{$user_or_team_id}
                 FROM late_day_cache AS ldc
@@ -5277,6 +5400,28 @@ AND gc_id IN (
     }
 
     /**
+     * Returns true if the student was ever in the course,
+     * even if they are in the null section now.
+     * @param string $user_id The name of the user.
+     * @param string $course The course we're looking at.
+     * @param string $term The term we're looking t.
+     * @return bool True if the student was ever in the course, false otherwise.
+     */
+    public function wasStudentEverInCourse(
+        string $user_id,
+        string $course,
+        string $term
+    ): bool {
+        $this->submitty_db->query("
+                SELECT user_id
+                FROM courses_users
+                WHERE user_id=? and course=? and term=?;
+            ", [$user_id, $course, $term]);
+        $row = $this->submitty_db->row();
+        return count($row) > 0;
+    }
+
+    /**
      * Determines if a course is 'active' or if it was dropped.
      *
      * This is used to filter out courses displayed on the home screen, for when
@@ -5606,7 +5751,8 @@ AND gc_id IN (
               eg.*,
               gamo.*,
               gc.*,
-              (SELECT COUNT(*) AS cnt FROM grade_inquiries WHERE g_id=g.g_id AND status = -1) AS active_grade_inquiries_count
+              (SELECT COUNT(*) AS cnt FROM grade_inquiries WHERE g_id=g.g_id AND status = -1) AS active_grade_inquiries_count,
+              (SELECT EXISTS (SELECT 1 FROM gradeable_data WHERE g_id=g.g_id)) AS any_manual_grades
             FROM gradeable g
               LEFT JOIN (
                 SELECT
