@@ -892,10 +892,10 @@ class ForumController extends AbstractController {
             }
 
             $markdown = !empty($_POST['markdown_status']);
-
+            
             $current_attachments = explode("\n", $original_post['attachment_name']);
             if (isset($_POST['deleted_attachments'])) {
-                foreach($_POST['deleted_attachments'] as $img) {
+                foreach(json_decode($_POST['deleted_attachments']) as $img) {
                     if(($key = array_search($img, $current_attachments)) !== false) unset($current_attachments[$key]);
                 }
             }

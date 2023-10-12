@@ -774,6 +774,7 @@ function modifyOrSplitPost(e) {
     e.preventDefault();
     const form = $(this);
     const formData = new FormData(form[0]);
+    formData.append("deleted_attachments", JSON.stringify((getDeletedAttachments())));
     const submit_url = form.attr('action');
 
     $.ajax({
@@ -978,6 +979,9 @@ function cancelEditPostForum() {
 
     //$('#existing-attachment-table').find('tbody').empty();
     $('.display-existing-attachments').css('display', 'none');
+    $('.display-existing-attachments').find('a.btn.btn-danger').each(function() {
+        unMarkForDeletion($(this));
+    });
 }
 
 // eslint-disable-next-line no-unused-vars
@@ -2211,10 +2215,8 @@ function forumFilterBar() {
 
 function getDeletedAttachments() {
     const deleted_attachments = [];
-    $('#existing-attachment-table').find('a').each(function() {
-        if($(this).attr('class') == 'btn btn-danger') {
+    $('.display-existing-attachments').find('a.btn.btn-danger').each(function() {
             deleted_attachments.push($(this).attr('name').substr(7));
-        }
     });
     return deleted_attachments;
 }
@@ -2242,7 +2244,7 @@ function updateThread(e) {
         expirationDate: $('input#expirationDate').val(),
         cat,
         markdown_status: parseInt($('input#markdown_input_').val()),
-        deleted_attachments: getDeletedAttachments(),
+        deleted_attachments: JSON.stringify(getDeletedAttachments()),
     };
 
     $.ajax({
