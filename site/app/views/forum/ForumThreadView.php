@@ -902,25 +902,27 @@ class ForumThreadView extends AbstractView {
 
                 $post_attachment["files"] = [];
 
-                $attachment_num_files = count($files);
+                //$attachment_num_files = count($files);
                 $attachment_id = "attachments_{$first_post['id']}";
                 $attachment_button_id = "button_attachments_{$first_post['id']}";
                 $attachment_file_count = 0;
                 $attachment_encoded_data = [];
 
                 foreach ($files as $file) {
-                    $path = rawurlencode($file['path']);
-                    $name = rawurlencode($file['name']);
-                    $url = $this->core->buildCourseUrl(['display_file']) . '?dir=forum_attachments&path=' . $path;
+                    if (in_array($file['name'], explode("\n", $first_post['attachment_name']))) {
+                        $path = rawurlencode($file['path']);
+                        $name = rawurlencode($file['name']);
+                        $url = $this->core->buildCourseUrl(['display_file']) . '?dir=forum_attachments&path=' . $path;
 
-                    $post_attachment["files"][] = [
-                        "file_viewer_id" => "file_viewer_" . $first_post['id'] . "_" . $attachment_file_count
-                    ];
+                        $post_attachment["files"][] = [
+                            "file_viewer_id" => "file_viewer_" . $first_post['id'] . "_" . $attachment_file_count
+                        ];
 
-                    $attachment_encoded_data[] = [$url, $first_post['id'] . '_' . $attachment_file_count, $name];
+                        $attachment_encoded_data[] = [$url, $first_post['id'] . '_' . $attachment_file_count, $name];
 
-                    $attachment_file_count++;
-                    $GLOBALS['totalAttachments']++;
+                        $attachment_file_count++;
+                        $GLOBALS['totalAttachments']++;
+                    }
                 }
 
                 $attachment_encoded_data[] = $attachment_id;
@@ -928,7 +930,7 @@ class ForumThreadView extends AbstractView {
                 $post_attachment["params"] = [
                     "well_id"   => $attachment_id,
                     "button_id" => $attachment_button_id,
-                    "num_files" => $attachment_num_files,
+                    "num_files" => $attachment_file_count,
                     "encoded_data" => json_encode($attachment_encoded_data),
                     "unencoded_data" => $attachment_encoded_data,
                 ];
@@ -1203,25 +1205,27 @@ class ForumThreadView extends AbstractView {
 
             $post_attachment["files"] = [];
 
-            $attachment_num_files = count($files);
+            //$attachment_num_files = count($files);
             $attachment_id = "attachments_{$post['id']}";
             $attachment_button_id = "button_attachments_{$post['id']}";
             $attachment_file_count = 0;
             $attachment_encoded_data = [];
 
             foreach ($files as $file) {
-                $path = rawurlencode($file['path']);
-                $name = rawurlencode($file['name']);
-                $url = $this->core->buildCourseUrl(['display_file']) . '?dir=forum_attachments&path=' . $path;
+                if (in_array($file['name'], explode("\n", $post['attachment_name']))) {
+                    $path = rawurlencode($file['path']);
+                    $name = rawurlencode($file['name']);
+                    $url = $this->core->buildCourseUrl(['display_file']) . '?dir=forum_attachments&path=' . $path;
 
-                $post_attachment["files"][] = [
-                    "file_viewer_id" => "file_viewer_" . $post_id . "_" . $attachment_file_count
-                ];
+                    $post_attachment["files"][] = [
+                        "file_viewer_id" => "file_viewer_" . $post_id . "_" . $attachment_file_count
+                    ];
 
-                $attachment_encoded_data[] = [$url, $post_id . '_' . $attachment_file_count, $name];
+                    $attachment_encoded_data[] = [$url, $post_id . '_' . $attachment_file_count, $name];
 
-                $attachment_file_count++;
-                $GLOBALS['totalAttachments']++;
+                    $attachment_file_count++;
+                    $GLOBALS['totalAttachments']++;
+                }
             }
 
             $attachment_encoded_data[] = $attachment_id;
@@ -1229,7 +1233,7 @@ class ForumThreadView extends AbstractView {
             $post_attachment["params"] = [
                 "well_id"   => $attachment_id,
                 "button_id" => $attachment_button_id,
-                "num_files" => $attachment_num_files,
+                "num_files" => $attachment_file_count,
                 "encoded_data" => json_encode($attachment_encoded_data),
                 "unencoded_data" => $attachment_encoded_data,
             ];
