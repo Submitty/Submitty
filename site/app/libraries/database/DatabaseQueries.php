@@ -183,7 +183,6 @@ class DatabaseQueries {
      * information such as logs for the course materials page, and logs
      * for the discussion forum page.
      */
-
     public function getAttendanceInfo(): array {
         $this->course_db->query("
         WITH
@@ -214,7 +213,11 @@ class DatabaseQueries {
         G AS
         (SELECT distinct on (user_id) user_id, time_in
         FROM queue
-        ORDER BY user_id, time_in desc)
+        ORDER BY user_id, time_in desc),
+        H AS
+        (SELECT distinct on (user_id) user_id, timestamp
+        FROM course_materials_access
+        ORDER BY user_id, timestamp desc)
         SELECT
         A.registration_section, A.user_id, A.user_givenname, user_familyname,
         B.timestamp as gradeable_access,
@@ -222,7 +225,8 @@ class DatabaseQueries {
         D.timestamp as forum_view,
         E.timestamp as forum_post,
         F.count as num_poll_responses,
-        G.time_in as office_hours_queue
+        G.time_in as office_hours_queue,
+        H.timestamp as course_materials_access
         FROM
         A
         left join B on A.user_id=B.user_id
@@ -231,6 +235,7 @@ class DatabaseQueries {
         left join E on A.user_id=E.author_user_id
         left join F on A.user_id=F.student_id
         left join G on A.user_id=G.user_id
+        left join H on A.user_id=H.user_id
         ORDER BY length(A.registration_section), A.registration_section, A.user_familyname, A.user_givenname, A.user_id;
         ");
         return $this->course_db->rows();
