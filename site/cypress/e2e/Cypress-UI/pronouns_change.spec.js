@@ -16,8 +16,8 @@ describe('Tests cases abut changing user pronouns', () => {
         cy.get('#edit-pronouns-submit').click();
 
         //ensure pronouns and display option changed on page
-        cy.get('#pronouns_val').contains('They/Them');
-        cy.get('#display_pronouns_val').contains('True');
+        cy.get('#pronouns_val').should('contain','They/Them');
+        cy.get('#display_pronouns_val').should('contain','True');
 
         cy.logout();
 
@@ -63,7 +63,7 @@ describe('Tests cases abut changing user pronouns', () => {
         cy.login('instructor');
 
         //Select text from photo area and parse to get pronoun
-        cy.get('.student-image-container > .name').first().contains('They/Them');
+        cy.get('.student-image-container > .name').first().should('contain','They/Them');
 
     });
 
