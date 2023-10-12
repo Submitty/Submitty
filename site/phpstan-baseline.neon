@@ -4336,6 +4336,11 @@ parameters:
 			path: app/libraries/database/DatabaseQueries.php
 
 		-
+			message: "#^Comparison operation \"\\>\" between int\\<min, 0\\> and 0 is always false\\.$#"
+			count: 1
+			path: app/libraries/database/DatabaseQueries.php
+
+		-
 			message: "#^If condition is always true\\.$#"
 			count: 1
 			path: app/libraries/database/DatabaseQueries.php
@@ -10532,12 +10537,12 @@ parameters:
 			path: app/views/AutoGradingView.php
 
 		-
-			message: "#^Method app\\\\views\\\\AutoGradingView\\:\\:convertToAnonPath\\(\\) has parameter \\$gradeable with no type specified\\.$#"
+			message: "#^Method app\\\\views\\\\AutoGradingView\\:\\:convertToAnonPath\\(\\) has parameter \\$g_id with no type specified\\.$#"
 			count: 1
 			path: app/views/AutoGradingView.php
-			
+
 		-
-			message: "#^Method app\\\\views\\\\AutoGradingView\\:\\:convertToAnonPath\\(\\) has parameter \\$g_id with no type specified\\.$#"
+			message: "#^Method app\\\\views\\\\AutoGradingView\\:\\:convertToAnonPath\\(\\) has parameter \\$gradeable with no type specified\\.$#"
 			count: 1
 			path: app/views/AutoGradingView.php
 

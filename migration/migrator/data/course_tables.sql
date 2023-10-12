@@ -595,16 +595,18 @@ CREATE FUNCTION public.random_string(length integer) RETURNS text
 
 
 --
--- Name: update_last_nonnull_rotating_section(); Type: FUNCTION; Schema: public; Owner: -
+-- Name: update_previous_rotating_section(); Type: FUNCTION; Schema: public; Owner: -
 --
 
-CREATE FUNCTION public.update_last_nonnull_rotating_section() RETURNS trigger
+CREATE FUNCTION public.update_previous_rotating_section() RETURNS trigger
     LANGUAGE plpgsql
     AS $$
 BEGIN
-	IF (NEW.rotating_section IS NOT NULL AND OLD.rotating_section IS NULL)
-		OR (NEW.rotating_section != OLD.rotating_section) THEN
-		NEW.last_nonnull_rotating_section := NEW.rotating_section;
+	IF (
+		(NEW.rotating_section IS NULL AND OLD.rotating_section IS NOT NULL)
+		OR NEW.rotating_section != OLD.rotating_section
+	) THEN
+		NEW.previous_rotating_section := OLD.rotating_section;
 	END IF;
 	RETURN NEW;
 END;
@@ -1827,7 +1829,7 @@ CREATE TABLE public.users (
     display_name_order character varying(255) DEFAULT 'GIVEN_F'::character varying NOT NULL,
     display_pronouns boolean DEFAULT false,
     user_preferred_locale character varying,
-    last_nonnull_rotating_section character varying,
+    previous_rotating_section integer,
     CONSTRAINT check_registration_type CHECK (((registration_type)::text = ANY (ARRAY[('graded'::character varying)::text, ('audit'::character varying)::text, ('withdrawn'::character varying)::text, ('staff'::character varying)::text]))),
     CONSTRAINT users_user_group_check CHECK (((user_group >= 1) AND (user_group <= 4))),
     CONSTRAINT users_user_last_initial_format_check CHECK (((user_last_initial_format >= 0) AND (user_last_initial_format <= 3)))
@@ -2561,10 +2563,10 @@ CREATE TRIGGER add_course_user AFTER INSERT OR UPDATE ON public.users FOR EACH R
 
 
 --
--- Name: users before_update_users_update_last_nonnull_rotating_section; Type: TRIGGER; Schema: public; Owner: -
+-- Name: users before_update_users_update_previous_rotating_section; Type: TRIGGER; Schema: public; Owner: -
 --
 
-CREATE TRIGGER before_update_users_update_last_nonnull_rotating_section BEFORE UPDATE ON public.users FOR EACH ROW EXECUTE PROCEDURE public.update_last_nonnull_rotating_section();
+CREATE TRIGGER before_update_users_update_previous_rotating_section BEFORE UPDATE ON public.users FOR EACH ROW EXECUTE PROCEDURE public.update_previous_rotating_section();
 
 
 --
