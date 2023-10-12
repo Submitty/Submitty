@@ -1,1 +1,30 @@
-{% if render_markdown %}{% include "misc/Markdown.twig" with { content: post_content } only %}{% else %}{{ post_content }}{% endif %}
+{% if render_markdown %}
+    {% include "misc/Markdown.twig" with { content: post_content } only %}
+{% else %}
+    {{ post_content }}
+{% endif %}
+{% if post_attachment is defined %}
+    {% if post_attachment.exist == true %}
+        <table>
+            <thead>
+                <tr>
+                    <th>Attached Images</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for row in post_attachment.params.unencoded_data %}
+                {% if row[2] is defined %}
+                    <tr>
+                        <td>
+                            <img src="{{ row[0] }}", alt="Click to view attachment in popup", title="Click to view attachment in popup", class="attachment-img", onclick="openInWindow(this)"/>
+                        <td/>
+                    </tr>
+                    <tr>
+                        <td class="display-attachment-name">{{ row[2] }}<td/>
+                    </tr>
+                    {% endif %}
+                {% endfor %}
+            </tbody>
+        </table>
+    {% endif %}
+{% endif %}

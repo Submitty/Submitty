@@ -2109,6 +2109,11 @@ function loadInlineImages(encoded_data) {
 
 }
 
+function openInWindow(img) {
+    const url = $(img).attr('src');
+    window.open(url,'_blank','toolbar=no,scrollbars=yes,resizable=yes, width=700, height=600');
+}
+
 // eslint-disable-next-line no-unused-vars, no-var
 var filters_applied = [];
 
