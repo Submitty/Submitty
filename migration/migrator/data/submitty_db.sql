@@ -374,16 +374,18 @@ CREATE FUNCTION public.sync_user() RETURNS trigger
 
 
 --
--- Name: update_last_nonnull_section(); Type: FUNCTION; Schema: public; Owner: -
+-- Name: update_previous_registration_section(); Type: FUNCTION; Schema: public; Owner: -
 --
 
-CREATE FUNCTION public.update_last_nonnull_section() RETURNS trigger
+CREATE FUNCTION public.update_previous_registration_section() RETURNS trigger
     LANGUAGE plpgsql
     AS $$
 BEGIN
-	IF (NEW.registration_section IS NOT NULL AND OLD.registration_section IS NULL)
-		OR (NEW.registration_section != OLD.registration_section) THEN
-		NEW.last_nonnull_registration_section := NEW.registration_section;
+	IF (
+		(NEW.registration_section IS NULL AND OLD.registration_section IS NOT NULL)
+		OR NEW.registration_section != OLD.registration_section
+	) THEN
+		NEW.previous_registration_section := OLD.registration_section;
 	END IF;
 	RETURN NEW;
 END;
@@ -433,7 +435,7 @@ CREATE TABLE public.courses_users (
     registration_section character varying(255),
     registration_type character varying(255) DEFAULT 'graded'::character varying,
     manual_registration boolean DEFAULT false,
-    last_nonnull_registration_section character varying NOT NULL,
+    previous_registration_section character varying,
     CONSTRAINT check_registration_type CHECK (((registration_type)::text = ANY (ARRAY[('graded'::character varying)::text, ('audit'::character varying)::text, ('withdrawn'::character varying)::text, ('staff'::character varying)::text]))),
     CONSTRAINT users_user_group_check CHECK (((user_group >= 1) AND (user_group <= 4)))
 );
@@ -788,10 +790,10 @@ CREATE TRIGGER before_delete_sync_delete_user BEFORE DELETE ON public.courses_us
 
 
 --
--- Name: courses_users before_update_courses_update_last_nonnull_section; Type: TRIGGER; Schema: public; Owner: -
+-- Name: courses_users before_update_courses_update_previous_registration_section; Type: TRIGGER; Schema: public; Owner: -
 --
 
-CREATE TRIGGER before_update_courses_update_last_nonnull_section BEFORE UPDATE ON public.courses_users FOR EACH ROW EXECUTE PROCEDURE public.update_last_nonnull_section();
+CREATE TRIGGER before_update_courses_update_previous_registration_section BEFORE UPDATE ON public.courses_users FOR EACH ROW EXECUTE PROCEDURE public.update_previous_registration_section();
 
 
 --

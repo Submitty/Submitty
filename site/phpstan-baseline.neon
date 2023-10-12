@@ -4336,6 +4336,11 @@ parameters:
 			path: app/libraries/database/DatabaseQueries.php
 
 		-
+			message: "#^Comparison operation \"\\>\" between int\\<min, 0\\> and 0 is always false\\.$#"
+			count: 1
+			path: app/libraries/database/DatabaseQueries.php
+
+		-
 			message: "#^If condition is always true\\.$#"
 			count: 1
 			path: app/libraries/database/DatabaseQueries.php
