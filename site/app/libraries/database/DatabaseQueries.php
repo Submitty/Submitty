@@ -495,11 +495,11 @@ SQL;
 
     /**
      * Returns the provided term's start date in the given user's timezone.
-     * @param string Id of term we are checking.
-     * @param User User whose timezone we get the date in.
+     * @param string $term Id of term we are checking.
+     * @param User $user whose timezone we get the date in.
      * @return string The start date of the term.
      */
-    public function getTermStartDate($term, $user): string {
+    public function getTermStartDate(string $term, User $user): string {
         $this->submitty_db->query("
             SELECT start_date
             FROM terms
