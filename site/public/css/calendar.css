@@ -230,7 +230,7 @@ a.cal-gradeable-status-ann {
 a.cal-gradeable-status-ann:hover {
     padding: 0;
     font-style: italic;
-    cursor: default;
+    cursor: pointer;
     border-style: solid;
     border-width: 3px!important;
 }

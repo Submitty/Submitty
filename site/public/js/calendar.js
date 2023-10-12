@@ -147,7 +147,7 @@ function generateCalendarItem(item) {
     if (link !== '') {
         element.href = link;
     }
-    if (onclick !== '' && exists) {
+    if (onclick !== '') {
         if (!item['show_due']) {
             element.onclick = () => editCalendarItemForm(item['status'], item['title'], item['id'], item['date'], item['semester'], item['course']);
         }
