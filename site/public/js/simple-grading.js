@@ -252,7 +252,6 @@ function updateCheckpointCells(elems, scores, no_cookie) {
                     elem.attr('data-score', elem.data('score'));      // update the score
                     elem.attr('data-grader', elem.data('grader'));    // update new grader
                     elem.find('.simple-grade-grader').text(elem.data('grader'));
-
                 });
                 window.socketClient.send({'type': 'update_checkpoint', 'elem': elems.attr('id').split('-')[3], 'user': parent.data('anon'), 'score': elems.data('score'), 'grader': elems.data('grader')});
             }
@@ -893,8 +892,6 @@ function checkpointSocketHandler(elem_id, anon_id, score, grader) {
         elem.data('grader', grader);
         elem.attr('data-grader', grader);
         elem.find('.simple-grade-grader').text(grader);
-        elem.find('.simple-grade-grader').css('display', 'block');
-
         switch (score) {
             case 1.0:
                 elem.addClass('simple-full-credit');
