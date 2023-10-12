@@ -74,18 +74,45 @@
         </div>
 
         {# Legend #}
+        {% if show_legend == 1 %}
         <div class="cal-legend">
             {% if show_all_cookie == 1 %}
                 {% for course in course_names %}
-                <div name="{{course.course_name|replace({' ':''})}}" class="legend-color" onclick="openOptionsModal()" style="cursor: pointer;" title="Click to open Calendar options form"></div>
-                <p for="{{course.course_name|replace({' ':''})}}-color" style="cursor: pointer;" onclick="filter_course('{{course.course_name}},{{course.display_name}}')" title="Click to filter course, click again to show all courses" class="legend-label">{{course.display_name}}</p>
-
+                <div 
+                    name="{{course.course_name|replace({' ':''})}}" 
+                    class="legend-color" 
+                    onclick="filter_course('{{course.course_name}},{{course.display_name}}')" 
+                    style="cursor: pointer;" 
+                    title="Click to open Calendar options form"
+                ></div>
+                <p 
+                    for="{{course.course_name|replace({' ':''})}}-color" 
+                    style="cursor: pointer;" 
+                    onclick="filter_course('{{course.course_name}},{{course.display_name}}')" 
+                    title="Click to filter course, click again to show all courses" 
+                    class="legend-label"
+                    >{{course.display_name}}
+                </p>
                 {% endfor %}
             {% else %}
-                <div name="{{calendar_course_cookie|replace({' ':''})}}" class="legend-color" onclick="openOptionsModal()" style="cursor: pointer;" title="Click to open Calendar options form"></div>
-                <p for="{{calendar_course_cookie|replace({' ':''})}}-color" style="cursor: pointer;" onclick="filter_course('{{"show all"}},{{""}}')" title="Click to filter course, click again to show all courses" class="legend-label">{{display_name_cookie}}</p>
+                <div 
+                    name="{{calendar_course_cookie|replace({' ':''})}}" 
+                    class="legend-color" 
+                    onclick="filter_course('{{"show all"}},{{""}}')"
+                    style="cursor: pointer;" 
+                    title="Click to open Calendar options form"
+                ></div>
+                <p 
+                    for="{{calendar_course_cookie|replace({' ':''})}}-color" 
+                    style="cursor: pointer;" 
+                    onclick="filter_course('{{"show all"}},{{""}}')" 
+                    title="Click to filter course, click again to show all courses" 
+                    class="legend-label"
+                    >{{display_name_cookie}}
+                </p>
             {% endif %}
         </div>
+        {% endif %}
 
         <div class="calendar" style='margin-bottom: 20px;' id="full-calendar">
             {# Replace by js function call #}
