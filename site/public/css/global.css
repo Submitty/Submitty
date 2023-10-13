@@ -104,7 +104,7 @@ nav a > i.f {
 
 #moving-unit {
     z-index: 90;
-    position: fixed;
+    position: absolute;
     right: 20%;
 }
 
