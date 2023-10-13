@@ -3,28 +3,23 @@
 {% else %}
     {{ post_content }}
 {% endif %}
-{% if post_attachment is defined %}
-    {% if post_attachment.exist == true %}
-        <table>
-            <thead>
+{% if post_attachment is defined and post_attachment.exist == true %}
+    <table>
+        <tbody class="history-attachment-table", id="history-table-{{ edit_id }}">
+            {% for row in post_attachment.params.unencoded_data %}
+            {% if row[2] is defined %}
                 <tr>
-                    <th>Attached Images</th>
+                    <td style="padding: 20px">
+                        <img src="{{ row[0] }}", alt="Click to view attachment in popup", title="Click to view attachment in popup", class="attachment-img", onclick="openInWindow(this)"/>
+                    <td/>
+                        <td class="attachment-name-history">{{ row[2] }}<td/>
                 </tr>
-            </thead>
-            <tbody>
-                {% for row in post_attachment.params.unencoded_data %}
-                {% if row[2] is defined %}
-                    <tr>
-                        <td>
-                            <img src="{{ row[0] }}", alt="Click to view attachment in popup", title="Click to view attachment in popup", class="attachment-img", onclick="openInWindow(this)"/>
-                        <td/>
-                    </tr>
-                    <tr>
-                        <td class="display-attachment-name">{{ row[2] }}<td/>
-                    </tr>
-                    {% endif %}
-                {% endfor %}
-            </tbody>
-        </table>
-    {% endif %}
+                {% endif %}
+            {% endfor %}
+        </tbody>
+    </table>
+    <a class="btn btn-default history-attachment-btn", onclick="displayHistoryAttachment('{{ edit_id }}')">
+        Attachments
+        <span class="attachment-badge badge">{{ post_attachment.params.num_files }}</span>
+    </a>
 {% endif %}

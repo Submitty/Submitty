@@ -1276,6 +1276,10 @@ function modifyThreadList(currentThreadId, currentCategoriesId, course, loadFirs
     });
 }
 
+function displayHistoryAttachment(edit_id) {
+    $("#history-table-" + edit_id).toggle();
+}
+
 // eslint-disable-next-line no-unused-vars
 function replyPost(post_id) {
     if ( $(`#${post_id}-reply`).css('display') === 'block' ) {
@@ -1451,6 +1455,7 @@ function showHistory(post_id) {
                 // eslint-disable-next-line no-undef
                 $('#popup-post-history .form-body').prepend(box);
             }
+            $('.history-attachment-table').hide();
             generateCodeMirrorBlocks($('#popup-post-history')[0]);
         },
         error: function() {

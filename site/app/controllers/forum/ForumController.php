@@ -1167,15 +1167,18 @@ class ForumController extends AbstractController {
         $oc = $current_post["author_user_id"];
         $anon = $current_post["anonymous"];
         $GLOBALS['totalAttachments'] = 0;
+        $edit_id = 0;
         foreach ($older_posts as $post) {
             $_post['user'] = !$this->modifyAnonymous($oc) && $oc == $post["edit_author"] && $anon ? '' : $post["edit_author"];
             $_post['content'] = $this->core->getOutput()->renderTwigTemplate("forum/RenderPost.twig", [
                 "post_content" => $post["content"],
                 "render_markdown" => false,
                 "post_attachment" => ForumUtils::getForumAttachments($current_post['id'], $current_post['thread_id'], $post['has_attachment'], $post['attachment_name'], $this->core->getConfig()->getCoursePath(), $this->core->buildCourseUrl(['display_file'])),
+                "edit_id" => $post_id . "-" . $edit_id,
             ]);
             $_post['post_time'] = DateUtils::parseDateTime($post['edit_timestamp'], $this->core->getConfig()->getTimezone())->format("n/j g:i A");
             $output[] = $_post;
+            $edit_id++;
         }
         if (count($output) == 0) {
             // Current post
@@ -1184,6 +1187,7 @@ class ForumController extends AbstractController {
                 "post_content" => $current_post["content"],
                 "render_markdown" => false,
                 "post_attachment" => ForumUtils::getForumAttachments($current_post['id'], $current_post['thread_id'], $current_post['has_attachment'], $current_post['attachment_name'], $this->core->getConfig()->getCoursePath(), $this->core->buildCourseUrl(['display_file'])),
+                "edit_id" => $post_id . "-" . $edit_id,
             ]);
             $_post['post_time'] = DateUtils::parseDateTime($current_post['timestamp'], $this->core->getConfig()->getTimezone())->format("n/j g:i A");
             $output[] = $_post;
