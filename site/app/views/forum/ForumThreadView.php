@@ -5,6 +5,7 @@ namespace app\views\forum;
 use app\libraries\DateUtils;
 use app\views\AbstractView;
 use app\libraries\FileUtils;
+use app\libraries\ForumUtils;
 use app\models\User;
 
 class ForumThreadView extends AbstractView {
@@ -891,7 +892,7 @@ class ForumThreadView extends AbstractView {
                 "current_user_posted" => $thread["current_user_posted"]
             ];
 
-            $post_attachment = $this->getForumAttachments($first_post['id'], $thread['id'], $first_post['has_attachment'], $first_post['attachment_name']);  
+            $post_attachment = ForumUtils::getForumAttachments($first_post['id'], $thread['id'], $first_post['has_attachment'], $first_post['attachment_name'], $this->core->getConfig()->getCoursePath(), $this->core->buildCourseUrl(['display_file']));  
 
             if ($is_full_page) {
                 $user_info = $this->core->getQueries()->getDisplayUserInfoFromUserId($first_post["author_user_id"]);
@@ -987,54 +988,6 @@ class ForumThreadView extends AbstractView {
         $post_content = preg_replace('/&lbrack;code&rsqb;(.*?)&lbrack;&sol;code&rsqb;/', '<textarea class="code">$1</textarea>', $post_content);
 
         return $post_content;
-    }
-
-    public function getForumAttachments($post_id, $thread_id, $has_attachment, $attachment_names) {
-        $thread_dir = FileUtils::joinPaths(FileUtils::joinPaths($this->core->getConfig()->getCoursePath(), "forum_attachments"), $thread_id);
-        $post_attachment = ["exist" => false];
-
-        if ($has_attachment) {
-            $post_attachment["exist"] = true;
-
-            $post_dir = FileUtils::joinPaths($thread_dir, $post_id);
-            $files = FileUtils::getAllFiles($post_dir);
-
-            $post_attachment["files"] = [];
-
-            //$attachment_num_files = count($files);
-            $attachment_id = "attachments_{$post_id}";
-            $attachment_button_id = "button_attachments_{$post_id}";
-            $attachment_file_count = 0;
-            $attachment_encoded_data = [];
-
-            foreach ($files as $file) {
-                if (in_array($file['name'], explode("\n", $attachment_names))) {
-                    $path = rawurlencode($file['path']);
-                    $name = rawurlencode($file['name']);
-                    $url = $this->core->buildCourseUrl(['display_file']) . '?dir=forum_attachments&path=' . $path;
-
-                    $post_attachment["files"][] = [
-                        "file_viewer_id" => "file_viewer_" . $post_id . "_" . $attachment_file_count
-                    ];
-
-                    $attachment_encoded_data[] = [$url, $post_id . '_' . $attachment_file_count, $name];
-
-                    $attachment_file_count++;
-                    $GLOBALS['totalAttachments']++;
-                }
-            }
-
-            $attachment_encoded_data[] = $attachment_id;
-
-            $post_attachment["params"] = [
-                "well_id"   => $attachment_id,
-                "button_id" => $attachment_button_id,
-                "num_files" => $attachment_file_count,
-                "encoded_data" => json_encode($attachment_encoded_data),
-                "unencoded_data" => $attachment_encoded_data,
-            ];
-        }
-        return $post_attachment;
     }
 
     public function createPost($thread_id, $post, $unviewed_posts, $first, $reply_level, $display_option, $includeReply, $render = false, $thread_announced = false) {
@@ -1200,7 +1153,7 @@ class ForumThreadView extends AbstractView {
             ];
         }
 
-        $post_attachment = $this->getForumAttachments($post_id, $thread_id, $post['has_attachment'], $post['attachment_name']);
+        $post_attachment = ForumUtils::getForumAttachments($post_id, $thread_id, $post['has_attachment'], $post['attachment_name'], $this->core->getConfig()->getCoursePath(), $this->core->buildCourseUrl(['display_file']));
 
         $post_box_id = 1;
         if ($this->core->getQueries()->isThreadLocked($thread_id) != 1 || $this->core->getUser()->accessFullGrading()) {
