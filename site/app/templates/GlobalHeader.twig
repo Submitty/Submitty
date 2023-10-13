@@ -419,8 +419,6 @@
     }
     images = currentImages.concat(seenImages);
 
-    console.log(images);
-    console.log("ok");
 
     if (getCookie("display") === "yes") showBanners();
 
@@ -437,6 +435,8 @@
                 var className = currentImages[0].className.split(' ')[1]
                 hiddenImages.push(className);
                 seenImages.push(currentImages[0]);
+                currentImages.shift();
+                images = currentImages.concat(seenImages);
                 setCookie('hiddenImages', JSON.stringify(hiddenImages));  
                 var duckdivElement = document.getElementById("moorthy-duck");
                 var wholeBannerElement = document.getElementById("banner");
@@ -452,16 +452,6 @@
             
 
                 bannerElement.addEventListener("animationend", function() {
-
-
-                currentImages.splice(0, 1);
-
-
-                seenImages.push(currentImages[0]);
-
-                currentImageIndex = images.length -1;
-
-                images = currentImages.concat(seenImages);
 
                 if (currentImages.length > 0 ) {
                     document.getElementById("triangle").style.display = "block";
@@ -499,13 +489,10 @@
             movingUnit.style.right = "20%";
         }
 
-
     }
 
     function changeImage(n) {
 
-        console.log("hi");
-        console.log(images);
         var originalIndex = currentImageIndex;
 
 
