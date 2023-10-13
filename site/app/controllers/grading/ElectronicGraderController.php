@@ -583,6 +583,7 @@ class ElectronicGraderController extends AbstractController {
         $peer_components = 0;
         $total_users_who_submitted = [];
         $graders_of_inquiries = [];
+        $verified_components = [];
 
         // Assure late day cache is calculated
         $this->core->getQueries()->generateLateDayCacheForUsers();
@@ -691,6 +692,7 @@ class ElectronicGraderController extends AbstractController {
             $num_components = count($gradeable->getNonPeerComponents());
             $viewed_grade = $this->core->getQueries()->getNumUsersWhoViewedGradeBySections($gradeable, $sections, $null_section_cookie);
             $histogram_data = $this->generateHistogramData($overall_scores);
+            $verified_components = $this->core->getQueries()->getVerifiedComponentsCountByGradingSections($gradeable_id, $sections, $section_key, $gradeable->isTeamAssignment());
         }
         $sections = [];
         //Either # of teams or # of students (for non-team assignments). Either case
@@ -892,7 +894,8 @@ class ElectronicGraderController extends AbstractController {
             $grade_inquiries,
             $graders_of_inquiries,
             $show_warnings,
-            $submissions_in_queue
+            $submissions_in_queue,
+            $verified
         );
     }
 
