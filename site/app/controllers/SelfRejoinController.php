@@ -36,14 +36,35 @@ class SelfRejoinController extends AbstractController {
         $course = $this->core->getConfig()->getCourse();
         $term = $this->core->getConfig()->getTerm();
 
-        // If manually removed from course, this was probably intentional removal.
-        if (
-            $user->isManualRegistration()
-            || !$this->core->getQueries()->
-                wasStudentEverInCourse($user_id, $course, $term)
-        ) {
+
+        // --------------------------------
+        // Reasons why you can't rejoin:
+
+        // Can't rejoin courses you were never in.
+        if (!$this->core->getQueries()->wasStudentEverInCourse($user_id, $course, $term)) {
             return false;
         }
+
+        // Can't rejoin a course if you're still registered.
+        if ($user->getRegistrationSection() !== null) {
+            return false;
+        }
+
+        // Can't rejoin archived courses.
+        $course_status = $this->core->getQueries()->getCourseStatus($term, $course);
+        if ($course_status === 2) {
+            return false;
+        }
+
+        // If manually removed from course, this was probably intentional removal.
+        if ($user->isManualRegistration()) {
+            return false;
+        }
+        // --------------------------------
+
+
+        // --------------------------------
+        // Meeting the requirements to rejoin
 
         $acceses = $this->core->getQueries()->getAttendanceInfoOneStudent($user_id);
         foreach ($acceses as $access_place => $timestamp) {
@@ -60,7 +81,10 @@ class SelfRejoinController extends AbstractController {
         if (abs(DateUtils::calculateDayDiff($term_start_date)) <= 14) {
             return true;
         }
+        // --------------------------------
 
+
+        // If don't meet requirements to rejoin, then can't rejoin.
         return false;
     }
 
@@ -111,11 +135,12 @@ class SelfRejoinController extends AbstractController {
         }
 
         $course = ucwords($this->core->getConfig()->getCourse());
+        $term = $this->core->getConfig()->getTerm();
 
-        $subject = "User Rejoin: $first_name $last_name ($user_id) of $course";
+        $subject = "User Rejoin: $first_name $last_name ($user_id) of $term $course";
         $body = <<<EMAIL
             The student $first_name $last_name ($user_id), who had been automatically removed
-            from the course $course, has readded themselves in section $joined_section.
+            from the course $course of term $term, has readded themselves in section $joined_section.
 
             Please move them to their appropiate section. If this rejoin was a mistake,
             you may move the student to the Null section.
