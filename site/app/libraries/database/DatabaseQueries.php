@@ -2136,6 +2136,11 @@ ORDER BY {$orderby}",
         return intval($this->course_db->row()['cnt']);
     }
 
+    public function getTotalVerifiedComponentCount($g_id) {
+        $this->course_db->query("SELECT count(*) AS cnt FROM gradeable_component_data WHERE GCD_VERIFIER_ID IS NOT NULL", [$g_id]);
+        return intval($this->course_db->row()['cnt']);
+    }
+
     public function getGradedComponentsCountByGradingSections($g_id, $sections, $section_key, $is_team) {
          $u_or_t = "u";
         $users_or_teams = "users";
@@ -2255,6 +2260,22 @@ ORDER BY {$u_or_t}.{$section_key}",
         }
 
         return $return;
+    }
+
+    public function getVerifiedComponentsCountByGradingSections($gradeable_id, $sections, $section_key, $is_team){
+        $u_or_t = "u";
+        $users_or_teams = "users";
+        $user_or_team_id = "user_id";
+        if ($is_team) {
+            $u_or_t = "t";
+            $users_or_teams = "gradeable_teams";
+            $user_or_team_id = "team_id";
+        }
+        $return = [];
+        
+        if(count($sections) > 0){
+            /* make seperate counts for teams and regular asssignments?? */
+        }
     }
 
     public function getAverageComponentScores($g_id, $section_key, $is_team, string $bad_submissions, string $null_section) {
