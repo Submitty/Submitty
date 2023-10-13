@@ -190,7 +190,9 @@
         {% if user_given_name != "" %}
         <div class= "speech-bubble-container" id= "speech-bubble-container">
         <button class="speech-bubble" id="speech-bubble" onclick = "showBanners()">
-          New Event!
+            <strong>
+             New Event!
+             </strong>
         </button >
         <div class="triangle" id="triangle"></div>
         </div>
@@ -423,6 +425,8 @@
     if (getCookie("display") === "yes") showBanners();
 
     function showBanners() {
+        console.log(images);
+        console.log(currentImageIndex);
         var movingUnit = document.getElementById("moving-unit");
         var bannerElement = document.getElementById("banner");
         if (bannerElement.style.display === "none") {
@@ -436,6 +440,7 @@
                 hiddenImages.push(className);
                 seenImages.push(currentImages[0]);
                 currentImages.shift();
+                currentImageIndex = images.length-1;
                 images = currentImages.concat(seenImages);
                 setCookie('hiddenImages', JSON.stringify(hiddenImages));  
                 var duckdivElement = document.getElementById("moorthy-duck");
@@ -472,6 +477,10 @@
             var duckdivElement = document.getElementById("moorthy-duck");
             movingUnit.style.animation = "none";
             duckdivElement.style.animation = "none";
+            if (currentImages.length > 0) {
+                document.getElementById("triangle").style.display = "block";
+                document.getElementById("speech-bubble").style.display = "block";
+            }
 
             duckdivElement.style.transform = "rotate(0deg)";
             document.getElementById("breadcrumbs").style.flexWrap = "wrap";

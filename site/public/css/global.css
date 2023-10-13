@@ -298,7 +298,7 @@ footer .footer-separator {
     left: -10px;
     padding: 10px;
     top: 7px;
-    font-size: 7px;
+    font-size: 10px;
 }
 
 .triangle {
@@ -310,7 +310,7 @@ footer .footer-separator {
     border-top: 15px solid #000000; /* Use the same background color as the circle */
     position: relative;
     top: -15px;
-    left: 50px;
+    left: 68px;
     transform: rotate(-90deg);
 }
 
