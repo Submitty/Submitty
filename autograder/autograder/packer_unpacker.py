@@ -399,7 +399,7 @@ def unpack_grading_results_zip(config, which_machine, which_untrusted, my_result
     if "term" in queue_obj:
         term_or_semester = "term"
     else:
-        config.logger.log_message(f"Generated config file is using 'semester' instead of 'term'")
+        config.logger.log_message("Generated config file is using 'semester' instead of 'term'")
         term_or_semester = "semester"
 
     job_id = queue_obj["job_id"]

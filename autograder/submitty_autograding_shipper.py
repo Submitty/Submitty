@@ -449,7 +449,7 @@ def prepare_job(
     if "term" in obj:
         term_or_semester = "term"
     else:
-        config.logger.log_message(f"Generated config file is using 'semester' instead of 'term'")
+        config.logger.log_message("Generated config file is using 'semester' instead of 'term'")
         term_or_semester = "semester"
 
     if "generate_output" not in obj:
@@ -493,7 +493,7 @@ def unpack_job(
     if "term" in obj:
         term_or_semester = "term"
     else:
-        config.logger.log_message(f"Generated config file is using 'semester' instead of 'term'")
+        config.logger.log_message("Generated config file is using 'semester' instead of 'term'")
         term_or_semester = "semester"
 
     if "generate_output" not in obj:
@@ -823,7 +823,7 @@ def checkout_vcs_repo(config, my_file):
     if "term" in obj:
         term_or_semester = "term"
     else:
-        config.logger.log_message(f"Generated config file is using 'semester' instead of 'term'")
+        config.logger.log_message("Generated config file is using 'semester' instead of 'term'")
         term_or_semester = "semester"
 
     partial_path = os.path.join(obj["gradeable"], obj["who"], str(obj["version"]))
@@ -1400,7 +1400,7 @@ def try_short_circuit(config: dict, queue_file: str) -> bool:
     if "term" in queue_obj:
         term_or_semester = "term"
     else:
-        config.logger.log_message(f"Generated config file is using 'semester' instead of 'term'")
+        config.logger.log_message("Generated config file is using 'semester' instead of 'term'")
         term_or_semester = "semester"
 
     gradeable_id = f"{queue_obj[term_or_semester]}/{queue_obj['course']}/{queue_obj['gradeable']}"

@@ -334,7 +334,7 @@ def grade_from_zip(
     if "term" in queue_obj:
         term_or_semester = "term"
     else:
-        config.logger.log_message(f"Generated config file is using 'semester' instead of 'term'")
+        config.logger.log_message("Generated config file is using 'semester' instead of 'term'")
         term_or_semester = "semester"
 
     if "generate_output" in queue_obj and queue_obj["generate_output"]:
