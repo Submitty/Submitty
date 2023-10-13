@@ -7156,7 +7156,7 @@ AND gc_id IN (
 //Make it pass in a paramater where if "Name" then sort by name. 
 //If "order" then keep it nomal
     public function getPastQueue($paramater = "off") {
-        //print($_COOKIE['sortStateTimeEntered']);
+        print($_COOKIE['sortStateTimeEntered']);
         //print("jiwdojfiodjfoidf");
         $off  = "ORDER BY ROW_NUMBER";
         $up   = "ORDER BY helper.user_id DESC";

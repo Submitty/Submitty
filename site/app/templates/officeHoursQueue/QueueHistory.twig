@@ -26,10 +26,8 @@
 
       {#onclick="changeAnon('{{ gradeable.getId() }}')">
                     {{ anon_mode ? "Disable Anonymous Mode" : "Enable Anonymous Mode" }}}
-
-
-
        {# <th scope="col"> <a href ="#" onclick = "sortTable(8)">Helped Started By</a></th>#}
+
         <th scope="col">
             <a href="#" onclick="toggleSort('HelpStartedBy')">Helped Started By
                 <span id="sortIndicator"></span>
@@ -43,8 +41,9 @@
       </tr>
     </thead>
     <tbody>
+      {% set js_return_value = '<script>callPHP()</script>' %}
       {% set history_count = 0 %}
-      {% for entry in viewer.getPastQueue() %}
+      {% for entry in viewer.getPastQueue(js_return_value) %}
         {% if (history_count < 25 or viewer.getFullHistory()) and (viewer.isGrader() or entry['user_id'] == viewer.getUserId()) %}
           {% set history_count = history_count + 1 %}
           <tr class="queue_history_{{entry['queue_code']}} queue_history_row">
@@ -87,6 +86,7 @@
                 <form method="post" action="{{base_url}}/{{entry['queue_code'] | url_encode }}/restore" onsubmit="return confirm('Are you sure you want to restore {{ entry['name'] }} to the queue?');">
                   <input type="hidden" name="csrf_token" value="{{ csrf_token }}"/>
                   <input type="hidden" name="entry_id" value="{{entry['entry_id']}}"/>
+
                   <button type="submit" class="btn btn-danger queue_restore_btn">Restore</button>
                 </form>
               </td>
@@ -104,30 +104,37 @@ var sortStateTimeEntered = "off";
 
 function toggleSort(column) {//per click actions handler
     var sortIndicator = document.getElementById("sortIndicator");
-    console.log("Hello world!")
     
     if (column == 'HelpStartedBy') {
         if (sortStateTimeEntered == "off") {
             sortStateTimeEntered = "up";
             sortIndicator.innerText = "▲";
             Cookies.set('sortStateTimeEntered', 'up'); // Save to cookie
-            //console.log(Cookies.get('sortStateTimeEntered'))
+            loadThreadHandler();
+
 
             // Add logic for sorting 'Time Entered' in ascending order here
         } else if (sortStateTimeEntered == "up") {
             sortStateTimeEntered = "down";
             sortIndicator.innerText = "▼";
             Cookies.set('sortStateTimeEntered', 'down'); // Save to cookie
-            
+            loadThreadHandler();
+
             // Add logic for sorting 'Time Entered' in descending order here
         } else if (sortStateTimeEntered == "down") {
             sortStateTimeEntered = "off";
             sortIndicator.innerText = ""; // Reset to down arrow for off state
             Cookies.set('sortStateTimeEntered', 'off'); // Save to cookie
+            loadThreadHandler();
 
             // Add logic for turning off sorting here
         }
     }
+}
+
+function callPHP(){
+    console.log(Cookies.get('sortStateTimeEntered'))
+    return Cookies.get('sortStateTimeEntered')
 }
 
 {#
