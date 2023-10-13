@@ -197,8 +197,7 @@ HTML;
         $this->addInternalJs('server.js');
         $this->addInternalJs('menu.js');
         $this->addInternalJs('testcase-output.js');
-
-        $this->addVendorJs(FileUtils::joinPaths('luxon', 'luxon.js'));
+        $this->addVendorJs(FileUtils::joinPaths('luxon', 'luxon.min.js'));
     }
 
     /**

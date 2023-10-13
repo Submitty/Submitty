@@ -262,7 +262,6 @@ if echo "{$result}" | grep -E -q "package(-lock)?.json"; then
 
     chown -R ${PHP_USER}:${PHP_USER} ${NODE_FOLDER}
 
-    #
     echo "Copy NPM packages into place"
     # clean out the old install so we don't leave anything behind
     rm -rf ${VENDOR_FOLDER}
@@ -325,7 +324,7 @@ if echo "{$result}" | grep -E -q "package(-lock)?.json"; then
     cp -R ${NODE_FOLDER}/jquery-ui-dist/images ${VENDOR_FOLDER}/jquery-ui/
     #luxon
     mkdir ${VENDOR_FOLDER}/luxon
-    cp ${NODE_FOLDER}/luxon/build/global/luxon.js ${VENDOR_FOLDER}/luxon
+    cp ${NODE_FOLDER}/luxon/build/global/luxon.min.js ${VENDOR_FOLDER}/luxon
     # pdfjs
     mkdir ${VENDOR_FOLDER}/pdfjs
     cp ${NODE_FOLDER}/pdfjs-dist/build/pdf.min.js ${VENDOR_FOLDER}/pdfjs
