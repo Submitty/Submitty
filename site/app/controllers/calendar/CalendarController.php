@@ -77,13 +77,17 @@ class CalendarController extends AbstractController {
                 }
             }
         }
-
         $gradeables_of_user = GradeableUtils::getAllGradeableListFromUserId($this->core, $user, $filtered_courses, $calendar_messages);
+        $this->core->loadCourseConfig("f23", "sample");
+        $this->core->loadCourseDatabase();
+        $future = $this->core->getQueries()->getGradeableConfig("123"); 
+        $this->core->loadMasterConfig();
+        //array_push($gradeables_of_user["gradeables"], $future);
 
         return new WebResponse(
             CalendarView::class,
             'showCalendar',
-            CalendarInfo::loadGradeableCalendarInfo($this->core, $gradeables_of_user, $filtered_courses, $calendar_messages),
+            CalendarInfo::loadGradeableCalendarInfo($this->core, $gradeables_of_user, $filtered_courses, $calendar_messages, $future),
             $courses
         );
     }

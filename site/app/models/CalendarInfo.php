@@ -47,6 +47,8 @@ class CalendarInfo extends AbstractModel {
      */
     private $items_by_sections = [];
 
+
+
     /**
      * @var array<string, string>
      * the structure is a string as the key and a string as the value
@@ -66,7 +68,9 @@ class CalendarInfo extends AbstractModel {
      * @param array $gradeables_of_user container of gradeables in the system
      * @return CalendarInfo
      */
-    public static function loadGradeableCalendarInfo(Core $core, array $gradeables_of_user, array $courses, array $calendar_items): CalendarInfo {
+    public static function loadGradeableCalendarInfo(Core $core, array $gradeables_of_user, array $courses, array $calendar_items, Gradeable $future): CalendarInfo {
+        //var_dump($gradeables_of_user["gradeables"]);
+       
         $info = new CalendarInfo($core);
         $date_format = $core->getConfig()->getDateTimeFormat()->getFormat('gradeable');
 
@@ -94,8 +98,8 @@ class CalendarInfo extends AbstractModel {
             GradeableList::GRADING => $gradeable_list->getGradingGradeables(),
             GradeableList::CLOSED => $gradeable_list->getClosedGradeables(),
             GradeableList::GRADED => $gradeable_list->getGradedGradeables(),
+            //GradeableList::FUTURE => [$future]
         ];
-
         foreach ($gradeable_list_sections as $section => $gradeables) {
             /** @var int $section */
             /** @var array<Gradeable> $gradeables */
@@ -132,6 +136,28 @@ class CalendarInfo extends AbstractModel {
                     'color' => $info->colors[$semester . $course_title],
                     'type' => 'gradeable'
                 ];
+                
+                $future = [
+                    'gradeable-id' => "123",
+                    'title' => "verynew",
+                    'semester' => "f23",
+                    'course' => "sample",
+                    'url' => 'http://localhost:1511/courses/f23/sample/gradeable/123',
+                    'onclick' => '',
+                    'submission' => '11/15/2023 @ 11:59 PM EST',
+                    'status' => "2",
+                    'status_note' => 'SUBMIT',
+                    'grading_open' => '11/15/2023 @ 11:59 PM EST',
+                    'grading_due' => '11/20/2023 @ 11:59 PM EST',
+                    'class' => '',
+                    'disabled' => false,
+                    'show_due' => true,
+                    'icon' => '',
+                    'color' => "var(--category-color-3)",
+                    'type' => 'gradeable'
+                ];
+
+                //var_dump($currGradeable);
 
                 // Put gradeables in current section by their id which consists of semester, course title and gradeable id
                 $curr_section['gradeables'][$id] = $currGradeable;
@@ -141,9 +167,14 @@ class CalendarInfo extends AbstractModel {
                 $info->items_by_date[$dueDate][] = $currGradeable;
             }
 
+
             // Put data of current section into the by-section map
             $info->items_by_sections[] = $curr_section;
         }
+        $curr_section['gradeables']["123"] = $future;
+        $info->items_by_date[$dueDate][] = $future;
+
+
         foreach ($courses as $course) {
             $cal_items = $calendar_items[$course->getTitle()];
             foreach ($cal_items as $cal_item) {

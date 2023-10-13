@@ -5711,6 +5711,7 @@ AND gc_id IN (
      * @throws ValidationException If any Gradeable or Component fails to construct
      */
     public function getGradeableConfig($id) {
+        echo $id;
         foreach ($this->getGradeableConfigs([$id]) as $gradeable) {
             return $gradeable;
         }

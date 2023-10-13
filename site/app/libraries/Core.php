@@ -139,6 +139,9 @@ class Core {
      * @throws \Exception
      */
     public function loadCourseConfig($semester, $course) {
+        echo $semester;
+        echo " ";
+        echo $course;
         if ($this->config === null) {
             throw new \Exception("Master config has not been loaded");
         }
