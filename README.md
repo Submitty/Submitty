@@ -12,7 +12,7 @@ System instructions located at [https://submitty.org/](https://submitty.org/)
 # Background
 
 [Submitty](https://submitty.org) is an open source course management, assignment submission, exam and grading system
-from the [Rensselaer Center for Open Source Software (RCOS)](https://rcos.io/),
+from the [Rensselaer Center for Open Source Software (RCOS)](https://new.rcos.io/),
 [Department of Computer Science](https://science.rpi.edu/computer-science) at
 [Rensselaer Polytechnic Institute](https://www.rpi.edu/).
 
