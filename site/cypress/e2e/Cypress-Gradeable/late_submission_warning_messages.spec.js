@@ -107,7 +107,7 @@ const SubmitAndCheckMessage = (gradeable_type, upload_file1,invalid_late_day,val
     cy.get('#submitted-files > div').should('contain', 'file1.txt');
     cy.get('#submitted-files > div').should('contain', 'file2.txt');
     //submit one more time to make sure no messages appears, if you're still in the same time window
-    cy.get('[fname = "file2.txt"] > td').first().contains('file2.txt').next('.file-trash').click();
+    cy.get('[fname="file2.txt"] .file-trash').click();
     cy.waitPageChange(() => {
         cy.get('#submit').click();
         cy.on('window:confirm', (t) => {
@@ -341,7 +341,7 @@ describe('Test warning messages for team gradeable', () => {
             cy.get('div.content').then((table) => {
                 if (table.find('#Delete').length > 0) {
                     cy.get('#delete-button').click();
-                    cy.get('div#success-0.inner-message.alert.alert-success').should('contain', ' Late days entry removed');
+                    cy.get('.alert-success').invoke('text').should('contain', 'Late days entry removed');
                     cy.get('a.fas.fa-times.key_to_click').click();
                     deleteLateDays();
                 }
