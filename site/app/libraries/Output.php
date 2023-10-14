@@ -193,11 +193,11 @@ HTML;
         $this->addVendorJs(FileUtils::joinPaths('jquery', 'jquery.min.js'));
         $this->addVendorJs(FileUtils::joinPaths('jquery-ui', 'jquery-ui.min.js'));
         $this->addVendorJs(FileUtils::joinPaths('js-cookie', 'js.cookie.min.js'));
+        $this->addVendorJs(FileUtils::joinPaths('luxon', 'luxon.min.js'));
         $this->addInternalJs('diff-viewer.js');
         $this->addInternalJs('server.js');
         $this->addInternalJs('menu.js');
         $this->addInternalJs('testcase-output.js');
-        $this->addVendorJs(FileUtils::joinPaths('luxon', 'luxon.min.js'));
     }
 
     /**
