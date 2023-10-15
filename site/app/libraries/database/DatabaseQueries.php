@@ -1677,19 +1677,31 @@ WHERE term=? AND course=? AND user_id=?",
      * ]
      */
     public function getLateDayCacheForUserGradeable(string $user_id, string $g_id): ?array {
-        $params = [$user_id, $g_id];
-        $query = "SELECT * FROM late_day_cache
-                    WHERE user_id=?
-                    AND g_id=?";
-        $this->course_db->query($query, $params);
+        static $cache = null;
+        if ($cache === null) {
+            $cache = [];
+            $full_query = "
+                SELECT * FROM late_day_cache WHERE g_id=?
+            ";
+            $this->course_db->query($full_query, [$g_id]);
+            $res = $this->course_db->rows();
+            foreach ($res as $row) {
+                $cache[$row["user_id"]] = $row;
+            }
+        }
 
-        $row = $this->course_db->row();
+        $row = $cache[$user_id];
 
         // If cache doesn't exist, generate it and query again
         if (empty($row)) {
+            $params = [$user_id, $g_id];
+            $query = "SELECT * FROM late_day_cache
+                    WHERE user_id=?
+                    AND g_id=?";
             $this->generateLateDayCacheForUser($user_id);
             $this->course_db->query($query, $params);
             $row = $this->course_db->row();
+            $cache[$user_id] = $row;
         }
 
         // If cache still doesn't exist, the gradeable is not associated with
