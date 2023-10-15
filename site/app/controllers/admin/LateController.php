@@ -227,7 +227,7 @@ class LateController extends AbstractController {
                 );
             }
             $reason_for_extension = null;
-            if (isset($_POST['reason_for_exception']) && $_POST['reason_for_exception'] != '') {
+            if (isset($_POST['reason_for_exception'])) {
                 $reason_for_exception = $_POST['reason_for_exception'];
             }
             else {

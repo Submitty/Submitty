@@ -57,6 +57,7 @@ function updateHomeworkExtension() {
 function deleteHomeworkExtension(user) {
     $('#user_id').val(user);
     $('#late-days').val(0);
+    $('#reason-for-exception').val('');
     updateHomeworkExtension();
 }
 
