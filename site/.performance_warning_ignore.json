@@ -9,7 +9,7 @@
   "/courses/<term>/<course>/gradeable/<gradeable>/team/invitation/accept",
   "/courses/<term>/<course>/gradeable/<gradeable>/team",
   "/courses/<term>/<course>/gradeable/<gradeable>/upload?merge=false&clobber=false",
-  "/courses/<term>/<course>/extentions/update",
+  "/courses/<term>/<course>/extensions/update",
   "/courses/<term>/<course>/gradeable/<gradeable>/components/save_pages",
   "/courses/<term>/<course>/gradeable/<gradeable>/RandomizePeers",
   "/courses/<term>/<course>/gradeable/<gradeable>/graders",
