@@ -7,6 +7,8 @@ use app\libraries\Core;
 use app\libraries\FileUtils;
 use app\libraries\SamlSettings;
 use OneLogin\Saml2\Auth;
+use OneLogin\Saml2\Error;
+use OneLogin\Saml2\ValidationError;
 
 class SamlAuthentication extends AbstractAuthentication {
     private $auth;
@@ -106,7 +108,13 @@ class SamlAuthentication extends AbstractAuthentication {
         }
         $request_id = $_SESSION['AuthnRequestID'];
         unset($_SESSION['AuthnRequestID']);
-        $this->auth->processResponse($request_id);
+        try {
+            $this->auth->processResponse($request_id);
+        }
+        catch (Error | ValidationError) {
+            $this->core->addErrorMessage("Invalid request. Please try again.");
+            return false;
+        }
 
         if ($this->auth->isAuthenticated() && empty($this->auth->getErrors())) {
             $attribute_name = $this->core->getConfig()->getSamlOptions()['username_attribute'];
