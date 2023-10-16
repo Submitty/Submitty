@@ -17,8 +17,8 @@ env:
   SUBMITTY_REPOSITORY: /usr/local/submitty/GIT_CHECKOUT/Submitty
   POSTGRES_HOST: localhost
   PHP_VER: 8.1
-  NODE_VERSION: 16
-  PYTHON_VERSION: 3.8
+  NODE_VERSION: 20
+  PYTHON_VERSION: "3.10"
 
 concurrency:
   # If this is a PR, cancel all previously running jobs on source branch
@@ -33,7 +33,7 @@ jobs:
       run:
         working-directory: site
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
       - uses: actions/setup-node@v3
         with:
           node-version: ${{ env.NODE_VERSION }}
@@ -55,7 +55,7 @@ jobs:
       run:
         working-directory: site
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
       - uses: actions/setup-node@v3
         with:
           node-version: ${{ env.NODE_VERSION }}
@@ -79,7 +79,7 @@ jobs:
       run:
         working-directory: site
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
       - uses: actions/setup-node@v3
         with:
           node-version: ${{ env.NODE_VERSION }}
@@ -105,8 +105,8 @@ jobs:
       run:
         working-directory: site
     steps:
-      - uses: actions/checkout@v3
-      - uses: shivammathur/setup-php@2.25.5
+      - uses: actions/checkout@v4
+      - uses: shivammathur/setup-php@2.26.0
         with:
           php-version: ${{ env.PHP_VER }}
       - name: Cache Composer
@@ -140,8 +140,8 @@ jobs:
       run:
         working-directory: site
     steps:
-      - uses: actions/checkout@v3
-      - uses: shivammathur/setup-php@2.25.5
+      - uses: actions/checkout@v4
+      - uses: shivammathur/setup-php@2.26.0
         with:
           php-version: ${{ env.PHP_VER }}
           extensions: imagick
@@ -170,7 +170,7 @@ jobs:
   python-lint:
     runs-on: ubuntu-22.04
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
       - uses: actions/setup-python@v4
         with:
           python-version: ${{ env.PYTHON_VERSION }}
@@ -192,7 +192,7 @@ jobs:
   python-unit:
     runs-on: ubuntu-22.04
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
       - uses: actions/setup-python@v4
         with:
           python-version: ${{ env.PYTHON_VERSION }}
@@ -269,7 +269,7 @@ jobs:
     name: yaml-lint
     runs-on: ubuntu-22.04
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
       - name: install yamllint
         run: sudo apt-get install -y yamllint
       - name: Run yamllint
@@ -280,7 +280,7 @@ jobs:
     name: ShellCheck
     runs-on: ubuntu-22.04
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
       - name: install ShellCheck
         run: sudo apt-get install -y shellcheck
       - name: Run ShellCheck
@@ -306,7 +306,7 @@ jobs:
 
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
       - uses: ./.github/actions/e2e-Setup-Composite
       # TODO: Remove this block after upgrading jsPDF
       - name: Cache Node Modules
@@ -323,6 +323,14 @@ jobs:
           npm install file-saver --save
           npm install --production=false
 
+      - name: Run accessibility test
+        uses: cypress-io/github-action@v6
+        with:
+          config: baseUrl=http://localhost
+          spec: cypress/e2e/Cypress-System/accessibility.spec.js
+          working-directory: ${{env.SUBMITTY_REPOSITORY}}/site
+          browser: chrome
+
       - name: Run API tests
         working-directory: ${{env.SUBMITTY_REPOSITORY}}/site
         run: npm run test:api
@@ -335,10 +343,10 @@ jobs:
           sudo systemctl stop submitty_autograding_shipper
 
       - name: Run autograding status test
-        uses: cypress-io/github-action@v5
+        uses: cypress-io/github-action@v6
         with:
           config: baseUrl=http://localhost
-          spec: cypress/e2e/cypress-system/autograding_status_1.spec.js
+          spec: cypress/e2e/Cypress-System/autograding_status_1.spec.js
           working-directory: ${{env.SUBMITTY_REPOSITORY}}/site
           browser: chrome
           env: autograding_shipper_off=True
@@ -348,10 +356,10 @@ jobs:
           sudo systemctl restart submitty_autograding_shipper
 
       - name: Run autograding status test
-        uses: cypress-io/github-action@v5
+        uses: cypress-io/github-action@v6
         with:
           config: baseUrl=http://localhost
-          spec: cypress/e2e/cypress-system/autograding_status_2.spec.js
+          spec: cypress/e2e/Cypress-System/autograding_status_2.spec.js
           working-directory: ${{env.SUBMITTY_REPOSITORY}}/site
           browser: chrome
           env: autograding_shipper_off=True
@@ -361,10 +369,10 @@ jobs:
           sudo systemctl restart submitty_autograding_worker
 
       - name: Run cypress e2e login tests with PAM auth
-        uses: cypress-io/github-action@v5
+        uses: cypress-io/github-action@v6
         with:
           config: baseUrl=http://localhost,chromeWebSecurity=false
-          spec: cypress/e2e/cypress-system/login.spec.js
+          spec: cypress/e2e/Cypress-System/login.spec.js
           working-directory: ${{env.SUBMITTY_REPOSITORY}}/site
           browser: chrome
 
@@ -372,10 +380,10 @@ jobs:
         run: sudo sed -ie "s/Pam/Database/g" ${SUBMITTY_INSTALL_DIR}/config/authentication.json
 
       - name: Run cypress e2e login tests with database auth
-        uses: cypress-io/github-action@v5
+        uses: cypress-io/github-action@v6
         with:
           config: baseUrl=http://localhost
-          spec: cypress/e2e/cypress-system/login.spec.js
+          spec: cypress/e2e/Cypress-System/login.spec.js
           working-directory: ${{env.SUBMITTY_REPOSITORY}}/site
           browser: chrome
 
@@ -383,10 +391,10 @@ jobs:
         run: sudo sed -ie "s/Database/Ldap/g" ${SUBMITTY_INSTALL_DIR}/config/authentication.json
 
       - name: Run cypress e2e login tests with LDAP auth
-        uses: cypress-io/github-action@v5
+        uses: cypress-io/github-action@v6
         with:
           config: baseUrl=http://localhost
-          spec: cypress/e2e/cypress-system/login.spec.js
+          spec: cypress/e2e/Cypress-System/login.spec.js
           working-directory: ${{env.SUBMITTY_REPOSITORY}}/site
           browser: chrome
 
@@ -399,10 +407,10 @@ jobs:
         run: sudo sed -ie "s/Ldap/Saml/g" ${SUBMITTY_INSTALL_DIR}/config/authentication.json
 
       - name: Run cypress e2e login tests with SAML auth
-        uses: cypress-io/github-action@v5
+        uses: cypress-io/github-action@v6
         with:
           config: baseUrl=http://localhost,chromeWebSecurity=false
-          spec: cypress/e2e/cypress-system/login.spec.js
+          spec: cypress/e2e/Cypress-System/login.spec.js
           working-directory: ${{env.SUBMITTY_REPOSITORY}}/site
           browser: chrome
 
@@ -421,14 +429,12 @@ jobs:
         working-directory: ${{ env.SUBMITTY_REPOSITORY }}
         run: sudo bash tests/test_site_error_log.sh
 
-  Cypress-Feature:
+  Cypress:
     runs-on: ubuntu-22.04
     strategy:
-      # don't fail the entire matrix on failure
       fail-fast: false
       matrix:
-        # run copies of the current job in parallel
-        containers: [1, 2, 3, 4]
+        containers: ["Gradeable", "Admin", "UI", "Feature"]
     services:
       postgres:
         image: postgres
@@ -446,7 +452,7 @@ jobs:
 
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
       - uses: ./.github/actions/e2e-Setup-Composite
       # TODO: Remove this block after upgrading jsPDF
       - name: Cache Node Modules
@@ -464,23 +470,28 @@ jobs:
           npm install --production=false
 
       - name: Run cypress e2e tests with pam auth
-        uses: cypress-io/github-action@v5
+        uses: cypress-io/github-action@v6
         with:
           config: baseUrl=http://localhost
           working-directory: ${{env.SUBMITTY_REPOSITORY}}/site
-          spec: cypress/e2e/cypress-feature/*
+          spec: cypress/e2e/Cypress-${{matrix.containers}}/*
           browser: chrome
           env: run_area=CI
-          record: true
-          parallel: true  # Runs test in parallel using settings above
-        env:
-          CYPRESS_RECORD_KEY: ${{ secrets.CYPRESS_RECORD_KEY }}
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          COMMIT_INFO_MESSAGE: ${{github.event.pull_request.title}}
 
       - name: Check for site errors
         working-directory: ${{ env.SUBMITTY_REPOSITORY }}
         run: sudo bash tests/test_site_error_log.sh
+
+      - uses: actions/upload-artifact@v3
+        if: failure()
+        with:
+          name: cypress-screenshots
+          path: ${{env.SUBMITTY_REPOSITORY}}/site/cypress/screenshots
+      - uses: actions/upload-artifact@v3
+        if: failure()
+        with:
+          name: cypress-videos
+          path: ${{env.SUBMITTY_REPOSITORY}}/site/cypress/videos
 
 
   Integration:
@@ -505,7 +516,7 @@ jobs:
 
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
       - uses: ./.github/actions/e2e-Setup-Composite
       - name: Run integration tests
         run: sudo -E env "PATH=$PATH" python3 /usr/local/submitty/test_suite/integrationTests/run.py

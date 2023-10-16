@@ -214,15 +214,6 @@ source ${CURRENT_DIR}/distro_setup/setup_distro.sh
 
 bash "${SUBMITTY_REPOSITORY}/.setup/update_system.sh"
 
-
-#################################################################
-# Node Package Setup
-####################
-# NOTE: with umask 0027, the npm packages end up with the wrong permissions.
-# (this happens if we re-run install_system on an existing installation).
-# So let's manually set the umask just for this call.
-(umask 0022 && npm install -g npm)
-
 #################################################################
 # STACK SETUP
 #################
@@ -333,7 +324,7 @@ if ! cut -d ':' -f 1 /etc/passwd | grep -q ${DAEMON_USER} ; then
     fi
 fi
 
-# The VCS directores (/var/local/submitty/vcs) are owfned by root:$DAEMONCGI_GROUP
+# The VCS directories (/var/local/submitty/vcs) are owned by root:$DAEMONCGI_GROUP
 usermod -a -G "${DAEMONPHP_GROUP}" "${DAEMON_USER}"
 usermod -a -G "${DAEMONCGI_GROUP}" "${DAEMON_USER}"
 
@@ -397,10 +388,17 @@ fi
 
 # Dr Memory is a tool for detecting memory errors in C++ programs (similar to Valgrind)
 
+# FIXME: Use of this tool should eventually be moved to containerized
+# autograding and not installed on the native primary and worker
+# machines by default
+
+# FIXME: DrMemory is also re-installed in INSTALL_SUBMITTY_HELPER.sh
+
 pushd /tmp > /dev/null
 
 echo "Getting DrMemory..."
 
+rm -rf /tmp/DrMemory*
 wget https://github.com/DynamoRIO/drmemory/releases/download/${DRMEMORY_TAG}/DrMemory-Linux-${DRMEMORY_VERSION}.tar.gz -o /dev/null > /dev/null 2>&1
 tar -xpzf DrMemory-Linux-${DRMEMORY_VERSION}.tar.gz
 rsync --delete -a /tmp/DrMemory-Linux-${DRMEMORY_VERSION}/ ${SUBMITTY_INSTALL_DIR}/drmemory
