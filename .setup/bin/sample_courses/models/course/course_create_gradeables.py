@@ -107,8 +107,8 @@ class Course_create_gradeables:
                     anon_team_id = None
                     if gradeable.team_assignment is True:
                         # If gradeable is team assignment, then make sure to make a team_id and don't over submit
-                        res = self.conn.execute("SELECT teams.team_id, gradeable_teams.anon_id FROM teams INNER JOIN gradeable_teams\
-                        ON teams.team_id = gradeable_teams.team_id where user_id='{}' and g_id='{}'".format(user.id, gradeable.id))
+                        res = self.conn.execute("SELECT teams.team_id, gradeable_teams.anon_id FROM teams INNER JOIN gradeable_teams"
+                                                f"ON teams.team_id = gradeable_teams.team_id where user_id='{user.id}' and g_id='{gradeable.id}'")
                         temp = res.fetchall()
                         if len(temp) != 0:
                             team_id = temp[0][0]
@@ -151,7 +151,7 @@ class Course_create_gradeables:
                             # only create these directories if we're actually going to put something in them
                             if not os.path.exists(gradeable_path):
                                 os.makedirs(gradeable_path)
-                                os.system("chown -R submitty_php:{}_tas_www {}".format(self.code, gradeable_path))
+                                os.system(f"chown -R submitty_php:{self.code}_tas_www {gradeable_path}")
                             if not os.path.exists(submission_path):
                                 os.makedirs(submission_path)
                             if gradeable.is_repository:
@@ -308,7 +308,7 @@ class Course_create_gradeables:
                     if gradeable.grade_start_date < NOW and os.path.exists(os.path.join(submission_path, str(versions_to_submit))):
                         if (gradeable.has_release_date is True and gradeable.grade_released_date < NOW) or (random.random() < 0.5 and (submitted or gradeable.type !=0)):
                             status = 1 if gradeable.type != 0 or submitted else 0
-                            print("Inserting {} for {}...".format(gradeable.id, user.id))
+                            print(f"Inserting {gradeable.id} for {user.id}...")
                             values = {'g_id': gradeable.id}
                             overall_comment_values = {'g_id' : gradeable.id,  'goc_overall_comment': 'lorem ipsum lodar', 'goc_grader_id' : self.instructor.id}
 
@@ -352,10 +352,10 @@ class Course_create_gradeables:
                                         first = False
 
                     if gradeable.type == 0 and os.path.isdir(submission_path):
-                        os.system("chown -R submitty_php:{}_tas_www {}".format(self.code, submission_path))
+                        os.system(f"chown -R submitty_php:{self.code}_tas_www {submission_path}")
 
                     if gradeable.type == 0 and os.path.isdir(gradeable_annotation_path):
-                        os.system("chown -R submitty_php:{}_tas_www {}".format(self.code, gradeable_annotation_path))
+                        os.system(f"chown -R submitty_php:{self.code}_tas_www {gradeable_annotation_path}")
 
                     if (gradeable.type != 0 and gradeable.grade_start_date < NOW and ((gradeable.has_release_date is True and gradeable.grade_released_date < NOW) or random.random() < 0.5) and
                        random.random() < 0.9 and (ungraded_section != (user.get_detail(self.code, 'registration_section') if gradeable.grade_by_registration else user.get_detail(self.code, 'rotating_section')))):

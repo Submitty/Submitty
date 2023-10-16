@@ -62,22 +62,21 @@ class Course_create:
         add_to_group(course_group, "submitty_php")
         add_to_group(course_group, "submitty_daemon")
         add_to_group(course_group, "submitty_cgi")
-        os.system("{}/sbin/create_course.sh {} {} {} {}"
-                  .format(SUBMITTY_INSTALL_DIR, self.semester, self.code, self.instructor.id,
-                          course_group))
+        os.system(f"{SUBMITTY_INSTALL_DIR}/sbin/create_course.sh {self.semester} {self.code}"
+                  f" {self.instructor.id} {course_group}")
 
         os.environ['PGPASSWORD'] = DB_PASS
         database = "submitty_" + self.semester + "_" + self.code
         print("Database created, now populating ", end="")
 
-        submitty_engine = create_engine("postgresql:///submitty?host={}&port={}&user={}&password={}"
-                                        .format(DB_HOST, DB_PORT, DB_USER, DB_PASS))
+        submitty_engine = create_engine(f"postgresql:///submitty?host={DB_HOST}&port={DB_PORT}"
+                                        f"&user={DB_USER}&password={DB_PASS}")
         submitty_conn = submitty_engine.connect()
         submitty_metadata = MetaData(bind=submitty_engine)
         print("(Master DB connection made, metadata bound)...")
 
-        engine = create_engine("postgresql:///{}?host={}&port={}&user={}&password={}"
-                               .format(database, DB_HOST, DB_PORT, DB_USER, DB_PASS))
+        engine = create_engine(f"postgresql:///{database}?host={DB_HOST}&port={DB_PORT}"
+                               f"&user={DB_USER}&password={DB_PASS}")
         self.conn = engine.connect()
         self.metadata = MetaData(bind=engine)
         print("(Course DB connection made, metadata bound)...")
@@ -87,14 +86,14 @@ class Course_create:
         table = Table("courses_registration_sections", submitty_metadata, autoload=True)
         print("(tables loaded)...")
         for section in range(1, self.registration_sections+1):
-            print("Create section {}".format(section))
+            print(f"Create section {section}")
             submitty_conn.execute(table.insert(), term=self.semester, course=self.code, registration_section_id=str(section))
 
         print("Creating rotating sections ", end="")
         table = Table("sections_rotating", self.metadata, autoload=True)
         print("(tables loaded)...")
         for section in range(1, self.rotating_sections+1):
-            print("Create section {}".format(section))
+            print(f"Create section {section}")
             self.conn.execute(table.insert(), sections_rotating_id=section)
 
         print("Create users ", end="")
@@ -103,9 +102,9 @@ class Course_create:
         reg_table = Table("grading_registration", self.metadata, autoload=True)
         print("(tables loaded)...")
         for user in self.users:
-            print("Creating user {} {} ({})...".format(user.get_detail(self.code, "givenname"),
-                                                       user.get_detail(self.code, "familyname"),
-                                                       user.get_detail(self.code, "id")))
+            print(f"Creating user {user.get_detail(self.code, 'givenname')} "
+                  f"{user.get_detail(self.code, 'familyname')} "
+                  f"({user.get_detail(self.code, 'id')})...")
             reg_section = user.get_detail(self.code, "registration_section")
             if reg_section is not None and reg_section > self.registration_sections:
                 reg_section = None
@@ -161,25 +160,20 @@ class Course_create:
         self.electronic_gradeable_version = Table("electronic_gradeable_version", self.metadata, autoload=True)
         for gradeable in self.gradeables:
             gradeable.create(self.conn, self.gradeable_table, self.electronic_table, self.peer_assign, reg_table, self.component_table, self.mark_table)
-            form = os.path.join(self.course_path, "config", "form", "form_{}.json".format(gradeable.id))
+            form = os.path.join(self.course_path, "config", "form", f"form_{gradeable.id}.json")
             with open(form, "w") as open_file:
                 json.dump(gradeable.create_form(), open_file, indent=2)
-        os.system("chown -f submitty_php:{}_tas_www {}".format(self.code, os.path.join(self.course_path, "config", "form", "*")))
+        os.system(f"chown -f submitty_php:{self.code}_tas_www {os.path.join(self.course_path, 'config', 'form', '*')}")
         if not os.path.isfile(os.path.join(self.course_path, "ASSIGNMENTS.txt")):
-            os.system("touch {}".format(os.path.join(self.course_path, "ASSIGNMENTS.txt")))
-            os.system("chown {}:{}_tas_www {}".format(self.instructor.id, self.code,
-                                                      os.path.join(self.course_path, "ASSIGNMENTS.txt")))
-            os.system("chmod -R g+w {}".format(self.course_path))
-            os.system("su {} -c '{}'".format("submitty_daemon", os.path.join(self.course_path,
-                                                                          "BUILD_{}.sh".format(self.code))))
-            #os.system("su {} -c '{}'".format(self.instructor.id, os.path.join(self.course_path,
-            #                                                              "BUILD_{}.sh".format(self.code))))
-        os.system("chown -R {}:{}_tas_www {}".format(self.instructor.id, self.code, os.path.join(self.course_path, "build")))
-        os.system("chown -R {}:{}_tas_www {}".format(self.instructor.id, self.code,
-                                                     os.path.join(self.course_path, "test_*")))
+            os.system(f"touch {os.path.join(self.course_path, 'ASSIGNMENTS.txt')}")
+            os.system(f"chown {self.instructor.id}:{self.code}_tas_www {os.path.join(self.course_path, 'ASSIGNMENTS.txt')}")
+            os.system(f"chmod -R g+w {self.course_path}")
+            os.system(f"su {'submitty_daemon'} -c '{ os.path.join(self.course_path,f'BUILD_{self.code}.sh')}'")
+        os.system(f"chown -R {self.instructor.id}:{self.code}_tas_www {os.path.join(self.course_path, 'build')}")
+        os.system(f"chown -R {self.instructor.id}:{self.code}_tas_www {os.path.join(self.course_path, 'test_*')}")
         # On python 3, replace with os.makedirs(..., exist_ok=True)
-        os.system("mkdir -p {}".format(os.path.join(self.course_path, "submissions")))
-        os.system('chown submitty_php:{}_tas_www {}'.format(self.code, os.path.join(self.course_path, 'submissions')))
+        os.system(f"mkdir -p {os.path.join(self.course_path, 'submissions')}")
+        os.system(f"chown submitty_php:{self.code}_tas_www {os.path.join(self.course_path, 'submissions')}")
 
         self.add_gradeables();
         self.conn.close()
