@@ -773,6 +773,9 @@ SQL;
         return [$old_thread_id, $thread_id, $counted_posts];
     }
 
+    /**
+     * @param string $attachment_name
+     */
     public function createPost($user, $content, $thread_id, $anonymous, $type, $first, $hasAttachment, $markdown, $attachment_name, $parent_post = -1) {
         if (!$first && $parent_post == 0) {
             $this->course_db->query("SELECT MIN(id) as id FROM posts where thread_id = ?", [$thread_id]);
@@ -958,6 +961,9 @@ SQL;
         return $rows;
     }
 
+    /**
+     * @param string $attachment_name
+     */
     public function createThread($markdown, $user, $title, $content, $anon, $prof_pinned, $status, $hasAttachment, $attachment_name, $categories_ids, $lock_thread_date, $expiration, $announcement) {
         $this->course_db->beginTransaction();
 
@@ -1100,6 +1106,10 @@ SQL;
         return $this->course_db->rows()[0]['parent_id'];
     }
 
+    /**
+     * @param int $hasAttachment
+     * @param string $attachment_name
+     */
     public function editPost($original_creator, $user, $post_id, $content, $anon, $markdown, $hasAttachment, $attachment_name) {
         try {
             $markdown = $markdown ? 1 : 0;

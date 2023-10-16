@@ -507,7 +507,8 @@ class ForumController extends AbstractController {
                     for ($i = 0; $i < count($_FILES[$file_post]["name"]); $i++) {
                         if ($attachment_name == "") {
                             $attachment_name = basename($_FILES[$file_post]["name"][$i]);
-                        } else {
+                        }
+                        else {
                             $attachment_name = $attachment_name . "\n" . basename($_FILES[$file_post]["name"][$i]);
                         }
                     }

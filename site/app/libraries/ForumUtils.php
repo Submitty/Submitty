@@ -72,6 +72,15 @@ class ForumUtils {
         return $real_name['given_name'] . substr($real_name['family_name'], 0, 2) . '.';
     }
 
+    /**
+     * @param int $post_id
+     * @param int $thread_id
+     * @param bool $has_attachment
+     * @param string $attachment_names
+     * @param string $course_path
+     * @param string $course_url
+     * @return mixed[]
+     */
     public static function getForumAttachments($post_id, $thread_id, $has_attachment, $attachment_names, $course_path, $course_url) {
         $thread_dir = FileUtils::joinPaths(FileUtils::joinPaths($course_path, "forum_attachments"), $thread_id);
         $post_attachment = ["exist" => false];
@@ -83,8 +92,6 @@ class ForumUtils {
             $files = FileUtils::getAllFiles($post_dir);
 
             $post_attachment["files"] = [];
-
-            //$attachment_num_files = count($files);
             $attachment_id = "attachments_{$post_id}";
             $attachment_button_id = "button_attachments_{$post_id}";
             $attachment_file_count = 0;
