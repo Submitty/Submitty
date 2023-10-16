@@ -774,7 +774,7 @@ function modifyOrSplitPost(e) {
     e.preventDefault();
     const form = $(this);
     const formData = new FormData(form[0]);
-    formData.append("deleted_attachments", JSON.stringify((getDeletedAttachments())));
+    formData.append('deleted_attachments', JSON.stringify((getDeletedAttachments())));
     const submit_url = form.attr('action');
 
     $.ajax({
@@ -902,10 +902,9 @@ function showEditPostForm(post_id, thread_id, shouldEditThread, render_markdown,
                 $('#markdown_toggle_').removeClass('markdown-active');
                 $('#markdown_buttons_').hide();
             }
-            
             if (Object.keys(img_urls).length > 0) {
-                $("#display-attachments-" + post_id).css('display', 'block');
-                $(".display-attachment-name").each(function() {
+                $(`#display-attachments-${post_id}`).css('display', 'block');
+                $('.display-attachment-name').each(function() {
                     $(this).text(decodeURI($(this).text()));
                 });
             }
@@ -955,6 +954,7 @@ function showEditPostForm(post_id, thread_id, shouldEditThread, render_markdown,
         },
     });
 }
+// eslint-disable-next-line no-unused-vars
 function markForDeletion(ele) {
     $(ele).attr('class', 'btn btn-danger');
     $(ele).attr('onclick', 'unMarkForDeletion(this)');
@@ -963,7 +963,7 @@ function markForDeletion(ele) {
 function unMarkForDeletion(ele) {
     $(ele).attr('class', 'btn btn-default');
     $(ele).attr('onclick', 'markForDeletion(this)');
-    $(ele).text('Delete')
+    $(ele).text('Delete');
 }
 
 // eslint-disable-next-line no-unused-vars
@@ -1276,8 +1276,9 @@ function modifyThreadList(currentThreadId, currentCategoriesId, course, loadFirs
     });
 }
 
+// eslint-disable-next-line no-unused-vars
 function displayHistoryAttachment(edit_id) {
-    $("#history-table-" + edit_id).toggle();
+    $(`#history-table-${edit_id}`).toggle();
 }
 
 // eslint-disable-next-line no-unused-vars
@@ -2114,6 +2115,7 @@ function loadInlineImages(encoded_data) {
 
 }
 
+// eslint-disable-next-line no-unused-vars
 function openInWindow(img) {
     const url = $(img).attr('src');
     window.open(url,'_blank','toolbar=no,scrollbars=yes,resizable=yes, width=700, height=600');
@@ -2229,7 +2231,7 @@ function forumFilterBar() {
 function getDeletedAttachments() {
     const deleted_attachments = [];
     $('.display-existing-attachments').find('a.btn.btn-danger').each(function() {
-            deleted_attachments.push(decodeURI($(this).attr('name').substr(7)));
+        deleted_attachments.push(decodeURI($(this).attr('name').substr(7)));
     });
     return deleted_attachments;
 }

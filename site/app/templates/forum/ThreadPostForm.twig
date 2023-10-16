@@ -172,7 +172,6 @@
     {% if post_data is defined %}
         {% for post in post_data %}
             {% if post.post_attachment.params is defined %}
-            {#<pre> {{ dump(post.post_attachment.params) }} <pre/>#}
             <div class="display-existing-attachments", id = "display-attachments-{{ post.post_id }}">
                 <table class="file-upload-table", align="left">
                     <thead>

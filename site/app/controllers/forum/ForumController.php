@@ -6,7 +6,6 @@ use app\libraries\Core;
 use app\libraries\ForumUtils;
 use app\models\Notification;
 use app\controllers\AbstractController;
-use app\views\forum\ForumThreadView;
 use app\libraries\Utils;
 use app\libraries\FileUtils;
 use app\libraries\DateUtils;
@@ -362,7 +361,7 @@ class ForumController extends AbstractController {
             else {
                 // Good Attachment
                 $attachment_name = "";
-                if($hasGoodAttachment[0] == 1) {
+                if ($hasGoodAttachment[0] == 1) {
                     for ($i = 0; $i < count($_FILES['file_input']["name"]); $i++) {
                         $attachment_name = $attachment_name . "\n" . basename($_FILES['file_input']["name"][$i]);
                     }
@@ -504,10 +503,13 @@ class ForumController extends AbstractController {
             }
             else {
                 $attachment_name = "";
-                if($hasGoodAttachment[0] == 1) {
+                if ($hasGoodAttachment[0] == 1) {
                     for ($i = 0; $i < count($_FILES[$file_post]["name"]); $i++) {
-                        if($attachment_name == "") $attachment_name = basename($_FILES[$file_post]["name"][$i]);
-                        else $attachment_name = $attachment_name . "\n" . basename($_FILES[$file_post]["name"][$i]);
+                        if ($attachment_name == "") {
+                            $attachment_name = basename($_FILES[$file_post]["name"][$i]);
+                        } else {
+                            $attachment_name = $attachment_name . "\n" . basename($_FILES[$file_post]["name"][$i]);
+                        }
                     }
                 }
 
@@ -893,15 +895,19 @@ class ForumController extends AbstractController {
             }
 
             $markdown = !empty($_POST['markdown_status']);
-            
+
             $current_attachments = explode("\n", $original_post['attachment_name']);
             if (isset($_POST['deleted_attachments'])) {
-                foreach(json_decode($_POST['deleted_attachments']) as $img) {
-                    if(($key = array_search($img, $current_attachments)) !== false) unset($current_attachments[$key]);
+                foreach (json_decode($_POST['deleted_attachments']) as $img) {
+                    if (($key = array_search($img, $current_attachments)) !== false) {
+                        unset($current_attachments[$key]);
+                    }
                 }
             }
             $attachment_name = "";
-            if(!empty($current_attachments)) $attachment_name = implode("\n", $current_attachments);
+            if (!empty($current_attachments)) {
+                $attachment_name = implode("\n", $current_attachments);
+            }
             $has_attachment = ($attachment_name == "") ? 0 : 1;
 
             return $this->core->getQueries()->editPost($original_creator, $current_user, $post_id, $new_post_content, $anon, $markdown, $has_attachment, $attachment_name);
@@ -1225,7 +1231,9 @@ class ForumController extends AbstractController {
                 $thread_dir = FileUtils::joinPaths(FileUtils::joinPaths($this->core->getConfig()->getCoursePath(), "forum_attachments"), $result["thread_id"]);
                 $post_dir = FileUtils::joinPaths($thread_dir, $post_id);
                 $filenames = explode("\n", $result["attachment_name"]);
-                if ($filenames[0] == "") unset($filenames[0]);
+                if ($filenames[0] == "") {
+                    unset($filenames[0]);
+                }
                 foreach ($filenames as $filename) {
                     $urls[$filename] = $this->core->buildCourseUrl(['display_file']) . '?dir=forum_attachments&path=' . $post_dir . "/" . $filename;
                 }

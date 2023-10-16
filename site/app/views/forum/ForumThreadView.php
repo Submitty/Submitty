@@ -892,7 +892,7 @@ class ForumThreadView extends AbstractView {
                 "current_user_posted" => $thread["current_user_posted"]
             ];
 
-            $post_attachment = ForumUtils::getForumAttachments($first_post['id'], $thread['id'], $first_post['has_attachment'], $first_post['attachment_name'], $this->core->getConfig()->getCoursePath(), $this->core->buildCourseUrl(['display_file']));  
+            $post_attachment = ForumUtils::getForumAttachments($first_post['id'], $thread['id'], $first_post['has_attachment'], $first_post['attachment_name'], $this->core->getConfig()->getCoursePath(), $this->core->buildCourseUrl(['display_file']));
 
             if ($is_full_page) {
                 $user_info = $this->core->getQueries()->getDisplayUserInfoFromUserId($first_post["author_user_id"]);
