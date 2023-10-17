@@ -14,7 +14,7 @@ jobs:
 
     steps:
       - uses: actions/checkout@v4
-        with: 
+        with:
           fetch-depth: 0
       - name: Get latest version
         id: get-version
@@ -25,6 +25,7 @@ jobs:
             exit 1
           fi
           echo "version=${TAG:1}" >> $GITHUB_OUTPUT
+          echo "version=${TAG:1}"
       - name: Acquire Job ID
         if: failure()
         id: get-job-id
@@ -49,7 +50,7 @@ jobs:
           vagrant cloud auth login --token ${{ secrets.VAGRANT_CLOUD_TOKEN }}
           vagrant cloud publish submitty_temp/ubuntu22-dev ${{ steps.get-version.outputs.version }}.$(date +"%y%m%d%H%M") virtualbox submitty.box --release --force
           vagrant cloud auth logout
-      - name: Send slack message on failure
-        if: failure()
-        run: |
-          curl -X POST -H "Content-type: application/json" --data '{"text":"The Vagrant Up Github Action has failed. View here: https://github.com/Submitty/Submitty/actions/runs/${{ github.run_id }}/job/${{ steps.get-job-id.outputs.job_id }}"}' ${{ secrets.VAGRANT_UP_WEBHOOK }}
+     # - name: Send slack message on failure
+       # if: failure()
+      #  run: |
+       #   curl -X POST -H "Content-type: application/json" --data '{"text":"The Vagrant Up Github Action has failed. View here: https://github.com/Submitty/Submitty/actions/runs/${{ github.run_id }}/job/${{ steps.get-job-id.outputs.job_id }}"}' ${{ secrets.VAGRANT_UP_WEBHOOK }}
