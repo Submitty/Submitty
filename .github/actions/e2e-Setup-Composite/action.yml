@@ -17,6 +17,14 @@ env:
 runs:
   using: "composite"
   steps:
+    - name: Delete huge unnecessary folders, and clean apt cache
+      run: |
+        rm -rf /opt/hostedtoolcache
+        rm -rf /usr/share/dotnet
+        rm -rf /opt/ghc
+        rm -rf "$AGENT_TOOLSDIRECTORY"
+        sudo apt-get clean
+      shell: bash
     - uses: actions/checkout@v3
       with:
         path: SUBMITTY_CPY/

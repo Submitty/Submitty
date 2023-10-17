@@ -78,6 +78,7 @@ use app\controllers\admin\AdminGradeableController;
  * @method void setDependsOn($depends_on)
  * @method int getDependsOnPoints()
  * @method void setDependsOnPoints($depends_on_points)
+ * @method void setAnyManualGrades($any_manual_grades)
  * @method bool isGradeInquiryAllowed()
  * @method bool isGradeInquiryPerComponentAllowed()
  * @method void setGradeInquiryPerComponentAllowed($is_grade_inquiry_per_component)
@@ -153,7 +154,7 @@ class Gradeable extends AbstractModel {
 
     /** @prop
      * @var bool If any manual grades have been entered for this gradeable */
-    private $any_manual_grades = null;
+    protected $any_manual_grades = null;
     /** @prop
      * @var bool If any submissions exist */
     private $any_submissions = null;
@@ -340,6 +341,7 @@ class Gradeable extends AbstractModel {
         $this->setMinGradingGroup($details['min_grading_group']);
         $this->setSyllabusBucket($details['syllabus_bucket']);
         $this->setTaInstructions($details['ta_instructions']);
+        $this->setAnyManualGrades($details['any_manual_grades']);
         if (array_key_exists('peer_graders_list', $details)) {
             $this->setPeerGradersList($details['peer_graders_list']);
         }
@@ -1671,6 +1673,9 @@ class Gradeable extends AbstractModel {
      * @return Team[]
      */
     public function getTeams() {
+        if ($this->team_assignment === false) {
+            return [];
+        }
         if ($this->teams === null) {
             $this->teams = $this->core->getQueries()->getTeamsByGradeableId($this->getId());
         }
@@ -2044,11 +2049,11 @@ class Gradeable extends AbstractModel {
                         $teams[$teamToAdd->getId()] = $this->core->getQueries()->getTeamByGradeableAndUser($this->getId(), $u->getId());
                     }
                 }
-                $g_section = new GradingSection($this->core, false, -1, [$user], null, $teams);
+                $g_section = new GradingSection($this->core, false, -1, [$user], [], $teams);
                 return [$g_section];
             }
             $users = $this->core->getQueries()->getUsersById($this->core->getQueries()->getPeerAssignment($this->getId(), $user->getId()));
-            $g_section = new GradingSection($this->core, false, -1, [$user], $users, null);
+            $g_section = new GradingSection($this->core, false, -1, [$user], $users, []);
             return [$g_section];
         }
         else {
@@ -2113,8 +2118,8 @@ class Gradeable extends AbstractModel {
                     $this->isGradeByRegistration(),
                     $section_name,
                     $graders[$section_name] ?? [],
-                    $users[$section_name] ?? null,
-                    $teams[$section_name] ?? null
+                    $users[$section_name] ?? [],
+                    $teams[$section_name] ?? []
                 );
             }
 
@@ -2169,7 +2174,7 @@ class Gradeable extends AbstractModel {
 
         $sections = [];
         foreach ($section_names as $section_name) {
-            $sections[] = new GradingSection($this->core, $this->isGradeByRegistration(), $section_name, $graders[$section_name] ?? [], $users[$section_name] ?? null, $teams[$section_name] ?? null);
+            $sections[] = new GradingSection($this->core, $this->isGradeByRegistration(), $section_name, $graders[$section_name] ?? [], $users[$section_name] ?? [], $teams[$section_name] ?? []);
         }
 
         return $sections;
