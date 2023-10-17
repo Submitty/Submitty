@@ -125,7 +125,7 @@ void Analysis::Analyse(int code)
 	{
        cout<<"Your Dog is perfectly healthy"<<endl;
 	}
-	if(ratio2<ratio1)
+	if(ratio2<0.06)
 	{
       cout<<"Your dog is over weigiing for its age"<<endl;
 	  cout<<" "<<endl;
