@@ -14,6 +14,8 @@ jobs:
 
     steps:
       - uses: actions/checkout@v4
+        with: 
+          fetch-depth: 0
       - name: Get latest version
         id: get-version
         run: |
@@ -45,7 +47,7 @@ jobs:
       - name: Publish image
         run: |
           vagrant cloud auth login --token ${{ secrets.VAGRANT_CLOUD_TOKEN }}
-          vagrant cloud publish submitty_temp/ubuntu22-dev ${{ steps.get-version.outputs.version }}.$(date +"%y%m%d%H%M") virtualbox submitty.box --force
+          vagrant cloud publish submitty_temp/ubuntu22-dev ${{ steps.get-version.outputs.version }}.$(date +"%y%m%d%H%M") virtualbox submitty.box --release --force
           vagrant cloud auth logout
       - name: Send slack message on failure
         if: failure()
