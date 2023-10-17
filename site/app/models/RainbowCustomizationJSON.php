@@ -294,7 +294,6 @@ class RainbowCustomizationJSON extends AbstractModel {
         $json = (object) [];
 
         // Copy each property from $this over to $json
-        // @phpstan-ignore-next-line phpstan devs do not like object iteration
         foreach ($this as $key => $value) {
             // Dont include $core or $modified
             if ($key != 'core' && $key != 'modified') {
