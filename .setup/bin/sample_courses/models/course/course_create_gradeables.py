@@ -108,7 +108,7 @@ class Course_create_gradeables:
                     if gradeable.team_assignment is True:
                         # If gradeable is team assignment, then make sure to make a team_id and don't over submit
                         res = self.conn.execute("SELECT teams.team_id, gradeable_teams.anon_id FROM teams INNER JOIN gradeable_teams"
-                                                f"ON teams.team_id = gradeable_teams.team_id where user_id='{user.id}' and g_id='{gradeable.id}'")
+                                                f" ON teams.team_id = gradeable_teams.team_id where user_id='{user.id}' and g_id='{gradeable.id}'")
                         temp = res.fetchall()
                         if len(temp) != 0:
                             team_id = temp[0][0]
