@@ -836,7 +836,6 @@ HTML;
             $message .= ($message === "") ? "Notice: You are viewing students with active grade inquiry." : "\nNotice: You are viewing students with active grade inquiry.";
             $message_warning = true;
         }
-        
 
         $team_gradeable_view_history = $gradeable->isTeamAssignment() ? $this->core->getQueries()->getAllTeamViewedTimesForGradeable($gradeable) : [];
         foreach ($team_gradeable_view_history as $team_id => $team) {
