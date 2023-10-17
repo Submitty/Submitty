@@ -1,17 +1,17 @@
-/* global luxon */
-const DateTime = luxon.DateTime;
-
 function calculateLateDays(inputDate) {
     const select_menu = document.getElementById('g_id');
     if (select_menu.selectedIndex === 0) {
         alert('Please select a gradeable first!');
         return;
     }
-
     const due_date_value = select_menu.options[select_menu.selectedIndex].getAttribute('data-due-date');
-    const new_due_date = DateTime.fromISO(inputDate);
-    const old_due_date = DateTime.fromISO(due_date_value);
-    const diff = Math.floor(Math.max(0, new_due_date.diff(old_due_date, 'days').days));
+    const new_due_date = new Date(inputDate);
+    const old_due_date = new Date(due_date_value);
+    let delta = (new_due_date.getTime() - old_due_date.getTime()) / (1000*60*60*24);
+    if (delta < 0) {
+        delta = 0;
+    }
+    const diff = Math.floor(delta);
     document.getElementById('late_days').value = diff;
 }
 
@@ -34,10 +34,10 @@ $(document).ready(() => {
                     let date;
                     switch (index) {
                         case 0:
-                            date = DateTime.now();
+                            date = new Date();
                             break;
                         case 1:
-                            date = DateTime.fromISO('9998-01-01');
+                            date = new Date('9998-01-01');
                             break;
                     }
                     fp.setDate(date, true);
