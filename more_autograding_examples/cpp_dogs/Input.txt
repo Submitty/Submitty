@@ -1,0 +1,30 @@
+___WELCOME___
+Displaying all the dog breeds :
+ 
+1labrador
+ 
+2german_shepard
+ 
+3Rott wiler
+ 
+4Golden retriver
+ 
+5Pug
+ 
+6Pomerian
+ 
+7Huskey
+ 
+8Doberman
+ 
+9Boxer
+ 
+10Bull dog
+ 
+Select a breed form the above list :
+1
+searching...
+Enter your dogs age :
+3
+Enter your dogs weight :
+31
