@@ -11,7 +11,6 @@ permissions:
 jobs:
   vagrant-up:
     runs-on: macos-latest
-
     steps:
       - uses: actions/checkout@v4
         with:
@@ -30,27 +29,27 @@ jobs:
       # attempting to mount the shared folder. The guest and host guest additions
       # versions are close enough that we are fine without it.
       # - run: vagrant plugin install vagrant-vbguest
-      # - name: Vagrant Up
-      #   run: NO_SUBMISSIONS=1 vagrant up
-      # - name: Validate image
-      #   run: curl --show-error --fail --include http://localhost:1511
-      # - name: Save image
-      #   run: vagrant package --output submitty.box
-      #   vagrant cloud publish submitty_temp/ubuntu22-dev ${{ steps.get-version.outputs.version }}.$(date +"%y%m%d%H%M") virtualbox submitty.box --release --force
+      - name: Vagrant Up
+        run: NO_SUBMISSIONS=1 vagrant up
+      - name: Validate image
+        run: curl --show-error --fail --include http://localhost:1511
+      - name: Save image
+        run: vagrant package --output submitty.box
       - name: Publish image
         run: |
           vagrant cloud auth login --token ${{ secrets.VAGRANT_CLOUD_TOKEN }}
+          vagrant cloud publish submitty_temp/ubuntu22-dev ${{ steps.get-version.outputs.version }}.$(date +"%y%m%d%H%M") virtualbox submitty.box --release --force
           vagrant cloud auth logout
-      # - name: Acquire Job ID
-      #   if: failure()
-      #   id: get-job-id
-      #   env:
-      #     GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      #   run: |
-      #     jobs=$(gh api repos/${{ github.repository }}/actions/runs/${{ github.run_id}}/attempts/${{ github.run_attempt }}/jobs)
-      #     job_id=$(echo $jobs | jq -r '.jobs[] | select(.runner_name=="${{ runner.name }}") | .id')
-      #     echo "job_id=$job_id" >> $GITHUB_OUTPUT
-     # - name: Send slack message on failure
-       # if: failure()
-      #  run: |
-       #   curl -X POST -H "Content-type: application/json" --data '{"text":"The Vagrant Up Github Action has failed. View here: https://github.com/Submitty/Submitty/actions/runs/${{ github.run_id }}/job/${{ steps.get-job-id.outputs.job_id }}"}' ${{ secrets.VAGRANT_UP_WEBHOOK }}
+      - name: Acquire Job ID
+        if: failure()
+        id: get-job-id
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          jobs=$(gh api repos/${{ github.repository }}/actions/runs/${{ github.run_id}}/attempts/${{ github.run_attempt }}/jobs)
+          job_id=$(echo $jobs | jq -r '.jobs[] | select(.runner_name=="${{ runner.name }}") | .id')
+          echo "job_id=$job_id" >> $GITHUB_OUTPUT
+      - name: Send slack message on failure
+        if: failure()
+        run: |
+          curl -X POST -H "Content-type: application/json" --data '{"text":"The Vagrant Up Github Action has failed. View here: https://github.com/Submitty/Submitty/actions/runs/${{ github.run_id }}/job/${{ steps.get-job-id.outputs.job_id }}"}' ${{ secrets.VAGRANT_UP_WEBHOOK }}
