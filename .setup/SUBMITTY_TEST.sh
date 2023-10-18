@@ -7,7 +7,7 @@ pushd /usr/local/submitty/GIT_CHECKOUT/Submitty/site  > /dev/null || {
     exit 1
 }
 
-composer install
+COMPOSER_ALLOW_SUPERUSER=1 composer install
 
 
 run_php_stan() {
