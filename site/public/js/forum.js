@@ -786,11 +786,6 @@ function modifyOrSplitPost(e) {
             }
             // split
             else {
-                // eslint-disable-next-line no-var, no-redeclare
-                var post_id = form.find('#split_post_id').val();
-                const new_thread_id = json['data']['new_thread_id'];
-                const old_thread_id = json['data']['old_thread_id'];
-                window.socketClient.send({'type': 'split_post', 'new_thread_id': new_thread_id, 'thread_id': old_thread_id, 'post_id': post_id});
                 window.location.replace(json['data']['next']);
             }
         },
@@ -1750,12 +1745,10 @@ function deletePostToggle(isDeletion, thread_id, post_id, author, time, csrf_tok
                 let new_url = '';
                 switch (json['data']['type']) {
                     case 'thread':
-                        //window.socketClient.send({'type': 'delete_thread', 'thread_id': thread_id});
                         // eslint-disable-next-line no-undef
                         new_url = buildCourseUrl(['forum']);
                         break;
                     case 'post':
-                        //window.socketClient.send({'type': 'delete_post', 'thread_id': thread_id, 'post_id': post_id});
                         // eslint-disable-next-line no-undef
                         new_url = buildCourseUrl(['forum', 'threads', thread_id]);
                         break;
@@ -1789,12 +1782,6 @@ function alterAnnouncement(thread_id, confirmString, type, csrf_token) {
             },
             // eslint-disable-next-line no-unused-vars
             success: function(data) {
-                if (type) {
-                    //window.socketClient.send({'type': 'announce_thread', 'thread_id': thread_id});
-                }
-                else {
-                    //window.socketClient.send({'type': 'unpin_thread', 'thread_id': thread_id});
-                }
                 window.location.reload();
             },
             error: function() {
@@ -2495,12 +2482,6 @@ function pinAnnouncement(thread_id, type, csrf_token) {
             },
             // eslint-disable-next-line no-unused-vars
             success: function(data) {
-                if (type) {
-                    //window.socketClient.send({'type': 'announce_thread', 'thread_id': thread_id});
-                }
-                else {
-                    //window.socketClient.send({'type': 'unpin_thread', 'thread_id': thread_id});
-                }
             },
             error: function() {
                 window.alert('Something went wrong while trying to remove announcement. Please try again.');

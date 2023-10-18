@@ -773,7 +773,7 @@ class ForumController extends AbstractController {
             if ($isError) {
                 return $this->core->getOutput()->renderJsonFail($messageString);
             }
-            if($type == 'edit_post') {
+            if($type == 'Post') {
                 //logic for finding reply level / post_box_id
                 $posts = $this->core->getQueries()->getPostsInThreads([$thread_id]);
                 $first = true;
@@ -813,7 +813,7 @@ class ForumController extends AbstractController {
                 }
                 $this->sendSocketMessage(['type' => 'edit_post', 'thread_id' => $thread_id, 'post_id' => $post_id, 'reply_level' => $reply_level, 'post_box_id' => $post_box_id]);
             }
-            elseif ($type == 'edit_thread') {
+            elseif ($type == 'Thread and Post') {
                 $reply_level = 1;
                 $post_box_id = 1;
                 $this->sendSocketMessage(['type' => 'edit_thread', 'thread_id' => $thread_id, 'post_id' => $post_id, 'reply_level' => $reply_level, 'post_box_id' => $post_box_id]);
@@ -922,6 +922,7 @@ class ForumController extends AbstractController {
                 $result['next'] = $this->core->buildCourseUrl(['forum', 'threads', $thread_id]);
                 $result['new_thread_id'] = $thread_id;
                 $result['old_thread_id'] = $thread_ids[0];
+                $this->sendSocketMessage(['type' => 'split_post', 'new_thread_id' =>  $result['new_thread_id'], 'thread_id' => $result['old_thread_id'], 'post_id' => $post_id]);
                 return $this->core->getOutput()->renderJsonSuccess($result);
             }
             else {
