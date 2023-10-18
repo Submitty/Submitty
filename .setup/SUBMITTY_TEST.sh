@@ -11,7 +11,7 @@ composer install
 
 
 run_php_stan() {
-    COMPOSER_ALLOW_SUPERUSER=1 composer run-script sample "${@:2}" 2>/dev/null
+    COMPOSER_ALLOW_SUPERUSER=1 composer run-script static-analysis "${@:2}" 2>/dev/null
 }
 
 run_php_cs() {
