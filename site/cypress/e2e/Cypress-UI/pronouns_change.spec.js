@@ -2,31 +2,27 @@
 describe('Tests cases abut changing user pronouns', () => {
 
     let oldPronouns = '';
+    const newPronouns = 'They/Them'; // Define constant for new pronouns
 
     //Set the stage by saving old pronouns and setting a desired pronoun to look for
     before(() => {
         cy.visit('/user_profile');
         cy.login('student');
 
-        //open pronouns form
-        cy.get('#pronouns_val').click();
-        cy.get('#user-pronouns-change').as('e');
+        cy.get('#pronouns_val').as('pronounsVal').click(); // Alias for pronouns value
+        cy.get('#user-pronouns-change').as('pronounsInput'); // Alias for pronouns input
 
-        //save old pronouns
-        cy.get('@e').then(($pronounsInput) => {
+        cy.get('@pronounsInput').then(($pronounsInput) => {
             oldPronouns = $pronounsInput.val();
         });
 
-        //type in new pronouns
-        cy.get('button[aria-label="Clear pronoun input"]').click(); //clear input using trash can
-        cy.get('@e').type('They/Them');
+        cy.get('button[aria-label="Clear pronoun input"]').click();
+        cy.get('@pronounsInput').type(newPronouns);
         cy.get('#edit-pronouns-submit').click();
 
-        //ensure pronouns changed on page
-        cy.get('#pronouns_val').contains('They/Them');
+        cy.get('@pronounsVal').contains(newPronouns);
 
         cy.logout();
-
     });
 
     //restore pronouns to previous value at the end
@@ -35,16 +31,17 @@ describe('Tests cases abut changing user pronouns', () => {
         cy.login('student');
 
         //change back to old pronouns
-        cy.get('#pronouns_val').click();
+        cy.get('#pronouns_val').as('pronounsVal').click();
+        cy.get('#user-pronouns-change').as('pronounsInput');
         cy.get('button[aria-label="Clear pronoun input"]').click(); //clear input using trash can
         if (oldPronouns !== '') {
-            cy.get('#user-pronouns-change').type(oldPronouns);
+            cy.get('@pronounsInput').type(oldPronouns);
         }
         cy.get('#edit-pronouns-submit').first().click();
 
         //ensure pronouns changed on page
         if (oldPronouns !== '') {
-            cy.get('#pronouns_val').contains(oldPronouns);
+            cy.get('@pronounsVal').contains(oldPronouns);
         }
     });
 
@@ -58,7 +55,7 @@ describe('Tests cases abut changing user pronouns', () => {
         cy.get('#toggle-student-col-submit').first().click();
 
         //Ensure correctness in table
-        cy.get('.td-pronouns:eq( 12 )').should('have.text', 'They/Them');
+        cy.get('.td-pronouns:eq( 12 )').should('have.text', newPronouns);
 
     });
 
@@ -68,7 +65,7 @@ describe('Tests cases abut changing user pronouns', () => {
         cy.login('instructor');
 
         //Select text from photo area and parse to get pronoun
-        cy.get('.student-image-container > .name').first().contains('They/Them');
+        cy.get('.student-image-container > .name').first().contains(newPronouns);
 
     });
 
