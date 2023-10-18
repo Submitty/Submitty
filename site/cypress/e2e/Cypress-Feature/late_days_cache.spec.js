@@ -138,6 +138,7 @@ describe('Test cases involving late day cache updates', () => {
 
             // Check cache
             cy.visit(['sample', 'bulk_late_days']);
+            calculateCache();
             cy.get('[USER_ID=instructor] > [id="Late Allowed Homework"]')
                 .contains('0')
                 .should('exist');

@@ -919,6 +919,9 @@ function showEditPostForm(post_id, thread_id, shouldEditThread, render_markdown,
 
 // eslint-disable-next-line no-unused-vars
 function cancelEditPostForum() {
+    if (!checkAreYouSureForm()) {
+        return;
+    }
     const markdown_header = $('#markdown_header_0');
     const edit_button = markdown_header.find('.markdown-write-mode');
     if (markdown_header.attr('data-mode') === 'preview') {
@@ -927,7 +930,6 @@ function cancelEditPostForum() {
     $('#edit-user-post').css('display', 'none');
     $(this).closest('.thread-post-form').find('[name=thread_post_content]').val('');
     $('#title').val('');
-    $(this).closest('form').trigger('reinitialize.areYouSure');
 }
 
 // eslint-disable-next-line no-unused-vars
