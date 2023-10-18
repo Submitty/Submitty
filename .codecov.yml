@@ -38,5 +38,14 @@ comment:
   layout: "reach, diff, flags"
   behavior: once
 
-- name: Validates PR titles against Submitty guidelines
-  uses: Submitty/action-pr-title@v22.07.00
+
+name: 'PR Title Check'
+on:
+  pull_request:
+    types: [ opened, reopened, edited, synchronize ]
+
+jobs:
+  title-check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: submitty/action-pr-title@main
