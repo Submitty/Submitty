@@ -14,6 +14,7 @@ use app\libraries\routers\Enabled;
 use app\libraries\response\JsonResponse;
 use Symfony\Component\Routing\Annotation\Route;
 use app\libraries\socket\Client;
+
 use WebSocket;
 
 
@@ -569,8 +570,8 @@ class ForumController extends AbstractController {
         }
         $place = array_search($post["id"], $order_array);
         $reply_level = $reply_level_array[$place];
-        $max_post_box_id = sizeof($posts);
-        $this->sendSocketMessage(['type' => 'new_post', 'thread_id'=> $thread_id, 'post_id' => $post_id, 'reply_level' => $reply_level, 'post_box_id' => $max_post_box_id]);
+        $max_post_box_id = count($posts);
+        $this->sendSocketMessage(['type' => 'new_post', 'thread_id' => $thread_id, 'post_id' => $post_id, 'reply_level' => $reply_level, 'post_box_id' => $max_post_box_id]);
         return $this->core->getOutput()->renderJsonSuccess($result);
     }
 
@@ -599,13 +600,11 @@ class ForumController extends AbstractController {
      */
     public function alterAnnouncement(bool $type) {
         $thread_id = $_POST["thread_id"];
-        if($type == 'announce_thread') {
+        if ($type == 'announce_thread') {
             $this->sendSocketMessage(['type' => 'announce_thread', 'thread_id' => $thread_id]);
-
         }
-        elseif($type == 'unpin_thread') {
+        elseif ($type == 'unpin_thread') {
             $this->sendSocketMessage(['type' => 'unpin_thread', 'thread_id' => $thread_id]);
-
         }
         $this->core->getQueries()->setAnnouncement($thread_id, $type);
         //TODO: notify on edited announcement
@@ -670,12 +669,11 @@ class ForumController extends AbstractController {
             $content = "In " . $full_course_name . "\n\nThread: " . $thread_title . "\n\nPost:\n" . $post["content"] . " was deleted.";
             $event = [ 'component' => 'forum', 'metadata' => $metadata, 'content' => $content, 'subject' => $subject, 'recipient' => $post_author_id, 'preference' => 'all_modifications_forum'];
             $this->core->getNotificationFactory()->onPostModified($event);
-
             $this->core->getQueries()->removeNotificationsPost($post_id);
-            if($type == "thread") {
+            if ($type == "thread") {
                 $this->sendSocketMessage(['type' => 'delete_thread', 'thread_id' => $thread_id]);
             }
-            elseif($type == "post") {
+            elseif ($type == "post") {
                 $post_id = $_POST["post_id"];
                 $this->sendSocketMessage(['type' => 'delete_post', 'thread_id' => $thread_id, 'post_id' => $post_id]);
             }
@@ -771,7 +769,7 @@ class ForumController extends AbstractController {
             if ($isError) {
                 return $this->core->getOutput()->renderJsonFail($messageString);
             }
-            if($type == 'Post') {
+            if ($type == 'Post') {
                 $posts = $this->core->getQueries()->getPostsInThreads([$thread_id]);
                 $first = true;
                 $first_post_id = 1;
@@ -1342,7 +1340,6 @@ class ForumController extends AbstractController {
         ksort($users);
         $this->core->getOutput()->renderOutput('forum\ForumThread', 'statPage', $users);
     }
-    
     /**
      * this function opens a WebSocket client and sends a message with the corresponding update
      * @param array $msg_array
