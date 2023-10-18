@@ -1,36 +1,17 @@
 #!/bin/bash
 
-install_composer() {
-    if ! command -v composer &> /dev/null; then
-        echo "Composer not found. Installing Composer..."
-        EXPECTED_SIGNATURE=$(wget https://composer.github.io/installer.sig -O - -q)
-        php -r "copy('https://getcomposer.org/installer', 'composer-setup.php');"
-        ACTUAL_SIGNATURE=$(php -r "echo hash_file('sha384', 'composer-setup.php');")
 
-        if [ "$EXPECTED_SIGNATURE" != "$ACTUAL_SIGNATURE" ]; then
-            >&2 echo 'ERROR: Invalid installer signature'
-            rm composer-setup.php
-            exit 1
-        fi
-
-        php composer-setup.php --quiet
-        RESULT=$?
-        rm composer-setup.php
-        exit $RESULT
-    fi
-}
-
-pushd /usr/local/submitty/GIT_CHECKOUT/Submitty/site || {
+pushd /usr/local/submitty/GIT_CHECKOUT/Submitty/site  > /dev/null || {
     echo "Failed to change to the Submitty/site directory.
     Please check if you have /usr/local/submitty/GIT_CHECKOUT/Submitty/site and valid permission"
     exit 1
-} > /dev/null
+}
 
-install_composer
+composer install
 
 
 run_php_stan() {
-    COMPOSER_ALLOW_SUPERUSER=1 composer run-script static-analysis "${@:2}" 2>/dev/null
+    COMPOSER_ALLOW_SUPERUSER=1 composer run-script sample "${@:2}" 2>/dev/null
 }
 
 run_php_cs() {
@@ -59,7 +40,7 @@ submitty_test() {
 
 submitty_test "$@"
 
-popd || {
+popd > /dev/null || {
     echo "Failed to return to the previous directory. Check if you have valid permission."
     exit 1
-} > /dev/null
+}
