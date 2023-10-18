@@ -225,7 +225,7 @@ class Course_data:
                 # In posts.txt, if the 10th column is f or empty, then no attachment is added. If anything else is in the column, then it will be treated as the file name.
                 attachment_path = os.path.join(self.course_path, "forum_attachments", str(postData[0]), str(counter))
                 os.makedirs(attachment_path)
-                os.system("chown -R submitty_php:sample_tas_www {}".format(os.path.join(self.course_path, "forum_attachments", str(postData[0]))))
+                os.system(f"chown -R submitty_php:sample_tas_www {os.path.join(self.course_path, 'forum_attachments', str(postData[0]))}")
                 copyfile(os.path.join(SETUP_DATA_PATH, "forum", "attachments", postData[10]), os.path.join(attachment_path, postData[10]))
             counter += 1
             self.conn.execute(forum_posts.insert(),
