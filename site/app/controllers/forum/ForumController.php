@@ -13,6 +13,9 @@ use app\libraries\routers\AccessControl;
 use app\libraries\routers\Enabled;
 use app\libraries\response\JsonResponse;
 use Symfony\Component\Routing\Annotation\Route;
+use app\libraries\socket\Client;
+use WebSocket;
+
 
 /**
  * Class ForumHomeController
@@ -90,6 +93,7 @@ class ForumController extends AbstractController {
         }
         if ($this->core->getQueries()->getAuthorOfThread($thread_id) === $this->core->getUser()->getId() || $this->core->getUser()->accessGrading()) {
             if ($this->core->getQueries()->updateResolveState($thread_id, $status)) {
+                $this->sendSocketMessage(['type' => 'resolve_thread', 'thread_id' => $thread_id]);
                 return $this->core->getOutput()->renderJsonSuccess();
             }
             else {
@@ -394,6 +398,7 @@ class ForumController extends AbstractController {
                 }
 
                 $result['next_page'] = $this->core->buildCourseUrl(['forum', 'threads', $thread_id]);
+                 $this->sendSocketMessage(['type' => 'new_thread', 'thread_id' => $thread_id]);
             }
         }
         return $this->core->getOutput()->renderJsonSuccess($result);
@@ -529,6 +534,45 @@ class ForumController extends AbstractController {
                 $result['thread_id'] = $thread_id;
             }
         }
+        $posts = $this->core->getQueries()->getPostsInThreads([$result['thread_id']]);
+        $first = true;
+        $first_post_id = 1;
+        //$post_box_ids = [];
+        $order_array = [];
+        $reply_level_array = [];
+        if ($display_option != 'tree') {
+            $reply_level = 1;
+        }
+        else {
+            foreach ($posts as $post) {
+                if ($thread_id == -1) {
+                    $thread_id = $post["thread_id"];
+                }
+                if ($first) {
+                    $first = false;
+                    $first_post_id = $post["id"];
+                }
+                if ($post["parent_id"] > $first_post_id) {
+                    $place = array_search($post["parent_id"], $order_array);
+                    $tmp_array = [$post["id"]];
+                    $parent_reply_level = $reply_level_array[$place];
+                    while ($place !== false && $place + 1 < count($reply_level_array) && $reply_level_array[$place + 1] > $parent_reply_level) {
+                        $place++;
+                    }
+                    array_splice($order_array, $place + 1, 0, $tmp_array);
+                    array_splice($reply_level_array, $place + 1, 0, $parent_reply_level + 1);
+                }
+                else {
+                    array_push($order_array, $post["id"]);
+                    array_push($reply_level_array, 1);
+                }
+            }
+        }
+        //grabs the reply_level for the post
+        $place = array_search($post["id"], $order_array);
+        $reply_level = $reply_level_array[$place];
+        $max_post_box_id = sizeof($posts);
+        $this->sendSocketMessage(['type' => 'new_post', 'thread_id'=> $thread_id, 'post_id' => $post_id, 'reply_level' => $reply_level, 'post_box_id' => $max_post_box_id]);
         return $this->core->getOutput()->renderJsonSuccess($result);
     }
 
@@ -557,8 +601,15 @@ class ForumController extends AbstractController {
      */
     public function alterAnnouncement(bool $type) {
         $thread_id = $_POST["thread_id"];
-        $this->core->getQueries()->setAnnouncement($thread_id, $type);
+        if($type == 'announce_thread') {
+            $this->sendSocketMessage(['type' => 'announce_thread', 'thread_id' => $thread_id]);
 
+        }
+        elseif($type == 'unpin_thread') {
+            $this->sendSocketMessage(['type' => 'unpin_thread', 'thread_id' => $thread_id]);
+
+        }
+        $this->core->getQueries()->setAnnouncement($thread_id, $type);
         //TODO: notify on edited announcement
     }
 
@@ -623,6 +674,13 @@ class ForumController extends AbstractController {
             $this->core->getNotificationFactory()->onPostModified($event);
 
             $this->core->getQueries()->removeNotificationsPost($post_id);
+            if($type == "thread") {
+                $this->sendSocketMessage(['type' => 'delete_thread', 'thread_id' => $thread_id]);
+            }
+            elseif($type == "post") {
+                $post_id = $_POST["post_id"];
+                $this->sendSocketMessage(['type' => 'delete_post', 'thread_id' => $thread_id, 'post_id' => $post_id]);
+            }
             return $this->core->getOutput()->renderJsonSuccess(['type' => $type]);
         }
         elseif ($modify_type == 2) { //undelete post or thread
@@ -714,6 +772,51 @@ class ForumController extends AbstractController {
             }
             if ($isError) {
                 return $this->core->getOutput()->renderJsonFail($messageString);
+            }
+            if($type == 'edit_post') {
+                //logic for finding reply level / post_box_id
+                $posts = $this->core->getQueries()->getPostsInThreads([$thread_id]);
+                $first = true;
+                $first_post_id = 1;
+                //$post_box_ids = [];
+                $order_array = [];
+                $reply_level_array = [];
+                foreach ($posts as $post) {
+                    if ($thread_id == -1) {
+                        $thread_id = $post["thread_id"];
+                    }
+                    if ($first) {
+                        $first = false;
+                        $first_post_id = $post["id"];
+                    }
+                    if ($post["parent_id"] > $first_post_id) {
+                        $place = array_search($post["parent_id"], $order_array);
+                        $tmp_array = [$post["id"]];
+                        $parent_reply_level = $reply_level_array[$place];
+                        while ($place !== false && $place + 1 < count($reply_level_array) && $reply_level_array[$place + 1] > $parent_reply_level) {
+                            $place++;
+                        }
+                        array_splice($order_array, $place + 1, 0, $tmp_array);
+                        array_splice($reply_level_array, $place + 1, 0, $parent_reply_level + 1);
+                    }
+                    else {
+                        array_push($order_array, $post["id"]);
+                        array_push($reply_level_array, 1);
+                    }
+                }
+                //grabs the reply_level for the post
+                $place = array_search($post["id"], $order_array);
+                $reply_level = $reply_level_array[$place];
+                $post_box_id = 1;
+                if ($this->core->getQueries()->isThreadLocked($thread_id) != 1 || $this->core->getUser()->accessFullGrading()) {
+                    $GLOBALS['post_box_id'] = $post_box_id = isset($GLOBALS['post_box_id']) ? $GLOBALS['post_box_id'] + 1 : 1;
+                }
+                $this->sendSocketMessage(['type' => 'edit_post', 'thread_id' => $thread_id, 'post_id' => $post_id, 'reply_level' => $reply_level, 'post_box_id' => $post_box_id]);
+            }
+            elseif ($type == 'edit_thread') {
+                $reply_level = 1;
+                $post_box_id = 1;
+                $this->sendSocketMessage(['type' => 'edit_thread', 'thread_id' => $thread_id, 'post_id' => $post_id, 'reply_level' => $reply_level, 'post_box_id' => $post_box_id]);
             }
             return $this->core->getOutput()->renderJsonSuccess(['type' => $type]);
         }
@@ -1242,5 +1345,21 @@ class ForumController extends AbstractController {
         }
         ksort($users);
         $this->core->getOutput()->renderOutput('forum\ForumThread', 'statPage', $users);
+    }
+    
+    /**
+     * this function opens a WebSocket client and sends a message with the corresponding update
+     * @param array $msg_array
+     */
+    private function sendSocketMessage(array $msg_array): void {
+        $msg_array['user_id'] = $this->core->getUser()->getId();
+        $msg_array['page'] = $this->core->getConfig()->getTerm() . '-' . $this->core->getConfig()->getCourse() . "-discussion_forum";
+        try {
+            $client = new Client($this->core);
+            $client->json_send($msg_array);
+        }
+        catch (WebSocket\ConnectionException $e) {
+            $this->core->addNoticeMessage("WebSocket Server is down, page won't load dynamically.");
+        }
     }
 }
