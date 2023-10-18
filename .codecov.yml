@@ -37,3 +37,6 @@ flags:
 comment:
   layout: "reach, diff, flags"
   behavior: once
+
+- name: Validates PR titles against Submitty guidelines
+  uses: Submitty/action-pr-title@v22.07.00
