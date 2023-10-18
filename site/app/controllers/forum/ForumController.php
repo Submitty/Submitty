@@ -360,10 +360,10 @@ class ForumController extends AbstractController {
             }
             else {
                 // Good Attachment
-                $attachment_name = "";
+                $attachment_name = [];
                 if ($hasGoodAttachment[0] == 1) {
                     for ($i = 0; $i < count($_FILES['file_input']["name"]); $i++) {
-                        $attachment_name = $attachment_name . "\n" . basename($_FILES['file_input']["name"][$i]);
+                        $attachment_name[] = basename($_FILES['file_input']["name"][$i]);
                     }
                 }
                 $result = $this->core->getQueries()->createThread($markdown, $current_user_id, $thread_title, $thread_post_content, $anon, $pinned, $thread_status, $hasGoodAttachment[0], $attachment_name, $categories_ids, $lock_thread_date, $expiration, $announcement);
@@ -502,15 +502,10 @@ class ForumController extends AbstractController {
                 $result['next_page'] = $hasGoodAttachment[1];
             }
             else {
-                $attachment_name = "";
+                $attachment_name = [];
                 if ($hasGoodAttachment[0] == 1) {
                     for ($i = 0; $i < count($_FILES[$file_post]["name"]); $i++) {
-                        if ($attachment_name == "") {
-                            $attachment_name = basename($_FILES[$file_post]["name"][$i]);
-                        }
-                        else {
-                            $attachment_name = $attachment_name . "\n" . basename($_FILES[$file_post]["name"][$i]);
-                        }
+                        $attachment_name[] = basename($_FILES[$file_post]["name"][$i]);
                     }
                 }
 
@@ -905,13 +900,9 @@ class ForumController extends AbstractController {
                     }
                 }
             }
-            $attachment_name = "";
-            if (!empty($current_attachments)) {
-                $attachment_name = implode("\n", $current_attachments);
-            }
-            $has_attachment = ($attachment_name == "") ? 0 : 1;
+            $has_attachment = (empty($attachment_name)) ? 0 : 1;
 
-            return $this->core->getQueries()->editPost($original_creator, $current_user, $post_id, $new_post_content, $anon, $markdown, $has_attachment, $attachment_name);
+            return $this->core->getQueries()->editPost($original_creator, $current_user, $post_id, $new_post_content, $anon, $markdown, $has_attachment);
         }
         return null;
     }
