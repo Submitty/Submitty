@@ -1,6 +1,8 @@
 /* exported addConfetti */
+/* global luxon */
 
 function addConfetti() {
+    const DateTime = luxon.DateTime;
     const canvas = document.getElementById('confetti_canvas');
     if (!canvas) {
         return;
@@ -25,7 +27,7 @@ function addConfetti() {
     // Resume confetti animation when window is visible again
     window.addEventListener('visibilitychange', () => {
         if (document.visibilityState === 'visible' && is_drawing) {
-            lastUpdateTime = Date.now();
+            lastUpdateTime = DateTime.now().toMillis();
             draw();
         }
     });
@@ -38,7 +40,7 @@ function addConfetti() {
     const ctx = canvas.getContext('2d');
     const pieces = [];
     const numberOfPieces = canvas.height;
-    let lastUpdateTime = Date.now();
+    let lastUpdateTime = DateTime.now().toMillis()
     const x_const = 0.25;
     const max_times = 250;
     const size_const = 10;
@@ -52,8 +54,8 @@ function addConfetti() {
         submission_date = date_box.innerHTML.match(/\d+/g);
     }
 
-    const d = new Date();
-    let month = d.getMonth();
+    const d = DateTime.now();
+    let month = d.month();
 
     //if we parsed the submission due date, use that instead
     if (submission_date.length >= 1) {
@@ -111,8 +113,8 @@ function addConfetti() {
     }
 
     function update () {
-        const now = Date.now(),
-            dt = now - lastUpdateTime;
+        const now = DateTime.now().toMillis();
+        dt = now - lastUpdateTime;
 
         for (let i = pieces.length - 1; i >= 0; i--) {
             const p = pieces[i];
