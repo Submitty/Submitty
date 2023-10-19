@@ -531,45 +531,45 @@ class ForumController extends AbstractController {
                 $result['next_page'] = $this->core->buildCourseUrl(['forum', 'threads', $thread_id]) . '?' . http_build_query(['option' => $display_option]);
                 $result['post_id'] = $post_id;
                 $result['thread_id'] = $thread_id;
-            }
-        }
-        $posts = $this->core->getQueries()->getPostsInThreads([$result['thread_id']]);
-        $first = true;
-        $first_post_id = 1;
-        $order_array = [];
-        $reply_level_array = [];
-        if ($display_option != 'tree') {
-            $reply_level = 1;
-        }
-        else {
-            foreach ($posts as $post) {
-                if ($thread_id == -1) {
-                    $thread_id = $post["thread_id"];
-                }
-                if ($first) {
-                    $first = false;
-                    $first_post_id = $post["id"];
-                }
-                if ($post["parent_id"] > $first_post_id) {
-                    $place = array_search($post["parent_id"], $order_array);
-                    $tmp_array = [$post["id"]];
-                    $parent_reply_level = $reply_level_array[$place];
-                    while ($place !== false && $place + 1 < count($reply_level_array) && $reply_level_array[$place + 1] > $parent_reply_level) {
-                        $place++;
-                    }
-                    array_splice($order_array, $place + 1, 0, $tmp_array);
-                    array_splice($reply_level_array, $place + 1, 0, $parent_reply_level + 1);
+                $posts = $this->core->getQueries()->getPostsInThreads([$result['thread_id']]);
+                $first = true;
+                $first_post_id = 1;
+                $order_array = [];
+                $reply_level_array = [];
+                if ($display_option != 'tree') {
+                    $reply_level = 1;
                 }
                 else {
-                    array_push($order_array, $post["id"]);
-                    array_push($reply_level_array, 1);
+                    foreach ($posts as $post) {
+                        if ($thread_id == -1) {
+                            $thread_id = $post["thread_id"];
+                        }
+                        if ($first) {
+                            $first = false;
+                            $first_post_id = $post["id"];
+                        }
+                        if ($post["parent_id"] > $first_post_id) {
+                            $place = array_search($post["parent_id"], $order_array);
+                            $tmp_array = [$post["id"]];
+                            $parent_reply_level = $reply_level_array[$place];
+                            while ($place !== false && $place + 1 < count($reply_level_array) && $reply_level_array[$place + 1] > $parent_reply_level) {
+                                $place++;
+                            }
+                            array_splice($order_array, $place + 1, 0, $tmp_array);
+                            array_splice($reply_level_array, $place + 1, 0, $parent_reply_level + 1);
+                        }
+                        else {
+                            array_push($order_array, $post["id"]);
+                            array_push($reply_level_array, 1);
+                        }
+                    }
                 }
+                $place = array_search($post_id, $order_array);
+                $reply_level = $reply_level_array[$place];
+                $max_post_box_id = count($posts);
+                $this->sendSocketMessage(['type' => 'new_post', 'thread_id' => $thread_id, 'post_id' => $post_id, 'reply_level' => $reply_level, 'post_box_id' => $max_post_box_id]);
             }
         }
-        $place = array_search($post["id"], $order_array);
-        $reply_level = $reply_level_array[$place];
-        $max_post_box_id = count($posts);
-        $this->sendSocketMessage(['type' => 'new_post', 'thread_id' => $thread_id, 'post_id' => $post_id, 'reply_level' => $reply_level, 'post_box_id' => $max_post_box_id]);
         return $this->core->getOutput()->renderJsonSuccess($result);
     }
 
@@ -601,7 +601,7 @@ class ForumController extends AbstractController {
         if ($type == 'announce_thread') {
             $this->sendSocketMessage(['type' => 'announce_thread', 'thread_id' => $thread_id]);
         }
-        elseif ($type == 'unpin_thread') {
+        if ($type == 'unpin_thread') {
             $this->sendSocketMessage(['type' => 'unpin_thread', 'thread_id' => $thread_id]);
         }
         $this->core->getQueries()->setAnnouncement($thread_id, $type);
@@ -671,7 +671,7 @@ class ForumController extends AbstractController {
             if ($type == "thread") {
                 $this->sendSocketMessage(['type' => 'delete_thread', 'thread_id' => $thread_id]);
             }
-            elseif ($type == "post") {
+            if ($type == "post") {
                 $post_id = $_POST["post_id"];
                 $this->sendSocketMessage(['type' => 'delete_post', 'thread_id' => $thread_id, 'post_id' => $post_id]);
             }
@@ -799,9 +799,7 @@ class ForumController extends AbstractController {
                 $place = array_search($post["id"], $order_array);
                 $reply_level = $reply_level_array[$place];
                 $post_box_id = 1;
-                if ($this->core->getQueries()->isThreadLocked($thread_id) != 1 || $this->core->getUser()->accessFullGrading()) {
-                    $GLOBALS['post_box_id'] = $post_box_id = isset($GLOBALS['post_box_id']) ? $GLOBALS['post_box_id'] + 1 : 1;
-                }
+
                 $this->sendSocketMessage(['type' => 'edit_post', 'thread_id' => $thread_id, 'post_id' => $post_id, 'reply_level' => $reply_level, 'post_box_id' => $post_box_id]);
             }
             elseif ($type == 'Thread and Post') {
@@ -1340,7 +1338,7 @@ class ForumController extends AbstractController {
     }
     /**
      * this function opens a WebSocket client and sends a message with the corresponding update
-     * @param array $msg_array
+     * @param array<mixed> $msg_array
      */
     private function sendSocketMessage(array $msg_array): void {
         $msg_array['user_id'] = $this->core->getUser()->getId();
