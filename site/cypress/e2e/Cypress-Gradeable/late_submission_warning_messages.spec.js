@@ -358,6 +358,7 @@ describe('Test warning messages for team gradeable', () => {
                 cy.get('#apply-to-all').click();
             }
         });
+        cy.get('.alert-success').invoke('text').should('contain', 'Extensions have been updated');
         cy.get('#gradeable-select').select(gradeable);
         cy.get('body').then((body) => {
             if (body.find('#extensions-table').length > 0) {
