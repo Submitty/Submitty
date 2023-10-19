@@ -840,6 +840,18 @@ CREATE TABLE public.electronic_gradeable_version (
 
 
 --
+-- Name: forum_attachments; Type: TABLE; Schema: public; Owner: -
+--
+
+CREATE TABLE public.forum_attachments (
+    post_id integer NOT NULL,
+    file_name character varying NOT NULL,
+    version_added integer DEFAULT 1 NOT NULL,
+    version_deleted integer DEFAULT 0 NOT NULL
+);
+
+
+--
 -- Name: forum_posts_history; Type: TABLE; Schema: public; Owner: -
 --
 
@@ -849,7 +861,8 @@ CREATE TABLE public.forum_posts_history (
     content text NOT NULL,
     edit_timestamp timestamp(0) with time zone NOT NULL,
     has_attachment boolean DEFAULT false,
-    attachment_name character varying(255) DEFAULT ''::character varying
+    attachment_name character varying(255) DEFAULT ''::character varying,
+    version_id integer
 );
 
 
@@ -1539,7 +1552,8 @@ CREATE TABLE public.posts (
     type integer NOT NULL,
     has_attachment boolean NOT NULL,
     render_markdown boolean DEFAULT false NOT NULL,
-    attachment_name character varying(255) DEFAULT ''::character varying
+    attachment_name character varying(255) DEFAULT ''::character varying,
+    version_id integer DEFAULT 1
 );
 
 

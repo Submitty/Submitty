@@ -1,5 +1,6 @@
 """Migration for a given Submitty course database."""
 import os
+#import pdb; pdb.set_trace()
 
 def up(config, database, semester, course):
     """
@@ -15,26 +16,69 @@ def up(config, database, semester, course):
     :type course: str
     """
     database.execute("""
-        ALTER TABLE posts ADD COLUMN IF NOT EXISTS version_id int DEFAULT 1;
-        ALTER TABLE forum_posts_history ADD COLUMN IF NOT EXISTS has_attachment boolean DEFAULT false;
-        ALTER TABLE forum_posts_history ADD COLUMN IF NOT EXISTS version_id int DEFAULT 1;
+        ALTER TABLE 
+                     posts 
+        ADD COLUMN IF NOT EXISTS 
+                     version_id int;
+        ALTER TABLE 
+                     forum_posts_history 
+        ADD COLUMN IF NOT EXISTS 
+                     has_attachment boolean DEFAULT false;
+        ALTER TABLE 
+                     forum_posts_history 
+        ADD COLUMN IF NOT EXISTS 
+                     version_id int;
+        WITH 
+            versions AS (
+                SELECT 
+                post_id, edit_timestamp,
+                     ROW_NUMBER() OVER 
+                     (
+                        PARTITION BY post_id ORDER BY edit_timestamp)
+                        AS 
+                           version_id 
+                        FROM 
+                            forum_posts_history
+                        )
+                     UPDATE 
+                        forum_posts_history 
+                     AS 
+                        p 
+                     SET 
+                        version_id = v.version_id 
+                     FROM 
+                        versions 
+                     AS 
+                        v 
+                     WHERE 
+                        p.post_id = v.post_id 
+                     AND 
+                        p.edit_timestamp = v.edit_timestamp;
+        UPDATE 
+            posts
+        SET 
+            version_id = t.countVersionID
+        FROM
+            (
+            SELECT 
+                fph.post_id, COUNT(fph.post_id) AS countVersionID
+            FROM 
+                forum_posts_history fph 
+            JOIN 
+                posts p ON p.id = fph.post_id 
+            GROUP BY 
+                fph.post_id
+            ) t
+        WHERE 
+            posts.id = t.post_id;
+                     
         CREATE TABLE IF NOT EXISTS forum_attachments ( 
                      post_id int NOT NULL,
                      file_name character varying NOT NULL,
                      version_added int NOT NULL DEFAULT 1,
-                     version_deleted int NOT NULL DEFAULT 0,
-        )
+                     version_deleted int NOT NULL DEFAULT 0
+                    )
     """)
-
-    #update forum_posts_history with version_id
-    modified_posts = database.execute("SELECT DISTINCT post_id FROM forum_posts_history;")
-    for post in modified_posts:
-        all_versions = database.execute("SELECT edit_timestamp FROM forum_posts_history WHERE post_id = {post} ORDER BY edit_timestamp;")
-        i = 0
-        for version in all_versions:
-            i += 1
-            database.execute("UPDATE forum_posts_history SET version_id = {i} WHERE post_id = {post} AND edit_timestamp = {version};")
-        database.execute("UPDATE posts SET version_id = {i} WHERE post_id = {post};")
 
     #set attachment names of existing posts
     posts = database.execute("""
@@ -47,7 +91,7 @@ def up(config, database, semester, course):
         all_imgs = os.listdir(img_path)
         for img in all_imgs:
             database.execute(f"""
-                         INSERT INTO forum_attachments (post_id, file_name, version_added, version_deleted) VALUES ({post_id}, {img}, 1, 0)
+                         INSERT INTO forum_attachments (post_id, file_name, version_added, version_deleted) VALUES ({post_id}, '{img}', 1, 0);
                          UPDATE forum_posts_history SET has_attachment = true WHERE post_id = {post_id};
                          """)
 
