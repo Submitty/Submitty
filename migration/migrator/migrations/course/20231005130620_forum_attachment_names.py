@@ -19,7 +19,7 @@ def up(config, database, semester, course):
         ALTER TABLE 
                      posts 
         ADD COLUMN IF NOT EXISTS 
-                     version_id int;
+                     version_id int DEFAULT 1;
         ALTER TABLE 
                      forum_posts_history 
         ADD COLUMN IF NOT EXISTS 
@@ -110,3 +110,7 @@ def down(config, database, semester, course):
     :type course: str
     """
     pass
+    database.execute("""
+        DROP TABLE forum_attachments;
+        ALTER TABLE posts DROP COLUMN version_id;
+    """)

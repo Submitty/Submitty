@@ -784,21 +784,22 @@ SQL;
         }
 
         try {
-            $this->course_db->query("INSERT INTO posts (thread_id, parent_id, author_user_id, content, timestamp, anonymous, deleted, endorsed_by, type, has_attachment, render_markdown) VALUES (?, ?, ?, ?, current_timestamp, ?, ?, ?, ?, ?, ?, ?)", [$thread_id, $parent_post, $user, $content, $anonymous, 0, null, $type, $hasAttachment, $markdown]);
+            $this->course_db->query("INSERT INTO posts (thread_id, parent_id, author_user_id, content, timestamp, anonymous, deleted, endorsed_by, type, has_attachment, render_markdown, version_id) VALUES (?, ?, ?, ?, current_timestamp, ?, ?, ?, ?, ?, ?, 1)", [$thread_id, $parent_post, $user, $content, $anonymous, 0, null, $type, $hasAttachment, $markdown]);
             $this->course_db->query("SELECT MAX(id) as max_id from posts where thread_id=? and author_user_id=?", [$thread_id, $user]);
             $id = $this->course_db->rows()[0]["max_id"];
+            $this->visitThread($user, $thread_id);
             foreach ($attachment_name as $img) {
                 $this->course_db->query("INSERT INTO forum_attachments (post_id, file_name, version_added, version_deleted) VALUES (?, ?, 1, 0)", [$id, $img]);
             }
-            $this->visitThread($user, $thread_id);
+            
+            return $id;
         }
         catch (DatabaseException $dbException) {
             if ($this->course_db->inTransaction()) {
                 $this->course_db->rollback();
             }
+            return false;
         }
-
-        return $id;
     }
 
     public function findParentPost($thread_id) {
