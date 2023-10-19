@@ -40,6 +40,6 @@ submitty_test() {
 submitty_test "$@"
 
 popd > /dev/null || {
-    echo "Failed to return to the previous directory. Check if you have valid permission."
+    echo "Failed to return to the previous directory."
     exit 1
 }
