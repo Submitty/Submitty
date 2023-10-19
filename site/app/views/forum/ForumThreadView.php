@@ -315,8 +315,10 @@ class ForumThreadView extends AbstractView {
                 "post_box_id" => $generatePostContent["post_box_id"],
                 "merge_url" => $this->core->buildCourseUrl(['forum', 'threads', 'merge']),
                 "split_url" => $this->core->buildCourseUrl(['forum', 'posts', 'split']),
+                "edit_url" => $this->core->buildCourseUrl(['forum', 'posts', 'modify']) . '?' . http_build_query(['modify_type' => '1']),
                 "post_content_limit" => $post_content_limit,
-                "render_markdown" => $markdown_enabled
+                "render_markdown" => $markdown_enabled,
+                "categories" => $categories,
             ]);
 
             $return = $this->core->getOutput()->renderJsonSuccess(["html" => json_encode($return)]);
@@ -601,7 +603,10 @@ class ForumThreadView extends AbstractView {
                 "post_box_id" => $post_box_id,
                 "total_attachments" => $GLOBALS['totalAttachments'],
                 "merge_url" => $this->core->buildCourseUrl(['forum', 'threads', 'merge']),
-                "split_url" => $this->core->buildCourseUrl(['forum', 'posts', 'split'])
+                "split_url" => $this->core->buildCourseUrl(['forum', 'posts', 'split']),
+                "edit_url" => $this->core->buildCourseUrl(['forum', 'posts', 'modify']) . '?' . http_build_query(['modify_type' => '1']),
+                "categories" => $this->core->getQueries()->getCategories(),
+
             ]);
         }
         else {
@@ -1192,7 +1197,8 @@ class ForumThreadView extends AbstractView {
             "render_markdown" => $markdown,
             "has_history" => $has_history,
             "thread_previously_merged" => $merged_thread,
-            "thread_announced" => $thread_announced
+            "thread_announced" => $thread_announced,
+            "categories" => $this->core->getQueries()->getCategories(),
         ];
 
         if ($render) {

@@ -9,7 +9,6 @@
         });
 
         $(".post_reply_form").submit(publishPost);
-        $("#thread_form").submit(modifyOrSplitPost);
         $("#split_form").submit(modifyOrSplitPost);
         $("form").areYouSure();
         loadThreadHandler();
@@ -22,10 +21,10 @@
 
 </script>
 
-{%  include "forum/EditPostForm.twig" with {
+{#{%  include "forum/EditPostForm.twig" with {
     "categories" : filterFormData.categories,
     "post_data" : generate_post_content.post_data,
-} %}
+} %}#}
 
 {%  include "forum/HistoryForm.twig" %}
 
@@ -123,7 +122,9 @@
                     "merge_thread_content" : generate_post_content.merge_thread_content,
                     "csrf_token" : generate_post_content.csrf_token,
                     "activeThreadTitle" : generate_post_content.activeThreadTitle,
-                    "post_box_id" : generate_post_content.post_box_id
+                    "post_box_id" : generate_post_content.post_box_id,
+                    "categories" : filterFormData.categories,
+                    "edit_url" : edit_url,
                 } %}
 
                 <script>

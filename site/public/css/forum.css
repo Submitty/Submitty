@@ -284,13 +284,13 @@
 }
 
 /* stylelint-disable-next-line selector-id-pattern */
-#thread_form {
+.edit_thread_form {
     margin-right: 15px;
     margin-left: 15px;
 }
 
 .display-existing-attachments {
-    display: none;
+    display: block;
     float: none;
     overflow: hidden;
 }
