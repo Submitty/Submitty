@@ -892,17 +892,7 @@ class ForumController extends AbstractController {
 
             $markdown = !empty($_POST['markdown_status']);
 
-            $current_attachments = explode("\n", $original_post['attachment_name']);
-            if (isset($_POST['deleted_attachments'])) {
-                foreach (json_decode($_POST['deleted_attachments']) as $img) {
-                    if (($key = array_search($img, $current_attachments)) !== false) {
-                        unset($current_attachments[$key]);
-                    }
-                }
-            }
-            $has_attachment = (empty($attachment_name)) ? 0 : 1;
-
-            return $this->core->getQueries()->editPost($original_creator, $current_user, $post_id, $new_post_content, $anon, $markdown, $has_attachment);
+            return $this->core->getQueries()->editPost($original_creator, $current_user, $post_id, $new_post_content, $anon, $markdown, json_decode($_POST['deleted_attachments']));
         }
         return null;
     }
@@ -1171,7 +1161,7 @@ class ForumController extends AbstractController {
             $_post['content'] = $this->core->getOutput()->renderTwigTemplate("forum/RenderPost.twig", [
                 "post_content" => $post["content"],
                 "render_markdown" => false,
-                "post_attachment" => ForumUtils::getForumAttachments($current_post['id'], $current_post['thread_id'], $post['has_attachment'], $post['attachment_name'], $this->core->getConfig()->getCoursePath(), $this->core->buildCourseUrl(['display_file'])),
+                "post_attachment" => ForumUtils::getForumAttachments($current_post['id'], $current_post['thread_id'], $this->core->getQueries()->getForumAttachments($current_post['id'], $post['version_id']), $this->core->getConfig()->getCoursePath(), $this->core->buildCourseUrl(['display_file'])),
                 "edit_id" => $post_id . "-" . $edit_id,
             ]);
             $_post['post_time'] = DateUtils::parseDateTime($post['edit_timestamp'], $this->core->getConfig()->getTimezone())->format("n/j g:i A");
@@ -1184,7 +1174,7 @@ class ForumController extends AbstractController {
             $_post['content'] = $this->core->getOutput()->renderTwigTemplate("forum/RenderPost.twig", [
                 "post_content" => $current_post["content"],
                 "render_markdown" => false,
-                "post_attachment" => ForumUtils::getForumAttachments($current_post['id'], $current_post['thread_id'], $current_post['has_attachment'], $current_post['attachment_name'], $this->core->getConfig()->getCoursePath(), $this->core->buildCourseUrl(['display_file'])),
+                "post_attachment" => ForumUtils::getForumAttachments($current_post['id'], $current_post['thread_id'], $this->core->getQueries()->getForumAttachments($current_post['id']), $this->core->getConfig()->getCoursePath(), $this->core->buildCourseUrl(['display_file'])),
                 "edit_id" => $post_id . "-" . $edit_id,
             ]);
             $_post['post_time'] = DateUtils::parseDateTime($current_post['timestamp'], $this->core->getConfig()->getTimezone())->format("n/j g:i A");
@@ -1222,10 +1212,7 @@ class ForumController extends AbstractController {
                 $urls = [];
                 $thread_dir = FileUtils::joinPaths(FileUtils::joinPaths($this->core->getConfig()->getCoursePath(), "forum_attachments"), $result["thread_id"]);
                 $post_dir = FileUtils::joinPaths($thread_dir, $post_id);
-                $filenames = explode("\n", $result["attachment_name"]);
-                if ($filenames[0] == "") {
-                    unset($filenames[0]);
-                }
+                $filenames = $this->core->getQueries()->getForumAttachments($post_id);
                 foreach ($filenames as $filename) {
                     $urls[$filename] = $this->core->buildCourseUrl(['display_file']) . '?dir=forum_attachments&path=' . $post_dir . "/" . $filename;
                 }

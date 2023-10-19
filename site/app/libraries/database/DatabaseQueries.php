@@ -788,7 +788,7 @@ SQL;
             $this->course_db->query("SELECT MAX(id) as max_id from posts where thread_id=? and author_user_id=?", [$thread_id, $user]);
             $id = $this->course_db->rows()[0]["max_id"];
             foreach ($attachment_name as $img) {
-                $this->course_db->query("INSERT INTO forum_attachments (post_id, file_name, version_added, version_deleted) VALUES (?, ?, 1, 0)", [$id, $img])
+                $this->course_db->query("INSERT INTO forum_attachments (post_id, file_name, version_added, version_deleted) VALUES (?, ?, 1, 0)", [$id, $img]);
             }
             $this->visitThread($user, $thread_id);
         }
@@ -1104,11 +1104,21 @@ SQL;
         return $this->course_db->rows()[0]['parent_id'];
     }
 
-    public function getForumAttachments($post_id) {
-        return $this->course_db
+    public function getForumAttachments($post_id, $version = 0) {
+        // Default version is current version
+        if ($version === 0) {
+            $version = $this->getPost($post_id)['version_id'];
+        }
+        $this->course_db->query("SELECT file_name FROM forum_attachments WHERE post_id = ? AND version_added <= ? AND (version_deleted > ? OR version_deleted = 0)", [$post_id, $version, $version]);
+        // Strip 'file_name' keys from each row
+        $attachment_name = [];
+        foreach ($this->course_db->rows() as $row) {
+            $attachment_name[] = $row['file_name'];
+        }
+        return $attachment_name;
     }
 
-    public function editPost($original_creator, $user, $post_id, $content, $anon, $markdown, $hasAttachment, $attachments_deleted) {
+    public function editPost($original_creator, $user, $post_id, $content, $anon, $markdown, $attachments_deleted) {
         try {
             $markdown = $markdown ? 1 : 0;
             // Before making any edit to $post_id, forum_posts_history will not have any corresponding entry
@@ -1119,15 +1129,16 @@ SQL;
             // Get latest version number
             $this->course_db->query("SELECT version_id FROM posts WHERE id = ?", [$post_id]);
             $version_id = $this->course_db->rows()[0]["version_id"] + 1;
-            // Update current post
-            $this->course_db->query("UPDATE posts SET content =  ?, anonymous = ?, render_markdown = ?, has_attachment = ?, version_id = ? where id = ?", [$content, $anon, $markdown, $hasAttachment, $post_id, $version_id]);
-            // Insert latest version of post into forum_posts_history
-            $this->course_db->query("INSERT INTO forum_posts_history(post_id, edit_author, content, edit_timestamp, has_attachment, version_id) SELECT id, ?, content, current_timestamp, has_attachment, version_id FROM posts WHERE id = ?", [$user, $post_id]);
-            $this->course_db->query("UPDATE notifications SET content = substring(content from '.+?(?=from)') || 'from ' || ? where metadata::json->>'thread_id' = ? and metadata::json->>'post_id' = ?", [ForumUtils::getDisplayName($anon, $this->getDisplayUserInfoFromUserId($original_creator)), $this->getParentPostId($post_id), $post_id]);
             // Update attachments
             foreach ($attachments_deleted as $img) {
                 $this->course_db->query("UPDATE forum_attachments SET version_deleted = ? WHERE post_id = ? AND file_name = ?", [$version_id, $post_id, $img]);
             }
+            $hasAttachment = !empty($this->getForumAttachments($post_id));
+            // Update current post
+            $this->course_db->query("UPDATE posts SET content =  ?, anonymous = ?, render_markdown = ?, has_attachment = ?, version_id = ? where id = ?", [$content, $anon, $markdown, $hasAttachment, $version_id, $post_id]);
+            // Insert latest version of post into forum_posts_history
+            $this->course_db->query("INSERT INTO forum_posts_history(post_id, edit_author, content, edit_timestamp, version_id) SELECT id, ?, content, current_timestamp, version_id FROM posts WHERE id = ?", [$user, $post_id]);
+            $this->course_db->query("UPDATE notifications SET content = substring(content from '.+?(?=from)') || 'from ' || ? where metadata::json->>'thread_id' = ? and metadata::json->>'post_id' = ?", [ForumUtils::getDisplayName($anon, $this->getDisplayUserInfoFromUserId($original_creator)), $this->getParentPostId($post_id), $post_id]);
             $this->course_db->commit();
         }
         catch (DatabaseException $dbException) {

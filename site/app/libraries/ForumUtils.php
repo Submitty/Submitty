@@ -72,20 +72,11 @@ class ForumUtils {
         return $real_name['given_name'] . substr($real_name['family_name'], 0, 2) . '.';
     }
 
-    /**
-     * @param int $post_id
-     * @param int $thread_id
-     * @param bool $has_attachment
-     * @param string $attachment_names
-     * @param string $course_path
-     * @param string $course_url
-     * @return mixed[]
-     */
-    public static function getForumAttachments($post_id, $thread_id, $has_attachment, $attachment_names, $course_path, $course_url) {
+    public static function getForumAttachments($post_id, $thread_id, $attachment_names, $course_path, $course_url) {
         $thread_dir = FileUtils::joinPaths(FileUtils::joinPaths($course_path, "forum_attachments"), $thread_id);
         $post_attachment = ["exist" => false];
 
-        if ($has_attachment) {
+        if (!empty($attachment_names)) {
             $post_attachment["exist"] = true;
 
             $post_dir = FileUtils::joinPaths($thread_dir, $post_id);
@@ -98,7 +89,7 @@ class ForumUtils {
             $attachment_encoded_data = [];
 
             foreach ($files as $file) {
-                if (in_array($file['name'], explode("\n", $attachment_names))) {
+                if (in_array($file['name'], $attachment_names)) {
                     $path = rawurlencode($file['path']);
                     $name = rawurlencode($file['name']);
                     $url = $course_url . '?dir=forum_attachments&path=' . $path;
