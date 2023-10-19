@@ -2,8 +2,7 @@
 
 
 pushd /usr/local/submitty/GIT_CHECKOUT/Submitty/site  > /dev/null || {
-    echo "Failed to change to the Submitty/site directory.
-    Please check if you have /usr/local/submitty/GIT_CHECKOUT/Submitty/site and valid permission"
+    echo "Failed to change to /usr/local/submitty/GIT_CHECKOUT/Submitty/site."
     exit 1
 }
 
