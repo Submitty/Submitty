@@ -53,6 +53,6 @@
   "scripts": {
     "test": "phpunit",
     "lint": "php vendor/bin/phpcs --extensions=php ./app",
-    "static-analysis": "php vendor/bin/phpstan analyze app public/index.php socket/index.php"
+    "static-analysis": "php vendor/bin/phpstan analyze"
   }
 }
