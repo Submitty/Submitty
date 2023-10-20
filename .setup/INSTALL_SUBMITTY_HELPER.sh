@@ -653,6 +653,12 @@ chmod 700       "${SUBMITTY_INSTALL_DIR}/.setup/bin/reupload"*
 chown root:root "${SUBMITTY_INSTALL_DIR}/.setup/bin/track_git_version.py"
 chmod 700       "${SUBMITTY_INSTALL_DIR}/.setup/bin/track_git_version.py"
 
+###############################################
+# submitty_test script
+cp  "${SUBMITTY_REPOSITORY}/.setup/SUBMITTY_TEST.sh"        "${SUBMITTY_INSTALL_DIR}/.setup/"
+chown root:root "${SUBMITTY_INSTALL_DIR}/.setup/SUBMITTY_TEST.sh"
+chmod 700       "${SUBMITTY_INSTALL_DIR}/.setup/SUBMITTY_TEST.sh"
+
 ########################################################################################################################
 ########################################################################################################################
 # PREPARE THE UNTRUSTED_EXEUCTE EXECUTABLE WITH SUID

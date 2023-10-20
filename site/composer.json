@@ -52,7 +52,7 @@
   },
   "scripts": {
     "test": "phpunit",
-    "lint": "phpcs --extensions=php ./app",
-    "static-analysis": "phpstan analyze app public/index.php socket/index.php"
+    "lint": "php vendor/bin/phpcs --extensions=php ./app",
+    "static-analysis": "php vendor/bin/phpstan analyze"
   }
 }
