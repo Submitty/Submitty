@@ -84,7 +84,7 @@ def create_group(group) -> None:
         return
 
 
-def generate_random_user_id(length: int=15) -> str:
+def generate_random_user_id(length: int = 15) -> str:
     return ''.join(random.choice(string.ascii_lowercase + string.ascii_uppercase
                                  + string.digits) for _ in range(length))
 
