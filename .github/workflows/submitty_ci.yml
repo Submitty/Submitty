@@ -33,7 +33,7 @@ jobs:
       run:
         working-directory: site
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
       - uses: actions/setup-node@v3
         with:
           node-version: ${{ env.NODE_VERSION }}
@@ -55,7 +55,7 @@ jobs:
       run:
         working-directory: site
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
       - uses: actions/setup-node@v3
         with:
           node-version: ${{ env.NODE_VERSION }}
@@ -79,7 +79,7 @@ jobs:
       run:
         working-directory: site
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
       - uses: actions/setup-node@v3
         with:
           node-version: ${{ env.NODE_VERSION }}
@@ -105,7 +105,7 @@ jobs:
       run:
         working-directory: site
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
       - uses: shivammathur/setup-php@2.26.0
         with:
           php-version: ${{ env.PHP_VER }}
@@ -140,7 +140,7 @@ jobs:
       run:
         working-directory: site
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
       - uses: shivammathur/setup-php@2.26.0
         with:
           php-version: ${{ env.PHP_VER }}
@@ -170,7 +170,7 @@ jobs:
   python-lint:
     runs-on: ubuntu-22.04
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
       - uses: actions/setup-python@v4
         with:
           python-version: ${{ env.PYTHON_VERSION }}
@@ -192,7 +192,7 @@ jobs:
   python-unit:
     runs-on: ubuntu-22.04
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
       - uses: actions/setup-python@v4
         with:
           python-version: ${{ env.PYTHON_VERSION }}
@@ -269,7 +269,7 @@ jobs:
     name: yaml-lint
     runs-on: ubuntu-22.04
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
       - name: install yamllint
         run: sudo apt-get install -y yamllint
       - name: Run yamllint
@@ -280,7 +280,7 @@ jobs:
     name: ShellCheck
     runs-on: ubuntu-22.04
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
       - name: install ShellCheck
         run: sudo apt-get install -y shellcheck
       - name: Run ShellCheck
@@ -306,7 +306,7 @@ jobs:
 
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
       - uses: ./.github/actions/e2e-Setup-Composite
       # TODO: Remove this block after upgrading jsPDF
       - name: Cache Node Modules
@@ -327,7 +327,7 @@ jobs:
         uses: cypress-io/github-action@v6
         with:
           config: baseUrl=http://localhost
-          spec: cypress/e2e/cypress-system/accessibility.spec.js
+          spec: cypress/e2e/Cypress-System/accessibility.spec.js
           working-directory: ${{env.SUBMITTY_REPOSITORY}}/site
           browser: chrome
 
@@ -346,7 +346,7 @@ jobs:
         uses: cypress-io/github-action@v6
         with:
           config: baseUrl=http://localhost
-          spec: cypress/e2e/cypress-system/autograding_status_1.spec.js
+          spec: cypress/e2e/Cypress-System/autograding_status_1.spec.js
           working-directory: ${{env.SUBMITTY_REPOSITORY}}/site
           browser: chrome
           env: autograding_shipper_off=True
@@ -359,7 +359,7 @@ jobs:
         uses: cypress-io/github-action@v6
         with:
           config: baseUrl=http://localhost
-          spec: cypress/e2e/cypress-system/autograding_status_2.spec.js
+          spec: cypress/e2e/Cypress-System/autograding_status_2.spec.js
           working-directory: ${{env.SUBMITTY_REPOSITORY}}/site
           browser: chrome
           env: autograding_shipper_off=True
@@ -372,7 +372,7 @@ jobs:
         uses: cypress-io/github-action@v6
         with:
           config: baseUrl=http://localhost,chromeWebSecurity=false
-          spec: cypress/e2e/cypress-system/login.spec.js
+          spec: cypress/e2e/Cypress-System/login.spec.js
           working-directory: ${{env.SUBMITTY_REPOSITORY}}/site
           browser: chrome
 
@@ -383,7 +383,7 @@ jobs:
         uses: cypress-io/github-action@v6
         with:
           config: baseUrl=http://localhost
-          spec: cypress/e2e/cypress-system/login.spec.js
+          spec: cypress/e2e/Cypress-System/login.spec.js
           working-directory: ${{env.SUBMITTY_REPOSITORY}}/site
           browser: chrome
 
@@ -394,7 +394,7 @@ jobs:
         uses: cypress-io/github-action@v6
         with:
           config: baseUrl=http://localhost
-          spec: cypress/e2e/cypress-system/login.spec.js
+          spec: cypress/e2e/Cypress-System/login.spec.js
           working-directory: ${{env.SUBMITTY_REPOSITORY}}/site
           browser: chrome
 
@@ -410,7 +410,7 @@ jobs:
         uses: cypress-io/github-action@v6
         with:
           config: baseUrl=http://localhost,chromeWebSecurity=false
-          spec: cypress/e2e/cypress-system/login.spec.js
+          spec: cypress/e2e/Cypress-System/login.spec.js
           working-directory: ${{env.SUBMITTY_REPOSITORY}}/site
           browser: chrome
 
@@ -452,7 +452,7 @@ jobs:
 
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
       - uses: ./.github/actions/e2e-Setup-Composite
       # TODO: Remove this block after upgrading jsPDF
       - name: Cache Node Modules
@@ -516,7 +516,7 @@ jobs:
 
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
       - uses: ./.github/actions/e2e-Setup-Composite
       - name: Run integration tests
         run: sudo -E env "PATH=$PATH" python3 /usr/local/submitty/test_suite/integrationTests/run.py
