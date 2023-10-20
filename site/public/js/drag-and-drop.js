@@ -1350,7 +1350,7 @@ function handleUploadBanner(csrf_token, closeTime, releaseTime, extraName, linkN
     formData.append('close_time', closeTime);
     formData.append('release_time', releaseTime);
     formData.append('extra_name', extraName);
-    formData.append('link_name', linkName)
+    formData.append('link_name', linkName);
     for (let i = 0; i < file_array.length; i++) {
         for (let j = 0; j < file_array[i].length; j++) {
             if (file_array[i][j].name.indexOf("'") !== -1 ||

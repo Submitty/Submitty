@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace app\entities\banner;
 
-
 use app\repositories\banner\BannerImageRepository;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
@@ -20,13 +19,13 @@ class BannerImage {
     #[ORM\Column(type: Types::INTEGER)]
     #[ORM\GeneratedValue(strategy: "AUTO")]
     protected $id;
-    
+
     #[ORM\Column(type: Types::DATETIME_MUTABLE, precision: 6)]
     protected $release_date;
 
     #[ORM\Column(type: Types::DATETIME_MUTABLE, precision: 6)]
     protected $closing_date;
-    
+
     #[ORM\Column(type: Types::STRING)]
     protected $name;
 
@@ -44,8 +43,15 @@ class BannerImage {
 
 
 
-    public function __construct(string $path, string $name, string $extra_info_name, 
-        string $link_url_name, \DateTime $release_date, \DateTime $close_date, string $folder_name) {
+    public function __construct(
+        string $path,
+        string $name,
+        string $extra_info_name,
+        string $link_url_name,
+        \DateTime $release_date,
+        \DateTime $close_date,
+        string $folder_name
+    ) {
         $this->setReleaseDate($release_date);
         $this->setClosingDate($close_date);
         $this->setName($name);

@@ -326,13 +326,7 @@ footer .footer-separator {
 }
 
 @keyframes rocking {
-  0% {
-    transform: rotateZ(-10deg);
-  }
-  50% {
-    transform: rotateZ(10deg);
-  }
-  100% {
-    transform: rotateZ(-10deg);
-  }
+    0% { transform: rotateZ(-10deg); }
+    50% { transform: rotateZ(10deg); }
+    100% { transform: rotateZ(-10deg); }
 }
