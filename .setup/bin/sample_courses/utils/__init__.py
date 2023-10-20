@@ -34,7 +34,7 @@ def load_data_json(file_name):
     """
     file_path = os.path.join(SETUP_DATA_PATH, file_name)
     if not os.path.isfile(file_path):
-        raise IOError("Missing the json file .setup/data/{}".format(file_name))
+        raise IOError(f"Missing the json file .setup/data/{file_name}")
     with open(file_path) as open_file:
         json_file = json.load(open_file)
     return json_file
@@ -47,7 +47,7 @@ def load_data_yaml(file_path):
     :return: parsed YAML structure from loaded file
     """
     if not os.path.isfile(file_path):
-        raise IOError("Missing the yaml file {}".format(file_path))
+        raise IOError(f"Missing the yaml file {file_path}")
     with open(file_path) as open_file:
         yaml_file = yaml.load(open_file)
     return yaml_file
@@ -62,7 +62,7 @@ def get_php_db_password(password):
     :return: password hash to be inserted into the DB for a user
     """
     proc = subprocess.Popen(
-        ["php", "-r", "print(password_hash('{}', PASSWORD_DEFAULT));".format(password)],
+        ["php", "-r", f"print(password_hash('{password}', PASSWORD_DEFAULT));"],
         stdout=subprocess.PIPE, stderr=subprocess.PIPE)
     (out, err) = proc.communicate()
     return out.decode('utf-8')

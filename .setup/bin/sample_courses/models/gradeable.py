@@ -225,7 +225,7 @@ class Gradeable(object):
                         for elem in self.submissions:
                             if isinstance(elem, dict):
                                 raise TypeError("Cannot have dictionary inside of list for submissions "
-                                                "for {}".format(self.sample_path))
+                                                f"for {self.sample_path}")
                 if self.annotation_path is not None:
                     self.annotations = os.listdir(self.annotation_path)
                     self.annotations = list(filter(lambda x: not x.startswith("."), self.annotations))
