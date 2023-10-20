@@ -791,7 +791,6 @@ SQL;
             foreach ($attachment_name as $img) {
                 $this->course_db->query("INSERT INTO forum_attachments (post_id, file_name, version_added, version_deleted) VALUES (?, ?, 1, 0)", [$id, $img]);
             }
-            
             return $id;
         }
         catch (DatabaseException $dbException) {

@@ -775,8 +775,8 @@ function modifyOrSplitPost(e) {
     // eslint-disable-next-line no-var
     const post_id = e.data.post_id;
     const form = $(`#edit-thread-form-${post_id}`);
-    if (!form.prop('ignore-cat') && form.find('.btn-selected').length == 0) {
-        alert("At least one category must be selected.");
+    if (!form.prop('ignore-cat') && form.find('.btn-selected').length === 0) {
+        alert('At least one category must be selected.');
         return false;
     }
     const formData = new FormData(form[0]);
@@ -806,7 +806,7 @@ function modifyOrSplitPost(e) {
             }
 
             // modify
-            if (form.attr('class') === 'edit_thread_form') {
+            if (form.attr('class') === 'edit-thread-form') {
                 const thread_id = form.find('#edit_thread_id').val();
                 const reply_level = $(`#${post_id}`).attr('data-reply_level');
                 const post_box_id = $(`#${post_id}-reply .thread-post-form`).data('post_box_id') -1;

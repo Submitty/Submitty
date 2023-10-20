@@ -88,7 +88,7 @@ def up(config, database, semester, course):
         post_id = post[0]
         thread_id = post[1]
         img_path = f"/var/local/submitty/courses/{semester}/{course}/forum_attachments/{thread_id}/{post_id}"
-        all_imgs = os.listdir(img_path)
+        all_imgs = os.listdir(img_path) if (os.path.isdir(img_path)) else []
         for img in all_imgs:
             database.execute(f"""
                          INSERT INTO forum_attachments (post_id, file_name, version_added, version_deleted) VALUES ({post_id}, '{img}', 1, 0);
@@ -109,8 +109,9 @@ def down(config, database, semester, course):
     :param course: Code of course being migrated
     :type course: str
     """
-    pass
+    #pass
     database.execute("""
         DROP TABLE forum_attachments;
-        ALTER TABLE posts DROP COLUMN version_id;
+        ALTER TABLE posts DROP COLUMN version_id, DROP COLUMN attachment_name;
+        ALTER TABLE forum_posts_history DROP COLUMN attachment_name;
     """)
