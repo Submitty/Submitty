@@ -2262,6 +2262,15 @@ ORDER BY {$u_or_t}.{$section_key}",
         return $return;
     }
 
+    /**
+     * Gets the number of verified graded components associated with this gradeable.
+     *
+     * @param  int $gradeable_id gradeable id we are looking up
+     * @param  array<int> $sections an array holding sections of the given gradeable
+     * @param  string $section_key key we are using for grading sections
+     * @param  boolean $is_team true if the gradeable is a team assignment
+     * @return array<int,int> with a key representing a section and value representing the number of verified submissions
+     */
     public function getVerifiedComponentsCountByGradingSections($gradeable_id, $sections, $section_key, $is_team){
         $u_or_t = "u";
         $users_or_teams = "users";
