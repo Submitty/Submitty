@@ -1,4 +1,5 @@
 /* global displaySuccessMessage */
+/* exported markForDeletion */
 
 // eslint-disable-next-line no-unused-vars
 function categoriesFormEvents() {
@@ -780,7 +781,7 @@ function modifyOrSplitPost(e) {
         return false;
     }
     const formData = new FormData(form[0]);
-    formData.append('deleted_attachments', JSON.stringify((getDeletedAttachments())));
+    formData.append('deleted_attachments', JSON.stringify(getDeletedAttachments()));
     const submit_url = form.attr('action');
 
     $.ajax({
@@ -958,12 +959,13 @@ function showEditPostForm(post_id, thread_id, shouldEditThread, render_markdown,
         },
     });
 }
-// eslint-disable-next-line no-unused-vars
+
 function markForDeletion(ele) {
     $(ele).attr('class', 'btn btn-danger');
     $(ele).attr('onclick', 'unMarkForDeletion(this)');
     $(ele).text('Keep');
 }
+
 function unMarkForDeletion(ele) {
     $(ele).attr('class', 'btn btn-default');
     $(ele).attr('onclick', 'markForDeletion(this)');

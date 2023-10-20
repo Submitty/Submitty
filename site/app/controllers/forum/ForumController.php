@@ -355,13 +355,13 @@ class ForumController extends AbstractController {
         }
         else {
             $hasGoodAttachment = $this->checkGoodAttachment(true, -1, 'file_input');
-            if ($hasGoodAttachment[0] == -1) {
+            if ($hasGoodAttachment[0] === -1) {
                 $result['next_page'] = $hasGoodAttachment[1];
             }
             else {
                 // Good Attachment
                 $attachment_name = [];
-                if ($hasGoodAttachment[0] == 1) {
+                if ($hasGoodAttachment[0] === 1) {
                     for ($i = 0; $i < count($_FILES['file_input']["name"]); $i++) {
                         $attachment_name[] = basename($_FILES['file_input']["name"][$i]);
                     }
@@ -370,7 +370,7 @@ class ForumController extends AbstractController {
                 $thread_id = $result["thread_id"];
                 $post_id = $result["post_id"];
 
-                if ($hasGoodAttachment[0] == 1) {
+                if ($hasGoodAttachment[0] === 1) {
                     $thread_dir = FileUtils::joinPaths(FileUtils::joinPaths($this->core->getConfig()->getCoursePath(), "forum_attachments"), $thread_id);
                     FileUtils::createDir($thread_dir);
 
@@ -498,12 +498,12 @@ class ForumController extends AbstractController {
         }
         else {
             $hasGoodAttachment = $this->checkGoodAttachment(false, $thread_id, $file_post);
-            if ($hasGoodAttachment[0] == -1) {
+            if ($hasGoodAttachment[0] === -1) {
                 $result['next_page'] = $hasGoodAttachment[1];
             }
             else {
                 $attachment_name = [];
-                if ($hasGoodAttachment[0] == 1) {
+                if ($hasGoodAttachment[0] === 1) {
                     for ($i = 0; $i < count($_FILES[$file_post]["name"]); $i++) {
                         $attachment_name[] = basename($_FILES[$file_post]["name"][$i]);
                     }
@@ -516,7 +516,7 @@ class ForumController extends AbstractController {
                     FileUtils::createDir($thread_dir);
                 }
 
-                if ($hasGoodAttachment[0] == 1) {
+                if ($hasGoodAttachment[0] === 1) {
                     $post_dir = FileUtils::joinPaths($thread_dir, $post_id);
                     FileUtils::createDir($post_dir);
                     for ($i = 0; $i < count($_FILES[$file_post]["name"]); $i++) {

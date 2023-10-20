@@ -933,7 +933,6 @@ class ForumThreadView extends AbstractView {
                     "post_attachment" => $post_attachment,
                 ]);
             }
-//            var_dump($first_post);
 
             $thread_content[] = $thread_info;
         }
