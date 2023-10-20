@@ -18,9 +18,11 @@ jobs:
       # attempting to mount the shared folder. The guest and host guest additions
       # versions are close enough that we are fine without it.
       # - run: vagrant plugin install vagrant-vbguest
-      - run: NO_SUBMISSIONS=1 vagrant up ubuntu-22.04
-      - name: Validate image
-        run: curl --show-error --fail --include http://localhost:1511
+      # - run: NO_SUBMISSIONS=1 vagrant up ubuntu-22.04
+      # - name: Validate image
+      #   run: curl --show-error --fail --include http://localhost:1511
+      - name: Fail github action
+        run: exit 1
       - name: Acquire Job ID
         if: failure()
         id: get-job-id
