@@ -397,6 +397,14 @@
     bannerElement.style.width = "1%";
 
 
+    if (window.innerWidth < 900) {
+
+        // Get the element with id "moorthy-duck"
+        var element = document.getElementById("moorthy-duck");
+
+        // Set the onclick attribute to "ducky()"
+        element.onclick = ducky;
+    }
 
     var currentImages = [];
     for (var i = 0; i < images.length; i++) {
