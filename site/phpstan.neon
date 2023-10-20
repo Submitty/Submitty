@@ -5,6 +5,10 @@ includes:
     - vendor/phpstan/phpstan-doctrine/rules.neon
 
 parameters:
+    paths:
+        - app
+        - public/index.php
+        - socket/index.php
     ignoreErrors:
         - '#Access to an undefined property Ratchet\\ConnectionInterface::\$resourceId\.#'
         - '#Access to an undefined property Ratchet\\ConnectionInterface::\$httpRequest\.#'
