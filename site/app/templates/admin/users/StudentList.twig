@@ -52,12 +52,27 @@
                     {% if active_student_columns[11] %}
                         <th>Delete Student</th>
                     {% endif %}
+                    {% if active_student_columns[12] %}
+                        <th>User Numeric ID</th>
+                    {% endif %}
+                    {% if active_student_columns[13] %}
+                        <th>Legal First Name</th>
+                    {% endif %}
+                    {% if active_student_columns[14] %}
+                        <th>Legal Last Name</th>
+                    {% endif %}
+                    {% if active_student_columns[15] %}
+                        <th>Email</th>
+                    {% endif %}
+                    {% if active_student_columns[16] %}
+                        <th>Secondary Email</th>
+                    {% endif %}
                 </tr>
             </thead>
             {% for registration, students in sections %}
                 <tbody id="section-{{ registration }}">
                     <tr class="info">
-                        <th class="section-break" colspan="13">Students Enrolled in Registration Section {{ registration }}</td>
+                        <th class="section-break" colspan="18">Students Enrolled in Registration Section {{ registration }}</td>
                     </tr>
                     {% for student in students %}
                         {% set class = "" %}
@@ -121,6 +136,21 @@
                             {% endif %}
                             {% if active_student_columns[11] %}
                                 <td class="td-delete-student"><a href="javascript:deleteUserForm('{{ student.getId() }}', '{{ student.getDisplayedGivenName() }}', '{{ student.getDisplayedFamilyName() }}');" aria-label="delete student {{ student.getDisplayedGivenName() }} {{ student.getDisplayedFamilyName() }}"><i class="fas fa-trash"></i></a></td>
+                            {% endif %}
+                            {% if active_student_columns[12] %}
+                                <td class="align-left td-user-numeric-id">{{ student.getNumericId() }}</td>
+                            {% endif %}
+                            {% if active_student_columns[13] %}
+                                <td class="align-left td-legal-first-name">{{ student.getLegalGivenName() }}</td>
+                            {% endif %}
+                            {% if active_student_columns[14] %}
+                                <td class="align-left td-legal-last-name">{{ student.getLegalFamilyName() }}</td>
+                            {% endif %}
+                            {% if active_student_columns[15] %}
+                                <td class="align-left td-email">{{ student.getEmail() }}</td>
+                            {% endif %}
+                            {% if active_student_columns[16] %}
+                                <td class="align-left td-secondary-email">{{ student.getSecondaryEmail() }}</td>
                             {% endif %}
                         </tr>
                     {% endfor %}
