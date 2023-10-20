@@ -226,14 +226,7 @@ class LateController extends AbstractController {
                     JsonResponse::getFailResponse($error)
                 );
             }
-            $reason_for_extension = null;
-            if (isset($_POST['reason_for_exception'])) {
-                $reason_for_exception = $_POST['reason_for_exception'];
-            }
-            else {
-                $reason_for_exception = 'unspecified';
-            }
-
+            $reason_for_exception = $_POST['reason_for_exception'] ?? 'unspecified';
             $users_with_exceptions = $this->core->getQueries()->getUsersWithExtensions($_POST['g_id']);
             $simple_late_user = null;
             $no_change = false;
@@ -367,7 +360,7 @@ class LateController extends AbstractController {
             }, $fields);
 
             //All types have 3 fields except for exceptions, which can have 3 or 4 rows.
-            if (count($fields) !== 3 && !($type == 'extension' && count($fields) == 4)) {
+            if (count($fields) !== 3 && !($type === 'extension' && count($fields) === 4)) {
                 $data = null;
                 return [
                     "success" => false,
@@ -408,7 +401,7 @@ class LateController extends AbstractController {
                 ];
             }
             //$fields[3] added if not present to extension type. Allows for backwards compatibility.
-            if ($type == "extension" && count($fields) == 3) {
+            if ($type === "extension" && count($fields) === 3) {
                 $fields[] = 'unspecified';
             }
             //Fields information seems okay.  Push fields onto data array.
