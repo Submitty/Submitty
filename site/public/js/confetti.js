@@ -55,7 +55,7 @@ function addConfetti() {
     }
 
     const d = DateTime.now();
-    let month = d.month();
+    let month = d.month;
 
     //if we parsed the submission due date, use that instead
     if (submission_date.length >= 1) {
@@ -113,8 +113,8 @@ function addConfetti() {
     }
 
     function update () {
-        const now = DateTime.now().toMillis(),
-            dt = now - lastUpdateTime;
+        const now = DateTime.now().toMillis();
+        const dt = now - lastUpdateTime;
 
         for (let i = pieces.length - 1; i >= 0; i--) {
             const p = pieces[i];
