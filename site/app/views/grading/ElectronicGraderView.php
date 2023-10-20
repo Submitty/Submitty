@@ -56,8 +56,8 @@ class ElectronicGraderView extends AbstractView {
         int $grade_inquiries,
         array $graders_of_inquiries,
         bool $show_warnings,
-        int $submissions_in_queue,
-        int $verified
+        int $submissions_in_queue
+        //int $verified
     ) {
 
         $peer = $gradeable->hasPeerComponent();
@@ -361,8 +361,8 @@ class ElectronicGraderView extends AbstractView {
             "include_null_section" => array_key_exists('include_null_section', $_COOKIE) ? $_COOKIE['include_null_section'] : 'omit',
             "warnings" => $warnings,
             "submissions_in_queue" => $submissions_in_queue,
-            "can_manage_teams" => $this->core->getAccess()->canI('grading.electronic.show_edit_teams', ["gradeable" => $gradeable]),
-            "verified" => 
+            "can_manage_teams" => $this->core->getAccess()->canI('grading.electronic.show_edit_teams', ["gradeable" => $gradeable])
+            //"verified" => 
         ]);
     }
 

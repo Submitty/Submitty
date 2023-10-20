@@ -2150,6 +2150,8 @@ ORDER BY {$orderby}",
             $users_or_teams = "gradeable_teams";
             $user_or_team_id = "team_id";
         }
+        $v = "";
+        // if cookie == inxlusw, then v = 
         $return = [];
         $params = [$g_id];
         $where = "";
@@ -2167,7 +2169,7 @@ INNER JOIN (
   LEFT JOIN (
   gradeable_component_data AS gcd
   INNER JOIN gradeable_component AS gc ON gc.gc_id = gcd.gc_id AND gc.gc_is_peer = {$this->course_db->convertBoolean(false)}
-  )AS gcd ON gcd.gd_id = gd.gd_id WHERE gcd.g_id=?
+  )AS gcd ON gcd.gd_id = gd.gd_id WHERE gcd.g_id=? AND GCD_VERIFIER_ID IS NOT NULL
 ) AS gd ON {$u_or_t}.{$user_or_team_id} = gd.gd_{$user_or_team_id}
 {$where}
 GROUP BY {$u_or_t}.{$section_key}

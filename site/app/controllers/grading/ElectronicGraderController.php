@@ -692,7 +692,7 @@ class ElectronicGraderController extends AbstractController {
             $num_components = count($gradeable->getNonPeerComponents());
             $viewed_grade = $this->core->getQueries()->getNumUsersWhoViewedGradeBySections($gradeable, $sections, $null_section_cookie);
             $histogram_data = $this->generateHistogramData($overall_scores);
-            $verified_components = $this->core->getQueries()->getVerifiedComponentsCountByGradingSections($gradeable_id, $sections, $section_key, $gradeable->isTeamAssignment());
+            // $verified_components = $this->core->getQueries()->getVerifiedComponentsCountByGradingSections($gradeable_id, $sections, $section_key, $gradeable->isTeamAssignment());
         }
         $sections = [];
         //Either # of teams or # of students (for non-team assignments). Either case
@@ -894,8 +894,8 @@ class ElectronicGraderController extends AbstractController {
             $grade_inquiries,
             $graders_of_inquiries,
             $show_warnings,
-            $submissions_in_queue,
-            $verified
+            $submissions_in_queue
+            // $verified
         );
     }
 
@@ -3338,7 +3338,7 @@ class ElectronicGraderController extends AbstractController {
      */
     private function getStats(Gradeable $gradeable, User $grader, bool $full_stats, &$total_graded, &$total_total) {
         $num_components = $this->core->getQueries()->getTotalComponentCount($gradeable->getId());
-        $verified_components = $this->core->getQueries()->getTotalVerifiedComponentCount($gradeable->getId());
+        //$verified_components = $this->core->getQueries()->getTotalVerifiedComponentCount($gradeable->getId());
         $sections = [];
         if ($full_stats) {
             $sections = $this->core->getQueries()->getAllSectionsForGradeable($gradeable);
