@@ -425,8 +425,6 @@
     if (getCookie("display") === "yes") showBanners();
 
     function showBanners() {
-        console.log("index");
-        console.log(currentImageIndex);
 
         var movingUnit = document.getElementById("moving-unit");
         var bannerElement = document.getElementById("banner");
@@ -505,13 +503,7 @@
             setCookie('hiddenImages', JSON.stringify(hiddenImages)); 
 
         }
-        console.log("images");
-        console.log(images);
-        console.log("current Images");
-        console.log(currentImages);
-        console.log("hiddenImages");
-        console.log(hiddenImages);
-        console.log("==========================");
+
     }
 
     function changeImage(n) {
@@ -546,13 +538,7 @@
         }
 
         images[currentImageIndex].classList.add("active");
-        console.log("images");
-        console.log(images);
-        console.log("current Images");
-        console.log( currentImages);
-        console.log("hidden Images");
-        console.log( hiddenImages );
-        console.log("==========================");
+ 
     }
 
 
