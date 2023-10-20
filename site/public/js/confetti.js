@@ -113,8 +113,8 @@ function addConfetti() {
     }
 
     function update () {
-        const now = DateTime.now().toMillis();
-        dt = now - lastUpdateTime;
+        const now = DateTime.now().toMillis(),
+            dt = now - lastUpdateTime;
 
         for (let i = pieces.length - 1; i >= 0; i--) {
             const p = pieces[i];
