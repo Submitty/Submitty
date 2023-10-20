@@ -36,13 +36,16 @@ const fillData = (data) => {
     });
 
     testModification('#edit-pronouns-form', () => {
-        const e = cy.get('#user-pronouns-change').clear();
-        data.pronouns && e.type(data.pronouns);
+        cy.get('#user-pronouns-change').clear().as('pronounsInput');
+        data.pronouns && cy.get('@pronounsInput').type(data.pronouns);
     });
 
     testModification('#edit-secondary-email-form', () => {
-        const e = cy.get('#user-secondary-email-change').clear();
-        data.secondaryEmail && e.type(data.secondaryEmail);
+        cy.get('#user-secondary-email-change')
+            .clear()
+            .as('secondaryEmailInput');
+        data.secondaryEmail &&
+            cy.get('@secondaryEmailInput').type(data.secondaryEmail);
     });
 };
 
