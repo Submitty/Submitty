@@ -7275,16 +7275,20 @@ AND gc_id IN (
         $this->course_db->query($query, [$this->core->getDateTimeNow()->format('Y-m-d')]);
         return $this->course_db->rows();
     }
-//Make it pass in a paramater where if "Name" then sort by name. 
-//If "order" then keep it nomal
     public function getPastQueue() {
         $off  = "ORDER BY ROW_NUMBER";
         $up   = "ORDER BY helper.user_id";
         $down = "ORDER BY helper.user_id DESC";
         $orderType = "";
-        if($_COOKIE['sortStateTimeEntered']=="up"){           $orderType = $up;     }
-        elseif($_COOKIE['sortStateTimeEntered'] == "down"){   $orderType = $down;   }
-        else{                           $orderType = $off;    }
+        if ($_COOKIE['sortStateTimeEntered'] == "up"){           
+            $orderType = $up;     
+        }
+        elseif ($_COOKIE['sortStateTimeEntered'] == "down"){   
+            $orderType = $down;   
+        }
+        else {                          
+             $orderType = $off;    
+        }
 
         $query = "
         SELECT Row_number()
