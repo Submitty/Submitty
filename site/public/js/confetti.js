@@ -40,7 +40,7 @@ function addConfetti() {
     const ctx = canvas.getContext('2d');
     const pieces = [];
     const numberOfPieces = canvas.height;
-    let lastUpdateTime = DateTime.now().toMillis()
+    let lastUpdateTime = DateTime.now().toMillis();
     const x_const = 0.25;
     const max_times = 250;
     const size_const = 10;
