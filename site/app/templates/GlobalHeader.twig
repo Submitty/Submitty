@@ -425,8 +425,9 @@
     if (getCookie("display") === "yes") showBanners();
 
     function showBanners() {
-        console.log(images);
+        console.log("index");
         console.log(currentImageIndex);
+
         var movingUnit = document.getElementById("moving-unit");
         var bannerElement = document.getElementById("banner");
         if (bannerElement.style.display === "none") {
@@ -436,13 +437,7 @@
 
             if (currentImages.length > 0) {
                 images[0].classList.add("active");
-                var className = currentImages[0].className.split(' ')[1]
-                hiddenImages.push(className);
-                seenImages.push(currentImages[0]);
-                currentImages.shift();
-                currentImageIndex = images.length-1;
-                images = currentImages.concat(seenImages);
-                setCookie('hiddenImages', JSON.stringify(hiddenImages));  
+
                 var duckdivElement = document.getElementById("moorthy-duck");
                 var wholeBannerElement = document.getElementById("banner");
                 duckdivElement.style.animation = "rocking 2s linear infinite";
@@ -472,7 +467,8 @@
 
             }
         }
-        else {
+        else { 
+
             setCookie('display', "no");
             var duckdivElement = document.getElementById("moorthy-duck");
             movingUnit.style.animation = "none";
@@ -481,11 +477,14 @@
                 document.getElementById("triangle").style.display = "block";
                 document.getElementById("speech-bubble").style.display = "block";
             }
+            else {
+                currentImageIndex ++;
+            }
 
             duckdivElement.style.transform = "rotate(0deg)";
             document.getElementById("breadcrumbs").style.flexWrap = "wrap";
             images[currentImageIndex].classList.remove("active");
-            currentImageIndex ++;
+
             if (currentImageIndex < 0) {
                 currentImageIndex = images.length - 1;
             } else if (currentImageIndex >= images.length) {
@@ -496,21 +495,50 @@
             bannerElement.style.display = "none";
             movingUnit.style.left = ""
             movingUnit.style.right = "20%";
-        }
 
+
+            var className = currentImages[currentImageIndex].className.split(' ')[1]
+            hiddenImages.push(className);
+            seenImages.push(currentImages[currentImageIndex]);
+            currentImages.shift();
+            images = currentImages.concat(seenImages);
+            setCookie('hiddenImages', JSON.stringify(hiddenImages)); 
+
+        }
+        console.log("images");
+        console.log(images);
+        console.log("current Images");
+        console.log(currentImages);
+        console.log("hiddenImages");
+        console.log(hiddenImages);
+        console.log("==========================");
     }
 
     function changeImage(n) {
 
         var originalIndex = currentImageIndex;
 
-
-        if (currentImageIndex >= 0 && currentImageIndex < images.length) {
-            images[currentImageIndex].classList.remove("active");
+        if (currentImageIndex < 0 || currentImageIndex >= images.length) {
+            console.log("Issue of index");
+            return;
         }
 
 
+        images[currentImageIndex].classList.remove("active");
+        if (currentImageIndex < currentImages.length) {
+            console.log("index");
+            console.log(currentImageIndex);
+            var className = currentImages[originalIndex].className.split(' ')[1]
+            hiddenImages.push(className);
+            seenImages.push(currentImages[originalIndex]);
+            currentImages.shift();
+            images = currentImages.concat(seenImages);
+            setCookie('hiddenImages', JSON.stringify(hiddenImages));  
+            currentImageIndex --;
+
+        }
         currentImageIndex += n;
+
         if (currentImageIndex < 0) {
             currentImageIndex = images.length - 1;
         } else if (currentImageIndex >= images.length) {
@@ -518,6 +546,13 @@
         }
 
         images[currentImageIndex].classList.add("active");
+        console.log("images");
+        console.log(images);
+        console.log("current Images");
+        console.log( currentImages);
+        console.log("hidden Images");
+        console.log( hiddenImages );
+        console.log("==========================");
     }
 
 
