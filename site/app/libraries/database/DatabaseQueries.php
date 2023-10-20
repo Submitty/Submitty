@@ -7280,14 +7280,14 @@ AND gc_id IN (
         $up   = "ORDER BY helper.user_id";
         $down = "ORDER BY helper.user_id DESC";
         $orderType = "";
-        if ($_COOKIE['sortStateTimeEntered'] == "up"){           
-            $orderType = $up;     
+        if ($_COOKIE['sortStateTimeEntered'] == "up") {
+            $orderType = $up;
         }
-        elseif ($_COOKIE['sortStateTimeEntered'] == "down"){   
-            $orderType = $down;   
+        elseif ($_COOKIE['sortStateTimeEntered'] == "down") {
+            $orderType = $down;
         }
-        else {                          
-             $orderType = $off;    
+        else {
+             $orderType = $off;
         }
 
         $query = "
