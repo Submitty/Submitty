@@ -53,6 +53,10 @@ tr:nth-child(even) td:nth-child(n+1):nth-child(-n+5) {
     background: var(--standard-light-gray);
 }
 
+.highlighted-row td:nth-child(n+1):nth-child(-n+5){
+    background: var(--standard-focus-cornflower-blue) !important ;
+}
+
 #data-table td:focus,
 #data-table textarea:focus,
 #data-table input:focus {
