@@ -118,6 +118,18 @@ class Output {
 
         $this->twig->addGlobal("core", $this->core);
 
+        $this->twig->addFunction(new \Twig\TwigFunction("localize", function ($key, $default, $vals = []) {
+            $config = $this->core->getConfig();
+            if ($config) {
+                $val = $config->getLocale()->fetchKey($key, $vals);
+                if ($val) {
+                    return $val;
+                }
+            }
+
+            return $default;
+        }));
+
         $this->twig->addFunction(new \Twig\TwigFunction("render_template", function (...$args) {
             return call_user_func_array('self::renderTemplate', $args);
         }, ["is_safe" => ["html"]]));
@@ -191,6 +203,7 @@ HTML;
         $this->addVendorJs(FileUtils::joinPaths('jquery', 'jquery.min.js'));
         $this->addVendorJs(FileUtils::joinPaths('jquery-ui', 'jquery-ui.min.js'));
         $this->addVendorJs(FileUtils::joinPaths('js-cookie', 'js.cookie.min.js'));
+        $this->addVendorJs(FileUtils::joinPaths('luxon', 'luxon.min.js'));
         $this->addInternalJs('diff-viewer.js');
         $this->addInternalJs('server.js');
         $this->addInternalJs('menu.js');

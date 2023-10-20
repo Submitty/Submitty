@@ -1,4 +1,4 @@
-/* exported prevMonth, nextMonth, loadCalendar, loadFullCalendar, editCalendarItemForm, deleteCalendarItem, openNewItemModal */
+/* exported prevMonth, nextMonth, loadCalendar, loadFullCalendar, editCalendarItemForm, deleteCalendarItem, openNewItemModal, openOptionsModal, updateCalendarOptions, colorLegend */
 /* global curr_day, curr_month, curr_year, gradeables_by_date, instructor_courses, buildUrl */
 /* global csrfToken */
 
@@ -137,8 +137,8 @@ function generateCalendarItem(item) {
     if (item['show_due']) {
         element.style.setProperty('background-color', item['color']);
     }
-    if (item['status'] === 'ann') {
-        element.style.setProperty('border-color', item['color']);
+    if (item['status'] === 'text' || item['status'] === 'ann') {
+        element.style.setProperty('background-color', item['color']);
     }
     if (exists) {
         element.style.setProperty('cursor','pointer');
@@ -676,6 +676,9 @@ function loadCalendar(month_, year_, day_, type) {
     else {
         calendar.appendChild(generateCalendarOfMonthWeek(year_, month_, day_));
     }
+    Cookies.set('calendar_year', year_);
+    Cookies.set('calendar_month', month_);
+    Cookies.set('calendar_day', day_);
 }
 
 /**
@@ -694,3 +697,77 @@ function loadFullCalendar(start, end, semester_name) {
 function openNewItemModal() {
     $('#new-calendar-item-form').css('display', 'block');
 }
+
+function openOptionsModal() {
+    $('#calendar-options-form').css('display', 'block');
+    setOptionsValues();
+    //Make color dropdowns change colors when values are changed
+    $('.course-color-picker').on('change', function () {
+        $(this).css('background-color', $(this).val());
+    });
+}
+
+//checks proper tick marks in modal
+function setOptionsValues() {
+    //Courses filter
+    const showAll = loadShowAllCoursesCookie();
+    if (showAll) { //if show all is true, tick off show all
+        document.getElementById('filter-courses-menu').value = 'show all';
+    }
+    else { //if show all if false, select a specific course
+        document.getElementById('filter-courses-menu').value = loadCurrentCourseCookie();
+    }
+    //Course Colors
+    $('.course-color-picker').each(function() {
+        const selected_color = Cookies.get(`calendar_color_${$(this).attr('id').slice(6)}`);
+        $(this).css('background-color', selected_color);
+        $(this).val(selected_color);
+    });
+}
+
+function loadShowAllCoursesCookie() {
+    const cookie = Cookies.get('calendar_show_all');
+    return cookie === '1' ? true : false;
+}
+
+function loadCurrentCourseCookie() {
+    return Cookies.get('calendar_course');
+}
+
+function updateCalendarOptions() {
+    saveOptions();
+    location.reload();
+}
+
+function saveOptions() {
+    //Courses Filter
+    const courses_val = document.getElementById('filter-courses-menu').value;
+    if (courses_val === 'show all') {
+        Cookies.set('calendar_show_all', '1', { expires: 365 });
+    }
+    else {
+        Cookies.set('calendar_show_all', '0', { expires: 365 });
+        Cookies.set('calendar_course', courses_val, { expires: 365 });
+    }
+    //Course Colors
+    $('.course-color-picker').each(function() {
+        const cname = `calendar_color_${$(this).attr('id').slice(6)}`;
+        Cookies.set(cname, $(this).val(), { expires: 365 });
+    });
+    //Legend
+    const legend_val = document.getElementById('show-legend-box').checked;
+    if (legend_val) {
+        Cookies.set('show_legend', '1', { expires: 365 });
+    }
+    else {
+        Cookies.set('show_legend', '0', { expires: 365 });
+    }
+}
+
+//Adds Color to Legend
+function colorLegend() {
+    $('.legend-color').each( function () {
+        $(this).css('background-color', Cookies.get(`calendar_color_${$(this).attr('name')}`));
+    });
+}
+

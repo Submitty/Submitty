@@ -29,7 +29,8 @@ class GradedComponent extends AbstractModel {
     private $component = null;
     /** @var TaGradedGradeable Reference to TaGradedGradeable this component belongs to */
     private $ta_graded_gradeable = null;
-    /** @prop @var string Id of the component this grade is attached to */
+    /** @prop
+     * @var string Id of the component this grade is attached to */
     protected $component_id = 0;
 
     /** @var bool If the component is peer */
@@ -41,29 +42,39 @@ class GradedComponent extends AbstractModel {
     /** @var Mark[] References to the marks this graded component received */
     private $marks = [];
 
-    /** @prop @var int[] The mark ids the submitter received for this component */
+    /** @prop
+     * @var int[] The mark ids the submitter received for this component */
     protected $mark_ids = [];
-    /** @prop @var int[]|null The mark ids the submitter received for this component as reflected in the db */
+    /** @prop
+     * @var int[]|null The mark ids the submitter received for this component as reflected in the db */
     private $db_mark_ids = null;
 
-    /** @prop @var bool True if the marks array was modified after construction */
+    /** @prop
+     * @var bool True if the marks array was modified after construction */
     protected $marks_modified = false;
 
-    /** @prop @var float The score for this component (or custom mark point value) */
+    /** @prop
+     * @var float The score for this component (or custom mark point value) */
     protected $score = 0.0;
-    /** @prop @var string The comment on this mark / custom mark description */
+    /** @prop
+     * @var string The comment on this mark / custom mark description */
     protected $comment = "";
-    /** @prop @var string The Id of the grader who most recently updated the component's grade */
+    /** @prop
+     * @var string The Id of the grader who most recently updated the component's grade */
     protected $grader_id = "";
-    /** @prop @var int The submission version this grade is for */
+    /** @prop
+     * @var int The submission version this grade is for */
     protected $graded_version = 0;
-    /** @prop @var \DateTime The time which this grade was most recently updated */
+    /** @prop
+     * @var \DateTime The time which this grade was most recently updated */
     protected $grade_time = null;
     /** @var User The verifier of this component */
     protected $verifier = null;
-    /** @prop @var string The Id of the verifier who verified the grade */
+    /** @prop
+     * @var string The Id of the verifier who verified the grade */
     protected $verifier_id = "";
-    /** @prop @var \DateTime The time which this grade was verified */
+    /** @prop
+     * @var \DateTime The time which this grade was verified */
     protected $verify_time = null;
 
     /**

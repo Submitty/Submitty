@@ -64,31 +64,31 @@ export UTM=0
 export VAGRANT=0
 export NO_SUBMISSIONS=0
 export WORKER=0
-export WORKER_PAIR=0
 
 # Read through the flags passed to the script reading them in and setting
 # appropriate bash variables, breaking out of this once we hit something we
 # don't recognize as a flag
+echo ""
+echo "Running setup:"
 while :; do
     case $1 in
         --utm)
             export UTM=1
             export DEV_VM=1
+            echo "utm"
             ;;
         --vagrant)
             export VAGRANT=1
             export DEV_VM=1
+            echo "vagrant"
             ;;
         --worker)
             export WORKER=1
+            echo "worker"
             ;;
         --no_submissions)
             export NO_SUBMISSIONS=1
-            echo 'no_submissions'
-            ;;
-        --worker-pair)
-            export WORKER_PAIR=1
-            echo "worker_pair"
+            echo "no_submissions"
             ;;
         *) # No more options, so break out of the loop.
             break
@@ -168,6 +168,7 @@ alias submitty_code_watcher='python3 /usr/local/submitty/GIT_CHECKOUT/Submitty/.
 alias submitty_restart_autograding='systemctl restart submitty_autograding_shipper && systemctl restart submitty_autograding_worker'
 alias submitty_restart_websocket='systemctl restart submitty_websocket_server'
 alias submitty_restart_services='submitty_restart_autograding && submitty_restart_websocket && systemctl restart submitty_daemon_jobs_handler && systemctl restart nullsmtpd'
+alias submitty_test='bash /usr/local/submitty/GIT_CHECKOUT/Submitty/.setup/SUBMITTY_TEST.sh'
 alias migrator='python3 ${SUBMITTY_REPOSITORY}/migration/run_migrator.py -c ${SUBMITTY_INSTALL_DIR}/config'
 alias vagrant_info='cat /etc/motd'
 alias ntp_sync='service ntp stop && ntpd -gq && service ntp start'
@@ -213,15 +214,6 @@ DB_COURSE_PASSWORD=submitty_dbuser
 source ${CURRENT_DIR}/distro_setup/setup_distro.sh
 
 bash "${SUBMITTY_REPOSITORY}/.setup/update_system.sh"
-
-
-#################################################################
-# Node Package Setup
-####################
-# NOTE: with umask 0027, the npm packages end up with the wrong permissions.
-# (this happens if we re-run install_system on an existing installation).
-# So let's manually set the umask just for this call.
-(umask 0022 && npm install -g npm)
 
 #################################################################
 # STACK SETUP
@@ -319,16 +311,21 @@ fi
 
 if ! cut -d ':' -f 1 /etc/passwd | grep -q ${DAEMON_USER} ; then
     useradd -m -c "First Last,RoomNumber,WorkPhone,HomePhone" "${DAEMON_USER}"
-    if [ ${WORKER_PAIR} == 1 ]; then
+    if [ ${WORKER} == 0 ] && [ ${DEV_VM} == 1 ] && [ -f ${SUBMITTY_REPOSITORY}/.vagrant/workers.json ]; then
         echo -e "attempting to create ssh key for submitty_daemon..."
         su submitty_daemon -c "cd ~/"
         su submitty_daemon -c "ssh-keygen -b 2048 -t rsa -f ~/.ssh/id_rsa -q -N ''"
         su submitty_daemon -c "echo 'successfully created ssh key'"
-        su submitty_daemon -c "sshpass -p 'submitty' ssh-copy-id -i ~/.ssh/id_rsa.pub -o StrictHostKeyChecking=no submitty@192.168.56.21"
+
+        while read -r IP
+        do
+            su submitty_daemon -c "sshpass -p 'submitty' ssh-copy-id -i ~/.ssh/id_rsa.pub -o StrictHostKeyChecking=no submitty@${IP}"
+        done <<< "$(jq -r ".[].ip_addr" "${SUBMITTY_REPOSITORY}/.vagrant/workers.json")"
+        echo "DONE"
     fi
 fi
 
-# The VCS directores (/var/local/submitty/vcs) are owfned by root:$DAEMONCGI_GROUP
+# The VCS directories (/var/local/submitty/vcs) are owned by root:$DAEMONCGI_GROUP
 usermod -a -G "${DAEMONPHP_GROUP}" "${DAEMON_USER}"
 usermod -a -G "${DAEMONCGI_GROUP}" "${DAEMON_USER}"
 
@@ -392,10 +389,17 @@ fi
 
 # Dr Memory is a tool for detecting memory errors in C++ programs (similar to Valgrind)
 
+# FIXME: Use of this tool should eventually be moved to containerized
+# autograding and not installed on the native primary and worker
+# machines by default
+
+# FIXME: DrMemory is also re-installed in INSTALL_SUBMITTY_HELPER.sh
+
 pushd /tmp > /dev/null
 
 echo "Getting DrMemory..."
 
+rm -rf /tmp/DrMemory*
 wget https://github.com/DynamoRIO/drmemory/releases/download/${DRMEMORY_TAG}/DrMemory-Linux-${DRMEMORY_VERSION}.tar.gz -o /dev/null > /dev/null 2>&1
 tar -xpzf DrMemory-Linux-${DRMEMORY_VERSION}.tar.gz
 rsync --delete -a /tmp/DrMemory-Linux-${DRMEMORY_VERSION}/ ${SUBMITTY_INSTALL_DIR}/drmemory
@@ -673,6 +677,7 @@ ${DATABASE_PASSWORD}
 ${DB_COURSE_USER}
 ${DB_COURSE_PASSWORD}
 America/New_York
+en_US
 ${SUBMISSION_URL}
 
 
@@ -687,7 +692,7 @@ submitty@vagrant
 do-not-reply@vagrant
 localhost
 25
-" | python3 ${SUBMITTY_REPOSITORY}/.setup/CONFIGURE_SUBMITTY.py --debug --setup-for-sample-courses --websocket-port ${WEBSOCKET_PORT} --worker-pair ${WORKER_PAIR}
+" | python3 ${SUBMITTY_REPOSITORY}/.setup/CONFIGURE_SUBMITTY.py --debug --setup-for-sample-courses --websocket-port ${WEBSOCKET_PORT}
 
         # Set these manually as they're not asked about during CONFIGURE_SUBMITTY.py
         sed -i -e 's/"url": ""/"url": "ldap:\/\/localhost"/g' ${SUBMITTY_INSTALL_DIR}/config/authentication.json

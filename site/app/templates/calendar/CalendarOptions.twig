@@ -1,0 +1,36 @@
+{% extends 'generic/Popup.twig' %}
+{% block popup_id %}calendar-options-form{% endblock %}
+{% block title %}Calendar Options{% endblock %}
+{% block body %}
+    <label for="filter-courses-menu">Select Course: </label>
+    <select name="filter-courses-menu" id="filter-courses-menu">
+        {% if course_names|length > 1 %}
+        <option value="show all">All Courses</option>
+        {% endif %}
+        {% for course in course_names %}
+        <option value="{{course.course_name}}">{{course.display_name}}</option>
+        {% endfor %}
+    </select>
+    <hr class="line-break">
+    <h2 class="cal-options-section-head">Colors</h2>
+    <div class="options-colors">
+        {% for course in course_names %}
+        <div class="course-color-field cal-option-area">
+            <label for="color-{{course.course_name|replace({' ':''})}}" class="course-color-label">{{course.display_name}}</label>
+            <select aria-label="Course Color Picker" class='course-color-picker' style="color: white;font-size: 14px;height: 18px;padding: 0px;" id="color-{{course.course_name|replace({' ':''})}}">
+                {% for color_name, color_code in color_options %}
+                    <option value="{{ color_code }}" style="color: white;background-color: {{ color_code }};">{{ color_name }}</option>
+                {% endfor %}
+            </select>
+        </div>
+        {% endfor %}
+        <div class="cal-option-area">
+            <label for="show-legend-box">Show Legend</label>
+            <input type="checkbox" id="show-legend-box" {% if show_legend %}checked{% endif %}>
+        </div>
+    </div>
+{% endblock %}
+{% block buttons %}
+    {{ block('close_button') }}
+    <input name="submit" class="btn btn-primary key_to_click" type="submit" value="Submit" onclick="updateCalendarOptions()"/>
+{% endblock %}

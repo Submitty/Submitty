@@ -161,6 +161,16 @@ mkdir -p ${SUBMITTY_INSTALL_DIR}/site/cache/doctrine-proxy
 # create doctrine proxy classes
 php "${SUBMITTY_INSTALL_DIR}/sbin/doctrine.php" "orm:generate-proxies"
 
+# clear old lang cache
+if [ -d "${SUBMITTY_INSTALL_DIR}/site/cache/lang" ]; then
+    rm -rf "${SUBMITTY_INSTALL_DIR}/site/cache/lang"
+fi
+# create lang cache directory
+mkdir -p ${SUBMITTY_INSTALL_DIR}/site/cache/lang
+
+# load lang files
+php "${SUBMITTY_INSTALL_DIR}/sbin/load_lang.php" "${SUBMITTY_REPOSITORY}/../Localization/lang" "${SUBMITTY_INSTALL_DIR}/site/cache/lang"
+
 if [ -d "${SUBMITTY_INSTALL_DIR}/site/public/mjs" ]; then
     rm -r "${SUBMITTY_INSTALL_DIR}/site/public/mjs"
 fi
@@ -312,6 +322,9 @@ if echo "{$result}" | grep -E -q "package(-lock)?.json"; then
     mkdir ${VENDOR_FOLDER}/jquery-ui
     cp ${NODE_FOLDER}/jquery-ui-dist/*.min.* ${VENDOR_FOLDER}/jquery-ui
     cp -R ${NODE_FOLDER}/jquery-ui-dist/images ${VENDOR_FOLDER}/jquery-ui/
+    #luxon
+    mkdir ${VENDOR_FOLDER}/luxon
+    cp ${NODE_FOLDER}/luxon/build/global/luxon.min.js ${VENDOR_FOLDER}/luxon
     # pdfjs
     mkdir ${VENDOR_FOLDER}/pdfjs
     cp ${NODE_FOLDER}/pdfjs-dist/build/pdf.min.js ${VENDOR_FOLDER}/pdfjs
