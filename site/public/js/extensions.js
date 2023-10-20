@@ -6,7 +6,7 @@ const DateTime = luxon.DateTime;
 $(document).ready(() => {
     $('#gradeable-select').change(() => {
         const g_id = $('#gradeable-select').val();
-        const expirationDate = luxon.DateTime.now().plus({ days: 1 });
+        const expirationDate = DateTime.now().plus({ days: 1 });
         const expirationDateJS = expirationDate.toJSDate();
         Cookies.set('exception_gid', g_id, { expires: expirationDateJS });
         // eslint-disable-next-line no-self-assign
