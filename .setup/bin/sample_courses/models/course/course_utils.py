@@ -32,8 +32,7 @@ class Course_utils:
     def check_rotating(self, users) -> None:
         for gradeable in self.gradeables:
             for grading_rotating in gradeable.grading_rotating:
-                string = "Invalid user_id {} for rotating section for gradeable {}".format(
-                    grading_rotating['user_id'], gradeable.id)
+                string = f"Invalid user_id {grading_rotating['user_id']} for rotating section for gradeable {gradeable.id}"
                 if grading_rotating['user_id'] not in users:
                     raise ValueError(string)
                 

@@ -78,7 +78,7 @@ def create_group(group) -> None:
     :param group: name of the group to create
     """
     if not group_exists(group):
-        os.system("groupadd {}".format(group))
+        os.system(f"groupadd {group}")
 
     if group == "sudo":
         return
