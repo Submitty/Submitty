@@ -5,9 +5,8 @@ describe('Tests cases abut changing user pronouns', () => {
         cy.visit('/user_profile');
         cy.login('student');
 
-        //open pronouns form
-        cy.get('#pronouns_val').click();
-        cy.get('#user-pronouns-change').as('e');
+        cy.get('#pronouns_val').as('pronounsVal').click(); // Alias for pronouns value
+        cy.get('#user-pronouns-change').as('pronounsInput'); // Alias for pronouns input
 
         //type in new pronouns and check display in forum option
         cy.get('button[aria-label="Clear pronoun input"]').click(); //clear input using trash can
@@ -19,8 +18,8 @@ describe('Tests cases abut changing user pronouns', () => {
         cy.get('#pronouns_val').should('contain','They/Them');
         cy.get('#display_pronouns_val').should('contain','True');
 
-        cy.logout();
 
+        cy.logout();
     });
 
     //restore pronouns to previous value at the end
@@ -42,6 +41,7 @@ describe('Tests cases abut changing user pronouns', () => {
         //ensure pronouns and display option changed on page
         cy.get('#pronouns_val').should('contain', ' ');
         cy.get('#display_pronouns_val').should('contain','False');
+
     });
 
     it('Verifies changed pronouns as instructor in Manage Students', () => {
@@ -54,7 +54,7 @@ describe('Tests cases abut changing user pronouns', () => {
         cy.get('#toggle-student-col-submit').first().click();
 
         //Ensure correctness in table
-        cy.get('.td-pronouns:eq( 12 )').should('have.text', 'They/Them');
+        cy.get('.td-pronouns:eq( 12 )').should('have.text', newPronouns);
 
     });
 
