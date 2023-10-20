@@ -24,7 +24,7 @@ def add_to_group(group, user_id) -> None:
     :param user_id:
     """
     create_group(group)
-    os.system("usermod -a -G {} {}".format(group, user_id))
+    os.system(f"usermod -a -G {group} {user_id}")
 
 
 def commit_submission_to_repo(user_id, src_file, repo_path, vcs_subdirectory) -> None:

@@ -95,18 +95,12 @@ class User(object):
             self.group = user["user_group"]
         if self.group < 1 or 4 < self.group:
             raise SystemExit(
-                "ASSERT: user {}, user_group is not between 1 - 4. Check YML file.".format(
-                    self.id
-                )
-            )
+                f"ASSERT: user {self.id}, user_group is not between 1 - 4. Check YML file.")
         if "user_access_level" in user:
             self.access_level = user["user_access_level"]
         if self.access_level < 1 or 3 < self.access_level:
             raise SystemExit(
-                "ASSERT: user {}, user_access_level is not between 1 - 3. Check YML file.".format(
-                    self.id
-                )
-            )
+                f"ASSERT: user {self.id}, user_access_level is not between 1 - 3. Check YML file.")
         if "registration_section" in user:
             self.registration_section = int(user["registration_section"])
         if "rotating_section" in user:
@@ -150,20 +144,19 @@ class User(object):
             add_to_group("sudo", self.id)
 
     def create_ssh(self) -> None:
-        print("Creating user {}...".format(self.id))
+        print(f"Creating user {self.id}...")
+
         os.system(
-            "useradd -m -c 'First Last,RoomNumber,WorkPhone,HomePhone' {}".format(
-                self.id
-            )
+            f"useradd -m -c 'First Last,RoomNumber,WorkPhone,HomePhone' {self.id}"
         )
         self.set_password()
 
     def create_non_ssh(self) -> None:
         # Change this to f strings
-        print("Creating user {}...".format(self.id))
+        print(f"Creating user {self.id}...")
         os.system(
             "useradd --home /tmp -c 'AUTH ONLY account' "
-            "-M --shell /bin/false {}".format(self.id)
+            f"-M --shell /bin/false {self.id}"
         )
         self.set_password()
 
@@ -188,8 +181,8 @@ shadowWarning: 0"""
         path.unlink()
 
     def set_password(self) -> None:
-        print("Setting password for user {}...".format(self.id))
-        os.system("echo {}:{} | chpasswd".format(self.id, self.password))
+        print(f"Setting password for user {self.id}...")
+        os.system(f"echo {self.id}:{self.password} | chpasswd")
 
     def get_detail(self, course, detail):
         if self.courses is not None and course in self.courses:
@@ -202,7 +195,6 @@ shadowWarning: 0"""
             return self.__dict__[detail]
         else:
             return None
-
 
 def generate_random_users(total, real_users) -> list:
     """
@@ -238,7 +230,7 @@ def generate_random_users(total, real_users) -> list:
             user_id = user_id.lower()
             anon_id = generate_random_user_id(15)
             # create a binary string for the numeric ID
-            numeric_id = "{0:09b}".format(i)
+            numeric_id = f"{i:09b}"
             while user_id in user_ids or user_id in real_users:
                 if user_id[-1].isdigit():
                     user_id = user_id[:-1] + str(int(user_id[-1]) + 1)
