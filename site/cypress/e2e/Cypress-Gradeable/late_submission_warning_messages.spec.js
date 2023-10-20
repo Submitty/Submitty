@@ -338,11 +338,11 @@ describe('Test warning messages for team gradeable', () => {
         //Delete all late days
         cy.visit(['sample', 'late_days']);
         const deleteLateDays = () => {
-            cy.get('div.content').then((table) => {
+            cy.get('table').then((table) => {
                 if (table.find('#Delete').length > 0) {
                     cy.get('#delete-button').click();
                     cy.get('.alert-success').invoke('text').should('contain', 'Late days entry removed');
-                    cy.get('a.fas.fa-times.key_to_click').click();
+                    cy.get('#remove_popup').click();
                     deleteLateDays();
                 }
             });
@@ -359,6 +359,7 @@ describe('Test warning messages for team gradeable', () => {
             }
         });
         cy.get('.alert-success').invoke('text').should('contain', 'Extensions have been updated');
+        cy.get('#remove_popup').click();
         cy.get('#gradeable-select').select(gradeable);
         cy.get('body').then((body) => {
             if (body.find('#extensions-table').length > 0) {
