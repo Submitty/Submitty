@@ -77,7 +77,7 @@ class BannerController extends AbstractController {
         if ($link_name != "") {
             $headers = @get_headers($link_name);
         }
-        if ($link_name != "" && $headers && strpos($headers[0], '200 OK') === false ) {
+        if ($link_name != "" && $headers && strpos($headers[0], '200 OK') === false) {
             return JsonResponse::getErrorResponse("Invalid link");
         }
 
