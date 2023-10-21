@@ -39,7 +39,7 @@ class Course_create:
 
     def __init__(self) -> None:
         pass
-    def create(self):
+    def create(self) -> None:
 
         # Sort users and gradeables in the name of determinism
         self.users.sort(key=lambda x: x.get_detail(self.code, "id"))
