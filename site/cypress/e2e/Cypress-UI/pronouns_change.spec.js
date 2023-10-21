@@ -9,15 +9,14 @@ describe('Tests cases abut changing user pronouns', () => {
         cy.get('#user-pronouns-change').as('pronounsInput'); // Alias for pronouns input
 
         //type in new pronouns and check display in forum option
-        cy.get('button[aria-label="Clear pronoun input"]').click(); //clear input using trash can
-        cy.get('@e').type('They/Them');
+        cy.get('button[aria-label="Clear pronoun input"]').click();
+        cy.get('@pronounsInput').type('They/Them');
         cy.get('#pronouns-forum-display').check();
         cy.get('#edit-pronouns-submit').click();
 
         //ensure pronouns and display option changed on page
         cy.get('#pronouns_val').should('contain','They/Them');
         cy.get('#display_pronouns_val').should('contain','True');
-
 
         cy.logout();
     });
