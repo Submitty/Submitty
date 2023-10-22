@@ -76,8 +76,10 @@
     --standard-medium-dark-blue: #286090;
     --standard-deep-blue: #0000ff;
     --standard-gray-blue: #0088bf;
+    --standard-vibrant-red: #ff0000;
     --standard-light-red: #d9534f;
     --standard-medium-red: #c9302c;
+    --standard-medium-dark-red: #962e2e;
     --standard-red-orange: #f62817;
     --standard-light-orange: #f0ad4e;
     --standard-medium-orange: #ec971f;
@@ -180,6 +182,11 @@
     --simple-half-credit-light-blue: #88d0f4;
     --simple-save-error-red: #da4f49;
 
+    /* peer feedback */
+    --peer-feedback-red: #804040;
+    --peer-feedback-red-translucent: #800000b0;
+    --peer-feedback-green: #008000;
+
     /* For categorizing objects */
     --category-color-1: #F44336;
     --category-color-2: #FF9800;
@@ -202,9 +209,23 @@
     --category-color-19: #e57fcf;
     --category-color-20: #c0c246;
 
+    /* rainbow */
+    --rainbow-gradient: linear-gradient(
+        135deg,
+        rgb(255 0 0 / 30%),
+        rgb(255 255 0 / 30%),
+        rgb(0 255 0 / 30%),
+        rgb(0 255 155 / 30%),
+        rgb(0 0 255 / 30%),
+        rgb(255 0 255 / 30%),
+        rgb(255 0 0 / 30%)
+    );
+
     /* other */
-    --box-shadow-very-transparent: rgb(0 0 0 / 12%);
-    --box-shadow-slightly-transparent: rgb(0 0 0 / 20%);
+    --box-shadow-very-transparent: #00000020;
+    --box-shadow-slightly-transparent: #00000030;
+    --black-moderately-transparent: #00000080;
+    --white-moderately-transparent: #ffffff80;
     --no-image-available: #595959;
     --standard-input-background: #ffffff;
     --checkbox-black: #000000;
@@ -215,6 +236,7 @@
     --viewed-content: #e8f0f7;
     --code-box-background-light-gray: #fafafa;
     --code-box-font-color-dark-gray: #343a42;
+    --invisible: #00000000;
 }
 
 [data-black_mode="black"][data-theme="dark"] {
@@ -247,6 +269,7 @@
     --standard-hover-light-gray: #2b2b2b;
     --standard-light-gray: #757575;
     --standard-medium-gray: #a3a3a3;
+    --standard-medium-dark-gray: #b1b1b1;
     --standard-focus-cornflower-blue: #2a3e64;
     --standard-deep-blue: #9e9eff;
     --standard-peachpuff: #99704c;
@@ -312,8 +335,9 @@
     --notebook-builder-itempool-green: #50826a;
 
     /* other */
-    --box-shadow-very-transparent: rgb(255 255 255 / 0%);
-    --box-shadow-slightly-transparent: rgb(255 255 255 / 0%);
+    --box-shadow-very-transparent: #00000000;
+    --box-shadow-slightly-transparent: #00000000;
+    --white-moderately-transparent: #00000000;
     --no-image-available: #adadad;
     --standard-input-background: #4a4a4a;
     --checkbox-black: #5296db;

@@ -41,6 +41,26 @@ parameters:
 			path: app/authentication/AbstractAuthentication.php
 
 		-
+			message: "#^Construct empty\\(\\) is not allowed\\. Use more strict comparison\\.$#"
+			count: 2
+			path: app/authentication/LdapAuthentication.php
+
+		-
+			message: "#^Construct empty\\(\\) is not allowed\\. Use more strict comparison\\.$#"
+			count: 2
+			path: app/authentication/PamAuthentication.php
+
+		-
+			message: "#^Call to function in_array\\(\\) requires parameter \\#3 to be set\\.$#"
+			count: 2
+			path: app/authentication/SamlAuthentication.php
+
+		-
+			message: "#^Construct empty\\(\\) is not allowed\\. Use more strict comparison\\.$#"
+			count: 1
+			path: app/authentication/SamlAuthentication.php
+
+		-
 			message: "#^Method app\\\\authentication\\\\SamlAuthentication\\:\\:redirect\\(\\) has parameter \\$old with no type specified\\.$#"
 			count: 1
 			path: app/authentication/SamlAuthentication.php
@@ -92,6 +112,11 @@ parameters:
 			path: app/controllers/AuthenticationController.php
 
 		-
+			message: "#^Construct empty\\(\\) is not allowed\\. Use more strict comparison\\.$#"
+			count: 4
+			path: app/controllers/AuthenticationController.php
+
+		-
 			message: "#^Method app\\\\controllers\\\\AuthenticationController\\:\\:checkLogin\\(\\) has parameter \\$old with no type specified\\.$#"
 			count: 1
 			path: app/controllers/AuthenticationController.php
@@ -102,9 +127,24 @@ parameters:
 			path: app/controllers/AuthenticationController.php
 
 		-
+			message: "#^Only booleans are allowed in an if condition, string\\|null given\\.$#"
+			count: 1
+			path: app/controllers/AuthenticationController.php
+
+		-
 			message: "#^PHPDoc tag @var above a method has no effect\\.$#"
 			count: 2
 			path: app/controllers/AuthenticationController.php
+
+		-
+			message: "#^Call to function in_array\\(\\) requires parameter \\#3 to be set\\.$#"
+			count: 1
+			path: app/controllers/AutogradingStatusController.php
+
+		-
+			message: "#^Construct empty\\(\\) is not allowed\\. Use more strict comparison\\.$#"
+			count: 3
+			path: app/controllers/AutogradingStatusController.php
 
 		-
 			message: "#^Method app\\\\controllers\\\\AutogradingStatusController\\:\\:getAutogradingInfo\\(\\) return type has no value type specified in iterable type array\\.$#"
@@ -112,9 +152,34 @@ parameters:
 			path: app/controllers/AutogradingStatusController.php
 
 		-
+			message: "#^Call to function in_array\\(\\) requires parameter \\#3 to be set\\.$#"
+			count: 1
+			path: app/controllers/DockerInterfaceController.php
+
+		-
 			message: "#^Call to function is_null\\(\\) with app\\\\models\\\\User will always evaluate to false\\.$#"
 			count: 3
 			path: app/controllers/DockerInterfaceController.php
+
+		-
+			message: "#^Only booleans are allowed in a negated boolean, int given\\.$#"
+			count: 1
+			path: app/controllers/DockerInterfaceController.php
+
+		-
+			message: "#^Only booleans are allowed in \\|\\|, int given on the left side\\.$#"
+			count: 1
+			path: app/controllers/DockerInterfaceController.php
+
+		-
+			message: "#^Call to function in_array\\(\\) requires parameter \\#3 to be set\\.$#"
+			count: 2
+			path: app/controllers/GlobalController.php
+
+		-
+			message: "#^Construct empty\\(\\) is not allowed\\. Use more strict comparison\\.$#"
+			count: 3
+			path: app/controllers/GlobalController.php
 
 		-
 			message: "#^Left side of && is always true\\.$#"
@@ -177,6 +242,11 @@ parameters:
 			path: app/controllers/GlobalController.php
 
 		-
+			message: "#^Only booleans are allowed in &&, app\\\\models\\\\User given on the left side\\.$#"
+			count: 1
+			path: app/controllers/GlobalController.php
+
+		-
 			message: """
 				#^Call to deprecated method JsonOnlyResponse\\(\\) of class app\\\\libraries\\\\response\\\\MultiResponse\\:
 				should not be used, just return JsonResponse directly$#
@@ -193,8 +263,28 @@ parameters:
 			path: app/controllers/HomePageController.php
 
 		-
+			message: "#^Call to function in_array\\(\\) requires parameter \\#3 to be set\\.$#"
+			count: 1
+			path: app/controllers/HomePageController.php
+
+		-
 			message: "#^Call to function is_null\\(\\) with app\\\\models\\\\User will always evaluate to false\\.$#"
 			count: 4
+			path: app/controllers/HomePageController.php
+
+		-
+			message: "#^Call to function is_null\\(\\) with null will always evaluate to true\\.$#"
+			count: 1
+			path: app/controllers/HomePageController.php
+
+		-
+			message: "#^Construct empty\\(\\) is not allowed\\. Use more strict comparison\\.$#"
+			count: 3
+			path: app/controllers/HomePageController.php
+
+		-
+			message: "#^Dynamic call to static method app\\\\libraries\\\\response\\\\MultiResponse\\:\\:RedirectOnlyResponse\\(\\)\\.$#"
+			count: 1
 			path: app/controllers/HomePageController.php
 
 		-
@@ -218,11 +308,26 @@ parameters:
 			path: app/controllers/HomePageController.php
 
 		-
+			message: "#^Variable variables are not allowed\\.$#"
+			count: 1
+			path: app/controllers/HomePageController.php
+
+		-
+			message: "#^Construct empty\\(\\) is not allowed\\. Use more strict comparison\\.$#"
+			count: 1
+			path: app/controllers/ManageSessionsController.php
+
+		-
 			message: """
 				#^Call to deprecated method JsonOnlyResponse\\(\\) of class app\\\\libraries\\\\response\\\\MultiResponse\\:
 				should not be used, just return JsonResponse directly$#
 			"""
 			count: 3
+			path: app/controllers/MiscController.php
+
+		-
+			message: "#^Call to function in_array\\(\\) requires parameter \\#3 to be set\\.$#"
+			count: 5
 			path: app/controllers/MiscController.php
 
 		-
@@ -420,12 +525,22 @@ parameters:
 			path: app/controllers/NotificationController.php
 
 		-
+			message: "#^Construct empty\\(\\) is not allowed\\. Use more strict comparison\\.$#"
+			count: 1
+			path: app/controllers/NotificationController.php
+
+		-
 			message: "#^Method app\\\\controllers\\\\NotificationController\\:\\:validateNotificationSettings\\(\\) has no return type specified\\.$#"
 			count: 1
 			path: app/controllers/NotificationController.php
 
 		-
 			message: "#^Method app\\\\controllers\\\\NotificationController\\:\\:validateNotificationSettings\\(\\) has parameter \\$columns with no type specified\\.$#"
+			count: 1
+			path: app/controllers/NotificationController.php
+
+		-
+			message: "#^Only booleans are allowed in a negated boolean, string\\|null given\\.$#"
 			count: 1
 			path: app/controllers/NotificationController.php
 
@@ -456,6 +571,11 @@ parameters:
 				should not be used, just return WebResponse directly$#
 			"""
 			count: 5
+			path: app/controllers/OfficeHoursQueueController.php
+
+		-
+			message: "#^Construct empty\\(\\) is not allowed\\. Use more strict comparison\\.$#"
+			count: 23
 			path: app/controllers/OfficeHoursQueueController.php
 
 		-
@@ -554,6 +674,16 @@ parameters:
 			path: app/controllers/OfficeHoursQueueController.php
 
 		-
+			message: "#^Call to function in_array\\(\\) requires parameter \\#3 to be set\\.$#"
+			count: 7
+			path: app/controllers/PollController.php
+
+		-
+			message: "#^Construct empty\\(\\) is not allowed\\. Use more strict comparison\\.$#"
+			count: 5
+			path: app/controllers/PollController.php
+
+		-
 			message: "#^Method app\\\\controllers\\\\PollController\\:\\:editPoll\\(\\) has parameter \\$poll_id with no type specified\\.$#"
 			count: 1
 			path: app/controllers/PollController.php
@@ -574,12 +704,52 @@ parameters:
 			path: app/controllers/PollController.php
 
 		-
+			message: "#^Construct empty\\(\\) is not allowed\\. Use more strict comparison\\.$#"
+			count: 2
+			path: app/controllers/SelfRejoinController.php
+
+		-
 			message: """
 				#^Call to deprecated method RedirectOnlyResponse\\(\\) of class app\\\\libraries\\\\response\\\\MultiResponse\\:
 				should not be used, just return RedirectResponse directly$#
 			"""
 			count: 1
 			path: app/controllers/UserProfileController.php
+
+		-
+			message: "#^Construct empty\\(\\) is not allowed\\. Use more strict comparison\\.$#"
+			count: 7
+			path: app/controllers/UserProfileController.php
+
+		-
+			message: "#^Dynamic call to static method app\\\\models\\\\User\\:\\:validateUserData\\(\\)\\.$#"
+			count: 4
+			path: app/controllers/UserProfileController.php
+
+		-
+			message: "#^Call to function array_search\\(\\) requires parameter \\#3 to be set\\.$#"
+			count: 1
+			path: app/controllers/admin/AdminGradeableController.php
+
+		-
+			message: "#^Call to function in_array\\(\\) requires parameter \\#3 to be set\\.$#"
+			count: 3
+			path: app/controllers/admin/AdminGradeableController.php
+
+		-
+			message: "#^Construct empty\\(\\) is not allowed\\. Use more strict comparison\\.$#"
+			count: 3
+			path: app/controllers/admin/AdminGradeableController.php
+
+		-
+			message: "#^Dynamic call to static method app\\\\controllers\\\\admin\\\\AdminGradeableController\\:\\:enqueueGenerateRepos\\(\\)\\.$#"
+			count: 1
+			path: app/controllers/admin/AdminGradeableController.php
+
+		-
+			message: "#^For loop initial assignment overwrites variable \\$x\\.$#"
+			count: 2
+			path: app/controllers/admin/AdminGradeableController.php
 
 		-
 			message: "#^Method app\\\\controllers\\\\admin\\\\AdminGradeableController\\:\\:createGradeable\\(\\) has no return type specified\\.$#"
@@ -902,7 +1072,22 @@ parameters:
 			path: app/controllers/admin/AdminGradeableController.php
 
 		-
+			message: "#^Only booleans are allowed in &&, int\\<0, max\\> given on the right side\\.$#"
+			count: 1
+			path: app/controllers/admin/AdminGradeableController.php
+
+		-
+			message: "#^Only booleans are allowed in a ternary operator condition, string\\|null given\\.$#"
+			count: 1
+			path: app/controllers/admin/AdminGradeableController.php
+
+		-
 			message: "#^Strict comparison using \\=\\=\\= between app\\\\models\\\\gradeable\\\\Gradeable and null will always evaluate to false\\.$#"
+			count: 1
+			path: app/controllers/admin/AdminGradeableController.php
+
+		-
+			message: "#^Variable method call on app\\\\models\\\\gradeable\\\\Gradeable\\.$#"
 			count: 1
 			path: app/controllers/admin/AdminGradeableController.php
 
@@ -931,11 +1116,31 @@ parameters:
 			path: app/controllers/admin/AutogradingConfigController.php
 
 		-
+			message: "#^Construct empty\\(\\) is not allowed\\. Use more strict comparison\\.$#"
+			count: 4
+			path: app/controllers/admin/AutogradingConfigController.php
+
+		-
+			message: "#^Only booleans are allowed in an if condition, string given\\.$#"
+			count: 1
+			path: app/controllers/admin/AutogradingConfigController.php
+
+		-
 			message: """
 				#^Call to deprecated method JsonOnlyResponse\\(\\) of class app\\\\libraries\\\\response\\\\MultiResponse\\:
 				should not be used, just return JsonResponse directly$#
 			"""
 			count: 10
+			path: app/controllers/admin/ConfigurationController.php
+
+		-
+			message: "#^Call to function in_array\\(\\) requires parameter \\#3 to be set\\.$#"
+			count: 3
+			path: app/controllers/admin/ConfigurationController.php
+
+		-
+			message: "#^Construct empty\\(\\) is not allowed\\. Use more strict comparison\\.$#"
+			count: 2
 			path: app/controllers/admin/ConfigurationController.php
 
 		-
@@ -947,6 +1152,11 @@ parameters:
 			message: "#^Method app\\\\controllers\\\\admin\\\\EmailRoomSeatingController\\:\\:replacePlaceholders\\(\\) has parameter \\$data with no value type specified in iterable type array\\.$#"
 			count: 1
 			path: app/controllers/admin/EmailRoomSeatingController.php
+
+		-
+			message: "#^Construct empty\\(\\) is not allowed\\. Use more strict comparison\\.$#"
+			count: 1
+			path: app/controllers/admin/GradeOverrideController.php
 
 		-
 			message: "#^Method app\\\\controllers\\\\admin\\\\GradeOverrideController\\:\\:deleteOverriddenGrades\\(\\) has no return type specified\\.$#"
@@ -992,6 +1202,11 @@ parameters:
 			path: app/controllers/admin/LateController.php
 
 		-
+			message: "#^Foreach overwrites \\$user with its value variable\\.$#"
+			count: 1
+			path: app/controllers/admin/LateController.php
+
+		-
 			message: "#^Method app\\\\controllers\\\\admin\\\\LateController\\:\\:parseAndValidateCsv\\(\\) has parameter \\$data with no value type specified in iterable type array\\.$#"
 			count: 1
 			path: app/controllers/admin/LateController.php
@@ -1025,6 +1240,21 @@ parameters:
 			message: "#^Method app\\\\controllers\\\\admin\\\\NotebookBuilderController\\:\\:getFiles\\(\\) return type has no value type specified in iterable type array\\.$#"
 			count: 1
 			path: app/controllers/admin/NotebookBuilderController.php
+
+		-
+			message: "#^Only booleans are allowed in an if condition, array given\\.$#"
+			count: 6
+			path: app/controllers/admin/NotebookBuilderController.php
+
+		-
+			message: "#^Call to function in_array\\(\\) requires parameter \\#3 to be set\\.$#"
+			count: 20
+			path: app/controllers/admin/PlagiarismController.php
+
+		-
+			message: "#^Construct empty\\(\\) is not allowed\\. Use more strict comparison\\.$#"
+			count: 4
+			path: app/controllers/admin/PlagiarismController.php
 
 		-
 			message: "#^Expression on left side of \\?\\? is not nullable\\.$#"
@@ -1087,6 +1317,11 @@ parameters:
 				should not be used, just return WebResponse directly$#
 			"""
 			count: 1
+			path: app/controllers/admin/ReportController.php
+
+		-
+			message: "#^Construct empty\\(\\) is not allowed\\. Use more strict comparison\\.$#"
+			count: 2
 			path: app/controllers/admin/ReportController.php
 
 		-
@@ -1175,6 +1410,21 @@ parameters:
 			path: app/controllers/admin/ReportController.php
 
 		-
+			message: "#^Only booleans are allowed in &&, int\\<min, \\-2\\>\\|int\\<0, 45\\> given on the left side\\.$#"
+			count: 1
+			path: app/controllers/admin/ReportController.php
+
+		-
+			message: "#^Only booleans are allowed in &&, int\\<min, \\-2\\>\\|int\\<0, 45\\> given on the right side\\.$#"
+			count: 1
+			path: app/controllers/admin/ReportController.php
+
+		-
+			message: "#^Only booleans are allowed in &&, int\\<min, 45\\> given on the right side\\.$#"
+			count: 1
+			path: app/controllers/admin/ReportController.php
+
+		-
 			message: "#^Property app\\\\controllers\\\\admin\\\\ReportController\\:\\:\\$all_overrides has no type specified\\.$#"
 			count: 1
 			path: app/controllers/admin/ReportController.php
@@ -1202,6 +1452,26 @@ parameters:
 				#^Call to deprecated method webOnlyResponse\\(\\) of class app\\\\libraries\\\\response\\\\MultiResponse\\:
 				should not be used, just return WebResponse directly$#
 			"""
+			count: 1
+			path: app/controllers/admin/UsersController.php
+
+		-
+			message: "#^Call to function array_search\\(\\) requires parameter \\#3 to be set\\.$#"
+			count: 1
+			path: app/controllers/admin/UsersController.php
+
+		-
+			message: "#^Call to function in_array\\(\\) requires parameter \\#3 to be set\\.$#"
+			count: 17
+			path: app/controllers/admin/UsersController.php
+
+		-
+			message: "#^Construct empty\\(\\) is not allowed\\. Use more strict comparison\\.$#"
+			count: 24
+			path: app/controllers/admin/UsersController.php
+
+		-
+			message: "#^Implicit array creation is not allowed \\- variable \\$bad_rows might not exist\\.$#"
 			count: 1
 			path: app/controllers/admin/UsersController.php
 
@@ -1281,11 +1551,6 @@ parameters:
 			path: app/controllers/admin/UsersController.php
 
 		-
-			message: "#^Strict comparison using \\=\\=\\= between \\*NEVER\\* and 'invalid_grading…' will always evaluate to false\\.$#"
-			count: 1
-			path: app/controllers/admin/UsersController.php
-
-		-
 			message: """
 				#^Call to deprecated method RedirectOnlyResponse\\(\\) of class app\\\\libraries\\\\response\\\\MultiResponse\\:
 				should not be used, just return RedirectResponse directly$#
@@ -1300,6 +1565,31 @@ parameters:
 			"""
 			count: 3
 			path: app/controllers/admin/WrapperController.php
+
+		-
+			message: "#^Call to function in_array\\(\\) requires parameter \\#3 to be set\\.$#"
+			count: 2
+			path: app/controllers/admin/WrapperController.php
+
+		-
+			message: "#^Construct empty\\(\\) is not allowed\\. Use more strict comparison\\.$#"
+			count: 1
+			path: app/controllers/admin/WrapperController.php
+
+		-
+			message: "#^Call to function in_array\\(\\) requires parameter \\#3 to be set\\.$#"
+			count: 4
+			path: app/controllers/course/CourseMaterialsController.php
+
+		-
+			message: "#^Call to static method app\\\\libraries\\\\FileUtils\\:\\:validPath\\(\\) with incorrect case\\: ValidPath$#"
+			count: 1
+			path: app/controllers/course/CourseMaterialsController.php
+
+		-
+			message: "#^Construct empty\\(\\) is not allowed\\. Use more strict comparison\\.$#"
+			count: 5
+			path: app/controllers/course/CourseMaterialsController.php
 
 		-
 			message: "#^Method app\\\\controllers\\\\course\\\\CourseMaterialsController\\:\\:addDirs\\(\\) has parameter \\$dirs_to_make with no value type specified in iterable type array\\.$#"
@@ -1360,6 +1650,21 @@ parameters:
 			message: "#^Method app\\\\controllers\\\\course\\\\CourseMaterialsController\\:\\:viewCourseMaterial\\(\\) has no return type specified\\.$#"
 			count: 1
 			path: app/controllers/course/CourseMaterialsController.php
+
+		-
+			message: "#^Call to function in_array\\(\\) requires parameter \\#3 to be set\\.$#"
+			count: 3
+			path: app/controllers/forum/ForumController.php
+
+		-
+			message: "#^Construct empty\\(\\) is not allowed\\. Use more strict comparison\\.$#"
+			count: 50
+			path: app/controllers/forum/ForumController.php
+
+		-
+			message: "#^Foreach overwrites \\$_post with its value variable\\.$#"
+			count: 1
+			path: app/controllers/forum/ForumController.php
 
 		-
 			message: "#^Method app\\\\controllers\\\\forum\\\\ForumController\\:\\:addNewCategory\\(\\) has no return type specified\\.$#"
@@ -1707,6 +2012,31 @@ parameters:
 			path: app/controllers/forum/ForumController.php
 
 		-
+			message: "#^Only booleans are allowed in &&, int given on the right side\\.$#"
+			count: 1
+			path: app/controllers/forum/ForumController.php
+
+		-
+			message: "#^Only booleans are allowed in a negated boolean, int given\\.$#"
+			count: 1
+			path: app/controllers/forum/ForumController.php
+
+		-
+			message: "#^Only booleans are allowed in an if condition, int given\\.$#"
+			count: 1
+			path: app/controllers/forum/ForumController.php
+
+		-
+			message: "#^Call to function in_array\\(\\) requires parameter \\#3 to be set\\.$#"
+			count: 5
+			path: app/controllers/grading/ElectronicGraderController.php
+
+		-
+			message: "#^Construct empty\\(\\) is not allowed\\. Use more strict comparison\\.$#"
+			count: 12
+			path: app/controllers/grading/ElectronicGraderController.php
+
+		-
 			message: "#^Elseif condition is always true\\.$#"
 			count: 1
 			path: app/controllers/grading/ElectronicGraderController.php
@@ -1714,6 +2044,16 @@ parameters:
 		-
 			message: "#^Expression on left side of \\?\\? is not nullable\\.$#"
 			count: 1
+			path: app/controllers/grading/ElectronicGraderController.php
+
+		-
+			message: "#^Implicit array creation is not allowed \\- variable \\$gradeables does not exist\\.$#"
+			count: 1
+			path: app/controllers/grading/ElectronicGraderController.php
+
+		-
+			message: "#^Implicit array creation is not allowed \\- variable \\$sorted_students might not exist\\.$#"
+			count: 2
 			path: app/controllers/grading/ElectronicGraderController.php
 
 		-
@@ -2322,6 +2662,16 @@ parameters:
 			path: app/controllers/grading/ElectronicGraderController.php
 
 		-
+			message: "#^Call to function in_array\\(\\) requires parameter \\#3 to be set\\.$#"
+			count: 2
+			path: app/controllers/grading/ImagesController.php
+
+		-
+			message: "#^Construct empty\\(\\) is not allowed\\. Use more strict comparison\\.$#"
+			count: 1
+			path: app/controllers/grading/ImagesController.php
+
+		-
 			message: "#^Method app\\\\controllers\\\\grading\\\\ImagesController\\:\\:ajaxUploadImagesFiles\\(\\) has no return type specified\\.$#"
 			count: 1
 			path: app/controllers/grading/ImagesController.php
@@ -2332,14 +2682,44 @@ parameters:
 			path: app/controllers/grading/ImagesController.php
 
 		-
+			message: "#^Only booleans are allowed in an if condition, app\\\\models\\\\DisplayImage\\|null given\\.$#"
+			count: 1
+			path: app/controllers/grading/ImagesController.php
+
+		-
+			message: "#^Construct empty\\(\\) is not allowed\\. Use more strict comparison\\.$#"
+			count: 1
+			path: app/controllers/grading/SimpleGraderController.php
+
+		-
 			message: "#^Parameter \\#1 \\$score of method app\\\\models\\\\gradeable\\\\GradedComponent\\:\\:setScore\\(\\) expects float, string given\\.$#"
 			count: 1
 			path: app/controllers/grading/SimpleGraderController.php
 
 		-
+			message: "#^Construct empty\\(\\) is not allowed\\. Use more strict comparison\\.$#"
+			count: 1
+			path: app/controllers/grading/popup_refactor/RubricGraderController.php
+
+		-
+			message: "#^Construct empty\\(\\) is not allowed\\. Use more strict comparison\\.$#"
+			count: 1
+			path: app/controllers/pdf/PDFController.php
+
+		-
+			message: "#^Implicit array creation is not allowed \\- variable \\$pdf_array does not exist\\.$#"
+			count: 1
+			path: app/controllers/pdf/PDFController.php
+
+		-
 			message: "#^Method app\\\\controllers\\\\pdf\\\\PDFController\\:\\:showGraderPDFEmbedded\\(\\) has no return type specified\\.$#"
 			count: 1
 			path: app/controllers/pdf/PDFController.php
+
+		-
+			message: "#^Call to function in_array\\(\\) requires parameter \\#3 to be set\\.$#"
+			count: 1
+			path: app/controllers/student/AuthTokenController.php
 
 		-
 			message: """
@@ -2354,6 +2734,16 @@ parameters:
 				#^Call to deprecated method webOnlyResponse\\(\\) of class app\\\\libraries\\\\response\\\\MultiResponse\\:
 				should not be used, just return WebResponse directly$#
 			"""
+			count: 1
+			path: app/controllers/student/GradeInquiryController.php
+
+		-
+			message: "#^Construct empty\\(\\) is not allowed\\. Use more strict comparison\\.$#"
+			count: 5
+			path: app/controllers/student/GradeInquiryController.php
+
+		-
+			message: "#^Implicit array creation is not allowed \\- variable \\$notifications might not exist\\.$#"
 			count: 1
 			path: app/controllers/student/GradeInquiryController.php
 
@@ -2378,9 +2768,19 @@ parameters:
 			path: app/controllers/student/LateDaysTableController.php
 
 		-
+			message: "#^Construct empty\\(\\) is not allowed\\. Use more strict comparison\\.$#"
+			count: 1
+			path: app/controllers/student/LeaderboardController.php
+
+		-
 			message: "#^Method app\\\\controllers\\\\student\\\\RainbowGradesController\\:\\:run\\(\\) has no return type specified\\.$#"
 			count: 1
 			path: app/controllers/student/RainbowGradesController.php
+
+		-
+			message: "#^Construct empty\\(\\) is not allowed\\. Use more strict comparison\\.$#"
+			count: 3
+			path: app/controllers/student/SubmissionController.php
 
 		-
 			message: "#^Else branch is unreachable because previous condition is always true\\.$#"
@@ -2573,6 +2973,11 @@ parameters:
 			path: app/controllers/student/SubmissionController.php
 
 		-
+			message: "#^Only booleans are allowed in a negated boolean, app\\\\models\\\\User\\|null given\\.$#"
+			count: 1
+			path: app/controllers/student/SubmissionController.php
+
+		-
 			message: "#^Parameter \\#2 \\$array of function implode expects array\\<string\\>, array\\<app\\\\models\\\\User\\> given\\.$#"
 			count: 1
 			path: app/controllers/student/SubmissionController.php
@@ -2583,9 +2988,24 @@ parameters:
 			path: app/controllers/student/SubmissionController.php
 
 		-
+			message: "#^Strict comparison using \\!\\=\\= between app\\\\models\\\\gradeable\\\\GradedGradeable and null will always evaluate to true\\.$#"
+			count: 1
+			path: app/controllers/student/SubmissionController.php
+
+		-
 			message: "#^Strict comparison using \\=\\=\\= between string and null will always evaluate to false\\.$#"
 			count: 1
 			path: app/controllers/student/SubmissionController.php
+
+		-
+			message: "#^Call to function in_array\\(\\) requires parameter \\#3 to be set\\.$#"
+			count: 2
+			path: app/controllers/student/TeamController.php
+
+		-
+			message: "#^Call to method app\\\\libraries\\\\Core\\:\\:addErrorMessage\\(\\) with incorrect case\\: addErrorMEssage$#"
+			count: 7
+			path: app/controllers/student/TeamController.php
 
 		-
 			message: "#^Method app\\\\controllers\\\\student\\\\TeamController\\:\\:acceptInvitation\\(\\) has no return type specified\\.$#"
@@ -2693,6 +3113,11 @@ parameters:
 			path: app/controllers/student/TeamController.php
 
 		-
+			message: "#^Construct empty\\(\\) is not allowed\\. Use more strict comparison\\.$#"
+			count: 4
+			path: app/controllers/superuser/SamlManagerController.php
+
+		-
 			message: """
 				#^Call to deprecated method webOnlyResponse\\(\\) of class app\\\\libraries\\\\response\\\\MultiResponse\\:
 				should not be used, just return WebResponse directly$#
@@ -2774,6 +3199,16 @@ parameters:
 			message: "#^Property app\\\\entities\\\\forum\\\\Thread\\:\\:\\$viewers with generic interface Doctrine\\\\Common\\\\Collections\\\\Collection does not specify its types\\: TKey, T$#"
 			count: 1
 			path: app/entities/forum/Thread.php
+
+		-
+			message: "#^Call to function in_array\\(\\) requires parameter \\#3 to be set\\.$#"
+			count: 1
+			path: app/entities/plagiarism/PlagiarismConfig.php
+
+		-
+			message: "#^Call to method app\\\\entities\\\\plagiarism\\\\PlagiarismRunAccess\\:\\:getUserID\\(\\) with incorrect case\\: getUserId$#"
+			count: 1
+			path: app/entities/plagiarism/PlagiarismConfig.php
 
 		-
 			message: "#^Method app\\\\entities\\\\plagiarism\\\\PlagiarismConfig\\:\\:__construct\\(\\) has parameter \\$ignored_submissions with no value type specified in iterable type array\\.$#"
@@ -2961,6 +3396,11 @@ parameters:
 			path: app/entities/poll/Poll.php
 
 		-
+			message: "#^Call to function is_array\\(\\) with array will always evaluate to true\\.$#"
+			count: 1
+			path: app/exceptions/BaseException.php
+
+		-
 			message: "#^Method app\\\\exceptions\\\\BaseException\\:\\:__construct\\(\\) has parameter \\$details with no value type specified in iterable type array\\.$#"
 			count: 1
 			path: app/exceptions/BaseException.php
@@ -3031,6 +3471,16 @@ parameters:
 			path: app/exceptions/FileNotFoundException.php
 
 		-
+			message: "#^Call to function in_array\\(\\) requires parameter \\#3 to be set\\.$#"
+			count: 2
+			path: app/libraries/Access.php
+
+		-
+			message: "#^Construct empty\\(\\) is not allowed\\. Use more strict comparison\\.$#"
+			count: 1
+			path: app/libraries/Access.php
+
+		-
 			message: "#^Left side of && is always true\\.$#"
 			count: 1
 			path: app/libraries/Access.php
@@ -3061,8 +3511,18 @@ parameters:
 			path: app/libraries/Access.php
 
 		-
+			message: "#^Only booleans are allowed in a negated boolean, int\\<0, 16\\> given\\.$#"
+			count: 1
+			path: app/libraries/Access.php
+
+		-
 			message: "#^Property app\\\\libraries\\\\Access\\:\\:\\$directories type has no value type specified in iterable type array\\.$#"
 			count: 1
+			path: app/libraries/Access.php
+
+		-
+			message: "#^Strict comparison using \\!\\=\\= between app\\\\models\\\\gradeable\\\\GradedGradeable and null will always evaluate to true\\.$#"
+			count: 2
 			path: app/libraries/Access.php
 
 		-
@@ -3084,6 +3544,11 @@ parameters:
 			message: "#^Method app\\\\libraries\\\\CodeMirrorUtils\\:\\:getLanguages\\(\\) return type has no value type specified in iterable type array\\.$#"
 			count: 1
 			path: app/libraries/CodeMirrorUtils.php
+
+		-
+			message: "#^Construct empty\\(\\) is not allowed\\. Use more strict comparison\\.$#"
+			count: 5
+			path: app/libraries/Core.php
 
 		-
 			message: "#^Method app\\\\libraries\\\\Core\\:\\:addErrorMessage\\(\\) has no return type specified\\.$#"
@@ -3201,6 +3666,21 @@ parameters:
 			path: app/libraries/Core.php
 
 		-
+			message: "#^Only booleans are allowed in a negated boolean, app\\\\libraries\\\\database\\\\AbstractDatabase given\\.$#"
+			count: 2
+			path: app/libraries/Core.php
+
+		-
+			message: "#^Only booleans are allowed in a negated boolean, int given\\.$#"
+			count: 1
+			path: app/libraries/Core.php
+
+		-
+			message: "#^Only booleans are allowed in an if condition, Doctrine\\\\DBAL\\\\Logging\\\\DebugStack\\|null given\\.$#"
+			count: 1
+			path: app/libraries/Core.php
+
+		-
 			message: "#^Property app\\\\libraries\\\\Core\\:\\:\\$user_id is never read, only written\\.$#"
 			count: 1
 			path: app/libraries/Core.php
@@ -3236,6 +3716,11 @@ parameters:
 			path: app/libraries/CustomCodeInlineRenderer.php
 
 		-
+			message: "#^Instanceof between DateTime and DateTime will always evaluate to true\\.$#"
+			count: 1
+			path: app/libraries/DateUtils.php
+
+		-
 			message: "#^Method app\\\\libraries\\\\DateUtils\\:\\:getAvailableTimeZones\\(\\) return type has no value type specified in iterable type array\\.$#"
 			count: 1
 			path: app/libraries/DateUtils.php
@@ -3254,6 +3739,16 @@ parameters:
 			message: "#^Unsafe access to private property app\\\\libraries\\\\DateUtils\\:\\:\\$timezone through static\\:\\:\\.$#"
 			count: 3
 			path: app/libraries/DateUtils.php
+
+		-
+			message: "#^Call to function in_array\\(\\) requires parameter \\#3 to be set\\.$#"
+			count: 2
+			path: app/libraries/DiffViewer.php
+
+		-
+			message: "#^Foreach overwrites \\$diff with its value variable\\.$#"
+			count: 1
+			path: app/libraries/DiffViewer.php
 
 		-
 			message: "#^Method app\\\\libraries\\\\DiffViewer\\:\\:buildViewer\\(\\) has no return type specified\\.$#"
@@ -3323,6 +3818,11 @@ parameters:
 		-
 			message: "#^Method app\\\\libraries\\\\DiffViewer\\:\\:reset\\(\\) has no return type specified\\.$#"
 			count: 1
+			path: app/libraries/DiffViewer.php
+
+		-
+			message: "#^Only booleans are allowed in &&, int\\<0, 1\\> given on the right side\\.$#"
+			count: 2
 			path: app/libraries/DiffViewer.php
 
 		-
@@ -3396,6 +3896,11 @@ parameters:
 			path: app/libraries/DiffViewer.php
 
 		-
+			message: "#^Construct empty\\(\\) is not allowed\\. Use more strict comparison\\.$#"
+			count: 1
+			path: app/libraries/ExceptionHandler.php
+
+		-
 			message: "#^Method app\\\\libraries\\\\ExceptionHandler\\:\\:setDisplayExceptions\\(\\) has no return type specified\\.$#"
 			count: 1
 			path: app/libraries/ExceptionHandler.php
@@ -3419,6 +3924,26 @@ parameters:
 			message: "#^Unsafe call to private method app\\\\libraries\\\\ExceptionHandler\\:\\:parseArgs\\(\\) through static\\:\\:\\.$#"
 			count: 1
 			path: app/libraries/ExceptionHandler.php
+
+		-
+			message: "#^Call to function in_array\\(\\) requires parameter \\#3 to be set\\.$#"
+			count: 5
+			path: app/libraries/FileUtils.php
+
+		-
+			message: "#^Call to function is_string\\(\\) with string will always evaluate to true\\.$#"
+			count: 1
+			path: app/libraries/FileUtils.php
+
+		-
+			message: "#^Construct empty\\(\\) is not allowed\\. Use more strict comparison\\.$#"
+			count: 1
+			path: app/libraries/FileUtils.php
+
+		-
+			message: "#^Foreach overwrites \\$file with its key variable\\.$#"
+			count: 1
+			path: app/libraries/FileUtils.php
 
 		-
 			message: "#^Method app\\\\libraries\\\\FileUtils\\:\\:areWordsInFile\\(\\) has parameter \\$words with no value type specified in iterable type array\\.$#"
@@ -3491,6 +4016,16 @@ parameters:
 			path: app/libraries/FileUtils.php
 
 		-
+			message: "#^Only booleans are allowed in an if condition, string\\|null given\\.$#"
+			count: 2
+			path: app/libraries/FileUtils.php
+
+		-
+			message: "#^Construct empty\\(\\) is not allowed\\. Use more strict comparison\\.$#"
+			count: 1
+			path: app/libraries/ForumUtils.php
+
+		-
 			message: "#^Method app\\\\libraries\\\\ForumUtils\\:\\:checkGoodAttachment\\(\\) has no return type specified\\.$#"
 			count: 1
 			path: app/libraries/ForumUtils.php
@@ -3544,6 +4079,11 @@ parameters:
 			message: "#^Method app\\\\libraries\\\\ForumUtils\\:\\:isValidCategories\\(\\) has parameter \\$rows with no type specified\\.$#"
 			count: 1
 			path: app/libraries/ForumUtils.php
+
+		-
+			message: "#^Call to function in_array\\(\\) requires parameter \\#3 to be set\\.$#"
+			count: 1
+			path: app/libraries/GradingQueue.php
 
 		-
 			message: "#^Method app\\\\libraries\\\\GradingQueue\\:\\:__construct\\(\\) has parameter \\$course with no type specified\\.$#"
@@ -3619,6 +4159,11 @@ parameters:
 			message: "#^Property app\\\\libraries\\\\GradingQueue\\:\\:\\$grading_remaining is never read, only written\\.$#"
 			count: 1
 			path: app/libraries/GradingQueue.php
+
+		-
+			message: "#^Implicit array creation is not allowed \\- variable \\$log_message does not exist\\.$#"
+			count: 3
+			path: app/libraries/Logger.php
 
 		-
 			message: "#^Method app\\\\libraries\\\\Logger\\:\\:debug\\(\\) has no return type specified\\.$#"
@@ -3716,6 +4261,11 @@ parameters:
 			path: app/libraries/Logger.php
 
 		-
+			message: "#^Construct empty\\(\\) is not allowed\\. Use more strict comparison\\.$#"
+			count: 5
+			path: app/libraries/NotificationFactory.php
+
+		-
 			message: "#^Method app\\\\libraries\\\\NotificationFactory\\:\\:createEmailsArray\\(\\) has parameter \\$event with no value type specified in iterable type array\\.$#"
 			count: 1
 			path: app/libraries/NotificationFactory.php
@@ -3789,6 +4339,16 @@ parameters:
 			message: "#^Method app\\\\libraries\\\\NumberUtils\\:\\:getRandomIndices\\(\\) return type has no value type specified in iterable type array\\.$#"
 			count: 1
 			path: app/libraries/NumberUtils.php
+
+		-
+			message: "#^Call to static method app\\\\libraries\\\\FileUtils\\:\\:joinPaths\\(\\) with incorrect case\\: joinpaths$#"
+			count: 1
+			path: app/libraries/Output.php
+
+		-
+			message: "#^Construct empty\\(\\) is not allowed\\. Use more strict comparison\\.$#"
+			count: 1
+			path: app/libraries/Output.php
 
 		-
 			message: "#^Method app\\\\libraries\\\\Output\\:\\:addBreadcrumb\\(\\) has no return type specified\\.$#"
@@ -4076,6 +4636,16 @@ parameters:
 			path: app/libraries/Output.php
 
 		-
+			message: "#^Only booleans are allowed in an if condition, app\\\\models\\\\Config\\|null given\\.$#"
+			count: 1
+			path: app/libraries/Output.php
+
+		-
+			message: "#^Only booleans are allowed in an if condition, string\\|null given\\.$#"
+			count: 1
+			path: app/libraries/Output.php
+
+		-
 			message: "#^Property app\\\\libraries\\\\Output\\:\\:\\$breadcrumbs has no type specified\\.$#"
 			count: 1
 			path: app/libraries/Output.php
@@ -4166,6 +4736,11 @@ parameters:
 			path: app/libraries/SamlSettings.php
 
 		-
+			message: "#^Construct empty\\(\\) is not allowed\\. Use more strict comparison\\.$#"
+			count: 2
+			path: app/libraries/SessionManager.php
+
+		-
 			message: "#^Method app\\\\libraries\\\\TokenManager\\:\\:generateSessionToken\\(\\) has parameter \\$persistent with no type specified\\.$#"
 			count: 1
 			path: app/libraries/TokenManager.php
@@ -4211,7 +4786,22 @@ parameters:
 			path: app/libraries/Utils.php
 
 		-
+			message: "#^Strict comparison using \\=\\=\\= between null and null will always evaluate to true\\.$#"
+			count: 1
+			path: app/libraries/Utils.php
+
+		-
+			message: "#^Call to function in_array\\(\\) requires parameter \\#3 to be set\\.$#"
+			count: 1
+			path: app/libraries/database/AbstractDatabase.php
+
+		-
 			message: "#^Comparison operation \"\\>\" between int\\<1, max\\> and 0 is always true\\.$#"
+			count: 1
+			path: app/libraries/database/AbstractDatabase.php
+
+		-
+			message: "#^Foreach overwrites \\$result with its value variable\\.$#"
 			count: 1
 			path: app/libraries/database/AbstractDatabase.php
 
@@ -4331,12 +4921,47 @@ parameters:
 			path: app/libraries/database/DatabaseFactory.php
 
 		-
+			message: "#^Call to function in_array\\(\\) requires parameter \\#3 to be set\\.$#"
+			count: 4
+			path: app/libraries/database/DatabaseQueries.php
+
+		-
+			message: "#^Call to function is_array\\(\\) with array\\<string\\> will always evaluate to true\\.$#"
+			count: 1
+			path: app/libraries/database/DatabaseQueries.php
+
+		-
 			message: "#^Call to function is_null\\(\\) with DateTime will always evaluate to false\\.$#"
 			count: 2
 			path: app/libraries/database/DatabaseQueries.php
 
 		-
+			message: "#^Call to method app\\\\libraries\\\\database\\\\AbstractDatabase\\:\\:getRowCount\\(\\) with incorrect case\\: getrowcount$#"
+			count: 1
+			path: app/libraries/database/DatabaseQueries.php
+
+		-
+			message: "#^Call to method app\\\\libraries\\\\database\\\\DatabaseQueries\\:\\:getRawUsersWithOverriddenGrades\\(\\) with incorrect case\\: getRawUsersWIthOverriddenGrades$#"
+			count: 1
+			path: app/libraries/database/DatabaseQueries.php
+
+		-
+			message: "#^Construct empty\\(\\) is not allowed\\. Use more strict comparison\\.$#"
+			count: 18
+			path: app/libraries/database/DatabaseQueries.php
+
+		-
+			message: "#^Foreach overwrites \\$post_id with its value variable\\.$#"
+			count: 1
+			path: app/libraries/database/DatabaseQueries.php
+
+		-
 			message: "#^If condition is always true\\.$#"
+			count: 1
+			path: app/libraries/database/DatabaseQueries.php
+
+		-
+			message: "#^Instanceof between app\\\\models\\\\gradeable\\\\Gradeable and app\\\\models\\\\gradeable\\\\Gradeable will always evaluate to true\\.$#"
 			count: 1
 			path: app/libraries/database/DatabaseQueries.php
 
@@ -7116,6 +7741,46 @@ parameters:
 			path: app/libraries/database/DatabaseQueries.php
 
 		-
+			message: "#^Only booleans are allowed in a negated boolean, int given\\.$#"
+			count: 1
+			path: app/libraries/database/DatabaseQueries.php
+
+		-
+			message: "#^Only booleans are allowed in a ternary operator condition, app\\\\models\\\\Team\\|null given\\.$#"
+			count: 1
+			path: app/libraries/database/DatabaseQueries.php
+
+		-
+			message: "#^Only booleans are allowed in a ternary operator condition, app\\\\models\\\\User\\|null given\\.$#"
+			count: 1
+			path: app/libraries/database/DatabaseQueries.php
+
+		-
+			message: "#^Only booleans are allowed in a ternary operator condition, int\\<0, max\\> given\\.$#"
+			count: 1
+			path: app/libraries/database/DatabaseQueries.php
+
+		-
+			message: "#^Only booleans are allowed in an if condition, app\\\\libraries\\\\database\\\\AbstractDatabase given\\.$#"
+			count: 1
+			path: app/libraries/database/DatabaseQueries.php
+
+		-
+			message: "#^Only booleans are allowed in an if condition, array given\\.$#"
+			count: 1
+			path: app/libraries/database/DatabaseQueries.php
+
+		-
+			message: "#^Strict comparison using \\!\\=\\= between mixed and null will always evaluate to true\\.$#"
+			count: 1
+			path: app/libraries/database/DatabaseQueries.php
+
+		-
+			message: "#^Strict comparison using \\!\\=\\= between non\\-empty\\-array and null will always evaluate to true\\.$#"
+			count: 1
+			path: app/libraries/database/DatabaseQueries.php
+
+		-
 			message: "#^Strict comparison using \\=\\=\\= between array\\<int\\> and null will always evaluate to false\\.$#"
 			count: 1
 			path: app/libraries/database/DatabaseQueries.php
@@ -7171,6 +7836,26 @@ parameters:
 			path: app/libraries/database/DatabaseUtils.php
 
 		-
+			message: "#^Call to function in_array\\(\\) requires parameter \\#3 to be set\\.$#"
+			count: 1
+			path: app/libraries/database/PostgresqlDatabase.php
+
+		-
+			message: "#^Call to function is_array\\(\\) with array will always evaluate to true\\.$#"
+			count: 1
+			path: app/libraries/database/PostgresqlDatabase.php
+
+		-
+			message: "#^Call to function is_string\\(\\) with non\\-falsy\\-string will always evaluate to true\\.$#"
+			count: 1
+			path: app/libraries/database/PostgresqlDatabase.php
+
+		-
+			message: "#^Construct empty\\(\\) is not allowed\\. Use more strict comparison\\.$#"
+			count: 1
+			path: app/libraries/database/PostgresqlDatabase.php
+
+		-
 			message: "#^Method app\\\\libraries\\\\database\\\\PostgresqlDatabase\\:\\:__construct\\(\\) has parameter \\$connection_params with no value type specified in iterable type array\\.$#"
 			count: 1
 			path: app/libraries/database/PostgresqlDatabase.php
@@ -7197,6 +7882,11 @@ parameters:
 
 		-
 			message: "#^Method app\\\\libraries\\\\database\\\\PostgresqlDatabase\\:\\:parsePGArrayValue\\(\\) has parameter \\$return with no value type specified in iterable type array\\.$#"
+			count: 1
+			path: app/libraries/database/PostgresqlDatabase.php
+
+		-
+			message: "#^Parameter \\#1 \\$array \\(array\\) of method app\\\\libraries\\\\database\\\\PostgresqlDatabase\\:\\:fromPHPToDatabaseArray\\(\\) should be contravariant with parameter \\$array \\(mixed\\) of method app\\\\libraries\\\\database\\\\AbstractDatabase\\:\\:fromPHPToDatabaseArray\\(\\)$#"
 			count: 1
 			path: app/libraries/database/PostgresqlDatabase.php
 
@@ -7281,9 +7971,39 @@ parameters:
 			path: app/libraries/plagiarism/PlagiarismUtils.php
 
 		-
+			message: "#^Only booleans are allowed in an if condition, string\\|null given\\.$#"
+			count: 1
+			path: app/libraries/response/JsonResponse.php
+
+		-
+			message: "#^Only booleans are allowed in \\|\\|, mixed given on the left side\\.$#"
+			count: 1
+			path: app/libraries/response/JsonResponse.php
+
+		-
+			message: "#^Only booleans are allowed in \\|\\|, string\\|null given on the left side\\.$#"
+			count: 1
+			path: app/libraries/response/JsonResponse.php
+
+		-
 			message: "#^Property app\\\\libraries\\\\response\\\\JsonResponse\\:\\:\\$json type has no value type specified in iterable type array\\.$#"
 			count: 1
 			path: app/libraries/response/JsonResponse.php
+
+		-
+			message: "#^Only booleans are allowed in &&, app\\\\libraries\\\\response\\\\JsonResponse\\|null given on the left side\\.$#"
+			count: 1
+			path: app/libraries/response/MultiResponse.php
+
+		-
+			message: "#^Only booleans are allowed in &&, app\\\\libraries\\\\response\\\\RedirectResponse\\|app\\\\libraries\\\\response\\\\WebResponse\\|null given on the left side\\.$#"
+			count: 1
+			path: app/libraries/response/MultiResponse.php
+
+		-
+			message: "#^Only booleans are allowed in a ternary operator condition, app\\\\libraries\\\\response\\\\RedirectResponse\\|null given\\.$#"
+			count: 1
+			path: app/libraries/response/MultiResponse.php
 
 		-
 			message: "#^Parameter \\#3 \\$code of static method app\\\\libraries\\\\response\\\\JsonResponse\\:\\:getErrorResponse\\(\\) expects string\\|null, int given\\.$#"
@@ -7306,7 +8026,17 @@ parameters:
 			path: app/libraries/response/WebResponse.php
 
 		-
+			message: "#^Call to function in_array\\(\\) requires parameter \\#3 to be set\\.$#"
+			count: 2
+			path: app/libraries/routers/AccessControl.php
+
+		-
 			message: "#^Method app\\\\libraries\\\\routers\\\\AccessControl\\:\\:__construct\\(\\) has parameter \\$data with no value type specified in iterable type array\\.$#"
+			count: 1
+			path: app/libraries/routers/AccessControl.php
+
+		-
+			message: "#^Variable method call on \\$this\\(app\\\\libraries\\\\routers\\\\AccessControl\\)\\.$#"
 			count: 1
 			path: app/libraries/routers/AccessControl.php
 
@@ -7326,9 +8056,19 @@ parameters:
 			path: app/libraries/routers/AnnotatedRouteLoader.php
 
 		-
+			message: "#^Construct empty\\(\\) is not allowed\\. Use more strict comparison\\.$#"
+			count: 1
+			path: app/libraries/routers/Enabled.php
+
+		-
 			message: "#^Method app\\\\libraries\\\\routers\\\\Enabled\\:\\:__construct\\(\\) has parameter \\$data with no value type specified in iterable type array\\.$#"
 			count: 1
 			path: app/libraries/routers/Enabled.php
+
+		-
+			message: "#^Construct empty\\(\\) is not allowed\\. Use more strict comparison\\.$#"
+			count: 1
+			path: app/libraries/routers/FeatureFlag.php
 
 		-
 			message: "#^Method app\\\\libraries\\\\routers\\\\FeatureFlag\\:\\:__construct\\(\\) has parameter \\$data with no value type specified in iterable type array\\.$#"
@@ -7349,6 +8089,16 @@ parameters:
 				should not be used, just return RedirectResponse directly$#
 			"""
 			count: 7
+			path: app/libraries/routers/WebRouter.php
+
+		-
+			message: "#^Call to function ucfirst\\(\\) with incorrect case\\: ucFirst$#"
+			count: 1
+			path: app/libraries/routers/WebRouter.php
+
+		-
+			message: "#^Construct empty\\(\\) is not allowed\\. Use more strict comparison\\.$#"
+			count: 1
 			path: app/libraries/routers/WebRouter.php
 
 		-
@@ -7382,9 +8132,29 @@ parameters:
 			path: app/libraries/routers/WebRouter.php
 
 		-
+			message: "#^Only booleans are allowed in an if condition, string\\|null given\\.$#"
+			count: 3
+			path: app/libraries/routers/WebRouter.php
+
+		-
 			message: "#^Property app\\\\libraries\\\\routers\\\\WebRouter\\:\\:\\$parameters type has no value type specified in iterable type array\\.$#"
 			count: 1
 			path: app/libraries/routers/WebRouter.php
+
+		-
+			message: "#^Strict comparison using \\!\\=\\= between app\\\\models\\\\User and null will always evaluate to true\\.$#"
+			count: 2
+			path: app/libraries/routers/WebRouter.php
+
+		-
+			message: "#^Variable method call on app\\\\models\\\\Config\\|null\\.$#"
+			count: 1
+			path: app/libraries/routers/WebRouter.php
+
+		-
+			message: "#^Construct empty\\(\\) is not allowed\\. Use more strict comparison\\.$#"
+			count: 2
+			path: app/libraries/socket/Server.php
 
 		-
 			message: "#^Method app\\\\libraries\\\\socket\\\\Server\\:\\:log\\(\\) has no return type specified\\.$#"
@@ -7394,6 +8164,11 @@ parameters:
 		-
 			message: "#^Method app\\\\libraries\\\\socket\\\\Server\\:\\:logError\\(\\) has no return type specified\\.$#"
 			count: 1
+			path: app/libraries/socket/Server.php
+
+		-
+			message: "#^Only booleans are allowed in an if condition, string\\|null given\\.$#"
+			count: 2
 			path: app/libraries/socket/Server.php
 
 		-
@@ -7447,6 +8222,11 @@ parameters:
 			path: app/models/AbstractModel.php
 
 		-
+			message: "#^Variable property access on \\$this\\(app\\\\models\\\\AbstractModel\\)\\.$#"
+			count: 4
+			path: app/models/AbstractModel.php
+
+		-
 			message: "#^Method app\\\\models\\\\Breadcrumb\\:\\:__construct\\(\\) has parameter \\$use_as_heading with no type specified\\.$#"
 			count: 1
 			path: app/models/Breadcrumb.php
@@ -7470,6 +8250,11 @@ parameters:
 			message: "#^Method app\\\\models\\\\Button\\:\\:__construct\\(\\) has parameter \\$details with no value type specified in iterable type array\\.$#"
 			count: 1
 			path: app/models/Button.php
+
+		-
+			message: "#^Implicit array creation is not allowed \\- variable \\$curr_section might not exist\\.$#"
+			count: 1
+			path: app/models/CalendarInfo.php
 
 		-
 			message: "#^Method app\\\\models\\\\CalendarInfo\\:\\:getColors\\(\\) return type has no value type specified in iterable type array\\.$#"
@@ -7500,6 +8285,16 @@ parameters:
 			message: "#^Property app\\\\models\\\\CalendarInfo\\:\\:\\$items_by_sections type has no value type specified in iterable type array\\.$#"
 			count: 1
 			path: app/models/CalendarInfo.php
+
+		-
+			message: "#^Call to function in_array\\(\\) requires parameter \\#3 to be set\\.$#"
+			count: 1
+			path: app/models/Config.php
+
+		-
+			message: "#^Construct empty\\(\\) is not allowed\\. Use more strict comparison\\.$#"
+			count: 6
+			path: app/models/Config.php
 
 		-
 			message: "#^Expression on left side of \\?\\? is not nullable\\.$#"
@@ -7582,6 +8377,11 @@ parameters:
 			path: app/models/Config.php
 
 		-
+			message: "#^Only booleans are allowed in an if condition, string given\\.$#"
+			count: 1
+			path: app/models/Config.php
+
+		-
 			message: "#^Property app\\\\models\\\\Config\\:\\:\\$course_database_params type has no value type specified in iterable type array\\.$#"
 			count: 1
 			path: app/models/Config.php
@@ -7637,6 +8437,11 @@ parameters:
 			path: app/models/Config.php
 
 		-
+			message: "#^Variable property access on \\$this\\(app\\\\models\\\\Config\\)\\.$#"
+			count: 10
+			path: app/models/Config.php
+
+		-
 			message: "#^Method app\\\\models\\\\Course\\:\\:__construct\\(\\) has parameter \\$details with no value type specified in iterable type array\\.$#"
 			count: 1
 			path: app/models/Course.php
@@ -7662,6 +8467,21 @@ parameters:
 			path: app/models/Course.php
 
 		-
+			message: "#^Call to function in_array\\(\\) requires parameter \\#3 to be set\\.$#"
+			count: 2
+			path: app/models/DateTimeFormat.php
+
+		-
+			message: "#^Call to function in_array\\(\\) requires parameter \\#3 to be set\\.$#"
+			count: 2
+			path: app/models/DisplayImage.php
+
+		-
+			message: "#^Construct empty\\(\\) is not allowed\\. Use more strict comparison\\.$#"
+			count: 1
+			path: app/models/DisplayImage.php
+
+		-
 			message: "#^Method app\\\\models\\\\Email\\:\\:__construct\\(\\) has parameter \\$details with no value type specified in iterable type array\\.$#"
 			count: 1
 			path: app/models/Email.php
@@ -7680,6 +8500,11 @@ parameters:
 			message: "#^Property app\\\\models\\\\GradeableAutocheck\\:\\:\\$messages type has no value type specified in iterable type array\\.$#"
 			count: 1
 			path: app/models/GradeableAutocheck.php
+
+		-
+			message: "#^Call to function in_array\\(\\) requires parameter \\#3 to be set\\.$#"
+			count: 4
+			path: app/models/GradingOrder.php
 
 		-
 			message: "#^Call to function is_null\\(\\) with array\\<string\\> will always evaluate to false\\.$#"
@@ -7727,6 +8552,11 @@ parameters:
 			path: app/models/NavButton.php
 
 		-
+			message: "#^Construct empty\\(\\) is not allowed\\. Use more strict comparison\\.$#"
+			count: 2
+			path: app/models/Notification.php
+
+		-
 			message: "#^Method app\\\\models\\\\Notification\\:\\:createNotification\\(\\) has no return type specified\\.$#"
 			count: 1
 			path: app/models/Notification.php
@@ -7755,6 +8585,11 @@ parameters:
 			message: "#^Property app\\\\models\\\\Notification\\:\\:\\$elapsed_time has unknown class app\\\\models\\\\real as its type\\.$#"
 			count: 1
 			path: app/models/Notification.php
+
+		-
+			message: "#^Call to function in_array\\(\\) requires parameter \\#3 to be set\\.$#"
+			count: 1
+			path: app/models/OfficeHoursQueueModel.php
 
 		-
 			message: "#^Method app\\\\models\\\\OfficeHoursQueueModel\\:\\:__construct\\(\\) has parameter \\$full_history with no type specified\\.$#"
@@ -8147,6 +8982,16 @@ parameters:
 			path: app/models/QueueItem.php
 
 		-
+			message: "#^app\\\\models\\\\QueueItem\\:\\:__construct\\(\\) does not call parent constructor from app\\\\models\\\\AbstractModel\\.$#"
+			count: 1
+			path: app/models/QueueItem.php
+
+		-
+			message: "#^Call to function in_array\\(\\) requires parameter \\#3 to be set\\.$#"
+			count: 3
+			path: app/models/RainbowCustomization.php
+
+		-
 			message: "#^Call to function is_null\\(\\) with array will always evaluate to false\\.$#"
 			count: 1
 			path: app/models/RainbowCustomization.php
@@ -8227,6 +9072,11 @@ parameters:
 			path: app/models/RainbowCustomization.php
 
 		-
+			message: "#^Only booleans are allowed in &&, int\\<0, max\\> given on the right side\\.$#"
+			count: 1
+			path: app/models/RainbowCustomization.php
+
+		-
 			message: "#^Property app\\\\models\\\\RainbowCustomization\\:\\:\\$RCJSON has no type specified\\.$#"
 			count: 1
 			path: app/models/RainbowCustomization.php
@@ -8270,6 +9120,21 @@ parameters:
 			message: "#^Property app\\\\models\\\\RainbowCustomization\\:\\:\\$used_buckets has no type specified\\.$#"
 			count: 1
 			path: app/models/RainbowCustomization.php
+
+		-
+			message: "#^Call to function in_array\\(\\) requires parameter \\#3 to be set\\.$#"
+			count: 4
+			path: app/models/RainbowCustomizationJSON.php
+
+		-
+			message: "#^Casting to float something that's already float\\.$#"
+			count: 1
+			path: app/models/RainbowCustomizationJSON.php
+
+		-
+			message: "#^Construct empty\\(\\) is not allowed\\. Use more strict comparison\\.$#"
+			count: 4
+			path: app/models/RainbowCustomizationJSON.php
 
 		-
 			message: "#^Method app\\\\models\\\\RainbowCustomizationJSON\\:\\:addBenchmarkPercent\\(\\) has no return type specified\\.$#"
@@ -8357,6 +9222,11 @@ parameters:
 			path: app/models/RainbowCustomizationJSON.php
 
 		-
+			message: "#^Variable property access on mixed\\.$#"
+			count: 2
+			path: app/models/RainbowCustomizationJSON.php
+
+		-
 			message: "#^Method app\\\\models\\\\SimpleGradeOverriddenUser\\:\\:__construct\\(\\) has parameter \\$details with no value type specified in iterable type array\\.$#"
 			count: 1
 			path: app/models/SimpleGradeOverriddenUser.php
@@ -8402,6 +9272,16 @@ parameters:
 			path: app/models/SuperuserEmail.php
 
 		-
+			message: "#^Call to function in_array\\(\\) requires parameter \\#3 to be set\\.$#"
+			count: 3
+			path: app/models/Team.php
+
+		-
+			message: "#^Construct empty\\(\\) is not allowed\\. Use more strict comparison\\.$#"
+			count: 1
+			path: app/models/Team.php
+
+		-
 			message: "#^Method app\\\\models\\\\Team\\:\\:__construct\\(\\) has parameter \\$details with no value type specified in iterable type array\\.$#"
 			count: 1
 			path: app/models/Team.php
@@ -8420,6 +9300,21 @@ parameters:
 			message: "#^Property app\\\\models\\\\Team\\:\\:\\$assignment_settings type has no value type specified in iterable type array\\.$#"
 			count: 1
 			path: app/models/Team.php
+
+		-
+			message: "#^Short ternary operator is not allowed\\. Use null coalesce operator if applicable or consider using long ternary\\.$#"
+			count: 1
+			path: app/models/Team.php
+
+		-
+			message: "#^Call to function in_array\\(\\) requires parameter \\#3 to be set\\.$#"
+			count: 3
+			path: app/models/User.php
+
+		-
+			message: "#^Construct empty\\(\\) is not allowed\\. Use more strict comparison\\.$#"
+			count: 5
+			path: app/models/User.php
 
 		-
 			message: "#^Method app\\\\models\\\\User\\:\\:__construct\\(\\) has parameter \\$details with no value type specified in iterable type array\\.$#"
@@ -8587,6 +9482,21 @@ parameters:
 			path: app/models/User.php
 
 		-
+			message: "#^Call to function ctype_digit\\(\\) with \\*NEVER\\* will always evaluate to true\\.$#"
+			count: 1
+			path: app/models/gradeable/AutoGradedGradeable.php
+
+		-
+			message: "#^Call to function is_int\\(\\) with int will always evaluate to true\\.$#"
+			count: 1
+			path: app/models/gradeable/AutoGradedGradeable.php
+
+		-
+			message: "#^Instanceof between app\\\\models\\\\gradeable\\\\AutoGradedVersion and app\\\\models\\\\gradeable\\\\AutoGradedVersion will always evaluate to true\\.$#"
+			count: 1
+			path: app/models/gradeable/AutoGradedGradeable.php
+
+		-
 			message: "#^Method app\\\\models\\\\gradeable\\\\AutoGradedGradeable\\:\\:__construct\\(\\) has parameter \\$details with no value type specified in iterable type array\\.$#"
 			count: 1
 			path: app/models/gradeable/AutoGradedGradeable.php
@@ -8667,7 +9577,17 @@ parameters:
 			path: app/models/gradeable/AutoGradedTestcase.php
 
 		-
+			message: "#^Call to function in_array\\(\\) requires parameter \\#3 to be set\\.$#"
+			count: 1
+			path: app/models/gradeable/AutoGradedVersion.php
+
+		-
 			message: "#^Call to function is_null\\(\\) with array\\<app\\\\models\\\\gradeable\\\\AutoGradedTestcase\\> will always evaluate to false\\.$#"
+			count: 1
+			path: app/models/gradeable/AutoGradedVersion.php
+
+		-
+			message: "#^Class DateTime referenced with incorrect case\\: Datetime\\.$#"
 			count: 1
 			path: app/models/gradeable/AutoGradedVersion.php
 
@@ -8852,12 +9772,22 @@ parameters:
 			path: app/models/gradeable/AutoGradedVersion.php
 
 		-
+			message: "#^Strict comparison using \\!\\=\\= between DateTime\\|string and null will always evaluate to true\\.$#"
+			count: 1
+			path: app/models/gradeable/AutoGradedVersion.php
+
+		-
 			message: "#^Strict comparison using \\=\\=\\= between app\\\\models\\\\gradeable\\\\GradedGradeable and null will always evaluate to false\\.$#"
 			count: 1
 			path: app/models/gradeable/AutoGradedVersion.php
 
 		-
 			message: "#^Strict comparison using \\=\\=\\= between bool and 'true' will always evaluate to false\\.$#"
+			count: 1
+			path: app/models/gradeable/AutoGradedVersion.php
+
+		-
+			message: "#^Variable property access on \\$this\\(app\\\\models\\\\gradeable\\\\AutoGradedVersion\\)\\.$#"
 			count: 1
 			path: app/models/gradeable/AutoGradedVersion.php
 
@@ -9132,6 +10062,26 @@ parameters:
 			path: app/models/gradeable/AutogradingTestcase.php
 
 		-
+			message: "#^Call to function ctype_digit\\(\\) with \\*NEVER\\* will always evaluate to true\\.$#"
+			count: 1
+			path: app/models/gradeable/Component.php
+
+		-
+			message: "#^Call to function in_array\\(\\) requires parameter \\#3 to be set\\.$#"
+			count: 1
+			path: app/models/gradeable/Component.php
+
+		-
+			message: "#^Call to function is_int\\(\\) with int will always evaluate to true\\.$#"
+			count: 1
+			path: app/models/gradeable/Component.php
+
+		-
+			message: "#^Instanceof between app\\\\models\\\\gradeable\\\\Mark and app\\\\models\\\\gradeable\\\\Mark will always evaluate to true\\.$#"
+			count: 1
+			path: app/models/gradeable/Component.php
+
+		-
 			message: "#^Method app\\\\models\\\\gradeable\\\\Component\\:\\:__construct\\(\\) has parameter \\$details with no value type specified in iterable type array\\.$#"
 			count: 1
 			path: app/models/gradeable/Component.php
@@ -9342,6 +10292,16 @@ parameters:
 			path: app/models/gradeable/Component.php
 
 		-
+			message: "#^Variable property access on \\$this\\(app\\\\models\\\\gradeable\\\\Component\\)\\.$#"
+			count: 1
+			path: app/models/gradeable/Component.php
+
+		-
+			message: "#^Call to function in_array\\(\\) requires parameter \\#3 to be set\\.$#"
+			count: 1
+			path: app/models/gradeable/GradeInquiry.php
+
+		-
 			message: "#^Method app\\\\models\\\\gradeable\\\\GradeInquiry\\:\\:__construct\\(\\) has parameter \\$details with no value type specified in iterable type array\\.$#"
 			count: 1
 			path: app/models/gradeable/GradeInquiry.php
@@ -9357,7 +10317,37 @@ parameters:
 			path: app/models/gradeable/GradeInquiry.php
 
 		-
+			message: "#^Call to function array_search\\(\\) requires parameter \\#3 to be set\\.$#"
+			count: 1
+			path: app/models/gradeable/Gradeable.php
+
+		-
+			message: "#^Call to function in_array\\(\\) requires parameter \\#3 to be set\\.$#"
+			count: 8
+			path: app/models/gradeable/Gradeable.php
+
+		-
 			message: "#^Call to function is_null\\(\\) with app\\\\models\\\\User will always evaluate to false\\.$#"
+			count: 1
+			path: app/models/gradeable/Gradeable.php
+
+		-
+			message: "#^Construct empty\\(\\) is not allowed\\. Use more strict comparison\\.$#"
+			count: 9
+			path: app/models/gradeable/Gradeable.php
+
+		-
+			message: "#^Foreach overwrites \\$user with its value variable\\.$#"
+			count: 2
+			path: app/models/gradeable/Gradeable.php
+
+		-
+			message: "#^Instanceof between app\\\\models\\\\User and app\\\\models\\\\User will always evaluate to true\\.$#"
+			count: 1
+			path: app/models/gradeable/Gradeable.php
+
+		-
+			message: "#^Instanceof between app\\\\models\\\\gradeable\\\\Component and app\\\\models\\\\gradeable\\\\Component will always evaluate to true\\.$#"
 			count: 1
 			path: app/models/gradeable/Gradeable.php
 
@@ -9712,6 +10702,36 @@ parameters:
 			path: app/models/gradeable/Gradeable.php
 
 		-
+			message: "#^Only booleans are allowed in &&, int\\<0, 1\\> given on the right side\\.$#"
+			count: 1
+			path: app/models/gradeable/Gradeable.php
+
+		-
+			message: "#^Only booleans are allowed in &&, int\\<0, 64\\> given on the right side\\.$#"
+			count: 1
+			path: app/models/gradeable/Gradeable.php
+
+		-
+			message: "#^Only booleans are allowed in &&, int\\<0, 8\\> given on the right side\\.$#"
+			count: 1
+			path: app/models/gradeable/Gradeable.php
+
+		-
+			message: "#^Only booleans are allowed in an if condition, int\\<0, 256\\> given\\.$#"
+			count: 1
+			path: app/models/gradeable/Gradeable.php
+
+		-
+			message: "#^Only booleans are allowed in an if condition, int\\<0, 32\\> given\\.$#"
+			count: 1
+			path: app/models/gradeable/Gradeable.php
+
+		-
+			message: "#^Only booleans are allowed in an if condition, int\\<0, 4\\> given\\.$#"
+			count: 1
+			path: app/models/gradeable/Gradeable.php
+
+		-
 			message: "#^Property app\\\\models\\\\gradeable\\\\Gradeable\\:\\:\\$active_grade_inquiries_count \\(bool\\) does not accept default value of type int\\.$#"
 			count: 1
 			path: app/models/gradeable/Gradeable.php
@@ -9772,6 +10792,41 @@ parameters:
 			path: app/models/gradeable/Gradeable.php
 
 		-
+			message: "#^Strict comparison using \\!\\=\\= between DateTime and null will always evaluate to true\\.$#"
+			count: 2
+			path: app/models/gradeable/Gradeable.php
+
+		-
+			message: "#^Strict comparison using \\!\\=\\= between mixed and null will always evaluate to true\\.$#"
+			count: 2
+			path: app/models/gradeable/Gradeable.php
+
+		-
+			message: "#^Variable method call on app\\\\models\\\\Team\\.$#"
+			count: 1
+			path: app/models/gradeable/Gradeable.php
+
+		-
+			message: "#^Variable method call on app\\\\models\\\\User\\.$#"
+			count: 1
+			path: app/models/gradeable/Gradeable.php
+
+		-
+			message: "#^Variable property access on \\$this\\(app\\\\models\\\\gradeable\\\\Gradeable\\)\\.$#"
+			count: 5
+			path: app/models/gradeable/Gradeable.php
+
+		-
+			message: "#^Variable method call on app\\\\models\\\\gradeable\\\\Gradeable\\.$#"
+			count: 4
+			path: app/models/gradeable/GradeableList.php
+
+		-
+			message: "#^Variable property access on \\$this\\(app\\\\models\\\\gradeable\\\\GradeableList\\)\\.$#"
+			count: 1
+			path: app/models/gradeable/GradeableList.php
+
+		-
 			message: "#^Method app\\\\models\\\\gradeable\\\\GradeableUtils\\:\\:getAllGradeableListFromUserId\\(\\) has parameter \\$calendar_messages with no value type specified in iterable type array\\.$#"
 			count: 1
 			path: app/models/gradeable/GradeableUtils.php
@@ -9795,6 +10850,11 @@ parameters:
 			message: "#^Method app\\\\models\\\\gradeable\\\\GradeableUtils\\:\\:getGradeablesFromUserAndCourse\\(\\) return type has no value type specified in iterable type array\\.$#"
 			count: 1
 			path: app/models/gradeable/GradeableUtils.php
+
+		-
+			message: "#^Call to function in_array\\(\\) requires parameter \\#3 to be set\\.$#"
+			count: 2
+			path: app/models/gradeable/GradedComponent.php
 
 		-
 			message: "#^Method app\\\\models\\\\gradeable\\\\GradedComponent\\:\\:__construct\\(\\) has parameter \\$details with no value type specified in iterable type array\\.$#"
@@ -9890,6 +10950,11 @@ parameters:
 			message: "#^Strict comparison using \\=\\=\\= between app\\\\models\\\\gradeable\\\\TaGradedGradeable and null will always evaluate to false\\.$#"
 			count: 1
 			path: app/models/gradeable/GradedComponent.php
+
+		-
+			message: "#^Instanceof between app\\\\models\\\\gradeable\\\\GradedComponent and app\\\\models\\\\gradeable\\\\GradedComponent will always evaluate to true\\.$#"
+			count: 1
+			path: app/models/gradeable/GradedComponentContainer.php
 
 		-
 			message: "#^Method app\\\\models\\\\gradeable\\\\GradedComponentContainer\\:\\:setGradedComponents\\(\\) has no return type specified\\.$#"
@@ -10012,6 +11077,11 @@ parameters:
 			path: app/models/gradeable/GradedGradeable.php
 
 		-
+			message: "#^Call to function in_array\\(\\) requires parameter \\#3 to be set\\.$#"
+			count: 1
+			path: app/models/gradeable/LateDayInfo.php
+
+		-
 			message: "#^Method app\\\\models\\\\gradeable\\\\LateDayInfo\\:\\:__construct\\(\\) has parameter \\$event_info with no value type specified in iterable type array\\.$#"
 			count: 1
 			path: app/models/gradeable/LateDayInfo.php
@@ -10037,6 +11107,11 @@ parameters:
 			path: app/models/gradeable/LateDayInfo.php
 
 		-
+			message: "#^Call to function array_search\\(\\) requires parameter \\#3 to be set\\.$#"
+			count: 1
+			path: app/models/gradeable/LateDays.php
+
+		-
 			message: "#^Method app\\\\models\\\\gradeable\\\\LateDays\\:\\:__construct\\(\\) has parameter \\$late_day_updates with no value type specified in iterable type array\\.$#"
 			count: 1
 			path: app/models/gradeable/LateDays.php
@@ -10055,6 +11130,16 @@ parameters:
 			message: "#^Method app\\\\models\\\\gradeable\\\\LeaderboardConfig\\:\\:__construct\\(\\) has parameter \\$details with no value type specified in iterable type array\\.$#"
 			count: 1
 			path: app/models/gradeable/LeaderboardConfig.php
+
+		-
+			message: "#^Call to function ctype_digit\\(\\) with \\*NEVER\\* will always evaluate to true\\.$#"
+			count: 1
+			path: app/models/gradeable/Mark.php
+
+		-
+			message: "#^Call to function is_int\\(\\) with int will always evaluate to true\\.$#"
+			count: 1
+			path: app/models/gradeable/Mark.php
 
 		-
 			message: "#^Method app\\\\models\\\\gradeable\\\\Mark\\:\\:__construct\\(\\) has parameter \\$details with no value type specified in iterable type array\\.$#"
@@ -10102,6 +11187,11 @@ parameters:
 			path: app/models/gradeable/Mark.php
 
 		-
+			message: "#^Instanceof between app\\\\models\\\\User and app\\\\models\\\\User will always evaluate to true\\.$#"
+			count: 1
+			path: app/models/gradeable/Submitter.php
+
+		-
 			message: "#^Method app\\\\models\\\\gradeable\\\\Submitter\\:\\:getAnonId\\(\\) has parameter \\$g_id with no type specified\\.$#"
 			count: 1
 			path: app/models/gradeable/Submitter.php
@@ -10120,6 +11210,36 @@ parameters:
 			message: "#^Strict comparison using \\=\\=\\= between app\\\\models\\\\Team\\|app\\\\models\\\\User and null will always evaluate to false\\.$#"
 			count: 1
 			path: app/models/gradeable/Submitter.php
+
+		-
+			message: "#^Call to function ctype_digit\\(\\) with \\*NEVER\\* will always evaluate to true\\.$#"
+			count: 1
+			path: app/models/gradeable/TaGradedGradeable.php
+
+		-
+			message: "#^Call to function is_int\\(\\) with int will always evaluate to true\\.$#"
+			count: 1
+			path: app/models/gradeable/TaGradedGradeable.php
+
+		-
+			message: "#^Call to method SplFileInfo\\:\\:getPathname\\(\\) with incorrect case\\: getPathName$#"
+			count: 1
+			path: app/models/gradeable/TaGradedGradeable.php
+
+		-
+			message: "#^Construct empty\\(\\) is not allowed\\. Use more strict comparison\\.$#"
+			count: 1
+			path: app/models/gradeable/TaGradedGradeable.php
+
+		-
+			message: "#^Implicit array creation is not allowed \\- variable \\$graders might not exist\\.$#"
+			count: 1
+			path: app/models/gradeable/TaGradedGradeable.php
+
+		-
+			message: "#^Instanceof between app\\\\models\\\\gradeable\\\\GradedComponentContainer and app\\\\models\\\\gradeable\\\\GradedComponentContainer will always evaluate to true\\.$#"
+			count: 1
+			path: app/models/gradeable/TaGradedGradeable.php
 
 		-
 			message: "#^Method app\\\\models\\\\gradeable\\\\TaGradedGradeable\\:\\:__construct\\(\\) has parameter \\$details with no value type specified in iterable type array\\.$#"
@@ -10255,6 +11375,11 @@ parameters:
 			message: "#^Method app\\\\models\\\\notebook\\\\AbstractNotebookInput\\:\\:__construct\\(\\) has parameter \\$details with no value type specified in iterable type array\\.$#"
 			count: 1
 			path: app/models/notebook/AbstractNotebookInput.php
+
+		-
+			message: "#^Call to function in_array\\(\\) requires parameter \\#3 to be set\\.$#"
+			count: 2
+			path: app/models/notebook/Notebook.php
 
 		-
 			message: "#^Method app\\\\models\\\\notebook\\\\Notebook\\:\\:__construct\\(\\) has parameter \\$details with no value type specified in iterable type array\\.$#"
@@ -10402,6 +11527,11 @@ parameters:
 			path: app/repositories/SessionRepository.php
 
 		-
+			message: "#^Construct empty\\(\\) is not allowed\\. Use more strict comparison\\.$#"
+			count: 1
+			path: app/repositories/SessionRepository.php
+
+		-
 			message: "#^Class app\\\\repositories\\\\VcsAuthTokenRepository extends generic class Doctrine\\\\ORM\\\\EntityRepository but does not specify its types\\: TEntityClass$#"
 			count: 1
 			path: app/repositories/VcsAuthTokenRepository.php
@@ -10532,12 +11662,12 @@ parameters:
 			path: app/views/AutoGradingView.php
 
 		-
-			message: "#^Method app\\\\views\\\\AutoGradingView\\:\\:convertToAnonPath\\(\\) has parameter \\$gradeable with no type specified\\.$#"
+			message: "#^Method app\\\\views\\\\AutoGradingView\\:\\:convertToAnonPath\\(\\) has parameter \\$g_id with no type specified\\.$#"
 			count: 1
 			path: app/views/AutoGradingView.php
-			
+
 		-
-			message: "#^Method app\\\\views\\\\AutoGradingView\\:\\:convertToAnonPath\\(\\) has parameter \\$g_id with no type specified\\.$#"
+			message: "#^Method app\\\\views\\\\AutoGradingView\\:\\:convertToAnonPath\\(\\) has parameter \\$gradeable with no type specified\\.$#"
 			count: 1
 			path: app/views/AutoGradingView.php
 
@@ -10622,6 +11752,11 @@ parameters:
 			path: app/views/ErrorView.php
 
 		-
+			message: "#^Construct empty\\(\\) is not allowed\\. Use more strict comparison\\.$#"
+			count: 1
+			path: app/views/GlobalView.php
+
+		-
 			message: "#^Method app\\\\views\\\\GlobalView\\:\\:footer\\(\\) has no return type specified\\.$#"
 			count: 1
 			path: app/views/GlobalView.php
@@ -10693,6 +11828,11 @@ parameters:
 
 		-
 			message: "#^Method app\\\\views\\\\GlobalView\\:\\:header\\(\\) has parameter \\$wrapper_urls with no type specified\\.$#"
+			count: 1
+			path: app/views/GlobalView.php
+
+		-
+			message: "#^Only booleans are allowed in a ternary operator condition, app\\\\models\\\\User given\\.$#"
 			count: 1
 			path: app/views/GlobalView.php
 
@@ -10787,6 +11927,21 @@ parameters:
 			path: app/views/MarkdownView.php
 
 		-
+			message: "#^Call to method app\\\\libraries\\\\Core\\:\\:getOutput\\(\\) with incorrect case\\: getoutput$#"
+			count: 3
+			path: app/views/MiscView.php
+
+		-
+			message: "#^Call to method app\\\\libraries\\\\Output\\:\\:addVendorJs\\(\\) with incorrect case\\: addvendorjs$#"
+			count: 3
+			path: app/views/MiscView.php
+
+		-
+			message: "#^Call to static method app\\\\libraries\\\\FileUtils\\:\\:joinPaths\\(\\) with incorrect case\\: joinpaths$#"
+			count: 3
+			path: app/views/MiscView.php
+
+		-
 			message: "#^Method app\\\\views\\\\MiscView\\:\\:displayCode\\(\\) has no return type specified\\.$#"
 			count: 1
 			path: app/views/MiscView.php
@@ -10825,6 +11980,11 @@ parameters:
 			message: "#^Method app\\\\views\\\\MiscView\\:\\:tooLarge\\(\\) has no return type specified\\.$#"
 			count: 1
 			path: app/views/MiscView.php
+
+		-
+			message: "#^Construct empty\\(\\) is not allowed\\. Use more strict comparison\\.$#"
+			count: 1
+			path: app/views/NavigationView.php
 
 		-
 			message: "#^Method app\\\\views\\\\NavigationView\\:\\:closeSubmissionsWarning\\(\\) has no return type specified\\.$#"
@@ -10888,6 +12048,11 @@ parameters:
 
 		-
 			message: "#^Method app\\\\views\\\\NavigationView\\:\\:showGradeables\\(\\) has parameter \\$submit_everyone with no value type specified in iterable type array\\.$#"
+			count: 1
+			path: app/views/NavigationView.php
+
+		-
+			message: "#^Strict comparison using \\!\\=\\= between app\\\\models\\\\gradeable\\\\AutoGradedGradeable and null will always evaluate to true\\.$#"
 			count: 1
 			path: app/views/NavigationView.php
 
@@ -11135,6 +12300,16 @@ parameters:
 			message: "#^Method app\\\\views\\\\admin\\\\EmailRoomSeatingView\\:\\:displayPage\\(\\) has parameter \\$defaultSubject with no type specified\\.$#"
 			count: 1
 			path: app/views/admin/EmailRoomSeatingView.php
+
+		-
+			message: "#^Call to function array_search\\(\\) requires parameter \\#3 to be set\\.$#"
+			count: 1
+			path: app/views/admin/ExtensionsView.php
+
+		-
+			message: "#^Construct empty\\(\\) is not allowed\\. Use more strict comparison\\.$#"
+			count: 1
+			path: app/views/admin/ExtensionsView.php
 
 		-
 			message: "#^Method app\\\\views\\\\admin\\\\ExtensionsView\\:\\:displayExtensions\\(\\) has no return type specified\\.$#"
@@ -11397,6 +12572,11 @@ parameters:
 			path: app/views/course/CourseMaterialsView.php
 
 		-
+			message: "#^Construct empty\\(\\) is not allowed\\. Use more strict comparison\\.$#"
+			count: 1
+			path: app/views/course/CourseMaterialsView.php
+
+		-
 			message: "#^Method app\\\\views\\\\course\\\\CourseMaterialsView\\:\\:listCourseMaterials\\(\\) has no return type specified\\.$#"
 			count: 1
 			path: app/views/course/CourseMaterialsView.php
@@ -11442,6 +12622,11 @@ parameters:
 			path: app/views/course/CourseMaterialsView.php
 
 		-
+			message: "#^Call to function in_array\\(\\) requires parameter \\#3 to be set\\.$#"
+			count: 1
+			path: app/views/email/EmailStatusView.php
+
+		-
 			message: "#^Method app\\\\views\\\\email\\\\EmailStatusView\\:\\:EmailToKey\\(\\) has no return type specified\\.$#"
 			count: 1
 			path: app/views/email/EmailStatusView.php
@@ -11465,6 +12650,21 @@ parameters:
 			message: "#^Method app\\\\views\\\\email\\\\EmailStatusView\\:\\:showEmailStatusPage\\(\\) has no return type specified\\.$#"
 			count: 1
 			path: app/views/email/EmailStatusView.php
+
+		-
+			message: "#^Call to function array_search\\(\\) requires parameter \\#3 to be set\\.$#"
+			count: 1
+			path: app/views/forum/ForumThreadView.php
+
+		-
+			message: "#^Call to function in_array\\(\\) requires parameter \\#3 to be set\\.$#"
+			count: 3
+			path: app/views/forum/ForumThreadView.php
+
+		-
+			message: "#^Construct empty\\(\\) is not allowed\\. Use more strict comparison\\.$#"
+			count: 18
+			path: app/views/forum/ForumThreadView.php
 
 		-
 			message: "#^Expression \"\\$category_colors\" on a separate line does not do anything\\.$#"
@@ -11947,6 +13147,31 @@ parameters:
 			path: app/views/forum/ForumThreadView.php
 
 		-
+			message: "#^Only booleans are allowed in an if condition, array\\<int, mixed\\> given\\.$#"
+			count: 1
+			path: app/views/forum/ForumThreadView.php
+
+		-
+			message: "#^Construct empty\\(\\) is not allowed\\. Use more strict comparison\\.$#"
+			count: 1
+			path: app/views/grading/ElectronicGraderView.php
+
+		-
+			message: "#^Implicit array creation is not allowed \\- variable \\$component_details might not exist\\.$#"
+			count: 1
+			path: app/views/grading/ElectronicGraderView.php
+
+		-
+			message: "#^Implicit array creation is not allowed \\- variable \\$user_id does not exist\\.$#"
+			count: 1
+			path: app/views/grading/ElectronicGraderView.php
+
+		-
+			message: "#^Implicit array creation is not allowed \\- variable \\$user_ids does not exist\\.$#"
+			count: 1
+			path: app/views/grading/ElectronicGraderView.php
+
+		-
 			message: "#^Method app\\\\views\\\\grading\\\\ElectronicGraderView\\:\\:adminTeamForm\\(\\) has no return type specified\\.$#"
 			count: 1
 			path: app/views/grading/ElectronicGraderView.php
@@ -12177,6 +13402,11 @@ parameters:
 			path: app/views/grading/ElectronicGraderView.php
 
 		-
+			message: "#^Only booleans are allowed in a negated boolean, app\\\\models\\\\User given\\.$#"
+			count: 1
+			path: app/views/grading/ElectronicGraderView.php
+
+		-
 			message: "#^PHPDoc tag @var for variable \\$working_dir has no value type specified in iterable type array\\.$#"
 			count: 1
 			path: app/views/grading/ElectronicGraderView.php
@@ -12190,6 +13420,16 @@ parameters:
 			message: "#^Strict comparison using \\=\\=\\= between int and null will always evaluate to false\\.$#"
 			count: 2
 			path: app/views/grading/ElectronicGraderView.php
+
+		-
+			message: "#^Call to function in_array\\(\\) requires parameter \\#3 to be set\\.$#"
+			count: 1
+			path: app/views/grading/ImagesView.php
+
+		-
+			message: "#^Construct empty\\(\\) is not allowed\\. Use more strict comparison\\.$#"
+			count: 2
+			path: app/views/grading/ImagesView.php
 
 		-
 			message: "#^Method app\\\\views\\\\grading\\\\ImagesView\\:\\:listStudentImages\\(\\) has parameter \\$grader_sections with no type specified\\.$#"
@@ -12227,6 +13467,16 @@ parameters:
 			path: app/views/grading/SimpleGraderView.php
 
 		-
+			message: "#^Call to function in_array\\(\\) requires parameter \\#3 to be set\\.$#"
+			count: 1
+			path: app/views/submission/HomeworkView.php
+
+		-
+			message: "#^Construct empty\\(\\) is not allowed\\. Use more strict comparison\\.$#"
+			count: 2
+			path: app/views/submission/HomeworkView.php
+
+		-
 			message: "#^Method app\\\\views\\\\submission\\\\HomeworkView\\:\\:removeLowConfidenceDigits\\(\\) has no return type specified\\.$#"
 			count: 1
 			path: app/views/submission/HomeworkView.php
@@ -12249,6 +13499,16 @@ parameters:
 		-
 			message: "#^Method app\\\\views\\\\submission\\\\HomeworkView\\:\\:renderSubmissionsClosedBox\\(\\) has no return type specified\\.$#"
 			count: 1
+			path: app/views/submission/HomeworkView.php
+
+		-
+			message: "#^Only booleans are allowed in a ternary operator condition, app\\\\models\\\\gradeable\\\\GradedGradeable\\|null given\\.$#"
+			count: 1
+			path: app/views/submission/HomeworkView.php
+
+		-
+			message: "#^Strict comparison using \\!\\=\\= between app\\\\models\\\\gradeable\\\\GradedGradeable and null will always evaluate to true\\.$#"
+			count: 2
 			path: app/views/submission/HomeworkView.php
 
 		-
@@ -12333,6 +13593,11 @@ parameters:
 				            doctrine/annotations 2\\.0\\. Annotations will be autoloaded in 2\\.0\\.$#
 			"""
 			count: 1
+			path: public/index.php
+
+		-
+			message: "#^Construct empty\\(\\) is not allowed\\. Use more strict comparison\\.$#"
+			count: 2
 			path: public/index.php
 
 		-
