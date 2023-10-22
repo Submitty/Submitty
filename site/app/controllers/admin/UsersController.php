@@ -805,7 +805,7 @@ class UsersController extends AbstractController {
                 $this->core->redirect($return_url);
             }
         }
-        elseif ($content_type === 'text/csv' && $mime_type === 'text/plain') {
+        elseif ($content_type === 'text/csv' && ($mime_type === 'text/plain' || $mime_type === "text/csv")) {
             $csv_file = $tmp_name;
         }
         else {
