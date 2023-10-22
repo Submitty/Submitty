@@ -1690,7 +1690,7 @@ WHERE term=? AND course=? AND user_id=?",
             }
         }
 
-        $row = NULL;
+        $row = null;
         // If cache doesn't exist, generate it and query again
         if (!array_key_exists($user_id, $cache) || empty($cache[$user_id])) {
             $params = [$user_id, $g_id];
