@@ -1676,6 +1676,10 @@ class ElectronicGraderController extends AbstractController {
             // Get the graded gradeable for the $from user
             $id_from_anon = $this->core->getQueries()->getSubmitterIdFromAnonId($from, $gradeable_id);
             if ($blind_grading !== "unblind" || $anon_mode) {
+                if ($id_from_anon === null) {
+                    header('Location: /home');
+                    exit;
+                }
                 $from_graded_gradeable = $this->tryGetGradedGradeable($gradeable, $id_from_anon, false);
             }
             else {
