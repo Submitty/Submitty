@@ -44,14 +44,18 @@ class ExtensionsView extends AbstractView {
         if (empty($current_exceptions)) {
             $current_exceptions = null;
         }
-        $reasons = ["illness", "interview", "travel", "personal issue"];
 
         return $this->core->getOutput()->renderTwigTemplate("admin/Extensions.twig", [
             "gradeables" => $gradeables,
             "student_full" => $student_full,
             "current_gradeable" => $current_gradeable,
             "current_exceptions" => $current_exceptions,
-            "reasons" => $reasons,
+            "reasons" => [
+                "illness",
+                "interview",
+                "travel",
+                "personal issue",
+            ],
             "csrf_token" => $this->core->getCsrfToken()
         ]);
     }
