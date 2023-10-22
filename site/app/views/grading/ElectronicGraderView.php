@@ -369,7 +369,6 @@ class ElectronicGraderView extends AbstractView {
             "warnings" => $warnings,
             "submissions_in_queue" => $submissions_in_queue,
             "can_manage_teams" => $this->core->getAccess()->canI('grading.electronic.show_edit_teams', ["gradeable" => $gradeable])
-            //"verified" => 
         ]);
     }
 

@@ -2202,21 +2202,21 @@ ORDER BY {$u_or_t}.{$section_key}",
 
     public function getVerifiedComponentsCountByGradingSections($g_id, $sections, $section_key, $is_team) {
         $u_or_t = "u";
-       $users_or_teams = "users";
-       $user_or_team_id = "user_id";
-       if ($is_team) {
+        $users_or_teams = "users";
+        $user_or_team_id = "user_id";
+        if ($is_team) {
            $u_or_t = "t";
            $users_or_teams = "gradeable_teams";
            $user_or_team_id = "team_id";
-       }
-       $return = [];
-       $params = [$g_id];
-       $where = "";
-       if (count($sections) > 0) {
-           $where = "WHERE active_version > 0 AND ({$section_key} IN " . $this->createParameterList(count($sections)) . ") IS NOT FALSE";
-           $params = array_merge($params, $sections);
-       }
-       $this->course_db->query(
+        }
+        $return = [];
+        $params = [$g_id];
+        $where = "";
+        if (count($sections) > 0) {
+            $where = "WHERE active_version > 0 AND ({$section_key} IN " . $this->createParameterList(count($sections)) . ") IS NOT FALSE";
+            $params = array_merge($params, $sections);
+        }
+        $this->course_db->query(
            "
 SELECT {$u_or_t}.{$section_key}, count({$u_or_t}.*) as cnt
 FROM {$users_or_teams} AS {$u_or_t}
@@ -2232,19 +2232,19 @@ INNER JOIN (
 GROUP BY {$u_or_t}.{$section_key}
 ORDER BY {$u_or_t}.{$section_key}",
            $params
-       );
-       foreach ($this->course_db->rows() as $row) {
-           if ($row[$section_key] === null) {
-               $row[$section_key] = "NULL";
-           }
-           $return[$row[$section_key]] = intval($row['cnt']);
-       }
+        );
+        foreach ($this->course_db->rows() as $row) {
+            if ($row[$section_key] === null) {
+                $row[$section_key] = "NULL";
+            }
+            $return[$row[$section_key]] = intval($row['cnt']);
+        }
 
-       if (!array_key_exists('NULL', $return)) {
-           $return['NULL'] = 0;
-       }
-       return $return;
-   }
+        if (!array_key_exists('NULL', $return)) {
+            $return['NULL'] = 0;
+        }
+        return $return;
+    }
 
     /**
      * Gets the number of bad (late) graded components associated with this gradeable.
