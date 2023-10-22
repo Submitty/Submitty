@@ -12,7 +12,7 @@ from sample_courses import *
 from sample_courses.models import generate_random_marks, Mark
 
 class Component(object):
-    def __init__(self, component, order):
+    def __init__(self, component, order) -> None:
         self.title = component['gc_title']
         self.ta_comment = ""
         self.student_comment = ""
@@ -53,7 +53,7 @@ class Component(object):
 
         self.key = None
 
-    def create(self, g_id, conn, table, mark_table):
+    def create(self, g_id, conn, table, mark_table) -> None:
         ins = table.insert().values(g_id=g_id, gc_title=self.title, gc_ta_comment=self.ta_comment,
                                     gc_student_comment=self.student_comment,
                                     gc_lower_clamp=self.lower_clamp, gc_default=self.default, gc_max_value=self.max_value,
