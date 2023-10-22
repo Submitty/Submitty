@@ -147,8 +147,9 @@ function generateCalendarItem(item) {
     if (link !== '') {
         element.href = link;
     }
-    if (onclick !== '' && exists) {
+    if (onclick !== '' && instructor_courses.length > 0) {
         if (!item['show_due']) {
+            element.style.cursor = 'pointer';
             element.onclick = () => editCalendarItemForm(item['status'], item['title'], item['id'], item['date'], item['semester'], item['course']);
         }
         else {
