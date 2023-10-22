@@ -441,9 +441,13 @@ class SubmissionController extends AbstractController {
 
             //create a new job to split but uploads via QR
             for ($i = 0; $i < $count; $i++) {
+                //
+                // FIXME
+                // "semester" SHOULD BE "term"
+                //
                 $qr_upload_data = [
                     "job"       => "BulkUpload",
-                    "term"      => $term,
+                    "semester"  => $term,
                     "course"    => $course,
                     "g_id"      => $gradeable_id,
                     "timestamp" => $current_time,
@@ -465,9 +469,13 @@ class SubmissionController extends AbstractController {
         }
         else {
             for ($i = 0; $i < $count; $i++) {
+                //
+                // FIXME
+                // "semester" SHOULD BE "term"
+                //
                 $job_data = [
                     "job"       => "BulkUpload",
-                    "term"      => $term,
+                    "semester"  => $term,
                     "course"    => $course,
                     "g_id"      => $gradeable_id,
                     "timestamp" => $current_time,
