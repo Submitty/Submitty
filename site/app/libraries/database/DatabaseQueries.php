@@ -4284,13 +4284,13 @@ ORDER BY gt.{$section_key}",
         $this->course_db->query(
             "
         SELECT u.user_id, user_givenname,
-          user_preferred_givenname, user_familyname, late_day_exceptions
+          user_preferred_givenname, user_familyname, excused_absence_extensions
         FROM users as u
-        FULL OUTER JOIN late_day_exceptions as l
+        FULL OUTER JOIN excused_absence_extensions as l
           ON u.user_id=l.user_id
         WHERE g_id=?
-          AND late_day_exceptions IS NOT NULL
-          AND late_day_exceptions>0
+          AND excused_absence_extensions IS NOT NULL
+          AND excused_absence_extensions>0
         ORDER BY user_email ASC;",
             [$gradeable_id]
         );
@@ -7930,7 +7930,7 @@ WHERE current_state IN
         $submitter_data_inject = 'ERROR ERROR';
         if ($team) {
             $submitter_data_inject =
-              'ldet.array_late_day_exceptions,
+              'ldet.array_excused_absence_extensions,
                ldet.array_late_day_user_ids,
                /* Aggregate Team User Data */
                team.team_id,
@@ -7961,14 +7961,14 @@ WHERE current_state IN
                 WHERE gt.team_id=team.team_id AND gt.g_id=g.g_id
                 LIMIT 1)
 
-              /* Join team late day exceptions */
+              /* Join team excused absence extensions */
               LEFT JOIN (
                 SELECT
-                  json_agg(e.late_day_exceptions) AS array_late_day_exceptions,
+                  json_agg(e.excused_absence_extensions) AS array_excused_absence_extensions,
                   json_agg(e.user_id) AS array_late_day_user_ids,
                   t.team_id,
                   g_id
-                FROM late_day_exceptions e
+                FROM excused_absence_extensions e
                 LEFT JOIN teams t ON e.user_id=t.user_id AND t.state=1
                 GROUP BY team_id, g_id
               ) AS ldet ON g.g_id=ldet.g_id AND ldet.team_id=team.team_id';
@@ -7995,7 +7995,7 @@ WHERE current_state IN
               u.course_section_id,
               u.rotating_section,
               u.registration_type,
-              ldeu.late_day_exceptions,
+              ldeu.excused_absence_extensions,
               u.registration_subsection';
             $submitter_inject = '
             JOIN (
@@ -8019,7 +8019,7 @@ WHERE current_state IN
             ) AS u ON (eg IS NULL OR NOT eg.team_assignment) AND u. g_id=g.g_id
 
             /* Join user late day exceptions */
-            LEFT JOIN late_day_exceptions ldeu ON g.g_id=ldeu.g_id AND u.user_id=ldeu.user_id';
+            LEFT JOIN excused_absence_extensions ldeu ON g.g_id=ldeu.g_id AND u.user_id=ldeu.user_id';
         }
         if ($team && count($teams) > 0) {
             $team_placeholders = implode(',', array_fill(0, count($teams), '?'));
@@ -8281,7 +8281,7 @@ WHERE current_state IN
                 if (isset($row['array_late_day_user_ids'])) {
                     $late_day_exceptions = array_combine(
                         json_decode($row['array_late_day_user_ids']),
-                        json_decode($row['array_late_day_exceptions'])
+                        json_decode($row['array_excused_absence_extensions'])
                     );
                 }
                 foreach ($submitter->getMembers() as $user_id) {
