@@ -27,7 +27,7 @@ function addConfetti() {
     // Resume confetti animation when window is visible again
     window.addEventListener('visibilitychange', () => {
         if (document.visibilityState === 'visible' && is_drawing) {
-            lastUpdateTime = DateTime.now().toMillis();
+            lastUpdateTime = DateTime.local().toMillis();
             draw();
         }
     });
@@ -40,7 +40,7 @@ function addConfetti() {
     const ctx = canvas.getContext('2d');
     const pieces = [];
     const numberOfPieces = canvas.height;
-    let lastUpdateTime = DateTime.now().toMillis();
+    let lastUpdateTime = DateTime.local().toMillis();
     const x_const = 0.25;
     const max_times = 250;
     const size_const = 10;
@@ -54,7 +54,7 @@ function addConfetti() {
         submission_date = date_box.innerHTML.match(/\d+/g);
     }
 
-    const d = DateTime.now();
+    const d = DateTime.local();
     let month = d.month;
 
     //if we parsed the submission due date, use that instead
@@ -113,7 +113,7 @@ function addConfetti() {
     }
 
     function update () {
-        const now = DateTime.now().toMillis();
+        const now = DateTime.local().toMillis();
         const dt = now - lastUpdateTime;
 
         for (let i = pieces.length - 1; i >= 0; i--) {

@@ -34,7 +34,7 @@ $(document).ready(() => {
                     let date;
                     switch (index) {
                         case 0:
-                            date = DateTime.now();
+                            date = DateTime.local();
                             break;
                         case 1:
                             date = DateTime.fromISO('9998-01-01');
