@@ -1,7 +1,7 @@
 .course-material-badge {
     background-color: var(--standard-dark-green);
     min-width: 10px;
-    color: white;
+    color: var(--default-white);
     float: none;
 }
 
