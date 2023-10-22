@@ -39,7 +39,11 @@ def down(config, database, semester, course):
 
     sql = """ALTER TABLE excused_absence_extensions RENAME TO late_day_exceptions;
             ALTER TABLE late_day_exceptions RENAME COLUMN excused_absence_extensions TO late_day_exceptions;
+<<<<<<< Updated upstream
             ALTER TABLE late_day_cache RENAME COLUMN late_day_exceptions TO excused_absence_extensions;"""
+=======
+            ALTER TABLE late_day_cache RENAME COLUMN excused_absence_extensions TO late_day_exceptions;"""
+>>>>>>> Stashed changes
     database.execute(sql)
 
     pass
