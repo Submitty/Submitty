@@ -931,6 +931,9 @@ class ForumThreadView extends AbstractView {
                     "deleted" => $first_post['deleted'],
                     "has_attachment" => $first_post['has_attachment'],
                     "post_attachment" => $post_attachment,
+                    "post_content" => $first_post_content,
+                    "category_info" => $this->core->getQueries()->getCategories(),
+                    "edit_url" => $this->core->buildCourseUrl(['forum', 'posts', 'modify']) . '?' . http_build_query(['modify_type' => '1']),
                 ]);
             }
 

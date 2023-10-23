@@ -910,7 +910,7 @@ function showEditPostForm(post_id, thread_id, shouldEditThread, render_markdown,
             if (Object.keys(img_urls).length > 0) {
                 //$(`#display-attachments-${post_id}`).css('display', 'block');
                 $('.display-attachment-name').each(function() {
-                    $(this).text(decodeURI($(this).text()));
+                    $(this).text(decodeURIComponent($(this).text()));
                 });
             }
 
@@ -2235,7 +2235,7 @@ function forumFilterBar() {
 function getDeletedAttachments() {
     const deleted_attachments = [];
     $('.display-existing-attachments').find('a.btn.btn-danger').each(function() {
-        deleted_attachments.push(decodeURI($(this).attr('name').substr(7)));
+        deleted_attachments.push(decodeURIComponent($(this).attr('name').substr(7)));
     });
     return deleted_attachments;
 }
