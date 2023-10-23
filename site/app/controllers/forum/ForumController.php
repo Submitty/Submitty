@@ -366,7 +366,21 @@ class ForumController extends AbstractController {
                         $attachment_name[] = basename($_FILES['file_input']["name"][$i]);
                     }
                 }
-                $result = $this->core->getQueries()->createThread($markdown, $current_user_id, $thread_title, $thread_post_content, $anon, $pinned, $thread_status, $hasGoodAttachment[0], $attachment_name, $categories_ids, $lock_thread_date, $expiration, $announcement);
+                $result = $this->core->getQueries()->createThread(
+                    $markdown,
+                    $current_user_id,
+                    $thread_title,
+                    $thread_post_content,
+                    $anon,
+                    $pinned,
+                    $thread_status,
+                    $hasGoodAttachment[0],
+                    $attachment_name,
+                    $categories_ids,
+                    $lock_thread_date,
+                    $expiration,
+                    $announcement
+                );
                 $thread_id = $result["thread_id"];
                 $post_id = $result["post_id"];
 
@@ -509,7 +523,18 @@ class ForumController extends AbstractController {
                     }
                 }
 
-                $post_id = $this->core->getQueries()->createPost($current_user_id, $post_content, $thread_id, $anon, 0, false, $hasGoodAttachment[0], $markdown, $attachment_name, $parent_id);
+                $post_id = $this->core->getQueries()->createPost(
+                    $current_user_id,
+                    $post_content,
+                    $thread_id,
+                    $anon,
+                    0,
+                    false,
+                    $hasGoodAttachment[0],
+                    $markdown,
+                    $attachment_name,
+                    $parent_id
+                );
                 $thread_dir = FileUtils::joinPaths(FileUtils::joinPaths($this->core->getConfig()->getCoursePath(), "forum_attachments"), $thread_id);
 
                 if (!is_dir($thread_dir)) {
@@ -892,7 +917,15 @@ class ForumController extends AbstractController {
 
             $markdown = !empty($_POST['markdown_status']);
 
-            return $this->core->getQueries()->editPost($original_creator, $current_user, $post_id, $new_post_content, $anon, $markdown, json_decode($_POST['deleted_attachments']));
+            return $this->core->getQueries()->editPost(
+                $original_creator,
+                $current_user,
+                $post_id,
+                $new_post_content,
+                $anon,
+                $markdown,
+                json_decode($_POST['deleted_attachments'])
+            );
         }
         return null;
     }
@@ -1142,6 +1175,7 @@ class ForumController extends AbstractController {
         }
         return $this->core->getOutput()->renderJsonSuccess($result);
     }
+
     /**
      * @Route("/courses/{_semester}/{_course}/forum/posts/history", methods={"POST"})
      * @AccessControl(role="LIMITED_ACCESS_GRADER")
@@ -1161,7 +1195,13 @@ class ForumController extends AbstractController {
             $_post['content'] = $this->core->getOutput()->renderTwigTemplate("forum/RenderPost.twig", [
                 "post_content" => $post["content"],
                 "render_markdown" => false,
-                "post_attachment" => ForumUtils::getForumAttachments($current_post['id'], $current_post['thread_id'], $this->core->getQueries()->getForumAttachments($current_post['id'], $post['version_id']), $this->core->getConfig()->getCoursePath(), $this->core->buildCourseUrl(['display_file'])),
+                "post_attachment" => ForumUtils::getForumAttachments(
+                    $current_post['id'],
+                    $current_post['thread_id'],
+                    $this->core->getQueries()->getForumAttachments($current_post['id'], $post['version_id']),
+                    $this->core->getConfig()->getCoursePath(),
+                    $this->core->buildCourseUrl(['display_file'])
+                ),
                 "edit_id" => $post_id . "-" . $edit_id,
             ]);
             $_post['post_time'] = DateUtils::parseDateTime($post['edit_timestamp'], $this->core->getConfig()->getTimezone())->format("n/j g:i A");
@@ -1174,7 +1214,13 @@ class ForumController extends AbstractController {
             $_post['content'] = $this->core->getOutput()->renderTwigTemplate("forum/RenderPost.twig", [
                 "post_content" => $current_post["content"],
                 "render_markdown" => false,
-                "post_attachment" => ForumUtils::getForumAttachments($current_post['id'], $current_post['thread_id'], $this->core->getQueries()->getForumAttachments($current_post['id']), $this->core->getConfig()->getCoursePath(), $this->core->buildCourseUrl(['display_file'])),
+                "post_attachment" => ForumUtils::getForumAttachments(
+                    $current_post['id'],
+                    $current_post['thread_id'],
+                    $this->core->getQueries()->getForumAttachments($current_post['id']),
+                    $this->core->getConfig()->getCoursePath(),
+                    $this->core->buildCourseUrl(['display_file'])
+                ),
                 "edit_id" => $post_id . "-" . $edit_id,
             ]);
             $_post['post_time'] = DateUtils::parseDateTime($current_post['timestamp'], $this->core->getConfig()->getTimezone())->format("n/j g:i A");

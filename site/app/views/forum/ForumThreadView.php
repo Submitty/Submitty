@@ -897,7 +897,13 @@ class ForumThreadView extends AbstractView {
                 "current_user_posted" => $thread["current_user_posted"]
             ];
 
-            $post_attachment = ForumUtils::getForumAttachments($first_post['id'], $thread['id'], $this->core->getQueries()->getForumAttachments($first_post['id']), $this->core->getConfig()->getCoursePath(), $this->core->buildCourseUrl(['display_file']));
+            $post_attachment = ForumUtils::getForumAttachments(
+                $first_post['id'],
+                $thread['id'],
+                $this->core->getQueries()->getForumAttachments($first_post['id']),
+                $this->core->getConfig()->getCoursePath(),
+                $this->core->buildCourseUrl(['display_file'])
+            );
 
             if ($is_full_page) {
                 $user_info = $this->core->getQueries()->getDisplayUserInfoFromUserId($first_post["author_user_id"]);
@@ -1160,7 +1166,13 @@ class ForumThreadView extends AbstractView {
             ];
         }
 
-        $post_attachment = ForumUtils::getForumAttachments($post_id, $thread_id, $this->core->getQueries()->getForumAttachments($post_id), $this->core->getConfig()->getCoursePath(), $this->core->buildCourseUrl(['display_file']));
+        $post_attachment = ForumUtils::getForumAttachments(
+            $post_id,
+            $thread_id,
+            $this->core->getQueries()->getForumAttachments($post_id),
+            $this->core->getConfig()->getCoursePath(),
+            $this->core->buildCourseUrl(['display_file'])
+        );
 
         $post_box_id = 1;
         if ($this->core->getQueries()->isThreadLocked($thread_id) != 1 || $this->core->getUser()->accessFullGrading()) {

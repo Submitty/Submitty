@@ -170,8 +170,8 @@
         {% endif %}
     {% endif %}
     {% if post_attachment.params is defined %}
-    <div class="display-existing-attachments", id = "display-attachments-{{ post_id }}">
-        <table class="file-upload-table", align="left">
+    <div class="display-existing-attachments" id = "display-attachments-{{ post_id }}">
+        <table class="file-upload-table" align="left">
             <thead>
                 <tr>
                     <th>Attached Images</th>
@@ -182,11 +182,11 @@
                 {% if row[2] is defined %}
                 <tr>
                     <td>
-                        <img src="{{ row[0] }}", class="thumbnail", alt="{{ row[2] }}"/>
+                        <img src="{{ row[0] }}" class="thumbnail" alt="{{ row[2] }}"/>
                     <td/>
                     <td class="display-attachment-name">{{ row[2] }}<td/>
                     <td class="file-trash">
-                        <a class="btn btn-default", onclick="markForDeletion(this)", name="delete_{{ row[2] }}">Delete<a/>
+                        <a class="btn btn-default" onclick="markForDeletion(this)" name="delete_{{ row[2] }}">Delete<a/>
                     <td/>
                 <tr/>
                 {% endif %}

@@ -1283,6 +1283,9 @@ function modifyThreadList(currentThreadId, currentCategoriesId, course, loadFirs
 // eslint-disable-next-line no-unused-vars
 function displayHistoryAttachment(edit_id) {
     $(`#history-table-${edit_id}`).toggle();
+    $(`#history-table-${edit_id}`).find('.attachment-name-history').each(function () {
+        $(this).text(decodeURIComponent($(this).text()));
+    });
 }
 
 // eslint-disable-next-line no-unused-vars

@@ -445,6 +445,11 @@
     float: right;
 }
 
+.history-buffer {
+    margin-bottom:3px;
+    margin-top:1.5em;
+}
+
 /* stylelint-disable-next-line selector-id-pattern */
 #merge_thread_parent {
     width: 200px;
