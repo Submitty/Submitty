@@ -5310,16 +5310,27 @@ AND gc_id IN (
     /**
      * Queues emails for all given recipients to be sent by email job
      *
-     * @param array $flattened_params array of params
+     * @param array $flattened_params An array of email information.
+     *  Rather than being a 2D array, each email information comes one after another
+     *  in a 1D array.
+     *  The order of the information for each email is:
+     *      Email subject
+     *      Email body
+     *      Time email was created
+     *      User_id of the email's reciever (if Submitty user)
+     *      Name of the email's reciever (if non Submitty user)
+     *      Email address of reciever
+     *      Term email is being sent
+     *      Course email belongs to
      * @param int   $email_count
      */
     public function insertEmails(array $flattened_params, int $email_count) {
         // PDO Placeholders
-        $row_string = "(?, ?, current_timestamp, ?, ?, ?, ?)";
+        $row_string = "(?, ?, current_timestamp, ?, ?, ?, ?, ?)";
         $value_param_string = implode(', ', array_fill(0, $email_count, $row_string));
         $this->submitty_db->query(
             "
-            INSERT INTO emails(subject, body, created, user_id, email_address, term, course)
+            INSERT INTO emails(subject, body, created, user_id, to_name, email_address, term, course)
             VALUES " . $value_param_string,
             $flattened_params
         );
