@@ -1690,10 +1690,9 @@ WHERE term=? AND course=? AND user_id=?",
             }
         }
 
-        $row = $cache[$user_id];
-
+        $row = null;
         // If cache doesn't exist, generate it and query again
-        if (empty($row)) {
+        if (!array_key_exists($user_id, $cache) || empty($cache[$user_id])) {
             $params = [$user_id, $g_id];
             $query = "SELECT * FROM late_day_cache
                     WHERE user_id=?
@@ -1703,7 +1702,7 @@ WHERE term=? AND course=? AND user_id=?",
             $row = $this->course_db->row();
             $cache[$user_id] = $row;
         }
-
+        $row = $cache[$user_id];
         // If cache still doesn't exist, the gradeable is not associated with
         // LateDays OR there has been a computation error
         if (empty($row)) {
