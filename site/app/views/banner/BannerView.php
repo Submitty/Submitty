@@ -6,8 +6,16 @@ namespace app\views\banner;
 
 use app\libraries\FileUtils;
 use app\views\AbstractView;
+use app\entities\banner\BannerImage;
 
 class BannerView extends AbstractView {
+    /**
+     * This function shows a calendar with arbitrary items. It first shows a calendar view that list all items on
+     * @param array<BannerImage> $bannerImages
+     * @return string
+     * calendar by their given date. Then it shows a series of tables to list all items.
+     *
+     */
     public function showEventBanners(array $communityEventImages): string {
         $this->core->getOutput()->addInternalCss(FileUtils::joinPaths('fileinput.css'));
 
