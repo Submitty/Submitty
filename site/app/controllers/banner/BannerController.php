@@ -24,7 +24,7 @@ class BannerController extends AbstractController {
      * @see BannerView::showEventBanners
      */
     public function viewCommunityEvents(): WebResponse {
-        $communityEventBanners = $this->core->getSubmittyEntityManager()->getRepository(BannerImage::class) ->findall();
+        $communityEventBanners = $this->core->getSubmittyEntityManager()->getRepository(BannerImage::class) ->findAll();
         return new WebResponse(BannerView::class, 'showEventBanners', $communityEventBanners);
     }
 
@@ -49,7 +49,7 @@ class BannerController extends AbstractController {
         else {
             return JsonResponse::getErrorResponse("No release date.");
         }
-        if (!isset($_FILES["files1"]) || empty($_FILES["files1"])) {
+        if (!isset($_FILES["files1"]) || $_FILES["files1"] === []) {
             return JsonResponse::getErrorResponse("No files were submitted.");
         }
 
@@ -62,7 +62,7 @@ class BannerController extends AbstractController {
             return JsonResponse::getErrorResponse("invalid name");
         }
 
-        if (empty($extra_name) !== false) {
+        if ($extra_name === "") {
             if ($count_item !== 1) {
                 return JsonResponse::getErrorResponse("You can only have one banner submitted.");
             }
@@ -74,6 +74,7 @@ class BannerController extends AbstractController {
         }
 
 
+        $headers = false;
         if ($link_name != "") {
             $headers = @get_headers($link_name);
         }
@@ -180,7 +181,7 @@ class BannerController extends AbstractController {
         $event_repository = $entity_manager->getRepository(BannerImage::class);
 
         $event_items = $event_repository->findBy(['name' => $_POST['name'] ]);
-        if (empty($event_items)) {
+        if (count($event_items) === 0) {
             $error_message = "Banner item with name '" . $_POST['name'] . "' not found in the database.";
             return JsonResponse::getErrorResponse($error_message);
         }
