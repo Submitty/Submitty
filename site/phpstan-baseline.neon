@@ -12349,3 +12349,8 @@ parameters:
 			message: "#^Function exception_handler\\(\\) has no return type specified\\.$#"
 			count: 1
 			path: public/index.php
+			
+		-
+			message: "#^Offset int\\<1, max\\> does not exist on non\\-empty\\-array\\<0, \\(float\\|int\\)\\>\\.$#"
+			count: 2
+			path: app/controllers/forum/ForumController.php
