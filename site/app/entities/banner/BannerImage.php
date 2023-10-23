@@ -18,28 +18,28 @@ class BannerImage {
     #[ORM\Id]
     #[ORM\Column(type: Types::INTEGER)]
     #[ORM\GeneratedValue(strategy: "AUTO")]
-    protected $id;
+    protected int $id;
 
     #[ORM\Column(type: Types::DATETIME_MUTABLE, precision: 6)]
-    protected $release_date;
+    protected \DateTime $release_date;
 
     #[ORM\Column(type: Types::DATETIME_MUTABLE, precision: 6)]
-    protected $closing_date;
+    protected \DateTime $closing_date;
 
     #[ORM\Column(type: Types::STRING)]
-    protected $name;
+    protected string $name;
 
     #[ORM\Column(type: Types::STRING)]
-    protected $folder_name;
+    protected string $folder_name;
 
     #[ORM\Column(type: Types::STRING)]
-    protected $path_date;
+    protected string $path_date;
 
     #[ORM\Column(type: Types::STRING)]
-    protected $extra_info;
+    protected string $extra_info;
 
     #[ORM\Column(type: Types::STRING)]
-    protected $link_name;
+    protected string $link_name;
 
 
 
