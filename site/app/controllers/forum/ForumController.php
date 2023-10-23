@@ -567,7 +567,13 @@ class ForumController extends AbstractController {
                 $place = array_search($post_id, $order_array);
                 $reply_level = $reply_level_array[$place];
                 $max_post_box_id = count($posts);
-                $this->sendSocketMessage(['type' => 'new_post', 'thread_id' => $thread_id, 'post_id' => $post_id, 'reply_level' => $reply_level, 'post_box_id' => $max_post_box_id]);
+                $this->sendSocketMessage([
+                    'type' => 'new_post',
+                    'thread_id' => $thread_id,
+                    'post_id' => $post_id,
+                    'reply_level' => $reply_level,
+                    'post_box_id' => $max_post_box_id
+                ]);
             }
         }
         return $this->core->getOutput()->renderJsonSuccess($result);
@@ -800,12 +806,24 @@ class ForumController extends AbstractController {
                 $reply_level = $reply_level_array[$place];
                 $post_box_id = 1;
 
-                $this->sendSocketMessage(['type' => 'edit_post', 'thread_id' => $thread_id, 'post_id' => $post_id, 'reply_level' => $reply_level, 'post_box_id' => $post_box_id]);
+                $this->sendSocketMessage([
+                    'type' => 'edit_post',
+                    'thread_id' => $thread_id,
+                    'post_id' => $post_id,
+                    'reply_level' => $reply_level,
+                    'post_box_id' => $post_box_id,
+                ]);
             }
             elseif ($type == 'Thread and Post') {
                 $reply_level = 1;
                 $post_box_id = 1;
-                $this->sendSocketMessage(['type' => 'edit_thread', 'thread_id' => $thread_id, 'post_id' => $post_id, 'reply_level' => $reply_level, 'post_box_id' => $post_box_id]);
+                $this->sendSocketMessage([
+                    'type' => 'edit_thread',
+                    'thread_id' => $thread_id,
+                    'post_id' => $post_id,
+                    'reply_level' => $reply_level,
+                    'post_box_id' => $post_box_id,
+                ]);
             }
             return $this->core->getOutput()->renderJsonSuccess(['type' => $type]);
         }
