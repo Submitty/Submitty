@@ -3,7 +3,7 @@ import pwd
 import grp
 
 
-def user_exists(user):
+def user_exists(user) -> bool:
     """
     Checks to see if the user exists on the linux file system. We can use this to delete a user
     so that we can recreate them which avoids users having left over data from a previous run of
@@ -18,7 +18,7 @@ def user_exists(user):
         return False
 
 
-def group_exists(group):
+def group_exists(group) -> bool:
     """
     Checks to see if the group exists on the linux file system so that we don't try to create
     groups that already exist.

@@ -443,12 +443,21 @@ def prepare_job(
 
     # log completion of job preparation
     obj = packer_unpacker.load_queue_file_obj(config, JOB_ID, next_directory, next_to_grade)
+
+    # REMOVE THIS After a few patches as this ensures backwards compatibility
+    term_or_semester = None
+    if "term" in obj:
+        term_or_semester = "term"
+    else:
+        config.logger.log_message("Generated config file is using 'semester' instead of 'term'")
+        term_or_semester = "semester"
+
     if "generate_output" not in obj:
         partial_path = os.path.join(obj["gradeable"], obj["who"], str(obj["version"]))
-        item_name = os.path.join(obj["semester"], obj["course"], "submissions", partial_path)
+        item_name = os.path.join(obj[term_or_semester], obj["course"], "submissions", partial_path)
     elif obj["generate_output"]:
         item_name = os.path.join(
-            obj["semester"], obj["course"], "generated_output", obj["gradeable"]
+            obj[term_or_semester], obj["course"], "generated_output", obj["gradeable"]
         )
     is_batch = "regrade" in obj and obj["regrade"]
     config.logger.log_message(
@@ -478,11 +487,20 @@ def unpack_job(
 
     # Grab the path to this assignment for logging purposes
     obj = packer_unpacker.load_queue_file_obj(config, JOB_ID, next_directory, next_to_grade)
+
+    # REMOVE THIS After a few patches as this ensures backwards compatibility
+    term_or_semester = None
+    if "term" in obj:
+        term_or_semester = "term"
+    else:
+        config.logger.log_message("Generated config file is using 'semester' instead of 'term'")
+        term_or_semester = "semester"
+
     if "generate_output" not in obj:
         partial_path = os.path.join(obj["gradeable"], obj["who"], str(obj["version"]))
-        item_name = os.path.join(obj["semester"], obj["course"], "submissions", partial_path)
+        item_name = os.path.join(obj[term_or_semester], obj["course"], "submissions", partial_path)
     elif obj["generate_output"]:
-        item_name = os.path.join(obj["semester"], obj["course"], "generated_output")
+        item_name = os.path.join(obj[term_or_semester], obj["course"], "generated_output")
     is_batch = "regrade" in obj and obj["regrade"]
 
     # Address is either localhost or a string of the form user@host
@@ -800,11 +818,19 @@ def checkout_vcs_repo(config, my_file):
     with open(my_file, 'r') as infile:
         obj = json.load(infile)
 
+    # REMOVE THIS After a few patches as this ensures backwards compatibility
+    term_or_semester = None
+    if "term" in obj:
+        term_or_semester = "term"
+    else:
+        config.logger.log_message("Generated config file is using 'semester' instead of 'term'")
+        term_or_semester = "semester"
+
     partial_path = os.path.join(obj["gradeable"], obj["who"], str(obj["version"]))
     course_dir = os.path.join(
         config.submitty['submitty_data_dir'],
         "courses",
-        obj["semester"],
+        obj[term_or_semester],
         obj["course"]
     )
     checkout_path = os.path.join(course_dir, "checkout", partial_path)
@@ -824,7 +850,7 @@ def checkout_vcs_repo(config, my_file):
     vcs_info = packer_unpacker.get_vcs_info(
         config,
         config.submitty['submitty_data_dir'],
-        obj["semester"], obj["course"], obj["gradeable"], obj["who"], obj["team"]
+        obj[term_or_semester], obj["course"], obj["gradeable"], obj["who"], obj["team"]
     )
     (is_vcs, vcs_type, vcs_base_url, vcs_partial_path,
      using_subdirectory, vcs_subdirectory) = vcs_info
@@ -1365,15 +1391,24 @@ def try_short_circuit(config: dict, queue_file: str) -> bool:
     will return False, signaling to the caller that this job should be graded
     normally.
     """
+
     with open(queue_file) as fd:
         queue_obj = json.load(fd)
 
-    gradeable_id = f"{queue_obj['semester']}/{queue_obj['course']}/{queue_obj['gradeable']}"
+    # REMOVE THIS After a few patches as this ensures backwards compatibility
+    term_or_semester = None
+    if "term" in queue_obj:
+        term_or_semester = "term"
+    else:
+        config.logger.log_message("Generated config file is using 'semester' instead of 'term'")
+        term_or_semester = "semester"
+
+    gradeable_id = f"{queue_obj[term_or_semester]}/{queue_obj['course']}/{queue_obj['gradeable']}"
 
     course_path = os.path.join(
         config.submitty['submitty_data_dir'],
         'courses',
-        queue_obj['semester'],
+        queue_obj[term_or_semester],
         queue_obj['course']
     )
 

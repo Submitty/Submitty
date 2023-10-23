@@ -5,6 +5,7 @@ namespace app\views\course;
 use app\entities\course\CourseMaterial;
 use app\libraries\FileUtils;
 use app\views\AbstractView;
+use app\libraries\DateUtils;
 
 class CourseMaterialsView extends AbstractView {
     public function listCourseMaterials(array $course_materials_db) {
@@ -26,7 +27,7 @@ class CourseMaterialsView extends AbstractView {
         $folder_ids = [];
         $links = [];
         $base_view_url = $this->core->buildCourseUrl(['course_material']);
-
+        $begining_of_time_date = DateUtils::BEGINING_OF_TIME;
         /** @var CourseMaterial $course_material */
         foreach ($course_materials_db as $course_material) {
             $rel_path = substr($course_material->getPath(), strlen($base_course_material_path) + 1);
@@ -156,7 +157,8 @@ class CourseMaterialsView extends AbstractView {
             "course_materials" => $final_structure,
             "folder_ids" => $folder_ids,
             "links" => $links,
-            "folder_paths" => $folder_paths
+            "folder_paths" => $folder_paths,
+            "begining_of_time_date" => $begining_of_time_date
         ]);
     }
 

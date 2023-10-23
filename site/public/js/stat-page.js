@@ -41,7 +41,7 @@ $(document).ready(() => {
                 $(this).parent().parent().parent().append(`<tr id="${ids[i]}"><td></td><td>${timestamps[i]}</td><td style = "cursor:pointer;" data-type = "thread" data-thread_id="${thread_ids[i]}"><pre class="pre-forum" style="white-space: pre-wrap;">${thread_title}</pre></td><td colspan = "2" style = "cursor:pointer;" align = "left" data-type = "post" data-thread_id="${thread_ids[i]}"><pre class="pre-forum" style="white-space: pre-wrap;">${post_string}</pre></td></tr> `);
             }
             $(this).html('Collapse');
-            $(this).data('action','collapse');
+            $(this).data('action', 'collapse');
             $('td').click(function() {
                 if ($(this).data('type') === 'post' || $(this).data('type') === 'thread') {
                     const id = $(this).data('thread_id');
@@ -56,7 +56,7 @@ $(document).ready(() => {
                 item.remove();
             }
             $(this).html('Expand');
-            $(this).data('action','expand');
+            $(this).data('action', 'expand');
         }
         return false;
     });
