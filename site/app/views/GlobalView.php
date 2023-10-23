@@ -64,10 +64,7 @@ class GlobalView extends AbstractView {
 
 
 
-            $extraFile = "";
-            if (is_file($extraPathName)) {
-                $extraFile = base64_encode(file_get_contents($extraPathName));
-            }
+            $extraFile = base64_encode(file_get_contents($extraPathName));
 
             $images_data_array[] = [
                 "name" => $banner->getName(),

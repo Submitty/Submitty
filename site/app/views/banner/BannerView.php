@@ -10,10 +10,9 @@ use app\entities\banner\BannerImage;
 
 class BannerView extends AbstractView {
     /**
-     * This function shows a calendar with arbitrary items. It first shows a calendar view that list all items on
-     * @param array<BannerImage> $bannerImages
+     * Shows banners
+     * @param array<BannerImage> $communityEventImages
      * @return string
-     * calendar by their given date. Then it shows a series of tables to list all items.
      *
      */
     public function showEventBanners(array $communityEventImages): string {
