@@ -10,7 +10,7 @@ describe('Tests cases abut changing user pronouns', () => {
 
         //type in new pronouns and check display in forum option
         cy.get('button[aria-label="Clear pronoun input"]').click(); //clear input using trash can
-        cy.get('@e').type('They/Them');
+        cy.get('@pronounsInput').type('They/Them');
         cy.get('#pronouns-forum-display').check();
         cy.get('#edit-pronouns-submit').click();
 
