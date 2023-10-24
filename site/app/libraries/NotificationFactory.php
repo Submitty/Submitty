@@ -269,8 +269,8 @@ class NotificationFactory {
             }
         }
         if (!empty($flattened_emails)) {
-            $this->core->getQueries()->insertEmails($flattened_emails, count($flattened_emails) / 6);
+            $this->core->getQueries()->insertEmails($flattened_emails, count($flattened_emails) / 7);
         }
-        return count($flattened_emails) / 6;
+        return count($flattened_emails) / 7;
     }
 }
