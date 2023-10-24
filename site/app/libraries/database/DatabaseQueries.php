@@ -2205,9 +2205,9 @@ ORDER BY {$u_or_t}.{$section_key}",
         $users_or_teams = "users";
         $user_or_team_id = "user_id";
         if ($is_team) {
-           $u_or_t = "t";
-           $users_or_teams = "gradeable_teams";
-           $user_or_team_id = "team_id";
+            $u_or_t = "t";
+            $users_or_teams = "gradeable_teams";
+            $user_or_team_id = "team_id";
         }
         $return = [];
         $params = [$g_id];
@@ -2217,7 +2217,7 @@ ORDER BY {$u_or_t}.{$section_key}",
             $params = array_merge($params, $sections);
         }
         $this->course_db->query(
-           "
+            "
 SELECT {$u_or_t}.{$section_key}, count({$u_or_t}.*) as cnt
 FROM {$users_or_teams} AS {$u_or_t}
 INNER JOIN (
@@ -2231,7 +2231,7 @@ INNER JOIN (
 {$where}
 GROUP BY {$u_or_t}.{$section_key}
 ORDER BY {$u_or_t}.{$section_key}",
-           $params
+            $params
         );
         foreach ($this->course_db->rows() as $row) {
             if ($row[$section_key] === null) {
