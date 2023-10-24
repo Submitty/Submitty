@@ -13,7 +13,11 @@ use Symfony\Component\Routing\Annotation\Route;
 use app\entities\banner\BannerImage;
 use app\libraries\DateUtils;
 use app\libraries\FileUtils;
+use app\libraries\routers\AccessControl;
 
+/**
+ * @AccessControl(level="SUPERUSER")
+ */
 class BannerController extends AbstractController {
     /**
      *

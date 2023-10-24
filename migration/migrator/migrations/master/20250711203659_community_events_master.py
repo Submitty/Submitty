@@ -37,11 +37,12 @@ def up(config, database):
     database.execute(alter_query)
 
 def down(config, database):
-    community_events_dir = Path(config.submitty['submitty_data_dir'], 'community_events')
+    # community_events_dir = Path(config.submitty['submitty_data_dir'], 'community_events')
 
-    if os.path.exists(str(community_events_dir)):
-        # Delete all contents within community_events directory
-        shutil.rmtree(str(community_events_dir))
+    # if os.path.exists(str(community_events_dir)):
+    #     # Delete all contents within community_events directory
+    #     shutil.rmtree(str(community_events_dir))
 
-    query = "DROP TABLE IF EXISTS community_events"
-    database.execute(query)
+    # query = "DROP TABLE IF EXISTS community_events"
+    # database.execute(query)
+    pass
