@@ -1227,7 +1227,6 @@ class ForumThreadView extends AbstractView {
         ];
 
         if ($render) {
-            
             if ($first) {
                 $activeThread = $this->core->getQueries()->getThread($thread_id);
                 $activeThreadTitle = "({$activeThread['id']}) " . $activeThread['title'];
