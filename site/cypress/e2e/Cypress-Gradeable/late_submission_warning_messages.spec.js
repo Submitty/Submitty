@@ -257,46 +257,6 @@ describe('Test warning messages for non team gradeable', () => {
 
 describe('Test warning messages for team gradeable', () => {
 
-    after(() => {
-        //cleanup everything that was added during testing
-        //Disable late submissions for team gradeable
-        cy.login('instructor');
-        cy.visit(['sample', 'gradeable', team_gradeable, 'update?nav_tab=5']);
-        cy.get('#no_late_submission').click();
-        cy.get('#save_status', {timeout:20000}).should('have.text', 'All Changes Saved');
-        //Delete all late days
-        cy.visit(['sample', 'late_days']);
-        const deleteLateDays = () => {
-            cy.get('table').then((table) => {
-                if (table.find('#Delete').length > 0) {
-                    cy.get('#delete-button').click();
-                    cy.get('.alert-success').invoke('text').should('contain', 'Late days entry removed');
-                    cy.get('#remove_popup').click();
-                    deleteLateDays();
-                }
-            });
-        };
-        deleteLateDays();
-        //Delete extensions granted
-        cy.visit(['sample', 'extensions']);
-        cy.get('#gradeable-select').select(team_gradeable);
-        cy.get('body').then((body) => {
-            if (body.find('#extensions-table').length > 0) {
-                cy.wrap(body).find('#Delete').first().click();
-                cy.get('#more_extension_popup', {timeout:20000});
-                cy.get('#apply-to-all').click();
-            }
-        });
-        cy.get('.alert-success').invoke('text').should('contain', 'Extensions have been updated');
-        cy.get('#remove_popup').click();
-        cy.get('#gradeable-select').select(gradeable);
-        cy.get('body').then((body) => {
-            if (body.find('#extensions-table').length > 0) {
-                cy.wrap(body).find('#Delete').first().click();
-            }
-        });
-    });
-
     it('should create team gradeable for testing', () => {
         cy.login('instructor');
         cy.visit(['sample', 'gradeable']);
@@ -368,6 +328,45 @@ describe('Test warning messages for team gradeable', () => {
         cy.get('#save_status', {timeout:20000}).should('have.text', 'All Changes Saved');
         cy.logout();
         SubmitAndCheckMessage('team', 'upload_file2', 'both_messages', 'both_messages');
+    });
+
+    it('should cleanup everything that was added during testing', () => {
+        //Disable late submissions for team gradeable
+        cy.login('instructor');
+        cy.visit(['sample', 'gradeable', team_gradeable, 'update?nav_tab=5']);
+        cy.get('#no_late_submission').click();
+        cy.get('#save_status', {timeout:20000}).should('have.text', 'All Changes Saved');
+        //Delete all late days
+        cy.visit(['sample', 'late_days']);
+        const deleteLateDays = () => {
+            cy.get('table').then((table) => {
+                if (table.find('#Delete').length > 0) {
+                    cy.get('#delete-button').click();
+                    cy.get('.alert-success').invoke('text').should('contain', 'Late days entry removed');
+                    cy.get('#remove_popup').click();
+                    deleteLateDays();
+                }
+            });
+        };
+        deleteLateDays();
+        //Delete extensions granted
+        cy.visit(['sample', 'extensions']);
+        cy.get('#gradeable-select').select(team_gradeable);
+        cy.get('body').then((body) => {
+            if (body.find('#extensions-table').length > 0) {
+                cy.wrap(body).find('#Delete').first().click();
+                cy.get('#more_extension_popup', {timeout:20000});
+                cy.get('#apply-to-all').click();
+            }
+        });
+        cy.get('.alert-success').invoke('text').should('contain', 'Extensions have been updated');
+        cy.get('#remove_popup').click();
+        cy.get('#gradeable-select').select(gradeable);
+        cy.get('body').then((body) => {
+            if (body.find('#extensions-table').length > 0) {
+                cy.wrap(body).find('#Delete').first().click();
+            }
+        });
     });
     //TO DO https://github.com/Submitty/Submitty/issues/9549 , Add test case to make sure the bugfix worked
 });
