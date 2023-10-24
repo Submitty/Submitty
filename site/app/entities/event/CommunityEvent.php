@@ -2,19 +2,19 @@
 
 declare(strict_types=1);
 
-namespace app\entities\banner;
+namespace app\entities\event;
 
-use app\repositories\banner\BannerImageRepository;
+use app\repositories\event\CommunityEventRepository;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
 
 /**
- * Class BannerImage
+ * Class CommunityEvent
  * @package app\entities
  */
-#[ORM\Entity(repositoryClass: BannerImageRepository::class)]
+#[ORM\Entity(repositoryClass: CommunityEventRepository::class)]
 #[ORM\Table(name: "community_events")]
-class BannerImage {
+class CommunityEvent {
     #[ORM\Id]
     #[ORM\Column(type: Types::INTEGER)]
     #[ORM\GeneratedValue(strategy: "AUTO")]

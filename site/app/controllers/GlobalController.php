@@ -6,8 +6,8 @@ use app\libraries\FileUtils;
 use app\models\Button;
 use app\models\NavButton;
 use app\models\User;
-use app\entities\banner\BannerImage;
-use app\repositories\banner\BannerImageRepository;
+use app\entities\event\CommunityEvent;
+use app\repositories\event\CommunityEventRepository;
 
 class GlobalController extends AbstractController {
     public function header() {
