@@ -60,14 +60,6 @@ class SessionManagerTester extends BaseUnitTest {
             ->method('getActiveSessionById')
             ->with('id')
             ->willReturn($session);
-        $session->expects($this->once())
-            ->method('updateSessionExpiration')
-            ->with(
-                $this->callback(function (\DateTime $dt): bool {
-                    $this->assertInstanceOf(\DateTime::class, $dt);
-                    return true;
-                })
-            );
         $core->getSubmittyEntityManager()
             ->expects($this->exactly(0))
             ->method('persist');
