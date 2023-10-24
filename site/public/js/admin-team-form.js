@@ -9,7 +9,7 @@ function adminTeamForm(new_team, who_id, reg_section, rot_section, user_assignme
     captureTabInModal('admin-team-form');
 
     form.find('.form-body').scrollTop(0);
-    $('#admin-team-form-submit').prop('disabled',false);
+    $('#admin-team-form-submit').prop('disabled', false);
     $('[name="new_team"]', form).val(new_team);
     $(`[name="reg_section"] option[value="${reg_section}"]`, form).prop('selected', true);
     $(`[name="rot_section"] option[value="${rot_section}"]`, form).prop('selected', true);
@@ -157,7 +157,7 @@ function adminTeamForm(new_team, who_id, reg_section, rot_section, user_assignme
         }
     }
 
-    $(':text',form).change(function() {
+    $(':text', form).change(function() {
         if ($(this)[0].id === 'admin-team-name-form') {
             return;
         }
