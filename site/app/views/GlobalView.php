@@ -3,11 +3,11 @@
 namespace app\views;
 
 use app\libraries\FileUtils;
-use app\entities\event\CommunityEvent;
+use app\entities\banner\BannerImage;
 
 class GlobalView extends AbstractView {
     /**
-     * @param array<CommunityEvent> $eventBannerImages
+     * @param array<BannerImage> $eventBannerImages
      */
     public function header($breadcrumbs, $wrapper_urls, $sidebar_buttons, $notifications_info, $css, $js, $duck_img, $page_name, $content_only, array $eventBannerImages) {
         $messages = [];

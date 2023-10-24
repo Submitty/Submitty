@@ -2,30 +2,30 @@
 
 declare(strict_types=1);
 
-namespace app\controllers\event;
+namespace app\controllers\banner;
 
 use app\controllers\AbstractController;
 use app\controllers\GlobalController;
 use app\libraries\response\JsonResponse;
 use app\libraries\response\WebResponse;
-use app\views\event\EventView;
+use app\views\banner\BannerView;
 use Symfony\Component\Routing\Annotation\Route;
-use app\entities\event\CommunityEvent;
+use app\entities\banner\BannerImage;
 use app\libraries\DateUtils;
 use app\libraries\FileUtils;
 
-class EventController extends AbstractController {
+class BannerController extends AbstractController {
     /**
      *
      * @Route("/banner")
      *
      * @return WebResponse
      * @see GlobalController::prep_user_sidebar
-     * @see EventView::showEventBanners
+     * @see BannerView::showEventBanners
      */
     public function viewCommunityEvents(): WebResponse {
-        $communityEventBanners = $this->core->getSubmittyEntityManager()->getRepository(CommunityEvent::class) ->findAll();
-        return new WebResponse(EventView::class, 'showEventBanners', $communityEventBanners);
+        $communityEventBanners = $this->core->getSubmittyEntityManager()->getRepository(BannerImage::class) ->findAll();
+        return new WebResponse(BannerView::class, 'showEventBanners', $communityEventBanners);
     }
 
 
@@ -155,7 +155,7 @@ class EventController extends AbstractController {
             if ($all_match) {
                 continue;
             }
-            $community_event_image = new CommunityEvent(
+            $community_event_image = new BannerImage(
                 $specificPath,
                 $actual_banner_name,
                 $extra_name,
@@ -178,7 +178,7 @@ class EventController extends AbstractController {
 
         $entity_manager = $this->core->getSubmittyEntityManager();
 
-        $event_repository = $entity_manager->getRepository(CommunityEvent::class);
+        $event_repository = $entity_manager->getRepository(BannerImage::class);
 
         $event_items = $event_repository->findBy(['name' => $_POST['name'] ]);
         if (count($event_items) === 0) {

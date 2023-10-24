@@ -2,16 +2,16 @@
 
 declare(strict_types=1);
 
-namespace app\views\event;
+namespace app\views\banner;
 
 use app\libraries\FileUtils;
 use app\views\AbstractView;
-use app\entities\event\CommunityEvent;
+use app\entities\banner\BannerImage;
 
-class EventView extends AbstractView {
+class BannerView extends AbstractView {
     /**
      * Shows banners
-     * @param array<CommunityEvent> $communityEventImages
+     * @param array<BannerImage> $communityEventImages
      * @return string
      *
      */
@@ -25,7 +25,7 @@ class EventView extends AbstractView {
 
         $this->core->getOutput()->addInternalJs("drag-and-drop.js");
 
-        return $this->core->getOutput()->renderTwigTemplate("event/Banner.twig", [
+        return $this->core->getOutput()->renderTwigTemplate("banner/Banner.twig", [
             "csrf_token" => $this->core->getCsrfToken(),
             "banners" => $communityEventImages,
 
