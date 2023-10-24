@@ -82,7 +82,7 @@ class SessionManagerTester extends BaseUnitTest {
             ->expects($this->once())
             ->method('remove');
         $core->getSubmittyEntityManager()
-            ->expects($this->exactly(2))
+            ->expects($this->once())
             ->method('flush');
         $manager = new SessionManager($core);
         $this->assertEquals('test', $manager->getSession('id'));
