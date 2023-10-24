@@ -37,7 +37,7 @@ export function sortTable(n, dir) {
         const mid = Math.floor(arr.length/2);
         const left = mergeSort(arr.slice(0, mid));
         const right = mergeSort(arr.slice(mid));
-        const res = merge(left,right);
+        const res = merge(left, right);
         return res;
     };
     const rows = table.rows;
