@@ -833,7 +833,8 @@ HTML;
             $message = 'Notice: You are not assigned to grade any students for this gradeable.';
         }
         if ($inquiry_status) {
-            $message .= ($message === "") ? "Notice: You are viewing students with active grade inquiry." : "\nNotice: You are viewing students with active grade inquiry.";
+            $notice = "Notice: You are viewing students with active grade inquiries.";
+            $message .= ($message === "") ? $notice : "\n" . $notice;
             $message_warning = true;
         }
 

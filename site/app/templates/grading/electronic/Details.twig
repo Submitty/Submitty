@@ -65,18 +65,17 @@
             status = Cookies.get('inquiry_status')
             if (status === 'on') {
                 $('[data-testid=grade-button]').each(function() {
-                    const hasGradeInquiry = typeof $(this).attr('data-grade-inquiry') !== 'undefined';
-                    if (!hasGradeInquiry) {
+                    if (typeof $(this).attr('data-grade-inquiry') === 'undefined') {
                         $(this).closest('[data-testid="grade-table"]').hide();  // hide gradeable items without active inquiries
                     }
                 });
-                button.innerHTML = "Grade Inquiry Only: On";
+                button.textContent = "Grade Inquiry Only: On";
             } 
             else {
                 $('[data-testid=grade-button]').each(function() {
                         $(this).closest('[data-testid="grade-table"]').show();  // show all gradeable items
                     });
-                    button.innerHTML = "Grade Inquiry Only: Off";
+                    button.textContent = "Grade Inquiry Only: Off";
             }
         }
     </script>
@@ -790,12 +789,12 @@
             Cookies.set('inquiry_status', 'on');
             var inquiry = Cookies.get('inquiry_status');
             grade_inquiry_only();
-            button.innerHTML = "Grade Inquiry Only: On";
+            button.textContent = "Grade Inquiry Only: On";
         } else {
             Cookies.set('inquiry_status', 'off');
             var inquiry = Cookies.get('inquiry_status');
             reverse_inquiry_only();
-            button.innerHTML = "Grade Inquiry Only: Off";
+            button.textContent = "Grade Inquiry Only: Off";
         }
     }
 
