@@ -78,8 +78,8 @@ class UsersController extends AbstractController {
         }
         else {
             //Expires 10 years from today (functionally indefinite)
-            if (setcookie('active_student_columns', implode('-', array_fill(0, 17, true)), time() + (10 * 365 * 24 * 60 * 60))) {
-                $active_student_columns = implode('-', array_fill(0, 17, true));
+            if (setcookie('active_student_columns', implode('-', array_merge(array_fill(0, 12, true), array_fill(0, 5, false))), time() + (10 * 365 * 24 * 60 * 60))) {
+                $active_student_columns = implode('-', array_merge(array_fill(0, 12, true), array_fill(0, 5, false)));
             }
         }
 
