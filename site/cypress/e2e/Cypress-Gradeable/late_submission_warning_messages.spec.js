@@ -57,7 +57,7 @@ const giveExtentions = (gradeable_name) => {
         .contains('Submit')
         .click();
     if (gradeable_name.includes('_team')) {
-        cy.get('#more_extension_popup',{timeout:20000});
+        cy.get('#more_extension_popup', {timeout:20000});
         cy.get('#apply-to-all').click();
     }
 };
@@ -73,10 +73,10 @@ const SubmitAndCheckMessage = (gradeable_type, upload_file1, invalid_late_day, v
         cy.visit(['sample', 'gradeable', team_gradeable]);
     }
     if (upload_file1 === 'upload_file1') {
-        cy.get('#upload1').selectFile('cypress/fixtures/file1.txt',{action: 'drag-drop'});
+        cy.get('#upload1').selectFile('cypress/fixtures/file1.txt', {action: 'drag-drop'});
     }
 
-    cy.get('#upload1').selectFile('cypress/fixtures/file2.txt',{action: 'drag-drop'});
+    cy.get('#upload1').selectFile('cypress/fixtures/file2.txt', {action: 'drag-drop'});
     cy.get('#gradeable-time-remaining-text', {timeout:20000}).should('have.text', 'Gradeable Time Remaining: Past Due');
     const team_warning_messages = [
         'Your submission will be 4 day(s) late. Are you sure you want to use 3 late day(s)?',
@@ -166,7 +166,7 @@ describe('Test warning messages for non team gradeable', () => {
         cy.visit(['sample', 'gradeable', gradeable, 'update?nav_tab=5']);
         cy.get('#late_days')
             .clear()
-            .type(1,{force: true})
+            .type(1, {force: true})
             .type('{enter}');
         cy.get('#save_status', {timeout:20000}).should('have.text', 'All Changes Saved');
         cy.get('#date_due')
@@ -181,7 +181,7 @@ describe('Test warning messages for non team gradeable', () => {
     it('should show a confirmation message before late submission', () => {
         //1 allowed late day and 1 remaining late day for student ==> Confirmation message
         cy.login('instructor');
-        giveLateDays(getCurrentTime(),'student');
+        giveLateDays(getCurrentTime(), 'student');
         cy.visit(['sample', 'gradeable', gradeable, 'update?nav_tab=5']);
         cy.get('#date_due')
             .clear()
@@ -221,7 +221,7 @@ describe('Test warning messages for non team gradeable', () => {
         cy.login('instructor');
         giveExtentions(gradeable);
         giveLateDays(getCurrentTime('threeDaysAgo'), 'student'); //Give valid late days (the current ones are after the original due date)
-        cy.visit(['sample', 'gradeable',gradeable,'update?nav_tab=5']);
+        cy.visit(['sample', 'gradeable', gradeable, 'update?nav_tab=5']);
         cy.get('#late_days')
             .clear()
             .type(3)
@@ -264,7 +264,7 @@ describe('Test warning messages for team gradeable', () => {
         cy.get('#g_title').type(team_gradeable);
         cy.get('#g_id').type(team_gradeable);
         cy.get('#radio_ef_student_upload').check().click();
-        cy.get('#team_yes_radio',{timeout:20000}).check().click();
+        cy.get('#team_yes_radio', {timeout:20000}).check().click();
         // Create Gradeable
         cy.get('#create-gradeable-btn').click();
 
@@ -303,8 +303,8 @@ describe('Test warning messages for team gradeable', () => {
         //The first submission will be done 2 days after the due date and use 2 valid late days for each team member
         cy.login('instructor');
         giveExtentions(team_gradeable);
-        giveLateDays(getCurrentTime('threeDaysAgo'),'student',3); //this is important for part 2/2
-        giveLateDays(getCurrentTime('threeDaysAgo'),'aphacker',2);
+        giveLateDays(getCurrentTime('threeDaysAgo'), 'student', 3); //this is important for part 2/2
+        giveLateDays(getCurrentTime('threeDaysAgo'), 'aphacker', 2);
         cy.visit(['sample', 'gradeable', team_gradeable, 'update?nav_tab=5']);
         cy.get('#date_due')
             .clear()
@@ -354,7 +354,7 @@ describe('Test warning messages for team gradeable', () => {
         cy.get('body').then((body) => {
             if (body.find('#extensions-table').length > 0) {
                 cy.wrap(body).find('#Delete').first().click();
-                cy.get('#more_extension_popup',{timeout:20000});
+                cy.get('#more_extension_popup', {timeout:20000});
                 cy.get('#apply-to-all').click();
             }
         });
