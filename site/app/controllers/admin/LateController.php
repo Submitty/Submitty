@@ -341,9 +341,9 @@ class LateController extends AbstractController {
                 "error" => "Invalid mimetype, must start with 'text/', got '{$mime_type}'"
             ];
         }
-        ini_set("auto_detect_line_endings", true);
+        $context = stream_context_create(['file' => ['eol' => "\n"]]);
 
-        $rows = file($csv_file, FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES);
+        $rows = file($csv_file, FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES, $context);
         if ($rows === false) {
             $data = null;
             return [
