@@ -1766,8 +1766,8 @@ function deletePostToggle(isDeletion, thread_id, post_id, author, time, csrf_tok
                 }
                 catch (err) {
                     // eslint-disable-next-line no-undef
-                    displayErrorMessage('Error parsing data. Please try again').
-                        return;
+                    displayErrorMessage('Error parsing data. Please try again');
+                    return;
                 }
                 if (json['status'] === 'fail') {
                     // eslint-disable-next-line no-undef
