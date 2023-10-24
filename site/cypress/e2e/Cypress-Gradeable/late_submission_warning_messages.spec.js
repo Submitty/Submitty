@@ -36,7 +36,7 @@ const team_gradeable = `${gradeable}_team`;
 const giveLateDays = (timestamp, student_id, late_days = 2) => {
     //Give a student a specific number of late days
     cy.login('instructor');
-    cy.visit(['sample', 'late_days']);
+    cy.visit(['blank', 'late_days']);
     cy.get('#user_id').type(student_id);
     cy.get('#datestamp').type(timestamp, {force: true});
     cy.get('#user_id').click();
@@ -48,7 +48,7 @@ const giveLateDays = (timestamp, student_id, late_days = 2) => {
 const giveExtentions = (gradeable_name) => {
     //Grant an extention to the student
     cy.login('instructor');
-    cy.visit(['sample', 'extensions']);
+    cy.visit(['blank', 'extensions']);
     cy.get('#gradeable-select').select(gradeable_name);
     cy.get('#user_id').type('student');
     cy.get('#late-days').clear().type(1, {force: true});
@@ -67,10 +67,10 @@ const SubmitAndCheckMessage = (gradeable_type, upload_file1, invalid_late_day, v
 
     cy.login('student');
     if ( gradeable_type === 'non_team') {
-        cy.visit(['sample', 'gradeable', gradeable]);
+        cy.visit(['blank', 'gradeable', gradeable]);
     }
     else {
-        cy.visit(['sample', 'gradeable', team_gradeable]);
+        cy.visit(['blank', 'gradeable', team_gradeable]);
     }
     if (upload_file1 === 'upload_file1') {
         cy.get('#upload1').selectFile('cypress/fixtures/file1.txt',{action: 'drag-drop'});
@@ -122,7 +122,7 @@ describe('Test warning messages for non team gradeable', () => {
 
     it('should create non-team gradeable for testing', () => {
         cy.login('instructor');
-        cy.visit(['sample', 'gradeable']);
+        cy.visit(['blank', 'gradeable']);
         // Enter gradeable info
         cy.get('#g_title').type(gradeable);
         cy.get('#g_id').type(gradeable);
@@ -147,7 +147,7 @@ describe('Test warning messages for non team gradeable', () => {
     it('should show a warning message before late submission', () => {
         //0 allowed late days and 0 remaining late days for student ==> Warning message
         cy.login('instructor');
-        cy.visit(['sample', 'gradeable', gradeable, 'update?nav_tab=5']);
+        cy.visit(['blank', 'gradeable', gradeable, 'update?nav_tab=5']);
         cy.get('#date_due')
             .clear()
             .type(getCurrentTime('few_seconds_future'))
@@ -163,7 +163,7 @@ describe('Test warning messages for non team gradeable', () => {
         below with extentions (3 days in the past test)
         If testing runs for too long, you can remove this test bloc*/
         cy.login('instructor');
-        cy.visit(['sample', 'gradeable', gradeable, 'update?nav_tab=5']);
+        cy.visit(['blank', 'gradeable', gradeable, 'update?nav_tab=5']);
         cy.get('#late_days')
             .clear()
             .type(1,{force: true})
@@ -182,7 +182,7 @@ describe('Test warning messages for non team gradeable', () => {
         //1 allowed late day and 1 remaining late day for student ==> Confirmation message
         cy.login('instructor');
         giveLateDays(getCurrentTime(),'student');
-        cy.visit(['sample', 'gradeable', gradeable, 'update?nav_tab=5']);
+        cy.visit(['blank', 'gradeable', gradeable, 'update?nav_tab=5']);
         cy.get('#date_due')
             .clear()
             .type(getCurrentTime())
@@ -195,7 +195,7 @@ describe('Test warning messages for non team gradeable', () => {
     it('should show a warning message before late submission', () => {
         //0 allowed late day and 1 remaining late day for student ==> Warning message
         cy.login('instructor');
-        cy.visit(['sample', 'gradeable', gradeable, 'update?nav_tab=5']);
+        cy.visit(['blank', 'gradeable', gradeable, 'update?nav_tab=5']);
 
         cy.get('#late_days')
             .clear()
@@ -211,7 +211,7 @@ describe('Test warning messages for non team gradeable', () => {
         cy.logout();
         SubmitAndCheckMessage('non_team', 'upload_file2', 'invalid_1_day_late');
         cy.login('student');
-        cy.visit(['sample', 'gradeable', gradeable]);
+        cy.visit(['blank', 'gradeable', gradeable]);
         cy.get('#do_not_grade').click();
     });
 
@@ -221,7 +221,7 @@ describe('Test warning messages for non team gradeable', () => {
         cy.login('instructor');
         giveExtentions(gradeable);
         giveLateDays(getCurrentTime('threeDaysAgo'), 'student'); //Give valid late days (the current ones are after the original due date)
-        cy.visit(['sample', 'gradeable',gradeable,'update?nav_tab=5']);
+        cy.visit(['blank', 'gradeable',gradeable,'update?nav_tab=5']);
         cy.get('#late_days')
             .clear()
             .type(3)
@@ -240,7 +240,7 @@ describe('Test warning messages for non team gradeable', () => {
         This submission is invalid because the late days remaining are earned at the extention date,
         not the original due date.*/
         cy.login('instructor');
-        cy.visit(['sample', 'gradeable', gradeable, 'update?nav_tab=5']);
+        cy.visit(['blank', 'gradeable', gradeable, 'update?nav_tab=5']);
         cy.get('#date_due')
             .clear()
             .type(getCurrentTime('threeDaysAgo'))
@@ -249,7 +249,7 @@ describe('Test warning messages for non team gradeable', () => {
         cy.logout();
         SubmitAndCheckMessage('non_team', 'upload_file2', 'invalid_4_days_late');
         cy.login('instructor');
-        cy.visit(['sample', 'gradeable', gradeable, 'update?nav_tab=5']);
+        cy.visit(['blank', 'gradeable', gradeable, 'update?nav_tab=5']);
         cy.get('#no_late_submission').click(); //disable late submissions
         cy.get('#save_status', {timeout:20000}).should('have.text', 'All Changes Saved');
     });
@@ -259,7 +259,7 @@ describe('Test warning messages for team gradeable', () => {
 
     it('should create team gradeable for testing', () => {
         cy.login('instructor');
-        cy.visit(['sample', 'gradeable']);
+        cy.visit(['blank', 'gradeable']);
         // Enter gradeable info
         cy.get('#g_title').type(team_gradeable);
         cy.get('#g_id').type(team_gradeable);
@@ -289,12 +289,12 @@ describe('Test warning messages for team gradeable', () => {
         //Create team
         cy.logout();
         cy.login('student');
-        cy.visit(['sample', 'gradeable', team_gradeable, 'team']);
+        cy.visit(['blank', 'gradeable', team_gradeable, 'team']);
         cy.get('#create_new_team').click();
         cy.get('#invite_id').type('aphacker').type('{enter}');
         cy.logout();
         cy.login('aphacker');
-        cy.visit(['sample', 'gradeable', team_gradeable, 'team']);
+        cy.visit(['blank', 'gradeable', team_gradeable, 'team']);
         cy.get('#accept_invitation').click();
     });
 
@@ -305,7 +305,7 @@ describe('Test warning messages for team gradeable', () => {
         giveExtentions(team_gradeable);
         giveLateDays(getCurrentTime('threeDaysAgo'),'student',3); //this is important for part 2/2
         giveLateDays(getCurrentTime('threeDaysAgo'),'aphacker',2);
-        cy.visit(['sample', 'gradeable', team_gradeable, 'update?nav_tab=5']);
+        cy.visit(['blank', 'gradeable', team_gradeable, 'update?nav_tab=5']);
         cy.get('#date_due')
             .clear()
             .type(getCurrentTime('twoDaysAgo'))
@@ -319,7 +319,7 @@ describe('Test warning messages for team gradeable', () => {
         so student will see a confirmation message first. However since aphacker doesn't have enough late days,
         student will see a second warning message saying that aphacker will have a bad submission.*/
         cy.login('instructor');
-        cy.visit(['sample', 'gradeable', team_gradeable, 'update?nav_tab=5']);
+        cy.visit(['blank', 'gradeable', team_gradeable, 'update?nav_tab=5']);
         cy.get('#date_due')
             .clear()
             .type(getCurrentTime('threeDaysAgo'))
@@ -332,11 +332,11 @@ describe('Test warning messages for team gradeable', () => {
     it('should cleanup everything that was added during testing', () => {
         //Disable late submissions for team gradeable
         cy.login('instructor');
-        cy.visit(['sample', 'gradeable', team_gradeable, 'update?nav_tab=5']);
+        cy.visit(['blank', 'gradeable', team_gradeable, 'update?nav_tab=5']);
         cy.get('#no_late_submission').click();
         cy.get('#save_status', {timeout:20000}).should('have.text', 'All Changes Saved');
         //Delete all late days
-        cy.visit(['sample', 'late_days']);
+        cy.visit(['blank', 'late_days']);
         const deleteLateDays = () => {
             cy.get('table').then((table) => {
                 if (table.find('#Delete').length > 0) {
@@ -349,7 +349,7 @@ describe('Test warning messages for team gradeable', () => {
         };
         deleteLateDays();
         //Delete extentions granted
-        cy.visit(['sample', 'extensions']);
+        cy.visit(['blank', 'extensions']);
         cy.get('#gradeable-select').select(team_gradeable);
         cy.get('body').then((body) => {
             if (body.find('#extensions-table').length > 0) {
