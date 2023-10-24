@@ -39,7 +39,7 @@ class Course_generate_utils:
         pass
 
 
-    def make_course_json(self):
+    def make_course_json(self) -> None:
         """
         This function generates customization_sample.json in case it has changed from the provided version in the test suite
         within the Submitty repository. Ideally this function will be pulled out and made independent, or better yet when
@@ -64,7 +64,7 @@ class Course_generate_utils:
         # Would be great if we could install directly to test_suite, but
         # currently the test uses "clean" which will blow away test_suite
         customization_path = os.path.join(SUBMITTY_INSTALL_DIR, ".setup")
-        print("Generating customization_{}.json".format(course_id))
+        print(f"Generating customization_{course_id}.json")
 
         gradeables = {}
         gradeables_json_output = {}
@@ -175,7 +175,7 @@ class Course_generate_utils:
             gradeables_json_output["benchmark_percent"]["lowest_" + benchmarks[i]] = 0.9 - (0.1 * i)
 
         gradeables_json_output["section"] = section_ta_mapping
-        messages = ["<b>{} Course</b>".format(course_id),
+        messages = [f"<b>{course_id} Course</b>",
                     "Note: Please be patient with data entry/grade corrections for the most recent "
                     "lab, homework, and test.",
                     "Please contact your graduate lab TA if a grade remains missing or incorrect for more than a week."]
@@ -186,15 +186,15 @@ class Course_generate_utils:
             with open(os.path.join(customization_path, "customization_" + course_id + ".json"), 'w') as customization_file:
                 customization_file.write("/*\n"
                                          "This JSON is based on the automatically generated customization for\n"
-                                         "the development course \"{}\" as of {}.\n"
+                                         f"the development course \"{course_id}\" as of {NOW.strftime('%Y-%m-%d %H:%M:%S%z')}.\n"
                                          "It is intended as a simple example, with additional documentation online.\n"
-                                         "*/\n".format(course_id,NOW.strftime("%Y-%m-%d %H:%M:%S%z")))
+                                         "*/\n")
             json.dump(gradeables_json_output,
                       open(os.path.join(customization_path, "customization_" + course_id + ".json"), 'a'),indent=2)
         except EnvironmentError as e:
-            print("Failed to write to customization file: {}".format(e))
+            print(f"Failed to write to customization file: {e}")
 
-        print("Wrote customization_{}.json".format(course_id))
+        print(f"Wrote customization_{course_id}.json")
 
 
     def make_sample_teams(self, gradeable):

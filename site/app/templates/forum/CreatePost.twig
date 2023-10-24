@@ -104,7 +104,7 @@
         <span class="last-edit">
 			<strong class="post_user_id">{{ visible_username }}</strong>
             {% if post_user_info.pronouns and post_user_info.display_pronouns and visible_username !="Anonymous" %}
-                ({{post_user_info.pronouns}})
+                <strong class="post_user_pronouns">({{post_user_info.pronouns}})</strong>
             {% endif %}
 			{{ post_date }}
             {% if edit_date is not null %}
