@@ -940,7 +940,7 @@ function showEditPostForm(post_id, thread_id, shouldEditThread, render_markdown,
                     cat_input.parent().addClass('btn-selected');
                 });
                 $('.cat-buttons').trigger('eventChangeCatClass');
-                $(`#edit-thread-form-${post_id}`).prop('ignore-cat',false);
+                $(`#edit-thread-form-${post_id}`).prop('ignore-cat', false);
                 $('#category-selection-container').show();
                 $('#thread_status').show();
             }
@@ -949,7 +949,7 @@ function showEditPostForm(post_id, thread_id, shouldEditThread, render_markdown,
                 $('.edit_thread').hide();
                 $('.expiration').hide();
                 $('#label_lock_thread').hide();
-                $(`#edit-thread-form-${post_id}`).prop('ignore-cat',true);
+                $(`#edit-thread-form-${post_id}`).prop('ignore-cat', true);
                 $('#category-selection-container').hide();
                 $('#thread_status').hide();
             }
@@ -2125,7 +2125,7 @@ function loadInlineImages(encoded_data) {
 // eslint-disable-next-line no-unused-vars
 function openInWindow(img) {
     const url = $(img).attr('src');
-    window.open(url,'_blank','toolbar=no,scrollbars=yes,resizable=yes, width=700, height=600');
+    window.open(url, '_blank', 'toolbar=no,scrollbars=yes,resizable=yes, width=700, height=600');
 }
 
 // eslint-disable-next-line no-unused-vars, no-var

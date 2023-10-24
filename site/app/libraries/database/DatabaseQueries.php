@@ -773,6 +773,9 @@ SQL;
         return [$old_thread_id, $thread_id, $counted_posts];
     }
 
+    /**
+     * @param string[] $attachment_name
+     */
     public function createPost($user, $content, $thread_id, $anonymous, $type, $first, $hasAttachment, $markdown, $attachment_name, $parent_post = -1) {
         if (!$first && $parent_post == 0) {
             $this->course_db->query("SELECT MIN(id) as id FROM posts where thread_id = ?", [$thread_id]);
@@ -962,6 +965,9 @@ SQL;
         return $rows;
     }
 
+    /**
+     * @param string[] $attachment_name
+     */
     public function createThread($markdown, $user, $title, $content, $anon, $prof_pinned, $status, $hasAttachment, $attachment_name, $categories_ids, $lock_thread_date, $expiration, $announcement) {
         $this->course_db->beginTransaction();
 
@@ -1104,7 +1110,10 @@ SQL;
         return $this->course_db->rows()[0]['parent_id'];
     }
 
-    public function getForumAttachments($post_id, $version = 0) {
+    /**
+     * @return string[]
+     */
+    public function getForumAttachments(int $post_id, int $version = 0) {
         // Default version is current version
         if ($version === 0) {
             $version = $this->getPost($post_id)['version_id'];
@@ -1118,6 +1127,9 @@ SQL;
         return $attachment_name;
     }
 
+    /**
+     * @param string[] $attachments_deleted
+     */
     public function editPost($original_creator, $user, $post_id, $content, $anon, $markdown, $attachments_deleted) {
         try {
             $markdown = $markdown ? 1 : 0;
