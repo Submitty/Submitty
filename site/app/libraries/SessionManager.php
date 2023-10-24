@@ -53,12 +53,6 @@ class SessionManager {
             return false;
         }
 
-        // Only refresh the session once per day
-        if ($this->shouldSessionBeUpdated()) {
-            $this->session->updateSessionExpiration($this->core->getDateTimeNow());
-            $em->flush();
-        }
-
         return $this->session->getUserId();
     }
 
