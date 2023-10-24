@@ -722,7 +722,9 @@ class ElectronicGraderController extends AbstractController {
                    'total_components' => count($gradeable->getPeerComponents()) * $total_who_submitted,
                    'non_late_total_components' => count($gradeable->getPeerComponents()) * $total_who_submitted,
                    'graded_components' => 0,
+                   'verified_components' => 0,
                    'non_late_graded_components' => 0,
+                   'non_late_verified_components' => 0,
                    'view_peer_graded_components' => $peer_graded_components,
                    'view_peer_components' => $peer_components,
                    'ta_graded_components' => 0,
@@ -741,6 +743,7 @@ class ElectronicGraderController extends AbstractController {
                        'graded_components' => $my_grading,
                        'verified_components' => $my_grading,
                        'non_late_graded_components' => $my_grading,
+                       'non_late_verified_components'=> $my_grading,
                        'num_gradeables' => $num_gradeables,
                        'ta_graded_components' => 0,
                        'graders' => [],
@@ -752,6 +755,7 @@ class ElectronicGraderController extends AbstractController {
                        'verified_components' => 0,
                        'non_late_total_components' => 0,
                        'non_late_graded_components' => 0,
+                       'non_late_verified_components'=> 0,
                        'graders' => [],
                        'valid_graders' => []
                     ];
@@ -768,6 +772,7 @@ class ElectronicGraderController extends AbstractController {
                     $sections['all']['verified_components'] -= $my_grading;
                     $sections['all']['non_late_total_components'] = $sections['all']['total_components'];
                     $sections['all']['non_late_graded_components'] = $sections['all']['graded_components'];
+                    $sections['all']['non_late_verified_components'] = $sections['all']['verified_components'];
                     $sections['stu_grad']['no_team'] = 0;
                     $sections['stu_grad']['team'] = 0;
                     $sections['all']['no_team'] = 0;
@@ -781,6 +786,7 @@ class ElectronicGraderController extends AbstractController {
                         'graded_components' => $my_grading,
                         'verified_components' => $my_grading,
                         'non_late_graded_components' => $my_grading,
+                        'non_late_verified_components'=> $my_grading,
                         'num_gradeables' => $num_gradeables,
                         'ta_graded_components' => 0,
                         'graders' => [],
@@ -792,6 +798,7 @@ class ElectronicGraderController extends AbstractController {
                         'verified_components' => 0,
                         'non_late_total_components' => 0,
                         'non_late_graded_components' => 0,
+                        'non_late_verified_components'=> 0,
                         'graders' => [],
                         'valid_graders' => []
                     ];
@@ -808,6 +815,7 @@ class ElectronicGraderController extends AbstractController {
                     $sections['all']['verified_components'] -= $my_grading;
                     $sections['all']['non_late_total_components'] = $sections['all']['total_components'];
                     $sections['all']['non_late_graded_components'] = $sections['all']['graded_components'];
+                    $sections['all']['non_late_verified_components'] = $sections['all']['verified_components'];
                 }
             }
             else {
@@ -819,6 +827,7 @@ class ElectronicGraderController extends AbstractController {
                             'graded_components' => 0,
                             'verified_components' => 0,
                             'non_late_graded_components' => 0,
+                            'non_late_verified_components'=> 0,
                             'ta_graded_components' => 0,
                             'graders' => [],
                             'valid_graders' => []
@@ -831,6 +840,7 @@ class ElectronicGraderController extends AbstractController {
                             'verified_components' => 0,
                             'non_late_total_components' => 0,
                             'non_late_graded_components' => 0,
+                            'non_late_verified_components'=> 0,
                             'graders' => [],
                             'valid_graders' => []
                         ];
@@ -847,6 +857,7 @@ class ElectronicGraderController extends AbstractController {
                     }
                     if (isset($verified_components[$key])) {
                         $sections[$key]['verified_components'] = $verified_components[$key];
+                        $sections[$key]['non_late_verified_components'] = $verified_components[$key] - $late_components[$key];
                     }
                     if (isset($graders[$key])) {
                         $sections[$key]['graders'] = $graders[$key];

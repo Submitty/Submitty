@@ -225,7 +225,7 @@ class ElectronicGraderView extends AbstractView {
                 $section['verified'] = round($section['verified_components'] / $non_zero_non_peer_components_count, 1);
                 $section['total'] = $section['total_components'];
                 $section['non_late_graded'] = round($section['non_late_graded_components'] / $non_zero_non_peer_components_count, 1);
-                $section['non_late_verified'] = round($section['non_late_graded_components'] / $non_zero_non_peer_components_count, 1);
+                $section['non_late_verified'] = round($section['non_late_verified_components'] / $non_zero_non_peer_components_count, 1);
                 $section['non_late_total'] = $section['non_late_total_components'];// / $non_zero_non_peer_components_count;
 
                 if ($section['total_components'] == 0) {
@@ -243,7 +243,7 @@ class ElectronicGraderView extends AbstractView {
                 }
                 else {
                     $section['non_late_percentage'] = number_format(($section['non_late_graded'] / $section['non_late_total']) * 100, 1);
-                    $section['non_late_verified_percentage'] = number_format(($section['non_late_graded'] / $section['non_late_total']) * 100, 1);
+                    $section['non_late_verified_percentage'] = number_format(($section['non_late_verified'] / $section['non_late_total']) * 100, 1);
                 }
             }
                 unset($section); // Clean up reference

@@ -73,7 +73,7 @@
                                     {% if key == "NULL" and include_null_section != 'include' %}
                                         {# Skip rendering this section #}
                                      {% else %}
-                                        Section {{ key }}: Graded: {{ section.non_late_graded }} / {{ section.non_late_total }} ({{ section.non_late_percentage }}%) <span>Verified: {{ section.verified }} / {{ section.non_late_total }} ({{ section.verified_percentage }}%) </span><br />
+                                        Section {{ key }}: Graded: {{ section.non_late_graded }} / {{ section.non_late_total }} ({{ section.non_late_percentage }}%) <span>Verified: {{ section.non_late_verified }} / {{ section.non_late_total }} ({{ section.non_late_verified_percentage }}%) </span><br />
                                     {% endif %}
                             {% endif %}
                         {% endif %}
