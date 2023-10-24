@@ -71,7 +71,7 @@ function onGradeInquirySubmitClicked(button) {
     const button_clicked = $(button);
     const component_selected = $('.btn-selected');
     const component_id = component_selected.length ? component_selected.data('component_id') : 0;
-    localStorage.setItem('selected_tab',`.component-${component_id}`);
+    localStorage.setItem('selected_tab', `.component-${component_id}`);
     const form = $(`#reply-text-form-${component_id}`);
     if (form.data('submitted') === true) {
         return;
@@ -101,7 +101,7 @@ function onGradeInquirySubmitClicked(button) {
 
 
     // prevent double submission
-    form.data('submitted',true);
+    form.data('submitted', true);
     const gc_id = form.children('#gc_id').val();
     $.ajax({
         type: 'POST',
@@ -145,7 +145,7 @@ function onGradeInquirySubmitClicked(button) {
         },
     });
     // allow form resubmission
-    form.data('submitted',false);
+    form.data('submitted', false);
     $('.gi-submit').prop('disabled', true);
     $('.gi-submit-empty').prop('disabled', false);
 }
@@ -223,7 +223,7 @@ function newDiscussionRender(discussion) {
     // save the selected component before updating regrade discussion
     const component_selected = $('.btn-selected');
     const component_id = component_selected.length ? component_selected.data('component_id') : 0;
-    localStorage.setItem('selected_tab',`.component-${component_id}`);
+    localStorage.setItem('selected_tab', `.component-${component_id}`);
 
     // TA (access grading)
     if ($('#gradeInquiryBoxSection').length === 0) {

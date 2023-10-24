@@ -13,7 +13,7 @@ jobs:
     runs-on: macos-latest
 
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
       # Installing this is skipped in CI as using it was causing some corruption in
       # attempting to mount the shared folder. The guest and host guest additions
       # versions are close enough that we are fine without it.
@@ -22,6 +22,7 @@ jobs:
       - name: Validate image
         run: curl --show-error --fail --include http://localhost:1511
       - name: Acquire Job ID
+        if: failure()
         id: get-job-id
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -33,3 +34,4 @@ jobs:
         if: failure()
         run: |
           curl -X POST -H "Content-type: application/json" --data '{"text":"The Vagrant Up Github Action has failed. View here: https://github.com/Submitty/Submitty/actions/runs/${{ github.run_id }}/job/${{ steps.get-job-id.outputs.job_id }}"}' ${{ secrets.VAGRANT_UP_WEBHOOK }}
+          curl -X POST https://submitty.zulipchat.com/api/v1/messages -u ${{ secrets.ZULIP_AUTHENTICATION }} --data-urlencode 'type=stream' --data-urlencode 'to=Submitty Developer Studio' --data-urlencode 'topic=Vagrant Up Failures' --data-urlencode 'content=The Vagrant Up Github Action has failed. View here: https://github.com/Submitty/Submitty/actions/runs/${{ github.run_id }}/job/${{ steps.get-job-id.outputs.job_id }}'
