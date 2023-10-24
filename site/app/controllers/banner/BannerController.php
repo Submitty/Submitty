@@ -74,15 +74,6 @@ class BannerController extends AbstractController {
         }
 
 
-        $headers = false;
-        if ($link_name != "") {
-            $headers = @get_headers($link_name);
-        }
-        if ($link_name != "" && $headers && strpos($headers[0], '200 OK') === false) {
-            return JsonResponse::getErrorResponse("Invalid link");
-        }
-
-
         $specificPath = $close_date->format("Y");
         $actual_banner_name = "";
 

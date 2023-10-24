@@ -66,7 +66,20 @@ class GlobalController extends AbstractController {
         $repo = $this->core->getSubmittyEntityManager()->getRepository(BannerImage::class);
         $bannerImages = $repo->getValidBannerImages();
 
-        return $this->core->getOutput()->renderTemplate('Global', 'header', $breadcrumbs, $wrapper_urls, $sidebar_buttons, $unread_notifications_count, $css->toArray(), $js->toArray(), $duck_img, $page_name, $content_only, $bannerImages);
+        return $this->core->getOutput()->renderTemplate(
+            'Global',
+            'header',
+            $breadcrumbs,
+            $wrapper_urls,
+            $sidebar_buttons,
+            $unread_notifications_count,
+            $css->toArray(),
+            $js->toArray(),
+            $duck_img,
+            $page_name,
+            $content_only,
+            $bannerImages
+        );
     }
 
     // ==========================================================================================

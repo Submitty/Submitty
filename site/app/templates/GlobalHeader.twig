@@ -384,19 +384,19 @@
 <script>
     
 
-    var currentImageIndex = 0;
-    var hiddenImages = getHiddenImages();
-    var seenImages = []; 
-    var images = document.getElementsByClassName('club-banners');
+    let currentImageIndex = 0;
+    let hiddenImages = getHiddenImages();
+    let seenImages = []; 
+    let images = document.getElementsByClassName('club-banners');
     bannerElement = document.getElementById("banner");
     bannerElement.style.display = 'none';
     bannerElement.style.width = "1%";
 
 
 
-    var currentImages = [];
-    for (var i = 0; i < images.length; i++) {
-        var className = images[i].className.split(' ')[1];
+    let currentImages = [];
+    for (let i = 0; i < images.length; i++) {
+        let className = images[i].className.split(' ')[1];
         if (!hiddenImages.includes(className)) {
             currentImages.push(images[i]);
         }
@@ -405,7 +405,7 @@
         }
     }
 
-    var bubble = document.getElementById("speech-bubble-container");
+    let bubble = document.getElementById("speech-bubble-container");
     if (bubble != null) {
         if (currentImages.length == 0) {
 
@@ -418,22 +418,22 @@
     images = currentImages.concat(seenImages);
 
 
-    if (getCookie("display") === "yes") showBanners();
+    if (getCookie("display-banner") === "yes") showBanners();
 
     function showBanners() {
 
-        var movingUnit = document.getElementById("moving-unit");
-        var bannerElement = document.getElementById("banner");
-        if (bannerElement.style.display === "none") {
-            setCookie('display', "yes");
+        let movingUnit = document.getElementById("moving-unit");
+        let bannerElement = document.getElementById("banner");
+        if (bannerElement.style.display === "n"one") {
+            setCookie('display-banner', "yes");
 
             document.getElementById("breadcrumbs").style.flexWrap = "inherit";
 
             if (currentImages.length > 0) {
                 images[0].classList.add("active");
 
-                var duckdivElement = document.getElementById("moorthy-duck");
-                var wholeBannerElement = document.getElementById("banner");
+                let duckdivElement = document.getElementById("moorthy-duck");
+                let wholeBannerElement = document.getElementById("banner");
                 duckdivElement.style.animation = "rocking 2s linear infinite";
                 setTimeout(function() {
                     bannerElement.style.width = "100%";
@@ -463,8 +463,8 @@
         }
         else { 
 
-            setCookie('display', "no");
-            var duckdivElement = document.getElementById("moorthy-duck");
+            setCookie('display-banner', "no");
+            let duckdivElement = document.getElementById("moorthy-duck");
             movingUnit.style.animation = "none";
             duckdivElement.style.animation = "none";
             if (currentImages.length > 0) {
@@ -491,7 +491,7 @@
             movingUnit.style.right = "20%";
 
 
-            var className = currentImages[currentImageIndex].className.split(' ')[1]
+            let className = currentImages[currentImageIndex].className.split(' ')[1]
             hiddenImages.push(className);
             seenImages.push(currentImages[currentImageIndex]);
             currentImages.shift();
@@ -504,7 +504,7 @@
 
     function changeImage(n) {
 
-        var originalIndex = currentImageIndex;
+        let originalIndex = currentImageIndex;
 
         if (currentImageIndex < 0 || currentImageIndex >= images.length) {
             console.log("Issue of index");
@@ -516,7 +516,7 @@
         if (currentImageIndex < currentImages.length) {
             console.log("index");
             console.log(currentImageIndex);
-            var className = currentImages[originalIndex].className.split(' ')[1]
+            let className = currentImages[originalIndex].className.split(' ')[1]
             hiddenImages.push(className);
             seenImages.push(currentImages[originalIndex]);
             currentImages.shift();
@@ -541,21 +541,21 @@
 
 
     function getHiddenImages() {
-        var hiddenImagesCookie = getCookie('hiddenImages');
+        let hiddenImagesCookie = getCookie('hiddenImages');
         return hiddenImagesCookie ? JSON.parse(hiddenImagesCookie) : [];
     }
 
     function setCookie(name, value) {
-        var date = new Date();
+        let date = new Date();
         date.setFullYear(date.getFullYear() + 100); 
         document.cookie = name + '=' + (value || '') + '; path=/';
     }
 
     function getCookie(name) {
-        var nameEQ = name + '=';
-        var cookies = document.cookie.split(';');
-        for (var i = 0; i < cookies.length; i++) {
-            var cookie = cookies[i];
+        let nameEQ = name + '=';
+        let cookies = document.cookie.split(';');
+        for (let i = 0; i < cookies.length; i++) {
+            let cookie = cookies[i];
             while (cookie.charAt(0) === ' ') {
                 cookie = cookie.substring(1, cookie.length);
             }
