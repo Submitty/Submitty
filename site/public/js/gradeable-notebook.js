@@ -9,7 +9,7 @@ function setMultipleChoices(mc_field_id, viewing_inactive_version) {
     let prev_checked = $(`#${mc_field_id}`).attr('data-prev_checked');
     prev_checked = prev_checked.split('\n');
     // For each input inside the fieldset see if its value is inside the prev checked array
-    $(`#${mc_field_id} :input`).each((index,element) => {
+    $(`#${mc_field_id} :input`).each((index, element) => {
 
         const value = element.getAttribute('value');
 
@@ -32,7 +32,7 @@ function setMultipleChoices(mc_field_id, viewing_inactive_version) {
  */
 function clearMultipleChoices(mc_field_id) {
     // For each input inside the fieldset remove the 'checked' attribute
-    $(`#${mc_field_id} :input`).each((index,element) => {
+    $(`#${mc_field_id} :input`).each((index, element) => {
 
         $(element).prop('checked', false);
 
