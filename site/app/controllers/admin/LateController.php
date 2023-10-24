@@ -342,7 +342,10 @@ class LateController extends AbstractController {
             ];
         }
 
-        $rows = file($csv_file, FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES);
+        $file_content = file_get_contents($csv_file);
+        $file_content = preg_replace("/\r\n|\r/", "\n", $file_content);
+        $rows = explode("\n", $file_content);
+        $rows = array_filter($rows, 'strlen');
         if ($rows === false) {
             $data = null;
             return [
