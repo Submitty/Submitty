@@ -343,16 +343,16 @@ class LateController extends AbstractController {
         }
 
         $file_content = file_get_contents($csv_file);
-        $file_content = preg_replace("/\r\n|\r/", "\n", $file_content);
-        $rows = explode("\n", $file_content);
-        $rows = array_filter($rows, 'strlen');
-        if ($rows === false) {
+        if ($file_content === false) {
             $data = null;
             return [
                 "success" => false,
                 "error" => "Could not open CSV file for reading",
             ];
         }
+        $file_content = preg_replace("/\r\n|\r/", "\n", $file_content);
+        $rows = explode("\n", $file_content);
+        $rows = array_filter($rows, 'strlen');
         foreach ($rows as $idx => $row) {
             $row_number = $idx + 1;
             $fields = explode(',', $row);
