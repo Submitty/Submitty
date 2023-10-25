@@ -84,7 +84,7 @@ class ForumUtils {
         $thread_dir = FileUtils::joinPaths(FileUtils::joinPaths($course_path, "forum_attachments"), $thread_id);
         $post_attachment = ["exist" => false];
 
-        if (!empty($attachment_names)) {
+        if (count($attachment_names) > 0) {
             $post_attachment["exist"] = true;
 
             $post_dir = FileUtils::joinPaths($thread_dir, $post_id);
@@ -97,7 +97,7 @@ class ForumUtils {
             $attachment_encoded_data = [];
 
             foreach ($files as $file) {
-                if (in_array($file['name'], $attachment_names)) {
+                if (in_array($file['name'], $attachment_names, true)) {
                     $path = rawurlencode($file['path']);
                     $name = rawurlencode($file['name']);
                     $url = $course_url . '?dir=forum_attachments&path=' . $path;

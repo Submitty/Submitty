@@ -723,7 +723,7 @@ SQL;
         $post = $this->core->getQueries()->getPost($post_id);
         // Safety measure in case the database is bad for some reason
         $counted_posts = [];
-        if (!empty($post)) {
+        if (count($post) > 0) {
             if ($post["parent_id"] != -1) {
                 $old_thread_id = $post["thread_id"];
                 $this->course_db->query("SELECT id from threads where merged_post_id = ?", [$post_id]);
