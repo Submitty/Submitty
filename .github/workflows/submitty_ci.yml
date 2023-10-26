@@ -520,3 +520,15 @@ jobs:
       - uses: ./.github/actions/e2e-Setup-Composite
       - name: Run integration tests
         run: sudo -E env "PATH=$PATH" python3 /usr/local/submitty/test_suite/integrationTests/run.py
+
+  Notify-Failure:
+    runs-on: ubuntu-latest
+    if: ${{ always() && contains(join(needs.*.result, ','), 'failure') && github.event.pull_request.base.ref == 'main' }}
+    needs: [css-lint, js-lint, js-unit, php-lint, php-unit, yaml-lint, ShellCheck, Cypress-System, Integration, Cypress (Admin), Cypress (Feature), Cypress (Gradeable), Cypress(UI)]
+    steps:
+      - name: Send notification to Zulip
+        run: |
+          curl -X POST https://submitty.zulipchat.com/api/v1/messages -u ${{ secrets.ZULIP_AUTHENTICATION }} --data-urlencode 'type=stream' --data-urlencode 'to=Submitty Developer Studio' \
+          --data-urlencode 'topic=Main CI Failures' --data-urlencode \
+          'content=The CI has failed on the Main branch, View here: [Main CI](https://github.com/IDzyre/Submitty/actions/runs/${{ github.run_id }}/job/${{ steps.get-job-id.outputs.job_id }}"})'\
+          ${{ secrets.VAGRANT_UP_WEBHOOK }}
