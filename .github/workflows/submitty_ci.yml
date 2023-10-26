@@ -524,7 +524,7 @@ jobs:
   Notify-Failure:
     runs-on: ubuntu-latest
     if: ${{ always() && contains(join(needs.*.result, ','), 'failure') && github.event.pull_request.title }}
-    needs: [css-lint, js-lint, js-unit, php-lint, php-unit, python-lint, python-unit, yaml-lint, ShellCheck]
+    needs: [css-lint, js-lint, js-unit, php-lint, php-unit, python-lint, python-unit, yaml-lint, ShellCheck, Integration, Cypress-System, Cypress]
     steps:
       - name: Send notification to Zulip
         run: |
