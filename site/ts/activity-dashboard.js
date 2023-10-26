@@ -184,6 +184,7 @@ export function clearFields() {
     document.getElementById('forum_post_date').value = '';
     document.getElementById('num_poll_responses').value = '';
     document.getElementById('office_hours_queue_date').value = '';
+    document.getElementById('course_materials_access').value = '';
     applySettings();
     const table = document.getElementById('data-table');
     const data = JSON.parse(document.getElementById('data').getAttribute('data-original'));
