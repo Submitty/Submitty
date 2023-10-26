@@ -523,7 +523,7 @@ jobs:
 
   Notify-Failure:
     runs-on: ubuntu-latest
-    if: ${{ always() && contains(join(needs.*.result, ','), 'failure') && github.event.pull_request.base.ref == 'main' }}
+    if: ${{ always() && contains(join(needs.*.result, ','), 'failure')}}
     needs: [css-lint, js-lint, js-unit, php-lint, php-unit, python-lint, python-unit, yaml-lint, ShellCheck]
     steps:
       - name: Send notification to Zulip
