@@ -23,7 +23,7 @@
     "aptoma/twig-markdown": "3.4.1",
     "browscap/browscap-php": "7.2.0",
     "cboden/ratchet": "0.4.4",
-    "doctrine/annotations": "1.14.3",
+    "doctrine/annotations": "2.0.1",
     "doctrine/dbal": "2.13.9",
     "doctrine/orm": "2.16.2",
     "egulias/email-validator": "4.0.1",
