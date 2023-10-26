@@ -523,19 +523,11 @@ jobs:
 
   Notify-Failure:
     runs-on: ubuntu-latest
-    if: ${{ always() && contains(join(needs.*.result, ','), 'failure')}}
+    if: ${{ always() && contains(join(needs.*.result, ','), 'failure') && github.event.pull_request.title }}
     needs: [css-lint, js-lint, js-unit, php-lint, php-unit, python-lint, python-unit, yaml-lint, ShellCheck]
     steps:
-      - name: Acquire Job ID
-        id: get-job-id
-        env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: |
-          jobs=$(gh api repos/${{ github.repository }}/actions/runs/${{ github.run_id}}/attempts/${{ github.run_attempt }}/jobs)
-          job_id=$(echo $jobs | jq -r '.jobs[] | select(.runner_name=="${{ runner.name }}") | .id')
-          echo "job_id=$job_id" >> $GITHUB_OUTPUT
       - name: Send notification to Zulip
         run: |
           curl -X POST https://submitty.zulipchat.com/api/v1/messages -u ${{ secrets.ZULIP_AUTHENTICATION }} --data-urlencode 'type=stream' --data-urlencode 'to=Submitty Developer Studio' \
           --data-urlencode 'topic=Main CI Failures' --data-urlencode \
-          'content=The CI has failed on the Main branch, View here: [Main CI](https://github.com/IDzyre/Submitty/actions/runs/${{ github.run_id }}/job/${{ steps.get-job-id.outputs.job_id }})'
+          'content=The Github Actions CI has failed on the Main branch, View here: [Main CI](https://github.com/Submitty/Submitty/actions/runs/${{ github.run_id }})'
