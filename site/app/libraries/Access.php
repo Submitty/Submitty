@@ -250,8 +250,8 @@ class Access {
             "base" => $this->core->getConfig()->getSubmittyPath() . "/community_events",
             "subparts" => [],
             "permissions" => [
-                "path.read" => "path.read.submissions",
-                "path.write" => "path.write.submissions",
+                "path.read" => "path.read.community_events",
+                "path.write" => "path.write.community_events",
             ]
         ];
 

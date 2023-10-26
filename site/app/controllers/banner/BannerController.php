@@ -39,6 +39,7 @@ class BannerController extends AbstractController {
      */
     public function ajaxUploadEventFiles(): JsonResponse {
         $upload_path = FileUtils::joinPaths($this->core->getConfig()->getSubmittyPath(), "community_events");
+
         if (isset($_POST['release_time'])) {
             $release_date = DateUtils::parseDateTime($_POST['release_time'], $this->core->getDateTimeNow()->getTimezone());
         }
@@ -95,6 +96,12 @@ class BannerController extends AbstractController {
         $folder_made_name = $actual_banner_name . "Folder" . $currentDate->format('Y-m-d_H-i-s');
 
         $full_path = FileUtils::joinPaths($upload_path, $specificPath, $folder_made_name);
+
+        if (!$this->core->getAccess()->canI("path.write", ["dir" => "community_events", "path" => $full_path])) {
+            return JsonResponse::getErrorResponse("Don't hack me bro");
+        }
+
+
         if (!is_dir($full_path)) {
             // Create a new folder for the current month
             if (!mkdir($full_path, 0755, true)) {
@@ -185,12 +192,16 @@ class BannerController extends AbstractController {
         $entity_manager->remove($event_item);
         $entity_manager->flush();
 
-        $full_path = FileUtils::joinPaths($this->core->getConfig()->getSubmittyPath(), "community_events");
+        $upload_path= FileUtils::joinPaths($this->core->getConfig()->getSubmittyPath(), "community_events");
 
         $folder_name = $_POST['path'];
         $event_name = $_POST['name'];
 
-        $full_path = FileUtils::joinPaths($full_path, $folder_name, $event_item->getFolderName(), $event_name);
+        $full_path = FileUtils::joinPaths($upload_path, $folder_name, $event_item->getFolderName(), $event_name);
+        if (!$this->core->getAccess()->canI("path.write", ["dir" => "community_events", "path" => $full_path])) {
+            return JsonResponse::getErrorResponse("Don't hack me bro");
+        }
+
 
 
         if (is_file($full_path)) {
