@@ -709,6 +709,11 @@ parameters:
 			path: app/controllers/SelfRejoinController.php
 
 		-
+			message: "#^Strict comparison using \\!\\=\\= between bool and null will always evaluate to true\\.$#"
+			count: 1
+			path: app/controllers/SelfRejoinController.php
+
+		-
 			message: """
 				#^Call to deprecated method RedirectOnlyResponse\\(\\) of class app\\\\libraries\\\\response\\\\MultiResponse\\:
 				should not be used, just return RedirectResponse directly$#
@@ -3159,6 +3164,11 @@ parameters:
 			message: "#^Property app\\\\entities\\\\db\\\\Table\\:\\:\\$columns with generic interface Doctrine\\\\Common\\\\Collections\\\\Collection does not specify its types\\: TKey, T$#"
 			count: 1
 			path: app/entities/db/Table.php
+
+		-
+			message: "#^Construct empty\\(\\) is not allowed\\. Use more strict comparison\\.$#"
+			count: 1
+			path: app/entities/email/EmailEntity.php
 
 		-
 			message: "#^Property app\\\\entities\\\\forum\\\\Category\\:\\:\\$threads with generic interface Doctrine\\\\Common\\\\Collections\\\\Collection does not specify its types\\: TKey, T$#"
