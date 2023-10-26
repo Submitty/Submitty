@@ -113,9 +113,9 @@ function updateCacheBuildStatus(url, confirm_message, status) {
         $('#rebuild-status').html(status);
 
         // disable and grey out table and buttons
-        $('#calculate-btn').prop('disabled',true).css('opacity',0.5);
-        $('#flush-btn').prop('disabled',true).css('opacity',0.5);
-        $('#late-day-table').css('opacity',0.5);
+        $('#calculate-btn').prop('disabled', true).css('opacity', 0.5);
+        $('#flush-btn').prop('disabled', true).css('opacity', 0.5);
+        $('#late-day-table').css('opacity', 0.5);
 
         $.ajax({
             url: url,

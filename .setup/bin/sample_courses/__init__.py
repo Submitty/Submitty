@@ -60,11 +60,11 @@ SETUP_DATA_PATH = os.path.join(CURRENT_PATH, "..", "..", "data")
 
 args = parse_args()
 
-SUBMITTY_INSTALL_DIR = args.install_dir
-SUBMITTY_DATA_DIR = args.data_dir
-SUBMITTY_REPOSITORY = os.path.join(SUBMITTY_INSTALL_DIR, "GIT_CHECKOUT/Submitty")
-MORE_EXAMPLES_DIR = os.path.join(SUBMITTY_INSTALL_DIR, "more_autograding_examples")
-TUTORIAL_DIR = os.path.join(SUBMITTY_INSTALL_DIR, "GIT_CHECKOUT/Tutorial", "examples")
+SUBMITTY_INSTALL_DIR: str = args.install_dir
+SUBMITTY_DATA_DIR: str = args.data_dir
+SUBMITTY_REPOSITORY: str = os.path.join(SUBMITTY_INSTALL_DIR, "GIT_CHECKOUT/Submitty")
+MORE_EXAMPLES_DIR: str = os.path.join(SUBMITTY_INSTALL_DIR, "more_autograding_examples")
+TUTORIAL_DIR: str = os.path.join(SUBMITTY_INSTALL_DIR, "GIT_CHECKOUT/Tutorial", "examples")
 
 DB_HOST: str = "localhost"
 DB_PORT: int = 5432
@@ -91,11 +91,11 @@ with open(os.path.join(SUBMITTY_INSTALL_DIR, "config", "database.json")) as data
 # used for constructing the url to clone repos for vcs gradeables
 # with open(os.path.join(SUBMITTY_INSTALL_DIR, "config", "submitty.json")) as submitty_config:
 #     submitty_config_json = json.load(submitty_config)
-SUBMISSION_URL = 'submitty_config_json["submission_url"]'
-VCS_FOLDER = os.path.join(SUBMITTY_DATA_DIR, 'vcs', 'git')
+SUBMISSION_URL: str = 'submitty_config_json["submission_url"]'
+VCS_FOLDER: str = os.path.join(SUBMITTY_DATA_DIR, 'vcs', 'git')
 
-DB_ONLY = args.db_only
-NO_SUBMISSIONS = args.no_submissions
-NO_GRADING = args.no_grading
+DB_ONLY: bool = args.db_only
+NO_SUBMISSIONS: bool = args.no_submissions
+NO_GRADING: bool = args.no_grading
 
 NOW = dateutils.get_current_time()

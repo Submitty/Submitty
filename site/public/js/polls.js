@@ -81,7 +81,7 @@ function updatePollVisible(pollid, base_url) {
     fd.append('csrf_token', csrfToken);
     fd.append('poll_id', pollid);
     if (!$(visible_checkbox).is(':checked')) {
-        $(accepting_answers_checkbox).prop('checked',false);
+        $(accepting_answers_checkbox).prop('checked', false);
         url += '/setClosed';
     }
     else {
