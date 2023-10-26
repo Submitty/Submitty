@@ -521,10 +521,13 @@ jobs:
       - name: Run integration tests
         run: sudo -E env "PATH=$PATH" python3 /usr/local/submitty/test_suite/integrationTests/run.py
 
+  # Notifies a Zulip channel when there is a CI failure on the main branch.
   Notify-Failure:
     runs-on: ubuntu-latest
+    # If any of the CI tests result in a failure flag, and the branch is main.
     if: ${{ always() && contains(join(needs.*.result, ','), 'failure') && github.event.pull_request.title == 'main' }}
-    needs: [css-lint, js-lint, js-unit, php-lint, php-unit, python-lint, python-unit, yaml-lint, ShellCheck, Integration, Cypress-System, Cypress]
+    # Needs all of the tests to finish, in order to not spam messages if multiple tests fail, and to get the results easier.
+    needs: [css-lint, js-lint, js-unit, php-lint, php-unit, python-lint, python-unit, yaml-lint, shellcheck, Integration, Cypress-System, Cypress]
     steps:
       - name: Send notification to Zulip
         run: |
