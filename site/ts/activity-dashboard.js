@@ -132,7 +132,7 @@ export function applySettings() {
         const s_forum_post = data[i].forum_post;
         let s_num_polls = data[i].num_poll_responses;
         const s_off_hours = data[i].office_hours_queue;
-        if (s_num_polls == null) {
+        if (s_num_polls === null) {
             s_num_polls = 0;
         }
 
