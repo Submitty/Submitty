@@ -526,7 +526,7 @@ jobs:
     if: ${{ always() && contains(join(needs.*.result, ','), 'failure')}}
     needs: [css-lint, js-lint, js-unit, php-lint, php-unit, python-lint, python-unit, yaml-lint, ShellCheck]
     steps:
-     - name: Acquire Job ID
+      - name: Acquire Job ID
         id: get-job-id
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
