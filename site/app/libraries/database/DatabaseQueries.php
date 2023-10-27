@@ -1451,7 +1451,7 @@ WHERE term=? AND course=? AND user_id=?",
         $params = [300];
         $query = "SELECT
                       submissions.*
-                      , coalesce(late_day_exceptions, 0) extensions
+                      , coalesce(excused_absence_extensions, 0) extensions
                       , greatest(0, ceil((extract(EPOCH FROM(coalesce(submission_time, eg_submission_due_date) - eg_submission_due_date)) - (?*60))/86400):: integer) as days_late
                     FROM
                       (
@@ -1504,7 +1504,7 @@ WHERE term=? AND course=? AND user_id=?",
                     )
                       AS submissions
                       FULL OUTER JOIN
-                        late_day_exceptions AS lde
+                        excused_absence_extensions AS lde
                       ON submissions.g_id = lde.g_id
                       AND submissions.user_id = lde.user_id";
         if ($user_id !== null) {
@@ -1814,7 +1814,7 @@ WHERE term=? AND course=? AND user_id=?",
 				LEFT JOIN users u
 					ON u.user_id=t.user_id
 					OR u.user_id=egd.user_id
-                LEFT JOIN late_day_exceptions lde
+                LEFT JOIN excused_absence_extensions lde
                 ON lde.g_id=eg.g_id AND lde.user_id=u.user_id
                 WHERE eg.g_id=?
                 AND (CASE WHEN eg.eg_team_assignment IS TRUE THEN egd.team_id
@@ -1825,7 +1825,7 @@ WHERE term=? AND course=? AND user_id=?",
                     FROM get_late_day_info_from_previous(
                         calculate_submission_days_late(egd.submission_time, eg.eg_submission_due_date),
                         eg.eg_late_days,
-                        COALESCE(lde.late_day_exceptions, 0),
+                        COALESCE(lde.excused_absence_extensions, 0),
                         ?
                     )
                 ) != 3";
@@ -4456,8 +4456,8 @@ SQL;
     public function updateExtensions($user_id, $g_id, $days) {
         $this->course_db->query(
             "
-          UPDATE late_day_exceptions
-          SET late_day_exceptions=?
+          UPDATE excused_absence_extensions
+          SET excused_absence_extensions=?
           WHERE user_id=?
             AND g_id=?;",
             [$days, $user_id, $g_id]
@@ -4465,8 +4465,8 @@ SQL;
         if ($this->course_db->getRowCount() === 0) {
             $this->course_db->query(
                 "
-            INSERT INTO late_day_exceptions
-            (user_id, g_id, late_day_exceptions)
+            INSERT INTO excused_absence_extensions
+            (user_id, g_id, excused_absence_extensions)
             VALUES(?,?,?)",
                 [$user_id, $g_id, $days]
             );
