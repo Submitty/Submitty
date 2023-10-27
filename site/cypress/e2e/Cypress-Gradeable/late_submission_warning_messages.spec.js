@@ -338,7 +338,7 @@ describe('Test warning messages for team gradeable', () => {
         cy.get('#save_status', {timeout:20000}).should('have.text', 'All Changes Saved');
         //Delete all late days
         cy.visit(['sample', 'late_days']);
-        for (let i = 0; i<3 ; i++){
+        for (let i = 0; i<3 ; i++) {
             cy.get('table').then((table) => {
                 if (table.find('#Delete').length > 0) {
                     cy.get('#delete-button').click();
