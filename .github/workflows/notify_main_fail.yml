@@ -4,7 +4,7 @@ on:
   workflow_run:
     workflows: [Submitty CI]
     types: [completed]
-    branches: 
+    branches:
       - 'main'
 jobs:
   Notify-Failure:
@@ -20,4 +20,3 @@ jobs:
         if: ${{ github.event.workflow_run.conclusion == 'success' }}
         run: |
             echo('All Tests have passed')
-      
