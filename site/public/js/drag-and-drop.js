@@ -418,7 +418,7 @@ function handle_input_keypress(inactive_version) {
 // BULK UPLOAD
 //========================================================================================
 function openFile(url_full) {
-    window.open(url_full,'_blank','toolbar=no,scrollbars=yes,resizable=yes, width=700, height=600');
+    window.open(url_full, '_blank', 'toolbar=no,scrollbars=yes,resizable=yes, width=700, height=600');
 }
 
 // HANDLE SUBMISSION
@@ -943,7 +943,7 @@ function handleSubmission(gradeable_status, remaining_late_days_for_gradeable, c
 
     let late_warning_seen = false;
 
-    const days_to_be_charged = Math.max(0,days_past_deadline-late_day_exceptions);
+    const days_to_be_charged = Math.max(0, days_past_deadline-late_day_exceptions);
     // gradeable_status == 3 is a bad submission (too many late days used) and therefore no need to show a warning message anymore
 
     if ( days_past_deadline > 0 && gradeable_status !== 3 ) {
@@ -1030,7 +1030,7 @@ function handleSubmission(gradeable_status, remaining_late_days_for_gradeable, c
     const multiple_choice_object = gatherInputAnswersByType('multiple_choice');
     const codebox_object         = gatherInputAnswersByType('codebox');
     formData.append('multiple_choice_answers', JSON.stringify(multiple_choice_object));
-    formData.append('codebox_answers'        , JSON.stringify(codebox_object));
+    formData.append('codebox_answers', JSON.stringify(codebox_object));
 
     if (student_page) {
         const pages = [];
@@ -1058,7 +1058,7 @@ function handleSubmission(gradeable_status, remaining_late_days_for_gradeable, c
         xhr: function() {
             const myXhr = $.ajaxSettings.xhr();
             if (myXhr.upload) {
-                myXhr.upload.addEventListener('progress',progress, false);
+                myXhr.upload.addEventListener('progress', progress, false);
             }
             return myXhr;
         },
@@ -1180,8 +1180,8 @@ function handleUploadCourseMaterials(csrf_token, expand_zip, hide_from_students,
     formData.append('expand_zip', expand_zip);
     formData.append('hide_from_students', hide_from_students);
     formData.append('requested_path', requested_path);
-    formData.append('release_time',cmTime);
-    formData.append('sort_priority',priority);
+    formData.append('release_time', cmTime);
+    formData.append('sort_priority', priority);
     formData.append('sections_lock', sections_lock);
 
     if (sections !== null) {
@@ -1327,8 +1327,8 @@ function handleEditCourseMaterials(csrf_token, hide_from_students, id, sectionsE
 
     formData.append('csrf_token', csrf_token);
     formData.append('id', id);
-    formData.append('release_time',cmTime);
-    formData.append('sort_priority',priority);
+    formData.append('release_time', cmTime);
+    formData.append('sort_priority', priority);
     formData.append('sections_lock', sections_lock);
 
     if (hide_from_students !== null) {
