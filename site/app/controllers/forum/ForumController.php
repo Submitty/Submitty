@@ -549,7 +549,7 @@ class ForumController extends AbstractController {
                             $first_post_id = $post["id"];
                         }
                         if ($post["parent_id"] > $first_post_id) {
-                            $place = array_search($post["parent_id"], $order_array);
+                            $place = array_search($post["parent_id"], $order_array, true);
                             $tmp_array = [$post["id"]];
                             $parent_reply_level = $reply_level_array[$place];
                             while ($place !== false && $place + 1 < count($reply_level_array) && $reply_level_array[$place + 1] > $parent_reply_level) {
@@ -564,7 +564,7 @@ class ForumController extends AbstractController {
                         }
                     }
                 }
-                $place = array_search($post_id, $order_array);
+                $place = array_search($post_id, $order_array, true);
                 $reply_level = $reply_level_array[$place];
                 $max_post_box_id = count($posts);
                 $this->sendSocketMessage([
@@ -788,7 +788,7 @@ class ForumController extends AbstractController {
                         $first_post_id = $post_["id"];
                     }
                     if ($post_["parent_id"] > $first_post_id) {
-                        $place = array_search($post_["parent_id"], $order_array);
+                        $place = array_search($post_["parent_id"], $order_array, true);
                         $tmp_array = [$post_["id"]];
                         $parent_reply_level = $reply_level_array[$place];
                         while ($place !== false && $place + 1 < count($reply_level_array) && $reply_level_array[$place + 1] > $parent_reply_level) {
@@ -802,7 +802,7 @@ class ForumController extends AbstractController {
                         array_push($reply_level_array, 1);
                     }
                 }
-                $place = array_search($post["id"], $order_array);
+                $place = array_search($post["id"], $order_array, true);
                 $reply_level = $reply_level_array[$place];
                 $post_box_id = 1;
 

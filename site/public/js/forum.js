@@ -296,7 +296,9 @@ function socketNewOrEditPostHandler(post_id, reply_level, post_box_id=null, edit
                             });
                             if (parent_sibling_posts.length !== 0) {
                                 $(new_post).insertBefore(parent_sibling_posts.first()).hide().fadeIn();
-                                displaySuccessMessage('Refresh for correct ordering');
+                            }
+                            else {
+                                $(new_post).insertAfter(parent_sibling_posts.prevObject.last()).hide().fadeIn();
                             }
                         }
                         else {
