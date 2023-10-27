@@ -743,7 +743,7 @@ class ElectronicGraderController extends AbstractController {
                        'graded_components' => $my_grading,
                        'verified_components' => $my_grading,
                        'non_late_graded_components' => $my_grading,
-                       'non_late_verified_components'=> $my_grading,
+                       'non_late_verified_components' => $my_grading,
                        'num_gradeables' => $num_gradeables,
                        'ta_graded_components' => 0,
                        'graders' => [],
@@ -755,7 +755,7 @@ class ElectronicGraderController extends AbstractController {
                        'verified_components' => 0,
                        'non_late_total_components' => 0,
                        'non_late_graded_components' => 0,
-                       'non_late_verified_components'=> 0,
+                       'non_late_verified_components' => 0,
                        'graders' => [],
                        'valid_graders' => []
                     ];
@@ -786,7 +786,7 @@ class ElectronicGraderController extends AbstractController {
                         'graded_components' => $my_grading,
                         'verified_components' => $my_grading,
                         'non_late_graded_components' => $my_grading,
-                        'non_late_verified_components'=> $my_grading,
+                        'non_late_verified_components' => $my_grading,
                         'num_gradeables' => $num_gradeables,
                         'ta_graded_components' => 0,
                         'graders' => [],
@@ -798,7 +798,7 @@ class ElectronicGraderController extends AbstractController {
                         'verified_components' => 0,
                         'non_late_total_components' => 0,
                         'non_late_graded_components' => 0,
-                        'non_late_verified_components'=> 0,
+                        'non_late_verified_components' => 0,
                         'graders' => [],
                         'valid_graders' => []
                     ];
@@ -827,7 +827,7 @@ class ElectronicGraderController extends AbstractController {
                             'graded_components' => 0,
                             'verified_components' => 0,
                             'non_late_graded_components' => 0,
-                            'non_late_verified_components'=> 0,
+                            'non_late_verified_components' => 0,
                             'ta_graded_components' => 0,
                             'graders' => [],
                             'valid_graders' => []
@@ -840,7 +840,7 @@ class ElectronicGraderController extends AbstractController {
                             'verified_components' => 0,
                             'non_late_total_components' => 0,
                             'non_late_graded_components' => 0,
-                            'non_late_verified_components'=> 0,
+                            'non_late_verified_components' => 0,
                             'graders' => [],
                             'valid_graders' => []
                         ];

@@ -67,7 +67,7 @@
                                     {% if key == "NULL" and include_null_section != 'include' %}
                                         {# Skip rendering this section #}
                                      {% else %}
-                                        Section {{ key }}: Graded: {{ section.graded }} / {{ section.total }} ({{ section.percentage }}%) <span>Verified {{ section.verified }} / {{ section.total }} ({{ section.verified_percentage }}%)</span><br />
+                                        Section {{ key }}: Graded: {{ section.graded }} / {{ section.total }} ({{ section.percentage }}%) <span>Verified: {{ section.verified }} / {{ section.total }} ({{ section.verified_percentage }}%)</span><br />
                                     {% endif %}
                                 {% else %}
                                     {% if key == "NULL" and include_null_section != 'include' %}
