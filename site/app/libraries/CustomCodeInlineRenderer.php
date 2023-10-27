@@ -11,16 +11,16 @@ use League\CommonMark\Extension\CommonMark\Renderer\Inline\CodeRenderer;
 use League\CommonMark\Renderer\HtmlRenderer;
 
 class CustomCodeInlineRenderer implements NodeRendererInterface {
-    /** @var \League\CommonMark\Extension\CommonMark\Renderer\Inline\CodeRenderer */
+    /** @var CodeRenderer */
     protected $baseRenderer;
 
     public function __construct() {
         $this->baseRenderer = new CodeRenderer();
     }
 
-    public function render(Node $inline, ChildNodeRendererInterface $htmlRenderer) {
+    public function render(Node $node, ChildNodeRendererInterface $childRenderer) {
         setcookie("inline","0");
-        $element = $this->baseRenderer->render($inline, $htmlRenderer);
+        $element = $this->baseRenderer->render($node, $childRenderer);
         $attrs = [
             "class" => "inline-code hljs"
         ];
