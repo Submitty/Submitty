@@ -338,17 +338,15 @@ describe('Test warning messages for team gradeable', () => {
         cy.get('#save_status', {timeout:20000}).should('have.text', 'All Changes Saved');
         //Delete all late days
         cy.visit(['sample', 'late_days']);
-        const deleteLateDays = () => {
+        for (let i = 0; i<3 ; i++){
             cy.get('table').then((table) => {
                 if (table.find('#Delete').length > 0) {
                     cy.get('#delete-button').click();
                     cy.get('.alert-success').invoke('text').should('contain', 'Late days entry removed');
                     cy.get('#remove_popup').click();
-                    deleteLateDays();
                 }
             });
-        };
-        deleteLateDays();
+        }
         //Delete extensions granted
         cy.visit(['sample', 'extensions']);
         cy.get('#gradeable-select').select(team_gradeable);

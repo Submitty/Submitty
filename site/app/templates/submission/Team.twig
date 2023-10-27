@@ -102,7 +102,7 @@
                 <form action="{{ accept_invitation_url }}" method="post">
                     <input type="hidden" name="team_id" value={{ invite.getId() }} />
                     <input type="hidden" name="csrf_token" value="{{ csrf_token }}" />
-                    &emsp;{{  invite.getMemberList() }}: <input type="submit" value = "Accept" id = "accept_invitation" class="btn btn-success" />
+                    &emsp;{{  invite.getMemberList() }}: <input type="submit" value = "Accept" id="accept_invitation" class="btn btn-success" />
                 </form>
                 <br />
             {% endfor %} {# invite in received #}
@@ -110,7 +110,7 @@
 
         {# Create new team button #}
         <br />
-        <button class="btn btn-primary key_to_click" id = "create_new_team" tabindex="0" onclick="location.href='{{ create_team_url }}'">Create New Team </button>
+        <button class="btn btn-primary key_to_click" id="create_new_team" tabindex="0" onclick="location.href='{{ create_team_url }}'">Create New Team </button>
 
         {% if lock == false %}
             {% if seeking_partner %}
