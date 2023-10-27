@@ -2147,6 +2147,12 @@ ORDER BY {$orderby}",
         return intval($this->course_db->row()['cnt']);
     }
 
+    /**
+     * Get an array of Teams for a Gradeable matching the given rotating sections
+     *
+     * @param  string $g_id
+     * @return int
+     */
     public function getTotalVerifiedComponentCount($g_id) {
         $this->course_db->query("SELECT count(*) AS cnt FROM gradeable_component_data WHERE GCD_VERIFIER_ID IS NOT NULL", [$g_id]);
         return intval($this->course_db->row()['cnt']);
@@ -2199,6 +2205,15 @@ ORDER BY {$u_or_t}.{$section_key}",
     }
 
 
+    /**
+     * Get an array of Teams for a Gradeable matching the given rotating sections
+     *
+     * @param  string $g_id
+     * @param  array  $sections
+     * @param  string $section_key
+     * @param  bool   $is_team
+     * @return array<int|string,int>
+     */
     public function getVerifiedComponentsCountByGradingSections($g_id, $sections, $section_key, $is_team) {
         $u_or_t = "u";
         $users_or_teams = "users";
