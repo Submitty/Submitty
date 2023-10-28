@@ -1227,7 +1227,8 @@ CREATE TABLE public.grading_rotating (
 CREATE TABLE public.late_day_exceptions (
     user_id character varying(255) NOT NULL,
     g_id character varying(255) NOT NULL,
-    late_day_exceptions integer NOT NULL
+    late_day_exceptions integer NOT NULL,
+    reason_for_exception character varying(255) DEFAULT ''::character varying
 );
 
 
