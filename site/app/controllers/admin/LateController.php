@@ -187,7 +187,7 @@ class LateController extends AbstractController {
             }
             else {
                 for ($i = 0; $i < count($data); $i++) {
-                    $this->core->getQueries()->updateExtensions($data[$i][0], $data[$i][1], $data[$i][2]);
+                    $this->core->getQueries()->updateExtensions($data[$i][0], $data[$i][1], $data[$i][2], $data[$i][3]);
                 }
                 return MultiResponse::JsonOnlyResponse(JsonResponse::getSuccessResponse());
             }
@@ -226,7 +226,7 @@ class LateController extends AbstractController {
                     JsonResponse::getFailResponse($error)
                 );
             }
-
+            $reason_for_exception = $_POST['reason_for_exception'] ?? 'unspecified';
             $users_with_exceptions = $this->core->getQueries()->getUsersWithExtensions($_POST['g_id']);
             $simple_late_user = null;
             $no_change = false;
@@ -249,14 +249,14 @@ class LateController extends AbstractController {
             $option = isset($_POST['option']) ? $_POST['option'] : -1;
             if ($team != null && $team->getSize() > 1) {
                 if ($option == 0) {
-                    $this->core->getQueries()->updateExtensions($_POST['user_id'], $_POST['g_id'], $late_days);
+                    $this->core->getQueries()->updateExtensions($_POST['user_id'], $_POST['g_id'], $late_days, $reason_for_exception);
                     $this->core->addSuccessMessage("Extensions have been updated");
                     return MultiResponse::JsonOnlyResponse(JsonResponse::getSuccessResponse());
                 }
                 elseif ($option == 1) {
                     $team_member_ids = explode(", ", $team->getMemberList());
                     for ($i = 0; $i < count($team_member_ids); $i++) {
-                        $this->core->getQueries()->updateExtensions($team_member_ids[$i], $_POST['g_id'], $late_days);
+                        $this->core->getQueries()->updateExtensions($team_member_ids[$i], $_POST['g_id'], $late_days, $reason_for_exception);
                     }
                     $this->core->addSuccessMessage("Extensions have been updated");
                     return MultiResponse::JsonOnlyResponse(JsonResponse::getSuccessResponse());
@@ -278,7 +278,7 @@ class LateController extends AbstractController {
                 }
             }
             else {
-                $this->core->getQueries()->updateExtensions($_POST['user_id'], $_POST['g_id'], $late_days);
+                $this->core->getQueries()->updateExtensions($_POST['user_id'], $_POST['g_id'], $late_days, $reason_for_exception);
                 $this->core->addSuccessMessage("Extensions have been updated");
                 return MultiResponse::JsonOnlyResponse(JsonResponse::getSuccessResponse());
             }
@@ -361,8 +361,8 @@ class LateController extends AbstractController {
                 return trim($k);
             }, $fields);
 
-            //Each row has three fields
-            if (count($fields) !== 3) {
+            //All types have 3 fields except for exceptions, which can have 3 or 4 rows.
+            if (count($fields) !== 3 && !($type === 'extension' && count($fields) === 4)) {
                 $data = null;
                 return [
                     "success" => false,
@@ -401,6 +401,10 @@ class LateController extends AbstractController {
                     "success" => false,
                     "error" => "Third column must be an integer greater or equal to zero, got '{$fields[2]}' on row {$row_number}",
                 ];
+            }
+            //$fields[3] added if not present to extension type. Allows for backwards compatibility.
+            if ($type === "extension" && count($fields) === 3) {
+                $fields[] = 'unspecified';
             }
             //Fields information seems okay.  Push fields onto data array.
             $data[] = $fields;
