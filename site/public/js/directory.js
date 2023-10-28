@@ -42,7 +42,7 @@ function newGraderListForm() {
 
 function editRegistrationSectionsForm() {
     const form = $('#registration-sections-form');
-    form.css('display','block');
+    form.css('display', 'block');
     captureTabInModal('registration-sections-form');
     form.find('.form-body').scrollTop(0);
     $('#instructor_all').focus();

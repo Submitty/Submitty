@@ -327,7 +327,7 @@ jobs:
         uses: cypress-io/github-action@v6
         with:
           config: baseUrl=http://localhost
-          spec: cypress/e2e/cypress-system/accessibility.spec.js
+          spec: cypress/e2e/Cypress-System/accessibility.spec.js
           working-directory: ${{env.SUBMITTY_REPOSITORY}}/site
           browser: chrome
 
@@ -346,7 +346,7 @@ jobs:
         uses: cypress-io/github-action@v6
         with:
           config: baseUrl=http://localhost
-          spec: cypress/e2e/cypress-system/autograding_status_1.spec.js
+          spec: cypress/e2e/Cypress-System/autograding_status_1.spec.js
           working-directory: ${{env.SUBMITTY_REPOSITORY}}/site
           browser: chrome
           env: autograding_shipper_off=True
@@ -359,7 +359,7 @@ jobs:
         uses: cypress-io/github-action@v6
         with:
           config: baseUrl=http://localhost
-          spec: cypress/e2e/cypress-system/autograding_status_2.spec.js
+          spec: cypress/e2e/Cypress-System/autograding_status_2.spec.js
           working-directory: ${{env.SUBMITTY_REPOSITORY}}/site
           browser: chrome
           env: autograding_shipper_off=True
@@ -372,7 +372,7 @@ jobs:
         uses: cypress-io/github-action@v6
         with:
           config: baseUrl=http://localhost,chromeWebSecurity=false
-          spec: cypress/e2e/cypress-system/login.spec.js
+          spec: cypress/e2e/Cypress-System/login.spec.js
           working-directory: ${{env.SUBMITTY_REPOSITORY}}/site
           browser: chrome
 
@@ -383,7 +383,7 @@ jobs:
         uses: cypress-io/github-action@v6
         with:
           config: baseUrl=http://localhost
-          spec: cypress/e2e/cypress-system/login.spec.js
+          spec: cypress/e2e/Cypress-System/login.spec.js
           working-directory: ${{env.SUBMITTY_REPOSITORY}}/site
           browser: chrome
 
@@ -394,7 +394,7 @@ jobs:
         uses: cypress-io/github-action@v6
         with:
           config: baseUrl=http://localhost
-          spec: cypress/e2e/cypress-system/login.spec.js
+          spec: cypress/e2e/Cypress-System/login.spec.js
           working-directory: ${{env.SUBMITTY_REPOSITORY}}/site
           browser: chrome
 
@@ -410,7 +410,7 @@ jobs:
         uses: cypress-io/github-action@v6
         with:
           config: baseUrl=http://localhost,chromeWebSecurity=false
-          spec: cypress/e2e/cypress-system/login.spec.js
+          spec: cypress/e2e/Cypress-System/login.spec.js
           working-directory: ${{env.SUBMITTY_REPOSITORY}}/site
           browser: chrome
 
