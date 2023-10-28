@@ -5,7 +5,7 @@ on:
     workflows: [Submitty CI]
     types: [completed]
     branches:
-      - 'main'
+      - 'notify_main_fail'
 jobs:
   Notify-Failure:
     runs-on: ubuntu-latest
