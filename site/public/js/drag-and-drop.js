@@ -959,7 +959,7 @@ function handleSubmission(gradeable_status, remaining_late_days_for_gradeable, c
         }
         else if ( ( days_to_be_charged > late_days_allowed || remaining_late_days_for_gradeable === 0 )  && days_to_be_charged !== charged_late_days  && days_to_be_charged>0  ) {
             late_warning_seen = true;
-            message = `Your submission will be ${days_past_deadline} days late. You are not supposed to submit unless you have an excused absence. Are you sure you want to continue?`;
+            message = `Your submission will be ${days_past_deadline} day(s) late. You are not supposed to submit unless you have an excused absence. Are you sure you want to continue?`;
             if (!confirm(message)) {
                 $('#submit').prop('disabled', false);
                 return;
