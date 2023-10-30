@@ -1116,20 +1116,49 @@ SQL;
     }
 
     /**
-     * @return string[]
+     * @param int[] $post_ids
+     * @return array<int, array<int, string[]>>
+     * }
      */
-    public function getForumAttachments(int $post_id, int $version = 0): array {
+    public function getForumAttachments(array $post_ids, bool $all_vers = false): array {
+        $return = [];
         // Default version is current version
-        if ($version === 0) {
-            $version = $this->getPost($post_id)['version_id'];
+        $placeholders = $this->createParameterList(count($post_ids));
+        if ($all_vers === false) {
+            // Initialize return values
+            foreach ($post_ids as $post_id) {
+                $return[$post_id][0] = [];
+            }
+            $this->course_db->query("SELECT * FROM forum_attachments WHERE post_id IN {$placeholders} AND version_deleted = 0", $post_ids);
+            foreach ($this->course_db->rows() as $row) {
+                $return[$row['post_id']][0][] = $row['file_name'];
+            }
         }
-        $this->course_db->query("SELECT file_name FROM forum_attachments WHERE post_id = ? AND version_added <= ? AND (version_deleted > ? OR version_deleted = 0)", [$post_id, $version, $version]);
-        // Strip 'file_name' keys from each row
-        $attachment_name = [];
-        foreach ($this->course_db->rows() as $row) {
-            $attachment_name[] = $row['file_name'];
+        else {
+            // Get current version of each post
+            $this->course_db->query("SELECT id, version_id FROM posts WHERE id IN {$placeholders}", $post_ids);
+            $current_versions = [];
+            foreach ($post_ids as $post_id) {
+                $current_versions[$post_id] = 1;
+            }
+            foreach ($this->course_db->rows() as $row) {
+                $current_versions[$row['id']] = $row['version_id'];
+            }
+            // Initialize return values
+            foreach ($post_ids as $post_id) {
+                for ($i = 1; $i <= $current_versions[$post_id]; $i++) {
+                    $return[$post_id][$i] = [];
+                }
+            }
+            $this->course_db->query("SELECT * FROM forum_attachments WHERE post_id IN {$placeholders}", $post_ids);
+            foreach ($this->course_db->rows() as $row) {
+                $version_max = ($row['version_deleted'] === 0) ? $current_versions[$row['post_id']] : $row['version_deleted'] - 1;
+                foreach (range($row['version_added'], $version_max) as $version) {
+                    $return[$row['post_id']][$version][] = $row['file_name'];
+                }
+            }
         }
-        return $attachment_name;
+        return $return;
     }
 
     /**
@@ -1151,7 +1180,7 @@ SQL;
                 $placeholders = $this->createParameterList(count($attachments_deleted));
                 $this->course_db->query("UPDATE forum_attachments SET version_deleted = ? WHERE post_id = ? AND file_name IN {$placeholders}", array_merge([$version_id, $post_id], $attachments_deleted));
             }
-            $hasAttachment = !empty($this->getForumAttachments($post_id));
+            $hasAttachment = !empty($this->getForumAttachments([$post_id])[$post_id][0]);
             // Update current post
             $this->course_db->query("UPDATE posts SET content =  ?, anonymous = ?, render_markdown = ?, has_attachment = ?, version_id = ? where id = ?", [$content, $anon, $markdown, $hasAttachment, $version_id, $post_id]);
             // Insert latest version of post into forum_posts_history
@@ -1161,7 +1190,6 @@ SQL;
         }
         catch (DatabaseException $dbException) {
             $this->course_db->rollback();
-            throw $dbException;
             return false;
         } return true;
     }

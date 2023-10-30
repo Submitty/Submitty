@@ -1186,6 +1186,7 @@ class ForumController extends AbstractController {
         $_post = [];
         $older_posts = $this->core->getQueries()->getPostHistory($post_id);
         $current_post = $this->core->getQueries()->getPost($post_id);
+        $post_attachments = $this->core->getQueries()->getForumAttachments([$post_id], true);
         $oc = $current_post["author_user_id"];
         $anon = $current_post["anonymous"];
         $GLOBALS['totalAttachments'] = 0;
@@ -1196,9 +1197,9 @@ class ForumController extends AbstractController {
                 "post_content" => $post["content"],
                 "render_markdown" => false,
                 "post_attachment" => ForumUtils::getForumAttachments(
-                    $current_post['id'],
+                    $post_id,
                     $current_post['thread_id'],
-                    $this->core->getQueries()->getForumAttachments($current_post['id'], $post['version_id']),
+                    $post_attachments[$post_id][$post['version_id']],
                     $this->core->getConfig()->getCoursePath(),
                     $this->core->buildCourseUrl(['display_file'])
                 ),
@@ -1215,9 +1216,9 @@ class ForumController extends AbstractController {
                 "post_content" => $current_post["content"],
                 "render_markdown" => false,
                 "post_attachment" => ForumUtils::getForumAttachments(
-                    $current_post['id'],
+                    $post_id,
                     $current_post['thread_id'],
-                    $this->core->getQueries()->getForumAttachments($current_post['id']),
+                    array_values($post_attachments[$post_id])[0],
                     $this->core->getConfig()->getCoursePath(),
                     $this->core->buildCourseUrl(['display_file'])
                 ),
@@ -1254,16 +1255,6 @@ class ForumController extends AbstractController {
                 $output['change_anon'] = $this->modifyAnonymous($result["author_user_id"]);
                 $output['user'] = $output['anon'] ? 'Anonymous' : $result["author_user_id"];
                 $output['markdown'] = $result['render_markdown'];
-
-                $urls = [];
-                $thread_dir = FileUtils::joinPaths(FileUtils::joinPaths($this->core->getConfig()->getCoursePath(), "forum_attachments"), $result["thread_id"]);
-                $post_dir = FileUtils::joinPaths($thread_dir, $post_id);
-                $filenames = $this->core->getQueries()->getForumAttachments($post_id);
-                foreach ($filenames as $filename) {
-                    $urls[$filename] = $this->core->buildCourseUrl(['display_file']) . '?dir=forum_attachments&path=' . $post_dir . "/" . $filename;
-                }
-
-                $output['img_urls'] = $urls;
 
                 if (isset($_POST["thread_id"])) {
                     $this->getThreadContent($_POST["thread_id"], $output);

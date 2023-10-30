@@ -865,7 +865,6 @@ function showEditPostForm(post_id, thread_id, shouldEditThread, render_markdown,
             const lines = post_content.split(/\r|\r\n|\n/).length;
             const anon = json.anon;
             const change_anon = json.change_anon;
-            const img_urls = json.img_urls;
             // eslint-disable-next-line no-undef
             const user_id = escapeSpecialChars(json.user);
             let time = Date.parse(json.post_time);
@@ -907,12 +906,9 @@ function showEditPostForm(post_id, thread_id, shouldEditThread, render_markdown,
                 $('#markdown_toggle_').removeClass('markdown-active');
                 $('#markdown_buttons_').hide();
             }
-            if (Object.keys(img_urls).length > 0) {
-                //$(`#display-attachments-${post_id}`).css('display', 'block');
-                $('.display-attachment-name').each(function() {
-                    $(this).text(decodeURIComponent($(this).text()));
-                });
-            }
+            $('.display-attachment-name').each(function() {
+                $(this).text(decodeURIComponent($(this).text()));
+            });
 
             // If first post of thread
             if (shouldEditThread) {

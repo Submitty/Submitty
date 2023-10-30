@@ -764,13 +764,23 @@ class ForumThreadView extends AbstractView {
         foreach ($author_user_groups as $author) {
             $is_instructor_full_access[$author["user_id"]] = $author["user_group"] <= User::GROUP_FULL_ACCESS_GRADER;
         }
+        $first_posts = [];
+        $first_posts_ids = [];
+        foreach ($threads as $thread) {
+            if (count($thread["id"]) === 0) {
+                continue;
+            }
+            $first_posts[$thread["id"]] = $this->core->getQueries()->getFirstPostForThread($thread["id"]);
+            $first_posts_ids[] = $first_posts[$thread["id"]]['id'];
+        }
+        $post_attachments = $this->core->getQueries()->getForumAttachments($first_posts_ids);
 
         foreach ($threads as $thread) {
             // Checks if thread ID is empty. If so, skip this threads.
             if (empty($thread["id"])) {
                 continue;
             }
-            $first_post = $this->core->getQueries()->getFirstPostForThread($thread["id"]);
+            $first_post = $first_posts[$thread["id"]];
             if (is_null($first_post)) {
                 // Thread without any posts(eg. Merged Thread)
                 $first_post = ['content' => "", 'render_markdown' => 0];
@@ -900,7 +910,7 @@ class ForumThreadView extends AbstractView {
             $post_attachment = ForumUtils::getForumAttachments(
                 $first_post['id'],
                 $thread['id'],
-                $this->core->getQueries()->getForumAttachments($first_post['id']),
+                $post_attachments[$first_post['id']][0],
                 $this->core->getConfig()->getCoursePath(),
                 $this->core->buildCourseUrl(['display_file'])
             );
@@ -1169,7 +1179,7 @@ class ForumThreadView extends AbstractView {
         $post_attachment = ForumUtils::getForumAttachments(
             $post_id,
             $thread_id,
-            $this->core->getQueries()->getForumAttachments($post_id),
+            $this->core->getQueries()->getForumAttachments([$post_id])[$post_id][0],
             $this->core->getConfig()->getCoursePath(),
             $this->core->buildCourseUrl(['display_file'])
         );
