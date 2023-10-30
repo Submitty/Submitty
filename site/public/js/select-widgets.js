@@ -1,8 +1,8 @@
-/* exported registerSelect2Widgets */
+/* exported registerSelect2Widget */
 
 function registerSelect2Widget(widget_id, belongingModalId = 'off') {
     // Inspired by https://stackoverflow.com/a/30021059
-    let options = {
+    const options = {
         tags: true,
         theme: 'bootstrap-5',
         createTag: (params) => ({
