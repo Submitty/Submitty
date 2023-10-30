@@ -18,7 +18,7 @@ class SelectWidgets {
      * @param Core $core The core of the Submitty application we will add CSS and Js to.
      * @return void
      */
-    public static function addSelect2WidgetCSSAndJs(Core $core): Void {
+    public static function addSelect2WidgetCSSAndJs(Core $core): void {
         $core->getOutput()->addVendorJs(FileUtils::joinPaths('select2', 'js', 'select2.min.js'));
         $core->getOutput()->addVendorCss(FileUtils::joinPaths('select2', 'css', 'select2.min.css'));
         $core->getOutput()->addVendorCss(FileUtils::joinPaths(
