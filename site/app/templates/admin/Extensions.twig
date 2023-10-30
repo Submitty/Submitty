@@ -52,6 +52,7 @@
                             <option value="{{ reason }}">{{ reason }}</option>
                         {% endfor %}
                     </select>
+                    <script> registerSelect2Widget("reason-for-exception"); </script>
                 </span>
             </label>
             <a class="btn btn-primary" href="javascript:updateHomeworkExtension()">Submit</a>
