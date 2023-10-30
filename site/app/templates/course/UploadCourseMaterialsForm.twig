@@ -20,6 +20,12 @@
                     <option value="{{ folder_path }}">{{ folder_path }}</option>
                 {% endfor %}
             </select>
+            <script> 
+                registerSelect2Widget(
+                    "provide-full-path",
+                    "upload-course-materials-form"
+                );
+            </script>
             </div>
         </label>
         <fieldset>

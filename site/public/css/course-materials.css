@@ -56,24 +56,3 @@ a.popout-item > .fas:hover {
 #config-drop-down {
    margin-top: 10px;
 }
-
-#provide-full-path {
-    width: 90%;
-}
-
-/* stylelint-disable selector-class-pattern -- Select2 internal classes */
-#config-drop-down .select2-selection,
-#config-drop-down .select2-selection__rendered,
-#config-drop-down .select2-selection__arrow,
-.select2-container .select2-dropdown,
-.select2-container .select2-dropdown .select2-search .select2-search__field {
-    color: var(--text-black);
-    background-color: var(--default-white);
-}
-
-/* stylelint-disable selector-descendant-combinator-no-non-space -- line too long */
-.select2-container .select2-dropdown .select2-results__options
-.select2-results__option.select2-results__option--selected {
-    background-color: var(--submitty-logo-blue);
-}
-/* stylelint-enable selector-descendant-combinator-no-non-space, selector-class-pattern */
