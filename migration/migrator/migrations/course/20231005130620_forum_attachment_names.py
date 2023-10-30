@@ -109,9 +109,4 @@ def down(config, database, semester, course):
     :param course: Code of course being migrated
     :type course: str
     """
-    #pass
-    database.execute("""
-        DROP TABLE forum_attachments;
-        ALTER TABLE posts DROP COLUMN version_id, DROP COLUMN attachment_name;
-        ALTER TABLE forum_posts_history DROP COLUMN attachment_name;
-    """)
+    pass

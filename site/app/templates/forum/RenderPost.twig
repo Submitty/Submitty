@@ -10,7 +10,13 @@
             {% if row[2] is defined %}
                 <tr>
                     <td style="padding: 20px">
-                        <img src="{{ row[0] }}" alt="Click to view attachment in popup" title="Click to view attachment in popup" class="attachment-img" onclick="openInWindow(this)"/>
+                        <img 
+                            src="{{ row[0] }}"
+                            alt="Click to view attachment in popup"
+                            title="Click to view attachment in popup"
+                            class="attachment-img"
+                            onclick="openInWindow(this)"
+                        />
                     <td/>
                     <td class="attachment-name-history">{{ row[2] }}<td/>
                 </tr>

@@ -791,9 +791,14 @@ SQL;
             $this->course_db->query("SELECT MAX(id) as max_id from posts where thread_id=? and author_user_id=?", [$thread_id, $user]);
             $id = $this->course_db->rows()[0]["max_id"];
             $this->visitThread($user, $thread_id);
+            $rows = [];
+            $params = [];
             foreach ($attachment_name as $img) {
-                $this->course_db->query("INSERT INTO forum_attachments (post_id, file_name, version_added, version_deleted) VALUES (?, ?, 1, 0)", [$id, $img]);
+                $params[] = $this->createParameterList(4);
+                $rows = array_merge($rows, [$id, $img, 1, 0]);
             }
+            $placeholders = implode(", ", $params);
+            $this->course_db->query("INSERT INTO forum_attachments (post_id, file_name, version_added, version_deleted) VALUES {$placeholders}", $rows);
             return $id;
         }
         catch (DatabaseException $dbException) {
@@ -1113,7 +1118,7 @@ SQL;
     /**
      * @return string[]
      */
-    public function getForumAttachments(int $post_id, int $version = 0) {
+    public function getForumAttachments(int $post_id, int $version = 0): array {
         // Default version is current version
         if ($version === 0) {
             $version = $this->getPost($post_id)['version_id'];
@@ -1142,8 +1147,9 @@ SQL;
             $this->course_db->query("SELECT version_id FROM posts WHERE id = ?", [$post_id]);
             $version_id = $this->course_db->rows()[0]["version_id"] + 1;
             // Update attachments
-            foreach ($attachments_deleted as $img) {
-                $this->course_db->query("UPDATE forum_attachments SET version_deleted = ? WHERE post_id = ? AND file_name = ?", [$version_id, $post_id, $img]);
+            if (count($attachments_deleted) > 0) {
+                $placeholders = $this->createParameterList(count($attachments_deleted));
+                $this->course_db->query("UPDATE forum_attachments SET version_deleted = ? WHERE post_id = ? AND file_name IN {$placeholders}", array_merge([$version_id, $post_id], $attachments_deleted));
             }
             $hasAttachment = !empty($this->getForumAttachments($post_id));
             // Update current post
@@ -1155,6 +1161,7 @@ SQL;
         }
         catch (DatabaseException $dbException) {
             $this->course_db->rollback();
+            throw $dbException;
             return false;
         } return true;
     }
