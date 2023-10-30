@@ -414,6 +414,7 @@ function newEditCourseMaterialsForm(tag) {
 
     editFilePathRecommendations();
     path.val(file_path.substring(1));
+    registerSelect2Widget("new-file-name", "material-edit-form");
 
     $("#material-edit-form", form).attr('data-id', id);
     $("#edit-picker", form).attr('value', release_time);
