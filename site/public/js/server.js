@@ -395,7 +395,6 @@ function newEditCourseMaterialsForm(tag) {
     const title_label = $("#edit-title-label", form);
     const url_label = $("#edit-url-url-label", form);
     const path = $("#new-file-name");
-    path.val(file_path.substring(1));
     const titleVal = $("#edit-title");
     title_label.css('display', 'block');
     if (is_link === 1) {
@@ -414,6 +413,7 @@ function newEditCourseMaterialsForm(tag) {
     }
 
     editFilePathRecommendations();
+    path.val(file_path.substring(1));
 
     $("#material-edit-form", form).attr('data-id', id);
     $("#edit-picker", form).attr('value', release_time);
@@ -431,18 +431,24 @@ function editFilePathRecommendations() {
     const fileNameInput = $("#edit-title");
     const fileName = fileNameInput.val();
 
-    // Get options
-    const dataList = $("#change_folder_paths");
-    const optionsArray = dataList.find('option').map(function () {return $(this);}).get();
-
-    optionsArray.forEach((option) => {
-        const optionString = option.val();
+    const options = document.getElementById("new-file-name").options;
+    for (let i = 0; i < options.length; i++) {
+        const optionString = options[i].value;
         const lastSlash = optionString.lastIndexOf('/');
         const currentOptionMinusFile = optionString.substring(0, lastSlash);
 
-        const newOption = `${currentOptionMinusFile}/${fileName}`;
-        option.val(newOption);
-    })
+        let newOption;
+        if (lastSlash !== -1) {
+            newOption = `${currentOptionMinusFile}/${fileName}`;
+        }
+        else {
+            newOption = fileName;
+        }
+
+        options[i].value = newOption;
+        options[i].innerHTML = newOption;
+    }
+    registerSelect2Widget("new-file-name", "material-edit-form");
 }
 
 var lastActiveElement = null;

@@ -14,18 +14,18 @@
                 {{ base_course_material_path }}/optional/subdirectory
             </div>
             <div id="config-drop-down">
-            <select name="eg_config_path" id="provide-full-path">
-                <option value=""> (Top Directory) </option>
-                {% for folder_path in folder_paths %}
-                    <option value="{{ folder_path }}">{{ folder_path }}</option>
-                {% endfor %}
-            </select>
-            <script> 
-                registerSelect2Widget(
-                    "provide-full-path",
-                    "upload-course-materials-form"
-                );
-            </script>
+                <select name="eg_config_path" id="provide-full-path">
+                    <option value=""> (Top Directory) </option>
+                    {% for folder_path in folder_paths %}
+                        <option value="{{ folder_path }}">{{ folder_path }}</option>
+                    {% endfor %}
+                </select>
+                <script> 
+                    registerSelect2Widget(
+                        "provide-full-path",
+                        "upload-course-materials-form"
+                    );
+                </script>
             </div>
         </label>
         <fieldset>

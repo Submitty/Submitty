@@ -56,3 +56,7 @@ a.popout-item > .fas:hover {
 #config-drop-down {
    margin-top: 10px;
 }
+
+#new-file-name {
+    width: 100%;
+}
