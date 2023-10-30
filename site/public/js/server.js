@@ -283,6 +283,18 @@ function newUploadCourseMaterialsForm() {
     form.find('.form-body').scrollTop(0);
     $('[name="upload"]', form).val(null);
     $('#overwrite-materials-flag').remove();
+
+    // Register select2
+    // https://stackoverflow.com/a/30021059
+    $('#provide-full-path').select2({
+        tags: true,
+        theme: 'bootstrap-5',
+        dropdownParent: $("#upload-course-materials-form"),
+        createTag: (params) => ({
+            id: params.term,
+            text: params.term,
+        }),
+    });
 }
 
 function newEditCourseMaterialsFolderForm(tag) {
