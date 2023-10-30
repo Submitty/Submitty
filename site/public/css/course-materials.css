@@ -57,6 +57,10 @@ a.popout-item > .fas:hover {
    margin-top: 10px;
 }
 
+#provide-full-path {
+    width: 90%;
+}
+
 /* stylelint-disable selector-class-pattern -- Select2 internal classes */
 #config-drop-down .select2-selection,
 #config-drop-down .select2-selection__rendered,
