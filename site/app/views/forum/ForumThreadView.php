@@ -767,7 +767,7 @@ class ForumThreadView extends AbstractView {
         $first_posts = [];
         $first_posts_ids = [];
         foreach ($threads as $thread) {
-            if (count($thread["id"]) === 0) {
+            if (!isset($thread["id"])) {
                 continue;
             }
             $first_posts[$thread["id"]] = $this->core->getQueries()->getFirstPostForThread($thread["id"]);
