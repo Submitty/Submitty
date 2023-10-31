@@ -65,16 +65,16 @@
             var status = Cookies.get('inquiry_status');
             
             if (status === 'on') {
-                $('[data-testid=grade-button]').each(function() {
+                $('.grade-button').each(function() {
                     if (typeof $(this).attr('data-grade-inquiry') === 'undefined') {
-                        $(this).closest('[data-testid="grade-table"]').hide();  // hide gradeable items without active inquiries
+                        $(this).closest('.grade-table').hide();  // hide gradeable items without active inquiries
                     }
                 });
                 button.textContent = "Grade Inquiry Only: On";
             }
             else {
-                $('[data-testid=grade-button]').each(function() {
-                    $(this).closest('[data-testid="grade-table"]').show();  // show all gradeable items
+                $('.grade-button').each(function() {
+                    $(this).closest('.grade-table').show();  // show all gradeable items
                 });
                 button.textContent = "Grade Inquiry Only: Off";
             }
@@ -261,7 +261,7 @@
 </div>
 
 {% macro render_student(context, section, graded_gradeable, index, info, columns, team_gradeable_view_history, overrides, anon_ids) %}
-    <tr data-testid="grade-table"
+    <tr class="grade-table" data-testid="grade-table"
         {% if not graded_gradeable.getSubmitter().isTeam() and graded_gradeable.getSubmitter().getUser().accessGrading() %}
             style='background: #7bd0f7;'
         {% endif %}
@@ -516,7 +516,7 @@
         {% set badge_count = graded_gradeable.getActiveGradeInquiryCount()  %}
     {%  endif %}
     <td style="text-align: center;">
-        <a data-testid="grade-button" {% if graded_gradeable.hasActiveGradeInquiry() %}data-grade-inquiry="true"{% endif %} class="btn {{ btn_class }}" href="{{ context.grade_url }}?who_id={{ anon_ids[graded_gradeable.getSubmitter().getId()] }}&sort={{ context.sort }}&direction={{ context.direction }}">
+        <a class="grade-button" data-testid="grade-button" {% if graded_gradeable.hasActiveGradeInquiry() %}data-grade-inquiry="true"{% endif %} class="btn {{ btn_class }}" href="{{ context.grade_url }}?who_id={{ anon_ids[graded_gradeable.getSubmitter().getId()] }}&sort={{ context.sort }}&direction={{ context.direction }}">
             {{ contents }}
             {% if badge_count > 0 and graded_gradeable.getGradeable().isGradeInquiryPerComponentAllowed()%}
                 <span class="notification-badge">{{ badge_count }}</span>
@@ -566,7 +566,7 @@
         {% set badge_count = graded_gradeable.getActiveGradeInquiryCount()  %}
     {%  endif %}
     <td style="text-align: center;">
-        <a data-testid="grade-button" {% if graded_gradeable.hasActiveGradeInquiry() %}data-grade-inquiry="true"{% endif %} class="btn {{ btn_class }}" href="{{ context.grade_url }}?who_id={{ anon_ids[graded_gradeable.getSubmitter().getId()] }}&sort={{ context.sort }}&direction={{ context.direction }}">
+        <a class="grade-button" data-testid="grade-button" {% if graded_gradeable.hasActiveGradeInquiry() %}data-grade-inquiry="true"{% endif %} class="btn {{ btn_class }}" href="{{ context.grade_url }}?who_id={{ anon_ids[graded_gradeable.getSubmitter().getId()] }}&sort={{ context.sort }}&direction={{ context.direction }}">
             {{ contents }}
             {% if badge_count is defined and badge_count > 0 and graded_gradeable.getGradeable().isGradeInquiryPerComponentAllowed()%}
                 <span class="notification-badge">{{ badge_count }}</span>
