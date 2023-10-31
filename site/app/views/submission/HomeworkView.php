@@ -455,6 +455,8 @@ class HomeworkView extends AbstractView {
             else {
                 return 0;
             }
+        }, $team_ldi)) : 0;
+
         $min_team_member_late_days_exception = $team_ldi !== null ? min(array_map(function ($ldi) {
             if ($ldi !== null) {
                 return $ldi->getLateDayException();
