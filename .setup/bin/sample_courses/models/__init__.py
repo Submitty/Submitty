@@ -3,7 +3,8 @@ Contains the Mark class and User class
 """
 from pathlib import Path
 import random
-from sample_courses import *
+import os
+from sample_courses import SETUP_DATA_PATH, DB_ONLY, yaml
 from sample_courses.utils.create_or_generate import generate_random_user_id, generate_pronouns
 from sample_courses.utils.checks import user_exists
 from sample_courses.utils.dependent import add_to_group
@@ -195,6 +196,7 @@ shadowWarning: 0"""
             return self.__dict__[detail]
         else:
             return None
+
 
 def generate_random_users(total, real_users) -> list:
     """

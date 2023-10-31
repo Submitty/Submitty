@@ -6,10 +6,8 @@ Contains function:
 
 from __future__ import print_function, division
 
-# if you need to modify any global variables, change this to import file as name
-from sample_courses import *
-
 from sample_courses.models import generate_random_marks, Mark
+
 
 class Component(object):
     def __init__(self, component, order) -> None:
@@ -56,9 +54,10 @@ class Component(object):
     def create(self, g_id, conn, table, mark_table) -> None:
         ins = table.insert().values(g_id=g_id, gc_title=self.title, gc_ta_comment=self.ta_comment,
                                     gc_student_comment=self.student_comment,
-                                    gc_lower_clamp=self.lower_clamp, gc_default=self.default, gc_max_value=self.max_value,
-                                    gc_upper_clamp=self.upper_clamp, gc_is_text=self.is_text,
-                                    gc_is_peer=self.is_peer_component, gc_order=self.order, gc_page=self.page)
+                                    gc_lower_clamp=self.lower_clamp, gc_default=self.default,
+                                    gc_max_value=self.max_value, gc_upper_clamp=self.upper_clamp,
+                                    gc_is_text=self.is_text, gc_is_peer=self.is_peer_component,
+                                    gc_order=self.order, gc_page=self.page)
         res = conn.execute(ins)
         self.key = res.inserted_primary_key[0]
 
