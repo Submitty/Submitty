@@ -764,23 +764,15 @@ class ForumThreadView extends AbstractView {
         foreach ($author_user_groups as $author) {
             $is_instructor_full_access[$author["user_id"]] = $author["user_group"] <= User::GROUP_FULL_ACCESS_GRADER;
         }
-        $first_posts = [];
-        $first_posts_ids = [];
-        foreach ($threads as $thread) {
-            if (!isset($thread["id"])) {
-                continue;
-            }
-            $first_posts[$thread["id"]] = $this->core->getQueries()->getFirstPostForThread($thread["id"]);
-            $first_posts_ids[] = $first_posts[$thread["id"]]['id'];
-        }
-        $post_attachments = $this->core->getQueries()->getForumAttachments($first_posts_ids);
+        $first_posts = $this->core->getQueries()->getFirstPostForThreads(array_column($threads, "id"));
+        $post_attachments = $this->core->getQueries()->getForumAttachments(array_column($first_posts, "id"));
 
         foreach ($threads as $thread) {
             // Checks if thread ID is empty. If so, skip this threads.
             if (empty($thread["id"])) {
                 continue;
             }
-            $first_post = $first_posts[$thread["id"]];
+            $first_post = (isset($first_posts[$thread["id"]])) ? $first_posts[$thread['id']] : null;
             if (is_null($first_post)) {
                 // Thread without any posts(eg. Merged Thread)
                 $first_post = ['content' => "", 'render_markdown' => 0];

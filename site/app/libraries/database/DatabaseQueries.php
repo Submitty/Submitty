@@ -919,6 +919,20 @@ SQL;
         }
     }
 
+    /**
+     * @param int[] $thread_ids
+     * @return array<int, mixed[]>
+     */
+    public function getFirstPostForThreads(array $thread_ids): array {
+        $placeholders = $this->createParameterList(count($thread_ids));
+        $this->course_db->query("SELECT * FROM posts WHERE parent_id = -1 AND thread_id IN {$placeholders}", $thread_ids);
+        $return = [];
+        foreach ($this->course_db->rows() as $row) {
+            $return[$row['thread_id']] = $row;
+        }
+        return $return;
+    }
+
     public function getPost($post_id) {
         $this->course_db->query("SELECT * FROM posts where id = ?", [$post_id]);
         return $this->course_db->row();
