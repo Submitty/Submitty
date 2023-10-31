@@ -11,7 +11,7 @@ import hashlib
 import os
 import os.path
 import random
-from submitty_utils import dateutils, parse_datetime
+from submitty_utils import dateutils
 
 # if you need to modify any global variables, change this to import file as name
 from sample_courses import MORE_EXAMPLES_DIR, SETUP_DATA_PATH, TUTORIAL_DIR
@@ -192,7 +192,7 @@ class Gradeable(object):
             if 'eg_max_team_size' in gradeable:
                 self.max_team_size = gradeable['eg_max_team_size']
             if 'eg_team_lock_date' in gradeable:
-                self.team_lock_date = parse_datetime(gradeable['eg_team_lock_date'])
+                self.team_lock_date = dateutils.parse_datetime(gradeable['eg_team_lock_date'])
             if 'eg_annotated_pdf' in gradeable:
                 self.annotated_pdf = gradeable['eg_annotated_pdf'] is True
                 self.annotation_path = os.path.join(MORE_EXAMPLES_DIR, self.gradeable_config,
