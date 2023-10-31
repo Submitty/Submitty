@@ -974,7 +974,6 @@ function handleSubmission(gradeable_status, remaining_late_days_for_gradeable, c
             }
         }
     }
-    
 
     const formData = new FormData();
 
