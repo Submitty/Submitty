@@ -62,7 +62,8 @@
     <script>
         window.onload = function() {
             var button = document.getElementById('inquiryButton');
-            status = Cookies.get('inquiry_status')
+            var status = Cookies.get('inquiry_status');
+            
             if (status === 'on') {
                 $('[data-testid=grade-button]').each(function() {
                     if (typeof $(this).attr('data-grade-inquiry') === 'undefined') {
@@ -70,16 +71,16 @@
                     }
                 });
                 button.textContent = "Grade Inquiry Only: On";
-            } 
+            }
             else {
                 $('[data-testid=grade-button]').each(function() {
-                        $(this).closest('[data-testid="grade-table"]').show();  // show all gradeable items
-                    });
-                    button.textContent = "Grade Inquiry Only: Off";
+                    $(this).closest('[data-testid="grade-table"]').show();  // show all gradeable items
+                });
+                button.textContent = "Grade Inquiry Only: Off";
             }
         }
     </script>
-    
+
     {% endif %}
     {% if not is_student %}
         <a href="{{ stats_url }}" class="btn btn-primary">Grading Stats</a>
