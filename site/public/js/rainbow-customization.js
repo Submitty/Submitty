@@ -311,11 +311,6 @@ function addToTable() {
         return;
     }
 
-    const newRowData = {
-        user: USERID,
-        gradeable: gradeable,
-        penalty: penalty,
-    };
 
     const tableBody = document.getElementById('table-body');
 
@@ -346,7 +341,9 @@ function addToTable() {
 
     const cellDelete = newRow.insertCell();
     const deleteLink = document.createElement('a');
-    deleteLink.innerHTML = '<i class="fas fa-trash"></i>';
+    const deleteIcon = document.createElement('i');
+    deleteIcon.className = 'fas fa-trash';
+    deleteLink.appendChild(deleteIcon);
     deleteLink.onclick = function () {
         deleteRow(this);
     };
@@ -425,9 +422,6 @@ function buildJSON() {
     ret = JSON.stringify(ret);
     return ret;
 }
-
-
-
 
 function showLogButton(responseData) {
     $('#show_log_button').show();
@@ -513,7 +507,7 @@ function ajaxUpdateJSON(successCallback, errorCallback) {
 
 
 function displayChangeDetectedMessage() {
-    $('#save_status').html('Changes detected, press "Save Changes" to save them.');
+    $('#save_status').text('Changes detected, press "Save Changes" to save them.');
 }
 
 /**
