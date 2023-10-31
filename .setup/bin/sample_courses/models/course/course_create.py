@@ -191,8 +191,6 @@ class Course_create:
         os.system(f"mkdir -p {os.path.join(self.course_path, 'submissions')}")
         os.system(f"chown submitty_php:{self.code}_tas_www "
                   f"{os.path.join(self.course_path, 'submissions')}")
-        # os.system("su {} -c '{}'".format(self.instructor.id, os.path.join(self.course_path,
-        #                                                              "BUILD_{}.sh".format(self.code))))
 
         self.add_gradeables()
         self.conn.close()
