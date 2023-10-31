@@ -28,13 +28,12 @@ class RainbowCustomizationJSON extends AbstractModel {
     private $gradeables = [];
 
     // The order of allowed_display and allowed_display_description has to match
-    const allowed_display = ['grade_summary', 'grade_details', 'display_benchmark', 'benchmark_percent',
+    const allowed_display = ['grade_summary', 'grade_details', 'benchmark_percent',
         'exam_seating', 'section', 'messages', 'warning', 'final_grade', 'manual_grade', 'final_cutoff', 'instructor_notes'];
 
     const allowed_display_description = [
         "Display a column(row) for each gradeable bucket on the syllabus.", //grade_summary
         "Display a column(row) for each gradeable within each gradeable bucket on the syllabus.", //grade_details
-        "Display a row(column) for each benchmark/comparison selected below.", //display_benchmark
         "not used", //benchmark_percent
         "Used for assigned seating for exams, see also:  <a href='https://submitty.org/instructor/course_settings/rainbow_grades/exam_seating'>Exam Seating</a> ", //exam_seating
         "Display the students registration section.", //section
