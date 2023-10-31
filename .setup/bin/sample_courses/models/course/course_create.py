@@ -26,7 +26,7 @@ class Course_create:
     """
     semester: str
     # code: unknown type
-    # instructor: unknown idk type
+    # instructor: unknown type
     gradeables: list
     make_customization: bool
     users: list
