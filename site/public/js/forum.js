@@ -1251,6 +1251,22 @@ function modifyThreadList(currentThreadId, currentCategoriesId, course, loadFirs
     });
 }
 
+function toggleLike(postId) {
+    var likeIcon = document.getElementById('likeIcon_' + postId);
+    var likeCounter = document.getElementById('likeCounter_' + postId);
+    //var likeToggle = document.getElementById('likeToggle'+postId);
+    //console.log(likeCounter);
+
+    if (likeIcon.src.endsWith('site/public/img/off-duck-button.svg')) {
+        likeIcon.src = 'site/public/img/on-duck-button.svg';
+        likeCounter.textContent = parseInt(likeCounter.textContent) + 1;
+    } else {
+        likeIcon.src = 'site/public/img/off-duck-button.svg';
+        likeCounter.textContent = parseInt(likeCounter.textContent) - 1;
+    }
+}
+
+
 // eslint-disable-next-line no-unused-vars
 function replyPost(post_id) {
     if ( $(`#${post_id}-reply`).css('display') === 'block' ) {
