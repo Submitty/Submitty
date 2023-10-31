@@ -12,6 +12,7 @@ from sqlalchemy import Table
 
 from sample_courses import SETUP_DATA_PATH
 
+
 class Course_data:
     """
     Contains functions that add/create data to the course
@@ -19,11 +20,11 @@ class Course_data:
     # global vars that are instantiated in Class course
     # This is only to type define the global vars to make it easier to debug using
     # intellisense
-    semester:str
-    # code:dict idk type
-    # instructor:dict idk type
-    gradeables:list
-    make_customization:bool
+    semester: str
+    # code: unknown type
+    # instructor: unknown type
+    gradeables: list
+    make_customization: bool
     users: list
     registration_sections: int
     rotating_sections: int
@@ -35,7 +36,7 @@ class Course_data:
     def __init__(self):
         # Anything that needs to be initialized goes here
         pass
-    
+
     def add_sample_queue_data(self) -> None:
         # load the sample polls from input file
         queue_data_path = os.path.join(SETUP_DATA_PATH, "queue", "queue_data.json")
@@ -48,7 +49,8 @@ class Course_data:
             course_json = json.load(open_file)
             course_json['course_details']['queue_enabled'] = True
             course_json['course_details']['queue_message'] = queue_data["queue_message"]
-            course_json['course_details']['queue_announcement_message'] = queue_data["queue_announcement_message"]
+            course_json['course_details']['queue_announcement_message'] = \
+                queue_data["queue_announcement_message"]
             open_file.seek(0)
             open_file.truncate()
             json.dump(course_json, open_file, indent=2)
@@ -70,15 +72,18 @@ class Course_data:
         queue_data["queue_entries"][3]["time_help_start"] = datetime.now() - timedelta(minutes=14)
         # waiting for help for second time today --- LAB queue
         queue_data["queue_entries"][4]["time_in"] = datetime.now() - timedelta(minutes=21)
-        queue_data["queue_entries"][4]["last_time_in_queue"] = queue_data["queue_entries"][0]["time_in"]
+        queue_data["queue_entries"][4]["last_time_in_queue"] = \
+            queue_data["queue_entries"][0]["time_in"]
         # paused --- HW queue
         queue_data["queue_entries"][5]["time_in"] = datetime.now() - timedelta(minutes=20)
-        queue_data["queue_entries"][5]["time_paused_start"] = datetime.now() - timedelta(minutes=18)
+        queue_data["queue_entries"][5]["time_paused_start"] = \
+            datetime.now() - timedelta(minutes=18)
         # wait for the first time --- HW queue
         queue_data["queue_entries"][6]["time_in"] = datetime.now() - timedelta(minutes=15)
         # waiting for help for second time this week --- LAB queue
         queue_data["queue_entries"][7]["time_in"] = datetime.now() - timedelta(minutes=10)
-        queue_data["queue_entries"][7]["last_time_in_queue"] = datetime.now() - timedelta(days=1, minutes=30)
+        queue_data["queue_entries"][7]["last_time_in_queue"] = \
+            datetime.now() - timedelta(days=1, minutes=30)
 
         queues_table = Table("queue_settings", self.metadata, autoload=True)
         queue_entries_table = Table("queue", self.metadata, autoload=True)
@@ -139,7 +144,8 @@ class Course_data:
 
         os.makedirs(image_dir)
         os.system(f"chown -R submitty_php:sample_tas_www {image_dir}")
-        copyfile(os.path.join(SETUP_DATA_PATH, "polls", "sea_animals.png"), polls_data[0]["image_path"])
+        copyfile(os.path.join(SETUP_DATA_PATH, "polls", "sea_animals.png"),
+                 polls_data[0]["image_path"])
 
         # add polls to DB
         polls_table = Table("polls", self.metadata, autoload=True)
@@ -167,7 +173,8 @@ class Course_data:
         # poll1: for each self.users make a random number (0-5) of responses
         poll1_response_ids = list(range(len(polls_data[0]['responses'])))
         for user in self.users:
-            random_responses = random.sample(poll1_response_ids, random.randint(0, len(polls_data[0]['responses'])))
+            random_responses = random.sample(poll1_response_ids,
+                                             random.randint(0, len(polls_data[0]['responses'])))
             for response_id in random_responses:
                 poll_responses_data.append({
                     "poll_id": polls_data[0]["id"],
@@ -177,10 +184,14 @@ class Course_data:
         # poll2: take a large portion of self.users and make each submit one random response
         for user in self.users:
             if random.random() < 0.8:
+                generate_rand_int = random.randint(1, len(polls_data[1]['responses'])) + \
+                    len(polls_data[0]['responses'])
+
                 poll_responses_data.append({
                     "poll_id": polls_data[1]["id"],
                     "student_id": user.id,
-                    "option_id": random.randint(1, len(polls_data[1]['responses'])) + len(polls_data[0]['responses']) # Must offset by number of options for poll 1
+                    # Must offset by number of options for poll 1
+                    "option_id": generate_rand_int
                 })
 
         # add responses to DB
@@ -200,16 +211,18 @@ class Course_data:
             open_file.truncate()
             json.dump(course_json, open_file, indent=2)
 
-        f_data = (self.getForumDataFromFile('posts.txt'), self.getForumDataFromFile('threads.txt'), self.getForumDataFromFile('categories.txt'))
+        f_data = (self.getForumDataFromFile('posts.txt'), self.getForumDataFromFile('threads.txt'),
+                  self.getForumDataFromFile('categories.txt'))
         forum_threads = Table("threads", self.metadata, autoload=True)
         forum_posts = Table("posts", self.metadata, autoload=True)
         forum_cat_list = Table("categories_list", self.metadata, autoload=True)
         forum_thread_cat = Table("thread_categories", self.metadata, autoload=True)
 
         for catData in f_data[2]:
-            self.conn.execute(forum_cat_list.insert(), category_desc=catData[0], rank=catData[1], color=catData[2])
+            self.conn.execute(forum_cat_list.insert(), category_desc=catData[0], rank=catData[1],
+                              color=catData[2])
 
-        for thread_id, threadData in enumerate(f_data[1], start = 1):
+        for thread_id, threadData in enumerate(f_data[1], start=1):
             self.conn.execute(forum_threads.insert(),
                               title=threadData[0],
                               created_by=threadData[1],
@@ -218,15 +231,21 @@ class Course_data:
                               merged_thread_id=threadData[4],
                               merged_post_id=threadData[5],
                               is_visible=True if threadData[6] == "t" else False)
-            self.conn.execute(forum_thread_cat.insert(), thread_id=thread_id, category_id=threadData[7])
+            self.conn.execute(forum_thread_cat.insert(), thread_id=thread_id,
+                              category_id=threadData[7])
         counter = 1
         for postData in f_data[0]:
-            if(postData[10] != "f" and postData[10] != ""):
-                # In posts.txt, if the 10th column is f or empty, then no attachment is added. If anything else is in the column, then it will be treated as the file name.
-                attachment_path = os.path.join(self.course_path, "forum_attachments", str(postData[0]), str(counter))
+            if (postData[10] != "f" and postData[10] != ""):
+                # In posts.txt, if the 10th column is f or empty, then no attachment is added.
+                # If anything else is in the column, then it will be treated as the file name.
+                attachment_path = os.path.join(self.course_path, "forum_attachments",
+                                               str(postData[0]), str(counter))
                 os.makedirs(attachment_path)
-                os.system(f"chown -R submitty_php:sample_tas_www {os.path.join(self.course_path, 'forum_attachments', str(postData[0]))}")
-                copyfile(os.path.join(SETUP_DATA_PATH, "forum", "attachments", postData[10]), os.path.join(attachment_path, postData[10]))
+                path_to_forum = os.path.join(self.course_path, 'forum_attachments',
+                                             str(postData[0]))
+                os.system(f"chown -R submitty_php:sample_tas_www {path_to_forum}")
+                copyfile(os.path.join(SETUP_DATA_PATH, "forum", "attachments", postData[10]),
+                         os.path.join(attachment_path, postData[10]))
             counter += 1
             self.conn.execute(forum_posts.insert(),
                               thread_id=postData[0],
@@ -237,8 +256,7 @@ class Course_data:
                               anonymous=True if postData[5] == "t" else False,
                               deleted=True if postData[6] == "t" else False,
                               endorsed_by=postData[7],
-                              resolved = True if postData[8] == "t" else False,
+                              resolved=True if postData[8] == "t" else False,
                               type=postData[9],
                               has_attachment=True if postData[10] != "f" else False,
                               render_markdown=True if postData[11] == "t" else False)
-
