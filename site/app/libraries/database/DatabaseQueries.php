@@ -4356,7 +4356,8 @@ ORDER BY gt.{$section_key}",
         $this->course_db->query(
             "
         SELECT u.user_id, user_givenname,
-          user_preferred_givenname, user_familyname, late_day_exceptions
+          user_preferred_givenname, user_familyname,
+          late_day_exceptions, reason_for_exception
         FROM users as u
         FULL OUTER JOIN late_day_exceptions as l
           ON u.user_id=l.user_id
@@ -4524,23 +4525,25 @@ SQL;
      * @param string  $user_id
      * @param string  $g_id
      * @param integer $days
+     * @param string  $reason
      */
-    public function updateExtensions($user_id, $g_id, $days) {
+    public function updateExtensions($user_id, $g_id, $days, $reason) {
         $this->course_db->query(
             "
           UPDATE late_day_exceptions
-          SET late_day_exceptions=?
+          SET late_day_exceptions=?,
+              reason_for_exception=?
           WHERE user_id=?
             AND g_id=?;",
-            [$days, $user_id, $g_id]
+            [$days, $reason, $user_id, $g_id]
         );
         if ($this->course_db->getRowCount() === 0) {
             $this->course_db->query(
                 "
             INSERT INTO late_day_exceptions
-            (user_id, g_id, late_day_exceptions)
-            VALUES(?,?,?)",
-                [$user_id, $g_id, $days]
+            (user_id, g_id, late_day_exceptions, reason_for_exception)
+            VALUES(?,?,?,?)",
+                [$user_id, $g_id, $days, $reason]
             );
         }
     }
