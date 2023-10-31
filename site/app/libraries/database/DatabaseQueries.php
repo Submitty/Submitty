@@ -2209,7 +2209,7 @@ ORDER BY {$u_or_t}.{$section_key}",
      * Get an array of Teams for a Gradeable matching the given rotating sections
      *
      * @param  string $g_id
-     * @param  array  $sections
+     * @param  array<int>  $sections
      * @param  string $section_key
      * @param  bool   $is_team
      * @return array<int|string,int>
