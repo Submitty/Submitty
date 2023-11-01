@@ -21,11 +21,6 @@
 
 </script>
 
-{#{%  include "forum/EditPostForm.twig" with {
-    "categories" : filterFormData.categories,
-    "post_data" : generate_post_content.post_data,
-} %}#}
-
 {%  include "forum/HistoryForm.twig" %}
 
 {% include "forum/SplitPostForm.twig" with {

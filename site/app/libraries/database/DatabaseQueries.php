@@ -791,14 +791,16 @@ SQL;
             $this->course_db->query("SELECT MAX(id) as max_id from posts where thread_id=? and author_user_id=?", [$thread_id, $user]);
             $id = $this->course_db->rows()[0]["max_id"];
             $this->visitThread($user, $thread_id);
-            $rows = [];
-            $params = [];
-            foreach ($attachment_name as $img) {
-                $params[] = $this->createParameterList(4);
-                $rows = array_merge($rows, [$id, $img, 1, 0]);
+            if($hasAttachment) {
+                $rows = [];
+                $params = [];
+                foreach ($attachment_name as $img) {
+                    $params[] = $this->createParameterList(4);
+                    $rows = array_merge($rows, [$id, $img, 1, 0]);
+                }
+                $placeholders = implode(", ", $params);
+                $this->course_db->query("INSERT INTO forum_attachments (post_id, file_name, version_added, version_deleted) VALUES {$placeholders}", $rows);
             }
-            $placeholders = implode(", ", $params);
-            $this->course_db->query("INSERT INTO forum_attachments (post_id, file_name, version_added, version_deleted) VALUES {$placeholders}", $rows);
             return $id;
         }
         catch (DatabaseException $dbException) {

@@ -5,7 +5,7 @@
 {% endif %}
 {% if post_attachment is defined and post_attachment.exist == true %}
     <table>
-        <tbody class="history-attachment-table", id="history-table-{{ edit_id }}">
+        <tbody class="history-attachment-table" id="history-table-{{ edit_id }}">
             {% for row in post_attachment.params.unencoded_data %}
             {% if row[2] is defined %}
                 <tr>
@@ -17,8 +17,8 @@
                             class="attachment-img"
                             onclick="openInWindow(this)"
                         />
-                    <td/>
-                    <td class="attachment-name-history">{{ row[2] }}<td/>
+                    </td>
+                    <td class="attachment-name-history">{{ row[2] }}</td>
                 </tr>
                 {% endif %}
             {% endfor %}

@@ -183,19 +183,19 @@
                 <tr>
                     <td>
                         <img src="{{ row[0] }}" class="thumbnail" alt="{{ row[2] }}"/>
-                    <td/>
-                    <td class="display-attachment-name">{{ row[2] }}<td/>
+                    </td>
+                    <td class="display-attachment-name">{{ row[2] }}</td>
                     <td class="file-trash">
-                        <a class="btn btn-default" onclick="markForDeletion(this)" name="delete_{{ row[2] }}">Delete<a/>
-                    <td/>
-                <tr/>
+                        <a class="btn btn-default" onclick="markForDeletion(this)" name="delete_{{ row[2] }}">Delete</a>
+                    </td>
+                </tr>
                 {% endif %}
             {% endfor %}
             </tbody>
         </table>
     </div>
     {% endif %}
-    <br style-"margin-bottom:1rem;">
+    <br style="margin-bottom:1rem;">
     <fieldset class="inline-block right-zero">
       <legend style="display:none">Settings:</legend>
         <div class="new-thread-settings-wrapper">
