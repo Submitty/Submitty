@@ -65,3 +65,7 @@
     {% endif %}
 
 </div>
+
+{%  include "forum/EditPostForm.twig" with {
+    "categories" : filterFormData.categories,
+} %}

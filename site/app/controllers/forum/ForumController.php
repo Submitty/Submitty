@@ -1247,6 +1247,17 @@ class ForumController extends AbstractController {
         $post_id = $_POST["post_id"];
         if (!empty($post_id)) {
             $result = $this->core->getQueries()->getPost($post_id);
+            $post_attachments = $this->core->getQueries()->getForumAttachments([$post_id]);
+            $GLOBALS['totalAttachments'] = 0;
+            $img_table = $this->core->getOutput()->renderTwigTemplate('forum/EditImgTable.twig', [
+                "post_attachment" => ForumUtils::getForumAttachments(
+                    $post_id,
+                    $result['thread_id'],
+                    $post_attachments[$post_id][0],
+                    $this->core->getConfig()->getCoursePath(),
+                    $this->core->buildCourseUrl(['display_file'])
+                )
+            ]);
             if ($this->core->getAccess()->canI("forum.modify_post", ['post_author' => $result['author_user_id']])) {
                 $output = [];
                 $output['post'] = $result["content"];
@@ -1255,6 +1266,7 @@ class ForumController extends AbstractController {
                 $output['change_anon'] = $this->modifyAnonymous($result["author_user_id"]);
                 $output['user'] = $output['anon'] ? 'Anonymous' : $result["author_user_id"];
                 $output['markdown'] = $result['render_markdown'];
+                $output['img_table'] = $img_table;
 
                 if (isset($_POST["thread_id"])) {
                     $this->getThreadContent($_POST["thread_id"], $output);

@@ -162,7 +162,6 @@ class ForumThreadView extends AbstractView {
         $threadExists = $this->core->getQueries()->threadExists();
         $filteredThreadExists = (count($threadsHead) > 0);
         $currentThread = -1;
-        $GLOBALS['totalAttachments'] = 0;
         $currentCategoriesIds = [];
         $show_deleted_thread_title = null;
         $currentCourse = $this->core->getConfig()->getCourse();
@@ -315,10 +314,7 @@ class ForumThreadView extends AbstractView {
                 "post_box_id" => $generatePostContent["post_box_id"],
                 "merge_url" => $this->core->buildCourseUrl(['forum', 'threads', 'merge']),
                 "split_url" => $this->core->buildCourseUrl(['forum', 'posts', 'split']),
-                "edit_url" => $this->core->buildCourseUrl(['forum', 'posts', 'modify']) . '?' . http_build_query(['modify_type' => '1']),
                 "post_content_limit" => $post_content_limit,
-                "render_markdown" => $markdown_enabled,
-                "categories" => $categories,
             ]);
 
             $return = $this->core->getOutput()->renderJsonSuccess(["html" => json_encode($return)]);
@@ -449,7 +445,6 @@ class ForumThreadView extends AbstractView {
         $first_post_id = 1;
 
         $post_data = [];
-        $GLOBALS['totalAttachments'] = 0;
 
         $csrf_token = $this->core->getCsrfToken();
 
@@ -603,10 +598,7 @@ class ForumThreadView extends AbstractView {
                 "post_box_id" => $post_box_id,
                 "total_attachments" => $GLOBALS['totalAttachments'],
                 "merge_url" => $this->core->buildCourseUrl(['forum', 'threads', 'merge']),
-                "split_url" => $this->core->buildCourseUrl(['forum', 'posts', 'split']),
-                "edit_url" => $this->core->buildCourseUrl(['forum', 'posts', 'modify']) . '?' . http_build_query(['modify_type' => '1']),
-                "categories" => $this->core->getQueries()->getCategories(),
-
+                "split_url" => $this->core->buildCourseUrl(['forum', 'posts', 'split'])
             ]);
         }
         else {
@@ -765,7 +757,6 @@ class ForumThreadView extends AbstractView {
             $is_instructor_full_access[$author["user_id"]] = $author["user_group"] <= User::GROUP_FULL_ACCESS_GRADER;
         }
         $first_posts = $this->core->getQueries()->getFirstPostForThreads(array_column($threads, "id"));
-        $post_attachments = $this->core->getQueries()->getForumAttachments(array_column($first_posts, "id"));
 
         foreach ($threads as $thread) {
             // Checks if thread ID is empty. If so, skip this threads.
@@ -899,13 +890,6 @@ class ForumThreadView extends AbstractView {
                 "current_user_posted" => $thread["current_user_posted"]
             ];
 
-            $post_attachment = ForumUtils::getForumAttachments(
-                $first_post['id'],
-                $thread['id'],
-                $post_attachments[$first_post['id']][0],
-                $this->core->getConfig()->getCoursePath(),
-                $this->core->buildCourseUrl(['display_file'])
-            );
 
             if ($is_full_page) {
                 $user_info = $this->core->getQueries()->getDisplayUserInfoFromUserId($first_post["author_user_id"]);
@@ -936,12 +920,7 @@ class ForumThreadView extends AbstractView {
                     "is_anon" => $first_post["anonymous"],
                     "render_markdown" => $first_post["render_markdown"],
                     "author_info" => $author_info,
-                    "deleted" => $first_post['deleted'],
-                    "has_attachment" => $first_post['has_attachment'],
-                    "post_attachment" => $post_attachment,
-                    "post_content" => $first_post_content,
-                    "category_info" => $this->core->getQueries()->getCategories(),
-                    "edit_url" => $this->core->buildCourseUrl(['forum', 'posts', 'modify']) . '?' . http_build_query(['modify_type' => '1']),
+                    "deleted" => $first_post['deleted']
                 ]);
             }
 
@@ -1213,8 +1192,7 @@ class ForumThreadView extends AbstractView {
             "render_markdown" => $markdown,
             "has_history" => $has_history,
             "thread_previously_merged" => $merged_thread,
-            "thread_announced" => $thread_announced,
-            "categories" => $this->core->getQueries()->getCategories(),
+            "thread_announced" => $thread_announced
         ];
 
         if ($render) {

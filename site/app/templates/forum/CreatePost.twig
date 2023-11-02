@@ -89,15 +89,6 @@
             {% else %}
                 <a class="post_button delete-post-button key_to_click" tabindex = "0" onClick="deletePostToggle({{ post_buttons.delete.ud_toggle_status }}, {{ post.thread_id }}, {{ post.id }}, '{{ post.author_user_id }}', '{{ post_date }}', '{{ csrf_token }}' )" title="{{ post_buttons.delete.ud_button_title }}" aria-label="{{ post_buttons.delete.ud_button_title }}"><i class="fa {{ post_buttons.delete.ud_button_icon }}"></i></a>
                 <a class="post_button edit-post-button key_to_click" tabindex = "0" onClick="showEditPostForm({{ post.id }}, {{ post.thread_id }}, {{ post_buttons.edit.shouldEditThread }}, {{ render_markdown?1:0 }}, '{{ csrf_token }}')" title="{{ post_buttons.edit.edit_button_title }}" aria-label="{{ post_buttons.edit.edit_button_title }}"><i class="fas fa-edit"></i></a>
-                {%  include "forum/EditPostForm.twig" with {
-                    "post_attachment" : post_attachment,
-                    "post_id" : post.id,
-                    "thread_id" : post.thread_id,
-                    "categories" : categories,
-                    "post_content" : post_content,
-                    "first" : first,
-                    "edit_url" : edit_url,
-                } %}
             {% endif %}
         {% endif %}
 

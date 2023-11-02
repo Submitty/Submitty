@@ -1,15 +1,15 @@
 {% extends 'generic/Popup.twig' %}
-{% block popup_id %}edit-user-post-{{ post_id }}{% endblock %}
+{% block popup_id %}edit-user-post{% endblock %}
 {% block title_tag %}<h1 id="edit_user_prompt">Editing a post</h1>{% endblock %}
 {% block body %}
-    <input type="hidden" id="edit_thread_id" name="edit_thread_id" value="{{ thread_id }}" data-ays-ignore="true"/>
-    <input type="hidden" id="edit_post_id" name="edit_post_id" value="{{ post_id }}" data-ays-ignore="true"/>
+    <input type="hidden" id="edit_thread_id" name="edit_thread_id" value="" data-ays-ignore="true"/>
+    <input type="hidden" id="edit_post_id" name="edit_post_id" value="" data-ays-ignore="true"/>
 
     {% include 'forum/ThreadPostForm.twig' with {
-        "show_title": first,
+        "show_title": true,
         "show_post": true,
         "post_content_placeholder": "Enter your post here...",
-        "show_categories": first,
+        "show_categories": true,
         "post_box_id": 0,
         "show_thread_status": true,
         "show_anon": true,
@@ -19,19 +19,18 @@
         "show_expiration" : true,
         "submit_label": "Update Post",
         "categories" : categories,
-        "post_attachment" : post_attachment,
-        "post_id" : post_id,
-        "post_content" : post_content,
     } %}
     <script>
-        $("#edit-thread-form-{{ post_id }}").on("submit", {
-            post_id : {{post_id}}
-        }, modifyOrSplitPost);
-        document.querySelector('.popup-box').onclick = null;
+        $("#thread_form").submit(function() {
+            if((!$(this).prop("ignore-cat")) && $(this).find('.btn-selected').length == 0) {
+                alert("At least one category must be selected.");
+                return false;
+            }
+        });
     </script>
 {% endblock %}
 {% block form %}
-    <form class="edit-thread-form" id="edit-thread-form-{{ post_id }}" method="post" action="{{ edit_url }}">
+    <form id="thread_form" method="post" action="{{ edit_url }}">
         {{ parent() }}
     </form>
 {% endblock %}

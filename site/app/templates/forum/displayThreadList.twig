@@ -87,16 +87,7 @@
                                    onClick="showEditPostForm({{ thread.post_id }}, {{ thread.thread_id }}, true, {{ thread.render_markdown ? 1 : 0 }}, '{{ csrf_token }}'); return false;"
                                    title="Edit thread and post"
                                    aria-label="Edit thread and post"
-                                ><i class="fas fa-edit"></i></span>
-                                {%  include "forum/EditPostForm.twig" with {
-                                    "post_attachment" : thread.post_attachment,
-                                    "post_id" : thread.post_id,
-                                    "thread_id" : thread.thread_id,
-                                    "categories" : thread.category_info,
-                                    "post_content" : thread.post_content,
-                                    "first" : true,
-                                    "edit_url" : thread.edit_url,
-                                } %}
+                                ><i class="fas fa-edit"></i></span>                                
                             {% endif %}
                         {% endif %}
                         <strong class="post_user_id">{{ thread.author_info.name}}</strong>

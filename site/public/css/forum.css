@@ -284,15 +284,20 @@
 }
 
 /* stylelint-disable-next-line selector-id-pattern */
-.edit-thread-form {
+#thread_form {
     margin-right: 15px;
     margin-left: 15px;
 }
 
-.display-existing-attachments {
+#display-existing-attachments {
     display: block;
     float: none;
     overflow: hidden;
+}
+
+.file-upload-table.edit-imgs-table {
+    margin-left: 0;
+    margin-right: auto;
 }
 
 .create-thread-title {
