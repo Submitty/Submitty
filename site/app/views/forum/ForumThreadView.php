@@ -315,6 +315,7 @@ class ForumThreadView extends AbstractView {
                 "merge_url" => $this->core->buildCourseUrl(['forum', 'threads', 'merge']),
                 "split_url" => $this->core->buildCourseUrl(['forum', 'posts', 'split']),
                 "post_content_limit" => $post_content_limit,
+                "render_markdown" => $markdown_enabled
             ]);
 
             $return = $this->core->getOutput()->renderJsonSuccess(["html" => json_encode($return)]);
@@ -889,7 +890,6 @@ class ForumThreadView extends AbstractView {
                 "date" => $date_content,
                 "current_user_posted" => $thread["current_user_posted"]
             ];
-
 
             if ($is_full_page) {
                 $user_info = $this->core->getQueries()->getDisplayUserInfoFromUserId($first_post["author_user_id"]);
