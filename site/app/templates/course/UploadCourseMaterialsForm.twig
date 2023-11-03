@@ -20,12 +20,6 @@
                         <option value="{{ folder_path }}">{{ folder_path }}</option>
                     {% endfor %}
                 </select>
-                <script> 
-                    registerSelect2Widget(
-                        "provide-full-path",
-                        "upload-course-materials-form"
-                    );
-                </script>
             </div>
         </label>
         <fieldset>
@@ -226,6 +220,9 @@
         dropzone.addEventListener("dragover", draghandle, false);
         dropzone.addEventListener("dragleave", draghandle, false);
         dropzone.addEventListener("drop", dropWithMultipleZips, false);
+    </script>
+    <script>
+        registerSelect2Widget("provide-full-path", "upload-course-materials-form");
     </script>
 {% endblock %}
 {% block buttons %}
