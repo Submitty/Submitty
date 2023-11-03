@@ -117,14 +117,14 @@ class Course_generate_utils:
                 release_grades = (gradeable.has_release_date is True) and \
                     (gradeable.grade_released_date < NOW)
 
-                gradeable_config_dir = os.path.join(SUBMITTY_DATA_DIR, "courses",
-                                                    get_current_semester(), "sample",
-                                                    "config", "complete_config")
+                gradeable_config_dir = \
+                    os.path.join(SUBMITTY_DATA_DIR, "courses", get_current_semester(), "sample",
+                                 "config", "complete_config")
 
                 # For electronic gradeables there is a config file - read through to get the total
                 if os.path.isdir(gradeable_config_dir):
-                    gradeable_config = os.path.join(gradeable_config_dir,
-                                                    f"complete_config_{g_id}.json")
+                    gradeable_config = \
+                        os.path.join(gradeable_config_dir, f"complete_config_{g_id}.json")
                     if os.path.isfile(gradeable_config):
                         try:
                             with open(gradeable_config, 'r') as gradeable_config_file:
@@ -212,7 +212,7 @@ class Course_generate_utils:
                                          "It is intended as a simple example, "
                                          "with additional documentation online.\n"
                                          "*/\n")
-            temp_custom_path = os.path.join(customization_path,f"customization_{course_id}.json")
+            temp_custom_path = os.path.join(customization_path, f"customization_{course_id}.json")
             json.dump(gradeables_json_output, open(temp_custom_path, 'a'), indent=2)
         except EnvironmentError as e:
             print(f"Failed to write to customization file: {e}")
