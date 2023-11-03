@@ -2,7 +2,7 @@
 name: Feature request
 about: Suggest an idea for implementation
 title: ''
-labels: enhancement / feature request
+labels: enhancement / feature request / Awaiting Triage
 assignees: ''
 
 ---
