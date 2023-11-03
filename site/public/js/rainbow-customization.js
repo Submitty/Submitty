@@ -1,3 +1,4 @@
+/* exported addToTable, deleteRow */
 const benchmarks_with_input_fields = ['lowest_a-', 'lowest_b-', 'lowest_c-', 'lowest_d'];
 
 // eslint-disable-next-line no-unused-vars
@@ -293,7 +294,6 @@ function getPlagiarism() {
     return plagiarismData;
 }
 
-// eslint-disable-next-line no-unused-vars
 function addToTable() {
     const USERID = document.getElementById('user_id').value.trim();
     const gradeable = document.getElementById('g_id').value.trim();
@@ -355,7 +355,6 @@ function addToTable() {
     document.getElementById('marks').value = '';
 }
 
-// eslint-disable-next-line no-unused-vars
 function deleteRow(button) {
     const row = button.parentNode.parentNode;
     row.parentNode.removeChild(row);
