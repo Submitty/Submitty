@@ -14,7 +14,11 @@ import random
 from submitty_utils import dateutils
 
 # if you need to modify any global variables, change this to import file as name
-from sample_courses import MORE_EXAMPLES_DIR, SETUP_DATA_PATH, TUTORIAL_DIR
+from sample_courses import (
+    MORE_EXAMPLES_DIR,
+    SETUP_DATA_PATH,
+    TUTORIAL_DIR
+    )
 from sample_courses.utils import load_data_yaml
 from sample_courses.utils.create_or_generate import (
     generate_random_ta_note,

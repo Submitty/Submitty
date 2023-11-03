@@ -13,8 +13,14 @@ import random
 
 from sqlalchemy import create_engine, Table, MetaData, bindparam
 
-from sample_courses import (SUBMITTY_DATA_DIR, SUBMITTY_INSTALL_DIR, DB_HOST, DB_PORT,
-                            DB_USER, DB_PASS)
+from sample_courses import (
+    SUBMITTY_DATA_DIR,
+    SUBMITTY_INSTALL_DIR,
+    DB_HOST,
+    DB_PORT,
+    DB_USER,
+    DB_PASS
+    )
 
 from sample_courses.utils.dependent import add_to_group
 from sample_courses.utils.create_or_generate import create_group

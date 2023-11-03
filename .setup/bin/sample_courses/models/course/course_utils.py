@@ -43,6 +43,6 @@ class Course_utils:
         forum_data = []
         for line in open(os.path.join(forum_path, filename)):
             parsed_line = [x.replace("\\n", "\n").strip() for x in line.split("|")]
-            if (len(line) > 1):
+            if len(line) > 1:
                 forum_data.append(parsed_line)
         return forum_data

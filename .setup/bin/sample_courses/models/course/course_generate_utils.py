@@ -11,9 +11,11 @@ from sqlalchemy import Table, select, func
 
 from submitty_utils import dateutils
 
-from sample_courses import (SUBMITTY_INSTALL_DIR,
-                            SUBMITTY_DATA_DIR,
-                            NOW)
+from sample_courses import (
+    SUBMITTY_INSTALL_DIR,
+    SUBMITTY_DATA_DIR,
+    NOW
+    )
 from sample_courses.utils import get_current_semester
 from sample_courses.utils.create_or_generate import generate_random_user_id
 
@@ -110,11 +112,7 @@ class Course_generate_utils:
                 g_id = gradeable.id
                 max_auto = 0
                 max_ta = 0
-
-                if g_type != 0 or (gradeable.submission_open_date < NOW):
-                    print_grades = True
-                else:
-                    print_grades = False
+                print_grades = g_type != 0 or (gradeable.submission_open_date < NOW)
 
                 release_grades = (gradeable.has_release_date is True) and \
                     (gradeable.grade_released_date < NOW)
@@ -126,7 +124,7 @@ class Course_generate_utils:
                 # For electronic gradeables there is a config file - read through to get the total
                 if os.path.isdir(gradeable_config_dir):
                     gradeable_config = os.path.join(gradeable_config_dir,
-                                                    "complete_config_" + g_id + ".json")
+                                                    f"complete_config_{g_id}.json")
                     if os.path.isfile(gradeable_config):
                         try:
                             with open(gradeable_config, 'r') as gradeable_config_file:
@@ -214,9 +212,8 @@ class Course_generate_utils:
                                          "It is intended as a simple example, "
                                          "with additional documentation online.\n"
                                          "*/\n")
-            json.dump(gradeables_json_output,
-                      open(os.path.join(customization_path,
-                                        "customization_" + course_id + ".json"), 'a'), indent=2)
+            temp_custom_path = os.path.join(customization_path,f"customization_{course_id}.json")
+            json.dump(gradeables_json_output, open(temp_custom_path, 'a'), indent=2)
         except EnvironmentError as e:
             print(f"Failed to write to customization file: {e}")
 
