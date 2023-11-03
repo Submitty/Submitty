@@ -2216,13 +2216,13 @@ function updateThread(e) {
         edit_post_id: $('#edit_post_id').val(),
         csrf_token: $('input[name="csrf_token"]').val(),
         title: $('input#title').val(),
-        thread_post_content: $('textarea#reply_box_').val(),
+        thread_post_content: $('textarea#reply_box_0').val(),
         thread_status: $('#thread_status').val(),
         Anon: $('input#thread_post_anon_edit').is(':checked') ? $('input#thread_post_anon_edit').val() : 0,
         lock_thread_date: $('input#lock_thread_date').text(),
         expirationDate: $('input#expirationDate').val(),
         cat,
-        markdown_status: parseInt($('input#markdown_input_').val()),
+        markdown_status: parseInt($('input#markdown_input_0').val()),
     };
 
     $.ajax({
