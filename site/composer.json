@@ -19,8 +19,13 @@
       "tests\\": "tests/"
     }
   },
+  "repositories": [
+    {
+      "type": "vcs",
+      "url": "https://github.com/Submitty/Markdown.git"
+    }
+  ],
   "require": {
-    "aptoma/twig-markdown": "3.4.1",
     "browscap/browscap-php": "7.2.0",
     "cboden/ratchet": "0.4.4",
     "doctrine/annotations": "1.14.3",
@@ -38,6 +43,7 @@
     "symfony/http-foundation": "6.3.2",
     "symfony/polyfill-php80": "1.27.0",
     "symfony/routing": "6.1.11",
+    "Submitty/Markdown": "1.0.0",
     "textalk/websocket": "1.6.3",
     "twig/twig": "3.7.0"
   },
