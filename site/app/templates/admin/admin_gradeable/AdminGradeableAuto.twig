@@ -93,7 +93,6 @@
                         <option value={{path.1}}>{{path.0}}</option>
                     {% endfor %}
                 </select>
-                <script> registerSelect2Widget("autograding_config_selector"); </script>
             </div>
         </div>
         <a data-testid="config-button" class="btn btn-primary" style="margin-top: 6px" href="{{ upload_config_url }}">Upload a custom autograding configuration</a>
@@ -138,6 +137,8 @@
 </div>
 
 <script>
+    registerSelect2Widget("autograding_config_selector");
+    
     var gradeable_max_autograder_points = {{ gradeable_max_points|json_encode|raw }}
 
     function onPdfChange() {

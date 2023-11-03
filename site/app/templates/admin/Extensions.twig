@@ -52,7 +52,6 @@
                             <option value="{{ reason }}">{{ reason }}</option>
                         {% endfor %}
                     </select>
-                    <script> registerSelect2Widget("reason-for-exception"); </script>
                 </span>
             </label>
             <a class="btn btn-primary" href="javascript:updateHomeworkExtension()">Submit</a>
@@ -112,6 +111,8 @@
     {% endif %}
 </div>
 <script>
+    registerSelect2Widget("reason-for-exception");
+
     $("#user_id").autocomplete({
         source: {{ student_full|raw }}
     });
@@ -148,4 +149,5 @@
         }
     });
 </script>
+
 {% include('admin/users/MoreExtensions.twig') %}
