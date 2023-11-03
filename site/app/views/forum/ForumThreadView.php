@@ -1231,7 +1231,6 @@ class ForumThreadView extends AbstractView {
                 $thread_title = $this->core->getQueries()->getThreadTitle($thread_id);
                 $activeThreadTitle = "({$thread_id}) " . $thread_title;
                 $created_post['activeThreadTitle'] = $activeThreadTitle;
-
             }
             $created_post['csrf_token'] = $this->core->getCsrfToken();
             return $this->core->getOutput()->renderTwigTemplate("forum/CreatePost.twig", $created_post);
