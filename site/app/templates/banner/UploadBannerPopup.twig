@@ -109,8 +109,8 @@
         $('#url_link_address').hide();
         $('#extra_name').hide();
         function makeSubmission() {
-            var releaseTime = document.getElementById("release_date").value;
-            var closeTime = document.getElementById("closing_date").value;
+            var releaseTime = $("#release_date").val();
+            var closeTime = $("#closing_date").val();
 
             var extraName = "";
             if (image === true) extraName = document.getElementById("input-provide-name").value;

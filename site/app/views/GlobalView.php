@@ -43,7 +43,6 @@ class GlobalView extends AbstractView {
         $images_data_array = [];
         $error_image_data = '_NONE_';
 
-        //NEW WAY -----------------------------------
 
         $currentDate = new \DateTime();
         foreach ($eventBannerImages as $banner) {
@@ -74,10 +73,6 @@ class GlobalView extends AbstractView {
                 "link_name" => $banner->getLinkName()
             ];
         }
-
-
-        // ---------------------------
-
 
         $html_lang = str_replace('_', '-', $this->core->getConfig()->getLocale()->getName());
 

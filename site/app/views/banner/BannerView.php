@@ -12,7 +12,6 @@ class BannerView extends AbstractView {
     /**
      * Shows banners
      * @param array<BannerImage> $communityEventImages
-     * @return string
      *
      */
     public function showEventBanners(array $communityEventImages): string {
