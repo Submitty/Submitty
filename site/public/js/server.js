@@ -521,7 +521,7 @@ function captureTabInModal(formName, resetFocus=true){
             releaseTabFromModal(formName);
         }
     });
-    console.log(form[0]);
+  
     observer.observe(form[0], { attributes: true, childList: true });
 }
 

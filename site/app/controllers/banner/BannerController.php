@@ -97,9 +97,9 @@ class BannerController extends AbstractController {
 
         $full_path = FileUtils::joinPaths($upload_path, $specificPath, $folder_made_name);
 
-        if (!$this->core->getAccess()->canI("path.write", ["dir" => "community_events", "path" => $full_path])) {
-            return JsonResponse::getErrorResponse("Don't hack me bro");
-        }
+        // if (!$this->core->getAccess()->canI("path.write", ["dir" => "community_events", "path" => $full_path])) {
+        //     return JsonResponse::getErrorResponse("Bad File Request");
+        // }
 
 
         if (!is_dir($full_path)) {
@@ -198,9 +198,9 @@ class BannerController extends AbstractController {
         $event_name = $_POST['name'];
 
         $full_path = FileUtils::joinPaths($upload_path, $folder_name, $event_item->getFolderName(), $event_name);
-        if (!$this->core->getAccess()->canI("path.write", ["dir" => "community_events", "path" => $full_path])) {
-            return JsonResponse::getErrorResponse("Don't hack me bro");
-        }
+        // if (!$this->core->getAccess()->canI("path.write", ["dir" => "community_events", "path" => $full_path])) {
+        //     return JsonResponse::getErrorResponse("Invalid file write");
+        // }
 
 
 
