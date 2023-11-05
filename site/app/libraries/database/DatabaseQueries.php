@@ -1187,7 +1187,14 @@ SQL;
             // forum_posts_history will store all history state of the post(if edited at any point of time)
             $this->course_db->beginTransaction();
             // Insert first version of post during first edit
-            $this->course_db->query("INSERT INTO forum_posts_history(post_id, edit_author, content, edit_timestamp, has_attachment, version_id) SELECT id, author_user_id, content, timestamp, has_attachment, version_id FROM posts WHERE id = ? AND NOT EXISTS (SELECT 1 FROM forum_posts_history WHERE post_id = ?)", [$post_id, $post_id]);
+            $this->course_db->query(
+                "INSERT INTO forum_posts_history (post_id, edit_author, content, edit_timestamp, has_attachment, version_id)
+                    SELECT id, author_user_id, content, timestamp, has_attachment, version_id
+                        FROM posts
+                        WHERE id = ?
+                        AND NOT EXISTS (SELECT 1 FROM forum_posts_history WHERE post_id = ?);",
+                [$post_id, $post_id]
+            );
             // Get latest version number
             $this->course_db->query("SELECT version_id FROM posts WHERE id = ?", [$post_id]);
             $version_id = $this->course_db->rows()[0]["version_id"] + 1;

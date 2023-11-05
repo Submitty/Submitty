@@ -764,7 +764,7 @@ class ForumThreadView extends AbstractView {
             if (empty($thread["id"])) {
                 continue;
             }
-            $first_post = (isset($first_posts[$thread["id"]])) ? $first_posts[$thread['id']] : null;
+            $first_post = $first_posts[$thread['id']] ?? null;
             if (is_null($first_post)) {
                 // Thread without any posts(eg. Merged Thread)
                 $first_post = ['content' => "", 'render_markdown' => 0];
