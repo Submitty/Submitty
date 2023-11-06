@@ -35,6 +35,3 @@ ignore=
 
 [FORMAT]
 max-line-length=100
-
-[MESSAGES CONTROL]
-disable=E203
