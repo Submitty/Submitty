@@ -297,7 +297,11 @@ class RainbowCustomizationJSON extends AbstractModel {
     /**
      * Add plagiarism entry to existing array
      *
-     * @param object $plagiarismEntry
+     * @param object{
+     *     "user": string,
+     *     "gradeable": string,
+     *     "penalty": int
+     * } $plagiarismEntry
      */
     public function addPlagiarismEntry(object $plagiarismEntry): void {
         $emptyObject = (object) [];
