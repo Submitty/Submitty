@@ -185,8 +185,11 @@ jobs:
         run: |
           python3 -m pip install --upgrade pip
           python3 -m pip install flake8 flake8-bugbear
-      - name: Run python linting
+          python3 -m pip install pylint
+      - name: Run flake8
         run: python3 -m flake8
+      - name: Run pylint
+        run: python3 -m pylint
 
 
   python-unit:
