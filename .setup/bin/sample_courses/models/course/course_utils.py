@@ -10,6 +10,7 @@ class Course_utils:
     """
     Contains basic course utils functions
     """
+
     # global vars that are instantiated in Class course
     # This is only to type define the global vars to make it easier to debug using
     # intellisense
@@ -33,9 +34,11 @@ class Course_utils:
     def check_rotating(self, users) -> None:
         for gradeable in self.gradeables:
             for grading_rotating in gradeable.grading_rotating:
-                string = f"Invalid user_id {grading_rotating['user_id']} for "\
-                         f"rotating section for gradeable {gradeable.id}"
-                if grading_rotating['user_id'] not in users:
+                string = (
+                    f"Invalid user_id {grading_rotating['user_id']} for "
+                    f"rotating section for gradeable {gradeable.id}"
+                )
+                if grading_rotating["user_id"] not in users:
                     raise ValueError(string)
 
     def getForumDataFromFile(self, filename) -> None:
