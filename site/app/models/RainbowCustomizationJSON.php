@@ -75,7 +75,7 @@ class RainbowCustomizationJSON extends AbstractModel {
     /**
      * Get array of plagiarism
      *
-     * @return array<mixed>
+     * @return array<object>
      */
     public function getPlagiarism(): array {
         return $this->plagiarism;

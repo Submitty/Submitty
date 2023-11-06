@@ -500,7 +500,7 @@ class RainbowCustomization extends AbstractModel {
     /**
      * Get plagiarism from json file if there is any
      *
-     * @return array<mixed> multidimensional array of plagiarism data
+     * @return array<object>  array of plagiarism JSON object
      */
     public function getPlagiarism(): array {
         return !is_null($this->RCJSON) ? $this->RCJSON->getPlagiarism() : [];
