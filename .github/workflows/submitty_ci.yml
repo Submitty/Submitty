@@ -189,7 +189,7 @@ jobs:
       - name: Run flake8
         run: python3 -m flake8
       - name: Run pylint
-        run: python3 -m pylint *.py
+        run: python3 -m pylint --recursive=y .
 
   python-unit:
     runs-on: ubuntu-22.04
