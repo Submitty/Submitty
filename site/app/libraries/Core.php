@@ -970,4 +970,11 @@ class Core {
         }
         return null;
     }
+
+    /**
+     * Insert a new superuser announcement into databse.
+     * @param array $announcement containing type, text, time of the announcement
+     * @return bool returns true or false on success or failure
+     */
+    public function createSuperuserAnnouncement(array $announcement): bool 
 }
