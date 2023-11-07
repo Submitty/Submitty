@@ -67,13 +67,21 @@
                                     {% if key == "NULL" and include_null_section != 'include' %}
                                         {# Skip rendering this section #}
                                      {% else %}
-                                        Section {{ key }}: Graded: {{ section.graded }} / {{ section.total }} ({{ section.percentage }}%) <span>Verified: {{ section.verified }} / {{ section.total }} ({{ section.verified_percentage }}%)</span><br />
+                                        Section {{ key }}: Graded: {{ section.graded }} / {{ section.total }} ({{ section.percentage }}%) 
+                                        {% if section.graded > 0 %}
+                                            <span>Verified: {{ section.verified }} / {{ section.total }} ({{ section.verified_percentage }}%)</span>
+                                        {% endif %}
+                                        <br />
                                     {% endif %}
                                 {% else %}
                                     {% if key == "NULL" and include_null_section != 'include' %}
                                         {# Skip rendering this section #}
                                      {% else %}
-                                        Section {{ key }}: Graded: {{ section.non_late_graded }} / {{ section.non_late_total }} ({{ section.non_late_percentage }}%) <span>Verified: {{ section.non_late_verified }} / {{ section.non_late_total }} ({{ section.non_late_verified_percentage }}%) </span><br />
+                                        Section {{ key }}: Graded: {{ section.non_late_graded }} / {{ section.non_late_total }} ({{ section.non_late_percentage }}%) 
+                                        {% if section.non_late_verified > 0 %}
+                                            <span>Verified: {{ section.non_late_verified }} / {{ section.non_late_total }} ({{ section.non_late_verified_percentage }}%) </span>
+                                        {% endif %}
+                                        <br />
                                     {% endif %}
                             {% endif %}
                         {% endif %}
