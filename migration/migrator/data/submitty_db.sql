@@ -545,6 +545,37 @@ CREATE TABLE public.sessions (
 
 
 --
+-- Name: superuser_announcements; Type: TABLE; Schema: public; Owner: -
+--
+
+CREATE TABLE public.superuser_announcements (
+    id integer NOT NULL,
+    text character varying(255) NOT NULL,
+    date date NOT NULL
+);
+
+
+--
+-- Name: superuser_announcements_id_seq; Type: SEQUENCE; Schema: public; Owner: -
+--
+
+CREATE SEQUENCE public.superuser_announcements_id_seq
+    AS integer
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+--
+-- Name: superuser_announcements_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: -
+--
+
+ALTER SEQUENCE public.superuser_announcements_id_seq OWNED BY public.superuser_announcements.id;
+
+
+--
 -- Name: terms; Type: TABLE; Schema: public; Owner: -
 --
 
@@ -636,6 +667,13 @@ ALTER TABLE ONLY public.emails ALTER COLUMN id SET DEFAULT nextval('public.email
 --
 
 ALTER TABLE ONLY public.saml_mapped_users ALTER COLUMN id SET DEFAULT nextval('public.saml_mapped_users_id_seq'::regclass);
+
+
+--
+-- Name: superuser_announcements id; Type: DEFAULT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.superuser_announcements ALTER COLUMN id SET DEFAULT nextval('public.superuser_announcements_id_seq'::regclass);
 
 
 --

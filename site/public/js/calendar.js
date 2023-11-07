@@ -699,6 +699,13 @@ function openNewItemModal() {
     $('#new-calendar-item-form').css('display', 'block');
 }
 
+function openNewGlobalEventModal() {
+    console.log("popopsad");
+    $('#new-global-event-form').css('display', 'block');
+    console.log("popoasdasasd");
+
+}
+
 function openOptionsModal() {
     $('#calendar-options-form').css('display', 'block');
     setOptionsValues();

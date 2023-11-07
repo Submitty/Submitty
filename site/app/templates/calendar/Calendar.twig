@@ -62,7 +62,11 @@
                     <i class="fas fa-plus"></i> New Item
                 </button>
             {% endif %}
-
+            {% if is_superuser %}
+                <button type="button" onclick="openNewGlobalEventModal()" class="btn btn-primary">
+                    <i class="fas fa-plus"></i> New Gloabl Event
+                </button>
+            {% endif %}
                 <button type="button" onclick="openOptionsModal()" class="btn btn-primary">
                     <i class="fas fa-sliders"></i> Options
                 </button>
@@ -143,3 +147,4 @@
 {{ include('calendar/NewCalendarItem.twig') }}
 {{ include('calendar/EditCalendarItem.twig') }}
 {{ include('calendar/CalendarOptions.twig') }}
+{{ include('calendar/GlobalAnnouncement.twig') }}

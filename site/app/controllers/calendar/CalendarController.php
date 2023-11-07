@@ -298,4 +298,192 @@ class CalendarController extends AbstractController {
         }
         return JsonResponse::getErrorResponse("Failed to delete message");
     }
+
+    /**
+     * @Route("/calendar/announcement/new", methods={"POST"})
+     */
+    public function createGlobalAnnouncement(): RedirectResponse {
+        // Checks if the values exist that are set and returns an error message if not
+        if (isset($_POST['type'])) {
+            $type = $_POST['type'];
+        }
+        else {
+            $this->core->addErrorMessage("Invalid or incorrect type given");
+            return new RedirectResponse($this->core->buildUrl(['calendar']));
+        }
+
+        if (isset($_POST['date'])) {
+            $date = $_POST['date'];
+        }
+        else {
+            $this->core->addErrorMessage("Invalid or incorrect date given");
+            return new RedirectResponse($this->core->buildUrl(['calendar']));
+        }
+
+        if (isset($_POST['text'])) {
+            $text = $_POST['text'];
+        }
+        else {
+            $this->core->addErrorMessage("Invalid or incorrect text given");
+            return new RedirectResponse($this->core->buildUrl(['calendar']));
+        }
+
+        $calendar_item = new CalendarItem();
+        try {
+            $calendar_item->setStringType($type);
+        }
+        catch (\InvalidArgumentException $e) {
+            $this->core->addErrorMessage($e->getMessage());
+            return new RedirectResponse($this->core->buildUrl(['calendar']));
+        }
+        $calendar_item->setDate(new \DateTime($date));
+        try {
+            $calendar_item->setText($text);
+        }
+        catch (\InvalidArgumentException $e) {
+            $this->core->addErrorMessage($e->getMessage());
+            return new RedirectResponse($this->core->buildUrl(['calendar']));
+        }
+
+        $this->core->loadMasterDatabase();
+        $this->core->getSubmittyEntityManager()->persist($calendar_item);
+        $this->core->getSubmittyEntityManager()->flush();
+        $this->core->getMasterDB()->disconnect();
+    
+        $this->core->addSuccessMessage("Calendar item successfully added");
+        return new RedirectResponse($this->core->buildUrl(['calendar']));
+    }
+
+
+    /**
+     * @Route("/calendar/announcement/edit", methods={"POST"})
+     */
+    public function editGlobalAnnouncement(): RedirectResponse {
+        // Checks if the values exist that are set and returns an error message if not
+        if (isset($_POST['type'])) {
+            $type = $_POST['type'];
+        }
+        else {
+            $this->core->addErrorMessage("Invalid or incorrect type given");
+            return new RedirectResponse($this->core->buildUrl(['calendar']));
+        }
+
+        if (isset($_POST['date'])) {
+            $date = $_POST['date'];
+        }
+        else {
+            $this->core->addErrorMessage("Invalid or incorrect date given");
+            return new RedirectResponse($this->core->buildUrl(['calendar']));
+        }
+
+        if (isset($_POST['text'])) {
+            $text = $_POST['text'];
+        }
+        else {
+            $this->core->addErrorMessage("Invalid or incorrect text given");
+            return new RedirectResponse($this->core->buildUrl(['calendar']));
+        }
+
+        if (isset($_POST['id'])) {
+            $id = $_POST['id'];
+        }
+        else {
+            $this->core->addErrorMessage("Invalid or incorrect id");
+            return new RedirectResponse($this->core->buildUrl(['calendar']));
+        }
+
+        if (isset($_POST['semester'])) {
+            $semester = $_POST['semester'];
+        }
+        else {
+            $this->core->addErrorMessage("Invalid semester");
+            return new RedirectResponse($this->core->buildUrl(['calendar']));
+        }
+
+        if (isset($_POST['course'])) {
+            $InputCourse = $_POST['course'];
+        }
+        else {
+            $this->core->addErrorMessage("Invalid course");
+            return new RedirectResponse($this->core->buildUrl(['calendar']));
+        }
+        // Load master database
+        $this->core->loadMasterDatabase();
+
+        // Find the announcement in the master database
+        $announcement = $this->core->getSubmittyEntityManager()
+            ->getRepository(SuperuserAnnouncement::class) // Assuming the entity is called SuperuserAnnouncement
+            ->findOneBy(['id' => $id]);
+
+        if ($announcement === null) {
+            $this->core->addErrorMessage("Announcement not found");
+            return new RedirectResponse($this->core->buildUrl(['calendar']));
+        }
+
+        // Edit the announcement
+        try {
+            $announcement->setText($text);
+            $announcement->setDate(new \DateTime($date));
+            $calendar_item->setStringType($type);
+        } catch (\InvalidArgumentException $e) {
+            $this->core->addErrorMessage($e->getMessage());
+            return new RedirectResponse($this->core->buildUrl(['calendar']));
+        }
+
+        // Persist the changes and flush to save them
+        $this->core->getSubmittyEntityManager()->flush();
+
+        // Disconnect from the master database
+        $this->core->getMasterDB()->disconnect();
+
+        $this->core->addSuccessMessage("Announcement successfully updated");
+        return new RedirectResponse($this->core->buildUrl(['calendar']));
+   }
+
+   /**
+     * @Route("/calendar/announcement/delete", methods={"POST"})
+     */
+    public function deleteGlobalAnnouncement(): RedirectResponse {
+        if (isset($_POST['id'])) {
+            $id = $_POST['id'];
+        }
+        else {
+            $this->core->addErrorMessage("Error: No id specified");
+            return new RedirectResponse($this->core->buildUrl(['calendar']));
+        }
+        if (isset($_POST['course'])) {
+            $course = $_POST['course'];
+        }
+        else {
+            $this->core->addErrorMessage("Error: No course specified");
+            return new RedirectResponse($this->core->buildUrl(['calendar']));
+        }
+        if (isset($_POST['semester'])) {
+            $semester = $_POST['semester'];
+        }
+        else {
+            $this->core->addErrorMessage("Error: No semester specified");
+            return new RedirectResponse($this->core->buildUrl(['calendar']));
+        }
+
+        $this->core->loadMasterDatabase();
+
+        // Find the announcement in the master database
+        $announcement = $this->core->getSubmittyEntityManager()
+            ->getRepository(SuperuserAnnouncement::class) // Assuming the entity is called SuperuserAnnouncement
+            ->findOneBy(['id' => $id]);
+
+        if ($announcement === null) {
+            $this->core->addErrorMessage("Announcement not found");
+            return new RedirectResponse($this->core->buildUrl(['calendar']));
+        }
+
+        $this->core->getSubmittyEntityManager()->remove($announcement);
+        $this->core->getSubmittyEntityManager()->flush();
+        $this->core->getMasterDB()->disconnect();
+
+        $this->core->addSuccessMessage("Announcement successfully deleted");
+        return new RedirectResponse($this->core->buildUrl(['calendar']));
+    }
+
 }
