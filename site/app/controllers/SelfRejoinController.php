@@ -134,7 +134,7 @@ class SelfRejoinController extends AbstractController {
             $last_name = $user->getLegalFamilyName();
         }
 
-        $course = ucwords($this->core->getConfig()->getCourse());
+        $course = $this->core->getConfig()->getCourse();
         $term = $this->core->getConfig()->getTerm();
 
         $subject = "User Rejoin: $first_name $last_name ($user_id) of $term $course";
@@ -152,7 +152,15 @@ class SelfRejoinController extends AbstractController {
         foreach ($instructor_ids as $instructor_id) {
             $details["to_user_id"] = $instructor_id;
             $email = new Email($this->core, $details);
-            array_push($emails, $email);
+            $emails[] = $email;
+        }
+        $sysadamin_email = $this->core->getConfig()->getSysAdminEmail();
+        if (!$sysadamin_email !== null && $sysadamin_email !== "") {
+            unset($details["to_user_id"]);
+            $details["email_address"] = $sysadamin_email;
+            $details["to_name"] = "Sysadmin";
+            $email = new Email($this->core, $details);
+            $emails[] = $email;
         }
 
         $this->core->getNotificationFactory()->sendEmails($emails);

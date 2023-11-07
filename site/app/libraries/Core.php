@@ -892,7 +892,7 @@ class Core {
                 }
                 else {
                     // If more than a day has passed since we last updated the cookie, update it with the new timestamp
-                    if ($this->session_manager->shouldSessionBeUpdated()) {
+                    if ($this->session_manager->checkAndUpdateSession()) {
                         $new_token = TokenManager::generateSessionToken(
                             $session_id,
                             $token->claims()->get('sub')
