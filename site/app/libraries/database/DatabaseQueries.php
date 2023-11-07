@@ -2205,13 +2205,10 @@ ORDER BY {$u_or_t}.{$section_key}",
     /**
      * Get an array of Teams for a Gradeable matching the given rotating sections
      *
-     * @param  string $g_id
      * @param  array<int>  $sections
-     * @param  string $section_key
-     * @param  bool   $is_team
      * @return array<int|string,int>
      */
-    public function getVerifiedComponentsCountByGradingSections($g_id, $sections, $section_key, $is_team) {
+    public function getVerifiedComponentsCountByGradingSections(string $g_id, array $sections, string $section_key, bool $is_team): array {
         $u_or_t = "u";
         $users_or_teams = "users";
         $user_or_team_id = "user_id";
