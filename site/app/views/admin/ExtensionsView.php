@@ -8,9 +8,6 @@ use app\libraries\FileUtils;
 
 class ExtensionsView extends AbstractView {
     public function displayExtensions($gradeables) {
-        $this->core->getOutput()->addVendorJs(FileUtils::joinPaths('flatpickr', 'flatpickr.min.js'));
-        $this->core->getOutput()->addVendorCss(FileUtils::joinPaths('flatpickr', 'flatpickr.min.css'));
-        $this->core->getOutput()->addVendorJs(FileUtils::joinPaths('flatpickr', 'plugins', 'shortcutButtons', 'shortcut-buttons-flatpickr.min.js'));
         $this->core->getOutput()->addVendorCss(FileUtils::joinPaths('flatpickr', 'plugins', 'shortcutButtons', 'themes', 'light.min.css'));
         $this->core->getOutput()->addVendorJs(FileUtils::joinPaths('select2', 'js', 'select2.min.js'));
         $this->core->getOutput()->addVendorCss(FileUtils::joinPaths('select2', 'css', 'select2.min.css'));
@@ -18,6 +15,10 @@ class ExtensionsView extends AbstractView {
         $this->core->getOutput()->addInternalCss('exceptionforms.css');
         $this->core->getOutput()->addInternalCss('table.css');
         $this->core->getOutput()->addInternalJs('extensions.js');
+        $this->core->getOutput()->addVendorJs(FileUtils::joinPaths('flatpickr', 'flatpickr.min.js'));
+        $this->core->getOutput()->addVendorCss(FileUtils::joinPaths('flatpickr', 'flatpickr.min.css'));
+        $this->core->getOutput()->addVendorJs(FileUtils::joinPaths('flatpickr', 'plugins', 'shortcutButtons', 'shortcut-buttons-flatpickr.min.js'));
+        $this->core->getOutput()->addVendorCss(FileUtils::joinPaths('flatpickr', 'plugins', 'shortcutButtons', 'themes', 'light.min.css'));
         $this->core->getOutput()->addBreadcrumb('Excused Absence Extensions');
         $this->core->getOutput()->enableMobileViewport();
 
@@ -40,14 +41,18 @@ class ExtensionsView extends AbstractView {
         if (empty($current_exceptions)) {
             $current_exceptions = null;
         }
-        $reasons = ["illness", "interview", "travel", "personal issue"];
 
         return $this->core->getOutput()->renderTwigTemplate("admin/Extensions.twig", [
             "gradeables" => $gradeables,
             "student_full" => $student_full,
             "current_gradeable" => $current_gradeable,
             "current_exceptions" => $current_exceptions,
-            "reasons" => $reasons,
+            "reasons" => [
+                "illness",
+                "interview",
+                "travel",
+                "personal issue",
+            ],
             "csrf_token" => $this->core->getCsrfToken()
         ]);
     }

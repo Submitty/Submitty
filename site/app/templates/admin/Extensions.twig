@@ -45,14 +45,14 @@
             </label>
             <label for="reason-for-exception">
                 Reason for Extension:
-                <div class="drop-down" id="config-drop-down">
+                <span id="config-drop-down">
                     <select name="reason_for_exception" id="reason-for-exception">
                         <option>{{ "unspecified" }}</option>
                         {% for reason in reasons %}
                             <option value="{{ reason }}">{{ reason }}</option>
                         {% endfor %}
                     </select>
-                </div>
+                </span>
             </label>
             <a class="btn btn-primary" href="javascript:updateHomeworkExtension()">Submit</a>
         </fieldset>
