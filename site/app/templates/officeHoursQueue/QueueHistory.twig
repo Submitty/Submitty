@@ -24,7 +24,7 @@
         <th scope="col">Times Helped this week</th>
       
         <th scope="col">
-            <a href="#" onclick="toggleSort('HelpStartedBy')">Helped Started By
+            <a onclick="toggleSort('HelpStartedBy')">Helped Started By
                 <span id="sortIndicator"></span>
             </a>
         </th>
@@ -36,13 +36,14 @@
         {% endif %}
       </tr>
     </thead>
-    <tbody>
+    <tbody id="queueHistoryTable">
       {% set history_count = 0 %}
       {% for entry in viewer.getPastQueue() %}
+
         {% if (history_count < 25 or viewer.getFullHistory()) and (viewer.isGrader() or entry['user_id'] == viewer.getUserId()) %}
           {% set history_count = history_count + 1 %}
           <tr class="queue_history_{{entry['queue_code']}} queue_history_row">
-            <th scope="row">{{history_count}}</th>
+            <th scope="row" class="numberCount">{{history_count}}</th>
             <td>
               {{ entry['name'] }}
               <a onclick="unhideId(this, '{{ entry['user_id'] }}')" onkeypress="unhideId(this, '{{ entry['user_id'] }}')" title="Show user id" aria-label="Show user id" tabindex="0">
@@ -68,7 +69,7 @@
 
             <td>{{ entry['helped_today'] }}</td>
             <td>{{ entry['times_helped'] }}</td>
-            <td class="mobile-hide">{{ entry['help_started_by'] }}</td> 
+            <td class="mobile-hide helpStarted">{{ entry['help_started_by'] }}</td> 
 
 
             {% if entry['removal_type'] == 'self' %}
@@ -92,37 +93,3 @@
     </tbody>
   </table>
 </div>
-
-<script>
-
-    document.addEventListener('DOMContentLoaded', function() {
-      var sortIndicator = document.getElementById('sortIndicator');
-      if(Cookies.get('sortStateTimeEntered')=='up'){
-        //sortIndicator.innerText = "▲";
-        sortIndicator.innerHTML = '<i class="fas fa-sort-up"></i>'
-      }
-      if(Cookies.get('sortStateTimeEntered')=='off'){
-        sortIndicator.innerText = "";
-      }
-      if(Cookies.get('sortStateTimeEntered')=='down'){
-        sortIndicator.innerHTML = '<i class="fas fa-sort-down"></i>';
-      }
-    });
-
-    function toggleSort(column) {//per click actions handler
-        if (column == 'HelpStartedBy') {
-            if (Cookies.get('sortStateTimeEntered') == "off") {
-                Cookies.set('sortStateTimeEntered', 'up'); // Save to cookie
-                sortIndicator.innerHTML = '<i class="fas fa-sort-up"></i>'
-            } else if (Cookies.get('sortStateTimeEntered') == "up") {
-                Cookies.set('sortStateTimeEntered', 'down'); // Save to cookie
-                sortIndicator.innerHTML = '<i class="fas fa-sort-down"></i>';
-            } else if (Cookies.get('sortStateTimeEntered') == "down") {
-                Cookies.set('sortStateTimeEntered', 'off'); // Save to cookie
-                sortIndicator.innerText = ""; // Reset to down arrow for off state
-                console.log(Cookies.get('sortStateTimeEntered'))
-            }
-        }
-        window.location.reload();
-    }
-</script>

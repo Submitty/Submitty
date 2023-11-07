@@ -7276,20 +7276,17 @@ AND gc_id IN (
         return $this->course_db->rows();
     }
     public function getPastQueue() {
-        $off  = "ORDER BY ROW_NUMBER";
-        $up   = "ORDER BY helper.user_id";
-        $down = "ORDER BY helper.user_id DESC";
-        $orderType = "";
-        if ($_COOKIE['sortStateTimeEntered'] == "up") {
-            $orderType = $up;
-        }
-        elseif ($_COOKIE['sortStateTimeEntered'] == "down") {
-            $orderType = $down;
-        }
-        else {
-             $orderType = $off;
-        }
 
+       $orderType = "ORDER BY ROW_NUMBER";
+    
+        // if ($_POST['sortState'] == "up") {
+        //     $orderType = "ORDER BY helper.user_id";
+        // } elseif ($_POST['sortState'] == "down") {
+        //     $orderType = "ORDER BY helper.user_id DESC";
+        // } else {
+        //     $orderType = "ORDER BY ROW_NUMBER";
+        // }
+        
         $query = "
         SELECT Row_number()
             OVER (ORDER BY time_out DESC, time_in DESC),
