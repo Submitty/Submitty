@@ -919,7 +919,6 @@ class ElectronicGraderController extends AbstractController {
             $graders_of_inquiries,
             $show_warnings,
             $submissions_in_queue
-            // $verified
         );
     }
 
@@ -3362,7 +3361,6 @@ class ElectronicGraderController extends AbstractController {
      */
     private function getStats(Gradeable $gradeable, User $grader, bool $full_stats, &$total_graded, &$total_total) {
         $num_components = $this->core->getQueries()->getTotalComponentCount($gradeable->getId());
-        //$verified_components = $this->core->getQueries()->getTotalVerifiedComponentCount($gradeable->getId());
         $sections = [];
         if ($full_stats) {
             $sections = $this->core->getQueries()->getAllSectionsForGradeable($gradeable);
