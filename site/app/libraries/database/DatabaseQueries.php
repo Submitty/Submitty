@@ -7934,6 +7934,7 @@ WHERE current_state IN
         if ($team) {
             $submitter_data_inject =
               'ldet.array_late_day_exceptions,
+               ldet.array_reason_for_exception,
                ldet.array_late_day_user_ids,
                /* Aggregate Team User Data */
                team.team_id,
@@ -7968,6 +7969,7 @@ WHERE current_state IN
               LEFT JOIN (
                 SELECT
                   json_agg(e.late_day_exceptions) AS array_late_day_exceptions,
+                  json_agg(e.reason_for_exception) AS array_reason_for_exception,
                   json_agg(e.user_id) AS array_late_day_user_ids,
                   t.team_id,
                   g_id
@@ -7999,6 +8001,7 @@ WHERE current_state IN
               u.rotating_section,
               u.registration_type,
               ldeu.late_day_exceptions,
+              ldeu.reason_for_exception,
               u.registration_subsection';
             $submitter_inject = '
             JOIN (
@@ -8022,7 +8025,8 @@ WHERE current_state IN
             ) AS u ON (eg IS NULL OR NOT eg.team_assignment) AND u. g_id=g.g_id
 
             /* Join user late day exceptions */
-            LEFT JOIN late_day_exceptions ldeu ON g.g_id=ldeu.g_id AND u.user_id=ldeu.user_id';
+            LEFT JOIN late_day_exceptions ldeu ON g.g_id=ldeu.g_id AND u.user_id=ldeu.user_id
+            LEFT JOIN reason_for_exception ldeu ON g.g_id=ldeu.g_id AND u.user_id=ldeu.user_id';
         }
         if ($team && count($teams) > 0) {
             $team_placeholders = implode(',', array_fill(0, count($teams), '?'));
@@ -8284,14 +8288,19 @@ WHERE current_state IN
                 if (isset($row['array_late_day_user_ids'])) {
                     $late_day_exceptions = array_combine(
                         json_decode($row['array_late_day_user_ids']),
-                        json_decode($row['array_late_day_exceptions'])
+                        json_decode($row['array_late_day_exceptions']),
+                        json_decode($row['array_reason_for_exception'])
                     );
                 }
                 foreach ($submitter->getMembers() as $user_id) {
                     if (!isset($late_day_exceptions[$user_id])) {
                         $late_day_exceptions[$user_id] = 0;
                     }
+                    if (!isset($reason_for_exception[$user_id])) {
+                        $reason_for_exception[$user_id] = '';
+                    }
                 }
+
             }
             else {
                 if (isset($row['grading_registration_sections'])) {
@@ -8303,6 +8312,9 @@ WHERE current_state IN
                 $late_day_exceptions = [
                     $submitter->getId() => $row['late_day_exceptions'] ?? 0
                 ];
+                $reason_for_exception = [
+                    $submitter->getID() => $row['reason_for_exception'] ?? ''
+                ]
             }
 
             // Create the graded gradeable instances
@@ -8312,6 +8324,7 @@ WHERE current_state IN
                 new Submitter($this->core, $submitter),
                 [
                     'late_day_exceptions' => $late_day_exceptions
+                    'reason_for_exception' => $reason_for_exception
                 ]
             );
             $ta_graded_gradeable = null;

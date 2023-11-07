@@ -70,6 +70,8 @@ class GradedGradeable extends AbstractModel {
         $this->submitter = $submitter;
 
         $this->late_day_exceptions = $details['late_day_exceptions'] ?? [];
+
+        $this->reason_for_exceptions = $details['reason_for_exception'] ?? [];
     }
 
     /**
@@ -222,6 +224,21 @@ class GradedGradeable extends AbstractModel {
             return $this->late_day_exceptions[$this->submitter->getId()] ?? 0;
         }
         return $this->late_day_exceptions[$user->getId()] ?? 0;
+    }
+
+    /**
+     * Gets the reason of exception for a user
+     * @param User|null $user The user to get exception info for (can be null if not team assignment)
+     * @return string the reason for a user's excused absence extension
+     */
+    public function getReasonForException($user = null) {
+        if ($user === null) {
+            if ($this->gradeable->isTeamAssignment()) {
+                throw new \InvalidArgumentException('Must provide user if team assignment');
+            }
+            return $this->reason_for_exceptions[$this->submitter->getId()] ?? 0;
+        }
+        return $this->reason_for_exceptions[$user->getId()] ?? 0;
     }
 
     /**

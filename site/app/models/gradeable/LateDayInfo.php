@@ -44,6 +44,9 @@ class LateDayInfo extends AbstractModel {
      * @var int The number exceptions allowed for the user on this assignment */
     protected $late_day_exceptions = null;
     /** @prop
+    * @var string The reason for a given late day exception */
+    protected $reason_for_exception = null;
+    /** @prop
      * @var int The update to late days remaining based on this late day event */
     protected $late_days_change = null;
     /** @prop
@@ -76,6 +79,7 @@ class LateDayInfo extends AbstractModel {
         $this->late_day_date = $event_info['late_day_date'] ?? null;
         $this->submission_days_late = $event_info['submission_days_late'] ?? null;
         $this->late_day_exceptions = $event_info['late_day_exceptions'] ?? null;
+        $this->late_day_exceptions = $event_info['reason_for_exception'] ?? null;
         $this->late_days_remaining = $event_info['late_days_remaining']  ?? null;
         $this->late_days_change = $event_info['late_days_change']  ?? null;
 
@@ -107,6 +111,7 @@ class LateDayInfo extends AbstractModel {
         $auto_graded_gradeable = $graded_gradeable->getAutoGradedGradeable();
         $submission_days_late = $auto_graded_gradeable->hasActiveVersion() ? $auto_graded_gradeable->getActiveVersionInstance()->getDaysLate() : 0;
         $exceptions = $graded_gradeable->getLateDayException($user);
+        $reason = $graded_gradeable->getReasonForException($user);
 
         $late_days_charged = 0;
         $assignment_budget = min($late_days_allowed, $late_days_remaining) + $exceptions;
@@ -280,6 +285,14 @@ class LateDayInfo extends AbstractModel {
      */
     public function getLateDayException() {
         return $this->late_day_exceptions;
+    }
+
+    /**
+     * Gets the number of late days the student gets extra for this gradeable
+     * @return string
+     */
+    public function getReasonForException() {
+        return $this->reason_for_exception;
     }
 
     /**

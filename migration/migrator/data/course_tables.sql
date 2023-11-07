@@ -77,6 +77,7 @@ CREATE TABLE public.late_day_cache (
     late_days_allowed integer,
     submission_days_late integer,
     late_day_exceptions integer,
+    reason_for_exception character varying(255),
     late_day_status integer,
     late_days_change integer NOT NULL,
     CONSTRAINT ldc_gradeable_info CHECK (((g_id IS NULL) OR ((submission_days_late IS NOT NULL) AND (late_day_exceptions IS NOT NULL))))
@@ -415,6 +416,10 @@ CREATE FUNCTION public.grab_late_day_gradeables_for_user(user_id text) RETURNS S
 					WHEN lde.late_day_exceptions IS NULL THEN 0
 					ELSE lde.late_day_exceptions
 				END AS late_day_exceptions
+                CASE
+					WHEN lde.reason_for_exception IS NULL THEN ''
+					ELSE lde.reason_for_exception
+				END AS reason_for_exception
 			FROM valid_gradeables vg
 			LEFT JOIN submitted_gradeables sg
 				ON vg.g_id=sg.g_id
@@ -430,6 +435,7 @@ CREATE FUNCTION public.grab_late_day_gradeables_for_user(user_id text) RETURNS S
 		returnrow.late_day_date = var_row.late_day_date;
 		returnrow.submission_days_late = var_row.submission_days_late;
 		returnrow.late_day_exceptions = var_row.late_day_exceptions;
+        returnedrow.reason_for_exception = var_row.reason_for_exception;
 		RETURN NEXT returnrow;
         END LOOP;
         RETURN;	
