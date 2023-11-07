@@ -111,11 +111,14 @@ function darken(colorstr) {
         const hexcodestr = window.getComputedStyle(document.documentElement).getPropertyValue(colorstr.slice(4, -1)).toLowerCase();
         const darkerstr = hexcodestr.split('');
         for (let i = 1; i < hexcodestr.length; i++) {
-            if ((hexcodestr[i] > 'a' && hexcodestr[i] <= 'f') || (hexcodestr[i] > '0' && hexcodestr[i] <= '9')) {
-                darkerstr[i] = String.fromCharCode(hexcodestr.charCodeAt(i) - 1);
+            if ((hexcodestr[i] > 'b' && hexcodestr[i] <= 'f') || (hexcodestr[i] > '1' && hexcodestr[i] <= '9')) {
+                darkerstr[i] = String.fromCharCode(hexcodestr.charCodeAt(i) - 2);
+            }
+            else if (hexcodestr[i] === 'b') {
+                darkerstr[i] = '9';
             }
             else if (hexcodestr[i] === 'a') {
-                darkerstr[i] = '9';
+                darkerstr[i] = '8';
             }
         }
         return darkerstr.join('');
