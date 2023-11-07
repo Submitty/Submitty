@@ -38,37 +38,33 @@
         </label>
 
             <label class = "radio" for="image_selection_radio">
-                <input id="url_selection_radio" name="course_material_type" type="checkbox" onchange="imageSelectionUpdate();">
+                <input id="url_selection_radio" name="course_material_type" type="checkbox" onchange="imageSelectionUpdate(this.checked);">
                 Image
             </label>
             <label class = "radio" for="url_selection_radio">
-                <input id="url_selection_radio" name="course_material_type" type="checkbox" onchange="urlSelectionUpdate();">
+                <input id="url_selection_radio" name="course_material_type" type="checkbox" onchange="urlSelectionUpdate(this.checked);">
                 External URL
             </label>
 
 
             <script>
-            function imageSelectionUpdate() {
-                if (image === true) {
-                    image = false;
-                    $('#extra_name').hide();
+            function imageSelectionUpdate(checked) {
+                if (checked === true) {
+                    $('#extra_name').show();
 
                 }
                 else {
-                    image = true;
                     $('#extra_name').show();
                 }
             }
 
-            function urlSelectionUpdate() {
-                if (url === true) {
-                    url = false;
-                    $('#url_link_address').hide();
+            function urlSelectionUpdate(checked) {
+                if (checkred === true) {
+                    $('#url_link_address').show();
 
                 }
                 else {
-                    url = true;
-                    $('#url_link_address').show();
+                    $('#url_link_address').hide();
                 }
             }   
 
