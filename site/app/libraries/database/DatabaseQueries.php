@@ -8306,9 +8306,6 @@ WHERE current_state IN
                     if (!isset($late_day_exceptions[$user_id])) {
                         $late_day_exceptions[$user_id] = 0;
                     }
-                    if (!isset($reason_for_exception[$user_id])) {
-                        $reason_for_exception[$user_id] = '';
-                    }
                 }
 
             }
