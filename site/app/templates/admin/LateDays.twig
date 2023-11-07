@@ -81,6 +81,7 @@
                         <td data-before-content="Effective Date">{{ user.getSinceTimestamp() }}</td>
                         <td id="Delete">
                             <a
+                                id="delete-button" 
                                 aria-label='Delete late days for {{ user.getId() }} on {{ user.getSinceTimestamp() }}'
                                 href="javascript:deleteLateDays('{{ user.getId() }}', '{{ user.getSinceTimestamp() }}');"
                             >
