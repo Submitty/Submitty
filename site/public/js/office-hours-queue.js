@@ -1,10 +1,11 @@
 //this helps update the frontend when the page refreshes because without this the sort icon would reset and the sort state would not
+// eslint-disable-next-line no-unused-vars
 document.addEventListener('DOMContentLoaded', function() {
     let sortState = localStorage.getItem('sortIndicator');
 
     if (sortState === null) {
         sortState = 'off';
-        localStorage.setItem('sortStateTimeEntered', sortState);
+        localStorage.setItem('sortIndicator', sortState);
     }
 
     if (sortState === 'up') {
@@ -19,21 +20,25 @@ document.addEventListener('DOMContentLoaded', function() {
     adjustRows();
 });
 
+// eslint-disable-next-line no-unused-vars
 function toggleSort(column) {
     if (column === 'HelpStartedBy') {
         if (localStorage.getItem('sortIndicator') === 'off') {
             localStorage.setItem('sortIndicator', 'up');
             sortIndicator.innerHTML = '<i class="fas fa-sort-up"></i>';
-        } else if (localStorage.getItem('sortIndicator') === 'up') {
+        } 
+        else if (localStorage.getItem('sortIndicator') === 'up') {
             localStorage.setItem('sortIndicator', 'down');
             sortIndicator.innerHTML = '<i class="fas fa-sort-down"></i>';
-        } else if (localStorage.getItem('sortIndicator') === 'down') {
+        } 
+        else if (localStorage.getItem('sortIndicator') === 'down') {
             localStorage.setItem('sortIndicator', 'off');
             sortIndicator.innerHTML = '<i class="fa-solid fa-sort"></i>';
         }
     }
     adjustRows();
 }
+// eslint-disable-next-line no-unused-vars
 function adjustRows() {
     const rows = $('.queue_history_row').toArray();
     rows.sort(function (a, b) {
