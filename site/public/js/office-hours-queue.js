@@ -1,11 +1,9 @@
-//this helps update the frontend when the page refreshes because without this the sort icon would reset and the sort state would not 
+//this helps update the frontend when the page refreshes because without this the sort icon would reset and the sort state would not
 document.addEventListener('DOMContentLoaded', function() {
-    var sortIndicator = "";
-    var sortIndicator = document.getElementById('sortIndicator');
-    var sortState = localStorage.getItem('sortStateTimeEntered');
+    let sortState = localStorage.getItem('sortIndicator');
 
     if (sortState === null) {
-        sortState = 'off'; 
+        sortState = 'off';
         localStorage.setItem('sortStateTimeEntered', sortState);
     }
 
@@ -23,23 +21,23 @@ document.addEventListener('DOMContentLoaded', function() {
 
 function toggleSort(column) {
     if (column === 'HelpStartedBy') {
-        if (localStorage.getItem('sortStateTimeEntered') === 'off') {
-            localStorage.setItem('sortStateTimeEntered', 'up');
+        if (localStorage.getItem('sortIndicator') === 'off') {
+            localStorage.setItem('sortIndicator', 'up');
             sortIndicator.innerHTML = '<i class="fas fa-sort-up"></i>';
-        } else if (localStorage.getItem('sortStateTimeEntered') === 'up') {
-            localStorage.setItem('sortStateTimeEntered', 'down');
+        } else if (localStorage.getItem('sortIndicator') === 'up') {
+            localStorage.setItem('sortIndicator', 'down');
             sortIndicator.innerHTML = '<i class="fas fa-sort-down"></i>';
-        } else if (localStorage.getItem('sortStateTimeEntered') === 'down') {
-            localStorage.setItem('sortStateTimeEntered', 'off');
+        } else if (localStorage.getItem('sortIndicator') === 'down') {
+            localStorage.setItem('sortIndicator', 'off');
             sortIndicator.innerHTML = '<i class="fa-solid fa-sort"></i>';
         }
     }
     adjustRows();
 }
 function adjustRows() {
-    let rows = $('.queue_history_row').toArray();
+    const rows = $('.queue_history_row').toArray();
     rows.sort(function (a, b) {
-        if (localStorage.getItem('sortStateTimeEntered') === 'up') {
+        if (localStorage.getItem('sortIndicator') === 'up') {
             if ($(a).find('.helpStarted').text()>$(b).find('.helpStarted').text()) {
                 return -1;
             }
@@ -47,7 +45,7 @@ function adjustRows() {
                 return 1;
             }
         }
-        else if (localStorage.getItem('sortStateTimeEntered') === "down") {
+        else if (localStorage.getItem('sortIndicator') === 'down') {
             if ($(a).find('.helpStarted').text()>$(b).find('.helpStarted').text()) {
                 return 1;
             }
