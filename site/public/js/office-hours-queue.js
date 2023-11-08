@@ -1,6 +1,7 @@
 //this helps update the frontend when the page refreshes because without this the sort icon would reset and the sort state would not
 // eslint-disable-next-line no-unused-vars
 document.addEventListener('DOMContentLoaded', function() {
+    var sortIndicator = document.getElementById('sortIndicator');
     let sortState = localStorage.getItem('sortIndicator');
 
     if (sortState === null) {
@@ -26,11 +27,11 @@ function toggleSort(column) {
         if (localStorage.getItem('sortIndicator') === 'off') {
             localStorage.setItem('sortIndicator', 'up');
             sortIndicator.innerHTML = '<i class="fas fa-sort-up"></i>';
-        } 
+        }
         else if (localStorage.getItem('sortIndicator') === 'up') {
             localStorage.setItem('sortIndicator', 'down');
             sortIndicator.innerHTML = '<i class="fas fa-sort-down"></i>';
-        } 
+        }
         else if (localStorage.getItem('sortIndicator') === 'down') {
             localStorage.setItem('sortIndicator', 'off');
             sortIndicator.innerHTML = '<i class="fa-solid fa-sort"></i>';
