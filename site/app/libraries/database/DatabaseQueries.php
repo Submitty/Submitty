@@ -7276,17 +7276,6 @@ AND gc_id IN (
         return $this->course_db->rows();
     }
     public function getPastQueue() {
-
-       $orderType = "ORDER BY ROW_NUMBER";
-    
-        // if ($_POST['sortState'] == "up") {
-        //     $orderType = "ORDER BY helper.user_id";
-        // } elseif ($_POST['sortState'] == "down") {
-        //     $orderType = "ORDER BY helper.user_id DESC";
-        // } else {
-        //     $orderType = "ORDER BY ROW_NUMBER";
-        // }
-        
         $query = "
         SELECT Row_number()
             OVER (ORDER BY time_out DESC, time_in DESC),
@@ -7332,11 +7321,10 @@ AND gc_id IN (
             AS h1
             ON queue.user_id = h1.uid AND queue.queue_code = h1.qc
             WHERE time_in > ? AND current_state IN ('done')
-            $orderType
+            ORDER BY ROW_NUMBER
         ";
         $current_date = $this->core->getDateTimeNow()->format('Y-m-d');
         $this->course_db->query($query, [$current_date, $current_date, $current_date]);
-
         return $this->course_db->rows();
     }
 
