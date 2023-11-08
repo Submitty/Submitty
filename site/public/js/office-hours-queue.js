@@ -1,7 +1,7 @@
 //this helps update the frontend when the page refreshes because without this the sort icon would reset and the sort state would not
-// eslint-disable-next-line no-unused-vars
+/* eslint prefer-arrow-callback: [ "error", { "allowNamedFunctions": true } ] */
 document.addEventListener('DOMContentLoaded', function() {
-    var sortIndicator = document.getElementById('sortIndicator');
+    let sortIndicator = document.getElementById('sortIndicator');
     let sortState = localStorage.getItem('sortIndicator');
 
     if (sortState === null) {
@@ -21,8 +21,9 @@ document.addEventListener('DOMContentLoaded', function() {
     adjustRows();
 });
 
-// eslint-disable-next-line no-unused-vars
+/* eslint prefer-arrow-callback: [ "error", { "allowNamedFunctions": true } ] */
 function toggleSort(column) {
+    let sortIndicator = document.getElementById('sortIndicator');
     if (column === 'HelpStartedBy') {
         if (localStorage.getItem('sortIndicator') === 'off') {
             localStorage.setItem('sortIndicator', 'up');
@@ -39,8 +40,9 @@ function toggleSort(column) {
     }
     adjustRows();
 }
-// eslint-disable-next-line no-unused-vars
+/* eslint prefer-arrow-callback: [ "error", { "allowNamedFunctions": true } ] */
 function adjustRows() {
+    let sortIndicator = document.getElementById('sortIndicator');
     const rows = $('.queue_history_row').toArray();
     rows.sort(function (a, b) {
         if (localStorage.getItem('sortIndicator') === 'up') {
