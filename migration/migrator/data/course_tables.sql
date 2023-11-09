@@ -415,11 +415,8 @@ CREATE FUNCTION public.grab_late_day_gradeables_for_user(user_id text) RETURNS S
 				CASE
 					WHEN lde.late_day_exceptions IS NULL THEN 0
 					ELSE lde.late_day_exceptions
-				END AS late_day_exceptions
-                CASE
-					WHEN lde.reason_for_exception IS NULL THEN ''
-					ELSE lde.reason_for_exception
-				END AS reason_for_exception
+				END AS late_day_exceptions,
+                lde.reason_for_exception
 			FROM valid_gradeables vg
 			LEFT JOIN submitted_gradeables sg
 				ON vg.g_id=sg.g_id
