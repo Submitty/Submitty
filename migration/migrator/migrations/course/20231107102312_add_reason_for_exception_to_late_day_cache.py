@@ -15,7 +15,7 @@ def up(config, database, semester, course):
     :type course: str
     """
     sql = """ALTER TABLE late_day_cache ADD COLUMN IF NOT EXISTS reason_for_exception
-      character varying(255) DEFAULT '';"""
+      character varying(255);"""
     database.execute(sql)
 
 
