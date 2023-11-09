@@ -184,6 +184,10 @@ function getGradeableBuckets() {
             const count = $(`#config-count-${type}`).val();
             bucket.count = parseInt(count);
 
+            // Extract drop-lowest
+            const dropLowest = $(`#config-drop-lowest-${type}`).val();
+            bucket['drop-lowest'] = parseInt(dropLowest);
+
             // Extract percent
             let percent = $(`#percent-${type}`).val();
             percent = percent / 100;

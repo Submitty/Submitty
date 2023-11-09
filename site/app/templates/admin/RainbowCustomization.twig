@@ -137,6 +137,8 @@
                                 <div id="config-{{ bucket }}" style="margin-top:25px;min-height:100px;display:none;" class="bucket_detail_div">
                                     <h3 style="display:inline">{{ bucket|capitalize }}</h3>:
                                     <input type="text" aria-label="{{ bucket|capitalize }} config count" value="{{ bucket_counts[bucket] }}" id="config-count-{{ bucket }}" style="display:inline;"> items
+                                    <span style="margin-left: 10px;"></span>
+                                    <input type="text" aria-label="{{ bucket|capitalize }} drop-howmany" value="{{ bucket_droplowest[bucket] }}" id="config-drop-lowest-{{ bucket }}" style="display:inline;"> items
                                     <div style="margin-top:10px">
                                         <ol style="list-style-type: none;" id="gradeables-list-{{ bucket }}">
                                             {% for gradeable in gradeables %}
