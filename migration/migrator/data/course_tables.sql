@@ -412,11 +412,11 @@ CREATE FUNCTION public.grab_late_day_gradeables_for_user(user_id text) RETURNS S
 				vg.eg_submission_due_date AS late_day_date,
 				vg.eg_late_days AS late_days_allowed,
 				calculate_submission_days_late(sg.submission_time, vg.eg_submission_due_date) AS submission_days_late,
+                lde.reason_for_exception,
 				CASE
 					WHEN lde.late_day_exceptions IS NULL THEN 0
 					ELSE lde.late_day_exceptions
-				END AS late_day_exceptions,
-                lde.reason_for_exception
+				END AS late_day_exceptions
 			FROM valid_gradeables vg
 			LEFT JOIN submitted_gradeables sg
 				ON vg.g_id=sg.g_id
@@ -431,8 +431,8 @@ CREATE FUNCTION public.grab_late_day_gradeables_for_user(user_id text) RETURNS S
 		returnrow.late_days_allowed = var_row.late_days_allowed;
 		returnrow.late_day_date = var_row.late_day_date;
 		returnrow.submission_days_late = var_row.submission_days_late;
-		returnrow.late_day_exceptions = var_row.late_day_exceptions;
         returnrow.reason_for_exception = var_row.reason_for_exception;
+		returnrow.late_day_exceptions = var_row.late_day_exceptions;
 		RETURN NEXT returnrow;
         END LOOP;
         RETURN;	
