@@ -817,6 +817,16 @@ SQL;
         return $this->course_db->rows();
     }
 
+    /**
+     * @param int[] $thread_ids
+     * @return int[] status of threads indexed by id
+     */
+    public function getResolvedThreads(array $thread_ids): array {
+        $placeholders = $this->createParameterList(count($thread_ids));
+        $this->course_db->query("SELECT * FROM threads WHERE id IN {$placeholders};", $thread_ids);
+        return array_column($this->course_db->rows(), "status", "id");
+    }
+
     public function updateResolveState($thread_id, $state) {
         if (in_array($state, [-1, 0, 1])) {
             $this->course_db->query("UPDATE threads set status = ? where id = ?", [$state, $thread_id]);
@@ -909,7 +919,7 @@ SQL;
 
     /**
      * @param int[] $thread_ids
-     * @return array<int, mixed[]>
+     * @return array<int, mixed[]> array of posts, indexed by thread id.
      */
     public function getFirstPostForThreads(array $thread_ids): array {
         $placeholders = $this->createParameterList(count($thread_ids));
@@ -4918,7 +4928,7 @@ AND gc_id IN (
 
     /**
      * @param int[] $thread_ids
-     * @return int[]
+     * @return int[] thread ids that have been viewed by user
      */
     public function getViewedThreads(string $user, array $thread_ids): array {
         $placeholders = $this->createParameterList(count($thread_ids));
@@ -4957,6 +4967,26 @@ AND gc_id IN (
         $ar["display_pronouns"] = $name_rows["display_pronouns"];
 
         return $ar;
+    }
+
+    /**
+     * @param string[] $user_ids
+     * @return array<string, mixed[]> user info, indexed by user id.
+     */
+    public function getDisplayUserInfoFromUserIds(array $user_ids): array {
+        $placeholders = $this->createParameterList(count($user_ids));
+        $this->course_db->query("SELECT * FROM users WHERE user_id IN {$placeholders}", $user_ids);
+        $return = [];
+        foreach ($this->course_db->rows() as $row) {
+            $return[$row['user_id']] = [
+                "given_name" => (isset($row["user_preferred_givenname"]) && strlen($row["user_preferred_givenname"]) > 0) ? $row["user_preferred_givenname"] : $row["user_givenname"],
+                "family_name" => " " . ((isset($row["user_preferred_familyname"]) && strlen($row["user_preferred_familyname"]) > 0) ? $row["user_preferred_familyname"] : $row["user_familyname"]),
+                "user_email" => $row["user_email"],
+                "pronouns" => $row["user_pronouns"],
+                "display_pronouns" => $row["display_pronouns"]
+            ];
+        }
+        return $return;
     }
 
     public function filterCategoryDesc($category_desc) {
@@ -7214,6 +7244,22 @@ AND gc_id IN (
             return false;
         }
         return $this->course_db->rows()[0]['lock_thread_date'] < date("Y-m-d H:i:S");
+    }
+
+    /**
+     * @param int[] $thread_ids
+     * @return int[] ids of locked threads.
+     */
+    public function getLockedThreads(array $thread_ids): array {
+        $placeholders = $this->createParameterList(count($thread_ids));
+        $this->course_db->query("SELECT * FROM threads WHERE id IN {$placeholders}", $thread_ids);
+        $return = [];
+        foreach ($this->course_db->rows() as $row) {
+            if (isset($row['lock_thread_date']) && $row['lock_thread_date'] < date("Y-m-d H:i:S")) {
+                $return[] = $row['id'];
+            }
+        }
+        return $return;
     }
 
     /**

@@ -755,8 +755,11 @@ class ForumThreadView extends AbstractView {
         foreach ($author_user_groups as $author) {
             $is_instructor_full_access[$author["user_id"]] = $author["user_group"] <= User::GROUP_FULL_ACCESS_GRADER;
         }
-        $first_posts = $this->core->getQueries()->getFirstPostForThreads(array_column($threads, "id"));
-        $viewed_threads = $this->core->getQueries()->getViewedThreads($current_user, array_column($threads, 'id'));
+        $thread_ids = array_column($threads, 'id');
+        $first_posts = $this->core->getQueries()->getFirstPostForThreads($thread_ids);
+        $viewed_threads = $this->core->getQueries()->getViewedThreads($current_user, $thread_ids);
+        $authors = $this->core->getQueries()->getUsersById($author_user_ids);
+        $authors_info = $this->core->getQueries()->getDisplayUserInfoFromUserIds($author_user_ids);
 
         foreach ($threads as $thread) {
             // Checks if thread ID is empty. If so, skip this threads.
@@ -803,7 +806,7 @@ class ForumThreadView extends AbstractView {
                 $class .= " deleted";
             }
 
-            if ($this->core->getQueries()->getUserById($thread['created_by'])->accessGrading()) {
+            if ($authors[$thread['created_by']]->accessGrading()) {
                 $class .= " important";
             }
 
@@ -885,13 +888,13 @@ class ForumThreadView extends AbstractView {
                 "fa_icon" => $fa_icon,
                 "fa_class" => $fa_class,
                 "tooltip" => $tooltip,
-                "is_locked" => $this->core->getQueries()->isThreadLocked($thread['id']),
+                "is_locked" => isset($thread['lock_thread_date']) && $thread['lock_thread_date'] < date("Y-m-d H:i:S"),
                 "date" => $date_content,
                 "current_user_posted" => $thread["current_user_posted"]
             ];
 
             if ($is_full_page) {
-                $user_info = $this->core->getQueries()->getDisplayUserInfoFromUserId($first_post["author_user_id"]);
+                $user_info = $authors_info[$first_post["author_user_id"]];
                 $email = trim($user_info["user_email"]);
                 $given_name = trim($user_info["given_name"]);
                 $family_name = trim($user_info["family_name"]);
@@ -913,8 +916,8 @@ class ForumThreadView extends AbstractView {
                 ];
                 $thread_info = array_merge($thread_info, [
                     "post_id" => $first_post["id"],
-                    "is_thread_locked" => $this->core->getQueries()->isThreadLocked($thread['id']),
-                    "thread_resolve_state" => $this->core->getQueries()->getResolveState($thread['id'])[0]['status'],
+                    "is_thread_locked" => isset($thread['lock_thread_date']) && $thread['lock_thread_date'] < date("Y-m-d H:i:S"),
+                    "thread_resolve_state" => $thread['status'],
                     "show_unresolve" => false,
                     "is_anon" => $first_post["anonymous"],
                     "render_markdown" => $first_post["render_markdown"],
@@ -1081,7 +1084,7 @@ class ForumThreadView extends AbstractView {
         $post_button = [];
 
         if ($this->core->getUser()->getGroup() <= 3 || $post['author_user_id'] === $current_user) {
-            if (!($this->core->getQueries()->isThreadLocked($thread_id) != 1 || $this->core->getUser()->accessFullGrading())) {
+            if (!($this->core->getQueries()->isThreadLocked($thread_id) != 1 || $userAccessFullGrading)) {
             }
             else {
                 if ($deleted && $this->core->getUser()->getGroup() <= 3) {
