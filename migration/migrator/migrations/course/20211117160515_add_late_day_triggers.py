@@ -147,7 +147,7 @@ def up(config, database, semester, course):
 				CASE
 					WHEN lde.late_day_exceptions IS NULL THEN 0
 					ELSE lde.late_day_exceptions
-				END AS late_day_exceptions
+				END AS late_day_exceptions,
                 lde.reason_for_exception
 			FROM valid_gradeables vg
 			LEFT JOIN submitted_gradeables sg
