@@ -755,13 +755,15 @@ class ForumThreadView extends AbstractView {
         foreach ($author_user_groups as $author) {
             $is_instructor_full_access[$author["user_id"]] = $author["user_group"] <= User::GROUP_FULL_ACCESS_GRADER;
         }
+        $first_posts = $this->core->getQueries()->getFirstPostForThreads(array_column($threads, "id"));
+        $viewed_threads = $this->core->getQueries()->getViewedThreads($current_user, array_column($threads, 'id'));
 
         foreach ($threads as $thread) {
             // Checks if thread ID is empty. If so, skip this threads.
             if (empty($thread["id"])) {
                 continue;
             }
-            $first_post = $this->core->getQueries()->getFirstPostForThread($thread["id"]);
+            $first_post = $first_posts[$thread['id']] ?? null;
             if (is_null($first_post)) {
                 // Thread without any posts(eg. Merged Thread)
                 $first_post = ['content' => "", 'render_markdown' => 0];
@@ -790,7 +792,7 @@ class ForumThreadView extends AbstractView {
                     $thread_id_p = $thread["id"];
                 }
             }
-            $isNewThread = !$this->core->getQueries()->viewedThread($current_user, $thread["id"]);
+            $isNewThread = !in_array($thread['id'], $viewed_threads);
             if ($isNewThread) {
                 $class .= " new_thread";
             }
@@ -920,7 +922,6 @@ class ForumThreadView extends AbstractView {
                     "deleted" => $first_post['deleted']
                 ]);
             }
-//            var_dump($first_post);
 
             $thread_content[] = $thread_info;
         }

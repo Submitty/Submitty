@@ -907,6 +907,20 @@ SQL;
         }
     }
 
+    /**
+     * @param int[] $thread_ids
+     * @return array<int, mixed[]>
+     */
+    public function getFirstPostForThreads(array $thread_ids): array {
+        $placeholders = $this->createParameterList(count($thread_ids));
+        $this->course_db->query("SELECT * FROM posts WHERE parent_id = -1 AND thread_id IN {$placeholders}", $thread_ids);
+        $return = [];
+        foreach ($this->course_db->rows() as $row) {
+            $return[$row['thread_id']] = $row;
+        }
+        return $return;
+    }
+
     public function getPost($post_id) {
         $this->course_db->query("SELECT * FROM posts where id = ?", [$post_id]);
         return $this->course_db->row();
@@ -4900,6 +4914,36 @@ AND gc_id IN (
     public function viewedThread($user, $thread_id) {
         $this->course_db->query("SELECT * FROM viewed_responses v WHERE thread_id = ? AND user_id = ? AND NOT EXISTS(SELECT thread_id FROM (posts LEFT JOIN forum_posts_history ON posts.id = forum_posts_history.post_id) AS jp WHERE jp.thread_id = ? AND (jp.timestamp > v.timestamp OR (jp.edit_timestamp IS NOT NULL AND jp.edit_timestamp > v.timestamp)))", [$thread_id, $user, $thread_id]);
         return count($this->course_db->rows()) > 0;
+    }
+
+    /**
+     * @param int[] $thread_ids
+     * @return int[]
+     */
+    public function getViewedThreads(string $user, array $thread_ids): array {
+        $placeholders = $this->createParameterList(count($thread_ids));
+        $this->course_db->query("
+            SELECT * FROM viewed_responses v
+            WHERE thread_id IN {$placeholders}
+            AND user_id = ?
+            AND NOT EXISTS(
+                SELECT thread_id 
+                FROM (
+                    posts LEFT JOIN forum_posts_history 
+                    ON posts.id = forum_posts_history.post_id) 
+                    AS jp 
+                    WHERE jp.thread_id = v.thread_id 
+                    AND (
+                        jp.timestamp > v.timestamp 
+                        OR (
+                            jp.edit_timestamp IS NOT NULL 
+                            AND jp.edit_timestamp > v.timestamp
+                        )
+                    )
+                )",
+            array_merge($thread_ids, array($user))
+        );
+        return array_column($this->course_db->rows(), 'thread_id');
     }
 
     public function getDisplayUserInfoFromUserId($user_id) {
