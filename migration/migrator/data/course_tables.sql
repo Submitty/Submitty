@@ -79,7 +79,7 @@ CREATE TABLE public.late_day_cache (
     late_day_exceptions integer,
     late_day_status integer,
     late_days_change integer NOT NULL,
-    reason_for_exception character varying(255) DEFAULT ''::character varying,
+    reason_for_exception character varying(255),
     CONSTRAINT ldc_gradeable_info CHECK (((g_id IS NULL) OR ((submission_days_late IS NOT NULL) AND (late_day_exceptions IS NOT NULL))))
 );
 
@@ -432,7 +432,6 @@ CREATE FUNCTION public.grab_late_day_gradeables_for_user(user_id text) RETURNS S
 		returnrow.late_day_date = var_row.late_day_date;
 		returnrow.submission_days_late = var_row.submission_days_late;
 		returnrow.late_day_exceptions = var_row.late_day_exceptions;
-        returnrow.reason_for_exception = var_row.reason_for_exception;
 		RETURN NEXT returnrow;
         END LOOP;
         RETURN;	
