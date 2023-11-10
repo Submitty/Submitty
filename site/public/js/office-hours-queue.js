@@ -1,7 +1,7 @@
 //this helps update the frontend when the page refreshes because without this the sort icon would reset and the sort state would not
 /* eslint prefer-arrow-callback: [ "error", { "allowNamedFunctions": true } ] */
 document.addEventListener('DOMContentLoaded', function() {
-    let sortIndicator = document.getElementById('sortIndicator');
+    const sortIndicator = document.getElementById('sortIndicator');
     let sortState = localStorage.getItem('sortIndicator');
 
     if (sortState === null) {
