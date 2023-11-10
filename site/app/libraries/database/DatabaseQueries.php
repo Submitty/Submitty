@@ -8317,7 +8317,6 @@ WHERE current_state IN
                         $reasons_for_exceptions[$user_id] = '';
                     }
                 }
-
             }
             else {
                 if (isset($row['grading_registration_sections'])) {
