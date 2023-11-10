@@ -27,7 +27,7 @@
                                         {% block close_button %}
                                             <a
                                                 {% block close_button_id %}{% endblock %}
-                                                onClick="{% block close_click_action %}closePopup('{{ block('popup_id') }}'); $('body').css('overflow', 'auto');{% endblock %}"
+                                                onClick="{% block close_click_action %}closePopup('{{ block('popup_id') }}');{% endblock %}"
                                                 class="btn {% block close_button_classes %}btn-default{% endblock %} close-button key_to_click"
                                                 tabindex="0"
                                             >
@@ -57,7 +57,6 @@
 
 <script>
     function closePopup(id) {
-        console.log("working");
         $('#' + id).hide();
     }
 </script>
