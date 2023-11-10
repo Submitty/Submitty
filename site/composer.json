@@ -43,7 +43,7 @@
     "symfony/http-foundation": "6.3.2",
     "symfony/polyfill-php80": "1.27.0",
     "symfony/routing": "6.1.11",
-    "Submitty/Markdown": "1.0.0",
+    "submitty/markdown": "dev-main",
     "textalk/websocket": "1.6.3",
     "twig/twig": "3.7.0"
   },

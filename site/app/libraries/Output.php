@@ -17,9 +17,11 @@ use League\CommonMark\Extension\CommonMark\Node\Block\FencedCode;
 use League\CommonMark\Extension\CommonMark\Node\Block\IndentedCode;
 //use app\libraries\CustomCodeInlineRenderer;
 //use app\libraries\CustomInlineParser;
-use Aptoma\Twig\Extension\MarkdownEngine\PHPLeagueCommonMarkEngine;
+// use Aptoma\Twig\Extension\MarkdownEngine\PHPLeagueCommonMarkEngine;
+use Submitty\Twig\Extension\PHPLeagueMarkdownEngine;
 use League\CommonMark\CommonMarkConverter;
-use Aptoma\Twig\Extension\MarkdownExtension;
+// use Aptoma\Twig\Extension\MarkdownExtension;
+use Submitty\Twig\Extension\MarkdownExtension;
 use Ds\Set;
 
 /**
@@ -177,8 +179,10 @@ HTML;
         
         $environment->addInlineParser(new CustomInlineParser());
 
-        $converter = new CommonMarkConverter($config);
-        $engine = new PHPLeagueCommonMarkEngine($converter);
+        // $converter = new CommonMarkConverter($config);
+        // $engine = new PHPLeagueCommonMarkEngine($converter);
+        $converter = new MarkdownConverter($environment);
+        $engine = new PHPLeagueMarkdownEngine($converter);
         $this->twig->addExtension(new MarkdownExtension($engine));
     }
 
