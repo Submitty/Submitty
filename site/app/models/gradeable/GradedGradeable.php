@@ -320,8 +320,4 @@ class GradedGradeable extends AbstractModel {
         throw new \BadFunctionCallException('Cannot set late day exception info');
     }
 
-    /** @internal */
-    public function setReasonsForExceptions() {
-        throw new \BadFunctionCallException('Cannot set late day exception info');
-    }
 }
