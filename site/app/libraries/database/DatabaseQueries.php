@@ -901,6 +901,16 @@ SQL;
         }
     }
 
+    /**
+     * @param int[] $post_ids
+     * @return int[] threads that have been merged
+     */
+    public function getMergedThreadIds(array $post_ids): array {
+        $placeholders = $this->createParameterList(count($post_ids));
+        $this->course_db->query("SELECT id FROM threads WHERE merged_thread_id <> -1 AND merged_post_id IN {$placeholders}", $post_ids);
+        return array_column($this->course_db->rows(), "id");
+    }
+
     public function getDeletedPostsByUser($user) {
         $this->course_db->query("SELECT * FROM posts where deleted = true AND author_user_id = ?", [$user]);
         return $this->course_db->rows();
@@ -960,6 +970,16 @@ SQL;
     public function postHasHistory($post_id) {
         $this->course_db->query("SELECT * FROM forum_posts_history WHERE post_id = ?", [$post_id]);
         return 0 !== count($this->course_db->rows());
+    }
+
+    /**
+     * @param int[] $post_ids
+     * @return int[] ids of posts with history
+     */
+    public function getPostsWithHistory(array $post_ids): array {
+        $placeholders = $this->createParameterList(count($post_ids));
+        $this->course_db->query("SELECT DISTINCT post_id FROM forum_posts_history WHERE post_id IN {$placeholders}", $post_ids);
+        return array_column($this->course_db->rows(), "post_id");
     }
 
     public function getUnviewedPosts($thread_id, $user_id) {

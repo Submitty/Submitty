@@ -493,6 +493,9 @@ class ForumThreadView extends AbstractView {
             $i = 0;
             $first = true;
 
+            $posts_with_history = $this->core->getQueries()->getPostsWithHistory(array_column($posts, "id"));
+            $merged_threads = $this->core->getQueries()->getMergedThreadIds(array_column($posts, "id"));
+
             foreach ($order_array as $ordered_post) {
                 foreach ($posts as $post) {
                     if ($post["id"] == $ordered_post) {
@@ -514,6 +517,8 @@ class ForumThreadView extends AbstractView {
                             $display_option,
                             $includeReply,
                             $authors_display_info[$post['author_user_id']],
+                            in_array($post["id"], $posts_with_history),
+                            in_array($post["id"], $merged_threads),
                             false,
                             $thread_announced,
                         );
@@ -546,6 +551,8 @@ class ForumThreadView extends AbstractView {
                     $display_option,
                     $includeReply,
                     $authors_display_info[$post['author_user_id']],
+                    in_array($post["id"], $posts_with_history),
+                    in_array($post["id"], $merged_threads),
                     false,
                     $thread_announced,   
                 );
@@ -1009,7 +1016,7 @@ class ForumThreadView extends AbstractView {
         return $post_content;
     }
 
-    public function createPost(array $thread, array $post, $unviewed_posts, $first, $reply_level, $display_option, $includeReply,  array $author_info, $render = false, $thread_announced = false) {
+    public function createPost(array $thread, array $post, $unviewed_posts, $first, $reply_level, $display_option, $includeReply,  array $author_info, bool $has_history, bool $is_merged_thread, bool $render = false, bool $thread_announced = false) {
         $current_user = $this->core->getUser()->getId();
         $thread_id = $thread["id"];
         $post_id = $post["id"];
@@ -1085,8 +1092,8 @@ class ForumThreadView extends AbstractView {
 
         $post_user_info = [];
 
-        $merged_thread = false;
-        if ($this->core->getUser()->getGroup() <= 2) {
+        $merged_thread = $is_merged_thread && $userAccessFullGrading;
+        if ($userAccessFullGrading) {
             $info_name = $given_name . " " . $family_name . " (" . $post['author_user_id'] . ")";
             $visible_user_json = json_encode($visible_username);
             $pronouns = trim($author_info["pronouns"]);
@@ -1106,7 +1113,7 @@ class ForumThreadView extends AbstractView {
 
         $post_button = [];
 
-        if ($this->core->getUser()->getGroup() <= 3 || $post['author_user_id'] === $current_user) {
+        if ($userGroup <= 3 || $post['author_user_id'] === $current_user) {
             if ($isThreadLocked && !$userAccessFullGrading) {
             }
             else {
@@ -1127,13 +1134,6 @@ class ForumThreadView extends AbstractView {
                     "ud_button_title" => $ud_button_title,
                     "ud_button_icon" => $ud_button_icon
                 ];
-
-                if ($this->core->getUser()->accessGrading()) {
-                    $merged_thread_query = $this->core->getQueries()->getPostOldThread($post_id);
-                    if ($merged_thread_query["merged_thread_id"] != -1) {
-                        $merged_thread = true;
-                    }
-                }
 
                 $shouldEditThread = null;
 
@@ -1217,8 +1217,6 @@ class ForumThreadView extends AbstractView {
         if (!$isThreadLocked || $this->core->getUser()->accessFullGrading()) {
             $GLOBALS['post_box_id'] = $post_box_id = isset($GLOBALS['post_box_id']) ? $GLOBALS['post_box_id'] + 1 : 1;
         }
-
-        $has_history = $this->core->getQueries()->postHasHistory($post_id);
 
         $created_post = [
             "classes" => $classes,
