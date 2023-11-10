@@ -1,6 +1,6 @@
 //this helps update the frontend when the page refreshes because without this the sort icon would reset and the sort state would not
 /* eslint prefer-arrow-callback: [ "error", { "allowNamedFunctions": true } ] */
-document.addEventListener('DOMContentLoaded', function() {
+document.addEventListener('DOMContentLoaded', () => {
     const sortIndicator = document.getElementById('sortIndicator');
     let sortState = localStorage.getItem('sortIndicator');
 
@@ -21,8 +21,6 @@ document.addEventListener('DOMContentLoaded', function() {
     adjustRows();
 });
 
-// eslint-disable-next-line no-unused-vars
-/* eslint prefer-arrow-callback: [ "error", { "allowNamedFunctions": true } ] */
 /* exported toggleSort */
 function toggleSort(column) {
     const sortIndicator = document.getElementById('sortIndicator');
@@ -42,7 +40,6 @@ function toggleSort(column) {
     }
     adjustRows();
 }
-/* eslint prefer-arrow-callback: [ "error", { "allowNamedFunctions": true } ] */
 function adjustRows() {
     const rows = $('.queue_history_row').toArray();
     rows.sort((a, b) => {
