@@ -158,6 +158,16 @@ class GradingOrder extends AbstractModel {
                     }
                 };
                 break;
+            case "auto":
+                $keyFn = function (Submitter $a) {
+                    if ($a->isTeam()) {
+                        return $a->getId();
+                    }
+                    else {
+                        return $a->getUser()->getAutoGradedGradeable()->getTotalPoints();
+                    }
+                };
+                break;
             case "random":
                 $keyFn = function (Submitter $a) {
                     //So it's (pseudo) randomly ordered, and will be different for each gradeable
