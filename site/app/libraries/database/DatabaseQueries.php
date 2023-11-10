@@ -1534,6 +1534,7 @@ WHERE term=? AND course=? AND user_id=?",
      *              'late_day_date' => DateTime,
      *              'submission_days_late' => int,
      *              'late_day_exceptions' => int,
+     *              'reason_for_exception' => string,
      *              'late_days_remaining' => int,
      *              'late_day_status' => int,
      *              'late_days_change' => int
@@ -1587,12 +1588,13 @@ WHERE term=? AND course=? AND user_id=?",
         $params[] = $late_day_info->getLateDaysRemaining();
         $params[] = $late_day_info->getStatus();
         $params[] = $late_day_info->getLateDaysChange();
+        $params[] = $late_day_info->getReasonForException();
 
         $user_or_team = $late_day_info->getGradedGradeable()->getGradeable()->isTeamAssignment() ? 'team_id' : 'user_id';
         $query = "INSERT INTO late_day_cache
                     (" . $user_or_team . ", g_id, late_day_date, late_days_allowed, submission_days_late, 
-                    late_day_exceptions, late_days_remaining, late_day_status, late_days_change) 
-                    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)";
+                    late_day_exceptions, late_days_remaining, late_day_status, late_days_change, reason_for_exception) 
+                    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
         $this->course_db->query($query, $params);
     }
 
@@ -1629,6 +1631,7 @@ WHERE term=? AND course=? AND user_id=?",
      *          'late_day_date' => DateTime,
      *          'submission_days_late' => int,
      *          'late_day_exceptions' => int,
+     *          'reason_for_exception' => string,
      *          'late_days_remaining' => int,
      *          'late_day_status' => int,
      *          'late_days_change' => int
@@ -1673,7 +1676,8 @@ WHERE term=? AND course=? AND user_id=?",
      *      'late_day_exceptions' => int,
      *      'late_days_remaining' => int,
      *      'late_day_status' => int,
-     *      'late_days_change' => int
+     *      'late_days_change' => int,
+     *      'reason_for_exception' => string
      * ]
      */
     public function getLateDayCacheForUserGradeable(string $user_id, string $g_id): ?array {
@@ -8035,8 +8039,7 @@ WHERE current_state IN
             ) AS u ON (eg IS NULL OR NOT eg.team_assignment) AND u. g_id=g.g_id
 
             /* Join user late day exceptions */
-            LEFT JOIN late_day_exceptions ldeu ON g.g_id=ldeu.g_id AND u.user_id=ldeu.user_id
-            LEFT JOIN reason_for_exception ldeu ON g.g_id=ldeu.g_id AND u.user_id=ldeu.user_id';
+            LEFT JOIN late_day_exceptions ldeu ON g.g_id=ldeu.g_id AND u.user_id=ldeu.user_id';
         }
         if ($team && count($teams) > 0) {
             $team_placeholders = implode(',', array_fill(0, count($teams), '?'));
@@ -8295,16 +8298,23 @@ WHERE current_state IN
 
                 // Get the late day exceptions for each user
                 $late_day_exceptions = [];
+                $reasons_for_exceptions = [];
                 if (isset($row['array_late_day_user_ids'])) {
                     $late_day_exceptions = array_combine(
                         json_decode($row['array_late_day_user_ids']),
                         json_decode($row['array_late_day_exceptions']),
-                        json_decode($row['array_reason_for_exception'])
                     );
+                    $reasons_for_exceptions = array_combine(
+                        json_decode($row['array_late_day_user_ids']),
+                        json_decode($row['array_reason_for_exception'])
+                    )
                 }
                 foreach ($submitter->getMembers() as $user_id) {
                     if (!isset($late_day_exceptions[$user_id])) {
                         $late_day_exceptions[$user_id] = 0;
+                    }
+                    if (!isset($reasons_for_exceptions[$user_id])) {
+                        $reasons_for_exceptions[$user_id] = '';
                     }
                 }
 
@@ -8319,9 +8329,9 @@ WHERE current_state IN
                 $late_day_exceptions = [
                     $submitter->getId() => $row['late_day_exceptions'] ?? 0
                 ];
-                $reason_for_exception = [
+                $reasons_for_exceptions = [
                     $submitter->getID() => $row['reason_for_exception'] ?? ''
-                ]
+                ];
             }
 
             // Create the graded gradeable instances
@@ -8330,8 +8340,8 @@ WHERE current_state IN
                 $gradeable,
                 new Submitter($this->core, $submitter),
                 [
-                    'late_day_exceptions' => $late_day_exceptions
-                    'reason_for_exception' => $reason_for_exception
+                    'late_day_exceptions' => $late_day_exceptions,
+                    'reasons_for_exceptions' => $reasons_for_exceptions
                 ]
             );
             $ta_graded_gradeable = null;

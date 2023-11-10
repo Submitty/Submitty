@@ -79,7 +79,7 @@ class LateDayInfo extends AbstractModel {
         $this->late_day_date = $event_info['late_day_date'] ?? null;
         $this->submission_days_late = $event_info['submission_days_late'] ?? null;
         $this->late_day_exceptions = $event_info['late_day_exceptions'] ?? null;
-        $this->late_day_exceptions = $event_info['reason_for_exception'] ?? null;
+        $this->reason_for_exception = $event_info['reason_for_exception'] ?? null;
         $this->late_days_remaining = $event_info['late_days_remaining']  ?? null;
         $this->late_days_change = $event_info['late_days_change']  ?? null;
 
@@ -128,6 +128,7 @@ class LateDayInfo extends AbstractModel {
             'late_day_date' => $graded_gradeable->getGradeable()->getSubmissionDueDate(),
             'submission_days_late' => $submission_days_late,
             'late_day_exceptions' => $exceptions,
+            'reason_for_exception' => $reason,
             'late_days_remaining' => $late_days_remaining,
             'late_days_change' => -$late_days_charged
         ];

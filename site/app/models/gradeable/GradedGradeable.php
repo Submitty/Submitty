@@ -42,6 +42,10 @@ class GradedGradeable extends AbstractModel {
     protected $late_day_exceptions = [];
 
     /** @prop
+     * @var array The reasons for exceptions indexed by user id */
+    protected $reasons_for_exceptions = [];
+
+    /** @prop
      * @var bool|null|SimpleGradeOverriddenUser Does this graded gradeable have overridden grades */
     protected $overridden_grades = false;
 
@@ -71,7 +75,7 @@ class GradedGradeable extends AbstractModel {
 
         $this->late_day_exceptions = $details['late_day_exceptions'] ?? [];
 
-        $this->reason_for_exceptions = $details['reason_for_exception'] ?? [];
+        $this->reasons_for_exceptions = $details['reasons_for_exceptions'] ?? [];
     }
 
     /**
@@ -236,9 +240,9 @@ class GradedGradeable extends AbstractModel {
             if ($this->gradeable->isTeamAssignment()) {
                 throw new \InvalidArgumentException('Must provide user if team assignment');
             }
-            return $this->reason_for_exceptions[$this->submitter->getId()] ?? 0;
+            return $this->reasons_for_exceptions[$this->submitter->getId()] ?? '';
         }
-        return $this->reason_for_exceptions[$user->getId()] ?? 0;
+        return $this->reasons_for_exceptions[$user->getId()] ?? '';
     }
 
     /**
@@ -313,6 +317,11 @@ class GradedGradeable extends AbstractModel {
 
     /** @internal  */
     public function setLateDayExceptions() {
+        throw new \BadFunctionCallException('Cannot set late day exception info');
+    }
+
+    /** @internal  */
+    public function setReasonsForExceptions() {
         throw new \BadFunctionCallException('Cannot set late day exception info');
     }
 }
