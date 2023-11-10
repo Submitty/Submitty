@@ -84,7 +84,7 @@
                                    aria-label="{{ title }}"
                                 ><i class="fa {{ icon }}"></i></span>
                                 <span class="post_button edit-post-button key_to_click"
-                                   onClick="showEditPostForm({{ thread.post_id }}, {{ thread.thread_id }}, true, {{ thread.render_markdown ? 1 : 0 }}, '{{ csrf_token }}'); return false;"
+                                   onClick="showEditPostForm({{ thread.post_id }}, {{ thread.thread_id }}, true, {{ thread.render_markdown ? 1 : 0 }}, '{{ csrf_token }}'); $('body').css('overflow', 'hidden'); return false;"
                                    title="Edit thread and post"
                                    aria-label="Edit thread and post"
                                 ><i class="fas fa-edit"></i></span>
