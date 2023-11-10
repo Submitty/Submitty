@@ -8329,7 +8329,7 @@ WHERE current_state IN
                     $submitter->getId() => $row['late_day_exceptions'] ?? 0
                 ];
                 $reasons_for_exceptions = [
-                    $submitter->getID() => $row['reason_for_exception'] ?? ''
+                    $submitter->getId() => $row['reason_for_exception'] ?? ''
                 ];
             }
 
