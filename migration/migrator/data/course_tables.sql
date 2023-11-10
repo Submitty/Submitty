@@ -356,6 +356,7 @@ CREATE FUNCTION public.get_late_day_info_from_previous(submission_days_late inte
     $$;
 
 
+--
 -- Name: grab_late_day_updates_for_user(text); Type: FUNCTION; Schema: public; Owner: -
 --
 
