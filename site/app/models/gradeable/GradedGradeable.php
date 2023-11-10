@@ -42,7 +42,7 @@ class GradedGradeable extends AbstractModel {
     protected $late_day_exceptions = [];
 
     /** @prop
-     * @var array The reasons for exceptions indexed by user id */
+     * @var array<string> The reasons for exceptions indexed by user id */
     protected $reasons_for_exceptions = [];
 
     /** @prop
@@ -320,7 +320,7 @@ class GradedGradeable extends AbstractModel {
         throw new \BadFunctionCallException('Cannot set late day exception info');
     }
 
-    /** @internal  */
+    /** @internal */
     public function setReasonsForExceptions() {
         throw new \BadFunctionCallException('Cannot set late day exception info');
     }
