@@ -8302,12 +8302,12 @@ WHERE current_state IN
                 if (isset($row['array_late_day_user_ids'])) {
                     $late_day_exceptions = array_combine(
                         json_decode($row['array_late_day_user_ids']),
-                        json_decode($row['array_late_day_exceptions']),
+                        json_decode($row['array_late_day_exceptions'])
                     );
                     $reasons_for_exceptions = array_combine(
                         json_decode($row['array_late_day_user_ids']),
                         json_decode($row['array_reason_for_exception'])
-                    )
+                    );
                 }
                 foreach ($submitter->getMembers() as $user_id) {
                     if (!isset($late_day_exceptions[$user_id])) {
