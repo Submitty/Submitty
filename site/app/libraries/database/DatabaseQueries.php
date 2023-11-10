@@ -4983,7 +4983,8 @@ AND gc_id IN (
                 "family_name" => " " . ((isset($row["user_preferred_familyname"]) && strlen($row["user_preferred_familyname"]) > 0) ? $row["user_preferred_familyname"] : $row["user_familyname"]),
                 "user_email" => $row["user_email"],
                 "pronouns" => $row["user_pronouns"],
-                "display_pronouns" => $row["display_pronouns"]
+                "display_pronouns" => $row["display_pronouns"],
+                "is_staff" => intval($row["user_group"]) <= 3,
             ];
         }
         return $return;

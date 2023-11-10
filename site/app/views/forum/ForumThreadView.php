@@ -458,6 +458,7 @@ class ForumThreadView extends AbstractView {
         }, $posts);
 
         $author_user_groups = $this->core->getQueries()->getAuthorUserGroups($author_user_ids);
+        $authors_display_info = $this->core->getQueries()->getDisplayUserInfoFromUserIds($author_user_ids);
 
         foreach ($author_user_groups as $author) {
             $author_user_groups_map[$author["user_id"]] = $author["user_group"];
@@ -504,7 +505,18 @@ class ForumThreadView extends AbstractView {
 
                         $post["author_user_group"] = $author_user_groups_map[$post["author_user_id"]];
 
-                        $post_data[] = $this->createPost($thread_id, $post, $unviewed_posts, $first, $reply_level, $display_option, $includeReply, false, $thread_announced);
+                        $post_data[] = $this->createPost(
+                            $activeThread,
+                            $post,
+                            $unviewed_posts,
+                            $first,
+                            $reply_level,
+                            $display_option,
+                            $includeReply,
+                            $authors_display_info[$post['author_user_id']],
+                            false,
+                            $thread_announced,
+                        );
 
                         break;
                     }
@@ -525,7 +537,18 @@ class ForumThreadView extends AbstractView {
 
                 $post["author_user_group"] = $author_user_groups_map[$post["author_user_id"]];
 
-                $post_data[] = $this->createPost($thread_id, $post, $unviewed_posts, $first, 1, $display_option, $includeReply, false, $thread_announced);
+                $post_data[] = $this->createPost(
+                    $activeThread,
+                    $post,
+                    $unviewed_posts,
+                    $first,
+                    1,
+                    $display_option,
+                    $includeReply,
+                    $authors_display_info[$post['author_user_id']],
+                    false,
+                    $thread_announced,   
+                );
 
                 if ($first) {
                     $first = false;
@@ -986,8 +1009,9 @@ class ForumThreadView extends AbstractView {
         return $post_content;
     }
 
-    public function createPost($thread_id, $post, $unviewed_posts, $first, $reply_level, $display_option, $includeReply, $render = false, $thread_announced = false) {
+    public function createPost(array $thread, array $post, $unviewed_posts, $first, $reply_level, $display_option, $includeReply,  array $author_info, $render = false, $thread_announced = false) {
         $current_user = $this->core->getUser()->getId();
+        $thread_id = $thread["id"];
         $post_id = $post["id"];
         $parent_id = $post["parent_id"];
 
@@ -1003,14 +1027,13 @@ class ForumThreadView extends AbstractView {
             $edit_date = null;
         }
 
-        $user_info = $this->core->getQueries()->getDisplayUserInfoFromUserId($post["author_user_id"]);
-        $author_email = trim($user_info['user_email']);
-        $given_name = trim($user_info["given_name"]);
-        $family_name = trim($user_info["family_name"]);
+        $author_email = trim($author_info['user_email']);
+        $given_name = trim($author_info["given_name"]);
+        $family_name = trim($author_info["family_name"]);
         $visible_username = $given_name . " " . substr($family_name, 0, 1) . ".";
-        $pronouns = trim($user_info["pronouns"]);
-        $display_pronouns = $user_info["display_pronouns"];
-        $thread_resolve_state = $this->core->getQueries()->getResolveState($thread_id)[0]['status'];
+        $pronouns = trim($author_info["pronouns"]);
+        $display_pronouns = $author_info["display_pronouns"];
+        $thread_resolve_state = $thread['status'];
 
         if ($display_option != 'tree') {
             $reply_level = 1;
@@ -1037,7 +1060,7 @@ class ForumThreadView extends AbstractView {
         else {
             $classes[] = "viewed_post";
         }
-        if ($this->core->getQueries()->isStaffPost($post["author_user_id"])) {
+        if ($author_info['is_staff']) {
             $classes[] = "important";
         }
         if ($post["deleted"]) {
@@ -1056,7 +1079,7 @@ class ForumThreadView extends AbstractView {
         $post_content = $post['content'];
         $markdown = $post["render_markdown"];
 
-        $isThreadLocked = $this->core->getQueries()->isThreadLocked($thread_id);
+        $isThreadLocked = isset($thread['lock_thread_date']) && $thread['lock_thread_date'] < date("Y-m-d H:i:S");
         $userAccessFullGrading = $this->core->getUser()->accessFullGrading();
         $userGroup = $this->core->getUser()->getGroup();
 
@@ -1066,8 +1089,8 @@ class ForumThreadView extends AbstractView {
         if ($this->core->getUser()->getGroup() <= 2) {
             $info_name = $given_name . " " . $family_name . " (" . $post['author_user_id'] . ")";
             $visible_user_json = json_encode($visible_username);
-            $pronouns = trim($user_info["pronouns"]);
-            $display_pronouns = $user_info["display_pronouns"];
+            $pronouns = trim($author_info["pronouns"]);
+            $display_pronouns = $author_info["display_pronouns"];
             $info_name = json_encode($info_name);
             $jscriptAnonFix = $post['anonymous'] ? 'true' : 'false';
             $jscriptAnonFix = json_encode($jscriptAnonFix);
@@ -1084,7 +1107,7 @@ class ForumThreadView extends AbstractView {
         $post_button = [];
 
         if ($this->core->getUser()->getGroup() <= 3 || $post['author_user_id'] === $current_user) {
-            if (!($this->core->getQueries()->isThreadLocked($thread_id) != 1 || $userAccessFullGrading)) {
+            if ($isThreadLocked && !$userAccessFullGrading) {
             }
             else {
                 if ($deleted && $this->core->getUser()->getGroup() <= 3) {
@@ -1134,8 +1157,8 @@ class ForumThreadView extends AbstractView {
         if ($this->core->getUser()->getGroup() == 4) {
             $info_name = $given_name . " " . $family_name . " (" . $post['author_user_id'] . ")";
             $visible_user_json = json_encode($visible_username);
-            $pronouns = trim($user_info["pronouns"]);
-            $display_pronouns = $user_info["display_pronouns"];
+            $pronouns = trim($author_info["pronouns"]);
+            $display_pronouns = $author_info["display_pronouns"];
             $info_name = json_encode($info_name);
             $jscriptAnonFix = $post['anonymous'] ? 'true' : 'false';
             $jscriptAnonFix = json_encode($jscriptAnonFix);
@@ -1191,7 +1214,7 @@ class ForumThreadView extends AbstractView {
         }
 
         $post_box_id = 1;
-        if ($this->core->getQueries()->isThreadLocked($thread_id) != 1 || $this->core->getUser()->accessFullGrading()) {
+        if (!$isThreadLocked || $this->core->getUser()->accessFullGrading()) {
             $GLOBALS['post_box_id'] = $post_box_id = isset($GLOBALS['post_box_id']) ? $GLOBALS['post_box_id'] + 1 : 1;
         }
 
@@ -1232,7 +1255,7 @@ class ForumThreadView extends AbstractView {
 
         if ($render) {
             if ($first) {
-                $thread_title = $this->core->getQueries()->getThreadTitle($thread_id);
+                $thread_title = $thread['title'];
                 $activeThreadTitle = "({$thread_id}) " . $thread_title;
                 $created_post['activeThreadTitle'] = $activeThreadTitle;
             }
