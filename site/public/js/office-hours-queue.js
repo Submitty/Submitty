@@ -1,8 +1,8 @@
 //this helps update the frontend when the page refreshes because without this the sort icon would reset and the sort state would not
 /* eslint prefer-arrow-callback: [ "error", { "allowNamedFunctions": true } ] */
 document.addEventListener('DOMContentLoaded', function() {
-    const sortIndicator = document.getElementById('sortIndicator');
-    const sortState = localStorage.getItem('sortIndicator');
+    let sortIndicator = document.getElementById('sortIndicator');
+    let sortState = localStorage.getItem('sortIndicator');
 
     if (sortState === null) {
         sortState = 'off';
@@ -23,6 +23,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
 // eslint-disable-next-line no-unused-vars
 /* eslint prefer-arrow-callback: [ "error", { "allowNamedFunctions": true } ] */
+/* exported toggleSort */
 function toggleSort(column) {
     const sortIndicator = document.getElementById('sortIndicator');
     if (column === 'HelpStartedBy') {
@@ -43,9 +44,8 @@ function toggleSort(column) {
 }
 /* eslint prefer-arrow-callback: [ "error", { "allowNamedFunctions": true } ] */
 function adjustRows() {
-    const sortIndicator = document.getElementById('sortIndicator');
     const rows = $('.queue_history_row').toArray();
-    rows.sort(function (a, b) {
+    rows.sort((a, b) => {
         if (localStorage.getItem('sortIndicator') === 'up') {
             if ($(a).find('.helpStarted').text()>$(b).find('.helpStarted').text()) {
                 return -1;
