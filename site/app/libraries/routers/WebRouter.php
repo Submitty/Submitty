@@ -285,12 +285,18 @@ class WebRouter {
                     $this->core->buildCourseUrl(),
                     $this->core->getConfig()->getCourseHomeUrl()
                 );
+            } else {
+                // Redirect to /home if the course is not loaded successfully
+                return MultiResponse::RedirectOnlyResponse(
+                    new RedirectResponse($this->core->buildUrl(['home']))
+                );
             }
 
             /** @noinspection PhpUnhandledExceptionInspection */
             $this->core->loadCourseDatabase();
         }
     }
+    
 
     /**
      * Check if the user needs a redirection depending on their login status.
