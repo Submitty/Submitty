@@ -1,4 +1,5 @@
 /* global displaySuccessMessage */
+/* global luxon */
 
 // eslint-disable-next-line no-unused-vars
 function categoriesFormEvents() {
@@ -833,6 +834,8 @@ function modifyOrSplitPost(e) {
 
 // eslint-disable-next-line no-unused-vars
 function showEditPostForm(post_id, thread_id, shouldEditThread, render_markdown, csrf_token) {
+    console.log("EHREH");
+    const DateTime = luxon.DateTime;
     if (!checkAreYouSureForm()) {
         return;
     }
@@ -870,19 +873,19 @@ function showEditPostForm(post_id, thread_id, shouldEditThread, render_markdown,
             const change_anon = json.change_anon;
             // eslint-disable-next-line no-undef
             const user_id = escapeSpecialChars(json.user);
-            let time = Date.parse(json.post_time);
-            if (!time) {
+            const validIsoString = json.post_time.replace(' ', 'T');
+            let time = DateTime.fromISO(json.validIsoString, { zone: 'local' });
+            if (!time.isValid) {
                 // Timezone suffix ":00" might be missing
-                time = Date.parse(`${json.post_time}:00`);
+                time = DateTime.fromISO(`${validIsoString}:00`, { zone: 'local' });
             }
-            time = new Date(time);
             const categories_ids = json.categories_ids;
-            const date = time.toLocaleDateString();
-            time = time.toLocaleString('en-US', { hour: 'numeric', minute: 'numeric', hour12: true });
+            const date = time.toLocaleString(DateTime.DATE_SHORT);
+            const timeString = time.toLocaleString(DateTime.TIME_SIMPLE);
             const contentBox = form.find('[name=thread_post_content]')[0];
             contentBox.style.height = lines*14;
             const editUserPrompt = document.getElementById('edit_user_prompt');
-            editUserPrompt.innerHTML = `Editing a post by: ${user_id} on ${date} at ${time}`;
+            editUserPrompt.innerHTML = `Editing a post by: ${user_id} on ${date} at ${timeString}`;
             contentBox.value = post_content;
             document.getElementById('edit_post_id').value = post_id;
             document.getElementById('edit_thread_id').value = thread_id;
