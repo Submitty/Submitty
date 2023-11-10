@@ -440,9 +440,13 @@ class ForumThreadView extends AbstractView {
         $expiring = $activeThread['pinned_expiration'] <= date("Y-m-d H:i:s", strtotime("+7 day"));
 
         $thread_id = $activeThread['id'];
+        if ($thread_id == -1) {
+            $thread_id = array_values($posts)[0]["thread_id"];
+        }
+        $first_post = $this->core->getQueries()->getFirstPostForThread($currentThread);
+        $first_post_id = $first_post["id"];
 
         $first = true;
-        $first_post_id = 1;
 
         $post_data = [];
 
@@ -534,12 +538,6 @@ class ForumThreadView extends AbstractView {
         }
         else {
             foreach ($posts as $post) {
-                if ($thread_id == -1) {
-                    $thread_id = $post["thread_id"];
-                }
-
-                $first_post_id = $this->core->getQueries()->getFirstPostForThread($thread_id)['id'];
-
                 $post["author_user_group"] = $author_user_groups_map[$post["author_user_id"]];
 
                 $post_data[] = $this->createPost(
@@ -586,16 +584,14 @@ class ForumThreadView extends AbstractView {
             $this->core->getOutput()->addInternalJs('autosave-utils.js');
             $this->core->getOutput()->addInternalJs('forum.js');
             $this->core->getOutput()->addInternalCss('forum.css');
-            $current_thread_first_post = $this->core->getQueries()->getFirstPostForThread($currentThread);
-            $current_thread_date = $current_thread_first_post["timestamp"];
+            $current_thread_date = $first_post["timestamp"];
             $merge_thread_list = $this->core->getQueries()->getThreadsBefore($current_thread_date, 1);
-
+            $merge_thread_first_posts = $this->core->getQueries()->getFirstPostForThreads(array_column($merge_thread_list, "id"));
             // Get first post of each thread. To be used later
             // to obtain the content of the post to be displayed
             // in the modal.
             foreach ($merge_thread_list as $key => $temp_thread) {
-                $temp_first_post = $this->core->getQueries()->getFirstPostForThread($temp_thread['id']);
-                $merge_thread_list[$key]['first_post_id'] = $temp_first_post['id'];
+                $merge_thread_list[$key]['first_post_id'] = $merge_thread_first_posts[$temp_thread['id']]['id'];
             }
 
             $merge_thread_content = [
