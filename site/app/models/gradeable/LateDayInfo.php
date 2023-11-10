@@ -205,6 +205,7 @@ class LateDayInfo extends AbstractModel {
             'late_days_allowed' => $this->getAssignmentAllowedLateDays(),
             'submission_days_late' => $this->getDaysLate(),
             'late_day_exceptions' => $this->getLateDayException(),
+            'reason_for_exception' => $this->getReasonForException(),
             'late_day_status' => $this->getStatus(),
             'late_days_change' => $this->getLateDaysChange()
         ];
