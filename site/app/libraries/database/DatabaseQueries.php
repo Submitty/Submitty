@@ -812,21 +812,6 @@ SQL;
         return count($row) > 0 && $row['announced'] != null;
     }
 
-    public function getResolveState($thread_id) {
-        $this->course_db->query("SELECT status from threads where id = ?", [$thread_id]);
-        return $this->course_db->rows();
-    }
-
-    /**
-     * @param int[] $thread_ids
-     * @return int[] status of threads indexed by id
-     */
-    public function getResolvedThreads(array $thread_ids): array {
-        $placeholders = $this->createParameterList(count($thread_ids));
-        $this->course_db->query("SELECT * FROM threads WHERE id IN {$placeholders};", $thread_ids);
-        return array_column($this->course_db->rows(), "status", "id");
-    }
-
     public function updateResolveState($thread_id, $state) {
         if (in_array($state, [-1, 0, 1])) {
             $this->course_db->query("UPDATE threads set status = ? where id = ?", [$state, $thread_id]);
@@ -929,9 +914,12 @@ SQL;
 
     /**
      * @param int[] $thread_ids
-     * @return array<int, mixed[]> array of posts, indexed by thread id.
+     * @return null|array<int, mixed[]> array of posts, indexed by thread id.
      */
-    public function getFirstPostForThreads(array $thread_ids): array {
+    public function getFirstPostForThreads(array $thread_ids): null|array {
+        if (count($thread_ids) == 0) {
+            return null;
+        }
         $placeholders = $this->createParameterList(count($thread_ids));
         $this->course_db->query("SELECT * FROM posts WHERE parent_id = -1 AND thread_id IN {$placeholders}", $thread_ids);
         $return = [];
@@ -965,11 +953,6 @@ SQL;
         $placeholders = $this->createParameterList(count($author_ids));
         $this->course_db->query("SELECT user_id, user_group FROM users WHERE user_id IN {$placeholders}", $author_ids);
         return $this->course_db->rows();
-    }
-
-    public function postHasHistory($post_id) {
-        $this->course_db->query("SELECT * FROM forum_posts_history WHERE post_id = ?", [$post_id]);
-        return 0 !== count($this->course_db->rows());
     }
 
     /**
@@ -4941,11 +4924,6 @@ AND gc_id IN (
         return empty($result[0]["max"]) ? -1 : $result[0]["max"];
     }
 
-    public function viewedThread($user, $thread_id) {
-        $this->course_db->query("SELECT * FROM viewed_responses v WHERE thread_id = ? AND user_id = ? AND NOT EXISTS(SELECT thread_id FROM (posts LEFT JOIN forum_posts_history ON posts.id = forum_posts_history.post_id) AS jp WHERE jp.thread_id = ? AND (jp.timestamp > v.timestamp OR (jp.edit_timestamp IS NOT NULL AND jp.edit_timestamp > v.timestamp)))", [$thread_id, $user, $thread_id]);
-        return count($this->course_db->rows()) > 0;
-    }
-
     /**
      * @param int[] $thread_ids
      * @return int[] thread ids that have been viewed by user
@@ -4994,8 +4972,9 @@ AND gc_id IN (
      * @return array<string, mixed[]> user info, indexed by user id.
      */
     public function getDisplayUserInfoFromUserIds(array $user_ids): array {
-        $placeholders = $this->createParameterList(count($user_ids));
-        $this->course_db->query("SELECT * FROM users WHERE user_id IN {$placeholders}", $user_ids);
+        $unique_users = array_values(array_unique($user_ids));
+        $placeholders = $this->createParameterList(count($unique_users));
+        $this->course_db->query("SELECT * FROM users WHERE user_id IN {$placeholders};", $unique_users);
         $return = [];
         foreach ($this->course_db->rows() as $row) {
             $return[$row['user_id']] = [
@@ -7265,22 +7244,6 @@ AND gc_id IN (
             return false;
         }
         return $this->course_db->rows()[0]['lock_thread_date'] < date("Y-m-d H:i:S");
-    }
-
-    /**
-     * @param int[] $thread_ids
-     * @return int[] ids of locked threads.
-     */
-    public function getLockedThreads(array $thread_ids): array {
-        $placeholders = $this->createParameterList(count($thread_ids));
-        $this->course_db->query("SELECT * FROM threads WHERE id IN {$placeholders}", $thread_ids);
-        $return = [];
-        foreach ($this->course_db->rows() as $row) {
-            if (isset($row['lock_thread_date']) && $row['lock_thread_date'] < date("Y-m-d H:i:S")) {
-                $return[] = $row['id'];
-            }
-        }
-        return $return;
     }
 
     /**

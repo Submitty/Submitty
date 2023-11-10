@@ -443,7 +443,7 @@ class ForumThreadView extends AbstractView {
         if ($thread_id == -1) {
             $thread_id = array_values($posts)[0]["thread_id"];
         }
-        $first_post = $this->core->getQueries()->getFirstPostForThread($currentThread);
+        $first_post = $this->core->getQueries()->getFirstPostForThread($thread_id);
         $first_post_id = $first_post["id"];
 
         $first = true;
