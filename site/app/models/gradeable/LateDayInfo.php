@@ -44,7 +44,7 @@ class LateDayInfo extends AbstractModel {
      * @var int The number exceptions allowed for the user on this assignment */
     protected $late_day_exceptions = null;
     /** @prop
-    * @var string The reason for a given late day exception */
+     * @var string The reason for a given late day exception */
     protected $reason_for_exception = null;
     /** @prop
      * @var int The update to late days remaining based on this late day event */
