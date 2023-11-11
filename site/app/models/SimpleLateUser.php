@@ -40,6 +40,9 @@ class SimpleLateUser extends AbstractModel {
     /** @prop
      * @var string The extensions of a user (allowed late days for a specific homework) */
     protected $late_day_exceptions;
+    /** @prop
+     * @var string The reason for an extension given on a homework assignment */
+    protected $reason_for_exception;
 
     /**
      * User constructor.
@@ -77,6 +80,9 @@ class SimpleLateUser extends AbstractModel {
         }
         if (isset($details['late_day_exceptions'])) {
             $this->late_day_exceptions = $details['late_day_exceptions'];
+        }
+        if (isset($details['reason_for_exception'])) {
+            $this->reason_for_exception = $details['reason_for_exception'];
         }
     }
 
