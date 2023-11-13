@@ -1,4 +1,4 @@
-const future_date = '9994-12-31 20:59:59';
+const future_date = '9994-12-31 23:59:59';
 const past_date = '1970-10-10 23:59:59';
 
 const notBeVisible = (button_selectors, selectors) => {
