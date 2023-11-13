@@ -1,12 +1,12 @@
 //this helps update the frontend when the page refreshes because without this the sort icon would reset and the sort state would not
 /* eslint prefer-arrow-callback: [ "error", { "allowNamedFunctions": true } ] */
 document.addEventListener('DOMContentLoaded', () => {
-    const sortIndicator = document.getElementById('sortIndicator');
-    let sortState = localStorage.getItem('sortIndicator');
+    const sortIndicator = document.getElementById('sort-indicator');
+    let sortState = localStorage.getItem('sort-indicator');
 
     if (sortState === null) {
         sortState = 'off';
-        localStorage.setItem('sortIndicator', sortState);
+        localStorage.setItem('sort-indicator', sortState);
     }
 
     if (sortState === 'up') {
@@ -23,18 +23,18 @@ document.addEventListener('DOMContentLoaded', () => {
 
 /* exported toggleSort */
 function toggleSort(column) {
-    const sortIndicator = document.getElementById('sortIndicator');
+    const sortIndicator = document.getElementById('sort-indicator');
     if (column === 'HelpStartedBy') {
-        if (localStorage.getItem('sortIndicator') === 'off') {
-            localStorage.setItem('sortIndicator', 'up');
+        if (localStorage.getItem('sort-indicator') === 'off') {
+            localStorage.setItem('sort-indicator', 'up');
             sortIndicator.innerHTML = '<i class="fas fa-sort-up"></i>';
         }
-        else if (localStorage.getItem('sortIndicator') === 'up') {
-            localStorage.setItem('sortIndicator', 'down');
+        else if (localStorage.getItem('sort-indicator') === 'up') {
+            localStorage.setItem('sort-indicator', 'down');
             sortIndicator.innerHTML = '<i class="fas fa-sort-down"></i>';
         }
-        else if (localStorage.getItem('sortIndicator') === 'down') {
-            localStorage.setItem('sortIndicator', 'off');
+        else if (localStorage.getItem('sort-indicator') === 'down') {
+            localStorage.setItem('sort-indicator', 'off');
             sortIndicator.innerHTML = '<i class="fa-solid fa-sort"></i>';
         }
     }
@@ -43,16 +43,16 @@ function toggleSort(column) {
 function adjustRows() {
     const rows = $('.queue_history_row').toArray();
     rows.sort((a, b) => {
-        if (localStorage.getItem('sortIndicator') === 'up') {
-            if ($(a).find('.helpStarted').text()>$(b).find('.helpStarted').text()) {
+        if (localStorage.getItem('sort-indicator') === 'up') {
+            if ($(a).find('.help-started').text()>$(b).find('.help-started').text()) {
                 return -1;
             }
             else {
                 return 1;
             }
         }
-        else if (localStorage.getItem('sortIndicator') === 'down') {
-            if ($(a).find('.helpStarted').text()>$(b).find('.helpStarted').text()) {
+        else if (localStorage.getItem('sort-indicator') === 'down') {
+            if ($(a).find('.help-started').text()>$(b).find('.help-started').text()) {
                 return 1;
             }
             else {
@@ -60,7 +60,7 @@ function adjustRows() {
             }
         }
         else {
-            if (parseInt($(a).find('.numberCount').text())<parseInt($(b).find('.numberCount').text())) {
+            if (parseInt($(a).find('.number-count').text())<parseInt($(b).find('.number-count').text())) {
                 return -1;
             }
             else {
@@ -68,9 +68,9 @@ function adjustRows() {
             }
         }
     });
-    $('#queueHistoryTable').empty();
+    $('#queue-history-table').empty();
     for (let i=0; i < rows.length; i++) {
-        $('#queueHistoryTable').append($(rows[i]));
+        $('#queue-history-table').append($(rows[i]));
     }
 }
 
