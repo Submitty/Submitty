@@ -550,6 +550,7 @@ CREATE TABLE public.sessions (
 
 CREATE TABLE public.superuser_announcements (
     id integer NOT NULL,
+    type integer NOT NULL,
     text character varying(255) NOT NULL,
     date date NOT NULL
 );

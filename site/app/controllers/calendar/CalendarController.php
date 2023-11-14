@@ -300,7 +300,7 @@ class CalendarController extends AbstractController {
     }
 
     /**
-     * @Route("/calendar/announcement/new", methods={"POST"})
+     * @Route("/calendar/global_items/new", methods={"POST"})
      */
     public function createGlobalAnnouncement(): RedirectResponse {
         // Checks if the values exist that are set and returns an error message if not
@@ -356,7 +356,7 @@ class CalendarController extends AbstractController {
 
 
     /**
-     * @Route("/calendar/announcement/edit", methods={"POST"})
+     * @Route("/calendar/global_items/edit", methods={"POST"})
      */
     public function editGlobalAnnouncement(): RedirectResponse {
         // Checks if the values exist that are set and returns an error message if not
@@ -441,7 +441,7 @@ class CalendarController extends AbstractController {
    }
 
    /**
-     * @Route("/calendar/announcement/delete", methods={"POST"})
+     * @Route("/calendar/global_items/delete", methods={"POST"})
      */
     public function deleteGlobalAnnouncement(): RedirectResponse {
         if (isset($_POST['id'])) {

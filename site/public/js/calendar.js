@@ -1,4 +1,4 @@
-/* exported prevMonth, nextMonth, loadCalendar, loadFullCalendar, editCalendarItemForm, deleteCalendarItem, openNewItemModal, openOptionsModal, updateCalendarOptions, colorLegend */
+/* exported prevMonth, nextMonth, loadCalendar, loadFullCalendar, editCalendarItemForm, deleteCalendarItem, openNewItemModal, openNewGlobalEventModal, openOptionsModal, updateCalendarOptions, colorLegend */
 /* global curr_day, curr_month, curr_year, gradeables_by_date, instructor_courses, buildUrl */
 /* global csrfToken */
 
@@ -129,6 +129,7 @@ function generateCalendarItem(item) {
             if (instructor_courses[course].course === item['course'] && instructor_courses[course].semester === item['semester']) {
                 exists = true;
             }
+            console.log(instructor_courses);
         }
     }
     const icon = item['icon'];
@@ -221,6 +222,41 @@ function deleteCalendarItem() {
 }
 
 /**
+ * Deletes the selected global calendar item.
+ *
+ * @returns {void} : Just deleting.
+ */
+function deleteGlobalCalendarItem() {
+    const id = $('#calendar-item-id').val();
+    const course = $('#calendar-item-course-edit').val();
+    const semester = $('#calendar-item-semester-edit').val();
+    if (id !== '') {
+        const data = new FormData();
+        data.append('id', id);
+        data.append('course', course);
+        data.append('semester', semester);
+        data.append('csrf_token', csrfToken);
+        $.ajax({
+            url: buildUrl(['calendar', 'global_items', 'delete']),
+            type: 'POST',
+            processData: false,
+            contentType: false,
+            data: data,
+            success: function (res) {
+                const response = JSON.parse(res);
+                if (response.status === 'success') {
+                    location.reload();
+                }
+                else {
+                    alert(response.message);
+                }
+            },
+        });
+    }
+}
+
+
+/**
  * Creates a HTML table cell that contains a date.
  *
  * @param year : int the year of the date
@@ -270,6 +306,7 @@ function generateDayCell(year, month, day, curr_view_month, view_semester=false)
     itemList.classList.add('cal-cell-items-panel');
     for (const i in gradeables_by_date[cell_date_str]) {
         itemList.appendChild(generateCalendarItem(gradeables_by_date[cell_date_str][i]));
+        console.log((gradeables_by_date[cell_date_str][i]));
     }
     content.appendChild(itemList);
     return content;
@@ -700,10 +737,7 @@ function openNewItemModal() {
 }
 
 function openNewGlobalEventModal() {
-    console.log("popopsad");
     $('#new-global-event-form').css('display', 'block');
-    console.log("popoasdasasd");
-
 }
 
 function openOptionsModal() {
