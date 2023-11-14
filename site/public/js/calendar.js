@@ -141,14 +141,15 @@ function generateCalendarItem(item) {
         element.style.setProperty('background-color', item['color']);
     }
     if (exists) {
-        element.style.setProperty('cursor','pointer');
+        element.style.setProperty('cursor', 'pointer');
     }
     element.title = tooltip;
     if (link !== '') {
         element.href = link;
     }
-    if (onclick !== '' && exists) {
+    if (onclick !== '' && instructor_courses.length > 0) {
         if (!item['show_due']) {
+            element.style.cursor = 'pointer';
             element.onclick = () => editCalendarItemForm(item['status'], item['title'], item['id'], item['date'], item['semester'], item['course']);
         }
         else {
@@ -201,7 +202,7 @@ function deleteCalendarItem() {
         data.append('semester', semester);
         data.append('csrf_token', csrfToken);
         $.ajax({
-            url: buildUrl(['calendar', 'items','delete']),
+            url: buildUrl(['calendar', 'items', 'delete']),
             type: 'POST',
             processData: false,
             contentType: false,
@@ -230,7 +231,7 @@ function deleteCalendarItem() {
  * @returns {HTMLElement} the HTML Element containing the cell
  */
 function generateDayCell(year, month, day, curr_view_month, view_semester=false) {
-    const cell_date_str = dateToStr(year, month ,day);
+    const cell_date_str = dateToStr(year, month, day);
 
     const content = document.createElement('td');
     content.classList.add('cal-day-cell');
