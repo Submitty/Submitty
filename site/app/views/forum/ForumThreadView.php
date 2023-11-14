@@ -505,7 +505,7 @@ class ForumThreadView extends AbstractView {
 
                         $post["author_user_group"] = $author_user_groups_map[$post["author_user_id"]];
 
-                        $post_data[] = $this->createPost($thread_id, $post, $unviewed_posts, $first, $reply_level, $display_option, $includeReply, false, $thread_announced);
+                        $post_data[] = $this->createPost($thread_id, $post, $unviewed_posts, $first, $reply_level, $display_option, $includeReply, false, $thread_announced, $isCurrentFavorite);
 
                         break;
                     }
@@ -526,7 +526,7 @@ class ForumThreadView extends AbstractView {
 
                 $post["author_user_group"] = $author_user_groups_map[$post["author_user_id"]];
 
-                $post_data[] = $this->createPost($thread_id, $post, $unviewed_posts, $first, 1, $display_option, $includeReply, false, $thread_announced);
+                $post_data[] = $this->createPost($thread_id, $post, $unviewed_posts, $first, 1, $display_option, $includeReply, false, $thread_announced, $isCurrentFavorite);
 
                 if ($first) {
                     $first = false;
@@ -984,7 +984,7 @@ class ForumThreadView extends AbstractView {
         return $post_content;
     }
 
-    public function createPost($thread_id, $post, $unviewed_posts, $first, $reply_level, $display_option, $includeReply, $render = false, $thread_announced = false) {
+    public function createPost($thread_id, $post, $unviewed_posts, $first, $reply_level, $display_option, $includeReply, $render = false, $thread_announced = false, bool $isCurrentFavorite = false) {
         $current_user = $this->core->getUser()->getId();
         $post_id = $post["id"];
         $parent_id = $post["parent_id"];
@@ -1197,10 +1197,14 @@ class ForumThreadView extends AbstractView {
 
         if ($render) {
             if ($first) {
-                $thread_title = $this->core->getQueries()->getThreadTitle($thread_id);
-                $activeThreadTitle = "({$thread_id}) " . $thread_title;
+                $activeThread = $this->core->getQueries()->getThread($thread_id);
+                $activeThreadTitle = "({$activeThread['id']}) " . $activeThread['title'];
                 $created_post['activeThreadTitle'] = $activeThreadTitle;
+                $activeThreadAnnouncement = $activeThread['pinned_expiration'] > date("Y-m-d H:i:s");
+                $created_post['activeThreadAnnouncement'] = $activeThreadAnnouncement;
+                $created_post['activeThread'] = $activeThread;
             }
+            $created_post['isCurrentFavorite'] = $isCurrentFavorite;
             $created_post['csrf_token'] = $this->core->getCsrfToken();
             return $this->core->getOutput()->renderTwigTemplate("forum/CreatePost.twig", $created_post);
         }
