@@ -525,6 +525,7 @@ class ForumThreadView extends AbstractView {
                             in_array($post["id"], $merged_threads, true),
                             false,
                             $thread_announced,
+                            $isCurrentFavorite,
                         );
 
                         break;
@@ -553,6 +554,7 @@ class ForumThreadView extends AbstractView {
                     in_array($post["id"], $merged_threads, true),
                     false,
                     $thread_announced,
+                    $isCurrentFavorite,
                 );
 
                 if ($first) {
@@ -1050,7 +1052,8 @@ class ForumThreadView extends AbstractView {
      *      is_staff: bool
      * } $author_info
      */
-    public function createPost(array $thread, array $post, $unviewed_posts, $first, $reply_level, $display_option, $includeReply, array $author_info, bool $has_history, bool $is_merged_thread, bool $render = false, bool $thread_announced = false) {
+    public function createPost(array $thread, array $post, $unviewed_posts, $first, $reply_level, $display_option, $includeReply, array $author_info, bool $has_history, bool $is_merged_thread, bool $render = false, bool $thread_announced = false,  bool $isCurrentFavorite = false) {
+
         $current_user = $this->core->getUser()->getId();
         $thread_id = $thread["id"];
         $post_id = $post["id"];
@@ -1289,8 +1292,13 @@ class ForumThreadView extends AbstractView {
             if ($first) {
                 $thread_title = $thread['title'];
                 $activeThreadTitle = "({$thread_id}) " . $thread_title;
+
                 $created_post['activeThreadTitle'] = $activeThreadTitle;
+                $activeThreadAnnouncement = $activeThread['pinned_expiration'] > date("Y-m-d H:i:s");
+                $created_post['activeThreadAnnouncement'] = $activeThreadAnnouncement;
+                $created_post['activeThread'] = $activeThread;
             }
+            $created_post['isCurrentFavorite'] = $isCurrentFavorite;
             $created_post['csrf_token'] = $this->core->getCsrfToken();
             return $this->core->getOutput()->renderTwigTemplate("forum/CreatePost.twig", $created_post);
         }
