@@ -130,7 +130,7 @@ export function applySettings() {
         const s_grad_sub = data[i].gradeable_submission;
         const s_forum_view = data[i].forum_view;
         const s_forum_post = data[i].forum_post;
-        let s_num_polls = data[i].num_poll_responses ?? 0;
+        const s_num_polls = data[i].num_poll_responses ?? (0);
         const s_off_hours = data[i].office_hours_queue;
 
         let flag = false;
