@@ -1052,7 +1052,7 @@ class ForumThreadView extends AbstractView {
      *      is_staff: bool
      * } $author_info
      */
-    public function createPost(array $thread, array $post, $unviewed_posts, $first, $reply_level, $display_option, $includeReply, array $author_info, bool $has_history, bool $is_merged_thread, bool $render = false, bool $thread_announced = false,  bool $isCurrentFavorite = false) {
+    public function createPost(array $thread, array $post, $unviewed_posts, $first, $reply_level, $display_option, $includeReply, array $author_info, bool $has_history, bool $is_merged_thread, bool $render = false, bool $thread_announced = false, bool $isCurrentFavorite = false) {
 
         $current_user = $this->core->getUser()->getId();
         $thread_id = $thread["id"];
