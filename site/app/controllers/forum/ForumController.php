@@ -541,7 +541,7 @@ class ForumController extends AbstractController {
                 }
                 else {
                     foreach ($posts as $post) {
-                        if ($thread_id == -1) {
+                        if ($thread_id === -1) {
                             $thread_id = $post["thread_id"];
                         }
                         if ($first) {
@@ -604,10 +604,10 @@ class ForumController extends AbstractController {
      */
     public function alterAnnouncement(bool $type) {
         $thread_id = $_POST["thread_id"];
-        if ($type == 'announce_thread') {
+        if ($type === 'announce_thread') {
             $this->sendSocketMessage(['type' => 'announce_thread', 'thread_id' => $thread_id]);
         }
-        if ($type == 'unpin_thread') {
+        if ($type === 'unpin_thread') {
             $this->sendSocketMessage(['type' => 'unpin_thread', 'thread_id' => $thread_id]);
         }
         $this->core->getQueries()->setAnnouncement($thread_id, $type);
@@ -674,10 +674,10 @@ class ForumController extends AbstractController {
             $event = [ 'component' => 'forum', 'metadata' => $metadata, 'content' => $content, 'subject' => $subject, 'recipient' => $post_author_id, 'preference' => 'all_modifications_forum'];
             $this->core->getNotificationFactory()->onPostModified($event);
             $this->core->getQueries()->removeNotificationsPost($post_id);
-            if ($type == "thread") {
+            if ($type === "thread") {
                 $this->sendSocketMessage(['type' => 'delete_thread', 'thread_id' => $thread_id]);
             }
-            if ($type == "post") {
+            if ($type === "post") {
                 $post_id = $_POST["post_id"];
                 $this->sendSocketMessage(['type' => 'delete_post', 'thread_id' => $thread_id, 'post_id' => $post_id]);
             }
@@ -773,14 +773,14 @@ class ForumController extends AbstractController {
             if ($isError) {
                 return $this->core->getOutput()->renderJsonFail($messageString);
             }
-            if ($type == 'Post') {
+            if ($type === 'Post') {
                 $posts = $this->core->getQueries()->getPostsInThreads([$thread_id]);
                 $first = true;
                 $first_post_id = 1;
                 $order_array = [];
                 $reply_level_array = [];
                 foreach ($posts as $post_) {
-                    if ($thread_id == -1) {
+                    if ($thread_id === -1) {
                         $thread_id = $post_["thread_id"];
                     }
                     if ($first) {
@@ -814,7 +814,7 @@ class ForumController extends AbstractController {
                     'post_box_id' => $post_box_id,
                 ]);
             }
-            elseif ($type == 'Thread and Post') {
+            elseif ($type === 'Thread and Post') {
                 $reply_level = 1;
                 $post_box_id = 1;
                 $this->sendSocketMessage([
