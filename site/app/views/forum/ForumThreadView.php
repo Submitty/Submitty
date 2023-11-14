@@ -1294,9 +1294,9 @@ class ForumThreadView extends AbstractView {
                 $activeThreadTitle = "({$thread_id}) " . $thread_title;
 
                 $created_post['activeThreadTitle'] = $activeThreadTitle;
-                $activeThreadAnnouncement = $activeThread['pinned_expiration'] > date("Y-m-d H:i:s");
+                $activeThreadAnnouncement = $thread['pinned_expiration'] > date("Y-m-d H:i:s");
                 $created_post['activeThreadAnnouncement'] = $activeThreadAnnouncement;
-                $created_post['activeThread'] = $activeThread;
+                $created_post['activeThread'] = $thread;
             }
             $created_post['isCurrentFavorite'] = $isCurrentFavorite;
             $created_post['csrf_token'] = $this->core->getCsrfToken();
