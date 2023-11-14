@@ -834,7 +834,6 @@ function modifyOrSplitPost(e) {
 
 // eslint-disable-next-line no-unused-vars
 function showEditPostForm(post_id, thread_id, shouldEditThread, render_markdown, csrf_token) {
-    console.log("EHREH");
     const DateTime = luxon.DateTime;
     if (!checkAreYouSureForm()) {
         return;
