@@ -776,7 +776,7 @@ SQL;
     /**
      * @param string[] $attachment_name
      */
-    public function createPost($user, $content, $thread_id, $anonymous, $type, $first, $hasAttachment, $markdown, $attachment_name, $parent_post = -1) {
+    public function createPost($user, $content, $thread_id, $anonymous, $type, $first, $hasAttachment, $markdown, array $attachment_name, $parent_post = -1) {
         if (!$first && $parent_post == 0) {
             $this->course_db->query("SELECT MIN(id) as id FROM posts where thread_id = ?", [$thread_id]);
             $parent_post = $this->course_db->rows()[0]["id"];
@@ -1134,7 +1134,7 @@ SQL;
     /**
      * @param int[] $post_ids
      * @return array<int, array<int, string[]>>
-     * }
+     *
      */
     public function getForumAttachments(array $post_ids, bool $all_vers = false): array {
         $return = [];

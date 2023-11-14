@@ -1,6 +1,7 @@
 /* global displaySuccessMessage */
 /* exported markForDeletion */
 /* exported unMarkForDeletion */
+/* exported  displayHistoryAttachment */
 
 // eslint-disable-next-line no-unused-vars
 function categoriesFormEvents() {
@@ -1281,7 +1282,6 @@ function modifyThreadList(currentThreadId, currentCategoriesId, course, loadFirs
     });
 }
 
-// eslint-disable-next-line no-unused-vars
 function displayHistoryAttachment(edit_id) {
     $(`#history-table-${edit_id}`).toggle();
     $(`#history-table-${edit_id}`).find('.attachment-name-history').each(function () {

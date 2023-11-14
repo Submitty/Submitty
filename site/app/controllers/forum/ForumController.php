@@ -362,8 +362,8 @@ class ForumController extends AbstractController {
                 // Good Attachment
                 $attachment_name = [];
                 if ($hasGoodAttachment[0] === 1) {
-                    for ($i = 0; $i < count($_FILES['file_input']["name"]); $i++) {
-                        $attachment_name[] = basename($_FILES['file_input']["name"][$i]);
+                    foreach ($_FILES['file_input']["name"] as $file_name) {
+                        $attachment_name[] = basename($file_name);
                     }
                 }
                 $result = $this->core->getQueries()->createThread(
@@ -1250,7 +1250,7 @@ class ForumController extends AbstractController {
             $post_attachments = $this->core->getQueries()->getForumAttachments([$post_id]);
             $GLOBALS['totalAttachments'] = 0;
             $img_table = $this->core->getOutput()->renderTwigTemplate('forum/EditImgTable.twig', [
-                "post_attachment" => ForumUtils::getForumAttachments(
+                "post_attachments" => ForumUtils::getForumAttachments(
                     $post_id,
                     $result['thread_id'],
                     $post_attachments[$post_id][0],

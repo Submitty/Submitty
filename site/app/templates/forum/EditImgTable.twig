@@ -1,4 +1,4 @@
-{% if post_attachment.params is defined %}
+{% if post_attachments.params is defined %}
     <div id="display-existing-attachments">
         <table class="file-upload-table edit-imgs-table">
             <thead>
@@ -7,15 +7,15 @@
                 </tr>
             </thead>
             <tbody>
-            {% for row in post_attachment.params.unencoded_data %}
-                {% if row[2] is defined %}
+            {% for attachment in post_attachments.params.unencoded_data %}
+                {% if attachment[2] is defined %}
                 <tr>
                     <td>
-                        <img src="{{ row[0] }}" class="thumbnail" alt="{{ row[2] }}"/>
+                        <img src="{{ attachment[0] }}" class="thumbnail" alt="{{ attachment[2] }}"/>
                     </td>
-                    <td class="display-attachment-name">{{ row[2] }}</td>
+                    <td class="display-attachment-name">{{ attachment[2] }}</td>
                     <td class="file-trash">
-                        <a class="btn btn-default" onclick="markForDeletion(this)" id="delete_{{ row[2] }}">Delete</a>
+                        <a class="btn btn-default" onclick="markForDeletion(this)" id="delete_{{ attachment[2] }}">Delete</a>
                     </td>
                 </tr>
                 {% endif %}
