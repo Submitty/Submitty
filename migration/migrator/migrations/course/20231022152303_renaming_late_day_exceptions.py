@@ -16,7 +16,7 @@ def up(config, database, semester, course):
     """
 
     sql = """ALTER TABLE late_day_exceptions RENAME TO excused_absence_extensions;
-            ALTER TABLE excused_absence_extensions RENAME COLUMN late_day_exceptions TO excused_absence_extensions;"""
+            ALTER TABLE excused_absence_extensions RENAME COLUMN late_day_exceptions TO days_extended;"""
     database.execute(sql)
 
 
@@ -35,5 +35,5 @@ def down(config, database, semester, course):
     """
 
     sql = """ALTER TABLE excused_absence_extensions RENAME TO late_day_exceptions;
-            ALTER TABLE late_day_exceptions RENAME COLUMN excused_absence_extensions TO late_day_exceptions;"""
+            ALTER TABLE late_day_exceptions RENAME COLUMN days_extended TO late_day_exceptions;"""
     database.execute(sql)

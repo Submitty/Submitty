@@ -4284,13 +4284,13 @@ ORDER BY gt.{$section_key}",
             "
         SELECT u.user_id, user_givenname,
           user_preferred_givenname, user_familyname,
-          excused_absence_extensions, reason_for_exception
+          days_extended, reason_for_exception
         FROM users as u
         FULL OUTER JOIN excused_absence_extensions as l
           ON u.user_id=l.user_id
         WHERE g_id=?
-          AND excused_absence_extensions IS NOT NULL
-          AND excused_absence_extensions>0
+          AND days_extended IS NOT NULL
+          AND days_extended>0
         ORDER BY user_email ASC;",
             [$gradeable_id]
         );
@@ -4458,7 +4458,7 @@ SQL;
         $this->course_db->query(
             "
           UPDATE excused_absence_extensions
-          SET excused_absence_extensions=?,
+          SET days_extended=?,
               reason_for_exception=?
           WHERE user_id=?
             AND g_id=?;",
@@ -4468,7 +4468,7 @@ SQL;
             $this->course_db->query(
                 "
             INSERT INTO excused_absence_extensions
-            (user_id, g_id, excused_absence_extensions, reason_for_exception)
+            (user_id, g_id, days_extended, reason_for_exception)
             VALUES(?,?,?,?)",
                 [$user_id, $g_id, $days, $reason]
             );
@@ -7977,7 +7977,7 @@ WHERE current_state IN
               /* Join team late day exceptions */
               LEFT JOIN (
                 SELECT
-                  json_agg(e.excused_absence_extensions) AS array_late_day_exceptions,
+                  json_agg(e.days_extended) AS array_late_day_exceptions,
                   json_agg(e.user_id) AS array_late_day_user_ids,
                   t.team_id,
                   g_id
@@ -8008,7 +8008,7 @@ WHERE current_state IN
               u.course_section_id,
               u.rotating_section,
               u.registration_type,
-              ldeu.excused_absence_extensions,
+              ldeu.days_extended,
               u.registration_subsection';
             $submitter_inject = '
             JOIN (
