@@ -311,7 +311,7 @@ function socketNewOrEditPostHandler(post_id, reply_level, post_box_id=null, edit
                             }
                         }
                         else {
-                            $(new_post).insertAfter(parent_post.next()).hide().fadeIn();
+                            $(new_post).insertAfter(parent_post).hide().fadeIn();
                         }
                     }
                 }
