@@ -468,6 +468,9 @@ class ForumThreadView extends AbstractView {
             $author_user_groups_map[$author["user_id"]] = $author["user_group"];
         }
 
+        $posts_with_history = $this->core->getQueries()->getPostsWithHistory(array_column($posts, "id"));
+        $merged_threads = $this->core->getQueries()->getMergedThreadIds(array_column($posts, "id"));
+
         if ($display_option == "tree") {
             $order_array = [];
             $reply_level_array = [];
@@ -497,9 +500,6 @@ class ForumThreadView extends AbstractView {
             $i = 0;
             $first = true;
 
-            $posts_with_history = $this->core->getQueries()->getPostsWithHistory(array_column($posts, "id"));
-            $merged_threads = $this->core->getQueries()->getMergedThreadIds(array_column($posts, "id"));
-
             foreach ($order_array as $ordered_post) {
                 foreach ($posts as $post) {
                     if ($post["id"] == $ordered_post) {
@@ -521,8 +521,8 @@ class ForumThreadView extends AbstractView {
                             $display_option,
                             $includeReply,
                             $authors_display_info[$post['author_user_id']],
-                            in_array($post["id"], $posts_with_history),
-                            in_array($post["id"], $merged_threads),
+                            in_array($post["id"], $posts_with_history, true),
+                            in_array($post["id"], $merged_threads, true),
                             false,
                             $thread_announced,
                         );
@@ -549,10 +549,10 @@ class ForumThreadView extends AbstractView {
                     $display_option,
                     $includeReply,
                     $authors_display_info[$post['author_user_id']],
-                    in_array($post["id"], $posts_with_history),
-                    in_array($post["id"], $merged_threads),
+                    in_array($post["id"], $posts_with_history, true),
+                    in_array($post["id"], $merged_threads, true),
                     false,
-                    $thread_announced,   
+                    $thread_announced,
                 );
 
                 if ($first) {
@@ -821,7 +821,7 @@ class ForumThreadView extends AbstractView {
                     $thread_id_p = $thread["id"];
                 }
             }
-            $isNewThread = !in_array($thread['id'], $viewed_threads);
+            $isNewThread = !in_array($thread['id'], $viewed_threads, true);
             if ($isNewThread) {
                 $class .= " new_thread";
             }
@@ -1012,7 +1012,45 @@ class ForumThreadView extends AbstractView {
         return $post_content;
     }
 
-    public function createPost(array $thread, array $post, $unviewed_posts, $first, $reply_level, $display_option, $includeReply,  array $author_info, bool $has_history, bool $is_merged_thread, bool $render = false, bool $thread_announced = false) {
+    /**
+     * @param array{
+     *      id: int,
+     *      title: string,
+     *      created_by: string,
+     *      pinned: bool,
+     *      deleted: bool,
+     *      merged_thread_id: int,
+     *      merged_post_id: int,
+     *      is_visible: bool,
+     *      status: int,
+     *      lock_thread_date?: string,
+     *      pinned_expiration: string,
+     *      announced: string
+     * } $thread
+     * @param array{
+     *      id: int,
+     *      thread_id: int,
+     *      parent_id: int,
+     *      author_user_id: string,
+     *      author_user_group?: string,
+     *      content: string,
+     *      timestamp: string,
+     *      edit_timestamp?: string,
+     *      anonymous: bool,
+     *      deleted: bool,
+     *      has_attachment: bool,
+     *      render_markdown: bool
+     * } $post
+     * @param array{
+     *      given_name: string,
+     *      family_name: string,
+     *      user_email: string,
+     *      pronouns: string,
+     *      display_pronouns: bool,
+     *      is_staff: bool
+     * } $author_info
+     */
+    public function createPost(array $thread, array $post, $unviewed_posts, $first, $reply_level, $display_option, $includeReply, array $author_info, bool $has_history, bool $is_merged_thread, bool $render = false, bool $thread_announced = false) {
         $current_user = $this->core->getUser()->getId();
         $thread_id = $thread["id"];
         $post_id = $post["id"];
@@ -1054,7 +1092,7 @@ class ForumThreadView extends AbstractView {
             $classes[] = "first_post";
         }
         $isNewPost = false;
-        if (in_array($post_id, $unviewed_posts)) {
+        if (in_array($post_id, $unviewed_posts, true)) {
             if ($current_user != $post["author_user_id"]) {
                 $classes[] = "new_post";
                 $isNewPost = true;

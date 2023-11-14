@@ -4930,7 +4930,8 @@ AND gc_id IN (
      */
     public function getViewedThreads(string $user, array $thread_ids): array {
         $placeholders = $this->createParameterList(count($thread_ids));
-        $this->course_db->query("
+        $this->course_db->query(
+            "
             SELECT * FROM viewed_responses v
             WHERE thread_id IN {$placeholders}
             AND user_id = ?
@@ -4949,7 +4950,7 @@ AND gc_id IN (
                         )
                     )
                 )",
-            array_merge($thread_ids, array($user))
+            array_merge($thread_ids, [$user])
         );
         return array_column($this->course_db->rows(), 'thread_id');
     }
