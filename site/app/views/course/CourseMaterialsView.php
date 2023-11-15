@@ -6,11 +6,10 @@ use app\entities\course\CourseMaterial;
 use app\libraries\FileUtils;
 use app\views\AbstractView;
 use app\libraries\DateUtils;
-use app\libraries\SelectWidgets;
 
 class CourseMaterialsView extends AbstractView {
     public function listCourseMaterials(array $course_materials_db) {
-        SelectWidgets::addSelect2WidgetCSSAndJs($this->core);
+        $this->core->getOutput()->addSelect2WidgetCSSAndJs();
         $this->core->getOutput()->addInternalCss(FileUtils::joinPaths('fileinput.css'));
         $this->core->getOutput()->addInternalCss(FileUtils::joinPaths('course-materials.css'));
         $this->core->getOutput()->addVendorJs(FileUtils::joinPaths('flatpickr', 'flatpickr.min.js'));
