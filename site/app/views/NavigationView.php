@@ -663,10 +663,10 @@ class NavigationView extends AbstractView {
             if (!$gradeable->hasDueDate()) {
 
                 $cookie_string = "include_bad_submissions__" . $gradeable->getId() ;
-                $bad_submissions = array_key_exists($cookie_string, $_COOKIE) ? ($_COOKIE[$cookie_string]==="include" ? true : false) : false;
+                $bad_submissions = ($_COOKIE[$cookie_string] ?? '') === "include";
 
                 $cookie_string = "include_null_section__" . $gradeable->getId() ;
-                $null_section = array_key_exists($cookie_string, $_COOKIE) ? ($_COOKIE[$cookie_string]==="include" ? true : false) : false;
+                $null_section = ($_COOKIE[$cookie_string] ?? '') === "include";
 
                 $progress_bar = $gradeable->getGradingProgress($this->core->getUser(), $bad_submissions, $null_section);
                 if ($progress_bar === 0) {
@@ -719,10 +719,10 @@ class NavigationView extends AbstractView {
                 if ($gradeable->isTaGrading()) {
 
                     $cookie_string = "include_bad_submissions__" . $gradeable->getId();
-                    $bad_submissions = array_key_exists($cookie_string, $_COOKIE) ? ($_COOKIE[$cookie_string]==="include" ? true : false) : false;
+                    $bad_submissions = ($_COOKIE[$cookie_string] ?? '') === "include";
 
                     $cookie_string = "include_null_section__" . $gradeable->getId() ;
-                    $null_section = array_key_exists($cookie_string, $_COOKIE) ? ($_COOKIE[$cookie_string]==="include" ? true : false) : false;
+                    $null_section = ($_COOKIE[$cookie_string] ?? '') === "include";
 
                     $TA_percent = $gradeable->getGradingProgress($this->core->getUser(), $bad_submissions, $null_section);
 

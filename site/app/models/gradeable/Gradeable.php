@@ -1910,7 +1910,7 @@ class Gradeable extends AbstractModel {
                 $sections[$key] = [
                     'total_components' => $value * $num_components,
                     'graded_components' => 0,
-                    'non_late_total_components' => ($value  - (array_key_exists($key, $late_submitted) ? $late_submitted[$key] : 0) ) * $num_components,
+                    'non_late_total_components' => ($value - ($late_submitted[$key] ?? 0)) * $num_components,
                     'non_late_graded_components' => 0
                 ];
                 if (isset($graded_components[$key])) {
