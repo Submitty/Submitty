@@ -5,12 +5,11 @@ namespace app\views\admin;
 use app\views\AbstractView;
 use app\libraries\Utils;
 use app\libraries\FileUtils;
-use app\libraries\SelectWidgets;
 
 class ExtensionsView extends AbstractView {
     public function displayExtensions($gradeables) {
         $this->core->getOutput()->addVendorCss(FileUtils::joinPaths('flatpickr', 'plugins', 'shortcutButtons', 'themes', 'light.min.css'));
-        SelectWidgets::addSelect2WidgetCSSAndJs($this->core);
+        $this->core->getOutput()->addSelect2WidgetCSSAndJs();
         $this->core->getOutput()->addInternalCss('exceptionforms.css');
         $this->core->getOutput()->addInternalCss('table.css');
         $this->core->getOutput()->addInternalJs('extensions.js');

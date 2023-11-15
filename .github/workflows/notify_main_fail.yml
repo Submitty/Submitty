@@ -15,8 +15,8 @@ jobs:
         run: |
             curl -X POST https://submitty.zulipchat.com/api/v1/messages -u ${{ secrets.ZULIP_AUTHENTICATION }} --data-urlencode 'type=stream' --data-urlencode 'to=Submitty Developer Studio' \
             --data-urlencode 'topic=Main CI Failures' --data-urlencode \
-            'content=The Github Actions CI has failed on the Main branch, View here: [Main CI](https://github.com/Submitty/Submitty/actions/runs/${{ github.event.workflow_run.run_id }})'
+            'content=The Github Actions CI has failed on the Main branch, View here: [Main CI](https://github.com/Submitty/Submitty/actions/runs/${{ github.event.workflow_run.id }})'
       - name: Echo success message
         if: ${{ github.event.workflow_run.conclusion == 'success' }}
         run: |
-            echo('All Tests have passed')
+            echo "All Tests have passed"
