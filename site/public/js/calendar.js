@@ -773,7 +773,7 @@ function colorLegend() {
 }
 
 //args contains course id and course name. We want to use display_name is possible
-function filter_course(args) {
+function filter_course(course_val, display_name) {
     const [courses_val, display_name] = args.split(',');
     if (courses_val === 'show all') {
         Cookies.set('calendar_show_all', '1', { expires: 365 });
