@@ -772,7 +772,9 @@ function colorLegend() {
     });
 }
 
-//args contains course id and course name. We want to use display_name is possible
+// Modifies cookies so the correct filtering of courses on the calendar is chosen.
+// param string course_val Id of the course
+// param string display_name display name of the course
 function filter_course(course_val, display_name) {
     const [courses_val, display_name] = args.split(',');
     if (courses_val === 'show all') {
