@@ -88,7 +88,7 @@
                 <p 
                     for="{{course.course_name|replace({' ':''})}}-color" 
                     style="cursor: pointer;" 
-                    onclick="filter_course('{{course.course_name}},{{course.display_name}}')" 
+                    onclick="filter_course({{course.course_name}}, {{course.display_name}})" 
                     title="Click to filter course, click again to show all courses" 
                     class="legend-label"
                     >{{course.display_name}}
