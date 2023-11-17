@@ -164,7 +164,7 @@ class GradingOrder extends AbstractModel {
                         return $a->getId();
                     }
                     else {
-                        return $a->getUser()->getAutoGradedGradeable()->getTotalPoints();
+                        return $a->getUser().getAutoGradedGradeable().getTotalPoints();
                     }
                 };
                 break;
@@ -187,7 +187,7 @@ class GradingOrder extends AbstractModel {
             $directionMult = ($direction === "DESC" ? -1 : 1);
 
             usort($section, function (Submitter $a, Submitter $b) use ($keys, $directionMult) {
-                return strcmp($keys[$a->getId()], $keys[$b->getId()]) * $directionMult;
+                return strcmp(strval($keys[$a->getId()]), strval($keys[$b->getId()])) * $directionMult;
             });
         }
         unset($section);
@@ -609,6 +609,12 @@ class GradingOrder extends AbstractModel {
         }
         elseif ($sort == 'id' && $direction == 'DESC') {
             $msg = 'ID Descending';
+        }
+        elseif ($sort == 'auto' && $direction == 'ASC') {
+            $msg = 'Auto Grading Ascending';
+        }
+        elseif ($sort == 'auto' && $direction == 'DESC') {
+            $msg = 'Auto Grading Descending';
         }
         elseif ($sort == 'random') {
             $msg = 'Randomized';
