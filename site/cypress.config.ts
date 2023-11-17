@@ -25,6 +25,7 @@ export default defineConfig({
             const videoPath = path.resolve(results.video);            
             // Check if the video file exists before attempting to delete it
             if (fs.existsSync(videoPath)) {
+              // delete the video if the spec passed and no tests retried
               fs.unlinkSync(videoPath)
             }
           }

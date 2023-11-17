@@ -73,9 +73,9 @@ describe('Test cases for grading stats', () => {
             ApplyFilter(true, true);
         });
         /*Currently the Bulk Upload gradeable on Sample course doesn't have any submissions.
-        Until sample course is modified to have a bulk upload gradeable released, 
-        another way of mimicking the behavior of these gradeables is to disable the option 
-        to submit past the due date in a released homework gradeable, that way when we omit or 
+        Until sample course is modified to have a bulk upload gradeable released,
+        another way of mimicking the behavior of these gradeables is to disable the option
+        to submit past the due date in a released homework gradeable, that way when we omit or
         include bad submissions, we can make sure the statistics stay the same*/
         it(`${user} view should be accurate for released bulk upload exams grades.`, () => {
             cy.visit(['sample', 'gradeable', 'grades_released_homework', 'grades_released_homework', 'update?nav_tab=5']);
