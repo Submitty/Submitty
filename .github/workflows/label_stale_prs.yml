@@ -2,7 +2,7 @@ name: Label Stale PRs
 
 on:
   schedule:
-  - cron:  '0 0 * * *' #runs every day at midnight
+    - cron: '0 0 * * *'  # runs every day at midnight
 jobs:
   autoClosePr:
     name: auto close pr
