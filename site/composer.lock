@@ -4,8 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-
-    "content-hash": "2300227cdab5c04f9809f913825caf73",
+    "content-hash": "4e2ff99c54970957d227e5365ee355bc",
     "packages": [
         {
             "name": "brick/math",
@@ -3760,16 +3759,16 @@
         },
         {
             "name": "react/event-loop",
-            "version": "v1.4.0",
+            "version": "v1.5.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/reactphp/event-loop.git",
-                "reference": "6e7e587714fff7a83dcc7025aee42ab3b265ae05"
+                "reference": "bbe0bd8c51ffc05ee43f1729087ed3bdf7d53354"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/reactphp/event-loop/zipball/6e7e587714fff7a83dcc7025aee42ab3b265ae05",
-                "reference": "6e7e587714fff7a83dcc7025aee42ab3b265ae05",
+                "url": "https://api.github.com/repos/reactphp/event-loop/zipball/bbe0bd8c51ffc05ee43f1729087ed3bdf7d53354",
+                "reference": "bbe0bd8c51ffc05ee43f1729087ed3bdf7d53354",
                 "shasum": ""
             },
             "require": {
@@ -3820,7 +3819,7 @@
             ],
             "support": {
                 "issues": "https://github.com/reactphp/event-loop/issues",
-                "source": "https://github.com/reactphp/event-loop/tree/v1.4.0"
+                "source": "https://github.com/reactphp/event-loop/tree/v1.5.0"
             },
             "funding": [
                 {
@@ -3828,28 +3827,28 @@
                     "type": "open_collective"
                 }
             ],
-            "time": "2023-05-05T10:11:24+00:00"
+            "time": "2023-11-13T13:48:05+00:00"
         },
         {
             "name": "react/promise",
-            "version": "v3.0.0",
+            "version": "v3.1.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/reactphp/promise.git",
-                "reference": "c86753c76fd3be465d93b308f18d189f01a22be4"
+                "reference": "e563d55d1641de1dea9f5e84f3cccc66d2bfe02c"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/reactphp/promise/zipball/c86753c76fd3be465d93b308f18d189f01a22be4",
-                "reference": "c86753c76fd3be465d93b308f18d189f01a22be4",
+                "url": "https://api.github.com/repos/reactphp/promise/zipball/e563d55d1641de1dea9f5e84f3cccc66d2bfe02c",
+                "reference": "e563d55d1641de1dea9f5e84f3cccc66d2bfe02c",
                 "shasum": ""
             },
             "require": {
                 "php": ">=7.1.0"
             },
             "require-dev": {
-                "phpstan/phpstan": "1.10.20 || 1.4.10",
-                "phpunit/phpunit": "^9.5 || ^7.5"
+                "phpstan/phpstan": "1.10.39 || 1.4.10",
+                "phpunit/phpunit": "^9.6 || ^7.5"
             },
             "type": "library",
             "autoload": {
@@ -3893,7 +3892,7 @@
             ],
             "support": {
                 "issues": "https://github.com/reactphp/promise/issues",
-                "source": "https://github.com/reactphp/promise/tree/v3.0.0"
+                "source": "https://github.com/reactphp/promise/tree/v3.1.0"
             },
             "funding": [
                 {
@@ -3901,7 +3900,7 @@
                     "type": "open_collective"
                 }
             ],
-            "time": "2023-07-11T16:12:49+00:00"
+            "time": "2023-11-16T16:21:57+00:00"
         },
         {
             "name": "react/socket",
@@ -4109,12 +4108,12 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/Submitty/Markdown.git",
-                "reference": "39b73aab98105303c61a16fad6efaed63592d37e"
+                "reference": "ac7b13a30ecf423eaa93b984665781c37a05ba2a"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/Submitty/Markdown/zipball/39b73aab98105303c61a16fad6efaed63592d37e",
-                "reference": "39b73aab98105303c61a16fad6efaed63592d37e",
+                "url": "https://api.github.com/repos/Submitty/Markdown/zipball/ac7b13a30ecf423eaa93b984665781c37a05ba2a",
+                "reference": "ac7b13a30ecf423eaa93b984665781c37a05ba2a",
                 "shasum": ""
             },
             "require": {
@@ -4128,6 +4127,11 @@
             },
             "default-branch": true,
             "type": "library",
+            "autoload": {
+                "psr-0": {
+                    "Submitty": "src/"
+                }
+            },
             "license": [
                 "BSD-3-Clause"
             ],
@@ -4135,7 +4139,7 @@
             "support": {
                 "source": "https://github.com/Submitty/Markdown/tree/main"
             },
-            "time": "2023-11-06T18:30:31+00:00"
+            "time": "2023-11-10T21:29:43+00:00"
         },
         {
             "name": "symfony/cache",
@@ -4235,16 +4239,16 @@
         },
         {
             "name": "symfony/cache-contracts",
-            "version": "v3.3.0",
+            "version": "v3.4.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/symfony/cache-contracts.git",
-                "reference": "ad945640ccc0ae6e208bcea7d7de4b39b569896b"
+                "reference": "1d74b127da04ffa87aa940abe15446fa89653778"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/symfony/cache-contracts/zipball/ad945640ccc0ae6e208bcea7d7de4b39b569896b",
-                "reference": "ad945640ccc0ae6e208bcea7d7de4b39b569896b",
+                "url": "https://api.github.com/repos/symfony/cache-contracts/zipball/1d74b127da04ffa87aa940abe15446fa89653778",
+                "reference": "1d74b127da04ffa87aa940abe15446fa89653778",
                 "shasum": ""
             },
             "require": {
@@ -4291,7 +4295,7 @@
                 "standards"
             ],
             "support": {
-                "source": "https://github.com/symfony/cache-contracts/tree/v3.3.0"
+                "source": "https://github.com/symfony/cache-contracts/tree/v3.4.0"
             },
             "funding": [
                 {
@@ -4307,7 +4311,7 @@
                     "type": "tidelift"
                 }
             ],
-            "time": "2023-05-23T14:45:45+00:00"
+            "time": "2023-09-25T12:52:38+00:00"
         },
         {
             "name": "symfony/config",
@@ -4476,7 +4480,7 @@
         },
         {
             "name": "symfony/deprecation-contracts",
-            "version": "v3.3.0",
+            "version": "v3.4.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/symfony/deprecation-contracts.git",
@@ -4523,7 +4527,7 @@
             "description": "A generic function and convention to trigger deprecation notices",
             "homepage": "https://symfony.com",
             "support": {
-                "source": "https://github.com/symfony/deprecation-contracts/tree/v3.3.0"
+                "source": "https://github.com/symfony/deprecation-contracts/tree/v3.4.0"
             },
             "funding": [
                 {
@@ -5427,16 +5431,16 @@
         },
         {
             "name": "symfony/service-contracts",
-            "version": "v3.3.0",
+            "version": "v3.4.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/symfony/service-contracts.git",
-                "reference": "40da9cc13ec349d9e4966ce18b5fbcd724ab10a4"
+                "reference": "b3313c2dbffaf71c8de2934e2ea56ed2291a3838"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/symfony/service-contracts/zipball/40da9cc13ec349d9e4966ce18b5fbcd724ab10a4",
-                "reference": "40da9cc13ec349d9e4966ce18b5fbcd724ab10a4",
+                "url": "https://api.github.com/repos/symfony/service-contracts/zipball/b3313c2dbffaf71c8de2934e2ea56ed2291a3838",
+                "reference": "b3313c2dbffaf71c8de2934e2ea56ed2291a3838",
                 "shasum": ""
             },
             "require": {
@@ -5489,7 +5493,7 @@
                 "standards"
             ],
             "support": {
-                "source": "https://github.com/symfony/service-contracts/tree/v3.3.0"
+                "source": "https://github.com/symfony/service-contracts/tree/v3.4.0"
             },
             "funding": [
                 {
@@ -5505,7 +5509,7 @@
                     "type": "tidelift"
                 }
             ],
-            "time": "2023-05-23T14:45:45+00:00"
+            "time": "2023-07-30T20:28:31+00:00"
         },
         {
             "name": "symfony/string",
@@ -8200,4 +8204,3 @@
     },
     "plugin-api-version": "2.6.0"
 }
-

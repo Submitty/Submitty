@@ -2,13 +2,11 @@
 
 namespace app\libraries;
 
-use League\CommonMark\Node\Inline\AbstractInline;
 use League\CommonMark\Node\Node;
 use League\CommonMark\Renderer\NodeRendererInterface;
 use League\CommonMark\Renderer\ChildNodeRendererInterface;
 use League\CommonMark\Util\HtmlElement;
 use League\CommonMark\Extension\CommonMark\Renderer\Inline\CodeRenderer;
-use League\CommonMark\Renderer\HtmlRenderer;
 
 class CustomCodeInlineRenderer implements NodeRendererInterface {
     /** @var CodeRenderer */
