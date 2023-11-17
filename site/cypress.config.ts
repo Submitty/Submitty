@@ -1,5 +1,6 @@
 import { defineConfig } from 'cypress'
 import * as fs from 'fs'
+const path = require('path');
 
 export default defineConfig({
   video: true,
