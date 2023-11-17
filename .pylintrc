@@ -95,5 +95,3 @@ max-line-length=100
 disable=too-many-arguments,
         too-many-locals,
         too-few-public-methods,
-
-[TYPECHECK]
