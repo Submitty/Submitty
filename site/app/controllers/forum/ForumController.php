@@ -536,12 +536,12 @@ class ForumController extends AbstractController {
                 $first_post_id = 1;
                 $order_array = [];
                 $reply_level_array = [];
-                if ($display_option != 'tree') {
+                if ($display_option !== 'tree') {
                     $reply_level = 1;
                 }
                 else {
                     foreach ($posts as $post) {
-                        if ($thread_id === -1) {
+                        if ($thread_id == -1) {
                             $thread_id = $post["thread_id"];
                         }
                         if ($first) {
@@ -604,10 +604,10 @@ class ForumController extends AbstractController {
      */
     public function alterAnnouncement(bool $type) {
         $thread_id = $_POST["thread_id"];
-        if ($type === 'announce_thread') {
+        if ($type == 'announce_thread') {
             $this->sendSocketMessage(['type' => 'announce_thread', 'thread_id' => $thread_id]);
         }
-        if ($type === 'unpin_thread') {
+        if ($type == 'unpin_thread') {
             $this->sendSocketMessage(['type' => 'unpin_thread', 'thread_id' => $thread_id]);
         }
         $this->core->getQueries()->setAnnouncement($thread_id, $type);
@@ -780,7 +780,7 @@ class ForumController extends AbstractController {
                 $order_array = [];
                 $reply_level_array = [];
                 foreach ($posts as $post_) {
-                    if ($thread_id === -1) {
+                    if ($thread_id == -1) {
                         $thread_id = $post_["thread_id"];
                     }
                     if ($first) {
