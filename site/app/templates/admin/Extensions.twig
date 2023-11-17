@@ -111,6 +111,8 @@
     {% endif %}
 </div>
 <script>
+    registerSelect2Widget("reason-for-exception");
+
     $("#user_id").autocomplete({
         source: {{ student_full|raw }}
     });
@@ -147,4 +149,5 @@
         }
     });
 </script>
+
 {% include('admin/users/MoreExtensions.twig') %}
