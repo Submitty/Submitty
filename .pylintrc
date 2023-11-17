@@ -80,7 +80,6 @@ ignore=
     killall.py,
     untrusted_canary.py,
     testcase.py,
-    tests,
     update_repo_version.py
 
 ignored-modules=docker,
