@@ -2494,10 +2494,8 @@ function pinAnnouncement(thread_id, type, csrf_token) {
                 csrf_token: csrf_token,
 
             },
-            // eslint-disable-next-line no-unused-vars
-            success: function(data) {
-            },
-            error: function() {
+            error: function(err) {
+                console.error(err);
                 window.alert('Something went wrong while trying to remove announcement. Please try again.');
             },
         });
