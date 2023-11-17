@@ -21,8 +21,7 @@ export default defineConfig({
           )
           if (!failures) {
             // Specify the full path to the video file
-            const videoPath = path.join(__dirname, 'cypress/videos', spec.relative)
-            
+            const videoPath = path.resolve(results.video);            
             // Check if the video file exists before attempting to delete it
             if (fs.existsSync(videoPath)) {
               fs.unlinkSync(videoPath)
