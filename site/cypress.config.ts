@@ -20,8 +20,13 @@ export default defineConfig({
             test.attempts.some((attempt) => attempt.state === 'failed')
           )
           if (!failures) {
-            // delete the video if the spec passed and no tests retried
-            fs.unlinkSync(results.video)
+            // Specify the full path to the video file
+            const videoPath = path.join(__dirname, 'cypress/videos', spec.relative)
+            
+            // Check if the video file exists before attempting to delete it
+            if (fs.existsSync(videoPath)) {
+              fs.unlinkSync(videoPath)
+            }
           }
         }
       })
