@@ -2017,7 +2017,6 @@ function loadThreadHandler() {
                 saveScrollLocationOnRefresh('posts_list');
 
                 $('.post_reply_form').submit(publishPost);
-
                 hljs.highlightAll();
             },
             error: function() {
