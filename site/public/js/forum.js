@@ -345,6 +345,7 @@ function socketNewOrEditPostHandler(post_id, reply_level, post_box_id=null, edit
                 // eslint-disable-next-line no-undef
                 file_array[post_box_id] = [];
                 uploadImageAttachments(`#${post_id}-reply .upload_attachment_box`);
+                hljs.highlightAll();
 
             }
             catch (error) {
@@ -2016,6 +2017,8 @@ function loadThreadHandler() {
                 saveScrollLocationOnRefresh('posts_list');
 
                 $('.post_reply_form').submit(publishPost);
+
+                hljs.highlightAll();
             },
             error: function() {
                 window.alert('Something went wrong while trying to display thread details. Please try again.');
