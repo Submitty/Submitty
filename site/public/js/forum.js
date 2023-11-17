@@ -849,6 +849,8 @@ function showEditPostForm(post_id, thread_id, shouldEditThread, render_markdown,
             csrf_token: csrf_token,
         },
         success: function(data) {
+            $('body').css('overflow', 'hidden');
+            
             try {
                 // eslint-disable-next-line no-var
                 var json = JSON.parse(data);
