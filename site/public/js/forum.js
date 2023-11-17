@@ -345,6 +345,7 @@ function socketNewOrEditPostHandler(post_id, reply_level, post_box_id=null, edit
                 // eslint-disable-next-line no-undef
                 file_array[post_box_id] = [];
                 uploadImageAttachments(`#${post_id}-reply .upload_attachment_box`);
+                // eslint-disable-next-line no-undef
                 hljs.highlightAll();
 
             }
@@ -2017,6 +2018,7 @@ function loadThreadHandler() {
                 saveScrollLocationOnRefresh('posts_list');
 
                 $('.post_reply_form').submit(publishPost);
+                // eslint-disable-next-line no-undef
                 hljs.highlightAll();
             },
             error: function() {
