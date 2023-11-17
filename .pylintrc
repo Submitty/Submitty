@@ -56,7 +56,6 @@ ignore=
     secure_execution_environment.py,
     sample_upload.py,
     submitty_daemon_jobs.py,
-    submitty_jobs,
     scheduler.py,
     send_email.py,
     setup_sample_emails.py,
