@@ -143,6 +143,10 @@ class NavigationView extends AbstractView {
             if (is_file($seating_user_path)) {
                 $user_seating_details = json_decode(file_get_contents($seating_user_path));
 
+                if ($user_seating_details === null ||  filesize($seating_user_path) == 0) {
+                    //print error message without breaking (ex ERR: Please contact instructor)
+                }
+
                 // if the user seating details have both a building and a room property
                 if (property_exists($user_seating_details, 'building') && property_exists($user_seating_details, 'room')) {
                     $seating_config_path = FileUtils::joinPaths(
