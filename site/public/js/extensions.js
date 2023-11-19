@@ -12,16 +12,6 @@ $(document).ready(() => {
         // eslint-disable-next-line no-self-assign
         window.location = window.location; // pseudo post/redirect/get pattern
     });
-    // Register select2 for #autograding_config_selector
-    // https://stackoverflow.com/a/30021059
-    $('#reason-for-exception').select2({
-        tags: true,
-        theme: 'bootstrap-5',
-        createTag: (params) => ({
-            id: params.term,
-            text: params.term,
-        }),
-    });
 });
 
 function updateHomeworkExtension() {

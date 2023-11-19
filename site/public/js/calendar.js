@@ -89,6 +89,34 @@ function dateToStr(year, month, day) {
 }
 
 /**
+ * This function returns a slightly darker color than the color variable name passed.
+ *
+ * @param colorstr : string the color to darken in the form "var(--color-name)"
+ * @returns {string} a hex code for a slightly darker shade
+ */
+function darken(colorstr) {
+    if (typeof colorstr !== 'string') {
+        return colorstr;
+    }
+    else {
+        const hexcodestr = window.getComputedStyle(document.documentElement).getPropertyValue(colorstr.slice(4, -1)).toLowerCase();
+        const darkerstr = hexcodestr.split('');
+        for (let i = 1; i < hexcodestr.length; i++) {
+            if ((hexcodestr[i] > 'b' && hexcodestr[i] <= 'f') || (hexcodestr[i] > '1' && hexcodestr[i] <= '9')) {
+                darkerstr[i] = String.fromCharCode(hexcodestr.charCodeAt(i) - 2);
+            }
+            else if (hexcodestr[i] === 'b') {
+                darkerstr[i] = '9';
+            }
+            else if (hexcodestr[i] === 'a') {
+                darkerstr[i] = '8';
+            }
+        }
+        return darkerstr.join('');
+    }
+}
+
+/**
  * Create a HTML element that contains the calendar item (button/link/text).
  *
  * @param item : array the calendar item
@@ -137,6 +165,12 @@ function generateCalendarItem(item) {
     element.title = tooltip;
     if (link !== '') {
         element.href = link;
+        element.addEventListener('mouseover', () => {
+            element.style.setProperty('background-color', darken(item['color']));
+        });
+        element.addEventListener('mouseout', () => {
+            element.style.setProperty('background-color', item['color']);
+        });
     }
     if (onclick !== '' && instructor_courses.length > 0) {
         if (!item['show_due']) {
