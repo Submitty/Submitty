@@ -681,4 +681,23 @@ HTML;
         $extension = $this->twig->getExtension(\Twig\Extension\CoreExtension::class);
         $extension->setTimezone($tz);
     }
+
+    /**
+     * Adds the necessary CSS and JS to use a Select2 widget.
+     * Select2 widgets allow you to preselect from options as well as
+     * type your own option.
+     *
+     * @return void
+     */
+    public function addSelect2WidgetCSSAndJs(): void {
+        $this->addVendorJs(FileUtils::joinPaths('select2', 'js', 'select2.min.js'));
+        $this->addVendorCss(FileUtils::joinPaths('select2', 'css', 'select2.min.css'));
+        $this->addVendorCss(FileUtils::joinPaths(
+            'select2',
+            'bootstrap5-theme',
+            'select2-bootstrap-5-theme.min.css'
+        ));
+        $this->addInternalCss("select-widgets.css");
+        $this->addInternalJs("select-widgets.js");
+    }
 }

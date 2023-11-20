@@ -927,7 +927,7 @@ function handleRegrade(versions_used, csrf_token, gradeable_id, user_id, regrade
  * @param num_components
  * @param merge_previous
  */
-function handleSubmission(gradeable_status, remaining_late_days_for_gradeable, charged_late_days, days_past_deadline, late_day_exceptions, late_days_allowed, is_team_assignment, min_team_member_late_days, versions_used, versions_allowed, csrf_token, vcs_checkout, num_inputs, gradeable_id, user_id, git_user_id, git_repo_id, student_page, num_components, merge_previous=false, clobber=false, viewing_inactive_version = false) {
+function handleSubmission(gradeable_status, remaining_late_days_for_gradeable, charged_late_days, days_past_deadline, late_day_exceptions, late_days_allowed, is_team_assignment, min_team_member_late_days, min_team_member_late_days_exception, versions_used, versions_allowed, csrf_token, vcs_checkout, num_inputs, gradeable_id, user_id, git_user_id, git_repo_id, student_page, num_components, merge_previous=false, clobber=false, viewing_inactive_version = false) {
     $('#submit').prop('disabled', true);
     const submit_url = `${buildCourseUrl(['gradeable', gradeable_id, 'upload'])}?merge=${merge_previous.toString()}&clobber=${clobber.toString()}`;
     const return_url = buildCourseUrl(['gradeable', gradeable_id]);
@@ -959,18 +959,19 @@ function handleSubmission(gradeable_status, remaining_late_days_for_gradeable, c
         }
         else if ( ( days_to_be_charged > late_days_allowed || remaining_late_days_for_gradeable === 0 )  && days_to_be_charged !== charged_late_days  && days_to_be_charged>0  ) {
             late_warning_seen = true;
-            message = `Your submission will be ${days_past_deadline} days late. You are not supposed to submit unless you have an excused absence. Are you sure you want to continue?`;
+            message = `Your submission will be ${days_past_deadline} day(s) late. You are not supposed to submit unless you have an excused absence. Are you sure you want to continue?`;
             if (!confirm(message)) {
                 $('#submit').prop('disabled', false);
                 return;
             }
         }
-    }
-    // check team date
-    if (!late_warning_seen && is_team_assignment && min_team_member_late_days - days_to_be_charged + charged_late_days < 0) {
-        message = 'There is at least 1 member on your team that does not have enough late days for this submission. This will result in them receiving a marked grade of zero. Are you sure you want to continue?';
-        if (!confirm(message)) {
-            return;
+
+        // check team date
+        if (!late_warning_seen && is_team_assignment && (min_team_member_late_days - days_to_be_charged + charged_late_days < 0 || min_team_member_late_days_exception + days_to_be_charged < days_past_deadline ) ) {
+            message = 'There is at least 1 member on your team that does not have enough late days for this submission. This will result in them receiving a marked grade of zero. Are you sure you want to continue?';
+            if (!confirm(message)) {
+                return;
+            }
         }
     }
 
