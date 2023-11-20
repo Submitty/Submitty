@@ -8,13 +8,20 @@ from sample_courses.utils import get_current_semester
 from sample_courses.models.gradeable import Gradeable
 from sample_courses.models.course.course_create import Course_create
 from sample_courses.models.course.course_generate_utils import Course_generate_utils
-from sample_courses.models.course.course_create_gradeables import Course_create_gradeables
+from sample_courses.models.course.course_create_gradeables import (
+    Course_create_gradeables,
+)
 from sample_courses.models.course.course_utils import Course_utils
 from sample_courses.models.course.course_data import Course_data
 
 
-class Course(Course_create, Course_generate_utils, Course_create_gradeables,
-             Course_utils, Course_data):
+class Course(
+    Course_create,
+    Course_generate_utils,
+    Course_create_gradeables,
+    Course_utils,
+    Course_data,
+):
     """
     Object to represent the courses loaded from the courses.json file as well as the list of
     users that are needed for this particular course (which is a list of User objects).
@@ -27,6 +34,7 @@ class Course(Course_create, Course_generate_utils, Course_create_gradeables,
         users
         max_random_submissions
     """
+
     def __init__(self, course) -> None:
         # Using super() to call the contructor will only run the first init in the parent class
         # Nothing is currently running in the init of both of these classes
@@ -51,13 +59,13 @@ class Course(Course_create, Course_generate_utils, Course_create_gradeables,
         self.electronic_gradeable_data: Table
         self.electronic_gradeable_version: Table
         self.semester: str = get_current_semester()
-        self.code = course['code']
-        self.instructor = course['instructor']
+        self.code = course["code"]
+        self.instructor = course["instructor"]
         self.gradeables: list = []
         self.make_customization: bool = False
         ids = []
-        if 'gradeables' in course:
-            for gradeable in course['gradeables']:
+        if "gradeables" in course:
+            for gradeable in course["gradeables"]:
                 self.gradeables.append(Gradeable(gradeable))
                 assert self.gradeables[-1].id not in ids
                 ids.append(self.gradeables[-1].id)
@@ -68,17 +76,17 @@ class Course(Course_create, Course_generate_utils, Course_create_gradeables,
         self.no_registration_students: int = 10
         self.no_rotating_students: int = 10
         self.unregistered_students: int = 10
-        if 'registration_sections' in course:
-            self.registration_sections = course['registration_sections']
-        if 'rotating_sections' in course:
-            self.rotating_sections = course['rotating_sections']
-        if 'registered_students' in course:
-            self.registered_students = course['registered_students']
-        if 'no_registration_students' in course:
-            self.no_registration_students = course['no_registration_students']
-        if 'no_rotating_students' in course:
-            self.no_rotating_students = course['no_rotating_students']
-        if 'unregistered_students' in course:
-            self.unregistered_students = course['unregistered_students']
-        if 'make_customization' in course:
-            self.make_customization = course['make_customization']
+        if "registration_sections" in course:
+            self.registration_sections = course["registration_sections"]
+        if "rotating_sections" in course:
+            self.rotating_sections = course["rotating_sections"]
+        if "registered_students" in course:
+            self.registered_students = course["registered_students"]
+        if "no_registration_students" in course:
+            self.no_registration_students = course["no_registration_students"]
+        if "no_rotating_students" in course:
+            self.no_rotating_students = course["no_rotating_students"]
+        if "unregistered_students" in course:
+            self.unregistered_students = course["unregistered_students"]
+        if "make_customization" in course:
+            self.make_customization = course["make_customization"]

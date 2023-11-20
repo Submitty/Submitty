@@ -1,4 +1,4 @@
-/* global displaySuccessMessage */
+/* global displaySuccessMessage, hljs */
 
 // eslint-disable-next-line no-unused-vars
 function categoriesFormEvents() {
@@ -86,15 +86,18 @@ function checkNumFilesForumUpload(input, post_id) {
 }
 
 function uploadImageAttachments(attachment_box) {
-    $(attachment_box).on('DOMNodeInserted', (e) => {
+    const observer = new MutationObserver((e) => {
+        if (e[0].addedNodes.length === 0 || e[0].addedNodes[0].className === 'thumbnail') {
+            return;
+        }
         // eslint-disable-next-line no-undef
-        const part = get_part_number(e);
+        const part = get_part_number(e[0]);
         if (isNaN(parseInt(part))) {
             return;
         }
-        const target = $(e.target);
+        const target = $(e[0].target).find('tr')[$(e[0].target).find('tr').length - 1];
         let file_object = null;
-        const filename = target.attr('fname');
+        const filename = $(target).attr('fname');
         // eslint-disable-next-line no-undef
         for (let j = 0; j < file_array[part-1].length; j++) {
             // eslint-disable-next-line no-undef
@@ -108,6 +111,12 @@ function uploadImageAttachments(attachment_box) {
         $(image).addClass('thumbnail');
         $(image).css('background-image', `url(${window.URL.createObjectURL(file_object)})`);
         target.prepend(image);
+    });
+    $(attachment_box).each(function() {
+        observer.observe($(this)[0], {
+            childList : true,
+            subtree: true,
+        });
     });
 }
 
@@ -336,6 +345,7 @@ function socketNewOrEditPostHandler(post_id, reply_level, post_box_id=null, edit
                 // eslint-disable-next-line no-undef
                 file_array[post_box_id] = [];
                 uploadImageAttachments(`#${post_id}-reply .upload_attachment_box`);
+                hljs.highlightAll();
 
             }
             catch (error) {
@@ -1709,8 +1719,8 @@ function reorderCategories(csrf_token) {
             }
             catch (err) {
                 // eslint-disable-next-line no-undef
-                displayErrorMessage('Error parsing data. Please try again').
-                    return;
+                displayErrorMessage('Error parsing data. Please try again');
+                return;
             }
             if (json['status'] === 'fail') {
                 // eslint-disable-next-line no-undef
@@ -1766,8 +1776,8 @@ function deletePostToggle(isDeletion, thread_id, post_id, author, time, csrf_tok
                 }
                 catch (err) {
                     // eslint-disable-next-line no-undef
-                    displayErrorMessage('Error parsing data. Please try again').
-                        return;
+                    displayErrorMessage('Error parsing data. Please try again');
+                    return;
                 }
                 if (json['status'] === 'fail') {
                     // eslint-disable-next-line no-undef
@@ -1972,8 +1982,8 @@ function loadThreadHandler() {
                 }
                 catch (err) {
                     // eslint-disable-next-line no-undef
-                    displayErrorMessage('Error parsing data. Please try again').
-                        return;
+                    displayErrorMessage('Error parsing data. Please try again');
+                    return;
                 }
                 if (json['status'] === 'fail') {
                     // eslint-disable-next-line no-undef
@@ -2007,6 +2017,7 @@ function loadThreadHandler() {
                 saveScrollLocationOnRefresh('posts_list');
 
                 $('.post_reply_form').submit(publishPost);
+                hljs.highlightAll();
             },
             error: function() {
                 window.alert('Something went wrong while trying to display thread details. Please try again.');
@@ -2201,19 +2212,20 @@ function updateThread(e) {
     e.preventDefault();
     const cat = [];
     $('input[name="cat[]"]:checked').each(item => cat.push($('input[name="cat[]"]:checked')[item].value));
+    const post_box_id = $('#edit-user-post').find('.thread-post-form').data('post_box_id');
 
     const data =  {
         edit_thread_id: $('#edit_thread_id').val(),
         edit_post_id: $('#edit_post_id').val(),
         csrf_token: $('input[name="csrf_token"]').val(),
         title: $('input#title').val(),
-        thread_post_content: $('textarea#reply_box_').val(),
+        thread_post_content: $(`textarea#reply_box_${post_box_id}`).val(),
         thread_status: $('#thread_status').val(),
         Anon: $('input#thread_post_anon_edit').is(':checked') ? $('input#thread_post_anon_edit').val() : 0,
         lock_thread_date: $('input#lock_thread_date').text(),
         expirationDate: $('input#expirationDate').val(),
         cat,
-        markdown_status: parseInt($('input#markdown_input_').val()),
+        markdown_status: parseInt($(`input#markdown_input_${post_box_id}`).val()),
     };
 
     $.ajax({

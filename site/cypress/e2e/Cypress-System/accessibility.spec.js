@@ -66,7 +66,6 @@ describe('Test cases for the site\'s adherence to accessibility guidelines', () 
     });
 
     beforeEach(() => {
-        cy.visit('/');
         cy.login();
     });
 
