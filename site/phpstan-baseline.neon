@@ -13615,3 +13615,27 @@ parameters:
 			message: "#^Method app\\\\views\\\\superuser\\\\SuperuserEmailView\\:\\:showEmailPage\\(\\) has parameter \\$num_student with no type specified\\.$#"
 			count: 1
 			path: app/views/superuser/SuperuserEmailView.php
+
+		-
+			message: """
+				#^Call to deprecated method registerLoader\\(\\) of class Doctrine\\\\Common\\\\Annotations\\\\AnnotationRegistry\\:
+				This method is deprecated and will be removed in
+				            doctrine/annotations 2\\.0\\. Annotations will be autoloaded in 2\\.0\\.$#
+			"""
+			count: 1
+			path: public/index.php
+
+		-
+			message: "#^Construct empty\\(\\) is not allowed\\. Use more strict comparison\\.$#"
+			count: 2
+			path: public/index.php
+
+		-
+			message: "#^Function error_handler\\(\\) has no return type specified\\.$#"
+			count: 1
+			path: public/index.php
+
+		-
+			message: "#^Function exception_handler\\(\\) has no return type specified\\.$#"
+			count: 1
+			path: public/index.php
