@@ -11552,11 +11552,6 @@ parameters:
 			path: app/repositories/course/CourseMaterialRepository.php
 
 		-
-			message: "#^Class app\\\\repositories\\\\banner\\\\BannerImageRepository extends generic class Doctrine\\\\ORM\\\\EntityRepository but does not specify its types\\: TEntityClass$#"
-			count: 1
-			path: app/repositories/banner/BannerImageRepository.php
-
-		-
 			message: "#^Class app\\\\repositories\\\\email\\\\EmailRepository extends generic class Doctrine\\\\ORM\\\\EntityRepository but does not specify its types\\: TEntityClass$#"
 			count: 1
 			path: app/repositories/email/EmailRepository.php
