@@ -96,29 +96,39 @@ function showBanners() {
         else {
             currentImageIndex ++;
         }
-
-        duckdivElement.style.transform = "rotate(0deg)";
-        document.getElementById("breadcrumbs").style.flexWrap = "wrap";
-        images[currentImageIndex].classList.remove("active");
-
         if (currentImageIndex < 0) {
             currentImageIndex = images.length - 1;
         } else if (currentImageIndex >= images.length) {
             currentImageIndex = 0;
         }
         
+
+        duckdivElement.style.transform = "rotate(0deg)";
+        document.getElementById("breadcrumbs").style.flexWrap = "wrap";
+        images[currentImageIndex].classList.remove("active");
+
+
         bannerElement.style.width = "1%";
         bannerElement.style.display = "none";
         movingUnit.style.left = ""
         movingUnit.style.right = "20%";
 
-
-        let className = currentImages[currentImageIndex].className.split(' ')[1]
-        hiddenImages.push(className);
-        seenImages.push(currentImages[currentImageIndex]);
-        currentImages.shift();
+        if (currentImages.length >0) {
+            let className = currentImages[currentImageIndex].className.split(' ')[1]
+            hiddenImages.push(className);
+            seenImages.push(currentImages[currentImageIndex]);
+            currentImages.shift();
+        }
         images = currentImages.concat(seenImages);
-        setCookie('hiddenImages', JSON.stringify(hiddenImages)); 
+        setCookie('hiddenImages', JSON.stringify(hiddenImages));
+        if (currentImages.length == 0) {
+
+            bubble.style.display = "none";
+        }
+        else {
+            bubble.style.display = "block";
+        }
+
 
     }
 
