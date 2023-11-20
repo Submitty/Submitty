@@ -69,13 +69,34 @@
 
 
     <script>
-
+            image = false;
+            url = false;
         $('#url_link_address').hide();
         $('#extra_name').hide();
+            function imageSelectionUpdate(checked) {
+                if (checked === true) {
+                    $('#extra_name').show();
+                    image = true;
+                }
+                else {
+                    image = false;
+                    $('#extra_name').show();
+                }
+            }
+            function urlSelectionUpdate(checked) {
+                if (checked === true) {
+                    url = true
+                    $('#url_link_address').show();
+                }
+                else {
+                    url = false;
+                    $('#url_link_address').hide();
+                }
+            } 
+
         function makeSubmission() {
             var releaseTime = $("#release_date").val();
             var closeTime = $("#closing_date").val();
-
             var extraName = "";
             if (image === true) extraName = document.getElementById("input-provide-name").value;
             var linkName = "";
@@ -88,11 +109,6 @@
                 e.stopPropagation();
             });
         });
-        
-
-
-
-
     </script>
 
     <script>

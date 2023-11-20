@@ -1,41 +1,47 @@
-
-
 let currentImageIndex = 0;
-let hiddenImages = getHiddenImages();
-let seenImages = [];
-let images = $('.club-banners'); 
-let bannerElement = $('#banner');
-bannerElement.style.display = 'none';
-bannerElement.style.width = "1%";
-
-
-
+let hiddenImages = undefined;
+let seenImages = undefined;
+let images = undefined; 
+let bannerElement = undefined;
+let bubble  = undefined;
 let currentImages = [];
-for (let i = 0; i < images.length; i++) {
-    let className = images[i].className.split(' ')[1];
-    if (!hiddenImages.includes(className)) {
-        currentImages.push(images[i]);
+
+$(function() {
+    currentImageIndex = 0;
+    hiddenImages = getHiddenImages();
+    seenImages = [];
+    images = document.getElementsByClassName('club-banners'); 
+    bannerElement = document.getElementById('banner');
+    bannerElement.style.display = 'none';
+    bannerElement.style.width = "1%";
+
+
+
+    for (let i = 0; i < images.length; i++) {
+        let className = images[i].className.split(' ')[1];
+        if (!hiddenImages.includes(className)) {
+            currentImages.push(images[i]);
+        }
+        else {
+            seenImages.push(images[i]);
+        }
     }
-    else {
-        seenImages.push(images[i]);
+
+    bubble = document.getElementById("speech-bubble-container");
+    if (bubble != null) {
+        if (currentImages.length == 0) {
+
+            bubble.style.display = "none";
+        }
+        else {
+            bubble.style.display = "block";
+        }
     }
-}
-
-let bubble = document.getElementById("speech-bubble-container");
-if (bubble != null) {
-    if (currentImages.length == 0) {
-
-        bubble.style.display = "none";
-    }
-    else {
-        bubble.style.display = "block";
-    }
-}
-images = currentImages.concat(seenImages);
+    images = currentImages.concat(seenImages);
 
 
-if (getCookie("display-banner") === "yes") showBanners();
-
+    if (getCookie("display-banner") === "yes") showBanners();
+});
 function showBanners() {
 
     let movingUnit = document.getElementById("moving-unit");
