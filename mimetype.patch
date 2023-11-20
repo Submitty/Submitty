@@ -1,0 +1,111 @@
+diff --git a/site/app/controllers/MiscController.php b/site/app/controllers/MiscController.php
+index f28102330..caae7cc55 100644
+--- a/site/app/controllers/MiscController.php
++++ b/site/app/controllers/MiscController.php
+@@ -17,6 +17,7 @@ use app\models\User;
+ 
+ class MiscController extends AbstractController {
+     const GENERIC_NO_ACCESS_MSG = 'You do not have access to this file';
++    const GENERIC_FILE_NOT_SUPPORTED_MSG = 'This file type is not supported for inline display. Please download the file.';
+ 
+     /**
+      * Get the current server time
+@@ -166,7 +167,7 @@ class MiscController extends AbstractController {
+         $corrected_name = pathinfo($path, PATHINFO_DIRNAME) . "/" .  $file_name;
+         $mime_type = mime_content_type($corrected_name);
+         $file_type = FileUtils::getContentType($file_name);
+-        if ($mime_type === "application/pdf" || (str_starts_with($mime_type, "image/") && $mime_type !== "image/svg+xml")) {
++        if (in_array($mime_type, FileUtils::Allowed_Inline_Types)) {
+             $this->core->getOutput()->useHeader(false);
+             $this->core->getOutput()->useFooter(false);
+             header("Content-type: " . $mime_type);
+@@ -174,7 +175,7 @@ class MiscController extends AbstractController {
+             readfile($corrected_name);
+             $this->core->getOutput()->renderString($path);
+         }
+-        else {
++        elseif (in_array($mime_type, FileUtils::Allowed_Text_Types)) {
+             $contents = file_get_contents($corrected_name);
+             if (!is_null($ta_grading) && $ta_grading === "true") {
+                 $newlines = substr_count($contents, "\n");
+diff --git a/site/app/controllers/course/CourseMaterialsController.php b/site/app/controllers/course/CourseMaterialsController.php
+index 58a3432db..31270b91d 100644
+--- a/site/app/controllers/course/CourseMaterialsController.php
++++ b/site/app/controllers/course/CourseMaterialsController.php
+@@ -70,19 +70,29 @@ class CourseMaterialsController extends AbstractController {
+         $this->core->getOutput()->useHeader(false);
+         $this->core->getOutput()->useFooter(false);
+ 
+-        if ($mime_type === "application/pdf" || (str_starts_with($mime_type, "image/") && $mime_type !== "image/svg+xml")) {
++        if (in_array($mime_type, FileUtils::Allowed_Inline_Types)) {
+             header("Content-type: " . $mime_type);
+             header('Content-Disposition: inline; filename="' . $file_name . '"');
+             readfile($corrected_name);
+             $this->core->getOutput()->renderString($full_path);
+         }
+         else {
+-            $contents = file_get_contents($corrected_name);
+-            return new WebResponse(
+-                MiscView::class,
+-                "displayFile",
+-                $contents
+-            );
++            if (in_array($mime_type, FileUtils::Allowed_Text_Types)) {
++                $contents = file_get_contents($corrected_name);
++                return new WebResponse(
++                    MiscView::class,
++                    "displayFile",
++                    $contents
++                );
++            }
++            else {
++                return new WebResponse(
++                    ErrorView::class,
++                    "errorPage",
++                    MiscController::GENERIC_FILE_NOT_SUPPORTED_MSG
++                );
++            }
++            
+         }
+     }
+ 
+diff --git a/site/app/libraries/FileUtils.php b/site/app/libraries/FileUtils.php
+index a5aa6fca9..dd2289cf4 100644
+--- a/site/app/libraries/FileUtils.php
++++ b/site/app/libraries/FileUtils.php
+@@ -13,6 +13,13 @@ class FileUtils {
+     const IGNORE_FOLDERS = [".svn", ".git", ".idea", "__macosx"];
+     const IGNORE_FILES = ['.ds_store'];
+     const ALLOWED_IMAGE_TYPES = ['jpg', 'jpeg', 'png', 'gif'];
++    const Allowed_Text_Types = [
++        "text/plain", "text/x-php", "text/x-java-source", "text/x-script.python", "text/csv",
++        "application/javascript", "text/x-shellscript", "text/css", "text/html", "application/json",
++        "text/markdown", "text/javascript", "text/x-c", "text/x-c++", "application/sql"
++    ];
++    const Allowed_Inline_Types = ["application/pdf", "image/jpeg", "image/png", "image/gif"];
++
+ 
+     /**
+      * Return all files from a given directory.  All subdirectories
+@@ -451,9 +458,6 @@ class FileUtils {
+             case 'gif':
+                 $content_type = "image/gif";
+                 break;
+-            case 'bmp':
+-                $content_type = "image/bmp";
+-                break;
+             // text
+             case 'c':
+                 $content_type = 'text/x-csrc';
+diff --git a/site/tests/app/libraries/FileUtilsTester.php b/site/tests/app/libraries/FileUtilsTester.php
+index d2fb5a4dc..0e1aaa8eb 100644
+--- a/site/tests/app/libraries/FileUtilsTester.php
++++ b/site/tests/app/libraries/FileUtilsTester.php
+@@ -401,7 +401,6 @@ STRING;
+             ['test.jpg', 'image/jpeg'],
+             ['test.jpeg', 'image/jpeg'],
+             ['test.gif', 'image/gif'],
+-            ['test.bmp', 'image/bmp'],
+             ['test.c', 'text/x-csrc'],
+             ['test.cpp', 'text/x-c++src'],
+             ['test.cxx', 'text/x-c++src'],

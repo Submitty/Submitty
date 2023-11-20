@@ -13,6 +13,13 @@ class FileUtils {
     const IGNORE_FOLDERS = [".svn", ".git", ".idea", "__macosx"];
     const IGNORE_FILES = ['.ds_store'];
     const ALLOWED_IMAGE_TYPES = ['jpg', 'jpeg', 'png', 'gif'];
+    const Allowed_Text_Types = [
+        "text/plain", "text/x-php", "text/x-java-source", "text/x-script.python", "text/csv",
+        "application/javascript", "text/x-shellscript", "text/css", "text/html", "application/json",
+        "text/markdown", "text/javascript", "text/x-c", "text/x-c++", "application/sql"
+    ];
+    const Allowed_Inline_Types = ["application/pdf", "image/jpeg", "image/png", "image/gif"];
+
 
     /**
      * Return all files from a given directory.  All subdirectories
@@ -450,9 +457,6 @@ class FileUtils {
                 break;
             case 'gif':
                 $content_type = "image/gif";
-                break;
-            case 'bmp':
-                $content_type = "image/bmp";
                 break;
             // text
             case 'c':
