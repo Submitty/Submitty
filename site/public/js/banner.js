@@ -32,33 +32,29 @@ function deleteBannerImage(csrf_token, imageName, imagePath, description, releas
     formData.append('description', description);
     formData.append('release_date', releaseDate);
     formData.append('close_date', closeDate);
-    $.ajax({
-        url: buildUrl(['banner', 'delete']),
-        data: formData,
-        processData: false,
-        contentType: false,
-        type: 'POST',
-        success: function(data) {
-            try {
-                const jsondata = JSON.parse(data);
 
-                if (jsondata['status'] === 'success') {
-                    window.location.href = buildUrl(['banner']);
-                }
-                else {
-                    alert(jsondata['message']);
-                }
+    $.post(buildUrl(['banner', 'delete']), formData
+    ).done(function(res) {
+        try {
+            const jsondata = JSON.parse(data);
+
+            if (jsondata['status'] === 'success') {
+                window.location.href = buildUrl(['banner']);
             }
-            catch (e) {
-                alert('Error parsing response from server. Please copy the contents of your Javascript Console and ' +
-                    'send it to an administrator, as well as what you were doing and what files you were uploading. - [handleUploadCourseMaterials]');
-                console.log(data);
+            else {
+                alert(jsondata['message']);
             }
-        },
-        error: function() {
-            window.location.href = buildUrl(['banner']);
-        },
-    });
+        }
+        catch (e) {
+            alert('Error parsing response from server. Please copy the contents of your Javascript Console and ' +
+                'send it to an administrator, as well as what you were doing and what files you were uploading. - [handleUploadCourseMaterials]');
+            console.log(data);
+        }
+    }).fail(function() {
+        window.location.href = buildUrl(['banner']);
+    })
+
+
 }
 
 
