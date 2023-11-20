@@ -125,6 +125,7 @@
 
 
 <script>
+    const DateTime = luxon.DateTime;
 
     const upload_fp = flatpickr('.upload_picker', {
                 plugins: [ShortcutButtonsPlugin(
@@ -147,17 +148,18 @@
                             let date;
                             switch (index) {
                                 case 0:
-                                    date = new Date("1001-01-01 00:00:00");
+                                    date = DateTime.fromISO("1001-01-01 00:00:00");
                                     break;
                                 case 1:
-                                    date = new Date();
+                                    date = DateTime.local();
                                     break;
                                 case 2:
-                                    date = new Date();
+                                    date = DateTime.local();
                                     date.setDate(date.getDate() + 1);
                                     break;
                                 case 3:
-                                    date = new Date("9998-01-01 00:00:00");
+                                    
+                                    date = DateTime.fromISO("9998-01-01 00:00:00");
                                     break;
                             }
                             fp.setDate(date);
