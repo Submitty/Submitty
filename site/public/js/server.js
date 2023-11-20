@@ -280,7 +280,8 @@ function newUploadCourseMaterialsForm() {
     var form = $("#upload-course-materials-form");
 
     $('[name="existing-file-list"]', form).html('');
-    $('[name="existing-file-list"]', form).append('<b>'+JSON.stringify(files)+'</b>');
+    var addingStuff = $("<b></b>").text(JSON.stringify(files));
+    $('[name="existing-file-list"]', form).append(addingStuff);
 
     form.css("display", "block");
     captureTabInModal("upload-course-materials-form");
