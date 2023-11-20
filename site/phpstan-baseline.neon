@@ -3716,7 +3716,17 @@ parameters:
 			path: app/libraries/CustomCodeBlockRenderer.php
 
 		-
-			message: "#^Parameter \\#1 \\$inline of method League\\\\CommonMark\\\\Inline\\\\Renderer\\\\CodeRenderer\\:\\:render\\(\\) expects League\\\\CommonMark\\\\Inline\\\\Element\\\\Code, League\\\\CommonMark\\\\Inline\\\\Element\\\\AbstractInline given\\.$#"
+			message: "#^Parameter \\#1 \\$element of method app\\\\libraries\\\\CustomCodeBlockRenderer\\:\\:addLineNumbers\\(\\) expects League\\\\CommonMark\\\\Util\\\\HtmlElement, Stringable given\\.$#"
+			count: 1
+			path: app/libraries/CustomCodeBlockRenderer.php
+
+		-
+			message: "#^Parameter \\#1 \\$node of method League\\\\CommonMark\\\\Extension\\\\CommonMark\\\\Renderer\\\\Block\\\\FencedCodeRenderer\\:\\:render\\(\\) expects League\\\\CommonMark\\\\Extension\\\\CommonMark\\\\Node\\\\Block\\\\FencedCode\\|League\\\\CommonMark\\\\Extension\\\\CommonMark\\\\Node\\\\Block\\\\IndentedCode, League\\\\CommonMark\\\\Node\\\\Node given\\.$#"
+			count: 1
+			path: app/libraries/CustomCodeBlockRenderer.php
+
+		-
+			message: "#^Parameter \\#1 \\$node of method League\\\\CommonMark\\\\Extension\\\\CommonMark\\\\Renderer\\\\Inline\\\\CodeRenderer\\:\\:render\\(\\) expects League\\\\CommonMark\\\\Extension\\\\CommonMark\\\\Node\\\\Inline\\\\Code, League\\\\CommonMark\\\\Node\\\\Node given\\.$#"
 			count: 1
 			path: app/libraries/CustomCodeInlineRenderer.php
 
@@ -4356,6 +4366,16 @@ parameters:
 			path: app/libraries/Output.php
 
 		-
+			message: "#^Instantiated class Submitty\\\\Twig\\\\Extension\\\\MarkdownExtension not found\\.$#"
+			count: 1
+			path: app/libraries/Output.php
+
+		-
+			message: "#^Instantiated class Submitty\\\\Twig\\\\Extension\\\\PHPLeagueMarkdownEngine not found\\.$#"
+			count: 1
+			path: app/libraries/Output.php
+
+		-
 			message: "#^Method app\\\\libraries\\\\Output\\:\\:addBreadcrumb\\(\\) has no return type specified\\.$#"
 			count: 1
 			path: app/libraries/Output.php
@@ -4647,6 +4667,11 @@ parameters:
 
 		-
 			message: "#^Only booleans are allowed in an if condition, string\\|null given\\.$#"
+			count: 1
+			path: app/libraries/Output.php
+
+		-
+			message: "#^Parameter \\#1 \\$extension of method Twig\\\\Environment\\:\\:addExtension\\(\\) expects Twig\\\\Extension\\\\ExtensionInterface, Submitty\\\\Twig\\\\Extension\\\\MarkdownExtension given\\.$#"
 			count: 1
 			path: app/libraries/Output.php
 
@@ -13590,27 +13615,3 @@ parameters:
 			message: "#^Method app\\\\views\\\\superuser\\\\SuperuserEmailView\\:\\:showEmailPage\\(\\) has parameter \\$num_student with no type specified\\.$#"
 			count: 1
 			path: app/views/superuser/SuperuserEmailView.php
-
-		-
-			message: """
-				#^Call to deprecated method registerLoader\\(\\) of class Doctrine\\\\Common\\\\Annotations\\\\AnnotationRegistry\\:
-				This method is deprecated and will be removed in
-				            doctrine/annotations 2\\.0\\. Annotations will be autoloaded in 2\\.0\\.$#
-			"""
-			count: 1
-			path: public/index.php
-
-		-
-			message: "#^Construct empty\\(\\) is not allowed\\. Use more strict comparison\\.$#"
-			count: 2
-			path: public/index.php
-
-		-
-			message: "#^Function error_handler\\(\\) has no return type specified\\.$#"
-			count: 1
-			path: public/index.php
-
-		-
-			message: "#^Function exception_handler\\(\\) has no return type specified\\.$#"
-			count: 1
-			path: public/index.php
