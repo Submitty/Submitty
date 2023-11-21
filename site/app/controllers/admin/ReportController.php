@@ -481,7 +481,6 @@ class ReportController extends AbstractController {
                     }
                     if ($late_days_charged > 0) {
                         $entry['days_after_deadline'] = $ldi->getDaysLate();
-                        $entry['late_day_exceptions'] = $late_day_exceptions;
                         $entry['days_charged'] = $late_days_charged;
                     }
                 }
