@@ -151,7 +151,9 @@ describe('Tests cases revolving around modifying gradeables', () => {
         cy.get('#add-peer-grader').click();
         cy.get('.form-button-container > a').click({ force: true, multiple: true });
 
-        cy.get('#page_5_nav').click();
+        //clicking on page 5 directly, loads the page too fast, which causes flakyness
+        //so we better visit the url
+        cy.visit(['sample', 'gradeable', 'open_peer_homework', 'update?nav_tab=5']);
 
         notBeVisible(['#has_due_date_no'], ['#date_due']);
 
