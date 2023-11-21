@@ -92,7 +92,6 @@ class CourseMaterialsController extends AbstractController {
                     MiscController::GENERIC_FILE_NOT_SUPPORTED_MSG
                 );
             }
-            
         }
     }
 
