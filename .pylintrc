@@ -75,11 +75,10 @@ ignore=
     untrusted_canary.py,
     testcase.py,
     update_repo_version.py
-    migrator,
+    migrations,
     sample_files,
     sample_courses,
     ParseLogFiles,
-    python_submitty_utils,
     more_autograding_examples
 
 ignored-modules=docker,
