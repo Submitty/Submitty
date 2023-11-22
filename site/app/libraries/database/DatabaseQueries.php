@@ -7330,7 +7330,7 @@ AND gc_id IN (
         return $this->course_db->rows();
     }
 
-    
+
     public function isAnyQueueOpen() {
         $this->course_db->query("SELECT COUNT(*) AS num_open FROM queue_settings WHERE open = true");
         return $this->course_db->row()['num_open'] > 0;
