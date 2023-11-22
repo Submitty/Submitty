@@ -70,14 +70,14 @@ class CourseMaterialsController extends AbstractController {
         $this->core->getOutput()->useHeader(false);
         $this->core->getOutput()->useFooter(false);
 
-        if (in_array($mime_type, FileUtils::Allowed_Inline_Types)) {
+        if (in_array($mime_type, FileUtils::ALLOWED_INLINE_TYPES, true)) {
             header("Content-type: " . $mime_type);
             header('Content-Disposition: inline; filename="' . $file_name . '"');
             readfile($corrected_name);
             $this->core->getOutput()->renderString($full_path);
         }
         else {
-            if (in_array($mime_type, FileUtils::Allowed_Text_Types)) {
+            if (in_array($mime_type, FileUtils::ALLOWED_TEXT_TYPES, true)) {
                 $contents = file_get_contents($corrected_name);
                 return new WebResponse(
                     MiscView::class,

@@ -167,7 +167,7 @@ class MiscController extends AbstractController {
         $corrected_name = pathinfo($path, PATHINFO_DIRNAME) . "/" .  $file_name;
         $mime_type = mime_content_type($corrected_name);
         $file_type = FileUtils::getContentType($file_name);
-        if (in_array($mime_type, FileUtils::Allowed_Inline_Types)) {
+        if (in_array($mime_type, FileUtils::ALLOWED_INLINE_TYPES, true)) {
             $this->core->getOutput()->useHeader(false);
             $this->core->getOutput()->useFooter(false);
             header("Content-type: " . $mime_type);
@@ -175,7 +175,7 @@ class MiscController extends AbstractController {
             readfile($corrected_name);
             $this->core->getOutput()->renderString($path);
         }
-        elseif (in_array($mime_type, FileUtils::Allowed_Text_Types)) {
+        elseif (in_array($mime_type, FileUtils::ALLOWED_TEXT_TYPES, true)) {
             $contents = file_get_contents($corrected_name);
             if (!is_null($ta_grading) && $ta_grading === "true") {
                 $newlines = substr_count($contents, "\n");

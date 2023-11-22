@@ -13,12 +13,12 @@ class FileUtils {
     const IGNORE_FOLDERS = [".svn", ".git", ".idea", "__macosx"];
     const IGNORE_FILES = ['.ds_store'];
     const ALLOWED_IMAGE_TYPES = ['jpg', 'jpeg', 'png', 'gif'];
-    const Allowed_Text_Types = [
+    const ALLOWED_TEXT_TYPES = [
         "text/plain", "text/x-php", "text/x-java-source", "text/x-script.python", "text/csv",
         "application/javascript", "text/x-shellscript", "text/css", "text/html", "application/json",
         "text/markdown", "text/javascript", "text/x-c", "text/x-c++", "application/sql"
     ];
-    const Allowed_Inline_Types = ["application/pdf", "image/jpeg", "image/png", "image/gif"];
+    const ALLOWED_INLINE_TYPES = ["application/pdf", "image/jpeg", "image/png", "image/gif"];
 
 
     /**
