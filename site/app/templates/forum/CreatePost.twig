@@ -62,12 +62,10 @@
             {% endif %}
         {% endif %}
 
-        <a class="btn btn-default btn-sm post_button_color text-decoration-none key_to_click" tabindex = "0" onClick="toggleLike({{post.id}})">
-            <img id="likeIcon_{{post.id}}" src="site/public/img/off-duck-button.svg" alt="" width="15" height="15">
-            <span id="likeCounter_{{post.id}}">0</span>
+        <a class="btn btn-default btn-sm post_button_color text-decoration-none key_to_click" tabindex="0" onClick="toggleLike({{post.id}}, {{post.thread_id}}, '{{current_user}}')">
+            <img id="likeIcon_{{post.id}}" src="{{ post_user_info.upduck_user_liked ? 'site/public/img/on-duck-button.svg' : 'site/public/img/off-duck-button.svg' }}" alt="" width="15" height="15">
+            <span id="likeCounter_{{post.id}}">{{ post_user_info.upduck_count }}</span>
         </a>
-
-
 
     {% endif %}
 

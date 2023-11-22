@@ -505,7 +505,6 @@ class ForumThreadView extends AbstractView {
                         $post["author_user_group"] = $author_user_groups_map[$post["author_user_id"]];
 
                         $post_data[] = $this->createPost($thread_id, $post, $unviewed_posts, $first, $reply_level, $display_option, $includeReply, false, $thread_announced);
-
                         break;
                     }
                 }
@@ -576,7 +575,7 @@ class ForumThreadView extends AbstractView {
         }
 
         $return = "";
-
+        
         if ($render) {
             $return = $this->core->getOutput()->renderTwigTemplate("forum/GeneratePostList.twig", [
                 "userGroup" => $this->core->getUser()->getGroup(),
@@ -867,7 +866,6 @@ class ForumThreadView extends AbstractView {
             if (!is_null($date)) {
                 $date_content["formatted"] = $date;
             }
-
             $thread_info = [
                 'thread_id' => $thread['id'],
                 "title" => $titleDisplay,
@@ -1058,6 +1056,11 @@ class ForumThreadView extends AbstractView {
 
         $post_user_info = [];
 
+        $upDuckCount = $this->core->getQueries()->getUpduckInfo($post["id"]);
+        //this function should return a number for the like count
+        $userLiked = $this->core->getQueries()->getUserLikes($post["id"], $current_user);
+        //return a bool for if liked or not
+        
         $merged_thread = false;
         if ($this->core->getUser()->getGroup() <= 2) {
             $info_name = $given_name . " " . $family_name . " (" . $post['author_user_id'] . ")";
@@ -1070,6 +1073,8 @@ class ForumThreadView extends AbstractView {
 
             $post_user_info = [
                 "info_name" => $info_name,
+                "upduck_count" => $upDuckCount,
+                "upduck_user_liked" => $userLiked,
                 "visible_user_json" => $visible_user_json,
                 "jscriptAnonFix" => $jscriptAnonFix,
                 "pronouns" => $pronouns,
@@ -1223,7 +1228,7 @@ class ForumThreadView extends AbstractView {
             "render_markdown" => $markdown,
             "has_history" => $has_history,
             "thread_previously_merged" => $merged_thread,
-            "thread_announced" => $thread_announced
+            "thread_announced" => $thread_announced,
         ];
 
         if ($render) {

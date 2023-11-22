@@ -717,6 +717,47 @@ SQL;
         return $categories_list;
     }
 
+    public function toggleLikes($post_id, $thread_id, $current_user){
+        try{
+            $this->course_db->query("SELECT * FROM upducks_table WHERE post_id = ? AND user_id = ? AND thread_id = ?", [$post_id, $current_user, $thread_id]);
+
+            if (isset($this->course_db->rows()[0])) {
+                // If a row with the same values exists, delete it
+                $this->course_db->query("DELETE FROM upducks_table WHERE post_id = ? AND user_id = ? AND thread_id = ?", [$post_id, $current_user, $thread_id]);
+                $result = 'unlike';
+            } 
+            else {
+                // If no row with the same values exists, insert the new row
+                $this->course_db->query("INSERT INTO upducks_table (post_id, user_id, thread_id) VALUES (?, ?, ?)",[$post_id, $current_user, $thread_id]);
+                $result = 'like';
+            }
+            return $result;
+        }   
+        catch (DatabaseException $dbException) {
+            if ($this->course_db->inTransaction()) {
+                $this->course_db->rollback();
+            }
+            return false;
+        }
+    }
+
+    public function getUpduckInfo($post_id): int {
+        $this->course_db->query('SELECT COUNT(*) AS cnt FROM upducks_table WHERE post_id = ?', [$post_id]);
+        return intval($this->course_db->row()['cnt']);
+    }
+
+    public function getUserLikes($post_id, $current_user): bool {
+        $this->course_db->query('SELECT COUNT(*) AS cnt FROM upducks_table WHERE post_id = ? AND user_id = ?', [$post_id, $current_user]);
+        if(intval($this->course_db->row()['cnt']) >= 1){
+            //user liked
+            $bool_liked=true;
+        }
+        else{
+            $bool_liked=false;
+        }
+        return $bool_liked;
+    }
+
     public function splitPost($post_id, $title, $categories_ids) {
         $old_thread_id = -1;
         $thread_id = -1;

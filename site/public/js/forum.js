@@ -1251,19 +1251,65 @@ function modifyThreadList(currentThreadId, currentCategoriesId, course, loadFirs
     });
 }
 
-function toggleLike(postId) {
-    var likeIcon = document.getElementById('likeIcon_' + postId);
-    var likeCounter = document.getElementById('likeCounter_' + postId);
-    //var likeToggle = document.getElementById('likeToggle'+postId);
-    //console.log(likeCounter);
+function toggleLike(post_id,thread_id,current_user) {
 
-    if (likeIcon.src.endsWith('site/public/img/off-duck-button.svg')) {
-        likeIcon.src = 'site/public/img/on-duck-button.svg';
-        likeCounter.textContent = parseInt(likeCounter.textContent) + 1;
-    } else {
-        likeIcon.src = 'site/public/img/off-duck-button.svg';
-        likeCounter.textContent = parseInt(likeCounter.textContent) - 1;
-    }
+    // eslint-disable-next-line no-undef
+    const url = buildCourseUrl(['post', 'likes']);
+    $.ajax({
+        url: url,
+        type: 'POST',
+        data: {
+            post_id: post_id,
+            thread_id: thread_id,
+            current_user: current_user,
+            csrf_token: csrfToken,
+        },
+        success: function(data) {
+            try {
+                // eslint-disable-next-line no-var
+                var json = JSON.parse(data);
+            }
+            catch (err) {
+                // eslint-disable-next-line no-undef
+                displayErrorMessage('Error parsing data. Please try again.');
+                return;
+            }
+            if (json['status'] === 'fail') {
+                // eslint-disable-next-line no-undef
+                displayErrorMessage(json['message']);
+                return;
+            }
+            json=json['data'];
+            //window.alert(json.type);
+            var likeCounterElement = document.getElementById('likeCounter_' + post_id);
+            var likeCounter = parseInt(likeCounterElement.innerText);
+
+            var likeIconSrc = document.getElementById('likeIcon_' + post_id);
+            var likeIconSrcElement = likeIconSrc.src;
+
+
+            if(likeIconSrcElement.endsWith('site/public/img/on-duck-button.svg')){
+                likeIconSrcElement = likeIconSrcElement.replace('on-duck-button.svg', 'off-duck-button.svg');
+                likeCounter=likeCounter-1;
+
+                likeIconSrc.src = likeIconSrcElement; // Update the state
+                likeCounterElement.innerText = likeCounter;
+                
+            }
+            else{
+                likeIconSrcElement = likeIconSrcElement.replace('off-duck-button.svg', 'on-duck-button.svg');
+                likeCounter=likeCounter+1;
+
+                likeIconSrc.src = likeIconSrcElement; // Update the state
+                likeCounterElement.innerText = likeCounter;
+            }
+
+            console.log(likeIconSrcElement)
+        },
+        error: function(err) {
+            console.log(err)
+        },
+    });
 }
 
 

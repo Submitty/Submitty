@@ -614,7 +614,6 @@ class ForumController extends AbstractController {
             else {
                 $type = "post";
             }
-
             $post_author_id = $post['author_user_id'];
             $metadata = json_encode([]);
             $subject = "Deleted: " . Notification::textShortner($post["content"]);
@@ -1243,4 +1242,18 @@ class ForumController extends AbstractController {
         ksort($users);
         $this->core->getOutput()->renderOutput('forum\ForumThread', 'statPage', $users);
     }
+
+    /**
+     * @Route("/courses/{_semester}/{_course}/post/likes", methods={"POST"})
+     */
+    public function toggleLike() {
+        $output= [];
+        $output['type']=$this->core->getQueries()->toggleLikes($_POST['post_id'], $_POST['thread_id'], $_POST['current_user']);
+
+        if($output["type"]===false){
+            return $this->core->getOutput()->renderJsonFail("Catch Fail in Query");
+        }
+        return $this->core->getOutput()->renderJsonSuccess($output);
+    }
+
 }
