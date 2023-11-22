@@ -44,28 +44,14 @@ function adjustRows() {
     const rows = $('.queue_history_row').toArray();
     rows.sort((a, b) => {
         if (localStorage.getItem('sort-indicator') === 'up') {
-            if ($(a).find('.help-started').text()>$(b).find('.help-started').text()) {
-                return -1;
-            }
-            else {
-                return 1;
-            }
+            return $(a).find('.help-started').text() > $(b).find('.help-started').text() ? -1 : 1;
         }
         else if (localStorage.getItem('sort-indicator') === 'down') {
-            if ($(a).find('.help-started').text()>$(b).find('.help-started').text()) {
-                return 1;
-            }
-            else {
-                return -1;
-            }
+            return $(a).find('.help-started').text() > $(b).find('.help-started').text() ? 1 : -1;
+
         }
         else {
-            if (parseInt($(a).find('.number-count').text())<parseInt($(b).find('.number-count').text())) {
-                return -1;
-            }
-            else {
-                return 1;
-            }
+            return parseInt$((a).find('.number-count').text()) < parseInt($(b).find('.number-count').text()) ? -1 : 1;
         }
     });
     $('#queue-history-table').empty();

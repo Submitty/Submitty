@@ -7275,7 +7275,9 @@ AND gc_id IN (
         $this->course_db->query($query, [$this->core->getDateTimeNow()->format('Y-m-d')]);
         return $this->course_db->rows();
     }
+
     public function getPastQueue() {
+        
         $query = "
         SELECT Row_number()
             OVER (ORDER BY time_out DESC, time_in DESC),
