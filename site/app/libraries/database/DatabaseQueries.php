@@ -7277,7 +7277,7 @@ AND gc_id IN (
     }
 
     public function getPastQueue() {
-        
+
         $query = "
         SELECT Row_number()
             OVER (ORDER BY time_out DESC, time_in DESC),
@@ -7323,7 +7323,7 @@ AND gc_id IN (
             AS h1
             ON queue.user_id = h1.uid AND queue.queue_code = h1.qc
             WHERE time_in > ? AND current_state IN ('done')
-            ORDER BY ROW_NUMBER
+            ORDER BY row_number
         ";
         $current_date = $this->core->getDateTimeNow()->format('Y-m-d');
         $this->course_db->query($query, [$current_date, $current_date, $current_date]);
