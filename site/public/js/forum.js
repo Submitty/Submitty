@@ -305,11 +305,11 @@ function socketNewOrEditPostHandler(post_id, reply_level, post_box_id=null, edit
                         if (forum_display_setting === 'reverse-tree') {
                             $(new_post).insertAfter('#current-thread').hide().fadeIn();
                         }
-                        else if (forum_display_setting === 'alpha' || forum_display_setting === 'alpha_by_registration' || forum_display_setting === 'alpha_by_rotating') {
+                        else if (forum_display_setting === 'alpha_by_registration' || forum_display_setting === 'alpha_by_rotating') {
                             $(new_post).insertBefore('#post-hr').hide().fadeIn();
                             displaySuccessMessage('Refresh for correct ordering');
                         }
-                        else {
+                        else if (forum_display_setting === 'tree'){
                             $(new_post).insertBefore('#post-hr').hide().fadeIn();
                         }
                     }
@@ -335,6 +335,32 @@ function socketNewOrEditPostHandler(post_id, reply_level, post_box_id=null, edit
                     original_post.next().remove();
                     original_post.remove();
                 }
+                
+                if(forum_display_setting === 'alpha'){
+                    let postBoxElements = document.querySelectorAll(".post-box, .reply-box");
+                    var postBoxArray = Array.from(postBoxElements);
+
+                    // Sort the array based on the text content of "post_user_id" in each post-box
+                    postBoxArray.sort(function(a, b) {
+                        var userIdA = a.querySelector(".post-action-container .last-edit .post_user_id").textContent;
+                        var userIdB = b.querySelector(".post-action-container .last-edit .post_user_id").textContent;
+
+                        // Use localeCompare for case-insensitive alphabetical sorting
+                        return userIdA.localeCompare(userIdB);
+                    });
+
+                    var currentPostBox = 0;
+                    var nextPostBox = 1
+                    postBoxArray[currentPostBox].insertBefore('#post-hr').hide().fadeIn();
+
+                    for (var i = 0; i < postBoxArray.length - 2; i++) {
+                        currentPostBox = postBoxArray[i];
+                        nextPostBox = postBoxArray[i + 1];
+                    
+                        nextPostBox.insertAfter(currentPostBox).hide().fadeIn();
+                    }
+                }
+
 
                 $(`#${post_id}-reply`).css('display', 'none');
                 $(`#${post_id}-reply`).submit(publishPost);
