@@ -308,6 +308,7 @@ class ForumController extends AbstractController {
      * @AccessControl(permission="forum.publish")
      */
     public function publishThread() {
+        //look here 
         $markdown = !empty($_POST['markdown_status']);
         $current_user_id = $this->core->getUser()->getId();
         $result = [];
@@ -547,6 +548,7 @@ class ForumController extends AbstractController {
         $GLOBALS['post_box_id'] = $_POST['post_box_id'];
         $unviewed_posts = [$post_id];
         $first = $post['parent_id'] == -1;
+
         $result = $this->core->getOutput()->renderTemplate('forum\ForumThread', 'createPost', $thread_id, $post, $unviewed_posts, $first, $reply_level, 'tree', true, true, $this->core->getQueries()->existsAnnouncementsId($thread_id));
         return $this->core->getOutput()->renderJsonSuccess($result);
     }

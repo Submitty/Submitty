@@ -290,6 +290,7 @@ function socketNewOrEditPostHandler(post_id, reply_level, post_box_id=null, edit
         data: {'post_id': post_id, 'reply_level': reply_level, 'post_box_id': post_box_id, 'edit': edit, 'csrf_token': window.csrfToken},
         success: function (response) {
             try {
+
                 const new_post = JSON.parse(response).data;
                 const forum_display_setting = Cookies.get('forum_display_option');
                 if (!edit) {
@@ -337,6 +338,30 @@ function socketNewOrEditPostHandler(post_id, reply_level, post_box_id=null, edit
                 }
                 
                 if(forum_display_setting === 'alpha'){
+                    let postBoxElements = document.querySelectorAll(".post-box, .reply-box");
+                    var postBoxArray = Array.from(postBoxElements);
+
+                    // Sort the array based on the text content of "post_user_id" in each post-box
+                    postBoxArray.sort(function(a, b) {
+                        var userIdA = a.querySelector(".post-action-container .last-edit .post_user_id").textContent;
+                        var userIdB = b.querySelector(".post-action-container .last-edit .post_user_id").textContent;
+
+                        // Use localeCompare for case-insensitive alphabetical sorting
+                        return userIdA.localeCompare(userIdB);
+                    });
+
+                    var currentPostBox = 0;
+                    var nextPostBox = 1
+                    postBoxArray[currentPostBox].insertBefore('#post-hr').hide().fadeIn();
+
+                    for (var i = 0; i < postBoxArray.length - 2; i++) {
+                        currentPostBox = postBoxArray[i];
+                        nextPostBox = postBoxArray[i + 1];
+                    
+                        nextPostBox.insertAfter(currentPostBox).hide().fadeIn();
+                    }
+                }
+                else if(forum_display_setting === 'alpha'){
                     let postBoxElements = document.querySelectorAll(".post-box, .reply-box");
                     var postBoxArray = Array.from(postBoxElements);
 
