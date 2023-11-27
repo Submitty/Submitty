@@ -218,8 +218,8 @@ class ForumThreadView extends AbstractView {
             "cookie_selected_unread_value" => $cookieSelectedUnread,
             "display_option" => $display_option,
             "thread_exists" => $threadExists,
-            "registration_section" => strval($registrationSection),
-            "rotating_section" => strval($rotatingSection)
+            "registration_section" => $registrationSection,
+            "rotating_section" => $rotatingSection
         ];
 
         $next_page = 0;
@@ -294,8 +294,8 @@ class ForumThreadView extends AbstractView {
                 "merge_url" => $this->core->buildCourseUrl(['forum', 'threads', 'merge']),
                 "split_url" => $this->core->buildCourseUrl(['forum', 'posts', 'split']),
                 "post_content_limit" => $post_content_limit,
-                "registration_section" => strval($registrationSection),
-                "rotating_section" => strval($rotatingSection)
+                "registration_section" => $registrationSection,
+                "rotating_section" => $rotatingSection
             ]);
         }
         else {
@@ -323,8 +323,8 @@ class ForumThreadView extends AbstractView {
                 "split_url" => $this->core->buildCourseUrl(['forum', 'posts', 'split']),
                 "post_content_limit" => $post_content_limit,
                 "render_markdown" => $markdown_enabled,
-                "registration_section" => strval($registrationSection),
-                "rotating_section" => strval($rotatingSection)
+                "registration_section" => $generatePostContent["registration_section"],
+                "rotating_section" => $generatePostContent["rotating_section"]
             ]);
 
             $return = $this->core->getOutput()->renderJsonSuccess(["html" => json_encode($return)]);
@@ -466,15 +466,32 @@ class ForumThreadView extends AbstractView {
 
         $author_user_groups_map = [];
 
+        $author_user_registration_map = [];
+
+        $author_user_rotating_map = [];
+
         $author_user_ids = array_map(function ($post) {
             return $post["author_user_id"];
         }, $posts);
 
         $author_user_groups = $this->core->getQueries()->getAuthorUserGroups($author_user_ids);
+        $author_registration_section = $this->core->getQueries()->getAuthorRegistrationSection($author_user_ids);
+        $author_rotating_section = $this->core->getQueries()->getAuthorRotatingSection($author_user_ids);
 
+
+        
         foreach ($author_user_groups as $author) {
             $author_user_groups_map[$author["user_id"]] = $author["user_group"];
         }
+
+        foreach ($author_registration_section as $author) {
+            $author_user_registration_map[$author["user_id"]] = $author["registration_section"];
+        }
+
+        foreach ($author_rotating_section as $author) {
+            $author_user_rotating_map[$author["user_id"]] = $author["rotating_section"];
+        }
+
 
         if ($display_option == "tree") {
             $order_array = [];
@@ -514,8 +531,11 @@ class ForumThreadView extends AbstractView {
                         else {
                             $reply_level = $reply_level_array[$i];
                         }
+                        //hola
 
                         $post["author_user_group"] = $author_user_groups_map[$post["author_user_id"]];
+                        $post["author_registration_section"] = $author_user_registration_map[$post["author_user_id"]];
+                        $post["author_rotating_section"] = $author_user_rotating_map[$post["author_user_id"]];
 
                         $post_data[] = $this->createPost($thread_id, $post, $unviewed_posts, $first, $reply_level, $display_option, $includeReply, false, $thread_announced, $isCurrentFavorite);
 
@@ -537,6 +557,8 @@ class ForumThreadView extends AbstractView {
                 $first_post_id = $this->core->getQueries()->getFirstPostForThread($thread_id)['id'];
 
                 $post["author_user_group"] = $author_user_groups_map[$post["author_user_id"]];
+                $post["author_registration_section"] = $author_user_registration_map[$post["author_user_id"]];
+                $post["author_rotating_section"] = $author_user_rotating_map[$post["author_user_id"]];
 
                 $post_data[] = $this->createPost($thread_id, $post, $unviewed_posts, $first, 1, $display_option, $includeReply, false, $thread_announced, $isCurrentFavorite);
 
@@ -589,7 +611,6 @@ class ForumThreadView extends AbstractView {
         }
 
         $return = "";
-
         if ($render) {
             $return = $this->core->getOutput()->renderTwigTemplate("forum/GeneratePostList.twig", [
                 "userGroup" => $this->core->getUser()->getGroup(),
@@ -612,8 +633,8 @@ class ForumThreadView extends AbstractView {
                 "total_attachments" => $GLOBALS['totalAttachments'],
                 "merge_url" => $this->core->buildCourseUrl(['forum', 'threads', 'merge']),
                 "split_url" => $this->core->buildCourseUrl(['forum', 'posts', 'split']),
-                "registration_section" => strval($registrationSection),
-                "rotating_section" => strval($rotatingSection)
+                "registration_section" => $this->core->getUser()->getRegistrationSection() !== null ? $this->core->getUser()->getRegistrationSection() : 0,
+                "rotating_section" => $this->core->getUser()->getRotatingSection() !== null ? $this->core->getUser()->getRotatingSection() : 0
             ]);
         }
         else {
@@ -636,8 +657,8 @@ class ForumThreadView extends AbstractView {
                 "activeThreadTitle" => $activeThreadTitle,
                 "post_box_id" => $post_box_id,
                 "total_attachments" => $GLOBALS['totalAttachments'],
-                "registration_section" => strval($registrationSection),
-                "rotating_section" => strval($rotatingSection)
+                "registration_section" => $this->core->getUser()->getRegistrationSection() !== null ? $this->core->getUser()->getRegistrationSection() : 0,
+                "rotating_section" => $this->core->getUser()->getRotatingSection() !== null ? $this->core->getUser()->getRotatingSection() : 0
             ];
         }
 
@@ -1005,7 +1026,8 @@ class ForumThreadView extends AbstractView {
         $registrationSection = $this->core->getUser()->getRegistrationSection() !== null ? $this->core->getUser()->getRegistrationSection() : 0;
         $rotatingSection = $this->core->getUser()->getRotatingSection() !== null ? $this->core->getUser()->getRotatingSection() : 0;
 
-        
+        $registrationSection = $post['author_registration_section'];
+        $rotatingSection = $post['author_rotating_section'];
         $post_id = $post["id"];
         $parent_id = $post["parent_id"];
 
@@ -1246,8 +1268,8 @@ class ForumThreadView extends AbstractView {
             "has_history" => $has_history,
             "thread_previously_merged" => $merged_thread,
             "thread_announced" => $thread_announced,
-            "registration_section" => strval($registrationSection),
-            "rotating_section" => strval($rotatingSection)
+            "registration_section" => $registrationSection,
+            "rotating_section" => $rotatingSection
         ];
 
         echo $registrationSection;
