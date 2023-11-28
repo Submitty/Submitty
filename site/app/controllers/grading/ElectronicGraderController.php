@@ -857,7 +857,7 @@ class ElectronicGraderController extends AbstractController {
                     }
                     if (isset($verified_components[$key])) {
                         $sections[$key]['verified_components'] = $verified_components[$key];
-                        $sections[$key]['non_late_verified_components'] = $verified_components[$key];
+                        $sections[$key]['non_late_verified_components'] = $verified_components[$key] - $late_components[$key];
                     }
                     if (isset($graders[$key])) {
                         $sections[$key]['graders'] = $graders[$key];
