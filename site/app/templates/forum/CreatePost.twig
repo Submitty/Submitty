@@ -1,3 +1,7 @@
+{% if userGroup > 1 %}
+    {% set registration_section = "" %}
+    {% set rotating_section = "" %}  
+{% endif %}
 <div class="{{ classes|join(" ") }}" id="{{ post_id }}" style="margin-left:{{ offset }}px;" data-reply_level="{{ reply_level }}" data-parent_id="{{ parent_id }}" data-registration = "{{ registration_section }}" data-rotating = "{{ rotating_section }}">
     {% if first == true %}
         <h2 class="create-post-head">
@@ -118,6 +122,10 @@
 </div>
 
 {% if isThreadLocked != 1 or userAccessFullGrading %}
+    {% if userGroup > 1 %}
+        {% set registration_section = "" %}
+        {% set rotating_section = "" %}  
+    {% endif %}
     <form class="reply-box post_reply_form" id="{{ post_id }}-reply" style="margin-left:{{ offset }}px" method="POST" action="{{ form_post_url }}" enctype="multipart/form-data" data-registration = "{{ registration_section }}" data-rotating = "{{ rotating_section }}">
         <input type="hidden" name="thread_id" value="{{ thread_id }}" />
         <input type="hidden" name="parent_id" value="{{ post_id }}" />

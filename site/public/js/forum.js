@@ -340,69 +340,68 @@ function socketNewOrEditPostHandler(post_id, reply_level, post_box_id=null, edit
                 if (forum_display_settings === 'alpha' || forum_display_settings === 'alpha_by_registration' || forum_display_settings === 'alpha_by_rotating') {
                     let postBoxElements = document.querySelectorAll(".post-box, .reply-box");
                     var postBoxArray = Array.from(postBoxElements);
-                }
 
-                if(forum_display_setting === 'alpha'){
 
-                    // Sort the array based on the text content of "post_user_id" in each post-box
-                    postBoxArray.sort(function(a, b) {
-                        var userIdA = a.querySelector(".post-action-container .last-edit .post_user_id").textContent;
-                        var userIdB = b.querySelector(".post-action-container .last-edit .post_user_id").textContent;
+                    if(forum_display_setting === 'alpha'){
 
-                        // Use localeCompare for case-insensitive alphabetical sorting
-                        return userIdA.localeCompare(userIdB);
-                    });
-                }
-                else if(forum_display_setting === 'alpha_by_registration'){
-                    let postBoxElements = document.querySelectorAll(".post-box, .reply-box");
-                    var postBoxArray = Array.from(postBoxElements);
+                        // Sort the array based on the text content of "post_user_id" in each post-box
+                        postBoxArray.sort(function(a, b) {
+                            var userIdA = a.querySelector(".post-action-container .last-edit .post_user_id").textContent;
+                            var userIdB = b.querySelector(".post-action-container .last-edit .post_user_id").textContent;
 
-                    // Sort the array based on the text content of "post_user_id" in each post-box
-                    postBoxArray.sort(function(a, b) {
-                        var registrationA = parseInt(a.getAttribute('data-registration')) || 0;
-                        var registrationB = parseInt(b.getAttribute('data-registration')) || 0;
-                        
-                        return registrationA - registrationB;
-                    });
-                    
-
-                    var currentPostBox = 0;
-                    var nextPostBox = 1
-                    postBoxArray[currentPostBox].insertBefore('#post-hr').hide().fadeIn();
-
-                    for (var i = 0; i < postBoxArray.length - 2; i++) {
-                        currentPostBox = postBoxArray[i];
-                        nextPostBox = postBoxArray[i + 1];
-                    
-                        nextPostBox.insertAfter(currentPostBox).hide().fadeIn();
+                            // Use localeCompare for case-insensitive alphabetical sorting
+                            return userIdA.localeCompare(userIdB);
+                        });
                     }
-                }
-                else if(forum_display_setting === 'alpha_by_rotating'){
-                    let postBoxElements = document.querySelectorAll(".post-box, .reply-box");
-                    var postBoxArray = Array.from(postBoxElements);
+                    else if(forum_display_setting === 'alpha_by_registration'){
+                        let postBoxElements = document.querySelectorAll(".post-box, .reply-box");
+                        var postBoxArray = Array.from(postBoxElements);
 
-                    // Sort the array based on the text content of "post_user_id" in each post-box
-                    postBoxArray.sort(function(a, b) {
-                        var registrationA = parseInt(a.getAttribute('data-rotation')) || 0;
-                        var registrationB = parseInt(b.getAttribute('data-rotation')) || 0;
+                        // Sort the array based on the text content of "post_user_id" in each post-box
+                        postBoxArray.sort(function(a, b) {
+                            var registrationA = parseInt(a.getAttribute('data-registration')) || 0;
+                            var registrationB = parseInt(b.getAttribute('data-registration')) || 0;
+                            
+                            return registrationA - registrationB;
+                        });
                         
-                        return registrationA - registrationB;
-                    });
-                    
 
-                    var currentPostBox = 0;
-                    var nextPostBox = 1
-                    postBoxArray[currentPostBox].insertBefore('#post-hr').hide().fadeIn();
+                        var currentPostBox = 0;
+                        var nextPostBox = 1
+                        postBoxArray[currentPostBox].insertBefore('#post-hr').hide().fadeIn();
 
-                    for (var i = 0; i < postBoxArray.length - 2; i++) {
-                        currentPostBox = postBoxArray[i];
-                        nextPostBox = postBoxArray[i + 1];
-                    
-                        nextPostBox.insertAfter(currentPostBox).hide().fadeIn();
+                        for (var i = 0; i < postBoxArray.length - 2; i++) {
+                            currentPostBox = postBoxArray[i];
+                            nextPostBox = postBoxArray[i + 1];
+                        
+                            nextPostBox.insertAfter(currentPostBox).hide().fadeIn();
+                        }
                     }
-                }
+                    else if(forum_display_setting === 'alpha_by_rotating'){
+                        let postBoxElements = document.querySelectorAll(".post-box, .reply-box");
+                        var postBoxArray = Array.from(postBoxElements);
 
-                if (forum_display_settings === 'alpha' || forum_display_settings === 'alpha_by_registration' || forum_display_settings === 'alpha_by_rotating') {
+                        // Sort the array based on the text content of "post_user_id" in each post-box
+                        postBoxArray.sort(function(a, b) {
+                            var registrationA = parseInt(a.getAttribute('data-rotation')) || 0;
+                            var registrationB = parseInt(b.getAttribute('data-rotation')) || 0;
+                            
+                            return registrationA - registrationB;
+                        });
+                        
+
+                        var currentPostBox = 0;
+                        var nextPostBox = 1
+                        postBoxArray[currentPostBox].insertBefore('#post-hr').hide().fadeIn();
+
+                        for (var i = 0; i < postBoxArray.length - 2; i++) {
+                            currentPostBox = postBoxArray[i];
+                            nextPostBox = postBoxArray[i + 1];
+                        
+                            nextPostBox.insertAfter(currentPostBox).hide().fadeIn();
+                        }
+                    }
+
                     var currentPostBox = 0;
                     var nextPostBox = 1
                     postBoxArray[currentPostBox].insertBefore('#post-hr').hide().fadeIn();
