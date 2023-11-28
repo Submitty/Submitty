@@ -1272,8 +1272,6 @@ class ForumThreadView extends AbstractView {
             "rotating_section" => $rotatingSection
         ];
 
-        echo $registrationSection;
-        echo $rotatingSection;
 
         if ($render) {
             if ($first) {
