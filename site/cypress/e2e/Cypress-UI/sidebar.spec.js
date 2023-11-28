@@ -64,7 +64,6 @@ function notHaveInstructorSidebars() {
 }
 
 function baseCourseSidebar(user, course) {
-    cy.visit('/');
     cy.login(user);
     cy.visit([course]);
     sidebarContains('Gradeables', `/courses/${currentSemester}/sample`);
