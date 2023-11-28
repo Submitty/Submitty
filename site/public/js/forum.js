@@ -874,19 +874,19 @@ function showEditPostForm(post_id, thread_id, shouldEditThread, render_markdown,
             const change_anon = json.change_anon;
             // eslint-disable-next-line no-undef
             const user_id = escapeSpecialChars(json.user);
-            let time = Date.parse(json.post_time);
-            if (!time) {
+            const validIsoString = json.post_time.replace(' ', 'T');
+            let time = DateTime.fromISO(json.validIsoString, { zone: 'local' });
+            if (!time.isValid) {
                 // Timezone suffix ":00" might be missing
-                time = Date.parse(`${json.post_time}:00`);
+                time = DateTime.fromISO(`${validIsoString}:00`, { zone: 'local' });
             }
-            time = new Date(time);
             const categories_ids = json.categories_ids;
-            const date = time.toLocaleDateString();
-            time = time.toLocaleString('en-US', { hour: 'numeric', minute: 'numeric', hour12: true });
+            const date = time.toLocaleString(DateTime.DATE_SHORT);
+            const timeString = time.toLocaleString(DateTime.TIME_SIMPLE);
             const contentBox = form.find('[name=thread_post_content]')[0];
             contentBox.style.height = lines*14;
             const editUserPrompt = document.getElementById('edit_user_prompt');
-            editUserPrompt.innerHTML = `Editing a post by: ${user_id} on ${date} at ${time}`;
+            editUserPrompt.innerHTML = `Editing a post by: ${user_id} on ${date} at ${timeString}`;
             contentBox.value = post_content;
             document.getElementById('edit_post_id').value = post_id;
             document.getElementById('edit_thread_id').value = thread_id;
@@ -900,9 +900,7 @@ function showEditPostForm(post_id, thread_id, shouldEditThread, render_markdown,
             $('#edit-user-post').css('display', 'block');
             // eslint-disable-next-line no-undef
             captureTabInModal('edit-user-post');
-
             $('.cat-buttons input').prop('checked', false);
-
             if (json.markdown === true) {
                 $('#markdown_input_').val('1');
                 $('#markdown_toggle_').addClass('markdown-active');
@@ -913,7 +911,6 @@ function showEditPostForm(post_id, thread_id, shouldEditThread, render_markdown,
                 $('#markdown_toggle_').removeClass('markdown-active');
                 $('#markdown_buttons_').hide();
             }
-
             // If first post of thread
             if (shouldEditThread) {
                 const thread_title = json.title;
@@ -931,7 +928,6 @@ function showEditPostForm(post_id, thread_id, shouldEditThread, render_markdown,
                     $('.expiration').show();
                 }
                 $('#expirationDate').val(json.expiration);
-
                 // Categories
                 $('.cat-buttons').removeClass('btn-selected');
                 $.each(categories_ids, (index, category_id) => {
