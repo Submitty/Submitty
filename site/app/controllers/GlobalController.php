@@ -475,6 +475,8 @@ class GlobalController extends AbstractController {
 
         switch ($month) {
             case 12:
+                //December (Christmas)
+                $duck_img = 'moorthy_duck/12-december.svg';
                 break;
             case 11:
                 //November (Thanksgiving)
