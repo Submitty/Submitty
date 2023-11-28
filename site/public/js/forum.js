@@ -373,18 +373,6 @@ function socketNewOrEditPostHandler(post_id, reply_level, post_box_id=null, edit
                             
                             return registrationA - registrationB;
                         });
-                        
-
-                        var currentPostBox = 0;
-                        var nextPostBox = 1
-                        postBoxArray[currentPostBox].insertBefore('#post-hr').hide().fadeIn();
-
-                        for (var i = 0; i < postBoxArray.length - 2; i++) {
-                            currentPostBox = postBoxArray[i];
-                            nextPostBox = postBoxArray[i + 1];
-                        
-                            nextPostBox.insertAfter(currentPostBox).hide().fadeIn();
-                        }
                     }
                     else if(forum_display_setting === 'alpha_by_rotating'){
                         let postBoxElements = document.querySelectorAll(".post-box, .reply-box");
@@ -397,10 +385,11 @@ function socketNewOrEditPostHandler(post_id, reply_level, post_box_id=null, edit
                             
                             return registrationA - registrationB;
                         });
-                        
+                    }
 
-                        var currentPostBox = 0;
-                        var nextPostBox = 1
+                    var currentPostBox = 0;
+                    var nextPostBox = 1
+                    if (postBoxArray[currentPostBox] != null) {
                         postBoxArray[currentPostBox].insertBefore('#post-hr').hide().fadeIn();
 
                         for (var i = 0; i < postBoxArray.length - 2; i++) {
@@ -409,17 +398,6 @@ function socketNewOrEditPostHandler(post_id, reply_level, post_box_id=null, edit
                         
                             nextPostBox.insertAfter(currentPostBox).hide().fadeIn();
                         }
-                    }
-
-                    var currentPostBox = 0;
-                    var nextPostBox = 1
-                    postBoxArray[currentPostBox].insertBefore('#post-hr').hide().fadeIn();
-
-                    for (var i = 0; i < postBoxArray.length - 2; i++) {
-                        currentPostBox = postBoxArray[i];
-                        nextPostBox = postBoxArray[i + 1];
-                    
-                        nextPostBox.insertAfter(currentPostBox).hide().fadeIn();
                     }
                 }
                     
