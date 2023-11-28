@@ -145,6 +145,7 @@ class NavigationView extends AbstractView {
 
                 if ($user_seating_details === null ||  filesize($seating_user_path) == 0) {
                     //print error message without breaking (ex ERR: Please contact instructor)
+                    $seating_config = 'empty-case-handling';
                 }
 
                 // if the user seating details have both a building and a room property
