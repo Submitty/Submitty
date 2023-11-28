@@ -1,4 +1,4 @@
-/* global displaySuccessMessage, hjls */
+/* global displaySuccessMessage, hljs */
 /* exported markForDeletion */
 /* exported unMarkForDeletion */
 /* exported  displayHistoryAttachment */
