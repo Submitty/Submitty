@@ -75,10 +75,10 @@ function showBanners() {
 
             bannerElement.addEventListener('animationend', function() {
 
-            if (currentImages.length > 0 ) {
-                document.getElementById('triangle').style.display = 'block';
-                document.getElementById('speech-bubble').style.display = 'block';
-            }
+                if (currentImages.length > 0 ) {
+                    document.getElementById('triangle').style.display = 'block';
+                    document.getElementById('speech-bubble').style.display = 'block';
+                }
 
             }, { once: true });
         }
@@ -88,10 +88,10 @@ function showBanners() {
             images[currentImageIndex].classList.add('active');
         }
     }
-    else { 
+    else {
 
         setCookie('display-banner', 'no');
-        let duckdivElement = document.getElementById('moorthy-duck');
+        const duckdivElement = document.getElementById('moorthy-duck');
         movingUnit.style.animation = 'none';
         duckdivElement.style.animation = 'none';
         if (currentImages.length > 0) {
@@ -103,10 +103,11 @@ function showBanners() {
         }
         if (currentImageIndex < 0) {
             currentImageIndex = images.length - 1;
-        } else if (currentImageIndex >= images.length) {
+        } 
+        else if (currentImageIndex >= images.length) {
             currentImageIndex = 0;
         }
-        
+
 
         duckdivElement.style.transform = 'rotate(0deg)';
         document.getElementById('breadcrumbs').style.flexWrap = 'wrap';
@@ -115,18 +116,18 @@ function showBanners() {
 
         bannerElement.style.width = '1%';
         bannerElement.style.display = 'none';
-        movingUnit.style.left = ''
+        movingUnit.style.left = '';
         movingUnit.style.right = '20%';
 
         if (currentImages.length >0) {
-            let className = currentImages[currentImageIndex].className.split(' ')[1]
+            const className = currentImages[currentImageIndex].className.split(' ')[1];
             hiddenImages.push(className);
             seenImages.push(currentImages[currentImageIndex]);
             currentImages.shift();
         }
         images = currentImages.concat(seenImages);
         setCookie('hiddenImages', JSON.stringify(hiddenImages));
-        if (currentImages.length == 0) {
+        if (currentImages.length === 0) {
 
             bubble.style.display = 'none';
         }
