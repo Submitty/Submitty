@@ -130,7 +130,7 @@ class SimpleGraderController extends AbstractController {
             $sort_key = "coalesce(NULLIF(u.user_preferred_familyname, ''), u.user_familyname)";
         }
         elseif ($sort === "auto") {
-            $sort_key = ;
+            // $sort_key = ;
         }
         else {
             $sort_key = "u.registration_subsection";

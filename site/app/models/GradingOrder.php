@@ -6,6 +6,7 @@ use app\libraries\Core;
 use app\models\gradeable\GradedGradeable;
 use app\models\gradeable\Submitter;
 use app\models\gradeable\Gradeable;
+use app\models\User;
 
 class GradingOrder extends AbstractModel {
     /**
@@ -126,13 +127,14 @@ class GradingOrder extends AbstractModel {
     /**
      * Sort grading order.
      */
-    public function sort($type, $direction, $gradeables) {
-        //Function to turn submitters into "keys" that are sorted (like python's list.sort)
-        $this->core->getQueries()->getGradedGradeablesUserOrTeam([$gradeables], null, null, $type, false);
-        $user_points;
+    public function sort($type, $direction) {
+        //Functizon to turn submitters into "keys" that are sorted (like python's list.sort)
+        // $this->core->getQueries()->getGradedGradeablesUserOrTeam([$gradeables], null, null, $type, false);
+        // $user_points;
         $keyFn = function (Submitter $a) {
             return $a->getId();
         };
+        
 
         switch ($type) {
             case "id":
@@ -166,7 +168,9 @@ class GradingOrder extends AbstractModel {
                         return $a->getId();
                     }
                     else {
-                        return $user_points[$a->user_id()];
+                        $g = $this->gradeable;
+                        $graded_gradeable = $this->core->getQueries()->getGradedGradeable($g, $a->getId());
+                        return $graded_gradeable->getAutoGradedGradeable()->getTotalPoints();
                     }
                 };
                 break;
