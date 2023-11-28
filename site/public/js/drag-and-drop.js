@@ -2,7 +2,7 @@
             handleSubmission, handleRegrade, handleBulk, deleteSplitItem, submitSplitItem, displayPreviousSubmissionOptions
             displaySubmissionMessage, validateUserId, openFile, handle_input_keypress, addFilesFromInput,
             dropWithMultipleZips, initMaxNoFiles, setUsePrevious, readPrevious, createArray, initializeDragAndDrop */
-/* global buildCourseUrl, getFileExtension, csrfToken, removeMessagePopup, newOverwriteCourseMaterialForm, luxon*/
+/* global buildCourseUrl, getFileExtension, csrfToken, newOverwriteCourseMaterialForm*/
 
 /*
 References:
@@ -488,7 +488,6 @@ function validateUserId(csrf_token, gradeable_id, user_id) {
 //@param index used for id
 //function to display pop-up notification after bulk submission/delete
 function displaySubmissionMessage(json) {
-    const DateTime = luxon.DateTime;
     // Generate a unique ID using the current timestamp
     const messageId = `message-${Date.now()}`;
 

@@ -1,10 +1,6 @@
-<<<<<<< HEAD
 /* global displaySuccessMessage */
 /* global luxon */
 /* global hljs */
-=======
-/* global displaySuccessMessage, hljs */
->>>>>>> 9731-new-date-v3
 
 // eslint-disable-next-line no-unused-vars
 function categoriesFormEvents() {
@@ -840,10 +836,7 @@ function modifyOrSplitPost(e) {
 
 // eslint-disable-next-line no-unused-vars
 function showEditPostForm(post_id, thread_id, shouldEditThread, render_markdown, csrf_token) {
-<<<<<<< HEAD
     const DateTime = luxon.DateTime;
-=======
->>>>>>> 9731-new-date-v3
     if (!checkAreYouSureForm()) {
         return;
     }
