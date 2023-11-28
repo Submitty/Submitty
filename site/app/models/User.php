@@ -597,7 +597,16 @@ class User extends AbstractModel {
         }
         return self::LAST_INITIAL_FORMATS[$format];
     }
+    public function getDisplayNameFormat(int $format = -1): string {
+        if ($format <= 0) {
+            $returning = $this->getDisplayedGivenName() . " " . $this->getDisplayedFamilyName();
 
+        }
+        if ($format > 0) {
+            $returning = $this->getDisplayedFamilyName() . " " . $this->getDisplayedGivenName();
+        }
+        return $returning;
+    }
     public function setRegistrationSection($section) {
         $this->registration_section = ($section !== null) ? $section : null;
     }

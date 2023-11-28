@@ -59,6 +59,14 @@
                             <i class="fas fa-pencil-alt"></i> {{ user.getDisplayAbbreviatedName() }}
                         </button>
                     </div>
+                    <div class="flex-row" id="name-order" data-testid="name-order">
+                        <span class="label">
+                            Name Order:
+                        </span>
+                        <button class="icon" tabindex="0" onclick="showUpdateNameOrderForm()" aria-label="Edit user last initial format" title="Edit user last initial format">
+                            <i class="fas fa-pencil-alt"></i> {{ user.getDisplayAbbreviatedName() }}
+                        </button>
+                    </div>
                     <div class="flex-row" id="pronouns-row" data-testid="pronouns-row">
                         <span class="label">
                              {{ localize('My_Profile.Pronouns', "Pronouns" )}}:
@@ -220,6 +228,7 @@
 </div>
 {% include 'EditNameForm.twig' %}
 {% include 'EditLastInitialFormatForm.twig' %}
+{% include 'EditNameOrderForm.twig' %}
 {% include 'EditProfilePhotoForm.twig' %}
 {% include 'EditSecondaryEmailForm.twig' %}
 {% include 'EditPronounsForm.twig' %}

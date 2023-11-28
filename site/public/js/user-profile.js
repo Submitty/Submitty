@@ -26,6 +26,15 @@ function showUpdateLastInitialFormatForm() {
     dropdown.val(dropdown.data().default || 0);
 }
 
+function showUpdateNameOrderForm() {
+    $('.popup-form').css('display', 'none');
+    const form = $('#edit-name-order-format-form');
+    form.css('display', 'block');
+    form.find('.form-body').scrollTop(0);
+    const dropdown = $('#user-last-initial-format-change');
+    dropdown.val(dropdown.data().default || 0);
+}
+
 function showUpdatePronounsForm() {
     $('.popup-form').css('display', 'none');
     const form = $('#edit-pronouns-form');
