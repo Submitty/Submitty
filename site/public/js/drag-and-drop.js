@@ -2,7 +2,7 @@
             handleSubmission, handleRegrade, handleBulk, deleteSplitItem, submitSplitItem, displayPreviousSubmissionOptions
             displaySubmissionMessage, validateUserId, openFile, handle_input_keypress, addFilesFromInput,
             dropWithMultipleZips, initMaxNoFiles, setUsePrevious, readPrevious, createArray, initializeDragAndDrop */
-/* global buildCourseUrl, getFileExtension, csrfToken, removeMessagePopup, newOverwriteCourseMaterialForm*/
+/* global buildCourseUrl, getFileExtension, csrfToken, removeMessagePopup, newOverwriteCourseMaterialForm, luxon*/
 
 /*
 References:
@@ -488,23 +488,36 @@ function validateUserId(csrf_token, gradeable_id, user_id) {
 //@param index used for id
 //function to display pop-up notification after bulk submission/delete
 function displaySubmissionMessage(json) {
-    //let the id be the date to prevent closing the wrong message
-    const d = new Date();
-    const t = String(d.getTime());
+    const DateTime = luxon.DateTime;
+    // Generate a unique ID using the current timestamp
+    const messageId = `message-${Date.now()}`;
 
-    const class_str = `class="inner-message alert ${json['status'] === 'success' ? 'alert-success' : 'alert-error'}"` ;
-    const close_btn = `<a class="fas fa-times message-close" onclick="removeMessagePopup(${t});"></a>`;
-    const fa_icon = `<i class="${json['status'] === 'success' ? 'fas fa-check-circle' : 'fas fa-times-circle'}"></i>`;
-    const response = (json['status'] === 'success' ? json['data'] : json['message'] );
+    // Determine class based on the status
+    const statusClass = json.status === 'success' ? 'alert-success' : 'alert-error';
 
-    const message = `<div id="${t}"${class_str}>${fa_icon}${response}${close_btn}</div>`;
-    $('#messages').append(message);
+    // Construct the message HTML
+    const faIconClass = json.status === 'success' ? 'fa-check-circle' : 'fa-times-circle';
+    const responseContent = json.status === 'success' ? json.data : json.message;
+    const messageHTML = `
+        <div id="${messageId}" class="inner-message alert ${statusClass}">
+            <i class="fas ${faIconClass}"></i>
+            ${responseContent}
+            <a class="fas fa-times message-close" onclick="removeMessagePopup('${messageId}');"></a>
+        </div>
+    `;
 
-    if (json['status'] === 'success') {
-        setTimeout(() => {
-            removeMessagePopup(t);
-        }, 5000);
+    // Append the message to the DOM
+    $('#messages').append(messageHTML);
+
+    // Automatically close success messages after 5 seconds
+    if (json.status === 'success') {
+        setTimeout(() => removeMessagePopup(messageId), 5000);
     }
+}
+
+function removeMessagePopup(messageId) {
+    // Remove the message with the provided ID
+    $(`#${messageId}`).remove();
 }
 
 //@param callback to function when user selects an option
