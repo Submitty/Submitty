@@ -116,7 +116,7 @@ class WebRouter {
     public static function getApiResponse(Request $request, Core $core) {
         try {
             $router = new self($request, $core);
-    
+
             // Check if loadCourse returns true
             if (!$router->loadCourse()) {
                 // If loadCourse returns false, return an error response
@@ -124,36 +124,36 @@ class WebRouter {
                     JsonResponse::getFailResponse("Failed to load course.")
                 );
             }
-    
+
             $logged_in = $core->isApiLoggedIn($request);
-    
+
             // Prevent user that is not logged in from going anywhere except AuthenticationController
             if (!$logged_in && !str_ends_with($router->parameters['_controller'], 'AuthenticationController')) {
                 return new MultiResponse(JsonResponse::getFailResponse("Unauthenticated access. Please log in."));
             }
-    
+
             if ($logged_in && !$core->getUser()->accessFaculty()) {
                 return new MultiResponse(JsonResponse::getFailResponse("API is open to faculty only."));
             }
-    
+
             /** @noinspection PhpUnhandledExceptionInspection */
             if (!$router->accessCheck()) {
                 return MultiResponse::JsonOnlyResponse(
                     JsonResponse::getFailResponse("You don't have access to this endpoint.")
                 );
             }
-    
+
             $enabled = $router->getEnabled();
             if ($enabled !== null && !$router->checkEnabled($enabled)) {
                 return JsonResponse::getFailResponse("The {$enabled->getFeature()} feature is not enabled.");
             }
-    
+
             if (!$router->checkFeatureFlag()) {
                 return MultiResponse::JsonOnlyResponse(
                     JsonResponse::getFailResponse('Feature is not yet available.')
                 );
             }
-    
+
             $check_post_max_size = $router->checkPostMaxSize($request);
             if ($check_post_max_size instanceof MultiResponse) {
                 return $check_post_max_size;
@@ -168,12 +168,12 @@ class WebRouter {
         catch (\Exception $e) {
             return new MultiResponse(JsonResponse::getErrorResponse($e->getMessage()));
         }
-    
+
         $core->getOutput()->disableRender();
         $core->disableRedirects();
         return $router->run();
     }
-    
+
 
     /**
      * @param Request $request
@@ -185,7 +185,7 @@ class WebRouter {
         $logged_in = false;
         try {
             $router = new self($request, $core);
-    
+
             // Check if loadCourse returns true
             if (!$router->loadCourse()) {
                 // If loadCourse returns false, redirect to home page
@@ -193,24 +193,24 @@ class WebRouter {
                     new RedirectResponse($core->buildUrl(['home']))
                 );
             }
-    
+
             $logged_in = $core->isWebLoggedIn();
-    
+
             $login_check_response = $router->loginRedirectCheck($logged_in);
             if ($login_check_response instanceof MultiResponse || $login_check_response instanceof WebResponse) {
                 return $login_check_response;
             }
-    
+
             $check_post_max_size = $router->checkPostMaxSize($request);
             if ($check_post_max_size instanceof MultiResponse) {
                 return $check_post_max_size;
             }
-    
+
             $csrf_check_response = $router->csrfCheck();
             if ($csrf_check_response instanceof MultiResponse || $login_check_response instanceof WebResponse) {
                 return $csrf_check_response;
             }
-    
+
             /** @noinspection PhpUnhandledExceptionInspection */
             if (!$router->accessCheck()) {
                 return new MultiResponse(
@@ -218,7 +218,7 @@ class WebRouter {
                     new WebResponse("Error", "errorPage", "You don't have access to this page.")
                 );
             }
-    
+
             $enabled = $router->getEnabled();
             if ($enabled !== null && !$router->checkEnabled($enabled)) {
                 $errorString = "The {$enabled->getFeature()} feature is not enabled.";
@@ -227,7 +227,7 @@ class WebRouter {
                     new WebResponse("Error", "courseErrorPage", $errorString)
                 );
             }
-    
+
             if (!$router->checkFeatureFlag()) {
                 return new MultiResponse(
                     JsonResponse::getFailResponse('Feature is not yet available.'),
@@ -241,16 +241,17 @@ class WebRouter {
                 return MultiResponse::RedirectOnlyResponse(
                     new RedirectResponse($core->buildUrl(['authentication', 'login']))
                 );
-            } else {
+            } 
+            else {
                 return MultiResponse::RedirectOnlyResponse(
                     new RedirectResponse($core->buildUrl(['home']))
                 );
             }
         }
-    
+
         return $router->run();
     }
-    
+
 
     private function run() {
         $this->controller_name = $this->parameters['_controller'];
@@ -283,11 +284,11 @@ class WebRouter {
         if (array_key_exists('_semester', $this->parameters) && array_key_exists('_course', $this->parameters)) {
             $semester = $this->parameters['_semester'];
             $course = $this->parameters['_course'];
-    
+
             // Load the course configuration
             $this->core->loadCourseConfig($semester, $course);
             $this->core->loadGradingQueue();
-    
+
             // Check if the course is successfully loaded
             if ($this->core->getConfig()->isCourseLoaded()) {
                 $this->core->getOutput()->addBreadcrumb(
@@ -295,20 +296,21 @@ class WebRouter {
                     $this->core->buildCourseUrl(),
                     $this->core->getConfig()->getCourseHomeUrl()
                 );
-    
+
                 // Load other course-related configurations
                 $this->core->loadCourseDatabase();
-    
+
                 return true;
-            } else {
+            } 
+            else {
                 return false;
             }
         }
-    
+
         return true;
     }
-    
-    
+
+
 
     /**
      * Check if the user needs a redirection depending on their login status.
