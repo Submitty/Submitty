@@ -2,7 +2,7 @@
 -- Name: grab_late_day_gradeables_for_user(text); Type: FUNCTION; Schema: public; Owner: -
 --
 
-CREATE FUNCTION public.grab_late_day_gradeables_for_user(user_id text) RETURNS SETOF public.late_day_cache
+CREATE OR REPLACE FUNCTION public.grab_late_day_gradeables_for_user(user_id text) RETURNS SETOF public.late_day_cache
     LANGUAGE plpgsql
     AS $$
     #variable_conflict use_variable
