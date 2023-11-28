@@ -10,7 +10,7 @@ $(function() {
     currentImageIndex = 0;
     hiddenImages = getHiddenImages();
     seenImages = [];
-    images = document.getElementsByClassName('club-banners'); 
+    images = document.getElementsByClassName('club-banners');
     bannerElement = document.getElementById('banner');
     bannerElement.style.display = 'none';
     bannerElement.style.width = '1%';
@@ -40,46 +40,48 @@ $(function() {
     images = currentImages.concat(seenImages);
 
 
-    if (getCookie('display-banner') === 'yes') showBanners();
+    if (getCookie('display-banner') === 'yes') {
+        showBanners();
+    }
 });
 function showBanners() {
 
-    let movingUnit = document.getElementById('moving-unit');
-    let bannerElement = document.getElementById('banner');
+    const movingUnit = document.getElementById('moving-unit');
+    const bannerElement = document.getElementById('banner');
     if (bannerElement.style.display === 'none') {
-        setCookie('display-banner', "yes");
+        setCookie('display-banner', 'yes');
 
-        document.getElementById("breadcrumbs").style.flexWrap = "inherit";
+        document.getElementById('breadcrumbs').style.flexWrap = 'inherit';
 
         if (currentImages.length > 0) {
-            images[0].classList.add("active");
+            images[0].classList.add('active');
 
-            let duckdivElement = document.getElementById("moorthy-duck");
-            let wholeBannerElement = document.getElementById("banner");
-            duckdivElement.style.animation = "rocking 2s linear infinite";
+            let duckdivElement = document.getElementById('moorthy-duck');
+            let wholeBannerElement = document.getElementById('banner');
+            duckdivElement.style.animation = 'rocking 2s linear infinite';
             setTimeout(function() {
-                bannerElement.style.width = "100%";
-                bannerElement.style.display = "block";
-                movingUnit.style.left = "10%";
-                movingUnit.style.animation = "slide 2s linear forwards";
+                bannerElement.style.width = '100%';
+                bannerElement.style.display = 'block';
+                movingUnit.style.left = '10%';
+                movingUnit.style.animation = 'slide 2s linear forwards';
             }, 500);
-            document.getElementById("triangle").style.display = "none";
-            document.getElementById("speech-bubble").style.display = "none";
+            document.getElementById('triangle').style.display = 'none';
+            document.getElementById('speech-bubble').style.display = 'none';
         
 
-            bannerElement.addEventListener("animationend", function() {
+            bannerElement.addEventListener('animationend', function() {
 
             if (currentImages.length > 0 ) {
-                document.getElementById("triangle").style.display = "block";
-                document.getElementById("speech-bubble").style.display = "block";
+                document.getElementById('triangle').style.display = 'block';
+                document.getElementById('speech-bubble').style.display = 'block';
             }
 
                         }, { once: true });
         }
         else {
-            bannerElement.style.width = "100%";
-            bannerElement.style.display = "block";
-            images[currentImageIndex].classList.add("active");
+            bannerElement.style.width = '100%';
+            bannerElement.style.display = 'block';
+            images[currentImageIndex].classList.add('active');
 
         }
     }
