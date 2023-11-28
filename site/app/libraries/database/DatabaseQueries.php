@@ -179,7 +179,7 @@ class DatabaseQueries {
     }
 
     public function getGrading($u_or_t, $section_key, $users_or_teams, $user_or_team_id, $verified, $where): ?string {
-        $query = "
+        return "
         SELECT {$u_or_t}.{$section_key}, count({$u_or_t}.*) as cnt
         FROM {$users_or_teams} AS {$u_or_t}
         INNER JOIN (
@@ -193,7 +193,6 @@ class DatabaseQueries {
         {$where}
         GROUP BY {$u_or_t}.{$section_key}
         ORDER BY {$u_or_t}.{$section_key}";
-        return $query;
     }
 
     /**
