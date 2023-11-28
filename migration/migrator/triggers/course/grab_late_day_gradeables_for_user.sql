@@ -1,21 +1,8 @@
-"""Migration for a given Submitty course database."""
+--
+-- Name: grab_late_day_gradeables_for_user(text); Type: FUNCTION; Schema: public; Owner: -
+--
 
-
-def up(config, database, semester, course):
-    """
-    Run up migration.
-
-    :param config: Object holding configuration details about Submitty
-    :type config: migrator.config.Config
-    :param database: Object for interacting with given database for environment
-    :type database: migrator.db.Database
-    :param semester: Semester of the course being migrated
-    :type semester: str
-    :param course: Code of course being migrated
-    :type course: str
-    """
-    database.execute("""
-    CREATE OR REPLACE FUNCTION public.grab_late_day_gradeables_for_user(user_id text) RETURNS SETOF public.late_day_cache
+CREATE OR REPLACE FUNCTION public.grab_late_day_gradeables_for_user(user_id text) RETURNS SETOF public.late_day_cache
     LANGUAGE plpgsql
     AS $$
     #variable_conflict use_variable
@@ -92,20 +79,3 @@ def up(config, database, semester, course):
         RETURN;	
     END;
     $$;
-    """)
-
-
-def down(config, database, semester, course):
-    """
-    Run down migration (rollback).
-
-    :param config: Object holding configuration details about Submitty
-    :type config: migrator.config.Config
-    :param database: Object for interacting with given database for environment
-    :type database: migrator.db.Database
-    :param semester: Semester of the course being migrated
-    :type semester: str
-    :param course: Code of course being migrated
-    :type course: str
-    """
-    pass
