@@ -1,5 +1,4 @@
-/* global displaySuccessMessage */
-/* global luxon */
+/* global displaySuccessMessage, hljs */
 
 // eslint-disable-next-line no-unused-vars
 function categoriesFormEvents() {
@@ -346,6 +345,7 @@ function socketNewOrEditPostHandler(post_id, reply_level, post_box_id=null, edit
                 // eslint-disable-next-line no-undef
                 file_array[post_box_id] = [];
                 uploadImageAttachments(`#${post_id}-reply .upload_attachment_box`);
+                hljs.highlightAll();
 
             }
             catch (error) {
@@ -834,8 +834,6 @@ function modifyOrSplitPost(e) {
 
 // eslint-disable-next-line no-unused-vars
 function showEditPostForm(post_id, thread_id, shouldEditThread, render_markdown, csrf_token) {
-    console.log("EHREH");
-    const DateTime = luxon.DateTime;
     if (!checkAreYouSureForm()) {
         return;
     }
@@ -873,19 +871,19 @@ function showEditPostForm(post_id, thread_id, shouldEditThread, render_markdown,
             const change_anon = json.change_anon;
             // eslint-disable-next-line no-undef
             const user_id = escapeSpecialChars(json.user);
-            const validIsoString = json.post_time.replace(' ', 'T');
-            let time = DateTime.fromISO(json.validIsoString, { zone: 'local' });
-            if (!time.isValid) {
+            let time = Date.parse(json.post_time);
+            if (!time) {
                 // Timezone suffix ":00" might be missing
-                time = DateTime.fromISO(`${validIsoString}:00`, { zone: 'local' });
+                time = Date.parse(`${json.post_time}:00`);
             }
+            time = new Date(time);
             const categories_ids = json.categories_ids;
-            const date = time.toLocaleString(DateTime.DATE_SHORT);
-            const timeString = time.toLocaleString(DateTime.TIME_SIMPLE);
+            const date = time.toLocaleDateString();
+            time = time.toLocaleString('en-US', { hour: 'numeric', minute: 'numeric', hour12: true });
             const contentBox = form.find('[name=thread_post_content]')[0];
             contentBox.style.height = lines*14;
             const editUserPrompt = document.getElementById('edit_user_prompt');
-            editUserPrompt.innerHTML = `Editing a post by: ${user_id} on ${date} at ${timeString}`;
+            editUserPrompt.innerHTML = `Editing a post by: ${user_id} on ${date} at ${time}`;
             contentBox.value = post_content;
             document.getElementById('edit_post_id').value = post_id;
             document.getElementById('edit_thread_id').value = thread_id;
@@ -2019,6 +2017,7 @@ function loadThreadHandler() {
                 saveScrollLocationOnRefresh('posts_list');
 
                 $('.post_reply_form').submit(publishPost);
+                hljs.highlightAll();
             },
             error: function() {
                 window.alert('Something went wrong while trying to display thread details. Please try again.');
