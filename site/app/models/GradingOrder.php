@@ -126,8 +126,10 @@ class GradingOrder extends AbstractModel {
     /**
      * Sort grading order.
      */
-    public function sort($type, $direction) {
+    public function sort($type, $direction, $gradeables) {
         //Function to turn submitters into "keys" that are sorted (like python's list.sort)
+        $this->core->getQueries()->getGradedGradeablesUserOrTeam([$gradeables], null, null, $type, false);
+        $user_points;
         $keyFn = function (Submitter $a) {
             return $a->getId();
         };
@@ -164,7 +166,7 @@ class GradingOrder extends AbstractModel {
                         return $a->getId();
                     }
                     else {
-                        return $a->getUser().getAutoGradedGradeable().getTotalPoints();
+                        return $user_points[$a->user_id()];
                     }
                 };
                 break;
