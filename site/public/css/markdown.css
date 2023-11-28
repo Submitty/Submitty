@@ -88,6 +88,11 @@
     overflow-x: scroll;
 }
 
+.markdown code.inline-code {
+    border-radius: 4px;
+    padding: 0.2rem;
+}
+
 .markdown th,
 .markdown td {
     border: 1px solid var(--standard-light-gray);
