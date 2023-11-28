@@ -3726,6 +3726,11 @@ parameters:
 			path: app/libraries/CustomCodeBlockRenderer.php
 
 		-
+			message: "#^Call to an undefined method Stringable\\:\\:getContents\\(\\)\\.$#"
+			count: 1
+			path: app/libraries/CustomCodeInlineRenderer.php
+
+		-
 			message: "#^Parameter \\#1 \\$node of method League\\\\CommonMark\\\\Extension\\\\CommonMark\\\\Renderer\\\\Inline\\\\CodeRenderer\\:\\:render\\(\\) expects League\\\\CommonMark\\\\Extension\\\\CommonMark\\\\Node\\\\Inline\\\\Code, League\\\\CommonMark\\\\Node\\\\Node given\\.$#"
 			count: 1
 			path: app/libraries/CustomCodeInlineRenderer.php
@@ -4366,16 +4371,6 @@ parameters:
 			path: app/libraries/Output.php
 
 		-
-			message: "#^Instantiated class Submitty\\\\Twig\\\\Extension\\\\MarkdownExtension not found\\.$#"
-			count: 1
-			path: app/libraries/Output.php
-
-		-
-			message: "#^Instantiated class Submitty\\\\Twig\\\\Extension\\\\PHPLeagueMarkdownEngine not found\\.$#"
-			count: 1
-			path: app/libraries/Output.php
-
-		-
 			message: "#^Method app\\\\libraries\\\\Output\\:\\:addBreadcrumb\\(\\) has no return type specified\\.$#"
 			count: 1
 			path: app/libraries/Output.php
@@ -4667,11 +4662,6 @@ parameters:
 
 		-
 			message: "#^Only booleans are allowed in an if condition, string\\|null given\\.$#"
-			count: 1
-			path: app/libraries/Output.php
-
-		-
-			message: "#^Parameter \\#1 \\$extension of method Twig\\\\Environment\\:\\:addExtension\\(\\) expects Twig\\\\Extension\\\\ExtensionInterface, Submitty\\\\Twig\\\\Extension\\\\MarkdownExtension given\\.$#"
 			count: 1
 			path: app/libraries/Output.php
 
