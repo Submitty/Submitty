@@ -5,7 +5,7 @@ namespace app\repositories\banner;
 use app\entities\banner\BannerImage;
 use Doctrine\ORM\EntityRepository;
 
-/** 
+/**
  * @template-extends EntityRepository<BannerImage>
  */
 class BannerImageRepository extends EntityRepository {

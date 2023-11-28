@@ -192,7 +192,7 @@ class BannerController extends AbstractController {
         $entity_manager->remove($event_item);
         $entity_manager->flush();
 
-        $upload_path=  FileUtils::joinPaths($this->core->getConfig()->getSubmittyPath(), "community_events");
+        $upload_path =  FileUtils::joinPaths($this->core->getConfig()->getSubmittyPath(), "community_events");
 
         $folder_name = $_POST['path'];
         $event_name = $_POST['name'];
