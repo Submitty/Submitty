@@ -154,12 +154,12 @@ function changeImage(n) {
     if (currentImageIndex < currentImages.length) {
         console.log('index');
         console.log(currentImageIndex);
-        let className = currentImages[originalIndex].className.split(' ')[1]
+        const className = currentImages[originalIndex].className.split(' ')[1];
         hiddenImages.push(className);
         seenImages.push(currentImages[originalIndex]);
         currentImages.shift();
         images = currentImages.concat(seenImages);
-        setCookie('hiddenImages', JSON.stringify(hiddenImages));  
+        setCookie('hiddenImages', JSON.stringify(hiddenImages));
         currentImageIndex --;
 
     }
@@ -167,7 +167,8 @@ function changeImage(n) {
 
     if (currentImageIndex < 0) {
         currentImageIndex = images.length - 1;
-    } else if (currentImageIndex >= images.length) {
+    }
+    else if (currentImageIndex >= images.length) {
         currentImageIndex = 0;
     }
 
@@ -179,19 +180,19 @@ function changeImage(n) {
 
 
 function getHiddenImages() {
-    let hiddenImagesCookie = getCookie('hiddenImages');
+    const hiddenImagesCookie = getCookie('hiddenImages');
     return hiddenImagesCookie ? JSON.parse(hiddenImagesCookie) : [];
 }
 
 function setCookie(name, value) {
-    let date = new Date();
-    date.setFullYear(date.getFullYear() + 100); 
+    const date = new Date();
+    date.setFullYear(date.getFullYear() + 100);
     document.cookie = name + '=' + (value || '') + '; path=/';
 }
 
 function getCookie(name) {
-    let nameEQ = name + '=';
-    let cookies = document.cookie.split(';');
+    const nameEQ = `${name}=`;
+    const cookies = document.cookie.split(';');
     for (let i = 0; i < cookies.length; i++) {
         let cookie = cookies[i];
         while (cookie.charAt(0) === ' ') {
