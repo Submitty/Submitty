@@ -1,23 +1,5 @@
-function imageSelectionUpdate(checked) {
-    if (checked === true) {
-        $('#extra_name').show();
-
-    }
-    else {
-        $('#extra_name').show();
-    }
-}
-
-function urlSelectionUpdate(checked) {
-    if (checkred === true) {
-        $('#url_link_address').show();
-
-    }
-    else {
-        $('#url_link_address').hide();
-    }
-}  
-
+/* exported deleteBannerImage, handleUploadBanner */
+/* global buildUrl, csrfToken*/
 
 
 /**

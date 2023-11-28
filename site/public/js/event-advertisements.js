@@ -1,7 +1,7 @@
 let currentImageIndex = 0;
 let hiddenImages = undefined;
 let seenImages = undefined;
-let images = undefined; 
+let images = undefined;
 let bannerElement = undefined;
 let bubble  = undefined;
 let currentImages = [];
@@ -13,12 +13,12 @@ $(function() {
     images = document.getElementsByClassName('club-banners'); 
     bannerElement = document.getElementById('banner');
     bannerElement.style.display = 'none';
-    bannerElement.style.width = "1%";
+    bannerElement.style.width = '1%';
 
 
 
     for (let i = 0; i < images.length; i++) {
-        let className = images[i].className.split(' ')[1];
+        const className = images[i].className.split(' ')[1];
         if (!hiddenImages.includes(className)) {
             currentImages.push(images[i]);
         }
@@ -27,26 +27,26 @@ $(function() {
         }
     }
 
-    bubble = document.getElementById("speech-bubble-container");
-    if (bubble != null) {
-        if (currentImages.length == 0) {
+    bubble = document.getElementById('speech-bubble-container');
+    if (bubble !== null) {
+        if (currentImages.length === 0) {
 
-            bubble.style.display = "none";
+            bubble.style.display = 'none';
         }
         else {
-            bubble.style.display = "block";
+            bubble.style.display = 'block';
         }
     }
     images = currentImages.concat(seenImages);
 
 
-    if (getCookie("display-banner") === "yes") showBanners();
+    if (getCookie('display-banner') === 'yes') showBanners();
 });
 function showBanners() {
 
-    let movingUnit = document.getElementById("moving-unit");
-    let bannerElement = document.getElementById("banner");
-    if (bannerElement.style.display === "none") {
+    let movingUnit = document.getElementById('moving-unit');
+    let bannerElement = document.getElementById('banner');
+    if (bannerElement.style.display === 'none') {
         setCookie('display-banner', "yes");
 
         document.getElementById("breadcrumbs").style.flexWrap = "inherit";
@@ -85,13 +85,13 @@ function showBanners() {
     }
     else { 
 
-        setCookie('display-banner', "no");
-        let duckdivElement = document.getElementById("moorthy-duck");
-        movingUnit.style.animation = "none";
-        duckdivElement.style.animation = "none";
+        setCookie('display-banner', 'no');
+        let duckdivElement = document.getElementById('moorthy-duck');
+        movingUnit.style.animation = 'none';
+        duckdivElement.style.animation = 'none';
         if (currentImages.length > 0) {
-            document.getElementById("triangle").style.display = "block";
-            document.getElementById("speech-bubble").style.display = "block";
+            document.getElementById('triangle').style.display = 'block';
+            document.getElementById('speech-bubble').style.display = 'block';
         }
         else {
             currentImageIndex ++;
@@ -103,15 +103,15 @@ function showBanners() {
         }
         
 
-        duckdivElement.style.transform = "rotate(0deg)";
-        document.getElementById("breadcrumbs").style.flexWrap = "wrap";
-        images[currentImageIndex].classList.remove("active");
+        duckdivElement.style.transform = 'rotate(0deg)';
+        document.getElementById('breadcrumbs').style.flexWrap = 'wrap';
+        images[currentImageIndex].classList.remove('active');
 
 
-        bannerElement.style.width = "1%";
-        bannerElement.style.display = "none";
-        movingUnit.style.left = ""
-        movingUnit.style.right = "20%";
+        bannerElement.style.width = '1%';
+        bannerElement.style.display = 'none';
+        movingUnit.style.left = ''
+        movingUnit.style.right = '20%';
 
         if (currentImages.length >0) {
             let className = currentImages[currentImageIndex].className.split(' ')[1]
@@ -123,10 +123,10 @@ function showBanners() {
         setCookie('hiddenImages', JSON.stringify(hiddenImages));
         if (currentImages.length == 0) {
 
-            bubble.style.display = "none";
+            bubble.style.display = 'none';
         }
         else {
-            bubble.style.display = "block";
+            bubble.style.display = 'block';
         }
 
 
@@ -139,14 +139,14 @@ function changeImage(n) {
     let originalIndex = currentImageIndex;
 
     if (currentImageIndex < 0 || currentImageIndex >= images.length) {
-        console.log("Issue of index");
+        console.log('Issue of index');
         return;
     }
 
 
-    images[currentImageIndex].classList.remove("active");
+    images[currentImageIndex].classList.remove('active');
     if (currentImageIndex < currentImages.length) {
-        console.log("index");
+        console.log('index');
         console.log(currentImageIndex);
         let className = currentImages[originalIndex].className.split(' ')[1]
         hiddenImages.push(className);
@@ -165,7 +165,7 @@ function changeImage(n) {
         currentImageIndex = 0;
     }
 
-    images[currentImageIndex].classList.add("active");
+    images[currentImageIndex].classList.add('active');
 
 }
 
