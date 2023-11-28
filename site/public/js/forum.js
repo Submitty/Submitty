@@ -1256,14 +1256,15 @@ function toggleLike(postId) {
     var likeCounter = document.getElementById('likeCounter_' + postId);
     //var likeToggle = document.getElementById('likeToggle'+postId);
     //console.log(likeCounter);
-
-    if (likeIcon.src.endsWith('site/public/img/off-duck-button.svg')) {
+    console.log("HEREH", likeIcon.src);
+    /*
+    if (likeIcon.src.endsWith('../img/off-duck-button.svg')) {
         likeIcon.src = '../img/on-duck-button.svg';
         likeCounter.textContent = parseInt(likeCounter.textContent) + 1;
     } else {
         likeIcon.src = '../img/off-duck-button.svg';
         likeCounter.textContent = parseInt(likeCounter.textContent) - 1;
-    }
+    }*/
 }
 
 
