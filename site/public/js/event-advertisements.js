@@ -187,7 +187,7 @@ function getHiddenImages() {
 function setCookie(name, value) {
     const date = new Date();
     date.setFullYear(date.getFullYear() + 100);
-    document.cookie = name + '=' + (value || '') + '; path=/';
+    document.cookie = `${name}=${value || ''}; path=/`;
 }
 
 function getCookie(name) {
