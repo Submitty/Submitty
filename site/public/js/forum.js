@@ -1258,10 +1258,10 @@ function toggleLike(postId) {
     //console.log(likeCounter);
 
     if (likeIcon.src.endsWith('site/public/img/off-duck-button.svg')) {
-        likeIcon.src = 'site/public/img/on-duck-button.svg';
+        likeIcon.src = '../img/on-duck-button.svg';
         likeCounter.textContent = parseInt(likeCounter.textContent) + 1;
     } else {
-        likeIcon.src = 'site/public/img/off-duck-button.svg';
+        likeIcon.src = '../img/off-duck-button.svg';
         likeCounter.textContent = parseInt(likeCounter.textContent) - 1;
     }
 }
