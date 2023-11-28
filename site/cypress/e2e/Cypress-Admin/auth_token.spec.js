@@ -2,7 +2,6 @@ import {getCurrentSemester} from '../../support/utils';
 
 describe('Test cases revolving around authentication tokens', () => {
     beforeEach(() => {
-        cy.visit('/');
         cy.login();
         cy.visit('/authentication_tokens');
     });
