@@ -337,7 +337,7 @@ function socketNewOrEditPostHandler(post_id, reply_level, post_box_id=null, edit
                     original_post.remove();
                 }
     
-                if (forum_display_settings === 'alpha' || forum_display_settings === 'alpha_by_registration' || forum_display_settings === 'alpha_by_rotating') {
+                if (forum_display_setting === 'alpha' || forum_display_setting === 'alpha_by_registration' || forum_display_setting === 'alpha_by_rotating') {
                     let postBoxElements = document.querySelectorAll(".post-box, .reply-box");
                     var postBoxArray = Array.from(postBoxElements);
 
@@ -346,8 +346,17 @@ function socketNewOrEditPostHandler(post_id, reply_level, post_box_id=null, edit
 
                         // Sort the array based on the text content of "post_user_id" in each post-box
                         postBoxArray.sort(function(a, b) {
-                            var userIdA = a.querySelector(".post-action-container .last-edit .post_user_id").textContent;
-                            var userIdB = b.querySelector(".post-action-container .last-edit .post_user_id").textContent;
+                            var queryA = a.querySelector(".post-action-container .last-edit .post_user_id");
+
+                            var userIdA = "z";
+                            if (queryA != null)
+                                userIdA = queryA.textContent;
+                            var userIdB = "z";
+                            
+                            var queryB = b.querySelector(".post-action-container .last-edit .post_user_id");
+
+                            if (queryB != null)
+                                userIdB = queryB.textContent;
 
                             // Use localeCompare for case-insensitive alphabetical sorting
                             return userIdA.localeCompare(userIdB);
@@ -428,6 +437,8 @@ function socketNewOrEditPostHandler(post_id, reply_level, post_box_id=null, edit
 
             }
             catch (error) {
+                console.log(error);
+                console.log(response);
                 // eslint-disable-next-line no-undef
                 displayErrorMessage('Error parsing new post. Please refresh the page.');
             }

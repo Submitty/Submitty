@@ -538,17 +538,25 @@ class ForumController extends AbstractController {
      */
     public function getSinglePost() {
         $post_id = $_POST['post_id'];
+        $user_list = ["abernl"];
+        #$registration = $this->core->getQueries()->getAuthorRegistrationSection($user_list)[0];
+        #$rotating = $this->core->getQueries()->getAuthorRotatingSection($user_list)[0];
+
+        $registration = "0";
+        $rotating = "0";
         $reply_level = $_POST['reply_level'];
         $post = $this->core->getQueries()->getPost($post_id);
         if (($_POST['edit']) && !empty($this->core->getQueries()->getPostHistory($post_id))) {
             $post['edit_timestamp'] = $this->core->getQueries()->getPostHistory($post_id)[0]['edit_timestamp'];
         }
+
+        $post['author_registration_section'] = $registration;
+        $post['author_rotating_section'] = $rotating;
         $thread_id = $post['thread_id'];
         $GLOBALS['totalAttachments'] = 0;
         $GLOBALS['post_box_id'] = $_POST['post_box_id'];
         $unviewed_posts = [$post_id];
         $first = $post['parent_id'] == -1;
-
         $result = $this->core->getOutput()->renderTemplate('forum\ForumThread', 'createPost', $thread_id, $post, $unviewed_posts, $first, $reply_level, 'tree', true, true, $this->core->getQueries()->existsAnnouncementsId($thread_id));
         return $this->core->getOutput()->renderJsonSuccess($result);
     }

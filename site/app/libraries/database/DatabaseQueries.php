@@ -978,6 +978,14 @@ SQL;
         return $rows;
     }
 
+    public function getPostAuthorFromID($theId) {
+        $this->course_db->query("SELECT author_user_id FROM posts WHERE id = ?", [$theId]);
+
+        $authorUserId = $this->course_db->fetchColumn();
+        
+        return $authorUserId;
+    }
+
     public function createThread($markdown, $user, $title, $content, $anon, $prof_pinned, $status, $hasAttachment, $categories_ids, $lock_thread_date, $expiration, $announcement) {
         $this->course_db->beginTransaction();
 
