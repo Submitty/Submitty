@@ -1288,7 +1288,7 @@ function toggleLike(post_id,thread_id,current_user) {
             var likeIconSrcElement = likeIconSrc.src;
 
 
-            if(likeIconSrcElement.endsWith('site/public/img/on-duck-button.svg')){
+            if(likeIconSrcElement.endsWith('/img/on-duck-button.svg')){
                 likeIconSrcElement = likeIconSrcElement.replace('on-duck-button.svg', 'off-duck-button.svg');
                 likeCounter=likeCounter-1;
 

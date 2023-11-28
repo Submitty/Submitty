@@ -1055,11 +1055,6 @@ class ForumThreadView extends AbstractView {
         $userGroup = $this->core->getUser()->getGroup();
 
         $post_user_info = [];
-
-        $upDuckCount = $this->core->getQueries()->getUpduckInfo($post["id"]);
-        //this function should return a number for the like count
-        $userLiked = $this->core->getQueries()->getUserLikes($post["id"], $current_user);
-        //return a bool for if liked or not
         
         $merged_thread = false;
         if ($this->core->getUser()->getGroup() <= 2) {
@@ -1073,8 +1068,6 @@ class ForumThreadView extends AbstractView {
 
             $post_user_info = [
                 "info_name" => $info_name,
-                "upduck_count" => $upDuckCount,
-                "upduck_user_liked" => $userLiked,
                 "visible_user_json" => $visible_user_json,
                 "jscriptAnonFix" => $jscriptAnonFix,
                 "pronouns" => $pronouns,
@@ -1131,6 +1124,16 @@ class ForumThreadView extends AbstractView {
                 ];
             }
         }
+
+        $upDuckCount = $this->core->getQueries()->getUpduckInfo($post["id"]);
+        //this function should return a number for the like count
+        $userLiked = $this->core->getQueries()->getUserLikes($post["id"], $current_user);
+        //return a bool for if liked or not
+
+        $post_up_duck = [
+            "upduck_count" => $upDuckCount,
+            "upduck_user_liked" => $userLiked,
+        ];
 
         if ($this->core->getUser()->getGroup() == 4) {
             $info_name = $given_name . " " . $family_name . " (" . $post['author_user_id'] . ")";
@@ -1216,6 +1219,7 @@ class ForumThreadView extends AbstractView {
             "current_user" => $current_user,
             "author_email" => $author_email,
             "post_user_info" => $post_user_info,
+            "post_up_duck" => $post_up_duck,
             "post_date" => $date,
             "edit_date" => $edit_date,
             "post_buttons" => $post_button,
