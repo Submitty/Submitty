@@ -241,8 +241,7 @@ class WebRouter {
                 return MultiResponse::RedirectOnlyResponse(
                     new RedirectResponse($core->buildUrl(['authentication', 'login']))
                 );
-            } 
-            else {
+            }else {
                 return MultiResponse::RedirectOnlyResponse(
                     new RedirectResponse($core->buildUrl(['home']))
                 );
@@ -301,8 +300,7 @@ class WebRouter {
                 $this->core->loadCourseDatabase();
 
                 return true;
-            } 
-            else {
+            } else {
                 return false;
             }
         }
