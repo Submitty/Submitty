@@ -4,8 +4,10 @@ let seenImages = undefined;
 let images = undefined;
 let bannerElement = undefined;
 let bubble  = undefined;
-let currentImages = [];
+const currentImages = [];
 
+/* eslint prefer-arrow-callback: "error" */
+/* eslint-env es6 */
 $(function() {
     currentImageIndex = 0;
     hiddenImages = getHiddenImages();
@@ -56,9 +58,11 @@ function showBanners() {
         if (currentImages.length > 0) {
             images[0].classList.add('active');
 
-            let duckdivElement = document.getElementById('moorthy-duck');
-            let wholeBannerElement = document.getElementById('banner');
+            const duckdivElement = document.getElementById('moorthy-duck');
             duckdivElement.style.animation = 'rocking 2s linear infinite';
+
+            /* eslint prefer-arrow-callback: "error" */
+            /* eslint-env es6 */
             setTimeout(function() {
                 bannerElement.style.width = '100%';
                 bannerElement.style.display = 'block';
@@ -67,7 +71,7 @@ function showBanners() {
             }, 500);
             document.getElementById('triangle').style.display = 'none';
             document.getElementById('speech-bubble').style.display = 'none';
-        
+
 
             bannerElement.addEventListener('animationend', function() {
 
@@ -76,13 +80,12 @@ function showBanners() {
                 document.getElementById('speech-bubble').style.display = 'block';
             }
 
-                        }, { once: true });
+            }, { once: true });
         }
         else {
             bannerElement.style.width = '100%';
             bannerElement.style.display = 'block';
             images[currentImageIndex].classList.add('active');
-
         }
     }
     else { 
