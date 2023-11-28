@@ -1,5 +1,6 @@
 
 //These functions are defined in normal JS and can be imported into a spec file
+/* global luxon */
 
 /**
 * Generate a 3 letter semester code e.g s21, f20 based on today's data
@@ -7,14 +8,15 @@
 *
 * @returns {String}
 */
+
 export function getCurrentSemester() {
-    const today = new Date();
-    const year = today.getFullYear().toString().slice(2, 4);	//get last two digits
-    const semester = ((today.getMonth() + 1) < 7) ? 's' : 'f';	//first half of year 'spring' rest is fall
+    const DateTime = luxon.DateTime;
+    const today = DateTime.now();
+    const year = today.year.toString().slice(2, 4); // get last two digits
+    const semester = today.month < 7 ? 's' : 'f'; // first half of year 'spring', rest is 'fall'
 
     return semester + year;
 }
-
 /**
 * Build a courseURL based on an array of 'parts', e.g [foo, bar] -> courses/s21/foo/bar
 *
