@@ -264,37 +264,36 @@ class WebRouter {
 
     /**
      * Loads course config if they exist in the requested URL.
+     * @return bool True if course is loaded or not needed, false if course load fails.    
      * @throws \Exception
      */
-    private function loadCourse() {
+    private function loadCourse(): bool {
         if (
             array_key_exists('_semester', $this->parameters)
             && array_key_exists('_course', $this->parameters)
         ) {
             $semester = $this->parameters['_semester'];
             $course = $this->parameters['_course'];
-
-            /** @noinspection PhpUnhandledExceptionInspection */
-            $this->core->loadCourseConfig($semester, $course);
-            /** @noinspection PhpUnhandledExceptionInspection */
-            $this->core->loadGradingQueue();
-
-            if ($this->core->getConfig()->isCourseLoaded()) {
-                $this->core->getOutput()->addBreadcrumb(
-                    $this->core->getDisplayedCourseName(),
-                    $this->core->buildCourseUrl(),
-                    $this->core->getConfig()->getCourseHomeUrl()
-                );
-            } else {
-                // Redirect to /home if the course is not loaded successfully
-                return MultiResponse::RedirectOnlyResponse(
-                    new RedirectResponse($this->core->buildUrl(['home']))
-                );
+    
+            try {
+                /** @noinspection PhpUnhandledExceptionInspection */
+                $this->core->loadCourseConfig($semester, $course);
+                /** @noinspection PhpUnhandledExceptionInspection */
+                $this->core->loadGradingQueue();
+            } catch (\Exception $e) {
+                // Handle exception if needed
+                return false;
             }
-
+    
+            if (!$this->core->getConfig()->isCourseLoaded()) {
+                return false;
+            }
+    
             /** @noinspection PhpUnhandledExceptionInspection */
             $this->core->loadCourseDatabase();
         }
+    
+        return true;
     }
     
 
