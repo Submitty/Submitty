@@ -62,13 +62,10 @@
             {% endif %}
         {% endif %} 
 
-        <div style="position: relative; display: inline-block;">
-            <button class="btn text-decoration-none key_to_click" tabindex="0" onClick="toggleLike({{post.id}}, {{post.thread_id}}, '{{current_user}}')" style="background: none; border: none; padding: 0; cursor: pointer; outline: none;">
-                <img id="likeIcon_{{post.id}}" src="{{ post_up_duck.upduck_user_liked ? '/img/on-duck-button.svg' : '/img/off-duck-button.svg' }}" alt="Like" width="40" height="40">
-            </button>
-            <span id="likeCounter_{{post.id}}" style="position: absolute; bottom: 3px; right: 3px; font-size: 12px; color: white; font-weight: bold;">{{ post_up_duck.upduck_count }}</span>
-        </div>
-
+        <button class="btn text-decoration-none key_to_click" tabindex="0" onClick="toggleLike({{post.id}}, {{post.thread_id}}, '{{current_user}}')" style="position: relative; background: none; border: none; padding: 0; cursor: pointer; outline: none; display: inline-block;">
+            <img id="likeIcon_{{post.id}}" src="{{ post_up_duck.upduck_user_liked ? '/img/on-duck-button.svg' : '/img/off-duck-button.svg' }}" alt="Like" style="display: block; width: 40px; height: 40px;">
+            <span id="likeCounter_{{post.id}}" style="position: absolute; top: 60%; left: 50%; transform: translate(-50%, -50%); font-size: 10px; color: white; font-weight: bold; pointer-events: none;">{{ post_up_duck.upduck_count }}</span>
+        </button>
 
     {% endif %}
 
