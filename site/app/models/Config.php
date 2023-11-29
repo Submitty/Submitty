@@ -425,7 +425,7 @@ class Config extends AbstractModel {
         $this->sys_admin_email = $submitty_json['sys_admin_email'] ?? '';
         $this->sys_admin_url = $submitty_json['sys_admin_url'] ?? '';
 
-        $this->create_new_account = $submitty_json['create_new_account'] ?? === false;
+        $this->create_new_account = $submitty_json['create_new_account'] === false;
         
         if (isset($submitty_json['timezone'])) {
             if (!in_array($submitty_json['timezone'], \DateTimeZone::listIdentifiers())) {
