@@ -180,6 +180,7 @@ defaults = {
     'authentication_method': 0,
     'institution_name' : '',
     'institution_homepage' : '',
+    'create_new_account' : False,
     'timezone' : tzlocal.get_localzone().zone,
     'submitty_admin_username': '',
     'email_user': '',
@@ -304,7 +305,15 @@ else:
             INSTITUTION_HOMEPAGE = ''
         print()
 
-
+    while True:
+        CREATE_NEW_ACCOUNT = get_input("Enable Create New Account feature? [y/n]", 'y')
+        if (CREATE_NEW_ACCOUNT.lower() in ['yes', 'y']):
+            create_new_account = True
+        elif (CREATE_NEW_ACCOUNT.lower() in ['no', 'n']):
+            create_new_account = False
+            break
+    print()
+    
     SYS_ADMIN_EMAIL = get_input("What is the email for system administration?", defaults['sys_admin_email'])
     SYS_ADMIN_URL = get_input("Where to report problems with Submitty (url for help link)?", defaults['sys_admin_url'])
 
@@ -439,6 +448,7 @@ else:
 
     config['institution_name'] = INSTITUTION_NAME
     config['institution_homepage'] = INSTITUTION_HOMEPAGE
+    config['create_new_account'] = CREATE_NEW_ACCOUNT
     config['debugging_enabled'] = DEBUGGING_ENABLED
 
 # site_log_path is a holdover name. This could more accurately be called the "log_path"
@@ -624,6 +634,7 @@ if not args.worker:
     config['timezone'] = TIMEZONE
     config['default_locale'] = DEFAULT_LOCALE
     config['duck_special_effects'] = False
+    config['create_new_account'] = CREATE_NEW_ACCOUNT
 
 config['worker'] = True if args.worker == 1 else False
 
