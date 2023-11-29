@@ -61,6 +61,30 @@
             {% endif %}
                 <b>TA Grading By Sections:</b>
                 <div style="margin-left: 20px">
+                {# checks if any of sections has a verified value #}
+                    {% set isVerified = 0 %}
+                    {% for key, section in sections %}
+                        {% if key != "peer_stu_grad"%}
+                                {% if include_bad_submissions  == 'include'  %}
+                                    {% if key == "NULL" and include_null_section != 'include' %}
+                                     {% else %}
+                                        {% if section.graded > 0 %}
+                                            {% set isVerified = 1 %}
+                                        {% endif %}
+                                        <br />
+                                    {% endif %}
+                                {% else %}
+                                    {% if key == "NULL" and include_null_section != 'include' %}
+                                     {% else %}
+                                        {% if section.non_late_verified > 0 %}
+                                            {% set isVerified = 1 %}
+                                        {% endif %}
+                                        <br />
+                                    {% endif %}
+                            {% endif %}
+                        {% endif %}
+                    {% endfor %}
+
                     {% for key, section in sections %}
                         {% if key != "peer_stu_grad"%}
                                 {% if include_bad_submissions  == 'include'  %}
@@ -68,7 +92,7 @@
                                         {# Skip rendering this section #}
                                      {% else %}
                                         Section {{ key }}: Graded: {{ section.graded }} / {{ section.total }} ({{ section.percentage }}%) 
-                                        {% if section.graded > 0 %}
+                                        {% if isVerified > 0 %}
                                             <span>Verified: {{ section.verified }} / {{ section.total }} ({{ section.verified_percentage }}%)</span>
                                         {% endif %}
                                         <br />
@@ -78,7 +102,7 @@
                                         {# Skip rendering this section #}
                                      {% else %}
                                         Section {{ key }}: Graded: {{ section.non_late_graded }} / {{ section.non_late_total }} ({{ section.non_late_percentage }}%) 
-                                        {% if section.non_late_verified > 0 %}
+                                        {% if isVerified > 0 %}
                                             <span>Verified: {{ section.non_late_verified }} / {{ section.non_late_total }} ({{ section.non_late_verified_percentage }}%) </span>
                                         {% endif %}
                                         <br />
