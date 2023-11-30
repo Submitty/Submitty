@@ -165,12 +165,12 @@ class GradingOrder extends AbstractModel {
             case "auto":
                 $keyFn = function (Submitter $a) {
                     if ($a->isTeam()) {
-                        return $a->getId();
+                        return (int)$a->getId();
                     }
                     else {
                         $g = $this->gradeable;
                         $graded_gradeable = $this->core->getQueries()->getGradedGradeable($g, $a->getId());
-                        return $graded_gradeable->getAutoGradedGradeable()->getTotalPoints();
+                        return (int)$graded_gradeable->getAutoGradedGradeable()->getTotalPoints();
                     }
                 };
                 break;
@@ -193,7 +193,20 @@ class GradingOrder extends AbstractModel {
             $directionMult = ($direction === "DESC" ? -1 : 1);
 
             usort($section, function (Submitter $a, Submitter $b) use ($keys, $directionMult) {
-                return strcmp(strval($keys[$a->getId()]), strval($keys[$b->getId()])) * $directionMult;
+                if (is_int($keys[$a->getId()]) && is_int($keys[$b->getId()])){
+                    if($keys[$a->getId()] > $keys[$b->getId()]){
+                        return 1 * $directionMult;
+                    }
+                    else if($keys[$a->getId()] > $keys[$b->getId()]){
+                        return -1 * $directionMult;
+                    }
+                    else{
+                        return 0 * $directionMult;
+                    }
+                }
+                else{
+                    return strcmp($keys[$a->getId()], $keys[$b->getId()]) * $directionMult;
+                }
             });
         }
         unset($section);
