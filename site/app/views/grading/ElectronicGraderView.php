@@ -247,10 +247,10 @@ class ElectronicGraderView extends AbstractView {
                     $section['non_late_percentage'] = number_format(($section['non_late_graded'] / $section['non_late_total']) * 100, 1);
                     $section['non_late_verified_percentage'] = number_format(($section['non_late_verified'] / $section['non_late_total']) * 100, 1);
                 }
-                if ( $section['verified'] > 0 ) {
+                if ($section['verified'] > 0) {
                     $isVerified = 1;
                 }
-                if ( $section['non_late_verified'] > 0 ) {
+                if ($section['non_late_verified'] > 0) {
                     $isNonLateVerified = 1;
                 }
             }
