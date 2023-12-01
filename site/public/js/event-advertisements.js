@@ -1,3 +1,4 @@
+/* exported changeImage */
 let currentImageIndex = 0;
 let hiddenImages = undefined;
 let seenImages = undefined;
@@ -99,7 +100,7 @@ function showBanners() {
         }
         if (currentImageIndex < 0) {
             currentImageIndex = images.length - 1;
-        } 
+        }
         else if (currentImageIndex >= images.length) {
             currentImageIndex = 0;
         }
@@ -138,7 +139,7 @@ function showBanners() {
 
 function changeImage(n) {
 
-    let originalIndex = currentImageIndex;
+    const originalIndex = currentImageIndex;
 
     if (currentImageIndex < 0 || currentImageIndex >= images.length) {
         console.log('Issue of index');
