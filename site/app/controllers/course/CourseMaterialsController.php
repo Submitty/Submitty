@@ -107,7 +107,7 @@ class CourseMaterialsController extends AbstractController {
     /**
      * @Route("/courses/{_semester}/{_course}/course_materials/viewAll", methods={"POST"})
      */
-    public function setAllViewed() {
+    public function setAllViewed(): JsonResponse {
         $cms = $this->core->getCourseEntityManager()->getRepository(CourseMaterial::class)
             ->findAll();
         foreach ($cms as $cm) {
