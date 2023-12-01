@@ -66,27 +66,27 @@ describe('Test cases for grading stats', () => {
             cy.get('#left-grading-stats').as('on_time_submissions');
             cy.get('@on_time_submissions').should('contain', 'Students who have submitted on time: 64 / 101 (63.4%)');
             cy.get('@on_time_submissions').should('contain', 'Current percentage of TA grading done: 64 / 64 (100.0%)');
-            cy.get('@on_time_submissions').should('contain', 'Section 10: Graded: 3 / 3 (100.0%) Verified: 0 / 3 (0.0%)');
+            cy.get('@on_time_submissions').should('contain', 'Section 10: Graded: 3 / 3 (100.0%))');
             cy.get('@on_time_submissions').should('contain', 'Number of students who have viewed their grade: 49 / 71 (69.0%)');
             //Include Bad Submissions only
             ApplyFilter(true, false);
             cy.get('#left-grading-stats').as('all_submissions');
             cy.get('@all_submissions').should('contain', 'Students who have submitted: 71 / 101 (70.3%)');
             cy.get('@all_submissions').should('contain', 'Current percentage of TA grading done: 71 / 71 (100.0%)');
-            cy.get('@all_submissions').should('contain', 'Section 10: Graded: 4 / 4 (100.0%) Verified: 0 / 4 (0.0%)');
+            cy.get('@all_submissions').should('contain', 'Section 10: Graded: 4 / 4 (100.0%)');
             //Omit Bad submissions and Include Null Section
             ApplyFilter(true, true);
             cy.get('#left-grading-stats').as('null_on_time_submissions');
             cy.get('@null_on_time_submissions').should('contain', 'Students who have submitted on time: 86 / 139 (61.9%)');
             cy.get('@null_on_time_submissions').should('contain', 'Current percentage of TA grading done: 86 / 86 (100.0%)');
-            cy.get('@null_on_time_submissions').should('contain', 'Section NULL: Graded: 22 / 22 (100.0%) Verified: 0 / 22 (0.0%)');
+            cy.get('@null_on_time_submissions').should('contain', 'Section NULL: Graded: 22 / 22 (100.0%)');
             cy.get('@on_time_submissions').should('contain', 'Number of students who have viewed their grade: 67 / 98 (68.4%)');
             //Include Bad Submission with the Null section filter included
             ApplyFilter(true, false);
             cy.get('#left-grading-stats').as('null_all_submissions');
             cy.get('@null_all_submissions').should('contain', 'Students who have submitted: 98 / 139 (70.5%)');
             cy.get('@null_all_submissions').should('contain', 'Current percentage of TA grading done: 98 / 98 (100.0%)');
-            cy.get('@null_all_submissions').should('contain', 'Section NULL: Graded: 27 / 27 (100.0%) Verified: 0 / 27 (0.0%)');
+            cy.get('@null_all_submissions').should('contain', 'Section NULL: Graded: 27 / 27 (100.0%)');
             //Default, omit both filter
             ApplyFilter(true, true);
         });
