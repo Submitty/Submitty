@@ -870,6 +870,35 @@ function markViewed(ids, redirect) {
     });
 }
 
+function deleteBadges() {
+    // Delete badges
+    var badges = document.querySelectorAll('.course-material-badge');
+    badges.forEach(function(badge) {
+        badge.remove();
+    });
+    let data = new FormData();
+    data.append("csrf_token", csrfToken);
+    $.ajax({
+        url: buildCourseUrl(['course_materials', 'viewAll']), 
+        type: "POST",
+        data: data,
+        contentType: false,
+        processData: false,
+        success: function(response) {
+            console.log("Success:", response);
+            // Optional: Redirect or perform some action on success
+            if (redirect) {
+                window.location.href = redirect;
+            }
+        },
+        error: function(xhr, status, error) {
+            console.error("Error:", error);
+            // Handle errors
+        }
+    });
+
+}
+
 function toggleCMFolder(id, open) {
     const elem = $('#div_viewer_' + id);
     if (typeof open === 'undefined') {

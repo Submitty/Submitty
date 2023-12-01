@@ -6,6 +6,12 @@
         red = getComputedStyle(document.documentElement).getPropertyValue('--date-picker-red');
     </script>
 
+    
+    <div class="action-buttons" style="float: right; margin-bottom: 20px;">
+        <a id= "deleteButton" type="button" class="btn btn-primary key_to_click" onclick="deleteBadges()">Mark all as seen</a>
+    </div>
+    
+
     <div class="action-buttons" style="float: right; margin-bottom: 20px;">
         {# button to open all of the subfolders and cookie it#}            
         <a onclick="toggleFoldersOpen();" id="cm-toggle-folders-btn" class="btn btn-primary key_to_click" tabindex="0">Open/Close All Folders</a>
