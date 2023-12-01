@@ -6,6 +6,7 @@
     const curr_month = {{ curr_month }};
     const curr_day = {{ curr_day }};
     const instructor_courses = {{ instructor_courses|json_encode|raw }};
+    const global_calendar_items = {{global_calendar_items|json_encode|raw }};
 
     $( document ).ready(function() {
         // Get value of the type dropdown
@@ -147,4 +148,5 @@
 {{ include('calendar/NewCalendarItem.twig') }}
 {{ include('calendar/EditCalendarItem.twig') }}
 {{ include('calendar/CalendarOptions.twig') }}
-{{ include('calendar/GlobalAnnouncement.twig') }}
+{{ include('calendar/NewGlobalItem.twig') }}
+{{ include('calendar/EditGlobalItem.twig') }}

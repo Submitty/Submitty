@@ -4743,6 +4743,21 @@ SQL;
         return $this->submitty_db->rows();
     }
 
+    /**
+     * Retrieves all items from the superuser_announcements table.
+     *
+     * @return array An array of announcements with each announcement including the id, type, text, and date.
+     */
+    public function getGlobalCalendarItems(): array {
+        $query = "
+            SELECT id, type, text, date
+            FROM superuser_announcements
+            ORDER BY date DESC
+        ";
+        $this->submitty_db->query($query);
+        return $this->submitty_db->rows();
+    }
+
     public function getAllCoursesForUserId(string $user_id): array {
         $query = "
         SELECT t.name AS term_name, u.term, u.course, u.user_group
@@ -4762,20 +4777,6 @@ SQL;
         return $return;
     }
 
-    /**
-     * Retrieves all items from the superuser_announcements table.
-     *
-     * @return array An array of announcements with each announcement including the id, type, text, and date.
-     */
-    public function getGlobalItems(): array {
-        $query = "
-            SELECT id, type, text, date
-            FROM superuser_announcements
-            ORDER BY date DESC
-        ";
-        $this->submitty_db->query($query);
-        return $this->submitty_db->rows();
-    }
 
     public function getCourseStatus($semester, $course) {
         $this->submitty_db->query("SELECT status FROM courses WHERE term=? AND course=?", [$semester, $course]);

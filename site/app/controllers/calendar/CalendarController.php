@@ -7,6 +7,7 @@ namespace app\controllers\calendar;
 use app\controllers\AbstractController;
 use app\controllers\GlobalController;
 use app\entities\calendar\CalendarItem;
+use app\entities\calendar\GlobalItem;
 use app\libraries\response\JsonResponse;
 use app\libraries\response\RedirectResponse;
 use app\libraries\response\WebResponse;
@@ -87,7 +88,7 @@ class CalendarController extends AbstractController {
             $courses
         );
     }
-
+    
     /**
      * @Route("/calendar/items/new", methods={"POST"})
      */
@@ -224,7 +225,7 @@ class CalendarController extends AbstractController {
             if (($semester === $course['term']) && ($InputCourse === $course['course'])) {
                 $this->core->loadCourseConfig($course['term'], $course['course']);
                 $this->core->loadCourseDatabase();
-                $calendar_item = $this->core->getCourseEntityManager()->getRepository(CalendarItem::class)
+                $calendar_item = $this->core->getCourseEntityManager()->getRepository(GlobalItem::class)
                     ->findOneBy(['id' => $id]);
                 if ($calendar_item === null) {
                     return new RedirectResponse($this->core->buildUrl(['calendar']));
@@ -328,7 +329,7 @@ class CalendarController extends AbstractController {
             return new RedirectResponse($this->core->buildUrl(['calendar']));
         }
 
-        $calendar_item = new CalendarItem();
+        $calendar_item = new GlobalItem();
         try {
             $calendar_item->setStringType($type);
         }
@@ -348,7 +349,7 @@ class CalendarController extends AbstractController {
         $this->core->loadMasterDatabase();
         $this->core->getSubmittyEntityManager()->persist($calendar_item);
         $this->core->getSubmittyEntityManager()->flush();
-        $this->core->getMasterDB()->disconnect();
+        $this->core->getSubmittyDB()->disconnect();
     
         $this->core->addSuccessMessage("Calendar item successfully added");
         return new RedirectResponse($this->core->buildUrl(['calendar']));
@@ -407,12 +408,10 @@ class CalendarController extends AbstractController {
             $this->core->addErrorMessage("Invalid course");
             return new RedirectResponse($this->core->buildUrl(['calendar']));
         }
-        // Load master database
         $this->core->loadMasterDatabase();
 
-        // Find the announcement in the master database
         $announcement = $this->core->getSubmittyEntityManager()
-            ->getRepository(SuperuserAnnouncement::class) // Assuming the entity is called SuperuserAnnouncement
+            ->getRepository(GlobalItem::class) 
             ->findOneBy(['id' => $id]);
 
         if ($announcement === null) {
@@ -434,7 +433,7 @@ class CalendarController extends AbstractController {
         $this->core->getSubmittyEntityManager()->flush();
 
         // Disconnect from the master database
-        $this->core->getMasterDB()->disconnect();
+        $this->core->getSubmittyDB()->disconnect();
 
         $this->core->addSuccessMessage("Announcement successfully updated");
         return new RedirectResponse($this->core->buildUrl(['calendar']));
@@ -470,7 +469,7 @@ class CalendarController extends AbstractController {
 
         // Find the announcement in the master database
         $announcement = $this->core->getSubmittyEntityManager()
-            ->getRepository(SuperuserAnnouncement::class) // Assuming the entity is called SuperuserAnnouncement
+            ->getRepository(GlobalItem::class)
             ->findOneBy(['id' => $id]);
 
         if ($announcement === null) {
@@ -480,7 +479,7 @@ class CalendarController extends AbstractController {
 
         $this->core->getSubmittyEntityManager()->remove($announcement);
         $this->core->getSubmittyEntityManager()->flush();
-        $this->core->getMasterDB()->disconnect();
+        $this->core->getSubmittyDB()->disconnect();
 
         $this->core->addSuccessMessage("Announcement successfully deleted");
         return new RedirectResponse($this->core->buildUrl(['calendar']));
