@@ -134,7 +134,6 @@ class GradingOrder extends AbstractModel {
         $keyFn = function (Submitter $a) {
             return $a->getId();
         };
-        
 
         switch ($type) {
             case "id":
@@ -166,12 +165,12 @@ class GradingOrder extends AbstractModel {
                 $keyFn = function (Submitter $a) {
                     if ($a->isTeam()) {
                         return (int)$a->getId();
-                    }
+                    } 
                     else {
                         $g = $this->gradeable;
                         $graded_gradeable = $this->core->getQueries()->getGradedGradeable($g, $a->getId());
                         return (int)$graded_gradeable->getAutoGradedGradeable()->getTotalPoints();
-                    }
+                    } 
                 };
                 break;
             case "random":
@@ -193,18 +192,18 @@ class GradingOrder extends AbstractModel {
             $directionMult = ($direction === "DESC" ? -1 : 1);
 
             usort($section, function (Submitter $a, Submitter $b) use ($keys, $directionMult) {
-                if (is_int($keys[$a->getId()]) && is_int($keys[$b->getId()])){
-                    if($keys[$a->getId()] > $keys[$b->getId()]){
+                if (is_int($keys[$a->getId()]) && is_int($keys[$b->getId()])) {
+                    if($keys[$a->getId()] > $keys[$b->getId()]) {
                         return 1 * $directionMult;
                     }
-                    else if($keys[$a->getId()] > $keys[$b->getId()]){
+                    else if($keys[$a->getId()] > $keys[$b->getId()]) {
                         return -1 * $directionMult;
                     }
-                    else{
+                    else {
                         return 0 * $directionMult;
                     }
                 }
-                else{
+                else {
                     return strcmp($keys[$a->getId()], $keys[$b->getId()]) * $directionMult;
                 }
             });
