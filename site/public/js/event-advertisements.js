@@ -6,9 +6,7 @@ let bannerElement = undefined;
 let bubble  = undefined;
 const currentImages = [];
 
-/* eslint prefer-arrow-callback: "error" */
-/* eslint-env es6 */
-$(function() {
+$(() => {
     currentImageIndex = 0;
     hiddenImages = getHiddenImages();
     seenImages = [];
@@ -61,9 +59,7 @@ function showBanners() {
             const duckdivElement = document.getElementById('moorthy-duck');
             duckdivElement.style.animation = 'rocking 2s linear infinite';
 
-            /* eslint prefer-arrow-callback: "error" */
-            /* eslint-env es6 */
-            setTimeout(function() {
+            setTimeout(() => {
                 bannerElement.style.width = '100%';
                 bannerElement.style.display = 'block';
                 movingUnit.style.left = '10%';
@@ -73,7 +69,7 @@ function showBanners() {
             document.getElementById('speech-bubble').style.display = 'none';
 
 
-            bannerElement.addEventListener('animationend', function() {
+            bannerElement.addEventListener('animationend', () => {
 
                 if (currentImages.length > 0 ) {
                     document.getElementById('triangle').style.display = 'block';
