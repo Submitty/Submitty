@@ -290,7 +290,7 @@ class LateDayInfo extends AbstractModel {
     }
 
     /**
-     * Gets the number of late days the student gets extra for this gradeable
+     * Gets the reason for an excused absence extension
      * @return string
      */
     public function getReasonForException() {
