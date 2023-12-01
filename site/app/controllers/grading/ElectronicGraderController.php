@@ -1664,13 +1664,13 @@ class ElectronicGraderController extends AbstractController {
         $order_all_sections = null;
         if ($who_id === '') {
             $order_grading_sections = new GradingOrder($this->core, $gradeable, $this->core->getUser());
-            $order_grading_sections->sort($sort, $direction, $gradeable);
+            $order_grading_sections->sort($sort, $direction);
 
             // Only need to instantiate this order if the user is a full access grader
             // Limited access graders should never need the order that includes all sections
             if ($this->core->getUser()->accessFullGrading() && $navigate_assigned_students_only === "false") {
                 $order_all_sections = new GradingOrder($this->core, $gradeable, $this->core->getUser(), true);
-                $order_all_sections->sort($sort, $direction, $gradeable);
+                $order_all_sections->sort($sort, $direction);
             }
 
             // Get the graded gradeable for the $from user

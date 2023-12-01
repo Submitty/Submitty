@@ -129,8 +129,6 @@ class GradingOrder extends AbstractModel {
      */
     public function sort($type, $direction) {
         //Functizon to turn submitters into "keys" that are sorted (like python's list.sort)
-        // $this->core->getQueries()->getGradedGradeablesUserOrTeam([$gradeables], null, null, $type, false);
-        // $user_points;
         $keyFn = function (Submitter $a) {
             return $a->getId();
         };

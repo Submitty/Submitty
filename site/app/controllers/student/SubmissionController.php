@@ -874,7 +874,7 @@ class SubmissionController extends AbstractController {
         $gradeable = $this->tryGetElectronicGradeable($_POST['gradeable_id']);
         $order = new GradingOrder($this->core, $gradeable, $this->core->getUser(), true);
         $regrade_all = $_POST['regrade_all'];
-        $order->sort("id", "ASC", $gradeable);
+        $order->sort("id", "ASC");
         $count = 0;
         if ($regrade_all === 'true') {
             foreach ($order->getSortedGradedGradeables() as $g) {
@@ -918,7 +918,7 @@ class SubmissionController extends AbstractController {
         $who_id = "";
         //grab all graded gradeables for this gradeable
         $order = new GradingOrder($this->core, $gradeable, $this->core->getUser(), true);
-        $order->sort("id", "ASC", $gradeable);
+        $order->sort("id", "ASC");
         $graded_gradeables = [];
         /** @var GradedGradeable $g */
         foreach ($order->getSortedGradedGradeables() as $g) {

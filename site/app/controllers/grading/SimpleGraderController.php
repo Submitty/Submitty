@@ -36,7 +36,7 @@ class SimpleGraderController extends AbstractController {
         elseif ($sort === "first") {
             $sort_by = "coalesce(NULLIF(u.user_preferred_givenname, ''), u.user_givenname)";
         }
-        else if ($sort === "last") {
+        elseif ($sort === "last") {
             $sort_by = "coalesce(NULLIF(u.user_preferred_familyname, ''), u.user_familyname)";
         }
 
