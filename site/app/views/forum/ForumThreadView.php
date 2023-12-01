@@ -469,8 +469,10 @@ class ForumThreadView extends AbstractView {
             $author_user_groups_map[$author["user_id"]] = $author["user_group"];
         }
 
-        $posts_with_history = $this->core->getQueries()->getPostsWithHistory(array_column($posts, "id"));
-        $merged_threads = $this->core->getQueries()->getMergedThreadIds(array_column($posts, "id"));
+        $post_ids = array_column($posts, "id");
+        $posts_with_history = $this->core->getQueries()->getPostsWithHistory($post_ids);
+        $merged_threads = $this->core->getQueries()->getMergedThreadIds($post_ids);
+        $post_attachments = $this->core->getQueries()->getForumAttachments($post_ids);
 
         if ($display_option == "tree") {
             $order_array = [];
@@ -522,6 +524,7 @@ class ForumThreadView extends AbstractView {
                             $display_option,
                             $includeReply,
                             $authors_display_info[$post['author_user_id']],
+                            $post_attachments[$post["id"]][0],
                             in_array($post["id"], $posts_with_history, true),
                             in_array($post["id"], $merged_threads, true),
                             false,
@@ -551,6 +554,7 @@ class ForumThreadView extends AbstractView {
                     $display_option,
                     $includeReply,
                     $authors_display_info[$post['author_user_id']],
+                    $post_attachments[$post["id"]][0],
                     in_array($post["id"], $posts_with_history, true),
                     in_array($post["id"], $merged_threads, true),
                     false,
@@ -1054,8 +1058,9 @@ class ForumThreadView extends AbstractView {
      *      display_pronouns: bool,
      *      is_staff: bool
      * } $author_info
+     * @param string[] $post_attachments
      */
-    public function createPost(array $thread, array $post, $unviewed_posts, $first, $reply_level, $display_option, $includeReply, array $author_info, bool $has_history, bool $is_merged_thread, bool $render = false, bool $thread_announced = false, bool $isCurrentFavorite = false) {
+    public function createPost(array $thread, array $post, $unviewed_posts, $first, $reply_level, $display_option, $includeReply, array $author_info, array $post_attachments, bool $has_history, bool $is_merged_thread, bool $render = false, bool $thread_announced = false, bool $isCurrentFavorite = false) {
 
         $current_user = $this->core->getUser()->getId();
         $thread_id = $thread["id"];
@@ -1215,7 +1220,7 @@ class ForumThreadView extends AbstractView {
         $post_attachment = ForumUtils::getForumAttachments(
             $post_id,
             $thread_id,
-            $this->core->getQueries()->getForumAttachments([$post_id])[$post_id][0],
+            $post_attachments,
             $this->core->getConfig()->getCoursePath(),
             $this->core->buildCourseUrl(['display_file'])
         );
