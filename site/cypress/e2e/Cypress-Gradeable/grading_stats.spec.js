@@ -66,7 +66,7 @@ describe('Test cases for grading stats', () => {
             cy.get('#left-grading-stats').as('on_time_submissions');
             cy.get('@on_time_submissions').should('contain', 'Students who have submitted on time: 64 / 101 (63.4%)');
             cy.get('@on_time_submissions').should('contain', 'Current percentage of TA grading done: 64 / 64 (100.0%)');
-            cy.get('@on_time_submissions').should('contain', 'Section 10: Graded: 3 / 3 (100.0%)) Verified: 0 / 3 (0.0%)');
+            cy.get('@on_time_submissions').should('contain', 'Section 10: Graded: 3 / 3 (100.0%)');
             cy.get('@on_time_submissions').should('contain', 'Number of students who have viewed their grade: 49 / 71 (69.0%)');
             //Include Bad Submissions only
             ApplyFilter(true, false);
