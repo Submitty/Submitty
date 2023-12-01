@@ -184,6 +184,7 @@ class DatabaseQueries {
      * @param string $u_or_t
      * @param string $section_key
      * @param string $users_or_teams
+     * @param string $user_or_team_id
      * @param string $verified
      * @param string $where
      * @return string

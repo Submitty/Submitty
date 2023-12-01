@@ -61,6 +61,7 @@
             {% endif %}
                 <b>TA Grading By Sections:</b>
                 <div style="margin-left: 20px">
+                {# checks if any of sections has a verified value #}
                     {% for key, section in sections %}
                         {% if key != "peer_stu_grad"%}
                                 {% if include_bad_submissions  == 'include'  %}
@@ -68,7 +69,7 @@
                                         {# Skip rendering this section #}
                                      {% else %}
                                         Section {{ key }}: Graded: {{ section.graded }} / {{ section.total }} ({{ section.percentage }}%) 
-                                        {% if section.graded > 0 %}
+                                        {% if isVerified > 0 %}
                                             <span>Verified: {{ section.verified }} / {{ section.total }} ({{ section.verified_percentage }}%)</span>
                                         {% endif %}
                                         <br />
@@ -78,7 +79,7 @@
                                         {# Skip rendering this section #}
                                      {% else %}
                                         Section {{ key }}: Graded: {{ section.non_late_graded }} / {{ section.non_late_total }} ({{ section.non_late_percentage }}%) 
-                                        {% if section.non_late_verified > 0 %}
+                                        {% if isNonLateVerified > 0 %}
                                             <span>Verified: {{ section.non_late_verified }} / {{ section.non_late_total }} ({{ section.non_late_verified_percentage }}%) </span>
                                         {% endif %}
                                         <br />

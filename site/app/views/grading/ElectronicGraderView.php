@@ -94,6 +94,8 @@ class ElectronicGraderView extends AbstractView {
         $component_overall_score = 0;
         $component_overall_max = 0;
         $component_overall_percentage = 0;
+        $isVerified = 0;
+        $isNonLateVerified = 0;
 
         $warnings = [];
 
@@ -245,6 +247,12 @@ class ElectronicGraderView extends AbstractView {
                     $section['non_late_percentage'] = number_format(($section['non_late_graded'] / $section['non_late_total']) * 100, 1);
                     $section['non_late_verified_percentage'] = number_format(($section['non_late_verified'] / $section['non_late_total']) * 100, 1);
                 }
+                if ($section['verified'] > 0) {
+                    $isVerified = 1;
+                }
+                if ($section['non_late_verified'] > 0) {
+                    $isNonLateVerified = 1;
+                }
             }
                 unset($section); // Clean up reference
 
@@ -368,7 +376,9 @@ class ElectronicGraderView extends AbstractView {
             "include_null_section" => array_key_exists('include_null_section', $_COOKIE) ? $_COOKIE['include_null_section'] : 'omit',
             "warnings" => $warnings,
             "submissions_in_queue" => $submissions_in_queue,
-            "can_manage_teams" => $this->core->getAccess()->canI('grading.electronic.show_edit_teams', ["gradeable" => $gradeable])
+            "can_manage_teams" => $this->core->getAccess()->canI('grading.electronic.show_edit_teams', ["gradeable" => $gradeable]),
+            "isVerified" => $isVerified,
+            "isNonLateVerified" => $isNonLateVerified
         ]);
     }
 
