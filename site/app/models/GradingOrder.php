@@ -197,10 +197,10 @@ class GradingOrder extends AbstractModel {
             usort($section, function (Submitter $a, Submitter $b) use ($keys, $directionMult) {
                 if (is_int($keys[$a->getId()]) && is_int($keys[$b->getId()])) {
                     if ($keys[$a->getId()] > $keys[$b->getId()]) {
-                        return 1 * $directionMult;
+                        return -1 * $directionMult;
                     }
                     elseif ($keys[$a->getId()] < $keys[$b->getId()]) {
-                        return -1 * $directionMult;
+                        return 1 * $directionMult;
                     }
                     else {
                         return 0 * $directionMult;
