@@ -293,7 +293,7 @@ class LateDayInfo extends AbstractModel {
      * Gets the number of late days the student gets extra for this gradeable
      * @return string
      */
-    public function getReasonForException() {
+    public function getReasonForException(): string {
         return $this->reason_for_exception;
     }
 
