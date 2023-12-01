@@ -50,12 +50,13 @@ function showBanners() {
     const movingUnit = document.getElementById('moving-unit');
     const bannerElement = document.getElementById('banner');
     if (bannerElement.style.display === 'none') {
+        currentImageIndex = 0;
         Cookies.set('display-banner', 'yes');
 
         document.getElementById('breadcrumbs').style.flexWrap = 'inherit';
 
         if (currentImages.length > 0) {
-            images[0].classList.add('active');
+            images[currentImageIndex].classList.add('active');
 
             const duckdivElement = document.getElementById('moorthy-duck');
             duckdivElement.style.animation = 'rocking 2s linear infinite';
@@ -91,20 +92,6 @@ function showBanners() {
         const duckdivElement = document.getElementById('moorthy-duck');
         movingUnit.style.animation = 'none';
         duckdivElement.style.animation = 'none';
-        if (currentImages.length > 0) {
-            document.getElementById('triangle').style.display = 'block';
-            document.getElementById('speech-bubble').style.display = 'block';
-        }
-        else {
-            currentImageIndex ++;
-        }
-        if (currentImageIndex < 0) {
-            currentImageIndex = images.length - 1;
-        }
-        else if (currentImageIndex >= images.length) {
-            currentImageIndex = 0;
-        }
-
 
         duckdivElement.style.transform = 'rotate(0deg)';
         document.getElementById('breadcrumbs').style.flexWrap = 'wrap';
@@ -120,10 +107,16 @@ function showBanners() {
             const className = currentImages[currentImageIndex].className.split(' ')[1];
             hiddenImages.push(className);
             seenImages.push(currentImages[currentImageIndex]);
+            currentImageIndex = seenImages.length; // the last currentImage we were at
             currentImages.shift();
+
         }
         images = currentImages.concat(seenImages);
         Cookies.set('hiddenImages', JSON.stringify(hiddenImages));
+        if (currentImages.length > 0) {
+            document.getElementById('triangle').style.display = 'block';
+            document.getElementById('speech-bubble').style.display = 'block';
+        }
         if (currentImages.length === 0) {
 
             bubble.style.display = 'none';
@@ -149,15 +142,14 @@ function changeImage(n) {
 
     images[currentImageIndex].classList.remove('active');
     if (currentImageIndex < currentImages.length) {
-        console.log('index');
-        console.log(currentImageIndex);
+
         const className = currentImages[originalIndex].className.split(' ')[1];
         hiddenImages.push(className);
         seenImages.push(currentImages[originalIndex]);
+        currentImageIndex = seenImages.length -1;
         currentImages.shift();
         images = currentImages.concat(seenImages);
         Cookies.set('hiddenImages', JSON.stringify(hiddenImages));
-        currentImageIndex --;
 
     }
     currentImageIndex += n;
@@ -181,24 +173,4 @@ function getHiddenImages() {
     return hiddenImagesCookie ? JSON.parse(hiddenImagesCookie) : [];
 }
 
-// function setCookie(name, value) {
-//     const date = new Date();
-//     date.setFullYear(date.getFullYear() + 100);
-//     document.cookie = `${name}=${value || ''}; path=/`;
-// }
-
-// function getCookie(name) {
-//     const nameEQ = `${name}=`;
-//     const cookies = document.cookie.split(';');
-//     for (let i = 0; i < cookies.length; i++) {
-//         let cookie = cookies[i];
-//         while (cookie.charAt(0) === ' ') {
-//             cookie = cookie.substring(1, cookie.length);
-//         }
-//         if (cookie.indexOf(nameEQ) === 0) {
-//             return cookie.substring(nameEQ.length, cookie.length);
-//         }
-//     }
-//     return null;
-// }
 
