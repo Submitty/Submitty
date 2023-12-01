@@ -1514,11 +1514,7 @@ end of styles used in the admin gradeable page
     flex-direction: row;
 }
 
-.wrapper-example .wrapper-top,
-.wrapper-example .wrapper-left,
-.wrapper-example .wrapper-body,
-.wrapper-example .wrapper-right,
-.wrapper-example .wrapper-bottom {
+.wrapper-example .wrapper-body {
     flex-grow: 1;
     border: 1px solid var(--text-black);
     display: flex;
@@ -1531,26 +1527,9 @@ end of styles used in the admin gradeable page
     flex-grow: 5;
 }
 
-.wrapper-top {
-    background-color: var(--standard-light-pink);
-}
-
-.wrapper-left {
-    background-color: var(--standard-light-yellow);
-}
-
 .wrapper-body {
     background-color: var(--default-white);
     color: var(--text-black);
-}
-
-.wrapper-right {
-    background-color: var(--standard-light-green);
-    color: var(--text-black);
-}
-
-.wrapper-bottom {
-    background-color: var(--standard-light-blue);
 }
 
 .wrapper-css {
