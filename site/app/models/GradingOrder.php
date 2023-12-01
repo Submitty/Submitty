@@ -169,7 +169,12 @@ class GradingOrder extends AbstractModel {
                     else {
                         $g = $this->gradeable;
                         $graded_gradeable = $this->core->getQueries()->getGradedGradeable($g, $a->getId());
-                        return (int)$graded_gradeable->getAutoGradedGradeable()->getTotalPoints();
+                        if(is_nan($graded_gradeable->getAutoGradedGradeable()->getTotalPoints())) {
+                            return -9999;
+                        }
+                        else{
+                            return (int)$graded_gradeable->getAutoGradedGradeable()->getTotalPoints();
+                        }
                     } 
                 };
                 break;
@@ -196,7 +201,7 @@ class GradingOrder extends AbstractModel {
                     if($keys[$a->getId()] > $keys[$b->getId()]) {
                         return 1 * $directionMult;
                     }
-                    else if($keys[$a->getId()] > $keys[$b->getId()]) {
+                    else if($keys[$a->getId()] < $keys[$b->getId()]) {
                         return -1 * $directionMult;
                     }
                     else {
