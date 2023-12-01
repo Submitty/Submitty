@@ -12,7 +12,7 @@
 opencv-python-headless==4.8.1.78
 
 # jsonschema & jsonref & pytz & tzlocal
-pytz==2023.3 # Submitty-util specific.
+pytz==2023.3.post1 # Submitty-util specific.
 
 
 python-pam==2.0.2
