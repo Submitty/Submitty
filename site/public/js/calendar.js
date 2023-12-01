@@ -1,5 +1,5 @@
 /* exported prevMonth, nextMonth, loadCalendar, loadFullCalendar, editCalendarItemForm, deleteCalendarItem, openNewItemModal, openNewGlobalEventModal, openOptionsModal, updateCalendarOptions, colorLegend */
-/* global curr_day, curr_month, curr_year, gradeables_by_date, instructor_courses, global_calendar_items, buildUrl */
+/* global curr_day, curr_month, curr_year, gradeables_by_date, global_items_by_date, instructor_courses, global_calendar_items, buildUrl */
 /* global csrfToken */
 
 // List of names of months in English
@@ -307,12 +307,10 @@ function generateDayCell(year, month, day, curr_view_month, view_semester=false)
         itemList.appendChild(generateCalendarItem(gradeables_by_date[cell_date_str][i]));
         console.log((gradeables_by_date[cell_date_str][i]));
     }
-    for (const i in global_calendar_items) {
-        console.log((global_calendar_items[i]));
-        
-        itemList.appendChild(generateCalendarItem(global_calendar_items[i]));
+    for (const i in global_items_by_date[cell_date_str]) {
+        itemList.appendChild(generateCalendarItem(global_items_by_date[cell_date_str][i]))
+        console.log( global_items_by_date[cell_date_str]);
     }
-
     content.appendChild(itemList);
     return content;
 }

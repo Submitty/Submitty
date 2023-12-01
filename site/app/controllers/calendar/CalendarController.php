@@ -13,6 +13,7 @@ use app\libraries\response\RedirectResponse;
 use app\libraries\response\WebResponse;
 use app\libraries\response\ResponseInterface;
 use app\models\CalendarInfo;
+use app\models\GlobalCalendarInfo;
 use app\models\gradeable\GradeableUtils;
 use app\views\calendar\CalendarView;
 use Symfony\Component\Routing\Annotation\Route;
@@ -34,7 +35,7 @@ class CalendarController extends AbstractController {
         $user = $this->core->getUser();
 
         $calendar_messages = [];
-
+        $global_calendar_messages = [];
         $courses = $this->core->getQueries()->getCourseForUserId($user->getId());
         $filtered_courses = [];
 
@@ -85,6 +86,7 @@ class CalendarController extends AbstractController {
             CalendarView::class,
             'showCalendar',
             CalendarInfo::loadGradeableCalendarInfo($this->core, $gradeables_of_user, $filtered_courses, $calendar_messages),
+            GlobalCalendarInfo::loadGlobalCalendarInfo($this->core),
             $courses
         );
     }
