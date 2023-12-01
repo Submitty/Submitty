@@ -535,12 +535,13 @@ class ForumController extends AbstractController {
 
     /**
      * @Route("/courses/{_semester}/{_course}/forum/posts/single", methods={"POST"})
+     * @return JsonResponse | MultiResponse
      */
     public function getSinglePost() {
         $post_id = $_POST['post_id'];
-        $user_list = ["abernl"];
-        #$registration = $this->core->getQueries()->getAuthorRegistrationSection($user_list)[0];
-        #$rotating = $this->core->getQueries()->getAuthorRotatingSection($user_list)[0];
+        return JsonResponse::getErrorResponse($post_id);
+        $registration = $this->core->getQueries()->getAuthorRegistrationSection($user_list)[0];
+        $rotating = $this->core->getQueries()->getAuthorRotatingSection($user_list)[0];
 
         $registration = "0";
         $rotating = "0";
