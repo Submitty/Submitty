@@ -308,7 +308,6 @@ function socketNewOrEditPostHandler(post_id, reply_level, post_box_id=null, edit
                         }
                         else if (forum_display_setting === 'alpha_by_registration' || forum_display_setting === 'alpha_by_rotating') {
                             $(new_post).insertBefore('#post-hr').hide().fadeIn();
-                            displaySuccessMessage('Refresh for correct ordering');
                         }
                         else if (forum_display_setting === 'tree'){
                             $(new_post).insertBefore('#post-hr').hide().fadeIn();
@@ -387,16 +386,16 @@ function socketNewOrEditPostHandler(post_id, reply_level, post_box_id=null, edit
                         });
                     }
 
-                    var currentPostBox = 0;
-                    var nextPostBox = 1
-                    if (postBoxArray[currentPostBox] != null) {
-                        postBoxArray[currentPostBox].insertBefore('#post-hr').hide().fadeIn();
 
-                        for (var i = 0; i < postBoxArray.length - 2; i++) {
-                            currentPostBox = postBoxArray[i];
-                            nextPostBox = postBoxArray[i + 1];
+                    if (postBoxArray.length != 0) {
+                        const postHr = document.getElementById('post-hr');
+                        postBoxArray[postBoxArray.length-1].parentElement.insertBefore(postBoxArray[postBoxArray.length-1], postHr);
+
+                        for (let i = postBoxArray.length-2; i >=0; i--) {
+                            lastBox = postBoxArray[i+1];
+                            thisBox = postBoxArray[i];
                         
-                            nextPostBox.insertAfter(currentPostBox).hide().fadeIn();
+                            thisBox.parentElement.insertBefore(thisBox, lastBox);
                         }
                     }
                 }
