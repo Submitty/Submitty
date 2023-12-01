@@ -41,7 +41,7 @@ $(() => {
     images = currentImages.concat(seenImages);
 
 
-    if (getCookie('display-banner') === 'yes') {
+    if (Cookies.get('display-banner') === 'yes') {
         showBanners();
     }
 });
@@ -50,7 +50,7 @@ function showBanners() {
     const movingUnit = document.getElementById('moving-unit');
     const bannerElement = document.getElementById('banner');
     if (bannerElement.style.display === 'none') {
-        setCookie('display-banner', 'yes');
+        Cookies.set('display-banner', 'yes');
 
         document.getElementById('breadcrumbs').style.flexWrap = 'inherit';
 
@@ -87,7 +87,7 @@ function showBanners() {
     }
     else {
 
-        setCookie('display-banner', 'no');
+        Cookies.set('display-banner', 'no');
         const duckdivElement = document.getElementById('moorthy-duck');
         movingUnit.style.animation = 'none';
         duckdivElement.style.animation = 'none';
@@ -123,7 +123,7 @@ function showBanners() {
             currentImages.shift();
         }
         images = currentImages.concat(seenImages);
-        setCookie('hiddenImages', JSON.stringify(hiddenImages));
+        Cookies.set('hiddenImages', JSON.stringify(hiddenImages));
         if (currentImages.length === 0) {
 
             bubble.style.display = 'none';
@@ -156,7 +156,7 @@ function changeImage(n) {
         seenImages.push(currentImages[originalIndex]);
         currentImages.shift();
         images = currentImages.concat(seenImages);
-        setCookie('hiddenImages', JSON.stringify(hiddenImages));
+        Cookies.set('hiddenImages', JSON.stringify(hiddenImages));
         currentImageIndex --;
 
     }
@@ -177,28 +177,28 @@ function changeImage(n) {
 
 
 function getHiddenImages() {
-    const hiddenImagesCookie = getCookie('hiddenImages');
+    const hiddenImagesCookie = Cookies.get('hiddenImages');
     return hiddenImagesCookie ? JSON.parse(hiddenImagesCookie) : [];
 }
 
-function setCookie(name, value) {
-    const date = new Date();
-    date.setFullYear(date.getFullYear() + 100);
-    document.cookie = `${name}=${value || ''}; path=/`;
-}
+// function setCookie(name, value) {
+//     const date = new Date();
+//     date.setFullYear(date.getFullYear() + 100);
+//     document.cookie = `${name}=${value || ''}; path=/`;
+// }
 
-function getCookie(name) {
-    const nameEQ = `${name}=`;
-    const cookies = document.cookie.split(';');
-    for (let i = 0; i < cookies.length; i++) {
-        let cookie = cookies[i];
-        while (cookie.charAt(0) === ' ') {
-            cookie = cookie.substring(1, cookie.length);
-        }
-        if (cookie.indexOf(nameEQ) === 0) {
-            return cookie.substring(nameEQ.length, cookie.length);
-        }
-    }
-    return null;
-}
+// function getCookie(name) {
+//     const nameEQ = `${name}=`;
+//     const cookies = document.cookie.split(';');
+//     for (let i = 0; i < cookies.length; i++) {
+//         let cookie = cookies[i];
+//         while (cookie.charAt(0) === ' ') {
+//             cookie = cookie.substring(1, cookie.length);
+//         }
+//         if (cookie.indexOf(nameEQ) === 0) {
+//             return cookie.substring(nameEQ.length, cookie.length);
+//         }
+//     }
+//     return null;
+// }
 
