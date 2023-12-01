@@ -24,7 +24,6 @@ const docker_ui_path = '/admin/docker';
 
 describe('Docker UI Test', () => {
     beforeEach(() => {
-        cy.visit('/');
         cy.login();
         cy.visit(docker_ui_path);
     });
