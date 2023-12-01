@@ -249,6 +249,48 @@ function updateUserLastInitialFormat() {
     return false;
 }
 
+
+function updateUserDisplayNameOrder() {
+    const newVal = Number($('#user-last-initial-format-change').val());
+    if (isNaN(newVal)) {
+        return displayErrorMessage('Invalid option for last initial format!');
+    }
+    const data = new FormData();
+    data.append('csrf_token', $('#user-last-initial-format-csrf').val());
+    data.append('format', newVal);
+    const url = buildUrl(['user_profile', 'update_name_order']);
+    $.ajax({
+        url,
+        type: 'POST',
+        data,
+        processData: false,
+        contentType: false,
+        success: function(res) {
+            try {
+                const response = JSON.parse(res);
+                if (response.status === 'success') {
+                    const { data } = response;
+                    displaySuccessMessage(data.message);
+                    const icon = '<i class="fas fa-pencil-alt"></i>';
+                    $('#last-initial-format-row .icon').html(`${icon} ${data.new_abbreviated_name}`);
+                    $('#user-last-initial-format-change').data('default', data.format);
+                } else {
+                    displayErrorMessage(response.message);
+                }
+            } catch (error) {
+                displayErrorMessage('Error parsing the response');
+                console.log(error)
+            }
+        },
+        error: function() {
+            displayErrorMessage('Something went wrong!');
+        },
+    });
+    // hide the form form view
+    $('.popup-form').css('display', 'none');
+    return false;
+}
+
 function updateUserProfilePhoto () {
     const data = new FormData();
     data.append('csrf_token', $('#user-profile-photo-csrf').val());

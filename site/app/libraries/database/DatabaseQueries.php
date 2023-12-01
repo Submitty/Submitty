@@ -1174,7 +1174,7 @@ VALUES (?,?,?,?,?,?)",
      */
     public function updateUser(User $user, $semester = null, $course = null) {
         $params = [$user->getNumericId(), $user->getPronouns(), $user->getDisplayPronouns(), $user->getLegalGivenName(), $user->getPreferredGivenName(),
-                       $user->getLegalFamilyName(), $user->getPreferredFamilyName(), $user->getLastInitialFormat(), $user->getEmail(),
+                       $user->getLegalFamilyName(), $user->getPreferredFamilyName(), $user->getLastInitialFormat(), $user->getDispayNameOrder(), $user->getEmail(),
                        $user->getSecondaryEmail(), $this->submitty_db->convertBoolean($user->getEmailBoth()),
                        $this->submitty_db->convertBoolean($user->isUserUpdated()),
                        $this->submitty_db->convertBoolean($user->isInstructorUpdated())];
@@ -1196,7 +1196,7 @@ VALUES (?,?,?,?,?,?)",
 UPDATE users
 SET
   user_numeric_id=?, user_pronouns=?, display_pronouns=?, user_givenname=?, user_preferred_givenname=?,
-  user_familyname=?, user_preferred_familyname=?, user_last_initial_format=?,
+  user_familyname=?, user_preferred_familyname=?, user_last_initial_format=?, display_name_order =?,
   user_email=?, user_email_secondary=?, user_email_secondary_notify=?,
   user_updated=?, instructor_updated=?{$extra}
 WHERE user_id=? /* AUTH: \"{$logged_in}\" */",

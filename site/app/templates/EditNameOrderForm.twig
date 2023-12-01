@@ -8,7 +8,7 @@ hi
         <p class="std-margin"> Implement Description Later </p>
         <div class="edit_user_row">
             <label for="user-last-initial-format-change">Display Format:&emsp;</label>
-            <select id="user-last-initial-format-change" data-default="{{ user.getLastInitialFormat() }}" onchange="previewUserLastInitialFormat()">
+            <select id="user-last-initial-format-change" data-default="{{ user.getDispayNameOrder() }}" onchange="previewUserLastInitialFormat()">
                 {% for i in 0..1 %}
                     <option value="{{ i }}">{{ user.getDisplayNameFormat(i) }}</option>
                 {% endfor %}
@@ -18,7 +18,7 @@ hi
     </div>
 {% endblock %}
 {% block form %}
-    <form method="post" onsubmit="return updateUserLastInitialFormat()">
+    <form method="post" onsubmit="return updateUserDisplayNameOrder()">
         {{ parent() }}
     </form>
 {% endblock %}

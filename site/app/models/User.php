@@ -29,6 +29,7 @@ use Egulias\EmailValidator\Validation\RFCValidation;
  * @method void setPronouns(string $pronouns)
  * @method void setDisplayPronouns(bool $display_pronouns)
  * @method int getLastInitialFormat()
+ * @method string getDispayNameOrder()
  * @method string getEmail()
  * @method void setEmail(string $email)
  * @method string getSecondaryEmail()
@@ -128,6 +129,9 @@ class User extends AbstractModel {
     /** @prop
      * @var int The display format for the last initial of the user */
     protected $last_initial_format = 0;
+    /** @prop
+     * @var string The display format for the last initial of the user */
+    protected $display_name_order = "Given_F";
     /** @prop
      * @var string The primary email of the user */
     protected $email;
@@ -247,6 +251,10 @@ class User extends AbstractModel {
         $this->last_initial_format = isset($details['user_last_initial_format']) ? intval($details['user_last_initial_format']) : 0;
         if ($this->last_initial_format < 0 || $this->last_initial_format > 3) {
             $this->last_initial_format = 0;
+        }
+
+        if (isset($details['display_name_order'])) {
+            $this->setDisplayOrder($details['display_name_order']);
         }
 
         $this->email = $details['user_email'];
@@ -518,6 +526,13 @@ class User extends AbstractModel {
         $this->last_initial_format = $format;
     }
 
+    public function setDisplayOrderFormat(int $format) {
+        if ($format < 0 || $format > 3) {
+            throw new \InvalidArgumentException("Invalid format value specified");
+        }
+        $this->display_name_order = $format;
+    }
+
     public function getNotificationSettings() {
         return $this->notification_settings; //either receives it or not
     }
@@ -542,6 +557,10 @@ class User extends AbstractModel {
     public function setPreferredFamilyName($name) {
         $this->preferred_family_name = $name;
         $this->setDisplayedFamilyName();
+    }
+
+    public function setDisplayOrder($order) {
+        $this->display_name_order = $order;
     }
 
     private function setDisplayedGivenName() {
