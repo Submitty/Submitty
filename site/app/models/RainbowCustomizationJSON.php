@@ -28,8 +28,13 @@ class RainbowCustomizationJSON extends AbstractModel {
     private $gradeables = [];
 
     // The order of allowed_display and allowed_display_description has to match
-    const allowed_display = ['grade_summary', 'grade_details',
-        'exam_seating', 'final_grade', 'instructor_notes'];
+    const allowed_display = [
+        'grade_summary',
+        'grade_details',
+        'exam_seating',
+        'final_grade',
+        'instructor_notes',
+    ];
 
     const allowed_display_description = [
         "Display a column(row) for each gradeable bucket on the syllabus.", //grade_summary
