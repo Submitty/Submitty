@@ -5,7 +5,6 @@ namespace app\views\forum;
 use app\libraries\DateUtils;
 use app\views\AbstractView;
 use app\libraries\FileUtils;
-use app\libraries\ForumUtils;
 use app\models\User;
 
 class ForumThreadView extends AbstractView {
@@ -656,7 +655,6 @@ class ForumThreadView extends AbstractView {
         $activeThreadAnnouncements = [];
         $activeThreadTitle = "";
         $activeThread = [];
-        $GLOBALS['totalAttachments'] = 0;
         $thread_content =  $this->displayThreadList($threads, false, $activeThreadAnnouncements, $activeThreadTitle, $activeThread, null, $category_ids, false, true);
         $categories = $this->core->getQueries()->getCategories();
         $current_course = $this->core->getConfig()->getCourse();
@@ -757,14 +755,13 @@ class ForumThreadView extends AbstractView {
         foreach ($author_user_groups as $author) {
             $is_instructor_full_access[$author["user_id"]] = $author["user_group"] <= User::GROUP_FULL_ACCESS_GRADER;
         }
-        $first_posts = $this->core->getQueries()->getFirstPostForThreads(array_column($threads, "id"));
 
         foreach ($threads as $thread) {
             // Checks if thread ID is empty. If so, skip this threads.
             if (empty($thread["id"])) {
                 continue;
             }
-            $first_post = $first_posts[$thread['id']] ?? null;
+            $first_post = $this->core->getQueries()->getFirstPostForThread($thread["id"]);
             if (is_null($first_post)) {
                 // Thread without any posts(eg. Merged Thread)
                 $first_post = ['content' => "", 'render_markdown' => 0];
@@ -923,6 +920,7 @@ class ForumThreadView extends AbstractView {
                     "deleted" => $first_post['deleted']
                 ]);
             }
+//            var_dump($first_post);
 
             $thread_content[] = $thread_info;
         }
@@ -1147,13 +1145,46 @@ class ForumThreadView extends AbstractView {
             ];
         }
 
-        $post_attachment = ForumUtils::getForumAttachments(
-            $post_id,
-            $thread_id,
-            $this->core->getQueries()->getForumAttachments([$post_id])[$post_id][0],
-            $this->core->getConfig()->getCoursePath(),
-            $this->core->buildCourseUrl(['display_file'])
-        );
+        $post_attachment = ["exist" => false];
+
+        if ($post["has_attachment"]) {
+            $post_attachment["exist"] = true;
+
+            $post_dir = FileUtils::joinPaths($thread_dir, $post["id"]);
+            $files = FileUtils::getAllFiles($post_dir);
+
+            $post_attachment["files"] = [];
+
+            $attachment_num_files = count($files);
+            $attachment_id = "attachments_{$post['id']}";
+            $attachment_button_id = "button_attachments_{$post['id']}";
+            $attachment_file_count = 0;
+            $attachment_encoded_data = [];
+
+            foreach ($files as $file) {
+                $path = rawurlencode($file['path']);
+                $name = rawurlencode($file['name']);
+                $url = $this->core->buildCourseUrl(['display_file']) . '?dir=forum_attachments&path=' . $path;
+
+                $post_attachment["files"][] = [
+                    "file_viewer_id" => "file_viewer_" . $post_id . "_" . $attachment_file_count
+                ];
+
+                $attachment_encoded_data[] = [$url, $post_id . '_' . $attachment_file_count, $name];
+
+                $attachment_file_count++;
+                $GLOBALS['totalAttachments']++;
+            }
+
+            $attachment_encoded_data[] = $attachment_id;
+
+            $post_attachment["params"] = [
+                "well_id"   => $attachment_id,
+                "button_id" => $attachment_button_id,
+                "num_files" => $attachment_num_files,
+                "encoded_data" => json_encode($attachment_encoded_data)
+            ];
+        }
 
         $post_box_id = 1;
         if ($this->core->getQueries()->isThreadLocked($thread_id) != 1 || $this->core->getUser()->accessFullGrading()) {

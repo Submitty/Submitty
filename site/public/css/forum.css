@@ -289,17 +289,6 @@
     margin-left: 15px;
 }
 
-#display-existing-attachments {
-    display: block;
-    float: none;
-    overflow: hidden;
-}
-
-.file-upload-table.edit-imgs-table {
-    margin-left: 0;
-    margin-right: auto;
-}
-
 .create-thread-title {
     margin-left: 15px;
     margin-bottom: 10px;
@@ -434,25 +423,6 @@
 .history-container span h7 {
     position: relative;
     right: 5px;
-}
-
-.history-attachment-table {
-    background-color: var(--attachment-box-color);
-    border: 1px solid var(--standard-light-gray);
-}
-
-.attachment-name-history {
-    vertical-align: middle;
-}
-
-.history-attachment-btn {
-    vertical-align: bottom;
-    float: right;
-}
-
-.history-buffer {
-    margin-bottom:3px;
-    margin-top:1.5em;
 }
 
 /* stylelint-disable-next-line selector-id-pattern */
