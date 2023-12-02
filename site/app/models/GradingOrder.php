@@ -128,7 +128,7 @@ class GradingOrder extends AbstractModel {
      * Sort grading order.
      */
     public function sort($type, $direction) {
-        //Functizon to turn submitters into "keys" that are sorted (like python's list.sort)
+        //Function to turn submitters into "keys" that are sorted (like python's list.sort)
         $keyFn = function (Submitter $a) {
             return $a->getId();
         };
@@ -196,15 +196,7 @@ class GradingOrder extends AbstractModel {
 
             usort($section, function (Submitter $a, Submitter $b) use ($keys, $directionMult) {
                 if (is_int($keys[$a->getId()]) && is_int($keys[$b->getId()])) {
-                    if ($keys[$a->getId()] > $keys[$b->getId()]) {
-                        return -1 * $directionMult;
-                    }
-                    elseif ($keys[$a->getId()] < $keys[$b->getId()]) {
-                        return 1 * $directionMult;
-                    }
-                    else {
-                        return 0 * $directionMult;
-                    }
+                    return ($keys[$a->getId()] <=> $keys[$b->getId()]) * $directionMult;
                 }
                 else {
                     return strcmp($keys[$a->getId()], $keys[$b->getId()]) * $directionMult;
