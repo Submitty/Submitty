@@ -2279,8 +2279,6 @@ ORDER BY {$orderby}",
     /**
      * Returns the total number of verified components found in the database
      *
-     * @param  string $g_id
-     * @return int
      */
     public function getTotalVerifiedComponentCount(string $g_id): int {
         $this->course_db->query("SELECT count(*) AS cnt FROM gradeable_component_data WHERE GCD_VERIFIER_ID IS NOT NULL", [$g_id]);
