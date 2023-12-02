@@ -180,16 +180,8 @@ class DatabaseQueries {
 
     /**
      * Gets a list of given and family names from the database given an array of IDs.
-     *
-     * @param string $u_or_t
-     * @param string $section_key
-     * @param string $users_or_teams
-     * @param string $user_or_team_id
-     * @param string $verified
-     * @param string $where
-     * @return string
      */
-    public function getGrading($u_or_t, $section_key, $users_or_teams, $user_or_team_id, $verified, $where): ?string {
+    public function getGrading(string $u_or_t, string $section_key, string $users_or_teams, string $user_or_team_id, string $verified, string $where): ?string {
         return "
         SELECT {$u_or_t}.{$section_key}, count({$u_or_t}.*) as cnt
         FROM {$users_or_teams} AS {$u_or_t}
