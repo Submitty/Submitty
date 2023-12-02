@@ -26,7 +26,7 @@
     "doctrine/annotations": "1.14.3",
     "doctrine/dbal": "2.13.9",
     "doctrine/orm": "2.16.2",
-    "egulias/email-validator": "4.0.2",
+    "egulias/email-validator": "4.0.1",
     "lcobucci/jwt": "5.0.0",
     "league/commonmark": "1.6.7",
     "maennchen/zipstream-php": "3.1.0",
