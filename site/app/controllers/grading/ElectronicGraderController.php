@@ -765,7 +765,7 @@ class ElectronicGraderController extends AbstractController {
                         }
                         $sections['all']['total_components'] += $value * $num_components;
                         $sections['all']['graded_components'] += isset($graded_components[$key]) ? $graded_components[$key] : 0;
-                        $sections['all']['verified_components'] += $verified_components[$key]) ?? 0;
+                        $sections['all']['verified_components'] += $verified_components[$key] ?? 0;
                     }
                     $sections['all']['total_components'] -= $num_components;
                     $sections['all']['graded_components'] -= $my_grading;
