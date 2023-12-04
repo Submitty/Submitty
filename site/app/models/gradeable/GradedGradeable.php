@@ -235,7 +235,7 @@ class GradedGradeable extends AbstractModel {
      * @param User|null $user The user to get exception info for (can be null if not team assignment)
      * @return string the reason for a user's excused absence extension
      */
-    public function getReasonForException($user = null): string {
+    public function getReasonForException(?User $user = null): string {
         if ($user === null) {
             if ($this->gradeable->isTeamAssignment()) {
                 throw new \InvalidArgumentException('Must provide user if team assignment');
