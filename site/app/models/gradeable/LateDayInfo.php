@@ -291,7 +291,6 @@ class LateDayInfo extends AbstractModel {
 
     /**
      * Gets the reason for an excused absence extension
-     * @return string
      */
     public function getReasonForException(): string {
         return $this->reason_for_exception;
