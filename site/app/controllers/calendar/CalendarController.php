@@ -410,34 +410,34 @@ class CalendarController extends AbstractController {
         return new RedirectResponse($this->core->buildUrl(['calendar']));
     }
 
-        /**
-         * @Route("/calendar/global_items/delete", methods={"POST"})
-         */
-        public function deleteGlobalAnnouncement(): ResponseInterface {
-            if (isset($_POST['id'])) {
-                $id = $_POST['id'];
-            }
-            else {
-                $this->core->addErrorMessage("Error: No id specified");
-                return new RedirectResponse($this->core->buildUrl(['calendar']));
-            }
-
-            $this->core->loadMasterDatabase();
-
-            // Find the announcement in the master database
-            $item = $this->core->getSubmittyEntityManager()
-                ->getRepository(GlobalItem::class)
-                ->findOneBy(['id' => $id]);
-
-            if ($item === null) {
-                $this->core->addErrorMessage("Announcement not found");
-                return new RedirectResponse($this->core->buildUrl(['calendar']));
-            }
-        
-            $this->core->getSubmittyEntityManager()->remove($item);
-            $this->core->getSubmittyEntityManager()->flush();
-            $this->core->getSubmittyDB()->disconnect();
-            $this->core->addSuccessMessage($item->getText() . " was successfully deleted.");
-            return JsonResponse::getSuccessResponse();
+    /**
+     * @Route("/calendar/global_items/delete", methods={"POST"})
+     */
+    public function deleteGlobalAnnouncement(): ResponseInterface {
+        if (isset($_POST['id'])) {
+            $id = $_POST['id'];
         }
+        else {
+            $this->core->addErrorMessage("Error: No id specified");
+            return new RedirectResponse($this->core->buildUrl(['calendar']));
+        }
+
+        $this->core->loadMasterDatabase();
+
+        // Find the announcement in the master database
+        $item = $this->core->getSubmittyEntityManager()
+            ->getRepository(GlobalItem::class)
+            ->findOneBy(['id' => $id]);
+
+        if ($item === null) {
+            $this->core->addErrorMessage("Announcement not found");
+            return new RedirectResponse($this->core->buildUrl(['calendar']));
+        }
+    
+        $this->core->getSubmittyEntityManager()->remove($item);
+        $this->core->getSubmittyEntityManager()->flush();
+        $this->core->getSubmittyDB()->disconnect();
+        $this->core->addSuccessMessage($item->getText() . " was successfully deleted.");
+        return JsonResponse::getSuccessResponse();
+    }
 }
