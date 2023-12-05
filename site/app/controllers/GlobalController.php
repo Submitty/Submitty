@@ -475,7 +475,8 @@ class GlobalController extends AbstractController {
 
         switch ($month) {
             case 12:
-                break;
+                $decemberImages = ['moorthy_duck/12-december.svg', 'moorthy_duck/menorah-duck.svg'];
+                $duck_img = $decemberImages[array_rand($decemberImages)];
             case 11:
                 //November (Thanksgiving)
                 //last week of November
