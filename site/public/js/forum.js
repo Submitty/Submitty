@@ -1,4 +1,7 @@
-/* global displaySuccessMessage */
+/* global displaySuccessMessage, hljs */
+/* exported markForDeletion */
+/* exported unMarkForDeletion */
+/* exported  displayHistoryAttachment */
 
 // eslint-disable-next-line no-unused-vars
 function categoriesFormEvents() {
@@ -86,15 +89,18 @@ function checkNumFilesForumUpload(input, post_id) {
 }
 
 function uploadImageAttachments(attachment_box) {
-    $(attachment_box).on('DOMNodeInserted', (e) => {
+    const observer = new MutationObserver((e) => {
+        if (e[0].addedNodes.length === 0 || e[0].addedNodes[0].className === 'thumbnail') {
+            return;
+        }
         // eslint-disable-next-line no-undef
-        const part = get_part_number(e);
+        const part = get_part_number(e[0]);
         if (isNaN(parseInt(part))) {
             return;
         }
-        const target = $(e.target);
+        const target = $(e[0].target).find('tr')[$(e[0].target).find('tr').length - 1];
         let file_object = null;
-        const filename = target.attr('fname');
+        const filename = $(target).attr('fname');
         // eslint-disable-next-line no-undef
         for (let j = 0; j < file_array[part-1].length; j++) {
             // eslint-disable-next-line no-undef
@@ -108,6 +114,12 @@ function uploadImageAttachments(attachment_box) {
         $(image).addClass('thumbnail');
         $(image).css('background-image', `url(${window.URL.createObjectURL(file_object)})`);
         target.prepend(image);
+    });
+    $(attachment_box).each(function() {
+        observer.observe($(this)[0], {
+            childList : true,
+            subtree: true,
+        });
     });
 }
 
@@ -336,6 +348,7 @@ function socketNewOrEditPostHandler(post_id, reply_level, post_box_id=null, edit
                 // eslint-disable-next-line no-undef
                 file_array[post_box_id] = [];
                 uploadImageAttachments(`#${post_id}-reply .upload_attachment_box`);
+                hljs.highlightAll();
 
             }
             catch (error) {
@@ -772,8 +785,10 @@ function changeThreadStatus(thread_id) {
 // eslint-disable-next-line no-unused-vars
 function modifyOrSplitPost(e) {
     e.preventDefault();
+    // eslint-disable-next-line no-var
     const form = $(this);
     const formData = new FormData(form[0]);
+    formData.append('deleted_attachments', JSON.stringify(getDeletedAttachments()));
     const submit_url = form.attr('action');
 
     $.ajax({
@@ -801,8 +816,7 @@ function modifyOrSplitPost(e) {
             // modify
             if (form.attr('id') === 'thread_form') {
                 const thread_id = form.find('#edit_thread_id').val();
-                // eslint-disable-next-line no-var
-                var post_id = form.find('#edit_post_id').val();
+                const post_id = form.find('#edit_post_id').val();
                 const reply_level = $(`#${post_id}`).attr('data-reply_level');
                 const post_box_id = $(`#${post_id}-reply .thread-post-form`).data('post_box_id') -1;
                 const msg_type = json['data']['type'] === 'Post' ? 'edit_post' : 'edit_thread';
@@ -900,6 +914,10 @@ function showEditPostForm(post_id, thread_id, shouldEditThread, render_markdown,
                 $('#markdown_toggle_').removeClass('markdown-active');
                 $('#markdown_buttons_').hide();
             }
+            $('#img-table-loc').append(json.img_table);
+            $('.display-attachment-name').each(function() {
+                $(this).text(decodeURIComponent($(this).text()));
+            });
 
             // If first post of thread
             if (shouldEditThread) {
@@ -947,6 +965,18 @@ function showEditPostForm(post_id, thread_id, shouldEditThread, render_markdown,
     });
 }
 
+function markForDeletion(ele) {
+    $(ele).attr('class', 'btn btn-danger');
+    $(ele).attr('onclick', 'unMarkForDeletion(this)');
+    $(ele).text('Keep');
+}
+
+function unMarkForDeletion(ele) {
+    $(ele).attr('class', 'btn btn-default');
+    $(ele).attr('onclick', 'markForDeletion(this)');
+    $(ele).text('Delete');
+}
+
 // eslint-disable-next-line no-unused-vars
 function cancelEditPostForum() {
     if (!checkAreYouSureForm()) {
@@ -960,6 +990,8 @@ function cancelEditPostForum() {
     $('#edit-user-post').css('display', 'none');
     $(this).closest('.thread-post-form').find('[name=thread_post_content]').val('');
     $('#title').val('');
+
+    $('#display-existing-attachments').remove();
 }
 
 // eslint-disable-next-line no-unused-vars
@@ -1251,6 +1283,13 @@ function modifyThreadList(currentThreadId, currentCategoriesId, course, loadFirs
     });
 }
 
+function displayHistoryAttachment(edit_id) {
+    $(`#history-table-${edit_id}`).toggle();
+    $(`#history-table-${edit_id}`).find('.attachment-name-history').each(function () {
+        $(this).text(decodeURIComponent($(this).text()));
+    });
+}
+
 // eslint-disable-next-line no-unused-vars
 function replyPost(post_id) {
     if ( $(`#${post_id}-reply`).css('display') === 'block' ) {
@@ -1426,6 +1465,7 @@ function showHistory(post_id) {
                 // eslint-disable-next-line no-undef
                 $('#popup-post-history .form-body').prepend(box);
             }
+            $('.history-attachment-table').hide();
             generateCodeMirrorBlocks($('#popup-post-history')[0]);
         },
         error: function() {
@@ -1709,8 +1749,8 @@ function reorderCategories(csrf_token) {
             }
             catch (err) {
                 // eslint-disable-next-line no-undef
-                displayErrorMessage('Error parsing data. Please try again').
-                    return;
+                displayErrorMessage('Error parsing data. Please try again');
+                return;
             }
             if (json['status'] === 'fail') {
                 // eslint-disable-next-line no-undef
@@ -1766,8 +1806,8 @@ function deletePostToggle(isDeletion, thread_id, post_id, author, time, csrf_tok
                 }
                 catch (err) {
                     // eslint-disable-next-line no-undef
-                    displayErrorMessage('Error parsing data. Please try again').
-                        return;
+                    displayErrorMessage('Error parsing data. Please try again');
+                    return;
                 }
                 if (json['status'] === 'fail') {
                     // eslint-disable-next-line no-undef
@@ -1972,8 +2012,8 @@ function loadThreadHandler() {
                 }
                 catch (err) {
                     // eslint-disable-next-line no-undef
-                    displayErrorMessage('Error parsing data. Please try again').
-                        return;
+                    displayErrorMessage('Error parsing data. Please try again');
+                    return;
                 }
                 if (json['status'] === 'fail') {
                     // eslint-disable-next-line no-undef
@@ -2007,6 +2047,7 @@ function loadThreadHandler() {
                 saveScrollLocationOnRefresh('posts_list');
 
                 $('.post_reply_form').submit(publishPost);
+                hljs.highlightAll();
             },
             error: function() {
                 window.alert('Something went wrong while trying to display thread details. Please try again.');
@@ -2082,6 +2123,12 @@ function loadInlineImages(encoded_data) {
         }
     }
 
+}
+
+// eslint-disable-next-line no-unused-vars
+function openInWindow(img) {
+    const url = $(img).attr('src');
+    window.open(url, '_blank', 'toolbar=no,scrollbars=yes,resizable=yes, width=700, height=600');
 }
 
 // eslint-disable-next-line no-unused-vars, no-var
@@ -2191,6 +2238,14 @@ function forumFilterBar() {
     $('#forum_filter_bar').toggle();
 }
 
+function getDeletedAttachments() {
+    const deleted_attachments = [];
+    $('#display-existing-attachments').find('a.btn.btn-danger').each(function() {
+        deleted_attachments.push(decodeURIComponent($(this).attr('id').substring(7)));
+    });
+    return deleted_attachments;
+}
+
 function updateThread(e) {
     // Only proceed if its full forum page
     // eslint-disable-next-line no-undef
@@ -2201,19 +2256,21 @@ function updateThread(e) {
     e.preventDefault();
     const cat = [];
     $('input[name="cat[]"]:checked').each(item => cat.push($('input[name="cat[]"]:checked')[item].value));
+    const post_box_id = $('#edit-user-post').find('.thread-post-form').data('post_box_id');
 
     const data =  {
         edit_thread_id: $('#edit_thread_id').val(),
         edit_post_id: $('#edit_post_id').val(),
         csrf_token: $('input[name="csrf_token"]').val(),
         title: $('input#title').val(),
-        thread_post_content: $('textarea#reply_box_').val(),
+        thread_post_content: $(`textarea#reply_box_${post_box_id}`).val(),
         thread_status: $('#thread_status').val(),
         Anon: $('input#thread_post_anon_edit').is(':checked') ? $('input#thread_post_anon_edit').val() : 0,
         lock_thread_date: $('input#lock_thread_date').text(),
         expirationDate: $('input#expirationDate').val(),
         cat,
-        markdown_status: parseInt($('input#markdown_input_').val()),
+        markdown_status: parseInt($(`input#markdown_input_${post_box_id}`).val()),
+        deleted_attachments: JSON.stringify(getDeletedAttachments()),
     };
 
     $.ajax({
