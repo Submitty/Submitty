@@ -4,7 +4,6 @@ namespace app\models;
 
 use app\libraries\Core;
 use app\entities\calendar\GlobalItem;
-use app\views\NavigationView;
 
 /**
  * Class CalendarInfo
@@ -35,7 +34,7 @@ class GlobalCalendarInfo extends AbstractModel {
 
     /** @var string */
     private $empty_message = "";
-    
+
     /**
      * Loads global calendar items.
      *
@@ -48,7 +47,7 @@ class GlobalCalendarInfo extends AbstractModel {
 
         $info = new GlobalCalendarInfo($core);
         foreach ($global_calendar_items as $item) {
-            $date = $item->getDate()->format('Y-m-d'); 
+            $date = $item->getDate()->format('Y-m-d');
             $curItem = [
                 'title' => htmlspecialchars($item->getText()),
                 'status' => $item->getTypeString(),
@@ -82,5 +81,4 @@ class GlobalCalendarInfo extends AbstractModel {
     public function getGlobalEmptyMessage(): string {
         return $this->empty_message;
     }
-
 }
