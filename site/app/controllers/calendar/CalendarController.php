@@ -443,3 +443,4 @@ class CalendarController extends AbstractController {
 
         return JsonResponse::getErrorResponse("Failed to delete message");
     }
+}
