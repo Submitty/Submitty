@@ -433,7 +433,7 @@ class CalendarController extends AbstractController {
             $this->core->addErrorMessage("Announcement not found");
             return new RedirectResponse($this->core->buildUrl(['calendar']));
         }
-    
+
         $this->core->getSubmittyEntityManager()->remove($item);
         $this->core->getSubmittyEntityManager()->flush();
         $this->core->getSubmittyDB()->disconnect();
