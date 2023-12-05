@@ -4848,9 +4848,9 @@ SQL;
     }
 
     /**
-     * Retrieves all items from the global_calendar_items table.
-     *
-     * Get An array of items with each item including the id, type, text, and date.
+     * Get an array of items with each item including the id, type, text, and date.
+     * 
+     * @return array<array{id: int, type: int, text: string, date: string}> An array of items.
      */
     public function getGlobalCalendarItems(): array {
         $query = "

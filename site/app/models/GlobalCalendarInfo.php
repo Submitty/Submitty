@@ -39,8 +39,7 @@ class GlobalCalendarInfo extends AbstractModel {
      * Loads global calendar items.
      *
      * @param Core $core
-     * @param array $global_calendar_items container of global calendar items
-     * @return GlobalCalendarInfo
+     * @return GlobalCalendarInfo with item infos
      */
     public static function loadGlobalCalendarInfo(Core $core) {
         $global_calendar_items = $core->getSubmittyEntityManager()->getRepository(GlobalItem::class)->findAll();
