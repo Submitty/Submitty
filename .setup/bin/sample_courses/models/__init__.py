@@ -3,8 +3,12 @@ Contains the Mark class and User class
 """
 from pathlib import Path
 import random
-from sample_courses import *
-from sample_courses.utils.create_or_generate import generate_random_user_id, generate_pronouns
+import os
+from sample_courses import SETUP_DATA_PATH, DB_ONLY, yaml
+from sample_courses.utils.create_or_generate import (
+    generate_random_user_id,
+    generate_pronouns,
+)
 from sample_courses.utils.checks import user_exists
 from sample_courses.utils.dependent import add_to_group
 
@@ -95,12 +99,14 @@ class User(object):
             self.group = user["user_group"]
         if self.group < 1 or 4 < self.group:
             raise SystemExit(
-                f"ASSERT: user {self.id}, user_group is not between 1 - 4. Check YML file.")
+                f"ASSERT: user {self.id}, user_group is not between 1 - 4. Check YML file."
+            )
         if "user_access_level" in user:
             self.access_level = user["user_access_level"]
         if self.access_level < 1 or 3 < self.access_level:
             raise SystemExit(
-                f"ASSERT: user {self.id}, user_access_level is not between 1 - 3. Check YML file.")
+                f"ASSERT: user {self.id}, user_access_level is not between 1 - 3. Check YML file."
+            )
         if "registration_section" in user:
             self.registration_section = int(user["registration_section"])
         if "rotating_section" in user:
@@ -195,6 +201,7 @@ shadowWarning: 0"""
             return self.__dict__[detail]
         else:
             return None
+
 
 def generate_random_users(total, real_users) -> list:
     """
