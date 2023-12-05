@@ -1,5 +1,5 @@
 /* exported prevMonth, nextMonth, loadCalendar, loadFullCalendar, editCalendarItemForm, deleteCalendarItem, deleteGlobalCalendarItem, openNewItemModal, openNewGlobalEventModal, openOptionsModal, updateCalendarOptions, colorLegend */
-/* global curr_day, curr_month, curr_year, gradeables_by_date, global_items_by_date, instructor_courses, is_suerpuser, buildUrl */
+/* global curr_day, curr_month, curr_year, gradeables_by_date, global_items_by_date, instructor_courses, is_superuser, buildUrl */
 /* global csrfToken */
 
 // List of names of months in English
