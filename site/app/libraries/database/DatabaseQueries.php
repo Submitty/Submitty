@@ -4744,9 +4744,9 @@ SQL;
     }
 
     /**
-     * Retrieves all items from the superuser_announcements table.
+     * Retrieves all items from the global_calendar_items table.
      *
-     * @return array An array of announcements with each announcement including the id, type, text, and date.
+     * Get An array of items with each item including the id, type, text, and date.
      */
     public function getGlobalCalendarItems(): array {
         $query = "
