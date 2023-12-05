@@ -1,5 +1,5 @@
-/* exported prevMonth, nextMonth, loadCalendar, loadFullCalendar, editCalendarItemForm, deleteCalendarItem, openNewItemModal, openNewGlobalEventModal, openOptionsModal, updateCalendarOptions, colorLegend */
-/* global curr_day, curr_month, curr_year, gradeables_by_date, global_items_by_date, instructor_courses, global_calendar_items, buildUrl */
+/* exported prevMonth, nextMonth, loadCalendar, loadFullCalendar, editCalendarItemForm, deleteCalendarItem, deleteGlobalCalendarItem, openNewItemModal, openNewGlobalEventModal, openOptionsModal, updateCalendarOptions, colorLegend */
+/* global curr_day, curr_month, curr_year, gradeables_by_date, global_items_by_date, instructor_courses, is_suerpuser, buildUrl */
 /* global csrfToken */
 
 // List of names of months in English
@@ -147,7 +147,7 @@ function generateCalendarItem(item) {
     if (link !== '') {
         element.href = link;
     }
-    
+
     if (onclick !== '' && instructor_courses.length > 0 && item['course'] !== 'Superuser') {
         console.log(onclick !== '' && instructor_courses.length > 0 && item['course'] !== 'Superuser');
         if (!item['show_due']) {
@@ -158,7 +158,7 @@ function generateCalendarItem(item) {
             element.onclick = onclick;
         }
     }
-    else if (onclick !== '' && is_superuser && item['course'] == 'Superuser') {
+    else if (onclick !== '' && is_superuser && item['course'] === 'Superuser') {
         if (!item['show_due']) {
             element.style.cursor = 'pointer';
             element.onclick = () => editGlobalCalendarItemForm(item['status'], item['title'], item['id'], item['date']);
@@ -206,7 +206,7 @@ function editCalendarItemForm(itemType, itemText, itemId, date, semester, course
  * @param date : string the item date
  * @returns {void} : only has to update existing variables
  */
-function editGlobalCalendarItemForm(itemType, itemText, itemId, date,) {
+function editGlobalCalendarItemForm(itemType, itemText, itemId, date) {
     console.log(itemType);
     $(`#global-calendar-item-type-edit>option[value=${itemType}]`).attr('selected', true);
     $('#global-calendar-item-text-edit').val(itemText);
@@ -332,12 +332,10 @@ function generateDayCell(year, month, day, curr_view_month, view_semester=false)
     const itemList = document.createElement('div');
     itemList.classList.add('cal-cell-items-panel');
     for (const i in global_items_by_date[cell_date_str]) {
-        itemList.appendChild(generateCalendarItem(global_items_by_date[cell_date_str][i]))
-        console.log( global_items_by_date[cell_date_str]);
+        itemList.appendChild(generateCalendarItem(global_items_by_date[cell_date_str][i]));
     }
     for (const i in gradeables_by_date[cell_date_str]) {
         itemList.appendChild(generateCalendarItem(gradeables_by_date[cell_date_str][i]));
-        console.log((gradeables_by_date[cell_date_str][i]));
     }
     content.appendChild(itemList);
     return content;
