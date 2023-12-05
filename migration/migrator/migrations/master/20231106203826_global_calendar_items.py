@@ -10,35 +10,27 @@ def up(config, database):
     :param database: Object for interacting with given database for environment
     :type database: migrator.db.Database
     """
-    # Create the sequence for superuser_announcements id
+    # Create the sequence for global_calendar_items id
+    # Create the table for global_calendar_items
+    # Set the OWNED BY property for the sequence
     database.execute(
     """
-    CREATE SEQUENCE IF NOT EXISTS superuser_announcements_id_seq
+    CREATE SEQUENCE IF NOT EXISTS global_calendar_items_id_seq
         AS integer
         START WITH 1
         INCREMENT BY 1
         NO MINVALUE
         NO MAXVALUE
         CACHE 1;
-    """
-    )
 
-    # Create the table for superuser_announcements
-    database.execute(
-    """
-    CREATE TABLE IF NOT EXISTS superuser_announcements (
-        id integer NOT NULL DEFAULT nextval('superuser_announcements_id_seq'::regclass),
+    CREATE TABLE IF NOT EXISTS global_calendar_items (
+        id integer NOT NULL DEFAULT nextval('global_calendar_items_id_seq'::regclass),
         type integer NOT NULL,
         text character varying(255) NOT NULL,
         date date NOT NULL
     );
-    """
-    )
 
-    # Set the OWNED BY property for the sequence
-    database.execute(
-    """
-    ALTER SEQUENCE superuser_announcements_id_seq OWNED BY superuser_announcements.id;
+    ALTER SEQUENCE global_calendar_items_id_seq OWNED BY global_calendar_items.id;
     """
     )
 

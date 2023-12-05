@@ -9,7 +9,7 @@ use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
 
 #[ORM\Entity]
-#[ORM\Table(name: "superuser_announcements")]
+#[ORM\Table(name: "global_calendar_items")]
 class GlobalItem {
     const TEXT = 0;
     const ANNOUNCEMENT = 1;

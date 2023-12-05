@@ -4751,7 +4751,7 @@ SQL;
     public function getGlobalCalendarItems(): array {
         $query = "
             SELECT id, type, text, date
-            FROM superuser_announcements
+            FROM global_calendar_items
             ORDER BY date DESC
         ";
         $this->submitty_db->query($query);
