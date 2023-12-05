@@ -90,7 +90,7 @@ class CalendarController extends AbstractController {
             $courses
         );
     }
-    
+
     /**
      * @Route("/calendar/items/new", methods={"POST"})
      */
@@ -336,7 +336,7 @@ class CalendarController extends AbstractController {
         $this->core->getSubmittyEntityManager()->persist($calendar_item);
         $this->core->getSubmittyEntityManager()->flush();
         $this->core->getSubmittyDB()->disconnect();
-    
+
         $this->core->addSuccessMessage("Calendar item successfully added");
         return new RedirectResponse($this->core->buildUrl(['calendar']));
     }
@@ -381,7 +381,7 @@ class CalendarController extends AbstractController {
 
 
         $announcement = $this->core->getSubmittyEntityManager()
-            ->getRepository(GlobalItem::class) 
+            ->getRepository(GlobalItem::class)
             ->findOneBy(['id' => $id]);
 
         if ($announcement === null) {
@@ -394,7 +394,8 @@ class CalendarController extends AbstractController {
             $announcement->setText($text);
             $announcement->setDate(new \DateTime($date));
             //$calendar_item->setStringType($type);
-        } catch (\InvalidArgumentException $e) {
+        }
+        catch (\InvalidArgumentException $e) {
             $this->core->addErrorMessage($e->getMessage());
             return new RedirectResponse($this->core->buildUrl(['calendar']));
         }
@@ -407,9 +408,9 @@ class CalendarController extends AbstractController {
 
         $this->core->addSuccessMessage("Announcement successfully updated");
         return new RedirectResponse($this->core->buildUrl(['calendar']));
-   }
+    }
 
-   /**
+    /**
      * @Route("/calendar/global_items/delete", methods={"POST"})
      */
     public function deleteGlobalAnnouncement(): ResponseInterface {
