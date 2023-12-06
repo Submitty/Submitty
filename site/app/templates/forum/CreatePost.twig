@@ -62,7 +62,7 @@
             {% endif %}
         {% endif %} 
 
-        <button class="btn text-decoration-none key_to_click" tabindex="0" onClick="toggleLike({{post.id}}, {{post.thread_id}}, '{{current_user}}')" style="background: none; border: none; padding: 0; cursor: pointer; outline: none;">
+        <button class="btn upduck-button text-decoration-none key_to_click" tabindex="0" onClick="toggleLike({{post.id}}, {{post.thread_id}}, '{{current_user}}')">
             <img id="likeIcon_{{post.id}}" src="{{ post_up_duck.upduck_user_liked ? '/img/on-duck-button.svg' : '/img/off-duck-button.svg' }}" alt="Like" width="35" height="35" style="vertical-align: middle;">
         </button>
         <span id="likeCounter_{{post.id}}" style="font-size: 15px; vertical-align: middle;">{{ post_up_duck.upduck_count }}</span>
