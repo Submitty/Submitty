@@ -202,7 +202,7 @@
             const warningIds = {"hide-materials-checkbox": "upload-form", "hide-materials-checkbox-edit": "edit-form", "hide-folder-materials-checkbox-edit": "edit-folder-form"};
             var callerId = clicked.target ? clicked.target.id : clicked; //can be an event or id itself
             var caller = $('#'+callerId);
-            var warningMessage = $('#'+callerId+' ~ #'+warningIds[callerId]+'-hide-warning');
+            var warningMessage = $('#'+warningIds[callerId]+'-hide-warning');
             if (caller.hasClass('partial-checkbox')) {
                 caller.removeClass('partial-checkbox');
                 caller.siblings()[0].remove();
@@ -212,10 +212,10 @@
                 caller.prop('checked', true);
             }
             if(caller.is(':checked') && warningMessage.length === 0) {
-                var callerParent = caller.parent().get(0);
-                callerParent.insertAdjacentHTML(
-                    'beforeend',
-                    '<span id="'+warningIds[callerId]+`-hide-warning" class="red-message full-width">\nWarning:
+                var callerParentNext = caller.parent().next().get(0);
+                callerParentNext.insertAdjacentHTML(
+                    'afterend',
+                    '<span id="'+warningIds[callerId]+`-hide-warning" class="red-message full-width mt-0">\nWarning:
                     Students can view the hidden course material by guessing the corresponding
                     course material ID (a simple number). It is recommended to instead use the release date feature
                     if it is necessary to prevent students from accessing course materials.\n</span>`
