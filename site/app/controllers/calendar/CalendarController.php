@@ -204,7 +204,7 @@ class CalendarController extends AbstractController {
             $this->core->addErrorMessage("Invalid or incorrect id");
             return new RedirectResponse($this->core->buildUrl(['calendar']));
         }
-        
+
         if (isset($_POST['semester'])) {
             $semester = $_POST['semester'];
         }
