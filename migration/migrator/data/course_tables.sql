@@ -692,7 +692,11 @@ CREATE TABLE public.course_materials (
     hidden_from_students boolean,
     priority double precision NOT NULL,
     url text,
-    title character varying(255)
+    title character varying(255),
+    uploaded_by character varying(255) DEFAULT NULL::character varying,
+    upload_date timestamp with time zone,
+    last_edit_by character varying(255) DEFAULT NULL::character varying,
+    last_edit_date timestamp with time zone
 );
 
 
@@ -2591,6 +2595,22 @@ CREATE TRIGGER late_day_extension_change AFTER INSERT OR DELETE OR UPDATE ON pub
 --
 
 CREATE TRIGGER late_days_allowed_change AFTER INSERT OR DELETE OR UPDATE ON public.late_days FOR EACH ROW EXECUTE PROCEDURE public.late_days_allowed_change();
+
+
+--
+-- Name: course_materials course_materials_last_edit_by_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.course_materials
+    ADD CONSTRAINT course_materials_last_edit_by_fkey FOREIGN KEY (last_edit_by) REFERENCES public.users(user_id);
+
+
+--
+-- Name: course_materials course_materials_uploaded_by_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.course_materials
+    ADD CONSTRAINT course_materials_uploaded_by_fkey FOREIGN KEY (uploaded_by) REFERENCES public.users(user_id);
 
 
 --
