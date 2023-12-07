@@ -204,6 +204,22 @@ class CalendarController extends AbstractController {
             $this->core->addErrorMessage("Invalid or incorrect id");
             return new RedirectResponse($this->core->buildUrl(['calendar']));
         }
+        
+        if (isset($_POST['semester'])) {
+            $semester = $_POST['semester'];
+        }
+        else {
+            $this->core->addErrorMessage("Invalid semester");
+            return new RedirectResponse($this->core->buildUrl(['calendar']));
+        }
+
+        if (isset($_POST['course'])) {
+            $InputCourse = $_POST['course'];
+        }
+        else {
+            $this->core->addErrorMessage("Invalid course");
+            return new RedirectResponse($this->core->buildUrl(['calendar']));
+        }
 
         $instructor_courses = $this->core->getQueries()->getInstructorLevelUnarchivedCourses($this->core->getUser()->getId());
 
