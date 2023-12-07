@@ -44,12 +44,15 @@ $(() => {
     if (Cookies.get('display-banner') === 'yes') {
         showBanners();
     }
+    else {
+        Cookies.set('display-banner', 'no');
+    }
 });
 function showBanners() {
 
     const movingUnit = document.getElementById('moving-unit');
     const bannerElement = document.getElementById('banner');
-    if (bannerElement.style.display === 'none') {
+    if (bannerElement.style.display === 'none' && images.length > 0) {
         currentImageIndex = 0;
         Cookies.set('display-banner', 'yes');
 
@@ -95,7 +98,9 @@ function showBanners() {
 
         duckdivElement.style.transform = 'rotate(0deg)';
         document.getElementById('breadcrumbs').style.flexWrap = 'wrap';
-        images[currentImageIndex].classList.remove('active');
+        if (images.length > 0) {
+            images[currentImageIndex].classList.remove('active');
+        }
 
 
         bannerElement.style.width = '1%';
@@ -109,9 +114,9 @@ function showBanners() {
             seenImages.push(currentImages[currentImageIndex]);
             currentImageIndex = seenImages.length; // the last currentImage we were at
             currentImages.shift();
+            images = currentImages.concat(seenImages);
 
         }
-        images = currentImages.concat(seenImages);
         Cookies.set('hiddenImages', JSON.stringify(hiddenImages));
         if (currentImages.length > 0) {
             document.getElementById('triangle').style.display = 'block';
