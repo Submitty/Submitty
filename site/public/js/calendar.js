@@ -183,7 +183,6 @@ function generateCalendarItem(item) {
     }
 
     if (onclick !== '' && instructor_courses.length > 0 && item['course'] !== 'Superuser') {
-        console.log(onclick !== '' && instructor_courses.length > 0 && item['course'] !== 'Superuser');
         if (!item['show_due']) {
             element.style.cursor = 'pointer';
             element.onclick = () => editCalendarItemForm(item['status'], item['title'], item['id'], item['date'], item['semester'], item['course']);
@@ -241,7 +240,6 @@ function editCalendarItemForm(itemType, itemText, itemId, date, semester, course
  * @returns {void} : only has to update existing variables
  */
 function editGlobalCalendarItemForm(itemType, itemText, itemId, date) {
-    console.log(itemType);
     $(`#global-calendar-item-type-edit>option[value=${itemType}]`).attr('selected', true);
     $('#global-calendar-item-text-edit').val(itemText);
     $('#edit-global-picker').val(date);
@@ -272,7 +270,6 @@ function deleteCalendarItem() {
             contentType: false,
             data: data,
             success: function (res) {
-                console.log(res);
                 const response = JSON.parse(res);
                 if (response.status === 'success') {
                     location.reload();
@@ -303,7 +300,6 @@ function deleteGlobalCalendarItem() {
             contentType: false,
             data: data,
             success: function (res) {
-                console.log(res);
                 const response = JSON.parse(res);
                 if (response.status === 'success') {
                     location.reload();
