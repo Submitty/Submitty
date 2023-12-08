@@ -5071,7 +5071,7 @@ AND gc_id IN (
                 "user_email" => $row["user_email"],
                 "pronouns" => $row["user_pronouns"],
                 "display_pronouns" => $row["display_pronouns"],
-                "is_staff" => intval($row["user_group"]) <= 3,
+                "is_staff" => intval($row["user_group"]) <= User::GROUP_LIMITED_ACCESS_GRADER,
             ];
         }
         return $return;

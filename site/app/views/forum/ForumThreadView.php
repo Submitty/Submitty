@@ -441,7 +441,7 @@ class ForumThreadView extends AbstractView {
         $expiring = $activeThread['pinned_expiration'] <= date("Y-m-d H:i:s", strtotime("+7 day"));
 
         $thread_id = $activeThread['id'];
-        if ($thread_id == -1) {
+        if ($thread_id === -1) {
             $thread_id = array_values($posts)[0]["thread_id"];
         }
         $first_post = $this->core->getQueries()->getFirstPostForThread($thread_id);
