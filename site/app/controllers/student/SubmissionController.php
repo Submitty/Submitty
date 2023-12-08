@@ -22,9 +22,9 @@ use app\models\GradingOrder;
 use Symfony\Component\Routing\Annotation\Route;
 use app\models\notebook\SubmissionCodeBox;
 use app\models\notebook\SubmissionMultipleChoice;
-use setasign\Fpdi\Fpdi;
 
-//require_once __DIR__ . "/../../../vendor/autoload.php";
+// Adds Fpdi library for getting page count of pdfs
+use setasign\Fpdi\Fpdi;
 
 class SubmissionController extends AbstractController {
     private $upload_details = [
@@ -430,6 +430,17 @@ class SubmissionController extends AbstractController {
             }
         }
 
+        // Initialize new instance of FPDI and get page count
+        $pdf = new Fpdi();
+        $actual_page_count = $pdf->setSourceFile($dst);
+            
+        // Check if the actual page count matches the expected count
+        if ($actual_page_count % $num_pages !== 0) {
+            $error_message = "The PDF page count ($actual_page_count) is not divisible by the expected count per exam ($num_pages).";
+            return $this->core->getOutput()->renderJsonFail($error_message);
+        }
+
+        // pdf_check.cgi DEPRECATED
         // use pdf_check.cgi to check that # of pages is valid and split
         // also get the cover image and name for each pdf appropriately
 
