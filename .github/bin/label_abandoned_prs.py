@@ -4,16 +4,16 @@ import datetime
 from datetime import timedelta
 
 pr_json = "gh pr list --json updatedAt,labels,number,comments"
-string = subprocess.check_output(pr_json, shell=True, text=True)
-output = json.loads(string)
+terminal_output = subprocess.check_output(pr_json, shell=True, text=True)
+json_output = json.loads(terminal_output)
 
-inactive_comment = 'This\
-                         PR has been inactive (no commits and no review comments)\
-                         for 12 days. If there is no new activity in the next 48 hours,\
-                         this PR will be labeled as Abandoned PR - Needs New Owner and\
-                         either another developer will finish the PR or it will be closed.'
+inactive_comment = "This"\
+" PR has been inactive (no commits and no review comments)"\
+" for 12 days. If there is no new activity in the next 48 hours,"\
+" this PR will be labeled as Abandoned PR - Needs New Owner and"\
+" either another developer will finish the PR or it will be closed."
 
-for json_data in output:
+for json_data in json_output:
     already_warned = False
     string = json_data['updatedAt']
     for comment in json_data['comments']:
@@ -34,10 +34,10 @@ for json_data in output:
     num = str(json_data['number'])
     already_abandoned = False
     for labels in json_data['labels']:
-        if (labels['name'] == 'Abandoned PR - Needs New Owner'):
+        if labels['name'] == 'Abandoned PR - Needs New Owner':
             already_abandoned = True
 
-    if ((tdiff > twelve_days and not already_abandoned and not already_warned)):
+    if tdiff > twelve_days and not already_abandoned and not already_warned:
         subprocess.run(['gh', 'pr', 'comment', num, '--body', inactive_comment])
-    if ((tdiff > two_weeks and not already_abandoned) or (tdiff > two_days and already_warned)):
+    if (tdiff > two_weeks and not already_abandoned) or (tdiff > two_days and already_warned):
         subprocess.run(['gh', 'pr', 'edit', num, '--add-label', 'Abandoned PR - Needs New Owner'])
