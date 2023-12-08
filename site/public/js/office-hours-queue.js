@@ -22,6 +22,7 @@ document.addEventListener('DOMContentLoaded', () => {
     adjustRows();
 });
 
+// eslint-disable-next-line no-unused-vars
 function toggleSort(column) {
     const sortIndicator = $('#sort-indicator');
     if (column === 'HelpStartedBy') {
