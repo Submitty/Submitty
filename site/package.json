@@ -12,7 +12,7 @@
   "homepage": "https://github.com/Submitty/Submitty#readme",
   "dependencies": {
     "@codemirror/autocomplete": "6.7.1",
-    "@codemirror/commands": "6.3.0",
+    "@codemirror/commands": "6.3.2",
     "@codemirror/lang-cpp": "6.0.2",
     "@codemirror/lang-java": "6.0.1",
     "@codemirror/lang-json": "6.0.1",
@@ -49,7 +49,7 @@
   },
   "devDependencies": {
     "@babel/core": "^7.22.1",
-    "@babel/preset-env": "^7.22.4",
+    "@babel/preset-env": "^7.23.5",
     "@babel/preset-typescript": "^7.22.11",
     "@cypress/skip-test": "^2.6.1",
     "@types/jest": "^29.5.4",
@@ -57,7 +57,7 @@
     "@types/jquery.are-you-sure": "^0.0.31",
     "@types/jqueryui": "^1.12.17",
     "@types/twig": "^1.12.14",
-    "@typescript-eslint/eslint-plugin": "^6.5.0",
+    "@typescript-eslint/eslint-plugin": "^6.13.1",
     "@typescript-eslint/parser": "^6.0.0",
     "babel-jest": "^29.4.3",
     "cypress": "^13.1.0",
@@ -70,7 +70,7 @@
     "jest-environment-jsdom": "^29.7.0",
     "node-fetch": "^2.6.12",
     "regenerator-runtime": "^0.14.0",
-    "stylelint": "^15.10.3",
+    "stylelint": "^15.11.0",
     "stylelint-config-standard": "^33.0.0",
     "typescript": "^5.0.4",
     "vnu-jar": "^23.4.11"
