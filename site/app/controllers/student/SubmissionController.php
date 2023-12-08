@@ -496,8 +496,11 @@ class SubmissionController extends AbstractController {
                 $response = json_decode($output);
 
                 if (!$response->success) {
+                    if (!isset($response->error_message)) {
+                      return $this->core->getOutput()->renderJsonFail("Unknown error occurred.");
+                    }
                     return $this->core->getOutput()->renderJsonFail($response->error_message);
-                }
+                  }
 
                 //add new job to queue
                 if (!file_put_contents($bulk_upload_job, json_encode($job_data, JSON_PRETTY_PRINT))) {
