@@ -242,11 +242,14 @@
 }
 
 .upduck-button {
+    position: relative;
+    display: inline-block;
     background: none; 
     border: none; 
     padding: 0; 
     cursor: pointer; 
     outline: none;
+    vertical-align: middle;
 }
 
 .delete-post-button,
