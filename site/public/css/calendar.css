@@ -163,8 +163,7 @@ h2.cal-month-title {
     max-height: 160px;
     width: 100%;
     display: block;
-    overflow-y: auto;
-    overflow-x: hidden;
+    overflow: hidden auto;
 }
 
 /* each item in the day cell */
