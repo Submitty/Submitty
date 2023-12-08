@@ -1,5 +1,5 @@
 //this helps update the frontend when the page refreshes because without this the sort icon would reset and the sort state would not
-/* eslint prefer-arrow-callback: [ "error", { "allowNamedFunctions": true } ] */
+/* eslint prefer-arrow-callback: [ 'error', { 'allowNamedFunctions': true } ] */
 document.addEventListener('DOMContentLoaded', () => {
     const sortIndicator = document.getElementById('sort-indicator');
     let sortState = localStorage.getItem('sort-indicator');
@@ -10,15 +10,14 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     if (sortState === 'up') {
-        sortIndicator.classList.add("fas", "fa-sort-up");
-    } 
-    else if (sortState === 'off') {
-        sortIndicator.classList.add("fa-solid", "fa-sort");
-    } 
-    else if (sortState === 'down') {
-        sortIndicator.classList.add("fas", "fa-sort-down");
+        sortIndicator.classList.add('fas', 'fa-sort-up');
     }
-
+    else if (sortState === 'off') {
+        sortIndicator.classList.add('fa-solid', 'fa-sort');
+    }
+    else if (sortState === 'down') {
+        sortIndicator.classList.add('fas', 'fa-sort-down');
+    }
 
     adjustRows();
 });
@@ -28,15 +27,15 @@ function toggleSort(column) {
     if (column === 'HelpStartedBy') {
         if (localStorage.getItem('sort-indicator') === 'off') {
             localStorage.setItem('sort-indicator', 'up');
-            sortIndicator.attr("class", "fas fa-sort-up");
-        } 
+            sortIndicator.attr('class', 'fas fa-sort-up');
+        }
         else if (localStorage.getItem('sort-indicator') === 'up') {
             localStorage.setItem('sort-indicator', 'down');
-            sortIndicator.attr("class", "fas fa-sort-down");
-        } 
+            sortIndicator.attr('class', 'fas fa-sort-down');
+        }
         else if (localStorage.getItem('sort-indicator') === 'down') {
             localStorage.setItem('sort-indicator', 'off');
-            sortIndicator.attr("class", "fa-solid fa-sort");
+            sortIndicator.attr('class', 'fa-solid fa-sort');
         }
     }
     adjustRows();
