@@ -883,18 +883,7 @@ function deleteBadges() {
         type: "POST",
         data: data,
         contentType: false,
-        processData: false,
-        success: function(response) {
-            console.log("Success:", response);
-            // Optional: Redirect or perform some action on success
-            if (redirect) {
-                window.location.href = redirect;
-            }
-        },
-        error: function(xhr, status, error) {
-            console.error("Error:", error);
-            // Handle errors
-        }
+        processData: false
     });
 
 }
