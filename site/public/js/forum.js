@@ -1253,7 +1253,6 @@ function modifyThreadList(currentThreadId, currentCategoriesId, course, loadFirs
 
 function toggleLike(post_id,thread_id,current_user) {
 
-    // eslint-disable-next-line no-undef
     const url = buildCourseUrl(['post', 'likes']);
     $.ajax({
         url: url,
@@ -1266,16 +1265,13 @@ function toggleLike(post_id,thread_id,current_user) {
         },
         success: function(data) {
             try {
-                // eslint-disable-next-line no-var
                 var json = JSON.parse(data);
             }
             catch (err) {
-                // eslint-disable-next-line no-undef
                 displayErrorMessage('Error parsing data. Please try again.');
                 return;
             }
             if (json['status'] === 'fail') {
-                // eslint-disable-next-line no-undef
                 displayErrorMessage(json['message']);
                 return;
             }
