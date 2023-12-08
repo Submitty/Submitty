@@ -22,6 +22,9 @@ use app\models\GradingOrder;
 use Symfony\Component\Routing\Annotation\Route;
 use app\models\notebook\SubmissionCodeBox;
 use app\models\notebook\SubmissionMultipleChoice;
+use setasign\Fpdi\Fpdi;
+
+//require_once __DIR__ . "/../../../vendor/autoload.php";
 
 class SubmissionController extends AbstractController {
     private $upload_details = [
@@ -343,6 +346,7 @@ class SubmissionController extends AbstractController {
      * @Route("/courses/{_semester}/{_course}/gradeable/{gradeable_id}/bulk", methods={"POST"})
      */
     public function ajaxBulkUpload($gradeable_id) {
+
         $is_qr = isset($_POST['use_qr_codes']) && $_POST['use_qr_codes'] === "true";
 
         if (!isset($_POST['num_pages']) && !$is_qr) {
@@ -394,8 +398,6 @@ class SubmissionController extends AbstractController {
         if ($file_size > $max_size) {
             return $this->uploadResult("File(s) uploaded too large.  Maximum size is " . ($max_size / 1000) . " kb. Uploaded file(s) was " . ($file_size / 1000) . " kb.", false);
         }
-
-        // creating uploads/bulk_pdf/gradeable_id directory
 
         $pdf_path = FileUtils::joinPaths($this->core->getConfig()->getCoursePath(), "uploads", "bulk_pdf", $gradeable->getId());
         if (!FileUtils::createDir($pdf_path)) {
