@@ -10,32 +10,33 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     if (sortState === 'up') {
-        sortIndicator.innerHTML = '<i class="fas fa-sort-up"></i>';
-    }
+        sortIndicator.classList.add("fas", "fa-sort-up");
+    } 
     else if (sortState === 'off') {
-        sortIndicator.innerHTML = '<i class="fa-solid fa-sort"></i>';
-    }
+        sortIndicator.classList.add("fa-solid", "fa-sort");
+    } 
     else if (sortState === 'down') {
-        sortIndicator.innerHTML = '<i class="fas fa-sort-down"></i>';
+        sortIndicator.classList.add("fas", "fa-sort-down");
     }
+
+
     adjustRows();
 });
 
-/* exported toggleSort */
 function toggleSort(column) {
-    const sortIndicator = document.getElementById('sort-indicator');
+    const sortIndicator = $('#sort-indicator');
     if (column === 'HelpStartedBy') {
         if (localStorage.getItem('sort-indicator') === 'off') {
             localStorage.setItem('sort-indicator', 'up');
-            sortIndicator.innerHTML = '<i class="fas fa-sort-up"></i>';
-        }
+            sortIndicator.attr("class", "fas fa-sort-up");
+        } 
         else if (localStorage.getItem('sort-indicator') === 'up') {
             localStorage.setItem('sort-indicator', 'down');
-            sortIndicator.innerHTML = '<i class="fas fa-sort-down"></i>';
-        }
+            sortIndicator.attr("class", "fas fa-sort-down");
+        } 
         else if (localStorage.getItem('sort-indicator') === 'down') {
             localStorage.setItem('sort-indicator', 'off');
-            sortIndicator.innerHTML = '<i class="fa-solid fa-sort"></i>';
+            sortIndicator.attr("class", "fa-solid fa-sort");
         }
     }
     adjustRows();
@@ -51,7 +52,7 @@ function adjustRows() {
 
         }
         else {
-            return parseInt$((a).find('.number-count').text()) < parseInt($(b).find('.number-count').text()) ? -1 : 1;
+            return parseInt($(a).find('.number-count').text()) < parseInt($(b).find('.number-count').text()) ? -1 : 1;
         }
     });
     $('#queue-history-table').empty();
