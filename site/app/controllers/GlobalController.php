@@ -467,13 +467,24 @@ class GlobalController extends AbstractController {
     }
 
 
-    public function calculateHanukkahDate(int $year): string {
+//    public function calculateHanukkahDate(int $year): string {
+//        $gregorianDate = gregoriantojd(12, 25, $year);
+//        $dayOfWeek = jddayofweek($gregorianDate);
+//        $daysToAdd = 7 - $dayOfWeek + 1;
+//        $hanukkahDate = $gregorianDate + $daysToAdd;
+//        return jdtogregorian($hanukkahDate);
+//    }
+
+    public function calculateHanukkahDate(int $year): \DateTime {
         $gregorianDate = gregoriantojd(12, 25, $year);
         $dayOfWeek = jddayofweek($gregorianDate);
         $daysToAdd = 7 - $dayOfWeek + 1;
         $hanukkahDate = $gregorianDate + $daysToAdd;
-        return jdtogregorian($hanukkahDate);
+        $hanukkahDateTime = \DateTime::createFromFormat('Y-m-d', jdtogregorian($hanukkahDate));
+
+        return $hanukkahDateTime;
     }
+
 
 
 
@@ -488,9 +499,8 @@ class GlobalController extends AbstractController {
         switch ($month) {
             case 12:
                 //December (Christmas, Hanukkah)
-                $hanukkahDate = calculateHanukkahDate($yearint);
-                // Calculate the day of Hanukkah
-                $dayOfHanukkah = $day - (int) $hanukkahDate->format('j') + 1;
+                $hanukkahDateTime = $this->calculateHanukkahDate($yearint);
+                $dayOfHanukkah = $day - (int) $hanukkahDateTime->format('j') + 1;
 
                 if ($dayOfHanukkah >= 1 && $dayOfHanukkah <= 8) {
                     // Select the menorah duck image based on the day of Hanukkah
