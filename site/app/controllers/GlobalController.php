@@ -467,7 +467,7 @@ class GlobalController extends AbstractController {
     }
 
 
-    public function calculateHanukkahDate(string $year): string {
+    public function calculateHanukkahDate(int $year): string {
         $gregorianDate = gregoriantojd(12, 25, $year);
         $dayOfWeek = jddayofweek($gregorianDate);
         $daysToAdd = 7 - $dayOfWeek + 1;
@@ -483,11 +483,12 @@ class GlobalController extends AbstractController {
         $day = (int) $now->format('j');
         $month = (int) $now->format('n');
         $year = $now->format('Y');
+        $yearint = (int) $now->format('Y');
 
         switch ($month) {
             case 12:
                 //December (Christmas, Hanukkah)
-                $hanukkahDate = calculateHanukkahDate($year);
+                $hanukkahDate = calculateHanukkahDate($yearint);
                 // Calculate the day of Hanukkah
                 $dayOfHanukkah = $day - (int) $hanukkahDate->format('j') + 1;
 
