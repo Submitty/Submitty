@@ -480,9 +480,7 @@ class GlobalController extends AbstractController {
         $dayOfWeek = jddayofweek($gregorianDate);
         $daysToAdd = 7 - $dayOfWeek + 1;
         $hanukkahDate = $gregorianDate + $daysToAdd;
-        $hanukkahDateTime = \DateTime::createFromFormat('Y-m-d', jdtogregorian($hanukkahDate));
-
-        return $hanukkahDateTime;
+        return \DateTime::createFromFormat('Y-m-d', jdtogregorian($hanukkahDate));
     }
 
 
