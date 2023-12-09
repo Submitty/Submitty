@@ -466,6 +466,26 @@ class GlobalController extends AbstractController {
         ]);
     }
 
+
+    function calculateHanukkahDate($year)
+    {
+        $gregorianDate = gregoriantojd(12, 25, $year); // Gregorian date for December 25th of the given year
+        $dayOfWeek = jddayofweek($gregorianDate); // Day of the week for December 25th
+
+        // Calculate the number of days to add to reach the first day of Hanukkah
+        $daysToAdd = 7 - $dayOfWeek + 1;
+
+        // Calculate the Julian date of the first day of Hanukkah
+        $hanukkahDate = $gregorianDate + $daysToAdd;
+
+        // Convert the Julian date back to Gregorian
+        $hanukkahGregorian = jdtogregorian($hanukkahDate);
+
+        return $hanukkahGregorian;
+    }
+
+
+
     // ==========================================================================================
     private function getDuckImage(\DateTime $now): string {
         $duck_img = 'moorthy_duck/00-original.svg';
@@ -475,7 +495,19 @@ class GlobalController extends AbstractController {
 
         switch ($month) {
             case 12:
-                $decemberImages = ['moorthy_duck/12-december.svg', 'moorthy_duck/menorah-duck.svg'];
+                $hanukkahDate = calculateHanukkahDate($year);
+                // Calculate the day of Hanukkah
+                $dayOfHanukkah = $day - (int) $hanukkahDate->format('j') + 1;
+
+                if ($dayOfHanukkah >= 1 && $dayOfHanukkah <= 8) {
+                    // Select the menorah duck image based on the day of Hanukkah
+                    $menorah_duck = 'moorthy_duck/menorah-duck/' . $dayOfHanukkah . '.svg';
+                    $decemberImages = ['moorthy_duck/12-december.svg', $menorah_duck];
+                }
+                else {
+                    $decemberImages = ['moorthy_duck/12-december.svg'];
+                }
+                
                 $duck_img = $decemberImages[array_rand($decemberImages)];
             case 11:
                 //November (Thanksgiving)
