@@ -507,7 +507,7 @@ class GlobalController extends AbstractController {
                 if ($day >= 7 && $day <= 15) {
                     // Select the menorah duck image based on the day of Hanukkah
                     $datecounter = $day - 6;
-                    $menorah_duck = 'moorthy_duck/menorah-duck/' . $datecounter. '.svg';
+                    $menorah_duck = 'moorthy_duck/menorah-duck/' . $datecounter . '.svg';
                     $decemberImages = ['moorthy_duck/12-December.svg', $menorah_duck];
                 }
                 else {
