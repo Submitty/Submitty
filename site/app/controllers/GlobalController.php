@@ -467,8 +467,7 @@ class GlobalController extends AbstractController {
     }
 
 
-    function calculateHanukkahDate($year)
-    {
+    function calculateHanukkahDate($year): int {
         $gregorianDate = gregoriantojd(12, 25, $year);
         $dayOfWeek = jddayofweek($gregorianDate);
 
