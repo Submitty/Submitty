@@ -143,7 +143,7 @@ class NavigationView extends AbstractView {
             if (is_file($seating_user_path)) {
                 $user_seating_details = json_decode(file_get_contents($seating_user_path));
 
-                if ($user_seating_details === null ||  filesize($seating_user_path) == 0) {
+                if ($user_seating_details === null || filesize($seating_user_path) == 0) {
                     //print error message without breaking (ex ERR: Please contact instructor)
                     $seating_config = 'empty-case-handling';
                 }
