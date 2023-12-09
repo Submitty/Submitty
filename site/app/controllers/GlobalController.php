@@ -475,13 +475,13 @@ class GlobalController extends AbstractController {
 //        return jdtogregorian($hanukkahDate);
 //    }
 
-    public function calculateHanukkahDate(int $year): \DateTime {
-        $gregorianDate = gregoriantojd(12, 25, $year);
-        $dayOfWeek = jddayofweek($gregorianDate);
-        $daysToAdd = 7 - $dayOfWeek + 1;
-        $hanukkahDate = $gregorianDate + $daysToAdd;
-        return \DateTime::createFromFormat('Y-m-d', jdtogregorian($hanukkahDate));
-    }
+//    public function calculateHanukkahDate(int $year): \DateTime {
+//        $gregorianDate = gregoriantojd(12, 25, $year);
+//        $dayOfWeek = jddayofweek($gregorianDate);
+//        $daysToAdd = 7 - $dayOfWeek + 1;
+//        $hanukkahDate = $gregorianDate + $daysToAdd;
+//        return \DateTime::createFromFormat('m/d/Y', jdtogregorian($hanukkahDate));
+//    }
 
 
 
@@ -497,16 +497,21 @@ class GlobalController extends AbstractController {
         switch ($month) {
             case 12:
                 //December (Christmas, Hanukkah)
-                $hanukkahDateTime = $this->calculateHanukkahDate($yearint);
-                $dayOfHanukkah = $day - (int) $hanukkahDateTime->format('j') + 1;
+//                $hanukkahDateTime = $this->calculateHanukkahDate($yearint);
+//                $dayOfHanukkah = $day - (int) $hanukkahDateTime->format('j') + 1;
+//                var_dump($yearint);
+//                var_dump($hanukkahDateTime);
+//                var_dump($dayOfHanukkah);
 
-                if ($dayOfHanukkah >= 1 && $dayOfHanukkah <= 8) {
+//                if ($dayOfHanukkah >= 1 && $dayOfHanukkah <= 8) {
+                if ($day >= 7 && $day <= 15){
+
                     // Select the menorah duck image based on the day of Hanukkah
-                    $menorah_duck = 'moorthy_duck/menorah-duck/' . $dayOfHanukkah . '.svg';
+                    $menorah_duck = 'moorthy_duck/menorah-duck/' . $day - 6 . '.svg';
                     $decemberImages = ['moorthy_duck/12-december.svg', $menorah_duck];
                 }
                 else {
-                    $decemberImages = ['moorthy_duck/12-december.svg'];
+                    $decemberImages = ['moorthy_duck/12-December.svg'];
                 }
                 $duck_img = $decemberImages[array_rand($decemberImages)];
                 break;
