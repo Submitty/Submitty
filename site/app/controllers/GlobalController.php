@@ -498,7 +498,6 @@ class GlobalController extends AbstractController {
                     $decemberImages = ['moorthy_duck/12-december.svg', $menorah_duck];
                 }
                 else {
-                  
                     $decemberImages = ['moorthy_duck/12-december.svg'];
                 }
                 $duck_img = $decemberImages[array_rand($decemberImages)];
