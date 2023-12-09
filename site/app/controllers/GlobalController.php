@@ -467,19 +467,13 @@ class GlobalController extends AbstractController {
     }
 
 
-    function calculateHanukkahDate($year): int {
+    private function calculateHanukkahDate($year): int {
         $gregorianDate = gregoriantojd(12, 25, $year);
         $dayOfWeek = jddayofweek($gregorianDate);
-
         $daysToAdd = 7 - $dayOfWeek + 1;
-
-        // Calculate the Julian date of the first day of Hanukkah
         $hanukkahDate = $gregorianDate + $daysToAdd;
 
-        // Convert the Julian date back to Gregorian
-        $hanukkahGregorian = jdtogregorian($hanukkahDate);
-
-        return $hanukkahGregorian;
+        return jdtogregorian($hanukkahDate);
     }
 
 
@@ -505,8 +499,8 @@ class GlobalController extends AbstractController {
                 else {
                     $decemberImages = ['moorthy_duck/12-december.svg'];
                 }
-
                 $duck_img = $decemberImages[array_rand($decemberImages)];
+                break;
             case 11:
                 //November (Thanksgiving)
                 //last week of November
