@@ -504,11 +504,11 @@ class GlobalController extends AbstractController {
 //                var_dump($dayOfHanukkah);
 
 //                if ($dayOfHanukkah >= 1 && $dayOfHanukkah <= 8) {
-                if ($day >= 7 && $day <= 15){
-
+                if ($day >= 7 && $day <= 15) {
                     // Select the menorah duck image based on the day of Hanukkah
-                    $menorah_duck = 'moorthy_duck/menorah-duck/' . $day - 6 . '.svg';
-                    $decemberImages = ['moorthy_duck/12-december.svg', $menorah_duck];
+                    $datecounter = $day - 6;
+                    $menorah_duck = 'moorthy_duck/menorah-duck/' . $datecounter. '.svg';
+                    $decemberImages = ['moorthy_duck/12-December.svg', $menorah_duck];
                 }
                 else {
                     $decemberImages = ['moorthy_duck/12-December.svg'];
