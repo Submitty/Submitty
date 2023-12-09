@@ -486,6 +486,7 @@ class GlobalController extends AbstractController {
 
         switch ($month) {
             case 12:
+                //December (Christmas, Hanukkah)
                 $hanukkahDate = calculateHanukkahDate($year);
                 // Calculate the day of Hanukkah
                 $dayOfHanukkah = $day - (int) $hanukkahDate->format('j') + 1;
