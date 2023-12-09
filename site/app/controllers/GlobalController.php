@@ -487,6 +487,7 @@ class GlobalController extends AbstractController {
 
         switch ($month) {
             case 12:
+                //December (Christmas, Hanukkah)
                 $hanukkahDate = calculateHanukkahDate($year);
                 // Calculate the day of Hanukkah
                 $dayOfHanukkah = $day - (int) $hanukkahDate->format('j') + 1;
@@ -497,6 +498,7 @@ class GlobalController extends AbstractController {
                     $decemberImages = ['moorthy_duck/12-december.svg', $menorah_duck];
                 }
                 else {
+                  
                     $decemberImages = ['moorthy_duck/12-december.svg'];
                 }
                 $duck_img = $decemberImages[array_rand($decemberImages)];
