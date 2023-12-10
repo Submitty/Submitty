@@ -430,7 +430,7 @@ class SubmissionController extends AbstractController {
         }
 
         // Initialize new instance of FPDI and get page count
-        if (!is_null($dst)) {
+        if (defined($dst)) {
             $pdf = new Fpdi();
             $actual_page_count = $pdf->setSourceFile($dst);
 
