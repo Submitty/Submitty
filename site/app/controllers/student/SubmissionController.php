@@ -22,7 +22,6 @@ use app\models\GradingOrder;
 use Symfony\Component\Routing\Annotation\Route;
 use app\models\notebook\SubmissionCodeBox;
 use app\models\notebook\SubmissionMultipleChoice;
-
 // Adds Fpdi library for getting page count of pdfs
 use setasign\Fpdi\Fpdi;
 
@@ -433,7 +432,7 @@ class SubmissionController extends AbstractController {
         // Initialize new instance of FPDI and get page count
         $pdf = new Fpdi();
         $actual_page_count = $pdf->setSourceFile($dst);
-            
+
         // Check if the actual page count matches the expected count
         if ($actual_page_count % $num_pages !== 0) {
             $error_message = "The PDF page count ($actual_page_count) is not divisible by the expected count per exam ($num_pages).";
