@@ -928,9 +928,12 @@ SQL;
 
     /**
      * @param int[] $thread_ids
-     * @return array<int, mixed[]>
+     * @return null|array<int, mixed[]> array of posts, indexed by thread id.
      */
-    public function getFirstPostForThreads(array $thread_ids): array {
+    public function getFirstPostForThreads(array $thread_ids): null|array {
+        if (count($thread_ids) == 0) {
+            return null;
+        }
         $placeholders = $this->createParameterList(count($thread_ids));
         $this->course_db->query("SELECT * FROM posts WHERE parent_id = -1 AND thread_id IN {$placeholders}", $thread_ids);
         $return = [];
