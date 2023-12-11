@@ -910,6 +910,9 @@ SQL;
      * @return int[] threads that have been merged
      */
     public function getMergedThreadIds(array $post_ids): array {
+        if (count($post_ids) === 0) {
+            return [];
+        }
         $placeholders = $this->createParameterList(count($post_ids));
         $this->course_db->query("SELECT id FROM threads WHERE merged_thread_id <> -1 AND merged_post_id IN {$placeholders}", $post_ids);
         return array_column($this->course_db->rows(), "id");
@@ -936,7 +939,7 @@ SQL;
      * @return null|array<int, mixed[]> array of posts, indexed by thread id.
      */
     public function getFirstPostForThreads(array $thread_ids): null|array {
-        if (count($thread_ids) == 0) {
+        if (count($thread_ids) === 0) {
             return null;
         }
         $placeholders = $this->createParameterList(count($thread_ids));
@@ -979,6 +982,9 @@ SQL;
      * @return int[] ids of posts with history
      */
     public function getPostsWithHistory(array $post_ids): array {
+        if (count($post_ids) === 0) {
+            return [];
+        }
         $placeholders = $this->createParameterList(count($post_ids));
         $this->course_db->query("SELECT DISTINCT post_id FROM forum_posts_history WHERE post_id IN {$placeholders}", $post_ids);
         return array_column($this->course_db->rows(), "post_id");
@@ -1155,6 +1161,9 @@ SQL;
      *
      */
     public function getForumAttachments(array $post_ids, bool $all_vers = false): array {
+        if (count($post_ids) === 0) {
+            return [];
+        }
         $return = [];
         // Default version is current version
         $placeholders = $this->createParameterList(count($post_ids));
@@ -5016,6 +5025,9 @@ AND gc_id IN (
      * @return int[] thread ids that have been viewed by user
      */
     public function getViewedThreads(string $user, array $thread_ids): array {
+        if (count($thread_ids) === 0) {
+            return [];
+        }
         $placeholders = $this->createParameterList(count($thread_ids));
         $this->course_db->query(
             "
@@ -5060,6 +5072,9 @@ AND gc_id IN (
      * @return array<string, mixed[]> user info, indexed by user id.
      */
     public function getDisplayUserInfoFromUserIds(array $user_ids): array {
+        if (count($user_ids) === 0) {
+            return [];
+        }
         $unique_users = array_values(array_unique($user_ids));
         $placeholders = $this->createParameterList(count($unique_users));
         $this->course_db->query("SELECT * FROM users WHERE user_id IN {$placeholders};", $unique_users);
@@ -8702,6 +8717,9 @@ WHERE current_state IN
      * @return array|null
      */
     private function getUsers(array $user_id_list, bool $is_numeric = false): ?array {
+        if (count($user_id_list) === 0) {
+            return null;
+        }
         $placeholders = $this->createParameterList(count($user_id_list));
 
         if (!$is_numeric) {
