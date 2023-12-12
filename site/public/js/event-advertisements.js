@@ -133,7 +133,8 @@ function changeImage(n) {
     const originalIndex = currentImageIndex;
 
     if (currentImageIndex < 0 || currentImageIndex >= images.length) {
-        console.log('Issue of index');
+        console.log('Issue of index, you are out of range: ');
+        console.log(currentImageIndex)
         return;
     }
 
