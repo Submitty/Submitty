@@ -168,6 +168,7 @@ alias submitty_code_watcher='python3 /usr/local/submitty/GIT_CHECKOUT/Submitty/.
 alias submitty_restart_autograding='systemctl restart submitty_autograding_shipper && systemctl restart submitty_autograding_worker'
 alias submitty_restart_websocket='systemctl restart submitty_websocket_server'
 alias submitty_restart_services='submitty_restart_autograding && submitty_restart_websocket && systemctl restart submitty_daemon_jobs_handler && systemctl restart nullsmtpd'
+alias submitty_test='bash /usr/local/submitty/GIT_CHECKOUT/Submitty/.setup/SUBMITTY_TEST.sh'
 alias migrator='python3 ${SUBMITTY_REPOSITORY}/migration/run_migrator.py -c ${SUBMITTY_INSTALL_DIR}/config'
 alias vagrant_info='cat /etc/motd'
 alias ntp_sync='service ntp stop && ntpd -gq && service ntp start'
@@ -213,15 +214,6 @@ DB_COURSE_PASSWORD=submitty_dbuser
 source ${CURRENT_DIR}/distro_setup/setup_distro.sh
 
 bash "${SUBMITTY_REPOSITORY}/.setup/update_system.sh"
-
-
-#################################################################
-# Node Package Setup
-####################
-# NOTE: with umask 0027, the npm packages end up with the wrong permissions.
-# (this happens if we re-run install_system on an existing installation).
-# So let's manually set the umask just for this call.
-(umask 0022 && npm install -g npm)
 
 #################################################################
 # STACK SETUP
@@ -397,10 +389,17 @@ fi
 
 # Dr Memory is a tool for detecting memory errors in C++ programs (similar to Valgrind)
 
+# FIXME: Use of this tool should eventually be moved to containerized
+# autograding and not installed on the native primary and worker
+# machines by default
+
+# FIXME: DrMemory is also re-installed in INSTALL_SUBMITTY_HELPER.sh
+
 pushd /tmp > /dev/null
 
 echo "Getting DrMemory..."
 
+rm -rf /tmp/DrMemory*
 wget https://github.com/DynamoRIO/drmemory/releases/download/${DRMEMORY_TAG}/DrMemory-Linux-${DRMEMORY_VERSION}.tar.gz -o /dev/null > /dev/null 2>&1
 tar -xpzf DrMemory-Linux-${DRMEMORY_VERSION}.tar.gz
 rsync --delete -a /tmp/DrMemory-Linux-${DRMEMORY_VERSION}/ ${SUBMITTY_INSTALL_DIR}/drmemory
