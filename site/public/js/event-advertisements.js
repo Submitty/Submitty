@@ -46,7 +46,7 @@ $(() => {
     bannerElement = document.getElementById('banner');
     bannerElement.style.display = 'none';
     bannerElement.style.width = '1%';
-    
+
     bubble = document.getElementById('speech-bubble-container');
     bubble.style.display = 'none';
 
@@ -101,7 +101,7 @@ function showBanners(noMove = false) {
                 movingUnit.style.left = '10%';
                 movingUnit.style.animation = 'slide 2s linear forwards';
             }, 500);
-            
+
         }
         else {
             bannerElement.style.width = '100%';
