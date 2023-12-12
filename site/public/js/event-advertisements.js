@@ -7,7 +7,38 @@ let bannerElement = undefined;
 let bubble  = undefined;
 const currentImages = [];
 
+
+function alignElementToLeft(referenceElementId, targetElementId) {
+    const referenceElement = document.getElementById(referenceElementId);
+    const targetElement = document.getElementById(targetElementId);
+
+    // Ensure both elements exist before proceeding
+    if (referenceElement && targetElement) {
+        // Get the left position and width of the reference element
+        const referenceElementWidth = referenceElement.offsetWidth;
+        const targetElementWidth = targetElement.offsetWidth ;
+        const targetElementHeight =  targetElement.offsetHeight/2;
+        const totalWidth = targetElementWidth / 2 + referenceElementWidth;
+
+        console.log(targetElementHeight);
+        console.log(totalWidth);
+
+
+        // Set the left position of the target element to be aligned with the left of the reference element
+
+        targetElement.style.left = 0;
+        targetElement.style.down = 0;
+        targetElement.style.up = targetElementHeight;
+        targetElement.style.right = `${totalWidth}px`;
+        targetElement.style.position = 'absolute';
+    }
+}
+
+
+
+
 $(() => {
+    alignElementToLeft('logo-box', 'moorthy-duck');
     currentImageIndex = 0;
     hiddenImages = getHiddenImages();
     seenImages = [];
@@ -88,6 +119,7 @@ function showBanners(noMove = false) {
         duckdivElement.style.animation = 'none';
 
         duckdivElement.style.transform = 'rotate(0deg)';
+        alignElementToLeft('logo-box', 'moorthy-duck');
         document.getElementById('breadcrumbs').style.flexWrap = 'wrap';
         if (images.length > 0) {
             images[currentImageIndex].classList.remove('active');
