@@ -795,7 +795,7 @@ CREATE TRIGGER before_delete_sync_delete_user BEFORE DELETE ON public.courses_us
 -- Name: courses_users before_update_courses_update_previous_registration_section; Type: TRIGGER; Schema: public; Owner: -
 --
 
-CREATE TRIGGER before_update_courses_update_previous_registration_section BEFORE UPDATE ON public.courses_users FOR EACH ROW EXECUTE PROCEDURE public.update_previous_registration_section();
+CREATE TRIGGER before_update_courses_update_previous_registration_section BEFORE UPDATE OF registration_section ON public.courses_users FOR EACH ROW EXECUTE PROCEDURE public.update_previous_registration_section();
 
 
 --
