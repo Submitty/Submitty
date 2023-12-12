@@ -577,15 +577,35 @@ class ForumController extends AbstractController {
         $post_id = $_POST['post_id'];
         $reply_level = $_POST['reply_level'];
         $post = $this->core->getQueries()->getPost($post_id);
-        if (($_POST['edit']) && !empty($this->core->getQueries()->getPostHistory($post_id))) {
-            $post['edit_timestamp'] = $this->core->getQueries()->getPostHistory($post_id)[0]['edit_timestamp'];
+        $post_history = $this->core->getQueries()->getPostHistory($post_id);
+        if (($_POST['edit']) && !empty($post_history)) {
+            $post['edit_timestamp'] = $post_history[0]['edit_timestamp'];
         }
         $thread_id = $post['thread_id'];
+        $thread = $this->core->getQueries()->getThread($thread_id);
         $GLOBALS['totalAttachments'] = 0;
         $GLOBALS['post_box_id'] = $_POST['post_box_id'];
         $unviewed_posts = [$post_id];
         $first = $post['parent_id'] == -1;
-        $result = $this->core->getOutput()->renderTemplate('forum\ForumThread', 'createPost', $thread_id, $post, $unviewed_posts, $first, $reply_level, 'tree', true, true, $this->core->getQueries()->existsAnnouncementsId($thread_id));
+        $author_info = $this->core->getQueries()->getDisplayUserInfoFromUserIds([$post["author_user_id"]]);
+        $post_attachments = $this->core->getQueries()->getForumAttachments([$post_id]);
+        $merged_threads = $this->core->getQueries()->getMergedThreadIds([$post_id]);
+        $result = $this->core->getOutput()->renderTemplate(
+            'forum\ForumThread',
+            'createPost',
+            $thread,
+            $post,
+            $unviewed_posts,
+            $first,
+            $reply_level,
+            'tree',
+            true,
+            $author_info[$post["author_user_id"]],
+            $post_attachments[$post["id"]][0],
+            !empty($post_history),
+            in_array($post["id"], $merged_threads, true),
+            true,
+            $this->core->getQueries()->existsAnnouncementsId($thread_id));
         return $this->core->getOutput()->renderJsonSuccess($result);
     }
 
