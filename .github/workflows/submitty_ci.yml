@@ -34,7 +34,7 @@ jobs:
         working-directory: site
     steps:
       - uses: actions/checkout@v4
-      - uses: actions/setup-node@v3
+      - uses: actions/setup-node@v4
         with:
           node-version: ${{ env.NODE_VERSION }}
       - name: Cache Node Modules
@@ -56,7 +56,7 @@ jobs:
         working-directory: site
     steps:
       - uses: actions/checkout@v4
-      - uses: actions/setup-node@v3
+      - uses: actions/setup-node@v4
         with:
           node-version: ${{ env.NODE_VERSION }}
       - name: Cache Node Modules
@@ -80,7 +80,7 @@ jobs:
         working-directory: site
     steps:
       - uses: actions/checkout@v4
-      - uses: actions/setup-node@v3
+      - uses: actions/setup-node@v4
         with:
           node-version: ${{ env.NODE_VERSION }}
       - name: Cache Node Modules
@@ -106,7 +106,7 @@ jobs:
         working-directory: site
     steps:
       - uses: actions/checkout@v4
-      - uses: shivammathur/setup-php@2.26.0
+      - uses: shivammathur/setup-php@2.28.0
         with:
           php-version: ${{ env.PHP_VER }}
       - name: Cache Composer
@@ -141,7 +141,7 @@ jobs:
         working-directory: site
     steps:
       - uses: actions/checkout@v4
-      - uses: shivammathur/setup-php@2.26.0
+      - uses: shivammathur/setup-php@2.28.0
         with:
           php-version: ${{ env.PHP_VER }}
           extensions: imagick
@@ -182,9 +182,7 @@ jobs:
           restore-keys: |
               ${{ runner.os }}-${{ github.job }}-pip-
       - name: Install python libraries
-        run: |
-          python3 -m pip install --upgrade pip
-          python3 -m pip install flake8 flake8-bugbear
+        run: python3 -m pip install -r .setup/pip/dev_requirements.txt
       - name: Run python linting
         run: python3 -m flake8
 

@@ -1,6 +1,5 @@
 p {
-    margin-block-start: 1em;
-    margin-block-end: 1em;
+    margin-block: 1em 1em;
 }
 
 fieldset > * {
