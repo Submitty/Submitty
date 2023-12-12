@@ -16,7 +16,7 @@ def up(config, database, semester, course):
     """
     database.execute("""
         ALTER TABLE users -- Create column
-        ADD COLUMN previous_rotating_section INTEGER;
+        ADD COLUMN IF NOT EXISTS previous_rotating_section INTEGER;
 
         -- Create empty trigger function that is replaced by new trigger function file
         CREATE OR REPLACE FUNCTION public.update_previous_rotating_section()
@@ -30,7 +30,7 @@ def up(config, database, semester, course):
 
         -- Attatch trigger function
         CREATE TRIGGER before_update_users_update_previous_rotating_section
-        BEFORE UPDATE ON public.users
+        BEFORE UPDATE OF rotating_section ON public.users
         FOR EACH ROW EXECUTE PROCEDURE update_previous_rotating_section();
     """)
 
@@ -49,9 +49,6 @@ def down(config, database, semester, course):
     :type course: str
     """
     database.execute("""
-        ALTER TABLE users
-        DROP COLUMN previous_rotating_section;
-
         DROP TRIGGER IF EXISTS
             before_update_users_update_previous_rotating_section
             ON users;
