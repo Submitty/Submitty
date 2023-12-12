@@ -1283,9 +1283,19 @@ function toggleLike(post_id,thread_id,current_user) {
             var likeIconSrc = document.getElementById('likeIcon_' + post_id);
             var likeIconSrcElement = likeIconSrc.src;
 
+            var choice = localStorage.getItem("theme");
+            if(localStorage.getItem("theme")){
+                console.log("here");
+                console.log(localStorage.getItem("theme"));
+            }
 
             if(likeIconSrcElement.endsWith('/img/on-duck-button.svg')){
-                likeIconSrcElement = likeIconSrcElement.replace('on-duck-button.svg', 'off-duck-button.svg');
+                if(choice=="light" && likeIconSrcElement.endsWith('/img/on-duck-button.svg')){
+                    likeIconSrcElement = likeIconSrcElement.replace('on-duck-button.svg', 'light-mode-off-duck.svg');
+                }
+                else{
+                    likeIconSrcElement = likeIconSrcElement.replace('on-duck-button.svg', 'dark-mode-off-duck.svg');
+                }    
                 likeCounter=likeCounter-1;
 
                 likeIconSrc.src = likeIconSrcElement; // Update the state
@@ -1293,14 +1303,18 @@ function toggleLike(post_id,thread_id,current_user) {
                 
             }
             else{
-                likeIconSrcElement = likeIconSrcElement.replace('off-duck-button.svg', 'on-duck-button.svg');
+                if(choice=="light"){
+                    likeIconSrcElement = likeIconSrcElement.replace('light-mode-off-duck.svg', 'on-duck-button.svg');
+                }
+                else{
+                    likeIconSrcElement = likeIconSrcElement.replace('dark-mode-off-duck.svg', 'on-duck-button.svg');
+                } 
                 likeCounter=likeCounter+1;
 
                 likeIconSrc.src = likeIconSrcElement; // Update the state
                 likeCounterElement.innerText = likeCounter;
             }
 
-            console.log(likeIconSrcElement)
         },
         error: function(err) {
             console.log(err)
