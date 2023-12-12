@@ -12,7 +12,7 @@ def up(config, database):
     """
     database.execute("""
         ALTER TABLE courses_users -- Create column
-        ADD COLUMN IF NOT EXISTS previous_registration_section VARCHAR;
+        ADD COLUMN IF NOT EXISTS previous_registration_section VARCHAR(255);
 
         -- Create empty trigger function that is replaced by new trigger function file
         CREATE OR REPLACE FUNCTION public.update_previous_registration_section()
