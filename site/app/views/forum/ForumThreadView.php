@@ -514,7 +514,10 @@ class ForumThreadView extends AbstractView {
                         $post["author_user_group"] = $author_user_groups_map[$post["author_user_id"]];
 
                         // $likeCount = $upDuckCounter_map[$post["id"]];
+                        // [post_id:count, post_id:count]
                         // $userLiked = $userLiked_map[$post["id"]];
+                        // [post_id:bool, post_id:bool]
+
                         //then here I can make a call with the specific postid
                         $post_data[] = $this->createPost($thread_id, $post, $unviewed_posts, $first, $reply_level, $display_option, $includeReply, false, $thread_announced);
                         break;
