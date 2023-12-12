@@ -48,7 +48,6 @@ const removeThread = (title) => {
 describe('Test cases revolving around creating, replying to, merging, and removing discussion forum threads', () => {
 
     beforeEach(() => {
-        cy.visit('/');
         cy.login('instructor');
         cy.visit(['sample']);
         cy.get('#nav-sidebar-forum').click();

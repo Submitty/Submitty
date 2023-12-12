@@ -33,7 +33,7 @@ To learn how to contribute to our project, please read:
 
 # Contact Us
 
-If you have a question, please [contact us](https://submitty.org/index/contact) through Slack.
+If you have a question, please [contact us](https://submitty.org/index/contact) through Zulip.
 
 
 ### LICENSING
