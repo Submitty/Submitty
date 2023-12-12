@@ -101,7 +101,7 @@ function download(gradeable_id, user_id, grader_id, file_name, file_path, page_n
     }
     else {
         const anchor = document.createElement('a');
-        anchor.setAttribute('href','file_path');
+        anchor.setAttribute('href', 'file_path');
         anchor.setAttribute('download', file_path);
         document.body.appendChild(anchor);
         anchor.click();

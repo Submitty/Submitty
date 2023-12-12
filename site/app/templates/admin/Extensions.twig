@@ -43,12 +43,26 @@
                 Or Pick a New Due Date:
                 <input name="late_calendar" id="late-calendar" class="option-input" type="text" autocomplete="off" onchange="setLateDays()">
             </label>
+            <label for="reason-for-exception">
+                Reason for Extension:
+                <span id="config-drop-down">
+                    <select name="reason_for_exception" id="reason-for-exception">
+                        <option>{{ "unspecified" }}</option>
+                        {% for reason in reasons %}
+                            <option value="{{ reason }}">{{ reason }}</option>
+                        {% endfor %}
+                    </select>
+                </span>
+            </label>
+            <p><strong>Note:</strong> The optional reason for extension text will be displayed to the student on the Rainbow Grades page.</p>
+            <br>
             <a class="btn btn-primary" href="javascript:updateHomeworkExtension()">Submit</a>
         </fieldset>
         <fieldset>
             <legend class="option-title" id="csv-upload-title">Multiple Student Entry Via CSV Upload</legend>
             <label for="csv-upload" id="csv-upload-format">
-                Do not use column headers. CSV must be of the following form: student_id, gradeable_id, days_of_extension
+                Do not use column headers. CSV must be of the following form: student_id, gradeable_id, days_of_extension, reason_for_extension.<br>
+                reason_for_extension is an optional argument and can be omitted.
             </label>
             <input type="file" name="csv_upload" id="csv-upload" aria-labelledby="csv-upload-title csv-upload-format" onchange="updateHomeworkExtension()">
         </fieldset>
@@ -71,6 +85,7 @@
                     <th>First Name</th>
                     <th>Last Name</th>
                     <th>Number of Days of Extension</th>
+                    <th>Reason for Extension</th>
                     <th>Delete</th>
                 </tr>
             </thead>
@@ -81,6 +96,7 @@
                         <td class="align-left">{{ user.user_givenname }}</td>
                         <td class="align-left">{{ user.user_familyname }}</td>
                         <td>{{ user.late_day_exceptions }}</td>
+                        <td>{{ user.reason_for_exception }}</td>
                         <td>
                             <a
                                 id="Delete"
@@ -97,6 +113,8 @@
     {% endif %}
 </div>
 <script>
+    registerSelect2Widget("reason-for-exception");
+
     $("#user_id").autocomplete({
         source: {{ student_full|raw }}
     });
@@ -133,4 +151,5 @@
         }
     });
 </script>
+
 {% include('admin/users/MoreExtensions.twig') %}
