@@ -17,7 +17,9 @@ $(() => {
     bannerElement.style.width = '1%';
 
     bubble = document.getElementById('speech-bubble-container');
-    bubble.style.display = 'none';
+    if (bubble !== null) {
+        bubble.style.display = 'none';
+    }
 
 
 
