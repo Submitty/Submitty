@@ -3,21 +3,25 @@ Contains the Mark class and User class
 """
 from pathlib import Path
 import random
-from sample_courses import *
-from sample_courses.utils.create_or_generate import generate_random_user_id, generate_pronouns
+import os
+from sample_courses import SETUP_DATA_PATH, DB_ONLY, yaml
+from sample_courses.utils.create_or_generate import (
+    generate_random_user_id,
+    generate_pronouns,
+)
 from sample_courses.utils.checks import user_exists
 from sample_courses.utils.dependent import add_to_group
 
 
 class Mark(object):
-    def __init__(self, mark, order):
+    def __init__(self, mark, order) -> None:
         self.note = mark["gcm_note"]
         self.points = mark["gcm_points"]
         self.order = order
         self.grader = "instructor"
         self.key = None
 
-    def create(self, gc_id, conn, table):
+    def create(self, gc_id, conn, table) -> None:
         ins = table.insert().values(
             gc_id=gc_id,
             gcm_points=self.points,
@@ -28,7 +32,7 @@ class Mark(object):
         self.key = res.inserted_primary_key[0]
 
 
-def generate_random_marks(default_value, max_value):
+def generate_random_marks(default_value, max_value) -> list:
     with open(os.path.join(SETUP_DATA_PATH, "random", "marks.yml")) as f:
         marks_yml = yaml.load(f)
     if default_value == max_value and default_value > 0:
@@ -65,7 +69,7 @@ class User(object):
         courses
     """
 
-    def __init__(self, user):
+    def __init__(self, user) -> None:
         self.id = user["user_id"]
         self.numeric_id = user["user_numeric_id"]
         self.password = self.id
@@ -95,17 +99,13 @@ class User(object):
             self.group = user["user_group"]
         if self.group < 1 or 4 < self.group:
             raise SystemExit(
-                "ASSERT: user {}, user_group is not between 1 - 4. Check YML file.".format(
-                    self.id
-                )
+                f"ASSERT: user {self.id}, user_group is not between 1 - 4. Check YML file."
             )
         if "user_access_level" in user:
             self.access_level = user["user_access_level"]
         if self.access_level < 1 or 3 < self.access_level:
             raise SystemExit(
-                "ASSERT: user {}, user_access_level is not between 1 - 3. Check YML file.".format(
-                    self.id
-                )
+                f"ASSERT: user {self.id}, user_access_level is not between 1 - 3. Check YML file."
             )
         if "registration_section" in user:
             self.registration_section = int(user["registration_section"])
@@ -136,7 +136,7 @@ class User(object):
         if "user_password" in user:
             self.password = user["user_password"]
 
-    def create(self, force_ssh=False):
+    def create(self, force_ssh=False) -> None:
         if not DB_ONLY and not user_exists(self.id):
             if self.group > 2 and not force_ssh:
                 self.create_non_ssh()
@@ -149,25 +149,24 @@ class User(object):
         if self.sudo:
             add_to_group("sudo", self.id)
 
-    def create_ssh(self):
-        print("Creating user {}...".format(self.id))
+    def create_ssh(self) -> None:
+        print(f"Creating user {self.id}...")
+
         os.system(
-            "useradd -m -c 'First Last,RoomNumber,WorkPhone,HomePhone' {}".format(
-                self.id
-            )
+            f"useradd -m -c 'First Last,RoomNumber,WorkPhone,HomePhone' {self.id}"
         )
         self.set_password()
 
-    def create_non_ssh(self):
+    def create_non_ssh(self) -> None:
         # Change this to f strings
-        print("Creating user {}...".format(self.id))
+        print(f"Creating user {self.id}...")
         os.system(
             "useradd --home /tmp -c 'AUTH ONLY account' "
-            "-M --shell /bin/false {}".format(self.id)
+            f"-M --shell /bin/false {self.id}"
         )
         self.set_password()
 
-    def create_ldap(self):
+    def create_ldap(self) -> None:
         print(f"Creating LDAP user {self.id}...")
         path = Path("/tmp", self.id)
         path.write_text(
@@ -187,9 +186,9 @@ shadowWarning: 0"""
         )
         path.unlink()
 
-    def set_password(self):
-        print("Setting password for user {}...".format(self.id))
-        os.system("echo {}:{} | chpasswd".format(self.id, self.password))
+    def set_password(self) -> None:
+        print(f"Setting password for user {self.id}...")
+        os.system(f"echo {self.id}:{self.password} | chpasswd")
 
     def get_detail(self, course, detail):
         if self.courses is not None and course in self.courses:
@@ -204,7 +203,7 @@ shadowWarning: 0"""
             return None
 
 
-def generate_random_users(total, real_users):
+def generate_random_users(total, real_users) -> list:
     """
     :param total:
     :param real_users:
@@ -238,7 +237,7 @@ def generate_random_users(total, real_users):
             user_id = user_id.lower()
             anon_id = generate_random_user_id(15)
             # create a binary string for the numeric ID
-            numeric_id = "{0:09b}".format(i)
+            numeric_id = f"{i:09b}"
             while user_id in user_ids or user_id in real_users:
                 if user_id[-1].isdigit():
                     user_id = user_id[:-1] + str(int(user_id[-1]) + 1)

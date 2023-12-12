@@ -37,7 +37,7 @@ export function sortTable(n, dir) {
         const mid = Math.floor(arr.length/2);
         const left = mergeSort(arr.slice(0, mid));
         const right = mergeSort(arr.slice(mid));
-        const res = merge(left,right);
+        const res = merge(left, right);
         return res;
     };
     const rows = table.rows;
@@ -120,7 +120,7 @@ export function applySettings() {
     const grad_sub = Date.parse(document.getElementById('gradeable_submission_date').value);
     const forum_view = Date.parse(document.getElementById('forum_view_date').value);
     const forum_post = Date.parse(document.getElementById('forum_post_date').value);
-    const num_poll = Date.parse(document.getElementById('num_poll_responses').value);
+    const num_poll = parseInt(document.getElementById('num_poll_responses').value);
     const off_hours = Date.parse(document.getElementById('office_hours_queue_date').value);
     const course_mat = Date.parse(document.getElementById('course_materials_access').value);
     const data = JSON.parse(document.getElementById('data').getAttribute('data-original'));
@@ -131,11 +131,16 @@ export function applySettings() {
         const s_grad_sub = data[i].gradeable_submission;
         const s_forum_view = data[i].forum_view;
         const s_forum_post = data[i].forum_post;
-        const s_num_polls = data[i].num_poll_responses;
+        let s_num_polls = data[i].num_poll_responses;
         const s_off_hours = data[i].office_hours_queue;
         const s_course_mat = data[i].course_materials_access;
         let flag = false;
 
+        if (s_num_polls === null) {
+            s_num_polls = 0;
+        }
+
+        let flag = false;
         // eslint-disable-next-line eqeqeq
         if ((!Number.isNaN(grad_acc) && s_grad_acc == null) || Date.parse(s_grad_acc) < grad_acc) {
             flag = true;
@@ -153,7 +158,7 @@ export function applySettings() {
             flag = true;
         }
         // eslint-disable-next-line eqeqeq
-        else if ((!Number.isNaN(num_poll) && s_num_polls == null) || Date.parse(s_num_polls) < num_poll) {
+        else if (!Number.isNaN(num_poll) && parseInt(s_num_polls) < num_poll) {
             flag = true;
         }
         // eslint-disable-next-line eqeqeq
@@ -174,7 +179,6 @@ export function applySettings() {
         }
 
     }
-    document.getElementById('office_hours_queue_date').value = '';
 }
 
 export function clearFields() {
@@ -184,6 +188,7 @@ export function clearFields() {
     document.getElementById('forum_post_date').value = '';
     document.getElementById('num_poll_responses').value = '';
     document.getElementById('office_hours_queue_date').value = '';
+    document.getElementById('course_materials_access').value = '';
     applySettings();
     const table = document.getElementById('data-table');
     const data = JSON.parse(document.getElementById('data').getAttribute('data-original'));

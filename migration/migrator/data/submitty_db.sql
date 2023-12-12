@@ -435,7 +435,7 @@ CREATE TABLE public.courses_users (
     registration_section character varying(255),
     registration_type character varying(255) DEFAULT 'graded'::character varying,
     manual_registration boolean DEFAULT false,
-    previous_registration_section character varying,
+    previous_registration_section character varying(255),
     CONSTRAINT check_registration_type CHECK (((registration_type)::text = ANY (ARRAY[('graded'::character varying)::text, ('audit'::character varying)::text, ('withdrawn'::character varying)::text, ('staff'::character varying)::text]))),
     CONSTRAINT users_user_group_check CHECK (((user_group >= 1) AND (user_group <= 4)))
 );
@@ -447,7 +447,7 @@ CREATE TABLE public.courses_users (
 
 CREATE TABLE public.emails (
     id bigint NOT NULL,
-    user_id character varying NOT NULL,
+    user_id character varying,
     subject text NOT NULL,
     body text NOT NULL,
     created timestamp without time zone NOT NULL,
@@ -455,7 +455,9 @@ CREATE TABLE public.emails (
     error character varying DEFAULT ''::character varying NOT NULL,
     email_address character varying(255) DEFAULT ''::character varying NOT NULL,
     term character varying,
-    course character varying
+    course character varying,
+    to_name character varying,
+    CONSTRAINT name_or_email CHECK (((user_id IS NOT NULL) <> (to_name IS NOT NULL)))
 );
 
 
@@ -793,7 +795,7 @@ CREATE TRIGGER before_delete_sync_delete_user BEFORE DELETE ON public.courses_us
 -- Name: courses_users before_update_courses_update_previous_registration_section; Type: TRIGGER; Schema: public; Owner: -
 --
 
-CREATE TRIGGER before_update_courses_update_previous_registration_section BEFORE UPDATE ON public.courses_users FOR EACH ROW EXECUTE PROCEDURE public.update_previous_registration_section();
+CREATE TRIGGER before_update_courses_update_previous_registration_section BEFORE UPDATE OF registration_section ON public.courses_users FOR EACH ROW EXECUTE PROCEDURE public.update_previous_registration_section();
 
 
 --
