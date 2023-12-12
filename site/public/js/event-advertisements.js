@@ -15,6 +15,9 @@ $(() => {
     bannerElement = document.getElementById('banner');
     bannerElement.style.display = 'none';
     bannerElement.style.width = '1%';
+    
+    bubble = document.getElementById('speech-bubble-container');
+    bubble.style.display = 'none';
 
 
 
@@ -30,11 +33,8 @@ $(() => {
 
     bubble = document.getElementById('speech-bubble-container');
     if (bubble !== null) {
-        if (currentImages.length === 0) {
+        if (currentImages.length > 0) {
 
-            bubble.style.display = 'none';
-        }
-        else {
             bubble.style.display = 'block';
         }
     }
