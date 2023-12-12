@@ -28,7 +28,7 @@ class BannerController extends AbstractController {
      * @see BannerView::showEventBanners
      */
     public function viewCommunityEvents(): WebResponse {
-        $communityEventBanners = $this->core->getSubmittyEntityManager()->getRepository(BannerImage::class) ->findAll();
+        $communityEventBanners = $this->core->getSubmittyEntityManager()->getRepository(BannerImage::class)->findAll();
         return new WebResponse(BannerView::class, 'showEventBanners', $communityEventBanners);
     }
 
