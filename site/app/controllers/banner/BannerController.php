@@ -63,10 +63,6 @@ class BannerController extends AbstractController {
         $extra_name = $_POST['extra_name'];
         $link_name = $_POST['link_name'];
 
-        if ($extra_name == ".." || $link_name == "..") {
-            return JsonResponse::getErrorResponse("invalid name");
-        }
-
         if ($extra_name === "") {
             if ($count_item !== 1) {
                 return JsonResponse::getErrorResponse("You can only have one banner submitted.");
@@ -83,10 +79,6 @@ class BannerController extends AbstractController {
         $actual_banner_name = "";
 
         for ($j = 0; $j < $count_item; $j++) {
-            if ($uploaded_files['name'][$j] == "..") {
-                return JsonResponse::getErrorResponse("invalid name");
-            }
-
             if ($uploaded_files['name'][$j] != $extra_name) {
                 $actual_banner_name = $uploaded_files['name'][$j];
             }
@@ -95,16 +87,21 @@ class BannerController extends AbstractController {
         $currentDate = new \DateTime();
         $folder_made_name = $actual_banner_name . "Folder" . $currentDate->format('Y-m-d_H-i-s');
 
+
         $full_path = FileUtils::joinPaths($upload_path, $specificPath, $folder_made_name);
-        // $submitty_path = $this->core->getConfig()->getSubmittyPath() . "/community_events";
+        $full_path1= FileUtils::joinPaths($full_path, $actual_banner_name);
+        
 
-        // if (!$this->core->getAccess()->canI("path.write", ["dir" => "community_events", "path" => $submitty_path])) {
-        //     return JsonResponse::getErrorResponse("Bad File Request");
-        // }
+        $full_path1 = $this->core->getAccess()->resolveDirPath("community_events", $full_path1);
+        
 
-        $full_path = $this->core->getAccess()->resolveDirPath("community_events", $full_path);
+        $full_path2 = "empty";
+        if ($extra_name !== "") {
+            $full_path2= FileUtils::joinPaths($full_path, $extra_name);
+            $full_path2 = $this->core->getAccess()->resolveDirPath("community_events", $full_path2);
+        }
 
-        if ($full_path === false) {
+        if ($full_path1 === false || $full_path2 === false) {
             return JsonResponse::getErrorResponse("Path is bad.");
         }
 
@@ -120,9 +117,6 @@ class BannerController extends AbstractController {
         }
 
         for ($j = 0; $j < $count_item; $j++) {
-            if ($uploaded_files['name'][$j] == "..") {
-                return JsonResponse::getErrorResponse("invalid name");
-            }
             $all_match = false;
             if ($uploaded_files['name'][$j] == $extra_name) {
                 $all_match = true;
