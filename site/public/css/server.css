@@ -250,7 +250,7 @@ table a {
 }
 
 table tr.table-header {
-    border-bottom: 1px solid black;
+    border-bottom: 1px solid var(--default-black);
 }
 
 .table {
@@ -265,7 +265,7 @@ table tr.table-header {
 }
 
 .table tr {
-    border-top: 1px solid #dddddd;
+    border-top: 1px solid var(--standard-light-gray);
 }
 
 .table-bordered {
@@ -404,7 +404,7 @@ td > a.active-sort {
 
 .content.overridden-message {
     background-color: var(--important-post);
-    color: black;
+    color: var(--btn-text-black);
 }
 
 .content h1 {
@@ -459,29 +459,19 @@ td > a.active-sort {
     padding: 5px;
 }
 
-.fa-green {
-    color: green;
-}
 
-.fas-green {
-    color: green;
-}
-
+.fa-green,
+.fas-green,
 .far-green {
-    color: green;
+    color: var(--standard-dark-green);
 }
 
-.fa-red {
-    color: red;
-}
-
-.fas-red {
-    color: red;
-}
-
+.fa-red,
+.fas-red,
 .far-red {
-    color: red;
+    color: var(--standard-vibrant-red);
 }
+
 
 .menu {
     font-size: 20px;
@@ -979,7 +969,7 @@ table .gradeable_title {
 
 table .has-url:hover {
     cursor: pointer;
-    color: #3232ff;
+    color: var(--external-link-blue);
 }
 
 /* stylelint-disable-next-line selector-class-pattern */
@@ -1068,25 +1058,25 @@ div.full-height {
 .peer-feedback-negative-unselected {
     margin-top: 5px;
     background-color: var(--default-white);
-    color: rgb(128 64 64);
+    color: var(--peer-feedback-red);
 }
 
 .peer-feedback-positive-unselected {
     margin-top: 5px;
     background-color: var(--default-white);
-    color: rgb(0 128 0);
+    color: var(--peer-feedback-green);
 }
 
 .peer-feedback-positive-selected {
     margin-top: 5px;
-    background-color: rgb(0 128 0);
-    color: rgb(0 0 0);
+    background-color: var(--peer-feedback-green);
+    color: var(--default-black);
 }
 
 .peer-feedback-negative-selected {
     margin-top: 5px;
-    background-color: rgb(128 0 0 / 70%);
-    color: rgb(0 0 0);
+    background-color: var(--peer-feedback-red-translucent);
+    color: var(--default-black);
 }
 
 #ui-category-list {
@@ -1121,18 +1111,9 @@ div.full-height {
     pointer-events: none;
 }
 
+
 .rainbow {
-    background:
-        linear-gradient(
-            135deg,
-            rgb(255 0 0 / 30%),
-            rgb(255 255 0 / 30%),
-            rgb(0 255 0 / 30%),
-            rgb(0 255 155 / 30%),
-            rgb(0 0 255 / 30%),
-            rgb(255 0 255 / 30%),
-            rgb(255 0 0 / 30%)
-        );
+    background: var(--rainbow-gradient);
 }
 
 .thumbnail {
@@ -1153,7 +1134,7 @@ div.full-height {
     height: 100%;
     top: 0;
     left: 0;
-    background-color: rgb(0 0 0 / 50%);
+    background-color: var(--black-moderately-transparent);
 }
 
 .popup-box {
@@ -1168,7 +1149,7 @@ div.full-height {
 
 .popup-window {
     background: var(--default-white);
-    box-shadow: 0 6px 20px 2px #0000007f;
+    box-shadow: 0 6px 20px 2px var(--black-moderately-transparent);
     border-radius: 4px;
     padding: 10px;
     overflow-y: auto;
@@ -1219,7 +1200,7 @@ div.full-height {
 
 .close-button {
     margin-right: 5px;
-    border: 1px solid black !important;
+    border: 1px solid var(--default-black) !important;
 }
 
 .popup-form .form-button-container .btn {
@@ -1400,7 +1381,7 @@ end of styles used in the admin gradeable page
 /* color for limited access graders who were verifed */
 .grader-verified {
     /* yellow       green   */
-    background: linear-gradient(to right, #ffcc33 50%, #33cc33 50%);
+    background: linear-gradient(to right, var(--standard-vibrant-yellow) 50%, var(--standard-vibrant-green) 50%);
     background-clip: text;
     color: transparent;
     border-radius: 50%;
@@ -1461,10 +1442,10 @@ end of styles used in the admin gradeable page
     color: var(--default-white);
     font-size: 1.5em;
     text-shadow:
-        -1px -1px 0 #000000,
-        1px -1px 0 #000000,
-        -1px 1px 0 #000000,
-        1px 1px 0 #000000;
+        -1px -1px 0 var(--default-black),
+        1px -1px 0 var(--default-black),
+        -1px 1px 0 var(--default-black),
+        1px 1px 0 var(--default-black);
 }
 
 .viewed-red-x {
@@ -1477,7 +1458,9 @@ end of styles used in the admin gradeable page
     color: var(--badge-backgroud-red);
 }
 
-.required::placeholder { color: var(--error-alert-dark-red); }
+.required::placeholder { 
+    color: var(--error-alert-dark-red); 
+}
 
 /* stylelint-disable-next-line selector-class-pattern */
 .required_type {
@@ -1500,7 +1483,7 @@ end of styles used in the admin gradeable page
     width: 100%;
     height: 100%;
     overflow: auto;
-    background-color: rgb(0 0 0 / 40%);
+    background-color: var(--black-moderately-transparent);
 }
 
 .modal-content {
@@ -1662,7 +1645,7 @@ end of styles used in the admin gradeable page
 }
 
 .invisible-btn {
-    background-color: #00000000;
+    background-color: var(--invisible);
     border: 0;
     padding: 0;
 }
@@ -1675,7 +1658,7 @@ end of styles used in the admin gradeable page
 }
 
 .skip-btn {
-    box-shadow: 0 2px 15px -5px #888888;
+    box-shadow: 0 2px 15px -5px var(--standard-medium-gray);
     border-radius: 3px;
 
     /* TODO on mobile, different header height */
@@ -1683,7 +1666,7 @@ end of styles used in the admin gradeable page
     background-color: var(--default-white);
     text-align: center;
     width: 108px;
-    border: 2px solid #2627ee;
+    border: 2px solid var(--standard-deep-blue);
     height: min-content;
     position: absolute;
     z-index: 999;
@@ -1937,8 +1920,8 @@ header > * {
 }
 
 .loader {
-    border: 16px solid #f3f3f3; /* Light grey */
-    border-top: 16px solid #3498db; /* Blue */
+    border: 16px solid var(--standard-pale-gray); 
+    border-top: 16px solid var(--standard-medium-blue); 
     border-radius: 50%;
     top: 50%;
     left: 50%;
@@ -1949,7 +1932,7 @@ header > * {
     align-content: center;
     animation: spin 2s linear infinite;
     position: fixed; /* Sit on top of the page content */
-    background-color: rgb(0 0 0 / 50%); /* Black background with opacity */
+    background-color: var(--black-moderately-transparent); /* Black background with opacity */
     z-index: 999; /* Specify a stack order in case you're using a different order for other elements */
     cursor: pointer; /* Add a pointer on hover */
 }
@@ -1969,7 +1952,7 @@ header > * {
     background: var(--actionable-blue);
     border: 1px var(--actionable-blue);
     border-radius: 3px;
-    color: white;
+    color: var(--default-white);
     padding: 5px 8px;
     outline: none;
     white-space: nowrap;
@@ -1979,11 +1962,11 @@ header > * {
 }
 
 .custom-file-input:hover::before {
-    border-color: white;
+    border-color: var(--default-white);
 }
 
 .custom-file-input:active::before {
-    background: linear-gradient(to bottom, #e3e3e3, #f9f9f9);
+    background: linear-gradient(to bottom, var(--standard-light-gray), var(--standard-pale-gray));
 }
 
 .mermaid-element {

@@ -3,6 +3,7 @@ includes:
     - vendor/phpstan/phpstan-deprecation-rules/rules.neon
     - vendor/phpstan/phpstan-doctrine/extension.neon
     - vendor/phpstan/phpstan-doctrine/rules.neon
+    - vendor/phpstan/phpstan-strict-rules/rules.neon
 
 parameters:
     paths:
