@@ -1043,7 +1043,7 @@ SQL;
     /**
      * @param string[] $attachment_name
      */
-    public function createThread($markdown, $user, $title, $content, $anon, $prof_pinned, $status, $hasAttachment, $attachment_name, $categories_ids, $lock_thread_date, $expiration, $announcement)
+    public function createThread($markdown, $user, $title, $content, $anon, $prof_pinned, $status, $hasAttachment, $attachment_name, $categories_ids, $lock_thread_date, $expiration, $announcement) {
         $this->course_db->beginTransaction();
 
         $now = $announcement ? $this->core->getDateTimeNow() : null;
