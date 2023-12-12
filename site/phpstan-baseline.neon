@@ -709,6 +709,11 @@ parameters:
 			path: app/controllers/SelfRejoinController.php
 
 		-
+			message: "#^Strict comparison using \\!\\=\\= between bool and null will always evaluate to true\\.$#"
+			count: 1
+			path: app/controllers/SelfRejoinController.php
+
+		-
 			message: """
 				#^Call to deprecated method RedirectOnlyResponse\\(\\) of class app\\\\libraries\\\\response\\\\MultiResponse\\:
 				should not be used, just return RedirectResponse directly$#
@@ -3159,6 +3164,11 @@ parameters:
 			message: "#^Property app\\\\entities\\\\db\\\\Table\\:\\:\\$columns with generic interface Doctrine\\\\Common\\\\Collections\\\\Collection does not specify its types\\: TKey, T$#"
 			count: 1
 			path: app/entities/db/Table.php
+
+		-
+			message: "#^Construct empty\\(\\) is not allowed\\. Use more strict comparison\\.$#"
+			count: 1
+			path: app/entities/email/EmailEntity.php
 
 		-
 			message: "#^Property app\\\\entities\\\\forum\\\\Category\\:\\:\\$threads with generic interface Doctrine\\\\Common\\\\Collections\\\\Collection does not specify its types\\: TKey, T$#"
@@ -6661,16 +6671,6 @@ parameters:
 			path: app/libraries/database/DatabaseQueries.php
 
 		-
-			message: "#^Method app\\\\libraries\\\\database\\\\DatabaseQueries\\:\\:getResolveState\\(\\) has no return type specified\\.$#"
-			count: 1
-			path: app/libraries/database/DatabaseQueries.php
-
-		-
-			message: "#^Method app\\\\libraries\\\\database\\\\DatabaseQueries\\:\\:getResolveState\\(\\) has parameter \\$thread_id with no type specified\\.$#"
-			count: 1
-			path: app/libraries/database/DatabaseQueries.php
-
-		-
 			message: "#^Method app\\\\libraries\\\\database\\\\DatabaseQueries\\:\\:getRootPostOfNonMergedThread\\(\\) has no return type specified\\.$#"
 			count: 1
 			path: app/libraries/database/DatabaseQueries.php
@@ -7351,16 +7351,6 @@ parameters:
 			path: app/libraries/database/DatabaseQueries.php
 
 		-
-			message: "#^Method app\\\\libraries\\\\database\\\\DatabaseQueries\\:\\:postHasHistory\\(\\) has no return type specified\\.$#"
-			count: 1
-			path: app/libraries/database/DatabaseQueries.php
-
-		-
-			message: "#^Method app\\\\libraries\\\\database\\\\DatabaseQueries\\:\\:postHasHistory\\(\\) has parameter \\$post_id with no type specified\\.$#"
-			count: 1
-			path: app/libraries/database/DatabaseQueries.php
-
-		-
 			message: "#^Method app\\\\libraries\\\\database\\\\DatabaseQueries\\:\\:removeFromSeekingTeam\\(\\) has no return type specified\\.$#"
 			count: 1
 			path: app/libraries/database/DatabaseQueries.php
@@ -7707,21 +7697,6 @@ parameters:
 
 		-
 			message: "#^Method app\\\\libraries\\\\database\\\\DatabaseQueries\\:\\:updateUsersRotatingSection\\(\\) has no return type specified\\.$#"
-			count: 1
-			path: app/libraries/database/DatabaseQueries.php
-
-		-
-			message: "#^Method app\\\\libraries\\\\database\\\\DatabaseQueries\\:\\:viewedThread\\(\\) has no return type specified\\.$#"
-			count: 1
-			path: app/libraries/database/DatabaseQueries.php
-
-		-
-			message: "#^Method app\\\\libraries\\\\database\\\\DatabaseQueries\\:\\:viewedThread\\(\\) has parameter \\$thread_id with no type specified\\.$#"
-			count: 1
-			path: app/libraries/database/DatabaseQueries.php
-
-		-
-			message: "#^Method app\\\\libraries\\\\database\\\\DatabaseQueries\\:\\:viewedThread\\(\\) has parameter \\$user with no type specified\\.$#"
 			count: 1
 			path: app/libraries/database/DatabaseQueries.php
 
@@ -12658,7 +12633,7 @@ parameters:
 
 		-
 			message: "#^Call to function in_array\\(\\) requires parameter \\#3 to be set\\.$#"
-			count: 3
+			count: 2
 			path: app/views/forum/ForumThreadView.php
 
 		-
@@ -12702,27 +12677,7 @@ parameters:
 			path: app/views/forum/ForumThreadView.php
 
 		-
-			message: "#^Method app\\\\views\\\\forum\\\\ForumThreadView\\:\\:createPost\\(\\) has parameter \\$post with no type specified\\.$#"
-			count: 1
-			path: app/views/forum/ForumThreadView.php
-
-		-
-			message: "#^Method app\\\\views\\\\forum\\\\ForumThreadView\\:\\:createPost\\(\\) has parameter \\$render with no type specified\\.$#"
-			count: 1
-			path: app/views/forum/ForumThreadView.php
-
-		-
 			message: "#^Method app\\\\views\\\\forum\\\\ForumThreadView\\:\\:createPost\\(\\) has parameter \\$reply_level with no type specified\\.$#"
-			count: 1
-			path: app/views/forum/ForumThreadView.php
-
-		-
-			message: "#^Method app\\\\views\\\\forum\\\\ForumThreadView\\:\\:createPost\\(\\) has parameter \\$thread_announced with no type specified\\.$#"
-			count: 1
-			path: app/views/forum/ForumThreadView.php
-
-		-
-			message: "#^Method app\\\\views\\\\forum\\\\ForumThreadView\\:\\:createPost\\(\\) has parameter \\$thread_id with no type specified\\.$#"
 			count: 1
 			path: app/views/forum/ForumThreadView.php
 
