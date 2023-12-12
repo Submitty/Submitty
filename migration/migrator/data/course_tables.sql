@@ -1227,7 +1227,8 @@ CREATE TABLE public.grading_rotating (
 CREATE TABLE public.late_day_exceptions (
     user_id character varying(255) NOT NULL,
     g_id character varying(255) NOT NULL,
-    late_day_exceptions integer NOT NULL
+    late_day_exceptions integer NOT NULL,
+    reason_for_exception character varying(255) DEFAULT ''::character varying
 );
 
 
@@ -1778,6 +1779,17 @@ CREATE SEQUENCE public.threads_id_seq
 --
 
 ALTER SEQUENCE public.threads_id_seq OWNED BY public.threads.id;
+
+
+--
+-- Name: upducks_table; Type: TABLE; Schema: public; Owner: -
+--
+
+CREATE TABLE public.upducks_table (
+    post_id integer NOT NULL,
+    user_id character varying(255) NOT NULL,
+    thread_id integer NOT NULL
+);
 
 
 --
@@ -3287,6 +3299,30 @@ ALTER TABLE ONLY public.thread_categories
 
 ALTER TABLE ONLY public.thread_categories
     ADD CONSTRAINT thread_categories_fk1 FOREIGN KEY (category_id) REFERENCES public.categories_list(category_id);
+
+
+--
+-- Name: upducks_table upducks_table_post_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.upducks_table
+    ADD CONSTRAINT upducks_table_post_id_fkey FOREIGN KEY (post_id) REFERENCES public.posts(id) ON UPDATE CASCADE;
+
+
+--
+-- Name: upducks_table upducks_table_thread_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.upducks_table
+    ADD CONSTRAINT upducks_table_thread_id_fkey FOREIGN KEY (thread_id) REFERENCES public.threads(id) ON UPDATE CASCADE;
+
+
+--
+-- Name: upducks_table upducks_table_user_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.upducks_table
+    ADD CONSTRAINT upducks_table_user_id_fkey FOREIGN KEY (user_id) REFERENCES public.users(user_id) ON UPDATE CASCADE;
 
 
 --

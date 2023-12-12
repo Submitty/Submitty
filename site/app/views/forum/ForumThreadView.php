@@ -492,7 +492,14 @@ class ForumThreadView extends AbstractView {
             $i = 0;
             $first = true;
 
-            //create the map here
+            $postIDs = [];
+            foreach ($posts as $post) {
+                array_push($postIDs, $post["id"]);
+            }
+            //add map here
+            $current_user = $this->core->getUser()->getId();
+            $upDuckCounter_map = $this->core->getQueries()->getUpduckInfoForPosts($postIDs);
+            $userLiked_map = $this->core->getQueries()->getUserLikes($postIDs, $current_user);
 
             foreach ($order_array as $ordered_post) {
                 foreach ($posts as $post) {
@@ -506,6 +513,8 @@ class ForumThreadView extends AbstractView {
 
                         $post["author_user_group"] = $author_user_groups_map[$post["author_user_id"]];
 
+                        $likeCount = $upDuckCounter_map[$post["id"]];
+                        $userLiked = $userLiked_map[$post["id"]];
                         //then here I can make a call with the specific postid
                         $post_data[] = $this->createPost($thread_id, $post, $unviewed_posts, $first, $reply_level, $display_option, $includeReply, false, $thread_announced);
                         break;
