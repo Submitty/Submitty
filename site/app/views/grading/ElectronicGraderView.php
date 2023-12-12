@@ -299,6 +299,8 @@ class ElectronicGraderView extends AbstractView {
         $this->core->getOutput()->addInternalCss('admin-gradeable.css');
         return $this->core->getOutput()->renderTwigTemplate("grading/electronic/ta_status/StatusBase.twig", [
             "gradeable_id" => $gradeable->getId(),
+            "semester" => $this->core->getConfig()->getTerm(),
+            "course" => $this->core->getConfig()->getCourse(),
             "gradeable_title" => $gradeable->getTitle(),
             "team_assignment" => $gradeable->isTeamAssignment(),
             "ta_grades_released" => $gradeable->isTaGradeReleased(),
