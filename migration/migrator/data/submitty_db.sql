@@ -93,7 +93,7 @@ CREATE FUNCTION public.sync_courses_user() RETURNS trigger
                 db_conn varchar;
                 query_string text;
             BEGIN
-                db_conn := format('dbname=submitty_%s_%s', NEW.semester, NEW.course);
+                db_conn := format('dbname=submitty_%s_%s', NEW.term, NEW.course);
 
                 IF (TG_OP = 'INSERT') THEN
                     -- FULL data sync on INSERT of a new user record.
@@ -185,7 +185,7 @@ DECLARE
     db_conn VARCHAR;
     query_string TEXT;
 BEGIN
-    db_conn := format('dbname=submitty_%s_%s', OLD.semester, OLD.course);
+    db_conn := format('dbname=submitty_%s_%s', OLD.term, OLD.course);
     query_string := 'DELETE FROM sections_registration WHERE sections_registration_id = ' || quote_literal(OLD.registration_section_id);
     -- Need to make sure that query_string was set properly as dblink_exec will happily take a null and then do nothing
     IF query_string IS NULL THEN
@@ -219,7 +219,7 @@ DECLARE
     db_conn VARCHAR;
     query_string TEXT;
 BEGIN
-    db_conn := format('dbname=submitty_%s_%s', OLD.semester, OLD.course);
+    db_conn := format('dbname=submitty_%s_%s', OLD.term, OLD.course);
     -- Need to delete anon_id entry from gradeable_anon otherwise foreign key constraint will be violated and execution will fail
     query_string := 'DELETE FROM gradeable_anon WHERE user_id = ' || quote_literal(OLD.user_id) || '; '
                     || 'DELETE FROM users WHERE user_id = ' || quote_literal(OLD.user_id);
@@ -287,7 +287,7 @@ DECLARE
     db_conn VARCHAR;
     query_string TEXT;
 BEGIN
-    db_conn := format('dbname=submitty_%s_%s', NEW.semester, NEW.course);
+    db_conn := format('dbname=submitty_%s_%s', NEW.term, NEW.course);
 
     IF (TG_OP = 'INSERT') THEN
         query_string := 'INSERT INTO sections_registration (sections_registration_id, course_section_id) VALUES(' || quote_literal(NEW.registration_section_id) || ',' || quote_literal(NEW.course_section_id) || ')';
@@ -338,9 +338,9 @@ CREATE FUNCTION public.sync_user() RETURNS trigger
                 RAISE LOG USING MESSAGE = 'PREFERRED_NAME DATA UPDATE', DETAIL = preferred_name_change_details;
             END IF;
             -- Propagate UPDATE to course DBs
-            FOR course_row IN SELECT semester, course FROM courses_users WHERE user_id=NEW.user_id LOOP
-                RAISE NOTICE 'Semester: %, Course: %', course_row.semester, course_row.course;
-                db_conn := format('dbname=submitty_%s_%s', course_row.semester, course_row.course);
+            FOR course_row IN SELECT term, course FROM courses_users WHERE user_id=NEW.user_id LOOP
+                RAISE NOTICE 'Term: %, Course: %', course_row.term, course_row.course;
+                db_conn := format('dbname=submitty_%s_%s', course_row.term, course_row.course);
                 query_string := 'UPDATE users SET '
                     || 'user_numeric_id=' || quote_nullable(NEW.user_numeric_id) || ', '
                     || 'user_pronouns=' || quote_literal(NEW.user_pronouns) || ', '
@@ -381,7 +381,7 @@ SET default_tablespace = '';
 --
 
 CREATE TABLE public.courses (
-    semester character varying(255) NOT NULL,
+    term character varying(255) NOT NULL,
     course character varying(255) NOT NULL,
     status smallint DEFAULT 1 NOT NULL,
     group_name character varying(255) NOT NULL,
@@ -397,7 +397,7 @@ CREATE TABLE public.courses (
 --
 
 CREATE TABLE public.courses_registration_sections (
-    semester character varying(255) NOT NULL,
+    term character varying(255) NOT NULL,
     course character varying(255) NOT NULL,
     registration_section_id character varying(255) NOT NULL,
     course_section_id character varying(255) DEFAULT ''::character varying
@@ -409,7 +409,7 @@ CREATE TABLE public.courses_registration_sections (
 --
 
 CREATE TABLE public.courses_users (
-    semester character varying(255) NOT NULL,
+    term character varying(255) NOT NULL,
     course character varying(255) NOT NULL,
     user_id character varying NOT NULL,
     user_group integer NOT NULL,
@@ -427,15 +427,17 @@ CREATE TABLE public.courses_users (
 
 CREATE TABLE public.emails (
     id bigint NOT NULL,
-    user_id character varying NOT NULL,
+    user_id character varying,
     subject text NOT NULL,
     body text NOT NULL,
     created timestamp without time zone NOT NULL,
     sent timestamp without time zone,
     error character varying DEFAULT ''::character varying NOT NULL,
     email_address character varying(255) DEFAULT ''::character varying NOT NULL,
-    semester character varying,
-    course character varying
+    term character varying,
+    course character varying,
+    to_name character varying,
+    CONSTRAINT name_or_email CHECK (((user_id IS NOT NULL) <> (to_name IS NOT NULL)))
 );
 
 
@@ -464,7 +466,7 @@ ALTER SEQUENCE public.emails_id_seq OWNED BY public.emails.id;
 --
 
 CREATE TABLE public.mapped_courses (
-    semester character varying(255) NOT NULL,
+    term character varying(255) NOT NULL,
     course character varying(255) NOT NULL,
     registration_section character varying(255) NOT NULL,
     mapped_course character varying(255) NOT NULL,
@@ -648,7 +650,7 @@ ALTER TABLE ONLY public.vcs_auth_tokens ALTER COLUMN id SET DEFAULT nextval('pub
 --
 
 ALTER TABLE ONLY public.courses
-    ADD CONSTRAINT courses_pkey PRIMARY KEY (semester, course);
+    ADD CONSTRAINT courses_pkey PRIMARY KEY (term, course);
 
 
 --
@@ -656,7 +658,7 @@ ALTER TABLE ONLY public.courses
 --
 
 ALTER TABLE ONLY public.courses_registration_sections
-    ADD CONSTRAINT courses_registration_sections_pkey PRIMARY KEY (semester, course, registration_section_id);
+    ADD CONSTRAINT courses_registration_sections_pkey PRIMARY KEY (term, course, registration_section_id);
 
 
 --
@@ -664,7 +666,7 @@ ALTER TABLE ONLY public.courses_registration_sections
 --
 
 ALTER TABLE ONLY public.courses_users
-    ADD CONSTRAINT courses_users_pkey PRIMARY KEY (semester, course, user_id);
+    ADD CONSTRAINT courses_users_pkey PRIMARY KEY (term, course, user_id);
 
 
 --
@@ -680,7 +682,7 @@ ALTER TABLE ONLY public.emails
 --
 
 ALTER TABLE ONLY public.mapped_courses
-    ADD CONSTRAINT mapped_courses_pkey PRIMARY KEY (semester, course, registration_section);
+    ADD CONSTRAINT mapped_courses_pkey PRIMARY KEY (term, course, registration_section);
 
 
 --
@@ -816,7 +818,7 @@ CREATE TRIGGER user_sync_users AFTER UPDATE ON public.users FOR EACH ROW EXECUTE
 --
 
 ALTER TABLE ONLY public.courses
-    ADD CONSTRAINT courses_fkey FOREIGN KEY (semester) REFERENCES public.terms(term_id) ON UPDATE CASCADE;
+    ADD CONSTRAINT courses_fkey FOREIGN KEY (term) REFERENCES public.terms(term_id) ON UPDATE CASCADE;
 
 
 --
@@ -824,7 +826,7 @@ ALTER TABLE ONLY public.courses
 --
 
 ALTER TABLE ONLY public.courses_registration_sections
-    ADD CONSTRAINT courses_registration_sections_fkey FOREIGN KEY (semester, course) REFERENCES public.courses(semester, course) ON UPDATE CASCADE;
+    ADD CONSTRAINT courses_registration_sections_fkey FOREIGN KEY (term, course) REFERENCES public.courses(term, course) ON UPDATE CASCADE;
 
 
 --
@@ -832,7 +834,7 @@ ALTER TABLE ONLY public.courses_registration_sections
 --
 
 ALTER TABLE ONLY public.courses_users
-    ADD CONSTRAINT courses_users_course_fkey FOREIGN KEY (semester, course) REFERENCES public.courses(semester, course) ON UPDATE CASCADE;
+    ADD CONSTRAINT courses_users_course_fkey FOREIGN KEY (term, course) REFERENCES public.courses(term, course) ON UPDATE CASCADE;
 
 
 --
@@ -864,7 +866,7 @@ ALTER TABLE ONLY public.saml_mapped_users
 --
 
 ALTER TABLE ONLY public.mapped_courses
-    ADD CONSTRAINT mapped_courses_fkey FOREIGN KEY (semester, mapped_course) REFERENCES public.courses(semester, course) ON UPDATE CASCADE;
+    ADD CONSTRAINT mapped_courses_fkey FOREIGN KEY (term, mapped_course) REFERENCES public.courses(term, course) ON UPDATE CASCADE;
 
 
 --

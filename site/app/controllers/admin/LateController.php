@@ -45,39 +45,36 @@ class LateController extends AbstractController {
     }
 
     /**
-     * @Route("/courses/{_semester}/{_course}/late_days_forensics")
+     * @Route("/courses/{_semester}/{_course}/bulk_late_days")
      * @return WebResponse
      */
-    public function viewLateDaysForensics() {
+    public function viewLateDayCache() {
         return new WebResponse(
             ['admin', 'LateDay'],
-            'displayLateDayForesnics',
+            'displayLateDayCache',
             $this->core->getQueries()->getAllUsers(),
             $this->core->getConfig()->getDefaultStudentLateDays()
         );
     }
 
     /**
-     * @Route("/courses/{_semester}/{_course}/late_days_forensics/flush")
+     * @Route("/courses/{_semester}/{_course}/bulk_late_days/flush")
      * @return RedirectResponse
      */
     public function flushLateDayCache() {
         $this->core->getQueries()->flushAllLateDayCache();
         $this->core->addSuccessMessage("Late day cache flushed!");
-
-        return new RedirectResponse($this->core->buildCourseUrl(['late_days_forensics']));
+        return new RedirectResponse($this->core->buildCourseUrl(['bulk_late_days']));
     }
 
     /**
-     * @Route("/courses/{_semester}/{_course}/late_days_forensics/calculate")
+     * @Route("/courses/{_semester}/{_course}/bulk_late_days/calculate")
      * @return RedirectResponse
      */
     public function calculateLateDayCache() {
         $this->core->getQueries()->generateLateDayCacheForUsers();
-
         $this->core->addSuccessMessage("Late day cache calculated!");
-
-        return new RedirectResponse($this->core->buildCourseUrl(['late_days_forensics']));
+        return new RedirectResponse($this->core->buildCourseUrl(['bulk_late_days']));
     }
 
     /**
@@ -124,6 +121,13 @@ class LateController extends AbstractController {
             }
             if (((!isset($_POST['late_days'])) || $_POST['late_days'] == "" || (!ctype_digit($_POST['late_days'])))) {
                 $error = "Late Days must be a nonnegative integer";
+                $this->core->addErrorMessage($error);
+                return MultiResponse::JsonOnlyResponse(
+                    JsonResponse::getFailResponse($error)
+                );
+            }
+            if (((!isset($_POST['late_days'])) || $_POST['late_days'] == "" || $_POST['late_days'] > 2147483647)) {
+                $error = "Late Days must be within the range of integer values";
                 $this->core->addErrorMessage($error);
                 return MultiResponse::JsonOnlyResponse(
                     JsonResponse::getFailResponse($error)
@@ -183,7 +187,7 @@ class LateController extends AbstractController {
             }
             else {
                 for ($i = 0; $i < count($data); $i++) {
-                    $this->core->getQueries()->updateExtensions($data[$i][0], $data[$i][1], $data[$i][2]);
+                    $this->core->getQueries()->updateExtensions($data[$i][0], $data[$i][1], $data[$i][2], $data[$i][3]);
                 }
                 return MultiResponse::JsonOnlyResponse(JsonResponse::getSuccessResponse());
             }
@@ -222,7 +226,7 @@ class LateController extends AbstractController {
                     JsonResponse::getFailResponse($error)
                 );
             }
-
+            $reason_for_exception = $_POST['reason_for_exception'] ?? 'unspecified';
             $users_with_exceptions = $this->core->getQueries()->getUsersWithExtensions($_POST['g_id']);
             $simple_late_user = null;
             $no_change = false;
@@ -245,14 +249,14 @@ class LateController extends AbstractController {
             $option = isset($_POST['option']) ? $_POST['option'] : -1;
             if ($team != null && $team->getSize() > 1) {
                 if ($option == 0) {
-                    $this->core->getQueries()->updateExtensions($_POST['user_id'], $_POST['g_id'], $late_days);
+                    $this->core->getQueries()->updateExtensions($_POST['user_id'], $_POST['g_id'], $late_days, $reason_for_exception);
                     $this->core->addSuccessMessage("Extensions have been updated");
                     return MultiResponse::JsonOnlyResponse(JsonResponse::getSuccessResponse());
                 }
                 elseif ($option == 1) {
                     $team_member_ids = explode(", ", $team->getMemberList());
                     for ($i = 0; $i < count($team_member_ids); $i++) {
-                        $this->core->getQueries()->updateExtensions($team_member_ids[$i], $_POST['g_id'], $late_days);
+                        $this->core->getQueries()->updateExtensions($team_member_ids[$i], $_POST['g_id'], $late_days, $reason_for_exception);
                     }
                     $this->core->addSuccessMessage("Extensions have been updated");
                     return MultiResponse::JsonOnlyResponse(JsonResponse::getSuccessResponse());
@@ -274,7 +278,7 @@ class LateController extends AbstractController {
                 }
             }
             else {
-                $this->core->getQueries()->updateExtensions($_POST['user_id'], $_POST['g_id'], $late_days);
+                $this->core->getQueries()->updateExtensions($_POST['user_id'], $_POST['g_id'], $late_days, $reason_for_exception);
                 $this->core->addSuccessMessage("Extensions have been updated");
                 return MultiResponse::JsonOnlyResponse(JsonResponse::getSuccessResponse());
             }
@@ -337,16 +341,18 @@ class LateController extends AbstractController {
                 "error" => "Invalid mimetype, must start with 'text/', got '{$mime_type}'"
             ];
         }
-        ini_set("auto_detect_line_endings", true);
 
-        $rows = file($csv_file, FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES);
-        if ($rows === false) {
+        $file_content = file_get_contents($csv_file);
+        if ($file_content === false) {
             $data = null;
             return [
                 "success" => false,
                 "error" => "Could not open CSV file for reading",
             ];
         }
+        $file_content = preg_replace("/\r\n|\r/", "\n", $file_content);
+        $rows = explode("\n", $file_content);
+        $rows = array_filter($rows, 'strlen');
         foreach ($rows as $idx => $row) {
             $row_number = $idx + 1;
             $fields = explode(',', $row);
@@ -355,8 +361,8 @@ class LateController extends AbstractController {
                 return trim($k);
             }, $fields);
 
-            //Each row has three fields
-            if (count($fields) !== 3) {
+            //All types have 3 fields except for exceptions, which can have 3 or 4 rows.
+            if (count($fields) !== 3 && !($type === 'extension' && count($fields) === 4)) {
                 $data = null;
                 return [
                     "success" => false,
@@ -395,6 +401,10 @@ class LateController extends AbstractController {
                     "success" => false,
                     "error" => "Third column must be an integer greater or equal to zero, got '{$fields[2]}' on row {$row_number}",
                 ];
+            }
+            //$fields[3] added if not present to extension type. Allows for backwards compatibility.
+            if ($type === "extension" && count($fields) === 3) {
+                $fields[] = 'unspecified';
             }
             //Fields information seems okay.  Push fields onto data array.
             $data[] = $fields;

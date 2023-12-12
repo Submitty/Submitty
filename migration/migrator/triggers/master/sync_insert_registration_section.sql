@@ -11,7 +11,7 @@ DECLARE
     db_conn VARCHAR;
     query_string TEXT;
 BEGIN
-    db_conn := format('dbname=submitty_%s_%s', NEW.semester, NEW.course);
+    db_conn := format('dbname=submitty_%s_%s', NEW.term, NEW.course);
 
     IF (TG_OP = 'INSERT') THEN
         query_string := 'INSERT INTO sections_registration (sections_registration_id, course_section_id) VALUES(' || quote_literal(NEW.registration_section_id) || ',' || quote_literal(NEW.course_section_id) || ')';

@@ -38,7 +38,6 @@ class LateDays extends AbstractModel {
     public function __construct(Core $core, User $user, array $graded_gradeables, $late_day_updates = null, $reCache = false) {
         parent::__construct($core);
         $this->user = $user;
-        $this->late_days_updates = $late_day_updates;
 
         // Filter out non-electronic gradeables
         $graded_gradeables = array_filter($graded_gradeables, function (GradedGradeable $gg) {
@@ -48,7 +47,6 @@ class LateDays extends AbstractModel {
         // Get the late day updates that the instructor will enter
         $this->late_days_updates = $late_day_updates ?? $this->core->getQueries()->getLateDayUpdates($user->getId());
         $late_day_cache = $this->core->getQueries()->getLateDayCacheForUser($user->getId());
-
         // Get all late day events (late day updates and graded gradeable submission dates)
         $late_day_events = $this->createLateDayEvents($graded_gradeables);
 

@@ -1,5 +1,6 @@
 [flake8]
 max-line-length = 100
+extend-ignore = E203, E501, E704
 exclude=
     .git,
     .setup/bin/code_watcher.py,
@@ -8,7 +9,7 @@ exclude=
     .setup/bin/reset_system.py,
     .setup/bin/reupload_generate_csv.py,
     .setup/bin/reupload_old_assignments.py,
-    .setup/bin/setup_sample_courses.py,
+    .setup/bin/sample_courses/models/course/course_create_gradeables.py,
     .setup/bin/track_git_version.py,
     .setup/CONFIGURE_SUBMITTY.py,
     .setup/update_database.py,
@@ -17,7 +18,6 @@ exclude=
     bin/left_right_parse.py,
     bin/make_assignments_txt_file.py,
     bin/make_generated_output.py,
-    bin/read_iclicker_ids.py,
     bin/regrade.py,
     grading/python/submitty_router.py,
     grading/json_syntax_checker.py,

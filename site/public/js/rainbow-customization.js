@@ -4,7 +4,7 @@ const benchmarks_with_input_fields = ['lowest_a-', 'lowest_b-', 'lowest_c-', 'lo
 function ExtractBuckets() {
     const x = [];
     const bucket_list = $('#buckets_used_list').find('li');
-    bucket_list.each((idx,li) => {
+    bucket_list.each((idx, li) => {
         x.push($(li).text());
     });
 
@@ -19,7 +19,7 @@ function ClampPoints(el) {
         el.value = el.placeholder;
         el.classList.remove('override');
     }
-    el.value = Math.max(0.0,el.value);
+    el.value = Math.max(0.0, el.value);
 }
 
 // eslint-disable-next-line no-unused-vars
@@ -32,7 +32,7 @@ function DetectMaxOverride(el) {
     }
 }
 
-function ExtractBucketName(s,offset) {
+function ExtractBucketName(s, offset) {
     const tmp = s.split('-');
     let bucket = '';
     let i;
@@ -48,9 +48,9 @@ function ExtractBucketName(s,offset) {
 //Forces element's value to be in range [0.0,100.0]
 // eslint-disable-next-line no-unused-vars
 function ClampPercent(el) {
-    el.value = Math.min(Math.max(el.value,0.0),100.0);
+    el.value = Math.min(Math.max(el.value, 0.0), 100.0);
     UpdateUsedPercentage();
-    $(`#config-percent-${ExtractBucketName(el.id,1)}`).text(`${el.value}%`);
+    $(`#config-percent-${ExtractBucketName(el.id, 1)}`).text(`${el.value}%`);
 }
 
 //Updates the sum of percentage points accounted for by the buckets being used
@@ -64,10 +64,10 @@ function UpdateUsedPercentage() {
     const percentage_span = $('#used_percentage');
     percentage_span.text(`${val.toString()}%`);
     if (val>100.0) {
-        percentage_span.css({'color':'red','font-weight':'bold'});
+        percentage_span.css({'color':'red', 'font-weight':'bold'});
     }
     else {
-        percentage_span.css({'color':'var(--text-black)','font-weight':''});
+        percentage_span.css({'color':'var(--text-black)', 'font-weight':''});
     }
 }
 
@@ -77,8 +77,8 @@ function UpdateVisibilityBuckets() {
     //For each bucket that isn't being used, hide it
     $('#buckets_available_list').find('input').each(function() {
         //Extract the bucket name
-        const bucket = ExtractBucketName($(this).attr('id'),1);
-        $(`#config-${bucket}`).css('display','none');
+        const bucket = ExtractBucketName($(this).attr('id'), 1);
+        $(`#config-${bucket}`).css('display', 'none');
     });
 
     //For each bucket that IS being used, show it
@@ -86,12 +86,12 @@ function UpdateVisibilityBuckets() {
     if (used_buckets.length === 0) {
         return;
     }
-    let prev_bucket = ExtractBucketName(used_buckets.first().attr('id'),1);
-    $(`#config-${prev_bucket}`).prependTo('#config-wrapper').css('display','block');
+    let prev_bucket = ExtractBucketName(used_buckets.first().attr('id'), 1);
+    $(`#config-${prev_bucket}`).prependTo('#config-wrapper').css('display', 'block');
 
     used_buckets.each(function() {
         //Extract the bucket name
-        const bucket = ExtractBucketName($(this).attr('id'),1);
+        const bucket = ExtractBucketName($(this).attr('id'), 1);
         console.log(`prev_bucket: ${prev_bucket} bucket: ${bucket}`);
         if (bucket !== prev_bucket) {
             $(`#config-${bucket}`).css('display', 'block');
@@ -100,6 +100,18 @@ function UpdateVisibilityBuckets() {
         }
     });
 }
+
+function getDisplay() {
+    // Collect display
+    const display = [];
+
+    $.each($("input[name='display']:checked"), function() {
+        display.push($(this).val());
+    });
+
+    return display;
+}
+
 
 function getSection() {
     // Collect sections and labels
@@ -308,6 +320,7 @@ function buildJSON() {
 
     // Build the overall json
     let ret = {
+        'display': getDisplay(),
         'display_benchmark': getDisplayBenchmark(),
         'benchmark_percent': getBenchmarkPercent(),
         'section' : getSection(),
@@ -503,6 +516,10 @@ $(document).ready(() => {
             setInputsVisibility(this);
         });
 
+    });
+
+    $("input[name*='display']").change(() => {
+        displayChangeDetectedMessage();
     });
 
     // Register change handlers to update the status message when form inputs change

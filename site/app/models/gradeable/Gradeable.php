@@ -78,6 +78,7 @@ use app\controllers\admin\AdminGradeableController;
  * @method void setDependsOn($depends_on)
  * @method int getDependsOnPoints()
  * @method void setDependsOnPoints($depends_on_points)
+ * @method void setAnyManualGrades($any_manual_grades)
  * @method bool isGradeInquiryAllowed()
  * @method bool isGradeInquiryPerComponentAllowed()
  * @method void setGradeInquiryPerComponentAllowed($is_grade_inquiry_per_component)
@@ -95,7 +96,7 @@ use app\controllers\admin\AdminGradeableController;
  * @method int getLimitedAccessBlind()
  * @method void setPeerBlind($peer_blind)
  * @method int getPeerBlind()
- * @method void setInstructorBlind($peer_blind)
+ * @method void setInstructorBlind($instructor_blind)
  * @method int getInstructorBlind()
  * @method bool getAllowCustomMarks()
  * @method void setAllowCustomMarks($allow_custom_marks)
@@ -153,7 +154,7 @@ class Gradeable extends AbstractModel {
 
     /** @prop
      * @var bool If any manual grades have been entered for this gradeable */
-    private $any_manual_grades = null;
+    protected $any_manual_grades = null;
     /** @prop
      * @var bool If any submissions exist */
     private $any_submissions = null;
@@ -340,6 +341,7 @@ class Gradeable extends AbstractModel {
         $this->setMinGradingGroup($details['min_grading_group']);
         $this->setSyllabusBucket($details['syllabus_bucket']);
         $this->setTaInstructions($details['ta_instructions']);
+        $this->setAnyManualGrades($details['any_manual_grades']);
         if (array_key_exists('peer_graders_list', $details)) {
             $this->setPeerGradersList($details['peer_graders_list']);
         }
@@ -350,6 +352,9 @@ class Gradeable extends AbstractModel {
 
         if (array_key_exists('limited_access_blind', $details)) {
             $this->setLimitedAccessBlind($details['limited_access_blind']);
+        }
+        if (array_key_exists('instructor_blind', $details)) {
+            $this->setInstructorBlind($details['instructor_blind']);
         }
 
         if ($this->getType() === GradeableType::ELECTRONIC_FILE) {
@@ -1668,6 +1673,9 @@ class Gradeable extends AbstractModel {
      * @return Team[]
      */
     public function getTeams() {
+        if ($this->team_assignment === false) {
+            return [];
+        }
         if ($this->teams === null) {
             $this->teams = $this->core->getQueries()->getTeamsByGradeableId($this->getId());
         }
@@ -1843,9 +1851,11 @@ class Gradeable extends AbstractModel {
     /**
      * Gets the percent of grading complete for the provided user for this gradeable
      * @param User $grader
+     * @param bool $include_null_section
+     * @param bool $include_bad_submissions
      * @return float The percentage (0 to 1) of grading completed or NAN if none required
      */
-    public function getGradingProgress(User $grader) {
+    public function getGradingProgress(User $grader, bool $include_bad_submissions, bool $include_null_section) {
         //This code is taken from the ElectronicGraderController, it used to calculate the TA percentage.
         $total_users = [];
         $graded_components = [];
@@ -1874,16 +1884,22 @@ class Gradeable extends AbstractModel {
             $section_key = 'rotating_section';
         }
         $num_submitted = [];
+        $late_submitted = [];
+        $late_graded = [];
         if (count($sections) > 0) {
             if ($this->isTeamAssignment()) {
                 $total_users = $this->core->getQueries()->getTotalTeamCountByGradingSections($this->getId(), $sections, $section_key);
-                $graded_components = $this->core->getQueries()->getGradedComponentsCountByTeamGradingSections($this->getId(), $sections, $section_key);
+                $graded_components = $this->core->getQueries()->getGradedComponentsCountByGradingSections($this->getId(), $sections, $section_key, $this->isTeamAssignment());
                 $num_submitted = $this->core->getQueries()->getTotalSubmittedTeamCountByGradingSections($this->getId(), $sections, $section_key);
+                $late_submitted = $this->core->getQueries()->getBadTeamSubmissionsByGradingSection($this->getId(), $sections, $section_key);
+                $late_graded = $this->core->getQueries()->getBadGradedComponentsCountByGradingSections($this->getId(), $sections, $section_key, $this->isTeamAssignment());
             }
             else {
                 $total_users = $this->core->getQueries()->getTotalUserCountByGradingSections($sections, $section_key);
                 $graded_components = $this->core->getQueries()->getGradedComponentsCountByGradingSections($this->getId(), $sections, $section_key, $this->isTeamAssignment());
                 $num_submitted = $this->core->getQueries()->getTotalSubmittedUserCountByGradingSections($this->getId(), $sections, $section_key);
+                $late_submitted = $this->core->getQueries()->getBadUserSubmissionsByGradingSection($this->getId(), $sections, $section_key);
+                $late_graded = $this->core->getQueries()->getBadGradedComponentsCountByGradingSections($this->getId(), $sections, $section_key, $this->isTeamAssignment());
             }
         }
 
@@ -1894,21 +1910,30 @@ class Gradeable extends AbstractModel {
                 $sections[$key] = [
                     'total_components' => $value * $num_components,
                     'graded_components' => 0,
+                    'non_late_total_components' => ($value - ($late_submitted[$key] ?? 0)) * $num_components,
+                    'non_late_graded_components' => 0
                 ];
                 if (isset($graded_components[$key])) {
                     // Clamp to total components if unsubmitted assignment is graded for whatever reason
                     $sections[$key]['graded_components'] = min(intval($graded_components[$key]), $sections[$key]['total_components']);
+                    $sections[$key]['non_late_graded_components'] = $graded_components[$key] - $late_graded[$key];
                 }
             }
         }
         $components_graded = 0;
         $components_total = 0;
         foreach ($sections as $key => $section) {
-            if ($key === "NULL") {
+            if ($key === "NULL" && !$include_null_section) {
                 continue;
             }
-            $components_graded += $section['graded_components'];
-            $components_total += $section['total_components'];
+            if ($include_bad_submissions) {
+                $components_graded += $section['graded_components'];
+                $components_total += $section['total_components'];
+            }
+            else {
+                $components_graded += $section['non_late_graded_components'];
+                $components_total += $section['non_late_total_components'];
+            }
         }
         if ($components_total === 0) {
             return NAN;
@@ -2041,11 +2066,11 @@ class Gradeable extends AbstractModel {
                         $teams[$teamToAdd->getId()] = $this->core->getQueries()->getTeamByGradeableAndUser($this->getId(), $u->getId());
                     }
                 }
-                $g_section = new GradingSection($this->core, false, -1, [$user], null, $teams);
+                $g_section = new GradingSection($this->core, false, -1, [$user], [], $teams);
                 return [$g_section];
             }
             $users = $this->core->getQueries()->getUsersById($this->core->getQueries()->getPeerAssignment($this->getId(), $user->getId()));
-            $g_section = new GradingSection($this->core, false, -1, [$user], $users, null);
+            $g_section = new GradingSection($this->core, false, -1, [$user], $users, []);
             return [$g_section];
         }
         else {
@@ -2110,8 +2135,8 @@ class Gradeable extends AbstractModel {
                     $this->isGradeByRegistration(),
                     $section_name,
                     $graders[$section_name] ?? [],
-                    $users[$section_name] ?? null,
-                    $teams[$section_name] ?? null
+                    $users[$section_name] ?? [],
+                    $teams[$section_name] ?? []
                 );
             }
 
@@ -2166,7 +2191,7 @@ class Gradeable extends AbstractModel {
 
         $sections = [];
         foreach ($section_names as $section_name) {
-            $sections[] = new GradingSection($this->core, $this->isGradeByRegistration(), $section_name, $graders[$section_name] ?? [], $users[$section_name] ?? null, $teams[$section_name] ?? null);
+            $sections[] = new GradingSection($this->core, $this->isGradeByRegistration(), $section_name, $graders[$section_name] ?? [], $users[$section_name] ?? [], $teams[$section_name] ?? []);
         }
 
         return $sections;
@@ -2404,8 +2429,6 @@ class Gradeable extends AbstractModel {
                 FileUtils::joinPaths($install_dir, 'more_autograding_examples/upload_only_100mb/config')],
             ['PROVIDED: bulk scanned pdf exam (200 mb maximum total student file submission)',
                 FileUtils::joinPaths($install_dir, 'more_autograding_examples/pdf_exam/config')],
-            ['PROVIDED: iclicker_upload (for collecting student iclicker IDs)',
-                FileUtils::joinPaths($install_dir, 'more_autograding_examples/iclicker_upload/config')],
             ['PROVIDED: left_right_exam_seating (for collecting student handedness for exam seating assignment)',
                 FileUtils::joinPaths($install_dir, 'more_autograding_examples/left_right_exam_seating/config')],
             ['PROVIDED: test_notes_upload (expects single file, 2 mb maximum, 2-page pdf student submission)',

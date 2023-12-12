@@ -284,11 +284,6 @@ class GlobalController extends AbstractController {
                 "title" => "Gradebook",
                 "icon" => "fa-book-reader"
             ]);
-            $sidebar_buttons[] = new NavButton($this->core, [
-                "href" => $this->core->buildCourseUrl(['autograding_status']),
-                "title" => "Autograding Status",
-                "icon" => "fa-server"
-            ]);
         }
 
         // --------------------------------------------------------------------------
@@ -311,6 +306,13 @@ class GlobalController extends AbstractController {
                 "id" => "nav-sidebar-extensions",
                 "icon" => "fa-calendar-plus"
             ]);
+            if ($this->core->getConfig()->checkFeatureFlagEnabled('late_day_cache_display')) {
+                $sidebar_buttons[] = new NavButton($this->core, [
+                    "href" => $this->core->buildCourseUrl(['bulk_late_days']),
+                    "title" => "Bulk Late Days",
+                    "icon" => "fa-calendar-alt"
+                ]);
+            }
             $sidebar_buttons[] = new NavButton($this->core, [
                 "href" => $this->core->buildCourseUrl(['grade_override']),
                 "title" => "Grade Override",
@@ -464,15 +466,54 @@ class GlobalController extends AbstractController {
         ]);
     }
 
+
+//    public function calculateHanukkahDate(int $year): string {
+//        $gregorianDate = gregoriantojd(12, 25, $year);
+//        $dayOfWeek = jddayofweek($gregorianDate);
+//        $daysToAdd = 7 - $dayOfWeek + 1;
+//        $hanukkahDate = $gregorianDate + $daysToAdd;
+//        return jdtogregorian($hanukkahDate);
+//    }
+
+//    public function calculateHanukkahDate(int $year): \DateTime {
+//        $gregorianDate = gregoriantojd(12, 25, $year);
+//        $dayOfWeek = jddayofweek($gregorianDate);
+//        $daysToAdd = 7 - $dayOfWeek + 1;
+//        $hanukkahDate = $gregorianDate + $daysToAdd;
+//        return \DateTime::createFromFormat('m/d/Y', jdtogregorian($hanukkahDate));
+//    }
+
+
+
+
     // ==========================================================================================
     private function getDuckImage(\DateTime $now): string {
         $duck_img = 'moorthy_duck/00-original.svg';
         $day = (int) $now->format('j');
         $month = (int) $now->format('n');
         $year = $now->format('Y');
+        $yearint = (int) $now->format('Y');
 
         switch ($month) {
             case 12:
+                //December (Christmas, Hanukkah)
+//                $hanukkahDateTime = $this->calculateHanukkahDate($yearint);
+//                $dayOfHanukkah = $day - (int) $hanukkahDateTime->format('j') + 1;
+//                var_dump($yearint);
+//                var_dump($hanukkahDateTime);
+//                var_dump($dayOfHanukkah);
+
+//                if ($dayOfHanukkah >= 1 && $dayOfHanukkah <= 8) {
+                if ($day >= 7 && $day <= 15) {
+                    // Select the menorah duck image based on the day of Hanukkah
+                    $datecounter = $day - 6;
+                    $menorah_duck = 'moorthy_duck/menorah-duck/' . $datecounter . '.svg';
+                    $decemberImages = ['moorthy_duck/12-December.svg', $menorah_duck];
+                }
+                else {
+                    $decemberImages = ['moorthy_duck/12-December.svg'];
+                }
+                $duck_img = $decemberImages[array_rand($decemberImages)];
                 break;
             case 11:
                 //November (Thanksgiving)
@@ -489,6 +530,8 @@ class GlobalController extends AbstractController {
                 }
                 break;
             case 9:
+                //September (leaf)
+                $duck_img = 'moorthy_duck/09-september.svg';
                 break;
             case 8:
                 break;
