@@ -1332,10 +1332,10 @@ class ForumController extends AbstractController {
                 return $this->core->getOutput()->renderJsonFail("Missing required key in POST data: $key");
             }
         }
-        $output= [];
-        $output['type']=$this->core->getQueries()->toggleLikes($_POST['post_id'], $_POST['thread_id'], $_POST['current_user']);
+        $output = [];
+        $output['type'] = $this->core->getQueries()->toggleLikes($_POST['post_id'], $_POST['thread_id'], $_POST['current_user']);
 
-        if($output["type"]===false){
+        if ($output["type"] === false) {
             return $this->core->getOutput()->renderJsonFail("Catch Fail in Query");
         }
         return $this->core->getOutput()->renderJsonSuccess($output);

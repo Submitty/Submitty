@@ -478,7 +478,7 @@ class ForumThreadView extends AbstractView {
         foreach ($posts as $post) {
             array_push($postIDs, $post["id"]);
         }
-        
+
         $current_user = $this->core->getUser()->getId();
         $upDuckCounter_map = $this->core->getQueries()->getUpduckInfoForPosts($postIDs);
         $userLiked = $this->core->getQueries()->getUserLikesForPosts($postIDs, $current_user);
@@ -523,9 +523,9 @@ class ForumThreadView extends AbstractView {
                         }
 
                         $post["author_user_group"] = $author_user_groups_map[$post["author_user_id"]];
-  
-                        $boolLiked =in_array($post["id"], $userLiked);
-                        
+
+                        $boolLiked = in_array($post["id"], $userLiked);
+
                         $post_data[] = $this->createPost(
                             $activeThread,
                             $post,
@@ -557,7 +557,7 @@ class ForumThreadView extends AbstractView {
         else {
             foreach ($posts as $post) {
                 $post["author_user_group"] = $author_user_groups_map[$post["author_user_id"]];
-                $boolLiked =in_array($post["id"], $userLiked);
+                $boolLiked = in_array($post["id"], $userLiked);
                 $post_data[] = $this->createPost(
                     $activeThread,
                     $post,
@@ -624,7 +624,7 @@ class ForumThreadView extends AbstractView {
         }
 
         $return = "";
-        
+
         if ($render) {
             $return = $this->core->getOutput()->renderTwigTemplate("forum/GeneratePostList.twig", [
                 "userGroup" => $this->core->getUser()->getGroup(),
@@ -1150,9 +1150,9 @@ class ForumThreadView extends AbstractView {
         $userGroup = $this->core->getUser()->getGroup();
 
         $post_user_info = [];
-      
+
         $merged_thread = $is_merged_thread && $userAccessFullGrading;
-      
+
         if ($userAccessFullGrading) {
             $info_name = $given_name . " " . $family_name . " (" . $post['author_user_id'] . ")";
             $visible_user_json = json_encode($visible_username);

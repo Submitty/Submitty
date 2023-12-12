@@ -2,6 +2,7 @@
 /* exported markForDeletion */
 /* exported unMarkForDeletion */
 /* exported  displayHistoryAttachment */
+/* exported toggleLike */
 
 // eslint-disable-next-line no-unused-vars
 function categoriesFormEvents() {
@@ -1283,8 +1284,9 @@ function modifyThreadList(currentThreadId, currentCategoriesId, course, loadFirs
     });
 }
 
-function toggleLike(post_id,thread_id,current_user) {
+function toggleLike(post_id, thread_id, current_user) {
 
+    // eslint-disable-next-line no-undef
     const url = buildCourseUrl(['post', 'likes']);
     $.ajax({
         url: url,
@@ -1293,53 +1295,57 @@ function toggleLike(post_id,thread_id,current_user) {
             post_id: post_id,
             thread_id: thread_id,
             current_user: current_user,
+            // eslint-disable-next-line no-undef
             csrf_token: csrfToken,
         },
         success: function(data) {
+            let json;
             try {
-                var json = JSON.parse(data);
+                json = JSON.parse(data);
             }
             catch (err) {
+                // eslint-disable-next-line no-undef
                 displayErrorMessage('Error parsing data. Please try again.');
                 return;
             }
             if (json['status'] === 'fail') {
+                // eslint-disable-next-line no-undef
                 displayErrorMessage(json['message']);
                 return;
             }
             json=json['data'];
             //window.alert(json.type);
-            var likeCounterElement = document.getElementById('likeCounter_' + post_id);
-            var likeCounter = parseInt(likeCounterElement.innerText);
+            const likeCounterElement = document.getElementById('likeCounter_' + post_id);
+            let likeCounter = parseInt(likeCounterElement.innerText);
 
-            var likeIconSrc = document.getElementById('likeIcon_' + post_id);
-            var likeIconSrcElement = likeIconSrc.src;
+            // eslint-disable-next-line no-useless-concat
+            const likeIconSrc = document.getElementById('likeIcon_' + post_id);
+            let likeIconSrcElement = likeIconSrc.src;
 
-            var theme = localStorage.getItem("theme");
-            if(localStorage.getItem("theme")){
-                console.log(localStorage.getItem("theme"));
+            const theme = localStorage.getItem('theme');
+            if (localStorage.getItem('theme')) {
+                console.log(localStorage.getItem('theme'));
             }
 
-            if(likeIconSrcElement.endsWith('/img/on-duck-button.svg')){
-                if(theme=="light" && likeIconSrcElement.endsWith('/img/on-duck-button.svg')){
+            if (likeIconSrcElement.endsWith('/img/on-duck-button.svg')) {
+                if (theme==='light' && likeIconSrcElement.endsWith('/img/on-duck-button.svg')) {
                     likeIconSrcElement = likeIconSrcElement.replace('on-duck-button.svg', 'dark-mode-off-duck.svg');
                 }
-                else{
+                else {
                     likeIconSrcElement = likeIconSrcElement.replace('on-duck-button.svg', 'dark-mode-off-duck.svg');
-                }    
+                }
                 likeCounter=likeCounter-1;
 
                 likeIconSrc.src = likeIconSrcElement; // Update the state
                 likeCounterElement.innerText = likeCounter;
-                
             }
-            else{
-                if(theme=="light"){
+            else {
+                if (theme==='light') {
                     likeIconSrcElement = likeIconSrcElement.replace('dark-mode-off-duck.svg', 'on-duck-button.svg');
                 }
-                else{
+                else {
                     likeIconSrcElement = likeIconSrcElement.replace('dark-mode-off-duck.svg', 'on-duck-button.svg');
-                } 
+                }
                 likeCounter=likeCounter+1;
 
                 likeIconSrc.src = likeIconSrcElement; // Update the state
@@ -1348,7 +1354,7 @@ function toggleLike(post_id,thread_id,current_user) {
 
         },
         error: function(err) {
-            console.log(err)
+            console.log(err);
         },
     });
 }

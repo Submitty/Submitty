@@ -722,22 +722,22 @@ SQL;
         return $categories_list;
     }
 
-    public function toggleLikes($post_id, $thread_id, $current_user){
-        try{
+    public function toggleLikes($post_id, $thread_id, $current_user) {
+        try {
             $this->course_db->query("SELECT * FROM forum_upducks WHERE post_id = ? AND user_id = ? AND thread_id = ?", [$post_id, $current_user, $thread_id]);
 
             if (isset($this->course_db->rows()[0])) {
                 // If a row with the same values exists, delete it
                 $this->course_db->query("DELETE FROM forum_upducks WHERE post_id = ? AND user_id = ? AND thread_id = ?", [$post_id, $current_user, $thread_id]);
                 $result = 'unlike';
-            } 
+            }
             else {
                 // If no row with the same values exists, insert the new row
                 $this->course_db->query("INSERT INTO forum_upducks (post_id, user_id, thread_id) VALUES (?, ?, ?)",[$post_id, $current_user, $thread_id]);
                 $result = 'like';
             }
             return $result;
-        }   
+        }
         catch (DatabaseException $dbException) {
             if ($this->course_db->inTransaction()) {
                 $this->course_db->rollback();
@@ -748,24 +748,24 @@ SQL;
 
     public function getUpduckInfoForPosts(array $post_ids): array {
         $resultDict = [];
-        foreach($post_ids as $post_id) {
+        foreach ($post_ids as $post_id) {
             $this->course_db->query('SELECT COUNT(*) AS cnt FROM forum_upducks WHERE post_id = ?', [$post_id]);
-            $resultDict[$post_id]= intval($this->course_db->row()['cnt']);
+            $resultDict[$post_id] = intval($this->course_db->row()['cnt']);
         }
         return $resultDict;
     }
 
     public function getUserLikesForPosts(array $post_ids, $current_user): array {
-        $result = [];    
-        foreach ($post_ids as $post){
+        $result = [];
+        foreach ($post_ids as $post) {
             $this->course_db->query('SELECT COUNT(*) AS cnt FROM forum_upducks WHERE post_id = ? AND user_id = ?', [$post, $current_user]);
-            if(intval($this->course_db->row()['cnt']) >= 1){
-                array_push($result,$post);
+            if (intval($this->course_db->row()['cnt']) >= 1) {
+                array_push($result, $post);
             }
         }
         return $result;
     }
-    
+
     public function splitPost($post_id, $title, $categories_ids) {
         $old_thread_id = -1;
         $thread_id = -1;
