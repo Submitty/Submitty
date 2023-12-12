@@ -181,97 +181,99 @@
                     </div>
                 </div>
 
-                <div id = "moving-unit">
+<div id = "moving-unit">
 
 
 
-                    <div style="display: flex">
+    <div style="display: flex">
 
-                        {% if user_given_name != "" %}
-                        <div class="speech-bubble-container" id="speech-bubble-container">
-                            <button class="speech-bubble" id="speech-bubble" onclick="showBanners()">
-                                <strong>
-                                    New Event!
-                                </strong>
-                            </button >
-                            <div class="triangle" id="triangle"></div>
-                        </div>
+        {% if user_given_name != "" %}
+        <div class="speech-bubble-container" id="speech-bubble-container">
+            <button class="speech-bubble" id="speech-bubble" onclick="showBanners()">
+                <strong>
+                    New Event!
+                 </strong>
+            </button >
+        <div class="triangle" id="triangle"></div>
+        </div>
 
-                        {% endif %}
+        {% endif %}
 
-                        <span id="duckdiv" style="position: relative; display: inline-block; vertical-align: top;">
-                            <img id="moorthy-duck"
-                                src="{{ base_url }}/img/{{ duck_img }}"
-                                alt="Moorthy - Submitty's Duck Mascot!"
-                                height="80"
-                                class="key_to_click"
-                                {% if user_given_name != "" %}
-                                    onclick="showBanners();"
-                                {% endif %}
-                                tabindex="0"
-                            />
+            <span id="duckdiv" style="position: relative; display: inline-block; vertical-align: top;">
+                <img id="moorthy-duck"
+                    src="{{ base_url }}/img/{{ duck_img }}"
+                    alt="Moorthy - Submitty's Duck Mascot!"
+                    height="80"
+                    class="key_to_click"
+                    {% if user_given_name != "" %}
+                        onclick="showBanners();"
+                    {% endif %}
+                    tabindex="0"
+                />
 
+                {% if not enable_banner %}
+                </a>
+                {% endif %}
 
-
-                            {% if enable_banner %}
-                                <img id="submitty-banner"
-                                    src="{{ base_url }}/img/submitty-banner.png"
-                                    alt="Happy Submitty Week!"
-                                    height="70"
-                                    style="position:absolute; top:6px;display:none;"
-                                />
-                            {% endif %}
-                        </span>
-                        <div class="banner" id = "banner">
-                            {% set image_found = false %}
-                            
-
-
-                            {% for imageData in imageDataArray %}
-                            <div>
-                                {% set imgName = imageData.name %}
-
-                                {% if imageData.extra_info == "" and imageData.link_name == "" %}
-                                    
-                                    <img id="club-bannersid" 
-                                    class="club-banners {{imageData.name}}_{{imageData.id}}" 
-                                    src="data:imgName/png;base64,{{ imageData.data }}" />
-
-                                {% elseif imageData.extra_info == "" and imageData.link_name != "" %}
-                                    <a href="{{ imageData.link_name }}" >
-                                    <img id="club-bannersid" 
-                                    class="club-banners {{imageData.name}}_{{imageData.id}}" 
-                                    src="data:imgName/png;base64,{{ imageData.data }}" />
-                                    </a>
-
-                                {% elseif imageData.extra_info != "" and imageData.link_name == "" %}
+                {% if enable_banner %}
+                <img id="submitty-banner"
+                        src="{{ base_url }}/img/submitty-banner.png"
+                        alt="Happy Submitty Week!"
+                        height="70"
+                        style="position:absolute; top:6px;display:none;"
+                />
+                {% endif %}
+            </span>
+        <div class="banner" id = "banner">
+            {% set image_found = false %}
+            
 
 
-                                    {% set extraImageData = "data:image/png;base64," ~ imageData.extra_info %}
-                                    <img id="club-bannersid" class="club-banners {{imageData.name}}_{{imageData.id}}" src="data:imgName/png;base64,{{ imageData.data }}" onclick="newShowImage('{{extraImageData}}')" />
-                                {% else %}
-                                    {% set extraImageData = "data:image/png;base64," ~ imageData.extra_info %}
-                                    <img id="club-bannersid"
-                                    class="club-banners {{imageData.name}}_{{imageData.id}}" 
-                                    src="data:imgName/png;base64,{{ imageData.data }}" 
-                                    onclick="newShowImage('{{extraImageData}}', '{{imageData.link_name}}')" />
-                                {% endif %}
-                                <button class="delete-button" onclick="showBanners()">x</button>
+            {% for imageData in imageDataArray %}
+              <div>
+              {% set imgName = imageData.name %}
 
-                            </div>
-                            {% endfor %}
-                            <button class="prev-button" aria-label="go to the next banner" onclick="changeImage(-1)"><i class="fas fa-arrow-left"></i></button>
-                            <button class="next-button" aria-label="go to the previous banner" onclick="changeImage(1)"><i class="fas fa-arrow-right"></i></button>
-                        </div>
+                {% if imageData.extra_info == "" and imageData.link_name == "" %}
+                    
+                    <img id="club-bannersid" 
+                    class="club-banners {{imageData.name}}_{{imageData.id}}" 
+                    src="data:imgName/png;base64,{{ imageData.data }}" />
 
-                    </div>
-                </div>
-
-                <span style = "right: -500px"> <a class="flex-col" id="logo-box" href="http://submitty.org" target="_blank" aria-label="Visit submitty dot org">
-                        <img id="logo-submitty" src="{{ base_url }}/img/submitty_logo.png" alt="Submitty Logo">
-                        <img id="logo-submitty-light" src="{{ base_url }}/img/submitty_logo_white.png" alt="Submitty Logo">
+                {% elseif imageData.extra_info == "" and imageData.link_name != "" %}
+                    <a href="{{ imageData.link_name }}" >
+                    <img id="club-bannersid" 
+                    class="club-banners {{imageData.name}}_{{imageData.id}}" 
+                    src="data:imgName/png;base64,{{ imageData.data }}" />
                     </a>
-                </span>
+
+                {% elseif imageData.extra_info != "" and imageData.link_name == "" %}
+
+
+                    {% set extraImageData = "data:image/png;base64," ~ imageData.extra_info %}
+                    <img id="club-bannersid" class="club-banners {{imageData.name}}_{{imageData.id}}" src="data:imgName/png;base64,{{ imageData.data }}" onclick="newShowImage('{{extraImageData}}')" />
+                {% else %}
+                    {% set extraImageData = "data:image/png;base64," ~ imageData.extra_info %}
+                    <img id="club-bannersid"
+                    class="club-banners {{imageData.name}}_{{imageData.id}}" 
+                    src="data:imgName/png;base64,{{ imageData.data }}" 
+                    onclick="newShowImage('{{extraImageData}}', '{{imageData.link_name}}')" />
+                {% endif %}
+                <button class="delete-button" onclick="showBanners()">x</button>
+
+              </div>
+            {% endfor %}
+            <button class="prev-button" aria-label="go to the next banner" onclick="changeImage(-1)"><i class="fas fa-arrow-left"></i></button>
+            <button class="next-button" aria-label="go to the previous banner" onclick="changeImage(1)"><i class="fas fa-arrow-right"></i></button>
+        </div>
+
+    </div>
+</div>
+
+                    <span style = "right: -500px"> <a class="flex-col" id="logo-box" href="http://submitty.org" target="_blank" aria-label="Visit submitty dot org">
+                            <img id="logo-submitty" src="{{ base_url }}/img/submitty_logo.png" alt="Submitty Logo">
+                            <img id="logo-submitty-light" src="{{ base_url }}/img/submitty_logo_white.png" alt="Submitty Logo">
+                        </a>
+                    </span>
 
                 {# assuming that if sidebar_buttons only has len 2 it contains logout and collapse (on index page only) #}
                 {% if sidebar_buttons|length > 2 %}
