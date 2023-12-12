@@ -661,7 +661,13 @@ class NavigationView extends AbstractView {
             }
 
             if (!$gradeable->hasDueDate()) {
-                $progress_bar = $gradeable->getGradingProgress($this->core->getUser());
+                $cookie_string = "include_bad_submissions__" . $gradeable->getId();
+                $bad_submissions = ($_COOKIE[$cookie_string] ?? '') === "include";
+
+                $cookie_string = "include_null_section__" . $gradeable->getId();
+                $null_section = ($_COOKIE[$cookie_string] ?? '') === "include";
+
+                $progress_bar = $gradeable->getGradingProgress($this->core->getUser(), $bad_submissions, $null_section);
                 if ($progress_bar === 0) {
                     $progress_bar = 0.01;
                 }
@@ -710,7 +716,13 @@ class NavigationView extends AbstractView {
 
             if ($gradeable->getType() === GradeableType::ELECTRONIC_FILE) {
                 if ($gradeable->isTaGrading()) {
-                    $TA_percent = $gradeable->getGradingProgress($this->core->getUser());
+                    $cookie_string = "include_bad_submissions__" . $gradeable->getId();
+                    $bad_submissions = ($_COOKIE[$cookie_string] ?? '') === "include";
+
+                    $cookie_string = "include_null_section__" . $gradeable->getId();
+                    $null_section = ($_COOKIE[$cookie_string] ?? '') === "include";
+
+                    $TA_percent = $gradeable->getGradingProgress($this->core->getUser(), $bad_submissions, $null_section);
 
                     if ($TA_percent === 1) {
                         //If they're done, change the text to REGRADE
