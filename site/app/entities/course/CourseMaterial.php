@@ -42,6 +42,12 @@ class CourseMaterial {
     #[ORM\Column(type: Types::FLOAT)]
     protected float $priority;
 
+    #[ORM\Column(type: Types::BOOLEAN)]
+    protected bool $on_calendar;
+
+    #[ORM\Column(type: Types::STRING)]
+    protected string $gradeable;    
+
     /**
      * @var Collection<CourseMaterialAccess>
      */
@@ -72,7 +78,7 @@ class CourseMaterial {
     #[ORM\Column(type: Types::STRING, nullable: true)]
     protected ?string $title;
 
-    public function __construct(int $type, string $path, \DateTime $release_date, bool $hidden_from_students, float $priority, ?string $url, ?string $title) {
+    public function __construct(int $type, string $path, \DateTime $release_date, bool $hidden_from_students, float $priority, ?string $url, ?string $title, ?bool $onCalender, ?string $gradeableName) {
         $this->setType($type);
         $this->setPath($path);
         $this->setReleaseDate($release_date);
@@ -81,6 +87,8 @@ class CourseMaterial {
         $this->sections = new ArrayCollection();
         $this->url = $url;
         $this->title = $title;
+        $this->on_calendar = $on_calendar;
+        $this->gradeable = $gradeableName;
     }
 
     /**
@@ -132,6 +140,14 @@ class CourseMaterial {
             }
         }
         return false;
+    }
+
+    public function isOnCalendar(): bool {
+        return $this->on_calendar;
+    }
+
+    public function getGradeable(): string {
+        return $this->gradeable;
     }
 
     public function setReleaseDate(\DateTime $release_date): void {
@@ -194,5 +210,12 @@ class CourseMaterial {
 
     public function setTitle(string $title): void {
         $this->title = $title;
+    }
+    public function setIsOnCalendar(bool $value): bool {
+        $this->on_calendar = $value;
+    }
+
+    public function setGradeable(string $gradeableString): string {
+        $this->gradeable = $gradeableString;
     }
 }
