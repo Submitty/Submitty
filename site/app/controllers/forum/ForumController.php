@@ -1063,13 +1063,13 @@ class ForumController extends AbstractController {
         $option = ($this->core->getUser()->accessGrading() || $option != 'alpha') ? $option : 'tree';
         if (!empty($thread_id)) {
             $thread_id = (int) $thread_id;
-            $thread_resolve_state = $this->core->getQueries()->getResolveState($thread_id)[0]['status'];
+            $thread = $this->core->getQueries()->getThread($thread_id);
+            $thread_resolve_state = $thread['status'];
             $this->core->getQueries()->markNotificationAsSeen($user, -2, (string) $thread_id);
             $unread_p = $this->core->getQueries()->getUnviewedPosts($thread_id, $current_user);
             foreach ($unread_p as $up) {
                 $new_posts[] = $up["id"];
             }
-            $thread = $this->core->getQueries()->getThread($thread_id);
             $thread_announced = $this->core->getQueries()->existsAnnouncementsId($thread_id);
             if (!empty($thread)) {
                 if ($thread['merged_thread_id'] != -1) {
