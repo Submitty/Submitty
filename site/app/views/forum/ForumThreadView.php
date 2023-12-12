@@ -492,6 +492,8 @@ class ForumThreadView extends AbstractView {
             $i = 0;
             $first = true;
 
+            //create the map here
+
             foreach ($order_array as $ordered_post) {
                 foreach ($posts as $post) {
                     if ($post["id"] == $ordered_post) {
@@ -504,6 +506,7 @@ class ForumThreadView extends AbstractView {
 
                         $post["author_user_group"] = $author_user_groups_map[$post["author_user_id"]];
 
+                        //then here I can make a call with the specific postid
                         $post_data[] = $this->createPost($thread_id, $post, $unviewed_posts, $first, $reply_level, $display_option, $includeReply, false, $thread_announced);
                         break;
                     }
