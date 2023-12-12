@@ -1,3 +1,4 @@
+/* exported setCalendarMenuValues*/
 const settings_divs = ['#cal-gradeable-div', '#cal-date-div'];
 
 function setCalendarMenuValues(div_class) {
