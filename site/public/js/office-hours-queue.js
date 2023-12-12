@@ -20,9 +20,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
     adjustRows();
 });
-
- /* exported toggleSort */
- function toggleSort(column) {
+/* exported toggleSort */
+function toggleSort(column) {
     const sortIndicator = $('#sort-indicator');
     if (column === 'HelpStartedBy') {
         if (localStorage.getItem('sort-indicator') === 'off') {
