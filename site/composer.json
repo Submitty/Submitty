@@ -21,8 +21,8 @@
   },
   "repositories": [
     {
-      "type": "vcs",
-      "url": "https://github.com/Submitty/Markdown"
+      "type": "git",
+      "url": "https://github.com/Submitty/Markdown.git"
     }
   ],
   "require": {

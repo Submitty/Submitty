@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "4e2ff99c54970957d227e5365ee355bc",
+    "content-hash": "3fbd7713946ec9e88c8fdd1db017d1ed",
     "packages": [
         {
             "name": "brick/math",
@@ -1313,16 +1313,16 @@
         },
         {
             "name": "egulias/email-validator",
-            "version": "4.0.1",
+            "version": "4.0.2",
             "source": {
                 "type": "git",
                 "url": "https://github.com/egulias/EmailValidator.git",
-                "reference": "3a85486b709bc384dae8eb78fb2eec649bdb64ff"
+                "reference": "ebaaf5be6c0286928352e054f2d5125608e5405e"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/egulias/EmailValidator/zipball/3a85486b709bc384dae8eb78fb2eec649bdb64ff",
-                "reference": "3a85486b709bc384dae8eb78fb2eec649bdb64ff",
+                "url": "https://api.github.com/repos/egulias/EmailValidator/zipball/ebaaf5be6c0286928352e054f2d5125608e5405e",
+                "reference": "ebaaf5be6c0286928352e054f2d5125608e5405e",
                 "shasum": ""
             },
             "require": {
@@ -1331,8 +1331,8 @@
                 "symfony/polyfill-intl-idn": "^1.26"
             },
             "require-dev": {
-                "phpunit/phpunit": "^9.5.27",
-                "vimeo/psalm": "^4.30"
+                "phpunit/phpunit": "^10.2",
+                "vimeo/psalm": "^5.12"
             },
             "suggest": {
                 "ext-intl": "PHP Internationalization Libraries are required to use the SpoofChecking validation"
@@ -1368,7 +1368,7 @@
             ],
             "support": {
                 "issues": "https://github.com/egulias/EmailValidator/issues",
-                "source": "https://github.com/egulias/EmailValidator/tree/4.0.1"
+                "source": "https://github.com/egulias/EmailValidator/tree/4.0.2"
             },
             "funding": [
                 {
@@ -1376,7 +1376,7 @@
                     "type": "github"
                 }
             ],
-            "time": "2023-01-14T14:17:03+00:00"
+            "time": "2023-10-06T06:47:41+00:00"
         },
         {
             "name": "evenement/evenement",
@@ -4104,17 +4104,11 @@
         },
         {
             "name": "submitty/markdown",
-            "version": "dev-main",
+            "version": "v23.12.00",
             "source": {
                 "type": "git",
                 "url": "https://github.com/Submitty/Markdown.git",
-                "reference": "81eab26d5da0741f111675fb9b2bce03b7c2541d"
-            },
-            "dist": {
-                "type": "zip",
-                "url": "https://api.github.com/repos/Submitty/Markdown/zipball/81eab26d5da0741f111675fb9b2bce03b7c2541d",
-                "reference": "81eab26d5da0741f111675fb9b2bce03b7c2541d",
-                "shasum": ""
+                "reference": "2d8bcc3adda6d2fbc2ab2e247baeccf15a9fcec6"
             },
             "require": {
                 "league/commonmark": "^2.0.0",
@@ -4125,7 +4119,6 @@
                 "php": "^7.2.5|^8.0",
                 "phpunit/phpunit": "~6.0|~5.0|~8.0"
             },
-            "default-branch": true,
             "type": "library",
             "autoload": {
                 "psr-0": {
@@ -4136,10 +4129,7 @@
                 "BSD-3-Clause"
             ],
             "description": "A twig markdown extension",
-            "support": {
-                "source": "https://github.com/Submitty/Markdown/tree/main"
-            },
-            "time": "2023-12-12T00:13:33+00:00"
+            "time": "2023-11-28T15:49:56+00:00"
         },
         {
             "name": "symfony/cache",
@@ -6242,16 +6232,16 @@
         },
         {
             "name": "php-mock/php-mock-phpunit",
-            "version": "2.7.2",
+            "version": "2.9.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/php-mock/php-mock-phpunit.git",
-                "reference": "33a99c190d078e77864b8d74cdc91cc4e5342598"
+                "reference": "3dabfd474d43da4d1d2fee5260c634457c5da344"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/php-mock/php-mock-phpunit/zipball/33a99c190d078e77864b8d74cdc91cc4e5342598",
-                "reference": "33a99c190d078e77864b8d74cdc91cc4e5342598",
+                "url": "https://api.github.com/repos/php-mock/php-mock-phpunit/zipball/3dabfd474d43da4d1d2fee5260c634457c5da344",
+                "reference": "3dabfd474d43da4d1d2fee5260c634457c5da344",
                 "shasum": ""
             },
             "require": {
@@ -6298,7 +6288,7 @@
             ],
             "support": {
                 "issues": "https://github.com/php-mock/php-mock-phpunit/issues",
-                "source": "https://github.com/php-mock/php-mock-phpunit/tree/2.7.2"
+                "source": "https://github.com/php-mock/php-mock-phpunit/tree/2.9.0"
             },
             "funding": [
                 {
@@ -6306,7 +6296,7 @@
                     "type": "github"
                 }
             ],
-            "time": "2023-06-13T07:46:04+00:00"
+            "time": "2023-12-01T21:50:22+00:00"
         },
         {
             "name": "phpstan/phpdoc-parser",
@@ -8220,9 +8210,7 @@
     ],
     "aliases": [],
     "minimum-stability": "stable",
-    "stability-flags": {
-        "submitty/markdown": 20
-    },
+    "stability-flags": [],
     "prefer-stable": false,
     "prefer-lowest": false,
     "platform": [],
