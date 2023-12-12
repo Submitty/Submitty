@@ -168,9 +168,8 @@ class BannerController extends AbstractController {
                 $folder_made_name
             );
             $this->core->getSubmittyEntityManager()->persist($community_event_image);
-            $this->core->getSubmittyEntityManager()->flush();
         }
-
+        $this->core->getSubmittyEntityManager()->flush();
         return JsonResponse::getSuccessResponse("Successfully uploaded!");
     }
 
@@ -190,14 +189,14 @@ class BannerController extends AbstractController {
         }
 
         $event_item = $event_items[0];
+        $folder_name = $event_item.getName();
+        $event_name = $event_item.getExtraInfo();
         $entity_manager->remove($event_item);
         $entity_manager->flush();
 
         $upload_path =  FileUtils::joinPaths($this->core->getConfig()->getSubmittyPath(), "community_events");
 
 
-        $folder_name = $_POST['path'];
-        $event_name = $_POST['name'];
 
         $full_path = FileUtils::joinPaths($upload_path, $folder_name, $event_item->getFolderName(), $event_name);
 
