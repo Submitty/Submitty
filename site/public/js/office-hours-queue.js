@@ -1,5 +1,4 @@
 //this helps update the frontend when the page refreshes because without this the sort icon would reset and the sort state would not
-/* eslint prefer-arrow-callback: [ 'error', { 'allowNamedFunctions': true } ] */
 document.addEventListener('DOMContentLoaded', () => {
     const sortIndicator = document.getElementById('sort-indicator');
     let sortState = localStorage.getItem('sort-indicator');
@@ -22,8 +21,8 @@ document.addEventListener('DOMContentLoaded', () => {
     adjustRows();
 });
 
-// eslint-disable-next-line no-unused-vars
-function toggleSort(column) {
+ /* exported toggleSort */
+ function toggleSort(column) {
     const sortIndicator = $('#sort-indicator');
     if (column === 'HelpStartedBy') {
         if (localStorage.getItem('sort-indicator') === 'off') {
