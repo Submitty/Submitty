@@ -134,8 +134,6 @@ export function applySettings() {
         let s_num_polls = data[i].num_poll_responses;
         const s_off_hours = data[i].office_hours_queue;
         const s_course_mat = data[i].course_materials_access;
-        let flag = false;
-
         if (s_num_polls === null) {
             s_num_polls = 0;
         }
