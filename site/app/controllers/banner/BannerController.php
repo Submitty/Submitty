@@ -213,11 +213,6 @@ class BannerController extends AbstractController {
             if (!unlink($full_path)) {
                 return JsonResponse::getErrorResponse("Failed to delete the file.");
             }
-            // Maybe implemement later to get rid of the folder, i dunno?
-            // $folder_path = FileUtils::joinPaths($full_path, $banner_item->getFolderName());
-            // if (is_dir($folder_path)) {
-            //     FileUtils::deleteDir($folder_path);
-            // }
         }
         else {
             return JsonResponse::getErrorResponse("File not found.");
