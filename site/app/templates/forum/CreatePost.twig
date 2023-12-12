@@ -51,7 +51,7 @@
             {% if has_history %}
                 <a class="btn btn-default btn-sm post_button_color text-decoration-none key_to_click" tabindex = "0" onClick="showHistory({{ post.id }})">Show History</a>
             {% endif %}
-            {% if (isThreadLocked != 1 or accessFullGrading) and first != 1 %}
+            {% if (isThreadLocked != 1 or userAccessFullGrading) and first != 1 %}
                 <a class="btn btn-default btn-sm post_button_color text-decoration-none" tabindex = "0" onClick="showSplit({{ post.id }})">
                     {% if thread_previously_merged %}
                         Unmerge Thread
@@ -103,7 +103,7 @@
         <span class="last-edit">
 			<strong class="post_user_id">{{ visible_username }}</strong>
             {% if post_user_info.pronouns and post_user_info.display_pronouns and visible_username !="Anonymous" %}
-                ({{post_user_info.pronouns}})
+                <strong class="post_user_pronouns">({{post_user_info.pronouns}})</strong>
             {% endif %}
 			{{ post_date }}
             {% if edit_date is not null %}

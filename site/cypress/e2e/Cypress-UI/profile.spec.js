@@ -36,13 +36,16 @@ const fillData = (data) => {
     });
 
     testModification('#edit-pronouns-form', () => {
-        const e = cy.get('#user-pronouns-change').clear();
-        data.pronouns && e.type(data.pronouns);
+        cy.get('#user-pronouns-change').clear().as('pronounsInput');
+        data.pronouns && cy.get('@pronounsInput').type(data.pronouns);
     });
 
     testModification('#edit-secondary-email-form', () => {
-        const e = cy.get('#user-secondary-email-change').clear();
-        data.secondaryEmail && e.type(data.secondaryEmail);
+        cy.get('#user-secondary-email-change')
+            .clear()
+            .as('secondaryEmailInput');
+        data.secondaryEmail &&
+            cy.get('@secondaryEmailInput').type(data.secondaryEmail);
     });
 };
 
@@ -83,7 +86,7 @@ describe('Test cases revolving around user profile page', () => {
     // Selenium test_time_zone_selection
     it('Time zone selector should work', () => {
         cy.get('[data-testid="time-zone-dropdown"]').should('contain.text', 'NOT_SET/NOT_SET');
-        cy.get('[data-testid="time-zone-dropdown"]').select('(UTC-04:00) America/New_York');
+        cy.get('[data-testid="time-zone-dropdown"]').select('(UTC-07:00) America/Phoenix');
         // Since the login success message is still up, we get the next message.
         cy.get('[data-testid="popup-message"]').next().should('contain.text', 'Time-zone updated successfully');
         cy.get('[data-testid="time-zone-dropdown"]').select('NOT_SET/NOT_SET');
