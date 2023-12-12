@@ -5,6 +5,15 @@
 <br>
 <br>
 
+<p>
+
+Instructors can upload an advertisement banner for different club or community events. Once a banner is uploaded a log will be printed of the current banners in our database.
+Please remember that a banner must have certain dementions. The file width needs to be between 200 and 800 pixels, and the height needs to be between 10 pixels and 100 pixels,
+although we recommend having a 600px x 70px as the standard dimentions. 
+</p>
+<br>
+
+
 <input type="hidden" name="csrf_token" value="{{ csrf_token }}" />
 {% for bannerImage in banners %}
     {% set imageName = bannerImage.getName() %}
