@@ -7,7 +7,7 @@ namespace app\libraries\routers;
 use InvalidArgumentException;
 
 /**
- * Annotation class for @Enabled().
+ * Annotation class for @ Enabled().
  *
  * Use this to add a check to a controller to see if that
  * feature is enabled within the Config. Whatever string

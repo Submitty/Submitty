@@ -7,6 +7,7 @@ namespace app\entities\plagiarism;
 use app\exceptions\ValidationException;
 use app\exceptions\FileNotFoundException;
 use app\libraries\DateUtils;
+use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
 use Doctrine\Common\Collections\Collection;
 use app\libraries\plagiarism\PlagiarismUtils;
@@ -15,116 +16,68 @@ use DateTime;
 /**
  * Class PlagiarismConfig
  * @package app\entities\plagiarism
- * @ORM\Entity
- * @ORM\Table(name="lichen")
  */
+#[ORM\Entity]
+#[ORM\Table(name: "lichen")]
 class PlagiarismConfig {
     /* VARIABLES */
 
-    /**
-     * @ORM\Id
-     * @ORM\Column(type="integer")
-     * @ORM\GeneratedValue(strategy="AUTO")
-     * @var int
-     */
-    protected $id;
+    #[ORM\Id]
+    #[ORM\Column(type: Types::INTEGER)]
+    #[ORM\GeneratedValue(strategy: "AUTO")]
+    protected int $id;
+
+    #[ORM\Column(type: Types::STRING, length: 255)]
+    protected string $gradeable_id;
+
+    #[ORM\Column(type: Types::SMALLINT)]
+    protected int $config_id;
+
+    #[ORM\Column(type: Types::BOOLEAN)]
+    protected bool $has_provided_code;
+
+    #[ORM\Column(type: Types::STRING, length: 255)]
+    protected string $version;
+
+    #[ORM\Column(type: "simple_array")]
+    protected array $regex;
+
+    #[ORM\Column(type: Types::BOOLEAN)]
+    protected bool $regex_dir_submissions;
+
+    #[ORM\Column(type: Types::BOOLEAN)]
+    protected bool $regex_dir_results;
+
+    #[ORM\Column(type: Types::BOOLEAN)]
+    protected bool $regex_dir_checkout;
+
+    #[ORM\Column(type: Types::STRING, length: 255)]
+    protected string $language;
+
+    #[ORM\Column(type: Types::SMALLINT)]
+    protected int $threshold;
+
+    #[ORM\Column(type: Types::SMALLINT)]
+    protected int $hash_size;
+
+    #[ORM\Column(type: Types::JSON)]
+    protected array $other_gradeables;
+
+    #[ORM\Column(type: "simple_array")]
+    protected array $other_gradeable_paths;
+
+    #[ORM\Column(type: Types::SIMPLE_ARRAY)]
+    protected array $ignore_submissions;
+
+    #[ORM\Column(type: Types::DATETIME_MUTABLE)]
+    protected DateTime $last_run_timestamp;
 
     /**
-     * @ORM\Column(type="string", length=255)
-     * @var string
-     */
-    protected $gradeable_id;
-
-    /**
-     * @ORM\Column(type="smallint")
-     * @var int
-     */
-    protected $config_id;
-
-    /**
-     * @ORM\Column(type="boolean")
-     * @var bool
-     */
-    protected $has_provided_code;
-
-    /**
-     * @ORM\Column(type="string", length=255)
-     * @var string
-     */
-    protected $version;
-
-    /**
-     * @ORM\Column(type="simple_array")
-     * @var array
-     */
-    protected $regex;
-
-    /**
-     * @ORM\Column(type="boolean")
-     * @var bool
-     */
-    protected $regex_dir_submissions;
-
-    /**
-     * @ORM\Column(type="boolean")
-     * @var bool
-     */
-    protected $regex_dir_results;
-
-    /**
-     * @ORM\Column(type="boolean")
-     * @var bool
-     */
-    protected $regex_dir_checkout;
-
-    /**
-     * @ORM\Column(type="string", length=255)
-     * @var string
-     */
-    protected $language;
-
-    /**
-     * @ORM\Column(type="smallint")
-     * @var int
-     */
-    protected $threshold;
-
-    /**
-     * @ORM\Column(type="smallint")
-     * @var int
-     */
-    protected $hash_size;
-
-    /**
-     * @ORM\Column(type="json")
-     * @var array
-     */
-    protected $other_gradeables;
-
-    /**
-     * @ORM\Column(type="simple_array")
-     * @var array
-     */
-    protected $other_gradeable_paths;
-
-    /**
-     * @ORM\Column(type="simple_array")
-     * @var array
-     */
-    protected $ignore_submissions;
-
-    /**
-     * @ORM\Column(type="datetime")
-     * @var DateTime
-     */
-    protected $last_run_timestamp;
-
-    /**
-     * @ORM\OneToMany(targetEntity="app\entities\plagiarism\PlagiarismRunAccess", mappedBy="lichen_run")
-     * @ORM\OrderBy({"timestamp" = "DESC"})
      * @var Collection<PlagiarismRunAccess>
      */
-    protected $access_times;
+    #[ORM\OneToMany(mappedBy: "lichen_run", targetEntity: PlagiarismRunAccess::class)]
+    #[ORM\OrderBy(["timestamp" => "DESC"])]
+    protected Collection $access_times;
 
     /* FUNCTIONS */
 

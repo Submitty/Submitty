@@ -10,7 +10,7 @@ CREATE OR REPLACE FUNCTION public.sync_courses_user() RETURNS trigger
                 db_conn varchar;
                 query_string text;
             BEGIN
-                db_conn := format('dbname=submitty_%s_%s', NEW.semester, NEW.course);
+                db_conn := format('dbname=submitty_%s_%s', NEW.term, NEW.course);
 
                 IF (TG_OP = 'INSERT') THEN
                     -- FULL data sync on INSERT of a new user record.
@@ -29,6 +29,7 @@ CREATE OR REPLACE FUNCTION public.sync_courses_user() RETURNS trigger
                         user_email_secondary,
                         user_email_secondary_notify,
                         time_zone,
+                        user_preferred_locale,
                         display_image_state,
                         user_updated,
                         instructor_updated,
@@ -51,6 +52,7 @@ CREATE OR REPLACE FUNCTION public.sync_courses_user() RETURNS trigger
                         || quote_literal(user_row.user_email_secondary) || ', ' 
                         || quote_literal(user_row.user_email_secondary_notify) || ', ' 
                         || quote_literal(user_row.time_zone) || ', '
+                        || quote_nullable(user_row.user_preferred_locale) || ', '
                         || quote_literal(user_row.display_image_state) || ', '
                         || quote_literal(user_row.user_updated) || ', '
                         || quote_literal(user_row.instructor_updated) || ', '

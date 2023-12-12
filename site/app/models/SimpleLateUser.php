@@ -6,29 +6,43 @@ use app\libraries\Core;
 use app\libraries\DateUtils;
 
 class SimpleLateUser extends AbstractModel {
-    /** @prop @var bool Is this user actually loaded (else you cannot access the other member variables) */
+    /** @prop
+     * @var bool Is this user actually loaded (else you cannot access the other member variables) */
     protected $loaded = false;
 
-    /** @prop @var string The id of this user which should be a unique identifier (ex: RCS ID at RPI) */
+    /** @prop
+     * @var string The id of this user which should be a unique identifier (ex: RCS ID at RPI) */
     protected $id;
-    /** @prop @var string The given name of the user */
+    /** @prop
+     * @var string The given name of the user */
     protected $legal_given_name;
-    /** @prop @var string The preferred given name of the user if exists */
+    /** @prop
+     * @var string The preferred given name of the user if exists */
     protected $preferred_given_name = "";
-    /** @prop @var  string The name to be displayed by the system (either preferred given name or legal given name) */
+    /** @prop
+     * @var  string The name to be displayed by the system (either preferred given name or legal given name) */
     protected $displayed_given_name;
-    /** @prop @var string The family name of the user */
+    /** @prop
+     * @var string The family name of the user */
     protected $legal_family_name;
-    /** @prop @var string The preferred family name of the user if exists */
+    /** @prop
+     * @var string The preferred family name of the user if exists */
     protected $preferred_family_name;
-    /** @prop @var  string The name to be displayed by the system (either preferred family name or legal family name) */
+    /** @prop
+     * @var  string The name to be displayed by the system (either preferred family name or legal family name) */
     protected $displayed_family_name;
-    /** @prop @var string The allowed late days of the user */
+    /** @prop
+     * @var string The allowed late days of the user */
     protected $allowed_late_days;
-    /** @prop @var date The day late days are put into effect */
+    /** @prop
+     * @var date The day late days are put into effect */
     protected $since_timestamp;
-    /** @prop @var string The extensions of a user (allowed late days for a specific homework) */
+    /** @prop
+     * @var string The extensions of a user (allowed late days for a specific homework) */
     protected $late_day_exceptions;
+    /** @prop
+     * @var string The reason for an extension given on a homework assignment */
+    protected $reason_for_exception;
 
     /**
      * User constructor.
@@ -66,6 +80,9 @@ class SimpleLateUser extends AbstractModel {
         }
         if (isset($details['late_day_exceptions'])) {
             $this->late_day_exceptions = $details['late_day_exceptions'];
+        }
+        if (isset($details['reason_for_exception'])) {
+            $this->reason_for_exception = $details['reason_for_exception'];
         }
     }
 

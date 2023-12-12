@@ -1,4 +1,4 @@
-/* exported prevMonth, nextMonth, loadCalendar, loadFullCalendar, editCalendarItemForm, deleteCalendarItem, openNewItemModal, openOptionsModal, updateCalendarFilters */
+/* exported prevMonth, nextMonth, loadCalendar, loadFullCalendar, editCalendarItemForm, deleteCalendarItem, openNewItemModal, openOptionsModal, updateCalendarOptions, colorLegend */
 /* global curr_day, curr_month, curr_year, gradeables_by_date, instructor_courses, buildUrl */
 /* global csrfToken */
 
@@ -98,6 +98,34 @@ function dateToStr(year, month, day) {
 }
 
 /**
+ * This function returns a slightly darker color than the color variable name passed.
+ *
+ * @param colorstr : string the color to darken in the form "var(--color-name)"
+ * @returns {string} a hex code for a slightly darker shade
+ */
+function darken(colorstr) {
+    if (typeof colorstr !== 'string') {
+        return colorstr;
+    }
+    else {
+        const hexcodestr = window.getComputedStyle(document.documentElement).getPropertyValue(colorstr.slice(4, -1)).toLowerCase();
+        const darkerstr = hexcodestr.split('');
+        for (let i = 1; i < hexcodestr.length; i++) {
+            if ((hexcodestr[i] > 'b' && hexcodestr[i] <= 'f') || (hexcodestr[i] > '1' && hexcodestr[i] <= '9')) {
+                darkerstr[i] = String.fromCharCode(hexcodestr.charCodeAt(i) - 2);
+            }
+            else if (hexcodestr[i] === 'b') {
+                darkerstr[i] = '9';
+            }
+            else if (hexcodestr[i] === 'a') {
+                darkerstr[i] = '8';
+            }
+        }
+        return darkerstr.join('');
+    }
+}
+
+/**
  * Create a HTML element that contains the calendar item (button/link/text).
  *
  * @param item : array the calendar item
@@ -137,18 +165,25 @@ function generateCalendarItem(item) {
     if (item['show_due']) {
         element.style.setProperty('background-color', item['color']);
     }
-    if (item['status'] === 'ann') {
-        element.style.setProperty('border-color', item['color']);
+    if (item['status'] === 'text' || item['status'] === 'ann') {
+        element.style.setProperty('background-color', item['color']);
     }
     if (exists) {
-        element.style.setProperty('cursor','pointer');
+        element.style.setProperty('cursor', 'pointer');
     }
     element.title = tooltip;
     if (link !== '') {
         element.href = link;
+        element.addEventListener('mouseover', () => {
+            element.style.setProperty('background-color', darken(item['color']));
+        });
+        element.addEventListener('mouseout', () => {
+            element.style.setProperty('background-color', item['color']);
+        });
     }
-    if (onclick !== '' && exists) {
+    if (onclick !== '' && instructor_courses.length > 0) {
         if (!item['show_due']) {
+            element.style.cursor = 'pointer';
             element.onclick = () => editCalendarItemForm(item['status'], item['title'], item['id'], item['date'], item['semester'], item['course']);
         }
         else {
@@ -201,7 +236,7 @@ function deleteCalendarItem() {
         data.append('semester', semester);
         data.append('csrf_token', csrfToken);
         $.ajax({
-            url: buildUrl(['calendar', 'items','delete']),
+            url: buildUrl(['calendar', 'items', 'delete']),
             type: 'POST',
             processData: false,
             contentType: false,
@@ -230,7 +265,7 @@ function deleteCalendarItem() {
  * @returns {HTMLElement} the HTML Element containing the cell
  */
 function generateDayCell(year, month, day, curr_view_month, view_semester=false) {
-    const cell_date_str = dateToStr(year, month ,day);
+    const cell_date_str = dateToStr(year, month, day);
 
     const content = document.createElement('td');
     content.classList.add('cal-day-cell');
@@ -700,11 +735,16 @@ function openNewItemModal() {
 
 function openOptionsModal() {
     $('#calendar-options-form').css('display', 'block');
-    checkProperOptions();
+    setOptionsValues();
+    //Make color dropdowns change colors when values are changed
+    $('.course-color-picker').on('change', function () {
+        $(this).css('background-color', $(this).val());
+    });
 }
 
 //checks proper tick marks in modal
-function checkProperOptions() {
+function setOptionsValues() {
+    //Courses filter
     const showAll = loadShowAllCoursesCookie();
     if (showAll) { //if show all is true, tick off show all
         document.getElementById('filter-courses-menu').value = 'show all';
@@ -712,6 +752,12 @@ function checkProperOptions() {
     else { //if show all if false, select a specific course
         document.getElementById('filter-courses-menu').value = loadCurrentCourseCookie();
     }
+    //Course Colors
+    $('.course-color-picker').each(function() {
+        const selected_color = Cookies.get(`calendar_color_${$(this).attr('id').slice(6)}`);
+        $(this).css('background-color', selected_color);
+        $(this).val(selected_color);
+    });
 }
 
 function loadShowAllCoursesCookie() {
@@ -723,13 +769,12 @@ function loadCurrentCourseCookie() {
     return Cookies.get('calendar_course');
 }
 
-function updateCalendarFilters() {
-    saveFilterValues();
+function updateCalendarOptions() {
+    saveOptions();
     location.reload();
 }
 
-//Fix this
-function saveFilterValues() {
+function saveOptions() {
     //Courses Filter
     const courses_val = document.getElementById('filter-courses-menu').value;
     if (courses_val === 'show all') {
@@ -739,4 +784,25 @@ function saveFilterValues() {
         Cookies.set('calendar_show_all', '0', { expires: 365 });
         Cookies.set('calendar_course', courses_val, { expires: 365 });
     }
+    //Course Colors
+    $('.course-color-picker').each(function() {
+        const cname = `calendar_color_${$(this).attr('id').slice(6)}`;
+        Cookies.set(cname, $(this).val(), { expires: 365 });
+    });
+    //Legend
+    const legend_val = document.getElementById('show-legend-box').checked;
+    if (legend_val) {
+        Cookies.set('show_legend', '1', { expires: 365 });
+    }
+    else {
+        Cookies.set('show_legend', '0', { expires: 365 });
+    }
 }
+
+//Adds Color to Legend
+function colorLegend() {
+    $('.legend-color').each( function () {
+        $(this).css('background-color', Cookies.get(`calendar_color_${$(this).attr('name')}`));
+    });
+}
+
