@@ -412,13 +412,13 @@ CREATE FUNCTION public.grab_late_day_gradeables_for_user(user_id text) RETURNS S
 				vg.eg_late_days AS late_days_allowed,
 				calculate_submission_days_late(sg.submission_time, vg.eg_submission_due_date) AS submission_days_late,
 				CASE
-					WHEN lde.days_extended IS NULL THEN 0
-					ELSE lde.days_extended
+					WHEN lde.late_day_exceptions IS NULL THEN 0
+					ELSE lde.late_day_exceptions
 				END AS late_day_exceptions
 			FROM valid_gradeables vg
 			LEFT JOIN submitted_gradeables sg
 				ON vg.g_id=sg.g_id
-			LEFT JOIN excused_absence_extensions lde
+			LEFT JOIN late_day_exceptions lde
 				ON lde.user_id=user_id
 				AND vg.g_id=lde.g_id
 		ORDER BY late_day_date, g_id
@@ -840,14 +840,14 @@ CREATE TABLE public.electronic_gradeable_version (
 
 
 --
--- Name: excused_absence_extensions; Type: TABLE; Schema: public; Owner: -
+-- Name: forum_attachments; Type: TABLE; Schema: public; Owner: -
 --
 
-CREATE TABLE public.excused_absence_extensions (
-    user_id character varying(255) NOT NULL,
-    g_id character varying(255) NOT NULL,
-    days_extended integer NOT NULL,
-    reason_for_exception character varying(255) DEFAULT ''::character varying
+CREATE TABLE public.forum_attachments (
+    post_id integer NOT NULL,
+    file_name character varying NOT NULL,
+    version_added integer DEFAULT 1 NOT NULL,
+    version_deleted integer DEFAULT 0 NOT NULL
 );
 
 
@@ -859,7 +859,9 @@ CREATE TABLE public.forum_posts_history (
     post_id integer NOT NULL,
     edit_author character varying NOT NULL,
     content text NOT NULL,
-    edit_timestamp timestamp(0) with time zone NOT NULL
+    edit_timestamp timestamp(0) with time zone NOT NULL,
+    has_attachment boolean DEFAULT false,
+    version_id integer
 );
 
 
@@ -1233,6 +1235,18 @@ CREATE TABLE public.grading_rotating (
 
 
 --
+-- Name: late_day_exceptions; Type: TABLE; Schema: public; Owner: -
+--
+
+CREATE TABLE public.late_day_exceptions (
+    user_id character varying(255) NOT NULL,
+    g_id character varying(255) NOT NULL,
+    late_day_exceptions integer NOT NULL,
+    reason_for_exception character varying(255) DEFAULT ''::character varying
+);
+
+
+--
 -- Name: late_days; Type: TABLE; Schema: public; Owner: -
 --
 
@@ -1537,7 +1551,8 @@ CREATE TABLE public.posts (
     endorsed_by character varying,
     type integer NOT NULL,
     has_attachment boolean NOT NULL,
-    render_markdown boolean DEFAULT false NOT NULL
+    render_markdown boolean DEFAULT false NOT NULL,
+    version_id integer DEFAULT 1
 );
 
 
@@ -2215,10 +2230,10 @@ ALTER TABLE ONLY public.grading_rotating
 
 
 --
--- Name: excused_absence_extensions late_day_exceptions_pkey; Type: CONSTRAINT; Schema: public; Owner: -
+-- Name: late_day_exceptions late_day_exceptions_pkey; Type: CONSTRAINT; Schema: public; Owner: -
 --
 
-ALTER TABLE ONLY public.excused_absence_extensions
+ALTER TABLE ONLY public.late_day_exceptions
     ADD CONSTRAINT late_day_exceptions_pkey PRIMARY KEY (g_id, user_id);
 
 
@@ -2565,10 +2580,10 @@ CREATE TRIGGER gradeable_version_change AFTER INSERT OR DELETE OR UPDATE ON publ
 
 
 --
--- Name: excused_absence_extensions late_day_extension_change; Type: TRIGGER; Schema: public; Owner: -
+-- Name: late_day_exceptions late_day_extension_change; Type: TRIGGER; Schema: public; Owner: -
 --
 
-CREATE TRIGGER late_day_extension_change AFTER INSERT OR DELETE OR UPDATE ON public.excused_absence_extensions FOR EACH ROW EXECUTE PROCEDURE public.late_day_extension_change();
+CREATE TRIGGER late_day_extension_change AFTER INSERT OR DELETE OR UPDATE ON public.late_day_exceptions FOR EACH ROW EXECUTE PROCEDURE public.late_day_extension_change();
 
 
 --
@@ -3051,18 +3066,18 @@ ALTER TABLE ONLY public.late_day_cache
 
 
 --
--- Name: excused_absence_extensions late_day_exceptions_g_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
+-- Name: late_day_exceptions late_day_exceptions_g_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
 --
 
-ALTER TABLE ONLY public.excused_absence_extensions
+ALTER TABLE ONLY public.late_day_exceptions
     ADD CONSTRAINT late_day_exceptions_g_id_fkey FOREIGN KEY (g_id) REFERENCES public.gradeable(g_id) ON DELETE CASCADE;
 
 
 --
--- Name: excused_absence_extensions late_day_exceptions_user_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
+-- Name: late_day_exceptions late_day_exceptions_user_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
 --
 
-ALTER TABLE ONLY public.excused_absence_extensions
+ALTER TABLE ONLY public.late_day_exceptions
     ADD CONSTRAINT late_day_exceptions_user_id_fkey FOREIGN KEY (user_id) REFERENCES public.users(user_id) ON UPDATE CASCADE;
 
 
