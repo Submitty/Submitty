@@ -559,39 +559,6 @@ else
 fi
 
 
-#################################################################
-# DRMEMORY SETUP
-#################
-
-# Dr Memory is a tool for detecting memory errors in C++ programs (similar to Valgrind)
-
-# FIXME: Use of this tool should eventually be moved to containerized
-# autograding and not installed on the native primary and worker
-# machines by default
-
-# FIXME: DrMemory is initially installed in install_system.sh
-# It is re-installed here (on every Submitty software update) in case of version updates.
-
-pushd /tmp > /dev/null
-
-echo "Updating DrMemory..."
-
-rm -rf /tmp/DrMemory*
-wget https://github.com/DynamoRIO/drmemory/releases/download/${DRMEMORY_TAG}/DrMemory-Linux-${DRMEMORY_VERSION}.tar.gz -o /dev/null > /dev/null 2>&1
-tar -xpzf DrMemory-Linux-${DRMEMORY_VERSION}.tar.gz
-rsync --delete -a /tmp/DrMemory-Linux-${DRMEMORY_VERSION}/ ${SUBMITTY_INSTALL_DIR}/drmemory
-rm -rf /tmp/DrMemory*
-
-chown -R root:${COURSE_BUILDERS_GROUP} ${SUBMITTY_INSTALL_DIR}/drmemory
-chmod -R 755 ${SUBMITTY_INSTALL_DIR}/drmemory
-
-
-
-echo "...DrMemory ${DRMEMORY_TAG} update complete."
-
-popd > /dev/null
-
-
 ########################################################################################################################
 ########################################################################################################################
 # COPY VARIOUS SCRIPTS USED BY INSTRUCTORS AND SYS ADMINS FOR COURSE ADMINISTRATION
@@ -652,12 +619,6 @@ chown root:root "${SUBMITTY_INSTALL_DIR}/.setup/bin/reupload"*
 chmod 700       "${SUBMITTY_INSTALL_DIR}/.setup/bin/reupload"*
 chown root:root "${SUBMITTY_INSTALL_DIR}/.setup/bin/track_git_version.py"
 chmod 700       "${SUBMITTY_INSTALL_DIR}/.setup/bin/track_git_version.py"
-
-###############################################
-# submitty_test script
-cp  "${SUBMITTY_REPOSITORY}/.setup/SUBMITTY_TEST.sh"        "${SUBMITTY_INSTALL_DIR}/.setup/"
-chown root:root "${SUBMITTY_INSTALL_DIR}/.setup/SUBMITTY_TEST.sh"
-chmod 700       "${SUBMITTY_INSTALL_DIR}/.setup/SUBMITTY_TEST.sh"
 
 ########################################################################################################################
 ########################################################################################################################
