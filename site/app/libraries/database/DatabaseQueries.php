@@ -733,7 +733,7 @@ SQL;
             }
             else {
                 // If no row with the same values exists, insert the new row
-                $this->course_db->query("INSERT INTO forum_upducks (post_id, user_id, thread_id) VALUES (?, ?, ?)",[$post_id, $current_user, $thread_id]);
+                $this->course_db->query("INSERT INTO forum_upducks (post_id, user_id, thread_id) VALUES (?, ?, ?)", [$post_id, $current_user, $thread_id]);
                 $result = 'like';
             }
             return $result;

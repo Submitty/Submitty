@@ -1315,11 +1315,11 @@ function toggleLike(post_id, thread_id, current_user) {
             }
             json=json['data'];
             //window.alert(json.type);
-            const likeCounterElement = document.getElementById('likeCounter_' + post_id);
+            const likeCounterElement = document.getElementById(`likeCounter_${post_id}`);
             let likeCounter = parseInt(likeCounterElement.innerText);
 
             // eslint-disable-next-line no-useless-concat
-            const likeIconSrc = document.getElementById('likeIcon_' + post_id);
+            const likeIconSrc = document.getElementById(`likeIcon_${post_id}`);
             let likeIconSrcElement = likeIconSrc.src;
 
             const theme = localStorage.getItem('theme');
@@ -1329,10 +1329,10 @@ function toggleLike(post_id, thread_id, current_user) {
 
             if (likeIconSrcElement.endsWith('/img/on-duck-button.svg')) {
                 if (theme==='light' && likeIconSrcElement.endsWith('/img/on-duck-button.svg')) {
-                    likeIconSrcElement = likeIconSrcElement.replace('on-duck-button.svg', 'dark-mode-off-duck.svg');
+                    likeIconSrcElement = likeIconSrcElement.replace('on-duck-button.svg', 'light-mode-off-duck.svg');
                 }
                 else {
-                    likeIconSrcElement = likeIconSrcElement.replace('on-duck-button.svg', 'dark-mode-off-duck.svg');
+                    likeIconSrcElement = likeIconSrcElement.replace('on-duck-button.svg', 'light-mode-off-duck.svg');
                 }
                 likeCounter=likeCounter-1;
 
@@ -1341,10 +1341,10 @@ function toggleLike(post_id, thread_id, current_user) {
             }
             else {
                 if (theme==='light') {
-                    likeIconSrcElement = likeIconSrcElement.replace('dark-mode-off-duck.svg', 'on-duck-button.svg');
+                    likeIconSrcElement = likeIconSrcElement.replace('light-mode-off-duck.svg', 'on-duck-button.svg');
                 }
                 else {
-                    likeIconSrcElement = likeIconSrcElement.replace('dark-mode-off-duck.svg', 'on-duck-button.svg');
+                    likeIconSrcElement = likeIconSrcElement.replace('light-mode-off-duck.svg', 'on-duck-button.svg');
                 }
                 likeCounter=likeCounter+1;
 
