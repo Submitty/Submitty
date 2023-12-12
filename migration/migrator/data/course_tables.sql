@@ -357,19 +357,6 @@ CREATE FUNCTION public.get_late_day_info_from_previous(submission_days_late inte
 
 
 --
--- Name: grab_late_day_gradeables_for_user(integer); Type: FUNCTION; Schema: public; Owner: -
---
-
-CREATE FUNCTION public.grab_late_day_gradeables_for_user(user_id integer) RETURNS TABLE(gradeable_id integer, late_days integer)
-    LANGUAGE plpgsql
-    AS $$
-                            BEGIN
-                                SELECT gradeable_id, late_days FROM excused_absence_extensions WHERE user_id = user_id;
-                            END;
-                            $$;
-
-
---
 -- Name: grab_late_day_gradeables_for_user(text); Type: FUNCTION; Schema: public; Owner: -
 --
 
