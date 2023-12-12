@@ -602,10 +602,11 @@ class ForumController extends AbstractController {
             true,
             $author_info[$post["author_user_id"]],
             $post_attachments[$post["id"]][0],
-            !empty($post_history),
+            count($post_history) > 0,
             in_array($post["id"], $merged_threads, true),
             true,
-            $this->core->getQueries()->existsAnnouncementsId($thread_id));
+            $this->core->getQueries()->existsAnnouncementsId($thread_id)
+        );
         return $this->core->getOutput()->renderJsonSuccess($result);
     }
 
