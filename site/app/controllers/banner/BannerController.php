@@ -96,8 +96,9 @@ class BannerController extends AbstractController {
         $folder_made_name = $actual_banner_name . "Folder" . $currentDate->format('Y-m-d_H-i-s');
 
         $full_path = FileUtils::joinPaths($upload_path, $specificPath, $folder_made_name);
+        // $submitty_path = $this->core->getConfig()->getSubmittyPath() . "/community_events";
 
-        // if (!$this->core->getAccess()->canI("path.write", ["dir" => "community_events", "path" => $full_path])) {
+        // if (!$this->core->getAccess()->canI("path.write", ["dir" => "community_events", "path" => $submitty_path])) {
         //     return JsonResponse::getErrorResponse("Bad File Request");
         // }
 

@@ -166,6 +166,11 @@ class Access {
 
         $this->permissions["gradeable.submit.everyone"] = self::ALLOW_MIN_FULL_ACCESS_GRADER | self::CHECK_GRADEABLE_MIN_GROUP;
 
+        //community_events permissions
+        $this->permissions['path.read.community_events'] = self::ALLOW_MIN_STUDENT;
+        $this->permissions['path.write.community_events'] = self::ALLOW_MIN_INSTRUCTOR;
+
+
         //General path read/write checks
         $this->permissions["path.read"] = self::ALLOW_MIN_STUDENT | self::CHECK_FILE_DIRECTORY | self::CHECK_FILE_EXISTS;
         $this->permissions["path.write"] = self::ALLOW_MIN_STUDENT | self::CHECK_CSRF | self::CHECK_FILE_DIRECTORY;
@@ -211,9 +216,6 @@ class Access {
         $this->permissions["forum.merge_thread"] = self::ALLOW_MIN_LIMITED_ACCESS_GRADER | self::CHECK_CSRF;
 
         $this->permissions["admin.wrapper"] = self::ALLOW_MIN_INSTRUCTOR;
-
-        $this->permissions['path.read.community_events'] = self::ALLOW_MIN_STUDENT;
-        $this->permissions['path.write.community_events'] = self::ALLOW_MIN_INSTRUCTOR;
     }
 
     /**
