@@ -1,11 +1,12 @@
+/* exported toggleSort */
 //this helps update the frontend when the page refreshes because without this the sort icon would reset and the sort state would not
 document.addEventListener('DOMContentLoaded', () => {
-    const sortIndicator = document.getElementById('sort-indicator');
-    let sortState = localStorage.getItem('sort-indicator');
+    const sortIndicator = document.getElementById('sort-indicator-oh-queue');
+    let sortState = localStorage.getItem('sort-indicator-oh-queue');
 
     if (sortState === null) {
         sortState = 'off';
-        localStorage.setItem('sort-indicator', sortState);
+        localStorage.setItem('sort-indicator-oh-queue', sortState);
     }
 
     if (sortState === 'up') {
@@ -20,20 +21,19 @@ document.addEventListener('DOMContentLoaded', () => {
 
     adjustRows();
 });
-/* exported toggleSort */
 function toggleSort(column) {
-    const sortIndicator = $('#sort-indicator');
+    const sortIndicator = $('#sort-indicator-oh-queue');
     if (column === 'HelpStartedBy') {
-        if (localStorage.getItem('sort-indicator') === 'off') {
-            localStorage.setItem('sort-indicator', 'up');
+        if (localStorage.getItem('sort-indicator-oh-queue') === 'off') {
+            localStorage.setItem('sort-indicator-oh-queue', 'up');
             sortIndicator.attr('class', 'fas fa-sort-up');
         }
-        else if (localStorage.getItem('sort-indicator') === 'up') {
-            localStorage.setItem('sort-indicator', 'down');
+        else if (localStorage.getItem('sort-indicator-oh-queue') === 'up') {
+            localStorage.setItem('sort-indicator-oh-queue', 'down');
             sortIndicator.attr('class', 'fas fa-sort-down');
         }
-        else if (localStorage.getItem('sort-indicator') === 'down') {
-            localStorage.setItem('sort-indicator', 'off');
+        else if (localStorage.getItem('sort-indicator-oh-queue') === 'down') {
+            localStorage.setItem('sort-indicator-oh-queue', 'off');
             sortIndicator.attr('class', 'fa-solid fa-sort');
         }
     }
@@ -42,10 +42,10 @@ function toggleSort(column) {
 function adjustRows() {
     const rows = $('.queue_history_row').toArray();
     rows.sort((a, b) => {
-        if (localStorage.getItem('sort-indicator') === 'up') {
+        if (localStorage.getItem('sort-indicator-oh-queue') === 'up') {
             return $(a).find('.help-started').text() > $(b).find('.help-started').text() ? -1 : 1;
         }
-        else if (localStorage.getItem('sort-indicator') === 'down') {
+        else if (localStorage.getItem('sort-indicator-oh-queue') === 'down') {
             return $(a).find('.help-started').text() > $(b).find('.help-started').text() ? 1 : -1;
 
         }
