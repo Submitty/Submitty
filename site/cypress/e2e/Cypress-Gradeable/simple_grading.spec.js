@@ -13,10 +13,6 @@ function accurateSectionHeaders(sectionType, sectionLimit) {
 
 describe('Test cases revolving around simple grading lab', () => {
     ['ta', 'instructor'].forEach((user) => {
-        beforeEach(() => {
-            cy.visit('/');
-        });
-
         it(`${user} should have grader submission options`, () => {
             cy.login(user);
             cy.visit(['sample', 'gradeable', 'grading_lab_rotating', 'grading']);

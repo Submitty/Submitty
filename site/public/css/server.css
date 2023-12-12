@@ -1619,8 +1619,7 @@ end of styles used in the admin gradeable page
 
 .ui-autocomplete {
     max-height: 300px;
-    overflow-y: scroll;
-    overflow-x: hidden;
+    overflow: hidden scroll;
 }
 
 /* Override the -15px that bootstrap-grid.css sets for these */
