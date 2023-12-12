@@ -22,7 +22,7 @@
   "repositories": [
     {
       "type": "vcs",
-      "url": "https://github.com/Submitty/Markdown.git"
+      "url": "https://github.com/Submitty/Markdown"
     }
   ],
   "require": {
