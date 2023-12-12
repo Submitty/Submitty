@@ -199,9 +199,9 @@ class BannerController extends AbstractController {
         $event_name = $_POST['name'];
 
         $full_path = FileUtils::joinPaths($upload_path, $folder_name, $event_item->getFolderName(), $event_name);
-        // if (!$this->core->getAccess()->canI("path.write", ["dir" => "community_events", "path" => $full_path])) {
-        //     return JsonResponse::getErrorResponse("Invalid file write");
-        // }
+        if (!$this->core->getAccess()->canI("path.write", ["dir" => "community_events", "path" => $full_path])) {
+            return JsonResponse::getErrorResponse("Invalid file write");
+        }
 
 
 
