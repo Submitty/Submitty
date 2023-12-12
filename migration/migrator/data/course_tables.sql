@@ -357,6 +357,19 @@ CREATE FUNCTION public.get_late_day_info_from_previous(submission_days_late inte
 
 
 --
+-- Name: grab_late_day_gradeables_for_user(integer); Type: FUNCTION; Schema: public; Owner: -
+--
+
+CREATE FUNCTION public.grab_late_day_gradeables_for_user(user_id integer) RETURNS TABLE(gradeable_id integer, late_days integer)
+    LANGUAGE plpgsql
+    AS $$
+                            BEGIN
+                                SELECT gradeable_id, late_days FROM excused_absence_extensions WHERE user_id = user_id;
+                            END;
+                            $$;
+
+
+--
 -- Name: grab_late_day_gradeables_for_user(text); Type: FUNCTION; Schema: public; Owner: -
 --
 
@@ -412,13 +425,13 @@ CREATE FUNCTION public.grab_late_day_gradeables_for_user(user_id text) RETURNS S
 				vg.eg_late_days AS late_days_allowed,
 				calculate_submission_days_late(sg.submission_time, vg.eg_submission_due_date) AS submission_days_late,
 				CASE
-					WHEN lde.late_day_exceptions IS NULL THEN 0
-					ELSE lde.late_day_exceptions
+					WHEN lde.days_extended IS NULL THEN 0
+					ELSE lde.days_extended
 				END AS late_day_exceptions
 			FROM valid_gradeables vg
 			LEFT JOIN submitted_gradeables sg
 				ON vg.g_id=sg.g_id
-			LEFT JOIN late_day_exceptions lde
+			LEFT JOIN excused_absence_extensions lde
 				ON lde.user_id=user_id
 				AND vg.g_id=lde.g_id
 		ORDER BY late_day_date, g_id
