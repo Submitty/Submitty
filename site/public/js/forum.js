@@ -1322,7 +1322,7 @@ function toggleLike(post_id,thread_id,current_user) {
 
             if(likeIconSrcElement.endsWith('/img/on-duck-button.svg')){
                 if(theme=="light" && likeIconSrcElement.endsWith('/img/on-duck-button.svg')){
-                    likeIconSrcElement = likeIconSrcElement.replace('on-duck-button.svg', 'light-mode-off-duck.svg');
+                    likeIconSrcElement = likeIconSrcElement.replace('on-duck-button.svg', 'dark-mode-off-duck.svg');
                 }
                 else{
                     likeIconSrcElement = likeIconSrcElement.replace('on-duck-button.svg', 'dark-mode-off-duck.svg');
@@ -1335,7 +1335,7 @@ function toggleLike(post_id,thread_id,current_user) {
             }
             else{
                 if(theme=="light"){
-                    likeIconSrcElement = likeIconSrcElement.replace('light-mode-off-duck.svg', 'on-duck-button.svg');
+                    likeIconSrcElement = likeIconSrcElement.replace('dark-mode-off-duck.svg', 'on-duck-button.svg');
                 }
                 else{
                     likeIconSrcElement = likeIconSrcElement.replace('dark-mode-off-duck.svg', 'on-duck-button.svg');
