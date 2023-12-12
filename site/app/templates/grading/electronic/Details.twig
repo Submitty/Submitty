@@ -59,28 +59,9 @@
         </div>
     </div>
     {% if grade_inquiry_only_button %}
-    <script>
-        window.onload = function() {
-            var button = document.getElementById('inquiryButton');
-            var status = Cookies.get('inquiry_status');
-            
-            if (status === 'on') {
-                $('.grade-button').each(function() {
-                    if (typeof $(this).attr('data-grade-inquiry') === 'undefined') {
-                        $(this).closest('.grade-table').hide();  // hide gradeable items without active inquiries
-                    }
-                });
-                button.textContent = "Grade Inquiry Only: On";
-            }
-            else {
-                $('.grade-button').each(function() {
-                    $(this).closest('.grade-table').show();  // show all gradeable items
-                });
-                button.textContent = "Grade Inquiry Only: Off";
-            }
-        }
-    </script>
-
+        <script>
+            inquiry_update();
+        </script>
     {% endif %}
     {% if not is_student %}
         <a href="{{ stats_url }}" class="btn btn-primary">Grading Stats</a>
