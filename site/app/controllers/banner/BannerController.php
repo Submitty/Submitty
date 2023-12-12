@@ -102,6 +102,12 @@ class BannerController extends AbstractController {
         //     return JsonResponse::getErrorResponse("Bad File Request");
         // }
 
+        $full_path = $this->core->getAccess()->resolveDirPath("community_events", $full_path);
+
+        if ($full_path === false) {
+            return JsonResponse::getErrorResponse("Path is bad.");
+        }
+
 
         if (!is_dir($full_path)) {
             // Create a new folder for the current month
@@ -194,18 +200,23 @@ class BannerController extends AbstractController {
         $entity_manager->flush();
 
         $upload_path =  FileUtils::joinPaths($this->core->getConfig()->getSubmittyPath(), "community_events");
+        
 
         $folder_name = $_POST['path'];
         $event_name = $_POST['name'];
 
         $full_path = FileUtils::joinPaths($upload_path, $folder_name, $event_item->getFolderName(), $event_name);
-        if (!$this->core->getAccess()->canI("path.write", ["dir" => "community_events", "path" => $full_path])) {
-            return JsonResponse::getErrorResponse("Invalid file write");
+        
+        $full_path = $this->core->getAccess()->resolveDirPath("community_events", $full_path);
+
+        if ($full_path === false) {
+            return JsonResponse::getErrorResponse("Path is bad.");
         }
 
-
-
         if (is_file($full_path)) {
+
+            $entity_manager->remove($event_item);
+            $entity_manager->flush();
             // Check if the file exists before attempting to delete it
             if (!unlink($full_path)) {
                 return JsonResponse::getErrorResponse("Failed to delete the file.");
