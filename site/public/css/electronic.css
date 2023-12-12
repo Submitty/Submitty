@@ -32,8 +32,7 @@ main#main.full-screen-mode .content {
 aside {
     margin: 0;
     padding-top: 0;
-    overflow-x: hidden;
-    overflow-y: auto;
+    overflow: hidden auto;
 }
 
 #electronic-gradeable-container {
@@ -907,8 +906,7 @@ progress::-webkit-progress-value {
 #overall-comment-collapsed {
     padding: 0 0 0 20px;
     max-height: 100px;
-    overflow-x: hidden;
-    overflow-y: scroll;
+    overflow: hidden scroll;
     width: 100%;
     overflow-wrap: break-word;
 }
