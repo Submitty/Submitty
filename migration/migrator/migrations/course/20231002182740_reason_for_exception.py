@@ -14,25 +14,9 @@ def up(config, database, semester, course):
     :param course: Code of course being migrated
     :type course: str
     """
-    database.execute("""
-        ALTER TABLE users -- Create column
-        ADD COLUMN previous_rotating_section INTEGER;
-
-        -- Create empty trigger function that is replaced by new trigger function file
-        CREATE OR REPLACE FUNCTION public.update_previous_rotating_section()
-            RETURNS trigger
-            LANGUAGE plpgsql
-            AS $$
-        BEGIN
-            RETURN NEW;
-        END;
-        $$;
-
-        -- Attatch trigger function
-        CREATE TRIGGER before_update_users_update_previous_rotating_section
-        BEFORE UPDATE ON public.users
-        FOR EACH ROW EXECUTE PROCEDURE update_previous_rotating_section();
-    """)
+    sql = """ALTER TABLE late_day_exceptions ADD COLUMN IF NOT EXISTS reason_for_exception
+      character varying(255) DEFAULT '';"""
+    database.execute(sql)
 
 
 def down(config, database, semester, course):
@@ -48,11 +32,4 @@ def down(config, database, semester, course):
     :param course: Code of course being migrated
     :type course: str
     """
-    database.execute("""
-        ALTER TABLE users
-        DROP COLUMN previous_rotating_section;
-
-        DROP TRIGGER IF EXISTS
-            before_update_users_update_previous_rotating_section
-            ON users;
-    """)
+    pass
