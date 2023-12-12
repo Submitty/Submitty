@@ -6,10 +6,10 @@ function setCalendarMenuValues(div_class) {
     $(`.${div_class} #show-menu`).each(function () {
         settings_divs.forEach(cur_div => {
             if (!cur_div.includes($(this).val())) {
-                $(`.${div_class} ${cur_div}`).css('display','none');
+                $(`.${div_class} ${cur_div}`).css('display', 'none');
             }
             else {
-                $(`.${div_class} ${cur_div}`).css('display','block');
+                $(`.${div_class} ${cur_div}`).css('display', 'block');
             }
         });
     });
@@ -18,10 +18,10 @@ function setCalendarMenuValues(div_class) {
     $(`.${div_class} #show-menu`).on('change', function () {
         settings_divs.forEach(cur_div => {
             if (!cur_div.includes($(this).val())) {
-                $(`.${div_class} ${cur_div}`).css('display','none');
+                $(`.${div_class} ${cur_div}`).css('display', 'none');
             }
             else {
-                $(`.${div_class} ${cur_div}`).css('display','block');
+                $(`.${div_class} ${cur_div}`).css('display', 'block');
             }
         });
     });
