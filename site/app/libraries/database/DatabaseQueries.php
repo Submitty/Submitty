@@ -1829,7 +1829,7 @@ WHERE term=? AND course=? AND user_id=?",
                     FROM get_late_day_info_from_previous(
                         calculate_submission_days_late(egd.submission_time, eg.eg_submission_due_date),
                         eg.eg_late_days,
-                        COALESCE(lde.excused_absence_extensions, 0),
+                        COALESCE(lde.days_extended, 0),
                         ?
                     )
                 ) != 3";
