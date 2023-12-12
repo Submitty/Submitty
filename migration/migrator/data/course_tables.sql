@@ -2584,6 +2584,7 @@ CREATE TRIGGER add_course_user AFTER INSERT OR UPDATE ON public.users FOR EACH R
 
 CREATE TRIGGER before_update_users_update_previous_rotating_section BEFORE UPDATE OF rotating_section ON public.users FOR EACH ROW EXECUTE PROCEDURE public.update_previous_rotating_section();
 
+
 --
 -- Name: electronic_gradeable electronic_gradeable_change; Type: TRIGGER; Schema: public; Owner: -
 --
