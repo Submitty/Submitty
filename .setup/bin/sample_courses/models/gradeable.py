@@ -67,6 +67,7 @@ class Gradeable(object):
         self.annotated_pdf = False
         self.annotation_path = None
         self.annotations = []
+        self.gradeable_type = Students will submit one or more files by direct upload to the Submitty website
 
         if "gradeable_config" in gradeable:
             self.gradeable_config = gradeable["gradeable_config"]
@@ -81,6 +82,10 @@ class Gradeable(object):
                 self.max_random_submissions = int(
                     gradeable["eg_max_random_submissions"]
                 )
+
+            if "eg_gradeable_type" in gradeable:
+                self.gradeable_type = 
+                    gradeable["eg_gradeable_type"]
 
             if "eg_max_individual_submissions" in gradeable:
                 self.max_individual_submissions = int(
