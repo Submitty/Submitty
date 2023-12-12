@@ -18,17 +18,19 @@ class HomePageView extends AbstractView {
         array $archived_courses
     ) {
         $statuses = [];
-        $course_types = ["unarchived_courses", "dropped_courses", "archived_courses"];
+        $course_types = [
+            "unarchived_courses" => $unarchived_courses,
+            "dropped_courses" => $dropped_courses,
+            "archived_courses" => $archived_courses
+        ];
         $rank_titles = [
             User::GROUP_INSTRUCTOR              => "Instructor:",
             User::GROUP_FULL_ACCESS_GRADER      => "Full Access Grader:",
             User::GROUP_LIMITED_ACCESS_GRADER   => "Grader:",
             User::GROUP_STUDENT                 => "Student:"
         ];
-        foreach ($course_types as $course_type_name) {
+        foreach ($course_types as $course_type_name => $course_type) {
             $ranks = [];
-            $course_type = $$course_type_name;
-
             //Create rank lists
             for ($i = 1; $i < 5; $i++) {
                 $ranks[$i] = [
