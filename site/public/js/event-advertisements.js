@@ -42,13 +42,13 @@ $(() => {
 
 
     if (Cookies.get('display-banner') === 'yes') {
-        showBanners();
+        showBanners(true); // don't want to make duck move
     }
     else {
         Cookies.set('display-banner', 'no');
     }
 });
-function showBanners() {
+function showBanners(noMove = false) {
 
     const movingUnit = document.getElementById('moving-unit');
     const bannerElement = document.getElementById('banner');
@@ -58,7 +58,7 @@ function showBanners() {
 
         document.getElementById('breadcrumbs').style.flexWrap = 'inherit';
 
-        if (currentImages.length > 0) {
+        if (currentImages.length > 0 && !noMove) {
             images[currentImageIndex].classList.add('active');
 
             const duckdivElement = document.getElementById('moorthy-duck');
@@ -70,24 +70,15 @@ function showBanners() {
                 movingUnit.style.left = '10%';
                 movingUnit.style.animation = 'slide 2s linear forwards';
             }, 500);
-            document.getElementById('triangle').style.display = 'none';
-            document.getElementById('speech-bubble').style.display = 'none';
-
-
-            bannerElement.addEventListener('animationend', () => {
-
-                if (currentImages.length > 0 ) {
-                    document.getElementById('triangle').style.display = 'block';
-                    document.getElementById('speech-bubble').style.display = 'block';
-                }
-
-            }, { once: true });
+            
         }
         else {
             bannerElement.style.width = '100%';
             bannerElement.style.display = 'block';
             images[currentImageIndex].classList.add('active');
         }
+        document.getElementById('triangle').style.display = 'none';
+        document.getElementById('speech-bubble').style.display = 'none';
     }
     else {
 
