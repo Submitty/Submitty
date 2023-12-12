@@ -746,57 +746,26 @@ SQL;
         }
     }
 
-    public function getUpduckInfo($post_id): int {
-        $this->course_db->query('SELECT COUNT(*) AS cnt FROM forum_upducks WHERE post_id = ?', [$post_id]);
-        return intval($this->course_db->row()['cnt']);
-    }
-
     public function getUpduckInfoForPosts(array $post_ids): array {
         $resultDict = [];
-        //placeholder
-        $parameters = $this->createParameterList(count($post_ids));
-
-        $this->course_db->query("SELECT post_id, COUNT(*) AS cnt FROM upducks_table WHERE post_id IN ($parameters) GROUP BY post_id", $post_ids);
-
-        foreach ($this->course_db->rows() as $row) {
-            $resultDict[$row['post_id']] = intval($row['cnt']);
+        foreach($post_ids as $post_id) {
+            $this->course_db->query('SELECT COUNT(*) AS cnt FROM forum_upducks WHERE post_id = ?', [$post_id]);
+            $resultDict[$post_id]= intval($this->course_db->row()['cnt']);
         }
-    
         return $resultDict;
     }
 
     public function getUserLikesForPosts(array $post_ids, $current_user): array {
-
-        $resultDict = [];
-        $parameters = $this->createParameterList(count($post_ids));
-    
-        $this->course_db->query('SELECT post_id FROM forum_upducks WHERE post_id IN ($parameters) AND user_id = ?', [$post_ids, $current_user]);
-    
-        foreach ($this->course_db->rows() as $row) {
-            $resultDict[$row['post_id']] = true;
-        }
-    
-        foreach ($post_ids as $post_id) {
-            if (!isset($resultDict[$post_id])) {
-                $resultDict[$post_id] = false;
+        $result = [];    
+        foreach ($post_ids as $post){
+            $this->course_db->query('SELECT COUNT(*) AS cnt FROM forum_upducks WHERE post_id = ? AND user_id = ?', [$post, $current_user]);
+            if(intval($this->course_db->row()['cnt']) >= 1){
+                array_push($result,$post);
             }
         }
-    
-        return $resultDict;
+        return $result;
     }
     
-    public function getUserLikes($post_id, $current_user): bool {
-        $this->course_db->query('SELECT COUNT(*) AS cnt FROM forum_upducks WHERE post_id = ? AND user_id = ?', [$post_id, $current_user]);
-        if(intval($this->course_db->row()['cnt']) >= 1){
-            //user liked
-            $bool_liked=true;
-        }
-        else{
-            $bool_liked=false;
-        }
-        return $bool_liked;
-    }
-
     public function splitPost($post_id, $title, $categories_ids) {
         $old_thread_id = -1;
         $thread_id = -1;

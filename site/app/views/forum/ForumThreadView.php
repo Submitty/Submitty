@@ -474,6 +474,15 @@ class ForumThreadView extends AbstractView {
         $merged_threads = $this->core->getQueries()->getMergedThreadIds($post_ids);
         $post_attachments = $this->core->getQueries()->getForumAttachments($post_ids);
 
+        $postIDs = [];
+        foreach ($posts as $post) {
+            array_push($postIDs, $post["id"]);
+        }
+        
+        $current_user = $this->core->getUser()->getId();
+        $upDuckCounter_map = $this->core->getQueries()->getUpduckInfoForPosts($postIDs);
+        $userLiked = $this->core->getQueries()->getUserLikesForPosts($postIDs, $current_user);
+
         if ($display_option == "tree") {
             $order_array = [];
             $reply_level_array = [];
@@ -503,15 +512,6 @@ class ForumThreadView extends AbstractView {
             $i = 0;
             $first = true;
 
-            // $postIDs = [];
-            // foreach ($posts as $post) {
-            //     array_push($postIDs, $post["id"]);
-            // }
-            // //add map here
-            // $current_user = $this->core->getUser()->getId();
-            // $upDuckCounter_map = $this->core->getQueries()->getUpduckInfoForPosts($postIDs);
-            // $userLiked_map = $this->core->getQueries()->getUserLikes($postIDs, $current_user);
-
             foreach ($order_array as $ordered_post) {
                 foreach ($posts as $post) {
                     if ($post["id"] == $ordered_post) {
@@ -523,13 +523,8 @@ class ForumThreadView extends AbstractView {
                         }
 
                         $post["author_user_group"] = $author_user_groups_map[$post["author_user_id"]];
-
-                        // $likeCount = $upDuckCounter_map[$post["id"]];
-                        // [post_id:count, post_id:count]
-                        // $userLiked = $userLiked_map[$post["id"]];
-                        // [post_id:bool, post_id:bool]
-
-                        //then here I can make a call with the specific postid
+  
+                        $boolLiked =in_array($post["id"], $userLiked);
                         
                         $post_data[] = $this->createPost(
                             $activeThread,
@@ -538,6 +533,8 @@ class ForumThreadView extends AbstractView {
                             $first,
                             $reply_level,
                             $display_option,
+                            $upDuckCounter_map[$post["id"]],
+                            $boolLiked,
                             $includeReply,
                             $authors_display_info[$post['author_user_id']],
                             $post_attachments[$post["id"]][0],
@@ -560,7 +557,7 @@ class ForumThreadView extends AbstractView {
         else {
             foreach ($posts as $post) {
                 $post["author_user_group"] = $author_user_groups_map[$post["author_user_id"]];
-
+                $boolLiked =in_array($post["id"], $userLiked);
                 $post_data[] = $this->createPost(
                     $activeThread,
                     $post,
@@ -568,6 +565,8 @@ class ForumThreadView extends AbstractView {
                     $first,
                     1,
                     $display_option,
+                    $upDuckCounter_map[$post["id"]],
+                    $boolLiked,
                     $includeReply,
                     $authors_display_info[$post['author_user_id']],
                     $post_attachments[$post["id"]][0],
@@ -1075,7 +1074,7 @@ class ForumThreadView extends AbstractView {
      * } $author_info
      * @param string[] $post_attachments
      */
-    public function createPost(array $thread, array $post, $unviewed_posts, $first, $reply_level, $display_option, $includeReply, array $author_info, array $post_attachments, bool $has_history, bool $is_merged_thread, bool $render = false, bool $thread_announced = false, bool $isCurrentFavorite = false) {
+    public function createPost(array $thread, array $post, $unviewed_posts, $first, $reply_level, $display_option, $counter, $isLiked, $includeReply, array $author_info, array $post_attachments, bool $has_history, bool $is_merged_thread, bool $render = false, bool $thread_announced = false, bool $isCurrentFavorite = false) {
 
         $current_user = $this->core->getUser()->getId();
         $thread_id = $thread["id"];
@@ -1215,14 +1214,9 @@ class ForumThreadView extends AbstractView {
             }
         }
 
-        $upDuckCount = $this->core->getQueries()->getUpduckInfo($post["id"]);
-        //this function should return a number for the like count
-        $userLiked = $this->core->getQueries()->getUserLikes($post["id"], $current_user);
-        //return a bool for if liked or not
-
         $post_up_duck = [
-            "upduck_count" => $upDuckCount,
-            "upduck_user_liked" => $userLiked,
+            "upduck_count" => $counter,
+            "upduck_user_liked" => $isLiked,
         ];
 
         if ($this->core->getUser()->getGroup() == 4) {

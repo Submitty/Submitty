@@ -866,6 +866,17 @@ CREATE TABLE public.forum_posts_history (
 
 
 --
+-- Name: forum_upducks; Type: TABLE; Schema: public; Owner: -
+--
+
+CREATE TABLE public.forum_upducks (
+    post_id integer NOT NULL,
+    user_id character varying(255) NOT NULL,
+    thread_id integer NOT NULL
+);
+
+
+--
 -- Name: grade_inquiries; Type: TABLE; Schema: public; Owner: -
 --
 
@@ -1794,17 +1805,6 @@ CREATE SEQUENCE public.threads_id_seq
 --
 
 ALTER SEQUENCE public.threads_id_seq OWNED BY public.threads.id;
-
-
---
--- Name: upducks_table; Type: TABLE; Schema: public; Owner: -
---
-
-CREATE TABLE public.upducks_table (
-    post_id integer NOT NULL,
-    user_id character varying(255) NOT NULL,
-    thread_id integer NOT NULL
-);
 
 
 --
@@ -2749,6 +2749,30 @@ ALTER TABLE ONLY public.forum_posts_history
 
 
 --
+-- Name: forum_upducks forum_upducks_post_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.forum_upducks
+    ADD CONSTRAINT forum_upducks_post_id_fkey FOREIGN KEY (post_id) REFERENCES public.posts(id) ON UPDATE CASCADE ON DELETE CASCADE;
+
+
+--
+-- Name: forum_upducks forum_upducks_thread_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.forum_upducks
+    ADD CONSTRAINT forum_upducks_thread_id_fkey FOREIGN KEY (thread_id) REFERENCES public.threads(id) ON UPDATE CASCADE ON DELETE CASCADE;
+
+
+--
+-- Name: forum_upducks forum_upducks_user_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.forum_upducks
+    ADD CONSTRAINT forum_upducks_user_id_fkey FOREIGN KEY (user_id) REFERENCES public.users(user_id) ON UPDATE CASCADE ON DELETE CASCADE;
+
+
+--
 -- Name: grade_inquiries grade_inquiries_fk0; Type: FK CONSTRAINT; Schema: public; Owner: -
 --
 
@@ -3314,30 +3338,6 @@ ALTER TABLE ONLY public.thread_categories
 
 ALTER TABLE ONLY public.thread_categories
     ADD CONSTRAINT thread_categories_fk1 FOREIGN KEY (category_id) REFERENCES public.categories_list(category_id);
-
-
---
--- Name: upducks_table upducks_table_post_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
---
-
-ALTER TABLE ONLY public.upducks_table
-    ADD CONSTRAINT upducks_table_post_id_fkey FOREIGN KEY (post_id) REFERENCES public.posts(id) ON UPDATE CASCADE;
-
-
---
--- Name: upducks_table upducks_table_thread_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
---
-
-ALTER TABLE ONLY public.upducks_table
-    ADD CONSTRAINT upducks_table_thread_id_fkey FOREIGN KEY (thread_id) REFERENCES public.threads(id) ON UPDATE CASCADE;
-
-
---
--- Name: upducks_table upducks_table_user_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
---
-
-ALTER TABLE ONLY public.upducks_table
-    ADD CONSTRAINT upducks_table_user_id_fkey FOREIGN KEY (user_id) REFERENCES public.users(user_id) ON UPDATE CASCADE;
 
 
 --

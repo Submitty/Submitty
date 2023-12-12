@@ -1315,14 +1315,13 @@ function toggleLike(post_id,thread_id,current_user) {
             var likeIconSrc = document.getElementById('likeIcon_' + post_id);
             var likeIconSrcElement = likeIconSrc.src;
 
-            var choice = localStorage.getItem("theme");
+            var theme = localStorage.getItem("theme");
             if(localStorage.getItem("theme")){
-                console.log("here");
                 console.log(localStorage.getItem("theme"));
             }
 
             if(likeIconSrcElement.endsWith('/img/on-duck-button.svg')){
-                if(choice=="light" && likeIconSrcElement.endsWith('/img/on-duck-button.svg')){
+                if(theme=="light" && likeIconSrcElement.endsWith('/img/on-duck-button.svg')){
                     likeIconSrcElement = likeIconSrcElement.replace('on-duck-button.svg', 'light-mode-off-duck.svg');
                 }
                 else{
@@ -1335,7 +1334,7 @@ function toggleLike(post_id,thread_id,current_user) {
                 
             }
             else{
-                if(choice=="light"){
+                if(theme=="light"){
                     likeIconSrcElement = likeIconSrcElement.replace('light-mode-off-duck.svg', 'on-duck-button.svg');
                 }
                 else{
