@@ -475,9 +475,13 @@ class ReportController extends AbstractController {
 
                     // Only include late day info if the submission was late
                     $late_days_charged = $ldi->getLateDaysCharged();
+                    $late_day_exceptions = $ldi->getLateDayException();
+                    if ($late_day_exceptions > 0) {
+                        $entry['late_day_exceptions'] = $late_day_exceptions;
+                        $entry['reason_for_exception'] = $ldi->getReasonForException();
+                    }
                     if ($late_days_charged > 0) {
                         $entry['days_after_deadline'] = $ldi->getDaysLate();
-                        $entry['extensions'] = $ldi->getLateDayException();
                         $entry['days_charged'] = $late_days_charged;
                     }
                 }
@@ -508,6 +512,7 @@ class ReportController extends AbstractController {
                     }
                     else {
                         $entry['note'] = 'Score is set to 0 because there are version conflicts.';
+                        $entry['version_conflict'] = 'true';
                     }
                 }
             }
