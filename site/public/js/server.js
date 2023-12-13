@@ -296,7 +296,7 @@ function newUploadBanner() {
 
     $('[name="existing-file-list"]', form).html('');
 
-    var stringifiedFiles = $("<b></b>").text(JSON.stringify(files));
+    const stringifiedFiles = $("<b></b>").text(JSON.stringify(files));
     $('[name="existing-file-list"]', form).append(stringifiedFiles);
 
 
