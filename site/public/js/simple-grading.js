@@ -305,12 +305,6 @@ function generateCheckpointCookie(user_id, g_id, old_scores, new_scores) {
     history.push([user_id, old_scores]);
     history.push([user_id, new_scores]);
 
-    // update undo/redo buttons
-    if (history.length > 1) {
-        $('#checkpoint-undo').prop('disabled', false);
-    }
-    $('#checkpoint-redo').prop('disabled', true);
-
     // keep max history of 5 entries (1 buffer for pointer, 5x2 for old/new)
     if (history.length > 11) {
         history.splice(1, 2);
@@ -322,101 +316,47 @@ function generateCheckpointCookie(user_id, g_id, old_scores, new_scores) {
     setCheckpointHistory(g_id, history);
 }
 
-// helper function for undo/redo which rolls the history to a specific point
-function checkpointRollTo(g_id, diff) {
-    // grab history from cookie
-    const history = getCheckpointHistory(g_id);
-
-    const update_queue = [];
-    const direction = Math.sign(diff);
-    let pointer = history[0];
-
-    // clamp to bounds
-    if (pointer + diff < 1) {
-        diff = 1 - pointer;
-    }
-    if (pointer + diff >= history.length) {
-        diff = history.length - 1 - pointer;
-    }
-
-    // if redoing and pointer is on an old_score, move pointer to next new_score
-    if (direction>0 && pointer%2) {
-        pointer += 1;
-        diff -= direction;
-        update_queue.push(history[pointer]);
-    }
-    // if undoing and pointer is on an new_score, move pointer to next old_score
-    else if (direction<0 && !(pointer%2)) {
-        pointer -= 1;
-        diff -= direction;
-        update_queue.push(history[pointer]);
-    }
-
-    // incrementally move snapshot and set states to update, incrementing by old_scores if direction < 0, new_scores if dir > 0
-    while (diff !== 0) {
-        pointer += (2*direction);
-        update_queue.push(history[pointer]);
-        diff -= direction;
-    }
-
-    // update buttons
-    $('#checkpoint-undo').prop('disabled', false);
-    $('#checkpoint-redo').prop('disabled', false);
-    if (pointer <= 1) {
-        $('#checkpoint-undo').prop('disabled', true);
-    }
-    if (pointer >= history.length-1) {
-        $('#checkpoint-redo').prop('disabled', true);
-    }
-
-    //write new cookie
-    history[0] = pointer;
-    setCheckpointHistory(g_id, history);
-
-    // update cells for each snapshot
-    update_queue.forEach((snapshot) => {
-        // get elems from studentID
-        const elems = $(`tr[data-user='${snapshot[0]}'] .cell-grade`);
-        updateCheckpointCells(elems, snapshot[1], true);
-    });
-}
-
 function setupCheckboxCells() {
     // jQuery for the elements with the class cell-grade (those in the component columns)
     $('td.cell-grade').click(function() {
         updateCheckpointCells(this);
     });
 
-    // show all the hidden grades when this checkbox is clicked
-    $('#show-graders').on('change', function() {
+    // Initialize based on cookies
+    const showGradersCheckbox = $('#show-graders');
+    const showDatesGradedCheckbox = $('#show-dates');
+
+    if (Cookies.get('show_grader') === 'true') {
+        $('.simple-grade-grader').css('display', 'block');
+        showGradersCheckbox.prop('checked', true);
+    }
+
+    if (Cookies.get('show_dates') === 'true') {
+        $('.simple-grade-date').css('display', 'block');
+        showDatesGradedCheckbox.prop('checked', true);
+    }
+
+    // show all the hidden grades when showGradersCheckbox is clicked
+    showGradersCheckbox.on('change', function() {
         if ($(this).is(':checked')) {
             $('.simple-grade-grader').css('display', 'block');
         }
         else {
             $('.simple-grade-grader').css('display', 'none');
         }
+        Cookies.set('show_grader', showGradersCheckbox.is(':checked'));
     });
 
-    // show all the hidden dates when that checkbox is clicked
-    $('#show-dates').on('change', function() {
+    // show all the hidden dates when showDatesGradedCheckbox is clicked
+    showDatesGradedCheckbox.on('change', function() {
         if ($(this).is(':checked')) {
             $('.simple-grade-date').css('display', 'block');
         }
         else {
             $('.simple-grade-date').css('display', 'none');
         }
+        Cookies.set('show_dates', showDatesGradedCheckbox.is(':checked'));
     });
-
-    // initialize undo/redo
-    const g_id = $('tr#row-0').data('gradeable');
-    const history = getCheckpointHistory(g_id);
-
-    if (history.length > 1) {
-        $('#checkpoint-undo').prop('disabled', false);
-        if (history[0] < history.length - 1) {
-            $('#checkpoint-redo').prop('disabled', false);
-        }
-    }
 }
 
 function setupNumericTextCells() {

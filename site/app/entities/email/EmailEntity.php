@@ -18,6 +18,9 @@ class EmailEntity {
     #[ORM\Column(type: Types::STRING)]
     protected string $user_id;
 
+    #[ORM\Column(type: Types::STRING)]
+    protected string $to_name;
+
     #[ORM\Column(type: Types::TEXT)]
     protected string $subject;
 
@@ -27,8 +30,8 @@ class EmailEntity {
     #[ORM\Column(type: Types::DATETIME_MUTABLE)]
     protected DateTime $created;
 
-    #[ORM\Column(type: Types::DATETIME_MUTABLE)]
-    protected DateTime $sent;
+    #[ORM\Column(type: Types::DATETIME_MUTABLE, nullable: true)]
+    protected ?DateTime $sent;
 
     #[ORM\Column(type: Types::STRING)]
     protected string $error;
@@ -47,10 +50,21 @@ class EmailEntity {
     }
 
     /**
+     * The user_id of the person this is email is sent to.
+     * Used if to_name is null.
      * @return string
      */
     public function getUserId(): string {
         return $this->user_id;
+    }
+
+    /**
+     * The name of the person this is email is sent to.
+     * Used if user_id is null.
+     * @return string
+     */
+    public function getToName(): string {
+        return $this->to_name;
     }
 
     public function getSubject(): string {
@@ -83,5 +97,13 @@ class EmailEntity {
 
     public function getCourse(): ?string {
         return $this->course;
+    }
+
+    /**
+     * Returns true if this email was sent to a submitty user.
+     * @return bool True if the email is to a submitty user.
+     */
+    public function isToSubmittyUser(): bool {
+        return empty($this->to_name);
     }
 }
