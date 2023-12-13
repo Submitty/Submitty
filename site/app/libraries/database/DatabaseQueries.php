@@ -722,7 +722,7 @@ SQL;
         return $categories_list;
     }
 
-    public function toggleLikes($post_id, $thread_id, $current_user) {
+    public function toggleLikes(int $post_id, int $thread_id, string $current_user) : string {
         try {
             $this->course_db->query("SELECT * FROM forum_upducks WHERE post_id = ? AND user_id = ? AND thread_id = ?", [$post_id, $current_user, $thread_id]);
 
@@ -742,7 +742,7 @@ SQL;
             if ($this->course_db->inTransaction()) {
                 $this->course_db->rollback();
             }
-            return false;
+            return "false";
         }
     }
 
@@ -763,7 +763,7 @@ SQL;
         return $result;
     }
 
-    public function getUserLikesForPosts(array $post_ids, $current_user): array {
+    public function getUserLikesForPosts(array $post_ids, string $current_user): array {
         $placeholders = $this->createParameterList(count($post_ids));
         $user_id = $current_user;
 

@@ -479,6 +479,7 @@ class ForumThreadView extends AbstractView {
             array_push($postIDs, $post["id"]);
         }
         $current_user = $this->core->getUser()->getId();
+        $upDuckCounter_map = [];
         $upDuckCounter_map = $this->core->getQueries()->getUpduckInfoForPosts($postIDs);
         $userLiked = $this->core->getQueries()->getUserLikesForPosts($postIDs, $current_user);
 
@@ -523,7 +524,8 @@ class ForumThreadView extends AbstractView {
 
                         $post["author_user_group"] = $author_user_groups_map[$post["author_user_id"]];
 
-                        $boolLiked = in_array($post["id"], $userLiked);
+                        $boolLiked = true;
+                        $boolLiked = in_array($post["id"], $userLiked, true);
 
                         $post_data[] = $this->createPost(
                             $activeThread,
@@ -556,7 +558,7 @@ class ForumThreadView extends AbstractView {
         else {
             foreach ($posts as $post) {
                 $post["author_user_group"] = $author_user_groups_map[$post["author_user_id"]];
-                $boolLiked = in_array($post["id"], $userLiked);
+                $boolLiked = in_array($post["id"], $userLiked, true);
                 $post_data[] = $this->createPost(
                     $activeThread,
                     $post,
