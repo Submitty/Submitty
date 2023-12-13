@@ -66,7 +66,7 @@ class BannerController extends AbstractController {
         if ($extra_name === "" && $count_item !== 1) {
             return JsonResponse::getErrorResponse("You can only have one banner submitted.");
         }
-        else if ($count_item > 2) {
+        elseif ($count_item > 2) {
             return JsonResponse::getErrorResponse("Can't have more than two banners submitted.");
         }
 
@@ -80,18 +80,18 @@ class BannerController extends AbstractController {
                 break; // Exit the loop once a valid name is found
             }
         }
-    
+
         $currentDate = new \DateTime();
         $folder_made_name = $actual_banner_name . "Folder" . $currentDate->format('Y-m-d_H-i-s');
 
 
         $full_path = FileUtils::joinPaths($upload_path, $specificPath, $folder_made_name);
-        $full_path1= FileUtils::joinPaths($full_path, $actual_banner_name);
+        $full_path1 = FileUtils::joinPaths($full_path, $actual_banner_name);
         $full_path1 = $this->core->getAccess()->resolveDirPath("community_events", $full_path1);
 
         $full_path2 = "empty";
         if ($extra_name !== "") {
-            $full_path2= FileUtils::joinPaths($full_path, $extra_name);
+            $full_path2 = FileUtils::joinPaths($full_path, $extra_name);
             $full_path2 = $this->core->getAccess()->resolveDirPath("community_events", $full_path2);
         }
 

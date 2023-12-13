@@ -7,8 +7,8 @@ const eventAdvertisements = {
     images: undefined,
     bannerElement: undefined,
     bubble: undefined,
-    currentImages: []
-}
+    currentImages: [],
+};
 
 $(() => {
     eventAdvertisements.currentImageIndex = 0;
@@ -124,7 +124,7 @@ function changeImage(n) {
     const originalIndex = eventAdvertisements.currentImageIndex;
     if (eventAdvertisements.currentImageIndex < 0 || eventAdvertisements.currentImageIndex >= eventAdvertisements.images.length) {
         console.log('Issue of index, you are out of range: ');
-        console.log(eventAdvertisements.currentImageIndex)
+        console.log(eventAdvertisements.currentImageIndex);
         return;
     }
     eventAdvertisements.images[eventAdvertisements.currentImageIndex].classList.remove('active');
