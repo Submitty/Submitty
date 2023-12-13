@@ -663,10 +663,10 @@ class ForumController extends AbstractController {
      */
     public function alterAnnouncement(bool $type) {
         $thread_id = $_POST["thread_id"];
-        if ($type == 'announce_thread') {
+        if ($type) {
             $this->sendSocketMessage(['type' => 'announce_thread', 'thread_id' => $thread_id]);
         }
-        if ($type == 'unpin_thread') {
+        else {
             $this->sendSocketMessage(['type' => 'unpin_thread', 'thread_id' => $thread_id]);
         }
         $this->core->getQueries()->setAnnouncement($thread_id, $type);
@@ -874,14 +874,12 @@ class ForumController extends AbstractController {
                 ]);
             }
             elseif ($type === 'Thread and Post') {
-                $reply_level = 1;
-                $post_box_id = 1;
                 $this->sendSocketMessage([
                     'type' => 'edit_thread',
                     'thread_id' => $thread_id,
                     'post_id' => $post_id,
-                    'reply_level' => $reply_level,
-                    'post_box_id' => $post_box_id,
+                    'reply_level' => 1,
+                    'post_box_id' => 1,
                 ]);
             }
             return $this->core->getOutput()->renderJsonSuccess(['type' => $type]);
