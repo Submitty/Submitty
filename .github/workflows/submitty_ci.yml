@@ -182,9 +182,7 @@ jobs:
           restore-keys: |
               ${{ runner.os }}-${{ github.job }}-pip-
       - name: Install python libraries
-        run: |
-          python3 -m pip install --upgrade pip
-          python3 -m pip install flake8 flake8-bugbear
+        run: python3 -m pip install -r .setup/pip/dev_requirements.txt
       - name: Run python linting
         run: python3 -m flake8
 
