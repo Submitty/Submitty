@@ -312,7 +312,6 @@ footer .footer-separator {
     border-radius: 50% 0% 0% 50%;
 }
 
-
 /* Styling for the speech bubble */
 .speech-bubble {
     position: relative;
@@ -325,6 +324,7 @@ footer .footer-separator {
     top: 7px;
     font-size: 10px;
 }
+
 #speech-bubble-container {
     display: none;
 }

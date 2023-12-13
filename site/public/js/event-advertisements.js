@@ -63,7 +63,7 @@ function showBanners(noMove = false) {
             duckdivElement.style.animation = 'rocking 2s linear infinite';
 
             setTimeout(() => {
-                duck = document.getElementById('moorthy-duck')
+                const duck = document.getElementById('moorthy-duck');
                 duck.style.position = 'relative';
                 duck.style.marginRight = '0px';
                 bannerElement.style.width = '100%';
@@ -74,7 +74,7 @@ function showBanners(noMove = false) {
 
         }
         else {
-            duck = document.getElementById('moorthy-duck')
+            const duck = document.getElementById('moorthy-duck');
             duck.style.position = 'relative';
             duck.style.marginRight = '0px';
             bannerElement.style.width = '100%';
