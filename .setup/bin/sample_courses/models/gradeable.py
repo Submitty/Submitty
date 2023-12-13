@@ -67,7 +67,7 @@ class Gradeable(object):
         self.annotated_pdf = False
         self.annotation_path = None
         self.annotations = []
-        self.gradeable_type = "Students will submit one or more files by direct upload to the Submitty website"
+        self.gradeable_type = ""
 
         if "gradeable_config" in gradeable:
             self.gradeable_config = gradeable["gradeable_config"]
