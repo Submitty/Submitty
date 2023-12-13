@@ -177,8 +177,8 @@ function handleUploadBanner(csrf_token, closeTime, releaseTime, extraName, linkN
     formData.append('release_time', releaseTime);
     formData.append('extra_name', extraName);
     formData.append('link_name', linkName);
-    file_array.forEach((subArray, i) => {
-        subArray.forEach((file, _) => {
+    for (const fileGroup of file_array) {
+        for (const file of fileGroup) {
             if (file.name.includes("'") || file.name.includes('"')) {
                 alert(`ERROR! You may not use quotes in your filename: ${file.name}`);
                 return;
@@ -189,19 +189,18 @@ function handleUploadBanner(csrf_token, closeTime, releaseTime, extraName, linkN
                 alert(`ERROR! You may not use angle brackets in your filename: ${file.name}`);
                 return;
             }
-    
-            const k = fileExists(`/${file.name}`, 1);
-    
+            
+            const fileExistsResult = fileExists(`/${file.name}`, 1);
             // Check conflict here
-            if (k[0] === 1) {
+            if (fileExistsResult[0] === 1) {
                 if (!confirm(`Note: ${file.name} already exists. Do you want to replace it?`)) {
-                    return;
+                    continue;
                 }
             }
+            formData.append(`files${fileGroup.indexOf(fileGroup) + 1}[]`, file, file.name);
+        }
+    }
     
-            formData.append(`files${i + 1}[]`, file, file.name);
-        });
-    });    
     $.ajax({
         url: buildUrl(['banner', 'upload']),
         data: formData,
