@@ -189,14 +189,14 @@ class BannerController extends AbstractController {
         }
 
         $event_item = $event_items[0];
-        $folder_name = $event_item.getName();
-        $event_name = $event_item.getExtraInfo();
-        $entity_manager->remove($event_item);
-        $entity_manager->flush();
+
 
         $upload_path =  FileUtils::joinPaths($this->core->getConfig()->getSubmittyPath(), "community_events");
 
 
+        $releaseDateInt = $event_item->getClosingDate();
+        $folder_name = $releaseDateInt->format('Y');
+        $event_name = $event_item->getName();
 
         $full_path = FileUtils::joinPaths($upload_path, $folder_name, $event_item->getFolderName(), $event_name);
 

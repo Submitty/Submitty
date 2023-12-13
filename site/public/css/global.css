@@ -155,6 +155,16 @@ footer .footer-separator {
     padding: 0 8px;
 }
 
+#duckdiv {
+    position: relative; 
+    display: inline-block; 
+    vertical-align: top;
+}
+
+.Upload_Banner {
+    margin-bottom: 20px;
+}
+
 #moorthy-duck {
     display: block;
     margin-right: -30px;

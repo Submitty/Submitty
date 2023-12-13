@@ -69,27 +69,27 @@
 
 
     <script>
-            image = false;
-            url = false;
+            let image_banner = false;
+            let url_banner = false;
             $('#url_link_address').hide();
             $('#extra_name').hide();
             function imageSelectionUpdate(checked) {
-                if (false === false) {
+                if (image_banner === false) {
                     $('#extra_name').show();
-                    image = true;
+                    image_banner = true;
                 }
                 else {
-                    image = false;
+                    image_banner = false;
                     $('#extra_name').show();
                 }
             }
             function urlSelectionUpdate(checked) {
-                if (url === false) {
-                    url = true;
+                if (url_banner === false) {
+                    url_banner = true;
                     $('#url_link_address').show();
                 }
                 else {
-                    url = false;
+                    url_banner = false;
                     $('#url_link_address').hide();
                 }
             } 
@@ -98,9 +98,9 @@
             var releaseTime = $("#release_date").val();
             var closeTime = $("#closing_date").val();
             var extraName = "";
-            if (image === true) extraName = document.getElementById("input-provide-name").value;
+            if (image_banner === true) extraName = document.getElementById("input-provide-name").value;
             var linkName = "";
-            if (url === true) linkName = document.getElementById("input-provide-url").value;
+            if (url_banner === true) linkName = document.getElementById("input-provide-url").value;
             handleUploadBanner("{{ csrf_token }}", closeTime, releaseTime, extraName, linkName);
         }
         $(function() {

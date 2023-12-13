@@ -1,46 +1,49 @@
 /* exported changeImage */
-let currentImageIndex = 0;
-let hiddenImages = undefined;
-let seenImages = undefined;
-let images = undefined;
-let bannerElement = undefined;
-let bubble  = undefined;
-const currentImages = [];
+
+const eventAdvertisements = {
+    currentImageIndex: 0,
+    hiddenImages: undefined,
+    seenImages: undefined,
+    images: undefined,
+    bannerElement: undefined,
+    bubble: undefined,
+    currentImages: []
+}
 
 $(() => {
-    currentImageIndex = 0;
-    hiddenImages = getHiddenImages();
-    seenImages = [];
-    images = document.getElementsByClassName('club-banners');
-    bannerElement = document.getElementById('banner');
-    bannerElement.style.display = 'none';
-    bannerElement.style.width = '1%';
+    eventAdvertisements.currentImageIndex = 0;
+    eventAdvertisements.hiddenImages = getHiddenImages();
+    eventAdvertisements.seenImages = [];
+    eventAdvertisements.images = document.getElementsByClassName('club-banners');
+    eventAdvertisements.bannerElement = document.getElementById('banner');
+    eventAdvertisements.bannerElement.style.display = 'none';
+    eventAdvertisements.bannerElement.style.width = '1%';
 
-    bubble = document.getElementById('speech-bubble-container');
-    if (bubble !== null) {
-        bubble.style.display = 'none';
+    eventAdvertisements.bubble = document.getElementById('speech-bubble-container');
+    if (eventAdvertisements.bubble !== null) {
+        eventAdvertisements.bubble.style.display = 'none';
     }
 
 
 
-    for (let i = 0; i < images.length; i++) {
-        const className = images[i].className.split(' ')[1];
-        if (!hiddenImages.includes(className)) {
-            currentImages.push(images[i]);
+    for (let i = 0; i < eventAdvertisements.images.length; i++) {
+        const className = eventAdvertisements.images[i].className.split(' ')[1];
+        if (!eventAdvertisements.hiddenImages.includes(className)) {
+            eventAdvertisements.currentImages.push(eventAdvertisements.images[i]);
         }
         else {
-            seenImages.push(images[i]);
+            eventAdvertisements.seenImages.push(eventAdvertisements.images[i]);
         }
     }
 
-    bubble = document.getElementById('speech-bubble-container');
-    if (bubble !== null) {
-        if (currentImages.length > 0) {
+    eventAdvertisements.bubble = document.getElementById('speech-bubble-container');
+    if (eventAdvertisements.bubble !== null) {
+        if (eventAdvertisements.currentImages.length > 0) {
 
-            bubble.style.display = 'block';
+            eventAdvertisements.bubble.style.display = 'block';
         }
     }
-    images = currentImages.concat(seenImages);
+    eventAdvertisements.images = eventAdvertisements.currentImages.concat(eventAdvertisements.seenImages);
 
 
     if (Cookies.get('display-banner') === 'yes') {
@@ -54,14 +57,14 @@ function showBanners(noMove = false) {
 
     const movingUnit = document.getElementById('moving-unit');
     const bannerElement = document.getElementById('banner');
-    if (bannerElement.style.display === 'none' && images.length > 0) {
-        currentImageIndex = 0;
+    if (bannerElement.style.display === 'none' && eventAdvertisements.images.length > 0) {
+        eventAdvertisements.currentImageIndex = 0;
         Cookies.set('display-banner', 'yes');
 
-        document.getElementById('breadcrumbs').style.flexWrap = 'inherit';
+        $('#breadcrumbs').css('flex-wrap', 'inherit');
 
-        if (currentImages.length > 0 && !noMove) {
-            images[currentImageIndex].classList.add('active');
+        if (eventAdvertisements.currentImages.length > 0 && !noMove) {
+            eventAdvertisements.images[eventAdvertisements.currentImageIndex].classList.add('active');
 
             const duckdivElement = document.getElementById('moorthy-duck');
             duckdivElement.style.animation = 'rocking 2s linear infinite';
@@ -77,7 +80,7 @@ function showBanners(noMove = false) {
         else {
             bannerElement.style.width = '100%';
             bannerElement.style.display = 'block';
-            images[currentImageIndex].classList.add('active');
+            eventAdvertisements.images[eventAdvertisements.currentImageIndex].classList.add('active');
         }
         document.getElementById('triangle').style.display = 'none';
         document.getElementById('speech-bubble').style.display = 'none';
@@ -91,8 +94,8 @@ function showBanners(noMove = false) {
 
         duckdivElement.style.transform = 'rotate(0deg)';
         document.getElementById('breadcrumbs').style.flexWrap = 'wrap';
-        if (images.length > 0) {
-            images[currentImageIndex].classList.remove('active');
+        if (eventAdvertisements.images.length > 0) {
+            eventAdvertisements.images[eventAdvertisements.currentImageIndex].classList.remove('active');
         }
 
 
@@ -101,26 +104,26 @@ function showBanners(noMove = false) {
         movingUnit.style.left = '';
         movingUnit.style.right = '20%';
 
-        if (currentImages.length >0) {
-            const className = currentImages[currentImageIndex].className.split(' ')[1];
-            hiddenImages.push(className);
-            seenImages.push(currentImages[currentImageIndex]);
-            currentImageIndex = seenImages.length; // the last currentImage we were at
-            currentImages.shift();
-            images = currentImages.concat(seenImages);
+        if (eventAdvertisements.currentImages.length >0) {
+            const className = eventAdvertisements.currentImages[eventAdvertisements.currentImageIndex].className.split(' ')[1];
+            eventAdvertisements.hiddenImages.push(className);
+            eventAdvertisements.seenImages.push(eventAdvertisements.currentImages[eventAdvertisements.currentImageIndex]);
+            eventAdvertisements.currentImageIndex = eventAdvertisements.seenImages.length; // the last currentImage we were at
+            eventAdvertisements.currentImages.shift();
+            eventAdvertisements.images = eventAdvertisements.currentImages.concat(eventAdvertisements.seenImages);
 
         }
-        Cookies.set('hiddenImages', JSON.stringify(hiddenImages));
-        if (currentImages.length > 0) {
+        Cookies.set('hiddenImages', JSON.stringify(eventAdvertisements.hiddenImages));
+        if (eventAdvertisements.currentImages.length > 0) {
             document.getElementById('triangle').style.display = 'block';
             document.getElementById('speech-bubble').style.display = 'block';
         }
-        if (currentImages.length === 0) {
+        if (eventAdvertisements.currentImages.length === 0) {
 
-            bubble.style.display = 'none';
+            eventAdvertisements.bubble.style.display = 'none';
         }
         else {
-            bubble.style.display = 'block';
+            eventAdvertisements.bubble.style.display = 'block';
         }
 
 
@@ -130,37 +133,37 @@ function showBanners(noMove = false) {
 
 function changeImage(n) {
 
-    const originalIndex = currentImageIndex;
+    const originalIndex = eventAdvertisements.currentImageIndex;
 
-    if (currentImageIndex < 0 || currentImageIndex >= images.length) {
+    if (eventAdvertisements.currentImageIndex < 0 || eventAdvertisements.currentImageIndex >= eventAdvertisements.images.length) {
         console.log('Issue of index, you are out of range: ');
-        console.log(currentImageIndex)
+        console.log(eventAdvertisements.currentImageIndex)
         return;
     }
 
 
-    images[currentImageIndex].classList.remove('active');
-    if (currentImageIndex < currentImages.length) {
+    eventAdvertisements.images[eventAdvertisements.currentImageIndex].classList.remove('active');
+    if (eventAdvertisements.currentImageIndex < eventAdvertisements.currentImages.length) {
 
-        const className = currentImages[originalIndex].className.split(' ')[1];
-        hiddenImages.push(className);
-        seenImages.push(currentImages[originalIndex]);
-        currentImageIndex = seenImages.length -1;
-        currentImages.shift();
-        images = currentImages.concat(seenImages);
-        Cookies.set('hiddenImages', JSON.stringify(hiddenImages));
+        const className = eventAdvertisements.currentImages[originalIndex].className.split(' ')[1];
+        eventAdvertisements.hiddenImages.push(className);
+        eventAdvertisements.seenImages.push(eventAdvertisements.currentImages[originalIndex]);
+        eventAdvertisements.currentImageIndex = eventAdvertisements.seenImages.length -1;
+        eventAdvertisements.currentImages.shift();
+        eventAdvertisements.images = eventAdvertisements.currentImages.concat(eventAdvertisements.seenImages);
+        Cookies.set('hiddenImages', JSON.stringify(eventAdvertisements.hiddenImages));
 
     }
-    currentImageIndex += n;
+    eventAdvertisements.currentImageIndex += n;
 
-    if (currentImageIndex < 0) {
-        currentImageIndex = images.length - 1;
+    if (eventAdvertisements.currentImageIndex < 0) {
+        eventAdvertisements.currentImageIndex = eventAdvertisements.images.length - 1;
     }
-    else if (currentImageIndex >= images.length) {
-        currentImageIndex = 0;
+    else if (eventAdvertisements.currentImageIndex >= eventAdvertisements.images.length) {
+        eventAdvertisements.currentImageIndex = 0;
     }
 
-    images[currentImageIndex].classList.add('active');
+    eventAdvertisements.images[eventAdvertisements.currentImageIndex].classList.add('active');
 
 }
 

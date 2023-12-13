@@ -46,7 +46,6 @@ class GlobalView extends AbstractView {
 
         $currentDate = new \DateTime();
         foreach ($eventBannerImages as $banner) {
-            //FUTURE MIGHT NEED TO FIX SO WE ADD MID PATH
             $semiPath = FileUtils::joinPaths($this->core->getConfig()->getSubmittyPath(), "community_events", $banner->getClosingDate()->format('Y'), $banner->getFolderName());
             $pathName = FileUtils::joinPaths($semiPath, $banner->getName());
             $extraPathName = FileUtils::joinPaths($semiPath, $banner->getExtraInfo());
