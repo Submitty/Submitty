@@ -6,6 +6,7 @@ use app\libraries\Core;
 use app\models\gradeable\GradedGradeable;
 use app\models\gradeable\Submitter;
 use app\models\gradeable\Gradeable;
+use app\models\User;
 
 class GradingOrder extends AbstractModel {
     /**
@@ -158,6 +159,23 @@ class GradingOrder extends AbstractModel {
                     }
                 };
                 break;
+            case "auto":
+                $keyFn = function (Submitter $a) {
+                    if ($a->isTeam()) {
+                        return (int) $a->getId();
+                    }
+                    else {
+                        $g = $this->gradeable;
+                        $graded_gradeable = $this->core->getQueries()->getGradedGradeable($g, $a->getId());
+                        if (is_nan($graded_gradeable->getAutoGradedGradeable()->getTotalPoints())) {
+                            return -9999;
+                        }
+                        else {
+                            return (int) $graded_gradeable->getAutoGradedGradeable()->getTotalPoints();
+                        }
+                    }
+                };
+                break;
             case "random":
                 $keyFn = function (Submitter $a) {
                     //So it's (pseudo) randomly ordered, and will be different for each gradeable
@@ -177,7 +195,12 @@ class GradingOrder extends AbstractModel {
             $directionMult = ($direction === "DESC" ? -1 : 1);
 
             usort($section, function (Submitter $a, Submitter $b) use ($keys, $directionMult) {
-                return strcmp($keys[$a->getId()], $keys[$b->getId()]) * $directionMult;
+                if (is_int($keys[$a->getId()]) && is_int($keys[$b->getId()])) {
+                    return ($keys[$a->getId()] <=> $keys[$b->getId()]) * $directionMult;
+                }
+                else {
+                    return strcmp($keys[$a->getId()], $keys[$b->getId()]) * $directionMult;
+                }
             });
         }
         unset($section);
@@ -599,6 +622,12 @@ class GradingOrder extends AbstractModel {
         }
         elseif ($sort == 'id' && $direction == 'DESC') {
             $msg = 'ID Descending';
+        }
+        elseif ($sort == 'auto' && $direction == 'ASC') {
+            $msg = 'Auto Grading Ascending';
+        }
+        elseif ($sort == 'auto' && $direction == 'DESC') {
+            $msg = 'Auto Grading Descending';
         }
         elseif ($sort == 'random') {
             $msg = 'Randomized';
