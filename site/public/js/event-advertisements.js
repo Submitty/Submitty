@@ -1,5 +1,37 @@
 /* exported changeImage */
 
+
+function alignRightEdgeWithLeftEdge(element1Id, element2Id) {
+    const element1 = document.getElementById(element1Id);
+    const element2 = document.getElementById(element2Id);
+    const bubbleContainer = document.getElementById('speech-bubble-container');
+
+    if (element1 && element2) {
+        element1.style.position = 'fixed';
+        element1.style.top = '0';
+        element1.style.right = '0';
+
+        // Get the left edge position of element2
+        const element2LeftEdge = element2.offsetWidth;
+        const element1LeftEdge = element1.offsetWidth;
+        const totalWidth = element2LeftEdge;
+
+        element1.style.marginRight = `${totalWidth}px`;
+
+        if (bubbleContainer) {
+            bubbleContainer.style.position = 'fixed';
+            bubbleContainer.style.top = '0';
+            bubbleContainer.style.right = '0';
+            const bubbleWidth = totalWidth + element1LeftEdge;
+            bubbleContainer.style.marginRight = `${bubbleWidth}px`;
+        }
+
+    }
+    else {
+        console.error('One or both elements not found');
+    }
+}
+
 const eventAdvertisements = {
     currentImageIndex: 0,
     hiddenImages: undefined,
