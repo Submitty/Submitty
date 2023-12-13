@@ -85,7 +85,7 @@ class WebRouter {
 
     /**
      * If a request is a post request check to see if its less than the post_max_size
-     * @return MultiResponse|bool
+     * @return JsonResponse|bool
      */
     private function checkPostMaxSize(Request $request) {
         if ($request->isMethod('POST')) {
@@ -309,7 +309,7 @@ class WebRouter {
     /**
      * Check if the user needs a redirection depending on their login status.
      * @param bool $logged_in
-     * @return MultiResponse|bool
+     * @return RedirectResponse|bool
      */
     private function loginRedirectCheck(bool $logged_in) {
         if (!$logged_in && !str_ends_with($this->parameters['_controller'], 'AuthenticationController')) {
