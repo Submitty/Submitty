@@ -1297,7 +1297,7 @@ class ForumController extends AbstractController {
         $post_id = $_POST["post_id"];
         $result = $this->core->getQueries()->getPostOldThread($post_id);
         $result["all_categories_list"] = $this->core->getQueries()->getCategories();
-        if ($result["merged_thread_id"] == -1) {
+        if ($result["merged_thread_id"] === -1) {
             $post = $this->core->getQueries()->getPost($post_id);
             $result["categories_list"] = $this->core->getQueries()->getCategoriesIdForThread($post["thread_id"]);
             $result["title"] = $this->core->getQueries()->getThreadTitle($post["thread_id"]);
@@ -1324,7 +1324,7 @@ class ForumController extends AbstractController {
         $GLOBALS['totalAttachments'] = 0;
         $edit_id = 0;
         foreach ($older_posts as $post) {
-            $_post['user'] = !$this->modifyAnonymous($oc) && $oc == $post["edit_author"] && $anon ? '' : $post["edit_author"];
+            $_post['user'] = !$this->modifyAnonymous($oc) && $oc === $post["edit_author"] && $anon ? '' : $post["edit_author"];
             $_post['content'] = $this->core->getOutput()->renderTwigTemplate("forum/RenderPost.twig", [
                 "post_content" => $post["content"],
                 "render_markdown" => false,
@@ -1341,7 +1341,7 @@ class ForumController extends AbstractController {
             $output[] = $_post;
             $edit_id++;
         }
-        if (count($output) == 0) {
+        if (count($output) === 0) {
             // Current post
             $_post['user'] = !$this->modifyAnonymous($oc) && $anon ? '' : $oc;
             $_post['content'] = $this->core->getOutput()->renderTwigTemplate("forum/RenderPost.twig", [
@@ -1442,7 +1442,7 @@ class ForumController extends AbstractController {
                 $users[$user]["total_threads"] = 0;
                 $users[$user]["num_deleted_posts"] = count($this->core->getQueries()->getDeletedPostsByUser($user));
             }
-            if ($posts[$i]["parent_id"] == -1) {
+            if ($posts[$i]["parent_id"] === -1) {
                 $users[$user]["total_threads"]++;
             }
             $users[$user]["posts"][] = $content;
