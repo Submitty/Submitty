@@ -113,54 +113,54 @@
         dropzone.addEventListener("drop", dropWithMultipleZips, false);
 
         const upload_fp = flatpickr('.upload_picker', {
-                    plugins: [ShortcutButtonsPlugin(
+            plugins: [ShortcutButtonsPlugin(
+                {
+                    button: [
                         {
-                            button: [
-                                {
-                                    label: "Beginning of time"
-                                },
-                                {
-                                    label: "Now"
-                                },
-                                {
-                                    label: "Tomorrow"
-                                },
-                                {
-                                    label: "End of time"
-                                }
-                            ],
-                            onClick: (index, fp) => {
-                                let date;
-                                switch (index) {
-                                    case 0:
-                                        date = new Date("1001-01-01 00:00:00");
-                                        break;
-                                    case 1:
-                                        date = new Date();
-                                        break;
-                                    case 2:
-                                        date = new Date();
-                                        date.setDate(date.getDate() + 1);
-                                        break;
-                                    case 3:
-                                        date = new Date("9998-01-01 00:00:00");
-                                        break;
-                                }
-                                fp.setDate(date);
-                            }
+                            label: "Beginning of time"
+                        },
+                        {
+                            label: "Now"
+                        },
+                        {
+                            label: "Tomorrow"
+                        },
+                        {
+                            label: "End of time"
                         }
-                    )],
-                    appendTo: document.getElementById('upload-banner'),
-                    allowInput: true,
-                    enableTime: true,
-                    enableSeconds: true,
-                    time_24hr: true,
-                    dateFormat: "Y-m-d H:i:S",
-                    onReady: (a, b, fp) => {
-                    fp.calendarContainer.firstChild.childNodes[1].firstChild.firstChild.setAttribute('aria-label', 'Month');
-                    fp.calendarContainer.childNodes[2].childNodes[4].firstChild.setAttribute('aria-label', 'Seconds');
+                    ],
+                    onClick: (index, fp) => {
+                        let date;
+                        switch (index) {
+                            case 0:
+                                date = new Date("1001-01-01 00:00:00");
+                                break;
+                            case 1:
+                                date = new Date();
+                                break;
+                            case 2:
+                                date = new Date();
+                                date.setDate(date.getDate() + 1);
+                                break;
+                            case 3:
+                                date = new Date("9998-01-01 00:00:00");
+                                break;
+                        }
+                        fp.setDate(date);
                     }
-                    });
+                }
+            )],
+            appendTo: document.getElementById('upload-banner'),
+            allowInput: true,
+            enableTime: true,
+            enableSeconds: true,
+            time_24hr: true,
+            dateFormat: "Y-m-d H:i:S",
+            onReady: (a, b, fp) => {
+            fp.calendarContainer.firstChild.childNodes[1].firstChild.firstChild.setAttribute('aria-label', 'Month');
+            fp.calendarContainer.childNodes[2].childNodes[4].firstChild.setAttribute('aria-label', 'Seconds');
+            }
+            });
         $('.form-body').on('scroll', function() {
             upload_fp._positionCalendar();
         });
