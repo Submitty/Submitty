@@ -1357,7 +1357,7 @@ class ForumController extends AbstractController {
         $output = [];
         $output['type'] = $this->core->getQueries()->toggleLikes($_POST['post_id'], $_POST['thread_id'], $_POST['current_user']);
 
-        if ($output["type"] === false) {
+        if ($output["type"] === "false") {
             // return $this->core->getOutput()->renderJsonFail("Catch Fail in Query");
             return JsonResponse::getErrorResponse('Catch Fail in Query');
         }
