@@ -250,10 +250,6 @@ function newOverwriteCourseMaterialForm(clashing_names, is_link, is_edit_form) {
     form.find('.form-body').scrollTop(0);
 }
 
-
-
-
-
 function newUploadImagesForm() {
     $('.popup-form').css('display', 'none');
     var form = $("#upload-images-form");
@@ -299,7 +295,10 @@ function newUploadBanner() {
     var form = $("#upload-banner");
 
     $('[name="existing-file-list"]', form).html('');
-    $('[name="existing-file-list"]', form).append('<b>'+JSON.stringify(files)+'</b>');
+
+    var stringifiedFiles = $("<b></b>").text(JSON.stringify(files));
+    $('[name="existing-file-list"]', form).append(stringifiedFiles);
+
 
     form.css("display", "block");
     captureTabInModal("upload-banner");
