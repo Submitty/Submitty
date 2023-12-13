@@ -748,7 +748,6 @@ SQL;
 
     public function getUpduckInfoForPosts(array $post_ids): array {
         $placeholders = $this->createParameterList(count($post_ids));
-
         $sql = "SELECT post_id, COUNT(*) AS cnt FROM forum_upducks WHERE post_id IN {$placeholders} GROUP BY post_id";
 
         $this->course_db->query($sql, $post_ids);
