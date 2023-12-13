@@ -403,7 +403,6 @@ function socketNewOrEditThreadHandler(thread_id, edit=false) {
                 else {
                     const original_thread = $(`[data-thread_id="${thread_id}"]`);
                     $(new_thread).insertBefore(original_thread);
-                    original_thread.next().remove();
                     original_thread.remove();
                 }
                 // eslint-disable-next-line eqeqeq
