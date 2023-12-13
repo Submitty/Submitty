@@ -71,7 +71,7 @@ class GlobalCalendarInfo extends AbstractModel {
     }
 
     /**
-     * @return array<string, array<string,bool|string>>>
+     * @return array<string, array<string,bool|string>>
      */
     public function getGlobalItemsByDate(): array {
         return $this->items_by_date;
