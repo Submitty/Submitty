@@ -49,6 +49,8 @@ function showBanners(noMove = false) {
     const movingUnit = document.getElementById('moving-unit');
     const bannerElement = document.getElementById('banner');
     if (bannerElement.style.display === 'none' && eventAdvertisements.images.length > 0) {
+
+
         eventAdvertisements.currentImageIndex = 0;
         Cookies.set('display-banner', 'yes');
 
@@ -61,6 +63,9 @@ function showBanners(noMove = false) {
             duckdivElement.style.animation = 'rocking 2s linear infinite';
 
             setTimeout(() => {
+                duck = document.getElementById('moorthy-duck')
+                duck.style.position = 'relative';
+                duck.style.marginRight = '0px';
                 bannerElement.style.width = '100%';
                 bannerElement.style.display = 'block';
                 movingUnit.style.left = '10%';
@@ -69,6 +74,9 @@ function showBanners(noMove = false) {
 
         }
         else {
+            duck = document.getElementById('moorthy-duck')
+            duck.style.position = 'relative';
+            duck.style.marginRight = '0px';
             bannerElement.style.width = '100%';
             bannerElement.style.display = 'block';
             eventAdvertisements.images[eventAdvertisements.currentImageIndex].classList.add('active');
@@ -77,7 +85,7 @@ function showBanners(noMove = false) {
         document.getElementById('speech-bubble').style.display = 'none';
     }
     else {
-
+        alignRightEdgeWithLeftEdge('moorthy-duck', 'logo-box');
         Cookies.set('display-banner', 'no');
         const duckdivElement = document.getElementById('moorthy-duck');
         movingUnit.style.animation = 'none';

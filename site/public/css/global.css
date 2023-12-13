@@ -178,7 +178,6 @@ footer .footer-separator {
 
 #moorthy-duck {
     display: block;
-    margin-right: -30px;
 }
 
 @media (max-width: 541px) {
@@ -326,7 +325,6 @@ footer .footer-separator {
     top: 7px;
     font-size: 10px;
 }
-
 #speech-bubble-container {
     display: none;
 }
