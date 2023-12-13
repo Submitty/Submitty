@@ -279,6 +279,7 @@ To remove a curve simply blank all boxes."></i>
         $("#user_id").autocomplete({
             source: {{ student_full|raw }}
         });
+        var studentFullData = {{ student_full|raw }};
 
         var old_index;
         var new_index;

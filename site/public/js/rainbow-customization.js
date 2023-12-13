@@ -280,9 +280,9 @@ function getPlagiarism() {
 
     for (let i = 0; i < rows.length; i++) {
         const row = rows[i];
-        const user = row.cells[0].innerHTML;
-        const gradeable = row.cells[1].innerHTML;
-        const penalty = parseFloat(row.cells[2].innerHTML);
+        const user = row.cells[0].textContent;
+        const gradeable = row.cells[1].textContent;
+        const penalty = parseFloat(row.cells[2].textContent);
 
         plagiarismData.push({
             user: user,
@@ -302,6 +302,12 @@ function addToTable() {
     // Check for empty fields
     if (USERID === '' || gradeable === '' || penalty === '') {
         alert('Please fill in all the fields.');
+        return;
+    }
+
+    // eslint-disable-next-line no-undef
+    if (!studentFullData.includes(USERID)) {
+        alert('Invalid User ID. Please enter a valid one.');
         return;
     }
 
