@@ -1524,7 +1524,11 @@ function openFrame(html_file, url_file, num, pdf_full_panel=true, panel="submiss
   if (!iframe.hasClass('open') || iframe.hasClass('full_panel')) {
     let iframeId = "file_viewer_" + num + "_iframe";
     let directory = "";
-    if (url_file.includes("submissions")) {
+    if (url_file.includes("user_assignment_settings.json")) {
+        directory = "submission_versions";
+        url_file = url_file;
+    }
+    else if (url_file.includes("submissions")) {
       directory = "submissions";
       url_file = url_file;
     }

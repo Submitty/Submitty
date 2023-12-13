@@ -165,7 +165,7 @@
 
                 const log = $(`#${gradeable_id}_${config_id}_table_row`).next().find('pre');
                 const stickToBottom = log[0].scrollHeight - log.scrollTop() - log.outerHeight() < 1;
-                log.text(data.data);
+                log.html(data.data);
 
                 if (stickToBottom) {
                     log.scrollTop(log[0].scrollHeight);
