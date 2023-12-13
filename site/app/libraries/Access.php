@@ -257,8 +257,6 @@ class Access {
             ]
         ];
 
-
-
         $this->directories["attachments"] = [
             "base" => $this->core->getConfig()->getCoursePath() . "/attachments",
             "subparts" => ["gradeable", "submitter", "grader"],
