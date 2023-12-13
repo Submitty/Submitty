@@ -6,9 +6,9 @@
 
 # SUBMITTY REPOS
 export AnalysisTools_Version=v22.03.00
-export AnalysisToolsTS_Version=v23.08.00
+export AnalysisToolsTS_Version=v23.10.00
 export Lichen_Version=v23.09.00
-export RainbowGrades_Version=v23.09.00
+export RainbowGrades_Version=v23.12.00
 export Tutorial_Version=v23.09.00
 export SysadminTools_Version=v23.08.00
 export Localization_Version=v23.08.02
