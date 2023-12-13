@@ -60,8 +60,6 @@ class GlobalView extends AbstractView {
                 continue;
             }
 
-
-
             $extraFile = base64_encode(file_get_contents($extraPathName));
 
             $images_data_array[] = [

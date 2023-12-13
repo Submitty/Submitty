@@ -166,8 +166,6 @@ function addFilesFromInput(part, check_duplicate_zip=true) {
     $(`#input-file${part}`).val('');
 }
 
-
-
 /**
  * @param csrf_token
  */
@@ -180,7 +178,7 @@ function handleUploadBanner(csrf_token, closeTime, releaseTime, extraName, linkN
     formData.append('extra_name', extraName);
     formData.append('link_name', linkName);
     file_array.forEach((subArray, i) => {
-        subArray.forEach((file, j) => {
+        subArray.forEach((file, _) => {
             if (file.name.includes("'") || file.name.includes('"')) {
                 alert(`ERROR! You may not use quotes in your filename: ${file.name}`);
                 return;
@@ -203,8 +201,7 @@ function handleUploadBanner(csrf_token, closeTime, releaseTime, extraName, linkN
     
             formData.append(`files${i + 1}[]`, file, file.name);
         });
-    });
-    
+    });    
     $.ajax({
         url: buildUrl(['banner', 'upload']),
         data: formData,
@@ -1366,8 +1363,6 @@ function handleUploadCourseMaterials(csrf_token, expand_zip, hide_from_students,
         },
     });
 }
-
-
 
 /**
  * @param csrf_token

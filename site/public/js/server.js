@@ -286,11 +286,8 @@ function newUploadCourseMaterialsForm() {
 }
 
 function newUploadBanner() {
-
     createArray(1);
-
     var files = [];
-
     $('.popup-form').css('display', 'none');
     var form = $("#upload-banner");
 
@@ -298,7 +295,6 @@ function newUploadBanner() {
 
     const stringifiedFiles = $("<b></b>").text(JSON.stringify(files));
     $('[name="existing-file-list"]', form).append(stringifiedFiles);
-
 
     form.css("display", "block");
     captureTabInModal("upload-banner");
@@ -520,7 +516,6 @@ function captureTabInModal(formName, resetFocus=true){
             releaseTabFromModal(formName);
         }
     });
-  
     observer.observe(form[0], { attributes: true, childList: true });
 }
 

@@ -16,25 +16,20 @@ $(() => {
     eventAdvertisements.seenImages = [];
     eventAdvertisements.images = document.getElementsByClassName('club-banners');
     eventAdvertisements.bannerElement = document.getElementById('banner');
-    eventAdvertisements.bannerElement.style.display = 'none';
-    eventAdvertisements.bannerElement.style.width = '1%';
 
     eventAdvertisements.bubble = document.getElementById('speech-bubble-container');
     if (eventAdvertisements.bubble !== null) {
         eventAdvertisements.bubble.style.display = 'none';
     }
 
-
-
-    for (let i = 0; i < eventAdvertisements.images.length; i++) {
-        const className = eventAdvertisements.images[i].className.split(' ')[1];
+    eventAdvertisements.images.forEach((image) => {
+        const className = image.className.split(' ')[1];
         if (!eventAdvertisements.hiddenImages.includes(className)) {
-            eventAdvertisements.currentImages.push(eventAdvertisements.images[i]);
+            eventAdvertisements.currentImages.push(image);
+        } else {
+            eventAdvertisements.seenImages.push(image);
         }
-        else {
-            eventAdvertisements.seenImages.push(eventAdvertisements.images[i]);
-        }
-    }
+    });
 
     eventAdvertisements.bubble = document.getElementById('speech-bubble-container');
     if (eventAdvertisements.bubble !== null) {
@@ -54,7 +49,6 @@ $(() => {
     }
 });
 function showBanners(noMove = false) {
-
     const movingUnit = document.getElementById('moving-unit');
     const bannerElement = document.getElementById('banner');
     if (bannerElement.style.display === 'none' && eventAdvertisements.images.length > 0) {
@@ -125,23 +119,17 @@ function showBanners(noMove = false) {
         else {
             eventAdvertisements.bubble.style.display = 'block';
         }
-
-
     }
 
 }
 
 function changeImage(n) {
-
     const originalIndex = eventAdvertisements.currentImageIndex;
-
     if (eventAdvertisements.currentImageIndex < 0 || eventAdvertisements.currentImageIndex >= eventAdvertisements.images.length) {
         console.log('Issue of index, you are out of range: ');
         console.log(eventAdvertisements.currentImageIndex)
         return;
     }
-
-
     eventAdvertisements.images[eventAdvertisements.currentImageIndex].classList.remove('active');
     if (eventAdvertisements.currentImageIndex < eventAdvertisements.currentImages.length) {
 
@@ -152,7 +140,6 @@ function changeImage(n) {
         eventAdvertisements.currentImages.shift();
         eventAdvertisements.images = eventAdvertisements.currentImages.concat(eventAdvertisements.seenImages);
         Cookies.set('hiddenImages', JSON.stringify(eventAdvertisements.hiddenImages));
-
     }
     eventAdvertisements.currentImageIndex += n;
 
@@ -166,9 +153,6 @@ function changeImage(n) {
     eventAdvertisements.images[eventAdvertisements.currentImageIndex].classList.add('active');
 
 }
-
-
-
 
 function getHiddenImages() {
     const hiddenImagesCookie = Cookies.get('hiddenImages');

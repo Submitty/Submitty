@@ -63,37 +63,31 @@ class BannerController extends AbstractController {
         $extra_name = $_POST['extra_name'];
         $link_name = $_POST['link_name'];
 
-        if ($extra_name === "") {
-            if ($count_item !== 1) {
-                return JsonResponse::getErrorResponse("You can only have one banner submitted.");
-            }
+        if ($extra_name === "" && $count_item !== 1) {
+            return JsonResponse::getErrorResponse("You can only have one banner submitted.");
         }
-        else {
-            if ($count_item > 2) {
-                return JsonResponse::getErrorResponse("Can't have more than two banners submitted.");
-            }
+        else if ($count_item > 2) {
+            return JsonResponse::getErrorResponse("Can't have more than two banners submitted.");
         }
 
 
         $specificPath = $close_date->format("Y");
         $actual_banner_name = "";
 
-        for ($j = 0; $j < $count_item; $j++) {
-            if ($uploaded_files['name'][$j] != $extra_name) {
-                $actual_banner_name = $uploaded_files['name'][$j];
+        foreach ($uploaded_files['name'] as $uploaded_file_name) {
+            if ($uploaded_file_name != $extra_name) {
+                $actual_banner_name = $uploaded_file_name;
+                break; // Exit the loop once a valid name is found
             }
         }
-
+    
         $currentDate = new \DateTime();
         $folder_made_name = $actual_banner_name . "Folder" . $currentDate->format('Y-m-d_H-i-s');
 
 
         $full_path = FileUtils::joinPaths($upload_path, $specificPath, $folder_made_name);
         $full_path1= FileUtils::joinPaths($full_path, $actual_banner_name);
-        
-
         $full_path1 = $this->core->getAccess()->resolveDirPath("community_events", $full_path1);
-        
 
         $full_path2 = "empty";
         if ($extra_name !== "") {
@@ -104,7 +98,6 @@ class BannerController extends AbstractController {
         if ($full_path1 === false || $full_path2 === false) {
             return JsonResponse::getErrorResponse("Path is bad.");
         }
-
 
         if (!is_dir($full_path)) {
             // Create a new folder for the current month
@@ -122,14 +115,11 @@ class BannerController extends AbstractController {
                 $all_match = true;
             }
 
-
             if (is_uploaded_file($uploaded_files["tmp_name"][$j])) {
                 $dst = FileUtils::joinPaths($full_path, $uploaded_files["name"][$j]);
 
                 if (!$all_match) {
                     [$width, $height] = getimagesize($uploaded_files["tmp_name"][$j]);
-
-
                     if ($width > 800 || $height > 100) {
                         return JsonResponse::getErrorResponse("File dimensions must be no more than 800x100 pixels.");
                     }
@@ -154,7 +144,6 @@ class BannerController extends AbstractController {
                 return JsonResponse::getErrorResponse("Failed to delete the uploaded file '{$uploaded_files['name'][$j]}' from temporary storage.");
             }
 
-
             if ($all_match) {
                 continue;
             }
@@ -177,11 +166,8 @@ class BannerController extends AbstractController {
      * @Route("/banner/delete", methods={"POST"})
      */
     public function ajaxDeleteEventFiles(): JsonResponse {
-
         $entity_manager = $this->core->getSubmittyEntityManager();
-
         $event_repository = $entity_manager->getRepository(BannerImage::class);
-
         $event_items = $event_repository->findBy(['name' => $_POST['name'] ]);
         if (count($event_items) === 0) {
             $error_message = "Banner item with name '" . $_POST['name'] . "' not found in the database.";
@@ -189,17 +175,11 @@ class BannerController extends AbstractController {
         }
 
         $event_item = $event_items[0];
-
-
         $upload_path =  FileUtils::joinPaths($this->core->getConfig()->getSubmittyPath(), "community_events");
-
-
         $releaseDateInt = $event_item->getClosingDate();
         $folder_name = $releaseDateInt->format('Y');
         $event_name = $event_item->getName();
-
         $full_path = FileUtils::joinPaths($upload_path, $folder_name, $event_item->getFolderName(), $event_name);
-
         $full_path = $this->core->getAccess()->resolveDirPath("community_events", $full_path);
 
         if ($full_path === false) {
@@ -216,8 +196,6 @@ class BannerController extends AbstractController {
         else {
             return JsonResponse::getErrorResponse("File not found.");
         }
-
-
         return JsonResponse::getSuccessResponse("Successfully uploaded!");
     }
 }
