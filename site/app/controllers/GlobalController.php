@@ -467,22 +467,16 @@ class GlobalController extends AbstractController {
     }
 
 
-//    public function calculateHanukkahDate(int $year): string {
-//        $gregorianDate = gregoriantojd(12, 25, $year);
-//        $dayOfWeek = jddayofweek($gregorianDate);
-//        $daysToAdd = 7 - $dayOfWeek + 1;
-//        $hanukkahDate = $gregorianDate + $daysToAdd;
-//        return jdtogregorian($hanukkahDate);
-//    }
+    public function calculateHanukkahDate(int $year): \DateTime {
+        // This is the Hanukkah in civil year
+        $startdate = jewishtojd(3, 24, $year + 3761);
+        $gregorianDate = \DateTime::createFromFormat('m/d/Y', jdtogregorian($startdate));
 
-//    public function calculateHanukkahDate(int $year): \DateTime {
-//        $gregorianDate = gregoriantojd(12, 25, $year);
-//        $dayOfWeek = jddayofweek($gregorianDate);
-//        $daysToAdd = 7 - $dayOfWeek + 1;
-//        $hanukkahDate = $gregorianDate + $daysToAdd;
-//        return \DateTime::createFromFormat('m/d/Y', jdtogregorian($hanukkahDate));
-//    }
+        // Set the time to 4:00 PM for approx sunfall
+        $gregorianDate->setTime(16, 0, 0);
 
+        return $gregorianDate;
+    }
 
 
 
@@ -493,20 +487,22 @@ class GlobalController extends AbstractController {
         $month = (int) $now->format('n');
         $year = $now->format('Y');
         $yearint = (int) $now->format('Y');
-
+        $hour = (int) $now->format('G');
+        $minute = (int) $now->format('i');
+        $second = (int) $now->format('s');
         switch ($month) {
             case 12:
                 //December (Christmas, Hanukkah)
-//                $hanukkahDateTime = $this->calculateHanukkahDate($yearint);
-//                $dayOfHanukkah = $day - (int) $hanukkahDateTime->format('j') + 1;
-//                var_dump($yearint);
-//                var_dump($hanukkahDateTime);
-//                var_dump($dayOfHanukkah);
 
-//                if ($dayOfHanukkah >= 1 && $dayOfHanukkah <= 8) {
-                if ($day >= 7 && $day <= 15) {
+                $hanukkahStartDateTime = $this->calculateHanukkahDate($yearint);
+                $hanukkahEndDateTime = $this->calculateHanukkahDate($yearint);
+                $hanukkahEndDateTime->modify('+8 days');
+
+                if ($now >= $hanukkahStartDateTime && $now <= $hanukkahEndDateTime) {
                     // Select the menorah duck image based on the day of Hanukkah
-                    $datecounter = $day - 6;
+                    $datecounter = (int) $now->diff($hanukkahStartDateTime)->format('%a') + 1;
+                    // Ensure datecounter is between 1 and 8
+                    $datecounter = max(1, min(8, $datecounter));
                     $menorah_duck = 'moorthy_duck/menorah-duck/' . $datecounter . '.svg';
                     $decemberImages = ['moorthy_duck/12-December.svg', $menorah_duck];
                 }
