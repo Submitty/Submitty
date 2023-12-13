@@ -193,6 +193,7 @@ hr {
 /* stylelint-disable-next-line selector-class-pattern */
 .rg_info_message {
     margin-bottom: 10px;
+    max-width: 800px;
 }
 
 /* stylelint-disable-next-line selector-id-pattern */
