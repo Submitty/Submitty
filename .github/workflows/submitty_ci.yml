@@ -413,6 +413,27 @@ jobs:
           working-directory: ${{env.SUBMITTY_REPOSITORY}}/site
           browser: chrome
 
+      - name: Setup HTTP/2
+        run: |
+          cd $SUBMITTY_REPOSITORY
+          if [ -f .setup/dev-upgrade-h2.sh ]; then
+            sudo sed -e "s/:80/:443/g" --in-place /etc/apache2/sites-available/submitty.conf
+            sudo -E env "PATH=$PATH" bash .setup/dev-upgrade-h2.sh up --i-know-what-i-am-doing-please-go-ahead \
+              && echo "Setup OK"  \
+              || {
+                echo "::warning::Setup Failed"
+                sudo sed -e "s/:443/:80/g" --in-place /etc/apache2/sites-available/submitty.conf
+              }
+          else
+            echo "Could not find dev-upgrade-h2.sh, skipping"
+          fi
+
+      - name: Test HTTP/2 Connection
+        run: |
+          http_ver=$(curl -ksI https://localhost -o/dev/null -w "%{http_version}\n")
+          [ "$http_ver" = "2" ] && echo "Pass" || echo "::warning::Failed"
+
+
       - uses: actions/upload-artifact@v3
         if: failure()
         with:
