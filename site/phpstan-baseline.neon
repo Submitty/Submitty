@@ -117,6 +117,11 @@ parameters:
 			path: app/controllers/AuthenticationController.php
 
 		-
+			message: "#^Loose comparison via \"\\=\\=\" is not allowed\\.$#"
+			count: 1
+			path: app/controllers/AuthenticationController.php
+
+		-
 			message: "#^Method app\\\\controllers\\\\AuthenticationController\\:\\:checkLogin\\(\\) has parameter \\$old with no type specified\\.$#"
 			count: 1
 			path: app/controllers/AuthenticationController.php
@@ -134,6 +139,11 @@ parameters:
 		-
 			message: "#^PHPDoc tag @var above a method has no effect\\.$#"
 			count: 2
+			path: app/controllers/AuthenticationController.php
+
+		-
+			message: "#^PHPDoc tag @var with type app\\\\repositories\\\\VcsAuthTokenRepository is not subtype of type app\\\\repositories\\\\VcsAuthTokenRepository\\<app\\\\entities\\\\VcsAuthToken\\>\\.$#"
+			count: 1
 			path: app/controllers/AuthenticationController.php
 
 		-
@@ -162,6 +172,11 @@ parameters:
 			path: app/controllers/DockerInterfaceController.php
 
 		-
+			message: "#^Loose comparison via \"\\=\\=\" is not allowed\\.$#"
+			count: 1
+			path: app/controllers/DockerInterfaceController.php
+
+		-
 			message: "#^Only booleans are allowed in a negated boolean, int given\\.$#"
 			count: 1
 			path: app/controllers/DockerInterfaceController.php
@@ -170,6 +185,16 @@ parameters:
 			message: "#^Only booleans are allowed in \\|\\|, int given on the left side\\.$#"
 			count: 1
 			path: app/controllers/DockerInterfaceController.php
+
+		-
+			message: "#^Parameter \\#3 \\$value of function curl_setopt expects bool, int given\\.$#"
+			count: 1
+			path: app/controllers/DockerInterfaceController.php
+
+		-
+			message: "#^PHPDoc tag @var with type app\\\\repositories\\\\email\\\\EmailRepository is not subtype of type app\\\\repositories\\\\email\\\\EmailRepository\\<app\\\\entities\\\\email\\\\EmailEntity\\>\\.$#"
+			count: 4
+			path: app/controllers/EmailStatusController.php
 
 		-
 			message: "#^Call to function in_array\\(\\) requires parameter \\#3 to be set\\.$#"
@@ -183,6 +208,11 @@ parameters:
 
 		-
 			message: "#^Left side of && is always true\\.$#"
+			count: 1
+			path: app/controllers/GlobalController.php
+
+		-
+			message: "#^Loose comparison via \"\\!\\=\" is not allowed\\.$#"
 			count: 1
 			path: app/controllers/GlobalController.php
 
@@ -318,6 +348,11 @@ parameters:
 			path: app/controllers/ManageSessionsController.php
 
 		-
+			message: "#^PHPDoc tag @var with type app\\\\repositories\\\\SessionRepository is not subtype of type app\\\\repositories\\\\SessionRepository\\<app\\\\entities\\\\Session\\>\\.$#"
+			count: 3
+			path: app/controllers/ManageSessionsController.php
+
+		-
 			message: """
 				#^Call to deprecated method JsonOnlyResponse\\(\\) of class app\\\\libraries\\\\response\\\\MultiResponse\\:
 				should not be used, just return JsonResponse directly$#
@@ -328,6 +363,16 @@ parameters:
 		-
 			message: "#^Call to function in_array\\(\\) requires parameter \\#3 to be set\\.$#"
 			count: 5
+			path: app/controllers/MiscController.php
+
+		-
+			message: "#^Loose comparison via \"\\!\\=\" is not allowed\\.$#"
+			count: 1
+			path: app/controllers/MiscController.php
+
+		-
+			message: "#^Loose comparison via \"\\=\\=\" is not allowed\\.$#"
+			count: 2
 			path: app/controllers/MiscController.php
 
 		-
@@ -496,6 +541,11 @@ parameters:
 			path: app/controllers/MiscController.php
 
 		-
+			message: "#^Loose comparison via \"\\=\\=\" is not allowed\\.$#"
+			count: 1
+			path: app/controllers/NavigationController.php
+
+		-
 			message: "#^Method app\\\\controllers\\\\NavigationController\\:\\:navigationPage\\(\\) has no return type specified\\.$#"
 			count: 1
 			path: app/controllers/NavigationController.php
@@ -526,6 +576,11 @@ parameters:
 
 		-
 			message: "#^Construct empty\\(\\) is not allowed\\. Use more strict comparison\\.$#"
+			count: 1
+			path: app/controllers/NotificationController.php
+
+		-
+			message: "#^Loose comparison via \"\\=\\=\" is not allowed\\.$#"
 			count: 1
 			path: app/controllers/NotificationController.php
 
@@ -576,6 +631,16 @@ parameters:
 		-
 			message: "#^Construct empty\\(\\) is not allowed\\. Use more strict comparison\\.$#"
 			count: 23
+			path: app/controllers/OfficeHoursQueueController.php
+
+		-
+			message: "#^Loose comparison via \"\\!\\=\" is not allowed\\.$#"
+			count: 2
+			path: app/controllers/OfficeHoursQueueController.php
+
+		-
+			message: "#^Loose comparison via \"\\=\\=\" is not allowed\\.$#"
+			count: 2
 			path: app/controllers/OfficeHoursQueueController.php
 
 		-
@@ -704,6 +769,16 @@ parameters:
 			path: app/controllers/PollController.php
 
 		-
+			message: "#^PHPDoc tag @var with type app\\\\repositories\\\\poll\\\\OptionRepository is not subtype of type app\\\\repositories\\\\poll\\\\OptionRepository\\<app\\\\entities\\\\poll\\\\Option\\>\\.$#"
+			count: 2
+			path: app/controllers/PollController.php
+
+		-
+			message: "#^PHPDoc tag @var with type app\\\\repositories\\\\poll\\\\PollRepository is not subtype of type app\\\\repositories\\\\poll\\\\PollRepository\\<app\\\\entities\\\\poll\\\\Poll\\>\\.$#"
+			count: 5
+			path: app/controllers/PollController.php
+
+		-
 			message: "#^Construct empty\\(\\) is not allowed\\. Use more strict comparison\\.$#"
 			count: 2
 			path: app/controllers/SelfRejoinController.php
@@ -732,6 +807,11 @@ parameters:
 			path: app/controllers/UserProfileController.php
 
 		-
+			message: "#^Loose comparison via \"\\=\\=\" is not allowed\\.$#"
+			count: 1
+			path: app/controllers/UserProfileController.php
+
+		-
 			message: "#^Call to function array_search\\(\\) requires parameter \\#3 to be set\\.$#"
 			count: 1
 			path: app/controllers/admin/AdminGradeableController.php
@@ -754,6 +834,16 @@ parameters:
 		-
 			message: "#^For loop initial assignment overwrites variable \\$x\\.$#"
 			count: 2
+			path: app/controllers/admin/AdminGradeableController.php
+
+		-
+			message: "#^Loose comparison via \"\\!\\=\" is not allowed\\.$#"
+			count: 3
+			path: app/controllers/admin/AdminGradeableController.php
+
+		-
+			message: "#^Loose comparison via \"\\=\\=\" is not allowed\\.$#"
+			count: 10
 			path: app/controllers/admin/AdminGradeableController.php
 
 		-
@@ -1126,6 +1216,11 @@ parameters:
 			path: app/controllers/admin/AutogradingConfigController.php
 
 		-
+			message: "#^Loose comparison via \"\\=\\=\" is not allowed\\.$#"
+			count: 4
+			path: app/controllers/admin/AutogradingConfigController.php
+
+		-
 			message: "#^Only booleans are allowed in an if condition, string given\\.$#"
 			count: 1
 			path: app/controllers/admin/AutogradingConfigController.php
@@ -1149,6 +1244,11 @@ parameters:
 			path: app/controllers/admin/ConfigurationController.php
 
 		-
+			message: "#^Loose comparison via \"\\=\\=\" is not allowed\\.$#"
+			count: 2
+			path: app/controllers/admin/ConfigurationController.php
+
+		-
 			message: "#^Method app\\\\controllers\\\\admin\\\\ConfigurationController\\:\\:getGradeableSeatingOptions\\(\\) return type has no value type specified in iterable type array\\.$#"
 			count: 1
 			path: app/controllers/admin/ConfigurationController.php
@@ -1161,6 +1261,11 @@ parameters:
 		-
 			message: "#^Construct empty\\(\\) is not allowed\\. Use more strict comparison\\.$#"
 			count: 1
+			path: app/controllers/admin/GradeOverrideController.php
+
+		-
+			message: "#^Loose comparison via \"\\=\\=\" is not allowed\\.$#"
+			count: 2
 			path: app/controllers/admin/GradeOverrideController.php
 
 		-
@@ -1209,6 +1314,16 @@ parameters:
 		-
 			message: "#^Foreach overwrites \\$user with its value variable\\.$#"
 			count: 1
+			path: app/controllers/admin/LateController.php
+
+		-
+			message: "#^Loose comparison via \"\\!\\=\" is not allowed\\.$#"
+			count: 1
+			path: app/controllers/admin/LateController.php
+
+		-
+			message: "#^Loose comparison via \"\\=\\=\" is not allowed\\.$#"
+			count: 9
 			path: app/controllers/admin/LateController.php
 
 		-
@@ -1264,6 +1379,16 @@ parameters:
 		-
 			message: "#^Expression on left side of \\?\\? is not nullable\\.$#"
 			count: 2
+			path: app/controllers/admin/PlagiarismController.php
+
+		-
+			message: "#^Loose comparison via \"\\!\\=\" is not allowed\\.$#"
+			count: 1
+			path: app/controllers/admin/PlagiarismController.php
+
+		-
+			message: "#^Loose comparison via \"\\=\\=\" is not allowed\\.$#"
+			count: 8
 			path: app/controllers/admin/PlagiarismController.php
 
 		-
@@ -1326,6 +1451,11 @@ parameters:
 
 		-
 			message: "#^Construct empty\\(\\) is not allowed\\. Use more strict comparison\\.$#"
+			count: 2
+			path: app/controllers/admin/ReportController.php
+
+		-
+			message: "#^Loose comparison via \"\\=\\=\" is not allowed\\.$#"
 			count: 2
 			path: app/controllers/admin/ReportController.php
 
@@ -1430,9 +1560,24 @@ parameters:
 			path: app/controllers/admin/ReportController.php
 
 		-
+			message: "#^PHPDoc tag @var with type app\\\\models\\\\User is not subtype of native type null\\.$#"
+			count: 1
+			path: app/controllers/admin/ReportController.php
+
+		-
+			message: "#^PHPDoc tag @var with type app\\\\repositories\\\\poll\\\\PollRepository is not subtype of type app\\\\repositories\\\\poll\\\\PollRepository\\<app\\\\entities\\\\poll\\\\Poll\\>\\.$#"
+			count: 1
+			path: app/controllers/admin/ReportController.php
+
+		-
 			message: "#^Property app\\\\controllers\\\\admin\\\\ReportController\\:\\:\\$all_overrides has no type specified\\.$#"
 			count: 1
 			path: app/controllers/admin/ReportController.php
+
+		-
+			message: "#^Loose comparison via \"\\!\\=\" is not allowed\\.$#"
+			count: 6
+			path: app/controllers/admin/StudentActivityDashboardController.php
 
 		-
 			message: "#^Method app\\\\controllers\\\\admin\\\\StudentActivityDashboardController\\:\\:downloadData\\(\\) has no return type specified\\.$#"
@@ -1478,6 +1623,16 @@ parameters:
 		-
 			message: "#^Implicit array creation is not allowed \\- variable \\$bad_rows might not exist\\.$#"
 			count: 1
+			path: app/controllers/admin/UsersController.php
+
+		-
+			message: "#^Loose comparison via \"\\!\\=\" is not allowed\\.$#"
+			count: 2
+			path: app/controllers/admin/UsersController.php
+
+		-
+			message: "#^Loose comparison via \"\\=\\=\" is not allowed\\.$#"
+			count: 8
 			path: app/controllers/admin/UsersController.php
 
 		-
@@ -1556,6 +1711,11 @@ parameters:
 			path: app/controllers/admin/UsersController.php
 
 		-
+			message: "#^Parameter \\#3 \\$value of function curl_setopt expects bool, int given\\.$#"
+			count: 1
+			path: app/controllers/admin/UsersController.php
+
+		-
 			message: """
 				#^Call to deprecated method RedirectOnlyResponse\\(\\) of class app\\\\libraries\\\\response\\\\MultiResponse\\:
 				should not be used, just return RedirectResponse directly$#
@@ -1582,6 +1742,11 @@ parameters:
 			path: app/controllers/admin/WrapperController.php
 
 		-
+			message: "#^Loose comparison via \"\\!\\=\" is not allowed\\.$#"
+			count: 1
+			path: app/controllers/calendar/CalendarController.php
+
+		-
 			message: "#^Call to function in_array\\(\\) requires parameter \\#3 to be set\\.$#"
 			count: 4
 			path: app/controllers/course/CourseMaterialsController.php
@@ -1594,6 +1759,16 @@ parameters:
 		-
 			message: "#^Construct empty\\(\\) is not allowed\\. Use more strict comparison\\.$#"
 			count: 5
+			path: app/controllers/course/CourseMaterialsController.php
+
+		-
+			message: "#^Loose comparison via \"\\!\\=\" is not allowed\\.$#"
+			count: 3
+			path: app/controllers/course/CourseMaterialsController.php
+
+		-
+			message: "#^Loose comparison via \"\\=\\=\" is not allowed\\.$#"
+			count: 11
 			path: app/controllers/course/CourseMaterialsController.php
 
 		-
@@ -1657,6 +1832,11 @@ parameters:
 			path: app/controllers/course/CourseMaterialsController.php
 
 		-
+			message: "#^PHPDoc tag @var with type app\\\\repositories\\\\course\\\\CourseMaterialRepository is not subtype of type app\\\\repositories\\\\course\\\\CourseMaterialRepository\\<app\\\\entities\\\\course\\\\CourseMaterial\\>\\.$#"
+			count: 1
+			path: app/controllers/course/CourseMaterialsController.php
+
+		-
 			message: "#^Call to function in_array\\(\\) requires parameter \\#3 to be set\\.$#"
 			count: 3
 			path: app/controllers/forum/ForumController.php
@@ -1669,6 +1849,16 @@ parameters:
 		-
 			message: "#^Foreach overwrites \\$_post with its value variable\\.$#"
 			count: 1
+			path: app/controllers/forum/ForumController.php
+
+		-
+			message: "#^Loose comparison via \"\\!\\=\" is not allowed\\.$#"
+			count: 3
+			path: app/controllers/forum/ForumController.php
+
+		-
+			message: "#^Loose comparison via \"\\=\\=\" is not allowed\\.$#"
+			count: 24
 			path: app/controllers/forum/ForumController.php
 
 		-
@@ -2022,6 +2212,11 @@ parameters:
 			path: app/controllers/forum/ForumController.php
 
 		-
+			message: "#^Only booleans are allowed in &&, mixed given on the left side\\.$#"
+			count: 1
+			path: app/controllers/forum/ForumController.php
+
+		-
 			message: "#^Only booleans are allowed in a negated boolean, int given\\.$#"
 			count: 1
 			path: app/controllers/forum/ForumController.php
@@ -2059,6 +2254,16 @@ parameters:
 		-
 			message: "#^Implicit array creation is not allowed \\- variable \\$sorted_students might not exist\\.$#"
 			count: 2
+			path: app/controllers/grading/ElectronicGraderController.php
+
+		-
+			message: "#^Loose comparison via \"\\!\\=\" is not allowed\\.$#"
+			count: 25
+			path: app/controllers/grading/ElectronicGraderController.php
+
+		-
+			message: "#^Loose comparison via \"\\=\\=\" is not allowed\\.$#"
+			count: 21
 			path: app/controllers/grading/ElectronicGraderController.php
 
 		-
@@ -2652,6 +2857,11 @@ parameters:
 			path: app/controllers/grading/ElectronicGraderController.php
 
 		-
+			message: "#^Only booleans are allowed in a negated boolean, mixed given\\.$#"
+			count: 1
+			path: app/controllers/grading/ElectronicGraderController.php
+
+		-
 			message: "#^Parameter \\#1 \\$verify_time of method app\\\\models\\\\gradeable\\\\GradedComponent\\:\\:setVerifyTime\\(\\) expects string\\|null, DateTime given\\.$#"
 			count: 2
 			path: app/controllers/grading/ElectronicGraderController.php
@@ -2677,6 +2887,11 @@ parameters:
 			path: app/controllers/grading/ImagesController.php
 
 		-
+			message: "#^Loose comparison via \"\\=\\=\" is not allowed\\.$#"
+			count: 2
+			path: app/controllers/grading/ImagesController.php
+
+		-
 			message: "#^Method app\\\\controllers\\\\grading\\\\ImagesController\\:\\:ajaxUploadImagesFiles\\(\\) has no return type specified\\.$#"
 			count: 1
 			path: app/controllers/grading/ImagesController.php
@@ -2693,6 +2908,16 @@ parameters:
 
 		-
 			message: "#^Construct empty\\(\\) is not allowed\\. Use more strict comparison\\.$#"
+			count: 1
+			path: app/controllers/grading/SimpleGraderController.php
+
+		-
+			message: "#^Loose comparison via \"\\!\\=\" is not allowed\\.$#"
+			count: 1
+			path: app/controllers/grading/SimpleGraderController.php
+
+		-
+			message: "#^Loose comparison via \"\\=\\=\" is not allowed\\.$#"
 			count: 1
 			path: app/controllers/grading/SimpleGraderController.php
 
@@ -2722,7 +2947,22 @@ parameters:
 			path: app/controllers/pdf/PDFController.php
 
 		-
+			message: "#^Only booleans are allowed in a ternary operator condition, mixed given\\.$#"
+			count: 2
+			path: app/controllers/pdf/PDFController.php
+
+		-
+			message: "#^Only booleans are allowed in an if condition, mixed given\\.$#"
+			count: 1
+			path: app/controllers/pdf/PDFController.php
+
+		-
 			message: "#^Call to function in_array\\(\\) requires parameter \\#3 to be set\\.$#"
+			count: 1
+			path: app/controllers/student/AuthTokenController.php
+
+		-
+			message: "#^PHPDoc tag @var with type app\\\\repositories\\\\VcsAuthTokenRepository is not subtype of type app\\\\repositories\\\\VcsAuthTokenRepository\\<app\\\\entities\\\\VcsAuthToken\\>\\.$#"
 			count: 1
 			path: app/controllers/student/AuthTokenController.php
 
@@ -2750,6 +2990,16 @@ parameters:
 		-
 			message: "#^Implicit array creation is not allowed \\- variable \\$notifications might not exist\\.$#"
 			count: 1
+			path: app/controllers/student/GradeInquiryController.php
+
+		-
+			message: "#^Loose comparison via \"\\!\\=\" is not allowed\\.$#"
+			count: 1
+			path: app/controllers/student/GradeInquiryController.php
+
+		-
+			message: "#^Loose comparison via \"\\=\\=\" is not allowed\\.$#"
+			count: 9
 			path: app/controllers/student/GradeInquiryController.php
 
 		-
@@ -2788,11 +3038,6 @@ parameters:
 			path: app/controllers/student/SubmissionController.php
 
 		-
-			message: "#^Else branch is unreachable because previous condition is always true\\.$#"
-			count: 1
-			path: app/controllers/student/SubmissionController.php
-
-		-
 			message: "#^Elseif condition is always true\\.$#"
 			count: 1
 			path: app/controllers/student/SubmissionController.php
@@ -2800,6 +3045,16 @@ parameters:
 		-
 			message: "#^Expression on left side of \\?\\? is not nullable\\.$#"
 			count: 1
+			path: app/controllers/student/SubmissionController.php
+
+		-
+			message: "#^Loose comparison via \"\\!\\=\" is not allowed\\.$#"
+			count: 3
+			path: app/controllers/student/SubmissionController.php
+
+		-
+			message: "#^Loose comparison via \"\\=\\=\" is not allowed\\.$#"
+			count: 11
 			path: app/controllers/student/SubmissionController.php
 
 		-
@@ -3013,6 +3268,11 @@ parameters:
 			path: app/controllers/student/TeamController.php
 
 		-
+			message: "#^Loose comparison via \"\\=\\=\" is not allowed\\.$#"
+			count: 1
+			path: app/controllers/student/TeamController.php
+
+		-
 			message: "#^Method app\\\\controllers\\\\student\\\\TeamController\\:\\:acceptInvitation\\(\\) has no return type specified\\.$#"
 			count: 1
 			path: app/controllers/student/TeamController.php
@@ -3128,6 +3388,11 @@ parameters:
 				should not be used, just return WebResponse directly$#
 			"""
 			count: 1
+			path: app/controllers/superuser/SuperuserEmailController.php
+
+		-
+			message: "#^Loose comparison via \"\\=\\=\" is not allowed\\.$#"
+			count: 8
 			path: app/controllers/superuser/SuperuserEmailController.php
 
 		-
@@ -3496,6 +3761,11 @@ parameters:
 			path: app/libraries/Access.php
 
 		-
+			message: "#^Loose comparison via \"\\!\\=\" is not allowed\\.$#"
+			count: 1
+			path: app/libraries/Access.php
+
+		-
 			message: "#^Method app\\\\libraries\\\\Access\\:\\:canI\\(\\) has parameter \\$args with no value type specified in iterable type array\\.$#"
 			count: 1
 			path: app/libraries/Access.php
@@ -3558,6 +3828,11 @@ parameters:
 		-
 			message: "#^Construct empty\\(\\) is not allowed\\. Use more strict comparison\\.$#"
 			count: 5
+			path: app/libraries/Core.php
+
+		-
+			message: "#^Loose comparison via \"\\=\\=\" is not allowed\\.$#"
+			count: 3
 			path: app/libraries/Core.php
 
 		-
@@ -3691,9 +3966,24 @@ parameters:
 			path: app/libraries/Core.php
 
 		-
+			message: "#^PHPDoc tag @var with type app\\\\repositories\\\\SessionRepository is not subtype of type app\\\\repositories\\\\SessionRepository\\<app\\\\entities\\\\Session\\>\\.$#"
+			count: 1
+			path: app/libraries/Core.php
+
+		-
+			message: "#^Parameter \\#3 \\$value of function curl_setopt expects bool, int given\\.$#"
+			count: 2
+			path: app/libraries/Core.php
+
+		-
 			message: "#^Property app\\\\libraries\\\\Core\\:\\:\\$user_id is never read, only written\\.$#"
 			count: 1
 			path: app/libraries/Core.php
+
+		-
+			message: "#^Loose comparison via \"\\=\\=\" is not allowed\\.$#"
+			count: 2
+			path: app/libraries/CourseMaterialsUtils.php
 
 		-
 			message: "#^Method app\\\\libraries\\\\CourseMaterialsUtils\\:\\:finalAccessCourseMaterialCheck\\(\\) has no return type specified\\.$#"
@@ -3731,6 +4021,11 @@ parameters:
 			path: app/libraries/DateUtils.php
 
 		-
+			message: "#^Loose comparison via \"\\=\\=\" is not allowed\\.$#"
+			count: 1
+			path: app/libraries/DateUtils.php
+
+		-
 			message: "#^Method app\\\\libraries\\\\DateUtils\\:\\:getAvailableTimeZones\\(\\) return type has no value type specified in iterable type array\\.$#"
 			count: 1
 			path: app/libraries/DateUtils.php
@@ -3758,6 +4053,16 @@ parameters:
 		-
 			message: "#^Foreach overwrites \\$diff with its value variable\\.$#"
 			count: 1
+			path: app/libraries/DiffViewer.php
+
+		-
+			message: "#^Loose comparison via \"\\!\\=\" is not allowed\\.$#"
+			count: 10
+			path: app/libraries/DiffViewer.php
+
+		-
+			message: "#^Loose comparison via \"\\=\\=\" is not allowed\\.$#"
+			count: 8
 			path: app/libraries/DiffViewer.php
 
 		-
@@ -3911,6 +4216,11 @@ parameters:
 			path: app/libraries/ExceptionHandler.php
 
 		-
+			message: "#^Loose comparison via \"\\=\\=\" is not allowed\\.$#"
+			count: 1
+			path: app/libraries/ExceptionHandler.php
+
+		-
 			message: "#^Method app\\\\libraries\\\\ExceptionHandler\\:\\:setDisplayExceptions\\(\\) has no return type specified\\.$#"
 			count: 1
 			path: app/libraries/ExceptionHandler.php
@@ -3953,6 +4263,16 @@ parameters:
 		-
 			message: "#^Foreach overwrites \\$file with its key variable\\.$#"
 			count: 1
+			path: app/libraries/FileUtils.php
+
+		-
+			message: "#^Loose comparison via \"\\!\\=\" is not allowed\\.$#"
+			count: 10
+			path: app/libraries/FileUtils.php
+
+		-
+			message: "#^Loose comparison via \"\\=\\=\" is not allowed\\.$#"
+			count: 8
 			path: app/libraries/FileUtils.php
 
 		-
@@ -4036,6 +4356,11 @@ parameters:
 			path: app/libraries/ForumUtils.php
 
 		-
+			message: "#^Loose comparison via \"\\=\\=\" is not allowed\\.$#"
+			count: 1
+			path: app/libraries/ForumUtils.php
+
+		-
 			message: "#^Method app\\\\libraries\\\\ForumUtils\\:\\:checkGoodAttachment\\(\\) has no return type specified\\.$#"
 			count: 1
 			path: app/libraries/ForumUtils.php
@@ -4093,6 +4418,11 @@ parameters:
 		-
 			message: "#^Call to function in_array\\(\\) requires parameter \\#3 to be set\\.$#"
 			count: 1
+			path: app/libraries/GradingQueue.php
+
+		-
+			message: "#^Loose comparison via \"\\!\\=\" is not allowed\\.$#"
+			count: 2
 			path: app/libraries/GradingQueue.php
 
 		-
@@ -4276,6 +4606,11 @@ parameters:
 			path: app/libraries/NotificationFactory.php
 
 		-
+			message: "#^Loose comparison via \"\\!\\=\" is not allowed\\.$#"
+			count: 3
+			path: app/libraries/NotificationFactory.php
+
+		-
 			message: "#^Method app\\\\libraries\\\\NotificationFactory\\:\\:createEmailsArray\\(\\) has parameter \\$event with no value type specified in iterable type array\\.$#"
 			count: 1
 			path: app/libraries/NotificationFactory.php
@@ -4346,6 +4681,11 @@ parameters:
 			path: app/libraries/NotificationFactory.php
 
 		-
+			message: "#^Loose comparison via \"\\=\\=\" is not allowed\\.$#"
+			count: 1
+			path: app/libraries/NumberUtils.php
+
+		-
 			message: "#^Method app\\\\libraries\\\\NumberUtils\\:\\:getRandomIndices\\(\\) return type has no value type specified in iterable type array\\.$#"
 			count: 1
 			path: app/libraries/NumberUtils.php
@@ -4358,6 +4698,11 @@ parameters:
 		-
 			message: "#^Construct empty\\(\\) is not allowed\\. Use more strict comparison\\.$#"
 			count: 1
+			path: app/libraries/Output.php
+
+		-
+			message: "#^Loose comparison via \"\\=\\=\" is not allowed\\.$#"
+			count: 2
 			path: app/libraries/Output.php
 
 		-
@@ -4656,6 +5001,11 @@ parameters:
 			path: app/libraries/Output.php
 
 		-
+			message: "#^PHPDoc tag @var with type app\\\\views\\\\ErrorView is not subtype of type string\\.$#"
+			count: 1
+			path: app/libraries/Output.php
+
+		-
 			message: "#^Property app\\\\libraries\\\\Output\\:\\:\\$breadcrumbs has no type specified\\.$#"
 			count: 1
 			path: app/libraries/Output.php
@@ -4721,6 +5071,11 @@ parameters:
 			path: app/libraries/Output.php
 
 		-
+			message: "#^Loose comparison via \"\\=\\=\" is not allowed\\.$#"
+			count: 3
+			path: app/libraries/PollUtils.php
+
+		-
 			message: "#^Method app\\\\libraries\\\\PollUtils\\:\\:getPollExportData\\(\\) return type has no value type specified in iterable type array\\.$#"
 			count: 1
 			path: app/libraries/PollUtils.php
@@ -4751,9 +5106,19 @@ parameters:
 			path: app/libraries/SessionManager.php
 
 		-
+			message: "#^PHPDoc tag @var with type app\\\\repositories\\\\SessionRepository is not subtype of type app\\\\repositories\\\\SessionRepository\\<app\\\\entities\\\\Session\\>\\.$#"
+			count: 1
+			path: app/libraries/SessionManager.php
+
+		-
 			message: "#^Method app\\\\libraries\\\\TokenManager\\:\\:generateSessionToken\\(\\) has parameter \\$persistent with no type specified\\.$#"
 			count: 1
 			path: app/libraries/TokenManager.php
+
+		-
+			message: "#^Loose comparison via \"\\=\\=\" is not allowed\\.$#"
+			count: 4
+			path: app/libraries/Utils.php
 
 		-
 			message: "#^Method app\\\\libraries\\\\Utils\\:\\:checkUploadedImageFile\\(\\) has no return type specified\\.$#"
@@ -4812,6 +5177,11 @@ parameters:
 
 		-
 			message: "#^Foreach overwrites \\$result with its value variable\\.$#"
+			count: 1
+			path: app/libraries/database/AbstractDatabase.php
+
+		-
+			message: "#^Loose comparison via \"\\!\\=\" is not allowed\\.$#"
 			count: 1
 			path: app/libraries/database/AbstractDatabase.php
 
@@ -4976,6 +5346,16 @@ parameters:
 		-
 			message: "#^Instanceof between app\\\\models\\\\gradeable\\\\Gradeable and app\\\\models\\\\gradeable\\\\Gradeable will always evaluate to true\\.$#"
 			count: 1
+			path: app/libraries/database/DatabaseQueries.php
+
+		-
+			message: "#^Loose comparison via \"\\!\\=\" is not allowed\\.$#"
+			count: 16
+			path: app/libraries/database/DatabaseQueries.php
+
+		-
+			message: "#^Loose comparison via \"\\=\\=\" is not allowed\\.$#"
+			count: 36
 			path: app/libraries/database/DatabaseQueries.php
 
 		-
@@ -7774,6 +8154,11 @@ parameters:
 			path: app/libraries/database/DatabaseRowIterator.php
 
 		-
+			message: "#^PHPDoc tag @var with type mixed is not subtype of native type \\$this\\(app\\\\libraries\\\\database\\\\DatabaseRowIterator\\)\\.$#"
+			count: 1
+			path: app/libraries/database/DatabaseRowIterator.php
+
+		-
 			message: "#^Property app\\\\libraries\\\\database\\\\DatabaseRowIterator\\:\\:\\$callback has no type specified\\.$#"
 			count: 1
 			path: app/libraries/database/DatabaseRowIterator.php
@@ -7831,6 +8216,16 @@ parameters:
 		-
 			message: "#^Construct empty\\(\\) is not allowed\\. Use more strict comparison\\.$#"
 			count: 1
+			path: app/libraries/database/PostgresqlDatabase.php
+
+		-
+			message: "#^Loose comparison via \"\\!\\=\" is not allowed\\.$#"
+			count: 1
+			path: app/libraries/database/PostgresqlDatabase.php
+
+		-
+			message: "#^Loose comparison via \"\\=\\=\" is not allowed\\.$#"
+			count: 4
 			path: app/libraries/database/PostgresqlDatabase.php
 
 		-
@@ -8225,6 +8620,11 @@ parameters:
 			path: app/models/Breadcrumb.php
 
 		-
+			message: "#^Loose comparison via \"\\=\\=\" is not allowed\\.$#"
+			count: 1
+			path: app/models/Button.php
+
+		-
 			message: "#^Method app\\\\models\\\\Button\\:\\:__construct\\(\\) has parameter \\$details with no value type specified in iterable type array\\.$#"
 			count: 1
 			path: app/models/Button.php
@@ -8236,6 +8636,16 @@ parameters:
 
 		-
 			message: "#^Method app\\\\models\\\\CalendarInfo\\:\\:getColors\\(\\) return type has no value type specified in iterable type array\\.$#"
+			count: 1
+			path: app/models/CalendarInfo.php
+
+		-
+			message: "#^Method app\\\\models\\\\CalendarInfo\\:\\:getItemsByDate\\(\\) return type has no value type specified in iterable type array\\.$#"
+			count: 1
+			path: app/models/CalendarInfo.php
+
+		-
+			message: "#^Method app\\\\models\\\\CalendarInfo\\:\\:getItemsByDateInCourses\\(\\) return type has no value type specified in iterable type array\\.$#"
 			count: 1
 			path: app/models/CalendarInfo.php
 
@@ -8257,6 +8667,11 @@ parameters:
 		-
 			message: "#^Method app\\\\models\\\\CalendarInfo\\:\\:loadGradeableCalendarInfo\\(\\) has parameter \\$gradeables_of_user with no value type specified in iterable type array\\.$#"
 			count: 1
+			path: app/models/CalendarInfo.php
+
+		-
+			message: "#^PHPDoc tag @return has invalid value \\(array\\<string, array\\<string,bool\\|string\\>\\>\\>\\)\\: Unexpected token \"\\>\", expected TOKEN_HORIZONTAL_WS at offset 59 on line 2$#"
+			count: 2
 			path: app/models/CalendarInfo.php
 
 		-
@@ -8460,9 +8875,19 @@ parameters:
 			path: app/models/DisplayImage.php
 
 		-
+			message: "#^Loose comparison via \"\\=\\=\" is not allowed\\.$#"
+			count: 1
+			path: app/models/Email.php
+
+		-
 			message: "#^Method app\\\\models\\\\Email\\:\\:__construct\\(\\) has parameter \\$details with no value type specified in iterable type array\\.$#"
 			count: 1
 			path: app/models/Email.php
+
+		-
+			message: "#^Loose comparison via \"\\=\\=\" is not allowed\\.$#"
+			count: 3
+			path: app/models/GradeableAutocheck.php
 
 		-
 			message: "#^Method app\\\\models\\\\GradeableAutocheck\\:\\:__construct\\(\\) has parameter \\$details with no value type specified in iterable type array\\.$#"
@@ -8487,6 +8912,11 @@ parameters:
 		-
 			message: "#^Call to function is_null\\(\\) with array\\<string\\> will always evaluate to false\\.$#"
 			count: 2
+			path: app/models/GradingOrder.php
+
+		-
+			message: "#^Loose comparison via \"\\=\\=\" is not allowed\\.$#"
+			count: 17
 			path: app/models/GradingOrder.php
 
 		-
@@ -8535,6 +8965,11 @@ parameters:
 			path: app/models/Notification.php
 
 		-
+			message: "#^Loose comparison via \"\\=\\=\" is not allowed\\.$#"
+			count: 3
+			path: app/models/Notification.php
+
+		-
 			message: "#^Method app\\\\models\\\\Notification\\:\\:createNotification\\(\\) has no return type specified\\.$#"
 			count: 1
 			path: app/models/Notification.php
@@ -8567,6 +9002,16 @@ parameters:
 		-
 			message: "#^Call to function in_array\\(\\) requires parameter \\#3 to be set\\.$#"
 			count: 1
+			path: app/models/OfficeHoursQueueModel.php
+
+		-
+			message: "#^Loose comparison via \"\\!\\=\" is not allowed\\.$#"
+			count: 2
+			path: app/models/OfficeHoursQueueModel.php
+
+		-
+			message: "#^Loose comparison via \"\\=\\=\" is not allowed\\.$#"
+			count: 3
 			path: app/models/OfficeHoursQueueModel.php
 
 		-
@@ -8950,6 +9395,11 @@ parameters:
 			path: app/models/OfficeHoursQueueModel.php
 
 		-
+			message: "#^Loose comparison via \"\\!\\=\" is not allowed\\.$#"
+			count: 1
+			path: app/models/QueueItem.php
+
+		-
 			message: "#^Property app\\\\models\\\\QueueItem\\:\\:\\$grading_queue_obj type has no value type specified in iterable type array\\.$#"
 			count: 1
 			path: app/models/QueueItem.php
@@ -8971,6 +9421,16 @@ parameters:
 
 		-
 			message: "#^Call to function is_null\\(\\) with array will always evaluate to false\\.$#"
+			count: 1
+			path: app/models/RainbowCustomization.php
+
+		-
+			message: "#^Loose comparison via \"\\!\\=\" is not allowed\\.$#"
+			count: 1
+			path: app/models/RainbowCustomization.php
+
+		-
+			message: "#^Loose comparison via \"\\=\\=\" is not allowed\\.$#"
 			count: 1
 			path: app/models/RainbowCustomization.php
 
@@ -9115,6 +9575,16 @@ parameters:
 			path: app/models/RainbowCustomizationJSON.php
 
 		-
+			message: "#^Loose comparison via \"\\!\\=\" is not allowed\\.$#"
+			count: 2
+			path: app/models/RainbowCustomizationJSON.php
+
+		-
+			message: "#^Loose comparison via \"\\=\\=\" is not allowed\\.$#"
+			count: 1
+			path: app/models/RainbowCustomizationJSON.php
+
+		-
 			message: "#^Method app\\\\models\\\\RainbowCustomizationJSON\\:\\:addBenchmarkPercent\\(\\) has no return type specified\\.$#"
 			count: 1
 			path: app/models/RainbowCustomizationJSON.php
@@ -9205,12 +9675,22 @@ parameters:
 			path: app/models/RainbowCustomizationJSON.php
 
 		-
+			message: "#^Loose comparison via \"\\=\\=\" is not allowed\\.$#"
+			count: 1
+			path: app/models/SimpleGradeOverriddenUser.php
+
+		-
 			message: "#^Method app\\\\models\\\\SimpleGradeOverriddenUser\\:\\:__construct\\(\\) has parameter \\$details with no value type specified in iterable type array\\.$#"
 			count: 1
 			path: app/models/SimpleGradeOverriddenUser.php
 
 		-
 			message: "#^Call to method format\\(\\) on an unknown class app\\\\models\\\\date\\.$#"
+			count: 1
+			path: app/models/SimpleLateUser.php
+
+		-
+			message: "#^Loose comparison via \"\\=\\=\" is not allowed\\.$#"
 			count: 1
 			path: app/models/SimpleLateUser.php
 
@@ -9292,6 +9772,11 @@ parameters:
 		-
 			message: "#^Construct empty\\(\\) is not allowed\\. Use more strict comparison\\.$#"
 			count: 5
+			path: app/models/User.php
+
+		-
+			message: "#^Loose comparison via \"\\=\\=\" is not allowed\\.$#"
+			count: 2
 			path: app/models/User.php
 
 		-
@@ -9445,6 +9930,11 @@ parameters:
 			path: app/models/User.php
 
 		-
+			message: "#^PHPDoc tag @return has invalid value \\(string, message if it exists or N/A if it doesn't\\)\\: Unexpected token \",\", expected TOKEN_HORIZONTAL_WS at offset 173 on line 4$#"
+			count: 1
+			path: app/models/User.php
+
+		-
 			message: "#^Property app\\\\models\\\\User\\:\\:\\$anon_id_by_gradeable type has no value type specified in iterable type array\\.$#"
 			count: 1
 			path: app/models/User.php
@@ -9570,8 +10060,13 @@ parameters:
 			path: app/models/gradeable/AutoGradedVersion.php
 
 		-
-			message: "#^Else branch is unreachable because previous condition is always true\\.$#"
-			count: 1
+			message: "#^Loose comparison via \"\\!\\=\" is not allowed\\.$#"
+			count: 3
+			path: app/models/gradeable/AutoGradedVersion.php
+
+		-
+			message: "#^Loose comparison via \"\\=\\=\" is not allowed\\.$#"
+			count: 2
 			path: app/models/gradeable/AutoGradedVersion.php
 
 		-
@@ -9980,6 +10475,11 @@ parameters:
 			path: app/models/gradeable/AutogradingConfig.php
 
 		-
+			message: "#^Loose comparison via \"\\!\\=\" is not allowed\\.$#"
+			count: 1
+			path: app/models/gradeable/AutogradingTestcase.php
+
+		-
 			message: "#^Method app\\\\models\\\\gradeable\\\\AutogradingTestcase\\:\\:__construct\\(\\) has parameter \\$testcase with no value type specified in iterable type array\\.$#"
 			count: 1
 			path: app/models/gradeable/AutogradingTestcase.php
@@ -10330,6 +10830,16 @@ parameters:
 			path: app/models/gradeable/Gradeable.php
 
 		-
+			message: "#^Loose comparison via \"\\!\\=\" is not allowed\\.$#"
+			count: 2
+			path: app/models/gradeable/Gradeable.php
+
+		-
+			message: "#^Loose comparison via \"\\=\\=\" is not allowed\\.$#"
+			count: 9
+			path: app/models/gradeable/Gradeable.php
+
+		-
 			message: "#^Method app\\\\models\\\\gradeable\\\\Gradeable\\:\\:__construct\\(\\) has parameter \\$details with no value type specified in iterable type array\\.$#"
 			count: 1
 			path: app/models/gradeable/Gradeable.php
@@ -10421,6 +10931,11 @@ parameters:
 
 		-
 			message: "#^Method app\\\\models\\\\gradeable\\\\Gradeable\\:\\:parseDates\\(\\) has parameter \\$dates with no value type specified in iterable type array\\.$#"
+			count: 1
+			path: app/models/gradeable/Gradeable.php
+
+		-
+			message: "#^Method app\\\\models\\\\gradeable\\\\Gradeable\\:\\:parseDates\\(\\) should return array\\<DateTime\\> but returns array\\<string, DateTime\\|int\\|null\\>\\.$#"
 			count: 1
 			path: app/models/gradeable/Gradeable.php
 
@@ -10750,7 +11265,7 @@ parameters:
 			path: app/models/gradeable/Gradeable.php
 
 		-
-			message: "#^Property app\\\\models\\\\gradeable\\\\Gradeable\\:\\:\\$rotating_grader_sections \\(array\\<array\\<string\\>\\>\\) does not accept array\\<array\\<int\\<0, max\\>, int\\<1, max\\>\\>\\>\\.$#"
+			message: "#^Property app\\\\models\\\\gradeable\\\\Gradeable\\:\\:\\$rotating_grader_sections \\(array\\<array\\<string\\>\\>\\) does not accept array\\<array\\<int, int\\>\\>\\.$#"
 			count: 1
 			path: app/models/gradeable/Gradeable.php
 
@@ -10795,6 +11310,11 @@ parameters:
 			path: app/models/gradeable/Gradeable.php
 
 		-
+			message: "#^Loose comparison via \"\\=\\=\" is not allowed\\.$#"
+			count: 2
+			path: app/models/gradeable/GradeableList.php
+
+		-
 			message: "#^Variable method call on app\\\\models\\\\gradeable\\\\Gradeable\\.$#"
 			count: 4
 			path: app/models/gradeable/GradeableList.php
@@ -10832,6 +11352,11 @@ parameters:
 		-
 			message: "#^Call to function in_array\\(\\) requires parameter \\#3 to be set\\.$#"
 			count: 2
+			path: app/models/gradeable/GradedComponent.php
+
+		-
+			message: "#^Loose comparison via \"\\!\\=\" is not allowed\\.$#"
+			count: 1
 			path: app/models/gradeable/GradedComponent.php
 
 		-
@@ -10935,6 +11460,11 @@ parameters:
 			path: app/models/gradeable/GradedComponentContainer.php
 
 		-
+			message: "#^Loose comparison via \"\\!\\=\" is not allowed\\.$#"
+			count: 1
+			path: app/models/gradeable/GradedComponentContainer.php
+
+		-
 			message: "#^Method app\\\\models\\\\gradeable\\\\GradedComponentContainer\\:\\:setGradedComponents\\(\\) has no return type specified\\.$#"
 			count: 1
 			path: app/models/gradeable/GradedComponentContainer.php
@@ -10957,6 +11487,16 @@ parameters:
 		-
 			message: "#^Cannot call method getMarks\\(\\) on app\\\\models\\\\gradeable\\\\SimpleGradeOverriddenUser\\|bool\\.$#"
 			count: 1
+			path: app/models/gradeable/GradedGradeable.php
+
+		-
+			message: "#^Loose comparison via \"\\!\\=\" is not allowed\\.$#"
+			count: 1
+			path: app/models/gradeable/GradedGradeable.php
+
+		-
+			message: "#^Loose comparison via \"\\=\\=\" is not allowed\\.$#"
+			count: 5
 			path: app/models/gradeable/GradedGradeable.php
 
 		-
@@ -11060,6 +11600,11 @@ parameters:
 			path: app/models/gradeable/LateDayInfo.php
 
 		-
+			message: "#^Loose comparison via \"\\=\\=\" is not allowed\\.$#"
+			count: 2
+			path: app/models/gradeable/LateDayInfo.php
+
+		-
 			message: "#^Method app\\\\models\\\\gradeable\\\\LateDayInfo\\:\\:__construct\\(\\) has parameter \\$event_info with no value type specified in iterable type array\\.$#"
 			count: 1
 			path: app/models/gradeable/LateDayInfo.php
@@ -11090,12 +11635,32 @@ parameters:
 			path: app/models/gradeable/LateDays.php
 
 		-
+			message: "#^Loose comparison via \"\\=\\=\" is not allowed\\.$#"
+			count: 1
+			path: app/models/gradeable/LateDays.php
+
+		-
 			message: "#^Method app\\\\models\\\\gradeable\\\\LateDays\\:\\:__construct\\(\\) has parameter \\$late_day_updates with no value type specified in iterable type array\\.$#"
 			count: 1
 			path: app/models/gradeable/LateDays.php
 
 		-
+			message: "#^Method app\\\\models\\\\gradeable\\\\LateDays\\:\\:createEventInfo\\(\\) should return array\\<string, int\\> but returns array\\<string, mixed\\>\\.$#"
+			count: 1
+			path: app/models/gradeable/LateDays.php
+
+		-
+			message: "#^Method app\\\\models\\\\gradeable\\\\LateDays\\:\\:getDefaultLateDays\\(\\) has no return type specified\\.$#"
+			count: 1
+			path: app/models/gradeable/LateDays.php
+
+		-
 			message: "#^Method app\\\\models\\\\gradeable\\\\LateDays\\:\\:toArray\\(\\) return type has no value type specified in iterable type array\\.$#"
+			count: 1
+			path: app/models/gradeable/LateDays.php
+
+		-
+			message: "#^PHPDoc tag @return has invalid value \\(int'\\)\\: Unexpected token \"'\", expected TOKEN_HORIZONTAL_WS at offset 96 on line 3$#"
 			count: 1
 			path: app/models/gradeable/LateDays.php
 
@@ -11360,6 +11925,11 @@ parameters:
 			path: app/models/notebook/Notebook.php
 
 		-
+			message: "#^Loose comparison via \"\\=\\=\" is not allowed\\.$#"
+			count: 7
+			path: app/models/notebook/Notebook.php
+
+		-
 			message: "#^Method app\\\\models\\\\notebook\\\\Notebook\\:\\:__construct\\(\\) has parameter \\$details with no value type specified in iterable type array\\.$#"
 			count: 1
 			path: app/models/notebook/Notebook.php
@@ -11428,6 +11998,11 @@ parameters:
 			message: "#^Method app\\\\models\\\\notebook\\\\SubmissionCodeBox\\:\\:__construct\\(\\) has parameter \\$details with no value type specified in iterable type array\\.$#"
 			count: 1
 			path: app/models/notebook/SubmissionCodeBox.php
+
+		-
+			message: "#^Loose comparison via \"\\=\\=\" is not allowed\\.$#"
+			count: 2
+			path: app/models/notebook/SubmissionMultipleChoice.php
 
 		-
 			message: "#^Method app\\\\models\\\\notebook\\\\SubmissionMultipleChoice\\:\\:__construct\\(\\) has parameter \\$details with no value type specified in iterable type array\\.$#"
@@ -11522,6 +12097,16 @@ parameters:
 		-
 			message: "#^Class app\\\\repositories\\\\email\\\\EmailRepository extends generic class Doctrine\\\\ORM\\\\EntityRepository but does not specify its types\\: TEntityClass$#"
 			count: 1
+			path: app/repositories/email/EmailRepository.php
+
+		-
+			message: "#^Loose comparison via \"\\!\\=\" is not allowed\\.$#"
+			count: 4
+			path: app/repositories/email/EmailRepository.php
+
+		-
+			message: "#^Loose comparison via \"\\=\\=\" is not allowed\\.$#"
+			count: 2
 			path: app/repositories/email/EmailRepository.php
 
 		-
@@ -11637,6 +12222,16 @@ parameters:
 		-
 			message: "#^Left side of && is always true\\.$#"
 			count: 2
+			path: app/views/AutoGradingView.php
+
+		-
+			message: "#^Loose comparison via \"\\!\\=\" is not allowed\\.$#"
+			count: 5
+			path: app/views/AutoGradingView.php
+
+		-
+			message: "#^Loose comparison via \"\\=\\=\" is not allowed\\.$#"
+			count: 3
 			path: app/views/AutoGradingView.php
 
 		-
@@ -11965,6 +12560,16 @@ parameters:
 			path: app/views/NavigationView.php
 
 		-
+			message: "#^Loose comparison via \"\\!\\=\" is not allowed\\.$#"
+			count: 3
+			path: app/views/NavigationView.php
+
+		-
+			message: "#^Loose comparison via \"\\=\\=\" is not allowed\\.$#"
+			count: 20
+			path: app/views/NavigationView.php
+
+		-
 			message: "#^Method app\\\\views\\\\NavigationView\\:\\:closeSubmissionsWarning\\(\\) has no return type specified\\.$#"
 			count: 1
 			path: app/views/NavigationView.php
@@ -12230,6 +12835,11 @@ parameters:
 			path: app/views/PollView.php
 
 		-
+			message: "#^Loose comparison via \"\\!\\=\" is not allowed\\.$#"
+			count: 2
+			path: app/views/UserProfileView.php
+
+		-
 			message: "#^Method app\\\\views\\\\admin\\\\ConfigurationView\\:\\:viewConfig\\(\\) has no return type specified\\.$#"
 			count: 1
 			path: app/views/admin/ConfigurationView.php
@@ -12248,6 +12858,11 @@ parameters:
 			message: "#^Method app\\\\views\\\\admin\\\\ConfigurationView\\:\\:viewConfig\\(\\) has parameter \\$submitty_admin_user with no value type specified in iterable type array\\.$#"
 			count: 1
 			path: app/views/admin/ConfigurationView.php
+
+		-
+			message: "#^Loose comparison via \"\\!\\=\" is not allowed\\.$#"
+			count: 5
+			path: app/views/admin/DockerView.php
 
 		-
 			message: "#^Method app\\\\views\\\\admin\\\\DockerView\\:\\:displayDockerPage\\(\\) has no return type specified\\.$#"
@@ -12545,12 +13160,22 @@ parameters:
 			path: app/views/admin/WrapperView.php
 
 		-
+			message: "#^Loose comparison via \"\\!\\=\" is not allowed\\.$#"
+			count: 2
+			path: app/views/calendar/CalendarView.php
+
+		-
 			message: "#^Call to function is_array\\(\\) with app\\\\entities\\\\course\\\\CourseMaterial will always evaluate to false\\.$#"
 			count: 1
 			path: app/views/course/CourseMaterialsView.php
 
 		-
 			message: "#^Construct empty\\(\\) is not allowed\\. Use more strict comparison\\.$#"
+			count: 1
+			path: app/views/course/CourseMaterialsView.php
+
+		-
+			message: "#^Loose comparison via \"\\!\\=\" is not allowed\\.$#"
 			count: 1
 			path: app/views/course/CourseMaterialsView.php
 
@@ -12605,6 +13230,11 @@ parameters:
 			path: app/views/email/EmailStatusView.php
 
 		-
+			message: "#^Loose comparison via \"\\!\\=\" is not allowed\\.$#"
+			count: 4
+			path: app/views/email/EmailStatusView.php
+
+		-
 			message: "#^Method app\\\\views\\\\email\\\\EmailStatusView\\:\\:EmailToKey\\(\\) has no return type specified\\.$#"
 			count: 1
 			path: app/views/email/EmailStatusView.php
@@ -12647,6 +13277,16 @@ parameters:
 		-
 			message: "#^Expression \"\\$category_colors\" on a separate line does not do anything\\.$#"
 			count: 2
+			path: app/views/forum/ForumThreadView.php
+
+		-
+			message: "#^Loose comparison via \"\\!\\=\" is not allowed\\.$#"
+			count: 6
+			path: app/views/forum/ForumThreadView.php
+
+		-
+			message: "#^Loose comparison via \"\\=\\=\" is not allowed\\.$#"
+			count: 17
 			path: app/views/forum/ForumThreadView.php
 
 		-
@@ -13130,6 +13770,16 @@ parameters:
 			path: app/views/grading/ElectronicGraderView.php
 
 		-
+			message: "#^Loose comparison via \"\\!\\=\" is not allowed\\.$#"
+			count: 16
+			path: app/views/grading/ElectronicGraderView.php
+
+		-
+			message: "#^Loose comparison via \"\\=\\=\" is not allowed\\.$#"
+			count: 31
+			path: app/views/grading/ElectronicGraderView.php
+
+		-
 			message: "#^Method app\\\\views\\\\grading\\\\ElectronicGraderView\\:\\:adminTeamForm\\(\\) has no return type specified\\.$#"
 			count: 1
 			path: app/views/grading/ElectronicGraderView.php
@@ -13405,6 +14055,11 @@ parameters:
 			path: app/views/grading/ImagesView.php
 
 		-
+			message: "#^Loose comparison via \"\\!\\=\" is not allowed\\.$#"
+			count: 2
+			path: app/views/grading/SimpleGraderView.php
+
+		-
 			message: "#^Method app\\\\views\\\\grading\\\\SimpleGraderView\\:\\:simpleDisplay\\(\\) has parameter \\$anon_ids with no type specified\\.$#"
 			count: 1
 			path: app/views/grading/SimpleGraderView.php
@@ -13432,6 +14087,16 @@ parameters:
 		-
 			message: "#^Construct empty\\(\\) is not allowed\\. Use more strict comparison\\.$#"
 			count: 2
+			path: app/views/submission/HomeworkView.php
+
+		-
+			message: "#^Loose comparison via \"\\!\\=\" is not allowed\\.$#"
+			count: 3
+			path: app/views/submission/HomeworkView.php
+
+		-
+			message: "#^Loose comparison via \"\\=\\=\" is not allowed\\.$#"
+			count: 4
 			path: app/views/submission/HomeworkView.php
 
 		-
@@ -13498,6 +14163,11 @@ parameters:
 			message: "#^Method app\\\\views\\\\submission\\\\RainbowGradesView\\:\\:showStudentToInstructor\\(\\) has parameter \\$user with no type specified\\.$#"
 			count: 1
 			path: app/views/submission/RainbowGradesView.php
+
+		-
+			message: "#^Loose comparison via \"\\=\\=\" is not allowed\\.$#"
+			count: 1
+			path: app/views/submission/TeamView.php
 
 		-
 			message: "#^Method app\\\\views\\\\superuser\\\\GradeablesView\\:\\:showGradeablesList\\(\\) has no return type specified\\.$#"
