@@ -478,7 +478,6 @@ class ForumThreadView extends AbstractView {
         foreach ($posts as $post) {
             array_push($postIDs, $post["id"]);
         }
-
         $current_user = $this->core->getUser()->getId();
         $upDuckCounter_map = $this->core->getQueries()->getUpduckInfoForPosts($postIDs);
         $userLiked = $this->core->getQueries()->getUserLikesForPosts($postIDs, $current_user);

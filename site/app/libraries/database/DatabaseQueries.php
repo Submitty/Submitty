@@ -747,23 +747,41 @@ SQL;
     }
 
     public function getUpduckInfoForPosts(array $post_ids): array {
-        $resultDict = [];
-        foreach ($post_ids as $post_id) {
-            $this->course_db->query('SELECT COUNT(*) AS cnt FROM forum_upducks WHERE post_id = ?', [$post_id]);
-            $resultDict[$post_id] = intval($this->course_db->row()['cnt']);
+        $placeholders = $this->createParameterList(count($post_ids));
+
+        $sql = "SELECT post_id, COUNT(*) AS cnt FROM forum_upducks WHERE post_id IN {$placeholders} GROUP BY post_id";
+
+        $this->course_db->query($sql, $post_ids);
+        $result = [];
+
+        foreach ($post_ids as $post) {
+            $result[$post] = 0;
         }
-        return $resultDict;
+        foreach ($this->course_db->rows() as $row) {
+            $result[$row['post_id']] = intval($row['cnt']);
+        }
+        return $result;
     }
 
     public function getUserLikesForPosts(array $post_ids, $current_user): array {
+        $placeholders = $this->createParameterList(count($post_ids));
+        $user_id = $current_user;
+
+        $sql = "SELECT post_id, user_id, COUNT(*) AS cnt FROM forum_upducks WHERE post_id IN {$placeholders}
+                AND user_id = ? GROUP BY (post_id, user_id)";
+        $bindParams = array_merge($post_ids, [$user_id]);
+        $this->course_db->query($sql, $bindParams);
         $result = [];
-        foreach ($post_ids as $post) {
-            $this->course_db->query('SELECT COUNT(*) AS cnt FROM forum_upducks WHERE post_id = ? AND user_id = ?', [$post, $current_user]);
-            if (intval($this->course_db->row()['cnt']) >= 1) {
-                array_push($result, $post);
+        $final = [];
+        foreach ($this->course_db->rows() as $row) {
+            $result[$row['post_id']] = intval($row['cnt']);
+        }
+        foreach ($result as $key => $value) {
+            if($value>=1) {
+                array_push($final, $key);
             }
         }
-        return $result;
+        return $final;
     }
 
     public function splitPost($post_id, $title, $categories_ids) {
