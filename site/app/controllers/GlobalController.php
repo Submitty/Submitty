@@ -469,7 +469,7 @@ class GlobalController extends AbstractController {
 
     public function calculateHanukkahDate(int $year): \DateTime {
         // This is the Hanukkah in civil year
-        $startdate = jewishtojd(3, 25, $year + 3761);
+        $startdate = jewishtojd(3, 24, $year + 3761);
         $gregorianDate = \DateTime::createFromFormat('m/d/Y', jdtogregorian($startdate));
 
         // Set the time to 4:00 PM for approx sunfall
@@ -501,7 +501,7 @@ class GlobalController extends AbstractController {
 
                 if ($now >= $hanukkahStartDateTime && $now <= $hanukkahEndDateTime) {
                     // Select the menorah duck image based on the day of Hanukkah
-                    $datecounter = $now->diff($hanukkahStartDateTime)->format('%a') + 1;
+                    $datecounter = (int) $now->diff($hanukkahStartDateTime)->format('%a') + 1;
                     // Ensure datecounter is between 1 and 8
                     $datecounter = max(1, min(8, $datecounter));
                     $menorah_duck = 'moorthy_duck/menorah-duck/' . $datecounter . '.svg';
