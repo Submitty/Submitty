@@ -6,11 +6,12 @@
  * @param csrf_token
  */
 
-function deleteBannerImage(csrf_token, imageName, imagePath, description, releaseDate, closeDate) {
+function deleteBannerImage(csrf_token, id, imageName, imagePath, description, releaseDate, closeDate) {
     const formData = new FormData();
     formData.append('csrf_token', csrf_token);
     formData.append('name', imageName);
     formData.append('path', imagePath);
+    formData.append('id', id);
     formData.append('description', description);
     formData.append('release_date', releaseDate);
     formData.append('close_date', closeDate);

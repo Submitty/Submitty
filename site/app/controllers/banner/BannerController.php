@@ -82,7 +82,7 @@ class BannerController extends AbstractController {
         }
 
         $currentDate = new \DateTime();
-        $folder_made_name = $actual_banner_name . "Folder" . $currentDate->format('Y-m-d_H-i-s');
+        $folder_made_name = $actual_banner_name . "_" . $currentDate->format('Y-m-d_H-i-s');
 
 
         $full_path = FileUtils::joinPaths($upload_path, $specificPath, $folder_made_name);
@@ -168,13 +168,12 @@ class BannerController extends AbstractController {
     public function ajaxDeleteEventFiles(): JsonResponse {
         $entity_manager = $this->core->getSubmittyEntityManager();
         $event_repository = $entity_manager->getRepository(BannerImage::class);
-        $event_items = $event_repository->findBy(['name' => $_POST['name'] ]);
-        if (count($event_items) === 0) {
+        $event_item = $event_repository->findOneBy(['id' => $_POST['id']]);
+
+        if (!$event_item) {
             $error_message = "Banner item with name '" . $_POST['name'] . "' not found in the database.";
             return JsonResponse::getErrorResponse($error_message);
         }
-
-        $event_item = $event_items[0];
         $upload_path =  FileUtils::joinPaths($this->core->getConfig()->getSubmittyPath(), "community_events");
         $releaseDateInt = $event_item->getClosingDate();
         $folder_name = $releaseDateInt->format('Y');

@@ -22,8 +22,8 @@ although we recommend having a 600px x 70px as the standard dimentions.
   {# Do something with the attributes... #}
   <div>
     <div class="image-info" style="display: inline-flex; align-items: center;">
-      <h3 style="margin-right: 10px;">{{ imageName|e('js') }}</h3>
-      <a onclick='deleteBannerImage("{{ csrf_token|e('js') }}", "{{ imageName|e('js') }}", 
+      <h3 style="margin-right: 10px;">{{ imageName }}</h3>
+      <a onclick='deleteBannerImage("{{ csrf_token|e('js') }}", "{{ id|e('js') }}", "{{ imageName|e('js') }}", 
         "{{ imagePath|e('js') }}", "{{ description|e('js') }}", "{{ releaseDate|e('js') }}", 
         "{{ closeDate|e('js') }}");'>
         <i class="fas fa-trash" style="font-size: 16px;"></i>

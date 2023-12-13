@@ -64,30 +64,30 @@
     </div>
 
     <script>
-            let image_banner = false;
-            let url_banner = false;
-            $('#url_link_address').hide();
-            $('#extra_name').hide();
-            function imageSelectionUpdate(checked) {
-                if (image_banner === false) {
-                    $('#extra_name').show();
-                    image_banner = true;
-                }
-                else {
-                    image_banner = false;
-                    $('#extra_name').show();
-                }
+        let image_banner = false;
+        let url_banner = false;
+        $('#url_link_address').hide();
+        $('#extra_name').hide();
+        function imageSelectionUpdate(checked) {
+            if (image_banner === false) {
+                $('#extra_name').show();
+                image_banner = true;
             }
-            function urlSelectionUpdate(checked) {
-                if (url_banner === false) {
-                    url_banner = true;
-                    $('#url_link_address').show();
-                }
-                else {
-                    url_banner = false;
-                    $('#url_link_address').hide();
-                }
-            } 
+            else {
+                image_banner = false;
+                $('#extra_name').show();
+            }
+        }
+        function urlSelectionUpdate(checked) {
+            if (url_banner === false) {
+                url_banner = true;
+                $('#url_link_address').show();
+            }
+            else {
+                url_banner = false;
+                $('#url_link_address').hide();
+            }
+        } 
 
         function makeSubmission() {
             var releaseTime = $("#release_date").val();
@@ -104,9 +104,7 @@
                 e.stopPropagation();
             });
         });
-    </script>
 
-    <script>
         createArray(1);
         var dropzone = document.getElementById("upload1");
         dropzone.addEventListener("dragenter", draghandle, false);
@@ -114,68 +112,61 @@
         dropzone.addEventListener("dragleave", draghandle, false);
         dropzone.addEventListener("drop", dropWithMultipleZips, false);
 
+        const upload_fp = flatpickr('.upload_picker', {
+                    plugins: [ShortcutButtonsPlugin(
+                        {
+                            button: [
+                                {
+                                    label: "Beginning of time"
+                                },
+                                {
+                                    label: "Now"
+                                },
+                                {
+                                    label: "Tomorrow"
+                                },
+                                {
+                                    label: "End of time"
+                                }
+                            ],
+                            onClick: (index, fp) => {
+                                let date;
+                                switch (index) {
+                                    case 0:
+                                        date = new Date("1001-01-01 00:00:00");
+                                        break;
+                                    case 1:
+                                        date = new Date();
+                                        break;
+                                    case 2:
+                                        date = new Date();
+                                        date.setDate(date.getDate() + 1);
+                                        break;
+                                    case 3:
+                                        date = new Date("9998-01-01 00:00:00");
+                                        break;
+                                }
+                                fp.setDate(date);
+                            }
+                        }
+                    )],
+                    appendTo: document.getElementById('upload-banner'),
+                    allowInput: true,
+                    enableTime: true,
+                    enableSeconds: true,
+                    time_24hr: true,
+                    dateFormat: "Y-m-d H:i:S",
+                    onReady: (a, b, fp) => {
+                    fp.calendarContainer.firstChild.childNodes[1].firstChild.firstChild.setAttribute('aria-label', 'Month');
+                    fp.calendarContainer.childNodes[2].childNodes[4].firstChild.setAttribute('aria-label', 'Seconds');
+                    }
+                    });
+        $('.form-body').on('scroll', function() {
+            upload_fp._positionCalendar();
+        });
+
 
     </script>
-
-
-
-<script>
-
-    const upload_fp = flatpickr('.upload_picker', {
-                plugins: [ShortcutButtonsPlugin(
-                    {
-                        button: [
-                            {
-                                label: "Beginning of time"
-                            },
-                            {
-                                label: "Now"
-                            },
-                            {
-                                label: "Tomorrow"
-                            },
-                            {
-                                label: "End of time"
-                            }
-                        ],
-                        onClick: (index, fp) => {
-                            let date;
-                            switch (index) {
-                                case 0:
-                                    date = new Date("1001-01-01 00:00:00");
-                                    break;
-                                case 1:
-                                    date = new Date();
-                                    break;
-                                case 2:
-                                    date = new Date();
-                                    date.setDate(date.getDate() + 1);
-                                    break;
-                                case 3:
-                                    date = new Date("9998-01-01 00:00:00");
-                                    break;
-                            }
-                            fp.setDate(date);
-                        }
-                    }
-                )],
-                appendTo: document.getElementById('upload-banner'),
-                allowInput: true,
-                enableTime: true,
-                enableSeconds: true,
-                time_24hr: true,
-                dateFormat: "Y-m-d H:i:S",
-                onReady: (a, b, fp) => {
-                  fp.calendarContainer.firstChild.childNodes[1].firstChild.firstChild.setAttribute('aria-label', 'Month');
-                  fp.calendarContainer.childNodes[2].childNodes[4].firstChild.setAttribute('aria-label', 'Seconds');
-                }
-                });
-    $('.form-body').on('scroll', function() {
-        upload_fp._positionCalendar();
-    });
-
-
-</script>
 
 
 {% endblock %}
