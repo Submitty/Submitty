@@ -480,7 +480,6 @@ class GlobalController extends AbstractController {
 
 
 
-
     // ==========================================================================================
     private function getDuckImage(\DateTime $now): string {
         $duck_img = 'moorthy_duck/00-original.svg';
