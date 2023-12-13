@@ -182,9 +182,7 @@ jobs:
           restore-keys: |
               ${{ runner.os }}-${{ github.job }}-pip-
       - name: Install python libraries
-        run: |
-          python3 -m pip install --upgrade pip
-          python3 -m pip install flake8 flake8-bugbear
+        run: python3 -m pip install -r .setup/pip/dev_requirements.txt
       - name: Run python linting
         run: python3 -m flake8
 
@@ -413,6 +411,27 @@ jobs:
           spec: cypress/e2e/Cypress-System/login.spec.js
           working-directory: ${{env.SUBMITTY_REPOSITORY}}/site
           browser: chrome
+
+      - name: Setup HTTP/2
+        run: |
+          cd $SUBMITTY_REPOSITORY
+          if [ -f .setup/dev-upgrade-h2.sh ]; then
+            sudo sed -e "s/:80/:443/g" --in-place /etc/apache2/sites-available/submitty.conf
+            sudo -E env "PATH=$PATH" bash .setup/dev-upgrade-h2.sh up --i-know-what-i-am-doing-please-go-ahead \
+              && echo "Setup OK"  \
+              || {
+                echo "::warning::Setup Failed"
+                sudo sed -e "s/:443/:80/g" --in-place /etc/apache2/sites-available/submitty.conf
+              }
+          else
+            echo "Could not find dev-upgrade-h2.sh, skipping"
+          fi
+
+      - name: Test HTTP/2 Connection
+        run: |
+          http_ver=$(curl -ksI https://localhost -o/dev/null -w "%{http_version}\n")
+          [ "$http_ver" = "2" ] && echo "Pass" || echo "::warning::Failed"
+
 
       - uses: actions/upload-artifact@v3
         if: failure()
