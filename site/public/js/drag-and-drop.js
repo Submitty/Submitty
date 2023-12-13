@@ -182,14 +182,16 @@ function handleUploadBanner(csrf_token, closeTime, releaseTime, extraName, linkN
             if (file.name.includes("'") || file.name.includes('"')) {
                 alert(`ERROR! You may not use quotes in your filename: ${file.name}`);
                 return;
-            } else if (file.name.includes('\\') || file.name.includes('/')) {
+            } 
+            else if (file.name.includes('\\') || file.name.includes('/')) {
                 alert(`ERROR! You may not use a slash in your filename: ${file.name}`);
                 return;
-            } else if (file.name.includes('<') || file.name.includes('>')) {
+            } 
+            else if (file.name.includes('<') || file.name.includes('>')) {
                 alert(`ERROR! You may not use angle brackets in your filename: ${file.name}`);
                 return;
             }
-            
+
             const fileExistsResult = fileExists(`/${file.name}`, 1);
             // Check conflict here
             if (fileExistsResult[0] === 1) {
@@ -200,7 +202,6 @@ function handleUploadBanner(csrf_token, closeTime, releaseTime, extraName, linkN
             formData.append(`files${fileGroup.indexOf(fileGroup) + 1}[]`, file, file.name);
         }
     }
-    
     $.ajax({
         url: buildUrl(['banner', 'upload']),
         data: formData,

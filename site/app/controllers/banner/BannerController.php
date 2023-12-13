@@ -75,7 +75,7 @@ class BannerController extends AbstractController {
         $actual_banner_name = "";
 
         foreach ($uploaded_files['name'] as $uploaded_file_name) {
-            if ($uploaded_file_name != $extra_name) {
+            if ($uploaded_file_name !== $extra_name) {
                 $actual_banner_name = $uploaded_file_name;
                 break; // Exit the loop once a valid name is found
             }
@@ -111,7 +111,7 @@ class BannerController extends AbstractController {
 
         for ($j = 0; $j < $count_item; $j++) {
             $all_match = false;
-            if ($uploaded_files['name'][$j] == $extra_name) {
+            if ($uploaded_files['name'][$j] === $extra_name) {
                 $all_match = true;
             }
 
