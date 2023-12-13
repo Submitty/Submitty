@@ -870,9 +870,9 @@ function markViewed(ids, redirect) {
     });
 }
 
-function deleteBadges() {
+function markAllViewed() {
     // Delete badges
-    var badges = document.querySelectorAll('.course-material-badge');
+    const badges = document.querySelectorAll('.course-material-badge');
     badges.forEach(function(badge) {
         badge.remove();
     });

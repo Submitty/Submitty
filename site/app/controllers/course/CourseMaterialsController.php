@@ -111,6 +111,9 @@ class CourseMaterialsController extends AbstractController {
         $cms = $this->core->getCourseEntityManager()->getRepository(CourseMaterial::class)
             ->findAll();
         foreach ($cms as $cm) {
+            if ($cm->isHiddenFromStudents() || $cm->getReleaseDate() > $this->core->getDateTimeNow()) {
+                continue;
+            }
             $cm_access = new CourseMaterialAccess($cm, $this->core->getUser()->getId(), $this->core->getDateTimeNow());
             $cm->addAccess($cm_access);
         }
