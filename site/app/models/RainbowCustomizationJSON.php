@@ -304,10 +304,11 @@ class RainbowCustomizationJSON extends AbstractModel {
      * } $plagiarismEntry
      */
     public function addPlagiarismEntry(object $plagiarismEntry): void {
-        $emptyObject = new stdClass();
-        $emptyObject->user = "";
-        $emptyObject->gradeable = "";
-        $emptyObject->penalty = 0;
+        let $emptyObject = {
+            "user": "",
+            "gradeable": "",
+            "penalty": 0
+        };
         if ($plagiarismEntry === $emptyObject) {
             throw new BadArgumentException('Plagiarism entry may not be empty.');
         }
