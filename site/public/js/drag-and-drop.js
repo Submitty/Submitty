@@ -177,29 +177,31 @@ function handleUploadBanner(csrf_token, closeTime, releaseTime, extraName, linkN
     formData.append('release_time', releaseTime);
     formData.append('extra_name', extraName);
     formData.append('link_name', linkName);
-    for (const fileGroup of file_array) {
-        for (const file of fileGroup) {
-            if (file.name.includes("'") || file.name.includes('"')) {
-                alert(`ERROR! You may not use quotes in your filename: ${file.name}`);
-                return;
-            } 
-            else if (file.name.includes('\\') || file.name.includes('/')) {
-                alert(`ERROR! You may not use a slash in your filename: ${file.name}`);
-                return;
-            } 
-            else if (file.name.includes('<') || file.name.includes('>')) {
-                alert(`ERROR! You may not use angle brackets in your filename: ${file.name}`);
+    for (let i = 0; i < file_array.length; i++) {
+        for (let j = 0; j < file_array[i].length; j++) {
+            if (file_array[i][j].name.indexOf("'") !== -1 ||
+              file_array[i][j].name.indexOf('"') !== -1) {
+                alert(`ERROR! You may not use quotes in your filename: ${file_array[i][j].name}`);
                 return;
             }
-
-            const fileExistsResult = fileExists(`/${file.name}`, 1);
+            else if (file_array[i][j].name.indexOf('\\') !== -1 ||
+              file_array[i][j].name.indexOf('/') !== -1) {
+                alert(`ERROR! You may not use a slash in your filename: ${file_array[i][j].name}`);
+                return;
+            }
+            else if (file_array[i][j].name.indexOf('<') !== -1 ||
+              file_array[i][j].name.indexOf('>') !== -1) {
+                alert(`ERROR! You may not use angle brackets in your filename: ${file_array[i][j].name}`);
+                return;
+            }
+            const k = fileExists(`/${file_array[i][j].name}`, 1);
             // Check conflict here
-            if (fileExistsResult[0] === 1) {
-                if (!confirm(`Note: ${file.name} already exists. Do you want to replace it?`)) {
+            if ( k[0] === 1 ) {
+                if (!confirm(`Note: ${file_array[i][j].name} already exists. Do you want to replace it?`)) {
                     continue;
                 }
             }
-            formData.append(`files${fileGroup.indexOf(fileGroup) + 1}[]`, file, file.name);
+            formData.append(`files${i + 1}[]`, file_array[i][j], file_array[i][j].name);
         }
     }
     $.ajax({
