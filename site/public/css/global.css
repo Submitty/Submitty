@@ -167,11 +167,9 @@ footer .footer-separator {
 }
 
 #duckdiv {
-    order: 1;
     position: relative; 
     display: inline-block; 
     vertical-align: top;
-    margin-left: auto;
 }
 
 .upload-banner {
