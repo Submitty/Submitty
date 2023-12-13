@@ -97,7 +97,9 @@ class WebRouter {
                 $msg = "POST request exceeds maximum size of " . $max_post_length;
                 $this->core->addErrorMessage($msg);
 
-                return JsonResponse::getFailResponse($msg);
+                return MultiResponse::JsonResponse(
+                    JsonResponse::getFailResponse($msg)
+                );
             }
 
             return true;
@@ -147,7 +149,9 @@ class WebRouter {
             }
 
             if (!$router->checkFeatureFlag()) {
-                return JsonResponse::getFailResponse('Feature is not yet available.');
+                return MultiResponse::JsonResponse(
+                    JsonResponse::getFailResponse('Feature is not yet available.')
+                );
             }
 
             $check_post_max_size = $router->checkPostMaxSize($request);
@@ -185,7 +189,9 @@ class WebRouter {
             // Check if loadCourse returns true
             if (!$router->loadCourse()) {
                 // If loadCourse returns false, redirect to home page
-                return new RedirectResponse($core->buildUrl(['home']));
+                return MultiResponse::RedirectResponse(
+                    new RedirectResponse($core->buildUrl(['home']))
+                );
             }
 
             $logged_in = $core->isWebLoggedIn();
@@ -358,7 +364,9 @@ class WebRouter {
                 }
             }
             elseif (!str_ends_with($this->parameters['_controller'], 'AuthenticationController')) {
-                return new RedirectResponse($this->core->buildUrl(['authentication', 'login']));
+                return MultiResponse::RedirectResponse(
+                    new RedirectResponse($this->core->buildUrl(['authentication', 'login']))
+                );
             }
         }
 
