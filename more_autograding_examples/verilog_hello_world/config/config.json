@@ -1,0 +1,44 @@
+{
+    "required_capabilities": "default",
+    "grading_parameters": {
+        "TOTAL_POINTS": 10,
+        "AUTO_POINTS": 10,
+        "TA_POINTS": 0,
+        "EXTRA_CREDIT_POINTS": 0
+    },
+    "autograding_method": "docker",
+    "autograding": {
+        // compile .v files
+        "submission_to_compilation": ["**/*.v"],
+        // run a.out
+        "compilation_to_runner": ["**/a.out"]
+    },
+    // use the verilog container for grading
+    "container_options": {
+        "container_image": "submitty/verilog:latest"
+    },
+    "testcases": [
+        {
+            "type": "Compilation",
+            "title": "Compilation",
+            "command": "iverilog *.v",
+            "executable_name": "a.out",
+            "points": 5
+        },
+        {
+            "title": "Check output",
+            "details": "details",
+            "command": "./a.out",
+            "points": 5,
+            // check STDOUT.txt for a single line containing "hello world"
+            "validation": [
+                {
+                    "actual_file": "STDOUT.txt",
+                    "method": "diff",
+                    "comparison": "byLinebyChar",
+                    "expected_string": "hello world\n"
+                }
+            ]
+        }
+    ]
+}
