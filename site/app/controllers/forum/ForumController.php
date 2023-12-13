@@ -1346,19 +1346,22 @@ class ForumController extends AbstractController {
     /**
      * @Route("/courses/{_semester}/{_course}/post/likes", methods={"POST"})
      */
-    public function toggleLike(): JsonResponse {
+    public function toggleLike(): JasonResponse {
         $requiredKeys = ['post_id', 'thread_id', 'current_user'];
         foreach ($requiredKeys as $key) {
             if (!isset($_POST[$key])) {
-                return $this->core->getOutput()->renderJsonFail("Missing required key in POST data: $key");
+                // return $this->core->getOutput()->renderJsonFail("Missing required key in POST data: $key");
+                return JsonResponse::getErrorResponse('Missing required key in POST data: ' . $key);
             }
         }
         $output = [];
         $output['type'] = $this->core->getQueries()->toggleLikes($_POST['post_id'], $_POST['thread_id'], $_POST['current_user']);
 
         if ($output["type"] === false) {
-            return $this->core->getOutput()->renderJsonFail("Catch Fail in Query");
+            // return $this->core->getOutput()->renderJsonFail("Catch Fail in Query");
+            return JsonResponse::getErrorResponse('Catch Fail in Query');
         }
-        return $this->core->getOutput()->renderJsonSuccess($output);
+        // return $this->core->getOutput()->renderJsonSuccess($output);
+        return JsonResponse::getSuccessResponse($output);
     }
 }
