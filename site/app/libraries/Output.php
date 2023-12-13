@@ -4,7 +4,6 @@ namespace app\libraries;
 
 use app\controllers\GlobalController;
 use app\exceptions\OutputException;
-//use app\libraries\FileUtils;
 use app\models\Breadcrumb;
 use app\views\ErrorView;
 use League\CommonMark\Extension\Autolink\AutolinkExtension;
