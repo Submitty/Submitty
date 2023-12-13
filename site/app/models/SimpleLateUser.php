@@ -79,7 +79,7 @@ class SimpleLateUser extends AbstractModel {
             $this->since_timestamp = DateUtils::parseDateTime($details['since_timestamp'], $this->core->getDateTimeNow()->getTimezone());
         }
         if (isset($details['late_day_exceptions'])) {
-            $this->days_extended = $details['late_day_exceptions'];
+            $this->late_day_exceptions = $details['late_day_exceptions'];
         }
         if (isset($details['reason_for_exception'])) {
             $this->reason_for_exception = $details['reason_for_exception'];
