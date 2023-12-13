@@ -2372,7 +2372,7 @@ ORDER BY {$orderby}",
     public function getBadGradedComponentsCountByGradingSections($g_id, $sections, $section_key, $is_team) {
         //getBadTeamSubmissionsByGradingSection
         //getBadUserSubmissionsByGradingSection
-         $u_or_t = "u";
+        $u_or_t = "u";
         $users_or_teams = "users";
         $user_or_team_id = "user_id";
         if ($is_team) {
