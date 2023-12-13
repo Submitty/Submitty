@@ -79,7 +79,7 @@ CREATE TABLE public.late_day_cache (
     late_day_exceptions integer,
     late_day_status integer,
     late_days_change integer NOT NULL,
-    reason_for_exception character varying(255),
+    reason_for_exception character varying(255) DEFAULT ''::character varying,
     CONSTRAINT ldc_gradeable_info CHECK (((g_id IS NULL) OR ((submission_days_late IS NOT NULL) AND (late_day_exceptions IS NOT NULL))))
 );
 
