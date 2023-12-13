@@ -76,8 +76,7 @@
     padding: 7px;
     margin-top: 20px;
     word-wrap: break-word;
-    overflow-y: auto;
-    overflow-x: hidden;
+    overflow: hidden auto;
 }
 
 /* stylelint-disable-next-line selector-class-pattern */
