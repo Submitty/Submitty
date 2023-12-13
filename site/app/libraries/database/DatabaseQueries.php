@@ -746,7 +746,7 @@ SQL;
         }
     }
 
-    public function getUpduckInfoForPosts(array $post_ids): array {
+    public function getUpduckInfoForPosts(int[] $post_ids): int[] {
         $placeholders = $this->createParameterList(count($post_ids));
         $sql = "SELECT post_id, COUNT(*) AS cnt FROM forum_upducks WHERE post_id IN {$placeholders} GROUP BY post_id";
 
@@ -762,7 +762,7 @@ SQL;
         return $result;
     }
 
-    public function getUserLikesForPosts(array $post_ids, string $current_user): array {
+    public function getUserLikesForPosts(int[] $post_ids, string $current_user): int[] {
         $placeholders = $this->createParameterList(count($post_ids));
         $user_id = $current_user;
 
