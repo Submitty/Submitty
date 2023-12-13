@@ -511,6 +511,7 @@ class ReportController extends AbstractController {
                     }
                     else {
                         $entry['note'] = 'Score is set to 0 because there are version conflicts.';
+                        $entry['version_conflict'] = 'true';
                     }
                 }
             }
