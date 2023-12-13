@@ -7,11 +7,10 @@ pr_json = "gh pr list --json updatedAt,labels,number,comments"
 terminal_output = subprocess.check_output(pr_json, shell=True, text=True)
 json_output = json.loads(terminal_output)
 
-inactive_comment = "This"\
-" PR has been inactive (no commits and no review comments)"\
-" for 12 days. If there is no new activity in the next 48 hours,"\
-" this PR will be labeled as Abandoned PR - Needs New Owner and"\
-" either another developer will finish the PR or it will be closed."
+inactive_comment = "This PR has been inactive (no commits and no review comments)"\
+    " for 12 days. If there is no new activity in the next 48 hours,"\
+    " this PR will be labeled as Abandoned PR - Needs New Owner and"\
+    " either another developer will finish the PR or it will be closed."
 
 for json_data in json_output:
     already_warned = False
