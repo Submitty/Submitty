@@ -2315,7 +2315,7 @@ ORDER BY {$orderby}",
             {$where}
             GROUP BY {$u_or_t}.{$section_key}
             ORDER BY {$u_or_t}.{$section_key}
-        ", 
+        ",
             $params
         );
         foreach ($this->course_db->rows() as $row) {
@@ -2370,7 +2370,7 @@ ORDER BY {$orderby}",
             {$where}
             GROUP BY {$u_or_t}.{$section_key}
             ORDER BY {$u_or_t}.{$section_key}
-        ", 
+        ",
             $params
         );
         foreach ($this->course_db->rows() as $row) {
