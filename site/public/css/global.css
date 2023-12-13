@@ -55,6 +55,11 @@ nav a > i.f {
     align-items: center; /* Center vertically */
 }
 
+#banner {
+    display: none;
+    width: 1%;
+}
+
 #breadcrumbs {
     display: flex;
     width: 1px;
@@ -314,6 +319,9 @@ footer .footer-separator {
     padding: 10px;
     top: 7px;
     font-size: 10px;
+}
+#speech-bubble-container {
+    display: none;
 }
 
 .triangle {
