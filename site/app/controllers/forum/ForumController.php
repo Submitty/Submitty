@@ -1346,7 +1346,7 @@ class ForumController extends AbstractController {
     /**
      * @Route("/courses/{_semester}/{_course}/post/likes", methods={"POST"})
      */
-    public function toggleLike(): JasonResponse {
+    public function toggleLike(): JsonResponse {
         $requiredKeys = ['post_id', 'thread_id', 'current_user'];
         foreach ($requiredKeys as $key) {
             if (!isset($_POST[$key])) {
