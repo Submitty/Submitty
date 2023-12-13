@@ -65,7 +65,6 @@
         <button class="upduck-button text-decoration-none key_to_click" tabindex="0" onClick="toggleLike({{post.id}}, {{post.thread_id}}, '{{current_user}}')">
             <img id="likeIcon_{{post.id}}" src="{{ post_up_duck.upduck_user_liked ? '/img/on-duck-button.svg' : '/img/light-mode-off-duck.svg' }}" alt="Like" width="30" height="30">
         </button>
-        {# I didnt implement the dark mode button because I like how the light mode button looks like for dark and light mode#}
         <span id="likeCounter_{{post.id}}" style="font-size: 15px; vertical-align: middle;">{{ post_up_duck.upduck_count }}</span>
 
     {% endif %}

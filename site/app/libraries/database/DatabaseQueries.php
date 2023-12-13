@@ -777,7 +777,7 @@ SQL;
             $result[$row['post_id']] = intval($row['cnt']);
         }
         foreach ($result as $key => $value) {
-            if($value>=1) {
+            if ($value >= 1) {
                 array_push($final, $key);
             }
         }
