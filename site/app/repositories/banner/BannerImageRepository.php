@@ -19,11 +19,10 @@ class BannerImageRepository extends EntityRepository {
             SELECT b
             FROM app\entities\banner\BannerImage b
             WHERE
-                b.release_date <= :currentDate
-                AND :currentDate <= b.closing_date
+                b.release_date <= CURRENT_TIME()
+                AND CURRENT_TIME() <= b.closing_date
             ORDER BY b.release_date DESC
         ')
-            ->setParameter('currentDate', $currentDate)
             ->getResult();
     }
 }
