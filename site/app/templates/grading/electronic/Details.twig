@@ -59,19 +59,9 @@
         </div>
     </div>
     {% if grade_inquiry_only_button %}
-    <script>
-        window.onload = function() {
-            var button = document.getElementById('inquiryButton');
-            status = Cookies.get('inquiry_status')
-            if (status === 'on') {
-                grade_inquiry_only();
-                button.innerHTML = "Grade Inquiry Only: On";
-            } else {
-                reverse_inquiry_only();
-                button.innerHTML = "Grade Inquiry Only: Off";
-            }
-        }
-    </script>
+        <script>
+            inquiry_update();
+        </script>
     {% endif %}
     {% if not is_student %}
         <a href="{{ stats_url }}" class="btn btn-primary">Grading Stats</a>
@@ -94,7 +84,7 @@
     <button type="button" class="btn btn-primary" onclick="expandAllSections()">Expand All Sections</button>
     {% if message is not empty %}
     <div class="details-warning-box{% if message_warning %} details-warning-highlight{% else %} details-warning-neutral{% endif %}">
-        {{ message }}
+        {{ message|nl2br }}
     </div>
     {% endif %}
     <div class="details-action-box">
@@ -252,7 +242,7 @@
 </div>
 
 {% macro render_student(context, section, graded_gradeable, index, info, columns, team_gradeable_view_history, overrides, anon_ids) %}
-    <tr data-testid="grade-table"
+    <tr class="grade-table" data-testid="grade-table"
         {% if not graded_gradeable.getSubmitter().isTeam() and graded_gradeable.getSubmitter().getUser().accessGrading() %}
             style='background: #7bd0f7;'
         {% endif %}
@@ -507,7 +497,7 @@
         {% set badge_count = graded_gradeable.getActiveGradeInquiryCount()  %}
     {%  endif %}
     <td style="text-align: center;">
-        <a data-testid="grade-button" {% if graded_gradeable.hasActiveGradeInquiry() %}data-grade-inquiry="true"{% endif %} class="btn {{ btn_class }}" href="{{ context.grade_url }}?who_id={{ anon_ids[graded_gradeable.getSubmitter().getId()] }}&sort={{ context.sort }}&direction={{ context.direction }}">
+        <a class="grade-button" data-testid="grade-button" {% if graded_gradeable.hasActiveGradeInquiry() %}data-grade-inquiry="true"{% endif %} class="btn {{ btn_class }}" href="{{ context.grade_url }}?who_id={{ anon_ids[graded_gradeable.getSubmitter().getId()] }}&sort={{ context.sort }}&direction={{ context.direction }}">
             {{ contents }}
             {% if badge_count > 0 and graded_gradeable.getGradeable().isGradeInquiryPerComponentAllowed()%}
                 <span class="notification-badge">{{ badge_count }}</span>
@@ -557,7 +547,7 @@
         {% set badge_count = graded_gradeable.getActiveGradeInquiryCount()  %}
     {%  endif %}
     <td style="text-align: center;">
-        <a data-testid="grade-button" {% if graded_gradeable.hasActiveGradeInquiry() %}data-grade-inquiry="true"{% endif %} class="btn {{ btn_class }}" href="{{ context.grade_url }}?who_id={{ anon_ids[graded_gradeable.getSubmitter().getId()] }}&sort={{ context.sort }}&direction={{ context.direction }}">
+        <a class="grade-button" data-testid="grade-button" {% if graded_gradeable.hasActiveGradeInquiry() %}data-grade-inquiry="true"{% endif %} class="btn {{ btn_class }}" href="{{ context.grade_url }}?who_id={{ anon_ids[graded_gradeable.getSubmitter().getId()] }}&sort={{ context.sort }}&direction={{ context.direction }}">
             {{ contents }}
             {% if badge_count is defined and badge_count > 0 and graded_gradeable.getGradeable().isGradeInquiryPerComponentAllowed()%}
                 <span class="notification-badge">{{ badge_count }}</span>
@@ -781,12 +771,12 @@
             Cookies.set('inquiry_status', 'on');
             var inquiry = Cookies.get('inquiry_status');
             grade_inquiry_only();
-            button.innerHTML = "Grade Inquiry Only: On";
+            button.textContent = "Grade Inquiry Only: On";
         } else {
             Cookies.set('inquiry_status', 'off');
             var inquiry = Cookies.get('inquiry_status');
             reverse_inquiry_only();
-            button.innerHTML = "Grade Inquiry Only: Off";
+            button.textContent = "Grade Inquiry Only: Off";
         }
     }
 
