@@ -652,7 +652,6 @@ class ForumController extends AbstractController {
             else {
                 $type = "post";
             }
-
             $post_author_id = $post['author_user_id'];
             $metadata = json_encode([]);
             $subject = "Deleted: " . Notification::textShortner($post["content"]);
