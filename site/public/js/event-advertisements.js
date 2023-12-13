@@ -16,27 +16,24 @@ $(() => {
     eventAdvertisements.seenImages = [];
     eventAdvertisements.images = document.getElementsByClassName('club-banners');
     eventAdvertisements.bannerElement = document.getElementById('banner');
-
+    eventAdvertisements.bannerElement.style.display = 'none';
     eventAdvertisements.bubble = document.getElementById('speech-bubble-container');
     if (eventAdvertisements.bubble !== null) {
         eventAdvertisements.bubble.style.display = 'none';
     }
 
-    eventAdvertisements.images.forEach((image) => {
-        const className = image.className.split(' ')[1];
+    for (let i = 0; i < eventAdvertisements.images.length; i++) {
+        const className = eventAdvertisements.images[i].className.split(' ')[1];
         if (!eventAdvertisements.hiddenImages.includes(className)) {
-            eventAdvertisements.currentImages.push(image);
-        } else {
-            eventAdvertisements.seenImages.push(image);
+            eventAdvertisements.currentImages.push(eventAdvertisements.images[i]);
         }
-    });
-
+        else {
+            eventAdvertisements.seenImages.push(eventAdvertisements.images[i]);
+        }
+    }
     eventAdvertisements.bubble = document.getElementById('speech-bubble-container');
-    if (eventAdvertisements.bubble !== null) {
-        if (eventAdvertisements.currentImages.length > 0) {
-
-            eventAdvertisements.bubble.style.display = 'block';
-        }
+    if (eventAdvertisements.bubble !== null && eventAdvertisements.currentImages.length > 0) {
+        eventAdvertisements.bubble.style.display = 'block';
     }
     eventAdvertisements.images = eventAdvertisements.currentImages.concat(eventAdvertisements.seenImages);
 
