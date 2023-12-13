@@ -1,7 +1,9 @@
 ## Admins / Project Managers  
 [Barbara Cutler](http://www.cs.rpi.edu/~cutler/) 2014-current  
 [Matthew Peveler](http://mpeveler.com/) 2014-current  
-Evan Maicus 2016-current  
+Christopher Reed, 2021-current  
+William Allen, 2021-current  
+
 
 ## Developers  
 
@@ -38,8 +40,6 @@ Adam Tuhacek 2023-current
 Yanli Wang 2023-current  
 Kerui (Ray) Wu 2023-current  
 Bairong Zhang 2023-current  
-William Allen, 2021-current  
-Christopher Reed, 2021-current  
 Shail Patel 2018-current  
 Jasmine Plum 2017-current  
 Ana Milanova 2016-current  
@@ -49,6 +49,7 @@ Peter Bailie 2014-current
 David Goldschmidt 2014-current  
 Konstantin Kuzmin 2018-current  
 Preston Carman 2019-current  
+Evan Maicus 2016-2021  
 Shelly Belsky, 2021-2023  
 Jenay Barela, 2020-2023  
 Jensen Li, 2020-2023  
