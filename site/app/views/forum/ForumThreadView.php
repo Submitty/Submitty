@@ -474,14 +474,10 @@ class ForumThreadView extends AbstractView {
         $merged_threads = $this->core->getQueries()->getMergedThreadIds($post_ids);
         $post_attachments = $this->core->getQueries()->getForumAttachments($post_ids);
 
-        $postIDs = [];
-        foreach ($posts as $post) {
-            array_push($postIDs, $post["id"]);
-        }
         $current_user = $this->core->getUser()->getId();
         $upDuckCounter_map = [];
-        $upDuckCounter_map = $this->core->getQueries()->getUpduckInfoForPosts($postIDs);
-        $userLiked = $this->core->getQueries()->getUserLikesForPosts($postIDs, $current_user);
+        $upDuckCounter_map = $this->core->getQueries()->getUpduckInfoForPosts($post_ids);
+        $userLiked = $this->core->getQueries()->getUserLikesForPosts($post_ids, $current_user);
 
         if ($display_option == "tree") {
             $order_array = [];
