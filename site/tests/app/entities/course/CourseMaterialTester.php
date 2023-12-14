@@ -22,6 +22,10 @@ class CourseMaterialTester extends BaseUnitTest {
             $details['hidden_from_students'],
             $details['priority'],
             null,
+            null,
+            "instructor",
+            $this->core->getDateTimeNow(),
+            null,
             null
         );
         $sections = ['1', '2'];
