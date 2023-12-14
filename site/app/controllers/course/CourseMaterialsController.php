@@ -515,6 +515,10 @@ class CourseMaterialsController extends AbstractController {
                                     $course_material->isHiddenFromStudents(),
                                     $course_material->getPriority(),
                                     null,
+                                    null,
+                                    $course_material->getUploadedBy(),
+                                    $course_material->getUploadDate(),
+                                    null,
                                     null
                                 );
                                 $this->core->getCourseEntityManager()->persist($course_material_dir);

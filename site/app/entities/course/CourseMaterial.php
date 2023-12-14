@@ -73,10 +73,10 @@ class CourseMaterial {
     protected ?string $title;
 
     #[ORM\Column(type: Types::STRING, nullable: true)]
-    protected string $uploaded_by;
+    protected ?string $uploaded_by;
 
     #[ORM\Column(type: Types::DATETIMETZ_MUTABLE, nullable: true)]
-    protected DateTime $upload_date;
+    protected ?DateTime $upload_date;
 
     #[ORM\Column(type: Types::STRING, nullable: true)]
     protected ?string $last_edit_by;
@@ -84,7 +84,7 @@ class CourseMaterial {
     #[ORM\Column(type: Types::DATETIMETZ_MUTABLE, nullable: true)]
     protected ?DateTime $last_edit_date;
 
-    public function __construct(int $type, string $path, \DateTime $release_date, bool $hidden_from_students, float $priority, ?string $url, ?string $title, string $uploaded_by, \DateTime $upload_date, ?string $last_edit_by, ?\DateTime $last_edit_date) {
+    public function __construct(int $type, string $path, \DateTime $release_date, bool $hidden_from_students, float $priority, ?string $url, ?string $title, ?string $uploaded_by, ?\DateTime $upload_date, ?string $last_edit_by, ?\DateTime $last_edit_date) {
         $this->setType($type);
         $this->setPath($path);
         $this->setReleaseDate($release_date);
