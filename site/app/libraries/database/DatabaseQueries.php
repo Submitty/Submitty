@@ -910,6 +910,9 @@ SQL;
      * @return int[] threads that have been merged
      */
     public function getMergedThreadIds(array $post_ids): array {
+        if (count($post_ids) === 0) {
+            return [];
+        }
         $placeholders = $this->createParameterList(count($post_ids));
         $this->course_db->query("SELECT id FROM threads WHERE merged_thread_id <> -1 AND merged_post_id IN {$placeholders}", $post_ids);
         return array_column($this->course_db->rows(), "id");
@@ -936,7 +939,7 @@ SQL;
      * @return null|array<int, mixed[]> array of posts, indexed by thread id.
      */
     public function getFirstPostForThreads(array $thread_ids): null|array {
-        if (count($thread_ids) == 0) {
+        if (count($thread_ids) === 0) {
             return null;
         }
         $placeholders = $this->createParameterList(count($thread_ids));
@@ -979,6 +982,9 @@ SQL;
      * @return int[] ids of posts with history
      */
     public function getPostsWithHistory(array $post_ids): array {
+        if (count($post_ids) === 0) {
+            return [];
+        }
         $placeholders = $this->createParameterList(count($post_ids));
         $this->course_db->query("SELECT DISTINCT post_id FROM forum_posts_history WHERE post_id IN {$placeholders}", $post_ids);
         return array_column($this->course_db->rows(), "post_id");
@@ -1155,6 +1161,9 @@ SQL;
      *
      */
     public function getForumAttachments(array $post_ids, bool $all_vers = false): array {
+        if (count($post_ids) === 0) {
+            return [];
+        }
         $return = [];
         // Default version is current version
         $placeholders = $this->createParameterList(count($post_ids));
@@ -1648,6 +1657,7 @@ WHERE term=? AND course=? AND user_id=?",
      *              'late_day_date' => DateTime,
      *              'submission_days_late' => int,
      *              'late_day_exceptions' => int,
+     *              'reason_for_exception' => string,
      *              'late_days_remaining' => int,
      *              'late_day_status' => int,
      *              'late_days_change' => int
@@ -1701,12 +1711,13 @@ WHERE term=? AND course=? AND user_id=?",
         $params[] = $late_day_info->getLateDaysRemaining();
         $params[] = $late_day_info->getStatus();
         $params[] = $late_day_info->getLateDaysChange();
+        $params[] = $late_day_info->getReasonForException();
 
         $user_or_team = $late_day_info->getGradedGradeable()->getGradeable()->isTeamAssignment() ? 'team_id' : 'user_id';
         $query = "INSERT INTO late_day_cache
                     (" . $user_or_team . ", g_id, late_day_date, late_days_allowed, submission_days_late, 
-                    late_day_exceptions, late_days_remaining, late_day_status, late_days_change) 
-                    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)";
+                    late_day_exceptions, late_days_remaining, late_day_status, late_days_change, reason_for_exception) 
+                    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
         $this->course_db->query($query, $params);
     }
 
@@ -1743,6 +1754,7 @@ WHERE term=? AND course=? AND user_id=?",
      *          'late_day_date' => DateTime,
      *          'submission_days_late' => int,
      *          'late_day_exceptions' => int,
+     *          'reason_for_exception' => string,
      *          'late_days_remaining' => int,
      *          'late_day_status' => int,
      *          'late_days_change' => int
@@ -1787,7 +1799,8 @@ WHERE term=? AND course=? AND user_id=?",
      *      'late_day_exceptions' => int,
      *      'late_days_remaining' => int,
      *      'late_day_status' => int,
-     *      'late_days_change' => int
+     *      'late_days_change' => int,
+     *      'reason_for_exception' => string
      * ]
      */
     public function getLateDayCacheForUserGradeable(string $user_id, string $g_id): ?array {
@@ -5016,6 +5029,9 @@ AND gc_id IN (
      * @return int[] thread ids that have been viewed by user
      */
     public function getViewedThreads(string $user, array $thread_ids): array {
+        if (count($thread_ids) === 0) {
+            return [];
+        }
         $placeholders = $this->createParameterList(count($thread_ids));
         $this->course_db->query(
             "
@@ -5060,6 +5076,9 @@ AND gc_id IN (
      * @return array<string, mixed[]> user info, indexed by user id.
      */
     public function getDisplayUserInfoFromUserIds(array $user_ids): array {
+        if (count($user_ids) === 0) {
+            return [];
+        }
         $unique_users = array_values(array_unique($user_ids));
         $placeholders = $this->createParameterList(count($unique_users));
         $this->course_db->query("SELECT * FROM users WHERE user_id IN {$placeholders};", $unique_users);
@@ -8106,6 +8125,7 @@ WHERE current_state IN
         if ($team) {
             $submitter_data_inject =
               'ldet.array_late_day_exceptions,
+               ldet.array_reason_for_exception,
                ldet.array_late_day_user_ids,
                /* Aggregate Team User Data */
                team.team_id,
@@ -8140,6 +8160,7 @@ WHERE current_state IN
               LEFT JOIN (
                 SELECT
                   json_agg(e.late_day_exceptions) AS array_late_day_exceptions,
+                  json_agg(e.reason_for_exception) AS array_reason_for_exception,
                   json_agg(e.user_id) AS array_late_day_user_ids,
                   t.team_id,
                   g_id
@@ -8171,6 +8192,7 @@ WHERE current_state IN
               u.rotating_section,
               u.registration_type,
               ldeu.late_day_exceptions,
+              ldeu.reason_for_exception,
               u.registration_subsection';
             $submitter_inject = '
             JOIN (
@@ -8453,15 +8475,23 @@ WHERE current_state IN
 
                 // Get the late day exceptions for each user
                 $late_day_exceptions = [];
+                $reasons_for_exceptions = [];
                 if (isset($row['array_late_day_user_ids'])) {
                     $late_day_exceptions = array_combine(
                         json_decode($row['array_late_day_user_ids']),
                         json_decode($row['array_late_day_exceptions'])
                     );
+                    $reasons_for_exceptions = array_combine(
+                        json_decode($row['array_late_day_user_ids']),
+                        json_decode($row['array_reason_for_exception'])
+                    );
                 }
                 foreach ($submitter->getMembers() as $user_id) {
                     if (!isset($late_day_exceptions[$user_id])) {
                         $late_day_exceptions[$user_id] = 0;
+                    }
+                    if (!isset($reasons_for_exceptions[$user_id])) {
+                        $reasons_for_exceptions[$user_id] = '';
                     }
                 }
             }
@@ -8475,6 +8505,9 @@ WHERE current_state IN
                 $late_day_exceptions = [
                     $submitter->getId() => $row['late_day_exceptions'] ?? 0
                 ];
+                $reasons_for_exceptions = [
+                    $submitter->getId() => $row['reason_for_exception'] ?? ''
+                ];
             }
 
             // Create the graded gradeable instances
@@ -8483,7 +8516,8 @@ WHERE current_state IN
                 $gradeable,
                 new Submitter($this->core, $submitter),
                 [
-                    'late_day_exceptions' => $late_day_exceptions
+                    'late_day_exceptions' => $late_day_exceptions,
+                    'reasons_for_exceptions' => $reasons_for_exceptions
                 ]
             );
             $ta_graded_gradeable = null;
@@ -8702,6 +8736,9 @@ WHERE current_state IN
      * @return array|null
      */
     private function getUsers(array $user_id_list, bool $is_numeric = false): ?array {
+        if (count($user_id_list) === 0) {
+            return null;
+        }
         $placeholders = $this->createParameterList(count($user_id_list));
 
         if (!$is_numeric) {
