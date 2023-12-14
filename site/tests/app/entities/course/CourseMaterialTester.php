@@ -23,8 +23,8 @@ class CourseMaterialTester extends BaseUnitTest {
             $details['priority'],
             null,
             null,
-            "instructor",
-            $this->core->getDateTimeNow(),
+            "testUser",
+            $details['release_date'],
             null,
             null
         );
@@ -59,6 +59,10 @@ class CourseMaterialTester extends BaseUnitTest {
             $details['release_date'],
             $details['hidden_from_students'],
             $details['priority'],
+            null,
+            null,
+            "testUser",
+            $details['release_date'],
             null,
             null
         );
