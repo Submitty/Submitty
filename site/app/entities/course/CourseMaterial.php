@@ -72,7 +72,19 @@ class CourseMaterial {
     #[ORM\Column(type: Types::STRING, nullable: true)]
     protected ?string $title;
 
-    public function __construct(int $type, string $path, \DateTime $release_date, bool $hidden_from_students, float $priority, ?string $url, ?string $title) {
+    #[ORM\Column(type: Types::STRING, nullable: true)]
+    protected string $uploaded_by;
+
+    #[ORM\Column(type: Types::DATETIMETZ_MUTABLE, nullable: true)]
+    protected DateTime $upload_date;
+
+    #[ORM\Column(type: Types::STRING, nullable: true)]
+    protected ?string $last_edit_by;
+
+    #[ORM\Column(type: Types::DATETIMETZ_MUTABLE, nullable: true)]
+    protected ?DateTime $last_edit_date;
+
+    public function __construct(int $type, string $path, \DateTime $release_date, bool $hidden_from_students, float $priority, ?string $url, ?string $title, string $uploaded_by, \DateTime $upload_date, ?string $last_edit_by, ?\DateTime $last_edit_date) {
         $this->setType($type);
         $this->setPath($path);
         $this->setReleaseDate($release_date);
@@ -81,8 +93,11 @@ class CourseMaterial {
         $this->sections = new ArrayCollection();
         $this->url = $url;
         $this->title = $title;
+        $this->uploaded_by = $uploaded_by;
+        $this->upload_date = $upload_date;
+        $this->last_edit_by = $last_edit_by;
+        $this->last_edit_date = $last_edit_date;
     }
-
     /**
      * @return Collection<CourseMaterialSection>
      */
@@ -116,6 +131,22 @@ class CourseMaterial {
 
     public function getReleaseDate(): \DateTime {
         return $this->release_date;
+    }
+
+    public function getUploadedBy(): string {
+        return $this->uploaded_by;
+    }
+
+    public function getUploadDate(): \DateTime {
+        return $this->upload_date;
+    }
+
+    public function getLastEditBy(): string {
+        return $this->last_edit_by;
+    }
+
+    public function getLastEditDate(): \DateTime {
+        return $this->last_edit_date;
     }
 
     public function isHiddenFromStudents(): bool {
@@ -194,5 +225,21 @@ class CourseMaterial {
 
     public function setTitle(string $title): void {
         $this->title = $title;
+    }
+
+    public function setUploadedBy(string $uploaded_by): void {
+        $this->uploaded_by = $uploaded_by;
+    }
+
+    public function setUploadDate(\DateTime $upload_date): void {
+        $this->upload_date = $upload_date;
+    }
+
+    public function setLastEditBy(string $last_edit_by): void {
+        $this->last_edit_by = $last_edit_by;
+    }
+
+    public function setLastEditDate(\DateTime $last_edit_date): void {
+        $this->last_edit_date = $last_edit_date;
     }
 }
