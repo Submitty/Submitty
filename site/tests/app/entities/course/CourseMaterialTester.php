@@ -34,10 +34,13 @@ class CourseMaterialTester extends BaseUnitTest {
         $this->assertEquals($details['release_date'], $course_material->getReleaseDate());
         $this->assertEquals($details['hidden_from_students'], $course_material->isHiddenFromStudents());
         $this->assertEquals($details['priority'], $course_material->getPriority());
+        $activeSection =; ['1', '2']; //define the expected active sections 
         $index = 0;
         foreach ($course_material->getSections()->toArray() as $section) {
+            if(!$section->isDeleted()){ //check if the section is deleted 
             $this->assertEquals($sections[$index], $section->getSectionId());
             $index++;
+            }
         }
     }
 

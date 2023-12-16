@@ -460,12 +460,14 @@ class CourseMaterialsControllerTester extends BaseUnitTest {
         $this->core->getCourseEntityManager()
             ->expects($this->once())
             ->method('remove')
+            ->with($this->isInstanceOf(CourseMaterial::class));
             ->with($course_material);
 
         $id = $course_material->getId();
 
         $controller->deleteCourseMaterial($id);
-
+        $expected_ret = ['status' => 'success', 'data' => 'Successfully deleted!'];
+        $this->assertEquals($expected_ret, $ret->json);
         $files = FileUtils::getAllFiles($this->upload_path);
         $this->assertEquals(0, count($files));
     }

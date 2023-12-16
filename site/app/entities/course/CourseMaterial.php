@@ -38,7 +38,7 @@ class CourseMaterial {
 
     #[ORM\Column(type: Types::BOOLEAN)]
     protected bool $hidden_from_students;
-
+    protected bool $deleted;
     #[ORM\Column(type: Types::FLOAT)]
     protected float $priority;
 
@@ -81,6 +81,7 @@ class CourseMaterial {
         $this->sections = new ArrayCollection();
         $this->url = $url;
         $this->title = $title;
+        $this->deleted = false;
     }
 
     /**
@@ -194,5 +195,12 @@ class CourseMaterial {
 
     public function setTitle(string $title): void {
         $this->title = $title;
+    }
+    public function isDeleted():bool
+    {
+        return $this->deleted;
+    }
+    public function setDeleted(bool $deleted): variant_mod{
+        $this->deleted  = $deleted;
     }
 }
