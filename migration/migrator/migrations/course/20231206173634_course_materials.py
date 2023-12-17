@@ -16,13 +16,10 @@ def up(config, database, semester, course):
     """
     
     # Add columns to the course_materials table.
-    database.execute("""
-                     ALTER TABLE course_materials ADD COLUMN IF NOT EXISTS uploaded_by character varying(255) REFERENCES users(user_id) DEFAULT NULL;
-                     ALTER TABLE course_materials ADD COLUMN IF NOT EXISTS upload_date TIMESTAMP WITH TIME ZONE DEFAULT NULL;
-                     ALTER TABLE course_materials ADD COLUMN IF NOT EXISTS last_edit_by character varying(255) REFERENCES users(user_id) DEFAULT NULL;
-                     ALTER TABLE course_materials ADD COLUMN IF NOT EXISTS last_edit_date TIMESTAMP WITH TIME ZONE DEFAULT NULL;
-                     UPDATE course_materials SET last_edit_by = uploaded_by, last_edit_date = upload_date;
-                     """)
+    database.execute("ALTER TABLE course_materials ADD COLUMN IF NOT EXISTS uploaded_by character varying(255) REFERENCES users(user_id) DEFAULT NULL;")
+    database.execute("ALTER TABLE course_materials ADD COLUMN IF NOT EXISTS upload_date TIMESTAMP WITH TIME ZONE DEFAULT NULL;")
+    database.execute("ALTER TABLE course_materials ADD COLUMN IF NOT EXISTS last_edit_by character varying(255) REFERENCES users(user_id) DEFAULT NULL;")
+    database.execute("ALTER TABLE course_materials ADD COLUMN IF NOT EXISTS last_edit_date TIMESTAMP WITH TIME ZONE DEFAULT NULL;")
 
 def down(config, database, semester, course):
     """
