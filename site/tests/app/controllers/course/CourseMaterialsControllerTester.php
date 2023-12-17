@@ -461,7 +461,10 @@ class CourseMaterialsControllerTester extends BaseUnitTest {
             ->expects($this->once())
             ->method('remove')
             ->with($this->isInstanceOf(CourseMaterial::class));
-            ->with($course_material);
+            ->willReturnCallBack(function($courseMaterial) use ($course_material)
+            {
+                $this->assertSame($course_material, $courseMaterial);
+            });
 
         $id = $course_material->getId();
 
