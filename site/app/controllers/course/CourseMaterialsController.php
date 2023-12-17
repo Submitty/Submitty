@@ -456,8 +456,8 @@ class CourseMaterialsController extends AbstractController {
             $course_material->setPriority($_POST['sort_priority']);
         }
 
-        $course_material->setLastEditBy($course_material->getUploadedBy());
-        $course_material->setLastEditDate($course_material->getUploadDate());
+        $course_material->setLastEditBy($this->core->getUser()->getId());
+        $course_material->setLastEditDate(DateUtils::parseDateTime($this->core->getDateTimeNow(), $this->core->getDateTimeNow()->getTimezone()));
 
         if (isset($_POST['file_path']) || isset($_POST['title'])) {
             $path = $course_material->getPath();
@@ -881,7 +881,7 @@ class CourseMaterialsController extends AbstractController {
                 $value === CourseMaterial::LINK ? $url_url : null,
                 $value === CourseMaterial::LINK ? $title_name : null,
                 uploaded_by: $this->core->getUser()->getId(),
-                upload_date: DateUtils::parseDateTime($details['release_date'], $this->core->getDateTimeNow()->getTimezone()),
+                upload_date: DateUtils::parseDateTime($this->core->getDateTimeNow(), $this->core->getDateTimeNow()->getTimezone()),
                 last_edit_by: null,
                 last_edit_date: null
             );
