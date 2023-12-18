@@ -117,7 +117,7 @@ function showBanners(noMove = false) {
         document.getElementById('speech-bubble').style.display = 'none';
     }
     else {
-        alignRightEdgeWithLeftEdge('moorthy-duck', 'logo-box');
+        //alignRightEdgeWithLeftEdge('moorthy-duck', 'logo-box');
         Cookies.set('display-banner', 'no');
         const duckdivElement = document.getElementById('moorthy-duck');
         movingUnit.style.animation = 'none';
