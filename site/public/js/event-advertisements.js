@@ -43,6 +43,10 @@ const eventAdvertisements = {
 };
 
 $(() => {
+    if (document.getElementById('banner') === null) {
+        return;
+    }
+
     eventAdvertisements.currentImageIndex = 0;
     eventAdvertisements.hiddenImages = getHiddenImages();
     eventAdvertisements.seenImages = [];
