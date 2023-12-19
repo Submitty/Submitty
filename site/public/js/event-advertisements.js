@@ -38,6 +38,8 @@ const eventAdvertisements = {
     seenImages: undefined,
     images: undefined,
     bannerElement: undefined,
+    moveDuck: undefined,
+    originalDuck: undefined,
     bubble: undefined,
     currentImages: [],
 };
@@ -53,6 +55,9 @@ $(() => {
     eventAdvertisements.images = document.getElementsByClassName('club-banners');
     eventAdvertisements.bannerElement = document.getElementById('banner');
     eventAdvertisements.bannerElement.style.display = 'none';
+    eventAdvertisements.moveDuck = document.getElementById('duckdivmove');
+    eventAdvertisements.moveDuck.style.display = 'none';
+    eventAdvertisements.originalDuck = document.getElementById('duckdiv');
     eventAdvertisements.bubble = document.getElementById('speech-bubble-container');
     if (eventAdvertisements.bubble !== null) {
         eventAdvertisements.bubble.style.display = 'none';
@@ -84,7 +89,9 @@ $(() => {
 function showBanners(noMove = false) {
     const movingUnit = document.getElementById('moving-unit');
     const bannerElement = document.getElementById('banner');
+    const logoBox = document.getElementById('logo-box');
     if (bannerElement.style.display === 'none' && eventAdvertisements.images.length > 0) {
+        logoBox.classList.add('logo-inmovement');
 
 
         eventAdvertisements.currentImageIndex = 0;
@@ -99,9 +106,10 @@ function showBanners(noMove = false) {
             duckdivElement.style.animation = 'rocking 2s linear infinite';
 
             setTimeout(() => {
-                const duck = document.getElementById('moorthy-duck');
-                duck.style.position = 'relative';
-                duck.style.marginRight = '0px';
+                eventAdvertisements.originalDuck.style.display = 'none';
+                eventAdvertisements.moveDuck.style.display = 'block';
+                eventAdvertisements.moveDuck.style.position = 'relative';
+                eventAdvertisements.moveDuck.style.marginRight = '0px';
                 bannerElement.style.width = '100%';
                 bannerElement.style.display = 'block';
                 movingUnit.style.left = '10%';
@@ -110,9 +118,10 @@ function showBanners(noMove = false) {
 
         }
         else {
-            const duck = document.getElementById('moorthy-duck');
-            duck.style.position = 'relative';
-            duck.style.marginRight = '0px';
+            eventAdvertisements.originalDuck.style.display = 'none';
+            eventAdvertisements.moveDuck.style.display = 'block';
+            eventAdvertisements.moveDuck.style.position = 'relative';
+            eventAdvertisements.moveDuck.style.marginRight = '0px';
             bannerElement.style.width = '100%';
             bannerElement.style.display = 'block';
             eventAdvertisements.images[eventAdvertisements.currentImageIndex].classList.add('active');
@@ -122,12 +131,15 @@ function showBanners(noMove = false) {
     }
     else {
         //alignRightEdgeWithLeftEdge('moorthy-duck', 'logo-box');
+        logoBox.classList.remove('logo-inmovement');
         Cookies.set('display-banner', 'no');
-        const duckdivElement = document.getElementById('moorthy-duck');
+        eventAdvertisements.moveDuck.style.display = 'none';
         movingUnit.style.animation = 'none';
-        duckdivElement.style.animation = 'none';
+        eventAdvertisements.moveDuck.style.animation = 'none';
 
-        duckdivElement.style.transform = 'rotate(0deg)';
+        eventAdvertisements.moveDuck.style.transform = 'rotate(0deg)';
+
+        eventAdvertisements.originalDuck.style.display = "block";
         document.getElementById('breadcrumbs').style.flexWrap = 'wrap';
         if (eventAdvertisements.images.length > 0) {
             eventAdvertisements.images[eventAdvertisements.currentImageIndex].classList.remove('active');

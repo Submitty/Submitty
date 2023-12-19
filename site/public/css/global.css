@@ -113,6 +113,12 @@ nav a > i.f {
     z-index: 0;*/
 }
 
+.logo-inmovement {
+    top: 0;
+    right: 0;
+    z-index: 0;
+}
+
 #moving-unit {
     z-index: 90;
     position: absolute;
@@ -170,6 +176,10 @@ footer .footer-separator {
     position: relative; 
     display: inline-block; 
     vertical-align: top;
+}
+
+#duckdivmove {
+    display: none;
 }
 
 .upload-banner {
