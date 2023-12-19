@@ -261,19 +261,12 @@
                     </div>
                     {% endif %}
                     <span id="duckdiv" style="position: relative">
-                    {% if not enable_banner and imageDataArray|length == 0%}
-                    <a id="duck-desktop"
-                        href="http://submitty.org/developer/rcos_moorthy"
-                        target="_blank"
-                        aria-label="Learn more about Moorthy"
-                    >
-                    {% endif %}
                         <img id="moorthy-duck" class="moorth-duck"
                             src="{{ base_url }}/img/{{ duck_img }}"
                             alt="Moorthy - Submitty's Duck Mascot!"
                             height="80"
                             class="key_to_click"
-                            {% if user_given_name != "" %}
+                            {% if user_given_name != "" and imageDataArray|length != 0%}
                                 onclick="showBanners();"
                             {% endif %}
                         />
