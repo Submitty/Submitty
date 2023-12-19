@@ -185,16 +185,6 @@
 
                 <div id="moving-unit">
                     <div style="display: flex">
-                        {% if user_given_name != "" %}
-                        <div class="speech-bubble-container" id="speech-bubble-container">
-                            <button class="speech-bubble" id="speech-bubble" onclick="showBanners()">
-                                <strong>
-                                    New Event!
-                                </strong>
-                            </button >
-                            <div class="triangle" id="triangle"></div>
-                        </div>
-                        {% endif %}
                         <span id="duckdivmove">
                             <img id="moorthy-duck"
                                 src="{{ base_url }}/img/{{ duck_img }}"
@@ -261,6 +251,16 @@
 
 
                 <div style="display: flex">
+                    {% if user_given_name != "" %}
+                    <div class="speech-bubble-container" id="speech-bubble-container">
+                        <button class="speech-bubble" id="speech-bubble" onclick="showBanners()">
+                            <strong>
+                                New Event!
+                            </strong>
+                        </button >
+                        <div class="triangle" id="triangle"></div>
+                    </div>
+                    {% endif %}
                     <span id="duckdiv" style="position: relative">
                     {% if not enable_banner and imageDataArray|length == 0%}
                     <a id="duck-desktop"
