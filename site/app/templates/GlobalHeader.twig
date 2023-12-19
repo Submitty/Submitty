@@ -186,7 +186,7 @@
                     <div id="moving-unit">
                         <div style="display: flex">
                             <span id="duckdivmove">
-                                <img id="moorthy-duck"
+                                <img id="moorthy-duckmove" class="moorthy-duck"
                                     src="{{ base_url }}/img/{{ duck_img }}"
                                     alt="Moorthy - Submitty's Duck Mascot!"
                                     height="80"
@@ -194,7 +194,6 @@
                                     {% if user_given_name != "" %}
                                         onclick="showBanners();"
                                     {% endif %}
-                                    tabindex="0"
                                 />
                                 {% if enable_banner %}
                                     <img id="submitty-banner"
@@ -269,7 +268,7 @@
                         aria-label="Learn more about Moorthy"
                     >
                     {% endif %}
-                        <img id="moorthy-duck"
+                        <img id="moorthy-duck" class="moorth-duck"
                             src="{{ base_url }}/img/{{ duck_img }}"
                             alt="Moorthy - Submitty's Duck Mascot!"
                             height="80"
@@ -277,11 +276,8 @@
                             {% if user_given_name != "" %}
                                 onclick="showBanners();"
                             {% endif %}
-                            tabindex="0"
                         />
-                    {% if not enable_banner %}
-                    </a>
-                    {% endif %}
+
 
                     {% if enable_banner %}
                     <img id="submitty-banner"

@@ -107,10 +107,6 @@ nav a > i.f {
 
 #logo-box {
     display: none;
-/*    position: absolute;
-    top: 0;
-    right: 0;
-    z-index: 0;*/
 }
 
 .logo-inmovement {
@@ -186,7 +182,7 @@ footer .footer-separator {
     margin-bottom: 20px;
 }
 
-#moorthy-duck {
+.moorthy-duck {
     display: block;
 }
 
