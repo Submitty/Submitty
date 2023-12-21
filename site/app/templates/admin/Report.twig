@@ -10,6 +10,23 @@
 
     <div id="grade-report">
         <h1>Grade Reports</h1>
+        <div id="rainbow-grade-report-csv" class="card">
+            <div class="title-cont">
+                Pushing this button will generate a CSV file (for download) of Rainbow Grades.
+            </div>
+            <div class="card-btn-cont">
+                <button onclick="location.href='{{ rainbow_grades_csv_url }}'"
+                class="btn btn-primary key_to_click"
+                tabindex="0"
+                >
+                    Download CSV of grades
+                </button>
+                <div class="card-btn-info">
+                    Last ran: <span id="grade-summaries-last-run">{{ grade_summaries_last_run }}</span>
+                </div>
+            </div>
+        </div>
+        <hr>
         <div id="grade-report-summary" class="card">
             <div class="title-cont">
                 Pushing this button will update the grade summary data used to generate the rainbow grades reports.
