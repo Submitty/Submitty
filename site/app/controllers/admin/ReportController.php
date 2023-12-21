@@ -789,4 +789,49 @@ class ReportController extends AbstractController {
             )
         );
     }
+
+    /**
+     * Generate a custom filename for the downloaded CSV file
+     *
+     * @return string
+     */
+    private function generateCustomFilename() {
+        $course = $this->core->getConfig()->getCourse();
+        $timestamp = date("ymdHis");
+        return "{$course}_rainbow_grades_{$timestamp}.csv";
+    }
+
+    /**
+     * Download CSV file for Rainbow Grades
+     *
+     * @Route("/courses/{_semester}/{_course}/reports/rainbow_grades_csv")
+     */
+    public function downloadRainbowGradesCSVFile() {
+        // Check if the user has the necessary permissions (e.g., admin access)
+        if (!$this->core->getUser()->accessAdmin()) {
+            $this->core->getOutput()->showError("This account cannot access admin pages");
+        }
+
+        // Path to the CSV file for Rainbow Grades
+        $csvFilePath = '/var/local/submitty/courses/f23/development/rainbow_grades/output.csv';
+
+        // Check if the file exists
+        if (file_exists($csvFilePath)) {
+            // Set appropriate headers for file download with a custom filename
+            header('Content-Description: File Transfer');
+            header('Content-Type: application/csv');
+            header('Content-Disposition: attachment; filename="' . $this->generateCustomFilename() . '"');
+            header('Expires: 0');
+            header('Cache-Control: must-revalidate');
+            header('Pragma: public');
+            header('Content-Length: ' . filesize($csvFilePath));
+
+            // Output the file content
+            readfile($csvFilePath);
+            exit;
+        } else {
+            // Handle the case where the file does not exist
+            $this->core->getOutput()->showError("CSV file not found");
+        }
+    }
 }

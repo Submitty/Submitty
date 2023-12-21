@@ -17,6 +17,7 @@ class ReportView extends AbstractView {
         return $this->core->getOutput()->renderTwigTemplate("admin/Report.twig", [
             'summaries_url' => $this->core->buildCourseUrl(['reports', 'summaries']),
             'csv_url' => $this->core->buildCourseUrl(['reports', 'csv']),
+            'rainbow_grades_csv_url' => $this->core->buildCourseUrl(['reports', 'rainbow_grades_csv']),
             'rainbow_grades_customization_url' => $this->core->buildCourseUrl(['reports', 'rainbow_grades_customization']),
             'customization_upload_url' => $this->core->buildCourseUrl(['reports', 'rainbow_grades_customization', 'upload']),
             'csrfToken' => $this->core->getCsrfToken(),
