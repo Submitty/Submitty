@@ -2274,6 +2274,15 @@ ORDER BY {$orderby}",
         return intval($this->course_db->row()['cnt']);
     }
 
+    /**
+     * Returns the total number of verified components found in the database
+     *
+     */
+    public function getTotalVerifiedComponentCount(string $g_id): int {
+        $this->course_db->query("SELECT count(*) AS cnt FROM gradeable_component_data WHERE GCD_VERIFIER_ID IS NOT NULL", [$g_id]);
+        return intval($this->course_db->row()['cnt']);
+    }
+
     public function getGradedComponentsCountByGradingSections($g_id, $sections, $section_key, $is_team) {
          $u_or_t = "u";
         $users_or_teams = "users";
@@ -2290,21 +2299,78 @@ ORDER BY {$orderby}",
             $where = "WHERE active_version > 0 AND ({$section_key} IN " . $this->createParameterList(count($sections)) . ") IS NOT FALSE";
             $params = array_merge($params, $sections);
         }
+
         $this->course_db->query(
             "
-SELECT {$u_or_t}.{$section_key}, count({$u_or_t}.*) as cnt
-FROM {$users_or_teams} AS {$u_or_t}
-INNER JOIN (
-  SELECT * FROM gradeable_data AS gd
-  INNER JOIN (SELECT g_id, $user_or_team_id, max(active_version) as active_version FROM electronic_gradeable_version GROUP BY g_id, $user_or_team_id) AS egd on egd.g_id = gd.g_id AND egd.{$user_or_team_id} = gd.gd_{$user_or_team_id}
-  LEFT JOIN (
-  gradeable_component_data AS gcd
-  INNER JOIN gradeable_component AS gc ON gc.gc_id = gcd.gc_id AND gc.gc_is_peer = {$this->course_db->convertBoolean(false)}
-  )AS gcd ON gcd.gd_id = gd.gd_id WHERE gcd.g_id=?
-) AS gd ON {$u_or_t}.{$user_or_team_id} = gd.gd_{$user_or_team_id}
-{$where}
-GROUP BY {$u_or_t}.{$section_key}
-ORDER BY {$u_or_t}.{$section_key}",
+            SELECT {$u_or_t}.{$section_key}, count({$u_or_t}.*) as cnt
+            FROM {$users_or_teams} AS {$u_or_t}
+            INNER JOIN (
+            SELECT * FROM gradeable_data AS gd
+            INNER JOIN (SELECT g_id, $user_or_team_id, max(active_version) as active_version FROM electronic_gradeable_version GROUP BY g_id, $user_or_team_id) AS egd on egd.g_id = gd.g_id AND egd.{$user_or_team_id} = gd.gd_{$user_or_team_id}
+            LEFT JOIN (
+            gradeable_component_data AS gcd
+            INNER JOIN gradeable_component AS gc ON gc.gc_id = gcd.gc_id AND gc.gc_is_peer = {$this->course_db->convertBoolean(false)}
+            )AS gcd ON gcd.gd_id = gd.gd_id WHERE gcd.g_id=?
+            ) AS gd ON {$u_or_t}.{$user_or_team_id} = gd.gd_{$user_or_team_id}
+            {$where}
+            GROUP BY {$u_or_t}.{$section_key}
+            ORDER BY {$u_or_t}.{$section_key}
+        ",
+            $params
+        );
+        foreach ($this->course_db->rows() as $row) {
+            if ($row[$section_key] === null) {
+                $row[$section_key] = "NULL";
+            }
+            $return[$row[$section_key]] = intval($row['cnt']);
+        }
+
+        if (!array_key_exists('NULL', $return)) {
+            $return['NULL'] = 0;
+        }
+        return $return;
+    }
+
+
+    /**
+     * Returns an array of Verified components for each Section
+     *
+     * @param  array<int>  $sections
+     * @return array<int|string,int>
+     */
+    public function getVerifiedComponentsCountByGradingSections(string $g_id, array $sections, string $section_key, bool $is_team): array {
+        $u_or_t = "u";
+        $users_or_teams = "users";
+        $user_or_team_id = "user_id";
+        if ($is_team) {
+            $u_or_t = "t";
+            $users_or_teams = "gradeable_teams";
+            $user_or_team_id = "team_id";
+        }
+        $return = [];
+        $params = [$g_id];
+        $where = "";
+        if (count($sections) > 0) {
+            $where = "WHERE active_version > 0 AND ({$section_key} IN " . $this->createParameterList(count($sections)) . ") IS NOT FALSE";
+            $params = array_merge($params, $sections);
+        }
+
+        $this->course_db->query(
+            "
+            SELECT {$u_or_t}.{$section_key}, count({$u_or_t}.*) as cnt
+            FROM {$users_or_teams} AS {$u_or_t}
+            INNER JOIN (
+            SELECT * FROM gradeable_data AS gd
+            INNER JOIN (SELECT g_id, $user_or_team_id, max(active_version) as active_version FROM electronic_gradeable_version GROUP BY g_id, $user_or_team_id) AS egd on egd.g_id = gd.g_id AND egd.{$user_or_team_id} = gd.gd_{$user_or_team_id}
+            LEFT JOIN (
+            gradeable_component_data AS gcd
+            INNER JOIN gradeable_component AS gc ON gc.gc_id = gcd.gc_id AND gc.gc_is_peer = {$this->course_db->convertBoolean(false)}
+            )AS gcd ON gcd.gd_id = gd.gd_id WHERE gcd.g_id=? AND GCD_VERIFIER_ID IS NOT NULL
+            ) AS gd ON {$u_or_t}.{$user_or_team_id} = gd.gd_{$user_or_team_id}
+            {$where}
+            GROUP BY {$u_or_t}.{$section_key}
+            ORDER BY {$u_or_t}.{$section_key}
+        ",
             $params
         );
         foreach ($this->course_db->rows() as $row) {
@@ -2332,7 +2398,7 @@ ORDER BY {$u_or_t}.{$section_key}",
     public function getBadGradedComponentsCountByGradingSections($g_id, $sections, $section_key, $is_team) {
         //getBadTeamSubmissionsByGradingSection
         //getBadUserSubmissionsByGradingSection
-         $u_or_t = "u";
+        $u_or_t = "u";
         $users_or_teams = "users";
         $user_or_team_id = "user_id";
         if ($is_team) {

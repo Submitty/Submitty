@@ -61,20 +61,29 @@
             {% endif %}
                 <b>TA Grading By Sections:</b>
                 <div style="margin-left: 20px">
+                {# checks if any of sections has a verified value #}
                     {% for key, section in sections %}
                         {% if key != "peer_stu_grad"%}
                                 {% if include_bad_submissions  == 'include'  %}
                                     {% if key == "NULL" and include_null_section != 'include' %}
                                         {# Skip rendering this section #}
                                      {% else %}
-                                        Section {{ key }}: {{ section.graded }} / {{ section.total }} ({{ section.percentage }}%)<br />
+                                        Section {{ key }}: Graded: {{ section.graded }} / {{ section.total }} ({{ section.percentage }}%) 
+                                        {% if isVerified > 0 %}
+                                            <span>Verified: {{ section.verified }} / {{ section.total }} ({{ section.verified_percentage }}%)</span>
+                                        {% endif %}
+                                        <br />
                                     {% endif %}
                                 {% else %}
                                     {% if key == "NULL" and include_null_section != 'include' %}
                                         {# Skip rendering this section #}
                                      {% else %}
-                                        Section {{ key }}: {{ section.non_late_graded }} / {{ section.non_late_total }} ({{ section.non_late_percentage }}%)<br />
-                                    {% endif %}    
+                                        Section {{ key }}: Graded: {{ section.non_late_graded }} / {{ section.non_late_total }} ({{ section.non_late_percentage }}%) 
+                                        {% if isNonLateVerified > 0 %}
+                                            <span>Verified: {{ section.non_late_verified }} / {{ section.non_late_total }} ({{ section.non_late_verified_percentage }}%) </span>
+                                        {% endif %}
+                                        <br />
+                                    {% endif %}
                             {% endif %}
                         {% endif %}
                     {% endfor %}
