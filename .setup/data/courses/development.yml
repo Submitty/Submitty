@@ -528,7 +528,7 @@ gradeables:
     eg_has_due_date: true
     eg_has_release_date: true
     eg_max_random_submissions: 0
-    eg_gradeable_type: TA/Instructor will (bulk) upload scanned .pdf for online manual grading
+    eg_gradeable_type: electronic_bulk
 
   - gradeable_config: pdf_word_count
     components:

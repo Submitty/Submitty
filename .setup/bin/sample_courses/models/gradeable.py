@@ -67,7 +67,7 @@ class Gradeable(object):
         self.annotated_pdf = False
         self.annotation_path = None
         self.annotations = []
-        self.gradeable_type = ""
+        self.gradeable_type = "electronic_hw"
 
         if "gradeable_config" in gradeable:
             self.gradeable_config = gradeable["gradeable_config"]
