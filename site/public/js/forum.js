@@ -854,6 +854,7 @@ function showEditPostForm(post_id, thread_id, shouldEditThread, render_markdown,
             csrf_token: csrf_token,
         },
         success: function(data) {
+            $('body').css('overflow', 'hidden');
             try {
                 // eslint-disable-next-line no-var
                 var json = JSON.parse(data);
@@ -990,7 +991,7 @@ function cancelEditPostForum() {
     $('#edit-user-post').css('display', 'none');
     $(this).closest('.thread-post-form').find('[name=thread_post_content]').val('');
     $('#title').val('');
-
+    $('body').css('overflow', 'auto');
     $('#display-existing-attachments').remove();
 }
 

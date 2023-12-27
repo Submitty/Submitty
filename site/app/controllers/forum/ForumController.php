@@ -577,15 +577,36 @@ class ForumController extends AbstractController {
         $post_id = $_POST['post_id'];
         $reply_level = $_POST['reply_level'];
         $post = $this->core->getQueries()->getPost($post_id);
-        if (($_POST['edit']) && !empty($this->core->getQueries()->getPostHistory($post_id))) {
-            $post['edit_timestamp'] = $this->core->getQueries()->getPostHistory($post_id)[0]['edit_timestamp'];
+        $post_history = $this->core->getQueries()->getPostHistory($post_id);
+        if (($_POST['edit']) && !empty($post_history)) {
+            $post['edit_timestamp'] = $post_history[0]['edit_timestamp'];
         }
         $thread_id = $post['thread_id'];
+        $thread = $this->core->getQueries()->getThread($thread_id);
         $GLOBALS['totalAttachments'] = 0;
         $GLOBALS['post_box_id'] = $_POST['post_box_id'];
         $unviewed_posts = [$post_id];
         $first = $post['parent_id'] == -1;
-        $result = $this->core->getOutput()->renderTemplate('forum\ForumThread', 'createPost', $thread_id, $post, $unviewed_posts, $first, $reply_level, 'tree', true, true, $this->core->getQueries()->existsAnnouncementsId($thread_id));
+        $author_info = $this->core->getQueries()->getDisplayUserInfoFromUserIds([$post["author_user_id"]]);
+        $post_attachments = $this->core->getQueries()->getForumAttachments([$post_id]);
+        $merged_threads = $this->core->getQueries()->getMergedThreadIds([$post_id]);
+        $result = $this->core->getOutput()->renderTemplate(
+            'forum\ForumThread',
+            'createPost',
+            $thread,
+            $post,
+            $unviewed_posts,
+            $first,
+            $reply_level,
+            'tree',
+            true,
+            $author_info[$post["author_user_id"]],
+            $post_attachments[$post["id"]][0],
+            count($post_history) > 0,
+            in_array($post["id"], $merged_threads, true),
+            true,
+            $this->core->getQueries()->existsAnnouncementsId($thread_id)
+        );
         return $this->core->getOutput()->renderJsonSuccess($result);
     }
 
@@ -1063,13 +1084,13 @@ class ForumController extends AbstractController {
         $option = ($this->core->getUser()->accessGrading() || $option != 'alpha') ? $option : 'tree';
         if (!empty($thread_id)) {
             $thread_id = (int) $thread_id;
-            $thread_resolve_state = $this->core->getQueries()->getResolveState($thread_id)[0]['status'];
+            $thread = $this->core->getQueries()->getThread($thread_id);
+            $thread_resolve_state = $thread['status'];
             $this->core->getQueries()->markNotificationAsSeen($user, -2, (string) $thread_id);
             $unread_p = $this->core->getQueries()->getUnviewedPosts($thread_id, $current_user);
             foreach ($unread_p as $up) {
                 $new_posts[] = $up["id"];
             }
-            $thread = $this->core->getQueries()->getThread($thread_id);
             $thread_announced = $this->core->getQueries()->existsAnnouncementsId($thread_id);
             if (!empty($thread)) {
                 if ($thread['merged_thread_id'] != -1) {
