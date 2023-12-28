@@ -497,6 +497,8 @@ class CourseMaterialsController extends AbstractController {
                                     $course_material->isHiddenFromStudents(),
                                     $course_material->getPriority(),
                                     null,
+                                    null,
+                                    false,
                                     null
                                 );
                                 $this->core->getCourseEntityManager()->persist($course_material_dir);
@@ -858,7 +860,9 @@ class CourseMaterialsController extends AbstractController {
                 $details['hidden_from_students'],
                 $details['priority'],
                 $value === CourseMaterial::LINK ? $url_url : null,
-                $value === CourseMaterial::LINK ? $title_name : null
+                $value === CourseMaterial::LINK ? $title_name : null,
+                false,
+                null
             );
             $this->core->getCourseEntityManager()->persist($course_material);
             if ($details['section_lock']) {

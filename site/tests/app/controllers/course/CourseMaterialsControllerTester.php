@@ -92,6 +92,8 @@ class CourseMaterialsControllerTester extends BaseUnitTest {
             false,
             0,
             null,
+            null,
+            false,
             null
         );
         $course_material->setId(0);

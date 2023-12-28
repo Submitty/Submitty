@@ -87,8 +87,8 @@ class CourseMaterial {
         $this->sections = new ArrayCollection();
         $this->url = $url;
         $this->title = $title;
-        $this->on_calendar = $on_calendar;
-        $this->gradeable = $gradeableName;
+        $this->on_calendar = $onCalender ?? false;
+        $this->gradeable = $gradeableName ?? 'none';
     }
 
     /**
