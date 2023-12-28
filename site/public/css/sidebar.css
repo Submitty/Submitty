@@ -102,5 +102,7 @@ aside {
 
     [data-theme="dark"] aside ul {
         background-color: var(--background-blue);
+        position: sticky;
+        top: 10px;
     }
 }
