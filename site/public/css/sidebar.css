@@ -99,10 +99,13 @@ aside {
         position: absolute;
         margin: 12px 0 0 32px;
     }
+    
+    aside ul {
+        position: sticky;
+        top: 10px;
+    }
 
     [data-theme="dark"] aside ul {
         background-color: var(--background-blue);
-        position: sticky;
-        top: 10px;
     }
 }
