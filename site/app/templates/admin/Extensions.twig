@@ -54,6 +54,8 @@
                     </select>
                 </span>
             </label>
+            <p><strong>Note:</strong> The optional reason for extension text will be displayed to the student on the Rainbow Grades page.</p>
+            <br>
             <a class="btn btn-primary" href="javascript:updateHomeworkExtension()">Submit</a>
         </fieldset>
         <fieldset>
@@ -111,6 +113,8 @@
     {% endif %}
 </div>
 <script>
+    registerSelect2Widget("reason-for-exception");
+
     $("#user_id").autocomplete({
         source: {{ student_full|raw }}
     });
@@ -133,7 +137,7 @@
                                 date = new Date();
                                 break;
                             case 1:
-                                date = new Date("01/01/9998");
+                                date = new Date('9998-01-01');
                                 break;
                         }
                         fp.setDate(date, true);
@@ -147,4 +151,5 @@
         }
     });
 </script>
+
 {% include('admin/users/MoreExtensions.twig') %}
