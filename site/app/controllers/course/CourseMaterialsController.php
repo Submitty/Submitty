@@ -566,7 +566,7 @@ class CourseMaterialsController extends AbstractController {
 
         $connected_gradeable = 'none';
         if (isset($_POST['gradeableInputValue'])) {
-            $connected_gradeable = $_POST['gradeableInputVal'];
+            $connected_gradeable = $_POST['gradeableInputValue'];
         }
 
         $details = [];
