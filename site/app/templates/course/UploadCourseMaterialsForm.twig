@@ -122,12 +122,22 @@
         "current_gradeable" : current_gradeable,
     } only %}
     <script>
+    var showMenu = document.getElementById('show-menu');
+            showMenu.addEventListener('change', function () {
+                console.log('Showing On Calendar:', showMenu.value);
+            });
+                console.log('ShowingING On Calendar:', showMenu.value);
+
+                if (showMenu == null) console.log("aw");
+                
         function makeSubmission(expandZip, hideFromStudents, cmPath, requestedPath, cmTime, sort, sections, sections_lock, overwrite_all) {
             handleUploadCourseMaterials("{{ csrf_token }}", expandZip, hideFromStudents, cmPath, requestedPath, cmTime, sort, sections, sections_lock, overwrite_all);
         }
         $(function() {
             $("#submit-materials").click(function(e){ // Submit button
 
+                var calenderMenu = document.getElementById('show-menu').value;
+                var gradeableInputValue = document.getElementById('gradeable-select').value;
                 var sections = [];
                 var cmTime = document.getElementById("upload_picker").value;
                 var sort = document.getElementById("upload_sort").value;
