@@ -1166,7 +1166,7 @@ function handleDownloadImages(csrf_token) {
  * @param csrf_token
  */
 
-function handleUploadCourseMaterials(csrf_token, expand_zip, hide_from_students, cmPath, requested_path, cmTime, sortPriority, sections, sections_lock, overwrite_all) {
+function handleUploadCourseMaterials(csrf_token, expand_zip, hide_from_students, cmPath, requested_path, cmTime, sortPriority, sections, sections_lock, overwrite_all, calenderMenu, gradeableInputValue) {
     const submit_url = buildCourseUrl(['course_materials', 'upload']);
     const return_url = buildCourseUrl(['course_materials']);
     const formData = new FormData();
@@ -1177,6 +1177,9 @@ function handleUploadCourseMaterials(csrf_token, expand_zip, hide_from_students,
         return;
     }
 
+
+    formData.append('calenderMenu', calenderMenu);
+    formData.append('gradeableInputValue', gradeableInputValue);
     formData.append('csrf_token', csrf_token);
     formData.append('expand_zip', expand_zip);
     formData.append('hide_from_students', hide_from_students);

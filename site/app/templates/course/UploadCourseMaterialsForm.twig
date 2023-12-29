@@ -121,17 +121,9 @@
         "gradeables" : gradeables,
         "current_gradeable" : current_gradeable,
     } only %}
-    <script>
-    var showMenu = document.getElementById('show-menu');
-            showMenu.addEventListener('change', function () {
-                console.log('Showing On Calendar:', showMenu.value);
-            });
-                console.log('ShowingING On Calendar:', showMenu.value);
-
-                if (showMenu == null) console.log("aw");
-                
-        function makeSubmission(expandZip, hideFromStudents, cmPath, requestedPath, cmTime, sort, sections, sections_lock, overwrite_all) {
-            handleUploadCourseMaterials("{{ csrf_token }}", expandZip, hideFromStudents, cmPath, requestedPath, cmTime, sort, sections, sections_lock, overwrite_all);
+    <script>    
+        function makeSubmission(expandZip, hideFromStudents, cmPath, requestedPath, cmTime, sort, sections, sections_lock, overwrite_all, calenderMenu, gradeableInputValue) {
+            handleUploadCourseMaterials("{{ csrf_token }}", expandZip, hideFromStudents, cmPath, requestedPath, cmTime, sort, sections, sections_lock, overwrite_all, calenderMenu, gradeableInputValue);
         }
         $(function() {
             $("#submit-materials").click(function(e){ // Submit button
@@ -168,7 +160,7 @@
                     const sections_lock = document.getElementById('all_Sections_Showing_yes').checked === true;
                     const overwrite_input = document.body.querySelector('input[name=overwrite-all]');
                     overwrite_all = overwrite_input ? (document.body.querySelector('input[name=overwrite-all]').value === 'true') : null;
-                    makeSubmission(expandZip, hideFromStudents, cmPath, requestedPath, cmTime, sort, sections, sections_lock, overwrite_all);
+                    makeSubmission(expandZip, hideFromStudents, cmPath, requestedPath, cmTime, sort, sections, sections_lock, overwrite_all, calenderMenu, gradeableInputValue);
                 }
                 else {
                     alert("Select at least one section");
