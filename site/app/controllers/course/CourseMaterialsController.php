@@ -559,6 +559,16 @@ class CourseMaterialsController extends AbstractController {
      * @AccessControl(role="INSTRUCTOR")
      */
     public function ajaxUploadCourseMaterialsFiles(): JsonResponse {
+        $on_calendar = false;
+        if (isset($_POST['calenderMenu'])) {
+            $on_calendar = $_POST['calenderMenu'];
+        }
+
+        $connected_gradeable = 'none';
+        if (isset($_POST['gradeableInputValue'])) {
+            $connected_gradeable = $_POST['gradeableInputVal'];
+        }
+
         $details = [];
         $expand_zip = "";
         if (isset($_POST['expand_zip'])) {
@@ -861,8 +871,8 @@ class CourseMaterialsController extends AbstractController {
                 $details['priority'],
                 $value === CourseMaterial::LINK ? $url_url : null,
                 $value === CourseMaterial::LINK ? $title_name : null,
-                false,
-                null
+                $on_calendar, 
+                $connected_gradeable
             );
             $this->core->getCourseEntityManager()->persist($course_material);
             if ($details['section_lock']) {
