@@ -4,7 +4,10 @@
 {% block body %}
     <p class="std-margin">
         Please fill in an appropriate name for your team if you would like.
+        <br>
+        Team names are limited to 30 characters
     </p>
+    
     <div class="flex-col" id="team-name-modal">
         <input id="team-name-csrf" type="hidden" name="csrf_token" value="{{ csrf_token }}" />
         <div class="edit_user_row">

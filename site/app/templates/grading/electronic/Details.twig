@@ -597,7 +597,12 @@
 {# Team Name #}
 {% macro render_column_team_name(context, section, graded_gradeable, index, info, column) %}
     <td>
-        {{ graded_gradeable.getSubmitter().getTeam().getTeamName() }}
+        {% if graded_gradeable.getSubmitter().getTeam().getTeamName()|length > 30 %}
+          {% set truncatedString = graded_gradeable.getSubmitter().getTeam().getTeamName()|slice(0, 30) ~ '...' %}
+          {{ truncatedString }}
+        {% else %}
+          {{ graded_gradeable.getSubmitter().getTeam().getTeamName() }}
+        {% endif %}
     </td>
 {% endmacro %}
 
