@@ -3,13 +3,7 @@
         $(document).ready(function() {
             // Bind click listener to grade summaries button
             $('#grade-summaries-button').click(function() {
-                $('.grade-summaries-last-run').html('Running...');
-            });
-            // Bind click listener to download buttons
-            $('.download-btn').click(function() {
-                let path = $(this).data('path');
-                let dir = $(this).data('dir');
-                downloadFile(path, dir);
+                $('#grade-summaries-last-run').html('Running...');
             });
         });
     </script>
@@ -21,15 +15,15 @@
                 Pushing this button will generate a CSV file (for download) of Rainbow Grades.
             </div>
             <div class="card-btn-cont">
-                <button class="btn btn-primary key_to_click download-btn"
-                        data-path="/var/local/submitty/courses/f23/development/rainbow_grades/output.csv"
-                        data-dir="rainbow_grades"
+                <button id="rainbow-grade-download-button"
+                        class="btn btn-primary key_to_click"
+                        onclick='downloadFile("/output.csv","rainbow_grades")'
                         tabindex="0"
                 >
                     Download CSV of grades
                 </button>
                 <div class="card-btn-info">
-                    Last ran: <span class="grade-summaries-last-run">{{ grade_summaries_last_run }}</span>
+                    Last ran: <span>{{ grade_summaries_last_run }}</span>
                 </div>
             </div>
         </div>
@@ -47,7 +41,7 @@
                     Generate Grade Summaries
                 </button>
                 <div class="card-btn-info">
-                    Last ran: <span class="grade-summaries-last-run">{{ grade_summaries_last_run }}</span>
+                    Last ran: <span id="grade-summaries-last-run">{{ grade_summaries_last_run }}</span>
                 </div>
             </div>
         </div>
