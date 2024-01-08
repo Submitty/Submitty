@@ -496,6 +496,17 @@ class RainbowCustomization extends AbstractModel {
         }
     }
 
+
+    /**
+     * Get plagiarism from json file if there is any
+     *
+     * @return array<object>  array of plagiarism JSON object
+     */
+    public function getPlagiarism(): array {
+        return !is_null($this->RCJSON) ? $this->RCJSON->getPlagiarism() : [];
+    }
+
+
     // This function handles processing the incoming post data
     public function processForm() {
 
@@ -532,6 +543,12 @@ class RainbowCustomization extends AbstractModel {
         if (isset($form_json->messages)) {
             foreach ($form_json->messages as $message) {
                 $this->RCJSON->addMessage($message);
+            }
+        }
+
+        if (isset($form_json->plagiarism)) {
+            foreach ($form_json->plagiarism as $plagiarism_single) {
+                $this->RCJSON->addPlagiarismEntry($plagiarism_single);
             }
         }
 
