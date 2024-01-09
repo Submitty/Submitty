@@ -10,7 +10,7 @@
                 <select id="new-file-name">
                     <option value=""></option>
                     {% for folder_path in folder_paths %}
-                        <option value="{{ folder_path }}/"></option>
+                        <option value="{{ folder_path }}/">{{ folder_path }}</option>
                     {% endfor %}
                 </select>
             </span>
