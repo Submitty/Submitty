@@ -6,9 +6,21 @@ use app\controllers\AbstractController;
 use app\controllers\admin\AdminGradeableController;
 use app\libraries\FileUtils;
 use app\libraries\response\RedirectResponse;
+use app\models\Team;
 use Symfony\Component\Routing\Annotation\Route;
 
 class TeamController extends AbstractController {
+    /**
+     * Check if a string has special characters.
+     * @param string $str
+     * @return bool
+     */
+    public static function hasSpecialCharacters($str) {
+        $allowedSpecialCharacters = ['-', '_']; // This array can be expandable upon further requests
+        $escapedSpecialCharacters = array_map('preg_quote', $allowedSpecialCharacters);
+        $pattern = '/[^\w\s' . implode('', $escapedSpecialCharacters) . ']/';
+        return preg_match($pattern, $str);
+    }
     /**
      * @Route("/courses/{_semester}/{_course}/gradeable/{gradeable_id}/team/new")
      */
@@ -495,28 +507,21 @@ class TeamController extends AbstractController {
 
         if ($_POST['team_name'] == '') {
             $_POST['team_name'] = null;
-        }
-
-        if(strlen($_POST['team_name']) > 30) {
-            $this->core->addErrorMessage("Number of characters in team name must be less than 30");
-            return new RedirectResponse($return_url);
-        }
-        
-        if(preg_match('/[\x{1F600}-\x{1F64F}\x{1F300}-\x{1F5FF}\x{1F680}-\x{1F6FF}\x{1F700}-\x{1F77F}\x{1F780}-\x{1F7FF}\x{1F800}-\x{1F8FF}\x{1F900}-\x{1F9FF}\x{1FA00}-\x{1FA6F}\x{1FA70}-\x{1FAFF}\x{2600}-\x{26FF}\x{2700}-\x{27BF}\x{2300}-\x{23FF}]/u',$_POST['team_name'])) {
-            $this->core->addErrorMessage("Team name should not contain emojis");
-            return new RedirectResponse($return_url);
-        } 
-
-        function hasSpecialCharacters($str) {
-            $allowedSpecialCharacters = ['-', '_']; // This array can be expandable upon further requests
-            $escapedSpecialCharacters = array_map('preg_quote', $allowedSpecialCharacters);
-            $pattern = '/[^\w\s' . implode('', $escapedSpecialCharacters) . ']/';
-            return preg_match($pattern, $str);
-        }
-
-        if(hasSpecialCharacters($_POST['team_name'])) {
-            $this->core->addErrorMessage("Team name should not contain special characters");
-            return new RedirectResponse($return_url);
+        } else {
+            if(strlen($_POST['team_name']) > Team::MAX_TEAM_NAME_LENGTH) {
+                $this->core->addErrorMessage("Number of characters in team name must be less than ".Team::MAX_TEAM_NAME_LENGTH);
+                return new RedirectResponse($return_url);
+            }
+            
+            if(preg_match('/[\x{1F600}-\x{1F64F}\x{1F300}-\x{1F5FF}\x{1F680}-\x{1F6FF}\x{1F700}-\x{1F77F}\x{1F780}-\x{1F7FF}\x{1F800}-\x{1F8FF}\x{1F900}-\x{1F9FF}\x{1FA00}-\x{1FA6F}\x{1FA70}-\x{1FAFF}\x{2600}-\x{26FF}\x{2700}-\x{27BF}\x{2300}-\x{23FF}]/u',$_POST['team_name'])) {
+                $this->core->addErrorMessage("Team name should not contain emojis");
+                return new RedirectResponse($return_url);
+            } 
+    
+            if(self::hasSpecialCharacters($_POST['team_name'])) {
+                $this->core->addErrorMessage("Team name should not contain special characters");
+                return new RedirectResponse($return_url);
+            }
         } 
 
         if ($_POST['team_name'] === $team->getTeamName()) {

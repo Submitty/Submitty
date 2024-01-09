@@ -5,7 +5,7 @@
     <p class="std-margin">
         Please fill in an appropriate name for your team if you would like.
         <br>
-        Team names are limited to 30 characters
+        Team names are limited to {{ team_name_length }} characters
     </p>
     
     <div class="flex-col" id="team-name-modal">
@@ -13,10 +13,12 @@
         <div class="edit_user_row">
             <label for="team-name-change">Team Name:&emsp;</label>
             <input type="text"
-                   name="team_name"
-                   value="{{ team_name }}"
-                   id="team-name-change"
-                   data-current-name="{{ team_name }}"/>
+                name="team_name"
+                value="{{ team_name }}"
+                id="team-name-change"
+                data-current-name="{{ team_name }}"
+                maxlength="{{ team_name_length }}"
+            />
         </div>
     </div>
 {% endblock %}
