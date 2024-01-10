@@ -775,7 +775,7 @@ class ReportController extends AbstractController {
      */
     public function displayGradebook() {
         $grade_path = $this->core->getConfig()->getCoursePath() . "/rainbow_grades/output.html";
-
+        $grade_summaries_last_run = $this->getGradeSummariesLastRun();
         $grade_file = null;
         if (file_exists($grade_path)) {
             $grade_file = file_get_contents($grade_path);
@@ -785,7 +785,8 @@ class ReportController extends AbstractController {
             new WebResponse(
                 ['admin', 'Report'],
                 'showFullGradebook',
-                $grade_file
+                $grade_file,
+                $grade_summaries_last_run
             )
         );
     }
