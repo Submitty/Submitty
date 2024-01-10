@@ -311,7 +311,7 @@ class ForumThreadView extends AbstractView {
                 "merge_thread_content" => $generatePostContent["merge_thread_content"],
                 "csrf_token" => $generatePostContent["csrf_token"],
                 "activeThreadTitle" => $generatePostContent["activeThreadTitle"],
-                "post_box_id" => $generatePostContent["post_box_id"],
+                "post_box_id" => $generatePostContent["post_box_id"] + 1,
                 "merge_url" => $this->core->buildCourseUrl(['forum', 'threads', 'merge']),
                 "split_url" => $this->core->buildCourseUrl(['forum', 'posts', 'split']),
                 "post_content_limit" => $post_content_limit,
@@ -628,7 +628,7 @@ class ForumThreadView extends AbstractView {
                 "merge_thread_content" => $merge_thread_content,
                 "csrf_token" => $csrf_token,
                 "activeThreadTitle" => $activeThreadTitle,
-                "post_box_id" => $post_box_id,
+                "post_box_id" => $post_box_id + 1,
                 "total_attachments" => $GLOBALS['totalAttachments'],
                 "merge_url" => $this->core->buildCourseUrl(['forum', 'threads', 'merge']),
                 "split_url" => $this->core->buildCourseUrl(['forum', 'posts', 'split'])
