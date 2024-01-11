@@ -32,7 +32,8 @@ describe('Test cases revolving around course material uploading and access contr
 
     it('Should support optional file locations', () => {
         cy.get('[onclick="newUploadCourseMaterialsForm()"]').click();
-        cy.get('#input-provide-full-path').type('option1');
+        cy.get('#upload-location-drop-down').click();
+        cy.get('.select2-search__field').type('option1{enter}');
         cy.get('#upload1').selectFile('cypress/fixtures/file1.txt', { action: 'drag-drop' });
         cy.waitPageChange(() => {
             cy.get('#submit-materials').click();
@@ -49,7 +50,8 @@ describe('Test cases revolving around course material uploading and access contr
         cy.get('#upload1').selectFile('cypress/fixtures/file1.txt', { action: 'drag-drop' });
 
         const fpath = 'option1/1234/!@#$%^&*()';
-        cy.get('#input-provide-full-path').type(fpath);
+        cy.get('#upload-location-drop-down').click();
+        cy.get('.select2-search__field').type(fpath + '{enter}');
         cy.waitPageChange(() => {
             cy.get('#submit-materials').click();
         });
@@ -88,7 +90,6 @@ describe('Test cases revolving around course material uploading and access contr
         const date = '2021-06-29 21:37:53';
         cy.get('[onclick="newUploadCourseMaterialsForm()"]').click();
         cy.get('#upload_picker').clear({force: true}).type(date);
-        cy.get('#input-provide-full-path').click();
         cy.get('#upload1').selectFile(['cypress/fixtures/file1.txt', 'cypress/fixtures/file2.txt'], { action: 'drag-drop' });
         cy.waitPageChange(() => {
             cy.get('#submit-materials').click();
@@ -144,7 +145,8 @@ describe('Test cases revolving around course material uploading and access contr
         });
 
         cy.get('[onclick="newUploadCourseMaterialsForm()"]').click();
-        cy.get('#input-provide-full-path').type('option1');
+        cy.get('#upload-location-drop-down').click();
+        cy.get('.select2-search__field').type('option1{enter}');
         cy.get('#upload1').selectFile('cypress/fixtures/file2.txt', { action: 'drag-drop' });
         cy.get('#hide-materials-checkbox').check();
         cy.waitPageChange(() => {
@@ -235,7 +237,6 @@ describe('Test cases revolving around course material uploading and access contr
         cy.get('#upload1').selectFile(['cypress/fixtures/file1.txt', 'cypress/fixtures/file2.txt'], { action: 'drag-drop' });
         cy.get('#section-upload-1').check();
         cy.get('#upload_picker').clear({force: true}).type('2021-06-29 21:37:53', {force: true});
-        cy.get('#input-provide-full-path').click();
         cy.waitPageChange(() => {
             cy.get('#submit-materials').click();
         });
@@ -284,7 +285,6 @@ describe('Test cases revolving around course material uploading and access contr
         cy.get('#upload1').selectFile(['cypress/fixtures/file1.txt', 'cypress/fixtures/file2.txt'], { action: 'drag-drop' });
         cy.get('#upload_picker').clear({force: true}).type('2021-06-29 21:37:53', {force: true});
 
-        cy.get('#input-provide-full-path').click();
         cy.get('#submit-materials').click();
         cy.on('window:alert', (alert) => {
             expect(alert).eq('Select at least one section');
@@ -335,7 +335,8 @@ describe('Test cases revolving around course material uploading and access contr
 
     it('Should sort course materials', () => {
         cy.get('[onclick="newUploadCourseMaterialsForm()"]').click();
-        cy.get('#input-provide-full-path').type('a');
+        cy.get('#upload-location-drop-down').click();
+        cy.get('.select2-search__field').type('a{enter}');
         cy.get('#upload1').selectFile('cypress/fixtures/file1.txt', { action: 'drag-drop' });
         cy.get('#upload_sort').clear().type('50000');
         cy.waitPageChange(() => {
@@ -343,7 +344,8 @@ describe('Test cases revolving around course material uploading and access contr
         });
 
         cy.get('[onclick="newUploadCourseMaterialsForm()"]').click();
-        cy.get('#input-provide-full-path').type('a');
+        cy.get('#upload-location-drop-down').click();
+        cy.get('.select2-search__field').type('a{enter}');
         cy.get('#upload1').selectFile('cypress/fixtures/file2.txt', { action: 'drag-drop' });
         cy.get('#upload_sort').clear().type('10');
         cy.waitPageChange(() => {
@@ -351,7 +353,8 @@ describe('Test cases revolving around course material uploading and access contr
         });
 
         cy.get('[onclick="newUploadCourseMaterialsForm()"]').click();
-        cy.get('#input-provide-full-path').type('a');
+        cy.get('#upload-location-drop-down').click();
+        cy.get('.select2-search__field').type('a{enter}');
         cy.get('#upload1').selectFile('cypress/fixtures/file3.txt', { action: 'drag-drop' });
         cy.get('#upload_sort').clear().type('5.5');
         cy.waitPageChange(() => {
@@ -359,7 +362,8 @@ describe('Test cases revolving around course material uploading and access contr
         });
 
         cy.get('[onclick="newUploadCourseMaterialsForm()"]').click();
-        cy.get('#input-provide-full-path').type('a');
+        cy.get('#upload-location-drop-down').click();
+        cy.get('.select2-search__field').type('a{enter}');
         cy.get('#upload1').selectFile('cypress/fixtures/file4.txt', { action: 'drag-drop' });
         cy.get('#upload_sort').clear().type('5.4');
         cy.waitPageChange(() => {
@@ -367,7 +371,8 @@ describe('Test cases revolving around course material uploading and access contr
         });
 
         cy.get('[onclick="newUploadCourseMaterialsForm()"]').click();
-        cy.get('#input-provide-full-path').type('a');
+        cy.get('#upload-location-drop-down').click();
+        cy.get('.select2-search__field').type('a{enter}');
         cy.get('#upload1').selectFile('cypress/fixtures/file5.txt', { action: 'drag-drop' });
         cy.get('#upload_sort').clear().type('0');
         cy.waitPageChange(() => {
@@ -385,7 +390,8 @@ describe('Test cases revolving around course material uploading and access contr
     it('Should sort course materials folders', () => {
         // Upload file 1
         cy.get('[onclick="newUploadCourseMaterialsForm()"]').click();
-        cy.get('#input-provide-full-path').type('a/b1');
+        cy.get('#upload-location-drop-down').click();
+        cy.get('.select2-search__field').type('a/b1{enter}');
         cy.get('#upload1').selectFile('cypress/fixtures/file1.txt', { action: 'drag-drop' });
         cy.waitPageChange(() => {
             cy.get('#submit-materials').click();
@@ -393,7 +399,8 @@ describe('Test cases revolving around course material uploading and access contr
 
         // Upload file 2
         cy.get('[onclick="newUploadCourseMaterialsForm()"]').click();
-        cy.get('#input-provide-full-path').type('a/b2');
+        cy.get('#upload-location-drop-down').click();
+        cy.get('.select2-search__field').type('a/b2{enter}');
         cy.get('#upload1').selectFile('cypress/fixtures/file2.txt', { action: 'drag-drop' });
         cy.waitPageChange(() => {
             cy.get('#submit-materials').click();
@@ -426,7 +433,8 @@ describe('Test cases revolving around course material uploading and access contr
     it('Should release course materials in folder by date', () => {
         // Upload file 1
         cy.get('[onclick="newUploadCourseMaterialsForm()"]').click();
-        cy.get('#input-provide-full-path').type('a');
+        cy.get('#upload-location-drop-down').click();
+        cy.get('.select2-search__field').type('a{enter}');
         cy.get('#upload1').selectFile('cypress/fixtures/file1.txt', { action: 'drag-drop' });
         cy.waitPageChange(() => {
             cy.get('#submit-materials').click();
@@ -434,7 +442,8 @@ describe('Test cases revolving around course material uploading and access contr
 
         // Upload file 2
         cy.get('[onclick="newUploadCourseMaterialsForm()"]').click();
-        cy.get('#input-provide-full-path').type('a/b');
+        cy.get('#upload-location-drop-down').click();
+        cy.get('.select2-search__field').type('a/b{enter}');
         cy.get('#upload1').selectFile('cypress/fixtures/file2.txt', { action: 'drag-drop' });
         cy.waitPageChange(() => {
             cy.get('#submit-materials').click();
@@ -490,7 +499,8 @@ describe('Test cases revolving around course material uploading and access contr
     it('Should restrict course materials in folder', () => {
         // Upload file 1
         cy.get('[onclick="newUploadCourseMaterialsForm()"]').click();
-        cy.get('#input-provide-full-path').type('a');
+        cy.get('#upload-location-drop-down').click();
+        cy.get('.select2-search__field').type('a{enter}');
         cy.get('#upload1').selectFile('cypress/fixtures/file1.txt', { action: 'drag-drop' });
         cy.waitPageChange(() => {
             cy.get('#submit-materials').click();
@@ -498,7 +508,8 @@ describe('Test cases revolving around course material uploading and access contr
 
         // Upload file 2
         cy.get('[onclick="newUploadCourseMaterialsForm()"]').click();
-        cy.get('#input-provide-full-path').type('a/b');
+        cy.get('#upload-location-drop-down').click();
+        cy.get('.select2-search__field').type('a/b{enter}');
         cy.get('#upload1').selectFile('cypress/fixtures/file2.txt', { action: 'drag-drop' });
         cy.waitPageChange(() => {
             cy.get('#submit-materials').click();
@@ -556,7 +567,8 @@ describe('Test cases revolving around course material uploading and access contr
     it('Should hide course materials in folder visually', () => {
         // Upload file 1
         cy.get('[onclick="newUploadCourseMaterialsForm()"]').click();
-        cy.get('#input-provide-full-path').type('a');
+        cy.get('#upload-location-drop-down').click();
+        cy.get('.select2-search__field').type('a{enter}');
         cy.get('#upload1').selectFile('cypress/fixtures/file1.txt', { action: 'drag-drop' });
         cy.waitPageChange(() => {
             cy.get('#submit-materials').click();
@@ -564,7 +576,8 @@ describe('Test cases revolving around course material uploading and access contr
 
         // Upload file 2
         cy.get('[onclick="newUploadCourseMaterialsForm()"]').click();
-        cy.get('#input-provide-full-path').type('a/b');
+        cy.get('#upload-location-drop-down').click();
+        cy.get('.select2-search__field').type('a/b{enter}');
         cy.get('#upload1').selectFile('cypress/fixtures/file2.txt', { action: 'drag-drop' });
         cy.waitPageChange(() => {
             cy.get('#submit-materials').click();
@@ -615,10 +628,11 @@ describe('Test cases revolving around course material uploading and access contr
         // overwriting a file
         cy.get('[onclick="newUploadCourseMaterialsForm()"]').click();
         cy.get('#upload_picker').clear().type('2022-01-01 00:00:00');
-        cy.get('#input-provide-full-path').type('words');
+        cy.get('#upload-location-drop-down').click();
+        cy.get('.select2-search__field').type('words{enter}');
         cy.get('#upload1').attachFile('words_249.pdf', { subjectType: 'drag-n-drop' });
         cy.get('#submit-materials').click();
-        cy.get('#overwrite-course-material-form', {timeout: 10000}).should('be.visible');
+        cy.get('#edit-location-drop-down', {timeout: 10000}).should('be.visible');
         cy.get('#existing-names').should('have.length', 1);
         cy.waitPageChange(() => {
             cy.get('#overwrite-submit').click();
@@ -639,7 +653,7 @@ describe('Test cases revolving around course material uploading and access contr
         cy.get('.file-viewer > a').contains(link_titles[1]).parent().find('.fa-pencil-alt').click();
         cy.get('#edit-title').clear().type(link_titles[0]);
         cy.get('#submit-edit').click();
-        cy.get('#overwrite-course-material-form', {timeout: 10000}).should('be.visible');
+        cy.get('#edit-location-drop-down', {timeout: 10000}).should('be.visible');
         cy.get('#existing-names').should('have.length', 1);
         cy.waitPageChange(() => {
             cy.get('#overwrite-submit').click();
@@ -655,7 +669,8 @@ describe('Test cases revolving around course material uploading and access contr
 
         // Upload link 1
         cy.get('[onclick="newUploadCourseMaterialsForm()"]').click();
-        cy.get('#input-provide-full-path').type('a');
+        cy.get('#upload-location-drop-down').click();
+        cy.get('.select2-search__field').type('a{enter}');
         cy.get('#url_selection_radio').click();
         cy.get('#title').type(link_titles[0]);
         cy.get('#url_url').type(test_url);
@@ -665,7 +680,8 @@ describe('Test cases revolving around course material uploading and access contr
 
         // Upload link 2
         cy.get('[onclick="newUploadCourseMaterialsForm()"]').click();
-        cy.get('#input-provide-full-path').type('a/b');
+        cy.get('#upload-location-drop-down').click();
+        cy.get('.select2-search__field').type('a/b{enter}');
         cy.get('#url_selection_radio').click();
         cy.get('#title').type(link_titles[1]);
         cy.get('#url_url').type(test_url);
@@ -706,7 +722,8 @@ describe('Test cases revolving around course material uploading and access contr
 
         // Upload link 1
         cy.get('[onclick="newUploadCourseMaterialsForm()"]').click();
-        cy.get('#input-provide-full-path').type('a');
+        cy.get('#upload-location-drop-down').click();
+        cy.get('.select2-search__field').type('a{enter}');
         cy.get('#url_selection_radio').click();
         cy.get('#title').type(link_titles[0]);
         cy.get('#url_url').type(test_url);
@@ -716,7 +733,8 @@ describe('Test cases revolving around course material uploading and access contr
 
         // Upload link 2
         cy.get('[onclick="newUploadCourseMaterialsForm()"]').click();
-        cy.get('#input-provide-full-path').type('a/b');
+        cy.get('#upload-location-drop-down').click();
+        cy.get('.select2-search__field').type('a/b{enter}');
         cy.get('#url_selection_radio').click();
         cy.get('#title').type(link_titles[1]);
         cy.get('#url_url').type(test_url);
