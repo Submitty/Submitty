@@ -2280,20 +2280,28 @@ function updateThread(e) {
         markdown_status: parseInt($(`input#markdown_input_${post_box_id}`).val()),
         deleted_attachments: JSON.stringify(getDeletedAttachments()),
     };
-
+    const form = $(this);
+    const formData = new FormData(form[0]);
+    formData.append('deleted_attachments', JSON.stringify(getDeletedAttachments()));
+    
     const files = testAndGetAttachments(1, false);
     if (files === false) {
         return false;
     }
+    //for (let i = 0; i < files.length ; i++) {
+      //  data = Object.assign(data, {'file_input[]': files[i]});
+    //}
     for (let i = 0; i < files.length ; i++) {
-        data.append('file_input[]', files[i], files[i].name);
+        formData.append('file_input[]', files[i], files[i].name);
     }
 
     $.ajax({
         // eslint-disable-next-line no-undef
         url: `${buildCourseUrl(['forum', 'posts', 'modify'])}?modify_type=1`,
         type: 'POST',
-        data,
+        data: formData,
+        processData: false,
+        contentType: false,
         success: function (response) {
             try {
                 response = JSON.parse(response);
