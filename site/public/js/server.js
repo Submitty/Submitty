@@ -399,7 +399,6 @@ function newEditCourseMaterialsForm(tag) {
     title_label.css('display', 'block');
     if (is_link === 1) {
         titleVal.val(title.replace('link-',''));
-        path.val(decodeURIComponent(file_path.substring(file_path.indexOf("course_materials/") + 17).replace('link-','')));
         url_label.css('display', 'block');
         const url = $("#edit-url-url");
         url.prop('disabled', false);
@@ -413,7 +412,12 @@ function newEditCourseMaterialsForm(tag) {
     }
 
     editFilePathRecommendations();
-    path.val(file_path.substring(1));
+    if (is_link === 1) {
+        path.val(decodeURIComponent(file_path.substring(file_path.indexOf("course_materials/") + 17).replace('link-','')));
+    }
+    else {
+        path.val(file_path.substring(1));
+    }
     registerSelect2Widget("new-file-name", "material-edit-form");
 
     $("#material-edit-form", form).attr('data-id', id);
