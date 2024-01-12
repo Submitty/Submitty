@@ -51,7 +51,7 @@ describe('Test cases revolving around course material uploading and access contr
 
         const fpath = 'option1/1234/!@#$%^&*()';
         cy.get('#upload-location-drop-down').click();
-        cy.get('.select2-search__field').type(fpath + '{enter}');
+        cy.get('.select2-search__field').type(`${fpath}{enter}`);
         cy.waitPageChange(() => {
             cy.get('#submit-materials').click();
         });
