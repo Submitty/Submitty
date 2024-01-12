@@ -37,7 +37,6 @@
                 <span class="option-title">Title</span>
                 <br>
                 <span class="option-alt">What is the title of this gradable?</span>
-                <br>
                 <span class="required_type">(Required)</span>
             </label>
         </div>
@@ -346,9 +345,9 @@
 <div class="row">
     <input type="hidden" name="csrf_token" value="{{ csrf_token }}" />
     <button class="btn btn-primary" type="submit" id="create-gradeable-btn" disabled style="margin-left:10px;">Create New Gradeable</button>
+    <a class="btn btn-primary" type="button" id="upload-gradeable-btn" style="margin-left:auto" href="javascript:newGradeableJsonForm()" >Upload Gradeable JSON</a>
 </div>
 {% endif %}
-
 
 <div id="alert-message" title="WARNING">
     <p>Gradeable ID must not be blank and only contain characters <strong> a-z A-Z 0-9 _ - </strong> </p>
@@ -717,3 +716,4 @@
     }
 
 </script>
+{% include('admin/admin_gradeable/AdminGradeableUploadForm.twig') %}

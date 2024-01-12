@@ -327,6 +327,21 @@ function ajaxRebuildGradeableButton() {
     });
 }
 
+function ajaxUploadGradeable(url){
+    const json = $('[name="upload"]').val();
+    console.log(json);
+    $.ajax({
+        url: buildCourseUrl(['gradeable_upload']),
+        data: json,
+        success: function (data) {
+            console.log(data);
+        },
+        error: function (response) {
+            console.error(response);
+        },
+    });
+}
+
 function ajaxGetBuildLogs(gradeable_id) {
     $.getJSON({
         type: 'GET',

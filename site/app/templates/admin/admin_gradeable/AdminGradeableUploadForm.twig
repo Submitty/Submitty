@@ -1,0 +1,21 @@
+{% extends 'generic/Popup.twig' %}
+{% block popup_id %}gradeable-json-form{% endblock %}
+{% block title %}Upload Gradeable{% endblock %}
+{% block body %}
+    <p>
+       Submit a JSON file.
+    </p>
+    <p>
+        For more formatting information, see
+        <a target="_blank" href="https://submitty.org/instructor/course_management/managing_enrollment#add-students-by-bulk-file-csv-upload">
+            Add Students by Bulk File CSV Upload <i style="font-style:normal;" class="fa-question-circle"></i>
+        </a>
+    </p>
+    <input type="hidden" name="csrf_token" value="{{ csrf_token }}" />
+    <input type="file" name="upload" accept=".xlsx, .csv" aria-label="Choose File">
+{% endblock %}
+{% block buttons %}
+    {{ block('close_button') }}
+    <input class="btn btn-primary" onclick="ajaxUploadGradeable('{{ post_url }}')" type="button" value="Submit" />
+{% endblock %}
+ 
