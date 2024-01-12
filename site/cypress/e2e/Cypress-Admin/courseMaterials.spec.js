@@ -632,7 +632,7 @@ describe('Test cases revolving around course material uploading and access contr
         cy.get('.select2-search__field').type('words{enter}');
         cy.get('#upload1').attachFile('words_249.pdf', { subjectType: 'drag-n-drop' });
         cy.get('#submit-materials').click();
-        cy.get('#edit-location-drop-down', {timeout: 10000}).should('be.visible');
+        cy.get('#overwrite-confirmation', {timeout: 10000}).should('be.visible');
         cy.get('#existing-names').should('have.length', 1);
         cy.waitPageChange(() => {
             cy.get('#overwrite-submit').click();
@@ -653,7 +653,7 @@ describe('Test cases revolving around course material uploading and access contr
         cy.get('.file-viewer > a').contains(link_titles[1]).parent().find('.fa-pencil-alt').click();
         cy.get('#edit-title').clear().type(link_titles[0]);
         cy.get('#submit-edit').click();
-        cy.get('#edit-location-drop-down', {timeout: 10000}).should('be.visible');
+        cy.get('#overwrite-confirmation', {timeout: 10000}).should('be.visible');
         cy.get('#existing-names').should('have.length', 1);
         cy.waitPageChange(() => {
             cy.get('#overwrite-submit').click();
