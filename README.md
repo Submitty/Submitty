@@ -15,6 +15,11 @@
 
 [![Submitty CI](https://github.com/Submitty/Submitty/actions/workflows/submitty_ci.yml/badge.svg?event=push)](https://github.com/Submitty/Submitty/actions/workflows/submitty_ci.yml)
 [![Vagrant Up](https://github.com/Submitty/Submitty/actions/workflows/vagrant_up.yaml/badge.svg)](https://github.com/Submitty/Submitty/actions/workflows/vagrant_up.yaml)
+<h1>
+  <a href="https://git.io/typing-svg">
+    <img src="https://readme-typing-svg.herokuapp.com?color=62F7F3&size=25&lines=Submitty+Homework+Submission+Server">
+  </a>
+</h1>
 
 # Usage
 
@@ -49,3 +54,12 @@ If you have a question, please [contact us](https://submitty.org/index/contact) 
 Submitty is licensed under BSD "3-Clause" which can be viewed in [LICENSE](LICENSE.md)  
 Licenses for the 3rd party components can be viewed in [LICENSE-THIRD-PARTY](LICENSE-THIRD-PARTY.md)
 
+<div align = "center">
+<!-- ---------------------------------------------------------------------------------------------------------------------------------------------------- -->
+
+![Line](https://user-images.githubusercontent.com/85225156/171937799-8fc9e255-9889-4642-9c92-6df85fb86e82.gif)
+ 
+**Visitors Count**  
+![VisitorCount](https://profile-counter.glitch.me/{Submitty}/count.svg)
+
+</div>
