@@ -834,6 +834,11 @@ HTML;
         elseif (count($grader_registration_sections) === 0) {
             $message = 'Notice: You are not assigned to grade any students for this gradeable.';
         }
+        if ($inquiry_status) {
+            $notice = "Notice: You are viewing students with active grade inquiries.";
+            $message .= ($message === "") ? $notice : "\n" . $notice;
+            $message_warning = true;
+        }
 
         $team_gradeable_view_history = $gradeable->isTeamAssignment() ? $this->core->getQueries()->getAllTeamViewedTimesForGradeable($gradeable) : [];
         foreach ($team_gradeable_view_history as $team_id => $team) {
