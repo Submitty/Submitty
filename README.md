@@ -1,9 +1,17 @@
-<p align="center">
+<!-- ---------------------------------------------------------------------------------------------------------------------------------------------------- -->
+
+![Line](https://user-images.githubusercontent.com/85225156/171937799-8fc9e255-9889-4642-9c92-6df85fb86e82.gif)
+<img align="center" alt="Coding" width="1000" src="https://github.com/hustler0109/Submitty/blob/main/Resources/Galaxy%20Business%20Digital%20Background.gif">
+
+<!-- ---------------------------------------------------------------------------------------------------------------------------------------------------- -->
+
+![Line](https://user-images.githubusercontent.com/85225156/171937799-8fc9e255-9889-4642-9c92-6df85fb86e82.gif)
+<!-- <p align="center">
   <picture>
     <source media="(prefers-color-scheme: dark)" srcset="https://github.com/Submitty/Submitty/blob/main/site/public/img/submitty_logo_white.png?raw=true">
     <img src="https://github.com/Submitty/Submitty/blob/main/site/public/img/submitty_logo.png?raw=true" alt="Submitty Logo" width="500px"/>
   </picture>
-</p>
+</p> -->
 
 [![Submitty CI](https://github.com/Submitty/Submitty/actions/workflows/submitty_ci.yml/badge.svg?event=push)](https://github.com/Submitty/Submitty/actions/workflows/submitty_ci.yml)
 [![Vagrant Up](https://github.com/Submitty/Submitty/actions/workflows/vagrant_up.yaml/badge.svg)](https://github.com/Submitty/Submitty/actions/workflows/vagrant_up.yaml)
