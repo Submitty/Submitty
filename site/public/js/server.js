@@ -8,7 +8,7 @@
    removeMessagePopup validateHtml togglePageDetails copyToClipboard downloadCSV setFolderRelease
    newEditCourseMaterialsForm newEditCourseMaterialsFolderForm newUploadCourseMaterialsForm newUploadImagesForm
    newOverwriteCourseMaterialForm newDeleteCourseMaterialForm displayCloseSubmissionsWarning newDeleteGradeableForm
-   */
+   markAllViewed */
 /* global csrfToken my_window:writable file_path:writable updateBulkProgress icon:writable detectColorScheme
    createArray readPrevious disableFullUpdate */
 
@@ -896,25 +896,25 @@ function markViewed(ids) {
 }
 
 function markAllViewed() {
-    let data = new FormData();
-    data.append("csrf_token", csrfToken);
+    const data = new FormData();
+    data.append('csrf_token', csrfToken);
     $.ajax({
-        url: buildCourseUrl(['course_materials', 'viewAll']), 
-        type: "POST",
+        url: buildCourseUrl(['course_materials', 'viewAll']),
+        type: 'POST',
         data: data,
         contentType: false,
         processData: false,
         success: () => {
             // Delete badges
             const badges = document.querySelectorAll('.course-material-badge');
-            badges.forEach(function(badge) {
+            badges.forEach((badge) => {
                 badge.remove();
             });
         },
         error: (e) => {
-            displayErrorMessage("Failed to mark all viewed.");
+            displayErrorMessage('Failed to mark all viewed.');
             console.error(e);
-        }
+        },
     });
 
 }
