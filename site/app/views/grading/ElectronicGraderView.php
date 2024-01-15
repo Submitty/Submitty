@@ -913,8 +913,8 @@ HTML;
             "message" => $message,
             "message_warning" => $message_warning,
             "overrides" => $overrides,
-            "anon_ids" => $anon_ids
-
+            "anon_ids" => $anon_ids,
+            "max_team_name_length" => Team::MAX_TEAM_NAME_LENGTH,
         ]);
     }
 
