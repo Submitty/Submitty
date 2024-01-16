@@ -2264,7 +2264,7 @@ function updateThread(e) {
     e.preventDefault();
     const cat = [];
     $('input[name="cat[]"]:checked').each(item => cat.push($('input[name="cat[]"]:checked')[item].value));
-    const post_box_id = $('#edit-user-post').find('.thread-post-form').data('post_box_id');
+    /*const post_box_id = $('#edit-user-post').find('.thread-post-form').data('post_box_id');
 
     const data =  {
         edit_thread_id: $('#edit_thread_id').val(),
@@ -2279,18 +2279,16 @@ function updateThread(e) {
         cat,
         markdown_status: parseInt($(`input#markdown_input_${post_box_id}`).val()),
         deleted_attachments: JSON.stringify(getDeletedAttachments()),
-    };
+    };*/
     const form = $(this);
     const formData = new FormData(form[0]);
     formData.append('deleted_attachments', JSON.stringify(getDeletedAttachments()));
-    
+
     const files = testAndGetAttachments(1, false);
     if (files === false) {
         return false;
     }
-    //for (let i = 0; i < files.length ; i++) {
-      //  data = Object.assign(data, {'file_input[]': files[i]});
-    //}
+
     for (let i = 0; i < files.length ; i++) {
         formData.append('file_input[]', files[i], files[i].name);
     }
