@@ -951,7 +951,7 @@ class ForumController extends AbstractController {
                     $attachment_name[] = basename($_FILES[$file_post]["name"][$i]);
                 }
             }
-            
+
             $thread_dir = FileUtils::joinPaths(FileUtils::joinPaths($this->core->getConfig()->getCoursePath(), "forum_attachments"), $thread_id);
 
             if (!is_dir($thread_dir)) {

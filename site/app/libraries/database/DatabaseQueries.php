@@ -1206,8 +1206,9 @@ SQL;
 
     /**
      * @param string[] $attachments_deleted
+     * @param string[] $attachments_added
      */
-    public function editPost($original_creator, $user, $post_id, $content, $anon, $markdown, $attachments_deleted, $attachments_added) {
+    public function editPost($original_creator, $user, $post_id, $content, $anon, $markdown, array $attachments_deleted, array $attachments_added) {
         try {
             $markdown = $markdown ? 1 : 0;
             // Before making any edit to $post_id, forum_posts_history will not have any corresponding entry
