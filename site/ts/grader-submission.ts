@@ -41,6 +41,9 @@ function init() {
             document.getElementById('radio-bulk')!.click();
         }
     }
+    else {
+        document.getElementById('radio-bulk')!.click();
+    }
 
     const qrPrefixInput = document.getElementById('qr_prefix') as HTMLInputElement;
     const qrSuffixInput = document.getElementById('qr_suffix') as HTMLInputElement;
