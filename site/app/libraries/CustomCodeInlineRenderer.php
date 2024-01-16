@@ -19,7 +19,7 @@ class CustomCodeInlineRenderer implements NodeRendererInterface {
     public function render(Node $node, ChildNodeRendererInterface $childRenderer) {
         $element = $this->baseRenderer->render($node, $childRenderer);
         $attrs = [
-            "class" => "inline-code hljs"
+            "class" => "inline-code"
         ];
         return new HtmlElement('code', $attrs, $element->getContents());
     }
