@@ -1207,7 +1207,7 @@ SQL;
     /**
      * @param string[] $attachments_deleted
      */
-    public function editPost($original_creator, $user, $post_id, $content, $anon, $markdown, $attachments_deleted) {
+    public function editPost($original_creator, $user, $post_id, $content, $anon, $markdown, $attachments_deleted, $attachments_added) {
         try {
             $markdown = $markdown ? 1 : 0;
             // Before making any edit to $post_id, forum_posts_history will not have any corresponding entry
@@ -1229,6 +1229,16 @@ SQL;
             if (count($attachments_deleted) > 0) {
                 $placeholders = $this->createParameterList(count($attachments_deleted));
                 $this->course_db->query("UPDATE forum_attachments SET version_deleted = ? WHERE post_id = ? AND file_name IN {$placeholders}", array_merge([$version_id, $post_id], $attachments_deleted));
+            }
+            if (count($attachments_added) > 0) {
+                $rows = [];
+                $params = [];
+                foreach ($attachments_added as $img) {
+                    $params[] = $this->createParameterList(4);
+                    $rows = array_merge($rows, [$post_id, $img, $version_id, 0]);
+                }
+                $placeholders = implode(", ", $params);
+                $this->course_db->query("INSERT INTO forum_attachments (post_id, file_name, version_added, version_deleted) VALUES {$placeholders}", $rows);
             }
             $hasAttachment = !empty($this->getForumAttachments([$post_id])[$post_id][0]);
             // Update current post

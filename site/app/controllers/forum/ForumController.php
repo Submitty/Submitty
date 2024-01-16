@@ -938,6 +938,35 @@ class ForumController extends AbstractController {
 
             $markdown = !empty($_POST['markdown_status']);
 
+            $file_post = 'file_input';
+            $thread_id = $original_post["thread_id"];
+            $hasGoodAttachment = $this->checkGoodAttachment(false, $thread_id, $file_post);
+            if ($hasGoodAttachment[0] === -1) {
+                return null;
+            }
+
+            $attachment_name = [];
+            if ($hasGoodAttachment[0] === 1) {
+                for ($i = 0; $i < count($_FILES[$file_post]["name"]); $i++) {
+                    $attachment_name[] = basename($_FILES[$file_post]["name"][$i]);
+                }
+            }
+            
+            $thread_dir = FileUtils::joinPaths(FileUtils::joinPaths($this->core->getConfig()->getCoursePath(), "forum_attachments"), $thread_id);
+
+            if (!is_dir($thread_dir)) {
+                FileUtils::createDir($thread_dir);
+            }
+
+            if ($hasGoodAttachment[0] === 1) {
+                $post_dir = FileUtils::joinPaths($thread_dir, $post_id);
+                FileUtils::createDir($post_dir);
+                for ($i = 0; $i < count($_FILES[$file_post]["name"]); $i++) {
+                    $target_file = $post_dir . "/" . basename($_FILES[$file_post]["name"][$i]);
+                    move_uploaded_file($_FILES[$file_post]["tmp_name"][$i], $target_file);
+                }
+            }
+
             return $this->core->getQueries()->editPost(
                 $original_creator,
                 $current_user,
@@ -945,7 +974,8 @@ class ForumController extends AbstractController {
                 $new_post_content,
                 $anon,
                 $markdown,
-                json_decode($_POST['deleted_attachments'])
+                json_decode($_POST['deleted_attachments']),
+                $attachment_name,
             );
         }
         return null;
