@@ -919,7 +919,7 @@ class Access {
             // Removing "/upload" from path
             $base = substr($info["base"], 0, -23) . "/rainbow_grades";
             //checking the path
-            if(!str_starts_with($path, $base)) {
+            if (!str_starts_with($path, $base)) {
                 $path = $base . $path;
             }
         }//Make sure it starts with the dir base
