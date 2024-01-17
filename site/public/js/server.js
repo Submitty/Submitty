@@ -49,6 +49,17 @@ function buildCourseUrl(parts = []) {
     return document.body.dataset.courseUrl + '/' + parts.join('/');
 }
 
+/**
+ * Acts in a similar fashion to Core->buildCourseUrl() function within the PHP code
+ * Course information is prepended to the URL constructed.
+ *
+ * @param {object} parts - Object representing URL parts to append to the URL
+ * @returns {string} - Built up URL to use
+ */
+function getUploadUrl() {
+    return document.body.dataset.uploadUrl;
+}
+
 function changeDiffView(div_name, gradeable_id, who_id, version, index, autocheck_cnt, helper_id){
     var actual_div_name = "#" + div_name + "_0";
     var expected_div_name = "#" + div_name + "_1";

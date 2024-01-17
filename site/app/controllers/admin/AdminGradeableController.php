@@ -21,6 +21,7 @@ use Symfony\Component\Routing\Annotation\Route;
  */
 class AdminGradeableController extends AbstractController {
     /**
+     * @Route("/courses/{_semester}/{_course}/gradeable/{gradeable_id}/update", methods={"GET"})
      */
     public function editGradeableRequest($gradeable_id, $nav_tab = 0) {
         try {
@@ -52,13 +53,31 @@ class AdminGradeableController extends AbstractController {
     /**
      * Displays the 'new' page, populating the first-page properties with the
      *  provided gradeable's data
-     * @Route("/courses/{_semester}/{_course}/gradeable/{gradeable_id}/update", methods={"GET"})
-     * @Route("/api/{_semester}/{_course}/upload", methods={"POST"})
-     * @Route("/courses/{_semester}/{_course}/gradeable_upload", methods={"POST"})
+     * @return JsonResponse
+     * @Route("/courses/upload/{_semester}/{_course}", methods={"POST"})
      */
     public function uploadGradeable() {
-        $this->core->getOutput()->renderTwigOutput('admin/admin_gradeable/w');
-        echo('<script>console.log("test")</script>');
+        $invalid = false;
+        isset($_POST['id']) ? $gradeable_id = $_POST['id'] : $invalid = true;
+        isset($_POST['title']) ? $title = $_POST['title'] : $invalid = true;
+        isset($_POST['type']) ? $type = $_POST['type'] : $invalid = true;
+
+        if($invalid){
+            $this->core->addErrorMessage('JSON requires id, title, and type');
+            return JsonResponse::getErrorResponse('JSON requires id, title, and type');
+        }
+
+        try {
+            $build_result = $this->createGradeable($gradeable_id, $_POST);
+            // Finally, redirect to the edit page
+            if ($build_result !== null) {
+                return JsonResponse::getErrorResponse($build_result);
+            }
+            return JsonResponse::getSuccessResponse($gradeable_id);
+        }
+        catch (\Exception $e) {
+            return JsonResponse::getErrorResponse($e->getMessage());
+        }
     }
 
     /**
@@ -82,11 +101,10 @@ class AdminGradeableController extends AbstractController {
         $this->core->getOutput()->addSelect2WidgetCSSAndJs();
         $this->core->getOutput()->addInternalCss('admin-gradeable.css');
         $this->core->getOutput()->addInternalJs('directory.js');
-        $this->core->getOutput()->addInternalJs('admin-gradeable-updates.js');
+        $this->core->getOutput()->addInternalJs('gradeable.js');
         $this->core->getOutput()->renderTwigOutput('admin/admin_gradeable/AdminGradeableBase.twig', [
             'submit_url' => $submit_url,
             'gradeable' => $gradeable,
-            'post_url' => $this->core->buildCourseUrl(['gradeable_upload']),
             'vcs_subdirectory' => '',
             'using_subdirectory' => false,
             'action' => $gradeable !== null ? 'template' : 'new',

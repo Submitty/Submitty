@@ -12,10 +12,9 @@
         </a>
     </p>
     <input type="hidden" name="csrf_token" value="{{ csrf_token }}" />
-    <input type="file" name="upload" accept=".xlsx, .csv" aria-label="Choose File">
+    <input type="file" name="upload" id="upload" accept=".json" aria-label="Choose File">
 {% endblock %}
 {% block buttons %}
     {{ block('close_button') }}
-    <input class="btn btn-primary" onclick="ajaxUploadGradeable('{{ post_url }}')" type="button" value="Submit" />
+    <input class="btn btn-primary" onclick="ajaxUploadGradeable()" type="button" value="Submit" />
 {% endblock %}
- 

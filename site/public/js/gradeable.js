@@ -1,3 +1,6 @@
+/* global csrfToken, getUploadUrl
+*/
+
 /**
  * The number of decimal places to show to the user
  * @type {int}
@@ -261,6 +264,7 @@ function renderGradingComponentHeader(grader_id, component, graded_component, gr
     });
 }
 
+
 /**
  * Asynchronously renders a gradeable using the passed data
  * Note: Call 'loadTemplates' first
@@ -320,6 +324,45 @@ function renderEditComponentHeader(component, showMarkList) {
             'decimal_precision': DECIMAL_PRECISION
         }));
     });
+}
+
+
+// Uploads a gradeable via JSON
+function ajaxUploadGradeable(url){
+    var files = document.getElementById('upload').files;
+    if (files.length <= 0) {
+        return false;
+    }
+    const extension = files[0].name.split('.').pop();
+    if(extension !== "json"){
+        return false;
+    }
+    var fr = new FileReader();
+
+    fr.onload = function(e) {
+        var result = JSON.parse(e.target.result);
+        result['csrf_token'] = csrfToken;
+        const url = getUploadUrl();
+        $.ajax({
+            url: url,
+            headers : {
+                Accept: 'application/json',
+            },
+            dataType:'json',
+            data: result,
+            method: 'POST',
+        }).always(function(data){
+            data = JSON.parse(JSON.stringify(data));
+            console.log(data);
+            if(data['status'] === 'success'){
+                window.location = buildCourseUrl(['gradeable', data['data'], 'update']);
+            } else {
+                return false;
+            }
+        });
+    }
+    fr.readAsText(files.item(0));
+    
 }
 
 /**
