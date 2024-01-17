@@ -61,9 +61,8 @@ class AdminGradeableController extends AbstractController {
         isset($_POST['id']) ? $gradeable_id = $_POST['id'] : $invalid = true;
         isset($_POST['title']) ? $title = $_POST['title'] : $invalid = true;
         isset($_POST['type']) ? $type = $_POST['type'] : $invalid = true;
-
-        if($invalid){
-            $this->core->addErrorMessage('JSON requires id, title, and type');
+        $many = $_POST['any_manual_grades'];
+        if($invalid || !isset($_POST['title']) || ! isset($_POST['type'])){
             return JsonResponse::getErrorResponse('JSON requires id, title, and type');
         }
 
@@ -75,7 +74,7 @@ class AdminGradeableController extends AbstractController {
             }
             return JsonResponse::getSuccessResponse($gradeable_id);
         }
-        catch (\Exception $e) {
+        catch (Exception $e) {
             return JsonResponse::getErrorResponse($e->getMessage());
         }
     }
@@ -974,7 +973,7 @@ class AdminGradeableController extends AbstractController {
                 'autograding_config_path' =>
                     FileUtils::joinPaths($this->core->getConfig()->getSubmittyInstallPath(), 'more_autograding_examples/upload_only/config'),
                 'allow_custom_marks' => true,
-
+                'any_manual_grades' => false,
                 //For discussion component
                 'discussion_based' => $discussion_clicked,
                 'discussion_thread_ids' => $jsonThreads,

@@ -357,7 +357,8 @@ function ajaxUploadGradeable(url){
             if(data['status'] === 'success'){
                 window.location = buildCourseUrl(['gradeable', data['data'], 'update']);
             } else {
-                return false;
+                window.location = buildCourseUrl(['gradeable']);
+                alert(data['message']);
             }
         });
     }
