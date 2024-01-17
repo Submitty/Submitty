@@ -1,4 +1,4 @@
-/* global csrfToken, buildCourseUrl, getUploadUrl, displayErrorMessage, gradeable_max_autograder_points,
+/* global csrfToken, buildCourseUrl, displayErrorMessage, gradeable_max_autograder_points,
           is_electronic, onHasReleaseDate, reloadInstructorEditRubric, getItempoolOptions,
           isItempoolAvailable, getGradeableId, closeAllComponents, onHasDueDate, setPdfPageAssignment,
           PDF_PAGE_INSTRUCTOR, PDF_PAGE_STUDENT, PDF_PAGE_NONE */
@@ -318,7 +318,6 @@ function ajaxRebuildGradeableButton() {
     const gradeable_id = $('#g_id').val();
     console.log(buildCourseUrl(['gradeable', gradeable_id, 'rebuild']));
     $.ajax({
-        
         url: buildCourseUrl(['gradeable', gradeable_id, 'rebuild']),
         success: function () {
             ajaxCheckBuildStatus();

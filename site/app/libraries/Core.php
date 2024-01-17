@@ -707,7 +707,7 @@ class Core {
     }
 
     /**
-     * This function will return the URL for uploading a JSON file to create a gradeable. 
+     * This function will return the URL for uploading a JSON file to create a gradeable.
      *
      * @return string
      */

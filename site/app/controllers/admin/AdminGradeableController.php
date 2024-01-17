@@ -61,8 +61,7 @@ class AdminGradeableController extends AbstractController {
         isset($_POST['id']) ? $gradeable_id = $_POST['id'] : $invalid = true;
         isset($_POST['title']) ? $title = $_POST['title'] : $invalid = true;
         isset($_POST['type']) ? $type = $_POST['type'] : $invalid = true;
-        $many = $_POST['any_manual_grades'];
-        if($invalid || !isset($_POST['title']) || ! isset($_POST['type'])){
+        if ($invalid || !isset($_POST['title']) || ! isset($_POST['type'])) {
             return JsonResponse::getErrorResponse('JSON requires id, title, and type');
         }
 
@@ -74,7 +73,7 @@ class AdminGradeableController extends AbstractController {
             }
             return JsonResponse::getSuccessResponse($gradeable_id);
         }
-        catch (Exception $e) {
+        catch (\Exception $e) {
             return JsonResponse::getErrorResponse($e->getMessage());
         }
     }

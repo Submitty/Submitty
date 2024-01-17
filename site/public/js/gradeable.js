@@ -353,7 +353,6 @@ function ajaxUploadGradeable(url){
             method: 'POST',
         }).always(function(data){
             data = JSON.parse(JSON.stringify(data));
-            console.log(data);
             if(data['status'] === 'success'){
                 window.location = buildCourseUrl(['gradeable', data['data'], 'update']);
             } else {
