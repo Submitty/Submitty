@@ -54,6 +54,7 @@ class AdminGradeableController extends AbstractController {
      * Displays the 'new' page, populating the first-page properties with the
      *  provided gradeable's data
      * @return JsonResponse
+     * @AccessControl(role="INSTRUCTOR")
      * @Route("/courses/upload/{_semester}/{_course}", methods={"POST"})
      */
     public function uploadGradeable() {
@@ -995,6 +996,7 @@ class AdminGradeableController extends AbstractController {
             // Values for these electronic-only properties
             $gradeable_create_data = array_merge($gradeable_create_data, [
                 'team_assignment' => false,
+                "any_manual_grades" => false,
                 'vcs' => false,
                 'team_size_max' => 0,
                 'vcs_subdirectory' => '',
