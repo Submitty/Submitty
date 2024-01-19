@@ -344,7 +344,7 @@ class Gradeable extends AbstractModel {
         if (array_key_exists('any_manual_grades', $details)) {
             $this->setAnyManualGrades($details['any_manual_grades']);
         }
-       
+
         if (array_key_exists('peer_graders_list', $details)) {
             $this->setPeerGradersList($details['peer_graders_list']);
         }
