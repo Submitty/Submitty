@@ -63,7 +63,7 @@ class AdminGradeableController extends AbstractController {
         isset($_POST['id']) ? $gradeable_id = $_POST['id'] : $invalid = true;
         isset($_POST['title']) ? $title = $_POST['title'] : $invalid = true;
         isset($_POST['type']) ? $type = $_POST['type'] : $invalid = true;
-        if ($invalid || !isset($_POST['title']) || ! isset($_POST['type'])) {
+        if ($invalid) {
             return JsonResponse::getErrorResponse('JSON requires id, title, and type');
         }
 

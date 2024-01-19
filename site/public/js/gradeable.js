@@ -264,7 +264,6 @@ function renderGradingComponentHeader(grader_id, component, graded_component, gr
     });
 }
 
-
 /**
  * Asynchronously renders a gradeable using the passed data
  * Note: Call 'loadTemplates' first
