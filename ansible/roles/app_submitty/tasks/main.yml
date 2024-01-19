@@ -5,18 +5,15 @@
     state: directory
     mode: "0755"
 
-# Change to normal Submitty here after testing
+# Change version to match current release
 - name: Checkout WWU fork of the submitty git repo
   ansible.builtin.git:
-    repo: https://github.com/wwu-cs/Submitty.git
+    repo: https://github.com/Submitty/Submitty.git
     dest: /usr/local/submitty/GIT_CHECKOUT/Submitty
-    version: wwuSubmitty
+    version: v24.01.01
     force: yes
     update: yes
 
-# TODO Add WWU specific install items here
-
-# TODO Found the system would run into locks with apt
 - name: Run Submitty install script.
   ansible.builtin.shell:
     executable: "/bin/bash"
@@ -24,7 +21,7 @@
       set -o pipefail
       echo "localhost
         5432
-        submitty_dbuser
+        "{{ submitty_dbuser }}"
         submitty_dbuser_password
         submitty_course_dbuser
         submitty_course_dbuser_password
@@ -71,8 +68,6 @@
     regexp: <VirtualHost \*:80>
     replace: "{{ lookup('file', 'append_to_submitty.conf') }}"
 
-#change require all acceptd for cgi-bin
-
 - name: Add ip to the Apache Submitty configuration
   ansible.builtin.replace:
     path: /etc/apache2/sites-available/submitty.conf
@@ -100,85 +95,7 @@
 - name: Run a2ensite submitty
   ansible.builtin.command: a2ensite submitty
 
-# TODO turn off TCP for postgresql
-
 - name: Restart service apache2
   ansible.builtin.service:
     name: apache2
     state: restarted
-
-# TODO Switch out id_rsa file copies for an API call to Gitlab that creates a unique key and pushes it
-- name: Create submitty git directory if none exists
-  ansible.builtin.file:
-    path: /home/submitty_daemon/.ssh/
-    state: directory
-    owner: submitty_daemon
-    group: submitty_daemon
-    mode: "0700"
-
-- name: Set up Gitlab configuration for student submissions (id_rsa)
-  ansible.builtin.copy:
-    src: id_rsa
-    dest: /home/submitty_daemon/.ssh/id_rsa
-    owner: submitty_daemon
-    group: submitty_daemon
-    mode: "0600"
-
-- name: Set up Gitlab configuration for student submissions (id_rsa.pub)
-  ansible.builtin.copy:
-    src: id_rsa.pub
-    dest: /home/submitty_daemon/.ssh/id_rsa.pub
-    owner: submitty_daemon
-    group: submitty_daemon
-    mode: "0640"
-
-- name: Set up Gitlab configuration for student submissions (known_hosts)
-  ansible.builtin.copy:
-    src: known_hosts
-    dest: /home/submitty_daemon/.ssh/known_hosts
-    owner: submitty_daemon
-    group: submitty_daemon
-    mode: "0644"
-
-# Add software needed for autograding
-- name: Run the equivalent of "apt-get update" as a separate step
-  ansible.builtin.apt:
-    update_cache: yes
-    cache_valid_time: 300
-
-- name: Install support packages for Submitty
-  ansible.builtin.apt:
-    name: "{{ packages }}"
-    state: latest  # noqa package-latest
-  vars:
-    packages:
-      - clang-format
-
-- name: Touch the sudoers file for debian
-  ansible.builtin.file:
-    path: /etc/sudoers.d/27-app-submitty-sudo-users
-    state: touch
-    mode: "0440"
-  changed_when: false
-
-- name: Enable submittyadmin group to have sudo privileges
-  ansible.builtin.lineinfile:
-    path: /etc/sudoers.d/27-app-submitty-sudo-users
-    line: '%submittyadmin ALL=(ALL:ALL) ALL'
-
-- name: Remove old sudo edits
-  ansible.builtin.lineinfile:
-    path: /etc/sudoers
-    line: '%submittyadmin ALL=(ALL:ALL) ALL'
-    state: absent
-
-- name: Install pip for installing pytest
-  ansible.builtin.apt:
-    state: latest  # noqa package-latest
-    name:
-      - python3-pip
-
-- name: Install pytest for grading homework
-  ansible.builtin.pip:
-    name: pytest
-    executable: pip3
