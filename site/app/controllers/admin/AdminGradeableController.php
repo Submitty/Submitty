@@ -59,6 +59,7 @@ class AdminGradeableController extends AbstractController {
      */
     public function uploadGradeable() {
         $invalid = false;
+        $gradeable_id = "";
         isset($_POST['id']) ? $gradeable_id = $_POST['id'] : $invalid = true;
         isset($_POST['title']) ? $title = $_POST['title'] : $invalid = true;
         isset($_POST['type']) ? $type = $_POST['type'] : $invalid = true;

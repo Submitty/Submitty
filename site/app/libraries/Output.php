@@ -674,7 +674,7 @@ HTML;
      * @return string
      */
     public function getUploadUrl() {
-        return $this->core->buildUploadUrl($parts);
+        return $this->core->buildUploadUrl();
     }
 
     /**
