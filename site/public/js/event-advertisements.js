@@ -53,6 +53,10 @@ $(() => {
     else {
         Cookies.set('display-banner', 'no');
     }
+
+    if (eventAdvertisements.images.length > 0) {
+        eventAdvertisements.originalDuck.style.cursor = "pointer";
+    }
 });
 function showBanners(noMove = false) {
     const movingUnit = document.getElementById('moving-unit');
