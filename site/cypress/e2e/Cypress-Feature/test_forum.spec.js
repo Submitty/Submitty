@@ -23,7 +23,7 @@ const createThread = (title, content, category) => {
 const replyToThread = (title, reply) => {
     cy.get('.thread-left-cont > .thread-list-item').contains(title).click();
     cy.get('.create-post-head').should('contain', title);
-    cy.get('#reply_box_2').type(reply);
+    cy.get('#reply_box_3').type(reply);
     cy.get('[value="Submit Reply to All"]').click();
     cy.get('#posts_list').should('contain', reply);
 };
