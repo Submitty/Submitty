@@ -235,12 +235,15 @@
                                     <button class="delete-button" onclick="showBanners()">x</button>
                                 </div>
                                 {% endfor %}
+
+                                {% if imageDataArray|length > 1 %}
                                 <button class="prev-button" aria-label="go to the next banner" onclick="changeImage(-1)">
                                     <i class="fas fa-arrow-left"></i>
                                 </button>
                                 <button class="next-button" aria-label="go to the previous banner" onclick="changeImage(1)">
                                     <i class="fas fa-arrow-right"></i>
                                 </button>
+                                {% endif %}
                             </div>
                         </div>
                     </div>

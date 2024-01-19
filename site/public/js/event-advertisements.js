@@ -71,7 +71,7 @@ function showBanners(noMove = false) {
             eventAdvertisements.images[eventAdvertisements.currentImageIndex].classList.add('active');
 
             const duckdivElement = document.getElementById('moorthy-duck');
-            duckdivElement.style.animation = 'rocking 2s linear infinite';
+            eventAdvertisements.moveDuck.style.animation = 'rocking 2s linear infinite';
 
             setTimeout(() => {
                 eventAdvertisements.originalDuck.style.display = 'none';
