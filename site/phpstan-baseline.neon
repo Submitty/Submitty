@@ -14080,11 +14080,6 @@ parameters:
 			path: app/views/grading/SimpleGraderView.php
 
 		-
-			message: "#^Call to function in_array\\(\\) requires parameter \\#3 to be set\\.$#"
-			count: 1
-			path: app/views/submission/HomeworkView.php
-
-		-
 			message: "#^Construct empty\\(\\) is not allowed\\. Use more strict comparison\\.$#"
 			count: 2
 			path: app/views/submission/HomeworkView.php
