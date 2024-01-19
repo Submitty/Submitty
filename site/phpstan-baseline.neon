@@ -5316,6 +5316,9 @@ parameters:
 			path: app/libraries/database/DatabaseQueries.php
 
 		-
+			message: "#^Comparison operation \"\\>\" between int\\<min, 0\\> and 0 is always false\\.$#"
+
+		-
 			message: "#^Call to method app\\\\libraries\\\\database\\\\AbstractDatabase\\:\\:getRowCount\\(\\) with incorrect case\\: getrowcount$#"
 			count: 1
 			path: app/libraries/database/DatabaseQueries.php
@@ -14075,11 +14078,6 @@ parameters:
 			message: "#^Method app\\\\views\\\\grading\\\\SimpleGraderView\\:\\:simpleDisplay\\(\\) has parameter \\$student_full with no type specified\\.$#"
 			count: 1
 			path: app/views/grading/SimpleGraderView.php
-
-		-
-			message: "#^Call to function in_array\\(\\) requires parameter \\#3 to be set\\.$#"
-			count: 1
-			path: app/views/submission/HomeworkView.php
 
 		-
 			message: "#^Construct empty\\(\\) is not allowed\\. Use more strict comparison\\.$#"
