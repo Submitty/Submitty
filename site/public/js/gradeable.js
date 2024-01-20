@@ -326,8 +326,8 @@ function renderEditComponentHeader(component, showMarkList) {
 }
 
 
-// Uploads a gradeable via JSON
-function ajaxUploadGradeable(url){
+// Uploads a gradeable via JSON POST request
+function ajaxUploadGradeable(){
     var files = document.getElementById('upload').files;
     if (files.length <= 0) {
         return false;
@@ -339,29 +339,34 @@ function ajaxUploadGradeable(url){
     var fr = new FileReader();
 
     fr.onload = function(e) {
-        var result = JSON.parse(e.target.result);
-        result['csrf_token'] = csrfToken;
-        const url = getUploadUrl();
-        $.ajax({
-            url: url,
-            headers : {
-                Accept: 'application/json',
-            },
-            dataType:'json',
-            data: result,
-            method: 'POST',
-        }).always(function(data){
-            data = JSON.parse(JSON.stringify(data));
-            if(data['status'] === 'success'){
-                window.location = buildCourseUrl(['gradeable', data['data'], 'update']);
-            } else {
-                window.location = buildCourseUrl(['gradeable']);
-                alert(data['message']);
-            }
-        });
+        try{
+            const result = JSON.parse(e.target.result);
+        } catch(error)
+        {
+           alert(error);
+           return false;
+        }
+            result['csrf_token'] = csrfToken;
+            const url = getUploadUrl();
+            $.ajax({
+                url: url,
+                headers : {
+                    Accept: 'application/json',
+                },
+                dataType:'json',
+                data: result,
+                method: 'POST',
+            }).always(function(data){
+                data = JSON.parse(JSON.stringify(data));
+                if(data['status'] === 'success'){
+                    window.location = buildCourseUrl(['gradeable', data['data'], 'update']);
+                } else {
+                    window.location = buildCourseUrl(['gradeable']);
+                    alert(data['message']);
+                }
+            });
     }
     fr.readAsText(files.item(0));
-    
 }
 
 /**

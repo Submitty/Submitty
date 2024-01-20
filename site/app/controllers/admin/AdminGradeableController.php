@@ -51,22 +51,18 @@ class AdminGradeableController extends AbstractController {
     ];
 
     /**
-     * Displays the 'new' page, populating the first-page properties with the
-     *  provided gradeable's data
+     * Creates a gradeable based on uploaded JSON data
      * @return JsonResponse
      * @AccessControl(role="INSTRUCTOR")
+     * @Route("/api/upload/{_semester}/{_course}", methods={"POST"})
      * @Route("/courses/upload/{_semester}/{_course}", methods={"POST"})
      */
     public function uploadGradeable() {
         $invalid = false;
-        $gradeable_id = "";
-        isset($_POST['id']) ? $gradeable_id = $_POST['id'] : $invalid = true;
-        isset($_POST['title']) ? $title = $_POST['title'] : $invalid = true;
-        isset($_POST['type']) ? $type = $_POST['type'] : $invalid = true;
-        if ($invalid) {
+        $gradeable_id = $_POST['id'] ?? '';
+            if (!isset($_POST['id']) || !isset($_POST['title']) || !isset($_POST['type'])) {
             return JsonResponse::getErrorResponse('JSON requires id, title, and type');
         }
-
         try {
             $build_result = $this->createGradeable($gradeable_id, $_POST);
             // Finally, redirect to the edit page
@@ -965,14 +961,14 @@ class AdminGradeableController extends AbstractController {
 
             $grade_inquiry_allowed = isset($details['grade_inquiry_allowed']) && ($details['grade_inquiry_allowed'] === 'true');
             $grade_inquiry = ($details['grade_inquiry_per_component_allowed'] ?? 'false') === 'true';
+            $autograding_config_path = $details['autograding_config_path'] ?? FileUtils::joinPaths($this->core->getConfig()->getSubmittyInstallPath(), 'more_autograding_examples/upload_only/config');
             $gradeable_create_data = array_merge($gradeable_create_data, [
                 'team_assignment' => $details['team_assignment'] === 'true',
                 'ta_grading' => $details['ta_grading'] === 'true',
                 'team_size_max' => $details['team_size_max'],
                 'grade_inquiry_allowed' => $grade_inquiry_allowed,
                 'grade_inquiry_per_component_allowed' => $grade_inquiry,
-                'autograding_config_path' =>
-                    FileUtils::joinPaths($this->core->getConfig()->getSubmittyInstallPath(), 'more_autograding_examples/upload_only/config'),
+                'autograding_config_path' => $autograding_config_path,
                 'allow_custom_marks' => true,
                 'any_manual_grades' => false,
                 //For discussion component
