@@ -135,7 +135,16 @@ footer .footer-separator {
     padding: 0 8px;
 }
 
-#moorthy-duck {
+
+#duckdivmove {
+    display: none;
+}
+
+.upload-banner {
+    margin-bottom: 20px;
+}
+
+.moorthy-duck {
     display: block;
 }
 
