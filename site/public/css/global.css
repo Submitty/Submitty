@@ -56,7 +56,7 @@ nav a > i.f {
     margin-right: 0;
 }
 
-#menu-header {
+.menu-headerbanner {
     justify-content: center; /* Center horizontally */
     align-items: center; /* Center vertically */
 }
@@ -168,11 +168,6 @@ footer .footer-separator {
     padding: 0 8px;
 }
 
-#duckdiv {
-    position: relative; 
-    display: inline-block; 
-    vertical-align: top;
-}
 
 #duckdivmove {
     display: none;

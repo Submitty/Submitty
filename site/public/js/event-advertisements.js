@@ -63,6 +63,8 @@ function showBanners(noMove = false) {
     const bannerElement = document.getElementById('banner');
     const logoBox = document.getElementById('logo-box');
     if (bannerElement.style.display === 'none' && eventAdvertisements.images.length > 0) {
+        document.getElementById("menu-header").classList.add("menu-headerbanner");
+
         logoBox.classList.add('logo-inmovement');
 
 
@@ -100,8 +102,11 @@ function showBanners(noMove = false) {
         }
         document.getElementById('triangle').style.display = 'none';
         document.getElementById('speech-bubble').style.display = 'none';
+
     }
     else {
+        document.getElementById("menu-header").classList.remove("menu-headerbanner");
+
         //alignRightEdgeWithLeftEdge('moorthy-duck', 'logo-box');
         logoBox.classList.remove('logo-inmovement');
         Cookies.set('display-banner', 'no');
