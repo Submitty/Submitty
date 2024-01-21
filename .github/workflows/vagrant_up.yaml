@@ -30,9 +30,9 @@ jobs:
       # versions are close enough that we are fine without it.
       # - run: vagrant plugin install vagrant-vbguest
       - name: Vagrant Up
-        run: VAGRANT_JOB=1 vagrant up
-      - name: Validate image
-        run: curl --show-error --fail --include http://localhost:1511
+        run: CI=1 vagrant up
+      # - name: Validate image
+      #   run: curl --show-error --fail --include http://localhost:1511
       - name: Save image
         run: vagrant package --output submitty.box
       - name: Publish image

@@ -32,29 +32,36 @@ $stderr.sync = true
 
 require 'json'
 
+ON_CI = !ENV.fetch('CI', '').empty?
+
 def gen_script(machine_name, worker: false)
   no_submissions = !ENV.fetch('NO_SUBMISSIONS', '').empty?
+  reinstall = !ENV.fetch('BASE_BOX', '').empty?
   extra = ENV.fetch('EXTRA', '')
-
-  # setup_cmd = 'bash ${GIT_PATH}/.setup/'
-  # if worker
-  #   setup_cmd += 'install_worker.sh'
-  # else
-  #   setup_cmd += 'vagrant/setup_vagrant.sh'
-  #   if no_submissions
-  #     setup_cmd += ' --no_submissions'
-  #   end
-  # end
-  # unless extra.empty?
-  #   setup_cmd += " #{extra}"
-  # end
-  # setup_cmd += " 2>&1 | tee ${GIT_PATH}/.vagrant/logs/#{machine_name}.log"
+  if reinstall || ON_CI
+    setup_cmd = 'bash ${GIT_PATH}/.setup/'
+    if worker
+      setup_cmd += 'install_worker.sh'
+    else
+      setup_cmd += 'vagrant/setup_vagrant.sh'
+      if no_submissions
+        setup_cmd += ' --no_submissions'
+      end
+    end
+  else
+    setup_cmd = ''
+  end
+  unless extra.empty?
+    setup_cmd += " #{extra}"
+  end
+  setup_cmd += " 2>&1 | tee ${GIT_PATH}/.vagrant/logs/#{machine_name}.log"
 
   script = <<SCRIPT
     GIT_PATH=/usr/local/submitty/GIT_CHECKOUT/Submitty
     DISTRO=$(lsb_release -si | tr '[:upper:]' '[:lower:]')
     VERSION=$(lsb_release -sr | tr '[:upper:]' '[:lower:]')
     mkdir -p ${GIT_PATH}/.vagrant/logs
+    #{setup_cmd}
 SCRIPT
 
   return script
@@ -63,7 +70,8 @@ end
 base_boxes = Hash[]
 
 # Should all be base Ubuntu boxes that use the same version
-base_boxes.default         = "bento/ubuntu-22.04"
+base_boxes.default         = "submitty_temp/ubuntu22-dev"
+base_boxes[:base]          = "bento/ubuntu-22.04"
 base_boxes[:arm_bento]     = "bento/ubuntu-22.04-arm64"
 base_boxes[:libvirt]       = "generic/ubuntu2204"
 base_boxes[:arm_mac_qemu]  = "perk/ubuntu-2204-arm64"
@@ -100,22 +108,19 @@ Vagrant.configure(2) do |config|
     config.env.enable
   end
 
-  if ENV.has_key('VAGRANT_JOB')
-      config.ssh.insert_key = 'false'
-  else 
-      config.ssh.insert_key = 'true'
+  if ON_CI
+    config.ssh.insert_key = false
+  else
+    config.ssh.insert_key = false
   end
-
   config.vm.box = ENV.fetch('VAGRANT_BOX', base_boxes.default)
 
   arch = `uname -m`.chomp
   arm = arch == 'arm64' || arch == 'aarch64'
   apple_silicon = Vagrant::Util::Platform.darwin? && (arm || (`sysctl -n machdep.cpu.brand_string`.chomp.start_with? 'Apple M'))
   
-  custom_box = ENV.has_key?('VAGRANT_BOX')
-
-  mount_options = []
-
+  custom_box = ENV.has_key?('VAGRANT_BOX') && !ENV.has_key?('BASE_BOX')
+  base_box = ENV.has_key?('BASE_BOX')
   # The time in seconds that Vagrant will wait for the machine to boot and be accessible.
   config.vm.boot_timeout = 600
 
@@ -132,7 +137,7 @@ Vagrant.configure(2) do |config|
     end
   end
 
-  vm_name = 'ubuntu-22.04'
+  vm_name = 'ubuntu-test-22.04'
   config.vm.define vm_name, primary: true do |ubuntu|
     ubuntu.vm.network 'forwarded_port', guest: 1511, host: ENV.fetch('VM_PORT_SITE', 1511)
     ubuntu.vm.network 'forwarded_port', guest: 8443, host: ENV.fetch('VM_PORT_WS',   8443)
@@ -143,8 +148,16 @@ Vagrant.configure(2) do |config|
   end
 
   config.vm.provider 'virtualbox' do |vb, override|
-    vb.memory = 2048
-    vb.cpus = 2
+    unless custom_box
+      if base_box || ON_CI
+        override.vm.box = base_boxes[:base]
+      end
+    end
+    # We limit resources when running on CI to avoid resource exhaustion and it isn't used for grading stuff or
+    # other things we do in dev.
+    vb.memory = ON_CI ? 1024 : 2048
+    vb.cpus = ON_CI ? 1 : 2
+
     # When you put your computer (while running the VM) to sleep, then resume work some time later the VM will be out
     # of sync timewise with the host for however long the host was asleep. Of course, the VM by default will
     # detect this and if the drift is great enough, it'll resync things such that the time matches, otherwise
@@ -239,6 +252,5 @@ Vagrant.configure(2) do |config|
   if ARGV.include?('ssh')
     config.ssh.username = 'vagrant'
     config.ssh.password = 'vagrant'
-    config.ssh.insert_key = 'true'
-  end
+  end 
 end
