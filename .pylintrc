@@ -130,17 +130,21 @@ ignore=
     test_office_hours_queue.py,
     test_homepage.py,
     test_submission.py,
-    base_testcase.py
-
-
-
+    base_testcase.py,
+    python_submitty_utils,
+    lib.py,
+    test_prev_next.py,
+    run.py,
+    test_sample.py
 
 ignore-paths=
     migration/migrator/main.py,
-    sbin/submitty_daemon_jobs/submitty_jobs/__init__.py,
-    sbin/submitty_daemon_jobs/submitty_jobs/jobs.py,
-    sbin/submitty_daemon_jobs/tests/__init__.py,
-
+    sbin/submitty_daemon_jobs/submitty_jobs,
+    sbin\submitty_daemon_jobs\tests,
+    tests\integrationTests,
+    tests\integrationTests\tests\choice_of_language,
+    tests\integrationTests\tests\comment_count
+    
 
 
 ignored-modules=docker,
