@@ -48,7 +48,7 @@ $(() => {
     }
 
     if (eventAdvertisements.images.length > 0) {
-        eventAdvertisements.originalDuck.style.cursor = "pointer";
+        eventAdvertisements.originalDuck.style.cursor = 'pointer';
     }
 });
 function showBanners(noMove = false) {
@@ -60,8 +60,6 @@ function showBanners(noMove = false) {
 
         if (eventAdvertisements.currentImages.length > 0 && !noMove) {
             eventAdvertisements.images[eventAdvertisements.currentImageIndex].classList.add('active');
-
-            const duckdivElement = document.getElementById('moorthy-duck');
             eventAdvertisements.moveDuck.style.animation = 'rocking 2s linear infinite';
 
             setTimeout(() => {
