@@ -100,6 +100,58 @@ nav a > i.f {
     font-weight: bold;
 }
 
+#club-banners {
+    border-style: double;
+    border-width: 5px;
+}
+
+@keyframes slide {
+    0% { transform: translateX(100%); }
+    100% { transform: translateX(-5%); }
+}
+
+.delete-button {
+    background: none;
+    border: none;
+    color: white;
+    cursor: pointer;
+    background-color: rgba(0 0 0 / 50%);
+    border-radius: 50%;
+}
+
+@keyframes rocking {
+    0% { transform: rotateZ(-10deg); }
+    50% { transform: rotateZ(10deg); }
+    100% { transform: rotateZ(-10deg); }
+}
+
+.prev-button {
+    left: 10px;
+    border-radius: 0% 50% 50% 0%;
+}
+
+.next-button {
+    right: 10px;
+    border-radius: 50% 0% 0% 50%;
+}
+
+
+
+.prev-button,
+.next-button {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    font-size: 24px;
+    background: none;
+    border: none;
+    color: white;
+    cursor: pointer;
+    padding: 0.5rem;
+    background-color: rgba(0 0 0 / 50%);
+    border-radius: 50%;
+}
+
 .inner-message {
     display: flex;
     justify-content: space-between;

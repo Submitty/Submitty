@@ -8,7 +8,6 @@ const eventAdvertisements = {
     bannerElement: undefined,
     moveDuck: undefined,
     originalDuck: undefined,
-    bubble: undefined,
     currentImages: [],
 };
 
@@ -26,10 +25,7 @@ $(() => {
     eventAdvertisements.moveDuck = document.getElementById('duckdivmove');
     eventAdvertisements.moveDuck.style.display = 'none';
     eventAdvertisements.originalDuck = document.getElementById('duckdiv');
-    eventAdvertisements.bubble = document.getElementById('speech-bubble-container');
-    if (eventAdvertisements.bubble !== null) {
-        eventAdvertisements.bubble.style.display = 'none';
-    }
+
 
     for (let i = 0; i < eventAdvertisements.images.length; i++) {
         const className = eventAdvertisements.images[i].className.split(' ')[1];
@@ -40,10 +36,7 @@ $(() => {
             eventAdvertisements.seenImages.push(eventAdvertisements.images[i]);
         }
     }
-    eventAdvertisements.bubble = document.getElementById('speech-bubble-container');
-    if (eventAdvertisements.bubble !== null && eventAdvertisements.currentImages.length > 0) {
-        eventAdvertisements.bubble.style.display = 'block';
-    }
+
     eventAdvertisements.images = eventAdvertisements.currentImages.concat(eventAdvertisements.seenImages);
 
 
@@ -61,17 +54,9 @@ $(() => {
 function showBanners(noMove = false) {
     const movingUnit = document.getElementById('moving-unit');
     const bannerElement = document.getElementById('banner');
-    const logoBox = document.getElementById('logo-box');
     if (bannerElement.style.display === 'none' && eventAdvertisements.images.length > 0) {
-        document.getElementById("menu-header").classList.add("menu-headerbanner");
-
-        logoBox.classList.add('logo-inmovement');
-
-
         eventAdvertisements.currentImageIndex = 0;
         Cookies.set('display-banner', 'yes');
-
-        $('#breadcrumbs').css('flex-wrap', 'inherit');
 
         if (eventAdvertisements.currentImages.length > 0 && !noMove) {
             eventAdvertisements.images[eventAdvertisements.currentImageIndex].classList.add('active');
@@ -82,11 +67,7 @@ function showBanners(noMove = false) {
             setTimeout(() => {
                 eventAdvertisements.originalDuck.style.display = 'none';
                 eventAdvertisements.moveDuck.style.display = 'block';
-                eventAdvertisements.moveDuck.style.position = 'relative';
-                eventAdvertisements.moveDuck.style.marginRight = '0px';
-                bannerElement.style.width = '100%';
                 bannerElement.style.display = 'block';
-                movingUnit.style.left = '10%';
                 movingUnit.style.animation = 'slide 2s linear forwards';
             }, 500);
 
@@ -94,21 +75,14 @@ function showBanners(noMove = false) {
         else {
             eventAdvertisements.originalDuck.style.display = 'none';
             eventAdvertisements.moveDuck.style.display = 'block';
-            eventAdvertisements.moveDuck.style.position = 'relative';
-            eventAdvertisements.moveDuck.style.marginRight = '0px';
-            bannerElement.style.width = '100%';
             bannerElement.style.display = 'block';
             eventAdvertisements.images[eventAdvertisements.currentImageIndex].classList.add('active');
         }
-        document.getElementById('triangle').style.display = 'none';
-        document.getElementById('speech-bubble').style.display = 'none';
+
 
     }
     else {
-        document.getElementById("menu-header").classList.remove("menu-headerbanner");
 
-        //alignRightEdgeWithLeftEdge('moorthy-duck', 'logo-box');
-        logoBox.classList.remove('logo-inmovement');
         Cookies.set('display-banner', 'no');
         eventAdvertisements.moveDuck.style.display = 'none';
         movingUnit.style.animation = 'none';
@@ -117,16 +91,12 @@ function showBanners(noMove = false) {
         eventAdvertisements.moveDuck.style.transform = 'rotate(0deg)';
 
         eventAdvertisements.originalDuck.style.display = 'block';
-        document.getElementById('breadcrumbs').style.flexWrap = 'wrap';
         if (eventAdvertisements.images.length > 0) {
             eventAdvertisements.images[eventAdvertisements.currentImageIndex].classList.remove('active');
         }
 
 
-        bannerElement.style.width = '1%';
         bannerElement.style.display = 'none';
-        movingUnit.style.left = '';
-        movingUnit.style.right = '20%';
 
         if (eventAdvertisements.currentImages.length >0) {
             const className = eventAdvertisements.currentImages[eventAdvertisements.currentImageIndex].className.split(' ')[1];
@@ -138,17 +108,7 @@ function showBanners(noMove = false) {
 
         }
         Cookies.set('hiddenImages', JSON.stringify(eventAdvertisements.hiddenImages));
-        if (eventAdvertisements.currentImages.length > 0) {
-            document.getElementById('triangle').style.display = 'block';
-            document.getElementById('speech-bubble').style.display = 'block';
-        }
-        if (eventAdvertisements.currentImages.length === 0) {
 
-            eventAdvertisements.bubble.style.display = 'none';
-        }
-        else {
-            eventAdvertisements.bubble.style.display = 'block';
-        }
     }
 
 }
