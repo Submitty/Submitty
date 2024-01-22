@@ -39,6 +39,11 @@ namespace dispatch {
 
 
     TestResults* diff_doit (const TestCase &tc, const nlohmann::json& j);
+
+    bool tolerance_diff (const std::string &expected_file_contents, std::string &student_file_contents, const float &tolerance, std::map<unsigned int,std::vector<ToleranceChange>> &t_changes, const bool &ignoreWhitespace, const bool &extraStudentOutputOk);
+
+    void update_difference(TestResults* answer, std::map<unsigned int, std::vector<ToleranceChange>> &t_changes);
+
 }
 
 #endif

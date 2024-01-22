@@ -1,0 +1,46 @@
+{
+  "assignment_message": "Calculate average and standard deviation given a list of number by filtering only positive numbers. Result expected with a precision of three decimal places.",
+  "testcases": [
+    {
+      "title" : "Avg and SD -- With and without Tolerance/Whitespace Comparison",
+      "command" : [ "python3 *.py test_input.txt" ],
+      "points" : 5,
+      "validation": [
+        {
+          "description": "Avg and SD -- without Tolerance",
+          "method": "diff",
+          "actual_file": "STDOUT.txt",
+          "expected_file": "test_output.txt",
+          "deduction": 0.2
+        },
+        {
+          "description": "Avg and SD -- Ignoring Whitespace without Tolerance",
+          "method": "diff",
+          "actual_file": "STDOUT.txt",
+          "expected_file": "test_output.txt",
+          "comparison" : "byLine",
+          "ignoreWhitespace": true,
+          "deduction": 0.1
+        },
+        {
+          "description": "Avg and SD -- Ignoring Whitespace with Tolerance",
+          "method": "diff",
+          "tolerance": 0.05,
+		      "comparison" : "byLine",
+          "ignoreWhitespace": true,
+          "actual_file": "STDOUT.txt",
+          "expected_file": "test_output.txt",
+          "deduction": 0.6
+        },
+        {
+          "description": "Avg and SD -- Whitespace Comparison with Tolerance",
+          "method": "diff",
+          "tolerance": 0.05,
+          "actual_file": "STDOUT.txt",
+          "expected_file": "test_output.txt",
+          "deduction": 0.1
+        }
+      ]
+    }
+  ]
+}

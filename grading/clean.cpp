@@ -220,3 +220,104 @@ vectorOfLines wordsToLines(vectorOfWords text) {
   }
   return contents;
 }
+
+/* METHOD: stringToWordsAndSpaceList
+ * ARGS: text: string
+ * ARGS: spaceVector: Reference to a vectorOfSpaces
+ * RETURN: vectorOfWords
+ * PURPOSE: converts a string into a vector whose length is number of lines in the string
+ * and each element in the vector is a vector containing the words  in each line.
+ * Sets the spaceVector to a vector containing number of spaces between two words in line
+ */
+vectorOfWords stringToWordsAndSpaceList(std::string const &text, vectorOfSpaces &spaceVector) {
+  vectorOfWords contents;
+  std::stringstream input(text);
+  int lineNum = 0;
+  std::string line;
+  while (getline(input, line)) {
+    std::vector<std::string> words;
+    int count = 0;
+    std::string word;
+    for (char chr : line) {
+      if (chr == ' ') {
+        count += 1;
+        if (!word.empty()) {
+          words.push_back(word);
+          word.clear();
+        }
+      } else {
+        word.push_back(chr);
+        if (count != 0) {
+          if (spaceVector.size() > lineNum) {
+            spaceVector[lineNum].push_back(count);
+          } else {
+            std::vector<int> newLineVec(1, count);
+            spaceVector.push_back(newLineVec);
+          }
+          count = 0;
+        }
+      }
+    }
+    if (!word.empty()) {
+      words.push_back(word);
+    }
+    contents.push_back(words);
+    lineNum += 1;
+  }
+  return contents;
+}
+
+std::string recreateStudentFile(vectorOfWords studentFileWords, vectorOfSpaces studentSpaces) {
+  int num_lines = studentFileWords.size();
+  std::vector<std::string> updatedLines;
+  for (size_t i = 0; i < num_lines; i++) {
+    std::string line;
+    for (size_t j = 0; j < studentFileWords[i].size(); j++) {
+      if (j == 0) {
+        line = studentFileWords[i][j];
+      } else {
+        for (int k = 0; k < studentSpaces[i][j - 1]; k++) {
+          line += " ";
+        }
+        line += studentFileWords[i][j];
+      }
+    }
+    updatedLines.push_back(line);
+  }
+  const char* const delim = "\n";
+  std::ostringstream imploded;
+  std::copy(updatedLines.begin(), updatedLines.end(),
+            std::ostream_iterator<std::string>(imploded, delim));
+  return imploded.str();
+}
+
+bool isNumber(const std::string &str) {
+  bool atLeastOneDigit = false;
+  bool dotFound = false;
+  for (char const &c : str) {
+    if (std::isdigit(c)) {
+      atLeastOneDigit = true;
+    }
+    else if (c == '.') {
+      if (dotFound) {
+        return false;
+      }
+      dotFound = true;
+    }
+    else {
+      return false;
+    }
+  }
+  return true == atLeastOneDigit;
+}
+
+bool whiteSpaceListsEqual(const std::vector<int> &expectedSpaces, const std::vector<int> &studentSpaces) {
+  int len = std::min(studentSpaces.size(), expectedSpaces.size());
+  for (size_t i = 0; i < len; i++)
+  {
+    if (studentSpaces[i] != expectedSpaces[i]) {
+      return false;
+    }
+  }
+  return true;
+}
