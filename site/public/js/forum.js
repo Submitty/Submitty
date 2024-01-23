@@ -1286,7 +1286,7 @@ function modifyThreadList(currentThreadId, currentCategoriesId, course, loadFirs
 
 function toggleLike(post_id, thread_id, current_user) {
 
-    // eslint-disable-next-line no-undef
+    // eslint-disable-next-line no-undef 
     const url = buildCourseUrl(['post', 'likes']);
     $.ajax({
         url: url,
