@@ -10,15 +10,10 @@ use app\models\Team;
 use Symfony\Component\Routing\Annotation\Route;
 
 class TeamController extends AbstractController {
-    /**
-     * Check if a string has special characters.
-     * @param string $str
-     * @return bool
-     */
-    public static function hasSpecialCharacters($str) {
+    public static function hasSpecialCharacters($str): bool {
         $allowedCharacters = ['a-z', 'A-Z', '0-9', '-', '_', ' ']; // This list can be expandable upon further requests
         $pattern = '/[^' . implode('', $allowedCharacters) . ']/';
-        return preg_match($pattern, $str);
+        return (bool) preg_match($pattern, $str);
     }
     
     /**
