@@ -54,14 +54,27 @@ class AdminGradeableController extends AbstractController {
      * Creates a gradeable based on uploaded JSON data
      * @return JsonResponse
      * @AccessControl(role="INSTRUCTOR")
-     * @Route("/api/upload/{_semester}/{_course}", methods={"POST"})
-     * @Route("/courses/upload/{_semester}/{_course}", methods={"POST"})
+     * @Route("/api/{_semester}/{_course}/upload", methods={"POST"})
+     * @Route("/courses/{_semester}/{_course}/upload", methods={"POST"})
      */
     public function uploadGradeable() {
         $invalid = false;
         $gradeable_id = $_POST['id'] ?? '';
         if (!isset($_POST['id']) || !isset($_POST['title']) || !isset($_POST['type'])) {
             return JsonResponse::getErrorResponse('JSON requires id, title, and type');
+        }
+        if($_POST['type'] == 'Electronic File'){
+            if(isset($_POST['vcs'])){
+                if (!isset($_POST['vcs_radio_buttons'])) {
+                    return JsonResponse::getErrorResponse('VCS gradeables require a vcs_radio_buttons value, See documentation for details.');
+                }
+                if(isset($_POST['using_subdirectory']) ? $_POST['using_subdirectory'] : false){
+                    if(!isset($_POST['vcs_subdirectory'])){
+                        return JsonResponse::getErrorResponse('If you are using a subdirectory, please specify in vcs_subdirectory variable.')
+                    }
+                }
+            }
+            // more error checking
         }
         try {
             $build_result = $this->createGradeable($gradeable_id, $_POST);
@@ -970,7 +983,6 @@ class AdminGradeableController extends AbstractController {
                 'grade_inquiry_per_component_allowed' => $grade_inquiry,
                 'autograding_config_path' => $autograding_config_path,
                 'allow_custom_marks' => true,
-                'any_manual_grades' => false,
                 //For discussion component
                 'discussion_based' => $discussion_clicked,
                 'discussion_thread_ids' => $jsonThreads,
@@ -993,7 +1005,6 @@ class AdminGradeableController extends AbstractController {
             // Values for these electronic-only properties
             $gradeable_create_data = array_merge($gradeable_create_data, [
                 'team_assignment' => false,
-                "any_manual_grades" => false,
                 'vcs' => false,
                 'team_size_max' => 0,
                 'vcs_subdirectory' => '',

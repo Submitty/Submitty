@@ -316,7 +316,6 @@ $(document).ready(() => {
 
 function ajaxRebuildGradeableButton() {
     const gradeable_id = $('#g_id').val();
-    console.log(buildCourseUrl(['gradeable', gradeable_id, 'rebuild']));
     $.ajax({
         url: buildCourseUrl(['gradeable', gradeable_id, 'rebuild']),
         success: function () {

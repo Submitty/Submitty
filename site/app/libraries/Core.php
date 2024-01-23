@@ -713,7 +713,7 @@ class Core {
      */
     public function buildUploadUrl() {
         $parts = [];
-        array_unshift($parts, "courses", "upload", $this->getConfig()->getTerm(), $this->getConfig()->getCourse());
+        array_unshift($parts, "courses", $this->getConfig()->getTerm(), $this->getConfig()->getCourse(), "upload");
         return $this->buildUrl($parts);
     }
 
