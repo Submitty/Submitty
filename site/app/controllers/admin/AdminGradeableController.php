@@ -96,7 +96,8 @@ class AdminGradeableController extends AbstractController {
                     if ($_POST['vcs_partial_path'] === '') {
                         return JsonResponse::getErrorResponse('Submitty hosted CHOOSE url requires vcs_partial_path. See documentation for information.');
                     }
-                } elseif ($_POST['vcs_radio_buttons'] === 'self-hosted') {
+                }
+                elseif ($_POST['vcs_radio_buttons'] === 'self-hosted') {
                     if ($_POST['external_repo'] === '') {
                         return JsonResponse::getErrorResponse('Self hosted requires external_repo. See documentation for information.');
                     }
