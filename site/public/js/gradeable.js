@@ -339,32 +339,31 @@ function ajaxUploadGradeable(){
     var fr = new FileReader();
 
     fr.onload = function(e) {
-        try{
+        try {
             const result = JSON.parse(e.target.result);
-        } catch(error)
-        {
-           alert(error);
-           return false;
-        }
             result['csrf_token'] = csrfToken;
             const url = getUploadUrl();
             $.ajax({
                 url: url,
-                headers : {
+                headers: {
                     Accept: 'application/json',
                 },
-                dataType:'json',
+                dataType: 'json',
                 data: result,
                 method: 'POST',
-            }).always(function(data){
+            }).always(function (data) {
                 data = JSON.parse(JSON.stringify(data));
-                if(data['status'] === 'success'){
+                if (data['status'] === 'success') {
                     window.location = buildCourseUrl(['gradeable', data['data'], 'update']);
                 } else {
                     window.location = buildCourseUrl(['gradeable']);
                     alert(data['message']);
                 }
             });
+        } catch(error) {
+            alert(error);
+            return false;
+        }
     }
     fr.readAsText(files.item(0));
 }

@@ -58,31 +58,68 @@ class AdminGradeableController extends AbstractController {
      * @Route("/courses/{_semester}/{_course}/upload", methods={"POST"})
      */
     public function uploadGradeable() {
-        $invalid = false;
-        $gradeable_id = $_POST['id'] ?? '';
+        $values = [
+            "title" => "Testing Json",
+            "instructions_url" => "",
+            "id" => "",
+            "type" => "",
+            "bulk_upload" => false,
+            "vcs" => false,
+            "ta_grading" => false,
+            "grade_inquiry_allowed" => false,
+            "grade_inquiry_per_component_allowed" => false,
+            "discussion_based" => false,
+            "discussion_thread_id" => "",
+            "team_assignment" => false,
+            "team_size_max" => 3,
+            "eg_inherit_teams_from" => "",
+            "gradeable_teams_read" => false,
+            "vcs_radio_buttons" => "",
+            "external_repo" => "",
+            "using_subdirectory" => false,
+            "vcs_subdirectory" => "",
+            "syllabus_bucket" => ""
+        ];
         if (!isset($_POST['id']) || !isset($_POST['title']) || !isset($_POST['type'])) {
             return JsonResponse::getErrorResponse('JSON requires id, title, and type');
         }
-        if($_POST['type'] == 'Electronic File'){
-            if(isset($_POST['vcs'])){
-                if (!isset($_POST['vcs_radio_buttons'])) {
-                    return JsonResponse::getErrorResponse('VCS gradeables require a vcs_radio_buttons value, See documentation for details.');
+        if ($_POST['type'] === 'Electronic File'){
+            if(sizeof(array_intersect_key($values, $_POST)) !== sizeof($values)) {
+                return JsonResponse::getErrorResponse('All values are required for electronic gradeables. See documentation for template.');
+            }
+
+            if ($_POST['vcs'] === 'true') {
+                if (!in_array($_POST['vcs_radio_buttons'], ['submitty-hosted', 'submitty-hosted-url', 'public-github', 'private-github', 'self-hosted'])) {
+                    return JsonResponse::getErrorResponse('VCS gradeables require a vcs_radio_buttons value. See documentation for information.');
                 }
-                if(isset($_POST['using_subdirectory']) ? $_POST['using_subdirectory'] : false){
-                    if(!isset($_POST['vcs_subdirectory'])){
-                        return JsonResponse::getErrorResponse('If you are using a subdirectory, please specify in vcs_subdirectory variable.')
+                if ($_POST['vcs_radio_buttons'] === 'submitty-hosted-url') {
+                    if ($_POST['vcs_partial_path'] === ''){
+                        return JsonResponse::getErrorResponse('Submitty hosted CHOOSE url requires vcs_partial_path. See documentation for information.');
+                    }
+                }
+                else if ($_POST['vcs_radio_buttons'] === 'self-hosted') {
+                    if ($_POST['external_repo'] === '') {
+                        return JsonResponse::getErrorResponse('Self hosted requires external_repo. See documentation for information.');                    }
+                }
+                if ($_POST['using_subdirectory'] === 'true') {
+                    if($_POST['vcs_subdirectory'] === '') {
+                        return JsonResponse::getErrorResponse('If using a subdirectory, please set the subdirectory');
                     }
                 }
             }
-            // more error checking
+            // VCS
+                // Subdirectory
+            // Discussion Based
+            // Team Grading
+            // Grade Inquiry
         }
         try {
-            $build_result = $this->createGradeable($gradeable_id, $_POST);
+            $build_result = $this->createGradeable($_POST['id'], $_POST);
             // Finally, redirect to the edit page
             if ($build_result !== null) {
                 return JsonResponse::getErrorResponse($build_result);
             }
-            return JsonResponse::getSuccessResponse($gradeable_id);
+            return JsonResponse::getSuccessResponse($_POST['id']);
         }
         catch (\Exception $e) {
             return JsonResponse::getErrorResponse($e->getMessage());
