@@ -83,8 +83,8 @@ class AdminGradeableController extends AbstractController {
         if (!isset($_POST['id']) || !isset($_POST['title']) || !isset($_POST['type'])) {
             return JsonResponse::getErrorResponse('JSON requires id, title, and type');
         }
-        if ($_POST['type'] === 'Electronic File'){
-            if(sizeof(array_intersect_key($values, $_POST)) !== sizeof($values)) {
+        if ($_POST['type'] === 'Electronic File') {
+            if (count(array_intersect_key($values, $_POST)) !== count($values)) {
                 return JsonResponse::getErrorResponse('All values are required for electronic gradeables. See documentation for template.');
             }
 
@@ -93,25 +93,20 @@ class AdminGradeableController extends AbstractController {
                     return JsonResponse::getErrorResponse('VCS gradeables require a vcs_radio_buttons value. See documentation for information.');
                 }
                 if ($_POST['vcs_radio_buttons'] === 'submitty-hosted-url') {
-                    if ($_POST['vcs_partial_path'] === ''){
+                    if ($_POST['vcs_partial_path'] === '') {
                         return JsonResponse::getErrorResponse('Submitty hosted CHOOSE url requires vcs_partial_path. See documentation for information.');
                     }
-                }
-                else if ($_POST['vcs_radio_buttons'] === 'self-hosted') {
+                } elseif ($_POST['vcs_radio_buttons'] === 'self-hosted') {
                     if ($_POST['external_repo'] === '') {
-                        return JsonResponse::getErrorResponse('Self hosted requires external_repo. See documentation for information.');                    }
+                        return JsonResponse::getErrorResponse('Self hosted requires external_repo. See documentation for information.');
+                    }
                 }
                 if ($_POST['using_subdirectory'] === 'true') {
-                    if($_POST['vcs_subdirectory'] === '') {
+                    if ($_POST['vcs_subdirectory'] === '') {
                         return JsonResponse::getErrorResponse('If using a subdirectory, please set the subdirectory');
                     }
                 }
             }
-            // VCS
-                // Subdirectory
-            // Discussion Based
-            // Team Grading
-            // Grade Inquiry
         }
         try {
             $build_result = $this->createGradeable($_POST['id'], $_POST);
