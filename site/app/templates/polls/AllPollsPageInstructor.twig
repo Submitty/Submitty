@@ -19,7 +19,8 @@
         <table id="today-table" class="table table-striped" style="width:100%;{{ dropdown_states['today'] ? '' : ' display: none;'}}">
             <col style="width: 5%">
             <col style="width: 5%">
-            <col style="width: 45%">
+            <col style="width: 35%">
+            <col style="width: 10%">
             <col style="width: 10%">
             <col style="width: 10%">
             <col style="width: 10%">
@@ -29,6 +30,7 @@
                     <th scope="col"></th>
                     <th scope="col"></th>
                     <th scope="col"></th>
+                    <th scope="col">Timer</th>
                     <th scope="col">Visible</th>
                     <th scope="col">Accepting Answers</th>
                     <th scope="col">Responses</th>
@@ -48,6 +50,8 @@
                         </td>
                         <td style="text-align: left">
                             {{ poll.getName() }}
+                        </td>
+                        <td >
                         </td>
                         <td>
                             <input type="checkbox" id="poll_{{ poll.getId() }}_visible" aria-label="label" onclick='updatePollVisible("{{ poll.getId() }}", "{{ base_url }}")' {{ (poll.isOpen() or poll.isEnded) ? 'checked' : '' }}>
