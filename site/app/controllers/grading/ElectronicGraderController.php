@@ -1756,8 +1756,10 @@ class ElectronicGraderController extends AbstractController {
         $section_key = ($gradeable->isGradeByRegistration() ? 'registration_section' : 'rotating_section');
         if ($peer) {
             $total = $gradeable->getPeerGradeSet();
-            $graded = $this->core->getQueries()->getNumGradedPeerComponents($gradeable->getId(), $this->core->getUser()->getId()) / count($gradeable->getPeerComponents());
-            $non_late_total_submitted = $total_submitted;
+            $graded = $this->core->getQueries()->getNumGradedPeerComponents($gradeable->getId(), $this->core->getUser()->getId());
+            $peer_assignments = $this->core->getQueries()->getPeerGradingAssignment($gradeable->getId());
+            $total_submitted = count($peer_assignments[$this->core->getUser()->getId()]);
+            $non_late_total_submitted = $total_submitted; // TODO total - users late or teams late?
             $non_late_graded = $graded;
         }
         elseif ($gradeable->isGradeByRegistration()) {
@@ -1811,8 +1813,8 @@ class ElectronicGraderController extends AbstractController {
             $non_late_graded = $graded - array_sum($late_graded);
         }
         //multiplies users and the number of components a gradeable has together
-        if ($team) {
-            $total_submitted = ($total_submitted * count($gradeable->getComponents()));
+        if ($peer) {
+            $total_submitted = ($total_submitted * count($gradeable->getPeerComponents()));
         }
         else {
             $total_submitted = ($total_submitted * count($gradeable->getComponents()));
