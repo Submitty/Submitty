@@ -39,8 +39,8 @@ describe('Tests cases abut changing user pronouns', () => {
 
         //ensure pronouns and display option changed on page
         cy.get('#pronouns_val').should('contain', ' ');
-        cy.get('#display_pronouns_val').should('contain', 'False');
-
+        // Try using trimmed inner text due to whitespace needed to break icon and text
+        cy.get('#display_pronouns_val').invoke('text').invoke('trim').should('eq', 'False');
     });
 
     it('Verifies changed pronouns as instructor in Manage Students', () => {
@@ -87,7 +87,8 @@ describe('Tests cases abut changing user pronouns', () => {
 
         //comment on the thread, verify pronouns is shown
         cy.get('.create-post-head').should('contain', 'Test pronouns display');
-        cy.get('#reply_box_2').type('my pronouns are They/Them{ctrl}{enter}');
+        // Not all reply all boxes are number 2, they could be higher for long thread
+        cy.get('#reply_box_2').type('my pronouns are They/Them{ctrl}{enter}').trigger('input');
         cy.contains('Submit Reply to All').click();
         cy.get('.post_box').should('contain', 'my pronouns are They/Them');
         cy.get('.post_user_pronouns').should('contain', 'They/Them');
@@ -113,7 +114,7 @@ describe('Tests cases abut changing user pronouns', () => {
         //comment on the thread anonymously, verify pronouns is not shown
         cy.get('.create-post-head').should('contain', 'Test Anonymous thread, should not show pronouns');
         cy.get('.thread-anon-checkbox').filter(':visible').click();
-        cy.get('#reply_box_2').type('I can not see your pronouns{ctrl}{enter}');
+        cy.get('#reply_box_2').type('I can not see your pronouns{ctrl}{enter}').trigger('input');
         cy.contains('Submit Reply to All').click();
         cy.get('.post_box').should('contain', 'I can not see your pronouns');
         cy.get('.post_user_id').should('contain', 'Anonymous');
