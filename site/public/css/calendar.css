@@ -221,13 +221,14 @@ a.cal-gradeable-status-text:focus {
 a.cal-gradeable-status-ann {
     padding: 0;
     font-style: italic;
-    cursor: initial;
     border-style: solid;
     border-width: 3px;
     box-shadow: none;
+    cursor: default;
 }
 
 a.cal-gradeable-status-ann:hover {
+    cursor: default;
     padding: 0;
     font-style: italic;
     border-style: solid;
