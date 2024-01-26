@@ -751,7 +751,7 @@ SQL;
      * @return int[]
      */
     public function getUpduckInfoForPosts(array $post_ids): array {
-        if ($post_ids === []) {
+        if (count($post_ids) === 0) {
             return [];
         }
         $placeholders = $this->createParameterList(count($post_ids));
@@ -775,9 +775,9 @@ SQL;
      * @return int[]
      */
     public function getUserLikesForPosts(array $post_ids, string $current_user): array {
-        if ($post_ids === []) {
+        if (count($post_ids) === 0) {
             return [];
-        }    
+        }
         $placeholders = $this->createParameterList(count($post_ids));
         $user_id = $current_user;
 
