@@ -250,3 +250,20 @@ footer .footer-separator {
 #loading-bar-percentage {
     margin-left: 10px;
 }
+
+#banner {
+    display: none;
+}
+
+.active {
+    display: block !important;
+}
+
+.theBanner {
+    position: absolute;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 7;
+    text-align: center;
+    /* Add any other styles you need */
+}
