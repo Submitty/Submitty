@@ -11,7 +11,9 @@ const eventAdvertisements = {
     currentImages: [],
 };
 
+
 $(() => {
+    document.getElementById('chat-box').style.display = 'none';
     if (document.getElementById('banner') === null) {
         return;
     }
@@ -38,7 +40,9 @@ $(() => {
     }
 
     eventAdvertisements.images = eventAdvertisements.currentImages.concat(eventAdvertisements.seenImages);
-
+    if (eventAdvertisements.currentImages.length > 0) {
+        document.getElementById('chat-box').style.display = 'block';
+    }
 
     if (Cookies.get('display-banner') === 'yes') {
         showBanners(true); // don't want to make duck move
@@ -97,6 +101,7 @@ function showBanners(noMove = false) {
         bannerElement.style.display = 'none';
 
         if (eventAdvertisements.currentImages.length >0) {
+            document.getElementById('chat-box').style.display = 'block';
             const className = eventAdvertisements.currentImages[eventAdvertisements.currentImageIndex].className.split(' ')[1];
             eventAdvertisements.hiddenImages.push(className);
             eventAdvertisements.seenImages.push(eventAdvertisements.currentImages[eventAdvertisements.currentImageIndex]);
@@ -104,6 +109,9 @@ function showBanners(noMove = false) {
             eventAdvertisements.currentImages.shift();
             eventAdvertisements.images = eventAdvertisements.currentImages.concat(eventAdvertisements.seenImages);
 
+        }
+        else {
+            document.getElementById('chat-box').style.display = 'none';
         }
         Cookies.set('hiddenImages', JSON.stringify(eventAdvertisements.hiddenImages));
 

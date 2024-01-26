@@ -306,7 +306,7 @@ function newUploadBanner() {
 function newShowImage(information, extraLink = null) {
 
 
-    let form = $('#show-banner');
+    let form = $('#showing-banner');
 
     form.css("display", "block");
 
@@ -314,7 +314,7 @@ function newShowImage(information, extraLink = null) {
     $('#theImage', form).attr('src', information);
     $('#linking', form).attr('href', extraLink);
 
-    captureTabInModal("show-banner");
+    captureTabInModal("showing-banner");
 }
 
 

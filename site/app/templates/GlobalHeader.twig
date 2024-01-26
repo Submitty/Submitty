@@ -171,6 +171,7 @@
                                     {% endif %}
                                 </span>
                                 <div class="banner" id="banner">
+                                <div class="container" style = "position: relative; display: inline-block;">
                                     {% set image_found = false %}
                                     {% for imageData in imageDataArray %}
                                     <div>
@@ -199,17 +200,18 @@
                                             src="data:imgName/png;base64,{{ imageData.data }}" 
                                             onclick="newShowImage('{{extraImageData}}', '{{imageData.link_name}}')" />
                                         {% endif %}
-                                        <button class="delete-button" onclick="showBanners()">x</button>
                                     </div>
                                     {% endfor %}
                                     {% if imageDataArray|length > 1 %}
-                                    <button class="prev-button" aria-label="go to the next banner" onclick="changeImage(-1)">
+                                    <button class="aprev-button" aria-label="go to the next banner" onclick="changeImage(-1)" style ="position: absolute; left: 0; transform: translateX(0);">
                                         <i class="fas fa-arrow-left"></i>
                                     </button>
-                                    <button class="next-button" aria-label="go to the previous banner" onclick="changeImage(1)">
+                                    <button class="anext-button" aria-label="go to the previous banner" onclick="changeImage(1)" style ="position: absolute; right: 0;">
                                         <i class="fas fa-arrow-right"></i>
                                     </button>
                                     {% endif %}
+                                    <button class="delete-button" onclick="showBanners()">x</button>
+                                </div>
                                 </div>
                             </div>
                         </div>
@@ -312,10 +314,11 @@
                             align-items: flex-start;
                         }
                     </style>
-
-                    <div class="chat">
-                        <div class="msg sent"><div class="loading"></div></div>
-                    </div>
+                    {% if imageDataArray|length != 0 %}
+                        <div class="chat" id="chat-box">
+                            <div class="msg sent"><div class="loading"></div></div>
+                        </div>
+                    {% endif %}
                     <div style="display: flex">
                         <span id="duckdiv" style="position: relative">
                         {% if not enable_banner and imageDataArray|length == 0%}
@@ -474,3 +477,5 @@
         </li>
     {% endif %}
 {% endmacro %}
+
+{{ include('bannerPopup.twig') }}

@@ -117,6 +117,9 @@ nav a > i.f {
     cursor: pointer;
     background-color: rgba(0 0 0 / 50%);
     border-radius: 50%;
+    position: absolute;
+    top: 0px;
+    right: 0px;
 }
 
 @keyframes rocking {
@@ -125,23 +128,21 @@ nav a > i.f {
     100% { transform: rotateZ(-10deg); }
 }
 
+
 .prev-button {
-    left: 10px;
     border-radius: 0% 50% 50% 0%;
 }
 
 .next-button {
-    right: 10px;
     border-radius: 50% 0% 0% 50%;
 }
 
 
 
-.prev-button,
-.next-button {
-    position: absolute;
+.aprev-button,
+.anext-button {
     top: 50%;
-    transform: translateY(-50%);
+    transform: translateY(-50%) !important;
     font-size: 24px;
     background: none;
     border: none;
@@ -266,4 +267,12 @@ footer .footer-separator {
     z-index: 7;
     text-align: center;
     /* Add any other styles you need */
+}
+
+.club-banners {
+    display: none;
+}
+
+.active {
+    display: block !important;
 }
