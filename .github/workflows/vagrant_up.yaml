@@ -14,9 +14,9 @@ jobs:
     steps:
       - uses: actions/checkout@v4
         with:
-            fetch-depth: 0
+          fetch-depth: 0
       - name: Install virtualbox and vagrant
-        run: brew install virtualbox vagrant        
+        run: brew install virtualbox vagrant
       - name: Get latest version
         id: get-version
         run: |
