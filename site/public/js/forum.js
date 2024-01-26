@@ -2264,22 +2264,7 @@ function updateThread(e) {
     e.preventDefault();
     const cat = [];
     $('input[name="cat[]"]:checked').each(item => cat.push($('input[name="cat[]"]:checked')[item].value));
-    /*const post_box_id = $('#edit-user-post').find('.thread-post-form').data('post_box_id');
 
-    const data =  {
-        edit_thread_id: $('#edit_thread_id').val(),
-        edit_post_id: $('#edit_post_id').val(),
-        csrf_token: $('input[name="csrf_token"]').val(),
-        title: $('input#title').val(),
-        thread_post_content: $(`textarea#reply_box_${post_box_id}`).val(),
-        thread_status: $('#thread_status').val(),
-        Anon: $('input#thread_post_anon_edit').is(':checked') ? $('input#thread_post_anon_edit').val() : 0,
-        lock_thread_date: $('input#lock_thread_date').text(),
-        expirationDate: $('input#expirationDate').val(),
-        cat,
-        markdown_status: parseInt($(`input#markdown_input_${post_box_id}`).val()),
-        deleted_attachments: JSON.stringify(getDeletedAttachments()),
-    };*/
     const form = $(this);
     const formData = new FormData(form[0]);
     formData.append('deleted_attachments', JSON.stringify(getDeletedAttachments()));

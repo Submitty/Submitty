@@ -1234,6 +1234,7 @@ SQL;
             if (count($attachments_added) > 0) {
                 $rows = [];
                 $params = [];
+                // Format placeholders and parameters for single query
                 foreach ($attachments_added as $img) {
                     $params[] = $this->createParameterList(4);
                     $rows = array_merge($rows, [$post_id, $img, $version_id, 0]);

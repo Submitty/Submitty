@@ -140,7 +140,7 @@
 <div class="form-group row thread-attachment-container">
     <div id="img-table-loc"></div>
     <br style="margin-bottom:1rem;">
-    {#% if post_box_id %#}
+    {% if post_box_id %}
         <div class="inline-block">
             {# uploadID and input-file + Index required for drag-and-drop.js #}
             <div class="upload_attachment_box cursor-pointer key_to_click" id="upload{{ post_box_id }}">
@@ -170,7 +170,7 @@
                 });
             </script>
         {% endif %}
-    {#% endif %#}
+    {% endif %}
     <fieldset class="inline-block right-zero">
       <legend style="display:none">Settings:</legend>
         <div class="new-thread-settings-wrapper">
