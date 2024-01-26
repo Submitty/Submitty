@@ -171,7 +171,7 @@
                                     {% endif %}
                                 </span>
                                 <div class="banner" id="banner">
-                                <div class="container" style = "position: relative; display: inline-block;">
+                                <div class="banner-container" style = "position: relative; display: inline-block;">
                                     {% set image_found = false %}
                                     {% for imageData in imageDataArray %}
                                     <div>
@@ -314,7 +314,7 @@
                             align-items: flex-start;
                         }
                     </style>
-                    {% if imageDataArray|length != 0 %}
+                    {% if user_given_name != "" and imageDataArray|length != 0 %}
                         <div class="chat" id="chat-box">
                             <div class="msg sent"><div class="loading"></div></div>
                         </div>
