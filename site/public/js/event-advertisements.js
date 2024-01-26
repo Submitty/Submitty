@@ -102,7 +102,6 @@ function showBanners(noMove = false) {
         bannerElement.style.display = 'none';
 
         if (eventAdvertisements.currentImages.length >0) {
-            document.getElementById('chat-box').style.display = 'block';
             const className = eventAdvertisements.currentImages[eventAdvertisements.currentImageIndex].className.split(' ')[1];
             eventAdvertisements.hiddenImages.push(className);
             eventAdvertisements.seenImages.push(eventAdvertisements.currentImages[eventAdvertisements.currentImageIndex]);
@@ -113,6 +112,10 @@ function showBanners(noMove = false) {
         }
         else {
             document.getElementById('chat-box').style.display = 'none';
+        }
+
+        if (eventAdvertisements.currentImages.length >0) {
+            document.getElementById('chat-box').style.display = 'block';
         }
         Cookies.set('hiddenImages', JSON.stringify(eventAdvertisements.hiddenImages));
 
