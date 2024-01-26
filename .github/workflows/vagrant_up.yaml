@@ -13,7 +13,7 @@ jobs:
     runs-on: macos-13
     steps:
       - uses: actions/checkout@v4
-          with:
+        with:
             fetch-depth: 0
       - name: Install virtualbox and vagrant
         run: brew install virtualbox vagrant        
