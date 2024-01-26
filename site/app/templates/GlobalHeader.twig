@@ -338,7 +338,7 @@
                                     tabindex="0"
                                     {% endif %}
 
-                                    {% if imageDataArray|length != 0 %}
+                                    {% if user_given_name != "" and imageDataArray|length != 0 %}
                                         onclick="showBanners();"
                                     {% endif %}
 
