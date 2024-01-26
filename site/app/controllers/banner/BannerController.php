@@ -170,7 +170,7 @@ class BannerController extends AbstractController {
         $event_repository = $entity_manager->getRepository(BannerImage::class);
         $event_item = $event_repository->findOneBy(['id' => $_POST['id']]);
 
-        if ($event_item === false) {
+        if ($event_item === null) {
             $error_message = "Banner item with name '" . $_POST['name'] . "' not found in the database.";
             return JsonResponse::getErrorResponse($error_message);
         }

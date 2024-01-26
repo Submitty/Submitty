@@ -118,8 +118,8 @@ nav a > i.f {
     background-color: rgba(0 0 0 / 50%);
     border-radius: 50%;
     position: absolute;
-    top: 0px;
-    right: 0px;
+    top: 0;
+    right: 0;
 }
 
 @keyframes rocking {
@@ -260,19 +260,14 @@ footer .footer-separator {
     display: block !important;
 }
 
-.theBanner {
+.banner-object {
     position: absolute;
     left: 50%;
     transform: translateX(-50%);
     z-index: 7;
     text-align: center;
-    /* Add any other styles you need */
 }
 
 .club-banners {
     display: none;
-}
-
-.active {
-    display: block !important;
 }
