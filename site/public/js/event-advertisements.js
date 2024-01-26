@@ -59,6 +59,7 @@ function showBanners(noMove = false) {
     const movingUnit = document.getElementById('moving-unit');
     const bannerElement = document.getElementById('banner');
     if (bannerElement.style.display === 'none' && eventAdvertisements.images.length > 0) {
+        document.getElementById('chat-box').style.display = 'none';
         eventAdvertisements.currentImageIndex = 0;
         Cookies.set('display-banner', 'yes');
 

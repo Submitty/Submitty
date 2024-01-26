@@ -206,6 +206,10 @@ footer .footer-separator {
         display: none;
     }
 
+    #chat-box {
+        display: none !important;
+    }
+
     footer {
         font-size: 14px;
     }
@@ -218,6 +222,10 @@ footer .footer-separator {
     }
 
     #logo-box {
+        display: block;
+    }
+
+    #chat-box {
         display: block;
     }
 
