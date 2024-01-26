@@ -89,7 +89,7 @@ class AdminGradeableController extends AbstractController {
             }
 
             if ($_POST['vcs'] === 'true') {
-                if (!in_array($_POST['vcs_radio_buttons'], ['submitty-hosted', 'submitty-hosted-url', 'public-github', 'private-github', 'self-hosted'])) {
+                if (!in_array($_POST['vcs_radio_buttons'], ['submitty-hosted', 'submitty-hosted-url', 'public-github', 'private-github', 'self-hosted'], true)) {
                     return JsonResponse::getErrorResponse('VCS gradeables require a vcs_radio_buttons value. See documentation for information.');
                 }
                 if ($_POST['vcs_radio_buttons'] === 'submitty-hosted-url') {
