@@ -115,6 +115,11 @@ form {
     flex-grow: 100;
     margin-left: 0.5em;
 }
+#poll-timer {
+    flex-grow: 100;
+    font-size: 14px; /* Adjust this value to change the font size */
+    margin-bottom: 10px;
+}
 
 .correct-tag-background {
     color: var(--standard-dark-green);

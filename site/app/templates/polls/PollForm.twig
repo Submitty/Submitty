@@ -87,7 +87,13 @@
             <input type="checkbox" id="keep-image" name="keep_image" checked />
         {% endif %}
         <br/>
-
+        {#This is the addition for the timer#}
+        <br/>
+        <label for="poll-timer" class="option-title">
+            Expected Time:
+        </label>
+        <input type="text" name="pollTimer" id="poll-timer" placeholder="Enter (HH:MM:SS)" value=""/>
+        <br/>
         <label for="poll-date" class="option-title">
             Expected release date:
         </label>
