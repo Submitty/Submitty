@@ -8,10 +8,11 @@ on:
       - 'main'
 jobs:
   Notify-Failure:
+    if: github.repository == 'Submitty/Submitty'
     runs-on: ubuntu-latest
     steps:
       - name: Send notification to Zulip on failure
-        if: ${{ github.event.workflow_run.conclusion == 'failure' }}
+        if: ${{ github.event.workflow_run.conclusion == 'failure' }} 
         run: |
             curl -X POST https://submitty.zulipchat.com/api/v1/messages -u ${{ secrets.ZULIP_AUTHENTICATION }} --data-urlencode 'type=stream' --data-urlencode 'to=Submitty Developer Studio' \
             --data-urlencode 'topic=Main CI Failures' --data-urlencode \
