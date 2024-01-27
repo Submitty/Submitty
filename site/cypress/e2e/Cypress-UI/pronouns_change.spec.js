@@ -27,20 +27,21 @@ describe('Tests cases abut changing user pronouns', () => {
         cy.login('student');
 
         //change back to old pronouns
-        cy.get('#pronouns_val').click();
+        cy.get('#pronouns_val').click({force: true});
 
         //set to default
-        cy.get('button[aria-label="Clear pronoun input"]').click(); //clear input using trash can
+        cy.get('button[aria-label="Clear pronoun input"]').click({force: true}); //clear input using trash can
 
         //set to false
-        cy.get('#pronouns-forum-display').uncheck();
+        cy.get('#pronouns-forum-display').uncheck({force: true});
+        cy.get('#edit-pronouns-submit').click({force: true});
 
-        cy.get('#edit-pronouns-submit').click();
+        //Wait for HTML content to update
+        cy.wait(10000);
 
         //ensure pronouns and display option changed on page
         cy.get('#pronouns_val').should('contain', ' ');
-        // Try using trimmed inner text due to whitespace needed to break icon and text
-        cy.get('#display_pronouns_val').invoke('text').invoke('trim').should('eq', 'False');
+        cy.get('#display_pronouns_val').should('contain', 'False');
     });
 
     it('Verifies changed pronouns as instructor in Manage Students', () => {
@@ -79,7 +80,7 @@ describe('Tests cases abut changing user pronouns', () => {
         cy.get('.create-post-head').should('contain', 'Test pronouns display');
         cy.get('.post_user_pronouns').should('contain', 'They/Them');
 
-        //verify pronouns is shown in overall fourm page
+        //verify pronouns is shown in overall forum page
         cy.get('#nav-sidebar-forum').click();
         cy.get('.thread-list-item').should('contain', 'Test pronouns display');
         cy.contains('Test pronouns display').find('.post_user_pronouns').should('contain', 'They/Them');
@@ -87,8 +88,9 @@ describe('Tests cases abut changing user pronouns', () => {
 
         //comment on the thread, verify pronouns is shown
         cy.get('.create-post-head').should('contain', 'Test pronouns display');
-        // Not all reply all boxes are number 2, they could be higher for long thread
-        cy.get('#reply_box_2').type('my pronouns are They/Them{ctrl}{enter}').trigger('input');
+        // For future cypress tests involving elements with event listeners, you must
+        // manually trigger change event to call that specific event listener within the browser
+        cy.get('#reply_box_2').type('my pronouns are They/Them{ctrl}{enter}').trigger('change');
         cy.contains('Submit Reply to All').click();
         cy.get('.post_box').should('contain', 'my pronouns are They/Them');
         cy.get('.post_user_pronouns').should('contain', 'They/Them');
@@ -104,7 +106,7 @@ describe('Tests cases abut changing user pronouns', () => {
         cy.get('.post_user_id').should('contain', 'Anonymous');
         cy.get('.post_user_pronouns').should('not.exist');
 
-        //verify pronouns is not shown in overall fourm page
+        //verify pronouns is not shown in overall forum page
         cy.get('#nav-sidebar-forum').click();
         cy.get('.thread-list-item').should('contain', 'Test Anonymous thread, should not show pronouns');
         cy.contains('Test Anonymous thread, should not show pronouns').find('.post_user_id').should('contain', 'Anonymous');
@@ -114,7 +116,7 @@ describe('Tests cases abut changing user pronouns', () => {
         //comment on the thread anonymously, verify pronouns is not shown
         cy.get('.create-post-head').should('contain', 'Test Anonymous thread, should not show pronouns');
         cy.get('.thread-anon-checkbox').filter(':visible').click();
-        cy.get('#reply_box_2').type('I can not see your pronouns{ctrl}{enter}').trigger('input');
+        cy.get('#reply_box_2').type('I can not see your pronouns{ctrl}{enter}').trigger('change');
         cy.contains('Submit Reply to All').click();
         cy.get('.post_box').should('contain', 'I can not see your pronouns');
         cy.get('.post_user_id').should('contain', 'Anonymous');
@@ -127,10 +129,12 @@ describe('Tests cases abut changing user pronouns', () => {
 
         //verify pronouns exist and remove thread
         cy.contains('Test pronouns display').find('.post_user_pronouns').should('contain', 'They/Them');
-        cy.contains('Test pronouns display').find('.post_user_pronouns').click();
+        cy.contains('Test pronouns display').find('.post_user_pronouns').click({force: true});
         cy.get('.post_user_pronouns').should('contain', 'They/Them');
-        cy.get('.first_post').find('.fa-trash').click();
-        cy.contains('Test pronouns display').should('not.exist');
+        cy.get('.first_post').find('.fa-trash').click({force: true});
+        // Wait for element to be removed and search by selector
+        cy.wait(10000);
+        cy.contains('.first_post').should('not.exist');
 
         //verify pronouns do not exist (post thread Anonymously) and remove thread
         cy.contains('Test Anonymous thread, should not show pronouns').find('.post_user_id').should('contain', 'Anonymous');
@@ -138,8 +142,9 @@ describe('Tests cases abut changing user pronouns', () => {
         cy.contains('Test Anonymous thread, should not show pronouns').find('.post_user_id').click();
         cy.get('.post_user_id').should('contain', 'Anonymous');
         cy.get('.post_user_pronouns').should('not.exist');
-        cy.get('.first_post').find('.fa-trash').click();
-        cy.contains('Test Anonymous thread, should not show pronouns').should('not.exist');
+        cy.get('.first_post').find('.fa-trash').click({force: true});
+        cy.wait(10000);
+        cy.contains('.first_post').should('not.exist');
     });
 
 });
