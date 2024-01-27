@@ -17,6 +17,14 @@ env:
 runs:
   using: "composite"
   steps:
+    - name: Delete huge unnecessary folders, and clean apt cache
+      run: |
+        rm -rf /opt/hostedtoolcache
+        rm -rf /usr/share/dotnet
+        rm -rf /opt/ghc
+        rm -rf "$AGENT_TOOLSDIRECTORY"
+        sudo apt-get clean
+      shell: bash
     - uses: actions/checkout@v3
       with:
         path: SUBMITTY_CPY/
@@ -117,6 +125,7 @@ runs:
         sudo apt-get install php${PHP_VER}-fpm
         sudo apt-get install poppler-utils
         sudo apt-get install valgrind
+        sudo apt-get install ca-certificates
         sudo apt-get install moreutils
       shell: bash
 
@@ -155,7 +164,7 @@ runs:
     - name: Set up apache
       run: |
         cd $SUBMITTY_REPOSITORY
-        sudo a2enmod include rewrite actions cgi alias headers suexec authnz_external headers proxy_fcgi proxy_http proxy_wstunnel
+        sudo a2enmod include rewrite actions cgi alias headers suexec authnz_external headers proxy_fcgi proxy_http proxy_wstunnel ssl
         sudo cp .setup/php-fpm/pool.d/submitty.conf /etc/php/$PHP_VER/fpm/php-fpm.conf
         sudo mkdir -p /run/php
         sudo chown www-data:www-data /run/php

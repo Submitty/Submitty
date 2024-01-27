@@ -12,7 +12,6 @@ document.addEventListener("DOMContentLoaded", function() {
   loadInBreadcrumbLinks();
   adjustBreadcrumbLinks();
 });
-
 function loadInBreadcrumbLinks(){
   mobileHomeLink = mobileHomeLink !== null ? mobileHomeLink : $("#home-button").attr('href');
   desktopHomeLink = desktopHomeLink !== null ? desktopHomeLink : $("#desktop_home_link").attr('href');
@@ -396,12 +395,10 @@ function newEditCourseMaterialsForm(tag) {
     const title_label = $("#edit-title-label", form);
     const url_label = $("#edit-url-url-label", form);
     const path = $("#new-file-name");
-    path.val(file_path.substring(1));
     const titleVal = $("#edit-title");
     title_label.css('display', 'block');
     if (is_link === 1) {
         titleVal.val(title.replace('link-',''));
-        path.val(decodeURIComponent(file_path.substring(file_path.indexOf("course_materials/") + 17).replace('link-','')));
         url_label.css('display', 'block');
         const url = $("#edit-url-url");
         url.prop('disabled', false);
@@ -415,6 +412,13 @@ function newEditCourseMaterialsForm(tag) {
     }
 
     editFilePathRecommendations();
+    if (is_link === 1) {
+        path.val(decodeURIComponent(file_path.substring(file_path.indexOf("course_materials/") + 17).replace('link-','')));
+    }
+    else {
+        path.val(file_path.substring(1));
+    }
+    registerSelect2Widget("new-file-name", "material-edit-form");
 
     $("#material-edit-form", form).attr('data-id', id);
     $("#edit-picker", form).attr('value', release_time);
@@ -432,18 +436,24 @@ function editFilePathRecommendations() {
     const fileNameInput = $("#edit-title");
     const fileName = fileNameInput.val();
 
-    // Get options
-    const dataList = $("#change_folder_paths");
-    const optionsArray = dataList.find('option').map(function () {return $(this);}).get();
-
-    optionsArray.forEach((option) => {
-        const optionString = option.val();
+    const options = document.getElementById("new-file-name").options;
+    for (let i = 0; i < options.length; i++) {
+        const optionString = options[i].value;
         const lastSlash = optionString.lastIndexOf('/');
         const currentOptionMinusFile = optionString.substring(0, lastSlash);
 
-        const newOption = `${currentOptionMinusFile}/${fileName}`;
-        option.val(newOption);
-    })
+        let newOption;
+        if (lastSlash !== -1) {
+            newOption = `${currentOptionMinusFile}/${fileName}`;
+        }
+        else {
+            newOption = fileName;
+        }
+
+        options[i].value = newOption;
+        options[i].innerHTML = newOption;
+    }
+    registerSelect2Widget("new-file-name", "material-edit-form");
 }
 
 var lastActiveElement = null;
@@ -869,6 +879,30 @@ function markViewed(ids, redirect) {
         contentType: false,
         processData: false
     });
+}
+
+function markAllViewed() {
+    let data = new FormData();
+    data.append("csrf_token", csrfToken);
+    $.ajax({
+        url: buildCourseUrl(['course_materials', 'viewAll']), 
+        type: "POST",
+        data: data,
+        contentType: false,
+        processData: false,
+        success: () => {
+            // Delete badges
+            const badges = document.querySelectorAll('.course-material-badge');
+            badges.forEach(function(badge) {
+                badge.remove();
+            });
+        },
+        error: (e) => {
+            displayErrorMessage("Failed to mark all viewed.");
+            console.error(e);
+        }
+    });
+
 }
 
 function toggleCMFolder(id, open) {
@@ -1394,7 +1428,7 @@ $.fn.isInViewport = function() {                                        // jQuer
     return elementTop > viewportTop && elementBottom < viewportBottom;
 };
 
-function checkSidebarCollapse() {
+function CollapseSidebarOnNarrowView() {
     if ($(document.body).width() < 1150) {
         Cookies.set('collapse_sidebar', 'true', { path: '/' });
         $("aside").toggleClass("collapsed", true);
@@ -1403,6 +1437,11 @@ function checkSidebarCollapse() {
         Cookies.set('collapse_sidebar', 'false', { path: '/' });
         $("aside").toggleClass("collapsed", false);
     }
+}
+
+function DisableAutomaticCollapse() {
+    Cookies.set('collapse_sidebar', 'false', { path: '/' });
+    $("aside").toggleClass("collapsed", false);
 }
 
 function updateTheme(){
@@ -1444,11 +1483,17 @@ $(document).ready(function() {
   }
 });
 
+
+function updateSidebarPreference() {
+    let collapse_preference = $("#desktop_sidebar_preference option:selected").val();
+    // Update local storage with the selected preference
+    localStorage.setItem("desktop-sidebar-preference", collapse_preference);
+}
+
 //Called from the DOM collapse button, toggle collapsed and save to localStorage
 function toggleSidebar() {
     const sidebar = $("aside");
     const shown = sidebar.hasClass("collapsed");
-
     Cookies.set('collapse_sidebar', !shown, { path: '/' });
     sidebar.toggleClass("collapsed", !shown);
 }
@@ -1470,7 +1515,16 @@ $(document).ready(function() {
         }
     });
 
-    window.addEventListener("resize", checkSidebarCollapse);
+    if (localStorage.getItem("desktop-sidebar-preference")) {
+        if(localStorage.getItem("desktop-sidebar-preference") === "automatic") {
+            $("#desktop_sidebar_preference").val("automatic");
+            window.addEventListener("resize", CollapseSidebarOnNarrowView);
+        }
+        else {
+            $("#desktop_sidebar_preference").val("manual");
+            window.addEventListener("resize", DisableAutomaticCollapse);
+        }
+    }
 });
 
 function checkBulkProgress(gradeable_id){
