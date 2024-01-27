@@ -220,7 +220,10 @@
         rgb(255 0 255 / 30%),
         rgb(255 0 0 / 30%)
     );
-
+    /* colors used for the poll histogram*/
+    --histogram-default: #006699;
+    --histogram-correct: #006600;
+    
     /* other */
     --box-shadow-very-transparent: #00000020;
     --box-shadow-slightly-transparent: #00000030;
@@ -244,6 +247,10 @@
     --deleted-and-unviewed-thread: #939494;
     --background-blue: #000000;
     --default-black: #ffffff;
+
+    /* colors used for the poll histogram*/
+    --histogram-default: #B0C4DE;
+    --histogram-correct: #90EE90;
 }
 
 [data-theme="dark"] {
@@ -348,6 +355,10 @@
     --viewed-content: #50535a;
     --code-box-background-light-gray: #282c34;
     --code-box-font-color-dark-gray: #abb2bf;
+
+    /* colors used for the poll histogram*/
+    --histogram-default: #006699;
+    --histogram-correct: #006600;
 }
 
 /* Dark Theme Versions of Colors */
