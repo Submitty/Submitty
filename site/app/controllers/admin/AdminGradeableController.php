@@ -80,14 +80,13 @@ class AdminGradeableController extends AbstractController {
             "vcs_subdirectory" => "",
             "syllabus_bucket" => ""
         ];
+        if (count(array_intersect_key($values, $_POST)) !== count($values)) {
+            return JsonResponse::getErrorResponse('All values are required. See documentation for template.');
+        }
         if (!isset($_POST['id']) || !isset($_POST['title']) || !isset($_POST['type'])) {
             return JsonResponse::getErrorResponse('JSON requires id, title, and type');
         }
         if ($_POST['type'] === 'Electronic File') {
-            if (count(array_intersect_key($values, $_POST)) !== count($values)) {
-                return JsonResponse::getErrorResponse('All values are required for electronic gradeables. See documentation for template.');
-            }
-
             if ($_POST['vcs'] === 'true') {
                 if (!in_array($_POST['vcs_radio_buttons'], ['submitty-hosted', 'submitty-hosted-url', 'public-github', 'private-github', 'self-hosted'], true)) {
                     return JsonResponse::getErrorResponse('VCS gradeables require a vcs_radio_buttons value. See documentation for information.');

@@ -2,7 +2,7 @@
     "title": "Testing Json",
     "instructions_url": "",
     "id": "TestingJson",
-    "type": "Electronic File",
+    "type": "Checkpoints",
     "bulk_upload": "False",
     "vcs": false,
     "ta_grading": false,
