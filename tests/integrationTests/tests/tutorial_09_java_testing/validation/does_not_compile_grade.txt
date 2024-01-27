@@ -1,6 +1,0 @@
-test01: Java - Compilation                                   0 /  2  
-test02: Java - Instructor JUnit Test Compilation             1 /  2  
-test03: Java - JUnit Test                                    0 / 16  
-SubmissionLimit: Submission Limit                                             
-Automatic grading total:                                          1 / 20
-Non-hidden automatic grading total:                               1 / 20

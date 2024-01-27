@@ -1,6 +1,0 @@
-test01: Compilation                                          2 /  2  
-test02: ./a.out 10                                           4 /  4  
-test03: ./a.out 30                                           4 /  4  
-SubmissionLimit: Submission Limit                                             
-Automatic grading total:                                         10 / 10
-Non-hidden automatic grading total:                              10 / 10

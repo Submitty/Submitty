@@ -1,6 +1,0 @@
-.idea/
-.DS_Store
-build/
-dist/
-*.egg-info/
-.eggs/

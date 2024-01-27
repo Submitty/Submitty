@@ -1,4 +1,0 @@
-test01: Reasonable Code Changes                              0 /  5  
-SubmissionLimit: Submission Limit                                             
-Automatic grading total:                                          0 /  5
-Non-hidden automatic grading total:                               0 /  5

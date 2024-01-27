@@ -1,8 +1,0 @@
-{
-    "status": "success",
-    "data": {
-        "score": 0,
-        "message": "ERROR: Incorrect number of numbers (5 instead of 10)",
-        "status": "failure"
-    }
-}
