@@ -297,13 +297,14 @@
                             padding-bottom: 50px;
                             padding-top: 10px;
                             height: 20px;
-                            max-width: 500px;
+                            max-width: 50px;
+                            margin-right: 0;
                         }
 
                         .msg {
                             position: relative;
                             max-width: 75%;
-                            padding: 1px 6px;
+                            padding: 1px 3px;
                         }
 
                         .msg.sent {
@@ -315,12 +316,14 @@
                         }
                     </style>
                     <div style="display: flex">
+                        <span id="duckdiv" style="position: relative">
+
                         {% if user_given_name != "" and imageDataArray|length != 0 %}
-                            <div class="chat" id="chat-box" onclick="showBanners()">
+                            <div class="chat" id="chat-box" onclick="showBanners()" style = "position: absolute; left: 0; transform: translateX(-40%);">
                                 <div class="msg sent"><div class="loading"></div></div>
                             </div>
                         {% endif %}
-                        <span id="duckdiv" style="position: relative">
+
                         {% if not enable_banner and imageDataArray|length == 0%}
                         <a id="duck-desktop"
                             href="http://submitty.org/developer/rcos_moorthy"
@@ -356,6 +359,7 @@
                         />
                         {% endif %}
                         </span>
+                        
                         <span>
                             <a class="flex-col" id="logo-box" href="http://submitty.org" target="_blank" aria-label="Visit submitty dot org">
                                 <img id="logo-submitty" src="{{ base_url }}/img/submitty_logo.png" alt="Submitty Logo">
