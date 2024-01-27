@@ -1,3 +1,0 @@
-START
-MAKE THIS DIR: something_new
-END

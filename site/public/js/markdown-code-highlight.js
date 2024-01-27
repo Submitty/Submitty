@@ -1,3 +1,0 @@
-/* global hljs */
-
-hljs.highlightAll();

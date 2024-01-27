@@ -1,5 +1,0 @@
-[run]
-source = submitty_utils
-omit = 
-    *_test*.py
-    tests/*.py

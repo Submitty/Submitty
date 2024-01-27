@@ -1,4 +1,0 @@
-Traceback (most recent call last):
-  File "syntax_error.py", line 10, in <module>
-    printchange(200,500,100,300)
-NameError: name 'printchange' is not defined

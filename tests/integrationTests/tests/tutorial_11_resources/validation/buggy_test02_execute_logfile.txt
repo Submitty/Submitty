@@ -1,4 +1,0 @@
-ERROR: KILL SIGNAL
-Program Terminated 
-ERROR: Maximum run time exceeded
-Program Terminated

@@ -1,8 +1,0 @@
-{# If the student does not submit anything, the only message will be "No submissions for this assignment." #}
-<div class="content ta-results-box">
-    {% if been_ta_graded %}
-        {{ rendered_ta_results|raw }}
-    {% else %}
-        <h3 class="label">Your assignment has not been graded, contact your TA or instructor for more information</h3>
-    {% endif %}
-</div>

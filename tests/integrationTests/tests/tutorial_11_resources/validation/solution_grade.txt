@@ -1,5 +1,0 @@
-test01: C++ - Compilation                                    5 /  5  
-test02: C++ - Execution                                      4 /  4  
-SubmissionLimit: Submission Limit                                             
-Automatic grading total:                                          9 /  9
-Non-hidden automatic grading total:                               9 /  9
