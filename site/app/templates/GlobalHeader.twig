@@ -256,7 +256,7 @@
                     </div>
                     <style>
                         .loading {
-                            font-size: 30px;
+                            font-size: 24px;
                             display: inline-block;
                             padding-right: 4px;
                         }
@@ -264,12 +264,12 @@
                         .loading:after {
                             content: "\00B7 \00B7 \00B7";
                             overflow: hidden;
-                            line-height: 0.7;
+                            line-height: 0.5;
                             display: inline-block;
                             vertical-align: text-top;
                             animation: ellipsis-dot 1s infinite .3s;
                             animation-fill-mode: forwards;
-                            width: 1.2em;
+                            width: 1.1em;
                         }
 
                         @keyframes ellipsis-dot {
@@ -296,63 +296,62 @@
                             justify-content: center;
                             padding-bottom: 50px;
                             padding-top: 10px;
-                            height: 20px;
+                            height: 18px;
                             max-width: 500px;
                         }
 
                         .msg {
                             position: relative;
                             max-width: 75%;
-                            padding: 1px 6px;
+                            padding: 1px 2px;
                         }
 
                         .msg.sent {
                             border-radius: var(--rad) var(--rad) var(--rad-sm) var(--rad);
-                            background: #42a5f5;
+                            background: var(--standard-medium-vibrant-blue);
                             color: #fff;
-                            height: 20px;
+                            height: 14px;
                             align-items: flex-start;
                         }
                     </style>
-                    <div style="display: flex">
+                    <div style="position: relative; display: flex;">
                         {% if user_given_name != "" and imageDataArray|length != 0 %}
-                            <div class="chat" id="chat-box" onclick="showBanners()">
+                            <div class="chat" id="chat-box" onclick="showBanners()" style="z-index: 2; position: absolute; top: 4px; right: 276px;">
                                 <div class="msg sent"><div class="loading"></div></div>
                             </div>
                         {% endif %}
-                        <span id="duckdiv" style="position: relative">
-                        {% if not enable_banner and imageDataArray|length == 0%}
-                        <a id="duck-desktop"
-                            href="http://submitty.org/developer/rcos_moorthy"
-                            target="_blank"
-                            aria-label="Learn more about Moorthy"
-                        >
+                        <span id="duckdiv" style="position: relative; top: 0; left: 0; z-index: 1;">
+                        {% if not enable_banner and imageDataArray|length == 0 %}
+                            <a id="duck-desktop"
+                           href="http://submitty.org/developer/rcos_moorthy"
+                           target="_blank"
+                           aria-label="Learn more about Moorthy"
+                            >
                         {% endif %}
-                            <img id="moorthy-duck"
-                                    src="{{ base_url }}/img/{{ duck_img }}"
-                                    alt="Moorthy - Submitty's Duck Mascot!"
-                                    height="80"
-                                    {% if enable_banner and imageDataArray|length != 0 %}
-                                    class="key_to_click"
-                                    onclick="ducky();"
-                                    tabindex="0"
-                                    {% endif %}
+                        <img id="moorthy-duck"
+                             src="{{ base_url }}/img/{{ duck_img }}"
+                             alt="Moorthy - Submitty's Duck Mascot!"
+                             height="80"
+                            {% if enable_banner and imageDataArray|length != 0 %}
+                                class="key_to_click"
+                                onclick="ducky();"
+                                tabindex="0"
+                            {% endif %}
 
-                                    {% if user_given_name != "" and imageDataArray|length != 0 %}
-                                        onclick="showBanners();"
-                                    {% endif %}
-
-                            />
+                            {% if user_given_name != "" and imageDataArray|length != 0%}
+                                onclick="showBanners();"
+                            {% endif %}
+                        />
                         {% if not enable_banner %}
-                        </a>
+                            </a>
                         {% endif %}
 
-                        {% if enable_banner %}
+                    {% if enable_banner %}
                         <img id="submitty-banner"
-                                src="{{ base_url }}/img/submitty-banner.png"
-                                alt="Happy Submitty Week!"
-                                height="70"
-                                style="position:absolute;right: -380px; top:6px;display:none;"
+                            src="{{ base_url }}/img/submitty-banner.png"
+                            alt="Happy Submitty Week!"
+                            height="70"
+                            style="position:absolute;right: -380px; top:6px;display:none;"
                         />
                         {% endif %}
                         </span>
