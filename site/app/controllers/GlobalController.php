@@ -556,7 +556,7 @@ class GlobalController extends AbstractController {
                 }
                 break;
             case 2:
-                if ($day >= 1 && $day <= 3) {
+                if ($day <= 3) {
                     $duck_img = 'moorthy_duck/party-duck/party-duck-10th.svg';
                 }
                 //Valentines (Hearts)
@@ -568,7 +568,7 @@ class GlobalController extends AbstractController {
                 //January (Snowflakes)
                 $duck_img = 'moorthy_duck/01-january.svg';
 
-                if ($day >= 28 && $day <= 31) {
+                if ($day >= 28) {
                     $duck_img = 'moorthy_duck/party-duck/party-duck-10th.svg';
                 }
                 break;
