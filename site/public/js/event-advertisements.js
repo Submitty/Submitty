@@ -9,11 +9,16 @@ const eventAdvertisements = {
     moveDuck: undefined,
     originalDuck: undefined,
     currentImages: [],
+    chatBox: undefined,
 };
 
 
 $(() => {
-    document.getElementById('chat-box').style.display = 'none';
+    eventAdvertisements.chatBox = document.getElementById('chat-box')
+    if( eventAdvertisements.chatBox != null) {
+        eventAdvertisements.chatBox.style.display = 'none';
+    }
+    
     if (document.getElementById('banner') === null) {
         return;
     }
@@ -40,8 +45,8 @@ $(() => {
     }
 
     eventAdvertisements.images = eventAdvertisements.currentImages.concat(eventAdvertisements.seenImages);
-    if (eventAdvertisements.currentImages.length > 0) {
-        document.getElementById('chat-box').style.display = 'block';
+    if (eventAdvertisements.currentImages.length > 0 && eventAdvertisements.chatBox != null) {
+        eventAdvertisements.chatBox.style.display = 'block';
     }
 
     if (Cookies.get('display-banner') === 'yes') {
@@ -111,11 +116,13 @@ function showBanners(noMove = false) {
 
         }
         else {
-            document.getElementById('chat-box').style.display = 'none';
+            if (eventAdvertisements.chatBox != null) {
+                eventAdvertisements.chatBox.style.display = 'none';
+            }
         }
 
-        if (eventAdvertisements.currentImages.length >0) {
-            document.getElementById('chat-box').style.display = 'block';
+        if (eventAdvertisements.currentImages.length >0 && eventAdvertisements.chatBox != null) {
+            chatBox.style.display = 'block';
         }
         Cookies.set('hiddenImages', JSON.stringify(eventAdvertisements.hiddenImages));
 
