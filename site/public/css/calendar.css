@@ -325,6 +325,11 @@ div.legend-color {
     padding-right: 1rem;
 }
 
+/* Add note/announcement course selector */
+#select-multiple-courses span {
+    display: inline-flex;
+}
+
 @media (max-width: 800px) {
     #calendar-list {
         margin: 0;

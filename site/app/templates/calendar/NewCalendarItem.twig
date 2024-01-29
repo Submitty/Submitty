@@ -5,12 +5,47 @@
     <p class="std-margin">
         Please select the course, type of item, when it should be, and the text it should display.
     </p>
-    <label for="calendar-course">Course</label>
-    <select id="calendar-course" name="course">
-    {% for one_course in instructor_courses %}
-        <option value="{{ one_course.term ~ ' ' ~ one_course.course }}">{{ one_course.term }} {{ one_course.course }}</option>
-    {% endfor %}
-    </select><br>
+    <label for="select-multiple-courses">Courses</label>
+    <div id = "select-multiple-courses">
+        {% for index, one_course in instructor_courses %}
+        <span>
+            <input type="checkbox" name = 'course_{{ index }}' value="{{ one_course.term ~ ' ' ~ one_course.course }}">
+            <label for="{{ one_course.term ~ ' ' ~ one_course.course }}"> {{ one_course.term }} {{ one_course.course }}</label>
+        </span>
+        {% endfor %}
+        <span>
+            <input type="checkbox" name="selectAllCourses" id = "selectAllCourses" value="selectAllCourses">
+            <label for="selectAllCourses">Select All</label>
+        </span>
+    </div>
+    <script>
+        const selectAllCourses = document.getElementById('selectAllCourses');
+        const courseOptions = document.querySelectorAll('#select-multiple-courses input');
+
+        selectAllCourses.onclick = () => {
+            if (selectAllCourses.checked === false) {
+                courseOptions.forEach((option) => {
+                    option.checked = false;
+                });
+            } else {
+                courseOptions.forEach((option) => {
+                    option.checked = true;
+                });
+            }
+        }
+
+        courseOptions.forEach((option) => {
+            if (option.id === 'selectAllCourses') {
+                return;
+            }
+
+            option.onclick = () => {
+                if (option.checked === false) {
+                    selectAllCourses.checked = false;
+                }
+            }
+        });
+    </script>
     <label for="calendar-item-type">Message Type</label>
     <select id="calendar-item-type" name="type">
         <option value="text">Note</option>

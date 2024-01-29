@@ -92,6 +92,19 @@ class CalendarController extends AbstractController {
      * @Route("/calendar/items/new", methods={"POST"})
      */
     public function createMessage(): RedirectResponse {
+        $course_array = array();
+
+        foreach ($_POST as $key => $value) {
+            if (strpos($key, 'course_') === 0) {
+                array_push($course_array,$value);
+            }
+        }
+
+        if(count($course_array) === 0){
+            $this->core->addErrorMessage("No courses selected.");
+            return new RedirectResponse($this->core->buildUrl(['calendar']));
+        }
+
         // Checks if the values exist that are set and returns an error message if not
         if (isset($_POST['type'])) {
             $type = $_POST['type'];
@@ -117,51 +130,63 @@ class CalendarController extends AbstractController {
             return new RedirectResponse($this->core->buildUrl(['calendar']));
         }
 
-        $calendar_item = new CalendarItem();
-        try {
-            $calendar_item->setStringType($type);
-        }
-        catch (\InvalidArgumentException $e) {
-            $this->core->addErrorMessage($e->getMessage());
-            return new RedirectResponse($this->core->buildUrl(['calendar']));
-        }
-        $calendar_item->setDate(new \DateTime($date));
-        try {
-            $calendar_item->setText($text);
-        }
-        catch (\InvalidArgumentException $e) {
-            $this->core->addErrorMessage($e->getMessage());
-            return new RedirectResponse($this->core->buildUrl(['calendar']));
-        }
-
-        if (isset($_POST['course'])) {
-            $set_course = $_POST['course'];
-        }
-        else {
-            $this->core->addErrorMessage("Invalid course given.");
-            return new RedirectResponse($this->core->buildUrl(['calendar']));
-        }
-
+        // Attach course names to course array from database
         $instructor_courses = $this->core->getQueries()->getInstructorLevelUnarchivedCourses($this->core->getUser()->getId());
-        $exists = false;
+        $instructor_courses_map = array();
+
         foreach ($instructor_courses as $course) {
-            if ($set_course === ($course['term'] . ' ' . $course['course'])) {
-                $this->core->loadCourseConfig($course['term'], $course['course']);
+            $course_key = trim($course['term']) . ' ' . trim($course['course']);
+            $instructor_courses_map[$course_key] = $course;
+        }
+
+        // Loop over all selected courses to add same calender note or announcement
+        foreach($course_array as $course){
+            $calendar_item = new CalendarItem();
+
+            try {
+                $calendar_item->setStringType($type);
+            }
+            catch (\InvalidArgumentException $e) {
+                $this->core->addErrorMessage($e->getMessage());
+                return new RedirectResponse($this->core->buildUrl(['calendar']));
+            }
+
+            $calendar_item->setDate(new \DateTime($date));
+
+            try {
+                $calendar_item->setText($text);
+            }
+            catch (\InvalidArgumentException $e) {
+                $this->core->addErrorMessage($e->getMessage());
+                return new RedirectResponse($this->core->buildUrl(['calendar']));
+            }
+
+            $course_array = explode(' ', trim($course));
+
+            if(count($course_array) !== 2){
+                $this->core->addErrorMessage("Invalid course given - $course");
+                return new RedirectResponse($this->core->buildUrl(['calendar']));
+            }
+
+            $course_term = trim($course_array[0]);
+            $course_name = trim($course_array[1]);
+            $course_search = $course_term . ' ' . $course_name;
+
+            if (array_key_exists($course_search,$instructor_courses_map)) {
+                $specific_course = $instructor_courses_map[$course_search];
+                $this->core->loadCourseConfig($specific_course['term'], $specific_course['course']);
                 $this->core->loadCourseDatabase();
                 $this->core->getCourseEntityManager()->persist($calendar_item);
                 $this->core->getCourseEntityManager()->flush();
                 $this->core->getCourseDB()->disconnect();
-                $exists = true;
-                break;
+            }
+            else {
+                $this->core->addErrorMessage("No valid course found by name - $course_search");
+                return new RedirectResponse($this->core->buildUrl(['calendar']));
             }
         }
 
-        if (!$exists) {
-            $this->core->addErrorMessage("No valid course found by that name.");
-            return new RedirectResponse($this->core->buildUrl(['calendar']));
-        }
-
-        $this->core->addSuccessMessage("Calendar item successfully added");
+        $this->core->addSuccessMessage("Calendar item(s) successfully added");
         return new RedirectResponse($this->core->buildUrl(['calendar']));
     }
 
