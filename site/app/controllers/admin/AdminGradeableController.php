@@ -59,7 +59,7 @@ class AdminGradeableController extends AbstractController {
      */
     public function uploadGradeable() {
         $values = [
-            "title" => "Testing Json",
+            "title" => "",
             "instructions_url" => "",
             "id" => "",
             "type" => "",
@@ -74,42 +74,74 @@ class AdminGradeableController extends AbstractController {
             "team_size_max" => 3,
             "eg_inherit_teams_from" => "",
             "gradeable_teams_read" => false,
-            "vcs_radio_buttons" => "",
+            "vcs_radio_buttons" => "submitty-hosted",
             "external_repo" => "",
             "using_subdirectory" => false,
             "vcs_subdirectory" => "",
-            "syllabus_bucket" => ""
+            "syllabus_bucket" => "Homework"
         ];
-        if (count(array_intersect_key($values, $_POST)) !== count($values)) {
-            return JsonResponse::getErrorResponse('All values are required. See documentation for template.');
-        }
+
         if (!isset($_POST['id']) || !isset($_POST['title']) || !isset($_POST['type'])) {
-            return JsonResponse::getErrorResponse('JSON requires id, title, and type');
+            return JsonResponse::getErrorResponse('JSON requires id, title, and type. See documentation for information');
         }
-        if ($_POST['type'] === 'Electronic File') {
-            if ($_POST['vcs'] === 'true') {
-                if (!in_array($_POST['vcs_radio_buttons'], ['submitty-hosted', 'submitty-hosted-url', 'public-github', 'private-github', 'self-hosted'], true)) {
-                    return JsonResponse::getErrorResponse('VCS gradeables require a vcs_radio_buttons value. See documentation for information.');
+
+        $values['id'] = $_POST['id'];
+        $values['title'] = $_POST['title'];
+        $values['type'] = $_POST['type'];
+        if($_POST['type'] === 'Electronic File'){
+            if (array_key_exists('vcs', $_POST)) {
+                if(!array_key_exists('repository_type', $_POST['vcs'])){
+                    return JsonResponse::getErrorResponse('VCS gradeables require a repository_type value. See documentation for information.');
                 }
-                if ($_POST['vcs_radio_buttons'] === 'submitty-hosted-url') {
-                    if ($_POST['vcs_partial_path'] === '') {
+                if (!in_array($_POST['vcs']['repository_type'], ['submitty-hosted', 'submitty-hosted-url', 'public-github', 'private-github', 'self-hosted'], true)) {
+                    return JsonResponse::getErrorResponse('VCS gradeables requires a valid vcs_radio_buttons value. See documentation for information.');
+                }
+                if (!array_key_exists('vcs_path', $_POST['vcs'])) {
+                    return JsonResponse::getErrorResponse('VCS gradeables require a vcs_path. See documentation for information.');
+                }
+                if ($_POST['vcs']['repository_type'] === 'submitty-hosted-url') {
+                    if ($_POST['vcs']['vcs_partial_path'] === '') {
                         return JsonResponse::getErrorResponse('Submitty hosted CHOOSE url requires vcs_partial_path. See documentation for information.');
                     }
                 }
-                elseif ($_POST['vcs_radio_buttons'] === 'self-hosted') {
-                    if ($_POST['external_repo'] === '') {
-                        return JsonResponse::getErrorResponse('Self hosted requires external_repo. See documentation for information.');
-                    }
+                elseif ($_POST['vcs']['repository_type'] === 'self-hosted') {
+                    $values['external_repo'] = $_POST['vcs']['vcs_path'];
                 }
-                if ($_POST['using_subdirectory'] === 'true') {
-                    if ($_POST['vcs_subdirectory'] === '') {
-                        return JsonResponse::getErrorResponse('If using a subdirectory, please set the subdirectory');
-                    }
+                if (isset($_POST['vcs']['vcs_subdirectory'])) {
+                    $values['using_subdirectory'] = 'true';
+                    $values['vcs_subdirectory'] = $_POST['vcs']['vcs_subdirectory'];
                 }
+                $values['vcs'] = 'true';
+                $values['vcs_radio_buttons'] = $_POST['vcs']['repository_type'];
+                $values['vcs_path'] = $_POST['vcs']['vcs_path'];
+                
+            } elseif (array_key_exists('bulk_upload', $_POST)) {
+                $values['bulk_upload'] = 'true';
             }
         }
+
+        if (array_key_exists('team_gradeable', $_POST)) {
+            if (!array_key_exists('team_size_max', $_POST['team_gradeable'])) {
+                return JsonResponse::getErrorResponse('Team gradeables require a team_size_max value. See documentation for information.');
+            }
+            $values['eg_inherit_teams_from'] = $_POST['team_gradeable']['inherit_from'] ?? '';
+            $values['team_assignment'] = 'true';
+            $values['team_size_max'] = $_POST['team_gradeable']['team_size_max'];
+        }
+        
+        $values['ta_grading'] = isset($_POST['ta_grading']);
+        if (array_key_exists('discussion_thread_id', $_POST)) {
+            $values['discussion_based'] = 'true';
+            $values['discussion_tread_id'] = $_POST['discussion_thread_id'];
+        }
+        if (array_key_exists('grade_inquiries', $_POST)) {
+            $values['grade_inquiries'] = 'true';
+            $values['grade_inquiries_per_component'] = $_POST['grade_inquiries_per_component'] ?? 'false';
+        }
+
+        $values['syllabus_bucket'] = $_POST['syllabus_bucket'] ?? 'Homework';
         try {
-            $build_result = $this->createGradeable($_POST['id'], $_POST);
+            $build_result = $this->createGradeable($_POST['id'], $values);
             // Finally, redirect to the edit page
             if ($build_result !== null) {
                 return JsonResponse::getErrorResponse($build_result);
