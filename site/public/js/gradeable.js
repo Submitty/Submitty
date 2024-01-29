@@ -358,6 +358,7 @@ function ajaxUploadGradeable(){
                 } else {
                     window.location = buildCourseUrl(['gradeable']);
                     alert(data['message']);
+                    return false;
                 }
             });
         } catch(error) {
@@ -366,6 +367,7 @@ function ajaxUploadGradeable(){
         }
     }
     fr.readAsText(files.item(0));
+    return true;
 }
 
 /**

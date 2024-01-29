@@ -66,7 +66,7 @@ describe('Tests cases revolving around gradeable access and submition', () => {
             // }).then((response) => {
             //     expect(response.body.message).to.eql('Gradeable already exists');
             // });
-            
+
             // // Invalid type error message
             // cy.request({
             //     method: 'POST',
@@ -140,7 +140,7 @@ describe('Tests cases revolving around gradeable access and submition', () => {
                     'external_repo': '',
                     'using_subdirectory': false,
                     'vcs_subdirectory': '',
-                    'syllabus_bucket': ''
+                    'syllabus_bucket': '',
                 },
                 headers: {
                     Authorization: key,
@@ -172,7 +172,7 @@ describe('Tests cases revolving around gradeable access and submition', () => {
                     'external_repo': '',
                     'using_subdirectory': false,
                     'vcs_subdirectory': '',
-                    'syllabus_bucket': ''
+                    'syllabus_bucket': '',
                 },
                 headers: {
                     Authorization: key,

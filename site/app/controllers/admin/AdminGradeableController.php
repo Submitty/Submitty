@@ -88,9 +88,9 @@ class AdminGradeableController extends AbstractController {
         $values['id'] = $_POST['id'];
         $values['title'] = $_POST['title'];
         $values['type'] = $_POST['type'];
-        if($_POST['type'] === 'Electronic File'){
+        if ($_POST['type'] === 'Electronic File') {
             if (array_key_exists('vcs', $_POST)) {
-                if(!array_key_exists('repository_type', $_POST['vcs'])){
+                if (!array_key_exists('repository_type', $_POST['vcs'])) {
                     return JsonResponse::getErrorResponse('VCS gradeables require a repository_type value. See documentation for information.');
                 }
                 if (!in_array($_POST['vcs']['repository_type'], ['submitty-hosted', 'submitty-hosted-url', 'public-github', 'private-github', 'self-hosted'], true)) {
@@ -114,8 +114,8 @@ class AdminGradeableController extends AbstractController {
                 $values['vcs'] = 'true';
                 $values['vcs_radio_buttons'] = $_POST['vcs']['repository_type'];
                 $values['vcs_path'] = $_POST['vcs']['vcs_path'];
-                
-            } elseif (array_key_exists('bulk_upload', $_POST)) {
+            }
+            elseif (array_key_exists('bulk_upload', $_POST)) {
                 $values['bulk_upload'] = 'true';
             }
         }
@@ -128,7 +128,7 @@ class AdminGradeableController extends AbstractController {
             $values['team_assignment'] = 'true';
             $values['team_size_max'] = $_POST['team_gradeable']['team_size_max'];
         }
-        
+
         $values['ta_grading'] = isset($_POST['ta_grading']);
         if (array_key_exists('discussion_thread_id', $_POST)) {
             $values['discussion_based'] = 'true';
