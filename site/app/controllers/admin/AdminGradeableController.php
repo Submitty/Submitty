@@ -128,15 +128,16 @@ class AdminGradeableController extends AbstractController {
             $values['team_assignment'] = 'true';
             $values['team_size_max'] = $_POST['team_gradeable']['team_size_max'];
         }
-
-        $values['ta_grading'] = isset($_POST['ta_grading']);
         if (array_key_exists('discussion_thread_id', $_POST)) {
-            $values['discussion_based'] = 'true';
+            $values['discussion_based'] = $_POST['discussion_based'];
             $values['discussion_tread_id'] = $_POST['discussion_thread_id'];
         }
-        if (array_key_exists('grade_inquiries', $_POST)) {
-            $values['grade_inquiries'] = 'true';
-            $values['grade_inquiries_per_component'] = $_POST['grade_inquiries_per_component'] ?? 'false';
+        if (array_key_exists('ta_grading', $_POST)) {
+            $values['ta_grading'] = $_POST['ta_grading'];
+            if (array_key_exists('grade_inquiries', $_POST)) {
+                $values['grade_inquiries'] = $_POST['grade_inquiries'];
+                $values['grade_inquiries_per_component'] = $_POST['grade_inquiries_per_component'] ?? 'false';
+            }
         }
 
         $values['syllabus_bucket'] = $_POST['syllabus_bucket'] ?? 'Homework';
