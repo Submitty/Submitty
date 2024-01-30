@@ -92,15 +92,15 @@ class CalendarController extends AbstractController {
      * @Route("/calendar/items/new", methods={"POST"})
      */
     public function createMessage(): RedirectResponse {
-        $course_array = array();
+        $course_array = [];
 
         foreach ($_POST as $key => $value) {
             if (strpos($key, 'course_') === 0) {
-                array_push($course_array,$value);
+                array_push($course_array, $value);
             }
         }
 
-        if(count($course_array) === 0){
+        if (count($course_array) === 0) {
             $this->core->addErrorMessage("No courses selected.");
             return new RedirectResponse($this->core->buildUrl(['calendar']));
         }
@@ -132,7 +132,7 @@ class CalendarController extends AbstractController {
 
         // Attach course names to course array from database
         $instructor_courses = $this->core->getQueries()->getInstructorLevelUnarchivedCourses($this->core->getUser()->getId());
-        $instructor_courses_map = array();
+        $instructor_courses_map = [];
 
         foreach ($instructor_courses as $course) {
             $course_key = trim($course['term']) . ' ' . trim($course['course']);
@@ -140,7 +140,7 @@ class CalendarController extends AbstractController {
         }
 
         // Loop over all selected courses to add same calender note or announcement
-        foreach($course_array as $course){
+        foreach ($course_array as $course) {
             $calendar_item = new CalendarItem();
 
             try {
@@ -163,7 +163,7 @@ class CalendarController extends AbstractController {
 
             $course_array = explode(' ', trim($course));
 
-            if(count($course_array) !== 2){
+            if (count($course_array) !== 2) {
                 $this->core->addErrorMessage("Invalid course given - $course");
                 return new RedirectResponse($this->core->buildUrl(['calendar']));
             }
@@ -172,7 +172,7 @@ class CalendarController extends AbstractController {
             $course_name = trim($course_array[1]);
             $course_search = $course_term . ' ' . $course_name;
 
-            if (array_key_exists($course_search,$instructor_courses_map)) {
+            if (array_key_exists($course_search, $instructor_courses_map)) {
                 $specific_course = $instructor_courses_map[$course_search];
                 $this->core->loadCourseConfig($specific_course['term'], $specific_course['course']);
                 $this->core->loadCourseDatabase();
