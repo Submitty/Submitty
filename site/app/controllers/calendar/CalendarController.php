@@ -106,7 +106,7 @@ class CalendarController extends AbstractController {
         }
 
         // Checks if the values exist that are set and returns an error message if not
-        if (isset($_POST['type'])) {
+        if (isset($_POST['type']) && !empty(trim($_POST['type']))) {
             $type = $_POST['type'];
         }
         else {
@@ -114,7 +114,7 @@ class CalendarController extends AbstractController {
             return new RedirectResponse($this->core->buildUrl(['calendar']));
         }
 
-        if (isset($_POST['date'])) {
+        if (isset($_POST['date']) && !empty(trim($_POST['date']))) {
             $date = $_POST['date'];
         }
         else {
@@ -122,7 +122,7 @@ class CalendarController extends AbstractController {
             return new RedirectResponse($this->core->buildUrl(['calendar']));
         }
 
-        if (isset($_POST['text'])) {
+        if (isset($_POST['text']) && !empty(trim($_POST['text']))) {
             $text = $_POST['text'];
         }
         else {
