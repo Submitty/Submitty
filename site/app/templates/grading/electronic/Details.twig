@@ -520,7 +520,7 @@
     {% elseif graded_gradeable.getGradeable().isTaGrading() %}
         {% set contents = "Grade" %}
         {% set btn_class = "btn-primary" %}
-        {% if graded_gradeable.getOrCreateTaGradedGradeable().anyGrades() %}
+        {% if graded_gradeable.getOrCreateTaGradedGradeable().anyGrades(core.getUser()) %}
             {% if graded_gradeable.getTaGradedGradeable().hasVersionConflict() %}
                 {% set contents = "Version Conflict" %}
                 {% set btn_class = "btn-primary" %}
