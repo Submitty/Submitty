@@ -122,7 +122,7 @@ function showBanners(noMove = false) {
         }
 
         if (eventAdvertisements.currentImages.length >0 && eventAdvertisements.chatBox !== null) {
-            chatBox.style.display = 'block';
+            eventAdvertisements.chatBox.style.display = 'block';
         }
         Cookies.set('hiddenImages', JSON.stringify(eventAdvertisements.hiddenImages));
 
