@@ -14,11 +14,11 @@ const eventAdvertisements = {
 
 
 $(() => {
-    eventAdvertisements.chatBox = document.getElementById('chat-box')
-    if( eventAdvertisements.chatBox != null) {
+    eventAdvertisements.chatBox = document.getElementById('chat-box');
+    if (eventAdvertisements.chatBox !== null) {
         eventAdvertisements.chatBox.style.display = 'none';
     }
-    
+
     if (document.getElementById('banner') === null) {
         return;
     }
@@ -45,7 +45,7 @@ $(() => {
     }
 
     eventAdvertisements.images = eventAdvertisements.currentImages.concat(eventAdvertisements.seenImages);
-    if (eventAdvertisements.currentImages.length > 0 && eventAdvertisements.chatBox != null) {
+    if (eventAdvertisements.currentImages.length > 0 && eventAdvertisements.chatBox !== null) {
         eventAdvertisements.chatBox.style.display = 'block';
     }
 
@@ -116,12 +116,12 @@ function showBanners(noMove = false) {
 
         }
         else {
-            if (eventAdvertisements.chatBox != null) {
+            if (eventAdvertisements.chatBox !== null) {
                 eventAdvertisements.chatBox.style.display = 'none';
             }
         }
 
-        if (eventAdvertisements.currentImages.length >0 && eventAdvertisements.chatBox != null) {
+        if (eventAdvertisements.currentImages.length >0 && eventAdvertisements.chatBox !== null) {
             chatBox.style.display = 'block';
         }
         Cookies.set('hiddenImages', JSON.stringify(eventAdvertisements.hiddenImages));

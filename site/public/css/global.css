@@ -286,7 +286,7 @@ footer .footer-separator {
     padding-right: 4px;
 }
 
-.loading:after {
+.loading::after {
     content: "\00B7 \00B7 \00B7";
     overflow: hidden;
     line-height: 0.5;
@@ -301,12 +301,15 @@ footer .footer-separator {
     25% {
         content: "";
     }
+
     50% {
         content: "\00B7";
     }
+
     75% {
         content: "\00B7 \00B7";
     }
+
     100% {
         content: "\00B7 \00B7 \00B7";
     }
@@ -315,6 +318,7 @@ footer .footer-separator {
 .chat {
     --rad: 20px;
     --rad-sm: 3px;
+    
     display: flex;
     flex-direction: column;
     align-items: flex-end;
@@ -334,7 +338,7 @@ footer .footer-separator {
 .msg.sent {
     border-radius: var(--rad) var(--rad) var(--rad-sm) var(--rad);
     background: var(--standard-medium-vibrant-blue);
-    color: #fff;
+    color: #ffffff;
     height: 14px;
     align-items: flex-start;
 }
