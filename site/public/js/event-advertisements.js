@@ -93,8 +93,8 @@ function showBanners(noMove = false) {
 
         Cookies.set('display-banner', 'no');
         eventAdvertisements.moveDuck.style.display = 'none';
-        movingUnit.style.animation = 'none';
-        eventAdvertisements.moveDuck.style.animation = 'none';
+        movingUnit.style.animation = 'unset';
+        eventAdvertisements.moveDuck.style.animation = 'unset';
 
         eventAdvertisements.moveDuck.style.transform = 'rotate(0deg)';
 
