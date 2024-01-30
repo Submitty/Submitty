@@ -29,7 +29,7 @@ class Poll {
     protected $status;
 
     #[ORM\Column(type: Types::DATE_MUTABLE)]
-    protected DateTime $release_date;
+    protected DateTime $release_date;   
 
     #[ORM\Column(type: Types::TEXT, nullable: true)]
     protected $image_path;

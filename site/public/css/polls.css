@@ -120,6 +120,15 @@ form {
     font-size: 14px;
     margin-bottom: 10px;
 }
+#poll-hours{
+    width: 60px;
+    margin-right: 8px;
+    margin-bottom: 10px;
+}
+#poll-minutes{
+    width: 60px;
+    margin-bottom: 10px;    
+}
 
 .correct-tag-background {
     color: var(--standard-dark-green);
