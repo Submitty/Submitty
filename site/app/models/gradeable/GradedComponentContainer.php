@@ -162,9 +162,18 @@ class GradedComponentContainer extends AbstractModel {
 
     /**
      * Gets if any grades exist for this component
+     * @param User|null $grader If provided, checks if any grades exist for that grader
      * @return bool
      */
-    public function anyGradedComponents() {
+    public function anyGradedComponents(User $grader = null) {
+        if ($grader !== null) {
+            foreach ($this->graded_components as $graded_component) {
+                if ($graded_component->getGrader()->getId() === $grader->getId()) {
+                    return true;
+                }
+            }
+            return false;
+        }
         return count($this->graded_components) > 0;
     }
 
@@ -282,16 +291,22 @@ class GradedComponentContainer extends AbstractModel {
      * Gets whether this component is considered fully graded
      * In the peer case, components are considered fully graded if they
      *  meet the peer grade set or one of the graders is non-peer
+     * @param User|null $grader If provided, checks if the component is fully graded for that grader
      * @return bool
      */
-    public function isComplete() {
+    public function isComplete(User $grader = null) {
         if ($this->component->isPeerComponent()) {
-            if (count($this->graded_components) > 0) {
-                return true;
+            if ($grader !== null) {
+                foreach ($this->graded_components as $graded_component) {
+                    if ($graded_component->getGrader()->getId() === $grader->getId()) {
+                        return true;
+                    }
+                }
             }
             else {
-                return false;
+                return count($this->graded_components) > 0;
             }
+            return false;
         }
 
         $required_graders = $this->component->getGradingSet();
