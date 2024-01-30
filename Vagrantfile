@@ -37,7 +37,7 @@ ON_CI = !ENV.fetch('CI', '').empty?
 def gen_script(machine_name, worker: false)
   no_submissions = !ENV.fetch('NO_SUBMISSIONS', '').empty?
   reinstall = !ENV.fetch('BASE_BOX', '').empty?
-  extra = ENV.fetch('EXTRA', '')
+  extra = ENV.fetch('EXTRA', '')  
   if reinstall || ON_CI
     setup_cmd = 'bash ${GIT_PATH}/.setup/'
     if worker
@@ -111,8 +111,11 @@ Vagrant.configure(2) do |config|
   if ON_CI
     config.ssh.insert_key = false
   else
-    config.ssh.insert_key = false
+    config.ssh.insert_key = true
   end
+
+  mount_options = []
+  
   config.vm.box = ENV.fetch('VAGRANT_BOX', base_boxes.default)
 
   arch = `uname -m`.chomp
