@@ -57,7 +57,6 @@ describe('Tests cases revolving around gradeable access and submition', () => {
                         'grade_inquiry_per_component_allowed': false,
                     },
                     'ta_grading': false,
-                    'discussion_thread_id': 'thread_id',
                     'syllabus_bucket': 'Homework',
                 },
                 headers: {
@@ -90,7 +89,6 @@ describe('Tests cases revolving around gradeable access and submition', () => {
                         'grade_inquiry_per_component_allowed': false,
                     },
                     'ta_grading': false,
-                    'discussion_thread_id': 'thread_id',
                     'syllabus_bucket': 'Homework',
                 },
                 headers: {
