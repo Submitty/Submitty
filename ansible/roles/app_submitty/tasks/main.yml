@@ -25,24 +25,24 @@
         submitty_dbuser_password
         submitty_course_dbuser
         submitty_course_dbuser_password
-        America/Los_Angeles
-        en_US
+        {{ timezone }}
+        {{ language }}
         "https://{{ submitty_url }}"
-        https://gitlab.cs.wallawalla.edu
-        Walla Walla University
-        https://cs.wallawalla.edu
+        {{ vcs_url}}
+        {{ institution_name}}
+        {{ sysadmin_email }}
         "{{ submitty_email }}"
-        https://cs.wallawalla.edu
+        {{ institution_url }}
         1
         admin
         y
         admin
         admin_password
         "{{ submitty_email }}"
-        submitty_do_not_replay@cs.wallawalla.edu
-        mail.cs.wallawalla.edu
-        25
-        cs.wallawalla.edu
+        {{ noreply_email }}
+        {{ smtp_server }}
+        {{ smtp_port }}
+        {{ institution_url }}
         " | bash -p ./.setup/install_system.sh > /usr/local/submitty/install.log 2>&1
   args:
     chdir: /usr/local/submitty/GIT_CHECKOUT/Submitty
