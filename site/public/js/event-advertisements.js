@@ -19,7 +19,7 @@ $(() => {
         eventAdvertisements.chatBox.style.display = 'none';
     }
 
-    if (document.getElementById('banner') === null) {
+    if (document.getElementById('abanner') === null) {
         return;
     }
 
@@ -27,7 +27,7 @@ $(() => {
     eventAdvertisements.hiddenImages = getHiddenImages();
     eventAdvertisements.seenImages = [];
     eventAdvertisements.images = document.getElementsByClassName('club-banners');
-    eventAdvertisements.bannerElement = document.getElementById('banner');
+    eventAdvertisements.bannerElement = document.getElementById('abanner');
     eventAdvertisements.bannerElement.style.display = 'none';
     eventAdvertisements.moveDuck = document.getElementById('duckdivmove');
     eventAdvertisements.moveDuck.style.display = 'none';
@@ -62,7 +62,7 @@ $(() => {
 });
 function showBanners(noMove = false) {
     const movingUnit = document.getElementById('moving-unit');
-    const bannerElement = document.getElementById('banner');
+    const bannerElement = document.getElementById('abanner');
     if (bannerElement.style.display === 'none' && eventAdvertisements.images.length > 0) {
         document.getElementById('chat-box').style.display = 'none';
         eventAdvertisements.currentImageIndex = 0;
