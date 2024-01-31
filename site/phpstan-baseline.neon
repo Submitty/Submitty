@@ -4006,12 +4006,22 @@ parameters:
 			path: app/libraries/CustomCodeBlockRenderer.php
 
 		-
-			message: "#^Parameter \\#1 \\$block of method League\\\\CommonMark\\\\Block\\\\Renderer\\\\FencedCodeRenderer\\:\\:render\\(\\) expects League\\\\CommonMark\\\\Block\\\\Element\\\\FencedCode\\|League\\\\CommonMark\\\\Block\\\\Element\\\\IndentedCode, League\\\\CommonMark\\\\Block\\\\Element\\\\AbstractBlock given\\.$#"
+			message: "#^Parameter \\#1 \\$element of method app\\\\libraries\\\\CustomCodeBlockRenderer\\:\\:addLineNumbers\\(\\) expects League\\\\CommonMark\\\\Util\\\\HtmlElement, Stringable given\\.$#"
 			count: 1
 			path: app/libraries/CustomCodeBlockRenderer.php
 
 		-
-			message: "#^Parameter \\#1 \\$inline of method League\\\\CommonMark\\\\Inline\\\\Renderer\\\\CodeRenderer\\:\\:render\\(\\) expects League\\\\CommonMark\\\\Inline\\\\Element\\\\Code, League\\\\CommonMark\\\\Inline\\\\Element\\\\AbstractInline given\\.$#"
+			message: "#^Parameter \\#1 \\$node of method League\\\\CommonMark\\\\Extension\\\\CommonMark\\\\Renderer\\\\Block\\\\FencedCodeRenderer\\:\\:render\\(\\) expects League\\\\CommonMark\\\\Extension\\\\CommonMark\\\\Node\\\\Block\\\\FencedCode\\|League\\\\CommonMark\\\\Extension\\\\CommonMark\\\\Node\\\\Block\\\\IndentedCode, League\\\\CommonMark\\\\Node\\\\Node given\\.$#"
+			count: 1
+			path: app/libraries/CustomCodeBlockRenderer.php
+
+		-
+			message: "#^Call to an undefined method Stringable\\:\\:getContents\\(\\)\\.$#"
+			count: 1
+			path: app/libraries/CustomCodeInlineRenderer.php
+
+		-
+			message: "#^Parameter \\#1 \\$node of method League\\\\CommonMark\\\\Extension\\\\CommonMark\\\\Renderer\\\\Inline\\\\CodeRenderer\\:\\:render\\(\\) expects League\\\\CommonMark\\\\Extension\\\\CommonMark\\\\Node\\\\Inline\\\\Code, League\\\\CommonMark\\\\Node\\\\Node given\\.$#"
 			count: 1
 			path: app/libraries/CustomCodeInlineRenderer.php
 

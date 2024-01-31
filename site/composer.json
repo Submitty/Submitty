@@ -19,8 +19,13 @@
       "tests\\": "tests/"
     }
   },
+  "repositories": [
+    {
+      "type": "git",
+      "url": "https://github.com/Submitty/Markdown.git"
+    }
+  ],
   "require": {
-    "aptoma/twig-markdown": "3.4.1",
     "browscap/browscap-php": "7.2.0",
     "cboden/ratchet": "0.4.4",
     "doctrine/annotations": "1.14.3",
@@ -28,7 +33,7 @@
     "doctrine/orm": "2.16.2",
     "egulias/email-validator": "4.0.2",
     "lcobucci/jwt": "5.0.0",
-    "league/commonmark": "1.6.7",
+    "league/commonmark": "2.4.0",
     "maennchen/zipstream-php": "3.1.0",
     "onelogin/php-saml": "4.1.0",
     "php-ds/php-ds": "1.4.1",
@@ -38,6 +43,7 @@
     "symfony/http-foundation": "6.3.2",
     "symfony/polyfill-php80": "1.27.0",
     "symfony/routing": "6.1.11",
+    "submitty/markdown": "23.12.00",
     "textalk/websocket": "1.6.3",
     "twig/twig": "3.7.0"
   },
