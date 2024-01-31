@@ -53,6 +53,16 @@ class AdminGradeableController extends AbstractController {
     /**
      * Displays the 'new' page, populating the first-page properties with the
      *  provided gradeable's data
+     * @Route("/courses/{_semester}/{_course}/{gradeable_id}/download", methods={"GET"})
+     * @Route("/api/{_semester}/{_course}/{gradeable_id}/download", methods={"GET"})
+     */
+    public function downloadJson($gradeable_id){
+        $gradeable = $this->core->getQueries()->getGradeableConfig($gradeable_id);
+        return JsonResponse::getSuccessResponse($gradeable);
+    }
+    /**
+     * Displays the 'new' page, populating the first-page properties with the
+     *  provided gradeable's data
      * @param string|null $template_id
      * @Route("/courses/{_semester}/{_course}/gradeable", methods={"GET"})
      */

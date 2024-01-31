@@ -340,6 +340,37 @@ function renderOverallComment(comment, editable) {
     });
 }
 
+// Uploads a gradeable via JSON POST request
+function ajaxDownloadGradeable(){
+    try {
+        result['csrf_token'] = csrfToken;
+        const url = '/courses/f24/blank/hw-3/download';
+        $.ajax({
+            url: url,
+            headers: {
+                Accept: 'application/json',
+            },
+            dataType: 'json',
+            data: result,
+            method: 'GET',
+        }).always(function (data) {
+            data = JSON.parse(JSON.stringify(data));
+            if (data['status'] === 'success') {
+                console.log(data);
+            } else {
+                window.location = buildCourseUrl(['gradeable']);
+                alert(data['message']);
+                return false;
+            }
+        });
+    } catch(error) {
+        alert(error);
+        return false;
+    }
+    fr.readAsText(files.item(0));
+    return true;
+}
+
 /**
  * Asynchronously renders the total scores box
  * @param {Object} scores
