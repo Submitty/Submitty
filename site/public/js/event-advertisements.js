@@ -69,7 +69,7 @@ function showBanners(noMove = false) {
         Cookies.set('display-banner', 'yes');
 
         if (eventAdvertisements.currentImages.length > 0 && !noMove) {
-            eventAdvertisements.images[eventAdvertisements.currentImageIndex].classList.add('active');
+            eventAdvertisements.images[eventAdvertisements.currentImageIndex].classList.add('active-banner');
             eventAdvertisements.moveDuck.style.animation = 'rocking 2s linear infinite';
 
             setTimeout(() => {
@@ -84,7 +84,7 @@ function showBanners(noMove = false) {
             eventAdvertisements.originalDuck.style.display = 'none';
             eventAdvertisements.moveDuck.style.display = 'block';
             bannerElement.style.display = 'block';
-            eventAdvertisements.images[eventAdvertisements.currentImageIndex].classList.add('active');
+            eventAdvertisements.images[eventAdvertisements.currentImageIndex].classList.add('active-banner');
         }
 
 
@@ -100,7 +100,7 @@ function showBanners(noMove = false) {
 
         eventAdvertisements.originalDuck.style.display = 'block';
         if (eventAdvertisements.images.length > 0) {
-            eventAdvertisements.images[eventAdvertisements.currentImageIndex].classList.remove('active');
+            eventAdvertisements.images[eventAdvertisements.currentImageIndex].classList.remove('active-banner');
         }
 
 
@@ -137,7 +137,7 @@ function changeImage(n) {
         console.log(eventAdvertisements.currentImageIndex);
         return;
     }
-    eventAdvertisements.images[eventAdvertisements.currentImageIndex].classList.remove('active');
+    eventAdvertisements.images[eventAdvertisements.currentImageIndex].classList.remove('active-banner');
     if (eventAdvertisements.currentImageIndex < eventAdvertisements.currentImages.length) {
 
         const className = eventAdvertisements.currentImages[originalIndex].className.split(' ')[1];
@@ -157,7 +157,7 @@ function changeImage(n) {
         eventAdvertisements.currentImageIndex = 0;
     }
 
-    eventAdvertisements.images[eventAdvertisements.currentImageIndex].classList.add('active');
+    eventAdvertisements.images[eventAdvertisements.currentImageIndex].classList.add('active-banner');
 
 }
 
