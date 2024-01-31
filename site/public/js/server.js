@@ -51,9 +51,8 @@ function buildCourseUrl(parts = []) {
 
 /**
  * Acts in a similar fashion to Core->buildCourseUrl() function within the PHP code
- * Course information is prepended to the URL constructed.
+ * Returns a string of the uploadUrl
  *
- * @param {object} parts - Object representing URL parts to append to the URL
  * @returns {string} - Built up URL to use
  */
 function getUploadUrl() {
