@@ -214,7 +214,7 @@ class CalendarController extends AbstractController {
         }
 
         if (isset($_POST['course'])) {
-            $InputCourse = $_POST['course'];
+            $input_course = $_POST['course'];
         }
         else {
             $this->core->addErrorMessage("Invalid course");
@@ -224,12 +224,13 @@ class CalendarController extends AbstractController {
         $instructor_courses = $this->core->getQueries()->getInstructorLevelUnarchivedCourses($this->core->getUser()->getId());
 
         foreach ($instructor_courses as $course) {
-            if (($semester === $course['term']) && ($InputCourse === $course['course'])) {
+            if (($semester === $course['term']) && ($input_course === $course['course'])) {
                 $this->core->loadCourseConfig($course['term'], $course['course']);
                 $this->core->loadCourseDatabase();
-                $calendar_item = $this->core->getCourseEntityManager()->getRepository(GlobalItem::class)
+                $calendar_item = $this->core->getCourseEntityManager()->getRepository(CalendarItem::class)
                     ->findOneBy(['id' => $id]);
                 if ($calendar_item === null) {
+                    $this->core->addErrorMessage("Calendar item does not exist");
                     return new RedirectResponse($this->core->buildUrl(['calendar']));
                 }
                 try {
@@ -246,6 +247,7 @@ class CalendarController extends AbstractController {
             }
         }
 
+        $this->core->addSuccessMessage("Successfully edited calendar item");
         return new RedirectResponse($this->core->buildUrl(['calendar']));
     }
 
@@ -277,8 +279,8 @@ class CalendarController extends AbstractController {
 
         $instructor_courses = $this->core->getQueries()->getInstructorLevelUnarchivedCourses($this->core->getUser()->getId());
         $exists = false;
-        foreach ($instructor_courses as $currCourse) {
-            if ($currCourse['term'] === $semester && $currCourse['course'] === $course) {
+        foreach ($instructor_courses as $current_course) {
+            if ($current_course['term'] === $semester && $current_course['course'] === $course) {
                 $exists = true;
                 break;
             }
@@ -305,7 +307,7 @@ class CalendarController extends AbstractController {
     /**
      * @Route("/calendar/global_items/new", methods={"POST"})
      */
-    public function createGlobalAnnouncement(): RedirectResponse {
+    public function createGlobalEvent(): RedirectResponse {
         // Checks if the values exist that are set and returns an error message if not
         if (isset($_POST['type'])) {
             $type = $_POST['type'];
@@ -331,29 +333,27 @@ class CalendarController extends AbstractController {
             return new RedirectResponse($this->core->buildUrl(['calendar']));
         }
 
-        $calendar_item = new GlobalItem();
+        $global_event = new GlobalItem();
         try {
-            $calendar_item->setStringType($type);
+            $global_event->setStringType($type);
         }
         catch (\InvalidArgumentException $e) {
             $this->core->addErrorMessage($e->getMessage());
             return new RedirectResponse($this->core->buildUrl(['calendar']));
         }
-        $calendar_item->setDate(new \DateTime($date));
+        $global_event->setDate(new \DateTime($date));
         try {
-            $calendar_item->setText($text);
+            $global_event->setText($text);
         }
         catch (\InvalidArgumentException $e) {
             $this->core->addErrorMessage($e->getMessage());
             return new RedirectResponse($this->core->buildUrl(['calendar']));
         }
 
-        $this->core->loadMasterDatabase();
-        $this->core->getSubmittyEntityManager()->persist($calendar_item);
+        $this->core->getSubmittyEntityManager()->persist($global_event);
         $this->core->getSubmittyEntityManager()->flush();
-        $this->core->getSubmittyDB()->disconnect();
 
-        $this->core->addSuccessMessage("Calendar item successfully added");
+        $this->core->addSuccessMessage("Global event successfully created");
         return new RedirectResponse($this->core->buildUrl(['calendar']));
     }
 
@@ -361,7 +361,7 @@ class CalendarController extends AbstractController {
     /**
      * @Route("/calendar/global_items/edit", methods={"POST"})
      */
-    public function editGlobalAnnouncement(): RedirectResponse {
+    public function editGlobalEvent(): RedirectResponse {
         // Checks if the values exist that are set and returns an error message if not
         if (isset($_POST['type'])) {
             $type = $_POST['type'];
@@ -396,20 +396,20 @@ class CalendarController extends AbstractController {
         }
 
 
-        $announcement = $this->core->getSubmittyEntityManager()
+        $global_event = $this->core->getSubmittyEntityManager()
             ->getRepository(GlobalItem::class)
             ->findOneBy(['id' => $id]);
 
-        if ($announcement === null) {
-            $this->core->addErrorMessage("Announcement not found");
+        if ($global_event === null) {
+            $this->core->addErrorMessage("Global event not found");
             return new RedirectResponse($this->core->buildUrl(['calendar']));
         }
 
-        // Edit the announcement
+        // Edit the global event
         try {
-            $announcement->setText($text);
-            $announcement->setDate(new \DateTime($date));
-            //$calendar_item->setStringType($type);
+            $global_event->setText($text);
+            $global_event->setDate(new \DateTime($date));
+            $global_event->setStringType($type);
         }
         catch (\InvalidArgumentException $e) {
             $this->core->addErrorMessage($e->getMessage());
@@ -419,17 +419,14 @@ class CalendarController extends AbstractController {
         // Persist the changes and flush to save them
         $this->core->getSubmittyEntityManager()->flush();
 
-        // Disconnect from the master database
-        $this->core->getSubmittyDB()->disconnect();
-
-        $this->core->addSuccessMessage("Announcement successfully updated");
+        $this->core->addSuccessMessage("Global event successfully updated");
         return new RedirectResponse($this->core->buildUrl(['calendar']));
     }
 
     /**
      * @Route("/calendar/global_items/delete", methods={"POST"})
      */
-    public function deleteGlobalAnnouncement(): ResponseInterface {
+    public function deleteGlobalEvent(): ResponseInterface {
         if (isset($_POST['id'])) {
             $id = $_POST['id'];
         }
@@ -438,22 +435,20 @@ class CalendarController extends AbstractController {
             return new RedirectResponse($this->core->buildUrl(['calendar']));
         }
 
-        $this->core->loadMasterDatabase();
-
         // Find the announcement in the master database
-        $item = $this->core->getSubmittyEntityManager()
+        $global_event = $this->core->getSubmittyEntityManager()
             ->getRepository(GlobalItem::class)
             ->findOneBy(['id' => $id]);
 
-        if ($item === null) {
-            $this->core->addErrorMessage("Announcement not found");
+        if ($global_event === null) {
+            $this->core->addErrorMessage("Global event not found");
             return new RedirectResponse($this->core->buildUrl(['calendar']));
         }
 
-        $this->core->getSubmittyEntityManager()->remove($item);
+        $this->core->getSubmittyEntityManager()->remove($global_event);
         $this->core->getSubmittyEntityManager()->flush();
-        $this->core->getSubmittyDB()->disconnect();
-        $this->core->addSuccessMessage($item->getText() . " was successfully deleted.");
+        $this->core->addSuccessMessage($global_event->getText() . " was successfully deleted.");
+
         return JsonResponse::getSuccessResponse();
     }
 }

@@ -65,7 +65,7 @@ class GlobalCalendarInfo extends AbstractModel {
             $info->items_by_date[$date][] = $curItem;
         }
 
-        $info->empty_message = "There are currently no assignments posted.  Please check back later.";
+        $info->empty_message = "There are currently no assignments posted. Please check back later.";
 
         return $info;
     }
