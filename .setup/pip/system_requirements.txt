@@ -16,7 +16,7 @@ pytz==2023.3.post1 # Submitty-util specific.
 
 
 python-pam==2.0.2
-ruamel.yaml==0.17.33
+ruamel.yaml==0.18.5
 psycopg2-binary==2.9.9
 sqlalchemy==1.4.29
 psutil==5.9.6
