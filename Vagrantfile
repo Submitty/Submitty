@@ -38,8 +38,8 @@ def gen_script(machine_name, worker: false)
   no_submissions = !ENV.fetch('NO_SUBMISSIONS', '').empty?
   reinstall = !ENV.fetch('BASE_BOX', '').empty?
   extra = ENV.fetch('EXTRA', '')  
+  setup_cmd = 'bash ${GIT_PATH}/.setup/'
   if reinstall || ON_CI
-    setup_cmd = 'bash ${GIT_PATH}/.setup/'
     if worker
       setup_cmd += 'install_worker.sh'
     else
@@ -49,7 +49,7 @@ def gen_script(machine_name, worker: false)
       end
     end
   else
-    setup_cmd = ''
+    setup_cmd += 'install_success_from_cloud.sh'
   end
   unless extra.empty?
     setup_cmd += " #{extra}"
