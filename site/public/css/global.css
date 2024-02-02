@@ -206,6 +206,10 @@ footer .footer-separator {
         display: none;
     }
 
+    #chat-box {
+        display: none !important;
+    }
+
     footer {
         font-size: 14px;
     }
@@ -218,6 +222,10 @@ footer .footer-separator {
     }
 
     #logo-box {
+        display: block;
+    }
+
+    #chat-box {
         display: block;
     }
 
@@ -256,7 +264,7 @@ footer .footer-separator {
     display: none;
 }
 
-.active {
+.active-banner {
     display: block !important;
 }
 
@@ -270,4 +278,67 @@ footer .footer-separator {
 
 .club-banners {
     display: none;
+}
+
+.loading {
+    font-size: 24px;
+    display: inline-block;
+    padding-right: 4px;
+}
+
+.loading::after {
+    content: "\00B7 \00B7 \00B7";
+    overflow: hidden;
+    line-height: 0.5;
+    display: inline-block;
+    vertical-align: text-top;
+    animation: ellipsis-dot 1s infinite .3s;
+    animation-fill-mode: forwards;
+    width: 1.1em;
+}
+
+@keyframes ellipsis-dot {
+    25% {
+        content: "";
+    }
+
+    50% {
+        content: "\00B7";
+    }
+
+    75% {
+        content: "\00B7 \00B7";
+    }
+
+    100% {
+        content: "\00B7 \00B7 \00B7";
+    }
+}
+
+.chat {
+    --rad: 20px;
+    --rad-sm: 3px;
+    
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    justify-content: center;
+    padding-bottom: 50px;
+    padding-top: 10px;
+    height: 18px;
+    max-width: 500px;
+}
+
+.msg {
+    position: relative;
+    max-width: 75%;
+    padding: 1px 2px;
+}
+
+.msg.sent {
+    border-radius: var(--rad) var(--rad) var(--rad-sm) var(--rad);
+    background: var(--standard-medium-vibrant-blue);
+    color: #ffffff;
+    height: 14px;
+    align-items: flex-start;
 }
