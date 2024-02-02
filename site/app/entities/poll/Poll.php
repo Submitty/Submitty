@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace app\entities\poll;
 
 use app\repositories\poll\PollRepository;
+use DateInterval;
 use DateTime;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
@@ -27,6 +28,9 @@ class Poll {
 
     #[ORM\Column(type: Types::TEXT)]
     protected $status;
+
+    #[ORM\Column(type: Types::DATEINTERVAL)]
+    protected DateInterval $duration;  
 
     #[ORM\Column(type: Types::DATE_MUTABLE)]
     protected DateTime $release_date;   
@@ -58,10 +62,11 @@ class Poll {
     #[ORM\JoinColumn(name: "poll_id", referencedColumnName: "poll_id")]
     protected Collection $responses;
 
-    public function __construct(string $name, string $question, string $question_type, \DateTime $release_date, string $release_histogram, string $release_answer, string $image_path = null) {
+    public function __construct(string $name, string $question, string $question_type, \DateInterval $duration, \DateTime $release_date, string $release_histogram, string $release_answer, string $image_path = null) {
         $this->setName($name);
         $this->setQuestion($question);
         $this->setQuestionType($question_type);
+        $this->setDuration($duration);
         $this->setReleaseDate($release_date);
         $this->setReleaseHistogram($release_histogram);
         $this->setReleaseAnswer($release_answer);
@@ -120,10 +125,18 @@ class Poll {
         return $this->status === "ended";
     }
 
+    public function getDuration(): \DateInterval{
+        return $this->duration;
+    }
+
     public function getReleaseDate(): \DateTime {
         return $this->release_date;
     }
 
+    public function setDuration(\DateInterval $duration): void{
+        $this->duration = $duration;
+    }
+    
     public function setReleaseDate(\DateTime $release_date): void {
         $this->release_date = $release_date;
     }

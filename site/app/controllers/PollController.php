@@ -190,6 +190,7 @@ class PollController extends AbstractController {
                     $this->core->addErrorMessage("Invalid poll answer release setting");
             return new RedirectResponse($this->core->buildCourseUrl(['polls']));
         }
+        //Handle the two inputs, both will be ints (one hours, one minutes). I have to combine both of them into a "DateInterval" and create the PollObject based on that.
 
         $poll = new Poll($_POST['name'], $_POST['question'], $_POST['question_type'], $date, $_POST['release_histogram'], $_POST["release_answer"]);
         $em->persist($poll);
