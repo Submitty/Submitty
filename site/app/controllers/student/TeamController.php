@@ -11,9 +11,8 @@ use Symfony\Component\Routing\Annotation\Route;
 
 class TeamController extends AbstractController {
     public static function hasSpecialCharacters($str): bool {
-        $allowedCharacters = ['a-z', 'A-Z', '0-9', '-', '_', ' ']; // This list can be expandable upon further requests
-        $pattern = '/[^' . implode('', $allowedCharacters) . ']/';
-        return (bool) preg_match($pattern, $str);
+        $pattern = '/[^a-zA-Z0-9\-_ ]/';
+        return preg_match($pattern, $str) === 1;
     }
     
     /**
