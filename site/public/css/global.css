@@ -129,11 +129,11 @@ nav a > i.f {
 }
 
 
-.prev-button {
+.aprev-button {
     border-radius: 0% 50% 50% 0%;
 }
 
-.next-button {
+.anext-button {
     border-radius: 50% 0% 0% 50%;
 }
 
