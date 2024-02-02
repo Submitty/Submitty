@@ -51,14 +51,10 @@ class AdminGradeableController extends AbstractController {
     ];
 
     /**
-     * Displays the 'new' page, populating the first-page properties with the
-     *  provided gradeable's data
-     * @Route("/courses/{_semester}/{_course}/{gradeable_id}/download", methods={"GET"})
-     * @Route("/api/{_semester}/{_course}/{gradeable_id}/download", methods={"GET"})
+     * @Route("/courses/{_semester}/{_course}/download", methods={"POST"})
      */
-    public function downloadJson($gradeable_id){
-        $gradeable = $this->core->getQueries()->getGradeableConfig($gradeable_id);
-        return JsonResponse::getSuccessResponse($gradeable);
+    public function downloadJson(){
+       return JsonResponse::getSuccessResponse($_POST['gradeable_id']);
     }
     /**
      * Displays the 'new' page, populating the first-page properties with the
@@ -246,6 +242,7 @@ class AdminGradeableController extends AbstractController {
         $this->core->getOutput()->addVendorCss(FileUtils::joinPaths('flatpickr', 'plugins', 'shortcutButtons', 'themes', 'light.min.css'));
         $this->core->getOutput()->addSelect2WidgetCSSAndJs();
         $this->core->getOutput()->addInternalJs('admin-gradeable-updates.js');
+        $this->core->getOutput()->addInternalJs('gradeable.js');
         $this->core->getOutput()->addInternalCss('admin-gradeable.css');
         $this->core->getOutput()->renderTwigOutput('admin/admin_gradeable/AdminGradeableBase.twig', [
             'gradeable' => $gradeable,

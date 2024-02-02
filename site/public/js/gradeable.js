@@ -1,3 +1,5 @@
+/* global csrfToken, getUploadUrl
+*/
 /**
  * The number of decimal places to show to the user
  * @type {int}
@@ -343,8 +345,10 @@ function renderOverallComment(comment, editable) {
 // Uploads a gradeable via JSON POST request
 function ajaxDownloadGradeable(){
     try {
+        var result = [];
+        result['gradeable_id'] = 'hw-3';
         result['csrf_token'] = csrfToken;
-        const url = '/courses/f24/blank/hw-3/download';
+        const url = '/courses/f24/blank/download';
         $.ajax({
             url: url,
             headers: {
@@ -352,14 +356,13 @@ function ajaxDownloadGradeable(){
             },
             dataType: 'json',
             data: result,
-            method: 'GET',
+            method: 'POST',
         }).always(function (data) {
             data = JSON.parse(JSON.stringify(data));
             if (data['status'] === 'success') {
                 console.log(data);
             } else {
-                window.location = buildCourseUrl(['gradeable']);
-                alert(data['message']);
+                console.log(data);
                 return false;
             }
         });
@@ -367,7 +370,6 @@ function ajaxDownloadGradeable(){
         alert(error);
         return false;
     }
-    fr.readAsText(files.item(0));
     return true;
 }
 
