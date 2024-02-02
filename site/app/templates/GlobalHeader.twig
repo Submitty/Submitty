@@ -147,7 +147,7 @@
             <div id="menu-overlay"></div>
 
             <div class = "big">
-                <div class = "theBanner" style="position: absolute; top: 0; z-index: 7; text-align: center;"> 
+                <div class = "banner-object" style="position: absolute; top: 0; z-index: 7; text-align: center;"> 
             
                     {% if imageDataArray|length != 0 %}
                         <div id="moving-unit" style="display: inline-block;">
@@ -170,7 +170,7 @@
                                         />
                                     {% endif %}
                                 </span>
-                                <div class="banner" id="banner">
+                                <div class="abanner" id="abanner">
                                     {% set image_found = false %}
                                     {% for imageData in imageDataArray %}
                                     <div>
@@ -199,17 +199,17 @@
                                             src="data:imgName/png;base64,{{ imageData.data }}" 
                                             onclick="newShowImage('{{extraImageData}}', '{{imageData.link_name}}')" />
                                         {% endif %}
-                                        <button class="delete-button" onclick="showBanners()">x</button>
                                     </div>
                                     {% endfor %}
                                     {% if imageDataArray|length > 1 %}
-                                    <button class="prev-button" aria-label="go to the next banner" onclick="changeImage(-1)">
+                                     <button class="aprev-button" aria-label="go to the next banner" onclick="changeImage(-1)" style ="position: absolute; left: 0; transform: translateX(0);">
                                         <i class="fas fa-arrow-left"></i>
                                     </button>
-                                    <button class="next-button" aria-label="go to the previous banner" onclick="changeImage(1)">
+                                    <button class="anext-button" aria-label="go to the previous banner" onclick="changeImage(1)" style ="position: absolute; right: 0;">
                                         <i class="fas fa-arrow-right"></i>
                                     </button>
                                     {% endif %}
+                                     <button class="delete-button" onclick="showBanners()">x</button>
                                 </div>
                             </div>
                         </div>
@@ -252,66 +252,6 @@
                             {% endfor %}
                         </div>
                     </div>
-                    <style>
-                        .loading {
-                            font-size: 30px;
-                            display: inline-block;
-                            padding-right: 4px;
-                        }
-
-                        .loading:after {
-                            content: "\00B7 \00B7 \00B7";
-                            overflow: hidden;
-                            line-height: 0.7;
-                            display: inline-block;
-                            vertical-align: text-top;
-                            animation: ellipsis-dot 1s infinite .3s;
-                            animation-fill-mode: forwards;
-                            width: 1.2em;
-                        }
-
-                        @keyframes ellipsis-dot {
-                            25% {
-                                content: "";
-                            }
-                            50% {
-                                content: "\00B7";
-                            }
-                            75% {
-                                content: "\00B7 \00B7";
-                            }
-                            100% {
-                                content: "\00B7 \00B7 \00B7";
-                            }
-                        }
-
-                        .chat {
-                            --rad: 20px;
-                            --rad-sm: 3px;
-                            display: flex;
-                            flex-direction: column;
-                            align-items: flex-end;
-                            justify-content: center;
-                            padding-bottom: 50px;
-                            padding-top: 10px;
-                            height: 20px;
-                            max-width: 500px;
-                        }
-
-                        .msg {
-                            position: relative;
-                            max-width: 75%;
-                            padding: 1px 6px;
-                        }
-
-                        .msg.sent {
-                            border-radius: var(--rad) var(--rad) var(--rad-sm) var(--rad);
-                            background: #42a5f5;
-                            color: #fff;
-                            height: 20px;
-                            align-items: flex-start;
-                        }
-                    </style>
 
                     <div class="chat">
                         <div class="msg sent"><div class="loading"></div></div>
@@ -335,9 +275,9 @@
                                     tabindex="0"
                                     {% endif %}
 
-                                    {% if imageDataArray|length != 0 %}
-                                        onclick="showBanners();"
-                                    {% endif %}
+                            {% if user_given_name != "" and imageDataArray|length != 0%}
+                                onclick="showBanners();"
+                            {% endif %}
 
                             />
                         {% if not enable_banner %}
@@ -474,3 +414,5 @@
         </li>
     {% endif %}
 {% endmacro %}
+
+{{ include('bannerPopup.twig') }}
