@@ -171,7 +171,7 @@
                                     {% endif %}
                                 </span>
                                 <div class="abanner" id="abanner">
-                                <div class="banner-container" style = "position: relative; display: inline-block;">
+                                <div class="banner-container" >
                                     {% set image_found = false %}
                                     {% for imageData in imageDataArray %}
                                     <div>
@@ -260,7 +260,7 @@
                                 <div class="msg sent"><div class="loading"></div></div>
                             </div>
                         {% endif %}
-                        <span id="duckdiv" style="position: relative; top: 0; left: 0; z-index: 1;">
+                        <span id="duckdiv" style="position: relative;">
                         {% if not enable_banner and imageDataArray|length == 0 %}
                             <a id="duck-desktop"
                            href="http://submitty.org/developer/rcos_moorthy"
