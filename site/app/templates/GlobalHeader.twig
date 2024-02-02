@@ -171,7 +171,6 @@
                                     {% endif %}
                                 </span>
                                 <div class="abanner" id="abanner">
-                                <div class="banner-container" style = "position: relative; display: inline-block;">
                                     {% set image_found = false %}
                                     {% for imageData in imageDataArray %}
                                     <div>
@@ -203,15 +202,14 @@
                                     </div>
                                     {% endfor %}
                                     {% if imageDataArray|length > 1 %}
-                                    <button class="aprev-button" aria-label="go to the next banner" onclick="changeImage(-1)" style ="position: absolute; left: 0; transform: translateX(0);">
+                                     <button class="aprev-button" aria-label="go to the next banner" onclick="changeImage(-1)" style ="position: absolute; left: 0; transform: translateX(0);">
                                         <i class="fas fa-arrow-left"></i>
                                     </button>
                                     <button class="anext-button" aria-label="go to the previous banner" onclick="changeImage(1)" style ="position: absolute; right: 0;">
                                         <i class="fas fa-arrow-right"></i>
                                     </button>
                                     {% endif %}
-                                    <button class="delete-button" onclick="showBanners()">x</button>
-                                </div>
+                                     <button class="delete-button" onclick="showBanners()">x</button>
                                 </div>
                             </div>
                         </div>
@@ -254,48 +252,47 @@
                             {% endfor %}
                         </div>
                     </div>
-                    <div style="position: relative; display: flex;">
-                        {% if user_given_name != "" and imageDataArray|length != 0 %}
-                            <div class="chat" id="chat-box" onclick="showBanners()" style="z-index: 2; position: absolute; top: 4px; right: 276px;">
-                                <div class="msg sent"><div class="loading"></div></div>
-                            </div>
+
+                    <div class="chat">
+                        <div class="msg sent"><div class="loading"></div></div>
+                    </div>
+                    <div style="display: flex">
+                        <span id="duckdiv" style="position: relative">
+                        {% if not enable_banner and imageDataArray|length == 0%}
+                        <a id="duck-desktop"
+                            href="http://submitty.org/developer/rcos_moorthy"
+                            target="_blank"
+                            aria-label="Learn more about Moorthy"
+                        >
                         {% endif %}
-                        <span id="duckdiv" style="position: relative; top: 0; left: 0; z-index: 1;">
-                        {% if not enable_banner and imageDataArray|length == 0 %}
-                            <a id="duck-desktop"
-                           href="http://submitty.org/developer/rcos_moorthy"
-                           target="_blank"
-                           aria-label="Learn more about Moorthy"
-                            >
-                        {% endif %}
-                        <img id="moorthy-duck"
-                             src="{{ base_url }}/img/{{ duck_img }}"
-                             alt="Moorthy - Submitty's Duck Mascot!"
-                             height="80"
-                            {% if enable_banner and imageDataArray|length != 0 %}
-                                class="key_to_click"
-                                onclick="ducky();"
-                                tabindex="0"
-                            {% endif %}
+                            <img id="moorthy-duck"
+                                    src="{{ base_url }}/img/{{ duck_img }}"
+                                    alt="Moorthy - Submitty's Duck Mascot!"
+                                    height="80"
+                                    {% if enable_banner and imageDataArray|length != 0 %}
+                                    class="key_to_click"
+                                    onclick="ducky();"
+                                    tabindex="0"
+                                    {% endif %}
 
                             {% if user_given_name != "" and imageDataArray|length != 0%}
                                 onclick="showBanners();"
                             {% endif %}
-                        />
+
+                            />
                         {% if not enable_banner %}
-                            </a>
+                        </a>
                         {% endif %}
 
-                    {% if enable_banner %}
+                        {% if enable_banner %}
                         <img id="submitty-banner"
-                            src="{{ base_url }}/img/submitty-banner.png"
-                            alt="Happy Submitty Week!"
-                            height="70"
-                            style="position:absolute;right: -380px; top:6px;display:none;"
+                                src="{{ base_url }}/img/submitty-banner.png"
+                                alt="Happy Submitty Week!"
+                                height="70"
+                                style="position:absolute;right: -380px; top:6px;display:none;"
                         />
                         {% endif %}
                         </span>
-                        
                         <span>
                             <a class="flex-col" id="logo-box" href="http://submitty.org" target="_blank" aria-label="Visit submitty dot org">
                                 <img id="logo-submitty" src="{{ base_url }}/img/submitty_logo.png" alt="Submitty Logo">
