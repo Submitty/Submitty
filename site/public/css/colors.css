@@ -249,8 +249,8 @@
     --default-black: #ffffff;
 
     /* poll histogram colors */
-    --histogram-default: #87CEFA;
-    --histogram-correct: #00bd00;
+    --histogram-default: #B2CCFF;
+    --histogram-correct: #00EB46;
 }
 
 [data-theme="dark"] {
