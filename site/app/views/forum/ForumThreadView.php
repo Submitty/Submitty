@@ -1214,6 +1214,7 @@ class ForumThreadView extends AbstractView {
         $post_up_duck = [
             "upduck_count" => $counter,
             "upduck_user_liked" => $isLiked,
+            "upduck_user_type" => $this->core->getUser()->getGroup(),
         ];
 
         if ($this->core->getUser()->getGroup() == 4) {

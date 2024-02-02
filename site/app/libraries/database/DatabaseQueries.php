@@ -746,6 +746,28 @@ SQL;
         }
     }
 
+    public function getColorOfUpduck(array $post_ids): array{
+        if (count($post_ids) === 0) {
+            return [];
+        }
+        $placeholders = $this->createParameterList(count($post_ids));
+        $sql = "SELECT post_id, COUNT(*) AS cnt FROM forum_upducks WHERE post_id IN {$placeholders} GROUP BY post_id";
+
+        $this->course_db->query($sql, $post_ids);
+        $result = [];
+
+        foreach ($post_ids as $post) {
+            $result[$post] = 0;
+        }
+        foreach ($this->course_db->rows() as $row) {
+            $result[$row['post_id']] = intval($row['cnt']);
+        }
+        return $result;
+    }
+
+    //make a function that goes through all the post_ids and if they are all liked by user_group of 1,2,3 then make it return 1
+    //                                                                                                  4 then make it return 0
+
     /**
      * @param int[] $post_ids
      * @return int[]
