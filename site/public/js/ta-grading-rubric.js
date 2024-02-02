@@ -185,6 +185,7 @@ function ajaxGetComponentRubric(gradeable_id, component_id) {
             async: AJAX_USE_ASYNC,
             url: buildCourseUrl(['gradeable', gradeable_id, 'components']) + `?component_id=${component_id}`,
             success: function (response) {
+                console.log("ajaxGetComponentRubric success");
                 if (response.status !== 'success') {
                     console.error('Something went wrong fetching the component rubric: ' + response.message);
                     reject(new Error(response.message));
@@ -1884,13 +1885,16 @@ function onGetMarkStats(me) {
  * @param edit_mode editing from ta grading page or instructor edit gradeable page
  */
 function onClickComponent(me, edit_mode = false) {
+    console.log("onClickComponent start");
     let component_id = getComponentIdFromDOMElement(me);
     toggleComponent(component_id, true, edit_mode)
         .catch(function (err) {
             console.error(err);
             setComponentInProgress(component_id, false);
             alert('Error opening/closing component! ' + err.message);
+
         });
+    console.log("onClickComponent end");
 }
 
 /**
@@ -2455,15 +2459,19 @@ function openCookieComponent() {
  * @return {Promise<void>}
  */
 function closeAllComponents(save_changes,edit_mode = false) {
+    console.log("closeAllComponents start");
     let sequence = Promise.resolve();
+    console.log("closeAllComponents resolve over");
 
     // Close all open components.  There shouldn't be more than one,
     //  but just in case there is...
     getOpenComponentIds().forEach(function (id) {
         sequence = sequence.then(function () {
+            console.log("closeAllComponents sequence");
             return closeComponent(id, save_changes, edit_mode);
         });
     });
+    console.log("closeAllComponents end");
     return sequence;
 }
 
@@ -2475,17 +2483,22 @@ function closeAllComponents(save_changes,edit_mode = false) {
  * @return {Promise}
  */
 function toggleComponent(component_id, saveChanges, edit_mode = false) {
+    console.log("toggleComponent start");
     let action = Promise.resolve();
+    console.log("toggleComponent after resolve");
     // Component is open, so close it
     if (isComponentOpen(component_id)) {
+        console.log("toggleComponent component was open");
         action = action.then(function() {
             return closeComponent(component_id, saveChanges, edit_mode);
         });
     }
     else {
+        console.log("toggleComponent component was not open");
         action = action.then(function () {
             return closeAllComponents(saveChanges,edit_mode)
                 .then(function () {
+                    console.log("toggleComponent .then of closeAllComponents")
                     return openComponent(component_id);
                 });
         });
@@ -2742,6 +2755,7 @@ function scrollToComponent(component_id) {
  * @return {Promise}
  */
 function closeComponentInstructorEdit(component_id, saveChanges) {
+    console.log("closeComponentInstructorEdit start");
     let sequence = Promise.resolve();
     let component = getComponentFromDOM(component_id);
     let countUp = getCountDirection(component_id) !== COUNT_DIRECTION_DOWN;
@@ -2792,17 +2806,20 @@ function closeComponentInstructorEdit(component_id, saveChanges) {
  * @return {Promise}
  */
 function closeComponentGrading(component_id, saveChanges) {
+    console.log("closeComponentGrading start");
     let sequence = Promise.resolve();
+    console.log("closeComponentGrading resolved");
     let gradeable_id = getGradeableId();
     let anon_id = getAnonId();
     let component_tmp = null;
 
     if (saveChanges) {
         sequence = sequence.then(function () {
+            console.log("closeComponentGrading about to save");
             return saveComponent(component_id);
         });
     }
-
+    console.log("closeComponentGrading after save");
     // Finally, render the graded component in non-edit mode with the mark list hidden
     return sequence
         .then(function () {
@@ -2828,12 +2845,14 @@ function closeComponentGrading(component_id, saveChanges) {
  * @return {Promise}
  */
 function closeComponent(component_id, saveChanges = true, edit_mode = false) {
+    console.log("closeComponent start");
     setComponentInProgress(component_id);
     // Achieve polymorphism in the interface using this `isInstructorEditEnabled` flag
     return (isInstructorEditEnabled()
         ? closeComponentInstructorEdit(component_id, saveChanges)
         : closeComponentGrading(component_id, saveChanges))
         .then(function () {
+            console.log("closeComponent .then");
             setComponentInProgress(component_id, false);
         })
         .then(function () {
@@ -2843,6 +2862,7 @@ function closeComponent(component_id, saveChanges = true, edit_mode = false) {
                 return updateTotals(gradeable_id, anon_id);
             }
         });
+    console.log("closeComponent end");
 }
 
 /**
@@ -3103,12 +3123,15 @@ function gradedComponentsEqual(gcDOM, gcOLD) {
 }
 
 function saveComponent(component_id) {
+    console.log("saveComponent start");
     // We are saving changes...
     if (isEditModeEnabled()) {
+        console.log("saveComponent editModeEnabled");
         // We're in edit mode, so save the component and fetch the up-to-date grade / rubric data
         return saveMarkList(component_id);
     }
     else {
+        console.log("saveComponent not editModeEnabled");
         // The grader unchecked the custom mark, but didn't delete the text.  This shouldn't happen too often,
         //  so prompt the grader if this is what they really want since it will delete the text / score.
         let gradedComponent = getGradedComponentFromDOM(component_id);
@@ -3120,6 +3143,7 @@ function saveComponent(component_id) {
             }
         }
         // We're in grade mode, so save the graded component
+        console.log("saveComponent almost done");
         return saveGradedComponent(component_id);
     }
 }
@@ -3132,6 +3156,7 @@ function saveComponent(component_id) {
  * @return {Promise}
  */
 function saveGradedComponent(component_id) {
+    console.log("saveGradedComponent start");
     let gradeable_id = getGradeableId();
     let gradedComponent = getGradedComponentFromDOM(component_id);
     gradedComponent.graded_version = getDisplayVersion();
@@ -3142,6 +3167,7 @@ function saveGradedComponent(component_id) {
     }
     return ajaxGetComponentRubric(getGradeableId(), component_id)
         .then(function (component) {
+            console.log("saveGradedComponent .then");
             let missingMarks = [];
             let domComponent = getComponentFromDOM(component_id);
 
