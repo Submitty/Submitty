@@ -254,7 +254,6 @@
                             {% endfor %}
                         </div>
                     </div>
-                    <div style="position: relative; display: flex;">
                         {% if user_given_name != "" and imageDataArray|length != 0 %}
                             <div class="chat" id="chat-box" onclick="showBanners()" style="z-index: 2; position: absolute; top: 4px; right: 276px;">
                                 <div class="msg sent"><div class="loading"></div></div>
@@ -286,7 +285,7 @@
                             </a>
                         {% endif %}
 
-                    {% if enable_banner %}
+                        {% if enable_banner %}
                         <img id="submitty-banner"
                             src="{{ base_url }}/img/submitty-banner.png"
                             alt="Happy Submitty Week!"
@@ -302,7 +301,7 @@
                                 <img id="logo-submitty-light" src="{{ base_url }}/img/submitty_logo_white.png" alt="Submitty Logo">
                             </a>
                         </span>
-                    </div>
+
                     {# assuming that if sidebar_buttons only has len 2 it contains logout and collapse (on index page only) #}
                     {% if sidebar_buttons|length > 2 %}
                         <button id="menu-button" class="black-btn">
