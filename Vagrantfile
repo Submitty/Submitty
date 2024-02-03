@@ -32,6 +32,8 @@ $stderr.sync = true
 
 require 'json'
 
+ON_CI = !ENV.fetch('CI', '').empty?
+
 def gen_script(machine_name, worker: false)
   no_submissions = !ENV.fetch('NO_SUBMISSIONS', '').empty?
   extra = ENV.fetch('EXTRA', '')
@@ -138,8 +140,11 @@ Vagrant.configure(2) do |config|
   end
 
   config.vm.provider 'virtualbox' do |vb, override|
-    vb.memory = 2048
-    vb.cpus = 2
+    # We limit resources when running on CI to avoid resource exhaustion and it isn't used for grading stuff or
+    # other things we do in dev.
+    vb.memory = ON_CI ? 1024 : 2048
+    vb.cpus = ON_CI ? 1 : 2
+
     # When you put your computer (while running the VM) to sleep, then resume work some time later the VM will be out
     # of sync timewise with the host for however long the host was asleep. Of course, the VM by default will
     # detect this and if the drift is great enough, it'll resync things such that the time matches, otherwise
