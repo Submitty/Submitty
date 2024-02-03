@@ -607,9 +607,8 @@ class User extends AbstractModel {
     }
 
     public function setGradingRegistrationSections($sections) {
-        if ($this->accessGrading()) {
-            $this->grading_registration_sections = $sections;
-        }
+        // Any access level can have grading sections
+        $this->grading_registration_sections = $sections;
     }
 
     /**
