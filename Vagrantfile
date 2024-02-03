@@ -108,11 +108,7 @@ Vagrant.configure(2) do |config|
     config.env.enable
   end
 
-  if ON_CI
-    config.ssh.insert_key = false
-  else
-    config.ssh.insert_key = true
-  end
+  config.ssh.insert_key = false
 
   mount_options = []
   
@@ -253,7 +249,8 @@ Vagrant.configure(2) do |config|
   config.vm.provision :shell, :inline => " sudo timedatectl set-timezone America/New_York", run: "once"
 
   if ARGV.include?('ssh')
-    config.ssh.username = 'vagrant'
+    config.ssh.username = 'root'
     config.ssh.password = 'vagrant'
+    config.ssh.insert_key = 'true'
   end 
 end
