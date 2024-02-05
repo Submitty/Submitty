@@ -50,7 +50,7 @@
                             {{ poll.getName() }}
                         </td>
                         <td>
-                            <input type="checkbox" id="poll_{{ poll.getId() }}_visible" aria-label="label" onclick='updatePollVisible("{{ poll.getId() }}", "{{ base_url }}")' {{ (poll.isOpen() or poll.isEnded) ? 'checked' : '' }}>
+                            <input type="checkbox" id="poll_{{ poll.getId() }}_visible" aria-label="label" onclick='updatePollVisible("{{ poll.getId() }}", "{{ base_url }}")' {{ poll.isClosed() ? '' : 'checked' }}>
                         </td>
                         <td>
                             <input type="checkbox" id="poll_{{ poll.getId() }}_view_results" aria-label="label" onclick='updatePollAcceptingAnswers("{{ poll.getId() }}", "{{ base_url }}")' {{ poll.isOpen ? 'checked' : ''}}>
@@ -182,8 +182,7 @@
                         </td>
                         <td> {{ poll.getReleaseDate() | date("Y-m-d") }} </td>
                         <td>
-                            <input type="checkbox" id="poll_{{ poll.getId() }}_visible" aria-label="label" onclick='updatePollVisible("{{ poll.getId() }}", "{{ base_url }}")' {{ (poll.isOpen() or poll.isEnded) ? 'checked' : '' }}>
-                        </td>
+                            <input type="checkbox" id="poll_{{ poll.getId() }}_visible" aria-label="label" onclick='updatePollVisible("{{ poll.getId() }}", "{{ base_url }}")' {{ poll.isClosed() ? '' : 'checked' }}>
                         <td>
                             <input type="checkbox" id="poll_{{ poll.getId() }}_view_results" aria-label="label" onclick='updatePollAcceptingAnswers("{{ poll.getId() }}", "{{ base_url }}")' {{ poll.isOpen ? 'checked' : ''}}>
                         </td>

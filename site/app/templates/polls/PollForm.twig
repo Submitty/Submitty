@@ -92,8 +92,10 @@
         <label for="poll-timer" class="option-title">
             Expected Time:
         </label>
-        <input type="number" name="poll-hours" id="poll-hours" placeholder="Hour" value="" />
-        <input type="number" name="poll-minutes" id="poll-minutes" placeholder="Min" max="59" value="" />
+        {% set hours = poll is not null ? poll.getDuration().format('%H') : '00' %}
+        {% set minutes = poll is not null ? poll.getDuration().format('%I') : '00' %}   
+        <input type="number" name="poll-hours" id="poll-hours" placeholder="Hour" min="0" value="{{ poll is not null ? poll.getDuration().h }}" />
+        <input type="number" name="poll-minutes" id="poll-minutes" placeholder="Min" min="0" max="59" value="{{ poll is not null ? poll.getDuration().i }}" />
         <br/>
         <label for="poll-date" class="option-title">
             Expected release date:

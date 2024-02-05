@@ -5,11 +5,14 @@ declare(strict_types=1);
 namespace app\entities\poll;
 
 use app\repositories\poll\PollRepository;
-use DateInterval;
-use DateTime;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\DBAL\Types\Types;
+use DateInterval;
+use DateTime;
+use app\libraries\DateUtils;
+
+
 use Doctrine\ORM\Mapping as ORM;
 
 #[ORM\Entity(repositoryClass: PollRepository::class)]
@@ -25,12 +28,15 @@ class Poll {
 
     #[ORM\Column(type: Types::TEXT)]
     protected $question;
-
+    
     #[ORM\Column(type: Types::TEXT)]
     protected $status;
 
-    #[ORM\Column(type: Types::DATEINTERVAL)]
-    protected DateInterval $duration;  
+    #[ORM\Column(type: Types::STRING)]
+    protected $duration;
+
+    #[ORM\Column(type: Types::DATETIME_MUTABLE)]
+    protected DateTime $end_date;
 
     #[ORM\Column(type: Types::DATE_MUTABLE)]
     protected DateTime $release_date;   
@@ -53,6 +59,7 @@ class Poll {
     #[ORM\OneToMany(mappedBy: "poll", targetEntity: Option::class, orphanRemoval: true)]
     #[ORM\JoinColumn(name: "poll_id", referencedColumnName: "poll_id")]
     #[ORM\OrderBy(["order_id" => "ASC"])]
+
     protected Collection $options;
 
     /**
@@ -62,17 +69,17 @@ class Poll {
     #[ORM\JoinColumn(name: "poll_id", referencedColumnName: "poll_id")]
     protected Collection $responses;
 
-    public function __construct(string $name, string $question, string $question_type, \DateInterval $duration, \DateTime $release_date, string $release_histogram, string $release_answer, string $image_path = null) {
+    public function __construct(string $name, string $question, string $question_type, \DateInterval $duration, \DateTime $release_date, string $release_histogram, string $release_answer, string $image_path = null, ) {
         $this->setName($name);
         $this->setQuestion($question);
         $this->setQuestionType($question_type);
         $this->setDuration($duration);
+        $this->setEndDate(new \DateTime("1900-01-02"));
         $this->setReleaseDate($release_date);
         $this->setReleaseHistogram($release_histogram);
         $this->setReleaseAnswer($release_answer);
         $this->setImagePath($image_path);
         $this->setClosed();
-
         $this->options = new ArrayCollection();
         $this->responses = new ArrayCollection();
     }
@@ -97,46 +104,57 @@ class Poll {
         $this->question = $question;
     }
 
-    public function getStatus(): string {
-        return $this->status;
+    public function getStatus(): string {	
+        return $this->status;	
     }
 
-    public function setOpen(): void {
-        $this->status = "open";
+    public function setClosed(): void {	
+        $this->status = "closed";	
     }
 
-    public function isOpen(): bool {
-        return $this->status === "open";
+    public function setEnded(): void {	
+        $this->status = "ended";	
     }
 
-    public function setClosed(): void {
-        $this->status = "closed";
+    public function setOpen(): void {	
+        $this->status = "open";	
     }
 
-    public function isClosed(): bool {
-        return $this->status === "closed";
-    }
-
-    public function setEnded(): void {
-        $this->status = "ended";
+    public function isOpen(): bool {     
+        $now = DateUtils::getDateTimeNow();
+        return $now < $this->end_date;
     }
 
     public function isEnded(): bool {
-        return $this->status === "ended";
+        $now = DateUtils::getDateTimeNow();
+        return $now > $this->end_date;
+    }
+    
+    public function isClosed(): bool {
+        $now = DateUtils::getDateTimeNow();
+        return $now > $this->end_date && $this->end_date->format('Y-m-d') == '1900-01-01';
+    }
+    public function getDuration(): \DateInterval {
+        return new \DateInterval($this->duration);
     }
 
-    public function getDuration(): \DateInterval{
-        return $this->duration;
+    public function getEndDate(): \DateTime{
+        return $this->end_date;
     }
 
     public function getReleaseDate(): \DateTime {
         return $this->release_date;
     }
 
-    public function setDuration(\DateInterval $duration): void{
-        $this->duration = $duration;
+    public function setDuration(\DateInterval $duration): void {
+        
+        $this->duration = $duration->format('P%yY%mM%dDT%hH%iM%sS');
     }
-    
+
+    public function setEndDate(\DateTime $end_date): void {
+        $this->end_date = $end_date;
+    }
+
     public function setReleaseDate(\DateTime $release_date): void {
         $this->release_date = $release_date;
     }

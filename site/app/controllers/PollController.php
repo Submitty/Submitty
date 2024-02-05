@@ -6,6 +6,7 @@ use app\entities\poll\Option;
 use app\entities\poll\Poll;
 use app\entities\poll\Response;
 use app\libraries\Core;
+use app\libraries\DateUtils;
 use app\libraries\response\WebResponse;
 use app\libraries\response\JsonResponse;
 use app\libraries\response\RedirectResponse;
@@ -15,6 +16,8 @@ use app\libraries\routers\Enabled;
 use app\libraries\FileUtils;
 use app\libraries\PollUtils;
 use app\views\PollView;
+use DateTime;
+use DateInterval;
 
 /**
  * @Enabled("polls")
@@ -191,8 +194,14 @@ class PollController extends AbstractController {
             return new RedirectResponse($this->core->buildCourseUrl(['polls']));
         }
         //Handle the two inputs, both will be ints (one hours, one minutes). I have to combine both of them into a "DateInterval" and create the PollObject based on that.
+        //We will default it to set to 0 if it is not found in $_POST.
+        $hours = intval($_POST['poll-hours'] ?? 0);
 
-        $poll = new Poll($_POST['name'], $_POST['question'], $_POST['question_type'], $date, $_POST['release_histogram'], $_POST["release_answer"]);
+        $minutes = intval($_POST['poll-minutes'] ?? 0);
+
+        $duration = new DateInterval("PT{$hours}H{$minutes}M");
+
+        $poll = new Poll($_POST['name'], $_POST['question'], $_POST['question_type'], $duration, $date, $_POST['release_histogram'], $_POST["release_answer"]);
         $em->persist($poll);
 
         // Need to run this after persist so that we can use getId() below
@@ -267,7 +276,7 @@ class PollController extends AbstractController {
             $this->core->addErrorMessage("Invalid Poll ID");
             return new RedirectResponse($this->core->buildCourseUrl(['polls']));
         }
-
+        
         return new WebResponse(
             PollView::class,
             'pollForm',
@@ -310,10 +319,14 @@ class PollController extends AbstractController {
 
 
         $date = \DateTime::createFromFormat("Y-m-d", $_POST["release_date"]);
+        $hours = intval($_POST['poll-hours'] ?? 0);
+        $minutes = intval($_POST['poll-minutes'] ?? 0);
+        $duration = new DateInterval("PT{$hours}H{$minutes}M0S");
         if ($date === false) {
             $this->core->addErrorMessage("Invalid poll release date");
             return new RedirectResponse($returnUrl);
         }
+
         if (!in_array($_POST["question_type"], PollUtils::getPollTypes())) {
             $this->core->addErrorMessage("Invalid poll question type");
             return new RedirectResponse($this->core->buildCourseUrl(['polls']));
@@ -322,6 +335,7 @@ class PollController extends AbstractController {
         $poll->setName($_POST['name']);
         $poll->setQuestion($_POST['question']);
         $poll->setQuestionType($_POST['question_type']);
+        $poll->setDuration($duration);
         $poll->setReleaseDate($date);
         $poll->setReleaseHistogram($_POST['release_histogram']);
         $poll->setReleaseAnswer($_POST['release_answer']);
@@ -430,9 +444,22 @@ class PollController extends AbstractController {
             $this->core->addErrorMessage("Invalid Poll ID");
             return new RedirectResponse($this->core->buildCourseUrl(['polls']));
         }
+
+        $duration = $poll->getDuration();
+        if ($duration->h > 0 || $duration->i > 0 || $duration->s > 0 || $duration->days > 0 || $duration->m > 0 || $duration->y > 0) {
+            // Duration evaluates to > 0
+            $end_date = $this->core->getDateTimeNow();
+            $end_date->add($duration);
+            $poll->setEndDate($end_date);
+        }
+        else {
+            // If duration is 0, set end date to a future date.
+            //If duration is 0, it means that the user wants to manually close it.
+            $end_date = new \DateTime("9999-01-01T00:00:00");
+            $poll->setEndDate($end_date);
+        }
         $poll->setOpen();
         $em->flush();
-
         return new RedirectResponse($this->core->buildCourseUrl(['polls']));
     }
 
@@ -449,7 +476,8 @@ class PollController extends AbstractController {
             $this->core->addErrorMessage("Invalid Poll ID");
             return new RedirectResponse($this->core->buildCourseUrl(['polls']));
         }
-        $poll->setEnded();
+        //Setting it current Time so it ends.
+        $poll->setEndDate($this->core->getDateTimeNow());
         $em->flush();
 
         return new RedirectResponse($this->core->buildCourseUrl(['polls']));
@@ -468,9 +496,10 @@ class PollController extends AbstractController {
             $this->core->addErrorMessage("Invalid Poll ID");
             return new RedirectResponse($this->core->buildCourseUrl(['polls']));
         }
-        $poll->setClosed();
+        //Setting the time to the beginning of time indicates that it is closed.
+        //Should be based on status.
+        $poll->setEndDate(new DateTime('1900-01-01'));
         $em->flush();
-
         return new RedirectResponse($this->core->buildCourseUrl(['polls']));
     }
 
