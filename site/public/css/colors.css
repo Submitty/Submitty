@@ -220,6 +220,7 @@
         rgb(255 0 255 / 30%),
         rgb(255 0 0 / 30%)
     );
+    
     /* poll histogram colors */
     --histogram-default: #006699;
     --histogram-correct: #006600;
