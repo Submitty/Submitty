@@ -1071,8 +1071,20 @@ HTML;
         		    <div class="content-items-container">
                     <div class="content-item content-item-right">
 HTML;
-
-            $return .= $this->core->getOutput()->renderTemplate(['grading', 'ElectronicGrader'], 'renderNavigationBar', $graded_gradeable, $progress, $gradeable->hasPeerComponent(), $sort, $direction, $from, ($this->core->getUser()->getGroup() == User::GROUP_LIMITED_ACCESS_GRADER && $gradeable->getLimitedAccessBlind() == 2), $anon_mode, $blind_grading);
+           
+            $return .= $this->core->getOutput()->renderTemplate(
+                ['grading', 'ElectronicGrader'],
+                'renderNavigationBar',
+                $graded_gradeable,
+                $progress,
+                $gradeable->hasPeerComponent(),
+                $sort,
+                $direction,
+                $from, 
+                ($this->core->getUser()->getGroup() == User::GROUP_LIMITED_ACCESS_GRADER && $gradeable->getLimitedAccessBlind() == 2),
+                $anon_mode,
+                $blind_grading
+            );
             $return .= $this->core->getOutput()->renderTemplate(
                 ['grading', 'ElectronicGrader'],
                 'renderGradingPanelHeader',
@@ -1105,18 +1117,51 @@ HTML;
 
 
 
-        $return .= $this->core->getOutput()->renderTemplate(['grading', 'ElectronicGrader'], 'renderAutogradingPanel', $display_version_instance, $show_hidden_cases, $ta_grading, $graded_gradeable);
-        $return .= $this->core->getOutput()->renderTemplate(['grading', 'ElectronicGrader'], 'renderSubmissionPanel', $graded_gradeable, $display_version, $limimted_access_blind);
+        $return .= $this->core->getOutput()->renderTemplate(
+            ['grading', 'ElectronicGrader'],
+            'renderAutogradingPanel', 
+            $display_version_instance, 
+            $show_hidden_cases, $ta_grading, 
+            $graded_gradeable
+        );
+        $return .= $this->core->getOutput()->renderTemplate(
+            ['grading', 'ElectronicGrader'], 
+            'renderSubmissionPanel', 
+            $graded_gradeable, 
+            $display_version, 
+            $limimted_access_blind
+        );
         //If TA grading isn't enabled, the rubric won't actually show up, but the template should be rendered anyway to prevent errors, as the code references the rubric panel
-        $return .= $this->core->getOutput()->renderTemplate(['grading', 'ElectronicGrader'], 'renderRubricPanel', $graded_gradeable, $display_version, $can_verify, $show_verify_all, $show_silent_edit, $is_peer_grader);
-        $return .= $this->core->getOutput()->renderTemplate(['grading', 'ElectronicGrader'], 'renderSolutionTaNotesPanel', $gradeable, $solution_ta_notes, $submitter_itempool_map);
+        $return .= $this->core->getOutput()->renderTemplate(
+            ['grading', 'ElectronicGrader'], 
+            'renderRubricPanel', 
+            $graded_gradeable, 
+            $display_version, 
+            $can_verify, 
+            $show_verify_all, 
+            $show_silent_edit, 
+            $is_peer_grader
+        );
+        $return .= $this->core->getOutput()->renderTemplate(
+            ['grading', 'ElectronicGrader'], 
+            'renderSolutionTaNotesPanel', 
+            $gradeable, 
+            $solution_ta_notes, 
+            $submitter_itempool_map
+        );
 
         if ($isPeerPanel) {
             $return .= $this->core->getOutput()->renderTemplate(['grading', 'ElectronicGrader'], 'renderPeerPanel', $graded_gradeable, $display_version);
             $return .= $this->core->getOutput()->renderTemplate(['grading', 'ElectronicGrader'], 'renderPeerEditMarksPanel', $graded_gradeable);
         }
         if ($isDiscussionPanel) {
-            $return .= $this->core->getOutput()->renderTemplate(['grading', 'ElectronicGrader'], 'renderDiscussionForum', json_decode($graded_gradeable->getGradeable()->getDiscussionThreadId(), true), $graded_gradeable->getSubmitter(), $graded_gradeable->getGradeable()->isTeamAssignment());
+            $return .= $this->core->getOutput()->renderTemplate(
+                ['grading', 'ElectronicGrader'], 
+                'renderDiscussionForum', 
+                json_decode($graded_gradeable->getGradeable()->getDiscussionThreadId(), true), 
+                $graded_gradeable->getSubmitter(), 
+                $graded_gradeable->getGradeable()->isTeamAssignment()
+            );
         }
 
         if ($is_notebook) {
@@ -1203,6 +1248,8 @@ HTML;
      * @param string $sort
      * @param string $direction
      * @return string
+     * 
+     * Gets information in preparation to render the navigation bar
      */
     public function renderNavigationBar(GradedGradeable $graded_gradeable, float $progress, bool $peer, $sort, $direction, $from, $limited_access_blind, $anon_mode, $blind_grading) {
         $gradeable = $graded_gradeable->getGradeable();
