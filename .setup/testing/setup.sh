@@ -24,6 +24,7 @@ python3 $SUBMITTY_REPOSITORY/.setup/bin/create_untrusted_users.py
 
 addgroup submitty_daemonphp
 addgroup submitty_daemoncgi
+addgroup submitty_daemonphpcgi
 addgroup submitty_course_builders
 adduser ${PHP_USER} --gecos "First Last,RoomNumber,WorkPhone,HomePhone" --disabled-password
 adduser ${CGI_USER} --gecos "First Last,RoomNumber,WorkPhone,HomePhone" --disabled-password
@@ -35,6 +36,9 @@ adduser ${PHP_USER} submitty_daemonphp
 adduser submitty_daemon submitty_daemonphp
 adduser ${CGI_USER} submitty_daemoncgi
 adduser submitty_daemon submitty_daemoncgi
+adduser submitty_daemon submitty_daemonphpcgi
+adduser ${PHP_USER} submitty_daemonphpcgi
+adduser ${CGI_USER} submitty_daemonphpcgi
 adduser submitty_daemon docker
 useradd -p $(openssl passwd -1 submitty_dbuser) submitty_dbuser
 

@@ -2014,7 +2014,7 @@ class SubmissionController extends AbstractController {
     /**
      * @Route("/courses/{_semester}/{_course}/gradeable/{gradeable_id}/generate_repo", methods={"POST"})
      */
-    public function generateRepo($gradeable_id): RedirectResponse {
+    public function generateRepo(string $gradeable_id): RedirectResponse {
         $g = $this->tryGetElectronicGradeable($gradeable_id);
 
         if ($g === null) {
