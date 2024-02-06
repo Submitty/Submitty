@@ -3,6 +3,7 @@
 namespace app\controllers\student;
 
 use app\controllers\AbstractController;
+use app\controllers\admin\AdminGradeableController;
 use app\libraries\DateUtils;
 use app\libraries\ErrorMessages;
 use app\libraries\FileUtils;
@@ -2008,5 +2009,30 @@ class SubmissionController extends AbstractController {
             }
         }
         return JsonResponse::getErrorResponse("Cannot find gradeable with given id!");
+    }
+
+    /**
+     * @Route("/courses/{_semester}/{_course}/gradeable/{gradeable_id}/generate_repo", methods={"POST"})
+     */
+    public function generateRepo($gradeable_id): RedirectResponse {
+        $g = $this->tryGetElectronicGradeable($gradeable_id);
+
+        if ($g === null) {
+            $this->core->addErrorMessage("Gradeable not found.");
+            return new RedirectResponse(
+                $this->core->buildCourseUrl(['gradeable', $gradeable_id])
+            );
+        }
+
+        AdminGradeableController::enqueueGenerateRepos(
+            $this->core->getConfig()->getTerm(),
+            $this->core->getConfig()->getCourse(),
+            $gradeable_id
+        );
+
+        $this->core->addSuccessMessage("Repository creation requested.");
+        return new RedirectResponse(
+            $this->core->buildCourseUrl(['gradeable', $gradeable_id])
+        );
     }
 }
