@@ -401,7 +401,6 @@ STRING;
             ['test.jpg', 'image/jpeg'],
             ['test.jpeg', 'image/jpeg'],
             ['test.gif', 'image/gif'],
-            ['test.bmp', 'image/bmp'],
             ['test.c', 'text/x-csrc'],
             ['test.cpp', 'text/x-c++src'],
             ['test.cxx', 'text/x-c++src'],
