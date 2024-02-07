@@ -183,7 +183,6 @@
                             {% else %}
                                 Students Assigned to Rotating Section {{ section_id | default('NULL') }}
                             {% endif %}
-                            <a href="https://www.explanatorywebsite.com" target="_blank" class="help-icon" title="Why is this colored?">?</a>
                             {# Print button #}
                             {% if action == 'lab' %}
                                 <a target=_blank href="{{ print_lab_url }}?section={{ section_id }}&section_type={{ section_type }}&sort={{ sort }}">
@@ -194,9 +193,15 @@
                         <td colspan="{{ colspan - 6 }}" style="text-align: center; background-color: var(--alert-border-blue)">
                         </td>
                     </tr>
+                    <tr class="info">
+                        <td colspan="6" style="text-align: left; z-index: 1; background-color: var(--alert-border-blue)">
+                            Graders: {{ section.grader_names|length ? section.grader_names|join(", ") : "Nobody" }}
+                        </td>
+                        <td colspan="{{ colspan - 6 }}" style="text-align: center; background-color: var(--alert-border-blue)">
+                        </td>
+                    </tr>
                 </tbody>
                 {# /Section header #}
-
                 <tbody id="section-{{ section_id }}" data-numnumeric="{{ components_numeric|length }}" data-numtext="{{ components_text|length }}" data-compids="{{ component_ids }}" data-section="{{ section_id }}">
                     {% for grade in section.rows %}
                         {{ _self.render_row(action, gradeable, section_id, grade, loop.index0, components_numeric, anon_ids) }}
