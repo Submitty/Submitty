@@ -111,12 +111,12 @@ Vagrant.configure(2) do |config|
   if ON_CI
     config.ssh.insert_key = false
   else 
+    config.ssh.username = 'root'
     config.ssh.insert_key = true
   end
-
-  config.ssh.username = 'root'
+ 
   mount_options = []
-  
+
   config.vm.box = ENV.fetch('VAGRANT_BOX', base_boxes.default)
 
   arch = `uname -m`.chomp
@@ -141,7 +141,7 @@ Vagrant.configure(2) do |config|
     end
   end
 
-  vm_name = 'ubuntu-test-22.04'
+  vm_name = 'ubuntu-22.04'
   config.vm.define vm_name, primary: true do |ubuntu|
     ubuntu.vm.network 'forwarded_port', guest: 1511, host: ENV.fetch('VM_PORT_SITE', 1511)
     ubuntu.vm.network 'forwarded_port', guest: 8443, host: ENV.fetch('VM_PORT_WS',   8443)

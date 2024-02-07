@@ -13,12 +13,10 @@ jobs:
     runs-on: macos-13
     steps:
       - uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
       - name: Install virtualbox and vagrant
         run: brew install virtualbox vagrant
       - name: Vagrant Up
-        run: NO_SUBMISSIONS=1 CI=1 vagrant up
+        run: NO_SUBMISSIONS=1 BASE_BOX=1 vagrant up
       - name: Validate image
         run: curl --show-error --fail --include http://localhost:1511
       - name: Acquire Job ID
