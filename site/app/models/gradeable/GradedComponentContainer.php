@@ -297,6 +297,7 @@ class GradedComponentContainer extends AbstractModel {
     public function isComplete(User $grader = null) {
         if ($this->component->isPeerComponent()) {
             if ($grader !== null) {
+                // A peer component might be graded by multiple graders, so we need to check if the $grader has graded it
                 foreach ($this->graded_components as $graded_component) {
                     if ($graded_component->getGrader()->getId() === $grader->getId()) {
                         return true;

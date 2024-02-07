@@ -351,18 +351,9 @@ class TaGradedGradeable extends AbstractModel {
      * @return bool
      */
     public function anyGrades(User $grader = null) {
-        if ($grader !== null) {
-            /** @var GradedComponentContainer $container */
-            foreach ($this->graded_component_containers as $container) {
-                if ($container->anyGradedComponents($grader)) {
-                    return true;
-                }
-            }
-            return false;
-        }
         /** @var GradedComponentContainer $container */
         foreach ($this->graded_component_containers as $container) {
-            if ($container->anyGradedComponents(null)) {
+            if ($container->anyGradedComponents($grader)) {
                 return true;
             }
         }
