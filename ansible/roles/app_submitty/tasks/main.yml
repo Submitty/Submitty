@@ -22,17 +22,17 @@
       echo "localhost
         5432
         "{{ submitty_dbuser }}"
-        submitty_dbuser_password
-        submitty_course_dbuser
-        submitty_course_dbuser_password
-        {{ timezone }}
-        {{ language }}
+        "{{ submitty_dbuser_password }}"
+        "{{ submitty_course_dbuser }}"
+        "{{ submitty_course_dbuser_password }}"
+        "{{ timezone }}"
+        "{{ language }}"
         "https://{{ submitty_url }}"
-        {{ vcs_url}}
-        {{ institution_name}}
-        {{ sysadmin_email }}
+        "{{ vcs_url}}"
+        "{{ institution_name }}"
+        "{{ sysadmin_email }}"
         "{{ submitty_email }}"
-        {{ institution_url }}
+        "{{ institution_url }}"
         1
         admin
         y

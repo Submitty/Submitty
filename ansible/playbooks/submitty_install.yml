@@ -6,3 +6,36 @@
 
   roles:
     - app_submitty
+
+  vars_prompt:
+    - name: submitty_dbuser
+      prompt: "Enter Submitty DB User:"
+
+    - name: submitty_dbuser_password
+      prompt: "Enter Password:"
+      private: no
+    - name: submitty_course_dbuser
+      prompt: "Enter Sumitty Course DB User: "
+    - name: submitty_course_dbuser_password
+      prompt: "Enter Submitty Course DB User Password: "
+      private: no
+    - name: timezone
+      prompt: "Timezone: "
+    - name: language
+      prompt: "Language: "
+    - name: submitty_url
+      prompt: "Enter Submitty URL: "
+    - name: vcs_url
+      prompt: "Enter Institution URL: "
+    - name: institution_name
+      prompt: "Enter Institution Name: "
+    - name: submitty_email
+      prompt: "Enter Submitty Email: "
+    - name: noreply_email
+      prompt: "Enter noreply emmail: "
+    - name: smtp_server
+      prompt: "Enter SMTP Server: "
+    - name: smtp_port
+      prompt: "Enter SMTP Port: "
+    - name: institution_url
+      prompt: "Enter Institution URL: "
