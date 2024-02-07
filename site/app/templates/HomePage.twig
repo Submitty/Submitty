@@ -1,9 +1,21 @@
 <div id="courses" class="content">
-    {% for ranks in statuses %}
-        {% if loop.index == 1 or ranks|length > 0 %}
-            <h1>My {{ loop.index == 1 ? "" : "Archived " }}Courses</h1>
+    {% for course_type, ranks in statuses %}
+        {% if loop.first or ranks|length > 0 %}
+            {% if not loop.first %}
+                <br>
+                <br>
+            {% endif %}
+            {% set course_type_message = "" %}
+            {% if course_type == "dropped_courses" %}
+                {% set course_type_message = "Recently Dropped " %}
+            {% elseif course_type == "archived_courses" %}
+                {% set course_type_message = "Archived " %}
+            {% endif %}
+            <h1>My {{ course_type_message }}Courses</h1>
             {% for rank in ranks %}
-                <h2>As {{ rank.title }}</h2>
+                {% if course_type != "dropped_courses" %}
+                    <h2>As {{ rank.title }}</h2>
+                {% endif %}
                 {% set display_semester = '' %}
                 {% for course in rank.courses %}
                     {% if display_semester != course.display_semester %}
