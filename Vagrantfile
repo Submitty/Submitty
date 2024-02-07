@@ -107,9 +107,14 @@ Vagrant.configure(2) do |config|
   if Vagrant.has_plugin?('vagrant-env')
     config.env.enable
   end
+  
+  if ON_CI
+    config.ssh.insert_key = false
+  else 
+    config.ssh.insert_key = true
+  end
 
-  config.ssh.insert_key = false
-
+  config.ssh.username = 'root'
   mount_options = []
   
   config.vm.box = ENV.fetch('VAGRANT_BOX', base_boxes.default)
@@ -251,6 +256,5 @@ Vagrant.configure(2) do |config|
   if ARGV.include?('ssh')
     config.ssh.username = 'root'
     config.ssh.password = 'vagrant'
-    config.ssh.insert_key = 'true'
   end 
 end
