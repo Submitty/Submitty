@@ -43,6 +43,8 @@ class Poll {
     #[ORM\Column(type: Types::STRING)]
     protected $release_answer;
 
+    protected $custom_answers;
+
     /**
      * @var Collection<Option>
      */
@@ -67,7 +69,7 @@ class Poll {
         $this->setReleaseAnswer($release_answer);
         $this->setImagePath($image_path);
         $this->setClosed();
-
+        $this->setDisableCustomAnswers();
         $this->options = new ArrayCollection();
         $this->responses = new ArrayCollection();
     }
@@ -104,6 +106,10 @@ class Poll {
         return $this->status === "open";
     }
 
+    public function allowsCustomAnswers(): bool {
+        return $this->custom_answers === "enabled";
+    }
+
     public function setClosed(): void {
         $this->status = "closed";
     }
@@ -118,6 +124,14 @@ class Poll {
 
     public function isEnded(): bool {
         return $this->status === "ended";
+    }
+
+    public function setEnableCustomAnswers(): void {
+        $this->custom_answers = "enabled";
+    }
+
+    public function setDisableCustomAnswers(): void {
+        $this->custom_answers = "disabled";
     }
 
     public function getReleaseDate(): \DateTime {

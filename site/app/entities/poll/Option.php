@@ -31,6 +31,9 @@ class Option {
     #[ORM\JoinColumn(name: "poll_id", referencedColumnName: "poll_id", nullable: false)]
     protected Poll $poll;
 
+    // Remember to max out custom options to one per user
+    protected string $author_id;
+
     /**
      * @var Collection<Response>
      */
@@ -84,6 +87,10 @@ class Option {
 
     public function hasUserResponses(): bool {
         return count($this->user_responses) > 0;
+    }
+
+    public function setAuthorID(string $authorID): void {
+        $this->author_id = $authorID;
     }
 
     /**

@@ -429,6 +429,11 @@ class PollController extends AbstractController {
             $this->core->addErrorMessage("Invalid Poll ID");
             return new RedirectResponse($this->core->buildCourseUrl(['polls']));
         }
+        if($_POST['allow_custom_answers'] === "enabled") {
+            $poll->setEnableCustomAnswers();
+        } else{
+            $poll->setDisableCustomAnswers();
+        }
         $poll->setOpen();
         $em->flush();
 

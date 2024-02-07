@@ -1464,7 +1464,8 @@ CREATE TABLE public.poll_options (
     poll_id integer,
     response text NOT NULL,
     correct boolean NOT NULL,
-    option_id integer NOT NULL
+    option_id integer NOT NULL,
+    author_id varying(255)
 );
 
 
@@ -1530,6 +1531,7 @@ CREATE TABLE public.polls (
     question text NOT NULL,
     status text NOT NULL,
     release_date date NOT NULL,
+    custome_answers boolean NOT NULL,
     image_path text,
     question_type character varying(35) DEFAULT 'single-response-multiple-correct'::character varying,
     release_histogram character varying(10) DEFAULT 'never'::character varying,
