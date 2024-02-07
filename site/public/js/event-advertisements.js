@@ -14,6 +14,7 @@ const eventAdvertisements = {
 
 
 $(() => {
+    theHeight = document.getElementById("flexing").offsetHeight;
     eventAdvertisements.chatBox = document.getElementById('chat-box');
     if (eventAdvertisements.chatBox !== null) {
         eventAdvertisements.chatBox.style.display = 'none';
@@ -68,8 +69,24 @@ function showBanners(noMove = false) {
         eventAdvertisements.currentImageIndex = 0;
         Cookies.set('display-banner', 'yes');
 
+        const currentImage = eventAdvertisements.images[eventAdvertisements.currentImageIndex];
+
+        // Resize height of the image
+
+
+
         if (eventAdvertisements.currentImages.length > 0 && !noMove) {
             eventAdvertisements.images[eventAdvertisements.currentImageIndex].classList.add('active-banner');
+            let originalHeight = currentImage.clientHeight;
+            let originalWidth = currentImage.originalWidth;
+
+            let ratio = theHeight / originalHeight;
+
+            console.log(originalHeight);
+            if (originalHeight * ratio > 0) {
+                currentImage.style.height = `${originalHeight * ratio}px`;
+                currentImage.style.width = `${originalWidth * ratio}px`;
+            }
             eventAdvertisements.moveDuck.style.animation = 'rocking 2s linear infinite';
 
             setTimeout(() => {
@@ -85,6 +102,16 @@ function showBanners(noMove = false) {
             eventAdvertisements.moveDuck.style.display = 'block';
             bannerElement.style.display = 'block';
             eventAdvertisements.images[eventAdvertisements.currentImageIndex].classList.add('active-banner');
+            let originalHeight = currentImage.clientHeight;
+            let originalWidth = currentImage.originalWidth;
+
+            let ratio = theHeight / originalHeight;
+
+            console.log(originalHeight);
+            if (originalHeight * ratio > 0) {
+                currentImage.style.height = `${originalHeight * ratio}px`;
+                currentImage.style.width = `${originalWidth * ratio}px`;
+            }
         }
 
 
