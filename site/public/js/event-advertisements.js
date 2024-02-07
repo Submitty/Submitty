@@ -14,7 +14,6 @@ const eventAdvertisements = {
 
 
 $(() => {
-    theHeight = document.getElementById("flexing").offsetHeight;
     eventAdvertisements.chatBox = document.getElementById('chat-box');
     if (eventAdvertisements.chatBox !== null) {
         eventAdvertisements.chatBox.style.display = 'none';
@@ -64,6 +63,8 @@ $(() => {
 function showBanners(noMove = false) {
     const movingUnit = document.getElementById('moving-unit');
     const bannerElement = document.getElementById('abanner');
+    let theHeight = document.getElementById('flexing').offsetHeight;
+    console.log(theHeight);
     if (bannerElement.style.display === 'none' && eventAdvertisements.images.length > 0) {
         document.getElementById('chat-box').style.display = 'none';
         eventAdvertisements.currentImageIndex = 0;
@@ -74,15 +75,12 @@ function showBanners(noMove = false) {
         // Resize height of the image
 
 
-
         if (eventAdvertisements.currentImages.length > 0 && !noMove) {
             eventAdvertisements.images[eventAdvertisements.currentImageIndex].classList.add('active-banner');
             let originalHeight = currentImage.clientHeight;
             let originalWidth = currentImage.originalWidth;
-
+    
             let ratio = theHeight / originalHeight;
-
-            console.log(originalHeight);
             if (originalHeight * ratio > 0) {
                 currentImage.style.height = `${originalHeight * ratio}px`;
                 currentImage.style.width = `${originalWidth * ratio}px`;
@@ -104,10 +102,7 @@ function showBanners(noMove = false) {
             eventAdvertisements.images[eventAdvertisements.currentImageIndex].classList.add('active-banner');
             let originalHeight = currentImage.clientHeight;
             let originalWidth = currentImage.originalWidth;
-
             let ratio = theHeight / originalHeight;
-
-            console.log(originalHeight);
             if (originalHeight * ratio > 0) {
                 currentImage.style.height = `${originalHeight * ratio}px`;
                 currentImage.style.width = `${originalWidth * ratio}px`;
