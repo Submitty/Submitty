@@ -311,8 +311,8 @@ function newShowImage(information, extraLink = null) {
     form.css("display", "block");
 
 
-    $('#theImage', form).attr('src', information);
-    $('#linking', form).attr('href', extraLink);
+    $('#click-for-bigger-banner', form).attr('src', information);
+    $('#click-banner-to-link', form).attr('href', extraLink);
 
     captureTabInModal("showing-banner");
 }
