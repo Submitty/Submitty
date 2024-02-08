@@ -63,8 +63,8 @@ $(() => {
 function showBanners(noMove = false) {
     const movingUnit = document.getElementById('moving-unit');
     const bannerElement = document.getElementById('abanner');
-    let theHeight = document.getElementById('flexing').offsetHeight;
-    console.log(theHeight);
+    const theHeight = document.getElementById('flexing').offsetHeight;
+
     if (bannerElement.style.display === 'none' && eventAdvertisements.images.length > 0) {
         document.getElementById('chat-box').style.display = 'none';
         eventAdvertisements.currentImageIndex = 0;
@@ -77,13 +77,13 @@ function showBanners(noMove = false) {
 
         if (eventAdvertisements.currentImages.length > 0 && !noMove) {
             eventAdvertisements.images[eventAdvertisements.currentImageIndex].classList.add('active-banner');
-            let originalHeight = currentImage.clientHeight;
-            let originalWidth = currentImage.originalWidth;
+            const originalHeight = currentImage.clientHeight;
+            // const originalWidth = currentImage.originalWidth;
     
-            let ratio = theHeight / originalHeight;
+            const ratio = theHeight / originalHeight;
             if (originalHeight * ratio > 0) {
-                currentImage.style.height = `${originalHeight * ratio}px`;
-                currentImage.style.width = `${originalWidth * ratio}px`;
+                currentImage.style.height = `${theHeight}px`;
+                // currentImage.style.width = `${originalWidth * ratio}px`;
             }
             eventAdvertisements.moveDuck.style.animation = 'rocking 2s linear infinite';
 
@@ -100,12 +100,13 @@ function showBanners(noMove = false) {
             eventAdvertisements.moveDuck.style.display = 'block';
             bannerElement.style.display = 'block';
             eventAdvertisements.images[eventAdvertisements.currentImageIndex].classList.add('active-banner');
-            let originalHeight = currentImage.clientHeight;
-            let originalWidth = currentImage.originalWidth;
-            let ratio = theHeight / originalHeight;
+            const originalHeight = currentImage.clientHeight;
+            // const originalWidth = currentImage.originalWidth;
+            const ratio = theHeight / originalHeight;
+            
             if (originalHeight * ratio > 0) {
-                currentImage.style.height = `${originalHeight * ratio}px`;
-                currentImage.style.width = `${originalWidth * ratio}px`;
+                currentImage.style.height = `${theHeight}px`;
+                // currentImage.style.width = `${originalWidth * ratio}px`;
             }
         }
 
@@ -149,14 +150,16 @@ function showBanners(noMove = false) {
         Cookies.set('hiddenImages', JSON.stringify(eventAdvertisements.hiddenImages));
 
     }
+    return;
 
 }
 
 function changeImage(n) {
     const originalIndex = eventAdvertisements.currentImageIndex;
+    const theHeight = document.getElementById('flexing').offsetHeight;
     if (eventAdvertisements.currentImageIndex < 0 || eventAdvertisements.currentImageIndex >= eventAdvertisements.images.length) {
-        console.log('Issue of index, you are out of range: ');
-        console.log(eventAdvertisements.currentImageIndex);
+        console.error('Issue of index, you are out of range: ');
+        console.error(eventAdvertisements.currentImageIndex);
         return;
     }
     eventAdvertisements.images[eventAdvertisements.currentImageIndex].classList.remove('active-banner');
@@ -180,7 +183,19 @@ function changeImage(n) {
     }
 
     eventAdvertisements.images[eventAdvertisements.currentImageIndex].classList.add('active-banner');
+    const currentImage = eventAdvertisements.images[eventAdvertisements.currentImageIndex];
 
+    const originalHeight = currentImage.clientHeight;
+    // const originalWidth = currentImage.originalWidth;
+
+    const ratio = theHeight / originalHeight;
+    if (originalHeight * ratio > 0) {
+        currentImage.style.height = `${theHeight}px`;
+        // console.log(currentImage);
+        // console.log(theHeight);
+        // currentImage.style.width = `${originalWidth * ratio}px`;
+    }
+    return;
 }
 
 function getHiddenImages() {

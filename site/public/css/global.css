@@ -201,6 +201,10 @@ footer .footer-separator {
     display: block;
 }
 
+#chat-box {
+    cursor: pointer;
+}
+
 @media (max-width: 541px) {
     #moorthy-duck {
         display: none;

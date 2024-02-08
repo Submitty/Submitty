@@ -35,11 +35,12 @@
 
             <label class = "radio" for="image_selection_radio">
                 <input id="url_selection_radio" name="course_material_type" type="checkbox" onchange="imageSelectionUpdate(this.checked);">
-                Image
+                Add Banner with More Info
             </label>
+            </br>
             <label class = "radio" for="url_selection_radio">
                 <input id="url_selection_radio" name="course_material_type" type="checkbox" onchange="urlSelectionUpdate(this.checked);">
-                External URL
+                Link a Website to the Banner
             </label>
 
         <br>
@@ -50,15 +51,18 @@
                 <strong>Name of additional Information</strong><br />
                 Only required if you are adding an additional file:<br />
             </span>
-            <input type="text" id="input-provide-name" class="full-width" name="eg_config_path" value="" placeholder="MUST BE AN IMAGE TYPE LIKE: PNG, JPEG, ETC"/>
-            <span><em>Note: if you provided a file or an png image the name has to match this input.</em></span>
+            <input type="text" id="input-provide-name" class="full-width" name="eg_config_path" value="" placeholder="Write the name of the png file here ex: biggerBanner.png"/>
+            <span><em>If you want a bigger banner with more information to pop up when you click on an advertisement, then add a bigger banner png file to your uploaded files, and write the name of it here!</em></span>
+            </br>
         </label>
 
         <label id="url_link_address">
             <span>
                 <strong>Address link</strong><br />
             </span>
-            <input type="text" id="input-provide-url" class="full-width" name="eg_config_path" value="" placeholder="MUST BE A LINK"/>
+            <input type="text" id="input-provide-url" class="full-width" name="eg_config_path" value="" placeholder="Add a link to the banner for when it gets pressed. ex: https://submitty.org"/>
+            <span><em>Add a link address here if you want the user to go to a website when they click on the banner! (If you upload a bigger banner, then clicking the bigger banner will activate the link)</em></span>
+            </br>
         </label>
     </div>
 
