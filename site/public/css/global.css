@@ -205,6 +205,9 @@ footer .footer-separator {
     cursor: pointer;
 }
 
+.club-banners {
+    object-fit: cover;
+}
 @media (max-width: 541px) {
     #moorthy-duck {
         display: none;

@@ -63,28 +63,17 @@ $(() => {
 function showBanners(noMove = false) {
     const movingUnit = document.getElementById('moving-unit');
     const bannerElement = document.getElementById('abanner');
-    const theHeight = document.getElementById('flexing').offsetHeight;
 
     if (bannerElement.style.display === 'none' && eventAdvertisements.images.length > 0) {
         document.getElementById('chat-box').style.display = 'none';
         eventAdvertisements.currentImageIndex = 0;
         Cookies.set('display-banner', 'yes');
 
-        const currentImage = eventAdvertisements.images[eventAdvertisements.currentImageIndex];
-
         // Resize height of the image
 
 
         if (eventAdvertisements.currentImages.length > 0 && !noMove) {
             eventAdvertisements.images[eventAdvertisements.currentImageIndex].classList.add('active-banner');
-            const originalHeight = currentImage.clientHeight;
-            // const originalWidth = currentImage.originalWidth;
-    
-            const ratio = theHeight / originalHeight;
-            if (originalHeight * ratio > 0) {
-                currentImage.style.height = `${theHeight}px`;
-                // currentImage.style.width = `${originalWidth * ratio}px`;
-            }
             eventAdvertisements.moveDuck.style.animation = 'rocking 2s linear infinite';
 
             setTimeout(() => {
@@ -100,14 +89,6 @@ function showBanners(noMove = false) {
             eventAdvertisements.moveDuck.style.display = 'block';
             bannerElement.style.display = 'block';
             eventAdvertisements.images[eventAdvertisements.currentImageIndex].classList.add('active-banner');
-            const originalHeight = currentImage.clientHeight;
-            // const originalWidth = currentImage.originalWidth;
-            const ratio = theHeight / originalHeight;
-            
-            if (originalHeight * ratio > 0) {
-                currentImage.style.height = `${theHeight}px`;
-                // currentImage.style.width = `${originalWidth * ratio}px`;
-            }
         }
 
 
@@ -156,7 +137,6 @@ function showBanners(noMove = false) {
 
 function changeImage(n) {
     const originalIndex = eventAdvertisements.currentImageIndex;
-    const theHeight = document.getElementById('flexing').offsetHeight;
     if (eventAdvertisements.currentImageIndex < 0 || eventAdvertisements.currentImageIndex >= eventAdvertisements.images.length) {
         console.error('Issue of index, you are out of range: ');
         console.error(eventAdvertisements.currentImageIndex);
@@ -183,18 +163,6 @@ function changeImage(n) {
     }
 
     eventAdvertisements.images[eventAdvertisements.currentImageIndex].classList.add('active-banner');
-    const currentImage = eventAdvertisements.images[eventAdvertisements.currentImageIndex];
-
-    const originalHeight = currentImage.clientHeight;
-    // const originalWidth = currentImage.originalWidth;
-
-    const ratio = theHeight / originalHeight;
-    if (originalHeight * ratio > 0) {
-        currentImage.style.height = `${theHeight}px`;
-        // console.log(currentImage);
-        // console.log(theHeight);
-        // currentImage.style.width = `${originalWidth * ratio}px`;
-    }
     return;
 }
 
