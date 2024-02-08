@@ -34,20 +34,28 @@ class NotebookBuilderController extends AbstractController {
      * @AccessControl(role="INSTRUCTOR")
      */
     public function builder(string $g_id, string $mode) {
-        try {
-            $gradeable = $this->core->getQueries()->getGradeableConfig($g_id);
-        }
-        catch (\Exception $exception) {
-            $this->core->addErrorMessage('Invalid Gradeable ID.');
-            return new RedirectResponse($this->core->buildUrl());
-        }
+      $gradeable = $this->getValidGradeable($g_id);
+      $failure_url = $this->core->buildCourseUrl(['gradeable', $gradeable->getId(), 'update']). '?nav_tab=1';
+        
+      if (!$gradeable->isUsingUploadedConfig()) {
+          $this->core->addErrorMessage("Notebook builder may only edit uploaded configurations for the current course and semester.");
+          return new Redirec $gradeable = $this->getValidGradeable($g_id);tResponse($failure_url);
+      }
 
-        $failure_url = $this->core->buildCourseUrl(['gradeable', $gradeable->getId(), 'update']) . '?nav_tab=1';
+        // try {
+        //     $gradeable = $this->core->getQueries()->getGradeableConfig($g_id);
+        // }
+        // catch (\Exception $exception) {
+        //     $this->core->addErrorMessage('Invalid Gradeable ID.');
+        //     return new RedirectResponse($this->core->buildUrl());
+        // }
 
-        if (!$gradeable->isUsingUploadedConfig()) {
-            $this->core->addErrorMessage("Notebook builder may only edit uploaded configurations for the current course and semester.");
-            return new RedirectResponse($failure_url);
-        }
+        // $failure_url = $this->core->buildCourseUrl(['gradeable', $gradeable->getId(), 'update']) . '?nav_tab=1';
+
+        // if (!$gradeable->isUsingUploadedConfig()) {
+        //     $this->core->addErrorMessage("Notebook builder may only edit uploaded configurations for the current course and semester.");
+        //     return new RedirectResponse($failure_url);
+        // }
 
         // If mode is new then generate a new config directory and place a default config.json inside of it
         if ($mode === 'new') {
