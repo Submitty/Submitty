@@ -39,8 +39,7 @@ class NotebookBuilderController extends AbstractController {
         
       if (!$gradeable->isUsingUploadedConfig()) {
           $this->core->addErrorMessage("Notebook builder may only edit uploaded configurations for the current course and semester.");
-          return new Redirec $gradeable = $this->getValidGradeable($g_id);tResponse($failure_url);
-      }
+          return new RedirectResponse($failure_url);
 
         // try {
         //     $gradeable = $this->core->getQueries()->getGradeableConfig($g_id);
