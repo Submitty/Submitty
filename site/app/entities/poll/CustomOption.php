@@ -11,8 +11,8 @@ use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
 
 #[ORM\Entity(repositoryClass: OptionRepository::class)]
-#[ORM\Table(name: "poll_options")]
-class Option {
+#[ORM\Table(name: "poll_options_custom")]
+class CustomOption {
     #[ORM\Id]
     #[ORM\Column(name: "option_id", type: Types::INTEGER)]
     #[ORM\GeneratedValue]
@@ -21,11 +21,14 @@ class Option {
     #[ORM\Column(name: "order_id", type: Types::INTEGER)]
     protected int $order_id;
 
+    #[ORM\Column(name: "author_id", type: Types::TEXT)]
+    protected string $author_id;
+
     #[ORM\Column(name: "response", type: Types::TEXT)]
     protected string $response;
 
-    #[ORM\Column(name: "correct", type: Types::BOOLEAN)]
-    protected bool $correct;
+    #[ORM\Column(name: "credit", type: Types::BOOLEAN)]
+    protected bool $credit;
 
     #[ORM\ManyToOne(targetEntity: Poll::class, inversedBy: "options")]
     #[ORM\JoinColumn(name: "poll_id", referencedColumnName: "poll_id", nullable: false)]
@@ -38,10 +41,11 @@ class Option {
     #[ORM\JoinColumn(name: "option_id", referencedColumnName: "option_id")]
     protected Collection $user_responses;
 
-    public function __construct(int $order_id, string $response, bool $is_correct) {
+    public function __construct(int $order_id, string $response, bool $credit, string $author_id) {
         $this->setOrderId($order_id);
         $this->setResponse($response);
-        $this->setCorrect($is_correct);
+        $this->setCredit($credit);
+        $this->setAuthorId($author_id);
 
         $this->user_responses = new ArrayCollection();
     }
@@ -58,6 +62,14 @@ class Option {
         return $this->order_id;
     }
 
+    public function setAuthorId(string $author_id) : void {
+        $this->author_id = $author_id;
+    }
+
+    public function getAuthorId() : string {
+        return $this->author_id;
+    }
+
     public function setResponse(string $response): void {
         $this->response = $response;
     }
@@ -66,12 +78,12 @@ class Option {
         return $this->response;
     }
 
-    public function setCorrect(bool $correct): void {
-        $this->correct = $correct;
+    public function setCredit(bool $credit): void {
+        $this->credit = $credit;
     }
 
-    public function isCorrect(): bool {
-        return $this->correct;
+    public function isCredit(): bool {
+        return $this->credit;
     }
 
     public function setPoll(Poll $poll): void {

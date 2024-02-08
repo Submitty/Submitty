@@ -429,12 +429,31 @@ class PollController extends AbstractController {
             $this->core->addErrorMessage("Invalid Poll ID");
             return new RedirectResponse($this->core->buildCourseUrl(['polls']));
         }
+        $poll->setOpen();
+        $em->flush();
+
+        return new RedirectResponse($this->core->buildCourseUrl(['polls']));
+    }
+
+    /**
+     * @Route("/courses/{_semester}/{_course}/polls/toggleCustomAnswers", methods={"POST"})
+     * @AccessControl(role="INSTRUCTOR")
+     */
+    public function toggleCustomAnswers(): RedirectResponse {
+        $poll_id = intval($_POST['poll_id'] ?? -1);
+        $em = $this->core->getCourseEntityManager();
+        /** @var Poll|null */
+        $poll = $em->find(Poll::class, $poll_id);
+        if ($poll === null) {
+            $this->core->addErrorMessage("Invalid Poll ID");
+            return new RedirectResponse($this->core->buildCourseUrl(['polls']));
+        }
         if($_POST['allow_custom_answers'] === "enabled") {
             $poll->setEnableCustomAnswers();
-        } else{
+        }
+        else {
             $poll->setDisableCustomAnswers();
         }
-        $poll->setOpen();
         $em->flush();
 
         return new RedirectResponse($this->core->buildCourseUrl(['polls']));

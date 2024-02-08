@@ -43,7 +43,8 @@ class Poll {
     #[ORM\Column(type: Types::STRING)]
     protected $release_answer;
 
-    protected $custom_answers;
+    #[ORM\Column(name: "custom_answers",type: Types::BOOLEAN)]
+    protected bool $custom_answers;
 
     /**
      * @var Collection<Option>
@@ -52,6 +53,11 @@ class Poll {
     #[ORM\JoinColumn(name: "poll_id", referencedColumnName: "poll_id")]
     #[ORM\OrderBy(["order_id" => "ASC"])]
     protected Collection $options;
+
+    #[ORM\OneToMany(mappedBy: "poll", targetEntity: CustomOption::class, orphanRemoval: true)]
+    #[ORM\JoinColumn(name: "poll_id", referencedColumnName: "poll_id")]
+    #[ORM\OrderBy(["custom_order" => "DESC"])]
+    protected Collection $custom_options;
 
     /**
      * @var Collection<Response>
@@ -107,7 +113,7 @@ class Poll {
     }
 
     public function allowsCustomAnswers(): bool {
-        return $this->custom_answers === "enabled";
+        return $this->custom_answers === true;
     }
 
     public function setClosed(): void {
@@ -127,11 +133,11 @@ class Poll {
     }
 
     public function setEnableCustomAnswers(): void {
-        $this->custom_answers = "enabled";
+        $this->custom_answers = true;
     }
 
     public function setDisableCustomAnswers(): void {
-        $this->custom_answers = "disabled";
+        $this->custom_answers = false;
     }
 
     public function getReleaseDate(): \DateTime {
@@ -220,6 +226,15 @@ class Poll {
 
     public function removeOption(Option $option): void {
         $this->options->removeElement($option);
+    }
+
+    public function addCustomOption(CustomOption $option): void {
+        $this->custom_options->add($option);
+        $option->setPoll($this);
+    }
+
+    public function removeCustomOption(CustomOption $option): void {
+        $this->custom_options->removeElement($option);
     }
 
     public function addResponse(Response $response, int $option_id) {
