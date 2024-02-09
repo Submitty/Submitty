@@ -168,7 +168,7 @@ function addFilesFromInput(part, check_duplicate_zip=true) {
 
 
 function handleUploadBanner(closeTime, releaseTime, extraName, linkName) {
-    const formData = new FormData(); 
+    const formData = new FormData();
     formData.append('csrf_token', window.csrfToken);
     formData.append('close_time', closeTime);
     formData.append('release_time', releaseTime);

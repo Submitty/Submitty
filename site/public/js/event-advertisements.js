@@ -49,11 +49,11 @@ $(() => {
         eventAdvertisements.chatBox.style.display = 'block';
     }
 
-    if (Cookies.get('display-banner') === 'yes') {
+    if (localStorage.getItem('display-banner') !== null && localStorage.getItem('display-banner') === 'yes') {
         showBanners(true); // don't want to make duck move
     }
     else {
-        Cookies.set('display-banner', 'no');
+        localStorage.setItem('display-banner', 'no');
     }
 
     if (eventAdvertisements.images.length > 0) {
@@ -67,7 +67,7 @@ function showBanners(noMove = false) {
     if (bannerElement.style.display === 'none' && eventAdvertisements.images.length > 0) {
         document.getElementById('chat-box').style.display = 'none';
         eventAdvertisements.currentImageIndex = 0;
-        Cookies.set('display-banner', 'yes');
+        localStorage.setItem('display-banner', 'yes');
 
         // Resize height of the image
 
@@ -95,7 +95,7 @@ function showBanners(noMove = false) {
     }
     else {
 
-        Cookies.set('display-banner', 'no');
+        localStorage.setItem('display-banner', 'no');
         eventAdvertisements.moveDuck.style.display = 'none';
         movingUnit.style.animation = 'unset';
         eventAdvertisements.moveDuck.style.animation = 'unset';
