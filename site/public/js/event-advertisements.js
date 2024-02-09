@@ -136,23 +136,43 @@ function showBanners(noMove = false) {
 }
 
 function changeImage(n) {
+    //IMPLEMENT FOR WHEN WE ARE GOING BACKWARDS
     eventAdvertisements.images[0].classList.remove('active-banner');
-    if (eventAdvertisements.currentImages.length > 0) {
+    if (n > 0) {
+        if (eventAdvertisements.currentImages.length) {
 
-        const className = eventAdvertisements.currentImages[originalIndex].className.split(' ')[1];
-        eventAdvertisements.hiddenImages.push(className);
-        eventAdvertisements.seenImages.push(eventAdvertisements.currentImages[0]);
-        eventAdvertisements.currentImages.shift();
-        eventAdvertisements.images = eventAdvertisements.currentImages.concat(eventAdvertisements.seenImages);
-        Cookies.set('hiddenImages', JSON.stringify(eventAdvertisements.hiddenImages));
+            const className = eventAdvertisements.currentImages[0].className.split(' ')[1];
+            eventAdvertisements.hiddenImages.push(className);
+            eventAdvertisements.seenImages.push(eventAdvertisements.currentImages[0]);
+            eventAdvertisements.currentImages.shift();
+            eventAdvertisements.images = eventAdvertisements.currentImages.concat(eventAdvertisements.seenImages);
+            Cookies.set('hiddenImages', JSON.stringify(eventAdvertisements.hiddenImages));
+        }
+        else {
+            eventAdvertisements.images.push(eventAdvertisements.images[0]);
+            eventAdvertisements.images.shift();
+            eventAdvertisements.seenImages = eventAdvertisements.images;
+        }
     }
     else {
-        eventAdvertisements.images.push(eventAdvertisements.images[0]);
-        eventAdvertisements.images.shift();
-        eventAdvertisements.seenImages = eventAdvertisements.images;
-    }
+        if (eventAdvertisements.currentImages.length) {
 
-    eventAdvertisements.images[0].classList.add('active-banner');
+            const className = eventAdvertisements.currentImages[0].className.split(' ')[1];
+            eventAdvertisements.hiddenImages.push(className);
+            eventAdvertisements.seenImages.push(eventAdvertisements.currentImages[eventAdvertisements.images.length -1]);
+            eventAdvertisements.images.pop();
+            eventAdvertisements.images = eventAdvertisements.currentImages.concat(eventAdvertisements.seenImages);
+            Cookies.set('hiddenImages', JSON.stringify(eventAdvertisements.hiddenImages));
+        }
+        else {
+            eventAdvertisements.images.push(eventAdvertisements.images[eventAdvertisements.images.length -1]);
+            eventAdvertisements.images.pop();
+            eventAdvertisements.seenImages = eventAdvertisements.images;
+        }        
+    }
+    
+
+        eventAdvertisements.images[0].classList.add('active-banner');
     return;
 }
 
