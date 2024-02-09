@@ -1,4 +1,4 @@
-/* exported deleteBannerImage, handleUploadBanner */
+/* exported deleteBannerImage, imageSelectionUpdate, urlSelectionUpdate */
 /* global buildUrl */
 
 
@@ -43,3 +43,27 @@ function deleteBannerImage(csrf_token, id, imageName, imagePath, description, re
         },
     });
 }
+
+
+function imageSelectionUpdate() {
+    if (image_banner === false) {
+        $('#extra_name').show();
+        image_banner = true;
+    }
+    else {
+        image_banner = false;
+        $('#extra_name').hide();
+    }
+}
+
+
+function urlSelectionUpdate() {
+    if (url_banner === false) {
+        url_banner = true;
+        $('#url_link_address').show();
+    }
+    else {
+        url_banner = false;
+        $('#url_link_address').hide();
+    }
+} 

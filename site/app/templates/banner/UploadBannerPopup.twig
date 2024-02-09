@@ -34,12 +34,12 @@
         </label>
 
             <label class = "radio" for="image_selection_radio">
-                <input id="url_selection_radio" name="course_material_type" type="checkbox" onchange="imageSelectionUpdate(this.checked);">
+                <input id="url_selection_radio" name="course_material_type" type="checkbox" onchange="imageSelectionUpdate();">
                 Add Banner with More Info
             </label>
             </br>
             <label class = "radio" for="url_selection_radio">
-                <input id="url_selection_radio" name="course_material_type" type="checkbox" onchange="urlSelectionUpdate(this.checked);">
+                <input id="url_selection_radio" name="course_material_type" type="checkbox" onchange="urlSelectionUpdate();">
                 Link a Website to the Banner
             </label>
 
@@ -71,26 +71,6 @@
         let url_banner = false;
         $('#url_link_address').hide();
         $('#extra_name').hide();
-        function imageSelectionUpdate(checked) {
-            if (image_banner === false) {
-                $('#extra_name').show();
-                image_banner = true;
-            }
-            else {
-                image_banner = false;
-                $('#extra_name').hide();
-            }
-        }
-        function urlSelectionUpdate(checked) {
-            if (url_banner === false) {
-                url_banner = true;
-                $('#url_link_address').show();
-            }
-            else {
-                url_banner = false;
-                $('#url_link_address').hide();
-            }
-        } 
 
         function makeSubmission() {
             var releaseTime = $("#release_date").val();
@@ -148,6 +128,8 @@
                             case 3:
                                 date = new Date("9998-01-01 00:00:00");
                                 break;
+                            default:
+                                date = new Date();
                         }
                         fp.setDate(date);
                     }
