@@ -29,8 +29,5 @@ def up(config, database):
         )
     """)
 
-    # Associate the sequence with the id column
-    database.execute("ALTER TABLE community_events ALTER COLUMN id SET DEFAULT nextval('community_events_id_seq'::regclass)")
-
 def down(config, database):
     pass
