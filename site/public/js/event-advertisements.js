@@ -167,8 +167,7 @@ function changeImage(n) {
 }
 
 function getHiddenImages() {
-    const hiddenImagesCookie = Cookies.get('hiddenImages');
-    return hiddenImagesCookie ? JSON.parse(hiddenImagesCookie) : [];
+    return JSON.parse(Cookies.get('hiddenImages')) : [];
 }
 
 
