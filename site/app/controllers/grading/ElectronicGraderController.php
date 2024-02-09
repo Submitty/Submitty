@@ -1767,8 +1767,6 @@ class ElectronicGraderController extends AbstractController {
             else {
                 $total_submitted = count($peer_assignments[$this->core->getUser()->getId()]);
             }
-            $non_late_total_submitted = $total_submitted; // TODO total - users late or teams late?
-            $non_late_graded = $graded;
         }
         elseif ($gradeable->isGradeByRegistration()) {
             $sections = $this->core->getUser()->getGradingRegistrationSections();
