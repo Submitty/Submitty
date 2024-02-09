@@ -89,6 +89,9 @@ void AddAutogradingConfiguration(nlohmann::json &whole_config) {
     for (typename nlohmann::json::iterator testcase = testcases->begin(); testcase != testcases->end(); testcase++) {
       if (testcase->value("type", "") == "Compilation") {
         nlohmann::json::iterator exe_name = testcase->find("executable_name");
+        if (exe_name == testcase->end()) {
+          continue;
+        }
         // Handle single file or array of files.
         if (exe_name->is_array()) {
           for (typename nlohmann::json::iterator itr = exe_name->begin(); itr != exe_name->end(); itr++) {
