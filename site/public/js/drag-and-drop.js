@@ -176,7 +176,7 @@ function handleUploadBanner(closeTime, releaseTime, extraName, linkName) {
     formData.append('link_name', linkName);
     for (let i = 0; i < file_array.length; i++) {
         for (let j = 0; j < file_array[i].length; j++) {
-            if (!/^[a-zA-Z0-9_-]+$/.test(file_array[i][j].name)) {
+            if (!/^[a-zA-Z0-9_.-]+$/.test(file_array[i][j].name)) {
                 alert(`ERROR! Filename "${file_array[i][j].name}" contains invalid characters. Please use only alphanumeric characters, underscores, and dashes.`);
                 return;
             }
