@@ -179,21 +179,11 @@ function handleUploadBanner(csrf_token, closeTime, releaseTime, extraName, linkN
     formData.append('link_name', linkName);
     for (let i = 0; i < file_array.length; i++) {
         for (let j = 0; j < file_array[i].length; j++) {
-            if (file_array[i][j].name.indexOf("'") !== -1 ||
-              file_array[i][j].name.indexOf('"') !== -1) {
-                alert(`ERROR! You may not use quotes in your filename: ${file_array[i][j].name}`);
+            if (!/^[a-zA-Z0-9_-]+$/.test(file_array[i][j].name)) {
+                alert(`ERROR! Filename "${file_array[i][j].name}" contains invalid characters. Please use only alphanumeric characters, underscores, and dashes.`);
                 return;
             }
-            else if (file_array[i][j].name.indexOf('\\') !== -1 ||
-              file_array[i][j].name.indexOf('/') !== -1) {
-                alert(`ERROR! You may not use a slash in your filename: ${file_array[i][j].name}`);
-                return;
-            }
-            else if (file_array[i][j].name.indexOf('<') !== -1 ||
-              file_array[i][j].name.indexOf('>') !== -1) {
-                alert(`ERROR! You may not use angle brackets in your filename: ${file_array[i][j].name}`);
-                return;
-            }
+    
             const k = fileExists(`/${file_array[i][j].name}`, 1);
             // Check conflict here
             if ( k[0] === 1 ) {
