@@ -183,7 +183,6 @@ function handleUploadBanner(csrf_token, closeTime, releaseTime, extraName, linkN
                 alert(`ERROR! Filename "${file_array[i][j].name}" contains invalid characters. Please use only alphanumeric characters, underscores, and dashes.`);
                 return;
             }
-    
             const k = fileExists(`/${file_array[i][j].name}`, 1);
             // Check conflict here
             if ( k[0] === 1 ) {
