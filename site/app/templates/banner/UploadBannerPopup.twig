@@ -99,7 +99,7 @@
             if (image_banner === true) extraName = document.getElementById("input-provide-name").value;
             var linkName = "";
             if (url_banner === true) linkName = document.getElementById("input-provide-url").value;
-            handleUploadBanner("{{ csrf_token }}", closeTime, releaseTime, extraName, linkName);
+            handleUploadBanner(closeTime, releaseTime, extraName, linkName);
         }
         $(function() {
             $("#submit-banner").click(function(e){ // Submit button

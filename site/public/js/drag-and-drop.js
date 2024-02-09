@@ -166,13 +166,10 @@ function addFilesFromInput(part, check_duplicate_zip=true) {
     $(`#input-file${part}`).val('');
 }
 
-/**
- * @param csrf_token
- */
 
-function handleUploadBanner(csrf_token, closeTime, releaseTime, extraName, linkName) {
-    const formData = new FormData();
-    formData.append('csrf_token', csrf_token);
+function handleUploadBanner(closeTime, releaseTime, extraName, linkName) {
+    const formData = new FormData(); 
+    formData.append('csrf_token', window.csrfToken);
     formData.append('close_time', closeTime);
     formData.append('release_time', releaseTime);
     formData.append('extra_name', extraName);
