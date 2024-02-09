@@ -67,18 +67,15 @@
     </div>
 
     <script>
-        let image_banner = false;
-        let url_banner = false;
         $('#url_link_address').hide();
         $('#extra_name').hide();
-
         function makeSubmission() {
             var releaseTime = $("#release_date").val();
             var closeTime = $("#closing_date").val();
             var extraName = "";
-            if (image_banner === true) extraName = document.getElementById("input-provide-name").value;
+            if ($('#extra_name').is(':visible')) extraName = document.getElementById("input-provide-name").value;
             var linkName = "";
-            if (url_banner === true) linkName = document.getElementById("input-provide-url").value;
+            if ($('#url_link_address').is(':visible')) linkName = document.getElementById("input-provide-url").value;
             handleUploadBanner(closeTime, releaseTime, extraName, linkName);
         }
         $(function() {

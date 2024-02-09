@@ -1,5 +1,5 @@
 /* exported deleteBannerImage, imageSelectionUpdate, urlSelectionUpdate */
-/* global buildUrl, image_banner, url_banner */
+/* global buildUrl */
 
 
 /**
@@ -44,26 +44,22 @@ function deleteBannerImage(csrf_token, id, imageName, imagePath, description, re
     });
 }
 
-
 function imageSelectionUpdate() {
-    if (image_banner === false) {
-        $('#extra_name').show();
-        image_banner = true;
+    if ($('#extra_name').is(':visible')) {
+        $('#extra_name').hide();
     }
     else {
-        image_banner = false;
-        $('#extra_name').hide();
+        $('#extra_name').show();
     }
 }
 
 
 function urlSelectionUpdate() {
-    if (url_banner === false) {
-        url_banner = true;
-        $('#url_link_address').show();
-    }
-    else {
-        url_banner = false;
+
+    if ($('#url_link_address').is(':visible')) {
         $('#url_link_address').hide();
     }
-} 
+    else {
+        $('#url_link_address').show();
+    }
+}
