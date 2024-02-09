@@ -1,5 +1,5 @@
 /* exported deleteBannerImage, imageSelectionUpdate, urlSelectionUpdate */
-/* global buildUrl */
+/* global buildUrl, image_banner, url_banner */
 
 
 /**
