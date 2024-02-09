@@ -63,21 +63,19 @@ $(() => {
 function showBanners(noMove = false) {
     const movingUnit = document.getElementById('moving-unit');
     const bannerElement = document.getElementById('abanner');
+    if (eventAdvertisements.chatBox !== null) {
+        eventAdvertisements.chatBox.style.display = 'none';
+    }
 
     if (bannerElement.style.display === 'none' && eventAdvertisements.images.length > 0) {
-        document.getElementById('chat-box').style.display = 'none';
-        eventAdvertisements.currentImageIndex = 0;
         localStorage.setItem('display-banner', 'yes');
 
-        // Resize height of the image
-
-
+        eventAdvertisements.images[0].classList.add('active-banner');
         if (eventAdvertisements.currentImages.length > 0 && !noMove) {
-            eventAdvertisements.images[eventAdvertisements.currentImageIndex].classList.add('active-banner');
             eventAdvertisements.moveDuck.style.animation = 'rocking 2s linear infinite';
+            eventAdvertisements.originalDuck.style.display = 'none';
 
             setTimeout(() => {
-                eventAdvertisements.originalDuck.style.display = 'none';
                 eventAdvertisements.moveDuck.style.display = 'block';
                 bannerElement.style.display = 'block';
                 movingUnit.style.animation = 'slide 2s linear forwards';
@@ -85,10 +83,9 @@ function showBanners(noMove = false) {
 
         }
         else {
-            eventAdvertisements.originalDuck.style.display = 'none';
             eventAdvertisements.moveDuck.style.display = 'block';
             bannerElement.style.display = 'block';
-            eventAdvertisements.images[eventAdvertisements.currentImageIndex].classList.add('active-banner');
+            eventAdvertisements.images[0].classList.add('active-banner');
         }
 
 
@@ -96,73 +93,66 @@ function showBanners(noMove = false) {
     else {
 
         localStorage.setItem('display-banner', 'no');
+
+        //Css changes necessary
         eventAdvertisements.moveDuck.style.display = 'none';
         movingUnit.style.animation = 'unset';
         eventAdvertisements.moveDuck.style.animation = 'unset';
-
         eventAdvertisements.moveDuck.style.transform = 'rotate(0deg)';
-
         eventAdvertisements.originalDuck.style.display = 'block';
+
+
         if (eventAdvertisements.images.length > 0) {
-            eventAdvertisements.images[eventAdvertisements.currentImageIndex].classList.remove('active-banner');
+            eventAdvertisements.images[0].classList.remove('active-banner');
+        }
+        else {
+            return; //incase open and we just want to close
         }
 
 
         bannerElement.style.display = 'none';
 
         if (eventAdvertisements.currentImages.length >0) {
-            const className = eventAdvertisements.currentImages[eventAdvertisements.currentImageIndex].className.split(' ')[1];
+            const className = eventAdvertisements.currentImages[0].className.split(' ')[1];
             eventAdvertisements.hiddenImages.push(className);
-            eventAdvertisements.seenImages.push(eventAdvertisements.currentImages[eventAdvertisements.currentImageIndex]);
-            eventAdvertisements.currentImageIndex = eventAdvertisements.seenImages.length; // the last currentImage we were at
+            eventAdvertisements.seenImages.push(eventAdvertisements.currentImages[0]);
             eventAdvertisements.currentImages.shift();
             eventAdvertisements.images = eventAdvertisements.currentImages.concat(eventAdvertisements.seenImages);
+            if (eventAdvertisements.currentImages.length > 0) {
+                eventAdvertisements.chatBox.style.display = "block";
+            }
 
         }
         else {
-            if (eventAdvertisements.chatBox !== null) {
-                eventAdvertisements.chatBox.style.display = 'none';
-            }
+            eventAdvertisements.images.push(eventAdvertisements.images[0]);
+            eventAdvertisements.images.shift();
+            eventAdvertisements.seenImages = eventAdvertisements.images;
         }
 
-        if (eventAdvertisements.currentImages.length >0 && eventAdvertisements.chatBox !== null) {
-            eventAdvertisements.chatBox.style.display = 'block';
-        }
         Cookies.set('hiddenImages', JSON.stringify(eventAdvertisements.hiddenImages));
-
     }
     return;
 
 }
 
 function changeImage(n) {
-    const originalIndex = eventAdvertisements.currentImageIndex;
-    if (eventAdvertisements.currentImageIndex < 0 || eventAdvertisements.currentImageIndex >= eventAdvertisements.images.length) {
-        console.error('Issue of index, you are out of range: ');
-        console.error(eventAdvertisements.currentImageIndex);
-        return;
-    }
-    eventAdvertisements.images[eventAdvertisements.currentImageIndex].classList.remove('active-banner');
-    if (eventAdvertisements.currentImageIndex < eventAdvertisements.currentImages.length) {
+    eventAdvertisements.images[0].classList.remove('active-banner');
+    if (eventAdvertisements.currentImages.length > 0) {
 
         const className = eventAdvertisements.currentImages[originalIndex].className.split(' ')[1];
         eventAdvertisements.hiddenImages.push(className);
-        eventAdvertisements.seenImages.push(eventAdvertisements.currentImages[originalIndex]);
-        eventAdvertisements.currentImageIndex = eventAdvertisements.seenImages.length -1;
+        eventAdvertisements.seenImages.push(eventAdvertisements.currentImages[0]);
         eventAdvertisements.currentImages.shift();
         eventAdvertisements.images = eventAdvertisements.currentImages.concat(eventAdvertisements.seenImages);
         Cookies.set('hiddenImages', JSON.stringify(eventAdvertisements.hiddenImages));
     }
-    eventAdvertisements.currentImageIndex += n;
-
-    if (eventAdvertisements.currentImageIndex < 0) {
-        eventAdvertisements.currentImageIndex = eventAdvertisements.images.length - 1;
-    }
-    else if (eventAdvertisements.currentImageIndex >= eventAdvertisements.images.length) {
-        eventAdvertisements.currentImageIndex = 0;
+    else {
+        eventAdvertisements.images.push(eventAdvertisements.images[0]);
+        eventAdvertisements.images.shift();
+        eventAdvertisements.seenImages = eventAdvertisements.images;
     }
 
-    eventAdvertisements.images[eventAdvertisements.currentImageIndex].classList.add('active-banner');
+    eventAdvertisements.images[0].classList.add('active-banner');
     return;
 }
 
