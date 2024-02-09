@@ -1285,7 +1285,7 @@ function modifyThreadList(currentThreadId, currentCategoriesId, course, loadFirs
     });
 }
 
-function toggleLike(post_id, thread_id, current_user) {
+function toggleLike(post_id, thread_id, current_user, action) {
 
     // eslint-disable-next-line no-undef
     const url = buildCourseUrl(['post', 'likes']);
@@ -1296,6 +1296,7 @@ function toggleLike(post_id, thread_id, current_user) {
             post_id: post_id,
             thread_id: thread_id,
             current_user: current_user,
+            action: action,
             // eslint-disable-next-line no-undef
             csrf_token: csrfToken,
         },

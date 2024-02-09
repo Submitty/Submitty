@@ -1348,16 +1348,23 @@ class ForumController extends AbstractController {
      * @Route("/courses/{_semester}/{_course}/post/likes", methods={"POST"})
      */
     public function toggleLike(): JsonResponse {
-        $requiredKeys = ['post_id', 'thread_id', 'current_user'];
+        $requiredKeys = ['post_id', 'thread_id', 'current_user','action'];
+        $action = $_POST['action'];
         foreach ($requiredKeys as $key) {
             if (!isset($_POST[$key])) {
                 return JsonResponse::getErrorResponse('Missing required key in POST data: ' . $key);
             }
         }
         $output = [];
-        $output['type'] = $this->core->getQueries()->toggleLikes($_POST['post_id'], $_POST['thread_id'], $_POST['current_user']);
+        $output['type'] = $this->core->getQueries()->toggleLikes($_POST['post_id'], $_POST['thread_id'], $this->core->getUser()->getId());
 
         if ($output["type"] === "false") {
+            return JsonResponse::getErrorResponse('Catch Fail in Query');
+        }
+        else if ($output["type"] === "unlike" && $action === "/img/light-mode-off-duck.svg"){
+            return JsonResponse::getErrorResponse('Catch Fail in Query');
+        }
+        else if ($output["type"] === "like" && $action === "/img/on-duck-button.svg"){
             return JsonResponse::getErrorResponse('Catch Fail in Query');
         }
         return JsonResponse::getSuccessResponse($output);

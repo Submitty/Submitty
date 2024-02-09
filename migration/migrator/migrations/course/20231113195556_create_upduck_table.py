@@ -21,7 +21,6 @@ def up(config, database, semester, course):
         CREATE TABLE IF NOT EXISTS forum_upducks (
             post_id integer NOT NULL,
             user_id VARCHAR(255) NOT NULL,
-            thread_id integer NOT NULL,
             FOREIGN KEY(post_id)
                 REFERENCES posts(id)
                 ON UPDATE CASCADE
@@ -30,10 +29,6 @@ def up(config, database, semester, course):
                 REFERENCES users(user_id)
                 ON UPDATE CASCADE
                 ON DELETE CASCADE,
-            FOREIGN KEY(thread_id)
-                REFERENCES threads(id)
-                ON UPDATE CASCADE
-                ON DELETE CASCADE
         );
     """
     )
