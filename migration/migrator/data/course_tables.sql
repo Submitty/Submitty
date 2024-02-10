@@ -703,6 +703,71 @@ ALTER SEQUENCE public.categories_list_category_id_seq OWNED BY public.categories
 
 
 --
+-- Name: chatroom_messages; Type: TABLE; Schema: public; Owner: -
+--
+
+CREATE TABLE public.chatroom_messages (
+    id integer NOT NULL,
+    user_id character varying NOT NULL,
+    content text NOT NULL,
+    "timestamp" timestamp(0) with time zone NOT NULL
+);
+
+
+--
+-- Name: chatroom_messages_id_seq; Type: SEQUENCE; Schema: public; Owner: -
+--
+
+CREATE SEQUENCE public.chatroom_messages_id_seq
+    AS integer
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+--
+-- Name: chatroom_messages_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: -
+--
+
+ALTER SEQUENCE public.chatroom_messages_id_seq OWNED BY public.chatroom_messages.id;
+
+
+--
+-- Name: chatrooms; Type: TABLE; Schema: public; Owner: -
+--
+
+CREATE TABLE public.chatrooms (
+    id integer NOT NULL,
+    host_id integer NOT NULL,
+    title text NOT NULL,
+    description text NOT NULL,
+    is_active boolean DEFAULT false NOT NULL
+);
+
+
+--
+-- Name: chatrooms_id_seq; Type: SEQUENCE; Schema: public; Owner: -
+--
+
+CREATE SEQUENCE public.chatrooms_id_seq
+    AS integer
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+--
+-- Name: chatrooms_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: -
+--
+
+ALTER SEQUENCE public.chatrooms_id_seq OWNED BY public.chatrooms.id;
+
+
+--
 -- Name: course_materials; Type: TABLE; Schema: public; Owner: -
 --
 
@@ -1881,6 +1946,20 @@ ALTER TABLE ONLY public.categories_list ALTER COLUMN category_id SET DEFAULT nex
 
 
 --
+-- Name: chatroom_messages id; Type: DEFAULT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.chatroom_messages ALTER COLUMN id SET DEFAULT nextval('public.chatroom_messages_id_seq'::regclass);
+
+
+--
+-- Name: chatrooms id; Type: DEFAULT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.chatrooms ALTER COLUMN id SET DEFAULT nextval('public.chatrooms_id_seq'::regclass);
+
+
+--
 -- Name: course_materials id; Type: DEFAULT; Schema: public; Owner: -
 --
 
@@ -2050,6 +2129,22 @@ ALTER TABLE ONLY public.categories_list
 
 ALTER TABLE ONLY public.categories_list
     ADD CONSTRAINT category_unique UNIQUE (category_desc);
+
+
+--
+-- Name: chatroom_messages chatroom_messages_pkey; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.chatroom_messages
+    ADD CONSTRAINT chatroom_messages_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: chatrooms chatrooms_pkey; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.chatrooms
+    ADD CONSTRAINT chatrooms_pkey PRIMARY KEY (id);
 
 
 --
