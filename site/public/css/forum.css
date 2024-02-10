@@ -48,7 +48,9 @@
 
 /* stylelint-disable-next-line selector-class-pattern, no-descending-specificity */
 .post_content {
+    display: flex;
     margin-right: 5px;
+    margin-top: 5px;
     white-space: pre-wrap;
 }
 
@@ -767,4 +769,12 @@
     margin-right: 10px;
     padding: unset;
     cursor: pointer;
+}
+
+.post_content .markdown p:first-child {
+    margin-top: 0;
+}
+
+.post_content .markdown p:last-child {
+    margin-bottom: 0;
 }
