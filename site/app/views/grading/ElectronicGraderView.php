@@ -816,11 +816,6 @@ HTML;
         }
 
         $grader_registration_sections = $gradeable->getGraderAssignmentMethod() === Gradeable::ROTATING_SECTION ? $gradeable->getRotatingGraderSections()[$this->core->getUser()->getId()] ?? [] : $this->core->getUser()->getGradingRegistrationSections();
-        // Peer Student Grader has no registration sections but they are still assigned to some students in peer grading gradeables.
-        if ($peer) {
-            // $graded_gradeables contains information about the submitter assigned to the peer grader
-            $grader_registration_sections = $graded_gradeables;
-        }
 
         $message = "";
         $message_warning = false;
