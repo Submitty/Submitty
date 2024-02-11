@@ -641,6 +641,14 @@
     max-width: 100%;
 }
 
+.post_content p:first-child {
+    margin-top: 0;
+}
+
+.post_content p:last-child {
+    margin-bottom: 0;
+}
+
 .markdown-inactive {
     color: var(--standard-light-gray);
 }
@@ -769,12 +777,4 @@
     margin-right: 10px;
     padding: unset;
     cursor: pointer;
-}
-
-.post_content .markdown p:first-child {
-    margin-top: 0;
-}
-
-.post_content .markdown p:last-child {
-    margin-bottom: 0;
 }
