@@ -139,7 +139,7 @@ function changeImage(n) {
     //IMPLEMENT FOR WHEN WE ARE GOING BACKWARDS
     eventAdvertisements.images[0].classList.remove('active-banner');
     if (n > 0) {
-        if (eventAdvertisements.currentImages.length) {
+        if (eventAdvertisements.currentImages.length > 0) {
 
             const className = eventAdvertisements.currentImages[0].className.split(' ')[1];
             eventAdvertisements.hiddenImages.push(className);
@@ -155,17 +155,22 @@ function changeImage(n) {
         }
     }
     else {
-        if (eventAdvertisements.currentImages.length) {
-
+        if (eventAdvertisements.currentImages.length > 0) {
+            //Have it so we can only go back to new ones before we look at the old ones on purpose for now
             const className = eventAdvertisements.currentImages[0].className.split(' ')[1];
             eventAdvertisements.hiddenImages.push(className);
-            eventAdvertisements.seenImages.push(eventAdvertisements.currentImages[eventAdvertisements.images.length -1]);
-            eventAdvertisements.images.pop();
+            eventAdvertisements.seenImages.push(eventAdvertisements.currentImages[0]); 
+            eventAdvertisements.currentImages.shift();
+            if (eventAdvertisements.currentImages.length > 0) {
+                eventAdvertisements.currentImages.unshift(eventAdvertisements.currentImages[eventAdvertisements.currentImages.length-1]);
+                eventAdvertisements.currentImages.pop();
+            }
+
             eventAdvertisements.images = eventAdvertisements.currentImages.concat(eventAdvertisements.seenImages);
             Cookies.set('hiddenImages', JSON.stringify(eventAdvertisements.hiddenImages));
         }
         else {
-            eventAdvertisements.images.push(eventAdvertisements.images[eventAdvertisements.images.length -1]);
+            eventAdvertisements.images.unshift(eventAdvertisements.images[eventAdvertisements.images.length -1]);
             eventAdvertisements.images.pop();
             eventAdvertisements.seenImages = eventAdvertisements.images;
         }        
