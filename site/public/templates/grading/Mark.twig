@@ -69,6 +69,12 @@ Required Input:
                     {{ first_mark ? 'disabled' : '' }}>{{ mark.title|escape }}</textarea>
         {% else %}
             {{ mark.title|nl2br }}
+            {% if mark.publish %}
+            <!-- This will only show when 'Show mark to all students' is checked -->
+            <a href="https://submitty.org/grader/rubric_grading/rubric_components_and_marks" target="_blank" class="explanation-link" title="Why is this highlighted?">
+                <i class="fas fa-question-circle"></i>
+            </a>
+            {% endif %}
         {% endif %}
     </span>
     {% if show_publish %}
