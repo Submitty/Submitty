@@ -195,11 +195,19 @@
         const already_exists = !new_grader && student_pairs[grader_id].includes(user_input.val());
         // the newly inputted student cannot be the grader themself
         self_grading = grader_id === user_input.val();
-        // if all 3 above conditions are met, allow user to press submit
+        //check if the newly inputted student is a team member of the grader
+        const student_teams = JSON.parse($('#student-teams').val());
+        for(let i = 0; i < student_teams.length; i++) {
+            if(student_teams[i].team_members.includes(grader_id) && student_teams[i].team_members.includes(user_input.val())) {
+                team_grading = true;
+                break;
+            }
+        }
+        // if all 4 above conditions are met, allow user to press submit
         const index = Number(user_input.attr('name').substr(12));
         if (user_input.val() === '') {
             valid_students[index] = undefined;
-        } else if (valid_entry && !already_exists && !self_grading) {
+        } else if (valid_entry && !already_exists && !self_grading && !team_grading) {
             valid_students[index] = true;
         } else {
             valid_students[index] = false;
@@ -323,6 +331,8 @@
                 $(error_div_id).text("Please enter a valid new grader that is in the course and not already in the matrix.");
             } else if (self_grading) {
                 $(error_div_id).text("Please note that student is not able to grade themselves.");
+            } else if (team_grading) {
+                $(error_div_id).text("Please note that student is not able to grade their team members.");
             } else if (valid_students.includes(false)) {
                 $(error_div_id).text("Please enter valid new students that are in the course and not already assigned to the grader.");
             } else if (new_grader && !valid_students.includes(true)) {
@@ -330,6 +340,7 @@
             }
             $(error_div_id).show();
             $(button_id).prop('disabled', true);
+            team_grading = false //resetting the status for team_grading
         }
     }
 
@@ -371,6 +382,7 @@
         let valid_grader = false;
         let valid_students = [];
         let self_grading = false;
+        let team_grading = false;
         $("#peer-table").on("click", ".fa-pencil-alt", function() {
             editGraderPeerForm($(this));
             valid_grader = true;

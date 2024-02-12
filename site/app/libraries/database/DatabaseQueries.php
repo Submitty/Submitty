@@ -4045,6 +4045,44 @@ VALUES(?, ?, ?, ?, 0, 0, 0, 0, ?)",
     }
 
     /**
+     * Return an array of Team objects(team_id, team_name, team_members) for all teams on given gradeable
+     *
+     * @param Gradeable $gradeable
+     * @return \app\models\Team[]
+     */
+    public function getTeamsByGradeable(Gradeable $gradeable) {
+        $this->course_db->query(
+            "
+            SELECT 
+                gt.team_id AS team_id,
+                gt.team_name AS team_name,
+                STRING_AGG(u.user_id, ',') AS team_members
+            FROM 
+                gradeable_teams gt
+            JOIN 
+                teams t ON gt.team_id = t.team_id
+            JOIN 
+                users u ON t.user_id = u.user_id
+            WHERE 
+                gt.g_id = ?
+            GROUP BY 
+                gt.team_id
+            ORDER BY
+                team_id",
+            [$gradeable->getId()]
+        );
+        $teams = [];
+        $rows = $this->course_db->rows();
+        if ($rows !== null) {
+            foreach ($rows as $row) {
+                $row['team_members'] = explode(',', $row['team_members']); // comma-separated string to an array
+                $teams[] = $row;
+            }
+        }
+        return $teams;
+    }
+
+    /**
      * Edit the user's message from table seeking_team
      */
     public function updateSeekingTeamMessageById(string $g_id, string $user_id, ?string $message) {
