@@ -132,14 +132,40 @@ class ElectronicGraderController extends AbstractController {
         }
         return $histogram;
     }
-
+    /**
+     * function to filter out students in the same team as Grader
+     * @param Gradeable $gradeable
+     * @param string $grader
+     * @param Array $students
+     * @return Array $filtered_grading_info
+     */
+    private function filterTeamStudents(Gradeable $gradeable, string $grader, array $students) {
+        $filtered_grading_info = [];
+        $teams = $this->core->getQueries()->getTeamsByGradeable($gradeable);
+        foreach ($teams as $team_key => $team) {
+            $team_members = $team['team_members'];
+            $grader_in_team = in_array($grader, $team_members);
+            if ($grader_in_team) {
+                foreach ($students as $student_key => $student) {
+                    if (in_array($student, $team_members)) {
+                        unset($students[$student_key]);
+                    }
+                }
+            }
+        }
+        $students = array_values($students);
+        $filtered_grading_info[0] = $grader;
+        $filtered_grading_info[1] = $students;
+        return $filtered_grading_info;
+    }
     /**
      * Helper function for Randomization
      * @param Array $student_array
      * @param int $number_to_grade
+     * @param Gradeable $gradeable
      * @return Array $final_grading_info
      */
-    private function setRandomizedGraders(array $student_array, int $number_to_grade) {
+    private function setRandomizedGraders(array $student_array, int $number_to_grade, Gradeable $gradeable) {
         $final_grading_info = [];
         $graded_array = $student_array;
         /*n_array_peers : An Array of arrays that holds information on to be graded peers
@@ -180,7 +206,8 @@ class ElectronicGraderController extends AbstractController {
             for ($j = 1; $j < count($n_array_peers); ++$j) {
                 array_push($temp, $n_array_peers[$j][$i]);
             }
-            array_push($final_grading_info, [$n_array_peers[0][$i],$temp]);
+            $filtered_array = $this->filterTeamStudents($gradeable, $n_array_peers[0][$i], $temp);
+            array_push($final_grading_info, $filtered_array);
         }
             return $final_grading_info;
     }
@@ -188,15 +215,17 @@ class ElectronicGraderController extends AbstractController {
     /**
      * Helper function for all grade all in randomized peer assignments
      * @param Array $student_array
+     * @param Gradeable $gradeable
      * @return Array $final_grading_info
      */
-    private function setAllGradAllGrading($student_array) {
+    private function setAllGradAllGrading($student_array, $gradeable) {
         $final_grading_info = [];
         for ($grader = 0; $grader < count($student_array); ++$grader) {
             $peer_array = $student_array;
             unset($peer_array[$grader]);
             $peer_array = array_values($peer_array);
-            array_push($final_grading_info, [$student_array[$grader],$peer_array]);
+            $filtered_array = $this->filterTeamStudents($gradeable, $student_array[$grader], $peer_array);
+            array_push($final_grading_info, $filtered_array);
         }
         return $final_grading_info;
     }
@@ -279,11 +308,12 @@ class ElectronicGraderController extends AbstractController {
                         $peer_array = $student_array;
                         unset($peer_array[$grader]);
                         $peer_array = array_values($peer_array);
-                        array_push($final_grading_info, [$student_array[$grader],$peer_array]);
+                        $filtered_array = $this->filterTeamStudents($gradeable, $student_array[$grader], $peer_array);
+                        array_push($final_grading_info, $filtered_array);
                     }
                 }
                 else {
-                    $final_grading_info = $this->setRandomizedGraders($student_array, $number_to_grade);
+                    $final_grading_info = $this->setRandomizedGraders($student_array, $number_to_grade, $gradeable);
                 }
             }
             $gradeable->setRandomPeerGradersList($final_grading_info);
@@ -319,11 +349,11 @@ class ElectronicGraderController extends AbstractController {
             $all_grade_all = true;
         }
         if ($all_grade_all) {
-            $final_grading_info = $this->setAllGradAllGrading($student_array);
+            $final_grading_info = $this->setAllGradAllGrading($student_array, $gradeable);
             $gradeable->setRandomPeerGradersList($final_grading_info);
             return JsonResponse::getSuccessResponse($final_grading_info);
         }
-        $final_grading_info = $this->setRandomizedGraders($student_array, $number_to_grade);
+        $final_grading_info = $this->setRandomizedGraders($student_array, $number_to_grade, $gradeable);
         if ($number_to_grade < 1) {
             $gradeable->setRandomPeerGradersList($final_grading_info);
             return JsonResponse::getSuccessResponse("Clear Peer Matrix");
