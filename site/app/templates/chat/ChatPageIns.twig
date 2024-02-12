@@ -1,0 +1,42 @@
+<div class="content">
+    <h1> Live Lecture Chat </h1>
+    <button onclick="newChatroomForm()" class="btn btn-primary">New Chatroom</button>
+    <hr>
+    <div class="chatrooms-table-wrapper">
+        <h2> Chatrooms </h2>
+        <table id="chatrooms-table" class="table table-striped">
+            <col style="width: 25%">
+            <col style="width: 25%">
+            <col style="width: 25%">
+            <col style="width: 25%">
+            <thead>
+                <tr>
+                    <th scope="col" style="text-align: left">Name</th>
+                    <th scope="col" style="text-align: left">Description</th>
+                    <th scope="col" style="text-align: left">Host</th>
+                    <th scope="col" style="text-align: left"></th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for chatroom in chatrooms %}
+                    <tr>
+                        <td style="text-align: left">
+                            {{ chatroom.getTitle() }}
+                        </td>
+                        <td style="text-align: left">
+                            {{ chatroom.getDescription() }}
+                        </td>
+                        <td style="text-align: left">
+                            {{ chatroom.getHostId() }}
+                        </td>
+                        <td>
+                            <a href="{{ base_url }}/{{ chatroom.getId() }}" class="btn btn-primary">Join</a>
+                        </td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+
+{% include('chat/CreateChatroomForm.twig') %}

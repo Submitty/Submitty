@@ -1892,4 +1892,11 @@ function tzWarn() {
         Cookies.set("last_tz_warn_time", Date.now());
     }
 }
+
 document.addEventListener('DOMContentLoaded', tzWarn);
+
+function newChatroomForm() {
+    $('.popup-form').css('display', 'none');
+    var form = $("#create-chatroom-form");
+    form.css("display", "block");
+}

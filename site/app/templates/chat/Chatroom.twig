@@ -1,0 +1,42 @@
+{% block body %}
+<div class="content">
+    <div class="chatroom-container">
+        <header class="chatroom-header">
+            <h1>{{ chatroom.getTitle() }}</h1>
+            <button id="leaveRoom">Leave Room</button>
+        </header>
+
+        <div class="chatroom-main">
+            <div class="message-area">
+                <!-- Sample Message -->
+                <div class="message other">
+                    <span class="user">Alice:</span>
+                    <p>Hey, how's everyone doing today?</p>
+                    <span class="time">09:45</span>
+                </div>
+                <div class="message you">
+                    <span class="user">You:</span>
+                    <p>Doing great, thanks! How about you?</p>
+                    <span class="time">09:46</span>
+                </div>
+                <!-- End of Sample Message -->
+            </div>
+
+            <div class="input-area">
+                <textarea id="messageInput" placeholder="Type your message here..."></textarea>
+                <button id="sendMessage">Send</button>
+            </div>
+        </div>
+
+        <aside class="chatroom-sidebar">
+            <h3>Active Users</h3>
+            <ul>
+                <li>Alice</li>
+                <li>Bob</li>
+                <li>Charlie</li>
+            </ul>
+        </aside>
+    </div>
+</div>
+{% endblock %}
+
