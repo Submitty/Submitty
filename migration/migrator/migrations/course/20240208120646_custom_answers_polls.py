@@ -17,18 +17,19 @@ def up(config, database, semester, course):
     database.execute(
         """
         ALTER TABLE polls
-        ADD COLUMN IF NOT EXISTS custom_answers BOOLEAN DEFAULT false;
+        ADD COLUMN IF NOT EXISTS custom_answers boolean DEFAULT false;
+
+        DROP TABLE IF EXISTS poll_options_custom;
 
         CREATE TABLE IF NOT EXISTS poll_options_custom (
-            order_id integer NOT NULL DEFAULT 1,
             poll_id integer,
             response text NOT NULL,
-            credit boolean NOT NULL,
-            option_id integer NOT NULL,
-            author_id VARCHAR(255)
+            correct boolean NOT NULL,
+            option_id integer NOT NULL DEFAULT 1,
+            author_id VARCHAR(255) NOT NULL
         );
 
-        CREATE SEQUENCE IF NOT EXISTS poll_options_custom_seq
+        CREATE SEQUENCE IF NOT EXISTS poll_options_order_id_seq
             AS integer
             START WITH 1
             INCREMENT BY 1
@@ -36,9 +37,7 @@ def up(config, database, semester, course):
             NO MAXVALUE
             CACHE 1;
 
-        ALTER SEQUENCE poll_options_custom_seq OWNED BY poll_options_custom.order_id;
-        ALTER TABLE poll_options_custom ALTER COLUMN order_id SET DEFAULT nextval('poll_options_custom_seq');
-        ALTER TABLE poll_options_custom ALTER COLUMN option_id SET DEFAULT nextval('poll_options_custom_seq');
+        ALTER SEQUENCE poll_options_custom_option_id_seq OWNED BY poll_options_custom.option_id;
         """
     )
 

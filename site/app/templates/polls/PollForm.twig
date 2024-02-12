@@ -54,6 +54,12 @@
         </div>
 
         <div class="poll-type-option">
+            <input type="radio" id="poll-type-single-custom-response-survey" name="question_type" value="single-custom-response-survey" onclick="changePollType()" {{ question_type == 'single-custom-response-survey'? "checked" : "" }}></input>
+            <label for="poll-type-single-custom-response-survey">single response - custom response survey</label>
+            <p class="poll-type-description"><i>Students can insert and select only one custom inserted response. Full credit if one option is chosen.</i></p>
+        </div>
+
+        <div class="poll-type-option">
             <input type="radio" id="poll-type-multiple-response-exact" name="question_type" value="multiple-response-exact" onclick="changePollType()" {{ question_type == 'multiple-response-exact'? "checked" : "" }}></input>
             <label for="poll-type-multiple-response-exact">multiple response - exact</label>
             <p class="poll-type-description"><i>Students can select one or more responses, and they receive full credit only if their selection exactly matches the instructor's selection.</i></p>
@@ -69,6 +75,12 @@
             <input type="radio" id="poll-type-multiple-response-survey" name="question_type" value="multiple-response-survey" onclick="changePollType()" {{ question_type == 'multiple-response-survey'? "checked" : "" }}></input>
             <label for="poll-type-multiple-response-survey">multiple response - survey</label>
             <p class="poll-type-description"><i>Students can select one or more responses, and any selection is worth full credit.</i></p>
+        </div>
+
+        <div class="poll-type-option">
+            <input type="radio" id="poll-type-multiple-custom-response-survey" name="question_type" value="multiple-custom-response-survey" onclick="changePollType()" {{ question_type == 'multiple-custom-response-survey'? "checked" : "" }}></input>
+            <label for="poll-type-multiple-custom-response-survey">multiple response - custom response survey</label>
+            <p class="poll-type-description"><i>Students may insert custom responses that others may select as well, and any selection is worth full credit, assuming at least one option was picked.</i></p>
         </div>
 
         <br/>
@@ -185,7 +197,9 @@
         let count = $(".option_id").length;
         for (let i = 0; i < count; i++) {
             if ($("#poll-type-single-response-survey").is(":checked")
-                || $("#poll-type-multiple-response-survey").is(":checked")) {
+                || $("#poll-type-single-custom-response-survey").is(":checked")
+                || $("#poll-type-multiple-response-survey").is(":checked")
+                || $("#poll-type-multiple-custom-response-survey").is(":checked")) {
                 $($(".correct-box")[i]).prop('checked', true);
                 $($(".correct-box")[i]).css({"display":"none"});
             } else {
@@ -248,6 +262,8 @@
             }
         }
 
+        const custom_survey = $('#poll-type-multiple-custom-response-survey').is(':checked') || $('#poll-type-single-custom-response-survey').is(':checked');
+
         if ($("#poll-name").val().length === 0) {
             $("#poll-form-submit").prop("disabled", true);
             $(".polls-submit-error").hide();
@@ -259,9 +275,11 @@
         } else if (!$('#poll-type-single-response-single-correct').is(':checked')
             && !$('#poll-type-single-response-multiple-correct').is(':checked')
             && !$('#poll-type-single-response-survey').is(':checked')
+            && !$('#poll-type-single-custom-response-survey').is(':checked')
             && !$('#poll-type-multiple-response-exact').is(':checked')
             && !$('#poll-type-multiple-response-flexible').is(':checked')
-            && !$('#poll-type-multiple-response-survey').is(':checked')) {
+            && !$('#poll-type-multiple-response-survey').is(':checked')
+            && !$('#poll-type-multiple-custom-response-survey').is(':checked')) {
             $("#poll-form-submit").prop("disabled", true);
             $(".polls-submit-error").hide();
             $("#question-type-error").show();
@@ -273,11 +291,11 @@
             $("#poll-form-submit").prop("disabled", true);
             $(".polls-submit-error").hide();
             $("#empty-date-error").show();
-        } else if ($(".response-container").length === 0) {
+        } else if ($(".response-container").length === 0 && !custom_survey) {
             $("#poll-form-submit").prop("disabled", true);
             $(".polls-submit-error").hide();
             $("#response-count-error").show();
-        } else if ($(".correct-box:checked").length === 0) {
+        } else if ($(".correct-box:checked").length === 0 && !custom_survey) {
             $("#poll-form-submit").prop("disabled", true);
             $(".polls-submit-error").hide();
             $("#correct-response-count-error").show();

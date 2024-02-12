@@ -16,19 +16,16 @@ class CustomOption {
     #[ORM\Id]
     #[ORM\Column(name: "option_id", type: Types::INTEGER)]
     #[ORM\GeneratedValue]
-    protected int $id;
-
-    #[ORM\Column(name: "order_id", type: Types::INTEGER)]
-    protected int $order_id;
+    protected int $option_id;
 
     #[ORM\Column(name: "author_id", type: Types::TEXT)]
     protected string $author_id;
 
+    #[ORM\Column(name: "correct", type: Types::BOOLEAN)]
+    protected bool $correct;
+
     #[ORM\Column(name: "response", type: Types::TEXT)]
     protected string $response;
-
-    #[ORM\Column(name: "credit", type: Types::BOOLEAN)]
-    protected bool $credit;
 
     #[ORM\ManyToOne(targetEntity: Poll::class, inversedBy: "options")]
     #[ORM\JoinColumn(name: "poll_id", referencedColumnName: "poll_id", nullable: false)]
@@ -41,25 +38,15 @@ class CustomOption {
     #[ORM\JoinColumn(name: "option_id", referencedColumnName: "option_id")]
     protected Collection $user_responses;
 
-    public function __construct(int $order_id, string $response, bool $credit, string $author_id) {
-        $this->setOrderId($order_id);
+    public function __construct(string $response, string $author_id) {
         $this->setResponse($response);
-        $this->setCredit($credit);
         $this->setAuthorId($author_id);
-
+        $this->setCorrect(true);
         $this->user_responses = new ArrayCollection();
     }
 
     public function getId(): int {
-        return $this->id;
-    }
-
-    public function setOrderId(int $order_id): void {
-        $this->order_id = $order_id;
-    }
-
-    public function getOrderId(): int {
-        return $this->order_id;
+        return $this->option_id;
     }
 
     public function setAuthorId(string $author_id) : void {
@@ -78,12 +65,12 @@ class CustomOption {
         return $this->response;
     }
 
-    public function setCredit(bool $credit): void {
-        $this->credit = $credit;
+    public function setCorrect(bool $correct): void {
+        $this->correct = $correct;
     }
 
-    public function isCredit(): bool {
-        return $this->credit;
+    public function isCorrect(): bool {
+        return $this->correct;
     }
 
     public function setPoll(Poll $poll): void {

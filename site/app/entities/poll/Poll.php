@@ -54,9 +54,12 @@ class Poll {
     #[ORM\OrderBy(["order_id" => "ASC"])]
     protected Collection $options;
 
-    #[ORM\OneToMany(mappedBy: "poll", targetEntity: CustomOption::class, orphanRemoval: true)]
+    /**
+     * @var Collection<CustomOption>
+     */
+    #[ORM\OneToMany(mappedBy: "poll", targetEntity: CustomOption::class, orphanRemoval: true, cascade: ["persist"])]
     #[ORM\JoinColumn(name: "poll_id", referencedColumnName: "poll_id")]
-    #[ORM\OrderBy(["custom_order" => "DESC"])]
+    #[ORM\OrderBy(["option_id" => "DESC"])]
     protected Collection $custom_options;
 
     /**
@@ -77,6 +80,7 @@ class Poll {
         $this->setClosed();
         $this->setDisableCustomAnswers();
         $this->options = new ArrayCollection();
+        $this->custom_options = new ArrayCollection();
         $this->responses = new ArrayCollection();
     }
 
@@ -210,8 +214,25 @@ class Poll {
         return $this->options;
     }
 
-    public function getOptionById(int $option_id): Option {
+    public function getCustomOptions(): Collection {
+        return $this->custom_options;
+    }
+
+    public function getAllOptions(): Collection {
+        $mergedCollection = new ArrayCollection();
         foreach ($this->options as $option) {
+            $mergedCollection->add($option);
+        }
+        foreach ($this->custom_options as $customOption) {
+            $mergedCollection->add($customOption);
+        }
+
+        return $mergedCollection;
+    }
+
+
+    public function getOptionById(int $option_id): Option | CustomOption {
+        foreach ($this->getAllOptions() as $option) {
             if ($option->getId() === $option_id) {
                 return $option;
             }

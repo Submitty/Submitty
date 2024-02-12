@@ -103,28 +103,6 @@ function updatePollVisible(pollid, base_url) {
     });
 }
 
-function toggleCustomAnswers(pollid, base_url) {
-    const accepting_custom_answers =`#poll_${pollid}_allow_custom_answers`;
-
-    const url = base_url + '/toggleCustomAnswers';
-    const fd = new FormData();
-    fd.append('csrf_token', csrfToken);
-    fd.append('poll_id', pollid);
-    fd.append('allow_custom_answers', $(accepting_custom_answers).is(':checked') ? 'enabled' : 'disabled');
-    $.ajax({
-        url: url,
-        type: 'POST',
-        data: fd,
-        processData: false,
-        cache: false,
-        contentType: false,
-        error: function(err) {
-            console.error(err);
-            window.alert('Something went wrong. Please try again.');
-        },
-    });
-}
-
 function updateDropdownStates(curr_state, cookie_key) {
     const expiration_date = new Date(new Date().getFullYear(), new Date().getMonth(), new Date().getDate()+7);
     Cookies.set(cookie_key, !curr_state, { expires: expiration_date, path: '/' });

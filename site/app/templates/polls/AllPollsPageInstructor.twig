@@ -31,7 +31,6 @@
                     <th scope="col"></th>
                     <th scope="col">Visible</th>
                     <th scope="col">Accepting Answers</th>
-                    <th scope="col">Custom Answers</th>
                     <th scope="col">Responses</th>
                     <th scope="col"></th>
                 </tr>
@@ -55,9 +54,6 @@
                         </td>
                         <td>
                             <input type="checkbox" id="poll_{{ poll.getId() }}_view_results" aria-label="label" onclick='updatePollAcceptingAnswers("{{ poll.getId() }}", "{{ base_url }}")' {{ poll.isOpen ? 'checked' : ''}}>
-                        </td>
-                        <td>
-                            <input type="checkbox" id="poll_{{ poll.getId() }}_allow_custom_answers" aria-label="label" onclick='toggleCustomAnswers("{{ poll.getId() }}", "{{ base_url }}")' {{ poll.allowsCustomAnswers() ? 'checked' : ''}}>
                         </td>
                         <td id="poll_{{ poll.getId() }}_responses"> {{ poll.getId() not in response_counts|keys ? 0 : response_counts[poll.getId()] }} </td>
                         <td>
@@ -166,7 +162,6 @@
                     <th scope="col">Date Released</th>
                     <th scope="col">Visible</th>
                     <th scope="col">Accepting Answers</th>
-                    <th scope="col">Custom Answers</th>
                     <th scope="col">Responses</th>
                     <th scope="col"></th>
                 </tr>
@@ -191,9 +186,6 @@
                         </td>
                         <td>
                             <input type="checkbox" id="poll_{{ poll.getId() }}_view_results" aria-label="label" onclick='updatePollAcceptingAnswers("{{ poll.getId() }}", "{{ base_url }}")' {{ poll.isOpen ? 'checked' : ''}}>
-                        </td>
-                        <td>
-                            <input type="checkbox" id="poll_{{ poll.getId() }}_allow_custom_answers" aria-label="label" onclick='toggleCustomAnswers("{{ poll.getId() }}", "{{ base_url }}")' {{ poll.allowsCustomAnswers() ? 'checked' : ''}}>
                         </td>
                         <td>
                             <a href="{{base_url}}/{{ poll.getId() }}" class="btn btn-primary">

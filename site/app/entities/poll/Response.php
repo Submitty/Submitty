@@ -26,6 +26,10 @@ class Response {
     #[ORM\JoinColumn(name: "option_id", referencedColumnName: "option_id", nullable: false)]
     protected Option $option;
 
+    #[ORM\ManyToOne(targetEntity: CustomOption::class, fetch: "EAGER", inversedBy: "user_responses")]
+    #[ORM\JoinColumn(name: "option_id", referencedColumnName: "option_id", nullable: false)]
+    protected CustomOption $custom_option;
+
     public function __construct(string $student_id) {
         $this->setStudentId($student_id);
     }
@@ -50,11 +54,19 @@ class Response {
         return $this->poll;
     }
 
-    public function setOption(Option $option): void {
-        $this->option = $option;
+    public function setOption(Option | CustomOption $option): void {
+        if ($option instanceof CustomOption) {
+            $this->custom_option = $option;
+        } else {
+            $this->option = $option;
+        }
     }
 
-    public function getOption(): Option {
-        return $this->option;
+    public function getOption(): Option | CustomOption {
+        if (isset($this->option)) {
+            return $this->option;
+        } else {
+            return $this->custom_option;
+        }
     }
 }
