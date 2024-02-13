@@ -1285,7 +1285,7 @@ function modifyThreadList(currentThreadId, currentCategoriesId, course, loadFirs
     });
 }
 
-function toggleLike(post_id, thread_id, current_user) {
+function toggleLike(post_id, thread_id, current_user, taTrue) {
 
     // eslint-disable-next-line no-undef
     const url = buildCourseUrl(['post', 'likes']);
@@ -1328,8 +1328,8 @@ function toggleLike(post_id, thread_id, current_user) {
                 console.log(localStorage.getItem('theme'));
             }
 
-            if (likeIconSrcElement.endsWith('/img/on-duck-button.svg')) {
-                if (theme==='light' && likeIconSrcElement.endsWith('/img/on-duck-button.svg')) {
+            if (likeIconSrcElement.endsWith('/img/on-duck-button.svg')||likeIconSrcElement.endsWith('/img/on-duck-button-ta-teacher.svg')) {
+                if (theme==='light' && (likeIconSrcElement.endsWith('/img/on-duck-button.svg')||likeIconSrcElement.endsWith('/img/on-duck-button-ta-teacher.svg'))) {
                     likeIconSrcElement = likeIconSrcElement.replace('on-duck-button.svg', 'light-mode-off-duck.svg');
                 }
                 else {
@@ -1341,8 +1341,8 @@ function toggleLike(post_id, thread_id, current_user) {
                 likeCounterElement.innerText = likeCounter;
             }
             else {
-                if (theme==='light') {
-                    likeIconSrcElement = likeIconSrcElement.replace('light-mode-off-duck.svg', 'on-duck-button.svg');
+                if (taTrue) {
+                    likeIconSrcElement = likeIconSrcElement.replace('light-mode-off-duck.svg', 'on-duck-button-ta-teacher.svg');
                 }
                 else {
                     likeIconSrcElement = likeIconSrcElement.replace('light-mode-off-duck.svg', 'on-duck-button.svg');
