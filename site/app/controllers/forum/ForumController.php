@@ -1348,7 +1348,7 @@ class ForumController extends AbstractController {
      * @Route("/courses/{_semester}/{_course}/post/likes", methods={"POST"})
      */
     public function toggleLike(): JsonResponse {
-        $requiredKeys = ['post_id', 'thread_id', 'current_user','action'];
+        $requiredKeys = ['post_id', 'current_user','action'];
         $action = $_POST['action'];
         foreach ($requiredKeys as $key) {
             if (!isset($_POST[$key])) {
@@ -1356,7 +1356,7 @@ class ForumController extends AbstractController {
             }
         }
         $output = [];
-        $output['type'] = $this->core->getQueries()->toggleLikes($_POST['post_id'], $_POST['thread_id'], $this->core->getUser()->getId());
+        $output['type'] = $this->core->getQueries()->toggleLikes($_POST['post_id'], $this->core->getUser()->getId());
 
         if ($output["type"] === "false") {
             return JsonResponse::getErrorResponse('Catch Fail in Query');

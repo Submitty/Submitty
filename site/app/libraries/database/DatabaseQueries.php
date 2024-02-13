@@ -722,18 +722,18 @@ SQL;
         return $categories_list;
     }
 
-    public function toggleLikes(int $post_id, int $thread_id, string $current_user): string {
+    public function toggleLikes(int $post_id, string $current_user): string {
         try {
-            $this->course_db->query("SELECT * FROM forum_upducks WHERE post_id = ? AND user_id = ? AND thread_id = ?", [$post_id, $current_user, $thread_id]);
+            $this->course_db->query("SELECT * FROM forum_upducks WHERE post_id = ? AND user_id = ?", [$post_id, $current_user]);
 
             if (isset($this->course_db->rows()[0])) {
                 // If a row with the same values exists, delete it
-                $this->course_db->query("DELETE FROM forum_upducks WHERE post_id = ? AND user_id = ? AND thread_id = ?", [$post_id, $current_user, $thread_id]);
+                $this->course_db->query("DELETE FROM forum_upducks WHERE post_id = ? AND user_id = ?", [$post_id, $current_user]);
                 $result = 'unlike';
             }
             else {
                 // If no row with the same values exists, insert the new row
-                $this->course_db->query("INSERT INTO forum_upducks (post_id, user_id, thread_id) VALUES (?, ?, ?)", [$post_id, $current_user, $thread_id]);
+                $this->course_db->query("INSERT INTO forum_upducks (post_id, user_id) VALUES (?, ?)", [$post_id, $current_user]);
                 $result = 'like';
             }
             return $result;
