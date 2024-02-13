@@ -42,6 +42,7 @@ class AdminGradeableController extends AbstractController {
         'participation', 'note',
         'none (for practice only)'];
 
+
     const gradeable_type_strings = [
         'checkpoint' => 'Checkpoints (simple data entry: full/half/no credit)',
         'numeric' => 'Numeric/Text (simple data entry: integer or floating point and/or short text strings)',
@@ -52,10 +53,37 @@ class AdminGradeableController extends AbstractController {
 
     /**
      * @Route("/courses/{_semester}/{_course}/download", methods={"POST"})
+     * @return JsonResponse
      */
     public function downloadJson(){
-       return JsonResponse::getSuccessResponse($_POST['gradeable_id']);
+        $config = $this->core->getConfig();
+        $return_json = [
+            'title' => $config->getTitle(),
+            'type' => $config->getType(),
+            'id' => $config->getId(),
+            'instructions_url' => $config->getInstructionsUrl(),
+            'syllabus_bucket' => $config->getSyllabusBucket()
+        ];
+        if ($config->getType() === GradeableType::Electronic_File) {
+            if ($config->isTeamAssignment()) {
+                $team_properties = [
+                    'team_max_size' => $config->getTeamSizeMax(),
+                    'inherit_from' => ''
+                ];
+               $return_json['team_assignment'] = $team_properties;
+            }
+            if ($config->isTaGrading()) {
+
+            }
+
+
+
+
+
+        }
+        return JsonResponse::getSuccessResponse($_POST['gradeable_id']);
     }
+
     /**
      * Displays the 'new' page, populating the first-page properties with the
      *  provided gradeable's data
