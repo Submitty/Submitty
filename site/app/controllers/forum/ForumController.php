@@ -1361,10 +1361,10 @@ class ForumController extends AbstractController {
         if ($output["type"] === "false") {
             return JsonResponse::getErrorResponse('Catch Fail in Query');
         }
-        else if ($output["type"] === "unlike" && $action === "/img/light-mode-off-duck.svg"){
+        elseif ($output["type"] === "unlike" && $action === "/img/light-mode-off-duck.svg") {
             return JsonResponse::getErrorResponse('Catch Fail in Query');
         }
-        else if ($output["type"] === "like" && $action === "/img/on-duck-button.svg"){
+        elseif ($output["type"] === "like" && $action === "/img/on-duck-button.svg") {
             return JsonResponse::getErrorResponse('Catch Fail in Query');
         }
         return JsonResponse::getSuccessResponse($output);
