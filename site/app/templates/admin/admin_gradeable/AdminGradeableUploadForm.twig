@@ -16,6 +16,5 @@
     <input type="file" data-testid="upload" name="upload" id="upload" accept=".json" aria-label="Choose File">
 {% endblock %}
 {% block buttons %}
-    {{ block('close_button') }}
     <input class="btn btn-primary" onclick="ajaxUploadGradeable()" data-testid="submit"  type="button" value="Submit" />
 {% endblock %}
