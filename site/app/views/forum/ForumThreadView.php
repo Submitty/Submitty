@@ -9,6 +9,7 @@ use app\libraries\ForumUtils;
 use app\models\User;
 
 class ForumThreadView extends AbstractView {
+
     private function getSavedForumCategories($current_course, $categories) {
         $category_ids_array = array_column($categories, 'category_id');
         $cookieSelectedCategories = [];
@@ -1061,6 +1062,9 @@ class ForumThreadView extends AbstractView {
      * @param string[] $post_attachments
      */
     public function createPost(array $thread, array $post, $unviewed_posts, $first, $reply_level, $display_option, $includeReply, array $author_info, array $post_attachments, bool $has_history, bool $is_merged_thread, bool $render = false, bool $thread_announced = false, bool $isCurrentFavorite = false) {
+        // Get first author information
+        $thread_id_start = $thread["id"];
+        $first_post_start = $this->core->getQueries()->getFirstPostForThread($thread_id_start);
 
         $current_user = $this->core->getUser()->getId();
         $thread_id = $thread["id"];
@@ -1096,8 +1100,17 @@ class ForumThreadView extends AbstractView {
         }
 
         if ($post["anonymous"]) {
-            $visible_username = "Anonymous";
+            if($first){
+                $visible_username = "[Owner] Anonymous";
+            }
+            else if($post["author_user_id"] == $first_post_start['author_user_id']){
+                $visible_username = "[Owner] Anonymous";
+            }
+            else{
+                $visible_username = "Anonymous";
+            }
         }
+
         $classes = ["post_box"];
         if ($first && $display_option != 'alpha') {
             $classes[] = "first_post";
