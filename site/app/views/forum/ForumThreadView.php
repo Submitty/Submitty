@@ -311,7 +311,7 @@ class ForumThreadView extends AbstractView {
                 "merge_thread_content" => $generatePostContent["merge_thread_content"],
                 "csrf_token" => $generatePostContent["csrf_token"],
                 "activeThreadTitle" => $generatePostContent["activeThreadTitle"],
-                "post_box_id" => $generatePostContent["post_box_id"] + 1,
+                "post_box_id" => $generatePostContent["post_box_id"],
                 "merge_url" => $this->core->buildCourseUrl(['forum', 'threads', 'merge']),
                 "split_url" => $this->core->buildCourseUrl(['forum', 'posts', 'split']),
                 "post_content_limit" => $post_content_limit,
@@ -571,12 +571,12 @@ class ForumThreadView extends AbstractView {
         $isThreadLocked = $this->core->getQueries()->isThreadLocked($thread_id);
         $accessFullGrading = $this->core->getUser()->accessFullGrading();
 
-        $post_box_id = 0;
+        $post_box_id = 1;
 
         $form_action_link = $this->core->buildCourseUrl(['forum', 'posts', 'new']);
 
         if (($isThreadLocked != 1 || $accessFullGrading ) && $includeReply) {
-            $GLOBALS['post_box_id'] = $post_box_id = isset($GLOBALS['post_box_id']) ? $GLOBALS['post_box_id'] + 1 : 1;
+            $GLOBALS['post_box_id'] = $post_box_id = isset($GLOBALS['post_box_id']) ? $GLOBALS['post_box_id'] + 1 : 2;
         }
 
         $merge_thread_content = [];
@@ -628,7 +628,7 @@ class ForumThreadView extends AbstractView {
                 "merge_thread_content" => $merge_thread_content,
                 "csrf_token" => $csrf_token,
                 "activeThreadTitle" => $activeThreadTitle,
-                "post_box_id" => $post_box_id + 1,
+                "post_box_id" => $post_box_id,
                 "total_attachments" => $GLOBALS['totalAttachments'],
                 "merge_url" => $this->core->buildCourseUrl(['forum', 'threads', 'merge']),
                 "split_url" => $this->core->buildCourseUrl(['forum', 'posts', 'split'])
@@ -1228,7 +1228,7 @@ class ForumThreadView extends AbstractView {
 
         $post_box_id = 1;
         if (!$isThreadLocked || $this->core->getUser()->accessFullGrading()) {
-            $GLOBALS['post_box_id'] = $post_box_id = isset($GLOBALS['post_box_id']) ? $GLOBALS['post_box_id'] + 1 : 1;
+            $GLOBALS['post_box_id'] = $post_box_id = isset($GLOBALS['post_box_id']) ? $GLOBALS['post_box_id'] + 1 : 2;
         }
 
         $created_post = [
