@@ -5415,7 +5415,7 @@ AND gc_id IN (
     public function existsCustomResponse(string $poll_id, string $author_id) : bool {
         $params = [$poll_id, $author_id];
         $query = "SELECT *
-                  FROM poll_options_custom
+                  FROM poll_options
                   WHERE poll_id = ? AND author_id = ?";
 
         $this->course_db->query($query,$params);

@@ -24,7 +24,7 @@
                 <fieldset>
                     <legend>
                         <h2>
-                            Instructor responses:
+                            Possible responses:
                         </h2>
                     </legend>
                     <table class="poll-content">
@@ -50,6 +50,9 @@
                     {% set index = 0 %}
 
                     {% set user_selections = poll.getSelectedOptionIds() %}
+                    {% set divide_custom_responses = false %}
+                    {% set exists_custom_response = false %}
+
                     {% for option in poll.getOptions() %}
                         <tr class="radio option-row">
                             <td class="option-btn">
@@ -69,6 +72,17 @@
                                 "content" : option.getResponse(),
                                 "style": "display: inline"
                             } only %}
+
+                            {% if user_id == option.getAuthorId() or (user_admin and option.isCustom()) %}
+                                        {% set exists_custom_response = true %}
+                                        <div class="move-btn" style = "border:0; color:var(--actionable-blue);">
+                                            <i class="fa-solid fa-pen-to-square"></i>
+                                        </div>
+                                        <div class="move-btn delete-btn" style = "border:0; color:var(--badge-backgroud-red);">
+                                            <i class="fa fa-lg fa-trash delete"></i>
+                                        </div>
+                            {% endif %}
+
                             {% if option.isCorrect() and poll.isReleaseAnswer()%}
                                 <span class="fa-stack fa-2xs correct-tag">
                                     <i class="fa fa-circle fa-stack-2x correct-tag-background"></i>
@@ -80,60 +94,13 @@
                         {% set index = index + 1 %}
                     {% endfor %}
                     <hr />
-                {% if poll and poll.allowsCustomAnswers()%}
-                    {% set existsResponse = false %}
-                    <legend>
-                        <h2>
-                            Custom responses:
-                        </h2>
-                    </legend>
-                    {% for option in poll.getCustomOptions() %}
-                            <tr class="radio option-row">
-                                <td class="option-btn">
-                                <input class="response-radio"
-                                    type={{ button_type }}
-                                    aria-label="Option {{ index + 1 }}"
-                                    value="{{ option.getId() }}"
-                                    name="answers[]"
-                                    id="answer-{{index}}"
-                                    {{ not user_admin and option.getId() in user_selections ? "checked" : "" }}
-                                    {{ (not user_admin and poll.isOpen()) ? "" : "disabled" }}
-                                    onchange="disableNoResponse();"
-                                />
-                                </td>
-                                <td class="option-text">
-
-                                    {% include "misc/Markdown.twig" with {
-                                        "content" : option.getResponse(),
-                                        "style": "display: inline"
-                                    } only %}
-
-                                    {% if user_id == option.getAuthorId() %}
-                                        {% set existsResponse = true %}
-                                        <div class="move-btn delete-btn">
-                                            <i class="fa fa-lg fa-trash delete"></i>
-                                        </div>
-                                    {% endif %}
-
-                                    {% if option.isCorrect() and poll.isReleaseAnswer()%}
-                                        <span class="fa-stack fa-2xs correct-tag">
-                                            <i class="fa fa-circle fa-stack-2x correct-tag-background"></i>
-                                            <i class="fa fa-check fa-stack-1x fa-xl correct-tag-checkmark"></i>
-                                        </span>
-                                    {% endif %}
-                                </td>
-                            </tr>
-                            {% set index = index + 1 %}
-                        {% endfor %}
-                        <hr />
-                {% endif %}
             </table>
                 </fieldset>
                 {% if not user_admin and poll.isOpen() %}
                     <button type="submit" class="btn btn-primary student-submit">Submit</button>
                 {% endif %}
             </form>
-            {% if not user_admin and poll.isOpen() and existsResponse is same as(false) %}
+            {% if not user_admin and poll.isOpen() and not exists_custom_response and poll.allowsCustomResponses() %}
                 <div class = 'info-wrapper'>
                     <form method="post" action="{{ base_url }}/addCustomResponse">
                         <input type="hidden" name="csrf_token" value="{{ csrf_token }}"/>

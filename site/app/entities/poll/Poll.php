@@ -43,9 +43,6 @@ class Poll {
     #[ORM\Column(type: Types::STRING)]
     protected $release_answer;
 
-    #[ORM\Column(name: "custom_answers",type: Types::BOOLEAN)]
-    protected bool $custom_answers;
-
     /**
      * @var Collection<Option>
      */
@@ -53,14 +50,6 @@ class Poll {
     #[ORM\JoinColumn(name: "poll_id", referencedColumnName: "poll_id")]
     #[ORM\OrderBy(["order_id" => "ASC"])]
     protected Collection $options;
-
-    /**
-     * @var Collection<CustomOption>
-     */
-    #[ORM\OneToMany(mappedBy: "poll", targetEntity: CustomOption::class, orphanRemoval: true, cascade: ["persist"])]
-    #[ORM\JoinColumn(name: "poll_id", referencedColumnName: "poll_id")]
-    #[ORM\OrderBy(["option_id" => "DESC"])]
-    protected Collection $custom_options;
 
     /**
      * @var Collection<Response>
@@ -80,7 +69,6 @@ class Poll {
         $this->setClosed();
         $this->setDisableCustomAnswers();
         $this->options = new ArrayCollection();
-        $this->custom_options = new ArrayCollection();
         $this->responses = new ArrayCollection();
     }
 
@@ -116,10 +104,6 @@ class Poll {
         return $this->status === "open";
     }
 
-    public function allowsCustomAnswers(): bool {
-        return $this->custom_answers === true;
-    }
-
     public function setClosed(): void {
         $this->status = "closed";
     }
@@ -134,6 +118,10 @@ class Poll {
 
     public function isEnded(): bool {
         return $this->status === "ended";
+    }
+
+    public function allowsCustomResponses() : bool {
+        return $this->question_type === "single-custom-response-survey" || $this->question_type === "multiple-custom-response-survey";
     }
 
     public function setEnableCustomAnswers(): void {
@@ -214,25 +202,8 @@ class Poll {
         return $this->options;
     }
 
-    public function getCustomOptions(): Collection {
-        return $this->custom_options;
-    }
-
-    public function getAllOptions(): Collection {
-        $mergedCollection = new ArrayCollection();
+    public function getOptionById(int $option_id): Option {
         foreach ($this->options as $option) {
-            $mergedCollection->add($option);
-        }
-        foreach ($this->custom_options as $customOption) {
-            $mergedCollection->add($customOption);
-        }
-
-        return $mergedCollection;
-    }
-
-
-    public function getOptionById(int $option_id): Option | CustomOption {
-        foreach ($this->getAllOptions() as $option) {
             if ($option->getId() === $option_id) {
                 return $option;
             }
@@ -247,15 +218,6 @@ class Poll {
 
     public function removeOption(Option $option): void {
         $this->options->removeElement($option);
-    }
-
-    public function addCustomOption(CustomOption $option): void {
-        $this->custom_options->add($option);
-        $option->setPoll($this);
-    }
-
-    public function removeCustomOption(CustomOption $option): void {
-        $this->custom_options->removeElement($option);
     }
 
     public function addResponse(Response $response, int $option_id) {

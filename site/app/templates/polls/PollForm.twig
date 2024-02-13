@@ -137,25 +137,26 @@
         <h2> Responses: </h2>
         <div id="responses">
             {% if poll is not null %}
-                {% set is_survey = poll.getQuestionType() == "single-response-survey" or poll.getQuestionType() == "multiple-response-survey" %}
+                {% set is_survey = poll.getQuestionType() == "single-response-survey" or poll.getQuestionType() == "single-custom-response-survey" or poll.getQuestionType() == "multiple-response-survey" or poll.getQuestionType() == "multiple-custom-response-survey" %}
                 {% for option in poll.getOptions() %}
-                    <div class="response-container" id="response_{{option.getId()}}_wrapper">
-                        <input type="hidden" class="order order-{{option.getOrderId()}}" name="option[{{option.getId()}}][order]" value="{{option.getOrderId()}}"/>
-                        <input type="hidden" class="option_id" name="option[{{option.getId()}}][id]" value="{{option.getId()}}"/>
-                        <input aria-label="Is correct" class="correct-box" type="checkbox" name="option[{{option.getId()}}][is_correct]" {{ option.isCorrect() or is_survey ? "checked": "" }} {{ is_survey ? "style='display:none'" : "" }}>
-                        <textarea aria-label="Response text" class="poll_response" name="option[{{option.getId()}}][response]" style="resize: none; min-height: 50px; max-height: 300px; height: 50px; width: calc(100% - 200px);"
-                                  rows="10" cols="30">{{option.getResponse()}}</textarea>
-                        <div class="move-btn up-btn">
-                            <i class="fa fa-lg fa-chevron-up"></i>
+                    {% if not option.isCustom() %}
+                        <div class="response-container" id="response_{{option.getId()}}_wrapper">
+                            <input type="hidden" class="order order-{{option.getOrderId()}}" name="option[{{option.getId()}}][order]" value="{{option.getOrderId()}}"/>
+                            <input type="hidden" class="option_id" name="option[{{option.getId()}}][id]" value="{{option.getId()}}"/>
+                            <input aria-label="Is correct" class="correct-box" type="checkbox" name="option[{{option.getId()}}][is_correct]" {{ option.isCorrect() or is_survey ? "checked": "" }} {{ is_survey ? "style='display:none'" : "" }}>
+                            <textarea aria-label="Response text" class="poll_response" name="option[{{option.getId()}}][response]" style="resize: none; min-height: 50px; max-height: 300px; height: 50px; width: calc(100% - 200px); rows="10" cols="30">{{option.getResponse()}}</textarea>
+                            <div class="move-btn up-btn">
+                                <i class="fa fa-lg fa-chevron-up"></i>
+                            </div>
+                            <div class="move-btn down-btn">
+                                <i class="fa fa-lg fa-chevron-down"></i>
+                            </div>
+                            <div class="move-btn delete-btn">
+                                <i class="fa fa-lg fa-trash delete"></i>
+                            </div>
+                            <br/>
                         </div>
-                        <div class="move-btn down-btn">
-                            <i class="fa fa-lg fa-chevron-down"></i>
-                        </div>
-                        <div class="move-btn delete-btn">
-                            <i class="fa fa-lg fa-trash delete"></i>
-                        </div>
-                        <br/>
-                    </div>
+                    {% endif %}
                 {% endfor %}
             {% endif %}
         </div>
@@ -228,7 +229,9 @@
         let hidden_style = "";
         let is_checked = "";
         if ($("#poll-type-single-response-survey").is(":checked")
-            || $("#poll-type-multiple-response-survey").is(":checked")) {
+            || $("#poll-type-single-custom-response-survey").is(":checked")
+            || $("#poll-type-multiple-response-survey").is(":checked")
+            || $("#poll-type-multiple-custom-response-survey").is(":checked")) {
             hidden_style = "style='display:none'";
             is_checked = "checked";
         }

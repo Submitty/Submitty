@@ -18,6 +18,9 @@ class Option {
     #[ORM\GeneratedValue]
     protected int $id;
 
+    #[ORM\Column(name: "author_id", type: Types::TEXT)]
+    protected string $author_id;
+
     #[ORM\Column(name: "order_id", type: Types::INTEGER)]
     protected int $order_id;
 
@@ -26,6 +29,9 @@ class Option {
 
     #[ORM\Column(name: "correct", type: Types::BOOLEAN)]
     protected bool $correct;
+
+    #[ORM\Column(name: "custom", type: Types::BOOLEAN)]
+    protected bool $custom;
 
     #[ORM\ManyToOne(targetEntity: Poll::class, inversedBy: "options")]
     #[ORM\JoinColumn(name: "poll_id", referencedColumnName: "poll_id", nullable: false)]
@@ -38,10 +44,12 @@ class Option {
     #[ORM\JoinColumn(name: "option_id", referencedColumnName: "option_id")]
     protected Collection $user_responses;
 
-    public function __construct(int $order_id, string $response, bool $is_correct) {
+    public function __construct(int $order_id, string $response, bool $is_correct, string $author_id = '', bool $custom = false) {
         $this->setOrderId($order_id);
         $this->setResponse($response);
         $this->setCorrect($is_correct);
+        $this->setAuthorId($author_id);
+        $this->setCustom($custom);
 
         $this->user_responses = new ArrayCollection();
     }
@@ -58,6 +66,14 @@ class Option {
         return $this->order_id;
     }
 
+    public function setAuthorId(string $author_id) : void {
+        $this->author_id = $author_id;
+    }
+
+    public function getAuthorId() : string {
+        return $this->author_id;
+    }
+
     public function setResponse(string $response): void {
         $this->response = $response;
     }
@@ -72,6 +88,14 @@ class Option {
 
     public function isCorrect(): bool {
         return $this->correct;
+    }
+
+    public function setCustom(bool $custom): void {
+        $this->custom = $custom;
+    }
+
+    public function isCustom(): bool {
+        return $this->custom;
     }
 
     public function setPoll(Poll $poll): void {

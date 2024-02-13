@@ -3,7 +3,6 @@
 namespace app\controllers;
 
 use app\entities\poll\Option;
-use app\entities\poll\CustomOption;
 use app\entities\poll\Poll;
 use app\entities\poll\Response;
 use app\libraries\Core;
@@ -195,12 +194,6 @@ class PollController extends AbstractController {
         $poll = new Poll($_POST['name'], $_POST['question'], $_POST['question_type'], $date, $_POST['release_histogram'], $_POST["release_answer"]);
         $em->persist($poll);
 
-        $allows_custom_answer = $poll->getQuestionType() === "single-custom-response-survey" || $poll->getQuestionType() === "multiple-custom-response-survey";
-
-        if ($allows_custom_answer) {
-            $poll->setEnableCustomAnswers();
-        }
-
         // Need to run this after persist so that we can use getId() below
         if (isset($_FILES['image_file']) && $_FILES["image_file"]["name"] !== "") {
             // validate the uploaded file size
@@ -225,7 +218,7 @@ class PollController extends AbstractController {
         $answers = 0;
 
         foreach ($_POST['option'] as $option) {
-            if (!$poll->allowsCustomAnswers() && (!isset($option['order']) || !isset($option['response']))) {
+            if (!$poll->allowsCustomResponses() && (!isset($option['order']) || !isset($option['response']))) {
                 $this->core->addErrorMessage("Error occurred in adding poll");
                 return new RedirectResponse($this->core->buildCourseUrl(['polls']));
             }
@@ -237,7 +230,7 @@ class PollController extends AbstractController {
             $em->persist($option);
         }
 
-        if ($answers === 0 && !$poll->allowsCustomAnswers()) {
+        if ($answers === 0 && !$poll->allowsCustomResponses()) {
             $this->core->addErrorMessage("Polls must have at least one correct response");
             return new RedirectResponse($this->core->buildCourseUrl(['polls']));
         }
@@ -395,9 +388,12 @@ class PollController extends AbstractController {
 
         foreach ($poll->getOptions() as $poll_option) {
             if (!in_array($poll_option->getId(), $keep_ids)) {
-                if ($poll_option->hasUserResponses()) {
+                if ($poll_option->hasUserResponses() && !$poll_option->isCustom()) {
                     $this->core->addErrorMessage("Error occurred in editing poll: attempt to delete response option that has already been submitted as an answer");
                     return new RedirectResponse($returnUrl);
+                }
+                if($poll->allowsCustomResponses() && $poll_option->isCustom()){
+                    continue;
                 }
                 $poll->removeOption($poll_option);
                 $em->remove($poll_option);
@@ -460,7 +456,7 @@ class PollController extends AbstractController {
             $this->core->addErrorMessage("No associated text provided for custom answer");
             return new RedirectResponse($this->core->buildCourseUrl(['polls']));
         }
-        else if ($poll->allowsCustomAnswers() === false) {
+        else if ($poll->allowsCustomResponses() === false) {
             $this->core->addErrorMessage("Poll is currently not accepting custom answers");
             return new RedirectResponse($this->core->buildCourseUrl(['polls']));
         }
@@ -468,9 +464,12 @@ class PollController extends AbstractController {
             $this->core->addErrorMessage("You may only submit at most one custom answer");
             return new RedirectResponse($this->core->buildCourseUrl(['polls']));
         }
-        $custom_poll_option = new CustomOption($poll_response,$user_id);
-        $poll->addCustomOption($custom_poll_option);
+        $custom_poll_option = new Option(1000, $poll_response, true, $user_id, true);
+        $em->persist($custom_poll_option);
         $em->flush();
+
+        $poll->addOption($custom_poll_option);
+        $em->persist($poll);
 
         $response = new Response($user_id);
         $poll->addResponse($response, $custom_poll_option->getId());
@@ -482,10 +481,10 @@ class PollController extends AbstractController {
     }
 
     /**
-     * @Route("/courses/{_semester}/{_course}/polls/removeCustomResponse", methods={"POST"})
+     * @Route("/courses/{_semester}/{_course}/polls/adustCustomResponse", methods={"POST"})
      */
     public function removeCustomResponse(): RedirectResponse {
-        // check if author id matches or if is an instructor
+        // TODO ==> Will handle any updates or removal from student or instructor
         $this->core->addSuccessMessage("Successfully removed custom response");
         return new RedirectResponse($this->core->buildCourseUrl(['polls']));
     }
