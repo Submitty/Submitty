@@ -478,6 +478,7 @@ class ForumThreadView extends AbstractView {
         $upDuckCounter_map = [];
         $upDuckCounter_map = $this->core->getQueries()->getUpduckInfoForPosts($post_ids);
         $userLiked = $this->core->getQueries()->getUserLikesForPosts($post_ids, $current_user);
+        $likedByTa = $this->core->getQueries()->getColorOfUpduck($post_ids);
 
         if ($display_option == "tree") {
             $order_array = [];
@@ -523,6 +524,9 @@ class ForumThreadView extends AbstractView {
                         $boolLiked = true;
                         $boolLiked = in_array($post["id"], $userLiked, true);
 
+                        $taTrue = true;
+                        $taTrue = in_array($post["id"], $likedByTa, false);
+
                         $post_data[] = $this->createPost(
                             $activeThread,
                             $post,
@@ -532,6 +536,7 @@ class ForumThreadView extends AbstractView {
                             $display_option,
                             $upDuckCounter_map[$post["id"]],
                             $boolLiked,
+                            $taTrue,
                             $includeReply,
                             $authors_display_info[$post['author_user_id']],
                             $post_attachments[$post["id"]][0],
@@ -555,6 +560,7 @@ class ForumThreadView extends AbstractView {
             foreach ($posts as $post) {
                 $post["author_user_group"] = $author_user_groups_map[$post["author_user_id"]];
                 $boolLiked = in_array($post["id"], $userLiked, true);
+                $taTrue = in_array($post["id"], $likedByTa, false);
                 $post_data[] = $this->createPost(
                     $activeThread,
                     $post,
@@ -564,6 +570,7 @@ class ForumThreadView extends AbstractView {
                     $display_option,
                     $upDuckCounter_map[$post["id"]],
                     $boolLiked,
+                    $taTrue,
                     $includeReply,
                     $authors_display_info[$post['author_user_id']],
                     $post_attachments[$post["id"]][0],
@@ -1071,7 +1078,7 @@ class ForumThreadView extends AbstractView {
      * } $author_info
      * @param string[] $post_attachments
      */
-    public function createPost(array $thread, array $post, $unviewed_posts, $first, $reply_level, $display_option, int $counter, bool $isLiked, $includeReply, array $author_info, array $post_attachments, bool $has_history, bool $is_merged_thread, bool $render = false, bool $thread_announced = false, bool $isCurrentFavorite = false) {
+    public function createPost(array $thread, array $post, $unviewed_posts, $first, $reply_level, $display_option, int $counter, bool $isLiked, bool $taTrue, $includeReply, array $author_info, array $post_attachments, bool $has_history, bool $is_merged_thread, bool $render = false, bool $thread_announced = false, bool $isCurrentFavorite = false) {
 
         $current_user = $this->core->getUser()->getId();
         $thread_id = $thread["id"];
@@ -1214,7 +1221,7 @@ class ForumThreadView extends AbstractView {
         $post_up_duck = [
             "upduck_count" => $counter,
             "upduck_user_liked" => $isLiked,
-            "upduck_user_type" => $this->core->getUser()->getGroup(),
+            "taTrue" => $taTrue
         ];
 
         if ($this->core->getUser()->getGroup() == 4) {
