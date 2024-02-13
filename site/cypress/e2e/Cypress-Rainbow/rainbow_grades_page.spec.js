@@ -5,32 +5,30 @@ describe('Test cases for the rainbow grades page', () => {
         cy.login('instructor');
         cy.get('#display-rainbow-grades-summary').then(($checkbox) => {
             if (!$checkbox.prop('checked')) {
-            cy.get('#display-rainbow-grades-summary').click();
+                cy.get('#display-rainbow-grades-summary').click();
             }
         });
         cy.get('#display-rainbow-grades-summary').should('be.checked');
-        
         cy.login('student');
         cy.visit(['development', 'grades']);
         cy.get('#nav-sidebar-grades').should('exist');
-        cy.get('#rainbow-grades').should('contain','No grades are available...');
+        cy.get('#rainbow-grades').should('contain', 'No grades are available...');
     });
-        
     it('test Rainbow Grades only summary', () => {
         cy.visit(['sample', 'config']);
         cy.login('instructor');
         cy.get('#display-rainbow-grades-summary').then(($checkbox) => {
             if (!$checkbox.prop('checked')) {
-            cy.get('#display-rainbow-grades-summary').click();
+                cy.get('#display-rainbow-grades-summary').click();
             }
         });
         cy.get('#display-rainbow-grades-summary').should('be.checked');
 
-        cy.visit(['sample', 'reports' , 'rainbow_grades_customization']);
+        cy.visit(['sample', 'reports', 'rainbow_grades_customization']);
         cy.get('#save_status').should('contain', 'No changes to save');
         cy.get('#display_grade_summary').then(($checkbox) => {
             if (!$checkbox.prop('checked')) {
-            cy.get('#display_grade_summary').click();
+                cy.get('#display_grade_summary').click();
             }
         });
         cy.get('#display_grade_summary').should('be.checked');
