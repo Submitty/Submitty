@@ -10,7 +10,7 @@
    newOverwriteCourseMaterialForm newDeleteCourseMaterialForm displayCloseSubmissionsWarning newDeleteGradeableForm
    markAllViewed */
 /* global csrfToken my_window:writable file_path:writable updateBulkProgress icon:writable detectColorScheme
-   createArray readPrevious disableFullUpdate */
+   createArray readPrevious disableFullUpdate registerSelect2Widget */
 
 ////////////Begin: Removed redundant link in breadcrumbs////////////////////////
 //See this pr for why we might want to remove this code at some point
@@ -410,13 +410,13 @@ function newEditCourseMaterialsForm(tag) {
         $('#all-sections-showing-yes', form).prop('checked', false);
         $('#all-sections-showing-no', form).prop('checked', true);
     }
-    const title_label = $("#edit-title-label", form);
-    const url_label = $("#edit-url-url-label", form);
-    const path = $("#new-file-name");
-    const titleVal = $("#edit-title");
+    const title_label = $('#edit-title-label', form);
+    const url_label = $('#edit-url-url-label', form);
+    const path = $('#new-file-name');
+    const titleVal = $('#edit-title');
     title_label.css('display', 'block');
     if (is_link === 1) {
-        titleVal.val(title.replace('link-',''));
+        titleVal.val(title.replace('link-', ''));
         url_label.css('display', 'block');
         const url = $('#edit-url-url');
         url.prop('disabled', false);
@@ -431,12 +431,12 @@ function newEditCourseMaterialsForm(tag) {
 
     editFilePathRecommendations();
     if (is_link === 1) {
-        path.val(decodeURIComponent(file_path.substring(file_path.indexOf("course_materials/") + 17).replace('link-','')));
+        path.val(decodeURIComponent(file_path.substring(file_path.indexOf('course_materials/') + 17).replace('link-', '')));
     }
     else {
         path.val(file_path.substring(1));
     }
-    registerSelect2Widget("new-file-name", "material-edit-form");
+    registerSelect2Widget('new-file-name', 'material-edit-form');
 
     $('#material-edit-form', form).attr('data-id', id);
     $('#edit-picker', form).attr('value', release_time);
@@ -454,7 +454,7 @@ function editFilePathRecommendations() {
     const fileNameInput = $('#edit-title');
     const fileName = fileNameInput.val();
 
-    const options = document.getElementById("new-file-name").options;
+    const options = document.getElementById('new-file-name').options;
     for (let i = 0; i < options.length; i++) {
         const optionString = options[i].value;
         const lastSlash = optionString.lastIndexOf('/');
@@ -471,7 +471,7 @@ function editFilePathRecommendations() {
         options[i].value = newOption;
         options[i].innerHTML = newOption;
     }
-    registerSelect2Widget("new-file-name", "material-edit-form");
+    registerSelect2Widget('new-file-name', 'material-edit-form');
 }
 
 // eslint-disable-next-line no-var

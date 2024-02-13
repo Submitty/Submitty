@@ -295,8 +295,7 @@ function remapGetLS(mapName) {
     catch (e) {
         return null;
     }
-    // eslint-disable-next-line no-prototype-builtins
-    if (!lsKeymap.hasOwnProperty(mapName)) {
+    if (!Object.prototype.hasOwnProperty.call(lsKeymap, mapName)) {
         return null;
     }
     return lsKeymap[mapName].code;
@@ -320,8 +319,7 @@ function remapSetLS(mapName, code) {
             lsKeymap = {};
         }
     }
-    // eslint-disable-next-line no-prototype-builtins
-    if (!lsKeymap.hasOwnProperty(mapName)) {
+    if (!Object.prototype.hasOwnProperty.call(lsKeymap, mapName)) {
         lsKeymap[mapName] = {};
     }
     lsKeymap[mapName].code = code;

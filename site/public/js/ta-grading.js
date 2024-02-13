@@ -116,8 +116,7 @@ $(() => {
         for (let x = 0; x < settingsData[i].values.length; x++) {
             const storageCode = settingsData[i].values[x].storageCode;
             const item = localStorage.getItem(storageCode);
-            // eslint-disable-next-line no-prototype-builtins
-            if (item && settingsCallbacks.hasOwnProperty(storageCode)) {
+            if (item && Object.prototype.hasOwnProperty.call(settingsCallbacks, storageCode)) {
                 settingsCallbacks[storageCode](item);
             }
         }
@@ -127,8 +126,7 @@ $(() => {
         const storageCode = $(this).attr('data-storage-code');
         if (storageCode) {
             localStorage.setItem(storageCode, this.value);
-            // eslint-disable-next-line no-prototype-builtins
-            if (settingsCallbacks && settingsCallbacks.hasOwnProperty(storageCode)) {
+            if (settingsCallbacks && Object.prototype.hasOwnProperty.call(settingsCallbacks, storageCode)) {
                 settingsCallbacks[storageCode](this.value);
                 if (this.value !== 'active-inquiry') {
                     //if user change setting to non-grade inquiry option, change the inquiry_status to off and set inquiry_status to off in grading index page

@@ -230,8 +230,7 @@ function renderGradingComponent(grader_id, component, graded_component, grading_
             'grader_id': grader_id,
             'peer_component' : component.peer,
             'allow_custom_marks' : allowCustomMarks,
-            // eslint-disable-next-line no-prototype-builtins
-            'itempool_id': itempool_items.hasOwnProperty(component.id) ? itempool_items[component.id] : '',
+            'itempool_id': Object.prototype.hasOwnProperty.call(itempool_items, component.id) ? itempool_items[component.id] : '',
             'ta_grading_peer': taGradingPeer,
         }));
     });

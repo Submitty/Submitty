@@ -74,8 +74,7 @@ function showNextConflict() {
  */
 function prepConflictMarks(conflictMarks) {
     for (const id in conflictMarks) {
-        // eslint-disable-next-line no-prototype-builtins
-        if (conflictMarks.hasOwnProperty(id)) {
+        if (Object.prototype.hasOwnProperty.call(conflictMarks, id)) {
             conflictMarks[id].local_deleted = isMarkDeleted(parseInt(id));
         }
     }
