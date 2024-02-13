@@ -67,15 +67,15 @@ def up(config, database, semester, course):
         SELECT * FROM posts WHERE has_attachment = true;
     """)
     for post in posts:
-        post_id = post[0]
+        post_id = str(post[0])
         thread_id = post[1]
         img_path = f"/var/local/submitty/courses/{semester}/{course}/forum_attachments/{thread_id}/{post_id}"
         all_imgs = os.listdir(img_path) if (os.path.isdir(img_path)) else []
         for img in all_imgs:
-            database.execute(f"""
-                         INSERT INTO forum_attachments (post_id, file_name, version_added, version_deleted) VALUES ({post_id}, '{img}', 1, 0);
-                         UPDATE forum_posts_history SET has_attachment = true WHERE post_id = {post_id};
-                         """)
+            database.session.execute("""
+                         INSERT INTO forum_attachments (post_id, file_name, version_added, version_deleted) VALUES (:id, :name, 1, 0);
+                         UPDATE forum_posts_history SET has_attachment = true WHERE post_id = :id;
+                         """, {"id": post_id, "name": img})
 
 
 def down(config, database, semester, course):
