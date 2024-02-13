@@ -17,24 +17,24 @@ class Chatroom {
     #[ORM\Id]
     #[ORM\Column(name: "id", type: Types::INTEGER)]
     #[ORM\GeneratedValue]
-    protected $id;
+    protected int $id;
 
     #[ORM\Column(type: Types::STRING)]
     protected string $host_id;
 
     #[ORM\Column(name: "title", type: Types::STRING)]
-    protected $title;
+    protected string $title;
 
     #[ORM\Column(name: "description", type: Types::STRING)]
-    protected $description;
+    protected string $description;
 
     #[ORM\Column(name: "is_active", type: Types::BOOLEAN)]
-    protected $isActive;
+    protected bool $isActive;
 
     /**
      * @var Collection<Message>
      */
-    #[ORM\OneToMany(mappedBy: "chat", targetEntity: Message::class)]
+    #[ORM\OneToMany(mappedBy: "chat", targetEntity: Message::class, cascade: ["remove"])]
     protected Collection $messages;
 
     public function __construct() {

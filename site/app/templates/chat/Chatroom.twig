@@ -1,42 +1,90 @@
-{% block body %}
-<div class="content">
-    <div class="chatroom-container">
-        <header class="chatroom-header">
-            <h1>{{ chatroom.getTitle() }}</h1>
-            <button id="leaveRoom">Leave Room</button>
-        </header>
-
-        <div class="chatroom-main">
-            <div class="message-area">
-                <!-- Sample Message -->
-                <div class="message other">
-                    <span class="user">Alice:</span>
-                    <p>Hey, how's everyone doing today?</p>
-                    <span class="time">09:45</span>
-                </div>
-                <div class="message you">
-                    <span class="user">You:</span>
-                    <p>Doing great, thanks! How about you?</p>
-                    <span class="time">09:46</span>
-                </div>
-                <!-- End of Sample Message -->
-            </div>
-
-            <div class="input-area">
-                <textarea id="messageInput" placeholder="Type your message here..."></textarea>
-                <button id="sendMessage">Send</button>
-            </div>
+<div class="content chatroom-container">
+    <div class="chatroom-header">
+        <span class="chatroom_title">{{ chatroom.getTitle() }}</span>
+        <button class="leave_room btn btn-danger">Leave Room</button>
+    </div>
+    <hr>
+    <div class="chatroom-main">
+        <div class="message-area"></div>
+        <hr>
+        <div id="input-area">
+            <textarea name="content" class="message_input" placeholder="Type your message here..." rows="2" cols="50"></textarea>
+            <button type="submit" class="send_message btn btn-primary">Send</button>
         </div>
-
-        <aside class="chatroom-sidebar">
-            <h3>Active Users</h3>
-            <ul>
-                <li>Alice</li>
-                <li>Bob</li>
-                <li>Charlie</li>
-            </ul>
-        </aside>
     </div>
 </div>
-{% endblock %}
 
+<script>
+    const chatroomId = "{{ chatroom.getId() }}";
+    const baseURL = "{{ base_url }}";
+
+    document.addEventListener('DOMContentLoaded', () => {
+        fetchMessages(); // Load existing messages
+        setupSendMessage(); // Setup message sending
+    });
+
+    function fetchMessages() {
+        fetch(`${baseURL}/${chatroomId}/messages`)
+            .then(response => response.json())
+            .then(responseData => {
+                const messagesContainer = document.querySelector('.message-area');
+                if (responseData.status === "success" && Array.isArray(responseData.data)) {
+                    responseData.data.forEach(msg => {
+                        appendMessage(messagesContainer, msg.user_id, msg.timestamp, msg.content);
+                    });
+                }
+            })
+            .catch(error => console.error('Error loading messages:', error));
+    }
+
+    function setupSendMessage() {
+        const sendButton = document.querySelector('.send_message');
+        const messageInput = document.querySelector('.message_input');
+
+        sendButton.addEventListener('click', () => {
+            const messageContent = messageInput.value.trim();
+            if (!messageContent) {
+                alert('Please enter a message.');
+                return;
+            }
+
+            const formData = new FormData();
+            formData.append('content', messageContent);
+
+            fetch(`${baseURL}/${chatroomId}/send`, {
+                method: 'POST',
+                body: formData,
+            })
+            .then(response => response.json())
+            .then(data => {
+                console.log('Success:', data);
+                messageInput.value = '';
+                messageInput.focus(); // Refocus on the input field after message send
+
+                // Optionally, update the chat UI with the new message
+                const messagesContainer = document.querySelector('.message-area');
+                appendMessage(messagesContainer, 'You', new Date().toLocaleString(), messageContent); // Adjust as needed
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('Failed to send message. Please try again.');
+            });
+        });
+    }
+
+    function appendMessage(container, userId, timestamp, content) {
+        const messageElement = document.createElement('div');
+        messageElement.classList.add('message');
+        messageElement.innerHTML = `
+            <div class="message_header">
+                <i class="fa-solid fa-circle-user"></i>
+                <span class="username">${userId}</span>
+                <span class="timestamp"> - ${timestamp}</span>
+            </div>
+            <div class="message_content">
+                ${content}
+            </div>
+        `;
+        container.appendChild(messageElement);
+    }
+</script>

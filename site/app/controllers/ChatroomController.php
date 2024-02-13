@@ -4,8 +4,9 @@ namespace app\controllers;
 
 use app\entities\poll\Poll;
 use app\libraries\Core;
-use app\libraries\response\RedirectResponse;
 use app\libraries\response\WebResponse;
+use app\libraries\response\JsonResponse;
+use app\libraries\response\RedirectResponse;
 use app\entities\chat\Chatroom;
 use app\entities\chat\Message;
 use app\libraries\routers\AccessControl;
@@ -53,14 +54,14 @@ class ChatroomController extends AbstractController {
      */
      public function showChatroom(string $chatroom_id): WebResponse|RedirectResponse {
 
-        /** @var \app\repositories\poll\PollRepository */
-        $repo = $this->core->getCourseEntityManager()->getRepository(Chatroom::class);
-        $chatroom = $repo->findByChatroomId($chatroom_id);
-
          if (!is_numeric($chatroom_id)) {
             $this->core->addErrorMessage("Invalid Chatroom ID");
             return new RedirectResponse($this->core->buildCourseUrl(['chat']));
         }
+
+        /** @var \app\repositories\poll\PollRepository */
+        $repo = $this->core->getCourseEntityManager()->getRepository(Chatroom::class);
+        $chatroom = $repo->find($chatroom_id);
 
         return new WebResponse(
             'Chatroom',
@@ -96,47 +97,67 @@ class ChatroomController extends AbstractController {
     }
 
     /**
-     * @Route("/chat/{chatroomId}/message", name="chatroom_post_message", methods={"POST"})
+     * @Route("/courses/{_semester}/{_course}/chat/deleteChatroom", methods={"POST"})
+     * @AccessControl(role="INSTRUCTOR")
      */
-    public function postMessage(int $chatroomId, Request $request, EntityManagerInterface $entityManager): JsonResponse {
-        $content = $request->request->get('content');
+    public function deleteChatroom(): JsonResponse {
+        $chatroom_id = intval($_POST['chatroom_id'] ?? -1);
+        $em = $this->core->getCourseEntityManager();
 
-        $chatroom = $entityManager->getRepository(Chatroom::class)->find($chatroomId);
-        if (!$chatroom || !$chatroom->getIsActive()) {
-            return new JsonResponse(['error' => 'Chatroom not found or not active.'], Response::HTTP_NOT_FOUND);
+        /** @var \app\repositories\chat\ChatroomRepository */
+        $repo = $em->getRepository(Chatroom::class);
+
+        /** @var Chatroom|null */
+        $chatroom = $repo->find(Chatroom::class, $chatroom_id);
+        if ($chatroom === null) {
+            return JsonResponse::getFailResponse('Invalid Chatroom ID');
         }
 
-        $message = new Message();
-        $message->setContent($content);
-        $message->setChatroom($chatroom);
-        // Set other necessary properties, such as timestamp
+        foreach ($chatroom->getMessages() as $message) {
+            $em->remove($message);
+        }
 
-        $entityManager->persist($message);
-        $entityManager->flush();
+        $em->remove($chatroom);
+        $em->flush();
 
-        return new JsonResponse(['success' => true, 'messageId' => $message->getId()]);
+        return JsonResponse::getSuccessResponse();
     }
 
     /**
-     * @Route("/chat/{chatroomId}/messages", name="chatroom_messages", methods={"GET"})
+     * @Route("/courses/{_semester}/{_course}/chat/{chatroom_id}/messages", name="fetch_chatroom_messages", methods={"GET"})
      */
-    public function getMessages(int $chatroomId, EntityManagerInterface $entityManager): JsonResponse {
-        $chatroom = $entityManager->getRepository(Chatroom::class)->find($chatroomId);
-        if (!$chatroom) {
-            return new JsonResponse(['error' => 'Chatroom not found.'], Response::HTTP_NOT_FOUND);
-        }
+    public function fetchChatroomMessages(int $chatroom_id): JsonResponse {
+        $em = $this->core->getCourseEntityManager();
+        $messages = $em->getRepository(Message::class)->findBy(['chatroom' => $chatroom_id], ['timestamp' => 'ASC']);
 
-        $messages = $chatroom->getMessages();
-        $response = [];
-
-        foreach ($messages as $message) {
-            $response[] = [
+        $formattedMessages = array_map(function ($message) {
+            return [
                 'id' => $message->getId(),
                 'content' => $message->getContent(),
-                'timestamp' => $message->getTimestamp()->format('Y-m-d H:i:s')
+                'timestamp' => $message->getTimestamp()->format('Y-m-d H:i:s'),
+                'user_id' => $message->getUserId()
             ];
-        }
+        }, $messages);
 
-        return new JsonResponse(['messages' => $response]);
+        return JsonResponse::getSuccessResponse($formattedMessages);
+    }
+
+    /**
+     * @Route("/courses/{_semester}/{_course}/chat/{chatroom_id}/send", name="send_chatroom_messages", methods={"POST"})
+     */
+    public function sendMessage(int $chatroom_id): JsonResponse {
+        $em = $this->core->getCourseEntityManager();
+        $content = $_POST['content'] ?? '';
+        $userId = $this->core->getUser()->getId();
+        $message = new Message();
+        $message->setChatroomId($chatroom_id);
+        $message->setUserId($userId);
+        $message->setContent($content);
+        $message->setTimestamp(new \DateTimeImmutable("now"));
+
+        $em->persist($message);
+        $em->flush();
+
+        return JsonResponse::getSuccessResponse("Message sent successfully");
     }
 }

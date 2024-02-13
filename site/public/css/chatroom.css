@@ -1,0 +1,64 @@
+.chatroom-container {
+    width:75%;
+    margin-left:10%;
+}
+
+.chatroom_title {
+    font-size: 1.3rem;
+}
+
+.chatroom_description {
+    font-size: 1rem;
+}
+
+.chatroom-main {
+
+}
+
+.leave_room {
+    float:right;
+}
+
+.message-area {
+    overflow-y: auto;
+    height: 33rem;
+}
+
+.message {
+    margin: 1rem;
+}
+
+.message_header {
+    margin-bottom: 3px;
+}
+
+.fa-circle-user {
+    margin-right: 0.5rem;
+}
+
+.username {
+    font-size: 1.1rem;
+}
+
+.timestamp {
+    color:grey;
+}
+
+.message_content {
+    margin-left: 1.7rem;
+}
+
+.input-area {
+}
+
+.message_input {
+    min-height: 30px;
+    min-width: 50rem;
+    resize: none;
+    border-radius: 15px;
+    margin-left:1rem;
+}
+
+.send_message {
+    margin-left: 1rem;
+}

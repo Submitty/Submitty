@@ -8,12 +8,14 @@
             <col style="width: 25%">
             <col style="width: 25%">
             <col style="width: 25%">
-            <col style="width: 25%">
+            <col style="width: 12.5%">
+            <col style="width: 12.5%">
             <thead>
                 <tr>
                     <th scope="col" style="text-align: left">Name</th>
                     <th scope="col" style="text-align: left">Description</th>
                     <th scope="col" style="text-align: left">Host</th>
+                    <th scope="col" style="text-align: left"></th>
                     <th scope="col" style="text-align: left"></th>
                 </tr>
             </thead>
@@ -31,6 +33,10 @@
                         </td>
                         <td>
                             <a href="{{ base_url }}/{{ chatroom.getId() }}" class="btn btn-primary">Join</a>
+                            <a href='javascript:newDeleteChatroomForm("{{ chatroom.getId() }}", "{{ chatroom.getTitle() }}","{{ base_url }}");' class="btn btn-danger">Delete</a>
+                        </td>
+                        <td>
+                            <a href="{{ base_url }}/{{ chatroom.getId() }}/history" class="btn btn-primary">Show History</a>
                         </td>
                     </tr>
                 {% endfor %}
@@ -38,5 +44,49 @@
         </table>
     </div>
 </div>
+
+<script>
+const csrfToken = "{{ csrf_token }}";
+const baseURL = "{{ base_url }}";
+function newDeleteChatroomForm(chatroomId, chatroomName, base_url) {
+    if (confirm(`This will delete chatroom '${chatroomName}'. Are you sure?`)) {
+        const url = `${base_url}/deleteChatroom`;
+        console.log(url);
+        console.log(csrfToken);
+        console.log(chatroomId);
+        const fd = new FormData();
+        fd.append('csrf_token', csrfToken);
+        fd.append('chatroom_id', chatroomId);
+        $.ajax({
+            url: url,
+            type: 'POST',
+            data: fd,
+            processData: false,
+            cache: false,
+            contentType: false,
+            success: function(data) {
+                try {
+                    const msg = JSON.parse(data);
+                    if (msg.status !== 'success') {
+                        console.error(msg);
+                        window.alert('Something went wrong. Please try again.');
+                    }
+                    else {
+                        window.location.reload();
+                    }
+                }
+                catch (err) {
+                    console.error(err);
+                    window.alert('Something went wrong. Please try again.');
+                }
+            },
+            error: function(err) {
+                console.error(err);
+                window.alert('Something went wrong. Please try again.');
+            },
+        });
+    }
+}
+</script>
 
 {% include('chat/CreateChatroomForm.twig') %}

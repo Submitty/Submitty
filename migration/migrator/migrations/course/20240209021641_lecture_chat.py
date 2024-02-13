@@ -16,7 +16,7 @@ def up(config, database, semester, course):
     :type course: str
     """
     database.execute("CREATE TABLE IF NOT EXISTS chatrooms(id SERIAL PRIMARY KEY, host_id character varying NOT NULL, title text NOT NULL, description text, is_active BOOLEAN DEFAULT false NOT NULL)")
-    database.execute("CREATE TABLE IF NOT EXISTS chatroom_messages(id SERIAL PRIMARY KEY, user_id character varying NOT NULL, content text NOT NULL, timestamp timestamp(0) with time zone NOT NULL)")
+    database.execute("CREATE TABLE IF NOT EXISTS chatroom_messages(id SERIAL PRIMARY KEY, chatroom_id integer NOT NULL, user_id character varying NOT NULL, content text NOT NULL, timestamp timestamp(0) with time zone NOT NULL)")
 
     course_dir = Path(config.submitty['submitty_data_dir'], 'courses', semester, course)
     # add boolean to course config
