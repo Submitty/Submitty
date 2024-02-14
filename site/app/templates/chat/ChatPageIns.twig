@@ -5,6 +5,7 @@
     <div class="chatrooms-table-wrapper">
         <h2> Chatrooms </h2>
         <table id="chatrooms-table" class="table table-striped">
+            <col style="width: 5%">
             <col style="width: 25%">
             <col style="width: 25%">
             <col style="width: 25%">
@@ -12,6 +13,7 @@
             <col style="width: 12.5%">
             <thead>
                 <tr>
+                    <th scope="col" style="text-aligh: left"></th>
                     <th scope="col" style="text-align: left">Name</th>
                     <th scope="col" style="text-align: left">Description</th>
                     <th scope="col" style="text-align: left">Host</th>
@@ -22,6 +24,10 @@
             <tbody>
                 {% for chatroom in chatrooms %}
                     <tr>
+                        <td>
+                            <a class="fas fa-pencil-alt black-btn">
+                            </a>
+                        </td>
                         <td style="text-align: left">
                             {{ chatroom.getTitle() }}
                         </td>
