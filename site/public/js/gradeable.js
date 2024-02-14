@@ -348,15 +348,11 @@ function ajaxDownloadGradeable(){
         var result = [];
         result['gradeable_id'] = 'hw-3';
         result['csrf_token'] = csrfToken;
-        const url = '/courses/f24/blank/download';
+        const url = '/courses/s24/sample/download/bulk_upload_test';
         $.ajax({
             url: url,
-            headers: {
-                Accept: 'application/json',
-            },
-            dataType: 'json',
             data: result,
-            method: 'POST',
+            method: 'GET',
         }).always(function (data) {
             data = JSON.parse(JSON.stringify(data));
             if (data['status'] === 'success') {

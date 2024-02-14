@@ -52,19 +52,20 @@ class AdminGradeableController extends AbstractController {
     ];
 
     /**
-     * @Route("/courses/{_semester}/{_course}/download", methods={"POST"})
+     * @Route("/courses/{_semester}/{_course}/download/{gradeable_id}", methods={"GET"})
      * @return JsonResponse
      */
-    public function downloadJson(){
-        $config = $this->core->getConfig();
+    public function downloadJson($gradeable_id){
+
+        $config = $this->core->getQueries()->getGradeableConfig($gradeable_id);
         $return_json = [
             'title' => $config->getTitle(),
-            'type' => $config->getType(),
+            'type' => GradeableType::typeToString($config->getType()),
             'id' => $config->getId(),
             'instructions_url' => $config->getInstructionsUrl(),
             'syllabus_bucket' => $config->getSyllabusBucket()
         ];
-        if ($config->getType() === GradeableType::Electronic_File) {
+        if ($config->getType() === GradeableType::ELECTRONIC_FILE) {
             if ($config->isTeamAssignment()) {
                 $team_properties = [
                     'team_max_size' => $config->getTeamSizeMax(),
@@ -73,7 +74,41 @@ class AdminGradeableController extends AbstractController {
                $return_json['team_assignment'] = $team_properties;
             }
             if ($config->isTaGrading()) {
-
+                $return_json['ta_grading'] = true;
+                if($config->isGradeInquiryAllowed()){
+                    $return_json['grade_inquiries'] = true;
+                    if($config->isGradeInquiryPerComponentAllowed()){
+                        $return_json['grade_inquiries_per_component'] = true;
+                    }
+                }
+            }
+            if ($config->isDiscussionBased()) {
+                $return_json['discussion_based'] = true;
+                $return_json['discussion_tread_id'] = $config->getDiscussionThreadId();
+            }
+            if ($config->isVcs()) {
+                switch($config->getVcsHostType()) {
+                    case 0:
+                        $vcs_values['repository_type'] = 'submitty-hosted';
+                        break;
+                    case 1:
+                        $vcs_values['repository_type'] = 'submitty-hosted-url';
+                        break;
+                    case 2:
+                        $vcs_values['repository_type'] = 'public-github';
+                        break;
+                    case 3:
+                        $vcs_values['repository_type'] = 'private-github';
+                        break;
+                    case 3:
+                        $vcs_values['repository_type'] = 'self-hosted';
+                        break;
+                    default:
+                        break;
+                }
+                $vcs_values = [
+                    $config->getVcsHostType()
+                ];
             }
 
 
@@ -81,7 +116,7 @@ class AdminGradeableController extends AbstractController {
 
 
         }
-        return JsonResponse::getSuccessResponse($_POST['gradeable_id']);
+        return JsonResponse::getSuccessResponse($return_json);
     }
 
     /**
@@ -271,6 +306,7 @@ class AdminGradeableController extends AbstractController {
         $this->core->getOutput()->addSelect2WidgetCSSAndJs();
         $this->core->getOutput()->addInternalJs('admin-gradeable-updates.js');
         $this->core->getOutput()->addInternalJs('gradeable.js');
+        $this->core->getOutput()->addInternalJs('directory.js');
         $this->core->getOutput()->addInternalCss('admin-gradeable.css');
         $this->core->getOutput()->renderTwigOutput('admin/admin_gradeable/AdminGradeableBase.twig', [
             'gradeable' => $gradeable,
