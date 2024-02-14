@@ -28,21 +28,21 @@
         "{{ timezone }}"
         "{{ language }}"
         "https://{{ submitty_url }}"
-        "{{ vcs_url}}"
+        "{{ vcs_url }}"
         "{{ institution_name }}"
         "{{ sysadmin_email }}"
         "{{ submitty_email }}"
         "{{ institution_url }}"
-        1
-        admin
-        y
-        admin
-        admin_password
+        "{{ 1 }}"
+        "{{ admin }}"
+        "{{ y }}"
+        " {{ admin }}"
+        " {{ admin_password }}"
         "{{ submitty_email }}"
-        {{ noreply_email }}
-        {{ smtp_server }}
-        {{ smtp_port }}
-        {{ institution_url }}
+        "{{ noreply_email }}"
+        "{{ smtp_server }}"
+        "{{ smtp_port }}"
+        "{{ institution_url }}"
         " | bash -p ./.setup/install_system.sh > /usr/local/submitty/install.log 2>&1
   args:
     chdir: /usr/local/submitty/GIT_CHECKOUT/Submitty

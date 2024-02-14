@@ -3,39 +3,26 @@
   hosts: submitty
   remote_user: ubuntu
   become: yes
-
-  roles:
-    - app_submitty
-
-  vars_prompt:
-    - name: submitty_dbuser
-      prompt: "Enter Submitty DB User:"
-
-    - name: submitty_dbuser_password
-      prompt: "Enter Password:"
-      private: no
-    - name: submitty_course_dbuser
-      prompt: "Enter Sumitty Course DB User: "
-    - name: submitty_course_dbuser_password
-      prompt: "Enter Submitty Course DB User Password: "
-      private: no
-    - name: timezone
-      prompt: "Timezone: "
-    - name: language
-      prompt: "Language: "
-    - name: submitty_url
-      prompt: "Enter Submitty URL: "
-    - name: vcs_url
-      prompt: "Enter Institution URL: "
-    - name: institution_name
-      prompt: "Enter Institution Name: "
-    - name: submitty_email
-      prompt: "Enter Submitty Email: "
-    - name: noreply_email
-      prompt: "Enter noreply emmail: "
-    - name: smtp_server
-      prompt: "Enter SMTP Server: "
-    - name: smtp_port
-      prompt: "Enter SMTP Port: "
-    - name: institution_url
-      prompt: "Enter Institution URL: "
+  tasks:
+    - name: Install Submitty
+      ansible.builtin.include_role: 
+        name: app_submitty
+      vars: 
+        submitty_dbuser: submitty_dbuser
+        submitty_dbuser_password: submitty_dbuser
+        submitty_course_dbuser: submitty_course_dbuser
+        submitty_course_dbuser_password: submitty_dbuser
+        timezone: America/New_York
+        language: en_US
+        submitty_url: submittyexample.com 
+        vcs_url: example.com
+        institution_name: Example University
+        sysadmin_email: sysadmin@example.com
+        submitty_email: submitty@example.com
+        institution_url: university@example.com
+        admin: admin@example.com
+        y: "yes"
+        admin_password: admin_password
+        noreply_email: noreply_email@example.com
+        smtp_server: mail@university.com
+        smtp_port: 25
