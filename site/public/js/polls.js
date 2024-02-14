@@ -108,6 +108,63 @@ function updateDropdownStates(curr_state, cookie_key) {
     Cookies.set(cookie_key, !curr_state, { expires: expiration_date, path: '/' });
 }
 
+function removeCustomResponse(pollid, optionid, base_url) {
+    const url = base_url + '/removeCustomResponse';
+    const fd = new FormData();
+    fd.append('csrf_token', csrfToken);
+    fd.append('poll_id', pollid);
+    fd.append('option_id', optionid);
+    $.ajax({
+        url: url,
+        type: 'POST',
+        data: fd,
+        processData: false,
+        cache: false,
+        contentType: false,
+        error: function(err) {
+            console.error(err);
+            window.alert('Something went wrong. Please try again.');
+        },
+        success: function(data) {
+            displaySuccessMessage("Successfully removed custom response");
+            document.getElementById(`option-row-${optionid}`).remove();
+            document.querySelector('.custom-response-wrapper').style.display = 'block';
+        }
+    });
+}
+
+function updateCustomResponse(pollid, optionid, base_url) {
+    const custom_response_value = document.getElementById(`${optionid}_custom_response`).value;
+    const url = base_url + '/updateCustomResponse';
+    const fd = new FormData();
+    fd.append('csrf_token', csrfToken);
+    fd.append('poll_id', pollid);
+    fd.append('option_id', optionid);
+    fd.append('option_response',custom_response_value);
+    $.ajax({
+        url: url,
+        type: 'POST',
+        data: fd,
+        processData: false,
+        cache: false,
+        contentType: false,
+        error: function(err) {
+            console.error(err);
+            window.alert('Something went wrong. Please try again.');
+        },
+        success: function(data) {
+            console.log(JSON.stringify(data));
+            displaySuccessMessage("Successfully updated custom response");
+            const parent_container = document.getElementById(`${optionid}_custom_response`).parentNode;
+            parent_container.querySelector('.markdown').style.display = 'inline-flex';
+            parent_container.querySelector('.markdown p').textContent = custom_response_value;
+            parent_container.querySelector('.edit-btn').style.display = 'inline-flex';
+            parent_container.querySelector('textarea').style.display = 'none';
+            parent_container.querySelector('.upload-btn').style.display = 'none';
+        }
+    });
+}
+
 function importPolls() {
     $('#import-polls-form').submit();
 }

@@ -54,7 +54,7 @@
                     {% set exists_custom_response = false %}
 
                     {% for option in poll.getOptions() %}
-                        <tr class="radio option-row">
+                        <tr class="radio option-row" id = "option-row-{{ option.getId() }}">
                             <td class="option-btn">
                             <input class="response-radio"
                                    type={{ button_type }}
@@ -67,7 +67,7 @@
                                    onchange="disableNoResponse();"
                             />
                             </td>
-                            <td class="option-text">
+                            <td class="option-text" id = "markdown-{{index}}">
                             {% include "misc/Markdown.twig" with {
                                 "content" : option.getResponse(),
                                 "style": "display: inline"
@@ -75,11 +75,16 @@
 
                             {% if user_id == option.getAuthorId() or (user_admin and option.isCustom()) %}
                                         {% set exists_custom_response = true %}
-                                        <div class="move-btn" style = "border:0; color:var(--actionable-blue);">
-                                            <i class="fa-solid fa-pen-to-square"></i>
+                                        <textarea aria-label="Response text" id = "{{option.getId()}}_custom_response" class="poll_response" name="option[{{option.getId()}}][response]" style="display:none; resize: none; min-height: 50px; max-height: 300px; height: 50px; width: 100%; rows="10" cols="30">{{option.getResponse()}}</textarea>
+                                        <div class="move-btn upload-btn" style = "display:none; border:0;" onclick = "updateCustomResponse({{ poll.getId() }}, {{ option.getId() }}, '{{ base_url }}');">
+                                            <i class="fa-solid fa-arrow-up-from-bracket black-btn"></i>
                                         </div>
-                                        <div class="move-btn delete-btn" style = "border:0; color:var(--badge-backgroud-red);">
-                                            <i class="fa fa-lg fa-trash delete"></i>
+
+                                        <div class="move-btn edit-btn" style = "border:0;">
+                                            <i class="fas fa-pencil-alt black-btn"></i>
+                                        </div>
+                                        <div class="move-btn delete-btn" style = "border:0;" onclick = "removeCustomResponse({{ poll.getId() }}, {{ option.getId() }}, '{{ base_url }}');">
+                                            <i class="fas fa-trash black-btn"></i>
                                         </div>
                             {% endif %}
 
@@ -100,18 +105,36 @@
                     <button type="submit" class="btn btn-primary student-submit">Submit</button>
                 {% endif %}
             </form>
-            {% if not user_admin and poll.isOpen() and not exists_custom_response and poll.allowsCustomResponses() %}
-                <div class = 'info-wrapper'>
+            {% if not user_admin and poll.isOpen() and poll.allowsCustomResponses() %}
+                <div class = 'info-wrapper custom-response-wrapper' style = 'display:{{exists_custom_response ? 'none' : 'block'}};'>
                     <form method="post" action="{{ base_url }}/addCustomResponse">
                         <input type="hidden" name="csrf_token" value="{{ csrf_token }}"/>
                         <input type="hidden" name="poll_id" value="{{ poll.getId() }}"/>
                         <br />
                         <div class="response-container">
-                            <textarea aria-label="Response text" class="poll_response" name="custom_response" placeholder="Enter response here..." style="resize: none; min-height: 50px; max-height: 300px; height: 50px; width: 100%;"
+                            <textarea aria-label="Response text" class="poll_response custom_poll_response" name="custom_response" placeholder="Enter response here..." style="resize: none; min-height: 50px; max-height: 300px; height: 50px; width: 100%;"
                             rows="10" cols="30"></textarea>
                         </div>
-                        <button type="submit" class="btn btn-primary student-submit">Submit Custom Response</button>
+                        <button type="submit" class="btn btn-primary student-submit custom-response-submit">Add Custom Response</button>
                     </form>
+                    <script>
+                        const custom_response = document.querySelector('.custom_poll_response');
+                        const custom_response_submit =  document.querySelector('.custom-response-submit');
+
+                        const validateCustomResponse = () => {
+                            if (custom_response.value.trim() !== '') {
+                                custom_response_submit.disabled = false;
+                            } else {
+                                custom_response_submit.disabled = true;
+                            }
+                        }
+
+                        custom_response.addEventListener('input', () => {
+                            validateCustomResponse();
+                        });
+
+                        validateCustomResponse();
+                    </script>
                 </div>
             {% endif %}
 
@@ -128,6 +151,16 @@
     function toggle_section(section_id) {
         $(`#${section_id}`).toggle('fast');
     }
+
+    document.querySelectorAll('.edit-btn').forEach((edit_icon) => {
+        edit_icon.onclick = () => {
+            const parent_container = edit_icon.parentNode;
+            parent_container.querySelector('.markdown').style.display = 'none';
+            parent_container.querySelector('.edit-btn').style.display = 'none';
+            parent_container.querySelector('textarea').style.display = 'inline-flex';
+            parent_container.querySelector('.upload-btn').style.display = 'inline-flex';
+        }
+    });
 
     function get_new_chart_width() {
         const MIN_CHART_WIDTH = 400;

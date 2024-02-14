@@ -52,6 +52,9 @@
 }
 
 .option-text {
+    display: flex;
+    align-items: center;
+    gap: 10px;
     padding-top: 0.5em;
     padding-bottom: 0.5em;
     padding-left: 0.25em;
