@@ -140,10 +140,15 @@
                 </div>
                 <div class="user-info">
                     <div class="flex-row-col">
-                        <label for="time_zone_drop_down">Select Timezone: </label>
-                        <select id="time_zone_drop_down" data-testid="time-zone-dropdown"></select>
-                    </div>
+                    <label for="time_zone_drop_down">Select Timezone: </label>
+                    <input type="text" id="time_zone_search" placeholder="Search Timezone">
+                    <select id="time_zone_drop_down" data-testid="time-zone-dropdown">
+                        {% for timezone in available_time_zones %}
+                            <option>{{ timezone }}</option>
+                        {% endfor %}
+                    </select>
                 </div>
+
             </div>
             <div class="user-info-cont">
                 <div class="user-info-title">
@@ -218,6 +223,29 @@
         </div>
     </div>
 </div>
+<script>
+document.addEventListener("DOMContentLoaded", function() {
+    const time_zone_dropdown = document.getElementById('time_zone_drop_down');
+    const time_zone_search = document.getElementById('time_zone_search');
+
+    time_zone_search.addEventListener('input', function() {
+        const search_term = time_zone_search.value.toLowerCase();
+        const options = Array.from(time_zone_dropdown.options);
+        
+        options.forEach(option => {
+            const text = option.textContent.toLowerCase();
+            if (text.includes(search_term)) {
+                option.style.display = 'block';
+            } else {
+                option.style.display = 'none';
+            }
+        });
+    });
+});
+
+
+</script>
+
 {% include 'EditNameForm.twig' %}
 {% include 'EditLastInitialFormatForm.twig' %}
 {% include 'EditProfilePhotoForm.twig' %}
