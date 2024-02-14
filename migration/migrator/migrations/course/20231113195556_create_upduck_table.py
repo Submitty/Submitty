@@ -35,6 +35,11 @@ def up(config, database, semester, course):
     pass
 
 def down(config, database, semester, course):
+    # database.execute(
+    # """
+    #     DROP TABLE forum_upducks;
+    # """
+    # )
     """
     Run down migration (rollback).
 
