@@ -66,6 +66,7 @@ class AdminGradeableController extends AbstractController {
             'syllabus_bucket' => $config->getSyllabusBucket()
         ];
         if ($config->getType() === GradeableType::ELECTRONIC_FILE) {
+            $return_json['bulk_upload'] = $config->isBulkUpload();
             if ($config->isTeamAssignment()) {
                 $team_properties = [
                     'team_max_size' => $config->getTeamSizeMax(),
