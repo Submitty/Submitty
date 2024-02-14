@@ -8,11 +8,8 @@ use app\repositories\poll\PollRepository;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\DBAL\Types\Types;
-use DateInterval;
 use DateTime;
 use app\libraries\DateUtils;
-
-
 use Doctrine\ORM\Mapping as ORM;
 
 #[ORM\Entity(repositoryClass: PollRepository::class)]
@@ -43,7 +40,7 @@ class Poll {
 
     #[ORM\Column(type: Types::TEXT, nullable: true)]
     protected $image_path;
-
+    
     #[ORM\Column(type: Types::STRING)]
     protected $question_type;
 

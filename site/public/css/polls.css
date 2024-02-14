@@ -115,16 +115,19 @@ form {
     flex-grow: 100;
     margin-left: 0.5em;
 }
+
 #poll-timer {
     flex-grow: 100;
     font-size: 14px;
     margin-bottom: 10px;
 }
+
 #poll-hours{
     width: 60px;
     margin-right: 8px;
     margin-bottom: 10px;
 }
+
 #poll-minutes{
     width: 60px;
     margin-bottom: 10px;    
