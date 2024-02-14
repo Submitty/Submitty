@@ -641,12 +641,12 @@
     max-width: 100%;
 }
 
-/* stylelint-disable selector-class-pattern */
+/* stylelint-disable-next-line selector-class-pattern */
 .post_content p:first-child {
     margin-top: 0;
 }
 
-/* stylelint-disable selector-class-pattern */
+/* stylelint-disable-next-line selector-class-pattern */
 .post_content p:last-child {
     margin-bottom: 0;
 }
