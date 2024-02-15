@@ -1,5 +1,3 @@
-/* global csrfToken, getUploadUrl
-*/
 /**
  * The number of decimal places to show to the user
  * @type {int}
@@ -358,7 +356,7 @@ function ajaxDownloadGradeable($gradeable_id){
             if (returned_json['status'] === 'success') {
                 let data = "data:json;charset=utf-8," + encodeURIComponent(JSON.stringify(returned_json['data'], null, 4));
                 let temporaryElement = document.createElement('a');
-                temporaryElement.setAttribute("href",     data);
+                temporaryElement.setAttribute("href", data);
                 temporaryElement.setAttribute("download", returned_json['data']['id'] + ".json");
                 document.body.appendChild(temporaryElement);
                 temporaryElement.click();

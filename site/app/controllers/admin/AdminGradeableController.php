@@ -42,7 +42,6 @@ class AdminGradeableController extends AbstractController {
         'participation', 'note',
         'none (for practice only)'];
 
-
     const gradeable_type_strings = [
         'checkpoint' => 'Checkpoints (simple data entry: full/half/no credit)',
         'numeric' => 'Numeric/Text (simple data entry: integer or floating point and/or short text strings)',
@@ -52,7 +51,7 @@ class AdminGradeableController extends AbstractController {
     ];
 
     /**
-     * @Route("/courses/{_semester}/{_course}/{gradeable_id}/download", methods={"GET"})
+     * @Route("/api/{_semester}/{_course}/{gradeable_id}/download", methods={"GET"})
      * @Route("/courses/{_semester}/{_course}/{gradeable_id}/download", methods={"GET"})
      * @AccessControl(role="INSTRUCTOR")
      * @return JsonResponse
