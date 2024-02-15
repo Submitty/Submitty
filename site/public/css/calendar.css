@@ -208,8 +208,8 @@ a.cal-gradeable-status-text {
 a.cal-gradeable-status-text:hover {
     color: var(--text-black);
     padding: 0;
-    border: none;
     cursor: default;
+    border: none;
 }
 
 a.cal-gradeable-status-text:focus {
