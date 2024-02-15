@@ -343,22 +343,28 @@ function renderOverallComment(comment, editable) {
 }
 
 // Uploads a gradeable via JSON POST request
-function ajaxDownloadGradeable(){
+function ajaxDownloadGradeable($gradeable_id){
     try {
-        var result = [];
-        result['gradeable_id'] = 'hw-3';
-        result['csrf_token'] = csrfToken;
-        const url = '/courses/s24/sample/download/bulk_upload_test';
+        let result = [];
+        // result['csrf_token'] = csrfToken;
+        const url = buildCourseUrl([$gradeable_id, 'download']);
         $.ajax({
             url: url,
             data: result,
             method: 'GET',
-        }).always(function (data) {
-            data = JSON.parse(JSON.stringify(data));
-            if (data['status'] === 'success') {
-                console.log(data);
+        }).always(function (returned_json) {
+            console.log(returned_json);
+            returned_json = JSON.parse(returned_json);
+            if (returned_json['status'] === 'success') {
+                let data = "data:json;charset=utf-8," + encodeURIComponent(JSON.stringify(returned_json['data'], null, 4));
+                let temporaryElement = document.createElement('a');
+                temporaryElement.setAttribute("href",     data);
+                temporaryElement.setAttribute("download", returned_json['data']['id'] + ".json");
+                document.body.appendChild(temporaryElement);
+                temporaryElement.click();
+                temporaryElement.remove();
             } else {
-                console.log(data);
+                alert(returned_json['message']);
                 return false;
             }
         });

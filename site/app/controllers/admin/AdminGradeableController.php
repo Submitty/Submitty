@@ -52,7 +52,7 @@ class AdminGradeableController extends AbstractController {
     ];
 
     /**
-     * @Route("/courses/{_semester}/{_course}/download/{gradeable_id}", methods={"GET"})
+     * @Route("/courses/{_semester}/{_course}/{gradeable_id}/download", methods={"GET"})
      * @return JsonResponse
      */
     public function downloadJson($gradeable_id){
@@ -88,12 +88,14 @@ class AdminGradeableController extends AbstractController {
                 $return_json['discussion_tread_id'] = $config->getDiscussionThreadId();
             }
             if ($config->isVcs()) {
+                $vcs_values = [];
                 switch($config->getVcsHostType()) {
                     case 0:
                         $vcs_values['repository_type'] = 'submitty-hosted';
                         break;
                     case 1:
                         $vcs_values['repository_type'] = 'submitty-hosted-url';
+                        $vcs_values['vcs_path'] = $config->getVcsPartialPath();
                         break;
                     case 2:
                         $vcs_values['repository_type'] = 'public-github';
@@ -101,21 +103,15 @@ class AdminGradeableController extends AbstractController {
                     case 3:
                         $vcs_values['repository_type'] = 'private-github';
                         break;
-                    case 3:
+                    case 4:
                         $vcs_values['repository_type'] = 'self-hosted';
+                        // $vcs_values['vcs_path'] = $config->get
                         break;
                     default:
                         break;
                 }
-                $vcs_values = [
-                    $config->getVcsHostType()
-                ];
+                $return_json['vcs'] = $vcs_values;
             }
-
-
-
-
-
         }
         return JsonResponse::getSuccessResponse($return_json);
     }
@@ -333,6 +329,7 @@ class AdminGradeableController extends AbstractController {
             'vcs_partial_path' => $gradeable->getVcsPartialPath(),
             'vcs_subdirectory' => $gradeable->getVcsSubdirectory(),
             'using_subdirectory' => $gradeable->isUsingSubdirectory(),
+            'download_url' => $this->core->buildCourseUrl([$gradeable->getId(), 'download']),
             'is_pdf_page' => $gradeable->isPdfUpload(),
             'is_pdf_page_student' => $gradeable->isStudentPdfUpload(),
             'itempool_available' => isset($gradeable_config) && $gradeable_config->isNotebookGradeable() && count($itempool_options),
