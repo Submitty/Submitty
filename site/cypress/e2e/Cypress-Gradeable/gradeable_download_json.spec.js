@@ -18,18 +18,18 @@ describe('Tests cases revolving around gradeable access and submition', () => {
         cy.login('instructor');
 
         cy.visit(['sample', 'gradeable', 'bulk_upload_test', 'update']);
-        
+
         cy.get('[data-testid="download-gradeable-btn"]').click();
 
         cy.readFile('cypress/downloads/bulk_upload_test.json').then(test_json => {
-                expect(test_json.title).to.eql('Bulk Upload Scanned Exam');
-                expect(test_json.type).to.eql('Electronic File');
-                expect(test_json.id).to.eql('bulk_upload_test');
-                expect(test_json.instructions_url).to.eql('');
-                expect(test_json.syllabus_bucket).to.eql('homework');
-                expect(test_json.bulk_upload).to.eql(true);
-                expect(test_json.ta_grading).to.eql(true);
-                expect(test_json.grade_inquiries).to.eql(true);
+            expect(test_json.title).to.eql('Bulk Upload Scanned Exam');
+            expect(test_json.type).to.eql('Electronic File');
+            expect(test_json.id).to.eql('bulk_upload_test');
+            expect(test_json.instructions_url).to.eql('');
+            expect(test_json.syllabus_bucket).to.eql('homework');
+            expect(test_json.bulk_upload).to.eql(true);
+            expect(test_json.ta_grading).to.eql(true);
+            expect(test_json.grade_inquiries).to.eql(true);
         });
 
         cy.visit(['sample', 'gradeable', 'subdirectory_vcs_homework', 'update']);
@@ -37,17 +37,17 @@ describe('Tests cases revolving around gradeable access and submition', () => {
         cy.get('[data-testid="download-gradeable-btn"]').click();
 
         cy.readFile('cypress/downloads/subdirectory_vcs_homework.json').then(test_json => {
-                        expect(test_json.title).to.eql('Subdirectory VCS Homework');
-                        expect(test_json.type).to.eql('Electronic File');
-                        expect(test_json.id).to.eql('subdirectory_vcs_homework');
-                        expect(test_json.instructions_url).to.eql('');
-                        expect(test_json.syllabus_bucket).to.eql('homework');
-                        expect(test_json.bulk_upload).to.eql(false);
-                        expect(test_json.ta_grading).to.eql(true);
-                        expect(test_json.grade_inquiries).to.eql(true);
-                        expect(test_json.vcs).to.exist;
-                        expect(test_json.vcs.subdirectory).to.eql('src');
-                        expect(test_json.vcs.repository_type).to.eql('submitty-hosted');
+            expect(test_json.title).to.eql('Subdirectory VCS Homework');
+            expect(test_json.type).to.eql('Electronic File');
+            expect(test_json.id).to.eql('subdirectory_vcs_homework');
+            expect(test_json.instructions_url).to.eql('');
+            expect(test_json.syllabus_bucket).to.eql('homework');
+            expect(test_json.bulk_upload).to.eql(false);
+            expect(test_json.ta_grading).to.eql(true);
+            expect(test_json.grade_inquiries).to.eql(true);
+            expect(test_json.vcs).to.exist;
+            expect(test_json.vcs.subdirectory).to.eql('src');
+            expect(test_json.vcs.repository_type).to.eql('submitty-hosted');
         });
 
         cy.visit(['sample', 'gradeable', 'open_team_homework', 'update']);
@@ -56,18 +56,18 @@ describe('Tests cases revolving around gradeable access and submition', () => {
 
         cy.readFile('cypress/downloads/open_team_homework.json').then(test_json => {
             console.log(test_json);
-                        expect(test_json.title).to.eql('Open Team Homework');
-                        expect(test_json.type).to.eql('Electronic File');
-                        expect(test_json.id).to.eql('open_team_homework');
-                        expect(test_json.instructions_url).to.eql('');
-                        expect(test_json.syllabus_bucket).to.eql('homework');
-                        expect(test_json.bulk_upload).to.eql(false);
-                        expect(test_json.ta_grading).to.eql(true);
-                        expect(test_json.grade_inquiries).to.eql(true);
-                        expect(test_json.team_assignment).to.exist;
-                        expect(test_json.team_assignment.team_max_size).to.eql(3);
-                        expect(test_json.team_assignment.inherit_from).to.eql('');
-                        expect(test_json.vcs).to.not.exist;
+            expect(test_json.title).to.eql('Open Team Homework');
+            expect(test_json.type).to.eql('Electronic File');
+            expect(test_json.id).to.eql('open_team_homework');
+            expect(test_json.instructions_url).to.eql('');
+            expect(test_json.syllabus_bucket).to.eql('homework');
+            expect(test_json.bulk_upload).to.eql(false);
+            expect(test_json.ta_grading).to.eql(true);
+            expect(test_json.grade_inquiries).to.eql(true);
+            expect(test_json.team_assignment).to.exist;
+            expect(test_json.team_assignment.team_max_size).to.eql(3);
+            expect(test_json.team_assignment.inherit_from).to.eql('');
+            expect(test_json.vcs).to.not.exist;
         });
     });
 

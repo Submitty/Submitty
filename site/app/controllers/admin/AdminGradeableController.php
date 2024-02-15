@@ -56,7 +56,7 @@ class AdminGradeableController extends AbstractController {
      * @AccessControl(role="INSTRUCTOR")
      * @return JsonResponse
      */
-    public function downloadJson($gradeable_id){
+    public function downloadJson($gradeable_id) {
         $config = $this->core->getQueries()->getGradeableConfig($gradeable_id);
         $return_json = [
             'title' => $config->getTitle(),
@@ -76,9 +76,9 @@ class AdminGradeableController extends AbstractController {
             }
             if ($config->isTaGrading()) {
                 $return_json['ta_grading'] = true;
-                if($config->isGradeInquiryAllowed()){
+                if ($config->isGradeInquiryAllowed()) {
                     $return_json['grade_inquiries'] = true;
-                    if($config->isGradeInquiryPerComponentAllowed()){
+                    if ($config->isGradeInquiryPerComponentAllowed()) {
                         $return_json['grade_inquiries_per_component'] = true;
                     }
                 }
@@ -89,7 +89,7 @@ class AdminGradeableController extends AbstractController {
             }
             if ($config->isVcs()) {
                 $vcs_values = [];
-                switch($config->getVcsHostType()) {
+                switch ($config->getVcsHostType()) {
                     case 0:
                         $vcs_values['repository_type'] = 'submitty-hosted';
                         break;
