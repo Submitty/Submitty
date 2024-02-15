@@ -99,11 +99,6 @@ class AdminGradeableController extends AbstractController {
                 if (!array_key_exists('vcs_path', $_POST['vcs'])) {
                     return JsonResponse::getErrorResponse('VCS gradeables require a vcs_path. See documentation for information.');
                 }
-                if ($_POST['vcs']['repository_type'] === 'submitty-hosted-url') {
-                    if ($_POST['vcs']['vcs_partial_path'] === '') {
-                        return JsonResponse::getErrorResponse('Submitty hosted CHOOSE url requires vcs_partial_path. See documentation for information.');
-                    }
-                }
                 elseif ($_POST['vcs']['repository_type'] === 'self-hosted') {
                     $values['external_repo'] = $_POST['vcs']['vcs_path'];
                 }
