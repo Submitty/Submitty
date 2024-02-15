@@ -53,10 +53,11 @@ class AdminGradeableController extends AbstractController {
 
     /**
      * @Route("/courses/{_semester}/{_course}/{gradeable_id}/download", methods={"GET"})
+     * @Route("/courses/{_semester}/{_course}/{gradeable_id}/download", methods={"GET"})
+     * @AccessControl(role="INSTRUCTOR")
      * @return JsonResponse
      */
     public function downloadJson($gradeable_id){
-
         $config = $this->core->getQueries()->getGradeableConfig($gradeable_id);
         $return_json = [
             'title' => $config->getTitle(),
@@ -105,10 +106,13 @@ class AdminGradeableController extends AbstractController {
                         break;
                     case 4:
                         $vcs_values['repository_type'] = 'self-hosted';
-                        // $vcs_values['vcs_path'] = $config->get
+                        $vcs_values['vcs_path'] = $config->getVcsPartialPath();
                         break;
                     default:
                         break;
+                }
+                if ($config->isUsingSubdirectory()) {
+                    $vcs_values['subdirectory'] = $config->getVcsSubdirectory();
                 }
                 $return_json['vcs'] = $vcs_values;
             }
