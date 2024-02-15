@@ -231,17 +231,28 @@ document.addEventListener("DOMContentLoaded", function() {
     time_zone_search.addEventListener('input', function() {
         const search_term = time_zone_search.value.toLowerCase();
         const options = Array.from(time_zone_dropdown.options);
-        
-        options.forEach(option => {
+
+        let firstMatchedOptionIndex = -1;
+
+        options.forEach((option, index) => {
             const text = option.textContent.toLowerCase();
             if (text.includes(search_term)) {
                 option.style.display = 'block';
+                if (firstMatchedOptionIndex === -1) {
+                    firstMatchedOptionIndex = index;
+                }
             } else {
                 option.style.display = 'none';
             }
         });
+
+        // Select the first matched option if found
+        if (firstMatchedOptionIndex !== -1) {
+            time_zone_dropdown.selectedIndex = firstMatchedOptionIndex;
+        }
     });
 });
+
 
 
 </script>
