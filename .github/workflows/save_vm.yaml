@@ -46,11 +46,11 @@ jobs:
           jobs=$(gh api repos/${{ github.repository }}/actions/runs/${{ github.run_id}}/attempts/${{ github.run_attempt }}/jobs)
           job_id=$(echo $jobs | jq -r '.jobs[] | select(.runner_name=="${{ runner.name }}") | .id')
           echo "job_id=$job_id" >> $GITHUB_OUTPUT
-      # - name: Send zulip message on failure
-      #   if: failure()
-      #   run: >-
-      #     curl -X POST https://submitty.zulipchat.com/api/v1/messages -u ${{ secrets.ZULIP_AUTHENTICATION }}
-      #       --data-urlencode 'type=stream'
-      #       --data-urlencode 'to=Submitty Developer Studio'
-      #       --data-urlencode 'topic=Vagrant Up Failures'
-      #       --data-urlencode 'content=The Package Vagrant VM Github Action has failed, this means the VM is not saved, and requires attention. View here: https://github.com/Submitty/Submitty/actions/runs/${{ github.run_id }}/job/${{ steps.get-job-id.outputs.job_id }}'
+      - name: Send zulip message on failure
+        if: failure()
+        run: >-
+          curl -X POST https://submitty.zulipchat.com/api/v1/messages -u ${{ secrets.ZULIP_AUTHENTICATION }}
+            --data-urlencode 'type=stream'
+            --data-urlencode 'to=Submitty Developer Studio'
+            --data-urlencode 'topic=Vagrant Up Failures'
+            --data-urlencode 'content=The Package Vagrant VM Github Action has failed, this means the VM is not saved, and requires attention. View here: https://github.com/Submitty/Submitty/actions/runs/${{ github.run_id }}/job/${{ steps.get-job-id.outputs.job_id }}'
