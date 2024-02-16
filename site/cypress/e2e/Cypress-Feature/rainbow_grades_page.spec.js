@@ -1,7 +1,7 @@
 describe('Test cases for the rainbow grades page', () => {
 
     it('test Display Rainbow Grades Summary button', () => {
-        cy.visit(['development', 'config']);
+        cy.visit(['sample', 'config']);
         cy.login('instructor');
         cy.get('#display-rainbow-grades-summary').then(($checkbox) => {
             if (!$checkbox.prop('checked')) {
@@ -10,7 +10,7 @@ describe('Test cases for the rainbow grades page', () => {
         });
         cy.get('#display-rainbow-grades-summary').should('be.checked');
         cy.login('student');
-        cy.visit(['development', 'grades']);
+        cy.visit(['sample', 'grades']);
         cy.get('#nav-sidebar-grades').should('exist');
         cy.get('#rainbow-grades').should('contain', 'No grades are available...');
     });
