@@ -72,7 +72,7 @@ class AdminGradeableController extends AbstractController {
                     'team_max_size' => $config->getTeamSizeMax(),
                     'inherit_from' => ''
                 ];
-               $return_json['team_assignment'] = $team_properties;
+                $return_json['team_assignment'] = $team_properties;
             }
             if ($config->isTaGrading()) {
                 $return_json['ta_grading'] = true;
