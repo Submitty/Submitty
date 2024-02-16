@@ -41,12 +41,3 @@ def down(config):
 
     vcs_path = os.path.join(config.submitty['submitty_data_dir'], 'vcs')
     os.system(f"chgrp -R {daemoncgi_group} {vcs_path}")
-
-    os.system("delgroup submitty_daemonphpcgi")
-
-    submitty_users = config.submitty_users
-    submitty_users.pop('daemonphpcgi_group')
-    submitty_users_file = config.config_path / 'submitty_users.json'
-
-    with open(submitty_users_file, 'w') as json_file:
-        json.dump(submitty_users, json_file, indent=2)
