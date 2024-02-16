@@ -76,14 +76,17 @@
                             {% if user_id == option.getAuthorId() or (user_admin and option.isCustom()) %}
                                         {% set exists_custom_response = true %}
                                         <textarea aria-label="Response text" id = "{{option.getId()}}_custom_response" class="poll_response" name="option[{{option.getId()}}][response]" style="display:none; resize: none; min-height: 50px; max-height: 300px; height: 50px; width: 100%; rows="10" cols="30">{{option.getResponse()}}</textarea>
-                                        <div class="move-btn upload-btn" style = "display:none; border:0;" onclick = "updateCustomResponse({{ poll.getId() }}, {{ option.getId() }}, '{{ base_url }}');">
-                                            <i class="fa-solid fa-arrow-up-from-bracket black-btn"></i>
+                                        <div class="move-btn upload-btn" style = "display:none; border:0; padding:0;" onclick = "updateCustomResponse({{ poll.getId() }}, {{ option.getId() }}, '{{ base_url }}');">
+                                            <i class="fa-solid fa-cloud-arrow-up black-btn"></i>
+                                        </div>
+                                        <div class="move-btn back-btn" style = "display:none; border:0; padding:0;" onclick = "displayCustomResponseEdit('false', {{option.getId()}});">
+                                            <i class="fa-solid fa-clock-rotate-left black-btn"></i>
                                         </div>
 
-                                        <div class="move-btn edit-btn" style = "border:0;">
+                                        <div class="move-btn edit-btn" style = "border:0; padding:0;" onclick = "displayCustomResponseEdit('true', {{option.getId()}});">
                                             <i class="fas fa-pencil-alt black-btn"></i>
                                         </div>
-                                        <div class="move-btn delete-btn" style = "border:0;" onclick = "removeCustomResponse({{ poll.getId() }}, {{ option.getId() }}, '{{ base_url }}');">
+                                        <div class="move-btn delete-btn" style = "border:0; padding:0;" onclick = "removeCustomResponse({{ poll.getId() }}, {{ option.getId() }}, '{{ base_url }}');">
                                             <i class="fas fa-trash black-btn"></i>
                                         </div>
                             {% endif %}
@@ -107,7 +110,6 @@
             </form>
             {% if not user_admin and poll.isOpen() and poll.allowsCustomResponses() %}
                 <div class = 'info-wrapper custom-response-wrapper' style = 'display:{{exists_custom_response ? 'none' : 'block'}};'>
-                    <form method="post" action="{{ base_url }}/addCustomResponse">
                         <input type="hidden" name="csrf_token" value="{{ csrf_token }}"/>
                         <input type="hidden" name="poll_id" value="{{ poll.getId() }}"/>
                         <br />
@@ -115,8 +117,7 @@
                             <textarea aria-label="Response text" class="poll_response custom_poll_response" name="custom_response" placeholder="Enter response here..." style="resize: none; min-height: 50px; max-height: 300px; height: 50px; width: 100%;"
                             rows="10" cols="30"></textarea>
                         </div>
-                        <button type="submit" class="btn btn-primary student-submit custom-response-submit">Add Custom Response</button>
-                    </form>
+                        <button type="button" class="btn btn-primary student-submit custom-response-submit" onclick = "addCustomResponse({{poll.getId()}},'{{base_url}}');">Add Custom Response</button>
                     <script>
                         const custom_response = document.querySelector('.custom_poll_response');
                         const custom_response_submit =  document.querySelector('.custom-response-submit');

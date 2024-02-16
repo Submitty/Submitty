@@ -108,6 +108,30 @@ function updateDropdownStates(curr_state, cookie_key) {
     Cookies.set(cookie_key, !curr_state, { expires: expiration_date, path: '/' });
 }
 
+function addCustomResponse(pollid, base_url) {
+    const custom_response_text = document.querySelector('.custom_poll_response').value;
+    const url = base_url + '/addCustomResponse';
+    const fd = new FormData();
+    fd.append('csrf_token', csrfToken);
+    fd.append('poll_id', pollid);
+    fd.append('custom_response', custom_response_text);
+    $.ajax({
+        url: url,
+        type: 'POST',
+        data: fd,
+        processData: false,
+        cache: false,
+        contentType: false,
+        error: function(err) {
+            console.error(err);
+            window.alert('Something went wrong. Please try again.');
+        },
+        success: function() {
+            window.location.reload();
+        }
+    });
+}
+
 function removeCustomResponse(pollid, optionid, base_url) {
     const url = base_url + '/removeCustomResponse';
     const fd = new FormData();
@@ -125,10 +149,10 @@ function removeCustomResponse(pollid, optionid, base_url) {
             console.error(err);
             window.alert('Something went wrong. Please try again.');
         },
-        success: function(data) {
-            displaySuccessMessage("Successfully removed custom response");
+        success: function() {
             document.getElementById(`option-row-${optionid}`).remove();
             document.querySelector('.custom-response-wrapper').style.display = 'block';
+            displaySuccessMessage("Successfully removed custom response");
         }
     });
 }
@@ -140,7 +164,7 @@ function updateCustomResponse(pollid, optionid, base_url) {
     fd.append('csrf_token', csrfToken);
     fd.append('poll_id', pollid);
     fd.append('option_id', optionid);
-    fd.append('option_response',custom_response_value);
+    fd.append('option_response', custom_response_value);
     $.ajax({
         url: url,
         type: 'POST',
@@ -152,17 +176,30 @@ function updateCustomResponse(pollid, optionid, base_url) {
             console.error(err);
             window.alert('Something went wrong. Please try again.');
         },
-        success: function(data) {
-            console.log(JSON.stringify(data));
-            displaySuccessMessage("Successfully updated custom response");
+        success: function() {
             const parent_container = document.getElementById(`${optionid}_custom_response`).parentNode;
-            parent_container.querySelector('.markdown').style.display = 'inline-flex';
             parent_container.querySelector('.markdown p').textContent = custom_response_value;
-            parent_container.querySelector('.edit-btn').style.display = 'inline-flex';
-            parent_container.querySelector('textarea').style.display = 'none';
-            parent_container.querySelector('.upload-btn').style.display = 'none';
+            displayCustomResponseEdit('false', optionid);
+            displaySuccessMessage("Successfully updated custom response");
         }
     });
+}
+
+function displayCustomResponseEdit(display, optionid) {
+    const parent_container = document.getElementById(`${optionid}_custom_response`).parentNode;
+    const display_edit = display === 'true' ? 'inline-flex' : 'none';
+    const display_default = display === 'true' ? 'none' : 'inline-flex';
+
+    parent_container.querySelector('.markdown').style.display = display_default;
+    parent_container.querySelector('.edit-btn').style.display = display_default;
+
+    parent_container.querySelector('textarea').style.display = display_edit;
+    parent_container.querySelector('.upload-btn').style.display = display_edit;
+    parent_container.querySelector('.back-btn').style.display = display_edit;
+
+    const custom_response_value = parent_container.querySelector('.markdown p').textContent;
+    parent_container.querySelector('.markdown p').textContent = custom_response_value;
+    parent_container.querySelector('textarea').value = custom_response_value;
 }
 
 function importPolls() {

@@ -442,7 +442,7 @@ class PollController extends AbstractController {
     /**
      * @Route("/courses/{_semester}/{_course}/polls/addCustomResponse", methods={"POST"})
      */
-    public function addCustomResponse(): RedirectResponse {
+    public function addCustomResponse(): RedirectResponse |  JsonResponse {
         $poll_id = intval($_POST['poll_id'] ?? -1);
         $poll_response = $_POST['custom_response'];
         $user_id = $this->core->getUser()->getId();
@@ -472,8 +472,7 @@ class PollController extends AbstractController {
         $em->persist($custom_poll_option);
         $em->flush();
 
-        $this->core->addSuccessMessage("Successfully submitted custom response");
-        return new RedirectResponse($this->core->buildCourseUrl(['polls']));
+        return JsonResponse::getSuccessResponse();
     }
 
     /**
@@ -510,13 +509,13 @@ class PollController extends AbstractController {
         $em->persist($custom_option);
         $em->flush();
 
-        return JsonResponse::getSuccessResponse([]);
+        return JsonResponse::getSuccessResponse();
     }
 
     /**
      * @Route("/courses/{_semester}/{_course}/polls/removeCustomResponse", methods={"POST"})
      */
-    public function removeCustomResponse(): RedirectResponse | JsonResponse {
+    public function removeCustomResponse(): JsonResponse {
         $poll_id = intval($_POST['poll_id'] ?? -1);
         $option_id = $_POST['option_id'];
         $user_id = $this->core->getUser()->getId();
@@ -524,25 +523,24 @@ class PollController extends AbstractController {
         /** @var Poll|null */
         $poll = $em->find(Poll::class, $poll_id);
         if ($poll === null) {
-            $this->core->addErrorMessage("Invalid Poll ID");
-            return new RedirectResponse($this->core->buildCourseUrl(['polls']));
+            return JsonResponse::getErrorResponse("Invalid Poll ID");
         }
         $custom_option = $poll->getOptionById($option_id);
         if ($custom_option === null) {
-            $this->core->addErrorMessage("Could not find custom option");
-            return new RedirectResponse($this->core->buildCourseUrl(['polls']));
+            return JsonResponse::getErrorResponse("Could not find custom option");
         }
         else if ($custom_option->getAuthorId() !== $user_id && !$this->core->getUser()->accessFaculty()) {
-            $this->core->addErrorMessage("You have no access to remove this custom option");
-            return new RedirectResponse($this->core->buildCourseUrl(['polls']));
+            return JsonResponse::getErrorResponse("You have no access to remove this custom option");
         }
-        $return_response = ['identification' => $custom_option->getId()];
+        foreach ($custom_option->getUserResponses() as $response) {
+            $em->remove($response);
+        }
         $poll->removeOption($custom_option);
         $em->remove($custom_option);
         $em->persist($poll);
         $em->flush();
 
-        return JsonResponse::getSuccessResponse($return_response);
+        return JsonResponse::getSuccessResponse();
     }
 
     /**
