@@ -1101,7 +1101,7 @@ class ForumThreadView extends AbstractView {
 
         if ($post["anonymous"]) {
             if($first){
-                $visible_username = "[Owner] Anonymous";
+                $visible_username = "Anonymous";
             }
             else if($post["author_user_id"] == $first_post_start['author_user_id']){
                 $visible_username = "[Owner] Anonymous";
