@@ -6,7 +6,6 @@ use app\entities\poll\Option;
 use app\entities\poll\Poll;
 use app\entities\poll\Response;
 use app\libraries\Core;
-use app\libraries\DateUtils;
 use app\libraries\response\WebResponse;
 use app\libraries\response\JsonResponse;
 use app\libraries\response\RedirectResponse;
@@ -15,6 +14,7 @@ use app\libraries\routers\AccessControl;
 use app\libraries\routers\Enabled;
 use app\libraries\FileUtils;
 use app\libraries\PollUtils;
+use app\libraries\DateUtils;
 use app\views\PollView;
 use DateTime;
 use DateInterval;
@@ -115,7 +115,7 @@ class PollController extends AbstractController {
 
         $response_counts = [];
 
-        if ($this->core->getUser()->accessAdmin()) {
+        if ($this->core->getUser()->accessAdmin()){
             /** @var Poll|null */
             $poll = $repo->findByIDWithOptions(intval($poll_id));
             if ($poll === null) {
@@ -198,6 +198,11 @@ class PollController extends AbstractController {
         $hours = intval($_POST['poll-hours'] ?? 0);
 
         $minutes = intval($_POST['poll-minutes'] ?? 0);
+
+        if (!is_numeric($hours) || !is_numeric($minutes) || $hours < 0 || $minutes < 0) {
+            $this->core->addErrorMessage('Invalid time given');
+            return new RedirectResponse($this->core->buildCourseUrl(['polls']));
+        }
 
         $duration = new DateInterval("PT{$hours}H{$minutes}M");
 
@@ -321,7 +326,18 @@ class PollController extends AbstractController {
         $date = \DateTime::createFromFormat("Y-m-d", $_POST["release_date"]);
         $hours = intval($_POST['poll-hours'] ?? 0);
         $minutes = intval($_POST['poll-minutes'] ?? 0);
-        $duration = new DateInterval("PT{$hours}H{$minutes}M0S");
+        if (!is_numeric($hours) || !is_numeric($minutes) || $hours < 0 || $minutes < 0) {
+            $this->core->addErrorMessage('Invalid time given');
+            return new RedirectResponse($this->core->buildCourseUrl(['polls']));
+        }
+        # I have to set the offset between old and new duration to the endDate.
+        $newDuration = new DateInterval("PT{$hours}H{$minutes}M0S");
+        if($poll->isOpen())
+        {
+            $endDate = $this->core->getDateTimeNow();
+            $endDate->add($newDuration);
+            $poll->setEndDate($endDate);
+        }
         if ($date === false) {
             $this->core->addErrorMessage("Invalid poll release date");
             return new RedirectResponse($returnUrl);
@@ -335,7 +351,7 @@ class PollController extends AbstractController {
         $poll->setName($_POST['name']);
         $poll->setQuestion($_POST['question']);
         $poll->setQuestionType($_POST['question_type']);
-        $poll->setDuration($duration);
+        $poll->setDuration($newDuration);
         $poll->setReleaseDate($date);
         $poll->setReleaseHistogram($_POST['release_histogram']);
         $poll->setReleaseAnswer($_POST['release_answer']);
@@ -446,7 +462,7 @@ class PollController extends AbstractController {
         }
 
         $duration = $poll->getDuration();
-        if ($duration->h > 0 || $duration->i > 0 || $duration->s > 0 || $duration->days > 0 || $duration->m > 0 || $duration->y > 0) {
+        if ($duration->format('%r%Y%m%d%H%i%s') !== '000000000000'){
             // Duration evaluates to > 0
             $end_date = $this->core->getDateTimeNow();
             $end_date->add($duration);
@@ -455,10 +471,9 @@ class PollController extends AbstractController {
         else {
             // If duration is 0, set end date to a future date.
             //If duration is 0, it means that the user wants to manually close it.
-            $end_date = new \DateTime("9999-01-01T00:00:00");
+            $end_date = new \DateTime(DateUtils::MAX_TIME);
             $poll->setEndDate($end_date);
         }
-        $poll->setOpen();
         $em->flush();
         return new RedirectResponse($this->core->buildCourseUrl(['polls']));
     }
@@ -498,7 +513,7 @@ class PollController extends AbstractController {
         }
         //Setting the time to the beginning of time indicates that it is closed.
         //Should be based on status.
-        $poll->setEndDate(new DateTime('1900-01-01'));
+        $poll->setEndDate(new DateTime(DateUtils::BEGINING_OF_TIME));
         $em->flush();
         return new RedirectResponse($this->core->buildCourseUrl(['polls']));
     }

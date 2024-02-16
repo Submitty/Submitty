@@ -25,9 +25,6 @@ class Poll {
 
     #[ORM\Column(type: Types::TEXT)]
     protected $question;
-    
-    #[ORM\Column(type: Types::TEXT)]
-    protected $status;
 
     #[ORM\Column(type: Types::STRING)]
     protected $duration;
@@ -71,12 +68,11 @@ class Poll {
         $this->setQuestion($question);
         $this->setQuestionType($question_type);
         $this->setDuration($duration);
-        $this->setEndDate(new \DateTime("1900-01-02"));
+        $this->setEndDate(new \DateTime(DateUtils::BEGINING_OF_TIME));
         $this->setReleaseDate($release_date);
         $this->setReleaseHistogram($release_histogram);
         $this->setReleaseAnswer($release_answer);
         $this->setImagePath($image_path);
-        $this->setClosed();
         $this->options = new ArrayCollection();
         $this->responses = new ArrayCollection();
     }
@@ -101,22 +97,6 @@ class Poll {
         $this->question = $question;
     }
 
-    public function getStatus(): string {	
-        return $this->status;	
-    }
-
-    public function setClosed(): void {	
-        $this->status = "closed";	
-    }
-
-    public function setEnded(): void {	
-        $this->status = "ended";	
-    }
-
-    public function setOpen(): void {	
-        $this->status = "open";	
-    }
-
     public function isOpen(): bool {     
         $now = DateUtils::getDateTimeNow();
         return $now < $this->end_date;
@@ -126,10 +106,10 @@ class Poll {
         $now = DateUtils::getDateTimeNow();
         return $now > $this->end_date;
     }
-    
+
     public function isClosed(): bool {
         $now = DateUtils::getDateTimeNow();
-        return $now > $this->end_date && $this->end_date->format('Y-m-d') == '1900-01-01';
+        return $now > $this->end_date && $this->end_date->format('Y-m-d') == '1900-02-01';
     }
     public function getDuration(): \DateInterval {
         return new \DateInterval($this->duration);
