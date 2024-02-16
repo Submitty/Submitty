@@ -54,6 +54,7 @@ class AdminGradeableController extends AbstractController {
      * @Route("/api/{_semester}/{_course}/{gradeable_id}/download", methods={"GET"})
      * @Route("/courses/{_semester}/{_course}/{gradeable_id}/download", methods={"GET"})
      * @AccessControl(role="INSTRUCTOR")
+     * @param string $gradeable_id
      * @return JsonResponse
      */
     public function downloadJson($gradeable_id) {
