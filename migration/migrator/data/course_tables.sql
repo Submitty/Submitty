@@ -1465,8 +1465,8 @@ CREATE TABLE public.poll_options (
     response text NOT NULL,
     correct boolean NOT NULL,
     option_id integer NOT NULL,
-    custom boolean NOT NULL DEFAULT false,
-    author_id varying(255),
+    custom boolean DEFAULT false NOT NULL,
+    author_id character varying(255)
 );
 
 
@@ -1536,7 +1536,7 @@ CREATE TABLE public.polls (
     question_type character varying(35) DEFAULT 'single-response-multiple-correct'::character varying,
     release_histogram character varying(10) DEFAULT 'never'::character varying,
     release_answer character varying(10) DEFAULT 'never'::character varying,
-    custom_credit boolean NOT NULL DEFAULT true
+    custom_credit boolean DEFAULT true NOT NULL
 );
 
 
