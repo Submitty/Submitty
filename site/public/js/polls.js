@@ -48,12 +48,10 @@ function newDeletePollForm(pollid, pollname, base_url) {
 function updatePollAcceptingAnswers(pollid, base_url) {
     const accepting_answers_checkbox = `#poll_${pollid}_view_results`;
     const visible_checkbox = `#poll_${pollid}_visible`;
-
     let url = base_url;
     const fd = new FormData();
     fd.append('csrf_token', csrfToken);
     fd.append('poll_id', pollid);
-
     if ($(accepting_answers_checkbox).is(':checked')) {
         $(visible_checkbox).prop('checked', true);
         url += '/setOpen';

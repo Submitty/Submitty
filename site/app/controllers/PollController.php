@@ -238,15 +238,13 @@ class PollController extends AbstractController {
             $this->core->addErrorMessage("Polls of type 'single-response-single-correct' must have exactly one correct response");
             return new RedirectResponse($this->core->buildCourseUrl(['polls']));
         }
-        elseif (in_array($_POST['question_type'], ["single-response-survey","single-custom-response-survey", "multiple-response-survey","multiple-custom-response-survey"]) && $answers !== count($poll->getOptions())) {
+        elseif (in_array($_POST['question_type'], ["single-response-survey", "single-custom-response-survey", "multiple-response-survey", "multiple-custom-response-survey"]) && $answers !== count($poll->getOptions())) {
             $this->core->addErrorMessage("All responses of polls of type 'survey' must be marked at correct responses");
             return new RedirectResponse($this->core->buildCourseUrl(['polls']));
         }
-
         if ($poll->allowsCustomResponses()) {
             $poll->setCustomCredit(isset($_POST['poll_credit']));
         }
-
         $em->flush();
 
         $this->core->addSuccessMessage("Poll successfully added");

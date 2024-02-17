@@ -50,7 +50,6 @@
                     {% set index = 0 %}
 
                     {% set user_selections = poll.getSelectedOptionIds() %}
-                    {% set divide_custom_responses = false %}
                     {% set exists_custom_response = false %}
 
                     {% for option in poll.getOptions() %}
