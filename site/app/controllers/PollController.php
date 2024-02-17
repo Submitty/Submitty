@@ -243,6 +243,10 @@ class PollController extends AbstractController {
             return new RedirectResponse($this->core->buildCourseUrl(['polls']));
         }
 
+        if ($poll->allowsCustomResponses()) {
+            $poll->setCustomCredit(isset($_POST['poll_credit']));
+        }
+
         $em->flush();
 
         $this->core->addSuccessMessage("Poll successfully added");
@@ -324,6 +328,7 @@ class PollController extends AbstractController {
         $poll->setReleaseDate($date);
         $poll->setReleaseHistogram($_POST['release_histogram']);
         $poll->setReleaseAnswer($_POST['release_answer']);
+        $poll->setCustomCredit(isset($_POST['poll_credit']));
 
         if (isset($_FILES['image_file']) && $_FILES["image_file"]["name"] !== "") {
             $file = $_FILES["image_file"];
@@ -394,6 +399,7 @@ class PollController extends AbstractController {
                 }
                 if($poll->allowsCustomResponses() && $poll_option->isCustom()){
                     // Keep current custom responses in case of switch from custom single to multiple survey or vice versa
+                    $poll_option->setCorrect(isset($_POST['poll_credit']));
                     continue;
                 }
                 $poll->removeOption($poll_option);
@@ -401,7 +407,7 @@ class PollController extends AbstractController {
             }
         }
 
-        if ($answers === 0) {
+        if ($answers === 0 && !$poll->allowsCustomResponses()) {
             $this->core->addErrorMessage("Polls must have at least one correct response");
             return new RedirectResponse($this->core->buildCourseUrl(['polls']));
         }
@@ -442,7 +448,7 @@ class PollController extends AbstractController {
     /**
      * @Route("/courses/{_semester}/{_course}/polls/addCustomResponse", methods={"POST"})
      */
-    public function addCustomResponse(): RedirectResponse |  JsonResponse {
+    public function addCustomResponse(): JsonResponse {
         $poll_id = intval($_POST['poll_id'] ?? -1);
         $poll_response = $_POST['custom_response'];
         $user_id = $this->core->getUser()->getId();
@@ -452,36 +458,34 @@ class PollController extends AbstractController {
         /** @var Poll|null */
         $poll = $repo->findByIDWithOptions($poll_id);
         if ($poll === null) {
-            $this->core->addErrorMessage("Invalid Poll ID");
-            return new RedirectResponse($this->core->buildCourseUrl(['polls']));
+            return JsonResponse::getFailResponse("Invalid Poll ID");
         }
         else if ($poll_response === null || trim($poll_response) === '') {
-            $this->core->addErrorMessage("No associated text provided for custom answer");
-            return new RedirectResponse($this->core->buildCourseUrl(['polls']));
+            return JsonResponse::getFailResponse("No associated text provided for custom response");
         }
         else if ($poll->allowsCustomResponses() === false) {
-            $this->core->addErrorMessage("Poll is currently not accepting custom answers");
-            return new RedirectResponse($this->core->buildCourseUrl(['polls']));
+            return JsonResponse::getFailResponse("Poll is currently not accepting custom response");
         }
-        else if ($this->core->getQueries()->existsCustomResponse($poll->getId(), $user_id)) {
-            $this->core->addErrorMessage("You may only submit at most one custom answer");
-            return new RedirectResponse($this->core->buildCourseUrl(['polls']));
+        $submitted_response = $this->core->getQueries()->submittedCustomResponse($poll->getId(), $user_id);
+        $exists_response = $this->core->getQueries()->existsCustomResponse($poll->getId(), $poll_response);
+        if ($submitted_response || $exists_response) {
+            return JsonResponse::getFailResponse("A similar response already exists or you've already submitted a response.");
         }
-        $custom_poll_option = new Option(1000 + $poll->getOptions()->count(), $poll_response, true, $user_id, true);
+        $custom_poll_option = new Option(1000 + $poll->getOptions()->count(), $poll_response, $poll->getCustomCredit(), $user_id, true);
         $poll->addOption($custom_poll_option);
         $em->persist($custom_poll_option);
         $em->flush();
 
-        return JsonResponse::getSuccessResponse();
+        return JsonResponse::getSuccessResponse(["message" => "Successfully added custom response"]);
     }
 
     /**
      * @Route("/courses/{_semester}/{_course}/polls/updateCustomResponse", methods={"POST"})
      */
-    public function updateCustomResponse(): RedirectResponse | JsonResponse {
+    public function updateCustomResponse(): JsonResponse {
         $poll_id = intval($_POST['poll_id'] ?? -1);
         $option_id = $_POST['option_id'];
-        $option_response = $_POST['option_response'];
+        $custom_response = $_POST['option_response'];
         $user_id = $this->core->getUser()->getId();
         $em = $this->core->getCourseEntityManager();
         /** @var \app\repositories\poll\PollRepository */
@@ -489,27 +493,27 @@ class PollController extends AbstractController {
         /** @var Poll|null */
         $poll = $repo->findByIDWithOptions($poll_id);
         if ($poll === null) {
-            $this->core->addErrorMessage("Invalid Poll ID");
-            return new RedirectResponse($this->core->buildCourseUrl(['polls']));
+            return JsonResponse::getFailResponse("Invalid Poll ID");
         }
         $custom_option = $poll->getOptionById($option_id);
         if ($custom_option === null) {
-            $this->core->addErrorMessage("Could not find custom option");
-            return new RedirectResponse($this->core->buildCourseUrl(['polls']));
+            return JsonResponse::getFailResponse("Could not find custom response");
         }
         else if ($custom_option->getAuthorId() !== $user_id && !$this->core->getUser()->accessFaculty()) {
-            $this->core->addErrorMessage("You have no access to edit this custom option");
-            return new RedirectResponse($this->core->buildCourseUrl(['polls']));
+            return JsonResponse::getFailResponse("You have no access to edit this custom response");
         }
-        else if ($option_response == null || trim($option_response) === '') {
-            $this->core->addErrorMessage("Invalid text to update custom option");
-            return new RedirectResponse($this->core->buildCourseUrl(['polls']));
+        else if ($custom_response == null || trim($custom_response) === '') {
+            return JsonResponse::getFailResponse("Invalid text to update custom response");
         }
-        $custom_option->setResponse($option_response);
+        $exists_response = $this->core->getQueries()->existsCustomResponse($poll->getId(), $custom_response);
+        if ($exists_response) {
+            return JsonResponse::getFailResponse("A similar response already exists");
+        }
+        $custom_option->setResponse($custom_response);
         $em->persist($custom_option);
         $em->flush();
 
-        return JsonResponse::getSuccessResponse();
+        return JsonResponse::getSuccessResponse(["message" => "Successfully updated custom response"]);
     }
 
     /**
@@ -540,7 +544,7 @@ class PollController extends AbstractController {
         $em->persist($poll);
         $em->flush();
 
-        return JsonResponse::getSuccessResponse();
+        return JsonResponse::getSuccessResponse(["message" => "Successfully removed custom response"]);
     }
 
     /**

@@ -43,6 +43,9 @@ class Poll {
     #[ORM\Column(type: Types::STRING)]
     protected $release_answer;
 
+    #[ORM\Column(name: "custom_credit", type: Types::BOOLEAN)]
+    protected bool $custom_credit;
+
     /**
      * @var Collection<Option>
      */
@@ -66,8 +69,9 @@ class Poll {
         $this->setReleaseHistogram($release_histogram);
         $this->setReleaseAnswer($release_answer);
         $this->setImagePath($image_path);
+        $this->setCustomCredit(true);
         $this->setClosed();
-        $this->setDisableCustomAnswers();
+
         $this->options = new ArrayCollection();
         $this->responses = new ArrayCollection();
     }
@@ -124,14 +128,6 @@ class Poll {
         return $this->question_type === "single-custom-response-survey" || $this->question_type === "multiple-custom-response-survey";
     }
 
-    public function setEnableCustomAnswers(): void {
-        $this->custom_answers = true;
-    }
-
-    public function setDisableCustomAnswers(): void {
-        $this->custom_answers = false;
-    }
-
     public function getReleaseDate(): \DateTime {
         return $this->release_date;
     }
@@ -146,6 +142,14 @@ class Poll {
 
     public function setImagePath(?string $image_path): void {
         $this->image_path = $image_path;
+    }
+
+    public function getCustomCredit(): bool {
+        return $this->custom_credit;
+    }
+
+    public function setCustomCredit(bool $custom_credit): void {
+        $this->custom_credit = $custom_credit;
     }
 
     public function getQuestionType(): string {

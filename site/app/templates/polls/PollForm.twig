@@ -56,7 +56,7 @@
         <div class="poll-type-option">
             <input type="radio" id="poll-type-single-custom-response-survey" name="question_type" value="single-custom-response-survey" onclick="changePollType()" {{ question_type == 'single-custom-response-survey'? "checked" : "" }}></input>
             <label for="poll-type-single-custom-response-survey">single response - custom response survey</label>
-            <p class="poll-type-description"><i>Students can submit a single custom response that can be chosen by others. Any selection is worth full credit.</i></p>
+            <p class="poll-type-description"><i>Students can submit a single custom response that can be chosen by others. Any selection is worth full credit unless otherwise toggled below.</i></p>
         </div>
 
         <div class="poll-type-option">
@@ -80,7 +80,7 @@
         <div class="poll-type-option">
             <input type="radio" id="poll-type-multiple-custom-response-survey" name="question_type" value="multiple-custom-response-survey" onclick="changePollType()" {{ question_type == 'multiple-custom-response-survey'? "checked" : "" }}></input>
             <label for="poll-type-multiple-custom-response-survey">multiple response - custom response survey</label>
-            <p class="poll-type-description"><i>Students can submit a single custom response that can be chosen by others and they can pick as many options as they prefer. Any single selection is worth full credit.</i></p>
+            <p class="poll-type-description"><i>Students can submit a single custom response that can be chosen by others and they can pick as many options as they prefer. Any single selection is worth full credit unless otherwise toggled below.</i></p>
         </div>
 
         <br/>
@@ -132,6 +132,11 @@
             <option value="always" {{ poll is not null and poll.getReleaseAnswer() == 'always' ? "selected" : "" }}>Always</option>
         </select>
         <br/>
+        <label for = "poll_credit" class="option-title credit-form-item" style="display: {{ poll is not null and poll.allowsCustomResponses() ? "inline-block" : "none" }}">
+            Allow custom poll to count as credit
+        </label>
+        <input id ="poll_credit" class="credit-box credit-form-item" type="checkbox" name="poll_credit" style="display: {{ poll is not null and poll.allowsCustomResponses() ? "inline-block" : "none" }}" {{ poll is not null and poll.getCustomCredit() ? "checked" : "" }}>
+        <br class = 'credit-form-item' style="display: {{ poll is not null and poll.allowsCustomResponses() ? "inline-block" : "none" }}" />
 
         <hr>
         <h2> Responses: </h2>
@@ -266,6 +271,15 @@
         }
 
         const custom_survey = $('#poll-type-multiple-custom-response-survey').is(':checked') || $('#poll-type-single-custom-response-survey').is(':checked');
+
+        document.querySelectorAll('.credit-form-item').forEach((item) => {
+            if (custom_survey) {
+                item.style.display = 'inline-block';
+            }
+            else{
+                item.style.display = 'none';
+            }
+        });
 
         if ($("#poll-name").val().length === 0) {
             $("#poll-form-submit").prop("disabled", true);

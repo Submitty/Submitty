@@ -16,6 +16,9 @@ def up(config, database, semester, course):
     """
     database.execute(
         """
+        ALTER TABLE polls
+        ADD COLUMN IF NOT EXISTS custom_credit boolean NOT NULL DEFAULT true;
+
         ALTER TABLE poll_options
         ADD COLUMN IF NOT EXISTS custom boolean NOT NULL DEFAULT false;
 

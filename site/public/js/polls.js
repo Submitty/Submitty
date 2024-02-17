@@ -126,8 +126,23 @@ function addCustomResponse(pollid, base_url) {
             console.error(err);
             window.alert('Something went wrong. Please try again.');
         },
-        success: function() {
-            window.location.reload();
+        success: function(data) {
+            try {
+                const msg = JSON.parse(data);
+                if (msg.status !== 'success') {
+                    displayErrorMessage(msg.message);
+                }
+                else {
+                    displaySuccessMessage(msg.data.message);
+                    setTimeout(() => {
+                        window.location.reload();
+                    }, 1000);
+                }
+            }
+            catch (err) {
+                console.error(err);
+                window.alert('Something went wrong. Please try again.');
+            }
         }
     });
 }
@@ -149,10 +164,22 @@ function removeCustomResponse(pollid, optionid, base_url) {
             console.error(err);
             window.alert('Something went wrong. Please try again.');
         },
-        success: function() {
-            document.getElementById(`option-row-${optionid}`).remove();
-            document.querySelector('.custom-response-wrapper').style.display = 'block';
-            displaySuccessMessage("Successfully removed custom response");
+        success: function(data) {
+            try {
+                const msg = JSON.parse(data);
+                if (msg.status !== 'success') {
+                    displayErrorMessage(msg.message);
+                }
+                else {
+                    document.getElementById(`option-row-${optionid}`).remove();
+                    document.querySelector('.custom-response-wrapper').style.display = 'block';
+                    displaySuccessMessage(msg.data.message);
+                }
+            }
+            catch (err) {
+                console.error(err);
+                window.alert('Something went wrong. Please try again.');
+            }
         }
     });
 }
@@ -176,17 +203,29 @@ function updateCustomResponse(pollid, optionid, base_url) {
             console.error(err);
             window.alert('Something went wrong. Please try again.');
         },
-        success: function() {
-            const parent_container = document.getElementById(`${optionid}_custom_response`).parentNode;
-            parent_container.querySelector('.markdown p').textContent = custom_response_value;
-            displayCustomResponseEdit('false', optionid);
-            displaySuccessMessage("Successfully updated custom response");
+        success: function(data) {
+            try {
+                const msg = JSON.parse(data);
+                if (msg.status !== 'success') {
+                    displayErrorMessage(msg.message);
+                }
+                else {
+                    const parent_container = document.getElementById(`option-row-${optionid}`);
+                    parent_container.querySelector('.markdown p').textContent = custom_response_value;
+                    displayCustomResponseEdit('false', `option-row-${optionid}`);
+                    displaySuccessMessage(msg.data.message);
+                }
+            }
+            catch (err) {
+                console.error(err);
+                window.alert('Something went wrong. Please try again.');
+            }
         }
     });
 }
 
-function displayCustomResponseEdit(display, optionid) {
-    const parent_container = document.getElementById(`${optionid}_custom_response`).parentNode;
+function displayCustomResponseEdit(display, parentid) {
+    const parent_container = document.getElementById(parentid);
     const display_edit = display === 'true' ? 'inline-flex' : 'none';
     const display_default = display === 'true' ? 'none' : 'inline-flex';
 
@@ -194,8 +233,8 @@ function displayCustomResponseEdit(display, optionid) {
     parent_container.querySelector('.edit-btn').style.display = display_default;
 
     parent_container.querySelector('textarea').style.display = display_edit;
+    parent_container.querySelector('.close-btn').style.display = display_edit;
     parent_container.querySelector('.upload-btn').style.display = display_edit;
-    parent_container.querySelector('.back-btn').style.display = display_edit;
 
     const custom_response_value = parent_container.querySelector('.markdown p').textContent;
     parent_container.querySelector('.markdown p').textContent = custom_response_value;

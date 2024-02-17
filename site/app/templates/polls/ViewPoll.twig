@@ -79,11 +79,11 @@
                                         <div class="move-btn upload-btn" style = "display:none; border:0; padding:0;" onclick = "updateCustomResponse({{ poll.getId() }}, {{ option.getId() }}, '{{ base_url }}');">
                                             <i class="fa-solid fa-cloud-arrow-up black-btn"></i>
                                         </div>
-                                        <div class="move-btn back-btn" style = "display:none; border:0; padding:0;" onclick = "displayCustomResponseEdit('false', {{option.getId()}});">
+                                        <div class="move-btn close-btn" style = "display:none; border:0; padding:0;" onclick = "displayCustomResponseEdit('false', 'option-row-{{ option.getId() }}');">
                                             <i class="fa-solid fa-clock-rotate-left black-btn"></i>
                                         </div>
 
-                                        <div class="move-btn edit-btn" style = "border:0; padding:0;" onclick = "displayCustomResponseEdit('true', {{option.getId()}});">
+                                        <div class="move-btn edit-btn" style = "border:0; padding:0;" onclick = "displayCustomResponseEdit('true', 'option-row-{{ option.getId() }}');">
                                             <i class="fas fa-pencil-alt black-btn"></i>
                                         </div>
                                         <div class="move-btn delete-btn" style = "border:0; padding:0;" onclick = "removeCustomResponse({{ poll.getId() }}, {{ option.getId() }}, '{{ base_url }}');">
@@ -152,16 +152,6 @@
     function toggle_section(section_id) {
         $(`#${section_id}`).toggle('fast');
     }
-
-    document.querySelectorAll('.edit-btn').forEach((edit_icon) => {
-        edit_icon.onclick = () => {
-            const parent_container = edit_icon.parentNode;
-            parent_container.querySelector('.markdown').style.display = 'none';
-            parent_container.querySelector('.edit-btn').style.display = 'none';
-            parent_container.querySelector('textarea').style.display = 'inline-flex';
-            parent_container.querySelector('.upload-btn').style.display = 'inline-flex';
-        }
-    });
 
     function get_new_chart_width() {
         const MIN_CHART_WIDTH = 400;
