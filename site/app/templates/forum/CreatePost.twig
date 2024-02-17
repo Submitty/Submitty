@@ -93,7 +93,11 @@
         {% endif %}
 
         <span class="last-edit">
-			<strong class="post_user_id">{{ visible_username }}</strong>
+            {% if '[OP]' in visible_username %}
+			    <strong class="post_user_id" title="Original Poster">{{ visible_username }}</strong>
+            {% else %}
+                <strong class="post_user_id">{{ visible_username }}</strong>
+            {% endif %}
             {% if post_user_info.pronouns and post_user_info.display_pronouns and visible_username !="Anonymous" %}
                 <strong class="post_user_pronouns">({{post_user_info.pronouns}})</strong>
             {% endif %}
