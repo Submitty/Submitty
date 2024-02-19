@@ -6036,7 +6036,6 @@ AND gc_id IN (
 
         // Generate the ORDER BY clause
         $order = self::generateOrderByClause($sort_keys, []);
-
         $query = "
             SELECT
               g.g_id AS id,
@@ -6085,6 +6084,7 @@ AND gc_id IN (
                   eg_instructor_blind AS instructor_blind,
                   eg_limited_access_blind AS limited_access_blind,
                   eg_peer_blind AS peer_blind,
+                  eg_peer_panel AS peer_panel,
                   eg_submission_open_date AS submission_open_date,
                   eg_submission_due_date AS submission_due_date,
                   eg_has_due_date AS has_due_date,
@@ -6781,6 +6781,7 @@ AND gc_id IN (
                 $gradeable->getPrecision(),
                 $gradeable->getLimitedAccessBlind(),
                 $gradeable->getPeerBlind(),
+                $gradeable->getPeerPanel(),
                 DateUtils::dateTimeToString($gradeable->getGradeInquiryStartDate()),
                 DateUtils::dateTimeToString($gradeable->getGradeInquiryDueDate()),
                 $gradeable->isGradeInquiryAllowed(),
@@ -6817,6 +6818,7 @@ AND gc_id IN (
                   eg_precision,
                   eg_limited_access_blind,
                   eg_peer_blind,
+                  eg_peer_panel,
                   eg_grade_inquiry_start_date,
                   eg_grade_inquiry_due_date,
                   eg_grade_inquiry_allowed,
@@ -6827,7 +6829,7 @@ AND gc_id IN (
                   eg_depends_on,
                   eg_depends_on_points
                   )
-                VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
+                VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
                 $params
             );
         }
@@ -6947,6 +6949,7 @@ AND gc_id IN (
                     $gradeable->getInstructorBlind(),
                     $gradeable->getLimitedAccessBlind(),
                     $gradeable->getPeerBlind(),
+                    $gradeable->getPeerPanel(),
                     DateUtils::dateTimeToString($gradeable->getGradeInquiryStartDate()),
                     DateUtils::dateTimeToString($gradeable->getGradeInquiryDueDate()),
                     $gradeable->isGradeInquiryAllowed(),
@@ -6985,6 +6988,7 @@ AND gc_id IN (
                       eg_instructor_blind=?,
                       eg_limited_access_blind=?,
                       eg_peer_blind=?,
+                      eg_peer_panel=?,
                       eg_grade_inquiry_start_date=?,
                       eg_grade_inquiry_due_date=?,
                       eg_grade_inquiry_allowed=?,

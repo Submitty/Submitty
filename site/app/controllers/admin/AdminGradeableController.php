@@ -270,7 +270,7 @@ class AdminGradeableController extends AbstractController {
             'type_string' => $type_string,
             'gradeable_type_strings' => self::gradeable_type_strings,
             'show_edit_warning' => $gradeable->anyManualGrades(),
-
+            'isDiscussionPanel' => $gradeable->isDiscussionBased(),
             // Config selection data
             'all_config_paths' => array_merge($default_config_paths, $all_uploaded_config_paths, $all_repository_config_paths),
             'repository_error_messages' => $repository_error_messages,
@@ -1047,6 +1047,11 @@ class AdminGradeableController extends AbstractController {
         }
         unset($_POST['csrf_token']);
         try {
+            // Converting [a, b] to "{a, b}" to satisfy interpretation of array by SQL
+            if (is_array($_POST['peer_panel'])) {
+                $_POST['peer_panel'] = array_map('intval', $_POST['peer_panel']);
+                $_POST['peer_panel'] = "{" . implode(", ", $_POST['peer_panel']) . "}";
+            }
             $response_props = $this->updateGradeable($gradeable, $_POST);
             // Finally, send the requester back the information
             $this->core->getOutput()->renderJsonSuccess($response_props);
