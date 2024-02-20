@@ -1,4 +1,4 @@
-/* exported prevMonth, nextMonth, loadCalendar, loadFullCalendar, editCalendarItemForm, deleteCalendarItem, openNewItemModal, openOptionsModal, updateCalendarOptions, colorLegend */
+/* exported prevMonth, nextMonth, loadCalendar, loadFullCalendar, editCalendarItemForm, deleteCalendarItem, openNewItemModal, openOptionsModal, updateCalendarOptions, colorLegend, filter_course */
 /* global curr_day, curr_month, curr_year, gradeables_by_date, instructor_courses, buildUrl */
 /* global csrfToken */
 
@@ -806,3 +806,23 @@ function colorLegend() {
     });
 }
 
+// Modifies cookies so the correct filtering of courses on the calendar is chosen.
+// param string course_val Id of the course
+// param string display_name display name of the course
+function filter_course(course_val, display_name) {
+    const [courses_val, display_name] = args.split(',');
+    if (courses_val === 'show all') {
+        Cookies.set('calendar_show_all', '1', { expires: 365 });
+    }
+    else {
+        Cookies.set('calendar_show_all', '0', { expires: 365 });
+        if (display_name) {
+            Cookies.set('display_name', display_name, { expires: 365 });
+        }
+        else {
+            Cookies.set('display_name', courses_val, { expires: 365 });
+        }
+        Cookies.set('calendar_course', courses_val, { expires: 365 });
+    }
+    location.reload();
+}
