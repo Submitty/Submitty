@@ -633,6 +633,8 @@ progress::-webkit-progress-value {
 .solution-ta-notes-textbox {
     width: 100%;
     height: 80%;
+    min-height: 100px;
+    max-height: 100vh;
 }
 
 .no-sol-box-cont {
