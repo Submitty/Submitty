@@ -1,4 +1,4 @@
-/* global csrfToken, getUploadUrl
+/* global csrfToken
 */
 
 /**
@@ -342,7 +342,7 @@ function ajaxUploadGradeable(){
         try {
             const result = JSON.parse(e.target.result);
             result['csrf_token'] = csrfToken;
-            const url = getUploadUrl();
+            const url = buildCourseUrl(['upload']);
             $.ajax({
                 url: url,
                 headers: {

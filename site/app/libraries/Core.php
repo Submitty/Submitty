@@ -707,17 +707,6 @@ class Core {
     }
 
     /**
-     * This function will return the URL for uploading a JSON file to create a gradeable.
-     *
-     * @return string
-     */
-    public function buildUploadUrl() {
-        $parts = [];
-        array_unshift($parts, "courses", $this->getConfig()->getTerm(), $this->getConfig()->getCourse(), "upload");
-        return $this->buildUrl($parts);
-    }
-
-    /**
      * @param string $url
      * @param int $http_response_code
      */

@@ -111,7 +111,7 @@
     {% endif %}
 
 </head>
-<body data-base-url="{{ base_url }}" data-course-url="{{ course_url }}" data-upload-url="{{ upload_url }}" data-csrf-token="{{ csrf_token }}" onload="if (onAjaxInit) { onAjaxInit(); }" data-user-tz-off="{{ core.getUser().getUTCOffset() ?? "NONE" }}">
+<body data-base-url="{{ base_url }}" data-course-url="{{ course_url }}" data-csrf-token="{{ csrf_token }}" onload="if (onAjaxInit) { onAjaxInit(); }" data-user-tz-off="{{ core.getUser().getUTCOffset() ?? "NONE" }}">
 <a id="skip-nav" class="skip-btn" href="#main">Skip to main content</a>
     {% if not content_only %}
         {% if wrapper_urls['top_bar.html'] is defined %}

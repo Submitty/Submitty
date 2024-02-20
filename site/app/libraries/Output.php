@@ -669,15 +669,6 @@ HTML;
     }
 
     /**
-     * Builds a URL for uploading JSON to create a gradeable
-     *
-     * @return string
-     */
-    public function getUploadUrl() {
-        return $this->core->buildUploadUrl();
-    }
-
-    /**
      * Set the time zone that the twig date filter should display times in.  This will typically be set to the
      * logged in user's time zone.  If a user's time zone has not been set then the server time zone will be used.
      *
