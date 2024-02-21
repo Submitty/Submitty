@@ -64,7 +64,8 @@ class AdminGradeableController extends AbstractController {
             'type' => GradeableType::typeToString($config->getType()),
             'id' => $config->getId(),
             'instructions_url' => $config->getInstructionsUrl(),
-            'syllabus_bucket' => $config->getSyllabusBucket()
+            'syllabus_bucket' => $config->getSyllabusBucket(), 
+            'autograding_config_path' => $config->getAutogradingConfigPath()
         ];
         if ($config->getType() === GradeableType::ELECTRONIC_FILE) {
             $return_json['bulk_upload'] = $config->isBulkUpload();
