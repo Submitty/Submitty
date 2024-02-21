@@ -218,7 +218,7 @@ class PollController extends AbstractController {
         $answers = 0;
 
         foreach ($_POST['option'] as $option) {
-            if ((!isset($option['order']) || !isset($option['response']))) {
+            if (!isset($option['order']) || !isset($option['response'])) {
                 $this->core->addErrorMessage("Error occurred in adding poll");
                 return new RedirectResponse($this->core->buildCourseUrl(['polls']));
             }
@@ -406,7 +406,7 @@ class PollController extends AbstractController {
             }
         }
 
-        if ($answers === 0 && !$poll->allowsCustomResponses()) {
+        if ($answers === 0) {
             $this->core->addErrorMessage("Polls must have at least one correct response");
             return new RedirectResponse($this->core->buildCourseUrl(['polls']));
         }
