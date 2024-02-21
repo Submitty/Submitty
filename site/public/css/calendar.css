@@ -202,7 +202,6 @@ a.cal-gradeable-status-text {
     padding: 0;
     border: none;
     box-shadow: none;
-    cursor: default;
 }
 
 a.cal-gradeable-status-text:hover {
