@@ -118,7 +118,7 @@ Vagrant.configure(2) do |config|
   mount_options = []
 
   config.vm.box = ENV.fetch('VAGRANT_BOX', base_boxes.default)
-
+  
   arch = `uname -m`.chomp
   arm = arch == 'arm64' || arch == 'aarch64'
   apple_silicon = Vagrant::Util::Platform.darwin? && (arm || (`sysctl -n machdep.cpu.brand_string`.chomp.start_with? 'Apple M'))
@@ -251,6 +251,12 @@ Vagrant.configure(2) do |config|
     mount_folders(override, [])
   end
 
+  unless config.vm.box == base_boxes.default
+    if !base_box
+      puts 'Please use BASE_BOX=1 vagrant up --provider=`your provider`'
+      abort
+    end
+  end
   config.vm.provision :shell, :inline => " sudo timedatectl set-timezone America/New_York", run: "once"
 
   if ARGV.include?('ssh')
