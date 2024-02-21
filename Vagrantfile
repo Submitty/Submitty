@@ -36,7 +36,7 @@ ON_CI = !ENV.fetch('CI', '').empty?
 
 def gen_script(machine_name, worker: false)
   no_submissions = !ENV.fetch('NO_SUBMISSIONS', '').empty?
-  reinstall = !ENV.fetch('BASE_BOX', '').empty?
+  reinstall = !ENV.fetch('BASE_BOX', '').empty? || ENV.has_key?('VAGRANT_BOX')
   extra = ENV.fetch('EXTRA', '')  
   setup_cmd = 'bash ${GIT_PATH}/.setup/'
   if reinstall || ON_CI
@@ -123,7 +123,7 @@ Vagrant.configure(2) do |config|
   arm = arch == 'arm64' || arch == 'aarch64'
   apple_silicon = Vagrant::Util::Platform.darwin? && (arm || (`sysctl -n machdep.cpu.brand_string`.chomp.start_with? 'Apple M'))
   
-  custom_box = ENV.has_key?('VAGRANT_BOX') && !ENV.has_key?('BASE_BOX')
+  custom_box = ENV.has_key?('VAGRANT_BOX') 
   base_box = ENV.has_key?('BASE_BOX')
   # The time in seconds that Vagrant will wait for the machine to boot and be accessible.
   config.vm.boot_timeout = 600
