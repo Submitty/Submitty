@@ -72,7 +72,7 @@
                                 "style": "display: inline"
                             } only %}
 
-                            {% if user_id == option.getAuthorId() or (user_admin and option.isCustom()) %}
+                            {% if ((poll.allowsCustomResponses() and option.isCustom()) and (user_id == option.getAuthorId() or user_admin)) %}
                                         {% set exists_custom_response = true %}
                                         <textarea aria-label="Response text" id = "{{option.getId()}}_custom_response" class="poll_response" name="option[{{option.getId()}}][response]" style="display:none; resize: none; min-height: 50px; max-height: 300px; height: 50px; width: 100%; rows="10" cols="30">{{option.getResponse()}}</textarea>
                                         <div class="move-btn upload-btn" style = "display:none; border:0; padding:0;" onclick = "updateCustomResponse({{ poll.getId() }}, {{ option.getId() }}, '{{ base_url }}');">
@@ -83,7 +83,7 @@
                                         </div>
 
                                         <div class="move-btn edit-btn" style = "border:0; padding:0;" onclick = "displayCustomResponseEdit('true', 'option-row-{{ option.getId() }}');">
-                                            <i class="fas fa-pencil-alt black-btn"></i>
+                                            <i class="fas fa-edit black-btn"></i>
                                         </div>
                                         <div class="move-btn delete-btn" style = "border:0; padding:0;" onclick = "removeCustomResponse({{ poll.getId() }}, {{ option.getId() }}, '{{ base_url }}');">
                                             <i class="fas fa-trash black-btn"></i>
@@ -100,7 +100,6 @@
                         </tr>
                         {% set index = index + 1 %}
                     {% endfor %}
-                    <hr />
             </table>
                 </fieldset>
                 {% if not user_admin and poll.isOpen() %}

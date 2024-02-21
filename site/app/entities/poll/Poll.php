@@ -124,7 +124,7 @@ class Poll {
         return $this->status === "ended";
     }
 
-    public function allowsCustomResponses() : bool {
+    public function allowsCustomResponses(): bool {
         return $this->question_type === "single-custom-response-survey" || $this->question_type === "multiple-custom-response-survey";
     }
 

@@ -1,5 +1,5 @@
-/* exported newDeletePollForm updatePollAcceptingAnswers updatePollVisible updateDropdownStates importPolls */
-/* global csrfToken */
+/* exported newDeletePollForm updatePollAcceptingAnswers updatePollVisible updateDropdownStates importPolls addCustomResponse updateCustomResponse removeCustomResponse */
+/* global csrfToken displaySuccessMessage displayErrorMessage */
 
 $(document).ready(() => {
     $('.dropdown-bar').on('click', function() {
@@ -108,7 +108,7 @@ function updateDropdownStates(curr_state, cookie_key) {
 
 function addCustomResponse(pollid, base_url) {
     const custom_response_text = document.querySelector('.custom_poll_response').value;
-    const url = base_url + '/addCustomResponse';
+    const url = `${base_url}/addCustomResponse`;
     const fd = new FormData();
     fd.append('csrf_token', csrfToken);
     fd.append('poll_id', pollid);
@@ -141,12 +141,12 @@ function addCustomResponse(pollid, base_url) {
                 console.error(err);
                 window.alert('Something went wrong. Please try again.');
             }
-        }
+        },
     });
 }
 
 function removeCustomResponse(pollid, optionid, base_url) {
-    const url = base_url + '/removeCustomResponse';
+    const url = `${base_url}/removeCustomResponse`;
     const fd = new FormData();
     fd.append('csrf_token', csrfToken);
     fd.append('poll_id', pollid);
@@ -169,8 +169,11 @@ function removeCustomResponse(pollid, optionid, base_url) {
                     displayErrorMessage(msg.message);
                 }
                 else {
+                    const edit_container = document.querySelector('.custom-response-wrapper');
+                    if (edit_container) {
+                        edit_container.style.display = 'block';
+                    }
                     document.getElementById(`option-row-${optionid}`).remove();
-                    document.querySelector('.custom-response-wrapper').style.display = 'block';
                     displaySuccessMessage(msg.data.message);
                 }
             }
@@ -178,13 +181,13 @@ function removeCustomResponse(pollid, optionid, base_url) {
                 console.error(err);
                 window.alert('Something went wrong. Please try again.');
             }
-        }
+        },
     });
 }
 
 function updateCustomResponse(pollid, optionid, base_url) {
     const custom_response_value = document.getElementById(`${optionid}_custom_response`).value;
-    const url = base_url + '/updateCustomResponse';
+    const url = `${base_url}/updateCustomResponse`;
     const fd = new FormData();
     fd.append('csrf_token', csrfToken);
     fd.append('poll_id', pollid);
@@ -218,14 +221,14 @@ function updateCustomResponse(pollid, optionid, base_url) {
                 console.error(err);
                 window.alert('Something went wrong. Please try again.');
             }
-        }
+        },
     });
 }
 
 function displayCustomResponseEdit(display, parentid) {
     const parent_container = document.getElementById(parentid);
-    const display_edit = display === 'true' ? 'inline-flex' : 'none';
-    const display_default = display === 'true' ? 'none' : 'inline-flex';
+    const display_edit = display === 'true' ? 'inline' : 'none';
+    const display_default = display === 'true' ? 'none' : 'inline';
 
     parent_container.querySelector('.markdown').style.display = display_default;
     parent_container.querySelector('.edit-btn').style.display = display_default;

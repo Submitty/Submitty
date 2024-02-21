@@ -133,9 +133,9 @@
         </select>
         <br/>
         <label for = "poll_credit" class="option-title credit-form-item" style="display: {{ poll is not null and poll.allowsCustomResponses() ? "inline-block" : "none" }}">
-            Allow custom poll to count as credit
+            Allow custom poll responses to count as credit
         </label>
-        <input id ="poll_credit" class="credit-box credit-form-item" type="checkbox" name="poll_credit" style="display: {{ poll is not null and poll.allowsCustomResponses() ? "inline-block" : "none" }}" {{ poll is not null and poll.getCustomCredit() ? "checked" : "" }}>
+        <input id ="poll_credit" class="credit-box credit-form-item" type="checkbox" name="poll_credit" style="display: {{ poll is not null and poll.allowsCustomResponses() ? "inline-block" : "none" }}" {{ poll is null or poll.getCustomCredit() ? "checked" : "" }}>
         <br class = 'credit-form-item' style="display: {{ poll is not null and poll.allowsCustomResponses() ? "inline-block" : "none" }}" />
 
         <hr>
@@ -308,11 +308,11 @@
             $("#poll-form-submit").prop("disabled", true);
             $(".polls-submit-error").hide();
             $("#empty-date-error").show();
-        } else if ($(".response-container").length === 0 && !custom_survey) {
+        } else if ($(".response-container").length === 0) {
             $("#poll-form-submit").prop("disabled", true);
             $(".polls-submit-error").hide();
             $("#response-count-error").show();
-        } else if ($(".correct-box:checked").length === 0 && !custom_survey) {
+        } else if ($(".correct-box:checked").length === 0) {
             $("#poll-form-submit").prop("disabled", true);
             $(".polls-submit-error").hide();
             $("#correct-response-count-error").show();

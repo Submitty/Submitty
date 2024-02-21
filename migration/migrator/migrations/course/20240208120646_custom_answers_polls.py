@@ -23,7 +23,7 @@ def up(config, database, semester, course):
         ADD COLUMN IF NOT EXISTS custom boolean NOT NULL DEFAULT false;
 
         ALTER TABLE poll_options
-        ADD COLUMN IF NOT EXISTS author_id VARCHAR(255);
+        ADD COLUMN IF NOT EXISTS author_id VARCHAR(255) NOT NULL DEFAULT 'instructor';
         """
     )
 

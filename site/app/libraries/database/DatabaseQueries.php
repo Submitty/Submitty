@@ -5412,7 +5412,7 @@ AND gc_id IN (
         return $this->course_db->rows();
     }
 
-    public function submittedCustomResponse(int $poll_id, string $author_id) : bool {
+    public function submittedCustomResponse(int $poll_id, string $author_id): bool {
         $params = [$poll_id, $author_id];
         $query = "SELECT *
                   FROM poll_options
@@ -5422,7 +5422,7 @@ AND gc_id IN (
         return count($this->course_db->rows()) >= 1;
     }
 
-    public function existsCustomResponse(int $poll_id, string $poll_response) : bool {
+    public function existsCustomResponse(int $poll_id, string $poll_response): bool {
         $params = [$poll_id, $poll_response];
         $query = "SELECT *
                   FROM poll_options
