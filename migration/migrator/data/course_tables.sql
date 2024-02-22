@@ -893,8 +893,7 @@ CREATE TABLE public.forum_posts_history (
 
 CREATE TABLE public.forum_upducks (
     post_id integer NOT NULL,
-    user_id character varying(255) NOT NULL,
-    thread_id integer NOT NULL
+    user_id character varying(255) NOT NULL
 );
 
 
@@ -2792,14 +2791,6 @@ ALTER TABLE ONLY public.forum_posts_history
 
 ALTER TABLE ONLY public.forum_upducks
     ADD CONSTRAINT forum_upducks_post_id_fkey FOREIGN KEY (post_id) REFERENCES public.posts(id) ON UPDATE CASCADE ON DELETE CASCADE;
-
-
---
--- Name: forum_upducks forum_upducks_thread_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
---
-
-ALTER TABLE ONLY public.forum_upducks
-    ADD CONSTRAINT forum_upducks_thread_id_fkey FOREIGN KEY (thread_id) REFERENCES public.threads(id) ON UPDATE CASCADE ON DELETE CASCADE;
 
 
 --
