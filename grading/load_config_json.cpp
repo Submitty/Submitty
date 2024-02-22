@@ -96,9 +96,7 @@ void AddAutogradingConfiguration(nlohmann::json &whole_config) {
         if (exe_name->is_array()) {
           for (typename nlohmann::json::iterator itr = exe_name->begin(); itr != exe_name->end(); itr++) {
             if (itr->is_string()) {
-              std::string name = to_string(*itr);
-              // to_string function inserts "" characters around the executable name. Need to strip.
-              whole_config["autograding"]["compilation_to_runner"].push_back("**/" + name.substr(1, name.size() - 2));
+              whole_config["autograding"]["compilation_to_runner"].push_back("**/" + itr->template get<std::string>());
             }
             else {
               throw std::invalid_argument("Unable to parse provided executable_name");
@@ -106,9 +104,7 @@ void AddAutogradingConfiguration(nlohmann::json &whole_config) {
           }
         }
         else if (exe_name->is_string()) {
-          std::string name = to_string(*exe_name);
-          // to_string function inserts "" characters around the executable name. Need to strip.
-          whole_config["autograding"]["compilation_to_runner"].push_back("**/" + name.substr(1, name.size() - 2));
+          whole_config["autograding"]["compilation_to_runner"].push_back("**/" + exe_name->template get<std::string>());
         }
       }
     }
