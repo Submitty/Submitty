@@ -1360,9 +1360,9 @@ class ForumController extends AbstractController {
 
         if ($output["type"] === "false") {
             return JsonResponse::getErrorResponse('Catch Fail in Query');
-        } elseif ($output["type"] === "unlike" && !$isLiked) { // Check if it's NOT liked
+        } elseif ($output["type"] === "unlike" && !$isLiked) {
             return JsonResponse::getErrorResponse('Catch Fail in Query');
-        } elseif ($output["type"] === "like" && $isLiked) { // Check if it's liked
+        } elseif ($output["type"] === "like" && $isLiked) {
             return JsonResponse::getErrorResponse('Catch Fail in Query');
         }
         return JsonResponse::getSuccessResponse($output);

@@ -727,18 +727,20 @@ SQL;
             if ($action) {
                 $this->course_db->query("DELETE FROM forum_upducks WHERE post_id = ? AND user_id = ?", [$post_id, $current_user]);
                 return "unlike";
-            } 
+            }
             else {
                 $this->course_db->query("INSERT INTO forum_upducks (post_id, user_id) VALUES (?, ?)", [$post_id, $current_user]);
                 return "like";
             }
-        } catch (DatabaseException $dbException) {
+        }
+        catch (DatabaseException $dbException) {
             if ($this->course_db->inTransaction()) {
                 $this->course_db->rollback();
             }
             return "false";
         }
     }
+
 
     /**
      * @param int[] $post_ids
