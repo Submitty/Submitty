@@ -727,7 +727,6 @@ SQL;
             // Check if the user has already liked bc if not database will get duplicates
             $this->course_db->query("SELECT * FROM forum_upducks WHERE post_id = ? AND user_id = ?", [$post_id, $current_user]);
             $hasLiked = isset($this->course_db->rows()[0]);
-    
             if ($action) {
                 if ($hasLiked) {
                     $this->course_db->query("DELETE FROM forum_upducks WHERE post_id = ? AND user_id = ?", [$post_id, $current_user]);
