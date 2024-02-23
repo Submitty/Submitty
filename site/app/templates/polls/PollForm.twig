@@ -87,15 +87,16 @@
             <input type="checkbox" id="keep-image" name="keep_image" checked />
         {% endif %}
         <br/>
-        {#This is the addition for the timer#}
+        
         <br/>
-        <label for="poll-timer" class="option-title">
-            Expected Time:
+        <label for="poll-hours" class="option-title">
+            Expected Duration of Poll:
         </label>
         {% set hours = poll is not null ? poll.getDuration().format('%H') : '00' %}
         {% set minutes = poll is not null ? poll.getDuration().format('%I') : '00' %}   
-        <input type="number" name="poll-hours" id="poll-hours" placeholder="Hour" min="0" value="{{ poll is not null ? poll.getDuration().h }}" />
-        <input type="number" name="poll-minutes" id="poll-minutes" placeholder="Min" min="0" max="59" value="{{ poll is not null ? poll.getDuration().i }}" />
+        <input type="number" name="poll-hours" id="poll-hours" class="poll-timer" placeholder="Hour" min="0" value="{{ poll is not null ? poll.getDuration().h }}" />
+        <input type="number" name="poll-minutes" id="poll-minutes" class="poll-timer" placeholder="Min" min="0" value="{{ poll is not null ? poll.getDuration().i }}" />
+        <input type="number" name="poll-seconds" id="poll-seconds" class="poll-timer" placeholder="Sec" min="0" value="{{ poll is not null ? poll.getDuration().s }}" />
         <br/>
         <label for="poll-date" class="option-title">
             Expected release date:

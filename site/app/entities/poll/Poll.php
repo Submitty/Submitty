@@ -26,6 +26,11 @@ class Poll {
     #[ORM\Column(type: Types::TEXT)]
     protected $question;
 
+    #[ORM\Column(type: Types::TEXT)]
+    protected $status;
+    /**
+     * @var string
+     */
     #[ORM\Column(type: Types::STRING)]
     protected $duration;
 
@@ -33,11 +38,11 @@ class Poll {
     protected DateTime $end_date;
 
     #[ORM\Column(type: Types::DATE_MUTABLE)]
-    protected DateTime $release_date;   
+    protected DateTime $release_date;
 
     #[ORM\Column(type: Types::TEXT, nullable: true)]
     protected $image_path;
-    
+
     #[ORM\Column(type: Types::STRING)]
     protected $question_type;
 
@@ -63,7 +68,7 @@ class Poll {
     #[ORM\JoinColumn(name: "poll_id", referencedColumnName: "poll_id")]
     protected Collection $responses;
 
-    public function __construct(string $name, string $question, string $question_type, \DateInterval $duration, \DateTime $release_date, string $release_histogram, string $release_answer, string $image_path = null, ) {
+    public function __construct(string $name, string $question, string $question_type, \DateInterval $duration, \DateTime $release_date, string $release_histogram, string $release_answer, string $image_path = null) {
         $this->setName($name);
         $this->setQuestion($question);
         $this->setQuestionType($question_type);
@@ -73,6 +78,8 @@ class Poll {
         $this->setReleaseHistogram($release_histogram);
         $this->setReleaseAnswer($release_answer);
         $this->setImagePath($image_path);
+        # Have to set closed because database has to be not null.
+        $this->setClosed();
         $this->options = new ArrayCollection();
         $this->responses = new ArrayCollection();
     }
@@ -96,8 +103,16 @@ class Poll {
     public function setQuestion(string $question): void {
         $this->question = $question;
     }
-
-    public function isOpen(): bool {     
+    public function setClosed(): void {
+        $this->end_date = new \DateTime(DateUtils::BEGINING_OF_TIME);
+    }
+    public function setOpen(): void {
+        $this->end_date = new \DateTime(DateUtils::MAX_TIME);
+    }
+    public function setEnded(): void {
+        $this->end_date = DateUtils::getDateTimeNow();
+    }
+    public function isOpen(): bool {
         $now = DateUtils::getDateTimeNow();
         return $now < $this->end_date;
     }
@@ -109,13 +124,13 @@ class Poll {
 
     public function isClosed(): bool {
         $now = DateUtils::getDateTimeNow();
-        return $now > $this->end_date && $this->end_date->format('Y-m-d') == '1900-02-01';
+        return $now > $this->end_date && $this->end_date->format('Y-m-d') === '1900-02-01';
     }
     public function getDuration(): \DateInterval {
         return new \DateInterval($this->duration);
     }
 
-    public function getEndDate(): \DateTime{
+    public function getEndDate(): \DateTime {
         return $this->end_date;
     }
 
@@ -124,7 +139,6 @@ class Poll {
     }
 
     public function setDuration(\DateInterval $duration): void {
-        
         $this->duration = $duration->format('P%yY%mM%dDT%hH%iM%sS');
     }
 

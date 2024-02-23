@@ -1,22 +1,6 @@
 <div class="content">
     <h1>
-        {{ poll.getEndDate() | date("F jS, Y \\a\\t g:i A")}} 
-        {% set duration = poll.getDuration() %}
-        {% set durationString = '' %}
-        {% if duration.days > 0 %}
-            {% set durationString = durationString ~ duration.days ~ ' day(s) ' %}
-        {% endif %}
-        {% if duration.h > 0 %}
-            {% set durationString = durationString ~ duration.h ~ ' hour(s) ' %}
-        {% endif %}
-        {% if duration.i > 0 %}
-            {% set durationString = durationString ~ duration.i ~ ' minute(s) ' %}
-        {% endif %}
-        {% if duration.s > 0 %}
-            {% set durationString = durationString ~ duration.s ~ ' second(s) ' %}
-        {% endif %}
-
-        {{ durationString }}
+        {{ poll.getName() }}
     </h1>
 
     {% if user_admin or poll.isHistogramAvailable() %}

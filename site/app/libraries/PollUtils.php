@@ -22,8 +22,8 @@ class PollUtils {
                 'question_type' => $poll->getQuestionType(),
                 'responses' => [],
                 'correct_responses' => [],
+                'duration' => $poll->getDuration()->format('P%yY%mM%dDT%hH%iM%sS'),
                 'release_date' => $poll->getReleaseDate()->format('Y-m-d'),
-                'status' => $poll->getStatus(),
                 'release_histogram' => $poll->getReleaseHistogram(),
                 'release_answer' => $poll->getReleaseAnswer(),
                 'image_path' => $poll->getImagePath()

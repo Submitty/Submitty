@@ -1535,7 +1535,7 @@ CREATE TABLE public.polls (
     release_histogram character varying(10) DEFAULT 'never'::character varying,
     release_answer character varying(10) DEFAULT 'never'::character varying,
     duration character varying(255) DEFAULT 'P0D'::character varying,
-    end_date timestamp with time zone DEFAULT '9999-01-01 00:00:00-05'::timestamp with time zone NOT NULL
+    end_date timestamp with time zone DEFAULT '1900-02-01 00:00:00-05'::timestamp with time zone NOT NULL
 );
 
 

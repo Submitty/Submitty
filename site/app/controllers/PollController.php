@@ -115,7 +115,7 @@ class PollController extends AbstractController {
 
         $response_counts = [];
 
-        if ($this->core->getUser()->accessAdmin()){
+        if ($this->core->getUser()->accessAdmin()) {
             /** @var Poll|null */
             $poll = $repo->findByIDWithOptions(intval($poll_id));
             if ($poll === null) {
@@ -193,19 +193,15 @@ class PollController extends AbstractController {
                     $this->core->addErrorMessage("Invalid poll answer release setting");
             return new RedirectResponse($this->core->buildCourseUrl(['polls']));
         }
-        //Handle the two inputs, both will be ints (one hours, one minutes). I have to combine both of them into a "DateInterval" and create the PollObject based on that.
-        //We will default it to set to 0 if it is not found in $_POST.
+        //set to 0 if it is not found in $_POST.
         $hours = intval($_POST['poll-hours'] ?? 0);
-
         $minutes = intval($_POST['poll-minutes'] ?? 0);
-
-        if (!is_numeric($hours) || !is_numeric($minutes) || $hours < 0 || $minutes < 0) {
+        $seconds = intval($_POST['poll-seconds'] ?? 0);
+        if ($hours < 0 || $minutes < 0) {
             $this->core->addErrorMessage('Invalid time given');
             return new RedirectResponse($this->core->buildCourseUrl(['polls']));
         }
-
-        $duration = new DateInterval("PT{$hours}H{$minutes}M");
-
+        $duration = new DateInterval("PT{$hours}H{$minutes}M{$seconds}S");
         $poll = new Poll($_POST['name'], $_POST['question'], $_POST['question_type'], $duration, $date, $_POST['release_histogram'], $_POST["release_answer"]);
         $em->persist($poll);
 
@@ -281,7 +277,7 @@ class PollController extends AbstractController {
             $this->core->addErrorMessage("Invalid Poll ID");
             return new RedirectResponse($this->core->buildCourseUrl(['polls']));
         }
-        
+
         return new WebResponse(
             PollView::class,
             'pollForm',
@@ -326,14 +322,13 @@ class PollController extends AbstractController {
         $date = \DateTime::createFromFormat("Y-m-d", $_POST["release_date"]);
         $hours = intval($_POST['poll-hours'] ?? 0);
         $minutes = intval($_POST['poll-minutes'] ?? 0);
-        if (!is_numeric($hours) || !is_numeric($minutes) || $hours < 0 || $minutes < 0) {
+        $seconds = intval($_POST['poll-seconds'] ?? 0);
+        if ($hours < 0 || $minutes < 0) {
             $this->core->addErrorMessage('Invalid time given');
             return new RedirectResponse($this->core->buildCourseUrl(['polls']));
         }
-        # I have to set the offset between old and new duration to the endDate.
-        $newDuration = new DateInterval("PT{$hours}H{$minutes}M0S");
-        if($poll->isOpen())
-        {
+        $newDuration = new DateInterval("PT{$hours}H{$minutes}M{$seconds}S");
+        if ($poll->isOpen()) {
             $endDate = $this->core->getDateTimeNow();
             $endDate->add($newDuration);
             $poll->setEndDate($endDate);
@@ -342,12 +337,10 @@ class PollController extends AbstractController {
             $this->core->addErrorMessage("Invalid poll release date");
             return new RedirectResponse($returnUrl);
         }
-
         if (!in_array($_POST["question_type"], PollUtils::getPollTypes())) {
             $this->core->addErrorMessage("Invalid poll question type");
             return new RedirectResponse($this->core->buildCourseUrl(['polls']));
         }
-
         $poll->setName($_POST['name']);
         $poll->setQuestion($_POST['question']);
         $poll->setQuestionType($_POST['question_type']);
@@ -355,7 +348,6 @@ class PollController extends AbstractController {
         $poll->setReleaseDate($date);
         $poll->setReleaseHistogram($_POST['release_histogram']);
         $poll->setReleaseAnswer($_POST['release_answer']);
-
         if (isset($_FILES['image_file']) && $_FILES["image_file"]["name"] !== "") {
             $file = $_FILES["image_file"];
             // validate file size
@@ -462,7 +454,7 @@ class PollController extends AbstractController {
         }
 
         $duration = $poll->getDuration();
-        if ($duration->format('%r%Y%m%d%H%i%s') !== '000000000000'){
+        if ($duration->format('%r%Y%m%d%H%i%s') !== '000000000000') {
             // Duration evaluates to > 0
             $end_date = $this->core->getDateTimeNow();
             $end_date->add($duration);
@@ -491,7 +483,6 @@ class PollController extends AbstractController {
             $this->core->addErrorMessage("Invalid Poll ID");
             return new RedirectResponse($this->core->buildCourseUrl(['polls']));
         }
-        //Setting it current Time so it ends.
         $poll->setEndDate($this->core->getDateTimeNow());
         $em->flush();
 
@@ -512,7 +503,6 @@ class PollController extends AbstractController {
             return new RedirectResponse($this->core->buildCourseUrl(['polls']));
         }
         //Setting the time to the beginning of time indicates that it is closed.
-        //Should be based on status.
         $poll->setEndDate(new DateTime(DateUtils::BEGINING_OF_TIME));
         $em->flush();
         return new RedirectResponse($this->core->buildCourseUrl(['polls']));
@@ -696,7 +686,7 @@ class PollController extends AbstractController {
                 implemented don't have this data. At the time, there
                 only existed questions of type single response. */
             $question_type = array_key_exists("question_type", $poll) ? $poll['question_type'] : 'single-response-multiple-correct';
-            $poll_entity = new Poll($poll['name'], $poll['question'], $question_type, \DateTime::createFromFormat("Y-m-d", $poll['release_date']), $poll['release_histogram'], $poll['release_answer']);
+            $poll_entity = new Poll($poll['name'], $poll['question'], $question_type, new \DateInterval($poll['duration']), \DateTime::createFromFormat("Y-m-d", $poll['release_date']), $poll['release_histogram'], $poll['release_answer']);
             $em->persist($poll_entity);
             $order = 0;
             foreach ($poll['responses'] as $id => $response) {
