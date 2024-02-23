@@ -724,13 +724,25 @@ SQL;
 
     public function toggleLikes(int $post_id, string $current_user, bool $action): string {
         try {
+            // Check if the user has already liked bc if not database will get duplicates
+            $this->course_db->query("SELECT * FROM forum_upducks WHERE post_id = ? AND user_id = ?", [$post_id, $current_user]);
+            $hasLiked = isset($this->course_db->rows()[0]);
+
             if ($action) {
-                $this->course_db->query("DELETE FROM forum_upducks WHERE post_id = ? AND user_id = ?", [$post_id, $current_user]);
-                return "unlike";
+                if ($hasLiked) {
+                    $this->course_db->query("DELETE FROM forum_upducks WHERE post_id = ? AND user_id = ?", [$post_id, $current_user]);
+                    return 'already_liked';
+                }
+                $this->course_db->query("INSERT INTO forum_upducks (post_id, user_id) VALUES (?, ?)", [$post_id, $current_user]);
+                return 'like';
             }
             else {
-                $this->course_db->query("INSERT INTO forum_upducks (post_id, user_id) VALUES (?, ?)", [$post_id, $current_user]);
-                return "like";
+                if (!$hasLiked) {
+                    $this->course_db->query("INSERT INTO forum_upducks (post_id, user_id) VALUES (?, ?)", [$post_id, $current_user]);
+                    return 'not_liked';
+                }
+                $this->course_db->query("DELETE FROM forum_upducks WHERE post_id = ? AND user_id = ?", [$post_id, $current_user]);
+                return 'unlike';
             }
         }
         catch (DatabaseException $dbException) {

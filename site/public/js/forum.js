@@ -1286,7 +1286,6 @@ function modifyThreadList(currentThreadId, currentCategoriesId, course, loadFirs
 }
 
 function toggleLike(post_id, current_user, isLiked) {
-
     // eslint-disable-next-line no-undef
     const url = buildCourseUrl(['post', 'likes']);
     $.ajax({
@@ -1328,12 +1327,14 @@ function toggleLike(post_id, current_user, isLiked) {
                 console.log(localStorage.getItem('theme'));
             }
 
-            if (likeIconSrcElement.endsWith('/img/on-duck-button.svg')||likeIconSrcElement.endsWith('/img/on-duck-button-ta-teacher.svg')) {
-                if (theme==='light' && (likeIconSrcElement.endsWith('/img/on-duck-button.svg')||likeIconSrcElement.endsWith('/img/on-duck-button-ta-teacher.svg'))) {
+            if (likeIconSrcElement.endsWith('/img/on-duck-button.svg')) {
+                if (theme==='light' && likeIconSrcElement.endsWith('/img/on-duck-button.svg')) {
                     likeIconSrcElement = likeIconSrcElement.replace('on-duck-button.svg', 'light-mode-off-duck.svg');
+                    likeCounterElement.style.color = 'white';
                 }
                 else {
                     likeIconSrcElement = likeIconSrcElement.replace('on-duck-button.svg', 'light-mode-off-duck.svg');
+                    likeCounterElement.style.color = 'white';
                 }
                 likeCounter=likeCounter-1;
 
@@ -1341,11 +1342,13 @@ function toggleLike(post_id, current_user, isLiked) {
                 likeCounterElement.innerText = likeCounter;
             }
             else {
-                if (taTrue) {
-                    likeIconSrcElement = likeIconSrcElement.replace('light-mode-off-duck.svg', 'on-duck-button-ta-teacher.svg');
+                if (theme==='light') {
+                    likeIconSrcElement = likeIconSrcElement.replace('light-mode-off-duck.svg', 'on-duck-button.svg');
+                    likeCounterElement.style.color = '#de31de';
                 }
                 else {
                     likeIconSrcElement = likeIconSrcElement.replace('light-mode-off-duck.svg', 'on-duck-button.svg');
+                    likeCounterElement.style.color = '#de31de';
                 }
                 likeCounter=likeCounter+1;
 
