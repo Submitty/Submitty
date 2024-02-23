@@ -180,15 +180,15 @@ class Server implements MessageComponentInterface {
      * @param string $msgString
      */
     public function onMessage(ConnectionInterface $from, $msgString): void {
+
         try {
             if ($msgString === 'ping') {
                 $from->send('pong');
                 return;
             }
 
-            $msg = json_decode($msgString, true);
-
             if (isset($msg["type"]) && $msg["type"] === "new_connection") {
+                $msg = json_decode($msgString, true);
                 if (isset($msg['page']) && is_string($msg['page'])) {
                     if (!array_key_exists($msg['page'], $this->clients)) {
                         $this->clients[$msg['page']] = new \SplObjectStorage();
@@ -213,6 +213,7 @@ class Server implements MessageComponentInterface {
             else {
                 $this->broadcast($from, $msgString, $this->getSocketClientPage($from));
             }
+
         }
         catch (\Throwable $t) {
             $this->logError($t, $from);

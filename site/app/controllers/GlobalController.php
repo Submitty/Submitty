@@ -170,7 +170,7 @@ class GlobalController extends AbstractController {
                 "href" => $this->core->buildCourseUrl(['chat']),
                 "title" => "Live Lecture Chat",
                 "id" => "nav-sidebar-chat",
-                "icon" => "far fa-smiley"
+                "icon" => "fa-regular fa-keyboard"
             ]);
         }
 

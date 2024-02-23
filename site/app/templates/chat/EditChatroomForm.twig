@@ -1,9 +1,8 @@
-{% set url_path = "/newChatroom" %}
 {% extends 'generic/Popup.twig' %}
-{% block popup_id %}create-chatroom-form{% endblock %}
-{% block title %}Create Chatroom{% endblock %}
+{% block popup_id %}edit-chatroom-form{% endblock %}
+{% block title %}Edit Chatroom{% endblock %}
 {% block body %}
-    <form id="chatroom-create-form" action="{{ base_url }}{{ url_path }}" method="post">
+    <form id="chatroom-edit-form" method="post">
         <div class="flex-col flex-col-space">
             <input type="hidden" name="csrf_token" value="{{ csrf_token }}"/>
             <label for="chatroom_name" class="option-title">
@@ -14,7 +13,7 @@
                 Description:
             </label>
             <textarea name="description" class="chatroom-description" placeholder="Enter description here..."></textarea>
-            <button type="submit" class="btn btn-primary">Create Chatroom</button>
+            <button type="submit" class="btn">Save Changes</button>
         </div>
     </form>
 {% endblock %}

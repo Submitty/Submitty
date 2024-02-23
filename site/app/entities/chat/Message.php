@@ -21,8 +21,6 @@ class Message {
     #[ORM\ManyToOne(targetEntity: "Chatroom")]
     #[ORM\JoinColumn(name: "chatroom_id", referencedColumnName: "id")]
     private $chatroom;
-    #[ORM\Column(name: "chatroom_id", type: Types::INTEGER)]
-    private $chatroom_id;
 
     #[ORM\Column(type: Types::STRING)]
     private string $user_id;
@@ -30,11 +28,10 @@ class Message {
     #[ORM\Column(type: Types::TEXT)]
     private $content;
 
-    #[ORM\Column(type: Types::DATETIME_IMMUTABLE)]
-    private $timestamp;
+    #[ORM\Column(type: Types::DATETIMETZ_MUTABLE)]
+    protected DateTime $timestamp;
 
     public function __construct() {
-        $this->timestamp = new \DateTime();
     }
 
     public function getId(): int {
@@ -57,20 +54,12 @@ class Message {
         $this->content = $text;
     }
 
-    public function getTimestamp(): \DateTimeImmutable {
+    public function getTimestamp(): DateTime {
         return $this->timestamp;
     }
 
-    public function setTimestamp(\DateTimeImmutable $timestamp): void {
+    public function setTimestamp(datetime $timestamp): void {
         $this->timestamp = $timestamp;
-    }
-
-    public function getChatroomId(): int {
-        return $this->chatroom_id;
-    }
-
-    public function setChatroomId(int $chatroom_id): void {
-        $this->chatroom_id = $chatroom_id;
     }
 
     public function getChatroom(): Chatroom {

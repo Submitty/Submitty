@@ -1894,9 +1894,3 @@ function tzWarn() {
 }
 
 document.addEventListener('DOMContentLoaded', tzWarn);
-
-function newChatroomForm() {
-    $('.popup-form').css('display', 'none');
-    var form = $("#create-chatroom-form");
-    form.css("display", "block");
-}

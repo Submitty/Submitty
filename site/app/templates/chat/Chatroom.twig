@@ -1,90 +1,23 @@
-<div class="content chatroom-container">
-    <div class="chatroom-header">
-        <span class="chatroom_title">{{ chatroom.getTitle() }}</span>
-        <button class="leave_room btn btn-danger">Leave Room</button>
-    </div>
-    <hr>
-    <div class="chatroom-main">
-        <div class="message-area"></div>
-        <hr>
-        <div id="input-area">
-            <textarea name="content" class="message_input" placeholder="Type your message here..." rows="2" cols="50"></textarea>
-            <button type="submit" class="send_message btn btn-primary">Send</button>
+<div class="content">
+    <div class="chatroom-container">
+        <div class="chatroom-header">
+            <span class="chatroom-title">{{ chatroom.getTitle() }}</span>
+            <a href="{{ base_url }}" class="leave-room btn btn-danger">leave room</a>
+        </div>
+        <div class="chatroom-content">
+            <div class="messages-area"></div>
+            <div class="input-container">
+                <textarea name="content" class="message-input" placeholder="Type your message here..."></textarea>
+                <button class="send-message-btn btn btn-primary">Send</button>
+            </div>
         </div>
     </div>
 </div>
-
-<script>
-    const chatroomId = "{{ chatroom.getId() }}";
-    const baseURL = "{{ base_url }}";
-
-    document.addEventListener('DOMContentLoaded', () => {
-        fetchMessages(); // Load existing messages
-        setupSendMessage(); // Setup message sending
-    });
-
-    function fetchMessages() {
-        fetch(`${baseURL}/${chatroomId}/messages`)
-            .then(response => response.json())
-            .then(responseData => {
-                const messagesContainer = document.querySelector('.message-area');
-                if (responseData.status === "success" && Array.isArray(responseData.data)) {
-                    responseData.data.forEach(msg => {
-                        appendMessage(messagesContainer, msg.user_id, msg.timestamp, msg.content);
-                    });
-                }
-            })
-            .catch(error => console.error('Error loading messages:', error));
-    }
-
-    function setupSendMessage() {
-        const sendButton = document.querySelector('.send_message');
-        const messageInput = document.querySelector('.message_input');
-
-        sendButton.addEventListener('click', () => {
-            const messageContent = messageInput.value.trim();
-            if (!messageContent) {
-                alert('Please enter a message.');
-                return;
-            }
-
-            const formData = new FormData();
-            formData.append('content', messageContent);
-
-            fetch(`${baseURL}/${chatroomId}/send`, {
-                method: 'POST',
-                body: formData,
-            })
-            .then(response => response.json())
-            .then(data => {
-                console.log('Success:', data);
-                messageInput.value = '';
-                messageInput.focus(); // Refocus on the input field after message send
-
-                // Optionally, update the chat UI with the new message
-                const messagesContainer = document.querySelector('.message-area');
-                appendMessage(messagesContainer, 'You', new Date().toLocaleString(), messageContent); // Adjust as needed
-            })
-            .catch(error => {
-                console.error('Error:', error);
-                alert('Failed to send message. Please try again.');
-            });
-        });
-    }
-
-    function appendMessage(container, userId, timestamp, content) {
-        const messageElement = document.createElement('div');
-        messageElement.classList.add('message');
-        messageElement.innerHTML = `
-            <div class="message_header">
-                <i class="fa-solid fa-circle-user"></i>
-                <span class="username">${userId}</span>
-                <span class="timestamp"> - ${timestamp}</span>
-            </div>
-            <div class="message_content">
-                ${content}
-            </div>
-        `;
-        container.appendChild(messageElement);
+<script type="application/json" id="page-data">
+    {
+        "chatroomId": "{{ chatroom.getId() }}",
+        "baseURL": "{{ base_url }}",
+        "userId": "{{ user_id }}",
+        "userName": "{{ user_first_name }} {{ user_last_name }}"
     }
 </script>

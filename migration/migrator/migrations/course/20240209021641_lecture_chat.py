@@ -42,5 +42,5 @@ def down(config, database, semester, course):
     :param course: Code of course being migrated
     :type course: str
     """
-    database.execute("DROP TABLE IF EXISTS chatrooms")
-    database.execute("DROP TABLE IF EXISTS chatroom_messages")
+
+    pass

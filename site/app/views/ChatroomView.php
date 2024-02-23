@@ -4,6 +4,7 @@ namespace app\views;
 
 use app\entities\chat\Chatroom;
 use app\entities\chat\Message;
+use app\entities\poll\Poll;
 use app\libraries\Core;
 use app\libraries\Output;
 use app\libraries\FileUtils;
@@ -15,6 +16,7 @@ class ChatroomView extends AbstractView {
         $this->core->getOutput()->addBreadcrumb("Live Lecture Chat", $this->core->buildCourseUrl(['chat']));
         $this->core->getOutput()->addInternalCss('chatroom.css');
         $this->core->getOutput()->addInternalJs('chatroom.js');
+        $this->core->getOutput()->addInternalJs('websocket.js');
     }
 
     public function showChatPageInstructor(array $chatrooms) {
@@ -45,7 +47,10 @@ class ChatroomView extends AbstractView {
             'semester' => $this->core->getConfig()->getTerm(),
             'course' => $this->core->getConfig()->getCourse(),
             'chatroom' => $chatroom,
-            'user_admin' => $this->core->getUser()->accessAdmin()
+            'user_admin' => $this->core->getUser()->accessAdmin(),
+            'user_id' => $this->core->getUser()->getId(),
+            'user_first_name' => $this->core->getUser()->getDisplayedGivenName(),
+            'user_last_name' => $this->core->getUser()->getDisplayedFamilyName()
         ]);
     }
 }
