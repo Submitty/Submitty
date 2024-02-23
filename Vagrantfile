@@ -111,7 +111,6 @@ Vagrant.configure(2) do |config|
   if ON_CI
     config.ssh.insert_key = false
   else 
-    config.ssh.username = 'root'
     config.ssh.insert_key = true
   end
  
@@ -155,8 +154,11 @@ Vagrant.configure(2) do |config|
     unless custom_box
       if base_box || ON_CI
         override.vm.box = base_boxes[:base]
+      else
+        config.ssh.username = 'root'
       end
     end
+
     # We limit resources when running on CI to avoid resource exhaustion and it isn't used for grading stuff or
     # other things we do in dev.
     vb.memory = ON_CI ? 1024 : 2048
@@ -225,6 +227,10 @@ Vagrant.configure(2) do |config|
   
   config.vm.provider "libvirt" do |libvirt, override|
     unless custom_box
+      if !base_box
+        puts 'Please use BASE_BOX=1 vagrant up --provider=`your provider`'
+        exit(0)
+      end
       override.vm.box = base_boxes[:libvirt]
     end
 
@@ -251,10 +257,10 @@ Vagrant.configure(2) do |config|
     mount_folders(override, [])
   end
 
-  unless config.vm.box == base_boxes.default
+  if (arm || apple_silicon)
     if !base_box
       puts 'Please use BASE_BOX=1 vagrant up --provider=`your provider`'
-      abort
+      exit(0)
     end
   end
   config.vm.provision :shell, :inline => " sudo timedatectl set-timezone America/New_York", run: "once"
