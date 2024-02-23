@@ -1,4 +1,5 @@
 import {getCurrentSemester} from '../../support/utils';
+
 function getKey(user_id, password) {
     return cy.request({
         method: 'POST',
@@ -64,9 +65,9 @@ describe('Tests cases revolving around gradeable access and submition', () => {
             expect(test_json.bulk_upload).to.eql(false);
             expect(test_json.ta_grading).to.eql(true);
             expect(test_json.grade_inquiries).to.eql(true);
-            expect(test_json.team_assignment).to.exist;
-            expect(test_json.team_assignment.team_max_size).to.eql(3);
-            expect(test_json.team_assignment.inherit_from).to.eql('');
+            expect(test_json.team_gradeable).to.exist;
+            expect(test_json.team_gradeable.team_max_size).to.eql(3);
+            expect(test_json.team_gradeable.inherit_from).to.eql('');
             expect(test_json.vcs).to.not.exist;
         });
     });
