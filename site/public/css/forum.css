@@ -48,9 +48,7 @@
 
 /* stylelint-disable-next-line selector-class-pattern, no-descending-specificity */
 .post_content {
-    display: flex;
     margin-right: 5px;
-    margin-top: 5px;
     white-space: pre-wrap;
 }
 
@@ -639,16 +637,6 @@
 /* stylelint-disable-next-line selector-class-pattern */
 .post_content p img {
     max-width: 100%;
-}
-
-/* stylelint-disable-next-line selector-class-pattern */
-.post_content p:first-child {
-    margin-top: 0;
-}
-
-/* stylelint-disable-next-line selector-class-pattern */
-.post_content p:last-child {
-    margin-bottom: 0;
 }
 
 .markdown-inactive {

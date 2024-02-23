@@ -1342,11 +1342,6 @@ parameters:
 			path: app/controllers/admin/LateController.php
 
 		-
-			message: "#^Parameter \\#2 \\$callback of function array_filter expects \\(callable\\(string\\)\\: bool\\)\\|null, 'strlen' given\\.$#"
-			count: 1
-			path: app/controllers/admin/LateController.php
-
-		-
 			message: "#^Parameter \\#2 \\$timestamp of method app\\\\libraries\\\\database\\\\DatabaseQueries\\:\\:updateLateDays\\(\\) expects string, DateTime given\\.$#"
 			count: 1
 			path: app/controllers/admin/LateController.php
@@ -1838,16 +1833,6 @@ parameters:
 
 		-
 			message: "#^PHPDoc tag @var with type app\\\\repositories\\\\course\\\\CourseMaterialRepository is not subtype of type app\\\\repositories\\\\course\\\\CourseMaterialRepository\\<app\\\\entities\\\\course\\\\CourseMaterial\\>\\.$#"
-			count: 1
-			path: app/controllers/course/CourseMaterialsController.php
-
-		-
-			message: "#^Result of && is always false\\.$#"
-			count: 1
-			path: app/controllers/course/CourseMaterialsController.php
-
-		-
-			message: "#^Variable \\$title in isset\\(\\) always exists and is always null\\.$#"
 			count: 1
 			path: app/controllers/course/CourseMaterialsController.php
 
@@ -2889,11 +2874,6 @@ parameters:
 		-
 			message: "#^Strict comparison using \\=\\=\\= between bool and 'true' will always evaluate to false\\.$#"
 			count: 1
-			path: app/controllers/grading/ElectronicGraderController.php
-
-		-
-			message: "#^Strict comparison using \\=\\=\\= between mixed and null will always evaluate to false\\.$#"
-			count: 2
 			path: app/controllers/grading/ElectronicGraderController.php
 
 		-
@@ -5336,17 +5316,15 @@ parameters:
 			path: app/libraries/database/DatabaseQueries.php
 
 		-
+			message: "#^Comparison operation \"\\>\" between int\\<min, 0\\> and 0 is always false\\.$#"
+
+		-
 			message: "#^Call to method app\\\\libraries\\\\database\\\\AbstractDatabase\\:\\:getRowCount\\(\\) with incorrect case\\: getrowcount$#"
 			count: 1
 			path: app/libraries/database/DatabaseQueries.php
 
 		-
 			message: "#^Call to method app\\\\libraries\\\\database\\\\DatabaseQueries\\:\\:getRawUsersWithOverriddenGrades\\(\\) with incorrect case\\: getRawUsersWIthOverriddenGrades$#"
-			count: 1
-			path: app/libraries/database/DatabaseQueries.php
-
-		-
-			message: "#^Comparison operation \"\\>\" between int\\<min, 0\\> and 0 is always false\\.$#"
 			count: 1
 			path: app/libraries/database/DatabaseQueries.php
 
@@ -9968,11 +9946,6 @@ parameters:
 
 		-
 			message: "#^Property app\\\\models\\\\User\\:\\:\\$notification_settings type has no value type specified in iterable type array\\.$#"
-			count: 1
-			path: app/models/User.php
-
-		-
-			message: "#^Variable \\$random on left side of \\?\\? always exists and is not nullable\\.$#"
 			count: 1
 			path: app/models/User.php
 
