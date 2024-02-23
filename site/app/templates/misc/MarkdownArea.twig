@@ -113,6 +113,22 @@
         enableTabsInTextArea("#{{markdown_area_id}}");
         const markdown_area = $('#{{markdown_area_id}}').closest('.markdown-area')
         markdown_area.find('[data-initialize-preview="1"]').trigger('click');
+        function resizeTextarea(textarea) {
+        // Set the height to 'auto' to get the correct scrollHeight
+        textarea.style.height = 'auto';
+        // Set the height to the scrollHeight plus a little extra space
+        textarea.style.height = (textarea.scrollHeight + 5) + 'px';
+        }
+        var textareaElement = document.getElementById('{{ markdown_area_id }}');
+        
+        resizeTextarea(textareaElement);
+
+        // Ensure the textarea allows for scrolling if content overflows
+        textareaElement.style.overflowY = 'auto';
+
+        textareaElement.addEventListener('input', function() {
+            resizeTextarea(this);
+        });
     });
     $('.markdown-mode-tab').on('click', function(){
         $(this).addClass('active');
