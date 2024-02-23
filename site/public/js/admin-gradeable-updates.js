@@ -221,14 +221,14 @@ $(document).ready(() => {
             data[this.name] = $(this).val();
         }
         //Retrieve all checked boxes for peerGrader-accessibility of panels
-        let selectedCheckboxes = [];
+        const selectedCheckboxes = [];
         $('input[name="peer_panel"]').each(function() {
             if ($(this).is(':checked')) {
                 selectedCheckboxes.push(parseInt($(this).val()));
             }
         });
         // 0 indicates none of the checkboxes are selected
-        data["peer_panel"] = selectedCheckboxes.length > 0 ? selectedCheckboxes : [0];
+        data['peer_panel'] = selectedCheckboxes.length > 0 ? selectedCheckboxes : [0];
         const addDataToRequest = function (i, val) {
             if (val.type === 'radio' && !$(val).is(':checked')) {
                 return;

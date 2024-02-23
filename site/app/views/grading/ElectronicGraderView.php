@@ -959,7 +959,7 @@ HTML;
         $isGradeInquiryPanel = false;
         $is_peer_grader = false;
         // Converting array from '{"a", "b"}' to [a, b]
-        $isPeerAccessible = explode(",",trim($gradeable->getPeerPanel(), '{}'));
+        $isPeerAccessible = explode(",", trim($gradeable->getPeerPanel(), '{}'));
         $isPeerAccessible = array_map('intval', $isPeerAccessible);
         // WIP: Replace this logic when there is a definitive way to get my peer-ness
         // If this is a peer gradeable but I am not allowed to view the peer panel, then I must be a peer.
