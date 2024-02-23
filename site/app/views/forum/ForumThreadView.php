@@ -1099,22 +1099,12 @@ class ForumThreadView extends AbstractView {
             $visible_username = $given_name . " " . $family_name;
         }
 
-        if ($post["anonymous"]) {
-            if($first){
-                $visible_username = "Anonymous";
-            }
-            else if($post["author_user_id"] == $first_post_start['author_user_id']){
-                $visible_username = "Anonymous [OP]";
-            }
-            else{
-                $visible_username = "Anonymous";
-            }
+        if ($post["anonymous"]){
+            $visible_username = "Anonymous";
         }
 
-        else {
-            if ($post["author_user_id"] == $first_post_start['author_user_id']) {
-                $visible_username = $visible_username . " [OP]";
-            }
+        if ($post["author_user_id"] == $first_post_start['author_user_id'] && !$first){
+            $visible_username .= " [OP]";
         }
 
         $classes = ["post_box"];
