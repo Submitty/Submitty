@@ -227,9 +227,6 @@ Vagrant.configure(2) do |config|
   
   config.vm.provider "libvirt" do |libvirt, override|
     unless custom_box
-      if !base_box
-        puts 'Please use BASE_BOX=1 vagrant up --provider=`your provider`'
-      end
       override.vm.box = base_boxes[:libvirt]
     end
 
