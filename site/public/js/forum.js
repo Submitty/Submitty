@@ -1344,11 +1344,11 @@ function toggleLike(post_id, current_user, isLiked) {
             else {
                 if (theme==='light') {
                     likeIconSrcElement = likeIconSrcElement.replace('light-mode-off-duck.svg', 'on-duck-button.svg');
-                    likeCounterElement.style.color = '#de31de';
+                    likeCounterElement.style.color = '#ffba00';
                 }
                 else {
                     likeIconSrcElement = likeIconSrcElement.replace('light-mode-off-duck.svg', 'on-duck-button.svg');
-                    likeCounterElement.style.color = '#de31de';
+                    likeCounterElement.style.color = '#ffba00';
                 }
                 likeCounter=likeCounter+1;
 
