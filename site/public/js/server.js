@@ -458,6 +458,7 @@ function editFilePathRecommendations() {
 
 var lastActiveElement = null;
 function captureTabInModal(formName, resetFocus=true){
+    $('body').css('overflow', 'hidden');
     if(resetFocus){
         lastActiveElement = document.activeElement;
     }
@@ -1369,6 +1370,7 @@ function setChildNewDateTime(path, changeDate,handleData) {
 
 function openSetAllRelease() {
     $('#set-all-release-form').css('display', 'block');
+    $('body').css('overflow', 'hidden');
 }
 
 function setAllRelease(newdatatime) {
