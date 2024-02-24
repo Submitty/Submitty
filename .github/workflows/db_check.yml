@@ -248,7 +248,7 @@ jobs:
 
       - name: Pack Artifacts
         if: failure()
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: dumped_database
           path: ${{ github.WORKSPACE }}/dumped/**/*.sql

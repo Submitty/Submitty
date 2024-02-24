@@ -6,12 +6,14 @@
     <div id="material-edit-form" class="flex-col flex-col-space" data-directory = "Check">
         <label id="file-path-label">
             <span><strong>File Path / URL </strong></span>
-            <input type="text" id="new-file-name" class="full-width" list="change_folder_paths"/>
-            <datalist id="change_folder_paths">
-                {% for folder_path in folder_paths %}
-                    <option value="{{ folder_path }}/">
-                {% endfor %}
-            </datalist>
+            <span id="edit-location-drop-down">
+                <select id="new-file-name">
+                    <option value="">.</option>
+                    {% for folder_path in folder_paths %}
+                        <option value="{{ folder_path }}/">{{ folder_path }}</option>
+                    {% endfor %}
+                </select>
+            </span>
         </label>
 
         <label id="edit-title-label">
@@ -145,7 +147,7 @@
                                 date.setDate(date.getDate() + 1);
                                 break;
                             case 3:
-                                date = new Date("9998-01-01 00:00:00");
+                                date = new Date("9998-01-01T00:00:00");
                                 break;
                         }
                         edit_fp.setDate(date);

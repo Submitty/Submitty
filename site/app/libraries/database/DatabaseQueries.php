@@ -5644,6 +5644,105 @@ AND gc_id IN (
     }
 
     /**
+     * Returns the previous registration section the student was in.
+     * If a student was ever not in the null section, then if they are in the null
+     * section now, this value is guaranteed to be nonnull as their previous section
+     * would be outside the null section.
+     *
+     * If the previous registration section was deleted or renamed, then this function
+     * returns the top registration section of the course.
+     *
+     * @param string $user_id The name of the user we're querying.
+     * @param string $course The course we are looking in.
+     * @param string $term The term we are looking at.
+     * @return string The previous section the student was in.
+     */
+    public function getPreviousRegistrationSection(
+        string $user_id,
+        string $term,
+        string $course
+    ): string|null {
+        $this->submitty_db->query("
+            WITH
+                Term (term) AS (VALUES (?)),
+                Course (course) AS (VALUES (?)),
+                PreviousRegSection AS (
+                    SELECT previous_registration_section, course
+                    FROM courses_users
+                    WHERE user_id=? and term=(table Term) and course=(table Course)
+                ),
+                TopSection AS (
+                    SELECT registration_section_id, course
+                    FROM courses_registration_sections
+                    WHERE term=(table Term) and course=(table Course)
+                    ORDER BY registration_section_id ASC
+                    LIMIT 1
+                )
+            SELECT
+                (CASE
+                    WHEN (
+                        SELECT registration_section_id
+                        FROM courses_registration_sections
+                        WHERE
+                            term = (table Term)
+                            and course = (table Course)
+                            and registration_section_id = PreviousRegSection.previous_registration_section
+                        ) IS NOT NULL THEN PreviousRegSection.previous_registration_section
+                    ELSE TopSection.registration_section_id
+                END) AS rejoin_section
+            FROM
+                Course
+                LEFT JOIN PreviousRegSection on Course.course = PreviousRegSection.course
+                LEFT JOIN TopSection on Course.course = TopSection.course;
+        ", [$term, $course, $user_id]);
+        return $this->submitty_db->row()["rejoin_section"];
+    }
+
+    /**
+     * Returns the previous rotating section the student was in.
+     * If the student was ever in a rotating section, this value is guaranteed
+     * to be nonnull if the student currently has a null rotating section.
+     *
+     * If the previous rotating section was deleted or renamed, then this function
+     * returns the top rotating section of the course.
+     *
+     * @param string $user_id The name of the user we're querying.
+     * @return string|null The rotating section the student was last in.
+     */
+    public function getPreviousRotatingSection(string $user_id): string|null {
+        $this->course_db->query("
+            SELECT previous_rotating_section
+            FROM users
+            WHERE user_id=?;
+        ", [$user_id]);
+        $previous_section = $this->course_db->row()["previous_rotating_section"];
+
+        $this->course_db->query("
+            SELECT sections_rotating_id
+            FROM sections_rotating
+            WHERE sections_rotating_id = ?;
+        ", [$previous_section]);
+        if ($this->course_db->getRowCount() > 0) {
+            // Rotating section still valid, time to return!
+            return $previous_section;
+        }
+
+        // Else we return the top rotating section.
+        $this->course_db->query("
+            SELECT sections_rotating_id
+            FROM sections_rotating
+            ORDER BY sections_rotating_id ASC
+            LIMIT 1;
+        ");
+        if ($this->course_db->getRowCount() > 0) {
+            return $this->course_db->row()["sections_rotating_id"];
+        }
+        else {
+            return null; // Course has no rotating sections.
+        }
+    }
+
+    /**
      * Determines if a course is 'active' or if it was dropped.
      *
      * This is used to filter out courses displayed on the home screen, for when

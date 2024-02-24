@@ -854,6 +854,7 @@ function showEditPostForm(post_id, thread_id, shouldEditThread, render_markdown,
             csrf_token: csrf_token,
         },
         success: function(data) {
+            $('body').css('overflow', 'hidden');
             try {
                 // eslint-disable-next-line no-var
                 var json = JSON.parse(data);
@@ -990,7 +991,7 @@ function cancelEditPostForum() {
     $('#edit-user-post').css('display', 'none');
     $(this).closest('.thread-post-form').find('[name=thread_post_content]').val('');
     $('#title').val('');
-
+    $('body').css('overflow', 'auto');
     $('#display-existing-attachments').remove();
 }
 
@@ -2496,8 +2497,7 @@ function restoreCreateThreadFromLocal() {
 
         // Optional fields
         $('.expiration').hide();
-        // eslint-disable-next-line no-prototype-builtins
-        if (data.hasOwnProperty('lockDate')) {
+        if (Object.prototype.hasOwnProperty.call(data, 'lockDate')) {
             $('#lock_thread_date').val(data.lockDate);
         }
         if (data.isAnnouncement) {
@@ -2508,8 +2508,7 @@ function restoreCreateThreadFromLocal() {
             $('#pinThread').prop('checked', data.pinThread);
             $('.expiration').show();
         }
-        // eslint-disable-next-line no-prototype-builtins
-        if (data.hasOwnProperty('expiration')) {
+        if (Object.prototype.hasOwnProperty.call(data, 'expiration')) {
             $('#expirationDate').val(data.expiration);
         }
     }

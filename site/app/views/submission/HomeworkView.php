@@ -1074,7 +1074,7 @@ class HomeworkView extends AbstractView {
         $failed_file = '';
         $file_count = 0;
         // See if the grade has succeeded or failed
-        if (in_array('files', $param)) {
+        if (array_key_exists('files', $param)) {
             $file_count = count($param['files']);
             if ($file_count === 1) {
                 foreach ($param['files'] as $file) {
