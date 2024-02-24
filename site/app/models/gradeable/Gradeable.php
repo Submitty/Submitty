@@ -641,7 +641,7 @@ class Gradeable extends AbstractModel {
                 $this->modified = true;
                 $this->peer_grading_pairs = $this->core->getQueries()->getPeerGradingAssignment($this->getId());
         }
-    }
+    } 
     public function setPeerGradersList($input) {
         $bad_rows = [];
         $self_grade_rows = [];
