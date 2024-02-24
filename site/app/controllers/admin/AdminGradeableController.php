@@ -53,9 +53,9 @@ class AdminGradeableController extends AbstractController {
     /**
      * Creates a gradeable based on uploaded JSON data
      * @return JsonResponse
-     * @AccessControl(role='INSTRUCTOR')
-     * @Route('/api/{_semester}/{_course}/upload', methods={'POST'})
-     * @Route('/courses/{_semester}/{_course}/upload', methods={'POST'})
+     * @AccessControl(role="INSTRUCTOR")
+     * @Route("/api/{_semester}/{_course}/upload", methods={"POST"})
+     * @Route("/courses/{_semester}/{_course}/upload", methods={"POST"})
      */
     public function uploadGradeable() {
         $values = [
@@ -78,7 +78,7 @@ class AdminGradeableController extends AbstractController {
             'external_repo' => '',
             'using_subdirectory' => 'false',
             'vcs_subdirectory' => '',
-            'syllabus_bucket' => 'Homework'
+            'syllabus_bucket' => 'Homework',
         ];
 
         if (!isset($_POST['id']) || !isset($_POST['title']) || !isset($_POST['type'])) {
