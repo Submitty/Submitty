@@ -709,7 +709,8 @@ ALTER SEQUENCE public.categories_list_category_id_seq OWNED BY public.categories
 CREATE TABLE public.chatroom_messages (
     id integer NOT NULL,
     chatroom_id integer NOT NULL,
-    user_id character varying NOT NULL,
+    userid character varying NOT NULL,
+    display_name character varying,
     content text NOT NULL,
     "timestamp" timestamp(0) with time zone NOT NULL
 );

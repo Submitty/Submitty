@@ -1,12 +1,12 @@
-function fetchMessages(baseURL, chatroomId) {
+function fetchMessages(chatroomId) {
     $.ajax({
-        url: `${baseURL}/${chatroomId}/messages`,
+        url: buildCourseUrl(['chat', chatroomId, 'messages']),
         type: 'GET',
         dataType: 'json',
         success: function(responseData) {
-            if (responseData.status === "success" && Array.isArray(responseData.data)) {
+            if (responseData.status === 'success' && Array.isArray(responseData.data)) {
                 responseData.data.forEach(msg => {
-                    appendMessage(msg.user_id, msg.timestamp, msg.content);
+                    appendMessage(msg.display_name, msg.timestamp, msg.content);
                 });
             }
         },
@@ -16,15 +16,42 @@ function fetchMessages(baseURL, chatroomId) {
     });
 }
 
-function appendMessage(senderName, timestamp, content) {
+function sendMessage(csrfToken, chatroomId, userId, displayName, content) {
+    console.log("csrf_token:", csrfToken, "chatroom_id:", chatroomId, "user_id:", userId);
+    $.ajax({
+        url: buildCourseUrl(['chat', chatroomId, 'send']),
+        type: 'POST',
+        data: {
+            'csrf_token': csrfToken,
+            'user_id': userId,
+            'content': content,
+            'display_name': displayName
+        },
+        error: function() {
+            window.alert('Something went wrong with storing message');
+        },
+    })
+    window.socketClient.send({'type': "chat_message", 'content': content, 'user_id': userId, 'display_name': displayName, 'timestamp': new Date(Date.now()).toLocaleString()})
+    appendMessage("me", null, content);
+}
+
+function appendMessage(displayName, ts, content) {
+    let timestamp = ts;
+    if (timestamp === null) {
+        timestamp = new Date(Date.now()).toLocaleString('en-us',  { year:"numeric", month:"short", day:"numeric", hour:"numeric", minute:"numeric"});
+    }
+    else {
+        timestamp = new Date(ts).toLocaleString('en-us', { year:"numeric", month:"short", day:"numeric", hour:"numeric", minute:"numeric"});
+    }
+
     const messages_area = document.querySelector('.messages-area');
     const message = document.createElement('div');
     message.classList.add('message-container');
     message.innerHTML = `
         <div class="message-header">
             <i class="fa-solid fa-circle-user user-icon"></i>
-            <span class="username">${senderName}</span>
-            <span class="timestamp"> - ${timestamp}</span>
+            <span class="sender-name">${displayName}</span>
+            <span class="timestamp">${timestamp}</span>
         </div>
         <div class="message-content">
             ${content}
@@ -35,16 +62,23 @@ function appendMessage(senderName, timestamp, content) {
 }
 
 function initChatroomSocketClient(chatroomId) {
-
+    window.socketClient = new WebSocketClient();
+    window.socketClient.onmessage = (msg) => {
+        if (msg.type === "chat_message") {
+            let sender = msg.display_name;
+            appendMessage(sender, msg.timestamp, msg.content);
+        }
+    };
+    window.socketClient.open(`chatroom_${chatroomId}`);
 }
 
 function newChatroomForm() {
-    let form = $("#create-chatroom-form");
-    form.css("display", "block");
+    const form = $('#create-chatroom-form');
+    form.css('display', 'block');
 }
 
 function editChatroomForm(chatroom_id, baseUrl) {
-    let form= $("#edit-chatroom-form");
+    const form= $('#edit-chatroom-form');
     form.css('display', 'block');
     document.getElementById('chatroom-edit-form').action = `${baseUrl}/${chatroom_id}/edit`;
 }
@@ -54,29 +88,29 @@ document.addEventListener('DOMContentLoaded', () => {
     const pageDataElement = document.getElementById('page-data');
     if (pageDataElement) {
         const pageData = JSON.parse(pageDataElement.textContent);
-        const { chatroomId, baseURL, userId } = pageData;
-
-        const client = new WebSocketClient();
-        client.onmessage = (msg) => {
-            console.log(`Data received from server:`, msg);
-        };
-        client.onopen = () => {
-          client.send({ type: "ping" });
-        }
-        client.open('some URL');
-
-        fetchMessages(baseURL, chatroomId);
+        const { csrfToken, chatroomId, userId, displayName } = pageData;
+        console.log(displayName);
+        initChatroomSocketClient(chatroomId)
+        fetchMessages(chatroomId);
 
         const sendMsgButton = document.querySelector('.send-message-btn');
         const messageInput = document.querySelector('.message-input');
 
-        sendMsgButton.addEventListener('click', function (e) {
-            e.preventDefault();
+        messageInput.addEventListener("keypress", function(event) {
+            if (event.keyCode === 13 && !event.shiftKey) {
+                event.preventDefault();
+                sendMsgButton.click();
+            }
+        });
+
+        sendMsgButton.addEventListener('click', (event) => {
+            event.preventDefault();
             const messageContent = messageInput.value.trim();
             if (messageContent === '') {
                 alert('Please enter a message.');
                 return;
             }
+            sendMessage(csrfToken, chatroomId, userId, displayName, messageContent);
             messageInput.value = '';
         });
     }

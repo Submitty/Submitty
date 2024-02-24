@@ -16,17 +16,20 @@ class Message {
     #[ORM\Id]
     #[ORM\Column(name: "id", type: Types::INTEGER)]
     #[ORM\GeneratedValue]
-    private $id;
+    private int $id;
 
     #[ORM\ManyToOne(targetEntity: "Chatroom")]
     #[ORM\JoinColumn(name: "chatroom_id", referencedColumnName: "id")]
-    private $chatroom;
+    private Chatroom $chatroom;
 
     #[ORM\Column(type: Types::STRING)]
-    private string $user_id;
+    private string $userId;
+
+    #[ORM\Column(type: Types::STRING)]
+    private string $display_name;
 
     #[ORM\Column(type: Types::TEXT)]
-    private $content;
+    private string $content;
 
     #[ORM\Column(type: Types::DATETIMETZ_MUTABLE)]
     protected DateTime $timestamp;
@@ -39,11 +42,19 @@ class Message {
     }
 
     public function getUserId(): string {
-        return $this->user_id;
+        return $this->userId;
     }
 
     public function setUserId($userId): void {
-        $this->user_id = $userId;
+        $this->userId = $userId;
+    }
+
+    public function getDisplayName(): string {
+        return $this->display_name;
+    }
+
+    public function setDisplayName($displayName): void {
+        $this->display_name = $displayName;
     }
 
     public function getContent(): string {

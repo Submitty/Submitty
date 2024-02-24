@@ -41,6 +41,11 @@ class ChatroomView extends AbstractView {
 
     public function showChatroom($chatroom) {
         $this->core->getOutput()->addBreadcrumb("Chatroom");
+        $user = $this->core->getUser();
+        $display_name = $user->getDisplayFullName();
+        if (!$user->accessAdmin()) {
+            $display_name = $user->getDisplayedGivenName() .  " " . substr($user->getDisplayedFamilyName(), 0, 1) . ".";
+        }
         return $this->core->getOutput()->renderTwigTemplate("chat/Chatroom.twig", [
             'csrf_token' => $this->core->getCsrfToken(),
             'base_url' => $this->core->buildCourseUrl() . '/chat',
@@ -49,8 +54,7 @@ class ChatroomView extends AbstractView {
             'chatroom' => $chatroom,
             'user_admin' => $this->core->getUser()->accessAdmin(),
             'user_id' => $this->core->getUser()->getId(),
-            'user_first_name' => $this->core->getUser()->getDisplayedGivenName(),
-            'user_last_name' => $this->core->getUser()->getDisplayedFamilyName()
+            'user_display_name' => $display_name,
         ]);
     }
 }

@@ -147,31 +147,12 @@ public function editChatroom(int $chatroom_id): RedirectResponse {
                 'id' => $message->getId(),
                 'content' => $message->getContent(),
                 'timestamp' => $message->getTimestamp()->format('Y-m-d H:i:s'),
-                'user_id' => $message->getUserId()
+                'user_id' => $message->getUserId(),
+                'display_name' => $message->getDisplayName()
             ];
         }, $messages);
 
         return JsonResponse::getSuccessResponse($formattedMessages);
-    }
-
-    /**
-     * @Route("/courses/{_semester}/{_course}/chat/{chatroom_id}/test", name="test_chatroom_messages", methods={"POST"})
-     */
-    public function testMessage(int $chatroom_id): JsonResponse
-    {
-        $em = $this->core->getCourseEntityManager();
-        $chatroom = $em->getRepository(Chatroom::class)->find($chatroom_id);
-
-        $msg = new Message();
-        $msg->setTimestamp(new \DateTime("now"));
-        $msg->setContent("test message");
-        $msg->setUserId('test user');
-        $msg->setChatroom($chatroom);
-
-        $em->persist($msg);
-        $em->flush();
-
-        return JsonResponse::getSuccessResponse("test message sent");
     }
 
     /**
@@ -180,11 +161,14 @@ public function editChatroom(int $chatroom_id): RedirectResponse {
     public function sendMessage(int $chatroom_id): JsonResponse {
         $em = $this->core->getCourseEntityManager();
         $content = $_POST['content'] ?? '';
-        $userId = $this->core->getUser()->getId();
+        $userId = $_POST['user_id'] ?? null;
+        $displayName = $_POST['display_name'] ?? '';
+
         $chatroom = $em->getRepository(Chatroom::class)->find($chatroom_id);
         $message = new Message();
         $message->setChatroom($chatroom);
         $message->setUserId($userId);
+        $message->setDisplayName($displayName);
         $message->setContent($content);
         $message->setTimestamp(new \DateTime("now"));
 
