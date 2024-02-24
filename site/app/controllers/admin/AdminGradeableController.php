@@ -53,32 +53,32 @@ class AdminGradeableController extends AbstractController {
     /**
      * Creates a gradeable based on uploaded JSON data
      * @return JsonResponse
-     * @AccessControl(role="INSTRUCTOR")
-     * @Route("/api/{_semester}/{_course}/upload", methods={"POST"})
-     * @Route("/courses/{_semester}/{_course}/upload", methods={"POST"})
+     * @AccessControl(role='INSTRUCTOR')
+     * @Route('/api/{_semester}/{_course}/upload', methods={'POST'})
+     * @Route('/courses/{_semester}/{_course}/upload', methods={'POST'})
      */
     public function uploadGradeable() {
         $values = [
-            "title" => "",
-            "instructions_url" => "",
-            "id" => "",
-            "type" => "",
-            "bulk_upload" => false,
-            "vcs" => false,
-            "ta_grading" => false,
-            "grade_inquiry_allowed" => false,
-            "grade_inquiry_per_component_allowed" => false,
-            "discussion_based" => false,
-            "discussion_thread_id" => "",
-            "team_assignment" => false,
-            "team_size_max" => 3,
-            "eg_inherit_teams_from" => "",
-            "gradeable_teams_read" => false,
-            "vcs_radio_buttons" => "submitty-hosted",
-            "external_repo" => "",
-            "using_subdirectory" => false,
-            "vcs_subdirectory" => "",
-            "syllabus_bucket" => "Homework"
+            'title' => '',
+            'instructions_url' => '',
+            'id' => '',
+            'type' => '',
+            'bulk_upload' => 'false',
+            'vcs' => 'false',
+            'ta_grading' => 'false',
+            'grade_inquiry_allowed' => 'false',
+            'grade_inquiry_per_component_allowed' => 'false',
+            'discussion_based' => 'false',
+            'discussion_thread_id' => '',
+            'team_assignment' => 'false',
+            'team_size_max' => 3,
+            'eg_inherit_teams_from' => '',
+            'gradeable_teams_read' => 'false',
+            'vcs_radio_buttons' => 'submitty-hosted',
+            'external_repo' => '',
+            'using_subdirectory' => 'false',
+            'vcs_subdirectory' => '',
+            'syllabus_bucket' => 'Homework'
         ];
 
         if (!isset($_POST['id']) || !isset($_POST['title']) || !isset($_POST['type'])) {
