@@ -110,9 +110,7 @@ class AdminGradeableController extends AbstractController {
                 $values['vcs_radio_buttons'] = $_POST['vcs']['repository_type'];
                 $values['vcs_path'] = $_POST['vcs']['vcs_path'];
             }
-            elseif (array_key_exists('bulk_upload', $_POST)) {
-                $values['bulk_upload'] = 'true';
-            }
+            $values['bulk_upload'] = $_POST['bulk_upload'] ?? 'false';
         }
 
         if (array_key_exists('team_gradeable', $_POST)) {
