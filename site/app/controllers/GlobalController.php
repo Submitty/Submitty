@@ -493,7 +493,6 @@ class GlobalController extends AbstractController {
         switch ($month) {
             case 12:
                 //December (Christmas, Hanukkah)
-
                 $hanukkahStartDateTime = $this->calculateHanukkahDate($yearint);
                 $hanukkahEndDateTime = $this->calculateHanukkahDate($yearint);
                 $hanukkahEndDateTime->modify('+8 days');
@@ -556,14 +555,23 @@ class GlobalController extends AbstractController {
                 }
                 break;
             case 2:
+                $februaryImages = ['moorthy_duck/black-history-duck.svg'];
+                if ($day <= 3) {
+                    $februaryImages[] = 'moorthy_duck/party-duck/party-duck-10th.svg';
+                }
                 //Valentines (Hearts)
                 if ($day >= 11 && $day <= 17) {
-                    $duck_img = 'moorthy_duck/02-february.svg';
+                    $februaryImages[] = 'moorthy_duck/02-february.svg';
                 }
+                $duck_img = $februaryImages[array_rand($februaryImages)];
                 break;
             case 1:
                 //January (Snowflakes)
                 $duck_img = 'moorthy_duck/01-january.svg';
+
+                if ($day >= 28) {
+                    $duck_img = 'moorthy_duck/party-duck/party-duck-10th.svg';
+                }
                 break;
             default:
                 break;

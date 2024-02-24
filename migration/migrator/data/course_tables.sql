@@ -2021,6 +2021,14 @@ ALTER TABLE ONLY public.threads ALTER COLUMN id SET DEFAULT nextval('public.thre
 
 
 --
+-- Name: gradeable_teams anon_id_unique; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.gradeable_teams
+    ADD CONSTRAINT anon_id_unique UNIQUE (anon_id);
+
+
+--
 -- Name: autograding_metrics autograding_metrics_pkey; Type: CONSTRAINT; Schema: public; Owner: -
 --
 

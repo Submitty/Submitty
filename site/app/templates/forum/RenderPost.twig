@@ -1,7 +1,7 @@
 {% if render_markdown %}
     {% include "misc/Markdown.twig" with { content: post_content } only %}
 {% else %}
-    {{ post_content }}
+    {{- post_content -}}
 {% endif %}
 {% if post_attachment is defined and post_attachment.exist == true %}
     <table>
