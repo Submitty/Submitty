@@ -253,10 +253,12 @@ Vagrant.configure(2) do |config|
     mount_folders(override, [])
   end
 
-  if (arm || apple_silicon)
-    if !base_box
-      puts 'Please use BASE_BOX=1 vagrant up --provider=`your provider`'
-      exit(0)
+  if ARGV.include?('up')
+    if (arm || apple_silicon)
+      if !base_box
+        puts 'Please use BASE_BOX=1 vagrant up --provider=`your provider`'
+        exit(0)
+      end
     end
   end
   config.vm.provision :shell, :inline => " sudo timedatectl set-timezone America/New_York", run: "once"
