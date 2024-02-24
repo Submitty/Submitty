@@ -457,6 +457,15 @@ class HomeworkView extends AbstractView {
             }
         }, $team_ldi)) : 0;
 
+        $min_team_member_late_days_exception = $team_ldi !== null ? min(array_map(function ($ldi) {
+            if ($ldi !== null) {
+                return $ldi->getLateDayException();
+            }
+            else {
+                return 0;
+            }
+        }, $team_ldi)) : 0;
+
         $testcase_messages = $version_instance !== null ? $version_instance->getTestcaseMessages() : [];
 
         $this->core->getOutput()->addInternalCss('submitbox.css');
@@ -509,6 +518,7 @@ class HomeworkView extends AbstractView {
             'gradeable_message' => $gradeable->getAutogradingConfig()->getGradeableMessage(),
             'allowed_late_days' => $gradeable->getLateDays(),
             'min_team_member_late_days' => $min_team_member_late_days,
+            'min_team_member_late_days_exception' => $min_team_member_late_days_exception,
             'num_inputs' => isset($notebook_inputs) ? count($notebook_inputs) : 0,
             'max_submissions' => $gradeable->getAutogradingConfig()->getMaxSubmissions(),
             'display_version' => $display_version,
@@ -1064,7 +1074,7 @@ class HomeworkView extends AbstractView {
         $failed_file = '';
         $file_count = 0;
         // See if the grade has succeeded or failed
-        if (in_array('files', $param)) {
+        if (array_key_exists('files', $param)) {
             $file_count = count($param['files']);
             if ($file_count === 1) {
                 foreach ($param['files'] as $file) {

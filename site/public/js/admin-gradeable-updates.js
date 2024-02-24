@@ -108,8 +108,7 @@ function onPrecisionChange() {
 
 function updateGradeableErrorCallback(message, response_data) {
     for (const key in response_data) {
-        // eslint-disable-next-line no-prototype-builtins
-        if (response_data.hasOwnProperty(key)) {
+        if (Object.prototype.hasOwnProperty.call(response_data, key)) {
             setError(key, response_data[key]);
         }
     }
@@ -245,15 +244,13 @@ $(document).ready(() => {
             (response_data) => {
                 // Clear errors by setting new values
                 for (const key in response_data) {
-                    // eslint-disable-next-line no-prototype-builtins
-                    if (response_data.hasOwnProperty(key)) {
+                    if (Object.prototype.hasOwnProperty.call(response_data, key)) {
                         clearError(key, response_data[key]);
                     }
                 }
                 // Clear errors by just removing red background
                 for (const key in data) {
-                    // eslint-disable-next-line no-prototype-builtins
-                    if (data.hasOwnProperty(key)) {
+                    if (Object.prototype.hasOwnProperty.call(data, key)) {
                         clearError(key);
                     }
                 }
@@ -270,15 +267,13 @@ $(document).ready(() => {
                     setRandomGraders($('#g_id').val(), data, (response_data) => {
                         // Clear errors by setting new values
                         for (const key in response_data) {
-                            // eslint-disable-next-line no-prototype-builtins
-                            if (response_data.hasOwnProperty(key)) {
+                            if (Object.prototype.hasOwnProperty.call(response_data, key)) {
                                 clearError(key, response_data[key]);
                             }
                         }
                         // Clear errors by just removing red background
                         for (const key in data) {
-                            // eslint-disable-next-line no-prototype-builtins
-                            if (data.hasOwnProperty(key)) {
+                            if (Object.prototype.hasOwnProperty.call(data, key)) {
                                 clearError(key);
                             }
                         }
@@ -293,15 +288,13 @@ $(document).ready(() => {
                 setRandomGraders($('#g_id').val(), data, (response_data) => {
                 // Clear errors by setting new values
                     for (const key in response_data) {
-                        // eslint-disable-next-line no-prototype-builtins
-                        if (response_data.hasOwnProperty(key)) {
+                        if (Object.prototype.hasOwnProperty.call(response_data, key)) {
                             clearError(key, response_data[key]);
                         }
                     }
                     // Clear errors by setting custom validity to ''
                     for (const key in data) {
-                        // eslint-disable-next-line no-prototype-builtins
-                        if (data.hasOwnProperty(key)) {
+                        if (Object.prototype.hasOwnProperty.call(data, key)) {
                             clearError(key);
                         }
                     }
@@ -367,22 +360,22 @@ function ajaxGetBuildLogs(gradeable_id) {
 
 function ajaxCheckBuildStatus() {
     const gradeable_id = $('#g_id').val();
-    $('#rebuild-log-button').css('display','none');
+    $('#rebuild-log-button').css('display', 'none');
     hideBuildLog();
     $.getJSON({
         type: 'GET',
         url: buildCourseUrl(['gradeable', gradeable_id, 'build_status']),
         success: function (response) {
-            $('#rebuild-log-button').css('display','block');
+            $('#rebuild-log-button').css('display', 'block');
             if (response['data'] === 'queued') {
                 $('#rebuild-status').html(gradeable_id.concat(' is in the rebuild queue...'));
-                $('#rebuild-log-button').css('display','none');
-                setTimeout(ajaxCheckBuildStatus,1000);
+                $('#rebuild-log-button').css('display', 'none');
+                setTimeout(ajaxCheckBuildStatus, 1000);
             }
             else if (response['data'] === 'processing') {
                 $('#rebuild-status').html(gradeable_id.concat(' is being rebuilt...'));
-                $('#rebuild-log-button').css('display','none');
-                setTimeout(ajaxCheckBuildStatus,1000);
+                $('#rebuild-log-button').css('display', 'none');
+                setTimeout(ajaxCheckBuildStatus, 1000);
             }
             else if (response['data'] === 'warnings') {
                 $('#rebuild-status').html('Gradeable built with warnings');
@@ -408,7 +401,7 @@ function ajaxCheckBuildStatus() {
         },
     });
 }
-function setRandomGraders(gradeable_id,p_values,successCallback,errorCallback,all_grade_all) {
+function setRandomGraders(gradeable_id, p_values, successCallback, errorCallback, all_grade_all) {
     let number_to_grade=1;
     if (all_grade_all===true) {
         number_to_grade=10000;
@@ -551,7 +544,7 @@ function ajaxUpdateGradeableProperty(gradeable_id, p_values, successCallback, er
                     success: function (response) {
                         if (Array.isArray(response['data'])) {
                             if (response['data'].includes('rebuild_queued')) {
-                                ajaxCheckBuildStatus(gradeable_id,'unknown');
+                                ajaxCheckBuildStatus(gradeable_id, 'unknown');
                             }
                         }
                         setGradeableUpdateComplete();
@@ -601,7 +594,7 @@ function ajaxUpdateGradeableProperty(gradeable_id, p_values, successCallback, er
             success: function (response) {
                 if (Array.isArray(response['data'])) {
                     if (response['data'].includes('rebuild_queued')) {
-                        ajaxCheckBuildStatus(gradeable_id,'unknown');
+                        ajaxCheckBuildStatus(gradeable_id, 'unknown');
                     }
                 }
                 setGradeableUpdateComplete();

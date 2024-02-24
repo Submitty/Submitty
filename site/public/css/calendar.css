@@ -1,7 +1,7 @@
 /* the entire table of calendar */
 .table-calendar {
     text-align: left;
-    border: 1px solid black;
+    border: 1px solid var(--default-black);
 }
 
 /* the title at the top of the calendar table, showing month, year */
@@ -163,8 +163,7 @@ h2.cal-month-title {
     max-height: 160px;
     width: 100%;
     display: block;
-    overflow-y: auto;
-    overflow-x: hidden;
+    overflow: hidden auto;
 }
 
 /* each item in the day cell */
@@ -203,6 +202,7 @@ a.cal-gradeable-status-text {
     padding: 0;
     border: none;
     box-shadow: none;
+    cursor: default;
 }
 
 a.cal-gradeable-status-text:hover {
@@ -225,12 +225,13 @@ a.cal-gradeable-status-ann {
     border-style: solid;
     border-width: 3px;
     box-shadow: none;
+    cursor: default;
 }
 
 a.cal-gradeable-status-ann:hover {
+    cursor: default;
     padding: 0;
     font-style: italic;
-    cursor: default;
     border-style: solid;
     border-width: 3px!important;
 }
@@ -263,7 +264,7 @@ a.cal-gradeable-status-link:focus {
 }
 
 .calendar-color-blue {
-    background-color: #218ffd;
+    background-color: var(--standard-medium-vibrant-blue);
     color: var(--text-black)!important;
 }
 
@@ -309,7 +310,7 @@ div.cal-legend {
     margin-top: 0.3rem;
     padding: 0.3rem;
     border-radius: 4px 4px 0 0;
-    border: 1px solid black;
+    border: 1px solid var(--default-black);
     border-bottom: none;
     background-color: var(--standard-hover-light-gray);
 }
@@ -317,7 +318,7 @@ div.cal-legend {
 div.legend-color {
     width: 1rem;
     height: 1rem;
-    border: 1px solid black;
+    border: 1px solid var(--default-black);
     border-radius: 4px;
 }
 

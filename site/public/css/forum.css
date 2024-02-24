@@ -48,7 +48,9 @@
 
 /* stylelint-disable-next-line selector-class-pattern, no-descending-specificity */
 .post_content {
+    display: flex;
     margin-right: 5px;
+    margin-top: 5px;
     white-space: pre-wrap;
 }
 
@@ -76,8 +78,7 @@
     padding: 7px;
     margin-top: 20px;
     word-wrap: break-word;
-    overflow-y: auto;
-    overflow-x: hidden;
+    overflow: hidden auto;
 }
 
 /* stylelint-disable-next-line selector-class-pattern */
@@ -289,6 +290,17 @@
     margin-left: 15px;
 }
 
+#display-existing-attachments {
+    display: block;
+    float: none;
+    overflow: hidden;
+}
+
+.file-upload-table.edit-imgs-table {
+    margin-left: 0;
+    margin-right: auto;
+}
+
 .create-thread-title {
     margin-left: 15px;
     margin-bottom: 10px;
@@ -423,6 +435,25 @@
 .history-container span h7 {
     position: relative;
     right: 5px;
+}
+
+.history-attachment-table {
+    background-color: var(--attachment-box-color);
+    border: 1px solid var(--standard-light-gray);
+}
+
+.attachment-name-history {
+    vertical-align: middle;
+}
+
+.history-attachment-btn {
+    vertical-align: bottom;
+    float: right;
+}
+
+.history-buffer {
+    margin-bottom:3px;
+    margin-top:1.5em;
 }
 
 /* stylelint-disable-next-line selector-id-pattern */
@@ -608,6 +639,16 @@
 /* stylelint-disable-next-line selector-class-pattern */
 .post_content p img {
     max-width: 100%;
+}
+
+/* stylelint-disable-next-line selector-class-pattern */
+.post_content p:first-child {
+    margin-top: 0;
+}
+
+/* stylelint-disable-next-line selector-class-pattern */
+.post_content p:last-child {
+    margin-bottom: 0;
 }
 
 .markdown-inactive {

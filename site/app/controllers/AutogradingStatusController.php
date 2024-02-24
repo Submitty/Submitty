@@ -87,7 +87,7 @@ class AutogradingStatusController extends AbstractController {
         }
         foreach ($info["ongoing_job_info"] as &$i) {
             foreach ($i as &$job) {
-                if (!in_array($job["semester"] . " " . $job["course"], $course)) {
+                if (!in_array($job["term"] . " " . $job["course"], $course)) {
                     $job["user_id"] = "Hidden";
                 }
             }
