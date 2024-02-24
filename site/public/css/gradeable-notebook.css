@@ -110,8 +110,8 @@ img {
     border: 1px solid var(--standard-light-gray) !important;
     border-radius: 4px !important;
     vertical-align: middle !important;
+    width: 100% !important;
     resize: vertical;
-    min-width: 100%;
     min-height: 300px;
 }
 
