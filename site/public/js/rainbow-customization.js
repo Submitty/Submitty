@@ -216,8 +216,7 @@ function getGradeableBuckets() {
                     const benchmark = this.getAttribute('data-benchmark').toString();
 
                     if (curve_points_selected.includes(benchmark) && this.value) {
-                        // eslint-disable-next-line no-prototype-builtins
-                        if (!gradeable.hasOwnProperty('curve')) {
+                        if (!Object.prototype.hasOwnProperty.call(gradeable, 'curve')) {
                             gradeable.curve = [];
                         }
 
@@ -226,8 +225,7 @@ function getGradeableBuckets() {
                 });
 
                 // Validate the set of per-gradeable curve values
-                // eslint-disable-next-line no-prototype-builtins
-                if (gradeable.hasOwnProperty('curve')) {
+                if (Object.prototype.hasOwnProperty.call(gradeable, 'curve')) {
 
                     // Has correct number of values
                     if (gradeable.curve.length !== curve_points_selected.length) {
