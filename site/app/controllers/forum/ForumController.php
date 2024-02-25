@@ -947,22 +947,34 @@ class ForumController extends AbstractController {
 
             $attachment_name = [];
             if ($hasGoodAttachment[0] === 1) {
-                for ($i = 0; $i < count($_FILES[$file_post]["name"]); $i++) {
-                    $attachment_name[] = basename($_FILES[$file_post]["name"][$i]);
-                }
-            }
-
-            $thread_dir = FileUtils::joinPaths(FileUtils::joinPaths($this->core->getConfig()->getCoursePath(), "forum_attachments"), $thread_id);
-
-            if (!is_dir($thread_dir)) {
-                FileUtils::createDir($thread_dir);
-            }
-
-            if ($hasGoodAttachment[0] === 1) {
+                $thread_dir = FileUtils::joinPaths($this->core->getConfig()->getCoursePath(), "forum_attachments", $thread_id);
                 $post_dir = FileUtils::joinPaths($thread_dir, $post_id);
-                FileUtils::createDir($post_dir);
+                
+                if (!is_dir($thread_dir)) {
+                    FileUtils::createDir($thread_dir);
+                }
+                if (!is_dir($post_dir)) {
+                    FileUtils::createDir($post_dir);
+                }
+                
+                $existing_attachments = array_column(FileUtils::getAllFiles($post_dir), "name");
+                //compile list of attachment names
                 for ($i = 0; $i < count($_FILES[$file_post]["name"]); $i++) {
-                    $target_file = $post_dir . "/" . basename($_FILES[$file_post]["name"][$i]);
+                    //check for files with same name
+                    $file_name = basename($_FILES[$file_post]["name"][$i]);
+                    if (in_array($file_name, $existing_attachments)) {
+                        // add unique prefix if file with this name already exists on this post
+                        $tmp = 1;
+                        while (in_array("(" . $tmp . ")" . $file_name, $existing_attachments)) {
+                            $tmp++;
+                        }
+                        $file_name = "(" . $tmp . ")" . $file_name;
+                    }
+                    $attachment_name[] = $file_name;
+                }
+                
+                for ($i = 0; $i < count($_FILES[$file_post]["name"]); $i++) {
+                    $target_file = $post_dir . "/" . $attachment_name[$i];
                     move_uploaded_file($_FILES[$file_post]["tmp_name"][$i], $target_file);
                 }
             }
