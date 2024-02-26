@@ -58,6 +58,8 @@ jobs:
       - uses: actions/checkout@v4
       - name: Run ansible-lint
         uses: ansible/ansible-lint@main
+        paths: 
+          - 'ansible/**'
             
 
 #  js-lint:
