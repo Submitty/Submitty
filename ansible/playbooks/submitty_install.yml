@@ -8,22 +8,18 @@
       ansible.builtin.include_role:
         name: app_submitty
       vars:
-        submitty_dbuser: submitty_dbuser
+      # customize your submitty install by adding variables here
         submitty_dbuser_password: submitty_dbuser
-        submitty_course_dbuser: submitty_course_dbuser
         submitty_course_dbuser_password: submitty_dbuser
         timezone: America/New_York
-        language: en_US
-        submitty_url: submittyexample.com
-        vcs_url: example.com
+        submitty_url: fordet.cs.wallawalla.edu
+        vcs_url: git.example.com
         institution_name: Example University
         sysadmin_email: sysadmin@example.com
         submitty_email: submitty@example.com
         institution_url: university@example.com
-        admin: admin@example.com
-        y: "yes"
+        admin_email: admin@example.com
+        submitty_ip: 172.27.23.13
         admin_password: admin_password
         noreply_email: noreply_email@example.com
-        smtp_server: mail@university.com
-        smtp_port: 25
-        
+        smtp_server: mail.example.com

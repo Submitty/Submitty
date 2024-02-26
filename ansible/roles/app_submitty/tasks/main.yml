@@ -1,4 +1,25 @@
 ---
+- name: run the equivalent of "apt get update" as a seperate stop
+  ansible.builtin.apt:
+    update_cache: yes
+    cache_valid_time: 300
+
+- name: Install PHP
+  ansible.builtin.apt:
+    name: php
+    state: present
+  register: apt_action
+  retries: 100
+  until: apt_action is success or 
+        ('Failed to lock apt for exclusive operation' not in apt_action.msg and
+        '/var/lib/dpkg/lock' not in apt_action.msg)
+
+- name: make sure cracklib is not installed
+  ansible.builtin.apt:
+    name: libpam-cracklib
+    state: absent
+    autoremove: yes
+     
 - name: Create submitty git directory if none exists
   ansible.builtin.file:
     path: /usr/local/submitty/GIT_CHECKOUT
@@ -6,7 +27,7 @@
     mode: "0755"
 
 # Change version to match current release
-- name: Checkout WWU fork of the submitty git repo
+- name: Checkout specific version of the submitty git repo
   ansible.builtin.git:
     repo: https://github.com/Submitty/Submitty.git
     dest: /usr/local/submitty/GIT_CHECKOUT/Submitty
@@ -14,11 +35,12 @@
     force: yes
     update: yes
 
+
+# this script only uses PAM and email server
 - name: Run Submitty install script.
   ansible.builtin.shell:
     executable: "/bin/bash"
     cmd: |
-      echo "Starting Submitty install"
       set -o pipefail
       echo "localhost
         5432
@@ -34,22 +56,25 @@
         "{{ sysadmin_email }}"
         "{{ submitty_email }}"
         "{{ institution_url }}"
-        "{{ 1 }}"
-        "{{ admin }}"
-        "{{ y }}"
-        " {{ admin }}"
-        " {{ admin_password }}"
+        1
+        "{{ admin_email }}"
+        y
+        "{{ admin_email }}"
+        "{{ admin_password }}"
+        "{{ submitty_ip }}"
         "{{ submitty_email }}"
         "{{ noreply_email }}"
         "{{ smtp_server }}"
         "{{ smtp_port }}"
         "{{ institution_url }}"
         " | bash -p ./.setup/install_system.sh > /usr/local/submitty/install.log 2>&1
-        echo "Finished Submitty install"
   args:
     chdir: /usr/local/submitty/GIT_CHECKOUT/Submitty
   become: yes
   become_user: root
+
+# another check to see if install log file doesnt have the installation failure
+# how to find a line in a log file
 
 - name: Update the PHP disabled functions
   ansible.builtin.lineinfile:
