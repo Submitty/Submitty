@@ -5,16 +5,16 @@
   become: yes
   tasks:
     - name: Install Submitty
-      ansible.builtin.include_role: 
+      ansible.builtin.include_role:
         name: app_submitty
-      vars: 
+      vars:
         submitty_dbuser: submitty_dbuser
         submitty_dbuser_password: submitty_dbuser
         submitty_course_dbuser: submitty_course_dbuser
         submitty_course_dbuser_password: submitty_dbuser
         timezone: America/New_York
         language: en_US
-        submitty_url: submittyexample.com 
+        submitty_url: submittyexample.com
         vcs_url: example.com
         institution_name: Example University
         sysadmin_email: sysadmin@example.com
@@ -26,3 +26,4 @@
         noreply_email: noreply_email@example.com
         smtp_server: mail@university.com
         smtp_port: 25
+        
