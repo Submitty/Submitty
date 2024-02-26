@@ -3,7 +3,7 @@ name: Submitty CI
 on:
   push:
     branches:
-      - main
+      - submitty_ci/ansible-lint
   pull_request:
   workflow_dispatch:
 
