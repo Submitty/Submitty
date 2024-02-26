@@ -49,6 +49,17 @@ jobs:
         run: npm run css-stylelint
 
 
+  ansible-lint:
+    runs-on: ubuntu-22.04
+    defaults:
+      run:
+        working-directory: site
+    steps:
+      - uses: actions/checkout@v4
+      - name: Run ansible-lint
+        uses: ansible/ansible-lint@main
+            
+
   js-lint:
     runs-on: ubuntu-22.04
     defaults:
