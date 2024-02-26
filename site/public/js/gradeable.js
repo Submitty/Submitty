@@ -1,6 +1,6 @@
 /* exported loadTemplates renderGradingGradeable renderPeerGradeable renderGradingComponent
    renderGradingComponentHeader renderInstructorEditGradeable renderConflictMarks renderRubricTotalBox
-   renderTotalScoreBox renderOverallComment renderEditComponentHeader renderEditComponent */
+   renderTotalScoreBox renderOverallComment renderEditComponentHeader renderEditComponent ajaxUploadGradeable */
 /* global Twig showVerifyComponent buildCourseUrl getItempoolOptions isItempoolAvailable csrfToken */
 
 /**
@@ -328,20 +328,20 @@ function renderEditComponentHeader(component, showMarkList) {
 
 
 // Uploads a gradeable via JSON POST request
-function ajaxUploadGradeable(){
-    var files = document.getElementById('upload').files;
+function ajaxUploadGradeable() {
+    const files = document.getElementById('upload').files;
     if (files.length <= 0) {
         return false;
     }
     const extension = files[0].name.split('.').pop();
-    if(extension !== "json"){
+    if (extension !== 'json') {
         return false;
     }
-    var fr = new FileReader();
+    const fr = new FileReader();
 
-    fr.onload = function(e) {
+    fr.onload = (file) => {
         try {
-            const result = JSON.parse(e.target.result);
+            const result = JSON.parse(file.target.result);
             result['csrf_token'] = csrfToken;
             const url = buildCourseUrl(['upload']);
             $.ajax({
@@ -352,21 +352,23 @@ function ajaxUploadGradeable(){
                 dataType: 'json',
                 data: result,
                 method: 'POST',
-            }).always(function (data) {
+            }).always((data) => {
                 data = JSON.parse(JSON.stringify(data));
                 if (data['status'] === 'success') {
                     window.location = buildCourseUrl(['gradeable', data['data'], 'update']);
-                } else {
+                }
+                else {
                     window.location = buildCourseUrl(['gradeable']);
                     alert(data['message']);
                     return false;
                 }
             });
-        } catch(error) {
+        }
+        catch (error) {
             alert(error);
             return false;
         }
-    }
+    };
     fr.readAsText(files.item(0));
     return true;
 }
