@@ -18,6 +18,7 @@
   ansible.builtin.shell:
     executable: "/bin/bash"
     cmd: |
+      echo "Starting Submitty install"
       set -o pipefail
       echo "localhost
         5432
@@ -44,6 +45,7 @@
         "{{ smtp_port }}"
         "{{ institution_url }}"
         " | bash -p ./.setup/install_system.sh > /usr/local/submitty/install.log 2>&1
+        echo "Finished Submitty install"
   args:
     chdir: /usr/local/submitty/GIT_CHECKOUT/Submitty
   become: yes
@@ -62,11 +64,11 @@
     remote_src: yes
     mode: "0644"
 
-- name: Set up SSL in Apache Submitty configuration
-  ansible.builtin.replace:
-    path: /etc/apache2/sites-available/submitty.conf
-    regexp: <VirtualHost \*:80>
-    replace: "{{ lookup('file', 'append_to_submitty.conf') }}"
+#- name: Set up SSL in Apache Submitty configuration
+#  ansible.builtin.replace:
+#    path: /etc/apache2/sites-available/submitty.conf
+#    regexp: <VirtualHost \*:80>
+#    replace: "{{ lookup('file', 'append_to_submitty.conf') }}"
 
 - name: Add ip to the Apache Submitty configuration
   ansible.builtin.replace:
