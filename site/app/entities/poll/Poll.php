@@ -110,7 +110,9 @@ class Poll {
         $this->end_date = new \DateTime(DateUtils::MAX_TIME);
     }
     public function setEnded(): void {
-        $this->end_date = DateUtils::getDateTimeNow();
+        $temp = DateUtils::getDateTimeNow();
+        $tempString = $temp->format('Y-m-d');
+        $this->end_date = new DateTime($tempString);
     }
     public function isOpen(): bool {
         $now = DateUtils::getDateTimeNow();
@@ -119,7 +121,8 @@ class Poll {
 
     public function isEnded(): bool {
         $now = DateUtils::getDateTimeNow();
-        return $now > $this->end_date;
+        $closeDate = '1900-02-01';
+        return $now > $this->end_date && $this->end_date->format("Y-m-d") !== $closeDate;
     }
 
     public function isClosed(): bool {

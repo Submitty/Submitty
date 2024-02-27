@@ -23,6 +23,7 @@ class PollUtils {
                 'responses' => [],
                 'correct_responses' => [],
                 'duration' => $poll->getDuration()->format('P%yY%mM%dDT%hH%iM%sS'),
+                'end_date' => $poll->getEndDate()->format('Y-m-d'),
                 'release_date' => $poll->getReleaseDate()->format('Y-m-d'),
                 'release_histogram' => $poll->getReleaseHistogram(),
                 'release_answer' => $poll->getReleaseAnswer(),

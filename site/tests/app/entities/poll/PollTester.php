@@ -6,6 +6,7 @@ use app\entities\poll\Option;
 use app\entities\poll\Poll;
 use app\entities\poll\Response;
 use DateTime;
+use DateInterval;
 use ReflectionProperty;
 use tests\BaseUnitTest;
 
@@ -44,7 +45,7 @@ class PollTester extends BaseUnitTest {
                 "/var/local/submitty/courses/s21/sample/uploads/polls/poll_image_3_colors.png"
             )
         ];
-
+        $this->my_polls[0]->setClosed();
         $this->my_polls[1]->setOpen();
         $this->my_polls[2]->setEnded();
 
@@ -231,7 +232,7 @@ class PollTester extends BaseUnitTest {
     public function testStatus(): void {
         $this->assertFalse($this->my_polls[0]->isOpen());
         $this->assertTrue($this->my_polls[0]->isClosed());
-        $this->assertFalse($this->my_polls[0]->isEnded());
+        $this->assertTrue($this->my_polls[0]->isEnded());
 
         $this->assertTrue($this->my_polls[1]->isOpen());
         $this->assertFalse($this->my_polls[1]->isClosed());
