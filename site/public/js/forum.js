@@ -2497,8 +2497,7 @@ function restoreCreateThreadFromLocal() {
 
         // Optional fields
         $('.expiration').hide();
-        // eslint-disable-next-line no-prototype-builtins
-        if (data.hasOwnProperty('lockDate')) {
+        if (Object.prototype.hasOwnProperty.call(data, 'lockDate')) {
             $('#lock_thread_date').val(data.lockDate);
         }
         if (data.isAnnouncement) {
@@ -2509,8 +2508,7 @@ function restoreCreateThreadFromLocal() {
             $('#pinThread').prop('checked', data.pinThread);
             $('.expiration').show();
         }
-        // eslint-disable-next-line no-prototype-builtins
-        if (data.hasOwnProperty('expiration')) {
+        if (Object.prototype.hasOwnProperty.call(data, 'expiration')) {
             $('#expirationDate').val(data.expiration);
         }
     }
