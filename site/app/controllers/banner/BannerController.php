@@ -44,7 +44,7 @@ class BannerController extends AbstractController {
             $release_date = DateUtils::parseDateTime($_POST['release_time'], $this->core->getDateTimeNow()->getTimezone());
         }
         else {
-            return JsonResponse::getErrorResponse("No release date.");
+            return JsonResponse::getErrorResponse("Please make sure you have a release date for the banner for when the banner will start being displayed.");
         }
 
 
@@ -52,7 +52,7 @@ class BannerController extends AbstractController {
             $close_date = DateUtils::parseDateTime($_POST['close_time'], $this->core->getDateTimeNow()->getTimezone());
         }
         else {
-            return JsonResponse::getErrorResponse("No release date.");
+            return JsonResponse::getErrorResponse("Please make sure you have an end date for the banner for when the banner will stop being displayed.");
         }
         if (!isset($_FILES["files1"]) || $_FILES["files1"] === []) {
             return JsonResponse::getErrorResponse("No files were submitted.");
@@ -60,10 +60,10 @@ class BannerController extends AbstractController {
 
         $uploaded_files = $_FILES["files1"];
         $count_item = count($uploaded_files["name"]);
-        $extra_name = $_POST['extra_name'];
+        $bigger_banner_name = $_POST['extra_name'];
         $link_name = $_POST['link_name'];
 
-        if ($extra_name === "" && $count_item !== 1) {
+        if ($bigger_banner_name === "" && $count_item !== 1) {
             return JsonResponse::getErrorResponse("You can only have one banner submitted.");
         }
         elseif ($count_item > 2) {
@@ -75,7 +75,7 @@ class BannerController extends AbstractController {
         $actual_banner_name = "";
 
         foreach ($uploaded_files['name'] as $uploaded_file_name) {
-            if ($uploaded_file_name !== $extra_name) {
+            if ($uploaded_file_name !== $bigger_banner_name) {
                 $actual_banner_name = $uploaded_file_name;
                 break; // Exit the loop once a valid name is found
             }
@@ -90,13 +90,13 @@ class BannerController extends AbstractController {
         $full_path1 = $this->core->getAccess()->resolveDirPath("community_events", $full_path1);
 
         $full_path2 = "empty";
-        if ($extra_name !== "") {
-            $full_path2 = FileUtils::joinPaths($full_path, $extra_name);
+        if ($bigger_banner_name !== "") {
+            $full_path2 = FileUtils::joinPaths($full_path, $bigger_banner_name);
             $full_path2 = $this->core->getAccess()->resolveDirPath("community_events", $full_path2);
         }
 
         if ($full_path1 === false || $full_path2 === false) {
-            return JsonResponse::getErrorResponse("Path is bad.");
+            return JsonResponse::getErrorResponse("Path is invalid.");
         }
 
         if (!is_dir($full_path)) {
@@ -111,7 +111,7 @@ class BannerController extends AbstractController {
 
         for ($j = 0; $j < $count_item; $j++) {
             $all_match = false;
-            if ($uploaded_files['name'][$j] === $extra_name) {
+            if ($uploaded_files['name'][$j] === $bigger_banner_name) {
                 $all_match = true;
             }
 
@@ -150,7 +150,7 @@ class BannerController extends AbstractController {
             $community_event_image = new BannerImage(
                 $specificPath,
                 $actual_banner_name,
-                $extra_name,
+                $bigger_banner_name,
                 $link_name,
                 $release_date,
                 $close_date,
