@@ -221,7 +221,7 @@ $(document).ready(() => {
             data[this.name] = $(this).val();
         }
         //Retrieve status of check boxes for each of the panels
-        let selectedCheckboxes = "";
+        let selectedCheckboxes = '';
         $('input[name="peer_panel"]').each(function() {
             if ($(this).is(':checked')) {
                 selectedCheckboxes += '1';
