@@ -179,6 +179,8 @@ function testAndGetAttachments(post_box_id, dynamic_check) {
         return false;
     }
     else {
+        const submitButton = document.querySelector(`[data-post_box_id="${post_box_id}"] input[type="submit"]`);
+        submitButton.disabled = false;
         return files;
     }
 }
@@ -2423,6 +2425,7 @@ function setupDisableReplyThreadForm() {
     threadPostForms.forEach((form) => {
         //For all thread forms either reply's or posts, ensure that when text area is empty, the submit button appears to be disabled
         const textArea = form.querySelector('textarea');
+
         const submitButton = form.querySelector('input[type="submit"]');
 
         if (textArea.id === 'reply_box_0' || textArea.id === 'reply_box_1') {
@@ -2431,7 +2434,7 @@ function setupDisableReplyThreadForm() {
         }
 
         const inputTest = () => {
-            if (textArea.value.trim() === '') {
+            if (textArea.value.trim() === '' ) {
                 submitButton.disabled = true;
             }
             else {
