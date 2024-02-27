@@ -17,6 +17,7 @@ class RainbowCustomization extends AbstractModel {
     /**/
     protected $core;
     private $bucket_counts = [];               // Keep track of how many items are in each bucket
+    private $bucket_droplowest = [];               // get how many droplowest are in each bucket
     private $customization_data = [];
     private $has_error;
     private $error_messages;
@@ -67,6 +68,7 @@ class RainbowCustomization extends AbstractModel {
         foreach (self::syllabus_buckets as $bucket) {
             $this->customization_data[$bucket] = [];
             $this->bucket_counts[$bucket] = 0;
+            $this->bucket_droplowest[$bucket] = 0;
         }
 
         $gradeables = $this->core->getQueries()->getGradeableConfigs(null);
@@ -324,6 +326,10 @@ class RainbowCustomization extends AbstractModel {
         return $this->bucket_counts;
     }
 
+    public function getBucketDropLowest() {
+        return $this->bucket_droplowest;
+    }
+
     public function getCustomizationData() {
         return $this->customization_data;
     }
@@ -339,6 +345,13 @@ class RainbowCustomization extends AbstractModel {
     public function getMessages() {
         return !is_null($this->RCJSON) ? $this->RCJSON->getMessages() : [];
     }
+
+    public function getDroplowest() {
+        return !is_null($this->RCJSON) ? $this->RCJSON->getDroplowest() : [];
+    }
+
+
+
 
     /**
      * Get display benchmarks
