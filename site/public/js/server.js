@@ -332,7 +332,7 @@ function newEditCourseMaterialsFolderForm(tag) {
     const is_hidden = $(tag).data('hidden-state');
     const partially_hidden = 2;
     const form = $('#edit-course-materials-folder-form');
-    let element = document.getElementById('edit-folder-picker');
+    const element = document.getElementById('edit-folder-picker');
     element._flatpickr.setDate(release_time);
 
     const hide_materials_box = $('#hide-folder-materials-checkbox-edit', form);
