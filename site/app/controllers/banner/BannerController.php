@@ -74,7 +74,7 @@ class BannerController extends AbstractController {
         $specificPath = $close_date->format("Y");
         $actual_banner_name = "";
 
-        //since the user could upload 2 banners (one being the bigger banner), we want to find what the actual banner name is so we loop 
+        //since the user could upload 2 banners (one being the bigger banner), we want to find what the actual banner name is so we loop
         //through the banners to find the right one (we have a loop so that in case if later we want to expand the number of allowed banners)
         foreach ($uploaded_files['name'] as $uploaded_file_name) {
             if ($uploaded_file_name !== $bigger_banner_name) {

@@ -1,6 +1,9 @@
 ////////////Begin: Removed redundant link in breadcrumbs////////////////////////
 //See this pr for why we might want to remove this code at some point
 //https://github.com/Submitty/Submitty/pull/5071
+
+/* exported newUploadBanner */
+
 window.addEventListener("resize", function(){
   loadInBreadcrumbLinks();
   adjustBreadcrumbLinks();
@@ -287,9 +290,9 @@ function newUploadCourseMaterialsForm() {
 
 function newUploadBanner() {
     createArray(1);
-    var files = [];
+    let files = [];
     $('.popup-form').css('display', 'none');
-    var form = $("#upload-banner");
+    let form = $("#upload-banner");
 
     $('[name="existing-file-list"]', form).html('');
 
@@ -301,23 +304,6 @@ function newUploadBanner() {
     form.find('.form-body').scrollTop(0);
     $('[name="upload"]', form).val(null);
 }
-
-
-function newShowImage(information, extraLink = null) {
-
-
-    let form = $('#showing-banner');
-
-    form.css("display", "block");
-
-
-    $('#click-for-bigger-banner', form).attr('src', information);
-    $('#click-banner-to-link', form).attr('href', extraLink);
-
-    captureTabInModal("showing-banner");
-}
-
-
 
 function newEditCourseMaterialsFolderForm(tag) {
     let id = $(tag).data('id');
