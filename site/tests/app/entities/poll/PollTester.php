@@ -19,6 +19,7 @@ class PollTester extends BaseUnitTest {
                 "Poll #1",
                 "Is this the first poll?",
                 "single-response-single-correct",
+                new DateInterval("P1Y"),
                 new DateTime("2021-01-11"),
                 "never",
                 "never"
@@ -27,6 +28,7 @@ class PollTester extends BaseUnitTest {
                 "Poll #2",
                 "Is this the first poll?",
                 "single-response-multiple-correct",
+                new DateInterval("PT1M"),
                 new DateTime("9999-12-31"),
                 "always",
                 "always"
@@ -35,6 +37,7 @@ class PollTester extends BaseUnitTest {
                 "Poll #3",
                 "What is your favorite color?",
                 "multiple-response-survey",
+                new DateInterval("PT1M30S"),
                 new DateTime('now'),
                 "when_ended",
                 "when_ended",
