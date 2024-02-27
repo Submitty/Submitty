@@ -496,8 +496,7 @@ function isValidSubmission() {
     }
 
     // If is_notebook is set then always valid submission
-    // eslint-disable-next-line no-prototype-builtins
-    if (window.hasOwnProperty('is_notebook')) {
+    if (Object.prototype.hasOwnProperty.call(window, 'is_notebook')) {
         return true;
     }
 
