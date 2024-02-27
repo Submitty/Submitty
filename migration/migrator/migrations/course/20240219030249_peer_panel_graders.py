@@ -14,7 +14,8 @@ def up(config, database, semester, course):
     :param course: Code of course being migrated
     :type course: str
     """
-    database.execute("ALTER TABLE electronic_gradeable ADD COLUMN IF NOT EXISTS eg_peer_panel INTEGER[] DEFAULT '{1, 2, 3, 4, 5}'")
+    database.execute("ALTER TABLE electronic_gradeable DROP COLUMN IF EXISTS eg_peer_panel;")
+    database.execute("ALTER TABLE electronic_gradeable ADD COLUMN eg_peer_panel VARCHAR(5) DEFAULT '11111';")
 
 
 def down(config, database, semester, course):

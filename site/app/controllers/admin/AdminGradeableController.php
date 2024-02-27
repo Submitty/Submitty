@@ -1047,11 +1047,6 @@ class AdminGradeableController extends AbstractController {
         }
         unset($_POST['csrf_token']);
         try {
-            // Converting [a, b] to "{a, b}" to satisfy interpretation of array by SQL
-            if (is_array($_POST['peer_panel'])) {
-                $_POST['peer_panel'] = array_map('intval', $_POST['peer_panel']);
-                $_POST['peer_panel'] = "{" . implode(", ", $_POST['peer_panel']) . "}";
-            }
             $response_props = $this->updateGradeable($gradeable, $_POST);
             // Finally, send the requester back the information
             $this->core->getOutput()->renderJsonSuccess($response_props);

@@ -118,20 +118,20 @@ Form
             Which tabs should be visible to peer graders?
         </legend>
         <input type="checkbox" name="peer_panel" value="1" id="autograding_peer_panel"
-            {{ (1 in gradeable.getPeerPanel()) ? 'checked' : ''}}><label for="autograding_peer_panel">Autograding</label>
+            {{ ('1' == gradeable.getPeerPanel()|slice(0,1)) ? 'checked' : ''}}><label for="autograding_peer_panel">Autograding</label>
         <input type="checkbox" name="peer_panel" value="2" id="rubric_peer_panel"
-            {{ (2 in gradeable.getPeerPanel()) ? 'checked' : '' }}> <label for="rubric_peer_panel">Rubric</label>
+            {{ ('1' == gradeable.getPeerPanel()|slice(1,1)) ? 'checked' : '' }}> <label for="rubric_peer_panel">Rubric</label>
 
         <input type="checkbox" name="peer_panel" value="3" id="files_peer_panel"
-            {{ (3 in gradeable.getPeerPanel()) ? 'checked' : '' }}><label for="files_peer_panel">Files</label>
+            {{ ('1' == gradeable.getPeerPanel()|slice(2,1)) ? 'checked' : '' }}><label for="files_peer_panel">Files</label>
 
         <input type="checkbox" name="peer_panel" value="4" id="solutions_peer_panel"
-            {{ (4 in gradeable.getPeerPanel()) ? 'checked' : '' }}><label for="solutions_peer_panel">Solution/Notes</label>
+            {{ ('1' == gradeable.getPeerPanel()|slice(3,1)) ? 'checked' : '' }}><label for="solutions_peer_panel">Solution/Notes</label>
 
         {% if isDiscussionPanel %}
 
             <input type="checkbox" name="peer_panel" value="5" id="discussion_peer_panel"
-                {{ (5 in gradeable.getPeerPanel()) ? 'checked' : '' }}><label for="discussion_peer_panel">Discussion</label>
+                {{ ('1' == gradeable.getPeerPanel()|slice(-1)) ? 'checked' : '' }}><label for="discussion_peer_panel">Discussion</label>
 
         {% endif %}
     </fieldset>

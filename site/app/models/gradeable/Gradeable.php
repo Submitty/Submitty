@@ -323,7 +323,7 @@ class Gradeable extends AbstractModel {
     protected $peer_blind = 3;
     /** @prop
      * @var array will peer graders access the grading panels*/
-    protected $peer_panel = [1,2,3,4,5];
+    protected $peer_panel = "11111";
     /** @prop
      * @var bool will instructors have blind peer grading enabled*/
     protected $instructor_blind = 1;

@@ -21,7 +21,7 @@
 
 <div id="grading-panel-header">
     <div class="panel-header-box">
-        {% if not isPeerGrader or (isPeerGrader and 1 in isPeerAccessible) %}
+        {% if not isPeerGrader or (isPeerGrader and '1' == isPeerAccessible|slice(0,1)) %}
             <span class="grade-panel" id="autograding_results_btn">
                 <button title="Show/Hide Autograding Testcases (Press A)"
                         class="invisible-btn key_to_click"
@@ -33,7 +33,7 @@
                 {{ self.renderPanelPositionSelector('autograding_results') }}
             </span>
         {% endif %}
-        {% if not isPeerGrader or (isPeerGrader and 2 in isPeerAccessible) %}
+        {% if not isPeerGrader or (isPeerGrader and '1' == isPeerAccessible|slice(1,1)) %}
             <span class="grade-panel" id="grading_rubric_btn">
                 <button title="Show/Hide Grading Rubric (Press G)"
                         class="invisible-btn key_to_click"
@@ -44,7 +44,7 @@
                 {{ self.renderPanelPositionSelector('grading_rubric') }}
             </span>
         {% endif %}
-        {% if not isPeerGrader or (isPeerGrader and 3 in isPeerAccessible) %}
+        {% if not isPeerGrader or (isPeerGrader and '1' == isPeerAccessible|slice(2,1)) %}
             <span class="grade-panel" id="submission_browser_btn">
                 <button title="Show/Hide Submission and Results Browser (Press O)"
                         class="invisible-btn key_to_click"
@@ -67,7 +67,7 @@
             {{ self.renderPanelPositionSelector('student_info') }}
             </span>
         {% endif %}
-        {% if not isPeerGrader or (isPeerGrader and 4 in isPeerAccessible) %}
+        {% if not isPeerGrader or (isPeerGrader and '1' == isPeerAccessible|slice(3,1)) %}
             <span class="grade-panel" id="solution_ta_notes_btn">
                 <button title="Show Solution and TA notes"
                         class="invisible-btn key_to_click"
@@ -89,7 +89,7 @@
             {{ self.renderPanelPositionSelector('peer_info') }}
             </span>
         {% endif %}
-        {% if not isPeerGrader or (isPeerGrader and 5 in isPeerAccessible) %}
+        {% if not isPeerGrader or (isPeerGrader and '1' == isPeerAccessible|slice(-1)) %}
             {% if isDiscussionPanel %}
                 <span class="grade-panel" id="discussion_browser_btn">
                     <button title="Show/Hide Discussion Posts"
