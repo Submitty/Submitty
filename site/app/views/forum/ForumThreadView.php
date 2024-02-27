@@ -9,7 +9,6 @@ use app\libraries\ForumUtils;
 use app\models\User;
 
 class ForumThreadView extends AbstractView {
-
     private function getSavedForumCategories($current_course, $categories) {
         $category_ids_array = array_column($categories, 'category_id');
         $cookieSelectedCategories = [];
@@ -1100,11 +1099,11 @@ class ForumThreadView extends AbstractView {
             $visible_username = $given_name . " " . $family_name;
         }
 
-        if ($post["anonymous"]){
+        if ($post["anonymous"]) {
             $visible_username = "Anonymous";
         }
 
-        if ($post["author_user_id"] == $first_post_start['author_user_id'] && !$first){
+        if ($post["author_user_id"] == $first_post_start['author_user_id'] && !$first) {
             $visible_username .= " [OP]";
         }
 
