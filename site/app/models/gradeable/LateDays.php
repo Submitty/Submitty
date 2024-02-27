@@ -290,11 +290,13 @@ class LateDays extends AbstractModel {
             $auto_graded_gradeable = $graded_gradeable->getAutoGradedGradeable();
             $submission_days_late = $auto_graded_gradeable->hasActiveVersion() ? $auto_graded_gradeable->getActiveVersionInstance()->getDaysLate() : 0;
             $exceptions = $graded_gradeable->getLateDayException($this->user);
+            $reason = $graded_gradeable->getReasonForException($this->user);
 
             $event_info['graded_gradeable'] = $graded_gradeable;
             $event_info['late_days_allowed'] = $late_days_allowed;
             $event_info['submission_days_late'] = $submission_days_late;
             $event_info['late_day_exceptions'] = $exceptions;
+            $event_info['reason_for_exception'] = $reason;
         }
 
         return $event_info;

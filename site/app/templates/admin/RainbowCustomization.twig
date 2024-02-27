@@ -99,6 +99,66 @@
                     {% endfor %}
                 </div>
             </div>
+            <div id="plagiarism" class="customization_item">
+                <h2>Penalties for Academic Dishonesty and Plagiarism</h2>
+                <p class="rg_info_message">All students will receive a zero for the specified gradeable.  Additionally if a non-zero penalty value is indicated they will receive an additional reduction on the semester grade.  Penalty = 1 is a full letter grade.  Penalty = 0.5 is a half letter grade.  Penalty = 0.33 is a one third letter grade.</p>
+                <input type="hidden" name="csrf_token" value="{{ csrfToken }}" />
+                <input type="hidden" name="option" value="-1" />
+                <div class="option">
+                    <label for="user_id">
+                        <span>USER ID:</span>
+                        <input class="option-input" type="text" name="user_id" id="user_id">
+                    </label>
+                    <label for="g_id" class="option">Gradeable:</label>
+                    <select name="g_id" id="g_id">
+                        <option disabled selected value> -- select an option -- </option>
+                        {% for index, value in gradeables %}
+                            <option value="{{value['g_id']}}" >{{ value['g_title'] }}</option>
+                        {% endfor %}
+                    </select>
+                    <label for="penalty">
+                        <span>Penalty:</span>
+                        <input class="option-input" type="text" name="marks" id="marks">
+                    </label>
+                    <button type="submit" class="btn btn-primary" onclick="addToTable()">
+                        <i class="fas fa-plus"></i>
+                    </button>
+                    {# This is a data table #}
+                    <style>
+                        #plagiarism-table th:first-child,
+                        #plagiarism-table td:first-child {
+                            text-align: left;
+                        }
+                        #plagiarism-table th:nth-child(2),
+                        #plagiarism-table td:nth-child(2) {
+                            text-align: left;
+                        }
+                    </style>
+                    <table id="plagiarism-table" class="table table-striped table-bordered persist-area mobile-table">
+                        <caption id="title"></caption>
+                        <thead>
+                        <tr>
+                            <th>USER ID</th>
+                            <th>Gradeable</th>
+                            <th>Penalty</th>
+                            <th>Delete</th>
+                        </tr>
+                        </thead>
+                        <tbody id="table-body">
+                        {% for entry in plagiarism %}
+                            <tr>
+                                <td>{{ entry.user }}</td>
+                                <td>{{ entry.gradeable }}</td>
+                                <td>{{ entry.penalty }}</td>
+                                <td><a onclick="deleteRow(this)"><i class="fas fa-trash"></i></a></td>
+                            </tr>
+                        {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+
             <div id="gradeables" class="customization_item">
                 <h2>Gradeables</h2>
                 <div id="gradeables_collapse" class="collapsible_area">
@@ -209,6 +269,8 @@ To remove a curve simply blank all boxes."></i>
         </div>
     </div>
 
+
+
     <script>
         $('.gradeable-li-info .tooltip').on('mouseenter', function(){
             const gradeable = $(this).closest('.gradeable-li');
@@ -217,6 +279,10 @@ To remove a curve simply blank all boxes."></i>
             $(`#override-${gradeable_id}`).html(override.val());
         });
 
+        $("#user_id").autocomplete({
+            source: {{ student_full|raw }}
+        });
+        var studentFullData = {{ student_full|raw }};
         var old_index;
         var new_index;
         var old_parent;

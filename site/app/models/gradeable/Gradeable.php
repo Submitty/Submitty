@@ -341,7 +341,10 @@ class Gradeable extends AbstractModel {
         $this->setMinGradingGroup($details['min_grading_group']);
         $this->setSyllabusBucket($details['syllabus_bucket']);
         $this->setTaInstructions($details['ta_instructions']);
-        $this->setAnyManualGrades($details['any_manual_grades']);
+        if (array_key_exists('any_manual_grades', $details)) {
+            $this->setAnyManualGrades($details['any_manual_grades']);
+        }
+
         if (array_key_exists('peer_graders_list', $details)) {
             $this->setPeerGradersList($details['peer_graders_list']);
         }
@@ -1851,9 +1854,11 @@ class Gradeable extends AbstractModel {
     /**
      * Gets the percent of grading complete for the provided user for this gradeable
      * @param User $grader
+     * @param bool $include_null_section
+     * @param bool $include_bad_submissions
      * @return float The percentage (0 to 1) of grading completed or NAN if none required
      */
-    public function getGradingProgress(User $grader) {
+    public function getGradingProgress(User $grader, bool $include_bad_submissions, bool $include_null_section) {
         //This code is taken from the ElectronicGraderController, it used to calculate the TA percentage.
         $total_users = [];
         $graded_components = [];
@@ -1882,16 +1887,22 @@ class Gradeable extends AbstractModel {
             $section_key = 'rotating_section';
         }
         $num_submitted = [];
+        $late_submitted = [];
+        $late_graded = [];
         if (count($sections) > 0) {
             if ($this->isTeamAssignment()) {
                 $total_users = $this->core->getQueries()->getTotalTeamCountByGradingSections($this->getId(), $sections, $section_key);
-                $graded_components = $this->core->getQueries()->getGradedComponentsCountByTeamGradingSections($this->getId(), $sections, $section_key);
+                $graded_components = $this->core->getQueries()->getGradedComponentsCountByGradingSections($this->getId(), $sections, $section_key, $this->isTeamAssignment());
                 $num_submitted = $this->core->getQueries()->getTotalSubmittedTeamCountByGradingSections($this->getId(), $sections, $section_key);
+                $late_submitted = $this->core->getQueries()->getBadTeamSubmissionsByGradingSection($this->getId(), $sections, $section_key);
+                $late_graded = $this->core->getQueries()->getBadGradedComponentsCountByGradingSections($this->getId(), $sections, $section_key, $this->isTeamAssignment());
             }
             else {
                 $total_users = $this->core->getQueries()->getTotalUserCountByGradingSections($sections, $section_key);
                 $graded_components = $this->core->getQueries()->getGradedComponentsCountByGradingSections($this->getId(), $sections, $section_key, $this->isTeamAssignment());
                 $num_submitted = $this->core->getQueries()->getTotalSubmittedUserCountByGradingSections($this->getId(), $sections, $section_key);
+                $late_submitted = $this->core->getQueries()->getBadUserSubmissionsByGradingSection($this->getId(), $sections, $section_key);
+                $late_graded = $this->core->getQueries()->getBadGradedComponentsCountByGradingSections($this->getId(), $sections, $section_key, $this->isTeamAssignment());
             }
         }
 
@@ -1902,21 +1913,30 @@ class Gradeable extends AbstractModel {
                 $sections[$key] = [
                     'total_components' => $value * $num_components,
                     'graded_components' => 0,
+                    'non_late_total_components' => ($value - ($late_submitted[$key] ?? 0)) * $num_components,
+                    'non_late_graded_components' => 0
                 ];
                 if (isset($graded_components[$key])) {
                     // Clamp to total components if unsubmitted assignment is graded for whatever reason
                     $sections[$key]['graded_components'] = min(intval($graded_components[$key]), $sections[$key]['total_components']);
+                    $sections[$key]['non_late_graded_components'] = $graded_components[$key] - $late_graded[$key];
                 }
             }
         }
         $components_graded = 0;
         $components_total = 0;
         foreach ($sections as $key => $section) {
-            if ($key === "NULL") {
+            if ($key === "NULL" && !$include_null_section) {
                 continue;
             }
-            $components_graded += $section['graded_components'];
-            $components_total += $section['total_components'];
+            if ($include_bad_submissions) {
+                $components_graded += $section['graded_components'];
+                $components_total += $section['total_components'];
+            }
+            else {
+                $components_graded += $section['non_late_graded_components'];
+                $components_total += $section['non_late_total_components'];
+            }
         }
         if ($components_total === 0) {
             return NAN;

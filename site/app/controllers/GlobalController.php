@@ -466,15 +466,49 @@ class GlobalController extends AbstractController {
         ]);
     }
 
+
+    public function calculateHanukkahDate(int $year): \DateTime {
+        // This is the Hanukkah in civil year
+        $startdate = jewishtojd(3, 24, $year + 3761);
+        $gregorianDate = \DateTime::createFromFormat('m/d/Y', jdtogregorian($startdate));
+
+        // Set the time to 4:00 PM for approx sunfall
+        $gregorianDate->setTime(16, 0, 0);
+
+        return $gregorianDate;
+    }
+
+
+
     // ==========================================================================================
     private function getDuckImage(\DateTime $now): string {
         $duck_img = 'moorthy_duck/00-original.svg';
         $day = (int) $now->format('j');
         $month = (int) $now->format('n');
         $year = $now->format('Y');
-
+        $yearint = (int) $now->format('Y');
+        $hour = (int) $now->format('G');
+        $minute = (int) $now->format('i');
+        $second = (int) $now->format('s');
         switch ($month) {
             case 12:
+                //December (Christmas, Hanukkah)
+                $hanukkahStartDateTime = $this->calculateHanukkahDate($yearint);
+                $hanukkahEndDateTime = $this->calculateHanukkahDate($yearint);
+                $hanukkahEndDateTime->modify('+8 days');
+
+                if ($now >= $hanukkahStartDateTime && $now <= $hanukkahEndDateTime) {
+                    // Select the menorah duck image based on the day of Hanukkah
+                    $datecounter = (int) $now->diff($hanukkahStartDateTime)->format('%a') + 1;
+                    // Ensure datecounter is between 1 and 8
+                    $datecounter = max(1, min(8, $datecounter));
+                    $menorah_duck = 'moorthy_duck/menorah-duck/' . $datecounter . '.svg';
+                    $decemberImages = ['moorthy_duck/12-December.svg', $menorah_duck];
+                }
+                else {
+                    $decemberImages = ['moorthy_duck/12-December.svg'];
+                }
+                $duck_img = $decemberImages[array_rand($decemberImages)];
                 break;
             case 11:
                 //November (Thanksgiving)
@@ -521,14 +555,23 @@ class GlobalController extends AbstractController {
                 }
                 break;
             case 2:
+                $februaryImages = ['moorthy_duck/black-history-duck.svg'];
+                if ($day <= 3) {
+                    $februaryImages[] = 'moorthy_duck/party-duck/party-duck-10th.svg';
+                }
                 //Valentines (Hearts)
                 if ($day >= 11 && $day <= 17) {
-                    $duck_img = 'moorthy_duck/02-february.svg';
+                    $februaryImages[] = 'moorthy_duck/02-february.svg';
                 }
+                $duck_img = $februaryImages[array_rand($februaryImages)];
                 break;
             case 1:
                 //January (Snowflakes)
                 $duck_img = 'moorthy_duck/01-january.svg';
+
+                if ($day >= 28) {
+                    $duck_img = 'moorthy_duck/party-duck/party-duck-10th.svg';
+                }
                 break;
             default:
                 break;
