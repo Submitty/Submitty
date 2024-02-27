@@ -109,30 +109,36 @@
     </div>
 </div>
 <script>
-    $('#{{markdown_area_id}}').ready(function() {
+    $(document).ready(function() {
         enableTabsInTextArea("#{{markdown_area_id}}");
         const markdown_area = $('#{{markdown_area_id}}').closest('.markdown-area')
         markdown_area.find('[data-initialize-preview="1"]').trigger('click');
+
         function resizeTextarea(textarea) {
-        // Set the height to 'auto' to get the correct scrollHeight
-        textarea.style.height = 'auto';
-        // Set the height to the scrollHeight plus a little extra space
-        textarea.style.height = (textarea.scrollHeight + 5) + 'px';
+            // Only adjust the height if the content is too long
+            if (textarea.scrollHeight > textarea.clientHeight) {
+                textarea.style.height = 'auto';
+                textarea.style.height = textarea.scrollHeight + 'px';
+            }
         }
-        var textareaElement = document.getElementById('{{ markdown_area_id }}');
-        
+
+        var textareaElement = document.getElementById('{{markdown_area_id}}');
+        // Run the resize function initially in case there's already content
         resizeTextarea(textareaElement);
 
-        // Ensure the textarea allows for scrolling if content overflows
-        textareaElement.style.overflowY = 'auto';
-
+        // Add input event listener to resize on input
         textareaElement.addEventListener('input', function() {
             resizeTextarea(this);
         });
-    });
-    $('.markdown-mode-tab').on('click', function(){
-        $(this).addClass('active');
-        const markdown_area = $(this).closest('.markdown-area');
-        markdown_area.find('.markdown-mode-tab').not(this).removeClass('active');
+
+        // Set overflowY to 'auto' to allow for a scrollbar when needed
+        textareaElement.style.overflowY = 'auto';
+
+        // Handle tab switching for Markdown preview
+        $('.markdown-mode-tab').on('click', function() {
+            $(this).addClass('active');
+            const markdown_area = $(this).closest('.markdown-area');
+            markdown_area.find('.markdown-mode-tab').not(this).removeClass('active');
+        });
     });
 </script>
