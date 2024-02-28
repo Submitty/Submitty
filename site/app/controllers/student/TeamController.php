@@ -14,7 +14,7 @@ class TeamController extends AbstractController {
         $pattern = '/[^a-zA-Z0-9\-_ ]/';
         return preg_match($pattern, $str) === 1;
     }
-    
+
     /**
      * @Route("/courses/{_semester}/{_course}/gradeable/{gradeable_id}/team/new")
      */
@@ -512,7 +512,6 @@ class TeamController extends AbstractController {
                 $this->core->addErrorMessage("Team name should not contain special characters");
                 return new RedirectResponse($return_url);
             }
-
         }
 
         if ($_POST['team_name'] === $team->getTeamName()) {
