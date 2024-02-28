@@ -2434,7 +2434,9 @@ function setupDisableReplyThreadForm() {
         }
 
         const inputTest = () => {
-            if (textArea.value.trim() === '' ) {
+            const imageAttachments = form.querySelectorAll('.file-upload-table .file-label');
+
+            if (textArea.value.trim() === '' && imageAttachments.length === 0) {
                 submitButton.disabled = true;
             }
             else {
