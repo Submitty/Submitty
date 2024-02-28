@@ -102,7 +102,7 @@ class CalendarView extends AbstractView {
             "show_legend" => $show_legend,
             "color_options" => $course_colors,
             "show_all_cookie" => isset($_COOKIE['calendar_show_all']) ? $_COOKIE['calendar_show_all'] : 1,
-            "calendar_course_cookie" => isset($_COOKIE['calendar_course']) ? $_COOKIE['calendar_course'] : (count($formatted_courses)>0 ? $formatted_courses[0] : NULL),
+            "calendar_course_cookie" => $_COOKIE['calendar_course'] ?? ($formatted_courses[0] ?? NULL),
         ]);
     }
 }
