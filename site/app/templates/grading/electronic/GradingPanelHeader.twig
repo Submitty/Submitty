@@ -1,16 +1,20 @@
 {% import _self as self %}
 <script>
+    let autograding_results = {% if not isPeerGrader or (isPeerGrader and '1' == isPeerAccessible|slice(0,1)) %} true {% else %} false {% endif %};
+    let grading_rubric = {% if not isPeerGrader or (isPeerGrader and '1' == isPeerAccessible|slice(1,1)) %} true {% else %} false {% endif %};
+    let submission_browser = {% if not isPeerGrader or (isPeerGrader and '1' == isPeerAccessible|slice(2,1)) %} true {% else %} false {% endif %};
+    let solution_ta_notes = {% if not isPeerGrader or (isPeerGrader and '1' == isPeerAccessible|slice(3,1)) %} true {% else %} false {% endif %};
     let student_info = {% if isStudentInfoPanel %} true {% else %} false {% endif %};
     let grade_inquiry_info = {% if isGradeInquiryPanel %} true {% else %} false {% endif %};
-    let discussion_browser = {% if isDiscussionPanel %} true {% else %} false {% endif %};
+    let discussion_browser = {% if isDiscussionPanel and (not isPeerGrader or (isPeerGrader and '1' == isPeerAccessible|slice(-1))) %} true {% else %} false {% endif %};
     let peer_info = {% if isPeerPanel %} true {% else %} false {% endif %};
     let is_notebook = {% if is_notebook %} true {% else %} false {% endif %};
 
     updateThePanelsElements({
-        autograding_results: true,
-        grading_rubric: true,
-        submission_browser: true,
-        solution_ta_notes: true,
+        autograding_results: autograding_results,
+        grading_rubric: grading_rubric,
+        submission_browser: submission_browser,
+        solution_ta_notes: solution_ta_notes,
         student_info,
         grade_inquiry_info,
         discussion_browser,
