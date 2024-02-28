@@ -9,13 +9,13 @@ submitty_url: localhost
 vcs_url: git.localhost
 institution_name: Example University
 sysadmin_email: sysadmin@localhost
-submitty_email: submitty@example.com
-institution_url: university@example.com
-admin_email: admin@example.com
+submitty_email: submitty@localhost
+institution_url: university@localhost
+admin_email: admin@localhost
 submitty_ip: 172.0.0.1
 admin_password: admin_password
-noreply_email: noreply_email@example.com
-smtp_server: mail.example.com
+noreply_email: noreply_email@localhost
+smtp_server: mail.localhost
 smtp_port: 25
 
 #default values we can install on our localhost

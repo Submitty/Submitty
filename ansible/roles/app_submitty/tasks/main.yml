@@ -73,8 +73,8 @@
   become: yes
   become_user: root
 
-# another check to see if install log file doesnt have the installation failure
-# how to find a line in a log file
+- name: check to see if installation succeeded
+  ansible.builtin.shell: grep "INSTALLATION SUCCESS!" /usr/local/submitty/install.log
 
 - name: Update the PHP disabled functions
   ansible.builtin.lineinfile:
