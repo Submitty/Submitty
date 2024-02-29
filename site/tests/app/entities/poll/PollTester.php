@@ -232,7 +232,7 @@ class PollTester extends BaseUnitTest {
     public function testStatus(): void {
         $this->assertFalse($this->my_polls[0]->isOpen());
         $this->assertTrue($this->my_polls[0]->isClosed());
-        $this->assertTrue($this->my_polls[0]->isEnded());
+        $this->assertFalse($this->my_polls[0]->isEnded());
 
         $this->assertTrue($this->my_polls[1]->isOpen());
         $this->assertFalse($this->my_polls[1]->isClosed());
