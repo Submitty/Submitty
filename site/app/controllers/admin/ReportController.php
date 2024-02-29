@@ -777,6 +777,7 @@ class ReportController extends AbstractController {
         $grade_path = $this->core->getConfig()->getCoursePath() . "/rainbow_grades/output.html";
         $grade_summaries_last_run = $this->getGradeSummariesLastRun();
         $grade_file = null;
+
         if (file_exists($grade_path)) {
             $grade_file = file_get_contents($grade_path);
         }
