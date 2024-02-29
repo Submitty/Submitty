@@ -914,17 +914,14 @@ class Access {
         }
         $path = implode(DIRECTORY_SEPARATOR, $parts);
 
-        //Make sure it starts with the dir base
-        if (!str_starts_with($path, $info["base"])) {
-            //This both prevents people from accessing files outside the base dir
-            // and lets us have relative paths. Convenient!
-            if ($path[0] === "/") {
-                $path = substr($path, 1);
+        if ($dir === "rainbow_grades" && substr($path, -11) === "/output.csv") {
+            $base = substr($info["base"], 0, -23) . "/rainbow_grades";
+            if (!str_starts_with($path, $base)) {
+                $path = $base . $path;
             }
-
-            $path = $info["base"] . "/" . $path;
+        } else if (!str_starts_with($path, $info["base"])) {
+            $path = ($path[0] === "/") ? substr($path, 1) : $info["base"] . "/" . $path;
         }
-
         return $path;
     }
 }
