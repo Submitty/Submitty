@@ -4873,21 +4873,6 @@ SQL;
         return $this->submitty_db->rows();
     }
 
-    /**
-     * Get an array of items with each item including the id, type, text, and date.
-     *
-     * @return array<array{id: int, type: int, text: string, date: string}> An array of items.
-     */
-    public function getGlobalCalendarItems(): array {
-        $query = "
-            SELECT id, type, text, date
-            FROM global_calendar_items
-            ORDER BY date DESC
-        ";
-        $this->submitty_db->query($query);
-        return $this->submitty_db->rows();
-    }
-
     public function getAllCoursesForUserId(string $user_id): array {
         $query = "
         SELECT t.name AS term_name, u.term, u.course, u.user_group
@@ -4906,7 +4891,6 @@ SQL;
         }
         return $return;
     }
-
 
     public function getCourseStatus($semester, $course) {
         $this->submitty_db->query("SELECT status FROM courses WHERE term=? AND course=?", [$semester, $course]);

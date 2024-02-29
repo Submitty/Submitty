@@ -15,17 +15,17 @@ class GlobalItem {
     const ANNOUNCEMENT = 1;
 
     #[ORM\Id]
-    #[ORM\Column(type: Types::INTEGER)]
-    #[ORM\GeneratedValue(strategy: "AUTO")]
+    #[ORM\GeneratedValue]
+    #[ORM\Column(name: "id", type: Types::INTEGER)]
     protected int $id;
 
-    #[ORM\Column(type: Types::INTEGER)]
+    #[ORM\Column(name: "type", type: Types::INTEGER)]
     protected int $type;
 
-    #[ORM\Column(type: Types::STRING)]
+    #[ORM\Column(name: "text", type: Types::STRING)]
     protected string $text;
 
-    #[ORM\Column(type: Types::DATE_MUTABLE)]
+    #[ORM\Column(name: "date", type: Types::DATE_MUTABLE)]
     protected DateTime $date;
 
     public function getId(): int {
