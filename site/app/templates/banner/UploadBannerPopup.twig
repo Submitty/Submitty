@@ -97,12 +97,14 @@
             });
         });
 
-        createArray(1);
-        var dropzone = document.getElementById("upload1");
-        dropzone.addEventListener("dragenter", draghandle, false);
-        dropzone.addEventListener("dragover", draghandle, false);
-        dropzone.addEventListener("dragleave", draghandle, false);
-        dropzone.addEventListener("drop", dropWithMultipleZips, false);
+        createArray(2);
+        for (let i = 1; i < 2; i++) {
+            let dropzone = document.getElementById(`upload${i}`);
+            dropzone.addEventListener("dragenter", draghandle, false);
+            dropzone.addEventListener("dragover", draghandle, false);
+            dropzone.addEventListener("dragleave", draghandle, false);
+            dropzone.addEventListener("drop", dropWithMultipleZips, false);
+        }
 
         const upload_fp = flatpickr('.upload_picker', {
             plugins: [ShortcutButtonsPlugin(
