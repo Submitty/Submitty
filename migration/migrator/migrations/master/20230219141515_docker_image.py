@@ -12,10 +12,11 @@ def up(config, database):
     """
     database.execute("""
 CREATE TABLE IF NOT EXISTS public.docker_image (
-    image_name character varying NOT NULL,
+    image_name character varying UNIQUE NOT NULL,
     user_id character varying NOT NULL);
     """)
 
+    container_file = config.config_path / 'autograding_containers.json'
 
 def down(config, database):
     """

@@ -9358,14 +9358,36 @@ ORDER BY
         return $this->rowsToArray($this->submitty_db->rows());
     }
 
+    public function getDockerImageOwner(string $image): string|bool {
+        $this->submitty_db->query("SELECT user_id FROM docker_image WHERE image_name = ?", [$image]);
+        return ($this->submitty_db->getRowCount() > 0) ? $this->submitty_db->row()['user_id'] : false; 
+    }
+
+    public function getDockerImageOwners(array $images): array {
+        if(count($images) == 0) {
+            return [];
+        }
+        $result = [];
+        $placeholders = $this->createParameterList(count($images));
+        $this->submitty_db->query("SELECT * FROM docker_image WHERE image_name IN ${placeholders}", $images);
+        foreach ($this->submitty_db->rows() as $row) {
+            $result[$row['image_name']] = $row['user_id'];
+        }
+        return $result;
+    }
+
     public function setDockerImageOwner(string $image, string $user_id): void {
         $this->submitty_db->query("
             INSERT INTO docker_image (image_name, user_id) values (?, ?);", [$image,$user_id]);
     }
 
-    public function removeDockerImageOwner(string $image, string $user_id): bool {
-        $this->submitty_db->query("
-            DELETE FROM docker_image WHERE image_name=? AND user_id=?;", [$image ,$user_id]);
-            return $this->submitty_db->getRowCount() > 0;
+    public function removeDockerImageOwner(string $image, User $user): bool {
+        if ($user->getAccessLevel() === User::LEVEL_SUPERUSER) {
+            $this->submitty_db->query("DELETE FROM docker_image WHERE image_name=?", [$image]);
+        }
+        else {
+            $this->submitty_db->query("DELETE FROM docker_image WHERE image_name=? AND user_id=?;", [$image ,$user->getId()]);
+        }
+        return $this->submitty_db->getRowCount() > 0;
     }
 }

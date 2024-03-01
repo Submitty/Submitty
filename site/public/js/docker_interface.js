@@ -64,19 +64,18 @@ function addFieldOnChange() {
     }
 }
 
-function confirmationdialog(url,id,capability) {
+function confirmationdialog(url,id) {
     if (confirm(`Are you sure you want to remove ${id} image?`)) {
         removeImage(url,id,capability);
     }
 }
 
-function removeImage(url,id,capability) {
+function removeImage(url,id) {
     $.ajax({
         url: url,
         type: 'POST',
         data: {
             'image': id,
-            'capability': capability,
             // eslint-disable-next-line no-undef
             csrf_token: csrfToken,
         },

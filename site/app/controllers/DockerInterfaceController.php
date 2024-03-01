@@ -41,6 +41,14 @@ class DockerInterfaceController extends AbstractController {
             )
         );
 
+        $images = [];
+        foreach ($json['autograding_containers'] as $capability => $image_list) {
+            foreach ($image_list as $image) {
+                $images[] = $image;
+            }
+        }
+        $json['image_owners'] = $this->core->getQueries()->getDockerImageOwners(array_unique($images));
+        
         $json['autograding_workers'] = FileUtils::readJsonFile(
             FileUtils::joinPaths(
                 $this->core->getConfig()->getSubmittyInstallPath(),
@@ -160,7 +168,7 @@ class DockerInterfaceController extends AbstractController {
      * @return JsonResponse
      */
     public function removeImage() {
-        $pattern = '/^([a-zA-Z0-9_.-]+\/)?([a-zA-Z0-9_.-]+\/)*[a-zA-Z0-9_.-]+(:[a-zA-Z0-9_.-]+)?$/';
+        $pattern = '/^[a-z0-9]+[a-z0-9._(__)-]*[a-z0-9]+\/[a-z0-9]+[a-z0-9._(__)-]*[a-z0-9]+:[a-zA-Z0-9][a-zA-Z0-9._-]{0,127}$/';
         $user = $this->core->getUser();
         $user_id = $this->core->getUser()->getId();
         $jsonFilePath = FileUtils::joinPaths(
@@ -169,20 +177,17 @@ class DockerInterfaceController extends AbstractController {
             "autograding_containers.json"
         );
         $json = json_decode(file_get_contents($jsonFilePath), true);
-        if (preg_match($pattern, $_POST['capability'])) {
-            $key = array_search($_POST['image'], $json[$_POST['capability']]);
-            if ($key !== false) {
-                $Verify = $this->core->getQueries()->removeDockerImageOwner($_POST['image'], $user_id);
-                if ($Verify != false) {
-                    unset($json[$_POST['capability']][$key]);
-                    $json[$_POST['capability']] = array_values($json[$_POST['capability']]);
+        if (preg_match($pattern, $_POST['image'])) {
+            if ($this->core->getQueries()->getDockerImageOwner($_POST['image']) !== false) {
+                $Verify = $this->core->getQueries()->removeDockerImageOwner($_POST['image'], $user);
+                if ($Verify) {
+                    foreach ($json as $capability) {
+                        unset($capability[$key]);
+                        $capability = array_values($capability);
+                    }
                     file_put_contents($jsonFilePath, json_encode($json, JSON_PRETTY_PRINT));
-                    return JsonResponse::getSuccessResponse($_POST['image'] . ' removed from docker images!');
-                }
-                elseif ($user->getAccessLevel() === User::LEVEL_SUPERUSER) {
-                    unset($json[$_POST['capability']][$key]);
-                    $json[$_POST['capability']] = array_values($json[$_POST['capability']]);
-                    file_put_contents($jsonFilePath, json_encode($json, JSON_PRETTY_PRINT));
+                    // Safe to exec since image name matches pattern.
+                    shell_exec("docker image rm -f " . $_POST['image']);
                     return JsonResponse::getSuccessResponse($_POST['image'] . ' removed from docker images!');
                 }
                 else {
