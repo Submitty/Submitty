@@ -34,18 +34,22 @@ require 'json'
 
 ON_CI = !ENV.fetch('CI', '').empty?
 
-def gen_script(machine_name, worker: false)
+def gen_script(machine_name, worker: false, base: false)
   no_submissions = !ENV.fetch('NO_SUBMISSIONS', '').empty?
-  extra = ENV.fetch('EXTRA', '')
-
+  reinstall = ENV.has_key?('VAGRANT_BOX') || base
+  extra = ENV.fetch('EXTRA', '')  
   setup_cmd = 'bash ${GIT_PATH}/.setup/'
-  if worker
-    setup_cmd += 'install_worker.sh'
-  else
-    setup_cmd += 'vagrant/setup_vagrant.sh'
-    if no_submissions
-      setup_cmd += ' --no_submissions'
+  if reinstall || ON_CI
+    if worker
+      setup_cmd += 'install_worker.sh'
+    else
+      setup_cmd += 'vagrant/setup_vagrant.sh'
+      if no_submissions
+        setup_cmd += ' --no_submissions'
+      end
     end
+  else
+    setup_cmd += 'install_success_from_cloud.sh'
   end
   unless extra.empty?
     setup_cmd += " #{extra}"
@@ -66,7 +70,8 @@ end
 base_boxes = Hash[]
 
 # Should all be base Ubuntu boxes that use the same version
-base_boxes.default         = "bento/ubuntu-22.04"
+base_boxes.default         = "SubmittyBot/ubuntu22-dev"
+base_boxes[:base]          = "bento/ubuntu-22.04"
 base_boxes[:arm_bento]     = "bento/ubuntu-22.04-arm64"
 base_boxes[:libvirt]       = "generic/ubuntu2204"
 base_boxes[:arm_mac_qemu]  = "perk/ubuntu-2204-arm64"
@@ -103,16 +108,22 @@ Vagrant.configure(2) do |config|
     config.env.enable
   end
 
-  config.vm.box = ENV.fetch('VAGRANT_BOX', base_boxes.default)
+  if ON_CI
+    config.ssh.insert_key = false
+  else 
+    config.ssh.insert_key = true
+  end
 
+  mount_options = []
+
+  config.vm.box = ENV.fetch('VAGRANT_BOX', base_boxes.default)
+  
   arch = `uname -m`.chomp
   arm = arch == 'arm64' || arch == 'aarch64'
   apple_silicon = Vagrant::Util::Platform.darwin? && (arm || (`sysctl -n machdep.cpu.brand_string`.chomp.start_with? 'Apple M'))
   
-  custom_box = ENV.has_key?('VAGRANT_BOX')
-
-  mount_options = []
-
+  custom_box = ENV.has_key?('VAGRANT_BOX') 
+  base_box = ENV.has_key?('BASE_BOX') || apple_silicon || arm
   # The time in seconds that Vagrant will wait for the machine to boot and be accessible.
   config.vm.boot_timeout = 600
 
@@ -125,7 +136,7 @@ Vagrant.configure(2) do |config|
     config.vm.define worker_name do |ubuntu|
       ubuntu.vm.network 'private_network', ip: data[:ip_addr]
       ubuntu.vm.network 'forwarded_port', guest: 22, host: data[:ssh_port], id: 'ssh'
-      ubuntu.vm.provision 'shell', inline: gen_script(worker_name, worker: true)
+      ubuntu.vm.provision 'shell', inline: gen_script(worker_name, worker: true, base: base_box)
     end
   end
 
@@ -136,10 +147,18 @@ Vagrant.configure(2) do |config|
     ubuntu.vm.network 'forwarded_port', guest: 5432, host: ENV.fetch('VM_PORT_DB',  16442)
     ubuntu.vm.network 'forwarded_port', guest: 7000, host: ENV.fetch('VM_PORT_SAML', 7000)
     ubuntu.vm.network 'forwarded_port', guest:   22, host: ENV.fetch('VM_PORT_SSH',  2222), id: 'ssh'
-    ubuntu.vm.provision 'shell', inline: gen_script(vm_name)
+    ubuntu.vm.provision 'shell', inline: gen_script(vm_name, base: base_box)
   end
 
   config.vm.provider 'virtualbox' do |vb, override|
+    unless custom_box
+      if base_box || ON_CI
+        override.vm.box = base_boxes[:base]
+      else
+        config.ssh.username = 'root'
+      end
+    end
+
     # We limit resources when running on CI to avoid resource exhaustion and it isn't used for grading stuff or
     # other things we do in dev.
     vb.memory = ON_CI ? 1024 : 2048
@@ -239,6 +258,5 @@ Vagrant.configure(2) do |config|
   if ARGV.include?('ssh')
     config.ssh.username = 'root'
     config.ssh.password = 'vagrant'
-    config.ssh.insert_key = 'true'
-  end
+  end 
 end

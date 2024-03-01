@@ -12,7 +12,11 @@
 
         <div class="modal-header" style="overflow: auto;">
             <div>
-                <h1 id="myModalLabel">{{ action == 'edit' ? 'Edit Gradeable' : 'New Gradeable' }}<span id="modal_label_title"></span></h1>
+                <h1 id="myModalLabel">{{ action == 'edit' ? 'Edit Gradeable' : 'New Gradeable' }}
+                    {% if action == 'new' %}
+                    <button class="btn btn-primary" type="button" data-testid="upload-gradeable-btn" id="upload-gradeable-btn" style="float:right;" onclick="javascript:newGradeableJsonForm()" >Upload Gradeable JSON</button>
+                    {% endif %}
+                </h1>
 			</div>
             {% if action == 'edit' %}
                     <button class="btn btn-primary" type="button" data-testid="download-gradeable-btn" id="download-gradeable-btn" style="float:right;" onclick="ajaxDownloadGradeable('{{ gradeable.getId() }}')" >Download Gradeable JSON</button>

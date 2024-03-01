@@ -121,6 +121,103 @@ class AdminGradeableController extends AbstractController {
         return JsonResponse::getSuccessResponse($return_json);
     }
 
+    /*
+     * Creates a gradeable based on uploaded JSON data
+     * @return JsonResponse
+     * @AccessControl(role="INSTRUCTOR")
+     * @Route("/api/{_semester}/{_course}/upload", methods={"POST"})
+     * @Route("/courses/{_semester}/{_course}/upload", methods={"POST"})
+     */
+    public function uploadGradeable() {
+        $values = [
+            'title' => '',
+            'instructions_url' => '',
+            'id' => '',
+            'type' => '',
+            'bulk_upload' => 'false',
+            'vcs' => 'false',
+            'ta_grading' => 'false',
+            'grade_inquiry_allowed' => 'false',
+            'grade_inquiry_per_component_allowed' => 'false',
+            'discussion_based' => 'false',
+            'discussion_thread_id' => '',
+            'team_assignment' => 'false',
+            'team_size_max' => 3,
+            'eg_inherit_teams_from' => '',
+            'gradeable_teams_read' => 'false',
+            'vcs_radio_buttons' => 'submitty-hosted',
+            'external_repo' => '',
+            'using_subdirectory' => 'false',
+            'vcs_subdirectory' => '',
+            'syllabus_bucket' => 'Homework',
+        ];
+
+        if (!isset($_POST['id']) || !isset($_POST['title']) || !isset($_POST['type'])) {
+            return JsonResponse::getErrorResponse('JSON requires id, title, and type. See documentation for information');
+        }
+
+        $values['id'] = $_POST['id'];
+        $values['title'] = $_POST['title'];
+        $values['type'] = $_POST['type'];
+        if ($_POST['type'] === 'Electronic File') {
+            if (array_key_exists('vcs', $_POST)) {
+                if (!array_key_exists('repository_type', $_POST['vcs'])) {
+                    return JsonResponse::getErrorResponse('VCS gradeables require a repository_type value. See documentation for information.');
+                }
+                if (!in_array($_POST['vcs']['repository_type'], ['submitty-hosted', 'submitty-hosted-url', 'public-github', 'private-github', 'self-hosted'], true)) {
+                    return JsonResponse::getErrorResponse('VCS gradeables requires a valid vcs_radio_buttons value. See documentation for information.');
+                }
+                if (!array_key_exists('vcs_path', $_POST['vcs'])) {
+                    return JsonResponse::getErrorResponse('VCS gradeables require a vcs_path. See documentation for information.');
+                }
+                elseif ($_POST['vcs']['repository_type'] === 'self-hosted') {
+                    $values['external_repo'] = $_POST['vcs']['vcs_path'];
+                }
+                if (isset($_POST['vcs']['vcs_subdirectory'])) {
+                    $values['using_subdirectory'] = 'true';
+                    $values['vcs_subdirectory'] = $_POST['vcs']['vcs_subdirectory'];
+                }
+                $values['vcs'] = 'true';
+                $values['vcs_radio_buttons'] = $_POST['vcs']['repository_type'];
+                $values['vcs_path'] = $_POST['vcs']['vcs_path'];
+            }
+            $values['bulk_upload'] = $_POST['bulk_upload'] ?? 'false';
+        }
+
+        if (array_key_exists('team_gradeable', $_POST)) {
+            if (!array_key_exists('team_size_max', $_POST['team_gradeable'])) {
+                return JsonResponse::getErrorResponse('Team gradeables require a team_size_max value. See documentation for information.');
+            }
+            $values['eg_inherit_teams_from'] = $_POST['team_gradeable']['inherit_from'] ?? '';
+            $values['team_assignment'] = 'true';
+            $values['team_size_max'] = $_POST['team_gradeable']['team_size_max'];
+        }
+        if (array_key_exists('discussion_thread_id', $_POST)) {
+            $values['discussion_based'] = $_POST['discussion_based'];
+            $values['discussion_tread_id'] = $_POST['discussion_thread_id'];
+        }
+        if (array_key_exists('ta_grading', $_POST)) {
+            $values['ta_grading'] = $_POST['ta_grading'];
+            if (array_key_exists('grade_inquiries', $_POST)) {
+                $values['grade_inquiry_allowed'] = $_POST['grade_inquiries'];
+                $values['grade_inquiry_per_component_allowed'] = $_POST['grade_inquiries_per_component'] ?? 'false';
+            }
+        }
+
+        $values['syllabus_bucket'] = $_POST['syllabus_bucket'] ?? 'Homework';
+        try {
+            $build_result = $this->createGradeable($_POST['id'], $values);
+            // Finally, redirect to the edit page
+            if ($build_result !== null) {
+                return JsonResponse::getErrorResponse($build_result);
+            }
+            return JsonResponse::getSuccessResponse($_POST['id']);
+        }
+        catch (\Exception $e) {
+            return JsonResponse::getErrorResponse($e->getMessage());
+        }
+    }
+
     /**
      * Displays the 'new' page, populating the first-page properties with the
      *  provided gradeable's data
@@ -141,6 +238,8 @@ class AdminGradeableController extends AbstractController {
         $this->core->getOutput()->addVendorCss(FileUtils::joinPaths('flatpickr', 'plugins', 'shortcutButtons', 'themes', 'light.min.css'));
         $this->core->getOutput()->addSelect2WidgetCSSAndJs();
         $this->core->getOutput()->addInternalCss('admin-gradeable.css');
+        $this->core->getOutput()->addInternalJs('directory.js');
+        $this->core->getOutput()->addInternalJs('gradeable.js');
         $this->core->getOutput()->renderTwigOutput('admin/admin_gradeable/AdminGradeableBase.twig', [
             'submit_url' => $submit_url,
             'gradeable' => $gradeable,
@@ -1007,16 +1106,15 @@ class AdminGradeableController extends AbstractController {
 
             $grade_inquiry_allowed = isset($details['grade_inquiry_allowed']) && ($details['grade_inquiry_allowed'] === 'true');
             $grade_inquiry = ($details['grade_inquiry_per_component_allowed'] ?? 'false') === 'true';
+            $autograding_config_path = $details['autograding_config_path'] ?? FileUtils::joinPaths($this->core->getConfig()->getSubmittyInstallPath(), 'more_autograding_examples/upload_only/config');
             $gradeable_create_data = array_merge($gradeable_create_data, [
                 'team_assignment' => $details['team_assignment'] === 'true',
                 'ta_grading' => $details['ta_grading'] === 'true',
                 'team_size_max' => $details['team_size_max'],
                 'grade_inquiry_allowed' => $grade_inquiry_allowed,
                 'grade_inquiry_per_component_allowed' => $grade_inquiry,
-                'autograding_config_path' =>
-                    FileUtils::joinPaths($this->core->getConfig()->getSubmittyInstallPath(), 'more_autograding_examples/upload_only/config'),
+                'autograding_config_path' => $autograding_config_path,
                 'allow_custom_marks' => true,
-
                 //For discussion component
                 'discussion_based' => $discussion_clicked,
                 'discussion_thread_ids' => $jsonThreads,
