@@ -26,10 +26,29 @@ class RainbowCustomizationJSON extends AbstractModel {
     private $display = [];
     private $benchmark_percent;         // Init in constructor
     private $gradeables = [];
+    /**
+     * @var object[]
+     */
+    private array $plagiarism = [];
 
-    const allowed_display = ['instructor_notes', 'grade_summary', 'grade_details', 'final_grade',
-        'exam_seating', 'display_rank_to_individual', 'display_benchmark', 'benchmark_percent', 'section', 'messages',
-        'final_cutoff', 'manual_grade', 'warning'];
+    // The order of allowed_display and allowed_display_description has to match
+    const allowed_display = ['grade_summary', 'grade_details', 'benchmark_percent',
+        'exam_seating', 'section', 'messages', 'warning', 'final_grade', 'manual_grade', 'final_cutoff', 'instructor_notes'];
+
+    const allowed_display_description = [
+        "Display a column(row) for each gradeable bucket on the syllabus.", //grade_summary
+        "Display a column(row) for each gradeable within each gradeable bucket on the syllabus.", //grade_details
+        "not used", //benchmark_percent
+        "Used for assigned seating for exams, see also:  <a href='https://submitty.org/instructor/course_settings/rainbow_grades/exam_seating'>Exam Seating</a> ", //exam_seating
+        "Display the students registration section.", //section
+        "Display the optional text message at the top of the page.", //messages
+        "not used", //warning
+        "Display the student's final term letter grade.", //final_grade
+        "not used", //manual_grade
+        "Display the histogram of average overall grade and count of students with each final term letter grade.", //final_cutoff
+        "Optional message for specific students that are only visible on the instructor gradebook, these messages are never displayed to students." //instructor_notes
+    ];
+
 
     const allowed_display_benchmarks = ["average", "stddev", "perfect", "lowest_a-", "lowest_b-", "lowest_c-",
         "lowest_d"
@@ -54,6 +73,16 @@ class RainbowCustomizationJSON extends AbstractModel {
     }
 
     /**
+     * Get array of plagiarism
+     *
+     * @return array<object>
+     */
+    public function getPlagiarism(): array {
+        return $this->plagiarism;
+    }
+
+
+    /**
      * Gets an array of display benchmarks
      *
      * @return array The display benchmarks
@@ -70,6 +99,17 @@ class RainbowCustomizationJSON extends AbstractModel {
     public function getBenchmarkPercent() {
         return $this->benchmark_percent;
     }
+
+
+    /**
+     * Gets an array of display
+     * @return array<string> The display
+     */
+    public function getDisplay(): array {
+        return $this->display;
+    }
+
+
 
     /**
      * Adds a benchmark to the display_benchmarks
@@ -153,6 +193,10 @@ class RainbowCustomizationJSON extends AbstractModel {
         if (isset($json->gradeables)) {
             $this->gradeables = $json->gradeables;
         }
+
+        if (isset($json->plagiarism)) {
+            $this->plagiarism = $json->plagiarism;
+        }
     }
 
     /**
@@ -185,7 +229,6 @@ class RainbowCustomizationJSON extends AbstractModel {
 
         $this->section->$sectionID = $label;
     }
-
 
     /**
      * Add a benchmark percent
@@ -249,6 +292,34 @@ class RainbowCustomizationJSON extends AbstractModel {
 
         $this->messages[] = $message;
     }
+
+
+    /**
+     * Add plagiarism entry to existing array
+     *
+     * @param object{
+     *     "user": string,
+     *     "gradeable": string,
+     *     "penalty": int
+     * } $plagiarismEntry
+     */
+    public function addPlagiarismEntry(object $plagiarismEntry): void {
+        $emptyArray = [
+            "user" => "",
+            "gradeable" => "",
+            "penalty" => 0
+        ];
+
+        $plagiarismArray = json_decode(json_encode($plagiarismEntry), true);
+
+        if ($plagiarismArray === $emptyArray) {
+            throw new BadArgumentException('Plagiarism entry may not be empty.');
+        }
+
+        $this->plagiarism[] = $plagiarismEntry;
+    }
+
+
 
     /**
      * Save the contents in this objects properties to the customization.json for the current course

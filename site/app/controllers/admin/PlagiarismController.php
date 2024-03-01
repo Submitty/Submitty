@@ -132,7 +132,7 @@ class PlagiarismController extends AbstractController {
         $valid_courses = $this->core->getQueries()->getOtherCoursesWithSameGroup($this_semester, $this_course);
         $ret = [];
         foreach ($valid_courses as $item) {
-            $ret[] = "{$item['semester']} {$item['course']}";
+            $ret[] = "{$item['term']} {$item['course']}";
         }
         sort($ret);
         return $ret;
@@ -403,7 +403,7 @@ class PlagiarismController extends AbstractController {
         }
 
         $json = [
-            "semester" => $semester,
+            "term" => $semester,
             "course" => $course,
             "gradeable" => $gradeable_id,
             "config_id" => $config_id,

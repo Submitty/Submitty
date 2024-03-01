@@ -79,6 +79,7 @@ CREATE TABLE public.late_day_cache (
     late_day_exceptions integer,
     late_day_status integer,
     late_days_change integer NOT NULL,
+    reason_for_exception character varying(255),
     CONSTRAINT ldc_gradeable_info CHECK (((g_id IS NULL) OR ((submission_days_late IS NOT NULL) AND (late_day_exceptions IS NOT NULL))))
 );
 
@@ -414,7 +415,8 @@ CREATE FUNCTION public.grab_late_day_gradeables_for_user(user_id text) RETURNS S
 				CASE
 					WHEN lde.late_day_exceptions IS NULL THEN 0
 					ELSE lde.late_day_exceptions
-				END AS late_day_exceptions
+				END AS late_day_exceptions,
+				lde.reason_for_exception
 			FROM valid_gradeables vg
 			LEFT JOIN submitted_gradeables sg
 				ON vg.g_id=sg.g_id
@@ -430,6 +432,7 @@ CREATE FUNCTION public.grab_late_day_gradeables_for_user(user_id text) RETURNS S
 		returnrow.late_day_date = var_row.late_day_date;
 		returnrow.submission_days_late = var_row.submission_days_late;
 		returnrow.late_day_exceptions = var_row.late_day_exceptions;
+		returnrow.reason_for_exception = var_row.reason_for_exception;
 		RETURN NEXT returnrow;
         END LOOP;
         RETURN;	
@@ -592,6 +595,25 @@ CREATE FUNCTION public.random_string(length integer) RETURNS text
             RETURN result;
         END;
     $$;
+
+
+--
+-- Name: update_previous_rotating_section(); Type: FUNCTION; Schema: public; Owner: -
+--
+
+CREATE FUNCTION public.update_previous_rotating_section() RETURNS trigger
+    LANGUAGE plpgsql
+    AS $$
+BEGIN
+	IF (
+		(NEW.rotating_section IS NULL AND OLD.rotating_section IS NOT NULL)
+		OR NEW.rotating_section != OLD.rotating_section
+	) THEN
+		NEW.previous_rotating_section := OLD.rotating_section;
+	END IF;
+	RETURN NEW;
+END;
+$$;
 
 
 --
@@ -796,6 +818,7 @@ CREATE TABLE public.electronic_gradeable (
     eg_has_release_date boolean DEFAULT true NOT NULL,
     eg_vcs_subdirectory character varying(1024) DEFAULT ''::character varying NOT NULL,
     eg_using_subdirectory boolean DEFAULT false NOT NULL,
+    eg_instructor_blind integer DEFAULT 1,
     CONSTRAINT eg_grade_inquiry_allowed_true CHECK (((eg_grade_inquiry_allowed IS TRUE) OR (eg_grade_inquiry_per_component_allowed IS FALSE))),
     CONSTRAINT eg_grade_inquiry_due_date_max CHECK ((eg_grade_inquiry_due_date <= '9999-03-01 00:00:00-05'::timestamp with time zone)),
     CONSTRAINT eg_grade_inquiry_start_date_max CHECK ((eg_grade_inquiry_start_date <= '9999-03-01 00:00:00-05'::timestamp with time zone)),
@@ -839,6 +862,18 @@ CREATE TABLE public.electronic_gradeable_version (
 
 
 --
+-- Name: forum_attachments; Type: TABLE; Schema: public; Owner: -
+--
+
+CREATE TABLE public.forum_attachments (
+    post_id integer NOT NULL,
+    file_name character varying NOT NULL,
+    version_added integer DEFAULT 1 NOT NULL,
+    version_deleted integer DEFAULT 0 NOT NULL
+);
+
+
+--
 -- Name: forum_posts_history; Type: TABLE; Schema: public; Owner: -
 --
 
@@ -846,7 +881,9 @@ CREATE TABLE public.forum_posts_history (
     post_id integer NOT NULL,
     edit_author character varying NOT NULL,
     content text NOT NULL,
-    edit_timestamp timestamp(0) with time zone NOT NULL
+    edit_timestamp timestamp(0) with time zone NOT NULL,
+    has_attachment boolean DEFAULT false,
+    version_id integer
 );
 
 
@@ -1226,7 +1263,8 @@ CREATE TABLE public.grading_rotating (
 CREATE TABLE public.late_day_exceptions (
     user_id character varying(255) NOT NULL,
     g_id character varying(255) NOT NULL,
-    late_day_exceptions integer NOT NULL
+    late_day_exceptions integer NOT NULL,
+    reason_for_exception character varying(255) DEFAULT ''::character varying
 );
 
 
@@ -1535,7 +1573,8 @@ CREATE TABLE public.posts (
     endorsed_by character varying,
     type integer NOT NULL,
     has_attachment boolean NOT NULL,
-    render_markdown boolean DEFAULT false NOT NULL
+    render_markdown boolean DEFAULT false NOT NULL,
+    version_id integer DEFAULT 1
 );
 
 
@@ -1808,6 +1847,8 @@ CREATE TABLE public.users (
     user_last_initial_format integer DEFAULT 0 NOT NULL,
     display_name_order character varying(255) DEFAULT 'GIVEN_F'::character varying NOT NULL,
     display_pronouns boolean DEFAULT false,
+    user_preferred_locale character varying,
+    previous_rotating_section integer,
     CONSTRAINT check_registration_type CHECK (((registration_type)::text = ANY (ARRAY[('graded'::character varying)::text, ('audit'::character varying)::text, ('withdrawn'::character varying)::text, ('staff'::character varying)::text]))),
     CONSTRAINT users_user_group_check CHECK (((user_group >= 1) AND (user_group <= 4))),
     CONSTRAINT users_user_last_initial_format_check CHECK (((user_last_initial_format >= 0) AND (user_last_initial_format <= 3)))
@@ -1977,6 +2018,14 @@ ALTER TABLE ONLY public.student_favorites ALTER COLUMN id SET DEFAULT nextval('p
 --
 
 ALTER TABLE ONLY public.threads ALTER COLUMN id SET DEFAULT nextval('public.threads_id_seq'::regclass);
+
+
+--
+-- Name: gradeable_teams anon_id_unique; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.gradeable_teams
+    ADD CONSTRAINT anon_id_unique UNIQUE (anon_id);
 
 
 --
@@ -2538,6 +2587,13 @@ CREATE INDEX users_user_numeric_id_idx ON public.users USING btree (user_numeric
 --
 
 CREATE TRIGGER add_course_user AFTER INSERT OR UPDATE ON public.users FOR EACH ROW EXECUTE PROCEDURE public.add_course_user();
+
+
+--
+-- Name: users before_update_users_update_previous_rotating_section; Type: TRIGGER; Schema: public; Owner: -
+--
+
+CREATE TRIGGER before_update_users_update_previous_rotating_section BEFORE UPDATE OF rotating_section ON public.users FOR EACH ROW EXECUTE PROCEDURE public.update_previous_rotating_section();
 
 
 --

@@ -92,17 +92,25 @@ class NavigationView extends AbstractView {
             //If statement seems redundant, but will help in case we ever decouple the is_file check from $display_custom_message
             if ($display_custom_message && is_file($message_file_path)) {
                 $message_json = json_decode(file_get_contents($message_file_path));
-                if (property_exists($message_json, 'special_message')) {
-                    $message_file_details = $message_json->special_message;
+                if ($message_json == null) {
+                    $display_custom_message = false;
+                }
+                else {
+                    if (property_exists($message_json, 'special_message')) {
+                        $message_file_details = $message_json->special_message;
 
-                    //If any fields are missing, treat this as though we just didn't have a message for this user.
-                    if (!property_exists($message_file_details, 'title') || !property_exists($message_file_details, 'description') || !property_exists($message_file_details, 'filename')) {
-                        $display_custom_message = false;
-                        $messsage_file_details = null;
+                        //If any fields are missing, treat this as though we just didn't have a message for this user.
+                        if (!property_exists($message_file_details, 'title') || !property_exists($message_file_details, 'description') || !property_exists($message_file_details, 'filename')) {
+                            $display_custom_message = false;
+                            $messsage_file_details = null;
+                        }
                     }
                 }
             }
         }
+
+
+
 
 
         // ======================================================================================
@@ -134,6 +142,11 @@ class NavigationView extends AbstractView {
             // if the instructor has generated a report for the student for this gradeable
             if (is_file($seating_user_path)) {
                 $user_seating_details = json_decode(file_get_contents($seating_user_path));
+
+                if ($user_seating_details === null || filesize($seating_user_path) == 0) {
+                    //print error message without breaking (ex ERR: Please contact instructor)
+                    $seating_config = 'empty-case-handling';
+                }
 
                 // if the user seating details have both a building and a room property
                 if (property_exists($user_seating_details, 'building') && property_exists($user_seating_details, 'room')) {
@@ -653,7 +666,13 @@ class NavigationView extends AbstractView {
             }
 
             if (!$gradeable->hasDueDate()) {
-                $progress_bar = $gradeable->getGradingProgress($this->core->getUser());
+                $cookie_string = "include_bad_submissions__" . $gradeable->getId();
+                $bad_submissions = ($_COOKIE[$cookie_string] ?? '') === "include";
+
+                $cookie_string = "include_null_section__" . $gradeable->getId();
+                $null_section = ($_COOKIE[$cookie_string] ?? '') === "include";
+
+                $progress_bar = $gradeable->getGradingProgress($this->core->getUser(), $bad_submissions, $null_section);
                 if ($progress_bar === 0) {
                     $progress_bar = 0.01;
                 }
@@ -702,7 +721,13 @@ class NavigationView extends AbstractView {
 
             if ($gradeable->getType() === GradeableType::ELECTRONIC_FILE) {
                 if ($gradeable->isTaGrading()) {
-                    $TA_percent = $gradeable->getGradingProgress($this->core->getUser());
+                    $cookie_string = "include_bad_submissions__" . $gradeable->getId();
+                    $bad_submissions = ($_COOKIE[$cookie_string] ?? '') === "include";
+
+                    $cookie_string = "include_null_section__" . $gradeable->getId();
+                    $null_section = ($_COOKIE[$cookie_string] ?? '') === "include";
+
+                    $TA_percent = $gradeable->getGradingProgress($this->core->getUser(), $bad_submissions, $null_section);
 
                     if ($TA_percent === 1) {
                         //If they're done, change the text to REGRADE

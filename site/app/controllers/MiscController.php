@@ -301,7 +301,7 @@ class MiscController extends AbstractController {
         $autograde = $graded_gradeable->getAutoGradedGradeable()->getAutoGradedVersionInstance($version);
         $file_path = null;
         $testcase = $autograde->getTestcases()[$test_case - 1];
-        if (!$testcase->getTestcase()->isHidden() && $testcase->hasAutochecks()) {
+        if ($testcase->hasAutochecks()) {
             foreach ($testcase->getAutochecks() as $autocheck) {
                 $path = explode('/', $autocheck->getDiffViewer()->getActualFilename());
                 $actual_file_name = array_pop($path);
@@ -410,12 +410,12 @@ class MiscController extends AbstractController {
             $zip_file_name = $gradeable_id . "_" . $user_id . "_v" . $version . ".zip";
         }
 
-        $options = new \ZipStream\Option\Archive();
-        $options->setSendHttpHeaders(true);
-        $options->setEnableZip64(false);
-
         // create a new zipstream object
-        $zip_stream = new \ZipStream\ZipStream($zip_file_name, $options);
+        $zip_stream = new \ZipStream\ZipStream(
+            outputName: $zip_file_name,
+            sendHttpHeaders: true,
+            enableZip64: false,
+        );
         foreach ($folder_names as $folder_name) {
             $path = FileUtils::joinPaths($gradeable_path, $folder_name, $gradeable->getId(), $graded_gradeable->getSubmitter()->getId(), $version);
             if (is_dir($path)) {
@@ -486,12 +486,12 @@ class MiscController extends AbstractController {
             $paths[] = 'results';
         }
 
-        $options = new \ZipStream\Option\Archive();
-        $options->setSendHttpHeaders(true);
-        $options->setEnableZip64(false);
-
         // create a new zipstream object
-        $zip_stream = new \ZipStream\ZipStream($zip_file_name, $options);
+        $zip_stream = new \ZipStream\ZipStream(
+            outputName: $zip_file_name,
+            sendHttpHeaders: true,
+            enableZip64: false,
+        );
 
         foreach ($paths as $path) {
             $gradeable_path = FileUtils::joinPaths(

@@ -46,13 +46,23 @@
                 </a>
                 {% if toggle_anon_button %}
                 <button class="btn btn-default" id="toggle-anon-button"
-                    onclick="changeAnon()">
+                    onclick="changeAnon('{{ gradeable.getId() }}')">
                     {{ anon_mode ? "Disable Anonymous Mode" : "Enable Anonymous Mode" }}
+                </button>
+                {% endif %}
+                {% if grade_inquiry_only_button %}
+                <button class="btn btn-default" id="inquiryButton" onclick="change_inquiry()">
+                    {{ inquiry_status ? "Grade Inquiry Only: Off" : "Grade Inquiry Only: On" }}
                 </button>
                 {% endif %}
             </div>
         </div>
     </div>
+    {% if grade_inquiry_only_button %}
+        <script>
+            inquiry_update();
+        </script>
+    {% endif %}
     {% if not is_student %}
         <a href="{{ stats_url }}" class="btn btn-primary">Grading Stats</a>
     {% endif %}
@@ -70,11 +80,11 @@
             </div>
         </div>
     {% endif %}
-    <button type="button" class="btn btn-primary" onclick="expandAllSections()">Expand All Sections</button>
     <button type="button" class="btn btn-primary" onclick="collapseAllSections()">Collapse All Sections</button>
+    <button type="button" class="btn btn-primary" onclick="expandAllSections()">Expand All Sections</button>
     {% if message is not empty %}
     <div class="details-warning-box{% if message_warning %} details-warning-highlight{% else %} details-warning-neutral{% endif %}">
-        {{ message }}
+        {{ message|nl2br }}
     </div>
     {% endif %}
     <div class="details-action-box">
@@ -232,7 +242,7 @@
 </div>
 
 {% macro render_student(context, section, graded_gradeable, index, info, columns, team_gradeable_view_history, overrides, anon_ids) %}
-    <tr data-testid="grade-table"
+    <tr class="grade-table" data-testid="grade-table"
         {% if not graded_gradeable.getSubmitter().isTeam() and graded_gradeable.getSubmitter().getUser().accessGrading() %}
             style='background: #7bd0f7;'
         {% endif %}
@@ -264,6 +274,8 @@
                 {{ _self.render_column_team_edit(context, section, graded_gradeable, index, info.team_edit_onclick, column, info.edited_past_lock_date) }}
             {% elseif column.function == "team_id" %}
                 {{ _self.render_column_team_id(context, section, graded_gradeable, index, info, column) }}
+            {% elseif column.function == "team_id_anon" %}
+                {{ _self.render_column_team_id_anon(context, section, graded_gradeable, index, info, column, anon_ids) }}
             {% elseif column.function == "team_name" %}
                 {{ _self.render_column_team_name(context, section, graded_gradeable, index, info, column) }}
             {% elseif column.function == "team_members" %}
@@ -313,6 +325,8 @@
             {% elseif column.function == "team_edit" %}
                 {{ _self.render_column_team_edit(context, section, null, index, new_team_onclick, column, edited_past_lock_date) }}
             {% elseif column.function == "team_id" %}
+                <td></td>
+             {% elseif column.function == "team_id_anon" %}
                 <td></td>
             {% elseif column.function == "team_name" %}
                 <td></td>
@@ -451,7 +465,7 @@
     {% elseif info.on_time_submission == false %}
         {% set contents = "Too Many Days Late" %}
         {% set btn_class = "btn-danger" %}
-    
+
     {% elseif graded_gradeable.getGradeable().isTaGrading() %}
             {% set contents = "Grade" %}
             {% set btn_class = "btn-primary" %}
@@ -483,7 +497,7 @@
         {% set badge_count = graded_gradeable.getActiveGradeInquiryCount()  %}
     {%  endif %}
     <td style="text-align: center;">
-        <a data-testid="grade-button" class="btn {{ btn_class }}" href="{{ context.grade_url }}?who_id={{ anon_ids[graded_gradeable.getSubmitter().getId()] }}&sort={{ context.sort }}&direction={{ context.direction }}">
+        <a data-testid="grade-button" {% if graded_gradeable.hasActiveGradeInquiry() %}data-grade-inquiry="true"{% endif %} class="grade-button btn {{ btn_class }}" href="{{ context.grade_url }}?who_id={{ anon_ids[graded_gradeable.getSubmitter().getId()] }}&sort={{ context.sort }}&direction={{ context.direction }}">
             {{ contents }}
             {% if badge_count > 0 and graded_gradeable.getGradeable().isGradeInquiryPerComponentAllowed()%}
                 <span class="notification-badge">{{ badge_count }}</span>
@@ -532,8 +546,8 @@
         {% set btn_class = "btn-danger" %}
         {% set badge_count = graded_gradeable.getActiveGradeInquiryCount()  %}
     {%  endif %}
-    <td>
-        <a class="btn {{ btn_class }}" href="{{ context.grade_url }}?who_id={{ anon_ids[graded_gradeable.getSubmitter().getId()] }}&sort={{ context.sort }}&direction={{ context.direction }}">
+    <td style="text-align: center;">
+        <a data-testid="grade-button" {% if graded_gradeable.hasActiveGradeInquiry() %}data-grade-inquiry="true"{% endif %} class="grade-button btn {{ btn_class }}" href="{{ context.grade_url }}?who_id={{ anon_ids[graded_gradeable.getSubmitter().getId()] }}&sort={{ context.sort }}&direction={{ context.direction }}">
             {{ contents }}
             {% if badge_count is defined and badge_count > 0 and graded_gradeable.getGradeable().isGradeInquiryPerComponentAllowed()%}
                 <span class="notification-badge">{{ badge_count }}</span>
@@ -571,6 +585,12 @@
         {% if graded_gradeable.getGradeable().isTeamAssignment() %}
             {{ graded_gradeable.getSubmitter.getId() }}
         {% endif %}
+    </td>
+{% endmacro %}
+{# Anonymous Team ID #}
+{% macro render_column_team_id_anon(context, section, graded_gradeable, index, info, column, anon_ids) %}
+    <td>
+        {{anon_ids[graded_gradeable.getSubmitter().getId()]}}
     </td>
 {% endmacro %}
 
@@ -612,7 +632,7 @@
 
 {# Total Point Summary #}
 {% macro render_column_total(context, section, graded_gradeable, index, info, column) %}
-   
+
     {% set box_background = (graded_gradeable.getAutoGradedGradeable().getActiveVersionInstance() is not null and graded_gradeable.getAutoGradedGradeable().getActiveVersionInstance().getDaysLate() > graded_gradeable.getGradeable().getLateDays()) ? "late-box" : "" %}
 
     {# todo: this is a lot of math for the view, we should move this into the Gradeable model #}
@@ -726,17 +746,41 @@
         location.reload();
     }
 
-    function changeAnon() {
+    function changeAnon(gradeable_id) {
+        Cookies.set(`default_anon_mode_${gradeable_id}_override`, 'on');
         const status = {{ anon_mode ? 1 : 0}};
         if (status) {
-            Cookies.set('anon_mode', 'off');
+            Cookies.set(`anon_mode_${gradeable_id}`, 'off');
         }
         else {
-            Cookies.set('anon_mode', 'on');
+            Cookies.set(`anon_mode_${gradeable_id}`, 'on');
         }
         location.reload();
     }
 
+    function change_inquiry() {
+        var button = document.getElementById('inquiryButton');
+        var status = Cookies.get('inquiry_status');
+        if(status === 'on') {
+            status = 'off'
+        }
+        else{
+            status = 'on';
+        }
+        if(status === 'on') {
+            Cookies.set('inquiry_status', 'on');
+            var inquiry = Cookies.get('inquiry_status');
+            grade_inquiry_only();
+            button.textContent = "Grade Inquiry Only: On";
+        } else {
+            Cookies.set('inquiry_status', 'off');
+            var inquiry = Cookies.get('inquiry_status');
+            reverse_inquiry_only();
+            button.textContent = "Grade Inquiry Only: Off";
+        }
+    }
+
+    
     function changeSortOrder() {
         if ({{ sort == 'random' ? "true" : "false" }}) {
             Cookies.set('sort', 'id');

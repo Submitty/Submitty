@@ -115,6 +115,18 @@ class Output {
 
         $this->twig->addGlobal("core", $this->core);
 
+        $this->twig->addFunction(new \Twig\TwigFunction("localize", function ($key, $default, $vals = []) {
+            $config = $this->core->getConfig();
+            if ($config) {
+                $val = $config->getLocale()->fetchKey($key, $vals);
+                if ($val) {
+                    return $val;
+                }
+            }
+
+            return $default;
+        }));
+
         $this->twig->addFunction(new \Twig\TwigFunction("render_template", function (...$args) {
             return call_user_func_array('self::renderTemplate', $args);
         }, ["is_safe" => ["html"]]));
@@ -181,6 +193,7 @@ HTML;
         $this->addVendorJs(FileUtils::joinPaths('jquery', 'jquery.min.js'));
         $this->addVendorJs(FileUtils::joinPaths('jquery-ui', 'jquery-ui.min.js'));
         $this->addVendorJs(FileUtils::joinPaths('js-cookie', 'js.cookie.min.js'));
+        $this->addVendorJs(FileUtils::joinPaths('luxon', 'luxon.min.js'));
         $this->addInternalJs('diff-viewer.js');
         $this->addInternalJs('server.js');
         $this->addInternalJs('menu.js');
@@ -666,5 +679,24 @@ HTML;
         /** @var \Twig\Extension\CoreExtension $extension */
         $extension = $this->twig->getExtension(\Twig\Extension\CoreExtension::class);
         $extension->setTimezone($tz);
+    }
+
+    /**
+     * Adds the necessary CSS and JS to use a Select2 widget.
+     * Select2 widgets allow you to preselect from options as well as
+     * type your own option.
+     *
+     * @return void
+     */
+    public function addSelect2WidgetCSSAndJs(): void {
+        $this->addVendorJs(FileUtils::joinPaths('select2', 'js', 'select2.min.js'));
+        $this->addVendorCss(FileUtils::joinPaths('select2', 'css', 'select2.min.css'));
+        $this->addVendorCss(FileUtils::joinPaths(
+            'select2',
+            'bootstrap5-theme',
+            'select2-bootstrap-5-theme.min.css'
+        ));
+        $this->addInternalCss("select-widgets.css");
+        $this->addInternalJs("select-widgets.js");
     }
 }

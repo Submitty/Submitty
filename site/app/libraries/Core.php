@@ -13,6 +13,7 @@ use app\models\Config;
 use app\models\User;
 use app\entities\Session;
 use app\repositories\SessionRepository;
+use Doctrine\DBAL\DriverManager;
 use Doctrine\DBAL\Logging\DebugStack;
 use Doctrine\ORM\EntityManager;
 use Doctrine\ORM\ORMSetup;
@@ -184,7 +185,7 @@ class Core {
     private function createEntityManager(AbstractDatabase $database, ?DebugStack $debug_stack): EntityManager {
         $cache_path = FileUtils::joinPaths(dirname(__DIR__, 2), 'cache', 'doctrine');
         $cache = new PhpFilesAdapter("", 0, $cache_path);
-        $config = ORMSetup::createAnnotationMetadataConfiguration(
+        $config = ORMSetup::createAttributeMetadataConfiguration(
             [FileUtils::joinPaths(__DIR__, '..', 'entities')],
             $this->config->isDebug(),
             FileUtils::joinPaths(dirname(__DIR__, 2), 'cache', 'doctrine-proxy'),
@@ -195,11 +196,13 @@ class Core {
             $config->setSQLLogger($debug_stack);
         }
 
-        $conn = [
-            'driver' => 'pdo_pgsql',
-            'pdo' => $database->getConnection(),
-        ];
-        return EntityManager::create($conn, $config);
+        $conn = DriverManager::getConnection(
+            [
+                'driver' => 'pdo_pgsql',
+                'pdo' => $database->getConnection()
+            ]
+        );
+        return new EntityManager($conn, $config);
     }
 
     /**
@@ -889,7 +892,7 @@ class Core {
                 }
                 else {
                     // If more than a day has passed since we last updated the cookie, update it with the new timestamp
-                    if ($this->session_manager->shouldSessionBeUpdated()) {
+                    if ($this->session_manager->checkAndUpdateSession()) {
                         $new_token = TokenManager::generateSessionToken(
                             $session_id,
                             $token->claims()->get('sub')
@@ -933,5 +936,38 @@ class Core {
         }
 
         return $logged_in;
+    }
+
+    /**
+     * Get the lang data for the current locale.
+     *
+     * @return array<mixed>|null
+     */
+    public function getLang(): array|null {
+        if ($this->config !== null) {
+            return $this->config->getLocale()->getLangData();
+        }
+        return null;
+    }
+
+    /**
+     * Gets a list of supported locales.
+     *
+     * @return array<string>|null
+     */
+    public function getSupportedLocales() {
+        if ($this->config !== null) {
+            FileUtils::getDirContents(FileUtils::joinPaths($this->config->getSubmittyInstallPath(), "site", "cache", "lang"), $files);
+            if (empty($files)) {
+                return [];
+            }
+            $files = array_filter($files, fn(string $file): bool => str_ends_with($file, ".php"));
+            $files = array_map(function (string $file) {
+                $parts = explode(DIRECTORY_SEPARATOR, $file);
+                return substr(end($parts), 0, -4);
+            }, $files);
+            return $files;
+        }
+        return null;
     }
 }

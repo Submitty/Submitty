@@ -1,6 +1,6 @@
 {% import _self as self %}
 <!DOCTYPE html>
-<html lang="en">
+<html lang="{{ html_lang }}">
 <head>
     <title>{{ page_title }}</title>
     <link rel="shortcut icon" href="{{ base_url }}img/favicon.ico" type="image/x-icon" />
@@ -263,7 +263,7 @@
                         {% endif %}
                         {{ message.error | nl2br }}
                     </span>
-                    <a class="fas fa-times key_to_click" tabindex="0" onClick="removeMessagePopup('{{ message.type }}-{{ message.key }}');"></a>
+                    <a class="fas fa-times key_to_click" tabindex="0" id="remove_popup" onClick="removeMessagePopup('{{ message.type }}-{{ message.key }}');"></a>
                 </div>
             {% endfor %}
         </div>

@@ -19,9 +19,11 @@ use app\models\User;
 class LateDays extends AbstractModel {
     /** @var User|null The user to whom this data belongs */
     private $user = null;
-    /** @prop @var LateDayInfo[] The late day info of each gradeable, indexed by gradeable id */
+    /** @prop
+     * @var LateDayInfo[] The late day info of each gradeable, indexed by gradeable id */
     protected $late_day_info = [];
-    /** @prop @var array All entries for the user in the `late_days` table */
+    /** @prop
+     * @var array All entries for the user in the `late_days` table */
     protected $late_days_updates = [];
 
     /**
@@ -36,7 +38,6 @@ class LateDays extends AbstractModel {
     public function __construct(Core $core, User $user, array $graded_gradeables, $late_day_updates = null, $reCache = false) {
         parent::__construct($core);
         $this->user = $user;
-        $this->late_days_updates = $late_day_updates;
 
         // Filter out non-electronic gradeables
         $graded_gradeables = array_filter($graded_gradeables, function (GradedGradeable $gg) {
@@ -46,7 +47,6 @@ class LateDays extends AbstractModel {
         // Get the late day updates that the instructor will enter
         $this->late_days_updates = $late_day_updates ?? $this->core->getQueries()->getLateDayUpdates($user->getId());
         $late_day_cache = $this->core->getQueries()->getLateDayCacheForUser($user->getId());
-
         // Get all late day events (late day updates and graded gradeable submission dates)
         $late_day_events = $this->createLateDayEvents($graded_gradeables);
 
@@ -290,11 +290,13 @@ class LateDays extends AbstractModel {
             $auto_graded_gradeable = $graded_gradeable->getAutoGradedGradeable();
             $submission_days_late = $auto_graded_gradeable->hasActiveVersion() ? $auto_graded_gradeable->getActiveVersionInstance()->getDaysLate() : 0;
             $exceptions = $graded_gradeable->getLateDayException($this->user);
+            $reason = $graded_gradeable->getReasonForException($this->user);
 
             $event_info['graded_gradeable'] = $graded_gradeable;
             $event_info['late_days_allowed'] = $late_days_allowed;
             $event_info['submission_days_late'] = $submission_days_late;
             $event_info['late_day_exceptions'] = $exceptions;
+            $event_info['reason_for_exception'] = $reason;
         }
 
         return $event_info;

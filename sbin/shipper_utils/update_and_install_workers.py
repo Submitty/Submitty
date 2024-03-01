@@ -120,7 +120,7 @@ def run_commands_on_worker(user, host, commands, operation='unspecified operatio
             for command in commands:
                 print(f'{host}: performing {command}')
                 (_, stdout, _) = target_connection.exec_command(command, timeout=600)
-                print(stdout.read().decode('ascii'))
+                print(stdout.read().decode('utf-8'))
                 status = int(stdout.channel.recv_exit_status())
                 if status != 0:
                     print(f"ERROR: Failure performing {operation} on {user}@{host}")

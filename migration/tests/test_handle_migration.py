@@ -39,7 +39,7 @@ class TestHandleMigration(unittest.TestCase):
     def create_course_table(self, database):
         database.execute("""
             CREATE TABLE courses (
-                semester character varying(255) NOT NULL,
+                term character varying(255) NOT NULL,
                 course character varying(255) NOT NULL,
                 status smallint DEFAULT 1 NOT NULL
             );
