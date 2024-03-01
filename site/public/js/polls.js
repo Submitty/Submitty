@@ -24,7 +24,6 @@ function newDeletePollForm(pollid, pollname, base_url) {
             success: function(data) {
                 try {
                     const msg = JSON.parse(data);
-                    console.log(data);
                     if (msg.status !== 'success') {
                         console.error(msg);
                         window.alert('Something went wrong. Please try again.');

@@ -1892,5 +1892,4 @@ function tzWarn() {
         Cookies.set("last_tz_warn_time", Date.now());
     }
 }
-
 document.addEventListener('DOMContentLoaded', tzWarn);
