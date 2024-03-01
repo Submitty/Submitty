@@ -13,7 +13,16 @@
                 Description:
             </label>
             <textarea name="description" class="chatroom-description" placeholder="Enter description here..."></textarea>
-            <button type="submit" class="btn">Save Changes</button>
         </div>
     </form>
+    <script>
+        function edit_room() {
+            let form = document.getElementById("chatroom-edit-form");
+            form.submit();
+        }
+    </script>
+{% endblock %}
+{% block buttons %}
+    {{ block('close_button') }}
+    <input type="submit" class="btn btn-primary" onclick="edit_room()">
 {% endblock %}

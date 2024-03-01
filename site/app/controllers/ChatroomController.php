@@ -2,6 +2,7 @@
 
 namespace app\controllers;
 
+use app\entities\poll\Poll;
 use app\libraries\Core;
 use app\libraries\response\WebResponse;
 use app\libraries\response\JsonResponse;
@@ -86,15 +87,19 @@ class ChatroomController extends AbstractController {
     }
 
     /**
-     * @Route("/courses/{_semester}/{_course}/chat/{chatroom_id}/delete", methods={"POST"})
+     * @Route("/courses/{_semester}/{_course}/chat/deleteChatroom", methods={"POST"})
      * @AccessControl(role="INSTRUCTOR")
      */
-    public function deleteChatroom(int $chatroom_id): JsonResponse {
+    public function deleteChatroom(): JsonResponse {
         $chatroom_id = intval($_POST['chatroom_id'] ?? -1);
         $em = $this->core->getCourseEntityManager();
+
+        /** @var \app\repositories\chat\ChatroomRepository $repo */
         $repo = $em->getRepository(Chatroom::class);
 
-        $chatroom = $repo->find(Chatroom::class, $chatroom_id);
+        /** @var Chatroom|null */
+        $chatroom = $repo->findByChatroomId($chatroom_id);
+
         if ($chatroom === null) {
             return JsonResponse::getFailResponse('Invalid Chatroom ID');
         }
@@ -105,7 +110,7 @@ class ChatroomController extends AbstractController {
         $em->remove($chatroom);
         $em->flush();
 
-        return JsonResponse::getSuccessResponse("Chatroom deleted successfully");
+        return JsonResponse::getSuccessResponse();
     }
 
 /**

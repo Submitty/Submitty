@@ -34,11 +34,10 @@ class Chatroom {
     /**
      * @var Collection<Message>
      */
-    #[ORM\OneToMany(mappedBy: "chat", targetEntity: Message::class, cascade: ["remove"])]
+    #[ORM\OneToMany(mappedBy: "chatroom", targetEntity: Message::class, cascade: ["remove"])]
     protected Collection $messages;
 
     public function __construct() {
-
         $this->messages = new ArrayCollection();
         $this->isActive = true;
     }

@@ -1,4 +1,5 @@
-function fetchMessages(chatroomId) {
+/* global csrfToken userId */
+function fetchMessages(chatroomId, my_id) {
     $.ajax({
         url: buildCourseUrl(['chat', chatroomId, 'messages']),
         type: 'GET',
@@ -6,7 +7,12 @@ function fetchMessages(chatroomId) {
         success: function(responseData) {
             if (responseData.status === 'success' && Array.isArray(responseData.data)) {
                 responseData.data.forEach(msg => {
-                    appendMessage(msg.display_name, msg.timestamp, msg.content);
+                    if (msg.user_id === my_id) {
+                        appendMessage("me", msg.timestamp, msg.content);
+                    }
+                    else {
+                        appendMessage(msg.display_name, msg.timestamp, msg.content);
+                    }
                 });
             }
         },
@@ -16,8 +22,7 @@ function fetchMessages(chatroomId) {
     });
 }
 
-function sendMessage(csrfToken, chatroomId, userId, displayName, content) {
-    console.log("csrf_token:", csrfToken, "chatroom_id:", chatroomId, "user_id:", userId);
+function sendMessage(chatroomId, userId, displayName, content) {
     $.ajax({
         url: buildCourseUrl(['chat', chatroomId, 'send']),
         type: 'POST',
@@ -37,7 +42,7 @@ function sendMessage(csrfToken, chatroomId, userId, displayName, content) {
 
 function appendMessage(displayName, ts, content) {
     let timestamp = ts;
-    if (timestamp === null) {
+    if (!timestamp) {
         timestamp = new Date(Date.now()).toLocaleString('en-us',  { year:"numeric", month:"short", day:"numeric", hour:"numeric", minute:"numeric"});
     }
     else {
@@ -49,7 +54,6 @@ function appendMessage(displayName, ts, content) {
     message.classList.add('message-container');
     message.innerHTML = `
         <div class="message-header">
-            <i class="fa-solid fa-circle-user user-icon"></i>
             <span class="sender-name">${displayName}</span>
             <span class="timestamp">${timestamp}</span>
         </div>
@@ -78,9 +82,46 @@ function newChatroomForm() {
 }
 
 function editChatroomForm(chatroom_id, baseUrl) {
-    const form= $('#edit-chatroom-form');
+    const form = $('#edit-chatroom-form');
     form.css('display', 'block');
     document.getElementById('chatroom-edit-form').action = `${baseUrl}/${chatroom_id}/edit`;
+}
+
+function deleteChatroomForm(chatroom_id, chatroom_name, base_url) {
+    if (confirm(`This will delete chatroom '${chatroom_name}'. Are you sure?`)) {
+        const url = `${base_url}/deleteChatroom`;
+        const fd = new FormData();
+        fd.append('csrf_token', csrfToken);
+        fd.append('chatroom_id', chatroom_id);
+        $.ajax({
+            url: url,
+            type: 'POST',
+            data: fd,
+            processData: false,
+            cache: false,
+            contentType: false,
+            success: function(data) {
+                try {
+                    const msg = JSON.parse(data);
+                    if (msg.status !== 'success') {
+                        console.error(msg);
+                        window.alert('Something went wrong. Please try again.');
+                    }
+                    else {
+                        window.location.reload();
+                    }
+                }
+                catch (err) {
+                    console.error(err);
+                    window.alert('Something went wrong. Please try again.');
+                }
+            },
+            error: function(err) {
+                console.error(err);
+                window.alert('Something went wrong. Please try again.');
+            },
+        });
+    }
 }
 
 document.addEventListener('DOMContentLoaded', () => {
@@ -88,10 +129,10 @@ document.addEventListener('DOMContentLoaded', () => {
     const pageDataElement = document.getElementById('page-data');
     if (pageDataElement) {
         const pageData = JSON.parse(pageDataElement.textContent);
-        const { csrfToken, chatroomId, userId, displayName } = pageData;
-        console.log(displayName);
+        const { chatroomId, userId, displayName } = pageData;
+
         initChatroomSocketClient(chatroomId)
-        fetchMessages(chatroomId);
+        fetchMessages(chatroomId, userId);
 
         const sendMsgButton = document.querySelector('.send-message-btn');
         const messageInput = document.querySelector('.message-input');
@@ -110,7 +151,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 alert('Please enter a message.');
                 return;
             }
-            sendMessage(csrfToken, chatroomId, userId, displayName, messageContent);
+            sendMessage(chatroomId, userId, displayName, messageContent);
             messageInput.value = '';
         });
     }

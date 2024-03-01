@@ -1,7 +1,7 @@
 <div class="content">
     <h1> Live Lecture Chat </h1>
     <hr>
-    <div class="chatrooms-table-wrapper">
+    <div class="chatrooms-table-wrapper ">
         <h2> Chatrooms </h2>
         <table id="chatrooms-table" class="table table-striped">
             <col style="width: 25%">
@@ -10,23 +10,27 @@
             <col style="width: 25%">
             <thead>
                 <tr>
-                    <th scope="col" style="text-align: left">Name</th>
-                    <th scope="col" style="text-align: left">Description</th>
-                    <th scope="col" style="text-align: left">Host</th>
+                    <th scope="col">Name</th>
+                    <th scope="col">Host</th>
+                    <th scope="col">Description</th>
                     <th scope="col" style="text-align: left"></th>
                 </tr>
             </thead>
             <tbody>
                 {% for chatroom in chatrooms %}
                     <tr>
-                        <td style="text-align: left">
-                            {{ chatroom.getTitle() }}
+                        <td>
+                            <span class="display-short" title="{{ chatroom.getTitle() }}">
+                                {{ chatroom.getTitle() | length > 15 ? chatroom.getTitle() | slice(0, 15) ~ '...' : chatroom.getTitle() }}
+                            </span>
                         </td>
-                        <td style="text-align: left">
-                            {{ chatroom.getDescription() }}
-                        </td>
-                        <td style="text-align: left">
+                        <td>
                             {{ chatroom.getHostId() }}
+                        </td>
+                        <td>
+                            <span class="display-short" title="{{ chatroom.getDescription() }}">
+                                {{ chatroom.getDescription() | length > 25 ? chatroom.getDescription() | slice(0, 25) ~ '...' : chatroom.getDescription() }}
+                            </span>
                         </td>
                         <td>
                             <a href="{{ base_url }}/{{ chatroom.getId() }}" class="btn btn-primary">Join</a>

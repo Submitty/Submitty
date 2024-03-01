@@ -14,7 +14,16 @@
                 Description:
             </label>
             <textarea name="description" class="chatroom-description" placeholder="Enter description here..."></textarea>
-            <button type="submit" class="btn btn-primary">Create Chatroom</button>
         </div>
     </form>
+    <script>
+        function create_room() {
+            let form = document.getElementById("chatroom-create-form");
+            form.submit();
+        }
+    </script>
+{% endblock %}
+{% block buttons %}
+    {{ block('close_button') }}
+    <input type="submit" class="btn btn-primary submit-create-chatroom" onclick="create_room()">
 {% endblock %}

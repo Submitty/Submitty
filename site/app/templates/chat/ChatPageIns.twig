@@ -2,23 +2,21 @@
     <h1> Live Lecture Chat </h1>
     <button onclick="newChatroomForm()" class="btn btn-primary">New Chatroom</button>
     <hr>
-    <div class="chatrooms-table-wrapper">
+    <div class="chatrooms-table-wrapper table-responsive">
         <h2> Chatrooms </h2>
         <table id="chatrooms-table" class="table table-striped">
             <col style="width: 5%">
+            <col style="width: 5%">
             <col style="width: 25%">
-            <col style="width: 25%">
-            <col style="width: 25%">
-            <col style="width: 12.5%">
-            <col style="width: 12.5%">
+            <col style="width: 35%">
+            <col style="width: 20%">
             <thead>
                 <tr>
-                    <th scope="col" style="text-aligh: left"></th>
-                    <th scope="col" style="text-align: left">Name</th>
-                    <th scope="col" style="text-align: left">Description</th>
-                    <th scope="col" style="text-align: left">Host</th>
                     <th scope="col" style="text-align: left"></th>
                     <th scope="col" style="text-align: left"></th>
+                    <th scope="col">Name</th>
+                    <th scope="col">Description</th>
+                    <th scope="col"></th>
                 </tr>
             </thead>
             <tbody>
@@ -27,21 +25,21 @@
                         <td>
                             <a href='javascript:editChatroomForm("{{ chatroom.getId() }}", "{{ base_url }}");' class="fas fa-pencil-alt black-btn"></a>
                         </td>
-                        <td style="text-align: left">
-                            {{ chatroom.getTitle() }}
+                        <td>
+                            <a href='javascript:deleteChatroomForm("{{ chatroom.getId() }}", "{{ chatroom.getTitle() }}","{{ base_url }}");' class="fas fa-trash-alt black-btn"></a>
                         </td>
-                        <td style="text-align: left">
-                            {{ chatroom.getDescription() }}
+                        <td>
+                            <span class="display-short" title="{{ chatroom.getTitle() }}">
+                                {{ chatroom.getTitle() | length > 15 ? chatroom.getTitle() | slice(0, 15) ~ '...' : chatroom.getTitle() }}
+                            </span>
                         </td>
-                        <td style="text-align: left">
-                            {{ chatroom.getHostId() }}
+                        <td>
+                            <span class="display-short" title="{{ chatroom.getDescription() }}">
+                                {{ chatroom.getDescription() | length > 25 ? chatroom.getDescription() | slice(0, 25) ~ '...' : chatroom.getDescription() }}
+                            </span>
                         </td>
                         <td>
                             <a href="{{ base_url }}/{{ chatroom.getId() }}" class="btn btn-primary">Join</a>
-                            <a class="btn btn-danger">Delete</a>
-                        </td>
-                        <td>
-                            <a class="btn btn-primary">Show History</a>
                         </td>
                     </tr>
                 {% endfor %}
@@ -49,10 +47,6 @@
         </table>
     </div>
 </div>
-
-<script>
-
-</script>
 
 {% include('chat/CreateChatroomForm.twig') %}
 {% include('chat/EditChatroomForm.twig') %}
