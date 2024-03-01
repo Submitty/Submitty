@@ -197,7 +197,7 @@ class PollController extends AbstractController {
         $hours = intval($_POST['poll-hours'] ?? 0);
         $minutes = intval($_POST['poll-minutes'] ?? 0);
         $seconds = intval($_POST['poll-seconds'] ?? 0);
-        if ($hours < 0 || $minutes < 0) {
+        if ($hours < 0 || $minutes < 0 || $seconds < 0) {
             $this->core->addErrorMessage('Invalid time given');
             return new RedirectResponse($this->core->buildCourseUrl(['polls']));
         }
@@ -323,15 +323,20 @@ class PollController extends AbstractController {
         $hours = intval($_POST['poll-hours'] ?? 0);
         $minutes = intval($_POST['poll-minutes'] ?? 0);
         $seconds = intval($_POST['poll-seconds'] ?? 0);
-        if ($hours < 0 || $minutes < 0) {
+        if ($hours < 0 || $minutes < 0 || $seconds < 0) {
             $this->core->addErrorMessage('Invalid time given');
             return new RedirectResponse($this->core->buildCourseUrl(['polls']));
         }
         $newDuration = new DateInterval("PT{$hours}H{$minutes}M{$seconds}S");
         if ($poll->isOpen()) {
-            $endDate = $this->core->getDateTimeNow();
-            $endDate->add($newDuration);
-            $poll->setEndDate($endDate);
+            if ($newDuration->h > 0 || $newDuration->i > 0 || $newDuration->s > 0 || $newDuration->days > 0 || $newDuration->m > 0 || $newDuration->y > 0) {
+                $endDate = $this->core->getDateTimeNow();
+                $endDate->add($newDuration);
+                $poll->setEndDate($endDate);
+            }
+            else {
+                $poll->setEndDate(new \DateTime(DateUtils::MAX_TIME));
+            }
         }
         if ($date === false) {
             $this->core->addErrorMessage("Invalid poll release date");
@@ -454,14 +459,12 @@ class PollController extends AbstractController {
         }
 
         $duration = $poll->getDuration();
-        if ($duration->format('%r%Y%m%d%H%i%s') !== '000000000000') {
-            // Duration evaluates to > 0
+        if ($duration->h > 0 || $duration->i > 0 || $duration->s > 0 || $duration->days > 0 || $duration->m > 0 || $duration->y > 0) {
             $end_date = $this->core->getDateTimeNow();
             $end_date->add($duration);
             $poll->setEndDate($end_date);
         }
         else {
-            // If duration is 0, set end date to a future date.
             //If duration is 0, it means that the user wants to manually close it.
             $end_date = new \DateTime(DateUtils::MAX_TIME);
             $poll->setEndDate($end_date);

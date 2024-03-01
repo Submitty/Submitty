@@ -16,7 +16,7 @@ def up(config, database, semester, course):
     """
     database.execute("ALTER TABLE polls ADD COLUMN IF NOT EXISTS duration VARCHAR(255) DEFAULT 'P0D'")
     database.execute("ALTER TABLE polls ADD COLUMN IF NOT EXISTS end_date timestamptz NOT NULL DEFAULT '9999-02-01'")
-    database.execute("ALTER TABLE polls ALTER COLUMN status SET NOT NULL")
+    database.execute("ALTER TABLE polls ALTER COLUMN status DROP NOT NULL")
     database.execute("UPDATE polls SET end_date = CASE "
                       "WHEN status = 'open' THEN '9999-02-01' "
                       "WHEN status = 'closed' THEN '1900-02-01' "

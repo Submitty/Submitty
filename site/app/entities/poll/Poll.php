@@ -26,13 +26,11 @@ class Poll {
     #[ORM\Column(type: Types::TEXT)]
     protected $question;
 
+    #[ORM\Column(type: Types::STRING)]
+    protected string $duration;
+
     #[ORM\Column(type: Types::TEXT)]
     protected $status;
-    /**
-     * @var string
-     */
-    #[ORM\Column(type: Types::STRING)]
-    protected $duration;
 
     #[ORM\Column(type: Types::DATETIME_MUTABLE)]
     protected DateTime $end_date;
@@ -58,7 +56,6 @@ class Poll {
     #[ORM\OneToMany(mappedBy: "poll", targetEntity: Option::class, orphanRemoval: true)]
     #[ORM\JoinColumn(name: "poll_id", referencedColumnName: "poll_id")]
     #[ORM\OrderBy(["order_id" => "ASC"])]
-
     protected Collection $options;
 
     /**
@@ -78,8 +75,6 @@ class Poll {
         $this->setReleaseHistogram($release_histogram);
         $this->setReleaseAnswer($release_answer);
         $this->setImagePath($image_path);
-        # Have to set closed because database has to be not null.
-        $this->setClosed();
         $this->options = new ArrayCollection();
         $this->responses = new ArrayCollection();
     }
@@ -121,8 +116,8 @@ class Poll {
 
     public function isEnded(): bool {
         $now = DateUtils::getDateTimeNow();
-        $closeDate = '1900-02-01';
-        return $now > $this->end_date && $this->end_date->format("Y-m-d") !== $closeDate;
+        $closeDate = '1900-02-01T00:00:00';
+        return $now > $this->end_date && $this->end_date->format('Y-m-d\TH:i:s') !== $closeDate;
     }
 
     public function isClosed(): bool {
