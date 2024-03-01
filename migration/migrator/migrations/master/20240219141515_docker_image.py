@@ -1,5 +1,5 @@
 """Migration for the Submitty master database."""
-
+import json
 
 def up(config, database):
     """
@@ -16,7 +16,19 @@ CREATE TABLE IF NOT EXISTS public.docker_image (
     user_id character varying NOT NULL);
     """)
 
-    container_file = config.config_path / 'autograding_containers.json'
+    # Add existing containers to db with no owner
+    container_file_path = config.config_path / 'autograding_containers.json'
+    container_file = open(container_file_path)
+    container_data = json.load(container_file)
+    images = set()
+    for capability in container_data:
+        for image in container_data[capability]:
+            images.add(image)
+    existing_images = database.execute("SELECT image_name FROM docker_image").all()[0]
+    for image in images:
+        if (image not in existing_images):
+            database.session.execute("INSERT INTO docker_image (image_name, user_id) VALUES (:name, '');", {"name": image})
+
 
 def down(config, database):
     """
