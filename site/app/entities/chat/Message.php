@@ -28,6 +28,9 @@ class Message {
     #[ORM\Column(type: Types::STRING)]
     private string $display_name;
 
+    #[ORM\Column(type: Types::STRING)]
+    private string $role;
+
     #[ORM\Column(type: Types::TEXT)]
     private string $content;
 
@@ -35,6 +38,7 @@ class Message {
     protected DateTime $timestamp;
 
     public function __construct() {
+        $this->setTimestamp(new \DateTime("now"));
     }
 
     public function getId(): int {
@@ -55,6 +59,14 @@ class Message {
 
     public function setDisplayName($displayName): void {
         $this->display_name = $displayName;
+    }
+
+    public function getRole(): string {
+        return $this->role;
+    }
+
+    public function setRole($role): string {
+        return $this->role = $role;
     }
 
     public function getContent(): string {

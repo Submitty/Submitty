@@ -153,7 +153,8 @@ public function editChatroom(int $chatroom_id): RedirectResponse {
                 'content' => $message->getContent(),
                 'timestamp' => $message->getTimestamp()->format('Y-m-d H:i:s'),
                 'user_id' => $message->getUserId(),
-                'display_name' => $message->getDisplayName()
+                'display_name' => $message->getDisplayName(),
+                'role' => $message->getRole()
             ];
         }, $messages);
 
@@ -168,14 +169,15 @@ public function editChatroom(int $chatroom_id): RedirectResponse {
         $content = $_POST['content'] ?? '';
         $userId = $_POST['user_id'] ?? null;
         $displayName = $_POST['display_name'] ?? '';
+        $role = $_POST['role'] ?? 'student';
 
         $chatroom = $em->getRepository(Chatroom::class)->find($chatroom_id);
         $message = new Message();
         $message->setChatroom($chatroom);
         $message->setUserId($userId);
         $message->setDisplayName($displayName);
+        $message->setRole($role);
         $message->setContent($content);
-        $message->setTimestamp(new \DateTime("now"));
 
         $em->persist($message);
         $em->flush();

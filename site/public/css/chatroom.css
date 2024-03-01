@@ -16,9 +16,6 @@
     padding-left: 1rem;
 }
 
-.chatroom-content {
-}
-
 .leave-room {
     float: right;
     margin-right: 1rem;
@@ -27,17 +24,22 @@
 .messages-area {
     overflow-y: auto;
     height: 38rem;
+    margin-left: 1rem;
 }
 
 .message-container {
     padding-bottom: 0.5rem;
     padding-top: 0.5rem;
-    margin-left: 1rem;
+    margin-right: 1rem;
+}
+
+.message-container:hover {
+    background-color: var(--standard-hover-light-gray);
 }
 
 .message-header {
     margin-bottom: 3px;
-    margin-left: 1.2rem;
+    margin-left: 0.5rem;
 }
 
 .user-icon {
@@ -46,7 +48,6 @@
 
 .sender-name {
     font-weight: bold;
-    font-size: 1.05rem;
 }
 
 .timestamp {
@@ -56,9 +57,9 @@
 }
 
 .message-content {
-    margin-left: 1.2rem;
     max-width: 90%;
     word-break: break-word;
+    margin-left: 0.5rem;
 }
 
 .input-container {

@@ -7,13 +7,14 @@ function fetchMessages(chatroomId, my_id) {
         success: function(responseData) {
             if (responseData.status === 'success' && Array.isArray(responseData.data)) {
                 responseData.data.forEach(msg => {
+                    let display_name = msg.display_name;
                     if (msg.user_id === my_id) {
-                        appendMessage("me", msg.timestamp, msg.content);
+                        display_name = "me";
                     }
-                    else {
-                        appendMessage(msg.display_name, msg.timestamp, msg.content);
-                    }
+                    appendMessage(display_name, msg.role, msg.timestamp, msg.content);
                 });
+                const messages_area = document.querySelector(".messages-area");
+                messages_area.scrollTop = messages_area.scrollHeight;
             }
         },
         error: function() {
@@ -22,25 +23,26 @@ function fetchMessages(chatroomId, my_id) {
     });
 }
 
-function sendMessage(chatroomId, userId, displayName, content) {
+function sendMessage(chatroomId, userId, displayName, role, content) {
     $.ajax({
         url: buildCourseUrl(['chat', chatroomId, 'send']),
         type: 'POST',
         data: {
             'csrf_token': csrfToken,
             'user_id': userId,
-            'content': content,
-            'display_name': displayName
+            'display_name': displayName,
+            'role': role,
+            'content': content
         },
         error: function() {
             window.alert('Something went wrong with storing message');
         },
     })
-    window.socketClient.send({'type': "chat_message", 'content': content, 'user_id': userId, 'display_name': displayName, 'timestamp': new Date(Date.now()).toLocaleString()})
-    appendMessage("me", null, content);
+    window.socketClient.send({'type': "chat_message", 'content': content, 'user_id': userId, 'display_name': displayName, 'role': role, 'timestamp': new Date(Date.now()).toLocaleString()})
+    appendMessage("me", role, null, content);
 }
 
-function appendMessage(displayName, ts, content) {
+function appendMessage(displayName, role, ts, content) {
     let timestamp = ts;
     if (!timestamp) {
         timestamp = new Date(Date.now()).toLocaleString('en-us',  { year:"numeric", month:"short", day:"numeric", hour:"numeric", minute:"numeric"});
@@ -49,28 +51,41 @@ function appendMessage(displayName, ts, content) {
         timestamp = new Date(ts).toLocaleString('en-us', { year:"numeric", month:"short", day:"numeric", hour:"numeric", minute:"numeric"});
     }
 
+    let display_name = displayName;
+    if (role && role !== 'student' && display_name !== 'me') {
+        display_name = `${displayName}[instructor]`;
+    }
+
     const messages_area = document.querySelector('.messages-area');
     const message = document.createElement('div');
     message.classList.add('message-container');
+    if (role === "instructor") {
+        message.classList.add('admin-message')
+    }
     message.innerHTML = `
         <div class="message-header">
-            <span class="sender-name">${displayName}</span>
+            <span class="sender-name">${display_name}</span>
             <span class="timestamp">${timestamp}</span>
         </div>
         <div class="message-content">
             ${content}
         </div>
     `;
+
     messages_area.appendChild(message);
-    messages_area.scrollTop = messages_area.scrollHeight;
+    const distanceFromBottom = messages_area.scrollHeight - messages_area.scrollTop - messages_area.clientHeight;
+    if ( distanceFromBottom < 110) {
+        messages_area.scrollTop = messages_area.scrollHeight;
+    }
 }
 
 function initChatroomSocketClient(chatroomId) {
     window.socketClient = new WebSocketClient();
     window.socketClient.onmessage = (msg) => {
         if (msg.type === "chat_message") {
-            let sender = msg.display_name;
-            appendMessage(sender, msg.timestamp, msg.content);
+            let sender_name = msg.display_name;
+            let role = msg.role;
+            appendMessage(sender_name, role, msg.timestamp, msg.content);
         }
     };
     window.socketClient.open(`chatroom_${chatroomId}`);
@@ -129,7 +144,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const pageDataElement = document.getElementById('page-data');
     if (pageDataElement) {
         const pageData = JSON.parse(pageDataElement.textContent);
-        const { chatroomId, userId, displayName } = pageData;
+        const { chatroomId, userId, displayName, user_admin } = pageData;
 
         initChatroomSocketClient(chatroomId)
         fetchMessages(chatroomId, userId);
@@ -151,7 +166,10 @@ document.addEventListener('DOMContentLoaded', () => {
                 alert('Please enter a message.');
                 return;
             }
-            sendMessage(chatroomId, userId, displayName, messageContent);
+
+            let role = user_admin ? 'instructor' : 'student';
+            sendMessage(chatroomId, userId, displayName, role, messageContent);
+
             messageInput.value = '';
         });
     }

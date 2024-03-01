@@ -711,6 +711,7 @@ CREATE TABLE public.chatroom_messages (
     chatroom_id integer NOT NULL,
     userid character varying NOT NULL,
     display_name character varying,
+    role character varying,
     content text NOT NULL,
     "timestamp" timestamp(0) with time zone NOT NULL
 );
