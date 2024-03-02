@@ -18,6 +18,7 @@ class Container():
     create, start, and cleanup after themselves. Note that a network of containers
     can be made up of 1 or more containers.
     """
+
     def __init__(self, container_info, untrusted_user, testcase_directory, more_than_one,
                  is_test_environment, log_function, log_container):
         self.name = container_info['container_name']
@@ -110,10 +111,32 @@ class Container():
                     name=self.full_name
                 )
         except docker.errors.ImageNotFound:
+
+            docker_error_path = os.path.join(
+                "/".join(self.directory.split("/")[:-3]), 'TMP_SUBMISSION', 'tmp_logs')
+            docker_error_data = {
+                "image": f'{self.image}',
+                "machine": f'{self.full_name.split("_")[0]}',
+                "error": f'ERROR: The image {self.image} is not available on {self.full_name}'
+            }
+            with open(os.path.join(docker_error_path, "docker_error.json"), "w") as json_file:
+                json.dump(docker_error_data, json_file, indent=4)
+
             self.log_function(f'ERROR: The image {self.image} is not available on this worker')
             client.close()
             raise
         except Exception:
+
+            docker_error_path = os.path.join(
+                "/".join(self.directory.split("/")[:-3]), 'TMP_SUBMISSION', 'tmp_logs')
+            docker_error_data = {
+                "image": f'{self.image}',
+                "machine": f'{self.full_name.split("_")[0]}',
+                "error": f'ERROR: could not create container {self.full_name}'
+            }
+            with open(os.path.join(docker_error_path, "docker_error.json"), "w") as json_file:
+                json.dump(docker_error_data, json_file, indent=4)
+
             self.log_function(f'ERROR: could not create container {self.full_name}')
             client.close()
             raise
@@ -184,6 +207,7 @@ class ContainerNetwork(secure_execution_environment.SecureExecutionEnvironment):
     Therefore, code is effectively run in a Jailed Sandbox within the container. Containers may
     be networked together to test networked gradeables.
     """
+
     def __init__(self, config, job_id, untrusted_user, testcase_directory, is_vcs,
                  is_batch_job, complete_config_obj, testcase_info, autograding_directory,
                  log_path, stack_trace_log_path, is_test_environment):
@@ -331,8 +355,8 @@ class ContainerNetwork(secure_execution_environment.SecureExecutionEnvironment):
                 created_containers.append(container)
             except Exception:
                 self.log_message(
-                  f"ERROR: Could not create container {container.name}"
-                  f" with image {container.image}"
+                    f"ERROR: Could not create container {container.name}"
+                    f" with image {container.image}"
                 )
                 self.log_stack_trace(traceback.format_exc())
 
@@ -489,13 +513,13 @@ class ContainerNetwork(secure_execution_environment.SecureExecutionEnvironment):
                 network.client.api.close()
                 network.client.close()
                 self.log_message(
-                  f'{dateutils.get_current_time()} '
-                  f'destroying docker network {network}'
+                    f'{dateutils.get_current_time()} '
+                    f'destroying docker network {network}'
                 )
             except Exception:
                 self.log_message(
-                  f'{dateutils.get_current_time()} ERROR: Could not remove docker '
-                  f'network {network}'
+                    f'{dateutils.get_current_time()} ERROR: Could not remove docker '
+                    f'network {network}'
                 )
         self.networks.clear()
 
