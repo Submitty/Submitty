@@ -70,7 +70,7 @@ class Poll {
         $this->setQuestion($question);
         $this->setQuestionType($question_type);
         $this->setDuration($duration);
-        $this->setEndDate(new \DateTime(DateUtils::BEGINING_OF_TIME));
+        $this->setClosed();
         $this->setReleaseDate($release_date);
         $this->setReleaseHistogram($release_histogram);
         $this->setReleaseAnswer($release_answer);
@@ -116,14 +116,15 @@ class Poll {
 
     public function isEnded(): bool {
         $now = DateUtils::getDateTimeNow();
-        $closeDate = '1900-02-01T00:00:00';
+        $closeDate = DateUtils::BEGINING_OF_TIME;
         return $now > $this->end_date && $this->end_date->format('Y-m-d\TH:i:s') !== $closeDate;
     }
 
     public function isClosed(): bool {
         $now = DateUtils::getDateTimeNow();
-        return $now > $this->end_date && $this->end_date->format('Y-m-d') === '1900-02-01';
+        return $now > $this->end_date && $this->end_date->format('Y-m-d\TH:i:s') === DateUtils::BEGINING_OF_TIME;
     }
+
     public function getDuration(): \DateInterval {
         return new \DateInterval($this->duration);
     }

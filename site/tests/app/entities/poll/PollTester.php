@@ -45,7 +45,6 @@ class PollTester extends BaseUnitTest {
                 "/var/local/submitty/courses/s21/sample/uploads/polls/poll_image_3_colors.png"
             )
         ];
-        $this->my_polls[0]->setClosed();
         $this->my_polls[1]->setOpen();
         $this->my_polls[2]->setEnded();
 

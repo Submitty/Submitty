@@ -57,7 +57,6 @@ class PollUtilsTester extends \PHPUnit\Framework\TestCase {
                 "when_ended"
             ),
         ];
-        $polls[0]->setClosed();
         $polls[1]->setOpen();
         $polls[2]->setEnded();
 

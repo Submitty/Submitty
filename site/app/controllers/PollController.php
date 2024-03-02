@@ -16,7 +16,6 @@ use app\libraries\FileUtils;
 use app\libraries\PollUtils;
 use app\libraries\DateUtils;
 use app\views\PollView;
-use DateTime;
 use DateInterval;
 
 /**
@@ -506,7 +505,7 @@ class PollController extends AbstractController {
             return new RedirectResponse($this->core->buildCourseUrl(['polls']));
         }
         //Setting the time to the beginning of time indicates that it is closed.
-        $poll->setEndDate(new DateTime(DateUtils::BEGINING_OF_TIME));
+        $poll->setClosed();
         $em->flush();
         return new RedirectResponse($this->core->buildCourseUrl(['polls']));
     }
