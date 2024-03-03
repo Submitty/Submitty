@@ -84,6 +84,21 @@ class CourseMaterial {
     #[ORM\Column(type: Types::DATETIMETZ_MUTABLE, nullable: true)]
     protected ?DateTime $last_edit_date;
 
+    /**
+     * Constructs a new instance of a CourseMaterial.
+     *
+     * @param int $type The type of the course material.
+     * @param string $path The file system path to the course material.
+     * @param \DateTime $release_date The release date of the course material.
+     * @param bool $hidden_from_students Indicates whether the course material is hidden from students.
+     * @param float $priority The priority or ordering of the course material.
+     * @param ?string $url The URL of the course material, applicable if it's a link type.
+     * @param ?string $title The title of the course material.
+     * @param ?string $uploaded_by The user ID of the person who uploaded the course material.
+     * @param ?\DateTime $upload_date The date and time when the course material was uploaded.
+     * @param ?string $last_edit_by The user ID of the last person who edited the course material.
+     * @param ?\DateTime $last_edit_date The date and time when the course material was last edited.
+     */
     public function __construct(int $type, string $path, \DateTime $release_date, bool $hidden_from_students, float $priority, ?string $url, ?string $title, ?string $uploaded_by, ?\DateTime $upload_date, ?string $last_edit_by, ?\DateTime $last_edit_date) {
         $this->setType($type);
         $this->setPath($path);
