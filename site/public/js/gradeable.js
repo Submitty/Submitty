@@ -1,6 +1,6 @@
 /* exported loadTemplates renderGradingGradeable renderPeerGradeable renderGradingComponent
    renderGradingComponentHeader renderInstructorEditGradeable renderConflictMarks renderRubricTotalBox
-   renderTotalScoreBox renderOverallComment renderEditComponentHeader renderEditComponent ajaxUploadGradeable */
+   renderTotalScoreBox renderOverallComment renderEditComponentHeader renderEditComponent ajaxUploadGradeable ajaxDownloadGradeable  */
 /* global Twig showVerifyComponent buildCourseUrl getItempoolOptions isItempoolAvailable csrfToken */
 
 /**
@@ -374,32 +374,34 @@ function ajaxUploadGradeable() {
 }
 
 // Uploads a gradeable via JSON POST request
-function ajaxDownloadGradeable($gradeable_id){
+function ajaxDownloadGradeable($gradeable_id) {
     try {
-        let result = [];
+        const result = [];
         // result['csrf_token'] = csrfToken;
         const url = buildCourseUrl([$gradeable_id, 'download']);
         $.ajax({
             url: url,
             data: result,
             method: 'GET',
-        }).always(function (returned_json) {
+        }).always((returned_json)=>{
             console.log(returned_json);
             returned_json = JSON.parse(returned_json);
             if (returned_json['status'] === 'success') {
-                let data = "data:json;charset=utf-8," + encodeURIComponent(JSON.stringify(returned_json['data'], null, 4));
-                let temporaryElement = document.createElement('a');
-                temporaryElement.setAttribute("href", data);
-                temporaryElement.setAttribute("download", returned_json['data']['id'] + ".json");
+                const data = 'data:json;charset=utf-8,'.concat(encodeURIComponent(JSON.stringify(returned_json['data'], null, 4)));
+                const temporaryElement = document.createElement('a');
+                temporaryElement.setAttribute('href', data);
+                temporaryElement.setAttribute('download', returned_json['data']['id'].concat('.json'));
                 document.body.appendChild(temporaryElement);
                 temporaryElement.click();
                 temporaryElement.remove();
-            } else {
+            }
+            else {
                 alert(returned_json['message']);
                 return false;
             }
         });
-    } catch(error) {
+    }
+    catch (error) {
         alert(error);
         return false;
     }
