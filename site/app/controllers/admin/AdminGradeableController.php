@@ -121,7 +121,7 @@ class AdminGradeableController extends AbstractController {
         return JsonResponse::getSuccessResponse($return_json);
     }
 
-    /** 
+    /**
      * Creates a gradeable based on uploaded JSON data
      * @Route("/api/{_semester}/{_course}/upload", methods={"POST"})
      * @Route("/courses/{_semester}/{_course}/upload", methods={"POST"})
