@@ -383,7 +383,7 @@ function ajaxDownloadGradeable($gradeable_id) {
             url: url,
             data: result,
             method: 'GET',
-        }).always((returned_json)=>{
+        }).always((returned_json) => {
             console.log(returned_json);
             returned_json = JSON.parse(returned_json);
             if (returned_json['status'] === 'success') {

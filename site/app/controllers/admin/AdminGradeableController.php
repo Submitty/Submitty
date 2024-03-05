@@ -121,12 +121,12 @@ class AdminGradeableController extends AbstractController {
         return JsonResponse::getSuccessResponse($return_json);
     }
 
-    /*
+    /** 
      * Creates a gradeable based on uploaded JSON data
-     * @return JsonResponse
-     * @AccessControl(role="INSTRUCTOR")
      * @Route("/api/{_semester}/{_course}/upload", methods={"POST"})
      * @Route("/courses/{_semester}/{_course}/upload", methods={"POST"})
+     * @AccessControl(role="INSTRUCTOR")
+     * @return JsonResponse
      */
     public function uploadGradeable() {
         $values = [
