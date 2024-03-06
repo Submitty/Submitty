@@ -18,4 +18,13 @@
   },
   "ta_grading": false,
   "syllabus_bucket": "Homework"
+  // $values['ta_view_start_date'] = $_POST['ta_view_start_date'] ?? NULL;
+  // $values['grade_start_date'] = $_POST['grade_start_date'] ?? NULL;
+  // $values['grade_due_date'] = $_POST['grade_due_date'] ?? NULL;
+  // $values['grade_released_date'] = $_POST['grade_released_date'] ?? NULL;
+  // $values['team_lock_date'] = $_POST['team_lock_date'] ?? NULL;
+  // $values['submission_open_date'] = $_POST['submission_open_date'] ?? NULL;
+  // $values['submission_due_date'] = $_POST['submission_due_date'] ?? NULL;
+  // $values['grade_inquiry_start_date'] = $_POST['grade_inquiry_start_date'] ?? NULL;
+  // $values['grade_inquiry_due_date'] = $_POST['grade_inquiry_due_date'] ?? NULL;
 }
