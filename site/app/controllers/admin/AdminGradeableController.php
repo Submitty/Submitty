@@ -57,7 +57,7 @@ class AdminGradeableController extends AbstractController {
      * @param string $gradeable_id
      * @return JsonResponse
      */
-    public function downloadJson(string $gradeable_id) : JsonResponse {
+    public function downloadJson(string $gradeable_id): JsonResponse {
         $config = $this->core->getQueries()->getGradeableConfig($gradeable_id);
         $return_json = [
             'title' => $config->getTitle(),
