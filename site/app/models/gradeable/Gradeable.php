@@ -208,7 +208,7 @@ class Gradeable extends AbstractModel {
     protected $vcs_partial_path = "";
     /** @prop
      * @var int Where are we hosting VCS (-1 -> Not VCS gradeable, 0,1 -> Submitty, 2,3 -> public/private Github) */
-    protected $vcs_host_type = -1;
+    protected $vcs_host_type = GradeableUtils::vcsStrToInt("novcs");
     /** @prop
      * @var bool If the gradeable is a team assignment */
     protected $team_assignment = false;

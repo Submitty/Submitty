@@ -116,4 +116,28 @@ class GradeableUtils {
             "graded_gradeables" => $graded_gradeables,
             "submit_btns" => $submit_btns];
     }
+
+    public static function vcsIntToStr(int $type): string {
+        switch($type) {
+            case 0:
+            case 1:
+                return "submitty";
+            case 2:
+            case 3:
+                return "github";
+            default:
+                return "novcs";
+        }
+    }
+
+    public static function vcsStrToInt(string $str): int {
+        switch($str) {
+            case "submitty":
+                return 0;
+            case "github":
+                return 2;
+            default:
+                return -1;
+        }
+    }
 }
