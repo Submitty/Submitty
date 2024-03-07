@@ -1,7 +1,7 @@
 /* exported loadTemplates renderGradingGradeable renderPeerGradeable renderGradingComponent
    renderGradingComponentHeader renderInstructorEditGradeable renderConflictMarks renderRubricTotalBox
-   renderTotalScoreBox renderOverallComment renderEditComponentHeader renderEditComponent ajaxUploadGradeable ajaxDownloadGradeable  */
-/* global Twig showVerifyComponent buildCourseUrl getItempoolOptions isItempoolAvailable csrfToken */
+   renderTotalScoreBox renderOverallComment renderEditComponentHeader renderEditComponent ajaxUploadGradeable downloadGradeableJson  */
+/* global Twig showVerifyComponent buildCourseUrl displayErrorMessage getItempoolOptions isItempoolAvailable csrfToken */
 
 /**
  * The number of decimal places to show to the user
@@ -373,38 +373,27 @@ function ajaxUploadGradeable() {
     return true;
 }
 
-// Uploads a gradeable via JSON POST request
-function ajaxDownloadGradeable($gradeable_id) {
-    try {
-        const result = [];
-        // result['csrf_token'] = csrfToken;
-        const url = buildCourseUrl([$gradeable_id, 'download']);
-        $.ajax({
-            url: url,
-            data: result,
-            method: 'GET',
-        }).always((returned_json) => {
-            console.log(returned_json);
-            returned_json = JSON.parse(returned_json);
-            if (returned_json['status'] === 'success') {
-                const data = 'data:json;charset=utf-8,'.concat(encodeURIComponent(JSON.stringify(returned_json['data'], null, 4)));
-                const temporaryElement = document.createElement('a');
-                temporaryElement.setAttribute('href', data);
-                temporaryElement.setAttribute('download', returned_json['data']['id'].concat('.json'));
-                document.body.appendChild(temporaryElement);
-                temporaryElement.click();
-                temporaryElement.remove();
-            }
-            else {
-                alert(returned_json['message']);
-                return false;
-            }
-        });
-    }
-    catch (error) {
-        alert(error);
-        return false;
-    }
+// Download the JSON file to recreate the gradeable.
+function downloadGradeableJson($gradeable_id) {
+    const url = buildCourseUrl([$gradeable_id, 'download']);
+    fetch(url, {
+        method: 'GET',
+    }).then(
+        response => {
+            return response.json();
+        }).then(json => {
+        if (json['status'] === 'success') {
+            const temporaryElement = document.createElement('a');
+            const file = new Blob([JSON.stringify(json['data'], null, 4)]);
+            temporaryElement.href = URL.createObjectURL(file);
+            temporaryElement.download = `${json['data']['id']}.json`;
+            temporaryElement.click();
+        }
+        else {
+            displayErrorMessage(json['message']);
+            return false;
+        }
+    });
     return true;
 }
 
