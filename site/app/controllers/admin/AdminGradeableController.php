@@ -1069,7 +1069,7 @@ class AdminGradeableController extends AbstractController {
                 'vcs_subdirectory' => '',
                 'using_subdirectory' => false,
                 'vcs_partial_path' => '',
-                'vcs_host_type' => -1,
+                'vcs_host_type' => GradeableUtils::vcsStrToInt("novcs"),
                 'autograding_config_path' => '',
                 'peer_grading' => false,
                 'peer_grade_set' => 0,
