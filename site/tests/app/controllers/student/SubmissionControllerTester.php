@@ -2,6 +2,7 @@
 
 namespace tests\app\controllers\student;
 
+use app\models\gradeable\GradeableUtils;
 use ZipArchive;
 use app\controllers\student\SubmissionController;
 use app\exceptions\IOException;
@@ -162,7 +163,7 @@ class SubmissionControllerTester extends BaseUnitTest {
             'using_subdirectory' => false,
             'vcs_subdirectory' => '',
             'vcs_partial_path' => '',
-            'vcs_host_type' => -1,
+            'vcs_host_type' => GradeableUtils::vcsStrToInt("vcs_none"),
             'team_assignment' => false,
             'team_size_max' => 1,
             'ta_grading' => true,

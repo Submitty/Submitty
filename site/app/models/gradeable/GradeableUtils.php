@@ -118,26 +118,24 @@ class GradeableUtils {
     }
 
     public static function vcsIntToStr(int $type): string {
-        switch($type) {
-            case 0:
-            case 1:
-                return "submitty";
-            case 2:
-            case 3:
-                return "github";
-            default:
-                return "novcs";
-        }
+        return match ($type) {
+            0 => "vcs_type_submitty_unique",
+            1 => "vcs_type_submitty_shared",
+            2 => "vcs_type_external_public",
+            3 => "vcs_type_external_private_student_created",
+            4 => "vcs_type_external_private_instructor_created",
+            default => "vcs_none",
+        };
     }
 
     public static function vcsStrToInt(string $str): int {
-        switch($str) {
-            case "submitty":
-                return 0;
-            case "github":
-                return 2;
-            default:
-                return -1;
-        }
+        return match ($str) {
+            "vcs_type_submitty_unique" => 0,
+            "vcs_type_submitty_shared" => 1,
+            "vcs_type_external_public" => 2,
+            "vcs_type_external_private_student_created" => 3,
+            "vcs_type_external_private_instructor_created" => 4,
+            default => -1,
+        };
     }
 }

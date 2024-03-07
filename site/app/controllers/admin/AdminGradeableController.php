@@ -1009,7 +1009,7 @@ class AdminGradeableController extends AbstractController {
                 'vcs' => false,
                 'vcs_subdirectory' => $subdir,
                 'using_subdirectory' => $using_subdirectory,
-                'vcs_host_type' => GradeableUtils::vcsStrToInt("novcs"),
+                'vcs_host_type' => GradeableUtils::vcsStrToInt("vcs_none"),
                 'vcs_partial_path' => $vcs_partial_path
             ];
             $gradeable_create_data = array_merge($gradeable_create_data, $non_vcs_property_values);
@@ -1069,7 +1069,7 @@ class AdminGradeableController extends AbstractController {
                 'vcs_subdirectory' => '',
                 'using_subdirectory' => false,
                 'vcs_partial_path' => '',
-                'vcs_host_type' => GradeableUtils::vcsStrToInt("novcs"),
+                'vcs_host_type' => GradeableUtils::vcsStrToInt("vcs_none"),
                 'autograding_config_path' => '',
                 'peer_grading' => false,
                 'peer_grade_set' => 0,
