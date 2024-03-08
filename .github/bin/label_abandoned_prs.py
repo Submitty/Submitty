@@ -3,7 +3,7 @@ import subprocess
 import datetime
 from datetime import timedelta
 
-pr_json = "gh pr list --json updatedAt,labels,number,comments"
+pr_json = "gh pr list --json updatedAt,labels,number,comments,reviews"
 terminal_output = subprocess.check_output(pr_json, shell=True, text=True)
 json_output = json.loads(terminal_output)
 
