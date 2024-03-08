@@ -36,7 +36,13 @@ for json_data in json_output:
         if labels['name'] == 'Abandoned PR - Needs New Owner':
             already_abandoned = True
 
+    for review in json_data['reviews']:
+        if review["state"] == "APPROVED":
+            approved = True
+        if review["state"] == "CHANGES_REQUESTED":
+            approved = False
+
     if tdiff > twelve_days and not already_abandoned and not already_warned:
         subprocess.run(['gh', 'pr', 'comment', num, '--body', inactive_comment])
-    if (tdiff > two_weeks and not already_abandoned) or (tdiff > two_days and already_warned):
+    if ((tdiff > two_weeks and not already_abandoned) or (tdiff > two_days and already_warned)) and not approved:
         subprocess.run(['gh', 'pr', 'edit', num, '--add-label', 'Abandoned PR - Needs New Owner'])
