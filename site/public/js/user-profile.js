@@ -83,6 +83,26 @@ function getCurrentUTCOffset() {
     return `${sign + hours}:00`;
 }
 
+// Event listener for dropdown change
+$('#time_zone_selector_label').on('change', function() {
+    // Get selected time zone
+    const selectedTimeZone = $(this).val();
+    
+    // Perform search or any other relevant action based on the selected time zone
+    console.log(`Selected Time Zone: ${selectedTimeZone}`);
+
+    // You can add additional logic here, such as triggering a search function or updating UI based on the selected time zone.
+    // For example, you might want to call a function like performSearch(selectedTimeZone);
+});
+
+// Example search function (replace this with your actual search logic)
+function performSearch(selectedTimeZone) {
+    // Replace this with your search logic using the selected time zone
+    console.log(`Searching for events in ${selectedTimeZone}`);
+    // Add your search implementation here
+}
+
+
 function clearPronounsBox() {
     const pronounsInput = document.getElementById('user-pronouns-change');
     if (pronounsLastVal === null || pronounsLastVal !== pronounsInput.value) {
