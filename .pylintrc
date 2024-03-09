@@ -136,6 +136,7 @@ ignore=
     test_prev_next.py,
     run.py,
     test_sample.py
+    label_abandoned_prs.py
 
 ignore-paths=
     migration/migrator/main.py,
