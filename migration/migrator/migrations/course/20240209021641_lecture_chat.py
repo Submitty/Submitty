@@ -15,20 +15,30 @@ def up(config, database, semester, course):
     :param course: Code of course being migrated
     :type course: str
     """
-    database.execute("CREATE TABLE IF NOT EXISTS chatrooms(id SERIAL PRIMARY KEY, host_id character varying NOT NULL, host_name character varying, title text NOT NULL, description text, is_active BOOLEAN DEFAULT false NOT NULL, allow_anon BOOLEAN DEFAULT true NOT NULL)")
-    database.execute("CREATE TABLE IF NOT EXISTS chatroom_messages(id SERIAL PRIMARY KEY, chatroom_id integer NOT NULL, userId character varying NOT NULL, display_name character varying, role character varying, content text NOT NULL, timestamp timestamp(0) with time zone NOT NULL)")
 
-    course_dir = Path(config.submitty['submitty_data_dir'], 'courses', semester, course)
-    # add boolean to course config
-    config_file = Path(course_dir, 'config', 'config.json')
-    if config_file.is_file():
-        with open(config_file, 'r') as in_file:
-            j = json.load(in_file)
-            j['course_details']['chat_enabled'] = False
+    database.execute(
+    """
+        CREATE TABLE IF NOT EXISTS chatrooms (
+            id SERIAL PRIMARY KEY,
+            host_id character varying NOT NULL,
+            host_name character varying,
+            title text NOT NULL,
+            description text,
+            is_active BOOLEAN DEFAULT false NOT NULL,
+            allow_anon BOOLEAN DEFAULT true NOT NULL
+        );
 
-        with open(config_file, 'w') as out_file:
-            json.dump(j, out_file, indent=4)
-
+        CREATE TABLE IF NOT EXISTS chatroom_messages (
+            id SERIAL PRIMARY KEY,
+            chatroom_id integer NOT NULL REFERENCES chatrooms(id),
+            user_id character varying NOT NULL REFERENCES users(user_id),
+            display_name character varying,
+            role character varying,
+            content text NOT NULL,
+            timestamp timestamp(0) with time zone NOT NULL
+        );
+    """
+    )
 
 def down(config, database, semester, course):
     """

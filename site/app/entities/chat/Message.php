@@ -12,7 +12,6 @@ use Doctrine\ORM\Mapping as ORM;
 #[ORM\Entity]
 #[ORM\Table(name: "chatroom_messages")]
 class Message {
-
     #[ORM\Id]
     #[ORM\Column(name: "id", type: Types::INTEGER)]
     #[ORM\GeneratedValue]
@@ -23,7 +22,7 @@ class Message {
     private Chatroom $chatroom;
 
     #[ORM\Column(type: Types::STRING)]
-    private string $userId;
+    private string $user_id;
 
     #[ORM\Column(type: Types::STRING)]
     private string $display_name;
@@ -37,8 +36,13 @@ class Message {
     #[ORM\Column(type: Types::DATETIMETZ_MUTABLE)]
     private DateTime $timestamp;
 
-    public function __construct() {
+    public function __construct($userId, $displayName, $role, $text, $chatroom) {
+        $this->setUserId($userId);
+        $this->setDisplayName($displayName);
+        $this->setRole($role);
         $this->setTimestamp(new \DateTime("now"));
+        $this->setContent($text);
+        $this->setChatroom($chatroom);
     }
 
     public function getId(): int {
@@ -46,11 +50,11 @@ class Message {
     }
 
     public function getUserId(): string {
-        return $this->userId;
+        return $this->user_id;
     }
 
     public function setUserId($userId): void {
-        $this->userId = $userId;
+        $this->user_id = $userId;
     }
 
     public function getDisplayName(): string {

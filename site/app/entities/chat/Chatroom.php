@@ -13,7 +13,6 @@ use Doctrine\ORM\Mapping as ORM;
 #[ORM\Entity(repositoryClass: ChatroomRepository::class)]
 #[ORM\Table(name: "chatrooms")]
 class Chatroom {
-
     #[ORM\Id]
     #[ORM\Column(name: "id", type: Types::INTEGER)]
     #[ORM\GeneratedValue]
@@ -43,7 +42,11 @@ class Chatroom {
     #[ORM\OneToMany(mappedBy: "chatroom", targetEntity: Message::class)]
     private Collection $messages;
 
-    public function __construct() {
+    public function __construct($hostId, $hostName, $title, $description) {
+        $this->setHostId($hostId);
+        $this->setHostName($hostName);
+        $this->setTitle($title);
+        $this->setDescription($description);
         $this->messages = new ArrayCollection();
         $this->is_active = false;
         $this->allow_anon = true;

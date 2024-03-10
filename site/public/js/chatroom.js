@@ -3,6 +3,7 @@
 // eslint-disable-next-line no-unused-vars
 function fetchMessages(chatroomId, my_id) {
     $.ajax({
+        // eslint-disable-next-line no-undef
         url: buildCourseUrl(['chat', chatroomId, 'messages']),
         type: 'GET',
         dataType: 'json',
@@ -28,6 +29,7 @@ function fetchMessages(chatroomId, my_id) {
 // eslint-disable-next-line no-unused-vars
 function sendMessage(chatroomId, userId, displayName, role, content) {
     $.ajax({
+        // eslint-disable-next-line no-undef
         url: buildCourseUrl(['chat', chatroomId, 'send']),
         type: 'POST',
         data: {
@@ -39,15 +41,15 @@ function sendMessage(chatroomId, userId, displayName, role, content) {
         },
         success: function (response) {
             try {
-                // eslint-disable-next-line no-var
-                let json = JSON.parse(response);
+                // eslint-disable-next-line no-unused-vars
+                const json = JSON.parse(response);
             }
             catch (e) {
                 // eslint-disable-next-line no-undef
                 displayErrorMessage('Error parsing data. Please try again.');
                 return;
             }
-            window.socketClient.send({'type': "chat_message", 'content': content, 'user_id': userId, 'display_name': displayName, 'role': role, 'timestamp': new Date(Date.now()).toLocaleString()});
+            window.socketClient.send({'type': 'chat_message', 'content': content, 'user_id': userId, 'display_name': displayName, 'role': role, 'timestamp': new Date(Date.now()).toLocaleString()});
         },
         error: function() {
             window.alert('Something went wrong with storing message');
@@ -59,10 +61,10 @@ function sendMessage(chatroomId, userId, displayName, role, content) {
 function appendMessage(displayName, role, ts, content) {
     let timestamp = ts;
     if (!timestamp) {
-        timestamp = new Date(Date.now()).toLocaleString('en-us',  { year:"numeric", month:"short", day:"numeric", hour:"numeric", minute:"numeric"});
+        timestamp = new Date(Date.now()).toLocaleString('en-us',  { year:'numeric', month:'short', day:'numeric', hour:'numeric', minute:'numeric'});
     }
     else {
-        timestamp = new Date(ts).toLocaleString('en-us', { year:"numeric", month:"short", day:"numeric", hour:"numeric", minute:"numeric"});
+        timestamp = new Date(ts).toLocaleString('en-us', { year:'numeric', month:'short', day:'numeric', hour:'numeric', minute:'numeric'});
     }
 
     let display_name = displayName;
@@ -73,7 +75,7 @@ function appendMessage(displayName, role, ts, content) {
     const messages_area = document.querySelector('.messages-area');
     const message = document.createElement('div');
     message.classList.add('message-container');
-    if (role === "instructor") {
+    if (role === 'instructor') {
         message.classList.add('admin-message');
     }
 
@@ -108,22 +110,25 @@ function appendMessage(displayName, role, ts, content) {
 }
 
 function initChatroomSocketClient(chatroomId) {
+    // eslint-disable-next-line no-undef
     window.socketClient = new WebSocketClient();
     window.socketClient.onmessage = (msg) => {
-        if (msg.type === "chat_message") {
-            let sender_name = msg.display_name;
-            let role = msg.role;
+        if (msg.type === 'chat_message') {
+            const sender_name = msg.display_name;
+            const role = msg.role;
             appendMessage(sender_name, role, msg.timestamp, msg.content);
         }
     };
     window.socketClient.open(`chatroom_${chatroomId}`);
 }
 
+// eslint-disable-next-line no-unused-vars
 function newChatroomForm() {
     const form = $('#create-chatroom-form');
     form.css('display', 'block');
 }
 
+// eslint-disable-next-line no-unused-vars
 function editChatroomForm(chatroom_id, baseUrl, title, description, allow_anon) {
     const form = $('#edit-chatroom-form');
     form.css('display', 'block');
@@ -135,16 +140,16 @@ function editChatroomForm(chatroom_id, baseUrl, title, description, allow_anon) 
     }
 }
 
+// eslint-disable-next-line no-unused-vars
 function deleteChatroomForm(chatroom_id, chatroom_name, base_url) {
     if (confirm(`This will delete chatroom '${chatroom_name}'. Are you sure?`)) {
-        const url = `${base_url}/deleteChatroom`;
-        const fd = new FormData();
-        fd.append('csrf_token', csrfToken);
-        fd.append('chatroom_id', chatroom_id);
+        const url = `${base_url}/${chatroom_id}/delete`;
         $.ajax({
             url: url,
             type: 'POST',
-            data: fd,
+            data: {
+                'csrf_token': csrfToken,
+            },
             processData: false,
             cache: false,
             contentType: false,
@@ -172,10 +177,11 @@ function deleteChatroomForm(chatroom_id, chatroom_name, base_url) {
     }
 }
 
+// eslint-disable-next-line no-unused-vars
 function toggle_chatroom(chatroomId, active) {
-    let form = document.getElementById(`chatroom_toggle_form_${chatroomId}`);
+    const form = document.getElementById(`chatroom_toggle_form_${chatroomId}`);
     if (active) {
-        if (confirm(`This will terminate this chatroom session. Are you sure?`)) {
+        if (confirm('This will terminate this chatroom session. Are you sure?')) {
             form.submit();
         }
     }
@@ -198,11 +204,12 @@ document.addEventListener('DOMContentLoaded', () => {
     const pageDataElement = document.getElementById('page-data');
     if (pageDataElement) {
         const pageData = JSON.parse(pageDataElement.textContent);
+        // eslint-disable-next-line no-unused-vars
         const { chatroomId, userId, displayName, user_admin, isAnonymous } = pageData;
 
         showToast(`You have successfully joined as ${displayName}.`);
 
-        initChatroomSocketClient(chatroomId)
+        initChatroomSocketClient(chatroomId);
 
         if (!user_admin) {
             window.socketClient.onopen = function() {
@@ -216,7 +223,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const sendMsgButton = document.querySelector('.send-message-btn');
         const messageInput = document.querySelector('.message-input');
 
-        messageInput.addEventListener("keypress", function(event) {
+        messageInput.addEventListener('keypress', (event) => {
             if (event.keyCode === 13 && !event.shiftKey) {
                 event.preventDefault();
                 sendMsgButton.click();
@@ -231,7 +238,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 return;
             }
 
-            let role = user_admin ? 'instructor' : 'student';
+            const role = user_admin ? 'instructor' : 'student';
             sendMessage(chatroomId, userId, displayName, role, messageContent);
 
             messageInput.value = '';

@@ -2,13 +2,8 @@
 
 namespace app\views;
 
-use app\entities\chat\Chatroom;
-use app\entities\chat\Message;
-use app\entities\poll\Poll;
 use app\libraries\Core;
 use app\libraries\Output;
-use app\libraries\FileUtils;
-use app\libraries\Utils;
 
 class ChatroomView extends AbstractView {
     public function __construct(Core $core, Output $output) {
@@ -39,13 +34,13 @@ class ChatroomView extends AbstractView {
         ]);
     }
 
-    public function showChatroom($chatroom, $anonymous=false) {
+    public function showChatroom($chatroom, $anonymous = false) {
         $this->core->getOutput()->addBreadcrumb("Chatroom");
         $user = $this->core->getUser();
         $display_name = $user->getDisplayFullName();
         if (!$anonymous) {
             if (!$user->accessAdmin()) {
-                $display_name = $user->getDisplayedGivenName() .  " " . substr($user->getDisplayedFamilyName(), 0, 1) . ".";
+                $display_name = $user->getDisplayedGivenName() . " " . substr($user->getDisplayedFamilyName(), 0, 1) . ".";
             }
         }
         else {
@@ -67,6 +62,3 @@ class ChatroomView extends AbstractView {
         ]);
     }
 }
-
-
-

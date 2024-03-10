@@ -4,11 +4,9 @@ declare(strict_types=1);
 
 namespace app\repositories\chat;
 
-use app\entities\chat\Chatroom;
 use Doctrine\ORM\EntityRepository;
 
 class ChatroomRepository extends EntityRepository {
-
     public function findAllChatroomsByHostId(string $hostId) {
         return $this->createQueryBuilder('c')
                     ->where('c.host_id = :hostId')
