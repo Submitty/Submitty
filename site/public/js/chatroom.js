@@ -1,4 +1,6 @@
-/* global csrfToken userId */
+/* global csrfToken */
+
+// eslint-disable-next-line no-unused-vars
 function fetchMessages(chatroomId, my_id) {
     $.ajax({
         url: buildCourseUrl(['chat', chatroomId, 'messages']),
@@ -9,11 +11,11 @@ function fetchMessages(chatroomId, my_id) {
                 responseData.data.forEach(msg => {
                     let display_name = msg.display_name;
                     if (msg.user_id === my_id) {
-                        display_name = "me";
+                        display_name = 'me';
                     }
                     appendMessage(display_name, msg.role, msg.timestamp, msg.content);
                 });
-                const messages_area = document.querySelector(".messages-area");
+                const messages_area = document.querySelector('.messages-area');
                 messages_area.scrollTop = messages_area.scrollHeight;
             }
         },
@@ -23,6 +25,7 @@ function fetchMessages(chatroomId, my_id) {
     });
 }
 
+// eslint-disable-next-line no-unused-vars
 function sendMessage(chatroomId, userId, displayName, role, content) {
     $.ajax({
         url: buildCourseUrl(['chat', chatroomId, 'send']),
@@ -32,14 +35,25 @@ function sendMessage(chatroomId, userId, displayName, role, content) {
             'user_id': userId,
             'display_name': displayName,
             'role': role,
-            'content': content
+            'content': content,
+        },
+        success: function (response) {
+            try {
+                // eslint-disable-next-line no-var
+                let json = JSON.parse(response);
+            }
+            catch (e) {
+                // eslint-disable-next-line no-undef
+                displayErrorMessage('Error parsing data. Please try again.');
+                return;
+            }
+            window.socketClient.send({'type': "chat_message", 'content': content, 'user_id': userId, 'display_name': displayName, 'role': role, 'timestamp': new Date(Date.now()).toLocaleString()});
         },
         error: function() {
             window.alert('Something went wrong with storing message');
         },
-    })
-    window.socketClient.send({'type': "chat_message", 'content': content, 'user_id': userId, 'display_name': displayName, 'role': role, 'timestamp': new Date(Date.now()).toLocaleString()})
-    appendMessage("me", role, null, content);
+    });
+    appendMessage(displayName, role, null, content);
 }
 
 function appendMessage(displayName, role, ts, content) {
@@ -52,27 +66,41 @@ function appendMessage(displayName, role, ts, content) {
     }
 
     let display_name = displayName;
-    if (role && role !== 'student' && display_name !== 'me') {
-        display_name = `${displayName}[instructor]`;
+    if (role && role !== 'student' && display_name !== 'me' && display_name.substring(0, 9) !== 'Anonymous') {
+        display_name = `${displayName} [${role}]`;
     }
 
     const messages_area = document.querySelector('.messages-area');
     const message = document.createElement('div');
     message.classList.add('message-container');
     if (role === "instructor") {
-        message.classList.add('admin-message')
+        message.classList.add('admin-message');
     }
-    message.innerHTML = `
-        <div class="message-header">
-            <span class="sender-name">${display_name}</span>
-            <span class="timestamp">${timestamp}</span>
-        </div>
-        <div class="message-content">
-            ${content}
-        </div>
-    `;
+
+    const messageHeader = document.createElement('div');
+    messageHeader.classList.add('message-header');
+
+    const senderName = document.createElement('span');
+    senderName.classList.add('sender-name');
+    senderName.innerText = display_name;
+
+    const timestampSpan = document.createElement('span');
+    timestampSpan.classList.add('timestamp');
+    timestampSpan.innerText = timestamp;
+
+    messageHeader.appendChild(senderName);
+    messageHeader.appendChild(timestampSpan);
+
+    const messageContent = document.createElement('div');
+    messageContent.classList.add('message-content');
+    messageContent.innerText = content;
+
+    message.appendChild(messageHeader);
+    message.appendChild(messageContent);
 
     messages_area.appendChild(message);
+
+    // automatically scroll to bottom for new messages, if close to bottom
     const distanceFromBottom = messages_area.scrollHeight - messages_area.scrollTop - messages_area.clientHeight;
     if ( distanceFromBottom < 110) {
         messages_area.scrollTop = messages_area.scrollHeight;
@@ -96,10 +124,15 @@ function newChatroomForm() {
     form.css('display', 'block');
 }
 
-function editChatroomForm(chatroom_id, baseUrl) {
+function editChatroomForm(chatroom_id, baseUrl, title, description, allow_anon) {
     const form = $('#edit-chatroom-form');
     form.css('display', 'block');
     document.getElementById('chatroom-edit-form').action = `${baseUrl}/${chatroom_id}/edit`;
+    document.getElementById('chatroom-title-input').value = title;
+    document.getElementById('chatroom-description-input').value = description;
+    if (allow_anon) {
+        document.getElementById('chatroom-allow-anon').checked = true;
+    }
 }
 
 function deleteChatroomForm(chatroom_id, chatroom_name, base_url) {
@@ -139,14 +172,45 @@ function deleteChatroomForm(chatroom_id, chatroom_name, base_url) {
     }
 }
 
+function toggle_chatroom(chatroomId, active) {
+    let form = document.getElementById(`chatroom_toggle_form_${chatroomId}`);
+    if (active) {
+        if (confirm(`This will terminate this chatroom session. Are you sure?`)) {
+            form.submit();
+        }
+    }
+    else {
+        form.submit();
+    }
+}
+
+function showToast(message) {
+    const toast = document.querySelector('.chatroom-toast');
+    toast.textContent = message;
+    toast.style.visibility = 'visible';
+    toast.style.opacity = '0.8';
+    setTimeout(() => {
+        toast.style.opacity = '0'; // fade out
+    }, 3000);
+}
+
 document.addEventListener('DOMContentLoaded', () => {
-    $('.popup-form').css('display', 'none');
     const pageDataElement = document.getElementById('page-data');
     if (pageDataElement) {
         const pageData = JSON.parse(pageDataElement.textContent);
-        const { chatroomId, userId, displayName, user_admin } = pageData;
+        const { chatroomId, userId, displayName, user_admin, isAnonymous } = pageData;
+
+        showToast(`You have successfully joined as ${displayName}.`);
 
         initChatroomSocketClient(chatroomId)
+
+        if (!user_admin) {
+            window.socketClient.onopen = function() {
+                const welcomeMessage = `Welcome, ${displayName}!`;
+                appendMessage('System', 'system', new Date().toLocaleString(), welcomeMessage);
+            };
+        }
+
         fetchMessages(chatroomId, userId);
 
         const sendMsgButton = document.querySelector('.send-message-btn');

@@ -17,29 +17,36 @@ class Chatroom {
     #[ORM\Id]
     #[ORM\Column(name: "id", type: Types::INTEGER)]
     #[ORM\GeneratedValue]
-    protected int $id;
+    private int $id;
 
     #[ORM\Column(type: Types::STRING)]
-    protected string $host_id;
+    private string $host_id;
 
-    #[ORM\Column(name: "title", type: Types::STRING)]
-    protected string $title;
+    #[ORM\Column(type: Types::STRING)]
+    private string $host_name;
 
-    #[ORM\Column(name: "description", type: Types::STRING)]
-    protected string $description;
+    #[ORM\Column(type: Types::STRING)]
+    private string $title;
 
-    #[ORM\Column(name: "is_active", type: Types::BOOLEAN)]
-    protected bool $isActive;
+    #[ORM\Column(type: Types::STRING)]
+    private string $description;
+
+    #[ORM\Column(type: Types::BOOLEAN)]
+    private bool $is_active;
+
+    #[ORM\Column(type: Types::BOOLEAN)]
+    private bool $allow_anon;
 
     /**
      * @var Collection<Message>
      */
-    #[ORM\OneToMany(mappedBy: "chatroom", targetEntity: Message::class, cascade: ["remove"])]
-    protected Collection $messages;
+    #[ORM\OneToMany(mappedBy: "chatroom", targetEntity: Message::class)]
+    private Collection $messages;
 
     public function __construct() {
         $this->messages = new ArrayCollection();
-        $this->isActive = true;
+        $this->is_active = false;
+        $this->allow_anon = true;
     }
 
     public function getId(): int {
@@ -52,6 +59,14 @@ class Chatroom {
 
     public function getHostId(): string {
         return $this->host_id;
+    }
+
+    public function setHostName($hostName): void {
+        $this->host_name = $hostName;
+    }
+
+    public function getHostName(): string {
+        return $this->host_name;
     }
 
     public function getTitle(): string {
@@ -70,16 +85,20 @@ class Chatroom {
         $this->description = $description;
     }
 
-    public function getStatus(): bool {
-        return $this->isActive;
+    public function toggle_on_off(): void {
+        $this->is_active = !$this->is_active;
     }
 
-    public function activate(): void {
-        $this->isActive = True;
+    public function isActive(): bool {
+        return $this->is_active;
     }
 
-    public function deactivate(): void {
-        $this->isActive = False;
+    public function isAllowAnon(): bool {
+        return $this->allow_anon;
+    }
+
+    public function setAllowAnon($allow_anon): void {
+        $this->allow_anon = $allow_anon;
     }
 
     public function getMessages(): Collection {

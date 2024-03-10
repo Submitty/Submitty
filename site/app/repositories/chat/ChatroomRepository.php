@@ -32,16 +32,4 @@ class ChatroomRepository extends EntityRepository {
                     ->getQuery()
                     ->getResult();
     }
-
-    public function findByChatroomId(string $chatroomId): ?Chatroom {
-        $result = $this->createQueryBuilder('c')
-                    ->where('c.id = :id')
-                    ->setParameter('id', $chatroomId)
-                    ->getQuery()
-                    ->getResult();
-        if (count($result) === 0) {
-            return null;
-        }
-        return $result[0];
-    }
 }

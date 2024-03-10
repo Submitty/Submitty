@@ -18,7 +18,7 @@ class Message {
     #[ORM\GeneratedValue]
     private int $id;
 
-    #[ORM\ManyToOne(targetEntity: "Chatroom")]
+    #[ORM\ManyToOne(targetEntity: Chatroom::class)]
     #[ORM\JoinColumn(name: "chatroom_id", referencedColumnName: "id")]
     private Chatroom $chatroom;
 
@@ -35,7 +35,7 @@ class Message {
     private string $content;
 
     #[ORM\Column(type: Types::DATETIMETZ_MUTABLE)]
-    protected DateTime $timestamp;
+    private DateTime $timestamp;
 
     public function __construct() {
         $this->setTimestamp(new \DateTime("now"));

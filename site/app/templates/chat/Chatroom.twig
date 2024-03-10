@@ -1,7 +1,8 @@
-<div class="content chatroom-page">
+<div class="chatroom-toast"></div>
+<div class="content chatroom-page dim-overlay">
     <div class="chatroom-container">
         <div class="chatroom-header">
-            <span class="chatroom-title">{{ chatroom.getTitle() }}</span>
+            <span class="chatroom-title" title="{{ chatroom.getTitle() }}"> {{ chatroom.getTitle() | length > 40 ? chatroom.getTitle() | slice(0, 40) ~ '...' : chatroom.getTitle() }} </span>
             <a href="{{ base_url }}" class="leave-room btn btn-danger">leave</a>
         </div>
         <div class="chatroom-content">
@@ -19,6 +20,7 @@
         "baseURL": "{{ base_url }}",
         "userId": "{{ user_id }}",
         "displayName": "{{ user_display_name }}",
-        "user_admin": "{{ user_admin }}"
+        "user_admin": "{{ user_admin }}",
+        "isAnonymous": "{{ anonymous }}"
     }
 </script>

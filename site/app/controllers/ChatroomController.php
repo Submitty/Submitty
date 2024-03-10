@@ -2,7 +2,6 @@
 
 namespace app\controllers;
 
-use app\entities\poll\Poll;
 use app\libraries\Core;
 use app\libraries\response\WebResponse;
 use app\libraries\response\JsonResponse;
@@ -27,8 +26,8 @@ class ChatroomController extends AbstractController {
     public function showChatroomsPage(): WebResponse {
         $repo = $this->core->getCourseEntityManager()->getRepository(Chatroom::class);
         $user = $this->core->getUser();
-        $chatrooms = $repo->findAll();
-        $active_chatrooms = $repo->findAllActiveChatrooms();
+        $chatrooms = $repo->findBy([], ['id' => 'ASC']);
+        $active_chatrooms = $repo->findBy(['is_active' => true], ['id' => 'ASC']);
 
         if ($user->accessAdmin()) {
             return new WebResponse(
@@ -47,11 +46,31 @@ class ChatroomController extends AbstractController {
     }
 
     /**
+     * @Route("/courses/{_semester}/{_course}/chat/newChatroom", methods={"POST"})
+     * @AccessControl(role="INSTRUCTOR")
+     */
+    public function addChatroom(): RedirectResponse {
+        $em = $this->core->getCourseEntityManager();
+
+        $chatroom = new Chatroom();
+        $chatroom->setTitle($_POST['title']);
+        $chatroom->setDescription($_POST['description']);
+        $chatroom->setHostId($this->core->getUser()->getId());
+        $chatroom->setHostName($this->core->getUser()->getDisplayFullName());
+
+        $em->persist($chatroom);
+        $em->flush();
+
+        $this->core->addSuccessMessage("Chatroom successfully added");
+        return new RedirectResponse($this->core->buildCourseUrl(['chat']));
+    }
+
+    /**
      * @Route("/courses/{_semester}/{_course}/chat/{chatroom_id}", methods={"GET"})
      * @param string $chatroom_id
      * @return RedirectResponse|WebResponse
      */
-     public function showChatroom(string $chatroom_id): WebResponse|RedirectResponse {
+     public function getChatroom(string $chatroom_id): WebResponse|RedirectResponse {
          if (!is_numeric($chatroom_id)) {
             $this->core->addErrorMessage("Invalid Chatroom ID");
             return new RedirectResponse($this->core->buildCourseUrl(['chat']));
@@ -63,28 +82,30 @@ class ChatroomController extends AbstractController {
         return new WebResponse(
             'Chatroom',
             'showChatroom',
-            $chatroom
+            $chatroom,
         );
      }
 
-    /**
-     * @Route("/courses/{_semester}/{_course}/chat/newChatroom", name="new_chatroom", methods={"POST"})
-     * @AccessControl(role="INSTRUCTOR")
+     /**
+     * @Route("/courses/{_semester}/{_course}/chat/{chatroom_id}/anonymous", methods={"GET"})
+     * @param string $chatroom_id
+     * @return RedirectResponse|WebResponse
      */
-    public function addChatroom(): RedirectResponse {
-        $em = $this->core->getCourseEntityManager();
+     public function getChatroomAnon(string $chatroom_id): WebResponse|RedirectResponse {
+         if (!is_numeric($chatroom_id)) {
+            $this->core->addErrorMessage("Invalid Chatroom ID");
+            return new RedirectResponse($this->core->buildCourseUrl(['chat']));
+        }
 
-        $chatroom = new Chatroom();
-        $chatroom->setTitle($_POST['title']);
-        $chatroom->setDescription($_POST['description']);
-        $chatroom->setHostId($this->core->getUser()->getId());
+        $repo = $this->core->getCourseEntityManager()->getRepository(Chatroom::class);
+        $chatroom = $repo->find($chatroom_id);
 
-        $em->persist($chatroom);
-        $em->flush();
-
-        $this->core->addSuccessMessage("Chatroom successfully added");
-        return new RedirectResponse($this->core->buildCourseUrl(['chat']));
-    }
+        return new WebResponse(
+            'Chatroom',
+            'showChatroom',
+            $chatroom, true,
+        );
+     }
 
     /**
      * @Route("/courses/{_semester}/{_course}/chat/deleteChatroom", methods={"POST"})
@@ -98,7 +119,7 @@ class ChatroomController extends AbstractController {
         $repo = $em->getRepository(Chatroom::class);
 
         /** @var Chatroom|null */
-        $chatroom = $repo->findByChatroomId($chatroom_id);
+        $chatroom = $repo->find($chatroom_id);
 
         if ($chatroom === null) {
             return JsonResponse::getFailResponse('Invalid Chatroom ID');
@@ -113,35 +134,61 @@ class ChatroomController extends AbstractController {
         return JsonResponse::getSuccessResponse();
     }
 
-/**
- * @Route("/courses/{_semester}/{_course}/chat/{chatroom_id}/edit", name="edit_chatroom", methods={"POST"})
- * @AccessControl(role="INSTRUCTOR")
- */
-public function editChatroom(int $chatroom_id): RedirectResponse {
-    $em = $this->core->getCourseEntityManager();
-    $chatroom = $em->getRepository(Chatroom::class)->find($chatroom_id);
+    /**
+     * @Route("/courses/{_semester}/{_course}/chat/{chatroom_id}/edit", methods={"POST"})
+     * @AccessControl(role="INSTRUCTOR")
+     */
+    public function editChatroom(int $chatroom_id): RedirectResponse {
+        $em = $this->core->getCourseEntityManager();
+        $chatroom = $em->getRepository(Chatroom::class)->find($chatroom_id);
 
-    if (!$chatroom) {
-        $this->core->addErrorMessage("Chatroom not found");
+        if (!$chatroom) {
+            $this->core->addErrorMessage("Chatroom not found");
+            return new RedirectResponse($this->core->buildCourseUrl(['chat']));
+        }
+
+        if (isset($_POST['title'])) {
+            $chatroom->setTitle($_POST['title']);
+        }
+        if (isset($_POST['description'])) {
+            $chatroom->setDescription($_POST['description']);
+        }
+        if (isset($_POST['allow-anon'])) {
+            $chatroom->setAllowAnon(true);
+        }
+        else {
+            $chatroom->setAllowAnon(false);
+        }
+
+        $em->flush();
+
+        $this->core->addSuccessMessage("Chatroom successfully updated");
         return new RedirectResponse($this->core->buildCourseUrl(['chat']));
     }
 
-    if (isset($_POST['title'])) {
-        $chatroom->setTitle($_POST['title']);
-    }
-    if (isset($_POST['description'])) {
-        $chatroom->setDescription($_POST['description']);
-    }
+    /**
+     * @Route("/courses/{_semester}/{_course}/chat/{chatroom_id}/toggleOnOff", methods={"POST"})
+     * @AccessControl(role="INSTRUCTOR")
+     */
+     public function toggleChatroomOnOf(int $chatroom_id): RedirectResponse {
+        $em = $this->core->getCourseEntityManager();
+        $chatroom = $em->getRepository(Chatroom::class)->find($chatroom_id);
 
-    $em->persist($chatroom);
-    $em->flush();
+        if ($chatroom === null) {
+            $this->core->addErrorMessage("Chatroom not found");
+            return new RedirectResponse($this->core->buildCourseUrl(['chat']));
+        }
 
-    $this->core->addSuccessMessage("Chatroom successfully updated");
-    return new RedirectResponse($this->core->buildCourseUrl(['chat']));
-}
+        $chatroom->toggle_on_off();
+
+        $em->flush();
+
+        return new RedirectResponse($this->core->buildCourseUrl(['chat']));
+     }
+
 
     /**
-     * @Route("/courses/{_semester}/{_course}/chat/{chatroom_id}/messages", name="fetch_chatroom_messages", methods={"GET"})
+     * @Route("/courses/{_semester}/{_course}/chat/{chatroom_id}/messages", methods={"GET"})
      */
     public function fetchMessages(int $chatroom_id): JsonResponse {
         $em = $this->core->getCourseEntityManager();
@@ -162,9 +209,9 @@ public function editChatroom(int $chatroom_id): RedirectResponse {
     }
 
     /**
-     * @Route("/courses/{_semester}/{_course}/chat/{chatroom_id}/send", name="send_chatroom_messages", methods={"POST"})
+     * @Route("/courses/{_semester}/{_course}/chat/{chatroom_id}/send", methods={"POST"})
      */
-    public function sendMessage(int $chatroom_id): JsonResponse {
+    public function addMessage(int $chatroom_id): JsonResponse {
         $em = $this->core->getCourseEntityManager();
         $content = $_POST['content'] ?? '';
         $userId = $_POST['user_id'] ?? null;

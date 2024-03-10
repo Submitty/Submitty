@@ -15,7 +15,7 @@ def up(config, database, semester, course):
     :param course: Code of course being migrated
     :type course: str
     """
-    database.execute("CREATE TABLE IF NOT EXISTS chatrooms(id SERIAL PRIMARY KEY, host_id character varying NOT NULL, title text NOT NULL, description text, is_active BOOLEAN DEFAULT false NOT NULL)")
+    database.execute("CREATE TABLE IF NOT EXISTS chatrooms(id SERIAL PRIMARY KEY, host_id character varying NOT NULL, host_name character varying, title text NOT NULL, description text, is_active BOOLEAN DEFAULT false NOT NULL, allow_anon BOOLEAN DEFAULT true NOT NULL)")
     database.execute("CREATE TABLE IF NOT EXISTS chatroom_messages(id SERIAL PRIMARY KEY, chatroom_id integer NOT NULL, userId character varying NOT NULL, display_name character varying, role character varying, content text NOT NULL, timestamp timestamp(0) with time zone NOT NULL)")
 
     course_dir = Path(config.submitty['submitty_data_dir'], 'courses', semester, course)

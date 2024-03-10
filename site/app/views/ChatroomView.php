@@ -39,13 +39,21 @@ class ChatroomView extends AbstractView {
         ]);
     }
 
-    public function showChatroom($chatroom) {
+    public function showChatroom($chatroom, $anonymous=false) {
         $this->core->getOutput()->addBreadcrumb("Chatroom");
         $user = $this->core->getUser();
         $display_name = $user->getDisplayFullName();
-        if (!$user->accessAdmin()) {
-            $display_name = $user->getDisplayedGivenName() .  " " . substr($user->getDisplayedFamilyName(), 0, 1) . ".";
+        if (!$anonymous) {
+            if (!$user->accessAdmin()) {
+                $display_name = $user->getDisplayedGivenName() .  " " . substr($user->getDisplayedFamilyName(), 0, 1) . ".";
+            }
         }
+        else {
+            $adjectives = ["Quick", "Lazy", "Cheerful", "Pensive", "Mysterious", "Bright", "Sly", "Brave", "Calm", "Eager", "Fierce", "Gentle", "Jolly", "Kind", "Lively", "Nice", "Proud", "Quiet", "Rapid", "Swift"];
+            $anon_names = ["Duck", "Goose", "Swan", "Eagle", "Parrot", "Owl", "Sparrow", "Robin", "Pigeon", "Falcon", "Hawk", "Flamingo", "Pelican", "Seagull", "Cardinal", "Canary", "Finch", "Hummingbird"];
+            $display_name = 'Anonymous' . ' ' . $adjectives[array_rand($anon_names)] . ' ' . $anon_names[array_rand($anon_names)];
+        }
+
         return $this->core->getOutput()->renderTwigTemplate("chat/Chatroom.twig", [
             'csrf_token' => $this->core->getCsrfToken(),
             'base_url' => $this->core->buildCourseUrl() . '/chat',
@@ -55,6 +63,7 @@ class ChatroomView extends AbstractView {
             'user_admin' => $this->core->getUser()->accessAdmin(),
             'user_id' => $this->core->getUser()->getId(),
             'user_display_name' => $display_name,
+            'anonymous' => $anonymous,
         ]);
     }
 }
