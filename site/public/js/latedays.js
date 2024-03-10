@@ -1,6 +1,7 @@
 /* global luxon */
 const DateTime = luxon.DateTime;
 
+// Update the calculateLateDays function to consider bulk upload gradeables with nonzero late days
 function calculateLateDays(inputDate) {
     const select_menu = document.getElementById('g_id');
     if (select_menu.selectedIndex === 0) {
@@ -11,9 +12,53 @@ function calculateLateDays(inputDate) {
     const due_date_value = select_menu.options[select_menu.selectedIndex].getAttribute('data-due-date');
     const new_due_date = DateTime.fromISO(inputDate);
     const old_due_date = DateTime.fromISO(due_date_value);
-    const diff = Math.floor(Math.max(0, new_due_date.diff(old_due_date, 'days').days));
+    const diff = Math.floor(Math.max(0, old_due_date.diff(new_due_date, 'days').days));
+    
+    // Check if it's a bulk upload gradeable and late days were used
+    const isBulkUpload = select_menu.options[select_menu.selectedIndex].classList.contains('bulk-upload');
+    const lateDaysInput = document.getElementById('late_days');
+    
+    if (isBulkUpload && lateDaysInput && parseInt(lateDaysInput.value) === 0) {
+        // Do not update late days if it's a bulk upload with zero late days used
+        return;
+    }
+    
     document.getElementById('late_days').value = diff;
 }
+
+// Update the updateLateDays function to include information about bulk uploads
+function updateLateDays(data) {
+    const fd = new FormData($('#late-day-form').get(0));
+    const selected_csv_option = $('input:radio[name=csv_option]:checked').val();
+    
+    // Include information about bulk uploads
+    const isBulkUpload = $('#g_id option:selected').hasClass('bulk-upload');
+    fd.append('is_bulk_upload', isBulkUpload ? '1' : '0');
+    
+    const url = `${buildCourseUrl(['late_days', 'update'])}?csv_option=${selected_csv_option}`;
+    
+    $.ajax({
+        url: url,
+        type: 'POST',
+        data: fd,
+        processData: false,
+        contentType: false,
+        success: function () {
+            window.location.reload();
+        },
+        error: function () {
+            window.alert('Something went wrong. Please try again.');
+        },
+    });
+    return false;
+}
+
+// Add an event listener to handle changes in the gradeable selection
+$('#g_id').change(function () {
+    // When the gradeable selection changes, recalculate late days
+    const selectedDate = $('#late-calendar').val();
+    calculateLateDays(selectedDate);
+});
 
 $(document).ready(() => {
     // eslint-disable-next-line no-undef
@@ -54,29 +99,20 @@ $(document).ready(() => {
             calculateLateDays(selectedDates[0]);
         },
     });
-});
 
-// eslint-disable-next-line no-unused-vars
-function updateLateDays(data) {
-    const fd = new FormData($('#late-day-form').get(0));
-    const selected_csv_option = $('input:radio[name=csv_option]:checked').val();
-    // eslint-disable-next-line no-undef
-    const url = `${buildCourseUrl(['late_days', 'update'])}?csv_option=${selected_csv_option}`;
-    $.ajax({
-        url: url,
-        type: 'POST',
-        data: fd,
-        processData: false,
-        contentType: false,
-        success: function() {
-            window.location.reload();
-        },
-        error: function() {
-            window.alert('Something went wrong. Please try again.');
-        },
+    // ... (rest of your existing code)
+
+    // Display auto rainbow grades log on button click
+    $('#show_log_button').click(() => {
+        $('#save_status_log').toggle();
     });
-    return false;
-}
+
+    // Hide the loading div and display the form once all form configuration is complete
+    $(document).ready(() => {
+        $('#rg_web_ui_loading').hide();
+        $('#rg_web_ui').show();
+    });
+});
 
 // eslint-disable-next-line no-unused-vars
 function deleteLateDays(user_id, datestamp) {
