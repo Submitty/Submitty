@@ -1303,7 +1303,6 @@ VALUES (?,?,?,?,?,?)",
         }
         $params[] = $user->getId();
 
-        echo $user->getDisplayNameOrder();
         // User preferred name tracking: Master DB cannot tell who is logged
         // into Submitty, so the AUTH token and $logged_in var embedded as a SQL
         // comment will be noted in Postgresql's logs as who has issued a change

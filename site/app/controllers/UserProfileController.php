@@ -154,6 +154,7 @@ class UserProfileController extends AbstractController {
         if (isset($_POST['display-name-order'])) {
             $newPronouns = trim($_POST['display-name-order']);
             //validPronouns() checks for valid option
+            // echo $newPronouns;
             $user->setDisplayNameOrder($newPronouns);
             $user->setUserUpdated(true);
             $this->core->getQueries()->updateUser($user);

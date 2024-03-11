@@ -12,10 +12,16 @@
         <input id="display-name-order-csrf" type="hidden" name="csrf_token" value="{{ csrf_token }}" />
         <h2>My Pronouns</h2>
         <div class="edit_user_row ui-front">
-        <select name="user_pronouns_change" id="user-pronouns-change">
-            <option value="GIVEN_F">GIVEN_F</option>
-            <option value="REVERSED_F">REVERSED_F</option>
-        </select>
+    <select name="display-name-order-change" id="display-name-order-change">
+        {% if user.getDisplayNameOrder() != 'REVERSED_F' %}
+        <option value="GIVEN_F">GIVEN_F</option>
+        <option value="REVERSED_F">REVERSED_F</option>
+        {% endif %}
+        {% if user.getDisplayNameOrder() != 'GIVEN_F' %}
+        <option value="REVERSED_F">REVERSED_F</option>
+        <option value="GIVEN_F">GIVEN_F</option>
+        {% endif %}
+    </select>
         </div>
         <br>
     </div>
