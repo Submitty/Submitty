@@ -263,6 +263,8 @@ function newUploadCourseMaterialsForm() {
 
     createArray(1);
 
+    document.body.classList.add("no-scroll");
+
     var fileList = document.getElementsByClassName("file-viewer-data");
 
     var files = [];
@@ -458,7 +460,7 @@ function editFilePathRecommendations() {
 
 var lastActiveElement = null;
 function captureTabInModal(formName, resetFocus=true){
-    $('body').css('overflow', 'hidden');
+    
     if(resetFocus){
         lastActiveElement = document.activeElement;
     }
