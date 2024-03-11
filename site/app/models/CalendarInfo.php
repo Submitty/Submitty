@@ -90,6 +90,7 @@ class CalendarInfo extends AbstractModel {
 
         // Get the gradeables from the GradeableList and group them by section
         $gradeable_list_sections = [
+            GradeableList::FUTURE => $gradeable_list->getFutureGradeables(),
             GradeableList::OPEN => $gradeable_list->getOpenGradeables(),
             GradeableList::GRADING => $gradeable_list->getGradingGradeables(),
             GradeableList::CLOSED => $gradeable_list->getClosedGradeables(),

@@ -312,10 +312,10 @@ class GradeableList extends AbstractModel {
         ) {
             return self::OPEN;
         }
-        elseif ($core->getUser()->accessGrading() && $gradeable->getTaViewStartDate() <= $now) {
+        elseif ($core->getUser()->getAccessLevel() < 4 && $gradeable->getTaViewStartDate() <= $now) {
             return self::BETA;
         }
-        elseif ($core->getUser()->accessAdmin()) {
+        elseif ($core->getUser()->getAccessLevel() < 3) {
             return self::FUTURE;
         }
         return -1;
