@@ -33,7 +33,7 @@ class BannerImage {
     protected string $folder_name;
 
     #[ORM\Column(type: Types::STRING)]
-    protected string $path_date;
+    protected string $path;
 
     #[ORM\Column(type: Types::STRING)]
     protected string $extra_info;
@@ -67,11 +67,11 @@ class BannerImage {
     }
 
     public function setPath(string $path): void {
-        $this->path_date = $path;
+        $this->path = $path;
     }
 
     public function getPath(): string {
-        return $this->path_date;
+        return $this->path;
     }
     public function setFolderName(string $folder_name): void {
         $this->folder_name = $folder_name;

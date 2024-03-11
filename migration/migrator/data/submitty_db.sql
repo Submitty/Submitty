@@ -401,7 +401,7 @@ SET default_tablespace = '';
 
 CREATE TABLE public.community_events (
     id integer NOT NULL,
-    path_date character varying(255) NOT NULL,
+    path character varying(255) NOT NULL,
     name character varying(255) NOT NULL,
     folder_name character varying(255) NOT NULL,
     extra_info character varying(255),
