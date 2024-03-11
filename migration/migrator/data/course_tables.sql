@@ -709,7 +709,7 @@ ALTER SEQUENCE public.categories_list_category_id_seq OWNED BY public.categories
 CREATE TABLE public.chatroom_messages (
     id integer NOT NULL,
     chatroom_id integer NOT NULL,
-    userid character varying NOT NULL,
+    user_id character varying NOT NULL,
     display_name character varying,
     role character varying,
     content text NOT NULL,
@@ -2729,6 +2729,22 @@ CREATE TRIGGER late_day_extension_change AFTER INSERT OR DELETE OR UPDATE ON pub
 --
 
 CREATE TRIGGER late_days_allowed_change AFTER INSERT OR DELETE OR UPDATE ON public.late_days FOR EACH ROW EXECUTE PROCEDURE public.late_days_allowed_change();
+
+
+--
+-- Name: chatroom_messages chatroom_messages_chatroom_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.chatroom_messages
+    ADD CONSTRAINT chatroom_messages_chatroom_id_fkey FOREIGN KEY (chatroom_id) REFERENCES public.chatrooms(id);
+
+
+--
+-- Name: chatroom_messages chatroom_messages_user_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.chatroom_messages
+    ADD CONSTRAINT chatroom_messages_user_id_fkey FOREIGN KEY (user_id) REFERENCES public.users(user_id);
 
 
 --

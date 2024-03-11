@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace app\entities\chat;
 
 use DateTime;
-use Doctrine\Common\Collections\Collection;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
 
@@ -85,7 +84,7 @@ class Message {
         return $this->timestamp;
     }
 
-    public function setTimestamp(datetime $timestamp): void {
+    public function setTimestamp(Datetime $timestamp): void {
         $this->timestamp = $timestamp;
     }
 

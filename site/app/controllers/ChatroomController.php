@@ -2,7 +2,6 @@
 
 namespace app\controllers;
 
-use app\libraries\Core;
 use app\libraries\response\WebResponse;
 use app\libraries\response\JsonResponse;
 use app\libraries\response\RedirectResponse;
@@ -10,12 +9,12 @@ use app\entities\chat\Chatroom;
 use app\entities\chat\Message;
 use app\libraries\routers\AccessControl;
 use app\libraries\routers\Enabled;
-use app\views\ChatroomView;
 use Symfony\Component\Routing\Annotation\Route;
-use Doctrine\ORM\EntityManagerInterface;
 
+/**
+ * @Enabled("chat")
+ */
 class ChatroomController extends AbstractController {
-
     /**
      * @Route("/courses/{_semester}/{_course}/chat", methods={"GET"})
      */
@@ -64,8 +63,8 @@ class ChatroomController extends AbstractController {
      * @param string $chatroom_id
      * @return RedirectResponse|WebResponse
      */
-     public function getChatroom(string $chatroom_id): WebResponse|RedirectResponse {
-         if (!is_numeric($chatroom_id)) {
+    public function getChatroom(string $chatroom_id): WebResponse|RedirectResponse {
+        if (!is_numeric($chatroom_id)) {
             $this->core->addErrorMessage("Invalid Chatroom ID");
             return new RedirectResponse($this->core->buildCourseUrl(['chat']));
         }
@@ -85,12 +84,12 @@ class ChatroomController extends AbstractController {
         );
      }
 
-     /**
+    /**
      * @Route("/courses/{_semester}/{_course}/chat/{chatroom_id}/anonymous", methods={"GET"})
      * @param string $chatroom_id
      * @return RedirectResponse|WebResponse
      */
-     public function getChatroomAnon(string $chatroom_id): WebResponse|RedirectResponse {
+    public function getChatroomAnon(string $chatroom_id): WebResponse|RedirectResponse {
         if (!is_numeric($chatroom_id)) {
             $this->core->addErrorMessage("Invalid Chatroom ID");
             return new RedirectResponse($this->core->buildCourseUrl(['chat']));
@@ -102,7 +101,8 @@ class ChatroomController extends AbstractController {
         return new WebResponse(
             'Chatroom',
             'showChatroom',
-            $chatroom, true,
+            $chatroom,
+            true,
         );
      }
 
@@ -165,7 +165,7 @@ class ChatroomController extends AbstractController {
      * @Route("/courses/{_semester}/{_course}/chat/{chatroom_id}/toggleOnOff", methods={"POST"})
      * @AccessControl(role="INSTRUCTOR")
      */
-     public function toggleChatroomOnOff(string $chatroom_id): RedirectResponse {
+    public function toggleChatroomOnOff(string $chatroom_id): RedirectResponse {
         $em = $this->core->getCourseEntityManager();
         $chatroom = $em->getRepository(Chatroom::class)->find($chatroom_id);
 
@@ -180,7 +180,6 @@ class ChatroomController extends AbstractController {
 
         return new RedirectResponse($this->core->buildCourseUrl(['chat']));
      }
-
 
     /**
      * @Route("/courses/{_semester}/{_course}/chat/{chatroom_id}/messages", methods={"GET"})
