@@ -143,13 +143,14 @@ function editChatroomForm(chatroom_id, baseUrl, title, description, allow_anon) 
 // eslint-disable-next-line no-unused-vars
 function deleteChatroomForm(chatroom_id, chatroom_name, base_url) {
     if (confirm(`This will delete chatroom '${chatroom_name}'. Are you sure?`)) {
-        const url = `${base_url}/${chatroom_id}/delete`;
+        const url = `${base_url}/delete`;
+        const fd = new FormData();
+        fd.append('csrf_token', csrfToken);
+        fd.append('chatroom_id', chatroom_id);
         $.ajax({
             url: url,
             type: 'POST',
-            data: {
-                'csrf_token': csrfToken,
-            },
+            data: fd,
             processData: false,
             cache: false,
             contentType: false,

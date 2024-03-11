@@ -84,7 +84,7 @@ class Message {
         return $this->timestamp;
     }
 
-    public function setTimestamp(Datetime $timestamp): void {
+    public function setTimestamp(DateTime $timestamp): void {
         $this->timestamp = $timestamp;
     }
 

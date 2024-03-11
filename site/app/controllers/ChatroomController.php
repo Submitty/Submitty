@@ -82,7 +82,7 @@ class ChatroomController extends AbstractController {
             'showChatroom',
             $chatroom,
         );
-     }
+    }
 
     /**
      * @Route("/courses/{_semester}/{_course}/chat/{chatroom_id}/anonymous", methods={"GET"})
@@ -104,28 +104,27 @@ class ChatroomController extends AbstractController {
             $chatroom,
             true,
         );
-     }
+    }
 
     /**
-     * @Route("/courses/{_semester}/{_course}/chat/chatroom_id/delete", methods={"POST"})
+     * @Route("/courses/{_semester}/{_course}/chat/delete", methods={"POST"})
      * @AccessControl(role="INSTRUCTOR")
      */
-    public function deleteChatroom(string $chatroom_id): JsonResponse {
+    public function deleteChatroom(): JsonResponse {
+        $chatroom_id = intval($_POST['chatroom_id'] ?? -1);
         $em = $this->core->getCourseEntityManager();
+
         $repo = $em->getRepository(Chatroom::class);
 
         $chatroom = $repo->find($chatroom_id);
-
         if ($chatroom === null) {
             return JsonResponse::getFailResponse('Invalid Chatroom ID');
         }
-
         foreach ($chatroom->getMessages() as $message) {
             $em->remove($message);
         }
         $em->remove($chatroom);
         $em->flush();
-
         return JsonResponse::getSuccessResponse();
     }
 
@@ -179,7 +178,7 @@ class ChatroomController extends AbstractController {
         $em->flush();
 
         return new RedirectResponse($this->core->buildCourseUrl(['chat']));
-     }
+    }
 
     /**
      * @Route("/courses/{_semester}/{_course}/chat/{chatroom_id}/messages", methods={"GET"})

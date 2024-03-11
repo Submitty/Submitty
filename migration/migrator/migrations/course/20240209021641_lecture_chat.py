@@ -20,7 +20,7 @@ def up(config, database, semester, course):
     """
         CREATE TABLE IF NOT EXISTS chatrooms (
             id SERIAL PRIMARY KEY,
-            host_id character varying NOT NULL,
+            host_id character varying NOT NULL REFERENCES users(user_id) ON DELETE CASCADE,
             host_name character varying,
             title text NOT NULL,
             description text,
@@ -30,8 +30,8 @@ def up(config, database, semester, course):
 
         CREATE TABLE IF NOT EXISTS chatroom_messages (
             id SERIAL PRIMARY KEY,
-            chatroom_id integer NOT NULL REFERENCES chatrooms(id),
-            user_id character varying NOT NULL REFERENCES users(user_id),
+            chatroom_id integer NOT NULL REFERENCES chatrooms(id) ON DELETE CASCADE,
+            user_id character varying NOT NULL REFERENCES users(user_id) ON DELETE CASCADE,
             display_name character varying,
             role character varying,
             content text NOT NULL,
@@ -52,7 +52,7 @@ def down(config, database, semester, course):
     :param course: Code of course being migrated
     :type course: str
     """
-    database.execute("DROP TABLE IF EXISTS chatrooms")
+    database.execute("DROP TABLE IF EXISTS chatrooms cascade")
     database.execute("DROP TABLE IF EXISTS chatroom_messages")
 
     pass
