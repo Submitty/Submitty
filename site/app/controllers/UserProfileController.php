@@ -206,6 +206,35 @@ class UserProfileController extends AbstractController {
     }
 
     /**
+     * @Route("/user_profile/change_display_name_order", methods={"POST"})
+     * @return JsonResponse
+     */
+    public function changeDisplayNameOrder() {
+        //Uh Oh
+        $user = $this->core->getUser();
+        if (isset($_POST['display_name_order'])) {
+            $newPronouns = trim($_POST['display_name_order']);
+            //validPronouns() checks for valid option
+            if ($user->validateUserData('user_display_name_order', $newPronouns) === true) {
+                $user->setPronouns($newPronouns);
+                $user->setUserUpdated(true);
+                $this->core->getQueries()->updateUser($user);
+                return JsonResponse::getSuccessResponse([
+                    'message' => "Pronouns updated successfully",
+                    'pronouns' => $newPronouns,
+                    'display_pronouns' => $newDisplayPronouns,
+                ]);
+            }
+            else {
+                return JsonResponse::getErrorResponse("Pronouns are not valid");
+            }
+        }
+        else {
+            return JsonResponse::getErrorResponse("Pronouns does not exist");
+        }
+    }
+
+    /**
      * @Route("/user_profile/change_profile_photo", methods={"POST"})
      * @return JsonResponse
      * @throws \ImagickException
