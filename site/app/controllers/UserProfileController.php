@@ -146,6 +146,28 @@ class UserProfileController extends AbstractController {
     }
 
     /**
+     * @Route("/user_profile/change_display_name_order", methods={"POST"})
+     * @return JsonResponse
+     */
+    public function changeDisplayNameOrder() {
+        $user = $this->core->getUser();
+        if (isset($_POST['display-name-order'])) {
+            $newPronouns = trim($_POST['display-name-order']);
+            //validPronouns() checks for valid option
+            $user->setDisplayNameOrder($newPronouns);
+            $user->setUserUpdated(true);
+            $this->core->getQueries()->updateUser($user);
+            return JsonResponse::getSuccessResponse([
+                'message' => "Pronouns updated successfully",
+                'display-name-order' => $newPronouns,
+            ]);
+        }
+        else {
+            return JsonResponse::getErrorResponse("Pronouns does not exist");
+        }
+    }
+
+    /**
      * @Route("/user_profile/change_preferred_names", methods={"POST"})
      * @return JsonResponse
      */

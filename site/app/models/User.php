@@ -29,6 +29,8 @@ use Egulias\EmailValidator\Validation\RFCValidation;
  * @method void setPronouns(string $pronouns)
  * @method void setDisplayPronouns(bool $display_pronouns)
  * @method int getLastInitialFormat()
+ * @method string getDisplayNameOrder()
+ * @method void setDisplayNameOrder()
  * @method string getEmail()
  * @method void setEmail(string $email)
  * @method string getSecondaryEmail()
@@ -128,6 +130,9 @@ class User extends AbstractModel {
     /** @prop
      * @var int The display format for the last initial of the user */
     protected $last_initial_format = 0;
+    /** @prop
+     * @var string The display format for the last initial of the user */
+    protected $display_name_order = "GIVEN_F";
     /** @prop
      * @var string The primary email of the user */
     protected $email;
@@ -234,6 +239,13 @@ class User extends AbstractModel {
         }
 
         $this->setPronouns($details['user_pronouns']);
+
+        if (isset($details['display_name_order'])) {
+            $this->setDisplayNameOrder($details['display_name_order']);
+        }
+        else{
+            $this->setDisplayNameOrder("GIVEN_F");
+        }
 
         if (isset($details['display_pronouns'])) {
             $this->setDisplayPronouns($details['display_pronouns']);

@@ -1,5 +1,5 @@
 /* exported updateUserPronouns, showUpdatePrefNameForm, showUpdateLastInitialFormatForm,
-showUpdatePronounsForm, showUpdatePasswordForm, showUpdateProfilePhotoForm, showUpdateSecondaryEmailForm,
+showUpdatePronounsForm, showDisplayNameOrderForm, showUpdatePasswordForm, showUpdateProfilePhotoForm, showUpdateSecondaryEmailForm,
 updateUserPreferredNames, updateUserLastInitialFormat, updateUserProfilePhoto, updateUserSecondaryEmail,
 changeSecondaryEmail, previewUserLastInitialFormat, clearPronounsBox
  */
@@ -7,6 +7,7 @@ changeSecondaryEmail, previewUserLastInitialFormat, clearPronounsBox
 
 //This variable is to store changes to the pronouns form that have not been submitted
 let pronounsLastVal = null;
+let displayNameOrderLast = "GIVEN_F";
 
 function showUpdatePrefNameForm() {
     $('.popup-form').css('display', 'none');
@@ -33,6 +34,16 @@ function showUpdatePronounsForm() {
     form.find('.form-body').scrollTop(0);
     if (pronounsLastVal !== null && document.getElementById('user-pronouns-change').value === '') {
         document.getElementById('user-pronouns-change').value = pronounsLastVal;
+    }
+}
+
+function showDisplayNameOrderForm() {
+    $('.popup-form').css('display', 'none');
+    const form = $('#edit-display-name-order-form');
+    form.css('display', 'block');
+    form.find('.form-body').scrollTop(0);
+    if (pronounsLastVal !== null && document.getElementById('display-name-order-change').value === '') {
+        document.getElementById('display-name-order-change').value = displayNameOrderLast;
     }
 }
 
@@ -149,6 +160,58 @@ function updateUserPronouns(e) {
     }
 
 }
+
+
+//update user pronouns and display pronouns option
+function updateDisplayNameOrder(e) {
+    //update user pronouns
+    e.preventDefault();
+    const displayNameOrder = $('#display-name-order-change');
+    displayNameOrderLast = displayNameOrder.val();
+
+    const data = new FormData();
+    // eslint-disable-next-line no-undef
+    data.append('csrf_token', csrfToken);
+    data.append('display-name-order', displayNameOrder.val());
+    // eslint-disable-next-line no-undef
+    const url = buildUrl(['user_profile', 'change_display_name_order']);
+    $.ajax({
+        url,
+        type: 'POST',
+        data,
+        processData: false,
+        contentType: false,
+        success: function(res) {
+            console.log(res);
+            const response = JSON.parse(res);
+            if (response.status === 'success') {
+                const {data} = response;
+                // eslint-disable-next-line no-undef
+                displaySuccessMessage(data.message);
+                const icon = '<i class="fas fa-pencil-alt"></i>';
+                // update the pronouns and display (true or false)
+                console.log(data);
+                $('#display_name_order_val').html(`${icon} ${data.display-name-order}`);
+
+                // update the data attributes
+                displayNameOrder.data('current-display-name-order', data.display-name-order);
+                $('#edit-display-name-order-form').hide();
+            }
+            else {
+                // eslint-disable-next-line no-undef
+                displayErrorMessage(response.message);
+            }
+        },
+        error: function() {
+            // eslint-disable-next-line no-undef
+            displayErrorMessage('Some went wrong while updating pronouns!');
+        },
+    });
+    
+
+}
+
+
 
 function updateUserPreferredNames () {
     const given_name_field = $('#user-givenname-change');
