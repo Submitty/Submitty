@@ -45,6 +45,15 @@ const removeThread = (title) => {
     cy.get('.thread-left-cont > .thread-list-item').contains(title).should('not.exist');
 };
 
+describe('Visuals', () => {
+    it('should compare screenshot of the entire page', () => {
+        cy.login('instructor');
+        cy.visit(['sample', 'forum', 'threads', '9']);
+
+        cy.compareSnapshot('forms-threads-9');
+    })
+})
+
 describe('Test cases revolving around creating, replying to, merging, and removing discussion forum threads', () => {
 
     beforeEach(() => {

@@ -27,3 +27,7 @@ afterEach(() => {
         cy.logout(true, checkLogout);
     });
 });
+
+
+const compareSnapshotCommand = require('cypress-image-diff-js/command');
+compareSnapshotCommand();
