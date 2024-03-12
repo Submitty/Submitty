@@ -95,7 +95,11 @@ class GradeableList extends AbstractModel {
         $this->now = $this->core->getDateTimeNow();
 
         foreach ($this->gradeables as $id => $gradeable) {
-            switch (self::getGradeableSection($this->core, $gradeable)) {
+            [$semester, $course_title, $_] = @unserialize($id);
+            if ($semester === false || $course_title === false) {
+                $semester = $course_title = null;
+            }
+            switch (self::getGradeableSection($this->core, $gradeable, $course_title, $semester)) {
                 case self::FUTURE:
                     $this->future_gradeables[$id] = $gradeable;
                     break;
@@ -256,7 +260,11 @@ class GradeableList extends AbstractModel {
      * @param Gradeable $gradeable
      * @return int the section number; or -1 if not categorized
      */
-    public static function getGradeableSection(Core $core, Gradeable $gradeable): int {
+    public static function getGradeableSection(Core $core, Gradeable $gradeable, String $course_title = null, $semester = null): int {
+        // echo "<script>console.log('semester: " . $semester . "');</script>";
+        // echo "<script>console.log('course_title: " . $course_title . "');</script>";
+        // echo "<script>console.log('gradeable id: " . $gradeable->getId() . "');</script>";
+        
         $now = DateUtils::getDateTimeNow();
         if ($gradeable->hasReleaseDate() && $gradeable->getGradeReleasedDate() <= $now) {
             return self::GRADED;
@@ -312,11 +320,21 @@ class GradeableList extends AbstractModel {
         ) {
             return self::OPEN;
         }
-        elseif ($core->getUser()->getAccessLevel() < 4 && $gradeable->getTaViewStartDate() <= $now) {
-            return self::BETA;
+        elseif ($core->getUser()->accessGrading() && $gradeable->getTaViewStartDate() <= $now) {
+            // TA access from course pages
+            return self::BETA; 
         }
-        elseif ($core->getUser()->getAccessLevel() < 3) {
+        // Instructor access from either crouse pages and home pages(i.e. from Calendar page)
+        elseif ($core->getUser()->accessAdmin() || $core->getUser()->accessFaculty()) {
             return self::FUTURE;
+        }
+        else {
+            // Grader access from home pages (i.e from Calendar page)
+            if ($semester !== null && $course_title !== null) {
+                if ($core->getQueries()->checkIsGraderInCourse($core->getUser()->getId(), $course_title, $semester)) {
+                    return self::BETA;
+                }
+            }
         }
         return -1;
     }

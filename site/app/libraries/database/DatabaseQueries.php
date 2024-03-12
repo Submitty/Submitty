@@ -5785,6 +5785,22 @@ AND gc_id IN (
             $this->submitty_db->row()['is_instructor'];
     }
 
+    public function checkIsGraderInCourse($user_id, $course, $semester) {
+        // find user_group < 4
+        $this->submitty_db->query(
+            "
+            SELECT
+                CASE WHEN user_group < 4 THEN TRUE
+                ELSE FALSE
+                END
+            AS is_grader
+            FROM courses_users WHERE user_id=? AND course=? AND term=?",
+            [$user_id, $course, $semester]
+        );
+        return count($this->submitty_db->rows()) >= 1 &&
+            $this->submitty_db->row()['is_grader'];
+    }
+
     public function getGradeInquiryStatus($user_id, $gradeable_id) {
         $this->course_db->query("SELECT * FROM grade_inquiries WHERE user_id = ? AND g_id = ? ", [$user_id, $gradeable_id]);
         return ($this->course_db->getRowCount() > 0) ? $this->course_db->row()['status'] : 0;
