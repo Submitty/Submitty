@@ -6,12 +6,11 @@
    markViewed openDiv changeColor downloadCourseMaterialZip downloadSubmissionZip downloadStudentAnnotations
    downloadTestCaseResult downloadCourseMaterial downloadFile toggleDiv checkVersionChange versionChange gradeableChange
    removeMessagePopup validateHtml togglePageDetails copyToClipboard downloadCSV setFolderRelease
-   newEditCourseMaterialsForm newEditCourseMaterialsFolderForm newUploadCourseMaterialsForm newUploadImagesForm
+   newEditCourseMaterialsForm newEditCourseMaterialsFolderForm newUploadCourseMaterialsForm newUploadBanner newUploadImagesForm
    newOverwriteCourseMaterialForm newDeleteCourseMaterialForm displayCloseSubmissionsWarning newDeleteGradeableForm
    markAllViewed */
 /* global csrfToken my_window:writable file_path:writable updateBulkProgress icon:writable detectColorScheme
    createArray readPrevious disableFullUpdate registerSelect2Widget */
-/* exported newUploadBanner */
 ////////////Begin: Removed redundant link in breadcrumbs////////////////////////
 //See this pr for why we might want to remove this code at some point
 //https://github.com/Submitty/Submitty/pull/5071

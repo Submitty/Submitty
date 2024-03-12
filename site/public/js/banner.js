@@ -33,8 +33,7 @@ function deleteBannerImage(csrf_token, id, imageName, imagePath, description, re
                 }
             }
             catch (e) {
-                alert('Error parsing response from server. Please copy the contents of your Javascript Console and ' +
-                    'send it to an administrator, as well as what you were doing and what files you were uploading.');
+                alert('Failed to delete banner image!');
                 console.log(data);
             }
         },
