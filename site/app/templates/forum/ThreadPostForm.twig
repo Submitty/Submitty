@@ -162,9 +162,11 @@
                     var part = "{{ post_box_id }}";
                     initializeDragAndDrop();
                     createArray(part);
-                    $(".upload_attachment_box").each(function() {
-                        this.addEventListener("click", clicked_on_box, false);
+                    
+                    $(".parent-container").on("click", ".upload_attachment_box", function() {
+                        clicked_on_box.apply(this, arguments);
                     });
+
                 });
             </script>
         {% endif %}
