@@ -124,7 +124,7 @@ class GradeableUtils {
             2 => "vcs_type_external_public",
             3 => "vcs_type_external_private_student_created",
             4 => "vcs_type_external_private_instructor_created",
-            default => "vcs_none",
+            default => "vcs_none"
         };
     }
 
@@ -135,7 +135,7 @@ class GradeableUtils {
             "vcs_type_external_public" => 2,
             "vcs_type_external_private_student_created" => 3,
             "vcs_type_external_private_instructor_created" => 4,
-            default => -1,
+            default => -1
         };
     }
 }
