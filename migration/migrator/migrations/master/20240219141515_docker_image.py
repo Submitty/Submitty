@@ -24,7 +24,9 @@ CREATE TABLE IF NOT EXISTS public.docker_image (
     for capability in container_data:
         for image in container_data[capability]:
             images.add(image)
-    existing_images = database.execute("SELECT image_name FROM docker_image").all()[0]
+    existing_images = set()
+    for row in database.execute("SELECT image_name FROM docker_image").all():
+        existing_images.add(row[0])
     for image in images:
         if (image not in existing_images):
             database.session.execute("INSERT INTO docker_image (image_name, user_id) VALUES (:name, '');", {"name": image})
