@@ -70,7 +70,19 @@ class CalendarInfo extends AbstractModel {
         $info = new CalendarInfo($core);
         $date_format = $core->getConfig()->getDateTimeFormat()->getFormat('gradeable');
 
-        $gradeable_list = new GradeableList($core, $core->getUser(), $gradeables_of_user["gradeables"]);
+        // unserialize the gradeables_of_user 
+        $unserialized_gradeables = [];
+        
+        foreach ($gradeables_of_user["gradeables"] as $id => $gradeable) {
+            [$semester, $course_title, $_] = unserialize($id);
+            $unserialized_gradeables[$id] = [
+                'semester' => $semester,
+                'course' => $course_title,
+                'gradeable' => $gradeable
+            ];
+        }
+
+        $gradeable_list = new GradeableList($core, $core->getUser(), $unserialized_gradeables);
 
         $i = 1;
         /** @var Course $course */

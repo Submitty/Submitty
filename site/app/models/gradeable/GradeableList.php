@@ -95,8 +95,13 @@ class GradeableList extends AbstractModel {
         $this->now = $this->core->getDateTimeNow();
 
         foreach ($this->gradeables as $id => $gradeable) {
-            [$semester, $course_title, $_] = @unserialize($id);
-            if ($semester === false || $course_title === false) {
+            // Only gradeables from CalendarInfo be an array of 3 elements
+            if ( is_array($gradeable) && array_keys($gradeable) === ['semester', 'course', 'gradeable']) {
+                $semester = $gradeable['semester'];
+                $course_title = $gradeable['course'];
+                $gradeable = $gradeable['gradeable'];
+            }
+            else {
                 $semester = $course_title = null;
             }
             switch (self::getGradeableSection($this->core, $gradeable, $course_title, $semester)) {
@@ -260,7 +265,7 @@ class GradeableList extends AbstractModel {
      * @param Gradeable $gradeable
      * @return int the section number; or -1 if not categorized
      */
-    public static function getGradeableSection(Core $core, Gradeable $gradeable, String $course_title = null, $semester = null): int {
+    public static function getGradeableSection(Core $core, Gradeable $gradeable, string $course_title = null, $semester = null): int {
         $now = DateUtils::getDateTimeNow();
         if ($gradeable->hasReleaseDate() && $gradeable->getGradeReleasedDate() <= $now) {
             return self::GRADED;
