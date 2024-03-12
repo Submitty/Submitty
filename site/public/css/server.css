@@ -1137,7 +1137,7 @@ div.full-height {
     background-color: var(--black-moderately-transparent);
 }
 
-.no-scroll{
+body.no-scroll {
     overflow: hidden;
 }
 

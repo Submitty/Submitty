@@ -27,7 +27,7 @@
                                         {% block close_button %}
                                             <a
                                                 {% block close_button_id %}{% endblock %}
-                                                onclick="{% block close_click_action %}closePopup('{{ block('popup_id') }}'); noOverFlow();{% endblock %}"
+                                                onclick="{% block close_click_action %}closePopup('{{ block('popup_id') }}'); document.body.classList.remove('no-scroll');{% endblock %}"
                                                 class="btn {% block close_button_classes %}btn-default{% endblock %} close-button key_to_click"
                                                 tabindex="0"
                                             >
@@ -58,8 +58,5 @@
 <script>
     function closePopup(id) {
         $('#' + id).hide();
-    }
-    function noOverFlow(){
-        document.body.classList.remove('no-scroll');
     }
 </script>

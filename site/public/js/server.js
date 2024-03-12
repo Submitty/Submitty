@@ -458,9 +458,14 @@ function editFilePathRecommendations() {
     registerSelect2Widget("new-file-name", "material-edit-form");
 }
 
+//Function to toggle overflow
+function toggleBodyOverflow(){
+    document.body.classList.add("no-scroll");
+}
+
 var lastActiveElement = null;
 function captureTabInModal(formName, resetFocus=true){
-    
+    toggleBodyOverflow();
     if(resetFocus){
         lastActiveElement = document.activeElement;
     }
