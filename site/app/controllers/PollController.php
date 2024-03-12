@@ -15,6 +15,8 @@ use app\libraries\routers\Enabled;
 use app\libraries\FileUtils;
 use app\libraries\PollUtils;
 use app\views\PollView;
+use app\libraries\socket\Client;
+use WebSocket;
 
 /**
  * @Enabled("polls")
@@ -136,6 +138,8 @@ class PollController extends AbstractController {
                 $response_counts = $option_repo->findByPollWithResponseCounts(intval($poll_id));
             }
         }
+
+        $this->sendSocketMessage(['type' => 'opened_poll_page', 'poll_id' => $poll_id]);
 
         return new WebResponse(
             PollView::class,
@@ -525,6 +529,8 @@ class PollController extends AbstractController {
         $em->flush();
 
         $this->core->addSuccessMessage("Poll response recorded");
+        $this->sendSocketMessage(['type' => 'opened_poll_page', 'poll_id' => $poll_id]);
+
         return new RedirectResponse($this->core->buildCourseUrl(['polls']));
     }
 
@@ -578,6 +584,8 @@ class PollController extends AbstractController {
             $this->core->addErrorMessage("Invalid Poll ID");
             return new RedirectResponse($this->core->buildCourseUrl(['polls']));
         }
+        
+        // $this->output->addInternalJs('websocket.js');
         return new WebResponse(
             PollView::class,
             'viewResults',
@@ -672,5 +680,23 @@ class PollController extends AbstractController {
             $this->core->addErrorMessage("Successfully imported " . $num_imported . " polls. Errors occurred in " . $num_errors . " polls");
         }
         return new RedirectResponse($this->core->buildCourseUrl(['polls']));
+    }
+
+    /**
+     * This method opens a WebSocket client and sends a message with the corresponding poll update
+     * @param array $msg_array
+     */
+    private function sendSocketMessage(array $msg_array): void {
+        $msg_array['option'] = 'test_option';
+        $msg_array['response'] = 1000;
+        $msg_array['page'] = $this->core->getConfig()->getTerm() . '-' . $this->core->getConfig()->getCourse() . "-polls" .  $msg_array['poll_id'];
+
+        try {
+            $client = new Client($this->core);
+            $client->json_send($msg_array);
+        }
+        catch (WebSocket\ConnectionException $e) {
+            $this->core->addNoticeMessage("WebSocket Server is down, histogram won't update dynamically.");
+        }
     }
 }

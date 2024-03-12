@@ -16,6 +16,7 @@ class PollView extends AbstractView {
         $this->core->getOutput()->addBreadcrumb("Submini Polls", $this->core->buildCourseUrl(['polls']));
         $this->core->getOutput()->addInternalCss('polls.css');
         $this->core->getOutput()->addInternalJs('polls.js');
+        $this->core->getOutput()->addInternalJs('websocket.js');
         $this->core->getOutput()->enableMobileViewport();
     }
 

@@ -165,6 +165,46 @@
             }
             Plotly.relayout(container, update);
         });
+
+        let webSocketData = data;
+        initSocketClient();
+
+        function initSocketClient() {
+            window.socketClient = new WebSocketClient();
+            window.socketClient.onmessage = (msg)=>{
+                console.log(msg);
+
+                switch (msg.type) {
+                    case "update_historgram":
+                        updateHistogram(msg.option, msg.response);
+                        break;
+                    default:
+                        console.log("Unknown message received.");
+                        break;
+                }
+            };
+            window.socketClient.open('polls/{{ poll.getId() }}');
+        }
+
+        function updateHistogram(option, response) {
+            const container = document.getElementById('chartContainer');
+            console.log(option);
+            console.log(response);
+
+            for (let i = 0; i < webSocketData[0].x.length; i++) {
+                if (webSocketData[0].x[i] === option) {
+                    // webSocketData[0].y[i] = response;
+                    // need to account for multiple responses at once from just one user
+                    break;
+                }
+            }
+
+            const update = {
+                y: webSocketData[0].y
+            }
+
+            Plotly.restyle(container, update);
+        }
     }
     {% endif %}
 </script>
