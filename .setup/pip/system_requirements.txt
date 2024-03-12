@@ -25,13 +25,13 @@ watchdog==4.0.0
 # Held back from 0.8.2 as no whl is available which breaks installing on Ubuntu 22.04
 xlsx2csv==0.8.1
 pause==0.3
-paramiko==3.3.1
+paramiko==3.4.0
 tzlocal==2.1
 PyPDF2==3.0.1
 distro==1.8.0
 jsonschema==4.19.2
 jsonref==1.1.0
-docker==6.1.3
+docker==7.0.0
 urllib3==2.0.7
 
 # Python libraries for QR bulk upload
