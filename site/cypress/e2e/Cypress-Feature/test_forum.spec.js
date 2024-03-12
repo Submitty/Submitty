@@ -47,10 +47,16 @@ const removeThread = (title) => {
 
 describe('Visuals', () => {
     it('should compare screenshot of the entire page', () => {
+        cy.viewport(1000, 1000)
         cy.login('instructor');
         cy.visit(['sample', 'forum', 'threads', '9']);
 
-        cy.compareSnapshot('forms-threads-9');
+        cy.compareSnapshot({
+            name: "forum-threads-9",
+            cypressScreenshotOptions: {
+                blackout: ['footer']
+            }
+        });
     })
 })
 
