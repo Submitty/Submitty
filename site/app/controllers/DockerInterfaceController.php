@@ -48,7 +48,7 @@ class DockerInterfaceController extends AbstractController {
             }
         }
         $json['image_owners'] = $this->core->getQueries()->getDockerImageOwners(array_unique($images));
-        
+
         $json['autograding_workers'] = FileUtils::readJsonFile(
             FileUtils::joinPaths(
                 $this->core->getConfig()->getSubmittyInstallPath(),
@@ -181,13 +181,15 @@ class DockerInterfaceController extends AbstractController {
             if ($this->core->getQueries()->getDockerImageOwner($_POST['image']) !== false) {
                 $Verify = $this->core->getQueries()->removeDockerImageOwner($_POST['image'], $user);
                 if ($Verify) {
-                    foreach ($json as $capability) {
-                        unset($capability[$key]);
-                        $capability = array_values($capability);
+                    foreach ($json as $capability_key => $capability) {
+                        $key = array_search($_POST['image'], $capability, true);
+                        if ($key !== false) {
+                            unset($capability[$key]);
+                            $capability = array_values($capability);
+                            $json[$capability_key] = $capability;
+                        }
                     }
                     file_put_contents($jsonFilePath, json_encode($json, JSON_PRETTY_PRINT));
-                    // Safe to exec since image name matches pattern.
-                    shell_exec("docker image rm -f " . $_POST['image']);
                     return JsonResponse::getSuccessResponse($_POST['image'] . ' removed from docker images!');
                 }
                 else {

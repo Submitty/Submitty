@@ -9377,8 +9377,14 @@ ORDER BY
     }
 
     public function setDockerImageOwner(string $image, string $user_id): void {
-        $this->submitty_db->query("
-            INSERT INTO docker_image (image_name, user_id) values (?, ?);", [$image,$user_id]);
+        $current_owner = $this->getDockerImageOwner($image);
+        if ($current_owner === false) {
+            $this->submitty_db->query("INSERT INTO docker_image (image_name, user_id) values (?, ?);", [$image,$user_id]);
+        // If an instructor wants to add an image they didn't upload to a capability, the image will have no owner.
+        // Only sysadmin will be able to remove it.
+        } elseif ($current_owner !== $user_id) {
+            $this->submitty_db->query("UPDATE docker_image SET user_id = '' WHERE image_name = ?", [$image]);
+        }
     }
 
     public function removeDockerImageOwner(string $image, User $user): bool {

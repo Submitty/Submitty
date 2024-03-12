@@ -66,7 +66,7 @@ function addFieldOnChange() {
 
 function confirmationdialog(url,id) {
     if (confirm(`Are you sure you want to remove ${id} image?`)) {
-        removeImage(url,id,capability);
+        removeImage(url,id);
     }
 }
 
@@ -82,6 +82,7 @@ function removeImage(url,id) {
         success: function(data) {
             const json = JSON.parse(data);
             if (json.status === 'success') {
+                location.reload();
                 // eslint-disable-next-line no-undef
                 displaySuccessMessage(json.data);
             }
