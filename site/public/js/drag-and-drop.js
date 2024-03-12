@@ -208,8 +208,7 @@ function handleUploadBanner(closeTime, releaseTime, extraName, linkName) {
                 }
             }
             catch (e) {
-                alert('Error parsing response from server. Please copy the contents of your Javascript Console and ' +
-                    'send it to an administrator, as well as what you were doing and what files you were uploading. - [handleUploadCourseMaterials]');
+                alert('Failed to upload a banner!');
                 console.log(data);
             }
         },
