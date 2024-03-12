@@ -43,5 +43,6 @@
   "/courses/<term>/<course>/course_materials/edit",
   "/courses/<term>/<course>/polls/newPoll",
   "/courses/<term>/<course>/polls/editPoll/submitEdits",
-  "/courses/<term>/<course>/polls/deletePoll"
+  "/courses/<term>/<course>/polls/deletePoll",
+  "/courses/<term>/<course>/upload"
 ]
