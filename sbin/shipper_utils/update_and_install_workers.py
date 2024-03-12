@@ -68,6 +68,7 @@ def update_docker_images(user, host, worker, autograding_workers, autograding_co
                     image_id = client.images.get(imageRemoved).id
                 except docker.errors.ImageNotFound as e:
                     print("Couldn't find image ", e)
+                    continue
                 client.images.remove(image_id, True)
         except Exception as e:
             # Handle the exception
