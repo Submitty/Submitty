@@ -261,10 +261,6 @@ class GradeableList extends AbstractModel {
      * @return int the section number; or -1 if not categorized
      */
     public static function getGradeableSection(Core $core, Gradeable $gradeable, String $course_title = null, $semester = null): int {
-        // echo "<script>console.log('semester: " . $semester . "');</script>";
-        // echo "<script>console.log('course_title: " . $course_title . "');</script>";
-        // echo "<script>console.log('gradeable id: " . $gradeable->getId() . "');</script>";
-        
         $now = DateUtils::getDateTimeNow();
         if ($gradeable->hasReleaseDate() && $gradeable->getGradeReleasedDate() <= $now) {
             return self::GRADED;
