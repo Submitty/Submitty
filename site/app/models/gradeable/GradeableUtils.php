@@ -119,23 +119,31 @@ class GradeableUtils {
 
     public static function vcsIntToStr(int $type): string {
         return match ($type) {
-            0 => "vcs_type_submitty_unique",
-            1 => "vcs_type_submitty_shared",
-            2 => "vcs_type_external_public",
-            3 => "vcs_type_external_private_student_created",
-            4 => "vcs_type_external_private_instructor_created",
-            default => "vcs_none",
+            0 => "submitty-hosted",
+            1 => "submitty-hosted-url",
+            2 => "public-github",
+            3 => "private-github",
+            4 => "self-hosted",
+            default => "none",
         };
     }
 
     public static function vcsStrToInt(string $str): int {
         return match ($str) {
-            "vcs_type_submitty_unique" => 0,
-            "vcs_type_submitty_shared" => 1,
-            "vcs_type_external_public" => 2,
-            "vcs_type_external_private_student_created" => 3,
-            "vcs_type_external_private_instructor_created" => 4,
+            "submitty-hosted" => 0,
+            "submitty-hosted-url" => 1,
+            "public-github" => 2,
+            "private-github" => 3,
+            "self-hosted" => 4,
             default => -1,
         };
     }
 }
+
+/*
+"vcs_type_submitty_unique"                          -> "submitty-hosted"
+"vcs_type_submitty_shared"                          -> "submitty-hosted-url"
+"vcs_type_external_public"                          -> "public-github"
+"vcs_type_external_private_student_created"         -> "private-github"
+"vcs_type_external_private_instructor_created"      -> "self-hosted"
+*/

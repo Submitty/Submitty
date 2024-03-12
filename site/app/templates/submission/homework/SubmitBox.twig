@@ -141,7 +141,7 @@
     {# /Admin submission type selector #}
 
     {% if is_vcs %}
-        {% if vcs_type_int_to_str(vcs_host_type) == "vcs_type_submitty_unique" or vcs_type_int_to_str(vcs_host_type) == "vcs_type_submitty_shared" %}
+        {% if vcs_type_int_to_str(vcs_host_type) == "submitty-hosted" or vcs_type_int_to_str(vcs_host_type) == "submitty-hosted-url" %}
             <h3>To access your Repository:</h3>
             <span><em>Note: There may be a delay before your repository is prepared, please refer to assignment instructions.</em></span><br />
             <samp>git  clone  {{ repository_path }}  SPECIFY_TARGET_DIRECTORY</samp>
@@ -155,7 +155,7 @@
             <br><br>
         {% endif %}
 
-        {% if vcs_type_int_to_str(vcs_host_type) == "vcs_type_external_public" or vcs_host_type == "vcs_type_external_private_student_created" %}
+        {% if vcs_type_int_to_str(vcs_host_type) == "public-github" or vcs_host_type == "private-github" %}
             <h3>Please enter your GitHub URL: </h3>
 
             GitHub URL: &nbsp;&nbsp; <kbd>https://www.github.com/</kbd>
@@ -163,7 +163,7 @@
             <kbd>/</kbd>
             <input type="text" id="github-repo-id" name="git_repo_id" class="required github-id" value="{{ github_repo_id }}" placeholder="repo_name"/>
 
-            {% if vcs_type_int_to_str(vcs_host_type) == "vcs_type_external_public" %}
+            {% if vcs_type_int_to_str(vcs_host_type) == "public-github" %}
             Note: This should be a <em>public repository</em>, visible to everyone.
             {% else %}
             Note: If this is not a <em>public repository</em>, please ensure that you have granted read access to INCOMPLETE! FIXME! SPECIAL USER.
@@ -171,7 +171,7 @@
 
         {% endif %}
 
-        {% if vcs_type_int_to_str(vcs_host_type) == "vcs_type_external_private_instructor_created" %}
+        {% if vcs_type_int_to_str(vcs_host_type) == "self-hosted" %}
             <h3>To access your Repository:</h3>
             <span><em>Note: Please push all changes before grading.</em></span><br />
             <samp> git clone {{ vcs_partial_path }} SPECIFY_TARGET_DIRECTORY  </samp>
