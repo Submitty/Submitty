@@ -10,7 +10,7 @@
                         {% block title_tag %}
                             <h1>{% block title %}Untitled Form{% endblock %}</h1>
                             <button
-                                data-close="close-button"
+                                data-testid="close-button"
                                 onclick="{{ block('close_click_action') }}"
                                 class="btn btn-default close-button key_to_click"
                                 tabindex="-1" type="button"
