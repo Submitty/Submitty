@@ -98,7 +98,8 @@ class GradeableList extends AbstractModel {
             if (is_array($gradeable) && array_key_exists("user_group", $gradeable) && array_key_exists("gradeable", $gradeable)) {
                 $user_group = $gradeable["user_group"];
                 $gradeable = $gradeable["gradeable"];
-            }else {
+            }
+            else {
                 $user_group = null;
             }
             switch (self::getGradeableSection($this->core, $gradeable, $user_group)) {
