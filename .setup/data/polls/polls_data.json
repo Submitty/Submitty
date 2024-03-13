@@ -65,7 +65,7 @@
             5
         ],
         "release_date": "",
-        "end_date":"9999-02-01",
+        "end_date":"9999-02-01 05:00:00.000000 +00:00",
         "status": "open",
         "image_path": null,
         "release_histogram": "when_ended",
@@ -88,7 +88,7 @@
             2
         ],
         "release_date": "9999-12-31",
-        "end_date":"1900-02-01",
+        "end_date":"1900-02-01 05:00:00.000000 +00:00",
         "status": "closed",
         "image_path": null,
         "release_histogram": "always",
