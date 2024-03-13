@@ -44,5 +44,6 @@
   "/courses/<term>/<course>/polls/newPoll",
   "/courses/<term>/<course>/polls/editPoll/submitEdits",
   "/courses/<term>/<course>/polls/deletePoll",
-  "/courses/<term>/<course>/upload"
+  "/courses/<term>/<course>/upload",
+  "/courses/<term>/<course>/email_status_page"
 ]
