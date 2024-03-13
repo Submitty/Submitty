@@ -8,13 +8,10 @@ use app\exceptions\CurlException;
 use app\libraries\database\DatabaseFactory;
 use app\libraries\database\AbstractDatabase;
 use app\libraries\database\DatabaseQueries;
-use app\libraries\database\DatabaseUtils;
 use app\models\Config;
 use app\models\User;
 use app\entities\Session;
 use app\repositories\SessionRepository;
-use Doctrine\DBAL\DriverManager;
-use Doctrine\DBAL\Logging\DebugStack;
 use Doctrine\ORM\EntityManager;
 use Doctrine\ORM\ORMSetup;
 use Symfony\Component\Cache\Adapter\FilesystemAdapter;
@@ -45,14 +42,8 @@ class Core {
     /** @var EntityManager */
     private $submitty_entity_manager;
 
-    /** @var DebugStack */
-    private $submitty_debug_stack;
-
     /** @var EntityManager */
     private $course_entity_manager;
-
-    /** @var DebugStack */
-    private $course_debug_stack;
 
     /** @var AbstractAuthentication */
     private $authentication;
@@ -182,7 +173,7 @@ class Core {
         $this->session_manager = $manager;
     }
 
-    private function createEntityManager(AbstractDatabase $database, ?DebugStack $debug_stack): EntityManager {
+    private function createEntityManager(AbstractDatabase $database): EntityManager {
         $cache_path = FileUtils::joinPaths(dirname(__DIR__, 2), 'cache', 'doctrine');
         $cache = new PhpFilesAdapter("", 0, $cache_path);
         $config = ORMSetup::createAttributeMetadataConfiguration(
@@ -192,17 +183,7 @@ class Core {
             $cache
         );
 
-        if ($debug_stack) {
-            $config->setSQLLogger($debug_stack);
-        }
-
-        $conn = DriverManager::getConnection(
-            [
-                'driver' => 'pdo_pgsql',
-                'pdo' => $database->getConnection()
-            ]
-        );
-        return new EntityManager($conn, $config);
+        return new EntityManager($database->getConnection(), $config);
     }
 
     /**
@@ -224,8 +205,7 @@ class Core {
         $this->submitty_db->connect();
 
         $this->setQueries($this->database_factory->getQueries($this));
-        $this->submitty_debug_stack = $this->config->isDebug() ? new DebugStack() : null;
-        $this->submitty_entity_manager = $this->createEntityManager($this->submitty_db, $this->submitty_debug_stack);
+        $this->submitty_entity_manager = $this->createEntityManager($this->submitty_db);
     }
 
     public function setMasterDatabase(AbstractDatabase $database): void {
@@ -240,11 +220,7 @@ class Core {
         if (!$this->config->isDebug() || !$this->submitty_db) {
             return [];
         }
-        $queries = $this->submitty_db->getPrintQueries();
-        foreach ($this->submitty_debug_stack->queries as $query) {
-            $queries[] = DatabaseUtils::formatQuery($query['sql'], $query['params']);
-        }
-        return $queries;
+        return $this->submitty_db->getPrintQueries();
     }
 
     public function loadCourseDatabase(): void {
@@ -255,8 +231,7 @@ class Core {
         $this->course_db->connect();
 
         $this->setQueries($this->database_factory->getQueries($this));
-        $this->course_debug_stack = $this->config->isDebug() ? new DebugStack() : null;
-        $this->course_entity_manager = $this->createEntityManager($this->course_db, $this->course_debug_stack);
+        $this->course_entity_manager = $this->createEntityManager($this->course_db);
     }
 
     public function setCourseDatabase(AbstractDatabase $database): void {
@@ -275,11 +250,7 @@ class Core {
         if (!$this->config->isDebug() || !$this->course_db) {
             return [];
         }
-        $queries = $this->course_db->getPrintQueries();
-        foreach ($this->course_debug_stack->queries as $query) {
-            $queries[] = DatabaseUtils::formatQuery($query['sql'], $query['params']);
-        }
-        return $queries;
+        return $this->course_db->getPrintQueries();
     }
 
     public function hasDBPerformanceWarning(): bool {
@@ -291,19 +262,7 @@ class Core {
             return true;
         }
 
-        $queries = [];
-        if ($this->course_debug_stack !== null) {
-            foreach ($this->course_debug_stack->queries as $query) {
-                $queries[] = $query['sql'];
-            }
-        }
-        if ($this->submitty_debug_stack !== null) {
-            foreach ($this->submitty_debug_stack->queries as $query) {
-                $queries[] = $query['sql'];
-            }
-        }
-
-        return count($queries) !== count(array_unique($queries));
+        return false;
     }
 
     private function logPerformanceWarning(): void {
