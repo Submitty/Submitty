@@ -73,7 +73,6 @@ class CalendarInfo extends AbstractModel {
         $unserialized_gradeables = [];
         // Get courses that the access level is grader so that the calendar can show the Beta and Future section gradeables
         $grader_level_courses = $core->getQueries()->getGraderLevelAccessCourse($core->getUser()->getId());
-        
         foreach ($gradeables_of_user["gradeables"] as $id => $gradeable) {
             [$semester, $course_title, $_] = unserialize($id);
             $term_course_object = [

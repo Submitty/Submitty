@@ -318,10 +318,10 @@ class GradeableList extends AbstractModel {
         }
         elseif (($core->getUser()->accessGrading() || $user_group === "Grader") && $gradeable->getTaViewStartDate() <= $now) {
             // TA access from course pages
-            return self::BETA; 
+            return self::BETA;
         }
-        // Instructor access from either crouse pages and home pages(i.e. from Calendar page)
         elseif ($core->getUser()->accessAdmin() || $core->getUser()->accessFaculty()) {
+            // Instructor access from either crouse pages and home pages(i.e. from Calendar page)
             return self::FUTURE;
         }
         return -1;
