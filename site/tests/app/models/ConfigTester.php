@@ -94,6 +94,7 @@ class ConfigTester extends \PHPUnit\Framework\TestCase {
             "course_code_requirements" => "Please follow your school's convention for course code.",
             "institution_homepage" => "https://rpi.edu",
             'system_message' => "Some system message",
+            'create_new_account' => false,
             "duck_special_effects" => false,
             "default_locale" => "default",
         ];
@@ -330,6 +331,7 @@ class ConfigTester extends \PHPUnit\Framework\TestCase {
             'vcs_url' => 'http://example.com/{$vcs_type}/',
             'wrapper_files' => [],
             'system_message' => 'Some system message',
+            'create_new_account' => false,
             'secret_session' => 'LIW0RT5XAxOn2xjVY6rrLTcb6iacl4IDNRyPw58M0Kn0haQbHtNvPfK18xpvpD93',
             'email_enabled' => true,
             'auto_rainbow_grades' => false,

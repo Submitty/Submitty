@@ -311,4 +311,58 @@ class AuthenticationController extends AbstractController {
 
         return new WebResponse(AuthenticationView::class, 'userSelection', $users);
     }
+
+    /**
+     * Display the form for creating a new account
+     *
+     * @Route("/authentication/create_account")
+     *
+     * @return ResponseInterface
+     */
+    public function createAccountForm() {
+        // Check if the user is already logged in, if yes, redirect to home or another appropriate page
+        if ($this->logged_in) {
+            return new RedirectResponse($this->core->buildUrl(['home']));
+        }
+        // Check if the creating a new account is allowed, if yes, redirect to create account page
+        if ($this->create_new_account) {
+            return new WebResponse('Authentication', 'createAccountForm'); 
+        }
+    }
+
+    /**
+     * Handles the submission of the new account creation form
+     *
+     * @Route("/authentication/checkNewUser")
+     *
+     * @return MultiResponse
+     */
+    public function checkNewUser() {
+        // Check if the user is already logged in, if yes, redirect to home or another appropriate page
+        if ($this->logged_in) {
+            return MultiResponse::RedirectOnlyResponse(
+                new RedirectResponse($this->core->buildUrl(['home']))
+            );
+        }
+        // Handle the form submission here
+        $username = $_POST['new_username'];
+        $password = $_POST['new_password'];
+
+        // Call the UserModel or authentication service to create the new account
+        $success = $this->core->getAuthentication()->createUser($username, $password);
+
+        if ($success) {
+            // Redirect to a login page and show a success message
+            $this->core->addSuccessMessage('Account created successfully!');
+            return MultiResponse::RedirectOnlyResponse(
+                new RedirectResponse($this->core->buildUrl(['authentication', 'login']))
+            );
+        } else {
+            // Handle account creation failure
+            $this->core->addErrorMessage('Failed to create the account.');
+            return MultiResponse::RedirectOnlyResponse(
+                new RedirectResponse($this->core->buildUrl(['authentication', 'create_account']))
+            );
+        }
+    }
 }
