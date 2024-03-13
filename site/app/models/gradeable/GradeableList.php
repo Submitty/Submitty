@@ -315,7 +315,7 @@ class GradeableList extends AbstractModel {
         elseif ($gradeable->getTaViewStartDate() <= $now) {
             return self::BETA;
         }
-        else {
+        elseif ($gradeable->getTaViewStartDate() > $now) {
             return self::FUTURE;
         }
         return -1;
