@@ -139,7 +139,7 @@ class PollController extends AbstractController {
             }
         }
 
-        $this->sendSocketMessage(['type' => 'opened_poll_page', 'poll_id' => $poll_id]);
+        $this->sendSocketMessage(['type' => 'opened_poll', 'poll_id' => $poll_id, 'updates' => []]);
 
         return new WebResponse(
             PollView::class,
@@ -514,23 +514,28 @@ class PollController extends AbstractController {
         }
 
         $user_id = $this->core->getUser()->getId();
+        $web_socket_response = ['type' => 'update_histogram', 'poll_id' => $poll_id, 'updates' => []];
 
         foreach ($poll->getUserResponses() as $response) {
+            /** @var Option|null */
+            $option = $this->core->getCourseEntityManager()->find(Option::class, $response->getOption()->getId());
+            $web_socket_response['updates'][$option->getResponse()] = $option->getUserResponses()->count() - 1;
             $em->remove($response);
         }
         if (array_key_exists("answers", $_POST) && $_POST['answers'][0] !== '-1') {
             foreach ($_POST['answers'] as $option_id) {
+                /** @var Option|null */
+                $option = $this->core->getCourseEntityManager()->find(Option::class, $option_id);
                 $response = new Response($user_id);
                 $poll->addResponse($response, $option_id);
+                $web_socket_response['updates'][$option->getResponse()] = $option->getUserResponses()->count() + 1;
                 $em->persist($response);
             }
         }
 
         $em->flush();
-
+        $this->sendSocketMessage($web_socket_response);
         $this->core->addSuccessMessage("Poll response recorded");
-        $this->sendSocketMessage(['type' => 'opened_poll_page', 'poll_id' => $poll_id]);
-
         return new RedirectResponse($this->core->buildCourseUrl(['polls']));
     }
 
@@ -584,8 +589,7 @@ class PollController extends AbstractController {
             $this->core->addErrorMessage("Invalid Poll ID");
             return new RedirectResponse($this->core->buildCourseUrl(['polls']));
         }
-        
-        // $this->output->addInternalJs('websocket.js');
+    
         return new WebResponse(
             PollView::class,
             'viewResults',
@@ -683,13 +687,11 @@ class PollController extends AbstractController {
     }
 
     /**
-     * This method opens a WebSocket client and sends a message with the corresponding poll update
+     * This method opens a WebSocket client and sends a message containing corresponding poll updates
      * @param array $msg_array
      */
     private function sendSocketMessage(array $msg_array): void {
-        $msg_array['option'] = 'test_option';
-        $msg_array['response'] = 1000;
-        $msg_array['page'] = $this->core->getConfig()->getTerm() . '-' . $this->core->getConfig()->getCourse() . "-polls" .  $msg_array['poll_id'];
+        $msg_array['page'] = $this->core->getConfig()->getTerm() . '-' . $this->core->getConfig()->getCourse() . "-polls-" .  $msg_array['poll_id'];
 
         try {
             $client = new Client($this->core);

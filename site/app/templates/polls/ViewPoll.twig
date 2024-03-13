@@ -135,10 +135,14 @@
                 color: [],
             },
         }];
+        // Store the index of each x-coordinate (option) for constant time access during websocket updates
+        const data_index = {};
+        let index = 0;
         const [correctColor, defaultColor] =
         [window.getComputedStyle(document.body).getPropertyValue('--standard-deep-dark-green'),
             window.getComputedStyle(document.body).getPropertyValue('--standard-vibrant-dark-blue')];
         {% for option in poll.getOptions() %}
+        data_index["{{ option.getResponse()|replace({"\n": " ", "\r": " ", "\t": " "}) }}"] = index++;
         data[0].x.push("{{ option.getResponse()|replace({"\n": " ", "\r": " ", "\t": " "}) }}");
         data[0].y.push({{ response_counts[option.getId()] }});
         data[0].marker.color.push(
@@ -166,43 +170,35 @@
             Plotly.relayout(container, update);
         });
 
-        let webSocketData = data;
+        let graph_data = data;
         initSocketClient();
 
         function initSocketClient() {
             window.socketClient = new WebSocketClient();
             window.socketClient.onmessage = (msg)=>{
                 console.log(msg);
-
                 switch (msg.type) {
-                    case "update_historgram":
-                        updateHistogram(msg.option, msg.response);
+                    case "update_histogram":
+                        updateHistogram(msg.updates);
                         break;
                     default:
                         console.log("Unknown message received.");
                         break;
                 }
             };
-            window.socketClient.open('polls/{{ poll.getId() }}');
+            console.log('polls-{{ poll.getId() }}');
+            window.socketClient.open('polls-{{ poll.getId() }}');
         }
 
-        function updateHistogram(option, response) {
+        function updateHistogram(updates) {
             const container = document.getElementById('chartContainer');
-            console.log(option);
-            console.log(response);
-
-            for (let i = 0; i < webSocketData[0].x.length; i++) {
-                if (webSocketData[0].x[i] === option) {
-                    // webSocketData[0].y[i] = response;
-                    // need to account for multiple responses at once from just one user
-                    break;
-                }
+            for (option of Object.keys(updates)) {
+                // Update the y-coordinate for each updated option given the latest response counts
+                graph_data[0].y[data_index[option]] = updates[option];
             }
-
             const update = {
-                y: webSocketData[0].y
+                y: [graph_data[0].y]
             }
-
             Plotly.restyle(container, update);
         }
     }
