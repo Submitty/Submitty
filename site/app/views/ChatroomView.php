@@ -34,6 +34,16 @@ class ChatroomView extends AbstractView {
         ]);
     }
 
+    public function showAllChatrooms(array $chatrooms) {
+        return $this->core->getOutput()->renderTwigTemplate("chat/AllChatroomsPage.twig", [
+            'csrf_token' => $this->core->getCsrfToken(),
+            'base_url' => $this->core->buildCourseUrl() . '/chat',
+            'semester' => $this->core->getConfig()->getTerm(),
+            'chatrooms' => $chatrooms,
+            'user_admin' => $this->core->getUser()->accessAdmin()
+        ]);
+    }
+
     public function showChatroom($chatroom, $anonymous = false) {
         $this->core->getOutput()->addBreadcrumb("Chatroom");
         $user = $this->core->getUser();

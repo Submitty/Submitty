@@ -126,6 +126,7 @@ function initChatroomSocketClient(chatroomId) {
 function newChatroomForm() {
     const form = $('#create-chatroom-form');
     form.css('display', 'block');
+    document.getElementById('chatroom-allow-anon').checked = true;
 }
 
 // eslint-disable-next-line no-unused-vars
@@ -195,7 +196,7 @@ function showToast(message) {
     const toast = document.querySelector('.chatroom-toast');
     toast.textContent = message;
     toast.style.visibility = 'visible';
-    toast.style.opacity = '0.8';
+    toast.style.opacity = '0.85';
     setTimeout(() => {
         toast.style.opacity = '0'; // fade out
     }, 3000);

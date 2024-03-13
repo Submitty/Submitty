@@ -18,26 +18,15 @@ class ChatroomController extends AbstractController {
     /**
      * @Route("/courses/{_semester}/{_course}/chat", methods={"GET"})
      */
-    public function showChatroomsPage(): WebResponse {
+    public function showChatroomssPage(): WebResponse {
         $repo = $this->core->getCourseEntityManager()->getRepository(Chatroom::class);
-        $user = $this->core->getUser();
         $chatrooms = $repo->findBy([], ['id' => 'ASC']);
-        $active_chatrooms = $repo->findBy(['is_active' => true], ['id' => 'ASC']);
 
-        if ($user->accessAdmin()) {
-            return new WebResponse(
-                'Chatroom',
-                'showChatPageInstructor',
-                $chatrooms
-            );
-        }
-        else { // Student view
-            return new WebResponse(
-                'Chatroom',
-                'showChatPageStudent',
-                $active_chatrooms
-            );
-        }
+        return new WebResponse(
+            'Chatroom',
+            'showAllChatrooms',
+            $chatrooms
+        );
     }
 
     /**
@@ -50,6 +39,9 @@ class ChatroomController extends AbstractController {
         $hostId = $this->core->getUser()->getId();
         $hostName = $this->core->getUser()->getDisplayFullName();
         $chatroom = new Chatroom($hostId, $hostName, $_POST['title'], $_POST['description']);
+        if (!isset($_POST['allow-anon'])) {
+            $chatroom->setAllowAnon(false);
+        }
 
         $em->persist($chatroom);
         $em->flush();
