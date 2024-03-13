@@ -20,10 +20,8 @@ class QueryLogger extends AbstractLogger {
      * @return void
      */
     public function log($level, \Stringable|string $message, array $context = []): void {
-        if ($level === "debug") { // SQL queries are in the debug level
-            if (!isset($context['sql'])) {
-                return; // Ignore if SQL is not set
-            }
+        // SQL queries are in the debug level, but we want to ignore any other debug log
+        if ($level === "debug" && isset($context['sql'])) {
             $this->queries[] = [
                 $context['sql'],
                 $context['params']
