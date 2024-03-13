@@ -70,16 +70,28 @@ class CalendarInfo extends AbstractModel {
         $info = new CalendarInfo($core);
         $date_format = $core->getConfig()->getDateTimeFormat()->getFormat('gradeable');
 
-        // unserialize the gradeables_of_user 
         $unserialized_gradeables = [];
+        // Get courses that the access level is grader so that the calendar can show the Beta and Future section gradeables
+        $grader_level_courses = $core->getQueries()->getGraderLevelAccessCourse($core->getUser()->getId());
         
         foreach ($gradeables_of_user["gradeables"] as $id => $gradeable) {
             [$semester, $course_title, $_] = unserialize($id);
-            $unserialized_gradeables[$id] = [
-                'semester' => $semester,
-                'course' => $course_title,
-                'gradeable' => $gradeable
+            $term_course_object = [
+                'term' => $semester,
+                'course' => $course_title
             ];
+            if (in_array($term_course_object, $grader_level_courses)) {
+                $unserialized_gradeables[$id] = [
+                    'user_group' => "Grader",
+                    'gradeable' => $gradeable
+                ];
+            }
+            else {
+                $unserialized_gradeables[$id] = [
+                    'user_group' => "Student",
+                    'gradeable' => $gradeable
+                ];
+            }
         }
 
         $gradeable_list = new GradeableList($core, $core->getUser(), $unserialized_gradeables);

@@ -95,16 +95,11 @@ class GradeableList extends AbstractModel {
         $this->now = $this->core->getDateTimeNow();
 
         foreach ($this->gradeables as $id => $gradeable) {
-            // Only gradeables from CalendarInfo be an array of 3 elements
-            if ( is_array($gradeable) && array_keys($gradeable) === ['semester', 'course', 'gradeable']) {
-                $semester = $gradeable['semester'];
-                $course_title = $gradeable['course'];
-                $gradeable = $gradeable['gradeable'];
+            if (is_array($gradeable) && array_key_exists("user_group", $gradeable) && array_key_exists("gradeable", $gradeable)) {
+                $user_group = $gradeable["user_group"];
+                $gradeable = $gradeable["gradeable"];
             }
-            else {
-                $semester = $course_title = null;
-            }
-            switch (self::getGradeableSection($this->core, $gradeable, $course_title, $semester)) {
+            switch (self::getGradeableSection($this->core, $gradeable, $user_group)) {
                 case self::FUTURE:
                     $this->future_gradeables[$id] = $gradeable;
                     break;
@@ -265,7 +260,7 @@ class GradeableList extends AbstractModel {
      * @param Gradeable $gradeable
      * @return int the section number; or -1 if not categorized
      */
-    public static function getGradeableSection(Core $core, Gradeable $gradeable, string $course_title = null, $semester = null): int {
+    public static function getGradeableSection(Core $core, Gradeable $gradeable, string $user_group = null): int {
         $now = DateUtils::getDateTimeNow();
         if ($gradeable->hasReleaseDate() && $gradeable->getGradeReleasedDate() <= $now) {
             return self::GRADED;
@@ -321,21 +316,13 @@ class GradeableList extends AbstractModel {
         ) {
             return self::OPEN;
         }
-        elseif ($core->getUser()->accessGrading() && $gradeable->getTaViewStartDate() <= $now) {
+        elseif (($core->getUser()->accessGrading() || $user_group === "Grader") && $gradeable->getTaViewStartDate() <= $now) {
             // TA access from course pages
             return self::BETA; 
         }
         // Instructor access from either crouse pages and home pages(i.e. from Calendar page)
         elseif ($core->getUser()->accessAdmin() || $core->getUser()->accessFaculty()) {
             return self::FUTURE;
-        }
-        else {
-            // Grader access from home pages (i.e from Calendar page)
-            if ($semester !== null && $course_title !== null) {
-                if ($core->getQueries()->checkIsGraderInCourse($core->getUser()->getId(), $course_title, $semester)) {
-                    return self::BETA;
-                }
-            }
         }
         return -1;
     }

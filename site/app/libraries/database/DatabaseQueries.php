@@ -4858,6 +4858,16 @@ SQL;
     }
 
     /**
+     * Get all courses where the user with the specified user_id is assigned as a grader
+     * @param string $user_id
+     * @return array
+     */
+    public function getGraderLevelAccessCourse($user_id): array {
+        $this->submitty_db->query("SELECT term, course FROM courses_users WHERE user_id=? AND user_group<4", [$user_id]);
+        return $this->submitty_db->rows();
+    }
+
+    /**
      * Get all unarchived courses where the user with the specified user_id is assigned as an instructor
      */
     public function getInstructorLevelUnarchivedCourses(string $user_id): array {
@@ -5783,22 +5793,6 @@ AND gc_id IN (
         );
         return count($this->submitty_db->rows()) >= 1 &&
             $this->submitty_db->row()['is_instructor'];
-    }
-
-    public function checkIsGraderInCourse($user_id, $course, $semester) {
-        // find user_group < 4
-        $this->submitty_db->query(
-            "
-            SELECT
-                CASE WHEN user_group < 4 THEN TRUE
-                ELSE FALSE
-                END
-            AS is_grader
-            FROM courses_users WHERE user_id=? AND course=? AND term=?",
-            [$user_id, $course, $semester]
-        );
-        return count($this->submitty_db->rows()) >= 1 &&
-            $this->submitty_db->row()['is_grader'];
     }
 
     public function getGradeInquiryStatus($user_id, $gradeable_id) {
