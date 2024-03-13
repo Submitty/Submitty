@@ -91,6 +91,7 @@ class Course_create_gradeables:
             gradeable_annotation_path = os.path.join(self.course_path, "annotations", gradeable.id)
 
             submission_count = 0
+            gradeable_type = gradeable.gradeable_type
             max_submissions = gradeable.max_random_submissions
             max_individual_submissions = gradeable.max_individual_submissions
             # makes a section be ungraded if the gradeable is not electronic
