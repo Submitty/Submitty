@@ -23,6 +23,7 @@
         if (isNaN(cookie_day)) {
             cookie_day = curr_day;
         }
+
         // Load the calendar to the correct day
         loadCalendar(cookie_month, cookie_year, cookie_day, type);
         //Color the legend
@@ -40,12 +41,15 @@
         cookie_day = parseInt(Cookies.get('calendar_day'));
         if (isNaN(cookie_year)) {
             cookie_year = view_year;
+            Cookies.set('calendar_year', cookie_year);
         }
         if (isNaN(cookie_month)) {
             cookie_month = view_month;
+            Cookies.set('calendar_month', cookie_month);
         }
         if (isNaN(cookie_day)) {
             cookie_day = view_day;
+            Cookies.set('calendar_day', cookie_day);
         }
 
         Cookies.set('calendar_year', x.value)
@@ -63,12 +67,16 @@
         cookie_day = parseInt(Cookies.get('calendar_day'));
         if (isNaN(cookie_year)) {
             cookie_year = view_year;
+            Cookies.set('calendar_year', cookie_year);
         }
         if (isNaN(cookie_month)) {
             cookie_month = view_month;
+            Cookies.set('calendar_month', cookie_month);
+
         }
         if (isNaN(cookie_day)) {
             cookie_day = view_day;
+            Cookies.set('calendar_day', cookie_day);
         }
 
         
@@ -85,12 +93,15 @@
         cookie_day = parseInt(Cookies.get('calendar_day'));
         if (isNaN(cookie_year)) {
             cookie_year = view_year;
+            Cookies.set('calendar_year', cookie_year);
         }
         if (isNaN(cookie_month)) {
             cookie_month = view_month;
+            Cookies.set('calendar_month', cookie_month);
         }
         if (isNaN(cookie_day)) {
             cookie_day = view_day;
+            Cookies.set('calendar_day', cookie_day);
         }
         // Load the calendar to the correct day
         loadCalendar(cookie_month, cookie_year, cookie_day, x.value);
@@ -116,22 +127,22 @@
                     {% set endYear = curr_year + 20 %}
 
                     {% for year in startYear..endYear%}
-                        <option value = "{{ year }}" {% if (cookie_year is defined) and cookie_year == year %} selected {% endif %}> {{year}} </option>
+                        <option value = "{{ year }}" {% if (year_cookie is defined) and year_cookie == year %} selected {% endif %}> {{year}} </option>
                     {% endfor %}
                 </select>
                 <select id="calendar-month-type-edit" name="type" onchange="changeMonth(this);">
-                    <option value = 1 {% if (cookie_month is defined) and cookie_month == 1 %} selected {% endif %}>January</option>
-                    <option value = 2 {% if (cookie_month is defined) and cookie_month == 2 %} selected {% endif %}>February</option>
-                    <option value = 3 {% if (cookie_month is defined) and cookie_month == 3 %} selected {% endif %}>March</option>
-                    <option value = 4 {% if (cookie_month is defined) and cookie_month == 4 %} selected {% endif %}>April</option>
-                    <option value = 5 {% if (cookie_month is defined) and cookie_month == 5 %} selected {% endif %}>May</option>
-                    <option value = 6 {% if (cookie_month is defined) and cookie_month == 6 %} selected {% endif %}>June</option>
-                    <option value = 7 {% if (cookie_month is defined) and cookie_month == 7 %} selected {% endif %}>July</option>
-                    <option value = 8 {% if (cookie_month is defined) and cookie_month == 8 %} selected {% endif %}>August</option>
-                    <option value = 9 {% if (cookie_month is defined) and cookie_month == 9 %} selected {% endif %}>September</option>
-                    <option value = 10 {% if (cookie_month is defined) and cookie_month == 10 %} selected {% endif %}>October</option>
-                    <option value = 11 {% if (cookie_month is defined) and cookie_month == 11 %} selected {% endif %}>November</option>
-                    <option value = 12 {% if (cookie_month is defined) and cookie_month == 12%} selected {% endif %}>December</option>
+                    <option value = 1 {% if (month_cookie is defined) and month_cookie == 1 %} selected {% endif %}>January</option>
+                    <option value = 2 {% if (month_cookie is defined) and month_cookie == 2 %} selected {% endif %}>February</option>
+                    <option value = 3 {% if (month_cookie is defined) and month_cookie == 3 %} selected {% endif %}>March</option>
+                    <option value = 4 {% if (month_cookie is defined) and month_cookie == 4 %} selected {% endif %}>April</option>
+                    <option value = 5 {% if (month_cookie is defined) and month_cookie == 5 %} selected {% endif %}>May</option>
+                    <option value = 6 {% if (month_cookie is defined) and month_cookie == 6 %} selected {% endif %}>June</option>
+                    <option value = 7 {% if (month_cookie is defined) and month_cookie == 7 %} selected {% endif %}>July</option>
+                    <option value = 8 {% if (month_cookie is defined) and month_cookie == 8 %} selected {% endif %}>August</option>
+                    <option value = 9 {% if (month_cookie is defined) and month_cookie == 9 %} selected {% endif %}>September</option>
+                    <option value = 10 {% if (month_cookie is defined) and month_cookie == 10 %} selected {% endif %}>October</option>
+                    <option value = 11 {% if (month_cookie is defined) and month_cookie == 11 %} selected {% endif %}>November</option>
+                    <option value = 12 {% if (month_cookie is defined) and month_cookie == 12%} selected {% endif %}>December</option>
                 </select>
                 <select id="calendar-item-type-edit" name="type" onchange="changeView(this);">
                     <option value="month" {% if (view_cookie is defined) and view_cookie == "month" %} selected {% endif %}>Month</option>
