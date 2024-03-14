@@ -26,7 +26,7 @@ class Poll {
     #[ORM\Column(type: Types::TEXT)]
     protected $question;
 
-    #[ORM\Column(type: Types::BIGINT)]
+    #[ORM\Column(type: Types::INTEGER)]
     protected int $duration;
 
     #[ORM\Column(type: Types::TEXT)]
