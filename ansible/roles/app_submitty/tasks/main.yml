@@ -94,7 +94,7 @@
 #    path: /etc/apache2/sites-available/submitty.conf
 #    regexp: <VirtualHost \*:80>
 #    replace: "{{ lookup('file', 'append_to_submitty.conf') }}"
-
+#  when: 
 - name: Add ip to the Apache Submitty configuration
   ansible.builtin.replace:
     path: /etc/apache2/sites-available/submitty.conf
