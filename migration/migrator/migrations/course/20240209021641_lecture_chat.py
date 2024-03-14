@@ -39,6 +39,16 @@ def up(config, database, semester, course):
         );
     """
     )
+    course_dir = Path(config.submitty['submitty_data_dir'], 'courses', semester, course)
+    # add boolean to course config
+    config_file = Path(course_dir, 'config', 'config.json')
+    if config_file.is_file():
+        with open(config_file, 'r') as in_file:
+            j = json.load(in_file)
+            j['course_details']['chat_enabled'] = False
+
+        with open(config_file, 'w') as out_file:
+            json.dump(j, out_file, indent=4)
 
 def down(config, database, semester, course):
     """

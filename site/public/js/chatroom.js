@@ -1,7 +1,7 @@
 /* global csrfToken */
 
 // eslint-disable-next-line no-unused-vars
-function fetchMessages(chatroomId, my_id) {
+function fetchMessages(chatroomId, my_id, when = new Date(0)) {
     $.ajax({
         // eslint-disable-next-line no-undef
         url: buildCourseUrl(['chat', chatroomId, 'messages']),
@@ -192,7 +192,7 @@ function toggle_chatroom(chatroomId, active) {
     }
 }
 
-function showToast(message) {
+function showJoinMessage(message) {
     const toast = document.querySelector('.chatroom-toast');
     toast.textContent = message;
     toast.style.visibility = 'visible';
@@ -209,30 +209,23 @@ document.addEventListener('DOMContentLoaded', () => {
         // eslint-disable-next-line no-unused-vars
         const { chatroomId, userId, displayName, user_admin, isAnonymous } = pageData;
 
-        showToast(`You have successfully joined as ${displayName}.`);
+        showJoinMessage(`You have successfully joined as ${displayName}.`);
 
         initChatroomSocketClient(chatroomId);
 
-        if (!user_admin) {
-            window.socketClient.onopen = function() {
-                const welcomeMessage = `Welcome, ${displayName}!`;
-                appendMessage('System', 'system', new Date().toLocaleString(), welcomeMessage);
-            };
-        }
-
         fetchMessages(chatroomId, userId);
 
-        const sendMsgButton = document.querySelector('.send-message-btn');
+        const sendButton = document.querySelector('.send-message-btn');
         const messageInput = document.querySelector('.message-input');
 
         messageInput.addEventListener('keypress', (event) => {
             if (event.keyCode === 13 && !event.shiftKey) {
                 event.preventDefault();
-                sendMsgButton.click();
+                sendButton.click();
             }
         });
 
-        sendMsgButton.addEventListener('click', (event) => {
+        sendButton.addEventListener('click', (event) => {
             event.preventDefault();
             const messageContent = messageInput.value.trim();
             if (messageContent === '') {
