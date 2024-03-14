@@ -128,21 +128,28 @@ class AdminGradeableController extends AbstractController {
         if (array_key_exists('ta_grading', $_POST)) {
             $values['ta_grading'] = $_POST['ta_grading'];
             if (array_key_exists('grade_inquiries', $_POST)) {
-                $values['grade_inquiry_allowed'] = $_POST['grade_inquiries'];
+                $values['grade_inquiry_allowed'] = $_POST['grade_inquiries'] ?? 'false';
                 $values['grade_inquiry_per_component_allowed'] = $_POST['grade_inquiries_per_component'] ?? 'false';
             }
         }
 
-        $values['ta_view_start_date'] = $_POST['ta_view_start_date'] ?? NULL;
-        $values['grade_start_date'] = $_POST['grade_start_date'] ?? NULL;
-        $values['grade_due_date'] = $_POST['grade_due_date'] ?? NULL;
-        $values['grade_released_date'] = $_POST['grade_released_date'] ?? NULL;
-        $values['team_lock_date'] = $_POST['team_lock_date'] ?? NULL;
-        $values['submission_open_date'] = $_POST['submission_open_date'] ?? NULL;
-        $values['submission_due_date'] = $_POST['submission_due_date'] ?? NULL;
-        $values['grade_inquiry_start_date'] = $_POST['grade_inquiry_start_date'] ?? NULL;
-        $values['grade_inquiry_due_date'] = $_POST['grade_inquiry_due_date'] ?? NULL;
+        if (array_key_exists('dates', $_POST)) {
+            $dates = $_POST['dates'];
+            $values['ta_view_start_date'] = $dates['ta_view_start_date'] ?? NULL;
+            $values['grade_start_date'] = $dates['grade_start_date'] ?? NULL;
+            $values['grade_due_date'] = $dates['grade_due_date'] ?? NULL;
+            $values['grade_released_date'] = $dates['grade_released_date'] ?? NULL;
+            $values['team_lock_date'] = $dates['team_lock_date'] ?? NULL;
+            $values['submission_open_date'] = $dates['submission_open_date'] ?? NULL;
+            $values['submission_due_date'] = $dates['submission_due_date'] ?? NULL;
+            $values['grade_inquiry_start_date'] = $dates['grade_inquiry_start_date'] ?? NULL;
+            $values['grade_inquiry_due_date'] = $dates['grade_inquiry_due_date'] ?? NULL;
 
+            $values['has_due_date'] = $dates['has_due_date'] ?? 'true';
+            $values['has_release_date'] = $dates['has_released_date'] ??  'true';
+            $values['late_submission_allowed'] = $dates['late_submission_allowed'] ?? 'true';
+            $values['late_days'] = $dates['late_days'] ?? 0;
+        }
         $values['syllabus_bucket'] = $_POST['syllabus_bucket'] ?? 'Homework';
         try {
             $build_result = $this->createGradeable($_POST['id'], $values);
@@ -153,6 +160,9 @@ class AdminGradeableController extends AbstractController {
             return JsonResponse::getSuccessResponse($_POST['id']);
         }
         catch (\Exception $e) {
+            if ($e->getMessage() == 'Date validation failed') {
+                return JsonResponse::getErrorResponse('Date validation has failed, ensure the dates are in the correct sequential order');
+            }
             return JsonResponse::getErrorResponse($e->getMessage());
         }
     }
@@ -952,7 +962,7 @@ class AdminGradeableController extends AbstractController {
                 'student_view_after_grades' => false,
                 'student_download' => true,
                 'student_submit' => true,
-                'late_days' => $default_late_days,
+                'late_days' => $details['late_days'] ?? $default_late_days,
                 'precision' => 0.5
             ];
             $gradeable_create_data = array_merge($gradeable_create_data, $non_template_property_values);
@@ -1064,8 +1074,8 @@ class AdminGradeableController extends AbstractController {
                 'peer_blind' => 3,
                 'depends_on' => null,
                 'depends_on_points' => null,
-                'has_due_date' => true,
-                'has_release_date' => true
+                'has_due_date' => $details['has_due_date'] ?? true,
+                'has_release_date' => $details['has_release_date'] ?? true
             ]);
         }
         else {
@@ -1081,7 +1091,7 @@ class AdminGradeableController extends AbstractController {
                 'autograding_config_path' => '',
                 'peer_grading' => false,
                 'peer_grade_set' => 0,
-                'late_submission_allowed' => true,
+                'late_submission_allowed' => $details['late_submission_allowed'] ?? true,
                 'hidden_files' => ""
             ]);
         }

@@ -358,14 +358,15 @@ function ajaxUploadGradeable() {
                     window.location = buildCourseUrl(['gradeable', data['data'], 'update']);
                 }
                 else {
-                    window.location = buildCourseUrl(['gradeable']);
-                    alert(data['message']);
+                    closePopup('gradeable-json-form');
+                    displayErrorMessage(data['message']);
                     return false;
                 }
             });
         }
         catch (error) {
-            alert(error);
+            closePopup('gradeable-json-form');
+            displayErrorMessage(error);
             return false;
         }
     };
