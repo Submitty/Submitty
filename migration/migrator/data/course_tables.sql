@@ -1598,12 +1598,14 @@ CREATE TABLE public.polls (
     poll_id integer NOT NULL,
     name text NOT NULL,
     question text NOT NULL,
-    status text NOT NULL,
+    status text,
     release_date date NOT NULL,
     image_path text,
     question_type character varying(35) DEFAULT 'single-response-multiple-correct'::character varying,
     release_histogram character varying(10) DEFAULT 'never'::character varying,
-    release_answer character varying(10) DEFAULT 'never'::character varying
+    release_answer character varying(10) DEFAULT 'never'::character varying,
+    duration character varying(255) DEFAULT 'P0D'::character varying,
+    end_date timestamp with time zone DEFAULT '1900-02-01 00:00:00-05'::timestamp with time zone NOT NULL
 );
 
 
@@ -2736,7 +2738,7 @@ CREATE TRIGGER late_days_allowed_change AFTER INSERT OR DELETE OR UPDATE ON publ
 --
 
 ALTER TABLE ONLY public.chatroom_messages
-    ADD CONSTRAINT chatroom_messages_chatroom_id_fkey FOREIGN KEY (chatroom_id) REFERENCES public.chatrooms(id);
+    ADD CONSTRAINT chatroom_messages_chatroom_id_fkey FOREIGN KEY (chatroom_id) REFERENCES public.chatrooms(id) ON DELETE CASCADE;
 
 
 --
@@ -2744,7 +2746,15 @@ ALTER TABLE ONLY public.chatroom_messages
 --
 
 ALTER TABLE ONLY public.chatroom_messages
-    ADD CONSTRAINT chatroom_messages_user_id_fkey FOREIGN KEY (user_id) REFERENCES public.users(user_id);
+    ADD CONSTRAINT chatroom_messages_user_id_fkey FOREIGN KEY (user_id) REFERENCES public.users(user_id) ON DELETE CASCADE;
+
+
+--
+-- Name: chatrooms chatrooms_host_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.chatrooms
+    ADD CONSTRAINT chatrooms_host_id_fkey FOREIGN KEY (host_id) REFERENCES public.users(user_id) ON DELETE CASCADE;
 
 
 --
