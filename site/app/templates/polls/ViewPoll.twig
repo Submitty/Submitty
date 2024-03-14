@@ -176,7 +176,6 @@
         function initSocketClient() {
             window.socketClient = new WebSocketClient();
             window.socketClient.onmessage = (msg)=>{
-                console.log(msg);
                 switch (msg.type) {
                     case "update_histogram":
                         updateHistogram(msg.updates);
@@ -186,7 +185,6 @@
                         break;
                 }
             };
-            console.log('polls-{{ poll.getId() }}');
             window.socketClient.open('polls-{{ poll.getId() }}');
         }
 

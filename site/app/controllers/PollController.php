@@ -139,8 +139,6 @@ class PollController extends AbstractController {
             }
         }
 
-        $this->sendSocketMessage(['type' => 'opened_poll', 'poll_id' => $poll_id, 'updates' => []]);
-
         return new WebResponse(
             PollView::class,
             'showPoll',
@@ -589,7 +587,6 @@ class PollController extends AbstractController {
             $this->core->addErrorMessage("Invalid Poll ID");
             return new RedirectResponse($this->core->buildCourseUrl(['polls']));
         }
-    
         return new WebResponse(
             PollView::class,
             'viewResults',
@@ -691,6 +688,7 @@ class PollController extends AbstractController {
      * @param array $msg_array
      */
     private function sendSocketMessage(array $msg_array): void {
+        $msg_array['user_id'] = $this->core->getUser()->getId();
         $msg_array['page'] = $this->core->getConfig()->getTerm() . '-' . $this->core->getConfig()->getCourse() . "-polls-" .  $msg_array['poll_id'];
 
         try {
