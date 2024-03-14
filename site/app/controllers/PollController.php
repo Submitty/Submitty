@@ -192,10 +192,16 @@ class PollController extends AbstractController {
                     $this->core->addErrorMessage("Invalid poll answer release setting");
             return new RedirectResponse($this->core->buildCourseUrl(['polls']));
         }
+
         //set to 0 if it is not found in $_POST.
         $hours = intval($_POST['poll-hours'] ?? 0);
         $minutes = intval($_POST['poll-minutes'] ?? 0);
         $seconds = intval($_POST['poll-seconds'] ?? 0);
+        if(($hours*3600) + (60 * $minutes) +  $seconds > 86400)
+        {
+            $this->core->addErrorMessage("Exceeded 24 hour limit");
+            return new RedirectResponse($this->core->buildCourseUrl(['polls/newPoll']));
+        }
         if ($hours < 0 || $minutes < 0 || $seconds < 0) {
             $this->core->addErrorMessage('Invalid time given');
             return new RedirectResponse($this->core->buildCourseUrl(['polls']));
@@ -316,12 +322,15 @@ class PollController extends AbstractController {
                 return new RedirectResponse($this->core->buildCourseUrl(['polls']));
             }
         }
-
-
         $date = \DateTime::createFromFormat("Y-m-d", $_POST["release_date"]);
         $hours = intval($_POST['poll-hours'] ?? 0);
         $minutes = intval($_POST['poll-minutes'] ?? 0);
         $seconds = intval($_POST['poll-seconds'] ?? 0);
+        if(($hours*3600) + (60 * $minutes) +  $seconds > 86400)
+        {
+            $this->core->addErrorMessage("Exceeded 24 hour limit");
+            return new RedirectResponse($this->core->buildCourseUrl(['polls']));
+        }
         if ($hours < 0 || $minutes < 0 || $seconds < 0) {
             $this->core->addErrorMessage('Invalid time given');
             return new RedirectResponse($this->core->buildCourseUrl(['polls']));

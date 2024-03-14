@@ -87,15 +87,6 @@
             <input type="checkbox" id="keep-image" name="keep_image" checked />
         {% endif %}
         <br/>
-        
-        <br/>
-        <label for="poll-hours" class="option-title">
-            Expected Duration of Poll:
-        </label>
-        <input type="number" name="poll-hours" id="poll-hours" class="poll-timer" style="width: 70px" min=0 placeholder="Hour" value="{{ poll is not null ? poll.getDuration().h }}" />
-        <input type="number" name="poll-minutes" id="poll-minutes" class="poll-timer" style="width: 70px" min=0 placeholder="Min" value="{{ poll is not null ? poll.getDuration().i }}" />
-        <input type="number" name="poll-seconds" id="poll-seconds" class="poll-timer" style="width: 70px" min=0 placeholder="Sec" value="{{ poll is not null ? poll.getDuration().s }}" />
-        <br/>
         <label for="poll-date" class="option-title">
             Expected release date:
         </label>
@@ -109,6 +100,19 @@
             value="{{ poll is not null ? poll.getReleaseDate() | date("Y-m-d") }}"
         />
         <br/>
+        <label for="enable-timer" class="option-title">
+            Enable Timer?
+        </label>
+        <input type="checkbox" id="enable-timer" onchange="toggleTimerInputs()" {% if poll is not null and (poll.getDuration().h != 0 or poll.getDuration().i != 0 or poll.getDuration().s != 0) %} checked {% endif %} value="enabled" />
+        <br/>
+        <div id="timer-inputs">
+            <label for="poll-hours" class="option-title">
+                Expected Duration of Poll:
+            </label>
+            <input type="hidden" name="poll-hours" id="poll-hours" class="poll-timer" style="width: 70px" min="0" max="24" placeholder="Hour" value="{{ poll is not null ? poll.getDuration().h }}" />
+            <input type="hidden" name="poll-minutes" id="poll-minutes" class="poll-timer" style="width: 70px" min="0" placeholder="Min" value="{{ poll is not null ? poll.getDuration().i }}" />
+            <input type="hidden" name="poll-seconds" id="poll-seconds" class="poll-timer" style="width: 70px" min="0" placeholder="Sec" value="{{ poll is not null ? poll.getDuration().s }}" />
+        </div>
 
         <label for="student-histogram-release-setting" class="option-title">
             Release response histogram to students:
@@ -201,7 +205,6 @@
             }
         }
     }
-
     function checkSize(uploadedFile) {
         if (uploadedFile.files[0].size > MAX_SIZE) {
             size_is_valid = false;
@@ -210,6 +213,27 @@
         }
         submitErrorChecks();
     };
+    window.onload = function() {
+        toggleTimerInputs();
+    };
+    function toggleTimerInputs() {
+        var enableTimerCheckbox = document.getElementById("enable-timer");
+        var timerInputs = document.getElementById("timer-inputs").querySelectorAll(".poll-timer");
+
+        if (enableTimerCheckbox.checked) {
+            document.getElementById("timer-inputs").style.display = "block";
+            timerInputs.forEach(function(input) {
+                input.setAttribute("type", "number");
+            });
+        } else {
+            document.getElementById("timer-inputs").style.display = "none";
+            timerInputs.forEach(function(input) {
+                input.setAttribute("type", "hidden");
+                input.value = "0"; 
+            });
+        }
+    }
+
 
     function addResponse() {
         let count = $(".option_id").length;

@@ -26,7 +26,7 @@ class Poll {
     #[ORM\Column(type: Types::TEXT)]
     protected $question;
 
-    #[ORM\Column(type: Types::BIGINT)]
+    #[ORM\Column(type: Types::INTEGER)]
     protected int $duration;
 
     #[ORM\Column(type: Types::TEXT)]
@@ -127,21 +127,11 @@ class Poll {
 
     public function getDuration(): \DateInterval {
         $seconds = $this->duration;
-        $years = floor($seconds / (365 * 24 * 60 * 60));
-        $seconds -= $years * (365 * 24 * 60 * 60);
-
-        $months = floor($seconds / (30 * 24 * 60 * 60));
-        $seconds -= $months * (30 * 24 * 60 * 60);
-
-        $days = floor($seconds / (24 * 60 * 60));
-        $seconds -= $days * (24 * 60 * 60);
-
         $hours = floor($seconds / (60 * 60));
         $seconds -= $hours * (60 * 60);
-
         $minutes = floor($seconds / 60);
         $seconds -= $minutes * 60;
-        return new \DateInterval("P{$years}Y{$months}M{$days}DT{$hours}H{$minutes}M{$seconds}S");
+        return new \DateInterval("PT{$hours}H{$minutes}M{$seconds}S");
     }
 
     public function getEndDate(): \DateTime {
@@ -156,9 +146,6 @@ class Poll {
         $totalSeconds = $duration->s;
         $totalSeconds += $duration->i * 60;
         $totalSeconds += $duration->h * 3600;
-        $totalSeconds += $duration->d * 86400;
-        $totalSeconds += $duration->m * 2592000;
-        $totalSeconds += $duration->y * 31536000;
         $this->duration = $totalSeconds;
     }
 
