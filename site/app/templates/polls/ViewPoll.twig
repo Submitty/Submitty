@@ -170,7 +170,7 @@
             Plotly.relayout(container, update);
         });
 
-        {% if poll.isOpen() %}
+        {% if user_admin and poll.isOpen() %}
         let graph_data = data;
         initSocketClient();
 
