@@ -170,6 +170,7 @@
             Plotly.relayout(container, update);
         });
 
+        {% if poll.isOpen() %}
         let graph_data = data;
         initSocketClient();
 
@@ -199,6 +200,7 @@
             }
             Plotly.restyle(container, update);
         }
+        {% endif %}
     }
     {% endif %}
 </script>
