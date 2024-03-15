@@ -2,12 +2,7 @@
 {% block popup_id %}edit-display-name-order-form{% endblock %}
 {% block title %}Edit Display Name Order{% endblock %}
 {% block body %}
-    <p class="std-margin">{{ "Pronouns are the part of speech used to refer to someone in the third person. We want to know how to respectfully refer to you!
-    Pronouns you specify will be visible to all members of the teaching staff." }}</p>
-    <p class="std-margin">
-        Your instructor and the system administrators reserve the right to remove
-        pronouns if they contain inappropriate or offensive language.
-    </p>
+    <p class="std-margin">{{ "You can edit the order in which your name is displayed here!" }}</p>
     <div class="flex-col" id="user_settings_modal">
         <input id="display-name-order-csrf" type="hidden" name="csrf_token" value="{{ csrf_token }}" />
         <h2>My Pronouns</h2>
