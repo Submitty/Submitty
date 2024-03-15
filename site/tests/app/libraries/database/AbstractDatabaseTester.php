@@ -41,7 +41,7 @@ class AbstractDatabaseTester extends \PHPUnit\Framework\TestCase {
         $database = new SqliteDatabase(['memory' => true]);
 
         $this->assertFalse($database->isConnected());
-        $database->connect();
+        $database->connect(true);
         $this->assertTrue($database->isConnected());
 
         $this->setupDatabase($database);
