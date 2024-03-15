@@ -7,7 +7,6 @@ use app\models\Button;
 use app\models\NavButton;
 use app\models\User;
 use app\entities\banner\BannerImage;
-use app\repositories\banner\BannerImageRepository;
 
 class GlobalController extends AbstractController {
     public function header() {
