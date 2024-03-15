@@ -15,9 +15,9 @@ function changeYear(x) {
     const type = $("#calendar-item-type-edit").val();
     Cookies.set('calendar_year', x.value);
 
-    cookie_year = parseInt(Cookies.get('calendar_year'));
-    cookie_month = parseInt(Cookies.get('calendar_month'));
-    cookie_day = parseInt(Cookies.get('calendar_day'));
+    const cookie_year = parseInt(Cookies.get('calendar_year'));
+    const cookie_month = parseInt(Cookies.get('calendar_month'));
+    const cookie_day = parseInt(Cookies.get('calendar_day'));
     if (isNaN(cookie_year)) {
         cookie_year = view_year;
         Cookies.set('calendar_year', cookie_year);
@@ -46,9 +46,9 @@ function changeMonth(x) {
     const type = $("#calendar-item-type-edit").val();
     Cookies.set('calendar_month', x.value);
 
-    cookie_year = parseInt(Cookies.get('calendar_year'));
-    cookie_month = parseInt(Cookies.get('calendar_month'));
-    cookie_day = parseInt(Cookies.get('calendar_day'));
+    const cookie_year = parseInt(Cookies.get('calendar_year'));
+    const cookie_month = parseInt(Cookies.get('calendar_month'));
+    const cookie_day = parseInt(Cookies.get('calendar_day'));
     if (isNaN(cookie_year)) {
         cookie_year = view_year;
         Cookies.set('calendar_year', cookie_year);
@@ -76,9 +76,9 @@ function changeMonth(x) {
 function changeView(x) {
     Cookies.set('view',x.value);
 
-    cookie_year = parseInt(Cookies.get('calendar_year'));
-    cookie_month = parseInt(Cookies.get('calendar_month'));
-    cookie_day = parseInt(Cookies.get('calendar_day'));
+    const cookie_year = parseInt(Cookies.get('calendar_year'));
+    const cookie_month = parseInt(Cookies.get('calendar_month'));
+    const cookie_day = parseInt(Cookies.get('calendar_day'));
     if (isNaN(cookie_year)) {
         cookie_year = view_year;
     }

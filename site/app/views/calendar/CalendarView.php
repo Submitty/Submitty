@@ -97,9 +97,9 @@ class CalendarView extends AbstractView {
             "is_instructor" => $this->core->getUser()->getGroup() === User::GROUP_INSTRUCTOR,
             "colors" => $info->getColors(),
             "instructor_courses" => $this->core->getQueries()->getInstructorLevelUnarchivedCourses($this->core->getUser()->getId()),
-            "view_cookie" => isset($_COOKIE['view']) ? $_COOKIE['view'] : "month",
-            "month_cookie" => isset($_COOKIE['calendar_month']) ? $_COOKIE['calendar_month'] : $month, //cookie that can be accessed by twig file
-            "year_cookie" => isset($_COOKIE['calendar_year']) ? $_COOKIE['calendar_year'] : $year, //cookie that can be accessed by twig file
+            "view_cookie" => $_COOKIE['view'] ?? $_COOKIE['view'] ?? "month", //view cookie that can be accessed by twig file
+            "month_cookie" => $_COOKIE['calendar_month'] ?? $_COOKIE['calendar_month'] ?? $month, //month cookie that can be accessed by twig file
+            "year_cookie" => $_COOKIE['calendar_year'] ?? $_COOKIE['calendar_year'] ?? $year, //year cookie that can be accessed by twig file
             "course_names" => $courseWithName,
             "show_legend" => $show_legend,
             "color_options" => $course_colors,
