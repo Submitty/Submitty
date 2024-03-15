@@ -84,12 +84,12 @@ function getBadItemNames() {
 
 function getBadImageInputs() {
     const bad_image_inputs = new Set();
-    const image_inputs = document.querySelectorAll(".image-input");
+    const image_inputs = document.querySelectorAll('.image-input');
 
     image_inputs.forEach(image_input => {
-        if (image_input.files.length == 0) {
+        if (image_input.files.length === 0) {
             bad_image_inputs.add(image_input);
-        };
+        }
     });
 
     return Array.from(bad_image_inputs);

@@ -193,16 +193,16 @@ class FormOptionsWidget extends Widget {
     /**
      * Validates to see if all image widgets contain an actual image. If validation error occurs, then error messages are added to the status div.
      * An error indicator will be added later.
-     * 
+     *
      * @returns {Boolean}
      */
 
     validateImageWidgets() {
         const image_inputs = getBadImageInputs();
         if (!(image_inputs.length === 0)) {
-            this.appendStatusMessage("An image widget was found to be blank. Please ensure all the images are not blank.");
-        }     
-        
+            this.appendStatusMessage('An image widget was found to be blank. Please ensure all the images are not blank.');
+        }
+
         return image_inputs.length === 0;
     }
 
