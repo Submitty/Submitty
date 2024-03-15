@@ -43,7 +43,6 @@ class NotebookBuilderController extends AbstractController {
         }
 
         $failure_url = $this->core->buildCourseUrl(['gradeable', $gradeable->getId(), 'update']) . '?nav_tab=1';
-
         // Related to PR #5945
         // if (!$gradeable->isUsingUploadedConfig()) {
         //     $this->core->addErrorMessage("Notebook builder may only edit uploaded configurations for the current course and semester.");
