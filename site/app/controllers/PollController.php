@@ -517,8 +517,8 @@ class PollController extends AbstractController {
         foreach ($poll->getUserResponses() as $response) {
             /** @var Option|null */
             $option = $this->core->getCourseEntityManager()->find(Option::class, $response->getOption()->getId());
-            $web_socket_response['updates'][$option->getResponse()] = $option->getUserResponses()->count() - 1;
             $em->remove($response);
+            $web_socket_response['updates'][$option->getResponse()] = $option->getUserResponses()->count() - 1;
         }
         if (array_key_exists("answers", $_POST) && $_POST['answers'][0] !== '-1') {
             foreach ($_POST['answers'] as $option_id) {
@@ -526,7 +526,7 @@ class PollController extends AbstractController {
                 $option = $this->core->getCourseEntityManager()->find(Option::class, $option_id);
                 $response = new Response($user_id);
                 $poll->addResponse($response, $option_id);
-                $web_socket_response['updates'][$option->getResponse()] = $option->getUserResponses()->count() + 1;
+                $web_socket_response['updates'][$option->getResponse()] += 1;
                 $em->persist($response);
             }
         }
