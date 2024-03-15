@@ -25,7 +25,7 @@ abstract class AbstractDatabase {
 
     protected $row_count = 0;
 
-    protected QueryLogger $query_logger;
+    protected ?QueryLogger $query_logger = null;
 
     /**
      * @var bool
@@ -87,15 +87,16 @@ abstract class AbstractDatabase {
      *
      * @throws DatabaseException
      */
-    public function connect() {
+    public function connect(bool $debug = false) {
         // Only start a new connection if we're not already connected to a DB
         if ($this->conn === null) {
             try {
-                $this->query_logger = new QueryLogger();
-                $logger_middleware = new Middleware($this->query_logger);
                 $config = new Configuration();
-                $config->setMiddlewares([$logger_middleware]);
-
+                if ($debug) {
+                    $this->query_logger = new QueryLogger();
+                    $logger_middleware = new Middleware($this->query_logger);
+                    $config->setMiddlewares([$logger_middleware]);
+                }
                 $details = $this->getConnectionDetails();
                 $this->conn = DriverManager::getConnection($details, $config);
             }
@@ -270,10 +271,16 @@ abstract class AbstractDatabase {
      * Return count of total queries run against current DBAL connection
      */
     public function getQueryCount(): int {
+        if ($this->query_logger === null) {
+            return 0;
+        }
         return count($this->query_logger->getQueries());
     }
 
     public function getQueries(): array {
+        if ($this->query_logger === null) {
+            return [];
+        }
         return $this->query_logger->getQueries();
     }
 

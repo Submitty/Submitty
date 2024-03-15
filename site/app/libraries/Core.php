@@ -202,7 +202,7 @@ class Core {
         $this->database_factory = new DatabaseFactory($this->config->getDatabaseDriver());
 
         $this->submitty_db = $this->database_factory->getDatabase($this->config->getSubmittyDatabaseParams());
-        $this->submitty_db->connect();
+        $this->submitty_db->connect($this->config->isDebug());
 
         $this->setQueries($this->database_factory->getQueries($this));
         $this->submitty_entity_manager = $this->createEntityManager($this->submitty_db);
@@ -228,7 +228,7 @@ class Core {
             return;
         }
         $this->course_db = $this->database_factory->getDatabase($this->config->getCourseDatabaseParams());
-        $this->course_db->connect();
+        $this->course_db->connect($this->config->isDebug());
 
         $this->setQueries($this->database_factory->getQueries($this));
         $this->course_entity_manager = $this->createEntityManager($this->course_db);
