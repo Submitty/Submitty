@@ -56,16 +56,20 @@ def update_docker_images(user, host, worker, autograding_workers, autograding_co
             # List all images
             image_current_list = client.images.list()
             image_set = set()
+            #lichen container doesn't appear in autograding json, but its still important so don't remove it.
+            images_to_update.add("submitty/lichen:latest")
             for image in image_current_list:
                 for image_name in image.attrs['RepoTags']:
                     image_set.add(image_name)
             images_to_remove = set.difference(image_set, images_to_update)
+            #lichen:latest is another name for lichen. Don't remove, but don't update either.
+            images_to_remove.remove("lichen:latest")
 
             # Remove images
             for imageRemoved in images_to_remove:
-                print("Removed image " + imageRemoved)
                 try:
                     image_id = client.images.get(imageRemoved).id
+                    print("Removed image " + imageRemoved)
                 except docker.errors.ImageNotFound as e:
                     print("Couldn't find image ", e)
                     continue
