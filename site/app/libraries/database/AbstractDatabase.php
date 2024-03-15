@@ -80,7 +80,7 @@ abstract class AbstractDatabase {
     abstract public function fromPHPToDatabaseArray($array);
 
     /**
-     * Connects to a database through the PDO extension (@link http://php.net/manual/en/book.pdo.php).
+     * Connects to a database through the DBAL library.
      * We wrap the potential exception that would get thrown by the DBAL constructor so that we can
      * bubble up the message, without exposing any of the parameters used by the connect function
      * as we don't wany anyone to get the DB details.
