@@ -33,7 +33,7 @@ class BannerImage {
     protected string $folder_name;
 
     #[ORM\Column(type: Types::STRING)]
-    protected string $path;
+    protected string $community_path;
 
     #[ORM\Column(type: Types::STRING)]
     protected string $extra_info;
@@ -67,11 +67,11 @@ class BannerImage {
     }
 
     public function setPath(string $path): void {
-        $this->path = $path;
+        $this->community_path = $path;
     }
 
     public function getPath(): string {
-        return $this->path;
+        return $this->community_path;
     }
     public function setFolderName(string $folder_name): void {
         $this->folder_name = $folder_name;

@@ -19,7 +19,7 @@ def up(config, database):
     database.execute("""
         CREATE TABLE IF NOT EXISTS community_events (
             id SERIAL PRIMARY KEY,
-            path VARCHAR(255) NOT NULL,
+            community_path VARCHAR(255) NOT NULL,
             name VARCHAR(255) NOT NULL,
             folder_name VARCHAR(255) NOT NULL,
             extra_info VARCHAR(255),
