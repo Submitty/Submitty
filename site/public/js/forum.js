@@ -1218,6 +1218,42 @@ function alterShowMergeThreadStatus(newStatus, course) {
 }
 
 // eslint-disable-next-line no-unused-vars
+function markUnread() {
+    const url = buildCourseUrl(['forum', 'threads', 'mark_unread']);
+    $.ajax({
+        url: url,
+        type: 'POST',
+        data: {
+            thread_id: thread_id,
+            user_id: user_id,
+        },
+        success: function(data) {
+            try {
+                // eslint-disable-next-line no-var
+                var json = JSON.parse(data);
+            }
+            catch (err) {
+                // eslint-disable-next-line no-undef
+                displayErrorMessage('Error parsing data. Please try again.');
+                return;
+            }
+            if (json['status'] === 'fail') {
+                // eslint-disable-next-line no-undef
+                displayErrorMessage(json['message']);
+                return;
+            }
+            // eslint-disable-next-line no-undef
+        },
+        error: function() {
+            window.alert('Something went wrong');
+        },
+    });
+    // Your logic to mark unread from here
+    console.log('Marking as unread...');
+    // Implement the functionality as needed
+}
+
+// eslint-disable-next-line no-unused-vars
 function modifyThreadList(currentThreadId, currentCategoriesId, course, loadFirstPage, success_callback) {
 
     let categories_value = readCategoryValues();

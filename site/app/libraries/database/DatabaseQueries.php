@@ -178,6 +178,11 @@ class DatabaseQueries {
         return $this->getUsers($user_id_list);
     }
 
+    public function markUnread(int $thread_id, string $user_id): bool {
+        $this->submitty_db->query("DELETE FROM viewed_responses WHERE thread_id=? AND user_id=?", [$thread_id, $user_id]);
+        return $this->submitty_db->getRowCount() > 0;
+    } 
+
     /**
      * Retrieves all students from a course and their virtual attendance
      * information such as logs for the course materials page, and logs
