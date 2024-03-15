@@ -9360,11 +9360,11 @@ ORDER BY
 
     public function getDockerImageOwner(string $image): string|bool {
         $this->submitty_db->query("SELECT user_id FROM docker_image WHERE image_name = ?", [$image]);
-        return ($this->submitty_db->getRowCount() > 0) ? $this->submitty_db->row()['user_id'] : false; 
+        return ($this->submitty_db->getRowCount() > 0) ? $this->submitty_db->row()['user_id'] : false;
     }
 
     public function getDockerImageOwners(array $images): array {
-        if(count($images) == 0) {
+        if (count($images) == 0) {
             return [];
         }
         $result = [];
@@ -9382,7 +9382,8 @@ ORDER BY
             $this->submitty_db->query("INSERT INTO docker_image (image_name, user_id) values (?, ?);", [$image,$user_id]);
         // If an instructor wants to add an image they didn't upload to a capability, the image will have no owner.
         // Only sysadmin will be able to remove it.
-        } elseif ($current_owner !== $user_id) {
+        }
+        elseif ($current_owner !== $user_id) {
             $this->submitty_db->query("UPDATE docker_image SET user_id = '' WHERE image_name = ?", [$image]);
         }
     }

@@ -2,7 +2,6 @@
 
 namespace app\controllers;
 
-use app\models\User;
 use app\libraries\FileUtils;
 use app\libraries\response\MultiResponse;
 use app\libraries\response\WebResponse;

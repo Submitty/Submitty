@@ -64,13 +64,13 @@ function addFieldOnChange() {
     }
 }
 
-function confirmationdialog(url,id) {
+function confirmationdialog(url, id) {
     if (confirm(`Are you sure you want to remove ${id} image?`)) {
-        removeImage(url,id);
+        removeImage(url, id);
     }
 }
 
-function removeImage(url,id) {
+function removeImage(url, id) {
     $.ajax({
         url: url,
         type: 'POST',
