@@ -136,7 +136,7 @@ class AdminGradeableController extends AbstractController {
             $dates['late_days'] = $config->getLateDays();
             $return_json['dates'] = $dates;
         }
-       
+
         return JsonResponse::getSuccessResponse($return_json);
     }
 
