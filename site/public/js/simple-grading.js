@@ -1,6 +1,27 @@
 /* global WebSocketClient, registerKeyHandler, student_full, csrfToken, buildCourseUrl, submitAJAX, captureTabInModal */
 /* exported setupSimpleGrading, checkpointRollTo, showSimpleGraderStats */
 
+function updateVisibility() {
+    const showGraders = $('#show-graders').is(':checked');
+    const showDates = $('#show-dates').is(':checked');
+    $('.cell-grade').each(function() {
+        const graderElement = $(this).find('.simple-grade-grader');
+        const gradeTimeElement = $(this).find('.simple-grade-date');
+        
+        if (showGraders && $(this).data('grader')) {
+            graderElement.text($(this).data('grader')).show();
+        } else {
+            graderElement.hide();
+        }
+
+        if (showDates && $(this).data('grade-time')) {
+            gradeTimeElement.text($(this).data('grade-time')).show();
+        } else {
+            gradeTimeElement.hide();
+        }
+    });
+}
+
 function calcSimpleGraderStats(action) {
     // start variable declarations
     let average = 0;                // overall average
@@ -37,27 +58,6 @@ function calcSimpleGraderStats(action) {
     elems = $(`${elem_type}[id^=cell-][id$=0]`);
     // end initial setup
 
-    function updateGradersAndDatesVisibility() {
-        const showGraders = $('#show-graders').is(':checked');
-        const showDates = $('#show-dates').is(':checked');
-        $('.cell-grade').each(function() {
-            const grader = $(this).data('grader') ? $(this).data('grader') : "N/A";
-            const gradeTime = $(this).data('grade-time') ? $(this).data('grade-time') : "N/A";
-            if(showGraders) {
-                $(this).find('.simple-grade-grader').text(grader).show();
-            } else {
-                $(this).find('.simple-grade-grader').hide();
-            }
-            if(showDates) {
-                $(this).find('.simple-grade-date').text(gradeTime).show();
-            } else {
-                $(this).find('.simple-grade-date').hide();
-            }
-        });
-    }
-    
-    // Call this function after updating the scores or toggling the show graders/dates checkboxes.
-    
     // start main loop: iterate by component and calculate stats
     while (elems.length > 0) {
         // eslint-disable-next-line eqeqeq
@@ -284,6 +284,7 @@ function updateCheckpointCells(elems, scores, no_cookie) {
                     elem.css('border-right', '60px solid #DA4F49');
                 });
             }
+            updateVisibility();
         },
         () => {
             elems.each((idx, elem) => {
@@ -293,6 +294,7 @@ function updateCheckpointCells(elems, scores, no_cookie) {
             });
         },
     );
+    updateVisibility();
 }
 
 function getCheckpointHistory(g_id) {
@@ -378,6 +380,7 @@ function setupCheckboxCells() {
         }
         Cookies.set('show_dates', showDatesGradedCheckbox.is(':checked'));
     });
+    updateVisibility();
 }
 
 function setupNumericTextCells() {
@@ -453,6 +456,7 @@ function setupNumericTextCells() {
                 }
 
                 window.socketClient.send({'type': 'update_numeric', 'elem': split_id[3], 'user': row_el.data('anon'), 'value': value, 'total': total});
+                updateVisibility();
             },
             () => {
                 elem.css('background-color', '--standard-light-pink');
@@ -578,6 +582,7 @@ function setupNumericTextCells() {
                                         }
                                     }
                                 });
+                                updateVisibility();
                             },
                             () => {
                                 alert('submission error');
@@ -596,6 +601,7 @@ function setupNumericTextCells() {
             f.replaceWith(f = f.clone(true));
         }
     });
+    updateVisibility();
 }
 
 function setupSimpleGrading(action) {
@@ -915,6 +921,7 @@ function initSocketClient() {
     };
     const gradeable_id = window.location.pathname.split('gradeable/')[1].split('/')[0];
     window.socketClient.open(gradeable_id);
+    updateVisibility();
 }
 
 function checkpointSocketHandler(elem_id, anon_id, score, grader) {
@@ -946,6 +953,7 @@ function checkpointSocketHandler(elem_id, anon_id, score, grader) {
         elem.css('border-right', `60px solid ${getComputedStyle(elem.parent()[0]).getPropertyValue('background-color')}`);
         elem.animate({'border-right-width': '0px'}, 400);
     }
+    updateVisibility();
 }
 
 function numericSocketHandler(elem_id, anon_id, value, total) {
@@ -969,4 +977,10 @@ function numericSocketHandler(elem_id, anon_id, value, total) {
             elem.parent().siblings('.option-small-output').children('.cell-total').text(total).hide().fadeIn('slow');
         }
     }
+    updateVisibility();
 }
+
+// Attach event listener to checkboxes
+$(document).on('change', '#show-graders, #show-dates', function() {
+    updateVisibility();
+});
