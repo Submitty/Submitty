@@ -62,7 +62,6 @@ class GlobalController extends AbstractController {
 
         $now = $this->core->getDateTimeNow();
         $duck_img = $this->getDuckImage($now);
-        /** @var BannerImageRepository<BannerImage> $repo  */
         $repo = $this->core->getSubmittyEntityManager()->getRepository(BannerImage::class);
         $bannerImages = $repo->getValidBannerImages();
 
