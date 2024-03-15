@@ -135,15 +135,15 @@ class AdminGradeableController extends AbstractController {
 
         if (array_key_exists('dates', $_POST)) {
             $dates = $_POST['dates'];
-            $values['ta_view_start_date'] = $dates['ta_view_start_date'] ?? NULL;
-            $values['grade_start_date'] = $dates['grade_start_date'] ?? NULL;
-            $values['grade_due_date'] = $dates['grade_due_date'] ?? NULL;
-            $values['grade_released_date'] = $dates['grade_released_date'] ?? NULL;
-            $values['team_lock_date'] = $dates['team_lock_date'] ?? NULL;
-            $values['submission_open_date'] = $dates['submission_open_date'] ?? NULL;
-            $values['submission_due_date'] = $dates['submission_due_date'] ?? NULL;
-            $values['grade_inquiry_start_date'] = $dates['grade_inquiry_start_date'] ?? NULL;
-            $values['grade_inquiry_due_date'] = $dates['grade_inquiry_due_date'] ?? NULL;
+            $values['ta_view_start_date'] = $dates['ta_view_start_date'] ?? null;
+            $values['grade_start_date'] = $dates['grade_start_date'] ?? null;
+            $values['grade_due_date'] = $dates['grade_due_date'] ?? null;
+            $values['grade_released_date'] = $dates['grade_released_date'] ?? null;
+            $values['team_lock_date'] = $dates['team_lock_date'] ?? null;
+            $values['submission_open_date'] = $dates['submission_open_date'] ?? null;
+            $values['submission_due_date'] = $dates['submission_due_date'] ?? null;
+            $values['grade_inquiry_start_date'] = $dates['grade_inquiry_start_date'] ?? null;
+            $values['grade_inquiry_due_date'] = $dates['grade_inquiry_due_date'] ?? null;
 
             $values['has_due_date'] = $dates['has_due_date'] ?? 'true';
             $values['has_release_date'] = $dates['has_released_date'] ??  'true';

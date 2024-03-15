@@ -1,7 +1,7 @@
 /* exported loadTemplates renderGradingGradeable renderPeerGradeable renderGradingComponent
    renderGradingComponentHeader renderInstructorEditGradeable renderConflictMarks renderRubricTotalBox
    renderTotalScoreBox renderOverallComment renderEditComponentHeader renderEditComponent ajaxUploadGradeable */
-/* global Twig showVerifyComponent buildCourseUrl getItempoolOptions isItempoolAvailable csrfToken */
+/* global Twig showVerifyComponent buildCourseUrl displayErrorMessage closePopup getItempoolOptions isItempoolAvailable csrfToken */
 
 /**
  * The number of decimal places to show to the user
