@@ -3,6 +3,7 @@
 namespace app\libraries\database;
 
 use Psr\Log\AbstractLogger;
+use Psr\Log\LogLevel;
 
 class QueryLogger extends AbstractLogger {
     /**
@@ -21,7 +22,7 @@ class QueryLogger extends AbstractLogger {
      */
     public function log($level, \Stringable|string $message, array $context = []): void {
         // SQL queries are in the debug level, but we want to ignore any other debug log
-        if ($level === "debug" && isset($context['sql'])) {
+        if ($level === LogLevel::DEBUG && isset($context['sql'])) {
             $this->queries[] = [
                 $context['sql'],
                 $context['params'] ?? []
