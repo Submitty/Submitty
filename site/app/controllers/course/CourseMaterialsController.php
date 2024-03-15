@@ -132,6 +132,11 @@ class CourseMaterialsController extends AbstractController {
             $this->core->addErrorMessage("Failed to delete course material");
             return new RedirectResponse($this->core->buildCourseUrl(['course_materials']));
         }
+        //Mark the course material as deleted instead of physcially removing it 
+        $cm->setDeleted(true);
+        $this->core->getCourseEntityManager()->flush();
+        $this->core->addSuccessMessage(basename($path). " has been marked as deleted. ");
+        return new RedirectResponse($this->core->buildCourseUrl(['course_materials']));
         // security check
         $dir = "course_materials";
         $path = $this->core->getAccess()->resolveDirPath($dir, $cm->getPath());

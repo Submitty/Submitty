@@ -715,6 +715,7 @@ CREATE TABLE public.course_materials (
     priority double precision NOT NULL,
     url text,
     title character varying(255)
+    deleted BOOLEAN DEFAULT FALSE
 );
 
 
