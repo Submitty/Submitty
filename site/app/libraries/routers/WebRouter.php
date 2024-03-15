@@ -116,15 +116,19 @@ class WebRouter {
     public static function getApiResponse(Request $request, Core $core) {
         try {
             $router = new self($request, $core);
-            $router->loadCourse();
+
+            // Check if loadCourse returns true
+            if (!$router->loadCourse()) {
+                // If loadCourse returns false, return an error response
+                return MultiResponse::JsonOnlyResponse(
+                    JsonResponse::getFailResponse("Failed to load course.")
+                );
+            }
 
             $logged_in = $core->isApiLoggedIn($request);
 
-            // prevent user that is not logged in from going anywhere except AuthenticationController
-            if (
-                !$logged_in
-                && !str_ends_with($router->parameters['_controller'], 'AuthenticationController')
-            ) {
+            // Prevent user that is not logged in from going anywhere except AuthenticationController
+            if (!$logged_in && !str_ends_with($router->parameters['_controller'], 'AuthenticationController')) {
                 return new MultiResponse(JsonResponse::getFailResponse("Unauthenticated access. Please log in."));
             }
 
@@ -170,6 +174,7 @@ class WebRouter {
         return $router->run();
     }
 
+
     /**
      * @param Request $request
      * @param Core $core
@@ -180,7 +185,14 @@ class WebRouter {
         $logged_in = false;
         try {
             $router = new self($request, $core);
-            $router->loadCourse();
+
+            // Check if loadCourse returns true
+            if (!$router->loadCourse()) {
+                // If loadCourse returns false, redirect to home page
+                return MultiResponse::RedirectOnlyResponse(
+                    new RedirectResponse($core->buildUrl(['home']))
+                );
+            }
 
             $logged_in = $core->isWebLoggedIn();
 
@@ -224,7 +236,7 @@ class WebRouter {
             }
         }
         catch (ResourceNotFoundException | MethodNotAllowedException $e) {
-            // redirect to login page or home page
+            // Redirect to login page or home page
             if (!$logged_in) {
                 return MultiResponse::RedirectOnlyResponse(
                     new RedirectResponse($core->buildUrl(['authentication', 'login']))
@@ -239,6 +251,7 @@ class WebRouter {
 
         return $router->run();
     }
+
 
     private function run() {
         $this->controller_name = $this->parameters['_controller'];
@@ -267,30 +280,37 @@ class WebRouter {
      * @throws \Exception
      */
     private function loadCourse() {
-        if (
-            array_key_exists('_semester', $this->parameters)
-            && array_key_exists('_course', $this->parameters)
-        ) {
+        // Check if course parameters are present in the request
+        if (array_key_exists('_semester', $this->parameters) && array_key_exists('_course', $this->parameters)) {
             $semester = $this->parameters['_semester'];
             $course = $this->parameters['_course'];
 
-            /** @noinspection PhpUnhandledExceptionInspection */
+            // Load the course configuration
             $this->core->loadCourseConfig($semester, $course);
-            /** @noinspection PhpUnhandledExceptionInspection */
             $this->core->loadGradingQueue();
 
+            // Check if the course is successfully loaded
             if ($this->core->getConfig()->isCourseLoaded()) {
                 $this->core->getOutput()->addBreadcrumb(
                     $this->core->getDisplayedCourseName(),
                     $this->core->buildCourseUrl(),
                     $this->core->getConfig()->getCourseHomeUrl()
                 );
-            }
 
-            /** @noinspection PhpUnhandledExceptionInspection */
-            $this->core->loadCourseDatabase();
+                // Load other course-related configurations
+                $this->core->loadCourseDatabase();
+
+                return true;
+            }
+            else {
+                return false;
+            }
         }
+
+        return true;
     }
+
+
 
     /**
      * Check if the user needs a redirection depending on their login status.
