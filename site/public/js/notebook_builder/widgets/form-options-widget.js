@@ -1,4 +1,4 @@
-/* global Widget, notebook_builder, csrfToken, builder_data, buildCourseUrl, uploadFiles, getBadItemNames */
+/* global Widget, notebook_builder, csrfToken, builder_data, buildCourseUrl, uploadFiles, getBadItemNames, getBadImageInputs */
 /* exported FormOptionsWidget */
 
 class FormOptionsWidget extends Widget {
@@ -102,7 +102,7 @@ class FormOptionsWidget extends Widget {
      * @returns {boolean}
      */
     validate() {
-        return this.validateFileNames() && this.validateItemNames();
+        return this.validateFileNames() && this.validateItemNames() && this.validateImageWidgets();
     }
 
     /**
@@ -188,6 +188,22 @@ class FormOptionsWidget extends Widget {
         this.colorFailedInputs(duplicated_filenames.concat(illegal_filenames), '.filename-input');
 
         return duplicated_filenames.length === 0 && illegal_filenames.length === 0;
+    }
+
+    /**
+     * Validates to see if all image widgets contain an actual image. If validation error occurs, then error messages are added to the status div.
+     * An error indicator will be added later.
+     * 
+     * @returns {Boolean}
+     */
+
+    validateImageWidgets() {
+        const image_inputs = getBadImageInputs();
+        if (!(image_inputs.length === 0)) {
+            this.appendStatusMessage("An image widget was found to be blank. Please ensure all the images are not blank.");
+        }     
+        
+        return image_inputs.length === 0;
     }
 
     /**
