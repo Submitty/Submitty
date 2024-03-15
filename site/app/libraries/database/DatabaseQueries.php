@@ -9358,13 +9358,21 @@ ORDER BY
         return $this->rowsToArray($this->submitty_db->rows());
     }
 
+    /**
+     * @param string $image the full name of the image to get
+     * @return string|bool the user id of the image's owner or false iff the image is not in the db
+     */
     public function getDockerImageOwner(string $image): string|bool {
         $this->submitty_db->query("SELECT user_id FROM docker_image WHERE image_name = ?", [$image]);
         return ($this->submitty_db->getRowCount() > 0) ? $this->submitty_db->row()['user_id'] : false;
     }
 
+    /**
+     * @param string[] $images the full names of the images to get owners for
+     * @return array<string, string> the owners of the images, indexed by image name
+     */
     public function getDockerImageOwners(array $images): array {
-        if (count($images) == 0) {
+        if (count($images) === 0) {
             return [];
         }
         $result = [];
@@ -9376,6 +9384,10 @@ ORDER BY
         return $result;
     }
 
+    /**
+     * @param string $image the full name of the image to set ownership
+     * @param string $user_id the user id of its owner.
+     */
     public function setDockerImageOwner(string $image, string $user_id): void {
         $current_owner = $this->getDockerImageOwner($image);
         if ($current_owner === false) {
@@ -9388,6 +9400,11 @@ ORDER BY
         }
     }
 
+    /**
+     * @param string $image the full name of the image to remove
+     * @param User $user the user who is removing the image
+     * @return bool true iff image was deleted
+     */
     public function removeDockerImageOwner(string $image, User $user): bool {
         if ($user->getAccessLevel() === User::LEVEL_SUPERUSER) {
             $this->submitty_db->query("DELETE FROM docker_image WHERE image_name=?", [$image]);
