@@ -599,8 +599,7 @@
     <td>
         {# existing teams names over max length get truncated down on display #}
         {% if graded_gradeable.getSubmitter().getTeam().getTeamName()|length > max_team_name_length %}
-          {% set truncatedString = graded_gradeable.getSubmitter().getTeam().getTeamName()|slice(0, max_team_name_length) ~ '...' %}
-          {{ truncatedString }}
+          {{ graded_gradeable.getSubmitter().getTeam().getTeamName()|slice(0, max_team_name_length) ~ '...' }}
         {% else %}
           {{ graded_gradeable.getSubmitter().getTeam().getTeamName() }}
         {% endif %}
