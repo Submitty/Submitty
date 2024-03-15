@@ -44,11 +44,9 @@ class PollUtils {
             "single-response-single-correct",
             "single-response-multiple-correct",
             "single-response-survey",
-            "single-custom-response-survey",
             "multiple-response-exact",
             "multiple-response-flexible",
             "multiple-response-survey",
-            "multiple-custom-response-survey"
         ];
     }
 

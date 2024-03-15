@@ -30,9 +30,6 @@ class Option {
     #[ORM\Column(name: "correct", type: Types::BOOLEAN)]
     protected bool $correct;
 
-    #[ORM\Column(name: "custom", type: Types::BOOLEAN)]
-    protected bool $custom;
-
     #[ORM\ManyToOne(targetEntity: Poll::class, inversedBy: "options")]
     #[ORM\JoinColumn(name: "poll_id", referencedColumnName: "poll_id", nullable: false)]
     protected Poll $poll;
@@ -44,12 +41,11 @@ class Option {
     #[ORM\JoinColumn(name: "option_id", referencedColumnName: "option_id")]
     protected Collection $user_responses;
 
-    public function __construct(int $order_id, string $response, bool $is_correct, string $author_id = 'instructor', bool $custom = false) {
+    public function __construct(int $order_id, string $response, bool $is_correct, string $author_id = 'instructor') {
         $this->setOrderId($order_id);
         $this->setResponse($response);
         $this->setCorrect($is_correct);
         $this->setAuthorId($author_id);
-        $this->setCustom($custom);
 
         $this->user_responses = new ArrayCollection();
     }
@@ -90,12 +86,8 @@ class Option {
         return $this->correct;
     }
 
-    public function setCustom(bool $custom): void {
-        $this->custom = $custom;
-    }
-
     public function isCustom(): bool {
-        return $this->custom;
+        return $this->author_id !== "instructor";
     }
 
     public function setPoll(Poll $poll): void {

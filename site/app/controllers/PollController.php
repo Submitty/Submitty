@@ -238,13 +238,13 @@ class PollController extends AbstractController {
             $this->core->addErrorMessage("Polls of type 'single-response-single-correct' must have exactly one correct response");
             return new RedirectResponse($this->core->buildCourseUrl(['polls']));
         }
-        elseif (in_array($_POST['question_type'], ["single-response-survey", "single-custom-response-survey", "multiple-response-survey", "multiple-custom-response-survey"]) && $answers !== count($poll->getOptions())) {
+        elseif (in_array($_POST['question_type'], ["single-response-survey", "multiple-response-survey"]) && $answers !== count($poll->getOptions())) {
             $this->core->addErrorMessage("All responses of polls of type 'survey' must be marked at correct responses");
             return new RedirectResponse($this->core->buildCourseUrl(['polls']));
         }
-        if ($poll->allowsCustomResponses()) {
-            $poll->setCustomCredit(isset($_POST['poll_credit']));
-        }
+
+        $poll->setAllowsCustomOptions(isset($_POST['poll_custom_options']));
+
         $em->flush();
 
         $this->core->addSuccessMessage("Poll successfully added");
@@ -326,7 +326,7 @@ class PollController extends AbstractController {
         $poll->setReleaseDate($date);
         $poll->setReleaseHistogram($_POST['release_histogram']);
         $poll->setReleaseAnswer($_POST['release_answer']);
-        $poll->setCustomCredit(isset($_POST['poll_credit']));
+        $poll->setAllowsCustomOptions(isset($_POST['poll_custom_options']));
 
         if (isset($_FILES['image_file']) && $_FILES["image_file"]["name"] !== "") {
             $file = $_FILES["image_file"];
@@ -391,16 +391,11 @@ class PollController extends AbstractController {
 
         foreach ($poll->getOptions() as $poll_option) {
             if (!in_array($poll_option->getId(), $keep_ids)) {
-                if ($poll_option->hasUserResponses() && !$poll_option->isCustom()) {
+                if ($poll_option->hasUserResponses()) {
                     $this->core->addErrorMessage("Error occurred in editing poll: attempt to delete response option that has already been submitted as an answer");
                     return new RedirectResponse($returnUrl);
                 }
 
-                if ($poll->allowsCustomResponses() && $poll_option->isCustom()) {
-                    // Keep current custom responses in case of switch from custom single to multiple survey or vice versa
-                    $poll_option->setCorrect(isset($_POST['poll_credit']));
-                    continue;
-                }
                 $poll->removeOption($poll_option);
                 $em->remove($poll_option);
             }
@@ -468,60 +463,22 @@ class PollController extends AbstractController {
         elseif ($poll->allowsCustomResponses() === false) {
             return JsonResponse::getFailResponse("Poll is currently not accepting custom response");
         }
-        $submitted_response = $this->core->getQueries()->submittedCustomResponse($poll->getId(), $user_id);
+   
         $exists_response = $this->core->getQueries()->existsCustomResponse($poll->getId(), $poll_response);
-        if ($submitted_response || $exists_response) {
+        if ($exists_response) {
             return JsonResponse::getFailResponse("A similar response already exists or you've already submitted a response.");
         }
-        $custom_poll_option = new Option(1000 + $poll->getOptions()->count(), $poll_response, $poll->getCustomCredit(), $user_id, true);
+        else if ($poll->getOptions() >= $poll->getCustomOptionLimit()) {
+            // TODO
+        }
+
+        $custom_poll_option = new Option(1000 + $poll->getOptions()->count(), $poll_response, true, $user_id);
         $poll->addOption($custom_poll_option);
         $em->persist($custom_poll_option);
         $em->flush();
 
         return JsonResponse::getSuccessResponse(["message" => "Successfully added custom response"]);
-    }
-
-    /**
-     * @Route("/courses/{_semester}/{_course}/polls/updateCustomResponse", methods={"POST"})
-     */
-    public function updateCustomResponse(): JsonResponse {
-        $poll_id = intval($_POST['poll_id'] ?? -1);
-        $option_id = $_POST['option_id'];
-        $custom_response = $_POST['option_response'];
-        $user_id = $this->core->getUser()->getId();
-        $em = $this->core->getCourseEntityManager();
-        /** @var \app\repositories\poll\PollRepository */
-        $repo = $em->getRepository(Poll::class);
-        /** @var Poll|null */
-        $poll = $repo->findByIDWithOptions($poll_id);
-        if ($poll === null) {
-            return JsonResponse::getFailResponse("Invalid Poll ID");
-        }
-        elseif (!$poll->isOpen() && !$this->core->getUser()->accessFaculty()) {
-            return JsonResponse::getFailResponse("Poll is closed");
-        }
-        /** @var Option|null */
-        $custom_option = $this->core->getCourseEntityManager()->find(Option::class, $option_id);
-        if ($custom_option === null) {
-            return JsonResponse::getFailResponse("Could not find custom response");
-        }
-        elseif ($custom_option->getAuthorId() !== $user_id && !$this->core->getUser()->accessFaculty()) {
-            return JsonResponse::getFailResponse("You have no access to edit this custom response");
-        }
-        elseif ($custom_response === null || trim($custom_response) === '') {
-            return JsonResponse::getFailResponse("Invalid text to update custom response");
-        }
-        $exists_response = $this->core->getQueries()->existsCustomResponse($poll->getId(), $custom_response);
-        if ($exists_response) {
-            return JsonResponse::getFailResponse("A similar response already exists");
-        }
-        $custom_option->setResponse($custom_response);
-        $em->persist($custom_option);
-        $em->flush();
-
-        return JsonResponse::getSuccessResponse(["message" => "Successfully updated custom response"]);
-    }
-
+    }   
     /**
      * @Route("/courses/{_semester}/{_course}/polls/removeCustomResponse", methods={"POST"})
      */
@@ -538,6 +495,7 @@ class PollController extends AbstractController {
         elseif (!$poll->isOpen() && !$this->core->getUser()->accessFaculty()) {
             return JsonResponse::getFailResponse("Poll is closed");
         }
+
         /** @var Option|null */
         $custom_option = $this->core->getCourseEntityManager()->find(Option::class, $option_id);
         if ($custom_option === null) {
@@ -546,6 +504,10 @@ class PollController extends AbstractController {
         elseif ($custom_option->getAuthorId() !== $user_id && !$this->core->getUser()->accessFaculty()) {
             return JsonResponse::getErrorResponse("You have no access to remove this custom option");
         }
+        elseif ($custom_option->getUserResponses()->count() >= 1 && $custom_option->getUserResponses()->first()->getStudentId() !== $user_id) {
+            return JsonResponse::getErrorResponse("Error occurred in editing poll: attempt to delete response option that has already been submitted as an answer");
+        }
+
         foreach ($custom_option->getUserResponses() as $response) {
             $em->remove($response);
         }

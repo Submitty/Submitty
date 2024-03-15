@@ -43,9 +43,12 @@ class Poll {
     #[ORM\Column(type: Types::STRING)]
     protected $release_answer;
 
-    #[ORM\Column(name: "custom_credit", type: Types::BOOLEAN)]
-    protected bool $custom_credit;
+    #[ORM\Column(name: "allows_custom", type: Types::BOOLEAN)]
+    protected bool $allows_custom;
 
+    #[ORM\Column(name: "custom_limit", type: Types::INTEGER)]
+    protected $custom_limit;
+    
     /**
      * @var Collection<Option>
      */
@@ -69,7 +72,8 @@ class Poll {
         $this->setReleaseHistogram($release_histogram);
         $this->setReleaseAnswer($release_answer);
         $this->setImagePath($image_path);
-        $this->setCustomCredit(true);
+        $this->setAllowsCustomOptions(false);
+        $this->setCustomLimit(0);
         $this->setClosed();
 
         $this->options = new ArrayCollection();
@@ -124,8 +128,20 @@ class Poll {
         return $this->status === "ended";
     }
 
+    public function setAllowsCustomOptions(bool $allows_custom): void {
+        $this->allows_custom = $allows_custom;
+    }
+
     public function allowsCustomResponses(): bool {
-        return $this->question_type === "single-custom-response-survey" || $this->question_type === "multiple-custom-response-survey";
+        return $this->allows_custom;
+    }
+
+    public function setCustomOptionLimit(int $limit_per_student): void {
+        $this->custom_limit = $limit_per_student;
+    }
+
+    public function getCustomOptionLimit(): int {
+        return $this->custom_limit;
     }
 
     public function getReleaseDate(): \DateTime {
@@ -142,14 +158,6 @@ class Poll {
 
     public function setImagePath(?string $image_path): void {
         $this->image_path = $image_path;
-    }
-
-    public function getCustomCredit(): bool {
-        return $this->custom_credit;
-    }
-
-    public function setCustomCredit(bool $custom_credit): void {
-        $this->custom_credit = $custom_credit;
     }
 
     public function getQuestionType(): string {

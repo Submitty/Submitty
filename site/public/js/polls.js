@@ -211,9 +211,6 @@ function updateCustomResponse(pollid, optionid, base_url) {
                     displayErrorMessage(msg.message);
                 }
                 else {
-                    const parent_container = document.getElementById(`option-row-${optionid}`);
-                    parent_container.querySelector('.markdown p').textContent = custom_response_value;
-                    displayCustomResponseEdit('false', `option-row-${optionid}`);
                     displaySuccessMessage(msg.data.message);
                 }
             }
@@ -223,23 +220,6 @@ function updateCustomResponse(pollid, optionid, base_url) {
             }
         },
     });
-}
-
-function displayCustomResponseEdit(display, parentid) {
-    const parent_container = document.getElementById(parentid);
-    const display_edit = display === 'true' ? 'inline' : 'none';
-    const display_default = display === 'true' ? 'none' : 'inline';
-
-    parent_container.querySelector('.markdown').style.display = display_default;
-    parent_container.querySelector('.edit-btn').style.display = display_default;
-
-    parent_container.querySelector('textarea').style.display = display_edit;
-    parent_container.querySelector('.close-btn').style.display = display_edit;
-    parent_container.querySelector('.upload-btn').style.display = display_edit;
-
-    const custom_response_value = parent_container.querySelector('.markdown p').textContent;
-    parent_container.querySelector('.markdown p').textContent = custom_response_value;
-    parent_container.querySelector('textarea').value = custom_response_value;
 }
 
 function importPolls() {

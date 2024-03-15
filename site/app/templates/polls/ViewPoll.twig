@@ -75,16 +75,7 @@
                             {% if ((poll.allowsCustomResponses() and option.isCustom()) and (user_id == option.getAuthorId() or user_admin)) %}
                                         {% set exists_custom_response = true %}
                                         <textarea aria-label="Response text" id = "{{option.getId()}}_custom_response" class="poll_response" name="option[{{option.getId()}}][response]" style="display:none; resize: none; min-height: 50px; max-height: 300px; height: 50px; width: 100%; rows="10" cols="30">{{option.getResponse()}}</textarea>
-                                        <div class="move-btn upload-btn" style = "display:none; border:0; padding:0;" onclick = "updateCustomResponse({{ poll.getId() }}, {{ option.getId() }}, '{{ base_url }}');">
-                                            <i class="fa-solid fa-cloud-arrow-up black-btn"></i>
-                                        </div>
-                                        <div class="move-btn close-btn" style = "display:none; border:0; padding:0;" onclick = "displayCustomResponseEdit('false', 'option-row-{{ option.getId() }}');">
-                                            <i class="fa-solid fa-clock-rotate-left black-btn"></i>
-                                        </div>
 
-                                        <div class="move-btn edit-btn" style = "border:0; padding:0;" onclick = "displayCustomResponseEdit('true', 'option-row-{{ option.getId() }}');">
-                                            <i class="fas fa-edit black-btn"></i>
-                                        </div>
                                         <div class="move-btn delete-btn" style = "border:0; padding:0;" onclick = "removeCustomResponse({{ poll.getId() }}, {{ option.getId() }}, '{{ base_url }}');">
                                             <i class="fas fa-trash black-btn"></i>
                                         </div>
@@ -106,6 +97,7 @@
                     <button type="submit" class="btn btn-primary student-submit">Submit</button>
                 {% endif %}
             </form>
+
             {% if not user_admin and poll.isOpen() and poll.allowsCustomResponses() %}
                 <div class = 'info-wrapper custom-response-wrapper' style = 'display:{{exists_custom_response ? 'none' : 'block'}};'>
                         <input type="hidden" name="csrf_token" value="{{ csrf_token }}"/>

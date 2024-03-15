@@ -54,12 +54,6 @@
         </div>
 
         <div class="poll-type-option">
-            <input type="radio" id="poll-type-single-custom-response-survey" name="question_type" value="single-custom-response-survey" onclick="changePollType()" {{ question_type == 'single-custom-response-survey'? "checked" : "" }}></input>
-            <label for="poll-type-single-custom-response-survey">single response - custom response survey</label>
-            <p class="poll-type-description"><i>Students can submit a single custom response that can be chosen by others. Any selection is worth full credit unless otherwise toggled below.</i></p>
-        </div>
-
-        <div class="poll-type-option">
             <input type="radio" id="poll-type-multiple-response-exact" name="question_type" value="multiple-response-exact" onclick="changePollType()" {{ question_type == 'multiple-response-exact'? "checked" : "" }}></input>
             <label for="poll-type-multiple-response-exact">multiple response - exact</label>
             <p class="poll-type-description"><i>Students can select one or more responses, and they receive full credit only if their selection exactly matches the instructor's selection.</i></p>
@@ -75,12 +69,6 @@
             <input type="radio" id="poll-type-multiple-response-survey" name="question_type" value="multiple-response-survey" onclick="changePollType()" {{ question_type == 'multiple-response-survey'? "checked" : "" }}></input>
             <label for="poll-type-multiple-response-survey">multiple response - survey</label>
             <p class="poll-type-description"><i>Students can select one or more responses, and any selection is worth full credit.</i></p>
-        </div>
-
-        <div class="poll-type-option">
-            <input type="radio" id="poll-type-multiple-custom-response-survey" name="question_type" value="multiple-custom-response-survey" onclick="changePollType()" {{ question_type == 'multiple-custom-response-survey'? "checked" : "" }}></input>
-            <label for="poll-type-multiple-custom-response-survey">multiple response - custom response survey</label>
-            <p class="poll-type-description"><i>Students can submit a single custom response that can be chosen by others and they can pick as many options as they prefer. Any single selection is worth full credit unless otherwise toggled below.</i></p>
         </div>
 
         <br/>
@@ -132,36 +120,38 @@
             <option value="always" {{ poll is not null and poll.getReleaseAnswer() == 'always' ? "selected" : "" }}>Always</option>
         </select>
         <br/>
-        <label for = "poll_credit" class="option-title credit-form-item" style="display: {{ poll is not null and poll.allowsCustomResponses() ? "inline-block" : "none" }}">
-            Allow custom poll responses to count as credit
+        <label for = "poll_custom_options" class="option-title credit-form-item">
+            Allow poll to accept custom answers from students
         </label>
-        <input id ="poll_credit" class="credit-box credit-form-item" type="checkbox" name="poll_credit" style="display: {{ poll is not null and poll.allowsCustomResponses() ? "inline-block" : "none" }}" {{ poll is null or poll.getCustomCredit() ? "checked" : "" }}>
-        <br class = 'credit-form-item' style="display: {{ poll is not null and poll.allowsCustomResponses() ? "inline-block" : "none" }}" />
+        <input id ="poll_custom_options" class="credit-box credit-form-item" type="checkbox" name="poll_custom_options"  {{ poll is not null and poll.allowsCustomResponses() ? "checked" : "" }}>
+        <label for = "poll_custom_options" class="option-title credit-form-item">
+            Custom response limit per student
+        </label>
+        <input id ="poll_custom_options" class="credit-box credit-form-item" type="number" value = "0" name="poll_custom_options"  {{ poll is not null and poll.allowsCustomResponses() ? "checked" : "" }}>
+        <br class = "credit-form-item" />
 
         <hr>
         <h2> Responses: </h2>
         <div id="responses">
             {% if poll is not null %}
-                {% set is_survey = poll.getQuestionType() == "single-response-survey" or poll.getQuestionType() == "single-custom-response-survey" or poll.getQuestionType() == "multiple-response-survey" or poll.getQuestionType() == "multiple-custom-response-survey" %}
+                {% set is_survey = poll.getQuestionType() == "single-response-survey" or poll.getQuestionType() == "multiple-response-survey" %}
                 {% for option in poll.getOptions() %}
-                    {% if not option.isCustom() %}
-                        <div class="response-container" id="response_{{option.getId()}}_wrapper">
-                            <input type="hidden" class="order order-{{option.getOrderId()}}" name="option[{{option.getId()}}][order]" value="{{option.getOrderId()}}"/>
-                            <input type="hidden" class="option_id" name="option[{{option.getId()}}][id]" value="{{option.getId()}}"/>
-                            <input aria-label="Is correct" class="correct-box" type="checkbox" name="option[{{option.getId()}}][is_correct]" {{ option.isCorrect() or is_survey ? "checked": "" }} {{ is_survey ? "style='display:none'" : "" }}>
-                            <textarea aria-label="Response text" class="poll_response" name="option[{{option.getId()}}][response]" style="resize: none; min-height: 50px; max-height: 300px; height: 50px; width: calc(100% - 200px); rows="10" cols="30">{{option.getResponse()}}</textarea>
-                            <div class="move-btn up-btn">
-                                <i class="fa fa-lg fa-chevron-up"></i>
-                            </div>
-                            <div class="move-btn down-btn">
-                                <i class="fa fa-lg fa-chevron-down"></i>
-                            </div>
-                            <div class="move-btn delete-btn">
-                                <i class="fa fa-lg fa-trash delete"></i>
-                            </div>
-                            <br/>
+                    <div class="response-container" id="response_{{option.getId()}}_wrapper">
+                        <input type="hidden" class="order order-{{option.getOrderId()}}" name="option[{{option.getId()}}][order]" value="{{option.getOrderId()}}"/>
+                        <input type="hidden" class="option_id" name="option[{{option.getId()}}][id]" value="{{option.getId()}}"/>
+                        <input aria-label="Is correct" class="correct-box" type="checkbox" name="option[{{option.getId()}}][is_correct]" {{ option.isCorrect() or is_survey ? "checked": "" }} {{ is_survey ? "style='display:none'" : "" }}>
+                        <textarea aria-label="Response text" class="poll_response" name="option[{{option.getId()}}][response]" style="resize: none; min-height: 50px; max-height: 300px; height: 50px; width: calc(100% - 200px); rows="10" cols="30">{{option.getResponse()}}</textarea>
+                        <div class="move-btn up-btn">
+                            <i class="fa fa-lg fa-chevron-up"></i>
                         </div>
-                    {% endif %}
+                        <div class="move-btn down-btn">
+                            <i class="fa fa-lg fa-chevron-down"></i>
+                        </div>
+                        <div class="move-btn delete-btn">
+                            <i class="fa fa-lg fa-trash delete"></i>
+                        </div>
+                        <br/>
+                    </div>
                 {% endfor %}
             {% endif %}
         </div>
@@ -203,9 +193,7 @@
         let count = $(".option_id").length;
         for (let i = 0; i < count; i++) {
             if ($("#poll-type-single-response-survey").is(":checked")
-                || $("#poll-type-single-custom-response-survey").is(":checked")
-                || $("#poll-type-multiple-response-survey").is(":checked")
-                || $("#poll-type-multiple-custom-response-survey").is(":checked")) {
+                || $("#poll-type-multiple-response-survey").is(":checked")) {
                 $($(".correct-box")[i]).prop('checked', true);
                 $($(".correct-box")[i]).css({"display":"none"});
             } else {
@@ -234,9 +222,7 @@
         let hidden_style = "";
         let is_checked = "";
         if ($("#poll-type-single-response-survey").is(":checked")
-            || $("#poll-type-single-custom-response-survey").is(":checked")
-            || $("#poll-type-multiple-response-survey").is(":checked")
-            || $("#poll-type-multiple-custom-response-survey").is(":checked")) {
+            || $("#poll-type-multiple-response-survey").is(":checked")) {
             hidden_style = "style='display:none'";
             is_checked = "checked";
         }
@@ -270,17 +256,6 @@
             }
         }
 
-        const custom_survey = $('#poll-type-multiple-custom-response-survey').is(':checked') || $('#poll-type-single-custom-response-survey').is(':checked');
-
-        document.querySelectorAll('.credit-form-item').forEach((item) => {
-            if (custom_survey) {
-                item.style.display = 'inline-block';
-            }
-            else{
-                item.style.display = 'none';
-            }
-        });
-
         if ($("#poll-name").val().length === 0) {
             $("#poll-form-submit").prop("disabled", true);
             $(".polls-submit-error").hide();
@@ -292,11 +267,9 @@
         } else if (!$('#poll-type-single-response-single-correct').is(':checked')
             && !$('#poll-type-single-response-multiple-correct').is(':checked')
             && !$('#poll-type-single-response-survey').is(':checked')
-            && !$('#poll-type-single-custom-response-survey').is(':checked')
             && !$('#poll-type-multiple-response-exact').is(':checked')
             && !$('#poll-type-multiple-response-flexible').is(':checked')
-            && !$('#poll-type-multiple-response-survey').is(':checked')
-            && !$('#poll-type-multiple-custom-response-survey').is(':checked')) {
+            && !$('#poll-type-multiple-response-survey').is(':checked')) {
             $("#poll-form-submit").prop("disabled", true);
             $(".polls-submit-error").hide();
             $("#question-type-error").show();
