@@ -447,8 +447,6 @@ class ForumThreadView extends AbstractView {
         $first_post = $this->core->getQueries()->getFirstPostForThread($thread_id);
         $first_post_id = $first_post["id"];
         
-        $first_post_start = $this->core->getQueries()->getFirstPostForThread($thread_id);
-
         $first = true;
 
         $post_data = [];
@@ -518,7 +516,7 @@ class ForumThreadView extends AbstractView {
                         $post["author_user_group"] = $author_user_groups_map[$post["author_user_id"]];
 
                         $post_data[] = $this->createPost(
-                            $first_post_start,
+                            $first_post,
                             $activeThread,
                             $post,
                             $unviewed_posts,
@@ -549,7 +547,7 @@ class ForumThreadView extends AbstractView {
                 $post["author_user_group"] = $author_user_groups_map[$post["author_user_id"]];
 
                 $post_data[] = $this->createPost(
-                    $first_post_start,
+                    $first_post,
                     $activeThread,
                     $post,
                     $unviewed_posts,
@@ -1064,7 +1062,7 @@ class ForumThreadView extends AbstractView {
      * } $author_info
      * @param string[] $post_attachments
      */
-    public function createPost($first_post_start, array $thread, array $post, $unviewed_posts, $first, $reply_level, $display_option, $includeReply, array $author_info, array $post_attachments, bool $has_history, bool $is_merged_thread, bool $render = false, bool $thread_announced = false, bool $isCurrentFavorite = false) {
+    public function createPost($first_post, array $thread, array $post, $unviewed_posts, $first, $reply_level, $display_option, $includeReply, array $author_info, array $post_attachments, bool $has_history, bool $is_merged_thread, bool $render = false, bool $thread_announced = false, bool $isCurrentFavorite = false) {
 
         $current_user = $this->core->getUser()->getId();
         $thread_id = $thread["id"];
@@ -1103,7 +1101,7 @@ class ForumThreadView extends AbstractView {
             $visible_username = "Anonymous";
         }
 
-        if ($post["author_user_id"] == $first_post_start['author_user_id'] && !$first) {
+        if ($post["author_user_id"] == $first_post['author_user_id'] && !$first) {
             $visible_username .= " [OP]";
         }
 
