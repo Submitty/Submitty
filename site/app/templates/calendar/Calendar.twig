@@ -48,8 +48,8 @@
                     <i class="fas fa-sliders"></i> Options
                 </button>
                 <select id="calendar-year-type-edit" name="type" onchange="changeYear(this);">
-                    {% set startYear = curr_year - 20 %}
-                    {% set endYear = curr_year + 20 %}
+                    {% set startYear = 2014 %}
+                    {% set endYear = curr_year + 5 %}
 
                     {% for year in startYear..endYear%}
                         <option value = "{{ year }}" {% if (year_cookie is defined) and year_cookie == year %} selected {% endif %}> {{year}} </option>
