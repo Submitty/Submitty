@@ -56,18 +56,10 @@
                     {% endfor %}
                 </select>
                 <select id="calendar-month-type-edit" name="type" onchange="changeMonth(this);">
-                    <option value = 1 {% if (month_cookie is defined) and month_cookie == 1 %} selected {% endif %}>January</option>
-                    <option value = 2 {% if (month_cookie is defined) and month_cookie == 2 %} selected {% endif %}>February</option>
-                    <option value = 3 {% if (month_cookie is defined) and month_cookie == 3 %} selected {% endif %}>March</option>
-                    <option value = 4 {% if (month_cookie is defined) and month_cookie == 4 %} selected {% endif %}>April</option>
-                    <option value = 5 {% if (month_cookie is defined) and month_cookie == 5 %} selected {% endif %}>May</option>
-                    <option value = 6 {% if (month_cookie is defined) and month_cookie == 6 %} selected {% endif %}>June</option>
-                    <option value = 7 {% if (month_cookie is defined) and month_cookie == 7 %} selected {% endif %}>July</option>
-                    <option value = 8 {% if (month_cookie is defined) and month_cookie == 8 %} selected {% endif %}>August</option>
-                    <option value = 9 {% if (month_cookie is defined) and month_cookie == 9 %} selected {% endif %}>September</option>
-                    <option value = 10 {% if (month_cookie is defined) and month_cookie == 10 %} selected {% endif %}>October</option>
-                    <option value = 11 {% if (month_cookie is defined) and month_cookie == 11 %} selected {% endif %}>November</option>
-                    <option value = 12 {% if (month_cookie is defined) and month_cookie == 12%} selected {% endif %}>December</option>
+                    {% set months = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'] %}
+                    {% for month in 1..12%}
+                        <option value = "{{month}}" {% if (month_cookie is defined) and month_cookie == month %} selected {% endif %}>{{months[month-1]}}</option>
+                    {% endfor %}
                 </select>
                 <select id="calendar-item-type-edit" name="type" onchange="changeView(this);">
                     <option value="month" {% if (view_cookie is defined) and view_cookie == "month" %} selected {% endif %}>Month</option>
