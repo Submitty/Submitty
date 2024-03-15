@@ -127,13 +127,13 @@ abstract class AbstractDatabase {
 
     /**
      * Run a query against the connected DBAL DB.
+     * This function will throw an exception if it fails.
+     * Otherwise, it can be assumed it succeeded.
      *
      * @param string $query
      * @param array $parameters
-     *
-     * @return boolean true if query succeeded, else false.
      */
-    public function query($query, $parameters = []) {
+    public function query($query, $parameters = []): void {
         try {
             foreach ($parameters as &$parameter) {
                 if (gettype($parameter) === "boolean") {
@@ -163,8 +163,6 @@ abstract class AbstractDatabase {
         catch (DBALException $dbalException) {
             throw new DatabaseException($dbalException->getMessage(), $query, $parameters);
         }
-
-        return true;
     }
 
     /**
@@ -184,7 +182,8 @@ abstract class AbstractDatabase {
     public function queryIterator(string $query, array $parameters = [], $callback = null) {
         $lower = trim(strtolower($query));
         if (!str_starts_with($lower, "select")) {
-            return $this->query($query, $parameters);
+            $this->query($query, $parameters);
+            return true;
         }
         try {
             $statement = $this->conn->prepare($query);
