@@ -7,6 +7,92 @@ const monthNames = ['December', 'January', 'February', 'March', 'April', 'May', 
 const monthNamesShort = ['Dec', 'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sept', 'Oct', 'Nov', 'Dec'];
 
 /**
+ * Changes the month and updates cookies and loads the calendar
+ * @param x : int the value of the month to change to
+ * @returns {void} : Loads the updated calendar
+ */
+function changeYear(x) {
+    const type = $("#calendar-item-type-edit").val();
+    Cookies.set('calendar_year', x.value);
+
+    cookie_year = parseInt(Cookies.get('calendar_year'));
+    cookie_month = parseInt(Cookies.get('calendar_month'));
+    cookie_day = parseInt(Cookies.get('calendar_day'));
+    if (isNaN(cookie_year)) {
+        cookie_year = view_year;
+        Cookies.set('calendar_year', cookie_year);
+    }
+    if (isNaN(cookie_month)) {
+        cookie_month = view_month;
+        Cookies.set('calendar_month', cookie_month);
+    }
+    if (isNaN(cookie_day)) {
+        cookie_day = view_day;
+        Cookies.set('calendar_day', cookie_day);
+    }
+
+    Cookies.set('calendar_year', x.value)
+
+    // Load the calendar to the correct day
+    loadCalendar(cookie_month, cookie_year, cookie_day, type);
+}
+
+/**
+ * Changes the year and updates cookies and loads the calendar
+ * @param x : int the value of the year to change to
+ * @returns {void} : Loads the updated calendar
+ */
+function changeMonth(x) {
+    const type = $("#calendar-item-type-edit").val();
+    Cookies.set('calendar_month', x.value);
+
+    cookie_year = parseInt(Cookies.get('calendar_year'));
+    cookie_month = parseInt(Cookies.get('calendar_month'));
+    cookie_day = parseInt(Cookies.get('calendar_day'));
+    if (isNaN(cookie_year)) {
+        cookie_year = view_year;
+        Cookies.set('calendar_year', cookie_year);
+    }
+    if (isNaN(cookie_month)) {
+        cookie_month = view_month;
+        Cookies.set('calendar_month', cookie_month);
+
+    }
+    if (isNaN(cookie_day)) {
+        cookie_day = view_day;
+        Cookies.set('calendar_day', cookie_day);
+    }
+
+    
+    // Load the calendar to the correct day
+    loadCalendar(cookie_month, cookie_year, cookie_day, type);
+}
+
+/**
+ * Changes the view and updates cookies and loads the calendar
+ * @param x : string the value of the view to change to
+ * @returns {void} : loads the updated calendar
+ */
+function changeView(x) {
+    Cookies.set('view',x.value);
+
+    cookie_year = parseInt(Cookies.get('calendar_year'));
+    cookie_month = parseInt(Cookies.get('calendar_month'));
+    cookie_day = parseInt(Cookies.get('calendar_day'));
+    if (isNaN(cookie_year)) {
+        cookie_year = view_year;
+    }
+    if (isNaN(cookie_month)) {
+        cookie_month = view_month;
+    }
+    if (isNaN(cookie_day)) {
+        cookie_day = view_day;
+    }
+    // Load the calendar to the correct day
+    loadCalendar(cookie_month, cookie_year, cookie_day, x.value);
+}
+
+/**
  * Gets the previous month of a given month
  * @param month : int the current month (1 as January and 12 as December)
  * @param year : int the current year
