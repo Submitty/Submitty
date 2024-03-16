@@ -4073,7 +4073,7 @@ VALUES(?, ?, ?, ?, 0, 0, 0, 0, ?)",
         );
         $teams = [];
         $rows = $this->course_db->rows();
-        if ($rows !== null) {
+        if ($rows != null) {
             foreach ($rows as $row) {
                 $row['team_members'] = explode(',', $row['team_members']); // comma-separated string to an array
                 $teams[] = $row;
