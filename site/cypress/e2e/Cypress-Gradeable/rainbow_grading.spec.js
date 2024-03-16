@@ -1,3 +1,18 @@
+const checkRainbowGrades = (username, numericId, firstName, lastName) => {
+    cy.get('#rainbow-grades').should('contain', 'USERNAME');
+    cy.get('#rainbow-grades').should('contain', username);
+    cy.get('#rainbow-grades').should('contain', 'NUMERIC ID');
+    cy.get('#rainbow-grades').should('contain', numericId);
+    cy.get('#rainbow-grades').should('contain', 'FIRST');
+    cy.get('#rainbow-grades').should('contain', firstName);
+    cy.get('#rainbow-grades').should('contain', 'LAST');
+    cy.get('#rainbow-grades').should('contain', lastName);
+    cy.get('#rainbow-grades').should('contain', 'AVERAGE');
+    cy.get('#rainbow-grades').should('contain', 'OVERALL');
+    cy.get('#rainbow-grades').should('contain', 'FINAL GRADE');
+    cy.get('#rainbow-grades').should('contain', `Lecture Participation Polls for: ${username}`);
+};
+
 describe('Test that for sample- rainbow grades', () => {
     it('can be configured automatically', () => {
         // Enable
@@ -47,34 +62,12 @@ describe('Test that for sample- rainbow grades', () => {
 
         // Check for instructor
         cy.visit(['sample', 'grades']);
-        cy.get('#rainbow-grades').should('contain', 'USERNAME');
-        cy.get('#rainbow-grades').should('contain', 'instructor');
-        cy.get('#rainbow-grades').should('contain', 'NUMERIC ID');
-        cy.get('#rainbow-grades').should('contain', '801516157');
-        cy.get('#rainbow-grades').should('contain', 'FIRST');
-        cy.get('#rainbow-grades').should('contain', 'Quinn');
-        cy.get('#rainbow-grades').should('contain', 'LAST');
-        cy.get('#rainbow-grades').should('contain', 'Instructor');
-        cy.get('#rainbow-grades').should('contain', 'AVERAGE');
-        cy.get('#rainbow-grades').should('contain', 'OVERALL');
-        cy.get('#rainbow-grades').should('contain', 'FINAL GRADE');
-        cy.get('#rainbow-grades').should('contain', 'Lecture Participation Polls for: instructor');
+        checkRainbowGrades('instructor', '801516157', 'Quinn', 'Instructor');
         cy.logout();
 
         // Check for student
         cy.login('student');
         cy.visit(['sample', 'grades']);
-        cy.get('#rainbow-grades').should('contain', 'USERNAME');
-        cy.get('#rainbow-grades').should('contain', 'student');
-        cy.get('#rainbow-grades').should('contain', 'NUMERIC ID');
-        cy.get('#rainbow-grades').should('contain', '410853871');
-        cy.get('#rainbow-grades').should('contain', 'FIRST');
-        cy.get('#rainbow-grades').should('contain', 'Joe');
-        cy.get('#rainbow-grades').should('contain', 'LAST');
-        cy.get('#rainbow-grades').should('contain', 'Student');
-        cy.get('#rainbow-grades').should('contain', 'AVERAGE');
-        cy.get('#rainbow-grades').should('contain', 'OVERALL');
-        cy.get('#rainbow-grades').should('contain', 'FINAL GRADE');
-        cy.get('#rainbow-grades').should('contain', 'Lecture Participation Polls for: student');
+        checkRainbowGrades('student', '410853871', 'Joe', 'Student');
     });
 });
