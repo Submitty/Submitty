@@ -181,7 +181,7 @@ SELECT * FROM test");
 
     public function testPrintQueries() {
         $database = new SqliteDatabase(['memory' => true]);
-        $database->connect();
+        $database->connect(true);
         $database->query("CREATE TABLE test(pid integer PRIMARY KEY, tcol text NOT NULL)");
         $database->query("INSERT INTO test VALUES (?, ?)", [1, 'a']);
         $this->assertEquals([
