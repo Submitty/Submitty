@@ -775,7 +775,7 @@ parameters:
 
 		-
 			message: "#^PHPDoc tag @var with type app\\\\repositories\\\\poll\\\\PollRepository is not subtype of type app\\\\repositories\\\\poll\\\\PollRepository\\<app\\\\entities\\\\poll\\\\Poll\\>\\.$#"
-			count: 7
+			count: 6
 			path: app/controllers/PollController.php
 
 		-
@@ -5092,7 +5092,7 @@ parameters:
 
 		-
 			message: "#^Loose comparison via \"\\=\\=\" is not allowed\\.$#"
-			count: 2
+			count: 3
 			path: app/libraries/PollUtils.php
 
 		-

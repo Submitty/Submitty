@@ -50,7 +50,6 @@
                     {% set index = 0 %}
 
                     {% set user_selections = poll.getSelectedOptionIds() %}
-                    {% set exists_custom_response = false %}
 
                     {% for option in poll.getOptions() %}
                         <tr class="radio option-row" id = "option-row-{{ option.getId() }}">
@@ -72,13 +71,10 @@
                                 "style": "display: inline"
                             } only %}
 
-                            {% if ((poll.allowsCustomResponses() and option.isCustom()) and (user_id == option.getAuthorId() or user_admin)) %}
-                                        {% set exists_custom_response = true %}
-                                        <textarea aria-label="Response text" id = "{{option.getId()}}_custom_response" class="poll_response" name="option[{{option.getId()}}][response]" style="display:none; resize: none; min-height: 50px; max-height: 300px; height: 50px; width: 100%; rows="10" cols="30">{{option.getResponse()}}</textarea>
-
-                                        <div class="move-btn delete-btn" style = "border:0; padding:0;" onclick = "removeCustomResponse({{ poll.getId() }}, {{ option.getId() }}, '{{ base_url }}');">
-                                            <i class="fas fa-trash black-btn"></i>
-                                        </div>
+                            {% if ((poll.allowsCustomResponses() and option.isCustom()) and (user_id == option.getAuthorId())) %}
+                                <div class="move-btn delete-btn" style = "border:0; padding:0;" onclick = "removeCustomResponse({{ poll.getId() }}, {{ option.getId() }}, '{{ base_url }}');">
+                                    <i class="fas fa-trash black-btn"></i>
+                                </div>
                             {% endif %}
 
                             {% if option.isCorrect() and poll.isReleaseAnswer()%}
@@ -99,7 +95,7 @@
             </form>
 
             {% if not user_admin and poll.isOpen() and poll.allowsCustomResponses() %}
-                <div class = 'info-wrapper custom-response-wrapper' style = 'display:{{exists_custom_response ? 'none' : 'block'}};'>
+                <div class = 'info-wrapper custom-response-wrapper'>
                         <input type="hidden" name="csrf_token" value="{{ csrf_token }}"/>
                         <input type="hidden" name="poll_id" value="{{ poll.getId() }}"/>
                         <br />

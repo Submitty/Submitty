@@ -5411,7 +5411,7 @@ AND gc_id IN (
         $this->course_db->query($query, $params);
         return $this->course_db->rows();
     }
-    
+
     public function existsCustomResponse(int $poll_id, string $poll_response): bool {
         $params = [$poll_id, $poll_response];
         $query = "SELECT *

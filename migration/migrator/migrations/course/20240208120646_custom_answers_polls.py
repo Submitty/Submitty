@@ -19,9 +19,6 @@ def up(config, database, semester, course):
         ALTER TABLE polls
         ADD COLUMN IF NOT EXISTS allows_custom boolean NOT NULL DEFAULT false;
 
-        ALTER TABLE polls
-        ADD COLUMN IF NOT EXISTS custom_limit INTEGER NOT NULL DEFAULT 0;
-
         ALTER TABLE poll_options
         ADD COLUMN IF NOT EXISTS author_id VARCHAR(255) NOT NULL DEFAULT 'instructor';
         """

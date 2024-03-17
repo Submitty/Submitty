@@ -45,10 +45,6 @@ class Poll {
 
     #[ORM\Column(name: "allows_custom", type: Types::BOOLEAN)]
     protected bool $allows_custom;
-
-    #[ORM\Column(name: "custom_limit", type: Types::INTEGER)]
-    protected $custom_limit;
-    
     /**
      * @var Collection<Option>
      */
@@ -73,7 +69,6 @@ class Poll {
         $this->setReleaseAnswer($release_answer);
         $this->setImagePath($image_path);
         $this->setAllowsCustomOptions(false);
-        $this->setCustomLimit(0);
         $this->setClosed();
 
         $this->options = new ArrayCollection();
@@ -135,15 +130,6 @@ class Poll {
     public function allowsCustomResponses(): bool {
         return $this->allows_custom;
     }
-
-    public function setCustomOptionLimit(int $limit_per_student): void {
-        $this->custom_limit = $limit_per_student;
-    }
-
-    public function getCustomOptionLimit(): int {
-        return $this->custom_limit;
-    }
-
     public function getReleaseDate(): \DateTime {
         return $this->release_date;
     }

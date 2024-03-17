@@ -185,43 +185,6 @@ function removeCustomResponse(pollid, optionid, base_url) {
     });
 }
 
-function updateCustomResponse(pollid, optionid, base_url) {
-    const custom_response_value = document.getElementById(`${optionid}_custom_response`).value;
-    const url = `${base_url}/updateCustomResponse`;
-    const fd = new FormData();
-    fd.append('csrf_token', csrfToken);
-    fd.append('poll_id', pollid);
-    fd.append('option_id', optionid);
-    fd.append('option_response', custom_response_value);
-    $.ajax({
-        url: url,
-        type: 'POST',
-        data: fd,
-        processData: false,
-        cache: false,
-        contentType: false,
-        error: function(err) {
-            console.error(err);
-            window.alert('Something went wrong. Please try again.');
-        },
-        success: function(data) {
-            try {
-                const msg = JSON.parse(data);
-                if (msg.status !== 'success') {
-                    displayErrorMessage(msg.message);
-                }
-                else {
-                    displaySuccessMessage(msg.data.message);
-                }
-            }
-            catch (err) {
-                console.error(err);
-                window.alert('Something went wrong. Please try again.');
-            }
-        },
-    });
-}
-
 function importPolls() {
     $('#import-polls-form').submit();
 }

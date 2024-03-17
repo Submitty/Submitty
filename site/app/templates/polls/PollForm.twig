@@ -124,17 +124,12 @@
             Allow poll to accept custom answers from students
         </label>
         <input id ="poll_custom_options" class="credit-box credit-form-item" type="checkbox" name="poll_custom_options"  {{ poll is not null and poll.allowsCustomResponses() ? "checked" : "" }}>
-        <label for = "poll_custom_options" class="option-title credit-form-item">
-            Custom response limit per student
-        </label>
-        <input id ="poll_custom_options" class="credit-box credit-form-item" type="number" value = "0" name="poll_custom_options"  {{ poll is not null and poll.allowsCustomResponses() ? "checked" : "" }}>
-        <br class = "credit-form-item" />
-
         <hr>
         <h2> Responses: </h2>
         <div id="responses">
             {% if poll is not null %}
                 {% set is_survey = poll.getQuestionType() == "single-response-survey" or poll.getQuestionType() == "multiple-response-survey" %}
+                <input aria-label="" id = "toggle-all" type="checkbox" name="toggle-all-options" onchange = "toggleOptions()" {{ is_survey ? "style='display:none'" : "" }}>
                 {% for option in poll.getOptions() %}
                     <div class="response-container" id="response_{{option.getId()}}_wrapper">
                         <input type="hidden" class="order order-{{option.getOrderId()}}" name="option[{{option.getId()}}][order]" value="{{option.getOrderId()}}"/>
@@ -189,6 +184,14 @@
         }
     });
 
+    function toggleOptions() {
+        const correct_options = $('.correct-box');
+
+        correct_options.each(function() {
+            $(this).prop('checked', $('#toggle-all').prop('checked'));
+        });
+    }
+
     function changePollType() {
         let count = $(".option_id").length;
         for (let i = 0; i < count; i++) {
@@ -229,7 +232,7 @@
         $("#responses").append(`
             <div class="response-container" id="response_${first_free_id}_wrapper">
                 <input type="hidden" class="order order-${count}" name="option[${first_free_id}][order]" value="${count}"/>
-                <input type="hidden" class="option_id" name="option[${first_free_id}][id]" value=""/>
+                <input type="hidden" class="option_id" name="option[${first_free_id}][id]" value="" data-order = "order order-${count}"/>
                 <input aria-label="Is correct" class="correct-box" type="checkbox" name="option[${first_free_id}][is_correct]" ${hidden_style} ${is_checked}>
                 <textarea aria-label="Response text" class="poll_response" name="option[${first_free_id}][response]" placeholder="Enter response here..." style="resize: none; min-height: 50px; max-height: 300px; height: 50px; width: calc(100% - 200px);"
                 rows="10" cols="30"></textarea>

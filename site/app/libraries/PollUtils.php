@@ -46,15 +46,14 @@ class PollUtils {
             "single-response-survey",
             "multiple-response-exact",
             "multiple-response-flexible",
-            "multiple-response-survey",
+            "multiple-response-survey"
         ];
     }
 
     public static function isSingleResponse(string $poll_type): bool {
         return (($poll_type == "single-response-single-correct")
                 || ($poll_type == "single-response-multiple-correct")
-                || ($poll_type == "single-response-survey")
-                || ($poll_type == "single-custom-response-survey"));
+                || ($poll_type == "single-response-survey"));
     }
 
     public static function getReleaseHistogramSettings(): array {
