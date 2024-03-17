@@ -206,7 +206,7 @@ function newDeleteCourseMaterialForm(id, file_name, str_id = null) {
     deleteMessageElement.appendChild(cm_message);
 
     $('[name="delete-confirmation"]', form).attr('action', url);
-    form.css("display", "block");
+    popUpInIt("#delete-course-material-form");
     captureTabInModal("delete-course-material-form");
     form.find('.form-body').scrollTop(0);
 }
@@ -263,8 +263,6 @@ function newUploadCourseMaterialsForm() {
 
     createArray(1);
 
-    document.body.classList.add("no-scroll");
-
     var fileList = document.getElementsByClassName("file-viewer-data");
 
     var files = [];
@@ -274,7 +272,7 @@ function newUploadCourseMaterialsForm() {
         readPrevious(file.getAttribute('data-file_url'), 1);
     }
 
-    $('.popup-form').css('display', 'none');
+    popUpInIt('.popup-form');
     var form = $("#upload-course-materials-form");
 
     $('[name="existing-file-list"]', form).html('');
@@ -348,7 +346,7 @@ function newEditCourseMaterialsFolderForm(tag) {
     $('#material-folder-edit-form', form).attr('data-id', id);
     $('#edit-folder-sort', form).attr('value', dir);
     disableFullUpdate();
-    form.css("display", "block");
+    popUpInIt('#edit-course-materials-folder-form');
     captureTabInModal("edit-course-materials-folder-form");
 }
 
@@ -426,7 +424,7 @@ function newEditCourseMaterialsForm(tag) {
     $("#edit-picker", form).attr('value', release_time);
     $("#edit-sort", form).attr('value', dir);
     $('#overwrite-materials-flag').remove();
-    form.css("display", "block");
+    popUpInIt('#edit-course-materials-form');
     captureTabInModal("edit-course-materials-form");
 }
 
@@ -458,14 +456,21 @@ function editFilePathRecommendations() {
     registerSelect2Widget("new-file-name", "material-edit-form");
 }
 
-//Function to toggle overflow
-function toggleBodyOverflow(){
-    document.body.classList.add("no-scroll");
+
+function popUpInIt(selector) {
+    if (selector.startsWith('.')) {
+        $(selector).css('display', 'none');
+
+    } else if (selector.startsWith('#')) {
+        $(selector).css('display', 'block');
+    }
+
+    $('body').css('overflow', 'hidden');
 }
+
 
 var lastActiveElement = null;
 function captureTabInModal(formName, resetFocus=true){
-    toggleBodyOverflow();
     if(resetFocus){
         lastActiveElement = document.activeElement;
     }
@@ -511,8 +516,8 @@ function releaseTabFromModal(formName){
 }
 
 function setFolderRelease(changeActionVariable,releaseDates,id,cm_id){
-
-    $('.popup-form').css('display', 'none');
+    
+    popUpInIt('.popup-form');
 
     var form = $("#set-folder-release-form");
     form.css("display", "block");
@@ -1376,8 +1381,7 @@ function setChildNewDateTime(path, changeDate,handleData) {
 }
 
 function openSetAllRelease() {
-    $('#set-all-release-form').css('display', 'block');
-    $('body').css('overflow', 'hidden');
+    popUpInIt('#set-all-release-form');
 }
 
 function setAllRelease(newdatatime) {

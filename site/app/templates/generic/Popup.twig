@@ -27,7 +27,7 @@
                                         {% block close_button %}
                                             <a
                                                 {% block close_button_id %}{% endblock %}
-                                                onclick="{% block close_click_action %}closePopup('{{ block('popup_id') }}'); document.body.classList.remove('no-scroll');{% endblock %}"
+                                                onclick="{% block close_click_action %}closePopup('{{ block('popup_id') }}'); if ($('body').css('overflow') === 'hidden') { $('body').css('overflow', 'auto'); } {% endblock %}"
                                                 class="btn {% block close_button_classes %}btn-default{% endblock %} close-button key_to_click"
                                                 tabindex="0"
                                             >
