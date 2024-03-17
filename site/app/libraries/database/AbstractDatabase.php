@@ -108,7 +108,7 @@ abstract class AbstractDatabase {
 
     /**
      * "Disconnect" from the underlying connection and set it to null for any further new connections.
-     * This will additionally commit any open transactions before disconnecting.
+     * This will additionally rollback any open transactions before disconnecting.
      */
     public function disconnect() {
         if ($this->transaction) {
