@@ -11,13 +11,14 @@ const monthNamesShort = ['Dec', 'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul',
  * @param x : int the value of the month to change to
  * @returns {void} : Loads the updated calendar
  */
-function changeYear(x) {
+function changeYear(x, view_year, view_month, view_day) {
     const type = $("#calendar-item-type-edit").val();
     Cookies.set('calendar_year', x.value);
 
-    const cookie_year = parseInt(Cookies.get('calendar_year'));
-    const cookie_month = parseInt(Cookies.get('calendar_month'));
-    const cookie_day = parseInt(Cookies.get('calendar_day'));
+    let cookie_year = parseInt(Cookies.get('calendar_year'));
+    let cookie_month = parseInt(Cookies.get('calendar_month'));
+    let cookie_day = parseInt(Cookies.get('calendar_day'));
+
     if (isNaN(cookie_year)) {
         cookie_year = view_year;
         Cookies.set('calendar_year', cookie_year);
@@ -31,7 +32,7 @@ function changeYear(x) {
         Cookies.set('calendar_day', cookie_day);
     }
 
-    Cookies.set('calendar_year', x.value)
+    Cookies.set('calendar_year', x.value);
 
     // Load the calendar to the correct day
     loadCalendar(cookie_month, cookie_year, cookie_day, type);
@@ -42,13 +43,13 @@ function changeYear(x) {
  * @param x : int the value of the year to change to
  * @returns {void} : Loads the updated calendar
  */
-function changeMonth(x) {
+function changeMonth(x, view_year, view_month, view_day) {
     const type = $("#calendar-item-type-edit").val();
     Cookies.set('calendar_month', x.value);
 
-    const cookie_year = parseInt(Cookies.get('calendar_year'));
-    const cookie_month = parseInt(Cookies.get('calendar_month'));
-    const cookie_day = parseInt(Cookies.get('calendar_day'));
+    let cookie_year = parseInt(Cookies.get('calendar_year'));
+    let cookie_month = parseInt(Cookies.get('calendar_month'));
+    let cookie_day = parseInt(Cookies.get('calendar_day'));
     if (isNaN(cookie_year)) {
         cookie_year = view_year;
         Cookies.set('calendar_year', cookie_year);
@@ -71,14 +72,17 @@ function changeMonth(x) {
 /**
  * Changes the view and updates cookies and loads the calendar
  * @param x : string the value of the view to change to
+ * @param view_year : int year that is currently being viewed 
+ * @param view_month : int month that is currently being viewed
+ * @param view_day : int day that is currently being viewed
  * @returns {void} : loads the updated calendar
  */
-function changeView(x) {
+function changeView(x, view_year, view_month, view_day) {
     Cookies.set('view',x.value);
 
-    const cookie_year = parseInt(Cookies.get('calendar_year'));
-    const cookie_month = parseInt(Cookies.get('calendar_month'));
-    const cookie_day = parseInt(Cookies.get('calendar_day'));
+    let cookie_year = parseInt(Cookies.get('calendar_year'));
+    let cookie_month = parseInt(Cookies.get('calendar_month'));
+    let cookie_day = parseInt(Cookies.get('calendar_day'));
     if (isNaN(cookie_year)) {
         cookie_year = view_year;
     }
@@ -470,12 +474,12 @@ function buildSwitchingHeader(view_year, view_month, view_day, type) {
     div = document.createElement('div');
     div.classList.add('cal-title');
     const h2 = document.createElement('h2');
-    h2.classList.add('cal-month-title');
-    h2.textContent = monthNames[view_month];
+    h2.classList.add('cal-month-title'); //month title
+    h2.textContent = monthNames[view_month]; //shows the month
     div.appendChild(h2);
     const h3 = document.createElement('h3');
-    h3.classList.add('cal-year-title');
-    h3.textContent = `${view_year}`;
+    h3.classList.add('cal-year-title'); //year title
+    h3.textContent = `${view_year}`; //shows the year
     div.appendChild(h3);
     th2.appendChild(div);
 

@@ -25,6 +25,8 @@ class CalendarView extends AbstractView {
 
         $year = (isset($_GET['year']) && $_GET['year'] != "")  ?  (int) $_GET['year']  : (int) date("Y");
         $month = (isset($_GET['month']) && $_GET['month'] != "") ?  (int) $_GET['month'] : (int) date("n");
+        $day = (isset($_GET['day']) && $_GET['day'] != "") ?  (int) $_GET['day'] : (int) date("j");
+        
         $show_table = (isset($_GET['show_table'])) ? (int) $_GET['show_table'] : 0; // not showing the table by default
 
         // Error checking
@@ -86,6 +88,7 @@ class CalendarView extends AbstractView {
             "show_table" => $show_table,
             "view_year" => $year,          // the year that the calendar is viewing
             "view_month" => $month,        // the month that the calendar is viewing
+            "view_day" => $day,
             "curr_year" => date("Y"),  // the current year
             "curr_month" => date("n"), // the current month
             "curr_day" => date("d"),   // the current date
