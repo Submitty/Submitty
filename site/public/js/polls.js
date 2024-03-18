@@ -169,10 +169,6 @@ function removeCustomResponse(pollid, optionid, base_url) {
                     displayErrorMessage(msg.message);
                 }
                 else {
-                    const edit_container = document.querySelector('.custom-response-wrapper');
-                    if (edit_container) {
-                        edit_container.style.display = 'block';
-                    }
                     document.getElementById(`option-row-${optionid}`).remove();
                     displaySuccessMessage(msg.data.message);
                 }
