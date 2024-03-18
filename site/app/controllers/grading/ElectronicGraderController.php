@@ -137,17 +137,17 @@ class ElectronicGraderController extends AbstractController {
      * @param Gradeable $gradeable
      * @param string $grader
      * @param Array<string> $students
-     * @return Array<string> $filtered_grading_info
+     * @return array<int, array<int, string>|string> $filtered_grading_info
      */
     private function filterTeamStudents(Gradeable $gradeable, string $grader, array $students) {
         $filtered_grading_info = [];
         $teams = $this->core->getQueries()->getTeamsByGradeable($gradeable);
         foreach ($teams as $team_key => $team) {
             $team_members = $team['team_members'];
-            $grader_in_team = in_array($grader, $team_members, false);
+            $grader_in_team = in_array($grader, $team_members, true);
             if ($grader_in_team) {
                 foreach ($students as $student_key => $student) {
-                    if (in_array($student, $team_members)) {
+                    if (in_array($student, $team_members, true)) {
                         unset($students[$student_key]);
                     }
                 }
@@ -1573,7 +1573,7 @@ class ElectronicGraderController extends AbstractController {
             $team_members = $team->getMembers();
             $add_user_ids = [];
             foreach ($user_ids as $id) {
-                if (!in_array($id, $team_members, false)) {
+                if (!in_array($id, $team_members, true)) {
                     if ($this->core->getQueries()->getTeamByGradeableAndUser($gradeable_id, $id) !== null) {
                         $this->core->addErrorMessage("ERROR: {$id} is already on a team");
                         $this->core->redirect($return_url);
@@ -1583,7 +1583,7 @@ class ElectronicGraderController extends AbstractController {
             }
             $remove_user_ids = [];
             foreach ($team_members as $id) {
-                if (!in_array($id, $user_ids, false)) {
+                if (!in_array($id, $user_ids, true)) {
                     $remove_user_ids[] = $id;
                 }
             }

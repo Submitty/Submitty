@@ -729,7 +729,7 @@ SQL;
         // Safety measure in case the database is bad for some reason
         $counted_posts = [];
         if (count($post) > 0) {
-            if ($post["parent_id"] != -1) {
+            if ($post["parent_id"] !== -1) {
                 $old_thread_id = $post["thread_id"];
                 $this->course_db->query("SELECT id from threads where merged_post_id = ?", [$post_id]);
                 $thread_id = $this->course_db->rows();
@@ -7877,7 +7877,7 @@ AND gc_id IN (
         $current_queue_state = $this->core->getQueries()->getCurrentQueueState();
         $time_paused_start = $current_queue_state['time_paused_start'];
         $current_state = $time_paused_start != null;
-        if ($new_state != $current_state) {
+        if ($new_state !== $current_state) {
             // The pause state is actually changing
             $time_paused = $current_queue_state['time_paused'];
             $time_paused_start = date_create($time_paused_start);
