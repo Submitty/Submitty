@@ -1535,7 +1535,7 @@ CREATE TABLE public.polls (
     question_type character varying(35) DEFAULT 'single-response-multiple-correct'::character varying,
     release_histogram character varying(10) DEFAULT 'never'::character varying,
     release_answer character varying(10) DEFAULT 'never'::character varying,
-    allows_custom boolean DEFAULT true NOT NULL
+    allows_custom boolean DEFAULT false NOT NULL
 );
 
 
