@@ -41,9 +41,11 @@ class DockerInterfaceController extends AbstractController {
         );
 
         $images = [];
-        foreach ($json['autograding_containers'] as $capability => $image_list) {
-            foreach ($image_list as $image) {
-                $images[] = $image;
+        if ($json['autograding_containers'] !== false) {
+            foreach ($json['autograding_containers'] as $capability => $image_list) {
+                foreach ($image_list as $image) {
+                    $images[] = $image;
+                }
             }
         }
         $json['image_owners'] = $this->core->getQueries()->getDockerImageOwners(array_unique($images));
