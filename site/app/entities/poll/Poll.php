@@ -130,7 +130,7 @@ class Poll {
     public function allowsCustomResponses(): bool {
         return $this->allows_custom;
     }
-    
+
     public function getReleaseDate(): \DateTime {
         return $this->release_date;
     }
