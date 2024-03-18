@@ -151,16 +151,6 @@ fi
 # create access control cache directory
 mkdir -p ${SUBMITTY_INSTALL_DIR}/site/cache/access_control
 
-# clear old doctrine proxy classes
-if [ -d "${SUBMITTY_INSTALL_DIR}/site/cache/doctrine-proxy" ]; then
-    rm -rf "${SUBMITTY_INSTALL_DIR}/site/cache/doctrine-proxy"
-fi
-# create doctrine proxy classes directory
-mkdir -p ${SUBMITTY_INSTALL_DIR}/site/cache/doctrine-proxy
-
-# create doctrine proxy classes
-php "${SUBMITTY_INSTALL_DIR}/sbin/doctrine.php" "orm:generate-proxies"
-
 # clear old lang cache
 if [ -d "${SUBMITTY_INSTALL_DIR}/site/cache/lang" ]; then
     rm -rf "${SUBMITTY_INSTALL_DIR}/site/cache/lang"
@@ -229,6 +219,16 @@ fi
 
 find ${SUBMITTY_INSTALL_DIR}/site/vendor -type d -exec chmod 551 {} \;
 find ${SUBMITTY_INSTALL_DIR}/site/vendor -type f -exec chmod 440 {} \;
+
+# clear old doctrine proxy classes
+if [ -d "${SUBMITTY_INSTALL_DIR}/site/cache/doctrine-proxy" ]; then
+    rm -rf "${SUBMITTY_INSTALL_DIR}/site/cache/doctrine-proxy"
+fi
+# create doctrine proxy classes directory
+mkdir -p ${SUBMITTY_INSTALL_DIR}/site/cache/doctrine-proxy
+
+# create doctrine proxy classes
+php "${SUBMITTY_INSTALL_DIR}/sbin/doctrine.php" "orm:generate-proxies"
 
 if [[ "${CI}" != true && "${BROWSCAP}" = true ]]; then
     echo -e "Checking for and fetching latest browscap.ini if needed"
