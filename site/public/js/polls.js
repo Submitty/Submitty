@@ -1,4 +1,4 @@
-/* exported newDeletePollForm updatePollAcceptingAnswers updatePollVisible updateDropdownStates importPolls addCustomResponse updateCustomResponse removeCustomResponse */
+/* exported newDeletePollForm updatePollAcceptingAnswers updatePollVisible updateDropdownStates importPolls addCustomResponse removeCustomResponse */
 /* global csrfToken displaySuccessMessage displayErrorMessage */
 
 $(document).ready(() => {

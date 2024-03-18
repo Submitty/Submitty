@@ -394,7 +394,6 @@ class PollController extends AbstractController {
                     $this->core->addErrorMessage("Error occurred in editing poll: attempt to delete response option that has already been submitted as an answer");
                     return new RedirectResponse($returnUrl);
                 }
-
                 $poll->removeOption($poll_option);
                 $em->remove($poll_option);
             }
@@ -460,7 +459,7 @@ class PollController extends AbstractController {
             return JsonResponse::getFailResponse("No associated text provided for custom response");
         }
         elseif ($poll->allowsCustomResponses() === false) {
-            return JsonResponse::getFailResponse("Poll is currently not accepting custom response");
+            return JsonResponse::getFailResponse("Poll is currently not accepting custom responses");
         }
         $exists_response = $this->core->getQueries()->existsCustomResponse($poll->getId(), $poll_response);
         if ($exists_response) {
@@ -468,7 +467,7 @@ class PollController extends AbstractController {
         }
 
         $is_survey = $poll->getQuestionType() === "single-response-survey" || $poll->getQuestionType() === "multiple-response-survey";
-        $custom_poll_option = new Option($poll->getOptions()->count() + 1, $poll_response, $is_survey, $user_id);
+        $custom_poll_option = new Option($poll->getOptions()->count(), $poll_response, $is_survey, $user_id);
         $poll->addOption($custom_poll_option);
         $em->persist($custom_poll_option);
 
@@ -500,13 +499,13 @@ class PollController extends AbstractController {
         /** @var Option|null */
         $custom_option = $this->core->getCourseEntityManager()->find(Option::class, $option_id);
         if ($custom_option === null) {
-            return JsonResponse::getErrorResponse("Could not find custom option");
+            return JsonResponse::getErrorResponse("Could not find custom response");
         }
         elseif ($custom_option->getAuthorId() !== $user_id && !$this->core->getUser()->accessFaculty()) {
-            return JsonResponse::getErrorResponse("You have no access to remove this custom option");
+            return JsonResponse::getErrorResponse("You have no access to remove this custom response");
         }
         elseif (($custom_option->getUserResponses()->count() > 1) || ($custom_option->getUserResponses()->count() === 1 && $custom_option->getUserResponses()->first()->getStudentId() !== $user_id)) {
-            return JsonResponse::getErrorResponse("Error occurred in editing poll: attempt to delete response option that has already been submitted as an answer");
+            return JsonResponse::getErrorResponse("Cannot delete response option that has already been submitted as an answer by another individual");
         }
 
         foreach ($custom_option->getUserResponses() as $response) {
