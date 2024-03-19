@@ -1,6 +1,17 @@
 {
 	"required_capabilities": "python",
 
+    "autograding_method": "docker",
+
+	"autograding": {
+        "submission_to_compilation": ["**/*.cpp"],
+        "compilation_to_runner": ["**/a.out"]
+    },
+
+	"container_options": {
+        "container_image": "ubuntu:custom"
+	},
+
     "grading_parameters" : {
         "AUTO_POINTS" : 20
     },

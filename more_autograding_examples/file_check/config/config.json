@@ -1,4 +1,14 @@
 {
+  "autograding_method": "docker",
+
+	"autograding": {
+        "submission_to_compilation": ["**/*.txt"]
+    },
+
+	"container_options": {
+        "container_image": "ubuntu:custom"
+	},
+
   "testcases": [
     {
       "type": "FileCheck",
