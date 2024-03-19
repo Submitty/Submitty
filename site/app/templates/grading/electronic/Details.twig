@@ -59,19 +59,9 @@
         </div>
     </div>
     {% if grade_inquiry_only_button %}
-    <script>
-        window.onload = function() {
-            var button = document.getElementById('inquiryButton');
-            status = Cookies.get('inquiry_status')
-            if (status === 'on') {
-                grade_inquiry_only();
-                button.innerHTML = "Grade Inquiry Only: On";
-            } else {
-                reverse_inquiry_only();
-                button.innerHTML = "Grade Inquiry Only: Off";
-            }
-        }
-    </script>
+        <script>
+            inquiry_update();
+        </script>
     {% endif %}
     {% if not is_student %}
         <a href="{{ stats_url }}" class="btn btn-primary">Grading Stats</a>
@@ -94,7 +84,7 @@
     <button type="button" class="btn btn-primary" onclick="expandAllSections()">Expand All Sections</button>
     {% if message is not empty %}
     <div class="details-warning-box{% if message_warning %} details-warning-highlight{% else %} details-warning-neutral{% endif %}">
-        {{ message }}
+        {{ message|nl2br }}
     </div>
     {% endif %}
     <div class="details-action-box">
@@ -195,7 +185,7 @@
                 <tbody class="details-content panel-content-active"{% if section.title in collapsed_sections %} style="display: none"{% endif %}>
                     {% if section.rows is defined %}
                         {% for info in section.rows %}
-                            {{ _self.render_student(_context, section, info.graded_gradeable, loop.index, info, columns, team_gradeable_view_history, overrides, anon_ids) }}
+                            {{ _self.render_student(_context, section, info.graded_gradeable, loop.index, info, columns, team_gradeable_view_history, overrides, anon_ids, max_team_name_length) }}
                         {% endfor %}
                     {% endif %}
                     {% if section.teamless_users is defined %}
@@ -251,8 +241,8 @@
     </table>
 </div>
 
-{% macro render_student(context, section, graded_gradeable, index, info, columns, team_gradeable_view_history, overrides, anon_ids) %}
-    <tr data-testid="grade-table"
+{% macro render_student(context, section, graded_gradeable, index, info, columns, team_gradeable_view_history, overrides, anon_ids, max_team_name_length) %}
+    <tr class="grade-table" data-testid="grade-table"
         {% if not graded_gradeable.getSubmitter().isTeam() and graded_gradeable.getSubmitter().getUser().accessGrading() %}
             style='background: #7bd0f7;'
         {% endif %}
@@ -287,7 +277,7 @@
             {% elseif column.function == "team_id_anon" %}
                 {{ _self.render_column_team_id_anon(context, section, graded_gradeable, index, info, column, anon_ids) }}
             {% elseif column.function == "team_name" %}
-                {{ _self.render_column_team_name(context, section, graded_gradeable, index, info, column) }}
+                {{ _self.render_column_team_name(context, section, graded_gradeable, index, info, column, max_team_name_length) }}
             {% elseif column.function == "team_members" %}
                 {{ _self.render_column_team_members(context, section, graded_gradeable, index, info, column) }}
             {% elseif column.function == "total" %}
@@ -507,7 +497,7 @@
         {% set badge_count = graded_gradeable.getActiveGradeInquiryCount()  %}
     {%  endif %}
     <td style="text-align: center;">
-        <a data-testid="grade-button" {% if graded_gradeable.hasActiveGradeInquiry() %}data-grade-inquiry="true"{% endif %} class="btn {{ btn_class }}" href="{{ context.grade_url }}?who_id={{ anon_ids[graded_gradeable.getSubmitter().getId()] }}&sort={{ context.sort }}&direction={{ context.direction }}">
+        <a data-testid="grade-button" {% if graded_gradeable.hasActiveGradeInquiry() %}data-grade-inquiry="true"{% endif %} class="grade-button btn {{ btn_class }}" href="{{ context.grade_url }}?who_id={{ anon_ids[graded_gradeable.getSubmitter().getId()] }}&sort={{ context.sort }}&direction={{ context.direction }}">
             {{ contents }}
             {% if badge_count > 0 and graded_gradeable.getGradeable().isGradeInquiryPerComponentAllowed()%}
                 <span class="notification-badge">{{ badge_count }}</span>
@@ -557,7 +547,7 @@
         {% set badge_count = graded_gradeable.getActiveGradeInquiryCount()  %}
     {%  endif %}
     <td style="text-align: center;">
-        <a data-testid="grade-button" {% if graded_gradeable.hasActiveGradeInquiry() %}data-grade-inquiry="true"{% endif %} class="btn {{ btn_class }}" href="{{ context.grade_url }}?who_id={{ anon_ids[graded_gradeable.getSubmitter().getId()] }}&sort={{ context.sort }}&direction={{ context.direction }}">
+        <a data-testid="grade-button" {% if graded_gradeable.hasActiveGradeInquiry() %}data-grade-inquiry="true"{% endif %} class="grade-button btn {{ btn_class }}" href="{{ context.grade_url }}?who_id={{ anon_ids[graded_gradeable.getSubmitter().getId()] }}&sort={{ context.sort }}&direction={{ context.direction }}">
             {{ contents }}
             {% if badge_count is defined and badge_count > 0 and graded_gradeable.getGradeable().isGradeInquiryPerComponentAllowed()%}
                 <span class="notification-badge">{{ badge_count }}</span>
@@ -605,9 +595,14 @@
 {% endmacro %}
 
 {# Team Name #}
-{% macro render_column_team_name(context, section, graded_gradeable, index, info, column) %}
+{% macro render_column_team_name(context, section, graded_gradeable, index, info, column, max_team_name_length) %}
     <td>
-        {{ graded_gradeable.getSubmitter().getTeam().getTeamName() }}
+        {# existing teams names over max length get truncated down on display #}
+        {% if graded_gradeable.getSubmitter().getTeam().getTeamName()|length > max_team_name_length %}
+          {{ graded_gradeable.getSubmitter().getTeam().getTeamName()|slice(0, max_team_name_length) ~ '...' }}
+        {% else %}
+          {{ graded_gradeable.getSubmitter().getTeam().getTeamName() }}
+        {% endif %}
     </td>
 {% endmacro %}
 
@@ -781,12 +776,12 @@
             Cookies.set('inquiry_status', 'on');
             var inquiry = Cookies.get('inquiry_status');
             grade_inquiry_only();
-            button.innerHTML = "Grade Inquiry Only: On";
+            button.textContent = "Grade Inquiry Only: On";
         } else {
             Cookies.set('inquiry_status', 'off');
             var inquiry = Cookies.get('inquiry_status');
             reverse_inquiry_only();
-            button.innerHTML = "Grade Inquiry Only: Off";
+            button.textContent = "Grade Inquiry Only: Off";
         }
     }
 
