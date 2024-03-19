@@ -173,10 +173,6 @@ for entry in "${result_array[@]}"; do
     chown ${PHP_USER}:${PHP_GROUP} "${SUBMITTY_INSTALL_DIR}/${entry:12}"
 done
 
-# Update permissions & ownership for cache directory
-chmod -R 751 ${SUBMITTY_INSTALL_DIR}/site/cache
-chown -R ${PHP_USER}:${PHP_GROUP} ${SUBMITTY_INSTALL_DIR}/site/cache
-
 # Update ownership for cgi-bin to CGI_USER
 find ${SUBMITTY_INSTALL_DIR}/site/cgi-bin -exec chown ${CGI_USER}:${CGI_GROUP} {} \;
 
@@ -229,6 +225,10 @@ mkdir -p ${SUBMITTY_INSTALL_DIR}/site/cache/doctrine-proxy
 
 # create doctrine proxy classes
 php "${SUBMITTY_INSTALL_DIR}/sbin/doctrine.php" "orm:generate-proxies"
+
+# Update permissions & ownership for cache directory
+chmod -R 751 ${SUBMITTY_INSTALL_DIR}/site/cache
+chown -R ${PHP_USER}:${PHP_GROUP} ${SUBMITTY_INSTALL_DIR}/site/cache
 
 if [[ "${CI}" != true && "${BROWSCAP}" = true ]]; then
     echo -e "Checking for and fetching latest browscap.ini if needed"
