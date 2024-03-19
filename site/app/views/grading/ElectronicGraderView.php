@@ -503,7 +503,7 @@ HTML;
 
         if ($peer || $anon_mode || $team_and_anon) {
             if ($gradeable->isTeamAssignment()) {
-                if ($gradeable->getPeerBlind() === Gradeable::DOUBLE_BLIND_GRADING || $anon_mode) {
+                if ($gradeable->getPeerBlind() === Gradeable::DOUBLE_BLIND_GRADING || $anon_mode || $team_and_anon) {
                     $columns[] = ["width" => "10%", "title" => "Team ID",     "function" => "team_id_anon"];
                 }
                 $peer_and_anon = ($this->core->getUser()->getGroup() === User::GROUP_STUDENT &&
@@ -512,6 +512,7 @@ HTML;
                     $columns[] = ["width" => "30%", "title" => "Team Members",     "function" => "team_members_anon"];
                 }
                 else {
+                    $columns[] = ["width" => "10%", "title" => "Team ID",          "function" => "team_id", "sort_type" => "id"];
                     $columns[] = ["width" => "32%", "title" => "Team Members",     "function" => "team_members"];
                 }
             }
@@ -556,7 +557,8 @@ HTML;
                     $columns[] = ["width" => "26%", "title" => "Team Members",     "function" => "team_members"];
                 }
                 else {
-                    $columns[] = ["width" => "10%",  "title" => "Team Name",        "function" => "team_name"];
+                    $columns[] = ["width" => "10%", "title" => "Team ID",          "function" => "team_id", "sort_type" => "id"];
+                    $columns[] = ["width" => "10%",  "title" => "Team Name",       "function" => "team_name"];
                     $columns[] = ["width" => "40%", "title" => "Team Members",     "function" => "team_members"];
                 }
             }
