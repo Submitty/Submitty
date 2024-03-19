@@ -20,7 +20,7 @@ class PollTester extends BaseUnitTest {
                 "Poll #1",
                 "Is this the first poll?",
                 "single-response-single-correct",
-                new DateInterval("P1Y"),
+                new DateInterval("PT1H"),
                 new DateTime("2021-01-11"),
                 "never",
                 "never"

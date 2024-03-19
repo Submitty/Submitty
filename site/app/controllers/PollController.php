@@ -197,8 +197,7 @@ class PollController extends AbstractController {
         $hours = intval($_POST['poll-hours'] ?? 0);
         $minutes = intval($_POST['poll-minutes'] ?? 0);
         $seconds = intval($_POST['poll-seconds'] ?? 0);
-        if(($hours*3600) + (60 * $minutes) +  $seconds > 86400)
-        {
+        if (($hours * 3600) + (60 * $minutes) +  $seconds > 86400) {
             $this->core->addErrorMessage("Exceeded 24 hour limit");
             return new RedirectResponse($this->core->buildCourseUrl(['polls/newPoll']));
         }
@@ -326,8 +325,7 @@ class PollController extends AbstractController {
         $hours = intval($_POST['poll-hours'] ?? 0);
         $minutes = intval($_POST['poll-minutes'] ?? 0);
         $seconds = intval($_POST['poll-seconds'] ?? 0);
-        if(($hours*3600) + (60 * $minutes) +  $seconds > 86400)
-        {
+        if (($hours * 3600) + (60 * $minutes) +  $seconds > 86400) {
             $this->core->addErrorMessage("Exceeded 24 hour limit");
             return new RedirectResponse($this->core->buildCourseUrl(['polls']));
         }

@@ -106,14 +106,22 @@
         <input type="checkbox" id="enable-timer" onchange="toggleTimerInputs()" {% if poll is not null and (poll.getDuration().h != 0 or poll.getDuration().i != 0 or poll.getDuration().s != 0) %} checked {% endif %} value="enabled" />
         <br/>
         <div id="timer-inputs">
-            <label for="poll-hours" class="option-title">
+            <label class="option-title">
                 Expected Duration of Poll:
             </label>
-            <input type="hidden" name="poll-hours" id="poll-hours" class="poll-timer" style="width: 70px" min="0" max="24" placeholder="Hour" value="{{ poll is not null ? poll.getDuration().h }}" />
-            <input type="hidden" name="poll-minutes" id="poll-minutes" class="poll-timer" style="width: 70px" min="0" placeholder="Min" value="{{ poll is not null ? poll.getDuration().i }}" />
-            <input type="hidden" name="poll-seconds" id="poll-seconds" class="poll-timer" style="width: 70px" min="0" placeholder="Sec" value="{{ poll is not null ? poll.getDuration().s }}" />
+            <div class="poll-input">
+                <label class="option"> Hrs </label><br>
+                <input name="poll-hours" id="poll-hours" class="poll-timer" value="{{ poll is not null ? poll.getDuration().h }}" />
+            </div>
+            <div class="poll-input">
+                <label class="option"> Min</label><br>
+                <input name="poll-minutes" id="poll-minutes" class="poll-timer" value="{{ poll is not null ? poll.getDuration().i }}"/>
+            </div>
+            <div class="poll-input">
+                <label class="option"> Sec</label><br>
+                <input name="poll-seconds" id="poll-seconds" class="poll-timer" value="{{ poll is not null ? poll.getDuration().s }}"/>
+            </div>
         </div>
-
         <label for="student-histogram-release-setting" class="option-title">
             Release response histogram to students:
         </label>
@@ -224,6 +232,15 @@
             document.getElementById("timer-inputs").style.display = "block";
             timerInputs.forEach(function(input) {
                 input.setAttribute("type", "number");
+                input.setAttribute("min", "0");
+                if (input.classList.contains("poll-hours")) {
+                    input.setAttribute("placeholder", "Hour");
+                    input.setAttribute("max", "24");
+                } else if (input.classList.contains("poll-minutes")) {
+                    input.setAttribute("placeholder", "Min");
+                } else if (input.classList.contains("poll-seconds")) {
+                    input.setAttribute("placeholder", "Sec");
+                }
             });
         } else {
             document.getElementById("timer-inputs").style.display = "none";
