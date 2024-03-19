@@ -3996,6 +3996,66 @@ VALUES(?, ?, ?, ?, 0, 0, 0, 0, ?)",
 
         return $teams;
     }
+     /**
+     * Return an array of Team objects for all empty teams on given gradeable
+     *
+     * @param  string $g_id
+     * @return \app\models\Team[]
+     */
+    public function getEmptyTeamsByGradeableId($g_id) {
+        $this->course_db->query(
+            "            
+                SELECT gt.team_id, gt.registration_section, gt.rotating_section, gt.team_name, json_agg(u) AS users
+                FROM gradeable_teams gt
+                  JOIN 
+                    (SELECT gt.team_id, NULL::integer AS state, nu.*
+                     FROM gradeable_teams gt
+                       LEFT JOIN teams t ON gt.team_id = t.team_id
+                       CROSS JOIN (
+                        SELECT 
+                        NULL::character varying AS user_id,
+                        NULL::character varying AS user_numeric_id,
+                        NULL::character varying AS user_givenname,
+                        NULL::character varying AS user_preferred_givenname,
+                        NULL::character varying AS user_familyname,
+                        NULL::character varying AS user_preferred_familyname,
+                        NULL::character varying AS user_email,
+                        NULL::integer AS user_group,
+                        NULL::character varying AS registration_section,
+                        NULL::integer AS rotating_section,
+                        NULL::boolean AS user_updated,
+                        NULL::boolean AS instructor_updated,
+                        NULL::boolean AS manual_registration,
+                        NULL::timestamp with time zone AS last_updated,
+                        NULL::character varying AS time_zone,
+                        NULL::character varying AS display_image_state,
+                        NULL::character varying AS registration_subsection,
+                        NULL::character varying AS user_email_secondary,
+                        NULL::boolean AS user_email_secondary_notify,
+                        NULL::character varying AS registration_type,
+                        NULL::character varying AS user_pronouns,
+                        NULL::integer AS user_last_initial_format,
+                        NULL::character varying AS display_name_order,
+                        NULL::boolean AS display_pronouns,
+                        NULL::character varying AS user_preferred_locale,
+                        NULL::integer AS previous_rotating_section
+                        ) AS nu
+                    WHERE t.team_id IS NULL
+                ) AS u ON gt.team_id = u.team_id
+                WHERE g_id=?
+                GROUP BY gt.team_id
+                ORDER BY team_id",
+            [$g_id]
+        );
+
+        $teams = [];
+        foreach ($this->course_db->rows() as $row) {
+            $row['users'] = json_decode($row['users'], true);
+            $teams[] = new Team($this->core, $row);
+        }
+
+        return $teams;
+    }
 
 
     /**

@@ -718,7 +718,7 @@ HTML;
                     $info["graded_groups"][] = "verified";
                 }
             }
-
+            // (remove) hint for myself, follow above to create info for empty team as well
             //More complicated info generation should go here
 
 
