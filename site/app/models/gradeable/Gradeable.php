@@ -784,7 +784,6 @@ class Gradeable extends AbstractModel {
      */
     private function getDateValidationSet(bool $grade_inquiry_modified = false) {
         if ($this->type === GradeableType::ELECTRONIC_FILE) {
-            // $this->isStudentSubmit() == true indicates student can make multiple submissions
             // Even if student cannot make multiple submissions, submission_open_date has to be included for validation
             if ($this->isTaGrading()) {
                 $result = self::date_properties_elec_ta;
