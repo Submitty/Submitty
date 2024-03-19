@@ -7,6 +7,24 @@ const monthNames = ['December', 'January', 'February', 'March', 'April', 'May', 
 const monthNamesShort = ['Dec', 'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sept', 'Oct', 'Nov', 'Dec'];
 
 /**
+ * Sets the current date to today and then changes the calendar
+ * @returns {void} : only changes cookies and calendar date
+ */
+function setDateToToday(){
+    const type = $("#calendar-item-type-edit").val();
+    const currentDay = new Date();
+    Cookies.set("calendar_year", currentDay.getFullYear());
+    Cookies.set("calendar_month", currentDay.getMonth()+1);
+    Cookies.set("calendar_day", currentDay.getDate());
+
+    let cookie_year = currentDay.getFullYear();
+    let cookie_month = currentDay.getMonth()+1;
+    let cookie_day = currentDay.getDate();
+    
+    loadCalendar(cookie_month, cookie_year, cookie_day, type);
+}
+
+/**
  * Gets the previous month of a given month
  * @param month : int the current month (1 as January and 12 as December)
  * @param year : int the current year
