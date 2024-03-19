@@ -44,7 +44,6 @@ class MarkdownWidget extends Widget {
                     preview_div_name : `notebook-builder-markdown-preview-${NUM_MARKDOWN}`,
                     preview_button_id : `notebook-builder-preview-button-${NUM_MARKDOWN}`,
                     render_header : true,
-                    min_height : '100px',
                 },
                 csrf_token: csrfToken,
             },

@@ -105,40 +105,65 @@
             {% endif %}
         >{{ markdown_area_value is defined ? markdown_area_value : '' }}</textarea>
         {# if min_height or max_height aren't defined, use values defined in markdown.css #}
-        <div id="{{ preview_div_id }}" class="fill-available markdown-preview" style="min-height:{{ min_height is defined ? min_height : "100px" }}; max-height:{{ max_height is defined ? max_height : "300px" }}" hidden></div>
+        <div id="{{ preview_div_id }}" class="fill-available markdown-preview" style="min-height:{{ min_height is defined ? min_height : "200px" }}; max-height:{{ max_height is defined ? max_height : "300px" }}" hidden></div>
     </div>
 </div>
 <script>
-    $(document).ready(function() {
-        enableTabsInTextArea("#{{markdown_area_id}}");
-        const markdown_area = $('#{{markdown_area_id}}').closest('.markdown-area')
-        markdown_area.find('[data-initialize-preview="1"]').trigger('click');
+$(document).ready(function() {
+    function resizeTextarea(textarea) {
+        // Force the browser to calculate the size if the content is dynamically loaded
+        textarea.style.height = 'auto'; 
+        textarea.style.height = textarea.scrollHeight + 'px'; // Set it to the scroll height
+        textarea.style.overflowY = 'hidden'; // Hide the scrollbar
+    }
 
-        function resizeTextarea(textarea) {
-            // Only adjust the height if the content is too long
-            if (textarea.scrollHeight > textarea.clientHeight) {
-                textarea.style.height = 'auto';
-                textarea.style.height = textarea.scrollHeight + 'px';
-            }
-        }
-
-        var textareaElement = document.getElementById('{{markdown_area_id}}');
-        // Run the resize function initially in case there's already content
-        resizeTextarea(textareaElement);
-
-        // Add input event listener to resize on input
-        textareaElement.addEventListener('input', function() {
+    // Function to initialize the resizing of the textarea
+    function initializeTextarea() {
+        var textareaElement = $('#{{markdown_area_id}}');
+        resizeTextarea(textareaElement[0]);
+        // Attach the input event listener to resize on input
+        textareaElement.on('input', function() {
             resizeTextarea(this);
         });
+    }
 
-        // Set overflowY to 'auto' to allow for a scrollbar when needed
-        textareaElement.style.overflowY = 'auto';
+    // Call the function to initialize the textarea on document ready
+    initializeTextarea();
 
-        // Handle tab switching for Markdown preview
-        $('.markdown-mode-tab').on('click', function() {
-            $(this).addClass('active');
-            const markdown_area = $(this).closest('.markdown-area');
-            markdown_area.find('.markdown-mode-tab').not(this).removeClass('active');
+    // Re-initialize the textarea when a markdown tab is clicked
+    $('.markdown-mode-tab').on('click', function() {
+        $(this).addClass('active');
+        $(this).siblings().removeClass('active');
+        initializeTextarea(); // Call this function to resize the textarea
+    });
+
+    // Check for dynamically loaded content if applicable
+    $(document).ajaxComplete(function() {
+        // Call the resizeTextarea function after AJAX content has been loaded
+        var textareaElement = $('#{{markdown_area_id}}'); // Ensure you have the correct selector
+        if (textareaElement.length) {
+            resizeTextarea(textareaElement[0]);
+        }
+    });
+
+    // If content is inserted into the DOM after load, observe for changes
+    var observer = new MutationObserver(function(mutations) {
+        mutations.forEach(function(mutation) {
+            if (mutation.addedNodes) {
+                mutation.addedNodes.forEach(function(node) {
+                    if (node.id === '{{markdown_area_id}}') {
+                        resizeTextarea(node);
+                    }
+                });
+            }
         });
     });
+
+    // Assuming 'container' is a parent element that exists on document ready
+    var config = { childList: true, subtree: true };
+    var target = document.getElementById('container'); // Replace with actual container ID
+    if (target) {
+        observer.observe(target, config);
+    }
+});
 </script>
