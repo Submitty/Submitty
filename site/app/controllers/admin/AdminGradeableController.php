@@ -120,15 +120,15 @@ class AdminGradeableController extends AbstractController {
             }
 
             $dates = [];
-            $dates['ta_view_start_date'] = $config->getTaViewStartDate()->format('Y-m-d H:i:s.u');
-            $dates['grade_start_date'] = $config->getGradeStartDate()->format('Y-m-d H:i:s.u');
-            $dates['grade_due_date'] = $config->getGradeDueDate()->format('Y-m-d H:i:s.u');
-            $dates['grade_released_date'] = $config->getGradeReleasedDate()->format('Y-m-d H:i:s.u');
-            $dates['team_lock_date'] = $config->getTeamLockDate()->format('Y-m-d H:i:s.u');
-            $dates['submission_open_date'] = $config->getSubmissionOpenDate()->format('Y-m-d H:i:s.u');
-            $dates['submission_due_date'] = $config->getSubmissionDueDate()->format('Y-m-d H:i:s.u');
-            $dates['grade_inquiry_start_date'] = $config->getGradeInquiryStartDate()->format('Y-m-d H:i:s.u');
-            $dates['grade_inquiry_due_date'] = $config->getGradeInquiryDueDate()->format('Y-m-d H:i:s.u');
+            $dates['ta_view_start_date'] = $config->getTaViewStartDate()->format('Y-m-d H:i:s');
+            $dates['grade_start_date'] = $config->getGradeStartDate()->format('Y-m-d H:i:s');
+            $dates['grade_due_date'] = $config->getGradeDueDate()->format('Y-m-d H:i:s');
+            $dates['grade_released_date'] = $config->getGradeReleasedDate()->format('Y-m-d H:i:s');
+            $dates['team_lock_date'] = $config->getTeamLockDate()->format('Y-m-d H:i:s');
+            $dates['submission_open_date'] = $config->getSubmissionOpenDate()->format('Y-m-d H:i:s');
+            $dates['submission_due_date'] = $config->getSubmissionDueDate()->format('Y-m-d H:i:s');
+            $dates['grade_inquiry_start_date'] = $config->getGradeInquiryStartDate()->format('Y-m-d H:i:s');
+            $dates['grade_inquiry_due_date'] = $config->getGradeInquiryDueDate()->format('Y-m-d H:i:s');
 
             $dates['has_due_date'] = $config->hasDueDate();
             $dates['has_release_date'] = $config->hasReleaseDate();
