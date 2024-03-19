@@ -513,6 +513,7 @@ HTML;
                 }
                 else {
                     $columns[] = ["width" => "10%", "title" => "Team ID",          "function" => "team_id", "sort_type" => "id"];
+                    $columns[] = ["width" => "6%",  "title" => "Team Name",        "function" => "team_name"];
                     $columns[] = ["width" => "32%", "title" => "Team Members",     "function" => "team_members"];
                 }
             }
