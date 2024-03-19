@@ -7,8 +7,11 @@ const monthNames = ['December', 'January', 'February', 'March', 'April', 'May', 
 const monthNamesShort = ['Dec', 'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sept', 'Oct', 'Nov', 'Dec'];
 
 /**
- * Changes the month and updates cookies and loads the calendar
+ * Changes the year and updates cookies and loads the calendar
  * @param x : int the value of the month to change to
+ * @param view_year : int year that is currently being viewed 
+ * @param view_month : int month that is currently being viewed
+ * @param view_day : int day that is currently being viewed
  * @returns {void} : Loads the updated calendar
  */
 function changeYear(x, view_year, view_month, view_day) {
@@ -32,15 +35,16 @@ function changeYear(x, view_year, view_month, view_day) {
         Cookies.set('calendar_day', cookie_day);
     }
 
-    Cookies.set('calendar_year', x.value);
-
     // Load the calendar to the correct day
     loadCalendar(cookie_month, cookie_year, cookie_day, type);
 }
 
 /**
- * Changes the year and updates cookies and loads the calendar
+ * Changes the month and updates cookies and loads the calendar
  * @param x : int the value of the year to change to
+ * @param view_year : int year that is currently being viewed 
+ * @param view_month : int month that is currently being viewed
+ * @param view_day : int day that is currently being viewed
  * @returns {void} : Loads the updated calendar
  */
 function changeMonth(x, view_year, view_month, view_day) {

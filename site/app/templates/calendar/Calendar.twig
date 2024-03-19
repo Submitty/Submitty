@@ -47,7 +47,7 @@
                 <button type="button" onclick="openOptionsModal()" class="btn btn-primary">
                     <i class="fas fa-sliders"></i> Options
                 </button>
-                <select id="calendar-year-type-edit" name="type" onchange="changeYear(this, {{view_year}}, {{view_month}});">
+                <select id="calendar-year-type-edit" name="type" onchange="changeYear(this, {{view_year}}, {{view_month}}, {{view_day}});">
                     {% set startYear = 2014 %}
                     {% set endYear = curr_year + 5 %}
 
@@ -55,7 +55,7 @@
                         <option value = "{{ year }}" {% if (year_cookie is defined) and year_cookie == year %} selected {% endif %}> {{year}} </option>
                     {% endfor %}
                 </select>
-                <select id="calendar-month-type-edit" name="type" onchange="changeMonth(this, {{view_year}}, {{view_month}});">
+                <select id="calendar-month-type-edit" name="type" onchange="changeMonth(this, {{view_year}}, {{view_month}}, {{view_day}});">
                     {% set months = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'] %}
                     {% for month in 1..12%}
                         <option value = "{{month}}" {% if (month_cookie is defined) and month_cookie == month %} selected {% endif %}>{{months[month-1]}}</option>
