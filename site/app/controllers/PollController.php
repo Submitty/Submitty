@@ -414,6 +414,9 @@ class PollController extends AbstractController {
 
         $em->flush();
 
+        $web_socket_message = ['type' => 'poll_updated', 'poll_id' => $poll_id, 'socket' => 'student', 'updates' => 'Poll updated'];
+        $this->sendSocketMessage($web_socket_message);
+
         $this->core->addSuccessMessage("Poll successfully edited");
         return new RedirectResponse($returnUrl);
     }
@@ -434,6 +437,9 @@ class PollController extends AbstractController {
         $poll->setOpen();
         $em->flush();
 
+        $web_socket_message = ['type' => 'poll_opened', 'poll_id' => $poll_id, 'socket' => 'student', 'updates' => 'Poll opened'];
+        $this->sendSocketMessage($web_socket_message);
+
         return new RedirectResponse($this->core->buildCourseUrl(['polls']));
     }
 
@@ -453,6 +459,9 @@ class PollController extends AbstractController {
         $poll->setEnded();
         $em->flush();
 
+        $web_socket_message = ['type' => 'poll_ended', 'poll_id' => $poll_id, 'socket' => 'student', 'updates' => 'Poll ended'];
+        $this->sendSocketMessage($web_socket_message);
+
         return new RedirectResponse($this->core->buildCourseUrl(['polls']));
     }
 
@@ -471,6 +480,9 @@ class PollController extends AbstractController {
         }
         $poll->setClosed();
         $em->flush();
+
+        $web_socket_message = ['type' => 'poll_closed', 'poll_id' => $poll_id, 'socket' => 'student', 'updates' => 'Poll closed'];
+        $this->sendSocketMessage($web_socket_message);
 
         return new RedirectResponse($this->core->buildCourseUrl(['polls']));
     }
@@ -512,13 +524,13 @@ class PollController extends AbstractController {
         }
 
         $user_id = $this->core->getUser()->getId();
-        $web_socket_response = ['type' => 'update_histogram', 'poll_id' => $poll_id, 'updates' => []];
+        $web_socket_message = ['type' => 'update_histogram', 'poll_id' => $poll_id, 'updates' => [], 'socket' => 'instructor'];
 
         foreach ($poll->getUserResponses() as $response) {
             /** @var Option|null */
             $option = $this->core->getCourseEntityManager()->find(Option::class, $response->getOption()->getId());
             $em->remove($response);
-            $web_socket_response['updates'][$option->getResponse()] = $option->getUserResponses()->count() - 1;
+            $web_socket_message['updates'][$option->getResponse()] = $option->getUserResponses()->count() - 1;
         }
         if (array_key_exists("answers", $_POST) && $_POST['answers'][0] !== '-1') {
             foreach ($_POST['answers'] as $option_id) {
@@ -526,13 +538,13 @@ class PollController extends AbstractController {
                 $option = $this->core->getCourseEntityManager()->find(Option::class, $option_id);
                 $response = new Response($user_id);
                 $poll->addResponse($response, $option_id);
-                $web_socket_response['updates'][$option->getResponse()] += 1;
+                $web_socket_message['updates'][$option->getResponse()] += 1;
                 $em->persist($response);
             }
         }
 
         $em->flush();
-        $this->sendSocketMessage($web_socket_response);
+        $this->sendSocketMessage($web_socket_message);
         $this->core->addSuccessMessage("Poll response recorded");
         return new RedirectResponse($this->core->buildCourseUrl(['polls']));
     }
@@ -689,7 +701,7 @@ class PollController extends AbstractController {
      */
     private function sendSocketMessage(array $msg_array): void {
         $msg_array['user_id'] = $this->core->getUser()->getId();
-        $msg_array['page'] = $this->core->getConfig()->getTerm() . '-' . $this->core->getConfig()->getCourse() . "-polls-" .  $msg_array['poll_id'];
+        $msg_array['page'] = $this->core->getConfig()->getTerm() . '-' . $this->core->getConfig()->getCourse() . "-polls-" .  $msg_array['poll_id'] . '-' . $msg_array['socket'];
 
         try {
             $client = new Client($this->core);
