@@ -84,6 +84,31 @@ void AddAutogradingConfiguration(nlohmann::json &whole_config) {
   }
 
   if (whole_config["autograding"].find("compilation_to_runner") == whole_config["autograding"].end()) {
+    // copy all executable names from compilation testcases to runner
+    nlohmann::json::iterator testcases = whole_config.find("testcases");
+    for (typename nlohmann::json::iterator testcase = testcases->begin(); testcase != testcases->end(); testcase++) {
+      if (testcase->value("type", "") == "Compilation") {
+        nlohmann::json::iterator exe_name = testcase->find("executable_name");
+        if (exe_name == testcase->end()) {
+          continue;
+        }
+        // Handle single file or array of files.
+        if (exe_name->is_array()) {
+          for (typename nlohmann::json::iterator itr = exe_name->begin(); itr != exe_name->end(); itr++) {
+            if (itr->is_string()) {
+              whole_config["autograding"]["compilation_to_runner"].push_back("**/" + itr->template get<std::string>());
+            }
+            else {
+              throw std::invalid_argument("Unable to parse provided executable_name");
+            }
+          }
+        }
+        else if (exe_name->is_string()) {
+          whole_config["autograding"]["compilation_to_runner"].push_back("**/" + exe_name->template get<std::string>());
+        }
+      }
+    }
+    // add all .out and .class in case executable name wasn't specified.
     whole_config["autograding"]["compilation_to_runner"].push_back("**/*.out");
     whole_config["autograding"]["compilation_to_runner"].push_back("**/*.class");
   }
