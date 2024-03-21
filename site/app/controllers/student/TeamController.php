@@ -6,9 +6,18 @@ use app\controllers\AbstractController;
 use app\controllers\admin\AdminGradeableController;
 use app\libraries\FileUtils;
 use app\libraries\response\RedirectResponse;
+use app\models\Team;
 use Symfony\Component\Routing\Annotation\Route;
 
 class TeamController extends AbstractController {
+    /**
+     * Check if a string has special characters.
+     */
+    public static function hasSpecialCharacters(string $str): bool {
+        $pattern = '/[^a-zA-Z0-9\-_ ]/';
+        return preg_match($pattern, $str) === 1;
+    }
+
     /**
      * @Route("/courses/{_semester}/{_course}/gradeable/{gradeable_id}/team/new")
      */
@@ -495,6 +504,17 @@ class TeamController extends AbstractController {
 
         if ($_POST['team_name'] == '') {
             $_POST['team_name'] = null;
+        }
+        else {
+            if (strlen($_POST['team_name']) > Team::MAX_TEAM_NAME_LENGTH) {
+                $this->core->addErrorMessage("Number of characters in team name must be less than " . Team::MAX_TEAM_NAME_LENGTH);
+                return new RedirectResponse($return_url);
+            }
+
+            if (self::hasSpecialCharacters($_POST['team_name'])) {
+                $this->core->addErrorMessage("Team name should not contain special characters");
+                return new RedirectResponse($return_url);
+            }
         }
 
         if ($_POST['team_name'] === $team->getTeamName()) {

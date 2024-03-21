@@ -48,7 +48,9 @@ class Team extends AbstractModel {
     /** @prop
      * @var string The name of the team */
     protected $team_name;
-
+    /** @prop
+     * @var number Maximum length of the team name */
+    const MAX_TEAM_NAME_LENGTH = 30;
     /**
      * Team constructor.
      * @param Core  $core
