@@ -22,6 +22,10 @@ class CourseMaterialTester extends BaseUnitTest {
             $details['hidden_from_students'],
             $details['priority'],
             null,
+            null,
+            "testUser",
+            $details['release_date'],
+            null,
             null
         );
         $sections = ['1', '2'];
@@ -55,6 +59,10 @@ class CourseMaterialTester extends BaseUnitTest {
             $details['release_date'],
             $details['hidden_from_students'],
             $details['priority'],
+            null,
+            null,
+            "testUser",
+            $details['release_date'],
             null,
             null
         );

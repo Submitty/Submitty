@@ -456,7 +456,8 @@ class CourseMaterialsController extends AbstractController {
             $course_material->setPriority($_POST['sort_priority']);
         }
 
-
+        $course_material->setLastEditBy($this->core->getUser()->getId());
+        $course_material->setLastEditDate(DateUtils::parseDateTime($this->core->getDateTimeNow(), $this->core->getDateTimeNow()->getTimezone()));
 
         if (isset($_POST['file_path']) || isset($_POST['title'])) {
             $path = $course_material->getPath();
@@ -513,6 +514,10 @@ class CourseMaterialsController extends AbstractController {
                                     $course_material->getReleaseDate(),
                                     $course_material->isHiddenFromStudents(),
                                     $course_material->getPriority(),
+                                    null,
+                                    null,
+                                    $course_material->getUploadedBy(),
+                                    $course_material->getUploadDate(),
                                     null,
                                     null
                                 );
@@ -866,7 +871,6 @@ class CourseMaterialsController extends AbstractController {
                 }
             }
         }
-
         foreach ($details['type'] as $key => $value) {
             $course_material = new CourseMaterial(
                 $value,
@@ -875,7 +879,11 @@ class CourseMaterialsController extends AbstractController {
                 $details['hidden_from_students'],
                 $details['priority'],
                 $value === CourseMaterial::LINK ? $url_url : null,
-                $value === CourseMaterial::LINK ? $title_name : null
+                $value === CourseMaterial::LINK ? $title_name : null,
+                uploaded_by: $this->core->getUser()->getId(),
+                upload_date: DateUtils::parseDateTime($this->core->getDateTimeNow(), $this->core->getDateTimeNow()->getTimezone()),
+                last_edit_by: null,
+                last_edit_date: null
             );
             $this->core->getCourseEntityManager()->persist($course_material);
             if ($details['section_lock']) {
