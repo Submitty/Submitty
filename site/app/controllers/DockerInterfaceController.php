@@ -48,7 +48,7 @@ class DockerInterfaceController extends AbstractController {
                 }
             }
         }
-        $json['image_owners'] = $this->core->getQueries()->getDockerImageOwners(array_unique($images));
+        $json['image_owners'] = $this->core->getQueries()->getAllDockerImageOwners();
 
         $json['autograding_workers'] = FileUtils::readJsonFile(
             FileUtils::joinPaths(

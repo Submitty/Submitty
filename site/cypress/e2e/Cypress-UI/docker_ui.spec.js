@@ -156,7 +156,7 @@ describe('Docker UI Test', () => {
                     'already exists in capability cpp');
     });
 
-    it('Should add new image', () => {
+    it('Should add new image and remove it', () => {
         cy.reload();
         // Add a new image
         cy.get('#capability-form')
@@ -170,21 +170,15 @@ describe('Docker UI Test', () => {
         cy.get('.alert-success')
             .should('have.text', 'submitty/python:2.7 found on DockerHub' +
                     ' and queued to be added!');
-    });
 
-    it('Should be able to remove image', () => {
         cy.reload();
         // Remove the image
-        cy.get('table.table.table-striped.docker-table.mobile-table')
-            .contains('td', 'submitty/python:2.7')
-            .parent('tr')
-            .find('td')
-            .eq(7)
+        cy.get('[data-image-id="submitty/python:2.7"]')
             .should('be.visible', { timeout: 10000 })
             .click();
         // Confirm dialog return true
         cy.on('window:confirm', () => true);
-        cy.get('.alert-success')
-            .should('have.text', 'submitty/python:2.7 removed from docker images!');
+        cy.get('[data-image-id="submitty/python:2.7"]')
+            .should('not.exist');
     });
 });

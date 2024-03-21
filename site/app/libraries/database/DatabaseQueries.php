@@ -9368,16 +9368,10 @@ ORDER BY
     }
 
     /**
-     * @param string[] $images the full names of the images to get owners for
-     * @return array<string, string> the owners of the images, indexed by image name
+     * @return array<string, string> the owners of all docker images, indexed by image name
      */
-    public function getDockerImageOwners(array $images): array {
-        if (count($images) === 0) {
-            return [];
-        }
-        $result = [];
-        $placeholders = $this->createParameterList(count($images));
-        $this->submitty_db->query("SELECT * FROM docker_image WHERE image_name IN ${placeholders}", $images);
+    public function getAllDockerImageOwners(): array {
+        $this->submitty_db->query("SELECT * FROM docker_image");
         foreach ($this->submitty_db->rows() as $row) {
             $result[$row['image_name']] = $row['user_id'];
         }
