@@ -9371,6 +9371,7 @@ ORDER BY
      * @return array<string, string> the owners of all docker images, indexed by image name
      */
     public function getAllDockerImageOwners(): array {
+        $result = [];
         $this->submitty_db->query("SELECT * FROM docker_image");
         foreach ($this->submitty_db->rows() as $row) {
             $result[$row['image_name']] = $row['user_id'];
