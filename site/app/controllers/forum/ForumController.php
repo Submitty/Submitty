@@ -1348,13 +1348,13 @@ class ForumController extends AbstractController {
      * @Route("/courses/{_semester}/{_course}/post/likes", methods={"POST"})
      */
     public function toggleLike(): JsonResponse {
-        $requiredKeys = ['post_id', 'current_user','action'];
+        $requiredKeys = ['post_id', 'current_user','isLiked'];
         foreach ($requiredKeys as $key) {
             if (!isset($_POST[$key])) {
                 return JsonResponse::getErrorResponse('Missing required key in POST data: ' . $key);
             }
         }
-        $isLiked = filter_var($_POST['action'], FILTER_VALIDATE_BOOLEAN); //validates type of bool
+        $isLiked = filter_var($_POST['isLiked'], FILTER_VALIDATE_BOOLEAN); //validates type of bool
         $output = [];
         $output['type'] = $this->core->getQueries()->toggleLikes($_POST['post_id'], $this->core->getUser()->getId(), $isLiked);
 
