@@ -329,8 +329,7 @@ class PollController extends AbstractController {
         $prevMinutes = $poll->getDuration()->i;
         $prevSeconds = $poll->getDuration()->s;
         $resetDuration = true;
-        if($hours === $prevHours && $minutes === $prevMinutes && $seconds === $prevSeconds)
-        {
+        if ($hours === $prevHours && $minutes === $prevMinutes && $seconds === $prevSeconds) {
             $resetDuration = false;
         }
         if (($hours * 3600) + (60 * $minutes) +  $seconds > 86400) {
