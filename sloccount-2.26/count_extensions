@@ -1,0 +1,56 @@
+#!/usr/bin/perl -w
+
+# Read from standard input a list of filenames, and
+# report a sorted list of extensions and filenames
+# (most common ones first).
+
+# The format is "name count", where "count" is the number of appearances.
+# "name" usually begins with a "." followed by the name of the extension.
+# In the case where the filename has no extension, the name begins with "/"
+# followed by the entire basename.
+
+# This is part of SLOCCount, a toolsuite that counts
+# source lines of code (SLOC).
+# Copyright (C) 2001-2004 David A. Wheeler.
+# 
+# This program is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation; either version 2 of the License, or
+# (at your option) any later version.
+# 
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+# 
+# You should have received a copy of the GNU General Public License
+# along with this program; if not, write to the Free Software
+# Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+# 
+# To contact David A. Wheeler, see his website at:
+#  http://www.dwheeler.com.
+# 
+# 
+
+%extensions = ();
+
+while (<>) {
+   if (m/\.([^.\/]+)$/) {
+      $type = $1;
+      chomp($type);
+      $type = ".$type";
+      if (defined($extensions{$type})) { $extensions{$type}++; }
+      else                             { $extensions{$type} = 1; }
+   } elsif (m!/([^/]+)$!) {
+      $filename = $1;
+      chomp($filename);
+      $filename = "/$filename";
+      if (defined($extensions{$filename})) { $extensions{$filename}++; }
+      else                                 { $extensions{$filename} = 1; }
+   }
+}
+
+foreach $entry (sort {$extensions{$b} <=> $extensions{$a}} keys %extensions) {
+  print "${entry}  $extensions{$entry}\n";
+}
+

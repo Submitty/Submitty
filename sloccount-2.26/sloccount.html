@@ -1,0 +1,2464 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html>
+<head>
+<title>SLOCCount User's Guide</title>
+</head>
+<body bgcolor="#FFFFFF">
+<center>
+<font size="+3"><b><span class="title">SLOCCount User's Guide</span></b></font>
+<br>
+<font size="+2"><span class="author">by David A. Wheeler (dwheeler, at, dwheeler.com)</span></font>
+<br>
+<font size="+2"><span class="pubdate">August 1, 2004</span></font>
+<br>
+<font size="+2"><span class="version">Version 2.26</span></font>
+</center>
+<p>
+<h1><a name="introduction">Introduction</a></h1>
+<p>
+SLOCCount (pronounced "sloc-count") is a suite of programs for counting
+physical source lines of code (SLOC) in potentially large software systems.
+Thus, SLOCCount is a "software metrics tool" or "software measurement tool".
+SLOCCount was developed by David A. Wheeler,
+originally to count SLOC in a GNU/Linux distribution, but it can be
+used for counting the SLOC of arbitrary software systems.
+<p>
+SLOCCount is known to work on Linux systems, and has been tested
+on Red Hat Linux versions 6.2, 7, and 7.1.
+SLOCCount should run on many other Unix-like systems (if Perl is installed),
+in particular, I would expect a *BSD system to work well.
+Windows users can run sloccount by first installing
+<a href="http://sources.redhat.com/cygwin">Cygwin</a>.
+SLOCCount is much slower on Windows/Cygwin, and it's not as easy to install
+or use on Windows, but it works.
+Of course, feel free to upgrade to an open source Unix-like system
+(such as Linux or *BSD) instead :-).
+<p>
+SLOCCount can count physical SLOC for a wide number of languages.
+Listed alphabetically, they are
+Ada, Assembly (for many machines and assemblers),
+awk (including gawk and nawk),
+Bourne shell (and relatives such as bash, ksh, zsh, and pdksh),
+C, C++, C# (also called C-sharp or cs), C shell (including tcsh),
+COBOL, Expect, Fortran (including Fortran 90), Haskell,
+Java, lex (including flex),
+LISP (including Scheme),
+makefiles (though they aren't usually shown in final reports),
+Modula3, Objective-C, Pascal, Perl, PHP, Python, Ruby, sed,
+SQL (normally not shown),
+TCL, and Yacc.
+It can gracefully handle awkward situations in many languages,
+for example, it can determine the
+syntax used in different assembly language files and adjust appropriately,
+it knows about Python's use of string constants as comments, and it
+can handle various Perl oddities (e.g., perlpods, here documents,
+and Perl's _&nbsp;_END_&nbsp;_ marker).
+It even has a "generic" SLOC counter that you may be able to use count the
+SLOC of other languages (depending on the language's syntax).
+<p>
+SLOCCount can also take a large list of files and automatically categorize
+them using a number of different heuristics.
+The heuristics automatically determine if a file
+is a source code file or not, and if so, which language it's written in.
+For example,
+it knows that ".pc" is usually a C source file for an Oracle preprocessor,
+but it can detect many circumstances where it's actually a file about
+a "PC" (personal computer).
+For another example, it knows that ".m" is the standard extension for
+Objective-C, but it will check the file contents to
+see if really is Objective-C.
+It will even examine file headers to attempt to accurately determine
+the file's true type.
+As a result, you can analyze large systems completely automatically.
+<p>
+Finally, SLOCCount has some report-generating tools
+to collect the data generated,
+and then present it in several different formats and sorted different ways.
+The report-generating tool can also generate simple tab-separated files
+so data can be passed on to other analysis tools (such as spreadsheets
+and database systems).
+<p>
+SLOCCount will try to quickly estimate development time and effort given only
+the lines of code it computes, using the original Basic COCOMO model.
+This estimate can be improved if you can give more information about the project.
+See the
+<a href="#cocomo">discussion below about COCOMO, including intermediate COCOMO</a>,
+if you want to improve the estimates by giving additional information about
+the project.
+<p>
+SLOCCount is open source software/free software (OSS/FS),
+released under the GNU General Public License (GPL), version 2;
+see the <a href="#license">license below</a>.
+The master web site for SLOCCount is
+<a href="http://www.dwheeler.com/sloccount">http://www.dwheeler.com/sloccount</a>.
+You can learn a lot about SLOCCount by reading the paper that caused its
+creation, available at
+<a href="http://www.dwheeler.com/sloc">http://www.dwheeler.com/sloc</a>.
+Feel free to see my master web site at
+<a href="http://www.dwheeler.com">http://www.dwheeler.com</a>, which has
+other material such as the
+<a href="http://www.dwheeler.com/secure-programs"><i>Secure Programming
+for Linux and Unix HOWTO</i></a>,
+my <a href="http://www.dwheeler.com/oss_fs_refs.html">list of
+OSS/FS references</a>, and my paper
+<a href="http://www.dwheeler.com/oss_fs_why.html"><i>Why OSS/FS? Look at
+the Numbers!</i></a>
+Please send improvements by email
+to dwheeler, at, dwheeler.com (DO NOT SEND SPAM - please remove the
+commas, remove the spaces, and change the word "at" into the at symbol).
+<p>
+The following sections first give a "quick start"
+(discussing how to use SLOCCount once it's installed),
+discuss basic SLOCCount concepts,
+how to install it, how to set your PATH,
+how to install source code on RPM-based systems if you wish, and
+more information on how to use the "sloccount" front-end.
+This is followed by material for advanced users:
+how to use SLOCCount tools individually (for when you want more control
+than the "sloccount" tool gives you), designer's notes,
+the definition of SLOC, and miscellaneous notes.
+The last sections states the license used (GPL) and gives
+hints on how to submit changes to SLOCCount (if you decide to make changes
+to the program).
+
+
+<p>
+<h1><a name="quick-start">Quick Start</a></h1>
+<p>
+Once you've installed SLOCCount (discussed below),
+you can measure an arbitrary program by typing everything
+after the dollar sign into a terminal session:
+<pre>
+  $  sloccount <i>topmost-source-code-directory</i>
+</pre>
+<p>
+The directory listed and all its descendants will be examined.
+You'll see output while it calculates,
+culminating with physical SLOC totals and
+estimates of development time, schedule, and cost.
+If the directory contains a set of directories, each of which is
+a different project developed independently,
+use the "--multiproject" option so the effort estimations
+can correctly take this into account.
+<p>
+You can redisplay the data different ways by using the "--cached"
+option, which skips the calculation stage and re-prints previously
+computed information.
+You can use other options to control what's displayed:
+"--filecount" shows counts of files instead of SLOC, and
+"--details" shows the detailed information about every source code file.
+So, to display all the details of every file once you've previously
+calculated the results, just type:
+<pre>
+  sloccount --cached --details
+</pre>
+<p>
+You'll notice that the default output ends with a request.
+If you use this data (e.g., in a report), please
+credit that data as being "generated using 'SLOCCount' by David A. Wheeler."
+I make no money from this program, so at least please give me some credit.
+<p>
+SLOCCount tries to ignore all automatically generated files, but its
+heuristics to detect this are necessarily imperfect (after all, even humans
+sometimes have trouble determining if a file was automatically genenerated).
+If possible, try to clean out automatically generated files from
+the source directories -- 
+in many situations "make clean" does this.
+<p>
+There's more to SLOCCount than this, but first we'll need to
+explain some basic concepts, then we'll discuss other options
+and advanced uses of SLOCCount.
+
+<p>
+<h1><a name="concepts">Basic Concepts</a></h1>
+<p>
+SLOCCount counts physical SLOC, also called "non-blank, non-comment lines".
+More formally, physical SLOC is defined as follows:
+``a physical source line of code (SLOC) is a line ending
+in a newline or end-of-file marker,
+and which contains at least one non-whitespace non-comment character.''
+Comment delimiters (characters other than newlines starting and ending
+a comment) are considered comment characters.
+Data lines only including whitespace
+(e.g., lines with only tabs and spaces in multiline strings) are not included.
+<p>
+In SLOCCount, there are 3 different directories:
+<ol>
+<li>The "source code directory", a directory containing the source code
+   being measured
+   (possibly in recursive subdirectories).  The directories immediately
+   contained in the source code directory will normally be counted separately,
+   so it helps if your system is designed so that this top set of directories
+   roughly represents the system's major components.
+   If it doesn't, there are various tricks you can use to group source
+   code into components, but it's more work.
+   You don't need write access to the source code directory, but
+   you do need read access to all files, and read and search (execute) access
+   to all subdirectories.
+<li>The "bin directory", the directory containing the SLOCCount executables.
+   By default, installing the program creates a subdirectory
+   named "sloccount-VERSION" which is the bin directory.
+   The bin directory must be part of your PATH.
+<li>The "data directory", which stores the analysis results.
+   When measuring programs using "sloccount", by default
+   this is the directory ".slocdata" inside your home directory.
+   When you use the advanced SLOCCount tools directly,
+   in many cases this must be your "current" directory.
+   Inside the data directory are "data directory children" - these are
+   subdirectories that contain a file named "filelist", and each child
+   is used to represent a different project or a different
+   major component of a project.
+</ol>
+<p>
+SLOCCount can handle many different programming languages, and separate
+them by type (so you can compare the use of each).
+Here is the set of languages, sorted alphabetically;
+common filename extensions are in
+parentheses, with SLOCCount's ``standard name'' for the language
+listed in brackets:
+<ol>
+<li>Ada (.ada, .ads, .adb, .pad) [ada]
+<li>Assembly for many machines and assemblers (.s, .S, .asm) [asm]
+<li>awk (.awk) [awk]
+<li>Bourne shell and relatives such as bash, ksh, zsh, and pdksh (.sh) [sh]
+<li>C (.c, .pc, .ec, .ecp) [ansic]
+<li>C++  (.C, .cpp, .cxx, .cc, .pcc) [cpp]
+<li>C# (.cs) [cs]
+<li>C shell including tcsh (.csh) [csh]
+<li>COBOL (.cob, .cbl, .COB, .CBL) [cobol]
+<li>Expect (.exp) [exp]
+<li>Fortran 77 (.f, .f77, .F, .F77) [fortran]
+<li>Fortran 90 (.f90, .F90) [f90]
+<li>Haskell (.hs, .lhs) [haskell]; deals with both types of literate files.
+<li>Java (.java) [java]
+<li>lex (.l) [lex]
+<li>LISP including Scheme (.cl, .el, .scm, .lsp, .jl) [lisp]
+<li>makefiles (makefile) [makefile]
+<li>ML (.ml, .ml3) [ml]
+<li>Modula3 (.m3, .mg, .i3, .ig) [modula3]
+<li>Objective-C (.m) [objc]
+<li>Pascal (.p, .pas) [pascal]
+<li>Perl (.pl, .pm, .perl) [perl]
+<li>PHP (.php, .php[3456], .inc) [php]
+<li>Python (.py) [python]
+<li>Ruby (.rb) [ruby]
+<li>sed (.sed) [sed]
+<li>sql (.sql) [sql]
+<li>TCL (.tcl, .tk, .itk) [tcl]
+<li>Yacc (.y) [yacc]
+</ol>
+
+<p>
+<h1><a name="installing">Installing SLOCCount</a></h1>
+<p>
+Obviously, before using SLOCCount you'll need to install it.
+SLOCCount depends on other programs, in particular perl, bash,
+a C compiler (gcc will do), and md5sum
+(you can get a useful md5sum program in the ``textutils'' package
+on many Unix-like systems), so you'll need to get them installed
+if they aren't already.
+<p>
+If your system uses RPM version 4 or greater to install software
+(e.g., Red Hat Linux 7 or later), just download the SLOCCount RPM
+and install it using a normal installation command; from the text line
+you can use:
+<pre>
+  rpm -Uvh sloccount*.rpm
+</pre>
+<p>
+Everyone else will need to install from a tar file, and Windows users will
+have to install Cygwin before installing sloccount.
+<p>
+If you're using Windows, you'll need to first install
+<a href="http://sources.redhat.com/cygwin">Cygwin</a>.
+By installing Cygwin, you'll install an environment and a set of
+open source Unix-like tools.
+Cygwin essentially creates a Unix-like environment in which sloccount can run.
+You may be able to run parts of sloccount without Cygwin, in particular,
+the perl programs should run in the Windows port of Perl, but you're
+on your own - many of the sloccount components expect a Unix-like environment.
+If you want to install Cygwin, go to the
+<a href="http://sources.redhat.com/cygwin">Cygwin main page</a>
+and install it.
+If you're using Cygwin, <b>install it to use Unix newlines, not
+DOS newlines</b> - DOS newlines will cause odd errors in SLOCCount
+(and probably other programs, too).
+I have only tested a "full" Cygwin installation, so I suggest installing
+everything.
+If you're short on disk space,  at least install
+binutils, bash, fileutils, findutils,
+gcc, grep, gzip, make, man, perl, readline,
+sed, sh-utils, tar, textutils, unzip, and zlib;
+you should probably install vim as well,
+and there may be other dependencies as well.
+By default Cygwin will create a directory C:\cygwin\home\NAME,
+and will set up the ability to run Unix programs
+(which will think that the same directory is called /home/NAME).
+Now double-click on the Cygwin icon, or select from the Start menu
+the selection Programs / Cygnus Solutions / Cygwin Bash shell;
+you'll see a terminal screen with a Unix-like interface.
+Now follow the instructions (next) for tar file users.
+<p>
+If you're installing from the tar file, download the file
+(into your home directory is fine).
+Unpacking the file will create a subdirectory, so if you want the
+unpacked subdirectory to go somewhere special, "cd" to where you
+want it to go.
+Most likely, your home directory is just fine.
+Now gunzip and untar SLOCCount (the * replaces the version #) by typing
+this at a terminal session:
+<pre>
+  gunzip -c sloccount*.tar.gz | tar xvf -
+</pre>
+Replace "sloccount*.tar.gz" shown above
+with the full path of the downloaded file, wherever that is.
+You've now created the "bin directory", which is simply the
+"sloccount-VERSION" subdirectory created by the tar command
+(where VERSION is the version number).
+<p>
+Now you need to compile the few compiled programs in the "bin directory" so
+SLOCCount will be ready to go.
+First, cd into the newly-created bin directory, by typing:
+<pre>
+  cd sloccount*
+</pre>
+<p>
+You may then need to override some installation settings.
+You can can do this by editing the supplied makefile, or alternatively,
+by providing options to "make" whenever you run make.
+The supplied makefile assumes your C compiler is named "gcc", which
+is true for most Linux systems, *BSD systems, and Windows systems using Cygwin.
+If this isn't true, you'll need to set
+the "CC" variable to the correct value (e.g., "cc").
+You can also modify where the files are stored; this variable is
+called PREFIX and its default is /usr/local
+(older versions of sloccount defaulted to /usr).
+<p>
+If you're using Windows and Cygwin, you
+<b>must</b> override one of the installation
+settings, EXE_SUFFIX, for installation to work correctly.
+One way to set this value is to edit the "makefile" file so that
+the line beginning with "EXE_SUFFIX" reads as follows:
+<pre>
+  EXE_SUFFIX=.exe
+</pre>
+If you're using Cygwin and you choose to modify the "makefile", you
+can use any text editor on the Cygwin side, or you can use a
+Windows text editor if it can read and write Unix-formatted text files.
+Cygwin users are free to use vim, for example.
+If you're installing into your home directory and using the default locations,
+Windows text editors will see the makefile as file
+C:\cygwin\home\NAME\sloccount-VERSION\makefile.
+Note that the Windows "Notepad" application doesn't work well, because it's not
+able to handle Unix text files correctly.
+Since this can be quite a pain, Cygus users may instead decide to override
+make the makefile values instead during installation.
+<p>
+Finally, compile the few compiled programs in it by typing "make":
+<pre>
+  make
+</pre>
+If you didn't edit the makefile in the previous step, you
+need to provide options to make invocations to set the correct values.
+This is done by simply saying (after "make") the name of the variable,
+an equal sign, and its correct value.
+Thus, to compile the program on a Windows system using Cygus, you can
+skip modifying the makefile file by typing this instead of just "make":
+<pre>
+  make EXE_SUFFIX=.exe
+</pre>
+<p>
+If you want, you can install sloccount for system-wide use without
+using the RPM version.
+Windows users using Cygwin should probably do this, particularly
+if they chose a "local" installation.
+To do this, first log in as root (Cygwin users don't need to do this
+for local installation).
+Edit the makefile to match your system's conventions, if necessary,
+and then type "make install":
+<pre>
+  make install
+</pre>
+If you need to set some make options, remember to do that here too.
+If you use "make install", you can uninstall it later using
+"make uninstall".
+Installing sloccount for system-wide use is optional;
+SLOCCount works without a system-wide installation.
+However, if you don't install sloccount system-wide, you'll need to
+set up your PATH variable; see the section on
+<a href="#path">setting your path</a>.
+<p>
+A note for Cygwin users (and some others): some systems, including Cygwin,
+don't set up the environment quite right and thus can't display the manual
+pages as installed.
+The problem is that they forget to search /usr/local/share/man for
+manual pages.
+If you want to read the installed manual pages, type this
+into a Bourne-like shell:
+<pre>
+  MANPATH=/usr/local/share/man:/usr/share/man:/usr/man
+  export MANPATH
+</pre>
+Or, if you use a C shell:
+<pre>
+  setenv MANPATH "/usr/local/share/man:/usr/share/man:/usr/man"
+</pre>
+From then on, you'll be able to view the reference manual pages
+by typing "man sloccount" (or by using whatever manual page display system
+you prefer).
+<p>
+
+<p>
+<h1><a name="installing-source">Installing The Source Code To Measure</a></h1>
+<p>
+Obviously, you must install the software source code you're counting,
+so somehow you must create the "source directory"
+with the source code to measure.
+You must also make sure that permissions are set so the software can
+read these directories and files.
+<p>
+For example, if you're trying to count the SLOC for an RPM-based Linux system,
+install the software source code by doing the following as root
+(which will place all source code into the source directory
+/usr/src/redhat/BUILD):
+<ol>
+<li>Install all source rpm's:
+<pre>
+    mount /mnt/cdrom
+    cd /mnt/cdrom/SRPMS
+    rpm -ivh *.src.rpm
+</pre>
+<li>Remove RPM spec files you don't want to count:
+<pre>
+    cd ../SPECS
+    (look in contents of spec files, removing what you don't want)
+</pre>
+<li>build/prep all spec files:
+<pre>
+    rpm -bp *.spec
+</pre>
+<li>Set permissions so the source files can be read by all:
+<pre>
+    chmod -R a+rX /usr/src/redhat/BUILD
+</pre>
+</ol>
+<p>
+Here's an example of how to download source code from an
+anonymous CVS server.
+Let's say you want to examine the source code in GNOME's "gnome-core"
+directory, as stored at the CVS server "anoncvs.gnome.org".
+Here's how you'd do that:
+<ol>
+<li>Set up site and login parameters:
+<pre>
+  export CVSROOT=':pserver:anonymous@anoncvs.gnome.org:/cvs/gnome'
+</pre>
+<li>Log in:
+<pre>
+  cvs login
+</pre>
+<li>Check out the software (copy it to your local directory), using
+mild compression to save on bandwidth:
+<pre>
+  cvs -z3 checkout gnome-core
+</pre>
+</ol>
+<p>
+Of course, if you have a non-anonymous account, you'd set CVSROOT
+to reflect this.  For example, to log in using the "pserver"
+protocol as ACCOUNT_NAME, do:
+<pre>
+  export CVSROOT=':pserver:ACCOUNT_NAME@cvs.gnome.org:/cvs/gnome'
+</pre>
+<p>
+You may need root privileges to install the source code and to give
+another user permission to read it, but please avoid running the
+sloccount program as root.
+Although I know of no specific reason this would be a problem,
+running any program as root turns off helpful safeguards.
+<p>
+Although SLOCCount tries to detect (and ignore) many cases where
+programs are automatically generated, these heuristics are necessarily
+imperfect.
+So, please don't run any programs that generate other programs - just
+do enough to get the source code prepared for counting.
+In general you shouldn't run "make" on the source code, and if you have,
+consider running "make clean" or "make really_clean" on the source code first.
+It often doesn't make any difference, but identifying those circumstances
+is difficult.
+<p>
+SLOCCount will <b>not</b> automatically uncompress files that are
+compressed/archive files (such as .zip, .tar, or .tgz files).
+Often such files are just "left over" old versions or files
+that you're already counting.
+If you want to count the contents of compressed files, uncompress them first.
+<p>
+SLOCCount also doesn't delve into files using "literate programming"
+techniques, in part because there are too many incompatible formats
+that implement it.
+Thus, run the tools to extract the code from the literate programming files
+before running SLOCCount.  Currently, the only exception to this rule is
+Haskell.
+
+
+<h1><a name="path">Setting your PATH</a></h1>
+Before you can run SLOCCount, you'll need to make sure
+the SLOCCount "bin directory" is in your PATH.
+If you've installed SLOCCount in a system-wide location
+such as /usr/bin, then you needn't do more; the RPMs and "make install"
+commands essentially do this.
+<p>
+Otherwise, in Bourne-shell variants, type:
+<pre>
+    PATH="$PATH:<i>the directory with SLOCCount's executable files</i>"
+    export PATH
+</pre>
+Csh users should instead type:
+<pre>
+    setenv PATH "$PATH:<i>the directory with SLOCCount's executable files</i>"
+</pre>
+
+<h1><a name="using-basics">Using SLOCCount: The Basics</a></h1>
+
+Normal use of SLOCCount is very simple.
+In a terminal window just type "sloccount", followed by a
+list of the source code directories to count.
+If you give it only a single directory, SLOCCount tries to be
+a little clever and break the source code into
+subdirectories for purposes of reporting:
+<ol>
+<li>if directory has at least
+two subdirectories, then those subdirectories will be used as the
+breakdown (see the example below).
+<li>If the single directory contains files as well as directories
+(or if you give sloccount some files as parameters), those files will
+be assigned to the directory "top_dir" so you can tell them apart
+from other directories.
+<li>If there's a subdirectory named "src", then that subdirectory is again
+broken down, with all the further subdirectories prefixed with "src_".
+So if directory "X" has a subdirectory "src", which contains subdirectory
+"modules", the program will report a separate count from "src_modules".
+</ol>
+In the terminology discussed above, each of these directories would become
+"data directory children."
+<p>
+You can also give "sloccount" a list of directories, in which case the
+report will be broken down by these directories
+(make sure that the basenames of these directories differ).
+SLOCCount normally considers all descendants of these directories,
+though unless told otherwise it ignores symbolic links.
+<p>
+This is all easier to explain by example.
+Let's say that we want to measure Apache 1.3.12 as installed using an RPM.
+Once it's installed, we just type:
+<pre>
+ sloccount /usr/src/redhat/BUILD/apache_1.3.12
+</pre>
+The output we'll see shows status reports while it analyzes things,
+and then it prints out:
+
+<pre>
+SLOC	Directory	SLOC-by-Language (Sorted)
+24728   src_modules     ansic=24728
+19067   src_main        ansic=19067
+8011    src_lib         ansic=8011
+5501    src_os          ansic=5340,sh=106,cpp=55
+3886    src_support     ansic=2046,perl=1712,sh=128
+3823    src_top_dir     sh=3812,ansic=11
+3788    src_include     ansic=3788
+3469    src_regex       ansic=3407,sh=62
+2783    src_ap          ansic=2783
+1378    src_helpers     sh=1345,perl=23,ansic=10
+1304    top_dir         sh=1304
+104     htdocs          perl=104
+31      cgi-bin         sh=24,perl=7
+0       icons           (none)
+0       conf            (none)
+0       logs            (none)
+
+
+ansic:       69191 (88.85%)
+sh:           6781 (8.71%)
+perl:         1846 (2.37%)
+cpp:            55 (0.07%)
+
+
+Total Physical Source Lines of Code (SLOC)                   = 77873
+Estimated Development Effort in Person-Years (Person-Months) = 19.36 (232.36)
+ (Basic COCOMO model, Person-Months = 2.4 * (KSLOC**1.05))
+Estimated Schedule in Years (Months)                         = 1.65 (19.82)
+ (Basic COCOMO model, Months = 2.5 * (person-months**0.38))
+Estimated Average Number of Developers  (Effort/Schedule)    = 11.72
+Total Estimated Cost to Develop                              = $ 2615760
+ (average salary = $56286/year, overhead = 2.4).
+
+Please credit this data as "generated using 'SLOCCount' by David A. Wheeler."
+</pre>
+<p>
+Interpreting this should be straightforward.
+The Apache directory has several subdirectories, including "htdocs", "cgi-bin",
+and "src".
+The "src" directory has many subdirectories in it
+("modules", "main", and so on).
+Code files directly
+contained in the main directory /usr/src/redhat/BUILD/apache_1.3.12
+is labelled "top_dir", while
+code directly contained in the src subdirectory is labelled "src_top_dir".
+Code in the "src/modules" directory is labelled "src_modules" here.
+The output shows each major directory broken
+out, sorted from largest to smallest.
+Thus, the "src/modules" directory had the most code of the directories,
+24728 physical SLOC, all of it in C.
+The "src/helpers" directory had a mix of shell, perl, and C; note that
+when multiple languages are shown, the list of languages in that child
+is also sorted from largest to smallest.
+<p>
+Below the per-component set is a list of all languages used,
+with their total SLOC shown, sorted from most to least.
+After this is the total physical SLOC (77,873 physical SLOC in this case).
+<p>
+Next is an estimation of the effort and schedule (calendar time)
+it would take to develop this code.
+For effort, the units shown are person-years (with person-months
+shown in parentheses); for schedule, total years are shown first
+(with months in parentheses).
+When invoked through "sloccount", the default assumption is that all code is
+part of a single program; the "--multiproject" option changes this
+to assume that all top-level components are independently developed
+programs.
+When "--multiproject" is invoked, each project's efforts are estimated
+separately (and then summed), and the schedule estimate presented
+is the largest estimated schedule of any single component.
+<p>
+By default the "Basic COCOMO" model is used for estimating
+effort and schedule; this model
+includes design, code, test, and documentation time (both
+user/admin documentation and development documentation).
+<a href="#cocomo">See below for more information on COCOMO</a>
+as it's used in this program.
+<p>
+Next are several numbers that attempt to estimate what it would have cost
+to develop this program.
+This is simply the amount of effort, multiplied by the average annual
+salary and by the "overhead multiplier".
+The default annual salary is
+$56,286 per year; this value was from the
+<i>ComputerWorld</i>, September 4, 2000's Salary Survey
+of an average U.S. programmer/analyst salary in the year 2000.
+You might consider using other numbers
+(<i>ComputerWorld</i>'s September 3, 2001 Salary Survey found
+an average U.S. programmer/analyst salary making $55,100, senior
+systems programmers averaging $68,900, and senior systems analysts averaging
+$72,300).
+
+<p>
+Overhead is much harder to estimate; I did not find a definitive source
+for information on overheads.
+After informal discussions with several cost analysts,
+I determined that an overhead of 2.4
+would be representative of the overhead sustained by
+a typical software development company.
+As discussed in the next section, you can change these numbers too.
+
+<p>
+You may be surprised by the high cost estimates, but remember,
+these include design, coding, testing, documentation (both for users
+and for programmers), and a wrap rate for corporate overhead
+(to cover facilities, equipment, accounting, and so on).
+Many programmers forget these other costs and are shocked by the high figures.
+If you only wanted to know the costs of the coding, you'd need to get
+those figures.
+
+
+<p>
+Note that if any top-level directory has a file named PROGRAM_LICENSE,
+that file is assumed to contain the name of the license
+(e.g., "GPL", "LGPL", "MIT", "BSD", "MPL", and so on).
+If there is at least one such file, sloccount will also report statistics
+on licenses.
+
+<p>
+Note: sloccount internally uses MD5 hashes to detect duplicate files,
+and thus needs some program that can compute MD5 hashes.
+Normally it will use "md5sum" (available, for example, as a GNU utility).
+If that doesn't work, it will try to use "md5" and "openssl", and you may
+see error messages in this format:
+<pre>
+ Can't exec "md5sum": No such file or directory at
+     /usr/local/bin/break_filelist line 678, &lt;CODE_FILE&gt; line 15.
+ Can't exec "md5": No such file or directory at
+     /usr/local/bin/break_filelist line 678, &lt;CODE_FILE&gt; line 15.
+</pre>
+You can safely ignore these error messages; these simply show that
+SLOCCount is probing for a working program to compute MD5 hashes.
+For example, Mac OS X users normally don't have md5sum installed, but
+do have md5 installed, so they will probably see the first error
+message (because md5sum isn't available), followed by a note that a
+working MD5 program was found.
+
+
+<h1><a name="options">Options</a></h1>
+The program "sloccount" has a large number of options
+so you can control what is selected for counting and how the
+results are displayed.
+<p>
+There are several options that control which files are selected
+for counting:
+<pre>
+ --duplicates   Count all duplicate files as normal files
+ --crossdups    Count duplicate files if they're in different data directory
+                children.
+ --autogen      Count automatically generated files
+ --follow       Follow symbolic links (normally they're ignored)
+ --addlang      Add languages to be counted that normally aren't shown.
+ --append       Add more files to the data directory
+</pre>
+Normally, files which have exactly the same content are counted only once
+(data directory children are counted alphabetically, so the child
+"first" in the alphabet will be considered the owner of the master copy).
+If you want them all counted, use "--duplicates".
+Sometimes when you use sloccount, each directory represents a different
+project, in which case you might want to specify "--crossdups".
+The program tries to reject files that are automatically generated
+(e.g., a C file generated by bison), but you can disable this as well.
+You can use "--addlang" to show makefiles and SQL files, which aren't
+usually counted.
+<p>
+Possibly the most important option is "--cached".
+Normally, when sloccount runs, it computes a lot of information and
+stores this data in a "data directory" (by default, "~/.slocdata").
+The "--cached" option tells sloccount to use data previously computed,
+greatly speeding up use once you've done the computation once.
+The "--cached" option can't be used along with the options used to
+select what files should be counted.
+You can also select a different data directory by using the
+"--datadir" option.
+<p>
+There are many options for controlling the output:
+<pre>
+ --filecount     Show counts of files instead of SLOC.
+ --details       Present details: present one line per source code file.
+ --wide          Show "wide" format.  Ignored if "--details" selected
+ --multiproject  Assume each directory is for a different project
+                 (this modifies the effort estimation calculations)
+ --effort F E    Change the effort estimation model, so that it uses
+                 F as the factor and E as the exponent.
+ --schedule F E  Change the schedule estimation model, so that it uses
+                 F as the factor and E as the exponent.
+ --personcost P  Change the average annual salary to P.
+ --overhead O    Change the annual overhead to O.
+ --              End of options
+</pre>
+<p>
+Basically, the first time you use sloccount, if you're measuring
+a set of projects (not a single project) you might consider
+using "--crossdups" instead of the defaults.
+Then, you can redisplay data quickly by using "--cached",
+combining it with options such as "--filecount".
+If you want to send the data to another tool, use "--details".
+<p>
+If you're measuring a set of projects, you probably ought to pass
+the option "--multiproject".
+When "--multiproject" is used, efforts are computed for each component
+separately and summed, and the time estimate used is the maximum
+single estimated time.
+<p>
+The "--details" option dumps the available data in 4 columns,
+tab-separated, where each line
+represents a source code file in the data directory children identified.
+The first column is the SLOC, the second column is the language type,
+the third column is the name of the data directory child
+(as it was given to get_sloc_details),
+and the last column is the absolute pathname of the source code file.
+You can then pipe this output to "sort" or some other tool for further
+analysis (such as a spreadsheet or RDBMS).
+<p>
+You can change the parameters used to estimate effort using "--effort".
+For example, if you believe that in the environment being used
+you can produce 2 KSLOC/month scaling linearly, then
+that means that the factor for effort you should use is 1/2 = 0.5 month/KSLOC,
+and the exponent for effort is 1 (linear).
+Thus, you can use "--effort 0.5 1".
+<p>
+You can also set the annual salary and overheads used to compute
+estimated development cost.
+While "$" is shown, there's no reason you have to use dollars;
+the unit of development cost is the same unit as the unit used for
+"--personcost".
+
+<h1><a name="cocomo">More about COCOMO</a></h1>
+
+<p>
+By default SLOCCount uses a very simple estimating model for effort and schedule:
+the basic COCOMO model in the "organic" mode (modes are more fully discussed below).
+This model estimates effort and schedule, including design, code, test,
+and documentation time (both user/admin documentation and development documentation).
+Basic COCOMO is a nice simple model, and it's used as the default because
+it doesn't require any information about the code other than the SLOC count
+already computed.
+<p>
+However, basic COCOMO's accuracy is limited for the same reason -
+basic COCOMO doesn't take a number of important factors into account.
+If you have the necessary information, you can improve the model's accuracy
+by taking these factors into account. You can at least quickly determine
+if the right "mode" is being used to improve accuracy. You can also
+use the "Intermediate COCOMO" and "Detailed COCOMO" models that take more
+factors into account, and are likely to produce more accurate estimates as
+a result. Take these estimates as just that - estimates - they're not grand truths.
+If you have the necessary information,
+you can improve the model's accuracy by taking these factors into account, and
+pass this additional information to sloccount using its
+"--effort" and "--schedule" options (as discussed in
+<a href="#options">options</a>).
+<p>
+To use the COCOMO model, you first need to determine if your application's
+mode, which can be "Organic", "embedded", or "semidetached".
+Most software is "organic" (which is why it's the default).
+Here are simple definitions of these modes:
+<ul>
+<li>Organic: Relatively small software teams develop software in a highly
+familiar, in-house environment. &nbsp;It has a generally stable development
+environment, minimal need for innovative algorithms, and requirements can
+be relaxed to avoid extensive rework.</li>
+<li>Semidetached: This is an intermediate
+step between organic and embedded. This is generally characterized by reduced
+flexibility in the requirements.</li>
+<li>Embedded: The project must operate
+within tight (hard-to-meet) constraints, and requirements
+and interface specifications are often non-negotiable.
+The software will be embedded in a complex environment that the
+software must deal with as-is.</li>
+</ul>
+By default, SLOCCount uses the basic COCOMO model in the organic mode.
+For the basic COCOMO model, here are the critical factors for --effort and --schedule:<br>
+<ul>
+<li>Organic: effort factor = 2.4, exponent = 1.05; schedule factor = 2.5, exponent = 0.38</li>
+<li>Semidetached:  effort factor = 3.0, exponent = 1.12; schedule factor = 2.5, exponent = 0.35</li>
+<li>Embedded:  effort factor = 3.6, exponent = 1.20; schedule factor = 2.5, exponent = 0.32</li>
+</ul>
+Thus, if you want to use SLOCCount but the project is actually semidetached,
+you can use the options "--effort 3.0 1.12 --schedule 2.5 0.35"
+to get a more accurate estimate.
+<br>
+For more accurate estimates, you can use the intermediate COCOMO models.
+For intermediate COCOMO, use the following figures:<br>
+<ul>
+  <li>Organic: effort base factor = 2.3, exponent = 1.05; schedule factor = 2.5, exponent = 0.38</li>
+  <li>Semidetached: effort base factor = 3.0, exponent = 1.12; schedule factor = 2.5, exponent = 0.35</li>
+  <li>Embedded: effort base factor = 2.8, exponent = 1.20; schedule factor = 2.5, exponent = 0.32</li>
+</ul>
+The intermediate COCOMO values for schedule are exactly the same as the basic
+COCOMO model; the starting effort values are not quite the same, as noted
+in Boehm's book. However, in the intermediate COCOMO model, you don't
+normally use the effort factors as-is, you use various corrective factors
+(called cost drivers). To use these corrections, you consider
+all the cost drivers, determine what best describes them,
+and multiply their corrective values by the effort base factor.
+The result is the final effort factor.
+Here are the cost drivers (from Boehm's book, table 8-2 and 8-3):
+
+<table cellpadding="2" cellspacing="2" border="1" width="100%">
+  <tbody>
+    <tr>
+      <th rowspan="1" colspan="2">Cost Drivers
+      </th>
+      <th rowspan="1" colspan="6">Ratings
+      </th>
+    </tr>
+    <tr>
+      <th>ID
+      </th>
+      <th>Driver Name
+      </th>
+      <th>Very Low
+      </th>
+      <th>Low
+      </th>
+      <th>Nominal
+      </th>
+      <th>High
+      </th>
+      <th>Very High
+      </th>
+      <th>Extra High
+      </th>
+    </tr>
+    <tr>
+      <td>RELY
+      </td>
+      <td>Required software reliability
+      </td>
+      <td>0.75 (effect is slight inconvenience)
+      </td>
+      <td>0.88 (easily recovered losses)
+      </td>
+      <td>1.00 (recoverable losses)
+      </td>
+      <td>1.15 (high financial loss)
+      </td>
+      <td>1.40 (risk to human life)
+      </td>
+      <td>&nbsp;
+      </td>
+    </tr>
+    <tr>
+      <td>DATA
+      </td>
+      <td>Database size
+      </td>
+      <td>&nbsp;
+      </td>
+      <td>0.94 (database bytes/SLOC &lt; 10)
+      </td>
+      <td>1.00 (D/S between 10 and 100)
+      </td>
+      <td>1.08 (D/S between 100 and 1000)
+      </td>
+      <td>1.16 (D/S &gt; 1000)
+      </td>
+      <td>&nbsp;
+      </td>
+    </tr>
+    <tr>
+      <td>CPLX
+      </td>
+      <td>Product complexity
+      </td>
+      <td>0.70 (mostly straightline code, simple arrays, simple expressions)
+      </td>
+      <td>0.85
+      </td>
+      <td>1.00
+      </td>
+      <td>1.15
+      </td>
+      <td>1.30
+      </td>
+      <td>1.65 (microcode, multiple resource scheduling, device timing dependent coding)
+      </td>
+    </tr>
+    <tr>
+      <td>TIME
+      </td>
+      <td>Execution time constraint
+      </td>
+      <td>&nbsp;
+      </td>
+      <td>&nbsp;
+      </td>
+      <td>1.00 (&lt;50% use of available execution time)
+      </td>
+      <td>1.11 (70% use)
+      </td>
+      <td>1.30 (85% use)
+      </td>
+      <td>1.66 (95% use)
+      </td>
+    </tr>
+    <tr>
+      <td>STOR
+      </td>
+      <td>Main storage constraint
+      </td>
+      <td>&nbsp;
+      </td>
+      <td>&nbsp;
+      </td>
+      <td>1.00&nbsp;(&lt;50% use of available storage)</td>
+      <td>1.06  (70% use)
+      </td>
+      <td>1.21 (85% use)
+      </td>
+      <td>1.56 (95% use)
+      </td>
+    </tr>
+    <tr>
+      <td>VIRT
+      </td>
+      <td>Virtual machine (HW and OS) volatility
+      </td>
+      <td>&nbsp;
+      </td>
+      <td>0.87 (major change every 12 months, minor every month)
+      </td>
+      <td>1.00 (major change every 6 months, minor every 2 weeks)</td>
+      <td>1.15 (major change every 2 months, minor changes every week)
+      </td>
+      <td>1.30 (major changes every 2 weeks, minor changes every 2 days)
+      </td>
+      <td>&nbsp;
+      </td>
+    </tr>
+    <tr>
+      <td>TURN
+      </td>
+      <td>Computer turnaround time
+      </td>
+      <td>&nbsp;
+      </td>
+      <td>0.87 (interactive)
+      </td>
+      <td>1.00 (average turnaround &lt; 4 hours)
+      </td>
+      <td>1.07
+      </td>
+      <td>1.15
+      </td>
+      <td>&nbsp;
+      </td>
+    </tr>
+    <tr>
+      <td>ACAP
+      </td>
+      <td>Analyst capability
+      </td>
+      <td>1.46 (15th percentile)
+      </td>
+      <td>1.19 (35th percentile)
+      </td>
+      <td>1.00 (55th percentile)
+      </td>
+      <td>0.86 (75th percentile)
+      </td>
+      <td>0.71 (90th percentile)
+      </td>
+      <td>&nbsp;
+      </td>
+    </tr>
+    <tr>
+      <td>AEXP
+      </td>
+      <td>Applications experience
+      </td>
+      <td>1.29 (&lt;= 4 months experience)
+      </td>
+      <td>1.13 (1 year)
+      </td>
+      <td>1.00 (3 years)
+      </td>
+      <td>0.91 (6 years)
+      </td>
+      <td>0.82 (12 years)
+      </td>
+      <td>&nbsp;
+      </td>
+    </tr>
+    <tr>
+      <td>PCAP
+      </td>
+      <td>Programmer capability
+      </td>
+      <td>1.42 (15th percentile)
+      </td>
+      <td>1.17  (35th percentile)
+      </td>
+      <td>1.00 (55th percentile)
+      </td>
+      <td>0.86  (75th percentile)
+      </td>
+      <td>0.70 (90th percentile)
+      </td>
+      <td>&nbsp;
+      </td>
+    </tr>
+    <tr>
+      <td>VEXP
+      </td>
+      <td>Virtual machine experience
+      </td>
+      <td>1.21 (&lt;= 1 month experience)
+      </td>
+      <td>1.10 (4 months)
+      </td>
+      <td>1.00 (1 year)
+      </td>
+      <td>0.90 (3 years)
+      </td>
+      <td>&nbsp;
+      </td>
+      <td>&nbsp;
+      </td>
+    </tr>
+    <tr>
+      <td>LEXP
+      </td>
+      <td>Programming language experience
+      </td>
+      <td>1.14  (&lt;= 1 month experience)
+      </td>
+      <td>1.07 (4 months)
+      </td>
+      <td>1.00 (1 year)
+      </td>
+      <td>0.95 (3 years)
+      </td>
+      <td>&nbsp;
+      </td>
+      <td>&nbsp;
+      </td>
+    </tr>
+    <tr>
+      <td>MODP
+      </td>
+      <td>Use of "modern" programming practices (e.g. structured programming)
+      </td>
+      <td>1.24 (No use)
+      </td>
+      <td>1.10
+      </td>
+      <td>1.00 (some use)
+      </td>
+      <td>0.91
+      </td>
+      <td>0.82 (routine use)
+      </td>
+      <td>&nbsp;
+      </td>
+    </tr>
+    <tr>
+      <td>TOOL
+      </td>
+      <td>Use of software tools
+      </td>
+      <td>1.24
+      </td>
+      <td>1.10
+      </td>
+      <td>1.00 (basic tools)
+      </td>
+      <td>0.91 (test tools)
+      </td>
+      <td>0.83 (requirements, design, management, documentation tools)
+      </td>
+      <td>&nbsp;
+      </td>
+    </tr>
+    <tr>
+      <td>SCED
+      </td>
+      <td>Required development schedule
+      </td>
+      <td>1.23 (75% of nominal)
+      </td>
+      <td>1.08 (85% of nominal)
+      </td>
+      <td>1.00 (nominal)
+      </td>
+      <td>1.04 (130% of nominal)
+      </td>
+      <td>1.10 (160% of nominal)
+      </td>
+      <td>&nbsp;
+      </td>
+    </tr>
+  </tbody>
+</table>
+<br>
+<br>
+<br>
+So, once all of the factors have been multiplied together, you can
+then use the "--effort" flag to set more accurate factors and exponents.
+Note that some factors will probably not be "nominal" simply because
+times have changed since COCOMO was originally developed, so a few regions
+that were desirable have become more common today.
+For example,
+for many software projects of today, virtual machine volatility tends to
+be low, and the
+use of "modern" programming practices (structured programming,
+object-oriented programming, abstract data types, etc.) tends to be high.
+COCOMO automatically handles these differences.
+<p>
+For example, imagine that you're examining a fairly simple application that
+meets the "organic" requirements. Organic projects have a base factor
+of 2.3 and exponents of 1.05, as noted above.
+We then examine all the factors to determine a corrected base factor.
+For this example, imagine
+that we determine the values of these cost drivers are as follows:<br>
+<br>
+<table cellpadding="2" cellspacing="2" border="1" width="100%">
+
+  <tbody>
+    <tr>
+      <td rowspan="1" colspan="2">Cost Drivers<br>
+      </td>
+      <td rowspan="1" colspan="2">Ratings<br>
+      </td>
+    </tr>
+    <tr>
+      <td>ID<br>
+      </td>
+      <td>Driver Name<br>
+      </td>
+      <td>Rating<br>
+      </td>
+      <td>Multiplier<br>
+      </td>
+    </tr>
+    <tr>
+      <td>RELY<br>
+      </td>
+      <td>Required software reliability<br>
+      </td>
+      <td>Low - easily recovered losses<br>
+      </td>
+      <td>0.88<br>
+      </td>
+    </tr>
+    <tr>
+      <td>DATA<br>
+      </td>
+      <td>Database size<br>
+      </td>
+      <td>Low<br>
+      </td>
+      <td>0.94<br>
+      </td>
+    </tr>
+    <tr>
+      <td>CPLX<br>
+      </td>
+      <td>Product complexity<br>
+      </td>
+      <td>Nominal<br>
+      </td>
+      <td>1.00<br>
+      </td>
+    </tr>
+    <tr>
+      <td>TIME<br>
+      </td>
+      <td>Execution time constraint<br>
+      </td>
+      <td>Nominal<br>
+      </td>
+      <td>1.00<br>
+      </td>
+    </tr>
+    <tr>
+      <td>STOR<br>
+      </td>
+      <td>Main storage constraint<br>
+      </td>
+      <td>Nominal<br>
+      </td>
+      <td>1.00<br>
+      </td>
+    </tr>
+    <tr>
+      <td>VIRT<br>
+      </td>
+      <td>Virtual machine (HW and OS) volatility<br>
+      </td>
+      <td>Low  (major change every 12 months, minor every month)<br>
+      </td>
+      <td>0.87<br>
+      </td>
+    </tr>
+    <tr>
+      <td>TURN<br>
+      </td>
+      <td>Computer turnaround time<br>
+      </td>
+      <td>Nominal<br>
+      </td>
+      <td>1.00<br>
+      </td>
+    </tr>
+    <tr>
+      <td>ACAP<br>
+      </td>
+      <td>Analyst capability<br>
+      </td>
+      <td>Nominal  (55th percentile)<br>
+      </td>
+      <td>1.00<br>
+      </td>
+    </tr>
+    <tr>
+      <td>AEXP<br>
+      </td>
+      <td>Applications experience<br>
+      </td>
+      <td>Nominal (3 years)<br>
+      </td>
+      <td>1.00<br>
+      </td>
+    </tr>
+    <tr>
+      <td>PCAP<br>
+      </td>
+      <td>Programmer capability<br>
+      </td>
+      <td>Nominal  (55th percentile)<br>
+      </td>
+      <td>1.00<br>
+      </td>
+    </tr>
+    <tr>
+      <td>VEXP<br>
+      </td>
+      <td>Virtual machine experience<br>
+      </td>
+      <td>High (3 years)<br>
+      </td>
+      <td>0.90<br>
+      </td>
+    </tr>
+    <tr>
+      <td>LEXP<br>
+      </td>
+      <td>Programming language experience<br>
+      </td>
+      <td>High (3 years)<br>
+      </td>
+      <td>0.95<br>
+      </td>
+    </tr>
+    <tr>
+      <td>MODP<br>
+      </td>
+      <td>Use of "modern" programming practices (e.g. structured programming)<br>
+      </td>
+      <td>High (Routine use)<br>
+      </td>
+      <td>0.82<br>
+      </td>
+    </tr>
+    <tr>
+      <td>TOOL<br>
+      </td>
+      <td>Use of software tools<br>
+      </td>
+      <td>Nominal (basic tools)<br>
+      </td>
+      <td>1.00<br>
+      </td>
+    </tr>
+    <tr>
+      <td>SCED<br>
+      </td>
+      <td>Required development schedule<br>
+      </td>
+      <td>Nominal<br>
+      </td>
+      <td>1.00<br>
+      </td>
+    </tr>
+    
+    
+    
+    
+  </tbody>
+</table>
+<p>
+So, starting with the base factor (2.3 in this case), and then multiplying
+the driver values, we'll compute a final factor of:
+By multiplying these driver values together in this example, we compute:<br>
+<pre>2.3*0.88*0.94*1*1*1*0.87*1.00*1*1*1*0.90*0.95*0.82*1*1</pre>
+For this
+example, the final factor for the effort calculation is 1.1605. You would then
+invoke sloccount with "--effort 1.1605 1.05" to pass in the corrected factor
+and exponent for the effort estimation.
+You don't need to use "--schedule" to set the factors when you're using
+organic model, because in SLOCCount
+the default values are the values for the organic model.
+You can set scheduling parameters manually
+anyway by setting "--schedule 2.5 0.38".
+You <i>do</i> need to use the --schedule option for
+embedded and semidetached projects, because those modes have different
+schedule parameters. The final command would be:<br>
+<br>
+sloccount --effort 1.1605 1.05 --schedule 2.5 0.38 my_project<br>
+<p>
+The detailed COCOMO model requires breaking information down further.
+<p>
+For more information about the original COCOMO model, including the detailed
+COCOMO model, see the book
+<i>Software Engineering Economics</i> by Barry Boehm.
+<p>
+You may be surprised by the high cost estimates, but remember,
+these include design, coding, testing (including
+integration and testing), documentation (both for users
+and for programmers), and a wrap rate for corporate overhead
+(to cover facilities, equipment, accounting, and so on).
+Many programmers forget these other costs and are shocked by the high cost
+estimates.
+<p>
+If you want to know a subset of this cost, you'll need to isolate
+just those figures that you're trying to measure.
+For example, let's say you want to find the money a programmer would receive
+to do just the coding of the units of the program
+(ignoring wrap rate, design, testing, integration, and so on).
+According to Boehm's book (page 65, table 5-2),
+the percentage varies by product size.
+For effort, code and unit test takes 42% for small (2 KSLOC), 40% for
+intermediate (8 KSLOC), 38% for medium (32 KSLOC), and 36% for large
+(128 KSLOC).
+Sadly, Boehm doesn't separate coding from unit test; perhaps
+50% of the time is spent in unit test in traditional proprietary
+development (including fixing bugs found from unit test).
+If you want to know the income to the programmer (instead of cost to
+the company), you'll also want to remove the wrap rate.
+Thus, a programmer's income to <i>only</i> write the code for a
+small program (circa 2 KSLOC) would be 8.75% (42% x 50% x (1/2.4)) 
+of the default figure computed by SLOCCount.
+<p>
+In other words, less than one-tenth of the cost as computed by SLOCCount
+is what actually would be made by a programmer for a small program for
+just the coding task.
+Note that a proprietary commercial company that bid using
+this lower figure would rapidly go out of business, since this figure
+ignores the many other costs they have to incur to actually develop
+working products.
+Programs don't arrive out of thin air; someone needs to determine what
+the requirements are, how to design it, and perform at least
+some testing of it.
+<p>
+There's another later estimation model for effort and schedule
+called "COCOMO II", but COCOMO II requires logical SLOC instead
+of physical SLOC.
+SLOCCount doesn't currently measure logical SLOC, so
+SLOCCount doesn't currently use COCOMO II.
+Contributions of code to compute logical SLOC and then optionally
+use COCOMO II will be gratefully accepted.
+
+<h1><a name="specific-files">Counting Specific Files</a></h1>
+<p>
+If you want to count a specific subset, you can use the "--details"
+option to list individual files, pipe this into "grep" to select the
+files you're interested in, and pipe the result to
+my tool "print_sum" (which reads lines beginning with numbers, and
+returns the total of those numbers).
+If you've already done the analysis, an example would be:
+<pre>
+  sloccount --cached --details | grep "/some/subdirectory/" | print_sum
+</pre>
+<p>
+If you just want to count specific files, and you know what language
+they're in, you
+can just invoke the basic SLOC counters directly.
+By convention the simple counters are named "LANGUAGE_count",
+and they take on the command line a list of the
+source files to count.
+Here are some examples:
+<pre>
+  c_count *.c *.cpp *.h  # Count C and C++ in current directory.
+  asm_count *.S          # Count assembly.
+</pre>
+All the counters (*_count) program accept a &quot;-f FILENAME&quot; option, where FILENAME
+is a file containing the names of all the source files to count
+(one file per text line). If FILENAME is &quot;-&quot;, the
+    list of file names is taken from the standard input.
+The &quot;c_count&quot; program handles both C and C++ (but not objective-C;
+for that use objc_count).
+The available counters are
+ada_count,
+asm_count,
+awk_count,
+c_count,
+csh_count,
+exp_count,
+fortran_count,
+f90_count,
+java_count,
+lex_count,
+lisp_count,
+ml_count,
+modula3_count,
+objc_count,
+pascal_count,
+perl_count,
+python_count,
+sed_count,
+sh_count,
+sql_count, and
+tcl_count.
+<p>
+There is also "generic_count", which takes as its first parameter
+the ``comment string'', followed by a list of files.
+The comment string begins a comment that ends at the end of the line.
+Sometimes, if you have source for a language not listed, generic_count
+will be sufficient.
+<p>
+The basic SLOC counters will send output to standard out, one line per file
+(showing the SLOC count and filename).
+The assembly counter shows some additional information about each file.
+The basic SLOC counters always complete their output with a line
+saying "Total:", followe by a line with the
+total SLOC count.
+
+<h1><a name="errors">Countering Problems and Handling Errors</a></h1>
+
+If you're analyzing unfamiliar code, there's always the possibility
+that it uses languages not processed by SLOCCount.
+To counter this, after running SLOCCount, run the following program:
+<pre>
+ count_unknown_ext
+</pre>
+This will look at the resulting data (in its default data directory
+location, ~/.slocdata) and report a sorted list of the file extensions
+for uncategorized ("unknown") files.
+The list will show every file extension and how many files had that
+extension, and is sorted by most common first.
+It's not a problem if an "unknown" type isn't a source code file, but
+if there are a significant number of source files in this category,
+you'll need to change SLOCCount to get an accurate result.
+
+<p>
+One error report that you may see is:
+<pre>
+  c_count ERROR - terminated in string in (filename)
+</pre>
+
+The cause of this is that c_count (the counter for C-like languages)
+keeps track of whether or not it's in a string, and when the counter
+reached the end of the file, it still thought it was in a string.
+
+<p>
+Note that c_count really does have to keep track of whether or
+not it's a string.
+For example, this is three lines of code, not two, because the
+``comment'' is actually in string data:
+
+<pre>
+ a = "hello
+ /* this is not a comment */
+ bye";
+</pre>
+<p>
+Usually this error means you have code that won't compile
+given certain #define settings.  E.G., XFree86 has a line of code that's
+actually wrong (it has a string that's not terminated), but people
+don't notice because the #define to enable it is not usually set.
+Legitimate code can trigger this message, but code that triggers
+this message is horrendously formatted and is begging for problems.
+
+<p>
+In either case, the best way to handle the situation
+is to modify the source code (slightly) so that the code's intent is clear
+(by making sure that double-quotes balance).
+If it's your own code, you definitely should fix this anyway.
+You need to look at the double-quote (") characters.  One approach is to
+just grep for double-quote, and look at every line for text that isn't
+terminated, e.g., printf("hello %s, myname);
+
+<p>
+SLOCcount reports warnings when an unusually
+large number of duplicate files are reported.
+A large number of duplicates <i>may</i> suggest that you're counting
+two different versions of the same program as though they were
+independently developed.
+You may want to cd into the data directory (usually ~/.slocdata), cd into
+the child directories corresponding to each component, and then look
+at their dup_list.dat files, which list the filenames that appeared
+to be duplicated (and what they duplicate with).
+
+
+<h1><a name="adding">Adding Support for New Languages</a></h1>
+SLOCcount handles many languages, but if it doesn't support one you need,
+you'll need to give the language a standard (lowercase ASCII) name,
+then modify SLOCcount to (1) detect and (2) count code in that language.
+
+<ol>
+<li>
+To detect a new language, you'll need to modify the program break_filelist.
+If the filename extension is reliable, you can modify the array
+%file_extensions, which maps various filename extensions into languages.
+If your needs are more complex, you'll need to modify the code
+(typically in functions get_file_type or file_type_from_contents)
+so that the correct file type is determined.
+For example, if a file with a given filename extension is only
+<i>sometimes</i> that type, you'll need to write code to examine the
+file contents.
+<li>
+You'll need to create a SLOC counter for that language type.
+It must have the name XYZ_count, where XYZ is the standard name for the
+language.
+<p>
+For some languages, you may be able to use the ``generic_count'' program
+to implement your counter - generic_count takes as its first argument
+the pattern which
+identifies comment begins (which continue until the end of the line);
+the other arguments are the files to count.
+Thus, the LISP counter looks like this:
+<pre>
+ #!/bin/sh
+ generic_count ';' $@
+</pre>
+The generic_count program won't work correctly if there are multiline comments
+(e.g., C) or multiline string constants.
+If your language is identical to C/C++'s syntax in terms of
+string constant definitions and commenting syntax
+(using // or /* .. */), then you can use the c_count program - in this case,
+modify compute_sloc_lang so that the c_count program is used.
+<p>
+Otherwise, you'll have to devise your own counting program.
+The program must generate files with the same format, e.g.,
+for every filename passed as an argument, it needs to return separate lines,
+where each line presents the SLOC
+for that file, a space, and the filename.
+(Note: the assembly language counter produces a slightly different format.)
+After that, print "Total:" on its own line, and the actual SLOC total
+on the following (last) line.
+</ol>
+
+<h1><a name="advanced">Advanced SLOCCount Use</a></h1>
+For most people, the previous information is enough.
+However, if you're measuring a large set of programs, or have unusual needs,
+those steps may not give you enough control.
+In that case, you may need to create your own "data directory"
+by hand and separately run the SLOCCount tools.
+Basically, "sloccount" (note the lower case) is the name for
+a high-level tool which invokes many other tools; this entire
+suite is named SLOCCount (note the mixed case).
+The next section will describe how to invoke the various tools "manually"
+so you can gain explicit control over the measuring process when
+the defaults are not to your liking, along with various suggestions
+for how to handle truly huge sets of data.
+<p>
+Here's how to manually create a "data directory" to hold
+intermediate results, and how to invoke each tool in sequence
+(with discussion of options):
+<ol>
+<li>Set your PATH to include the SLOCCount "bin directory", as discussed above.
+<li>Make an empty "data directory"
+(where all intermediate results will be stored);
+you can pick any name and location you like for this directory.
+Here, I'll use the name "data":
+<pre>
+    mkdir ~/data
+</pre>
+<li>Change your current directory to this "data directory":
+<pre>
+    cd ~/data
+</pre>
+The rest of these instructions assume that your current directory
+is the data directory.
+You can set up many different data directories if you wish, to analyze
+different source programs or analyze the programs in different ways;
+just "cd" to the one you want to work with.
+<li>(Optional) Some of the later steps will produce
+a lot of output while they're running.
+If you want to capture this information into a file, use the standard
+"script" command do to so.
+For example, "script run1" will save the output of everything you do into
+file "run1" (until you type control-D to stop saving the information).
+Don't forget that you're creating such a file, or it will become VERY large,
+and in particular don't type any passwords into such a session.
+You can store the script in the data directory, or create a subdirectory
+for such results - any data directory subdirectory that doesn't have the
+special file "filelist" is not a "data directory child" and is thus
+ignored by the later SLOCCount analysis routines.
+<li>Now initialize the "data directory".
+ In particular, initialization will create the "data directory children",
+ a set of subdirectories equivalent to the source code directory's
+ top directories.  Each of these data directory children (subdirectories)
+ will contain a file named "filelist", which
+ lists all filenames in the corresponding source code directory.
+ These data directory children
+ will also eventually contain intermediate results
+ of analysis, which you can check for validity
+ (also, having a cache of these values speeds later analysis steps).
+ <p>
+ You use the "make_filelists" command to initialize a data directory.
+ For example, if your source code is in /usr/src/redhat/BUILD, run:
+<pre>
+   make_filelists /usr/src/redhat/BUILD/*
+</pre>
+<p>
+ Internally, make_filelists uses "find" to create the list of files, and
+ by default it ignores all symbolic links.  However, you may need to
+ follow symbolic links; if you do, give make_filelists the
+ "--follow" option (which will use find's "-follow" option).
+ Here are make_filelists' options:
+<pre>
+ --follow         Follow symbolic links
+ --datadir D      Use this data directory
+ --skip S         Skip basenames named S
+ --prefix P       When creating children, prepend P to their name.
+ --               No more options
+</pre>
+<p>
+ Although you don't normally need to do so, if you want certain files to
+ not be counted at all in your analysis, you can remove
+ data directory children or edit the "filelist" files to do so.
+ There's no need to remove files which aren't source code files normally;
+ this is handled automatically by the next step.
+<p>
+ If you don't have a single source code directory where the subdirectories
+ represent the major components you want to count separately, you can
+ still use the tool but it's more work.
+ One solution is to create a "shadow" directory with the structure
+ you wish the program had, using symbolic links (you must use "--follow"
+ for this to work).
+ You can also just invoke make_filelists multiple times, with parameters
+ listing the various top-level directories you wish to include.
+ Note that the basenames of the directories must be unique.
+<p>
+ If there are so many directories (e.g., a massive number of projects)
+ that the command line is too long,
+ you can run make_filelists multiple times in the same
+ directory with different arguments to create them.
+ You may find "find" and/or "xargs" helpful in doing this automatically.
+ For example, here's how to do the same thing using "find":
+<pre>
+ find /usr/src/redhat/BUILD -maxdepth 1 -mindepth 1 -type d \
+        -exec make_filelists {} \;
+</pre>
+<li>Categorize each file.
+This means that we must determine which
+files contain source code (eliminating auto-generated and duplicate files),
+and of those files which language each file contains.
+The result will be a set of files in each subdirectory of the data directory,
+where each file represents a category (e.g., a language).
+<pre>
+   break_filelist *
+</pre>
+ At this point you might want to examine the data directory subdirectories
+ to ensure that "break_filelist" has correctly determined the types of
+ the various files.
+ In particular, the "unknown" category may have source files in a language
+ SLOCCount doesn't know about.
+ If the heuristics got some categorization wrong, you can modify the
+ break_filelist program and re-run break_filelist.
+<p>
+ By default break_filelist removes duplicates, doesn't count
+ automatically generated files as normal source code files, and
+ only gives some feedback.  You can change these defaults with the
+ following options:
+<pre>
+ --duplicates   Count all duplicate files as normal files
+ --crossdups    Count duplicate files if they're in different data directory
+                children (i.e., in different "filelists")
+ --autogen      Count automatically generated files
+ --verbose      Present more verbose status information while processing.
+</pre>
+<p>
+ Duplicate control in particular is an issue; you probably don't want
+ duplicates counted, so that's the default.
+ Duplicate files are detected by determining if their MD5 checksums
+ are identical; the "first" duplicate encountered is the only one kept.
+ Normally, since shells sort directory names, this means that the
+ file in the alphabetically first child directory is the one counted.
+ You can change this around by listing directories in the sort order you
+ wish followed by "*"; if the same data directory child
+ is requested for analysis more
+ than once in a given execution, it's skipped after the first time.
+ So, if you want any duplicate files with child directory "glibc" to 
+ count as part of "glibc", then you should provide the data directory children
+ list as "glibc *".
+<p>
+ Beware of choosing something other than "*" as the parameter here,
+ unless you use the "--duplicates" or "--crossdups" options.
+ The "*" represents the list of data directory children to examine.
+ Since break_filelist skips duplicate files identified
+ in a particular run, if you run break_filelist
+ on only certain children, some duplicate files won't be detected.
+ If you're allowing duplicates (via "--duplicates" or
+ "--crossdups"), then this isn't a problem.
+ Or, you can use the ``--duplistfile'' option to store and retrieve
+ hashes of files, so that additional files can be handled.
+<p>
+ If there are so many directories that the command line is too long,
+ you can run break_filelist multiple times and give it
+ a subset of the directories each time.
+ You'll need to use one of the duplicate control options to do this.
+ I would suggest using "--crossdups", which
+ means that duplicates inside a child will only be counted once,
+ eliminating at least some of the problems of duplicates.
+ Here's the equivalent of "break_filelist *" when there are a large
+ number of subdirectories:
+<pre>
+ find . -maxdepth 1 -mindepth 1 -type d -exec break_filelist --crossdups {} \;
+</pre>
+ Indeed, for all of the later commands where "*" is listed as the parameter
+ in these instructions
+ (for the list of data directory children), just run the above "find"
+ command and replace "break_filelist --crossdups" with the command shown.
+<li>(Optional)
+If you're not very familiar with the program you're analyzing, you
+might not be sure that "break_filelist" has correctly identified
+all of the files.
+In particular, the system might be using an unexpected
+programming language or extension not handled by SLOCCount.
+If this is your circumstance, you can just run the command:
+<pre>
+ count_unknown_ext
+</pre>
+(note that this command is unusual - it doesn't take any arguments,
+since it's hard to imagine a case where you wouldn't want every
+directory examined).
+Unlike the other commands discussed, this one specifically looks at
+${HOME}/.slocdata.
+This command presents a list of extensions which are unknown to break_filelist,
+with the most common ones listed first.
+The output format is a name, followed by the number of instances;
+the name begins with a "." if it's an extension, or, if there's no
+extension, it begins with "/" followed by the base name of the file.
+break_filelist already knows about common extensions such as ".gif" and ".png",
+as well as common filenames like "README".
+You can also view the contents of each of the data directory children's
+files to see if break_filelist has correctly categorized the files.
+<li>Now compute SLOC and filecounts for each language; you can compute for all
+ languages at once by calling:
+<pre>
+   compute_all *
+</pre>
+If you only want to compute SLOC for a specific language,
+you can invoke compute_sloc_lang, which takes as its first parameter
+the SLOCCount name of the language ("ansic" for C, "cpp" for C++,
+"ada" for Ada, "asm" for assembly), followed by the list
+of data directory children.
+Note that these names are a change from version 1.0, which
+called the master program "compute_all",
+and had "compute_*" programs for each language.
+<p>
+Notice the "*"; you can replace the "*" with just the list of
+data directory children (subdirectories) to compute, if you wish.
+Indeed, you'll notice that nearly all of the following commands take a
+list of data directory children as arguments; when you want all of them, use
+"*" (as shown in these instructions), otherwise, list the ones you want.
+<p>
+When you run compute_all or compute_sloc_lang, each data directory
+child (subdirectory)
+is consulted in turn for a list of the relevant files, and the
+SLOC results are placed in that data directory child.
+In each child,
+the file "LANGUAGE-outfile.dat" lists the information from the
+basic SLOC counters.
+That is, the oufile lists the SLOC and filename
+(the assembly outfile has additional information), and ends with
+a line saying "Total:" followed by a line showing the total SLOC of
+that language in that data directory child.
+The file "all-physical.sloc" has the final total SLOC for every language
+in that child directory (i.e., it's the last line of the outfile).
+<li>(Optional) If you want, you can also use USC's CodeCount.
+I've had trouble with these programs, so I don't do this normally.
+However, you're welcome to try - they support logical SLOC measures
+as well as physical ones (though not for most of the languages
+supported by SLOCCount).
+Sadly, they don't seem to compile in gcc without a lot of help, they
+used fixed-width buffers that make me nervous, and I found a
+number of bugs (e.g., it couldn't handle "/* text1 *//* text2 */" in
+C code, a format that's legal and used often in the Linux kernel).
+If you want to do this,
+modify the files compute_c_usc and compute_java_usc so they point to the
+right directories, and type:
+<pre>
+ compute_c_usc *
+</pre>
+<li>Now you can analyze the results. The main tool for
+presenting SLOCCount results is "get_sloc", e.g,:
+<pre>
+  get_sloc * | less
+</pre>
+The get_sloc program takes many options, including:
+<pre>
+ --filecount    Display number of files instead of SLOC (SLOC is the default)
+ --wide         Use "wide" format instead (tab-separated columns)
+ --nobreak      Don't insert breaks in long lines
+ --sort  X      Sort by "X", where "X" is the name of a language
+                ("ansic", "cpp", "fortran", etc.), or "total".
+                By default, get_sloc sorts by "total".
+ --nosort       Don't sort - just present results in order of directory
+                listing given.
+ --showother    Show non-language totals (e.g., # duplicate files).
+ --oneprogram   When computing effort, assume that all files are part of
+                a single program.  By default, each subdirectory specified
+                is assumed to be a separate, independently-developed program.
+ --noheader     Don't show the header
+ --nofooter     Don't show the footer (the per-language values and totals)
+</pre>
+<p>
+Note that unlike the "sloccount" tool, get_sloc requires the current
+directory to be the data directory.
+<p>
+If you're displaying SLOC, get_sloc will also estimate the time it
+would take to develop the software using COCOMO (using its "basic" model).
+By default, this figure assumes that each of the major subdirectories was
+developed independently of the others;
+you can use "--oneprogram" to make the assumption that all files are
+part of the same program.
+The COCOMO model makes many other assumptions; see the paper at
+<a href="http://www.dwheeler.com/sloc">http://www.dwheeler.com/sloc</a>
+for more information.
+<p>
+If you need to do more analysis, you might want to use the "--wide"
+option and send the data to another tool such as a spreadsheet
+(e.g., gnumeric) or RDBMS (e.g., PostgreSQL).
+Using the "--wide" option creates tab-separated data, which is easier to
+import.
+You may also want to use the "--noheader" and/or "--nofooter" options to
+simplify porting the data to another tool.
+<p>
+Note that in version 1.0, "get_sloc" was called "get_data".
+<p>
+If you have so many data directory children that you can't use "*"
+on the command line, get_sloc won't be as helpful.
+Feel free to patch get_sloc to add this capability (as another option),
+or use get_sloc_detail (discussed next) to feed the data into another tool.
+<li>(Optional) If you just can't get the information you need from get_sloc,
+then you can get the raw results of everything and process the data
+yourself.
+I have a little tool to do this, called get_sloc_details.
+You invoke it in a similar manner:
+<pre>
+get_sloc_details *
+</pre>
+</ol>
+
+<p>
+<h1><a name="designer-notes">Designer's Notes</a></h1>
+<p>
+Here are some ``designer's notes'' on how SLOCCount works,
+including what it can handle.
+<p>
+The program break_filelist
+has categories for each programming language it knows about,
+plus the special categories ``not'' (not a source code file),
+``auto'' (an automatically-generated file and thus not to be counted),
+``zero'' (a zero-length file),
+``dup'' (a duplicate of another file as determined by an md5 checksum),
+and
+``unknown'' (a file which doesn't seem to be a source code file
+nor any of these other categories).
+It's a good idea to examine
+the ``unknown'' items later, checking the common extensions
+to ensure you have not missed any common types of code.
+<p>
+The program break_filelist uses lots of heuristics to correctly
+categorize files.
+Here are few notes about its heuristics:
+<ol>
+<li>
+break_filelist first checks for well-known extensions (such as .gif) that
+cannot be program files, and for a number of common generated filenames.
+<li>
+It then peeks at the first few lines for "#!" followed by a legal script
+name.
+Sometimes it looks further, for example, many Python programs
+invoke "env" and then use it to invoke python.
+<li>
+If that doesn't work, it uses the extension to try to determine the category.
+For a number of languages, the extension is not reliable, so for those
+languages it examines the file contents and uses a set of heuristics
+to determine if the file actually belongs to that category.
+<li>
+Detecting automatically generated files is not easy, and it's
+quite conceivable that it won't detect some automatically generated files.
+The first 15 lines are examined, to determine if any of them
+include at the beginning of the line (after spaces and
+possible comment markers) one of the following phrases (ignoring
+upper and lower case distinctions):
+``generated automatically'',
+``automatically generated'',
+``this is a generated file'',
+``generated with the (something) utility'',
+or ``do not edit''.
+<li>A number of filename conventions are used, too.
+For example,
+any ``configure'' file is presumed to be automatically generated if
+there's a ``configure.in'' file in the same directory.
+<li>
+To eliminate duplicates,
+the program keeps md5 checksums of each program file.
+Any given md5 checksum is only counted once.
+Build directories are processed alphabetically, so
+if the same file content is in both directories ``a'' and ``b'',
+it will be counted only once as being part of ``a'' unless you make
+other arrangements.
+Thus, some data directory children with names later in the alphabet may appear
+smaller than would make sense at first glance.
+It is very difficult to eliminate ``almost identical'' files
+(e.g., an older and newer version of the same code, included in two
+separate packages), because
+it is difficult to determine when two ``similar'' files are essentially
+the same file.
+Changes such as the use of pretty-printers and massive renaming of variables
+could make small changes seem large, while the small files
+might easily appear to be the ``same''.
+Thus, files with different contents are simply considered different.
+<li>
+If all else fails, the file is placed in the ``unknown'' category for
+later analysis.
+</ol>
+<p>
+One complicating factor is that I wished to separate C, C++, and
+Objective-C code, but a header file ending with
+``.h'' or ``.hpp'' file could be any of these languages.
+In theory, ``.hpp'' is only C++, but I found that in practice this isn't true.
+I developed a number of heuristics to determine, for each file,
+what language a given header belonged to.
+For example, if a given directory has exactly one of these languages
+(ignoring header files),
+the header is assumed to belong to that category as well.
+Similarly, if there is a body file (e.g., ".c") that has the same name
+as the header file, then presumably the header file is of the same language.
+Finally, a header file with the keyword ``class'' is almost certainly not a
+C header file, but a C++ header file; otherwise it's assumed to
+be a C file.
+<p>
+None of the SLOC counters fully parse the source code; they just examine
+the code using simple text processing patterns to count the SLOC.
+In practice, by handling a number of special cases this seems to be fine.
+Here are some notes on some of the language counters;
+the language name is followed by common extensions in parentheses
+and the SLOCCount name of the language in brackets:
+<ol>
+<li>Ada (.ada, .ads, .adb) [ada]: Comments begin with "--".
+<li>Assembly (.s, .S, .asm) [asm]:
+Assembly languages vary greatly in the comment character they use,
+so my counter had to handle this variance.
+The assembly language counter (asm_count)
+first examines the file to determine if
+C-style ``/*'' comments and C preprocessor commands
+(e.g., ``#include'') are used.
+If both ``/*'' and ``*/'' are in the file, it's assumed that
+C-style comments are being used
+(since it is unlikely that <i>both</i> would be used
+as something else, say as string data, in the same assembly language file).
+Determining if a file used the C preprocessor was trickier, since
+many assembly files do use ``#'' as a comment character and some
+preprocessor directives are ordinary words that might be included
+in a human comment.
+The heuristic used is as follows: if #ifdef, #endif, or #include are used, the
+C preprocessor is used; or if at least three lines have either #define or #else,
+then the C preprocessor is used.
+No doubt other heuristics are possible, but this at least seems to produce
+reasonable results.
+The program then determines what the comment character is by identifying
+which punctuation mark (from a set of possible marks)
+is the most common non-space initial character on a line
+(ignoring ``/'' and ``#'' if C comments or preprocessor commands,
+respectively, are used).
+Once the comment character has been determined, and it's been determined
+if C-style comments are allowed, the lines of code
+are counted in the file.
+<li>awk (.awk) [awk]: Comments begin with "#".
+<li>C (.c) [ansic]: Both traditional C comments (/* .. */) and C++
+(//) style comments are supported.
+Although the older ANSI and ISO C standards didn't support // style
+comments, in practice many C programs have used them for some time, and
+the C99 standard includes them.
+The C counter understands multi-line strings, so
+comment characters (/* .. */ and //) are treated as data inside strings.
+Conversely, the counter knows that any double-quote characters inside a
+comment does not begin a C/C++ string.
+<li>C++  (.C, .cpp, .cxx, .cc) [cpp]: The same counter is used for
+both C and C++.
+Note that break_filelist does try to separate C from C++ for purposes
+of accounting between them.
+<li>C# (.cs): The same counter is used as for C and C++.
+Note that there are no "header" filetypes in C#.
+<li>C shell (.csh) [csh]: Comments begin with "#".
+<li>COBOL (.cob, .cbl) [cobol]: SLOCCount
+detects if a "freeform" command has been given; until such a command is
+given, fixed format is assumed.
+In fixed format, comments have a "*" or "/" in column 7 or column 1;
+any line that's not a comment, and has a nonwhitespace character after column 7
+(the indicator area) is counted as a source line of code.
+In a freeform style, any line beginning with optional whitespace and
+then "*" or "/" is considered a comment; any noncomment line
+with a nonwhitespace characeter is counted as SLOC.
+<li>Expect (.exp) [exp]: Comments begin with "#".
+<li>Fortran 77 (.f, .f77, .F, .F77) [fortran]: Comment-only lines are lines
+where column 1 character = C, c, *, or !, or
+where ! is preceded only by white space.
+<li>Fortran 90 (.f90, .F90) [f90]: Comment-only lines are lines
+where ! is preceded only by white space.
+<li>Haskell (.hs) [haskell]:
+This counter handles block comments {- .. -} and single line comments (--);
+pragmas {-# .. -} are counted as SLOC.
+This is a simplistic counter,
+and can be fooled by certain unlikely combinations of block comments
+and other syntax (line-ending comments or strings).
+In particular,  "Hello {-"  will be incorrectly interpreted as a
+comment block begin, and "{- -- -}" will be incorrectly interpreted as a
+comment block begin without an end.  Literate files are detected by
+their extension, and the style (TeX or plain text) is determined by
+searching for a \begin{code} or "&gt;" at the beginning of lines.
+See the <a
+    href="http://www.haskell.org/onlinereport/literate.html">Haskell 98
+    report section on literate Haskell</a> for more information.
+<li>Java (.java) [java]: Java is counted using the same counter as C and C++.
+<li>lex (.l) [lex]: Uses traditional C /* .. */ comments.
+Note that this does not use the counter as C/C++ internally, since
+it's quite legal in lex to have "//" (where it is NOT a comment).
+<li>LISP (.cl, .el, .scm, .lsp, .jl) [lisp]: Comments begin with ";".
+<li>ML (.ml, .mli, .mll, mly) [ml]: Comments nest and are enclosed in (* .. *).
+<li>Modula3 (.m3, .mg, .i3, .ig) [modula3]: Comments are enclosed in (* .. *).
+<li>Objective-C (.m) [objc]: Comments are old C-style /* .. */ comments.
+<li>Pascal (.p, .pas) [pascal]: Comments are enclosed in curly braces {}
+or (*..*).  This counter has known weaknesses; see the BUGS section of
+the manual page for more information.
+<li>Perl (.pl, .pm, .perl) [perl]:
+Comments begin with "#".
+Perl permits in-line ``perlpod'' documents, ``here'' documents, and an
+__END__ marker that complicate code-counting.
+Perlpod documents are essentially comments, but a ``here'' document
+may include text to generate them (in which case the perlpod document
+is data and should be counted).
+The __END__ marker indicates the end of the file from Perl's
+viewpoint, even if there's more text afterwards.
+<li>PHP (.php, .php[3456], .inc) [php]:
+Code is counted as PHP code if it has a .php file extension;
+it's also counted if it has an .inc extension and looks like PHP code.
+SLOCCount does <b>not</b> count PHP code embedded in HTML files normally,
+though its lower-level routines can do so if you want to
+(use php_count to do this).
+Any of the various ways to begin PHP code can be used
+(&lt;? .. ?&gt;,
+&lt;?php .. ?&gt;,
+&lt;script language="php"&gt; .. &lt;/script&gt;,
+or even &lt;% .. %&gt;).
+Any of the PHP comment formats (C, C++, and shell) can be used, and
+any string constant formats ("here document", double quote, and single
+quote) can be used as well.
+<li>Python (.py) [python]:
+Comments begin with "#".
+Python has a convention that, at the beginning of a definition
+(e.g., of a function, method, or class), an unassigned string can be
+placed to describe what's being defined. Since this is essentially
+a comment (though it doesn't syntactically look like one), the counter
+avoids counting such strings, which may have multiple lines.
+To handle this,
+strings which started the beginning of a line were not counted.
+Python also has the ``triple quote'' operator, permitting multiline
+strings; these needed to be handled specially.
+Triple quote stirngs are normally considered as data, regardless of
+content, unless they were used as a comment about a definition.
+<li>Ruby (.rb) [ruby]: Comments begin with "#".
+<li>sed (.sed) [sed]: Comments begin with "#".
+Note that these are "sed-only" files; many uses of sed are embeded in
+shell scripts (and are categorized as shell scripts in those cases).
+<li>shell (.sh) [sh]: Comments begin with "#".
+Note that I classify ksh, bash, and the original Bourne shell sh together,
+because they have very similar syntaxes.
+For example, in all of these shells,
+setting a variable is expressed as "varname=value",
+while C shells use the use "set varname=value".
+<li>TCL (.tcl, .tk, .itk) [tcl]: Comments begin with "#".
+<li>Yacc (.y) [yacc]: Yacc is counted using the same counter as C and C++.
+</ol>
+<p>
+Much of the code is written in Perl, since it's primarily a text processing
+problem and Perl is good at that.
+Many short scripts are Bourne shell scripts (it's good at
+short scripts for calling other programs), and the
+basic C/C++ SLOC counter is written in C for speed.
+<p>
+I originally named it "SLOC-Count", but I found that some web search
+engines (notably Google) treated that as two words.
+By naming it "SLOCCount", it's easier to find by those who know
+the name of the program.
+<p>
+SLOCCount only counts physical SLOC, not logical SLOC.
+Logical SLOC counting requires much more code to implement,
+and I needed to cover a large number of programming languages.
+
+
+<p>
+<h1><a name="sloc-definition">Definition of SLOC</a></h1>
+<p>
+This tool measures ``physical SLOC.''
+Physical SLOC is defined as follows:
+``a physical source line of code (SLOC) is a line ending
+in a newline or end-of-file marker,
+and which contains at least one non-whitespace non-comment character.''
+Comment delimiters (characters other than newlines starting and ending
+a comment) are considered comment characters.
+Data lines only including whitespace
+(e.g., lines with only tabs and spaces in multiline strings) are not included.
+<p>
+To make this concrete, here's an example of a simple C program
+(it strips ANSI C comments out).
+On the left side is the running SLOC total, where "-" indicates a line
+that is not considered a physical "source line of code":
+<pre>
+ 1    #include &lt;stdio.h&gt;
+ -    
+ -    /* peek at the next character in stdin, but don't get it */
+ 2    int peek() {
+ 3     int c = getchar();
+ 4     ungetc(c, stdin);
+ 5     return c;
+ 6    }
+ -    
+ 7    main() {
+ 8     int c;
+ 9     int incomment = 0;  /* 1 = we are inside a comment */
+ -    
+10     while ( (c = getchar()) != EOF) {
+11        if (!incomment) {
+12          if ((c == '/') &amp;&amp; (peek() == '*')) {incomment=1;}
+13        } else {
+14          if ((c == '*') &amp;&amp; (peek() == '/')) {
+15               c= getchar(); c=getchar(); incomment=0;
+16          }
+17        }
+18        if ((c != EOF) &amp;&amp; !incomment) {putchar(c);}
+19     }
+20    }
+</pre>
+<p>
+<a href="http://www.sei.cmu.edu/publications/documents/92.reports/92.tr.020.html">Robert E. Park et al.'s
+<i>Software Size Measurement:
+A Framework for Counting Source Statements</i></a>
+(Technical Report CMU/SEI-92-TR-20)
+presents a set of issues to be decided when trying to count code.
+The paper's abstract states:
+<blockquote><i>
+This report presents guidelines for defining, recording, and reporting
+two frequently used measures of software size— physical source lines
+and logical source statements.
+We propose a general framework for constructing size
+definitions and use it to derive operational methods for
+reducing misunderstandings in measurement results.
+</i></blockquote>
+<p>
+Using Park's framework, here is how physical lines of code are counted:
+<ol>
+<li>Statement Type: I used a physical line-of-code as my basis.
+I included executable statements, declarations
+(e.g., data structure definitions), and compiler directives
+(e.g., preprocessor commands such as #define).
+I excluded all comments and blank lines.
+<li>How Produced:
+I included all programmed code, including any files that had been modified.
+I excluded code generated with source code generators, converted with
+automatic translators, and those copied or reused without change.
+If a file was in the source package, I included it; if the file had
+been removed from a source package (including via a patch), I did
+not include it.
+<li>Origin: You select the files (and thus their origin).
+<li>Usage: You selects the files (and thus their usage), e.g.,
+you decide if you're going to
+include additional applications able to run on the system but not
+included with the system.
+<li>Delivery: You'll decide what code to include, but of course,
+if you don't have the code you can't count it.
+<li>Functionality: This tool will include both operative and inoperative code
+if they're mixed together.
+An example of intentionally ``inoperative'' code is
+code turned off by #ifdef commands; since it could be
+turned on for special purposes, it made sense to count it.
+An example of unintentionally ``inoperative'' code is dead or unused code.
+<li>Replications:
+Normally, duplicate files are ignored, unless you use
+the "--duplicates" or "--crossdups" option.
+The tool will count
+``physical replicates of master statements stored in
+the master code''.
+This is simply code cut and pasted from one place to another to reuse code;
+it's hard to tell where this happens, and since it has to be maintained
+separately, it's fair to include this in the measure.
+I excluded copies inserted, instantiated, or expanded when compiling
+or linking, and I excluded postproduction replicates
+(e.g., reparameterized systems).
+<li>Development Status: You'll decide what code
+should be included (and thus the development status of the code that
+you'll accept).
+<li>Languages: You can see the language list above.
+<li>Clarifications: I included all statement types.
+This included nulls, continues, no-ops, lone semicolons,
+statements that instantiate generics,
+lone curly braces ({ and }), and labels by themselves.
+</ol>
+<p>
+Thus, SLOCCount generally follows Park's ``basic definition'',
+but with the following exceptions depending on how you use it:
+<ol>
+<li>How Produced:
+By default, this tool excludes duplicate files and
+code generated with source code generators.
+After all, the COCOMO model states that the
+only code that should be counted is code
+``produced by project personnel'', whereas these kinds of files are
+instead the output of ``preprocessors and compilers.''
+If code is always maintained as the input to a code generator, and then
+the code generator is re-run, it's only the code generator input's size that
+validly measures the size of what is maintained.
+Note that while I attempted to exclude generated code, this exclusion
+is based on heuristics which may have missed some cases.
+If you want to count duplicates, use the
+"--autogen", "--duplicates", and/or "--crossdups" options.
+If you want to count automatically generated files, pass
+the "--autogen" option mentioned above.
+<li>Origin:
+You can choose what source code you'll measure.
+Normally physical SLOC doesn't include an unmodified
+``vendor-supplied language support library'' nor a
+``vendor-supplied system or utility''.
+However, if this is what you are measuring, then you need to include it.
+If you include such code, your set will be different
+than the usual ``basic definition.''
+<li>Functionality: I included counts of unintentionally inoperative code
+(e.g., dead or unused code).
+It is very difficult to automatically detect such code
+in general for many languages.
+For example, a program not directly invoked by anything else nor
+installed by the installer is much more likely to be a test program,
+which you may want to include in the count (you often would include it
+if you're estimating effort).
+Clearly, discerning human ``intent'' is hard to automate.
+</ol>
+<p>
+Otherwise, this counter follows Park's
+``basic definition'' of a physical line of code, even down to Park's
+language-specific definitions where Park defined them for a language.
+
+
+<p>
+<h1><a name="miscellaneous">Miscellaneous Notes</a></h1>
+<p>
+There are other undocumented analysis tools in the original tar file.
+Most of them are specialized scripts for my circumstances, but feel
+free to use them as you wish.
+<p>
+If you're packaging this program, don't just copy every executable
+into the system "bin" directory - many of the files are those
+specialized scripts.
+Just put in the bin directory every executable documented here, plus the
+the files they depend on (there aren't that many).
+See the RPM specification file to see what's actually installed.
+<p>
+You have to take any measure of SLOC (including this one) with a
+large grain of salt.
+Physical SLOC is sensitive to the format of source code.
+There's a correlation between SLOC and development effort, and some
+correlation between SLOC and functionality,
+but there's absolutely no correlation between SLOC
+and either "quality" or "value".
+<p>
+A problem of physical SLOC is that it's sensitive to formatting,
+and that's a legitimate (and known) problem with the measure.
+However, to be fair, logical SLOC is influenced by coding style too.
+For example, the following two phrases are semantically identical,
+but will have different logical SLOC values:
+<pre>
+   int i, j;  /* 1 logical SLOC */
+
+   int i;     /* 2 logical SLOC, but it does the same thing */
+   int j;
+</pre>
+<p>
+If you discover other information that can be divided up by
+data directory children (e.g., the license used), it's probably best
+to add that to each subdirectory (e.g., as a "license" file in the
+subdirectory).
+Then you can modify tools like get_sloc
+to add them to their display.
+<p>
+I developed SLOCCount for my own use, not originally as
+a community tool, so it's certainly not beautiful code.
+However, I think it's serviceable - I hope you find it useful.
+Please send me patches for any improvements you make!
+<p>
+You can't use this tool as-is with some estimation models, such as COCOMO II,
+because this tool doesn't compute logical SLOC.
+I certainly would accept code contributions to add the ability to
+measure logical SLOC (or related measures such as
+Cyclomatic Complexity and Cyclomatic density);
+selecting them could be a compile-time option.
+However, measuring logical SLOC takes more development effort, so I
+haven't done so; see USC's "CodeCount" for a set of code that
+measures logical SLOC for some languages
+(though I've had trouble with CodeCount - in particular, its C counter
+doesn't correctly handle large programs like the Linux kernel).
+
+
+<p>
+<h1><a name="license">SLOCCount License</a></h1>
+<p>
+Here is the SLOCCount License; the file COPYING contains the standard
+GPL version 2 license:
+<pre>
+=====================================================================
+SLOCCount
+Copyright (C) 2000-2001 David A. Wheeler (dwheeler, at, dwheeler.com)
+
+This program is free software; you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation; either version 2 of the License, or
+(at your option) any later version.
+
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License
+along with this program; if not, write to the Free Software
+Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+=====================================================================
+</pre>
+<p>
+While it's not formally required by the license, please give credit
+to me and this software in any report that uses results generated by it.
+<p>
+This document was written by David A. Wheeler (dwheeler, at, dwheeler.com),
+and is
+(C) Copyright 2001 David A. Wheeler.
+This document is covered by the license (GPL) listed above.
+<p>
+The license <i>does</i> give you the right to
+use SLOCCount to analyze proprietary programs.
+
+<p>
+<h1><a name="related-tools">Related Tools</a></h1>
+<p>
+One available toolset is
+<a href="http://sunset.usc.edu/research/CODECOUNT">CodeCount</a>.
+I tried using this toolset, but I eventually gave up.
+It had too many problems handling the code I was trying to analyze, and it
+does a poor job automatically categorizing code.
+It also has no support for many of today's languages (such as Python,
+Perl, Ruby, PHP, and so on).
+However, it does a lot of analysis and measurements that SLOCCount
+doesn't do, so it all depends on your need.
+Its license appeared to be open source, but it's quite unusual and
+I'm not enough of a lawyer to be able to confirm that.
+<p>
+Another tool that's available is <a href="http://csdl.ics.hawaii.edu/Research/LOCC/LOCC.html">LOCC</a>.
+It's available under the GPL.
+It can count Java code, and there's experimental support for C++.
+LOCC is really intended for more deeply analyzing each Java file;
+what's particularly interesting about it is that it can measure
+"diffs" (how much has changed).
+See
+<a href="http://csdl.ics.hawaii.edu/Publications/MasterList.html#csdl2-00-10">
+A comparative review of LOCC and CodeCount</a>.
+<p>
+<a href="http://sourceforge.net/projects/cccc">
+CCCC</a> is a tool which analyzes C++ and Java files
+and generates a report on various metrics of the code.
+Metrics supported include lines of code, McCabe's complexity,
+and metrics proposed by Chidamber &amp; Kemerer and Henry &amp; Kafura.
+(You can see
+<a href="http://cccc.sourceforge.net/">Time Littlefair's comments</a>).
+CCCC is in the public domain.
+It reports on metrics that sloccount doesn't, but sloccount can handle
+far more computer languages.
+
+<p>
+<h1><a name="submitting-changes">Submitting Changes</a></h1>
+<p>
+The GPL license doesn't require you to submit changes you make back to
+its maintainer (currently me),
+but it's highly recommended and wise to do so.
+Because others <i>will</i> send changes to me, a version you make on your
+own will slowly because obsolete and incompatible.
+Rather than allowing this to happen, it's better to send changes in to me
+so that the latest version of SLOCCount also has the
+features you're looking for.
+If you're submitting support for new languages, be sure that your
+chnage correctly ignores files that aren't in that new language
+(some filename extensions have multiple meanings).
+You might want to look at the <a href="TODO">TODO</a> file first.
+<p>
+When you send changes to me, send them as "diff" results so that I can
+use the "patch" program to install them.
+If you can, please send ``unified diffs'' -- GNU's diff can create these
+using the "-u" option.
+</body>
+

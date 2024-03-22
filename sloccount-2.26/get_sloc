@@ -1,0 +1,544 @@
+#!/usr/bin/perl -w
+
+# get_sloc
+# Take a list of dirs, and get the SLOC or filecount data from them.
+# NOTE: The intended input data ignores zero-length files & ignores dups,
+# so if that's true for the input data, it'll be true for the output data!
+
+# This code works but is NOT cleaned up-- it basically grew like
+# topsy.  Many of the variable names are misleading, as my needs for
+# output changed.
+
+# This is part of SLOCCount, a toolsuite that counts
+# source lines of code (SLOC).
+# Copyright (C) 2001-2004 David A. Wheeler.
+# 
+# This program is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation; either version 2 of the License, or
+# (at your option) any later version.
+# 
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+# 
+# You should have received a copy of the GNU General Public License
+# along with this program; if not, write to the Free Software
+# Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+# 
+# To contact David A. Wheeler, see his website at:
+#  http://www.dwheeler.com.
+
+
+
+# Default values for the effort estimation model; the model is
+# effort = ($effort_factor * KiloSLOC) ** $effort_exponent.
+# The following numbers are for basic COCOMO:
+
+$effort_factor =  2.40;
+$effort_exponent =  1.05;
+$effort_estimation_message = "Basic COCOMO model,";
+
+$schedule_factor =  2.5;
+$schedule_exponent =  0.38;
+$schedule_estimation_message = "Basic COCOMO model,";
+
+# Average Salary / year.
+# Source: ComputerWorld, Sep. 4, 2000 Salary Survey,
+# average (U.S.) programmer/analyst salary.
+
+$person_cost = 56286.;
+
+# Overhead; the person cost is multiplied by this value to determine
+# true annual costs.
+
+$overhead = 2.4;
+
+@license_list = ( "GPL", "LGPL", "MIT", "BSD", "distributable",
+                  "public domain", "MPL");
+
+%license_of = ();   # input is name of program, output is license.
+
+$no_license_total = 0;
+
+%non_language_list = (
+ "dup" => 1,
+ "not" => 1,
+ "unknown" => 1,
+ "auto" => 1,
+ "zero" => 1,
+);
+
+%ignore_language_list = (
+ "makefile" => 1,
+ "sql" => 1,
+ "html" => 1,
+);
+
+# Default input values
+$dirs_in_stdin = 0; # 0: dirs to analyze as arguments, 1: in stdin
+
+# Default Output Values:
+
+$computing_sloc = 1; # 0= showing filecounts, 1= showing SLOC.
+$narrow = 1;
+$sort_by = "total";  # If empty, sort by name; else "total" or lang name.
+$show_effort = 0;  # Show effort for each component?
+$break_line = 1; # Break up long lines into multiple lines?
+$show_non_lang = 0; # Show non-language counts?
+$one_program = 0; # Are all files part of a single program?
+$show_header = 1; # Show header?
+$show_footer = 1; # Show footer?
+
+
+# Global variables:
+
+@dirs = (); # Directories to examine
+
+%examined_directories = ();  # Keys = Names of directories examined this run.
+
+# Subroutines.
+
+sub commify {
+# TODO: Needs to be internationalized.
+  my $text = reverse $_[0];
+  $text =~ s/(\d\d\d)(?=\d)(?!\d*\.)/$1,/g;
+  return scalar reverse $text;
+}
+
+sub numformat {
+# Format number nicely with commas.
+ my $num = shift;
+ my $digits = shift;
+ return commify(sprintf("%0.${digits}f", $num));
+}
+
+sub effort_person_months {
+ # Given the SLOC, reply an estimate of the number of person-months
+ # needed to develop it traditionally.
+ my $total_sloc = shift;
+ return ( ($effort_factor*(($total_sloc/1000.0)**$effort_exponent)));
+}
+
+sub estimate_schedule {
+ # Given the person-months, reply an estimate of the number of months
+ # needed to develop it traditionally.
+ my $person_months = shift;
+ return ($schedule_factor*($person_months**$schedule_exponent));
+}
+
+sub get_lang_total {
+ my $lang = shift;
+ if (defined($lang_total{$lang}))  {return $lang_total{$lang}}
+ else {return 0;}
+}
+
+# MAIN PROGRAM
+
+
+# Process options (if any):
+
+if ($#ARGV < 0) {
+ print STDERR "Error! You must list at least one directory to process, or --stdin.\n";
+ exit(1);
+}
+
+while ((scalar (@ARGV) > 0) && ($ARGV[0] =~ m/^-/)) {
+ $arg = shift;
+ if ($arg eq "--") {last;}
+ elsif ($arg eq "--filecount") {$computing_sloc = 0;}
+ elsif ($arg eq "--filecounts") {$computing_sloc = 0;}
+ elsif ($arg eq "--sloc") {$computing_sloc = 1;}
+ elsif ($arg eq "--narrow") {$narrow = 1;}
+ elsif ($arg eq "--wide") {$narrow = 0;}
+ elsif ($arg eq "--break") {$break_line = 1;}
+ elsif ($arg eq "--nobreak") {$break_line = 0;}
+ elsif ($arg eq "--sort") {$sort_by = shift;}  # Must be "total" or a lang.
+ elsif ($arg eq "--nosort") {$sort_by = "";}
+ elsif ($arg eq "--showother") {$show_non_lang = 1;}
+ elsif ($arg eq "--noshowother") {$show_non_lang = 0;}
+ elsif ($arg eq "--oneprogram") {$one_program = 1;}
+ elsif ($arg eq "--noheader") {$show_header = 0;}
+ elsif ($arg eq "--nofooter") {$show_footer = 0;}
+ elsif ($arg eq "--addlang") { $lang = shift;
+                               if (!defined($ignore_language_list{$lang})) {
+                                  die "Sorry, but $lang isn't ignored"; };
+                               delete $ignore_language_list{$lang}; }
+ elsif ($arg eq "--addlangall") { %ignore_language_list = (); }
+ elsif ($arg eq "--effort") {$effort_factor = (shift)*1.0;
+                             $effort_exponent = (shift)*1.0;
+                             $effort_estimation_message = "effort model"}
+ elsif ($arg eq "--schedule") {$schedule_factor = (shift)*1.0;
+                             $schedule_exponent = (shift)*1.0;
+                             $schedule_estimation_message = "schedule model"}
+ elsif ($arg eq "--personcost") {$person_cost = (shift)*1.0;}
+ elsif ($arg eq "--overhead")   {$overhead = (shift)*1.0;}
+ elsif ($arg eq "--stdin")   {$dirs_in_stdin = 1;}
+ else {die "Unknown option: $arg\n";}
+}
+
+
+# Determine the languages to show:
+
+
+if ($computing_sloc) { $show_non_lang = 0; }
+
+if (!$show_non_lang) {
+ # Add the non_language_list to the ignored languages.
+ foreach $langname (keys(%non_language_list))
+   {$ignore_language_list{$langname} = 1;}
+}
+
+
+%lang_total    = ();
+%license_total = ();
+
+@data_lines = ();
+
+$sloc = 0;
+$total_sloc = 0;
+$total_lang_sloc = 0;
+$grand_total_sloc = 0;
+$grand_total_lang_sloc = 0;
+$effort = 0.0;
+$grand_total_effort = 0.0;
+$grand_schedule = 0.0;
+
+if (!$narrow) {
+ # Ouch!  To accurately determine the column positions and names,
+ # without "pre-knowing" them, we need to look through the data.
+ # So, we'll do it twice.  This isn't efficient - if needed,
+ # speed it up by rewriting this to do it in-memory.
+ while (defined($_ = <DATAFILE>)) {
+   ($lang, $sloc) = split;
+   next if ( (!defined($lang)) || (!defined($sloc)) );
+   next if ($ignore_language_list{$lang});
+   $lang_total{$lang} = 0;
+ }
+}
+
+
+# Print the header.
+if ($show_header) {
+if ($narrow) {
+ if ($computing_sloc) { print "SLOC\t"; }
+ else                 { print "#Files\t"; }
+ if ($show_effort) {print "P.Y.\t";}
+ print "Directory\t";
+ if ($computing_sloc) { print "SLOC-by-Language (Sorted)"; }
+ else                 { print "#Files-by-Language (Sorted)"; }
+ print "\n";
+} else {
+ if ($computing_sloc) { print "SLOC\t"; }
+ else                 { print "#Files\t"; }
+ if ($show_effort) {print "P.M.\t";}
+ printf "%-22s\t", "Dir";
+ foreach $lang (keys(%lang_total)) {
+  print "$lang\t";
+  $lang_total{$lang} = 0;
+ };
+ print "\n";
+}
+}
+
+if ($dirs_in_stdin == 1) {
+  while (defined($dir = <STDIN>)) {
+    chomp ($dir);
+    push (@dirs, $dir);
+  }
+}
+
+while ($dir = shift) {
+  push (@dirs, $dir);
+}
+
+
+foreach $dir (@dirs) {
+ if (! -d "$dir") {
+   # print "Skipping non-directory $dir\n";
+   next;
+ } 
+ 
+ # Skip previously-examined directories.
+ if ($examined_directories{$dir}) {
+   # print "Skipping already-examined directory $dir\n";
+   next;
+ }
+ $examined_directories{$dir} = 1;
+ 
+ if (! -r "${dir}/filelist") {
+   # print "Skipping directory $dir; it doesn't contain a file 'filelist'\n";
+   next;
+ }
+
+
+ $simplename = $dir;
+ $simplename =~ s!^.*\/!!;
+ $total_sloc = 0;
+ $total_lang_sloc = 0;
+ $preceding_entry = 0;
+
+ $line = "";
+ %lang_data = ();
+
+ if ($computing_sloc) {
+     $filename = "${dir}/all-physical.sloc";
+ } else {
+     $filename = "${dir}/all.filecount";
+ }
+ if (open(DATAFILE, "<$filename")) {
+   while (defined($_ = <DATAFILE>)) {
+     ($lang, $sloc) = split;
+     next if ( (!defined($lang)) || (!defined($sloc)) );
+     next if ($ignore_language_list{$lang});
+     if ($narrow) { if ($sloc) {$lang_data{$lang} = $sloc;}}
+     else { $line .= "${sloc}\t"; }
+     if ($lang eq $sort_by) {$interesting_lang_sloc = $sloc;}
+     $total_sloc += $sloc;
+     $total_lang_sloc += $sloc unless ($non_language_list{$lang});
+     $lang_total{$lang} += $sloc;
+   }
+   close(DATAFILE);
+ } else {
+   print STDERR "Error openinig $filename\n";
+ }
+ if ($narrow) {
+      # For narrow view, sort the language entries.
+      foreach $entry (sort {$lang_data{$b} <=> $lang_data{$a}} keys %lang_data){
+        if ($preceding_entry) {$line .= ",";}
+        $preceding_entry = 1;
+        $line .= "${entry}=${lang_data{$entry}}";
+      }
+      if (!$preceding_entry) {$line .= "(none)";}
+ }
+
+ $grand_total_sloc += $total_sloc;
+ $grand_total_lang_sloc += $total_lang_sloc;
+
+ $effort = effort_person_months($total_sloc);
+ $grand_total_effort += $effort;
+
+ $schedule = estimate_schedule($effort);
+ if ($schedule > $grand_schedule) {
+    $grand_schedule = $schedule;   # The longest leg wins.
+ }
+
+ $displayed_effort = "";
+ if ($show_effort) { $displayed_effort = sprintf "%.2f\t", $effort; }
+ if ($narrow) {
+   $displayed_name = "$simplename";
+ } else {
+   $displayed_name = sprintf "%-22s\t", $simplename;
+ }
+
+ # Add to the corresponding license, if the license is known.
+ $license = "";
+ if (open(LICENSE_FILE, "<${dir}/PROGRAM_LICENSE")) {
+   $license = <LICENSE_FILE>;
+   chomp($license);
+   close(LICENSE_FILE);
+   if ($license) {
+     $license_of{$simplename} = $license;  # Hash currently unused.
+     if (! defined($license_total{$license})) {
+       $license_total{$license} = 0;
+     }
+     $license_total{$license} = $license_total{$license} + $total_sloc;
+   }
+ } else {
+  $no_license_total += $total_sloc;
+ }
+
+ if ($narrow) {
+    $line = sprintf "%-7d %s%-15s %-s\n", $total_sloc, $displayed_effort,
+                                          $simplename, $line;
+    if ($break_line && (length($line) > 77)) { # Break up long line.
+      $line =~ s/(.{71})([^,]*),(.*)/$1$2,\n                        $3/;
+    }
+    if ($license) {
+      $line .= "                        [$license]\n";
+    }
+ } else {
+    $line = "${total_sloc}\t${displayed_effort}${displayed_name}${line}\n";
+ }
+ if ($sort_by) {
+   if ($sort_by eq "total") {$line = "$total_sloc\t$line";}
+   else {$line = "$interesting_lang_sloc\t$line";}
+   $data_lines[$#data_lines+1] = $line;   # Add to data lines.
+ } else {
+   print $line;  # No sort - print immediately for speed.
+ }
+
+}
+
+if ($sort_by) {
+ # Print sorted version.  This is a little inefficient, but for
+ # only a few hundred or thousand values it doesn't matter.
+ @sorted_data_lines = sort { ($b =~ /^(\d+)/)[0] <=> ($a =~ /^(\d+)/)[0] }
+                        @data_lines;
+ foreach $line (@sorted_data_lines) {
+    $short_line = $line;
+    $short_line =~ s/^[^\t]*\t//;  # Remove sort field.
+    print $short_line;
+ }
+}
+
+
+if (! $show_footer) {exit(0);}
+if ($grand_total_sloc == 0) {
+  print "SLOC total is zero, no further analysis performed.\n";
+  exit(1);
+}
+
+# Print the footer.
+if ($narrow) {
+ print "\n";
+ print "\n";
+ print "Totals grouped by language (dominant language first):\n";
+ # If you don't want the list sorted by size of language, just do:
+ # foreach $lang (@language_list) {
+ foreach $lang (sort {&get_lang_total($b) <=> &get_lang_total($a) } keys(%lang_total) ) {
+  $percent = get_lang_total($lang) * 100.0 / $grand_total_sloc;
+  if ($percent > 0.0) {
+    printf "%-9s %9d (%.2f%%)\n", $lang . ":", $lang_total{$lang}, $percent;
+  }
+ };
+
+ if ($show_non_lang) {
+  # The previous list showed "non-languages", so now we'll show only the
+  # data for data associated with a normal language:
+  print "\n";
+  print "\n";
+  foreach $lang (sort {&get_lang_total($b) <=> &get_lang_total($a) } keys(%lang_total)) {
+   next if (defined($non_language_list{$lang}));
+   $percent = $lang_total{$lang} * 100.0 / $grand_total_lang_sloc;
+   if ($percent > 0.0) {
+     printf "%-9s %9d (%.2f%%)\n", $lang . ":", $lang_total{$lang}, $percent;
+   }
+  };
+ }
+
+} else {  # Not narrow.
+ 
+ print "$grand_total_sloc\t";
+ if ($show_effort) {printf "%.2f\t", $grand_total_effort;}
+
+ printf "%-22s", "Totals";
+ foreach $lang (keys(%lang_total)) {
+  print "\t$lang_total{$lang}";
+ };
+ 
+ print "\t";
+ if ($show_effort) {printf "\t";}
+ printf "%-22s\t", "Percentages";
+ foreach $lang (keys(%lang_total)) {
+  $percent = $lang_total{$lang} * 100.0 / $grand_total_sloc;
+  printf "\t%0.2f", $percent;
+ };
+ print "\n";
+ 
+ print "\t";
+ if ($show_effort) {printf "\t";}
+ printf "%-22s\t", "Code Percentages";
+ foreach $lang (keys(%lang_total)) {
+   next if (defined($non_language_list{$lang}));
+   $percent = $lang_total{$lang} * 100.0 / $grand_total_lang_sloc;
+   printf "\t%0.2f", $percent;
+ };
+ print "\n";
+}
+
+print "\n";
+print "\n";
+
+
+if (%license_total) {
+ # We have license info on something, so if there's anything
+ # unallocated, add that to the list.
+ if ($no_license_total) {
+   $license_total{"Not listed"} = $no_license_total;
+ }
+ print "Licenses:\n";
+ foreach $license (sort {$license_total{$b} <=> $license_total{$a} } keys(%license_total)) {
+  $percent = $license_total{$license} * 100.0 / $grand_total_sloc;
+  if ($percent > 0.0) {
+     printf "%9d (%.2f%%) %s\n", $license_total{$license}, $percent, $license;
+   }
+ };
+ print "\n";
+ print "\n";
+
+ print "Percentage of Licenses containing selected key phrases:\n";
+ %license_phrase = ();
+ foreach $license (keys(%license_total)) {
+   foreach $phrase (@license_list) {
+     if ($license =~ m/\b$phrase\b/i) {
+       if (!defined($license_phrase{$phrase})) {$license_phrase{$phrase} = 0;}
+       $license_phrase{$phrase} = $license_phrase{$phrase} +
+                                  $license_total{$license};
+     }
+   }
+ }
+
+ foreach $phrase (sort {$license_phrase{$b} <=> $license_phrase{$a} } keys(%license_phrase)) {
+  $percent = $license_phrase{$phrase} * 100.0 / $grand_total_sloc;
+  if ($percent > 0.0) {
+     printf "%9d (%.2f%%) %s\n", $license_phrase{$phrase}, $percent, $phrase;
+   }
+ };
+
+}
+
+
+print "\n";
+print "\n";
+
+if ($computing_sloc) {
+ if ($one_program) {
+   # If it's one program, override the grand total of effort
+   # and the schedule calculations by using the total SLOC.
+
+   $grand_total_effort = effort_person_months($grand_total_sloc);
+   $grand_schedule = estimate_schedule($grand_total_effort);
+ }
+ printf "Total Physical Source Lines of Code (SLOC)                = %s\n",
+        commify($grand_total_sloc);
+
+ printf "Development Effort Estimate, Person-Years (Person-Months) = %s (%s)\n",
+       numformat($grand_total_effort/12.0, 2),
+       numformat($grand_total_effort, 2);
+ print " ($effort_estimation_message " .
+        "Person-Months = $effort_factor * (KSLOC**$effort_exponent))\n";
+
+ printf "Schedule Estimate, Years (Months)                         = %s (%s)\n",
+       numformat($grand_schedule/12.0, 2),
+       numformat($grand_schedule, 2);
+ print " ($schedule_estimation_message " .
+       "Months = $schedule_factor * (person-months**$schedule_exponent))\n";
+
+ # Don't show this if there are multiple programs, because the computation
+ # is essentially meaningless: after the "smaller" projects have completed,
+ # the longest one would keep going:
+ if ($one_program && ($grand_schedule > 0.0)) {
+ printf "Estimated Average Number of Developers (Effort/Schedule)  = %s\n",
+       numformat($grand_total_effort / $grand_schedule, 2);
+ }
+
+
+ $value = ($grand_total_effort / 12.0) * $person_cost * $overhead;
+ printf "Total Estimated Cost to Develop                           = \$ %s\n",
+      numformat($value, 0);
+ printf " (average salary = \$%s/year, overhead = %0.2f).\n",
+      commify($person_cost), $overhead;
+
+} else {
+print "Total Number of Files = $grand_total_sloc\n";
+print "Total Number of Source Code Files = $grand_total_lang_sloc\n";
+}
+print "SLOCCount, Copyright (C) 2001-2004 David A. Wheeler\n";
+print "SLOCCount is Open Source Software/Free Software, licensed under the GNU GPL.\n";
+print "SLOCCount comes with ABSOLUTELY NO WARRANTY, and you are welcome to\n";
+print "redistribute it under certain conditions as specified by the GNU GPL license;\n";
+print "see the documentation for details.\n";
+print "Please credit this data as \"generated using David A. Wheeler's 'SLOCCount'.\"\n";
+

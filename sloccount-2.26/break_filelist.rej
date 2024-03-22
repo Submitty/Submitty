@@ -1,0 +1,20 @@
+***************
+*** 965,972 ****
+                { &force_record_file_type($h_file, "objc"); }
+             elsif ($confidence == 1)
+                { &force_record_file_type($h_file, "cpp"); }
+-            elsif (m![a-z][0-9]*\.H$!)  # Mixed-case filename, .H extension.
+-               { force_record_file_type($h_file, "cpp"); }
+             else  # We're clueless.  Let's guess C.
+                { &force_record_file_type($h_file, "c"); };
+            }
+--- 967,975 ----
+                { &force_record_file_type($h_file, "objc"); }
+             elsif ($confidence == 1)
+                { &force_record_file_type($h_file, "cpp"); }
++            elsif ($h_file =~ m![a-z][0-9]*\.H$!)  # Mixed-case filename, 
++ 	                                          #.H extension.
++               { &force_record_file_type($h_file, "cpp"); }
+             else  # We're clueless.  Let's guess C.
+                { &force_record_file_type($h_file, "c"); };
+            }

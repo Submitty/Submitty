@@ -1,0 +1,57 @@
+#!/usr/bin/perl -w
+
+# Given a 2-column list "sloc build-directory-name",
+# output a 3-column list which appends the name of the spec file.
+# You'll need to fix this up afterwards.
+#
+# This is part of SLOCCount, a toolsuite that counts
+# source lines of code (SLOC).
+# Copyright (C) 2001-2004 David A. Wheeler.
+# 
+# This program is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation; either version 2 of the License, or
+# (at your option) any later version.
+# 
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+# 
+# You should have received a copy of the GNU General Public License
+# along with this program; if not, write to the Free Software
+# Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+# 
+# To contact David A. Wheeler, see his website at:
+#  http://www.dwheeler.com.
+# 
+# 
+$specdir = "/usr/src/redhat/SPECS";
+$garbage = "";
+
+while (<>) {
+ ($sloc, $buildname, $garbage) = split;
+ chomp($buildname);
+ print "$sloc $buildname ";
+
+ $unversioned = $buildname;
+ $unversioned =~ s/-[^\-]*$//;
+
+ $reallyshort = $buildname;
+ $reallyshort =~ s/[0-9\.\-_]*$//;
+
+
+ if    (-f "$specdir/${buildname}.spec")       {print "$buildname";}
+ elsif (-f "$specdir/${buildname}.spec.alpha") {print "${buildname}.alpha";}
+ elsif (-f "$specdir/${buildname}.spec.sparc") {print "${buildname}.sparc";}
+ elsif (-f "$specdir/${unversioned}.spec")       {print "$unversioned";}
+ elsif (-f "$specdir/${unversioned}.spec.alpha") {print "${unversioned}.alpha";}
+ elsif (-f "$specdir/${unversioned}.spec.sparc") {print "${unversioned}.sparc";}
+ elsif (-f "$specdir/${reallyshort}.spec")        {print "$reallyshort";}
+ elsif (-f "$specdir/${reallyshort}.spec.alpha")  {print "${reallyshort}.alpha";}
+ elsif (-f "$specdir/${reallyshort}.spec.sparc")  {print "${reallyshort}.sparc";}
+ else {print "?";}
+
+ print "\n";
+ 
+}

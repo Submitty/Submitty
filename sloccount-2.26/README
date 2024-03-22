@@ -1,0 +1,51 @@
+SLOCCount README
+=================
+
+This directory contains "SLOCCount", a set of the programs for counting
+source lines of code (SLOC) in large software systems.
+It was developed by David A. Wheeler (dwheeler@dwheeler.com),
+originally to count SLOC in a Linux (GNU/Linux) system, but it can be
+used for counting other software systems.
+
+Copyright (C) 2001-2004 David A. Wheeler.
+
+This program is free software; you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation; either version 2 of the License, or
+(at your option) any later version.
+
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License
+along with this program; if not, write to the Free Software
+Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+
+To contact David A. Wheeler, see his website at:
+ http://www.dwheeler.com.
+
+For more information, including installation instructions and license
+information, see the HTML file "sloccount.html".
+The file COPYING includes the license, the standard GNU GPL version 2 license.
+Even better, see the website http://www.dwheeler.com/sloccount.
+
+Some of the files contained in this directory aren't normally used -
+instead, they're scrap special-purpose files I used when I created these
+programs.  Feel free to use them, but if you're packaging this program,
+be selective - don't install in /usr/bin every executable here!
+Just install the ones documented, plus the executables they depend on.
+
+Packagers: I've developed an RPM spec file and RPM, so RPM systems can
+just load-and-go.  If you use a different package format, you may still
+find the spec file helpful for identifying what to load, and the "alien"
+program can apparantly translate the RPM file to Debian '.deb' format
+without any problem.
+
+Debian already includes a SLOCCount package.
+SLOCCount 2.08 is available in Debian 3.0.
+More info on the status of SLOCCount in Debian should see
+http://packages.debian.org/cgi-bin/search_packages.pl?keywords=sloccount&searchon=names&subword=1&version=all&release=all
+
+

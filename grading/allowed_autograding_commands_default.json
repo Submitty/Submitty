@@ -49,6 +49,7 @@
     "submitty_count":          { "path": "__INSTALL__FILLIN__SUBMITTY_INSTALL_DIR__/SubmittyAnalysisTools/count"},
     "commonast": 	       { "path": "__INSTALL__FILLIN__SUBMITTY_INSTALL_DIR__/SubmittyAnalysisTools/commonast.py" },
     "comment_count":           { "path": "__INSTALL__FILLIN__SUBMITTY_INSTALL_DIR__/bin/comment_count.py" },
+    "sloccount":           { "path": "__INSTALL__FILLIN__SUBMITTY_INSTALL_DIR__/GIT_CHECKOUT/Submitty/sloccount-2.26/sloccount" },
 
     // Submitty Analysis ToolsTS
     "submitty_count_ts":       { "path": "__INSTALL__FILLIN__SUBMITTY_INSTALL_DIR__/SubmittyAnalysisToolsTS/build/submitty_count_ts"},

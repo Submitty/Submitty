@@ -1,0 +1,120 @@
+#!/usr/bin/perl -w
+# python_count - count physical lines of code in Python programs.
+# Usage: python_count [-f file] [list_of_files]
+#  file: file with a list of files to count (if "-", read list from stdin)
+#  list_of_files: list of files to count
+#  -f file or list_of_files can be used, or both
+# This is a trivial/naive program.
+
+# Comments begin with "#".
+# Python supports multi-line strings using """, which matches another """.
+# When not inside a multi-line string, a line whose first non-whitespace
+# is """ almost always indicates a programming comment;
+# this is also true for lines beginning with '"' 
+# This means that a string which is part of an expression but which begins
+# a new line won't be counted; this problem is rare in practice.
+# This code DOES count _data_ inside a triple-quote (that's not a comment).
+# Note that this isn't true for single-quote, which is used in case
+# statements (etc.) but not in this context.
+
+# This is part of SLOCCount, a toolsuite that counts
+# source lines of code (SLOC).
+# Copyright (C) 2001-2004 David A. Wheeler.
+# 
+# This program is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation; either version 2 of the License, or
+# (at your option) any later version.
+# 
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+# 
+# You should have received a copy of the GNU General Public License
+# along with this program; if not, write to the Free Software
+# Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+# 
+# To contact David A. Wheeler, see his website at:
+#  http://www.dwheeler.com.
+# 
+# 
+
+$total_sloc = 0;
+
+# Do we have "-f" (read list of files from second argument)?
+if (($#ARGV >= 1) && ($ARGV[0] eq "-f")) {
+  # Yes, we have -f
+  if ($ARGV[1] eq "-") {
+    # The list of files is in STDIN
+    while (<STDIN>) {
+      chomp ($_);
+      &count_file ($_);
+    }
+  } else {
+    # The list of files is in the file $ARGV[1]
+    open (FILEWITHLIST, $ARGV[1]) || die "Error: Could not open $ARGV[1]\n";
+    while (<FILEWITHLIST>) {
+      chomp ($_);
+      &count_file ($_);
+    }
+    close FILEWITHLIST;
+  }
+  shift @ARGV; shift @ARGV;
+}
+# Process all (remaining) arguments as file names
+while ($file = shift @ARGV) {
+  &count_file ($file);
+}
+
+print "Total:\n";
+print "$total_sloc\n";
+
+sub count_file {
+  my ($file) = @_;
+  my $sloc = 0;
+  my $isintriple = 0;  # A triple-quote is in effect.
+  my $isincomment = 0;   # We are in a multiline (triple-quoted) comment.
+
+  open (FILE, $file);
+  while (<FILE>) {
+    if (! $isintriple) {  # Normal case:
+      s/""".*"""//;  # Delete triple-quotes that begin & end on the line.
+      s/^\s*"([^"]|(\\"))+"//;  # Delete lonely strings starting on BOL.
+      s/#.*//;       # Delete "#" comments.
+      if (m/"""/) {  # Does a multiline triple-quote begin here?
+        $isintriple = 1;
+        if (m/^\s*"""/) {$isincomment = 1;}  # It's a comment if at BOL.
+      }
+    } else {  # we ARE in a triple.
+      if (m/"""/) {
+        if ($isincomment) {
+          s/.*?"""//;   # Delete string text if it's a comment (not if data)
+        } else {
+	  s/.*?"""/x/;  # Leave something there to count.
+        }
+        # But wait!  Another triple might start on this line!
+        # (see Python-1.5.2/Tools/freeze/makefreeze.py for an example)
+        if (m/"""/) {
+          # It did!  No change in state!
+        } else {
+          $isintriple = 0;
+          $isincomment = 0;
+        }
+      }
+    }
+    # TO DEBUG:
+    # print "cmmnt=${isincomment} trp=${isintriple}: $_\n";
+    if ( (!$isincomment) && m/\S/) {$sloc++;};
+  }
+  print "$sloc $file\n";
+  $total_sloc += $sloc;
+  $sloc = 0;
+  if ($isintriple) {
+    print STDERR "No closing triple-doublequote-marks in file $file\n";
+  }
+  # Reset rest of state:
+  $isintriple = 0;
+  $isincomment = 0;
+  close (FILE);  # Reset $. (line count) each time.
+}

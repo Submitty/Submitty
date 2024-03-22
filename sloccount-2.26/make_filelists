@@ -1,0 +1,193 @@
+#!/bin/sh
+
+# On the command line, list the source code directories, e.g.:
+#    /usr/src/redhat/BUILD/*
+# This command creates a set of directories paralleling the source code
+# directories, with a file named "filelist" listing all the files.
+
+# This script goes through some trouble to turn all relative references
+# into absolute pathnames, to make sure that the intended files
+# are always referenced. Conceivably the current directory isn't the
+# data directory and the parameters given use relative addressing,
+# and we need to fix all that here.
+
+# This is part of SLOCCount, a toolsuite that counts
+# source lines of code (SLOC).
+# Copyright (C) 2001-2004 David A. Wheeler.
+# 
+# This program is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation; either version 2 of the License, or
+# (at your option) any later version.
+# 
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+# 
+# You should have received a copy of the GNU General Public License
+# along with this program; if not, write to the Free Software
+# Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+# 
+# To contact David A. Wheeler, see his website at:
+#  http://www.dwheeler.com.
+# 
+# 
+
+
+if [ "$#" -eq 0 ]
+then
+  echo "Error: You must provide a list of directories."
+  exit 1
+fi
+
+
+follow=""
+skip=""
+prefix=""
+startingdir=`pwd`
+datadir=`pwd`
+
+while [ "$#" -gt 0 ]
+do
+ case "$1"
+ in
+  --follow) follow="-follow"
+            shift;;
+  --datadir) shift
+             if [ ! -d "$1" ]
+             then
+               echo "Error: $1 is not a directory"
+               exit 1
+             fi
+             cd "$1"
+             datadir=`pwd`
+             cd "$startingdir"
+             shift;;
+  --skip) shift
+          skip="$1"
+          shift;;
+  --prefix) shift
+          prefix="$1"
+          shift;;
+  --) shift; break;;
+  --*) echo "Error: unrecognized option $1"
+       exit 1
+       shift ;;
+  *) break;;
+ esac
+done
+
+# Non-directories will be placed into the "top_dir" data directory:
+toplevel_name="${prefix}top_dir"
+
+for possible_dir
+do
+ # Reset to starting directory each time, so that relative directory
+ # requests will be processed correctly.
+ cd "$startingdir"
+
+ # Translate "." into the name of current directory.
+ # We have to handle "." and ".." specially, because we can't place
+ # files with these names into the data directory.
+ if [ "$possible_dir" = "." ]
+ then
+   possible_dir=`pwd`
+ fi
+ if [ "$possible_dir" = ".." ]
+ then
+   cd ..
+   possible_dir=`pwd`
+   # Reset current directory.
+   cd "$startingdir"
+ fi
+
+ base=`basename "$possible_dir"`
+ if [ "$base" = "$skip" ]
+ then
+  continue
+ fi
+
+ if [  -d "$possible_dir" ]
+ then
+  # Set "dir" to real name (if possible_dir is a symlink to another
+  # directory, then "dir" and "possible_dir" may have very different values)
+  # depending on how "cd" is implemented on your shell.
+  cd "$possible_dir"
+  dir=`pwd`
+
+  # The child directory's name is derived from possible_dir, not dir --
+  # that way, directories we create will have names based on the supplied
+  # name (potentially a link), not the linked-to directory's name.
+  # Thus, symlinks can be used to disambiguate names where necessary.
+  childname="${prefix}${base}"
+
+  cd "$datadir"
+  if [ -d "$childname" ]
+  then
+    echo "WARNING! Directory $childname pre-existed when adding $possible_dir"
+  else
+    mkdir "$childname"
+  fi
+
+  echo "Creating filelist for $childname"
+  find "$dir" $follow -type f -print > "${childname}/filelist"
+
+  # If it exists, copy the PROGRAM_LICENSE.
+  if [ -s "${dir}/PROGRAM_LICENSE" ]
+  then
+    cp "${dir}/PROGRAM_LICENSE" "${childname}/PROGRAM_LICENSE"
+  fi
+  # If it exists, copy the ORIGINAL_SPEC_FILE
+  if [ -s "${dir}/ORIGINAL_SPEC_FILE" ]
+  then
+    cp "${dir}/ORIGINAL_SPEC_FILE" "${childname}/ORIGINAL_SPEC_FILE"
+  fi
+
+  # Do some error-checking.
+  if [ ! -s "${childname}/filelist" ]
+  then
+   # This is inefficient, but it doesn't matter - it's only used
+   # when we have an empty filelist (which is often an error condition)
+   saw_a_file=n
+   for x in ls "$dir"
+   do
+    saw_a_file=y
+    break
+   done
+   case $saw_a_file
+   in
+    n)
+    echo "Warning: directory ${childname} got no files."
+    echo "You may need to use the --follow option.";;
+   esac
+  fi
+
+ elif [  -f "$possible_dir" ]
+ then
+  # We have a non-directory (regular file, symlink to a file, etc.).
+  # We'll just add an absolute path to it into the toplevel_name directory.
+
+  # First, convert possible_dir into an absolute pathname if necessary:
+  pathname="$possible_dir"
+  case "$pathname"
+  in
+    /*) ;;   # Already absolute pathname - do nothing.
+    *)  pathname="${startingdir}/${possible_dir}" ;;
+  esac
+
+  # Add it to the toplevel_name directory (creating the directory if needed)
+  cd "$datadir"
+  if [ ! -d "$toplevel_name" ]
+  then
+    echo "Have a non-directory at the top, so creating directory $toplevel_name"
+    mkdir "$toplevel_name"
+  fi
+  echo "Adding $pathname to $toplevel_name"
+  echo "$pathname" >> "${toplevel_name}/filelist"
+ else
+  echo "WARNING!!! Not a file nor a directory (so ignored): $possible_dir"
+ fi
+done
+exit 0
+

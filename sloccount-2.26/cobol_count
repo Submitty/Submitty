@@ -1,0 +1,82 @@
+#!/usr/bin/perl
+# cobol_count - count physical lines of code.
+# Usage: cobol_count [-f file] [list_of_files]
+#  file: file with a list of files to count (if "-", read list from stdin)
+#  list_of_files: list of files to count
+#  -f file or list_of_files can be used, or both
+# This is a trivial/naive program for scripts, etc.
+# 
+# This is part of SLOCCount, a toolsuite that counts
+# source lines of code (SLOC).
+# Copyright (C) 2001-2004 David A. Wheeler.
+# 
+# This program is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation; either version 2 of the License, or
+# (at your option) any later version.
+# 
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+# 
+# You should have received a copy of the GNU General Public License
+# along with this program; if not, write to the Free Software
+# Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+# 
+# To contact David A. Wheeler, see his website at:
+#  http://www.dwheeler.com.
+# 
+# 
+
+$total_sloc = 0;
+
+# Do we have "-f" (read list of files from second argument)?
+if (($#ARGV >= 1) && ($ARGV[0] eq "-f")) {
+  # Yes, we have -f
+  if ($ARGV[1] eq "-") {
+    # The list of files is in STDIN
+    while (<STDIN>) {
+      chomp ($_);
+      &count_file ($_);
+    }
+  } else {
+    # The list of files is in the file $ARGV[1]
+    open (FILEWITHLIST, $ARGV[1]) || die "Error: Could not open $filewithlist\n";
+    while (<FILEWITHLIST>) {
+      chomp ($_);
+      &count_file ($_);
+    }
+    close FILEWITHLIST;
+  }
+  shift @ARGV; shift @ARGV;
+}
+# Process all (remaining) arguments as file names
+while ($file = shift @ARGV) {
+  &count_file ($file);
+}
+
+print "Total:\n";
+print "$total_sloc\n";
+
+sub count_file {
+  my ($file) = @_;
+  my $sloc = 0;
+  my $free_format = 0;  # Support "free format" source code.
+
+  open (FILE, $file);
+  while (<FILE>) {
+    if (m/^......\$.*SET.*SOURCEFORMAT.*FREE/i) {$free_format = 1;}
+    if ($free_format) {
+      if (m/^\s*[\*\/]/) { }  # Saw a comment.
+      elsif (m/\S/) {$sloc++;} # Saw a non-whitespace, it's SLOC.
+    } else {
+      if (m/^......[\*\/]/) {}  # Saw a comment - marked in indicator area.
+      elsif (m/^[\*\/]/) {}     # Saw a comment.
+      elsif (m/^........*\S/) {$sloc++;} # Saw a non-whitespace, it's SLOC.
+    }
+  }
+  print "$sloc $file\n";
+  $total_sloc += $sloc;
+  close (FILE);
+}

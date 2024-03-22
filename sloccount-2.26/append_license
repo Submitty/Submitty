@@ -1,0 +1,62 @@
+#!/usr/bin/perl -w
+
+# Given a 3-column list "sloc build-directory-name spec-filename",
+# output a 4-column list which appends the license.
+# You'll need to fix this up afterwards.
+# 
+# This is part of SLOCCount, a toolsuite that counts
+# source lines of code (SLOC).
+# Copyright (C) 2001-2004 David A. Wheeler.
+# 
+# This program is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation; either version 2 of the License, or
+# (at your option) any later version.
+# 
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+# 
+# You should have received a copy of the GNU General Public License
+# along with this program; if not, write to the Free Software
+# Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+# 
+# To contact David A. Wheeler, see his website at:
+#  http://www.dwheeler.com.
+# 
+# 
+$specdir = "/usr/src/redhat/SPECS";
+$garbage = "";
+
+while (<>) {
+ ($sloc, $buildname, $specname, $garbage) = split;
+ chomp($specname);
+ print "$sloc $buildname $specname ";
+
+ if (! (-f "$specdir/$specname")) {
+    die "ERROR.  Cound not find spec file $specname\n";
+ }
+
+
+ # Get "Copyright:" or "License:"
+ $license = "";
+ $summary = "";
+ open(SPECFILE, "<$specdir/$specname") || die "Can't open $specname\n";
+ while (<SPECFILE>) {
+   # print;
+   if (m/^Summary\:(.*)/i) { $summary = $1; }
+   if (m/^License\:(.*)/i) { $license = $1; }
+   if ((! $license) && (m/^Copyright\:(.*)/i)) { $license = $1; }
+ }
+ close(SPECFILE);
+ 
+ if ($license) {print "$license";}
+ else          {print "?";}
+
+ # print "\t";
+ # print $summary;
+
+ print "\n";
+ 
+}

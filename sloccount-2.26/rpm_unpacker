@@ -1,0 +1,71 @@
+#!/bin/sh
+
+# unpacker -- unpacks RPMs into the BUILD directory.
+# This is part of SLOCCount, a toolsuite that counts
+# source lines of code (SLOC).
+# Copyright (C) 2001-2004 David A. Wheeler.
+# 
+# This program is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation; either version 2 of the License, or
+# (at your option) any later version.
+# 
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+# 
+# You should have received a copy of the GNU General Public License
+# along with this program; if not, write to the Free Software
+# Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+# 
+# To contact David A. Wheeler, see his website at:
+#  http://www.dwheeler.com.
+# 
+# 
+
+SPECS=/usr/src/redhat/SPECS
+BUILD=/usr/src/redhat/BUILD
+
+BUILD_LIST=/root/build_list
+OLD_BUILD_LIST=${BUILD_LIST}.old
+
+echo "lost+found" > $OLD_BUILD_LIST
+
+cd $SPECS
+for specfile in *.spec
+do
+ cd $SPECS
+ # The "yes" is to give "yes" to "do you want to run this patch" requests -
+ # in particular this is needed to unpack samba.2.0.7 in Red Hat 7.1.
+ if yes | rpm -bp $specfile
+ then
+  # Things were fine, do nothing.
+  echo "UNPACKER: Successfully performed rpm -bp $specfile"
+ else
+  echo "UNPACKER WARNING - ERROR in rpm -bp $specfile"
+ fi
+
+ # Find the new BUILD entries, and create cross-references to the old.
+ cd $BUILD
+ ls | sort > $BUILD_LIST
+ CHANGES=`comm -13 $OLD_BUILD_LIST $BUILD_LIST`
+ anychange="0"
+ for newbuild in $CHANGES
+ do
+  anychange=1
+  echo $specfile > ${newbuild}/ORIGINAL_SPEC_FILE
+  echo "UNPACKER: added build $newbuild from $specfile"
+  extract_license "$newbuild" "${SPECS}/$specfile" > ${newbuild}/PROGRAM_LICENSE
+  # For disk space, erase all HTML files.
+  # If disk space is available, REMOVE THIS LINE:
+  # find "$newbuild" -type f -name "*.html" -exec rm {} \;
+ done
+ if [ $anychange == 0 ]
+ then
+  echo "UNPACKER: did not add a build directory for spec file $specfile"
+ fi
+ mv $BUILD_LIST $OLD_BUILD_LIST
+ 
+done
+

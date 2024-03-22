@@ -1,0 +1,161 @@
+TODO List:
+
+
+As with all open source projects... if you want something strongly
+enough, then please (1) code it and submit it, or (2) pay me to add it.
+You have the source, you have the power - use it. Or has been said for years:
+
+  Use the Source, Luke.
+
+I _do_ listen to user requests, but I cannot do everything myself.
+I've released this program under the GPL _specifically_ so that others
+will help debug and extend it.
+
+
+
+Obviously, a general "TODO" is adding support for other computer languages;
+here are languages I'd like to add support for specifically:
++ Eiffel.
++ Sather (much like Eiffel).
++ CORBA IDL.
++ Forth.  Comments can start with "\" (backslash) and continue to end-of-line,
+  or be surrounded by parens.  In both cases, they must be on word
+  bounds-- .( is not a comment!  Variable names often begin with "\"!
+  For example:
+    : 2dup ( n1 n2 -- n1 n2 n1 n2 ) \ Duplicate two numbers.
+                                    \ Pronounced: two-dupe.
+        over over  ;
+  Strings begin with " (doublequote) or p" (p doublequote, for
+  packed strings), and these must be separate words
+  (e.g., followed by a whitespace).  They end with a matching ".
+  Also, the ." word begins a string that ends in " (this word immediately
+  prints it the given string).
+  Note that "copy is a perfectly legitimate Forth word, and does NOT
+  start a string.
+  Forth sources can be stored as blocks, or as more conventional text.
+  Any way to detect them?
+  See http://www.forth.org/dpans/dpans.html for syntax definition.
+  See also http://www.taygeta.com/forth_style.html
+  and http://www.forth.org/fig.html
++ Create a "javascript" category. ".js" extention, "js" type.
+  (see below for a discussion of the issues with embedded scripts)
++ .pco -> Oracle preprocessed Cobol Code
++ .pfo -> Oracle preprocessed Fortran Code
++ PL/1.
++ BASIC, including Visual Basic, Future Basic, GW-Basic, QBASIC, etc.
++ Improve Ocamlyacc, comments in yacc part are C-like, but I'm not sure
+  about comment nesting. 
+
+  For more language examples, see the ACM "Hello World" project, which tries
+  to collect "Hello World" in every computer language. It's at:
+   http://www2.latech.edu/~acm/HelloWorld.shtml
+
+
+
+Here are other TODOs:
+
+
+* A big one is to add support for logical SLOC, at least for C/C++.
+  Then add support for COCOMO II.  Even partial support would be great
+  (e.g., not all languages)... other languages could be displayed as
+  "UNK" (unknown) and be considered 0.
+  Add options to allow display of only one,
+  or of both.  See Park's paper, COCOMO II, and Humphrey's 1995 book.
+
+* In general, modify the program so that it ports more easily.  Currently,
+  it assumes a Unix-like system (esp. in the shell programs), and it requires
+  md5sum as a separate executable.
+  There are probably some other nonportable constructs, in particular
+  for non-Unix systems (e.g., symlink handling and file/dirnames).
+
+* Rewrite Bourne shell code to either Perl or Python (prob. Python), and
+  make the call to md5sum optional.  That way, the program
+  could run on Windows without Cygwin.
+
+* Improve the heuristics for detecting language type.
+  They're actually pretty good already.
+
+* Clean up the program.  This was originally written as a one-off program
+  that wouldn't be used again (or distributed!), and it shows.
+
+  The heuristics used to detect language type should
+  be made more modular, so it could be reused in other programs, and
+  so you don't HAVE to write out a list of filenames first if you
+  don't want to.
+
+* Consider rewriting everything not in C into Python.  Perl is
+  a write-only language, and it's absurdly hard to read Perl code later.
+  I find Python code much cleaner.  And shell isn't as portable.
+
+  One reason I didn't rewrite it in Python is that I had concerns about
+  Python's licensing issues; Python versions 1.6 and up have questionable
+  compatibility with the GPL.  Thankfully, the Free Software Foundation (FSF)
+  and the Python developers have worked together, and the Python 
+  developers have fixed the license for version 2.0.1 and up.
+  Joy!!  I'm VERY happy about this!
+
+* Improve the speed, primarily to support analysis of massive amounts
+  of data.  There's a generic routine in Perl; switching that
+  to C would probably help.  Perhaps rewriting many of the counters
+  using flex would speed things up, simplify maintenance, and make
+  supporting logical SLOC easier.
+
+* Handle scripts embedded in data.
+  Perhaps create a category, "only the code embedded in HTML"
+  (e.g., Javascript scripts, PHP statements, etc.).
+  This is currently complicated - the whole program assumes that a file
+  can be assigned a specific type, and HTML (etc.) might have multiple
+  languages embedded in it.
+
+* Are any CGI files (.cgi) unhandled?  Are files unidentified?
+
+* Improve makefile identification and counting.
+  Currently the program does not identify as makefiles "Imakefile"
+  (generated by xmkmf and processed by imake, used by MIT X server)
+  nor automake/autoconf files (Makefile.am/Makefile.in).
+  Need to handle ".rules" too.
+
+  I didn't just add these files to the "makefile" list, because
+  I have concerns about processing them correctly using the
+  makefile counter.  Since most people won't count makefiles anyway,
+  this isn't an issue for most.  I welcome patches to change this,
+  _IF_ you ensure that the resulting counts are correct.
+
+  The current version is sufficient for handling programs who have
+  ordinary makefiles that are to be included in the SLOC count when
+  they enable the option to count makefiles.
+
+  Currently the makefiles count "all non-blank lines"; conceivably
+  someone might want to count only the actual directives, not the
+  conditions under which they fire.
+
+* Improve the flexibility in symlink handling; see "make_filelists".
+  It should be rewritten.  Some systems don't allow
+  "test"ing for symlinks, which was a portability problem - that problem
+  at least has been removed.
+
+* I've added a few utilities that I use for counting whole Linux systems
+  to the tar file, but they're not installed by the RPM and they're not
+  documented.
+
+* More testing!  COBOL in particular is undertested.
+
+* Modify the code, esp. sloccount, to handle systems so large that
+  the data directory list can't be expanded using "*".
+  This would involve using "xargs" in sloccount, maybe getting rid
+  of the separate filelist creation, and having break_filelist
+  call compute_all directly (break_filelist needs to run all the time,
+  or its reloading of hashes during initialization would become the
+  bottleneck).  Some of this work has already been done.
+
+* Perl variation support.
+  The code says:
+    open(FH, "-|", "md5sum", $filename) or return undef;
+  but this doesn't work on some Perls.
+  This could be changed to:
+    open(FH, "-|", "md5sum $filename") or return undef;
+  But I dare not fix it that way;
+  imagine a file named "; rm -fr /*" and variations.
+
+
+

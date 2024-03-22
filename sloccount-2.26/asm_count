@@ -1,0 +1,166 @@
+#!/usr/bin/perl -w
+# asm_count - count physical lines of code in Assembly programs.
+# Usage: asm_count [-f file] [list_of_files]
+#  file: file with a list of files to count (if "-", read list from stdin)
+#  list_of_files: list of files to count
+#  -f file or list_of_files can be used, or both
+# This is a trivial/naive program.
+
+# For each file, it looks at the contents to heuristically determine
+# if C comments are permitted and what the "comment" character is.
+# If /* and */ are in the file, then C comments are permitted.
+# The punctuation mark that starts the most lines must be the comment
+# character (but ignoring "/" if C comments are allowed, and
+# ignoring '#' if cpp commands appear to be used)
+
+# This is part of SLOCCount, a toolsuite that counts
+# source lines of code (SLOC).
+# Copyright (C) 2001-2004 David A. Wheeler.
+# 
+# This program is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation; either version 2 of the License, or
+# (at your option) any later version.
+# 
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+# 
+# You should have received a copy of the GNU General Public License
+# along with this program; if not, write to the Free Software
+# Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+# 
+# To contact David A. Wheeler, see his website at:
+#  http://www.dwheeler.com.
+
+
+
+$total_sloc = 0;
+
+# Do we have "-f" (read list of files from second argument)?
+if (($#ARGV >= 1) && ($ARGV[0] eq "-f")) {
+  # Yes, we have -f
+  if ($ARGV[1] eq "-") {
+    # The list of files is in STDIN
+    while (<STDIN>) {
+      chomp ($_);
+      &count_file ($_);
+    }
+  } else {
+    # The list of files is in the file $ARGV[1]
+    open (FILEWITHLIST, $ARGV[1]) || die "Error: Could not open $ARGV[1]\n";
+    while (<FILEWITHLIST>) {
+      chomp ($_);
+      &count_file ($_);
+    }
+    close FILEWITHLIST;
+  }
+  shift @ARGV; shift @ARGV;
+}
+# Process all (remaining) arguments as file names
+while ($file = shift @ARGV) {
+  &count_file ($file);
+}
+
+print "Total:\n";
+print "$total_sloc\n";
+
+sub count_file {
+  my ($file) = @_;
+  # First, use heuristics to determine the comment char and if it uses C comments
+  $found_c_start = 0;
+  $found_c_end = 0;
+  $cpp_suspicious = 0;
+  $cpp_likely = 0;
+  $cpp_used = 0;
+  %count = ();
+  if ($file eq "") {
+    *CURRENTFILE = *STDIN
+  } else {
+    open(CURRENTFILE, "<$file");
+  }
+  while (<CURRENTFILE>) {
+    if (m!\/\*!) { $found_c_start++;}
+    if (m!\*\/!) { $found_c_end++;}
+    if ( (m!^#\s*define\s!) || (m!^#\s*else!)) {$cpp_suspicious++;}
+    if ( (m!^#\s*ifdef\s!) || (m!^#\s*endif!) || (m!#\s*include!)) {$cpp_likely++;}
+    if (m/^\s*([;!\/#\@\|\*])/) { $count{$1}++; }  # Found a likely comment char.
+  }
+  # Done examing file, let's figure out the parameters.
+  if ($found_c_start && $found_c_end) {
+    $ccomments = 1;
+    $count{'/'} = 0;
+    # $count{'*'} = 0;  # Do this to ignore '*' if C comments are used.
+  } else {
+    $ccomments = 0;
+  }
+  if (($cpp_suspicious > 2) || ($cpp_likely >= 1)) {
+    $cpp_used = 1;
+    $count{'#'} = 0;
+  } else {
+    $cpp_used = 0;
+  }
+  $likeliest = ';';
+  $likeliest_count = 0;
+  foreach $i (keys(%count)) {
+    # print "DEBUG: key=$i count=$count{$i}\n";
+    if ($count{$i} > $likeliest_count) {
+      $likeliest = $i;
+      $likeliest_count = $count{$i};
+    }
+  }
+  # print "DEBUG: likeliest = $likeliest\n";
+  $commentchar=$likeliest;
+  close(CURRENTFILE);
+
+  # Now count SLOC.
+  $sloc = 0;
+  $isincomment = 0;
+  open(CURRENTFILE, "<$file");
+  while (<CURRENTFILE>) {
+    # We handle C comments first, so that if an EOL-comment
+    # occurs inside a C comment, it's ignored.
+    if ($ccomments) {
+      # Handle C /* */ comments; this will get fooled if they're in strings,
+      # but that would be rare in assembly.
+      while ( (m!\/\*!) || (m!\*\/!)) {  # While unprocessed C comment.
+	if ($isincomment) {
+	  s!.*?\*\/.*!!;
+	  $isincomment = 0;
+	} else {           # Not in C comment, but have end comment marker.
+	  if (! m/\/\*/) {  # Whups, there's no starting marker!
+	    print STDERR "Warning: file $file line $. has unmatched comment end\n";
+	    # Get us back to a plausible state:
+	    s/.*//; # Destroy everything
+	      $isincomment = 0;
+	  } else {
+	    if (! s!\/\*.*?\*\/!!) { # Try to delete whole comment.
+              # We couldn't delete whole comment.  Delete what's there.
+              s!\/\*.*!!;
+              $isincomment = 1;
+	    }
+	  }
+	}
+      }
+    }  # End of handling C comments.
+    # This requires $[ be unchanged.
+    $locate_comment = index($_, $commentchar);
+    if ($locate_comment >= 0) {  # We found a comment character, delete comment
+       $_ = substr($_, 0, $locate_comment);
+       # print "DEBUG New text: @",$_,"@\n";
+    }
+    # old: s/${commentchar}.*//;  # Delete leading comments.
+
+    # FOR DEBUG: print "Finally isincomment=$isincomment line=$_\n";
+    if ((! $isincomment) && (m/\S/)) {$sloc++;}
+  }
+
+  # End-of-file processing
+  print "$sloc (commentchar=$commentchar C-comments=$ccomments) $file\n";
+  $total_sloc += $sloc;
+  $sloc = 0;
+  if ($isincomment) {
+    print STDERR "Missing comment close in file $file\n";
+  }
+}

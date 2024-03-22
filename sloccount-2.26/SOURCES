@@ -1,0 +1,29 @@
+
+"CodeCount" toolset for counting SLOC.
+  http://sunset.usc.edu/research/CODECOUNT/
+Covers C/C++/Ada/Java and a few others, but
+NOT Python, TCL, Perl, or LISP.
+I used this to count C, C++, and Java code.
+These tools are under a GPL-like license, but it's NOT the GPL.
+See their website for more info.
+
+A huge list of tools is at (mostly big $$):
+  http://www.concentricmc.com/toolsreport/5-3-2tools1.html
+which extracts from this 1995 paper from STSC:
+  http://www.stsc.hill.af.mil/CrossTalk/1995/apr/Metrics.asp
+
+Another list:
+ http://www.qucis.queensu.ca/Software-Engineering/toolcat.html#label181
+
+USC tools (inc. CodeCount) and info on COCOMO II is at:
+  http://sunset.usc.edu/available_tools/availabletools_main.html
+
+
+Software Metrics: An Analysis of the Evolution of COCOMO and Function Points
+Roger E. Masse
+University of Maryland
+July 8, 1997
+http://www.python.org/~rmasse/papers/software-metrics/
+(good overview paper)
+
+

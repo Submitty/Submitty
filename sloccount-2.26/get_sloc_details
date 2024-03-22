@@ -1,0 +1,103 @@
+#!/usr/bin/perl -w
+
+# get_sloc_details
+# Take a list of dirs, and get the detailed SLOC entries for every file.
+
+# This is part of SLOCCount, a toolsuite that counts
+# source lines of code (SLOC).
+# Copyright (C) 2001-2004 David A. Wheeler.
+# 
+# This program is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation; either version 2 of the License, or
+# (at your option) any later version.
+# 
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+# 
+# You should have received a copy of the GNU General Public License
+# along with this program; if not, write to the Free Software
+# Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+# 
+# To contact David A. Wheeler, see his website at:
+#  http://www.dwheeler.com.
+
+
+sub print_data
+{
+ my $dir = shift;
+ my $langfile = shift;
+ my $saw_total = 0;
+ my $filename = "${dir}/${langfile}";
+ my $lang = $langfile;
+ $lang =~ s/_outfile\.dat$//;
+
+ open(RAWDATA, "<$filename") ||
+     return;
+ #     die "Can't open file in $dir for language $lang.\n";
+
+ if ($lang eq "asm") {
+   while (<RAWDATA>) {
+     if (m/^Total:/) {
+       $saw_total = 1;
+       last;
+     }
+     chomp;
+     if (m/^([0-9]+)\s+\([^\)]+\)\s+(.*)/) {
+       print "$1\t$lang\t$dir\t$2\n";
+     } else {
+       print STDERR "Warning: file $filename has unexpected text: $_\n";
+     }
+   }
+ } else {
+   while (<RAWDATA>) {
+     if (m/^Total:/) {
+       $saw_total = 1;
+       last;
+     }
+     chomp;
+     if (m/^([0-9]+)\s+(.*)/) {
+       print "$1\t$lang\t$dir\t$2\n";
+     } else {
+       print STDERR "Warning: file $filename has unexpected text: $_\n";
+     }
+   }
+ }
+ close(RAWDATA);
+ if (! $saw_total) {
+   print STDERR "Warning! No 'Total' line in $filename.\n";
+ }
+}
+
+# MAIN PROGRAM
+
+
+if ($#ARGV < 0) {
+ print STDERR "Error! You must list at least one directory to process.\n";
+ exit(1);
+}
+
+
+while ( $dir = shift ) {
+
+ if (! -d "$dir") {
+   # print "Skipping non-directory $dir\n";
+   next;
+ } 
+ 
+ if (! -r "${dir}/filelist") {
+   # print "Skipping directory $dir; it doesn't contain a file 'filelist'\n";
+   next;
+ }
+
+  opendir(DATADIR, $dir) || die "can't opendir $dir: $!";
+  @outfiles = grep { /outfile\.dat$/ } readdir(DATADIR);
+  closedir DATADIR;
+  foreach $langfile (@outfiles) {
+    print_data($dir, $langfile);
+ }
+
+}
+

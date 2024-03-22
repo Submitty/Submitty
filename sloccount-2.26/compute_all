@@ -1,0 +1,87 @@
+#!/bin/sh
+# Computes filecounts and SLOC counts in the listed data directories
+# if the don't already exist.
+# 
+# This is part of SLOCCount, a toolsuite that counts
+# source lines of code (SLOC).
+# Copyright (C) 2001-2004 David A. Wheeler.
+# 
+# This program is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation; either version 2 of the License, or
+# (at your option) any later version.
+# 
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+# 
+# You should have received a copy of the GNU General Public License
+# along with this program; if not, write to the Free Software
+# Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+# 
+# To contact David A. Wheeler, see his website at:
+#  http://www.dwheeler.com.
+# 
+# 
+
+if [ "$#" -eq 0 ]
+then
+  echo "Error: You must provide a list of directories to examine."
+  exit 1
+fi
+
+starting_dir=`pwd`
+
+for dir
+do
+ if [ -d "$dir" -a -r "${dir}/filelist" ]
+ then
+  cd "$dir"
+
+  if [ ! -r all.filecount ]
+  then
+    # Create all.filecount and all-physical.sloc; create them in
+    # separate files, so that we can safely restart if it stops in the middle:
+    > all.filecount.new
+    > all-physical.sloc.new
+    for listfile in *_list.dat
+    do
+     language=`echo $listfile | sed -e 's/_list\.dat$//'`
+
+     # Skip language "*" - this happens if there are NO source
+     # files in the given directory.
+     if [ "$language" = "*" ]; then
+       continue
+     fi
+
+     # Skip language "h" - it's counted in the ansic, cpp, and objc lists.
+     if [ "$language" = "h" ]; then
+       continue
+     fi
+
+     numfiles=`wc -l < $listfile | tr -d " "`
+     echo "$language	$numfiles" >> all.filecount.new
+
+     # Ignore certain "languages" when counting SLOC:
+     case "$language"
+     in
+       not) true ;;
+       unknown) true ;;
+       zero) true ;;
+       dup) true ;;
+       auto) true ;;
+       *)
+         numsloc=`compute_sloc_lang $language "." | tr -d " "`
+         echo "$language	$numsloc" >> all-physical.sloc.new
+       ;;
+     esac
+    done
+    mv all.filecount.new all.filecount
+    mv all-physical.sloc.new all-physical.sloc
+  fi
+
+  cd "$starting_dir"
+ fi
+done
+

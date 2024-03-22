@@ -1,0 +1,83 @@
+#!/usr/bin/perl
+
+# Given USC output as standard input, find the # of physical and logical SLOC, and save in
+# "physical.sloc" and "logical.sloc".
+
+# 
+# This is part of SLOCCount, a toolsuite that counts
+# source lines of code (SLOC).
+# Copyright (C) 2001-2004 David A. Wheeler.
+# 
+# This program is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation; either version 2 of the License, or
+# (at your option) any later version.
+# 
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+# 
+# You should have received a copy of the GNU General Public License
+# along with this program; if not, write to the Free Software
+# Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+# 
+# To contact David A. Wheeler, see his website at:
+#  http://www.dwheeler.com.
+# 
+# 
+
+$found =0;
+
+while (<>) {
+  if (m/^The Totals/) {
+    $found = 1;
+    last;
+  } 
+}
+
+if (!$found) {
+  die "FAILED to find the totals section in code output.\n";
+}
+
+while (<>) {
+  # DEBUG: print "Read line: $_\n";
+  if (m/Physical/ || m/Logical/) {
+    s/^ *//;
+    ($total, $blank, $whole, $embedded, $compiler, $datadecl, $execinstruction,
+     $number_of_files, $sloc, $file_type, $sloc_definition ) =   split(/[ \|]+/);
+    # DEBUG: print "Found match; file_type='${file_type}', sloc_definition='${sloc_definition}'\n";
+    if ($file_type =~ m/code/i) {
+       if ($sloc_definition =~ m/Physical/i) {
+              `echo $sloc > physical.sloc`
+       }
+       if ($sloc_definition =~ m/Logical/i) {
+              `echo $sloc > logical.sloc`
+       }
+    } elsif ($file_type =~ m/DATA/i) {
+       if ($number_of_files > 0) {
+         print STDERR "WARNING! NONZERO NUMBER OF DATA FILES!\n";
+         $pwd = `pwd`;
+         chomp($pwd);
+         print STDERR "Extract-count in directory ${pwd}.\n";
+         # The mere existence of this file is reason to check it out:
+         `echo $number_of_files > data.count`
+       }
+    }
+  } 
+}
+
+
+__END__
+
+Here's a sample output (the beginning chopped off):
+
+                                    Temporary Project Name              
+The Totals
+   Total   Blank |      Comments     |  Compiler  Data    Exec.  |  Number  |          File  SLOC
+   Lines   Lines |   Whole  Embedded |  Direct.   Decl.   Instr. | of Files |   SLOC   Type  Definition
+------------------------------------------------------------------------------------------------------------------------------------
+ 1938455  359776 |  146182    164828 |        0   12359  1420138 |   3172   | 1432497  CODE  Physical
+ 1938455  359776 |  146182    164828 |        0    6507   613235 |   3172   |  619742  CODE  Logical
+       0       0 |       0         0 |        0       0        0 |      0   |       0  DATA  Physical
+

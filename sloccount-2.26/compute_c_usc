@@ -1,0 +1,77 @@
+#!/bin/sh
+# Computes C and C++ code sizes for the list of directories given;
+# each directory must contain ansic_list.dat and cpp_list.dat.
+# 
+# Change the following if it's the wrong place:
+
+C_DATA_ENV_FILE="/home/dwheeler/sloc/bin/c_lines_environment.dat"
+
+# Unfortunately, USC's code fails when c_list.dat is 0-length,
+# so we work around it.
+
+# This is part of SLOCCount, a toolsuite that counts
+# source lines of code (SLOC).
+# Copyright (C) 2001-2004 David A. Wheeler.
+# 
+# This program is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation; either version 2 of the License, or
+# (at your option) any later version.
+# 
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+# 
+# You should have received a copy of the GNU General Public License
+# along with this program; if not, write to the Free Software
+# Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+# 
+# To contact David A. Wheeler, see his website at:
+#  http://www.dwheeler.com.
+# 
+# 
+
+
+starting_dir=`pwd`
+
+for dir in $@
+do
+ if [ -d "$dir" -a -r "${dir}/filelist" ]
+ then
+  # ??? DEBUG: print out the name of each directory.
+  echo " $dir"
+  cd $dir
+  cp $C_DATA_ENV_FILE .
+
+  if [ -s ansic_list.dat ]
+  then
+   rm -f c_list.dat
+   ln -s ansic_list.dat c_list.dat
+   c_lines
+   mv c_outfile.dat ansic_outfile.dat.usc
+   extract-count < ansic_outfile.dat.usc
+   mv logical.sloc ansic-logical.sloc
+   mv physical.sloc ansic-physical.sloc.usc
+  else
+   echo 0 > ansic-logical.sloc
+   echo 0 > ansic-physical.sloc.usc
+  fi
+
+  if [ -s cpp_list.dat ]
+  then
+   rm -f c_list.dat
+   ln -s cpp_list.dat c_list.dat
+   c_lines
+   mv c_outfile.dat cpp_outfile.dat.usc
+   extract-count < cpp_outfile.dat.usc
+   mv logical.sloc cpp-logical.sloc
+   mv physical.sloc cpp-physical.sloc.usc
+  else
+   echo 0 > cpp-logical.sloc
+   echo 0 > cpp-physical.sloc.usc
+  fi
+
+  cd $starting_dir
+ fi
+done

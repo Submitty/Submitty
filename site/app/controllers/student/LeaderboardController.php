@@ -8,6 +8,11 @@ use app\libraries\response\RedirectResponse;
 use app\libraries\response\WebResponse;
 use app\libraries\response\ResponseInterface;
 use Symfony\Component\Routing\Annotation\Route;
+use Graph\Graph;
+use Graph\ScatterPlot;
+use Symfony\Component\HttpFoundation\Response;
+
+
 
 class LeaderboardController extends AbstractController {
     /**
@@ -122,4 +127,43 @@ class LeaderboardController extends AbstractController {
         $this->core->getQueries()->setUserAnonymousForGradeableLeaderboard($user_id, $gradeable_id, $state);
         return JsonResponse::getSuccessResponse($state);
     }
+
+
+    /**
+     * @Route("/scatter-plot", name="scatter_plot")
+     */
+    public function index(): Response
+    {
+        // Sample data (replace with your actual data)
+        $linesOfCode = array(100, 200, 300, 400, 500);
+        $grades = array(80, 75, 90, 85, 70);
+
+        // Create a new graph
+        $graph = new Graph(800, 600);
+
+        // Set up the graph title and margins
+        $graph->title->Set("Scatter Plot: Lines of Code vs Grade");
+        $graph->SetMargin(50, 50, 50, 100);
+
+        // Create a scatter plot
+        $scatterplot = new ScatterPlot($grades, $linesOfCode);
+
+        // Set the plot's title and axis labels
+        $scatterplot->title->Set("Grades vs Lines of Code");
+        $scatterplot->SetYTitle('Number of Lines of Code');
+        $scatterplot->SetXTitle('Grade (0-100)');
+
+        // Add the plot to the graph
+        $graph->Add($scatterplot);
+
+        // Generate and save the graph as an image
+        $imagePath = 'scatter_plot.png'; // Adjust the path as needed
+        $graph->Stroke($imagePath);
+
+        // Render the Twig template with the image path
+        return $this->render('scatter_plot/index.html.twig', [
+            'imagePath' => $imagePath,
+        ]);
+    }
+
 }

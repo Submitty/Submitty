@@ -1,0 +1,58 @@
+#!/bin/sh
+# given a list of data subdirs, show how many files of each type
+# are in each subdir.
+# 
+# This is part of SLOCCount, a toolsuite that counts
+# source lines of code (SLOC).
+# Copyright (C) 2001-2004 David A. Wheeler.
+# 
+# This program is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation; either version 2 of the License, or
+# (at your option) any later version.
+# 
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+# 
+# You should have received a copy of the GNU General Public License
+# along with this program; if not, write to the Free Software
+# Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+# 
+# To contact David A. Wheeler, see his website at:
+#  http://www.dwheeler.com.
+# 
+# 
+
+echo "Dir C C++ Python Asm sh csh Java Lisp Tcl Expect Perl ML Modula3 awk sed make not auto unknown"
+
+for dir in $@
+do
+  if [ -d "$dir" ]
+  then
+  echo $dir | tr -d '\n '; echo -n " "
+  wc -l < $dir/ansic_list.dat | tr -d '\n '; echo -n " "
+  wc -l < $dir/cpp_list.dat | tr -d '\n '; echo -n " "
+  wc -l < $dir/python_list.dat | tr -d '\n '; echo -n " "
+  wc -l < $dir/asm_list.dat | tr -d '\n '; echo -n " "
+  wc -l < $dir/sh_list.dat | tr -d '\n '; echo -n " "
+  wc -l < $dir/csh_list.dat | tr -d '\n '; echo -n " "
+  wc -l < $dir/java_list.dat | tr -d '\n '; echo -n " "
+  wc -l < $dir/lisp_list.dat | tr -d '\n '; echo -n " "
+  wc -l < $dir/tcl_list.dat | tr -d '\n '; echo -n " "
+  wc -l < $dir/exp_list.dat | tr -d '\n '; echo -n " "
+  wc -l < $dir/perl_list.dat | tr -d '\n '; echo -n " "
+  wc -l < $dir/ml_list.dat | tr -d '\n '; echo -n " "
+  wc -l < $dir/modula3_list.dat | tr -d '\n '; echo -n " "
+  wc -l < $dir/awk_list.dat | tr -d '\n '; echo -n " "
+  wc -l < $dir/sed_list.dat | tr -d '\n '; echo -n " "
+  wc -l < $dir/makefile_list.dat | tr -d '\n '; echo -n " "
+  wc -l < $dir/not_list.dat | tr -d '\n '; echo -n " "
+  wc -l < $dir/auto_list.dat | tr -d '\n '; echo -n " "
+  wc -l < $dir/unknown_list.dat | tr -d '\n '; echo -n " "
+  echo
+  fi
+done
+
+

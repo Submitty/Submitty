@@ -1,0 +1,147 @@
+#!/usr/bin/perl
+# perl_count - count physical lines of code in Perl programs.
+# Usage: perl_count [-f file] [list_of_files]
+#  file: file with a list of files to count (if "-", read list from stdin)
+#  list_of_files: list of files to count
+#  -f file or list_of_files can be used, or both
+
+# Physical lines of Perl are MUCH HARDER to count than you'd think.
+# Comments begin with "#".
+# Also, anything in a "perlpod" is a comment.
+# See perlpod(1) for more info; a perlpod starts with
+# \s*=command, can have more commands, and ends with \s*=cut.
+# Note that = followed by space is NOT a perlpod.
+# Although we ignore everything after __END__ in a file,
+# we will count everything after __DATA__; there's arguments for counting
+# and for not counting __DATA__.
+
+# What's worse, "here" documents must be COUNTED AS CODE, even if
+# they're FORMATTED AS A PERLPOD.  Surely no one would do this, right?
+# Sigh... it can happen. See perl5.005_03/pod/splitpod.
+
+# This is part of SLOCCount, a toolsuite that counts
+# source lines of code (SLOC).
+# Copyright (C) 2001-2004 David A. Wheeler.
+# 
+# This program is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation; either version 2 of the License, or
+# (at your option) any later version.
+# 
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+# 
+# You should have received a copy of the GNU General Public License
+# along with this program; if not, write to the Free Software
+# Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+# 
+# To contact David A. Wheeler, see his website at:
+#  http://www.dwheeler.com.
+# 
+# 
+
+$total_sloc = 0;
+
+# Do we have "-f" (read list of files from second argument)?
+if (($#ARGV >= 1) && ($ARGV[0] eq "-f")) {
+  # Yes, we have -f
+  if ($ARGV[1] eq "-") {
+    # The list of files is in STDIN
+    while (<STDIN>) {
+      chomp ($_);
+      &count_file ($_);
+    }
+  } else {
+    # The list of files is in the file $ARGV[1]
+    open (FILEWITHLIST, $ARGV[1]) || die "Error: Could not open $ARGV[1]\n";
+    while (<FILEWITHLIST>) {
+      chomp ($_);
+      &count_file ($_);
+    }
+    close FILEWITHLIST;
+  }
+  shift @ARGV; shift @ARGV;
+}
+# Process all (remaining) arguments as file names
+while ($file = shift @ARGV) {
+  &count_file ($file);
+}
+
+print "Total:\n";
+print "$total_sloc\n";
+
+sub count_file {
+  my ($file) = @_;
+  my $sloc = 0;
+  my $isinpod = 0;
+  my $heredocument = ""; # If nonempty, identifies the ending marker.
+
+  open (FILE, $file);
+  while (<FILE>) {
+    s/#.*//;  # Delete leading comments.
+    if ($heredocument and m/^\s*$heredocument/) {
+     $heredocument = ""; # finished here doc.
+    } elsif (m/<<\s*["']?([A-Za-z0-9_-]+)["']?[;,]\s*$/) {
+      # Beginning of a here document.
+      $heredocument = $1;
+    } elsif (!$heredocument && m/^\s*=cut/) {  # Ending a POD?
+      if (! $isinpod) {
+        print stderr "cut without pod start in file $file line $.\n";
+      }
+      s/.*//;  # Don't count the cut command.
+      $isinpod = 0;
+    } elsif (!$heredocument && m/^\s*=[a-zA-Z]/) { # Starting continuing a POD?
+      # Perlpods can have multiple contents, so it's okay if $isinpod == 1.
+      # Note that =(space) isn't a POD; library file perl5db.pl does this!
+      $isinpod = 1;
+    } elsif (m/^__END__/) {  # Stop processing this file on __END__.
+      last;
+    }
+    if ((! $isinpod) && (m/\S/)) { $sloc++;}
+  }
+  # Show per-file & total; reset $isinpod per file.
+  print "$sloc $file\n";
+  $total_sloc += $sloc;
+  $sloc = 0;
+  if ($isinpod) {
+    print stderr "pod without closing cut in file $file\n";
+  }
+  # Reset state:
+  $isinpod = 0;
+  $heredocument = "";
+  close (FILE);
+}
+
+# The following is POD documentation; it should not be counted:
+=head1 Test
+=head2 testing
+=cut
+
+__END__
+# The following should not be counted in a line-counting program:
+print "Hello!\n";
+print "Hello!\n";
+print "Hello!\n";
+print "Hello!\n";
+print "Hello!\n";
+print "Hello!\n";
+print "Hello!\n";
+print "Hello!\n";
+print "Hello!\n";
+print "Hello!\n";
+print "Hello!\n";
+print "Hello!\n";
+print "Hello!\n";
+print "Hello!\n";
+print "Hello!\n";
+print "Hello!\n";
+print "Hello!\n";
+print "Hello!\n";
+print "Hello!\n";
+print "Hello!\n";
+print "Hello!\n";
+print "Hello!\n";
+
+

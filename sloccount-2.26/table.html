@@ -1,0 +1,569 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"><html><head><title>table</title><meta http-equiv="content-type" content="text/html; charset=ISO-8859-1"></head><body><br>
+By default SLOCCount uses a very simple estimating model for effort and schedule:
+the basic COCOMO model in the "organic" mode (see below for more about this).
+&nbsp;This model estimates effort and schedule, including design, code, test,
+and documentation time (both user/admin documentation and development documentation).
+Basic COCOMO is a nice simple model, and it's used as the default because
+it doesn't require any information about the code other than the SLOC count
+already computed.<br>
+<br>
+However, basic COCOMO's accuracy is limited in part for the same reason -
+basic COCOMO doesn't take a number of important factors into account.<br>
+If you have the necessary information, you can improve the model's accuracy
+by taking these factors into account. &nbsp;You can at least quickly determine
+if the right "mode" is being used to improve accuracy. &nbsp;You can also
+use the "Intermediate COCOMO" and "Detailed COCOMO" models that take more
+factors into account, and are likely to produce more accurate estimates as
+a result. Take these estimates as just that - estimates - they're not grand
+truths.<br>
+<br>
+To use the COCOMO model, you first need to determine if your application's
+mode, which can be "Organic", "embedded", or "semidetached". &nbsp;Most software
+is "organic" (which is why it's the default). &nbsp;Here are simple definitions
+of these modes:<br>
+<ul>
+<li>Organic: Relatively small software teams develop software in a highly
+familiar, in-house environment. &nbsp;It has a generally stable development
+environment, minimal need for innovative algorithms, and requirements can
+be relaxed to avoid extensive rework.</li><li>Semidetached: This is an intermediate
+step between organic and embedded. This is generally characterized by reduced
+flexibility in the requirements.</li><li>Embedded: The project must operate
+within tight (hard-to-meet) constraints, and requirements and interface specifications
+are often non-negotiable. &nbsp;The software will be embedded in a complex environment that the software must deal with as-is.<br>
+  </li>
+</ul>
+By default, SLOCCount uses the basic COCOMO model in the organic mode. &nbsp;For
+the basic COCOMO model, here are the critical factors for --effort and --schedule:<br>
+<ul>
+<li>Organic: effort factor = 2.4, exponent = 1.05; schedule factor = 2.5, exponent = 0.38</li><li>Semidetached:  effort factor = 3.0, exponent = 1.12; schedule factor = 2.5, exponent = 0.35</li><li>Embedded:  effort factor = 3.6, exponent = 1.20; schedule factor = 2.5, exponent = 0.32<br>
+  </li>
+</ul>
+Thus, if you want to use sloccount but the project is actually semidetached,
+you can use "--effort 3.0 1.12 --schedule 2.5 0.35" as options to sloccount
+to get a more accurate estimate.<br>
+<br>
+For more accurate estimates, you can use the intermediate COCOMO models.
+&nbsp;For intermediate COCOMO, use the following figures:<br>
+<ul>
+  <li>Organic: effort base factor = 2.3, exponent = 1.05; schedule factor = 2.5, exponent = 0.38</li>
+  <li>Semidetached: effort base factor = 3.0, exponent = 1.12; schedule factor = 2.5, exponent = 0.35</li>
+  <li>Embedded: effort base factor = 2.8, exponent = 1.20; schedule factor = 2.5, exponent = 0.32<br>
+  </li>
+</ul>
+The intermediate COCOMO values for schedule are exactly the same as the basic
+COCOMO model; the starting effort values are not quite the same, as discussed
+in Boehm's book. &nbsp;However, in the intermediate COCOMO model, you don't
+normally use the effort factors as-is, you use various corrective factors
+(called cost drivers). &nbsp;To use these corrections, you then consider
+all the cost drivers, and multiply them by the effort base factor, to determine
+the final effort factor. &nbsp;Here are the cost drivers (from Boehm's book,
+table 8-2 and 8-3):<br>
+<br>
+<table cellpadding="2" cellspacing="2" border="1" width="100%">
+
+
+  <tbody>
+    <tr>
+      <td valign="top" rowspan="1" colspan="2">Cost Drivers<br>
+      </td>
+      <td valign="top" rowspan="1" colspan="6">Ratings<br>
+      </td>
+    </tr>
+    <tr>
+      <td valign="top">ID<br>
+      </td>
+      <td valign="top">Driver Name<br>
+      </td>
+      <td valign="top">Very Low<br>
+      </td>
+      <td valign="top">Low<br>
+      </td>
+      <td valign="top">Nominal<br>
+      </td>
+      <td valign="top">High<br>
+      </td>
+      <td valign="top">Very High<br>
+      </td>
+      <td valign="top">Extra High<br>
+      </td>
+    </tr>
+    <tr>
+      <td valign="top">RELY<br>
+      </td>
+      <td valign="top">Required software reliability<br>
+      </td>
+      <td valign="top">0.75 (effect is slight inconvenience)<br>
+      </td>
+      <td valign="top">0.88 (easily recovered losses)<br>
+      </td>
+      <td valign="top">1.00 (recoverable losses)<br>
+      </td>
+      <td valign="top">1.15 (high financial loss)<br>
+      </td>
+      <td valign="top">1.40 (risk to human life)<br>
+      </td>
+      <td valign="top"><br>
+      </td>
+    </tr>
+    <tr>
+      <td valign="top">DATA<br>
+      </td>
+      <td valign="top">Database size<br>
+      </td>
+      <td valign="top"><br>
+      </td>
+      <td valign="top">0.94 (database bytes/SLOC &lt; 10)<br>
+      </td>
+      <td valign="top">1.00 (D/S between 10 and 100)<br>
+      </td>
+      <td valign="top">1.08 (D/S between 100 and 1000)<br>
+      </td>
+      <td valign="top">1.16 (D/S &gt; 1000)<br>
+      </td>
+      <td valign="top"><br>
+      </td>
+    </tr>
+    <tr>
+      <td valign="top">CPLX<br>
+      </td>
+      <td valign="top">Product complexity<br>
+      </td>
+      <td valign="top">0.70 (mostly straightline code, simple arrays, simple expressions)<br>
+      </td>
+      <td valign="top">0.85<br>
+      </td>
+      <td valign="top">1.00<br>
+      </td>
+      <td valign="top">1.15<br>
+      </td>
+      <td valign="top">1.30<br>
+      </td>
+      <td valign="top">1.65 (microcode, multiple resource scheduling, device timing dependent coding)<br>
+      </td>
+    </tr>
+    <tr>
+      <td valign="top">TIME<br>
+      </td>
+      <td valign="top">Execution time constraint<br>
+      </td>
+      <td valign="top"><br>
+      </td>
+      <td valign="top"><br>
+      </td>
+      <td valign="top">1.00 (&lt;50% use of available execution time)<br>
+      </td>
+      <td valign="top">1.11 (70% use)<br>
+      </td>
+      <td valign="top">1.30 (85% use)<br>
+      </td>
+      <td valign="top">1.66 (95% use)<br>
+      </td>
+    </tr>
+    <tr>
+      <td valign="top">STOR<br>
+      </td>
+      <td valign="top">Main storage constraint<br>
+      </td>
+      <td valign="top"><br>
+      </td>
+      <td valign="top"><br>
+      </td>
+      <td valign="top">1.00&nbsp;(&lt;50% use of available storage)</td>
+      <td valign="top">1.06  (70% use)<br>
+      </td>
+      <td valign="top">1.21 (85% use)<br>
+      </td>
+      <td valign="top">1.56 (95% use)<br>
+      </td>
+    </tr>
+    <tr>
+      <td valign="top">VIRT<br>
+      </td>
+      <td valign="top">Virtual machine (HW and OS) volatility<br>
+      </td>
+      <td valign="top"><br>
+      </td>
+      <td valign="top">0.87 (major change every 12 months, minor every month)<br>
+      </td>
+      <td valign="top">1.00 (major change every 6 months, minor every 2 weeks)</td>
+      <td valign="top">1.15 (major change every 2 months, minor changes every week)<br>
+      </td>
+      <td valign="top">1.30 (major changes every 2 weeks, minor changes every 2 days)<br>
+      </td>
+      <td valign="top"><br>
+      </td>
+    </tr>
+    <tr>
+      <td valign="top">TURN<br>
+      </td>
+      <td valign="top">Computer turnaround time<br>
+      </td>
+      <td valign="top"><br>
+      </td>
+      <td valign="top">0.87 (interactive)<br>
+      </td>
+      <td valign="top">1.00 (average turnaround &lt; 4 hours)<br>
+      </td>
+      <td valign="top">1.07<br>
+      </td>
+      <td valign="top">1.15<br>
+      </td>
+      <td valign="top"><br>
+      </td>
+    </tr>
+    <tr>
+      <td valign="top">ACAP<br>
+      </td>
+      <td valign="top">Analyst capability<br>
+      </td>
+      <td valign="top">1.46 (15th percentile)<br>
+      </td>
+      <td valign="top">1.19 (35th percentile)<br>
+      </td>
+      <td valign="top">1.00 (55th percentile)<br>
+      </td>
+      <td valign="top">0.86 (75th percentile)<br>
+      </td>
+      <td valign="top">0.71 (90th percentile)<br>
+      </td>
+      <td valign="top"><br>
+      </td>
+    </tr>
+    <tr>
+      <td valign="top">AEXP<br>
+      </td>
+      <td valign="top">Applications experience<br>
+      </td>
+      <td valign="top">1.29 (&lt;= 4 months experience)<br>
+      </td>
+      <td valign="top">1.13 (1 year)<br>
+      </td>
+      <td valign="top">1.00 (3 years)<br>
+      </td>
+      <td valign="top">0.91 (6 years)<br>
+      </td>
+      <td valign="top">0.82 (12 years)<br>
+      </td>
+      <td valign="top"><br>
+      </td>
+    </tr>
+    <tr>
+      <td valign="top">PCAP<br>
+      </td>
+      <td valign="top">Programmer capability<br>
+      </td>
+      <td valign="top">1.42 (15th percentile)<br>
+      </td>
+      <td valign="top">1.17  (35th percentile)<br>
+      </td>
+      <td valign="top">1.00 (55th percentile)<br>
+      </td>
+      <td valign="top">0.86  (75th percentile)<br>
+      </td>
+      <td valign="top">0.70 (90th percentile)<br>
+      </td>
+      <td valign="top"><br>
+      </td>
+    </tr>
+    <tr>
+      <td valign="top">VEXP<br>
+      </td>
+      <td valign="top">Virtual machine experience<br>
+      </td>
+      <td valign="top">1.21 (&lt;= 1 month experience)<br>
+      </td>
+      <td valign="top">1.10 (4 months)<br>
+      </td>
+      <td valign="top">1.00 (1 year)<br>
+      </td>
+      <td valign="top">0.90 (3 years)<br>
+      </td>
+      <td valign="top"><br>
+      </td>
+      <td valign="top"><br>
+      </td>
+    </tr>
+    <tr>
+      <td valign="top">LEXP<br>
+      </td>
+      <td valign="top">Programming language experience<br>
+      </td>
+      <td valign="top">1.14  (&lt;= 1 month experience)<br>
+      </td>
+      <td valign="top">1.07 (4 months)<br>
+      </td>
+      <td valign="top">1.00 (1 year)<br>
+      </td>
+      <td valign="top">0.95 (3 years)<br>
+      </td>
+      <td valign="top"><br>
+      </td>
+      <td valign="top"><br>
+      </td>
+    </tr>
+    <tr>
+      <td valign="top">MODP<br>
+      </td>
+      <td valign="top">Use of "modern" programming practices (e.g. structured programming)<br>
+      </td>
+      <td valign="top">1.24 (No use)<br>
+      </td>
+      <td valign="top">1.10<br>
+      </td>
+      <td valign="top">1.00 (some use)<br>
+      </td>
+      <td valign="top">0.91<br>
+      </td>
+      <td valign="top">0.82 (routine use)<br>
+      </td>
+      <td valign="top"><br>
+      </td>
+    </tr>
+    <tr>
+      <td valign="top">TOOL<br>
+      </td>
+      <td valign="top">Use of software tools<br>
+      </td>
+      <td valign="top">1.24<br>
+      </td>
+      <td valign="top">1.10<br>
+      </td>
+      <td valign="top">1.00 (basic tools)<br>
+      </td>
+      <td valign="top">0.91 (test tools)<br>
+      </td>
+      <td valign="top">0.83 (requirements, design, management, documentation tools)<br>
+      </td>
+      <td valign="top"><br>
+      </td>
+    </tr>
+    <tr>
+      <td valign="top">SCED<br>
+      </td>
+      <td valign="top">Required development schedule<br>
+      </td>
+      <td valign="top">1.23 (75% of nominal)<br>
+      </td>
+      <td valign="top">1.08 (85% of nominal)<br>
+      </td>
+      <td valign="top">1.00 (nominal)<br>
+      </td>
+      <td valign="top">1.04 (130% of nominal)<br>
+      </td>
+      <td valign="top">1.10 (160% of nominal)<br>
+      </td>
+      <td valign="top"><br>
+      </td>
+    </tr>
+    
+    
+    
+    
+  </tbody>
+</table>
+<br>
+<br>
+<br>
+So, once all of the factors have been multiplied together, &nbsp;you can
+then use the "--effort" flag to set more accurate factors and exponents.<br>
+<br>
+For example, imagine that you're examining a fairly simple application that
+meets the "organic" requirements. &nbsp;Organic projects have a base factor
+of 2.3 and exponents of 1.05, as noted above. &nbsp;We then examine all the
+factors to determine a corrected base factor. &nbsp;For this example, imagine
+that we determine the values of these cost drivers are as follows:<br>
+<br>
+<table cellpadding="2" cellspacing="2" border="1" width="100%">
+
+  <tbody>
+    <tr>
+      <td valign="top" rowspan="1" colspan="2">Cost Drivers<br>
+      </td>
+      <td valign="top" rowspan="1" colspan="2">Ratings<br>
+      </td>
+    </tr>
+    <tr>
+      <td valign="top">ID<br>
+      </td>
+      <td valign="top">Driver Name<br>
+      </td>
+      <td valign="top">Rating<br>
+      </td>
+      <td valign="top">Multiplier<br>
+      </td>
+    </tr>
+    <tr>
+      <td valign="top">RELY<br>
+      </td>
+      <td valign="top">Required software reliability<br>
+      </td>
+      <td valign="top">Low - easily recovered losses<br>
+      </td>
+      <td valign="top">0.88<br>
+      </td>
+    </tr>
+    <tr>
+      <td valign="top">DATA<br>
+      </td>
+      <td valign="top">Database size<br>
+      </td>
+      <td valign="top">Low<br>
+      </td>
+      <td valign="top">0.94<br>
+      </td>
+    </tr>
+    <tr>
+      <td valign="top">CPLX<br>
+      </td>
+      <td valign="top">Product complexity<br>
+      </td>
+      <td valign="top">Nominal<br>
+      </td>
+      <td valign="top">1.00<br>
+      </td>
+    </tr>
+    <tr>
+      <td valign="top">TIME<br>
+      </td>
+      <td valign="top">Execution time constraint<br>
+      </td>
+      <td valign="top">Nominal<br>
+      </td>
+      <td valign="top">1.00<br>
+      </td>
+    </tr>
+    <tr>
+      <td valign="top">STOR<br>
+      </td>
+      <td valign="top">Main storage constraint<br>
+      </td>
+      <td valign="top">Nominal<br>
+      </td>
+      <td valign="top">1.00<br>
+      </td>
+    </tr>
+    <tr>
+      <td valign="top">VIRT<br>
+      </td>
+      <td valign="top">Virtual machine (HW and OS) volatility<br>
+      </td>
+      <td valign="top">Low  (major change every 12 months, minor every month)<br>
+      </td>
+      <td valign="top">0.87<br>
+      </td>
+    </tr>
+    <tr>
+      <td valign="top">TURN<br>
+      </td>
+      <td valign="top">Computer turnaround time<br>
+      </td>
+      <td valign="top">Low (interactive)<br>
+      </td>
+      <td valign="top">0.87<br>
+      </td>
+    </tr>
+    <tr>
+      <td valign="top">ACAP<br>
+      </td>
+      <td valign="top">Analyst capability<br>
+      </td>
+      <td valign="top">Nominal  (55th percentile)<br>
+      </td>
+      <td valign="top">1.00<br>
+      </td>
+    </tr>
+    <tr>
+      <td valign="top">AEXP<br>
+      </td>
+      <td valign="top">Applications experience<br>
+      </td>
+      <td valign="top">Nominal (3 years)<br>
+      </td>
+      <td valign="top">1.00<br>
+      </td>
+    </tr>
+    <tr>
+      <td valign="top">PCAP<br>
+      </td>
+      <td valign="top">Programmer capability<br>
+      </td>
+      <td valign="top">Nominal  (55th percentile)<br>
+      </td>
+      <td valign="top">1.00<br>
+      </td>
+    </tr>
+    <tr>
+      <td valign="top">VEXP<br>
+      </td>
+      <td valign="top">Virtual machine experience<br>
+      </td>
+      <td valign="top">High (3 years)<br>
+      </td>
+      <td valign="top">0.90<br>
+      </td>
+    </tr>
+    <tr>
+      <td valign="top">LEXP<br>
+      </td>
+      <td valign="top">Programming language experience<br>
+      </td>
+      <td valign="top">High (3 years)<br>
+      </td>
+      <td valign="top">0.95<br>
+      </td>
+    </tr>
+    <tr>
+      <td valign="top">MODP<br>
+      </td>
+      <td valign="top">Use of "modern" programming practices (e.g. structured programming)<br>
+      </td>
+      <td valign="top">High (Routine use)<br>
+      </td>
+      <td valign="top">0.82<br>
+      </td>
+    </tr>
+    <tr>
+      <td valign="top">TOOL<br>
+      </td>
+      <td valign="top">Use of software tools<br>
+      </td>
+      <td valign="top">Nominal (basic tools)<br>
+      </td>
+      <td valign="top">1.00<br>
+      </td>
+    </tr>
+    <tr>
+      <td valign="top">SCED<br>
+      </td>
+      <td valign="top">Required development schedule<br>
+      </td>
+      <td valign="top">Nominal<br>
+      </td>
+      <td valign="top">1.00<br>
+      </td>
+    </tr>
+    
+    
+    
+    
+  </tbody>
+</table>
+<br>
+By multiplying these driver values together in this example, we compute:<br>
+<pre>0.88*0.94*1*1*1*0.87*0.87*1*1*1*0.90*0.95*0.82*1*1</pre>
+The correction from these is 0.438964094, which you multiply by the base
+factor (2.3 in this case) to determine a final effort factor. &nbsp;For this
+example, the final factor for the effort calculation is 1.01. You would then
+invoke sloccount with "--effort 1.01 1.05" to pass in the corrected factor
+and exponent. &nbsp;You don't need to use "--schedule" to set the factors
+(they default to the values for organic model), but you can set them manually
+anyway by setting "--schedule 2.5 0.38". &nbsp;You <i>do</i> need to use the --schedule option for embedded and semidetached projects. The final command would be:<br>
+<br>
+sloccount --effort 1.01 1.05 --schedule 2.5 0.38 my_project<br>
+<br>
+<br>
+<br>
+<br>
+<br>
+<br>
+</body></html>

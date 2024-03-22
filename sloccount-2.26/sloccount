@@ -1,0 +1,258 @@
+#!/bin/sh
+
+# This is the front-end program "sloccount", part of the
+# SLOCCount tool suite by David A. Wheeler.
+# Given a list of directories, compute the SLOC count,
+# automatically creating the directory $HOME/.slocdata.
+
+# This is part of SLOCCount, a toolsuite that counts
+# source lines of code (SLOC).
+# Copyright (C) 2001-2004 David A. Wheeler.
+# 
+# This program is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation; either version 2 of the License, or
+# (at your option) any later version.
+# 
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+# 
+# You should have received a copy of the GNU General Public License
+# along with this program; if not, write to the Free Software
+# Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+# 
+# To contact David A. Wheeler, see his website at:
+#  http://www.dwheeler.com.
+
+# See the SLOCCount documentation if you need
+# more details about the license.
+
+version=2.26
+
+if [ "$#" -eq 0 ]
+then
+  echo "Error: You must provide a directory or directories of source code."
+  exit 1
+fi
+
+startingdir=`pwd`
+
+
+# "datadir" is some suitable safe place for the data; here's the default:
+datadir=${HOME}/.slocdata
+
+details="n"
+cached="n"
+append="n"  # If "append", then don't delete datadir, just add to it.
+oneprogram="--oneprogram"
+display_results="n"
+duplicate_control=""
+autogen=""
+filecount=""
+wide=""
+effort_model=""
+personcost=""
+overhead=""
+follow=""
+addlang=""
+notopfollow=""
+showother=""
+
+# Perl 5.8.0 handles the "LANG" environment variable oddly;
+# if it includes ".UTF-8" (which is does in Red Hat Linux 9 and others)
+# then it will bitterly complain about ordinary text.
+# So, we'll need to filter ".UTF-8" out of LANG.
+if [ x"$LANG" != x ]
+then
+ LANG=`echo "$LANG" | sed -e 's/\.UTF-8//'`
+ export LANG
+ # echo "New LANG variable: $LANG"
+fi
+
+while [ "$#" -gt 0 ]
+do
+ case "$1"
+ in
+  --version) echo "$version"
+             exit 0;;
+  --cached) cached="y"
+            shift;;
+  --append) append="y"
+            shift;;
+  --follow) follow="--follow"
+            shift;;
+  --notopfollow) notopfollow="--notopfollow"
+            shift;;
+  --datadir) shift
+             if [ ! -d "$1" ]
+             then
+               echo "Error: $1 is not a directory"
+               exit 1
+             fi
+             cd "$1"
+             datadir=`pwd`
+             cd $startingdir
+             shift;;
+  --duplicates) duplicate_control="$1"
+                shift;;
+  --crossdups)  duplicate_control="$1"
+                shift;;
+  --autogen)    autogen="$1"
+                shift;;
+  --multiproject) oneprogram=""
+                 shift;;
+  --filecount) filecount="$1"
+               shift;;
+  --filecounts) filecount="$1"
+               shift;;
+  --wide)      wide="$1"
+               shift;;
+  --details) details="y"
+            shift;;
+  --addlang)  addlang="$addlang $1 $2"
+            shift; shift;;
+  --addlangall)  addlang="--addlangall"
+            shift;;
+  --showother)  showother="--showother"
+            shift;;
+  --effort)  effort_model="$1 $2 $3"
+            shift; shift; shift;;
+  --schedule)  schedule_model="$1 $2 $3"
+            shift; shift; shift;;
+  --personcost) personcost="$1 $2"
+             shift; shift;;
+  --overhead) overhead="$1 $2"
+             shift; shift;;
+  --) break;;
+  --*) echo "Error: no such option $1"
+       exit 1;;
+  *) break;;
+ esac
+done
+
+# --duplicates) duplicate_control="$1"
+#  --autogen)    autogen="$1"
+# $follow
+
+case "$cached"
+in
+ y)
+   if [ -n "$duplicate_control" -o -n "$autogen" -o -n "$follow" ]
+   then
+     echo "Warning: You cannot control what files are selected in a cache."
+     echo "The option '--cached' disables --duplicates, --crossdups,"
+     echo "--autogen, and --follow.  Remove the --cached option if you"
+     echo "are changing what you wish to include in your calculations."
+     echo
+   fi
+   if [ -d "$datadir" ]
+   then
+    display_results="y"
+   else
+    echo "Sorry, data directory $datadir does not exist."
+    exit 1
+   fi;;
+ n)  # Not cached -- need to compute the results.
+
+  if [ "$append" = "n" ]; then
+     if [ -r "${datadir}/sloc_noerase" ]; then
+       echo "ERROR! This data directory is marked as do-not-erase."
+       echo "Remove the file ${datadir}/sloc_noerase to erase it."
+       exit 1
+     fi
+     if [ "$#" -eq 0 ]; then
+       echo "ERROR! No directories for initial analysis supplied."
+       exit 1
+     fi
+     rm -fr "$datadir"
+     mkdir "$datadir"
+  fi
+
+  # Now that "datadir" exists, first test to make sure wc -l works.
+  wctestfile=${datadir}/.wctestfile
+  echo "" > $wctestfile
+  echo "line two" >> $wctestfile
+  echo "line three" >> $wctestfile
+  echo "line four" >> $wctestfile
+  testcount=`wc -l < ${wctestfile} | sed -e 's/ //g'`
+  if [ "$testcount" -ne 4 ]
+  then
+   echo "FAILURE! Your wc program's -l option produces wrong results."
+   echo "Update your wc (probably in a textutils package) to a correct version."
+   exit 1
+  fi
+
+
+  # Split things up if we're given only one directory on the argument line
+  # and that directory has more than one subdirectory:
+  split_things_up="n"
+  if [ "$#" -eq 1 ]
+  then
+   count=0
+   for x in $1/*
+   do
+    if [ -d "$x" ]
+    then
+      count=`expr $count + 1`
+      if [ $count -gt 1 ]
+      then
+       split_things_up="y"
+       break
+      fi
+    fi
+   done
+  fi
+  # If we're appending, don't split things up.
+  if [ "$append" = "y" ]
+  then
+    split_things_up="n"
+  fi
+
+  case $split_things_up
+  in
+   y) make_filelists $follow $notopfollow --datadir "$datadir" --skip src "$1"/* ||
+          exit 1
+      if [ -d "$1"/src ]
+      then
+       make_filelists $notopfollow --datadir "$datadir" --prefix "src_" "$1"/src/* ||
+          exit 1
+      fi
+      ;;
+   *) make_filelists $follow $notopfollow --datadir "$datadir" "$@" || exit 1
+      ;;
+  esac
+
+  cd $datadir
+  if echo "Categorizing files." &&
+     break_filelist --duplistfile sloc_hashes $duplicate_control $autogen * &&
+     echo "Computing results." &&
+     compute_all *
+  then
+    display_results=y
+  fi
+  echo
+  echo
+  ;;
+esac
+
+# If we're appending, don't display results.
+if [ "$append" = "y" ]
+then
+  display_results="n"
+  echo "To display results, use the --cached option."
+fi
+
+
+case $display_results
+in
+ y)
+  cd $datadir
+  case $details
+  in
+    y)   get_sloc_details * ;;
+    *)   get_sloc $addlang $showother $filecount $oneprogram $effort_model $schedule_model $personcost $overhead * ;;
+  esac;;
+esac
+

@@ -1,0 +1,66 @@
+#!/bin/sh
+# Computes sloc in the listed directories.
+# first parameter = language.
+# Creates the "outfile", and prints the total.
+# 
+# This is part of SLOCCount, a toolsuite that counts
+# source lines of code (SLOC).
+# Copyright (C) 2001-2004 David A. Wheeler.
+# 
+# This program is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation; either version 2 of the License, or
+# (at your option) any later version.
+# 
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+# 
+# You should have received a copy of the GNU General Public License
+# along with this program; if not, write to the Free Software
+# Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+# 
+# To contact David A. Wheeler, see his website at:
+#  http://www.dwheeler.com.
+# 
+# 
+
+language="$1"
+shift
+
+starting_dir=`pwd`
+
+for dir in "$@"
+do
+ if [ -d "$dir" -a -r "${dir}/filelist" ]
+ then
+  cd "$dir"
+
+  if [ -s ${language}_list.dat ]
+  then
+   case "$language" in
+     ansic)  use_c_count="y" ;;
+     cpp)    use_c_count="y" ;;
+     java)   use_c_count="y" ;;
+     yacc)   use_c_count="y" ;;
+     cs)     use_c_count="y" ;;
+     *)      use_c_count="n" ;;
+   esac
+
+   case "$use_c_count" in
+     y) c_count -f ${language}_list.dat > ${language}_outfile.dat ;;
+     *) ${language}_count -f ${language}_list.dat > ${language}_outfile.dat
+        ;;
+   esac
+   tail -1 < ${language}_outfile.dat
+
+  else
+   rm -f ${language}_outfile.dat
+   echo 0
+  fi
+
+  cd "$starting_dir"
+ fi
+done
+

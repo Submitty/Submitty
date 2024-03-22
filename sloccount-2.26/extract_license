@@ -1,0 +1,178 @@
+#!/usr/bin/perl
+# extract_license
+# Determine the license of a program, given 2 parameters:
+# (1) the directory containing the program's source code.
+# (2) the RPM spec file (which may be /dev/null)
+
+# This "regularizes" license names.  For example,
+# BSD-style, BSDish, and BSD-like all become "BSD-like".
+# License names "sentence capitalization", e.g., "Freely distributable".
+# It also fixes a lot of errors in Red Hat spec files.
+
+# 
+# This is part of SLOCCount, a toolsuite that counts
+# source lines of code (SLOC).
+# Copyright (C) 2001-2004 David A. Wheeler.
+# 
+# This program is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation; either version 2 of the License, or
+# (at your option) any later version.
+# 
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+# 
+# You should have received a copy of the GNU General Public License
+# along with this program; if not, write to the Free Software
+# Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+# 
+# To contact David A. Wheeler, see his website at:
+#  http://www.dwheeler.com.
+# 
+# 
+
+$program_dir = shift;
+$rpm_spec = shift;
+
+$license = $copyright = "";
+
+%all_licenses = ();
+
+
+sub read_license_file() {
+ my $filename = shift(@_);
+ my $license = "";
+ if ((-s $filename) && open(LICENSE_FILE, "<$filename")) {
+    # TODO: detect even more licenses automatically.
+    # It'd hard to detect BSD/MIT licenses,
+    # because these licenses make changes in the MIDDLE of their text.
+    # Thus, it's hard to avoid falsely detecting "almost" licenses.
+    # For example, ipf has license text that looks like a BSD/MIT license,
+    # but it's not even open source.
+    # However, we CAN detect many other kinds, so let's at least do that.
+    for ($i=1; $i < 9; $i++) {
+      $line = <LICENSE_FILE>;
+      if ($line =~ m/GNU GENERAL PUBLIC LICENSE/i) {$license = "GPL";}
+      elsif ($line =~ m/GNU LIBRARY GENERAL PUBLIC LICENSE/i) {$license = "LGPL";}
+      elsif ($line =~ m/GNU LESSER GENERAL PUBLIC LICENSE/i) {$license = "LGPL";}
+      elsif ($line =~ m/Mozilla PUBLIC LICENSE/i) {$license = "MPL";}
+      elsif ($line =~ m/Netscape PUBLIC LICENSE/i) {$license = "NPL";}
+      elsif ($line =~ m/IBM PUBLIC LICENSE/i) {$license = "IBM Public License";}
+      elsif ($line =~ m/\bApache Software License\b/i) {$license = "Apache";}
+      elsif ($line =~ m/\bThe "Artistic License"/i) {$license = "Artistic";}
+    }
+    close(LICENSE_FILE);
+  }
+  return $license;
+}
+
+sub add_license() {
+ # Add to license list "all_licenses" the license in the given file, if one.
+ my $filename = shift(@_);
+ my $license = &read_license_file($filename);
+ if ($license) { $all_licenses{$license} = 1; }
+}
+
+open(RPM_SPEC, "<$rpm_spec");
+
+while (<RPM_SPEC>) {
+ if (/^Copyright:(.*)/i) {$copyright=$1;}
+ if (/^License:(.*)/i)       {$license=$1;}
+}
+close(RPM_SPEC);
+
+if (! $license) {
+  $license = $copyright;
+}
+
+# print "GOT: $license\n";
+
+if ( $license ) {
+  $_ = $license;
+
+  # Remove extraneous material in the middile of the license text.
+  s/ \(see: [^)]*\)//;  # Delete parenthetical see: references.
+  s/, ?no warranties//;  # "No warranties" not important for our purposes.
+  s/See COPYRIGHT file//i;
+  s/\b,?URW holds copyright\b//i;
+
+  # Clean up front and back.
+  s/^\s*//;
+  s/[ \t\.]*$//;  # Delete trailing periods and blanks.
+
+  $_ = ucfirst($_);  # Uppercase first character. Remove this line if need to.
+
+  if (/^GPL2?$/i || /^GNU$/ || /^GNU ?GPL *(Version 2)?$/i) {$_ = "GPL"};
+  if (/^Apache ?Group License$/i) {$_ = "Apache"};
+  if (/^Apacheish$/i || /^Apache-style$/i) {$_ = "Apache-like"};
+  if (/^Artistic$/i) {$_ = "Artistic"};
+  if (/^BSD$/i) {$_ = "BSD"};
+  if (/^BSDish$/i || /^BSD-style$/i || /^BSD-like$/) {$_ = "BSD-like"};
+  if (/^Distributable$/i) {$_ = "Distributable"};
+  if (/^Distributable ?\(BSD-like\)$/i) {$_ = "BSD-like"};
+  if (/^Freely ?Distributable$/i) {$_ = "Freely distributable"};
+  if (/^Free,no warranties.?$/i) {$_ = "Free"};
+  if (/^freeware. See COPYRIGHT file.?$/i) {$_ = "Free"};
+  if (/^freeware.?$/i) {$_ = "Free"};
+  if (/^GPLand Artistic$/i) {$_ = "GPL and Artistic"};
+  if (/^GPL ?or BSD$/i) {$_ = "GPL or BSD"};
+  if (/^GPL\/XFree86$/i) {$_ = "GPL/MIT"};
+  if (/^distributable- most of it GPL$/i) {$_ = "Distributable - mostly GPL"};
+  if (/^IBM ?Public License Version 1.0 -/i) {$_ = "IBM Public License"};
+  if (/^IBM ?Public License$/i) {$_ = "IBM Public License"};
+  if (/^MIT, ?freely distributable/i) {$_ = "MIT"};
+  if (/^MIT\/X ?Consortium$/i) {$_ = "MIT"};
+  if (/^Non[- ]commercial[- ]use[- ]only$/i) {$_ = "Non-commercial use only"};
+  if (/^Proprietary$/i) {$_ = "Proprietary"};
+  if (/^Public ?domain$/i) {$_ = "Public domain"};
+  if (/^Universityof Washington's Free-Fork License$/i)
+         {$_ = "U of Washington's Free-Fork License"};
+  if (/^W3CCopyright \(BSD like\)$/i) {$_ = "BSD-like"};
+  if (/^X ?Consortium[ -]?like$/i) {$_ = "MIT-like"};
+  if (/^XFree86$/i) {$_ = "MIT"};
+  if (/^W3C Copyright \(BSD[- ]like\)$/i) {$_ = "BSD-like"};
+
+  # Eliminate license if it isn't really a license.
+  if (/^2000Red Hat, Inc.?$/i) {$_ = ""};
+  if (/^OMRON ?Corporation, OMRON Software Co., Ltd.?$/i) {$_ = ""};
+  if (/^Copyright\s?.?\s?[1-9][0-9][0-9][0-9]/i) {$_ = ""}; # Not a license.
+  if (/^\(C\)\s?[1-9][0-9][0-9][0-9]/i) {$_ = ""}; # Not a license.
+  if (/^[1-9][0-9][0-9][0-9]\s/i) {$_ = ""}; # A date, not a license.
+
+  $license = $_;
+}
+
+if ($license) {
+  print $license;
+} else {
+  # The spec file didn't tell us anything.  Let's look for files that tell us.
+  &add_license("${program_dir}/LICENSE");
+  &add_license("${program_dir}/COPYING");
+  &add_license("${program_dir}/COPYING.LIB");
+  &add_license("${program_dir}/Artistic");
+  &add_license("${program_dir}/COPYING-2.0");
+  &add_license("${program_dir}/COPYING.WTFPL");
+  &add_license("${program_dir}/COPYING.GPL");
+  &add_license("${program_dir}/COPYING.NEWLIB");
+  &add_license("${program_dir}/COPYING.kdb");
+  if (-s "${program_dir}/COPYING.BSD") {  # Assume there's a BSD license.
+     $all_licenses{"BSD"} = 1;
+  }
+  if (-s "${program_dir}/COPYING.MIT") {  # Assume there's an MIT license.
+     $all_licenses{"MIT"} = 1;
+  }
+
+  if (%all_licenses) {
+     $license = "";
+     foreach $license_fragment (sort(keys(%all_licenses))) {
+       $license .= "${license_fragment}, "
+     }
+     $license =~ s/, $//;
+     print $license;
+  }
+
+}
+print "\n";
+

@@ -1,0 +1,235 @@
+'\"
+.\" (C) Copyright 2001-2004 David A. Wheeler (dwheeler at dwheeler.com)
+.\"
+.\" This program is free software; you can redistribute it and/or modify
+.\" it under the terms of the GNU General Public License as published by
+.\" the Free Software Foundation; either version 2 of the License, or
+.\" (at your option) any later version.
+.\" 
+.\" This program is distributed in the hope that it will be useful,
+.\" but WITHOUT ANY WARRANTY; without even the implied warranty of
+.\" MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+.\" GNU General Public License for more details.
+.\" 
+.\" You should have received a copy of the GNU General Public License
+.\" along with this program; if not, write to the Free Software
+.\" Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+.\" 
+.\" David A. Wheeler's website is http://www.dwheeler.com
+.\"
+.\" Created Mon Jan 08 23:00:00 2001, David A. Wheeler (dwheeler at dwheeler.com)
+.\"
+.TH SLOCCOUNT 1 "31 July 2004" "SLOCCount" "SLOCCount"
+.SH NAME
+sloccount \- count source lines of code (SLOC)
+.SH SYNOPSIS
+.B sloccount
+.RB [ --version ]
+.RB [ --cached ]
+.RB [ --append ]
+[ \fB--datadir\fR \fIdirectory\fR ]
+.RB [ --follow ]
+.RB [ --duplicates ]
+.RB [ --crossdups ]
+.RB [ --autogen ]
+.RB [ --multiproject ]
+.RB [ --filecount ]
+.RB [ --wide ]
+.RB [ --details ]
+[ \fB--effort\fR \fIF\fR \fIE\fR ]
+[ \fB--schedule\fR \fIF\fR \fIE\fR ]
+[ \fB--personcost\fR \fIcost\fR ]
+[ \fB--overhead\fR \fIoverhead\fR ]
+[ \fB--addlang\fR \fIlanguage\fR ]
+[ \fB--addlangall\fR ]
+.RB [ -- ]
+.I directories
+.SH DESCRIPTION
+.PP
+sloccount counts the physical source lines of code (SLOC)
+contained in descendants of the specified set of directories.
+It automatically determines which files are source code files,
+and it automatically determines the computer language used in each file.
+By default it summarizes the SLOC results and presents various estimates
+(such as effort and cost to develop),
+but its output can be controlled by various options.
+.PP
+If you give sloccount a list of two or more directories, the counts
+will be broken up according to that list.
+There is one important limitation:
+the basenames of the directories given as parameters must be different,
+because those names are used to group summary information.
+Thus, you can't run "sloccount /usr/src/hello /usr/local/src/hello".
+This limitation only applies to parameters of sloccount - subdirectories
+descended from the top directories can have the same basename.
+.PP
+If you give sloccount only a single directory, sloccount tries
+to automatically find a reasonable breakdown for purposes of reporting
+(so it'll produce a useful report).
+In this case, if the directory has at least
+two subdirectories, then those subdirectories will be used as the
+breakdown.
+If the single directory contains files as well as directories
+(or if you give sloccount some files as parameters), those files will
+be assigned to the directory "top_dir" so you can tell them apart
+from other contents.
+Finally, if there's a subdirectory named "src", then that subdirectory is
+again broken down, with all the further subdirectories prefixed with "src_".
+Thus, if directory "X" has a subdirectory "src", which contains subdirectory
+"modules", sloccount will report a separate count for "src_modules".
+.PP
+sloccount normally considers all descendants of these directories,
+though unless told otherwise it ignores symbolic links.
+.PP
+sloccount is the usual front-end of the package of tools named "SLOCCount".
+Note that the name of the entire package has capital letters, while
+the name of this front-end program does not.
+.PP
+sloccount will normally report estimates of schedule time, effort, and
+cost, and for single projects it also estimates
+the average number of active developers.
+These are merely estimates, not etched in stone; you can modify the
+parameters used to improve the estimates.
+
+
+.SH OPTIONS
+.TP 12
+.BI --version
+Report the version number of SLOCCount and immediately exit.
+This option can't be usefully combined with any other option.
+
+.TP 12
+.BI --cached
+Do not recalculate; instead, use cached results from a previous execution.
+Without the --cached or --append option,
+sloccount automatically removes the data directory
+and recreates it.
+
+.TP 12
+.BI --append
+Do not remove previous calculations from the data directory;
+instead, add the analysis to the current contents of the data directory.
+
+.TP
+.BI --datadir " directory"
+Store or use cached data in the given data directory; default value
+is "~/.slocdata".
+
+.TP
+.BI --follow
+Follow symbolic links.
+
+.TP
+.BI --duplicates
+Count all duplicates.
+Normally, if files have equal content (as determined using
+MD5 hash values), only one is counted.
+
+.TP
+.BI --crossdups
+Count duplicates if they occur in different portions of the breakdown.
+Thus, if the top directory contains many different projects, and you
+want the duplicates in different projects to count in each project,
+choose this option.
+
+.TP
+.BI --autogen
+Count source code files that appear to be automatically generated.
+Normally these are excluded.
+
+.TP
+.BI --multiproject
+The different directories represent different projects;
+otherwise, it's assumed that all of the source code belongs
+to a single project.
+This doesn't change the total number of files or SLOC values, but
+it does affect the effort and schedule estimates.
+Given this option,
+effort is computed separately for each project (and then summed),
+and the schedule is the estimated schedule of the largest project.
+
+.TP
+.BI --filecount
+Display counts of files instead of SLOC.
+
+.TP
+.BI --wide
+Display in the "wide" (tab-separated) format.
+
+.TP
+.BI --details
+Display details, that is, results for every source code file.
+
+.TP
+.BI --effort " F E"
+Change the factor and exponent for the effort model.
+Effort (in person-months) is computed as F*(SLOC/1000)^E.
+
+.TP
+.BI --schedule " F E"
+Change the factor and exponent for the schedule model.
+Schedule (in months) is computed as F*(effort)^E.
+
+.TP
+.BI --personcost " cost"
+Change the average annual salary to
+.IR cost .
+
+.TP
+.BI --overhead " overhead"
+Change the overhead value to
+.IR overhead .
+Estimated cost is computed as effort * personcost * overhead.
+
+.TP
+.BI --addlang " language"
+Add a language not considered by default to be a ``language'' to be
+reported.
+Currently the only legal values for language are "makefile", "sql",
+and "html".
+These files
+are not normally included in the SLOC counts, although their SLOCs are
+internally calculated and they are shown in the file counts.
+If you want to include more than one such language, do it by
+passing --addlang more than once, e.g., --addlang makefile --addlang sql.
+
+.TP
+.BI --addlangall
+Add all languages not normally included in final reports.
+
+.SH "NOTES"
+As with many other programs using Unix-like options,
+directories whose names begin with a
+dash (``-'') can be misinterpreted as options.
+If the directories to be analyzed might begin with a dash, use the
+double-dash (``-\ -'') to indicate the end of the option list
+before listing the directories.
+
+.SH "BUGS"
+Filenames with embedded newlines (in the directories or their
+descendants) won't be handled correctly; they will be interpreted
+as separate filenames where the newlines are inserted.
+An attacker could prevent sloccount from working by
+creating filenames of the form /normal/directory ... NEWLINE/dev/zero.
+Such filenames are exceedingly rare in source code because they're a pain
+to work with using other tools, too.
+Future versions of sloccount may internally use NUL-separated filenames
+(like GNU find's -print0 command) to fix this.
+
+There are many more languages not yet handled by SLOCCount.
+
+SLOCCount only reports physical source lines of code.
+It would be
+very useful if it could also report logical lines of code, and perhaps
+other common metrics such as McCabe's complexity measures
+and complexity density (complexity/SLOC for each function or procedure).
+
+
+.SH "SEE ALSO"
+See the SLOCCount website at http://www.dwheeler.com/sloccount.
+Note that more detailed documentation is available both on the website
+and with the SLOCCount package.
+
+.SH AUTHOR
+David A. Wheeler (dwheeler@dwheeler.com).
+
