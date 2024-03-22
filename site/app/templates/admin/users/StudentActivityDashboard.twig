@@ -61,7 +61,9 @@
                 <td id="8" style="cursor: pointer">Number of Poll Responses <i class="fas"></i></td>
                 <td id="9" style="cursor: pointer">Office Hours Queue Date <i class="fas"></i></td>
                 <td id="10" style="cursor: pointer">Course Materials Access Date <i class="fas"></i></td>
-                <td id="11"  style="cursor: pointer; display:none">Flagged <i class="fas"></i></td>
+                <td id="11" style="cursor: pointer">Upducks Recived <i class="fas"></i></td>
+                <td id="12" style="cursor: pointer">Upducks Given <i class="fas"></i></td>
+                <td id="13" style="cursor: pointer; display:none">Flagged <i class="fas"></i></td>
             </tr>
         </thead>
     
@@ -79,6 +81,8 @@
                 <td>{{row.num_poll_responses}}</td>
                 <td>{{row.office_hours_queue}}</td>
                 <td>{{row.course_materials_access}}</td>
+                <td>{{row.upducks_recived}}</td>
+                <td>{{row.upducks_given}}</td>
                 <td style="display: none;">False</td>
             </tr>
         {% endfor %}

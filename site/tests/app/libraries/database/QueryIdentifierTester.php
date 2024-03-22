@@ -55,6 +55,10 @@ class QueryIdentifierTester extends \PHPUnit\Framework\TestCase {
                 (SELECT distinct on (user_id) user_id, time_in
                 FROM queue
                 ORDER BY user_id, time_in desc)
+            I AS
+                //add a sql code to get the upducks recived by using post_id in forum_upducks and get that user
+                J AS
+                //get the upducks given by each user
             SELECT
                 A.registration_section, A.user_id, user_givenname, user_familyname,
                 B.timestamp as gradeable_access,
@@ -63,6 +67,9 @@ class QueryIdentifierTester extends \PHPUnit\Framework\TestCase {
                 E.timestamp as forum_post,
                 F.count as num_poll_responses,
                 G.time_in as office_hours_queue
+                H.timestamp as course_materials_access
+                I.upducks_recived as upducks_recived
+                J.upducks_given as upducks_given
             FROM
                 A
             left join B on A.user_id=B.user_id
@@ -71,6 +78,9 @@ class QueryIdentifierTester extends \PHPUnit\Framework\TestCase {
             left join E on A.user_id=E.author_user_id
             left join F on A.user_id=F.student_id
             left join G on A.user_id=G.user_id
+            left join H on A.user_id=H.user_id
+            left join G on A.user_id=I.user_id
+            left join H on A.user_id=J.user_id
             ORDER BY A.registration_section, A.user_familyname, A.user_givenname, A.user_id;
 SQL;
           $this->assertEquals(QueryIdentifier::SELECT, QueryIdentifier::identify($query));

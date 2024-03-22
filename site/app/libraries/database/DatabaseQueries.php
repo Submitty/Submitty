@@ -218,6 +218,10 @@ class DatabaseQueries {
         (SELECT distinct on (user_id) user_id, timestamp
         FROM course_materials_access
         ORDER BY user_id, timestamp desc)
+        I AS
+        //add a sql code to get the upducks recived by using post_id in forum_upducks and get that user
+        J AS
+        //get the upducks given by each user
         SELECT
         A.registration_section, A.user_id, A.user_givenname, user_familyname,
         B.timestamp as gradeable_access,
@@ -227,6 +231,8 @@ class DatabaseQueries {
         F.count as num_poll_responses,
         G.time_in as office_hours_queue,
         H.timestamp as course_materials_access
+        I.upducks_recived as upducks_recived
+        J.upducks_given as upducks_given
         FROM
         A
         left join B on A.user_id=B.user_id
@@ -236,6 +242,8 @@ class DatabaseQueries {
         left join F on A.user_id=F.student_id
         left join G on A.user_id=G.user_id
         left join H on A.user_id=H.user_id
+        left join G on A.user_id=I.user_id
+        left join H on A.user_id=J.user_id
         ORDER BY length(A.registration_section), A.registration_section, A.user_familyname, A.user_givenname, A.user_id;
         ");
         return $this->course_db->rows();
@@ -281,7 +289,7 @@ class DatabaseQueries {
                     (SELECT timestamp, user_id
                     FROM course_materials_access where user_id = (table Input)
                     ORDER BY timestamp desc
-                    LIMIT 1)
+                    LIMIT 1)            
             SELECT
                 Gradeable_Access.timestamp as gradeable_access,
                 Gradeable_Submission.submission_time as gradeable_submission,
