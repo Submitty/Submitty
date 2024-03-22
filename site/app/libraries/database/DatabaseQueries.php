@@ -6207,10 +6207,14 @@ AND gc_id IN (
             );
 
             // Unpack the component data
+            // updated the deprecated behavior in PHP. Passing null to json_decode() 
             $unpacked_component_data = [];
             foreach (array_merge($component_properties, $component_mark_properties) as $property) {
-                $unpacked_component_data[$property] = json_decode($row['array_' . $property]) ?? [];
+                $json_data = $row['array_' . $property];
+                $decoded_data = ($json_data !== null) ? json_decode($json_data) : [];
+                $unpacked_component_data[$property] = $decoded_data;
             }
+            
 
             // Create the components
             $components = [];
