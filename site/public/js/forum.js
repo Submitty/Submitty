@@ -1295,7 +1295,7 @@ function toggleLike(post_id, current_user, isLiked) {
         data: {
             post_id: post_id,
             current_user: current_user,
-            isLiked: isLiked,//this is a bool for if the button is liked or not
+            isLiked: isLiked, //this is a bool for if the button is liked or not
             // eslint-disable-next-line no-undef
             csrf_token: csrfToken,
         },
