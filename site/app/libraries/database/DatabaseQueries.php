@@ -2270,7 +2270,7 @@ ORDER BY {$orderby}",
     }
 
     public function getTotalComponentCount($g_id) {
-        $this->course_db->query("SELECT count(*) AS cnt FROM gradeable_component WHERE g_id=?", [$g_id]);
+        $this->course_db->query("SELECT count(*) AS cnt FROM gradeable_component WHERE g_id=? AND gc_is_peer=?", [$g_id, $this->course_db->convertBoolean(false)]);
         return intval($this->course_db->row()['cnt']);
     }
 
