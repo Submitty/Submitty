@@ -185,6 +185,7 @@
                 <tbody class="details-content panel-content-active"{% if section.title in collapsed_sections %} style="display: none"{% endif %}>
                     {% if section.rows is defined %}
                         {% for info in section.rows %}
+                        {# sections.section.rows.info #}
                             {{ _self.render_student(_context, section, info.graded_gradeable, loop.index, info, columns, team_gradeable_view_history, overrides, anon_ids) }}
                         {% endfor %}
                     {% endif %}
@@ -228,14 +229,15 @@
                         <td>
                             {{ display_section }}
                         </td>
-                        <td>
+                        <td colspan="{{ 1 }}">
+                            {# this will be add back when "admin team form" function for empty team
                             <a onclick="{{ empty_team_info[loop.index0].team_edit_onclick }}" aria-label="Edit Team" class="key_to_click" tabindex="0">
                                 <i class="fas fa-pencil-alt"></i>
                             </a>
+                            #}
                         </td>
                         <td>{{ team.getId() }}</td>
                         <td colspan="{{ columns|length - 4 }}"></td> 
-                        {# instead of skipping this, use EGView to pass Empty Team Gradeables here#}
                     </tr>
                 {% endfor %}
             </tbody>

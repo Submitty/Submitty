@@ -962,9 +962,8 @@ class ElectronicGraderController extends AbstractController {
         $empty_teams = [];
         if ($gradeable->isTeamAssignment()) {
             // Only give getGradeables one User ID per team
-            $all_teams = $this->core->getQueries()->getTeamsByGradeableId($gradeable_id);// this query won't include empty teams info.
-            if($show_empty_teams)
-            {
+            $all_teams = $this->core->getQueries()->getTeamsByGradeableId($gradeable_id);
+            if ($show_empty_teams){
                 $empty_teams = $this->core->getQueries()->getEmptyTeamsByGradeableId($gradeable_id);
             }
             
@@ -984,7 +983,6 @@ class ElectronicGraderController extends AbstractController {
         $user_ids = [];
         if ($gradeable->isTeamAssignment()) {
             $user_ids = $this->core->getQueries()->getUsersOnTeamsForGradeable($gradeable);
-            // Collect user ids so we know who isn't on a team
         }
         /** @var GradedGradeable $g */
         foreach ($order->getSortedGradedGradeables() as $g) {
