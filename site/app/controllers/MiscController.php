@@ -348,9 +348,6 @@ class MiscController extends AbstractController {
             $this->core->redirect($this->core->buildCourseUrl());
         }
 
-<<<<<<< Updated upstream
-        $graded_gradeable = $this->core->getQueries()->getGradedGradeable($gradeable, $user_id, null);
-=======
         $is_team = $gradeable->isTeamAssignment();
 
         $graded_gradeable = $this->core->getQueries()->getGradedGradeable($gradeable, $is_team ? null : $submitter_id, $is_team ? $submitter_id : null);
@@ -361,7 +358,6 @@ class MiscController extends AbstractController {
             //not team assignment
             $graded_gradeable = $this->core->getQueries()->getGradedGradeable($gradeable, $submitter_id, $gradeable->);
         }*/
->>>>>>> Stashed changes
 
         if ($graded_gradeable === null) {
             $message = "You do not have access to that page.";
