@@ -26,6 +26,8 @@ class Poll {
     #[ORM\Column(type: Types::TEXT)]
     protected $question;
 
+    //Duration should be stored as an interval
+    //Tried doctrine annotation to be DATEINTERVAL and interval type in database but there wasnt a proper conversion.
     #[ORM\Column(type: Types::INTEGER)]
     protected int $duration;
 
@@ -33,7 +35,7 @@ class Poll {
     protected $status;
 
     #[ORM\Column(type: Types::DATETIME_MUTABLE)]
-    protected DateTime $end_date;
+    protected DateTime $end_time;
 
     #[ORM\Column(type: Types::DATE_MUTABLE)]
     protected DateTime $release_date;
@@ -99,30 +101,30 @@ class Poll {
         $this->question = $question;
     }
     public function setClosed(): void {
-        $this->end_date = new \DateTime(DateUtils::BEGINING_OF_TIME);
+        $this->end_time = new \DateTime(DateUtils::BEGINING_OF_TIME);
     }
     public function setOpen(): void {
-        $this->end_date = new \DateTime(DateUtils::MAX_TIME);
+        $this->end_time = new \DateTime(DateUtils::MAX_TIME);
     }
     public function setEnded(): void {
         $temp = DateUtils::getDateTimeNow();
         $tempString = $temp->format('Y-m-d');
-        $this->end_date = new DateTime($tempString);
+        $this->end_time = new DateTime($tempString);
     }
     public function isOpen(): bool {
         $now = DateUtils::getDateTimeNow();
-        return $now < $this->end_date;
+        return $now < $this->end_time;
     }
 
     public function isEnded(): bool {
         $now = DateUtils::getDateTimeNow();
         $closeDate = DateUtils::BEGINING_OF_TIME;
-        return $now > $this->end_date && $this->end_date->format('Y-m-d\TH:i:s') !== $closeDate;
+        return $now > $this->end_time && $this->end_time->format('Y-m-d\TH:i:s') !== $closeDate;
     }
 
     public function isClosed(): bool {
         $now = DateUtils::getDateTimeNow();
-        return $now > $this->end_date && $this->end_date->format('Y-m-d\TH:i:s') === DateUtils::BEGINING_OF_TIME;
+        return $now > $this->end_time && $this->end_time->format('Y-m-d\TH:i:s') === DateUtils::BEGINING_OF_TIME;
     }
 
     public function getDuration(): \DateInterval {
@@ -135,7 +137,7 @@ class Poll {
     }
 
     public function getEndDate(): \DateTime {
-        return $this->end_date;
+        return $this->end_time;
     }
 
     public function getReleaseDate(): \DateTime {
@@ -149,8 +151,8 @@ class Poll {
         $this->duration = $totalSeconds;
     }
 
-    public function setEndDate(\DateTime $end_date): void {
-        $this->end_date = $end_date;
+    public function setEndDate(\DateTime $end_time): void {
+        $this->end_time = $end_time;
     }
 
     public function setReleaseDate(\DateTime $release_date): void {

@@ -15,10 +15,10 @@ def up(config, database, semester, course):
     :type course: str
     """
     database.execute("ALTER TABLE polls ADD COLUMN IF NOT EXISTS duration INTEGER DEFAULT 0")
-    database.execute("ALTER TABLE polls ADD COLUMN IF NOT EXISTS end_date timestamptz NOT NULL DEFAULT '1900-02-01'")
+    database.execute("ALTER TABLE polls ADD COLUMN IF NOT EXISTS end_time timestamptz NOT NULL DEFAULT '1900-02-01'")
     database.execute("ALTER TABLE polls ALTER COLUMN status DROP NOT NULL")
     database.execute("""
-        UPDATE polls SET end_date = CASE
+        UPDATE polls SET end_time = CASE
             WHEN status = 'open' THEN '9999-02-01'
             WHEN status = 'closed' THEN '1900-02-01'
             ELSE now() END
@@ -37,7 +37,7 @@ def down(config, database, semester, course):
     :param course: Code of course being migrated
     :type course: str
     """
-    database.execute("ALTER TABLE polls DROP COLUMN IF EXISTS end_date")
+    database.execute("ALTER TABLE polls DROP COLUMN IF EXISTS end_time")
     database.execute("ALTER TABLE polls DROP COLUMN IF EXISTS duration")
     
     

@@ -110,15 +110,15 @@
                 Expected Duration of Poll:
             </label>
             <div class="poll-input">
-                <label class="option"> Hrs </label><br>
+                <label class="option"> Hours </label><br>
                 <input name="poll-hours" id="poll-hours" class="poll-timer" value="{{ poll is not null ? poll.getDuration().h }}" />
             </div>
             <div class="poll-input">
-                <label class="option"> Min</label><br>
+                <label class="option"> Minutes </label><br>
                 <input name="poll-minutes" id="poll-minutes" class="poll-timer" value="{{ poll is not null ? poll.getDuration().i }}"/>
             </div>
             <div class="poll-input">
-                <label class="option"> Sec</label><br>
+                <label class="option"> Seconds </label><br>
                 <input name="poll-seconds" id="poll-seconds" class="poll-timer" value="{{ poll is not null ? poll.getDuration().s }}"/>
             </div>
         </div>

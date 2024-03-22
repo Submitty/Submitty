@@ -195,7 +195,7 @@ class Course_data:
                 polls_table.insert(),
                 name=poll["name"],
                 question=poll["question"],
-                end_date=poll["end_date"],
+                end_time=poll["end_time"],
                 status=poll["status"],
                 release_date=poll["release_date"],
                 image_path=poll["image_path"],

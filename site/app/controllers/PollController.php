@@ -325,6 +325,14 @@ class PollController extends AbstractController {
         $hours = intval($_POST['poll-hours'] ?? 0);
         $minutes = intval($_POST['poll-minutes'] ?? 0);
         $seconds = intval($_POST['poll-seconds'] ?? 0);
+        $prevHours = $poll->getDuration()->h;
+        $prevMinutes = $poll->getDuration()->i;
+        $prevSeconds = $poll->getDuration()->s;
+        $resetDuration = true;
+        if($hours === $prevHours && $minutes === $prevMinutes && $seconds === $prevSeconds)
+        {
+            $resetDuration = false;
+        }
         if (($hours * 3600) + (60 * $minutes) +  $seconds > 86400) {
             $this->core->addErrorMessage("Exceeded 24 hour limit");
             return new RedirectResponse($this->core->buildCourseUrl(['polls']));
@@ -334,7 +342,7 @@ class PollController extends AbstractController {
             return new RedirectResponse($this->core->buildCourseUrl(['polls']));
         }
         $newDuration = new DateInterval("PT{$hours}H{$minutes}M{$seconds}S");
-        if ($poll->isOpen()) {
+        if ($poll->isOpen() && $resetDuration) {
             if ($newDuration->h > 0 || $newDuration->i > 0 || $newDuration->s > 0 || $newDuration->days > 0 || $newDuration->m > 0 || $newDuration->y > 0) {
                 $endDate = $this->core->getDateTimeNow();
                 $endDate->add($newDuration);
@@ -466,14 +474,14 @@ class PollController extends AbstractController {
 
         $duration = $poll->getDuration();
         if ($duration->h > 0 || $duration->i > 0 || $duration->s > 0 || $duration->days > 0 || $duration->m > 0 || $duration->y > 0) {
-            $end_date = $this->core->getDateTimeNow();
-            $end_date->add($duration);
-            $poll->setEndDate($end_date);
+            $end_time = $this->core->getDateTimeNow();
+            $end_time->add($duration);
+            $poll->setEndDate($end_time);
         }
         else {
             //If duration is 0, it means that the user wants to manually close it.
-            $end_date = new \DateTime(DateUtils::MAX_TIME);
-            $poll->setEndDate($end_date);
+            $end_time = new \DateTime(DateUtils::MAX_TIME);
+            $poll->setEndDate($end_time);
         }
         $em->flush();
         return new RedirectResponse($this->core->buildCourseUrl(['polls']));
