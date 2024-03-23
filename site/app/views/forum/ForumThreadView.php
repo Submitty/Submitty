@@ -1101,10 +1101,6 @@ class ForumThreadView extends AbstractView {
             $visible_username = "Anonymous";
         }
 
-        if ($post["author_user_id"] == $first_post['author_user_id'] && !$first) {
-            $visible_username .= " [OP]";
-        }
-
         $classes = ["post_box"];
         if ($first && $display_option != 'alpha') {
             $classes[] = "first_post";
@@ -1143,6 +1139,11 @@ class ForumThreadView extends AbstractView {
         $userGroup = $this->core->getUser()->getGroup();
 
         $post_user_info = [];
+
+        $is_OP = false;
+        if ($post["author_user_id"] == $first_post['author_user_id']) {
+            $is_OP = true;
+        }
 
         $merged_thread = $is_merged_thread && $userAccessFullGrading;
         if ($userAccessFullGrading) {
@@ -1223,6 +1224,8 @@ class ForumThreadView extends AbstractView {
                 "display_pronouns" => $display_pronouns
             ];
         }
+
+        $post_user_info["is_OP"] = $is_OP;
 
         $post_attachment = ForumUtils::getForumAttachments(
             $post_id,
