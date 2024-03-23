@@ -54,18 +54,16 @@ function changeMonth(x, view_year, view_month, view_day) {
     let cookie_year = parseInt(Cookies.get('calendar_year'));
     let cookie_month = parseInt(Cookies.get('calendar_month'));
     let cookie_day = parseInt(Cookies.get('calendar_day'));
+
     if (isNaN(cookie_year)) {
         cookie_year = view_year;
-        Cookies.set('calendar_year', cookie_year);
     }
     if (isNaN(cookie_month)) {
         cookie_month = view_month;
-        Cookies.set('calendar_month', cookie_month);
 
     }
     if (isNaN(cookie_day)) {
         cookie_day = view_day;
-        Cookies.set('calendar_day', cookie_day);
     }
 
     
@@ -447,7 +445,7 @@ function generateCalendarHeader(title_area) {
 function buildSwitchingHeader(view_year, view_month, view_day, type) {
     const fragment = document.createDocumentFragment();
 
-    // Build first header
+    // Build first header column
     const th1 = document.createElement('th');
     th1.colSpan = 3;
     let div = document.createElement('div');
@@ -465,29 +463,113 @@ function buildSwitchingHeader(view_year, view_month, view_day, type) {
         prev = prevWeek(view_month, view_year, view_day);
         prev.push(type);
     }
-    a.onclick = () => loadCalendar.apply(this, prev);
+    a.onclick = () => loadCalendar.apply(this, prev); //prev = month, year, day, 'month'
     a.innerHTML = '<i class="fas fa-angle-left"></i>';
 
     // Append to header
     div.appendChild(a);
     th1.appendChild(div);
 
-    // Build second header
+    // Build second header column
     const th2 = document.createElement('th');
     th2.colSpan = 1;
     div = document.createElement('div');
     div.classList.add('cal-title');
+
+    /*
     const h2 = document.createElement('h2');
-    h2.classList.add('cal-month-title'); //month title
-    h2.textContent = monthNames[view_month]; //shows the month
+    h2.classList.add('cal-month-title');
+    h2.textContent = monthNames[view_month];
     div.appendChild(h2);
+    */
+
+    //create the month dropdown
+    const monthSelect = document.createElement('select');
+    for(let itermonth = 1; itermonth <= 12; itermonth++){
+        const monthOption = document.createElement('option');
+        monthOption.value = itermonth;
+        monthOption.textContent = monthNames[itermonth];
+        monthSelect.appendChild(monthOption);
+    }
+
+    monthSelect.classList.add('cal-month-title'); //month title
+
+    monthSelect.onchange = function() {
+        const type = $("#calendar-item-type-edit").val();
+        Cookies.set('calendar_month', this.value);
+
+        let cookie_year = parseInt(Cookies.get('calendar_year'));
+        let cookie_month = parseInt(Cookies.get('calendar_month'));
+        let cookie_day = parseInt(Cookies.get('calendar_day'));
+
+        if (isNaN(cookie_year)) {
+            cookie_year = view_year;
+        }
+        if (isNaN(cookie_month)) {
+            cookie_month = view_month;
+
+        }
+        if (isNaN(cookie_day)) {
+            cookie_day = view_day;
+        }
+        // Load the calendar to the correct day
+        loadCalendar(cookie_month, cookie_year, cookie_day, type);
+    };
+
+    monthSelect.value = parseInt(Cookies.get('calendar_month'));
+
+    div.appendChild(monthSelect);
+    
+    //create the year dropdown
+    let currentYear = new Date();
+    currentYear = currentYear.getFullYear();
+    const yearSelect = document.createElement('select');
+    for(let year = 2014; year <= currentYear+5; year++){
+        const yearOption = document.createElement('option');
+        yearOption.value = year;
+        yearOption.textContent = year;
+        yearSelect.appendChild(yearOption);
+    }
+    yearSelect.classList.add('cal-year-title'); //year title
+    //h3.textContent = `${view_year}`; //shows the year
+    //shows the year
+    //document.getElementById('year-select').value = view_year;
+    yearSelect.onchange = function() {
+        const type = $("#calendar-item-type-edit").val();
+        Cookies.set('calendar_year', this.value);
+
+        let cookie_year = parseInt(Cookies.get('calendar_year'));
+        let cookie_month = parseInt(Cookies.get('calendar_month'));
+        let cookie_day = parseInt(Cookies.get('calendar_day'));
+
+        if (isNaN(cookie_year)) {
+            cookie_year = view_year;
+        }
+        if (isNaN(cookie_month)) {
+            cookie_month = view_month;
+
+        }
+        if (isNaN(cookie_day)) {
+            cookie_day = view_day;
+        }
+        // Load the calendar to the correct day
+        loadCalendar(cookie_month, cookie_year, cookie_day, type);
+    };
+
+    yearSelect.value = parseInt(Cookies.get('calendar_year'));
+
+    //append the div with year & month to the column
+
+    /*
     const h3 = document.createElement('h3');
-    h3.classList.add('cal-year-title'); //year title
-    h3.textContent = `${view_year}`; //shows the year
-    div.appendChild(h3);
+    h3.classList.add('cal-year-title');
+    h3.textContent = `${view_year}`;
+    */
+
+    div.appendChild(yearSelect);
     th2.appendChild(div);
 
-    // Build third header
+    // Build third header column
     const th3 = document.createElement('th');
     th3.colSpan = 3;
     div = document.createElement('div');
@@ -805,6 +887,7 @@ function loadCalendar(month_, year_, day_, type) {
     else {
         calendar.appendChild(generateCalendarOfMonthWeek(year_, month_, day_));
     }
+
     Cookies.set('calendar_year', year_);
     Cookies.set('calendar_month', month_);
     Cookies.set('calendar_day', day_);
