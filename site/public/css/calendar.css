@@ -85,12 +85,6 @@ a.cal-btn:focus {
     margin-top: 0;
 }
 
-select.cal-month-title {
-    margin-top: 0;
-    margin-bottom: 0;
-    line-height: 100%;
-}
-
 .cal-year-title {
     font-size: 14px;
     margin-top: 0;

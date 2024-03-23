@@ -411,13 +411,6 @@ function buildSwitchingHeader(view_year, view_month, view_day, type) {
     div = document.createElement('div');
     div.classList.add('cal-title');
 
-    /*
-    const h2 = document.createElement('h2');
-    h2.classList.add('cal-month-title');
-    h2.textContent = monthNames[view_month];
-    div.appendChild(h2);
-    */
-
     //create the month dropdown
     const monthSelect = document.createElement('select');
     for(let itermonth = 1; itermonth <= 12; itermonth++){
@@ -466,9 +459,8 @@ function buildSwitchingHeader(view_year, view_month, view_day, type) {
         yearSelect.appendChild(yearOption);
     }
     yearSelect.classList.add('cal-year-title'); //year title
-    //h3.textContent = `${view_year}`; //shows the year
-    //shows the year
-    //document.getElementById('year-select').value = view_year;
+
+    //update cookies
     yearSelect.onchange = function() {
         const type = $("#calendar-item-type-edit").val();
         Cookies.set('calendar_year', this.value);
@@ -493,13 +485,7 @@ function buildSwitchingHeader(view_year, view_month, view_day, type) {
 
     yearSelect.value = parseInt(Cookies.get('calendar_year'));
 
-    //append the div with year & month to the column
-
-    /*
-    const h3 = document.createElement('h3');
-    h3.classList.add('cal-year-title');
-    h3.textContent = `${view_year}`;
-    */
+    //append the div with year & month to the middle column
 
     div.appendChild(yearSelect);
     th2.appendChild(div);
