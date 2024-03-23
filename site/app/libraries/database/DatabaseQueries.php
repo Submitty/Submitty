@@ -728,7 +728,7 @@ SQL;
         // Safety measure in case the database is bad for some reason
         $counted_posts = [];
         if (count($post) > 0) {
-            if ($post["parent_id"] != -1) {
+            if ($post["parent_id"] !== -1) {
                 $old_thread_id = $post["thread_id"];
                 $this->course_db->query("SELECT id from threads where merged_post_id = ?", [$post_id]);
                 $thread_id = $this->course_db->rows();
@@ -4041,6 +4041,44 @@ VALUES(?, ?, ?, ?, 0, 0, 0, 0, ?)",
      */
     public function removeFromSeekingTeam($g_id, $user_id) {
         $this->course_db->query("DELETE FROM seeking_team WHERE g_id=? AND user_id=?", [$g_id, $user_id]);
+    }
+
+    /**
+     * Return an array of Team objects(team_id, team_name, team_members) for all teams on given gradeable
+     *
+     * @param Gradeable $gradeable
+     * @return \app\models\Team[]
+     */
+    public function getTeamsByGradeable(Gradeable $gradeable) {
+        $this->course_db->query(
+            "
+            SELECT 
+                gt.team_id AS team_id,
+                gt.team_name AS team_name,
+                STRING_AGG(u.user_id, ',') AS team_members
+            FROM 
+                gradeable_teams gt
+            JOIN 
+                teams t ON gt.team_id = t.team_id
+            JOIN 
+                users u ON t.user_id = u.user_id
+            WHERE 
+                gt.g_id = ?
+            GROUP BY 
+                gt.team_id
+            ORDER BY
+                team_id",
+            [$gradeable->getId()]
+        );
+        $teams = [];
+        $rows = $this->course_db->rows();
+        if ($rows != null) {
+            foreach ($rows as $row) {
+                $row['team_members'] = explode(',', $row['team_members']); // comma-separated string to an array
+                $teams[] = $row;
+            }
+        }
+        return $teams;
     }
 
     /**
@@ -7838,7 +7876,7 @@ AND gc_id IN (
         $current_queue_state = $this->core->getQueries()->getCurrentQueueState();
         $time_paused_start = $current_queue_state['time_paused_start'];
         $current_state = $time_paused_start != null;
-        if ($new_state != $current_state) {
+        if ($new_state !== $current_state) {
             // The pause state is actually changing
             $time_paused = $current_queue_state['time_paused'];
             $time_paused_start = date_create($time_paused_start);
