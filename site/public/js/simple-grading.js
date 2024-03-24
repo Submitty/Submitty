@@ -37,6 +37,27 @@ function calcSimpleGraderStats(action) {
     elems = $(`${elem_type}[id^=cell-][id$=0]`);
     // end initial setup
 
+    function updateGradersAndDatesVisibility() {
+        const showGraders = $('#show-graders').is(':checked');
+        const showDates = $('#show-dates').is(':checked');
+        $('.cell-grade').each(function() {
+            const grader = $(this).data('grader') ? $(this).data('grader') : "N/A";
+            const gradeTime = $(this).data('grade-time') ? $(this).data('grade-time') : "N/A";
+            if(showGraders) {
+                $(this).find('.simple-grade-grader').text(grader).show();
+            } else {
+                $(this).find('.simple-grade-grader').hide();
+            }
+            if(showDates) {
+                $(this).find('.simple-grade-date').text(gradeTime).show();
+            } else {
+                $(this).find('.simple-grade-date').hide();
+            }
+        });
+    }
+    
+    // Call this function after updating the scores or toggling the show graders/dates checkboxes.
+    
     // start main loop: iterate by component and calculate stats
     while (elems.length > 0) {
         // eslint-disable-next-line eqeqeq
