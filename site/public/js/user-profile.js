@@ -407,10 +407,30 @@ $(document).ready(() => {
     availableTimeZones.forEach((elem) => {
         $('#time_zone_drop_down').append(`<option value="${elem}">${elem}</option>`);
     });
+    
+
+    //Allow user to input keywords to better filter for a timezone
+    $('#time_zone_search_input').on('input', function() {
+        var searchTerm = $(this).val().toLowerCase();  
+        
+        // Scroll to the matching option
+        $('#time_zone_drop_down option').each(function() {
+            var optionText = $(this).text().toLowerCase();  
+
+            // Check if the option contains the search term
+            if (optionText.includes(searchTerm)) {
+                $(this).prop('selected', true); // Select the option
+                $(this).get(0).scrollIntoView(); // Scroll to the option
+                return false; 
+            }
+        });
+    });
+
 
     $('#time_zone_drop_down').change(function() {
         const timeZoneWithOffset = $(this).children('option:selected').val();
         // extract out the time_zone from the timezone with utc offset
+
         const time_zone = timeZoneWithOffset === 'NOT_SET/NOT_SET' ? timeZoneWithOffset : timeZoneWithOffset.split(') ')[1];
 
         $.getJSON({
