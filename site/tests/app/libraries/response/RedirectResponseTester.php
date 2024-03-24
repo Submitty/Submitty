@@ -11,6 +11,7 @@ use PHPUnit\Framework\TestCase;
 class RedirectResponseTester extends TestCase {
     /**
      * @runInSeparateProcess
+     * @preserveGlobalState disabled
      */
     public function testRedirectResponse() {
         $core = new Core();

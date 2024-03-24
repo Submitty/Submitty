@@ -2,6 +2,8 @@
 
 namespace app\libraries\database;
 
+use Doctrine\DBAL\Result;
+
 /**
  * Class DatabaseRowIterator
  *
@@ -14,31 +16,26 @@ namespace app\libraries\database;
  * used within a foreach loop.
  */
 class DatabaseRowIterator implements \Iterator {
-    private $statement;
-    private $database;
+    private Result $overall_result;
     private $callback;
-    private $result;
+    private mixed $current_result;
     private $key = -1;
     private $valid = true;
-    private $columns = [];
 
     /**
      * DatabaseRowIterator constructor.
      *
-     * @param \PDOStatement    $statement
-     * @param AbstractDatabase $database
+     * @param Result           $result
      * @param null|callable    $callback
      */
-    public function __construct(\PDOStatement $statement, $database, $callback = null) {
-        $this->statement = $statement;
-        $this->database = $database;
-        $this->columns = $this->database->getColumnData($this->statement);
+    public function __construct(Result $result, $callback = null) {
+        $this->overall_result = $result;
         $this->callback = $callback;
         $this->next();
     }
 
     public function current(): mixed {
-        return $this->result;
+        return $this->current_result;
     }
 
     public function next(): void {
@@ -46,15 +43,13 @@ class DatabaseRowIterator implements \Iterator {
             return;
         }
         $this->key++;
-        $this->result = $this->statement->fetch(\PDO::FETCH_ASSOC);
-        if ($this->result === false) {
+        $this->current_result = $this->overall_result->fetchAssociative();
+        if ($this->current_result === false) {
             $this->valid = false;
             return;
         }
-        $this->result = $this->database->transformResult($this->result, $this->columns);
         if ($this->callback !== null) {
-            /** @var mixed $this->result */
-            $this->result = call_user_func($this->callback, $this->result);
+            $this->current_result = call_user_func($this->callback, $this->current_result);
         }
     }
 
@@ -70,8 +65,8 @@ class DatabaseRowIterator implements \Iterator {
     }
 
     public function close() {
-        $this->statement->closeCursor();
+        $this->overall_result->free();
         $this->valid = false;
-        $this->result = null;
+        $this->current_result = null;
     }
 }
