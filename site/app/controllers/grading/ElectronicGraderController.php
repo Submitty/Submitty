@@ -1752,9 +1752,17 @@ class ElectronicGraderController extends AbstractController {
         $section_key = ($gradeable->isGradeByRegistration() ? 'registration_section' : 'rotating_section');
         if ($peer) {
             $total = $gradeable->getPeerGradeSet();
-            $graded = $this->core->getQueries()->getNumGradedPeerComponents($gradeable->getId(), $this->core->getUser()->getId()) / count($gradeable->getPeerComponents());
-            $non_late_total_submitted = $total_submitted;
-            $non_late_graded = $graded;
+            $graded = $this->core->getQueries()->getNumGradedPeerComponents($gradeable->getId(), $this->core->getUser()->getId());
+            $peer_assignments = $this->core->getQueries()->getPeerGradingAssignment($gradeable->getId());
+            if ($team) {
+                $total_submitted = $this->peerTeamsWeAreGrading(
+                    $peer_assignments[$this->core->getUser()->getId()],
+                    $this->core->getQueries()->getTeamsByGradeableId($gradeable_id)
+                );
+            }
+            else {
+                $total_submitted = count($peer_assignments[$this->core->getUser()->getId()]);
+            }
         }
         elseif ($gradeable->isGradeByRegistration()) {
             $sections = $this->core->getUser()->getGradingRegistrationSections();
@@ -1807,12 +1815,13 @@ class ElectronicGraderController extends AbstractController {
             $non_late_graded = $graded - array_sum($late_graded);
         }
         //multiplies users and the number of components a gradeable has together
-        if ($team) {
-            $total_submitted = ($total_submitted * count($gradeable->getComponents()));
+        if ($peer) {
+            $total_submitted = ($total_submitted * count($gradeable->getPeerComponents()));
         }
         else {
             $total_submitted = ($total_submitted * count($gradeable->getComponents()));
         }
+
         if ($total_submitted == 0) {
             $progress = 100;
         }
@@ -1915,6 +1924,31 @@ class ElectronicGraderController extends AbstractController {
         $this->core->getOutput()->renderOutput(['grading', 'ElectronicGrader'], 'popupStudents');
         $this->core->getOutput()->renderOutput(['grading', 'ElectronicGrader'], 'popupMarkConflicts');
         $this->core->getOutput()->renderOutput(['grading', 'ElectronicGrader'], 'popupSettings');
+    }
+
+    /**
+     * Given a list of peers to grade, figure out how many teams we are
+     * actually grading.
+     *
+     * @param array<string> $people_assigned People we are being grading
+     * @param array<Team> $teams All teams for this gradeable.
+     * @return The number of teams this peer is grading.
+     */
+    private function peerTeamsWeAreGrading(array $people_assigned, array $teams) {
+        $people_assigned_set = [];
+        foreach ($people_assigned as $user_id) {
+            $people_assigned_set[$user_id] = true;
+        }
+        $unique_teams = 0;
+        foreach ($teams as $team) {
+            foreach ($team->getMemberUserIds() as $user_id) {
+                if (array_key_exists($user_id, $people_assigned_set)) {
+                    $unique_teams++;
+                    break;
+                }
+            }
+        }
+        return $unique_teams;
     }
 
     /**
