@@ -402,6 +402,10 @@ $(document).ready(() => {
         $('#flagged-message').addClass('show');
     }
 
+    /* adding select2 to the time_zone_drop_down element */
+    $('#time_zone_drop_down').select2({theme: 'bootstrap-5'});
+
+
     // Populate the time zone selector box with options
     const availableTimeZones = getAvailableTimeZones();
     availableTimeZones.forEach((elem) => {
