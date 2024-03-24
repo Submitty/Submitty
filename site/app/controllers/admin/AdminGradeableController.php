@@ -2,11 +2,13 @@
 
 namespace app\controllers\admin;
 
+use app\libraries\Core;
 use app\controllers\AbstractController;
 use app\exceptions\ValidationException;
 use app\libraries\DateUtils;
 use app\libraries\GradeableType;
 use app\models\gradeable\Gradeable;
+use app\models\Notification;
 use app\models\gradeable\Component;
 use app\models\gradeable\Mark;
 use app\libraries\FileUtils;
@@ -1601,6 +1603,16 @@ class AdminGradeableController extends AbstractController {
                 $message .= "Can't close submissions for ";
                 $success = false;
             }
+        }
+        elseif ($action === "test_gradeable_notification") {
+            $full_course_name = $this->core->getFullCourseName();
+            $subject = "New Grade Released: " . Notification::textShortner($gradeable->getId());
+            $content = "Instructor in " .  $full_course_name . " has released scores for " . $gradeable->getId();
+            $metadata = json_encode(['url' => $this->core->buildCourseUrl(['gradeable', $gradeable->getId()])]);
+            $gradable = ['component' => 'gradable', 'metadata' => $metadata, 'content' => $content, 'subject' => $subject];
+            $this->core->getNotificationFactory()->onGradableRelease($gradable);
+            $message .= "Grades released for " . $gradeable->getId();
+            $success = false;
         }
         $gradeable->setDates($dates);
         $this->core->getQueries()->updateGradeable($gradeable);

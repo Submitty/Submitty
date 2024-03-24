@@ -720,6 +720,7 @@ class User extends AbstractModel {
         $notification_settings['team_joined'] = $details['team_joined'] ?? true;
         $notification_settings['team_member_submission'] = $details['team_member_submission'] ?? true;
         $notification_settings['self_notification'] = $details['self_notification'] ?? false;
+        $notification_settings['all_released_grades'] = $details['all_released_grades'] ?? false;
         $notification_settings['reply_in_post_thread_email'] = $details['reply_in_post_thread_email'] ?? false;
         $notification_settings['merge_threads_email'] = $details['merge_threads_email'] ?? false;
         $notification_settings['all_new_threads_email'] = $details['all_new_threads_email'] ?? false;
@@ -729,6 +730,7 @@ class User extends AbstractModel {
         $notification_settings['team_joined_email'] = $details['team_joined_email'] ?? true;
         $notification_settings['team_member_submission_email'] = $details['team_member_submission_email'] ?? true;
         $notification_settings['self_notification_email'] = $details['self_notification_email'] ?? false;
+        $notification_settings['all_released_grades_email'] = $details['all_released_grades_email'] ?? false;
         return $notification_settings;
     }
 
