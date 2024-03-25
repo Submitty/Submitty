@@ -21,6 +21,8 @@ import re
 from sqlalchemy import create_engine, MetaData, Table, bindparam
 
 from submitty_utils import db_utils
+WARNING = '\033[93m'
+DEFAULT = '\033[0m'
 CONFIG_PATH = os.path.join(os.path.dirname(os.path.realpath(__file__)), '..', 'config')
 
 with open(os.path.join(CONFIG_PATH, 'submitty_users.json')) as open_file:
@@ -175,7 +177,7 @@ is_team = False
 course_conn_string = db_utils.generate_connect_string(
     DATABASE_HOST,
     DATABASE_PORT,
-    f"submitty_{args.semester}_{args.course}",
+    f"submitty_{args.semester}_{args.course}", # database name
     DATABASE_USER,
     DATABASE_PASS,
 )
@@ -191,19 +193,38 @@ eg = course_connection.execute(select, gradeable_id=args.repo_name).fetchone()
 is_team = False
 if eg is not None:
     is_team = eg.eg_team_assignment
+    # gradeable is not a vcs gradeable
+    if eg.eg_vcs_host_type == -1:
+        print((WARNING + "Warning: Semester '{}' and Course '{}' contains gradeable_id '{}' but it is not a VCS gradeable." + DEFAULT).format(args.semester, args.course, args.repo_name))
+        print("exiting")
+        sys.exit()
+# gradeable does not exist in the course
 elif not args.non_interactive:
-    print ("Warning: Semester '{}' and Course '{}' does not contain gradeable_id '{}'.".format(args.semester, args.course, args.repo_name))
-    response = input ("Should we continue and make individual repositories named '"+args.repo_name+"' for each student? (y/n) ")
-    if not response.lower() == 'y':
+    print ((WARNING + "Warning: Semester '{}' and Course '{}' does not contain gradeable_id '{}'." + DEFAULT).format(args.semester, args.course, args.repo_name))
+    # if the repo_name matches any repo_name in the different gradeables, we should ask the user if they want to continue
+    gradeables = course_connection.execute(eg_table.select()).fetchall()
+    is_repo_name_in_gradeables = False
+    for gradeable in gradeables:
+        # the eg_vcs_partial_path has pattern like `gradeable_id/user_id`, so we need to use regex to match the gradeable_id
+        if gradeable.eg_vcs_host_type == 1 and re.match(f'^{args.repo_name}/', gradeable.eg_vcs_partial_path):
+            print("Find matching gradeable_id '{}' in the course.".format(gradeable.g_id))
+            is_repo_name_in_gradeables = True
+            response = input ("Should we continue and make individual repositories named '"+args.repo_name+"' for each student/team? (y/n) ")
+            if not response.lower() == 'y':
+                print ("exiting")
+                sys.exit()
+
+    if is_repo_name_in_gradeables == False:
+        print (WARNING + "Warning: Please make the gradeable before attempting to run this script!" + DEFAULT)
         print ("exiting")
         sys.exit()
 
 subdirectory = ''
-if eg.eg_vcs_subdirectory != '':
+if eg is not None and eg.eg_vcs_subdirectory:
     subdirectory = eg.eg_vcs_subdirectory
 
 
-# Load the git branch for autgrading from the course config file
+# Load the git branch for autograding from the course config file
 course_config_file = os.path.join('/var/local/submitty/courses/',
                                   args.semester, args.course,
                                   'config', 'config.json')
