@@ -269,16 +269,16 @@ function generateDayCell(year, month, day, curr_view_month, view_mode, view_seme
 
     const content = document.createElement('td');
     //change the css of the cell based on the view mode:
-    if(view_mode == 'month'){
+    if (view_mode === 'month') {
         content.classList.add('cal-day-cell');
     }
-    else if(view_mode == 'twoweek'){
+    else if (view_mode === 'twoweek') {
         content.classList.add('cal-day-cell-twoweek');
     }
-    else if(view_mode == 'week'){
+    else if (view_mode === 'week') {
         content.classList.add('cal-day-cell-week');
     }
-    else{
+    else {
         content.classList.add('cal-day-cell');
     }
 
