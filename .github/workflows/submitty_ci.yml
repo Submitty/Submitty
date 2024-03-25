@@ -91,7 +91,7 @@ jobs:
           restore-keys: |
               ${{ runner.os }}-cache-node-modules-
       - run: npm install
-      - run: npm run test
+      - run: npm run test qwe
       - name: Upload Coverage
         uses: codecov/codecov-action@v3
         with:
