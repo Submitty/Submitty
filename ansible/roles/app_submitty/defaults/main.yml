@@ -1,0 +1,21 @@
+---
+submitty_dbuser: submitty_dbuser
+submitty_dbuser_password: submitty_password
+submitty_course_dbuser: submitty_course_dbuser
+submitty_course_dbuser_password: submitty_password
+timezone: America/New_York
+language: en_US
+submitty_url: localhost
+vcs_url: git.localhost
+institution_name: Example University
+sysadmin_email: sysadmin@localhost
+submitty_email: submitty@localhost
+institution_url: university@localhost
+admin_email: admin@localhost
+submitty_ip: 172.0.0.1
+admin_password: admin_password
+noreply_email: noreply_email@localhost
+smtp_server: mail.localhost
+smtp_port: 25
+
+#default values we can install on our localhost
