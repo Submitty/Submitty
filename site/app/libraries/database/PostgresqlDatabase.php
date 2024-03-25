@@ -30,21 +30,32 @@ class PostgresqlDatabase extends AbstractDatabase {
         }
     }
 
-    public function getDSN() {
-        $params = [];
+    public function getConnectionDetails(): array {
+        $details = [
+            'driver' => 'pdo_pgsql'
+        ];
+
         if ($this->host !== null) {
-            $params[] = "host={$this->host}";
+            $details['host'] = $this->host;
         }
 
         if ($this->port !== null && ($this->host === null || $this->host[0] !== '/')) {
-            $params[] = "port={$this->port}";
+            $details['port'] = $this->port;
         }
 
         if (isset($this->dbname)) {
-            $params[] = "dbname={$this->dbname}";
+            $details['dbname'] = $this->dbname;
         }
 
-        return 'pgsql:' . implode(';', $params);
+        if ($this->username !== null) {
+            $details['user'] = $this->username;
+        }
+
+        if ($this->password !== null) {
+            $details['password'] = $this->password;
+        }
+
+        return $details;
     }
 
     /**
