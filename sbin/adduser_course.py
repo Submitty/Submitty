@@ -30,6 +30,8 @@ def parse_args():
     parser.add_argument('course', help='title of the course')
     parser.add_argument('registration_section', nargs='?', default=None,
                         help='registration section that the user is added into')
+    parser.add_argument('user_group', default=1,
+                        help='group the user belongs to 1:Instructor 2:Full Access Grader 3:Limited Access Grader 4:Student 5:None')
 
     return parser.parse_args()
 
@@ -39,6 +41,7 @@ def main():
     user_id = args.user_id
     semester = args.semester
     course = args.course
+    user_group = args.user_group
     registration_section = args.registration_section
 
     conn_str = db_utils.generate_connect_string(
@@ -94,7 +97,7 @@ def main():
             user_id=user_id,
             term=semester,
             course=course,
-            user_group=1,
+            user_group=user_group,
             registration_section=registration_section
         )
     else:
