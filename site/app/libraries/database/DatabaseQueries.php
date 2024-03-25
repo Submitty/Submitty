@@ -4862,7 +4862,7 @@ SQL;
      * @param string $user_id
      * @return array
      */
-    public function getGraderLevelAccessCourse($user_id): array {
+    public function getGraderLevelAccessCourse(string $user_id): array {
         $this->submitty_db->query("SELECT term, course FROM courses_users WHERE user_id=? AND user_group<4", [$user_id]);
         return $this->submitty_db->rows();
     }
