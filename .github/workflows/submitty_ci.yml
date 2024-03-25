@@ -46,7 +46,7 @@ jobs:
                 ${{ runner.os }}-cache-node-modules-
       - run: npm install
       - name: Run stylelint
-        run: echo github.event.pull_request.head.repo.full_name
+        run: echo ${{ github.event.pull_request.head.repo.full_name }}
 
 
 #   js-lint:
