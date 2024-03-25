@@ -698,5 +698,6 @@ HTML;
         ));
         $this->addInternalCss("select-widgets.css");
         $this->addInternalJs("select-widgets.js");
+        $this->addInternalCss("select2-override.css");
     }
 }

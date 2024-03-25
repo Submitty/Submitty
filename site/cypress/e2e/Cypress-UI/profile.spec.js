@@ -90,14 +90,14 @@ describe('Test cases revolving around user profile page', () => {
         it('should have the correct default value', () => {
             cy.get('[data-testid="time-zone-dropdown"]').should('contain.text', 'NOT_SET/NOT_SET');
         });
-        
+
         //Check that the dropdown is visible and can be opened - testing first and last timezones to ensure range is covered
         it('should allow searching and selecting a specific time zone (first timezone)', () => {
             cy.get('[data-testid="time-zone-dropdown"]').parent().find('.select2-selection').click();
             cy.get('.select2-search__field').type('(UTC+14:00) Pacific/Kiritimati');
             cy.get('.select2-results__option').contains('(UTC+14:00) Pacific/Kiritimati').click();
             cy.get('[data-testid="popup-message"]').next().should('contain.text', 'Time-zone updated successfully');
-            cy.get('[data-testid="time-zone-dropdown"]').should('contain.text', 'Pacific/Kiritimati (UTC+14:00)')
+            cy.get('[data-testid="time-zone-dropdown"]').should('contain.text', 'Pacific/Kiritimati (UTC+14:00)');
         });
 
         //Check that the dropdown is visible and can be opened - testing last timezone
@@ -119,18 +119,18 @@ describe('Test cases revolving around user profile page', () => {
         //Testing keyboard navigation
         it('should allow navigating and selecting options via keyboard', () => {
             cy.get('[data-testid="time-zone-dropdown"]').parent().find('.select2-selection').click();
-            cy.get('.select2-search__field').type('{downarrow}{downarrow}{enter}'); 
+            cy.get('.select2-search__field').type('{downarrow}{downarrow}{enter}');
             cy.get('[data-testid="time-zone-dropdown"]').parent().find('.select2-selection__rendered').should('contain.text', '(UTC+13:45) Pacific/Chatham');
             cy.get('[data-testid="popup-message"]').next().should('contain.text', 'Time-zone updated successfully');
         });
-        
+
         //Testing no search results found
         it('should display a message when no search results are found', () => {
             cy.get('[data-testid="time-zone-dropdown"]').parent().find('.select2-selection').click();
             cy.get('.select2-search__field').type('Nonexistent Zone');
             cy.get('.select2-results').should('contain.text', 'No results found');
         });  
-          
+
     });
 
     it('Should error then succeed uploading profile photo', () => {
