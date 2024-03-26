@@ -293,6 +293,7 @@ function socketNewOrEditPostHandler(post_id, reply_level, post_box_id=null, edit
         data: {'post_id': post_id, 'reply_level': reply_level, 'post_box_id': post_box_id, 'edit': edit, 'csrf_token': window.csrfToken},
         success: function (response) {
             try {
+
                 const new_post = JSON.parse(response).data;
                 const forum_display_setting = Cookies.get('forum_display_option');
                 if (!edit) {
@@ -308,11 +309,10 @@ function socketNewOrEditPostHandler(post_id, reply_level, post_box_id=null, edit
                         if (forum_display_setting === 'reverse-tree') {
                             $(new_post).insertAfter('#current-thread').hide().fadeIn();
                         }
-                        else if (forum_display_setting === 'alpha' || forum_display_setting === 'alpha_by_registration' || forum_display_setting === 'alpha_by_rotating') {
+                        else if (forum_display_setting === 'alpha_by_registration' || forum_display_setting === 'alpha_by_rotating') {
                             $(new_post).insertBefore('#post-hr').hide().fadeIn();
-                            displaySuccessMessage('Refresh for correct ordering');
                         }
-                        else {
+                        else if (forum_display_setting === 'tree'){
                             $(new_post).insertBefore('#post-hr').hide().fadeIn();
                         }
                     }
@@ -338,6 +338,71 @@ function socketNewOrEditPostHandler(post_id, reply_level, post_box_id=null, edit
                     original_post.next().remove();
                     original_post.remove();
                 }
+    
+                if (forum_display_setting === 'alpha' || forum_display_setting === 'alpha_by_registration' || forum_display_setting === 'alpha_by_rotating') {
+                    let postBoxElements = document.querySelectorAll(".post-box, .reply-box");
+                    var postBoxArray = Array.from(postBoxElements);
+
+
+                    if(forum_display_setting === 'alpha'){
+
+                        // Sort the array based on the text content of "post_user_id" in each post-box
+                        postBoxArray.sort(function(a, b) {
+                            var queryA = a.querySelector(".post-action-container .last-edit .post_user_id");
+
+                            var userIdA = "z";
+                            if (queryA != null)
+                                userIdA = queryA.textContent;
+                            var userIdB = "z";
+                            
+                            var queryB = b.querySelector(".post-action-container .last-edit .post_user_id");
+
+                            if (queryB != null)
+                                userIdB = queryB.textContent;
+
+                            // Use localeCompare for case-insensitive alphabetical sorting
+                            return userIdA.localeCompare(userIdB);
+                        });
+                    }
+                    else if(forum_display_setting === 'alpha_by_registration'){
+                        let postBoxElements = document.querySelectorAll(".post-box, .reply-box");
+                        var postBoxArray = Array.from(postBoxElements);
+
+                        // Sort the array based on the text content of "post_user_id" in each post-box
+                        postBoxArray.sort(function(a, b) {
+                            var registrationA = parseInt(a.getAttribute('data-registration')) || 0;
+                            var registrationB = parseInt(b.getAttribute('data-registration')) || 0;
+                            
+                            return registrationA - registrationB;
+                        });
+                    }
+                    else if(forum_display_setting === 'alpha_by_rotating'){
+                        let postBoxElements = document.querySelectorAll(".post-box, .reply-box");
+                        var postBoxArray = Array.from(postBoxElements);
+
+                        // Sort the array based on the text content of "post_user_id" in each post-box
+                        postBoxArray.sort(function(a, b) {
+                            var registrationA = parseInt(a.getAttribute('data-rotation')) || 0;
+                            var registrationB = parseInt(b.getAttribute('data-rotation')) || 0;
+                            
+                            return registrationA - registrationB;
+                        });
+                    }
+
+
+                    if (postBoxArray.length != 0) {
+                        const postHr = document.getElementById('post-hr');
+                        postBoxArray[postBoxArray.length-1].parentElement.insertBefore(postBoxArray[postBoxArray.length-1], postHr);
+
+                        for (let i = postBoxArray.length-2; i >=0; i--) {
+                            lastBox = postBoxArray[i+1];
+                            thisBox = postBoxArray[i];
+                        
+                            thisBox.parentElement.insertBefore(thisBox, lastBox);
+                        }
+                    }
+                }
+                    
 
                 $(`#${post_id}-reply`).css('display', 'none');
                 $(`#${post_id}-reply`).submit(publishPost);
@@ -352,6 +417,8 @@ function socketNewOrEditPostHandler(post_id, reply_level, post_box_id=null, edit
 
             }
             catch (error) {
+                console.log(error);
+                console.log(response);
                 // eslint-disable-next-line no-undef
                 displayErrorMessage('Error parsing new post. Please refresh the page.');
             }
