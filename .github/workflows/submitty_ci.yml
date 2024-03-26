@@ -78,6 +78,7 @@ jobs:
       - name: Run Smoke Tests
         run: |
           pwd
+          ls -la
           ansible-playbook ansible/playbooks/submitty_install.yml --syntax-check
           ansible-playbook ansible/playbooks/submitty_install.yml --check
 
