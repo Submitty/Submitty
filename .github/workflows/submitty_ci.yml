@@ -77,8 +77,8 @@ jobs:
           pip install ansible
       - name: Run Smoke Tests
         run: |
-          ansible-playbook submitty_install.yml --syntax-check
-          ansible-playbook submitty_install.yml --check
+          ansible-playbook ansible/playbooks/submitty_install.yml --syntax-check
+          ansible-playbook ansible/playbooks/submitty_install.yml --check
 
 #  js-lint:
 #    runs-on: ubuntu-22.04
