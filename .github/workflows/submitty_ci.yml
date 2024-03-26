@@ -60,7 +60,25 @@ jobs:
         uses: ansible/ansible-lint@main
         with:
           args: ansible
-            
+
+  ansible-smoke-test:
+    runs-on: ubuntu-22.04
+    defaults:
+      run:
+        working-directory: site
+    steps:
+      - uses: actions/checkout@v4
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.x'
+      - name: Install Ansible
+        run: |
+          pip install ansible
+      - name: Run Smoke Tests
+        run: |
+          ansible-playbook submitty_install.yml --syntax-check
+          ansible-playbook submitty_install.yml --check
 
 #  js-lint:
 #    runs-on: ubuntu-22.04
