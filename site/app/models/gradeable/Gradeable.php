@@ -784,23 +784,15 @@ class Gradeable extends AbstractModel {
      */
     private function getDateValidationSet(bool $grade_inquiry_modified = false) {
         if ($this->type === GradeableType::ELECTRONIC_FILE) {
-            if (!$this->isStudentSubmit()) {
-                if ($this->isTaGrading()) {
-                    $result = self::date_properties_elec_exam;
-                }
-                else {
-                    $result = self::date_properties_bare;
-                }
-            }
-            elseif ($this->isTaGrading()) {
+            // submission open date has to be included for validation
+            if ($this->isTaGrading()) {
                 $result = self::date_properties_elec_ta;
             }
             else {
                 $result = self::date_properties_elec_no_ta;
             }
-
-            // Only add in submission due date if student submission is enabled
-            if ($this->isStudentSubmit() && $this->hasDueDate()) {
+            // Add in submission due date
+            if ($this->hasDueDate()) {
                 // Make sure we insert the due date into the correct location (after the open date)
                 array_splice($result, array_search('submission_open_date', $result) + 1, 0, 'submission_due_date');
             }
