@@ -116,7 +116,7 @@ class GradedComponentContainer extends AbstractModel {
         if ($this->component->isPeerComponent()) {
             // Try to find existing graded component for this component and user...
             foreach ($this->graded_components as $graded_component) {
-                if ($graded_component->getGrader()->getId() === $grader->getId()) {
+                if ($grader->accessGrading() || $graded_component->getGrader()->getId() === $grader->getId()) {
                     // ... Found one
                     return $graded_component;
                 }
