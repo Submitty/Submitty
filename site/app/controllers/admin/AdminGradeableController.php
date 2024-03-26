@@ -51,11 +51,101 @@ class AdminGradeableController extends AbstractController {
     ];
 
     /**
-     * Creates a gradeable based on uploaded JSON data
-     * @return JsonResponse
+     * @Route("/api/{_semester}/{_course}/{gradeable_id}/download", methods={"GET"})
+     * @Route("/courses/{_semester}/{_course}/{gradeable_id}/download", methods={"GET"})
      * @AccessControl(role="INSTRUCTOR")
+     * @param string $gradeable_id
+     * @return JsonResponse
+     */
+    public function downloadJson(string $gradeable_id): JsonResponse {
+        $config = $this->core->getQueries()->getGradeableConfig($gradeable_id);
+        $return_json = [
+            'title' => $config->getTitle(),
+            'type' => GradeableType::typeToString($config->getType()),
+            'id' => $config->getId(),
+            'instructions_url' => $config->getInstructionsUrl(),
+            'syllabus_bucket' => $config->getSyllabusBucket(),
+            'autograding_config_path' => $config->getAutogradingConfigPath()
+        ];
+        if ($config->getType() === GradeableType::ELECTRONIC_FILE) {
+            $return_json['bulk_upload'] = $config->isBulkUpload();
+            if ($config->isTeamAssignment()) {
+                $team_properties = [
+                    'team_max_size' => $config->getTeamSizeMax(),
+                    'inherit_from' => ''
+                ];
+                $return_json['team_gradeable'] = $team_properties;
+            }
+            if ($config->isTaGrading()) {
+                $return_json['ta_grading'] = true;
+                if ($config->isGradeInquiryAllowed()) {
+                    $return_json['grade_inquiries'] = true;
+                    if ($config->isGradeInquiryPerComponentAllowed()) {
+                        $return_json['grade_inquiries_per_component'] = true;
+                    }
+                }
+            }
+            if ($config->isDiscussionBased()) {
+                $return_json['discussion_based'] = true;
+                $return_json['discussion_tread_id'] = $config->getDiscussionThreadId();
+            }
+            if ($config->isVcs()) {
+                $vcs_values = [];
+                switch ($config->getVcsHostType()) {
+                    case 0:
+                        $vcs_values['repository_type'] = 'submitty-hosted';
+                        break;
+                    case 1:
+                        $vcs_values['repository_type'] = 'submitty-hosted-url';
+                        $vcs_values['vcs_path'] = $config->getVcsPartialPath();
+                        break;
+                    case 2:
+                        $vcs_values['repository_type'] = 'public-github';
+                        break;
+                    case 3:
+                        $vcs_values['repository_type'] = 'private-github';
+                        break;
+                    case 4:
+                        $vcs_values['repository_type'] = 'self-hosted';
+                        $vcs_values['vcs_path'] = $config->getVcsPartialPath();
+                        break;
+                    default:
+                        JsonResponse::getFailResponse('Invalid VCS Type');
+                        break;
+                }
+                if ($config->isUsingSubdirectory()) {
+                    $vcs_values['subdirectory'] = $config->getVcsSubdirectory();
+                }
+                $return_json['vcs'] = $vcs_values;
+            }
+
+            $dates = [];
+            $dates['ta_view_start_date'] = $config->getTaViewStartDate()->format('Y-m-d H:i:s');
+            $dates['grade_start_date'] = $config->getGradeStartDate()->format('Y-m-d H:i:s');
+            $dates['grade_due_date'] = $config->getGradeDueDate()->format('Y-m-d H:i:s');
+            $dates['grade_released_date'] = $config->getGradeReleasedDate()->format('Y-m-d H:i:s');
+            $dates['team_lock_date'] = $config->getTeamLockDate()->format('Y-m-d H:i:s');
+            $dates['submission_open_date'] = $config->getSubmissionOpenDate()->format('Y-m-d H:i:s');
+            $dates['submission_due_date'] = $config->getSubmissionDueDate()->format('Y-m-d H:i:s');
+            $dates['grade_inquiry_start_date'] = $config->getGradeInquiryStartDate()->format('Y-m-d H:i:s');
+            $dates['grade_inquiry_due_date'] = $config->getGradeInquiryDueDate()->format('Y-m-d H:i:s');
+
+            $dates['has_due_date'] = $config->hasDueDate();
+            $dates['has_release_date'] = $config->hasReleaseDate();
+            $dates['late_submission_allowed'] = $config->isLateSubmissionAllowed();
+            $dates['late_days'] = $config->getLateDays();
+            $return_json['dates'] = $dates;
+        }
+
+        return JsonResponse::getSuccessResponse($return_json);
+    }
+
+    /**
+     * Creates a gradeable based on uploaded JSON data
      * @Route("/api/{_semester}/{_course}/upload", methods={"POST"})
      * @Route("/courses/{_semester}/{_course}/upload", methods={"POST"})
+     * @AccessControl(role="INSTRUCTOR")
+     * @return JsonResponse
      */
     public function uploadGradeable() {
         $values = [
@@ -335,6 +425,8 @@ class AdminGradeableController extends AbstractController {
         $this->core->getOutput()->addVendorCss(FileUtils::joinPaths('flatpickr', 'plugins', 'shortcutButtons', 'themes', 'light.min.css'));
         $this->core->getOutput()->addSelect2WidgetCSSAndJs();
         $this->core->getOutput()->addInternalJs('admin-gradeable-updates.js');
+        $this->core->getOutput()->addInternalJs('gradeable.js');
+        $this->core->getOutput()->addInternalJs('directory.js');
         $this->core->getOutput()->addInternalCss('admin-gradeable.css');
         $this->core->getOutput()->renderTwigOutput('admin/admin_gradeable/AdminGradeableBase.twig', [
             'gradeable' => $gradeable,
@@ -360,6 +452,7 @@ class AdminGradeableController extends AbstractController {
             'vcs_partial_path' => $gradeable->getVcsPartialPath(),
             'vcs_subdirectory' => $gradeable->getVcsSubdirectory(),
             'using_subdirectory' => $gradeable->isUsingSubdirectory(),
+            'download_url' => $this->core->buildCourseUrl([$gradeable->getId(), 'download']),
             'is_pdf_page' => $gradeable->isPdfUpload(),
             'is_pdf_page_student' => $gradeable->isStudentPdfUpload(),
             'itempool_available' => isset($gradeable_config) && $gradeable_config->isNotebookGradeable() && count($itempool_options),
