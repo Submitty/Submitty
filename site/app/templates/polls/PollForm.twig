@@ -2,7 +2,7 @@
 {% set question_type = poll is not null ? poll.getQuestionType() : 'single-response-multiple-correct' %}
 
 <div class="content">
-    <h1>{{ poll is not null ? "Edit Poll" : "Add a New Poll" }}</h1>
+    <h1 id = "new-poll-title">{{ poll is not null ? "Edit Poll" : "Add a New Poll" }}</h1>
 
     <form id="new-poll-form" method="post" action="{{ base_url }}{{ url_path }}" enctype="multipart/form-data">
         {% if poll is not null %}

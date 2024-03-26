@@ -1,0 +1,40 @@
+<div class="content">
+
+<button class="upload-banner btn btn-primary" onclick="newUploadBanner()"> Upload an Event Banner </button>
+
+<p>
+This Part is a Work in Progress. Please do not upload yet!!!
+</p>
+<br>
+
+
+<input type="hidden" name="csrf_token" value="{{ csrf_token }}" />
+{% for bannerImage in banners %}
+  {% set imageName = bannerImage.getName() %}
+  {% set imagePath = bannerImage.getPath() %}
+  {% set id = bannerImage.getId() %}
+  {% set description = bannerImage.getExtraInfo() %}
+  {% set releaseDate = bannerImage.getReleaseDate().format('Y-m-d') %}
+  {% set closeDate = bannerImage.getClosingDate().format('Y-m-d') %}
+
+  {# Do something with the attributes... #}
+  <div>
+    <div class="image-info" style="display: inline-flex; align-items: center;">
+      <h3 style="margin-right: 10px;">{{ imageName }}</h3>
+      <a onclick='deleteBannerImage("{{ csrf_token|e('js') }}", "{{ id|e('js') }}", "{{ imageName|e('js') }}", 
+        "{{ imagePath|e('js') }}", "{{ description|e('js') }}", "{{ releaseDate|e('js') }}", 
+        "{{ closeDate|e('js') }}");'>
+        <i class="fas fa-trash" style="font-size: 16px;"></i>
+
+      </a>
+    </div>
+    <p> {{ imagePath}} </p>
+    <p>{{ description }}</p>
+    <p> Id: {{id}} </p>
+    <p>Release Date: {{ releaseDate|date('Y-m-d') }}</p>
+    <p>Close Date: {{ closeDate|date('Y-m-d') }}</p>
+</div>
+{% endfor %}
+</div>
+
+{{ include('banner/UploadBannerPopup.twig') }}

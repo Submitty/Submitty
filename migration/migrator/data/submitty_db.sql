@@ -396,6 +396,42 @@ SET default_tablespace = '';
 
 
 --
+-- Name: community_events; Type: TABLE; Schema: public; Owner: -
+--
+
+CREATE TABLE public.community_events (
+    id integer NOT NULL,
+    community_path character varying(255) NOT NULL,
+    name character varying(255) NOT NULL,
+    folder_name character varying(255) NOT NULL,
+    extra_info character varying(255),
+    link_name character varying(255),
+    release_date timestamp(6) without time zone,
+    closing_date timestamp(6) without time zone
+);
+
+
+--
+-- Name: community_events_id_seq; Type: SEQUENCE; Schema: public; Owner: -
+--
+
+CREATE SEQUENCE public.community_events_id_seq
+    AS integer
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+--
+-- Name: community_events_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: -
+--
+
+ALTER SEQUENCE public.community_events_id_seq OWNED BY public.community_events.id;
+
+
+--
 -- Name: courses; Type: TABLE; Schema: public; Owner: -
 --
 
@@ -645,6 +681,13 @@ ALTER SEQUENCE public.vcs_auth_tokens_id_seq OWNED BY public.vcs_auth_tokens.id;
 
 
 --
+-- Name: community_events id; Type: DEFAULT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.community_events ALTER COLUMN id SET DEFAULT nextval('public.community_events_id_seq'::regclass);
+
+
+--
 -- Name: emails id; Type: DEFAULT; Schema: public; Owner: -
 --
 
@@ -663,6 +706,14 @@ ALTER TABLE ONLY public.saml_mapped_users ALTER COLUMN id SET DEFAULT nextval('p
 --
 
 ALTER TABLE ONLY public.vcs_auth_tokens ALTER COLUMN id SET DEFAULT nextval('public.vcs_auth_tokens_id_seq'::regclass);
+
+
+--
+-- Name: community_events community_events_pkey; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.community_events
+    ADD CONSTRAINT community_events_pkey PRIMARY KEY (id);
 
 
 --

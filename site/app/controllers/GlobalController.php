@@ -6,6 +6,7 @@ use app\libraries\FileUtils;
 use app\models\Button;
 use app\models\NavButton;
 use app\models\User;
+use app\entities\banner\BannerImage;
 
 class GlobalController extends AbstractController {
     public function header() {
@@ -60,8 +61,23 @@ class GlobalController extends AbstractController {
 
         $now = $this->core->getDateTimeNow();
         $duck_img = $this->getDuckImage($now);
+        $repo = $this->core->getSubmittyEntityManager()->getRepository(BannerImage::class);
+        $bannerImages = $repo->getValidBannerImages();
 
-        return $this->core->getOutput()->renderTemplate('Global', 'header', $breadcrumbs, $wrapper_urls, $sidebar_buttons, $unread_notifications_count, $css->toArray(), $js->toArray(), $duck_img, $page_name, $content_only);
+        return $this->core->getOutput()->renderTemplate(
+            'Global',
+            'header',
+            $breadcrumbs,
+            $wrapper_urls,
+            $sidebar_buttons,
+            $unread_notifications_count,
+            $css->toArray(),
+            $js->toArray(),
+            $duck_img,
+            $page_name,
+            $content_only,
+            $bannerImages
+        );
     }
 
     // ==========================================================================================
@@ -406,6 +422,13 @@ class GlobalController extends AbstractController {
                 "id" => "nav-sidebar-docker-link",
                 "icon" => "fa-docker",
                 "prefix" => "fab",
+            ]);
+
+
+            $sidebar_buttons[] = new NavButton($this->core, [
+                "href" => $this->core->buildUrl(['banner']),
+                "title" => "Community Events",
+                "icon" => "fa-paper-plane"
             ]);
 
             $sidebar_buttons[] = new NavButton($this->core, [
