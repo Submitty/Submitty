@@ -1,13 +1,13 @@
 /* exported updateUserPronouns, showUpdatePrefNameForm, showUpdateLastInitialFormatForm,
 showUpdatePronounsForm, showDisplayNameOrderForm, showUpdatePasswordForm, showUpdateProfilePhotoForm, showUpdateSecondaryEmailForm,
-updateUserPreferredNames, updateUserLastInitialFormat, updateUserProfilePhoto, updateUserSecondaryEmail,
+updateUserPreferredNames, updateUserLastInitialFormat, updateUserProfilePhoto, updateUserSecondaryEmail, updateDisplayNameOrder, 
 changeSecondaryEmail, previewUserLastInitialFormat, clearPronounsBox
  */
 /* global displaySuccessMessage, displayErrorMessage, buildUrl */
 
 //This variable is to store changes to the pronouns form that have not been submitted
 let pronounsLastVal = null;
-let displayNameOrderLast = "GIVEN_F";
+let displayNameOrderLast = 'GIVEN_F';
 
 function showUpdatePrefNameForm() {
     $('.popup-form').css('display', 'none');
