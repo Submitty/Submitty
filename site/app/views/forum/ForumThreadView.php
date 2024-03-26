@@ -252,7 +252,7 @@ class ForumThreadView extends AbstractView {
             $markdown_enabled = $_COOKIE['markdown_enabled'];
         }
 
-        $button_params = $this->getAllForumButtons($threadExists, $currentThread, $display_option, $show_deleted, $show_merged_thread);
+        $button_params = $this->getAllForumButtons($threadExists, $currentThread, $display_option, $show_deleted, $show_merged_thread, $unmarked);
 
         if (!$ajax) {
             // Add breadcrumb for the current thread
@@ -325,7 +325,7 @@ class ForumThreadView extends AbstractView {
     }
 
     // Returns the set of buttons with the corresponding attributes
-    public function getAllForumButtons($thread_exists, $thread_id, $display_option, $show_deleted, $show_merged_thread) {
+    public function getAllForumButtons($thread_exists, $thread_id, $display_option, $show_deleted, $show_merged_thread, $unmarked) {
         $show_deleted_class = "";
         $show_deleted_action = "";
         $show_deleted_thread_title = "";
@@ -362,6 +362,13 @@ class ForumThreadView extends AbstractView {
                 $show_deleted_action = "alterShowDeletedStatus(1);";
                 $show_deleted_thread_title = "Show Deleted Threads";
             }
+        }
+
+        if($unmarked) {
+            $show_marked_title = "Un-read Post"
+        }
+        else {
+            $show_marked_title = "Read Post"
         }
 
         if ($show_merged_thread) {
@@ -700,7 +707,7 @@ class ForumThreadView extends AbstractView {
         // getting the forum page buttons
         $thread_id = -1;
         $thread_exists = $this->core->getQueries()->threadExists();
-        $button_params = $this->getAllForumButtons($thread_exists, $thread_id, null, $show_deleted, $show_merged_threads);
+        $button_params = $this->getAllForumButtons($thread_exists, $thread_id, null, $show_deleted, $show_merged_threads, $unmarked);
 
         // add css and js files
         $this->core->getOutput()->addInternalCss("forum.css");
