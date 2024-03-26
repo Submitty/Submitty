@@ -1218,14 +1218,14 @@ function alterShowMergeThreadStatus(newStatus, course) {
 }
 
 // eslint-disable-next-line no-unused-vars
-function markUnread() {
+function markUnread(current_thread, current_user) {
     const url = buildCourseUrl(['forum', 'threads', 'mark_unread']);
     $.ajax({
         url: url,
         type: 'POST',
         data: {
-            thread_id: thread_id,
-            user_id: user_id,
+            thread_id: current_thread,
+            user_id: current_user,
         },
         success: function(data) {
             try {
