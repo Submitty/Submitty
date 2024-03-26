@@ -3997,11 +3997,11 @@ VALUES(?, ?, ?, ?, 0, 0, 0, 0, ?)",
     }
 
     /**
-      * Return an array of Team objects for all empty teams with submissions on given gradeable
-      *
-      * @param  string $g_id
-      * @return \app\models\Team[]
-      */
+     * Return an array of Team objects for all empty teams with submissions on given gradeable
+     *
+     * @param  string $g_id
+     * @return \app\models\Team[]
+     */
     public function getEmptyTeamsByGradeableId($g_id) {
         $this->course_db->query(
             "            
