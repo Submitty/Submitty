@@ -14,10 +14,11 @@ def up(config, database, semester, course):
     :param course: Code of course being migrated
     :type course: str
     """
+    # ALTER TABLE gradable ADD COLUMN IF NOT EXISTS g_notification_state VARCHAR(9) DEFAULT 'none' NOT NULL;
     database.execute(
         """
-            ALTER TABLE notification_settings ADD COLUMN IF NOT EXISTS all_released_grades BOOLEAN DEFAULT true NOT NULL;
-            ALTER TABLE notification_settings ADD COLUMN IF NOT EXISTS all_released_grades_email BOOLEAN DEFAULT true NOT NULL;
+            ALTER TABLE notification_settings ADD COLUMN IF NOT EXISTS all_released_grades BOOLEAN DEFAULT false NOT NULL;
+            ALTER TABLE notification_settings ADD COLUMN IF NOT EXISTS all_released_grades_email BOOLEAN DEFAULT false NOT NULL;
         """
     )
 

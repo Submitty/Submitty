@@ -145,15 +145,15 @@ class NotificationFactory {
      * @param array $gradable
      */
     public function onGradableRelease(array $gradable): void {
-        // $recipients = $this->core->getQueries()->getAllUsersWithPreference("all_released_gradable");
-        $recipients = $this->core->getQueries()->getAllUsersIds();
+        $recipients = $this->core->getQueries()->getAllUsersWithPreference("all_released_grades");
         $recipients[] = $this->core->getUser()->getId();
         $recipients = array_unique($recipients);
         $notifications = $this->createNotificationsArray($gradable, $recipients);
         $this->sendNotifications($notifications);
 
         if ($this->core->getConfig()->isEmailEnabled()) {
-            // $recipients = $this->core->getQueries()->getAllUsersWithPreference("all_released_gradable_emails");
+            $recipients = $this->core->getQueries()->getAllUsersWithPreference("all_released_grades_email");
+            $recipients[] = $this->core->getUser()->getId();
             $emails = $this->createEmailsArray($gradable, $recipients, true);
             $this->sendEmails($emails);
         }
