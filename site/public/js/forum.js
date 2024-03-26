@@ -1294,7 +1294,7 @@ function toggleUpduck(post_id, current_user, isLiked, userGroup, taLiked) {
         data: {
             post_id: post_id,
             current_user: current_user,
-            action: isLiked,
+            isLiked: isLiked, //this is a bool for if the button is liked or not
             // eslint-disable-next-line no-undef
             csrf_token: csrfToken,
         },
@@ -1314,7 +1314,6 @@ function toggleUpduck(post_id, current_user, isLiked, userGroup, taLiked) {
                 return;
             }
             json=json['data'];
-            //window.alert(json.type);
             const likeCounterElement = document.getElementById(`likeCounter_${post_id}`);
             let likeCounter = parseInt(likeCounterElement.innerText);
 
