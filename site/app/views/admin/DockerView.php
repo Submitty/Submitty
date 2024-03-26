@@ -229,6 +229,8 @@ class DockerView extends AbstractView {
                     $machine_system_details[$current_machine]["worker"] = null;
                     $machine_system_details[$current_machine]["shipper"] = null;
                     $machine_system_details[$current_machine]["daemon"] = null;
+                    $machine_system_details[$current_machine]["disk"] = null;
+                    $machine_system_details[$current_machine]["load"] = null;
                 }
 
                 $is_match = preg_match("/Worker Service: (.+)/", $buffer, $matches);
