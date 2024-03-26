@@ -37,8 +37,7 @@
         "validation" : [
           {
             "actual_file" : "STDOUT.txt",
-            "method" : "warnIfNotEmpty",
-            // "method": "fileExists",
+            "method": "fileExists",
             "show_actual": "always",
             "show_message": "always"
           }
