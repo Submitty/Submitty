@@ -35,7 +35,7 @@ test('comparator', () => {
     document.body.innerHTML = `<table id="data-table" class="table table-striped mobile-table directory-table sortable">
         <thead>
             <tr>
-                <td id="0" style="cursor: pointer">Registration Section <i class="fas fa-angle-down"></i></td>
+                <td id="0" style="cursor: pointer">Registration Section <i class="fas fa-angle-up"></i></td>
                 <td id="1" style="cursor: pointer">User ID <i class="fas"></i></td>
                 <td id="2" style="cursor: pointer">First Name <i class="fas"></i></td>
                 <td id="3" style="cursor: pointer">Last Name <i class="fas"></i></td>
@@ -45,7 +45,10 @@ test('comparator', () => {
                 <td id="7" style="cursor: pointer">Gradeable Access Date <i class="fas"></i></td>
                 <td id="8" style="cursor: pointer">Number of Poll Responses <i class="fas"></i></td>
                 <td id="9" style="cursor: pointer">Office Hours Queue Date <i class="fas"></i></td>
-                <td id="10" style="cursor: pointer; display:none">Flagged <i class="fas"></i></td>
+                <td id="10" style="cursor: pointer">Course Materials Access Date <i class="fas"></i></td>
+                <td id="11" style="cursor: pointer">Upducks Recived <i class="fas"></i></td>
+                <td id="12" style="cursor: pointer">Upducks Given <i class="fas"></i></td>
+                <td id="13" style="cursor: pointer; display:none">Flagged <i class="fas"></i></td>
             </tr>
         </thead>
 
@@ -147,7 +150,7 @@ test('sort', () => {
     document.body.innerHTML = `<table id="data-table" class="table table-striped mobile-table directory-table sortable">
         <thead>
             <tr>
-                <td id="0" style="cursor: pointer">Registration Section <i class="fas fa-angle-down"></i></td>
+                <td id="0" style="cursor: pointer">Registration Section <i class="fas fa-angle-up"></i></td>
                 <td id="1" style="cursor: pointer">User ID <i class="fas"></i></td>
                 <td id="2" style="cursor: pointer">First Name <i class="fas"></i></td>
                 <td id="3" style="cursor: pointer">Last Name <i class="fas"></i></td>
@@ -157,7 +160,10 @@ test('sort', () => {
                 <td id="7" style="cursor: pointer">Gradeable Access Date <i class="fas"></i></td>
                 <td id="8" style="cursor: pointer">Number of Poll Responses <i class="fas"></i></td>
                 <td id="9" style="cursor: pointer">Office Hours Queue Date <i class="fas"></i></td>
-                <td id="10" style="cursor: pointer; display:none">Flagged <i class="fas"></i></td>
+                <td id="10" style="cursor: pointer">Course Materials Access Date <i class="fas"></i></td>
+                <td id="11" style="cursor: pointer">Upducks Recived <i class="fas"></i></td>
+                <td id="12" style="cursor: pointer">Upducks Given <i class="fas"></i></td>
+                <td id="13" style="cursor: pointer; display:none">Flagged <i class="fas"></i></td>
             </tr>
         </thead>
         <tbody id="tbody">
@@ -240,7 +246,7 @@ test('sort', () => {
     const expectedSort0Asc = `<table id="data-table" class="table table-striped mobile-table directory-table sortable">
         <thead>
             <tr>
-                <td id="0" style="cursor: pointer">Registration Section <i class="fas fa-angle-down"></i></td>
+                <td id="0" style="cursor: pointer">Registration Section <i class="fas fa-angle-up"></i></td>
                 <td id="1" style="cursor: pointer">User ID <i class="fas"></i></td>
                 <td id="2" style="cursor: pointer">First Name <i class="fas"></i></td>
                 <td id="3" style="cursor: pointer">Last Name <i class="fas"></i></td>
@@ -250,7 +256,10 @@ test('sort', () => {
                 <td id="7" style="cursor: pointer">Gradeable Access Date <i class="fas"></i></td>
                 <td id="8" style="cursor: pointer">Number of Poll Responses <i class="fas"></i></td>
                 <td id="9" style="cursor: pointer">Office Hours Queue Date <i class="fas"></i></td>
-                <td id="10" style="cursor: pointer; display:none">Flagged <i class="fas"></i></td>
+                <td id="10" style="cursor: pointer">Course Materials Access Date <i class="fas"></i></td>
+                <td id="11" style="cursor: pointer">Upducks Recived <i class="fas"></i></td>
+                <td id="12" style="cursor: pointer">Upducks Given <i class="fas"></i></td>
+                <td id="13" style="cursor: pointer; display:none">Flagged <i class="fas"></i></td>
             </tr>
         </thead>
         <tbody id="tbody">
@@ -334,7 +343,7 @@ test('sort', () => {
     const expectedSort0Desc = `<table id="data-table" class="table table-striped mobile-table directory-table sortable">
         <thead>
             <tr>
-                <td id="0" style="cursor: pointer">Registration Section <i class="fas fa-angle-down"></i></td>
+                <td id="0" style="cursor: pointer">Registration Section <i class="fas fa-angle-up"></i></td>
                 <td id="1" style="cursor: pointer">User ID <i class="fas"></i></td>
                 <td id="2" style="cursor: pointer">First Name <i class="fas"></i></td>
                 <td id="3" style="cursor: pointer">Last Name <i class="fas"></i></td>
@@ -344,7 +353,10 @@ test('sort', () => {
                 <td id="7" style="cursor: pointer">Gradeable Access Date <i class="fas"></i></td>
                 <td id="8" style="cursor: pointer">Number of Poll Responses <i class="fas"></i></td>
                 <td id="9" style="cursor: pointer">Office Hours Queue Date <i class="fas"></i></td>
-                <td id="10" style="cursor: pointer; display:none">Flagged <i class="fas"></i></td>
+                <td id="10" style="cursor: pointer">Course Materials Access Date <i class="fas"></i></td>
+                <td id="11" style="cursor: pointer">Upducks Recived <i class="fas"></i></td>
+                <td id="12" style="cursor: pointer">Upducks Given <i class="fas"></i></td>
+                <td id="13" style="cursor: pointer; display:none">Flagged <i class="fas"></i></td>
             </tr>
         </thead>
         <tbody id="tbody">
@@ -429,7 +441,7 @@ test('sort', () => {
     const expectedSort1Asc = `<table id="data-table" class="table table-striped mobile-table directory-table sortable">
         <thead>
             <tr>
-                <td id="0" style="cursor: pointer">Registration Section <i class="fas fa-angle-down"></i></td>
+                <td id="0" style="cursor: pointer">Registration Section <i class="fas fa-angle-up"></i></td>
                 <td id="1" style="cursor: pointer">User ID <i class="fas"></i></td>
                 <td id="2" style="cursor: pointer">First Name <i class="fas"></i></td>
                 <td id="3" style="cursor: pointer">Last Name <i class="fas"></i></td>
@@ -439,7 +451,10 @@ test('sort', () => {
                 <td id="7" style="cursor: pointer">Gradeable Access Date <i class="fas"></i></td>
                 <td id="8" style="cursor: pointer">Number of Poll Responses <i class="fas"></i></td>
                 <td id="9" style="cursor: pointer">Office Hours Queue Date <i class="fas"></i></td>
-                <td id="10" style="cursor: pointer; display:none">Flagged <i class="fas"></i></td>
+                <td id="10" style="cursor: pointer">Course Materials Access Date <i class="fas"></i></td>
+                <td id="11" style="cursor: pointer">Upducks Recived <i class="fas"></i></td>
+                <td id="12" style="cursor: pointer">Upducks Given <i class="fas"></i></td>
+                <td id="13" style="cursor: pointer; display:none">Flagged <i class="fas"></i></td>
             </tr>
         </thead>
         <tbody id="tbody">
@@ -524,7 +539,7 @@ test('sort', () => {
     const expectedSort1Desc = `<table id="data-table" class="table table-striped mobile-table directory-table sortable">
         <thead>
             <tr>
-                <td id="0" style="cursor: pointer">Registration Section <i class="fas fa-angle-down"></i></td>
+                <td id="0" style="cursor: pointer">Registration Section <i class="fas fa-angle-up"></i></td>
                 <td id="1" style="cursor: pointer">User ID <i class="fas"></i></td>
                 <td id="2" style="cursor: pointer">First Name <i class="fas"></i></td>
                 <td id="3" style="cursor: pointer">Last Name <i class="fas"></i></td>
@@ -534,7 +549,10 @@ test('sort', () => {
                 <td id="7" style="cursor: pointer">Gradeable Access Date <i class="fas"></i></td>
                 <td id="8" style="cursor: pointer">Number of Poll Responses <i class="fas"></i></td>
                 <td id="9" style="cursor: pointer">Office Hours Queue Date <i class="fas"></i></td>
-                <td id="10" style="cursor: pointer; display:none">Flagged <i class="fas"></i></td>
+                <td id="10" style="cursor: pointer">Course Materials Access Date <i class="fas"></i></td>
+                <td id="11" style="cursor: pointer">Upducks Recived <i class="fas"></i></td>
+                <td id="12" style="cursor: pointer">Upducks Given <i class="fas"></i></td>
+                <td id="13" style="cursor: pointer; display:none">Flagged <i class="fas"></i></td>
             </tr>
         </thead>
         <tbody id="tbody">
@@ -620,7 +638,7 @@ test('sort', () => {
     const expectedSort4Asc = `<table id="data-table" class="table table-striped mobile-table directory-table sortable">
         <thead>
             <tr>
-                <td id="0" style="cursor: pointer">Registration Section <i class="fas fa-angle-down"></i></td>
+                <td id="0" style="cursor: pointer">Registration Section <i class="fas fa-angle-up"></i></td>
                 <td id="1" style="cursor: pointer">User ID <i class="fas"></i></td>
                 <td id="2" style="cursor: pointer">First Name <i class="fas"></i></td>
                 <td id="3" style="cursor: pointer">Last Name <i class="fas"></i></td>
@@ -630,7 +648,10 @@ test('sort', () => {
                 <td id="7" style="cursor: pointer">Gradeable Access Date <i class="fas"></i></td>
                 <td id="8" style="cursor: pointer">Number of Poll Responses <i class="fas"></i></td>
                 <td id="9" style="cursor: pointer">Office Hours Queue Date <i class="fas"></i></td>
-                <td id="10" style="cursor: pointer; display:none">Flagged <i class="fas"></i></td>
+                <td id="10" style="cursor: pointer">Course Materials Access Date <i class="fas"></i></td>
+                <td id="11" style="cursor: pointer">Upducks Recived <i class="fas"></i></td>
+                <td id="12" style="cursor: pointer">Upducks Given <i class="fas"></i></td>
+                <td id="13" style="cursor: pointer; display:none">Flagged <i class="fas"></i></td>
             </tr>
         </thead>
         <tbody id="tbody">
@@ -716,7 +737,7 @@ test('sort', () => {
     const expectedSort4Desc = `<table id="data-table" class="table table-striped mobile-table directory-table sortable">
         <thead>
             <tr>
-                <td id="0" style="cursor: pointer">Registration Section <i class="fas fa-angle-down"></i></td>
+                <td id="0" style="cursor: pointer">Registration Section <i class="fas fa-angle-up"></i></td>
                 <td id="1" style="cursor: pointer">User ID <i class="fas"></i></td>
                 <td id="2" style="cursor: pointer">First Name <i class="fas"></i></td>
                 <td id="3" style="cursor: pointer">Last Name <i class="fas"></i></td>
@@ -726,7 +747,10 @@ test('sort', () => {
                 <td id="7" style="cursor: pointer">Gradeable Access Date <i class="fas"></i></td>
                 <td id="8" style="cursor: pointer">Number of Poll Responses <i class="fas"></i></td>
                 <td id="9" style="cursor: pointer">Office Hours Queue Date <i class="fas"></i></td>
-                <td id="10" style="cursor: pointer; display:none">Flagged <i class="fas"></i></td>
+                <td id="10" style="cursor: pointer">Course Materials Access Date <i class="fas"></i></td>
+                <td id="11" style="cursor: pointer">Upducks Recived <i class="fas"></i></td>
+                <td id="12" style="cursor: pointer">Upducks Given <i class="fas"></i></td>
+                <td id="13" style="cursor: pointer; display:none">Flagged <i class="fas"></i></td>
             </tr>
         </thead>
         <tbody id="tbody">
@@ -812,7 +836,7 @@ test('sort', () => {
     const expectedSort8Asc = `<table id="data-table" class="table table-striped mobile-table directory-table sortable">
         <thead>
             <tr>
-                <td id="0" style="cursor: pointer">Registration Section <i class="fas fa-angle-down"></i></td>
+                <td id="0" style="cursor: pointer">Registration Section <i class="fas fa-angle-up"></i></td>
                 <td id="1" style="cursor: pointer">User ID <i class="fas"></i></td>
                 <td id="2" style="cursor: pointer">First Name <i class="fas"></i></td>
                 <td id="3" style="cursor: pointer">Last Name <i class="fas"></i></td>
@@ -822,7 +846,10 @@ test('sort', () => {
                 <td id="7" style="cursor: pointer">Gradeable Access Date <i class="fas"></i></td>
                 <td id="8" style="cursor: pointer">Number of Poll Responses <i class="fas"></i></td>
                 <td id="9" style="cursor: pointer">Office Hours Queue Date <i class="fas"></i></td>
-                <td id="10" style="cursor: pointer; display:none">Flagged <i class="fas"></i></td>
+                <td id="10" style="cursor: pointer">Course Materials Access Date <i class="fas"></i></td>
+                <td id="11" style="cursor: pointer">Upducks Recived <i class="fas"></i></td>
+                <td id="12" style="cursor: pointer">Upducks Given <i class="fas"></i></td>
+                <td id="13" style="cursor: pointer; display:none">Flagged <i class="fas"></i></td>
             </tr>
         </thead>
         <tbody id="tbody">
@@ -908,7 +935,7 @@ test('sort', () => {
     const expectedSort8Desc = `<table id="data-table" class="table table-striped mobile-table directory-table sortable">
         <thead>
             <tr>
-                <td id="0" style="cursor: pointer">Registration Section <i class="fas fa-angle-down"></i></td>
+                <td id="0" style="cursor: pointer">Registration Section <i class="fas fa-angle-up"></i></td>
                 <td id="1" style="cursor: pointer">User ID <i class="fas"></i></td>
                 <td id="2" style="cursor: pointer">First Name <i class="fas"></i></td>
                 <td id="3" style="cursor: pointer">Last Name <i class="fas"></i></td>
@@ -918,7 +945,10 @@ test('sort', () => {
                 <td id="7" style="cursor: pointer">Gradeable Access Date <i class="fas"></i></td>
                 <td id="8" style="cursor: pointer">Number of Poll Responses <i class="fas"></i></td>
                 <td id="9" style="cursor: pointer">Office Hours Queue Date <i class="fas"></i></td>
-                <td id="10" style="cursor: pointer; display:none">Flagged <i class="fas"></i></td>
+                <td id="10" style="cursor: pointer">Course Materials Access Date <i class="fas"></i></td>
+                <td id="11" style="cursor: pointer">Upducks Recived <i class="fas"></i></td>
+                <td id="12" style="cursor: pointer">Upducks Given <i class="fas"></i></td>
+                <td id="13" style="cursor: pointer; display:none">Flagged <i class="fas"></i></td>
             </tr>
         </thead>
         <tbody id="tbody">

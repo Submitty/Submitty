@@ -45,3 +45,5 @@ input[type="number"]::-webkit-outer-spin-button {
 #data-table td:nth-of-type(8)::before { content: "Gradeable Access Date"; }
 #data-table td:nth-of-type(9)::before { content: "Number of Poll Responses"; }
 #data-table td:nth-of-type(10)::before { content: "Office Hours Queue Date"; }
+#data-table td:nth-of-type(11)::before { content: "Upducks Recived"; }
+#data-table td:nth-of-type(12)::before { content: "Upducks Given"; }

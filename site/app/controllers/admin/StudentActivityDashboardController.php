@@ -86,7 +86,9 @@ class StudentActivityDashboardController extends AbstractController {
             "Forum Post Date",
             "Number of Poll Responses",
             "Office Hours Queue Date",
-            "Course Materials Access Date"
+            "Course Materials Access Date",
+            "Upducks Recived",
+            "Upducks Given"
         ]);
         foreach ($data_dump as $rows) {
             fputcsv($fp, $rows);
