@@ -721,6 +721,91 @@ SQL;
         return $categories_list;
     }
 
+    public function toggleLikes(int $post_id, string $current_user, bool $intendToLike): string {
+        try {
+            $this->course_db->query("SELECT * FROM forum_upducks WHERE post_id = ? AND user_id = ?", [$post_id, $current_user]);
+            $alreadyLiked = isset($this->course_db->rows()[0]);
+            if ($intendToLike) {
+            //$isLiked is the current state of the upduck on the users computer
+                if ($alreadyLiked) {
+                    //$alreadyLiked is if the user already liked it in the database
+                    //needed or else if you spam like button the count will get high
+                    $this->course_db->query("DELETE FROM forum_upducks WHERE post_id = ? AND user_id = ?", [$post_id, $current_user]);
+                    return 'already_liked';
+                }
+                $this->course_db->query("INSERT INTO forum_upducks (post_id, user_id) VALUES (?, ?)", [$post_id, $current_user]);
+                return 'like';
+            }
+            else {
+                if (!$alreadyLiked) {
+                    $this->course_db->query("INSERT INTO forum_upducks (post_id, user_id) VALUES (?, ?)", [$post_id, $current_user]);
+                    return 'not_liked';
+                }
+                $this->course_db->query("DELETE FROM forum_upducks WHERE post_id = ? AND user_id = ?", [$post_id, $current_user]);
+                return 'unlike';
+            }
+        }
+        catch (DatabaseException $dbException) {
+            if ($this->course_db->inTransaction()) {
+                $this->course_db->rollback();
+            }
+            return "false";
+        }
+    }
+
+
+    /**
+     * @param int[] $post_ids
+     * @return int[]
+     */
+    public function getUpduckInfoForPosts(array $post_ids): array {
+        if (count($post_ids) === 0) {
+            return [];
+        }
+        $placeholders = $this->createParameterList(count($post_ids));
+        $sql = "SELECT post_id, COUNT(*) AS cnt FROM forum_upducks WHERE post_id IN {$placeholders} GROUP BY post_id";
+
+        $this->course_db->query($sql, $post_ids);
+        $result = [];
+
+        foreach ($post_ids as $post) {
+            $result[$post] = 0;
+        }
+        foreach ($this->course_db->rows() as $row) {
+            $result[$row['post_id']] = intval($row['cnt']);
+        }
+        return $result;
+    }
+
+    /**
+     * @param int[] $post_ids
+     * @param string $current_user
+     * @return int[]
+     */
+    public function getUserLikesForPosts(array $post_ids, string $current_user): array {
+        if (count($post_ids) === 0) {
+            return [];
+        }
+        $placeholders = $this->createParameterList(count($post_ids));
+        $user_id = $current_user;
+
+        $sql = "SELECT post_id, user_id, COUNT(*) AS cnt FROM forum_upducks WHERE post_id IN {$placeholders}
+                AND user_id = ? GROUP BY (post_id, user_id)";
+        $bindParams = array_merge($post_ids, [$user_id]);
+        $this->course_db->query($sql, $bindParams);
+        $result = [];
+        $final = [];
+        foreach ($this->course_db->rows() as $row) {
+            $result[$row['post_id']] = intval($row['cnt']);
+        }
+        foreach ($result as $key => $value) {
+            if ($value >= 1) {
+                array_push($final, $key);
+            }
+        }
+        return $final;
+    }
+
     public function splitPost($post_id, $title, $categories_ids) {
         $old_thread_id = -1;
         $thread_id = -1;
