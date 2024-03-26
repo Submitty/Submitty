@@ -180,10 +180,10 @@ do
   cd "$datadir"
   if [ ! -d "$toplevel_name" ]
   then
-    echo "Have a non-directory at the top, so creating directory $toplevel_name"
+    echo "Start SLOCC"
     mkdir "$toplevel_name"
   fi
-  echo "Adding $pathname to $toplevel_name"
+  echo "Adding $(basename "$pathname")"
   echo "$pathname" >> "${toplevel_name}/filelist"
  else
   echo "WARNING!!! Not a file nor a directory (so ignored): $possible_dir"

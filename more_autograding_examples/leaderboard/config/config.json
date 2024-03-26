@@ -18,6 +18,7 @@
   },
   "display_testcase_runtime_memory" : true,
 
+
   "testcases" : [
       {
           "type" : "Compilation",
@@ -29,7 +30,9 @@
       },
       {
         "title" : "SLOCC",
-        "command" : "sloccount  --append --details *.cpp",
+        "command" : [
+          "sloccount *"
+        ],
         "points" : 0,
         "validation" : [
           {

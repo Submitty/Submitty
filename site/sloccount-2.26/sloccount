@@ -41,7 +41,7 @@ startingdir=`pwd`
 
 
 # "datadir" is some suitable safe place for the data; here's the default:
-datadir=${HOME}/.slocdata
+datadir=${startingdir}/.slocdata
 
 details="n"
 cached="n"

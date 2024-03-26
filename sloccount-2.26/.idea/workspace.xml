@@ -1,0 +1,247 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="AutoImportSettings">
+    <option name="autoReloadType" value="SELECTIVE" />
+  </component>
+  <component name="CMakeRunConfigurationManager">
+    <generated>
+      <config projectName="sloccount-2.26" targetName="makefile" />
+      <config projectName="sloccount-2.26" targetName="Makefile" />
+      <config projectName="sloccount-2.26" targetName="GNUmakefile" />
+    </generated>
+  </component>
+  <component name="CMakeSettings">
+    <configurations>
+      <configuration PROFILE_NAME="Debug" ENABLED="true" CONFIG_NAME="Debug" />
+    </configurations>
+  </component>
+  <component name="ChangeListManager">
+    <list default="true" id="c88bfd8e-7298-454d-a33a-a47e6a5a02e2" name="Changes" comment="">
+      <change beforePath="$PROJECT_DIR$/.idea/.gitignore" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/misc.xml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/vcs.xml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/COPYING" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/ChangeLog" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/PROGRAM_LICENSE" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/README" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/SOURCES" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/TODO" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/ada_count" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/append_license" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/append_specname" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/asm_count" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/awk_count" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/break_filelist" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/break_filelist.rej" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/c_count.c" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/c_lines_environment.dat" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/c_outfile.dat" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/cobol_count" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/compute_all" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/compute_c_usc" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/compute_java_usc" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/compute_sloc_lang" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/count_extensions" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/count_unknown_ext" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/csh_count" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/dirmatch" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/driver.c" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/driver.h" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/exp_count" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/extract-count" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/extract_license" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/f90_count" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/fortran_count" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/generic_count" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/get_sloc" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/get_sloc_details" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/haskell_count" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/java_lines_environment.dat" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/jsp_count.c" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/jsp_count.l" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/lex_count" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/lexcount1.c" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/linux_unique" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/lisp_count" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/make_filelists" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/makefile" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/makefile_count" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/ml_count.c" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/modula3_count" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/objc_count" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/pascal_count.c" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/pascal_count.l" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/perl_count" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/php_count.c" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/print_sum" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/print_sum_subset" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/python_count" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/redo_licenses" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/rpm_unpacker" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/ruby_count" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/sed_count" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/sh_count" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/show_filecount" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/simplecount" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/sloccount" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/sloccount.1" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/sloccount.html" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/sloccount.spec" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/sql_count" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/stripccomments.c" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/stub" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/stubsh" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/table.html" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/tcl_count" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/testcode/conditions.CBL" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/testcode/hello.f" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/testcode/hello.f90" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/testcode/hello.pas" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/testcode/hello1.pas" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/testcode/messages.rb" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/testcode/temp.c" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/testcode/test.hs" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/testcode/test1.inc" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/testcode/test1.lhs" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/testcode/test1.php" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/testcode/test2.lhs" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/testcode/wokka.cbl" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/testcode/wokka.cs" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/usc_subset.tar" beforeDir="false" />
+    </list>
+    <option name="SHOW_DIALOG" value="false" />
+    <option name="HIGHLIGHT_CONFLICTS" value="true" />
+    <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
+    <option name="LAST_RESOLUTION" value="IGNORE" />
+  </component>
+  <component name="ClangdSettings">
+    <option name="formatViaClangd" value="false" />
+  </component>
+  <component name="ExternalProjectsData">
+    <projectState path="$PROJECT_DIR$/..">
+      <ProjectState />
+    </projectState>
+    <projectState path="$PROJECT_DIR$">
+      <ProjectState />
+    </projectState>
+  </component>
+  <component name="Git.Settings">
+    <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$/.." />
+  </component>
+  <component name="MakefileLocalSettings">
+    <option name="availableProjects">
+      <map>
+        <entry>
+          <key>
+            <ExternalProjectPojo>
+              <option name="name" value="sloccount-2.26" />
+              <option name="path" value="$PROJECT_DIR$" />
+            </ExternalProjectPojo>
+          </key>
+          <value>
+            <list>
+              <ExternalProjectPojo>
+                <option name="name" value="sloccount-2.26" />
+                <option name="path" value="$PROJECT_DIR$" />
+              </ExternalProjectPojo>
+            </list>
+          </value>
+        </entry>
+        <entry>
+          <key>
+            <ExternalProjectPojo>
+              <option name="name" value="sloccount-2.26" />
+              <option name="path" value="$PROJECT_DIR$/.." />
+            </ExternalProjectPojo>
+          </key>
+          <value>
+            <list>
+              <ExternalProjectPojo>
+                <option name="name" value="sloccount-2.26" />
+                <option name="path" value="$PROJECT_DIR$/.." />
+              </ExternalProjectPojo>
+            </list>
+          </value>
+        </entry>
+      </map>
+    </option>
+    <option name="projectSyncType">
+      <map>
+        <entry key="$PROJECT_DIR$" value="RE_IMPORT" />
+      </map>
+    </option>
+  </component>
+  <component name="ProjectApplicationVersion">
+    <option name="ide" value="CLion" />
+    <option name="majorVersion" value="2023" />
+    <option name="minorVersion" value="3.4" />
+  </component>
+  <component name="ProjectColorInfo"><![CDATA[{
+  "associatedIndex": 8
+}]]></component>
+  <component name="ProjectId" id="2e1PMZVRA0l9WocmZc9UO2wDY88" />
+  <component name="ProjectViewState">
+    <option name="hideEmptyMiddlePackages" value="true" />
+    <option name="showLibraryContents" value="true" />
+  </component>
+  <component name="PropertiesComponent"><![CDATA[{
+  "keyToString": {
+    "RunOnceActivity.OpenProjectViewOnStart": "true",
+    "RunOnceActivity.ShowReadmeOnStart": "true",
+    "RunOnceActivity.cidr.known.project.marker": "true",
+    "RunOnceActivity.readMode.enableVisualFormatting": "true",
+    "cf.first.check.clang-format": "false",
+    "cidr.known.project.marker": "true",
+    "git-widget-placeholder": "slocccount",
+    "last_opened_file_path": "/Users/jaeseok/Developer/GIT_CHECKOUT/Submitty/sloccount-2.26",
+    "node.js.detected.package.eslint": "true",
+    "node.js.detected.package.tslint": "true",
+    "node.js.selected.package.eslint": "(autodetect)",
+    "node.js.selected.package.tslint": "(autodetect)",
+    "nodejs_package_manager_path": "npm",
+    "vue.rearranger.settings.migration": "true"
+  }
+}]]></component>
+  <component name="RunManager" selected="Native Application.GNUmakefile">
+    <configuration default="true" type="CLionExternalRunConfiguration" factoryName="Application" REDIRECT_INPUT="false" ELEVATE="false" USE_EXTERNAL_CONSOLE="false" EMULATE_TERMINAL="false" PASS_PARENT_ENVS_2="true">
+      <method v="2">
+        <option name="CLION.EXTERNAL.BUILD" enabled="true" />
+      </method>
+    </configuration>
+    <configuration name="GNUmakefile" type="CLionNativeAppRunConfigurationType" REDIRECT_INPUT="false" ELEVATE="false" USE_EXTERNAL_CONSOLE="false" EMULATE_TERMINAL="false" PASS_PARENT_ENVS_2="true" PROJECT_NAME="sloccount-2.26" TARGET_NAME="GNUmakefile" CONFIG_NAME="GNUmakefile" version="1">
+      <method v="2">
+        <option name="CLION.COMPOUND.BUILD" enabled="true" />
+      </method>
+    </configuration>
+    <configuration name="Makefile" type="CLionNativeAppRunConfigurationType" REDIRECT_INPUT="false" ELEVATE="false" USE_EXTERNAL_CONSOLE="false" EMULATE_TERMINAL="false" PASS_PARENT_ENVS_2="true" PROJECT_NAME="sloccount-2.26" TARGET_NAME="Makefile" CONFIG_NAME="Makefile" version="1">
+      <method v="2">
+        <option name="CLION.COMPOUND.BUILD" enabled="true" />
+      </method>
+    </configuration>
+    <configuration name="makefile" type="CLionNativeAppRunConfigurationType" REDIRECT_INPUT="false" ELEVATE="false" USE_EXTERNAL_CONSOLE="false" EMULATE_TERMINAL="false" PASS_PARENT_ENVS_2="true" PROJECT_NAME="sloccount-2.26" TARGET_NAME="makefile" CONFIG_NAME="makefile" version="1">
+      <method v="2">
+        <option name="CLION.COMPOUND.BUILD" enabled="true" />
+      </method>
+    </configuration>
+    <list>
+      <item itemvalue="Native Application.GNUmakefile" />
+      <item itemvalue="Native Application.Makefile" />
+      <item itemvalue="Native Application.makefile" />
+    </list>
+  </component>
+  <component name="SpellCheckerSettings" RuntimeDictionaries="0" Folders="0" CustomDictionaries="0" DefaultDictionary="application-level" UseSingleDictionary="true" transferred="true" />
+  <component name="TaskManager">
+    <task active="true" id="Default" summary="Default task">
+      <changelist id="c88bfd8e-7298-454d-a33a-a47e6a5a02e2" name="Changes" comment="" />
+      <created>1711069063474</created>
+      <option name="number" value="Default" />
+      <option name="presentableId" value="Default" />
+      <updated>1711069063474</updated>
+      <workItem from="1711069064554" duration="8370000" />
+    </task>
+    <servers />
+  </component>
+  <component name="TypeScriptGeneratedFilesManager">
+    <option name="version" value="3" />
+  </component>
+</project>

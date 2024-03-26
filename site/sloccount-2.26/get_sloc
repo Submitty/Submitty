@@ -494,51 +494,9 @@ print "\n";
 print "\n";
 
 if ($computing_sloc) {
- if ($one_program) {
-   # If it's one program, override the grand total of effort
-   # and the schedule calculations by using the total SLOC.
-
-   $grand_total_effort = effort_person_months($grand_total_sloc);
-   $grand_schedule = estimate_schedule($grand_total_effort);
- }
  printf "Total Physical Source Lines of Code (SLOC)                = %s\n",
         commify($grand_total_sloc);
-
- printf "Development Effort Estimate, Person-Years (Person-Months) = %s (%s)\n",
-       numformat($grand_total_effort/12.0, 2),
-       numformat($grand_total_effort, 2);
- print " ($effort_estimation_message " .
-        "Person-Months = $effort_factor * (KSLOC**$effort_exponent))\n";
-
- printf "Schedule Estimate, Years (Months)                         = %s (%s)\n",
-       numformat($grand_schedule/12.0, 2),
-       numformat($grand_schedule, 2);
- print " ($schedule_estimation_message " .
-       "Months = $schedule_factor * (person-months**$schedule_exponent))\n";
-
- # Don't show this if there are multiple programs, because the computation
- # is essentially meaningless: after the "smaller" projects have completed,
- # the longest one would keep going:
- if ($one_program && ($grand_schedule > 0.0)) {
- printf "Estimated Average Number of Developers (Effort/Schedule)  = %s\n",
-       numformat($grand_total_effort / $grand_schedule, 2);
- }
-
-
- $value = ($grand_total_effort / 12.0) * $person_cost * $overhead;
- printf "Total Estimated Cost to Develop                           = \$ %s\n",
-      numformat($value, 0);
- printf " (average salary = \$%s/year, overhead = %0.2f).\n",
-      commify($person_cost), $overhead;
-
 } else {
 print "Total Number of Files = $grand_total_sloc\n";
 print "Total Number of Source Code Files = $grand_total_lang_sloc\n";
 }
-print "SLOCCount, Copyright (C) 2001-2004 David A. Wheeler\n";
-print "SLOCCount is Open Source Software/Free Software, licensed under the GNU GPL.\n";
-print "SLOCCount comes with ABSOLUTELY NO WARRANTY, and you are welcome to\n";
-print "redistribute it under certain conditions as specified by the GNU GPL license;\n";
-print "see the documentation for details.\n";
-print "Please credit this data as \"generated using David A. Wheeler's 'SLOCCount'.\"\n";
-
