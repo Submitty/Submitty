@@ -55,6 +55,9 @@
 {# Begin Calendar #}
 <div class="content">
     <h1>Calendar</h1>
+    <button type="button" onclick="setDateToToday()" class="btn btn-primary">
+        <i class="fas fa-clock"></i> Today
+    </button>
     <div class="cal-content">
         <div class="cal-toolbar">
             {% if instructor_courses|length > 0 %}
