@@ -183,7 +183,7 @@ function testAndGetAttachments(post_box_id, dynamic_check) {
     }
 }
 
-function publishFormWithAttachments(form, test_category, error_message, is_thread) {
+function publishFormWithAttachments(form, test_category, error_message) {
     if (!form[0].checkValidity()) {
         form[0].reportValidity();
         return false;
@@ -234,22 +234,6 @@ function publishFormWithAttachments(form, test_category, error_message, is_threa
             // eslint-disable-next-line no-undef
             cancelDeferredSave(autosaveKeyFor(form));
             clearReplyBoxAutosave(form);
-
-            const thread_id = json['data']['thread_id'];
-            if (is_thread) {
-                window.socketClient.send({'type': 'new_thread', 'thread_id': thread_id});
-            }
-            else {
-                const post_id = json['data']['post_id'];
-                let reply_level = form[0].hasAttribute('id') ? parseInt(form.prev().attr('data-reply_level')) : 0;
-                reply_level = reply_level < 7 ? reply_level+1 : reply_level;
-                const post_box_ids = $('.post_reply_form .thread-post-form').map(function() {
-                    return $(this).data('post_box_id');
-                }).get();
-                const max_post_box_id = Math.max.apply(Math, post_box_ids);
-                window.socketClient.send({'type': 'new_post', 'thread_id': thread_id, 'post_id': post_id, 'reply_level': reply_level, 'post_box_id': max_post_box_id});
-            }
-
             window.location.href = json['data']['next_page'];
         },
         error: function() {
@@ -324,11 +308,13 @@ function socketNewOrEditPostHandler(post_id, reply_level, post_box_id=null, edit
                             });
                             if (parent_sibling_posts.length !== 0) {
                                 $(new_post).insertBefore(parent_sibling_posts.first()).hide().fadeIn();
-                                displaySuccessMessage('Refresh for correct ordering');
+                            }
+                            else {
+                                $(new_post).insertAfter(parent_sibling_posts.prevObject.last()).hide().fadeIn();
                             }
                         }
                         else {
-                            $(new_post).insertAfter(parent_post.next()).hide().fadeIn();
+                            $(new_post).insertAfter(parent_post).hide().fadeIn();
                         }
                     }
                 }
@@ -417,7 +403,6 @@ function socketNewOrEditThreadHandler(thread_id, edit=false) {
                 else {
                     const original_thread = $(`[data-thread_id="${thread_id}"]`);
                     $(new_thread).insertBefore(original_thread);
-                    original_thread.next().remove();
                     original_thread.remove();
                 }
                 // eslint-disable-next-line eqeqeq
@@ -770,8 +755,6 @@ function changeThreadStatus(thread_id) {
                 displayErrorMessage(json['message']);
                 return;
             }
-
-            window.socketClient.send({'type': 'resolve_thread', 'thread_id': thread_id});
             window.location.reload();
             // eslint-disable-next-line no-undef
             displaySuccessMessage('Thread marked as resolved.');
@@ -815,21 +798,10 @@ function modifyOrSplitPost(e) {
 
             // modify
             if (form.attr('id') === 'thread_form') {
-                const thread_id = form.find('#edit_thread_id').val();
-                const post_id = form.find('#edit_post_id').val();
-                const reply_level = $(`#${post_id}`).attr('data-reply_level');
-                const post_box_id = $(`#${post_id}-reply .thread-post-form`).data('post_box_id') -1;
-                const msg_type = json['data']['type'] === 'Post' ? 'edit_post' : 'edit_thread';
-                window.socketClient.send({'type': msg_type, 'thread_id': thread_id, 'post_id': post_id, 'reply_level': reply_level, 'post_box_id': post_box_id});
                 window.location.reload();
             }
             // split
             else {
-                // eslint-disable-next-line no-var, no-redeclare
-                var post_id = form.find('#split_post_id').val();
-                const new_thread_id = json['data']['new_thread_id'];
-                const old_thread_id = json['data']['old_thread_id'];
-                window.socketClient.send({'type': 'split_post', 'new_thread_id': new_thread_id, 'thread_id': old_thread_id, 'post_id': post_id});
                 window.location.replace(json['data']['next']);
             }
         },
@@ -1818,12 +1790,10 @@ function deletePostToggle(isDeletion, thread_id, post_id, author, time, csrf_tok
                 let new_url = '';
                 switch (json['data']['type']) {
                     case 'thread':
-                        window.socketClient.send({'type': 'delete_thread', 'thread_id': thread_id});
                         // eslint-disable-next-line no-undef
                         new_url = buildCourseUrl(['forum']);
                         break;
                     case 'post':
-                        window.socketClient.send({'type': 'delete_post', 'thread_id': thread_id, 'post_id': post_id});
                         // eslint-disable-next-line no-undef
                         new_url = buildCourseUrl(['forum', 'threads', thread_id]);
                         break;
@@ -1857,12 +1827,6 @@ function alterAnnouncement(thread_id, confirmString, type, csrf_token) {
             },
             // eslint-disable-next-line no-unused-vars
             success: function(data) {
-                if (type) {
-                    window.socketClient.send({'type': 'announce_thread', 'thread_id': thread_id});
-                }
-                else {
-                    window.socketClient.send({'type': 'unpin_thread', 'thread_id': thread_id});
-                }
                 window.location.reload();
             },
             error: function() {
@@ -2576,16 +2540,8 @@ function pinAnnouncement(thread_id, type, csrf_token) {
                 csrf_token: csrf_token,
 
             },
-            // eslint-disable-next-line no-unused-vars
-            success: function(data) {
-                if (type) {
-                    window.socketClient.send({'type': 'announce_thread', 'thread_id': thread_id});
-                }
-                else {
-                    window.socketClient.send({'type': 'unpin_thread', 'thread_id': thread_id});
-                }
-            },
-            error: function() {
+            error: function(err) {
+                console.error(err);
                 window.alert('Something went wrong while trying to remove announcement. Please try again.');
             },
         });
