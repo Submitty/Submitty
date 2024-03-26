@@ -76,10 +76,10 @@ jobs:
         run: |
           pip install ansible
       - name: Run Smoke Tests
+        working-directory: ansible
         run: |
-          cd $SUBMITTY_REPOSITORY
-          ansible-playbook ansible/playbooks/submitty_install.yml --syntax-check
-          ansible-playbook ansible/playbooks/submitty_install.yml --check
+          ansible-playbook playbooks/submitty_install.yml --syntax-check
+          ansible-playbook playbooks/submitty_install.yml --check
 
 #  js-lint:
 #    runs-on: ubuntu-22.04
