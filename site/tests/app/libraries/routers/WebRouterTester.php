@@ -8,6 +8,7 @@ use Symfony\Component\HttpFoundation\Request;
 
 /**
  * @runTestsInSeparateProcesses
+ * @preserveGlobalState disabled
  */
 class WebRouterTester extends BaseUnitTest {
     public function testLogin() {
