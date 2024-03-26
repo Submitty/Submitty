@@ -334,11 +334,11 @@ class MiscController extends AbstractController {
     /**
      * @Route("/courses/{_semester}/{_course}/gradeable/{gradeable_id}/download_zip")
      */
-    public function downloadSubmissionZip($gradeable_id, $user_id, $version, $is_anon, $origin = null) {
+    public function downloadSubmissionZip($gradeable_id, $submitter_id, $version, $is_anon, $origin = null) {
 
-        $anon_id = $user_id;
+        $anon_id = $submitter_id;
         if ($is_anon === "true") {
-            $user_id = $this->core->getQueries()->getSubmitterIdFromAnonId($anon_id, $gradeable_id);
+            $submitter_id = $this->core->getQueries()->getSubmitterIdFromAnonId($anon_id, $gradeable_id);
         }
 
         $gradeable = $this->core->getQueries()->getGradeableConfig($gradeable_id);
@@ -348,11 +348,9 @@ class MiscController extends AbstractController {
             $this->core->redirect($this->core->buildCourseUrl());
         }
 
-        $graded_gradeable = $this->core->getQueries()->getGradedGradeable($gradeable, $user_id, $gradeable->isTeamAssignment());
+        $is_team = $gradeable->isTeamAssignment();
 
-        if ($gradeable->isTeamAssignment()) {
-            $graded_gradeable = $this->core->getQueries()->getGradedGradeable($gradeable, null, $user_id);
-        }
+        $graded_gradeable = $this->core->getQueries()->getGradedGradeable($gradeable, $is_team ? null : $submitter_id, $is_team ? $submitter_id : null);
 
         if ($graded_gradeable === null) {
             $message = "You do not have access to that page.";
@@ -407,7 +405,7 @@ class MiscController extends AbstractController {
             $zip_file_name = $gradeable_id . "_" . $anon_id . "_v" . $version . ".zip";
         }
         else {
-            $zip_file_name = $gradeable_id . "_" . $user_id . "_v" . $version . ".zip";
+            $zip_file_name = $gradeable_id . "_" . $submitter_id . "_v" . $version . ".zip";
         }
 
         // create a new zipstream object
