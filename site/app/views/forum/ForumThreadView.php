@@ -265,6 +265,7 @@ class ForumThreadView extends AbstractView {
             }
 
             $return = $this->core->getOutput()->renderTwigTemplate("forum/ShowForumThreads.twig", [
+                "current_user" = $user,
                 "categories" => $categories,
                 "filterFormData" => $filterFormData,
                 "button_params" => $button_params,
@@ -293,6 +294,7 @@ class ForumThreadView extends AbstractView {
         }
         else {
             $return = $this->core->getOutput()->renderTwigTemplate("forum/GeneratePostList.twig", [
+                "current_user" = $user,
                 "userGroup" => $generatePostContent["userGroup"],
                 "activeThread" => $generatePostContent["activeThread"],
                 "activeThreadAnnouncement" => $generatePostContent["activeThreadAnnouncement"],
