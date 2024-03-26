@@ -446,7 +446,7 @@ class ForumThreadView extends AbstractView {
         }
         $first_post = $this->core->getQueries()->getFirstPostForThread($thread_id);
         $first_post_id = $first_post["id"];
-
+        
         $first = true;
 
         $post_data = [];
@@ -516,6 +516,7 @@ class ForumThreadView extends AbstractView {
                         $post["author_user_group"] = $author_user_groups_map[$post["author_user_id"]];
 
                         $post_data[] = $this->createPost(
+                            $first_post,
                             $activeThread,
                             $post,
                             $unviewed_posts,
@@ -546,6 +547,7 @@ class ForumThreadView extends AbstractView {
                 $post["author_user_group"] = $author_user_groups_map[$post["author_user_id"]];
 
                 $post_data[] = $this->createPost(
+                    $first_post,
                     $activeThread,
                     $post,
                     $unviewed_posts,
@@ -1060,7 +1062,7 @@ class ForumThreadView extends AbstractView {
      * } $author_info
      * @param string[] $post_attachments
      */
-    public function createPost(array $thread, array $post, $unviewed_posts, $first, $reply_level, $display_option, $includeReply, array $author_info, array $post_attachments, bool $has_history, bool $is_merged_thread, bool $render = false, bool $thread_announced = false, bool $isCurrentFavorite = false) {
+    public function createPost($first_post, array $thread, array $post, $unviewed_posts, $first, $reply_level, $display_option, $includeReply, array $author_info, array $post_attachments, bool $has_history, bool $is_merged_thread, bool $render = false, bool $thread_announced = false, bool $isCurrentFavorite = false) {
 
         $current_user = $this->core->getUser()->getId();
         $thread_id = $thread["id"];
@@ -1098,6 +1100,7 @@ class ForumThreadView extends AbstractView {
         if ($post["anonymous"]) {
             $visible_username = "Anonymous";
         }
+
         $classes = ["post_box"];
         if ($first && $display_option != 'alpha') {
             $classes[] = "first_post";
@@ -1136,6 +1139,11 @@ class ForumThreadView extends AbstractView {
         $userGroup = $this->core->getUser()->getGroup();
 
         $post_user_info = [];
+
+        $is_OP = false;
+        if ($post["author_user_id"] == $first_post['author_user_id']) {
+            $is_OP = true;
+        }
 
         $merged_thread = $is_merged_thread && $userAccessFullGrading;
         if ($userAccessFullGrading) {
@@ -1216,6 +1224,8 @@ class ForumThreadView extends AbstractView {
                 "display_pronouns" => $display_pronouns
             ];
         }
+
+        $post_user_info["is_OP"] = $is_OP;
 
         $post_attachment = ForumUtils::getForumAttachments(
             $post_id,
