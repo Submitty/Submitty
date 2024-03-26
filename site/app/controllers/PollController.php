@@ -14,7 +14,9 @@ use app\libraries\routers\AccessControl;
 use app\libraries\routers\Enabled;
 use app\libraries\FileUtils;
 use app\libraries\PollUtils;
+use app\libraries\DateUtils;
 use app\views\PollView;
+use DateInterval;
 
 /**
  * @Enabled("polls")
@@ -191,7 +193,20 @@ class PollController extends AbstractController {
             return new RedirectResponse($this->core->buildCourseUrl(['polls']));
         }
 
-        $poll = new Poll($_POST['name'], $_POST['question'], $_POST['question_type'], $date, $_POST['release_histogram'], $_POST["release_answer"]);
+        //set to 0 if it is not found in $_POST.
+        $hours = intval($_POST['poll-hours'] ?? 0);
+        $minutes = intval($_POST['poll-minutes'] ?? 0);
+        $seconds = intval($_POST['poll-seconds'] ?? 0);
+        if (($hours * 3600) + (60 * $minutes) +  $seconds > 86400) {
+            $this->core->addErrorMessage("Exceeded 24 hour limit");
+            return new RedirectResponse($this->core->buildCourseUrl(['polls/newPoll']));
+        }
+        if ($hours < 0 || $minutes < 0 || $seconds < 0) {
+            $this->core->addErrorMessage('Invalid time given');
+            return new RedirectResponse($this->core->buildCourseUrl(['polls']));
+        }
+        $duration = new DateInterval("PT{$hours}H{$minutes}M{$seconds}S");
+        $poll = new Poll($_POST['name'], $_POST['question'], $_POST['question_type'], $duration, $date, $_POST['release_histogram'], $_POST["release_answer"]);
         $em->persist($poll);
 
         // Need to run this after persist so that we can use getId() below
@@ -306,9 +321,36 @@ class PollController extends AbstractController {
                 return new RedirectResponse($this->core->buildCourseUrl(['polls']));
             }
         }
-
-
         $date = \DateTime::createFromFormat("Y-m-d", $_POST["release_date"]);
+        $hours = intval($_POST['poll-hours'] ?? 0);
+        $minutes = intval($_POST['poll-minutes'] ?? 0);
+        $seconds = intval($_POST['poll-seconds'] ?? 0);
+        $prevHours = $poll->getDuration()->h;
+        $prevMinutes = $poll->getDuration()->i;
+        $prevSeconds = $poll->getDuration()->s;
+        $resetDuration = true;
+        if ($hours === $prevHours && $minutes === $prevMinutes && $seconds === $prevSeconds) {
+            $resetDuration = false;
+        }
+        if (($hours * 3600) + (60 * $minutes) +  $seconds > 86400) {
+            $this->core->addErrorMessage("Exceeded 24 hour limit");
+            return new RedirectResponse($this->core->buildCourseUrl(['polls']));
+        }
+        if ($hours < 0 || $minutes < 0 || $seconds < 0) {
+            $this->core->addErrorMessage('Invalid time given');
+            return new RedirectResponse($this->core->buildCourseUrl(['polls']));
+        }
+        $newDuration = new DateInterval("PT{$hours}H{$minutes}M{$seconds}S");
+        if ($poll->isOpen() && $resetDuration) {
+            if ($newDuration->h > 0 || $newDuration->i > 0 || $newDuration->s > 0 || $newDuration->days > 0 || $newDuration->m > 0 || $newDuration->y > 0) {
+                $endDate = $this->core->getDateTimeNow();
+                $endDate->add($newDuration);
+                $poll->setEndDate($endDate);
+            }
+            else {
+                $poll->setEndDate(new \DateTime(DateUtils::MAX_TIME));
+            }
+        }
         if ($date === false) {
             $this->core->addErrorMessage("Invalid poll release date");
             return new RedirectResponse($returnUrl);
@@ -317,14 +359,13 @@ class PollController extends AbstractController {
             $this->core->addErrorMessage("Invalid poll question type");
             return new RedirectResponse($this->core->buildCourseUrl(['polls']));
         }
-
         $poll->setName($_POST['name']);
         $poll->setQuestion($_POST['question']);
         $poll->setQuestionType($_POST['question_type']);
+        $poll->setDuration($newDuration);
         $poll->setReleaseDate($date);
         $poll->setReleaseHistogram($_POST['release_histogram']);
         $poll->setReleaseAnswer($_POST['release_answer']);
-
         if (isset($_FILES['image_file']) && $_FILES["image_file"]["name"] !== "") {
             $file = $_FILES["image_file"];
             // validate file size
@@ -429,9 +470,19 @@ class PollController extends AbstractController {
             $this->core->addErrorMessage("Invalid Poll ID");
             return new RedirectResponse($this->core->buildCourseUrl(['polls']));
         }
-        $poll->setOpen();
-        $em->flush();
 
+        $duration = $poll->getDuration();
+        if ($duration->h > 0 || $duration->i > 0 || $duration->s > 0 || $duration->days > 0 || $duration->m > 0 || $duration->y > 0) {
+            $end_time = $this->core->getDateTimeNow();
+            $end_time->add($duration);
+            $poll->setEndDate($end_time);
+        }
+        else {
+            //If duration is 0, it means that the user wants to manually close it.
+            $end_time = new \DateTime(DateUtils::MAX_TIME);
+            $poll->setEndDate($end_time);
+        }
+        $em->flush();
         return new RedirectResponse($this->core->buildCourseUrl(['polls']));
     }
 
@@ -448,7 +499,7 @@ class PollController extends AbstractController {
             $this->core->addErrorMessage("Invalid Poll ID");
             return new RedirectResponse($this->core->buildCourseUrl(['polls']));
         }
-        $poll->setEnded();
+        $poll->setEndDate($this->core->getDateTimeNow());
         $em->flush();
 
         return new RedirectResponse($this->core->buildCourseUrl(['polls']));
@@ -467,9 +518,9 @@ class PollController extends AbstractController {
             $this->core->addErrorMessage("Invalid Poll ID");
             return new RedirectResponse($this->core->buildCourseUrl(['polls']));
         }
+        //Setting the time to the beginning of time indicates that it is closed.
         $poll->setClosed();
         $em->flush();
-
         return new RedirectResponse($this->core->buildCourseUrl(['polls']));
     }
 
@@ -651,7 +702,7 @@ class PollController extends AbstractController {
                 implemented don't have this data. At the time, there
                 only existed questions of type single response. */
             $question_type = array_key_exists("question_type", $poll) ? $poll['question_type'] : 'single-response-multiple-correct';
-            $poll_entity = new Poll($poll['name'], $poll['question'], $question_type, \DateTime::createFromFormat("Y-m-d", $poll['release_date']), $poll['release_histogram'], $poll['release_answer']);
+            $poll_entity = new Poll($poll['name'], $poll['question'], $question_type, new \DateInterval($poll['duration']), \DateTime::createFromFormat("Y-m-d", $poll['release_date']), $poll['release_histogram'], $poll['release_answer']);
             $em->persist($poll_entity);
             $order = 0;
             foreach ($poll['responses'] as $id => $response) {
