@@ -722,14 +722,15 @@ SQL;
         return $categories_list;
     }
 
-    public function toggleLikes(int $post_id, string $current_user, bool $isLiked): string {
-        //$isLiked will be if the upducks button is liked or not
+    public function toggleLikes(int $post_id, string $current_user, bool $intendToLike): string {
         try {
-            // Check if the user has already liked bc if not database will get duplicates
             $this->course_db->query("SELECT * FROM forum_upducks WHERE post_id = ? AND user_id = ?", [$post_id, $current_user]);
-            $hasLiked = isset($this->course_db->rows()[0]);
-            if ($isLiked) {
-                if ($hasLiked) {
+            $alreadyLiked = isset($this->course_db->rows()[0]);
+            if ($intendToLike) {
+            //$isLiked is the current state of the upduck on the users computer
+                if ($alreadyLiked) {
+                    //$alreadyLiked is if the user already liked it in the database
+                    //needed or else if you spam like button the count will get high
                     $this->course_db->query("DELETE FROM forum_upducks WHERE post_id = ? AND user_id = ?", [$post_id, $current_user]);
                     return 'already_liked';
                 }
@@ -737,7 +738,7 @@ SQL;
                 return 'like';
             }
             else {
-                if (!$hasLiked) {
+                if (!$alreadyLiked) {
                     $this->course_db->query("INSERT INTO forum_upducks (post_id, user_id) VALUES (?, ?)", [$post_id, $current_user]);
                     return 'not_liked';
                 }
