@@ -79,6 +79,14 @@
                             {% endif %}
                         </button>
                     </div>
+                    <div class="flex-row" id="display-name-order-row" data-testid="display-name-order-row">
+                        <span class="label">
+                            Display Name Order:
+                        </span>
+                        <button id='display_name_order_val' class="icon" tabindex="0" onclick="showDisplayNameOrderForm()" aria-label="Edit user display name order" title="Edit user display name order">
+                            <i class="fas fa-pencil-alt"></i> {{ user.getDisplayNameOrder() }}
+                        </button>
+                    </div>
                     <div class="flex-row" id="email-row" data-testid="email-row">
                         <span class="label">
                             {{ localize('My_Profile.Primary_Email', "Primary Email" )}}:
@@ -223,6 +231,7 @@
 {% include 'EditProfilePhotoForm.twig' %}
 {% include 'EditSecondaryEmailForm.twig' %}
 {% include 'EditPronounsForm.twig' %}
+{% include 'EditDisplayNameOrderForm.twig' %}
 {% if show_change_password %}
     {% include 'ChangePasswordForm.twig' %}
 {% endif %}
