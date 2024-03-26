@@ -1348,7 +1348,7 @@ function toggleUpduck(post_id, current_user, isLiked, userGroup, taLiked) {
                     likeCounterElement.style.color = '#ffba00';
                 }
                 else {
-                    if(taLiked) {
+                    if (taLiked) {
                         likeCounterElement.style.color = '#ffba00';
                     }
                     else {

@@ -781,7 +781,6 @@ SQL;
         foreach ($this->course_db->rows() as $row) {
             array_push($result, $row['post_id']);
         }
-    
         return $result;
     }
 
