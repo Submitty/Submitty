@@ -1285,7 +1285,7 @@ function modifyThreadList(currentThreadId, currentCategoriesId, course, loadFirs
     });
 }
 
-function toggleUpduck(post_id, current_user, isLiked, userGroup) {
+function toggleUpduck(post_id, current_user, isLiked, userGroup, taLiked) {
     // eslint-disable-next-line no-undef
     const url = buildCourseUrl(['post', 'likes']);
     $.ajax({
@@ -1322,23 +1322,19 @@ function toggleUpduck(post_id, current_user, isLiked, userGroup) {
             const likeIconSrc = document.getElementById(`likeIcon_${post_id}`);
             let likeIconSrcElement = likeIconSrc.src;
 
-            const theme = localStorage.getItem('theme');
-            if (localStorage.getItem('theme')) {
-                console.log(localStorage.getItem('theme'));
-            }
-
             //if userGroup == 4 or 3 then make it print the liked by instructor in yellow
             if (likeIconSrcElement.endsWith('/img/on-duck-button.svg')) {
-                if (theme==='light' && likeIconSrcElement.endsWith('/img/on-duck-button.svg')) {
+                if (likeIconSrcElement.endsWith('/img/on-duck-button.svg')) {
                     likeIconSrcElement = likeIconSrcElement.replace('on-duck-button.svg', 'light-mode-off-duck.svg');
-                    likeCounterElement.style.color = 'white';
-                }
-                else {
-                    likeIconSrcElement = likeIconSrcElement.replace('on-duck-button.svg', 'light-mode-off-duck.svg');
-                    likeCounterElement.style.color = 'white';
+                    if (taLiked) {
+                        likeCounterElement.style.color = '#ffba00';
+                    }
+                    else {
+                        likeCounterElement.style.color = 'white';
+                    }
                 }
                 if (userGroup === 1 || userGroup === 2) {
-                    document.getElementById('likedByInstructor_${post_id}').style.display = 'none';
+                    document.getElementById(`likedByInstructor_${post_id}`).style.display = 'none';
                 }
 
                 likeCounter=likeCounter-1;
@@ -1347,18 +1343,21 @@ function toggleUpduck(post_id, current_user, isLiked, userGroup) {
                 likeCounterElement.innerText = likeCounter;
             }
             else {
-                if (theme==='light') {
-                    likeIconSrcElement = likeIconSrcElement.replace('light-mode-off-duck.svg', 'on-duck-button.svg');
+                likeIconSrcElement = likeIconSrcElement.replace('light-mode-off-duck.svg', 'on-duck-button.svg');
+                if (userGroup === 1 || userGroup ===2) {
+                    document.getElementById(`likedByInstructor_${post_id}`).style.display = '';
                     likeCounterElement.style.color = '#ffba00';
                 }
                 else {
-                    likeIconSrcElement = likeIconSrcElement.replace('light-mode-off-duck.svg', 'on-duck-button.svg');
-                    likeCounterElement.style.color = '#ffba00';
+                    if(taLiked) {
+                        likeCounterElement.style.color = '#ffba00';
+                    }
+                    else {
+                        likeCounterElement.style.color = 'white';
+                    }
                 }
+
                 likeCounter=likeCounter+1;
-                if (userGroup === 1 || userGroup ===2) {
-                    document.getElementById('likedByInstructor_${post_id}').style.display = 'ooooooo';
-                }
 
                 likeIconSrc.src = likeIconSrcElement; // Update the state
                 likeCounterElement.innerText = likeCounter;

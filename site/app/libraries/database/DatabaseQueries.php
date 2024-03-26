@@ -758,30 +758,32 @@ SQL;
      * @param int[] $post_ids
      * @return int[]
      */
-    public function getColorOfUpduck(array $post_ids): array {
+    public function getInstructorUpduck(array $post_ids): array {
         if (count($post_ids) === 0) {
             return [];
         }
-        // Assuming createParameterList generates a string of placeholders for the SQL query
         $placeholders = $this->createParameterList(count($post_ids));
-        $sql = "SELECT post_id, COUNT(*) AS cnt FROM forum_upducks
-                WHERE post_id IN {$placeholders} AND (user_id LIKE '%ta%' OR user_id LIKE '%instructor%')
-                GROUP BY post_id";
+
+        // SQL to join the forum_upducks and users tables, filter by user_group, and check against provided post_ids
+        $sql = "SELECT f.post_id
+                FROM forum_upducks f
+                JOIN users u ON f.user_id = u.user_id
+                WHERE f.post_id IN {$placeholders}
+                AND u.user_group IN (1, 2)
+                GROUP BY f.post_id";
+
+        // Execute the query with the post_ids as parameters
         $this->course_db->query($sql, $post_ids);
         $result = [];
+
+        // Fetch the rows and store the post_id in the result array
         foreach ($this->course_db->rows() as $row) {
-            // If a post_id matches, store it in the result array with its count
-            $result[$row['post_id']] = intval($row['cnt']);
+            array_push($result, $row['post_id']);
         }
-        $final = [];
-        foreach ($result as $post_id => $count) {
-            // Only add post_id to final if the count is 1 or more
-            if ($count >= 1) {
-                $final[] = $post_id;
-            }
-        }
-        return $final;
+    
+        return $result;
     }
+
     /**
      * @param int[] $post_ids
      * @return int[]

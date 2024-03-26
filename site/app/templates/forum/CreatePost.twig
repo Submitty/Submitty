@@ -113,11 +113,11 @@
 
     {% endif %}
 
-    <button class="upduck-button text-decoration-none key_to_click" tabindex="0" onClick="toggleUpduck({{post.id}}, '{{current_user}}', '{{post_up_duck.upduck_user_liked ? 'true' : 'false'}}', {{userGroup}})">
+    <button class="upduck-button text-decoration-none key_to_click" tabindex="0" onClick="toggleUpduck({{post.id}}, '{{current_user}}', '{{post_up_duck.upduck_user_liked ? 'true' : 'false'}}', {{userGroup}}, {{post_up_duck.taTrue}})">
             <img id="likeIcon_{{post.id}}" src="{{ post_up_duck.upduck_user_liked ? '/img/on-duck-button.svg' : '/img/light-mode-off-duck.svg' }}" alt="Like" width="30" height="30">
     </button>
     <span id="likeCounter_{{post.id}}" style="font-size: 15px; vertical-align: middle; color: {{ post_up_duck.taTrue ? '#ffba00' : 'white' }};">{{ post_up_duck.upduck_count }}</span>
-    <span id="likedByInstructor_{{post.id}}" style="font-size: 15px; vertical-align: middle; font-style: italic; color: #ffba00;{{ post_up_duck.taTrue ? '' : 'display: none;' }}">liked by instructor</span>
+    <span id="likedByInstructor_{{post.id}}" style="font-size: 15px; vertical-align: middle; font-style: italic; color: #ffba00;{{ post_up_duck.taTrue ? '' : 'display: none;' }}">instructor/ta liked</span>
 
     {% set offset = offset + 30 %}
 </div>

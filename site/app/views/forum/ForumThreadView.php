@@ -478,7 +478,7 @@ class ForumThreadView extends AbstractView {
         $upDuckCounter_map = [];
         $upDuckCounter_map = $this->core->getQueries()->getUpduckInfoForPosts($post_ids);
         $userLiked = $this->core->getQueries()->getUserLikesForPosts($post_ids, $current_user);
-        $likedByTa = $this->core->getQueries()->getColorOfUpduck($post_ids);
+        $likedByTa = $this->core->getQueries()->getInstructorUpduck($post_ids);
 
         if ($display_option == "tree") {
             $order_array = [];
