@@ -52,6 +52,7 @@ CGI_GROUP=submitty_cgi
 
 DAEMONPHP_GROUP=submitty_daemonphp
 DAEMONCGI_GROUP=submitty_daemoncgi
+DAEMONPHPCGI_GROUP=submitty_daemonphpcgi
 
 # VERSIONS
 source ${CURRENT_DIR}/bin/versions.sh
@@ -137,7 +138,8 @@ Saved variables:
     SUBMITTY_REPOSITORY, LICHEN_REPOSITORY, RAINBOWGRADES_REPOSITORY,
     SUBMITTY_INSTALL_DIR, SUBMITTY_DATA_DIR,
     DAEMON_USER, DAEMON_GROUP, PHP_USER, PHP_GROUP,
-    CGI_USER, CGI_GROUP, DAEMONPHP_GROUP, DAEMONCGI_GROUP
+    CGI_USER, CGI_GROUP, DAEMONPHP_GROUP, DAEMONCGI_GROUP,
+    DAEMONPHPCGI_GROUP
 EOF
 )
 
@@ -157,6 +159,7 @@ export CGI_USER=${CGI_USER}
 export CGI_GROUP=${CGI_GROUP}
 export DAEMONPHP_GROUP=${DAEMONPHP_GROUP}
 export DAEMONCGI_GROUP=${DAEMONCGI_GROUP}
+export DAEMONPHPCGI_GROUP=${DAEMONPHPCGI_GROUP}
 alias submitty_help=\"echo -e '${INSTALL_HELP}'\"
 alias install_submitty='/usr/local/submitty/.setup/INSTALL_SUBMITTY.sh'
 alias submitty_install='/usr/local/submitty/.setup/INSTALL_SUBMITTY.sh'
@@ -256,6 +259,12 @@ else
     echo "${DAEMONCGI_GROUP} already exists"
 fi
 
+if ! cut -d ':' -f 1 /etc/group | grep -q ${DAEMONPHPCGI_GROUP} ; then
+    addgroup ${DAEMONPHPCGI_GROUP}
+else
+    echo "${DAEMONPHPCGI_GROUP} already exists"
+fi
+
 # The COURSE_BUILDERS_GROUP allows instructors/head TAs/course
 # managers to write website customization files and run course
 # management scripts.
@@ -290,11 +299,13 @@ if [ ${WORKER} == 0 ]; then
         useradd -m -c "First Last,RoomNumber,WorkPhone,HomePhone" "${PHP_USER}"
     fi
     usermod -a -G "${DAEMONPHP_GROUP}" "${PHP_USER}"
+    usermod -a -G "${DAEMONPHPCGI_GROUP}" "${PHP_USER}"
     if ! cut -d ':' -f 1 /etc/passwd | grep -q ${CGI_USER} ; then
         useradd -m -c "First Last,RoomNumber,WorkPhone,HomePhone" "${CGI_USER}"
     fi
     usermod -a -G "${PHP_GROUP}" "${CGI_USER}"
     usermod -a -G "${DAEMONCGI_GROUP}" "${CGI_USER}"
+    usermod -a -G "${DAEMONPHPCGI_GROUP}" "${CGI_USER}"
     # THIS USER SHOULD NOT BE NECESSARY AS A UNIX GROUP
     #useradd -c "First Last,RoomNumber,WorkPhone,HomePhone" "${DB_USER}"
 
@@ -330,6 +341,7 @@ fi
 # The VCS directories (/var/local/submitty/vcs) are owned by root:$DAEMONCGI_GROUP
 usermod -a -G "${DAEMONPHP_GROUP}" "${DAEMON_USER}"
 usermod -a -G "${DAEMONCGI_GROUP}" "${DAEMON_USER}"
+usermod -a -G "${DAEMONPHPCGI_GROUP}" "${DAEMON_USER}"
 
 echo -e "\n# set by the .setup/install_system.sh script\numask 027" >> /home/${DAEMON_USER}/.profile
 
