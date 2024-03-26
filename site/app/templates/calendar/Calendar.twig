@@ -49,6 +49,42 @@
         // Load the calendar to the correct day
         loadCalendar(cookie_month, cookie_year, cookie_day, x.value);
     }
+
+    function changeMonth(x) {
+        Cookies.set('calendar_month',x.value);
+        cookie_year = parseInt(Cookies.get('calendar_year'));
+        cookie_month = parseInt(Cookies.get('calendar_month'));
+        cookie_day = parseInt(Cookies.get('calendar_day'));
+        if (isNaN(cookie_year)) {
+            cookie_year = view_year;
+        }
+        if (isNaN(cookie_month)) {
+            cookie_month = view_month;
+        }
+        if (isNaN(cookie_day)) {
+            cookie_day = view_day;
+        }
+        // Load the calendar to the correct day
+        loadCalendar(cookie_month, cookie_year, cookie_day, $("#calendar-item-type-edit").val());
+    }
+
+    function changeYear(x) {
+        Cookies.set('calendar_year',x.value);
+        cookie_year = parseInt(Cookies.get('calendar_year'));
+        cookie_month = parseInt(Cookies.get('calendar_month'));
+        cookie_day = parseInt(Cookies.get('calendar_day'));
+        if (isNaN(cookie_year)) {
+            cookie_year = view_year;
+        }
+        if (isNaN(cookie_month)) {
+            cookie_month = view_month;
+        }
+        if (isNaN(cookie_day)) {
+            cookie_day = view_day;
+        }
+        // Load the calendar to the correct day
+        loadCalendar(cookie_month, cookie_year, cookie_day, $("#calendar-item-type-edit").val());
+    }
 </script>
 
 
@@ -66,6 +102,26 @@
                 <button type="button" onclick="openOptionsModal()" class="btn btn-primary">
                     <i class="fas fa-sliders"></i> Options
                 </button>
+                <select id="calendar-year-edit" onchange="changeYear(this);">
+                    {# create options based on current year #}
+                    {% for year in range(curr_year -100, curr_year +100) %}
+                        <option value="{{ year }}" {% if curr_year == year %} selected {% endif %}>{{ year }}</option>
+                    {% endfor %}
+                </select>
+                <select id="calendar-month-edit" onchange="changeMonth(this);">
+                    <option value="1" {% if curr_month == 1 %} selected {% endif %}>January</option>
+                    <option value="2" {% if curr_month == 2 %} selected {% endif %}>February</option>
+                    <option value="3" {% if curr_month == 3 %} selected {% endif %}>March</option>
+                    <option value="4" {% if curr_month == 4 %} selected {% endif %}>April</option>
+                    <option value="5" {% if curr_month == 5 %} selected {% endif %}>May</option>
+                    <option value="6" {% if curr_month == 6 %} selected {% endif %}>June</option>
+                    <option value="7" {% if curr_month == 7 %} selected {% endif %}>July</option>
+                    <option value="8" {% if curr_month == 8 %} selected {% endif %}>August</option>
+                    <option value="9" {% if curr_month == 9 %} selected {% endif %}>September</option>
+                    <option value="10" {% if curr_month == 10 %} selected {% endif %}>October</option>
+                    <option value="11" {% if curr_month == 11 %} selected {% endif %}>November</option>
+                    <option value="12" {% if curr_month == 12 %} selected {% endif %}>December</option>
+                </select>
                 <select id="calendar-item-type-edit" name="type" onchange="changeView(this);">
                     <option value="month" {% if (view_cookie is defined) and view_cookie == "month" %} selected {% endif %}>Month</option>
                     <option value="two_week" {% if (view_cookie is defined)  and view_cookie == "two_week" %} selected {% endif %}>Two Week</option>
