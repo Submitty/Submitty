@@ -2,7 +2,7 @@
 /* exported markForDeletion */
 /* exported unMarkForDeletion */
 /* exported  displayHistoryAttachment */
-/* exported toggleLike */
+/* exported toggleUpduck */
 
 // eslint-disable-next-line no-unused-vars
 function categoriesFormEvents() {
@@ -1285,7 +1285,7 @@ function modifyThreadList(currentThreadId, currentCategoriesId, course, loadFirs
     });
 }
 
-function toggleLike(post_id, current_user, isLiked) {
+function toggleUpduck(post_id, current_user, isLiked, userGroup) {
     // eslint-disable-next-line no-undef
     const url = buildCourseUrl(['post', 'likes']);
     $.ajax({
@@ -1327,6 +1327,7 @@ function toggleLike(post_id, current_user, isLiked) {
                 console.log(localStorage.getItem('theme'));
             }
 
+            //if userGroup == 4 or 3 then make it print the liked by instructor in yellow
             if (likeIconSrcElement.endsWith('/img/on-duck-button.svg')) {
                 if (theme==='light' && likeIconSrcElement.endsWith('/img/on-duck-button.svg')) {
                     likeIconSrcElement = likeIconSrcElement.replace('on-duck-button.svg', 'light-mode-off-duck.svg');
@@ -1336,6 +1337,10 @@ function toggleLike(post_id, current_user, isLiked) {
                     likeIconSrcElement = likeIconSrcElement.replace('on-duck-button.svg', 'light-mode-off-duck.svg');
                     likeCounterElement.style.color = 'white';
                 }
+                if (userGroup === 1 || userGroup === 2) {
+                    document.getElementById('likedByInstructor_${post_id}').style.display = 'none';
+                }
+
                 likeCounter=likeCounter-1;
 
                 likeIconSrc.src = likeIconSrcElement; // Update the state
@@ -1351,6 +1356,9 @@ function toggleLike(post_id, current_user, isLiked) {
                     likeCounterElement.style.color = '#ffba00';
                 }
                 likeCounter=likeCounter+1;
+                if (userGroup === 1 || userGroup ===2) {
+                    document.getElementById('likedByInstructor_${post_id}').style.display = 'ooooooo';
+                }
 
                 likeIconSrc.src = likeIconSrcElement; // Update the state
                 likeCounterElement.innerText = likeCounter;
