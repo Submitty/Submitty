@@ -728,6 +728,7 @@ SQL;
             // Check if the user has already liked bc if not database will get duplicates
             $this->course_db->query("SELECT * FROM forum_upducks WHERE post_id = ? AND user_id = ?", [$post_id, $current_user]);
             $hasLiked = isset($this->course_db->rows()[0]);
+
             if ($isLiked) {
                 if ($hasLiked) {
                     $this->course_db->query("DELETE FROM forum_upducks WHERE post_id = ? AND user_id = ?", [$post_id, $current_user]);
@@ -753,6 +754,35 @@ SQL;
         }
     }
 
+
+    /**
+     * @param int[] $post_ids
+     * @return int[]
+     */
+    public function getInstructorUpduck(array $post_ids): array {
+        if (count($post_ids) === 0) {
+            return [];
+        }
+        $placeholders = $this->createParameterList(count($post_ids));
+
+        // SQL to join the forum_upducks and users tables, filter by user_group, and check against provided post_ids
+        $sql = "SELECT f.post_id
+                FROM forum_upducks f
+                JOIN users u ON f.user_id = u.user_id
+                WHERE f.post_id IN {$placeholders}
+                AND u.user_group IN (1, 2)
+                GROUP BY f.post_id";
+
+        // Execute the query with the post_ids as parameters
+        $this->course_db->query($sql, $post_ids);
+        $result = [];
+
+        // Fetch the rows and store the post_id in the result array
+        foreach ($this->course_db->rows() as $row) {
+            array_push($result, $row['post_id']);
+        }
+        return $result;
+    }
 
     /**
      * @param int[] $post_ids
