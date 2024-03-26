@@ -77,8 +77,7 @@ jobs:
           pip install ansible
       - name: Run Smoke Tests
         run: |
-          pwd
-          ls -la
+          cd $SUBMITTY_REPOSITORY
           ansible-playbook ansible/playbooks/submitty_install.yml --syntax-check
           ansible-playbook ansible/playbooks/submitty_install.yml --check
 
