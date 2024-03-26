@@ -141,11 +141,10 @@ class DatabaseQueries {
      * Update a user's preferred locale in the master database.
      *
      * @param User $user The user object to modify
-     * @param string $locale The locale string to set it to, must be one of Core::getSupportedLocales()
-     * @return bool Whether the operation was successful
+     * @param string|null $locale The locale string to set it to, must be one of Core::getSupportedLocales()
      */
-    public function updateSubmittyUserPreferredLocale(User $user, string|null $locale): bool {
-        return $this->submitty_db->query("UPDATE users SET user_preferred_locale=? WHERE user_id=?", [$locale, $user->getId()]);
+    public function updateSubmittyUserPreferredLocale(User $user, string|null $locale): void {
+        $this->submitty_db->query("UPDATE users SET user_preferred_locale=? WHERE user_id=?", [$locale, $user->getId()]);
     }
 
     /**
@@ -7448,12 +7447,12 @@ AND gc_id IN (
      * @param  String                     $userid
      * @return bool
      */
-    public function getUserHasSubmission(Gradeable $gradeable, string $userid) {
-
-        return $this->course_db->query(
+    public function getUserHasSubmission(Gradeable $gradeable, string $userid): bool {
+        $this->course_db->query(
             'SELECT user_id FROM electronic_gradeable_data WHERE g_id=? AND (user_id=?)',
             [$gradeable->getId(), $userid]
         );
+        return $this->course_db->getRowCount() > 0;
     }
 
     /**

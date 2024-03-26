@@ -1342,6 +1342,11 @@ parameters:
 			path: app/controllers/admin/LateController.php
 
 		-
+			message: "#^Parameter \\#2 \\$callback of function array_filter expects \\(callable\\(string\\)\\: bool\\)\\|null, 'strlen' given\\.$#"
+			count: 1
+			path: app/controllers/admin/LateController.php
+
+		-
 			message: "#^Parameter \\#2 \\$timestamp of method app\\\\libraries\\\\database\\\\DatabaseQueries\\:\\:updateLateDays\\(\\) expects string, DateTime given\\.$#"
 			count: 1
 			path: app/controllers/admin/LateController.php
@@ -1837,6 +1842,16 @@ parameters:
 			path: app/controllers/course/CourseMaterialsController.php
 
 		-
+			message: "#^Result of && is always false\\.$#"
+			count: 1
+			path: app/controllers/course/CourseMaterialsController.php
+
+		-
+			message: "#^Variable \\$title in isset\\(\\) always exists and is always null\\.$#"
+			count: 1
+			path: app/controllers/course/CourseMaterialsController.php
+
+		-
 			message: "#^Call to function in_array\\(\\) requires parameter \\#3 to be set\\.$#"
 			count: 3
 			path: app/controllers/forum/ForumController.php
@@ -2263,7 +2278,7 @@ parameters:
 
 		-
 			message: "#^Loose comparison via \"\\=\\=\" is not allowed\\.$#"
-			count: 21
+			count: 19
 			path: app/controllers/grading/ElectronicGraderController.php
 
 		-
@@ -2874,6 +2889,11 @@ parameters:
 		-
 			message: "#^Strict comparison using \\=\\=\\= between bool and 'true' will always evaluate to false\\.$#"
 			count: 1
+			path: app/controllers/grading/ElectronicGraderController.php
+
+		-
+			message: "#^Strict comparison using \\=\\=\\= between mixed and null will always evaluate to false\\.$#"
+			count: 2
 			path: app/controllers/grading/ElectronicGraderController.php
 
 		-
@@ -3957,11 +3977,6 @@ parameters:
 
 		-
 			message: "#^Only booleans are allowed in a negated boolean, int given\\.$#"
-			count: 1
-			path: app/libraries/Core.php
-
-		-
-			message: "#^Only booleans are allowed in an if condition, Doctrine\\\\DBAL\\\\Logging\\\\DebugStack\\|null given\\.$#"
 			count: 1
 			path: app/libraries/Core.php
 
@@ -5176,11 +5191,6 @@ parameters:
 			path: app/libraries/database/AbstractDatabase.php
 
 		-
-			message: "#^Foreach overwrites \\$result with its value variable\\.$#"
-			count: 1
-			path: app/libraries/database/AbstractDatabase.php
-
-		-
 			message: "#^Loose comparison via \"\\!\\=\" is not allowed\\.$#"
 			count: 1
 			path: app/libraries/database/AbstractDatabase.php
@@ -5216,16 +5226,6 @@ parameters:
 			path: app/libraries/database/AbstractDatabase.php
 
 		-
-			message: "#^Method app\\\\libraries\\\\database\\\\AbstractDatabase\\:\\:getColumnData\\(\\) return type has no value type specified in iterable type array\\.$#"
-			count: 1
-			path: app/libraries/database/AbstractDatabase.php
-
-		-
-			message: "#^Method app\\\\libraries\\\\database\\\\AbstractDatabase\\:\\:getDSN\\(\\) has no return type specified\\.$#"
-			count: 1
-			path: app/libraries/database/AbstractDatabase.php
-
-		-
 			message: "#^Method app\\\\libraries\\\\database\\\\AbstractDatabase\\:\\:getQueries\\(\\) return type has no value type specified in iterable type array\\.$#"
 			count: 1
 			path: app/libraries/database/AbstractDatabase.php
@@ -5247,26 +5247,6 @@ parameters:
 
 		-
 			message: "#^Method app\\\\libraries\\\\database\\\\AbstractDatabase\\:\\:rows\\(\\) return type has no value type specified in iterable type array\\.$#"
-			count: 1
-			path: app/libraries/database/AbstractDatabase.php
-
-		-
-			message: "#^Method app\\\\libraries\\\\database\\\\AbstractDatabase\\:\\:transformResult\\(\\) has parameter \\$columns with no value type specified in iterable type array\\.$#"
-			count: 1
-			path: app/libraries/database/AbstractDatabase.php
-
-		-
-			message: "#^Method app\\\\libraries\\\\database\\\\AbstractDatabase\\:\\:transformResult\\(\\) has parameter \\$result with no value type specified in iterable type array\\.$#"
-			count: 1
-			path: app/libraries/database/AbstractDatabase.php
-
-		-
-			message: "#^Property app\\\\libraries\\\\database\\\\AbstractDatabase\\:\\:\\$all_queries type has no value type specified in iterable type array\\.$#"
-			count: 1
-			path: app/libraries/database/AbstractDatabase.php
-
-		-
-			message: "#^Property app\\\\libraries\\\\database\\\\AbstractDatabase\\:\\:\\$columns has no type specified\\.$#"
 			count: 1
 			path: app/libraries/database/AbstractDatabase.php
 
@@ -5314,9 +5294,6 @@ parameters:
 			message: "#^Call to function is_null\\(\\) with DateTime will always evaluate to false\\.$#"
 			count: 2
 			path: app/libraries/database/DatabaseQueries.php
-
-		-
-			message: "#^Comparison operation \"\\>\" between int\\<min, 0\\> and 0 is always false\\.$#"
 
 		-
 			message: "#^Call to method app\\\\libraries\\\\database\\\\AbstractDatabase\\:\\:getRowCount\\(\\) with incorrect case\\: getrowcount$#"
@@ -8154,37 +8131,12 @@ parameters:
 			path: app/libraries/database/DatabaseRowIterator.php
 
 		-
-			message: "#^PHPDoc tag @var with type mixed is not subtype of native type \\$this\\(app\\\\libraries\\\\database\\\\DatabaseRowIterator\\)\\.$#"
-			count: 1
-			path: app/libraries/database/DatabaseRowIterator.php
-
-		-
 			message: "#^Property app\\\\libraries\\\\database\\\\DatabaseRowIterator\\:\\:\\$callback has no type specified\\.$#"
 			count: 1
 			path: app/libraries/database/DatabaseRowIterator.php
 
 		-
-			message: "#^Property app\\\\libraries\\\\database\\\\DatabaseRowIterator\\:\\:\\$columns has no type specified\\.$#"
-			count: 1
-			path: app/libraries/database/DatabaseRowIterator.php
-
-		-
-			message: "#^Property app\\\\libraries\\\\database\\\\DatabaseRowIterator\\:\\:\\$database has no type specified\\.$#"
-			count: 1
-			path: app/libraries/database/DatabaseRowIterator.php
-
-		-
 			message: "#^Property app\\\\libraries\\\\database\\\\DatabaseRowIterator\\:\\:\\$key has no type specified\\.$#"
-			count: 1
-			path: app/libraries/database/DatabaseRowIterator.php
-
-		-
-			message: "#^Property app\\\\libraries\\\\database\\\\DatabaseRowIterator\\:\\:\\$result has no type specified\\.$#"
-			count: 1
-			path: app/libraries/database/DatabaseRowIterator.php
-
-		-
-			message: "#^Property app\\\\libraries\\\\database\\\\DatabaseRowIterator\\:\\:\\$statement has no type specified\\.$#"
 			count: 1
 			path: app/libraries/database/DatabaseRowIterator.php
 
@@ -8240,11 +8192,6 @@ parameters:
 
 		-
 			message: "#^Method app\\\\libraries\\\\database\\\\PostgresqlDatabase\\:\\:fromPHPToDatabaseArray\\(\\) has parameter \\$array with no value type specified in iterable type array\\.$#"
-			count: 1
-			path: app/libraries/database/PostgresqlDatabase.php
-
-		-
-			message: "#^Method app\\\\libraries\\\\database\\\\PostgresqlDatabase\\:\\:getDSN\\(\\) has no return type specified\\.$#"
 			count: 1
 			path: app/libraries/database/PostgresqlDatabase.php
 
@@ -8305,11 +8252,6 @@ parameters:
 
 		-
 			message: "#^Method app\\\\libraries\\\\database\\\\SqliteDatabase\\:\\:fromPHPToDatabaseArray\\(\\) has parameter \\$array with no type specified\\.$#"
-			count: 1
-			path: app/libraries/database/SqliteDatabase.php
-
-		-
-			message: "#^Method app\\\\libraries\\\\database\\\\SqliteDatabase\\:\\:getDSN\\(\\) has no return type specified\\.$#"
 			count: 1
 			path: app/libraries/database/SqliteDatabase.php
 
@@ -9946,6 +9888,11 @@ parameters:
 
 		-
 			message: "#^Property app\\\\models\\\\User\\:\\:\\$notification_settings type has no value type specified in iterable type array\\.$#"
+			count: 1
+			path: app/models/User.php
+
+		-
+			message: "#^Variable \\$random on left side of \\?\\? always exists and is not nullable\\.$#"
 			count: 1
 			path: app/models/User.php
 
