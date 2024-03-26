@@ -154,6 +154,18 @@ h2.cal-month-title {
     height: 100px;
 }
 
+.cal-day-cell-twoweek{
+    min-height: 100px;
+    max-height: 390px;
+    height: 200px;
+}
+
+.cal-day-cell-week{
+    min-height: 100px;
+    max-height: 780px;
+    height: 400px;
+}
+
 .cal-cell-expand {
     height: 195px;
 }
