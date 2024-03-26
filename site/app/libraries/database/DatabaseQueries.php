@@ -4857,6 +4857,16 @@ SQL;
     }
 
     /**
+     * Get all courses where the user with the specified user_id is assigned as a grader
+     * @param string $user_id
+     * @return array
+     */
+    public function getGraderLevelAccessCourse(string $user_id): array {
+        $this->submitty_db->query("SELECT term, course FROM courses_users WHERE user_id=? AND user_group<4", [$user_id]);
+        return $this->submitty_db->rows();
+    }
+
+    /**
      * Get all unarchived courses where the user with the specified user_id is assigned as an instructor
      */
     public function getInstructorLevelUnarchivedCourses(string $user_id): array {

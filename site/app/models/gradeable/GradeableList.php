@@ -95,7 +95,14 @@ class GradeableList extends AbstractModel {
         $this->now = $this->core->getDateTimeNow();
 
         foreach ($this->gradeables as $id => $gradeable) {
-            switch (self::getGradeableSection($this->core, $gradeable)) {
+            if (is_array($gradeable) && array_key_exists("user_group", $gradeable) && array_key_exists("gradeable", $gradeable)) {
+                $user_group = $gradeable["user_group"];
+                $gradeable = $gradeable["gradeable"];
+            }
+            else {
+                $user_group = null;
+            }
+            switch (self::getGradeableSection($this->core, $gradeable, $user_group)) {
                 case self::FUTURE:
                     $this->future_gradeables[$id] = $gradeable;
                     break;
@@ -256,7 +263,7 @@ class GradeableList extends AbstractModel {
      * @param Gradeable $gradeable
      * @return int the section number; or -1 if not categorized
      */
-    public static function getGradeableSection(Core $core, Gradeable $gradeable): int {
+    public static function getGradeableSection(Core $core, Gradeable $gradeable, string $user_group = null): int {
         $now = DateUtils::getDateTimeNow();
         if ($gradeable->hasReleaseDate() && $gradeable->getGradeReleasedDate() <= $now) {
             return self::GRADED;
@@ -312,10 +319,12 @@ class GradeableList extends AbstractModel {
         ) {
             return self::OPEN;
         }
-        elseif ($core->getUser()->accessGrading() && $gradeable->getTaViewStartDate() <= $now) {
+        elseif (($core->getUser()->accessGrading() || $user_group === "Grader") && $gradeable->getTaViewStartDate() <= $now) {
+            // TA access from course pages
             return self::BETA;
         }
-        elseif ($core->getUser()->accessAdmin()) {
+        elseif ($core->getUser()->accessAdmin() || $core->getUser()->accessFaculty()) {
+            // Instructor access from either crouse pages and home pages(i.e. from Calendar page)
             return self::FUTURE;
         }
         return -1;
