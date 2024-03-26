@@ -1,6 +1,6 @@
 /* exported NUM_MARKDOWN, Widget */
 
-const NUM_MARKDOWN = 0;
+let NUM_MARKDOWN = 0;
 
 class Widget {
     /**
