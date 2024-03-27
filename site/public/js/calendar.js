@@ -132,21 +132,30 @@ function darken(colorstr) {
  * @returns {HTMLElement} the HTML Element for the calendar item
  */
 function generateCalendarItem(item) {
-    // When hovering over an item, shows the name and due date
-    // Due date information
-    let due_string = '';
-    if (item['submission'] !== '') {
-        due_string = `Due: ${item['submission']}`;
+    let tooltip = '';
+    if (!item['submission_open'] && item['is_student']) {
+        // Student shouldn't be able to access this item
+        // When hovering over an item, shows the below message
+        tooltip = 'You can access this gradeable, once the submission opens';
+        item['disabled'] = true;
     }
+    else {
+        // When hovering over an item, shows the name and due date
+        // Due-date information
+        let due_string = '';
+        if (item['submission'] !== '') {
+            due_string = `Due: ${item['submission']}`;
+        }
 
-    // Put detail in the tooltip
-    let tooltip = `Course: ${item['course']}&#10;` +
-        `Title: ${item['title']}&#10;`;
-    if (item['status_note'] !== '') {
-        tooltip += `Status: ${item['status_note']}&#10;`;
-    }
-    if (due_string !== '') {
-        tooltip += `${due_string}`;
+        // Put detail in the tooltip
+        tooltip = `Course: ${item['course']}&#10;` +
+            `Title: ${item['title']}&#10;`;
+        if (item['status_note'] !== '') {
+            tooltip += `Status: ${item['status_note']}&#10;`;
+        }
+        if (due_string !== '') {
+            tooltip += `${due_string}`;
+        }
     }
     // Put the item in the day cell
     const link = (!item['disabled']) ? item['url'] : '';
@@ -167,6 +176,10 @@ function generateCalendarItem(item) {
     }
     if (item['status'] === 'text' || item['status'] === 'ann') {
         element.style.setProperty('background-color', item['color']);
+    }
+    // disabling element for student access level if submission is not open
+    if (item['disabled']) {
+        element.style.setProperty('background-color', 'grey');
     }
     if (exists) {
         element.style.setProperty('cursor', 'pointer');
