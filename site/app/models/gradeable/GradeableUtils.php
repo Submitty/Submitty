@@ -15,6 +15,13 @@ class GradeableUtils {
      * @return array<string, array<string, Gradeable>|array<string, GradedGradeable>|array<string, Button>>
      * @throws \Exception
      */
+
+    const vcs_type_submitty_hosted = 0;
+    const vcs_type_submitty_hosted_url = 1;
+    const vcs_type_public_github = 2;
+    const vcs_type_private_github = 3;
+    const vcs_type_self_hosted = 4;
+
     public static function getGradeablesFromCourse(Core $core, string $semester, string $title, array &$calendar_messages, bool $global = true): array {
         /** @var array<string, Gradeable> $gradeables */
         $gradeables = [];
@@ -116,34 +123,4 @@ class GradeableUtils {
             "graded_gradeables" => $graded_gradeables,
             "submit_btns" => $submit_btns];
     }
-
-    public static function vcsIntToStr(int $type): string {
-        return match ($type) {
-            0 => "submitty-hosted",
-            1 => "submitty-hosted-url",
-            2 => "public-github",
-            3 => "private-github",
-            4 => "self-hosted",
-            default => "none",
-        };
-    }
-
-    public static function vcsStrToInt(string $str): int {
-        return match ($str) {
-            "submitty-hosted" => 0,
-            "submitty-hosted-url" => 1,
-            "public-github" => 2,
-            "private-github" => 3,
-            "self-hosted" => 4,
-            default => -1,
-        };
-    }
 }
-
-/*
-"vcs_type_submitty_unique"                          -> "submitty-hosted"
-"vcs_type_submitty_shared"                          -> "submitty-hosted-url"
-"vcs_type_external_public"                          -> "public-github"
-"vcs_type_external_private_student_created"         -> "private-github"
-"vcs_type_external_private_instructor_created"      -> "self-hosted"
-*/
