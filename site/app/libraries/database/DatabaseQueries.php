@@ -9356,4 +9356,56 @@ ORDER BY
         ");
         return $this->rowsToArray($this->submitty_db->rows());
     }
+
+    /**
+     * @param string $image the full name of the image to get
+     * @return string|bool the user id of the image's owner or false iff the image is not in the db
+     */
+    public function getDockerImageOwner(string $image): string|bool {
+        $this->submitty_db->query("SELECT user_id FROM docker_image WHERE image_name = ?", [$image]);
+        return ($this->submitty_db->getRowCount() > 0) ? $this->submitty_db->row()['user_id'] : false;
+    }
+
+    /**
+     * @return array<string, string> the owners of all docker images, indexed by image name
+     */
+    public function getAllDockerImageOwners(): array {
+        $result = [];
+        $this->submitty_db->query("SELECT * FROM docker_image");
+        foreach ($this->submitty_db->rows() as $row) {
+            $result[$row['image_name']] = $row['user_id'];
+        }
+        return $result;
+    }
+
+    /**
+     * @param string $image the full name of the image to set ownership
+     * @param string $user_id the user id of its owner.
+     */
+    public function setDockerImageOwner(string $image, string $user_id): void {
+        $current_owner = $this->getDockerImageOwner($image);
+        if ($current_owner === false) {
+            $this->submitty_db->query("INSERT INTO docker_image (image_name, user_id) values (?, ?);", [$image,$user_id]);
+        // If an instructor wants to add an image they didn't upload to a capability, the image will have no owner.
+        // Only sysadmin will be able to remove it.
+        }
+        elseif ($current_owner !== $user_id) {
+            $this->submitty_db->query("UPDATE docker_image SET user_id = '' WHERE image_name = ?", [$image]);
+        }
+    }
+
+    /**
+     * @param string $image the full name of the image to remove
+     * @param User $user the user who is removing the image
+     * @return bool true iff image was deleted
+     */
+    public function removeDockerImageOwner(string $image, User $user): bool {
+        if ($user->getAccessLevel() === User::LEVEL_SUPERUSER) {
+            $this->submitty_db->query("DELETE FROM docker_image WHERE image_name=?", [$image]);
+        }
+        else {
+            $this->submitty_db->query("DELETE FROM docker_image WHERE image_name=? AND user_id=?;", [$image ,$user->getId()]);
+        }
+        return $this->submitty_db->getRowCount() > 0;
+    }
 }

@@ -442,6 +442,16 @@ CREATE TABLE public.courses_users (
 
 
 --
+-- Name: docker_image; Type: TABLE; Schema: public; Owner: -
+--
+
+CREATE TABLE public.docker_image (
+    image_name character varying NOT NULL,
+    user_id character varying NOT NULL
+);
+
+
+--
 -- Name: emails; Type: TABLE; Schema: public; Owner: -
 --
 
@@ -687,6 +697,14 @@ ALTER TABLE ONLY public.courses_registration_sections
 
 ALTER TABLE ONLY public.courses_users
     ADD CONSTRAINT courses_users_pkey PRIMARY KEY (term, course, user_id);
+
+
+--
+-- Name: docker_image docker_image_image_name_key; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.docker_image
+    ADD CONSTRAINT docker_image_image_name_key UNIQUE (image_name);
 
 
 --
