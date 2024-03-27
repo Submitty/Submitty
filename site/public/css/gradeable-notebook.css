@@ -110,7 +110,9 @@ img {
     border: 1px solid var(--standard-light-gray) !important;
     border-radius: 4px !important;
     vertical-align: middle !important;
-    resize: both;
+    width: 100% !important;
+    resize: vertical;
+    min-height: 300px;
 }
 
 /* Fixes Safari spacing issue */
