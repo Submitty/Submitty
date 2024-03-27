@@ -96,6 +96,8 @@ use app\controllers\admin\AdminGradeableController;
  * @method int getLimitedAccessBlind()
  * @method void setPeerBlind($peer_blind)
  * @method int getPeerBlind()
+ * @method void setPeerPanel($peer_panel)
+ * @method string getPeerPanel()
  * @method void setInstructorBlind($instructor_blind)
  * @method int getInstructorBlind()
  * @method bool getAllowCustomMarks()
@@ -320,6 +322,9 @@ class Gradeable extends AbstractModel {
      * @var bool will peer graders grade the gradeable blindly*/
     protected $peer_blind = 3;
     /** @prop
+     * @var string will peer graders access the grading panels*/
+    protected $peer_panel = "11111";
+    /** @prop
      * @var bool will instructors have blind peer grading enabled*/
     protected $instructor_blind = 1;
 
@@ -351,6 +356,10 @@ class Gradeable extends AbstractModel {
 
         if (array_key_exists('peer_blind', $details)) {
             $this->setPeerBlind($details['peer_blind']);
+        }
+
+        if (array_key_exists('peer_panel', $details)) {
+            $this->setPeerPanel($details['peer_panel']);
         }
 
         if (array_key_exists('limited_access_blind', $details)) {

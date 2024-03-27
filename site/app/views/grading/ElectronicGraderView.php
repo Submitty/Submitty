@@ -962,6 +962,7 @@ HTML;
         $isStudentInfoPanel = true;
         $isDiscussionPanel = false;
         $isGradeInquiryPanel = false;
+        $isPeerAccessible = $gradeable->getPeerPanel();
         $is_peer_grader = false;
         // WIP: Replace this logic when there is a definitive way to get my peer-ness
         // If this is a peer gradeable but I am not allowed to view the peer panel, then I must be a peer.
@@ -976,6 +977,7 @@ HTML;
                 $is_peer_grader = true;
             }
         }
+        $isPeerGrader = $is_peer_grader;
         if ($graded_gradeable->getGradeable()->isDiscussionBased()) {
             $isDiscussionPanel = true;
         }
@@ -1082,6 +1084,8 @@ HTML;
                 ['grading', 'ElectronicGrader'],
                 'renderGradingPanelHeader',
                 $isPeerPanel,
+                $isPeerGrader,
+                $isPeerAccessible,
                 $isStudentInfoPanel,
                 $isDiscussionPanel,
                 $isGradeInquiryPanel,
@@ -1249,9 +1253,11 @@ HTML;
         ]);
     }
 
-    public function renderGradingPanelHeader(bool $isPeerPanel, bool $isStudentInfoPanel, bool $isDiscussionPanel, bool $isGradeInquiryPanel, bool $is_notebook, string $error_color, string $error_message): string {
+    public function renderGradingPanelHeader(bool $isPeerPanel, bool $isPeerGrader, string $isPeerAccessible, bool $isStudentInfoPanel, bool $isDiscussionPanel, bool $isGradeInquiryPanel, bool $is_notebook, string $error_color, string $error_message): string {
         return $this->core->getOutput()->renderTwigTemplate("grading/electronic/GradingPanelHeader.twig", [
             'isPeerPanel' => $isPeerPanel,
+            'isPeerGrader' => $isPeerGrader,
+            'isPeerAccessible' => $isPeerAccessible,
             'isStudentInfoPanel' => $isStudentInfoPanel,
             'isDiscussionPanel' => $isDiscussionPanel,
             'isGradeInquiryPanel' => $isGradeInquiryPanel,

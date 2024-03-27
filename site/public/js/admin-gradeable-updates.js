@@ -219,6 +219,17 @@ $(document).ready(() => {
         else {
             data[this.name] = $(this).val();
         }
+        //Retrieve status of check boxes for each of the panels
+        let selectedCheckboxes = '';
+        $('input[name="peer_panel"]').each(function() {
+            if ($(this).is(':checked')) {
+                selectedCheckboxes += '1';
+            }
+            else {
+                selectedCheckboxes += '0';
+            }
+        });
+        data['peer_panel'] = selectedCheckboxes;
         const addDataToRequest = function (i, val) {
             if (val.type === 'radio' && !$(val).is(':checked')) {
                 return;
