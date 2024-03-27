@@ -426,17 +426,17 @@
                     {% else %}
                         {# If submission has been made but not graded, non peer information should not be visible to peer grader #}
                         {%  if info.graded_groups[index] == "peer-no-submission" %}
-                            {# Indicates Submitted but Ungraded Peer Component #}
+                            {# Indicates Not Submitted Peer Component #}
                             <i title="{{graded_gradeable.getGradeable().getComponents()[index].getTitle()}}" class="fas fa-circle grader-NULL"></i>
                         {% elseif info.graded_groups[index] =="peer-null"   %}
-                            {# Indicates Non-Peer Component (Hidden) #}
+                            {# Indicates Submitted but Ungraded Peer Component #}
                             <i title="{{graded_gradeable.getGradeable().getComponents()[index].getTitle()}}" class="fas fa-circle grader-NULL"></i>
-                        {% elseif info.graded_groups[index] < 4   %}
-                            {# Indicates Non-Peer Component (Hidden) #}
-                            <i title="{{graded_gradeable.getGradeable().getComponents()[index].getTitle()}}" class="fas fa-circle hide-highlights"></i>
-                        {% else %}
+                        {% elseif info.graded_groups[index] == 4 %}
                             {# Indicates Submitted and Graded Peer Component #}
                              <i title="{{graded_gradeable.getGradeable().getComponents()[index].getTitle()}}" class="fas fa-circle grader-{{- info.graded_groups[index] -}}"></i>
+                        {% else %}
+                            {# Indicates Non-Peer Component (Hidden)#}
+                            <i title="{{graded_gradeable.getGradeable().getComponents()[index].getTitle()}}" class="fas fa-circle hide-highlights"></i>
                         {% endif %}
                     {% endif %}
                 {% endif %}
