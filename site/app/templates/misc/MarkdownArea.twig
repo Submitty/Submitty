@@ -104,14 +104,10 @@
                 {{ other_textarea_attributes }}
             {% endif %}
         >{{ markdown_area_value is defined ? markdown_area_value : '' }}</textarea>
-
-        <div class="reply_boxes" data-post-box-id="{{ markdown_area_id }}"></div>
-
         {# if min_height or max_height aren't defined, use values defined in markdown.css #}
         <div id="{{ preview_div_id }}" class="fill-available markdown-preview" style="min-height:{{ min_height is defined ? min_height : "100px" }}; max-height:{{ max_height is defined ? max_height : "300px" }}" hidden></div>
     </div>
 </div>
-
 <script>
     $('#{{markdown_area_id}}').ready(function() {
         enableTabsInTextArea("#{{markdown_area_id}}");
