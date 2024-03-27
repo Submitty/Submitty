@@ -76,7 +76,7 @@
 
             <br />
 
-            <input name="grade_inquiry_due_date" id="date_grade_inquiry_due" class="date_picker grade_inquiry_due_date" type="text" value="{{ gradeable.getGradeInquiryDueDate()|date(date_format, timezone_string) }}">
+            <input name="grade_inquiry_due_date" id="date_grade_inquiry_due" class="date_picker grade_inquiry_due_date" data-testid="date_grade_inquiry_due" type="text" value="{{ gradeable.getGradeInquiryDueDate()|date(date_format, timezone_string) }}">
             <label for="date_grade_inquiry_due">Grade Inquiry Due Date (Grade Inquiries must be initiated by this date)</label>
         </div>
 
