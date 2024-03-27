@@ -126,7 +126,7 @@ class CalendarInfo extends AbstractModel {
                     'status' => (string) $section,
                     'status_note' => ($submit_btn === null) ? "N/A" : $submit_btn->getTitle(),
                     'submission_open' => $gradeable->isSubmissionOpen(),
-                    'is_student' => $info->core->getUser()->getAccessLevel() === USER::LEVEL_USER,
+                    'is_student' => $info->core->getUser()->getAccessLevel() === User::LEVEL_USER,
                     'grading_open' => $gradeable->getGradeStartDate() !== null ? $gradeable->getGradeStartDate()->format($date_format) : '',
                     'grading_due' => $gradeable->getGradeDueDate() !== null ? $gradeable->getGradeDueDate()->format($date_format) : '',
                     'class' => 'btn-nav',
