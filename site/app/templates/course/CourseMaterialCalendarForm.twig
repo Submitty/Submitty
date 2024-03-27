@@ -1,0 +1,53 @@
+{% extends 'generic/Popup.twig' %}
+{% block popup_id %}course-material-calendar-form{% endblock %}
+{% block title %}Edit Course Material Folder{% endblock %}
+{% block body %}
+    <label for="show-menu">Show On Calendar: </label>
+    <select name="show-menu" id="show-menu">
+        <option value="none">None</option>
+        <option value="gradeable">On Gradeable</option>
+        <option value="date">On Date</option>
+    </select>
+    <div id="cal-gradeable-div">
+        <label for="associated-gradeable">Associated Gradeable ID: </label>
+        <input id="associated-gradeable" type="text"/>
+    </div>
+    <div id="cal-date-div">
+        <label for="associated-date">Associated Date: </label>
+        <input id="associated-date" class="date_picker flatpickr-input" type="text">
+    </div>
+
+
+    <script>
+        flatpickr('.flatpickr-input', {
+            plugins: [ShortcutButtonsPlugin(
+                    {
+                        button: [
+                            {
+                                label: "Today"
+                            }
+                        ],
+                        onClick: (index, fp) => {
+                            let date;
+                            switch (index) {
+                                case 0:
+                                    date = new Date();
+                                    break;
+                            }
+                            fp.setDate(date);
+                        }
+                    }
+            )],
+            allowInput: true,
+            time_24hr: true,
+            dateFormat: "Y-m-d",
+            onReady: (a, b, fp) => {
+                fp.calendarContainer.firstChild.childNodes[1].firstChild.firstChild.setAttribute('aria-label', 'Month');
+            }
+        });
+    </script>
+{% endblock %}
+{% block buttons %}
+    {{ block('close_button') }}
+    <input class="btn btn-primary" id="submit-folder-edit" type="submit" value="Submit" onclick = ""/>
+{% endblock %}

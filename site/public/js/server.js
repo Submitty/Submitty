@@ -293,6 +293,8 @@ function newUploadCourseMaterialsForm() {
     $('.popup-form').css('display', 'none');
     const form = $('#upload-course-materials-form');
 
+    setCalendarMenuValues('upload-cm-cal-menu');
+
     $('[name="existing-file-list"]', form).html('');
     $('[name="existing-file-list"]', form).append(`<b>${JSON.stringify(files)}</b>`);
 
@@ -361,6 +363,9 @@ function newEditCourseMaterialsFolderForm(tag) {
         }
     }
 
+    //Calendar Form
+    setCalendarMenuValues('edit-cm-folder-cal-menu');
+
     $('#material-folder-edit-form', form).attr('data-id', id);
     $('#edit-folder-sort', form).attr('value', dir);
     disableFullUpdate();
@@ -428,6 +433,9 @@ function newEditCourseMaterialsForm(tag) {
             url_label.css('display', 'none');
         }
     }
+
+    //Course Materials In Calendar Script
+    setCalendarMenuValues('edit-cm-file-cal-menu');
 
     editFilePathRecommendations();
     if (is_link === 1) {
