@@ -571,12 +571,12 @@ class ForumThreadView extends AbstractView {
         $isThreadLocked = $this->core->getQueries()->isThreadLocked($thread_id);
         $accessFullGrading = $this->core->getUser()->accessFullGrading();
 
-        $post_box_id = 0;
+        $post_box_id = 1;
 
         $form_action_link = $this->core->buildCourseUrl(['forum', 'posts', 'new']);
 
         if (($isThreadLocked != 1 || $accessFullGrading ) && $includeReply) {
-            $GLOBALS['post_box_id'] = $post_box_id = isset($GLOBALS['post_box_id']) ? $GLOBALS['post_box_id'] + 1 : 1;
+            $GLOBALS['post_box_id'] = $post_box_id = isset($GLOBALS['post_box_id']) ? $GLOBALS['post_box_id'] + 1 : 2;
         }
 
         $merge_thread_content = [];
@@ -709,6 +709,7 @@ class ForumThreadView extends AbstractView {
         $this->core->getOutput()->addInternalJs('autosave-utils.js');
         $this->core->getOutput()->addVendorJs('flatpickr/flatpickr.js');
         $this->core->getOutput()->addInternalJs('websocket.js');
+        $this->core->getOutput()->addInternalJs('drag-and-drop.js');
         $this->core->getOutput()->addVendorJs(FileUtils::joinPaths('flatpickr', 'plugins', 'shortcutButtons', 'shortcut-buttons-flatpickr.min.js'));
         $this->core->getOutput()->addVendorJs('jquery.are-you-sure/jquery.are-you-sure.js');
         $this->core->getOutput()->addVendorCss('flatpickr/flatpickr.min.css');
@@ -1227,7 +1228,7 @@ class ForumThreadView extends AbstractView {
 
         $post_box_id = 1;
         if (!$isThreadLocked || $this->core->getUser()->accessFullGrading()) {
-            $GLOBALS['post_box_id'] = $post_box_id = isset($GLOBALS['post_box_id']) ? $GLOBALS['post_box_id'] + 1 : 1;
+            $GLOBALS['post_box_id'] = $post_box_id = isset($GLOBALS['post_box_id']) ? $GLOBALS['post_box_id'] + 1 : 2;
         }
 
         $created_post = [

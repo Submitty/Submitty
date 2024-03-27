@@ -87,7 +87,7 @@ describe('Tests cases abut changing user pronouns', () => {
 
         //comment on the thread, verify pronouns is shown
         cy.get('.create-post-head').should('contain', 'Test pronouns display');
-        cy.get('#reply_box_2').type('my pronouns are They/Them{ctrl}{enter}');
+        cy.get('#reply_box_3').type('my pronouns are They/Them{ctrl}{enter}');
         cy.contains('Submit Reply to All').click();
         cy.get('.post_box').should('contain', 'my pronouns are They/Them');
         cy.get('.post_user_pronouns').should('contain', 'They/Them');
@@ -113,7 +113,7 @@ describe('Tests cases abut changing user pronouns', () => {
         //comment on the thread anonymously, verify pronouns is not shown
         cy.get('.create-post-head').should('contain', 'Test Anonymous thread, should not show pronouns');
         cy.get('.thread-anon-checkbox').filter(':visible').click();
-        cy.get('#reply_box_2').type('I can not see your pronouns{ctrl}{enter}');
+        cy.get('#reply_box_3').type('I can not see your pronouns{ctrl}{enter}');
         cy.contains('Submit Reply to All').click();
         cy.get('.post_box').should('contain', 'I can not see your pronouns');
         cy.get('.post_user_id').should('contain', 'Anonymous');

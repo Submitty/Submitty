@@ -140,6 +140,8 @@
     </div>
 {% endif %}
 <div class="form-group row thread-attachment-container">
+    <div id="img-table-loc"></div>
+    <br style="margin-bottom:1rem;">
     {% if post_box_id %}
         <div class="inline-block">
             {# uploadID and input-file + Index required for drag-and-drop.js #}
@@ -173,8 +175,6 @@
             </script>
         {% endif %}
     {% endif %}
-    <div id="img-table-loc"></div>
-    <br style="margin-bottom:1rem;">
     <fieldset class="inline-block right-zero">
       <legend style="display:none">Settings:</legend>
         <div class="new-thread-settings-wrapper">
