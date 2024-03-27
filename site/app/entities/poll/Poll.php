@@ -43,6 +43,8 @@ class Poll {
     #[ORM\Column(type: Types::STRING)]
     protected $release_answer;
 
+    #[ORM\Column(name: "allows_custom", type: Types::BOOLEAN)]
+    protected bool $allows_custom;
     /**
      * @var Collection<Option>
      */
@@ -66,6 +68,7 @@ class Poll {
         $this->setReleaseHistogram($release_histogram);
         $this->setReleaseAnswer($release_answer);
         $this->setImagePath($image_path);
+        $this->setAllowsCustomOptions(false);
         $this->setClosed();
 
         $this->options = new ArrayCollection();
@@ -118,6 +121,14 @@ class Poll {
 
     public function isEnded(): bool {
         return $this->status === "ended";
+    }
+
+    public function setAllowsCustomOptions(bool $allows_custom): void {
+        $this->allows_custom = $allows_custom;
+    }
+
+    public function allowsCustomResponses(): bool {
+        return $this->allows_custom;
     }
 
     public function getReleaseDate(): \DateTime {

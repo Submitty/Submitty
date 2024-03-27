@@ -1,5 +1,5 @@
-/* exported newDeletePollForm updatePollAcceptingAnswers updatePollVisible updateDropdownStates importPolls */
-/* global csrfToken */
+/* exported newDeletePollForm updatePollAcceptingAnswers updatePollVisible updateDropdownStates importPolls addCustomResponse removeCustomResponse */
+/* global csrfToken displaySuccessMessage displayErrorMessage */
 
 $(document).ready(() => {
     $('.dropdown-bar').on('click', function() {
@@ -104,6 +104,81 @@ function updatePollVisible(pollid, base_url) {
 function updateDropdownStates(curr_state, cookie_key) {
     const expiration_date = new Date(new Date().getFullYear(), new Date().getMonth(), new Date().getDate()+7);
     Cookies.set(cookie_key, !curr_state, { expires: expiration_date, path: '/' });
+}
+
+function addCustomResponse(pollid, base_url) {
+    const custom_response_text = document.querySelector('.custom_poll_response').value;
+    const url = `${base_url}/addCustomResponse`;
+    const fd = new FormData();
+    fd.append('csrf_token', csrfToken);
+    fd.append('poll_id', pollid);
+    fd.append('custom_response', custom_response_text);
+    $.ajax({
+        url: url,
+        type: 'POST',
+        data: fd,
+        processData: false,
+        cache: false,
+        contentType: false,
+        error: function(err) {
+            console.error(err);
+            window.alert('Something went wrong. Please try again.');
+        },
+        success: function(data) {
+            try {
+                const msg = JSON.parse(data);
+                if (msg.status !== 'success') {
+                    displayErrorMessage(msg.message);
+                }
+                else {
+                    displaySuccessMessage(msg.data.message);
+                    setTimeout(() => {
+                        window.location.reload();
+                    }, 1000);
+                }
+            }
+            catch (err) {
+                console.error(err);
+                window.alert('Something went wrong. Please try again.');
+            }
+        },
+    });
+}
+
+function removeCustomResponse(pollid, optionid, base_url) {
+    const url = `${base_url}/removeCustomResponse`;
+    const fd = new FormData();
+    fd.append('csrf_token', csrfToken);
+    fd.append('poll_id', pollid);
+    fd.append('option_id', optionid);
+    $.ajax({
+        url: url,
+        type: 'POST',
+        data: fd,
+        processData: false,
+        cache: false,
+        contentType: false,
+        error: function(err) {
+            console.error(err);
+            window.alert('Something went wrong. Please try again.');
+        },
+        success: function(data) {
+            try {
+                const msg = JSON.parse(data);
+                if (msg.status !== 'success') {
+                    displayErrorMessage(msg.message);
+                }
+                else {
+                    document.getElementById(`option-row-${optionid}`).remove();
+                    displaySuccessMessage(msg.data.message);
+                }
+            }
+            catch (err) {
+                console.error(err);
+                window.alert('Something went wrong. Please try again.');
+            }
+        },
+    });
 }
 
 function importPolls() {

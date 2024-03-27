@@ -78,7 +78,8 @@ class PollView extends AbstractView {
             'response_counts' => $response_counts,
             'file_data' => $file_data,
             'user_admin' => $this->core->getUser()->accessAdmin(),
-            'is_single_response' => PollUtils::isSingleResponse($poll->getQuestionType())
+            'is_single_response' => PollUtils::isSingleResponse($poll->getQuestionType()),
+            'user_id' => $this->core->getUser()->getId()
         ]);
     }
 

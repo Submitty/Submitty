@@ -5411,6 +5411,16 @@ AND gc_id IN (
         return $this->course_db->rows();
     }
 
+    public function existsCustomResponse(int $poll_id, string $poll_response): bool {
+        $params = [$poll_id, $poll_response];
+        $query = "SELECT *
+                  FROM poll_options
+                  WHERE poll_id = ? AND response = ?";
+
+        $this->course_db->query($query, $params);
+        return count($this->course_db->rows()) >= 1;
+    }
+
     /**
      * Gets All Parent Authors who this user responded to
      *
