@@ -11,8 +11,12 @@
       "**/*.py",
       "**/*.pdf",
       "**/*.cpp"
-  ]
+  ],
+  "work_to_details": [
+    "**/.slocdata/**/*.sloc"
+]
   },
+
   "resource_limits" : {
     "RLIMIT_NPROC" : 10
   },
