@@ -207,7 +207,7 @@
         <a onclick="cancelEditPostForum()"
                      class="btn btn-default close-button key_to_click" tabindex="0">Cancel</a>
         {% endif %}
-        <input type="submit" name="post" value="{{ submit_label }}" class="btn btn-primary inline-block" />
+        <input type="submit" name="post" value="{{ submit_label }}" class="btn btn-primary inline-block"/>
 
         {% if thread_resolve_state is defined and thread_resolve_state == 1 and show_unresolve %}
             <input type="hidden" name="thread_status" id="thread_status_input{{ post_box_id | length > 0 ? "_" ~ post_box_id : ""  }}" value="{{ thread_resolve_state }}" data-ays-ignore="true" />
@@ -289,4 +289,22 @@
             addFile(image, part);
         }
     }
+
+    document.addEventListener("DOMContentLoaded", function() {
+        var postBoxId = "{{ post_box_id }}"; 
+        var textBox = document.getElementById('reply_box_' + postBoxId);
+        var submitButton = document.querySelector('input[value = "{{submit_label}}"][type="submit"][name="post"]');
+
+        submitButton.disabled = true;   // Initially disable the submit button
+        
+        textBox.addEventListener('input', function toggleSubmitButton(){
+            if(textBox.value.trim() === '') {
+                submitButton.disabled = true; 
+            } else {
+                submitButton.disabled = false; // Enable the button if the textbox has text
+            }
+        });
+    });
+
 </script>
+
