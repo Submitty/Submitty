@@ -19,6 +19,7 @@
     "public/css/pdf/toolbar_fullscreen.css",
     "public/css/pdf/toolbar_embedded.css",
     "public/css/pdf/pdf_embedded.css",
+    "public/css/select2-override.css",
     "public/css/highlightjs/*"
   ]
 }

@@ -1,0 +1,22 @@
+
+/* Styles for Select2 dropdowns when in a dark theme */
+[data-theme="dark"] .select2-container--bootstrap-5 
+.select2-selection--single{
+
+    /* Using an SVG as the background image for the dropdown arrow, optimized for dark themes (white arrow) */
+    background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'><path fill='none' stroke='white' stroke-linecap='round' stroke-linejoin='round' stroke-width='3' d='M1.5 3.75l4.5 4.5 4.5-4.5'/></svg>");
+
+    /* Positioning the arrow icon */
+    background-position: right .10rem center;
+}
+
+/* Styles for Select2 dropdowns when in a light or default theme */
+[data-theme=""] .select2-container--bootstrap-5 
+.select2-selection--single{
+
+    /* Using an SVG as the background image for the dropdown arrow, optimized for light themes (dark grey arrow) */
+    background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'><path fill='none' stroke='darkslategrey' stroke-linecap='round' stroke-linejoin='round' stroke-width='3' d='M1.5 3.75l4.5 4.5 4.5-4.5'/></svg>");
+
+    /* Positioning the arrow icon */
+    background-position: right .10rem center;
+}
