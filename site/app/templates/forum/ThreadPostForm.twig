@@ -291,4 +291,22 @@
             addFile(image, part);
         }
     }
+
+    document.addEventListener("DOMContentLoaded", function() {
+        var postBoxId = "{{ post_box_id }}"; 
+        var textBox = document.getElementById('reply_box_' + postBoxId);
+        var submitButton = document.querySelector('input[value = "{{submit_label}}"][type="submit"][name="post"]');
+
+        submitButton.disabled = true;   // Initially disable the submit button
+        
+        textBox.addEventListener('input', function toggleSubmitButton(){
+            if(textBox.value.trim() === '') {
+                submitButton.disabled = true; 
+            } else {
+                submitButton.disabled = false; // Enable the button if the textbox has text
+            }
+        });
+    });
+
 </script>
+
