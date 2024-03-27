@@ -15,6 +15,13 @@ class GradeableUtils {
      * @return array<string, array<string, Gradeable>|array<string, GradedGradeable>|array<string, Button>>
      * @throws \Exception
      */
+
+    const vcs_type_submitty_hosted = 0;
+    const vcs_type_submitty_hosted_url = 1;
+    const vcs_type_public_github = 2;
+    const vcs_type_private_github = 3;
+    const vcs_type_self_hosted = 4;
+
     public static function getGradeablesFromCourse(Core $core, string $semester, string $title, array &$calendar_messages, bool $global = true): array {
         /** @var array<string, Gradeable> $gradeables */
         $gradeables = [];
