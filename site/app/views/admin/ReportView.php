@@ -25,7 +25,7 @@ class ReportView extends AbstractView {
         ]);
     }
 
-    public function showFullGradebook($grade_file) {
+    public function showFullGradebook($grade_file, string $grade_summaries_last_run) {
         $this->core->getOutput()->addBreadcrumb('Gradebook');
         $this->core->getOutput()->addInternalCss('rainbow-grades.css');
 
@@ -34,7 +34,9 @@ class ReportView extends AbstractView {
         return $this->core->getOutput()->renderTwigTemplate("submission/RainbowGrades.twig", [
             "show_summary" => $display_rainbow_grades_summary && $grade_file !== null,
             "grade_file" => $grade_file,
-            "extra_label" => "For All Students"
+            "extra_label" => "For All Students",
+            "is_gradebook" => true,
+            "grade_summaries_last_run" => $grade_summaries_last_run,
         ]);
     }
 }
