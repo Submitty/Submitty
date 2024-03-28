@@ -41,8 +41,6 @@ Required Parameters:
             preview_button_id : "overall-comment-markdown-preview-button",
             onclick : "previewOverallCommentMarkdown.bind(this, '" ~ (overall_comment["logged_in_user"]["user_id"]|escape) ~ "')", 
             render_header : true,
-            min_height : "100px",
-            max_height : "150px",
             textarea_onchange : grading_disabled ? '' : 'onChangeOverallComment()',
             data_previous_comment : (overall_comment["logged_in_user"]["comment"]|escape)
         } only %}
