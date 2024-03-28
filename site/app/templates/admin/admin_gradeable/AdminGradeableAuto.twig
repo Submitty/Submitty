@@ -96,6 +96,9 @@
             </div>
         </div>
         <a data-testid="config-button" class="btn btn-primary" style="margin-top: 6px" href="{{ upload_config_url }}">Upload a custom autograding configuration</a>
+        <a data-gradeableid="{{ gradeable.getId() }}" class="btn btn-primary" id="edit-gradeable" onclick="loadGradeableEditor('{{ gradeable.getId() }}')">Edit config.json</a>
+        <br>
+        <textarea id="gradeable-config-edit"></textarea>
     </div>
 
     <div class="notebook-builder-info">

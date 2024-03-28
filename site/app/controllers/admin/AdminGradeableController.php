@@ -1703,4 +1703,18 @@ class AdminGradeableController extends AbstractController {
         }
         $this->core->getOutput()->renderJsonError("Unknown gradeable");
     }
+
+    /**
+     * Loads config info for a gradeable to allow editing
+     * @Route("/courses/{_semester}/{_course}/gradeable/edit/load", methods={"POST"})
+     */
+    public function loadConfigEditor() {
+        $gradeable = $this->tryGetGradeable($_POST['gradeable_id']);
+        $config_path = $gradeable->getAutogradingConfigPath();
+        $config_content = file_get_contents(FileUtils::joinPaths($config_path, "config.json"));
+        $output = [];
+        $output["config_path"] = $config_path;
+        $output["config_content"] = $config_content;
+        return $this->core->getOutput()->renderJsonSuccess($output);
+    }
 }

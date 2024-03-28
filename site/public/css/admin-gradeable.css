@@ -317,3 +317,8 @@ body::-webkit-scrollbar-track {
     color: var(--standard-vibrant-red);
     font-style: italic;
 }
+
+#gradeable-config-edit {
+    display: none;
+    min-height: 500px;
+}

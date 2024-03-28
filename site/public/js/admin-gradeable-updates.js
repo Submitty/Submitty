@@ -846,3 +846,39 @@ function hideBuildLog() {
     $('#open-build-log').show();
     $('#close-build-log').hide();
 }
+
+function loadGradeableEditor(g_id) {
+    $.ajax({
+        url: buildCourseUrl(['gradeable','edit','load']),
+        type: 'POST',
+        data: {
+            gradeable_id: g_id,
+            csrf_token: csrfToken,
+        },
+        success: function(data) {
+            try {
+                let json = JSON.parse(data);
+                if (json['status'] === 'fail') {
+                    displayErrorMessage(json['message']);
+                    return;
+                }
+                json = json['data'];
+
+                editbox = $('textarea#gradeable-config-edit');
+                editbox.text(json.config_content);
+                editbox.css({
+                    'display': 'block',
+                    'min-width': '-webkit-fill-available',
+                });
+                
+            }
+            catch (err) {
+                displayErrorMessage('Error parsing data. Please try again');
+                return;
+            }
+        },
+        error: function() {
+            window.alert('Something went wrong while loading the gradeable config. Please try again.');
+        },
+    })
+}
