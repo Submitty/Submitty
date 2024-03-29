@@ -17,6 +17,68 @@ use app\models\User;
 use app\views\AbstractView;
 use app\libraries\NumberUtils;
 use app\libraries\CodeMirrorUtils;
+use Exception;
+
+
+function fetchSlocFile($graded_gradeable, int $display_version)
+{
+    // Get the AutoGradedVersionInstance object
+    $display_version_instance = $graded_gradeable->getAutoGradedGradeable()->getAutoGradedVersionInstance($display_version);
+
+    // Check if the instance exists
+    if ($display_version_instance === null) {
+        throw new Exception("AutoGradedVersionInstance not found for display version: $display_version");
+    }
+
+    // Attempt to get results files using the existing function
+    try {
+        $results_files = $display_version_instance->getResultsFiles();
+    } catch (Exception $e) {
+        throw new Exception("Failed to retrieve results files: {$e->getMessage()}");
+    }
+
+    // Look for the target file path within the results files
+    $target_file = 'details/test02/.slocdata/TMP_WORK/all-physical.sloc';
+    $file_path = null;
+
+    if (isset($results_files[$target_file])) {
+        $file_path_info = $results_files[$target_file];  // Store the array
+        $file_path = $file_path_info['path'];           // Extract the path string
+        // Proceed with file_get_contents($file_path)
+        var_dump($file_path);
+    }
+
+
+    // Handle the scenario where the file is not found
+    if (!$file_path) {
+        throw new Exception("File not found: $target_file");
+    }
+
+    // Read the file contents
+    try {
+        $file_contents = file_get_contents($file_path);
+    } catch (Exception $e) {
+        throw new Exception("Error reading file: $target_file - " . $e->getMessage());
+    }
+
+    // Process the file contents (same logic as before)
+    $lines = explode("\n", $file_contents);
+    $total_line_count = 0;
+
+    foreach ($lines as $line) {
+        $parts = explode("\t", $line);
+        if (count($parts) === 2) {
+            $language = trim($parts[0]);
+            $line_count = intval($parts[1]);
+            $total_line_count += $line_count;
+        }
+    }
+
+    // Return both the file contents and the total line count
+    return [$file_contents, $total_line_count];
+}
+
+
 
 class ElectronicGraderView extends AbstractView {
     private $user_id_to_User_cache = [];
@@ -1384,6 +1446,8 @@ HTML;
         return $anon_path;
     }
 
+
+
     /**
      * Render the Submissions and Results Browser panel
      * @param GradedGradeable $graded_gradeable
@@ -1450,6 +1514,7 @@ HTML;
         $submitter_id = $graded_gradeable->getSubmitter()->getId();
         $anon_submitter_id = $graded_gradeable->getSubmitter()->getAnonId($graded_gradeable->getGradeableId());
         $user_ids[$anon_submitter_id] = $submitter_id;
+        [$file_contents, $total_line_count] = fetchSlocFile($graded_gradeable, $display_version);
         $toolbar_css = $this->core->getOutput()->timestampResource(FileUtils::joinPaths('pdf', 'toolbar_embedded.css'), 'css');
         $this->core->getOutput()->addInternalJs(FileUtils::joinPaths('pdfjs', 'pdf.min.js'), 'vendor');
         $this->core->getOutput()->addInternalJs(FileUtils::joinPaths('pdfjs', 'pdf_viewer.js'), 'vendor');
@@ -1470,9 +1535,14 @@ HTML;
             "results_public" => $results_public,
             "active_version" => $display_version,
             'toolbar_css' => $toolbar_css,
-            "display_file_url" => $this->core->buildCourseUrl(['display_file'])
+            "display_file_url" => $this->core->buildCourseUrl(['display_file']),
+            "SLOCC" => $total_line_count
         ]);
     }
+
+
+
+
 
     /**
      * @param GradedGradeable $graded_gradeable
