@@ -133,6 +133,48 @@ class TestDateUtils(TestCase):
                     test_case[1], dateutils.read_submitty_date(test_case[0])
                 )
 
+    def test_read_submitty_date_unexpected_format(self):
+        date = "2024-03-29"
+
+        with self.assertRaises(SystemExit) as cm:
+            dateutils.read_submitty_date(date)
+
+        self.assertEqual(f"ERROR: unexpected date format {date}", str(cm.exception))
+
+    @patch(
+        "submitty_utils.dateutils.get_timezone",
+        return_value=pytz_timezone("America/New_York"),
+    )
+    def test_read_submitty_date_no_timezone(self, get_timezone):
+        parsed_date = dateutils.read_submitty_date("2020-06-12 03:21:30")
+        expected_date = pytz_timezone("America/New_York").localize(
+            datetime(2020, 6, 12, 3, 21, 30)
+        )
+
+        self.assertEqual(expected_date, parsed_date)
+
+    def test_read_submitty_date_short_timezone(self):
+        parsed_date = dateutils.read_submitty_date("2020-06-12 03:21:30-04")
+        expected_date = datetime(
+            2020,
+            6,
+            12,
+            3,
+            21,
+            30,
+            tzinfo=timezone(timedelta(days=-1, seconds=72000)),
+        )
+
+        self.assertEqual(parsed_date, expected_date)
+
+    def test_read_submitty_date_bad_format(self):
+        date = "2020-06-12 03:21:30-4"
+
+        with self.assertRaises(SystemExit) as cm:
+            dateutils.read_submitty_date(date)
+
+        self.assertEqual(f"ERROR:  invalid date format {date}", str(cm.exception))
+
     @patch(
         "submitty_utils.dateutils.get_current_time",
         return_value=pytz_timezone("America/New_York").localize(
