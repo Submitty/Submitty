@@ -13,6 +13,7 @@ use tests\BaseUnitTest;
 
 /**
  * @runTestsInSeparateProcesses
+ * @preserveGlobalState disabled
  */
 class AuthenticationControllerTester extends BaseUnitTest {
     public function setUp(): void {
