@@ -136,7 +136,7 @@ class Poll {
         return new \DateInterval("PT{$hours}H{$minutes}M{$seconds}S");
     }
 
-    public function getEndDate(): \DateTime {
+    public function getEndTime(): \DateTime {
         return $this->end_time;
     }
 
