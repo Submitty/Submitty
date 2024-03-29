@@ -206,7 +206,7 @@ function newDeleteCourseMaterialForm(id, file_name, str_id = null) {
     deleteMessageElement.appendChild(cm_message);
 
     $('[name="delete-confirmation"]', form).attr('action', url);
-    popUpInIt("#delete-course-material-form");
+    openPopup("#delete-course-material-form");
     captureTabInModal("delete-course-material-form");
     form.find('.form-body').scrollTop(0);
 }
@@ -272,7 +272,7 @@ function newUploadCourseMaterialsForm() {
         readPrevious(file.getAttribute('data-file_url'), 1);
     }
 
-    popUpInIt('.popup-form');
+    openPopup('.popup-form');
     var form = $("#upload-course-materials-form");
 
     $('[name="existing-file-list"]', form).html('');
@@ -346,7 +346,7 @@ function newEditCourseMaterialsFolderForm(tag) {
     $('#material-folder-edit-form', form).attr('data-id', id);
     $('#edit-folder-sort', form).attr('value', dir);
     disableFullUpdate();
-    popUpInIt('#edit-course-materials-folder-form');
+    openPopup('#edit-course-materials-folder-form');
     captureTabInModal("edit-course-materials-folder-form");
 }
 
@@ -424,7 +424,7 @@ function newEditCourseMaterialsForm(tag) {
     $("#edit-picker", form).attr('value', release_time);
     $("#edit-sort", form).attr('value', dir);
     $('#overwrite-materials-flag').remove();
-    popUpInIt('#edit-course-materials-form');
+    openPopup('#edit-course-materials-form');
     captureTabInModal("edit-course-materials-form");
 }
 
@@ -457,7 +457,7 @@ function editFilePathRecommendations() {
 }
 
 
-function popUpInIt(selector) {
+function openPopup(selector) {
     if (selector.startsWith('.')) {
         $(selector).css('display', 'none');
 
@@ -465,7 +465,7 @@ function popUpInIt(selector) {
         $(selector).css('display', 'block');
     }
 
-    $('body').css('overflow', 'hidden');
+    document.body.classList.add("no-scroll");
 }
 
 
@@ -517,7 +517,7 @@ function releaseTabFromModal(formName){
 
 function setFolderRelease(changeActionVariable,releaseDates,id,cm_id){
     
-    popUpInIt('.popup-form');
+    openPopup('.popup-form');
 
     var form = $("#set-folder-release-form");
     form.css("display", "block");
@@ -1381,7 +1381,7 @@ function setChildNewDateTime(path, changeDate,handleData) {
 }
 
 function openSetAllRelease() {
-    popUpInIt('#set-all-release-form');
+    openPopup('#set-all-release-form');
 }
 
 function setAllRelease(newdatatime) {

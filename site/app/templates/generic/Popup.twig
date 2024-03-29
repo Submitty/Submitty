@@ -27,7 +27,7 @@
                                         {% block close_button %}
                                             <a
                                                 {% block close_button_id %}{% endblock %}
-                                                onclick="{% block close_click_action %}closePopup('{{ block('popup_id') }}'); if ($('body').css('overflow') === 'hidden') { $('body').css('overflow', 'auto'); } {% endblock %}"
+                                                onclick="{% block close_click_action %}closePopup('{{ block('popup_id') }}');{% endblock %}"
                                                 class="btn {% block close_button_classes %}btn-default{% endblock %} close-button key_to_click"
                                                 tabindex="0"
                                             >
@@ -58,5 +58,9 @@
 <script>
     function closePopup(id) {
         $('#' + id).hide();
+        //Checking if the body contains the class no scroll making the page locked, then unlocking it
+        if (document.body.classList.contains('no-scroll')) {
+            document.body.classList.remove('no-scroll');
+        }
     }
 </script>
