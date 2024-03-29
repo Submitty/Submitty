@@ -1,0 +1,50 @@
+<div id="slocc" class="page-content">
+    <div id="myDiv4"><!-- Plotly chart will be drawn inside this DIV --></div>
+
+    <script>
+        var slocc = [137, 102, 51, 87, 179, 98, 104, 113, 138, 133, 183, 103, 195, 64, 89, 131, 160, 102, 114, 138, 58, 137, 112, 130, 82, 61, 97, 1238, 1370, 1391, 1190, 1074, 740, 1233, 730, 1154, 1338, 1077, 1056, 1452, 839, 847, 972, 876, 1127, 758, 1148, 1318, 971, 1191];
+        var scores = [56.11, 42.75, 48.37, 47.97, 80.76, 52.60, 54.52, 69.74, 54.65, 56.91, 41.75, 75.74, 48.73, 74.11, 46.99, 62.19, 39.45, 48.42, 61.41, 38.90, 45.55, 74.66, 58.14, 53.21, 75.68, 86.44, 47.87, 64.57, 37.49, 53.78, 46.60, 54.98, 68.24, 80.45, 66.63, 50.57, 55.23, 65.66, 40.10, 49.04, 40.58, 58.07, 53.02, 56.96, 31.54, 91.67, 52.70, 50.67, 49.35, 41.69];
+
+        var trace = {
+            x: slocc,
+            y: scores,
+            name: 'scores',
+            type: 'scatter',
+            mode: 'markers',
+            text: yValue,
+            textposition: 'auto',
+            hoverinfo: 'none',
+            marker: {
+                color: 'rgb(48,99,152)',
+                opacity: 1.0,
+                line: {
+                    color: 'rbg(170,170,170)',
+                    width: 1.5
+                }
+            }
+        };
+
+        var data = [trace];
+
+        var layout = {
+            title: 'Slocc vs. score',
+            barmode: 'overlay',
+            xaxis: {
+                title: 'Slocc'
+            },
+            yaxis:{
+                title: 'Scores'
+            },
+            font: {
+                family: '"Source Sans Pro", sans-serif',
+            }
+
+        };
+
+        Plotly.newPlot('myDiv4', data, layout, {displayModeBar: false,displaylogo: false});
+    </script>
+     <br/>
+    <br/>
+    Double-click on the chart to zoom out
+    <hr>
+</div>
