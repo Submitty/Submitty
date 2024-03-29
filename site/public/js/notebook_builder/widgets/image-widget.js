@@ -8,7 +8,7 @@ class ImageWidget extends Widget {
         this.dom_pointer;
 
         this.state = {
-            type: 'image'
+            type: 'image',
         };
     }
 
