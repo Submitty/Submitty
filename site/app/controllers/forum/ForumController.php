@@ -490,7 +490,7 @@ class ForumController extends AbstractController {
 
         $markdown = !empty($_POST['markdown_status']);
 
-        setcookie("markdown_enabled", strval($markdown ? 1 : 0), PHP_INT_MAX, "/");
+        setcookie("markdown_enabled", strval($markdown ? 1 : 0), time() + (86400 * 30 * 12), "/");
 
 
         $display_option = (!empty($_POST["display_option"])) ? htmlentities($_POST["display_option"], ENT_QUOTES | ENT_HTML5, 'UTF-8') : "tree";
