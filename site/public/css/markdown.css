@@ -174,7 +174,8 @@
 
 .markdown-area textarea {
     resize: none;
-    overflow-y: visible;
+    overflow-y: hidden;
+    min-height: 100px;
     tab-size: 4;
 }
 
@@ -183,7 +184,7 @@
     background-color: var(--default-white);
     border-radius: 4px;
     padding: 4px 6px;
-    height: auto;
+    height: auto !important;
     overflow: auto;
     resize: none;
     min-height: 100px;
