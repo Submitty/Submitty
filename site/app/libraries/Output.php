@@ -6,7 +6,6 @@ use app\controllers\GlobalController;
 use app\exceptions\OutputException;
 use app\libraries\FileUtils;
 use app\models\Breadcrumb;
-use app\models\gradeable\GradeableUtils;
 use app\views\ErrorView;
 use League\CommonMark\Extension\Autolink\AutolinkExtension;
 use League\CommonMark\Extension\Table\TableExtension;
@@ -146,10 +145,6 @@ HTML;
 
         $this->twig->addFunction(new \Twig\TwigFunction("add_twig_module_js", function ($name) {
             return call_user_func_array('self::addInternalModuleTwigJs', [$name]);
-        }));
-
-        $this->twig->addFunction(new \Twig\TwigFunction("vcs_type_int_to_str", function ($type) {
-            return GradeableUtils::vcsIntToStr($type);
         }));
 
         if ($full_load) {

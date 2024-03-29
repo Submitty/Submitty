@@ -9,6 +9,7 @@ use app\libraries\NumberUtils;
 use app\models\gradeable\AutoGradedVersion;
 use app\models\gradeable\Component;
 use app\models\gradeable\Gradeable;
+use app\models\gradeable\GradeableUtils;
 use app\models\gradeable\GradedGradeable;
 use app\models\gradeable\LateDays;
 use app\models\gradeable\LateDayInfo;
@@ -558,7 +559,13 @@ class HomeworkView extends AbstractView {
             'is_grader_view' => false,
             'recent_version_url' => $recent_version_url,
             'git_auth_token_url' => $this->core->buildUrl(['authentication_tokens']),
-            'git_auth_token_required' => false
+            'git_auth_token_required' => false,
+            'vcs_type_none' => GradeableUtils::vcs_type_none,
+            'vcs_type_submitty_hosted' => GradeableUtils::vcs_type_submitty_hosted,
+            'vcs_type_submitty_hosted_url' => GradeableUtils::vcs_type_submitty_hosted_url,
+            'vcs_type_public_github' => GradeableUtils::vcs_type_public_github,
+            'vcs_type_private_github' => GradeableUtils::vcs_type_private_github,
+            'vcs_type_self_hosted' => GradeableUtils::vcs_type_self_hosted
         ]);
     }
 

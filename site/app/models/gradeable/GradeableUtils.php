@@ -16,6 +16,7 @@ class GradeableUtils {
      * @throws \Exception
      */
 
+    const vcs_type_none = -1;
     const vcs_type_submitty_hosted = 0;
     const vcs_type_submitty_hosted_url = 1;
     const vcs_type_public_github = 2;

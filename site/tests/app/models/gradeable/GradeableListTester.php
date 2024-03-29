@@ -781,7 +781,7 @@ class GradeableListTester extends BaseUnitTest {
             'using_subdirectory' => false,
             'vcs_subdirectory' => '',
             'vcs_partial_path' => '',
-            'vcs_host_type' => GradeableUtils::vcsStrToInt("vcs_none"),
+            'vcs_host_type' => GradeableUtils::vcs_type_none,
             'team_assignment' => false,
             'team_size_max' => 1,
             'ta_grading' => $ta_grading,
