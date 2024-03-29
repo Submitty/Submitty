@@ -452,7 +452,6 @@ class AdminGradeableController extends AbstractController {
             'vcs_partial_path' => $gradeable->getVcsPartialPath(),
             'vcs_subdirectory' => $gradeable->getVcsSubdirectory(),
             'using_subdirectory' => $gradeable->isUsingSubdirectory(),
-            'download_url' => $this->core->buildCourseUrl([$gradeable->getId(), 'download']),
             'is_pdf_page' => $gradeable->isPdfUpload(),
             'is_pdf_page_student' => $gradeable->isStudentPdfUpload(),
             'itempool_available' => isset($gradeable_config) && $gradeable_config->isNotebookGradeable() && count($itempool_options),
