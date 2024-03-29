@@ -14,16 +14,17 @@ def up(config, database, semester, course):
     :param course: Code of course being migrated
     :type course: str
     """
-    # ALTER TABLE gradable ADD COLUMN IF NOT EXISTS g_notification_state VARCHAR(9) DEFAULT 'none' NOT NULL;
     database.execute(
         """
             ALTER TABLE notification_settings ADD COLUMN IF NOT EXISTS all_released_grades BOOLEAN DEFAULT false NOT NULL;
             ALTER TABLE notification_settings ADD COLUMN IF NOT EXISTS all_released_grades_email BOOLEAN DEFAULT false NOT NULL;
+            ALTER TABLE gradeable ADD COLUMN IF NOT EXISTS g_notification_state character varying(255) DEFAULT 'N/A' NOT NULL;
         """
     )
 
 
 def down(config, database, semester, course):
+
     """
     Run down migration (rollback).
 
@@ -40,5 +41,6 @@ def down(config, database, semester, course):
         """
             ALTER TABLE notification_settings DROP COLUMN all_released_grades;
             ALTER TABLE notification_settings DROP COLUMN all_released_grades_email;
+            ALTER TABLE gradeable DROP COLUMN g_notification_state;
         """
     )

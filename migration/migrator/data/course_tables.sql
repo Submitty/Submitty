@@ -988,6 +988,7 @@ CREATE TABLE public.gradeable (
     g_syllabus_bucket character varying(255) NOT NULL,
     g_allowed_minutes integer,
     g_allow_custom_marks boolean DEFAULT true NOT NULL,
+    g_notification_state character varying(255) DEFAULT 'N/A'::character varying NOT NULL,
     CONSTRAINT g_grade_due_date CHECK ((g_grade_due_date <= g_grade_released_date)),
     CONSTRAINT g_grade_start_date CHECK ((g_grade_start_date <= g_grade_due_date)),
     CONSTRAINT g_ta_view_start_date CHECK ((g_ta_view_start_date <= g_grade_start_date))
@@ -1530,7 +1531,7 @@ CREATE TABLE public.polls (
     poll_id integer NOT NULL,
     name text NOT NULL,
     question text NOT NULL,
-    status text NOT NULL,
+    status text,
     release_date date NOT NULL,
     image_path text,
     question_type character varying(35) DEFAULT 'single-response-multiple-correct'::character varying,

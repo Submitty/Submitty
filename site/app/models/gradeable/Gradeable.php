@@ -7,6 +7,7 @@ use app\libraries\GradeableType;
 use app\exceptions\ValidationException;
 use app\exceptions\NotImplementedException;
 use app\libraries\Utils;
+use app\models\Notification;
 use app\libraries\FileUtils;
 use app\libraries\Core;
 use app\models\AbstractModel;
@@ -100,6 +101,8 @@ use app\controllers\admin\AdminGradeableController;
  * @method int getInstructorBlind()
  * @method bool getAllowCustomMarks()
  * @method void setAllowCustomMarks($allow_custom_marks)
+ * @method string getNotificationState()
+ * @method void setNotificationState($state)
  */
 class Gradeable extends AbstractModel {
     /* Enum range for grader_assignment_method */
@@ -262,6 +265,10 @@ class Gradeable extends AbstractModel {
     /** @prop
      * @var int The amount of points a user must reach to unlock this gradeable */
     protected $depends_on_points = null;
+    /** @prop
+     * @var string determines current state of notification release for gradeable (N/A, pending, released)
+     * */
+    protected $notification_state = null;
 
     /* Dates for all types of gradeables */
 
@@ -341,6 +348,7 @@ class Gradeable extends AbstractModel {
         $this->setMinGradingGroup($details['min_grading_group']);
         $this->setSyllabusBucket($details['syllabus_bucket']);
         $this->setTaInstructions($details['ta_instructions']);
+        $this->setNotificationState('pending');
         if (array_key_exists('any_manual_grades', $details)) {
             $this->setAnyManualGrades($details['any_manual_grades']);
         }
@@ -2549,5 +2557,50 @@ class Gradeable extends AbstractModel {
             return false;
         }
         return !empty($autograding_config->getLeaderboards());
+    }
+
+    /**
+     * Sets current state of gradeable notification
+     * @param $state represents new state, which is either 'pending' or 'released' or 'N/A' (prior to migration)
+     * @return void
+     */
+    public function setNotificationState(string $state): void {
+        $this->notification_state = $state;
+    }
+
+    /**
+     * Returns current state of gradeable notification
+     *
+     * @return string
+     */
+    public function getNotificationState(): string {
+        return $this->notification_state;
+    }
+
+    /**
+     * Releases gradeable notifications
+     *
+     * @return void
+     */
+    private function releaseGradeableNotification(): void {
+        $full_course_name = $this->core->getFullCourseName();
+        $subject = "New Grade Released: " . Notification::textShortner($this->getTitle());
+        $content = "Instructor in " .  $full_course_name . " has released scores for " .  $this->getTitle();
+        $metadata = json_encode(['url' => $this->core->buildCourseUrl(['gradeable', $this->getId()])]);
+        $gradable = ['component' => 'grading', 'metadata' => $metadata, 'content' => $content, 'subject' => $subject];
+        $this->core->getNotificationFactory()->onGradableRelease($gradable);
+    }
+
+    /**
+     * Checks if the current state of gradable implies notification release to students
+     *
+     * @return void
+     */
+    public function checkGradableNotificationState(): void {
+        // TODO ~ ensure g_notification_state can updated via queries
+        if ($this->notification_state !== 'N/A' && $this->notification_state == 'pending') {
+            $this->releaseGradeableNotification();
+            $this->setNotificationState('released');
+        }
     }
 }

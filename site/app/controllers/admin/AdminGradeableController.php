@@ -1527,15 +1527,6 @@ class AdminGradeableController extends AbstractController {
         }
     }
 
-    private function releaseGradeableNotification(string $gradeable_id, string $grade_title): void {
-        $full_course_name = $this->core->getFullCourseName();
-        $subject = "New Grade Released: " . Notification::textShortner($grade_title);
-        $content = "Instructor in " .  $full_course_name . " has released scores for " . $grade_title;
-        $metadata = json_encode(['url' => $this->core->buildCourseUrl(['gradeable', $gradeable_id])]);
-        $gradable = ['component' => 'grading', 'metadata' => $metadata, 'content' => $content, 'subject' => $subject];
-        $this->core->getNotificationFactory()->onGradableRelease($gradable);
-    }
-
     /**
      * @Route("/courses/{_semester}/{_course}/gradeable/{gradeable_id}/quick_link")
      */
@@ -1550,7 +1541,7 @@ class AdminGradeableController extends AbstractController {
             if ($gradeable->hasReleaseDate()) {
                 if ($dates['grade_released_date'] > $now) {
                     $this->shiftDates($dates, 'grade_released_date', $now);
-                    $this->releaseGradeableNotification($gradeable->getId(), $gradeable->getTitle());
+                    $gradeable->releaseGradeableNotification();
                     $message .= "Released grades for ";
                     $success = true;
                 }
@@ -1613,12 +1604,6 @@ class AdminGradeableController extends AbstractController {
                 $message .= "Can't close submissions for ";
                 $success = false;
             }
-        }
-        elseif ($action === "test_gradeable_notification") {
-            // TESTING: http://localhost:1511/courses/s24/sample/gradeable/id/quick_link?action=test_gradeable_notification
-            $this->releaseGradeableNotification($gradeable->getId(), $gradeable->getTitle());
-            $message .= "Released grade notification for ";
-            $success = true;
         }
         $gradeable->setDates($dates);
         $this->core->getQueries()->updateGradeable($gradeable);

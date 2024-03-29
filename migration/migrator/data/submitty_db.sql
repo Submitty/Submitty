@@ -549,6 +549,40 @@ ALTER SEQUENCE public.saml_mapped_users_id_seq OWNED BY public.saml_mapped_users
 
 
 --
+-- Name: scheduled_notifications; Type: TABLE; Schema: public; Owner: -
+--
+
+CREATE TABLE public.scheduled_notifications (
+    id integer NOT NULL,
+    reference_id character varying(255) NOT NULL,
+    type character varying(255) NOT NULL,
+    term character varying NOT NULL,
+    course character varying NOT NULL,
+    date timestamp(6) with time zone NOT NULL
+);
+
+
+--
+-- Name: scheduled_notifications_id_seq; Type: SEQUENCE; Schema: public; Owner: -
+--
+
+CREATE SEQUENCE public.scheduled_notifications_id_seq
+    AS integer
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+--
+-- Name: scheduled_notifications_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: -
+--
+
+ALTER SEQUENCE public.scheduled_notifications_id_seq OWNED BY public.scheduled_notifications.id;
+
+
+--
 -- Name: sessions; Type: TABLE; Schema: public; Owner: -
 --
 
@@ -659,6 +693,13 @@ ALTER TABLE ONLY public.saml_mapped_users ALTER COLUMN id SET DEFAULT nextval('p
 
 
 --
+-- Name: scheduled_notifications id; Type: DEFAULT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.scheduled_notifications ALTER COLUMN id SET DEFAULT nextval('public.scheduled_notifications_id_seq'::regclass);
+
+
+--
 -- Name: vcs_auth_tokens id; Type: DEFAULT; Schema: public; Owner: -
 --
 
@@ -735,6 +776,14 @@ ALTER TABLE ONLY public.saml_mapped_users
 
 ALTER TABLE ONLY public.saml_mapped_users
     ADD CONSTRAINT saml_mapped_users_saml_id_user_id_key UNIQUE (saml_id, user_id);
+
+
+--
+-- Name: scheduled_notifications scheduled_notifications_pkey; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.scheduled_notifications
+    ADD CONSTRAINT scheduled_notifications_pkey PRIMARY KEY (id);
 
 
 --
