@@ -446,7 +446,7 @@ class ForumThreadView extends AbstractView {
         }
         $first_post = $this->core->getQueries()->getFirstPostForThread($thread_id);
         $first_post_id = $first_post["id"];
-
+        
         $first = true;
 
         $post_data = [];
