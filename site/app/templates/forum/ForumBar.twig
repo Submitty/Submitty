@@ -82,9 +82,8 @@
 					{% endif %}
 
 					<div class="dropdown-divider"></div>
-					<a class="dropdown-item" onclick="markUnread()" title="Mark items as unread from here">Mark Unread From Here</a>
 
-					{% comment %} <a class="dropdown-item" onclick="markUnread({{post.id}},'{{current_user}}')" title="Mark items as unread from here">Mark Unread From Here</a> {% endcomment %}
+					<a class="dropdown-item" onclick="markUnread({{ current_thread }}, '{{ current_user }}', '{{ "now"|date("Y-m-d H:i:s") }}')" title="Mark items as unread from here">Mark Unread From Here</a>
 
 					{% if thread_exists and (is_full_threads_page is not defined or not is_full_threads_page) %}
 						<div class="dropdown-divider"></div>

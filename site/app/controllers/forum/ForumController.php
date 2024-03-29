@@ -211,16 +211,16 @@ class ForumController extends AbstractController {
     /**
      * @Route("/courses/{_semester}/{_course}/forum/thread/mark_unread", methods={"POST"})
      */
-    public function markUnread(): JsonResponse {
+    public function markUnread(): bool {
         $requiredKeys = ['thread_id', 'user_id'];
         foreach ($requiredKeys as $key) {
             if (!isset($_POST[$key])) {
                 return JsonResponse::getErrorResponse("Missing {$key} in request");
             }
         }
-        $output = [];
-        $output['type'] = $this->core->getQueries()->markUnread($_POST['thread_id'], $_POST['user_id']);
-        return $this->core->getOutput()->renderJsonSuccess($result);
+        $output = true;
+        $output = $this->core->getQueries()->markUnread($_POST['thread_id'], $_POST['user_id']);
+        return $output;
     }
 
     /**

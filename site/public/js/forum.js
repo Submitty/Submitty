@@ -1226,6 +1226,8 @@ function markUnread(current_thread, current_user) {
         data: {
             thread_id: current_thread,
             user_id: current_user,
+            timestamp: timestamp,
+            csrf_token: window.csrfToken,
         },
         success: function(data) {
             try {
@@ -1242,6 +1244,7 @@ function markUnread(current_thread, current_user) {
                 displayErrorMessage(json['message']);
                 return;
             }
+            window.location.reload();
             // eslint-disable-next-line no-undef
         },
         error: function() {
