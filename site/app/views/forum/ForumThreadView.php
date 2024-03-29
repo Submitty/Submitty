@@ -520,7 +520,6 @@ class ForumThreadView extends AbstractView {
 
                         $post["author_user_group"] = $author_user_groups_map[$post["author_user_id"]];
 
-                        $boolLiked = true;
                         $boolLiked = in_array($post["id"], $userLiked, true);
 
                         $post_data[] = $this->createPost(
