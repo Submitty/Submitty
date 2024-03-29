@@ -1531,7 +1531,7 @@ CREATE TABLE public.polls (
     poll_id integer NOT NULL,
     name text NOT NULL,
     question text NOT NULL,
-    status text,
+    status text NOT NULL,
     release_date date NOT NULL,
     image_path text,
     question_type character varying(35) DEFAULT 'single-response-multiple-correct'::character varying,
