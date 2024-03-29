@@ -864,10 +864,10 @@ function loadGradeableEditor(g_id) {
                 }
                 json = json['data'];
 
+                $('#gradeable-config-edit-bar').show();
                 editbox = $('textarea#gradeable-config-edit');
                 editbox.text(json.config_content);
                 editbox.css({
-                    'display': 'block',
                     'min-width': '-webkit-fill-available',
                 });
                 
@@ -880,5 +880,13 @@ function loadGradeableEditor(g_id) {
         error: function() {
             window.alert('Something went wrong while loading the gradeable config. Please try again.');
         },
-    })
+    });
+}
+
+function cancelGradeableConfigEdit() {
+    $("#gradeable-config-edit-bar").hide();
+}
+
+function saveGradeableConfigEdit(g_id) {
+    
 }

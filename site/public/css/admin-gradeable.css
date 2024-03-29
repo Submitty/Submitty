@@ -319,6 +319,9 @@ body::-webkit-scrollbar-track {
 }
 
 #gradeable-config-edit {
-    display: none;
     min-height: 500px;
+}
+
+#gradeable-config-edit-bar {
+    display: none;
 }

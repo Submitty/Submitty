@@ -97,8 +97,12 @@
         </div>
         <a data-testid="config-button" class="btn btn-primary" style="margin-top: 6px" href="{{ upload_config_url }}">Upload a custom autograding configuration</a>
         <a data-gradeableid="{{ gradeable.getId() }}" class="btn btn-primary" id="edit-gradeable" onclick="loadGradeableEditor('{{ gradeable.getId() }}')">Edit config.json</a>
-        <br>
-        <textarea id="gradeable-config-edit"></textarea>
+        <div id = "gradeable-config-edit-bar">
+            <textarea id="gradeable-config-edit"></textarea>
+            <br>
+            <a class="btn btn-primary" onclick="saveGradeableConfigEdit('{{ gradeable.getId() }}')">Save</a>
+            <a class="btn btn-secondary" onclick="cancelGradeableConfigEdit()">Cancel</a>
+        <div>
     </div>
 
     <div class="notebook-builder-info">
