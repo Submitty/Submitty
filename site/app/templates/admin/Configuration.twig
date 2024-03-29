@@ -168,8 +168,8 @@
                 What instructions should be shown to students before they enter a message?
             </span>
         </label>
-        <textarea class="config-row" name="seek_message_instructions" id="seek-message-instructions">{{ fields['seek_message_instructions'] }}</textarea>
-
+        <textarea class="config-row" name="seek_message_instructions" id="seek-message-instructions" style="resize:vertical; height: 290px;">{{ fields['seek_message_instructions'] }}</textarea>
+ 
         <h2>Late Days</h2>
         <hr>
 
@@ -201,14 +201,14 @@
             <br>
             <span class="option-alt">Input the message shown on grades returned to students.  Include instructions for grade inquiries and the course staff mailing list.</span>
         </label>
-        <textarea class="config-row" name="course_email" id="course-email">{{ fields['course_email'] }}</textarea>
+        <textarea class="config-row" name="course_email" id="course-email" style = "resize:vertical ;">{{ fields['course_email'] }}</textarea>
 
         <label for="grade-inquiry-message" class="config-row">
             <span class="option-title">Grade Inquiry Warning Message</span>
             <br>
             <span class="option-alt">Input the warning message show to students while submitting a grade inquiry.</span>
         </label>
-        <textarea class="config-row" name="grade_inquiry_message" id="grade-inquiry-message" rows="4">{{ fields['grade_inquiry_message'] }}</textarea>
+        <textarea class="config-row" name="grade_inquiry_message" id="grade-inquiry-message" rows="4" style = "resize:vertical;">{{ fields['grade_inquiry_message'] }}</textarea>
 
         {# TODO: Not sure what this is
             <label for="zero_rubric_grades">
