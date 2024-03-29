@@ -1356,7 +1356,7 @@ class ForumController extends AbstractController {
         }
         $isLiked = filter_var($_POST['isLiked'], FILTER_VALIDATE_BOOLEAN); //validates type of bool
         $output = [];
-        $output['type'] = $this->core->getQueries()->toggleLikes($_POST['post_id'], $this->core->getUser()->getId(), $isLiked);
+        $output['type'] = $this->core->getQueries()->toggleLikes($_POST['post_id'], $this->core->getUser()->getId());//so isLiked is the frontend value
 
         if ($output["type"] === "false") {
             return JsonResponse::getErrorResponse('Catch Fail in Query');
