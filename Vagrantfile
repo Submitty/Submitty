@@ -60,8 +60,17 @@ def gen_script(machine_name, worker: false, base: false)
     GIT_PATH=/usr/local/submitty/GIT_CHECKOUT/Submitty
     DISTRO=$(lsb_release -si | tr '[:upper:]' '[:lower:]')
     VERSION=$(lsb_release -sr | tr '[:upper:]' '[:lower:]')
-    mkdir -p ${GIT_PATH}/.vagrant/logs
-    #{setup_cmd}
+    
+    # Conditional provisioning check at the very start
+    if [ ! -f "/vagrant/#{machine_name}_provisioned" ]; then
+      echo "Provisioning #{machine_name} for the first time..."
+      mkdir -p ${GIT_PATH}/.vagrant/logs
+      #{setup_cmd}
+      # Mark this provisioning step as done
+      touch "/vagrant/#{machine_name}_provisioned"
+    else
+      echo "#{machine_name} already provisioned. Skipping provisioning steps."
+    fi
 SCRIPT
 
   return script
@@ -253,7 +262,16 @@ Vagrant.configure(2) do |config|
     mount_folders(override, [])
   end
 
-  config.vm.provision :shell, :inline => " sudo timedatectl set-timezone America/New_York", run: "once"
+  config.vm.provision "shell", inline: <<-SCRIPT
+    if [ ! -f "/vagrant/timezone_set" ]; then
+      echo "Setting timezone to America/New_York..."
+      sudo timedatectl set-timezone America/New_York
+      # Mark this provisioning step as done
+      touch "/vagrant/timezone_set"
+    else
+      echo "Timezone already set. Skipping..."
+    fi
+    SCRIPT
 
   if ARGV.include?('ssh')
     config.ssh.username = 'root'
