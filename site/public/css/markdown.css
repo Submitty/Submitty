@@ -173,7 +173,7 @@
 }
 
 .markdown-area textarea {
-    resize: none;
+    resize: vertical;
     overflow-y: hidden;
     min-height: 100px;
     tab-size: 4;
