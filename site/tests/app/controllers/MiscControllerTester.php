@@ -42,6 +42,7 @@ class MiscControllerTester extends \PHPUnit\Framework\TestCase {
     /**
      * @dataProvider userDataProvider
      * @runInSeparateProcess
+     * @preserveGlobalState disabled
      */
     public function testReadFileSite($user_details): void {
         $this->getFunctionMock('app\controllers', 'header')
