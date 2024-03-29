@@ -9,13 +9,13 @@ const monthNamesShort = ['Dec', 'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul',
 /**
  * Changes the view and updates cookies and loads the calendar
  * @param x : string the value of the view to change to
- * @param view_year : int year that is currently being viewed 
+ * @param view_year : int year that is currently being viewed
  * @param view_month : int month that is currently being viewed
  * @param view_day : int day that is currently being viewed
  * @returns {void} : loads the updated calendar
  */
 function changeView(x, view_year, view_month, view_day) {
-    Cookies.set('view',x.value);
+    Cookies.set('view', x.value);
 
     let cookie_year = parseInt(Cookies.get('calendar_year'));
     let cookie_month = parseInt(Cookies.get('calendar_month'));
@@ -423,7 +423,7 @@ function buildSwitchingHeader(view_year, view_month, view_day, type) {
     monthSelect.classList.add('cal-month-title'); //month title
 
     monthSelect.onchange = function() {
-        const type = $("#calendar-item-type-edit").val();
+        const type = $('#calendar-item-type-edit').val();
         Cookies.set('calendar_month', this.value);
 
         let cookie_year = parseInt(Cookies.get('calendar_year'));

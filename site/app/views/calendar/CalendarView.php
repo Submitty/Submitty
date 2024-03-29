@@ -86,12 +86,12 @@ class CalendarView extends AbstractView {
         $this->core->getOutput()->addBreadcrumb($in_course ? "Course Calendar" : "Calendar");
         return $this->core->getOutput()->renderTwigTemplate("calendar/Calendar.twig", [
             "show_table" => $show_table,
-            "view_year" => $year,          // the year that the calendar is viewing
-            "view_month" => $month,        // the month that the calendar is viewing
+            "view_year" => $year,
+            "view_month" => $month,
             "view_day" => $day,
-            "curr_year" => date("Y"),  // the current year
-            "curr_month" => date("n"), // the current month
-            "curr_day" => date("d"),   // the current date
+            "curr_year" => date("Y"),
+            "curr_month" => date("n"),
+            "curr_day" => date("d"),
             'date_format' => $this->core->getConfig()->getDateTimeFormat()->getFormat('gradeable'),
             "gradeables_by_date" => $info->getItemsByDateInCourses(),
             "gradeables_by_section" => $info->getItemsBySections(),
@@ -100,7 +100,7 @@ class CalendarView extends AbstractView {
             "is_instructor" => $this->core->getUser()->getGroup() === User::GROUP_INSTRUCTOR,
             "colors" => $info->getColors(),
             "instructor_courses" => $this->core->getQueries()->getInstructorLevelUnarchivedCourses($this->core->getUser()->getId()),
-            "view_cookie" => $_COOKIE['view'] ?? $_COOKIE['view'] ?? "month", //view cookie that can be accessed by twig file
+            "view_cookie" => $_COOKIE['view'] ?? $_COOKIE['view'] ?? "month",
             "month_cookie" => $_COOKIE['calendar_month'] ?? $_COOKIE['calendar_month'] ?? $month, //month cookie that can be accessed by twig file
             "year_cookie" => $_COOKIE['calendar_year'] ?? $_COOKIE['calendar_year'] ?? $year, //year cookie that can be accessed by twig file
             "course_names" => $courseWithName,
