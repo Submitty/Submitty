@@ -111,23 +111,22 @@
 <script>
 $(document).ready(function() {
     function resizeTextarea(textarea) {
-        var scrollPosition = $(window).scrollTop();
+    if (textarea.scrollHeight > textarea.clientHeight) {
         textarea.style.height = 'auto'; 
         textarea.style.height = textarea.scrollHeight + 'px';
-        $(window).scrollTop(scrollPosition);
         textarea.style.overflowY = 'hidden';
+    } else {
+        textarea.style.height = '100px';
+        textarea.style.overflowY = 'auto';
+        }
     }
 
     $(document).ajaxComplete(function() {
-    // Directly target the textarea with the known ID 'reply_box_0'
     var textareaElement = $('#reply_box_0');
     if (textareaElement.length) {
         resizeTextarea(textareaElement[0]);
     }
 });
-
-
-    // MutationObserver for dynamically added content
     var observer = new MutationObserver(function(mutations) {
         mutations.forEach(function(mutation) {
             mutation.addedNodes.forEach(function(node) {
