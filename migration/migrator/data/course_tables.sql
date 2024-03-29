@@ -1464,9 +1464,7 @@ CREATE TABLE public.poll_options (
     poll_id integer,
     response text NOT NULL,
     correct boolean NOT NULL,
-    option_id integer NOT NULL,
-    custom boolean DEFAULT false NOT NULL,
-    author_id character varying(255) DEFAULT 'instructor'::character varying NOT NULL
+    option_id integer NOT NULL
 );
 
 
@@ -1530,13 +1528,12 @@ CREATE TABLE public.polls (
     poll_id integer NOT NULL,
     name text NOT NULL,
     question text NOT NULL,
-    status text,
+    status text NOT NULL,
     release_date date NOT NULL,
     image_path text,
     question_type character varying(35) DEFAULT 'single-response-multiple-correct'::character varying,
     release_histogram character varying(10) DEFAULT 'never'::character varying,
-    release_answer character varying(10) DEFAULT 'never'::character varying,
-    custom_credit boolean DEFAULT true NOT NULL
+    release_answer character varying(10) DEFAULT 'never'::character varying
 );
 
 
@@ -3373,7 +3370,7 @@ ALTER TABLE ONLY public.viewed_responses
 --
 -- Name: viewed_responses viewed_responses_fk1; Type: FK CONSTRAINT; Schema: public; Owner: -
 --
-
+Fixing 
 ALTER TABLE ONLY public.viewed_responses
     ADD CONSTRAINT viewed_responses_fk1 FOREIGN KEY (user_id) REFERENCES public.users(user_id);
 
@@ -3381,4 +3378,3 @@ ALTER TABLE ONLY public.viewed_responses
 --
 -- PostgreSQL database dump complete
 --
-
