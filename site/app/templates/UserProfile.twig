@@ -9,7 +9,7 @@
                 {% if image is not null %}
                     {{ base64_image(image.getImageBase64MaxDimension(250), image.getMimeType(), '%s %s'|format(user.getDisplayedGivenName(), user.getDisplayedFamilyName())) }}
                 {% else %}
-                    <span class="center-img-tag">{{ localize('My_Profile.Image_Not_Available', "N/A") }}</span>
+                    <span class="center-img-tag">{{ localize('My_Profile.Not_Available', "N/A") }}</span>
                 {% endif %}
             </div>
             <span class="edit-user-img">
