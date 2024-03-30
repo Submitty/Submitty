@@ -1322,6 +1322,7 @@ function toggleLike(post_id, current_user, isLiked) {
             const likeIconSrc = document.getElementById(`likeIcon_${post_id}`);
             let likeIconSrcElement = likeIconSrc.src;
 
+            const theme = localStorage.getItem('theme');
             if (likeIconSrcElement.endsWith('/img/on-duck-button.svg')) {
                 if (theme==='light' && likeIconSrcElement.endsWith('/img/on-duck-button.svg')) {
                     likeIconSrcElement = likeIconSrcElement.replace('on-duck-button.svg', 'light-mode-off-duck.svg');
