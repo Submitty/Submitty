@@ -224,7 +224,7 @@ function newDeleteCourseMaterialForm(id, file_name, str_id = null) {
     deleteMessageElement.appendChild(cm_message);
 
     $('[name="delete-confirmation"]', form).attr('action', url);
-    openPopup("#delete-course-material-form");
+    openPopup('#delete-course-material-form');
     captureTabInModal('delete-course-material-form');
     form.find('.form-body').scrollTop(0);
 }
@@ -488,7 +488,7 @@ function openPopup(selector) {
     document.body.classList.add('no-scroll');
 }
 
-const lastActiveElement = null;
+let lastActiveElement = null;
 function captureTabInModal(formName, resetFocus=true) {
     if (resetFocus) {
         lastActiveElement = document.activeElement;
@@ -534,7 +534,7 @@ function releaseTabFromModal(formName) {
     lastActiveElement.focus();
 }
 
-function setFolderRelease(changeActionVariable,releaseDates,id,cm_id){
+function setFolderRelease(changeActionVariable, releaseDates, id, cm_id) {
     openPopup('.popup-form');
     const form = $('#set-folder-release-form');
     form.css('display', 'block');
