@@ -358,7 +358,6 @@ function ajaxUploadGradeable() {
                     window.location = buildCourseUrl(['gradeable', data['data'], 'update']);
                 }
                 else {
-                    window.location = buildCourseUrl(['gradeable']);
                     alert(data['message']);
                     return false;
                 }
