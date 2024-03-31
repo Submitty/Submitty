@@ -225,7 +225,7 @@ function newDeleteCourseMaterialForm(id, file_name, str_id = null) {
 
     $('[name="delete-confirmation"]', form).attr('action', url);
     openPopup("#delete-course-material-form");
-    captureTabInModal("delete-course-material-form");
+    captureTabInModal('delete-course-material-form');
     form.find('.form-body').scrollTop(0);
 }
 
@@ -291,7 +291,7 @@ function newUploadCourseMaterialsForm() {
     }
 
     openPopup('.popup-form');
-    var form = $("#upload-course-materials-form");
+    const form = $('#upload-course-materials-form');
 
     $('[name="existing-file-list"]', form).html('');
     $('[name="existing-file-list"]', form).append(`<b>${JSON.stringify(files)}</b>`);
@@ -365,7 +365,7 @@ function newEditCourseMaterialsFolderForm(tag) {
     $('#edit-folder-sort', form).attr('value', dir);
     disableFullUpdate();
     openPopup('#edit-course-materials-folder-form');
-    captureTabInModal("edit-course-materials-folder-form");
+    captureTabInModal('edit-course-materials-folder-form');
 
 }
 
@@ -444,7 +444,7 @@ function newEditCourseMaterialsForm(tag) {
     $('#edit-sort', form).attr('value', dir);
     $('#overwrite-materials-flag').remove();
     openPopup('#edit-course-materials-form');
-    captureTabInModal("edit-course-materials-form");
+    captureTabInModal('edit-course-materials-form');
 
 }
 
@@ -480,14 +480,15 @@ function openPopup(selector) {
     if (selector.startsWith('.')) {
         $(selector).css('display', 'none');
 
-    } else if (selector.startsWith('#')) {
+    }
+    else if (selector.startsWith('#')) {
         $(selector).css('display', 'block');
     }
 
-    document.body.classList.add("no-scroll");
+    document.body.classList.add('no-scroll');
 }
 
-var lastActiveElement = null;
+const lastActiveElement = null;
 function captureTabInModal(formName, resetFocus=true) {
     if (resetFocus) {
         lastActiveElement = document.activeElement;
@@ -534,14 +535,10 @@ function releaseTabFromModal(formName) {
 }
 
 function setFolderRelease(changeActionVariable,releaseDates,id,cm_id){
-    
     openPopup('.popup-form');
-
     const form = $('#set-folder-release-form');
     form.css('display', 'block');
-
     captureTabInModal('set-folder-release-form');
-
     form.find('.form-body').scrollTop(0);
     $('[id="release_title"]', form).attr('data-path', changeActionVariable);
     $('[name="release_date"]', form).val(releaseDates);
