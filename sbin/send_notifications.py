@@ -43,7 +43,6 @@ except Exception as config_fail_error:
 
 
 DATA_DIR_PATH = SUBMITTY_CONFIG['submitty_data_dir']
-# TODO ~ Create this new directory in logs
 NOTIFICATION_LOG_PATH = os.path.join(DATA_DIR_PATH, "logs", "notifications")
 TODAY = datetime.datetime.now()
 LOG_FILE = open(os.path.join(
@@ -77,37 +76,40 @@ def setup_db():
     return db, metadata
 
 def fetchPendingGradeables(db):
-    query = """SELECT * FROM scheduled_notifications WHERE date <= NOW()"""
+    query = """SELECT reference_id, term, course FROM scheduled_notifications WHERE type = 'gradeable' AND date <= NOW() AND notification_state = false;"""
     result = db.execute(text(query))
     pending_gradeable_notifications = []
 
     for row in result:
         pending_gradeable_notifications.append({
-            'id': row[0],
-            'reference_id': row[1],
-            'type': row[2],
-            'term': row[3],
-            'course': row[4],
-            'date': row[5]
+            'reference_id': row[0],
+            'term': row[1],
+            'course': row[2],
             })
 
     return pending_gradeable_notifications
 
 def notifyPendingGradeables(db):
     pending_gradeable_notifications = fetchPendingGradeables(db)
+    notified_gradeables = []
 
     for gradeable in pending_gradeable_notifications:
-        payload = {} # use gradeable data...
-        requests.post("http://localhost:1511/courses/course/semester/...", data = payload)
-        continue
+        response = requests.post("http://localhost:1511/courses/{}/{}/gradeable/{}/release_notifications".format(gradeable['term'], gradeable['course'], gradeable['reference_id']), data = gradeable)
 
-    if len(pending_gradeable_notifications) >= 1:
-        query = "DELETE FROM scheduled_notifications WHERE date <= NOW()"
-        db.execute(text(query))
+        if response.status_code == 200:
+            notified_gradeables.append(gradeable['id'])
+        else:
+            # Testing API issues
+            print(response.json())
+
+    # Update all successfully sent notifications for the potential queued gradeables
+    if len(notified_gradeables) >= 1:
+        query = """UPDATE scheduled_notifications SET notification_state = true WHERE id in ({});""".format(','.join(['%s'] * len(notified_gradeables)))
+        db.execute(query, notified_gradeables)
 
 def main():
     try:
-        db, metadata = setup_db()
+        db = setup_db()[0]
         notifyPendingGradeables(db)
     except Exception as notification_send_error:
         e = "[{}] Error Sending Notification(s): {}".format(

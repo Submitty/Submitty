@@ -558,7 +558,8 @@ CREATE TABLE public.scheduled_notifications (
     type character varying(255) NOT NULL,
     term character varying NOT NULL,
     course character varying NOT NULL,
-    date timestamp(6) with time zone NOT NULL
+    date timestamp(6) with time zone NOT NULL,
+    notification_state boolean DEFAULT false NOT NULL
 );
 
 
