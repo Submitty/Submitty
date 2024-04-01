@@ -276,6 +276,8 @@ class UsersController extends AbstractController {
         $this->core->getOutput()->renderJsonSuccess($user_information);
     }
 
+   
+
     /**
      * @Route("/courses/{_semester}/{_course}/users", methods={"POST"})
      */

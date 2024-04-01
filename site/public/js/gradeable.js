@@ -1,6 +1,6 @@
 /* exported loadTemplates renderGradingGradeable renderPeerGradeable renderGradingComponent
    renderGradingComponentHeader renderInstructorEditGradeable renderConflictMarks renderRubricTotalBox
-   renderTotalScoreBox renderOverallComment renderEditComponentHeader renderEditComponent ajaxUploadGradeable */
+   renderTotalScoreBox renderOverallComment renderEditComponentHeader renderEditComponent ajaxUploadGradeable addUser */
 /* global Twig showVerifyComponent buildCourseUrl getItempoolOptions isItempoolAvailable csrfToken */
 
 /**
@@ -324,6 +324,33 @@ function renderEditComponentHeader(component, showMarkList) {
             'decimal_precision': DECIMAL_PRECISION,
         }));
     });
+}
+
+// Uploads a gradeable via JSON POST request
+function addUser() {       
+    data = {
+        'user_id': 'peteca',
+        'numeric_id': '2057358',
+        'given_name': 'Cameron',
+        'family_name': 'Peterson',
+        'email': 'none@none.none',
+        'preferred_name': 'Cameron',
+        'password': null
+    }
+    data['csrf_token'] = csrfToken;
+    $.ajax({
+        url: '/users/add',
+        headers: {
+            Accept: 'application/json',
+        },
+        dataType: 'json',
+        data: data,
+        method: 'POST',
+    }).always((data) => {
+        data = JSON.parse(JSON.stringify(data));
+        console.log(data);
+    });
+    return true;
 }
 
 

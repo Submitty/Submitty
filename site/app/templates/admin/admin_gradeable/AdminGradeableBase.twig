@@ -14,7 +14,7 @@
             <div>
                 <h1 id="myModalLabel">{{ action == 'edit' ? 'Edit Gradeable' : 'New Gradeable' }}
                     {% if action == 'new' %}
-                    <button class="btn btn-primary" type="button" data-testid="upload-gradeable-btn" id="upload-gradeable-btn" style="float:right;" onclick="javascript:newGradeableJsonForm()" >Upload Gradeable JSON</button>
+                    <button class="btn btn-primary" type="button" data-testid="upload-gradeable-btn" id="upload-gradeable-btn" style="float:right;" onclick="addUser()" >Upload Gradeable JSON</button>
                     {% endif %}
                 </h1>
 			</div>
