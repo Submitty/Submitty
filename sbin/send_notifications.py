@@ -1,7 +1,7 @@
 import json
 import os
 import datetime
-from sqlalchemy import create_engine, MetaData, Table, bindparam, text
+from sqlalchemy import create_engine
 import sys
 import requests
 import psutil
@@ -72,12 +72,11 @@ def setup_db():
 
     engine = create_engine(conn_string)
     db = engine.connect()
-    metadata = MetaData(bind=db)
-    return db, metadata
+    return db
 
 def fetchPendingGradeables(db):
     query = """SELECT reference_id, term, course FROM scheduled_notifications WHERE type = 'gradeable' AND date <= NOW() AND notification_state = false;"""
-    result = db.execute(text(query))
+    result = db.execute(query)
     pending_gradeable_notifications = []
 
     for row in result:
@@ -92,15 +91,16 @@ def fetchPendingGradeables(db):
 def notifyPendingGradeables(db):
     pending_gradeable_notifications = fetchPendingGradeables(db)
     notified_gradeables = []
+    print(pending_gradeable_notifications)
 
     for gradeable in pending_gradeable_notifications:
-        response = requests.post("http://localhost:1511/courses/{}/{}/gradeable/{}/release_notifications".format(gradeable['term'], gradeable['course'], gradeable['reference_id']), data = gradeable)
+        payload = {'reference_id' : gradeable['reference_id']}
+        print(payload)
+        response = requests.post("http://localhost:1511/courses/{}/{}/gradeable/{}/release_notifications".format(gradeable['term'].strip(), gradeable['course'].strip(), gradeable['reference_id'].strip()), data = payload)
 
         if response.status_code == 200:
             notified_gradeables.append(gradeable['id'])
-        else:
-            # Testing API issues
-            print(response.json())
+
 
     # Update all successfully sent notifications for the potential queued gradeables
     if len(notified_gradeables) >= 1:
@@ -109,7 +109,7 @@ def notifyPendingGradeables(db):
 
 def main():
     try:
-        db = setup_db()[0]
+        db = setup_db()
         notifyPendingGradeables(db)
     except Exception as notification_send_error:
         e = "[{}] Error Sending Notification(s): {}".format(

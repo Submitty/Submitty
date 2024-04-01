@@ -56,7 +56,7 @@ class GradeablesController extends AbstractController {
         }
         else {
             $gradeable->releaseGradeableNotification();
-            return JsonResponse::getSuccessResponse(['message' => "Successfully sent notifications", 'authenticated' => true]);
+            return JsonResponse::getSuccessResponse(['message' => "Successfully sent notifications for" . $gradeable]);
         }
     }
 }
