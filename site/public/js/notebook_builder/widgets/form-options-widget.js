@@ -1,4 +1,4 @@
-/* global Widget, notebook_builder, csrfToken, builder_data, buildCourseUrl, uploadFiles, getBadItemNames, getBadImageInputs */
+/* global Widget, notebook_builder, csrfToken, builder_data, buildCourseUrl, uploadFiles, getBadItemNames, getBadImageInputs, getBadMarkdownContents */
 /* exported FormOptionsWidget */
 
 class FormOptionsWidget extends Widget {
@@ -102,7 +102,7 @@ class FormOptionsWidget extends Widget {
      * @returns {boolean}
      */
     validate() {
-        return this.validateFileNames() && this.validateItemNames() && this.validateImageWidgets();
+        return this.validateFileNames() && this.validateItemNames() && this.validateImageWidgets() && this.validateMarkdownWidgets();
     }
 
     /**
@@ -132,6 +132,9 @@ class FormOptionsWidget extends Widget {
         document.querySelectorAll('input').forEach(elem => {
             elem.style.backgroundColor = '';
         });
+        document.querySelectorAll('.markdown-input').forEach(elem => {
+            elem.style.backgroundColor = '';
+        })
     }
 
     /**
@@ -204,6 +207,23 @@ class FormOptionsWidget extends Widget {
         }
 
         return image_inputs.length === 0;
+    }
+
+     /**
+     * Validates to see if all markdown widgets contain any text. If validation error occurs, then error messages are added to the status div.
+     * An error indicator will be added later.
+     *
+     * @returns {Boolean}
+     */
+
+    validateMarkdownWidgets() {
+        const bad_markdown_conents = getBadMarkdownContents();
+        if (!(bad_markdown_conents === 0)) {
+            this.appendStatusMessage('A markdown input was found to be blank. Please ensure all markdown inputs are not blank.');
+        }
+        this.colorFailedInputs([''], '.markdown-textarea');
+
+        return bad_markdown_conents.length === 0;
     }
 
     /**
