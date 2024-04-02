@@ -102,7 +102,7 @@ class FormOptionsWidget extends Widget {
      * @returns {boolean}
      */
     validate() {
-        return this.validateFileNames() && this.validateItemNames() && this.validateImageWidgets();
+        return this.validateFileNames() && this.validateItemNames() && this.validateImageWidgets() && this.validateMarkdownWidgets();
     }
 
     /**
