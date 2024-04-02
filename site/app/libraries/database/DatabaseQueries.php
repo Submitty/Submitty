@@ -976,6 +976,27 @@ SQL;
         return $this->course_db->rows();
     }
 
+    public function getAuthorRegistrationSection($author_ids) {
+        if (count($author_ids) === 0) {
+            return [];
+        }
+        $placeholders = $this->createParameterList(count($author_ids));
+        $this->course_db->query("SELECT user_id, COALESCE(registration_section, '0') AS registration_section FROM users WHERE user_id IN {$placeholders}", $author_ids);
+        return $this->course_db->rows();
+    }
+    public function getAuthorRotatingSection($author_ids) {
+        if (count($author_ids) === 0) {
+            return [];
+        }
+        $placeholders = $this->createParameterList(count($author_ids));
+        $this->course_db->query("SELECT user_id, COALESCE(CAST(rotating_section AS VARCHAR), '0') AS rotating_section FROM users WHERE user_id IN {$placeholders}", $author_ids);
+        return $this->course_db->rows();
+    }
+    public function postHasHistory($post_id) {
+        $this->course_db->query("SELECT * FROM forum_posts_history WHERE post_id = ?", [$post_id]);
+        return 0 !== count($this->course_db->rows());
+
+
     /**
      * @param int[] $post_ids
      * @return int[] ids of posts with history
@@ -1007,6 +1028,15 @@ SQL;
             $rows = [];
         }
         return $rows;
+    }
+
+
+    public function getPostAuthorFromID($theId) {
+        $this->course_db->query("SELECT author_user_id FROM posts WHERE id = ?", [$theId]);
+
+        $authorUserId = $this->course_db->fetchColumn();
+        
+        return $authorUserId;
     }
 
     /**
