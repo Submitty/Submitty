@@ -129,7 +129,6 @@ class AbstractBuilder {
     collectValidJsons(widgets, valid_jsons) {
         widgets.forEach(widget => {
             const widget_json = widget.getJSON();
-
             if (Object.keys(widget_json).length > 0) {
                 valid_jsons.push(widget_json);
             }

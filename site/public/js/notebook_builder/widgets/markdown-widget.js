@@ -62,13 +62,13 @@ class MarkdownWidget extends Widget {
 
     commitState() {
         const text_area = this.dom_pointer.querySelector('.markdown-input');
-        this.state.markdown_string = text_area.value;
+        text_area.value ? this.state.markdown_string = text_area.value : delete this.state.markdown_string;
     }
 
     getJSON() {
         this.commitState();
 
-        if (this.state.markdown_string !== '') {
+        if (this.state) {
             return this.state;
         }
     }
