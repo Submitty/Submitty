@@ -197,7 +197,14 @@ class PollController extends AbstractController {
         $hours = intval($_POST['poll-hours'] ?? 0);
         $minutes = intval($_POST['poll-minutes'] ?? 0);
         $seconds = intval($_POST['poll-seconds'] ?? 0);
-        if (($hours * 3600) + (60 * $minutes) +  $seconds > 86400) {
+        $duration = new DateInterval("PT{$hours}H{$minutes}M{$seconds}S");
+        //comparing with DateTimes because PHP doesn't support DateInterval comparison
+        $UserInputDuration = $this->core->getDateTimeNow();
+        $TwentyFourHourDateTime = clone $UserInputDuration;
+        $UserInputDuration->add($duration);
+        $twentyfourHourDuration = new DateInterval("PT24H");
+        $TwentyFourHourDateTime->add($twentyfourHourDuration);
+        if ($UserInputDuration > $TwentyFourHourDateTime) {
             $this->core->addErrorMessage("Exceeded 24 hour limit");
             return new RedirectResponse($this->core->buildCourseUrl(['polls/newPoll']));
         }
@@ -205,7 +212,6 @@ class PollController extends AbstractController {
             $this->core->addErrorMessage('Invalid time given');
             return new RedirectResponse($this->core->buildCourseUrl(['polls']));
         }
-        $duration = new DateInterval("PT{$hours}H{$minutes}M{$seconds}S");
         $poll = new Poll($_POST['name'], $_POST['question'], $_POST['question_type'], $duration, $date, $_POST['release_histogram'], $_POST["release_answer"]);
         $em->persist($poll);
 
@@ -332,15 +338,21 @@ class PollController extends AbstractController {
         if ($hours === $prevHours && $minutes === $prevMinutes && $seconds === $prevSeconds) {
             $resetDuration = false;
         }
-        if (($hours * 3600) + (60 * $minutes) +  $seconds > 86400) {
+        $newDuration = new DateInterval("PT{$hours}H{$minutes}M{$seconds}S");
+        //comparing with DateTimes because PHP doesn't support DateInterval comparison
+        $UserInputDuration = $this->core->getDateTimeNow();
+        $TwentyFourHourDateTime = clone $UserInputDuration;
+        $UserInputDuration->add($newDuration);
+        $twentyfourHourDuration = new DateInterval("PT24H");
+        $TwentyFourHourDateTime->add($twentyfourHourDuration);
+        if ($UserInputDuration > $TwentyFourHourDateTime) {
             $this->core->addErrorMessage("Exceeded 24 hour limit");
-            return new RedirectResponse($this->core->buildCourseUrl(['polls']));
+            return new RedirectResponse($this->core->buildCourseUrl(['polls/newPoll']));
         }
         if ($hours < 0 || $minutes < 0 || $seconds < 0) {
             $this->core->addErrorMessage('Invalid time given');
             return new RedirectResponse($this->core->buildCourseUrl(['polls']));
         }
-        $newDuration = new DateInterval("PT{$hours}H{$minutes}M{$seconds}S");
         if ($poll->isOpen() && $resetDuration) {
             if ($newDuration->h > 0 || $newDuration->i > 0 || $newDuration->s > 0 || $newDuration->days > 0 || $newDuration->m > 0 || $newDuration->y > 0) {
                 $endDate = $this->core->getDateTimeNow();

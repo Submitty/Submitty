@@ -122,6 +122,7 @@
                 <input name="poll-seconds" id="poll-seconds" class="poll-timer" value="{{ poll is not null ? poll.getDuration().s }}"/>
             </div>
         </div>
+        <br>
         <label for="student-histogram-release-setting" class="option-title">
             Release response histogram to students:
         </label>
@@ -225,31 +226,32 @@
         toggleTimerInputs();
     };
     function toggleTimerInputs() {
-        var enableTimerCheckbox = document.getElementById("enable-timer");
-        var timerInputs = document.getElementById("timer-inputs").querySelectorAll(".poll-timer");
+        const enableTimerCheckbox = $("#enable-timer");
+        const timerInputs = $(".poll-timer");
 
-        if (enableTimerCheckbox.checked) {
-            document.getElementById("timer-inputs").style.display = "block";
-            timerInputs.forEach(function(input) {
-                input.setAttribute("type", "number");
-                input.setAttribute("min", "0");
-                if (input.classList.contains("poll-hours")) {
-                    input.setAttribute("placeholder", "Hour");
-                    input.setAttribute("max", "24");
-                } else if (input.classList.contains("poll-minutes")) {
-                    input.setAttribute("placeholder", "Min");
-                } else if (input.classList.contains("poll-seconds")) {
-                    input.setAttribute("placeholder", "Sec");
+        if (enableTimerCheckbox.prop("checked")) {
+            $("#timer-inputs").show();
+            timerInputs.each(function() {
+                $(this).attr("type", "number")
+                    .attr("min", "0");
+                if ($(this).hasClass("poll-hours")) {
+                    $(this).attr("placeholder", "Hour")
+                        .attr("max", "24");
+                } else if ($(this).hasClass("poll-minutes")) {
+                    $(this).attr("placeholder", "Min");
+                } else if ($(this).hasClass("poll-seconds")) {
+                    $(this).attr("placeholder", "Sec");
                 }
             });
         } else {
-            document.getElementById("timer-inputs").style.display = "none";
-            timerInputs.forEach(function(input) {
-                input.setAttribute("type", "hidden");
-                input.value = "0"; 
+            $("#timer-inputs").hide();
+            timerInputs.each(function() {
+                $(this).attr("type", "hidden")
+                    .val("0");
             });
         }
     }
+
 
 
     function addResponse() {
