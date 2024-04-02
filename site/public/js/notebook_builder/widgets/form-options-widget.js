@@ -132,6 +132,9 @@ class FormOptionsWidget extends Widget {
         document.querySelectorAll('input').forEach(elem => {
             elem.style.backgroundColor = '';
         });
+        document.querySelectorAll('.markdown-input').forEach(elem => {
+            elem.style.backgroundColor = '';
+        });
     }
 
     /**
