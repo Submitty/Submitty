@@ -1,6 +1,6 @@
 /* exported updateUserPronouns, showUpdatePrefNameForm, showUpdateLastInitialFormatForm,
 showUpdatePronounsForm, showDisplayNameOrderForm, showUpdatePasswordForm, showUpdateProfilePhotoForm, showUpdateSecondaryEmailForm,
-updateUserPreferredNames, updateUserLastInitialFormat, updateUserProfilePhoto, updateUserSecondaryEmail, updateDisplayNameOrder, 
+updateUserPreferredNames, updateUserLastInitialFormat, updateUserProfilePhoto, updateUserSecondaryEmail, updateDisplayNameOrder,
 changeSecondaryEmail, previewUserLastInitialFormat, clearPronounsBox
  */
 /* global displaySuccessMessage, displayErrorMessage, buildUrl */
@@ -208,7 +208,6 @@ function updateDisplayNameOrder(e) {
             displayErrorMessage('Some went wrong while updating pronouns!');
         },
     });
-    
 
 }
 
