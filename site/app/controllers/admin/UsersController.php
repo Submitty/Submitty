@@ -276,7 +276,39 @@ class UsersController extends AbstractController {
         $this->core->getOutput()->renderJsonSuccess($user_information);
     }
 
-   
+   /**
+     * @return JsonResponse
+     * @Route("/api/users/add", methods={"POST"})
+     * @Route("/users/add", methods={"POST"})
+     */
+    function ajaxAddUser() {
+        $values = [
+            'user_id',
+            'numeric_id',
+            'given_name',
+            'family_name'
+        ];
+            if (FileUtils::arrayKeysExist($values, array_keys($_POST))) {
+                $user = $this->core->getQueries()->getUserById($_POST['user_id']);
+                if ($user !== null){
+                    return JsonResponse::getErrorResponse('User already exists!');
+                }
+                $user_data = array(
+                    $_POST['user_id'],
+                    $_POST['numeric_id'],
+                    $_POST['given_name'],
+                    $_POST['preferred_name'] ?? null,
+                    $_POST['family_name'],
+                    $_POST['email'] ?? '', 
+                    $_POST['password'] ?? null, 
+                );
+                $this->core->getQueries()->addUser($user_data);
+                return JsonResponse::getSuccessResponse($this->core->getQueries()->getUserById($_POST['user_id']));
+            } else { 
+                return JsonResponse::getErrorResponse('All required keys are not present');
+            }
+            
+    }
 
     /**
      * @Route("/courses/{_semester}/{_course}/users", methods={"POST"})

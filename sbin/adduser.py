@@ -8,19 +8,13 @@ import argparse
 import json
 from os import path
 import subprocess
-from sqlalchemy import create_engine, MetaData, Table, bindparam
-
+import requests
 from submitty_utils import db_utils
 
 CONFIG_PATH = path.join(path.dirname(path.realpath(__file__)), '..', 'config')
 with open(path.join(CONFIG_PATH, 'database.json')) as open_file:
     DATABASE_DETAILS = json.load(open_file)
-DATABASE_HOST = DATABASE_DETAILS['database_host']
-DATABASE_PORT = DATABASE_DETAILS['database_port']
-DATABASE_USER = DATABASE_DETAILS['database_user']
-DATABASE_PASS = DATABASE_DETAILS['database_password']
 AUTHENTICATION_METHOD = DATABASE_DETAILS['authentication_method']
-
 
 def get_php_db_password(password):
     """
@@ -36,7 +30,6 @@ def get_php_db_password(password):
         stdout=subprocess.PIPE, stderr=subprocess.PIPE)
     (out, err) = proc.communicate()
     return out.decode('utf-8')
-
 
 def get_input(question, default="", blank=False):
     add = "[{}] ".format(default) if default != "" or default is not None else ""
@@ -64,33 +57,12 @@ def main():
     args = parse_args()
     user_id = args.user_id
 
-    conn_str = db_utils.generate_connect_string(
-        DATABASE_HOST,
-        DATABASE_PORT,
-        "submitty",
-        DATABASE_USER,
-        DATABASE_PASS,
-    )
-
-    engine = create_engine(conn_str)
-    connection = engine.connect()
-    metadata = MetaData(bind=engine)
-    users_table = Table('users', metadata, autoload=True)
-    select = users_table.select().where(users_table.c.user_id == bindparam('user_id'))
-    user = connection.execute(select, user_id=user_id).fetchone()
     defaults = {
         'user_givenname': None,
         'user_preferred_givenname': None,
         'user_familyname': None,
         'user_email': None
     }
-    if user is not None:
-        print(
-            'User already exists! Hit enter on any question to use '
-            'existing value for that field.'
-        )
-        defaults = user
-
     givenname = get_input('User givenname', defaults['user_givenname'])
     preferred = get_input(
         'User preferred name',
@@ -98,35 +70,38 @@ def main():
         True
     )
     familyname = get_input('User familyname', defaults['user_familyname'])
+    numeric_id = get_input('User Numeric ID')
     email = get_input('User email', defaults['user_email'], True)
 
-    update = {
-        'user_givenname': givenname,
-        'user_preferred_givenname': preferred,
-        'user_familyname': familyname,
-        'user_email': email
+    data = {
+        'given_name': givenname,
+        'preferred_given_name': preferred,
+        'family_name': familyname,
+        'email': email,
+        'numeric_id': numeric_id,
+        'user_id': user_id
     }
 
     extra = ""
-    if user is not None and AUTHENTICATION_METHOD == 'DatabaseAuthentication':
+    if AUTHENTICATION_METHOD == 'DatabaseAuthentication':
         extra = ' (Leave blank to use previous password)'
     while AUTHENTICATION_METHOD == 'DatabaseAuthentication':
         password = input('User password{}: '.format(extra))
         if password != '':
-            update['user_password'] = get_php_db_password(password)
+            data['password'] = get_php_db_password(password)
             break
-        elif user is not None and password == '':
+        elif password == '':
             break
-
-    if user is not None:
-        query = users_table.update(values=update).where(
-            users_table.c.user_id == bindparam('b_user_id')
-        )
-        connection.execute(query, b_user_id=user_id)
-    else:
-        update['user_id'] = user_id
-        query = users_table.insert()
-        connection.execute(query, **update)
+    user = get_input('Enter your username')
+    admin_password = get_input('Enter your password')
+    key = requests.post('http://localhost:1511/api/token', data={'user_id': user, 'password': admin_password})
+    print(key.json())
+    request = requests.post('http://localhost:1511/api/users/add', headers={'Authorization' : key.json()['data']['token']}, data=data)
+    print(request.text)
+    # else:
+    #     update['user_id'] = user_id
+    #     query = users_table.insert()
+    #     connection.execute(query, **update)
 
 
 if __name__ == '__main__':

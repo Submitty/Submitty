@@ -79,6 +79,10 @@ class FileUtils {
         return $return;
     }
 
+    public static function arrayKeysExist($keys, $search) {
+        return (0 === count(array_diff($keys, $search)));
+    }
+
     /**
      * Recursively goes through a directory deleting everything in it before deleting the folder itself. Returns
      * true if successful, false otherwise.

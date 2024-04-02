@@ -33,34 +33,7 @@ class AdminGradeableController extends AbstractController {
             $this->newPage();
         }
     }
-    /**
-     * @return JsonResponse
-     * @Route("/users/add", methods={"POST"})
-     */
-    function ajaxAddUser() {
-        unset($_POST['csrf_token']);
-        $user = $this->core->getQueries()->getUserById($_POST['user_id']);
-        if ($user !== null){
-            return JsonResponse::getErrorResponse('User already exists!');
-        }
-        $user_data = array(
-            $_POST['user_id'],
-            $_POST['numeric_id'],
-            $_POST['given_name'],
-            $_POST['preferred_name'],
-            $_POST['family_name'],
-            $_POST['email'], 
-            $_POST['password'], 
-           
-        );
-        // if (array_key_exists('password', $_POST)) {
-        //     $user_data['user_password'] = 
-        // }
-    
-        // $this->core->getQueries()->addUser($user_data);
-        return JsonResponse::getSuccessResponse($this->core->getQueries()->addUser($user_data));
-    }
-    ///
+
     const syllabus_buckets = [
         'homework', 'assignment', 'problem-set',
         'quiz', 'test', 'exam',
