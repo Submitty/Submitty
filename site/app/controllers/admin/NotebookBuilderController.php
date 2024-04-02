@@ -77,6 +77,11 @@ class NotebookBuilderController extends AbstractController {
             return new RedirectResponse($this->core->buildCourseUrl(['notebook_builder', $gradeable->getId(), 'edit']));
         }
 
+        if (!$gradeable->isUsingUploadedConfig()) {
+            $this->core->addErrorMessage("Notebook builder may only edit uploaded configurations for the current course and semester.");
+            return new RedirectResponse($failure_url);
+        }
+
         $json_path = $gradeable->getAutogradingConfigPath() . '/config.json';
 
         $permission_failures = $this->checkPermissions($gradeable->getAutogradingConfigPath());

@@ -134,7 +134,7 @@ class FormOptionsWidget extends Widget {
         });
         document.querySelectorAll('.markdown-input').forEach(elem => {
             elem.style.backgroundColor = '';
-        })
+        });
     }
 
     /**
@@ -209,7 +209,7 @@ class FormOptionsWidget extends Widget {
         return image_inputs.length === 0;
     }
 
-     /**
+    /**
      * Validates to see if all markdown widgets contain any text. If validation error occurs, then error messages are added to the status div.
      * An error indicator will be added later.
      *
