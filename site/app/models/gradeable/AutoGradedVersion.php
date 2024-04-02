@@ -477,6 +477,14 @@ class AutoGradedVersion extends AbstractModel {
     }
 
     /**
+     * Gets the number of physical source lines of code
+     * @return int
+     */
+    public function getSloc() {
+        return 123;
+    }
+
+    /**
      * Gets the number of days late this version is
      * @return int result clamped to be >= 0
      */

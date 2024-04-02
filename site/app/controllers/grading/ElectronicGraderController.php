@@ -62,6 +62,7 @@ class ElectronicGraderController extends AbstractController {
             "bTA" => [],
             "tTA" => [],
             "bAuto" => [],
+            'sloc' => [],
             "VerConf" => 0,
             "noSub" => 0,
             "noActive" => 0,
@@ -125,6 +126,7 @@ class ElectronicGraderController extends AbstractController {
                         if ($ov->getTaGradedGradeable() != null && $ov->getTaGradedGradeable()->getGradedGradeable()->getSubmitter()->getRegistrationSection() != null) {
                             $histogram["bTA"] = array_merge($histogram["bTA"], [$ov->getTaGradedGradeable()->getTotalScore() + $ov->getAutoGradedGradeable()->getTotalPoints()]);
                             $histogram["tTA"] = array_merge($histogram["tTA"], [$ov->getGradeable()->getManualGradingPoints()]);
+                            $histogram["sloc"] = array_merge($histogram["sloc"], [$ov->getTaGradedGradeable()->getSloc()]);
                         }
                     }
                 }
@@ -686,7 +688,6 @@ class ElectronicGraderController extends AbstractController {
             $autograded_average = $this->core->getQueries()->getAverageAutogradedScores($gradeable_id, $section_key, $gradeable->isTeamAssignment(), $bad_submissions_cookie, $null_section_cookie);
             $overall_average = $this->core->getQueries()->getAverageForGradeable($gradeable_id, $section_key, $gradeable->isTeamAssignment(), $override_cookie, $bad_submissions_cookie, $null_section_cookie);
             $order = new GradingOrder($this->core, $gradeable, $this->core->getUser(), true);
-            $overall_scores = [];
             $overall_scores = $order->getSortedGradedGradeables();
             $num_components = count($gradeable->getNonPeerComponents());
             $viewed_grade = $this->core->getQueries()->getNumUsersWhoViewedGradeBySections($gradeable, $sections, $null_section_cookie);
@@ -3547,66 +3548,4 @@ class ElectronicGraderController extends AbstractController {
         $this->core->getOutput()->renderJsonSuccess("Marks removed successfully!");
         return true;
     }
-
-
-
-    function fetchSlocFile($graded_gradeable, int $display_version)
-    {
-        // Get the AutoGradedVersionInstance object
-        $display_version_instance = $graded_gradeable->getAutoGradedGradeable()->getAutoGradedVersionInstance($display_version);
-
-        // Check if the instance exists
-        if ($display_version_instance === null) {
-            throw new Exception("AutoGradedVersionInstance not found for display version: $display_version");
-        }
-
-        // Attempt to get results files using the existing function
-        try {
-            $results_files = $display_version_instance->getResultsFiles();
-        } catch (Exception $e) {
-            throw new Exception("Failed to retrieve results files: {$e->getMessage()}");
-        }
-
-        // Look for the target file path within the results files
-        $target_file = 'details/test02/.slocdata/TMP_WORK/all-physical.sloc';
-        $file_path = null;
-
-        if (isset($results_files[$target_file])) {
-            $file_path_info = $results_files[$target_file];  // Store the array
-            $file_path = $file_path_info['path'];           // Extract the path string
-            // Proceed with file_get_contents($file_path)
-            var_dump($file_path);
-        }
-
-
-        // Handle the scenario where the file is not found
-        if (!$file_path) {
-            throw new Exception("File not found: $target_file");
-        }
-
-        // Read the file contents
-        try {
-            $file_contents = file_get_contents($file_path);
-        } catch (Exception $e) {
-            throw new Exception("Error reading file: $target_file - " . $e->getMessage());
-        }
-
-        // Process the file contents (same logic as before)
-        $lines = explode("\n", $file_contents);
-        $total_line_count = 0;
-
-        foreach ($lines as $line) {
-            $parts = explode("\t", $line);
-            if (count($parts) === 2) {
-                $language = trim($parts[0]);
-                $line_count = intval($parts[1]);
-                $total_line_count += $line_count;
-            }
-        }
-
-        // Return both the file contents and the total line count
-        return [$file_contents, $total_line_count];
-    }
-
-
 }
