@@ -481,7 +481,7 @@ class AutoGradedVersion extends AbstractModel {
      * @return int number of total lines of code using sloccount
      */
     public function getSloc() {
-        $results_files = $this->results_files;
+        $results_files = $this->getResultsFiles();
         // Look for the target file path within the results files
         $target_file = 'details/test02/.slocdata/TMP_WORK/all-physical.sloc';
         $file_path = null;
@@ -489,20 +489,13 @@ class AutoGradedVersion extends AbstractModel {
         if (isset($results_files[$target_file])) {
             $file_path_info = $results_files[$target_file];  // Store the array
             $file_path = $file_path_info['path'];           // Extract the path string
-            // Proceed with file_get_contents($file_path)
-            var_dump($file_path);
-        }
-        // Handle the scenario where the file is not found
-        if (!$file_path) {
-            throw new Exception("File not found: $target_file");
+            // Proceed with file_get_contents($file_path) var_dump($file_path);
+        } else {
+            return 0;
         }
 
-        // Read the file contents
-        try {
-            $file_contents = file_get_contents($file_path);
-        } catch (Exception $e) {
-            throw new Exception("Error reading file: $target_file - " . $e->getMessage());
-        }
+        $file_contents = file_get_contents($file_path);
+
 
         // Process the file contents (same logic as before)
         $lines = explode("\n", $file_contents);

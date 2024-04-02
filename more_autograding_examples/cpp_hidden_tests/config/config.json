@@ -21,7 +21,7 @@
     },
 
     "resource_limits" : {
-      "RLIMIT_NPROC" : 10
+      "RLIMIT_NPROC" : 200
     },
     "display_testcase_runtime_memory" : true,
 

@@ -3,6 +3,10 @@
     <script>
         var sloc = [{{ histograms['sloc'] | join(',') }}];
         var scores = [{{ histograms['bAuto'] | join(',') }}];
+        console.log(sloc);
+        console.log(scores);
+
+
 
         var trace = {
             x: sloc,
