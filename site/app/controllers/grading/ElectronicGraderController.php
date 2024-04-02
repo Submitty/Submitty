@@ -83,6 +83,8 @@ class ElectronicGraderController extends AbstractController {
                     if ($ov->getGradeable()->getAutogradingConfig()->getTotalNonExtraCredit() != 0) {
                         if ($ov->getAutoGradedGradeable()->getTotalPoints() >= 0 || $ov->getAutoGradedGradeable()->getTotalPoints() < 0) {
                             $histogram["bAuto"] = array_merge($histogram["bAuto"], [$ov->getAutoGradedGradeable()->getTotalPoints()]);
+                            // add line count for autograded gradeables
+                            $histogram["sloc"] = array_merge($histogram["sloc"], [$ov->getAutoGradedGradeable()->getSloc()]);
                         }
                         else {
                             $histogram["cancelledSub"] += 1;
@@ -126,7 +128,6 @@ class ElectronicGraderController extends AbstractController {
                         if ($ov->getTaGradedGradeable() != null && $ov->getTaGradedGradeable()->getGradedGradeable()->getSubmitter()->getRegistrationSection() != null) {
                             $histogram["bTA"] = array_merge($histogram["bTA"], [$ov->getTaGradedGradeable()->getTotalScore() + $ov->getAutoGradedGradeable()->getTotalPoints()]);
                             $histogram["tTA"] = array_merge($histogram["tTA"], [$ov->getGradeable()->getManualGradingPoints()]);
-                            $histogram["sloc"] = array_merge($histogram["sloc"], [$ov->getTaGradedGradeable()->getSloc()]);
                         }
                     }
                 }

@@ -478,10 +478,45 @@ class AutoGradedVersion extends AbstractModel {
 
     /**
      * Gets the number of physical source lines of code
-     * @return int
+     * @return int number of total lines of code using sloccount
      */
     public function getSloc() {
-        return 123;
+        $results_files = $this->results_files;
+        // Look for the target file path within the results files
+        $target_file = 'details/test02/.slocdata/TMP_WORK/all-physical.sloc';
+        $file_path = null;
+
+        if (isset($results_files[$target_file])) {
+            $file_path_info = $results_files[$target_file];  // Store the array
+            $file_path = $file_path_info['path'];           // Extract the path string
+            // Proceed with file_get_contents($file_path)
+            var_dump($file_path);
+        }
+        // Handle the scenario where the file is not found
+        if (!$file_path) {
+            throw new Exception("File not found: $target_file");
+        }
+
+        // Read the file contents
+        try {
+            $file_contents = file_get_contents($file_path);
+        } catch (Exception $e) {
+            throw new Exception("Error reading file: $target_file - " . $e->getMessage());
+        }
+
+        // Process the file contents (same logic as before)
+        $lines = explode("\n", $file_contents);
+        $total_line_count = 0;
+
+        foreach ($lines as $line) {
+            $parts = explode("\t", $line);
+            if (count($parts) === 2) {
+                $line_count = intval($parts[1]);
+                $total_line_count += $line_count;
+            }
+        }
+
+        return $total_line_count;
     }
 
     /**

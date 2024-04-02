@@ -1,6 +1,5 @@
-<div id="slocc" class="page-content">
-    <div id="myDiv4"><!-- Plotly chart will be drawn inside this DIV --></div>
-
+<div id="sloc" class="page-content">
+    <div id="myDiv4"></div>
     <script>
         var sloc = [{{ histograms['sloc'] | join(',') }}];
         var scores = [{{ histograms['bAuto'] | join(',') }}];
@@ -27,23 +26,22 @@
         var data = [trace];
 
         var layout = {
-            title: 'Slocc vs. score',
+            title: 'Sloc vs. Autograding scores',
             barmode: 'overlay',
             xaxis: {
-                title: 'Slocc'
+                title: 'Physical source lines of code'
             },
             yaxis:{
-                title: 'Scores'
+                title: 'Autograding scores'
             },
             font: {
                 family: '"Source Sans Pro", sans-serif',
             }
 
         };
-
-        Plotly.newPlot('myDiv4', data, layout, {displayModeBar: false,displaylogo: false});
+        Plotly.newPlot('myDiv4', data, layout, { displayModeBar: false,displaylogo: false });
     </script>
-     <br/>
+    <br/>
     <br/>
     Double-click on the chart to zoom out
     <hr>

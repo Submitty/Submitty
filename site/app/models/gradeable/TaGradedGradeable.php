@@ -596,8 +596,4 @@ class TaGradedGradeable extends AbstractModel {
     public function setGradedComponentContainers(array $graded_component_containers) {
         throw new \BadFunctionCallException('Cannot set graded component containers');
     }
-
-    public function getSloc() {
-        return 123;
-    }
 }

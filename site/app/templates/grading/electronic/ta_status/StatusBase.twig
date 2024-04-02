@@ -179,7 +179,7 @@
             <a class="nav-bar key_to_click" id="page_1_nav" onclick="onChangeNavTab(1);">Manual Grading Component Averages</a>
             <a class="nav-bar key_to_click" id="page_2_nav" onclick="onChangeNavTab(2);">Autograding Histogram</a>
             <a class="nav-bar key_to_click" id="page_3_nav" onclick="onChangeNavTab(3);">Overall Histogram</a>
-            <a class="nav-bar key_to_click" id="page_4_nav" onclick="onChangeNavTab(4);">Slocc vs grade</a>
+            <a class="nav-bar key_to_click" id="page_4_nav" onclick="onChangeNavTab(4);">Sloc vs Autograding</a>
         </div>
         <br/>
         <div class="modal-body">
@@ -192,14 +192,11 @@
 
             {% if autograded_average != null and autograded_average.getCount() != 0 and histograms['bAuto']|length != 0 %}
                 <div class="page-content" id="page_2_content">{{ include('grading/electronic/ta_status/StatusAutogradingHistogram.twig')  }}</div>
+                <div class="page-content" id="page_4_content">{{ include('grading/electronic/ta_status/StatusSloc.twig')  }}</div>
             {% endif %}
 
             {% if (overall_average != null and overall_average.getCount() != 0) or component_averages|length != 0 %}
                 <div class="page-content" id="page_3_content">{{ include('grading/electronic/ta_status/StatusOverallHistogram.twig')  }}</div>
-            {% endif %}
-
-            {% if (overall_average != null and overall_average.getCount() != 0) or component_averages|length != 0 %}
-                <div class="page-content" id="page_4_content">{{ include('grading/electronic/ta_status/StatusSlocc.twig')  }}</div>
             {% endif %}
         </div>
         <br/>
@@ -292,19 +289,17 @@
     let adminGradeableNavTab = 0;
 
     function onChangeNavTab(tab) {
-    /*
-        if (tab > 3 || tab < 0) {
+        if (tab > 4 || tab < 0) {
             alert('Invalid Navigation');
             return;
         }
-    */
         // change the url so if the user refreshes the page, they stay on the same tab
         window.history.replaceState("", "", buildCourseUrl(['gradeable', '{{ gradeable_id }}', 'grading', 'status']) + `?nav_tab=${tab}`);
         adminGradeableNavTab = tab;
 
         //$('.page-content').hide();
         
-        for (var i =0 ; i<4 ;i++) {
+        for (var i =0 ; i<5 ;i++) {
             $('#page_' + i + '_nav').removeClass('active-btn');
             $('#page_' + i + '_content').hide();
         }
