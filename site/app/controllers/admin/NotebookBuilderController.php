@@ -41,7 +41,6 @@ class NotebookBuilderController extends AbstractController {
             $this->core->addErrorMessage('Invalid Gradeable ID.');
             return new RedirectResponse($this->core->buildUrl());
         }
-
         $failure_url = $this->core->buildCourseUrl(['gradeable', $gradeable->getId(), 'update']) . '?nav_tab=1';
         // If mode is new then generate a new config directory and place a default config.json inside of it
         if ($mode === 'new') {
@@ -75,6 +74,11 @@ class NotebookBuilderController extends AbstractController {
 
             // Redirect to same page but with mode now set to 'edit'
             return new RedirectResponse($this->core->buildCourseUrl(['notebook_builder', $gradeable->getId(), 'edit']));
+        }
+
+        if (!$gradeable->isUsingUploadedConfig()) {
+            $this->core->addErrorMessage("Notebook builder may only edit uploaded configurations for the current course and semester.");
+            return new RedirectResponse($failure_url);
         }
 
         $json_path = $gradeable->getAutogradingConfigPath() . '/config.json';
