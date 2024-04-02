@@ -28,7 +28,7 @@ class Poll {
 
     //Duration should be stored as an interval
     //Tried doctrine annotation to be DATEINTERVAL and interval type in database but there wasnt a proper conversion.
-    //Duration is the total seconds the poll should remain open after opening the poll. 
+    //Duration is the total seconds the poll should remain open after opening the poll.
     #[ORM\Column(type: Types::INTEGER)]
     protected int $duration;
 
