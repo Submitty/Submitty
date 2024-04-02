@@ -129,7 +129,7 @@ describe('Test cases revolving around user profile page', () => {
             cy.get('[data-testid="time-zone-dropdown"]').parent().find('.select2-selection').click();
             cy.get('.select2-search__field').type('Nonexistent Zone');
             cy.get('.select2-results').should('contain.text', 'No results found');
-        });  
+        });
 
     });
 
