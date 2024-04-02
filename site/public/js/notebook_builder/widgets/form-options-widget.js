@@ -207,6 +207,23 @@ class FormOptionsWidget extends Widget {
     }
 
     /**
+     * Validates to see if all markdown widgets contain any text. If validation error occurs, then error messages are added to the status div.
+     * An error indicator will be added later.
+     *
+     * @returns {Boolean}
+     */
+
+    validateMarkdownWidgets() {
+        const bad_markdown_conents = getBadMarkdownContents();
+        if (!(bad_markdown_conents === 0)) {
+            this.appendStatusMessage('A markdown input was found to be blank. Please ensure all markdown inputs are not blank.');
+        }
+        this.colorFailedInputs([''], '.markdown-textarea');
+
+        return bad_markdown_conents.length === 0;
+    }
+
+    /**
      * Color the selected input boxes red to indicate they failed validation.
      *
      * @param {String[]} failed_values The set of values that were found to have failed validation.

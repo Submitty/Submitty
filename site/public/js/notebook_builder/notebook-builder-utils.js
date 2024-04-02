@@ -94,3 +94,22 @@ function getBadImageInputs() {
 
     return Array.from(bad_image_inputs);
 }
+
+/**
+ * Determines if all markdown widgets contain any text inside the input.
+ *
+ * @returns {Array[]} Returns an array containing bad markdown contents.
+*/
+
+function getBadMarkdownContents() {
+    const bad_markdown_conents = new Set();
+    const markdown_contents = document.querySelectorAll('.markdown-textarea');
+
+    markdown_contents.forEach(markdown_content => {
+        if (markdown_content.value === '') {
+            bad_markdown_conents.add(markdown_content);
+        }
+    });
+
+    return Array.from(bad_markdown_conents);
+}
