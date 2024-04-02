@@ -335,11 +335,10 @@ class Core {
         if ($this->config !== null && $this->config->isDebug() && $this->hasDBPerformanceWarning()) {
             $this->logPerformanceWarning();
         }
-
-        if ($this->course_db !== null) {
+        if ($this->course_db !== null && $this->course_db->isConnected()) {
             $this->course_db->disconnect();
         }
-        if ($this->submitty_db !== null) {
+        if ($this->submitty_db !== null && $this->submitty_db->isConnected()) {
             $this->submitty_db->disconnect();
         }
     }
