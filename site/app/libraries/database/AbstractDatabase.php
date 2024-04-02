@@ -114,7 +114,9 @@ abstract class AbstractDatabase {
         if ($this->transaction) {
             $this->rollback();
         }
-        $this->conn->close();
+        if($this->conn) {
+            $this->conn->close();
+        }
         $this->conn = null;
     }
 
