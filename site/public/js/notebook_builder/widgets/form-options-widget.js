@@ -1,4 +1,4 @@
-/* global Widget, notebook_builder, csrfToken, builder_data, buildCourseUrl, uploadFiles, getBadItemNames, getBadImageInputs */
+/* global Widget, notebook_builder, csrfToken, builder_data, buildCourseUrl, uploadFiles, getBadItemNames, getBadImageInputs, getBadMarkdownContents */
 /* exported FormOptionsWidget */
 
 class FormOptionsWidget extends Widget {

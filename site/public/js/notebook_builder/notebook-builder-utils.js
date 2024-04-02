@@ -1,5 +1,5 @@
 /* global buildCourseUrl, csrfToken, displayErrorMessage */
-/* exported uploadFiles, getBadItemNames, getBadImageInputs */
+/* exported uploadFiles, getBadItemNames, getBadImageInputs, getBadMarkdownContents */
 
 /**
  * Asynchronous upload of configuration dependency file.
