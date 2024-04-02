@@ -25,7 +25,7 @@ for json_data in json_output:
 
     today = datetime.datetime.now()
     two_weeks = timedelta(weeks=2)
-    one_minute = timedelta(minutes=2)
+    one_minute = timedelta(minutes=1)
     twelve_days = timedelta(days=12)
     two_days = timedelta(days=2)
     et_today = today.astimezone(eastern)
@@ -46,5 +46,5 @@ for json_data in json_output:
 
     if tdiff > one_minute and not already_abandoned and not already_warned and not approved:
         subprocess.run(['gh', 'pr', 'comment', num, '--body', inactive_comment])
-    if ((tdiff > one_minute and not already_abandoned) or (tdiff > two_days and already_warned)) and not approved:
+    if ((tdiff > one_minute and not already_abandoned) or (tdiff > one_minute and already_warned)) and not approved:
         subprocess.run(['gh', 'pr', 'edit', num, '--add-label', 'Abandoned PR - Needs New Owner'])
