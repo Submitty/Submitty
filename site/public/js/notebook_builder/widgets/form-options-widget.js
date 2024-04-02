@@ -218,7 +218,7 @@ class FormOptionsWidget extends Widget {
 
     validateMarkdownWidgets() {
         const bad_markdown_conents = getBadMarkdownContents();
-        if (!(bad_markdown_conents === 0)) {
+        if (!(bad_markdown_conents.length === 0)) {
             this.appendStatusMessage('A markdown input was found to be blank. Please ensure all markdown inputs are not blank.');
         }
         this.colorFailedInputs([''], '.markdown-textarea');
