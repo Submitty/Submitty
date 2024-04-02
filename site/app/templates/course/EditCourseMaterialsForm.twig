@@ -79,6 +79,12 @@
         </label>
         <input type="hidden" name="csrf_token" value="{{ csrf_token }}" />
     </div>
+    <hr>
+    {% include "course/CourseMaterialsCalendarMenu.twig" with {
+        "div_class": 'edit-cm-file-cal-menu',
+        "gradeables" : gradeables,
+        "current_gradeable" : current_gradeable,
+    } only %}
     <script>
         function submitEdit(){ // Submit button
                 let sectionsEdit = [];

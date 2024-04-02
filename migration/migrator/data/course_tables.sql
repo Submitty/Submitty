@@ -714,7 +714,9 @@ CREATE TABLE public.course_materials (
     hidden_from_students boolean,
     priority double precision NOT NULL,
     url text,
-    title character varying(255)
+    title character varying(255),
+    on_calendar boolean DEFAULT false,
+    gradeable character varying(255) DEFAULT 'none'::character varying
 );
 
 
