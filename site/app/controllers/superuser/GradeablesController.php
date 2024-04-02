@@ -43,20 +43,4 @@ class GradeablesController extends AbstractController {
             new WebResponse(GradeablesView::class, 'showGradeablesList', $gradeable_list)
         );
     }
-
-    /**
-     * @Route("/courses/{_semester}/{_course}/gradeable/{gradeable_id}/release_notifications", methods={"POST"})
-     * @AccessControl(level="SUPERUSER")
-     */
-    public function sendNotifications(): JsonResponse {
-        $gradeable = $this->core->getQueries()->getGradeableConfig($_POST['reference_id']);
-
-        if ($gradeable === null) {
-            return JsonResponse::getErrorResponse("Invalid gradeable id");
-        }
-        else {
-            $gradeable->releaseGradeableNotification();
-            return JsonResponse::getSuccessResponse(['message' => "Successfully sent notifications for" . $gradeable]);
-        }
-    }
 }

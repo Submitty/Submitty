@@ -95,8 +95,7 @@ def notifyPendingGradeables(db):
 
     for gradeable in pending_gradeable_notifications:
         payload = {'reference_id' : gradeable['reference_id']}
-        print(payload)
-        response = requests.post("http://localhost:1511/courses/{}/{}/gradeable/{}/release_notifications".format(gradeable['term'].strip(), gradeable['course'].strip(), gradeable['reference_id'].strip()), data = payload)
+        response = requests.post("http://localhost:1511/courses/{}/{}/gradeable/{}/quick_link?action=release_gradeable_notification".format(gradeable['term'].strip(), gradeable['course'].strip(), gradeable['reference_id'].strip()), data = payload)
 
         if response.status_code == 200:
             notified_gradeables.append(gradeable['id'])

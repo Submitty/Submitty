@@ -5994,6 +5994,7 @@ AND gc_id IN (
                                 eg_depends_on_points = null WHERE eg_depends_on=?", [$g_id]);
         $this->course_db->query("DELETE FROM gradeable_anon WHERE g_id=?", [$g_id]);
         $this->course_db->query("DELETE FROM gradeable WHERE g_id=?", [$g_id]);
+        $this->submitty_db->query("DELETE FROM scheduled_notifications WHERE reference_id = ? AND type = 'gradeable';", [$g_id]);
     }
 
     /**
@@ -6756,6 +6757,7 @@ AND gc_id IN (
             VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
             $params
         );
+        $this->submitty_db->query("INSERT INTO scheduled_notifications (reference_id, type, term, course, date) VALUES (?, ?, ?, ?, ?);", [$gradeable->getId(), 'gradeable', $this->core->getConfig()->getTerm(), $this->core->getConfig()->getCourse(), $gradeable->getGradeReleasedDate() !== null ? $gradeable->getGradeReleasedDate() : new \DateTime(DateUtils::MAX_TIME)]);
         if ($gradeable->getType() === GradeableType::ELECTRONIC_FILE) {
             $params = [
                 $gradeable->getId(),
@@ -6922,6 +6924,7 @@ AND gc_id IN (
                 WHERE g_id=?",
                 $params
             );
+            $this->submitty_db->query("UPDATE scheduled_notifications SET date = ?, notification_state = ? WHERE reference_id = ? AND type = 'gradeable';", [$gradeable->getGradeReleasedDate(), $gradeable->getGradeReleasedDate() <= DateUtils::getDateTimeNow(), $gradeable->getId()]);
             if ($gradeable->getType() === GradeableType::ELECTRONIC_FILE) {
                 $params = [
                     DateUtils::dateTimeToString($gradeable->getSubmissionOpenDate()),

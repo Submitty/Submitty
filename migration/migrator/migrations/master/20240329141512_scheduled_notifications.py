@@ -20,8 +20,9 @@ def connect_course_db(db, course):
     return course_db
 
 def seed(db):
-    """Insert current gradeables into scheduled_notifications with a release date in the future for term s24"""
-    courses =  db.execute("SELECT term, course FROM courses WHERE term = 's24';")
+    """Insert current gradeables into scheduled_notifications with a release date in the current term"""
+    term = db.execute("SELECT term_id FROM terms WHERE start_date < NOW() AND end_date > NOW();")
+    courses =  db.execute("SELECT term, course FROM courses WHERE term = '{}';".format(term.first()[0]))
     gradeable_notifications_values = []
 
     for term, course in courses:

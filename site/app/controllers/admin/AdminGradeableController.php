@@ -20,6 +20,7 @@ use Symfony\Component\Routing\Annotation\Route;
  * Class AdminGradeableController
  * @package app\controllers\admin
  * @AccessControl(role="INSTRUCTOR")
+ * @AccessControl(role="submitty_daemon")
  */
 class AdminGradeableController extends AbstractController {
     /**
@@ -1541,7 +1542,6 @@ class AdminGradeableController extends AbstractController {
             if ($gradeable->hasReleaseDate()) {
                 if ($dates['grade_released_date'] > $now) {
                     $this->shiftDates($dates, 'grade_released_date', $now);
-                    $gradeable->releaseGradeableNotification();
                     $message .= "Released grades for ";
                     $success = true;
                 }
@@ -1604,6 +1604,10 @@ class AdminGradeableController extends AbstractController {
                 $message .= "Can't close submissions for ";
                 $success = false;
             }
+        }
+        elseif ($action === "release_gradeable_notification") {
+            $gradeable->releaseGradeableNotification();
+            return JsonResponse::getSuccessResponse();
         }
         $gradeable->setDates($dates);
         $this->core->getQueries()->updateGradeable($gradeable);
