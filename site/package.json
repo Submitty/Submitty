@@ -39,7 +39,7 @@
     "js-cookie": "3.0.5",
     "jspdf": "^2.5.1",
     "luxon": "3.4.4",
-    "mermaid": "10.8.0",
+    "mermaid": "10.9.0",
     "pdfjs-dist": "2.10.377",
     "plotly.js-dist": "2.25.2",
     "select2": "4.1.0-rc.0",
