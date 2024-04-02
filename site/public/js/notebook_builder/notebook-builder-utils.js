@@ -103,7 +103,7 @@ function getBadImageInputs() {
 
 function getBadMarkdownContents() {
     const bad_markdown_conents = new Set();
-    const markdown_contents = document.querySelectorAll('.markdown-textarea');
+    const markdown_contents = document.querySelectorAll('.markdown-input');
 
     markdown_contents.forEach(markdown_content => {
         if (markdown_content.value === '') {
