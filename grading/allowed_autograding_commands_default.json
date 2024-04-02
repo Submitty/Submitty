@@ -44,12 +44,13 @@
     "echo":                    { "path": "/bin/echo" },
     "iverilog":                { "path": "/usr/bin/iverilog" },
     "vvp":                     { "path": "/usr/bin/vvp" },
+    "sloccount":               { "path": "/usr/local/bingit /sloccount" },
 
     // Submitty Analysis Tools
     "submitty_count":          { "path": "__INSTALL__FILLIN__SUBMITTY_INSTALL_DIR__/SubmittyAnalysisTools/count"},
     "commonast": 	       { "path": "__INSTALL__FILLIN__SUBMITTY_INSTALL_DIR__/SubmittyAnalysisTools/commonast.py" },
     "comment_count":           { "path": "__INSTALL__FILLIN__SUBMITTY_INSTALL_DIR__/bin/comment_count.py" },
-    "sloccount":           { "path": "__INSTALL__FILLIN__SUBMITTY_INSTALL_DIR__/GIT_CHECKOUT/Submitty/site/sloccount-2.26/sloccount" },
+
 
     // Submitty Analysis ToolsTS
     "submitty_count_ts":       { "path": "__INSTALL__FILLIN__SUBMITTY_INSTALL_DIR__/SubmittyAnalysisToolsTS/build/submitty_count_ts"},
