@@ -1710,11 +1710,54 @@ class AdminGradeableController extends AbstractController {
      */
     public function loadConfigEditor() {
         $gradeable = $this->tryGetGradeable($_POST['gradeable_id']);
+
+        if ($gradeable === false) {
+            $this->core->renderJsonFail("Invalid gradeable");
+            return;
+        }
+
         $config_path = $gradeable->getAutogradingConfigPath();
         $config_content = file_get_contents(FileUtils::joinPaths($config_path, "config.json"));
         $output = [];
         $output["config_path"] = $config_path;
         $output["config_content"] = $config_content;
-        return $this->core->getOutput()->renderJsonSuccess($output);
+        $this->core->getOutput()->renderJsonSuccess($output);
+    }
+
+    /**
+     * Saves config info from a gradeable edit
+     * @Route("/courses/{_semester}/{_course}/gradeable/edit/save", methods={"POST"})
+     */
+    public function saveConfigEdit() {
+        $gradeable = $this->tryGetGradeable($_POST['gradeable_id']);
+        if ($gradeable === false) {
+            $this->core->renderJsonFail("Invalid gradeable");
+            return;
+        }
+
+        $config_path = $gradeable->getAutogradingConfigPath();
+        
+        if (!$gradeable->isUsingUploadedConfig()) {
+            $this->core->renderJsonFail("You may only save changes to uploaded configurations for the current course and semester.");
+            return;
+        }
+
+        if (!$this->core->getAccess()->canI("grading.electronic.save_component",  ["gradeable" => $gradeable])) {
+            $this->core->renderJsonFail("Insufficient permissions to save changes.");
+            return;
+        }
+
+        $write_success = FileUtils::writeFile(FileUtils::joinPaths($config_path, "config.json"), $_POST['write_content']);
+        if (!$write_success) {
+            $this->core->renderJsonFail("An error occurred writing the file.");
+            return;
+        }
+        
+        $result = $this->enqueueBuild($gradeable);
+        if ($result !== null) {
+            $this->core->renderJsonFail("An error occurred queuing the gradeable for rebuild.");
+        }
+
+        $this->core->getOutput()->renderJsonSuccess();
     }
 }

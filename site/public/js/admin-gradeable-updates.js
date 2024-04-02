@@ -888,5 +888,32 @@ function cancelGradeableConfigEdit() {
 }
 
 function saveGradeableConfigEdit(g_id) {
-    
+    let content = $('textarea#gradeable-config-edit').text();
+    $.ajax({
+        url: buildCourseUrl(['gradeable','edit','save']),
+        type: 'POST',
+        data: {
+            gradeable_id: g_id,
+            write_content: content,
+            csrf_token: csrfToken
+        },
+        success: function(data) {
+            try {
+                let json = JSON.parse(data);
+                if (json['status'] === 'fail') {
+                    displayErrorMessage(json['message']);
+                    return;
+                }
+                cancelGradeableConfigEdit();
+                ajaxCheckBuildStatus();
+            }
+            catch (err) {
+                displayErrorMessage('Error parsing data. Please try again');
+                return;
+            }
+        },
+        error: function() {
+            window.alert('Something went wrong while saving the gradeable config. Please try again.');
+        }
+    });
 }
