@@ -250,8 +250,8 @@
     --default-black: #ffffff;
 
     /* poll histogram colors */
-    --histogram-default: #B2CCFF;
-    --histogram-correct: #00EB46;
+    --histogram-default: var(--standard-aqua);
+    --histogram-correct: var(--standard-vibrant-green);
 }
 
 [data-theme="dark"] {
@@ -358,8 +358,8 @@
     --code-box-font-color-dark-gray: #abb2bf;
 
     /* poll histogram colors */
-    --histogram-default: #B2CCFF;
-    --histogram-correct: #00EB46;
+    --histogram-default: var(--standard-aqua);
+    --histogram-correct: var(--standard-vibrant-green);
 }
 
 /* Dark Theme Versions of Colors */
