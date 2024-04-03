@@ -1,4 +1,4 @@
-# Devlopment Requirements
+# Development Requirements
 
 # Linters
 pylint==3.0.2
@@ -7,3 +7,6 @@ flake8==6.1.0
 
 # Code Formatter
 black==23.11.0
+
+ruamel.yaml
+psutil
