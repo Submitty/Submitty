@@ -446,6 +446,7 @@ class ForumThreadView extends AbstractView {
         }
         $first_post = $this->core->getQueries()->getFirstPostForThread($thread_id);
         $first_post_id = $first_post["id"];
+        $first_post_author_id = $first_post['author_user_id'];
 
         $first = true;
 
@@ -516,7 +517,7 @@ class ForumThreadView extends AbstractView {
                         $post["author_user_group"] = $author_user_groups_map[$post["author_user_id"]];
 
                         $post_data[] = $this->createPost(
-                            $first_post,
+                            $first_post_author_id,
                             $activeThread,
                             $post,
                             $unviewed_posts,
@@ -547,7 +548,7 @@ class ForumThreadView extends AbstractView {
                 $post["author_user_group"] = $author_user_groups_map[$post["author_user_id"]];
 
                 $post_data[] = $this->createPost(
-                    $first_post,
+                    $first_post_author_id,
                     $activeThread,
                     $post,
                     $unviewed_posts,
@@ -1062,7 +1063,7 @@ class ForumThreadView extends AbstractView {
      * } $author_info
      * @param string[] $post_attachments
      */
-    public function createPost($first_post, array $thread, array $post, $unviewed_posts, $first, $reply_level, $display_option, $includeReply, array $author_info, array $post_attachments, bool $has_history, bool $is_merged_thread, bool $render = false, bool $thread_announced = false, bool $isCurrentFavorite = false) {
+    public function createPost(string $first_post_author_id, array $thread, array $post, $unviewed_posts, $first, $reply_level, $display_option, $includeReply, array $author_info, array $post_attachments, bool $has_history, bool $is_merged_thread, bool $render = false, bool $thread_announced = false, bool $isCurrentFavorite = false) {
 
         $current_user = $this->core->getUser()->getId();
         $thread_id = $thread["id"];
@@ -1139,11 +1140,6 @@ class ForumThreadView extends AbstractView {
         $userGroup = $this->core->getUser()->getGroup();
 
         $post_user_info = [];
-
-        $is_OP = false;
-        if ($post["author_user_id"] == $first_post['author_user_id']) {
-            $is_OP = true;
-        }
 
         $merged_thread = $is_merged_thread && $userAccessFullGrading;
         if ($userAccessFullGrading) {
@@ -1225,7 +1221,7 @@ class ForumThreadView extends AbstractView {
             ];
         }
 
-        $post_user_info["is_OP"] = $is_OP;
+        $post_user_info["is_OP"] = ($post["author_user_id"] == $first_post_author_id);
 
         $post_attachment = ForumUtils::getForumAttachments(
             $post_id,
