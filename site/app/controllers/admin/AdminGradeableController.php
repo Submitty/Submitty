@@ -87,7 +87,7 @@ class AdminGradeableController extends AbstractController {
             }
             if ($config->isDiscussionBased()) {
                 $return_json['discussion_based'] = true;
-                $return_json['discussion_tread_id'] = $config->getDiscussionThreadId();
+                $return_json['discussion_thread_id'] = $config->getDiscussionThreadId();
             }
             if ($config->isVcs()) {
                 $vcs_values = [];
@@ -213,7 +213,7 @@ class AdminGradeableController extends AbstractController {
         }
         if (array_key_exists('discussion_thread_id', $_POST)) {
             $values['discussion_based'] = $_POST['discussion_based'];
-            $values['discussion_tread_id'] = $_POST['discussion_thread_id'];
+            $values['discussion_thread_id'] = $_POST['discussion_thread_id'];
         }
         if (array_key_exists('ta_grading', $_POST)) {
             $values['ta_grading'] = $_POST['ta_grading'];
