@@ -196,7 +196,7 @@ class ForumThreadView extends AbstractView {
         }
 
         $currentThreadArr = array_filter($threadsHead, function ($ar) use ($currentThread) {
-            return ($ar['id'] === $currentThread);
+            return ($ar['id'] == $currentThread);
         });
 
         $categories = $this->core->getQueries()->getCategories();
