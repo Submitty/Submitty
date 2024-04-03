@@ -2607,7 +2607,6 @@ function newPostWhileUserOnline(){
         }
     });
     captureChange.observe(post_list, { childList: true});
-    alert('loaded');
 }
 setTimeout(function(){
     newPostWhileUserOnline();
