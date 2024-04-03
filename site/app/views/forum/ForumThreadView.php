@@ -196,7 +196,7 @@ class ForumThreadView extends AbstractView {
         }
 
         $currentThreadArr = array_filter($threadsHead, function ($ar) use ($currentThread) {
-            return ($ar['id'] == $currentThread);
+            return ($ar['id'] === $currentThread);
         });
 
         $categories = $this->core->getQueries()->getCategories();
@@ -1221,7 +1221,7 @@ class ForumThreadView extends AbstractView {
             ];
         }
 
-        $post_user_info["is_OP"] = ($post["author_user_id"] == $first_post_author_id);
+        $post_user_info["is_OP"] = ($post["author_user_id"] === $first_post_author_id);
 
         $post_attachment = ForumUtils::getForumAttachments(
             $post_id,
