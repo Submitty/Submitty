@@ -496,7 +496,7 @@ parameters:
 			path: app/controllers/MiscController.php
 
 		-
-			message: "#^Method app\\\\controllers\\\\MiscController\\:\\:downloadSubmissionZip\\(\\) has parameter \\$user_id with no type specified\\.$#"
+			message: "#^Method app\\\\controllers\\\\MiscController\\:\\:downloadSubmissionZip\\(\\) has parameter \\$submitter_id with no type specified\\.$#"
 			count: 1
 			path: app/controllers/MiscController.php
 
