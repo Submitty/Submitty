@@ -34,13 +34,13 @@ describe('Test cases revolving around simple grading lab', () => {
             // Check Settings Tab
             cy.get('#settings-btn').click({ force: true });
             cy.get('#settings-popup').should('have.attr', 'style', '');
-            cy.get('#settings-popup').find('.popup-box').find('div.popup-window').find('.form-title').find('button.btn.btn-default.close-button.key_to_click').click({ multiple: true });
+            cy.get('#settings-popup').find('[data-testid="close-button"]').click({ multiple: true });
             cy.get('#settings-popup').should('have.attr', 'style', 'display: none;');
 
             // Check Statistics Tab
             cy.get('#simple-stats-btn').click({ force: true });
             cy.get('#simple-stats-popup').should('have.attr', 'style', 'display: block;');
-            cy.get('#simple-stats-popup').find('.popup-box').find('div.popup-window').find('.form-title').find('button.btn.btn-default.close-button.key_to_click').click({ multiple: true });
+            cy.get('#simple-stats-popup').find('[data-testid="close-button"]').click({ multiple: true });
             cy.get('#settings-popup').should('have.attr', 'style', 'display: none;');
 
         });
@@ -85,13 +85,13 @@ describe('Test cases revolving around simple grading test', () => {
             // Check Settings Tab
             cy.get('#settings-btn').click({ force: true });
             cy.get('#settings-popup').should('have.attr', 'style', '');
-            cy.get('#settings-popup').find('.popup-box').find('div.popup-window').find('.form-title').find('button.btn.btn-default.close-button.key_to_click').click({ multiple: true });
+            cy.get('#settings-popup').find('[data-testid="close-button"]').click({ multiple: true });
             cy.get('#settings-popup').should('have.attr', 'style', 'display: none;');
 
             // Check Statistics Tab
             cy.get('#simple-stats-btn').click({ force: true });
             cy.get('#simple-stats-popup').should('have.attr', 'style', 'display: block;');
-            cy.get('#simple-stats-popup').find('.popup-box').find('div.popup-window').find('.form-title').find('button.btn.btn-default.close-button.key_to_click').click({ multiple: true });
+            cy.get('#simple-stats-popup').find('[data-testid="close-button"]').click({ multiple: true });
             cy.get('#settings-popup').should('have.attr', 'style', 'display: none;');
         });
 

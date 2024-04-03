@@ -1,0 +1,20 @@
+{% extends 'generic/Popup.twig' %}
+{% block popup_id %}gradeable-json-form{% endblock %}
+{% block title %}Upload JSON for Gradeable{% endblock %}
+{% block body %}
+    <p>
+       Submit a JSON file.
+    </p>
+    <p>
+        For more formatting information, see
+        <a target="_blank" href="https://submitty.org/instructor/assignment_preparation/upload_gradeable">
+            Create Gradeable by Uploading JSON <i style="font-style:normal;" class="fa-question-circle"></i>
+        </a>
+    </p>
+    <br/>
+    <input type="hidden" name="csrf_token" value="{{ csrf_token }}" />
+    <input type="file" data-testid="upload" name="upload" id="upload" accept=".json" aria-label="Choose File">
+{% endblock %}
+{% block buttons %}
+    <input class="btn btn-primary" onclick="ajaxUploadGradeable()" data-testid="submit"  type="button" value="Submit" />
+{% endblock %}

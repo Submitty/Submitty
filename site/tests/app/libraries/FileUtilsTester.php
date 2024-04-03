@@ -83,6 +83,7 @@ class FileUtilsTester extends \PHPUnit\Framework\TestCase {
 
     /**
      * @runInSeparateProcess
+     * @preserveGlobalState disabled
      */
     public function testRecursiveRmDirFileFail() {
         FileUtils::createDir($this->path);
@@ -97,6 +98,7 @@ class FileUtilsTester extends \PHPUnit\Framework\TestCase {
 
     /**
      * @runInSeparateProcess
+     * @preserveGlobalState disabled
      */
     public function testRecursiveRmDirRecurseFail() {
         FileUtils::createDir($this->path);
@@ -446,6 +448,7 @@ STRING;
 
     /**
      * @runInSeparateProcess
+     * @preserveGlobalState disabled
      */
     public function testRecursiveChmodFail() {
         $this->getFunctionMock("app\\libraries", "chmod")
