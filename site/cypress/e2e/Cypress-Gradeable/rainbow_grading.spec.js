@@ -36,7 +36,6 @@ describe('Test that for sample- rainbow grades', () => {
         cy.visit(['sample', 'reports']);
         cy.login('instructor');
         cy.get('#grade-summaries-button').click();
-        cy.wait(50);
 
         // Customize Rainbow grades
         cy.visit(['sample', 'reports', 'rainbow_grades_customization']);
@@ -48,7 +47,6 @@ describe('Test that for sample- rainbow grades', () => {
         });
         cy.get('#display_grade_summary').should('be.checked');
         cy.get('#save_status_button').click();
-        cy.wait(50);
 
         cy.get('#display_grade_summary').should('be.checked');
         cy.get('#display_grade_details').click();
@@ -57,8 +55,7 @@ describe('Test that for sample- rainbow grades', () => {
         cy.get('#display_final_grade').click();
         cy.get('#display_benchmarks_average').click();
         cy.get('#save_status_button').click();
-        cy.wait(20000);
-        cy.get('#save_status').should('contain', 'Rainbow grades successfully generated!', { timeout: 50000 });
+        cy.get('#save_status', { timeout: 500000 }).should('contain', 'Rainbow grades successfully generated!');
 
         // Check for instructor
         cy.visit(['sample', 'grades']);
