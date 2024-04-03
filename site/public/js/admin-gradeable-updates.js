@@ -853,6 +853,7 @@ function loadGradeableEditor(g_id, file_path) {
         type: 'POST',
         data: {
             gradeable_id: g_id,
+            file_path: file_path,
             csrf_token: csrfToken,
         },
         success: function(data) {
@@ -866,10 +867,11 @@ function loadGradeableEditor(g_id, file_path) {
 
                 $('#gradeable-config-edit-bar').show();
                 editbox = $('textarea#gradeable-config-edit');
-                editbox.text(json.config_content);
+                editbox.val(json.config_content);
                 editbox.css({
                     'min-width': '-webkit-fill-available',
                 });
+                editbox.data("file-path", file_path);
                 
             }
             catch (err) {
@@ -888,12 +890,13 @@ function cancelGradeableConfigEdit() {
 }
 
 function saveGradeableConfigEdit(g_id) {
-    let content = $('textarea#gradeable-config-edit').text();
+    let content = $('textarea#gradeable-config-edit').val();
     $.ajax({
         url: buildCourseUrl(['gradeable','edit','save']),
         type: 'POST',
         data: {
             gradeable_id: g_id,
+            file_path: $('textarea#gradeable-config-edit').data("file-path"),
             write_content: content,
             csrf_token: csrfToken
         },

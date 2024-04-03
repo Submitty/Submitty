@@ -1718,10 +1718,14 @@ class AdminGradeableController extends AbstractController {
             return;
         }
 
-        $config_path = $gradeable->getAutogradingConfigPath();
-        $config_content = file_get_contents(FileUtils::joinPaths($config_path, "config.json"));
+        $file_path = $_POST['file_path'];
+        if(!FileUtils::validPath($file_path) || !str_starts_with($file_path, $gradeable->getAutogradingConfigPath())) {
+            $this->core->renderJsonFail("Invalid file path");
+            return;
+        }
+
+        $config_content = file_get_contents(FileUtils::joinPaths($file_path));
         $output = [];
-        $output["config_path"] = $config_path;
         $output["config_content"] = $config_content;
         $this->core->getOutput()->renderJsonSuccess($output);
     }
@@ -1736,8 +1740,6 @@ class AdminGradeableController extends AbstractController {
             $this->core->renderJsonFail("Invalid gradeable");
             return;
         }
-
-        $config_path = $gradeable->getAutogradingConfigPath();
         
         if (!$gradeable->isUsingUploadedConfig()) {
             $this->core->renderJsonFail("You may only save changes to uploaded configurations for the current course and semester.");
@@ -1749,7 +1751,13 @@ class AdminGradeableController extends AbstractController {
             return;
         }
 
-        $write_success = FileUtils::writeFile(FileUtils::joinPaths($config_path, "config.json"), $_POST['write_content']);
+        $file_path = $_POST['file_path'];
+        if(!FileUtils::validPath($file_path) || !str_starts_with($file_path, $gradeable->getAutogradingConfigPath())) {
+            $this->core->renderJsonFail("Invalid file path");
+            return;
+        }
+
+        $write_success = FileUtils::writeFile($file_path, $_POST['write_content']);
         if (!$write_success) {
             $this->core->renderJsonFail("An error occurred writing the file.");
             return;
