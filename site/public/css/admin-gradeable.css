@@ -318,6 +318,16 @@ body::-webkit-scrollbar-track {
     font-style: italic;
 }
 
+.raw-config-info {
+    margin-top: 30px;
+    margin-bottom: 30px;
+}
+
+.config-folder-view {
+    list-style-type: none; 
+    display: none;
+}
+
 #gradeable-config-edit {
     min-height: 500px;
 }

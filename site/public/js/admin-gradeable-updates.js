@@ -847,7 +847,7 @@ function hideBuildLog() {
     $('#close-build-log').hide();
 }
 
-function loadGradeableEditor(g_id) {
+function loadGradeableEditor(g_id, file_path) {
     $.ajax({
         url: buildCourseUrl(['gradeable','edit','load']),
         type: 'POST',

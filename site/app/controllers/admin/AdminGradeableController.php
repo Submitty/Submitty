@@ -309,6 +309,7 @@ class AdminGradeableController extends AbstractController {
                 }
             }
         }
+        $config_files = FileUtils::getAllFiles($gradeable->getAutogradingConfigPath());
         // $this->inherit_teams_list = $this->core->getQueries()->getAllElectronicGradeablesWithBaseTeams();
         $template_list = $this->core->getQueries()->getAllGradeablesIdsAndTitles();
 
@@ -389,6 +390,7 @@ class AdminGradeableController extends AbstractController {
             'allow_custom_marks' => $gradeable->getAllowCustomMarks(),
             'has_custom_marks' => $hasCustomMarks,
             'is_bulk_upload' => $gradeable->isBulkUpload(),
+            'config_files' => $config_files,
         ]);
         $this->core->getOutput()->renderOutput(['grading', 'ElectronicGrader'], 'popupStudents');
         $this->core->getOutput()->renderOutput(['grading', 'ElectronicGrader'], 'popupMarkConflicts');
