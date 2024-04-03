@@ -1710,22 +1710,22 @@ class AdminGradeableController extends AbstractController {
      * Loads config info for a gradeable to allow editing
      * @Route("/courses/{_semester}/{_course}/gradeable/edit/load", methods={"POST"})
      */
-    public function loadConfigEditor() {
+    public function loadConfigEditor(): void {
         $gradeable = $this->tryGetGradeable($_POST['gradeable_id']);
 
         if ($gradeable === false) {
-            $this->core->renderJsonFail("Invalid gradeable");
+            $this->core->getOutput()->renderJsonFail("Invalid gradeable");
             return;
         }
 
-        if (!$this->core->getAccess()->canI("grading.electronic.load_config",  ["gradeable" => $gradeable])) {
-            $this->core->renderJsonFail("Insufficient permissions to load content.");
+        if (!$this->core->getAccess()->canI("grading.electronic.load_config", ["gradeable" => $gradeable])) {
+            $this->core->getOutput()->renderJsonFail("Insufficient permissions to load content.");
             return;
         }
 
         $file_path = $_POST['file_path'];
-        if(!FileUtils::validPath($file_path) || !str_starts_with($file_path, $gradeable->getAutogradingConfigPath())) {
-            $this->core->renderJsonFail("Invalid file path");
+        if (!FileUtils::validPath($file_path) || !str_starts_with($file_path, $gradeable->getAutogradingConfigPath())) {
+            $this->core->getOutput()->renderJsonFail("Invalid file path");
             return;
         }
 
@@ -1739,38 +1739,38 @@ class AdminGradeableController extends AbstractController {
      * Saves config info from a gradeable edit
      * @Route("/courses/{_semester}/{_course}/gradeable/edit/save", methods={"POST"})
      */
-    public function saveConfigEdit() {
+    public function saveConfigEdit(): void {
         $gradeable = $this->tryGetGradeable($_POST['gradeable_id']);
         if ($gradeable === false) {
-            $this->core->renderJsonFail("Invalid gradeable");
-            return;
-        }
-        
-        if (!$gradeable->isUsingUploadedConfig()) {
-            $this->core->renderJsonFail("You may only save changes to uploaded configurations for the current course and semester.");
+            $this->core->getOutput()->renderJsonFail("Invalid gradeable");
             return;
         }
 
-        if (!$this->core->getAccess()->canI("grading.electronic.load_config",  ["gradeable" => $gradeable])) {
-            $this->core->renderJsonFail("Insufficient permissions to save changes.");
+        if (!$gradeable->isUsingUploadedConfig()) {
+            $this->core->getOutput()->renderJsonFail("You may only save changes to uploaded configurations for the current course and semester.");
+            return;
+        }
+
+        if (!$this->core->getAccess()->canI("grading.electronic.load_config", ["gradeable" => $gradeable])) {
+            $this->core->getOutput()->renderJsonFail("Insufficient permissions to save changes.");
             return;
         }
 
         $file_path = $_POST['file_path'];
-        if(!FileUtils::validPath($file_path) || !str_starts_with($file_path, $gradeable->getAutogradingConfigPath())) {
-            $this->core->renderJsonFail("Invalid file path");
+        if (!FileUtils::validPath($file_path) || !str_starts_with($file_path, $gradeable->getAutogradingConfigPath())) {
+            $this->core->getOutput()->renderJsonFail("Invalid file path");
             return;
         }
 
         $write_success = FileUtils::writeFile($file_path, $_POST['write_content']);
         if (!$write_success) {
-            $this->core->renderJsonFail("An error occurred writing the file.");
+            $this->core->getOutput()->renderJsonFail("An error occurred writing the file.");
             return;
         }
-        
+
         $result = $this->enqueueBuild($gradeable);
         if ($result !== null) {
-            $this->core->renderJsonFail("An error occurred queuing the gradeable for rebuild.");
+            $this->core->getOutput()->renderJsonFail("An error occurred queuing the gradeable for rebuild.");
         }
 
         $this->core->getOutput()->renderJsonSuccess();

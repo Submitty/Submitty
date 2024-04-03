@@ -2,7 +2,8 @@
           is_electronic, onHasReleaseDate, reloadInstructorEditRubric, getItempoolOptions,
           isItempoolAvailable, getGradeableId, closeAllComponents, onHasDueDate, setPdfPageAssignment,
           PDF_PAGE_INSTRUCTOR, PDF_PAGE_STUDENT, PDF_PAGE_NONE */
-/* exported showBuildLog, ajaxRebuildGradeableButton, onPrecisionChange, onItemPoolOptionChange, updatePdfPageSettings */
+/* exported showBuildLog, ajaxRebuildGradeableButton, onPrecisionChange, onItemPoolOptionChange, updatePdfPageSettings,
+          loadGradeableEditor, saveGradeableConfigEdit*/
 
 let updateInProgressCount = 0;
 const errors = {};
@@ -849,7 +850,7 @@ function hideBuildLog() {
 
 function loadGradeableEditor(g_id, file_path) {
     $.ajax({
-        url: buildCourseUrl(['gradeable','edit','load']),
+        url: buildCourseUrl(['gradeable', 'edit', 'load']),
         type: 'POST',
         data: {
             gradeable_id: g_id,
@@ -866,13 +867,12 @@ function loadGradeableEditor(g_id, file_path) {
                 json = json['data'];
 
                 $('#gradeable-config-edit-bar').show();
-                editbox = $('textarea#gradeable-config-edit');
+                const editbox = $('textarea#gradeable-config-edit');
                 editbox.val(json.config_content);
                 editbox.css({
                     'min-width': '-webkit-fill-available',
                 });
-                editbox.data("file-path", file_path);
-                
+                editbox.data('file-path', file_path);
             }
             catch (err) {
                 displayErrorMessage('Error parsing data. Please try again');
@@ -886,23 +886,23 @@ function loadGradeableEditor(g_id, file_path) {
 }
 
 function cancelGradeableConfigEdit() {
-    $("#gradeable-config-edit-bar").hide();
+    $('#gradeable-config-edit-bar').hide();
 }
 
 function saveGradeableConfigEdit(g_id) {
-    let content = $('textarea#gradeable-config-edit').val();
+    const content = $('textarea#gradeable-config-edit').val();
     $.ajax({
-        url: buildCourseUrl(['gradeable','edit','save']),
+        url: buildCourseUrl(['gradeable', 'edit', 'save']),
         type: 'POST',
         data: {
             gradeable_id: g_id,
-            file_path: $('textarea#gradeable-config-edit').data("file-path"),
+            file_path: $('textarea#gradeable-config-edit').data('file-path'),
             write_content: content,
-            csrf_token: csrfToken
+            csrf_token: csrfToken,
         },
         success: function(data) {
             try {
-                let json = JSON.parse(data);
+                const json = JSON.parse(data);
                 if (json['status'] === 'fail') {
                     displayErrorMessage(json['message']);
                     return;
@@ -917,6 +917,6 @@ function saveGradeableConfigEdit(g_id) {
         },
         error: function() {
             window.alert('Something went wrong while saving the gradeable config. Please try again.');
-        }
+        },
     });
 }
