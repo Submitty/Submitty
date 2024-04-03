@@ -16,7 +16,7 @@
                     {% if action == 'new' %}
                     <button class="btn btn-primary" type="button" data-testid="upload-gradeable-btn" id="upload-gradeable-btn" style="float:right;" onclick="javascript:newGradeableJsonForm()" >Upload Gradeable JSON</button>
                     {% elseif action == 'edit' %}
-                    <button class="btn btn-primary" type="button" data-testid="download-gradeable-btn" id="download-gradeable-btn" style="float:right;" onclick="downloadGradeableJson('{{ gradeable.getId() }}')" >Download Gradeable JSON</button>
+                    <a class="btn btn-primary" data-testid="download-gradeable-btn" id="download-gradeable-btn" style="float:right;" href="{{ download_url }}" download="{{ gradeable.getId() }}.json" >Download Gradeable JSON</a>
                     {% endif %}
                 </h1>
 			</div>

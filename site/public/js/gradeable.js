@@ -373,30 +373,6 @@ function ajaxUploadGradeable() {
     return true;
 }
 
-// Download the JSON file to recreate the gradeable.
-function downloadGradeableJson($gradeable_id) {
-    const url = buildCourseUrl([$gradeable_id, 'download']);
-    fetch(url, {
-        method: 'GET',
-    }).then(
-        response => {
-            return response.json();
-        }).then(json => {
-        if (json['status'] === 'success') {
-            const temporaryElement = document.createElement('a');
-            const file = new Blob([JSON.stringify(json['data'], null, 4)]);
-            temporaryElement.href = URL.createObjectURL(file);
-            temporaryElement.download = `${json['data']['id']}.json`;
-            temporaryElement.click();
-        }
-        else {
-            displayErrorMessage(json['message']);
-            return false;
-        }
-    });
-    return true;
-}
-
 /**
  * Asynchronously renders the overall component using passed data
  * @param {string} comment

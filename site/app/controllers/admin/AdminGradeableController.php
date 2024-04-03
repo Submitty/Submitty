@@ -55,9 +55,8 @@ class AdminGradeableController extends AbstractController {
      * @Route("/courses/{_semester}/{_course}/{gradeable_id}/download", methods={"GET"})
      * @AccessControl(role="INSTRUCTOR")
      * @param string $gradeable_id
-     * @return JsonResponse
      */
-    public function downloadJson(string $gradeable_id): JsonResponse {
+    public function downloadJson(string $gradeable_id) {
         $config = $this->core->getQueries()->getGradeableConfig($gradeable_id);
         $return_json = [
             'title' => $config->getTitle(),
@@ -137,7 +136,9 @@ class AdminGradeableController extends AbstractController {
             $return_json['dates'] = $dates;
         }
 
-        return JsonResponse::getSuccessResponse($return_json);
+        $this->core->getOutput()->useHeader(false);
+        $this->core->getOutput()->useFooter(false);
+        echo json_encode($return_json, JSON_PRETTY_PRINT);
     }
 
     /**
@@ -451,6 +452,7 @@ class AdminGradeableController extends AbstractController {
             'vcs_base_url' => $vcs_base_url,
             'vcs_partial_path' => $gradeable->getVcsPartialPath(),
             'vcs_subdirectory' => $gradeable->getVcsSubdirectory(),
+            'download_url' => $this->core->buildCourseUrl([$gradeable->getId(), 'download']),
             'using_subdirectory' => $gradeable->isUsingSubdirectory(),
             'is_pdf_page' => $gradeable->isPdfUpload(),
             'is_pdf_page_student' => $gradeable->isStudentPdfUpload(),
