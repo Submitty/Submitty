@@ -852,6 +852,11 @@ parameters:
 			path: app/controllers/admin/AdminGradeableController.php
 
 		-
+			message: "#^Method app\\\\controllers\\\\admin\\\\AdminGradeableController\\:\\:downloadJson\\(\\) has no return type specified\\.$#"
+			count: 1
+			path: app/controllers/admin/AdminGradeableController.php
+
+		-
 			message: "#^Method app\\\\controllers\\\\admin\\\\AdminGradeableController\\:\\:createGradeable\\(\\) has parameter \\$details with no type specified\\.$#"
 			count: 1
 			path: app/controllers/admin/AdminGradeableController.php

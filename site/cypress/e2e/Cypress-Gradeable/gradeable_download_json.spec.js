@@ -82,7 +82,7 @@ describe('Tests cases revolving around gradeable access and submition', () => {
                     Authorization: key,
                 },
             }).then((response) => {
-                const test_json = JSON.parse(response.body)['data'];
+                const test_json = JSON.parse(response.body);
                 console.log(test_json);
                 expect(test_json.title).to.eql('Bulk Upload Scanned Exam');
                 expect(test_json.type).to.eql('Electronic File');
