@@ -2591,3 +2591,24 @@ function pinAnnouncement(thread_id, type, csrf_token) {
         });
     }
 }
+
+function newPostWhileUserOnline(){
+    const post_list = document.getElementById('posts_list');
+
+    const captureChange = new MutationObserver((mutationList , observer)=>{
+        for (let mutation of mutationList){
+            if (mutation.type === 'childList'){
+                mutation.addedNodes.forEach(node => {
+                    if (node.nodeType === Node.ELEMENT_NODE) {
+                        node.classList.add('new_post')
+                    }
+                });
+            }
+        }
+    });
+    captureChange.observe(post_list, { childList: true});
+    alert('loaded');
+}
+setTimeout(function(){
+    newPostWhileUserOnline();
+}, 4000);
