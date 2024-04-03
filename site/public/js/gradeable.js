@@ -1,7 +1,7 @@
 /* exported loadTemplates renderGradingGradeable renderPeerGradeable renderGradingComponent
    renderGradingComponentHeader renderInstructorEditGradeable renderConflictMarks renderRubricTotalBox
-   renderTotalScoreBox renderOverallComment renderEditComponentHeader renderEditComponent */
-/* global Twig showVerifyComponent buildCourseUrl getItempoolOptions isItempoolAvailable */
+   renderTotalScoreBox renderOverallComment renderEditComponentHeader renderEditComponent ajaxUploadGradeable */
+/* global Twig showVerifyComponent buildCourseUrl getItempoolOptions isItempoolAvailable csrfToken */
 
 /**
  * The number of decimal places to show to the user
@@ -324,6 +324,52 @@ function renderEditComponentHeader(component, showMarkList) {
             'decimal_precision': DECIMAL_PRECISION,
         }));
     });
+}
+
+
+// Uploads a gradeable via JSON POST request
+function ajaxUploadGradeable() {
+    const files = document.getElementById('upload').files;
+    if (files.length <= 0) {
+        return false;
+    }
+    const extension = files[0].name.split('.').pop();
+    if (extension !== 'json') {
+        return false;
+    }
+    const fr = new FileReader();
+
+    fr.onload = (file) => {
+        try {
+            const result = JSON.parse(file.target.result);
+            result['csrf_token'] = csrfToken;
+            const url = buildCourseUrl(['upload']);
+            $.ajax({
+                url: url,
+                headers: {
+                    Accept: 'application/json',
+                },
+                dataType: 'json',
+                data: result,
+                method: 'POST',
+            }).always((data) => {
+                data = JSON.parse(JSON.stringify(data));
+                if (data['status'] === 'success') {
+                    window.location = buildCourseUrl(['gradeable', data['data'], 'update']);
+                }
+                else {
+                    alert(data['message']);
+                    return false;
+                }
+            });
+        }
+        catch (error) {
+            alert(error);
+            return false;
+        }
+    };
+    fr.readAsText(files.item(0));
+    return true;
 }
 
 /**
