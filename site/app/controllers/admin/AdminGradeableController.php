@@ -1718,6 +1718,11 @@ class AdminGradeableController extends AbstractController {
             return;
         }
 
+        if (!$this->core->getAccess()->canI("grading.electronic.load_config",  ["gradeable" => $gradeable])) {
+            $this->core->renderJsonFail("Insufficient permissions to load content.");
+            return;
+        }
+
         $file_path = $_POST['file_path'];
         if(!FileUtils::validPath($file_path) || !str_starts_with($file_path, $gradeable->getAutogradingConfigPath())) {
             $this->core->renderJsonFail("Invalid file path");
@@ -1746,7 +1751,7 @@ class AdminGradeableController extends AbstractController {
             return;
         }
 
-        if (!$this->core->getAccess()->canI("grading.electronic.save_component",  ["gradeable" => $gradeable])) {
+        if (!$this->core->getAccess()->canI("grading.electronic.load_config",  ["gradeable" => $gradeable])) {
             $this->core->renderJsonFail("Insufficient permissions to save changes.");
             return;
         }
