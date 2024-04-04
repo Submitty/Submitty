@@ -113,7 +113,8 @@ class WebRouter {
      * @param Core $core
      * @return MultiResponse|mixed should be of type Response only in the future
      */
-    public static function getApiResponse(Request $request, Core $core) {
+    public static function getStudentApiResponse(Request $request, Core $core): mixed
+    {
         try {
             $router = new self($request, $core);
             $router->loadCourse();
@@ -127,7 +128,73 @@ class WebRouter {
             ) {
                 return new MultiResponse(JsonResponse::getFailResponse("Unauthenticated access. Please log in."));
             }
+            if ($request->get('user_id') !== $core->getUser()->getId()) {
+                return JsonResponse::getFailResponse('User ID of request and variable do not match');
+            }
 
+            /** @noinspection PhpUnhandledExceptionInspection */
+            if (!$router->accessCheck()) {
+                return MultiResponse::JsonOnlyResponse(
+                    JsonResponse::getFailResponse("You don't have access to this endpoint.")
+                );
+            }
+
+            $enabled = $router->getEnabled();
+            if ($enabled !== null && !$router->checkEnabled($enabled)) {
+                return JsonResponse::getFailResponse("The {$enabled->getFeature()} feature is not enabled.");
+            }
+
+            if (!$router->checkFeatureFlag()) {
+                return MultiResponse::JsonOnlyResponse(
+                    JsonResponse::getFailResponse('Feature is not yet available.')
+                );
+            }
+
+            $check_post_max_size = $router->checkPostMaxSize($request);
+            if ($check_post_max_size instanceof MultiResponse) {
+                return $check_post_max_size;
+            }
+        }
+        catch (ResourceNotFoundException $e) {
+            return new MultiResponse(JsonResponse::getFailResponse("Endpoint not found."));
+        }
+        catch (MethodNotAllowedException $e) {
+            return new MultiResponse(JsonResponse::getFailResponse("Method not allowed."));
+        }
+        catch (\Exception $e) {
+            return new MultiResponse(JsonResponse::getErrorResponse($e->getMessage()));
+        }
+
+        $core->getOutput()->disableRender();
+        $core->disableRedirects();
+        return $router->run();
+    }
+
+    /**
+     * @param Request $request
+     * @param Core $core
+     * @return MultiResponse|mixed should be of type Response only in the future
+     */
+    public static function getApiResponse(Request $request, Core $core) {
+        if (strpos($request->getRequestUri(), 'student_api')) {
+            return WebRouter::getStudentApiResponse($request, $core);
+        }
+        try {
+            $router = new self($request, $core);
+            $router->loadCourse();
+
+            $logged_in = $core->isApiLoggedIn($request);
+
+            // prevent user that is not logged in from going anywhere except AuthenticationController
+            if (
+                !$logged_in
+                && !str_ends_with($router->parameters['_controller'], 'AuthenticationController')
+            ) {
+                return new MultiResponse(JsonResponse::getFailResponse("Unauthenticated access. Please log in."));
+            }
+            if (strpos($request->getRequestUri(), 'student_api')) {
+                return WebRouter::getStudentApiResponse($request, $router, $core);
+            }
             if ($logged_in && !$core->getUser()->accessFaculty()) {
                 return new MultiResponse(JsonResponse::getFailResponse("API is open to faculty only."));
             }
@@ -162,7 +229,7 @@ class WebRouter {
             return new MultiResponse(JsonResponse::getFailResponse("Method not allowed."));
         }
         catch (\Exception $e) {
-            return new MultiResponse(JsonResponse::getErrorResponse($e->getMessage()));
+            return new MultiResponse(JsonResponse::getErrorResponse($e->getTraceAsString()));
         }
 
         $core->getOutput()->disableRender();

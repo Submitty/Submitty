@@ -1020,14 +1020,23 @@ class SubmissionController extends AbstractController {
     }
 
     /**
+     * @Route("/api/student_api/{_semester}/{_course}/gradeable/{gradeable_id}/score", methods={"GET"})
+     */
+    public function testStudentApi($gradeable_id){
+        $gradeable = $this->core->getQueries()->getGradeableConfig($gradeable_id);
+        $graded_gradeable = $this->core->getQueries()->getGradedGradeable($gradeable, $_GET['user_id'], $gradeable->isTeamAssignment());
+
+        return JsonResponse::getSuccessResponse($graded_gradeable->getAutoGradingScore());
+    }
+    
+     /**
      * Function for uploading a submission to the server. This should be called via AJAX, saving the result
      * to the json_buffer of the Output object, returning a true or false on whether or not it succeeded or not.
-     *
+     * @Route("/api/student_api/{_semester}/{_course}/gradeable/{gradeable_id}/upload", methods={"POST"})
      * @Route("/courses/{_semester}/{_course}/gradeable/{gradeable_id}/upload", methods={"POST"})
      * @return array
      */
     public function ajaxUploadSubmission($gradeable_id, $merge = null, $clobber = null) {
-
         // check for whether the item should be merged with previous submission,
         // and whether or not file clobbering should be done.
         $merge_previous = isset($merge) && $merge === 'true';
