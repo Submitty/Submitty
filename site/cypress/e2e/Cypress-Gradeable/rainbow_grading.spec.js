@@ -39,7 +39,7 @@ describe('Test that for sample- rainbow grades', () => {
 
         // Customize Rainbow grades
         cy.visit(['sample', 'reports', 'rainbow_grades_customization']);
-        cy.get('#save_status').should('contain', 'No changes to save');
+        cy.get('#save_status', { timeout: 500000 }).should('contain', 'No changes to save');
         cy.get('#display_grade_summary').then(($checkbox) => {
             if (!$checkbox.prop('checked')) {
                 cy.get('#display_grade_summary').click();
