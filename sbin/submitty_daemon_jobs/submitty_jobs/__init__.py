@@ -21,7 +21,7 @@ try:
     INSTALL_DIR = JSON_FILE['submitty_install_dir']
     DATA_DIR = JSON_FILE['submitty_data_dir']
     QUEUE_DIR = Path(DATA_DIR, 'daemon_job_queue')
-except FileNotFoundError as err:
+except Exception as err:
     if os.environ.get('PYTEST') is None:
         raise err
 
@@ -31,6 +31,6 @@ try:
         JSON_FILE = json.load(open_file)
     DAEMON_USER = JSON_FILE['daemon_user']
     VERIFIED_ADMIN_USER = JSON_FILE['verified_submitty_admin_user']
-except FileNotFoundError as err:
+except Exception as err:
     if os.environ.get('PYTEST') is None:
         raise err

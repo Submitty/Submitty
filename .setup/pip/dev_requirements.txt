@@ -7,6 +7,3 @@ flake8==6.1.0
 
 # Code Formatter
 black==23.11.0
-
-ruamel.yaml
-psutil

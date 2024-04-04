@@ -18,7 +18,6 @@ SAMPLE_SUBMISSIONS = os.path.join(SUBMITTY_INSTALL_DIR, "more_autograding_exampl
 
 @prebuild
 def initialize(test):
-    # pylint: disable=duplicate-code
     try:
         os.mkdir(os.path.join(test.testcase_path, "assignment_config"))
     except OSError:
@@ -37,7 +36,6 @@ def cleanup(test):
 
 @testcase
 def schema_validation(test):
-    # pylint: disable=duplicate-code
     cleanup(test)
     config_path = os.path.join(test.testcase_path, 'assignment_config', 'complete_config.json')
     try:

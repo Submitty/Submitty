@@ -4,5 +4,4 @@ __all__ = []
 for loader, module_name, is_pkg in pkgutil.iter_modules(__path__):
     __all__.append(module_name)
     module = loader.find_module(module_name).load_module(module_name)
-    # pylint: disable=exec-used
-    exec(f"{module_name} = module")
+    exec("%s = module" % module_name)

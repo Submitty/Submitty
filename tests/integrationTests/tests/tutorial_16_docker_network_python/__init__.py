@@ -16,7 +16,6 @@ SAMPLE_SUBMISSIONS = SUBMITTY_TUTORIAL_DIR + "/examples/16_docker_network_python
 
 @prebuild
 def initialize(test):
-    # pylint: disable=duplicate-code
     try:
         os.mkdir(os.path.join(test.testcase_path, "assignment_config"))
     except OSError:
