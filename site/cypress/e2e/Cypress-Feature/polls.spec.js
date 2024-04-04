@@ -287,8 +287,8 @@ describe('Test cases revolving around polls functionality', () => {
         cy.get('button[type=submit]').click();
         cy.contains('Poll Cypress Test').siblings(':nth-child(6)').children().should('not.be.checked');
         cy.contains('Poll Cypress Test').siblings(':nth-child(6)').children().check();
-        
-        
+
+
 
         // log into student and verify we can answer the poll
         cy.logout();
@@ -335,10 +335,10 @@ describe('Test cases revolving around polls functionality', () => {
         cy.get('#enable-timer').should('be.checked');
         cy.get('#timer-inputs').should('be.visible');
         cy.get('#poll-hours').invoke('val').should('eq', '3');
-        cy.get('#poll-minutes').invoke('val').should('eq','0');
-        cy.get('#poll-seconds').invoke('val').should('eq','0');
+        cy.get('#poll-minutes').invoke('val').should('eq', '0');
+        cy.get('#poll-seconds').invoke('val').should('eq', '0');
         cy.get('#poll-hours').clear();
-        cy.get("#poll-seconds").clear().type("10");
+        cy.get("#poll-seconds").clear().type('10');
         cy.get('#poll-date').invoke('val').should('eq', '1970-01-01');
         // release histogram/answer's default values should be "never"
         cy.get('#student-histogram-release-setting').invoke('val').should('eq', 'never');
