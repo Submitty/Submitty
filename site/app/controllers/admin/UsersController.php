@@ -290,7 +290,7 @@ class UsersController extends AbstractController {
         ];
         if (FileUtils::arrayKeysExist($values, array_keys($_POST))) {
             $user = $this->core->getQueries()->getUserById($_POST['user_id']);
-            if ($user !== null) {
+            if ($user !== null){
                 return JsonResponse::getErrorResponse('User already exists!');
             }
             $user_data = array(
