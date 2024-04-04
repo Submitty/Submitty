@@ -1022,9 +1022,16 @@ class SubmissionController extends AbstractController {
     /**
      * @Route("/api/student_api/{_semester}/{_course}/gradeable/{gradeable_id}/score", methods={"GET"})
      */
-    public function testStudentApi($gradeable_id){
+    public function ajaxGetGradeableScore($gradeable_id){
         $gradeable = $this->core->getQueries()->getGradeableConfig($gradeable_id);
+        if ($gradeable === null) {
+            return JsonResponse::getFailResponse('Gradeable does not exist');
+        }
         $graded_gradeable = $this->core->getQueries()->getGradedGradeable($gradeable, $_GET['user_id'], $gradeable->isTeamAssignment());
+
+        if ($graded_gradeable === null) {
+            return JsonResponse::getFailResponse("Gradeable hasn't been graded yet.");
+        }
 
         return JsonResponse::getSuccessResponse($graded_gradeable->getAutoGradingScore());
     }
