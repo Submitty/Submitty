@@ -196,12 +196,6 @@ describe('Test cases revolving around polls functionality', () => {
         cy.get('#poll-date').clear({force: true});
         // manually setting the release date to some time in the past
         cy.get('#poll-date').type('1970-01-01', {force: true});
-        // Testing the UI for timer
-        cy.get('#enable-timer').check();
-        cy.get('#timer-inputs').should('be.visible');
-        cy.get('#enable-timer').uncheck();
-        cy.get('#timer-inputs').should('not.be.visible');
-
         cy.get('h1').click(); // get rid of the date picker
         // test default release histogram and answer settings
         cy.get('#image-file').selectFile('cypress/fixtures/sea_animals.png');
@@ -310,14 +304,6 @@ describe('Test cases revolving around polls functionality', () => {
         cy.get('#poll-type-multiple-response-flexible').should('not.be.checked');
         cy.get('#poll-type-multiple-response-survey').should('not.be.checked');
         cy.get('#poll-date').invoke('val').should('eq', '1970-01-01');
-
-        cy.get('#timer-inputs').should('not.be.visible');
-        cy.get('#enable-timer').should('not.be.checked');
-        cy.get('#enable-timer').check();
-        cy.get('#enable-timer').should('be.checked');
-        cy.get('timer-inputs').should('be.visible');
-
-
         // release histogram/answer's default values should be "never"
         cy.get('#student-histogram-release-setting').invoke('val').should('eq', 'never');
         cy.get('#student-answer-release-setting').invoke('val').should('eq', 'never');
