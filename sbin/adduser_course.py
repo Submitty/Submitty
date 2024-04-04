@@ -1,8 +1,9 @@
 #!/usr/bin/env python3
 
 """
-Use this script to add a user to courses. You can choose the group
-that the user belongs to.
+Use this script to add a user to courses. By default, the user
+will be an instructor but you can specify a different group
+with an argument.
 """
 
 import argparse
