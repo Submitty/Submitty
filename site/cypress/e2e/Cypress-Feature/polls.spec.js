@@ -338,7 +338,7 @@ describe('Test cases revolving around polls functionality', () => {
         cy.get('#poll-minutes').invoke('val').should('eq', '0');
         cy.get('#poll-seconds').invoke('val').should('eq', '0');
         cy.get('#poll-hours').clear();
-        cy.get("#poll-seconds").clear().type('10');
+        cy.get('#poll-seconds').clear().type('10');
         cy.get('#poll-date').invoke('val').should('eq', '1970-01-01');
         // release histogram/answer's default values should be "never"
         cy.get('#student-histogram-release-setting').invoke('val').should('eq', 'never');
