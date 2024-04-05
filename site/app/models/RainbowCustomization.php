@@ -404,19 +404,19 @@ class RainbowCustomization extends AbstractModel {
      * @return array<int, array<string, bool|string>> multidimensional array of display option data
      */
     public function getDisplay(): array {
-        $allowedDisplayOptions = RainbowCustomizationJSON::allowed_display;
-        $displayOptions = [];
+        $allowed_display_options = RainbowCustomizationJSON::allowed_display;
+        $display_options = [];
 
-        $usedDisplayOptions = $this->RCJSON ? $this->RCJSON->getDisplay() : [];
+        $used_display_options = $this->RCJSON ? $this->RCJSON->getDisplay() : [];
 
-        foreach ($allowedDisplayOptions as $optionId) {
-            $displayOptions[] = [
+        foreach ($allowed_display_options as $optionId) {
+            $display_options[] = [
                 'id' => $optionId,
-                'isUsed' => in_array($optionId, $usedDisplayOptions)
+                'isUsed' => in_array($optionId, $used_display_options)
             ];
         }
 
-        return $displayOptions;
+        return $display_options;
     }
 
     /**
