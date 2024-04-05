@@ -13,7 +13,6 @@ const reply4 = 'Cypress Reply 4 Cypress';
 const merged1 = 'Merged Thread Title: '.concat(title3, '\n\n', content3);
 const merged2 = 'Merged Thread Title: '.concat(title2, '\n\n', content2);
 const attachment1 = 'sea_animals.png';
-const upload1 = '#input-file2';
 
 const createThread = (title, content, category) => {
     // Add more to tests for uploading attachments
