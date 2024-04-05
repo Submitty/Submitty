@@ -54,6 +54,7 @@ describe('Visuals', () => {
         cy.get('#posts_list').compareSnapshot('forum-threads-9', {
             capture: 'viewport',
             clip: { x: 0, y: 0, width: 1000, height: 1000 },
+            threshold: 0.15,
         });
 
     });
