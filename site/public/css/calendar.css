@@ -56,14 +56,6 @@ a.cal-btn:focus {
     text-align: left;
 }
 
-#calendar-year-type-edit{
-    float: right;
-}
-
-#calendar-month-type-edit{
-    float: right;
-}
-
 #calendar-item-type-edit{
     float: right;
 }
