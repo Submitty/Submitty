@@ -291,6 +291,12 @@ class PollTester extends BaseUnitTest {
         $this->assertEquals($this->my_polls[1]->getEndTime()->format("Y-m-d"), "9999-02-01");
         $this->my_polls[2]->setEnded();
         $this->assertEquals($this->my_polls[2]->getEndTime()->format("Y-m-d"), date("Y-m-d"));
+        $this->my_polls[0]->setEndTime(new DateTime('2025-10-03'));
+        $this->assertEquals($this->my_polls[0]->getEndTime()->format("Y-m-d"), "2025-10-03");
+        $this->my_polls[1]->setEndTime(new DateTime('9000-9-11'));
+        $this->assertEquals($this->my_polls[1]->getEndTime()->format("Y-m-d"), "9000-9-11");
+        $this->my_polls[2]->setEndTime(new DateTime('1900-12-05'));
+        $this->assertEquals($this->my_polls[2]->getEndTime()->format("Y-m-d"), "1900-12-05");
     }
 
     public function testHistogramRelease(): void {
