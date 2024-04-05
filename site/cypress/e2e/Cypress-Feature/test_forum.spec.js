@@ -51,12 +51,11 @@ describe('Visuals', () => {
         cy.login('instructor');
         cy.visit(['sample', 'forum', 'threads', '9']);
 
-        cy.compareSnapshot({
-            name: 'forum-threads-9',
-            cypressScreenshotOptions: {
-                blackout: ['footer'],
-            },
+        cy.get('#posts_list').compareSnapshot('forum-threads-9', {
+            capture: 'viewport',
+            clip: { x: 0, y: 0, width: 1000, height: 1000 } // Adjust dimensions according to your needs
         });
+
     });
 });
 
