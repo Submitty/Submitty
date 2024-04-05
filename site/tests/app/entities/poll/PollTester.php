@@ -256,6 +256,27 @@ class PollTester extends BaseUnitTest {
         $this->assertFalse($this->my_polls[2]->isClosed());
         $this->assertTrue($this->my_polls[2]->isEnded());
     }
+    public function testDuration(): void {
+        $this->assertEquals($this->my_polls[0]->getDuration()->h, 1);
+        $this->assertEquals($this->my_polls[1]->getDuration()->i, 1);
+        $this->assertTrue($this->assertEquals($this->my_polls[2]->getDuration()->i, 1),$this->assertEquals($this->my_polls[2]->getDuration()->s,30));
+        $newDateInterval = new DateInterval("PT10H");
+        $this->my_polls[0]->setDuration($newDateInterval);
+        $this->assertEquals($this->my_polls[0]->getDuration()->h, 10);
+        $newDateInterval = new DateInterval("PT30S");
+        $this->my_polls[1]->setDuration($newDateInterval);
+        $this->assertEquals($this->my_polls[1]->getDuration()->s, 30);
+        $newDateInterval = new DateInterval("PT0S");
+        $this->my_polls[2]->setDuration($newDateInterval);
+        // Testing empty duration
+        $this->assertEquals($this->my_polls[2]->getDuration()->s, 0);
+        $this->assertEquals($this->my_polls[2]->getDuration()->h, 0);
+        $this->assertEquals($this->my_polls[2]->getDuration()->i, 0);
+        $this->assertEquals($this->my_polls[2]->getDuration()->d, 0);
+        $this->assertEquals($this->my_polls[2]->getDuration()->m, 0);
+        $this->assertEquals($this->my_polls[2]->getDuration()->y, 0);
+
+    }
 
     public function testImagePath(): void {
         $this->assertEquals($this->my_polls[0]->getImagePath(), null);
