@@ -1,4 +1,4 @@
-# Devlopment Requirements
+# Development Requirements
 
 # Linters
 pylint==3.0.2
