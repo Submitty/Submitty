@@ -164,7 +164,7 @@ class SubmissionControllerTester extends BaseUnitTest {
             'using_subdirectory' => false,
             'vcs_subdirectory' => '',
             'vcs_partial_path' => '',
-            'vcs_host_type' => GradeableUtils::vcs_type_none,
+            'vcs_host_type' => GradeableUtils::VCS_TYPE_NONE,
             'team_assignment' => false,
             'team_size_max' => 1,
             'ta_grading' => true,

@@ -16,12 +16,12 @@ class GradeableUtils {
      * @throws \Exception
      */
 
-    const vcs_type_none = -1;
-    const vcs_type_submitty_hosted = 0;
-    const vcs_type_submitty_hosted_url = 1;
-    const vcs_type_public_github = 2;
-    const vcs_type_private_github = 3;
-    const vcs_type_self_hosted = 4;
+    const VCS_TYPE_NONE = -1;
+    const VCS_TYPE_SUBMITTY_HOSTED = 0;
+    const VCS_TYPE_SUBMITTY_HOSTED_URL = 1;
+    const VCS_TYPE_PUBLIC_GITHUB = 2;
+    const VCS_TYPE_PRIVATE_GITHUB = 3;
+    const VCS_TYPE_SELF_HOSTED = 4;
 
     public static function getGradeablesFromCourse(Core $core, string $semester, string $title, array &$calendar_messages, bool $global = true): array {
         /** @var array<string, Gradeable> $gradeables */
