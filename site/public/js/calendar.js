@@ -398,7 +398,7 @@ function buildSwitchingHeader(view_year, view_month, view_day, type) {
         prev = prevWeek(view_month, view_year, view_day);
         prev.push(type);
     }
-    a.onclick = () => loadCalendar.apply(this, prev); //prev = month, year, day, 'month'
+    a.onclick = () => loadCalendar.apply(this, prev);
     a.innerHTML = '<i class="fas fa-angle-left"></i>';
 
     // Append to header
@@ -420,7 +420,7 @@ function buildSwitchingHeader(view_year, view_month, view_day, type) {
         monthSelect.appendChild(monthOption);
     }
 
-    monthSelect.classList.add('cal-month-title'); //month title
+    monthSelect.classList.add('cal-month-title');
 
     monthSelect.onchange = function() {
         const type = $('#calendar-item-type-edit').val();
@@ -458,9 +458,8 @@ function buildSwitchingHeader(view_year, view_month, view_day, type) {
         yearOption.textContent = year;
         yearSelect.appendChild(yearOption);
     }
-    yearSelect.classList.add('cal-year-title'); //year title
+    yearSelect.classList.add('cal-year-title');
 
-    //update cookies
     yearSelect.onchange = function() {
         const type = $('#calendar-item-type-edit').val();
         Cookies.set('calendar_year', this.value);
@@ -808,7 +807,6 @@ function loadCalendar(month_, year_, day_, type) {
     else {
         calendar.appendChild(generateCalendarOfMonthWeek(year_, month_, day_));
     }
-
     Cookies.set('calendar_year', year_);
     Cookies.set('calendar_month', month_);
     Cookies.set('calendar_day', day_);
