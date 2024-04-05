@@ -1,4 +1,4 @@
-/* exported prevMonth, nextMonth, loadCalendar, loadFullCalendar, editCalendarItemForm, deleteCalendarItem, openNewItemModal, openOptionsModal, updateCalendarOptions, colorLegend */
+/* exported prevMonth, nextMonth, loadCalendar, loadFullCalendar, editCalendarItemForm, deleteCalendarItem, openNewItemModal, openOptionsModal, updateCalendarOptions, colorLegend, setDateToToday */
 /* global curr_day, curr_month, curr_year, gradeables_by_date, instructor_courses, buildUrl */
 /* global csrfToken */
 
@@ -10,7 +10,6 @@ const monthNamesShort = ['Dec', 'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul',
  * Sets the current date to today and then changes the calendar
  * @returns {void} : only changes cookies and calendar date
  */
-// eslint-disable-next-line no-unused-vars
 function setDateToToday() {
     const type = $('#calendar-item-type-edit').val();
     const currentDay = new Date();
