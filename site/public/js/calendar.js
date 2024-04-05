@@ -14,6 +14,7 @@ const monthNamesShort = ['Dec', 'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul',
  * @param view_day : int day that is currently being viewed
  * @returns {void} : loads the updated calendar
  */
+// eslint-disable-next-line no-unused-vars
 function changeView(x, view_year, view_month, view_day) {
     Cookies.set('view', x.value);
 
@@ -413,7 +414,7 @@ function buildSwitchingHeader(view_year, view_month, view_day, type) {
 
     //create the month dropdown
     const monthSelect = document.createElement('select');
-    for(let itermonth = 1; itermonth <= 12; itermonth++){
+    for (let itermonth = 1; itermonth <= 12; itermonth++) {
         const monthOption = document.createElement('option');
         monthOption.value = itermonth;
         monthOption.textContent = monthNames[itermonth];
@@ -447,12 +448,12 @@ function buildSwitchingHeader(view_year, view_month, view_day, type) {
     monthSelect.value = parseInt(Cookies.get('calendar_month'));
 
     div.appendChild(monthSelect);
-    
+
     //create the year dropdown
     let currentYear = new Date();
     currentYear = currentYear.getFullYear();
     const yearSelect = document.createElement('select');
-    for(let year = 2014; year <= currentYear+5; year++){
+    for (let year = 2014; year <= currentYear+5; year++) {
         const yearOption = document.createElement('option');
         yearOption.value = year;
         yearOption.textContent = year;
@@ -462,7 +463,7 @@ function buildSwitchingHeader(view_year, view_month, view_day, type) {
 
     //update cookies
     yearSelect.onchange = function() {
-        const type = $("#calendar-item-type-edit").val();
+        const type = $('#calendar-item-type-edit').val();
         Cookies.set('calendar_year', this.value);
 
         let cookie_year = parseInt(Cookies.get('calendar_year'));
