@@ -11,16 +11,16 @@ const monthNamesShort = ['Dec', 'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul',
  * @returns {void} : only changes cookies and calendar date
  */
 function setDateToToday(){
-    const type = $("#calendar-item-type-edit").val();
+    const type = $ ('#calendar-item-type-edit').val();
     const currentDay = new Date();
-    Cookies.set("calendar_year", currentDay.getFullYear());
-    Cookies.set("calendar_month", currentDay.getMonth()+1);
-    Cookies.set("calendar_day", currentDay.getDate());
+    Cookies.set('calendar_year', currentDay.getFullYear());
+    Cookies.set('calendar_month', currentDay.getMonth()+1);
+    Cookies.set('calendar_day', currentDay.getDate());
 
-    let cookie_year = currentDay.getFullYear();
-    let cookie_month = currentDay.getMonth()+1;
-    let cookie_day = currentDay.getDate();
-    
+    const cookie_year = currentDay.getFullYear();
+    const cookie_month = currentDay.getMonth()+1;
+    const cookie_day = currentDay.getDate();
+
     loadCalendar(cookie_month, cookie_year, cookie_day, type);
 }
 
