@@ -339,6 +339,7 @@ function socketNewOrEditPostHandler(post_id, reply_level, post_box_id=null, edit
                     original_post.remove();
                 }
 
+                $(`#${post_id}`).addClass('new_post');
                 $(`#${post_id}-reply`).css('display', 'none');
                 $(`#${post_id}-reply`).submit(publishPost);
                 // eslint-disable-next-line no-undef
@@ -2591,23 +2592,3 @@ function pinAnnouncement(thread_id, type, csrf_token) {
         });
     }
 }
-
-function newPostWhileUserOnline(){
-    const post_list = document.getElementById('posts_list');
-
-    const captureChange = new MutationObserver((mutationList , observer)=>{
-        for (let mutation of mutationList){
-            if (mutation.type === 'childList'){
-                mutation.addedNodes.forEach(node => {
-                    if (node.nodeType === Node.ELEMENT_NODE) {
-                        node.classList.add('new_post')
-                    }
-                });
-            }
-        }
-    });
-    captureChange.observe(post_list, { childList: true});
-}
-setTimeout(function(){
-    newPostWhileUserOnline();
-}, 4000);
