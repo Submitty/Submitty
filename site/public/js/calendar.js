@@ -1,4 +1,4 @@
-/* exported prevMonth, nextMonth, loadCalendar, loadFullCalendar, editCalendarItemForm, deleteCalendarItem, openNewItemModal, openOptionsModal, updateCalendarOptions, colorLegend */
+/* exported prevMonth, nextMonth, loadCalendar, loadFullCalendar, editCalendarItemForm, deleteCalendarItem, openNewItemModal, openOptionsModal, updateCalendarOptions, colorLegend, changeView */
 /* global curr_day, curr_month, curr_year, gradeables_by_date, instructor_courses, buildUrl */
 /* global csrfToken */
 
@@ -14,7 +14,6 @@ const monthNamesShort = ['Dec', 'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul',
  * @param view_day : int day that is currently being viewed
  * @returns {void} : loads the updated calendar
  */
-// eslint-disable-next-line no-unused-vars
 function changeView(x, view_year, view_month, view_day) {
     Cookies.set('view', x.value);
 
