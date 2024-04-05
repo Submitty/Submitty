@@ -10,16 +10,16 @@
     state: present
   register: apt_action
   retries: 100
-  until: apt_action is success or 
-        ('Failed to lock apt for exclusive operation' not in apt_action.msg and
-        '/var/lib/dpkg/lock' not in apt_action.msg)
+  until: apt_action is success or
+    ('Failed to lock apt for exclusive operation' not in apt_action.msg and
+    '/var/lib/dpkg/lock' not in apt_action.msg)
 
 - name: make sure cracklib is not installed
   ansible.builtin.apt:
     name: libpam-cracklib
     state: absent
     autoremove: yes
-     
+
 - name: Create submitty git directory if none exists
   ansible.builtin.file:
     path: /usr/local/submitty/GIT_CHECKOUT
@@ -34,7 +34,6 @@
     version: v24.01.01
     force: yes
     update: yes
-
 
 # this script only uses PAM and email server
 - name: Run Submitty install script.
@@ -79,7 +78,7 @@
 - name: Update the PHP disabled functions
   ansible.builtin.lineinfile:
     path: /etc/php/8.1/fpm/php.ini
-    regexp: '^disable_functions = '
+    regexp: "^disable_functions = "
     line: disable_functions = popen,pclose,proc_open,php_real_logo_guid,php_egg_logo_guid,php_ini_scanned_files,php_ini_loaded_file,readlink,symlink,link,set_file_buffer,proc_close,proc_terminate,proc_get_status,proc_nice,getmyuid,getmygid,getmyinode,putenv,get_current_user,magic_quotes_runtime,set_magic_quotes_runtime,import_request_variables,ini_alter,stream_socket_server,stream_socket_accept,stream_socket_pair,stream_get_transports,stream_wrapper_restore,mb_send_mail,openlog,syslog,closelog,pfsockopen,posix_kill,apache_child_terminate,apache_get_modules,apache_get_version,apache_lookup_uri,apache_reset_timeout,apache_response_headers,virtual,system,phpinfo,exec,shell_exec,passthru,
 
 - name: Set up Apache Submitty configuration
@@ -89,35 +88,36 @@
     remote_src: yes
     mode: "0644"
 
-#- name: Set up SSL in Apache Submitty configuration
-#  ansible.builtin.replace:
-#    path: /etc/apache2/sites-available/submitty.conf
-#    regexp: <VirtualHost \*:80>
-#    replace: "{{ lookup('file', 'append_to_submitty.conf') }}"
-#  when: 
+- name: Set up SSL in Apache Submitty configuration
+  ansible.builtin.replace:
+    path: /etc/apache2/sites-available/submitty.conf
+    regexp: '<VirtualHost \*:80>'
+    replace: "{{ lookup('file', 'append_to_submitty.conf') }}"
+  when: ssl_enabled | bool
+
 - name: Add ip to the Apache Submitty configuration
   ansible.builtin.replace:
     path: /etc/apache2/sites-available/submitty.conf
-    regexp: 'Require host __your_domain__'
+    regexp: "Require host __your_domain__"
     replace: "Require ip {{ submitty_ip }}"
 
 - name: Add domain to the Apache Submitty configuration
   ansible.builtin.replace:
     path: /etc/apache2/sites-available/submitty.conf
-    regexp: '__your_domain__'
+    regexp: "__your_domain__"
     replace: "{{ submitty_url }}"
 
 - name: Add email
   ansible.builtin.replace:
     path: /etc/apache2/sites-available/submitty.conf
-    regexp: 'ADMIN@DOMAIN.HERE'
+    regexp: "ADMIN@DOMAIN.HERE"
     replace: "{{ submitty_email }}"
 
 - name: Uncomment ServerName
   ansible.builtin.replace:
     path: /etc/apache2/sites-available/submitty.conf
-    regexp: '# ServerName'
-    replace: 'ServerName'
+    regexp: "# ServerName"
+    replace: "ServerName"
 
 - name: Run a2ensite submitty
   ansible.builtin.command: a2ensite submitty

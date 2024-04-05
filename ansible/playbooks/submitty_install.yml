@@ -18,6 +18,7 @@
         sysadmin_email: ethan.ford@wallawalla.edu
         submitty_email: submitty@cs.wallawalla.edu
         institution_url: cs.wallawalla.edu
+        ssl_enabled: true
         admin_email: ethan.ford@wallawalla.edu
         submitty_ip: 172.27.23.13
         admin_password: admin_password

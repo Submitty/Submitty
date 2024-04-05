@@ -10,7 +10,8 @@ vcs_url: git.localhost
 institution_name: Example University
 sysadmin_email: sysadmin@localhost
 submitty_email: submitty@localhost
-institution_url: university@localhost
+institution_url: localhost
+ssl_enabled: false
 admin_email: admin@localhost
 submitty_ip: 172.0.0.1
 admin_password: admin_password
