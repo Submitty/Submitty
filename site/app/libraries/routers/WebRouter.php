@@ -130,9 +130,6 @@ class WebRouter {
             ) {
                 return new MultiResponse(JsonResponse::getFailResponse("Unauthenticated access. Please log in."));
             }
-            if (strpos($request->getRequestUri(), 'student_api')) {
-                return WebRouter::getStudentApiResponse($request, $router, $core);
-            }
             if ($logged_in && !$core->getUser()->accessFaculty()) {
                 return new MultiResponse(JsonResponse::getFailResponse("API is open to faculty only."));
             }
@@ -175,13 +172,12 @@ class WebRouter {
         return $router->run();
     }
 
-     /**
+    /**
      * @param Request $request
      * @param Core $core
      * @return MultiResponse|mixed should be of type Response only in the future
      */
-    public static function getStudentApiResponse(Request $request, Core $core): mixed
-    {
+    public static function getStudentApiResponse(Request $request, Core $core) {
         try {
             $router = new self($request, $core);
             $router->loadCourse();
@@ -195,6 +191,7 @@ class WebRouter {
             ) {
                 return new MultiResponse(JsonResponse::getFailResponse("Unauthenticated access. Please log in."));
             }
+
             if ($request->get('user_id') !== $core->getUser()->getId()) {
                 return JsonResponse::getFailResponse('User ID of request and variable do not match');
             }
