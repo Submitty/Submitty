@@ -10,7 +10,7 @@ const monthNamesShort = ['Dec', 'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul',
  * Sets the current date to today and then changes the calendar
  * @returns {void} : only changes cookies and calendar date
  */
-// eslint-disable-next-line no-useless-concat
+// eslint-disable-next-line no-undef
 function setDateToToday() {
     const type = $('#calendar-item-type-edit').val();
     const currentDay = new Date();
