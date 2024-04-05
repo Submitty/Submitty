@@ -61,13 +61,13 @@ a.cal-btn:focus {
 }
 
 .cal-month-title {
+    text-align: center;
     font-size: 16px;
-    text-transform: uppercase;
     border: 0;
     margin-top: 0;
     margin-bottom: 0;
     line-height: 100%;
-    width: 110px;
+    width: 93px;
     height: 20px;
     padding: 0;
 }
