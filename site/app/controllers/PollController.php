@@ -357,10 +357,10 @@ class PollController extends AbstractController {
             if ($newDuration->h > 0 || $newDuration->i > 0 || $newDuration->s > 0 || $newDuration->days > 0 || $newDuration->m > 0 || $newDuration->y > 0) {
                 $endDate = $this->core->getDateTimeNow();
                 $endDate->add($newDuration);
-                $poll->setEndDate($endDate);
+                $poll->setEndTime($endDate);
             }
             else {
-                $poll->setEndDate(new \DateTime(DateUtils::MAX_TIME));
+                $poll->setEndTime(new \DateTime(DateUtils::MAX_TIME));
             }
         }
         if ($date === false) {
@@ -487,12 +487,12 @@ class PollController extends AbstractController {
         if ($duration->h > 0 || $duration->i > 0 || $duration->s > 0 || $duration->days > 0 || $duration->m > 0 || $duration->y > 0) {
             $end_time = $this->core->getDateTimeNow();
             $end_time->add($duration);
-            $poll->setEndDate($end_time);
+            $poll->setEndTime($end_time);
         }
         else {
             //If duration is 0, it means that the user wants to manually close it.
             $end_time = new \DateTime(DateUtils::MAX_TIME);
-            $poll->setEndDate($end_time);
+            $poll->setEndTime($end_time);
         }
         $em->flush();
         return new RedirectResponse($this->core->buildCourseUrl(['polls']));
@@ -511,7 +511,7 @@ class PollController extends AbstractController {
             $this->core->addErrorMessage("Invalid Poll ID");
             return new RedirectResponse($this->core->buildCourseUrl(['polls']));
         }
-        $poll->setEndDate($this->core->getDateTimeNow());
+        $poll->setEndTime($this->core->getDateTimeNow());
         $em->flush();
 
         return new RedirectResponse($this->core->buildCourseUrl(['polls']));

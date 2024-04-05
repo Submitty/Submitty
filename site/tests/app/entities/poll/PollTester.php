@@ -259,7 +259,8 @@ class PollTester extends BaseUnitTest {
     public function testDuration(): void {
         $this->assertEquals($this->my_polls[0]->getDuration()->h, 1);
         $this->assertEquals($this->my_polls[1]->getDuration()->i, 1);
-        $this->assertTrue($this->assertEquals($this->my_polls[2]->getDuration()->i, 1),$this->assertEquals($this->my_polls[2]->getDuration()->s,30));
+        $this->assertEquals($this->my_polls[2]->getDuration()->i, 1);
+        $this->assertEquals($this->my_polls[2]->getDuration()->s, 30);
         $newDateInterval = new DateInterval("PT10H");
         $this->my_polls[0]->setDuration($newDateInterval);
         $this->assertEquals($this->my_polls[0]->getDuration()->h, 10);
@@ -275,13 +276,21 @@ class PollTester extends BaseUnitTest {
         $this->assertEquals($this->my_polls[2]->getDuration()->d, 0);
         $this->assertEquals($this->my_polls[2]->getDuration()->m, 0);
         $this->assertEquals($this->my_polls[2]->getDuration()->y, 0);
-
     }
 
     public function testImagePath(): void {
         $this->assertEquals($this->my_polls[0]->getImagePath(), null);
         $this->assertEquals($this->my_polls[1]->getImagePath(), null);
         $this->assertEquals($this->my_polls[2]->getImagePath(), "/var/local/submitty/courses/s21/sample/uploads/polls/poll_image_3_colors.png");
+    }
+
+    public function testEndTime(): void {
+        $this->my_polls[0]->setClosed();
+        $this->assertEquals($this->my_polls[0]->getEndTime()->format("Y-m-d"), "1900-02-01");
+        $this->my_polls[1]->setOpen();
+        $this->assertEquals($this->my_polls[1]->getEndTime()->format("Y-m-d"), "9999-02-01");
+        $this->my_polls[2]->setEnded();
+        $this->assertEquals($this->my_polls[2]->getEndTime()->format("Y-m-d"), date("Y-m-d"));
     }
 
     public function testHistogramRelease(): void {

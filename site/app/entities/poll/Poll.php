@@ -152,7 +152,7 @@ class Poll {
         $this->duration = $totalSeconds;
     }
 
-    public function setEndDate(\DateTime $end_time): void {
+    public function setEndTime(\DateTime $end_time): void {
         $this->end_time = $end_time;
     }
 
