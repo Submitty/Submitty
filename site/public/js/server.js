@@ -224,7 +224,7 @@ function newDeleteCourseMaterialForm(id, file_name, str_id = null) {
     deleteMessageElement.appendChild(cm_message);
 
     $('[name="delete-confirmation"]', form).attr('action', url);
-    openPopup('#delete-course-material-form');
+    showPopup('#delete-course-material-form');
     captureTabInModal('delete-course-material-form');
     form.find('.form-body').scrollTop(0);
 }
@@ -290,13 +290,13 @@ function newUploadCourseMaterialsForm() {
         readPrevious(file.getAttribute('data-file_url'), 1);
     }
 
-    openPopup('.popup-form');
+    $('.popup-form').css('display', 'none');
     const form = $('#upload-course-materials-form');
 
     $('[name="existing-file-list"]', form).html('');
     $('[name="existing-file-list"]', form).append(`<b>${JSON.stringify(files)}</b>`);
 
-    form.css('display', 'block');
+    showPopup('#upload-course-materials-form');
     captureTabInModal('upload-course-materials-form');
     form.find('.form-body').scrollTop(0);
     $('[name="upload"]', form).val(null);
@@ -364,7 +364,7 @@ function newEditCourseMaterialsFolderForm(tag) {
     $('#material-folder-edit-form', form).attr('data-id', id);
     $('#edit-folder-sort', form).attr('value', dir);
     disableFullUpdate();
-    openPopup('#edit-course-materials-folder-form');
+    showPopup('#edit-course-materials-folder-form');
     captureTabInModal('edit-course-materials-folder-form');
 
 }
@@ -443,7 +443,7 @@ function newEditCourseMaterialsForm(tag) {
     $('#edit-picker', form).attr('value', release_time);
     $('#edit-sort', form).attr('value', dir);
     $('#overwrite-materials-flag').remove();
-    openPopup('#edit-course-materials-form');
+    showPopup('#edit-course-materials-form');
     captureTabInModal('edit-course-materials-form');
 
 }
@@ -476,15 +476,8 @@ function editFilePathRecommendations() {
     registerSelect2Widget('new-file-name', 'material-edit-form');
 }
 
-function openPopup(selector) {
-    if (selector.startsWith('.')) {
-        $(selector).css('display', 'none');
-
-    }
-    else if (selector.startsWith('#')) {
-        $(selector).css('display', 'block');
-    }
-
+function showPopup(selector) {
+    $(selector).css('display', 'block');
     document.body.classList.add('no-scroll');
 }
 
@@ -535,9 +528,9 @@ function releaseTabFromModal(formName) {
 }
 
 function setFolderRelease(changeActionVariable, releaseDates, id, cm_id) {
-    openPopup('.popup-form');
+    $('.popup-form').css('display', 'none');
     const form = $('#set-folder-release-form');
-    form.css('display', 'block');
+    showPopup('#set-folder-release-form');
     captureTabInModal('set-folder-release-form');
     form.find('.form-body').scrollTop(0);
     $('[id="release_title"]', form).attr('data-path', changeActionVariable);
@@ -1410,7 +1403,7 @@ function setChildNewDateTime(path, changeDate, handleData) {
 }
 
 function openSetAllRelease() {
-    openPopup('#set-all-release-form');
+    showPopup('#set-all-release-form');
 }
 
 function setAllRelease(newdatatime) {
