@@ -646,8 +646,6 @@ class ForumController extends AbstractController {
         $thread_id = $_POST["thread_id"];
         $current_user = $this->core->getUser()->getId();
         $this->core->getQueries()->unreadThread($current_user, $thread_id);
-        $response = ['user' => $current_user, 'thread' => $thread_id];
-        return $this->core->getOutput()->renderJsonSuccess($response);
     }
 
     /**

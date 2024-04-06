@@ -1290,8 +1290,14 @@ SQL;
         $this->course_db->query("INSERT INTO viewed_responses(thread_id,user_id,timestamp) VALUES(?, ?, current_timestamp) ON CONFLICT (thread_id, user_id) DO UPDATE SET timestamp = current_timestamp", [$thread_id, $current_user]);
     }
 
+    /**
+     * @param string $current_user
+     * @param int $thread_id
+     * @return null
+     */
     public function unreadThread(string $current_user, int $thread_id) {
         $this->course_db->query("DELETE FROM viewed_responses where thread_id = ? and user_id = ?", [$thread_id, $current_user]);
+        return null;
     }
     /**
      * Set delete status for given post and all descendant
