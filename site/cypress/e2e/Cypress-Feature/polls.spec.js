@@ -532,5 +532,85 @@ describe('Test cases revolving around polls functionality', () => {
         cy.get('Poll Future').should('not.exist');
     });
 
+    it('Should verify that custom polls are functional', () => {
+        const tzoffset = (new Date()).getTimezoneOffset() * 60000; //offset in milliseconds
+        const today = new Date(new Date() - tzoffset);
+        cy.logout();
+        cy.visit(['sample', 'polls']);
+        cy.login();
+
+        // Creates poll with custom options
+        cy.contains('New Poll').click();
+        cy.get('#poll-name').type('Custom Poll Today');
+        cy.get('#poll-question').type('# Question goes here...?');
+        cy.get('#poll-date').clear({force: true});
+        cy.get('#poll-date').type(today.toISOString().substring(0, 10), {force: true});
+        cy.get('h1').click(); // get rid of the date picker
+        cy.contains('Add Response').click();
+        cy.get('#response_0_wrapper').children(':nth-child(3)').check();
+        cy.get('#response_0_wrapper').children(':nth-child(4)').type('Answer 1');
+        cy.get('h1').click();
+        cy.get('#poll_custom_options').click();
+        cy.get('#poll-form-submit').click();
+
+        cy.visit(['sample', 'polls']);
+        cy.contains('Custom Poll Today').siblings(':nth-child(5)').children().click();
+
+        // Login as student to answer with custom response
+        cy.logout();
+        cy.login('student');
+        cy.visit(['sample', 'polls']);
+        cy.contains('Custom Poll Today').siblings(':nth-child(3)').contains('Answer').click();
+
+        cy.get('.response-container textarea').type('Student Custom Response');
+        cy.get('.custom-response-submit').should('not.be.disabled').click();
+
+        // Ensure custom option is selected by default and delete button properly deletes option
+        cy.get('#answer-1').should('be.checked');
+        cy.get('.delete-btn').should('be.visible').click();
+        cy.get('#answer-1').should('not.exist');
+
+        cy.visit(['sample', 'polls']);
+        cy.contains('Custom Poll Today').siblings(':nth-child(3)').contains('Answer').click();
+
+        // Create new option for other students to select
+        cy.get('.response-container textarea').type('Second Custom Response');
+        cy.get('.custom-response-submit').should('not.be.disabled').click();
+
+        // Login as other student
+        cy.logout();
+        cy.login('adamsg');
+        cy.visit(['sample', 'polls']);
+        cy.contains('Custom Poll Today').siblings(':nth-child(3)').contains('Answer').click();
+
+        // Ensure response is present with no delete option for other student
+        cy.contains('p', 'Second Custom Response').should('be.visible');
+        cy.get('.delete-btn').should('not.exist');
+
+        // Submit custom response created by other student
+        cy.get('#answer-1').check();
+        cy.get('.student-submit').first().click();
+
+        // Login as original poster, but removal of custom option is not possible as other student has chosen it
+        cy.logout();
+        cy.login('student');
+        cy.visit(['sample', 'polls']);
+        cy.contains('Custom Poll Today').siblings(':nth-child(3)').contains('Edit Answer').click();
+        cy.get('.delete-btn').should('be.visible').click();
+
+        // Wait for controller to verify another student has chosen the option
+        cy.contains('Cannot delete response option that has already been submitted as an answer by another individual').should('exist');
+        cy.contains('p', 'Second Custom Response').should('be.visible');
+        cy.logout();
+
+        // TODO ==> Account for closing poll, such that no removals of custom options can occur from student side
+        // when the custom poll is closed!
+
+        // Remove the custom poll as instructor
+        cy.login();
+        cy.visit(['sample', 'polls']);
+        cy.contains('Custom Poll Today').siblings(':nth-child(2)').click();
+    });
+
     // Done.
 });
