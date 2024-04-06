@@ -189,14 +189,7 @@ class WebRouter {
                 !$logged_in
                 && !str_ends_with($router->parameters['_controller'], 'AuthenticationController')
             ) {
-                return new MultiResponse(JsonResponse::getFailResponse("Unauthenticated access. Please log in."));
-            }
-
-            /** @noinspection PhpUnhandledExceptionInspection */
-            if (!$router->accessCheck()) {
-                return MultiResponse::JsonOnlyResponse(
-                    JsonResponse::getFailResponse("You don't have access to this endpoint.")
-                );
+                return JsonResponse::getFailResponse("Unauthenticated access. Please log in.");
             }
 
             $enabled = $router->getEnabled();
@@ -205,9 +198,7 @@ class WebRouter {
             }
 
             if (!$router->checkFeatureFlag()) {
-                return MultiResponse::JsonOnlyResponse(
-                    JsonResponse::getFailResponse('Feature is not yet available.')
-                );
+                return JsonResponse::getFailResponse('Feature is not yet available.');
             }
 
             $check_post_max_size = $router->checkPostMaxSize($request);
@@ -216,13 +207,13 @@ class WebRouter {
             }
         }
         catch (ResourceNotFoundException $e) {
-            return new MultiResponse(JsonResponse::getFailResponse("Endpoint not found."));
+            return JsonResponse::getFailResponse("Endpoint not found.");
         }
         catch (MethodNotAllowedException $e) {
-            return new MultiResponse(JsonResponse::getFailResponse("Method not allowed."));
+            return JsonResponse::getFailResponse("Method not allowed.");
         }
         catch (\Exception $e) {
-            return new MultiResponse(JsonResponse::getErrorResponse($e->getMessage()));
+            return JsonResponse::getErrorResponse($e->getMessage());
         }
 
         $core->getOutput()->disableRender();
