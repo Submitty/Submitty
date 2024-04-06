@@ -13108,7 +13108,7 @@ parameters:
 
 		-
 			message: "#^Loose comparison via \"\\!\\=\" is not allowed\\.$#"
-			count: 2
+			count: 3
 			path: app/views/calendar/CalendarView.php
 
 		-
