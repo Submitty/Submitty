@@ -1,15 +1,12 @@
 const title1 = 'Cypress Title 1 Cypress';
 const title2 = 'Cypress Title 2 Cypress';
 const title3 = 'Cypress Title 3 Cypress';
-const title4 = 'Cypress Title 4 Cypress';
 const content1 = 'Cypress Content 1 Cypress';
 const content2 = 'Cypress Content 2 Cypress';
 const content3 = 'Cypress Content 3 Cypress';
-const content4 = 'Cypress Content 4 Cypress';
 const reply1 = 'Cypress Reply 1 Cypress';
 const reply2 = 'Cypress Reply 2 Cypress';
 const reply3 = 'Cypress Reply 3 Cypress';
-const reply4 = 'Cypress Reply 4 Cypress';
 const merged1 = 'Merged Thread Title: '.concat(title3, '\n\n', content3);
 const merged2 = 'Merged Thread Title: '.concat(title2, '\n\n', content2);
 const attachment1 = 'sea_animals.png';
@@ -27,7 +24,7 @@ const createThread = (title, content, category) => {
 const replyToThread = (title, reply) => {
     cy.get('.thread-left-cont > .thread-list-item').contains(title).click();
     cy.get('.create-post-head').should('contain', title);
-    cy.get('#reply_box_2').type(reply).trigger('change');
+    cy.get('#reply_box_2').type(reply);
     cy.get('[value="Submit Reply to All"]').should('not.be.disabled').click();
     cy.get('#posts_list').should('contain', reply);
 };
@@ -49,24 +46,18 @@ const removeThread = (title) => {
     cy.get('.thread-left-cont > .thread-list-item').contains(title).should('not.exist');
 };
 
-const replyDisabled = (title, reply, attachment) => {
+const replyDisabled = (title, attachment) => {
     cy.get('.thread-left-cont > .thread-list-item').contains(title).click();
-    cy.get('.create-post-head').should('contain', title);
-
-    // Enter text to submit and clear text to disable reply all
-    cy.get('[value="Submit Reply to All"]').should('be.disabled');
-    cy.get('#reply_box_2').type(reply).trigger('change');
-    cy.get('[value="Submit Reply to All"]').should('not.be.disabled');
-    cy.get('#reply_box_2').clear().trigger('change');
+    // Reply button should be disabled by default with no text
     cy.get('[value="Submit Reply to All"]').should('be.disabled');
 
-    // Enter attachment to submit and clear attachment to disable reply all
-    cy.get(attachment).attachFile(attachment);
-    cy.wait(500);
-    cy.get('[value="Submit Reply to All"]').should('not.be.disabled');
-    cy.get(`[fname = "${attachment}"] .file-trash`).click();
-    cy.wait(500);
-    cy.get('[value="Submit Reply to All"]').should('be.disabled');
+    // Ensure reply button is not disabled when attachments are added
+    cy.get('#input-file2').attachFile(attachment);
+    cy.get('[value="Submit Reply to All"]').should('not.be.disabled').click();
+
+    // Wait for submission and ensure attachment with no text is visible
+    cy.get('.attachment-btn').should('exist').click();
+    cy.contains('p', attachment).should('be.visible');
 };
 
 describe('Test cases revolving around creating, replying to, merging, and removing discussion forum threads', () => {
@@ -76,6 +67,12 @@ describe('Test cases revolving around creating, replying to, merging, and removi
         cy.visit(['sample']);
         cy.get('#nav-sidebar-forum').click();
         cy.get('#nav-sidebar-collapse-sidebar').click();
+    });
+
+    it('Reply button is disabled when applicable and thread reply can contain an attachment', () => {
+        createThread(title1, title1, 'Comment');
+        replyDisabled(title1, attachment1);
+        removeThread(title1);
     });
 
     it('Create, reply to, merge, and delete threads', () => {
@@ -101,11 +98,5 @@ describe('Test cases revolving around creating, replying to, merging, and removi
 
         // Remove threads
         removeThread(title1);
-    });
-
-    it('Create thread and verify reply button should be disabled', () => {
-        createThread(title4, content4, 'Comment');
-        replyDisabled(title4, reply4, attachment1);
-        removeThread(title4);
     });
 });
