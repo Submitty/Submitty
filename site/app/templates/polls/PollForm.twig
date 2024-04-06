@@ -103,7 +103,7 @@
         <label for="enable-timer" class="option-title">
             Enable Timer?
         </label>
-        <input type="checkbox" id="enable-timer" onchange="toggleTimerInputs()" {% if poll is not null and (poll.getDuration().h != 0 or poll.getDuration().i != 0 or poll.getDuration().s != 0) %} checked {% endif %} value="enabled" />
+        <input type="checkbox" id="enable-timer" name="enable-timer" onchange="toggleTimerInputs()" {% if poll is not null and (poll.getDuration().h != 0 or poll.getDuration().i != 0 or poll.getDuration().s != 0) %} checked {% endif %} value="enabled" />
         <br/>
         <div id="timer-inputs">
             <label class="option-title">
@@ -111,15 +111,15 @@
             </label>
             <div class="poll-input">
                 <label class="option"> Hours </label><br>
-                <input name="poll-hours" id="poll-hours" class="poll-timer" value="{{ poll is not null ? poll.getDuration().h }}" />
+                <input type="number" name="poll-hours" id="poll-hours" class="poll-timer" placeholder="hrs" max="24" min="0" value="{{ poll is not null ? poll.getDuration().h }}" />
             </div>
             <div class="poll-input">
                 <label class="option"> Minutes </label><br>
-                <input name="poll-minutes" id="poll-minutes" class="poll-timer" value="{{ poll is not null ? poll.getDuration().i }}"/>
+                <input type="number" name="poll-minutes" id="poll-minutes" class="poll-timer" placeholder="min" min="0" value="{{ poll is not null ? poll.getDuration().i }}"/>
             </div>
             <div class="poll-input">
                 <label class="option"> Seconds </label><br>
-                <input name="poll-seconds" id="poll-seconds" class="poll-timer" value="{{ poll is not null ? poll.getDuration().s }}"/>
+                <input type="number" name="poll-seconds" id="poll-seconds" class="poll-timer" placeholder="sec" min="0" value="{{ poll is not null ? poll.getDuration().s }}"/>
             </div>
         </div>
         <br>
@@ -231,29 +231,12 @@
 
         if (enableTimerCheckbox.prop("checked")) {
             $("#timer-inputs").show();
-            timerInputs.each(function() {
-                $(this).attr("type", "number")
-                    .attr("min", "0");
-                if ($(this).hasClass("poll-hours")) {
-                    $(this).attr("placeholder", "Hour")
-                        .attr("max", "24");
-                } else if ($(this).hasClass("poll-minutes")) {
-                    $(this).attr("placeholder", "Min");
-                } else if ($(this).hasClass("poll-seconds")) {
-                    $(this).attr("placeholder", "Sec");
-                }
-            });
         } else {
             $("#timer-inputs").hide();
-            timerInputs.each(function() {
-                $(this).attr("type", "hidden")
-                    .val("0");
-            });
+
         }
     }
-
-
-
+    
     function addResponse() {
         let count = $(".option_id").length;
         let curr_max_id = -1;
