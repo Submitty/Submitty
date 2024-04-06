@@ -641,11 +641,14 @@ class ForumController extends AbstractController {
 
     /**
      * @Route("/courses/{_semester}/{_course}/forum/threads/unread", methods={"POST"})
+     * @return JsonResponse
      */
     public function markThreadUnread() {
         $thread_id = $_POST["thread_id"];
         $current_user = $this->core->getUser()->getId();
         $this->core->getQueries()->unreadThread($current_user, $thread_id);
+        $response = ['user' => $current_user, 'thread' => $thread_id];
+        return JsonResponse::getSuccessResponse($response);
     }
 
     /**
