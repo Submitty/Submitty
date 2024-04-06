@@ -3,7 +3,7 @@ import subprocess
 import datetime
 from datetime import timedelta
 
-pr_json = "gh pr list --json updatedAt,labels,number,comments"
+pr_json = "gh pr list --json updatedAt,labels,number,comments,reviews"
 terminal_output = subprocess.check_output(pr_json, shell=True, text=True)
 json_output = json.loads(terminal_output)
 
@@ -36,7 +36,15 @@ for json_data in json_output:
         if labels['name'] == 'Abandoned PR - Needs New Owner':
             already_abandoned = True
 
-    if tdiff > twelve_days and not already_abandoned and not already_warned:
+    for review in json_data['reviews']:
+        if review["state"] == "APPROVED":
+            approved = True
+        if review["state"] == "CHANGES_REQUESTED":
+            approved = False
+
+    if tdiff > twelve_days and not already_abandoned and not already_warned and not approved:
         subprocess.run(['gh', 'pr', 'comment', num, '--body', inactive_comment])
-    if (tdiff > two_weeks and not already_abandoned) or (tdiff > two_days and already_warned):
+    if ((tdiff > two_weeks and not already_abandoned) or (tdiff > two_days and already_warned)) and not approved:
         subprocess.run(['gh', 'pr', 'edit', num, '--add-label', 'Abandoned PR - Needs New Owner'])
+    if approved:
+        subprocess.run(['gh', 'pr', 'edit', num, '--remove-label', 'Abandoned PR - Needs New Owner'])
