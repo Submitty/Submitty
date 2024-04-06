@@ -23,9 +23,9 @@ class CalendarView extends AbstractView {
      */
     public function showCalendar(CalendarInfo $info, array $courses, bool $in_course = false): string {
 
-        $year = (isset($_GET['year']) && $_GET['year'] != "")  ?  (int) $_GET['year']  : (int) date("Y");
-        $month = (isset($_GET['month']) && $_GET['month'] != "") ?  (int) $_GET['month'] : (int) date("n");
-        $day = (isset($_GET['day']) && $_GET['day'] != "") ?  (int) $_GET['day'] : (int) date("j");
+        $year = (isset($_GET['year']) && $_GET['year'] !== "")  ?  (int) $_GET['year']  : (int) date("Y");
+        $month = (isset($_GET['month']) && $_GET['month'] !== "") ?  (int) $_GET['month'] : (int) date("n");
+        $day = (isset($_GET['day']) && $_GET['day'] !== "") ?  (int) $_GET['day'] : (int) date("j");
 
         $show_table = (isset($_GET['show_table'])) ? (int) $_GET['show_table'] : 0; // not showing the table by default
 
