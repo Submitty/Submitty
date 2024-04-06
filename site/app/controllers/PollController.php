@@ -332,7 +332,7 @@ class PollController extends AbstractController {
         $minutes = intval($_POST['poll-minutes'] ?? 0);
         $seconds = intval($_POST['poll-seconds'] ?? 0);
         $enableTimer = isset($_POST['enable-timer']);
-        if(!$enableTimer) {
+        if (!$enableTimer) {
             $hours = 0;
             $minutes = 0;
             $seconds = 0;
