@@ -61,7 +61,8 @@ a.cal-btn:focus {
 }
 
 #calendar-today-button{
-    float:right
+    float:right;
+    margin-right: 10px;
 }
 
 .cal-month-title {
