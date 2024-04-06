@@ -29,6 +29,8 @@
 
             {% endif %}
 
+            <a class="pinned-thread key_to_click" tabindex="0" onClick="markThreadUnread({{activeThread.id}})" title="Unread Thread" aria-label="Unread Thread"><i class="fas fa-envelope-open golden_hover"></i></a>
+
             {{ activeThreadTitle }}
 
         </h2>

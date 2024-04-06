@@ -1975,6 +1975,30 @@ function bookmarkThread(thread_id, type) {
 }
 
 // eslint-disable-next-line no-unused-vars
+function markThreadUnread(thread_id) {
+    // eslint-disable-next-line no-undef
+    const url = `${buildCourseUrl(['forum', 'threads', 'unread'])}`;
+    $.ajax({
+        url: url,
+        type: 'POST',
+        data: {
+            thread_id: thread_id,
+            // eslint-disable-next-line no-undef
+            csrf_token: csrfToken,
+        },
+        // eslint-disable-next-line no-unused-vars
+        success: function(data) {
+            $(`#thread_box_link_${thread_id}`).children().addClass('new_thread');
+            $('.post_box').removeClass('viewed_post').addClass('new_post');
+            $('.fa-envelope-open').removeClass('fa-envelope-open').addClass('fa-envelope');
+        },
+        error: function() {
+            window.alert('Something went wrong while trying to mark the thread as unread. Please try again.');
+        },
+    });
+}
+
+// eslint-disable-next-line no-unused-vars
 function toggleMarkdown(post_box_id, triggered) {
     if (post_box_id === undefined) {
         post_box_id = '';

@@ -640,6 +640,17 @@ class ForumController extends AbstractController {
     }
 
     /**
+     * @Route("/courses/{_semester}/{_course}/forum/threads/unread", methods={"POST"})
+     */
+    public function markThreadUnread() {
+        $thread_id = $_POST["thread_id"];
+        $current_user = $this->core->getUser()->getId();
+        $this->core->getQueries()->unreadThread($current_user, $thread_id);
+        $response = ['user' => $current_user, 'thread' => $thread_id];
+        return $this->core->getOutput()->renderJsonSuccess($response);
+    }
+
+    /**
      * Alter content/delete/undelete post of a thread
      *
      * If applied on the first post of a thread, same action will be reflected on the corresponding thread
