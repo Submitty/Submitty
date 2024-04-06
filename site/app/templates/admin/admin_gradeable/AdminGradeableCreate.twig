@@ -144,9 +144,9 @@
 
             <fieldset id="grade_inquiry_enable_container">
                 <legend>Should grade inquiries be enabled for this assignment?</legend>
-                <input type="radio" id="yes_grade_inquiry_allowed" name="grade_inquiry_allowed" value="true" class="bool_val auto_save date-related"
+                <input type="radio" id="yes_grade_inquiry_allowed" name="grade_inquiry_allowed" value="true" class="bool_val auto_save date-related" data-testid="yes-grade-inquiry-allowed"
                         {{ action != 'new' and gradeable.isGradeInquiryAllowed() ? 'checked' : '' }} /> <label for="yes_grade_inquiry_allowed">Yes</label>
-                <input type="radio" id="no_grade_inquiry_allowed" name="grade_inquiry_allowed" value="false" class="bool_val auto_save date-related"
+                <input type="radio" id="no_grade_inquiry_allowed" name="grade_inquiry_allowed" value="false" class="bool_val auto_save date-related" data-testid="no-grade-inquiry-allowed"
                         {{ not (action != 'new' and gradeable.isGradeInquiryAllowed()) ? 'checked' : '' }} /> <label for= "no_grade_inquiry_allowed">No</label>
             </fieldset>
 
