@@ -1,18 +1,5 @@
 import {getCurrentSemester} from '../../support/utils';
-
-function getKey(user_id, password) {
-    return cy.request({
-        method: 'POST',
-        url: `${Cypress.config('baseUrl')}/api/token`,
-        body: {
-            user_id: user_id,
-            password: password,
-        },
-    }).then((response) => {
-        return response.body.data.token;
-    });
-}
-
+import {getApiKey} from '../../support/utils';
 describe('Tests cases revolving around gradeable access and submition', () => {
 
     it('Should upload file, submit, view gradeable', () => {
@@ -33,7 +20,7 @@ describe('Tests cases revolving around gradeable access and submition', () => {
     });
 
     it('Should get error JSON responses', () => {
-        getKey('instructor', 'instructor').then((key) => {
+        getApiKey('instructor', 'instructor').then((key) => {
             // Gradeable already exists
             cy.request({
                 method: 'POST',

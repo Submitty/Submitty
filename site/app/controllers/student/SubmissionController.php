@@ -1027,7 +1027,7 @@ class SubmissionController extends AbstractController {
         if ($gradeable === null) {
             return JsonResponse::getFailResponse('Gradeable does not exist');
         }
-        $graded_gradeable = $this->core->getQueries()->getGradedGradeable($gradeable, $_GET['user_id'], $gradeable->isTeamAssignment());
+        $graded_gradeable = $this->core->getQueries()->getGradedGradeable($gradeable, $this->core->getUser()->getId(), $gradeable->isTeamAssignment());
 
         if ($graded_gradeable === null) {
             return JsonResponse::getFailResponse("Gradeable hasn't been graded yet.");

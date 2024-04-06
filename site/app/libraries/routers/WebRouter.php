@@ -192,10 +192,6 @@ class WebRouter {
                 return new MultiResponse(JsonResponse::getFailResponse("Unauthenticated access. Please log in."));
             }
 
-            if ($request->get('user_id') !== $core->getUser()->getId()) {
-                return JsonResponse::getFailResponse('User ID of request and variable do not match');
-            }
-
             /** @noinspection PhpUnhandledExceptionInspection */
             if (!$router->accessCheck()) {
                 return MultiResponse::JsonOnlyResponse(
