@@ -5316,17 +5316,15 @@ parameters:
 			path: app/libraries/database/DatabaseQueries.php
 
 		-
+			message: "#^Comparison operation \"\\>\" between int\\<min, 0\\> and 0 is always false\\.$#"
+
+		-
 			message: "#^Call to method app\\\\libraries\\\\database\\\\AbstractDatabase\\:\\:getRowCount\\(\\) with incorrect case\\: getrowcount$#"
 			count: 1
 			path: app/libraries/database/DatabaseQueries.php
 
 		-
 			message: "#^Call to method app\\\\libraries\\\\database\\\\DatabaseQueries\\:\\:getRawUsersWithOverriddenGrades\\(\\) with incorrect case\\: getRawUsersWIthOverriddenGrades$#"
-			count: 1
-			path: app/libraries/database/DatabaseQueries.php
-
-		-
-			message: "#^Comparison operation \"\\>\" between int\\<min, 0\\> and 0 is always false\\.$#"
 			count: 1
 			path: app/libraries/database/DatabaseQueries.php
 
