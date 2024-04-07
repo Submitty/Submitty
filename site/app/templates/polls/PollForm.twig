@@ -105,7 +105,7 @@
         </label>
         <input type="checkbox" id="enable-timer" name="enable-timer" onchange="toggleTimerInputs()" {% if poll is not null and (poll.getDuration().h != 0 or poll.getDuration().i != 0 or poll.getDuration().s != 0) %} checked {% endif %} value="enabled" />
         <br/>
-        <div id="timer-inputs" {% if poll is null or poll.getDuration().h == 0 and poll.getDuration().i == 0 and poll.getDuration().s == 0 %} style="display:none" {% endif %}>
+        <div id="timer-inputs" {% if poll is null or (poll.getDuration().h == 0 and poll.getDuration().i == 0 and poll.getDuration().s == 0) %} style="display:none" {% endif %}>
             <label class="option-title">
                 Expected Duration of Poll:
             </label>
