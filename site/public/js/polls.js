@@ -1,4 +1,4 @@
-/* exported newDeletePollForm updatePollAcceptingAnswers updatePollVisible updateDropdownStates importPolls */
+/* exported newDeletePollForm updatePollAcceptingAnswers updatePollVisible updateDropdownStates importPolls toggleTimerInputs */
 /* global csrfToken */
 
 $(document).ready(() => {
@@ -111,10 +111,11 @@ function importPolls() {
 }
 
 function toggleTimerInputs() {
-    const enableTimerCheckbox = $("#enable-timer");
-    if (enableTimerCheckbox.prop("checked")) {
-        $("#timer-inputs").show();
-    } else {
-        $("#timer-inputs").hide();
+    const enableTimerCheckbox = $('#enable-timer';
+    if (enableTimerCheckbox.prop('checked')) {
+        $('#timer-inputs').show();
+    } 
+    else {
+        $('#timer-inputs').hide();
     }
 }
