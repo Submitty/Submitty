@@ -20,7 +20,7 @@
                             {% endif %}
                         </form>
                         <br/>
-                        <br/>
+                        <br/>x
                     {% endif %}
                 </div>
                 <div style="padding-left:10px;">
@@ -45,7 +45,7 @@
                 </br>
                 {% if team_assignment %}
                     <form id="late-days-form" class="form-signin" method="post" enctype="multipart/form-data" onsubmit="return checkForm();">
-                        <div class="tab-bar-wrapper">
+                        <div class="tab-bar-wrapper" data-testid="tab_bar_wrapper">
                             {% for team_member in submitter.getTeam().getMemberUsers() %}
                                 <a class="nav-bar key_to_click" id="page_{{loop.index}}_nav" onclick="onChangeNavTab({{loop.index}});"> 
                                     {{ team_member.getDisplayedGivenName() }} {{ team_member.getDisplayedFamilyName() }} ({{ team_member.getId() }})
