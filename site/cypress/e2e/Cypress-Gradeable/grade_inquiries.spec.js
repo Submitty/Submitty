@@ -30,7 +30,6 @@ describe('Test cases revolving around grade inquires', () => {
         const gradeableId = 'grades_released_homework';
         const gradeInquiryDeadlineDate = '9998-01-01 00:00:00';
         setGradeInquiriesForGradeable(gradeableId, gradeInquiryDeadlineDate, true);
-
         cy.get(`#${gradeableId} .btn-nav-grade`).click();
         cy.get('[data-testid="view-sections"]').click();
         cy.get('[data-testid="grade-button"]').first().click();
@@ -38,6 +37,7 @@ describe('Test cases revolving around grade inquires', () => {
         cy.get('[data-testid="grading_label"]').should('contain', 'Grade Inquiry');
         cy.get('[data-testid="grade_inquiry_submit_button"]').should('contain', 'Submit Grade Inquiry').and('be.disabled');
         cy.get('[data-testid="component-tab"]').first().click();
+        // typing some text in question box for confirming the 'Submit Grade Inquiry' button enabled/disabled
         cy.get('#reply-text-area-36').click().type('Submitty');
         cy.get('[data-testid="markdown-mode-tab-preview"]').first().should('exist');
         cy.get('[data-testid="grade_inquiry_submit_button"]').should('contain', 'Submit Grade Inquiry').and('not.be.disabled');
@@ -47,6 +47,7 @@ describe('Test cases revolving around grade inquires', () => {
             cy.visit(['sample']);
             cy.login(user);
             const gradeableId = 'grades_released_homework';
+            // ta and grade do not have any access to change the grade inquiries date only instructor can do
             // const gradeInquiryDeadlineDate = '9998-01-01 00:00:00';
             // setGradeInquiriesForGradeable(gradeableId, gradeInquiryDeadlineDate, true);
             cy.get(`#${gradeableId} .btn-nav-grade`).click();
@@ -54,6 +55,7 @@ describe('Test cases revolving around grade inquires', () => {
             cy.get('[data-testid="close-button"]').should('exist');
             cy.get('[data-testid="close-hidden-button"]').should('exist');
             cy.get('[data-testid="agree-popup-btn"]').should('exist').click();
+            // grader do not have 'View All' button,but instructor and ta does have
             if ( user === 'ta') {
                 cy.get('[data-testid="view-sections"]').click();
             }
@@ -62,6 +64,7 @@ describe('Test cases revolving around grade inquires', () => {
             cy.get('[data-testid="grading_label"]').should('contain', 'Grade Inquiry');
             cy.get('[data-testid="grade_inquiry_submit_button"]').should('contain', 'Submit Grade Inquiry').and('be.disabled');
             cy.get('[data-testid="component-tab"]').first().click();
+            // typing some text in question box for confirming the 'Submit Grade Inquiry' button enabled/disabled
             cy.get('#reply-text-area-36').click().type('Submitty');
             cy.get('[data-testid="markdown-mode-tab-preview"]').first().should('exist');
             cy.get('[data-testid="grade_inquiry_submit_button"]').should('contain', 'Submit Grade Inquiry').and('not.be.disabled');
