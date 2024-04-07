@@ -114,7 +114,7 @@ function toggleTimerInputs() {
     const enableTimerCheckbox = $('#enable-timer');
     if (enableTimerCheckbox.prop('checked')) {
         $('#timer-inputs').show();
-    } 
+    }
     else {
         $('#timer-inputs').hide();
     }
