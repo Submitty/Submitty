@@ -222,8 +222,8 @@
     );
     
     /* poll histogram colors */
-    --histogram-default: #006699;
-    --histogram-correct: #006600;
+    --histogram-default: var(--standard-vibrant-dark-blue);
+    --histogram-correct: var(--standard-deep-dark-green);
     
     /* other */
     --box-shadow-very-transparent: #00000020;
