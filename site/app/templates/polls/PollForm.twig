@@ -105,7 +105,7 @@
         </label>
         <input type="checkbox" id="enable-timer" name="enable-timer" onchange="toggleTimerInputs()" {% if poll is not null and (poll.getDuration().h != 0 or poll.getDuration().i != 0 or poll.getDuration().s != 0) %} checked {% endif %} value="enabled" />
         <br/>
-        <div id="timer-inputs">
+        <div id="timer-inputs" {% if poll is null or poll.getDuration().h == 0 and poll.getDuration().i == 0 and poll.getDuration().s == 0 %} style="display:none" {% endif %}>
             <label class="option-title">
                 Expected Duration of Poll:
             </label>
@@ -222,19 +222,6 @@
         }
         submitErrorChecks();
     };
-    window.onload = function() {
-        toggleTimerInputs();
-    };
-    function toggleTimerInputs() {
-        const enableTimerCheckbox = $("#enable-timer");
-        const timerInputs = $(".poll-timer");
-
-        if (enableTimerCheckbox.prop("checked")) {
-            $("#timer-inputs").show();
-        } else {
-            $("#timer-inputs").hide();
-        }
-    }
     
     function addResponse() {
         let count = $(".option_id").length;
