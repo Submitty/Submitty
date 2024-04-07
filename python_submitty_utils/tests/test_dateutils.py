@@ -240,6 +240,10 @@ class TestDateUtils(TestCase):
         parsed_date = dateutils.parse_datetime(None)
         self.assertIsNone(parsed_date)
 
+    def test_parse_datetime_none(self):
+        parsed_date = dateutils.parse_datetime(None)
+        self.assertIsNone(parsed_date)
+
     def test_parse_datetime_invalid_type(self):
         with self.assertRaises(TypeError) as cm:
             dateutils.parse_datetime(10)
