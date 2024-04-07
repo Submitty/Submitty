@@ -53,8 +53,6 @@ class AdminGradeableController extends AbstractController {
     /**
      * @Route("/api/{_semester}/{_course}/{gradeable_id}/download", methods={"GET"})
      * @Route("/courses/{_semester}/{_course}/{gradeable_id}/download", methods={"GET"})
-     * @AccessControl(role="INSTRUCTOR")
-     * @param string $gradeable_id
      */
     public function downloadJson(string $gradeable_id) {
         $config = $this->core->getQueries()->getGradeableConfig($gradeable_id);
@@ -138,17 +136,18 @@ class AdminGradeableController extends AbstractController {
 
         $this->core->getOutput()->useHeader(false);
         $this->core->getOutput()->useFooter(false);
-        echo json_encode($return_json, JSON_PRETTY_PRINT);
+        $json_response = JsonResponse::getSuccessResponse($return_json);
+        // Make the JSON only the data, not the data and the success status.
+        $json_response->json = $json_response->json['data'];
+        $json_response->render($this->core);
     }
 
     /**
      * Creates a gradeable based on uploaded JSON data
      * @Route("/api/{_semester}/{_course}/upload", methods={"POST"})
      * @Route("/courses/{_semester}/{_course}/upload", methods={"POST"})
-     * @AccessControl(role="INSTRUCTOR")
-     * @return JsonResponse
      */
-    public function uploadGradeable() {
+    public function uploadGradeable(): JsonResponse {
         $values = [
             'title' => '',
             'instructions_url' => '',
