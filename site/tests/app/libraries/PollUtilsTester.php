@@ -51,10 +51,20 @@ class PollUtilsTester extends \PHPUnit\Framework\TestCase {
                 "when_ended",
                 "when_ended"
             ),
+            new Poll(
+                "Poll #4",
+                "Is this the fifth poll?",
+                "single-response-survey",
+                new DateTime("2020-01-13"),
+                "when_ended",
+                "when_ended"
+            ),
         ];
 
         $polls[1]->setOpen();
         $polls[2]->setEnded();
+        $polls[3]->setOpen();
+        $polls[3]->setAllowsCustomOptions(true);
 
         $poll_property = new ReflectionProperty("app\\entities\\poll\\Poll", "id");
         $poll_property->setAccessible(true);
@@ -62,6 +72,7 @@ class PollUtilsTester extends \PHPUnit\Framework\TestCase {
         $poll_property->setValue($polls[0], 0);
         $poll_property->setValue($polls[1], 1);
         $poll_property->setValue($polls[2], 2);
+        $poll_property->setValue($polls[3], 3);
 
         $option_property = new ReflectionProperty("app\\entities\\poll\\Option", "id");
         $option_property->setAccessible(true);
@@ -96,6 +107,19 @@ class PollUtilsTester extends \PHPUnit\Framework\TestCase {
         $polls[2]->addOption($option7);
         $polls[2]->addOption($option8);
 
+        $option9 = new Option(0, "Yes", true);
+        $option10 = new Option(1, "100%", true);
+        $option11 = new Option(2, "Undoubtedly", true);
+        $option12 = new Option(3, "Not sure", true, "aphacker");
+        $option_property->setValue($option9, 9);
+        $option_property->setValue($option10, 10);
+        $option_property->setValue($option11, 11);
+        $option_property->setValue($option12, 12);
+        $polls[3]->addOption($option9);
+        $polls[3]->addOption($option10);
+        $polls[3]->addOption($option11);
+        $polls[3]->addOption($option12);
+
         $expected_data = [
             [
                 "id" => 0,
@@ -108,7 +132,8 @@ class PollUtilsTester extends \PHPUnit\Framework\TestCase {
                 "status" => "closed",
                 "release_histogram" => "never",
                 "release_answer" => "never",
-                "image_path" => "/var/local/submitty/courses/s21/sample/uploads/polls/poll_image_3_colors.png"
+                "image_path" => "/var/local/submitty/courses/s21/sample/uploads/polls/poll_image_3_colors.png",
+                "allows_custom" => false
             ],
             [
                 "id" => 1,
@@ -121,7 +146,8 @@ class PollUtilsTester extends \PHPUnit\Framework\TestCase {
                 "status" => "open",
                 "release_histogram" => "always",
                 "release_answer" => "always",
-                "image_path" => null
+                "image_path" => null,
+                "allows_custom" => false
             ],
             [
                 "id" => 2,
@@ -134,7 +160,22 @@ class PollUtilsTester extends \PHPUnit\Framework\TestCase {
                 "status" => "ended",
                 "release_histogram" => "when_ended",
                 "release_answer" => "when_ended",
-                "image_path" => null
+                "image_path" => null,
+                "allows_custom" => false
+            ],
+            [
+                "id" => 3,
+                "name" => "Poll #4",
+                "question" => "Is this the fifth poll?",
+                "question_type" => "single-response-survey",
+                "responses" => ["Yes", "100%", "Undoubtedly", "Not sure"],
+                "correct_responses" => [0, 1, 2, 3],
+                "release_date" => "2020-01-13",
+                "status" => "open",
+                "release_histogram" => "when_ended",
+                "release_answer" => "when_ended",
+                "image_path" => null,
+                "allows_custom" => true
             ]
         ];
         $actual_data = PollUtils::getPollExportData($polls);

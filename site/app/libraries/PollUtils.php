@@ -26,7 +26,8 @@ class PollUtils {
                 'status' => $poll->getStatus(),
                 'release_histogram' => $poll->getReleaseHistogram(),
                 'release_answer' => $poll->getReleaseAnswer(),
-                'image_path' => $poll->getImagePath()
+                'image_path' => $poll->getImagePath(),
+                'allows_custom' => $poll->allowsCustomResponses()
             ];
             foreach ($poll->getOptions() as $option) {
                 $poll_data['responses'][$option->getOrderId()] = $option->getResponse();

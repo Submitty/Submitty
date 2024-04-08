@@ -466,8 +466,7 @@ class PollController extends AbstractController {
             return JsonResponse::getFailResponse("A similar response already exists");
         }
 
-        $is_survey = $poll->getQuestionType() === "single-response-survey" || $poll->getQuestionType() === "multiple-response-survey";
-        $custom_poll_option = new Option($poll->getOptions()->count(), $poll_response, $is_survey, $user_id);
+        $custom_poll_option = new Option($poll->getOptions()->count(), $poll_response, $poll->isSurvey(), $user_id);
         $poll->addOption($custom_poll_option);
         $em->persist($custom_poll_option);
 

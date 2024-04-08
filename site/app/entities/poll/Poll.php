@@ -123,6 +123,10 @@ class Poll {
         return $this->status === "ended";
     }
 
+    public function isSurvey(): bool {
+        return $this->getQuestionType() === "single-response-survey" || $this->getQuestionType() === "multiple-response-survey";
+    }
+
     public function setAllowsCustomOptions(bool $allows_custom): void {
         $this->allows_custom = $allows_custom;
     }
