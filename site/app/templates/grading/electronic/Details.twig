@@ -185,7 +185,7 @@
                 <tbody class="details-content panel-content-active"{% if section.title in collapsed_sections %} style="display: none"{% endif %}>
                     {% if section.rows is defined %}
                         {% for info in section.rows %}
-                            {{ _self.render_student(_context, section, info.graded_gradeable, loop.index, info, columns, team_gradeable_view_history, overrides, anon_ids) }}
+                            {{ _self.render_student(_context, section, info.graded_gradeable, loop.index, info, columns, team_gradeable_view_history, overrides, anon_ids, max_team_name_length) }}
                         {% endfor %}
                     {% endif %}
                     {% if section.teamless_users is defined %}
@@ -241,7 +241,7 @@
     </table>
 </div>
 
-{% macro render_student(context, section, graded_gradeable, index, info, columns, team_gradeable_view_history, overrides, anon_ids) %}
+{% macro render_student(context, section, graded_gradeable, index, info, columns, team_gradeable_view_history, overrides, anon_ids, max_team_name_length) %}
     <tr class="grade-table" data-testid="grade-table"
         {% if not graded_gradeable.getSubmitter().isTeam() and graded_gradeable.getSubmitter().getUser().accessGrading() %}
             style='background: #7bd0f7;'
@@ -277,7 +277,7 @@
             {% elseif column.function == "team_id_anon" %}
                 {{ _self.render_column_team_id_anon(context, section, graded_gradeable, index, info, column, anon_ids) }}
             {% elseif column.function == "team_name" %}
-                {{ _self.render_column_team_name(context, section, graded_gradeable, index, info, column) }}
+                {{ _self.render_column_team_name(context, section, graded_gradeable, index, info, column, max_team_name_length) }}
             {% elseif column.function == "team_members" %}
                 {{ _self.render_column_team_members(context, section, graded_gradeable, index, info, column) }}
             {% elseif column.function == "total" %}
@@ -595,9 +595,14 @@
 {% endmacro %}
 
 {# Team Name #}
-{% macro render_column_team_name(context, section, graded_gradeable, index, info, column) %}
+{% macro render_column_team_name(context, section, graded_gradeable, index, info, column, max_team_name_length) %}
     <td>
-        {{ graded_gradeable.getSubmitter().getTeam().getTeamName() }}
+        {# existing teams names over max length get truncated down on display #}
+        {% if graded_gradeable.getSubmitter().getTeam().getTeamName()|length > max_team_name_length %}
+          {{ graded_gradeable.getSubmitter().getTeam().getTeamName()|slice(0, max_team_name_length) ~ '...' }}
+        {% else %}
+          {{ graded_gradeable.getSubmitter().getTeam().getTeamName() }}
+        {% endif %}
     </td>
 {% endmacro %}
 
