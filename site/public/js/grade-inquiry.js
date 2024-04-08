@@ -1,6 +1,25 @@
 /* global buildCourseUrl, WebSocketClient */
 /* exported initGradingInquirySocketClient, onComponentTabClicked, onGradeInquirySubmitClicked, onReady, onReplyTextAreaKeyUp */
 
+function saveDraft() { 
+    //display the saved draft text on grade inquiry box
+    var draftContent = localStorage.getItem('content');
+    if(draftContent === null) {
+        draftContent = {};
+    }else{
+        draftContent = JSON.parse(draftContent);
+    }
+    var elements = document.getElementsByClassName('markdown-textarea fill-available ');
+    for (var i = 0; i < elements.length; i++) {
+        var element = elements[i];
+        var elementId = element.getAttribute('id');
+        const reply_text_area = $(element);
+        if(draftContent.hasOwnProperty(elementId)){
+            var value = draftContent[elementId];
+            reply_text_area.val(value);
+        }
+    }
+};      
 function onReady() {
     // open last opened grade inquiry or open first component with grade inquiry
     const component_selector = localStorage.getItem('selected_tab');
@@ -30,7 +49,6 @@ function onReady() {
 
 function onComponentTabClicked(tab) {
     const component_id = $(tab).data('component_id');
-
     // show posts that pertain to this component_id
     $('.grade-inquiry').each(function() {
         if ($(this).data('component_id') !== component_id) {
@@ -50,12 +68,25 @@ function onComponentTabClicked(tab) {
 }
 
 function onReplyTextAreaKeyUp(textarea) {
+    //save the draft input on grade inquiry box
     const reply_text_area = $(textarea);
     const must_have_text_buttons = $('.gi-submit:not(.gi-ignore-disabled)');
     must_have_text_buttons.prop('disabled', reply_text_area.val() === '');
     const must_be_empty_buttons = $('.gi-submit-empty:not(.gi-ignore-disabled)');
     must_be_empty_buttons.prop('disabled', reply_text_area.val() !== '');
 
+    const component_selected = $('.btn-selected');
+    const component_id = component_selected.length ? component_selected.data('component_id') : 0;
+    localStorage.setItem('selected_tab', `.component-${component_id}`);
+    let draftContent = localStorage.getItem('content');
+    if (draftContent === null) {
+        draftContent = {};
+    } else {
+        draftContent = JSON.parse(draftContent);}
+    // notice that from Discussion.twig file, all elementId start with this string pattern (i.e. 'reply-text-area-')
+    const key = 'reply-text-area-';
+    draftContent[key+component_id] = reply_text_area.val();
+    localStorage.setItem('content', JSON.stringify(draftContent));
     if (reply_text_area.val() === '') {
         $('.gi-show-empty').show();
         $('.gi-show-not-empty').hide();
@@ -112,7 +143,6 @@ function onGradeInquirySubmitClicked(button) {
                 const json = JSON.parse(response);
                 if (json['status'] === 'success') {
                     const data = json['data'];
-
                     // inform other open websocket clients
                     const submitter_id = form.children('#submitter_id').val();
                     if (data.type === 'new_post') {
