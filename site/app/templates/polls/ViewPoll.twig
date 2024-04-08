@@ -1,8 +1,18 @@
 <div class="content">
-    <h1>
-        {{ poll.getName() }}
-    </h1>
-
+    <div class="header">
+        <h1>
+            {{ poll.getName() }}
+        </h1>
+        {% if end_time != "9999-02-01T00:00:00" %}
+        <div id="timer" class="timer">
+            <label for="timerDisplay">
+                    Time until Poll Ends:
+            </label>
+            <span id="timerDisplay"></span>
+        </div>  
+        {% endif %}
+    </div>
+    
     {% if user_admin or poll.isHistogramAvailable() %}
         <button class="btn btn-primary" id='toggle-info-button' onclick="toggle_section('poll-info')">Toggle Poll Info</button>
         <button class="btn btn-primary" id='toggle-histogram-button' onclick="toggle_section('poll-histogram')">Toggle Histogram</button>
@@ -95,6 +105,43 @@
 </div>
 
 <script>
+    var endDate = new Date('{{ end_time }}');
+    function updateTimer() {
+        var now = new Date(); 
+        var timeRemaining = endDate - now;
+
+        if (timeRemaining <= 0) {
+            displayWarningMessage("Timer has expired");
+            var timerDisplayElement = document.getElementById('timer');
+            if (timerDisplayElement) {
+                timerDisplayElement.style.display = 'none'; 
+            }
+            return;
+        }
+
+        // Check if the timer display element exists
+        var timerDisplayElement = document.getElementById('timerDisplay');
+        if (!timerDisplayElement) {
+            return;
+        }
+
+        var seconds = Math.floor((timeRemaining / 1000) % 60);
+        var minutes = Math.floor((timeRemaining / (1000 * 60)) % 60);
+        var hours = Math.floor((timeRemaining / (1000 * 60 * 60)) % 24);
+
+        var hoursUpdated = (hours < 10) ? "0" + hours : hours;
+        var minutesUpdated = (minutes < 10) ? "0" + minutes : minutes;
+        var secondsUpdated = (seconds < 10) ? "0" + seconds : seconds;
+        var timerDisplay = hoursUpdated + ':' + minutesUpdated + ':' + secondsUpdated;
+
+        timerDisplayElement.innerHTML = timerDisplay;
+
+        setTimeout(updateTimer, 1000);
+    }
+
+    updateTimer();
+
+
     function toggle_section(section_id) {
         $(`#${section_id}`).toggle('fast');
     }
