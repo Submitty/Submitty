@@ -726,6 +726,7 @@ class PollController extends AbstractController {
                 || !array_key_exists("responses", $poll)
                 || !array_key_exists("correct_responses", $poll)
                 || !array_key_exists("release_date", $poll)
+                || !array_key_exists("allows_custom", $poll)
             ) {
                 $num_errors = $num_errors + 1;
                 continue;
@@ -735,6 +736,8 @@ class PollController extends AbstractController {
                 only existed questions of type single response. */
             $question_type = array_key_exists("question_type", $poll) ? $poll['question_type'] : 'single-response-multiple-correct';
             $poll_entity = new Poll($poll['name'], $poll['question'], $question_type, \DateTime::createFromFormat("Y-m-d", $poll['release_date']), $poll['release_histogram'], $poll['release_answer']);
+            $allows_custom = array_key_exists("allows_custom", $poll) ? $poll['allows_custom'] : false;
+            $poll_entity->setAllowsCustomOptions($allows_custom);
             $em->persist($poll_entity);
             $order = 0;
             foreach ($poll['responses'] as $id => $response) {
