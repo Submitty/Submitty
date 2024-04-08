@@ -726,7 +726,6 @@ class PollController extends AbstractController {
                 || !array_key_exists("responses", $poll)
                 || !array_key_exists("correct_responses", $poll)
                 || !array_key_exists("release_date", $poll)
-                || !array_key_exists("allows_custom", $poll)
             ) {
                 $num_errors = $num_errors + 1;
                 continue;
