@@ -11287,11 +11287,6 @@ parameters:
 			path: app/models/gradeable/GradeableUtils.php
 
 		-
-			message: "#^Method app\\\\models\\\\gradeable\\\\GradeableUtils\\:\\:getGradeablesFromCourse\\(\\) return type has no value type specified in iterable type array\\.$#"
-			count: 1
-			path: app/models/gradeable/GradeableUtils.php
-
-		-
 			message: "#^Method app\\\\models\\\\gradeable\\\\GradeableUtils\\:\\:getGradeablesFromUserAndCourse\\(\\) has parameter \\$calendar_messages with no value type specified in iterable type array\\.$#"
 			count: 1
 			path: app/models/gradeable/GradeableUtils.php
