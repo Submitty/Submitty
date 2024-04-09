@@ -445,7 +445,6 @@ function newEditCourseMaterialsForm(tag) {
     $('#overwrite-materials-flag').remove();
     showPopup('#edit-course-materials-form');
     captureTabInModal('edit-course-materials-form');
-
 }
 
 /**
