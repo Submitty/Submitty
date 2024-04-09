@@ -1182,7 +1182,7 @@ class ForumThreadView extends AbstractView {
             }
         }
 
-        if ($userGroup <= User::GROUP_STUDENT){
+        if ($userGroup <= User::GROUP_STUDENT) {
             $info_name = $given_name . " " . $family_name . " (" . $post['author_user_id'] . ")";
             $visible_user_json = json_encode($visible_username);
             $pronouns = trim($author_info["pronouns"]);
