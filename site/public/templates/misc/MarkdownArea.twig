@@ -104,40 +104,29 @@
     </div>
 </div>
 <script>
+<script>
 $(document).ready(function() {
-    // Define a minimum height for the textareas
-    const MIN_HEIGHT = 100; // Set this to whatever is appropriate for your design
+    const MIN_HEIGHT = 100;
 
     function resizeTextarea(textarea) {
         // Temporarily reduce padding to measure the natural content height more accurately
         var originalPadding = getComputedStyle(textarea).padding;
         textarea.style.padding = '0';
-
-        // Reset the height to the minimum before recalculating the actual content height
         textarea.style.height = `${MIN_HEIGHT}px`;
-
-        // Calculate the desired height based on content, padding, and minimum height
         var desiredHeight = Math.max(textarea.scrollHeight, MIN_HEIGHT);
-
-        // Restore the original padding
+        // Restore original padding
         textarea.style.padding = originalPadding;
-
-        // Set the textarea height if the scrollHeight is greater than minimum height
+        
         if (desiredHeight > MIN_HEIGHT) {
             desiredHeight += 5;
             textarea.style.height = desiredHeight + 'px';
         }
-        
-        // Restore overflow behavior after resizing
+
         textarea.style.overflowY = 'hidden'; // Allow scroll if needed
     }
-
-    // Attach the resize function to the 'input' event of all textareas
     $('textarea').on('input', function() {
         resizeTextarea(this);
     });
-
-    // Resize textareas on AJAX completion
     $(document).ajaxComplete(function() {
         $('textarea').each(function() {
             resizeTextarea(this);
@@ -167,5 +156,3 @@ $(document).ready(function() {
     });
 });
 </script>
-
-
