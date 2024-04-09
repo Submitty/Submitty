@@ -88,26 +88,9 @@ void AddAutogradingConfiguration(nlohmann::json &whole_config) {
     nlohmann::json::iterator testcases = whole_config.find("testcases");
     for (typename nlohmann::json::iterator testcase = testcases->begin(); testcase != testcases->end(); testcase++) {
       if (testcase->value("type", "") == "Compilation") {
-        nlohmann::json::iterator exe_name = testcase->find("executable_name");
-        if (exe_name == testcase->end()) {
-          continue;
-        }
-        // Handle single file or array of files.
-        if (exe_name->is_array()) {
-          for (typename nlohmann::json::iterator itr = exe_name->begin(); itr != exe_name->end(); itr++) {
-            if (itr->is_string()) {
-              whole_config["autograding"]["compilation_to_runner"].push_back("**/" + itr->template get<std::string>());
-            }
-            else {
-              throw std::invalid_argument("executable_name array must only contain strings.");
-            }
-          }
-        }
-        else if (exe_name->is_string()) {
-          whole_config["autograding"]["compilation_to_runner"].push_back("**/" + exe_name->template get<std::string>());
-        }
-        else {
-          throw std::invalid_argument("executable_name must be an array or string.");
+        std::vector<std::string> exe_names = stringOrArrayOfStrings(*testcase, "executable_name");
+        for(int i = 0, n = exe_names.size(); i < n; i++) {
+          whole_config["autograding"]["compilation_to_runner"].push_back("**/" + exe_names[i]);
         }
       }
     }
