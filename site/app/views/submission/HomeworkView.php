@@ -9,7 +9,6 @@ use app\libraries\NumberUtils;
 use app\models\gradeable\AutoGradedVersion;
 use app\models\gradeable\Component;
 use app\models\gradeable\Gradeable;
-use app\models\gradeable\GradeableUtils;
 use app\models\gradeable\GradedGradeable;
 use app\models\gradeable\LateDays;
 use app\models\gradeable\LateDayInfo;
