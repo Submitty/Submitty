@@ -99,12 +99,15 @@ void AddAutogradingConfiguration(nlohmann::json &whole_config) {
               whole_config["autograding"]["compilation_to_runner"].push_back("**/" + itr->template get<std::string>());
             }
             else {
-              throw std::invalid_argument("Unable to parse provided executable_name");
+              throw std::invalid_argument("executable_name array must only contain strings.");
             }
           }
         }
         else if (exe_name->is_string()) {
           whole_config["autograding"]["compilation_to_runner"].push_back("**/" + exe_name->template get<std::string>());
+        }
+        else {
+          throw std::invalid_argument("executable_name must be an array or string.");
         }
       }
     }
