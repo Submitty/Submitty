@@ -17,7 +17,6 @@ describe('Cyclic grading View Test', () => {
             cy.get('#prev-student-navlink').click();
             cy.get('.rubric-title').should('contain', 'John Smith');
             cy.get('#grading-setting-btn').click(); // change
-            // cy.get('#general-setting-list').children().should('exist').first().children().should('exist').eq(1).children().should('exist').eq(1).find('.ta-grading-setting-option').select('Prev/Next Ungraded Student');
             cy.get('#general-setting-list').find('.ta-grading-setting-option').first().select('Prev/Next Ungraded Student');
             cy.get('.form-title > [data-testid="close-button"]').should('exist').eq(3).click();
             cy.get('#next-student-navlink').click();
