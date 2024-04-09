@@ -138,12 +138,18 @@ if (empty($_COOKIE['submitty_token'])) {
     Utils::setCookie('submitty_token', \Ramsey\Uuid\Uuid::uuid4()->toString());
 }
 
-$is_api = explode('/', $request->getPathInfo())[1] === 'api';
-if ($is_api) {
+$prefix = explode('/', $request->getPathInfo())[1];
+if ($prefix === 'api') {
     if (!empty($_SERVER['CONTENT_TYPE']) && str_starts_with($_SERVER['CONTENT_TYPE'], 'application/json')) {
         $_POST = json_decode(file_get_contents('php://input'), true);
     }
     $response = WebRouter::getApiResponse($request, $core);
+}
+elseif ($prefix === 'student_api') {
+    if (!empty($_SERVER['CONTENT_TYPE']) && str_starts_with($_SERVER['CONTENT_TYPE'], 'application/json')) {
+        $_POST = json_decode(file_get_contents('php://input'), true);
+    }
+    $response = WebRouter::getStudentApiResponse($request, $core);
 }
 else {
     $response = WebRouter::getWebResponse($request, $core);

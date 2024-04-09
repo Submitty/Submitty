@@ -114,9 +114,6 @@ class WebRouter {
      * @return MultiResponse|mixed should be of type Response only in the future
      */
     public static function getApiResponse(Request $request, Core $core) {
-        if (strpos($request->getRequestUri(), 'student_api')) {
-            return WebRouter::getStudentApiResponse($request, $core);
-        }
         try {
             $router = new self($request, $core);
             $router->loadCourse();
