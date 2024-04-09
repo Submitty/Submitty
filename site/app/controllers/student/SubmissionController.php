@@ -1033,7 +1033,7 @@ class SubmissionController extends AbstractController {
             return JsonResponse::getFailResponse("Gradeable hasn't been graded yet.");
         }
 
-        return $graded_gradeable->getAutoGradingScore();
+        return JsonResponse::getSuccessResponse($graded_gradeable->getAutoGradingScore());
     }
 
     
@@ -1045,6 +1045,13 @@ class SubmissionController extends AbstractController {
      * @return array
      */
     public function ajaxUploadSubmission($gradeable_id, $merge = null, $clobber = null) {
+        if (array_key_exists('student_api', $_SESSION)) {
+            if (!array_key_exists('vcs_checkout', $_POST)) {
+                return $this->uploadResult("Student API only supports VCS gradeables currently.", false);
+            }
+        }
+        
+        // return $this->uploadResult($_SESSION['student_api']);
         // check for whether the item should be merged with previous submission,
         // and whether or not file clobbering should be done.
         $merge_previous = isset($merge) && $merge === 'true';
@@ -1056,7 +1063,7 @@ class SubmissionController extends AbstractController {
         }
 
         $vcs_checkout = isset($_POST['vcs_checkout']) ? $_POST['vcs_checkout'] === "true" : false;
-        if ($vcs_checkout && !isset($_POST['git_repo_id'])) {
+        if ($vcs_checkout && !isset($_POST['git_repo_id']) && (!array_key_exists('student_api', $_SESSION))) {
             return $this->uploadResult("Invalid repo id.", false);
         }
 
@@ -1081,8 +1088,10 @@ class SubmissionController extends AbstractController {
         $original_user_id = $this->core->getUser()->getId();
         $user_id = $_POST['user_id'];
         // repo_id for VCS use
-        $repo_id = ($vcs_checkout ? $_POST['git_repo_id'] : "");
+        $repo_id = ($vcs_checkout & (!array_key_exists('student_api', $_SESSION)) ? $_POST['git_repo_id'] : "");
 
+        // Unset session variable
+        unset($_SESSION['student_api']);
         // make sure is full grader if the two ids do not match
         if ($original_user_id !== $user_id && !$this->core->getUser()->accessFullGrading()) {
             $msg = "You do not have access to that page.";

@@ -4,7 +4,7 @@ import {getCurrentSemester} from '../../support/utils';
 describe('Tests cases for the Student API', () => {
     it('Should get correct responses', () => {
         // Success (0)
-            getApiKey('instructor', 'instructor').then((key) => {
+        getApiKey('instructor', 'instructor').then((key) => {
             cy.request({
                 method: 'GET',
                 url: `${Cypress.config('baseUrl')}/api/student_api/${getCurrentSemester()}/sample/gradeable/subdirectory_vcs_homework/score`,
@@ -14,7 +14,7 @@ describe('Tests cases for the Student API', () => {
             }).then((response) => {
                 expect(response.body.data).to.eql(0);
             });
-        // Success
+            // Success
             cy.request({
                 method: 'POST',
                 url: `${Cypress.config('baseUrl')}/api/student_api/${getCurrentSemester()}/sample/gradeable/subdirectory_vcs_homework/upload`,
@@ -23,7 +23,7 @@ describe('Tests cases for the Student API', () => {
                 }, body: {
                     'git_repo_id': 'none',
                     'user_id': 'instructor',
-                    'vcs_checkout': 'true'
+                    'vcs_checkout': 'true',
                 },
             }).then((response) => {
                 console.log(response);

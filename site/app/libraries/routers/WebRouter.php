@@ -184,6 +184,9 @@ class WebRouter {
 
             $logged_in = $core->isApiLoggedIn($request);
 
+            if (($_POST['user_id'] ?? '') !== $core->getUser()->getId()) {
+                return JsonResponse::getFailResponse("API Key and POST user do not match");
+            }
             // prevent user that is not logged in from going anywhere except AuthenticationController
             if (
                 !$logged_in
@@ -218,6 +221,8 @@ class WebRouter {
 
         $core->getOutput()->disableRender();
         $core->disableRedirects();
+        $_SESSION['student_api'] = true;
+        // return JsonResponse::getFailResponse($_COOKIE['student_api']);
         return $router->run();
     }
 
