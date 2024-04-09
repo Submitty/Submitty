@@ -480,7 +480,8 @@ function showPopup(selector) {
     document.body.classList.add('no-scroll');
 }
 
-let lastActiveElement = null;
+// eslint-disable-next-line no-var
+var lastActiveElement = null;
 function captureTabInModal(formName, resetFocus=true) {
     if (resetFocus) {
         lastActiveElement = document.activeElement;
