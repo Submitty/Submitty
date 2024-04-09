@@ -5,7 +5,7 @@
 function newDownloadForm() {
     $('.popup-form').css('display', 'none');
     const form = $('#download-form');
-    form.css('display', 'block');
+    showPopup('#download-form')
     captureTabInModal('download-form');
     form.find('.form-body').scrollTop(0);
     $('#download-form input:checkbox').each(function() {
@@ -43,7 +43,7 @@ function newGradeableJsonForm() {
 function newGraderListForm() {
     $('.popup-form').css('display', 'none');
     const form = $('#grader-list-form');
-    form.css('display', 'block');
+    showPopup('#grader-list-form');
     captureTabInModal('grader-list-form');
     form.find('.form-body').scrollTop(0);
     $('[name="upload"]', form).val(null);
@@ -52,7 +52,7 @@ function newGraderListForm() {
 
 function editRegistrationSectionsForm() {
     const form = $('#registration-sections-form');
-    form.css('display', 'block');
+    showPopup('#registration-sections-form');
     captureTabInModal('registration-sections-form');
     form.find('.form-body').scrollTop(0);
     $('#instructor_all').focus();

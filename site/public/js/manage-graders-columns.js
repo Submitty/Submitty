@@ -7,7 +7,7 @@ const checkboxes = document.getElementsByClassName('toggle-columns-box');
 //opens modal with initial settings for new student
 function toggleColumnsForm() {
     const form = $('#toggle-columns-form');
-    form.css('display', 'block');
+    showPopup('#toggle-columns-form')
     checkProperTicks();
 }
 

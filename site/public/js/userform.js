@@ -54,7 +54,7 @@ function newGraderForm() {
 function newUserForm() {
     $('.popup-form').css('display', 'none');
     const form = $('#edit-user-form');
-    form.css('display', 'block');
+    showPopup('#edit-user-form');
     form.find('.form-body').scrollTop(0);
     $('#edit-student-modal-title').css('display', 'none');
     $('#edit-grader-modal-title').css('display', 'none');
@@ -131,7 +131,7 @@ function deleteUserForm(user_id, givenname, familyname) {
     $('[name="user_id"]', form).val(user_id);
     $('[name="displayed_fullname"]', form).val(`${givenname} ${familyname}`);
     $('#user-fullname', form).text(`${givenname} ${familyname}`);
-    form.css('display', 'block');
+    showPopup('#delete-user-form');
 }
 
 function demoteGraderForm(user_id, givenname, familyname) {
@@ -140,7 +140,7 @@ function demoteGraderForm(user_id, givenname, familyname) {
     $('[name="user_id"]', form).val(user_id);
     $('[name="displayed_fullname"]', form).val(`${givenname} ${familyname}`);
     $('#grader-fullname', form).text(`${givenname} ${familyname}`);
-    form.css('display', 'block');
+    showPopup('#demote-grader-form');
 }
 
 function userFormChange() {
