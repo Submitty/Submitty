@@ -1022,21 +1022,21 @@ class SubmissionController extends AbstractController {
     /**
      * @Route("/api/student_api/{_semester}/{_course}/gradeable/{gradeable_id}/score", methods={"GET"})
      */
-    public function ajaxGetGradeableScore($gradeable_id){
-        $gradeable = $this->core->getQueries()->getGradeableConfig($gradeable_id);
-        if ($gradeable === null) {
+    public function ajaxGetGradeableScore($gradeable_id) {
+        try{
+            $gradeable = $this->core->getQueries()->getGradeableConfig($gradeable_id);
+        } catch (\InvalidArgumentException $e) {
             return JsonResponse::getFailResponse('Gradeable does not exist');
         }
         $graded_gradeable = $this->core->getQueries()->getGradedGradeable($gradeable, $this->core->getUser()->getId(), $gradeable->isTeamAssignment());
 
-        if ($graded_gradeable === null) {
+        if (!$graded_gradeable->getAutoGradedGradeable()->hasActiveVersion()) {
             return JsonResponse::getFailResponse("Gradeable hasn't been graded yet.");
         }
 
-        return JsonResponse::getSuccessResponse($graded_gradeable->getAutoGradingScore());
+        return JsonResponse::getSuccessResponse($graded_gradeable->getAutoGradedGradeable()->hasActiveVersion());
     }
 
-    
     /**
      * Function for uploading a submission to the server. This should be called via AJAX, saving the result
      * to the json_buffer of the Output object, returning a true or false on whether or not it succeeded or not.
@@ -1050,7 +1050,7 @@ class SubmissionController extends AbstractController {
                 return $this->uploadResult("Student API only supports VCS gradeables currently.", false);
             }
         }
-        
+
         // return $this->uploadResult($_SESSION['student_api']);
         // check for whether the item should be merged with previous submission,
         // and whether or not file clobbering should be done.

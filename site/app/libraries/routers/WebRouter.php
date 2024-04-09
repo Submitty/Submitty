@@ -175,7 +175,7 @@ class WebRouter {
     /**
      * @param Request $request
      * @param Core $core
-     * @return MultiResponse|mixed should be of type Response only in the future
+     * @return JsonResponse|mixed
      */
     public static function getStudentApiResponse(Request $request, Core $core) {
         try {
@@ -184,17 +184,16 @@ class WebRouter {
 
             $logged_in = $core->isApiLoggedIn($request);
 
-            if (($_POST['user_id'] ?? '') !== $core->getUser()->getId()) {
-                return JsonResponse::getFailResponse("API Key and POST user do not match");
-            }
             // prevent user that is not logged in from going anywhere except AuthenticationController
             if (
                 !$logged_in
                 && !str_ends_with($router->parameters['_controller'], 'AuthenticationController')
             ) {
-                return JsonResponse::getFailResponse("Unauthenticated access. Please log in.");
+                return JsonResponse::getFailResponse("Invalid API Key");
             }
-
+            if (($_POST['user_id'] ?? ($_GET['user_id'] ?? '')) !== $core->getUser()->getId()) {
+                return JsonResponse::getFailResponse("API Key and user_id do not match");
+            }
             $enabled = $router->getEnabled();
             if ($enabled !== null && !$router->checkEnabled($enabled)) {
                 return JsonResponse::getFailResponse("The {$enabled->getFeature()} feature is not enabled.");
@@ -222,7 +221,6 @@ class WebRouter {
         $core->getOutput()->disableRender();
         $core->disableRedirects();
         $_SESSION['student_api'] = true;
-        // return JsonResponse::getFailResponse($_COOKIE['student_api']);
         return $router->run();
     }
 
