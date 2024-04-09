@@ -220,7 +220,11 @@
         rgb(255 0 255 / 30%),
         rgb(255 0 0 / 30%)
     );
-
+    
+    /* poll histogram colors */
+    --histogram-default: var(--standard-vibrant-dark-blue);
+    --histogram-correct: var(--standard-deep-dark-green);
+    
     /* other */
     --box-shadow-very-transparent: #00000020;
     --box-shadow-slightly-transparent: #00000030;
@@ -244,6 +248,10 @@
     --deleted-and-unviewed-thread: #939494;
     --background-blue: #000000;
     --default-black: #ffffff;
+
+    /* poll histogram colors */
+    --histogram-default: var(--standard-light-blue);
+    --histogram-correct: var(--standard-medium-dark-lime-green);
 }
 
 [data-theme="dark"] {
@@ -348,6 +356,10 @@
     --viewed-content: #50535a;
     --code-box-background-light-gray: #282c34;
     --code-box-font-color-dark-gray: #abb2bf;
+
+    /* poll histogram colors */
+    --histogram-default: var(--standard-light-blue);
+    --histogram-correct: var(--standard-medium-dark-lime-green);
 }
 
 /* Dark Theme Versions of Colors */
