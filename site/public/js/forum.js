@@ -790,6 +790,13 @@ function modifyOrSplitPost(e) {
     const form = $(this);
     const formData = new FormData(form[0]);
     formData.append('deleted_attachments', JSON.stringify(getDeletedAttachments()));
+    const files = testAndGetAttachments(1, false);
+    if (files === false) {
+        return false;
+    }
+    for (let i = 0; i < files.length ; i++) {
+        formData.append('file_input[]', files[i], files[i].name);
+    }
     const submit_url = form.attr('action');
 
     $.ajax({
@@ -2258,28 +2265,27 @@ function updateThread(e) {
     e.preventDefault();
     const cat = [];
     $('input[name="cat[]"]:checked').each(item => cat.push($('input[name="cat[]"]:checked')[item].value));
-    const post_box_id = $('#edit-user-post').find('.thread-post-form').data('post_box_id');
 
-    const data =  {
-        edit_thread_id: $('#edit_thread_id').val(),
-        edit_post_id: $('#edit_post_id').val(),
-        csrf_token: $('input[name="csrf_token"]').val(),
-        title: $('input#title').val(),
-        thread_post_content: $(`textarea#reply_box_${post_box_id}`).val(),
-        thread_status: $('#thread_status').val(),
-        Anon: $('input#thread_post_anon_edit').is(':checked') ? $('input#thread_post_anon_edit').val() : 0,
-        lock_thread_date: $('input#lock_thread_date').text(),
-        expirationDate: $('input#expirationDate').val(),
-        cat,
-        markdown_status: parseInt($(`input#markdown_input_${post_box_id}`).val()),
-        deleted_attachments: JSON.stringify(getDeletedAttachments()),
-    };
+    const form = $(this);
+    const formData = new FormData(form[0]);
+    formData.append('deleted_attachments', JSON.stringify(getDeletedAttachments()));
+
+    const files = testAndGetAttachments(1, false);
+    if (files === false) {
+        return false;
+    }
+
+    for (let i = 0; i < files.length ; i++) {
+        formData.append('file_input[]', files[i], files[i].name);
+    }
 
     $.ajax({
         // eslint-disable-next-line no-undef
         url: `${buildCourseUrl(['forum', 'posts', 'modify'])}?modify_type=1`,
         type: 'POST',
-        data,
+        data: formData,
+        processData: false,
+        contentType: false,
         success: function (response) {
             try {
                 response = JSON.parse(response);
