@@ -19,3 +19,5 @@ noreply_email: noreply_email@localhost
 smtp_server: mail.localhost
 smtp_port: 25
 submitty_version: v24.01.01
+db_host: localhost
+db_port: 5432
