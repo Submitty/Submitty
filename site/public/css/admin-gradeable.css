@@ -14,10 +14,6 @@ input.readonly.peerstudents {
     color: var(--btn-text-black);
 }
 
-input[type="text"] {
-    font-family: monospace;
-}
-
 #gradeable-dates input[type="text"] {
     width: 200px;
 }

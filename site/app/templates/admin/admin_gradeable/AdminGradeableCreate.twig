@@ -31,21 +31,22 @@
     Primary Form
 #}
 <!-- Gradeable Title (read/write in all modes) -->
-    <div class="option row">
-        <div class="option-desc col-md-6">
-            <label for="g_title">
-                <span class="option-title">Title</span>
-                <br>
-                <span class="option-alt">What is the title of this gradable?</span>
-                <br>
-                <span class="required_type">(Required)</span>
-            </label>
-        </div>
-
-        <div class="option-input col-md-6">
-            <textarea onkeyup="textAreaAdjust(this)" name='title' id='g_title' class="required auto_save" style="overflow:hidden" placeholder="(Required)" required>{{action != 'new' ? gradeable.getTitle() : '' }}</textarea>
-        </div>
+<div class="option row">
+    <div class="option-desc col-md-6">
+        <label for="g_title">
+            <span class="option-title">Title</span>
+            <br>
+            <span class="option-alt">What is the title of this gradable?</span>
+            <br>
+            <span class="required_type">(Required)</span>
+        </label>
     </div>
+
+    <div class="option-input col-md-6">
+        <input type='text' name='title' id='g_title' class="required auto_save" style="overflow:hidden" placeholder="(Required)" required
+               value="{{ action != 'new' ? gradeable.getInstructionsUrl() : '' }}" />
+    </div>
+</div>
 
 
 <!-- Instruction URL (read/write in all modes) -->
