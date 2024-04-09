@@ -1,4 +1,7 @@
 ---
+# Example playbook
+# You can customize the variable to the app_submitty role by looking the default/main.yml list of variables in the role.
+
 - name: Install Submitty
   hosts: submitty
   remote_user: ubuntu
@@ -24,3 +27,6 @@
         admin_password: admin_password
         noreply_email: submitty_do_not_reply@cs.wallawalla.edu
         smtp_server: mail.cs.wallawalla.edu
+        submitty_version: v24.01.01
+        db_host: localhost
+        db_port: 5432

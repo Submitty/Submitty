@@ -13,10 +13,9 @@ submitty_email: submitty@localhost
 institution_url: localhost
 ssl_enabled: false
 admin_email: admin@localhost
-submitty_ip: 172.0.0.1
+submitty_ip: 127.0.0.1
 admin_password: admin_password
 noreply_email: noreply_email@localhost
 smtp_server: mail.localhost
 smtp_port: 25
-
-#default values we can install on our localhost
+submitty_version: v24.01.01

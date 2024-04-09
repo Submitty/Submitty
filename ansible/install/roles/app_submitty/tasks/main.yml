@@ -14,12 +14,6 @@
     ('Failed to lock apt for exclusive operation' not in apt_action.msg and
     '/var/lib/dpkg/lock' not in apt_action.msg)
 
-- name: make sure cracklib is not installed
-  ansible.builtin.apt:
-    name: libpam-cracklib
-    state: absent
-    autoremove: yes
-
 - name: Create submitty git directory if none exists
   ansible.builtin.file:
     path: /usr/local/submitty/GIT_CHECKOUT
@@ -31,7 +25,7 @@
   ansible.builtin.git:
     repo: https://github.com/Submitty/Submitty.git
     dest: /usr/local/submitty/GIT_CHECKOUT/Submitty
-    version: v24.01.01
+    version: "{{ submitty_version }}"
     force: yes
     update: yes
 
@@ -41,15 +35,15 @@
     executable: "/bin/bash"
     cmd: |
       set -o pipefail
-      echo "localhost
-        5432
+      echo "{{ db_host }}"
+        {{ db_port }}
         "{{ submitty_dbuser }}"
         "{{ submitty_dbuser_password }}"
         "{{ submitty_course_dbuser }}"
         "{{ submitty_course_dbuser_password }}"
         "{{ timezone }}"
         "{{ language }}"
-        "https://{{ submitty_url }}"
+        "{{ 'https' if ssl_enabled else 'http' }}://{{ submitty_url }}"        
         "{{ vcs_url }}"
         "{{ institution_name }}"
         "{{ sysadmin_email }}"
