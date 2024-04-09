@@ -2435,7 +2435,7 @@ function setupDisableReplyThreadForm() {
 
         const submitButton = form.querySelector('input[type="submit"]');
 
-        if (textArea.id === 'reply_box_0' || textArea.id === 'reply_box_1') {
+        if (textArea.id === 'reply_box_1' || textArea.id === 'reply_box_2') {
             // Should not apply for first two reply_box's as they imply the post itself which should be handled by another controller due to extensive inputs
             return;
         }

@@ -52,7 +52,7 @@ const replyDisabled = (title, attachment) => {
     cy.get('[value="Submit Reply to All"]').should('be.disabled');
 
     // Ensure reply button is not disabled when attachments are added
-    cy.get('#input-file2').attachFile(attachment);
+    cy.get('#input-file3').attachFile(attachment);
     cy.get('[value="Submit Reply to All"]').should('not.be.disabled').click();
 
     // Wait for submission and ensure attachment with no text is visible
