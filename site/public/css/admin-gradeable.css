@@ -225,11 +225,12 @@ div.btn-container {
     border-radius: 5px;
 }
 
-/* Make all text input fields on AdminGradeableCreate monospace. */
-/* TODO: decide on site-wide font policy */
+/* Make all text input fields on AdminGradeableCreate monospace. TODO: decide on site-wide font policy
 #g_title, #instructions_url, #g_id, #discussion_thread_id, #team_size_max, #vcs_path, #external_repo, #vcs_subdirectory_input {
     font-family: monospace;
 }
+*/
+
 
 .popup-form .left-panel {
     width: 50%;
