@@ -158,18 +158,12 @@ fi
 # create doctrine proxy classes directory
 mkdir -p ${SUBMITTY_INSTALL_DIR}/site/cache/doctrine-proxy
 
-# create doctrine proxy classes
-php "${SUBMITTY_INSTALL_DIR}/sbin/doctrine.php" "orm:generate-proxies"
-
 # clear old lang cache
 if [ -d "${SUBMITTY_INSTALL_DIR}/site/cache/lang" ]; then
     rm -rf "${SUBMITTY_INSTALL_DIR}/site/cache/lang"
 fi
 # create lang cache directory
 mkdir -p ${SUBMITTY_INSTALL_DIR}/site/cache/lang
-
-# load lang files
-php "${SUBMITTY_INSTALL_DIR}/sbin/load_lang.php" "${SUBMITTY_REPOSITORY}/../Localization/lang" "${SUBMITTY_INSTALL_DIR}/site/cache/lang"
 
 if [ -d "${SUBMITTY_INSTALL_DIR}/site/public/mjs" ]; then
     rm -r "${SUBMITTY_INSTALL_DIR}/site/public/mjs"
@@ -182,10 +176,6 @@ chown ${PHP_USER}:${PHP_GROUP} ${SUBMITTY_INSTALL_DIR}/site
 for entry in "${result_array[@]}"; do
     chown ${PHP_USER}:${PHP_GROUP} "${SUBMITTY_INSTALL_DIR}/${entry:12}"
 done
-
-# Update permissions & ownership for cache directory
-chmod -R 751 ${SUBMITTY_INSTALL_DIR}/site/cache
-chown -R ${PHP_USER}:${PHP_GROUP} ${SUBMITTY_INSTALL_DIR}/site/cache
 
 # Update ownership for cgi-bin to CGI_USER
 find ${SUBMITTY_INSTALL_DIR}/site/cgi-bin -exec chown ${CGI_USER}:${CGI_GROUP} {} \;
@@ -229,6 +219,16 @@ fi
 
 find ${SUBMITTY_INSTALL_DIR}/site/vendor -type d -exec chmod 551 {} \;
 find ${SUBMITTY_INSTALL_DIR}/site/vendor -type f -exec chmod 440 {} \;
+
+# create doctrine proxy classes
+php "${SUBMITTY_INSTALL_DIR}/sbin/doctrine.php" "orm:generate-proxies"
+
+# load lang files
+php "${SUBMITTY_INSTALL_DIR}/sbin/load_lang.php" "${SUBMITTY_REPOSITORY}/../Localization/lang" "${SUBMITTY_INSTALL_DIR}/site/cache/lang"
+
+# Update permissions & ownership for cache directory
+chmod -R 751 ${SUBMITTY_INSTALL_DIR}/site/cache
+chown -R ${PHP_USER}:${PHP_GROUP} ${SUBMITTY_INSTALL_DIR}/site/cache
 
 if [[ "${CI}" != true && "${BROWSCAP}" = true ]]; then
     echo -e "Checking for and fetching latest browscap.ini if needed"
