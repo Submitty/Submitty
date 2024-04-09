@@ -43,11 +43,22 @@ except Exception as config_fail_error:
 
 
 DATA_DIR_PATH = SUBMITTY_CONFIG['submitty_data_dir']
+BASE_URL_PATH = SUBMITTY_CONFIG['submission_url']
 NOTIFICATION_LOG_PATH = os.path.join(DATA_DIR_PATH, "logs", "notifications")
 TODAY = datetime.datetime.now()
 LOG_FILE = open(os.path.join(
     NOTIFICATION_LOG_PATH, "{:04d}{:02d}{:02d}.txt".format(TODAY.year, TODAY.month,
                                                     TODAY.day)), 'a')
+# Collect submitty admin token
+INSTALL_DIR_PATH = SUBMITTY_CONFIG['submitty_install_dir']
+SUBMITTY_CREDS_FILE = os.path.join(INSTALL_DIR_PATH, 'config', 'submitty_admin.json')
+# Load credentials out of admin file
+with open(SUBMITTY_CREDS_FILE, 'r') as file:
+    CREDENTIALS = json.load(file)
+
+if 'token' not in CREDENTIALS or not CREDENTIALS['token']:
+    raise Exception('Unable to read credentials from submitty_admin.json')
+
 try:
     DB_HOST = DATABASE_CONFIG['database_host']
     DB_USER = DATABASE_CONFIG['database_user']
@@ -81,7 +92,7 @@ def fetchPendingGradeables(db):
 
     for row in result:
         pending_gradeable_notifications.append({
-            'reference_id': row[0],
+            'gradeable_id': row[0],
             'term': row[1],
             'course': row[2],
             })
@@ -91,16 +102,11 @@ def fetchPendingGradeables(db):
 def notifyPendingGradeables(db):
     pending_gradeable_notifications = fetchPendingGradeables(db)
     notified_gradeables = []
-    print(pending_gradeable_notifications)
 
     for gradeable in pending_gradeable_notifications:
-        payload = {'reference_id' : gradeable['reference_id']}
-        response = requests.post("http://localhost:1511/courses/{}/{}/gradeable/{}/quick_link?action=release_gradeable_notification".format(gradeable['term'].strip(), gradeable['course'].strip(), gradeable['reference_id'].strip()), data = payload)
-
-        if response.status_code == 200:
-            notified_gradeables.append(gradeable['id'])
-
-
+        """Automatically call Send Gradeable Notification API."""
+        # TODO
+                
     # Update all successfully sent notifications for the potential queued gradeables
     if len(notified_gradeables) >= 1:
         query = """UPDATE scheduled_notifications SET notification_state = true WHERE id in ({});""".format(','.join(['%s'] * len(notified_gradeables)))
@@ -110,6 +116,10 @@ def main():
     try:
         db = setup_db()
         notifyPendingGradeables(db)
+        print('{}/courses/{}/{}/gradeable/{}/release-notifications'.format(BASE_URL_PATH, 's24', 'sample', 'closed_team_homework'))
+        response = requests.post('{}/courses/{}/{}/gradeable/{}/release-notifications'.format(BASE_URL_PATH, 's24', 'sample', 'closed_team_homework'), headers={'Authorization': CREDENTIALS['token']})
+        print(CREDENTIALS['token'])
+        print(response.json())  
     except Exception as notification_send_error:
         e = "[{}] Error Sending Notification(s): {}".format(
             str(datetime.datetime.now()), str(notification_send_error))

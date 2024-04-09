@@ -8,7 +8,6 @@ use app\exceptions\ValidationException;
 use app\libraries\DateUtils;
 use app\libraries\GradeableType;
 use app\models\gradeable\Gradeable;
-use app\models\Notification;
 use app\models\gradeable\Component;
 use app\models\gradeable\Mark;
 use app\libraries\FileUtils;
@@ -20,7 +19,6 @@ use Symfony\Component\Routing\Annotation\Route;
  * Class AdminGradeableController
  * @package app\controllers\admin
  * @AccessControl(role="INSTRUCTOR")
- * @AccessControl(role="submitty_daemon")
  */
 class AdminGradeableController extends AbstractController {
     /**
@@ -1605,10 +1603,6 @@ class AdminGradeableController extends AbstractController {
                 $success = false;
             }
         }
-        elseif ($action === "release_gradeable_notification") {
-            $gradeable->releaseGradeableNotification();
-            return JsonResponse::getSuccessResponse();
-        }
         $gradeable->setDates($dates);
         $this->core->getQueries()->updateGradeable($gradeable);
         if ($success === true) {
@@ -1709,5 +1703,19 @@ class AdminGradeableController extends AbstractController {
             return;
         }
         $this->core->getOutput()->renderJsonError("Unknown gradeable");
+    }
+    
+    /**
+     * @Route("/courses/{_semester}/{_course}/gradeable/{gradeable_id}/release-notifications")
+     * @Route("/api/courses/{_semester}/{_course}/gradeable/{gradeable_id}/release-notifications", methods={"POST"})
+     */
+    public function releaseGradeableNotifications($gradeable_id): JsonResponse {
+        if (!$this->core->getUser()->accessAdmin()) {
+            // return JsonResponse::getErrorResponse("This account cannot access admin pages");
+            $this->core->getOutput()->showError("This account cannot access admin pages");
+        }
+
+        $gradeable = $this->core->getQueries()->getGradeableConfig($gradeable_id);
+        return JsonResponse::getSuccessResponse(["message" => $gradeable->getAllowCustomMarks()]);
     }
 }
