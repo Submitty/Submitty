@@ -9,13 +9,6 @@ use app\models\User;
 use app\views\NavigationView;
 
 class GradeableUtils {
-    /**
-     * Get the gradeables of a specified course.
-     *
-     * @return array<string, array<string, Gradeable>|array<string, GradedGradeable>|array<string, Button>>
-     * @throws \Exception
-     */
-
     const VCS_TYPE_NONE = -1;
     const VCS_TYPE_SUBMITTY_HOSTED = 0;
     const VCS_TYPE_SUBMITTY_HOSTED_URL = 1;
@@ -23,6 +16,12 @@ class GradeableUtils {
     const VCS_TYPE_PRIVATE_GITHUB = 3;
     const VCS_TYPE_SELF_HOSTED = 4;
 
+    /**
+     * Get the gradeables of a specified course.
+     *
+     * @return array<string, array<string, Gradeable>|array<string, GradedGradeable>|array<string, Button>>
+     * @throws \Exception
+     */
     public static function getGradeablesFromCourse(Core $core, string $semester, string $title, array &$calendar_messages, bool $global = true): array {
         /** @var array<string, Gradeable> $gradeables */
         $gradeables = [];
