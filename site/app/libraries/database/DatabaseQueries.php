@@ -141,11 +141,10 @@ class DatabaseQueries {
      * Update a user's preferred locale in the master database.
      *
      * @param User $user The user object to modify
-     * @param string $locale The locale string to set it to, must be one of Core::getSupportedLocales()
-     * @return bool Whether the operation was successful
+     * @param string|null $locale The locale string to set it to, must be one of Core::getSupportedLocales()
      */
-    public function updateSubmittyUserPreferredLocale(User $user, string|null $locale): bool {
-        return $this->submitty_db->query("UPDATE users SET user_preferred_locale=? WHERE user_id=?", [$locale, $user->getId()]);
+    public function updateSubmittyUserPreferredLocale(User $user, string|null $locale): void {
+        $this->submitty_db->query("UPDATE users SET user_preferred_locale=? WHERE user_id=?", [$locale, $user->getId()]);
     }
 
     /**
@@ -1206,8 +1205,9 @@ SQL;
 
     /**
      * @param string[] $attachments_deleted
+     * @param string[] $attachments_added
      */
-    public function editPost($original_creator, $user, $post_id, $content, $anon, $markdown, $attachments_deleted) {
+    public function editPost($original_creator, $user, $post_id, $content, $anon, $markdown, array $attachments_deleted, array $attachments_added) {
         try {
             $markdown = $markdown ? 1 : 0;
             // Before making any edit to $post_id, forum_posts_history will not have any corresponding entry
@@ -1229,6 +1229,17 @@ SQL;
             if (count($attachments_deleted) > 0) {
                 $placeholders = $this->createParameterList(count($attachments_deleted));
                 $this->course_db->query("UPDATE forum_attachments SET version_deleted = ? WHERE post_id = ? AND file_name IN {$placeholders}", array_merge([$version_id, $post_id], $attachments_deleted));
+            }
+            if (count($attachments_added) > 0) {
+                $rows = [];
+                $params = [];
+                // Format placeholders and parameters for single query
+                foreach ($attachments_added as $img) {
+                    $params[] = $this->createParameterList(4);
+                    $rows = array_merge($rows, [$post_id, $img, $version_id, 0]);
+                }
+                $placeholders = implode(", ", $params);
+                $this->course_db->query("INSERT INTO forum_attachments (post_id, file_name, version_added, version_deleted) VALUES {$placeholders}", $rows);
             }
             $hasAttachment = !empty($this->getForumAttachments([$post_id])[$post_id][0]);
             // Update current post
@@ -7386,12 +7397,12 @@ AND gc_id IN (
      * @param  String                     $userid
      * @return bool
      */
-    public function getUserHasSubmission(Gradeable $gradeable, string $userid) {
-
-        return $this->course_db->query(
+    public function getUserHasSubmission(Gradeable $gradeable, string $userid): bool {
+        $this->course_db->query(
             'SELECT user_id FROM electronic_gradeable_data WHERE g_id=? AND (user_id=?)',
             [$gradeable->getId(), $userid]
         );
+        return $this->course_db->getRowCount() > 0;
     }
 
     /**

@@ -452,8 +452,8 @@
 }
 
 .history-buffer {
-    margin-bottom:3px;
-    margin-top:1.5em;
+    margin-bottom: 3px;
+    margin-top: 1.5em;
 }
 
 /* stylelint-disable-next-line selector-id-pattern */
@@ -779,4 +779,10 @@
     margin-right: 10px;
     padding: unset;
     cursor: pointer;
+}
+
+.button-row {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
 }
