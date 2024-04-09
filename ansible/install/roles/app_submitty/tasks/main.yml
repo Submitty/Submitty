@@ -120,3 +120,13 @@
   ansible.builtin.service:
     name: apache2
     state: restarted
+
+- name: Ensure submitty_autograding_shipper is running
+  ansible.builtin.service:
+    name: submitty_autograding_shipper
+    state: started
+
+- name: Ensure submitty_daemon_jobs_handler is running
+  ansible.builtin.service:
+    name: submitty_daemon_jobs_handler
+    state: started
