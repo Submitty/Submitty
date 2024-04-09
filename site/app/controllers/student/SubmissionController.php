@@ -1034,7 +1034,7 @@ class SubmissionController extends AbstractController {
             return JsonResponse::getFailResponse("Gradeable hasn't been graded yet.");
         }
 
-        return JsonResponse::getSuccessResponse($graded_gradeable->getAutoGradedGradeable()->hasActiveVersion());
+        return JsonResponse::getSuccessResponse($graded_gradeable->getAutoGradingScore());
     }
 
     /**
