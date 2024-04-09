@@ -110,36 +110,67 @@
 </div>
 <script>
 $(document).ready(function() {
+    // Define a minimum height for the textareas
+    const MIN_HEIGHT = 100; // Set this to whatever is appropriate for your design
+
     function resizeTextarea(textarea) {
-    if (textarea.scrollHeight > textarea.clientHeight) {
-        textarea.style.height = 'auto'; 
-        textarea.style.height = textarea.scrollHeight + 'px';
-        textarea.style.overflowY = 'hidden';
-    } else {
-        textarea.style.height = '100px';
-        textarea.style.overflowY = 'auto';
+        // Temporarily reduce padding to measure the natural content height more accurately
+        var originalPadding = getComputedStyle(textarea).padding;
+        textarea.style.padding = '0';
+
+        // Reset the height to the minimum before recalculating the actual content height
+        textarea.style.height = `${MIN_HEIGHT}px`;
+
+        // Calculate the desired height based on content, padding, and minimum height
+        var desiredHeight = Math.max(textarea.scrollHeight, MIN_HEIGHT);
+
+        // Restore the original padding
+        textarea.style.padding = originalPadding;
+
+        // Set the textarea height if the scrollHeight is greater than minimum height
+        if (desiredHeight > MIN_HEIGHT) {
+            desiredHeight += 5;
+            textarea.style.height = desiredHeight + 'px';
         }
+        
+        // Restore overflow behavior after resizing
+        textarea.style.overflowY = 'hidden'; // Allow scroll if needed
     }
 
+    // Attach the resize function to the 'input' event of all textareas
+    $('textarea').on('input', function() {
+        resizeTextarea(this);
+    });
+
+    // Resize textareas on AJAX completion
     $(document).ajaxComplete(function() {
-    var textareaElement = $('#reply_box_0');
-    if (textareaElement.length) {
-        resizeTextarea(textareaElement[0]);
-    }
-});
+        $('textarea').each(function() {
+            resizeTextarea(this);
+        });
+    });
+
+    // Resize textareas when the content is dynamically added
     var observer = new MutationObserver(function(mutations) {
         mutations.forEach(function(mutation) {
             mutation.addedNodes.forEach(function(node) {
-                if (node.nodeType === 1 && node.id === '{{markdown_area_id}}') {
+                if (node.nodeType === 1 && node.matches('textarea')) {
                     resizeTextarea(node);
                 }
             });
         });
     });
+
     var config = { childList: true, subtree: true };
     var target = document.getElementById('container');
     if (target) {
         observer.observe(target, config);
     }
+
+    // Resize all textareas immediately when the page loads
+    $('textarea').each(function() {
+        resizeTextarea(this);
+    });
 });
 </script>
+
+
