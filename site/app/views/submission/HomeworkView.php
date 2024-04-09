@@ -560,12 +560,6 @@ class HomeworkView extends AbstractView {
             'recent_version_url' => $recent_version_url,
             'git_auth_token_url' => $this->core->buildUrl(['authentication_tokens']),
             'git_auth_token_required' => false,
-            'VCS_TYPE_NONE' => GradeableUtils::VCS_TYPE_NONE,
-            'VCS_TYPE_SUBMITTY_HOSTED' => GradeableUtils::VCS_TYPE_SUBMITTY_HOSTED,
-            'VCS_TYPE_SUBMITTY_HOSTED_URL' => GradeableUtils::VCS_TYPE_SUBMITTY_HOSTED_URL,
-            'VCS_TYPE_PUBLIC_GITHUB' => GradeableUtils::VCS_TYPE_PUBLIC_GITHUB,
-            'VCS_TYPE_PRIVATE_GITHUB' => GradeableUtils::VCS_TYPE_PRIVATE_GITHUB,
-            'VCS_TYPE_SELF_HOSTED' => GradeableUtils::VCS_TYPE_SELF_HOSTED
         ]);
     }
 
