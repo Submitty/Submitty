@@ -16,7 +16,7 @@ describe('Tests cases for the Student API', () => {
                 },
             }).then((response) => {
                 expect(response.body.status).to.equal('success');
-                // Gradeables aren't graded quickly enough in CI to test for accurate score count. 
+                // Gradeables aren't graded quickly enough in CI to test for accurate score count.
             });
             // Success, successfully uploaded
             cy.request({
