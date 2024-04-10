@@ -29,6 +29,7 @@ use app\models\gradeable\AutoGradedGradeable;
 use app\models\gradeable\GradedComponentContainer;
 use app\models\gradeable\AutoGradedVersion;
 use app\models\gradeable\LateDayInfo;
+use DateTime;
 
 /**
  * DatabaseQueries
@@ -1286,7 +1287,7 @@ SQL;
         return count($this->course_db->rows()) == 1;
     }
 
-    public function visitThread($current_user, $thread_id, $last_viewed_post_time = null) {
+    public function visitThread($current_user, $thread_id, string $last_viewed_post_time = null) {
         // If the user has already visited the thread, set timestamp to current time
         if ($last_viewed_post_time === null) {
             $this->course_db->query("INSERT INTO viewed_responses(thread_id,user_id,timestamp) VALUES(?, ?, current_timestamp) ON CONFLICT (thread_id, user_id) DO UPDATE SET timestamp = current_timestamp", [$thread_id, $current_user]);
