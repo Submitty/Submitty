@@ -31,21 +31,21 @@
             {% if earned == 0 %}
                 gray-background
             {% else %}
-                green-background
+                auto-score-green
             {% endif %}
         {% elseif earned < 0 %}
             {% if earned < 0.5 * max %}
-                red-background
+                auto-score-red
             {% else %}
-                yellow-background
+                auto-score-yellow
             {% endif %}
         {% else %}
             {% if earned >= max %}
-                green-background
+                auto-score-green
             {% elseif earned > max * 0.5 %}
                 yellow-background
             {% else %}
-                red-background
+                auto-score-red
             {% endif %}
         {% endif %}
     {%- endapply -%}
