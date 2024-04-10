@@ -146,7 +146,7 @@ if ($prefix === 'api') {
     $response = WebRouter::getApiResponse($request, $core);
 }
 elseif ($prefix === 'student_api') {
-    if (!empty($_SERVER['CONTENT_TYPE']) && str_starts_with($_SERVER['CONTENT_TYPE'], 'application/json')) {
+    if (isset($_SERVER['CONTENT_TYPE']) && str_starts_with($_SERVER['CONTENT_TYPE'], 'application/json')) {
         $_POST = json_decode(file_get_contents('php://input'), true);
     }
     $response = WebRouter::getStudentApiResponse($request, $core);

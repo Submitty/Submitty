@@ -1021,8 +1021,10 @@ class SubmissionController extends AbstractController {
 
     /**
      * @Route("/student_api/{_semester}/{_course}/gradeable/{gradeable_id}/score", methods={"GET"})
+     * @return JsonResponse
+     * @param string $gradeable_id
      */
-    public function ajaxGetGradeableScore($gradeable_id) {
+    public function ajaxGetGradeableScore(string $gradeable_id): JsonResponse {
         try {
             $gradeable = $this->core->getQueries()->getGradeableConfig($gradeable_id);
         }
