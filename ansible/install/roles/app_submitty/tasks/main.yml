@@ -29,13 +29,12 @@
     force: yes
     update: yes
 
-# this script only uses PAM and email server
-- name: Run Submitty install script.
-  ansible.builtin.shell:
+- name: Run install_system.sh script
+  ansible.builtin.shell: |
     executable: "/bin/bash"
     cmd: |
       set -o pipefail
-      echo "{{ db_host }}"
+      echo  "{{ db_host }}
         {{ db_port }}
         "{{ submitty_dbuser }}"
         "{{ submitty_dbuser_password }}"
@@ -59,8 +58,9 @@
         "{{ noreply_email }}"
         "{{ smtp_server }}"
         "{{ smtp_port }}"
-        "{{ institution_url }}"
+        "{{ institution_url }}"    
         " | bash -p ./.setup/install_system.sh > /usr/local/submitty/install.log 2>&1
+
   args:
     chdir: /usr/local/submitty/GIT_CHECKOUT/Submitty
   become: yes
