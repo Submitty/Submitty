@@ -763,6 +763,34 @@ td > a.active-sort {
     background-color: var(--standard-medium-blue);
 }
 
+.auto-score-green {
+    border: 2px solid var(--standard-vibrant-green);
+    color: var(--text-black);
+    background-color: var(--default-white);
+    box-shadow: 0 0 6px 2px #404040;
+}
+
+.auto-score-yellow {
+    border: 2px solid var(--standard-light-yellow);
+    color: var(--text-black);
+    background-color: var(--default-white);
+    box-shadow: 0 0 6px 2px #404040;
+}
+
+.auto-score-red {
+    border: 2px solid var(--error-alert-dark-red);
+    color: var(--text-black);
+    background-color: var(--default-white);
+    box-shadow: 0 0 6px 2px #404040;
+}
+
+.auto-score-blue {
+    border: 2px solid var(--standard-medium-blue);
+    color: var(--text-black);
+    background-color: var(--default-white);
+    box-shadow: 0 0 6px 2px #404040;
+}
+
 .badge-container {
     padding: 6px 0;
     display: block;
