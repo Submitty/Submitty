@@ -12,21 +12,5 @@
         name: app_submitty
       vars:
       # customize your submitty install by adding variables here
-        submitty_dbuser_password: 
-        submitty_course_dbuser_password: 
-        timezone: 
-        submitty_url: 
-        vcs_url: 
-        institution_name: 
-        sysadmin_email: 
-        submitty_email: 
-        institution_url: 
-        ssl_enabled: true
-        admin_email: 
-        submitty_ip: 
-        admin_password: 
-        noreply_email: 
-        smtp_server: 
-        submitty_version: 
-        db_host: 
-        db_port: 
+      # these variables override the default variables in the role
+        submitty_version: v24.01.01

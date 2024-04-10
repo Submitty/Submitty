@@ -1,4 +1,7 @@
 ---
+submitty_version: v24.01.01
+db_host: localhost
+db_port: 5432
 submitty_dbuser: submitty_dbuser
 submitty_dbuser_password: submitty_password
 submitty_course_dbuser: submitty_course_dbuser
@@ -18,6 +21,3 @@ admin_password: admin_password
 noreply_email: noreply_email@localhost
 smtp_server: mail.localhost
 smtp_port: 25
-submitty_version: v24.01.01
-db_host: localhost
-db_port: 5432
