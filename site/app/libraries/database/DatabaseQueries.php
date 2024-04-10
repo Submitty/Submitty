@@ -1290,7 +1290,8 @@ SQL;
         // If the user has already visited the thread, set timestamp to current time
         if ($last_viewed_post_time === null) {
             $this->course_db->query("INSERT INTO viewed_responses(thread_id,user_id,timestamp) VALUES(?, ?, current_timestamp) ON CONFLICT (thread_id, user_id) DO UPDATE SET timestamp = current_timestamp", [$thread_id, $current_user]);
-        }else {
+        }
+        else {
         // Else set timestamp to the last view timestamp which is the post date of the last post viewed by user
             $this->course_db->query("INSERT INTO viewed_responses(thread_id,user_id,timestamp) VALUES(?, ?, ?) ON CONFLICT (thread_id, user_id) DO UPDATE SET timestamp = ?", [$thread_id, $current_user, $last_viewed_post_time, $last_viewed_post_time]);
         }
