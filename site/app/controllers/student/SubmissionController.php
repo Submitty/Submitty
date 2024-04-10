@@ -1090,7 +1090,7 @@ class SubmissionController extends AbstractController {
         $original_user_id = $this->core->getUser()->getId();
         $user_id = $_POST['user_id'];
         // repo_id for VCS use
-        $repo_id = ($vcs_checkout & (!array_key_exists('student_api', $_SESSION)) ? $_POST['git_repo_id'] : "");
+        $repo_id = ($vcs_checkout && (!array_key_exists('student_api', $_SESSION)) ? $_POST['git_repo_id'] : "");
 
         // Unset session variable
         unset($_SESSION['student_api']);
