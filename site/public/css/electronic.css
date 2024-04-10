@@ -590,6 +590,7 @@ progress::-webkit-progress-value {
     border: 5px solid var(--standard-vibrant-pink-red);
 }
 
+/* stylelint-disable-next-line selector-id-pattern */
 #autograding_results .box-block .red-message {
     padding-left: 5px;
 }
