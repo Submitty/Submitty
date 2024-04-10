@@ -12,21 +12,21 @@
         name: app_submitty
       vars:
       # customize your submitty install by adding variables here
-        submitty_dbuser_password: submitty_dbuser
-        submitty_course_dbuser_password: submitty_dbuser
-        timezone: America/New_York
-        submitty_url: fordet.cs.wallawalla.edu
-        vcs_url: github.com/ethanfordwork/submitty
-        institution_name: Walla Walla University
-        sysadmin_email: ethan.ford@wallawalla.edu
-        submitty_email: submitty@cs.wallawalla.edu
-        institution_url: cs.wallawalla.edu
+        submitty_dbuser_password: 
+        submitty_course_dbuser_password: 
+        timezone: 
+        submitty_url: 
+        vcs_url: 
+        institution_name: 
+        sysadmin_email: 
+        submitty_email: 
+        institution_url: 
         ssl_enabled: true
-        admin_email: ethan.ford@wallawalla.edu
-        submitty_ip: 172.27.23.13
-        admin_password: admin_password
-        noreply_email: submitty_do_not_reply@cs.wallawalla.edu
-        smtp_server: mail.cs.wallawalla.edu
-        submitty_version: v24.01.01
-        db_host: localhost
-        db_port: 5432
+        admin_email: 
+        submitty_ip: 
+        admin_password: 
+        noreply_email: 
+        smtp_server: 
+        submitty_version: 
+        db_host: 
+        db_port: 

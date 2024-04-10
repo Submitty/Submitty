@@ -1,5 +1,5 @@
 ---
-- name: run the equivalent of "apt get update" as a seperate stop
+- name: Run the equivalent of "apt get update" as a seperate stop
   ansible.builtin.apt:
     update_cache: yes
     cache_valid_time: 300
@@ -63,10 +63,10 @@
 
   args:
     chdir: /usr/local/submitty/GIT_CHECKOUT/Submitty
-  become: yes
+  become: true
   become_user: root
 
-- name: check to see if installation succeeded
+- name: Check to see if installation succeeded
   ansible.builtin.shell: grep "INSTALLATION SUCCESS!" /usr/local/submitty/install.log
 
 - name: Update the PHP disabled functions
