@@ -1990,10 +1990,34 @@ function markThreadUnread(thread_id) {
         success: function(data) {
             $(`#thread_box_link_${thread_id}`).children().addClass('new_thread');
             $('.post_box').removeClass('viewed_post').addClass('new_post');
-            $('.fa-envelope-open').removeClass('fa-envelope-open').addClass('fa-envelope');
         },
         error: function() {
             window.alert('Something went wrong while trying to mark the thread as unread. Please try again.');
+        },
+    });
+}
+
+// eslint-disable-next-line no-unused-vars
+function markPostUnread(thread_id, post_id, last_viewed_timestamp) {
+    // eslint-disable-next-line no-undef
+    const url = `${buildCourseUrl(['forum', 'posts', 'unread'])}`;
+    // format the timestamp to be in the correct format
+    $.ajax({
+        url: url,
+        type: 'POST',
+        data: {
+            thread_id: thread_id,
+            last_viewed_timestamp: last_viewed_timestamp,
+            // eslint-disable-next-line no-undef
+            csrf_token: csrfToken,
+        },
+        // eslint-disable-next-line no-unused-vars
+        success: function(data) {
+            $(`#thread_box_link_${thread_id}`).children().addClass('new_thread');
+            $(`#${post_id}`).removeClass('viewed_post').addClass('new_post');
+        },
+        error: function() {
+            window.alert('Something went wrong while trying to mark the post as unread. Please try again.');
         },
     });
 }

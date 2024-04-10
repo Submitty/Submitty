@@ -35,7 +35,7 @@
                 <i class="fas fa-ellipsis-vertical"></i>
             </a>
             <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
-                <a class="dropdown-item key_to_click" tabindex="0" onClick="markThreadUnread({{activeThread.id}})" title="Mark Thread Unread" aria-label="Mark Thread Unread">Mark Thread Unread</a>
+                <a class="dropdown-item key_to_click" tabindex="0" onClick="markThreadUnread({{activeThread.id}})" title="Mark Thread Unread" aria-label="Mark Thread Unread">Unread Thread</a>
             </div>
 
         </h2>
@@ -93,6 +93,13 @@
     
 
     <span class="post-action-container">
+
+        <a class="pinned-thread key_to_click" tabindex="0" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+            <i class="fas fa-ellipsis-vertical"></i>
+        </a>
+        <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
+            <a class="dropdown-item key_to_click" tabindex="0" onClick="markPostUnread('{{activeThread.id}}', '{{post_id}}', '{{post_date}}');" title="Mark Post Unread" aria-label="Mark Post Unread">Unread From Post Time</a>
+        </div>
 
         {% if userGroup <= 2 and post.author_user_id != current_user %}
             <a class="post-email-toggle key_to_click" tabindex = "0" onClick='$(this).next().toggle();' title="Show/Hide email address" aria-label="Show/Hide email address"><i class="fas fa-envelope"></i></a>
