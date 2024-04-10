@@ -157,6 +157,7 @@ class AuthenticationController extends AbstractController {
     }
 
     /**
+     * @Route("/student_api/token", methods={"POST"})
      * @Route("/api/token", methods={"POST"})
      *
      * @return MultiResponse
@@ -179,6 +180,7 @@ class AuthenticationController extends AbstractController {
     }
 
     /**
+     * @Route("/student_api/token/invalidate", methods={"POST"})
      * @Route("/api/token/invalidate", methods={"POST"})
      *
      * @return MultiResponse

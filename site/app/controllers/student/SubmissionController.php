@@ -1025,7 +1025,7 @@ class SubmissionController extends AbstractController {
     public function ajaxGetGradeableScore($gradeable_id) {
         try {
             $gradeable = $this->core->getQueries()->getGradeableConfig($gradeable_id);
-        } 
+        }
         catch (\InvalidArgumentException $e) {
             return JsonResponse::getFailResponse('Gradeable does not exist');
         }
