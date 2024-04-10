@@ -1,6 +1,7 @@
 const title1 = 'Cypress Title 1 Cypress';
 const title2 = 'Cypress Title 2 Cypress';
 const title3 = 'Cypress Title 3 Cypress';
+const title4 = 'Python Tutorials';
 const content1 = 'Cypress Content 1 Cypress';
 const content2 = 'Cypress Content 2 Cypress';
 const content3 = 'Cypress Content 3 Cypress';
@@ -45,6 +46,17 @@ const removeThread = (title) => {
     cy.get('.thread-left-cont > .thread-list-item').contains(title).should('not.exist');
 };
 
+const editThread = (title) => {
+    cy.get('.thread-left-cont > .thread-list-item').contains(title).click();
+    cy.get('.create-post-head').should('contain', title);
+    cy.get('.first_post > .post-action-container > .edit-post-button').click();
+    cy.get('#upload1').find('[for="input-file1"]').selectFile('cypress/fixtures/sea_animals.png');
+    cy.get('#file-upload-table-1').find('.file-label').should('contain', 'sea_animals.png');
+    cy.get('#file-upload-table-1').find('[aria-label="Press enter to remove file sea_animals.png"]').click();
+    cy.get('#file-upload-table-1').should('not.contain');
+    cy.get('[data-testid="cancel-forum-btn"').click();
+};
+
 describe('Test cases revolving around creating, replying to, merging, and removing discussion forum threads', () => {
 
     beforeEach(() => {
@@ -55,7 +67,10 @@ describe('Test cases revolving around creating, replying to, merging, and removi
     });
 
     it('Create, reply to, merge, and delete threads', () => {
+        // Add and Delete Image Attachment
+        editThread(title4);
         // Comment
+        editThread(title4);
         createThread(title1, content1, 'Comment');
         // Question
         createThread(title2, content2, 'Question');
