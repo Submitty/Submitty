@@ -73,7 +73,7 @@ class AdminGradeableController extends AbstractController {
     /**
      * @return array<mixed>
      */
-    public static function getGradeableJson(Gradeable $gradeable): array {
+    public function getGradeableJson(Gradeable $gradeable): array {
         $return_json = [
             'title' => $gradeable->getTitle(),
             'type' => GradeableType::typeToString($gradeable->getType()),
