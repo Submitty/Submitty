@@ -55,7 +55,7 @@ class AdminGradeableController extends AbstractController {
      */
     public function apiDownloadJson(string $gradeable_id): JsonResponse {
         $gradeable = $this->core->getQueries()->getGradeableConfig($gradeable_id);
-        return JsonResponse::getSuccessResponse(getGradeableJson($gradeable));
+        return JsonResponse::getSuccessResponse($this->getGradeableJson($gradeable));
     }
 
     /**
@@ -63,7 +63,7 @@ class AdminGradeableController extends AbstractController {
      */
     public function webDownloadJson(string $gradeable_id): void {
         $gradeable = $this->core->getQueries()->getGradeableConfig($gradeable_id);
-        $returned_json = getGradeableJson($gradeable);
+        $returned_json = $this->getGradeableJson($gradeable);
         $json_response = JsonResponse::getSuccessResponse($returned_json);
         // Make the JSON only the data, not the data and the success status.
         $json_response->json = $json_response->json['data'];
