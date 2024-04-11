@@ -722,6 +722,9 @@ SQL;
         return $categories_list;
     }
 
+    /**
+     * @return array<string|int>
+     */
     public function toggleLikes(int $post_id, string $current_user): array {
         try {
             $this->course_db->query("SELECT * FROM forum_upducks WHERE post_id = ? AND user_id = ?", [$post_id, $current_user]);
