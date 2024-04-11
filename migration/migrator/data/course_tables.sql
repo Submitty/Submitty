@@ -2103,6 +2103,14 @@ ALTER TABLE ONLY public.electronic_gradeable
 
 
 --
+-- Name: forum_upducks forum_upducks_user_id_post_id_key; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.forum_upducks
+    ADD CONSTRAINT forum_upducks_user_id_post_id_key UNIQUE (user_id, post_id);
+
+
+--
 -- Name: gradeable_data g_id_gd_team_id_unique; Type: CONSTRAINT; Schema: public; Owner: -
 --
 
