@@ -525,7 +525,7 @@ class ForumThreadView extends AbstractView {
                         $boolLiked = in_array($post["id"], $userLiked, true);
 
                         $taTrue = true;
-                        $taTrue = in_array($post["id"], $likedByTa, false);
+                        $taTrue = in_array($post["id"], $likedByTa, true);
 
                         $post_data[] = $this->createPost(
                             $activeThread,
@@ -560,7 +560,7 @@ class ForumThreadView extends AbstractView {
             foreach ($posts as $post) {
                 $post["author_user_group"] = $author_user_groups_map[$post["author_user_id"]];
                 $boolLiked = in_array($post["id"], $userLiked, true);
-                $taTrue = in_array($post["id"], $likedByTa, false);
+                $taTrue = in_array($post["id"], $likedByTa, true);
                 $post_data[] = $this->createPost(
                     $activeThread,
                     $post,
