@@ -56,6 +56,18 @@ const editThread = (title) => {
     cy.get('#file-upload-table-1').should('not.contain');
     cy.get('[data-testid="cancel-forum-btn"').click();
 };
+const uploadAttachmentAndDelete = (title) => {
+    cy.get('.thread-left-cont > .thread-list-item').contains(title).click();
+    cy.get('.create-post-head').should('contain', title);
+    cy.get('.first_post > .post-action-container > .edit-post-button').click();
+    cy.get('#upload1').find('[for="input-file1"]').selectFile('cypress/fixtures/sea_animals.png');
+    cy.get('#file-upload-table-1').find('.file-label').should('contain', 'sea_animals.png');
+    cy.get('input[value="Update Post"]').click();
+    cy.get('.first_post > .post-action-container > .edit-post-button').click();
+    cy.get('[data-testid="mark-for-delete-btn"]').should('contain', 'Delete').last().click();
+    cy.get('[data-testid="mark-for-delete-btn"]').last().should('contain', 'Keep');
+    cy.get('input[value="Update Post"]').click();
+};
 
 describe('Test cases revolving around creating, replying to, merging, and removing discussion forum threads', () => {
 
@@ -69,6 +81,7 @@ describe('Test cases revolving around creating, replying to, merging, and removi
     it('Create, reply to, merge, and delete threads', () => {
         // Add and Delete Image Attachment
         editThread(title4);
+        uploadAttachmentAndDelete(title4);
         // Comment
         editThread(title4);
         createThread(title1, content1, 'Comment');
