@@ -340,6 +340,7 @@ function socketNewOrEditPostHandler(post_id, reply_level, post_box_id=null, edit
                     original_post.remove();
                 }
 
+                $(`#${post_id}`).addClass('new_post');
                 $(`#${post_id}-reply`).css('display', 'none');
                 $(`#${post_id}-reply`).submit(publishPost);
                 // eslint-disable-next-line no-undef
@@ -790,6 +791,13 @@ function modifyOrSplitPost(e) {
     const form = $(this);
     const formData = new FormData(form[0]);
     formData.append('deleted_attachments', JSON.stringify(getDeletedAttachments()));
+    const files = testAndGetAttachments(1, false);
+    if (files === false) {
+        return false;
+    }
+    for (let i = 0; i < files.length ; i++) {
+        formData.append('file_input[]', files[i], files[i].name);
+    }
     const submit_url = form.attr('action');
 
     $.ajax({
@@ -1285,7 +1293,8 @@ function modifyThreadList(currentThreadId, currentCategoriesId, course, loadFirs
     });
 }
 
-function toggleUpduck(post_id, current_user, isLiked, userGroup, taLiked) {
+
+function toggleLike(post_id, current_user, userGroup, taLiked) {
     // eslint-disable-next-line no-undef
     const url = buildCourseUrl(['post', 'likes']);
     $.ajax({
@@ -1294,7 +1303,6 @@ function toggleUpduck(post_id, current_user, isLiked, userGroup, taLiked) {
         data: {
             post_id: post_id,
             current_user: current_user,
-            isLiked: isLiked, //this is a bool for if the button is liked or not
             // eslint-disable-next-line no-undef
             csrf_token: csrfToken,
         },
@@ -1314,6 +1322,10 @@ function toggleUpduck(post_id, current_user, isLiked, userGroup, taLiked) {
                 return;
             }
             json=json['data'];
+            const likes = json['likesCount'];
+            const liked = json['status'];
+            console.log(json['status']);
+
             const likeCounterElement = document.getElementById(`likeCounter_${post_id}`);
             let likeCounter = parseInt(likeCounterElement.innerText);
 
@@ -1321,9 +1333,9 @@ function toggleUpduck(post_id, current_user, isLiked, userGroup, taLiked) {
             const likeIconSrc = document.getElementById(`likeIcon_${post_id}`);
             let likeIconSrcElement = likeIconSrc.src;
 
-            //if userGroup == 4 or 3 then make it print the liked by instructor in yellow
-            if (likeIconSrcElement.endsWith('/img/on-duck-button.svg')) {
-                if (likeIconSrcElement.endsWith('/img/on-duck-button.svg')) {
+            const theme = localStorage.getItem('theme');
+            if (liked==='unlike') {
+                if (theme==='light' && likeIconSrcElement.endsWith('/img/on-duck-button.svg')) {
                     likeIconSrcElement = likeIconSrcElement.replace('on-duck-button.svg', 'light-mode-off-duck.svg');
                     if (taLiked) {
                         likeCounterElement.style.color = '#ffba00';
@@ -1336,16 +1348,16 @@ function toggleUpduck(post_id, current_user, isLiked, userGroup, taLiked) {
                     document.getElementById(`likedByInstructor_${post_id}`).style.display = 'none';
                 }
 
-                likeCounter=likeCounter-1;
-
+                likeCounter=likes;//set to the sql like value
                 likeIconSrc.src = likeIconSrcElement; // Update the state
                 likeCounterElement.innerText = likeCounter;
             }
-            else {
-                likeIconSrcElement = likeIconSrcElement.replace('light-mode-off-duck.svg', 'on-duck-button.svg');
-                if (userGroup === 1 || userGroup ===2) {
-                    document.getElementById(`likedByInstructor_${post_id}`).style.display = '';
-                    likeCounterElement.style.color = '#ffba00';
+            else if (liked ==='like') {
+                if (theme==='light') {
+                    likeIconSrcElement = likeIconSrcElement.replace('light-mode-off-duck.svg', 'on-duck-button.svg');
+                    if (userGroup === 1 || userGroup ===2) {
+                        document.getElementById(`likedByInstructor_${post_id}`).style.display = '';
+                        likeCounterElement.style.color = '#ffba00';
                 }
                 else {
                     if (taLiked) {
@@ -1355,14 +1367,13 @@ function toggleUpduck(post_id, current_user, isLiked, userGroup, taLiked) {
                         likeCounterElement.style.color = 'white';
                     }
                 }
-
-                likeCounter=likeCounter+1;
-
+                likeCounter=likes;
                 likeIconSrc.src = likeIconSrcElement; // Update the state
                 likeCounterElement.innerText = likeCounter;
             }
-
-        },
+        }
+    },
+    
         error: function(err) {
             console.log(err);
         },
@@ -2342,28 +2353,27 @@ function updateThread(e) {
     e.preventDefault();
     const cat = [];
     $('input[name="cat[]"]:checked').each(item => cat.push($('input[name="cat[]"]:checked')[item].value));
-    const post_box_id = $('#edit-user-post').find('.thread-post-form').data('post_box_id');
 
-    const data =  {
-        edit_thread_id: $('#edit_thread_id').val(),
-        edit_post_id: $('#edit_post_id').val(),
-        csrf_token: $('input[name="csrf_token"]').val(),
-        title: $('input#title').val(),
-        thread_post_content: $(`textarea#reply_box_${post_box_id}`).val(),
-        thread_status: $('#thread_status').val(),
-        Anon: $('input#thread_post_anon_edit').is(':checked') ? $('input#thread_post_anon_edit').val() : 0,
-        lock_thread_date: $('input#lock_thread_date').text(),
-        expirationDate: $('input#expirationDate').val(),
-        cat,
-        markdown_status: parseInt($(`input#markdown_input_${post_box_id}`).val()),
-        deleted_attachments: JSON.stringify(getDeletedAttachments()),
-    };
+    const form = $(this);
+    const formData = new FormData(form[0]);
+    formData.append('deleted_attachments', JSON.stringify(getDeletedAttachments()));
+
+    const files = testAndGetAttachments(1, false);
+    if (files === false) {
+        return false;
+    }
+
+    for (let i = 0; i < files.length ; i++) {
+        formData.append('file_input[]', files[i], files[i].name);
+    }
 
     $.ajax({
         // eslint-disable-next-line no-undef
         url: `${buildCourseUrl(['forum', 'posts', 'modify'])}?modify_type=1`,
         type: 'POST',
-        data,
+        data: formData,
+        processData: false,
+        contentType: false,
         success: function (response) {
             try {
                 response = JSON.parse(response);
@@ -2582,8 +2592,7 @@ function restoreCreateThreadFromLocal() {
 
         // Optional fields
         $('.expiration').hide();
-        // eslint-disable-next-line no-prototype-builtins
-        if (data.hasOwnProperty('lockDate')) {
+        if (Object.prototype.hasOwnProperty.call(data, 'lockDate')) {
             $('#lock_thread_date').val(data.lockDate);
         }
         if (data.isAnnouncement) {
@@ -2594,8 +2603,7 @@ function restoreCreateThreadFromLocal() {
             $('#pinThread').prop('checked', data.pinThread);
             $('.expiration').show();
         }
-        // eslint-disable-next-line no-prototype-builtins
-        if (data.hasOwnProperty('expiration')) {
+        if (Object.prototype.hasOwnProperty.call(data, 'expiration')) {
             $('#expirationDate').val(data.expiration);
         }
     }

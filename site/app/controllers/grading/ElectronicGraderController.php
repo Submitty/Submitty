@@ -257,9 +257,7 @@ class ElectronicGraderController extends AbstractController {
                 foreach ($students as $student) {
                     array_push($student_list, ['user_id' => $student->getId()]);
                     if ($submit_before_grading) {
-                        if ($this->core->getQueries()->getUserHasSubmission($gradeable, $student->getId()) == $student->getId()) {
-                        }
-                        else {
+                        if ($this->core->getQueries()->getUserHasSubmission($gradeable, $student->getId())) {
                             array_push($student_array, $student->getId());
                         }
                     }
@@ -300,9 +298,7 @@ class ElectronicGraderController extends AbstractController {
              $sorted_students[$reg_sec][] = $student;
              array_push($student_list, ['user_id' => $student->getId()]);
             if ($submit_before_grading) {
-                if ($this->core->getQueries()->getUserHasSubmission($gradeable, $student->getId()) == $student->getId()) {
-                }
-                else {
+                if ($this->core->getQueries()->getUserHasSubmission($gradeable, $student->getId())) {
                     array_push($student_array, $student->getId());
                 }
             }

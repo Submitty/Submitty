@@ -446,6 +446,7 @@ class ForumThreadView extends AbstractView {
         }
         $first_post = $this->core->getQueries()->getFirstPostForThread($thread_id);
         $first_post_id = $first_post["id"];
+        $first_post_author_id = $first_post['author_user_id'];
 
         $first = true;
 
@@ -521,13 +522,13 @@ class ForumThreadView extends AbstractView {
 
                         $post["author_user_group"] = $author_user_groups_map[$post["author_user_id"]];
 
-                        $boolLiked = true;
                         $boolLiked = in_array($post["id"], $userLiked, true);
 
                         $taTrue = true;
                         $taTrue = in_array($post["id"], $likedByTa, true);
 
                         $post_data[] = $this->createPost(
+                            $first_post_author_id,
                             $activeThread,
                             $post,
                             $unviewed_posts,
@@ -562,6 +563,7 @@ class ForumThreadView extends AbstractView {
                 $boolLiked = in_array($post["id"], $userLiked, true);
                 $taTrue = in_array($post["id"], $likedByTa, true);
                 $post_data[] = $this->createPost(
+                    $first_post_author_id,
                     $activeThread,
                     $post,
                     $unviewed_posts,
@@ -590,12 +592,12 @@ class ForumThreadView extends AbstractView {
         $isThreadLocked = $this->core->getQueries()->isThreadLocked($thread_id);
         $accessFullGrading = $this->core->getUser()->accessFullGrading();
 
-        $post_box_id = 0;
+        $post_box_id = 1;
 
         $form_action_link = $this->core->buildCourseUrl(['forum', 'posts', 'new']);
 
         if (($isThreadLocked != 1 || $accessFullGrading ) && $includeReply) {
-            $GLOBALS['post_box_id'] = $post_box_id = isset($GLOBALS['post_box_id']) ? $GLOBALS['post_box_id'] + 1 : 1;
+            $GLOBALS['post_box_id'] = $post_box_id = isset($GLOBALS['post_box_id']) ? $GLOBALS['post_box_id'] + 1 : 2;
         }
 
         $merge_thread_content = [];
@@ -728,6 +730,7 @@ class ForumThreadView extends AbstractView {
         $this->core->getOutput()->addInternalJs('autosave-utils.js');
         $this->core->getOutput()->addVendorJs('flatpickr/flatpickr.js');
         $this->core->getOutput()->addInternalJs('websocket.js');
+        $this->core->getOutput()->addInternalJs('drag-and-drop.js');
         $this->core->getOutput()->addVendorJs(FileUtils::joinPaths('flatpickr', 'plugins', 'shortcutButtons', 'shortcut-buttons-flatpickr.min.js'));
         $this->core->getOutput()->addVendorJs('jquery.are-you-sure/jquery.are-you-sure.js');
         $this->core->getOutput()->addVendorCss('flatpickr/flatpickr.min.css');
@@ -1078,7 +1081,8 @@ class ForumThreadView extends AbstractView {
      * } $author_info
      * @param string[] $post_attachments
      */
-    public function createPost(array $thread, array $post, $unviewed_posts, $first, $reply_level, $display_option, int $counter, bool $isLiked, bool $taTrue, $includeReply, array $author_info, array $post_attachments, bool $has_history, bool $is_merged_thread, bool $render = false, bool $thread_announced = false, bool $isCurrentFavorite = false) {
+
+    public function createPost(string $first_post_author_id, array $thread, array $post, $unviewed_posts, $first, $reply_level, $display_option, int $counter, bool $isLiked, bool $taTrue, $includeReply, array $author_info, array $post_attachments, bool $has_history, bool $is_merged_thread, bool $render = false, bool $thread_announced = false, bool $isCurrentFavorite = false) {
 
         $current_user = $this->core->getUser()->getId();
         $thread_id = $thread["id"];
@@ -1116,6 +1120,7 @@ class ForumThreadView extends AbstractView {
         if ($post["anonymous"]) {
             $visible_username = "Anonymous";
         }
+
         $classes = ["post_box"];
         if ($first && $display_option != 'alpha') {
             $classes[] = "first_post";
@@ -1242,6 +1247,8 @@ class ForumThreadView extends AbstractView {
             ];
         }
 
+        $post_user_info["is_OP"] = ($post["author_user_id"] === $first_post_author_id);
+
         $post_attachment = ForumUtils::getForumAttachments(
             $post_id,
             $thread_id,
@@ -1252,7 +1259,7 @@ class ForumThreadView extends AbstractView {
 
         $post_box_id = 1;
         if (!$isThreadLocked || $this->core->getUser()->accessFullGrading()) {
-            $GLOBALS['post_box_id'] = $post_box_id = isset($GLOBALS['post_box_id']) ? $GLOBALS['post_box_id'] + 1 : 1;
+            $GLOBALS['post_box_id'] = $post_box_id = isset($GLOBALS['post_box_id']) ? $GLOBALS['post_box_id'] + 1 : 2;
         }
 
         $created_post = [
