@@ -1704,18 +1704,4 @@ class AdminGradeableController extends AbstractController {
         }
         $this->core->getOutput()->renderJsonError("Unknown gradeable");
     }
-    
-    /**
-     * @Route("/courses/{_semester}/{_course}/gradeable/{gradeable_id}/release-notifications")
-     * @Route("/api/courses/{_semester}/{_course}/gradeable/{gradeable_id}/release-notifications", methods={"POST"})
-     */
-    public function releaseGradeableNotifications($gradeable_id): JsonResponse {
-        if (!$this->core->getUser()->accessAdmin()) {
-            // return JsonResponse::getErrorResponse("This account cannot access admin pages");
-            $this->core->getOutput()->showError("This account cannot access admin pages");
-        }
-
-        $gradeable = $this->core->getQueries()->getGradeableConfig($gradeable_id);
-        return JsonResponse::getSuccessResponse(["message" => $gradeable->getAllowCustomMarks()]);
-    }
 }

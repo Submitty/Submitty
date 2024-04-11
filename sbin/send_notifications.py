@@ -3,7 +3,6 @@ import os
 import datetime
 from sqlalchemy import create_engine
 import sys
-import requests
 import psutil
 
 my_program_name = sys.argv[0]
@@ -49,16 +48,6 @@ TODAY = datetime.datetime.now()
 LOG_FILE = open(os.path.join(
     NOTIFICATION_LOG_PATH, "{:04d}{:02d}{:02d}.txt".format(TODAY.year, TODAY.month,
                                                     TODAY.day)), 'a')
-# Collect submitty admin token
-INSTALL_DIR_PATH = SUBMITTY_CONFIG['submitty_install_dir']
-SUBMITTY_CREDS_FILE = os.path.join(INSTALL_DIR_PATH, 'config', 'submitty_admin.json')
-# Load credentials out of admin file
-with open(SUBMITTY_CREDS_FILE, 'r') as file:
-    CREDENTIALS = json.load(file)
-
-if 'token' not in CREDENTIALS or not CREDENTIALS['token']:
-    raise Exception('Unable to read credentials from submitty_admin.json')
-
 try:
     DB_HOST = DATABASE_CONFIG['database_host']
     DB_USER = DATABASE_CONFIG['database_user']
@@ -70,9 +59,8 @@ except Exception as config_fail_error:
     print(e)
     sys.exit(1)
 
-def setup_db():
-    """Set up a connection with the submitty database."""
-    db_name = "submitty"
+def connect_db(db_name):
+    """Set up a connection with the database."""
     # If using a UNIX socket, have to specify a slightly different connection string
     if os.path.isdir(DB_HOST):
         conn_string = "postgresql://{}:{}@/{}?host={}".format(
@@ -85,41 +73,58 @@ def setup_db():
     db = engine.connect()
     return db
 
-def fetchPendingGradeables(db):
-    query = """SELECT reference_id, term, course FROM scheduled_notifications WHERE type = 'gradeable' AND date <= NOW() AND notification_state = false;"""
-    result = db.execute(query)
-    pending_gradeable_notifications = []
+def notifyPendingGradeables():
+    master_db = connect_db("submitty")
+    term = master_db.execute("SELECT term_id FROM terms WHERE start_date < NOW() AND end_date > NOW();")
+    courses =  master_db.execute("SELECT term, course FROM courses WHERE term = '{}';".format(term.first()[0]))
 
-    for row in result:
-        pending_gradeable_notifications.append({
-            'gradeable_id': row[0],
-            'term': row[1],
-            'course': row[2],
-            })
+    for term, course in courses:
+        notified_gradeables = []
+        
+        course_db = connect_db("submitty_{}_{}".format(term, course))
+        gradeables = course_db.execute("SELECT g_id, g_title FROM gradeable WHERE g_grade_released_date > NOW() AND g_notification_state = false;")
 
-    return pending_gradeable_notifications
+        for row in gradeables:
+            gradeable_notifications = { "id": row[0], "title": row[1] }
+            
+            # subject: New Grade Released: [ title ]
+            # content: Instructor in [course]  has released scores for [title]
+            # metadata : {"url": BASE_URL_PATH/course/gradeable/id }
+            # component: grading
+            # from_user_id: System
+            # to_user_id: [ recipients ]
+            # created_at: NOW()
 
-def notifyPendingGradeables(db):
-    pending_gradeable_notifications = fetchPendingGradeables(db)
-    notified_gradeables = []
+            # Construct notification recipient list
+            notification_list_query = "SELECT user_id FROM notification_settings WHERE all_released_grades = true;" 
+            
+            # Send notifications ... 
+            send_notification_query = "INSERT INTO notifications(component, metadata, content, created_at, from_user_id, to_user_id) VALUES ?" 
+      
+            # Construct email recipient list
+            email_list_query = """
+                SELECT users.user_email, users.user_id 
+                FROM users
+                JOIN notification_settings ON notification_settings.user_id = users.user_id 
+                WHERE notification_settings.all_released_grades_email = true;
+            """ 
+            
+            # Send emails ... 
+            # Should use formatSubject and formatBody in Email.php...
+            send_email_query = "INSERT INTO emails(subject, body, created, user_id, to_name, email_address, term, course) VALUES ?"
+            
+            # Add successfully notified gradeables to eventually update notification state
+            notified_gradeables.append(gradeable_notifications["id"])
+            
+        # Update all successfully sent notifications for the potential queued gradeables)...
+        update_gradeables_query = "UPDATE gradeable SET g_notification_state = true WHERE g_id in ?"
+        
+        course_db.close()
 
-    for gradeable in pending_gradeable_notifications:
-        """Automatically call Send Gradeable Notification API."""
-        # TODO
-                
-    # Update all successfully sent notifications for the potential queued gradeables
-    if len(notified_gradeables) >= 1:
-        query = """UPDATE scheduled_notifications SET notification_state = true WHERE id in ({});""".format(','.join(['%s'] * len(notified_gradeables)))
-        db.execute(query, notified_gradeables)
 
 def main():
     try:
-        db = setup_db()
-        notifyPendingGradeables(db)
-        print('{}/courses/{}/{}/gradeable/{}/release-notifications'.format(BASE_URL_PATH, 's24', 'sample', 'closed_team_homework'))
-        response = requests.post('{}/courses/{}/{}/gradeable/{}/release-notifications'.format(BASE_URL_PATH, 's24', 'sample', 'closed_team_homework'), headers={'Authorization': CREDENTIALS['token']})
-        print(CREDENTIALS['token'])
-        print(response.json())  
+        notifyPendingGradeables()
     except Exception as notification_send_error:
         e = "[{}] Error Sending Notification(s): {}".format(
             str(datetime.datetime.now()), str(notification_send_error))
