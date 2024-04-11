@@ -80,16 +80,18 @@ describe('Tests cases revolving around gradeable access and submition', () => {
                 headers: {
                     Authorization: key,
                 },
+                // Needs body to return a JSON object instead of string
+                body: {
+                },
             }).then((response) => {
-                const test_json = JSON.parse(response.body.data);
-                expect(test_json.title).to.eql('Bulk Upload Scanned Exam');
-                expect(test_json.type).to.eql('Electronic File');
-                expect(test_json.id).to.eql('bulk_upload_test');
-                expect(test_json.instructions_url).to.eql('');
-                expect(test_json.syllabus_bucket).to.eql('homework');
-                expect(test_json.bulk_upload).to.eql(true);
-                expect(test_json.ta_grading).to.eql(true);
-                expect(test_json.grade_inquiries).to.eql(true);
+                expect(response.body.data.title).to.eql('Bulk Upload Scanned Exam');
+                expect(response.body.data.type).to.eql('Electronic File');
+                expect(response.body.data.id).to.eql('bulk_upload_test');
+                expect(response.body.data.instructions_url).to.eql('');
+                expect(response.body.data.syllabus_bucket).to.eql('homework');
+                expect(response.body.data.bulk_upload).to.eql(true);
+                expect(response.body.data.ta_grading).to.eql(true);
+                expect(response.body.data.grade_inquiries).to.eql(true);
             });
         });
     });
