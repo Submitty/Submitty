@@ -56,7 +56,6 @@ describe('Tests cases revolving around gradeable access and submition', () => {
         cy.get('[data-testid="download-gradeable-btn"]').click();
 
         cy.readFile('cypress/downloads/open_team_homework.json').then(test_json => {
-            console.log(test_json);
             expect(test_json.title).to.eql('Open Team Homework');
             expect(test_json.type).to.eql('Electronic File');
             expect(test_json.id).to.eql('open_team_homework');
@@ -82,8 +81,7 @@ describe('Tests cases revolving around gradeable access and submition', () => {
                     Authorization: key,
                 },
             }).then((response) => {
-                const test_json = JSON.parse(response.body);
-                console.log(test_json);
+                const test_json = JSON.parse(response.body.data);
                 expect(test_json.title).to.eql('Bulk Upload Scanned Exam');
                 expect(test_json.type).to.eql('Electronic File');
                 expect(test_json.id).to.eql('bulk_upload_test');
