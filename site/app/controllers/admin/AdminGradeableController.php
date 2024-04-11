@@ -68,7 +68,10 @@ class AdminGradeableController extends AbstractController {
         $json_response->render($this->core);
     }
 
-    public static function getGradeableJson(string $gradeable_id): array<mixed> {
+    /**
+     * @return array<mixed>
+     */
+    public static function getGradeableJson(string $gradeable_id): array {
         $config = $this->core->getQueries()->getGradeableConfig($gradeable_id);
         $return_json = [
             'title' => $config->getTitle(),
