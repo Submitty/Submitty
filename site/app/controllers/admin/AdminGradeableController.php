@@ -52,9 +52,23 @@ class AdminGradeableController extends AbstractController {
 
     /**
      * @Route("/api/{_semester}/{_course}/{gradeable_id}/download", methods={"GET"})
+     */
+    public function apiDownloadJson(string $gradeable_id): JsonResponse {
+        return JsonResponse::getSuccessResponse(getGradeableJson($gradeable_id));
+    }
+
+    /**
      * @Route("/courses/{_semester}/{_course}/{gradeable_id}/download", methods={"GET"})
      */
-    public function downloadJson(string $gradeable_id): void {
+    public function webDownloadJson(string $gradeable_id): void {
+        $returned_json = getGradeableJson($gradeable_id);
+        $json_response = JsonResponse::getSuccessResponse($returned_json);
+        // Make the JSON only the data, not the data and the success status.
+        $json_response->json = $json_response->json['data'];
+        $json_response->render($this->core);
+    }
+
+    public function getGradeableJson(string $gradeable_id): array {
         $config = $this->core->getQueries()->getGradeableConfig($gradeable_id);
         $return_json = [
             'title' => $config->getTitle(),
@@ -133,13 +147,7 @@ class AdminGradeableController extends AbstractController {
             $dates['late_days'] = $config->getLateDays();
             $return_json['dates'] = $dates;
         }
-
-        $this->core->getOutput()->useHeader(false);
-        $this->core->getOutput()->useFooter(false);
-        $json_response = JsonResponse::getSuccessResponse($return_json);
-        // Make the JSON only the data, not the data and the success status.
-        $json_response->json = $json_response->json['data'];
-        $json_response->render($this->core);
+        return $return_json;
     }
 
     /**
