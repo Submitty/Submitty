@@ -1295,7 +1295,6 @@ function toggleLike(post_id, current_user, isLiked) {
         data: {
             post_id: post_id,
             current_user: current_user,
-            isLiked: isLiked, //this is a bool for if the button is liked or not
             // eslint-disable-next-line no-undef
             csrf_token: csrfToken,
         },
@@ -1315,6 +1314,10 @@ function toggleLike(post_id, current_user, isLiked) {
                 return;
             }
             json=json['data'];
+            const likes = json['likesCount'];
+            const liked = json['status'];
+            console.log(json['status']);
+
             const likeCounterElement = document.getElementById(`likeCounter_${post_id}`);
             let likeCounter = parseInt(likeCounterElement.innerText);
 
@@ -1323,26 +1326,26 @@ function toggleLike(post_id, current_user, isLiked) {
             let likeIconSrcElement = likeIconSrc.src;
 
             const theme = localStorage.getItem('theme');
-            if (likeIconSrcElement.endsWith('/img/on-duck-button.svg')) {
+            if (liked==='unlike') {
                 if (theme==='light' && likeIconSrcElement.endsWith('/img/on-duck-button.svg')) {
                     likeIconSrcElement = likeIconSrcElement.replace('on-duck-button.svg', 'light-mode-off-duck.svg');
                 }
                 else {
                     likeIconSrcElement = likeIconSrcElement.replace('on-duck-button.svg', 'light-mode-off-duck.svg');
                 }
-                likeCounter=likeCounter-1;
+                likeCounter=likes;//set to the sql like value
 
                 likeIconSrc.src = likeIconSrcElement; // Update the state
                 likeCounterElement.innerText = likeCounter;
             }
-            else {
+            else if(liked ==="like"){
                 if (theme==='light') {
                     likeIconSrcElement = likeIconSrcElement.replace('light-mode-off-duck.svg', 'on-duck-button.svg');
                 }
                 else {
                     likeIconSrcElement = likeIconSrcElement.replace('light-mode-off-duck.svg', 'on-duck-button.svg');
                 }
-                likeCounter=likeCounter+1;
+                likeCounter=likes;
 
                 likeIconSrc.src = likeIconSrcElement; // Update the state
                 likeCounterElement.innerText = likeCounter;

@@ -722,27 +722,30 @@ SQL;
         return $categories_list;
     }
 
-    public function toggleLikes(int $post_id, string $current_user): string {
+    public function toggleLikes(int $post_id, string $current_user): array {
         try {
             $this->course_db->query("SELECT * FROM forum_upducks WHERE post_id = ? AND user_id = ?", [$post_id, $current_user]);
             $inDatabase = isset($this->course_db->rows()[0]);
             if ($inDatabase) {
                 $this->course_db->query("DELETE FROM forum_upducks WHERE post_id = ? AND user_id = ?", [$post_id, $current_user]);
-                return 'unlike';
+                $this->course_db->query("SELECT COUNT(*) AS likes_count FROM forum_upducks WHERE post_id = ?", [$post_id]);
+                $likesCount = intval($this->course_db->rows()[0]['likes_count']);
+                return ['unlike',$likesCount];
             }
             else {
                 $this->course_db->query("INSERT INTO forum_upducks (post_id, user_id) VALUES (?, ?)", [$post_id, $current_user]);
-                return 'like';
+                $this->course_db->query("SELECT COUNT(*) AS likes_count FROM forum_upducks WHERE post_id = ?", [$post_id]);
+                $likesCount = intval($this->course_db->rows()[0]['likes_count']);
+                return ['like',$likesCount];
             }
         }
         catch (DatabaseException $dbException) {
             if ($this->course_db->inTransaction()) {
                 $this->course_db->rollback();
             }
-            return "false";
+            return ["false",0];
         }
     }
-
 
     /**
      * @param int[] $post_ids
