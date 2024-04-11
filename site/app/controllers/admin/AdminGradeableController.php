@@ -54,7 +54,7 @@ class AdminGradeableController extends AbstractController {
      * @Route("/api/{_semester}/{_course}/{gradeable_id}/download", methods={"GET"})
      * @Route("/courses/{_semester}/{_course}/{gradeable_id}/download", methods={"GET"})
      */
-    public function downloadJson(string $gradeable_id) {
+    public function downloadJson(string $gradeable_id): void {
         $config = $this->core->getQueries()->getGradeableConfig($gradeable_id);
         $return_json = [
             'title' => $config->getTitle(),
