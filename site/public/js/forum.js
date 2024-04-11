@@ -1285,7 +1285,7 @@ function modifyThreadList(currentThreadId, currentCategoriesId, course, loadFirs
     });
 }
 
-function toggleLike(post_id, current_user, isLiked) {
+function toggleLike(post_id, current_user) {
 
     // eslint-disable-next-line no-undef
     const url = buildCourseUrl(['post', 'likes']);
@@ -1338,7 +1338,7 @@ function toggleLike(post_id, current_user, isLiked) {
                 likeIconSrc.src = likeIconSrcElement; // Update the state
                 likeCounterElement.innerText = likeCounter;
             }
-            else if(liked ==="like"){
+            else if (liked ==='like') {
                 if (theme==='light') {
                     likeIconSrcElement = likeIconSrcElement.replace('light-mode-off-duck.svg', 'on-duck-button.svg');
                 }
