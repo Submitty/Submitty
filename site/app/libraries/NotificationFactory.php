@@ -139,6 +139,7 @@ class NotificationFactory {
             $this->sendEmails($emails);
         }
     }    
+    
     // ***********************************HELPERS***********************************
 
     /**

@@ -7,7 +7,6 @@ use app\libraries\GradeableType;
 use app\exceptions\ValidationException;
 use app\exceptions\NotImplementedException;
 use app\libraries\Utils;
-use app\models\Notification;
 use app\libraries\FileUtils;
 use app\libraries\Core;
 use app\models\AbstractModel;
@@ -2550,19 +2549,5 @@ class Gradeable extends AbstractModel {
             return false;
         }
         return !empty($autograding_config->getLeaderboards());
-    }
-
-    /**
-     * Releases gradeable notifications
-     *
-     * @return void
-     */
-    public function releaseGradeableNotification(): void {
-        $full_course_name = $this->core->getFullCourseName();
-        $subject = "New Grade Released: " . Notification::textShortner($this->getTitle());
-        $content = "Instructor in " .  $full_course_name . " has released scores for " .  $this->getTitle();
-        $metadata = json_encode(['url' => $this->core->buildCourseUrl(['gradeable', $this->getId()])]);
-        $gradable = ['component' => 'grading', 'metadata' => $metadata, 'content' => $content, 'subject' => $subject];
-        $this->core->getNotificationFactory()->onGradableRelease($gradable);
     }
 }

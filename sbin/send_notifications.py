@@ -77,50 +77,78 @@ def notifyPendingGradeables():
     master_db = connect_db("submitty")
     term = master_db.execute("SELECT term_id FROM terms WHERE start_date < NOW() AND end_date > NOW();")
     courses =  master_db.execute("SELECT term, course FROM courses WHERE term = '{}';".format(term.first()[0]))
+    timestamp = str(datetime.datetime.now())
 
     for term, course in courses:
+        course_db = connect_db("submitty_{}_{}".format(term, course))
         notified_gradeables = []
         
-        course_db = connect_db("submitty_{}_{}".format(term, course))
-        gradeables = course_db.execute("SELECT g_id, g_title FROM gradeable WHERE g_grade_released_date > NOW() AND g_notification_state = false;")
-
+        gradeables = course_db.execute( """
+            SELECT gradeable.g_id, gradeable.g_title FROM electronic_gradeable 
+            JOIN gradeable ON gradeable.g_id =  electronic_gradeable.g_id
+            WHERE gradeable.g_grade_released_date < NOW() AND electronic_gradeable.eg_student_view = true
+            LIMIT 1;
+        """)
+                
         for row in gradeables:
-            gradeable_notifications = { "id": row[0], "title": row[1] }
+            gradeable = { "id": row[0], "title": row[1] }
             
-            # subject: New Grade Released: [ title ]
-            # content: Instructor in [course]  has released scores for [title]
-            # metadata : {"url": BASE_URL_PATH/course/gradeable/id }
-            # component: grading
-            # from_user_id: System
-            # to_user_id: [ recipients ]
-            # created_at: NOW()
-
-            # Construct notification recipient list
-            notification_list_query = "SELECT user_id FROM notification_settings WHERE all_released_grades = true;" 
+            # Construct gradeable URL into valid JSON string
+            gradeable_url = "{}/courses/{}/{}/gradeable/{}".format(BASE_URL_PATH, term, course, gradeable["id"])
+            metadata = json.dumps({ "url" : gradeable_url })
+  
+            # Send out notifications
+            notification_list = []
+            notification_content = "Grade Released: {}".format(gradeable["title"])
             
-            # Send notifications ... 
-            send_notification_query = "INSERT INTO notifications(component, metadata, content, created_at, from_user_id, to_user_id) VALUES ?" 
-      
-            # Construct email recipient list
-            email_list_query = """
-                SELECT users.user_email, users.user_id 
+            if len(notification_content) > 40:
+                # Max length for content of notification is 40
+                notification_content = notification_content[:36] + "..."
+            
+            # user_group = 4 implies a student
+            notification_recipients = course_db.execute("""
+                SELECT users.user_id , users.user_email 
                 FROM users
                 JOIN notification_settings ON notification_settings.user_id = users.user_id 
-                WHERE notification_settings.all_released_grades_email = true;
-            """ 
+                WHERE all_released_grades = true AND users.user_group = 4;
+            """)
             
-            # Send emails ... 
-            # Should use formatSubject and formatBody in Email.php...
-            send_email_query = "INSERT INTO emails(subject, body, created, user_id, to_name, email_address, term, course) VALUES ?"
+            for recipient in notification_recipients:
+                user_id = recipient[0]
+                notification_list.append("('grading', '{}', '{}', '{}', 'submitty-admin', '{}')".format(metadata, notification_content, timestamp, user_id))
             
+            # Send notifications to all potential recipients 
+            if len(notification_list) > 0:
+                course_db.execute("INSERT INTO notifications(component, metadata, content, created_at, from_user_id, to_user_id) VALUES {};".format(', '.join(notification_list)))
+      
+            # Send out emails using both course and master database
+            email_list = []
+            email_subject = "[Submitty {}] Grade Released: {}".format(course, gradeable["title"])
+            email_body = "An Instructor has released scores in:\n{}\nScores have been released for {}.\n\n".format(course, gradeable["title"]) + "Author: System\nClick here for more info: {}\n\n--\nNOTE: This is an automated email notification, which is unable to receive replies.\nPlease refer to the course syllabus for contact information for your teaching staff.".format(gradeable_url)     
+            
+            email_recipients = course_db.execute("""
+                SELECT users.user_id , users.user_email 
+                FROM users
+                JOIN notification_settings ON notification_settings.user_id = users.user_id 
+                WHERE notification_settings.all_released_grades_email = true AND users.user_group = 4;
+            """ )
+            
+            for recipient in email_recipients:
+                user_id, user_email = recipient[0], recipient[1]
+                email_list.append("('{}', '{}', '{}', '{}', '{}', '{}', '{}')".format(email_subject, email_body, timestamp, user_id, user_email, term, course))
+                
+            if len(email_list) > 0:
+                master_db.execute("INSERT INTO emails(subject, body, created, user_id, email_address, term, course) VALUES {};".format(', '.join(email_list)))
+                            
             # Add successfully notified gradeables to eventually update notification state
-            notified_gradeables.append(gradeable_notifications["id"])
+            notified_gradeables.append("'{}'".format(gradeable["id"]))
             
-        # Update all successfully sent notifications for the potential queued gradeables)...
-        update_gradeables_query = "UPDATE gradeable SET g_notification_state = true WHERE g_id in ?"
-        
-        course_db.close()
+        # Update all successfully sent notifications for current course
+        if len(notified_gradeables) > 0:
+            course_db.execute("UPDATE gradeable SET g_notification_state = true WHERE g_id in ({})".format(", ".join(notified_gradeables)))
 
+        # Close the course database connection
+        course_db.close()
 
 def main():
     try:
