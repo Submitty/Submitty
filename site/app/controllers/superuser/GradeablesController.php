@@ -18,10 +18,10 @@ use Symfony\Component\Routing\Annotation\Route;
  */
 class GradeablesController extends AbstractController {
     /**
-     * @Route("/api/superuser/gradeables")
-     * @Route("/superuser/gradeables")
      * @AccessControl(level="SUPERUSER")
      */
+    #[Route("/api/superuser/gradeables")]
+    #[Route("/superuser/gradeables")]
     public function viewGradeablesList(): MultiResponse {
         $this->core->getUser()->setGroup(\app\models\User::GROUP_INSTRUCTOR);
         /** @var array<string, \app\models\gradeable\Gradeable> */

@@ -16,9 +16,9 @@ use app\models\SuperuserEmail;
  */
 class SuperuserEmailController extends AbstractController {
     /**
-     * @Route("/superuser/email")
      * @return MultiResponse
      */
+    #[Route("/superuser/email")]
     public function showEmailPage(): MultiResponse {
         $query_result = $this->core->getQueries()->countActiveUsersByGroup();
         $num_faculty = $query_result['faculty'];
