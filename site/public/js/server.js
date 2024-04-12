@@ -1925,8 +1925,7 @@ function addMarkdownCode(type) {
             insert = '_italic text_';
             break;
         case 'blockquote':
-            insert = '> blockquote text\n';
-            text = parseBlockquote(text);
+            insert = '> blockquote text\n\n';
             break;
     }
     $(this).val(text.substring(0, cursor) + insert + text.substring(cursor));
