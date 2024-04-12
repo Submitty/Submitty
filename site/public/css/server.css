@@ -766,12 +766,15 @@ td > a.active-sort {
 .dark-green-background{
     background-color: #0bbb00;
 }
+
 .dark-yellow-background{
     background-color: #ffff00;
 }
+
 .dark-red-background{
     background-color: #ff2222;
 }
+
 .dark-blue-background{
     background-color: #0066ff;
 }
