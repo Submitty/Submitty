@@ -33,6 +33,7 @@ class NotebookBuilderController extends AbstractController {
      * notebook builder know to save a new configuration or edit the existing one.
      * @AccessControl(role="INSTRUCTOR")
      */
+    #[Route()]
     public function builder(string $g_id, string $mode) {
         try {
             $gradeable = $this->core->getQueries()->getGradeableConfig($g_id);
@@ -122,6 +123,7 @@ class NotebookBuilderController extends AbstractController {
      * @Route("/courses/{_semester}/{_course}/notebook_builder/save", methods={"POST"})
      * @AccessControl(role="INSTRUCTOR")
      */
+    #[Route()]
     public function save(): JsonResponse {
         $gradeable = $this->getValidGradeable($_POST['g_id']);
 
@@ -149,6 +151,7 @@ class NotebookBuilderController extends AbstractController {
      * @Route("/courses/{_semester}/{_course}/notebook_builder/file", methods={"POST"})
      * @AccessControl(role="INSTRUCTOR")
      */
+    #[Route()]
     public function file(): JsonResponse {
         $gradeable = $this->getValidGradeable($_POST['g_id']);
 

@@ -16,6 +16,7 @@ class NavigationController extends AbstractController {
     /**
      * @Route("/courses/{_semester}/{_course}", requirements={"_semester": "^(?!api)[^\/]+", "_course": "[^\/]+"})
      */
+    #[Route()]
     public function navigationPage() {
         try {
             $gradeables_list = new GradeableList($this->core);

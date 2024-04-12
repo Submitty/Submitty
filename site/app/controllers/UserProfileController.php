@@ -32,6 +32,7 @@ class UserProfileController extends AbstractController {
      * @Route("/user_profile", methods={"GET"})
      * @return MultiResponse
      */
+    #[Route()]
     public function showUserProfile() {
         $this->core->getOutput()->addBreadcrumb("My Profile");
         return new MultiResponse(
@@ -54,6 +55,7 @@ class UserProfileController extends AbstractController {
      *
      * Will return a json success or failure response depending on the result of the operation.
      */
+    #[Route()]
     public function changeTimeZone() {
         if (isset($_POST['time_zone'])) {
             $updated = $this->core->getUser()->setTimeZone($_POST['time_zone']);
@@ -79,6 +81,7 @@ class UserProfileController extends AbstractController {
      * @Route("/user_profile/set_pref_locale", methods={"POST"})
      * @return JsonResponse
      */
+    #[Route()]
     public function setPrefLocale() {
         if (isset($_POST['locale'])) {
             $user = $this->core->getUser();
@@ -93,6 +96,7 @@ class UserProfileController extends AbstractController {
      * @Route("/user_profile/change_password", methods={"POST"})
      * @return MultiResponse
      */
+    #[Route()]
     public function changePassword() {
         $user = $this->core->getUser();
         if (
@@ -117,6 +121,7 @@ class UserProfileController extends AbstractController {
      * @Route("/user_profile/change_pronouns", methods={"POST"})
      * @return JsonResponse
      */
+    #[Route()]
     public function changePronouns() {
         $user = $this->core->getUser();
         if (isset($_POST['pronouns'])) {
@@ -147,6 +152,7 @@ class UserProfileController extends AbstractController {
      * @Route("/user_profile/change_preferred_names", methods={"POST"})
      * @return JsonResponse
      */
+    #[Route()]
     public function changeUserName() {
         $user = $this->core->getUser();
         if (isset($_POST['given_name']) && isset($_POST['family_name']) && !empty($_POST['given_name']) && !empty($_POST['family_name'])) {
@@ -179,6 +185,7 @@ class UserProfileController extends AbstractController {
      * @Route("/user_profile/update_last_initial_format", methods={"POST"})
      * @return JsonResponse
      */
+    #[Route()]
     public function updateLastInitialFormat() {
         $user = $this->core->getUser();
         if (isset($_POST['format'])) {
@@ -208,6 +215,7 @@ class UserProfileController extends AbstractController {
      * @return JsonResponse
      * @throws \ImagickException
      */
+    #[Route()]
     public function changeProfilePhoto() {
         $user = $this->core->getUser();
         // No image uploaded
@@ -247,6 +255,7 @@ class UserProfileController extends AbstractController {
      * @Route("/user_profile/change_secondary_email", methods={"POST"})
      * @return JsonResponse
      */
+    #[Route()]
     public function changeSecondaryEmail(): JsonResponse {
         $user = $this->core->getUser();
 

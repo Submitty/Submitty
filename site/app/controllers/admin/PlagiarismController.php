@@ -429,6 +429,7 @@ class PlagiarismController extends AbstractController {
      * @param string $refresh_page
      * @return WebResponse
      */
+    #[Route()]
     public function plagiarismMainPage(string $refresh_page = "NO_REFRESH"): WebResponse {
         $em = $this->core->getCourseEntityManager();
         $all_configurations = [];
@@ -599,6 +600,7 @@ class PlagiarismController extends AbstractController {
      * @return ResponseInterface
      * @Route("/courses/{_semester}/{_course}/plagiarism/gradeable/{gradeable_id}")
      */
+    #[Route()]
     public function showPlagiarismResult(string $gradeable_id, string $config_id): ResponseInterface {
         $em = $this->core->getCourseEntityManager();
         /** @var PlagiarismConfig $plagiarism_config */
@@ -685,6 +687,7 @@ class PlagiarismController extends AbstractController {
      * @return RedirectResponse
      * @Route("/courses/{_semester}/{_course}/plagiarism/configuration/new", methods={"POST"})
      */
+    #[Route()]
     public function savePlagiarismConfiguration(string $new_or_edit, string $gradeable_id, string $config_id): RedirectResponse {
         $em = $this->core->getCourseEntityManager();
         $semester = $this->core->getConfig()->getTerm();
@@ -1016,6 +1019,7 @@ class PlagiarismController extends AbstractController {
      * @Route("/courses/{_semester}/{_course}/plagiarism/configuration/new", methods={"GET"})
      * @return WebResponse
      */
+    #[Route()]
     public function configurePlagiarismForm(): WebResponse {
         $gradeable_with_submission = array_diff(scandir(FileUtils::joinPaths($this->core->getConfig()->getCoursePath(), "submissions/")), ['.', '..']);
         $gradeable_ids_titles = $this->core->getQueries()->getAllGradeablesIdsAndTitles();
@@ -1097,6 +1101,7 @@ class PlagiarismController extends AbstractController {
      * @param string $config_id
      * @return ResponseInterface
      */
+    #[Route()]
     public function editPlagiarismSavedConfig(string $gradeable_id, string $config_id): ResponseInterface {
         $return_url = $this->core->buildCourseUrl(['plagiarism']);
 
@@ -1185,6 +1190,7 @@ class PlagiarismController extends AbstractController {
      * @param string $config_id
      * @return RedirectResponse
      */
+    #[Route()]
     public function reRunPlagiarism(string $gradeable_id, string $config_id): RedirectResponse {
         $return_url = $this->core->buildCourseUrl(['plagiarism']);
 
@@ -1232,6 +1238,7 @@ class PlagiarismController extends AbstractController {
      * @param string $config_id
      * @return RedirectResponse
      */
+    #[Route()]
     public function deletePlagiarismResultAndConfig(string $gradeable_id, string $config_id): RedirectResponse {
         $return_url = $this->core->buildCourseUrl(['plagiarism']);
 
@@ -1273,6 +1280,7 @@ class PlagiarismController extends AbstractController {
      * @param string $gradeable_id
      * @param string $config_id
      */
+    #[Route()]
     public function downloadConfigFile(string $gradeable_id, string $config_id) {
         $this->core->getOutput()->useHeader(false);
         $this->core->getOutput()->useFooter(false);
@@ -1290,6 +1298,7 @@ class PlagiarismController extends AbstractController {
      * @param string $gradeable_id
      * @param string $config_id
      */
+    #[Route()]
     public function toggleNightlyRerun(string $gradeable_id, string $config_id) {
         // $semester = $this->core->getConfig()->getTerm();
         // $course = $this->core->getConfig()->getCourse();
@@ -1311,6 +1320,7 @@ class PlagiarismController extends AbstractController {
     /**
      * @Route("/courses/{_semester}/{_course}/plagiarism/configuration/getOtherGradeables", methods={"POST"})
      */
+    #[Route()]
     public function getOtherGradeables(): JsonResponse {
         if (!isset($_POST['semester_course']) || !isset($_POST['this_gradeable'])) {
             return JsonResponse::getErrorResponse("Error: Unable to get other gradeables");
@@ -1337,6 +1347,7 @@ class PlagiarismController extends AbstractController {
      * @return JsonResponse
      * @Route("/courses/{_semester}/{_course}/plagiarism/gradeable/{gradeable_id}/log")
      */
+    #[Route()]
     public function getRunLog(string $gradeable_id, string $config_id): JsonResponse {
         try {
             $this->verifyGradeableAndConfigAreValid($gradeable_id, intval($config_id));
@@ -1366,6 +1377,7 @@ class PlagiarismController extends AbstractController {
      * @return JsonResponse
      * @Route("/courses/{_semester}/{_course}/plagiarism/gradeable/{gradeable_id}/{config_id}/versionlist")
      */
+    #[Route()]
     public function ajaxGetVersionList(string $gradeable_id, string $config_id, string $user_id_1): JsonResponse {
         // error checking
         try {
@@ -1432,6 +1444,7 @@ class PlagiarismController extends AbstractController {
      * @return JsonResponse
      * @Route("/courses/{_semester}/{_course}/plagiarism/gradeable/{gradeable_id}/{config_id}/concat")
      */
+    #[Route()]
     public function ajaxGetSubmissionConcatenated(string $gradeable_id, string $config_id, string $user_id, string $version, string $source_gradeable = null): JsonResponse {
         // error checking
         try {
@@ -1475,6 +1488,7 @@ class PlagiarismController extends AbstractController {
      * @return JsonResponse
      * @Route("/courses/{_semester}/{_course}/plagiarism/gradeable/{gradeable_id}/{config_id}/colorinfo")
      */
+    #[Route()]
     public function ajaxGetColorInfo(string $gradeable_id, string $config_id, string $user_id_1, string $version_user_1, string $user_id_2 = null, string $version_user_2 = null, string $source_gradeable_user_2 = null): JsonResponse {
         // error checking
         try {
@@ -1580,6 +1594,7 @@ class PlagiarismController extends AbstractController {
      * @param string $version_user_1
      * @return JsonResponse
      */
+    #[Route()]
     public function ajaxGetUser2DropdownList(string $gradeable_id, string $config_id, string $user_id_1, string $version_user_1): JsonResponse {
         // error checking
         try {
@@ -1646,6 +1661,7 @@ class PlagiarismController extends AbstractController {
      * @Route("/courses/{_semester}/{_course}/plagiarism/check_refresh")
      * @return JsonResponse
      */
+    #[Route()]
     public function checkRefreshLichenMainPage(): JsonResponse {
         $em = $this->core->getCourseEntityManager();
         $configs = $em->getRepository(PlagiarismConfig::class)->findAll();

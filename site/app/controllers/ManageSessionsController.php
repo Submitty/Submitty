@@ -20,6 +20,7 @@ class ManageSessionsController extends AbstractController {
      * @Route("/manage_sessions", methods={"GET"})
      * @return WebResponse
      */
+    #[Route()]
     public function showSessionsPage(): WebResponse {
         /** @var SessionRepository $repo */
         $repo = $this->core->getSubmittyEntityManager()->getRepository(Session::class);
@@ -37,6 +38,7 @@ class ManageSessionsController extends AbstractController {
      * @Route("/manage_sessions/logout", methods={"POST"})
      * @return RedirectResponse
      */
+    #[Route()]
     public function logoutFromSession(): RedirectResponse {
         if (isset($_POST["session_id"])) {
             $session_id = $_POST["session_id"];
@@ -66,6 +68,7 @@ class ManageSessionsController extends AbstractController {
      * @Route("/manage_sessions/logout_all", methods={"POST"})
      * @return RedirectResponse
      */
+    #[Route()]
     public function logoutAllExceptCurrent(): RedirectResponse {
         /** @var SessionRepository $repo */
         $repo = $this->core->getSubmittyEntityManager()->getRepository(Session::class);
@@ -80,6 +83,7 @@ class ManageSessionsController extends AbstractController {
      * @Route("/manage_sessions/update_single_session", methods={"POST"})
      * @return RedirectResponse
      */
+    #[Route()]
     public function updateSingleSession(): RedirectResponse {
         if (isset($_POST['single_session'])) {
             $single_session = $_POST['single_session'] === "on";

@@ -35,6 +35,8 @@ class HomePageController extends AbstractController {
      * @param bool|string $as_instructor
      * @return MultiResponse
      */
+    #[Route()]
+    #[Route()]
     public function getCourses($user_id = null, $as_instructor = false) {
         if ($as_instructor === 'true') {
             $as_instructor = true;
@@ -74,6 +76,7 @@ class HomePageController extends AbstractController {
      * @param null $user_id
      * @return MultiResponse
      */
+    #[Route()]
     public function getGroups($user_id = null): MultiResponse {
         $user = $this->core->getUser();
         if (is_null($user) || !$user->accessFaculty()) {
@@ -100,6 +103,7 @@ class HomePageController extends AbstractController {
      * @Route("/home")
      * @return MultiResponse
      */
+    #[Route()]
     public function showHomepage() {
         $courses = $this->getCourses()->json_response->json;
 
@@ -119,6 +123,8 @@ class HomePageController extends AbstractController {
      * @Route("/home/courses/new", methods={"POST"})
      * @Route("/api/courses", methods={"POST"})
      */
+    #[Route()]
+    #[Route()]
     public function createCourse() {
         $user = $this->core->getUser();
         if (is_null($user) || !$user->accessFaculty()) {
@@ -252,6 +258,7 @@ class HomePageController extends AbstractController {
     /**
      * @Route("/home/courses/new", methods={"GET"})
      */
+    #[Route()]
     public function createCoursePage() {
         $user = $this->core->getUser();
         if (is_null($user) || !$user->accessFaculty()) {
@@ -285,6 +292,7 @@ class HomePageController extends AbstractController {
      *
      * @return MultiResponse
      */
+    #[Route()]
     public function getGroupUsers($group_name = null): MultiResponse {
         if (!$this->core->getUser()->accessFaculty()) {
             return new MultiResponse(
@@ -317,6 +325,7 @@ class HomePageController extends AbstractController {
      * @Route("/term/new", methods={"POST"})
      * @return MultiResponse
      */
+    #[Route()]
     public function addNewTerm() {
         if (!$this->core->getUser()->isSuperUser()) {
             return new MultiResponse(
@@ -352,6 +361,7 @@ class HomePageController extends AbstractController {
      * @Route("/update", methods={"GET"})
      * @return MultiResponse|WebResponse
      */
+    #[Route()]
     public function systemUpdatePage() {
         $user = $this->core->getUser();
         if (is_null($user) || $user->getAccessLevel() !== User::LEVEL_SUPERUSER) {
