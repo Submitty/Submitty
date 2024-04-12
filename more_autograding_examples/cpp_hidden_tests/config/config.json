@@ -25,6 +25,12 @@
     },
     "display_testcase_runtime_memory" : true,
 
+  "sloccounts": [
+    {
+      "title": "SLOCC vs Autograding Score",
+      "description":"SLOC measures your significant code lines, excluding comments and lines with only whitespace, this scatterplot measures how elegantly you have solved this gradeable."
+    }
+  ],
 
 
   "testcases" : [

@@ -120,6 +120,10 @@ class HomeworkView extends AbstractView {
             $return .= $this->renderLeaderboardBox($graded_gradeable);
         }
 
+        if ($gradeable->hasSloccount()) {
+            $return .= $this->renderSloccScatterplot($graded_gradeable);
+        }
+
         if ($submission_count > 0 && $num_parts > 1) {
             $return .= $this->renderTotalScoreBox($graded_gradeable, $version_instance, $show_hidden_testcases);
         }
@@ -772,6 +776,25 @@ class HomeworkView extends AbstractView {
           'url' => $this->core->buildCourseUrl(['gradeable', $graded_gradeable->getGradeableId(), 'leaderboard'])
         ]);
     }
+
+    /**
+     * @param GradedGradeable $graded_gradeable
+     * @return string
+     */
+    private function renderSloccScatterplot(GradedGradeable $graded_gradeable): string {
+        $autograding_config = $graded_gradeable->getGradeable()->getAutogradingConfig();
+        if (is_null($autograding_config)) {
+            return "";
+        }
+
+        $sloccount = $autograding_config->getSloccount();
+
+        return $this->core->getOutput()->renderTwigTemplate('submission/homework/SloccountStudent.twig', [
+            'url' => $this->core->buildCourseUrl(['gradeable', $graded_gradeable->getGradeableId(), 'sloccount'])
+        ]);
+    }
+
+
 
      /**
       * @param GradedGradeable $graded_gradeable

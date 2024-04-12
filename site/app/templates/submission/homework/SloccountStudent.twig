@@ -1,0 +1,52 @@
+<div id="sloc" class="page-content">
+    <div id="myDiv4"></div>
+    <script>
+        var sloc = [{{ histograms['sloc'] | join(',') }}];
+        var scores = [{{ histograms['bAuto'] | join(',') }}];
+        console.log(sloc);
+        console.log(scores);
+
+
+
+        var trace = {
+            x: sloc,
+            y: scores,
+            name: 'scores',
+            type: 'scatter',
+            mode: 'markers',
+            text: yValue,
+            textposition: 'auto',
+            hoverinfo: 'none',
+            marker: {
+                color: 'rgb(48,99,152)',
+                opacity: 1.0,
+                line: {
+                    color: 'rbg(170,170,170)',
+                    width: 1.5
+                }
+            }
+        };
+
+        var data = [trace];
+
+        var layout = {
+            title: 'Sloc vs. Autograding scores',
+            barmode: 'overlay',
+            xaxis: {
+                title: 'Physical source lines of code'
+            },
+            yaxis:{
+                title: 'Autograding scores'
+            },
+            font: {
+                family: '"Source Sans Pro", sans-serif',
+            }
+
+        };
+        Plotly.newPlot('myDiv4', data, layout, { displayModeBar: false,displaylogo: false });
+    </script>
+    <br/>
+    <br/>
+    Double-click on the chart to zoom out
+    <hr>
+</div>
