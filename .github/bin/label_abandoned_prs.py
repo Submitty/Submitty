@@ -6,7 +6,10 @@ from datetime import timedelta
 
 data = ""
 if __name__ == "__main__":
-    data = sys.argv[1]
+    if len(sys.argv) > 1:
+        data = sys.argv[1]
+    else:
+        data = ""
 
 if data == "real":
     pr_json = "gh pr list --json updatedAt,labels,number,comments,reviews"
