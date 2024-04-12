@@ -22,7 +22,6 @@ class LateController extends AbstractController {
      * @Route("/courses/{_semester}/{_course}/late_days")
      * @return WebResponse
      */
-    #[Route()]
     public function viewLateDays() {
         return new WebResponse(
             ['admin', 'LateDay'],
@@ -37,7 +36,6 @@ class LateController extends AbstractController {
      * @Route("/courses/{_semester}/{_course}/extensions")
      * @return WebResponse
      */
-    #[Route()]
     public function viewExtensions() {
         return new WebResponse(
             ['admin', 'Extensions'],
@@ -50,7 +48,6 @@ class LateController extends AbstractController {
      * @Route("/courses/{_semester}/{_course}/bulk_late_days")
      * @return WebResponse
      */
-    #[Route()]
     public function viewLateDayCache() {
         return new WebResponse(
             ['admin', 'LateDay'],
@@ -64,7 +61,6 @@ class LateController extends AbstractController {
      * @Route("/courses/{_semester}/{_course}/bulk_late_days/flush")
      * @return RedirectResponse
      */
-    #[Route()]
     public function flushLateDayCache() {
         $this->core->getQueries()->flushAllLateDayCache();
         $this->core->addSuccessMessage("Late day cache flushed!");
@@ -75,7 +71,6 @@ class LateController extends AbstractController {
      * @Route("/courses/{_semester}/{_course}/bulk_late_days/calculate")
      * @return RedirectResponse
      */
-    #[Route()]
     public function calculateLateDayCache() {
         $this->core->getQueries()->generateLateDayCacheForUsers();
         $this->core->addSuccessMessage("Late day cache calculated!");
@@ -88,7 +83,6 @@ class LateController extends AbstractController {
      * @Route("/courses/{_semester}/{_course}/late_days/update", methods={"POST"})
      * @return MultiResponse
      */
-    #[Route()]
     public function updateLateDays($csv_option = null) {
         if (isset($_FILES['csv_upload']) && (file_exists($_FILES['csv_upload']['tmp_name']))) {
             $data = [];
@@ -152,7 +146,6 @@ class LateController extends AbstractController {
      * @Route("/courses/{_semester}/{_course}/late_days/delete", methods={"POST"})
      * @return MultiResponse
      */
-    #[Route()]
     public function deleteLateDays() {
         $user = current($this->core->getQueries()->getUsersById([$_POST['user_id']]));
         if (!$user) {
@@ -181,7 +174,6 @@ class LateController extends AbstractController {
      * @Route("/courses/{_semester}/{_course}/extensions/update", methods={"POST"})
      * @return MultiResponse
      */
-    #[Route()]
     public function updateExtension() {
         if (isset($_FILES['csv_upload']) && (file_exists($_FILES['csv_upload']['tmp_name']))) {
             $data = [];
@@ -298,7 +290,6 @@ class LateController extends AbstractController {
      * @Route("/courses/{_semester}/{_course}/users/view_latedays", methods={"GET"})
      * @return RedirectResponse|WebResponse
      **/
-    #[Route()]
     public function viewStudentLatedays() {
         if (!isset($_GET['student_id'])) {
             $this->core->addErrorMessage("No student ID provided");

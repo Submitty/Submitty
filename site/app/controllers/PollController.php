@@ -24,10 +24,7 @@ class PollController extends AbstractController {
         parent::__construct($core);
     }
 
-    /**
-     * @Route("/courses/{_semester}/{_course}/polls", methods={"GET"})
-     */
-    #[Route()]
+    #[Route("/courses/{_semester}/{_course}/polls", methods: ["GET"])]
     public function showPollsPage(): WebResponse {
         /** @var \app\repositories\poll\PollRepository */
         $repo = $this->core->getCourseEntityManager()->getRepository(Poll::class);
@@ -99,10 +96,9 @@ class PollController extends AbstractController {
     }
 
     /**
-     * @Route("/courses/{_semester}/{_course}/polls/{poll_id}", methods={"GET"}, requirements={"poll_id": "\d*", })
      * @return RedirectResponse|WebResponse
      */
-    #[Route()]
+    #[Route("/courses/{_semester}/{_course}/polls/{poll_id}", methods: ["GET"], requirements: ["poll_id" => "\d*", ])]
     public function showPoll(string $poll_id) {
         if (!is_numeric($poll_id)) {
             $this->core->addErrorMessage("Invalid Poll ID");
@@ -148,10 +144,9 @@ class PollController extends AbstractController {
     }
 
     /**
-     * @Route("/courses/{_semester}/{_course}/polls/newPoll", methods={"GET"})
      * @AccessControl(role="INSTRUCTOR")
      */
-    #[Route()]
+    #[Route("/courses/{_semester}/{_course}/polls/newPoll", methods: ["GET"])]
     public function showNewPollPage(): WebResponse {
         return new WebResponse(
             PollView::class,
@@ -161,10 +156,9 @@ class PollController extends AbstractController {
 
 
     /**
-     * @Route("/courses/{_semester}/{_course}/polls/newPoll", methods={"POST"})
      * @AccessControl(role="INSTRUCTOR")
      */
-    #[Route()]
+    #[Route("/courses/{_semester}/{_course}/polls/newPoll", methods: ["POST"])]
     public function addNewPoll(): RedirectResponse {
         $em = $this->core->getCourseEntityManager();
 
@@ -254,11 +248,11 @@ class PollController extends AbstractController {
     }
 
     /**
-     * @Route("/courses/{_semester}/{_course}/polls/editPoll/{poll_id}", methods={"GET"}, requirements={"poll_id": "\d*", })
+     * @Route()
      * @AccessControl(role="INSTRUCTOR")
      * @return RedirectResponse|WebResponse
      */
-    #[Route()]
+    #[Route("/courses/{_semester}/{_course}/polls/editPoll/{poll_id}", methods: ["GET"], requirements: ["poll_id" => "\d*", ])]
     public function editPoll($poll_id) {
         if (!isset($poll_id)) {
             $this->core->addErrorMessage("Invalid Poll ID");

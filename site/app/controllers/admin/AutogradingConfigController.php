@@ -22,7 +22,6 @@ class AutogradingConfigController extends AbstractController {
      * @param string $g_id gradeable Id
      * @return MultiResponse
      */
-    #[Route()]
     public function showConfig($g_id = '') {
         $target_dir = FileUtils::joinPaths($this->core->getConfig()->getCoursePath(), "config_upload");
         $all_files = FileUtils::getAllFiles($target_dir);
@@ -54,7 +53,6 @@ class AutogradingConfigController extends AbstractController {
      * @Route("/courses/{_semester}/{_course}/autograding_config/upload", methods={"POST"})
      * @param string $g_id gradeable Id
      */
-    #[Route()]
     public function uploadConfig($g_id = ''): MultiResponse {
         $redirect_url = empty($g_id) ? $this->core->buildCourseUrl((['autograding_config']))
             : $this->core->buildCourseUrl(['autograding_config']) . '?g_id=' . $g_id;
@@ -148,7 +146,6 @@ class AutogradingConfigController extends AbstractController {
      * @param string $g_id gradeable Id
      * @return MultiResponse
      */
-    #[Route()]
     public function renameConfig($g_id = '') {
         $config_file_path = $_POST['curr_config_name'] ?? null;
         if ($config_file_path == null) {
@@ -187,7 +184,6 @@ class AutogradingConfigController extends AbstractController {
      * @param string $g_id gradeable Id
      * @return MultiResponse
      */
-    #[Route()]
     public function deleteConfig($g_id = '') {
         $config_path = $_POST['config_path'] ?? null;
         $in_use = false;
@@ -226,7 +222,6 @@ class AutogradingConfigController extends AbstractController {
      * @Route("/courses/{_semester}/{_course}/autograding_config/usage", methods={"GET"})
      * @return MultiResponse
      */
-    #[Route()]
     public function configUsedBy($config_path = null) {
         $config_path = urldecode($config_path);
         // Returns a list of gradeables that are using this config

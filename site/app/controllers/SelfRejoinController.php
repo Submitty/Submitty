@@ -16,7 +16,6 @@ class SelfRejoinController extends AbstractController {
      * if they meet the right conditions.
      * @return void
      */
-    #[Route()]
     public function noAccess(): void {
         $this->core->getOutput()->renderOutput(
             'Error',
@@ -94,7 +93,6 @@ class SelfRejoinController extends AbstractController {
      *
      * @return RedirectResponse Course url if the student met the conditions to be readded.
      */
-    #[Route()]
     public function rejoinCourse(): RedirectResponse {
 
         if (!$this->canRejoinCourse()) {

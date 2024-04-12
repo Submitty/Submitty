@@ -29,8 +29,6 @@ class ConfigurationController extends AbstractController {
      * @Route("/courses/{_semester}/{_course}/config", methods={"GET"})
      * @return MultiResponse
      */
-    #[Route()]
-    #[Route()]
     public function viewConfiguration(): MultiResponse {
         $fields = [
             'course_name'                    => $this->core->getConfig()->getCourseName(),
@@ -100,8 +98,6 @@ class ConfigurationController extends AbstractController {
      * @Route("/courses/{_semester}/{_course}/config", methods={"POST"})
      * @return MultiResponse
      */
-    #[Route()]
-    #[Route()]
     public function updateConfiguration(): MultiResponse {
         if (!isset($_POST['name'])) {
             return MultiResponse::JsonOnlyResponse(
