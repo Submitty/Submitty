@@ -152,19 +152,17 @@ class UserProfileController extends AbstractController {
     public function changeDisplayNameOrder() {
         $user = $this->core->getUser();
         if (isset($_POST['display-name-order'])) {
-            $newPronouns = trim($_POST['display-name-order']);
-            //validPronouns() checks for valid option
-            // echo $newPronouns;
-            $user->setDisplayNameOrder($newPronouns);
+            $newDisplayNameOrdering = trim($_POST['display-name-order']);
+            $user->setDisplayNameOrder($newDisplayNameOrdering);
             $user->setUserUpdated(true);
             $this->core->getQueries()->updateUser($user);
             return JsonResponse::getSuccessResponse([
-                'message' => "Pronouns updated successfully",
-                'display-name-order' => $newPronouns,
+                'message' => "Name Order updated successfully",
+                'display-name-order' => $newDisplayNameOrdering,
             ]);
         }
         else {
-            return JsonResponse::getErrorResponse("Pronouns does not exist");
+            return JsonResponse::getErrorResponse("Name Order is incorrect");
         }
     }
 

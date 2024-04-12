@@ -183,7 +183,6 @@ function updateDisplayNameOrder(e) {
         processData: false,
         contentType: false,
         success: function(res) {
-            console.log(res);
             const response = JSON.parse(res);
             if (response.status === 'success') {
                 const {data} = response;

@@ -131,7 +131,7 @@ class User extends AbstractModel {
      * @var int The display format for the last initial of the user */
     protected $last_initial_format = 0;
     /** @prop
-     * @var string The display format for the last initial of the user */
+     * @var string The choice of how to do display name*/
     protected $display_name_order = "GIVEN_F";
     /** @prop
      * @var string The primary email of the user */
