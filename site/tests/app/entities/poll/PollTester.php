@@ -286,7 +286,7 @@ class PollTester extends BaseUnitTest {
 
     public function testEndTime(): void {
         $this->my_polls[0]->setClosed();
-        $this->assertEquals($this->my_polls[0]->getEndTime()->format("Y-m-d"), "1900-02-01");
+        $this->assertEquals($this->my_polls[0]->getEndTime(), "1900-02-01 00:00:00");
         $this->my_polls[1]->setOpen();
         $this->assertEquals($this->my_polls[1]->getEndTime()->format("Y-m-d"), "9999-02-01");
         $this->my_polls[2]->setEnded();
