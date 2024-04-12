@@ -445,7 +445,6 @@ function newEditCourseMaterialsForm(tag) {
     $('#overwrite-materials-flag').remove();
     showPopup('#edit-course-materials-form');
     captureTabInModal('edit-course-materials-form');
-
 }
 
 /**
@@ -481,7 +480,16 @@ function showPopup(selector) {
     document.body.classList.add('no-scroll');
 }
 
-let lastActiveElement = null;
+function closePopup(id) {
+    $('#' + id).hide();
+    //Checking if the body contains the class no scroll making the page locked, then unlocking it
+    if (document.body.classList.contains('no-scroll')) {
+        document.body.classList.remove('no-scroll');
+    }
+}
+
+// eslint-disable-next-line no-var
+var lastActiveElement = null;
 function captureTabInModal(formName, resetFocus=true) {
     if (resetFocus) {
         lastActiveElement = document.activeElement;

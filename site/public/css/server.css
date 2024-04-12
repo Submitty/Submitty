@@ -1151,7 +1151,6 @@ body.no-scroll {
     justify-content: center;
 }
 
-
 .popup-window {
     background: var(--default-white);
     box-shadow: 0 6px 20px 2px var(--black-moderately-transparent);

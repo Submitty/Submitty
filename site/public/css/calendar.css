@@ -60,6 +60,11 @@ a.cal-btn:focus {
     float: right;
 }
 
+#calendar-today-button{
+    float:right;
+    margin-right: 10px;
+}
+
 .cal-month-title {
     font-size: 26px;
     text-transform: uppercase;
