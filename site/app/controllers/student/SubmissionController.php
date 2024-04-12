@@ -1025,6 +1025,7 @@ class SubmissionController extends AbstractController {
      * @param string $gradeable_id
      */
     public function ajaxGetGradeableScore(string $gradeable_id): JsonResponse {
+        unset($_SESSION['student_api']);
         try {
             $gradeable = $this->core->getQueries()->getGradeableConfig($gradeable_id);
         }
@@ -1048,7 +1049,8 @@ class SubmissionController extends AbstractController {
      * @return array
      */
     public function ajaxUploadSubmission($gradeable_id, $merge = null, $clobber = null) {
-        if (array_key_exists('student_api', $_SESSION)) {
+        $student_api = array_key_exists('student_api', $_SESSION);
+        if ($student_api) {
             if (!array_key_exists('vcs_checkout', $_POST)) {
                 return $this->uploadResult("Student API only supports VCS gradeables currently.", false);
             }
@@ -1065,7 +1067,7 @@ class SubmissionController extends AbstractController {
         }
 
         $vcs_checkout = isset($_POST['vcs_checkout']) ? $_POST['vcs_checkout'] === "true" : false;
-        if ($vcs_checkout && !isset($_POST['git_repo_id']) && (!array_key_exists('student_api', $_SESSION))) {
+        if ($vcs_checkout && !isset($_POST['git_repo_id']) && (!$student_api)) {
             return $this->uploadResult("Invalid repo id.", false);
         }
 
@@ -1090,7 +1092,7 @@ class SubmissionController extends AbstractController {
         $original_user_id = $this->core->getUser()->getId();
         $user_id = $_POST['user_id'];
         // repo_id for VCS use
-        $repo_id = ($vcs_checkout && (!array_key_exists('student_api', $_SESSION)) ? $_POST['git_repo_id'] : "");
+        $repo_id = ($vcs_checkout && (!$student_api) ? $_POST['git_repo_id'] : "");
 
         // Unset session variable
         unset($_SESSION['student_api']);
