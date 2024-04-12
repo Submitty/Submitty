@@ -39,9 +39,9 @@ class SuperuserEmailController extends AbstractController {
         );
     }
     /**
-     * @Route("/superuser/email/send", methods={"POST"})
      * @return JsonResponse
      */
+    #[Route("/superuser/email/send", methods: ["POST"])]
     public function sendEmail(): JsonResponse {
         if (!isset($_POST['email_content']) || $_POST['email_content'] == '') {
             return JsonResponse::getFailResponse("Email content is empty.");
