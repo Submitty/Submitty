@@ -7222,6 +7222,12 @@ AND gc_id IN (
         $this->course_db->query($query, $params);
     }
 
+    /**
+     * @param string $gradeable_id
+     * @param string $grader_id
+     * @param string $submitter_id
+     * @return void
+     */
     public function deleteOverallComment($gradeable_id, $grader_id, $submitter_id) {
         $this->course_db->query(
             "DELETE FROM gradeable_data_overall_comment WHERE g_id=? AND goc_grader_id=? AND (goc_user_id=? OR goc_team_id=?)",
