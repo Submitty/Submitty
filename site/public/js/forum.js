@@ -1293,8 +1293,8 @@ function modifyThreadList(currentThreadId, currentCategoriesId, course, loadFirs
     });
 }
 
-
-function toggleLike(post_id, current_user, userGroup, taLiked) {
+// eslint-disable-next-line no-unused-vars
+function toggleLike(post_id, current_user, userGroup) {
     // eslint-disable-next-line no-undef
     const url = buildCourseUrl(['post', 'likes']);
     $.ajax({
@@ -1324,7 +1324,6 @@ function toggleLike(post_id, current_user, userGroup, taLiked) {
             json=json['data'];
             const likes = json['likesCount'];
             const liked = json['status'];
-            console.log(json['status']);
 
             const likeCounterElement = document.getElementById(`likeCounter_${post_id}`);
             let likeCounter = parseInt(likeCounterElement.innerText);
@@ -1334,7 +1333,6 @@ function toggleLike(post_id, current_user, userGroup, taLiked) {
             let likeIconSrcElement = likeIconSrc.src;
 
             if (liked==='unlike') {
-                console.log("here1");
                 likeIconSrcElement = likeIconSrcElement.replace('on-duck-button.svg', 'light-mode-off-duck.svg');
                 if (userGroup === 1 || userGroup === 2) {
                     document.getElementById(`likedByInstructor_${post_id}`).style.display = 'none';
@@ -1345,13 +1343,11 @@ function toggleLike(post_id, current_user, userGroup, taLiked) {
                 likeCounterElement.innerText = likeCounter;
             }
             else if (liked ==='like') {
-                console.log("here2");
-
                 likeIconSrcElement = likeIconSrcElement.replace('light-mode-off-duck.svg', 'on-duck-button.svg');
                 if (userGroup === 1 || userGroup ===2) {
                     document.getElementById(`likedByInstructor_${post_id}`).style.display = '';
                 }
-                
+
                 likeCounter=likes;
                 likeIconSrc.src = likeIconSrcElement; // Update the state
                 likeCounterElement.innerText = likeCounter;
