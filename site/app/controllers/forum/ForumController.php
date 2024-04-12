@@ -1385,4 +1385,28 @@ class ForumController extends AbstractController {
         ksort($users);
         $this->core->getOutput()->renderOutput('forum\ForumThread', 'statPage', $users);
     }
+
+    /**
+     * @Route("/courses/{_semester}/{_course}/post/likes", methods={"POST"})
+     */
+    public function toggleLike(): JsonResponse {
+        $requiredKeys = ['post_id', 'current_user'];
+        foreach ($requiredKeys as $key) {
+            if (!isset($_POST[$key])) {
+                return JsonResponse::getErrorResponse('Missing required key in POST data: ' . $key);
+            }
+        }
+        $output = [];
+        $output = $this->core->getQueries()->toggleLikes($_POST['post_id'], $this->core->getUser()->getId());//so isLiked is the frontend value
+
+        $responseData = [
+            'status' => $output[0], // 'like'
+            'likesCount' => $output[1] // The likes count
+        ];
+
+        if ($responseData['status'] === "false") {
+            return JsonResponse::getErrorResponse('Catch Fail in Query');
+        }
+        return JsonResponse::getSuccessResponse($responseData);
+    }
 }
