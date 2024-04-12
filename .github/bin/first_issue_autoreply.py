@@ -5,8 +5,7 @@ pr_json = "gh pr list --json number, comments"
 terminal_output = subprocess.check_output(pr_json, shell=True, text=True)
 json_output = json.loads(terminal_output)
 
-first_issue_comment = "Hi INSERT_MENTION_TO_GITHUB_USERNAME\n"\
-    "Thank you for your interest in the Submitty open source project.\n"\
+first_issue_comment = "Thank you for your interest in the Submitty open source project.\n"\
     "We welcome contributions from new developers!\n"\
     "However we do not use the Github issue 'assign' feature for first time prospective contributors.\n"\
     "Please read our documentation on [how to get started with Submitty](https://submitty.org/developer/getting_started/index), "\
@@ -20,4 +19,4 @@ for pr in json_output:
     num = str(pr['number'])
     for comment in pr:
         if comment['authorAssociation'] == "NONE":
-            subprocess.run(['gh', 'pr', 'comment', num, '--body', first_issue_comment])
+            subprocess.run(['gh', 'pr', 'comment', num, '--body', "Hi @" + comment['author']['login'] + "\n" + first_issue_comment])
