@@ -37,9 +37,7 @@ class ReportController extends AbstractController {
 
     private $all_overrides = [];
 
-    /**
-     * @Route("/courses/{_semester}/{_course}/reports")
-     */
+    #[Route("/courses/{_semester}/{_course}/reports")]
     public function showReportPage() {
         if (!$this->core->getUser()->accessAdmin()) {
             $this->core->getOutput()->showError("This account cannot access admin pages");
