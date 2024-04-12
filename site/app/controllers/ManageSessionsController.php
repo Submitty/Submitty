@@ -16,11 +16,10 @@ use app\views\ManageSessionsView;
 class ManageSessionsController extends AbstractController {
     /**
      * Show manage sessions page
-     *
-     * @Route("/manage_sessions", methods={"GET"})
+     * 
      * @return WebResponse
      */
-    #[Route()]
+    #[Route("/manage_sessions", methods: ["GET"])]
     public function showSessionsPage(): WebResponse {
         /** @var SessionRepository $repo */
         $repo = $this->core->getSubmittyEntityManager()->getRepository(Session::class);
@@ -35,10 +34,9 @@ class ManageSessionsController extends AbstractController {
     /**
      * Terminate a session
      *
-     * @Route("/manage_sessions/logout", methods={"POST"})
      * @return RedirectResponse
      */
-    #[Route()]
+    #[Route("/manage_sessions/logout", methods: ["POST"])]
     public function logoutFromSession(): RedirectResponse {
         if (isset($_POST["session_id"])) {
             $session_id = $_POST["session_id"];
@@ -65,10 +63,9 @@ class ManageSessionsController extends AbstractController {
     /**
      * Terminate all sessions except current
      *
-     * @Route("/manage_sessions/logout_all", methods={"POST"})
      * @return RedirectResponse
      */
-    #[Route()]
+    #[Route("/manage_sessions/logout_all", methods: ["POST"])]
     public function logoutAllExceptCurrent(): RedirectResponse {
         /** @var SessionRepository $repo */
         $repo = $this->core->getSubmittyEntityManager()->getRepository(Session::class);
@@ -80,10 +77,9 @@ class ManageSessionsController extends AbstractController {
     /**
      * Update the enforce_single_session boolean
      *
-     * @Route("/manage_sessions/update_single_session", methods={"POST"})
      * @return RedirectResponse
      */
-    #[Route()]
+    #[Route("/manage_sessions/update_single_session", methods: ["POST"])]
     public function updateSingleSession(): RedirectResponse {
         if (isset($_POST['single_session'])) {
             $single_session = $_POST['single_session'] === "on";

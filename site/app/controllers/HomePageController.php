@@ -28,15 +28,12 @@ class HomePageController extends AbstractController {
     }
 
     /**
-     * @Route("/api/courses", methods={"GET"})
-     * @Route("/home/courses", methods={"GET"})
-     *
      * @param string|null $user_id
      * @param bool|string $as_instructor
      * @return MultiResponse
      */
-    #[Route()]
-    #[Route()]
+    #[Route("/api/courses", methods: ["GET"])]
+    #[Route("/home/courses", methods: ["GET"])]
     public function getCourses($user_id = null, $as_instructor = false) {
         if ($as_instructor === 'true') {
             $as_instructor = true;
@@ -71,12 +68,10 @@ class HomePageController extends AbstractController {
     }
 
     /**
-     * @Route("/home/groups")
-     *
      * @param null $user_id
      * @return MultiResponse
      */
-    #[Route()]
+    #[Route("/home/groups")]
     public function getGroups($user_id = null): MultiResponse {
         $user = $this->core->getUser();
         if (is_null($user) || !$user->accessFaculty()) {
@@ -99,11 +94,10 @@ class HomePageController extends AbstractController {
 
     /**
      * Display the HomePageView to the student.
-     *
-     * @Route("/home")
+     * 
      * @return MultiResponse
      */
-    #[Route()]
+    #[Route("/home")]
     public function showHomepage() {
         $courses = $this->getCourses()->json_response->json;
 
@@ -119,12 +113,8 @@ class HomePageController extends AbstractController {
         );
     }
 
-    /**
-     * @Route("/home/courses/new", methods={"POST"})
-     * @Route("/api/courses", methods={"POST"})
-     */
-    #[Route()]
-    #[Route()]
+    #[Route("/home/courses/new", methods: ["POST"])]
+    #[Route("/api/courses", methods: ["POST"])]
     public function createCourse() {
         $user = $this->core->getUser();
         if (is_null($user) || !$user->accessFaculty()) {
@@ -255,10 +245,7 @@ class HomePageController extends AbstractController {
         );
     }
 
-    /**
-     * @Route("/home/courses/new", methods={"GET"})
-     */
-    #[Route()]
+    #[Route("/home/courses/new", methods: ["GET"])]
     public function createCoursePage() {
         $user = $this->core->getUser();
         if (is_null($user) || !$user->accessFaculty()) {
@@ -288,11 +275,9 @@ class HomePageController extends AbstractController {
     }
 
     /**
-     * @Route("/home/group/users")
-     *
      * @return MultiResponse
      */
-    #[Route()]
+    #[Route("/home/group/users")]
     public function getGroupUsers($group_name = null): MultiResponse {
         if (!$this->core->getUser()->accessFaculty()) {
             return new MultiResponse(
@@ -322,10 +307,9 @@ class HomePageController extends AbstractController {
     }
 
     /**
-     * @Route("/term/new", methods={"POST"})
      * @return MultiResponse
      */
-    #[Route()]
+    #[Route("/term/new", methods: ["POST"])]
     public function addNewTerm() {
         if (!$this->core->getUser()->isSuperUser()) {
             return new MultiResponse(
@@ -358,10 +342,9 @@ class HomePageController extends AbstractController {
     }
 
     /**
-     * @Route("/update", methods={"GET"})
      * @return MultiResponse|WebResponse
      */
-    #[Route()]
+    #[Route("/update", methods: ["GET"])]
     public function systemUpdatePage() {
         $user = $this->core->getUser();
         if (is_null($user) || $user->getAccessLevel() !== User::LEVEL_SUPERUSER) {
