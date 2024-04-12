@@ -1,11 +1,20 @@
 import json
 import subprocess
 import datetime
+import sys
 from datetime import timedelta
 
-pr_json = "gh pr list --json updatedAt,labels,number,comments,reviews"
-terminal_output = subprocess.check_output(pr_json, shell=True, text=True)
-json_output = json.loads(terminal_output)
+data = ""
+if __name__ == "__main__":
+    data = sys.argv[1]
+
+if data == "real":
+    pr_json = "gh pr list --json updatedAt,labels,number,comments,reviews"
+    terminal_output = subprocess.check_output(pr_json, shell=True, text=True)
+    json_output = json.loads(terminal_output)
+else:
+    terminal_output = open(sys.path[0] + '/../' + data, encoding="utf-8").read()
+    json_output = json.loads(terminal_output)
 
 inactive_comment = "This PR has been inactive (no commits and no review comments)"\
     " for 12 days. If there is no new activity in the next 48 hours,"\
