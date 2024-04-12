@@ -281,7 +281,7 @@ class UsersController extends AbstractController {
      * @Route("/api/users/add", methods={"POST"})
      * @Route("/users/add", methods={"POST"})
      */
-    function ajaxAddUser() {
+    function ajaxAddUser(): JsonResponse {
         $values = [
             'user_id',
             'numeric_id',
@@ -297,13 +297,20 @@ class UsersController extends AbstractController {
                 $_POST['user_id'],
                 $_POST['numeric_id'],
                 $_POST['given_name'],
-                $_POST['preferred_name'] ?? null,
+                $_POST['preferred_given_name'] ?? null,
                 $_POST['family_name'],
+                $_POST['preferred_family_name'] ?? null,
                 $_POST['email'] ?? '', 
                 $_POST['password'] ?? null, 
+                $_POST['user_access_level'] ?? 3,
             );
-            $this->core->getQueries()->addUser($user_data);
-            return JsonResponse::getSuccessResponse($this->core->getQueries()->getUserById($_POST['user_id']));
+            $id = $this->core->getQueries()->addUser($user_data);
+            if ($id !== null) {
+                return JsonResponse::getSuccessResponse($id);
+            }
+            else {
+                return JsonResponse::getErrorResponse('An error has occured.');
+            }
         } else { 
             return JsonResponse::getErrorResponse('All required keys are not present');
         }
