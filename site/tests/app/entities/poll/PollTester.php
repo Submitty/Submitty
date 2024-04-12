@@ -286,17 +286,18 @@ class PollTester extends BaseUnitTest {
 
     public function testEndTime(): void {
         $this->my_polls[0]->setClosed();
-        $this->assertEquals($this->my_polls[0]->getEndTime(), "1900-02-01 00:00:00");
+        $this->assertEquals($this->my_polls[0]->getEndTime()->format('Y-m-d H:i:s'), "1900-02-01 00:00:00");
         $this->my_polls[1]->setOpen();
-        $this->assertEquals($this->my_polls[1]->getEndTime()->format("Y-m-d"), "9999-02-01");
+        $this->assertEquals($this->my_polls[1]->getEndTime()->format("Y-m-d H:i:s"), "9999-02-01 00:00:00");
         $this->my_polls[2]->setEnded();
+        // SetEnded sets EndTime to current time (no way to check exact millisecond)
         $this->assertEquals($this->my_polls[2]->getEndTime()->format("Y-m-d"), date("Y-m-d"));
-        $this->my_polls[0]->setEndTime(new DateTime('2025-10-03'));
-        $this->assertEquals($this->my_polls[0]->getEndTime()->format("Y-m-d"), "2025-10-03");
+        $this->my_polls[0]->setEndTime(new DateTime('2025-10-03 05:30:00'));
+        $this->assertEquals($this->my_polls[0]->getEndTime()->format("Y-m-d H:i:s"), "2025-10-03 05:30:00");
         $this->my_polls[1]->setEndTime(new DateTime('9000-9-11'));
-        $this->assertEquals($this->my_polls[1]->getEndTime()->format("Y-m-d"), "9000-09-11");
-        $this->my_polls[2]->setEndTime(new DateTime('1900-12-05'));
-        $this->assertEquals($this->my_polls[2]->getEndTime()->format("Y-m-d"), "1900-12-05");
+        $this->assertEquals($this->my_polls[1]->getEndTime()->format("Y-m-d H:i:s"), "9000-09-11 00:00:00");
+        $this->my_polls[2]->setEndTime(new DateTime('1900-12-05 00:20:30'));
+        $this->assertEquals($this->my_polls[2]->getEndTime()->format("Y-m-d H:i:s"), "1900-12-05 00:20:30");
     }
 
     public function testHistogramRelease(): void {
