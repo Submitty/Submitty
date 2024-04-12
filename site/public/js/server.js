@@ -1925,12 +1925,19 @@ function addMarkdownCode(type) {
             insert = '_italic text_';
             break;
         case 'blockquote':
-            insert = '> blockquote text';
+            insert = '> blockquote text\n';
+            text = parseBlockquote(text);
             break;
     }
     $(this).val(text.substring(0, cursor) + insert + text.substring(cursor));
     $(this).focus();
     $(this)[0].setSelectionRange(cursor + insert.length, cursor + insert.length);
+}
+
+function parseBlockquote(text){
+    text = text.replace(/^\s*>\s*(.*)/gm, '<blockquote><p>$1</p></blockquote>');
+
+    return text;
 }
 
 /**
