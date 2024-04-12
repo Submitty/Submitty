@@ -20,6 +20,6 @@ for pr in json_output:
     replied_to = []
     for comment in pr:
         author = comment['author']['login']
-        if comment['authorAssociation'] == "NONE" and author in replied_to:
+        if comment['authorAssociation'] == "NONE" and author not in replied_to:
             # subprocess.run(['gh', 'pr', 'comment', num, '--body', "Hi @" + author + "\n" + first_issue_comment])
             replied_to.insert(author)
