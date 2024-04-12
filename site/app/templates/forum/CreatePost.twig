@@ -57,8 +57,7 @@
                     {% endif %}
                 </a>
             {% endif %}
-        {% endif %}
-
+        {% endif %} 
 
     {% endif %}
 
@@ -118,6 +117,11 @@
         <div id="{{ post_attachment.params.well_id }}" class="attachment-well well well-lg"></div>
 
     {% endif %}
+
+    <button class="upduck-button text-decoration-none key_to_click" tabindex="0" onClick="toggleLike({{post.id}}, '{{current_user}}')">
+        <img id="likeIcon_{{post.id}}" src="{{ post_up_duck.upduck_user_liked ? '/img/on-duck-button.svg' : '/img/light-mode-off-duck.svg' }}" alt="Like" width="30" height="30">
+    </button>
+    <span id="likeCounter_{{post.id}}" style="font-size: 15px; vertical-align: middle;">{{ post_up_duck.upduck_count }}</span>
 
     {% set offset = offset + 30 %}
 </div>
