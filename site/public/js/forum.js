@@ -1333,17 +1333,9 @@ function toggleLike(post_id, current_user, userGroup, taLiked) {
             const likeIconSrc = document.getElementById(`likeIcon_${post_id}`);
             let likeIconSrcElement = likeIconSrc.src;
 
-            const theme = localStorage.getItem('theme');
             if (liked==='unlike') {
-                if (theme==='light' && likeIconSrcElement.endsWith('/img/on-duck-button.svg')) {
-                    likeIconSrcElement = likeIconSrcElement.replace('on-duck-button.svg', 'light-mode-off-duck.svg');
-                    if (taLiked) {
-                        likeCounterElement.style.color = '#ffba00';
-                    }
-                    else {
-                        likeCounterElement.style.color = 'white';
-                    }
-                }
+                console.log("here1");
+                likeIconSrcElement = likeIconSrcElement.replace('on-duck-button.svg', 'light-mode-off-duck.svg');
                 if (userGroup === 1 || userGroup === 2) {
                     document.getElementById(`likedByInstructor_${post_id}`).style.display = 'none';
                 }
@@ -1353,27 +1345,18 @@ function toggleLike(post_id, current_user, userGroup, taLiked) {
                 likeCounterElement.innerText = likeCounter;
             }
             else if (liked ==='like') {
-                if (theme==='light') {
-                    likeIconSrcElement = likeIconSrcElement.replace('light-mode-off-duck.svg', 'on-duck-button.svg');
-                    if (userGroup === 1 || userGroup ===2) {
-                        document.getElementById(`likedByInstructor_${post_id}`).style.display = '';
-                        likeCounterElement.style.color = '#ffba00';
+                console.log("here2");
+
+                likeIconSrcElement = likeIconSrcElement.replace('light-mode-off-duck.svg', 'on-duck-button.svg');
+                if (userGroup === 1 || userGroup ===2) {
+                    document.getElementById(`likedByInstructor_${post_id}`).style.display = '';
                 }
-                else {
-                    if (taLiked) {
-                        likeCounterElement.style.color = '#ffba00';
-                    }
-                    else {
-                        likeCounterElement.style.color = 'white';
-                    }
-                }
+                
                 likeCounter=likes;
                 likeIconSrc.src = likeIconSrcElement; // Update the state
                 likeCounterElement.innerText = likeCounter;
             }
-        }
-    },
-    
+        },
         error: function(err) {
             console.log(err);
         },
