@@ -17,6 +17,9 @@ first_issue_comment = "Thank you for your interest in the Submitty open source p
 
 for pr in json_output:
     num = str(pr['number'])
+    replied_to = []
     for comment in pr:
-        if comment['authorAssociation'] == "NONE":
-            subprocess.run(['gh', 'pr', 'comment', num, '--body', "Hi @" + comment['author']['login'] + "\n" + first_issue_comment])
+        author = comment['author']['login']
+        if comment['authorAssociation'] == "NONE" and author in replied_to:
+            # subprocess.run(['gh', 'pr', 'comment', num, '--body', "Hi @" + author + "\n" + first_issue_comment])
+            replied_to.insert(author)
