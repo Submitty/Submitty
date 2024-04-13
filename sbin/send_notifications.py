@@ -1,40 +1,32 @@
+"""
+Script to be called by cron job to release notification regarding released gradeable scores.
+
+This script scans over all current courses, determining if any current electronic gradeable with student
+view has a grade release date in the past with no notification sent to students.
+"""
 import json
 import os
 import datetime
 from sqlalchemy import create_engine
 import sys
-import psutil
-
-my_program_name = sys.argv[0]
-
-my_pid = os.getpid()
-
-# Loop over all active processes on the server
-for p in psutil.pids():
-    try:
-        cmdline = psutil.Process(p).cmdline()
-        if (len(cmdline) < 2):
-            continue
-        # If anything on the command line matches the name of the program
-        if cmdline[0].find("python") != -1 and cmdline[1].find(my_program_name) != -1:
-            if p != my_pid:
-                print("ERROR!  Another copy of '" + my_program_name +
-                      "' is already running on the server.  Exiting.")
-                sys.exit(1)
-    except psutil.NoSuchProcess:
-        # Whoops, the process ended before we could look at it. But that's ok!
-        pass
+import getpass
 
 try:
     CONFIG_PATH = os.path.join(
         os.path.dirname(os.path.realpath(__file__)), '..', 'config')
+    
+    with open(os.path.join(CONFIG_PATH, 'submitty_users.json'), 'r') as file:
+        USER_DATA = json.load(file)
+        
+        # Confirm that submitty_daemon user is running this script
+        if USER_DATA['daemon_user'] != getpass.getuser():
+            raise Exception('- This script must be run by the submitty_daemon user')
 
     with open(os.path.join(CONFIG_PATH, 'submitty.json')) as open_file:
         SUBMITTY_CONFIG = json.load(open_file)
 
     with open(os.path.join(CONFIG_PATH, 'database.json')) as open_file:
         DATABASE_CONFIG = json.load(open_file)
-
 except Exception as config_fail_error:
     print("[{}] ERROR: CORE SUBMITTY CONFIGURATION ERROR {}".format(
         str(datetime.datetime.now()), str(config_fail_error)))
@@ -43,6 +35,7 @@ except Exception as config_fail_error:
 
 DATA_DIR_PATH = SUBMITTY_CONFIG['submitty_data_dir']
 BASE_URL_PATH = SUBMITTY_CONFIG['submission_url']
+
 NOTIFICATION_LOG_PATH = os.path.join(DATA_DIR_PATH, "logs", "notifications")
 TODAY = datetime.datetime.now()
 LOG_FILE = open(os.path.join(
@@ -60,7 +53,7 @@ except Exception as config_fail_error:
     sys.exit(1)
 
 def connect_db(db_name):
-    """Set up a connection with the database."""
+    """Set up a connection with the specific database."""
     # If using a UNIX socket, have to specify a slightly different connection string
     if os.path.isdir(DB_HOST):
         conn_string = "postgresql://{}:{}@/{}?host={}".format(
@@ -75,8 +68,7 @@ def connect_db(db_name):
 
 def notifyPendingGradeables():
     master_db = connect_db("submitty")
-    term = master_db.execute("SELECT term_id FROM terms WHERE start_date < NOW() AND end_date > NOW();")
-    courses =  master_db.execute("SELECT term, course FROM courses WHERE term = '{}';".format(term.first()[0]))
+    courses =  master_db.execute("SELECT term, course FROM courses WHERE status = '1';")
     timestamp = str(datetime.datetime.now())
 
     for term, course in courses:
@@ -84,10 +76,11 @@ def notifyPendingGradeables():
         notified_gradeables = []
         
         gradeables = course_db.execute( """
-            SELECT gradeable.g_id, gradeable.g_title FROM electronic_gradeable 
+            SELECT gradeable.g_id, gradeable.g_title 
+            FROM electronic_gradeable 
             JOIN gradeable ON gradeable.g_id =  electronic_gradeable.g_id
-            WHERE gradeable.g_grade_released_date < NOW() AND electronic_gradeable.eg_student_view = true
-            LIMIT 1;
+            WHERE gradeable.g_grade_released_date < NOW() AND electronic_gradeable.eg_student_view = true 
+            AND gradeable.g_notification_state = false;
         """)
                 
         for row in gradeables:

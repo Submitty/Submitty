@@ -138,7 +138,7 @@ class NotificationFactory {
             $emails = $this->createEmailsArray($event, $email_recipients, false);
             $this->sendEmails($emails);
         }
-    }    
+    }
     
     // ***********************************HELPERS***********************************
 
