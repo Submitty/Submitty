@@ -2,6 +2,7 @@
 /* exported markForDeletion */
 /* exported unMarkForDeletion */
 /* exported  displayHistoryAttachment */
+/* exported toggleLike */
 
 // eslint-disable-next-line no-unused-vars
 function categoriesFormEvents() {
@@ -1288,6 +1289,79 @@ function modifyThreadList(currentThreadId, currentCategoriesId, course, loadFirs
             window.alert('Something went wrong when trying to filter. Please try again.');
             Cookies.remove(`${course}_forum_categories`, { path: '/' });
             Cookies.remove('forum_thread_status', { path: '/' });
+        },
+    });
+}
+
+function toggleLike(post_id, current_user) {
+
+    // eslint-disable-next-line no-undef
+    const url = buildCourseUrl(['post', 'likes']);
+    $.ajax({
+        url: url,
+        type: 'POST',
+        data: {
+            post_id: post_id,
+            current_user: current_user,
+            // eslint-disable-next-line no-undef
+            csrf_token: csrfToken,
+        },
+        success: function(data) {
+            let json;
+            try {
+                json = JSON.parse(data);
+            }
+            catch (err) {
+                // eslint-disable-next-line no-undef
+                displayErrorMessage('Error parsing data. Please try again.');
+                return;
+            }
+            if (json['status'] === 'fail') {
+                // eslint-disable-next-line no-undef
+                displayErrorMessage(json['message']);
+                return;
+            }
+            json=json['data'];
+            const likes = json['likesCount'];
+            const liked = json['status'];
+            console.log(json['status']);
+
+            const likeCounterElement = document.getElementById(`likeCounter_${post_id}`);
+            let likeCounter = parseInt(likeCounterElement.innerText);
+
+            // eslint-disable-next-line no-useless-concat
+            const likeIconSrc = document.getElementById(`likeIcon_${post_id}`);
+            let likeIconSrcElement = likeIconSrc.src;
+
+            const theme = localStorage.getItem('theme');
+            if (liked==='unlike') {
+                if (theme==='light' && likeIconSrcElement.endsWith('/img/on-duck-button.svg')) {
+                    likeIconSrcElement = likeIconSrcElement.replace('on-duck-button.svg', 'light-mode-off-duck.svg');
+                }
+                else {
+                    likeIconSrcElement = likeIconSrcElement.replace('on-duck-button.svg', 'light-mode-off-duck.svg');
+                }
+                likeCounter=likes;//set to the sql like value
+
+                likeIconSrc.src = likeIconSrcElement; // Update the state
+                likeCounterElement.innerText = likeCounter;
+            }
+            else if (liked ==='like') {
+                if (theme==='light') {
+                    likeIconSrcElement = likeIconSrcElement.replace('light-mode-off-duck.svg', 'on-duck-button.svg');
+                }
+                else {
+                    likeIconSrcElement = likeIconSrcElement.replace('light-mode-off-duck.svg', 'on-duck-button.svg');
+                }
+                likeCounter=likes;
+
+                likeIconSrc.src = likeIconSrcElement; // Update the state
+                likeCounterElement.innerText = likeCounter;
+            }
+
+        },
+        error: function(err) {
+            console.log(err);
         },
     });
 }
