@@ -64,7 +64,7 @@ class AdminGradeableController extends AbstractController {
         // Make the JSON only the data, not the data and the success status.
         $json_response->json = $json_response->json['data'];
         $json_response->render($this->core);
-    } 
+    }
 
     /**
      * @return array<mixed>
