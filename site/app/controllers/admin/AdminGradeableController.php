@@ -50,17 +50,13 @@ class AdminGradeableController extends AbstractController {
         'electronic_bulk' => 'TA/Instructor will (bulk) upload scanned .pdf for online manual grading'
     ];
 
-    /**
-     * @Route("/api/{_semester}/{_course}/{gradeable_id}/download", methods={"GET"})
-     */
+    #[Route("/api/{_semester}/{_course}/{gradeable_id}/download", methods: ["GET"])]
     public function apiDownloadJson(string $gradeable_id): JsonResponse {
         $gradeable = $this->core->getQueries()->getGradeableConfig($gradeable_id);
         return JsonResponse::getSuccessResponse($this->getGradeableJson($gradeable));
     }
 
-    /**
-     * @Route("/courses/{_semester}/{_course}/{gradeable_id}/download", methods={"GET"})
-     */
+    #[Route("/courses/{_semester}/{_course}/{gradeable_id}/download", methods: ["GET"])]
     public function webDownloadJson(string $gradeable_id): void {
         $gradeable = $this->core->getQueries()->getGradeableConfig($gradeable_id);
         $returned_json = $this->getGradeableJson($gradeable);
@@ -68,7 +64,7 @@ class AdminGradeableController extends AbstractController {
         // Make the JSON only the data, not the data and the success status.
         $json_response->json = $json_response->json['data'];
         $json_response->render($this->core);
-    }
+    } 
 
     /**
      * @return array<mixed>
