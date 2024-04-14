@@ -69,7 +69,6 @@ def connect_db(db_name):
 def notifyPendingGradeables():
     master_db = connect_db("submitty")
     courses =  master_db.execute("SELECT term, course FROM courses WHERE status = '1';")
-    timestamp = str(datetime.datetime.now())
 
     for term, course in courses:
         course_db = connect_db("submitty_{}_{}".format(term, course))
@@ -85,7 +84,8 @@ def notifyPendingGradeables():
                 
         for row in gradeables:
             gradeable = { "id": row[0], "title": row[1] }
-            
+            timestamp = str(datetime.datetime.now())
+                  
             # Construct gradeable URL into valid JSON string
             gradeable_url = "{}/courses/{}/{}/gradeable/{}".format(BASE_URL_PATH, term, course, gradeable["id"])
             metadata = json.dumps({ "url" : gradeable_url })
@@ -117,7 +117,7 @@ def notifyPendingGradeables():
             # Send out emails using both course and master database
             email_list = []
             email_subject = "[Submitty {}] Grade Released: {}".format(course, gradeable["title"])
-            email_body = "An Instructor has released scores in:\n{}\nScores have been released for {}.\n\n".format(course, gradeable["title"]) + "Author: System\nClick here for more info: {}\n\n--\nNOTE: This is an automated email notification, which is unable to receive replies.\nPlease refer to the course syllabus for contact information for your teaching staff.".format(gradeable_url)     
+            email_body = "An Instructor has released scores in:\n{}\n\nScores have been released for {}.\n\n".format(course, gradeable["title"]) + "Author: System\nClick here for more info: {}\n\n--\nNOTE: This is an automated email notification, which is unable to receive replies.\nPlease refer to the course syllabus for contact information for your teaching staff.".format(gradeable_url)     
             
             email_recipients = course_db.execute("""
                 SELECT users.user_id , users.user_email 

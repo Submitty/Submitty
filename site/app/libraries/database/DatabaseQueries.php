@@ -6998,6 +6998,16 @@ AND gc_id IN (
                     WHERE g_id=?",
                     $params
                 );
+                // Reset notification state of gradeable if scores need to be released again 
+                if ($gradeable->isStudentView() && $gradeable->hasReleaseDate() && $gradeable->getGradeReleasedDate() >= DateUtils::getDateTimeNow()->modify('-1 minute')) {
+                    $this->course_db->query(
+                        "
+                        UPDATE gradeable SET
+                        g_notification_state = false
+                        WHERE g_id=? AND g_notification_state = true",
+                        [$gradeable->getId()]
+                    );
+                }
             }
         }
 
