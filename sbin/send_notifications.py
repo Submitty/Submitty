@@ -78,7 +78,7 @@ def notifyPendingGradeables():
             SELECT gradeable.g_id, gradeable.g_title 
             FROM electronic_gradeable 
             JOIN gradeable ON gradeable.g_id =  electronic_gradeable.g_id
-            WHERE gradeable.g_grade_released_date < NOW() AND electronic_gradeable.eg_student_view = true 
+            WHERE gradeable.g_grade_released_date <= NOW() AND electronic_gradeable.eg_student_view = true 
             AND gradeable.g_notification_state = false;
         """)
                 
