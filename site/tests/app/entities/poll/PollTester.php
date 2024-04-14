@@ -238,7 +238,7 @@ class PollTester extends BaseUnitTest {
         //Set End time to Far in the future to test open
         $this->my_polls[1]->setOpen();
         $future = new DateTime(DateUtils::MAX_TIME);
-        $this->my_polls[1]->setEndTime($future); 
+        $this->my_polls[1]->setEndTime($future);
         $this->assertTrue($this->my_polls[1]->isOpen());
         $this->assertFalse($this->my_polls[1]->isClosed());
         $this->assertFalse($this->my_polls[1]->isEnded());
@@ -260,7 +260,7 @@ class PollTester extends BaseUnitTest {
         $this->assertTrue($this->my_polls[2]->isEnded());
     }
     public function testDuration(): void {
-        
+
         $this->assertEquals($this->my_polls[0]->getDuration()->h, 1);
         $this->assertEquals($this->my_polls[1]->getDuration()->i, 1);
         $this->assertEquals($this->my_polls[2]->getDuration()->i, 1);
@@ -303,7 +303,6 @@ class PollTester extends BaseUnitTest {
 
         $this->my_polls[0]->setEndTime(new DateTime(DateUtils::MAX_TIME));
         $this->assertEquals($this->my_polls[0]->getEndTime()->format("Y-m-d H:i:s"), DateUtils::MAX_TIME);
-
     }
 
     public function testHistogramRelease(): void {
