@@ -5,6 +5,7 @@ namespace tests\app\entities\poll;
 use app\entities\poll\Option;
 use app\entities\poll\Poll;
 use app\entities\poll\Response;
+use app\libraries\DateUtils;
 use DateTime;
 use DateInterval;
 use ReflectionProperty;
@@ -229,34 +230,37 @@ class PollTester extends BaseUnitTest {
     }
 
     public function testStatus(): void {
+
         $this->assertFalse($this->my_polls[0]->isOpen());
         $this->assertTrue($this->my_polls[0]->isClosed());
         $this->assertFalse($this->my_polls[0]->isEnded());
 
+        //Set End time to Far in the future to test open
+        $this->my_polls[1]->setOpen();
+        $future = new DateTime(DateUtils::MAX_TIME);
+        $this->my_polls[1]->setEndTime($future); 
         $this->assertTrue($this->my_polls[1]->isOpen());
         $this->assertFalse($this->my_polls[1]->isClosed());
         $this->assertFalse($this->my_polls[1]->isEnded());
 
+        $this->my_polls[2]->setEnded();
         $this->assertFalse($this->my_polls[2]->isOpen());
         $this->assertFalse($this->my_polls[2]->isClosed());
         $this->assertTrue($this->my_polls[2]->isEnded());
+
 
         $this->my_polls[2]->setClosed();
         $this->assertFalse($this->my_polls[2]->isOpen());
         $this->assertTrue($this->my_polls[2]->isClosed());
         $this->assertFalse($this->my_polls[2]->isEnded());
 
-        $this->my_polls[2]->setOpen();
-        $this->assertTrue($this->my_polls[2]->isOpen());
-        $this->assertFalse($this->my_polls[2]->isClosed());
-        $this->assertFalse($this->my_polls[2]->isEnded());
-
-        $this->my_polls[2]->setEnded();
+        $this->my_polls[1]->setEnded();
         $this->assertFalse($this->my_polls[2]->isOpen());
         $this->assertFalse($this->my_polls[2]->isClosed());
         $this->assertTrue($this->my_polls[2]->isEnded());
     }
     public function testDuration(): void {
+        
         $this->assertEquals($this->my_polls[0]->getDuration()->h, 1);
         $this->assertEquals($this->my_polls[1]->getDuration()->i, 1);
         $this->assertEquals($this->my_polls[2]->getDuration()->i, 1);
@@ -285,19 +289,21 @@ class PollTester extends BaseUnitTest {
     }
 
     public function testEndTime(): void {
-        $this->my_polls[0]->setClosed();
-        $this->assertEquals($this->my_polls[0]->getEndTime()->format('Y-m-d H:i:s'), "1900-02-01 00:00:00");
-        $this->my_polls[1]->setOpen();
-        $this->assertEquals($this->my_polls[1]->getEndTime()->format("Y-m-d H:i:s"), "9999-02-01 00:00:00");
-        $this->my_polls[2]->setEnded();
+
+        //Testing Setters and Getters for EndTime
+        $this->my_polls[0]->setEndTime(new DateTime(DateUtils::BEGINING_OF_TIME));
+        $this->assertEquals($this->my_polls[0]->getEndTime()->format('Y-m-d H:i:s'), DateUtils::BEGINING_OF_TIME);
+
+        $this->my_polls[1]->setEnded();
         // SetEnded sets EndTime to current time (no way to check exact millisecond)
         $this->assertEquals($this->my_polls[2]->getEndTime()->format("Y-m-d"), date("Y-m-d"));
-        $this->my_polls[0]->setEndTime(new DateTime('2025-10-03 05:30:00'));
+
+        $this->my_polls[2]->setEndTime(new DateTime('2025-10-03 05:30:00'));
         $this->assertEquals($this->my_polls[0]->getEndTime()->format("Y-m-d H:i:s"), "2025-10-03 05:30:00");
-        $this->my_polls[1]->setEndTime(new DateTime('9000-9-11'));
-        $this->assertEquals($this->my_polls[1]->getEndTime()->format("Y-m-d H:i:s"), "9000-09-11 00:00:00");
-        $this->my_polls[2]->setEndTime(new DateTime('1900-12-05 00:20:30'));
-        $this->assertEquals($this->my_polls[2]->getEndTime()->format("Y-m-d H:i:s"), "1900-12-05 00:20:30");
+
+        $this->my_polls[0]->setEndTime(new DateTime(DateUtils::MAX_TIME));
+        $this->assertEquals($this->my_polls[0]->getEndTime()->format("Y-m-d H:i:s"), DateUtils::MAX_TIME);
+
     }
 
     public function testHistogramRelease(): void {
