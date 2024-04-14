@@ -39,7 +39,7 @@ class Poll {
     protected DateTime $end_time;
 
     #[ORM\Column(type: Types::BOOLEAN)]
-    protected bool $isVisible;
+    protected bool $is_visible;
 
     #[ORM\Column(type: Types::DATE_MUTABLE)]
     protected DateTime $release_date;
@@ -106,29 +106,29 @@ class Poll {
         $this->question = $question;
     }
     public function setClosed(): void {
-        $this->isVisible = false;
+        $this->is_visible = false;
     }
     public function setOpen(): void {
-        $this->isVisible = true;
+        $this->is_visible = true;
     }
     public function setEnded(): void {
-        $this->isVisible = true;
+        $this->is_visible = true;
         $temp = DateUtils::getDateTimeNow();
         $tempString = $temp->format('Y-m-d');
         $this->end_time = new DateTime($tempString);
     }
     public function isOpen(): bool {
         $now = DateUtils::getDateTimeNow();
-        return ($this->isVisible && ($now < $this->end_time));
+        return ($this->is_visible && ($now < $this->end_time));
     }
 
     public function isEnded(): bool {
         $now = DateUtils::getDateTimeNow();
-        return $now > $this->end_time && $this->isVisible;
+        return $now > $this->end_time && $this->is_visible;
     }
 
     public function isClosed(): bool {
-        return (!$this->isVisible);
+        return (!$this->is_visible);
     }
 
     public function getDuration(): \DateInterval {
@@ -149,11 +149,11 @@ class Poll {
     }
 
     public function isVisible(): bool {
-        return $this->isVisible;
+        return $this->is_visible;
     }
 
     public function setVisible(): void {
-        $this->isVisible = true;
+        $this->is_visible = true;
     }
 
     public function setDuration(\DateInterval $duration): void {
