@@ -17,12 +17,19 @@ def up(config, database, semester, course):
     database.execute("ALTER TABLE polls ADD COLUMN IF NOT EXISTS duration INTEGER DEFAULT 0")
     database.execute("ALTER TABLE polls ADD COLUMN IF NOT EXISTS end_time timestamptz NOT NULL DEFAULT '1900-02-01'")
     database.execute("ALTER TABLE polls ALTER COLUMN status DROP NOT NULL")
+    database.execute("ALTER TABLE polls ADD COLUMN IF NOT EXISTS isVisible BOOLEAN NOT NULL DEFAULT FALSE")
     database.execute("""
-        UPDATE polls SET end_time = CASE
-            WHEN status = 'open' THEN '9999-02-01'
-            WHEN status = 'closed' THEN '1900-02-01'
-            ELSE now() END
+        UPDATE polls SET 
+            end_time = CASE
+                WHEN status = 'open' THEN '9999-02-01'
+                ELSE now() 
+            END,
+            isVisible = CASE
+                WHEN status IN ('open', 'ended') THEN TRUE
+                ELSE FALSE
+            END
     """)
+    
 
 def down(config, database, semester, course):
     """

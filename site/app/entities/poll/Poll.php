@@ -38,6 +38,9 @@ class Poll {
     #[ORM\Column(type: Types::DATETIME_MUTABLE)]
     protected DateTime $end_time;
 
+    #[ORM\Column(type: Types::BOOLEAN)]
+    protected bool $isVisible;
+
     #[ORM\Column(type: Types::DATE_MUTABLE)]
     protected DateTime $release_date;
 
@@ -73,6 +76,7 @@ class Poll {
         $this->setQuestion($question);
         $this->setQuestionType($question_type);
         $this->setDuration($duration);
+        $this->end_time = new \DateTime(DateUtils::BEGINING_OF_TIME);
         $this->setClosed();
         $this->setReleaseDate($release_date);
         $this->setReleaseHistogram($release_histogram);
@@ -102,30 +106,29 @@ class Poll {
         $this->question = $question;
     }
     public function setClosed(): void {
-        $this->end_time = new \DateTime(DateUtils::BEGINING_OF_TIME);
+        $this->isVisible = false;
     }
     public function setOpen(): void {
-        $this->end_time = new \DateTime(DateUtils::MAX_TIME);
+        $this->isVisible = true;
     }
     public function setEnded(): void {
+        $this->isVisible = true;
         $temp = DateUtils::getDateTimeNow();
         $tempString = $temp->format('Y-m-d');
         $this->end_time = new DateTime($tempString);
     }
     public function isOpen(): bool {
         $now = DateUtils::getDateTimeNow();
-        return $now < $this->end_time;
+        return ($this->isVisible && ($now < $this->end_time));
     }
 
     public function isEnded(): bool {
         $now = DateUtils::getDateTimeNow();
-        $closeDate = DateUtils::BEGINING_OF_TIME;
-        return $now > $this->end_time && $this->end_time->format('Y-m-d\TH:i:s') !== $closeDate;
+        return $now > $this->end_time && $this->isVisible;
     }
 
     public function isClosed(): bool {
-        $now = DateUtils::getDateTimeNow();
-        return $now > $this->end_time && $this->end_time->format('Y-m-d\TH:i:s') === DateUtils::BEGINING_OF_TIME;
+        return (!$this->isVisible);
     }
 
     public function getDuration(): \DateInterval {
@@ -143,6 +146,14 @@ class Poll {
 
     public function getReleaseDate(): \DateTime {
         return $this->release_date;
+    }
+
+    public function isVisible(): bool {
+        return $this->isVisible;
+    }
+
+    public function setVisible(): void {
+        $this->isVisible = true;
     }
 
     public function setDuration(\DateInterval $duration): void {
