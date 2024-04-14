@@ -1500,24 +1500,6 @@ end of styles used in the admin gradeable page
 
 /* Site Wrapper View */
 
-.wrapper-example {
-    width: 400px;
-    height: 240px;
-    display: flex;
-    flex-direction: column;
-    color: var(--btn-text-black);
-}
-
-.wrapper-example .wrapper-center {
-    display: flex;
-    flex-grow: 2;
-    flex-direction: row;
-}
-
-.wrapper-example .wrapper-body {
-    flex-grow: 5;
-}
-
 .wrapper-css {
     background-color: var(--default-white);
     color: var(--text-black);
