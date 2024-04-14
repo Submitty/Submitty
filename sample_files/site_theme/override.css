@@ -8,7 +8,7 @@ body {
     background: rgba(240,240,240, 0.85) !important;
 }
 
-/* Force sidebars to 220px to line up with the image in top_bar.html */
+
 #container {
     width: 220px !important;
     min-width: 220px !important;
