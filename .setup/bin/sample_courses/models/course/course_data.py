@@ -196,6 +196,7 @@ class Course_data:
                 name=poll["name"],
                 question=poll["question"],
                 end_time=poll["end_time"],
+                isVisible=poll["isVisible"],
                 status=poll["status"],
                 release_date=poll["release_date"],
                 image_path=poll["image_path"],
