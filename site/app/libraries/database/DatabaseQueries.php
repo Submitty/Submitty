@@ -764,7 +764,7 @@ SQL;
                 FROM forum_upducks f
                 JOIN users u ON f.user_id = u.user_id
                 WHERE f.post_id IN {$placeholders}
-                AND u.user_group IN (1, 2)
+                AND u.user_group IN (1, 2, 3)
                 GROUP BY f.post_id";
 
         // Execute the query with the post_ids as parameters

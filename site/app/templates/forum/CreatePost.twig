@@ -123,9 +123,11 @@
         <img id="likeIcon_{{post.id}}" src="{{ post_up_duck.upduck_user_liked ? '/img/on-duck-button.svg' : '/img/light-mode-off-duck.svg' }}" alt="Like" width="30" height="30">
     </button>
     <span id="likeCounter_{{post.id}}" style="font-size: 15px; margin-right: 3px; vertical-align: middle;">{{ post_up_duck.upduck_count }}</span>
-    <span id="likedByInstructor_{{post.id}}" style="font-size: 12px; font-style: italic; color: #ffba00;{{ post_up_duck.taTrue ? '' : 'display: none;' }}"> 
-        instructor/ta liked
+    <span id="likedByInstructor_{{post.id}}" style="font-size: 15px; vertical-align: middle; font-style: italic; color: #ffba00; font-weight: bold;{{ post_up_duck.taTrue ? '' : 'display: none;' }}">
+        staff upduck
     </span>
+
+
 
 
     {% set offset = offset + 30 %}
