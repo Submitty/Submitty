@@ -7090,7 +7090,7 @@ AND gc_id IN (
                     WHERE g_id=?",
                     $params
                 );
-                // Reset notification state of gradeable if scores need to be released again 
+                // Reset notification state of gradeable if scores need to be released again
                 if ($gradeable->isStudentView() && $gradeable->hasReleaseDate() && $gradeable->getGradeReleasedDate() >= DateUtils::getDateTimeNow()->modify('-1 minute')) {
                     $this->course_db->query(
                         "
