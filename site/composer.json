@@ -34,7 +34,7 @@
     "php-ds/php-ds": "1.5.0",
     "ramsey/uuid": "4.7.4",
     "symfony/cache": "6.4.2",
-    "symfony/config": "6.3.2",
+    "symfony/config": "6.4.4",
     "symfony/http-foundation": "6.3.2",
     "symfony/polyfill-php80": "1.27.0",
     "symfony/routing": "6.1.11",
@@ -49,7 +49,7 @@
     "phpstan/phpstan-doctrine": "1.3.53",
     "phpstan/phpstan-strict-rules": "1.5.2",
     "phpunit/phpunit": "9.6.9",
-    "submitty/php-codesniffer": "2.5.0"
+    "submitty/php-codesniffer": "3.0.1"
   },
   "scripts": {
     "test": "phpunit",
