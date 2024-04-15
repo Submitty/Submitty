@@ -98,8 +98,7 @@ const closeFirstQueue = () => {
     cy.get('.toggle-queue-checkbox').first().should('exist').click();
 };
 const emptyFirstQueue = () => {
-    cy.get('.empty_queue_btn').first().should('exist').click();
-    cy.wait(100);
+    cy.get('.empty_queue_btn').first().click();
 };
 const verifyElementMissing = (type, values) => {
     values.forEach((value) => {
@@ -113,16 +112,6 @@ const verifyElementMissing = (type, values) => {
             console.log(`Invalid ${type}`);
         }
     });
-};
-const queueHistoryCount = (limited=true) => {
-    cy.get('#view_history_button').click();
-    const count = cy.get('.queue_history_row').its('length');
-    cy.get('#view_history_button').click();
-    return count;
-};
-const currentQueueCount = () => {
-    const count = cy.get('shown_queue_row').its('length');
-    return count;
 };
 const openAnnouncementSettings = () => {
     cy.get('#toggle_announcement_settings').click();
