@@ -13,4 +13,4 @@
       vars:
       # customize your submitty install by adding variables here
       # these variables override the default variables in the role
-        submitty_version: v24.01.01
+        submitty_version: v24.02.00
