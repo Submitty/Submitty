@@ -40,5 +40,5 @@ pdf2image==1.16.3
 numpy==1.26.4
 
 # python libraries for OCR for digit recognition
-onnx==1.15.0
+onnx==1.16.0
 onnxruntime==1.16.3
