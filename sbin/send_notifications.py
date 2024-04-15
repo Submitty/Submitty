@@ -98,12 +98,11 @@ def notifyPendingGradeables():
                 # Max length for content of notification is 40
                 notification_content = notification_content[:36] + "..."
             
-            # user_group = 4 implies a student
             notification_recipients = course_db.execute("""
                 SELECT users.user_id , users.user_email 
                 FROM users
                 JOIN notification_settings ON notification_settings.user_id = users.user_id 
-                WHERE all_released_grades = true AND users.user_group = 4;
+                WHERE all_released_grades = true;
             """)
             
             for recipient in notification_recipients:
@@ -123,7 +122,7 @@ def notifyPendingGradeables():
                 SELECT users.user_id , users.user_email 
                 FROM users
                 JOIN notification_settings ON notification_settings.user_id = users.user_id 
-                WHERE notification_settings.all_released_grades_email = true AND users.user_group = 4;
+                WHERE notification_settings.all_released_grades_email = true;
             """ )
             
             for recipient in email_recipients:
