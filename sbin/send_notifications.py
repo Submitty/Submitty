@@ -206,7 +206,7 @@ def notifyPendingGradeables():
                     ", ".join(notified_gradeables)
                 )
             )
-            total_notified_gradeables += len(total_notified_gradeables)
+            total_notified_gradeables += 1
 
         # Close the course database connection
         course_db.close()
