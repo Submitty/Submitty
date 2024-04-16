@@ -5,6 +5,8 @@ on:
     types: [created]
 jobs:
   firstIssueReply:
+    #only when it is an issue rather than a PR
+    if: ${{!github.event.issue.pull_request}}
     name: first issue reply
     runs-on: ubuntu-latest
     permissions:
