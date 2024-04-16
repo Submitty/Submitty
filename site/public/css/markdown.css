@@ -82,8 +82,8 @@
 }
 
 .markdown blockquote {
-    border-left: 3px solid #aaa;
-    padding-left: 0.5em;
+    border-left: 4px solid #aaa;
+    padding-left: 0.75em;
     margin-left: 0;
 }
 

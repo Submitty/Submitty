@@ -1934,9 +1934,19 @@ function addMarkdownCode(type) {
 }
 
 function parseBlockquote(text){
-    text = text.replace(/^\s*>\s*(.*)/gm, '<blockquote><p>$1</p></blockquote>');
 
-    return text;
+    var lines = text.split("\n");
+
+    for (var i = 0; i < lines.length; i++) {
+        if (lines[i].trim().startsWith(">")) {
+            lines[i] = "<blockquote>" + lines[i] + "</blockquote>";
+        }
+    }
+
+    var result = lines.join("\n");
+
+    return result;
+
 }
 
 /**
