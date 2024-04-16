@@ -16,14 +16,12 @@ try:
     CONFIG_PATH = os.path.join(
         os.path.dirname(os.path.realpath(__file__)), "..", "config"
     )
-
     with open(os.path.join(CONFIG_PATH, "submitty_users.json"), "r") as file:
         USER_DATA = json.load(file)
 
         # Confirm that submitty_daemon user is running this script
         if USER_DATA["daemon_user"] != getpass.getuser():
             raise Exception("- script must be run by the submitty_daemon user")
-
     with open(os.path.join(CONFIG_PATH, "submitty.json")) as open_file:
         SUBMITTY_CONFIG = json.load(open_file)
 
@@ -83,6 +81,7 @@ def notifyPendingGradeables():
     master_db = connect_db("submitty")
     course_query = "SELECT term, course FROM courses WHERE status = '1';"
     courses = master_db.execute(course_query)
+    total_notified_gradeables = 0
 
     for term, course in courses:
         course_db = connect_db("submitty_{}_{}".format(term, course))
@@ -162,8 +161,6 @@ def notifyPendingGradeables():
                           "information for your teaching staff.").format(
                           course, gradeable["title"], gradeable_url)
 
-            print(email_body)
-
             email_recipients = course_db.execute(
                 """
                 SELECT users.user_id , users.user_email
@@ -209,14 +206,20 @@ def notifyPendingGradeables():
                     ", ".join(notified_gradeables)
                 )
             )
+            total_notified_gradeables += len(total_notified_gradeables)
 
         # Close the course database connection
         course_db.close()
 
+    return total_notified_gradeables
+
 
 def main():
     try:
-        notifyPendingGradeables()
+        total_notified_gradeables = notifyPendingGradeables()
+        e = "[{}] Successfully released {} gradeable notifications".format(
+            str(datetime.datetime.now()), total_notified_gradeables)
+        LOG_FILE.write(e+"\n")
     except Exception as notification_send_error:
         e = "[{}] Error Sending Notification(s): {}".format(
             str(datetime.datetime.now()), str(notification_send_error)
