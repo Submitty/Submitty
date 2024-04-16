@@ -119,9 +119,9 @@
             <option value="when_ended" {{ poll is not null and poll.getReleaseAnswer() == 'when_ended' ? "selected" : "" }}>After Poll Ended</option>
             <option value="always" {{ poll is not null and poll.getReleaseAnswer() == 'always' ? "selected" : "" }}>Always</option>
         </select>
-        <br/>
+        <br><br>
         <label for = "poll_custom_options" class="option-title credit-form-item">
-            Allow poll to accept custom answers from students
+            Allow custom answers from students
         </label>
         <input id ="poll_custom_options" class="credit-box credit-form-item" type="checkbox" name="poll_custom_options"  {{ poll is not null and poll.allowsCustomResponses() ? "checked" : "" }}>
         <hr>
