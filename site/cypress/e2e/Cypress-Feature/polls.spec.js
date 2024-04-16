@@ -400,9 +400,10 @@ describe('Test cases revolving around polls functionality', () => {
         cy.logout();
         cy.login();
         cy.visit(['sample', 'polls']);
+        //Wait 6 seconds to wait out the time remaining for poll to close
         cy.wait(6000);
-        // Poll should have been closed from the edit poll 35 seconds assigned to duration
         cy.reload();
+        // Validate that the poll is closed.
         cy.contains('Poll Cypress Test').siblings(':nth-child(6)').children().should('not.be.checked');
 
         // log into student, now we can see the histogram on closed poll
