@@ -1,10 +1,28 @@
-/* exported prevMonth, nextMonth, loadCalendar, loadFullCalendar, editCalendarItemForm, deleteCalendarItem, openNewItemModal, openOptionsModal, updateCalendarOptions, colorLegend */
+/* exported prevMonth, nextMonth, loadCalendar, loadFullCalendar, editCalendarItemForm, deleteCalendarItem, openNewItemModal, openOptionsModal, updateCalendarOptions, colorLegend, setDateToToday */
 /* global curr_day, curr_month, curr_year, gradeables_by_date, instructor_courses, buildUrl */
 /* global csrfToken */
 
 // List of names of months in English
 const monthNames = ['December', 'January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
 const monthNamesShort = ['Dec', 'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sept', 'Oct', 'Nov', 'Dec'];
+
+/**
+ * Sets the current date to today and then changes the calendar
+ * @returns {void} : only changes cookies and calendar date
+ */
+function setDateToToday() {
+    const type = $('#calendar-item-type-edit').val();
+    const currentDay = new Date();
+    Cookies.set('calendar_year', currentDay.getFullYear());
+    Cookies.set('calendar_month', currentDay.getMonth()+1);
+    Cookies.set('calendar_day', currentDay.getDate());
+
+    const cookie_year = currentDay.getFullYear();
+    const cookie_month = currentDay.getMonth()+1;
+    const cookie_day = currentDay.getDate();
+
+    loadCalendar(cookie_month, cookie_year, cookie_day, type);
+}
 
 /**
  * Gets the previous month of a given month
@@ -264,11 +282,24 @@ function deleteCalendarItem() {
  * @param view_semester : boolean if the calendar is viewing the entire semester. If so, the day cell would show both the month and date
  * @returns {HTMLElement} the HTML Element containing the cell
  */
-function generateDayCell(year, month, day, curr_view_month, view_semester=false) {
+function generateDayCell(year, month, day, curr_view_month, view_mode, view_semester=false) {
     const cell_date_str = dateToStr(year, month, day);
 
     const content = document.createElement('td');
-    content.classList.add('cal-day-cell');
+    //change the css of the cell based on the view mode:
+    if (view_mode === 'month') {
+        content.classList.add('cal-day-cell');
+    }
+    else if (view_mode === 'twoweek') {
+        content.classList.add('cal-day-cell-twoweek');
+    }
+    else if (view_mode === 'week') {
+        content.classList.add('cal-day-cell-week');
+    }
+    else {
+        content.classList.add('cal-day-cell');
+    }
+
     content.id = `cell-${cell_date_str}`;
     if (view_semester) {
         content.classList.add('cal-cell-expand');
@@ -475,7 +506,7 @@ function generateCalendarOfMonth(view_year, view_month, view_day) {
         const lastMonthEnd = new Date(view_year, view_month - 1, 0).getDate();
         const lastMonthStart = lastMonthEnd + 1 - startWeekday;
         for (let day = lastMonthStart; day <= lastMonthEnd; day++) {
-            curRow.appendChild(generateDayCell(view_year, view_month - 1, day, view_month));
+            curRow.appendChild(generateDayCell(view_year, view_month - 1, day, view_month, 'month'));
         }
     }
 
@@ -483,7 +514,7 @@ function generateCalendarOfMonth(view_year, view_month, view_day) {
     const daysInMonth = new Date(view_year, view_month, 0).getDate();
     let weekday = startWeekday;
     for (let day = 1; day <= daysInMonth; day++) {
-        curRow.appendChild(generateDayCell(view_year, view_month, day, view_month));
+        curRow.appendChild(generateDayCell(view_year, view_month, day, view_month, 'month'));
         if (weekday === 6) {
             weekday = 0;
             // Next week should show on next line
@@ -499,7 +530,7 @@ function generateCalendarOfMonth(view_year, view_month, view_day) {
     if (weekday !== 0) {
         const remain = 7 - weekday;
         for (let day = 1; day <= remain; day++) {
-            curRow.appendChild(generateDayCell(view_year, view_month + 1, day, view_month));
+            curRow.appendChild(generateDayCell(view_year, view_month + 1, day, view_month, 'month'));
             if (weekday === 6) {
                 weekday = 0;
             }
@@ -541,7 +572,7 @@ function generateCalendarOfMonthWeek(view_year, view_month, view_day) {
     // Show days at the end of last month that belongs to the first week of current month
     if (view_day-currentDay <= 0) {
         for (let day = lastMonthStart; day <= lastMonthEnd; day++) {
-            curRow.appendChild(generateDayCell(view_year, view_month - 1, day, view_month));
+            curRow.appendChild(generateDayCell(view_year, view_month - 1, day, view_month, 'week'));
             print_day++;
         }
     }
@@ -549,20 +580,20 @@ function generateCalendarOfMonthWeek(view_year, view_month, view_day) {
     // Make the day cells before the "current" date
     if (print_day < currentDay) {
         for (let day = view_day - currentDay + print_day; print_day < currentDay; day++) {
-            curRow.appendChild(generateDayCell(view_year, view_month, day, view_month));
+            curRow.appendChild(generateDayCell(view_year, view_month, day, view_month, 'week'));
             print_day++;
         }
     }
 
     // Make the "current" day, and the days after in the month
     for (let day = view_day; print_day <= 6 && day <= daysInMonth; day++) {
-        curRow.appendChild(generateDayCell(view_year, view_month, day, view_month));
+        curRow.appendChild(generateDayCell(view_year, view_month, day, view_month, 'week'));
         print_day++;
     }
 
     // Makes any days that spill into the next month
     for (let day = 1; print_day <= 6; day++) {
-        curRow.appendChild(generateDayCell(view_year, view_month + 1, day, view_month));
+        curRow.appendChild(generateDayCell(view_year, view_month + 1, day, view_month, 'week'));
         print_day++;
     }
     tableBody.appendChild(curRow);
@@ -598,7 +629,7 @@ function generateCalendarOfMonthTwoWeek(view_year, view_month, view_day) {
     // Show days at the end of last month that belongs to the first week of current month
     if (view_day-currentDay <= 0) {
         for (let day = lastMonthStart; day <= lastMonthEnd; day++) {
-            curRow.appendChild(generateDayCell(view_year, view_month - 1, day, view_month));
+            curRow.appendChild(generateDayCell(view_year, view_month - 1, day, view_month, 'twoweek'));
             print_day++;
         }
     }
@@ -606,14 +637,14 @@ function generateCalendarOfMonthTwoWeek(view_year, view_month, view_day) {
     // Make the day cells before the "current" date
     if (print_day < currentDay) {
         for (let day = view_day - currentDay + print_day; print_day < currentDay; day++) {
-            curRow.appendChild(generateDayCell(view_year, view_month, day, view_month));
+            curRow.appendChild(generateDayCell(view_year, view_month, day, view_month, 'twoweek'));
             print_day++;
         }
     }
 
     // Make the "current" day, and the days after in the month
     for (let day = view_day; print_day <= 13 && day <= daysInMonth; day++) {
-        curRow.appendChild(generateDayCell(view_year, view_month, day, view_month));
+        curRow.appendChild(generateDayCell(view_year, view_month, day, view_month, 'twoweek'));
         print_day++;
         // If the day is the last day of the week, then make a new row
         if (print_day === 7) {
@@ -625,7 +656,7 @@ function generateCalendarOfMonthTwoWeek(view_year, view_month, view_day) {
 
     // Makes any days that spill into the next month
     for (let day = 1; print_day <= 13; day++) {
-        curRow.appendChild(generateDayCell(view_year, view_month + 1, day, view_month));
+        curRow.appendChild(generateDayCell(view_year, view_month + 1, day, view_month, 'twoweek'));
         print_day++;
         // If the day is the last day of the week, then make a new row
         if (print_day === 7) {
