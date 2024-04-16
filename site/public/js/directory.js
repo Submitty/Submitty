@@ -5,7 +5,7 @@
 function newDownloadForm() {
     $('.popup-form').css('display', 'none');
     const form = $('#download-form');
-    showPopup('#download-form')
+    showPopup('#download-form');
     captureTabInModal('download-form');
     form.find('.form-body').scrollTop(0);
     $('#download-form input:checkbox').each(function() {
