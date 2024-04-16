@@ -259,6 +259,7 @@ class PollTester extends BaseUnitTest {
         $this->assertFalse($this->my_polls[1]->isClosed());
         $this->assertTrue($this->my_polls[1]->isEnded());
     }
+
     public function testDuration(): void {
 
         $this->assertEquals($this->my_polls[0]->getDuration()->h, 1);

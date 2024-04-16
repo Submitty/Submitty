@@ -214,6 +214,7 @@
             }
         }
     }
+
     function checkSize(uploadedFile) {
         if (uploadedFile.files[0].size > MAX_SIZE) {
             size_is_valid = false;
@@ -222,7 +223,7 @@
         }
         submitErrorChecks();
     };
-    
+
     function addResponse() {
         let count = $(".option_id").length;
         let curr_max_id = -1;
