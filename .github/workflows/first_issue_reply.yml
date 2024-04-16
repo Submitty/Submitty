@@ -1,8 +1,8 @@
 name: First Issue Reply
 
 on:
-  schedule:
-    - cron: '0 0 * * *'  # runs every day at midnight
+  issue_comment:
+    types: [created]
 jobs:
   firstIssueReply:
     name: first issue reply
