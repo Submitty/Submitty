@@ -202,7 +202,7 @@ class ElectronicGraderController extends AbstractController {
     }
     /**
      * Route for Getting Gradeable
-     * 
+     *
      * @param string $gradeable_id
      * @return JsonResponse
      */
@@ -213,7 +213,7 @@ class ElectronicGraderController extends AbstractController {
     }
     /**
      * Route for randomizing peer assignments with 'One Grades Many'
-     * 
+     *
      * @AccessControl(role="INSTRUCTOR")
      */
     #[Route("/courses/{_semester}/{_course}/gradeable/{gradeable_id}/RandomizePeers", methods: ["POST"])]
@@ -416,7 +416,7 @@ class ElectronicGraderController extends AbstractController {
      * Route for verifying the grader of a graded component
      * @param string $gradeable_id verify all components or not
      * @param bool $verify_all false be default
-     * 
+     *
      * @AccessControl(permission="grading.electronic.verify_grader")
      */
     #[Route("/courses/{_semester}/{_course}/gradeable/{gradeable_id}/components/verify", methods: ["POST"])]
