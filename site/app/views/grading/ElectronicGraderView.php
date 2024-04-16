@@ -503,8 +503,8 @@ HTML;
 
         if ($peer || $anon_mode || $team_and_anon) {
             if ($gradeable->isTeamAssignment()) {
-                if ($gradeable->getPeerBlind() === Gradeable::DOUBLE_BLIND_GRADING || $anon_mode) {
-                    $columns[] = ["width" => "10%", "title" => "Team ID",     "function" => "team_id_anon"];
+                if ($gradeable->getPeerBlind() === Gradeable::DOUBLE_BLIND_GRADING || $anon_mode || $team_and_anon) {
+                    $columns[] = ["width" => "10%", "title" => "Team ID",          "function" => "team_id_anon"];
                 }
                 $peer_and_anon = ($this->core->getUser()->getGroup() === User::GROUP_STUDENT &&
                     $gradeable->getPeerBlind() === Gradeable::DOUBLE_BLIND_GRADING);
@@ -512,6 +512,8 @@ HTML;
                     $columns[] = ["width" => "30%", "title" => "Team Members",     "function" => "team_members_anon"];
                 }
                 else {
+                    $columns[] = ["width" => "10%", "title" => "Team ID",          "function" => "team_id", "sort_type" => "id"];
+                    $columns[] = ["width" => "6%",  "title" => "Team Name",        "function" => "team_name"];
                     $columns[] = ["width" => "32%", "title" => "Team Members",     "function" => "team_members"];
                 }
             }
@@ -556,7 +558,8 @@ HTML;
                     $columns[] = ["width" => "26%", "title" => "Team Members",     "function" => "team_members"];
                 }
                 else {
-                    $columns[] = ["width" => "10%",  "title" => "Team Name",        "function" => "team_name"];
+                    $columns[] = ["width" => "10%", "title" => "Team ID",          "function" => "team_id", "sort_type" => "id"];
+                    $columns[] = ["width" => "10%", "title" => "Team Name",        "function" => "team_name"];
                     $columns[] = ["width" => "40%", "title" => "Team Members",     "function" => "team_members"];
                 }
             }
@@ -579,10 +582,10 @@ HTML;
                 $columns[]     = ["width" => "8%",  "title" => "Graded Questions", "function" => "graded_questions"];
             }
             if ($this->core->getUser()->getGroup() === User::GROUP_LIMITED_ACCESS_GRADER && $gradeable->getLimitedAccessBlind() === Gradeable::SINGLE_BLIND_GRADING) {
-                $columns[]     = ["width" => "8%",  "title" => "Grading",       "function" => "grading_blind"];
+                $columns[]     = ["width" => "8%",  "title" => "Grading",          "function" => "grading_blind"];
             }
             else {
-                $columns[]     = ["width" => "8%",  "title" => "Grading",       "function" => "grading"];
+                $columns[]     = ["width" => "8%",  "title" => "Grading",          "function" => "grading"];
             }
             $columns[]         = ["width" => "7%",  "title" => "Total",            "function" => "total"];
             $columns[]         = ["width" => "10%", "title" => "Active Version",   "function" => "active_version"];
@@ -1111,7 +1114,7 @@ HTML;
 
 
         $return .= $this->core->getOutput()->renderTemplate(['grading', 'ElectronicGrader'], 'renderAutogradingPanel', $display_version_instance, $show_hidden_cases, $ta_grading, $graded_gradeable);
-        $return .= $this->core->getOutput()->renderTemplate(['grading', 'ElectronicGrader'], 'renderSubmissionPanel', $graded_gradeable, $display_version, $limimted_access_blind);
+        $return .= $this->core->getOutput()->renderTemplate(['grading', 'ElectronicGrader'], 'renderSubmissionPanel', $graded_gradeable, $display_version, $limimted_access_blind, $anon_mode);
         //If TA grading isn't enabled, the rubric won't actually show up, but the template should be rendered anyway to prevent errors, as the code references the rubric panel
         $return .= $this->core->getOutput()->renderTemplate(['grading', 'ElectronicGrader'], 'renderRubricPanel', $graded_gradeable, $display_version, $can_verify, $show_verify_all, $show_silent_edit, $is_peer_grader);
         $return .= $this->core->getOutput()->renderTemplate(['grading', 'ElectronicGrader'], 'renderSolutionTaNotesPanel', $gradeable, $solution_ta_notes, $submitter_itempool_map);
@@ -1395,7 +1398,7 @@ HTML;
      * @param int $display_version
      * @return string by reference
      */
-    public function renderSubmissionPanel(GradedGradeable $graded_gradeable, int $display_version, bool $blind_grader) {
+    public function renderSubmissionPanel(GradedGradeable $graded_gradeable, int $display_version, bool $blind_grader, bool $anon_mode) {
         $add_files = function (&$files, $new_files, $start_dir_name, $graded_gradeable) {
             $files[$start_dir_name] = [];
             $hidden_files = $graded_gradeable->getGradeable()->getHiddenFiles();
@@ -1455,6 +1458,7 @@ HTML;
         $submitter_id = $graded_gradeable->getSubmitter()->getId();
         $anon_submitter_id = $graded_gradeable->getSubmitter()->getAnonId($graded_gradeable->getGradeableId());
         $user_ids[$anon_submitter_id] = $submitter_id;
+        $uas = FileUtils::joinPaths($this->core->getConfig()->getCoursePath(), "submissions", $graded_gradeable->getGradeableId(), $graded_gradeable->getSubmitter()->getId(), "user_assignment_settings.json");
         $toolbar_css = $this->core->getOutput()->timestampResource(FileUtils::joinPaths('pdf', 'toolbar_embedded.css'), 'css');
         $this->core->getOutput()->addInternalJs(FileUtils::joinPaths('pdfjs', 'pdf.min.js'), 'vendor');
         $this->core->getOutput()->addInternalJs(FileUtils::joinPaths('pdfjs', 'pdf_viewer.js'), 'vendor');
@@ -1474,8 +1478,10 @@ HTML;
             "results" => $results,
             "results_public" => $results_public,
             "active_version" => $display_version,
+            "anon_mode" => $anon_mode,
             'toolbar_css' => $toolbar_css,
-            "display_file_url" => $this->core->buildCourseUrl(['display_file'])
+            "display_file_url" => $this->core->buildCourseUrl(['display_file']),
+            "user_assignment_settings_path" => $uas
         ]);
     }
 

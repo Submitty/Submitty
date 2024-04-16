@@ -60,6 +60,11 @@ a.cal-btn:focus {
     float: right;
 }
 
+#calendar-today-button{
+    float:right;
+    margin-right: 10px;
+}
+
 .cal-month-title {
     font-size: 26px;
     text-transform: uppercase;
@@ -152,6 +157,18 @@ h2.cal-month-title {
     min-height: 100px;
     max-height: 195px;
     height: 100px;
+}
+
+.cal-day-cell-twoweek{
+    min-height: 100px;
+    max-height: 390px;
+    height: 200px;
+}
+
+.cal-day-cell-week{
+    min-height: 100px;
+    max-height: 780px;
+    height: 400px;
 }
 
 .cal-cell-expand {
