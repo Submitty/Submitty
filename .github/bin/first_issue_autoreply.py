@@ -1,8 +1,12 @@
 import json
 import subprocess
+import sys
 
-pr_json = "gh issue list --json number, comments"
-terminal_output = subprocess.check_output(pr_json, shell=True, text=True)
+issue_commented_on = str(sys.argv[1])
+comment_id = str(sys.argv[2])
+
+issue_json = "gh issue view " + issue_commented_on + " --json comments"
+terminal_output = subprocess.check_output(issue_json, shell=True, text=True)
 json_output = json.loads(terminal_output)
 
 first_issue_comment = "Thank you for your interest in the Submitty open source project.\n"\
@@ -15,11 +19,6 @@ first_issue_comment = "Thank you for your interest in the Submitty open source p
     "reviewed by our team and then merged if it appropriately resolves the issue. "\
     "We also encourage you to join our [Zulip](https://submitty.org/index/contact) server to discuss technical questions."
 
-for pr in json_output:
-    num = str(pr['number'])
-    replied_to = []
-    for comment in pr:
-        author = comment['author']['login']
-        if comment['authorAssociation'] == "NONE" and author not in replied_to:
-            subprocess.run(['gh', 'pr', 'comment', num, '--body', "Hi @" + author + "\n" + first_issue_comment])
-            replied_to.insert(author)
+for comment in json_output['comments']:
+    if comment['id'] == comment_id and comment['authorAssociation'] == "NONE":
+        subprocess.run(['gh', 'issue', 'comment', issue_commented_on, '--body', "Hi @" + comment['author']['login'] + "\n" + first_issue_comment])
