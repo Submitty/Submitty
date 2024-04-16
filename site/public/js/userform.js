@@ -94,7 +94,7 @@ function editUserForm(user_id) {
             // will help to check whether the userForm is edited or not
             $('[name="edit_user"]', form).attr('data-user', data);
 
-            form.css('display', 'block');
+            showPopup('#edit-user-form');
             form.find('.form-body').scrollTop(0);
             // eslint-disable-next-line eqeqeq
             if (json['user_group'] == 4) {
@@ -432,7 +432,7 @@ function closeButton() {
     }
     if (closeForm) {
         clearUserFormInformation();
-        $('#edit-user-form').css('display', 'none');
+        closePopup('edit-user-form');
     }
 }
 

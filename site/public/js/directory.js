@@ -22,7 +22,7 @@ function newDownloadForm() {
 function newClassListForm() {
     $('.popup-form').css('display', 'none');
     const form = $('#class-list-form');
-    form.css('display', 'block');
+    showPopup('#class-list-form');
     captureTabInModal('class-list-form');
     form.find('.form-body').scrollTop(0);
     $('[name="move_missing"]', form).prop('checked', false);
