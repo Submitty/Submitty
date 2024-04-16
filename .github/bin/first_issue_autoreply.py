@@ -1,7 +1,7 @@
 import json
 import subprocess
 
-pr_json = "gh pr list --json number, comments"
+pr_json = "gh issue list --json number, comments"
 terminal_output = subprocess.check_output(pr_json, shell=True, text=True)
 json_output = json.loads(terminal_output)
 
