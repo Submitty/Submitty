@@ -8,8 +8,6 @@ use app\libraries\response\RedirectResponse;
 use app\libraries\response\WebResponse;
 use app\libraries\response\ResponseInterface;
 use Symfony\Component\Routing\Annotation\Route;
-use Graph\Graph;
-use Graph\ScatterPlot;
 use Symfony\Component\HttpFoundation\Response;
 
 

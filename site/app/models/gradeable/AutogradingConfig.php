@@ -33,7 +33,7 @@ use app\models\notebook\Notebook;
  * @method bool getOnePartyOnly()
  * @method bool isNotebookGradeable()
  * @method LeaderboardConfig[] getLeaderboards()
- * @method getSloccountConfig[] getSloccount()
+ * @method getSloccountConfig[] getSloccounts()
  * @method bool getDisplayTestcaseRuntimeMemory()
  * @method void setDisplayTestcaseRuntimeMemory()
  */
@@ -165,7 +165,7 @@ class AutogradingConfig extends AbstractModel {
         foreach ($details['leaderboards'] ?? [] as $leaderboard) {
             $this->leaderboards[] = new LeaderboardConfig($this->core, $leaderboard);
         }
-        $this->sloccount = [];
+        $this->sloccounts = [];
         foreach ($details['sloccounts'] ?? [] as $sloccount) {
             $this->sloccounts[] = new SloccountConfig($this->core, $sloccount);
         }

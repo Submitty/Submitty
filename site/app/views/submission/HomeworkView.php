@@ -33,6 +33,8 @@ class HomeworkView extends AbstractView {
 
         $this->core->getOutput()->addInternalJs('drag-and-drop.js');
         $this->core->getOutput()->addInternalCss('table.css');
+        $this->core->getOutput()->addVendorJs(FileUtils::joinPaths('plotly', 'plotly.js'));
+
 
         // The number of days late this gradeable would be if submitted now (including exceptions)
         $late_day_exceptions = 0;
@@ -787,7 +789,9 @@ class HomeworkView extends AbstractView {
             return "";
         }
 
+
         $sloccount = $autograding_config->getSloccount();
+//        var_dump("renderSloccScatterplot function is running"); // Debug message
 
         return $this->core->getOutput()->renderTwigTemplate('submission/homework/SloccountStudent.twig', [
             'url' => $this->core->buildCourseUrl(['gradeable', $graded_gradeable->getGradeableId(), 'sloccount'])

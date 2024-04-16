@@ -2562,6 +2562,11 @@ class Gradeable extends AbstractModel {
         if (is_null($autograding_config)) {
             return false;
         }
-        return !empty($autograding_config->getSloccount());
+//        return !empty($autograding_config->getSloccount());
+//        var_dump("hasSloccount function is running but returning"); // Debug message
+        $result = !empty($autograding_config->getSloccounts());
+//        var_dump("hasSloccount function is running and will return: " . var_export($result, true)); // Debug message
+
+        return $result;
     }
 }
