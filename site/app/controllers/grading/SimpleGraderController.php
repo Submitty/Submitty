@@ -25,7 +25,7 @@ class SimpleGraderController extends AbstractController {
      * @param int|string|null $section
      * @param string|null $section_type
      * @param string $sort
-     * 
+     *
      * @return ResponseInterface
      */
     #[Route("/courses/{_semester}/{_course}/gradeable/{gradeable_id}/grading/print", methods:["GET"])]
@@ -99,7 +99,7 @@ class SimpleGraderController extends AbstractController {
      * @param string $gradeable_id
      * @param null|string $view
      * @param string $sort
-     * 
+     *
      * @return ResponseInterface
      */
     #[Route("/courses/{_semester}/{_course}/gradeable/{gradeable_id}/grading", methods: ["GET"])]
@@ -286,7 +286,7 @@ class SimpleGraderController extends AbstractController {
 
     /**
      * @param string $gradeable_id
-     * 
+     *
      * @return ResponseInterface
      */
     #[Route("/courses/{_semester}/{_course}/gradeable/{gradeable_id}/grading/csv", methods: ["POST"])]
