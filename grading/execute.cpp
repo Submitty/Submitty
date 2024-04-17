@@ -47,10 +47,6 @@ extern const std::string GLOBAL_allowed_autograding_commands_custom_string;  // 
 
 bool system_program(const std::string &program, std::string &full_path_executable, const bool running_in_docker)
 {
-  // if we are docker, allow any program
-  if (running_in_docker) {
-    return true;
-  }
   // parse GLOBAL_allowed_autograding_commands_default_string into allowed_autograding_commands
   // ignore_comment flag set in parse function to ignore comments
   nlohmann::json allowed_autograding_commands =
@@ -77,6 +73,11 @@ bool system_program(const std::string &program, std::string &full_path_executabl
       full_path_executable = program_obj["path"];
       return true;
     }
+  }
+  // if we are docker, allow any program. previous code is necessary
+  // to run before return for full path expansion.
+  if (running_in_docker) {
+    return true;
   }
   return false;
 }
