@@ -475,6 +475,11 @@ class ForumThreadView extends AbstractView {
         $merged_threads = $this->core->getQueries()->getMergedThreadIds($post_ids);
         $post_attachments = $this->core->getQueries()->getForumAttachments($post_ids);
 
+        $current_user = $this->core->getUser()->getId();
+        $upDuckCounter_map = [];
+        $upDuckCounter_map = $this->core->getQueries()->getUpduckInfoForPosts($post_ids);
+        $userLiked = $this->core->getQueries()->getUserLikesForPosts($post_ids, $current_user);
+
         if ($display_option == "tree") {
             $order_array = [];
             $reply_level_array = [];
@@ -516,6 +521,8 @@ class ForumThreadView extends AbstractView {
 
                         $post["author_user_group"] = $author_user_groups_map[$post["author_user_id"]];
 
+                        $boolLiked = in_array($post["id"], $userLiked, true);
+
                         $post_data[] = $this->createPost(
                             $first_post_author_id,
                             $activeThread,
@@ -524,6 +531,8 @@ class ForumThreadView extends AbstractView {
                             $first,
                             $reply_level,
                             $display_option,
+                            $upDuckCounter_map[$post["id"]],
+                            $boolLiked,
                             $includeReply,
                             $authors_display_info[$post['author_user_id']],
                             $post_attachments[$post["id"]][0],
@@ -546,7 +555,7 @@ class ForumThreadView extends AbstractView {
         else {
             foreach ($posts as $post) {
                 $post["author_user_group"] = $author_user_groups_map[$post["author_user_id"]];
-
+                $boolLiked = in_array($post["id"], $userLiked, true);
                 $post_data[] = $this->createPost(
                     $first_post_author_id,
                     $activeThread,
@@ -555,6 +564,8 @@ class ForumThreadView extends AbstractView {
                     $first,
                     1,
                     $display_option,
+                    $upDuckCounter_map[$post["id"]],
+                    $boolLiked,
                     $includeReply,
                     $authors_display_info[$post['author_user_id']],
                     $post_attachments[$post["id"]][0],
@@ -911,7 +922,6 @@ class ForumThreadView extends AbstractView {
             if (!is_null($date)) {
                 $date_content["formatted"] = $date;
             }
-
             $thread_info = [
                 'thread_id' => $thread['id'],
                 "title" => $titleDisplay,
@@ -1064,7 +1074,7 @@ class ForumThreadView extends AbstractView {
      * } $author_info
      * @param string[] $post_attachments
      */
-    public function createPost(string $first_post_author_id, array $thread, array $post, $unviewed_posts, $first, $reply_level, $display_option, $includeReply, array $author_info, array $post_attachments, bool $has_history, bool $is_merged_thread, bool $render = false, bool $thread_announced = false, bool $isCurrentFavorite = false) {
+    public function createPost(string $first_post_author_id, array $thread, array $post, $unviewed_posts, $first, $reply_level, $display_option, int $counter, bool $isLiked, $includeReply, array $author_info, array $post_attachments, bool $has_history, bool $is_merged_thread, bool $render = false, bool $thread_announced = false, bool $isCurrentFavorite = false) {
 
         $current_user = $this->core->getUser()->getId();
         $thread_id = $thread["id"];
@@ -1143,6 +1153,7 @@ class ForumThreadView extends AbstractView {
         $post_user_info = [];
 
         $merged_thread = $is_merged_thread && $userAccessFullGrading;
+
         if ($userAccessFullGrading) {
             $info_name = $given_name . " " . $family_name . " (" . $post['author_user_id'] . ")";
             $visible_user_json = json_encode($visible_username);
@@ -1204,6 +1215,11 @@ class ForumThreadView extends AbstractView {
             }
         }
 
+        $post_up_duck = [
+            "upduck_count" => $counter,
+            "upduck_user_liked" => $isLiked,
+        ];
+
         if ($this->core->getUser()->getGroup() == 4) {
             $info_name = $given_name . " " . $family_name . " (" . $post['author_user_id'] . ")";
             $visible_user_json = json_encode($visible_username);
@@ -1255,6 +1271,7 @@ class ForumThreadView extends AbstractView {
             "current_user" => $current_user,
             "author_email" => $author_email,
             "post_user_info" => $post_user_info,
+            "post_up_duck" => $post_up_duck,
             "post_date" => $date,
             "edit_date" => $edit_date,
             "post_buttons" => $post_button,
@@ -1267,7 +1284,7 @@ class ForumThreadView extends AbstractView {
             "render_markdown" => $markdown,
             "has_history" => $has_history,
             "thread_previously_merged" => $merged_thread,
-            "thread_announced" => $thread_announced
+            "thread_announced" => $thread_announced,
         ];
 
         if ($render) {
