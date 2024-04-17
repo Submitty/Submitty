@@ -1535,8 +1535,8 @@ CREATE TABLE public.polls (
     release_histogram character varying(10) DEFAULT 'never'::character varying,
     release_answer character varying(10) DEFAULT 'never'::character varying,
     duration integer DEFAULT 0,
-    is_visible boolean DEFAULT false NOT NULL,
-    end_time timestamp with time zone
+    end_time timestamp with time zone,
+    is_visible boolean DEFAULT false NOT NULL
 );
 
 
