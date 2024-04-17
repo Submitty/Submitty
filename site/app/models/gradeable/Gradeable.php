@@ -2550,4 +2550,23 @@ class Gradeable extends AbstractModel {
         }
         return !empty($autograding_config->getLeaderboards());
     }
+
+
+    /**
+     * Returns if a gradeable has a sloccount scatter plot associated with it
+     *
+     * @return bool
+     */
+    public function hasSloccount(): bool {
+        $autograding_config = $this->loadAutogradingConfig();
+        if (is_null($autograding_config)) {
+            return false;
+        }
+//        return !empty($autograding_config->getSloccount());
+//        var_dump("hasSloccount function is running but returning"); // Debug message
+        $result = !empty($autograding_config->getSloccounts());
+//        var_dump("hasSloccount function is running and will return: " . var_export($result, true)); // Debug message
+
+        return $result;
+    }
 }
