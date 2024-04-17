@@ -765,18 +765,22 @@ td > a.active-sort {
 
 .dark-green-background{
     background-color: #0bbb00;
+    color: #000000;
 }
 
 .dark-yellow-background{
     background-color: #ffff00;
+    color: #000000;
 }
 
 .dark-red-background{
     background-color: #ff2222;
+    color: #000000;
 }
 
 .dark-blue-background{
     background-color: #0066ff;
+    color: #000000;
 }
 
 .badge-container {
