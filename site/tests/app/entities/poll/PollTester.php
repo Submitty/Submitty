@@ -237,7 +237,7 @@ class PollTester extends BaseUnitTest {
 
         //Set End time to NULL to test open state with no duration
         $this->my_polls[1]->setOpen();
-        $this->my_polls[1]->setEndTime(NULL);
+        $this->my_polls[1]->setEndTime(null);
         $this->assertTrue($this->my_polls[1]->isOpen());
         $this->assertFalse($this->my_polls[1]->isClosed());
         $this->assertFalse($this->my_polls[1]->isEnded());
@@ -290,7 +290,7 @@ class PollTester extends BaseUnitTest {
     public function testEndTime(): void {
 
         //Testing Setters and Getters for EndTime
-        $this->my_polls[0]->setEndTime(NULL);
+        $this->my_polls[0]->setEndTime(null);
         $this->assertEquals($this->my_polls[0]->getEndTime(), null);
 
         $this->my_polls[1]->setEnded();

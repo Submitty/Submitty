@@ -57,7 +57,7 @@ class PollUtilsTester extends \PHPUnit\Framework\TestCase {
                 "when_ended"
             ),
         ];
-        $polls[1]->setEndTime(NULL);
+        $polls[1]->setEndTime(null);
         $polls[2]->setEnded();
 
         $poll_property = new ReflectionProperty("app\\entities\\poll\\Poll", "id");

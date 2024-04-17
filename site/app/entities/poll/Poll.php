@@ -77,7 +77,7 @@ class Poll {
         $this->setQuestionType($question_type);
         $this->setDuration($duration);
         $this->setClosed();
-        $this->end_time = NULL;
+        $this->end_time = null;
         $this->setReleaseDate($release_date);
         $this->setReleaseHistogram($release_histogram);
         $this->setReleaseAnswer($release_answer);
@@ -118,8 +118,7 @@ class Poll {
         $this->end_time = new DateTime($tempString);
     }
     public function isOpen(): bool {
-        if($this->end_time == NULL && $this->is_visible)
-        {
+        if ($this->end_time == NULL && $this->is_visible) {
             return true;
         }
         $now = DateUtils::getDateTimeNow();
@@ -127,6 +126,9 @@ class Poll {
     }
 
     public function isEnded(): bool {
+        if ($this->end_time == NULL && $this->is_visible) {
+            return false;
+        }
         $now = DateUtils::getDateTimeNow();
         return $now > $this->end_time && $this->is_visible;
     }
@@ -172,7 +174,7 @@ class Poll {
     }
 
     public function isTimerEnabled(): bool {
-        return !($this->end_time === NULL);
+        return !($this->end_time === null);
     }
 
     public function setReleaseDate(\DateTime $release_date): void {

@@ -14,7 +14,6 @@ use app\libraries\routers\AccessControl;
 use app\libraries\routers\Enabled;
 use app\libraries\FileUtils;
 use app\libraries\PollUtils;
-use app\libraries\DateUtils;
 use app\views\PollView;
 use DateInterval;
 
@@ -367,7 +366,7 @@ class PollController extends AbstractController {
             }
             else {
                 // Timer Disabled
-                $poll->setEndTime(NULL);
+                $poll->setEndTime(null);
             }
         }
         if ($date === false) {
@@ -498,7 +497,7 @@ class PollController extends AbstractController {
         }
         else {
             //If duration is 0, it means that the user wants to manually close it.
-            $end_time = NULL;
+            $end_time = null;
             $poll->setEndTime($end_time);
         }
         $em->flush();
