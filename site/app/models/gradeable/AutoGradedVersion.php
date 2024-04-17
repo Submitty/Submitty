@@ -496,7 +496,6 @@ class AutoGradedVersion extends AbstractModel {
 
         $file_contents = file_get_contents($file_path);
 
-
         // Process the file contents (same logic as before)
         $lines = explode("\n", $file_contents);
         $total_line_count = 0;
@@ -510,6 +509,10 @@ class AutoGradedVersion extends AbstractModel {
         }
 
         return $total_line_count;
+    }
+
+    public function getSubmitterId() {
+        return $this->getGradedGradeable()->getSubmitter()->getId();
     }
 
     /**

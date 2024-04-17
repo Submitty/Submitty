@@ -1,36 +1,108 @@
-<div id="sloc" class="page-content">
+<div id="static-analysis" class="page-content">
     <div id="myDiv4"></div>
     <script>
         var sloc = [{{ histograms['sloc'] | join(',') }}];
         var scores = [{{ histograms['bAuto'] | join(',') }}];
-        console.log(sloc);
-        console.log(scores);
+        /* for demo, add noises to the data points */
+        var sloc_with_noise = sloc.map(element => {
+            return element * (1 + (Math.random() * 0.05) - 0.05);
+        });
+        var scores_with_noise = scores.map(element => {
+            return element * (1 + (Math.random() * 0.05) - 0.05);
+        });
+        var submitters = [
+            {% for submitter in histograms['submitters'] %}
+            "{{ submitter }}"{% if not loop.last %},{% endif %}
+            {% endfor %}
+        ];
 
+        var x1 = [];
+        var y1 = [];
+        var x2 = [];
+        var y2 = [];
+        var x3 = [];
+        var y3 = [];
 
+        var text1 = [];
+        var text2 = [];
+        var text3 = [];
 
-        var trace = {
-            x: sloc,
-            y: scores,
-            name: 'scores',
+        for (let i = 0; i < submitters.length; i++) {
+            if (scores[i] >= {{ autograding_non_extra_credit }}) {
+                x1.push(sloc_with_noise[i]);
+                y1.push(scores_with_noise[i]);
+                text1.push(submitters[i]);
+            }
+            else if (scores[i] < 0.5 * {{ autograding_non_extra_credit }}) {
+                x3.push(sloc_with_noise[i]);
+                y3.push(scores_with_noise[i]);
+                text3.push(submitters[i]);
+            }
+            else {
+                x2.push(sloc_with_noise[i]);
+                y2.push(scores_with_noise[i]);
+                text2.push(submitters[i]);
+            }
+        }
+
+        var trace1 = {
+            x: x1,
+            y: y1,
+            name: '100% or higher (for EC)',
             type: 'scatter',
             mode: 'markers',
-            text: yValue,
+            text: text1,
             textposition: 'auto',
-            hoverinfo: 'none',
             marker: {
-                color: 'rgb(48,99,152)',
-                opacity: 1.0,
+                color: getComputedStyle(document.documentElement).getPropertyValue('--standard-deep-dark-green'),
+                opacity: 1,
                 line: {
                     color: 'rbg(170,170,170)',
-                    width: 1.5
+                    width: 0.5
                 }
             }
-        };
+        }
 
-        var data = [trace];
+        var trace2 = {
+            x: x2,
+            y: y2,
+            name: '51-99%',
+            type: 'scatter',
+            mode: 'markers',
+            text: text2,
+            textposition: 'auto',
+            marker: {
+                color: getComputedStyle(document.documentElement).getPropertyValue('--standard-light-yellow-brown'),
+                opacity: 1,
+                line: {
+                    color: 'rbg(170,170,170)',
+                    width: 0.5
+                }
+            }
+        }
+
+        var trace3 = {
+            x: x3,
+            y: y3,
+            name: '0-50% or lower (for penalty)',
+            type: 'scatter',
+            mode: 'markers',
+            text: text3,
+            textposition: 'auto',
+            marker: {
+                color: getComputedStyle(document.documentElement).getPropertyValue('--error-alert-dark-red'),
+                opacity: 1,
+                line: {
+                    color: 'rbg(170,170,170)',
+                    width: 0.5
+                }
+            }
+        }
+
+        var data = [trace1, trace2, trace3];
 
         var layout = {
-            title: 'Sloc vs. Autograding scores',
+            title: 'Line count vs. Autograding scores',
             barmode: 'overlay',
             xaxis: {
                 title: 'Physical source lines of code'
@@ -45,6 +117,23 @@
         };
         Plotly.newPlot('myDiv4', data, layout, { displayModeBar: false,displaylogo: false });
     </script>
+    <div id="mySmallDiv4">
+        <script>
+            var sloc = [{{ histograms['sloc'] | join(',') }}];
+            var sum = 0;
+            for (var i = 0; i < sloc.length; i++) {
+                sum += sloc[i];
+            }
+            var average = Math.floor(sum / sloc.length);
+            var max = Math.max(...sloc);
+            var min = Math.min(...sloc);
+            document.write(`<b>Lines of code: </b>` + "<br>" + `Maximum: ` + `${max}` + '&nbsp&nbsp&nbsp&nbsp' +
+                `Minimum: ` + `${min}` + '&nbsp&nbsp&nbsp&nbsp' + 'Average: ' + `${average}`);
+            document.write("<br>" + "<br>");
+            document.write(`<b>Autograding: </b>` + "<br>" + `Maxmium possible: ` + {{ autograding_non_extra_credit }} +
+                '&nbsp&nbsp&nbsp&nbsp' + 'Average: ' + {{ autograded_average.getAverageScore() }});
+        </script>
+    </div>
     <br/>
     <br/>
     Double-click on the chart to zoom out
