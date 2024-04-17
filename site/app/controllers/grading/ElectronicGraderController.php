@@ -53,7 +53,7 @@ class ElectronicGraderController extends AbstractController {
     }
 
     /**
-     * Gnenerates histogram data needed for the TA stats page
+     * Generates histogram data needed for the TA stats page
      * @param GradedGradeable[] $overall_scores
      * @return array of histogram data
      */
@@ -62,7 +62,8 @@ class ElectronicGraderController extends AbstractController {
             "bTA" => [],
             "tTA" => [],
             "bAuto" => [],
-            'sloc' => [],
+            "sloc" => [],
+            "submitters" => [],
             "VerConf" => 0,
             "noSub" => 0,
             "noActive" => 0,
@@ -83,6 +84,7 @@ class ElectronicGraderController extends AbstractController {
                     if ($ov->getGradeable()->getAutogradingConfig()->getTotalNonExtraCredit() != 0) {
                         if ($ov->getAutoGradedGradeable()->getTotalPoints() >= 0 || $ov->getAutoGradedGradeable()->getTotalPoints() < 0) {
                             $histogram["bAuto"] = array_merge($histogram["bAuto"], [$ov->getAutoGradedGradeable()->getTotalPoints()]);
+                            $histogram["submitters"] = array_merge($histogram["submitters"], [$ov->getAutoGradedGradeable()->getSubmitterId()]);
                             // add line count for autograded gradeables
                             $histogram["sloc"] = array_merge($histogram["sloc"], [$ov->getAutoGradedGradeable()->getSloc()]);
                         }
