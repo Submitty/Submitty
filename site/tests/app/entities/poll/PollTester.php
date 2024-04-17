@@ -235,10 +235,9 @@ class PollTester extends BaseUnitTest {
         $this->assertTrue($this->my_polls[0]->isClosed());
         $this->assertFalse($this->my_polls[0]->isEnded());
 
-        //Set End time to Far in the future to test open
+        //Set End time to NULL to test open state with no duration
         $this->my_polls[1]->setOpen();
-        $future = new DateTime(DateUtils::MAX_TIME);
-        $this->my_polls[1]->setEndTime($future);
+        $this->my_polls[1]->setEndTime(NULL);
         $this->assertTrue($this->my_polls[1]->isOpen());
         $this->assertFalse($this->my_polls[1]->isClosed());
         $this->assertFalse($this->my_polls[1]->isEnded());
@@ -247,7 +246,6 @@ class PollTester extends BaseUnitTest {
         $this->assertFalse($this->my_polls[2]->isOpen());
         $this->assertFalse($this->my_polls[2]->isClosed());
         $this->assertTrue($this->my_polls[2]->isEnded());
-
 
         $this->my_polls[2]->setClosed();
         $this->assertFalse($this->my_polls[2]->isOpen());
@@ -292,8 +290,8 @@ class PollTester extends BaseUnitTest {
     public function testEndTime(): void {
 
         //Testing Setters and Getters for EndTime
-        $this->my_polls[0]->setEndTime(new DateTime(DateUtils::BEGINING_OF_TIME));
-        $this->assertEquals($this->my_polls[0]->getEndTime()->format('Y-m-d H:i:s'), '1900-02-01 00:00:00');
+        $this->my_polls[0]->setEndTime(NULL);
+        $this->assertEquals($this->my_polls[0]->getEndTime(), null);
 
         $this->my_polls[1]->setEnded();
         // SetEnded sets EndTime to current time (no way to check exact millisecond)

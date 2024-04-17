@@ -366,7 +366,8 @@ class PollController extends AbstractController {
                 $poll->setEndTime($endDate);
             }
             else {
-                $poll->setEndTime(new \DateTime(DateUtils::MAX_TIME));
+                // Timer Disabled
+                $poll->setEndTime(NULL);
             }
         }
         if ($date === false) {
@@ -497,7 +498,7 @@ class PollController extends AbstractController {
         }
         else {
             //If duration is 0, it means that the user wants to manually close it.
-            $end_time = new \DateTime(DateUtils::MAX_TIME);
+            $end_time = NULL;
             $poll->setEndTime($end_time);
         }
         $em->flush();

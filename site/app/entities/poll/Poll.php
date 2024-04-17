@@ -35,8 +35,8 @@ class Poll {
     #[ORM\Column(type: Types::TEXT)]
     protected $status;
 
-    #[ORM\Column(type: Types::DATETIME_MUTABLE)]
-    protected DateTime $end_time;
+    #[ORM\Column(type: Types::DATETIME_MUTABLE, nullable: true)]
+    protected ?DateTime $end_time;
 
     #[ORM\Column(type: Types::BOOLEAN)]
     protected bool $is_visible;
@@ -76,8 +76,8 @@ class Poll {
         $this->setQuestion($question);
         $this->setQuestionType($question_type);
         $this->setDuration($duration);
-        $this->end_time = new \DateTime(DateUtils::BEGINING_OF_TIME);
         $this->setClosed();
+        $this->end_time = NULL;
         $this->setReleaseDate($release_date);
         $this->setReleaseHistogram($release_histogram);
         $this->setReleaseAnswer($release_answer);
@@ -118,6 +118,10 @@ class Poll {
         $this->end_time = new DateTime($tempString);
     }
     public function isOpen(): bool {
+        if($this->end_time == NULL && $this->is_visible)
+        {
+            return true;
+        }
         $now = DateUtils::getDateTimeNow();
         return ($this->is_visible && ($now < $this->end_time));
     }
@@ -140,7 +144,7 @@ class Poll {
         return new \DateInterval("PT{$hours}H{$minutes}M{$seconds}S");
     }
 
-    public function getEndTime(): \DateTime {
+    public function getEndTime(): ?\DateTime {
         return $this->end_time;
     }
 
@@ -163,8 +167,12 @@ class Poll {
         $this->duration = $totalSeconds;
     }
 
-    public function setEndTime(\DateTime $end_time): void {
+    public function setEndTime(?\DateTime $end_time): void {
         $this->end_time = $end_time;
+    }
+
+    public function isTimerEnabled(): bool {
+        return !($this->end_time === NULL);
     }
 
     public function setReleaseDate(\DateTime $release_date): void {

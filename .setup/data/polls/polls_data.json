@@ -67,7 +67,7 @@
             5
         ],
         "release_date": "",
-        "end_time": "9999-02-01 00:00:00.000000 +00:00",
+        "end_time": null,
         "is_visible": true,
         "status": "open",
         "image_path": null,

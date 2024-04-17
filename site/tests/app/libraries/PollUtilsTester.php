@@ -57,7 +57,7 @@ class PollUtilsTester extends \PHPUnit\Framework\TestCase {
                 "when_ended"
             ),
         ];
-        $polls[1]->setEndTime(new DateTime(DateUtils::MAX_TIME));
+        $polls[1]->setEndTime(NULL);
         $polls[2]->setEnded();
 
         $poll_property = new ReflectionProperty("app\\entities\\poll\\Poll", "id");
@@ -123,7 +123,7 @@ class PollUtilsTester extends \PHPUnit\Framework\TestCase {
                 "responses" => ["Yes", "No", "Definitely Not"],
                 "correct_responses" => [0],
                 "duration" => "P0Y0M0DT0H1M0S",
-                "end_time" => "9999-02-01",
+                "end_time" => null,
                 "release_date" => "2020-01-12",
                 "release_histogram" => "always",
                 "release_answer" => "always",
