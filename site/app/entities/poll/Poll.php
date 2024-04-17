@@ -118,7 +118,7 @@ class Poll {
         $this->end_time = new DateTime($tempString);
     }
     public function isOpen(): bool {
-        if ($this->end_time == null && $this->is_visible) {
+        if ($this->end_time === null && $this->is_visible) {
             return true;
         }
         $now = DateUtils::getDateTimeNow();
@@ -126,7 +126,7 @@ class Poll {
     }
 
     public function isEnded(): bool {
-        if ($this->end_time == null && $this->is_visible) {
+        if ($this->end_time === null && $this->is_visible) {
             return false;
         }
         $now = DateUtils::getDateTimeNow();
