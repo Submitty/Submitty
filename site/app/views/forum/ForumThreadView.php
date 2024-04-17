@@ -479,8 +479,12 @@ class ForumThreadView extends AbstractView {
         $upDuckCounter_map = [];
         $upDuckCounter_map = $this->core->getQueries()->getUpduckInfoForPosts($post_ids);
         $userLiked = $this->core->getQueries()->getUserLikesForPosts($post_ids, $current_user);
-        $likedByTa = $this->core->getQueries()->getInstructorUpduck($post_ids);
 
+        $current_user = $this->core->getUser()->getId();
+        $upDuckCounter_map = [];
+        $upDuckCounter_map = $this->core->getQueries()->getUpduckInfoForPosts($post_ids);
+        $userLiked = $this->core->getQueries()->getUserLikesForPosts($post_ids, $current_user);
+        $likedByTa = $this->core->getQueries()->getInstructorUpduck($post_ids);
         if ($display_option == "tree") {
             $order_array = [];
             $reply_level_array = [];
@@ -1083,7 +1087,6 @@ class ForumThreadView extends AbstractView {
      */
 
     public function createPost(string $first_post_author_id, array $thread, array $post, $unviewed_posts, $first, $reply_level, $display_option, int $counter, bool $isLiked, bool $taTrue, $includeReply, array $author_info, array $post_attachments, bool $has_history, bool $is_merged_thread, bool $render = false, bool $thread_announced = false, bool $isCurrentFavorite = false) {
-
         $current_user = $this->core->getUser()->getId();
         $thread_id = $thread["id"];
         $post_id = $post["id"];

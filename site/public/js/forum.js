@@ -3,7 +3,7 @@
 /* exported unMarkForDeletion */
 /* exported  displayHistoryAttachment */
 /* exported toggleUpduck */
-
+/* exported toggleLike */
 // eslint-disable-next-line no-unused-vars
 function categoriesFormEvents() {
     $('#ui-category-list').sortable({
@@ -1293,7 +1293,6 @@ function modifyThreadList(currentThreadId, currentCategoriesId, course, loadFirs
     });
 }
 
-// eslint-disable-next-line no-unused-vars
 function toggleLike(post_id, current_user, userGroup) {
     // eslint-disable-next-line no-undef
     const url = buildCourseUrl(['post', 'likes']);
@@ -1339,6 +1338,7 @@ function toggleLike(post_id, current_user, userGroup) {
                 }
 
                 likeCounter=likes;//set to the sql like value
+
                 likeIconSrc.src = likeIconSrcElement; // Update the state
                 likeCounterElement.innerText = likeCounter;
             }
