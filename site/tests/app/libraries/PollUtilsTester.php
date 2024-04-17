@@ -109,7 +109,7 @@ class PollUtilsTester extends \PHPUnit\Framework\TestCase {
                 "responses" => ["Yes", "No", "Maybe"],
                 "correct_responses" => [0, 2],
                 "duration" => "P0Y0M0DT1H0M0S",
-                "end_time" => "1900-02-01",
+                "end_time" => null,
                 "release_date" => "2020-01-11",
                 "release_histogram" => "never",
                 "release_answer" => "never",
