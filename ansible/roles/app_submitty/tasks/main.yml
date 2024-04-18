@@ -20,7 +20,6 @@
     state: directory
     mode: "0755"
 
-# Change version to match current release
 - name: Checkout specific version of the submitty git repo
   ansible.builtin.git:
     repo: https://github.com/Submitty/Submitty.git
