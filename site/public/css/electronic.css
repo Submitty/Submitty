@@ -592,8 +592,8 @@ progress::-webkit-progress-value {
 
 /* stylelint-disable-next-line selector-id-pattern */
 #autograding_results .box-block .red-message {
-    background-color: #940000;
-    color: #ffffff;
+    background-color: var(--alert-danger-red);
+    color: var(--always-default-white);
     display: inline-block;
     padding: 0 10px;
     margin-left: 10px;
