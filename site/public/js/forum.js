@@ -180,6 +180,8 @@ function testAndGetAttachments(post_box_id, dynamic_check) {
         return false;
     }
     else {
+        const submitButton = document.querySelector(`[data-post_box_id="${post_box_id}"] input[type="submit"]`);
+        submitButton.disabled = false;
         return files;
     }
 }
@@ -2498,6 +2500,40 @@ function clearReplyBoxAutosave(replyBox) {
     }
 }
 
+function setupDisableReplyThreadForm() {
+    const threadPostForms = document.querySelectorAll('.thread-post-form');
+
+    threadPostForms.forEach((form) => {
+        //For all thread forms either reply's or posts, ensure that when text area is empty, the submit button appears to be disabled
+        const textArea = form.querySelector('textarea');
+
+        const submitButton = form.querySelector('input[type="submit"]');
+
+        if (textArea.id === 'reply_box_1' || textArea.id === 'reply_box_2') {
+            // Should not apply for first two reply_box's as they imply the post itself which should be handled by another controller due to extensive inputs
+            return;
+        }
+
+        const inputTest = () => {
+            const imageAttachments = form.querySelectorAll('.file-upload-table .file-label');
+
+            if (textArea.value.trim() === '' && imageAttachments.length === 0) {
+                submitButton.disabled = true;
+            }
+            else {
+                submitButton.disabled = false;
+            }
+        };
+
+        textArea.addEventListener('input', () => {
+            // On any text area input, check if disabling the corresponding reply submit button is appropriate
+            inputTest();
+        });
+
+        inputTest();
+    });
+}
+
 function setupForumAutosave() {
     // Include both regular reply boxes on the forum as well as the "reply" box
     // on the create thread page.
@@ -2509,6 +2545,8 @@ function setupForumAutosave() {
         );
         $(replyBox).find('input.thread-anon-checkbox').change(() => saveReplyBoxToLocal(replyBox));
     });
+
+    setupDisableReplyThreadForm();
 }
 
 // eslint-disable-next-line no-unused-vars
