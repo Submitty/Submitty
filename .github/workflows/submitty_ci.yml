@@ -57,7 +57,7 @@ jobs:
           touch /home/runner/.ssh/id_rsa
           echo -e "${{secrets.SSH_KEY}}" > /home/runner/.ssh/id_rsa
           chmod 700 /home/runner/.ssh/id_rsa
-          ssh-keyscan -t rsa,dsa,ecdsa,ed25519 ${{secrets.SSH_HOST}} >> /home/runner/.ssh/known_hosts
+#          ssh-keyscan -t rsa,dsa,ecdsa,ed25519 ${{secrets.SSH_HOST}} >> /home/runner/.ssh/known_hosts
       - name: Run Smoke Tests
         working-directory: ansible
         run: |
