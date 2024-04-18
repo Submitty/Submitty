@@ -481,7 +481,7 @@ function showPopup(selector) {
 }
 
 function closePopup(id) {
-    $('#' + id).hide();
+    $('#${id}').hide();
     //Checking if the body contains the class no scroll making the page locked, then unlocking it
     if (document.body.classList.contains('no-scroll')) {
         document.body.classList.remove('no-scroll');

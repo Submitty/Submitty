@@ -1,5 +1,5 @@
 /* exported redirectToEdit closeButton userFormChange demoteGraderForm deleteUserForm newStudentForm newGraderForm */
-/* global captureTabInModal buildCourseUrl */
+/* global captureTabInModal buildCourseUrl, showPopup, closePopup */
 
 $('#edit-user-form').ready(() => {
     const url = buildCourseUrl(['user_information']);
