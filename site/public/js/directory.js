@@ -1,4 +1,4 @@
-/* global captureTabInModal */
+/* global captureTabInModal, showPopup */
 /* exported newDownloadForm, newClassListForm, newGradeableJsonForm, newGraderListForm, editRegistrationSectionsForm */
 // Modals for StudentList and GraderList
 
