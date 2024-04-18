@@ -65,9 +65,12 @@
     chdir: /usr/local/submitty/GIT_CHECKOUT/Submitty
   become: true
   become_user: root
+  register: app_submitty_output
+  changed_when: app_submitty_output.rc != 0
 
 - name: Check to see if installation succeeded
-  ansible.builtin.shell: grep "INSTALLATION SUCCESS!" /usr/local/submitty/install.log
+  ansible.builtin.command: grep "INSTALLATION SUCCESS!" /usr/local/submitty/install.log
+  changed_when: False 
 
 - name: Update the PHP disabled functions
   ansible.builtin.lineinfile:
@@ -115,6 +118,8 @@
 
 - name: Run a2ensite submitty
   ansible.builtin.command: a2ensite submitty
+  register: app_submitty_output
+  changed_when: app_submitty_output.rc != 0
 
 - name: Restart service apache2
   ansible.builtin.service:
