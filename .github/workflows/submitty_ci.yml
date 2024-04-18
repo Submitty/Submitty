@@ -47,16 +47,20 @@ jobs:
         working-directory: site
     steps:
       - uses: actions/checkout@v4
-      - name: Set up Python
-        uses: actions/setup-python@v4
-        with:
-          python-version: '3.x'
-      - name: Install Ansible
+#      - name: Set up Python
+#        uses: actions/setup-python@v4
+#        with:
+#          python-version: '3.x'
+      - name: Setup SSH for localhost
         run: |
-          pip install ansible
+          sudo apt-get update
+          sudo apt-get install -y ssh
+          sudo systemctl enable ssh
+          sudo systemctl start ssh
       - name: Run Smoke Tests
         working-directory: ansible
         run: |
+          sudo apt-get install -y ansible
           ansible-playbook playbooks/submitty_install.yml --syntax-check
           ansible-playbook playbooks/submitty_install.yml --check
 
