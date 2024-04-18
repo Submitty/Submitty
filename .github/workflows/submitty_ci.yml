@@ -53,7 +53,6 @@ jobs:
 #          python-version: '3.x'
       - name: Setup SSH for localhost
         run: |
-          service ssh status
           mkdir -p /home/runner/.ssh/
           touch /home/runner/.ssh/id_rsa
           echo -e "${{secrets.SSH_KEY}}" > /home/runner/.ssh/id_rsa
