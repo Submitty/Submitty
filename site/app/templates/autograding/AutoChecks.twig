@@ -1,5 +1,16 @@
 {% import _self as self %}
 
+<script>
+    var errorIcon = document.createElement('i');
+    errorIcon.classList.add("fa-solid", "fa-circle-exclamation");
+    errorIcon.style.cssText = "margin-right: 5px";
+    document.querySelectorAll('.box-block span.red-message').forEach(element => {
+        if (!element.querySelector('.fa-circle-exclamation')) {
+            element.prepend(errorIcon.cloneNode(true));
+        }
+    });
+</script>
+
 {% set actions_id = "actions_" ~ index %}
 {% for check in checks %}
     <p>
