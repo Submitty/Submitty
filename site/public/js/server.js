@@ -480,8 +480,9 @@ function showPopup(selector) {
     document.body.classList.add('no-scroll');
 }
 
+/* eslint-disable-next-line no-unused-vars */
 function closePopup(id) {
-    $('#${id}').hide();
+    $('#' + id).hide();
     //Checking if the body contains the class no scroll making the page locked, then unlocking it
     if (document.body.classList.contains('no-scroll')) {
         document.body.classList.remove('no-scroll');
