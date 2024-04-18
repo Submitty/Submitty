@@ -42,7 +42,7 @@
         "{{ submitty_course_dbuser_password }}"
         "{{ timezone }}"
         "{{ language }}"
-        "{{ 'https' if ssl_enabled else 'http' }}://{{ submitty_url }}" 
+        "{{ 'https' if ssl_enabled else 'http' }}://{{ submitty_url }}"
         "{{ vcs_url }}"
         "{{ institution_name }}"
         "{{ sysadmin_email }}"
@@ -58,7 +58,7 @@
         "{{ noreply_email }}"
         "{{ smtp_server }}"
         "{{ smtp_port }}"
-        "{{ institution_url }}" 
+        "{{ institution_url }}"
         " | bash -p ./.setup/install_system.sh > /usr/local/submitty/install.log 2>&1
 
   args:

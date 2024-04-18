@@ -11,6 +11,6 @@
       ansible.builtin.include_role:
         name: app_submitty
       vars:
-      # customize your submitty install by adding variables here
-      # these variables override the default variables in the role
+        # customize your submitty install by adding variables here
+        # these variables override the default variables in the role
         submitty_version: v24.02.00
