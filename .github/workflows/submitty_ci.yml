@@ -44,31 +44,41 @@ jobs:
 # These might work....
 # https://github.com/dawidd6/action-ansible-playbook
 # https://stackoverflow.com/questions/74048180/how-to-run-ansible-playbook-from-github-actions-without-using-external-action
+# https://stackoverflow.com/questions/60066477/self-connecting-via-ssh-on-github-actions
 
-#  ansible-smoke-test:
-#    runs-on: ubuntu-22.04
-#    defaults:
-#      run:
-#        working-directory: site
-#    steps:
-#      - uses: actions/checkout@v4
-#      - name: Set up Python
-#        uses: actions/setup-python@v4
-#        with:
-#          python-version: '3.x'
-#      - name: Setup SSH for localhost
-#        run: |
-#          mkdir -p /home/runner/.ssh/
-#          touch /home/runner/.ssh/id_rsa
-#          echo -e "${{secrets.SSH_KEY}}" > /home/runner/.ssh/id_rsa
-#          chmod 700 /home/runner/.ssh/id_rsa
-#          ssh-keyscan -t rsa,dsa,ecdsa,ed25519 ${{secrets.SSH_HOST}} >> /home/runner/.ssh/known_hosts
-#      - name: Run Smoke Tests
-#        working-directory: ansible
-#        run: |
-#          sudo apt-get install -y ansible
-#          ansible-playbook playbooks/submitty_install.yml --syntax-check
-#          ansible-playbook playbooks/submitty_install.yml --check
+  ansible-smoke-test:
+    runs-on: ubuntu-22.04
+    defaults:
+      run:
+        working-directory: site
+    steps:
+      - uses: actions/checkout@v4
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.x'
+      - name: Setup SSH for localhost
+        run: |
+          ssh-keygen -t ed25519 -f ~/.ssh/actionKey -N ''
+          cat > ~/.ssh/config <<EOF
+            Host 127.0.0.1
+             User $USER
+             IdentityFile ~/.ssh/actionKey
+             StrictHostKeyChecking no
+          EOF
+          echo -n 'from="127.0.0.1" ' | cat - ~/.ssh/actionKey.pub > ~/.ssh/authorized_keys
+          chmod og-rw ~
+      #    mkdir -p /home/runner/.ssh/
+      #    touch /home/runner/.ssh/id_rsa
+      #    echo -e "${{secrets.SSH_KEY}}" > /home/runner/.ssh/id_rsa
+      #    chmod 700 /home/runner/.ssh/id_rsa
+      #    ssh-keyscan -t rsa,dsa,ecdsa,ed25519 ${{secrets.SSH_HOST}} >> /home/runner/.ssh/known_hosts
+      - name: Run Smoke Tests
+        working-directory: ansible
+        run: |
+          sudo apt-get install -y ansible
+          ansible-playbook playbooks/submitty_install.yml --syntax-check
+          ansible-playbook playbooks/submitty_install.yml --check
 
 
 #  css-lint:
