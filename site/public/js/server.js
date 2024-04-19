@@ -271,7 +271,7 @@ function newOverwriteCourseMaterialForm(clashing_names, is_link, is_edit_form) {
 function newUploadImagesForm() {
     $('.popup-form').css('display', 'none');
     const form = $('#upload-images-form');
-    form.css('display', 'block');
+    showPopup('#upload-images-form');
     captureTabInModal('upload-images-form');
     form.find('.form-body').scrollTop(0);
     $('[name="upload"]', form).val(null);
