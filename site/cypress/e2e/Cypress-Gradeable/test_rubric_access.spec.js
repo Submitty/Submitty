@@ -1,10 +1,23 @@
 describe('Rubric Access Test', () => {
-    it('test sample file exists', () => {
+    it('test sample file exists student', () => {
         cy.login('aphacker');
-        cy.visit(['sample']);
+        cy.visit('/courses/s24/sample/download');
         cy.get('.content').should('contain', "You don't have access to this page.");
-        cy.visit(['courses', 's24', 'sample', 'download', 'gradeable', 'grading_homework', 'grading', 'details']);
-        cy.get('#error-0').should('exist').and('contain', ' You do not have permission to grade Grading Homework');
+        cy.visit(['sample', 'gradeable', 'grading_homework', 'grading', 'details']);
+        cy.get('#error-0').should('exist').and('contain', 'You do not have permission to grade Grading Homework');
+        cy.get('.alert-error').contains('You do not have permission to grade Grading Homework');
+        cy.logout();
     });
-
+    it('test rubric delete file attachment ta and instructor', () => {
+        cy.login('ta');
+        cy.visit(['sample', 'gradeable', 'grading_homework', 'grading', 'details']);
+        cy.get('[data-testid="popup-window"]').should('exist');
+        cy.get('#agree-button').should('exist').click();
+        cy.get('[data-testid="view-sections"]').click();
+        cy.get('[data-testid="grade-button"]').eq(12).click();
+        cy.get('#grading_rubric_btn').should('exist').click();
+        const filePath = '../more_autograding_examples/image_diff_mirror/submissions/student1.png';
+        cy.get('#attachment-upload').should('exist').selectFile(filePath);
+        cy.get('.key_to_click').find('[title="Delete the file"]').click();
+    });
 });
