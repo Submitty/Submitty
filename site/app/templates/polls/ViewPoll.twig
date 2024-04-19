@@ -136,8 +136,8 @@
             },
         }];
         const [correctColor, defaultColor] =
-        [window.getComputedStyle(document.body).getPropertyValue('--standard-deep-dark-green'),
-            window.getComputedStyle(document.body).getPropertyValue('--standard-vibrant-dark-blue')];
+        [window.getComputedStyle(document.body).getPropertyValue('--histogram-correct'),
+            window.getComputedStyle(document.body).getPropertyValue('--histogram-default')];
         {% for option in poll.getOptions() %}
         data[0].x.push("{{ option.getResponse()|replace({"\n": " ", "\r": " ", "\t": " "}) }}");
         data[0].y.push({{ response_counts[option.getId()] }});
