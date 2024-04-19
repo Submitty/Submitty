@@ -121,7 +121,7 @@ class NotebookBuilderController extends AbstractController {
     /**
      * @AccessControl(role="INSTRUCTOR")
      */
-    #[Route("/courses/{_semester}/{_course}/notebook_builder/save", methods=["POST"])]
+    #[Route("/courses/{_semester}/{_course}/notebook_builder/save", methods: ["POST"])]
     public function save(): JsonResponse {
         $gradeable = $this->getValidGradeable($_POST['g_id']);
 
