@@ -31,13 +31,6 @@
 
             {{ activeThreadTitle }}
 
-            <a class="pinned-thread key_to_click" tabindex="0" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                <i class="fas fa-ellipsis-vertical"></i>
-            </a>
-            <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
-                <a class="dropdown-item key_to_click" tabindex="0" onClick="markThreadUnread({{activeThread.id}})" title="Mark Thread Unread" aria-label="Mark Thread Unread">Unread Thread</a>
-            </div>
-
         </h2>
 
     {% endif %}

@@ -69,8 +69,10 @@
 					More
 				</button>
 				<div class="dropdown-menu dropdown-menu-right">
-	                <a class="dropdown-item key_to_click" tabindex="0" onClick="markThreadUnread({{activeThread.id}})" title="Mark Thread Unread" aria-label="Mark Thread Unread">Unread Thread</a>
-					<div class="dropdown-divider"></div>
+					{% if activeThread != null %}
+	                	<a class="dropdown-item key_to_click" tabindex="0" onClick="markThreadUnread({{activeThread.id}})" title="Mark Thread Unread" aria-label="Mark Thread Unread">Unread Thread</a>
+						<div class="dropdown-divider"></div>
+					{% endif %}
 					{% for more in more_data|slice(1) %}
 						{% if user_group <= more.required_rank %}
 							{% set onclick = (more.onclick[0]) ? 'onclick=' ~ more.onclick[1] %}
