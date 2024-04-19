@@ -1323,6 +1323,9 @@ function toggleLike(post_id, current_user, userGroup) {
             json=json['data'];
             const likes = json['likesCount'];
             const liked = json['status'];
+            const taLiked = json['likesFromStaff'];
+
+            console.log(taLiked);
 
             const likeCounterElement = document.getElementById(`likeCounter_${post_id}`);
             let likeCounter = parseInt(likeCounterElement.innerText);
@@ -1334,7 +1337,12 @@ function toggleLike(post_id, current_user, userGroup) {
             if (liked==='unlike') {
                 likeIconSrcElement = likeIconSrcElement.replace('on-duck-button.svg', 'light-mode-off-duck.svg');
                 if (userGroup === 1 || userGroup === 2 || userGroup === 3) {
-                    document.getElementById(`likedByInstructor_${post_id}`).style.display = 'none';
+                    if(taLiked>0){
+                        document.getElementById(`likedByInstructor_${post_id}`).style.display = '';
+                    }
+                    else{
+                        document.getElementById(`likedByInstructor_${post_id}`).style.display = 'none';
+                    }
                 }
 
                 likeCounter=likes;//set to the sql like value
@@ -1345,7 +1353,12 @@ function toggleLike(post_id, current_user, userGroup) {
             else if (liked ==='like') {
                 likeIconSrcElement = likeIconSrcElement.replace('light-mode-off-duck.svg', 'on-duck-button.svg');
                 if (userGroup === 1 || userGroup === 2 || userGroup === 3) {
-                    document.getElementById(`likedByInstructor_${post_id}`).style.display = '';
+                    if(taLiked>0){
+                        document.getElementById(`likedByInstructor_${post_id}`).style.display = '';
+                    }
+                    else{
+                        document.getElementById(`likedByInstructor_${post_id}`).style.display = 'none';
+                    }                
                 }
 
                 likeCounter=likes;

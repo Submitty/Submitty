@@ -728,24 +728,37 @@ SQL;
         try {
             $this->course_db->query("SELECT * FROM forum_upducks WHERE post_id = ? AND user_id = ?", [$post_id, $current_user]);
             $inDatabase = isset($this->course_db->rows()[0]);
+
+            $sqlFilteredCount = "SELECT COUNT(*) AS filtered_likes_count
+                             FROM forum_upducks f
+                             JOIN users u ON f.user_id = u.user_id
+                             WHERE f.post_id = ?
+                             AND u.user_group IN (1, 2, 3)";
             if ($inDatabase) {
                 $this->course_db->query("DELETE FROM forum_upducks WHERE post_id = ? AND user_id = ?", [$post_id, $current_user]);
+                $action = "unlike";
                 $this->course_db->query("SELECT COUNT(*) AS likes_count FROM forum_upducks WHERE post_id = ?", [$post_id]);
                 $likesCount = intval($this->course_db->rows()[0]['likes_count']);
-                return ['unlike',$likesCount];
+
+                $this->course_db->query($sqlFilteredCount, [$post_id]);
+                $filteredLikesCount = intval($this->course_db->rows()[0]['filtered_likes_count']);
             }
             else {
                 $this->course_db->query("INSERT INTO forum_upducks (post_id, user_id) VALUES (?, ?)", [$post_id, $current_user]);
+                $action = "like";
                 $this->course_db->query("SELECT COUNT(*) AS likes_count FROM forum_upducks WHERE post_id = ?", [$post_id]);
                 $likesCount = intval($this->course_db->rows()[0]['likes_count']);
-                return ['like',$likesCount];
+                
+                $this->course_db->query($sqlFilteredCount, [$post_id]);
+                $filteredLikesCount = intval($this->course_db->rows()[0]['filtered_likes_count']);
             }
+            return [$action, $likesCount, $filteredLikesCount];
         }
         catch (DatabaseException $dbException) {
             if ($this->course_db->inTransaction()) {
                 $this->course_db->rollback();
             }
-            return ["false",0];
+            return ["false",0,0];
         }
     }
 

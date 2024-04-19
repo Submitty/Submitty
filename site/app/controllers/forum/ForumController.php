@@ -1401,7 +1401,8 @@ class ForumController extends AbstractController {
 
         $responseData = [
             'status' => $output[0], // 'like'
-            'likesCount' => $output[1] // The likes count
+            'likesCount' => $output[1], // The likes count
+            'likesFromStaff' => $output[2] // Likes from staff
         ];
 
         if ($responseData['status'] === "false") {
