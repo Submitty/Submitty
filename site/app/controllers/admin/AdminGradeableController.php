@@ -159,10 +159,10 @@ class AdminGradeableController extends AbstractController {
             }
             return JsonResponse::getSuccessResponse($_POST['id']);
         }
+        catch (ValidationException $e) {
+            return JsonResponse::getErrorResponse($e->getMessage());
+        }
         catch (\Exception $e) {
-            if ($e->getMessage() === 'Date validation failed') {
-                return JsonResponse::getErrorResponse('Date validation has failed, ensure the dates are in the correct sequential order');
-            }
             return JsonResponse::getErrorResponse($e->getMessage());
         }
     }
