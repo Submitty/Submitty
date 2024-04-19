@@ -1020,10 +1020,11 @@ class SubmissionController extends AbstractController {
     }
 
     /**
-     * @Route("/student_api/{_semester}/{_course}/gradeable/{gradeable_id}/score", methods={"GET"})
+     * 
      * @return JsonResponse
      * @param string $gradeable_id
      */
+    #[Route("/student_api/{_semester}/{_course}/gradeable/{gradeable_id}/score", methods: ["GET"])]
     public function ajaxGetGradeableScore(string $gradeable_id): JsonResponse {
         unset($_SESSION['student_api']);
         try {
@@ -1044,10 +1045,10 @@ class SubmissionController extends AbstractController {
     /**
      * Function for uploading a submission to the server. This should be called via AJAX, saving the result
      * to the json_buffer of the Output object, returning a true or false on whether or not it succeeded or not.
-     * @Route("/student_api/{_semester}/{_course}/gradeable/{gradeable_id}/upload", methods={"POST"})
      * @Route("/courses/{_semester}/{_course}/gradeable/{gradeable_id}/upload", methods={"POST"})
      * @return array
      */
+    #[Route("/student_api/{_semester}/{_course}/gradeable/{gradeable_id}/upload", methods: ["POST"])]
     public function ajaxUploadSubmission($gradeable_id, $merge = null, $clobber = null) {
         $student_api = array_key_exists('student_api', $_SESSION);
         if ($student_api) {

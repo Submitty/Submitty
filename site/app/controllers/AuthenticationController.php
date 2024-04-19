@@ -157,11 +157,11 @@ class AuthenticationController extends AbstractController {
     }
 
     /**
-     * @Route("/student_api/token", methods={"POST"})
      * @Route("/api/token", methods={"POST"})
      *
      * @return MultiResponse
      */
+    #[Route("/student_api/token", methods: ["POST"])]
     public function getToken() {
         if (!isset($_POST['user_id']) || !isset($_POST['password'])) {
             $msg = 'Cannot leave user id or password blank';
@@ -180,11 +180,11 @@ class AuthenticationController extends AbstractController {
     }
 
     /**
-     * @Route("/student_api/token/invalidate", methods={"POST"})
      * @Route("/api/token/invalidate", methods={"POST"})
      *
      * @return MultiResponse
      */
+    #[Route("/student_api/token/invalidate", methods: ["POST"])]
     public function invalidateToken() {
         if (!isset($_POST['user_id']) || !isset($_POST['password'])) {
             $msg = 'Cannot leave user id or password blank';
