@@ -739,7 +739,6 @@ SQL;
                 $action = "unlike";
                 $this->course_db->query("SELECT COUNT(*) AS likes_count FROM forum_upducks WHERE post_id = ?", [$post_id]);
                 $likesCount = intval($this->course_db->rows()[0]['likes_count']);
-
                 $this->course_db->query($sqlFilteredCount, [$post_id]);
                 $filteredLikesCount = intval($this->course_db->rows()[0]['filtered_likes_count']);
             }
@@ -748,7 +747,6 @@ SQL;
                 $action = "like";
                 $this->course_db->query("SELECT COUNT(*) AS likes_count FROM forum_upducks WHERE post_id = ?", [$post_id]);
                 $likesCount = intval($this->course_db->rows()[0]['likes_count']);
-                
                 $this->course_db->query($sqlFilteredCount, [$post_id]);
                 $filteredLikesCount = intval($this->course_db->rows()[0]['filtered_likes_count']);
             }
