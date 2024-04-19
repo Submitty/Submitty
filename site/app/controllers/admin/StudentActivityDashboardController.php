@@ -16,9 +16,9 @@ use app\libraries\DateUtils;
 
 class StudentActivityDashboardController extends AbstractController {
   /**
-   * @Route("/courses/{_semester}/{_course}/activity", methods={"GET"})
    * @AccessControl(role="INSTRUCTOR")
    */
+  #[Route("/courses/{_semester}/{_course}/activity", methods: ["GET"])]
     public function getStudents() {
         $data_dump = $this->core->getQueries()->getAttendanceInfo();
         // Convert the time stamp to the user's timezone
@@ -55,9 +55,9 @@ class StudentActivityDashboardController extends AbstractController {
     }
 
    /**
-    * @Route("/courses/{_semester}/{_course}/activity/download", methods={"GET"})
     * @AccessControl(role="INSTRUCTOR")
     */
+    #[Route("/courses/{_semester}/{_course}/activity/download", methods: ["GET"])]
     public function downloadData() {
         $data_dump = $this->core->getQueries()->getAttendanceInfo();
         $file_url = FileUtils::joinPaths(
