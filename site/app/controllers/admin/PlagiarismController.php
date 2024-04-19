@@ -1641,10 +1641,9 @@ class PlagiarismController extends AbstractController {
 
 
     /**
-     * @Route("/courses/{_semester}/{_course}/plagiarism/check_refresh")
      * @return JsonResponse
      */
-    #[Route()]
+    #[Route("/courses/{_semester}/{_course}/plagiarism/check_refresh")]
     public function checkRefreshLichenMainPage(): JsonResponse {
         $em = $this->core->getCourseEntityManager();
         $configs = $em->getRepository(PlagiarismConfig::class)->findAll();
