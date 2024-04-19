@@ -1,5 +1,5 @@
 /* global captureTabInModal */
-/* exported newDownloadForm, newClassListForm, newGraderListForm, editRegistrationSectionsForm */
+/* exported newDownloadForm, newClassListForm, newGradeableJsonForm, newGraderListForm, editRegistrationSectionsForm */
 // Modals for StudentList and GraderList
 
 function newDownloadForm() {
@@ -29,6 +29,16 @@ function newClassListForm() {
     $('[name="upload"]', form).val(null);
     $('#move_missing').focus();
 }
+
+function newGradeableJsonForm() {
+    $('.popup-form').css('display', 'none');
+    const form = $('#gradeable-json-form');
+    form.css('display', 'block');
+    captureTabInModal('gradeable-json-form');
+    form.find('.form-body').scrollTop(0);
+    $('[name="upload"]', form).val(null);
+}
+
 
 function newGraderListForm() {
     $('.popup-form').css('display', 'none');

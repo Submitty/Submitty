@@ -1112,8 +1112,7 @@ class HomeworkView extends AbstractView {
             'hide_test_details' => $gradeable->getAutogradingConfig()->getHideTestDetails(),
             'has_manual_grading' => $gradeable->isTaGrading(),
             'incomplete_autograding' => $version_instance !== null ? !$version_instance->isAutogradingComplete() : false,
-            // TODO: change this to submitter ID when the MiscController uses new model
-            'user_id' => $this->core->getUser()->getId(),
+            'submitter_id' => $graded_gradeable->getSubmitter()->getId(),
             'team_assignment' => $gradeable->isTeamAssignment(),
             'team_members' => $gradeable->isTeamAssignment() ? $graded_gradeable->getSubmitter()->getTeam()->getMemberList() : [],
             'team_name' => $gradeable->isTeamAssignment() ? $graded_gradeable->getSubmitter()->getTeam()->getTeamName() : '',
