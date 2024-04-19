@@ -104,9 +104,9 @@
     </div>
 </div>
 <script>
-<script>
 $(document).ready(function() {
     const MIN_HEIGHT = 100;
+    const targetTextarea = $('#reply_box_0');
 
     function resizeTextarea(textarea) {
         // Temporarily reduce padding to measure the natural content height more accurately
@@ -124,20 +124,20 @@ $(document).ready(function() {
 
         textarea.style.overflowY = 'hidden';
     }
-    $('textarea').on('input', function() {
+
+    targetTextarea.on('input', function() {
         resizeTextarea(this);
     });
+
     $(document).ajaxComplete(function() {
-        $('textarea').each(function() {
-            resizeTextarea(this);
-        });
+        resizeTextarea(targetTextarea.get(0));
     });
 
     // Resize textareas when the content is dynamically added
     var observer = new MutationObserver(function(mutations) {
         mutations.forEach(function(mutation) {
             mutation.addedNodes.forEach(function(node) {
-                if (node.nodeType === 1 && node.matches('textarea')) {
+                if (node.nodeType === 1 && node.matches('#reply_box_0')) {
                     resizeTextarea(node);
                 }
             });
@@ -145,14 +145,12 @@ $(document).ready(function() {
     });
 
     var config = { childList: true, subtree: true };
-    var target = document.getElementById('container');
-    if (target) {
-        observer.observe(target, config);
+    var container = document.getElementById('container');
+    if (container) {
+        observer.observe(container, config);
     }
 
-    // Resize all textareas immediately when the page loads
-    $('textarea').each(function() {
-        resizeTextarea(this);
-    });
+    // Resize the specific textarea immediately when the page loads
+    resizeTextarea(targetTextarea.get(0));
 });
 </script>
