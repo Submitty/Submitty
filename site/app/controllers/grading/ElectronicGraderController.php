@@ -257,9 +257,7 @@ class ElectronicGraderController extends AbstractController {
                 foreach ($students as $student) {
                     array_push($student_list, ['user_id' => $student->getId()]);
                     if ($submit_before_grading) {
-                        if ($this->core->getQueries()->getUserHasSubmission($gradeable, $student->getId()) == $student->getId()) {
-                        }
-                        else {
+                        if ($this->core->getQueries()->getUserHasSubmission($gradeable, $student->getId())) {
                             array_push($student_array, $student->getId());
                         }
                     }
@@ -300,9 +298,7 @@ class ElectronicGraderController extends AbstractController {
              $sorted_students[$reg_sec][] = $student;
              array_push($student_list, ['user_id' => $student->getId()]);
             if ($submit_before_grading) {
-                if ($this->core->getQueries()->getUserHasSubmission($gradeable, $student->getId()) == $student->getId()) {
-                }
-                else {
+                if ($this->core->getQueries()->getUserHasSubmission($gradeable, $student->getId())) {
                     array_push($student_array, $student->getId());
                 }
             }
@@ -3534,7 +3530,7 @@ class ElectronicGraderController extends AbstractController {
             $ta_graded_gradeable->deleteGradedComponent($component, $this->core->getQueries()->getUserById($peer_id));
         }
         $ta_graded_gradeable->removeOverallComment($peer_id);
-        $this->core->getQueries()->deleteOverallComment($gradeable_id, $peer_id);
+        $this->core->getQueries()->deleteOverallComment($gradeable_id, $peer_id, $graded_gradeable->getSubmitter()->getId());
         $this->core->getQueries()->deleteTaGradedGradeableByIds($gradeable_id, $peer_id);
         $ta_graded_gradeable->resetUserViewedDate();
 

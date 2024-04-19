@@ -41,7 +41,6 @@ class NotebookBuilderController extends AbstractController {
             $this->core->addErrorMessage('Invalid Gradeable ID.');
             return new RedirectResponse($this->core->buildUrl());
         }
-
         $failure_url = $this->core->buildCourseUrl(['gradeable', $gradeable->getId(), 'update']) . '?nav_tab=1';
         // If mode is new then generate a new config directory and place a default config.json inside of it
         if ($mode === 'new') {
