@@ -1325,8 +1325,6 @@ function toggleLike(post_id, current_user, userGroup) {
             const liked = json['status'];
             const taLiked = json['likesFromStaff'];
 
-            console.log(taLiked);
-
             const likeCounterElement = document.getElementById(`likeCounter_${post_id}`);
             let likeCounter = parseInt(likeCounterElement.innerText);
 
