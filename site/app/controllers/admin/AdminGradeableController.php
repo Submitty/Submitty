@@ -1104,7 +1104,7 @@ class AdminGradeableController extends AbstractController {
         }
 
         $ta_view_start_date = (
-            isset($details['ta_view_start_date']) 
+            isset($details['ta_view_start_date'])
                 ? new \DateTime($details['ta_view_start_date'], $this->core->getConfig()->getTimezone())
                 : (clone $tonight)
         );
@@ -1122,13 +1122,13 @@ class AdminGradeableController extends AbstractController {
         );
 
         $grade_released_date = (
-            isset($details['grade_released_date']) 
+            isset($details['grade_released_date'])
                 ? new \DateTime($details['grade_released_date'], $this->core->getConfig()->getTimezone())
                 : (clone $tonight)->add(new \DateInterval('P14D'))
         );
 
         $team_lock_date = (
-            isset($details['team_lock_date']) 
+            isset($details['team_lock_date'])
                 ? new \DateTime($details['team_lock_date'], $this->core->getConfig()->getTimezone())
                 : (clone $tonight)->add(new \DateInterval('P7D'))
         );
