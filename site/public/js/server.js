@@ -8,7 +8,7 @@
    removeMessagePopup validateHtml togglePageDetails copyToClipboard downloadCSV setFolderRelease
    newEditCourseMaterialsForm newEditCourseMaterialsFolderForm newUploadCourseMaterialsForm newUploadImagesForm
    newOverwriteCourseMaterialForm newDeleteCourseMaterialForm displayCloseSubmissionsWarning newDeleteGradeableForm
-   markAllViewed */
+   markAllViewed closePopup */
 /* global csrfToken my_window:writable file_path:writable updateBulkProgress icon:writable detectColorScheme
    createArray readPrevious disableFullUpdate registerSelect2Widget */
 
@@ -476,11 +476,10 @@ function editFilePathRecommendations() {
 }
 
 function showPopup(selector) {
-    $(selector).css('display', 'block');
+    $(selector).show();
     document.body.classList.add('no-scroll');
 }
 
-/* eslint-disable-next-line no-unused-vars */
 function closePopup(id) {
     $(`#${id}`).hide();
     //Checking if the body contains the class no scroll making the page locked, then unlocking it
