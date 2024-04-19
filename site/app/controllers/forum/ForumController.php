@@ -494,11 +494,7 @@ class ForumController extends AbstractController {
 
         $display_option = (!empty($_POST["display_option"])) ? htmlentities($_POST["display_option"], ENT_QUOTES | ENT_HTML5, 'UTF-8') : "tree";
         $anon = (isset($_POST["Anon"]) && $_POST["Anon"] == "Anon") ? 1 : 0;
-        if (strlen($post_content) === 0 || strlen($thread_id) === 0) {
-            $this->core->addErrorMessage("There was an error submitting your post. Please re-submit your post.");
-            $result['next_page'] = $this->core->buildCourseUrl(['forum', 'threads']);
-        }
-        elseif (!$this->core->getQueries()->existsThread($thread_id)) {
+        if (!$this->core->getQueries()->existsThread($thread_id)) {
             $this->core->addErrorMessage("There was an error submitting your post. Thread doesn't exist.");
             $result['next_page'] = $this->core->buildCourseUrl(['forum', 'threads']);
         }
@@ -517,7 +513,12 @@ class ForumController extends AbstractController {
             }
             else {
                 $attachment_name = [];
-                if ($hasGoodAttachment[0] === 1) {
+
+                if ($hasGoodAttachment[0] !== 1 && (strlen($post_content) === 0 || strlen($thread_id) === 0)) {
+                    $this->core->addErrorMessage("There was an error submitting your post. Please re-submit your post.");
+                    $result['next_page'] = $this->core->buildCourseUrl(['forum', 'threads']);
+                }
+                elseif ($hasGoodAttachment[0] === 1) {
                     for ($i = 0; $i < count($_FILES[$file_post]["name"]); $i++) {
                         $attachment_name[] = basename($_FILES[$file_post]["name"][$i]);
                     }
@@ -1384,5 +1385,29 @@ class ForumController extends AbstractController {
         }
         ksort($users);
         $this->core->getOutput()->renderOutput('forum\ForumThread', 'statPage', $users);
+    }
+
+    /**
+     * @Route("/courses/{_semester}/{_course}/post/likes", methods={"POST"})
+     */
+    public function toggleLike(): JsonResponse {
+        $requiredKeys = ['post_id', 'current_user'];
+        foreach ($requiredKeys as $key) {
+            if (!isset($_POST[$key])) {
+                return JsonResponse::getErrorResponse('Missing required key in POST data: ' . $key);
+            }
+        }
+        $output = [];
+        $output = $this->core->getQueries()->toggleLikes($_POST['post_id'], $this->core->getUser()->getId());//so isLiked is the frontend value
+
+        $responseData = [
+            'status' => $output[0], // 'like'
+            'likesCount' => $output[1] // The likes count
+        ];
+
+        if ($responseData['status'] === "false") {
+            return JsonResponse::getErrorResponse('Catch Fail in Query');
+        }
+        return JsonResponse::getSuccessResponse($responseData);
     }
 }
