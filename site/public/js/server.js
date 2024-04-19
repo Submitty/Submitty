@@ -476,7 +476,7 @@ function editFilePathRecommendations() {
 }
 
 function showPopup(selector) {
-    $(selector).css('display', 'block');
+    $(selector).show();
     document.body.classList.add('no-scroll');
 }
 
