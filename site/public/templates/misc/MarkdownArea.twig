@@ -110,6 +110,9 @@ $(document).ready(function() {
 
     function resizeTextarea(textarea) {
         // Temporarily reduce padding to measure the natural content height more accurately
+        if (!(textarea instanceof Element)) {
+            return;
+        }
         var originalPadding = getComputedStyle(textarea).padding;
         textarea.style.padding = '0';
         textarea.style.height = `${MIN_HEIGHT}px`;
