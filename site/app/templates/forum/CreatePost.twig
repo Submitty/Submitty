@@ -74,6 +74,14 @@
     {% endif %}
     <span class="post-action-container">
 
+        <span class="upduck-container">
+            <button class="upduck-button text-decoration-none key_to_click" tabindex="0" onClick="toggleLike({{post.id}}, '{{current_user}}')" title="Like the post">
+                <img id="likeIcon_{{post.id}}" src="{{ post_up_duck.upduck_user_liked ? '/img/on-duck-button.svg' : '/img/light-mode-off-duck.svg' }}" alt="Like" width="30" height="30">
+            </button>
+            <span id="likeCounter_{{post.id}}" class="like-counter">{{ post_up_duck.upduck_count }}</span>
+        </span>
+        {% set offset = offset + 30 %}
+
         {% if userGroup <= 2 and post.author_user_id != current_user %}
             <a class="post-email-toggle key_to_click" tabindex = "0" onClick='$(this).next().toggle();' title="Show/Hide email address" aria-label="Show/Hide email address"><i class="fas fa-envelope"></i></a>
             <a href="mailto:{{ author_email }}" style="display: none;">{{ author_email }}</a>
@@ -112,18 +120,9 @@
 
         <a href="#" id="{{ post_attachment.params.button_id }}" onclick="loadInlineImages('{{ post_attachment.params.encoded_data }}');" class="attachment-btn btn btn-default btn-sm key_to_click" tabindex="0" type="button">
                     Attachments <span class="attachment-badge badge">{{ post_attachment.params.num_files }}</span> </a>
-
-
         <div id="{{ post_attachment.params.well_id }}" class="attachment-well well well-lg"></div>
-
     {% endif %}
 
-    <button class="upduck-button text-decoration-none key_to_click" tabindex="0" onClick="toggleLike({{post.id}}, '{{current_user}}')">
-        <img id="likeIcon_{{post.id}}" src="{{ post_up_duck.upduck_user_liked ? '/img/on-duck-button.svg' : '/img/light-mode-off-duck.svg' }}" alt="Like" width="30" height="30">
-    </button>
-    <span id="likeCounter_{{post.id}}" style="font-size: 15px; vertical-align: middle;">{{ post_up_duck.upduck_count }}</span>
-
-    {% set offset = offset + 30 %}
 </div>
 
 {% if isThreadLocked != 1 or userAccessFullGrading %}
