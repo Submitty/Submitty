@@ -1020,7 +1020,6 @@ class SubmissionController extends AbstractController {
     }
 
     /**
-     * 
      * @return JsonResponse
      * @param string $gradeable_id
      */
