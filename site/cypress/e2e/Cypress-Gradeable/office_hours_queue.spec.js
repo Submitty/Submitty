@@ -98,7 +98,7 @@ const closeFirstQueue = () => {
     cy.get('.toggle-queue-checkbox').first().should('exist').click();
 };
 const emptyFirstQueue = () => {
-    cy.get('.empty_queue_btn').first().click();
+    cy.get('.empty_queue_btn').first().should('exist').click();
 };
 const verifyElementMissing = (type, values) => {
     values.forEach((value) => {
