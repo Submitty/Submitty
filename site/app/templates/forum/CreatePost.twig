@@ -117,7 +117,6 @@
     </span>
 
     {% if post_attachment.exist == true %}
-
         <a href="#" id="{{ post_attachment.params.button_id }}" onclick="loadInlineImages('{{ post_attachment.params.encoded_data }}');" class="attachment-btn btn btn-default btn-sm key_to_click" tabindex="0" type="button">
                     Attachments <span class="attachment-badge badge">{{ post_attachment.params.num_files }}</span> </a>
         <div id="{{ post_attachment.params.well_id }}" class="attachment-well well well-lg"></div>
