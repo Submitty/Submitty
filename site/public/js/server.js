@@ -10,7 +10,7 @@
    newOverwriteCourseMaterialForm newDeleteCourseMaterialForm displayCloseSubmissionsWarning newDeleteGradeableForm
    markAllViewed */
 /* global csrfToken my_window:writable file_path:writable updateBulkProgress icon:writable detectColorScheme
-   createArray readPrevious disableFullUpdate registerSelect2Widget */
+   createArray readPrevious disableFullUpdate registerSelect2Widget closePopup */
 
 ////////////Begin: Removed redundant link in breadcrumbs////////////////////////
 //See this pr for why we might want to remove this code at some point
@@ -476,11 +476,10 @@ function editFilePathRecommendations() {
 }
 
 function showPopup(selector) {
-    $(selector).css('display', 'block');
+    $(selector).show();
     document.body.classList.add('no-scroll');
 }
 
-/* eslint-disable-next-line no-unused-vars */
 function closePopup(id) {
     $(`#${id}`).hide();
     // Checking if the body contains the class no scroll making the page locked, then unlocking it
