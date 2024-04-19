@@ -8,7 +8,7 @@ on:
       - 'main'
 jobs:
   Notify-Failure:
-    if: github.repository == 'Submitty/Submitty'
+    if: ${{ github.event.workflow_run.head_repository.full_name == 'Submitty/Submitty' }}
     runs-on: ubuntu-latest
     steps:
       - name: Send notification to Zulip on failure
