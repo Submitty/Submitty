@@ -1103,82 +1103,20 @@ class AdminGradeableController extends AbstractController {
             $tonight->add(new \DateInterval('P1D'));
         }
         $date_names = [
-            'ta_view_start_date',
-            'grade_start_date',
-            'grade_due_date',
-            'grade_released_date',
-            'team_lock_date',
-            'submission_open_date',
-            'submission_due_date',
-            'grade_inquiry_start_date',
-            'grade_inquiry_due_date'
+            'ta_view_start_date' => '',
+            'grade_start_date' => 'P10D',
+            'grade_due_date' => 'P14D',
+            'grade_released_date' => 'P14D',
+            'team_lock_date' => 'P7D',
+            'submission_open_date' => '',
+            'submission_due_date' => 'P7D',
+            'grade_inquiry_start_date' => 'P15D',
+            'grade_inquiry_due_date' => 'P21D'
         ];
-        
-        $ta_view_start_date = (
-            isset($details['ta_view_start_date'])
-                ? new \DateTime($details['ta_view_start_date'], $this->core->getConfig()->getTimezone())
-                : (clone $tonight)
-        );
 
-        $grade_start_date = (
-            isset($details['grade_start_date'])
-                    ? new \DateTime($details['grade_start_date'], $this->core->getConfig()->getTimezone())
-                    : (clone $tonight)->add(new \DateInterval('P10D'))
-        );
-
-        $grade_due_date = (
-            isset($details['grade_due_date'])
-                ? new \DateTime($details['grade_due_date'], $this->core->getConfig()->getTimezone())
-                : (clone $tonight)->add(new \DateInterval('P14D'))
-        );
-
-        $grade_released_date = (
-            isset($details['grade_released_date'])
-                ? new \DateTime($details['grade_released_date'], $this->core->getConfig()->getTimezone())
-                : (clone $tonight)->add(new \DateInterval('P14D'))
-        );
-
-        $team_lock_date = (
-            isset($details['team_lock_date'])
-                ? new \DateTime($details['team_lock_date'], $this->core->getConfig()->getTimezone())
-                : (clone $tonight)->add(new \DateInterval('P7D'))
-        );
-
-        $submission_open_date = (
-            isset($details['submission_open_date'])
-                ? new \DateTime($details['submission_open_date'], $this->core->getConfig()->getTimezone())
-                : (clone $tonight)
-        );
-
-        $submission_due_date = (
-            isset($details['submission_due_date'])
-                ? new \DateTime($details['submission_due_date'], $this->core->getConfig()->getTimezone())
-                : (clone $tonight)->add(new \DateInterval('P7D'))
-        );
-
-        $grade_inquiry_start_date = (
-            isset($details['grade_inquiry_start_date'])
-                ? new \DateTime($details['grade_inquiry_start_date'], $this->core->getConfig()->getTimezone())
-                : (clone $tonight)->add(new \DateInterval('P15D'))
-        );
-
-        $grade_inquiry_due_date = (
-            isset($details['grade_inquiry_due_date'])
-                ? new \DateTime($details['grade_inquiry_due_date'], $this->core->getConfig()->getTimezone())
-                : (clone $tonight)->add(new \DateInterval('P21D'))
-        );
-
-        $gradeable_create_data = array_merge($gradeable_create_data, [
-            'ta_view_start_date' => $ta_view_start_date,
-            'grade_start_date' => $grade_start_date,
-            'grade_due_date' => $grade_due_date,
-            'grade_released_date' => $grade_released_date,
-            'team_lock_date' => $team_lock_date,
-            'submission_open_date' => $submission_open_date,
-            'submission_due_date' => $submission_due_date,
-            'grade_inquiry_start_date' => $grade_inquiry_start_date,
-            'grade_inquiry_due_date' => $grade_inquiry_due_date
-        ]);
+        foreach ($date_names as $time_string => $tonight_modifier){ 
+            $gradeable_create_data = array_merge($gradeable_create_data, [$time_string => $this->getDateObjects($details[$time_string] ?? '', $tonight, $tonight_modifier)]);
+        }
 
         // Finally, construct the gradeable
         $gradeable = new Gradeable($this->core, $gradeable_create_data);
@@ -1220,12 +1158,13 @@ class AdminGradeableController extends AbstractController {
         return $build_status;
     }
 
-    function getDateObjects($time_string, $tonight_modifier = '', $tonight): DateTime {
+    function getDateObjects($time_string, $tonight, $tonight_modifier = ''): \DateTime
+    {
         if ($time_string !== '') {
             return $this->core->getDateTimeSpecific($time_string);
         }
         if ($tonight_modifier !== '') {
-            return (clone $tonight)->add(new \DateInterval($tonight_modifier);
+            return (clone $tonight)->add(new \DateInterval($tonight_modifier));
         } else {
             return (clone $tonight);
         }
