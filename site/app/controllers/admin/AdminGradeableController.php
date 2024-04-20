@@ -1102,7 +1102,18 @@ class AdminGradeableController extends AbstractController {
         if ($tonight->diff($this->core->getDateTimeNow())->h < 12) {
             $tonight->add(new \DateInterval('P1D'));
         }
-
+        $date_names = [
+            'ta_view_start_date',
+            'grade_start_date',
+            'grade_due_date',
+            'grade_released_date',
+            'team_lock_date',
+            'submission_open_date',
+            'submission_due_date',
+            'grade_inquiry_start_date',
+            'grade_inquiry_due_date'
+        ];
+        
         $ta_view_start_date = (
             isset($details['ta_view_start_date'])
                 ? new \DateTime($details['ta_view_start_date'], $this->core->getConfig()->getTimezone())
@@ -1207,6 +1218,17 @@ class AdminGradeableController extends AbstractController {
         }
 
         return $build_status;
+    }
+
+    function getDateObjects($time_string, $tonight_modifier = '', $tonight): DateTime {
+        if ($time_string !== '') {
+            return $this->core->getDateTimeSpecific($time_string);
+        }
+        if ($tonight_modifier !== '') {
+            return (clone $tonight)->add(new \DateInterval($tonight_modifier);
+        } else {
+            return (clone $tonight);
+        }
     }
 
     /**
