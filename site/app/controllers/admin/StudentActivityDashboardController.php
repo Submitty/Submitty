@@ -15,10 +15,10 @@ use app\libraries\DateUtils;
  */
 
 class StudentActivityDashboardController extends AbstractController {
-  /**
-   * @AccessControl(role="INSTRUCTOR")
-   */
-  #[Route("/courses/{_semester}/{_course}/activity", methods: ["GET"])]
+    /**
+    * @AccessControl(role="INSTRUCTOR")
+    */
+    #[Route("/courses/{_semester}/{_course}/activity", methods: ["GET"])]
     public function getStudents() {
         $data_dump = $this->core->getQueries()->getAttendanceInfo();
         // Convert the time stamp to the user's timezone
