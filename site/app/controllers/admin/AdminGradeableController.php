@@ -1114,7 +1114,7 @@ class AdminGradeableController extends AbstractController {
             'grade_inquiry_due_date' => 'P21D'
         ];
 
-        foreach ($date_names as $time_string => $tonight_modifier){ 
+        foreach ($date_names as $time_string => $tonight_modifier) {
             $gradeable_create_data = array_merge($gradeable_create_data, [$time_string => $this->getDateObjects($details[$time_string] ?? '', $tonight, $tonight_modifier)]);
         }
 
@@ -1158,14 +1158,14 @@ class AdminGradeableController extends AbstractController {
         return $build_status;
     }
 
-    function getDateObjects($time_string, $tonight, $tonight_modifier = ''): \DateTime
-    {
+    function getDateObjects($time_string, $tonight, $tonight_modifier = ''): \DateTime {
         if ($time_string !== '') {
             return $this->core->getDateTimeSpecific($time_string);
         }
         if ($tonight_modifier !== '') {
             return (clone $tonight)->add(new \DateInterval($tonight_modifier));
-        } else {
+        }
+        else {
             return (clone $tonight);
         }
     }
