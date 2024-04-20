@@ -770,7 +770,6 @@ class Core {
         return new \DateTime('now', $this->getConfig()->getTimezone());
     }
 
-    
     /**
      * Gets the time for the given string in the config timezone
      */
