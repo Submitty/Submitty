@@ -134,7 +134,7 @@ class Poll {
     }
 
     public function isClosed(): bool {
-        return (!$this->is_visible);
+        return !$this->is_visible;
     }
 
     public function getDuration(): \DateInterval {
@@ -174,7 +174,7 @@ class Poll {
     }
 
     public function isTimerEnabled(): bool {
-        return !($this->end_time === null);
+        return $this->end_time !== null;
     }
 
     public function setReleaseDate(\DateTime $release_date): void {

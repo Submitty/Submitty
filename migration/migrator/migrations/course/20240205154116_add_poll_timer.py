@@ -15,15 +15,16 @@ def up(config, database, semester, course):
     :type course: str
     """
     database.execute("ALTER TABLE polls ADD COLUMN IF NOT EXISTS duration INTEGER DEFAULT 0")
-    database.execute("ALTER TABLE polls ADD COLUMN IF NOT EXISTS end_time timestamptz DEFAULT NULL")
+    database.execute("ALTER TABLE polls ADD COLUMN IF NOT EXISTS end_time timestamptz")
     database.execute("ALTER TABLE polls ALTER COLUMN status DROP NOT NULL")
     database.execute("ALTER TABLE polls ADD COLUMN IF NOT EXISTS is_visible BOOLEAN NOT NULL DEFAULT FALSE")
     database.execute("""
+        UPDATE polls
+        SET end_time = '1900-02-01'
+        WHERE status != 'open'
+    """)
+    database.execute("""
         UPDATE polls SET 
-            end_time = CASE
-                WHEN status = 'open' THEN NULL
-                ELSE now() 
-            END,
             is_visible = CASE
                 WHEN status IN ('open', 'ended') THEN TRUE
                 ELSE FALSE
