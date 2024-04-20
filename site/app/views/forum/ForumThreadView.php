@@ -1154,31 +1154,13 @@ class ForumThreadView extends AbstractView {
 
         $merged_thread = $is_merged_thread && $userAccessFullGrading;
 
-        if ($userAccessFullGrading) {
-            $info_name = $given_name . " " . $family_name . " (" . $post['author_user_id'] . ")";
-            $visible_user_json = json_encode($visible_username);
-            $pronouns = trim($author_info["pronouns"]);
-            $display_pronouns = $author_info["display_pronouns"];
-            $info_name = json_encode($info_name);
-            $jscriptAnonFix = $post['anonymous'] ? 'true' : 'false';
-            $jscriptAnonFix = json_encode($jscriptAnonFix);
-
-            $post_user_info = [
-                "info_name" => $info_name,
-                "visible_user_json" => $visible_user_json,
-                "jscriptAnonFix" => $jscriptAnonFix,
-                "pronouns" => $pronouns,
-                "display_pronouns" => $display_pronouns
-            ];
-        }
-
         $post_button = [];
 
-        if ($userGroup <= 3 || $post['author_user_id'] === $current_user) {
+        if ($userGroup <= User::GROUP_LIMITED_ACCESS_GRADER || $post['author_user_id'] === $current_user) {
             if ($isThreadLocked && !$userAccessFullGrading) {
             }
             else {
-                if ($deleted && $this->core->getUser()->getGroup() <= 3) {
+                if ($deleted && $userGroup <= User::GROUP_LIMITED_ACCESS_GRADER) {
                     $ud_toggle_status = "false";
                     $ud_button_title = "Undelete post";
                     $ud_button_icon = "fa-undo";
@@ -1220,7 +1202,7 @@ class ForumThreadView extends AbstractView {
             "upduck_user_liked" => $isLiked,
         ];
 
-        if ($this->core->getUser()->getGroup() == 4) {
+        if ($userGroup <= User::GROUP_STUDENT) {
             $info_name = $given_name . " " . $family_name . " (" . $post['author_user_id'] . ")";
             $visible_user_json = json_encode($visible_username);
             $pronouns = trim($author_info["pronouns"]);
