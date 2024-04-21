@@ -1933,22 +1933,6 @@ function addMarkdownCode(type) {
     $(this)[0].setSelectionRange(cursor + insert.length, cursor + insert.length);
 }
 
-function parseBlockquote(text){
-
-    var lines = text.split("\n");
-
-    for (var i = 0; i < lines.length; i++) {
-        if (lines[i].trim().startsWith(">")) {
-            lines[i] = "<blockquote>" + lines[i] + "</blockquote>";
-        }
-    }
-
-    var result = lines.join("\n");
-
-    return result;
-
-}
-
 /**
  * Check local timezone against user timezone and show warning if they are different
  */
