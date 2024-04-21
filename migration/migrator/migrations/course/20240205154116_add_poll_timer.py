@@ -46,5 +46,14 @@ def down(config, database, semester, course):
     :type course: str
     """
     database.execute("ALTER TABLE polls ALTER COLUMN status SET NOT NULL")
+    database.execute("""
+        UPDATE polls
+        SET status = CASE
+            WHEN end_time IS NULL AND is_visible = TRUE THEN 'open'
+            WHEN is_visible = TRUE AND end_time < NOW() THEN 'ended'
+            WHEN is_visible = TRUE AND end_time > NOW() AND duration > 0 THEN 'open'
+            WHEN is_visible = FALSE THEN 'closed'
+        END
+    """)
     
     
