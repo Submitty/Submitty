@@ -715,4 +715,19 @@ class OfficeHoursQueueController extends AbstractController {
             $this->core->addNoticeMessage("WebSocket Server is down, page won't load dynamically.");
         }
     }
+
+    /**
+     * @Route("/courses/{_semester}/{_course}/queue/student_search", methods={"POST"})
+     */
+    public function studentSearch(): JsonResponse {
+        $user_id = $_POST['student_id'];
+        $result = $this->core->getQueries()->studentQueueSearch($user_id);
+        $data = array();
+        foreach($result as $row) {
+                $data[] = $row;
+        }
+        $responseData = json_encode($data);
+        return JsonResponse::getSuccessResponse($responseData);
+    }
+
 }
