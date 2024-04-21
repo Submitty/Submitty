@@ -1879,10 +1879,8 @@ class SubmissionController extends AbstractController {
      * Check if the results folder exists for a given gradeable and version results.json
      * in the results/ directory. If the file exists, we output a string that the calling
      * JS checks for to initiate a page refresh (so as to go from "in-grading" to done
-     *
-     * @Route("/courses/{_semester}/{_course}/gradeable/{gradeable_id}/{gradeable_version}/check_refresh", requirements={"gradeable_version": "\d+"})
      */
-    #[Route()]
+    #[Route("/courses/{_semester}/{_course}/gradeable/{gradeable_id}/{gradeable_version}/check_refresh", requirements: ["gradeable_version" => "\d+"])]
     public function checkRefresh($gradeable_id, $gradeable_version) {
         $this->core->getOutput()->useHeader(false);
         $this->core->getOutput()->useFooter(false);
@@ -1939,10 +1937,9 @@ class SubmissionController extends AbstractController {
     }
 
     /**
-     * @Route("/courses/{_semester}/{_course}/gradeable/{gradeable_id}/bulk_stats")
      * @AccessControl(role="FULL_ACCESS_GRADER")
      */
-    #[Route()]
+    #[Route("/courses/{_semester}/{_course}/gradeable/{gradeable_id}/bulk_stats")]
     public function showBulkStats($gradeable_id) {
         $course_path = $this->core->getConfig()->getCoursePath();
         $base_path = $course_path . "/submissions/" . $gradeable_id . "/";
@@ -1978,10 +1975,9 @@ class SubmissionController extends AbstractController {
     }
 
     /**
-     * @Route("/courses/{_semester}/{_course}/gradeable/{gradeable_id}/time_remaining_data")
      * @return JsonResponse
      */
-    #[Route()]
+    #[Route("/courses/{_semester}/{_course}/gradeable/{gradeable_id}/time_remaining_data")]
     public function getTimeRemainingData($gradeable_id) {
         $gradeable = $this->tryGetElectronicGradeable($gradeable_id);
         if ($gradeable !== null) {
