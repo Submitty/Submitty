@@ -1158,7 +1158,7 @@ class AdminGradeableController extends AbstractController {
         return $build_status;
     }
 
-    function getDateObjects($time_string, $tonight, $tonight_modifier = ''): \DateTime {
+    public function getDateObjects($time_string, $tonight, $tonight_modifier = ''): \DateTime {
         if ($time_string !== '') {
             return $this->core->getDateTimeSpecific($time_string);
         }
