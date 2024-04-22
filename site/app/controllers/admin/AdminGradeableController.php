@@ -204,7 +204,7 @@ class AdminGradeableController extends AbstractController {
      *        late_submission_allowed: boolean,
      *        late_days: integer,
      *     }
-     *}
+     * }
      */
     public function getGradeableJson(Gradeable $gradeable): array {
         $return_json = [
