@@ -1389,22 +1389,6 @@ function getPeerGradingEarned() {
 
 
 /**
- * Gets if all components have a grade assigned
- * @return {boolean} If all components have at least one mark checked
- */
-function getTaGradingComplete() {
-    let anyIncomplete = false;
-    $('.graded-component-data').each(function () {
-        const pointsEarned = $(this).attr('data-total_score');
-        if (pointsEarned === '') {
-            anyIncomplete = true;
-        }
-    });
-    return !anyIncomplete;
-}
-
-
-/**
  * Gets the number of ta grading points that can be earned
  * @return {number}
  */
@@ -2323,7 +2307,7 @@ function reloadGradingRubric(gradeable_id, anon_id) {
                 .then(() => {
                     return renderGradingGradeable(getGraderId(), gradeable_tmp, graded_gradeable,
                         isGradingDisabled(), canVerifyGraders(), getDisplayVersion());
-                })
+                });
         })
         .then((elements) => {
             setRubricDOMElements(elements);
@@ -2335,7 +2319,7 @@ function reloadGradingRubric(gradeable_id, anon_id) {
         });
 
 }
-/** 
+/**
 * Call this to save components and graded components to global list
 * @param {Promise} gradeable
 * @param {Promise} graded_gradeable
@@ -2343,14 +2327,15 @@ function reloadGradingRubric(gradeable_id, anon_id) {
 */
 async function loadComponentData(gradeable, graded_gradeable) {
     for (const component of gradeable.components) {
-        COMPONENT_RUBRIC_LIST[component.id] = component
+        COMPONENT_RUBRIC_LIST[component.id] = component;
     }
     if (graded_gradeable.graded_components) {
         const graded_array = Object.values(graded_gradeable.graded_components);
         for (const component of graded_array) {
-            GRADED_COMPONENTS_LIST[component.component_id] = component
+            GRADED_COMPONENTS_LIST[component.component_id] = component;
         }
-    } else {
+    }
+    else {
         for (const component of gradeable.components) {
             GRADED_COMPONENTS_LIST[component.id] = undefined;
         }
@@ -2463,7 +2448,7 @@ function reloadGradingComponent(component_id, editable = false, showMarkList = f
         .then((component) => {
             // Set the global mark list data for this component for conflict resolution
             OLD_MARK_LIST[component_id] = component.marks;
-            COMPONENT_RUBRIC_LIST[component_id] = component
+            COMPONENT_RUBRIC_LIST[component_id] = component;
 
             component_tmp = component;
             return ajaxGetGradedComponent(gradeable_id, component_id, getAnonId());
@@ -2527,19 +2512,19 @@ function toggleComponent(component_id, saveChanges, edit_mode = false) {
     // Component is open, so close it
     if (isComponentOpen(component_id)) {
         action = action.then(() => {
-            console.time("closeComponent");
+            console.time('closeComponent');
             return closeComponent(component_id, saveChanges, edit_mode)
-                .then(function () { console.timeEnd("closeComponent") });
+                .then(function () { console.timeEnd('closeComponent') });
         });
     }
     else {
         action = action.then(() => {
-            console.time("closeAllComponents");
+            console.time('closeAllComponents');
             return closeAllComponents(saveChanges, edit_mode)
                 .then(() => {
-                    console.timeEnd("closeAllComponents");
-                    console.time("openComponent");
-                    return (openComponent(component_id)).then(function () { console.timeEnd("openComponent") });
+                    console.timeEnd('closeAllComponents');
+                    console.time('openComponent');
+                    return (openComponent(component_id)).then(function () { console.timeEnd('openComponent') });
                 });
         });
     }
@@ -2855,9 +2840,6 @@ function closeComponentInstructorEdit(component_id, saveChanges) {
  */
 function closeComponentGrading(component_id, saveChanges) {
     let sequence = Promise.resolve();
-    const gradeable_id = getGradeableId();
-    const anon_id = getAnonId();
-    let component_tmp = null;
 
     GRADED_COMPONENTS_LIST[component_id] = getGradedComponentFromDOM(component_id);
     COMPONENT_RUBRIC_LIST[component_id] = getComponentFromDOM(component_id);
@@ -2870,9 +2852,8 @@ function closeComponentGrading(component_id, saveChanges) {
     // Finally, render the graded component in non-edit mode with the mark list hidden
     return sequence
         .then(() => {
-            injectGradingComponent(COMPONENT_RUBRIC_LIST[component_id], GRADED_COMPONENTS_LIST[component_id], false, false)
-
-        })
+            injectGradingComponent(COMPONENT_RUBRIC_LIST[component_id], GRADED_COMPONENTS_LIST[component_id], false, false);
+        });
 }
 
 /**
