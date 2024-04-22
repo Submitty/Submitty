@@ -16,7 +16,8 @@
                 <th class = "cursor-pointer"  id="total_posts_sort"><a href="#">Total Posts (not deleted)</a></th>
                 <th class = "cursor-pointer" style="width:15%" id="total_threads_sort"><a href="#">Total Threads</a></th>
                 <th class = "cursor-pointer" style="width:15%" id="total_deleted_sort"><a href="#">Total Deleted Posts</a></th>
-                <th style="width:40%">Show Posts</th>
+                <th class = "cursor-pointer" style="width:15%" id="total_upducks"><a href="#">Total Upducks</a></th>
+                <th style="width:25%">Show Posts</th>
             </tr>
 
             {% for user in userData %}
@@ -26,6 +27,7 @@
                     <td>{{ user.post_count }}</td>
                     <td>{{ user.details_total_threads }}</td>
                     <td>{{ user.num_deleted }}</td>
+                    <td>{{ user.total_upducks }}</td>
                     <td><button class="btn btn-default" data-action = "expand" data-posts="{{ user.posts }}" data-id="{{ user.ids }}" data-timestamps="{{ user.timestamps }}" data-thread_id="{{ user.thread_ids }}" data-thread_titles="{{ user.thread_titles }}">Expand</button></td>
                 </tr>
                 </tbody>
