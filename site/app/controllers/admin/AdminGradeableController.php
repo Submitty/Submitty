@@ -165,7 +165,7 @@ class AdminGradeableController extends AbstractController {
 
     /**
      * Returns a JSON array to recreate the gradeable using
-     * the 'uploadGradeable' function. 
+     * the 'uploadGradeable' function.
      * @return array {
      *              title: string,
      *              type: string,
@@ -258,7 +258,6 @@ class AdminGradeableController extends AbstractController {
                         break;
                     default:
                         return JsonResponse::getFailResponse('Invalid VCS Type');
-                        break;
                 }
                 if ($gradeable->isUsingSubdirectory()) {
                     $vcs_values['subdirectory'] = $gradeable->getVcsSubdirectory();
