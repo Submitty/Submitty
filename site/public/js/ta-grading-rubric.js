@@ -2319,7 +2319,7 @@ function reloadGradingRubric(gradeable_id, anon_id) {
         })
         .then((graded_gradeable) => {
             GRADED_GRADEABLE = graded_gradeable;
-            return loadComponentData(gradeable_tmp.components, gradeable_id, anon_id)
+            return loadComponentData(gradeable_tmp, graded_gradeable)
                 .then(() => {
                     return renderGradingGradeable(getGraderId(), gradeable_tmp, graded_gradeable,
                         isGradingDisabled(), canVerifyGraders(), getDisplayVersion());
@@ -2337,23 +2337,23 @@ function reloadGradingRubric(gradeable_id, anon_id) {
 }
 /** 
 * Call this to save components and graded components to global list
-* @param {list} components
-* @param {string} gradeable_id
-* @param {string} anon_id
+* @param {Promise} gradeable
+* @param {Promise} graded_gradeable
 * @return {Promise}
 */
-async function loadComponentData(components, gradeable_id, anon_id) {
-    const loadComponent = async (component) => {
-        try {
-            COMPONENT_RUBRIC_LIST[component.id] = await ajaxGetComponentRubric(gradeable_id, component.id);
-            GRADED_COMPONENTS_LIST[component.id] = await ajaxGetGradedComponent(gradeable_id, component.id, anon_id);
-        } catch (err) {
-            console.error(`Error loading data for component ${component.id}: ${err}`);
+async function loadComponentData(gradeable, graded_gradeable) {
+    for (const component of gradeable.components) {
+        COMPONENT_RUBRIC_LIST[component.id] = component
+    }
+    if (graded_gradeable.graded_components) {
+        const graded_array = Object.values(graded_gradeable.graded_components);
+        for (const component of graded_array) {
+            GRADED_COMPONENTS_LIST[component.component_id] = component
         }
-    };
-
-    for (const component of components) {
-        await loadComponent(component);
+    } else {
+        for (const component of gradeable.components) {
+            GRADED_COMPONENTS_LIST[component.id] = undefined;
+        }
     }
 }
 /**
