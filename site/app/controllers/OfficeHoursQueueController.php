@@ -722,12 +722,11 @@ class OfficeHoursQueueController extends AbstractController {
     public function studentSearch(): JsonResponse {
         $user_id = $_POST['student_id'];
         $result = $this->core->getQueries()->studentQueueSearch($user_id);
-        $data = array();
-        foreach($result as $row) {
+        $data = [];
+        foreach ($result as $row) {
                 $data[] = $row;
         }
         $responseData = json_encode($data);
         return JsonResponse::getSuccessResponse($responseData);
     }
-
 }
