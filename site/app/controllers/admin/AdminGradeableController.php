@@ -166,44 +166,45 @@ class AdminGradeableController extends AbstractController {
     /**
      * Returns a JSON array to recreate the gradeable using
      * the 'uploadGradeable' function.
-     * @return array {
-     *              title: string,
-     *              type: string,
-     *              id: string,
-     *              instructions_url: string,
-     *              syllabus_bucket: string,
-     *              autograding_config_path: string,
-     *              bulk_upload: boolean,
-     *              team_gradeable?: array{
-     *                  team_max_size: int,
-     *                  inherit_from: string,
-     *              },
-     *              ta_grading?: boolean,
-     *              grade_inquiries?: boolean,
-     *              grade_inquiries_per_component?: boolean,
-     *              discussion_based?: boolean,
-     *              discussion_thread_id?: boolean,
-     *              vcs?: array{
-     *                  repository_type?: string,
-     *                  vcs_path?: string,
-     *                  vcs_subdirectory?: string
-     *              }
-     *              dates: array{
-     *                  ta_view_start_date: string,
-     *                  grade_start_date: string,
-     *                  grade_due_date: string,
-     *                  grade_released_date: string,
-     *                  team_lock_date: string,
-     *                  submission_open_date: string,
-     *                  submission_due_date: string,
-     *                  grade_inquiry_start_date: string,
-     *                  grade_inquiry_due_date: string,
-     *                  has_due_date: string,
-     *                  has_release_date: boolean,
-     *                  late_submission_allowed: boolean,
-     *                  late_days: integer
-     *              }
-     *            }
+     * @param Gradeable $gradeable
+     * @return array{
+     *     title: string,
+     *     type: string,
+     *     id: string,
+     *     instructions_url: string,
+     *     syllabus_bucket: string,
+     *     autograding_config_path: string,
+     *     bulk_upload: boolean,
+     *     team_gradeable?: array{
+     *         team_max_size: int,
+     *         inherit_from: string,
+     *     },
+     *     ta_grading?: boolean,
+     *     grade_inquiries?: boolean,
+     *     grade_inquiries_per_component?: boolean,
+     *     discussion_based?: boolean,
+     *     discussion_thread_id?: boolean,
+     *     vcs?: array{
+     *         repository_type?: string,
+     *         vcs_path?: string,
+     *         vcs_subdirectory?: string,
+     *     },
+     *     dates: array{
+     *        ta_view_start_date: string,
+     *        grade_start_date: string,
+     *        grade_due_date: string,
+     *        grade_released_date: string,
+     *        team_lock_date: string,
+     *        submission_open_date: string,
+     *        submission_due_date: string,
+     *        grade_inquiry_start_date: string,
+     *        grade_inquiry_due_date: string,
+     *        has_due_date: string,
+     *        has_release_date: boolean,
+     *        late_submission_allowed: boolean,
+     *        late_days: integer,
+     *     }
+     *}
      */
     public function getGradeableJson(Gradeable $gradeable): array {
         $return_json = [
@@ -257,7 +258,8 @@ class AdminGradeableController extends AbstractController {
                         $vcs_values['vcs_path'] = $gradeable->getVcsPartialPath();
                         break;
                     default:
-                        return JsonResponse::getFailResponse('Invalid VCS Type');
+                        $vcs_values['repository_type'] = 'invalid-type';
+                        break;
                 }
                 if ($gradeable->isUsingSubdirectory()) {
                     $vcs_values['subdirectory'] = $gradeable->getVcsSubdirectory();
