@@ -52,12 +52,10 @@ class AdminGradeableController extends AbstractController {
 
     /**
      * Creates a gradeable based on uploaded JSON data
-     * @return JsonResponse
-     * @AccessControl(role="INSTRUCTOR")
-     * @Route("/api/{_semester}/{_course}/upload", methods={"POST"})
-     * @Route("/courses/{_semester}/{_course}/upload", methods={"POST"})
      */
-    public function uploadGradeable() {
+    #[Route("/api/{_semester}/{_course}/upload", methods: ["POST"])]
+    #[Route("/courses/{_semester}/{_course}/upload", methods: ["POST"])]
+    public function uploadGradeable(): JsonResponse {
         $values = [
             'title' => '',
             'instructions_url' => '',
@@ -1115,7 +1113,14 @@ class AdminGradeableController extends AbstractController {
         ];
 
         foreach ($date_names as $time_string => $tonight_modifier) {
-            $gradeable_create_data = array_merge($gradeable_create_data, [$time_string => $this->getDateObjects($details[$time_string] ?? '', $tonight, $tonight_modifier)]);
+            $gradeable_create_data = array_merge($gradeable_create_data,
+                [
+                    $time_string => $this->getDateTimeForGradeable(
+                        $details[$time_string] ?? '',
+                        $tonight,
+                        $tonight_modifier)
+                ]
+            );
         }
 
         // Finally, construct the gradeable
@@ -1158,7 +1163,7 @@ class AdminGradeableController extends AbstractController {
         return $build_status;
     }
 
-    public function getDateObjects(string $time_string, \DateTime $tonight, string $tonight_modifier = ''): \DateTime {
+    public function getDateTimeForGradeable(string $time_string, \DateTime $tonight, string $tonight_modifier = ''): \DateTime {
         if ($time_string !== '') {
             return $this->core->getDateTimeSpecific($time_string);
         }
