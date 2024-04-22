@@ -2514,7 +2514,9 @@ function toggleComponent(component_id, saveChanges, edit_mode = false) {
         action = action.then(() => {
             console.time('closeComponent');
             return closeComponent(component_id, saveChanges, edit_mode)
-                .then(function () { console.timeEnd('closeComponent') });
+                .then(() => {
+                    console.timeEnd('closeComponent');
+                });
         });
     }
     else {
@@ -2524,7 +2526,9 @@ function toggleComponent(component_id, saveChanges, edit_mode = false) {
                 .then(() => {
                     console.timeEnd('closeAllComponents');
                     console.time('openComponent');
-                    return (openComponent(component_id)).then(function () { console.timeEnd('openComponent') });
+                    return (openComponent(component_id)).then(() => {
+                        console.timeEnd('openComponent');
+                    });
                 });
         });
     }
