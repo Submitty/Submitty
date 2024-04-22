@@ -18,8 +18,8 @@
  * Global variables.  Add these very sparingly
  */
 
-const globalGradedComponent = {};
-const globalComponentRubric = {};
+const GRADED_COMPONENTS_LIST = {};
+const COMPONENT_RUBRIC_LIST = {};
 let GRADED_GRADEABLE = Promise.resolve();
 
 /**
@@ -1350,10 +1350,9 @@ function getRubricTotalFromDOM() {
  * @return {number|undefined} Undefined if no score data exists
  */
 function getTaGradingEarned() {
-    console.log("getTaGradingEarned")
     let total = 0.0;
     let anyPoints = false;
-    $('.ta-graded-component-data').each(function () {
+    $('.graded-component-data').each(function () {
         const pointsEarned = $(this).attr('data-total_score');
         if (pointsEarned === '') {
             return;
@@ -1395,7 +1394,7 @@ function getPeerGradingEarned() {
  */
 function getTaGradingComplete() {
     let anyIncomplete = false;
-    $('.ta-graded-component-data').each(function () {
+    $('.graded-component-data').each(function () {
         const pointsEarned = $(this).attr('data-total_score');
         if (pointsEarned === '') {
             anyIncomplete = true;
@@ -1410,7 +1409,6 @@ function getTaGradingComplete() {
  * @return {number}
  */
 function getTaGradingTotal() {
-    console.log("getTaGradingTotal")
     let total = 0.0;
     $('.ta-component').each(function () {
         total += parseFloat($(this).attr('data-max_value'));
@@ -2058,7 +2056,6 @@ function onVerifyAll() {
  * Callback for the 'edit mode' checkbox changing states
  */
 function onToggleEditMode() {
-    console.log("edit mode")
     // Get the open components so we know which one to open once they're all saved
     const open_component_ids = getOpenComponentIds();
     let reopen_component_id = NO_COMPONENT_ID;
@@ -2321,10 +2318,6 @@ function reloadGradingRubric(gradeable_id, anon_id) {
             alert(`Could not fetch graded gradeable: ${err.message}`);
         })
         .then((graded_gradeable) => {
-            // gradeable_tmp.components.forEach((component) => {
-            //     globalComponentRubric[component.id] = ajaxGetComponentRubric(gradeable_id, component.id);
-            //     globalGradedComponent[component.id] = ajaxGetGradedComponent(gradeable_id, component.id, anon_id);
-            // });
             GRADED_GRADEABLE = graded_gradeable;
             return loadComponentData(gradeable_tmp.components, gradeable_id, anon_id)
                 .then(() => {
@@ -2342,11 +2335,18 @@ function reloadGradingRubric(gradeable_id, anon_id) {
         });
 
 }
+/** 
+* Call this to save components and graded components to global list
+* @param {list} components
+* @param {string} gradeable_id
+* @param {string} anon_id
+* @return {Promise}
+*/
 async function loadComponentData(components, gradeable_id, anon_id) {
     const loadComponent = async (component) => {
         try {
-            globalComponentRubric[component.id] = await ajaxGetComponentRubric(gradeable_id, component.id);
-            globalGradedComponent[component.id] = await ajaxGetGradedComponent(gradeable_id, component.id, anon_id);
+            COMPONENT_RUBRIC_LIST[component.id] = await ajaxGetComponentRubric(gradeable_id, component.id);
+            GRADED_COMPONENTS_LIST[component.id] = await ajaxGetGradedComponent(gradeable_id, component.id, anon_id);
         } catch (err) {
             console.error(`Error loading data for component ${component.id}: ${err}`);
         }
@@ -2381,40 +2381,10 @@ function updateTotals(gradeable_id, anon_id) {
                 isGradingDisabled(), canVerifyGraders(), getDisplayVersion());
         })
         .then((elements) => {
-            console.log(elements)
             setRubricDOMElements(elements);
         });
 }
 
-// function updateTotals(gradeable_id, anon_id) {
-//     let total = 0;
-//     for (component of globalComponentRubric) {
-//         graded_component = globalGradedComponent[component.component_id];
-//         let markCount = 0;
-//         // Calculate the score
-//         let score = component.default;
-//         if (graded_component.custom_mark_selected) {
-//             score += graded_component.custom_mark_selected && !isNaN(graded_component.score) ? graded_component.score : 0.0;
-//             markCount++;
-//         }
-
-//         component.marks.forEach((mark) => {
-//             if (graded_component.mark_ids.includes(mark.id)) {
-//                 score += mark.points;
-//                 markCount++;
-//             }
-//         });
-
-//         // If there were no marks earned, then there is no 'total'
-//         if (markCount === 0) {
-//             continue;
-//         }
-
-//         // Then clamp it in range
-//         total += Math.min(component.upper_clamp, Math.max(total, component.lower_clamp));
-//     }
-
-// }
 
 /**
  * Call this once on page load to load the peer panel.
@@ -2493,7 +2463,7 @@ function reloadGradingComponent(component_id, editable = false, showMarkList = f
         .then((component) => {
             // Set the global mark list data for this component for conflict resolution
             OLD_MARK_LIST[component_id] = component.marks;
-            globalComponentRubric[component_id] = component
+            COMPONENT_RUBRIC_LIST[component_id] = component
 
             component_tmp = component;
             return ajaxGetGradedComponent(gradeable_id, component_id, getAnonId());
@@ -2501,7 +2471,7 @@ function reloadGradingComponent(component_id, editable = false, showMarkList = f
         .then((graded_component) => {
             // Set the global graded component list data for this component to detect changes
             OLD_GRADED_COMPONENT_LIST[component_id] = graded_component;
-            globalGradedComponent[component_id] = graded_component;
+            GRADED_COMPONENTS_LIST[component_id] = graded_component;
 
             // Render the grading component with edit mode if enabled,
             //  and 'true' to show the mark list
@@ -2712,7 +2682,6 @@ function toggleCustomMark(component_id) {
  * @return {Promise}
  */
 function openComponentInstructorEdit(component_id) {
-    console.log("im in open component instructor edit")
     const gradeable_id = getGradeableId();
     return ajaxGetComponentRubric(gradeable_id, component_id)
         .then((component) => {
@@ -2732,13 +2701,10 @@ function openComponentInstructorEdit(component_id) {
  * @return {Promise}
  */
 function openComponentGrading(component_id) {
-    // return reloadGradingComponent(component_id, isEditModeEnabled(), true)
-    // console.log(globalComponentRubric[component_id]);
-    OLD_GRADED_COMPONENT_LIST[component_id] = globalGradedComponent[component_id];
-    OLD_MARK_LIST[component_id] = globalComponentRubric[component_id].marks;
-    console.log("in open component grading")
+    OLD_GRADED_COMPONENT_LIST[component_id] = GRADED_COMPONENTS_LIST[component_id];
+    OLD_MARK_LIST[component_id] = COMPONENT_RUBRIC_LIST[component_id].marks;
 
-    return injectGradingComponent(globalComponentRubric[component_id], globalGradedComponent[component_id], isEditModeEnabled(), true)
+    return injectGradingComponent(COMPONENT_RUBRIC_LIST[component_id], GRADED_COMPONENTS_LIST[component_id], isEditModeEnabled(), true)
         .then(() => {
             const page = getComponentPageNumber(component_id);
             if (page) {
@@ -2836,10 +2802,8 @@ function scrollToComponent(component_id) {
  * @return {Promise}
  */
 function closeComponentInstructorEdit(component_id, saveChanges) {
-    console.log('im here')
     let sequence = Promise.resolve();
     const component = getComponentFromDOM(component_id);
-    globalComponentRubric[component_id] = component;
     const countUp = getCountDirection(component_id) !== COUNT_DIRECTION_DOWN;
     if (saveChanges) {
         sequence = sequence
@@ -2895,8 +2859,8 @@ function closeComponentGrading(component_id, saveChanges) {
     const anon_id = getAnonId();
     let component_tmp = null;
 
-    globalGradedComponent[component_id] = getGradedComponentFromDOM(component_id);
-    globalComponentRubric[component_id] = getComponentFromDOM(component_id);
+    GRADED_COMPONENTS_LIST[component_id] = getGradedComponentFromDOM(component_id);
+    COMPONENT_RUBRIC_LIST[component_id] = getComponentFromDOM(component_id);
 
     if (saveChanges) {
         sequence = sequence.then(() => {
@@ -2906,7 +2870,7 @@ function closeComponentGrading(component_id, saveChanges) {
     // Finally, render the graded component in non-edit mode with the mark list hidden
     return sequence
         .then(() => {
-            injectGradingComponent(globalComponentRubric[component_id], globalGradedComponent[component_id], false, false)
+            injectGradingComponent(COMPONENT_RUBRIC_LIST[component_id], GRADED_COMPONENTS_LIST[component_id], false, false)
 
         })
 }
@@ -2920,24 +2884,36 @@ function closeComponentGrading(component_id, saveChanges) {
  */
 function closeComponent(component_id, saveChanges = true, edit_mode = false) {
     setComponentInProgress(component_id);
+    const gradeable_id = getGradeableId();
+    const anon_id = getAnonId();
     // Achieve polymorphism in the interface using this `isInstructorEditEnabled` flag
-    return (isInstructorEditEnabled()
-        ? closeComponentInstructorEdit(component_id, saveChanges)
-        : closeComponentGrading(component_id, saveChanges))
-        .then(() => {
-            console.time("setComponentInProgress");
+    if (isInstructorEditEnabled()) {
+        return closeComponentInstructorEdit(component_id, saveChanges).then(() => {
             setComponentInProgress(component_id, false);
         })
-        .then(() => {
-            console.timeEnd("setComponentInProgress");
-            if (!edit_mode) {
-                const gradeable_id = getGradeableId();
-                const anon_id = getAnonId();
-                console.time("updateTotals");
-                return refreshTotalScoreBox();
-                // return updateTotals(gradeable_id, anon_id);
-            }
-        }).then(() => console.timeEnd("updateTotals"));
+            .then(() => {
+                if (!edit_mode) {
+                    return updateTotals(gradeable_id, anon_id);
+                }
+            });
+    }
+    else {
+        return closeComponentGrading(component_id, saveChanges)
+            .then(() => {
+                setComponentInProgress(component_id, false);
+            })
+            .then(() => {
+                if (!edit_mode) {
+                    if (!GRADED_GRADEABLE.peer_gradeable) {
+                        return refreshTotalScoreBox();
+                    }
+                    else {
+                        return updateTotals(gradeable_id, anon_id);
+                    }
+
+                }
+            });
+    }
 }
 
 /**
@@ -3015,14 +2991,12 @@ function unCheckFirstMark(component_id) {
  * @return {Promise}
  */
 function saveMarkList(component_id) {
-    console.log("im in save mark list")
     const gradeable_id = getGradeableId();
     return ajaxGetComponentRubric(gradeable_id, component_id)
         .then((component) => {
             const domMarkList = getMarkListFromDOM(component_id);
             const serverMarkList = component.marks;
             const oldServerMarkList = OLD_MARK_LIST[component_id];
-            // const oldServerMarkList = globalComponentRubric[component_id].marks;
 
             // associative array of associative arrays of marks with conflicts {<mark_id>: {domMark, serverMark, oldServerMark}, ...}
             const conflictMarks = {};
@@ -3211,7 +3185,7 @@ function saveComponent(component_id) {
             .then(() => {
                 return ajaxGetComponentRubric(getGradeableId(), component_id);
             }).then((component) => {
-                globalComponentRubric[component_id] = component;
+                COMPONENT_RUBRIC_LIST[component_id] = component;
                 return Promise.resolve();
             });
     }
@@ -3448,10 +3422,8 @@ function injectGradingComponentHeader(component, graded_component, showMarkList)
  * @return {Promise}
  */
 function injectTotalScoreBox(scores) {
-    console.log(scores)
     return renderTotalScoreBox(scores)
         .then((elements) => {
-            console.log(elements)
             setTotalScoreBoxContents(elements);
         }).catch(error => {
             console.error('Failed to render:', error);
