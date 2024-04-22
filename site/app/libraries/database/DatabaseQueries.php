@@ -959,7 +959,7 @@ SQL;
 
     // Returns author_user_id, total_upducks
     public function getUpDucks() {
-        $this->course_db->query("SELECT p.author_user_id, count(f.*) as upducks from posts p join forum_upducks f on p.id = f.post_id group by p.author_user_id order by upducks desc");
+        $this->course_db->query("SELECT p.author_user_id, count(f.*) as upducks FROM posts p JOIN forum_upducks f ON p.id = f.post_id WHERE p.deleted = FALSE GROUP BY p.author_user_id ORDER BY upducks DESC");
         return $this->course_db->rows();
     }
 

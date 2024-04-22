@@ -22,12 +22,13 @@
 
             {% for user in userData %}
                 <tbody>
-                <tr>
+                {# potential problem: if two users have the exact same name #}
+                <tr class="user_stat">
                     <td>{{ user.family_name }}, {{ user.given_name }}</td>
                     <td>{{ user.post_count }}</td>
                     <td>{{ user.details_total_threads }}</td>
                     <td>{{ user.num_deleted }}</td>
-                    <td>{{ user.total_upducks }}</td>
+                    <td class="upduck_stat">{{ user.total_upducks }}</td>
                     <td><button class="btn btn-default" data-action = "expand" data-posts="{{ user.posts }}" data-id="{{ user.ids }}" data-timestamps="{{ user.timestamps }}" data-thread_id="{{ user.thread_ids }}" data-thread_titles="{{ user.thread_titles }}">Expand</button></td>
                 </tr>
                 </tbody>
