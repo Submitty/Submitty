@@ -1113,12 +1113,14 @@ class AdminGradeableController extends AbstractController {
         ];
 
         foreach ($date_names as $time_string => $tonight_modifier) {
-            $gradeable_create_data = array_merge($gradeable_create_data,
+            $gradeable_create_data = array_merge(
+                $gradeable_create_data,
                 [
                     $time_string => $this->getDateTimeForGradeable(
                         $details[$time_string] ?? '',
                         $tonight,
-                        $tonight_modifier)
+                        $tonight_modifier
+                    )
                 ]
             );
         }
