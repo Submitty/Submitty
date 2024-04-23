@@ -1903,7 +1903,7 @@ class Gradeable extends AbstractModel {
             }
         }
 
-        $num_components = $this->core->getQueries()->getTotalComponentCount($this->getId());
+        $num_components = $this->core->getQueries()->getTaComponentCount($this->getId());
         $sections = [];
         if (count($total_users) > 0) {
             foreach ($num_submitted as $key => $value) {
