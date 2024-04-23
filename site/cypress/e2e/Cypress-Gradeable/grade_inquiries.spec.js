@@ -32,8 +32,8 @@ describe('Test cases revolving around grade inquires', () => {
 
         cy.get(`#${gradeableId} .btn-nav-grade`).click();
         cy.get('[data-testid="view-sections"]').click();
-        cy.get(':nth-child(4) > :nth-child(1) > :nth-child(8) > [data-testid="grade-button"]').click();
-
+        cy.get('[data-testid="grade-table"]').contains('td', 'Farrell').nextAll('td').find('[data-testid="grade-button"]').click();
+        cy.contains('span', 'Grade Inquiry').click();
         cy.get('[data-testid= "submit"]').should('have.length', 1).and('contain', 'Submit Grade Inquiry');
 
     });
