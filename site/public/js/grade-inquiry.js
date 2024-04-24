@@ -3,16 +3,16 @@
 
 function saveDraft() { 
     //display the saved draft text on grade inquiry box
-    var draftContent = localStorage.getItem('content');
+    let draftContent = localStorage.getItem('content');
     if(draftContent === null) {
         draftContent = {};
     }else{
         draftContent = JSON.parse(draftContent);
     }
-    var elements = document.getElementsByClassName('markdown-textarea fill-available ');
-    for (var i = 0; i < elements.length; i++) {
-        var element = elements[i];
-        var elementId = element.getAttribute('id');
+    let elements = document.getElementsByClassName('markdown-textarea fill-available ');
+    for (let i = 0; i < elements.length; i++) {
+        let element = elements[i];
+        let elementId = element.getAttribute('id');
         const reply_text_area = $(element);
         if(draftContent.hasOwnProperty(elementId)){
             var value = draftContent[elementId];
