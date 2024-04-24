@@ -1045,9 +1045,10 @@ class SubmissionController extends AbstractController {
 
         return JsonResponse::getSuccessResponse($graded_gradeable->getAutoGradingScore());
     }
+
     /**
      * @return JsonResponse|array{
-     *     status: string, 
+     *     status: string,
      *     data: mixed
      * }
      */
@@ -1066,6 +1067,7 @@ class SubmissionController extends AbstractController {
     /**
      * Function for uploading a submission to the server. This should be called via AJAX, saving the result
      * to the json_buffer of the Output object, returning a true or false on whether or not it succeeded or not.
+     *
      * @Route("/courses/{_semester}/{_course}/gradeable/{gradeable_id}/upload", methods={"POST"})
      * @return array
      */
