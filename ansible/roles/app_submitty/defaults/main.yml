@@ -14,6 +14,8 @@ institution_name: Example University
 sysadmin_email: sysadmin@localhost
 submitty_email: submitty@localhost
 institution_url: localhost
+authentication_method: 1
+email_enable: y
 ssl_enabled: false
 admin_email: admin@localhost
 submitty_ip: 127.0.0.1
