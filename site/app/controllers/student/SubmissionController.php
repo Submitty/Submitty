@@ -1023,22 +1023,44 @@ class SubmissionController extends AbstractController {
      * @return JsonResponse
      * @param string $gradeable_id
      */
-    #[Route("/student_api/{_semester}/{_course}/gradeable/{gradeable_id}/score", methods: ["GET"])]
+    #[Route("/api/{_semester}/{_course}/gradeable/{gradeable_id}/score", methods: ["GET"])]
     public function ajaxGetGradeableScore(string $gradeable_id): JsonResponse {
-        unset($_SESSION['student_api']);
+        // Instructor
+        if ($this->core->getUser()->getAccessLevel() !== 1) {
+            if (($_GET['user_id'] ?? '') !== $this->core->getUser()->getId()) {
+                return JsonResponse::getFailResponse('API key and specified user_id are not for the same user.');
+            }
+        }
         try {
             $gradeable = $this->core->getQueries()->getGradeableConfig($gradeable_id);
         }
         catch (\InvalidArgumentException $e) {
             return JsonResponse::getFailResponse('Gradeable does not exist');
         }
-        $graded_gradeable = $this->core->getQueries()->getGradedGradeable($gradeable, $this->core->getUser()->getId(), $gradeable->isTeamAssignment());
+        $graded_gradeable = $this->core->getQueries()->getGradedGradeable($gradeable, $_GET['user_id'], $gradeable->isTeamAssignment());
 
         if (!$graded_gradeable->getAutoGradedGradeable()->hasActiveVersion()) {
             return JsonResponse::getFailResponse("Gradeable hasn't been graded yet.");
         }
 
         return JsonResponse::getSuccessResponse($graded_gradeable->getAutoGradingScore());
+    }
+    /**
+     * @return JsonResponse|array{
+     *     status: string, 
+     *     data: mixed
+     * }
+     */
+    #[Route("/api/{_semester}/{_course}/gradeable/{gradeable_id}/grade", methods: ["POST"])]
+    public function ajaxRequestGrade(string $gradeable_id): JsonResponse|array {
+        if (!array_key_exists('vcs_checkout', $_POST)) {
+            return JsonResponse::getFailResponse("API only supports requesting for VCS gradeables to be graded.");
+        }
+        if (!array_key_exists('git_repo_id', $_POST)) {
+            return JsonResponse::getFailResponse("API requires git_repo_id variable to be set.");
+        }
+
+        return $this->ajaxUploadSubmission($gradeable_id);
     }
 
     /**
@@ -1047,14 +1069,7 @@ class SubmissionController extends AbstractController {
      * @Route("/courses/{_semester}/{_course}/gradeable/{gradeable_id}/upload", methods={"POST"})
      * @return array
      */
-    #[Route("/student_api/{_semester}/{_course}/gradeable/{gradeable_id}/upload", methods: ["POST"])]
     public function ajaxUploadSubmission($gradeable_id, $merge = null, $clobber = null) {
-        $student_api = array_key_exists('student_api', $_SESSION);
-        if ($student_api) {
-            if (!array_key_exists('vcs_checkout', $_POST)) {
-                return $this->uploadResult("Student API only supports VCS gradeables currently.", false);
-            }
-        }
 
         // check for whether the item should be merged with previous submission,
         // and whether or not file clobbering should be done.
@@ -1067,7 +1082,7 @@ class SubmissionController extends AbstractController {
         }
 
         $vcs_checkout = isset($_POST['vcs_checkout']) ? $_POST['vcs_checkout'] === "true" : false;
-        if ($vcs_checkout && !isset($_POST['git_repo_id']) && (!$student_api)) {
+        if ($vcs_checkout && !isset($_POST['git_repo_id'])) {
             return $this->uploadResult("Invalid repo id.", false);
         }
 
@@ -1092,10 +1107,8 @@ class SubmissionController extends AbstractController {
         $original_user_id = $this->core->getUser()->getId();
         $user_id = $_POST['user_id'];
         // repo_id for VCS use
-        $repo_id = ($vcs_checkout && (!$student_api) ? $_POST['git_repo_id'] : "");
+        $repo_id = ($vcs_checkout ? $_POST['git_repo_id'] : "");
 
-        // Unset session variable
-        unset($_SESSION['student_api']);
         // make sure is full grader if the two ids do not match
         if ($original_user_id !== $user_id && !$this->core->getUser()->accessFullGrading()) {
             $msg = "You do not have access to that page.";

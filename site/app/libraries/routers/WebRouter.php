@@ -127,9 +127,6 @@ class WebRouter {
             ) {
                 return new MultiResponse(JsonResponse::getFailResponse("Unauthenticated access. Please log in."));
             }
-            if ($logged_in && !$core->getUser()->accessFaculty()) {
-                return new MultiResponse(JsonResponse::getFailResponse("API is open to faculty only."));
-            }
 
             /** @noinspection PhpUnhandledExceptionInspection */
             if (!$router->accessCheck()) {
@@ -168,59 +165,6 @@ class WebRouter {
         $core->disableRedirects();
         return $router->run();
     }
-
-    /**
-     * @param Request $request
-     * @param Core $core
-     * @return JsonResponse|mixed
-     */
-    public static function getStudentApiResponse(Request $request, Core $core) {
-        try {
-            $router = new self($request, $core);
-            $router->loadCourse();
-
-            $logged_in = $core->isApiLoggedIn($request);
-
-            // prevent user that is not logged in from going anywhere except AuthenticationController
-            if (
-                !$logged_in
-                && !str_ends_with($router->parameters['_controller'], 'AuthenticationController')
-            ) {
-                return JsonResponse::getFailResponse("Invalid API Key");
-            }
-            if (($_POST['user_id'] ?? ($_GET['user_id'] ?? '')) !== $core->getUser()->getId()) {
-                return JsonResponse::getFailResponse("API Key and user_id do not match");
-            }
-            $enabled = $router->getEnabled();
-            if ($enabled !== null && !$router->checkEnabled($enabled)) {
-                return JsonResponse::getFailResponse("The {$enabled->getFeature()} feature is not enabled.");
-            }
-
-            if (!$router->checkFeatureFlag()) {
-                return JsonResponse::getFailResponse('Feature is not yet available.');
-            }
-
-            $check_post_max_size = $router->checkPostMaxSize($request);
-            if ($check_post_max_size instanceof MultiResponse) {
-                return $check_post_max_size;
-            }
-        }
-        catch (ResourceNotFoundException $e) {
-            return JsonResponse::getFailResponse("Endpoint not found.");
-        }
-        catch (MethodNotAllowedException $e) {
-            return JsonResponse::getFailResponse("Method not allowed.");
-        }
-        catch (\Exception $e) {
-            return JsonResponse::getErrorResponse($e->getMessage());
-        }
-
-        $core->getOutput()->disableRender();
-        $core->disableRedirects();
-        $_SESSION['student_api'] = true;
-        return $router->run();
-    }
-
 
     /**
      * @param Request $request
