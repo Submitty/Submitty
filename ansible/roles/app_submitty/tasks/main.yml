@@ -47,9 +47,9 @@
         "{{ sysadmin_email }}"
         "{{ submitty_email }}"
         "{{ institution_url }}"
-        1
+        "{{ authentication_method }}"
         "{{ admin_email }}"
-        y
+        "{{ email_enabled }}"
         "{{ admin_email }}"
         "{{ admin_password }}"
         "{{ submitty_ip }}"
