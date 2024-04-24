@@ -5,10 +5,10 @@ describe('Tests cases for the Student API', () => {
     it('Should get correct responses', () => {
 
         getApiKey('student', 'student').then((key) => {
-            // Success, returns valid score
+            // Success
             cy.request({
                 method: 'GET',
-                url: `${Cypress.config('baseUrl')}/student_api/${getCurrentSemester()}/sample/gradeable/subdirectory_vcs_homework/score`,
+                url: `${Cypress.config('baseUrl')}/api/${getCurrentSemester()}/sample/gradeable/subdirectory_vcs_homework/score`,
                 headers: {
                     Authorization: key,
                 }, body: {
@@ -16,12 +16,12 @@ describe('Tests cases for the Student API', () => {
                 },
             }).then((response) => {
                 expect(response.body.status).to.equal('success');
-                // Gradeables aren't graded quickly enough in CI to test for accurate score count.
+                // Gradeables aren't graded in CI to test for accurate score count.
             });
             // Success, successfully uploaded
             cy.request({
                 method: 'POST',
-                url: `${Cypress.config('baseUrl')}/student_api/${getCurrentSemester()}/sample/gradeable/subdirectory_vcs_homework/upload`,
+                url: `${Cypress.config('baseUrl')}/api/${getCurrentSemester()}/sample/gradeable/subdirectory_vcs_homework/upload`,
                 headers: {
                     Authorization: key,
                 }, body: {
@@ -35,7 +35,7 @@ describe('Tests cases for the Student API', () => {
             // Fail
             cy.request({
                 method: 'POST',
-                url: `${Cypress.config('baseUrl')}/student_api/${getCurrentSemester()}/sample/gradeable/subdirectory_vcs_homework/score`,
+                url: `${Cypress.config('baseUrl')}/api/${getCurrentSemester()}/sample/gradeable/subdirectory_vcs_homework/score`,
                 headers: {
                     Authorization: key,
                 }, body:{},
@@ -47,7 +47,7 @@ describe('Tests cases for the Student API', () => {
             // Fail, invalid API key
             cy.request({
                 method: 'GET',
-                url: `${Cypress.config('baseUrl')}/student_api/${getCurrentSemester()}/sample/gradeable/subdirectory_vcs_homework/score`,
+                url: `${Cypress.config('baseUrl')}/api/${getCurrentSemester()}/sample/gradeable/subdirectory_vcs_homework/score`,
                 headers: {
                     Authorization: 'key',
                 }, body:{},
@@ -58,7 +58,7 @@ describe('Tests cases for the Student API', () => {
             // Fail, API key not for given user_id
             cy.request({
                 method: 'GET',
-                url: `${Cypress.config('baseUrl')}/student_api/${getCurrentSemester()}/sample/gradeable/subdirectory_vcs_homework/score`,
+                url: `${Cypress.config('baseUrl')}/api/${getCurrentSemester()}/sample/gradeable/subdirectory_vcs_homework/score`,
                 headers: {
                     Authorization: key,
                 }, body:{
@@ -66,12 +66,12 @@ describe('Tests cases for the Student API', () => {
                 },
             }).then((response) => {
                 expect(response.body.status).to.equal('fail');
-                expect(response.body.message).to.equal('API Key and user_id do not match');
+                expect(response.body.message).to.equal('API key and specified user_id are not for the same user.');
             });
             // Fail, endpoint not found.
             cy.request({
                 method: 'GET',
-                url: `${Cypress.config('baseUrl')}/student_api/not/found/url`,
+                url: `${Cypress.config('baseUrl')}/api/not/found/url`,
                 headers: {
                     Authorization: key,
                 }, body:{},
@@ -84,7 +84,7 @@ describe('Tests cases for the Student API', () => {
             // Gradeable doesn't exist
             cy.request({
                 method: 'GET',
-                url: `${Cypress.config('baseUrl')}/student_api/${getCurrentSemester()}/sample/gradeable/not_found_gradeable/score`,
+                url: `${Cypress.config('baseUrl')}/api/${getCurrentSemester()}/sample/gradeable/not_found_gradeable/score`,
                 headers: {
                     Authorization: key,
                 }, body: {
@@ -97,7 +97,7 @@ describe('Tests cases for the Student API', () => {
             // Ungraded gradeable
             cy.request({
                 method: 'GET',
-                url: `${Cypress.config('baseUrl')}/student_api/${getCurrentSemester()}/sample/gradeable/open_vcs_homework/score`,
+                url: `${Cypress.config('baseUrl')}/api/${getCurrentSemester()}/sample/gradeable/open_vcs_homework/score`,
                 headers: {
                     Authorization: key,
                 }, body: {
