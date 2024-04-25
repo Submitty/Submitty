@@ -18,7 +18,6 @@ use Symfony\Component\Routing\Annotation\Route;
  */
 class DockerInterfaceController extends AbstractController {
     /**
-     * @AccessControl(role="INSTRUCTOR")
      * @Route("/admin/docker", methods={"GET"})
      * @Route("/api/docker", methods={"GET"})
      * @return MultiResponse
@@ -28,7 +27,7 @@ class DockerInterfaceController extends AbstractController {
         if (is_null($user) || !$user->accessFaculty()) {
             return new MultiResponse(
                 JsonResponse::getFailResponse("You don't have access to this endpoint."),
-                new WebResponse("Error", "errorPage", "You don't have access to this page.")
+                new WebResponse("Error", "errorPage", $user)
             );
         }
 
@@ -60,7 +59,6 @@ class DockerInterfaceController extends AbstractController {
         );
     }
     /**
-     * @AccessControl(role="INSTRUCTOR")
      * @Route("/admin/add_image", methods={"POST"})
      * @Route("/api/admin/add_image", methods={"GET"})
      * @return JsonResponse | MultiResponse
