@@ -777,6 +777,11 @@ parameters:
 			message: "#^PHPDoc tag @var with type app\\\\repositories\\\\poll\\\\PollRepository is not subtype of type app\\\\repositories\\\\poll\\\\PollRepository\\<app\\\\entities\\\\poll\\\\Poll\\>\\.$#"
 			count: 5
 			path: app/controllers/PollController.php
+      
+		-
+			message: "#^Method app\\\\controllers\\\\PollController\\:\\:sendSocketMessage\\(\\) has parameter \\$msg_array with no value type specified in iterable type array\\.$#"
+			count: 1
+			path: app/controllers/PollController.php
 
 		-
 			message: "#^Construct empty\\(\\) is not allowed\\. Use more strict comparison\\.$#"
