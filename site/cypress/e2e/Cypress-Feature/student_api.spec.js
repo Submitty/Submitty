@@ -8,25 +8,26 @@ describe('Tests cases for the Student API', () => {
             // Success
             cy.request({
                 method: 'GET',
-                url: `${Cypress.config('baseUrl')}/api/${getCurrentSemester()}/sample/gradeable/subdirectory_vcs_homework/score`,
+                url: `${Cypress.config('baseUrl')}/api/${getCurrentSemester()}/sample/gradeable/subdirectory_vcs_homework/score?user_id=student`,
                 headers: {
                     Authorization: key,
                 }, body: {
-                    'user_id': 'student',
                 },
             }).then((response) => {
+                console.log(response);
                 expect(response.body.status).to.equal('success');
                 // Gradeables aren't graded in CI to test for accurate score count.
             });
-            // Success, successfully uploaded
+            // Success, successfully sent to be graded
             cy.request({
                 method: 'POST',
-                url: `${Cypress.config('baseUrl')}/api/${getCurrentSemester()}/sample/gradeable/subdirectory_vcs_homework/upload`,
+                url: `${Cypress.config('baseUrl')}/api/${getCurrentSemester()}/sample/gradeable/subdirectory_vcs_homework/grade`,
                 headers: {
                     Authorization: key,
                 }, body: {
                     'user_id': 'student',
                     'vcs_checkout': 'true',
+                    'git_repo_id': 'none',
                 },
             }).then((response) => {
                 expect(response.body.status).to.equal('success');
@@ -53,16 +54,15 @@ describe('Tests cases for the Student API', () => {
                 }, body:{},
             }).then((response) => {
                 expect(response.body.status).to.equal('fail');
-                expect(response.body.message).to.equal('Invalid API Key');
+                expect(response.body.message).to.equal('Unauthenticated access. Please log in.');
             });
             // Fail, API key not for given user_id
             cy.request({
                 method: 'GET',
-                url: `${Cypress.config('baseUrl')}/api/${getCurrentSemester()}/sample/gradeable/subdirectory_vcs_homework/score`,
+                url: `${Cypress.config('baseUrl')}/api/${getCurrentSemester()}/sample/gradeable/subdirectory_vcs_homework/score?user_id=not_student`,
                 headers: {
                     Authorization: key,
                 }, body:{
-                    'user_id': 'not_student',
                 },
             }).then((response) => {
                 expect(response.body.status).to.equal('fail');
@@ -84,11 +84,10 @@ describe('Tests cases for the Student API', () => {
             // Gradeable doesn't exist
             cy.request({
                 method: 'GET',
-                url: `${Cypress.config('baseUrl')}/api/${getCurrentSemester()}/sample/gradeable/not_found_gradeable/score`,
+                url: `${Cypress.config('baseUrl')}/api/${getCurrentSemester()}/sample/gradeable/not_found_gradeable/score?user_id=student`,
                 headers: {
                     Authorization: key,
                 }, body: {
-                    'user_id': 'student',
                 },
             }).then((response) => {
                 expect(response.body.status).to.equal('fail');
@@ -97,11 +96,10 @@ describe('Tests cases for the Student API', () => {
             // Ungraded gradeable
             cy.request({
                 method: 'GET',
-                url: `${Cypress.config('baseUrl')}/api/${getCurrentSemester()}/sample/gradeable/open_vcs_homework/score`,
+                url: `${Cypress.config('baseUrl')}/api/${getCurrentSemester()}/sample/gradeable/open_vcs_homework/score?user_id=student`,
                 headers: {
                     Authorization: key,
                 }, body: {
-                    'user_id': 'student',
                 },
             }).then((response) => {
                 expect(response.body.status).to.equal('fail');
