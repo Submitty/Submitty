@@ -116,6 +116,7 @@ class HomePageController extends AbstractController {
     }
 
     /**
+     * @AccessControl(role="INSTRUCTOR")
      * @Route("/home/courses/new", methods={"POST"})
      * @Route("/api/courses", methods={"POST"})
      */
