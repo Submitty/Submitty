@@ -2,7 +2,6 @@
 
 namespace app\controllers;
 
-use app\libraries\routers\AccessControl;
 use app\libraries\FileUtils;
 use app\libraries\response\MultiResponse;
 use app\libraries\response\WebResponse;
@@ -27,7 +26,7 @@ class DockerInterfaceController extends AbstractController {
         if (is_null($user) || !$user->accessFaculty()) {
             return new MultiResponse(
                 JsonResponse::getFailResponse("You don't have access to this endpoint."),
-                new WebResponse("Error", "errorPage", $user)
+                new WebResponse("Error", "errorPage", "You don't have access to this page.")
             );
         }
 
