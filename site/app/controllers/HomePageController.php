@@ -2,6 +2,7 @@
 
 namespace app\controllers;
 
+use app\libraries\routers\AccessControl;
 use app\libraries\response\RedirectResponse;
 use app\models\Course;
 use app\models\User;
