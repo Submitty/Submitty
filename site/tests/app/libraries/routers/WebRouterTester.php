@@ -201,7 +201,7 @@ class WebRouterTester extends BaseUnitTest {
         $response = WebRouter::getApiResponse($request, $core);
         $this->assertEquals([
             'status' => "fail",
-            'message' => "You do not have access to this endpoint."
+            'message' => "You don't have access to this endpoint."
         ], $response->json_response->json);
     }
 
