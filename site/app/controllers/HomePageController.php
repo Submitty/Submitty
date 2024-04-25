@@ -2,7 +2,6 @@
 
 namespace app\controllers;
 
-use app\libraries\routers\AccessControl;
 use app\libraries\response\RedirectResponse;
 use app\models\Course;
 use app\models\User;
@@ -117,7 +116,6 @@ class HomePageController extends AbstractController {
     }
 
     /**
-     * @AccessControl(role="INSTRUCTOR")
      * @Route("/home/courses/new", methods={"POST"})
      * @Route("/api/courses", methods={"POST"})
      */
