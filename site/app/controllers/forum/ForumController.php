@@ -12,7 +12,6 @@ use app\libraries\DateUtils;
 use app\libraries\routers\AccessControl;
 use app\libraries\routers\Enabled;
 use app\libraries\response\JsonResponse;
-use app\views\forum\ForumThreadView;
 use Symfony\Component\Routing\Annotation\Route;
 
 /**
