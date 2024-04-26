@@ -8,14 +8,14 @@ const monthNamesShort = ['Dec', 'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul',
 
 /**
  * Changes the view and updates cookies and loads the calendar
- * @param x : string the value of the view to change to
+ * @param view_type : string the value of the view to change to
  * @param view_year : int year that is currently being viewed
  * @param view_month : int month that is currently being viewed
  * @param view_day : int day that is currently being viewed
  * @returns {void} : loads the updated calendar
  */
-function changeView(x, view_year, view_month, view_day) {
-    Cookies.set('view', x.value);
+function changeView(view_type, view_year, view_month, view_day) {
+    Cookies.set('view', view_type.value);
 
     let cookie_year = parseInt(Cookies.get('calendar_year'));
     let cookie_month = parseInt(Cookies.get('calendar_month'));
@@ -30,7 +30,7 @@ function changeView(x, view_year, view_month, view_day) {
         cookie_day = view_day;
     }
     // Load the calendar to the correct day
-    loadCalendar(cookie_month, cookie_year, cookie_day, x.value);
+    loadCalendar(cookie_month, cookie_year, cookie_day, view_type.value);
 }
 
 /**
