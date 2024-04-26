@@ -9,7 +9,7 @@ use app\libraries\Core;
  * @package app\libraries\response
  */
 class DownloadResponse implements ResponseInterface {
-    /** @var array json encoded array */
+    /** @var array<mixed> json encoded array */
     public $json;
 
     /**
@@ -71,7 +71,6 @@ class DownloadResponse implements ResponseInterface {
     /**
      * Returns a fail DownloadResponse.
      * @param string $message
-     * @param mixed|null $data
      * @param bool $is_web
      * @return DownloadResponse
      */
@@ -88,6 +87,6 @@ class DownloadResponse implements ResponseInterface {
      * @return DownloadResponse
      */
     public static function getErrorResponse(string $message, mixed $data = null, string|null $code = null, bool $is_web = false): DownloadResponse {
-        return new self('error', $data, $message, $code, $is_web);
+        return new self('error', $data, $message, $is_web, $code);
     }
 }
