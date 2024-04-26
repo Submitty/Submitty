@@ -1,0 +1,32 @@
+---
+- name: Submitty Course Creation
+  hosts: submitty
+  become: yes
+
+  roles:
+    - role: submitty_term_creation
+      vars:
+        semester: winter24
+        semester_name: Winter 2024
+        start_date: 01/08/2024
+        end_date: 03/27/2024
+
+    - role: submitty_course_creation
+      vars:
+        semester: winter24
+        course: cptr141
+        section: all
+        instructor: instructor
+        firstname: instructor
+        lastname: instructor
+        email: instructor
+
+    - role: submitty_course_add_instructor
+      vars:
+        semester: winter24
+        course: cptr141
+        instructor: instructor
+        firstname: instructor
+        lastname: instructor
+        email: instructor
+
