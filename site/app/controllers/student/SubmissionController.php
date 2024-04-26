@@ -1045,7 +1045,8 @@ class SubmissionController extends AbstractController {
         )->getAutoGradedGradeable()->getActiveVersionInstance();
 
         if ($gradeable_version_instance === null || $gradeable_version_instance->isQueued() || $gradeable_version_instance->isGrading()) {
-            return JsonResponse::getFailResponse("Gradeable hasn't been graded yet.");
+            // Return null value for not graded, or not submitted gradeables.
+            return JsonResponse::getSuccessResponse(null);
         }
 
         return JsonResponse::getSuccessResponse($gradeable_version_instance->getTotalPoints());

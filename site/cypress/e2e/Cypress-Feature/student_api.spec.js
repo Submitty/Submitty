@@ -14,7 +14,6 @@ describe('Tests cases for the Student API', () => {
                 }, body: {
                 },
             }).then((response) => {
-                console.log(response);
                 expect(response.body.status).to.equal('success');
                 // Gradeables aren't graded in CI to test for accurate score count.
             });
@@ -102,8 +101,8 @@ describe('Tests cases for the Student API', () => {
                 }, body: {
                 },
             }).then((response) => {
-                expect(response.body.status).to.equal('fail');
-                expect(response.body.message).to.equal("Gradeable hasn't been graded yet.");
+                expect(response.body.status).to.equal('success');
+                expect(response.body.message).to.equal(null);
             });
         });
     });
