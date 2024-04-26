@@ -6,15 +6,17 @@
    markViewed openDiv changeColor downloadCourseMaterialZip downloadSubmissionZip downloadStudentAnnotations
    downloadTestCaseResult downloadCourseMaterial downloadFile toggleDiv checkVersionChange versionChange gradeableChange
    removeMessagePopup validateHtml togglePageDetails copyToClipboard downloadCSV setFolderRelease
-   newEditCourseMaterialsForm newEditCourseMaterialsFolderForm newUploadCourseMaterialsForm newUploadImagesForm
+   newEditCourseMaterialsForm newEditCourseMaterialsFolderForm newUploadCourseMaterialsForm newUploadBanner newUploadImagesForm
    newOverwriteCourseMaterialForm newDeleteCourseMaterialForm displayCloseSubmissionsWarning newDeleteGradeableForm
    markAllViewed closePopup */
 /* global csrfToken my_window:writable file_path:writable updateBulkProgress icon:writable detectColorScheme
    createArray readPrevious disableFullUpdate registerSelect2Widget */
-
 ////////////Begin: Removed redundant link in breadcrumbs////////////////////////
 //See this pr for why we might want to remove this code at some point
 //https://github.com/Submitty/Submitty/pull/5071
+
+
+
 window.addEventListener('resize', () => {
     loadInBreadcrumbLinks();
     adjustBreadcrumbLinks();
@@ -303,6 +305,23 @@ function newUploadCourseMaterialsForm() {
     $('#overwrite-materials-flag').remove();
 }
 
+function newUploadBanner() {
+    createArray(1);
+    const files = [];
+    $('.popup-form').css('display', 'none');
+    const form = $('#upload-banner');
+
+    $('[name="existing-file-list"]', form).html('');
+
+    const stringifiedFiles = $('<b></b>').text(JSON.stringify(files));
+    $('[name="existing-file-list"]', form).append(stringifiedFiles);
+
+    form.css('display', 'block');
+    captureTabInModal('upload-banner');
+    form.find('.form-body').scrollTop(0);
+    $('[name="upload"]', form).val(null);
+}
+
 function newEditCourseMaterialsFolderForm(tag) {
     const id = $(tag).data('id');
     const dir = $(tag).data('priority');
@@ -312,7 +331,6 @@ function newEditCourseMaterialsFolderForm(tag) {
     const is_hidden = $(tag).data('hidden-state');
     const partially_hidden = 2;
     const form = $('#edit-course-materials-folder-form');
-
     const element = document.getElementById('edit-folder-picker');
     element._flatpickr.setDate(release_time);
 
