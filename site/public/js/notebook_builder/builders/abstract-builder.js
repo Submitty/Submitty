@@ -227,7 +227,7 @@ class AbstractBuilder {
         const index = widgets_array.indexOf(widget);
 
         // If widget is already at the end of the form then do nothing
-        if (index === widgets_array - 1) {
+        if (index === widgets_array.length - 1) {
             return;
         }
 
