@@ -141,11 +141,10 @@ class DatabaseQueries {
      * Update a user's preferred locale in the master database.
      *
      * @param User $user The user object to modify
-     * @param string $locale The locale string to set it to, must be one of Core::getSupportedLocales()
-     * @return bool Whether the operation was successful
+     * @param string|null $locale The locale string to set it to, must be one of Core::getSupportedLocales()
      */
-    public function updateSubmittyUserPreferredLocale(User $user, string|null $locale): bool {
-        return $this->submitty_db->query("UPDATE users SET user_preferred_locale=? WHERE user_id=?", [$locale, $user->getId()]);
+    public function updateSubmittyUserPreferredLocale(User $user, string|null $locale): void {
+        $this->submitty_db->query("UPDATE users SET user_preferred_locale=? WHERE user_id=?", [$locale, $user->getId()]);
     }
 
     /**
@@ -722,6 +721,86 @@ SQL;
         return $categories_list;
     }
 
+    /**
+     * @return array<string|int>
+     */
+    public function toggleLikes(int $post_id, string $current_user): array {
+        try {
+            $this->course_db->query("SELECT * FROM forum_upducks WHERE post_id = ? AND user_id = ?", [$post_id, $current_user]);
+            $inDatabase = isset($this->course_db->rows()[0]);
+            if ($inDatabase) {
+                $this->course_db->query("DELETE FROM forum_upducks WHERE post_id = ? AND user_id = ?", [$post_id, $current_user]);
+                $this->course_db->query("SELECT COUNT(*) AS likes_count FROM forum_upducks WHERE post_id = ?", [$post_id]);
+                $likesCount = intval($this->course_db->rows()[0]['likes_count']);
+                return ['unlike',$likesCount];
+            }
+            else {
+                $this->course_db->query("INSERT INTO forum_upducks (post_id, user_id) VALUES (?, ?)", [$post_id, $current_user]);
+                $this->course_db->query("SELECT COUNT(*) AS likes_count FROM forum_upducks WHERE post_id = ?", [$post_id]);
+                $likesCount = intval($this->course_db->rows()[0]['likes_count']);
+                return ['like',$likesCount];
+            }
+        }
+        catch (DatabaseException $dbException) {
+            if ($this->course_db->inTransaction()) {
+                $this->course_db->rollback();
+            }
+            return ["false",0];
+        }
+    }
+
+    /**
+     * @param int[] $post_ids
+     * @return int[]
+     */
+    public function getUpduckInfoForPosts(array $post_ids): array {
+        if (count($post_ids) === 0) {
+            return [];
+        }
+        $placeholders = $this->createParameterList(count($post_ids));
+        $sql = "SELECT post_id, COUNT(*) AS cnt FROM forum_upducks WHERE post_id IN {$placeholders} GROUP BY post_id";
+
+        $this->course_db->query($sql, $post_ids);
+        $result = [];
+
+        foreach ($post_ids as $post) {
+            $result[$post] = 0;
+        }
+        foreach ($this->course_db->rows() as $row) {
+            $result[$row['post_id']] = intval($row['cnt']);
+        }
+        return $result;
+    }
+
+    /**
+     * @param int[] $post_ids
+     * @param string $current_user
+     * @return int[]
+     */
+    public function getUserLikesForPosts(array $post_ids, string $current_user): array {
+        if (count($post_ids) === 0) {
+            return [];
+        }
+        $placeholders = $this->createParameterList(count($post_ids));
+        $user_id = $current_user;
+
+        $sql = "SELECT post_id, user_id, COUNT(*) AS cnt FROM forum_upducks WHERE post_id IN {$placeholders}
+                AND user_id = ? GROUP BY (post_id, user_id)";
+        $bindParams = array_merge($post_ids, [$user_id]);
+        $this->course_db->query($sql, $bindParams);
+        $result = [];
+        $final = [];
+        foreach ($this->course_db->rows() as $row) {
+            $result[$row['post_id']] = intval($row['cnt']);
+        }
+        foreach ($result as $key => $value) {
+            if ($value >= 1) {
+                array_push($final, $key);
+            }
+        }
+        return $final;
+    }
+
     public function splitPost($post_id, $title, $categories_ids) {
         $old_thread_id = -1;
         $thread_id = -1;
@@ -1206,8 +1285,9 @@ SQL;
 
     /**
      * @param string[] $attachments_deleted
+     * @param string[] $attachments_added
      */
-    public function editPost($original_creator, $user, $post_id, $content, $anon, $markdown, $attachments_deleted) {
+    public function editPost($original_creator, $user, $post_id, $content, $anon, $markdown, array $attachments_deleted, array $attachments_added) {
         try {
             $markdown = $markdown ? 1 : 0;
             // Before making any edit to $post_id, forum_posts_history will not have any corresponding entry
@@ -1229,6 +1309,17 @@ SQL;
             if (count($attachments_deleted) > 0) {
                 $placeholders = $this->createParameterList(count($attachments_deleted));
                 $this->course_db->query("UPDATE forum_attachments SET version_deleted = ? WHERE post_id = ? AND file_name IN {$placeholders}", array_merge([$version_id, $post_id], $attachments_deleted));
+            }
+            if (count($attachments_added) > 0) {
+                $rows = [];
+                $params = [];
+                // Format placeholders and parameters for single query
+                foreach ($attachments_added as $img) {
+                    $params[] = $this->createParameterList(4);
+                    $rows = array_merge($rows, [$post_id, $img, $version_id, 0]);
+                }
+                $placeholders = implode(", ", $params);
+                $this->course_db->query("INSERT INTO forum_attachments (post_id, file_name, version_added, version_deleted) VALUES {$placeholders}", $rows);
             }
             $hasAttachment = !empty($this->getForumAttachments([$post_id])[$post_id][0]);
             // Update current post
@@ -1657,6 +1748,7 @@ WHERE term=? AND course=? AND user_id=?",
      *              'late_day_date' => DateTime,
      *              'submission_days_late' => int,
      *              'late_day_exceptions' => int,
+     *              'reason_for_exception' => string,
      *              'late_days_remaining' => int,
      *              'late_day_status' => int,
      *              'late_days_change' => int
@@ -1710,12 +1802,13 @@ WHERE term=? AND course=? AND user_id=?",
         $params[] = $late_day_info->getLateDaysRemaining();
         $params[] = $late_day_info->getStatus();
         $params[] = $late_day_info->getLateDaysChange();
+        $params[] = $late_day_info->getReasonForException();
 
         $user_or_team = $late_day_info->getGradedGradeable()->getGradeable()->isTeamAssignment() ? 'team_id' : 'user_id';
         $query = "INSERT INTO late_day_cache
                     (" . $user_or_team . ", g_id, late_day_date, late_days_allowed, submission_days_late, 
-                    late_day_exceptions, late_days_remaining, late_day_status, late_days_change) 
-                    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)";
+                    late_day_exceptions, late_days_remaining, late_day_status, late_days_change, reason_for_exception) 
+                    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
         $this->course_db->query($query, $params);
     }
 
@@ -1752,6 +1845,7 @@ WHERE term=? AND course=? AND user_id=?",
      *          'late_day_date' => DateTime,
      *          'submission_days_late' => int,
      *          'late_day_exceptions' => int,
+     *          'reason_for_exception' => string,
      *          'late_days_remaining' => int,
      *          'late_day_status' => int,
      *          'late_days_change' => int
@@ -1796,7 +1890,8 @@ WHERE term=? AND course=? AND user_id=?",
      *      'late_day_exceptions' => int,
      *      'late_days_remaining' => int,
      *      'late_day_status' => int,
-     *      'late_days_change' => int
+     *      'late_days_change' => int,
+     *      'reason_for_exception' => string
      * ]
      */
     public function getLateDayCacheForUserGradeable(string $user_id, string $g_id): ?array {
@@ -5624,6 +5719,105 @@ AND gc_id IN (
     }
 
     /**
+     * Returns the previous registration section the student was in.
+     * If a student was ever not in the null section, then if they are in the null
+     * section now, this value is guaranteed to be nonnull as their previous section
+     * would be outside the null section.
+     *
+     * If the previous registration section was deleted or renamed, then this function
+     * returns the top registration section of the course.
+     *
+     * @param string $user_id The name of the user we're querying.
+     * @param string $course The course we are looking in.
+     * @param string $term The term we are looking at.
+     * @return string The previous section the student was in.
+     */
+    public function getPreviousRegistrationSection(
+        string $user_id,
+        string $term,
+        string $course
+    ): string|null {
+        $this->submitty_db->query("
+            WITH
+                Term (term) AS (VALUES (?)),
+                Course (course) AS (VALUES (?)),
+                PreviousRegSection AS (
+                    SELECT previous_registration_section, course
+                    FROM courses_users
+                    WHERE user_id=? and term=(table Term) and course=(table Course)
+                ),
+                TopSection AS (
+                    SELECT registration_section_id, course
+                    FROM courses_registration_sections
+                    WHERE term=(table Term) and course=(table Course)
+                    ORDER BY registration_section_id ASC
+                    LIMIT 1
+                )
+            SELECT
+                (CASE
+                    WHEN (
+                        SELECT registration_section_id
+                        FROM courses_registration_sections
+                        WHERE
+                            term = (table Term)
+                            and course = (table Course)
+                            and registration_section_id = PreviousRegSection.previous_registration_section
+                        ) IS NOT NULL THEN PreviousRegSection.previous_registration_section
+                    ELSE TopSection.registration_section_id
+                END) AS rejoin_section
+            FROM
+                Course
+                LEFT JOIN PreviousRegSection on Course.course = PreviousRegSection.course
+                LEFT JOIN TopSection on Course.course = TopSection.course;
+        ", [$term, $course, $user_id]);
+        return $this->submitty_db->row()["rejoin_section"];
+    }
+
+    /**
+     * Returns the previous rotating section the student was in.
+     * If the student was ever in a rotating section, this value is guaranteed
+     * to be nonnull if the student currently has a null rotating section.
+     *
+     * If the previous rotating section was deleted or renamed, then this function
+     * returns the top rotating section of the course.
+     *
+     * @param string $user_id The name of the user we're querying.
+     * @return string|null The rotating section the student was last in.
+     */
+    public function getPreviousRotatingSection(string $user_id): string|null {
+        $this->course_db->query("
+            SELECT previous_rotating_section
+            FROM users
+            WHERE user_id=?;
+        ", [$user_id]);
+        $previous_section = $this->course_db->row()["previous_rotating_section"];
+
+        $this->course_db->query("
+            SELECT sections_rotating_id
+            FROM sections_rotating
+            WHERE sections_rotating_id = ?;
+        ", [$previous_section]);
+        if ($this->course_db->getRowCount() > 0) {
+            // Rotating section still valid, time to return!
+            return $previous_section;
+        }
+
+        // Else we return the top rotating section.
+        $this->course_db->query("
+            SELECT sections_rotating_id
+            FROM sections_rotating
+            ORDER BY sections_rotating_id ASC
+            LIMIT 1;
+        ");
+        if ($this->course_db->getRowCount() > 0) {
+            return $this->course_db->row()["sections_rotating_id"];
+        }
+        else {
+            return null; // Course has no rotating sections.
+        }
+    }
+
+    /**
      * Determines if a course is 'active' or if it was dropped.
      *
      * This is used to filter out courses displayed on the home screen, for when
@@ -7076,7 +7270,7 @@ AND gc_id IN (
     private function updateOverallComment(TaGradedGradeable $ta_graded_gradeable, $comment, $grader_id) {
         $g_id = $ta_graded_gradeable->getGradedGradeable()->getGradeable()->getId();
         if ($comment === "") {
-            $this->deleteOverallComment($g_id, $grader_id);
+            $this->deleteOverallComment($g_id, $grader_id, $ta_graded_gradeable->getGradedGradeable()->getSubmitter()->getId());
             $ta_graded_gradeable->removeOverallComment($grader_id);
             return;
         }
@@ -7108,8 +7302,17 @@ AND gc_id IN (
         $this->course_db->query($query, $params);
     }
 
-    public function deleteOverallComment($gradeable_id, $grader_id) {
-        $this->course_db->query("DELETE FROM gradeable_data_overall_comment WHERE g_id=? AND goc_grader_id=?", [$gradeable_id, $grader_id]);
+    /**
+     * @param string $gradeable_id
+     * @param string $grader_id
+     * @param string $submitter_id
+     * @return void
+     */
+    public function deleteOverallComment($gradeable_id, $grader_id, $submitter_id) {
+        $this->course_db->query(
+            "DELETE FROM gradeable_data_overall_comment WHERE g_id=? AND goc_grader_id=? AND (goc_user_id=? OR goc_team_id=?)",
+            [$gradeable_id, $grader_id, $submitter_id, $submitter_id]
+        );
     }
 
     /**
@@ -7283,12 +7486,12 @@ AND gc_id IN (
      * @param  String                     $userid
      * @return bool
      */
-    public function getUserHasSubmission(Gradeable $gradeable, string $userid) {
-
-        return $this->course_db->query(
+    public function getUserHasSubmission(Gradeable $gradeable, string $userid): bool {
+        $this->course_db->query(
             'SELECT user_id FROM electronic_gradeable_data WHERE g_id=? AND (user_id=?)',
             [$gradeable->getId(), $userid]
         );
+        return $this->course_db->getRowCount() > 0;
     }
 
     /**
@@ -8121,6 +8324,7 @@ WHERE current_state IN
         if ($team) {
             $submitter_data_inject =
               'ldet.array_late_day_exceptions,
+               ldet.array_reason_for_exception,
                ldet.array_late_day_user_ids,
                /* Aggregate Team User Data */
                team.team_id,
@@ -8155,6 +8359,7 @@ WHERE current_state IN
               LEFT JOIN (
                 SELECT
                   json_agg(e.late_day_exceptions) AS array_late_day_exceptions,
+                  json_agg(e.reason_for_exception) AS array_reason_for_exception,
                   json_agg(e.user_id) AS array_late_day_user_ids,
                   t.team_id,
                   g_id
@@ -8186,6 +8391,7 @@ WHERE current_state IN
               u.rotating_section,
               u.registration_type,
               ldeu.late_day_exceptions,
+              ldeu.reason_for_exception,
               u.registration_subsection';
             $submitter_inject = '
             JOIN (
@@ -8468,15 +8674,23 @@ WHERE current_state IN
 
                 // Get the late day exceptions for each user
                 $late_day_exceptions = [];
+                $reasons_for_exceptions = [];
                 if (isset($row['array_late_day_user_ids'])) {
                     $late_day_exceptions = array_combine(
                         json_decode($row['array_late_day_user_ids']),
                         json_decode($row['array_late_day_exceptions'])
                     );
+                    $reasons_for_exceptions = array_combine(
+                        json_decode($row['array_late_day_user_ids']),
+                        json_decode($row['array_reason_for_exception'])
+                    );
                 }
                 foreach ($submitter->getMembers() as $user_id) {
                     if (!isset($late_day_exceptions[$user_id])) {
                         $late_day_exceptions[$user_id] = 0;
+                    }
+                    if (!isset($reasons_for_exceptions[$user_id])) {
+                        $reasons_for_exceptions[$user_id] = '';
                     }
                 }
             }
@@ -8490,6 +8704,9 @@ WHERE current_state IN
                 $late_day_exceptions = [
                     $submitter->getId() => $row['late_day_exceptions'] ?? 0
                 ];
+                $reasons_for_exceptions = [
+                    $submitter->getId() => $row['reason_for_exception'] ?? ''
+                ];
             }
 
             // Create the graded gradeable instances
@@ -8498,7 +8715,8 @@ WHERE current_state IN
                 $gradeable,
                 new Submitter($this->core, $submitter),
                 [
-                    'late_day_exceptions' => $late_day_exceptions
+                    'late_day_exceptions' => $late_day_exceptions,
+                    'reasons_for_exceptions' => $reasons_for_exceptions
                 ]
             );
             $ta_graded_gradeable = null;

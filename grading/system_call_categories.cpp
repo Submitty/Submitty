@@ -529,6 +529,7 @@ void allow_system_calls(scmp_filter_ctx sc, const std::set<std::string> &categor
     ALLOW_SYSCALL(vm86old);
     ALLOW_SYSCALL(vmsplice);
     ALLOW_SYSCALL(vserver);
+    ALLOW_SYSCALL(copy_file_range);
   }
 
   // RESTRICTED : UNKNOWN_MODULE

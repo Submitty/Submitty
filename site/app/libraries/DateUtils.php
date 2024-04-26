@@ -14,7 +14,7 @@ class DateUtils {
     const MAX_TIME = '9999-02-01 00:00:00';
 
     /** @var string $BEGINING_OF_TIME feature we use in Course Materials */
-    const BEGINING_OF_TIME = '1900-02-01 00:00:00';
+    const BEGINING_OF_TIME = '1900-02-01T00:00:00';
 
     /** @var \DateTimeZone $timezone */
     private static $timezone;

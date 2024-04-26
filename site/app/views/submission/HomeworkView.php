@@ -1074,7 +1074,7 @@ class HomeworkView extends AbstractView {
         $failed_file = '';
         $file_count = 0;
         // See if the grade has succeeded or failed
-        if (in_array('files', $param)) {
+        if (array_key_exists('files', $param)) {
             $file_count = count($param['files']);
             if ($file_count === 1) {
                 foreach ($param['files'] as $file) {
@@ -1112,8 +1112,7 @@ class HomeworkView extends AbstractView {
             'hide_test_details' => $gradeable->getAutogradingConfig()->getHideTestDetails(),
             'has_manual_grading' => $gradeable->isTaGrading(),
             'incomplete_autograding' => $version_instance !== null ? !$version_instance->isAutogradingComplete() : false,
-            // TODO: change this to submitter ID when the MiscController uses new model
-            'user_id' => $this->core->getUser()->getId(),
+            'submitter_id' => $graded_gradeable->getSubmitter()->getId(),
             'team_assignment' => $gradeable->isTeamAssignment(),
             'team_members' => $gradeable->isTeamAssignment() ? $graded_gradeable->getSubmitter()->getTeam()->getMemberList() : [],
             'team_name' => $gradeable->isTeamAssignment() ? $graded_gradeable->getSubmitter()->getTeam()->getTeamName() : '',
