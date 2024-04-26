@@ -3,8 +3,9 @@
         <h1>
             {{ poll.getName() }}
         </h1>
-        {% if end_time != "9999-02-01T00:00:00" %}
-        <div id="timer" class="timer">
+        {% if timer_enabled %}
+        <!-- Invisible until JS renders -->
+        <div id="timer" class="timer" style="display:none">
             <label for="timerDisplay">
                     Time until Poll Ends:
             </label>
@@ -105,23 +106,30 @@
 </div>
 
 <script>
+
     var endDate = new Date('{{ end_time }}');
+    var timerId;
+    var ended = false;
     function updateTimer() {
-        var now = new Date(); 
+        var now = new Date();
         var timeRemaining = endDate - now;
+        var timerDisplayElement = document.getElementById('timerDisplay');
+        var timerElement = document.getElementById('timer');
+
+        // Show the timer element once we're ready to start updating it
+        timerElement.style.display = 'block';
 
         if (timeRemaining <= 0) {
-            displayWarningMessage("Timer has expired");
-            var timerDisplayElement = document.getElementById('timer');
-            if (timerDisplayElement) {
-                timerDisplayElement.innerHTML = "Poll Ended"; 
+            displayWarningMessage("Poll has ended");
+            if (timerElement) {
+                timerElement.innerHTML = "Poll Ended";
             }
+            clearInterval(timerId);
             return;
         }
 
-        // Check if the timer display element exists
-        var timerDisplayElement = document.getElementById('timerDisplay');
         if (!timerDisplayElement) {
+            clearInterval(timerId);
             return;
         }
 
@@ -135,12 +143,10 @@
         var timerDisplay = hoursUpdated + ':' + minutesUpdated + ':' + secondsUpdated;
 
         timerDisplayElement.innerHTML = timerDisplay;
-
-        setTimeout(updateTimer, 1000);
     }
 
-    updateTimer();
-
+    timerId = setInterval(updateTimer, 20);
+    
 
     function toggle_section(section_id) {
         $(`#${section_id}`).toggle('fast');
