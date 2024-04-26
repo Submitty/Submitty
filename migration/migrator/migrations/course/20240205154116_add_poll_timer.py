@@ -45,7 +45,6 @@ def down(config, database, semester, course):
     :param course: Code of course being migrated
     :type course: str
     """
-    database.execute("ALTER TABLE polls ALTER COLUMN status SET NOT NULL")
     database.execute("""
         UPDATE polls
         SET status = CASE
@@ -55,5 +54,6 @@ def down(config, database, semester, course):
             WHEN is_visible = FALSE THEN 'closed'
         END
     """)
+    database.execute("ALTER TABLE polls ALTER COLUMN status SET NOT NULL")
     
     
