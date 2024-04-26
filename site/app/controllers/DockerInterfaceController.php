@@ -6,6 +6,7 @@ use app\libraries\FileUtils;
 use app\libraries\response\MultiResponse;
 use app\libraries\response\WebResponse;
 use app\libraries\response\JsonResponse;
+use app\libraries\routers\AccessControl;
 use app\views\ErrorView;
 use Symfony\Component\Routing\Annotation\Route;
 
@@ -70,17 +71,12 @@ class DockerInterfaceController extends AbstractController {
     /**
      * @Route("/admin/add_image", methods={"POST"})
      * @Route("/api/admin/add_image", methods={"GET"})
-     * @return JsonResponse | MultiResponse
+     * @AccessControl(level="FACULTY")
+     * @return JsonResponse
      */
-    public function addImage() {
+    public function addImage(): JsonResponse {
         $user = $this->core->getUser();
         $user_id = $this->core->getUser()->getId();
-        if (is_null($user) || !$user->accessFaculty()) {
-            return new MultiResponse(
-                JsonResponse::getFailResponse("You don't have access to this endpoint."),
-                new WebResponse(ErrorView::class, "errorPage", "You don't have access to this page.")
-            );
-        }
 
         if (!isset($_POST['image'])) {
             return JsonResponse::getErrorResponse("Image not set");
@@ -166,12 +162,13 @@ class DockerInterfaceController extends AbstractController {
 
     /**
      * @Route("/admin/remove_image", methods={"POST"})
+     * @AccessControl(level="FACULTY")
      * @return JsonResponse
      */
-    public function removeImage() {
+    public function removeImage(): JsonResponse {
         $pattern = '/^[a-z0-9]+[a-z0-9._(__)-]*[a-z0-9]+\/[a-z0-9]+[a-z0-9._(__)-]*[a-z0-9]+:[a-zA-Z0-9][a-zA-Z0-9._-]{0,127}$/';
         $user = $this->core->getUser();
-        $user_id = $this->core->getUser()->getId();
+        $user_id = $user->getId();
         $jsonFilePath = FileUtils::joinPaths(
             $this->core->getConfig()->getSubmittyInstallPath(),
             "config",
@@ -185,9 +182,7 @@ class DockerInterfaceController extends AbstractController {
                     foreach ($json as $capability_key => $capability) {
                         $key = array_search($_POST['image'], $capability, true);
                         if ($key !== false) {
-                            unset($capability[$key]);
-                            $capability = array_values($capability);
-                            $json[$capability_key] = $capability;
+                            unset($json[$capability_key][$key]);
                         }
                     }
                     file_put_contents($jsonFilePath, json_encode($json, JSON_PRETTY_PRINT));

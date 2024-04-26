@@ -304,7 +304,7 @@ class DockerView extends AbstractView {
                 "error_logs" => $error_logs,
                 "user_id" => $this->core->getUser()->getId(),
                 "docker_image_owners" => $docker_data["image_owners"],
-                "superuser" => ($this->core->getUser()->getAccessLevel() === User::LEVEL_SUPERUSER)
+                "superuser" => $this->core->getUser()->getAccessLevel() === User::LEVEL_SUPERUSER,
             ]
         );
     }
