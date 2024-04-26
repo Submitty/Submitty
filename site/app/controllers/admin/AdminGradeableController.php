@@ -149,24 +149,27 @@ class AdminGradeableController extends AbstractController {
     }
 
     #[Route("/api/{_semester}/{_course}/{gradeable_id}/download", methods: ["GET"])]
-    public function apiDownloadJson(string $gradeable_id): DownloadResponse {
+    public function apiDownloadJson(string $gradeable_id): JsonResponse {
         try {
             $gradeable = $this->core->getQueries()->getGradeableConfig($gradeable_id);
         }
         catch (\InvalidArgumentException $exception) {
-            return DownloadResponse::getErrorResponse($exception->getMessage());
+            return JsonResponse::getErrorResponse($exception->getMessage());
         }
         catch (\Exception $exception) {
-            return DownloadResponse::getErrorResponse($exception->getMessage());
+            return JsonResponse::getErrorResponse($exception->getMessage());
         }
-        return DownloadResponse::getSuccessResponse($this->getGradeableJson($gradeable));
+        return JsonResponse::getSuccessResponse($this->getGradeableJson($gradeable));
     }
 
+    /**
+     * @return array<mixed>
+     */
     #[Route("/courses/{_semester}/{_course}/{gradeable_id}/download", methods: ["GET"])]
-    public function webDownloadJson(string $gradeable_id): void {
+    public function webDownloadJson(string $gradeable_id): array {
         $gradeable = $this->core->getQueries()->getGradeableConfig($gradeable_id);
-        $json_response = DownloadResponse::getSuccessResponse($this->getGradeableJson($gradeable), true);
-        $json_response->render($this->core);
+        $json_response = DownloadResponse::getDownloadResponse($this->getGradeableJson($gradeable));
+        return $json_response->getJson();
     }
 
     /**

@@ -14,79 +14,28 @@ class DownloadResponse implements ResponseInterface {
 
     /**
      * DownloadResponse constructor.
-     * Returns a Jsend format download response in the same format as
-     * JsonResponse
-     * (see http://submitty.org/developer/json_responses)
-     * @param string $type
+     * Returns a JSON array
      * @param mixed|null $data
-     * @param string|null $message
-     * @param string|null $code
-     * @param bool $is_web
      */
-    private function __construct(string $type, mixed $data = null, string|null $message = null, bool $is_web = false, string|null $code = null) {
-
-        if (!$is_web) {
-            $this->json['status'] = $type;
-
-            if ($type === 'success') {
-                $this->json['data'] = $data;
-            }
-
-            if ($type !== 'success') {
-                $this->json['message'] = $message;
-            }
-
-            if ($code !== null) {
-                $this->json['code'] = $code;
-            }
-        }
-        else {
-            if ($type === 'success') {
-                $this->json = $data;
-            }
-            if ($type !== 'success') {
-                $this->json = [$type . ' ' . $message];
-            }
-        }
+    private function __construct(mixed $data = null) {
+        $this->json = $data;
     }
 
     /**
-     * Renders JSON data.
-     * @param Core $core
+     * Returns JSON data.
+     * @return array<mixed>
      */
-    public function render(Core $core): void {
-        $core->getOutput()->renderJson($this->json);
+    public function getJson(): array {
+        return $this->json;
     }
 
     /**
-     * Returns a success DownloadResponse.
+     * Returns a DownloadResponse.
      * @param mixed|null $data
-     * @param bool $is_web
      * @return DownloadResponse
      */
-    public static function getSuccessResponse(mixed $data = null, bool $is_web = false): DownloadResponse {
-        return new self('success', $data, null, $is_web);
+    public static function getDownloadResponse(mixed $data = null): DownloadResponse {
+        return new self($data);
     }
 
-    /**
-     * Returns a fail DownloadResponse.
-     * @param string $message
-     * @param bool $is_web
-     * @return DownloadResponse
-     */
-    public static function getFailResponse(string $message, bool $is_web = false): DownloadResponse {
-        return new self('fail', null, $message, $is_web);
-    }
-
-    /**
-     * Returns an error DownloadResponse.
-     * @param string $message
-     * @param mixed|null $data
-     * @param string|null $code
-     * @param bool $is_web
-     * @return DownloadResponse
-     */
-    public static function getErrorResponse(string $message, mixed $data = null, string|null $code = null, bool $is_web = false): DownloadResponse {
-        return new self('error', $data, $message, $is_web, $code);
-    }
 }
