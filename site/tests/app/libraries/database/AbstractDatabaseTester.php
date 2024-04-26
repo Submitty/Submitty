@@ -300,8 +300,8 @@ SELECT * FROM test ORDER BY pid");
         $database->query("INSERT INTO test VALUES (?, ?)", [true, $now]);
         $this->assertEquals(1, $database->getRowCount());
         $database->query("SELECT * FROM test");
-        $this->assertEquals($database->rows()[0]["val_bool"], true);
-        $this->assertEquals($database->rows()[0]["val_date"], $now->format("Y-m-d H:i:sO"));
+        $this->assertEquals($database->row()["val_bool"], true);
+        $this->assertEquals($database->row()["val_date"], $now->format("Y-m-d H:i:sO"));
         $database->disconnect();
     }
 
