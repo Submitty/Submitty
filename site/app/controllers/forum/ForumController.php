@@ -494,11 +494,7 @@ class ForumController extends AbstractController {
 
         $display_option = (!empty($_POST["display_option"])) ? htmlentities($_POST["display_option"], ENT_QUOTES | ENT_HTML5, 'UTF-8') : "tree";
         $anon = (isset($_POST["Anon"]) && $_POST["Anon"] == "Anon") ? 1 : 0;
-        if (strlen($post_content) === 0 || strlen($thread_id) === 0) {
-            $this->core->addErrorMessage("There was an error submitting your post. Please re-submit your post.");
-            $result['next_page'] = $this->core->buildCourseUrl(['forum', 'threads']);
-        }
-        elseif (!$this->core->getQueries()->existsThread($thread_id)) {
+        if (!$this->core->getQueries()->existsThread($thread_id)) {
             $this->core->addErrorMessage("There was an error submitting your post. Thread doesn't exist.");
             $result['next_page'] = $this->core->buildCourseUrl(['forum', 'threads']);
         }
@@ -517,7 +513,12 @@ class ForumController extends AbstractController {
             }
             else {
                 $attachment_name = [];
-                if ($hasGoodAttachment[0] === 1) {
+
+                if ($hasGoodAttachment[0] !== 1 && (strlen($post_content) === 0 || strlen($thread_id) === 0)) {
+                    $this->core->addErrorMessage("There was an error submitting your post. Please re-submit your post.");
+                    $result['next_page'] = $this->core->buildCourseUrl(['forum', 'threads']);
+                }
+                elseif ($hasGoodAttachment[0] === 1) {
                     for ($i = 0; $i < count($_FILES[$file_post]["name"]); $i++) {
                         $attachment_name[] = basename($_FILES[$file_post]["name"][$i]);
                     }
@@ -583,6 +584,13 @@ class ForumController extends AbstractController {
         }
         $thread_id = $post['thread_id'];
         $thread = $this->core->getQueries()->getThread($thread_id);
+        $first_post = $this->core->getQueries()->getFirstPostForThread($thread_id);
+        $first_post_author_id = $first_post['author_user_id'];
+        $upduck_count = $this->core->getQueries()->getUpduckInfoForPosts([$post_id])[$post_id];
+        $upduck_liked_by_user = array_key_exists($post_id, $this->core->getQueries()->getUserLikesForPosts(
+            [$post_id],
+            $this->core->getUser()->getId()
+        ));
         $GLOBALS['totalAttachments'] = 0;
         $GLOBALS['post_box_id'] = $_POST['post_box_id'];
         $unviewed_posts = [$post_id];
@@ -593,12 +601,15 @@ class ForumController extends AbstractController {
         $result = $this->core->getOutput()->renderTemplate(
             'forum\ForumThread',
             'createPost',
+            $first_post_author_id,
             $thread,
             $post,
             $unviewed_posts,
             $first,
             $reply_level,
             'tree',
+            $upduck_count,
+            $upduck_liked_by_user,
             true,
             $author_info[$post["author_user_id"]],
             $post_attachments[$post["id"]][0],

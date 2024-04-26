@@ -1,4 +1,4 @@
-/* exported newDeletePollForm updatePollAcceptingAnswers updatePollVisible updateDropdownStates importPolls */
+/* exported newDeletePollForm updatePollAcceptingAnswers updatePollVisible updateDropdownStates importPolls toggleTimerInputs */
 /* global csrfToken */
 
 $(document).ready(() => {
@@ -108,4 +108,13 @@ function updateDropdownStates(curr_state, cookie_key) {
 
 function importPolls() {
     $('#import-polls-form').submit();
+}
+
+function toggleTimerInputs() {
+    if ($('#enable-timer').prop('checked')) {
+        $('#timer-inputs').show();
+    }
+    else {
+        $('#timer-inputs').hide();
+    }
 }
