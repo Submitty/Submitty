@@ -1336,10 +1336,10 @@ function toggleLike(post_id, current_user, userGroup) {
                 likeIconSrcElement = likeIconSrcElement.replace('on-duck-button.svg', 'light-mode-off-duck.svg');
                 if (userGroup === 1 || userGroup === 2 || userGroup === 3) {
                     if (taLiked>0) {
-                        document.getElementById(`likedByInstructor_${post_id}`).style.display = '';
+                        $(`#likedByInstructor_${post_id}`).show();
                     }
                     else {
-                        document.getElementById(`likedByInstructor_${post_id}`).style.display = 'none';
+                        $(`#likedByInstructor_${post_id}`).hide();
                     }
                 }
 
@@ -1352,10 +1352,10 @@ function toggleLike(post_id, current_user, userGroup) {
                 likeIconSrcElement = likeIconSrcElement.replace('light-mode-off-duck.svg', 'on-duck-button.svg');
                 if (userGroup === 1 || userGroup === 2 || userGroup === 3) {
                     if (taLiked>0) {
-                        document.getElementById(`likedByInstructor_${post_id}`).style.display = '';
+                        $(`#likedByInstructor_${post_id}`).show();
                     }
                     else {
-                        document.getElementById(`likedByInstructor_${post_id}`).style.display = 'none';
+                        $(`#likedByInstructor_${post_id}`).hide();
                     }
                 }
                 likeCounter=likes;

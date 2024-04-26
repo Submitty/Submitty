@@ -797,3 +797,17 @@
     flex-direction: row;
     align-items: center;
 }
+
+.liked-by-instructor {
+    font-size: 15px;
+    vertical-align: middle;
+    font-style: italic;
+    color: #ffba00;
+    font-weight: bold;
+}
+
+.like-counter {
+    font-size: 15px; 
+    margin-right: 3px; 
+    vertical-align: middle;
+}

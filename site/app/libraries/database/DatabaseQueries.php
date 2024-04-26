@@ -722,7 +722,14 @@ SQL;
     }
 
     /**
-     * @return array<string|int>
+     * toggles a like from upduck to off or off to upduck
+     * 
+     * @param int $post_id The ID of the post.
+     * @param string $current_user The ID of the current user.
+     * @return array{ status: string, likesCount: int, likesFromStaff: int} 
+     * 'status' indicating 'like' or 'unlike', 
+     * 'likesCount' indicating the total number of likes,
+     * 'likesFromStaff' indicating the number of likes from staff members.
      */
     public function toggleLikes(int $post_id, string $current_user): array {
         try {
@@ -737,30 +744,33 @@ SQL;
             if ($inDatabase) {
                 $this->course_db->query("DELETE FROM forum_upducks WHERE post_id = ? AND user_id = ?", [$post_id, $current_user]);
                 $action = "unlike";
-                $this->course_db->query("SELECT COUNT(*) AS likes_count FROM forum_upducks WHERE post_id = ?", [$post_id]);
-                $likesCount = intval($this->course_db->rows()[0]['likes_count']);
-                $this->course_db->query($sqlFilteredCount, [$post_id]);
-                $filteredLikesCount = intval($this->course_db->rows()[0]['filtered_likes_count']);
             }
             else {
                 $this->course_db->query("INSERT INTO forum_upducks (post_id, user_id) VALUES (?, ?)", [$post_id, $current_user]);
                 $action = "like";
-                $this->course_db->query("SELECT COUNT(*) AS likes_count FROM forum_upducks WHERE post_id = ?", [$post_id]);
-                $likesCount = intval($this->course_db->rows()[0]['likes_count']);
-                $this->course_db->query($sqlFilteredCount, [$post_id]);
-                $filteredLikesCount = intval($this->course_db->rows()[0]['filtered_likes_count']);
             }
-            return [$action, $likesCount, $filteredLikesCount];
+            $this->course_db->query("SELECT COUNT(*) AS likes_count FROM forum_upducks WHERE post_id = ?", [$post_id]);
+            $likesCount = intval($this->course_db->row()['likes_count']);
+            $this->course_db->query($sqlFilteredCount, [$post_id]);
+            $filteredLikesCount = intval($this->course_db->row()['filtered_likes_count']);
+            return [
+                'status' => $action, // 'like' or 'unlike'
+                'likesCount' => $likesCount, // Total likes count
+                'likesFromStaff' => $filteredLikesCount // Likes from staff
+            ];
         }
         catch (DatabaseException $dbException) {
             if ($this->course_db->inTransaction()) {
                 $this->course_db->rollback();
             }
-            return ["false",0,0];
+            return ['status' => "false", 'likesCount' => 0, 'likesFromStaff' => 0];
         }
     }
 
     /**
+     * get what posts should be loaded in with "staff upduck" upduck
+     * returns array that links each post with a bool if it is staff upducked or not
+     * 
      * @param int[] $post_ids
      * @return int[]
      */
@@ -784,12 +794,15 @@ SQL;
 
         // Fetch the rows and store the post_id in the result array
         foreach ($this->course_db->rows() as $row) {
-            array_push($result, $row['post_id']);
+            $result[] = $row['post_id'];
         }
         return $result;
     }
 
     /**
+     * Gets total number of upducks for each post
+     * returns an array that links each post_id with their total upducks
+     * 
      * @param int[] $post_ids
      * @return int[]
      */
@@ -813,6 +826,9 @@ SQL;
     }
 
     /**
+     * Gets what posts the user has upducked
+     * returns an array of what posts the user liked and what should be shown as upducked on the frontend
+     * 
      * @param int[] $post_ids
      * @param string $current_user
      * @return int[]

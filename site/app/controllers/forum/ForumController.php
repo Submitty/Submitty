@@ -1396,18 +1396,20 @@ class ForumController extends AbstractController {
                 return JsonResponse::getErrorResponse('Missing required key in POST data: ' . $key);
             }
         }
-        $output = [];
-        $output = $this->core->getQueries()->toggleLikes($_POST['post_id'], $this->core->getUser()->getId());//so isLiked is the frontend value
+        $output = $this->core->getQueries()->toggleLikes($_POST['post_id'], $this->core->getUser()->getId());
 
-        $responseData = [
-            'status' => $output[0], // 'like'
-            'likesCount' => $output[1], // The likes count
-            'likesFromStaff' => $output[2] // Likes from staff
-        ];
+        if ($output['status'] === "false") {
+            return JsonResponse::getErrorResponse('Catch Fail in Query');
+        }
+
+        return JsonResponse::getSuccessResponse([
+            'status' => $output['status'], // 'like' or 'unlike'
+            'likesCount' => $output['likesCount'], // Total likes count
+            'likesFromStaff' => $output['likesFromStaff'] // Likes from staff
+        ]);
 
         if ($responseData['status'] === "false") {
             return JsonResponse::getErrorResponse('Catch Fail in Query');
         }
-        return JsonResponse::getSuccessResponse($responseData);
     }
 }
