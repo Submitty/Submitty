@@ -20,7 +20,7 @@
 
 const GRADED_COMPONENTS_LIST = {};
 const COMPONENT_RUBRIC_LIST = {};
-let GRADED_GRADEABLE = Promise.resolve();
+let GRADED_GRADEABLE = null
 
 /**
  * An associative object of <component-id> : <mark[]>
@@ -2511,23 +2511,14 @@ function toggleComponent(component_id, saveChanges, edit_mode = false) {
     // Component is open, so close it
     if (isComponentOpen(component_id)) {
         action = action.then(() => {
-            console.time('closeComponent');
-            return closeComponent(component_id, saveChanges, edit_mode)
-                .then(() => {
-                    console.timeEnd('closeComponent');
-                });
+            return closeComponent(component_id, saveChanges, edit_mode);
         });
     }
     else {
         action = action.then(() => {
-            console.time('closeAllComponents');
             return closeAllComponents(saveChanges, edit_mode)
                 .then(() => {
-                    console.timeEnd('closeAllComponents');
-                    console.time('openComponent');
-                    return (openComponent(component_id)).then(() => {
-                        console.timeEnd('openComponent');
-                    });
+                    return (openComponent(component_id));
                 });
         });
     }
