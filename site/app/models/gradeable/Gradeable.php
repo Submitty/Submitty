@@ -1855,7 +1855,7 @@ class Gradeable extends AbstractModel {
      * @param bool $include_bad_submissions
      * @return float The percentage (0 to 1) of grading completed or NAN if none required
      */
-    public function getGradingProgress(User $grader, bool $include_bad_submissions, bool $include_null_section) {
+    public function getTaGradingProgress(User $grader, bool $include_bad_submissions, bool $include_null_section) {
         //This code is taken from the ElectronicGraderController, it used to calculate the TA percentage.
         $total_users = [];
         $graded_components = [];
