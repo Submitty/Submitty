@@ -90,8 +90,9 @@ class SubmissionController extends AbstractController {
             $this->core->getOutput()->renderOutput('Error', 'noGradeable', $gradeable_id);
             return ['error' => true, 'message' => 'No gradeable with that id.'];
         }
-        elseif ($gradeable->isTeamAssignment() && $graded_gradeable === null && !$this->core->getUser()->accessAdmin()) {
-            $this->core->addErrorMessage('Must be on a team to access submission');
+        elseif ($gradeable->isTeamAssignment() && $graded_gradeable === null) {
+            // Irrespective of the access level, user should be redirected out of page if not present in a team
+            $this->core->addErrorMessage('Must be on a team to access submission.');
             $this->core->redirect($this->core->buildCourseUrl());
             return ['error' => true, 'message' => 'Must be on a team to access submission.'];
         }
