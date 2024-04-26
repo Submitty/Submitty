@@ -584,6 +584,13 @@ class ForumController extends AbstractController {
         }
         $thread_id = $post['thread_id'];
         $thread = $this->core->getQueries()->getThread($thread_id);
+        $first_post = $this->core->getQueries()->getFirstPostForThread($thread_id);
+        $first_post_author_id = $first_post['author_user_id'];
+        $upduck_count = $this->core->getQueries()->getUpduckInfoForPosts([$post_id])[$post_id];
+        $upduck_liked_by_user = array_key_exists($post_id, $this->core->getQueries()->getUserLikesForPosts(
+            [$post_id],
+            $this->core->getUser()->getId()
+        ));
         $GLOBALS['totalAttachments'] = 0;
         $GLOBALS['post_box_id'] = $_POST['post_box_id'];
         $unviewed_posts = [$post_id];
@@ -594,12 +601,15 @@ class ForumController extends AbstractController {
         $result = $this->core->getOutput()->renderTemplate(
             'forum\ForumThread',
             'createPost',
+            $first_post_author_id,
             $thread,
             $post,
             $unviewed_posts,
             $first,
             $reply_level,
             'tree',
+            $upduck_count,
+            $upduck_liked_by_user,
             true,
             $author_info[$post["author_user_id"]],
             $post_attachments[$post["id"]][0],
