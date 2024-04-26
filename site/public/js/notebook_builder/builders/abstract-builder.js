@@ -101,7 +101,8 @@ class AbstractBuilder {
                     this.widgetAdd(widget);
                 }
             });
-        } else {
+        } 
+        else {
             displayErrorMessage('The current configuration does not use notebook as a defined key in required-configuration. Please update your configuration to require "notebook".');
         }
     }

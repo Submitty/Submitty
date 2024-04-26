@@ -171,8 +171,7 @@
 /**
  * Notebook Multiple Choice control styles
  */
-
- .move-btn {
+.move-btn {
     background: transparent;
     padding: 10px;
     display: inline-block;
