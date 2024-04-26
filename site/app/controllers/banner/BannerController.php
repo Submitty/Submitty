@@ -16,12 +16,12 @@ use app\libraries\FileUtils;
 use app\libraries\routers\AccessControl;
 
 /**
- * @AccessControl(level="FACULTY")
+ * @AccessControl(level="SUPERUSER")
  */
 class BannerController extends AbstractController {
     /**
      *
-     * @Route("/community_event")
+     * @Route("/community_events")
      *
      * @return WebResponse
      * @see GlobalController::prep_user_sidebar
@@ -165,7 +165,7 @@ class BannerController extends AbstractController {
     }
 
     /**
-     * @Route("/community_event/delete", methods={"POST"})
+     * @Route("/community_events/delete", methods={"POST"})
      */
     public function ajaxDeleteEventFiles(): JsonResponse {
         $entity_manager = $this->core->getSubmittyEntityManager();
