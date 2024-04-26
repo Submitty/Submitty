@@ -147,9 +147,8 @@ class NavigationView extends AbstractView {
                     //print error message without breaking (ex ERR: Please contact instructor)
                     $seating_config = 'empty-case-handling';
                 }
-
-                // if the user seating details have both a building and a room property
-                if (property_exists($user_seating_details, 'building') && property_exists($user_seating_details, 'room')) {
+                elseif (property_exists($user_seating_details, 'building') && property_exists($user_seating_details, 'room')) {
+                    // if the user seating details have both a building and a room property
                     $seating_config_path = FileUtils::joinPaths(
                         $this->core->getConfig()->getCoursePath(),
                         'uploads',
