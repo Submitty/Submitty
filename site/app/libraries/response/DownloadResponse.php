@@ -2,8 +2,6 @@
 
 namespace app\libraries\response;
 
-use app\libraries\Core;
-
 /**
  * Class DownloadResponse
  * @package app\libraries\response
@@ -37,5 +35,4 @@ class DownloadResponse {
     public static function getDownloadResponse(mixed $data = null): DownloadResponse {
         return new self($data);
     }
-
 }
