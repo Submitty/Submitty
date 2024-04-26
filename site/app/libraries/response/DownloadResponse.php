@@ -2,6 +2,8 @@
 
 namespace app\libraries\response;
 
+use app\libraries\Core;
+
 /**
  * Class DownloadResponse
  * @package app\libraries\response
@@ -20,11 +22,11 @@ class DownloadResponse {
     }
 
     /**
-     * Returns JSON data.
-     * @return array<mixed>
+     * Renders JSON data.
+     * @param Core $core
      */
-    public function getJson(): array {
-        return $this->json;
+    public function render(Core $core): void {
+        $core->getOutput()->renderJson($this->json);
     }
 
     /**
