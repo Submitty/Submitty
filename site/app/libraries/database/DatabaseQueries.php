@@ -2280,7 +2280,7 @@ ORDER BY {$orderby}",
      * @param  string $g_id gradeable id we are looking up
      * @return int the number of ta components
      */
-    public function getTaComponentCount($g_id) {
+    public function getTaComponentCount(string $g_id): int {
         $this->course_db->query("SELECT count(*) AS cnt FROM gradeable_component WHERE g_id=? AND gc_is_peer=?", [$g_id, $this->course_db->convertBoolean(false)]);
         return intval($this->course_db->row()['cnt']);
     }
