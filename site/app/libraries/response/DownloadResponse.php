@@ -45,7 +45,7 @@ class DownloadResponse implements ResponseInterface {
                 $this->json = $data;
             }
             if ($type !== 'success') {
-                $this->json = array($type . ' ' . $message);
+                $this->json = [$type . ' ' . $message];
             }
         }
     }
