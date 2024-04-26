@@ -103,7 +103,7 @@ class AbstractBuilder {
             });
         }
         else {
-            displayErrorMessage('The current configuration does not use notebook as a defined key in required-configuration. Please update your configuration to require "notebook".');
+            displayErrorMessage('The current configuration is missing the required "notebook" object. Please include a "notebook" object in your configuration');
         }
     }
 
