@@ -12,6 +12,7 @@ use app\libraries\DateUtils;
 use app\libraries\routers\AccessControl;
 use app\libraries\routers\Enabled;
 use app\libraries\response\JsonResponse;
+use app\views\forum\ForumThreadView;
 use Symfony\Component\Routing\Annotation\Route;
 
 /**
@@ -586,6 +587,11 @@ class ForumController extends AbstractController {
         $thread = $this->core->getQueries()->getThread($thread_id);
         $first_post = $this->core->getQueries()->getFirstPostForThread($thread_id);
         $first_post_author_id = $first_post['author_user_id'];
+        $upduck_count = $this->core->getQueries()->getUpduckInfoForPosts([$post_id])[$post_id];
+        $upduck_liked_by_user = array_key_exists($post_id, $this->core->getQueries()->getUserLikesForPosts(
+            [$post_id],
+            $this->core->getUser()->getId()
+        ));
         $GLOBALS['totalAttachments'] = 0;
         $GLOBALS['post_box_id'] = $_POST['post_box_id'];
         $unviewed_posts = [$post_id];
@@ -603,6 +609,8 @@ class ForumController extends AbstractController {
             $first,
             $reply_level,
             'tree',
+            $upduck_count,
+            $upduck_liked_by_user,
             true,
             $author_info[$post["author_user_id"]],
             $post_attachments[$post["id"]][0],
