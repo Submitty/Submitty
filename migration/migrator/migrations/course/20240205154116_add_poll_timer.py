@@ -15,14 +15,22 @@ def up(config, database, semester, course):
     :type course: str
     """
     database.execute("ALTER TABLE polls ADD COLUMN IF NOT EXISTS duration INTEGER DEFAULT 0")
-    database.execute("ALTER TABLE polls ADD COLUMN IF NOT EXISTS end_time timestamptz NOT NULL DEFAULT '1900-02-01'")
+    database.execute("ALTER TABLE polls ADD COLUMN IF NOT EXISTS end_time timestamptz")
     database.execute("ALTER TABLE polls ALTER COLUMN status DROP NOT NULL")
+    database.execute("ALTER TABLE polls ADD COLUMN IF NOT EXISTS is_visible BOOLEAN NOT NULL DEFAULT FALSE")
     database.execute("""
-        UPDATE polls SET end_time = CASE
-            WHEN status = 'open' THEN '9999-02-01'
-            WHEN status = 'closed' THEN '1900-02-01'
-            ELSE now() END
+        UPDATE polls
+        SET end_time = '1900-02-01'
+        WHERE status != 'open'
     """)
+    database.execute("""
+        UPDATE polls SET 
+            is_visible = CASE
+                WHEN status IN ('open', 'ended') THEN TRUE
+                ELSE FALSE
+            END
+    """)
+
 
 def down(config, database, semester, course):
     """
@@ -37,5 +45,15 @@ def down(config, database, semester, course):
     :param course: Code of course being migrated
     :type course: str
     """
+    database.execute("ALTER TABLE polls ALTER COLUMN status SET NOT NULL")
+    database.execute("""
+        UPDATE polls
+        SET status = CASE
+            WHEN end_time IS NULL AND is_visible = TRUE THEN 'open'
+            WHEN is_visible = TRUE AND end_time < NOW() THEN 'ended'
+            WHEN is_visible = TRUE AND end_time > NOW() AND duration > 0 THEN 'open'
+            WHEN is_visible = FALSE THEN 'closed'
+        END
+    """)
     
     

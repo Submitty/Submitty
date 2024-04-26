@@ -196,7 +196,7 @@ describe('Test cases revolving around polls functionality', () => {
         cy.get('#poll-date').clear({force: true});
         // manually setting the release date to some time in the past
         cy.get('#poll-date').type('1970-01-01', {force: true});
-        // Testing the Pol-Timer
+        // Testing the poll timer
         cy.get('#timer-inputs').should('not.be.visible');
         cy.get('#enable-timer').should('not.be.checked');
         cy.get('#enable-timer').check();
@@ -400,9 +400,10 @@ describe('Test cases revolving around polls functionality', () => {
         cy.logout();
         cy.login();
         cy.visit(['sample', 'polls']);
-        cy.wait(8000);
-        // Poll should have been closed from the edit poll 35 seconds assigned to duration
+        //Wait 6 seconds to wait out the time remaining for poll to close
+        cy.wait(6000);
         cy.reload();
+        // Validate that the poll is closed.
         cy.contains('Poll Cypress Test').siblings(':nth-child(6)').children().should('not.be.checked');
 
         // log into student, now we can see the histogram on closed poll

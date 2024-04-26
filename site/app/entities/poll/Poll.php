@@ -35,8 +35,11 @@ class Poll {
     #[ORM\Column(type: Types::TEXT)]
     protected $status;
 
-    #[ORM\Column(type: Types::DATETIME_MUTABLE)]
-    protected DateTime $end_time;
+    #[ORM\Column(type: Types::DATETIME_MUTABLE, nullable: true)]
+    protected ?DateTime $end_time;
+
+    #[ORM\Column(type: Types::BOOLEAN)]
+    protected bool $is_visible;
 
     #[ORM\Column(type: Types::DATE_MUTABLE)]
     protected DateTime $release_date;
@@ -74,6 +77,7 @@ class Poll {
         $this->setQuestionType($question_type);
         $this->setDuration($duration);
         $this->setClosed();
+        $this->end_time = null;
         $this->setReleaseDate($release_date);
         $this->setReleaseHistogram($release_histogram);
         $this->setReleaseAnswer($release_answer);
@@ -102,30 +106,35 @@ class Poll {
         $this->question = $question;
     }
     public function setClosed(): void {
-        $this->end_time = new \DateTime(DateUtils::BEGINING_OF_TIME);
+        $this->is_visible = false;
     }
     public function setOpen(): void {
-        $this->end_time = new \DateTime(DateUtils::MAX_TIME);
+        $this->is_visible = true;
     }
     public function setEnded(): void {
+        $this->is_visible = true;
         $temp = DateUtils::getDateTimeNow();
         $tempString = $temp->format('Y-m-d');
         $this->end_time = new DateTime($tempString);
     }
     public function isOpen(): bool {
+        if ($this->end_time === null && $this->is_visible) {
+            return true;
+        }
         $now = DateUtils::getDateTimeNow();
-        return $now < $this->end_time;
+        return ($this->is_visible && ($now < $this->end_time));
     }
 
     public function isEnded(): bool {
+        if ($this->end_time === null && $this->is_visible) {
+            return false;
+        }
         $now = DateUtils::getDateTimeNow();
-        $closeDate = DateUtils::BEGINING_OF_TIME;
-        return $now > $this->end_time && $this->end_time->format('Y-m-d\TH:i:s') !== $closeDate;
+        return $now > $this->end_time && $this->is_visible;
     }
 
     public function isClosed(): bool {
-        $now = DateUtils::getDateTimeNow();
-        return $now > $this->end_time && $this->end_time->format('Y-m-d\TH:i:s') === DateUtils::BEGINING_OF_TIME;
+        return !$this->is_visible;
     }
 
     public function getDuration(): \DateInterval {
@@ -137,12 +146,20 @@ class Poll {
         return new \DateInterval("PT{$hours}H{$minutes}M{$seconds}S");
     }
 
-    public function getEndTime(): \DateTime {
+    public function getEndTime(): ?\DateTime {
         return $this->end_time;
     }
 
     public function getReleaseDate(): \DateTime {
         return $this->release_date;
+    }
+
+    public function isVisible(): bool {
+        return $this->is_visible;
+    }
+
+    public function setVisible(): void {
+        $this->is_visible = true;
     }
 
     public function setDuration(\DateInterval $duration): void {
@@ -152,8 +169,12 @@ class Poll {
         $this->duration = $totalSeconds;
     }
 
-    public function setEndTime(\DateTime $end_time): void {
+    public function setEndTime(?\DateTime $end_time): void {
         $this->end_time = $end_time;
+    }
+
+    public function isTimerEnabled(): bool {
+        return $this->end_time !== null;
     }
 
     public function setReleaseDate(\DateTime $release_date): void {

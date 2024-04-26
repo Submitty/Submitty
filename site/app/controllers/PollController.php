@@ -14,7 +14,6 @@ use app\libraries\routers\AccessControl;
 use app\libraries\routers\Enabled;
 use app\libraries\FileUtils;
 use app\libraries\PollUtils;
-use app\libraries\DateUtils;
 use app\views\PollView;
 use DateInterval;
 
@@ -366,7 +365,8 @@ class PollController extends AbstractController {
                 $poll->setEndTime($endDate);
             }
             else {
-                $poll->setEndTime(new \DateTime(DateUtils::MAX_TIME));
+                // Timer Disabled
+                $poll->setEndTime(null);
             }
         }
         if ($date === false) {
@@ -488,7 +488,7 @@ class PollController extends AbstractController {
             $this->core->addErrorMessage("Invalid Poll ID");
             return new RedirectResponse($this->core->buildCourseUrl(['polls']));
         }
-
+        $poll->setVisible();
         $duration = $poll->getDuration();
         if ($duration->h > 0 || $duration->i > 0 || $duration->s > 0 || $duration->days > 0 || $duration->m > 0 || $duration->y > 0) {
             $end_time = $this->core->getDateTimeNow();
@@ -497,7 +497,7 @@ class PollController extends AbstractController {
         }
         else {
             //If duration is 0, it means that the user wants to manually close it.
-            $end_time = new \DateTime(DateUtils::MAX_TIME);
+            $end_time = null;
             $poll->setEndTime($end_time);
         }
         $em->flush();
@@ -517,6 +517,7 @@ class PollController extends AbstractController {
             $this->core->addErrorMessage("Invalid Poll ID");
             return new RedirectResponse($this->core->buildCourseUrl(['polls']));
         }
+        $poll->setOpen();
         $poll->setEndTime($this->core->getDateTimeNow());
         $em->flush();
 
@@ -536,7 +537,6 @@ class PollController extends AbstractController {
             $this->core->addErrorMessage("Invalid Poll ID");
             return new RedirectResponse($this->core->buildCourseUrl(['polls']));
         }
-        //Setting the time to the beginning of time indicates that it is closed.
         $poll->setClosed();
         $em->flush();
         return new RedirectResponse($this->core->buildCourseUrl(['polls']));

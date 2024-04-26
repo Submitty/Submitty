@@ -111,8 +111,7 @@ function importPolls() {
 }
 
 function toggleTimerInputs() {
-    const enableTimerCheckbox = $('#enable-timer');
-    if (enableTimerCheckbox.prop('checked')) {
+    if ($('#enable-timer').prop('checked')) {
         $('#timer-inputs').show();
     }
     else {

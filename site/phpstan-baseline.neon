@@ -496,7 +496,7 @@ parameters:
 			path: app/controllers/MiscController.php
 
 		-
-			message: "#^Method app\\\\controllers\\\\MiscController\\:\\:downloadSubmissionZip\\(\\) has parameter \\$user_id with no type specified\\.$#"
+			message: "#^Method app\\\\controllers\\\\MiscController\\:\\:downloadSubmissionZip\\(\\) has parameter \\$submitter_id with no type specified\\.$#"
 			count: 1
 			path: app/controllers/MiscController.php
 
@@ -5822,21 +5822,6 @@ parameters:
 
 		-
 			message: "#^Method app\\\\libraries\\\\database\\\\DatabaseQueries\\:\\:deleteMarks\\(\\) has no return type specified\\.$#"
-			count: 1
-			path: app/libraries/database/DatabaseQueries.php
-
-		-
-			message: "#^Method app\\\\libraries\\\\database\\\\DatabaseQueries\\:\\:deleteOverallComment\\(\\) has no return type specified\\.$#"
-			count: 1
-			path: app/libraries/database/DatabaseQueries.php
-
-		-
-			message: "#^Method app\\\\libraries\\\\database\\\\DatabaseQueries\\:\\:deleteOverallComment\\(\\) has parameter \\$gradeable_id with no type specified\\.$#"
-			count: 1
-			path: app/libraries/database/DatabaseQueries.php
-
-		-
-			message: "#^Method app\\\\libraries\\\\database\\\\DatabaseQueries\\:\\:deleteOverallComment\\(\\) has parameter \\$grader_id with no type specified\\.$#"
 			count: 1
 			path: app/libraries/database/DatabaseQueries.php
 
@@ -13233,7 +13218,7 @@ parameters:
 
 		-
 			message: "#^Loose comparison via \"\\=\\=\" is not allowed\\.$#"
-			count: 17
+			count: 16
 			path: app/views/forum/ForumThreadView.php
 
 		-
