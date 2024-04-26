@@ -1137,6 +1137,10 @@ div.full-height {
     background-color: var(--black-moderately-transparent);
 }
 
+body.no-scroll {
+    overflow: hidden;
+}
+
 .popup-box {
     width: 100%;
     height: 100%;
