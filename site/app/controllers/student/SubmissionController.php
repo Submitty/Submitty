@@ -1037,13 +1037,17 @@ class SubmissionController extends AbstractController {
         catch (\InvalidArgumentException $e) {
             return JsonResponse::getFailResponse('Gradeable does not exist');
         }
-        $graded_gradeable = $this->core->getQueries()->getGradedGradeable($gradeable, $_GET['user_id'], $gradeable->isTeamAssignment());
+        $gradeable_version_instance = $this->core->getQueries()->getGradedGradeable(
+            $gradeable,
+            $_GET['user_id'],
+            $gradeable->isTeamAssignment()
+            )->getAutoGradedGradeable()->getActiveVersionInstance();
 
-        if (!$graded_gradeable->getAutoGradedGradeable()->hasActiveVersion()) {
+        if ($gradeable_version_instance === null || $gradeable_version_instance->isQueued() || $gradeable_version_instance->isGrading()) {
             return JsonResponse::getFailResponse("Gradeable hasn't been graded yet.");
         }
 
-        return JsonResponse::getSuccessResponse($graded_gradeable->getAutoGradingScore());
+        return JsonResponse::getSuccessResponse($gradeable_version_instance->getTotalPoints());
     }
 
     /**
@@ -1054,7 +1058,14 @@ class SubmissionController extends AbstractController {
      */
     #[Route("/api/{_semester}/{_course}/gradeable/{gradeable_id}/grade", methods: ["POST"])]
     public function ajaxRequestGrade(string $gradeable_id): JsonResponse|array {
-        if (!array_key_exists('vcs_checkout', $_POST)) {
+        // Instructor
+        if ($this->core->getUser()->getAccessLevel() !== 1) {
+            if (($_POST['user_id'] ?? '') !== $this->core->getUser()->getId()) {
+                return JsonResponse::getFailResponse('API key and specified user_id are not for the same user.');
+            }
+        }
+        $vcs_checkout = array_key_exists('vcs_checkout', $_POST) ? $_POST['vcs_checkout'] === "true" : false;
+        if (!$vcs_checkout) {
             return JsonResponse::getFailResponse("API only supports requesting for VCS gradeables to be graded.");
         }
         if (!array_key_exists('git_repo_id', $_POST)) {
