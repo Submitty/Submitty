@@ -52,12 +52,10 @@ class AdminGradeableController extends AbstractController {
 
     /**
      * Creates a gradeable based on uploaded JSON data
-     * @return JsonResponse
-     * @AccessControl(role="INSTRUCTOR")
-     * @Route("/api/{_semester}/{_course}/upload", methods={"POST"})
-     * @Route("/courses/{_semester}/{_course}/upload", methods={"POST"})
      */
-    public function uploadGradeable() {
+    #[Route("/api/{_semester}/{_course}/upload", methods: ["POST"])]
+    #[Route("/courses/{_semester}/{_course}/upload", methods: ["POST"])]
+    public function uploadGradeable(): JsonResponse {
         $values = [
             'title' => '',
             'instructions_url' => '',
@@ -128,11 +126,28 @@ class AdminGradeableController extends AbstractController {
         if (array_key_exists('ta_grading', $_POST)) {
             $values['ta_grading'] = $_POST['ta_grading'];
             if (array_key_exists('grade_inquiries', $_POST)) {
-                $values['grade_inquiry_allowed'] = $_POST['grade_inquiries'];
+                $values['grade_inquiry_allowed'] = $_POST['grade_inquiries'] ?? 'false';
                 $values['grade_inquiry_per_component_allowed'] = $_POST['grade_inquiries_per_component'] ?? 'false';
             }
         }
 
+        if (array_key_exists('dates', $_POST)) {
+            $dates = $_POST['dates'];
+            $values['ta_view_start_date'] = $dates['ta_view_start_date'] ?? null;
+            $values['grade_start_date'] = $dates['grade_start_date'] ?? null;
+            $values['grade_due_date'] = $dates['grade_due_date'] ?? null;
+            $values['grade_released_date'] = $dates['grade_released_date'] ?? null;
+            $values['team_lock_date'] = $dates['team_lock_date'] ?? null;
+            $values['submission_open_date'] = $dates['submission_open_date'] ?? null;
+            $values['submission_due_date'] = $dates['submission_due_date'] ?? null;
+            $values['grade_inquiry_start_date'] = $dates['grade_inquiry_start_date'] ?? null;
+            $values['grade_inquiry_due_date'] = $dates['grade_inquiry_due_date'] ?? null;
+
+            $values['has_due_date'] = $dates['has_due_date'] ?? 'true';
+            $values['has_release_date'] = $dates['has_released_date'] ??  'true';
+            $values['late_submission_allowed'] = $dates['late_submission_allowed'] ?? 'true';
+            $values['late_days'] = $dates['late_days'] ?? 0;
+        }
         $values['syllabus_bucket'] = $_POST['syllabus_bucket'] ?? 'Homework';
         try {
             $build_result = $this->createGradeable($_POST['id'], $values);
@@ -141,6 +156,9 @@ class AdminGradeableController extends AbstractController {
                 return JsonResponse::getErrorResponse($build_result);
             }
             return JsonResponse::getSuccessResponse($_POST['id']);
+        }
+        catch (ValidationException $e) {
+            return JsonResponse::getErrorResponse($e->getMessage());
         }
         catch (\Exception $e) {
             return JsonResponse::getErrorResponse($e->getMessage());
@@ -188,7 +206,6 @@ class AdminGradeableController extends AbstractController {
     //view the page with pulled data from the gradeable to be edited
     private function editPage(Gradeable $gradeable, $semester, $course, $nav_tab = 0) {
         $this->core->getOutput()->addBreadcrumb('Edit Gradeable');
-
         // Serialize the components for numeric/checkpoint rubrics
         $gradeable_components_enc = array_map(function (Component $c) {
             return $c->toArray();
@@ -943,7 +960,7 @@ class AdminGradeableController extends AbstractController {
                 'student_view_after_grades' => false,
                 'student_download' => true,
                 'student_submit' => true,
-                'late_days' => $default_late_days,
+                'late_days' => $details['late_days'] ?? $default_late_days,
                 'precision' => 0.5
             ];
             $gradeable_create_data = array_merge($gradeable_create_data, $non_template_property_values);
@@ -1055,8 +1072,8 @@ class AdminGradeableController extends AbstractController {
                 'peer_blind' => 3,
                 'depends_on' => null,
                 'depends_on_points' => null,
-                'has_due_date' => true,
-                'has_release_date' => true
+                'has_due_date' => $details['has_due_date'] ?? true,
+                'has_release_date' => $details['has_release_date'] ?? true
             ]);
         }
         else {
@@ -1072,7 +1089,7 @@ class AdminGradeableController extends AbstractController {
                 'autograding_config_path' => '',
                 'peer_grading' => false,
                 'peer_grade_set' => 0,
-                'late_submission_allowed' => true,
+                'late_submission_allowed' => $details['late_submission_allowed'] ?? true,
                 'hidden_files' => ""
             ]);
         }
@@ -1083,17 +1100,30 @@ class AdminGradeableController extends AbstractController {
         if ($tonight->diff($this->core->getDateTimeNow())->h < 12) {
             $tonight->add(new \DateInterval('P1D'));
         }
-        $gradeable_create_data = array_merge($gradeable_create_data, [
-            'ta_view_start_date' => (clone $tonight),
-            'grade_start_date' => (clone $tonight)->add(new \DateInterval('P10D')),
-            'grade_due_date' => (clone $tonight)->add(new \DateInterval('P14D')),
-            'grade_released_date' => (clone $tonight)->add(new \DateInterval('P14D')),
-            'team_lock_date' => (clone $tonight)->add(new \DateInterval('P7D')),
-            'submission_open_date' => (clone $tonight),
-            'submission_due_date' => (clone $tonight)->add(new \DateInterval('P7D')),
-            'grade_inquiry_start_date' => (clone $tonight)->add(new \DateInterval('P15D')),
-            'grade_inquiry_due_date' => (clone $tonight)->add(new \DateInterval('P21D'))
-        ]);
+        $date_names = [
+            'ta_view_start_date' => '',
+            'grade_start_date' => 'P10D',
+            'grade_due_date' => 'P14D',
+            'grade_released_date' => 'P14D',
+            'team_lock_date' => 'P7D',
+            'submission_open_date' => '',
+            'submission_due_date' => 'P7D',
+            'grade_inquiry_start_date' => 'P15D',
+            'grade_inquiry_due_date' => 'P21D'
+        ];
+
+        foreach ($date_names as $time_string => $tonight_modifier) {
+            $gradeable_create_data = array_merge(
+                $gradeable_create_data,
+                [
+                    $time_string => $this->getDateTimeForGradeable(
+                        $details[$time_string] ?? '',
+                        $tonight,
+                        $tonight_modifier
+                    )
+                ]
+            );
+        }
 
         // Finally, construct the gradeable
         $gradeable = new Gradeable($this->core, $gradeable_create_data);
@@ -1133,6 +1163,18 @@ class AdminGradeableController extends AbstractController {
         }
 
         return $build_status;
+    }
+
+    public function getDateTimeForGradeable(string $time_string, \DateTime $tonight, string $tonight_modifier = ''): \DateTime {
+        if ($time_string !== '') {
+            return $this->core->getDateTimeSpecific($time_string);
+        }
+        if ($tonight_modifier !== '') {
+            return (clone $tonight)->add(new \DateInterval($tonight_modifier));
+        }
+        else {
+            return (clone $tonight);
+        }
     }
 
     /**
