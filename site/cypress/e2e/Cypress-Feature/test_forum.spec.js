@@ -55,8 +55,8 @@ describe('Visuals', () => {
         cy.get('#posts_list').compareSnapshot('forum-threads-9', {
             capture: 'viewport',
             clip: { x: 0, y: 0, width: 1000, height: 1000 },
-            threshold: 1.0 // Assuming the last parameter is the threshold for image comparison
-        });
+            // Assuming the last parameter is the threshold for image comparison
+        }, 1.0 );
 
     });
 });
