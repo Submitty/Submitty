@@ -1040,8 +1040,7 @@ class SubmissionController extends AbstractController {
         $gradeable_version_instance = $this->core->getQueries()->getGradedGradeable(
             $gradeable,
             $_GET['user_id'],
-            $gradeable->isTeamAssignment()
-            )->getAutoGradedGradeable()->getActiveVersionInstance();
+            $gradeable->isTeamAssignment())->getAutoGradedGradeable()->getActiveVersionInstance();
 
         if ($gradeable_version_instance === null || $gradeable_version_instance->isQueued() || $gradeable_version_instance->isGrading()) {
             return JsonResponse::getFailResponse("Gradeable hasn't been graded yet.");
