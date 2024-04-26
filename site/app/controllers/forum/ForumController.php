@@ -1412,15 +1412,10 @@ class ForumController extends AbstractController {
         if ($output['status'] === "false") {
             return JsonResponse::getErrorResponse('Catch Fail in Query');
         }
-
         return JsonResponse::getSuccessResponse([
             'status' => $output['status'], // 'like' or 'unlike'
             'likesCount' => $output['likesCount'], // Total likes count
             'likesFromStaff' => $output['likesFromStaff'] // Likes from staff
         ]);
-
-        if ($responseData['status'] === "false") {
-            return JsonResponse::getErrorResponse('Catch Fail in Query');
-        }
     }
 }

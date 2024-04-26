@@ -723,11 +723,11 @@ SQL;
 
     /**
      * toggles a like from upduck to off or off to upduck
-     * 
+     *
      * @param int $post_id The ID of the post.
      * @param string $current_user The ID of the current user.
-     * @return array{ status: string, likesCount: int, likesFromStaff: int} 
-     * 'status' indicating 'like' or 'unlike', 
+     * @return array{ status: string, likesCount: int, likesFromStaff: int}
+     * 'status' indicating 'like' or 'unlike',
      * 'likesCount' indicating the total number of likes,
      * 'likesFromStaff' indicating the number of likes from staff members.
      */
@@ -770,7 +770,7 @@ SQL;
     /**
      * get what posts should be loaded in with "staff upduck" upduck
      * returns array that links each post with a bool if it is staff upducked or not
-     * 
+     *
      * @param int[] $post_ids
      * @return int[]
      */
@@ -802,7 +802,7 @@ SQL;
     /**
      * Gets total number of upducks for each post
      * returns an array that links each post_id with their total upducks
-     * 
+     *
      * @param int[] $post_ids
      * @return int[]
      */
@@ -828,7 +828,7 @@ SQL;
     /**
      * Gets what posts the user has upducked
      * returns an array of what posts the user liked and what should be shown as upducked on the frontend
-     * 
+     *
      * @param int[] $post_ids
      * @param string $current_user
      * @return int[]
