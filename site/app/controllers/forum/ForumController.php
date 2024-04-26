@@ -584,6 +584,8 @@ class ForumController extends AbstractController {
         }
         $thread_id = $post['thread_id'];
         $thread = $this->core->getQueries()->getThread($thread_id);
+        $first_post = $this->core->getQueries()->getFirstPostForThread($thread_id);
+        $first_post_author_id = $first_post['author_user_id'];
         $GLOBALS['totalAttachments'] = 0;
         $GLOBALS['post_box_id'] = $_POST['post_box_id'];
         $unviewed_posts = [$post_id];
@@ -594,6 +596,7 @@ class ForumController extends AbstractController {
         $result = $this->core->getOutput()->renderTemplate(
             'forum\ForumThread',
             'createPost',
+            $first_post_author_id,
             $thread,
             $post,
             $unviewed_posts,
