@@ -21,30 +21,31 @@ class DownloadResponse implements ResponseInterface {
      * @param mixed|null $data
      * @param string|null $message
      * @param string|null $code
+     * @param bool $is_web
      */
-    private function __construct(string $type, $data = null, $message = null, $is_web = false, $code = null) {
+    private function __construct(string $type, mixed $data = null, string|null $message = null, bool $is_web = false, string|null $code = null) {
 
         if (!$is_web) {
             $this->json['status'] = $type;
 
-            if ($data || $type === 'success') {
+            if ($type === 'success') {
                 $this->json['data'] = $data;
             }
 
-            if ($message || $type !== 'success') {
+            if ($type !== 'success') {
                 $this->json['message'] = $message;
             }
 
-            if ($code) {
+            if ($code !== null) {
                 $this->json['code'] = $code;
             }
         }
         else {
-            if ($data || $type === 'success') {
+            if ($type === 'success') {
                 $this->json = $data;
             }
-            if ($message || $type !== 'success') {
-                $this->json = $type . ' ' . $message;
+            if ($type !== 'success') {
+                $this->json = array($type . ' ' . $message);
             }
         }
     }
@@ -60,9 +61,10 @@ class DownloadResponse implements ResponseInterface {
     /**
      * Returns a success DownloadResponse.
      * @param mixed|null $data
+     * @param bool $is_web
      * @return DownloadResponse
      */
-    public static function getSuccessResponse($data = null, $is_web = false): DownloadResponse {
+    public static function getSuccessResponse(mixed $data = null, bool $is_web = false): DownloadResponse {
         return new self('success', $data, null, $is_web);
     }
 
@@ -70,10 +72,11 @@ class DownloadResponse implements ResponseInterface {
      * Returns a fail DownloadResponse.
      * @param string $message
      * @param mixed|null $data
+     * @param bool $is_web
      * @return DownloadResponse
      */
-    public static function getFailResponse($message, $data = null, $is_web = false): DownloadResponse {
-        return new self('fail', $data, $message, $is_web);
+    public static function getFailResponse(string $message, bool $is_web = false): DownloadResponse {
+        return new self('fail', null, $message, $is_web);
     }
 
     /**
@@ -81,9 +84,10 @@ class DownloadResponse implements ResponseInterface {
      * @param string $message
      * @param mixed|null $data
      * @param string|null $code
+     * @param bool $is_web
      * @return DownloadResponse
      */
-    public static function getErrorResponse($message, $data = null, $code = null, $is_web = false): DownloadResponse {
+    public static function getErrorResponse(string $message, mixed $data = null, string|null $code = null, bool $is_web = false): DownloadResponse {
         return new self('error', $data, $message, $code, $is_web);
     }
 }
