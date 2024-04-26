@@ -152,9 +152,11 @@ class AdminGradeableController extends AbstractController {
     public function apiDownloadJson(string $gradeable_id): DownloadResponse {
         try {
             $gradeable = $this->core->getQueries()->getGradeableConfig($gradeable_id);
-        } catch (\InvalidArgumentException $exception) {
+        }
+        catch (\InvalidArgumentException $exception) {
             return DownloadResponse::getErrorResponse($exception->getMessage());
-        } catch (\Exception $exception) {
+        }
+        catch (\Exception $exception) {
             return DownloadResponse::getErrorResponse($exception->getMessage());
         }
         return DownloadResponse::getSuccessResponse($this->getGradeableJson($gradeable));

@@ -26,11 +26,11 @@ class DownloadResponse implements ResponseInterface {
 
         if (!$is_web) {
             $this->json['status'] = $type;
-            
+
             if ($data || $type === 'success') {
                 $this->json['data'] = $data;
             }
-    
+
             if ($message || $type !== 'success') {
                 $this->json['message'] = $message;
             }
@@ -47,7 +47,6 @@ class DownloadResponse implements ResponseInterface {
                 $this->json = $type . ' ' . $message;
             }
         }
-        
     }
 
     /**
