@@ -1314,7 +1314,6 @@ function getScoresFromDOM() {
         peer_grade_earned: getPeerGradingEarned(),
         peer_total: getPeerGradingTotal(),
         auto_grading_complete: false,
-
     };
 
     // Then check if auto grading scorse exist before adding them
