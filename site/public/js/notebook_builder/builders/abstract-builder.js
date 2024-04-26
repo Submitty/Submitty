@@ -1,4 +1,4 @@
-/* global MultipleChoiceWidget, MarkdownWidget, ShortAnswerWidget, ImageWidget, ItempoolWidget, ItemWidget, getBadItemNames */
+/* global MultipleChoiceWidget, MarkdownWidget, ShortAnswerWidget, ImageWidget, ItempoolWidget, ItemWidget, getBadItemNames, displayErrorMessage */
 /* exported AbstractBuilder */
 
 class AbstractBuilder {
@@ -72,35 +72,38 @@ class AbstractBuilder {
                 this.widgetAdd(widget);
             });
         }
+        if (data.notebook) {
+            data.notebook.forEach(cell => {
+                let widget;
 
-        data.notebook.forEach(cell => {
-            let widget;
+                switch (cell.type) {
+                    case 'multiple_choice':
+                        widget = new MultipleChoiceWidget();
+                        break;
+                    case 'markdown':
+                        widget = new MarkdownWidget();
+                        break;
+                    case 'short_answer':
+                        widget = new ShortAnswerWidget();
+                        break;
+                    case 'image':
+                        widget = new ImageWidget();
+                        break;
+                    case 'item':
+                        widget = new ItemWidget();
+                        break;
+                    default:
+                        break;
+                }
 
-            switch (cell.type) {
-                case 'multiple_choice':
-                    widget = new MultipleChoiceWidget();
-                    break;
-                case 'markdown':
-                    widget = new MarkdownWidget();
-                    break;
-                case 'short_answer':
-                    widget = new ShortAnswerWidget();
-                    break;
-                case 'image':
-                    widget = new ImageWidget();
-                    break;
-                case 'item':
-                    widget = new ItemWidget();
-                    break;
-                default:
-                    break;
-            }
-
-            if (widget) {
-                widget.load(cell);
-                this.widgetAdd(widget);
-            }
-        });
+                if (widget) {
+                    widget.load(cell);
+                    this.widgetAdd(widget);
+                }
+            });
+        } else {
+            displayErrorMessage('The current configuration does not use notebook as a defined key in required-configuration. Please update your configuration to require "notebook".');
+        }
     }
 
     /**
