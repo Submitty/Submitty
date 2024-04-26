@@ -10,6 +10,7 @@ use app\models\gradeable\Gradeable;
 use app\models\gradeable\Component;
 use app\models\gradeable\Mark;
 use app\libraries\FileUtils;
+use app\libraries\response\DownloadResponse;
 use app\libraries\response\JsonResponse;
 use app\libraries\routers\AccessControl;
 use Symfony\Component\Routing\Annotation\Route;
@@ -148,18 +149,21 @@ class AdminGradeableController extends AbstractController {
     }
 
     #[Route("/api/{_semester}/{_course}/{gradeable_id}/download", methods: ["GET"])]
-    public function apiDownloadJson(string $gradeable_id): JsonResponse {
-        $gradeable = $this->core->getQueries()->getGradeableConfig($gradeable_id);
-        return JsonResponse::getSuccessResponse($this->getGradeableJson($gradeable));
+    public function apiDownloadJson(string $gradeable_id): DownloadResponse {
+        try {
+            $gradeable = $this->core->getQueries()->getGradeableConfig($gradeable_id);
+        } catch (\InvalidArgumentException $exception) {
+            return DownloadResponse::getErrorResponse($exception->getMessage());
+        } catch (\Exception $exception) {
+            return DownloadResponse::getErrorResponse($exception->getMessage());
+        }
+        return DownloadResponse::getSuccessResponse($this->getGradeableJson($gradeable));
     }
 
     #[Route("/courses/{_semester}/{_course}/{gradeable_id}/download", methods: ["GET"])]
     public function webDownloadJson(string $gradeable_id): void {
         $gradeable = $this->core->getQueries()->getGradeableConfig($gradeable_id);
-        $returned_json = $this->getGradeableJson($gradeable);
-        $json_response = JsonResponse::getSuccessResponse($returned_json);
-        // Make the JSON only the data, not the data and the success status.
-        $json_response->json = $json_response->json['data'];
+        $json_response = DownloadResponse::getSuccessResponse($this->getGradeableJson($gradeable), true);
         $json_response->render($this->core);
     }
 
