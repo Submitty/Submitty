@@ -20,7 +20,7 @@
 
 const GRADED_COMPONENTS_LIST = {};
 const COMPONENT_RUBRIC_LIST = {};
-let GRADED_GRADEABLE = null
+let GRADED_GRADEABLE = null;
 
 /**
  * An associative object of <component-id> : <mark[]>
