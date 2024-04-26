@@ -129,6 +129,7 @@ describe('test office hours queue', () => {
         editAnnouncement('Submitty');
         cy.get('.alert-success').contains('Updated announcement');
         editAnnouncement('');
+        cy.get('#announcement').should('not.exist');
         cy.get('.alert-success').contains('Updated announcement');
         // diable and delete all queue
         disableQueue();
