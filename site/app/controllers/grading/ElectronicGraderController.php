@@ -1811,7 +1811,7 @@ class ElectronicGraderController extends AbstractController {
             $non_late_graded = $graded - array_sum($late_graded);
         }
         //multiplies users and the number of components a gradeable has together
-        $total_submitted = ($total_submitted * count($gradeable->getNonPeerComponents()));
+        $total_submitted = $total_submitted * count($gradeable->getNonPeerComponents());
         if ($total_submitted == 0) {
             $progress = 100;
         }
