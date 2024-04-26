@@ -279,7 +279,6 @@ class UsersController extends AbstractController {
    /**
      * @return JsonResponse
      * @Route("/api/users/add", methods={"POST"})
-     * @Route("/users/add", methods={"POST"})
      */
     function ajaxAddUser(): JsonResponse {
         $values = [
