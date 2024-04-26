@@ -146,9 +146,10 @@ class NavigationView extends AbstractView {
                 if ($user_seating_details === null || filesize($seating_user_path) == 0) {
                     //print error message without breaking (ex ERR: Please contact instructor)
                     $seating_config = 'empty-case-handling';
-                } elseif (property_exists($user_seating_details, 'building') && property_exists($user_seating_details, 'room')) {
-                  // if the user seating details have both a building and a room property
-                  $seating_config_path = FileUtils::joinPaths(
+                }
+                elseif (property_exists($user_seating_details, 'building') && property_exists($user_seating_details, 'room')) {
+                    // if the user seating details have both a building and a room property
+                    $seating_config_path = FileUtils::joinPaths(
                         $this->core->getConfig()->getCoursePath(),
                         'uploads',
                         'seating',
