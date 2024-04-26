@@ -2,7 +2,7 @@
             handleSubmission, handleRegrade, handleBulk, deleteSplitItem, submitSplitItem, displayPreviousSubmissionOptions
             displaySubmissionMessage, validateUserId, openFile, handle_input_keypress, addFilesFromInput,
             dropWithMultipleZips, initMaxNoFiles, setUsePrevious, readPrevious, createArray, initializeDragAndDrop */
-/* global buildCourseUrl, getFileExtension, csrfToken, newOverwriteCourseMaterialForm*/
+/* global buildCourseUrl, getFileExtension, csrfToken, removeMessagePopup, newOverwriteCourseMaterialForm*/
 
 /*
 References:
@@ -383,18 +383,19 @@ function addLabel(filename, filesize, part, previous) {
         e.stopPropagation();
         this.style.color = 'var(--text-black)';
     };
-    // remove file and label-row in table on click event
-    fileTrashElement.onclick = function(e) {
-        e.stopPropagation();
-        this.parentNode.parentNode.removeChild(this.parentNode);
-        deleteSingleFile(filename, part, previous);
-    };
 
-    // FOR VPAT if trash can has focus and key is pressed it will delete item
-    fileTrashElement.onkeypress = function(e) {
+    // onclick : remove file and label-row in table on click event
+    // onkeypress : FOR VPAT if trash can has focus and key is pressed it will delete item
+    fileTrashElement.onclick = fileTrashElement.onkeypress = function(e) {
         e.stopPropagation();
         this.parentNode.parentNode.removeChild(this.parentNode);
         deleteSingleFile(filename, part, previous);
+
+        const textArea = document.querySelector(`#reply_box_${part}`);
+        if (textArea) {
+            // Dispatch input event on existing forum textarea to disable forum reply button on empty input or no remaining files
+            textArea.dispatchEvent(new Event('input', { bubbles: false, cancelable: false }));
+        }
     };
 
     // adding the file in `table` in the parent div
@@ -442,8 +443,7 @@ function isValidSubmission() {
     }
 
     // If is_notebook is set then always valid submission
-    // eslint-disable-next-line no-prototype-builtins
-    if (window.hasOwnProperty('is_notebook')) {
+    if (Object.prototype.hasOwnProperty.call(window, 'is_notebook')) {
         return true;
     }
 
@@ -488,35 +488,23 @@ function validateUserId(csrf_token, gradeable_id, user_id) {
 //@param index used for id
 //function to display pop-up notification after bulk submission/delete
 function displaySubmissionMessage(json) {
-    // Generate a unique ID using the current timestamp
-    const messageId = `message-${Date.now()}`;
+    //let the id be the date to prevent closing the wrong message
+    const d = new Date();
+    const t = String(d.getTime());
 
-    // Determine class based on the status
-    const statusClass = json.status === 'success' ? 'alert-success' : 'alert-error';
+    const class_str = `class="inner-message alert ${json['status'] === 'success' ? 'alert-success' : 'alert-error'}"` ;
+    const close_btn = `<a class="fas fa-times message-close" onclick="removeMessagePopup(${t});"></a>`;
+    const fa_icon = `<i class="${json['status'] === 'success' ? 'fas fa-check-circle' : 'fas fa-times-circle'}"></i>`;
+    const response = (json['status'] === 'success' ? json['data'] : json['message'] );
 
-    // Construct the message HTML
-    const faIconClass = json.status === 'success' ? 'fa-check-circle' : 'fa-times-circle';
-    const responseContent = json.status === 'success' ? json.data : json.message;
-    const messageHTML = `
-        <div id="${messageId}" class="inner-message alert ${statusClass}">
-            <i class="fas ${faIconClass}"></i>
-            ${responseContent}
-            <a class="fas fa-times message-close" onclick="removeMessagePopup('${messageId}');"></a>
-        </div>
-    `;
+    const message = `<div id="${t}"${class_str}>${fa_icon}${response}${close_btn}</div>`;
+    $('#messages').append(message);
 
-    // Append the message to the DOM
-    $('#messages').append(messageHTML);
-
-    // Automatically close success messages after 5 seconds
-    if (json.status === 'success') {
-        setTimeout(() => removeMessagePopup(messageId), 5000);
+    if (json['status'] === 'success') {
+        setTimeout(() => {
+            removeMessagePopup(t);
+        }, 5000);
     }
-}
-
-function removeMessagePopup(messageId) {
-    // Remove the message with the provided ID
-    $(`#${messageId}`).remove();
 }
 
 //@param callback to function when user selects an option
