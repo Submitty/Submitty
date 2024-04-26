@@ -149,7 +149,7 @@ class NavigationView extends AbstractView {
                 }
 
                 // if the user seating details have both a building and a room property
-                if (property_exists($user_seating_details, 'building') && property_exists($user_seating_details, 'room')) {
+                else if (property_exists($user_seating_details, 'building') && property_exists($user_seating_details, 'room')) {
                     $seating_config_path = FileUtils::joinPaths(
                         $this->core->getConfig()->getCoursePath(),
                         'uploads',
