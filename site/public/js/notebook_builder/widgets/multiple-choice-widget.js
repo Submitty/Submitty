@@ -109,14 +109,16 @@ class MultipleChoiceWidget extends Widget {
                 Description
             </div>
             <div class="mc-header mc-col">
-                Controls
+                Choice Controls
             </div>
         </div>
         <div class="mc-inputs mc-row">
             <div class="mc-col"></div>
             <div class="mc-col-center"></div>
             <div class="mc-col mc-buttons">
-                <input type="button" class="add-button" value="Add Option">
+                <div class="move-btn add-button">
+                    <i class="fa-solid fa-plus"></i>
+                </div>
             </div>
         </div>`;
     }
@@ -178,11 +180,18 @@ class MultipleChoiceWidget extends Widget {
             <textarea class="entered-description-input">${description}</textarea>
         </div>
         <div class="mc-col mc-buttons">
-            <input type="button" class="up-button" value="Up">
-            <input type="button" class="down-button" value="Down">
-            <input type="button" class="remove-button" value="Remove">
+            <div class="move-btn up-button">
+                <i class="fa fa-lg fa-chevron-up"></i>
+            </div>
+            <div class="move-btn down-button">
+                <i class="fa fa-lg fa-chevron-down"></i>
+            </div>
+            <div class="move-btn remove-button">
+                <i class="fa fa-lg fa-trash"></i>
+            </div>
         </div>`;
     }
+    //<input type="button" class="move-btn up-button" value="Up">
 
     /**
      * Get the configuration area of the multiple choice widget.  These are the inputs related to
