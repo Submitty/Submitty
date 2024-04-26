@@ -141,11 +141,10 @@ class DatabaseQueries {
      * Update a user's preferred locale in the master database.
      *
      * @param User $user The user object to modify
-     * @param string $locale The locale string to set it to, must be one of Core::getSupportedLocales()
-     * @return bool Whether the operation was successful
+     * @param string|null $locale The locale string to set it to, must be one of Core::getSupportedLocales()
      */
-    public function updateSubmittyUserPreferredLocale(User $user, string|null $locale): bool {
-        return $this->submitty_db->query("UPDATE users SET user_preferred_locale=? WHERE user_id=?", [$locale, $user->getId()]);
+    public function updateSubmittyUserPreferredLocale(User $user, string|null $locale): void {
+        $this->submitty_db->query("UPDATE users SET user_preferred_locale=? WHERE user_id=?", [$locale, $user->getId()]);
     }
 
     /**
@@ -722,6 +721,86 @@ SQL;
         return $categories_list;
     }
 
+    /**
+     * @return array<string|int>
+     */
+    public function toggleLikes(int $post_id, string $current_user): array {
+        try {
+            $this->course_db->query("SELECT * FROM forum_upducks WHERE post_id = ? AND user_id = ?", [$post_id, $current_user]);
+            $inDatabase = isset($this->course_db->rows()[0]);
+            if ($inDatabase) {
+                $this->course_db->query("DELETE FROM forum_upducks WHERE post_id = ? AND user_id = ?", [$post_id, $current_user]);
+                $this->course_db->query("SELECT COUNT(*) AS likes_count FROM forum_upducks WHERE post_id = ?", [$post_id]);
+                $likesCount = intval($this->course_db->rows()[0]['likes_count']);
+                return ['unlike',$likesCount];
+            }
+            else {
+                $this->course_db->query("INSERT INTO forum_upducks (post_id, user_id) VALUES (?, ?)", [$post_id, $current_user]);
+                $this->course_db->query("SELECT COUNT(*) AS likes_count FROM forum_upducks WHERE post_id = ?", [$post_id]);
+                $likesCount = intval($this->course_db->rows()[0]['likes_count']);
+                return ['like',$likesCount];
+            }
+        }
+        catch (DatabaseException $dbException) {
+            if ($this->course_db->inTransaction()) {
+                $this->course_db->rollback();
+            }
+            return ["false",0];
+        }
+    }
+
+    /**
+     * @param int[] $post_ids
+     * @return int[]
+     */
+    public function getUpduckInfoForPosts(array $post_ids): array {
+        if (count($post_ids) === 0) {
+            return [];
+        }
+        $placeholders = $this->createParameterList(count($post_ids));
+        $sql = "SELECT post_id, COUNT(*) AS cnt FROM forum_upducks WHERE post_id IN {$placeholders} GROUP BY post_id";
+
+        $this->course_db->query($sql, $post_ids);
+        $result = [];
+
+        foreach ($post_ids as $post) {
+            $result[$post] = 0;
+        }
+        foreach ($this->course_db->rows() as $row) {
+            $result[$row['post_id']] = intval($row['cnt']);
+        }
+        return $result;
+    }
+
+    /**
+     * @param int[] $post_ids
+     * @param string $current_user
+     * @return int[]
+     */
+    public function getUserLikesForPosts(array $post_ids, string $current_user): array {
+        if (count($post_ids) === 0) {
+            return [];
+        }
+        $placeholders = $this->createParameterList(count($post_ids));
+        $user_id = $current_user;
+
+        $sql = "SELECT post_id, user_id, COUNT(*) AS cnt FROM forum_upducks WHERE post_id IN {$placeholders}
+                AND user_id = ? GROUP BY (post_id, user_id)";
+        $bindParams = array_merge($post_ids, [$user_id]);
+        $this->course_db->query($sql, $bindParams);
+        $result = [];
+        $final = [];
+        foreach ($this->course_db->rows() as $row) {
+            $result[$row['post_id']] = intval($row['cnt']);
+        }
+        foreach ($result as $key => $value) {
+            if ($value >= 1) {
+                array_push($final, $key);
+            }
+        }
+        return $final;
+    }
+
     public function splitPost($post_id, $title, $categories_ids) {
         $old_thread_id = -1;
         $thread_id = -1;
@@ -1206,8 +1285,9 @@ SQL;
 
     /**
      * @param string[] $attachments_deleted
+     * @param string[] $attachments_added
      */
-    public function editPost($original_creator, $user, $post_id, $content, $anon, $markdown, $attachments_deleted) {
+    public function editPost($original_creator, $user, $post_id, $content, $anon, $markdown, array $attachments_deleted, array $attachments_added) {
         try {
             $markdown = $markdown ? 1 : 0;
             // Before making any edit to $post_id, forum_posts_history will not have any corresponding entry
@@ -1229,6 +1309,17 @@ SQL;
             if (count($attachments_deleted) > 0) {
                 $placeholders = $this->createParameterList(count($attachments_deleted));
                 $this->course_db->query("UPDATE forum_attachments SET version_deleted = ? WHERE post_id = ? AND file_name IN {$placeholders}", array_merge([$version_id, $post_id], $attachments_deleted));
+            }
+            if (count($attachments_added) > 0) {
+                $rows = [];
+                $params = [];
+                // Format placeholders and parameters for single query
+                foreach ($attachments_added as $img) {
+                    $params[] = $this->createParameterList(4);
+                    $rows = array_merge($rows, [$post_id, $img, $version_id, 0]);
+                }
+                $placeholders = implode(", ", $params);
+                $this->course_db->query("INSERT INTO forum_attachments (post_id, file_name, version_added, version_deleted) VALUES {$placeholders}", $rows);
             }
             $hasAttachment = !empty($this->getForumAttachments([$post_id])[$post_id][0]);
             // Update current post
@@ -7179,7 +7270,7 @@ AND gc_id IN (
     private function updateOverallComment(TaGradedGradeable $ta_graded_gradeable, $comment, $grader_id) {
         $g_id = $ta_graded_gradeable->getGradedGradeable()->getGradeable()->getId();
         if ($comment === "") {
-            $this->deleteOverallComment($g_id, $grader_id);
+            $this->deleteOverallComment($g_id, $grader_id, $ta_graded_gradeable->getGradedGradeable()->getSubmitter()->getId());
             $ta_graded_gradeable->removeOverallComment($grader_id);
             return;
         }
@@ -7211,8 +7302,17 @@ AND gc_id IN (
         $this->course_db->query($query, $params);
     }
 
-    public function deleteOverallComment($gradeable_id, $grader_id) {
-        $this->course_db->query("DELETE FROM gradeable_data_overall_comment WHERE g_id=? AND goc_grader_id=?", [$gradeable_id, $grader_id]);
+    /**
+     * @param string $gradeable_id
+     * @param string $grader_id
+     * @param string $submitter_id
+     * @return void
+     */
+    public function deleteOverallComment($gradeable_id, $grader_id, $submitter_id) {
+        $this->course_db->query(
+            "DELETE FROM gradeable_data_overall_comment WHERE g_id=? AND goc_grader_id=? AND (goc_user_id=? OR goc_team_id=?)",
+            [$gradeable_id, $grader_id, $submitter_id, $submitter_id]
+        );
     }
 
     /**
@@ -7386,12 +7486,12 @@ AND gc_id IN (
      * @param  String                     $userid
      * @return bool
      */
-    public function getUserHasSubmission(Gradeable $gradeable, string $userid) {
-
-        return $this->course_db->query(
+    public function getUserHasSubmission(Gradeable $gradeable, string $userid): bool {
+        $this->course_db->query(
             'SELECT user_id FROM electronic_gradeable_data WHERE g_id=? AND (user_id=?)',
             [$gradeable->getId(), $userid]
         );
+        return $this->course_db->getRowCount() > 0;
     }
 
     /**
