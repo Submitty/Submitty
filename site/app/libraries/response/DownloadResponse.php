@@ -8,7 +8,7 @@ use app\libraries\Core;
  * Class DownloadResponse
  * @package app\libraries\response
  */
-class DownloadResponse {
+class DownloadResponse implements ResponseInterface {
     /** @var array<mixed> json encoded array */
     public $json;
 
