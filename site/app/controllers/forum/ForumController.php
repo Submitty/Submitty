@@ -774,7 +774,7 @@ class ForumController extends AbstractController {
      * @AccessControl(permission="forum.merge_thread")
      */
     #[Route("/courses/{_semester}/{_course}/forum/threads/merge", methods: ["POST"])]
-        public function mergeThread() {
+    public function mergeThread() {
         $current_user_id = $this->core->getUser()->getId();
         $parent_thread_id = $_POST["merge_thread_parent"];
         $child_thread_id = $_POST["merge_thread_child"];
@@ -1062,7 +1062,7 @@ class ForumController extends AbstractController {
         return $this->core->getOutput()->renderJsonSuccess($result);
     }
 
-    #[Route("/courses/{_semester}/{_course}/forum", methods: ["POST"])]
+    #[Route("/courses/{_semester}/{_course}/forum", methods: ["GET"])]
     public function showFullThreads() {
         // preparing the params for threads
         $currentCourse = $this->core->getConfig()->getCourse();
