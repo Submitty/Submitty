@@ -1024,34 +1024,45 @@ class SubmissionController extends AbstractController {
      * @return JsonResponse
      * @param string $gradeable_id
      */
-    #[Route("/api/{_semester}/{_course}/gradeable/{gradeable_id}/values", methods: ["GET"])]
+    #[Route('/api/{_semester}/{_course}/gradeable/{gradeable_id}/values', methods: ['GET'])]
     public function ajaxGetGradeableValues(string $gradeable_id): JsonResponse {
-        // Instructor
-        if ($this->core->getUser()->getAccessLevel() !== 1 && ($_GET['user_id'] ?? '') !== $this->core->getUser()->getId()) {
+        if ($this->core->getQueries()->getUserById($_GET['user_id']) === null) {
+            return JsonResponse::getFailResponse('User with id `' . $_GET['user_id'] . '` does not exist.');
+        }
+        // Faculty = 2, Superuser = 1
+        if ($this->core->getUser()->getAccessLevel() > 2 && ($_GET['user_id'] ?? '') !== $this->core->getUser()->getId()) {
             return JsonResponse::getFailResponse('API key and specified user_id are not for the same user.');
         }
+        
         try {
             $gradeable = $this->core->getQueries()->getGradeableConfig($gradeable_id);
         }
         catch (\InvalidArgumentException $e) {
             return JsonResponse::getFailResponse('Gradeable does not exist');
         }
-        $gradeable_version_values = $this->core->getQueries()->getGradedGradeable(
+
+        $graded_gradeable = $this->core->getQueries()->getGradedGradeable(
             $gradeable,
             $_GET['user_id'],
             $gradeable->isTeamAssignment()
-        )->getAutoGradedGradeable();
+        );
+
+        if ($graded_gradeable === null) {
+            return JsonResponse::getFailResponse('Gradeable does not exist');
+        }
+
+        $graded_gradeable = $graded_gradeable->getAutoGradedGradeable();
 
         return JsonResponse::getSuccessResponse([
-            'is_queued' => $gradeable_version_values->isQueued(),
-            'queue_position' => $gradeable_version_values->getQueuePosition(),
-            'is_grading' => $gradeable_version_values->isGrading(),
-            'has_submission' => $gradeable_version_values->hasSubmission(),
-            'autograding_complete' => $gradeable_version_values->isAutoGradingComplete(),
-            'has_active_version' => $gradeable_version_values->hasActiveVersion(),
-            'highest_version' => $gradeable_version_values->getHighestVersion(),
-            'total_points' => ($gradeable_version_values->hasActiveVersion() ? $gradeable_version_values->getTotalPoints() : null),
-            'total_percent' => ($gradeable_version_values->hasActiveVersion() ? $gradeable_version_values->getTotalPercent() : null)
+            'is_queued' => $graded_gradeable->isQueued(),
+            'queue_position' => $graded_gradeable->getQueuePosition(),
+            'is_grading' => $graded_gradeable->isGrading(),
+            'has_submission' => $graded_gradeable->hasSubmission(),
+            'autograding_complete' => $graded_gradeable->isAutoGradingComplete(),
+            'has_active_version' => $graded_gradeable->hasActiveVersion(),
+            'highest_version' => $graded_gradeable->getHighestVersion(),
+            'total_points' => ($graded_gradeable->hasActiveVersion() ? $graded_gradeable->getTotalPoints() : null),
+            'total_percent' => ($graded_gradeable->hasActiveVersion() ? $graded_gradeable->getTotalPercent() : null)
         ]);
     }
 
@@ -1061,20 +1072,18 @@ class SubmissionController extends AbstractController {
      *     data: mixed
      * }
      */
-    #[Route("/api/{_semester}/{_course}/gradeable/{gradeable_id}/grade", methods: ["POST"])]
+    #[Route('/api/{_semester}/{_course}/gradeable/{gradeable_id}/grade', methods: ['POST'])]
     public function ajaxRequestGrade(string $gradeable_id): JsonResponse|array {
-        // Instructor
-        if ($this->core->getUser()->getAccessLevel() !== 1) {
-            if (($_POST['user_id'] ?? '') !== $this->core->getUser()->getId()) {
-                return JsonResponse::getFailResponse('API key and specified user_id are not for the same user.');
-            }
+        // Faculty = 2, Superuser = 1
+        if ($this->core->getUser()->getAccessLevel() > 2 && ($_POST['user_id'] ?? '') !== $this->core->getUser()->getId()) {
+            return JsonResponse::getFailResponse('API key and specified user_id are not for the same user.');
         }
-        $vcs_checkout = array_key_exists('vcs_checkout', $_POST) ? $_POST['vcs_checkout'] === "true" : false;
+        $vcs_checkout = array_key_exists('vcs_checkout', $_POST) ? $_POST['vcs_checkout'] === 'true' : false;
         if (!$vcs_checkout) {
-            return JsonResponse::getFailResponse("API only supports requesting for VCS gradeables to be graded.");
+            return JsonResponse::getFailResponse('API only supports requesting for VCS gradeables to be graded.');
         }
         if (!array_key_exists('git_repo_id', $_POST)) {
-            return JsonResponse::getFailResponse("API requires git_repo_id variable to be set.");
+            return JsonResponse::getFailResponse('API requires git_repo_id variable to be set.');
         }
 
         return $this->ajaxUploadSubmission($gradeable_id);

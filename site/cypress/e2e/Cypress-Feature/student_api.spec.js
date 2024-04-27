@@ -39,7 +39,7 @@ describe('Tests cases for the Student API', () => {
                                 'queue_position': -1,
                                 'is_grading': false,
                                 'has_submission': true,
-                                'autograding_complete': true,
+                                'autograding_complete': false,
                                 'has_active_version': true,
                                 'highest_version': 1,
                                 'total_points': 0,
