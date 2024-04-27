@@ -141,7 +141,8 @@
     {# /Admin submission type selector #}
 
     {% if is_vcs %}
-        {% if vcs_host_type == 0 or vcs_host_type == 1 %}
+        {% if vcs_host_type == constant('app\\models\\gradeable\\GradeableUtils::VCS_TYPE_SUBMITTY_HOSTED')
+            or vcs_host_type == constant('app\\models\\gradeable\\GradeableUtils::VCS_TYPE_SUBMITTY_HOSTED_URL') %}
             {% if vcs_repo_exists %}
                 <h3>To access your Repository:</h3>
                 <span><em>Note: There may be a delay before your repository is prepared, please refer to assignment instructions.</em></span><br />
@@ -164,7 +165,8 @@
             {% endif %}
         {% endif %}
 
-        {% if vcs_host_type == 2 or vcs_host_type == 3 %}
+        {% if vcs_host_type == constant('app\\models\\gradeable\\GradeableUtils::VCS_TYPE_PUBLIC_GITHUB')
+            or vcs_host_type == constant('app\\models\\gradeable\\GradeableUtils::VCS_TYPE_PRIVATE_GITHUB') %}
             <h3>Please enter your GitHub URL: </h3>
 
             GitHub URL: &nbsp;&nbsp; <kbd>https://www.github.com/</kbd>
@@ -172,7 +174,7 @@
             <kbd>/</kbd>
             <input type="text" id="github-repo-id" name="git_repo_id" class="required github-id" value="{{ github_repo_id }}" placeholder="repo_name"/>
 
-            {% if vcs_host_type == 2 %}
+            {% if vcs_host_type == constant('app\\models\\gradeable\\GradeableUtils::VCS_TYPE_PUBLIC_GITHUB') %}
             Note: This should be a <em>public repository</em>, visible to everyone.
             {% else %}
             Note: If this is not a <em>public repository</em>, please ensure that you have granted read access to INCOMPLETE! FIXME! SPECIAL USER.
@@ -180,7 +182,7 @@
 
         {% endif %}
 
-        {% if vcs_host_type == 4 %}
+        {% if vcs_host_type == constant('app\\models\\gradeable\\GradeableUtils::VCS_TYPE_SELF_HOSTED') %}
             <h3>To access your Repository:</h3>
             <span><em>Note: Please push all changes before grading.</em></span><br />
             <samp> git clone {{ vcs_partial_path }} SPECIFY_TARGET_DIRECTORY  </samp>
