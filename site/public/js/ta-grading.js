@@ -567,7 +567,7 @@ function onAjaxInit() {}
 
 function readCookies() {
 
-    const silent_edit_enabled = Cookies.get('silent_edit_enabled') || '';
+    const silent_edit_enabled = Cookies.get('silent_edit_enabled') === 'true' || '';
 
     const autoscroll = Cookies.get('autoscroll') || '';
     const opened_mark = Cookies.get('opened_mark') || '';
