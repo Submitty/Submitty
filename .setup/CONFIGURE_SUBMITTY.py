@@ -640,6 +640,7 @@ try:
         if "system_message" in load_submitty_json:
                 config["system_message"] = load_submitty_json["system_message"]
 except IOError:
+	pass
 
 with open(SUBMITTY_JSON, 'w') as json_file:
     json.dump(config, json_file, indent=2)
