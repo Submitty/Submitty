@@ -1077,16 +1077,22 @@ class SubmissionController extends AbstractController {
      */
     #[Route('/api/{_semester}/{_course}/gradeable/{gradeable_id}/grade', methods: ['POST'])]
     public function ajaxRequestGrade(string $gradeable_id): JsonResponse|array {
-        // Faculty = 2, Superuser = 1
-        if ($this->core->getUser()->getAccessLevel() > User::LEVEL_FACULTY && ($_POST['user_id'] ?? '') !== $this->core->getUser()->getId()) {
+        // Faculty and Superusers can get request grading for other users, if it is a student, require the $_POST user id to be the same as the
+        // API authenticated user.
+        if ($this->core->getUser()->getAccessLevel() === User::LEVEL_USER && ($_POST['user_id'] ?? '') !== $this->core->getUser()->getId()) {
             return JsonResponse::getFailResponse('API key and specified user_id are not for the same user.');
         }
         $vcs_checkout = array_key_exists('vcs_checkout', $_POST) && $_POST['vcs_checkout'] === 'true';
         if (!$vcs_checkout) {
             return JsonResponse::getFailResponse('API only supports requesting for VCS gradeables to be graded.');
         }
+
         if (!array_key_exists('git_repo_id', $_POST)) {
             return JsonResponse::getFailResponse('API requires git_repo_id variable to be set.');
+        }
+
+        if (!array_key_exists('user_id', $_POST)) {
+            return JsonResponse::getFailResponse('API requires user_id variable to be set.');
         }
 
         return $this->ajaxUploadSubmission($gradeable_id);
