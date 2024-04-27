@@ -1026,14 +1026,15 @@ class SubmissionController extends AbstractController {
      */
     #[Route('/api/{_semester}/{_course}/gradeable/{gradeable_id}/values', methods: ['GET'])]
     public function ajaxGetGradeableValues(string $gradeable_id): JsonResponse {
-
-        // Faculty = 2, Superuser = 1
-        if ($this->core->getUser()->getAccessLevel() > 2 && ($_GET['user_id'] ?? '') !== $this->core->getUser()->getId()) {
+        $user_id = $_GET['user_id'] ?? '';
+        // Faculty and Superusers can get values for other users, if it is a student, require the $_GET user id to be the same as the 
+        // API authenticated user.
+        if ($this->core->getUser()->getAccessLevel() === User::LEVEL_USER && ($user_id !== $this->core->getUser()->getId())) {
             return JsonResponse::getFailResponse('API key and specified user_id are not for the same user.');
         }
-
-        if ($this->core->getQueries()->getUserById($_GET['user_id']) === null) {
-            return JsonResponse::getFailResponse('User with id `' . $_GET['user_id'] . '` does not exist.');
+        // This should only return fail response if an instructor is requesting a grade.
+        if ($this->core->getQueries()->getUserById($user_id) === null) {
+            return JsonResponse::getFailResponse('User with id ' . $user_id . ' does not exist.');
         }
 
         try {
@@ -1045,7 +1046,7 @@ class SubmissionController extends AbstractController {
 
         $graded_gradeable = $this->core->getQueries()->getGradedGradeable(
             $gradeable,
-            $_GET['user_id'],
+            $user_id,
             $gradeable->isTeamAssignment()
         );
 
@@ -1077,7 +1078,7 @@ class SubmissionController extends AbstractController {
     #[Route('/api/{_semester}/{_course}/gradeable/{gradeable_id}/grade', methods: ['POST'])]
     public function ajaxRequestGrade(string $gradeable_id): JsonResponse|array {
         // Faculty = 2, Superuser = 1
-        if ($this->core->getUser()->getAccessLevel() > 2 && ($_POST['user_id'] ?? '') !== $this->core->getUser()->getId()) {
+        if ($this->core->getUser()->getAccessLevel() > User::LEVEL_FACULTY && ($_POST['user_id'] ?? '') !== $this->core->getUser()->getId()) {
             return JsonResponse::getFailResponse('API key and specified user_id are not for the same user.');
         }
         $vcs_checkout = array_key_exists('vcs_checkout', $_POST) && $_POST['vcs_checkout'] === 'true';
