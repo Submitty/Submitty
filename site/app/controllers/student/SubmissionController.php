@@ -1027,9 +1027,9 @@ class SubmissionController extends AbstractController {
     #[Route('/api/{_semester}/{_course}/gradeable/{gradeable_id}/values', methods: ['GET'])]
     public function ajaxGetGradeableValues(string $gradeable_id): JsonResponse {
         $user_id = $_GET['user_id'] ?? '';
-        // Faculty and Superusers can get values for other users, if it is a student, require the $_GET user id to be the same as the
+        // Instructors can get values for other users, otherwise require the $_GET user id to be the same as the
         // API authenticated user.
-        if ($this->core->getUser()->getAccessLevel() === User::LEVEL_USER && ($user_id !== $this->core->getUser()->getId())) {
+        if ($this->core->getUser()->getGroup() !== User::GROUP_INSTRUCTOR && ($user_id !== $this->core->getUser()->getId())) {
             return JsonResponse::getFailResponse('API key and specified user_id are not for the same user.');
         }
 
@@ -1073,9 +1073,9 @@ class SubmissionController extends AbstractController {
      */
     #[Route('/api/{_semester}/{_course}/gradeable/{gradeable_id}/grade', methods: ['POST'])]
     public function ajaxRequestGrade(string $gradeable_id): JsonResponse|array {
-        // Faculty and Superusers can get request grading for other users, if it is a student, require the $_POST user id to be the same as the
+        // Instructors can get request grading for other users, otherwise require the $_POST user id to be the same as the
         // API authenticated user.
-        if ($this->core->getUser()->getAccessLevel() === User::LEVEL_USER && ($_POST['user_id'] ?? '') !== $this->core->getUser()->getId()) {
+        if ($this->core->getUser()->getGroup() !== User::GROUP_INSTRUCTOR && ($_POST['user_id'] ?? '') !== $this->core->getUser()->getId()) {
             return JsonResponse::getFailResponse('API key and specified user_id are not for the same user.');
         }
         $vcs_checkout = array_key_exists('vcs_checkout', $_POST) && $_POST['vcs_checkout'] === 'true';
