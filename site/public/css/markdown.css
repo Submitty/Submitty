@@ -85,6 +85,7 @@
     border-left: 4px solid #aaaaaa;
     padding-left: 0.75em;
     margin-left: 0;
+    color: #aaaaaa;
 }
 
 .markdown code:not(.inline-code) {
