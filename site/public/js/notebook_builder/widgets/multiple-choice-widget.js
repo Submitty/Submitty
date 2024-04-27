@@ -191,7 +191,6 @@ class MultipleChoiceWidget extends Widget {
             </div>
         </div>`;
     }
-    //<input type="button" class="move-btn up-button" value="Up">
 
     /**
      * Get the configuration area of the multiple choice widget.  These are the inputs related to

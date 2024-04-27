@@ -216,7 +216,7 @@ class AbstractBuilder {
         if (is_itempool_widget) {
             this.itempoolItemChangeAction();
         }
-    }   
+    }
 
     /**
      * Move a widget down one position in the notebook builder form.
