@@ -4,7 +4,7 @@
         Limited grader does not have "View All" option
         If nothing to grade, Instructor will see all sections
     #}
-    <div class="row details-header-row">
+    <div class="details-header-row">
     <h1>Grade Details for {{ gradeable.getTitle() }}</h1>
         <div class="markers-container">
             <ul id="details-legend">
@@ -36,24 +36,24 @@
 
             <div class="action-btn-cont">
                 {% if show_all_sections_button %}
-                <button class="btn btn-default" data-testid="view-sections" onclick="changeSections()">
+                <a class="btn btn-default" data-testid="view-sections" onclick="changeSections()">
                     {{ view_all ? "View Your Sections" : "View All" }}
-                </button>
+                </a>
                 {% endif %}
                 <a class="btn btn-default"
                    href="" onclick="changeSortOrder()">
                     {{ sort == 'random' ? "Switch to Default Order" : "Switch to Random Order" }}
                 </a>
                 {% if toggle_anon_button %}
-                <button class="btn btn-default" id="toggle-anon-button"
+                <a class="btn btn-default" id="toggle-anon-button"
                     onclick="changeAnon('{{ gradeable.getId() }}')">
                     {{ anon_mode ? "Disable Anonymous Mode" : "Enable Anonymous Mode" }}
-                </button>
+                </a>
                 {% endif %}
                 {% if grade_inquiry_only_button %}
-                <button class="btn btn-default" id="inquiryButton" onclick="change_inquiry()">
+                <a class="btn btn-default" id="inquiryButton" onclick="change_inquiry()">
                     {{ inquiry_status ? "Grade Inquiry Only: Off" : "Grade Inquiry Only: On" }}
-                </button>
+                </a>
                 {% endif %}
             </div>
         </div>
