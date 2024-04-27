@@ -1078,7 +1078,7 @@ class SubmissionController extends AbstractController {
         if ($this->core->getUser()->getAccessLevel() > 2 && ($_POST['user_id'] ?? '') !== $this->core->getUser()->getId()) {
             return JsonResponse::getFailResponse('API key and specified user_id are not for the same user.');
         }
-        $vcs_checkout = array_key_exists('vcs_checkout', $_POST) ? $_POST['vcs_checkout'] === 'true' : false;
+        $vcs_checkout = array_key_exists('vcs_checkout', $_POST) && $_POST['vcs_checkout'] === 'true';
         if (!$vcs_checkout) {
             return JsonResponse::getFailResponse('API only supports requesting for VCS gradeables to be graded.');
         }

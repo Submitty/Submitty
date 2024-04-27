@@ -36,12 +36,12 @@ describe('Tests cases for the Student API', () => {
                         JSON.stringify(
                             {
                                 'is_queued': false,
-                                'queue_position': -1,
-                                'is_grading': false,
+                                'queue_position': 0,
+                                'is_grading': true,
                                 'has_submission': true,
                                 'autograding_complete': false,
                                 'has_active_version': true,
-                                'highest_version': 1,
+                                'highest_version': 2,
                                 'total_points': 0,
                                 'total_percent': 0,
                             }));
