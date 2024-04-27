@@ -295,9 +295,9 @@ class PollTester extends BaseUnitTest {
 
         $this->my_polls[1]->setEnded();
         // SetEnded sets EndTime to current time (no way to check exact millisecond)
-        $endTime = $this->my_polls[2]->getEndTime()->format("Y-m-d");
-        $currentDate = gmdate("Y-m-d");
-        $this->assertEquals($endTime, $currentDate);
+        $endtime = $this->my_polls[1]->getEndTime()->format("Y-m-d");
+        $expectedDate = DateUtils::getDateTimeNow()->format("Y-m-d");
+        $this->assertEquals($endtime, $expectedDate);
 
         $this->my_polls[2]->setEndTime(new DateTime('2025-10-03 05:30:00'));
         $this->assertEquals($this->my_polls[2]->getEndTime()->format("Y-m-d H:i:s"), "2025-10-03 05:30:00");
