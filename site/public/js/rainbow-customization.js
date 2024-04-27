@@ -1,10 +1,11 @@
+/* exported addToTable, deleteRow */
 const benchmarks_with_input_fields = ['lowest_a-', 'lowest_b-', 'lowest_c-', 'lowest_d'];
 
 // eslint-disable-next-line no-unused-vars
 function ExtractBuckets() {
     const x = [];
     const bucket_list = $('#buckets_used_list').find('li');
-    bucket_list.each((idx,li) => {
+    bucket_list.each((idx, li) => {
         x.push($(li).text());
     });
 
@@ -19,7 +20,7 @@ function ClampPoints(el) {
         el.value = el.placeholder;
         el.classList.remove('override');
     }
-    el.value = Math.max(0.0,el.value);
+    el.value = Math.max(0.0, el.value);
 }
 
 // eslint-disable-next-line no-unused-vars
@@ -32,7 +33,7 @@ function DetectMaxOverride(el) {
     }
 }
 
-function ExtractBucketName(s,offset) {
+function ExtractBucketName(s, offset) {
     const tmp = s.split('-');
     let bucket = '';
     let i;
@@ -48,9 +49,9 @@ function ExtractBucketName(s,offset) {
 //Forces element's value to be in range [0.0,100.0]
 // eslint-disable-next-line no-unused-vars
 function ClampPercent(el) {
-    el.value = Math.min(Math.max(el.value,0.0),100.0);
+    el.value = Math.min(Math.max(el.value, 0.0), 100.0);
     UpdateUsedPercentage();
-    $(`#config-percent-${ExtractBucketName(el.id,1)}`).text(`${el.value}%`);
+    $(`#config-percent-${ExtractBucketName(el.id, 1)}`).text(`${el.value}%`);
 }
 
 //Updates the sum of percentage points accounted for by the buckets being used
@@ -64,10 +65,10 @@ function UpdateUsedPercentage() {
     const percentage_span = $('#used_percentage');
     percentage_span.text(`${val.toString()}%`);
     if (val>100.0) {
-        percentage_span.css({'color':'red','font-weight':'bold'});
+        percentage_span.css({'color':'red', 'font-weight':'bold'});
     }
     else {
-        percentage_span.css({'color':'var(--text-black)','font-weight':''});
+        percentage_span.css({'color':'var(--text-black)', 'font-weight':''});
     }
 }
 
@@ -77,8 +78,8 @@ function UpdateVisibilityBuckets() {
     //For each bucket that isn't being used, hide it
     $('#buckets_available_list').find('input').each(function() {
         //Extract the bucket name
-        const bucket = ExtractBucketName($(this).attr('id'),1);
-        $(`#config-${bucket}`).css('display','none');
+        const bucket = ExtractBucketName($(this).attr('id'), 1);
+        $(`#config-${bucket}`).css('display', 'none');
     });
 
     //For each bucket that IS being used, show it
@@ -86,12 +87,12 @@ function UpdateVisibilityBuckets() {
     if (used_buckets.length === 0) {
         return;
     }
-    let prev_bucket = ExtractBucketName(used_buckets.first().attr('id'),1);
-    $(`#config-${prev_bucket}`).prependTo('#config-wrapper').css('display','block');
+    let prev_bucket = ExtractBucketName(used_buckets.first().attr('id'), 1);
+    $(`#config-${prev_bucket}`).prependTo('#config-wrapper').css('display', 'block');
 
     used_buckets.each(function() {
         //Extract the bucket name
-        const bucket = ExtractBucketName($(this).attr('id'),1);
+        const bucket = ExtractBucketName($(this).attr('id'), 1);
         console.log(`prev_bucket: ${prev_bucket} bucket: ${bucket}`);
         if (bucket !== prev_bucket) {
             $(`#config-${bucket}`).css('display', 'block');
@@ -100,6 +101,18 @@ function UpdateVisibilityBuckets() {
         }
     });
 }
+
+function getDisplay() {
+    // Collect display
+    const display = [];
+
+    $.each($("input[name='display']:checked"), function() {
+        display.push($(this).val());
+    });
+
+    return display;
+}
+
 
 function getSection() {
     // Collect sections and labels
@@ -203,8 +216,7 @@ function getGradeableBuckets() {
                     const benchmark = this.getAttribute('data-benchmark').toString();
 
                     if (curve_points_selected.includes(benchmark) && this.value) {
-                        // eslint-disable-next-line no-prototype-builtins
-                        if (!gradeable.hasOwnProperty('curve')) {
+                        if (!Object.prototype.hasOwnProperty.call(gradeable, 'curve')) {
                             gradeable.curve = [];
                         }
 
@@ -213,8 +225,7 @@ function getGradeableBuckets() {
                 });
 
                 // Validate the set of per-gradeable curve values
-                // eslint-disable-next-line no-prototype-builtins
-                if (gradeable.hasOwnProperty('curve')) {
+                if (Object.prototype.hasOwnProperty.call(gradeable, 'curve')) {
 
                     // Has correct number of values
                     if (gradeable.curve.length !== curve_points_selected.length) {
@@ -257,6 +268,101 @@ function getGradeableBuckets() {
     });
 
     return gradeables;
+}
+
+function getPlagiarism() {
+    const plagiarismData = [];
+
+    const tableBody = document.getElementById('table-body');
+    const rows = tableBody.getElementsByTagName('tr');
+
+    for (let i = 0; i < rows.length; i++) {
+        const row = rows[i];
+        const user = row.cells[0].textContent;
+        const gradeable = row.cells[1].textContent;
+        const penalty = parseFloat(row.cells[2].textContent);
+
+        plagiarismData.push({
+            user: user,
+            gradeable: gradeable,
+            penalty: penalty,
+        });
+    }
+
+    return plagiarismData;
+}
+
+function addToTable() {
+    const USERID = document.getElementById('user_id').value.trim();
+    const gradeable = document.getElementById('g_id').value.trim();
+    const penalty = document.getElementById('marks').value.trim();
+
+    // Check for empty fields
+    if (USERID === '' || gradeable === '' || penalty === '') {
+        alert('Please fill in all the fields.');
+        return;
+    }
+
+    // eslint-disable-next-line no-undef
+    const studentFullDataValues = studentFullData.map(item => item.value);
+    if (!studentFullDataValues.includes(USERID)) {
+        alert('Invalid User ID. Please enter a valid one.');
+        return;
+    }
+
+    // Check for penalty
+    if (penalty > 1 || penalty < 0) {
+        alert('Penalty must be between 0 - 1');
+        return;
+    }
+
+
+    const tableBody = document.getElementById('table-body');
+
+    // Check for duplicate entries
+    const rows = tableBody.getElementsByTagName('tr');
+    for (let i = 0; i < rows.length; i++) {
+        const row = rows[i];
+        const existingUSERID = row.cells[0].textContent.trim();
+        const existingGradeable = row.cells[1].textContent.trim();
+
+        if (USERID === existingUSERID && gradeable === existingGradeable) {
+            alert('Entry with the same Student ID and Gradeable already exists.');
+            return;
+        }
+    }
+
+    // Create a new row and cells
+    const newRow = tableBody.insertRow();
+
+    const cellUSERID = newRow.insertCell();
+    cellUSERID.textContent = USERID;
+
+    const cellGradeable = newRow.insertCell();
+    cellGradeable.textContent = gradeable;
+
+    const cellPenalty = newRow.insertCell();
+    cellPenalty.textContent = penalty;
+
+    const cellDelete = newRow.insertCell();
+    const deleteLink = document.createElement('a');
+    const deleteIcon = document.createElement('i');
+    deleteIcon.className = 'fas fa-trash';
+    deleteLink.appendChild(deleteIcon);
+    deleteLink.onclick = function () {
+        deleteRow(this);
+    };
+    cellDelete.appendChild(deleteLink);
+
+    // Clear the form fields
+    document.getElementById('user_id').value = '';
+    document.getElementById('g_id').value = '';
+    document.getElementById('marks').value = '';
+}
+
+function deleteRow(button) {
+    const row = button.parentNode.parentNode;
+    row.parentNode.removeChild(row);
 }
 
 function getMessages() {
@@ -308,15 +414,16 @@ function buildJSON() {
 
     // Build the overall json
     let ret = {
+        'display': getDisplay(),
         'display_benchmark': getDisplayBenchmark(),
         'benchmark_percent': getBenchmarkPercent(),
         'section' : getSection(),
         'gradeables' : getGradeableBuckets(),
         'messages' : getMessages(),
+        'plagiarism' : getPlagiarism(),
     };
 
     ret = JSON.stringify(ret);
-
     return ret;
 }
 
@@ -360,6 +467,7 @@ function checkAutoRGStatus() {
     });
 }
 
+
 //This function attempts to create a new customization.json server-side based on form input
 // eslint-disable-next-line no-unused-vars
 function ajaxUpdateJSON(successCallback, errorCallback) {
@@ -369,7 +477,6 @@ function ajaxUpdateJSON(successCallback, errorCallback) {
 
         // eslint-disable-next-line no-undef
         const url = buildCourseUrl(['reports', 'rainbow_grades_customization']);
-
         $.getJSON({
             type: 'POST',
             url: url,
@@ -400,11 +507,11 @@ function ajaxUpdateJSON(successCallback, errorCallback) {
     catch (err) {
         $('#save_status').html(err);
     }
-
 }
 
+
 function displayChangeDetectedMessage() {
-    $('#save_status').html('Changes detected, press "Save Changes" to save them.');
+    $('#save_status').text('Changes detected, press "Save Changes" to save them.');
 }
 
 /**
@@ -505,6 +612,10 @@ $(document).ready(() => {
 
     });
 
+    $("input[name*='display']").change(() => {
+        displayChangeDetectedMessage();
+    });
+
     // Register change handlers to update the status message when form inputs change
     $("input[name*='display_benchmarks']").change(() => {
         displayChangeDetectedMessage();
@@ -517,6 +628,11 @@ $(document).ready(() => {
     $('.sections_and_labels').on('change keyup paste', () => {
         displayChangeDetectedMessage();
     });
+    // plagiarism option-input
+    $('.option-input').on('change keyup paste', () => {
+        displayChangeDetectedMessage();
+    });
+
 
     // https://stackoverflow.com/questions/15657686/jquery-event-detect-changes-to-the-html-text-of-a-div
     // More Details https://developer.mozilla.org/en-US/docs/Web/API/MutationObserver

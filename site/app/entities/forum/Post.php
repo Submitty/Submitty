@@ -6,103 +6,66 @@ namespace app\entities\forum;
 
 use DateTime;
 use Doctrine\Common\Collections\Collection;
+use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
 
-/**
- * @ORM\Entity
- * @ORM\Table(name="posts")
- */
+#[ORM\Entity]
+#[ORM\Table(name: "posts")]
 class Post {
-    /**
-     * @ORM\Id
-     * @ORM\Column(type="integer")
-     * @var integer
-     */
-    protected $id;
+    #[ORM\Id]
+    #[ORM\Column(type: Types::INTEGER)]
+    protected int $id;
 
     /**
-     * @ORM\OneToMany(targetEntity="\app\entities\forum\Thread", mappedBy="merged_post")
      * @var Collection<Thread>
      */
-    protected $merged_threads;
+    #[ORM\OneToMany(mappedBy: "merged_post", targetEntity: Thread::class)]
+    protected Collection $merged_threads;
+
+    #[ORM\ManyToOne(targetEntity: Thread::class, inversedBy: "posts")]
+    #[ORM\JoinColumn(name: "thread_id", referencedColumnName: "id", nullable: false)]
+    protected Thread $thread;
+
+    #[ORM\ManyToOne(targetEntity: Post::class, inversedBy: "children")]
+    #[ORM\JoinColumn(name: "parent_id", referencedColumnName: "id")]
+    protected ?Post $parent;
 
     /**
-     * @ORM\ManyToOne(targetEntity="\app\entities\forum\Thread", inversedBy="posts")
-     * @ORM\JoinColumn(name="thread_id", referencedColumnName="id")
-     * @var Thread
-     */
-    protected $thread;
-
-    /**
-     * @ORM\ManyToOne(targetEntity="Post", inversedBy="children")
-     * @ORM\JoinColumn(name="parent_id", referencedColumnName="id")
-     * @var Post
-     */
-    protected $parent;
-
-    /**
-     * @ORM\OneToMany(targetEntity="Post", mappedBy="parent")
      * @var Collection<Post>
      */
-    protected $children;
+    #[ORM\OneToMany(mappedBy: "parent", targetEntity: Post::class)]
+    protected Collection $children;
+
+    #[ORM\Column(type: Types::STRING)]
+    protected string $author_user_id;
+
+    #[ORM\Column(type: Types::TEXT)]
+    protected string $content;
+
+    #[ORM\Column(type: Types::DATETIMETZ_MUTABLE)]
+    protected DateTime $timestamp;
+
+    #[ORM\Column(type: Types::BOOLEAN)]
+    protected bool $anonymous;
+
+    #[ORM\Column(type: Types::BOOLEAN)]
+    protected bool $deleted;
+
+    #[ORM\Column(type: Types::STRING)]
+    protected string $endorsed_by;
+
+    #[ORM\Column(type: Types::INTEGER)]
+    protected int $type;
+
+    #[ORM\Column(type: Types::BOOLEAN)]
+    protected bool $has_attachment;
+
+    #[ORM\Column(type: Types::BOOLEAN)]
+    protected bool $render_markdown;
 
     /**
-     * @ORM\Column(type="string")
-     * @var string
-     */
-    protected $author_user_id;
-
-    /**
-     * @ORM\Column(type="text")
-     * @var string
-     */
-    protected $content;
-
-    /**
-     * @ORM\Column(type="datetimetz")
-     * @var DateTime
-     */
-    protected $timestamp;
-
-    /**
-     * @ORM\Column(type="boolean")
-     * @var bool
-     */
-    protected $anonymous;
-
-    /**
-     * @ORM\Column(type="boolean")
-     * @var bool
-     */
-    protected $deleted;
-
-    /**
-     * @ORM\Column(type="string")
-     * @var string
-     */
-    protected $endorsed_by;
-
-    /**
-     * @ORM\Column(type="integer")
-     * @var integer
-     */
-    protected $type;
-
-    /**
-     * @ORM\Column(type="boolean")
-     * @var bool
-     */
-    protected $has_attachment;
-
-    /**
-     * @ORM\Column(type="boolean")
-     * @var bool
-     */
-    protected $render_markdown;
-
-    /**
-     * @ORM\OneToMany(targetEntity="\app\entities\forum\PostHistory", mappedBy="post")
      * @var Collection<PostHistory>
      */
-    protected $history;
+    #[ORM\OneToMany(mappedBy: "post", targetEntity: PostHistory::class)]
+    protected Collection $history;
 }

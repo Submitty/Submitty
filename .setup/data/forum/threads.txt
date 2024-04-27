@@ -6,3 +6,4 @@ Python Tutorials               | huelsw     | f      | f       |        -1 |    
 Simple C++ threading example   | bitdiddle  | f      | f       |        -1 |        -1 | t | 1
 Different Levels& display order| bitdiddle  | f      | f       |        -1 |        -1 | t | 1
 Attachment contains secret     | instructor | f      | f       |        -1 |        -1 | t | 1
+Markdown example               | instructor | f      | f       |        -1 |        -1 | t | 1

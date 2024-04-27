@@ -25,6 +25,10 @@
         }
         // Load the calendar to the correct day
         loadCalendar(cookie_month, cookie_year, cookie_day, type);
+        //Color the legend
+        if ({{show_legend}} === 1) {
+            colorLegend();
+        }
     });
 
     function changeView(x) {
@@ -47,7 +51,6 @@
     }
 </script>
 
-
 {# Begin Calendar #}
 <div class="content">
     <h1>Calendar</h1>
@@ -58,7 +61,6 @@
                     <i class="fas fa-plus"></i> New Item
                 </button>
             {% endif %}
-
                 <button type="button" onclick="openOptionsModal()" class="btn btn-primary">
                     <i class="fas fa-sliders"></i> Options
                 </button>
@@ -67,7 +69,24 @@
                     <option value="two_week" {% if (view_cookie is defined)  and view_cookie == "two_week" %} selected {% endif %}>Two Week</option>
                     <option value="one_week" {% if (view_cookie is defined)  and view_cookie == "one_week" %} selected {% endif %}>One Week</option>
                 </select>
+                <button id="calendar-today-button" type="button" onclick="setDateToToday()" class="btn btn-primary">
+                    <i class="fas fa-clock"></i> Today
+                </button>
         </div>
+
+        {# Legend #}
+        {% if show_legend == 1 %}
+        <div class="cal-legend">
+            {% if show_all_cookie == 1 %}
+                {% for course in course_names %}
+                    <div name="{{course.course_name|replace({' ':''})}}" class="legend-color"></div>
+                    <p for="{{course.course_name|replace({' ':''})}}-color" class="legend-label">{{course.display_name}}</p>
+                {% endfor %}
+            {% else %}
+                <div name="{{calendar_course_cookie|replace({' ':''})}}" class="legend-color"></div><p for="{{calendar_course_cookie|replace({' ':''})}}-color" class="legend-label">{{calendar_course_cookie}}</p>
+            {% endif %}
+        </div>
+        {% endif %}
 
         <div class="calendar" style='margin-bottom: 20px;' id="full-calendar">
             {# Replace by js function call #}
@@ -119,6 +138,8 @@
         </div>
     {% endif %}
 </div>
+
+
 
 {{ include('calendar/NewCalendarItem.twig') }}
 {{ include('calendar/EditCalendarItem.twig') }}

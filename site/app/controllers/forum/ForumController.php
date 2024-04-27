@@ -355,16 +355,36 @@ class ForumController extends AbstractController {
         }
         else {
             $hasGoodAttachment = $this->checkGoodAttachment(true, -1, 'file_input');
-            if ($hasGoodAttachment[0] == -1) {
+            if ($hasGoodAttachment[0] === -1) {
                 $result['next_page'] = $hasGoodAttachment[1];
             }
             else {
                 // Good Attachment
-                $result = $this->core->getQueries()->createThread($markdown, $current_user_id, $thread_title, $thread_post_content, $anon, $pinned, $thread_status, $hasGoodAttachment[0], $categories_ids, $lock_thread_date, $expiration, $announcement);
+                $attachment_name = [];
+                if ($hasGoodAttachment[0] === 1) {
+                    foreach ($_FILES['file_input']["name"] as $file_name) {
+                        $attachment_name[] = basename($file_name);
+                    }
+                }
+                $result = $this->core->getQueries()->createThread(
+                    $markdown,
+                    $current_user_id,
+                    $thread_title,
+                    $thread_post_content,
+                    $anon,
+                    $pinned,
+                    $thread_status,
+                    $hasGoodAttachment[0],
+                    $attachment_name,
+                    $categories_ids,
+                    $lock_thread_date,
+                    $expiration,
+                    $announcement
+                );
                 $thread_id = $result["thread_id"];
                 $post_id = $result["post_id"];
 
-                if ($hasGoodAttachment[0] == 1) {
+                if ($hasGoodAttachment[0] === 1) {
                     $thread_dir = FileUtils::joinPaths(FileUtils::joinPaths($this->core->getConfig()->getCoursePath(), "forum_attachments"), $thread_id);
                     FileUtils::createDir($thread_dir);
 
@@ -474,11 +494,7 @@ class ForumController extends AbstractController {
 
         $display_option = (!empty($_POST["display_option"])) ? htmlentities($_POST["display_option"], ENT_QUOTES | ENT_HTML5, 'UTF-8') : "tree";
         $anon = (isset($_POST["Anon"]) && $_POST["Anon"] == "Anon") ? 1 : 0;
-        if (strlen($post_content) === 0 || strlen($thread_id) === 0) {
-            $this->core->addErrorMessage("There was an error submitting your post. Please re-submit your post.");
-            $result['next_page'] = $this->core->buildCourseUrl(['forum', 'threads']);
-        }
-        elseif (!$this->core->getQueries()->existsThread($thread_id)) {
+        if (!$this->core->getQueries()->existsThread($thread_id)) {
             $this->core->addErrorMessage("There was an error submitting your post. Thread doesn't exist.");
             $result['next_page'] = $this->core->buildCourseUrl(['forum', 'threads']);
         }
@@ -492,18 +508,41 @@ class ForumController extends AbstractController {
         }
         else {
             $hasGoodAttachment = $this->checkGoodAttachment(false, $thread_id, $file_post);
-            if ($hasGoodAttachment[0] == -1) {
+            if ($hasGoodAttachment[0] === -1) {
                 $result['next_page'] = $hasGoodAttachment[1];
             }
             else {
-                $post_id = $this->core->getQueries()->createPost($current_user_id, $post_content, $thread_id, $anon, 0, false, $hasGoodAttachment[0], $markdown, $parent_id);
+                $attachment_name = [];
+
+                if ($hasGoodAttachment[0] !== 1 && (strlen($post_content) === 0 || strlen($thread_id) === 0)) {
+                    $this->core->addErrorMessage("There was an error submitting your post. Please re-submit your post.");
+                    $result['next_page'] = $this->core->buildCourseUrl(['forum', 'threads']);
+                }
+                elseif ($hasGoodAttachment[0] === 1) {
+                    for ($i = 0; $i < count($_FILES[$file_post]["name"]); $i++) {
+                        $attachment_name[] = basename($_FILES[$file_post]["name"][$i]);
+                    }
+                }
+
+                $post_id = $this->core->getQueries()->createPost(
+                    $current_user_id,
+                    $post_content,
+                    $thread_id,
+                    $anon,
+                    0,
+                    false,
+                    $hasGoodAttachment[0],
+                    $markdown,
+                    $attachment_name,
+                    $parent_id
+                );
                 $thread_dir = FileUtils::joinPaths(FileUtils::joinPaths($this->core->getConfig()->getCoursePath(), "forum_attachments"), $thread_id);
 
                 if (!is_dir($thread_dir)) {
                     FileUtils::createDir($thread_dir);
                 }
 
-                if ($hasGoodAttachment[0] == 1) {
+                if ($hasGoodAttachment[0] === 1) {
                     $post_dir = FileUtils::joinPaths($thread_dir, $post_id);
                     FileUtils::createDir($post_dir);
                     for ($i = 0; $i < count($_FILES[$file_post]["name"]); $i++) {
@@ -539,15 +578,46 @@ class ForumController extends AbstractController {
         $post_id = $_POST['post_id'];
         $reply_level = $_POST['reply_level'];
         $post = $this->core->getQueries()->getPost($post_id);
-        if (($_POST['edit']) && !empty($this->core->getQueries()->getPostHistory($post_id))) {
-            $post['edit_timestamp'] = $this->core->getQueries()->getPostHistory($post_id)[0]['edit_timestamp'];
+        $post_history = $this->core->getQueries()->getPostHistory($post_id);
+        if (($_POST['edit']) && !empty($post_history)) {
+            $post['edit_timestamp'] = $post_history[0]['edit_timestamp'];
         }
         $thread_id = $post['thread_id'];
+        $thread = $this->core->getQueries()->getThread($thread_id);
+        $first_post = $this->core->getQueries()->getFirstPostForThread($thread_id);
+        $first_post_author_id = $first_post['author_user_id'];
+        $upduck_count = $this->core->getQueries()->getUpduckInfoForPosts([$post_id])[$post_id];
+        $upduck_liked_by_user = array_key_exists($post_id, $this->core->getQueries()->getUserLikesForPosts(
+            [$post_id],
+            $this->core->getUser()->getId()
+        ));
         $GLOBALS['totalAttachments'] = 0;
         $GLOBALS['post_box_id'] = $_POST['post_box_id'];
         $unviewed_posts = [$post_id];
         $first = $post['parent_id'] == -1;
-        $result = $this->core->getOutput()->renderTemplate('forum\ForumThread', 'createPost', $thread_id, $post, $unviewed_posts, $first, $reply_level, 'tree', true, true, $this->core->getQueries()->existsAnnouncementsId($thread_id));
+        $author_info = $this->core->getQueries()->getDisplayUserInfoFromUserIds([$post["author_user_id"]]);
+        $post_attachments = $this->core->getQueries()->getForumAttachments([$post_id]);
+        $merged_threads = $this->core->getQueries()->getMergedThreadIds([$post_id]);
+        $result = $this->core->getOutput()->renderTemplate(
+            'forum\ForumThread',
+            'createPost',
+            $first_post_author_id,
+            $thread,
+            $post,
+            $unviewed_posts,
+            $first,
+            $reply_level,
+            'tree',
+            $upduck_count,
+            $upduck_liked_by_user,
+            true,
+            $author_info[$post["author_user_id"]],
+            $post_attachments[$post["id"]][0],
+            count($post_history) > 0,
+            in_array($post["id"], $merged_threads, true),
+            true,
+            $this->core->getQueries()->existsAnnouncementsId($thread_id)
+        );
         return $this->core->getOutput()->renderJsonSuccess($result);
     }
 
@@ -879,7 +949,57 @@ class ForumController extends AbstractController {
 
             $markdown = !empty($_POST['markdown_status']);
 
-            return $this->core->getQueries()->editPost($original_creator, $current_user, $post_id, $new_post_content, $anon, $markdown);
+            $file_post = 'file_input';
+            $thread_id = $original_post["thread_id"];
+            $hasGoodAttachment = $this->checkGoodAttachment(false, $thread_id, $file_post);
+            if ($hasGoodAttachment[0] === -1) {
+                return null;
+            }
+
+            $attachment_name = [];
+            if ($hasGoodAttachment[0] === 1) {
+                $thread_dir = FileUtils::joinPaths($this->core->getConfig()->getCoursePath(), "forum_attachments", $thread_id);
+                $post_dir = FileUtils::joinPaths($thread_dir, $post_id);
+
+                if (!is_dir($thread_dir)) {
+                    FileUtils::createDir($thread_dir);
+                }
+                if (!is_dir($post_dir)) {
+                    FileUtils::createDir($post_dir);
+                }
+
+                $existing_attachments = array_column(FileUtils::getAllFiles($post_dir), "name");
+                //compile list of attachment names
+                for ($i = 0; $i < count($_FILES[$file_post]["name"]); $i++) {
+                    //check for files with same name
+                    $file_name = basename($_FILES[$file_post]["name"][$i]);
+                    if (in_array($file_name, $existing_attachments, true)) {
+                        // add unique prefix if file with this name already exists on this post
+                        $tmp = 1;
+                        while (in_array("(" . $tmp . ")" . $file_name, $existing_attachments, true)) {
+                            $tmp++;
+                        }
+                        $file_name = "(" . $tmp . ")" . $file_name;
+                    }
+                    $attachment_name[] = $file_name;
+                }
+
+                for ($i = 0; $i < count($_FILES[$file_post]["name"]); $i++) {
+                    $target_file = $post_dir . "/" . $attachment_name[$i];
+                    move_uploaded_file($_FILES[$file_post]["tmp_name"][$i], $target_file);
+                }
+            }
+
+            return $this->core->getQueries()->editPost(
+                $original_creator,
+                $current_user,
+                $post_id,
+                $new_post_content,
+                $anon,
+                $markdown,
+                json_decode($_POST['deleted_attachments']),
+                $attachment_name,
+            );
         }
         return null;
     }
@@ -1017,13 +1137,13 @@ class ForumController extends AbstractController {
         $option = ($this->core->getUser()->accessGrading() || $option != 'alpha') ? $option : 'tree';
         if (!empty($thread_id)) {
             $thread_id = (int) $thread_id;
-            $thread_resolve_state = $this->core->getQueries()->getResolveState($thread_id)[0]['status'];
+            $thread = $this->core->getQueries()->getThread($thread_id);
+            $thread_resolve_state = $thread['status'];
             $this->core->getQueries()->markNotificationAsSeen($user, -2, (string) $thread_id);
             $unread_p = $this->core->getQueries()->getUnviewedPosts($thread_id, $current_user);
             foreach ($unread_p as $up) {
                 $new_posts[] = $up["id"];
             }
-            $thread = $this->core->getQueries()->getThread($thread_id);
             $thread_announced = $this->core->getQueries()->existsAnnouncementsId($thread_id);
             if (!empty($thread)) {
                 if ($thread['merged_thread_id'] != -1) {
@@ -1140,16 +1260,28 @@ class ForumController extends AbstractController {
         $_post = [];
         $older_posts = $this->core->getQueries()->getPostHistory($post_id);
         $current_post = $this->core->getQueries()->getPost($post_id);
+        $post_attachments = $this->core->getQueries()->getForumAttachments([$post_id], true);
         $oc = $current_post["author_user_id"];
         $anon = $current_post["anonymous"];
+        $GLOBALS['totalAttachments'] = 0;
+        $edit_id = 0;
         foreach ($older_posts as $post) {
             $_post['user'] = !$this->modifyAnonymous($oc) && $oc == $post["edit_author"] && $anon ? '' : $post["edit_author"];
             $_post['content'] = $this->core->getOutput()->renderTwigTemplate("forum/RenderPost.twig", [
                 "post_content" => $post["content"],
                 "render_markdown" => false,
+                "post_attachment" => ForumUtils::getForumAttachments(
+                    $post_id,
+                    $current_post['thread_id'],
+                    $post_attachments[$post_id][$post['version_id']],
+                    $this->core->getConfig()->getCoursePath(),
+                    $this->core->buildCourseUrl(['display_file'])
+                ),
+                "edit_id" => $post_id . "-" . $edit_id,
             ]);
             $_post['post_time'] = DateUtils::parseDateTime($post['edit_timestamp'], $this->core->getConfig()->getTimezone())->format("n/j g:i A");
             $output[] = $_post;
+            $edit_id++;
         }
         if (count($output) == 0) {
             // Current post
@@ -1157,6 +1289,14 @@ class ForumController extends AbstractController {
             $_post['content'] = $this->core->getOutput()->renderTwigTemplate("forum/RenderPost.twig", [
                 "post_content" => $current_post["content"],
                 "render_markdown" => false,
+                "post_attachment" => ForumUtils::getForumAttachments(
+                    $post_id,
+                    $current_post['thread_id'],
+                    array_values($post_attachments[$post_id])[0],
+                    $this->core->getConfig()->getCoursePath(),
+                    $this->core->buildCourseUrl(['display_file'])
+                ),
+                "edit_id" => $post_id . "-" . $edit_id,
             ]);
             $_post['post_time'] = DateUtils::parseDateTime($current_post['timestamp'], $this->core->getConfig()->getTimezone())->format("n/j g:i A");
             $output[] = $_post;
@@ -1181,6 +1321,17 @@ class ForumController extends AbstractController {
         $post_id = $_POST["post_id"];
         if (!empty($post_id)) {
             $result = $this->core->getQueries()->getPost($post_id);
+            $post_attachments = $this->core->getQueries()->getForumAttachments([$post_id]);
+            $GLOBALS['totalAttachments'] = 0;
+            $img_table = $this->core->getOutput()->renderTwigTemplate('forum/EditImgTable.twig', [
+                "post_attachments" => ForumUtils::getForumAttachments(
+                    $post_id,
+                    $result['thread_id'],
+                    $post_attachments[$post_id][0],
+                    $this->core->getConfig()->getCoursePath(),
+                    $this->core->buildCourseUrl(['display_file'])
+                )
+            ]);
             if ($this->core->getAccess()->canI("forum.modify_post", ['post_author' => $result['author_user_id']])) {
                 $output = [];
                 $output['post'] = $result["content"];
@@ -1189,6 +1340,8 @@ class ForumController extends AbstractController {
                 $output['change_anon'] = $this->modifyAnonymous($result["author_user_id"]);
                 $output['user'] = $output['anon'] ? 'Anonymous' : $result["author_user_id"];
                 $output['markdown'] = $result['render_markdown'];
+                $output['img_table'] = $img_table;
+
                 if (isset($_POST["thread_id"])) {
                     $this->getThreadContent($_POST["thread_id"], $output);
                 }
@@ -1242,5 +1395,29 @@ class ForumController extends AbstractController {
         }
         ksort($users);
         $this->core->getOutput()->renderOutput('forum\ForumThread', 'statPage', $users);
+    }
+
+    /**
+     * @Route("/courses/{_semester}/{_course}/post/likes", methods={"POST"})
+     */
+    public function toggleLike(): JsonResponse {
+        $requiredKeys = ['post_id', 'current_user'];
+        foreach ($requiredKeys as $key) {
+            if (!isset($_POST[$key])) {
+                return JsonResponse::getErrorResponse('Missing required key in POST data: ' . $key);
+            }
+        }
+        $output = [];
+        $output = $this->core->getQueries()->toggleLikes($_POST['post_id'], $this->core->getUser()->getId());//so isLiked is the frontend value
+
+        $responseData = [
+            'status' => $output[0], // 'like'
+            'likesCount' => $output[1] // The likes count
+        ];
+
+        if ($responseData['status'] === "false") {
+            return JsonResponse::getErrorResponse('Catch Fail in Query');
+        }
+        return JsonResponse::getSuccessResponse($responseData);
     }
 }

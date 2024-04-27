@@ -319,6 +319,7 @@ class WebRouter {
             && !$this->core->getAccess()->canI("course.view", ["semester" => $this->core->getConfig()->getTerm(), "course" => $this->core->getConfig()->getCourse()])
             && !str_ends_with($this->parameters['_controller'], 'AuthenticationController')
             && $this->parameters['_method'] !== 'noAccess'
+            && $this->parameters['_method'] !== 'rejoinCourse'
         ) {
             return MultiResponse::RedirectOnlyResponse(
                 new RedirectResponse($this->core->buildCourseUrl(['no_access']))

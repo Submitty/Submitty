@@ -1,17 +1,17 @@
+/* global luxon */
+const DateTime = luxon.DateTime;
+
 function calculateLateDays(inputDate) {
     const select_menu = document.getElementById('g_id');
     if (select_menu.selectedIndex === 0) {
         alert('Please select a gradeable first!');
         return;
     }
+
     const due_date_value = select_menu.options[select_menu.selectedIndex].getAttribute('data-due-date');
-    const new_due_date = new Date(inputDate);
-    const old_due_date = new Date(due_date_value);
-    let delta = (new_due_date.getTime() - old_due_date.getTime()) / (1000*60*60*24);
-    if (delta < 0) {
-        delta = 0;
-    }
-    const diff = Math.floor(delta);
+    const new_due_date = DateTime.fromISO(inputDate);
+    const old_due_date = DateTime.fromISO(due_date_value);
+    const diff = Math.floor(Math.max(0, new_due_date.diff(old_due_date, 'days').days));
     document.getElementById('late_days').value = diff;
 }
 
@@ -34,10 +34,10 @@ $(document).ready(() => {
                     let date;
                     switch (index) {
                         case 0:
-                            date = new Date();
+                            date = DateTime.local();
                             break;
                         case 1:
-                            date = new Date('9998-01-01');
+                            date = DateTime.fromISO('9998-01-01');
                             break;
                     }
                     fp.setDate(date, true);
@@ -113,9 +113,9 @@ function updateCacheBuildStatus(url, confirm_message, status) {
         $('#rebuild-status').html(status);
 
         // disable and grey out table and buttons
-        $('#calculate-btn').prop('disabled',true).css('opacity',0.5);
-        $('#flush-btn').prop('disabled',true).css('opacity',0.5);
-        $('#late-day-table').css('opacity',0.5);
+        $('#calculate-btn').prop('disabled', true).css('opacity', 0.5);
+        $('#flush-btn').prop('disabled', true).css('opacity', 0.5);
+        $('#late-day-table').css('opacity', 0.5);
 
         $.ajax({
             url: url,
@@ -132,7 +132,7 @@ function updateCacheBuildStatus(url, confirm_message, status) {
 // eslint-disable-next-line no-unused-vars
 function calculateLateDayCache() {
     // eslint-disable-next-line no-undef
-    const url = buildCourseUrl(['late_days_forensics', 'calculate']);
+    const url = buildCourseUrl(['bulk_late_days', 'calculate']);
     const confirm_message = 'Are you sure you want to recalculate the cache? Calculating the remaining late day information for every user may take a while.';
     const status = 'Recaclulating...';
     updateCacheBuildStatus(url, confirm_message, status);
@@ -141,7 +141,7 @@ function calculateLateDayCache() {
 // eslint-disable-next-line no-unused-vars
 function flushLateDayCache() {
     // eslint-disable-next-line no-undef
-    const url = buildCourseUrl(['late_days_forensics', 'flush']);
+    const url = buildCourseUrl(['bulk_late_days', 'flush']);
     const confirm_message = 'Are you sure you want to flush the cache? This will remove the late day cache for every user.';
     const status = 'Flushing...';
     updateCacheBuildStatus(url, confirm_message, status);

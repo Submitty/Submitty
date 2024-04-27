@@ -22,30 +22,42 @@ use app\models\AbstractModel;
  * @method isPublishActions()
  */
 class AutogradingTestcase extends AbstractModel {
-    /** @prop @var string The index of this testcase in the autograding config */
+    /** @prop
+     * @var string The index of this testcase in the autograding config */
     protected $index;
 
-    /** @prop @var string Name of this testcase */
+    /** @prop
+     * @var string Name of this testcase */
     protected $name = "";
-    /** @prop @var string TODO: The command to run? */
+    /** @prop
+     * @var string TODO: The command to run? */
     protected $details = "";
-    /** @prop @var int Number of points this testcase is worth */
+    /** @prop
+     * @var int Number of points this testcase is worth */
     protected $points = 0;
-    /** @prop @var bool If this testcase is extra credit */
+    /** @prop
+     * @var bool If this testcase is extra credit */
     protected $extra_credit = false;
-    /** @prop @var bool If this testcase is hidden */
+    /** @prop
+     * @var bool If this testcase is hidden */
     protected $hidden = false;
-    /** @prop @var bool If testcase details should be released when grades are released for a hidden testcase */
+    /** @prop
+     * @var bool If testcase details should be released when grades are released for a hidden testcase */
     protected $release_hidden_details = false;
-    /** @prop @var bool If the user should see the message from a GradedAutogradingTestCase */
+    /** @prop
+     * @var bool If the user should see the message from a GradedAutogradingTestCase */
     protected $view_testcase_message = true;
-    /** @prop @var string */
+    /** @prop
+     * @var string */
     protected $testcase_label = '';
-    /** @prop-read @var array */
+    /** @prop-read
+     * @var array */
     protected $dispatcher_actions = [];
-    /** @prop-read @var array */
+    /** @prop-read
+     * @var array */
     protected $graphics_actions = [];
-    /** @prop-read @var boolean */
+    /** @prop-read
+     * @var boolean */
     protected $publish_actions = false;
 
     /**

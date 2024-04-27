@@ -40,7 +40,7 @@ def main():
     required_capabilities = config_file.get('required_capabilities','default')
     testcases = config_file.get('testcases',[])
     graded_file = {
-        "semester": args.semester,
+        "term": args.semester,
         "course": args.course,
         "gradeable": args.assignment,
         "required_capabilities": required_capabilities,

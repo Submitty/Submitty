@@ -348,25 +348,16 @@ class RainbowCustomization extends AbstractModel {
      *
      * @return array multidimensional array of display benchmark data
      */
-    public function getDisplayBenchmarks() {
-        // Get allowed benchmarks
-        $displayBenchmarks = RainbowCustomizationJSON::allowed_display_benchmarks;
-        $retArray = [];
-
-        // If json file available then collect used benchmarks from that, else get empty array
-        !is_null($this->RCJSON) ?
-            $usedDisplayBenchmarks = $this->RCJSON->getDisplayBenchmarks() :
-            $usedDisplayBenchmarks = [];
-
-        // Add data into retArray
-        foreach ($displayBenchmarks as $displayBenchmark) {
-            in_array($displayBenchmark, $usedDisplayBenchmarks) ? $isUsed = true : $isUsed = false;
-
-            // Add benchmark to return array
-            $retArray[] = ['id' => $displayBenchmark, 'isUsed' => $isUsed];
+    public function getDisplayBenchmarks(): array {
+        $allowedBenchmarks = RainbowCustomizationJSON::allowed_display_benchmarks;
+        // null safe operator
+        $usedBenchmarks = $this->RCJSON?->getDisplayBenchmarks() ?? [];
+        $benchmarksData = [];
+        foreach ($allowedBenchmarks as $benchmark) {
+            $benchmarkUsed = in_array($benchmark, $usedBenchmarks);
+            $benchmarksData[] = ['id' => $benchmark, 'isUsed' => $benchmarkUsed];
         }
-
-        return $retArray;
+        return $benchmarksData;
     }
 
     /**
@@ -392,6 +383,44 @@ class RainbowCustomization extends AbstractModel {
                 'lowest_c-' => 0.7,
                 'lowest_d' => 0.6,
             ];
+    }
+
+
+    /**
+     * Get display options
+     *
+     * Get a multidimensional array that contains not only a list of usable display options but also which ones
+     * are in use (in the customization.json)
+     *
+     * @return array<int, array<string, bool|string>> multidimensional array of display option data
+     */
+    public function getDisplay(): array {
+        // Get allowed benchmarks
+        $display = RainbowCustomizationJSON::allowed_display;
+        $retArray = [];
+
+        // If json file available then collect used display option from that, else get empty array
+        !is_null($this->RCJSON) ?
+            $usedDisplay = $this->RCJSON->getDisplay() :
+            $usedDisplay = [];
+
+        // Add data into retArray
+        foreach ($display as $display_option) {
+            in_array($display_option, $usedDisplay) ? $isUsed = true : $isUsed = false;
+
+            // Add display to return array
+            $retArray[] = ['id' => $display_option, 'isUsed' => $isUsed];
+        }
+
+        return $retArray;
+    }
+
+    /**
+     * Get display description
+     * @return array<string>  array of display description
+     */
+    public function getDisplayDescription(): array {
+        return RainbowCustomizationJSON::allowed_display_description;
     }
 
     /**
@@ -458,6 +487,17 @@ class RainbowCustomization extends AbstractModel {
         }
     }
 
+
+    /**
+     * Get plagiarism from json file if there is any
+     *
+     * @return array<object>  array of plagiarism JSON object
+     */
+    public function getPlagiarism(): array {
+        return !is_null($this->RCJSON) ? $this->RCJSON->getPlagiarism() : [];
+    }
+
+
     // This function handles processing the incoming post data
     public function processForm() {
 
@@ -494,6 +534,18 @@ class RainbowCustomization extends AbstractModel {
         if (isset($form_json->messages)) {
             foreach ($form_json->messages as $message) {
                 $this->RCJSON->addMessage($message);
+            }
+        }
+
+        if (isset($form_json->plagiarism)) {
+            foreach ($form_json->plagiarism as $plagiarism_single) {
+                $this->RCJSON->addPlagiarismEntry($plagiarism_single);
+            }
+        }
+
+        if (isset($form_json->display)) {
+            foreach ($form_json->display as $display_option) {
+                $this->RCJSON->addDisplay($display_option);
             }
         }
 

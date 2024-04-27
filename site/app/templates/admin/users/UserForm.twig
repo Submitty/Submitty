@@ -20,7 +20,8 @@
 		</a>
 		<label for="user_id">
             User ID:
-            <input class="readonly" type="text" name="user_id" id="user_id" readonly="readonly" placeholder="(Required)" autocomplete="off"/>
+            <input class="readonly" type="text" name="user_id" id="user_id" readonly="readonly" placeholder="(Required)" autocomplete="off" list="possible_users"/>
+            <datalist id="possible_users"> </datalist>
         </label>
         <label for="user_numeric_id">
             User Numeric ID:

@@ -10,7 +10,7 @@ DECLARE
     db_conn VARCHAR;
     query_string TEXT;
 BEGIN
-    db_conn := format('dbname=submitty_%s_%s', OLD.semester, OLD.course);
+    db_conn := format('dbname=submitty_%s_%s', OLD.term, OLD.course);
     -- Need to delete anon_id entry from gradeable_anon otherwise foreign key constraint will be violated and execution will fail
     query_string := 'DELETE FROM gradeable_anon WHERE user_id = ' || quote_literal(OLD.user_id) || '; '
                     || 'DELETE FROM users WHERE user_id = ' || quote_literal(OLD.user_id);

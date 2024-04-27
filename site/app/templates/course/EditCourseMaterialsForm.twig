@@ -6,12 +6,14 @@
     <div id="material-edit-form" class="flex-col flex-col-space" data-directory = "Check">
         <label id="file-path-label">
             <span><strong>File Path / URL </strong></span>
-            <input type="text" id="new-file-name" class="full-width" list="change_folder_paths"/>
-            <datalist id="change_folder_paths">
-                {% for folder_path in folder_paths %}
-                    <option value="{{ folder_path }}/">
-                {% endfor %}
-            </datalist>
+            <span id="edit-location-drop-down">
+                <select id="new-file-name">
+                    <option value="">.</option>
+                    {% for folder_path in folder_paths %}
+                        <option value="{{ folder_path }}/">{{ folder_path }}</option>
+                    {% endfor %}
+                </select>
+            </span>
         </label>
 
         <label id="edit-title-label">
@@ -51,7 +53,9 @@
                 <strong>Choose a time to release the files being uploaded:</strong>
             </span>
             <input id="edit-picker" class="edit-picker" type="text" size="26" style="pointer-events:auto;"><br>
-            <span><em>Note: Everyone with grading access will be able to view all the materials irrespective of the release date/time.</em></span>
+            <span>
+            <strong>Note:</strong> <em>Everyone with grading access will be able to view all the materials irrespective of the release date/time.</em>
+            </span>
         </label>
         <label>
             <span>
@@ -59,11 +63,14 @@
             </span>
             <input id="edit-sort" value="Check" type="text" size="26"/>
         </label>
-        <label>
+        <label class="my-0">
             <input id="hide-materials-checkbox-edit" type="checkbox">
-            Hide from Students<br>
-            <em>Note: Hidden course materials are omitted from the course materials directory listing; however, these materials can still be accessed via the URL.</em>
+            Hide from Students
         </label>
+        <p class="my-0">
+            <em><strong>Note:</strong> Hidden course materials are omitted from the course materials directory listing; however, these materials can still be accessed via the URL. </em> <br>
+            <em>These materials will always be available to course staff (full and limited access graders), regardless of release date. </em>
+        </p>
         <label hidden id="edit-url-url-label">
             <span>
                 <strong>Edit link url:</strong>
@@ -126,11 +133,11 @@
                         }
 
                     ],
-                    onClick: (index, fp) => {
+                    onClick: (index, edit_fp) => {
                         let date;
                         switch (index) {
                             case 0:
-                                date = new Date("1001-01-01 00:00:00");
+                                date = new Date('{{ begining_of_time_date }}');
                                 break;
                             case 1:
                                 date = new Date();
@@ -140,10 +147,10 @@
                                 date.setDate(date.getDate() + 1);
                                 break;
                             case 3:
-                                date = new Date("9998-01-01 00:00:00");
+                                date = new Date("9998-01-01T00:00:00");
                                 break;
                         }
-                        fp.setDate(date);
+                        edit_fp.setDate(date);
                     }
                 }
             )],
@@ -153,9 +160,9 @@
             enableSeconds: true,
             time_24hr: true,
             dateFormat: "Y-m-d H:i:S",
-            onReady: (a, b, fp) => {
-              fp.calendarContainer.firstChild.childNodes[1].firstChild.firstChild.setAttribute('aria-label', 'Month');
-              fp.calendarContainer.childNodes[2].childNodes[4].firstChild.setAttribute('aria-label', 'Seconds');
+            onReady: (a, b, edit_fp) => {
+              edit_fp.calendarContainer.firstChild.childNodes[1].firstChild.firstChild.setAttribute('aria-label', 'Month');
+              edit_fp.calendarContainer.childNodes[2].childNodes[4].firstChild.setAttribute('aria-label', 'Seconds');
             }
         });
     $('.form-body').on('scroll', function() {

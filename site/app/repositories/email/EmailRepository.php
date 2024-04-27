@@ -9,7 +9,6 @@ class EmailRepository extends EntityRepository {
     const MAX_SUBJECTS_PER_PAGE = 10;
 
     public function getEmailsByPage(int $page, $semester = null, $course = null): array {
-        $this->_em->getConnection()->getConfiguration()->setSQLLogger(null);
         $subjects = $this->getPageSubjects($page, $semester, $course);
         $result = [];
 
@@ -18,9 +17,9 @@ class EmailRepository extends EntityRepository {
             $qb ->select('e')
                 ->from('app\entities\email\EmailEntity', 'e');
             if ($semester && $course) {
-                $qb->where('e.semester = :semester')
+                $qb->where('e.term = :term')
                     ->andWhere('e.course = :course')
-                    ->setParameter('semester', $semester)
+                    ->setParameter('term', $semester)
                     ->setParameter('course', $course);
             }
             $qb ->orderBy('e.created', 'DESC')
@@ -36,7 +35,7 @@ class EmailRepository extends EntityRepository {
 
     public function getPageNum($semester = null, $course = null): int {
         if ($semester != null || $course != null) {
-            $dql = 'SELECT e.subject, e.created, COUNT(e) FROM app\entities\email\EmailEntity e WHERE e.semester = \'' . $semester . '\' AND e.course = \'' . $course . '\' GROUP BY e.subject, e.created ORDER BY e.created DESC';
+            $dql = 'SELECT e.subject, e.created, COUNT(e) FROM app\entities\email\EmailEntity e WHERE e.term = \'' . $semester . '\' AND e.course = \'' . $course . '\' GROUP BY e.subject, e.created ORDER BY e.created DESC';
         }
         else {
             $dql = 'SELECT e.subject, e.created, COUNT(e) FROM app\entities\email\EmailEntity e GROUP BY e.subject, e.created ORDER BY e.created DESC';
@@ -60,7 +59,7 @@ class EmailRepository extends EntityRepository {
 
     private function getPageSubjects($page, $semester = null, $course = null): array {
         if ($semester != null || $course != null) {
-            $dql = 'SELECT e.subject, e.created, COUNT(e) FROM app\entities\email\EmailEntity e WHERE e.semester = \'' . $semester . '\' AND e.course = \'' . $course . '\' GROUP BY e.subject, e.created ORDER BY e.created DESC';
+            $dql = 'SELECT e.subject, e.created, COUNT(e) FROM app\entities\email\EmailEntity e WHERE e.term = \'' . $semester . '\' AND e.course = \'' . $course . '\' GROUP BY e.subject, e.created ORDER BY e.created DESC';
         }
         else {
             $dql = 'SELECT e.subject, e.created, COUNT(e) FROM app\entities\email\EmailEntity e GROUP BY e.subject, e.created ORDER BY e.created DESC';

@@ -24,7 +24,8 @@ abstract class AbstractModel {
     /** @var Core */
     protected $core;
 
-    /** @prop @var bool flag on whether this model has been changed or not by the application layer */
+    /** @prop
+     * @var bool flag on whether this model has been changed or not by the application layer */
     protected $modified = false;
 
     public function __construct(Core $core) {
@@ -98,7 +99,7 @@ abstract class AbstractModel {
                         'read_only' => true,
                     ];
                 }
-                elseif (preg_match("/ @(prop|property)[\s]/", $doc_comment) === 1) {
+                elseif (preg_match("/ @prop[\s]/", $doc_comment) === 1) {
                     static::$properties[$class_name][$prop_name] = [];
                 }
 

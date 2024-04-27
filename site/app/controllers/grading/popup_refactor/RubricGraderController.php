@@ -36,7 +36,6 @@ class RubricGraderController extends AbstractController {
 
     /**
      * Creates the Rubric Grading page.
-     * @Route("/courses/{_semester}/{_course}/gradeable/{gradeable_id}/grading_beta/grade")
      *
      * @param string $gradeable_id - The id string of the current gradeable.
      * @param string $who_id - The id of the student we should grade.
@@ -51,6 +50,7 @@ class RubricGraderController extends AbstractController {
      * provided to the URL.
      * @return void
      */
+    #[Route("/courses/{_semester}/{_course}/gradeable/{gradeable_id}/grading_beta/grade")]
     public function createMainRubricGraderPage(
         string $gradeable_id,
         string $who_id = '',
@@ -222,7 +222,14 @@ class RubricGraderController extends AbstractController {
     ): string {
         // Blind Settings for Instructors and Full Access Graders:
         if ($user_group === User::GROUP_INSTRUCTOR || $user_group === User::GROUP_FULL_ACCESS_GRADER) {
-            if (isset($_COOKIE['anon_mode']) && $_COOKIE['anon_mode'] === 'on') {
+            $anon_mode = $gradeable->getInstructorBlind() - 1;
+            $anon_mode_enabled = "anon_mode_" . $gradeable->getId();
+            $anon_mode_override =  "default_" . $anon_mode_enabled . "_override";
+            if (isset($_COOKIE[$anon_mode_override]) && $_COOKIE[$anon_mode_override] === 'on') {
+                $anon_mode = (isset($_COOKIE[$anon_mode_enabled]) && $_COOKIE[$anon_mode_enabled] === 'on');
+            }
+
+            if ($anon_mode) {
                 return "single";
             }
             else {

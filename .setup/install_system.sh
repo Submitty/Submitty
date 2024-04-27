@@ -36,6 +36,7 @@ fi
 # PATHS
 CURRENT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 SUBMITTY_REPOSITORY=/usr/local/submitty/GIT_CHECKOUT/Submitty
+RAINBOWGRADES_REPOSITORY=/usr/local/submitty/GIT_CHECKOUT/RainbowGrades
 LICHEN_REPOSITORY=/usr/local/submitty/GIT_CHECKOUT/Lichen
 SUBMITTY_INSTALL_DIR=/usr/local/submitty
 SUBMITTY_DATA_DIR=/var/local/submitty
@@ -51,6 +52,7 @@ CGI_GROUP=submitty_cgi
 
 DAEMONPHP_GROUP=submitty_daemonphp
 DAEMONCGI_GROUP=submitty_daemoncgi
+DAEMONPHPCGI_GROUP=submitty_daemonphpcgi
 
 # VERSIONS
 source ${CURRENT_DIR}/bin/versions.sh
@@ -133,10 +135,11 @@ The vagrant box comes with some handy aliases:
     ntp_sync                     - Re-syncs NTP in case of time drift
 
 Saved variables:
-    SUBMITTY_REPOSITORY, LICHEN_REPOSITORY,
+    SUBMITTY_REPOSITORY, LICHEN_REPOSITORY, RAINBOWGRADES_REPOSITORY,
     SUBMITTY_INSTALL_DIR, SUBMITTY_DATA_DIR,
     DAEMON_USER, DAEMON_GROUP, PHP_USER, PHP_GROUP,
-    CGI_USER, CGI_GROUP, DAEMONPHP_GROUP, DAEMONCGI_GROUP
+    CGI_USER, CGI_GROUP, DAEMONPHP_GROUP, DAEMONCGI_GROUP,
+    DAEMONPHPCGI_GROUP
 EOF
 )
 
@@ -144,6 +147,7 @@ echo -e "
 
 # Convinence stuff for Submitty
 export SUBMITTY_REPOSITORY=${SUBMITTY_REPOSITORY}
+export RAINBOWGRADES_REPOSITORY=${RAINBOWGRADES_REPOSITORY}
 export LICHEN_REPOSITORY=${LICHEN_REPOSITORY}
 export SUBMITTY_INSTALL_DIR=${SUBMITTY_INSTALL_DIR}
 export SUBMITTY_DATA_DIR=${SUBMITTY_DATA_DIR}
@@ -155,6 +159,7 @@ export CGI_USER=${CGI_USER}
 export CGI_GROUP=${CGI_GROUP}
 export DAEMONPHP_GROUP=${DAEMONPHP_GROUP}
 export DAEMONCGI_GROUP=${DAEMONCGI_GROUP}
+export DAEMONPHPCGI_GROUP=${DAEMONPHPCGI_GROUP}
 alias submitty_help=\"echo -e '${INSTALL_HELP}'\"
 alias install_submitty='/usr/local/submitty/.setup/INSTALL_SUBMITTY.sh'
 alias submitty_install='/usr/local/submitty/.setup/INSTALL_SUBMITTY.sh'
@@ -168,6 +173,7 @@ alias submitty_code_watcher='python3 /usr/local/submitty/GIT_CHECKOUT/Submitty/.
 alias submitty_restart_autograding='systemctl restart submitty_autograding_shipper && systemctl restart submitty_autograding_worker'
 alias submitty_restart_websocket='systemctl restart submitty_websocket_server'
 alias submitty_restart_services='submitty_restart_autograding && submitty_restart_websocket && systemctl restart submitty_daemon_jobs_handler && systemctl restart nullsmtpd'
+alias submitty_test='bash /usr/local/submitty/GIT_CHECKOUT/Submitty/.setup/SUBMITTY_TEST.sh'
 alias migrator='python3 ${SUBMITTY_REPOSITORY}/migration/run_migrator.py -c ${SUBMITTY_INSTALL_DIR}/config'
 alias vagrant_info='cat /etc/motd'
 alias ntp_sync='service ntp stop && ntpd -gq && service ntp start'
@@ -214,15 +220,6 @@ source ${CURRENT_DIR}/distro_setup/setup_distro.sh
 
 bash "${SUBMITTY_REPOSITORY}/.setup/update_system.sh"
 
-
-#################################################################
-# Node Package Setup
-####################
-# NOTE: with umask 0027, the npm packages end up with the wrong permissions.
-# (this happens if we re-run install_system on an existing installation).
-# So let's manually set the umask just for this call.
-(umask 0022 && npm install -g npm)
-
 #################################################################
 # STACK SETUP
 #################
@@ -262,6 +259,12 @@ else
     echo "${DAEMONCGI_GROUP} already exists"
 fi
 
+if ! cut -d ':' -f 1 /etc/group | grep -q ${DAEMONPHPCGI_GROUP} ; then
+    addgroup ${DAEMONPHPCGI_GROUP}
+else
+    echo "${DAEMONPHPCGI_GROUP} already exists"
+fi
+
 # The COURSE_BUILDERS_GROUP allows instructors/head TAs/course
 # managers to write website customization files and run course
 # management scripts.
@@ -296,11 +299,13 @@ if [ ${WORKER} == 0 ]; then
         useradd -m -c "First Last,RoomNumber,WorkPhone,HomePhone" "${PHP_USER}"
     fi
     usermod -a -G "${DAEMONPHP_GROUP}" "${PHP_USER}"
+    usermod -a -G "${DAEMONPHPCGI_GROUP}" "${PHP_USER}"
     if ! cut -d ':' -f 1 /etc/passwd | grep -q ${CGI_USER} ; then
         useradd -m -c "First Last,RoomNumber,WorkPhone,HomePhone" "${CGI_USER}"
     fi
     usermod -a -G "${PHP_GROUP}" "${CGI_USER}"
     usermod -a -G "${DAEMONCGI_GROUP}" "${CGI_USER}"
+    usermod -a -G "${DAEMONPHPCGI_GROUP}" "${CGI_USER}"
     # THIS USER SHOULD NOT BE NECESSARY AS A UNIX GROUP
     #useradd -c "First Last,RoomNumber,WorkPhone,HomePhone" "${DB_USER}"
 
@@ -333,11 +338,19 @@ if ! cut -d ':' -f 1 /etc/passwd | grep -q ${DAEMON_USER} ; then
     fi
 fi
 
-# The VCS directores (/var/local/submitty/vcs) are owfned by root:$DAEMONCGI_GROUP
+# The VCS directories (/var/local/submitty/vcs) are owned by root:$DAEMONCGI_GROUP
 usermod -a -G "${DAEMONPHP_GROUP}" "${DAEMON_USER}"
 usermod -a -G "${DAEMONCGI_GROUP}" "${DAEMON_USER}"
+usermod -a -G "${DAEMONPHPCGI_GROUP}" "${DAEMON_USER}"
 
 echo -e "\n# set by the .setup/install_system.sh script\numask 027" >> /home/${DAEMON_USER}/.profile
+
+# Add RainbowGrades repo as safe directory for GIT
+gitconfig_path="/home/${DAEMON_USER}/.gitconfig"
+gitconfig_content="[safe]
+    directory = ${RAINBOWGRADES_REPOSITORY}"
+echo "$gitconfig_content" > "$gitconfig_path"
+sudo chown "${DAEMON_USER}:${DAEMON_USER}" "$gitconfig_path"
 
 usermod -a -G docker "${DAEMON_USER}"
 
@@ -397,10 +410,17 @@ fi
 
 # Dr Memory is a tool for detecting memory errors in C++ programs (similar to Valgrind)
 
+# FIXME: Use of this tool should eventually be moved to containerized
+# autograding and not installed on the native primary and worker
+# machines by default
+
+# FIXME: DrMemory is also re-installed in INSTALL_SUBMITTY_HELPER.sh
+
 pushd /tmp > /dev/null
 
 echo "Getting DrMemory..."
 
+rm -rf /tmp/DrMemory*
 wget https://github.com/DynamoRIO/drmemory/releases/download/${DRMEMORY_TAG}/DrMemory-Linux-${DRMEMORY_VERSION}.tar.gz -o /dev/null > /dev/null 2>&1
 tar -xpzf DrMemory-Linux-${DRMEMORY_VERSION}.tar.gz
 rsync --delete -a /tmp/DrMemory-Linux-${DRMEMORY_VERSION}/ ${SUBMITTY_INSTALL_DIR}/drmemory

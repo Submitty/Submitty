@@ -103,7 +103,9 @@ class WebSocketClient {
     }
 
     send(data) {
-        this.client.send(JSON.stringify(data));
+        if (this.client.readyState === WebSocket.OPEN) {
+            this.client.send(JSON.stringify(data));
+        }
     }
 
     removeClientListeners() {

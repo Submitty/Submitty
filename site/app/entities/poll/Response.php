@@ -4,42 +4,27 @@ declare(strict_types=1);
 
 namespace app\entities\poll;
 
+use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
 
-/**
- * @ORM\Entity
- * @ORM\Table(name="poll_responses")
- */
+#[ORM\Entity]
+#[ORM\Table(name: "poll_responses")]
 class Response {
-    /**
-     * @ORM\Id
-     * @ORM\GeneratedValue
-     * @ORM\Column(name="id",type="integer")
-     * @var int
-     */
-    private $id;
+    #[ORM\Id]
+    #[ORM\GeneratedValue]
+    #[ORM\Column(type: Types::INTEGER)]
+    protected int $id;
 
-    /**
-     * @ORM\Column(name="student_id",type="text")
-     * @var string
-     */
-    private $student_id;
+    #[ORM\Column(type: Types::TEXT)]
+    protected string $student_id;
 
-    /**
-     * @ORM\ManyToOne(targetEntity="\app\entities\poll\Poll",inversedBy="responses")
-     * @ORM\JoinColumn(name="poll_id", referencedColumnName="poll_id")
-     * @var Poll
-     */
-    private $poll;
+    #[ORM\ManyToOne(targetEntity: Poll::class, inversedBy: "responses")]
+    #[ORM\JoinColumn(name: "poll_id", referencedColumnName: "poll_id", nullable: false)]
+    protected Poll $poll;
 
-    /**
-     * @ORM\ManyToOne(targetEntity="\app\entities\poll\Option",inversedBy="user_responses",fetch="EAGER")
-     * @ORM\JoinColumns({
-     * @ORM\JoinColumn(name="option_id", referencedColumnName="option_id"),
-     * })
-     * @var Option
-     */
-    private $option;
+    #[ORM\ManyToOne(targetEntity: Option::class, fetch: "EAGER", inversedBy: "user_responses")]
+    #[ORM\JoinColumn(name: "option_id", referencedColumnName: "option_id", nullable: false)]
+    protected Option $option;
 
     public function __construct(string $student_id) {
         $this->setStudentId($student_id);

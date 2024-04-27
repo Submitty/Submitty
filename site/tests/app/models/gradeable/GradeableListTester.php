@@ -811,7 +811,8 @@ class GradeableListTester extends BaseUnitTest {
             'allowed_minutes' => null,
             'depends_on' => null,
             'depends_on_points' => null,
-            'allow_custom_marks' => true
+            'allow_custom_marks' => true,
+            'any_manual_grades' => false
         ];
 
         return new Gradeable($core, $details);

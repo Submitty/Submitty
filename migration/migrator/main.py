@@ -238,11 +238,11 @@ def handle_migration(args):
 
             courses = {}
             for course in database.execute(
-                'SELECT * FROM courses WHERE status=1 OR status=2 ORDER BY semester, course'
+                'SELECT * FROM courses WHERE status=1 OR status=2 ORDER BY term, course'
             ):
-                if course['semester'] not in courses:
-                    courses[course['semester']] = []
-                courses[course['semester']].append(course['course'])
+                if course['term'] not in courses:
+                    courses[course['term']] = []
+                courses[course['term']].append(course['course'])
             database.close()
 
             for semester in courses:
@@ -514,13 +514,13 @@ def load_triggers(args, output=True):
 
         elif environment == 'course':
             courses = masterdb.execute(
-                'SELECT * FROM courses WHERE status=1 OR status=2 ORDER BY semester, course;'
+                'SELECT * FROM courses WHERE status=1 OR status=2 ORDER BY term, course;'
             ).all()
             masterdb.close()
             first_err = True  # make sure first error appears on new line
             for course in courses:
                 db_config = deepcopy(args.config.database)
-                db_config['dbname'] = 'submitty_{}_{}'.format(course['semester'], course['course'])
+                db_config['dbname'] = 'submitty_{}_{}'.format(course['term'], course['course'])
                 try:
                     coursedb = db.Database(db_config, 'course')
                 except OperationalError as exc:
@@ -535,7 +535,7 @@ def load_triggers(args, output=True):
 
                 if output:
                     print('Loading trigger functions to {}.{}...'
-                          .format(course['semester'], course['course']))
+                          .format(course['term'], course['course']))
                 for file, data in sql:
                     if output:
                         print('  ' + file.stem)

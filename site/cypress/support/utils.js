@@ -9,7 +9,7 @@
 */
 export function getCurrentSemester() {
     const today = new Date();
-    const year = today.getFullYear().toString().slice(2,4);	//get last two digits
+    const year = today.getFullYear().toString().slice(2, 4);	//get last two digits
     const semester = ((today.getMonth() + 1) < 7) ? 's' : 'f';	//first half of year 'spring' rest is fall
 
     return semester + year;

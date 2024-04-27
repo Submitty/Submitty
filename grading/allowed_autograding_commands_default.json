@@ -42,6 +42,8 @@
     "tail":                    { "path": "/usr/bin/tail" },
     "uniq":                    { "path": "/usr/bin/uniq" },
     "echo":                    { "path": "/bin/echo" },
+    "iverilog":                { "path": "/usr/bin/iverilog" },
+    "vvp":                     { "path": "/usr/bin/vvp" },
 
     // Submitty Analysis Tools
     "submitty_count":          { "path": "__INSTALL__FILLIN__SUBMITTY_INSTALL_DIR__/SubmittyAnalysisTools/count"},

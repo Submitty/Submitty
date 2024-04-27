@@ -97,7 +97,7 @@
                 {% endif %}
             </div>
         {% endif %}
-        {% if (failed_file != '') or (file_length == 0 and not incomplete_autograding) %}
+        {% if (failed_file != '' or (file_count == 0 and not incomplete_autograding)) and is_vcs %}
         <div id="error-message" class="red-message">
             <b>Warning: The submitted repository is empty.</b><br/>
             {% if failed_file != '' %}

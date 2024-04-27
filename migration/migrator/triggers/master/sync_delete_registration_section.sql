@@ -11,7 +11,7 @@ DECLARE
     db_conn VARCHAR;
     query_string TEXT;
 BEGIN
-    db_conn := format('dbname=submitty_%s_%s', OLD.semester, OLD.course);
+    db_conn := format('dbname=submitty_%s_%s', OLD.term, OLD.course);
     query_string := 'DELETE FROM sections_registration WHERE sections_registration_id = ' || quote_literal(OLD.registration_section_id);
     -- Need to make sure that query_string was set properly as dblink_exec will happily take a null and then do nothing
     IF query_string IS NULL THEN
