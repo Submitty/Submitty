@@ -32,9 +32,7 @@ Seat: {$exam_seat}
 
 Please email your instructor with any questions or concerns.';
 
-    /**
-     * @Route("/courses/{_semester}/{_course}/email_room_seating")
-     */
+    #[Route("/courses/{_semester}/{_course}/email_room_seating")]
     public function renderEmailTemplate(): WebResponse {
         return new WebResponse(
             EmailRoomSeatingView::class,
@@ -44,9 +42,7 @@ Please email your instructor with any questions or concerns.';
         );
     }
 
-    /**
-     * @Route("/courses/{_semester}/{_course}/email_room_seating/send", methods={"POST"})
-     */
+    #[Route("/courses/{_semester}/{_course}/email_room_seating/send", methods: ["POST"])]
     public function emailSeatingAssignments(): RedirectResponse {
         $seating_assignment_subject = $_POST["room_seating_email_subject"];
         $seating_assignment_body = $_POST["room_seating_email_body"];
