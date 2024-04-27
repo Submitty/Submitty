@@ -9,6 +9,13 @@ use app\models\User;
 use app\views\NavigationView;
 
 class GradeableUtils {
+    const VCS_TYPE_NONE = -1;
+    const VCS_TYPE_SUBMITTY_HOSTED = 0;
+    const VCS_TYPE_SUBMITTY_HOSTED_URL = 1;
+    const VCS_TYPE_PUBLIC_GITHUB = 2;
+    const VCS_TYPE_PRIVATE_GITHUB = 3;
+    const VCS_TYPE_SELF_HOSTED = 4;
+
     /**
      * Get the gradeables of a specified course.
      *
