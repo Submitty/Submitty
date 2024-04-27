@@ -1084,7 +1084,7 @@ class ForumController extends AbstractController {
     }
 
     #[Route("/courses/{_semester}/{_course}/forum/threads", methods: ["GET"])]
-    #[Route("/courses/{_semester}/{_course}/forum/threads/{thread_id}", methods: ["GET","POST"], requirements: ["thread_id"=>"\d+"])]
+    #[Route("/courses/{_semester}/{_course}/forum/threads/{thread_id}", methods: ["GET","POST"], requirements: ["thread_id" => "\d+"])]
     public function showThreads($thread_id = null, $option = 'tree') {
         $user = $this->core->getUser()->getId();
         $currentCourse = $this->core->getConfig()->getCourse();
