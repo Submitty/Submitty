@@ -1026,12 +1026,14 @@ class SubmissionController extends AbstractController {
      */
     #[Route('/api/{_semester}/{_course}/gradeable/{gradeable_id}/values', methods: ['GET'])]
     public function ajaxGetGradeableValues(string $gradeable_id): JsonResponse {
-        if ($this->core->getQueries()->getUserById($_GET['user_id']) === null) {
-            return JsonResponse::getFailResponse('User with id `' . $_GET['user_id'] . '` does not exist.');
-        }
+
         // Faculty = 2, Superuser = 1
         if ($this->core->getUser()->getAccessLevel() > 2 && ($_GET['user_id'] ?? '') !== $this->core->getUser()->getId()) {
             return JsonResponse::getFailResponse('API key and specified user_id are not for the same user.');
+        }
+
+        if ($this->core->getQueries()->getUserById($_GET['user_id']) === null) {
+            return JsonResponse::getFailResponse('User with id `' . $_GET['user_id'] . '` does not exist.');
         }
 
         try {
