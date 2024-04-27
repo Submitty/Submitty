@@ -6,45 +6,45 @@ const queueCode1 = 'cypress_test_fail';
 const newQueueCode = 'cypress_update';
 const enableQueue = () => {
     cy.visit(['sample', 'config']); // course setting
-    cy.get('#queue-enabled').check();
-    cy.get('#queue-enabled').should('be.checked');
+    cy.get('[data-testid="queue-enabled"]').check();
+    cy.get('[data-testid="queue-enabled"]').should('be.checked');
 };
 const deleteQueue = () => {
     cy.visit(['sample', 'office_hours_queue']); // office hours queue
-    cy.get('#toggle_filter_settings').click();
+    cy.get('[data-testid="toggle-filter-settings"]').click();
     cy.get('[data-testid="popup-window"]').should('exist');
-    cy.get('.delete_queue_btn').last().click();
+    cy.get('[data-testid="delete-queue-btn"]').last().click();
 };
 const disableQueue = () => {
     cy.visit(['sample', 'config']);
-    cy.get('#queue-enabled').should('be.checked');
-    cy.get('#queue-enabled').check();
+    cy.get('[data-testid="queue-enabled"]').should('be.checked');
+    cy.get('[data-testid="queue-enabled"]').check();
 };
 const openNewQueue = (queueName, queueCode='') => {
     cy.get('#nav-sidebar-queue').click();
-    cy.get('#toggle_new_queue').should('exist').click();
+    cy.get('[data-testid="toggle-new-queue"]').should('exist').click();
     cy.get('[data-testid="popup-window"]').should('exist');
-    cy.get('#new_queue_code').type(queueName);
+    cy.get('[data-testid="new-queue-code"]').type(queueName);
     if (queueCode.length > 0) {
-        cy.get('#new-queue-token').type(queueCode);
+        cy.get('[data-testid="new-queue-token"]').type(queueCode);
     }
     else {
-        cy.get('#new_queue_rand_token').click();
+        cy.get('[data-testid="new-queue-rand-token"]').click();
     }
-    cy.get('#open_new_queue_btn').click();
+    cy.get('[data-testid="open-new-queue-btn"]').click();
 };
 
 const changeQueueCode = (queueName, queueCode='') => {
-    cy.get('#toggle_filter_settings').should('exist').click();
+    cy.get('[data-testid="toggle-filter-settings"]').should('exist').click();
     cy.get('[data-testid="popup-window"]').should('exist');
-    cy.get('#old_queue_code').select(queueName);
+    cy.get('[data-testid="old-queue-code"]').select(queueName);
     if (queueCode.length > 0) {
-        cy.get('#old_queue_token').type(queueCode);
+        cy.get('[data-testid="old-queue-token"]').type(queueCode);
     }
     else {
-        cy.get('#old_queue_rand_token').click(); //random code
+        cy.get('[data-testid="old-queue-rand-token"]').click(); // random code
     }
-    cy.get('#change_code_btn').click(); // update it
+    cy.get('[data-testid="change-code-btn"]').click(); // update it
 };
 const switchUser = (account) => {
     cy.logout();
@@ -52,21 +52,21 @@ const switchUser = (account) => {
     cy.visit(['sample', 'office_hours_queue']);
 };
 const studentJoinQueue = (queueName, queueCode) => {
-    cy.get('#queue_code').select(queueName).invoke('val'); // in which queue you want to join
-    cy.get('#queue_code').should('contain', queueName);
+    cy.get('[data-testid="queue-code"]').select(queueName).invoke('val'); // in which queue you want to join
+    cy.get('[data-testid="queue-code"]').should('contain', queueName);
     cy.get('#token-box').type(queueCode);
-    cy.get('#join_queue_btn').should('exist').click();
+    cy.get('[data-testid="join-queue-btn"]').click();
 };
 const editAnnouncement = (text='') => {
     // openAnnouncementSettings
-    cy.get('#toggle_announcement_settings').click();
+    cy.get('[data-testid="toggle-announcement-settings"]').click();
     cy.get('#announcement-settings').should('exist');
     cy.get('#queue-announcement-message').clear();
     if (text.length > 0) {
         cy.get('#queue-announcement-message').type(text);
     }
     // saveAnnouncementSettings
-    cy.get('#save_announcement').click();
+    cy.get('[data-testid="save_announcement"]').click();
 };
 describe('test office hours queue', () => {
     it('opened new queue, students joining queue, started and finished helping student', () => {
@@ -88,7 +88,7 @@ describe('test office hours queue', () => {
         switchUser('student');
         studentJoinQueue(queueName, newQueueCode);
         cy.get('.alert-success').contains('Added to queue');
-        cy.get('#leave_queue').click(); // studentRemoveSelfFromQueue
+        cy.get('[data-testid="leave-queue"]').click(); // studentRemoveSelfFromQueue
         cy.get('.alert-success').contains('Removed from queue');
         studentJoinQueue(queueName, newQueueCode);
         cy.get('.alert-success').contains('Added to queue');
@@ -98,7 +98,7 @@ describe('test office hours queue', () => {
         cy.get('.alert-success').contains('Started helping student');
         // switch to student for finishing help
         switchUser('student');
-        cy.get('#self_finish_help').click(); // studentFinishHelpSelf
+        cy.get('[data-testid="self-finish-help"]').click(); // studentFinishHelpSelf
         cy.get('.alert-success').contains('Finished helping student');
         studentJoinQueue(queueName1, queueCode1);
         cy.get('.alert-success').contains('Added to queue');
@@ -113,23 +113,23 @@ describe('test office hours queue', () => {
         cy.get('.alert-success').contains('Started helping student');
         cy.get('.finish_helping_btn').first().click(); // finished helping first student
         cy.get('.alert-success').contains('Finished helping student');
-        cy.get('.remove_from_queue_btn').first().click(); // remove First Student
+        cy.get('[data-testid="remove-from-queue-btn"]').first().click();  // remove First Student
         cy.get('.alert-success').contains('Removed from queue');
-        cy.get('.queue_restore_btn').first().click(); // restore first Student
+        cy.get('[data-testid="queue-restore-btn"]').first().click(); // restore first Student
         cy.get('.alert-success').contains('Student restored');
-        cy.get('.queue_restore_btn').first().click();
+        cy.get('[data-testid="queue-restore-btn"]').first().click();
         cy.get('.alert-success').contains('Student restored');
-        cy.get('.queue_restore_btn').first().click();
+        cy.get('[data-testid="queue-restore-btn"]').first().click();
         cy.get('.alert-error').contains('Cannot restore a user that is currently in the queue. Please remove them first.');
         cy.get('.filter-buttons').first().click(); // turn first "off"
         cy.get('.filter-buttons').first().click(); // turn first "on"
-        cy.get('#toggle_filter_settings').first().click();
-        cy.get('.toggle-queue-checkbox').first().click(); // closeFirstQueue
-        cy.get('.empty_queue_btn').first().click(); // emptyFirstQueue
+        cy.get('[data-testid="toggle-filter-settings"]').first().click();
+        cy.get('[data-testid="toggle-queue-checkbox"]').first().click(); // closeFirstQueue
+        cy.get('[data-testid="empty-queue-btn"]').first().click(); // emptyFirstQueue
         editAnnouncement('Submitty');
         cy.get('.alert-success').contains('Updated announcement');
         editAnnouncement('');
-        cy.get('#announcement').should('not.exist');
+        cy.get('[data-testid="announcement"]').should('not.exist');
         cy.get('.alert-success').contains('Updated announcement');
         // diable and delete all queue
         disableQueue();
