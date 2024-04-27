@@ -2,7 +2,7 @@
 {% set question_type = poll is not null ? poll.getQuestionType() : 'single-response-multiple-correct' %}
 
 <div class="content">
-    <h1>{{ poll is not null ? "Edit Poll" : "Add a New Poll" }}</h1>
+    <h1 id = "new-poll-title">{{ poll is not null ? "Edit Poll" : "Add a New Poll" }}</h1>
 
     <form id="new-poll-form" method="post" action="{{ base_url }}{{ url_path }}" enctype="multipart/form-data">
         {% if poll is not null %}
@@ -87,7 +87,6 @@
             <input type="checkbox" id="keep-image" name="keep_image" checked />
         {% endif %}
         <br/>
-
         <label for="poll-date" class="option-title">
             Expected release date:
         </label>
@@ -101,7 +100,29 @@
             value="{{ poll is not null ? poll.getReleaseDate() | date("Y-m-d") }}"
         />
         <br/>
-
+        <label for="enable-timer" class="option-title">
+            Enable Timer?
+        </label>
+        <input type="checkbox" id="enable-timer" name="enable-timer" onchange="toggleTimerInputs()" {% if poll is not null and (poll.getDuration().h != 0 or poll.getDuration().i != 0 or poll.getDuration().s != 0) %} checked {% endif %} value="enabled" />
+        <br/>
+        <div id="timer-inputs" {% if poll is null or (poll.getDuration().h == 0 and poll.getDuration().i == 0 and poll.getDuration().s == 0) %} style="display:none" {% endif %}>
+            <label class="option-title">
+                Expected Duration of Poll:
+            </label>
+            <div class="poll-input">
+                <label class="option"> Hours </label><br>
+                <input type="number" name="poll-hours" id="poll-hours" class="poll-timer" placeholder="hrs" max="24" min="0" value="{{ poll is not null ? poll.getDuration().h }}" />
+            </div>
+            <div class="poll-input">
+                <label class="option"> Minutes </label><br>
+                <input type="number" name="poll-minutes" id="poll-minutes" class="poll-timer" placeholder="min" min="0" value="{{ poll is not null ? poll.getDuration().i }}"/>
+            </div>
+            <div class="poll-input">
+                <label class="option"> Seconds </label><br>
+                <input type="number" name="poll-seconds" id="poll-seconds" class="poll-timer" placeholder="sec" min="0" value="{{ poll is not null ? poll.getDuration().s }}"/>
+            </div>
+        </div>
+        <br>
         <label for="student-histogram-release-setting" class="option-title">
             Release response histogram to students:
         </label>
