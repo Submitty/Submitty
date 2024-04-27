@@ -9,7 +9,7 @@ William Allen, 2021-current
 ## Developers  
 
 Jeffrey Cordero, 2024-current  
-Johnny Chen Chen, 2024-current  
+Johnny Chen, 2024-current  
 James Fitzgerald, 2024-current  
 Michael Krar, 2024-current  
 William Lin, 2024-current  
