@@ -136,7 +136,7 @@ function generateCalendarItem(item) {
     if (!item['submission_open'] && item['is_student']) {
         // Student shouldn't be able to access this item
         // When hovering over an item, shows the below message
-        tooltip = 'You can access this gradeable, once the submission opens';
+        tooltip = 'You can access this gradeable once the submission opens';
         item['disabled'] = true;
     }
     else {
@@ -179,9 +179,9 @@ function generateCalendarItem(item) {
     }
     // disabling element for student access level if submission is not open
     if (item['disabled']) {
-        element.style.setProperty('background-color', 'grey');
+        element.style.setProperty('cursor', 'default');
     }
-    if (exists) {
+    if (exists && !item['disabled']) {
         element.style.setProperty('cursor', 'pointer');
     }
     element.title = tooltip;
