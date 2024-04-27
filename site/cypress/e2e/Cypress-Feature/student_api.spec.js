@@ -8,15 +8,44 @@ describe('Tests cases for the Student API', () => {
             // Success
             cy.request({
                 method: 'GET',
-                url: `${Cypress.config('baseUrl')}/api/${getCurrentSemester()}/sample/gradeable/subdirectory_vcs_homework/score?user_id=student`,
+                url: `${Cypress.config('baseUrl')}/api/${getCurrentSemester()}/sample/gradeable/subdirectory_vcs_homework/values?user_id=student`,
                 headers: {
                     Authorization: key,
                 }, body: {
                 },
             }).then((response) => {
                 expect(response.body.status).to.equal('success');
-                // Gradeables aren't graded in CI to test for accurate score count.
-            });
+                // Remove these because they are different locally
+                if (Cypress.env('run_area') !== 'CI') {
+                    delete response.body.data['highest_version'];
+                    delete response.body.data['total_points'];
+                    delete response.body.data['total_percent'];
+                    delete response.body.data['queue_position'];
+                    expect(JSON.stringify(response.body.data)).to.equal(
+                        JSON.stringify(
+                        {
+                            "is_queued": false,
+                            "is_grading": false,
+                            "has_submission": true,
+                            "autograding_complete": true,
+                            "has_active_version": true,
+                        }));
+                } else {
+                    expect(JSON.stringify(response.body.data)).to.equal(
+                        JSON.stringify(
+                        {
+                            "is_queued": false,
+                            "queue_position": -1,
+                            "is_grading": false,
+                            "has_submission": true,
+                            "autograding_complete": true,
+                            "has_active_version": true,
+                            "highest_version": 1,
+                            "total_points": null,
+                            "total_percent": null
+                        }));
+                }});
+
             // Success, successfully sent to be graded
             cy.request({
                 method: 'POST',
@@ -35,7 +64,7 @@ describe('Tests cases for the Student API', () => {
             // Fail
             cy.request({
                 method: 'POST',
-                url: `${Cypress.config('baseUrl')}/api/${getCurrentSemester()}/sample/gradeable/subdirectory_vcs_homework/score`,
+                url: `${Cypress.config('baseUrl')}/api/${getCurrentSemester()}/sample/gradeable/subdirectory_vcs_homework/values`,
                 headers: {
                     Authorization: key,
                 }, body:{},
@@ -47,7 +76,7 @@ describe('Tests cases for the Student API', () => {
             // Fail, invalid API key
             cy.request({
                 method: 'GET',
-                url: `${Cypress.config('baseUrl')}/api/${getCurrentSemester()}/sample/gradeable/subdirectory_vcs_homework/score`,
+                url: `${Cypress.config('baseUrl')}/api/${getCurrentSemester()}/sample/gradeable/subdirectory_vcs_homework/values`,
                 headers: {
                     Authorization: 'key',
                 }, body:{},
@@ -58,7 +87,7 @@ describe('Tests cases for the Student API', () => {
             // Fail, API key not for given user_id
             cy.request({
                 method: 'GET',
-                url: `${Cypress.config('baseUrl')}/api/${getCurrentSemester()}/sample/gradeable/subdirectory_vcs_homework/score?user_id=not_student`,
+                url: `${Cypress.config('baseUrl')}/api/${getCurrentSemester()}/sample/gradeable/subdirectory_vcs_homework/values?user_id=not_student`,
                 headers: {
                     Authorization: key,
                 }, body:{
@@ -79,11 +108,11 @@ describe('Tests cases for the Student API', () => {
                 expect(response.body.message).to.equal('Endpoint not found.');
             });
 
-            // Specific fails for score API
+            // Specific fails for values API
             // Gradeable doesn't exist
             cy.request({
                 method: 'GET',
-                url: `${Cypress.config('baseUrl')}/api/${getCurrentSemester()}/sample/gradeable/not_found_gradeable/score?user_id=student`,
+                url: `${Cypress.config('baseUrl')}/api/${getCurrentSemester()}/sample/gradeable/not_found_gradeable/values?user_id=student`,
                 headers: {
                     Authorization: key,
                 }, body: {
@@ -91,18 +120,6 @@ describe('Tests cases for the Student API', () => {
             }).then((response) => {
                 expect(response.body.status).to.equal('fail');
                 expect(response.body.message).to.equal('Gradeable does not exist');
-            });
-            // Ungraded gradeable
-            cy.request({
-                method: 'GET',
-                url: `${Cypress.config('baseUrl')}/api/${getCurrentSemester()}/sample/gradeable/open_vcs_homework/score?user_id=student`,
-                headers: {
-                    Authorization: key,
-                }, body: {
-                },
-            }).then((response) => {
-                expect(response.body.status).to.equal('success');
-                expect(response.body.message).to.equal(null);
             });
         });
     });

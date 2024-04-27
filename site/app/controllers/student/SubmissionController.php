@@ -1024,8 +1024,8 @@ class SubmissionController extends AbstractController {
      * @return JsonResponse
      * @param string $gradeable_id
      */
-    #[Route("/api/{_semester}/{_course}/gradeable/{gradeable_id}/score", methods: ["GET"])]
-    public function ajaxGetGradeableScore(string $gradeable_id): JsonResponse {
+    #[Route("/api/{_semester}/{_course}/gradeable/{gradeable_id}/values", methods: ["GET"])]
+    public function ajaxGetGradeableValues(string $gradeable_id): JsonResponse {
         // Instructor
         if ($this->core->getUser()->getAccessLevel() !== 1) {
             if (($_GET['user_id'] ?? '') !== $this->core->getUser()->getId()) {
@@ -1038,18 +1038,23 @@ class SubmissionController extends AbstractController {
         catch (\InvalidArgumentException $e) {
             return JsonResponse::getFailResponse('Gradeable does not exist');
         }
-        $gradeable_version_instance = $this->core->getQueries()->getGradedGradeable(
+        $gradeable_version_values = $this->core->getQueries()->getGradedGradeable(
             $gradeable,
             $_GET['user_id'],
             $gradeable->isTeamAssignment()
-        )->getAutoGradedGradeable()->getActiveVersionInstance();
+        )->getAutoGradedGradeable();
 
-        if ($gradeable_version_instance === null || $gradeable_version_instance->isQueued() || $gradeable_version_instance->isGrading()) {
-            // Return null value for not graded, or not submitted gradeables.
-            return JsonResponse::getSuccessResponse(null);
-        }
-
-        return JsonResponse::getSuccessResponse($gradeable_version_instance->getTotalPoints());
+        return JsonResponse::getSuccessResponse([
+            'is_queued' => $gradeable_version_values->isQueued(),
+            'queue_position' => $gradeable_version_values->getQueuePosition(),
+            'is_grading' => $gradeable_version_values->isGrading(),
+            'has_submission' => $gradeable_version_values->hasSubmission(),
+            'autograding_complete' => $gradeable_version_values->isAutoGradingComplete(),
+            'has_active_version' => $gradeable_version_values->hasActiveVersion(),
+            'highest_version' => $gradeable_version_values->getHighestVersion(),
+            'total_points' => ($gradeable_version_values->hasActiveVersion() ? $gradeable_version_values->getTotalPoints() : null),
+            'total_percent' => ($gradeable_version_values->hasActiveVersion() ? $gradeable_version_values->getTotalPercent() : null)
+        ]);
     }
 
     /**
