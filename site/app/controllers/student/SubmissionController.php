@@ -1033,7 +1033,7 @@ class SubmissionController extends AbstractController {
         if ($this->core->getUser()->getAccessLevel() > 2 && ($_GET['user_id'] ?? '') !== $this->core->getUser()->getId()) {
             return JsonResponse::getFailResponse('API key and specified user_id are not for the same user.');
         }
-        
+
         try {
             $gradeable = $this->core->getQueries()->getGradeableConfig($gradeable_id);
         }
