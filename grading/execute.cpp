@@ -77,6 +77,9 @@ bool system_program(const std::string &program, std::string &full_path_executabl
   // if we are docker, allow any program. previous code is necessary
   // to run before return for full path expansion.
   if (running_in_docker) {
+    if (full_path_executable.empty()) {
+      full_path_executable = program;
+    }
     return true;
   }
   return false;
