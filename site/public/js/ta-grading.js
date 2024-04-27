@@ -567,7 +567,7 @@ function onAjaxInit() {}
 
 function readCookies() {
 
-    const silent_edit_enabled = Cookies.get('silent_edit_enabled') || '';
+    const silent_edit_enabled = Cookies.get('silent_edit_enabled') === 'true' || '';
 
     const autoscroll = Cookies.get('autoscroll') || '';
     const opened_mark = Cookies.get('opened_mark') || '';
@@ -1571,7 +1571,10 @@ function openFrame(html_file, url_file, num, pdf_full_panel=true, panel='submiss
     if (!iframe.hasClass('open') || iframe.hasClass('full_panel')) {
         const iframeId = `file_viewer_${num}_iframe`;
         let directory = '';
-        if (url_file.includes('submissions')) {
+        if (url_file.includes('user_assignment_settings.json')) {
+            directory = 'submission_versions';
+        }
+        else if (url_file.includes('submissions')) {
             directory = 'submissions';
         }
         else if (url_file.includes('results_public')) {

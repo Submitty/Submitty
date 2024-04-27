@@ -56,10 +56,16 @@ std::vector<std::string> stringOrArrayOfStrings(nlohmann::json j, const std::str
   if (itr->is_string()) {
     answer.push_back(*itr);
   } else {
-    assert (itr->is_array());
+    if (!itr->is_array()) {
+      std::cerr << "ERROR: " << what << " must be a string or array of strings." << std::endl;
+      exit(1);
+    }
     nlohmann::json::const_iterator itr2 = itr->begin();
     while (itr2 != itr->end()) {
-      assert (itr2->is_string());
+      if (!itr2->is_string()) {
+        std::cerr << "ERROR: " << what << " must only contain strings." << std::endl;
+        exit(1);
+      }
       answer.push_back(*itr2);
       itr2++;
     }

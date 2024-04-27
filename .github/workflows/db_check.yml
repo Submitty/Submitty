@@ -84,6 +84,7 @@ jobs:
 
           sudo addgroup submitty_daemonphp
           sudo addgroup submitty_daemoncgi
+          sudo addgroup submitty_daemonphpcgi
           sudo addgroup submitty_course_builders
           sudo addgroup submitty_phpgrp
 
@@ -97,6 +98,9 @@ jobs:
           sudo adduser  submitty_daemon submitty_daemonphp --no-create-home
           sudo adduser  submitty_cgi submitty_daemoncgi --no-create-home
           sudo adduser  submitty_daemon submitty_daemoncgi --no-create-home
+          sudo adduser  submitty_daemon submitty_daemonphpcgi --no-create-home
+          sudo adduser  submitty_php submitty_daemonphpcgi --no-create-home
+          sudo adduser  submitty_cgi submitty_daemonphpcgi --no-create-home
           sudo adduser  submitty_daemon docker --no-create-home
 
           sudo useradd -p $(openssl passwd -1 submitty_dbuser) submitty_dbuser
