@@ -27,22 +27,10 @@ Chuanyi Pan, 2023-current
 Arnav Pawar, 2023-current  
 Tate Whiteberg, 2023-current  
 Cameron Peterson, 2023-current, Google Summer of Code 2023  
-Nia Heermance 2023-current  
-Eden Bendheim 2023-current  
-Jason Chen 2023-current  
-Anson Decker 2023-current  
+Nia Heermance 2023-current
 Jaeseok Kang 2023-current  
 Hanson Gu 2023-current  
-Sátvik Karanam 2023-current  
 Viane Matsibekker 2023-current  
-Jason Ng 2023-current  
-Mahi Pasarkar 2023-current  
-Hannah Rose 2023-current  
-Zachary Silverstein 2023-current  
-Adam Tuhacek 2023-current  
-Yanli Wang 2023-current  
-Kerui (Ray) Wu 2023-current  
-Bairong Zhang 2023-current  
 Shail Patel 2018-current  
 Jasmine Plum 2017-current  
 Ana Milanova 2016-current  
@@ -63,6 +51,18 @@ Tevin Zhuo, 2023
 Saumya Borwankar, 2023, Google Summer of Code 2023  
 Musaab Imran, 2023, Google Summer of Code 2023  
 Youssef Hassan 2023  
+Eden Bendheim 2023
+Jason Chen 2023
+Anson Decker 2023
+Sátvik Karanam 2023
+Jason Ng 2023  
+Mahi Pasarkar 2023  
+Hannah Rose 2023  
+Zachary Silverstein 2023  
+Adam Tuhacek 2023  
+Yanli Wang 2023
+Kerui (Ray) Wu 2023  
+Bairong Zhang 2023
 Evan Maicus 2016-2021  
 Shelly Belsky, 2021-2023  
 Jenay Barela, 2020-2023  
