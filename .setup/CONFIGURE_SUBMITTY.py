@@ -644,7 +644,10 @@ if not args.worker:
 
 config['worker'] = True if args.worker == 1 else False
 
-#clobber 
+# this prevents a clobbered system message
+if system_message != None:
+    config['system_message'] = system_message
+
 with open(SUBMITTY_JSON, 'w') as json_file:
     json.dump(config, json_file, indent=2)
 os.chmod(SUBMITTY_JSON, 0o444)
