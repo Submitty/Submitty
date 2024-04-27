@@ -494,6 +494,17 @@ if not args.worker:
 
 IGNORED_FILES_AND_DIRS = ['saml', 'login.md']
 
+system_message = None
+# this prevents clobbered system_message
+try:
+    with open(SUBMITTY_JSON,"r") as submitty_config:
+        load_submitty_json = json.load(submitty_config)
+        if "system_message" in load_submitty_json:
+            system_message = load_submitty_json["system_message"]
+except IOError:
+    pass
+
+
 if os.path.isdir(CONFIG_INSTALL_DIR):
     for file in os.scandir(CONFIG_INSTALL_DIR):
         if file.name not in IGNORED_FILES_AND_DIRS:
@@ -633,15 +644,7 @@ if not args.worker:
 
 config['worker'] = True if args.worker == 1 else False
 
-# this prevents clobbered system_message
-try:
-    with open(SUBMITTY_JSON,"r") as submitty_config:
-        load_submitty_json = json.load(submitty_config)
-        if "system_message" in load_submitty_json:
-                config["system_message"] = load_submitty_json["system_message"]
-except IOError:
-	pass
-
+#clobber 
 with open(SUBMITTY_JSON, 'w') as json_file:
     json.dump(config, json_file, indent=2)
 os.chmod(SUBMITTY_JSON, 0o444)
