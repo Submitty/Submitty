@@ -1,7 +1,10 @@
-/* global displaySuccessMessage, hljs */
+/* global displaySuccessMessage */
+/* global luxon */
+/* global hljs */
 /* exported markForDeletion */
 /* exported unMarkForDeletion */
 /* exported  displayHistoryAttachment */
+/* exported toggleLike */
 
 // eslint-disable-next-line no-unused-vars
 function categoriesFormEvents() {
@@ -179,6 +182,8 @@ function testAndGetAttachments(post_box_id, dynamic_check) {
         return false;
     }
     else {
+        const submitButton = document.querySelector(`[data-post_box_id="${post_box_id}"] input[type="submit"]`);
+        submitButton.disabled = false;
         return files;
     }
 }
@@ -339,6 +344,7 @@ function socketNewOrEditPostHandler(post_id, reply_level, post_box_id=null, edit
                     original_post.remove();
                 }
 
+                $(`#${post_id}`).addClass('new_post');
                 $(`#${post_id}-reply`).css('display', 'none');
                 $(`#${post_id}-reply`).submit(publishPost);
                 // eslint-disable-next-line no-undef
@@ -789,6 +795,13 @@ function modifyOrSplitPost(e) {
     const form = $(this);
     const formData = new FormData(form[0]);
     formData.append('deleted_attachments', JSON.stringify(getDeletedAttachments()));
+    const files = testAndGetAttachments(1, false);
+    if (files === false) {
+        return false;
+    }
+    for (let i = 0; i < files.length ; i++) {
+        formData.append('file_input[]', files[i], files[i].name);
+    }
     const submit_url = form.attr('action');
 
     $.ajax({
@@ -838,6 +851,7 @@ function modifyOrSplitPost(e) {
 
 // eslint-disable-next-line no-unused-vars
 function showEditPostForm(post_id, thread_id, shouldEditThread, render_markdown, csrf_token) {
+    const DateTime = luxon.DateTime;
     if (!checkAreYouSureForm()) {
         return;
     }
@@ -876,19 +890,19 @@ function showEditPostForm(post_id, thread_id, shouldEditThread, render_markdown,
             const change_anon = json.change_anon;
             // eslint-disable-next-line no-undef
             const user_id = escapeSpecialChars(json.user);
-            let time = Date.parse(json.post_time);
-            if (!time) {
+            const validIsoString = json.post_time.replace(' ', 'T');
+            let time = DateTime.fromISO(json.validIsoString, { zone: 'local' });
+            if (!time.isValid) {
                 // Timezone suffix ":00" might be missing
-                time = Date.parse(`${json.post_time}:00`);
+                time = DateTime.fromISO(`${validIsoString}:00`, { zone: 'local' });
             }
-            time = new Date(time);
             const categories_ids = json.categories_ids;
-            const date = time.toLocaleDateString();
-            time = time.toLocaleString('en-US', { hour: 'numeric', minute: 'numeric', hour12: true });
+            const date = time.toLocaleString(DateTime.DATE_SHORT);
+            const timeString = time.toLocaleString(DateTime.TIME_SIMPLE);
             const contentBox = form.find('[name=thread_post_content]')[0];
             contentBox.style.height = lines*14;
             const editUserPrompt = document.getElementById('edit_user_prompt');
-            editUserPrompt.innerHTML = `Editing a post by: ${user_id} on ${date} at ${time}`;
+            editUserPrompt.innerHTML = `Editing a post by: ${user_id} on ${date} at ${timeString}`;
             contentBox.value = post_content;
             document.getElementById('edit_post_id').value = post_id;
             document.getElementById('edit_thread_id').value = thread_id;
@@ -902,9 +916,7 @@ function showEditPostForm(post_id, thread_id, shouldEditThread, render_markdown,
             $('#edit-user-post').css('display', 'block');
             // eslint-disable-next-line no-undef
             captureTabInModal('edit-user-post');
-
             $('.cat-buttons input').prop('checked', false);
-
             if (json.markdown === true) {
                 $('#markdown_input_').val('1');
                 $('#markdown_toggle_').addClass('markdown-active');
@@ -937,7 +949,6 @@ function showEditPostForm(post_id, thread_id, shouldEditThread, render_markdown,
                     $('.expiration').show();
                 }
                 $('#expirationDate').val(json.expiration);
-
                 // Categories
                 $('.cat-buttons').removeClass('btn-selected');
                 $.each(categories_ids, (index, category_id) => {
@@ -1280,6 +1291,79 @@ function modifyThreadList(currentThreadId, currentCategoriesId, course, loadFirs
             window.alert('Something went wrong when trying to filter. Please try again.');
             Cookies.remove(`${course}_forum_categories`, { path: '/' });
             Cookies.remove('forum_thread_status', { path: '/' });
+        },
+    });
+}
+
+function toggleLike(post_id, current_user) {
+
+    // eslint-disable-next-line no-undef
+    const url = buildCourseUrl(['post', 'likes']);
+    $.ajax({
+        url: url,
+        type: 'POST',
+        data: {
+            post_id: post_id,
+            current_user: current_user,
+            // eslint-disable-next-line no-undef
+            csrf_token: csrfToken,
+        },
+        success: function(data) {
+            let json;
+            try {
+                json = JSON.parse(data);
+            }
+            catch (err) {
+                // eslint-disable-next-line no-undef
+                displayErrorMessage('Error parsing data. Please try again.');
+                return;
+            }
+            if (json['status'] === 'fail') {
+                // eslint-disable-next-line no-undef
+                displayErrorMessage(json['message']);
+                return;
+            }
+            json=json['data'];
+            const likes = json['likesCount'];
+            const liked = json['status'];
+            console.log(json['status']);
+
+            const likeCounterElement = document.getElementById(`likeCounter_${post_id}`);
+            let likeCounter = parseInt(likeCounterElement.innerText);
+
+            // eslint-disable-next-line no-useless-concat
+            const likeIconSrc = document.getElementById(`likeIcon_${post_id}`);
+            let likeIconSrcElement = likeIconSrc.src;
+
+            const theme = localStorage.getItem('theme');
+            if (liked==='unlike') {
+                if (theme==='light' && likeIconSrcElement.endsWith('/img/on-duck-button.svg')) {
+                    likeIconSrcElement = likeIconSrcElement.replace('on-duck-button.svg', 'light-mode-off-duck.svg');
+                }
+                else {
+                    likeIconSrcElement = likeIconSrcElement.replace('on-duck-button.svg', 'light-mode-off-duck.svg');
+                }
+                likeCounter=likes;//set to the sql like value
+
+                likeIconSrc.src = likeIconSrcElement; // Update the state
+                likeCounterElement.innerText = likeCounter;
+            }
+            else if (liked ==='like') {
+                if (theme==='light') {
+                    likeIconSrcElement = likeIconSrcElement.replace('light-mode-off-duck.svg', 'on-duck-button.svg');
+                }
+                else {
+                    likeIconSrcElement = likeIconSrcElement.replace('light-mode-off-duck.svg', 'on-duck-button.svg');
+                }
+                likeCounter=likes;
+
+                likeIconSrc.src = likeIconSrcElement; // Update the state
+                likeCounterElement.innerText = likeCounter;
+            }
+
+        },
+        error: function(err) {
+            console.log(err);
         },
     });
 }
@@ -2257,28 +2341,27 @@ function updateThread(e) {
     e.preventDefault();
     const cat = [];
     $('input[name="cat[]"]:checked').each(item => cat.push($('input[name="cat[]"]:checked')[item].value));
-    const post_box_id = $('#edit-user-post').find('.thread-post-form').data('post_box_id');
 
-    const data =  {
-        edit_thread_id: $('#edit_thread_id').val(),
-        edit_post_id: $('#edit_post_id').val(),
-        csrf_token: $('input[name="csrf_token"]').val(),
-        title: $('input#title').val(),
-        thread_post_content: $(`textarea#reply_box_${post_box_id}`).val(),
-        thread_status: $('#thread_status').val(),
-        Anon: $('input#thread_post_anon_edit').is(':checked') ? $('input#thread_post_anon_edit').val() : 0,
-        lock_thread_date: $('input#lock_thread_date').text(),
-        expirationDate: $('input#expirationDate').val(),
-        cat,
-        markdown_status: parseInt($(`input#markdown_input_${post_box_id}`).val()),
-        deleted_attachments: JSON.stringify(getDeletedAttachments()),
-    };
+    const form = $(this);
+    const formData = new FormData(form[0]);
+    formData.append('deleted_attachments', JSON.stringify(getDeletedAttachments()));
+
+    const files = testAndGetAttachments(1, false);
+    if (files === false) {
+        return false;
+    }
+
+    for (let i = 0; i < files.length ; i++) {
+        formData.append('file_input[]', files[i], files[i].name);
+    }
 
     $.ajax({
         // eslint-disable-next-line no-undef
         url: `${buildCourseUrl(['forum', 'posts', 'modify'])}?modify_type=1`,
         type: 'POST',
-        data,
+        data: formData,
+        processData: false,
+        contentType: false,
         success: function (response) {
             try {
                 response = JSON.parse(response);
@@ -2417,6 +2500,40 @@ function clearReplyBoxAutosave(replyBox) {
     }
 }
 
+function setupDisableReplyThreadForm() {
+    const threadPostForms = document.querySelectorAll('.thread-post-form');
+
+    threadPostForms.forEach((form) => {
+        //For all thread forms either reply's or posts, ensure that when text area is empty, the submit button appears to be disabled
+        const textArea = form.querySelector('textarea');
+
+        const submitButton = form.querySelector('input[type="submit"]');
+
+        if (textArea.id === 'reply_box_1' || textArea.id === 'reply_box_2') {
+            // Should not apply for first two reply_box's as they imply the post itself which should be handled by another controller due to extensive inputs
+            return;
+        }
+
+        const inputTest = () => {
+            const imageAttachments = form.querySelectorAll('.file-upload-table .file-label');
+
+            if (textArea.value.trim() === '' && imageAttachments.length === 0) {
+                submitButton.disabled = true;
+            }
+            else {
+                submitButton.disabled = false;
+            }
+        };
+
+        textArea.addEventListener('input', () => {
+            // On any text area input, check if disabling the corresponding reply submit button is appropriate
+            inputTest();
+        });
+
+        inputTest();
+    });
+}
+
 function setupForumAutosave() {
     // Include both regular reply boxes on the forum as well as the "reply" box
     // on the create thread page.
@@ -2428,6 +2545,8 @@ function setupForumAutosave() {
         );
         $(replyBox).find('input.thread-anon-checkbox').change(() => saveReplyBoxToLocal(replyBox));
     });
+
+    setupDisableReplyThreadForm();
 }
 
 // eslint-disable-next-line no-unused-vars
@@ -2497,8 +2616,7 @@ function restoreCreateThreadFromLocal() {
 
         // Optional fields
         $('.expiration').hide();
-        // eslint-disable-next-line no-prototype-builtins
-        if (data.hasOwnProperty('lockDate')) {
+        if (Object.prototype.hasOwnProperty.call(data, 'lockDate')) {
             $('#lock_thread_date').val(data.lockDate);
         }
         if (data.isAnnouncement) {
@@ -2509,8 +2627,7 @@ function restoreCreateThreadFromLocal() {
             $('#pinThread').prop('checked', data.pinThread);
             $('.expiration').show();
         }
-        // eslint-disable-next-line no-prototype-builtins
-        if (data.hasOwnProperty('expiration')) {
+        if (Object.prototype.hasOwnProperty.call(data, 'expiration')) {
             $('#expirationDate').val(data.expiration);
         }
     }

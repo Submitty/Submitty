@@ -12,21 +12,22 @@ class SqliteDatabase extends AbstractDatabase {
         parent::__construct($connection_params);
         if (isset($connection_params['path'])) {
             $this->path = $connection_params['path'];
+            $this->memory = false;
         }
         else {
             $this->memory = isset($connection_params['memory']) && $connection_params['memory'] === true;
         }
     }
 
-    public function getDSN() {
-        $param = '';
+    public function getConnectionDetails(): array {
+        $details = [
+            'driver' => 'pdo_sqlite',
+            'memory' => $this->memory
+        ];
         if (isset($this->path)) {
-            $param = $this->path;
+            $details['path'] = $this->path;
         }
-        elseif ($this->memory === true) {
-            $param = ':memory:';
-        }
-        return "sqlite:{$param}";
+        return $details;
     }
 
     public function fromDatabaseToPHPArray($text, $parse_bools = false, $start = 0, &$end = null) {

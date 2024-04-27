@@ -51,6 +51,121 @@ class AdminGradeableController extends AbstractController {
     ];
 
     /**
+     * Creates a gradeable based on uploaded JSON data
+     */
+    #[Route("/api/{_semester}/{_course}/upload", methods: ["POST"])]
+    #[Route("/courses/{_semester}/{_course}/upload", methods: ["POST"])]
+    public function uploadGradeable(): JsonResponse {
+        $values = [
+            'title' => '',
+            'instructions_url' => '',
+            'id' => '',
+            'type' => '',
+            'bulk_upload' => 'false',
+            'vcs' => 'false',
+            'ta_grading' => 'false',
+            'grade_inquiry_allowed' => 'false',
+            'grade_inquiry_per_component_allowed' => 'false',
+            'discussion_based' => 'false',
+            'discussion_thread_id' => '',
+            'team_assignment' => 'false',
+            'team_size_max' => 3,
+            'eg_inherit_teams_from' => '',
+            'gradeable_teams_read' => 'false',
+            'vcs_radio_buttons' => 'submitty-hosted',
+            'external_repo' => '',
+            'using_subdirectory' => 'false',
+            'vcs_subdirectory' => '',
+            'syllabus_bucket' => 'Homework',
+        ];
+
+        if (!isset($_POST['id']) || !isset($_POST['title']) || !isset($_POST['type'])) {
+            return JsonResponse::getErrorResponse('JSON requires id, title, and type. See documentation for information');
+        }
+
+        $values['id'] = $_POST['id'];
+        $values['title'] = $_POST['title'];
+        $values['type'] = $_POST['type'];
+        if ($_POST['type'] === 'Electronic File') {
+            if (array_key_exists('vcs', $_POST)) {
+                if (!array_key_exists('repository_type', $_POST['vcs'])) {
+                    return JsonResponse::getErrorResponse('VCS gradeables require a repository_type value. See documentation for information.');
+                }
+                if (!in_array($_POST['vcs']['repository_type'], ['submitty-hosted', 'submitty-hosted-url', 'public-github', 'private-github', 'self-hosted'], true)) {
+                    return JsonResponse::getErrorResponse('VCS gradeables requires a valid vcs_radio_buttons value. See documentation for information.');
+                }
+                if (!array_key_exists('vcs_path', $_POST['vcs'])) {
+                    return JsonResponse::getErrorResponse('VCS gradeables require a vcs_path. See documentation for information.');
+                }
+                elseif ($_POST['vcs']['repository_type'] === 'self-hosted') {
+                    $values['external_repo'] = $_POST['vcs']['vcs_path'];
+                }
+                if (isset($_POST['vcs']['vcs_subdirectory'])) {
+                    $values['using_subdirectory'] = 'true';
+                    $values['vcs_subdirectory'] = $_POST['vcs']['vcs_subdirectory'];
+                }
+                $values['vcs'] = 'true';
+                $values['vcs_radio_buttons'] = $_POST['vcs']['repository_type'];
+                $values['vcs_path'] = $_POST['vcs']['vcs_path'];
+            }
+            $values['bulk_upload'] = $_POST['bulk_upload'] ?? 'false';
+        }
+
+        if (array_key_exists('team_gradeable', $_POST)) {
+            if (!array_key_exists('team_size_max', $_POST['team_gradeable'])) {
+                return JsonResponse::getErrorResponse('Team gradeables require a team_size_max value. See documentation for information.');
+            }
+            $values['eg_inherit_teams_from'] = $_POST['team_gradeable']['inherit_from'] ?? '';
+            $values['team_assignment'] = 'true';
+            $values['team_size_max'] = $_POST['team_gradeable']['team_size_max'];
+        }
+        if (array_key_exists('discussion_thread_id', $_POST)) {
+            $values['discussion_based'] = $_POST['discussion_based'];
+            $values['discussion_tread_id'] = $_POST['discussion_thread_id'];
+        }
+        if (array_key_exists('ta_grading', $_POST)) {
+            $values['ta_grading'] = $_POST['ta_grading'];
+            if (array_key_exists('grade_inquiries', $_POST)) {
+                $values['grade_inquiry_allowed'] = $_POST['grade_inquiries'] ?? 'false';
+                $values['grade_inquiry_per_component_allowed'] = $_POST['grade_inquiries_per_component'] ?? 'false';
+            }
+        }
+
+        if (array_key_exists('dates', $_POST)) {
+            $dates = $_POST['dates'];
+            $values['ta_view_start_date'] = $dates['ta_view_start_date'] ?? null;
+            $values['grade_start_date'] = $dates['grade_start_date'] ?? null;
+            $values['grade_due_date'] = $dates['grade_due_date'] ?? null;
+            $values['grade_released_date'] = $dates['grade_released_date'] ?? null;
+            $values['team_lock_date'] = $dates['team_lock_date'] ?? null;
+            $values['submission_open_date'] = $dates['submission_open_date'] ?? null;
+            $values['submission_due_date'] = $dates['submission_due_date'] ?? null;
+            $values['grade_inquiry_start_date'] = $dates['grade_inquiry_start_date'] ?? null;
+            $values['grade_inquiry_due_date'] = $dates['grade_inquiry_due_date'] ?? null;
+
+            $values['has_due_date'] = $dates['has_due_date'] ?? 'true';
+            $values['has_release_date'] = $dates['has_released_date'] ??  'true';
+            $values['late_submission_allowed'] = $dates['late_submission_allowed'] ?? 'true';
+            $values['late_days'] = $dates['late_days'] ?? 0;
+        }
+        $values['syllabus_bucket'] = $_POST['syllabus_bucket'] ?? 'Homework';
+        try {
+            $build_result = $this->createGradeable($_POST['id'], $values);
+            // Finally, redirect to the edit page
+            if ($build_result !== null) {
+                return JsonResponse::getErrorResponse($build_result);
+            }
+            return JsonResponse::getSuccessResponse($_POST['id']);
+        }
+        catch (ValidationException $e) {
+            return JsonResponse::getErrorResponse($e->getMessage());
+        }
+        catch (\Exception $e) {
+            return JsonResponse::getErrorResponse($e->getMessage());
+        }
+    }
+
+    /**
      * Displays the 'new' page, populating the first-page properties with the
      *  provided gradeable's data
      * @param string|null $template_id
@@ -70,6 +185,8 @@ class AdminGradeableController extends AbstractController {
         $this->core->getOutput()->addVendorCss(FileUtils::joinPaths('flatpickr', 'plugins', 'shortcutButtons', 'themes', 'light.min.css'));
         $this->core->getOutput()->addSelect2WidgetCSSAndJs();
         $this->core->getOutput()->addInternalCss('admin-gradeable.css');
+        $this->core->getOutput()->addInternalJs('directory.js');
+        $this->core->getOutput()->addInternalJs('gradeable.js');
         $this->core->getOutput()->renderTwigOutput('admin/admin_gradeable/AdminGradeableBase.twig', [
             'submit_url' => $submit_url,
             'gradeable' => $gradeable,
@@ -89,7 +206,6 @@ class AdminGradeableController extends AbstractController {
     //view the page with pulled data from the gradeable to be edited
     private function editPage(Gradeable $gradeable, $semester, $course, $nav_tab = 0) {
         $this->core->getOutput()->addBreadcrumb('Edit Gradeable');
-
         // Serialize the components for numeric/checkpoint rubrics
         $gradeable_components_enc = array_map(function (Component $c) {
             return $c->toArray();
@@ -844,7 +960,7 @@ class AdminGradeableController extends AbstractController {
                 'student_view_after_grades' => false,
                 'student_download' => true,
                 'student_submit' => true,
-                'late_days' => $default_late_days,
+                'late_days' => $details['late_days'] ?? $default_late_days,
                 'precision' => 0.5
             ];
             $gradeable_create_data = array_merge($gradeable_create_data, $non_template_property_values);
@@ -933,16 +1049,15 @@ class AdminGradeableController extends AbstractController {
 
             $grade_inquiry_allowed = isset($details['grade_inquiry_allowed']) && ($details['grade_inquiry_allowed'] === 'true');
             $grade_inquiry = ($details['grade_inquiry_per_component_allowed'] ?? 'false') === 'true';
+            $autograding_config_path = $details['autograding_config_path'] ?? FileUtils::joinPaths($this->core->getConfig()->getSubmittyInstallPath(), 'more_autograding_examples/upload_only/config');
             $gradeable_create_data = array_merge($gradeable_create_data, [
                 'team_assignment' => $details['team_assignment'] === 'true',
                 'ta_grading' => $details['ta_grading'] === 'true',
                 'team_size_max' => $details['team_size_max'],
                 'grade_inquiry_allowed' => $grade_inquiry_allowed,
                 'grade_inquiry_per_component_allowed' => $grade_inquiry,
-                'autograding_config_path' =>
-                    FileUtils::joinPaths($this->core->getConfig()->getSubmittyInstallPath(), 'more_autograding_examples/upload_only/config'),
+                'autograding_config_path' => $autograding_config_path,
                 'allow_custom_marks' => true,
-
                 //For discussion component
                 'discussion_based' => $discussion_clicked,
                 'discussion_thread_ids' => $jsonThreads,
@@ -957,8 +1072,8 @@ class AdminGradeableController extends AbstractController {
                 'peer_blind' => 3,
                 'depends_on' => null,
                 'depends_on_points' => null,
-                'has_due_date' => true,
-                'has_release_date' => true
+                'has_due_date' => $details['has_due_date'] ?? true,
+                'has_release_date' => $details['has_release_date'] ?? true
             ]);
         }
         else {
@@ -974,7 +1089,7 @@ class AdminGradeableController extends AbstractController {
                 'autograding_config_path' => '',
                 'peer_grading' => false,
                 'peer_grade_set' => 0,
-                'late_submission_allowed' => true,
+                'late_submission_allowed' => $details['late_submission_allowed'] ?? true,
                 'hidden_files' => ""
             ]);
         }
@@ -985,17 +1100,30 @@ class AdminGradeableController extends AbstractController {
         if ($tonight->diff($this->core->getDateTimeNow())->h < 12) {
             $tonight->add(new \DateInterval('P1D'));
         }
-        $gradeable_create_data = array_merge($gradeable_create_data, [
-            'ta_view_start_date' => (clone $tonight),
-            'grade_start_date' => (clone $tonight)->add(new \DateInterval('P10D')),
-            'grade_due_date' => (clone $tonight)->add(new \DateInterval('P14D')),
-            'grade_released_date' => (clone $tonight)->add(new \DateInterval('P14D')),
-            'team_lock_date' => (clone $tonight)->add(new \DateInterval('P7D')),
-            'submission_open_date' => (clone $tonight),
-            'submission_due_date' => (clone $tonight)->add(new \DateInterval('P7D')),
-            'grade_inquiry_start_date' => (clone $tonight)->add(new \DateInterval('P15D')),
-            'grade_inquiry_due_date' => (clone $tonight)->add(new \DateInterval('P21D'))
-        ]);
+        $date_names = [
+            'ta_view_start_date' => '',
+            'grade_start_date' => 'P10D',
+            'grade_due_date' => 'P14D',
+            'grade_released_date' => 'P14D',
+            'team_lock_date' => 'P7D',
+            'submission_open_date' => '',
+            'submission_due_date' => 'P7D',
+            'grade_inquiry_start_date' => 'P15D',
+            'grade_inquiry_due_date' => 'P21D'
+        ];
+
+        foreach ($date_names as $time_string => $tonight_modifier) {
+            $gradeable_create_data = array_merge(
+                $gradeable_create_data,
+                [
+                    $time_string => $this->getDateTimeForGradeable(
+                        $details[$time_string] ?? '',
+                        $tonight,
+                        $tonight_modifier
+                    )
+                ]
+            );
+        }
 
         // Finally, construct the gradeable
         $gradeable = new Gradeable($this->core, $gradeable_create_data);
@@ -1035,6 +1163,18 @@ class AdminGradeableController extends AbstractController {
         }
 
         return $build_status;
+    }
+
+    public function getDateTimeForGradeable(string $time_string, \DateTime $tonight, string $tonight_modifier = ''): \DateTime {
+        if ($time_string !== '') {
+            return $this->core->getDateTimeSpecific($time_string);
+        }
+        if ($tonight_modifier !== '') {
+            return (clone $tonight)->add(new \DateInterval($tonight_modifier));
+        }
+        else {
+            return (clone $tonight);
+        }
     }
 
     /**
