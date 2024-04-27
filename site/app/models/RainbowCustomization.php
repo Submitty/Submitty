@@ -409,10 +409,10 @@ class RainbowCustomization extends AbstractModel {
 
         $used_display_options = $this->RCJSON ? $this->RCJSON->getDisplay() : [];
 
-        foreach ($allowed_display_options as $optionId) {
+        foreach ($allowed_display_options as $option_id) {
             $display_options[] = [
-                'id' => $optionId,
-                'isUsed' => in_array($optionId, $used_display_options)
+                'id' => $option_id,
+                'isUsed' => in_array($option_id, $used_display_options)
             ];
         }
 
