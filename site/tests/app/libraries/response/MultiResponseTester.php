@@ -79,6 +79,7 @@ EOD;
 
     /**
      * @runInSeparateProcess
+     * @preserveGlobalState disabled
      */
     public function testRedirectOnlyResponse() {
         $redirect_response = new RedirectResponse('http://example.com');
@@ -92,6 +93,7 @@ EOD;
 
     /**
      * @runInSeparateProcess
+     * @preserveGlobalState disabled
      */
     public function testWebAndRedirectResponseUsesRedirect() {
         $web_response = new WebResponse("Error", "errorPage", "You don't have access to this page.");
@@ -111,6 +113,7 @@ EOD;
 
     /**
      * @runInSeparateProcess
+     * @preserveGlobalState disabled
      */
     public function testRedirectAndJsonResponseUsesRedirect() {
         $redirect_response = new RedirectResponse('http://example.com');

@@ -485,6 +485,20 @@ class HomeworkView extends AbstractView {
         $vcs_partial_path = str_replace('{$gradeable_id}', $gradeable->getId(), $vcs_partial_path);
         $vcs_partial_path = str_replace('{$user_id}', $this->core->getUser()->getId(), $vcs_partial_path);
 
+        $vcs_repo_exists = false;
+        if ($gradeable->isVcs()) {
+            $path = FileUtils::joinPaths(
+                $this->core->getConfig()->getSubmittyPath(),
+                'vcs',
+                'git',
+                $this->core->getConfig()->getTerm(),
+                $this->core->getConfig()->getCourse(),
+                $gradeable->getId(),
+                $student_id
+            );
+            $vcs_repo_exists = file_exists($path);
+        }
+
         $recent_version_url = $graded_gradeable ? $this->core->buildCourseUrl(['gradeable', $gradeable->getId()]) . '/' . $graded_gradeable->getAutoGradedGradeable()->getHighestVersion() : null;
         $numberUtils = new NumberUtils();
         return $output . $this->core->getOutput()->renderTwigTemplate('submission/homework/SubmitBox.twig', [
@@ -558,7 +572,9 @@ class HomeworkView extends AbstractView {
             'is_grader_view' => false,
             'recent_version_url' => $recent_version_url,
             'git_auth_token_url' => $this->core->buildUrl(['authentication_tokens']),
-            'git_auth_token_required' => false
+            'git_auth_token_required' => false,
+            'vcs_repo_exists' => $vcs_repo_exists,
+            'vcs_generate_repo_url' => $this->core->buildCourseUrl(['gradeable', $gradeable->getId(), 'generate_repo'])
         ]);
     }
 
@@ -1112,8 +1128,7 @@ class HomeworkView extends AbstractView {
             'hide_test_details' => $gradeable->getAutogradingConfig()->getHideTestDetails(),
             'has_manual_grading' => $gradeable->isTaGrading(),
             'incomplete_autograding' => $version_instance !== null ? !$version_instance->isAutogradingComplete() : false,
-            // TODO: change this to submitter ID when the MiscController uses new model
-            'user_id' => $this->core->getUser()->getId(),
+            'submitter_id' => $graded_gradeable->getSubmitter()->getId(),
             'team_assignment' => $gradeable->isTeamAssignment(),
             'team_members' => $gradeable->isTeamAssignment() ? $graded_gradeable->getSubmitter()->getTeam()->getMemberList() : [],
             'team_name' => $gradeable->isTeamAssignment() ? $graded_gradeable->getSubmitter()->getTeam()->getTeamName() : '',
