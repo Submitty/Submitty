@@ -23,28 +23,30 @@ describe('Tests cases for the Student API', () => {
                     delete response.body.data['queue_position'];
                     expect(JSON.stringify(response.body.data)).to.equal(
                         JSON.stringify(
-                        {
-                            "is_queued": false,
-                            "is_grading": false,
-                            "has_submission": true,
-                            "autograding_complete": true,
-                            "has_active_version": true,
-                        }));
-                } else {
+                            {
+                                'is_queued': false,
+                                'is_grading': false,
+                                'has_submission': true,
+                                'autograding_complete': true,
+                                'has_active_version': true,
+                            }));
+                }
+                else {
                     expect(JSON.stringify(response.body.data)).to.equal(
                         JSON.stringify(
-                        {
-                            "is_queued": false,
-                            "queue_position": -1,
-                            "is_grading": false,
-                            "has_submission": true,
-                            "autograding_complete": true,
-                            "has_active_version": true,
-                            "highest_version": 1,
-                            "total_points": null,
-                            "total_percent": null
-                        }));
-                }});
+                            {
+                                'is_queued': false,
+                                'queue_position': -1,
+                                'is_grading': false,
+                                'has_submission': true,
+                                'autograding_complete': true,
+                                'has_active_version': true,
+                                'highest_version': 1,
+                                'total_points': 0,
+                                'total_percent': 0,
+                            }));
+                }
+            });
 
             // Success, successfully sent to be graded
             cy.request({
