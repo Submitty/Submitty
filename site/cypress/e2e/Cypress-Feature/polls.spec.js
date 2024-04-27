@@ -196,6 +196,17 @@ describe('Test cases revolving around polls functionality', () => {
         cy.get('#poll-date').clear({force: true});
         // manually setting the release date to some time in the past
         cy.get('#poll-date').type('1970-01-01', {force: true});
+        // Testing the poll timer
+        cy.get('#timer-inputs').should('not.be.visible');
+        cy.get('#enable-timer').should('not.be.checked');
+        cy.get('#enable-timer').check();
+        cy.get('#timer-inputs').should('be.visible');
+        cy.get('#enable-timer').should('be.checked');
+        // Add 5 seconds to timer
+        cy.get('#timer-inputs').get('#poll-hours').clear().type('0');
+        cy.get('#timer-inputs').get('#poll-minutes').clear().type('0');
+        cy.get('#timer-inputs').get('#poll-seconds').clear().type('5');
+
         cy.get('h1').click(); // get rid of the date picker
         // test default release histogram and answer settings
         cy.get('#image-file').selectFile('cypress/fixtures/sea_animals.png');
@@ -207,7 +218,7 @@ describe('Test cases revolving around polls functionality', () => {
         cy.get('#response_1_wrapper').children(':nth-child(4)').type('Answer 2');
         cy.get('#response_2_wrapper').children(':nth-child(3)').check();
         cy.get('#response_2_wrapper').children(':nth-child(4)').type('Answer 3');
-        cy.get('h1').click();
+        cy.get('#new-poll-title').click();
 
         // submit and verify on main polls page, poll should be closed
         cy.get('#poll-form-submit').click();
@@ -260,6 +271,24 @@ describe('Test cases revolving around polls functionality', () => {
         cy.login();
         cy.visit(['sample', 'polls']);
         cy.contains('Poll Cypress Test').siblings(':nth-child(6)').children().click();
+        cy.wait(5000); // Waiting for duration to reach 0, so poll ends.
+        cy.reload(); // Will not need this after websockets.
+        cy.contains('Poll Cypress Test').siblings(':nth-child(6)').children().should('not.be.checked');
+        //Removing duration to continue testing
+        //Editing the poll to remove timer
+        cy.contains('Poll Cypress Test').siblings(':nth-child(1)').children().click();
+        //Checking if user input for duration saved
+        cy.get('#enable-timer').should('be.checked');
+        cy.get('#timer-inputs').get('#poll-hours').invoke('val').should('eq', '0');
+        cy.get('#timer-inputs').get('#poll-minutes').invoke('val').should('eq', '0');
+        cy.get('#timer-inputs').get('#poll-seconds').invoke('val').should('eq', '5');
+        cy.get('#poll-seconds').clear();
+        cy.get('#enable-timer').get('#poll-hours').clear().type('3');
+        cy.get('button[type=submit]').click();
+        cy.contains('Poll Cypress Test').siblings(':nth-child(6)').children().should('not.be.checked');
+        cy.contains('Poll Cypress Test').siblings(':nth-child(6)').children().check();
+
+
 
         // log into student and verify we can answer the poll
         cy.logout();
@@ -303,6 +332,13 @@ describe('Test cases revolving around polls functionality', () => {
         cy.get('#poll-type-multiple-response-exact').should('not.be.checked');
         cy.get('#poll-type-multiple-response-flexible').should('not.be.checked');
         cy.get('#poll-type-multiple-response-survey').should('not.be.checked');
+        cy.get('#enable-timer').should('be.checked');
+        cy.get('#timer-inputs').should('be.visible');
+        cy.get('#poll-hours').invoke('val').should('eq', '3');
+        cy.get('#poll-minutes').invoke('val').should('eq', '0');
+        cy.get('#poll-seconds').invoke('val').should('eq', '0');
+        cy.get('#poll-hours').clear();
+        cy.get('#poll-seconds').clear().type('10');
         cy.get('#poll-date').invoke('val').should('eq', '1970-01-01');
         // release histogram/answer's default values should be "never"
         cy.get('#student-histogram-release-setting').invoke('val').should('eq', 'never');
@@ -364,7 +400,11 @@ describe('Test cases revolving around polls functionality', () => {
         cy.logout();
         cy.login();
         cy.visit(['sample', 'polls']);
-        cy.contains('Poll Cypress Test').siblings(':nth-child(6)').children().click();
+        //Wait 6 seconds to wait out the time remaining for poll to close
+        cy.wait(6000);
+        cy.reload();
+        // Validate that the poll is closed.
+        cy.contains('Poll Cypress Test').siblings(':nth-child(6)').children().should('not.be.checked');
 
         // log into student, now we can see the histogram on closed poll
         cy.logout();
@@ -451,11 +491,11 @@ describe('Test cases revolving around polls functionality', () => {
         cy.get('#poll-question').type('# Question goes here...?');
         cy.get('#poll-date').clear({force: true});
         cy.get('#poll-date').type(today.toISOString().substring(0, 10), {force: true});
-        cy.get('h1').click(); // get rid of the date picker
+        cy.get('#new-poll-title').click(); // get rid of the date picker
         cy.contains('Add Response').click();
         cy.get('#response_0_wrapper').children(':nth-child(3)').check();
         cy.get('#response_0_wrapper').children(':nth-child(4)').type('Answer 1');
-        cy.get('h1').click();
+        cy.get('#new-poll-title').click();
         cy.get('#poll-form-submit').click();
 
         // make a poll, set release date to tomorrow
@@ -464,11 +504,11 @@ describe('Test cases revolving around polls functionality', () => {
         cy.get('#poll-question').type('What is your favorite class?');
         cy.get('#poll-date').clear({force: true});
         cy.get('#poll-date').type(tomorrow.toISOString().substring(0, 10), {force: true});
-        cy.get('h1').click();
+        cy.get('#new-poll-title').click();
         cy.contains('Add Response').click();
         cy.get('#response_0_wrapper').children(':nth-child(3)').check();
         cy.get('#response_0_wrapper').children(':nth-child(4)').type('Data Structures');
-        cy.get('h1').click();
+        cy.get('#new-poll-title').click();
         cy.get('#poll-form-submit').click();
 
         // make a poll, set release date to some time in the future
@@ -477,11 +517,11 @@ describe('Test cases revolving around polls functionality', () => {
         cy.get('#poll-question').type('Why do you want to pick this date?');
         cy.get('#poll-date').clear({force: true});
         cy.get('#poll-date').type('2049-06-30', {force: true});
-        cy.get('h1').click();
+        cy.get('#new-poll-title').click();
         cy.contains('Add Response').click();
         cy.get('#response_0_wrapper').children(':nth-child(3)').check();
         cy.get('#response_0_wrapper').children(':nth-child(4)').type('Answer 1');
-        cy.get('h1').click();
+        cy.get('#new-poll-title').click();
         cy.get('#poll-form-submit').click();
 
         // verify on main polls page, three newly created polls should be in their own time section
@@ -495,7 +535,7 @@ describe('Test cases revolving around polls functionality', () => {
         cy.url().should('include', 'sample/polls/editPoll');
         cy.get('#poll-date').clear({force: true});
         cy.get('#poll-date').type(tomorrow.toISOString().substring(0, 10), {force: true});
-        cy.get('h1').click();
+        cy.get('#new-poll-title').click();
         cy.get('#poll-form-submit').click();
 
         // change the release date of Poll tomorrow to today
@@ -503,7 +543,7 @@ describe('Test cases revolving around polls functionality', () => {
         cy.url().should('include', 'sample/polls/editPoll');
         cy.get('#poll-date').clear({force: true});
         cy.get('#poll-date').type(today.toISOString().substring(0, 10), {force: true});
-        cy.get('h1').click();
+        cy.get('#new-poll-title').click();
         cy.get('#poll-form-submit').click();
 
         // change the release date of Poll today to tomorrow
@@ -511,7 +551,7 @@ describe('Test cases revolving around polls functionality', () => {
         cy.url().should('include', 'sample/polls/editPoll');
         cy.get('#poll-date').clear({force: true});
         cy.get('#poll-date').type(tomorrow.toISOString().substring(0, 10), {force: true});
-        cy.get('h1').click();
+        cy.get('#new-poll-title').click();
         cy.get('#poll-form-submit').click();
 
         // changed Poll Future => tomorrow, Poll Tomorrow => today, Poll Today => tomorrow and verify
