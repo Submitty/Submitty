@@ -36,7 +36,7 @@ describe('Tests cases for the Student API', () => {
                 },
             }).then((response) => {
                 expect(response.body.status).to.equal('fail');
-                expect(response.body.message).to.equal('User with id not_a_student does not exist.');
+                expect(response.body.message).to.equal('Graded gradeable for user with id not_a_student does not exist');
             });
         });
 

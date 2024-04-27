@@ -1032,10 +1032,6 @@ class SubmissionController extends AbstractController {
         if ($this->core->getUser()->getAccessLevel() === User::LEVEL_USER && ($user_id !== $this->core->getUser()->getId())) {
             return JsonResponse::getFailResponse('API key and specified user_id are not for the same user.');
         }
-        // This should only return fail response if an instructor is requesting a grade.
-        if ($this->core->getQueries()->getUserById($user_id) === null) {
-            return JsonResponse::getFailResponse('User with id ' . $user_id . ' does not exist.');
-        }
 
         try {
             $gradeable = $this->core->getQueries()->getGradeableConfig($gradeable_id);
@@ -1051,7 +1047,7 @@ class SubmissionController extends AbstractController {
         );
 
         if ($graded_gradeable === null) {
-            return JsonResponse::getFailResponse('Gradeable does not exist');
+            return JsonResponse::getFailResponse('Graded gradeable for user with id ' . $user_id . ' does not exist');
         }
 
         $graded_gradeable = $graded_gradeable->getAutoGradedGradeable();
