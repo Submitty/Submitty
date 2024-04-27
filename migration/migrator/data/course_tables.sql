@@ -1538,12 +1538,15 @@ CREATE TABLE public.polls (
     poll_id integer NOT NULL,
     name text NOT NULL,
     question text NOT NULL,
-    status text NOT NULL,
+    status text,
     release_date date NOT NULL,
     image_path text,
     question_type character varying(35) DEFAULT 'single-response-multiple-correct'::character varying,
     release_histogram character varying(10) DEFAULT 'never'::character varying,
-    release_answer character varying(10) DEFAULT 'never'::character varying
+    release_answer character varying(10) DEFAULT 'never'::character varying,
+    duration integer DEFAULT 0,
+    end_time timestamp with time zone,
+    is_visible boolean DEFAULT false NOT NULL
 );
 
 

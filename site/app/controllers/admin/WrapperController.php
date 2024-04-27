@@ -17,10 +17,6 @@ use Symfony\Component\Routing\Annotation\Route;
  */
 class WrapperController extends AbstractController {
     const WRAPPER_FILES = [
-        'top_bar.html',
-        'left_sidebar.html',
-        'right_sidebar.html',
-        'bottom_bar.html',
         'override.css',
         'sidebar.json'
     ];
