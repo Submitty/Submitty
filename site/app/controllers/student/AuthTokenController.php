@@ -51,9 +51,6 @@ class AuthTokenController extends AbstractController {
         );
     }
 
-    /**
-     * @AccessControl(level="FACULTY")
-     */
     #[Route("/authentication_tokens/api", methods: ["POST"])]
     public function fetchApiToken(): RedirectResponse {
         $user_id = $this->core->getUser()->getId();
@@ -65,9 +62,6 @@ class AuthTokenController extends AbstractController {
         return new RedirectResponse($this->core->buildUrl(['authentication_tokens']));
     }
 
-    /**
-     * @AccessControl(level="FACULTY")
-     */
     #[Route("/authentication_tokens/api/invalidate", methods: ["POST"])]
     public function invalidateApiToken(): RedirectResponse {
         $user_id = $this->core->getUser()->getId();
