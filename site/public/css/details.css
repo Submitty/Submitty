@@ -253,7 +253,7 @@
     }
 
     #details-legend {
-        width: unset;
+        width: 300px;
     }
 }
 
@@ -269,14 +269,17 @@
     .details-action-box > * {
         margin-top: 0;
     }
+    
     .markers-container {
         display: grid;
         grid-template-columns: 60% 40%;
         gap: 10px;
     }
+    
     #details-legend {
         width: unset;
     }
+    
     .action-btn-cont {
         margin: 0;
         width: unset;
