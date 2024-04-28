@@ -9,16 +9,18 @@ use app\libraries\Core;
  * @package app\libraries\response
  */
 class DownloadResponse implements ResponseInterface {
-    /** @var array<mixed> json encoded array */
+
     public string $contents;
     public string $title;
     public string $file_type;
 
     /**
      * DownloadResponse constructor.
-     * @param mixed|null $data
+     * @param string $data
+     * @param string $title
+     * @param string $file_type
      */
-    private function __construct(mixed $data = null, string $title = 'downloaded_file', string $file_type = 'text/plain') {
+    private function __construct(string $data = '', string $title = 'downloaded_file', string $file_type = 'text/plain') {
         $this->contents = $data;
         $this->title = $title;
         $this->file_type = $file_type;
@@ -34,10 +36,12 @@ class DownloadResponse implements ResponseInterface {
 
     /**
      * Returns a DownloadResponse.
-     * @param mixed|null $data
+     * @param string $data
+     * @param string $title
+     * @param string $file_type
      * @return DownloadResponse
      */
-    public static function getDownloadResponse(mixed $data = null, string $title = 'downloaded_file', string $file_type = 'text/plain'): DownloadResponse {
+    public static function getDownloadResponse(string $data = '', string $title = 'downloaded_file', string $file_type = 'text/plain'): DownloadResponse {
         return new self($data, $title, $file_type);
     }
 }
