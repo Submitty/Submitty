@@ -6,16 +6,16 @@
   roles:
     - role: submitty_term_creation
       vars:
-        semester: winter24
-        semester_name: Winter 2024
-        start_date: 01/08/2024
-        end_date: 03/27/2024
+        semester: semester
+        semester_name: semester
+        start_date: xx/xx/xxxx
+        end_date: xx/xx/xxxx
 
     - role: submitty_course_creation
       vars:
-        semester: winter24
-        course: cptr141
-        section: all
+        semester: semester
+        course: course
+        section: section
         instructor: instructor
         firstname: instructor
         lastname: instructor
@@ -23,8 +23,8 @@
 
     - role: submitty_course_add_instructor
       vars:
-        semester: winter24
-        course: cptr141
+        semester: semester
+        course: course
         instructor: instructor
         firstname: instructor
         lastname: instructor
