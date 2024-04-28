@@ -597,7 +597,7 @@ progress::-webkit-progress-value {
 
 /* stylelint-disable-next-line selector-id-pattern */
 #autograding_results .box-block .diff-element .red-message {
-    margin-left: 0px;
+    margin-left: 0;
 }
 
 /* stylelint-disable-next-line selector-id-pattern, selector-class-pattern */
