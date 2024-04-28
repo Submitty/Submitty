@@ -22,9 +22,9 @@ class WrapperController extends AbstractController {
     ];
 
     /**
-     * @Route("/courses/{_semester}/{_course}/theme")
      * @return MultiResponse
      */
+    #[Route("/courses/{_semester}/{_course}/theme")]
     public function uploadWrapperPage() {
         return MultiResponse::webOnlyResponse(
             new WebResponse(
@@ -36,9 +36,9 @@ class WrapperController extends AbstractController {
     }
 
     /**
-     * @Route("/courses/{_semester}/{_course}/theme/upload", methods={"POST"})
      * @return MultiResponse
      */
+    #[Route("/courses/{_semester}/{_course}/theme/upload", methods: ["POST"])]
     public function processUploadHTML() {
         $filename = $_POST['location'];
         $location = FileUtils::joinPaths($this->core->getConfig()->getCoursePath(), 'site', $filename);
@@ -78,9 +78,9 @@ class WrapperController extends AbstractController {
     }
 
     /**
-     * @Route("/courses/{_semester}/{_course}/theme/delete", methods={"POST"})
      * @return MultiResponse
      */
+    #[Route("/courses/{_semester}/{_course}/theme/delete", methods: ["POST"])]
     public function deleteUploadedHTML() {
         $filename = $_POST['location'];
         $location = FileUtils::joinPaths($this->core->getConfig()->getCoursePath(), 'site', $filename);
