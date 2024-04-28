@@ -3182,7 +3182,7 @@ function saveComponent(component_id) {
             if (!isSilentEditModeEnabled()) {
                 GRADED_COMPONENTS_LIST[component_id].grader_id = getGraderId();
             }
-            GRADED_COMPONENTS_LIST[component_id].verifier_id = "";
+            GRADED_COMPONENTS_LIST[component_id].verifier_id = '';
         }
         return Promise.resolve();
     }
