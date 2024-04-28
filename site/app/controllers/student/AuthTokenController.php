@@ -7,7 +7,6 @@ use app\entities\VcsAuthToken;
 use app\libraries\response\RedirectResponse;
 use app\libraries\response\ResponseInterface;
 use app\libraries\response\WebResponse;
-use app\libraries\routers\AccessControl;
 use app\libraries\TokenManager;
 use app\libraries\Utils;
 use app\repositories\VcsAuthTokenRepository;
