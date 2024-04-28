@@ -9,7 +9,6 @@ use app\libraries\Core;
  * @package app\libraries\response
  */
 class DownloadResponse implements ResponseInterface {
-
     public string $contents;
     public string $title;
     public string $file_type;
