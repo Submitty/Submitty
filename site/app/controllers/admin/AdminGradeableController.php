@@ -183,7 +183,7 @@ class AdminGradeableController extends AbstractController {
     #[Route("/courses/{_semester}/{_course}/{gradeable_id}/download", methods: ["GET"])]
     public function webDownloadJson(string $gradeable_id): DownloadResponse {
         $gradeable = $this->core->getQueries()->getGradeableConfig($gradeable_id);
-        return DownloadResponse::getDownloadResponse($this->getGradeableJson($gradeable));
+        return DownloadResponse::getDownloadResponse($this->getGradeableJson($gradeable), $gradeable->getId() . '.json', 'application/json');
     }
 
     /**
