@@ -72,6 +72,9 @@ describe('test office hours queue', () => {
     it('opened new queue, students joining queue, started and finished helping student', () => {
         cy.login();
         enableQueue();
+        // deleting the Lab help and homework debugging
+        deleteQueue();
+        deleteQueue();
         openNewQueue(queueName, queueCode);
         // cy.get('.alert-success').contains('New queue added');
         openNewQueue(queueName, queueCode1); // same name but used different code
@@ -86,6 +89,7 @@ describe('test office hours queue', () => {
         // cy.get('.alert-success').contains('New queue added');
         // switch to student to join queue
         switchUser('student');
+        // cy.get('#leave_queue').click();
         studentJoinQueue(queueName, newQueueCode);
         cy.get('.alert-success').contains('Added to queue');
         cy.get('[data-testid="leave-queue"]').click(); // studentRemoveSelfFromQueue
