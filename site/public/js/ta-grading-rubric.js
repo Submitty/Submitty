@@ -3176,7 +3176,14 @@ function saveComponent(component_id) {
             }
         }
         // We're in grade mode, so save the graded component
-        saveGradedComponent(component_id);
+        // The grader didn't change the grade at all, so don't save (don't put our name on a grade we didn't contribute to)
+        if (!gradedComponentsEqual(gradedComponent, OLD_GRADED_COMPONENT_LIST[component_id])) {
+            saveGradedComponent(component_id);
+            if (!isSilentEditModeEnabled()) {
+                GRADED_COMPONENTS_LIST[component_id].grader_id = getGraderId();
+            }
+            GRADED_COMPONENTS_LIST[component_id].verifier_id = '';
+        }
         return Promise.resolve();
     }
 }
@@ -3193,10 +3200,6 @@ function saveGradedComponent(component_id) {
     const gradedComponent = getGradedComponentFromDOM(component_id);
     gradedComponent.graded_version = getDisplayVersion();
 
-    // The grader didn't change the grade at all, so don't save (don't put our name on a grade we didn't contribute to)
-    if (gradedComponentsEqual(gradedComponent, OLD_GRADED_COMPONENT_LIST[component_id])) {
-        return Promise.resolve();
-    }
     return ajaxGetComponentRubric(getGradeableId(), component_id)
         .then((component) => {
             const missingMarks = [];
