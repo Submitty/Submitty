@@ -1856,7 +1856,7 @@ class Gradeable extends AbstractModel {
         $graded_components = [];
         if ($this->isGradeByRegistration()) {
             $sections = $grader->getGradingRegistrationSections();
-            if ($this->core->getAccess()->canI("grading.electronic.grade.if_no_sections_exist") && !isset($sections)) {
+            if ($this->core->getAccess()->canI("grading.electronic.grade.if_no_sections_exist") && $sections === []) {
                 $sections = $this->core->getQueries()->getRegistrationSections();
                 foreach ($sections as $i => $section) {
                     $sections[$i] = $section['sections_registration_id'];
