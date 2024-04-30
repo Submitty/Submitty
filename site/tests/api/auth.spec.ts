@@ -1,5 +1,5 @@
 import { describe, expect, it } from '@jest/globals';
-import {postRequest, getRequest} from './utils';
+import { postRequest, getRequest } from './utils';
 
 describe('Test cases revolving around the API', () => {
     it('should authenticate a user', async () => {
@@ -38,4 +38,19 @@ describe('Test cases revolving around the API', () => {
         expect(coursesResponse).toHaveProperty('status', 'fail');
         expect(coursesResponse).toHaveProperty('message', 'Unauthenticated access. Please log in.')
     });
+
+    it('should return valid responses', async () => {
+        const postBody = {
+            user_id: 'instructor',
+            password: 'instructor',
+        };
+        const token_response = await postRequest('/api/token', postBody);
+
+        const coursesResponse = await getRequest('/api/courses', token_response.data.token);
+        expect(coursesResponse).toHaveProperty('status', 'success');
+        expect(coursesResponse).toHaveProperty('data.unarchived_courses');
+        expect(coursesResponse).toHaveProperty('data.archived_courses');
+        expect(typeof coursesResponse.data.token).toBe('json');
+    });
+
 });
