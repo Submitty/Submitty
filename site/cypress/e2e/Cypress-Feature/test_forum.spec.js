@@ -47,26 +47,26 @@ const removeThread = (title) => {
 };
 
 const editThread = (title) => {
-    cy.get('.thread-left-cont > .thread-list-item').contains(title).click();
-    cy.get('.create-post-head').should('contain', title);
+    cy.get('[data-testid="thread-list-item"]').contains(title).click();
+    cy.get('[data-testid="create-post-head"]').should('contain', title);
     cy.get('[data-testid="edit-post-button"]').first().click();
-    cy.get('#upload1').find('[for="input-file1"]').selectFile('cypress/fixtures/sea_animals.png');
-    cy.get('#file-upload-table-1').find('.file-label').should('contain', 'sea_animals.png');
-    cy.get('#file-upload-table-1').click();
-    cy.get('#file-upload-table-1').should('not.contain');
-    cy.get('[data-testid="cancel-forum-btn"').click();
+    cy.get('[data-testid="upload1"]').find('[for="input-file1"]').selectFile('cypress/fixtures/sea_animals.png');
+    cy.get('[data-testid="file-upload-table-1"]').find('.file-label').should('contain', 'sea_animals.png');
+    cy.get('[data-testid="file-upload-table-1"]').click();
+    cy.get('[data-testid="file-upload-table-1"]').should('not.contain');
+    cy.get('[data-testid="cancel-forum-btn"]').click();
 };
 const uploadAttachmentAndDelete = (title) => {
-    cy.get('.thread-left-cont > .thread-list-item').contains(title).click();
-    cy.get('.create-post-head').should('contain', title);
+    cy.get('[data-testid="thread-list-item"]').contains(title).click();
+    cy.get('[data-testid="create-post-head"]').should('contain', title);
     cy.get('[data-testid="edit-post-button"]').first().click();
     cy.get('#upload1').find('[for="input-file1"]').selectFile('cypress/fixtures/sea_animals.png');
-    cy.get('#file-upload-table-1').find('.file-label').should('contain', 'sea_animals.png');
-    cy.get('input[value="Update Post"]').click();
+    cy.get('[data-testid="file-upload-table-1"]').find('.file-label').should('contain', 'sea_animals.png');
+    cy.get('[data-testid="forum-update-post"]').contains('Update Post').click();
     cy.get('[data-testid="edit-post-button"]').first().click();
     cy.get('[data-testid="mark-for-delete-btn"]').should('contain', 'Delete').last().click();
     cy.get('[data-testid="mark-for-delete-btn"]').last().should('contain', 'Keep');
-    cy.get('input[value="Update Post"]').click();
+    cy.get('[data-testid="forum-update-post"]').contains('Update Post').click();
 };
 
 describe('Test cases revolving around creating, replying to, merging, and removing discussion forum threads', () => {
