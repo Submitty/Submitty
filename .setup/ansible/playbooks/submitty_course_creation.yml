@@ -8,8 +8,8 @@
       vars:
         semester: semester
         semester_name: semester
-        start_date: xx/xx/xxxx
-        end_date: xx/xx/xxxx
+        start_date:
+        end_date: 
 
     - role: submitty_course_creation
       vars:

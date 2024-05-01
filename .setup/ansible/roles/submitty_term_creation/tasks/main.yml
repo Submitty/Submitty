@@ -3,6 +3,6 @@
   ansible.builtin.command:
     cmd: ./create_term.sh --amend "{{ semester }}" "{{ semester_name }}" "{{ start_date }}" "{{ end_date }}"
     chdir: /usr/local/submitty/sbin/
-  become: yes
+  become: true
   become_user: root
   notify: Reload fpm
