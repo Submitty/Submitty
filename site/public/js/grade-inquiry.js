@@ -2,24 +2,26 @@
 /* exported initGradingInquirySocketClient, onComponentTabClicked, onGradeInquirySubmitClicked, onReady, onReplyTextAreaKeyUp */
 
 function saveDraft() { 
-    //display the saved draft text on grade inquiry box
+    //saveDraft function displays the saved draft text on grade inquiry box
     let draftContent = localStorage.getItem('content');
-    if(draftContent === null) {
+    if (draftContent === null) {
         draftContent = {};
-    }else{
+    }
+    else {
         draftContent = JSON.parse(draftContent);
     }
-    let elements = document.getElementsByClassName('markdown-textarea fill-available ');
+    const elements = document.getElementsByClassName('markdown-textarea fill-available ');
     for (let i = 0; i < elements.length; i++) {
-        let element = elements[i];
-        let elementId = element.getAttribute('id');
+        const element = elements[i];
+        const elementId = element.getAttribute('id');
         const reply_text_area = $(element);
-        if(draftContent.hasOwnProperty(elementId)){
+        if (draftContent.hasOwnProperty(elementId)){
             var value = draftContent[elementId];
             reply_text_area.val(value);
         }
     }
-};      
+}
+
 function onReady() {
     // open last opened grade inquiry or open first component with grade inquiry
     const component_selector = localStorage.getItem('selected_tab');
