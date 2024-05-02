@@ -1,4 +1,4 @@
-/* exported collapseSection, confirmationdialog, removeImage, addImage, updateImage */
+/* exported collapseSection, confirmationDialog, removeImage, addImage, updateImage */
 /**
 * toggles visibility of a content sections on the Docker UI
 * @param {string} id of the section to toggle
@@ -64,7 +64,7 @@ function addFieldOnChange() {
     }
 }
 
-function confirmationdialog(url, id) {
+function confirmationDialog(url, id) {
     if (confirm(`Are you sure you want to remove ${id} image?`)) {
         removeImage(url, id);
     }

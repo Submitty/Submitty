@@ -212,10 +212,6 @@ class Access {
         $this->permissions["forum.merge_thread"] = self::ALLOW_MIN_LIMITED_ACCESS_GRADER | self::CHECK_CSRF;
 
         $this->permissions["admin.wrapper"] = self::ALLOW_MIN_INSTRUCTOR;
-
-        //Docker UI permissions
-        $this->permissions["dockerui.add_image"] = self::CHECK_CSRF | self::ALLOW_MIN_INSTRUCTOR;
-        $this->permissions["dockerui.remove_image"] = self::CHECK_CSRF | self::ALLOW_MIN_INSTRUCTOR;
     }
 
     /**

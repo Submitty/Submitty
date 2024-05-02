@@ -9371,7 +9371,7 @@ ORDER BY
 
     /**
      * @param string $image the full name of the image to get
-     * @return string|false the user id of the image's owner or false iff the image is not in the db
+     * @return string|false the user id of the image's owner or false if the image is not in the db
      */
     public function getDockerImageOwner(string $image): string|false {
         $this->submitty_db->query("SELECT image_name, user_id FROM docker_images WHERE image_name = ?", [$image]);
@@ -9412,7 +9412,7 @@ ORDER BY
     /**
      * @param string $image the full name of the image to remove
      * @param User $user the user who is removing the image
-     * @return bool true iff image was deleted
+     * @return bool true if image was deleted, false otherwise
      */
     public function removeDockerImageOwner(string $image, User $user): bool {
         if ($user->getAccessLevel() === User::LEVEL_SUPERUSER) {
