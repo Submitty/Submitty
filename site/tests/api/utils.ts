@@ -1,6 +1,6 @@
 import fetch, { HeadersInit } from 'node-fetch';
 
-const BASE_URL = process.env.BASE_URL || "http://localhost:1511";
+const BASE_URL = process.env.BASE_URL || "http://127.0.0.1:1511";
 
 function getHeaders(auth: string | null = null) {
     const headers: HeadersInit = {'Content-Type': 'application/json'};
@@ -46,4 +46,20 @@ export async function getRequest<T = any>(url: string, auth: string | null = nul
     }
 
     return req.json() as Promise<T>;
+}
+
+
+/**
+* Generate a 3 letter semester code e.g s21, f20 based on today's data
+* This functions the same as the submitty python util's get_current_semester
+*
+* @returns {String}
+*/
+export function getCurrentSemester(full) {
+    const today = new Date();
+    let year = today.getFullYear().toString();
+    year = full ? ' ' + year : year.slice(2, 4);
+    const semester = ((today.getMonth() + 1) < 7) ? (full ? 'Spring' : 's') :  (full ? 'Fall' : 'f');	//first half of year 'spring' rest is fall
+
+    return semester + year;
 }
