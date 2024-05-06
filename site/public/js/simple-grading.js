@@ -1,4 +1,4 @@
-/* global WebSocketClient, registerKeyHandler, student_full, csrfToken, buildCourseUrl, submitAJAX, captureTabInModal */
+/* global WebSocketClient, registerKeyHandler, student_full, csrfToken, buildCourseUrl, submitAJAX, captureTabInModal, luxon */
 /* exported setupSimpleGrading, checkpointRollTo, showSimpleGraderStats */
 
 function calcSimpleGraderStats(action) {
@@ -285,9 +285,10 @@ function getCheckpointHistory(g_id) {
 }
 
 function setCheckpointHistory(g_id, history) {
-    const expiration_date = new Date();
-    expiration_date.setDate(expiration_date.getDate() + 1);
-    Cookies.set(`${g_id}_history`, JSON.stringify(history), { expires: expiration_date });
+    const DateTime = luxon.DateTime;
+    const now = DateTime.now();
+    const expiration_date = now.plus({ days: 1 });
+    Cookies.set(`${g_id}_history`, JSON.stringify(history), { expires: expiration_date.toJSDate() });
 }
 
 function generateCheckpointCookie(user_id, g_id, old_scores, new_scores) {
