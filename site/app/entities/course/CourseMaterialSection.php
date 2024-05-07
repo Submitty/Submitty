@@ -13,10 +13,13 @@ use Doctrine\ORM\Mapping as ORM;
 #[ORM\Table(name: "course_materials_sections")]
 class CourseMaterialSection {
     #[ORM\Id]
+    #[ORM\Column(type: Types::INTEGER)]
+    #[ORM\GeneratedValue(strategy: "AUTO")]
+    protected int $id;
+
     #[ORM\Column(type: Types::STRING)]
     protected string $section_id;
 
-    #[ORM\Id]
     #[ORM\ManyToOne(targetEntity: CourseMaterial::class, inversedBy: "sections")]
     protected CourseMaterial $course_material;
 
