@@ -46,21 +46,11 @@ const removeThread = (title) => {
     cy.get('.thread-left-cont > .thread-list-item').contains(title).should('not.exist');
 };
 
-const editThread = (title) => {
-    cy.get('[data-testid="thread-list-item"]').contains(title).click();
-    cy.get('[data-testid="create-post-head"]').should('contain', title);
-    cy.get('[data-testid="edit-post-button"]').first().click();
-    cy.get('[data-testid="upload1"]').find('[for="input-file1"]').selectFile('cypress/fixtures/sea_animals.png');
-    cy.get('[data-testid="file-upload-table-1"]').find('.file-label').should('contain', 'sea_animals.png');
-    cy.get('[data-testid="file-upload-table-1"]').click();
-    cy.get('[data-testid="file-upload-table-1"]').should('not.contain');
-    cy.get('[data-testid="cancel-forum-btn"]').click();
-};
 const uploadAttachmentAndDelete = (title) => {
     cy.get('[data-testid="thread-list-item"]').contains(title).click();
     cy.get('[data-testid="create-post-head"]').should('contain', title);
     cy.get('[data-testid="edit-post-button"]').first().click();
-    cy.get('#upload1').find('[for="input-file1"]').selectFile('cypress/fixtures/sea_animals.png');
+    cy.get('[data-testid="upload1"]').find('[for="input-file1"]').selectFile('cypress/fixtures/sea_animals.png');
     cy.get('[data-testid="file-upload-table-1"]').find('.file-label').should('contain', 'sea_animals.png');
     cy.get('[data-testid="forum-update-post"]').contains('Update Post').click();
     cy.get('[data-testid="edit-post-button"]').first().click();
@@ -80,10 +70,8 @@ describe('Test cases revolving around creating, replying to, merging, and removi
 
     it('Create, reply to, merge, and delete threads', () => {
         // Add and Delete Image Attachment
-        editThread(title4);
         uploadAttachmentAndDelete(title4);
         // Comment
-        editThread(title4);
         createThread(title1, content1, 'Comment');
         // Question
         createThread(title2, content2, 'Question');
