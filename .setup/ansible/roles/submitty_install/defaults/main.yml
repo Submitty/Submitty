@@ -1,5 +1,5 @@
 ---
-submitty_version: v24.02.00
+submitty_version: main
 db_host: localhost
 db_port: 5432
 submitty_dbuser: submitty_dbuser
