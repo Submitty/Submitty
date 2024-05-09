@@ -7154,7 +7154,6 @@ AND gc_id IN (
             VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?)";
         $this->course_db->query($query, $param);
     }
-
     /**
      * Updates an existing graded component in the database
      *

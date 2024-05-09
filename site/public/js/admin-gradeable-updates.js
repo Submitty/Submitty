@@ -221,7 +221,6 @@ $(document).ready(() => {
             data[this.name] = $(this).val();
         }
         //Retrieve status for each of the panels
-        let gradingPanels = {};
         $('input[name="peer_panel"]').each(function() {
             data[$(this).attr('id')] = $(this).is(':checked');
         });
