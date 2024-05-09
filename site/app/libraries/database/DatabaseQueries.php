@@ -6055,6 +6055,7 @@ AND gc_id IN (
               eg.*,
               gamo.*,
               gc.*,
+              pgp.*,
               (SELECT COUNT(*) AS cnt FROM grade_inquiries WHERE g_id=g.g_id AND status = -1) AS active_grade_inquiries_count,
               (SELECT EXISTS (SELECT 1 FROM gradeable_data WHERE g_id=g.g_id)) AS any_manual_grades
             FROM gradeable g
@@ -6084,7 +6085,6 @@ AND gc_id IN (
                   eg_instructor_blind AS instructor_blind,
                   eg_limited_access_blind AS limited_access_blind,
                   eg_peer_blind AS peer_blind,
-                  eg_peer_panel AS peer_panel,
                   eg_submission_open_date AS submission_open_date,
                   eg_submission_due_date AS submission_due_date,
                   eg_has_due_date AS has_due_date,
@@ -6097,6 +6097,17 @@ AND gc_id IN (
                   eg_depends_on_points as depends_on_points
                 FROM electronic_gradeable
               ) AS eg ON g.g_id=eg.eg_g_id
+                LEFT JOIN (
+                SELECT
+                  g_id AS pgp_g_id,
+                  autograding, 
+                  rubric, 
+                  files,
+                  solution_notes,
+                  discussion
+                FROM peer_grading_panel
+                GROUP BY pgp_g_id
+              ) AS pgp ON g.g_id=pgp.pgp_g_id
               LEFT JOIN (
                 SELECT
                   g_id AS gamo_g_id,
@@ -6781,7 +6792,6 @@ AND gc_id IN (
                 $gradeable->getPrecision(),
                 $gradeable->getLimitedAccessBlind(),
                 $gradeable->getPeerBlind(),
-                $gradeable->getPeerPanel(),
                 DateUtils::dateTimeToString($gradeable->getGradeInquiryStartDate()),
                 DateUtils::dateTimeToString($gradeable->getGradeInquiryDueDate()),
                 $gradeable->isGradeInquiryAllowed(),
@@ -6818,7 +6828,6 @@ AND gc_id IN (
                   eg_precision,
                   eg_limited_access_blind,
                   eg_peer_blind,
-                  eg_peer_panel,
                   eg_grade_inquiry_start_date,
                   eg_grade_inquiry_due_date,
                   eg_grade_inquiry_allowed,
@@ -6829,7 +6838,28 @@ AND gc_id IN (
                   eg_depends_on,
                   eg_depends_on_points
                   )
-                VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
+                VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
+                $params
+            );
+            $params = [
+                $gradeable->getId(),
+                $gradeable->getPeerAutograding(),
+                $gradeable->getPeerRubric(),
+                $gradeable->getPeerFiles(),
+                $gradeable->getPeerSolutions(),
+                $gradeable->getPeerDiscussion(),
+            ];
+            $this->course_db->query(
+                "
+                INSERT INTO peer_grading_panel(
+                    g_id,
+                    autograding,
+                    rubric,
+                    files,
+                    solution_notes,
+                    discussion
+                )
+                VALUES(?, ?, ?, ?, ?, ?)",
                 $params
             );
         }
@@ -6949,7 +6979,6 @@ AND gc_id IN (
                     $gradeable->getInstructorBlind(),
                     $gradeable->getLimitedAccessBlind(),
                     $gradeable->getPeerBlind(),
-                    $gradeable->getPeerPanel(),
                     DateUtils::dateTimeToString($gradeable->getGradeInquiryStartDate()),
                     DateUtils::dateTimeToString($gradeable->getGradeInquiryDueDate()),
                     $gradeable->isGradeInquiryAllowed(),
@@ -6988,7 +7017,6 @@ AND gc_id IN (
                       eg_instructor_blind=?,
                       eg_limited_access_blind=?,
                       eg_peer_blind=?,
-                      eg_peer_panel=?,
                       eg_grade_inquiry_start_date=?,
                       eg_grade_inquiry_due_date=?,
                       eg_grade_inquiry_allowed=?,
@@ -7001,6 +7029,29 @@ AND gc_id IN (
                     WHERE g_id=?",
                     $params
                 );
+                $params = [
+                    $gradeable->getId(),
+                    $gradeable->getPeerAutograding(),
+                    $gradeable->getPeerRubric(),
+                    $gradeable->getPeerFiles(),
+                    $gradeable->getPeerSolutions(),
+                    $gradeable->getPeerDiscussion()
+                ];
+                // Update row if exists, else Insert row
+                $this->course_db->query(
+                    "
+                    INSERT INTO peer_grading_panel (g_id, autograding, rubric, files, solution_notes, discussion)
+                    VALUES (?, ?, ?, ?, ?, ?)
+                    ON CONFLICT (g_id) DO UPDATE
+                    SET autograding = EXCLUDED.autograding,
+                        rubric = EXCLUDED.rubric,
+                        files = EXCLUDED.files,
+                        solution_notes = EXCLUDED.solution_notes,
+                        discussion = EXCLUDED.discussion
+                    ",
+                    $params
+                );
+
             }
         }
 

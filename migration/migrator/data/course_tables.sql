@@ -819,7 +819,6 @@ CREATE TABLE public.electronic_gradeable (
     eg_vcs_subdirectory character varying(1024) DEFAULT ''::character varying NOT NULL,
     eg_using_subdirectory boolean DEFAULT false NOT NULL,
     eg_instructor_blind integer DEFAULT 1,
-    eg_peer_panel character varying(5) DEFAULT '11111'::character varying,
     CONSTRAINT eg_grade_inquiry_allowed_true CHECK (((eg_grade_inquiry_allowed IS TRUE) OR (eg_grade_inquiry_per_component_allowed IS FALSE))),
     CONSTRAINT eg_grade_inquiry_due_date_max CHECK ((eg_grade_inquiry_due_date <= '9999-03-01 00:00:00-05'::timestamp with time zone)),
     CONSTRAINT eg_grade_inquiry_start_date_max CHECK ((eg_grade_inquiry_start_date <= '9999-03-01 00:00:00-05'::timestamp with time zone)),
@@ -1453,6 +1452,20 @@ CREATE TABLE public.peer_feedback (
     user_id character varying(255) NOT NULL,
     g_id character varying(255) NOT NULL,
     feedback character varying(255)
+);
+
+
+--
+-- Name: peer_grading_panel; Type: TABLE; Schema: public; Owner: -
+--
+
+CREATE TABLE public.peer_grading_panel (
+    g_id character varying(255) NOT NULL,
+    autograding boolean DEFAULT true NOT NULL,
+    rubric boolean DEFAULT true NOT NULL,
+    files boolean DEFAULT true NOT NULL,
+    solution_notes boolean DEFAULT true NOT NULL,
+    discussion boolean DEFAULT true NOT NULL
 );
 
 
@@ -2350,6 +2363,14 @@ ALTER TABLE ONLY public.peer_feedback
 
 
 --
+-- Name: peer_grading_panel peer_grading_panel_pkey; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.peer_grading_panel
+    ADD CONSTRAINT peer_grading_panel_pkey PRIMARY KEY (g_id);
+
+
+--
 -- Name: course_materials_sections pk_course_material_section; Type: CONSTRAINT; Schema: public; Owner: -
 --
 
@@ -3198,6 +3219,14 @@ ALTER TABLE ONLY public.peer_feedback
 
 ALTER TABLE ONLY public.peer_feedback
     ADD CONSTRAINT peer_feedback_user_id_fkey FOREIGN KEY (user_id) REFERENCES public.users(user_id) ON DELETE CASCADE;
+
+
+--
+-- Name: peer_grading_panel peer_grading_panel_g_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.peer_grading_panel
+    ADD CONSTRAINT peer_grading_panel_g_id_fkey FOREIGN KEY (g_id) REFERENCES public.electronic_gradeable(g_id);
 
 
 --

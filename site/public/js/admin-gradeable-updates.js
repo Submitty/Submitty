@@ -220,17 +220,11 @@ $(document).ready(() => {
         else {
             data[this.name] = $(this).val();
         }
-        //Retrieve status of check boxes for each of the panels
-        let selectedCheckboxes = '';
+        //Retrieve status for each of the panels
+        let gradingPanels = {};
         $('input[name="peer_panel"]').each(function() {
-            if ($(this).is(':checked')) {
-                selectedCheckboxes += '1';
-            }
-            else {
-                selectedCheckboxes += '0';
-            }
+            data[$(this).attr('id')] = $(this).is(':checked');
         });
-        data['peer_panel'] = selectedCheckboxes;
         const addDataToRequest = function (i, val) {
             if (val.type === 'radio' && !$(val).is(':checked')) {
                 return;
@@ -246,12 +240,12 @@ $(document).ready(() => {
         else if (data['depends_on_points'] !== null) {
             data['depends_on'] = gradeable;
         }
-
         // If its date-related, then submit all date data
         if ($('#gradeable-dates').find(`input[name="${this.name}"]:enabled`).length > 0
             || $(this).hasClass('date-related')) {
             $('#gradeable-dates :input:enabled,.date-related').each(addDataToRequest);
         }
+        delete data.peer_panel; // remove unwanted key
         ajaxUpdateGradeableProperty($('#g_id').val(), data,
             (response_data) => {
                 // Clear errors by setting new values

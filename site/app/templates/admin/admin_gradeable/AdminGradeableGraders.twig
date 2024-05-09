@@ -117,21 +117,21 @@ Form
         <legend>
             Which tabs should be visible to peer graders?
         </legend>
-        <input type="checkbox" name="peer_panel" value="1" id="autograding_peer_panel"
-            {{ ('1' == gradeable.getPeerPanel()|slice(0,1)) ? 'checked' : ''}}><label for="autograding_peer_panel">Autograding</label>
-        <input type="checkbox" name="peer_panel" value="2" id="rubric_peer_panel"
-            {{ ('1' == gradeable.getPeerPanel()|slice(1,1)) ? 'checked' : '' }}> <label for="rubric_peer_panel">Rubric</label>
+        <input type="checkbox" name="peer_panel" value="1" id="peer_autograding"
+            {{ (gradeable.getPeerAutograding() == true) ? 'checked' : ''}}><label for="autograding">Autograding</label>
+        <input type="checkbox" name="peer_panel" value="2" id="peer_rubric"
+            {{ (gradeable.getPeerRubric() == true) ? 'checked' : '' }}> <label for="rubric">Rubric</label>
 
-        <input type="checkbox" name="peer_panel" value="3" id="files_peer_panel"
-            {{ ('1' == gradeable.getPeerPanel()|slice(2,1)) ? 'checked' : '' }}><label for="files_peer_panel">Files</label>
+        <input type="checkbox" name="peer_panel" value="3" id="peer_files"
+            {{ (gradeable.getPeerFiles() == true) ? 'checked' : '' }}><label for="files">Files</label>
 
-        <input type="checkbox" name="peer_panel" value="4" id="solutions_peer_panel"
-            {{ ('1' == gradeable.getPeerPanel()|slice(3,1)) ? 'checked' : '' }}><label for="solutions_peer_panel">Solution/Notes</label>
+        <input type="checkbox" name="peer_panel" value="4" id="peer_solutions"
+            {{ (gradeable.getPeerSolutions() == true) ? 'checked' : '' }}><label for="solutions">Solution/Notes</label>
 
         {% if isDiscussionPanel %}
 
-            <input type="checkbox" name="peer_panel" value="5" id="discussion_peer_panel"
-                {{ ('1' == gradeable.getPeerPanel()|slice(-1)) ? 'checked' : '' }}><label for="discussion_peer_panel">Discussion</label>
+            <input type="checkbox" name="peer_panel" value="5" id="peer_discussion"
+                {{ (gradeable.getPeerDiscussion() == true) ? 'checked' : '' }}><label for="discussion">Discussion</label>
 
         {% endif %}
     </fieldset>
@@ -296,7 +296,7 @@ Form
             default:
                 alert('Error!  Invalid Minimum Grader!');
                 break;
-        }
+        }}
     }
 
     $(document).ready(function() {

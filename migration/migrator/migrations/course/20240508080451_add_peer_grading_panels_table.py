@@ -14,7 +14,18 @@ def up(config, database, semester, course):
     :param course: Code of course being migrated
     :type course: str
     """
-    database.execute("ALTER TABLE electronic_gradeable ADD COLUMN eg_peer_panel VARCHAR(5) DEFAULT '11111';")
+    database.execute("""
+        CREATE TABLE IF NOT EXISTS peer_grading_panel (
+            g_id VARCHAR(255) PRIMARY KEY,
+            autograding BOOLEAN NOT NULL DEFAULT TRUE,
+            rubric BOOLEAN NOT NULL DEFAULT TRUE,
+            files BOOLEAN NOT NULL DEFAULT TRUE,
+            solution_notes BOOLEAN NOT NULL DEFAULT TRUE,
+            discussion BOOLEAN NOT NULL DEFAULT TRUE,
+            FOREIGN KEY (g_id) REFERENCES electronic_gradeable(g_id)
+        );
+    """)
+    pass
 
 
 def down(config, database, semester, course):
