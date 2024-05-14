@@ -1933,6 +1933,7 @@ function addMarkdownCode(type) {
     $(this)[0].setSelectionRange(cursor + insert.length, cursor + insert.length);
 }
 
+
 /**
  * Check local timezone against user timezone and show warning if they are different
  */
