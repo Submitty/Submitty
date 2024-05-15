@@ -35,12 +35,12 @@
       (?m)^User familyname: "{{ lastname }}"
       (?m)^User email: "{{ email }}"
       (?m)^User password: NotUsedWithLdap
-  become: yes
+  become: true
   become_user: root
 
 - name: Add existing instructors to the course database.
   ansible.builtin.command:
     cmd: ./adduser_course.py "{{ instructor }}" "{{ semester }}" "{{ course }}"
     chdir: /usr/local/submitty/sbin/
-  become: yes
+  become: true
   become_user: root

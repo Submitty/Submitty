@@ -1,5 +1,5 @@
 ---
-instructor: instructor
+instructor: fordet
 submitty_course_add_instructor_groups: submitty_course_add_instructor_groups
 course: course
 submitty_course_add_instructor_users: submitty_course_add_instructor_users
@@ -7,5 +7,3 @@ firstname: firstname
 lastname: lastname
 email: email
 semester: semester
-
-

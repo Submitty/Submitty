@@ -1,8 +1,8 @@
 ---
 course: course
-instructor: instructor
+instructor: fordet
 submitty_course_creation_groups: submitty_course_creation_groups
-submitty_course_creation_users: submitty_course_creation_users
+submitty_course_creation_users: fordet
 firstname: firstname
 lastname: lastname
 email: email

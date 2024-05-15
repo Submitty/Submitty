@@ -85,7 +85,7 @@
       (?m)^User familyname: "{{ lastname }}"
       (?m)^User email: "{{ email }}"
       (?m)^User password: NotUsedWithLdap
-  become: yes
+  become: true
   become_user: root
 
 # Prepare the course directory and course database.
@@ -95,7 +95,7 @@
   ansible.builtin.command:
     cmd: ./create_course.sh "{{ semester }}" "{{ course }}" "{{ instructor }}" "{{ course }}_tas_www"
     chdir: /usr/local/submitty/sbin/
-  become: yes
+  become: true
   become_user: root
   notify: Reload fpm
 
@@ -103,5 +103,5 @@
   ansible.builtin.command:
     cmd: ./adduser_course.py "{{ instructor }}" "{{ semester }}" "{{ course }}"
     chdir: /usr/local/submitty/sbin/
-  become: yes
+  become: true
   become_user: root

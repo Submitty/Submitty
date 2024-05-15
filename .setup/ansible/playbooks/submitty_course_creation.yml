@@ -8,15 +8,15 @@
       vars:
         semester: semester
         semester_name: semester
-        start_date:
-        end_date: 
+        start_date: 01/01/2024
+        end_date: 06/06/2024
 
     - role: submitty_course_creation
       vars:
         semester: semester
         course: course
         section: section
-        instructor: instructor
+        instructor: fordet
         firstname: instructor
         lastname: instructor
         email: instructor
@@ -25,8 +25,7 @@
       vars:
         semester: semester
         course: course
-        instructor: instructor
+        instructor: fordet
         firstname: instructor
         lastname: instructor
         email: instructor
-

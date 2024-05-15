@@ -12,4 +12,8 @@
         name: install_ansible
       vars:
         # add overriding variables here
-        submitty_version: v24.02.00
+        # submitty_version: v24.02.00 # uncomment to specify version
+        submitty_ip: 172.27.23.13
+        submitty_url: fordet.cs.wallawalla.edu
+        ssl_enabled: true
+        institution_name: Walla Walla University
