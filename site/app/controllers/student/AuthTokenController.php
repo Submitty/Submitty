@@ -7,7 +7,6 @@ use app\entities\VcsAuthToken;
 use app\libraries\response\RedirectResponse;
 use app\libraries\response\ResponseInterface;
 use app\libraries\response\WebResponse;
-use app\libraries\routers\AccessControl;
 use app\libraries\TokenManager;
 use app\libraries\Utils;
 use app\repositories\VcsAuthTokenRepository;
@@ -51,9 +50,6 @@ class AuthTokenController extends AbstractController {
         );
     }
 
-    /**
-     * @AccessControl(level="FACULTY")
-     */
     #[Route("/authentication_tokens/api", methods: ["POST"])]
     public function fetchApiToken(): RedirectResponse {
         $user_id = $this->core->getUser()->getId();
@@ -65,9 +61,6 @@ class AuthTokenController extends AbstractController {
         return new RedirectResponse($this->core->buildUrl(['authentication_tokens']));
     }
 
-    /**
-     * @AccessControl(level="FACULTY")
-     */
     #[Route("/authentication_tokens/api/invalidate", methods: ["POST"])]
     public function invalidateApiToken(): RedirectResponse {
         $user_id = $this->core->getUser()->getId();
