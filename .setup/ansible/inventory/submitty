@@ -1,3 +1,3 @@
-# This is an example inventory file for Submitt
+# This is an example inventory file for Submitty
 [submitty]
 172.27.23.13 # change to your submitty ip address

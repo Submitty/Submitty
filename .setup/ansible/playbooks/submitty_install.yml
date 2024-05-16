@@ -1,6 +1,6 @@
 ---
 # Example playbook
-# Customize the submitty install by overriding the variable defaults found in `roles/install_ansible/defaults/main.yml`
+# Customize the submitty install by overriding the variable defaults found in `roles/submitty_install/defaults/main.yml`
 
 - name: Install Submitty
   hosts: submitty

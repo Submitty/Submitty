@@ -1,9 +1,10 @@
 ---
 course: course
-instructor: fordet
+instructor: instructor
 submitty_course_creation_groups: submitty_course_creation_groups
 submitty_course_creation_users: fordet
 firstname: firstname
 lastname: lastname
 email: email
 semester: semester
+user_group: 1

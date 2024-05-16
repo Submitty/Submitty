@@ -6,26 +6,27 @@
   roles:
     - role: submitty_term_creation
       vars:
-        semester: semester
-        semester_name: semester
+        semester: spring2024
+        semester_name: spring2024
         start_date: 01/01/2024
         end_date: 06/06/2024
 
     - role: submitty_course_creation
       vars:
-        semester: semester
-        course: course
-        section: section
+        semester: spring2024
+        course: seniorproject
+        section: iii
         instructor: fordet
-        firstname: instructor
-        lastname: instructor
-        email: instructor
+        firstname: Ethan
+        lastname: Ford
+        email: fordet.cs.wallawalla.edu
 
     - role: submitty_course_add_instructor
       vars:
-        semester: semester
-        course: course
+        semester: spring2024
+        course: seniorproject
         instructor: fordet
-        firstname: instructor
-        lastname: instructor
-        email: instructor
+        firstname: Ethan
+        lastname: Ford
+        email: fordet.cs.wallawalla.edu
+        user_group: 1

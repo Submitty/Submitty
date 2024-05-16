@@ -40,7 +40,7 @@
 
 - name: Add existing instructors to the course database.
   ansible.builtin.command:
-    cmd: ./adduser_course.py "{{ instructor }}" "{{ semester }}" "{{ course }}"
+    cmd: ./adduser_course.py "{{ instructor }}" "{{ semester }}" "{{ course }}" "{{ user_group }}"
     chdir: /usr/local/submitty/sbin/
   become: true
   become_user: root

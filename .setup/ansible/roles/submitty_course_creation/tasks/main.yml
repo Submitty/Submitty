@@ -39,6 +39,12 @@
   notify: Reload fpm
 
 # TODO move to submitty install script
+- name: Create course directory.
+  ansible.builtin.file:
+    path: "/var/local/submitty/courses/{{ semester }}/{{ course }}"
+    state: directory
+    mode: '0770'
+
 - name: Give course management permissions to "{{ instructor }}".
   ansible.builtin.user:
     name: "{{ submitty_course_creation_users }}"
@@ -101,7 +107,14 @@
 
 - name: Add existing instructors to the course database.
   ansible.builtin.command:
-    cmd: ./adduser_course.py "{{ instructor }}" "{{ semester }}" "{{ course }}"
+    cmd: ./adduser_course.py "{{ instructor }}" "{{ semester }}" "{{ course }}" "{{ user_group }}"
     chdir: /usr/local/submitty/sbin/
+  become: true
+  become_user: root
+
+- name: Restart php8.1-fpm service.
+  ansible.builtin.systemd:
+    name: php8.1-fpm
+    state: restarted
   become: true
   become_user: root
