@@ -1,9 +1,5 @@
 ---
-<<<<<<<< HEAD:.setup/ansible/roles/install_ansible/defaults/main.yml
 submitty_version: main
-========
-submitty_version: v24.02.00
->>>>>>>> main:.setup/ansible/roles/submitty_install/defaults/main.yml
 db_host: localhost
 db_port: 5432
 submitty_dbuser: submitty_dbuser

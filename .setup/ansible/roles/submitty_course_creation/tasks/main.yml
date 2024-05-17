@@ -39,11 +39,6 @@
   notify: Reload fpm
 
 # TODO move to submitty install script
-- name: Create course directory.
-  ansible.builtin.file:
-    path: "/var/local/submitty/courses/{{ semester }}/{{ course }}"
-    state: directory
-    mode: '0770'
 
 - name: Give course management permissions to "{{ instructor }}".
   ansible.builtin.user:
