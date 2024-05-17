@@ -13,9 +13,9 @@ use app\libraries\routers\AccessControl;
 
 class ImagesController extends AbstractController {
     /**
-     * @Route("/courses/{_semester}/{_course}/student_photos")
      * @AccessControl(role="LIMITED_ACCESS_GRADER")
      */
+    #[Route("/courses/{_semester}/{_course}/student_photos")]
     public function viewImagesPage() {
         $view = 'sections';
         if (isset($_GET['view']) && $_GET['view'] === 'all') {
@@ -28,9 +28,7 @@ class ImagesController extends AbstractController {
         $this->core->getOutput()->renderOutput(['grading', 'Images'], 'listStudentImages', $students, $grader_sections, $has_full_access, $view);
     }
 
-    /**
-     * @Route("/courses/{_semester}/{_course}/student_photos/upload")
-     */
+    #[Route("/courses/{_semester}/{_course}/student_photos/upload")]
     public function ajaxUploadImagesFiles() {
         if (!$this->core->getUser()->accessAdmin()) {
             return $this->core->getOutput()->renderResultMessage("You have no permission to access this page", false);
@@ -178,9 +176,9 @@ class ImagesController extends AbstractController {
     }
 
     /**
-     * @Route("/courses/{_semester}/{_course}/flag_user_image", methods={"POST"})
      * @AccessControl(role="FULL_ACCESS_GRADER")
      */
+    #[Route("/courses/{_semester}/{_course}/flag_user_image", methods: ["POST"])]
     public function flagUserImage(): JsonResponse {
         $user_id = $_POST['user_id'];
 
