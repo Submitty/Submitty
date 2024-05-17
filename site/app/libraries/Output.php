@@ -198,6 +198,7 @@ HTML;
         $this->addInternalJs('server.js');
         $this->addInternalJs('menu.js');
         $this->addInternalJs('testcase-output.js');
+        $this->addInternalJs('event-advertisements.js');
     }
 
     /**
