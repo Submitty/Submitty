@@ -91,7 +91,7 @@ class RubricGraderController extends AbstractController {
 
 
     /**
-     * Returns gradeable to the appropiate assignment unless $gradeable_id is invalid,
+     * Returns gradeable to the appropriate assignment unless $gradeable_id is invalid,
      * in which case an error is printed and the code exits.
      *
      * @param string $gradeable_id - The id string of the current gradeable.
