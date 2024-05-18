@@ -5603,9 +5603,9 @@ AND gc_id IN (
      *      Email subject
      *      Email body
      *      Time email was created
-     *      User_id of the email's reciever (if Submitty user)
-     *      Name of the email's reciever (if non Submitty user)
-     *      Email address of reciever
+     *      User_id of the email's receiver (if Submitty user)
+     *      Name of the email's receiver (if non Submitty user)
+     *      Email address of receiver
      *      Term email is being sent
      *      Course email belongs to
      * @param int   $email_count
