@@ -197,6 +197,22 @@ class HomeworkView extends AbstractView {
             $active_days_charged = max(0, $active_days_late - $extensions);
         }
 
+
+        $DayLightSavingMessageRequired = false;
+        $date = new \DateTime();
+        $daylightSpring = new \DateTime('2024-05-17', $this->core->getConfig()->getTimezone());
+        $daylightFall = new \DateTime('2024-11-03', $this->core->getConfig()->getTimezone());
+
+
+        $diff = $date->diff($daylightSpring)->days;
+        $diff2 = $date->diff($daylightFall)->days;
+
+    
+        
+        if (abs($diff) <= 7 || abs($diff2) <= 7) {
+            $DayLightSavingMessageRequired = true;
+        }
+           
         // ------------------------------------------------------------
         // IF STUDENT HAS ALREADY SUBMITTED AND THE ACTIVE VERSION IS LATE, PRINT LATE DAY INFORMATION FOR THE ACTIVE VERSION
         if ($active_version >= 1 && $active_days_late > 0) {
@@ -205,6 +221,8 @@ class HomeworkView extends AbstractView {
                 $error = true;
 
                 // AUTO ZERO BECAUSE INSUFFICIENT LATE DAYS REMAIN
+                
+
                 if ($active_days_late > $late_day_budget) {
                     $messages[] = ['type' => 'too_few_remain', 'info' => [
                         'late' => $active_days_late,
@@ -288,7 +306,8 @@ class HomeworkView extends AbstractView {
 
         return $this->core->getOutput()->renderTwigTemplate('submission/homework/LateDayMessage.twig', [
             'messages' => $messages,
-            'error' => $error
+            'error' => $error,
+            'daylight' => $DayLightSavingMessageRequired
         ]);
     }
 
