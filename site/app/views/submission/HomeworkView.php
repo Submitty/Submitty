@@ -494,7 +494,7 @@ class HomeworkView extends AbstractView {
                 $this->core->getConfig()->getTerm(),
                 $this->core->getConfig()->getCourse(),
                 $gradeable->getId(),
-                $student_id
+                $graded_gradeable->getSubmitter()->getId()
             );
             $vcs_repo_exists = file_exists($path);
         }
