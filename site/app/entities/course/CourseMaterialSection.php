@@ -21,6 +21,7 @@ class CourseMaterialSection {
     protected string $section_id;
 
     #[ORM\ManyToOne(targetEntity: CourseMaterial::class, inversedBy: "sections")]
+    #[ORM\JoinColumn(nullable: false)]
     protected CourseMaterial $course_material;
 
     public function __construct(string $section_id, CourseMaterial $course_material) {
