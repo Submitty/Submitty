@@ -126,6 +126,34 @@ function darken(colorstr) {
 }
 
 /**
+ * This function returns a slightly lighter color than the color variable name passed.
+ *
+ * @param colorstr : string the color to lighten in the form "var(--color-name)"
+ * @returns {string} a hex code for a slightly lighter shade
+ */
+function lighten(colorstr) {
+    if (typeof colorstr !== 'string') {
+        return colorstr;
+    }
+    else {
+        const hexcodestr = window.getComputedStyle(document.documentElement).getPropertyValue(colorstr.slice(4, -1)).toLowerCase();
+        const lighterstr = hexcodestr.split('');
+        for (let i = 1; i < hexcodestr.length; i++) {
+            if ((hexcodestr[i] >= '0' && hexcodestr[i] < '9') || (hexcodestr[i] >= 'a' && hexcodestr[i] < 'f')) {
+                lighterstr[i] = String.fromCharCode(hexcodestr.charCodeAt(i) + 2);
+            }
+            else if (hexcodestr[i] === '9') {
+                lighterstr[i] = 'b';
+            }
+            else if (hexcodestr[i] === '8') {
+                lighterstr[i] = 'a';
+            }
+        }
+        return lighterstr.join('');
+    }
+}
+
+/**
  * Create a HTML element that contains the calendar item (button/link/text).
  *
  * @param item : array the calendar item
@@ -180,6 +208,7 @@ function generateCalendarItem(item) {
     // disabling element for student access level if submission is not open
     if (item['disabled']) {
         element.style.setProperty('cursor', 'default');
+        element.style.setProperty('background', `repeating-linear-gradient(45deg, ${item['color']}, ${item['color']} 10px, ${lighten(item['color'])} 10px, ${lighten(item['color'])} 15px)`);
     }
     if (exists && !item['disabled']) {
         element.style.setProperty('cursor', 'pointer');
