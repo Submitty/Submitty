@@ -121,7 +121,7 @@
           <div id=id='categories-pick-list'>
             {% for category in categories %}
                 {# if diff > 0 then visible_Date is true
-                 diff is used for comparsion betweeen  the given date of category and the current date of user 
+                 diff is used for comparison between the given date of category and the current date of user 
                  when date is above then current date then output is less than zero.
                  and when date is below then current date the optput is greater then zero #}
                 {% if category.visible_date is null or category.diff > 0 %}
