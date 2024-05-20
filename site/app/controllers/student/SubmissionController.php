@@ -1069,7 +1069,8 @@ class SubmissionController extends AbstractController {
                             'points_received' => $testcase->getPoints(),
                             'testcase_message' => $testcase_config->canViewTestcaseMessage() ? $testcase->getMessage() : ''
                         ];
-                    } else {
+                    }
+                    else {
                         return [];
                     }
                 }, $gradeable_version->getTestcases()));
