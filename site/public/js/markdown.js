@@ -1,6 +1,6 @@
 $(document).ready(() => {
     const MIN_HEIGHT = 100;
-    const targetTextarea = $('#reply_box_0');
+    const targetTextarea = $('#reply_box_1');
 
     const resizeTextarea = (textarea) => {
         // Temporarily reduce padding to measure the natural content height more accurately
