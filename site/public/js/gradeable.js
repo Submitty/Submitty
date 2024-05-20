@@ -1,7 +1,7 @@
 /* exported loadTemplates renderGradingGradeable renderPeerGradeable renderGradingComponent
    renderGradingComponentHeader renderInstructorEditGradeable renderConflictMarks renderRubricTotalBox
    renderTotalScoreBox renderOverallComment renderEditComponentHeader renderEditComponent ajaxUploadGradeable */
-/* global Twig showVerifyComponent buildCourseUrl getItempoolOptions isItempoolAvailable csrfToken */
+/* global Twig showVerifyComponent buildCourseUrl displayErrorMessage closePopup getItempoolOptions isItempoolAvailable csrfToken */
 
 /**
  * The number of decimal places to show to the user
@@ -358,13 +358,15 @@ function ajaxUploadGradeable() {
                     window.location = buildCourseUrl(['gradeable', data['data'], 'update']);
                 }
                 else {
-                    alert(data['message']);
+                    closePopup('gradeable-json-form');
+                    displayErrorMessage(data['message']);
                     return false;
                 }
             });
         }
         catch (error) {
-            alert(error);
+            closePopup('gradeable-json-form');
+            displayErrorMessage(error);
             return false;
         }
     };

@@ -27,7 +27,7 @@ class SelfRejoinController extends AbstractController {
 
     /**
      * Returns if the user is allowed to self-readd to a course after being dropped.
-     * @return bool True if can readd, false otherwise.
+     * @return bool True if can re-add, false otherwise.
      */
     private function canRejoinCourse() {
         $user = $this->core->getUser();
@@ -66,8 +66,8 @@ class SelfRejoinController extends AbstractController {
         // --------------------------------
         // Meeting the requirements to rejoin
 
-        $acceses = $this->core->getQueries()->getAttendanceInfoOneStudent($user_id);
-        foreach ($acceses as $access_place => $timestamp) {
+        $accesses = $this->core->getQueries()->getAttendanceInfoOneStudent($user_id);
+        foreach ($accesses as $access_place => $timestamp) {
             if (is_null($timestamp)) {
                 continue;
             }
@@ -77,7 +77,7 @@ class SelfRejoinController extends AbstractController {
         }
 
         $term_start_date = $this->core->getQueries()->getCurrentTermStartDate();
-        // If never accessed course but today is within first two weeks of term, can readd self.
+        // If never accessed course but today is within first two weeks of term, can re-add self.
         if (abs(DateUtils::calculateDayDiff($term_start_date)) <= 14) {
             return true;
         }
@@ -91,7 +91,7 @@ class SelfRejoinController extends AbstractController {
     /**
      * @Route("/courses/{_semester}/{_course}/rejoin_course", methods={"POST"})
      *
-     * @return RedirectResponse Course url if the student met the conditions to be readded.
+     * @return RedirectResponse Course url if the student met the conditions to be re-added.
      */
     public function rejoinCourse(): RedirectResponse {
 
@@ -128,7 +128,7 @@ class SelfRejoinController extends AbstractController {
 
 
     /**
-     * Sends emails to instructors that a student readded themselves to the course.
+     * Sends emails to instructors that a student re-added themselves to the course.
      *
      * @param string $joined_section The section that the student has rejoined.
      * @return void
@@ -151,9 +151,9 @@ class SelfRejoinController extends AbstractController {
         $subject = "User Rejoin: $first_name $last_name ($user_id) of $term $course";
         $body = <<<EMAIL
             The student $first_name $last_name ($user_id), who had been automatically removed
-            from the course $course of term $term, has readded themselves in section $joined_section.
+            from the course $course of term $term, has re-added themselves in section $joined_section.
 
-            Please move them to their appropiate section. If this rejoin was a mistake,
+            Please move them to their appropriate section. If this rejoin was a mistake,
             you may move the student to the Null section.
         EMAIL;
 
