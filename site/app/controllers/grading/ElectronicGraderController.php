@@ -996,7 +996,7 @@ class ElectronicGraderController extends AbstractController {
             foreach ($all_teams as $team) {
                 $student_ids = array_diff($student_ids, $team->getMembers());
                 $team_section = $gradeable->isGradeByRegistration() ? $team->getRegistrationSection() : $team->getRotatingSection();
-                if ($team->getSize() > 0 && (in_array($team_section, $sections) || $show_all)) {
+                if ($team->getSize() > 0 && (in_array($team_section, $sections, true) || $show_all)) {
                     $student_ids[] = $team->getLeaderId();
                 }
                 if ($team->getSize() === 0 && $show_empty_teams) {
@@ -1033,7 +1033,7 @@ class ElectronicGraderController extends AbstractController {
                 }
             }
             foreach ($students as $user) {
-                if (!in_array($user->getId(), $user_ids)) {
+                if (!in_array($user->getId(), $user_ids, true)) {
                     $teamless_users[] = $user;
                 }
             }
@@ -1528,7 +1528,7 @@ class ElectronicGraderController extends AbstractController {
         $user_ids = [];
         for ($i = 0; $i < $num_users; $i++) {
             $id = trim(htmlentities($_POST["user_id_{$i}"]));
-            if (in_array($id, $user_ids)) {
+            if (in_array($id, $user_ids, true)) {
                 $this->core->addErrorMessage("ERROR: {$id} is already on this team");
                 $this->core->redirect($return_url);
             }

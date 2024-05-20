@@ -828,7 +828,7 @@ SQL;
     public function existsAnnouncementsId($thread_id) {
         $this->course_db->query("SELECT announced from threads where id = ?", [$thread_id]);
         $row = $this->course_db->row();
-        return count($row) > 0 && $row['announced'] != null;
+        return count($row) > 0 && $row['announced'] !== null;
     }
 
     public function updateResolveState($thread_id, $state) {
@@ -1544,7 +1544,7 @@ WHERE term=? AND course=? AND user_id=?",
 
     // Moved from class LateDaysCalculation on port from TAGrading server.  May want to incorporate late day information into gradeable object rather than having a separate query
     public function getLateDayUpdates($user_id) {
-        if ($user_id != null) {
+        if ($user_id !== null) {
             $query = "SELECT * FROM late_days WHERE user_id";
             if (is_array($user_id)) {
                 $query .= ' IN ' . $this->createParameterList(count($user_id));
@@ -4073,7 +4073,7 @@ VALUES(?, ?, ?, ?, 0, 0, 0, 0, ?)",
         );
         $teams = [];
         $rows = $this->course_db->rows();
-        if ($rows != null) {
+        if ($rows !== null) {
             foreach ($rows as $row) {
                 $row['team_members'] = explode(',', $row['team_members']); // comma-separated string to an array
                 $teams[] = $row;
@@ -7876,7 +7876,7 @@ AND gc_id IN (
     public function setQueuePauseState(bool $new_state) {
         $current_queue_state = $this->core->getQueries()->getCurrentQueueState();
         $time_paused_start = $current_queue_state['time_paused_start'];
-        $current_state = $time_paused_start != null;
+        $current_state = $time_paused_start !== null;
         if ($new_state !== $current_state) {
             // The pause state is actually changing
             $time_paused = $current_queue_state['time_paused'];
