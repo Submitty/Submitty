@@ -1455,7 +1455,7 @@ class AdminGradeableController extends AbstractController {
         return null;
     }
 
-    public static function enqueueGenerateRepos($semester, $course, $g_id, $subdirectory) {
+    public static function enqueueGenerateRepos(string $semester, string $course, string $g_id, string $subdirectory) {
         // FIXME:  should use a variable instead of hardcoded top level path
         $config_build_file = "/var/local/submitty/daemon_job_queue/generate_repos__" . $semester . "__" . $course . "__" . $g_id . ".json";
 
