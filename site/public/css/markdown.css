@@ -82,10 +82,15 @@
 }
 
 .markdown blockquote {
-    border-left: 4px solid #aaaaaa;
+    border-left: 4px solid var(--standard-dark-gray);
     padding-left: 0.75em;
     margin-left: 0;
-    color: #aaaaaa;
+    color: var(--standard-dark-gray);
+}
+
+[data-theme="dark"] .markdown blockquote {
+    border-left: 4px solid var(--standard-light-medium-gray);
+    color: var(--standard-light-medium-gray);
 }
 
 .markdown code:not(.inline-code) {
