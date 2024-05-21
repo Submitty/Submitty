@@ -15,8 +15,8 @@ use Symfony\Component\Routing\Annotation\Route;
 class GradeInquiryController extends AbstractController {
     /**
      * @param string $gradeable_id
-     * @Route("/courses/{_semester}/{_course}/gradeable/{gradeable_id}/grade_inquiry/new", methods={"POST"})
      */
+    #[Route("/courses/{_semester}/{_course}/gradeable/{gradeable_id}/grade_inquiry/new", methods: ["POST"])]
     public function requestGradeInquiry($gradeable_id) {
         $content = $_POST['replyTextArea'] ?? '';
         $submitter_id = $_POST['submitter_id'] ?? '';
@@ -75,9 +75,9 @@ class GradeInquiryController extends AbstractController {
 
     /**
      * @param string $gradeable_id
-     * @Route("/courses/{_semester}/{_course}/gradeable/{gradeable_id}/grade_inquiry/post", methods={"POST"})
      * @return MultiResponse|JsonResponse|null null is for tryGetGradeable and tryGetGradedGradeable
      */
+    #[Route("/courses/{_semester}/{_course}/gradeable/{gradeable_id}/grade_inquiry/post", methods: ["POST"])]
     public function makeGradeInquiryPost($gradeable_id) {
         $content = str_replace("\r", "", $_POST['replyTextArea']);
         $submitter_id = $_POST['submitter_id'] ?? '';
@@ -148,8 +148,8 @@ class GradeInquiryController extends AbstractController {
 
     /**
      * @param string $gradeable_id
-     * @Route("/courses/{_semester}/{_course}/gradeable/{gradeable_id}/grade_inquiry/single", methods={"POST"})
      */
+    #[Route("/courses/{_semester}/{_course}/gradeable/{gradeable_id}/grade_inquiry/single", methods: ["POST"])]
     public function getSingleGradeInquiryPost($gradeable_id) {
         $this->core->getOutput()->useHeader(false);
         $this->core->getOutput()->useFooter(false);
@@ -210,9 +210,9 @@ class GradeInquiryController extends AbstractController {
 
     /**
      * @param string $gradeable_id
-     * @Route("/courses/{_semester}/{_course}/gradeable/{gradeable_id}/grade_inquiry/toggle_status", methods={"POST"})
      * @return JsonResponse|null null is for tryGetGradeable and tryGetGradedGradeable
      */
+    #[Route("/courses/{_semester}/{_course}/gradeable/{gradeable_id}/grade_inquiry/toggle_status", methods: ["POST"])]
     public function changeGradeInquiryStatus($gradeable_id) {
         $content = str_replace("\r", "", $_POST['replyTextArea']);
         $submitter_id = $_POST['submitter_id'] ?? '';
@@ -285,9 +285,9 @@ class GradeInquiryController extends AbstractController {
 
     /**
      * @param string $gradeable_id
-     * @Route("/courses/{_semester}/{_course}/gradeable/{gradeable_id}/grade_inquiry/discussion", methods={"POST"})
      * @return MultiResponse
      */
+    #[Route("/courses/{_semester}/{_course}/gradeable/{gradeable_id}/grade_inquiry/discussion", methods: ["POST"])]
     public function getGradeInquiryDiscussion($gradeable_id) {
         $submitter_id = $_POST['submitter_id'];
 

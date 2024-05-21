@@ -9,6 +9,7 @@ const reply2 = 'Cypress Reply 2 Cypress';
 const reply3 = 'Cypress Reply 3 Cypress';
 const merged1 = 'Merged Thread Title: '.concat(title3, '\n\n', content3);
 const merged2 = 'Merged Thread Title: '.concat(title2, '\n\n', content2);
+const attachment1 = 'sea_animals.png';
 
 const createThread = (title, content, category) => {
     // Add more to tests for uploading attachments
@@ -24,7 +25,7 @@ const replyToThread = (title, reply) => {
     cy.get('.thread-left-cont > .thread-list-item').contains(title).click();
     cy.get('.create-post-head').should('contain', title);
     cy.get('#reply_box_3').type(reply);
-    cy.get('[value="Submit Reply to All"]').click();
+    cy.get('[value="Submit Reply to All"]').should('not.be.disabled').click();
     cy.get('#posts_list').should('contain', reply);
 };
 
@@ -45,6 +46,20 @@ const removeThread = (title) => {
     cy.get('.thread-left-cont > .thread-list-item').contains(title).should('not.exist');
 };
 
+const replyDisabled = (title, attachment) => {
+    cy.get('.thread-left-cont > .thread-list-item').contains(title).click();
+    // Reply button should be disabled by default with no text
+    cy.get('[value="Submit Reply to All"]').should('be.disabled');
+
+    // Ensure reply button is not disabled when attachments are added
+    cy.get('#input-file3').attachFile(attachment);
+    cy.get('[value="Submit Reply to All"]').should('not.be.disabled').click();
+
+    // Wait for submission and ensure attachment with no text is visible
+    cy.get('.attachment-btn').click();
+    cy.contains('p', attachment).should('be.visible');
+};
+
 describe('Test cases revolving around creating, replying to, merging, and removing discussion forum threads', () => {
 
     beforeEach(() => {
@@ -52,6 +67,12 @@ describe('Test cases revolving around creating, replying to, merging, and removi
         cy.visit(['sample']);
         cy.get('#nav-sidebar-forum').click();
         cy.get('#nav-sidebar-collapse-sidebar').click();
+    });
+
+    it('Reply button is disabled when applicable and thread reply can contain an attachment', () => {
+        createThread(title1, title1, 'Comment');
+        replyDisabled(title1, attachment1);
+        removeThread(title1);
     });
 
     it('Create, reply to, merge, and delete threads', () => {
