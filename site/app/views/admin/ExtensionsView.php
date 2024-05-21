@@ -8,6 +8,8 @@ use app\libraries\FileUtils;
 
 class ExtensionsView extends AbstractView {
     public function displayExtensions($gradeables) {
+        $this->core->getOutput()->addVendorCss(FileUtils::joinPaths('flatpickr', 'plugins', 'shortcutButtons', 'themes', 'light.min.css'));
+        $this->core->getOutput()->addSelect2WidgetCSSAndJs();
         $this->core->getOutput()->addInternalCss('exceptionforms.css');
         $this->core->getOutput()->addInternalCss('table.css');
         $this->core->getOutput()->addInternalJs('extensions.js');
@@ -31,7 +33,8 @@ class ExtensionsView extends AbstractView {
             $current_exceptions[] = ['user_id' => $user->getId(),
                                           'user_givenname' => $user->getDisplayedGivenName(),
                                           'user_familyname' => $user->getDisplayedFamilyName(),
-                                          'late_day_exceptions' => $user->getLateDayExceptions()];
+                                          'late_day_exceptions' => $user->getLateDayExceptions(),
+                                          'reason_for_exception' => $user->getReasonForException()];
         }
         if (empty($current_exceptions)) {
             $current_exceptions = null;
@@ -42,6 +45,12 @@ class ExtensionsView extends AbstractView {
             "student_full" => $student_full,
             "current_gradeable" => $current_gradeable,
             "current_exceptions" => $current_exceptions,
+            "reasons" => [
+                "illness",
+                "interview",
+                "travel",
+                "personal issue",
+            ],
             "csrf_token" => $this->core->getCsrfToken()
         ]);
     }

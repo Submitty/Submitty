@@ -54,7 +54,6 @@ const gradeable_type = [
 
 describe('Test cases for PDFs access', () => {
     before(() => {
-        cy.visit('/');
         cy.login('instructor');
         // Change the settings that aren't already what we need
         switch_settings('grading_homework_team_pdf');
@@ -63,12 +62,7 @@ describe('Test cases for PDFs access', () => {
         cy.logout();
     });
 
-    beforeEach(() => {
-        cy.visit('/');
-    });
-
     after(() => {
-        cy.visit('/');
         cy.login('instructor');
         revert_settings('grading_homework_team_pdf', 'rotating_section');
         revert_settings('grading_pdf_peer_homework', 'all_access');

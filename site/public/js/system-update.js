@@ -13,7 +13,7 @@ async function getReleases(current_tag) {
             // eslint-disable-next-line no-undef
             displayMessage(' Failed to get latest version info.' +
                 ` (Status Code : ${response.status.toString()})<br>` +
-                `Message : ${response.statusText}` , 'error',
+                `Message : ${response.statusText}`, 'error',
             );
             console.error('Got bad response:', response);
         }

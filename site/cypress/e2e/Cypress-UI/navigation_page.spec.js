@@ -13,7 +13,7 @@ describe('navigation page', () => {
     beforeEach(() => {
         cy.visit('/');
         cy.wait(500);
-        cy.viewport(1920,1200);
+        cy.viewport(1920, 1200);
     });
 
     it('should show instructor content for instructor', () => {

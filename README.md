@@ -1,5 +1,8 @@
 <p align="center">
-  <img src="http://submitty.org/images/submitty_logo.png" alt="Submitty Logo" width="500px"/>
+  <picture>
+    <source media="(prefers-color-scheme: dark)" srcset="https://github.com/Submitty/Submitty/blob/main/site/public/img/submitty_logo_white.png?raw=true">
+    <img src="https://github.com/Submitty/Submitty/blob/main/site/public/img/submitty_logo.png?raw=true" alt="Submitty Logo" width="500px"/>
+  </picture>
 </p>
 
 [![Submitty CI](https://github.com/Submitty/Submitty/actions/workflows/submitty_ci.yml/badge.svg?event=push)](https://github.com/Submitty/Submitty/actions/workflows/submitty_ci.yml)
@@ -30,7 +33,7 @@ To learn how to contribute to our project, please read:
 
 # Contact Us
 
-If you have a question, please [contact us](https://submitty.org/index/contact) through Slack.
+If you have a question, please [contact us](https://submitty.org/index/contact) through Zulip.
 
 
 ### LICENSING

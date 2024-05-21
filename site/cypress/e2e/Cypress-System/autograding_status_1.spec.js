@@ -7,7 +7,6 @@ const autograding_status_path = 'autograding_status';
 skipOn(Cypress.env('run_area') === 'CI', () => {
     describe('Pre autograding test', () => {
         before(() => {
-            cy.visit('/');
             cy.login();
             cy.wait(500);
             cy.viewport(1920, 1200);
@@ -32,7 +31,6 @@ skipOn(Cypress.env('run_area') === 'CI', () => {
         });
         // FIXME
         it('Should show newly added autograding jobs', () => {
-            cy.visit('/');
             cy.login();
             cy.wait(500);
 

@@ -2,7 +2,7 @@
     "env": {
         "browser": true,
         "es6": true,
-        "es2017": true,
+        "es2020": true,
         "jquery": true
     },
     "extends": "eslint:recommended",
@@ -12,7 +12,7 @@
         "Cookies": "readonly"
     },
     "parserOptions": {
-        "ecmaVersion": 2017,
+        "ecmaVersion": 2020,
         "sourceType": "script"
     },
     "rules": {
@@ -21,6 +21,7 @@
         "block-spacing": ["error"],
         "brace-style": ["error", "stroustrup"],
         "comma-dangle": ["error", "always-multiline"],
+        "comma-spacing": ["error", {"before": false, "after": true}],
         "curly" : ["error"],
         "default-param-last": ["error"],
         "eol-last": ["error"],

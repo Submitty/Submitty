@@ -3,15 +3,15 @@ import { skipOn } from '@cypress/skip-test';
 skipOn(Cypress.env('run_area') === 'CI', () => {
     describe('Testing functionality of Autograder Results', () => {
         beforeEach(() => {
-            cy.visit(['sample','gradeable','closed_team_homework']);
+            cy.visit(['sample', 'gradeable', 'closed_team_homework']);
             cy.login('student');
 
         });
 
         it('Should display confetti', () => {
-            cy.get('#confetti_canvas').should('have.css', 'display').and('match',/none/);
+            cy.get('#confetti_canvas').should('have.css', 'display').and('match', /none/);
             cy.get('.box-title-total').first().click();
-            cy.get('#confetti_canvas').should('have.css', 'display').and('not.match',/none/);
+            cy.get('#confetti_canvas').should('have.css', 'display').and('not.match', /none/);
         });
 
         it('Should show and hide details', () => {
