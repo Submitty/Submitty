@@ -153,7 +153,8 @@
 
 .mc-table .mc-buttons {
     display: flex;
-    flex-direction: column;
+    flex-direction: row;
+    align-items: center;
 }
 
 .multiple-choice-config {
@@ -165,6 +166,20 @@
     display: flex;
     flex-direction: column;
     text-align: right;
+}
+
+/**
+ * Notebook Multiple Choice control styles
+ */
+
+.move-btn {
+    background: transparent;
+    padding: 10px;
+    display: inline-block;
+    border: var(--text-black);
+    border-style: solid;
+    border-radius: 5px;
+    cursor: pointer;
 }
 
 /**

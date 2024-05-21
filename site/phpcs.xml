@@ -30,9 +30,6 @@
         <exclude name="SlevomatCodingStandard.Classes.ModernClassNameReference.ClassNameReferencedViaFunctionCall" />
         <exclude name="SlevomatCodingStandard.Classes.ModernClassNameReference.ClassNameReferencedViaMagicConstant" />
         <exclude name="SlevomatCodingStandard.Classes.ClassConstantVisibility.MissingConstantVisibility" />
-        <exclude name="SlevomatCodingStandard.Classes.UnusedPrivateElements.UnusedMethod" />
-        <exclude name="SlevomatCodingStandard.Classes.UnusedPrivateElements.WriteOnlyProperty" />
-        <exclude name="SlevomatCodingStandard.Classes.UnusedPrivateElements.UnusedProperty" />
         <exclude name="SlevomatCodingStandard.ControlStructures.UselessIfConditionWithReturn" />
         <exclude name="SlevomatCodingStandard.Exceptions.ReferenceThrowableOnly.ReferencedGeneralException" />
         <exclude name="SlevomatCodingStandard.Functions.UnusedParameter.UnusedParameter" />
