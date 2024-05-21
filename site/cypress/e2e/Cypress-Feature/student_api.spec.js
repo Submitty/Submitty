@@ -1,5 +1,5 @@
-import {getApiKey} from '../../support/utils';
-import {getCurrentSemester} from '../../support/utils';
+import { getApiKey } from '../../support/utils';
+import { getCurrentSemester } from '../../support/utils';
 
 describe('Tests cases for the Student API', () => {
     it('Should get correct responses', () => {
@@ -62,6 +62,46 @@ describe('Tests cases for the Student API', () => {
                 expect(data).to.contain('highest_version'),
                 expect(data).to.contain('total_points'),
                 expect(data).to.contain('total_percent');
+                expect(data).to.contain('testcases');
+                // CI doesn't have grades
+                if (Cypress.env('run_area') !== 'CI') {
+                    const read_me = {
+                        'name': 'Read Me',
+                        'details': '',
+                        'is_extra_credit': false,
+                        'points_available': 2,
+                        'points_received': 2,
+                        'testcase_message': ''
+                    }
+                    const coding_style = {
+                        'name': 'Coding Style',
+                        'details': '',
+                        'is_extra_credit': false,
+                        'points_available': 0,
+                        'points_received': 0,
+                        'testcase_message': ''
+                    }
+                    const documentation = {
+                        'name': 'Documentation',
+                        'details': '',
+                        'is_extra_credit': false,
+                        'points_available': 0,
+                        'points_received': 0,
+                        'testcase_message': ''
+                    }
+                    const extra_credit = {
+                        'name': 'Extra Credit',
+                        'details': '',
+                        'is_extra_credit': true,
+                        'points_available': 5,
+                        'points_received': 5,
+                        'testcase_message': ''
+                    }
+                    expect(data.testcases).to.contain(read_me);
+                    expect(data.testcases).to.contain(coding_style);
+                    expect(data.testcases).to.contain(documentation);
+                    expect(data.testcases).to.contain(extra_credit);
+                }
             });
 
             // Success, successfully sent to be graded
