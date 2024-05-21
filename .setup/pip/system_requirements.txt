@@ -14,7 +14,8 @@ opencv-python-headless==4.9.0.80
 # jsonschema & jsonref & pytz & tzlocal
 pytz==2023.3.post1 # Submitty-util specific.
 
-
+# Docker gets broken with 2.32.0 current release (before a hotfix is applied)
+requests==2.31.0
 python-pam==2.0.2
 ruamel.yaml==0.18.5
 psycopg2-binary==2.9.9
