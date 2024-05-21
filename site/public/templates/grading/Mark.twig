@@ -21,12 +21,20 @@ Required Input:
         </span>
     {% endif %}
     <span class="mark-selector-container">
-        {# Keep the mark checkbox so we can keep graded data when in edit mode to automatically update the component points #}
-        <span class="{{ is_checked ? 'mark-selected' : '' }} {{ edit_marks_enabled ? 'hidden' : '' }} mark-selector col-no-gutters"
+    <span class="mark-and-question">
+        <span class="{{ is_checked ? 'mark-selected' : '' }} mark-selector col-no-gutters"
               data-mark_id="{{ mark.id }}">
             {{ mark.order }}
         </span>
+        {% if mark.publish %}
+        <!-- This will only show when 'Show mark to all students' is checked -->
+        <a href="https://submitty.org/grader/rubric_grading/rubric_components_and_marks#common-mark-editing" target="_blank" class="explanation-link" title="mark will be displayed to ALL students">
+            <i class="fas fa-question-circle"></i>
+        </a>
+        {% endif %}
     </span>
+</span>
+
     <span class="col-no-gutters mark-points"
           data-points="{{ mark.points }}">
         {% if edit_marks_enabled %}
@@ -69,12 +77,6 @@ Required Input:
                     {{ first_mark ? 'disabled' : '' }}>{{ mark.title|escape }}</textarea>
         {% else %}
             {{ mark.title|nl2br }}
-            {% if mark.publish %}
-            <!-- This will only show when 'Show mark to all students' is checked -->
-            <a href="https://submitty.org/grader/rubric_grading/rubric_components_and_marks#common-mark-editing" target="_blank" class="explanation-link" title="mark will be displayed to ALL students">
-                <i class="fas fa-question-circle"></i>
-            </a>
-            {% endif %}
         {% endif %}
     </span>
     {% if show_publish %}
