@@ -71,32 +71,32 @@ describe('Tests cases for the Student API', () => {
                         'is_extra_credit': false,
                         'points_available': 2,
                         'points_received': 2,
-                        'testcase_message': ''
-                    }
+                        'testcase_message': '',
+                    };
                     const coding_style = {
                         'name': 'Coding Style',
                         'details': '',
                         'is_extra_credit': false,
                         'points_available': 0,
                         'points_received': 0,
-                        'testcase_message': ''
-                    }
+                        'testcase_message': '',
+                    };
                     const documentation = {
                         'name': 'Documentation',
                         'details': '',
                         'is_extra_credit': false,
                         'points_available': 0,
                         'points_received': 0,
-                        'testcase_message': ''
-                    }
+                        'testcase_message': '',
+                    };
                     const extra_credit = {
                         'name': 'Extra Credit',
                         'details': '',
                         'is_extra_credit': true,
                         'points_available': 5,
                         'points_received': 5,
-                        'testcase_message': ''
-                    }
+                        'testcase_message': '',
+                    };
                     expect(data.testcases).to.contain(read_me);
                     expect(data.testcases).to.contain(coding_style);
                     expect(data.testcases).to.contain(documentation);
