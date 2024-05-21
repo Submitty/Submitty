@@ -4,8 +4,10 @@ namespace tests\app\libraries;
 
 use app\entities\poll\Option;
 use app\entities\poll\Poll;
+use app\libraries\DateUtils;
 use app\libraries\PollUtils;
 use DateTime;
+use DateInterval;
 use ReflectionProperty;
 
 class PollUtilsTester extends \PHPUnit\Framework\TestCase {
@@ -30,6 +32,7 @@ class PollUtilsTester extends \PHPUnit\Framework\TestCase {
                 "Poll #1",
                 "Is this the first poll?",
                 "single-response",
+                new DateInterval("PT1H"),
                 new DateTime("2020-01-11"),
                 "never",
                 "never",
@@ -39,6 +42,7 @@ class PollUtilsTester extends \PHPUnit\Framework\TestCase {
                 "Poll #2",
                 "Is this the second poll?",
                 "single-response",
+                new DateInterval("PT1M"),
                 new DateTime("2020-01-12"),
                 "always",
                 "always"
@@ -47,13 +51,13 @@ class PollUtilsTester extends \PHPUnit\Framework\TestCase {
                 "Poll #3",
                 "Is this the fourth poll?",
                 "multiple-response",
+                new DateInterval("PT1M30S"),
                 new DateTime("2020-01-13"),
                 "when_ended",
                 "when_ended"
             ),
         ];
-
-        $polls[1]->setOpen();
+        $polls[1]->setEndTime(null);
         $polls[2]->setEnded();
 
         $poll_property = new ReflectionProperty("app\\entities\\poll\\Poll", "id");
@@ -104,8 +108,9 @@ class PollUtilsTester extends \PHPUnit\Framework\TestCase {
                 "question_type" => "single-response",
                 "responses" => ["Yes", "No", "Maybe"],
                 "correct_responses" => [0, 2],
+                "duration" => "P0Y0M0DT1H0M0S",
+                "end_time" => null,
                 "release_date" => "2020-01-11",
-                "status" => "closed",
                 "release_histogram" => "never",
                 "release_answer" => "never",
                 "image_path" => "/var/local/submitty/courses/s21/sample/uploads/polls/poll_image_3_colors.png"
@@ -117,8 +122,9 @@ class PollUtilsTester extends \PHPUnit\Framework\TestCase {
                 "question_type" => "single-response",
                 "responses" => ["Yes", "No", "Definitely Not"],
                 "correct_responses" => [0],
+                "duration" => "P0Y0M0DT0H1M0S",
+                "end_time" => null,
                 "release_date" => "2020-01-12",
-                "status" => "open",
                 "release_histogram" => "always",
                 "release_answer" => "always",
                 "image_path" => null
@@ -130,8 +136,9 @@ class PollUtilsTester extends \PHPUnit\Framework\TestCase {
                 "question_type" => "multiple-response",
                 "responses" => ["Yes", "No", "Maybe"],
                 "correct_responses" => [1],
+                "duration" => "P0Y0M0DT0H1M30S",
+                "end_time" => DateUtils::getDateTimeNow()->format("Y-m-d"),
                 "release_date" => "2020-01-13",
-                "status" => "ended",
                 "release_histogram" => "when_ended",
                 "release_answer" => "when_ended",
                 "image_path" => null
