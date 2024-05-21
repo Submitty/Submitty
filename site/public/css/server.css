@@ -1137,6 +1137,10 @@ div.full-height {
     background-color: var(--black-moderately-transparent);
 }
 
+body.no-scroll {
+    overflow: hidden;
+}
+
 .popup-box {
     width: 100%;
     height: 100%;
@@ -1499,59 +1503,6 @@ end of styles used in the admin gradeable page
 }
 
 /* Site Wrapper View */
-
-.wrapper-example {
-    width: 400px;
-    height: 240px;
-    display: flex;
-    flex-direction: column;
-    color: var(--btn-text-black);
-}
-
-.wrapper-example .wrapper-center {
-    display: flex;
-    flex-grow: 2;
-    flex-direction: row;
-}
-
-.wrapper-example .wrapper-top,
-.wrapper-example .wrapper-left,
-.wrapper-example .wrapper-body,
-.wrapper-example .wrapper-right,
-.wrapper-example .wrapper-bottom {
-    flex-grow: 1;
-    border: 1px solid var(--text-black);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    text-align: center;
-}
-
-.wrapper-example .wrapper-body {
-    flex-grow: 5;
-}
-
-.wrapper-top {
-    background-color: var(--standard-light-pink);
-}
-
-.wrapper-left {
-    background-color: var(--standard-light-yellow);
-}
-
-.wrapper-body {
-    background-color: var(--default-white);
-    color: var(--text-black);
-}
-
-.wrapper-right {
-    background-color: var(--standard-light-green);
-    color: var(--text-black);
-}
-
-.wrapper-bottom {
-    background-color: var(--standard-light-blue);
-}
 
 .wrapper-css {
     background-color: var(--default-white);

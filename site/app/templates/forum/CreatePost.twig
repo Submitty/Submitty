@@ -34,7 +34,7 @@
 
     {% endif %}
 
-    <div class='pre-forum'><span class="post_content">{% include "forum/RenderPost.twig" with { "post_content": post_content, "render_markdown": render_markdown } only %}</span></div>
+    <div class='pre-forum'><div class='post_content'>{% include "forum/RenderPost.twig" with { "post_content": post_content, "render_markdown": render_markdown } only %}</div></div>
 
     <hr style="margin-bottom: 3px;">
 
@@ -48,9 +48,6 @@
             <a class="btn btn-default btn-sm post_button_color text-decoration-none key_to_click" tabindex = "0" onClick="$('html, #posts_list').animate({ scrollTop: document.getElementById('posts_list').scrollHeight }, 'slow');"> Reply</a>
         {% endif %}
         {% if userGroup <= 3 %}
-            {% if has_history %}
-                <a class="btn btn-default btn-sm post_button_color text-decoration-none key_to_click" tabindex = "0" onClick="showHistory({{ post.id }})">Show History</a>
-            {% endif %}
             {% if (isThreadLocked != 1 or userAccessFullGrading) and first != 1 %}
                 <a class="btn btn-default btn-sm post_button_color text-decoration-none" tabindex = "0" onClick="showSplit({{ post.id }})">
                     {% if thread_previously_merged %}
@@ -60,9 +57,12 @@
                     {% endif %}
                 </a>
             {% endif %}
-        {% endif %}
+        {% endif %} 
 
+    {% endif %}
 
+    {% if userGroup <= 3 and has_history %}
+        <a class="btn btn-default btn-sm post_button_color text-decoration-none key_to_click" tabindex = "0" onClick="showHistory({{ post.id }})">Show History</a>
     {% endif %}
 
     {% if includeReply and (userGroup <= 3 or post.author_user_id == current_user) and first and thread_resolve_state == -1 %}
@@ -93,7 +93,11 @@
         {% endif %}
 
         <span class="last-edit">
-			<strong class="post_user_id">{{ visible_username }}</strong>
+            {% if post_user_info.is_OP == true and first == false %}
+			    <strong class="post_user_id" title="Original Poster">{{ visible_username }} <span style="color: var(--standard-medium-vibrant-blue);"><strong>OP</strong></span></strong>
+            {% else %}
+                <strong class="post_user_id">{{ visible_username }}</strong>
+            {% endif %}
             {% if post_user_info.pronouns and post_user_info.display_pronouns and visible_username !="Anonymous" %}
                 <strong class="post_user_pronouns">({{post_user_info.pronouns}})</strong>
             {% endif %}
@@ -113,6 +117,11 @@
         <div id="{{ post_attachment.params.well_id }}" class="attachment-well well well-lg"></div>
 
     {% endif %}
+
+    <button class="upduck-button text-decoration-none key_to_click" tabindex="0" onClick="toggleLike({{post.id}}, '{{current_user}}')" title="Like the post">
+        <img id="likeIcon_{{post.id}}" src="{{ post_up_duck.upduck_user_liked ? '/img/on-duck-button.svg' : '/img/light-mode-off-duck.svg' }}" alt="Like" width="30" height="30">
+    </button>
+    <span id="likeCounter_{{post.id}}" style="font-size: 15px; vertical-align: middle;">{{ post_up_duck.upduck_count }}</span>
 
     {% set offset = offset + 30 %}
 </div>
