@@ -1181,15 +1181,6 @@ tr.is_publish {
     align-items: center;
 }
 
-mark-and-question {
-    display: flex;
-    align-items: center;
-    justify-content: flex-start;
-    display: flex;
-    align-items: center; /* Aligns children vertically in the center */
-    justify-content: flex-start; /* Aligns children horizontally to the start */
-}
-
 .gradeable .mark-container {
     min-height: 28px;
     border-bottom: 1px solid var(--standard-medium-gray);
