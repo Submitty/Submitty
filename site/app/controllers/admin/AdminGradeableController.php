@@ -11,6 +11,7 @@ use app\models\gradeable\Component;
 use app\models\gradeable\GradeableUtils;
 use app\models\gradeable\Mark;
 use app\libraries\FileUtils;
+use app\libraries\response\DownloadResponse;
 use app\libraries\response\JsonResponse;
 use app\libraries\routers\AccessControl;
 use Symfony\Component\Routing\Annotation\Route;
@@ -120,7 +121,7 @@ class AdminGradeableController extends AbstractController {
         }
         if (array_key_exists('discussion_thread_id', $_POST)) {
             $values['discussion_based'] = $_POST['discussion_based'];
-            $values['discussion_tread_id'] = $_POST['discussion_thread_id'];
+            $values['discussion_thread_id'] = $_POST['discussion_thread_id'];
         }
         if (array_key_exists('ta_grading', $_POST)) {
             $values['ta_grading'] = $_POST['ta_grading'];
@@ -162,6 +163,153 @@ class AdminGradeableController extends AbstractController {
         catch (\Exception $e) {
             return JsonResponse::getErrorResponse($e->getMessage());
         }
+    }
+
+    #[Route("/api/{_semester}/{_course}/{gradeable_id}/download", methods: ["GET"])]
+    public function apiDownloadJson(string $gradeable_id): JsonResponse {
+        try {
+            $gradeable = $this->core->getQueries()->getGradeableConfig($gradeable_id);
+        }
+        catch (\InvalidArgumentException $exception) {
+            return JsonResponse::getErrorResponse($exception->getMessage());
+        }
+        catch (\Exception $exception) {
+            return JsonResponse::getErrorResponse($exception->getMessage());
+        }
+        return JsonResponse::getSuccessResponse($this->getGradeableJson($gradeable));
+    }
+
+    #[Route("/courses/{_semester}/{_course}/{gradeable_id}/download", methods: ["GET"])]
+    public function webDownloadJson(string $gradeable_id): DownloadResponse {
+        $gradeable = $this->core->getQueries()->getGradeableConfig($gradeable_id);
+        return DownloadResponse::getDownloadResponse(
+            json_encode($this->getGradeableJson($gradeable), JSON_PRETTY_PRINT),
+            $gradeable->getId() . '.json'
+        );
+    }
+
+    /**
+     * Returns a JSON array to recreate the gradeable using
+     * the 'uploadGradeable' function.
+     * @param Gradeable $gradeable
+     * @return array{
+     *     title: string|mixed,
+     *     type: string|mixed,
+     *     id: string|mixed,
+     *     instructions_url: string|mixed,
+     *     syllabus_bucket: string|mixed,
+     *     autograding_config_path: string|mixed,
+     *     bulk_upload: boolean,
+     *     team_gradeable?: array{
+     *         team_max_size: int,
+     *         inherit_from: string|mixed,
+     *     },
+     *     ta_grading?: boolean,
+     *     grade_inquiries?: boolean,
+     *     grade_inquiries_per_component?: boolean,
+     *     discussion_based?: boolean,
+     *     discussion_thread_id?: boolean,
+     *     vcs?: array{
+     *         repository_type?: string|mixed,
+     *         vcs_path?: string|mixed,
+     *         vcs_subdirectory?: string|mixed,
+     *     },
+     *     dates: array{
+     *        ta_view_start_date: string|mixed,
+     *        grade_start_date: string|mixed,
+     *        grade_due_date: string|mixed,
+     *        grade_released_date: string|mixed,
+     *        team_lock_date: string|mixed,
+     *        submission_open_date: string|mixed,
+     *        submission_due_date: string|mixed,
+     *        grade_inquiry_start_date: string|mixed,
+     *        grade_inquiry_due_date: string|mixed,
+     *        has_due_date: boolean,
+     *        has_release_date: boolean,
+     *        late_submission_allowed: boolean,
+     *        late_days: integer,
+     *     }
+     * }
+     */
+    public function getGradeableJson(Gradeable $gradeable): array {
+        $return_json = [
+            'title' => $gradeable->getTitle(),
+            'type' => GradeableType::typeToString($gradeable->getType()),
+            'id' => $gradeable->getId(),
+            'instructions_url' => $gradeable->getInstructionsUrl(),
+            'syllabus_bucket' => $gradeable->getSyllabusBucket(),
+            'autograding_config_path' => $gradeable->getAutogradingConfigPath()
+        ];
+        if ($gradeable->getType() === GradeableType::ELECTRONIC_FILE) {
+            $return_json['bulk_upload'] = $gradeable->isBulkUpload();
+            if ($gradeable->isTeamAssignment()) {
+                $team_properties = [
+                    'team_max_size' => $gradeable->getTeamSizeMax(),
+                    'inherit_from' => ''
+                ];
+                $return_json['team_gradeable'] = $team_properties;
+            }
+            if ($gradeable->isTaGrading()) {
+                $return_json['ta_grading'] = true;
+                if ($gradeable->isGradeInquiryAllowed()) {
+                    $return_json['grade_inquiries'] = true;
+                    if ($gradeable->isGradeInquiryPerComponentAllowed()) {
+                        $return_json['grade_inquiries_per_component'] = true;
+                    }
+                }
+            }
+            if ($gradeable->isDiscussionBased()) {
+                $return_json['discussion_based'] = true;
+                $return_json['discussion_thread_id'] = $gradeable->getDiscussionThreadId();
+            }
+            if ($gradeable->isVcs()) {
+                $vcs_values = [];
+                switch ($gradeable->getVcsHostType()) {
+                    case 0:
+                        $vcs_values['repository_type'] = 'submitty-hosted';
+                        break;
+                    case 1:
+                        $vcs_values['repository_type'] = 'submitty-hosted-url';
+                        $vcs_values['vcs_path'] = $gradeable->getVcsPartialPath();
+                        break;
+                    case 2:
+                        $vcs_values['repository_type'] = 'public-github';
+                        break;
+                    case 3:
+                        $vcs_values['repository_type'] = 'private-github';
+                        break;
+                    case 4:
+                        $vcs_values['repository_type'] = 'self-hosted';
+                        $vcs_values['vcs_path'] = $gradeable->getVcsPartialPath();
+                        break;
+                    default:
+                        $vcs_values['repository_type'] = 'invalid-type';
+                        break;
+                }
+                if ($gradeable->isUsingSubdirectory()) {
+                    $vcs_values['subdirectory'] = $gradeable->getVcsSubdirectory();
+                }
+                $return_json['vcs'] = $vcs_values;
+            }
+
+            $dates = [];
+            $dates['ta_view_start_date'] = $gradeable->getTaViewStartDate()->format('Y-m-d H:i:s');
+            $dates['grade_start_date'] = $gradeable->getGradeStartDate()->format('Y-m-d H:i:s');
+            $dates['grade_due_date'] = $gradeable->getGradeDueDate()->format('Y-m-d H:i:s');
+            $dates['grade_released_date'] = $gradeable->getGradeReleasedDate()->format('Y-m-d H:i:s');
+            $dates['team_lock_date'] = $gradeable->getTeamLockDate()->format('Y-m-d H:i:s');
+            $dates['submission_open_date'] = $gradeable->getSubmissionOpenDate()->format('Y-m-d H:i:s');
+            $dates['submission_due_date'] = $gradeable->getSubmissionDueDate()->format('Y-m-d H:i:s');
+            $dates['grade_inquiry_start_date'] = $gradeable->getGradeInquiryStartDate()->format('Y-m-d H:i:s');
+            $dates['grade_inquiry_due_date'] = $gradeable->getGradeInquiryDueDate()->format('Y-m-d H:i:s');
+
+            $dates['has_due_date'] = $gradeable->hasDueDate();
+            $dates['has_release_date'] = $gradeable->hasReleaseDate();
+            $dates['late_submission_allowed'] = $gradeable->isLateSubmissionAllowed();
+            $dates['late_days'] = $gradeable->getLateDays();
+            $return_json['dates'] = $dates;
+        }
+        return $return_json;
     }
 
     /**
@@ -375,6 +523,7 @@ class AdminGradeableController extends AbstractController {
             'vcs_base_url' => $vcs_base_url,
             'vcs_partial_path' => $gradeable->getVcsPartialPath(),
             'vcs_subdirectory' => $gradeable->getVcsSubdirectory(),
+            'download_url' => $this->core->buildCourseUrl([$gradeable->getId(), 'download']),
             'using_subdirectory' => $gradeable->isUsingSubdirectory(),
             'is_pdf_page' => $gradeable->isPdfUpload(),
             'is_pdf_page_student' => $gradeable->isStudentPdfUpload(),
