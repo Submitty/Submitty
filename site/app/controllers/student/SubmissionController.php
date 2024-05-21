@@ -23,6 +23,7 @@ use app\models\GradingOrder;
 use Symfony\Component\Routing\Annotation\Route;
 use app\models\notebook\SubmissionCodeBox;
 use app\models\notebook\SubmissionMultipleChoice;
+use app\models\gradeable\AutoGradedTestcase;
 
 class SubmissionController extends AbstractController {
     private $upload_details = [
