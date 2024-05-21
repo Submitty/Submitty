@@ -1173,17 +1173,6 @@ tr.is_publish {
 }
 
 /* Marks */
-.rubric-question-mark {
-    font-family: "Font Awesome 5 Free";
-    content: "\f059";
-    color: var(--external-link-blue);
-    font-weight: 300;
-    display: inline-block;
-    position: absolute;
-    margin-bottom: 16px;
-    font-size: 16px;
-    margin-left: 3px;
-}
 
 .gradeable span.col-no-gutters {
     padding-left: 1px;
