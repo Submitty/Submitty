@@ -209,11 +209,11 @@ function generateCalendarItem(item) {
     if (!item['submission_open']) {
         element.style.setProperty('background', `repeating-linear-gradient(45deg, ${item['color']}, ${item['color']} 10px, ${lighten(item['color'])} 10px, ${lighten(item['color'])} 15px)`);
     }
-    if (item['disabled']) {
-        element.style.setProperty('cursor', 'default');
+    if (!item['disabled'] || exists) {
+        element.style.setProperty('cursor', 'pointer');
     }
     else {
-        element.style.setProperty('cursor', 'pointer');
+        element.style.setProperty('cursor', 'default');
     }
     element.title = tooltip;
     if (link !== '') {
