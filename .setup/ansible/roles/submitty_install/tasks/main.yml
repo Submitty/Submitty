@@ -47,9 +47,9 @@
         "{{ sysadmin_email }}"
         "{{ submitty_email }}"
         "{{ institution_url }}"
-        "{{ authentication_method }}"
+        {{ authentication_method }}
         "{{ admin_email }}"
-        "{{ email_enabled }}"
+        {{ email_enabled }}
         "{{ admin_email }}"
         "{{ admin_password }}"
         "{{ submitty_ip }}"
@@ -81,6 +81,13 @@
     dest: /etc/apache2/sites-available/submitty.conf
     remote_src: yes
     mode: "0644"
+
+- name: Change CGI access to all for PAM authentication
+  ansible.builtin.replace:
+    path: /etc/apache2/sites-available/submitty.conf
+    regexp: "Require host __your_domain__"
+    replace: "Require all granted"
+  when: authentication_method == 1
 
 - name: Set up SSL in Apache Submitty configuration
   ansible.builtin.replace:
