@@ -84,6 +84,17 @@ void AddAutogradingConfiguration(nlohmann::json &whole_config) {
   }
 
   if (whole_config["autograding"].find("compilation_to_runner") == whole_config["autograding"].end()) {
+    // copy all executable names from compilation testcases to runner
+    nlohmann::json::iterator testcases = whole_config.find("testcases");
+    for (typename nlohmann::json::iterator testcase = testcases->begin(); testcase != testcases->end(); testcase++) {
+      if (testcase->value("type", "") == "Compilation") {
+        std::vector<std::string> exe_names = stringOrArrayOfStrings(*testcase, "executable_name");
+        for(int i = 0, n = exe_names.size(); i < n; i++) {
+          whole_config["autograding"]["compilation_to_runner"].push_back("**/" + exe_names[i]);
+        }
+      }
+    }
+    // add all .out and .class in case executable name wasn't specified.
     whole_config["autograding"]["compilation_to_runner"].push_back("**/*.out");
     whole_config["autograding"]["compilation_to_runner"].push_back("**/*.class");
   }

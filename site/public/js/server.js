@@ -6,15 +6,17 @@
    markViewed openDiv changeColor downloadCourseMaterialZip downloadSubmissionZip downloadStudentAnnotations
    downloadTestCaseResult downloadCourseMaterial downloadFile toggleDiv checkVersionChange versionChange gradeableChange
    removeMessagePopup validateHtml togglePageDetails copyToClipboard downloadCSV setFolderRelease
-   newEditCourseMaterialsForm newEditCourseMaterialsFolderForm newUploadCourseMaterialsForm newUploadImagesForm
+   newEditCourseMaterialsForm newEditCourseMaterialsFolderForm newUploadCourseMaterialsForm newUploadBanner newUploadImagesForm
    newOverwriteCourseMaterialForm newDeleteCourseMaterialForm displayCloseSubmissionsWarning newDeleteGradeableForm
-   markAllViewed */
+   markAllViewed closePopup */
 /* global csrfToken my_window:writable file_path:writable updateBulkProgress icon:writable detectColorScheme
    createArray readPrevious disableFullUpdate registerSelect2Widget */
-
 ////////////Begin: Removed redundant link in breadcrumbs////////////////////////
 //See this pr for why we might want to remove this code at some point
 //https://github.com/Submitty/Submitty/pull/5071
+
+
+
 window.addEventListener('resize', () => {
     loadInBreadcrumbLinks();
     adjustBreadcrumbLinks();
@@ -224,7 +226,7 @@ function newDeleteCourseMaterialForm(id, file_name, str_id = null) {
     deleteMessageElement.appendChild(cm_message);
 
     $('[name="delete-confirmation"]', form).attr('action', url);
-    form.css('display', 'block');
+    showPopup('#delete-course-material-form');
     captureTabInModal('delete-course-material-form');
     form.find('.form-body').scrollTop(0);
 }
@@ -271,7 +273,7 @@ function newOverwriteCourseMaterialForm(clashing_names, is_link, is_edit_form) {
 function newUploadImagesForm() {
     $('.popup-form').css('display', 'none');
     const form = $('#upload-images-form');
-    form.css('display', 'block');
+    showPopup('#upload-images-form');
     captureTabInModal('upload-images-form');
     form.find('.form-body').scrollTop(0);
     $('[name="upload"]', form).val(null);
@@ -296,11 +298,28 @@ function newUploadCourseMaterialsForm() {
     $('[name="existing-file-list"]', form).html('');
     $('[name="existing-file-list"]', form).append(`<b>${JSON.stringify(files)}</b>`);
 
-    form.css('display', 'block');
+    showPopup('#upload-course-materials-form');
     captureTabInModal('upload-course-materials-form');
     form.find('.form-body').scrollTop(0);
     $('[name="upload"]', form).val(null);
     $('#overwrite-materials-flag').remove();
+}
+
+function newUploadBanner() {
+    createArray(1);
+    const files = [];
+    $('.popup-form').css('display', 'none');
+    const form = $('#upload-banner');
+
+    $('[name="existing-file-list"]', form).html('');
+
+    const stringifiedFiles = $('<b></b>').text(JSON.stringify(files));
+    $('[name="existing-file-list"]', form).append(stringifiedFiles);
+
+    form.css('display', 'block');
+    captureTabInModal('upload-banner');
+    form.find('.form-body').scrollTop(0);
+    $('[name="upload"]', form).val(null);
 }
 
 function newEditCourseMaterialsFolderForm(tag) {
@@ -312,7 +331,6 @@ function newEditCourseMaterialsFolderForm(tag) {
     const is_hidden = $(tag).data('hidden-state');
     const partially_hidden = 2;
     const form = $('#edit-course-materials-folder-form');
-
     const element = document.getElementById('edit-folder-picker');
     element._flatpickr.setDate(release_time);
 
@@ -364,8 +382,9 @@ function newEditCourseMaterialsFolderForm(tag) {
     $('#material-folder-edit-form', form).attr('data-id', id);
     $('#edit-folder-sort', form).attr('value', dir);
     disableFullUpdate();
-    form.css('display', 'block');
+    showPopup('#edit-course-materials-folder-form');
     captureTabInModal('edit-course-materials-folder-form');
+
 }
 
 function newEditCourseMaterialsForm(tag) {
@@ -442,7 +461,7 @@ function newEditCourseMaterialsForm(tag) {
     $('#edit-picker', form).attr('value', release_time);
     $('#edit-sort', form).attr('value', dir);
     $('#overwrite-materials-flag').remove();
-    form.css('display', 'block');
+    showPopup('#edit-course-materials-form');
     captureTabInModal('edit-course-materials-form');
 }
 
@@ -473,6 +492,20 @@ function editFilePathRecommendations() {
     }
     registerSelect2Widget('new-file-name', 'material-edit-form');
 }
+
+function showPopup(selector) {
+    $(selector).show();
+    document.body.classList.add('no-scroll');
+}
+
+function closePopup(id) {
+    $(`#${id}`).hide();
+    // Checking if the body contains the class no scroll making the page locked, then unlocking it
+    if (document.body.classList.contains('no-scroll')) {
+        document.body.classList.remove('no-scroll');
+    }
+}
+
 
 // eslint-disable-next-line no-var
 var lastActiveElement = null;
@@ -522,14 +555,10 @@ function releaseTabFromModal(formName) {
 }
 
 function setFolderRelease(changeActionVariable, releaseDates, id, cm_id) {
-
     $('.popup-form').css('display', 'none');
-
     const form = $('#set-folder-release-form');
-    form.css('display', 'block');
-
+    showPopup('#set-folder-release-form');
     captureTabInModal('set-folder-release-form');
-
     form.find('.form-body').scrollTop(0);
     $('[id="release_title"]', form).attr('data-path', changeActionVariable);
     $('[name="release_date"]', form).val(releaseDates);
@@ -818,8 +847,8 @@ function downloadStudentAnnotations(url) {
     window.open(url, '_blank', 'toolbar=no, scrollbars=yes, resizable=yes, width=700, height=600');
 }
 
-function downloadSubmissionZip(grade_id, user_id, version, origin = null, is_anon = false) {
-    window.open(`${buildCourseUrl(['gradeable', grade_id, 'download_zip'])}?dir=submissions&user_id=${user_id}&version=${version}&origin=${origin}&is_anon=${is_anon}`, '_blank');
+function downloadSubmissionZip(grade_id, submitter_id, version, origin = null, is_anon = false) {
+    window.open(`${buildCourseUrl(['gradeable', grade_id, 'download_zip'])}?dir=submissions&submitter_id=${submitter_id}&version=${version}&origin=${origin}&is_anon=${is_anon}`, '_blank');
     return false;
 }
 
@@ -1401,7 +1430,7 @@ function setChildNewDateTime(path, changeDate, handleData) {
 }
 
 function openSetAllRelease() {
-    $('#set-all-release-form').css('display', 'block');
+    showPopup('#set-all-release-form');
 }
 
 function setAllRelease(newdatatime) {
