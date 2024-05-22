@@ -1021,6 +1021,80 @@ class SubmissionController extends AbstractController {
     }
 
     /**
+     * @return JsonResponse
+     * @param string $gradeable_id
+     */
+    #[Route('/api/{_semester}/{_course}/gradeable/{gradeable_id}/values', methods: ['GET'])]
+    public function ajaxGetGradeableValues(string $gradeable_id): JsonResponse {
+        $user_id = $_GET['user_id'] ?? '';
+        // Instructors can get values for other users, otherwise require the $_GET user id to be the same as the
+        // API authenticated user.
+        if ($this->core->getUser()->getGroup() !== User::GROUP_INSTRUCTOR && ($user_id !== $this->core->getUser()->getId())) {
+            return JsonResponse::getFailResponse('API key and specified user_id are not for the same user.');
+        }
+
+        try {
+            $gradeable = $this->core->getQueries()->getGradeableConfig($gradeable_id);
+        }
+        catch (\InvalidArgumentException $e) {
+            return JsonResponse::getFailResponse('Gradeable does not exist');
+        }
+
+        $graded_gradeable = $this->core->getQueries()->getGradedGradeable(
+            $gradeable,
+            $user_id,
+            $gradeable->isTeamAssignment()
+        );
+
+        if ($graded_gradeable === null) {
+            return JsonResponse::getFailResponse('Graded gradeable for user with id ' . $user_id . ' does not exist');
+        }
+
+        $graded_gradeable = $graded_gradeable->getAutoGradedGradeable();
+
+        return JsonResponse::getSuccessResponse([
+            'is_queued' => $graded_gradeable->isQueued(),
+            'queue_position' => $graded_gradeable->getQueuePosition(),
+            'is_grading' => $graded_gradeable->isGrading(),
+            'has_submission' => $graded_gradeable->hasSubmission(),
+            'autograding_complete' => $graded_gradeable->isAutoGradingComplete(),
+            'has_active_version' => $graded_gradeable->hasActiveVersion(),
+            'highest_version' => $graded_gradeable->getHighestVersion(),
+            'total_points' => ($graded_gradeable->hasActiveVersion() ? $graded_gradeable->getTotalPoints() : null),
+            'total_percent' => ($graded_gradeable->hasActiveVersion() ? $graded_gradeable->getTotalPercent() : null)
+        ]);
+    }
+
+    /**
+     * @return JsonResponse|array{
+     *     status: string,
+     *     data: mixed
+     * }
+     */
+    #[Route('/api/{_semester}/{_course}/gradeable/{gradeable_id}/grade', methods: ['POST'])]
+    public function ajaxRequestGrade(string $gradeable_id): JsonResponse|array {
+        // Instructors can get request grading for other users, otherwise require the $_POST user id to be the same as the
+        // API authenticated user.
+        if ($this->core->getUser()->getGroup() !== User::GROUP_INSTRUCTOR && ($_POST['user_id'] ?? '') !== $this->core->getUser()->getId()) {
+            return JsonResponse::getFailResponse('API key and specified user_id are not for the same user.');
+        }
+        $vcs_checkout = array_key_exists('vcs_checkout', $_POST) && $_POST['vcs_checkout'] === 'true';
+        if (!$vcs_checkout) {
+            return JsonResponse::getFailResponse('API only supports requesting for VCS gradeables to be graded.');
+        }
+
+        if (!array_key_exists('git_repo_id', $_POST)) {
+            return JsonResponse::getFailResponse('API requires git_repo_id variable to be set.');
+        }
+
+        if (!array_key_exists('user_id', $_POST)) {
+            return JsonResponse::getFailResponse('API requires user_id variable to be set.');
+        }
+
+        return $this->ajaxUploadSubmission($gradeable_id);
+    }
+
+    /**
      * Function for uploading a submission to the server. This should be called via AJAX, saving the result
      * to the json_buffer of the Output object, returning a true or false on whether or not it succeeded or not.
      *
