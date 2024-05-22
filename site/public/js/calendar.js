@@ -205,12 +205,14 @@ function generateCalendarItem(item) {
     if (item['status'] === 'text' || item['status'] === 'ann') {
         element.style.setProperty('background-color', item['color']);
     }
-    // disabling element for student access level if submission is not open
-    if (item['disabled']) {
-        element.style.setProperty('cursor', 'default');
+    // Displaying striped background if submission is not open irrespective of access level
+    if (!item['submission_open']) {
         element.style.setProperty('background', `repeating-linear-gradient(45deg, ${item['color']}, ${item['color']} 10px, ${lighten(item['color'])} 10px, ${lighten(item['color'])} 15px)`);
     }
-    if (exists && !item['disabled']) {
+    if (item['disabled']) {
+        element.style.setProperty('cursor', 'default');
+    }
+    else {
         element.style.setProperty('cursor', 'pointer');
     }
     element.title = tooltip;
