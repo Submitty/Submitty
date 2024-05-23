@@ -1,8 +1,8 @@
-/* exported initializeDropZone, handleEditCourseMaterials, handleUploadCourseMaterials, handleDownloadImages,
+/* exported handleUploadBanner, initializeDropZone, handleEditCourseMaterials, handleUploadCourseMaterials, handleDownloadImages,
             handleSubmission, handleRegrade, handleBulk, deleteSplitItem, submitSplitItem, displayPreviousSubmissionOptions
             displaySubmissionMessage, validateUserId, openFile, handle_input_keypress, addFilesFromInput,
             dropWithMultipleZips, initMaxNoFiles, setUsePrevious, readPrevious, createArray, initializeDragAndDrop */
-/* global buildCourseUrl, getFileExtension, csrfToken, removeMessagePopup, newOverwriteCourseMaterialForm*/
+/* global buildCourseUrl, buildUrl, getFileExtension, csrfToken, removeMessagePopup, newOverwriteCourseMaterialForm*/
 
 /*
 References:
@@ -165,6 +165,59 @@ function addFilesFromInput(part, check_duplicate_zip=true) {
     }
     $(`#input-file${part}`).val('');
 }
+
+
+function handleUploadBanner(closeTime, releaseTime, extraName, linkName) {
+    const formData = new FormData();
+    formData.append('csrf_token', window.csrfToken);
+    formData.append('close_time', closeTime);
+    formData.append('release_time', releaseTime);
+    formData.append('extra_name', extraName);
+    formData.append('link_name', linkName);
+    for (let i = 0; i < file_array.length; i++) {
+        for (let j = 0; j < file_array[i].length; j++) {
+            if (!/^[a-zA-Z0-9_.-]+$/.test(file_array[i][j].name)) {
+                alert(`ERROR! Filename "${file_array[i][j].name}" contains invalid characters. Please use only alphanumeric characters, underscores, and dashes.`);
+                return;
+            }
+            const k = fileExists(`/${file_array[i][j].name}`, 1);
+            // Check conflict here
+            if ( k[0] === 1 ) {
+                if (!confirm(`Note: ${file_array[i][j].name} already exists. Do you want to replace it?`)) {
+                    continue;
+                }
+            }
+            formData.append(`files${i + 1}[]`, file_array[i][j], file_array[i][j].name);
+        }
+    }
+    $.ajax({
+        url: buildUrl(['banner', 'upload']),
+        data: formData,
+        processData: false,
+        contentType: false,
+        type: 'POST',
+        success: function(data) {
+            try {
+                const jsondata = JSON.parse(data);
+
+                if (jsondata['status'] === 'success') {
+                    window.location.href = buildUrl(['banner']);
+                }
+                else {
+                    alert(jsondata['message']);
+                }
+            }
+            catch (e) {
+                alert('Failed to upload a banner!');
+                console.log(data);
+            }
+        },
+        error: function() {
+            window.location.href = buildUrl(['banner']);
+        },
+    });
+}
+
 
 // Check for duplicate file names. This function returns an array.
 // First element:
@@ -383,18 +436,19 @@ function addLabel(filename, filesize, part, previous) {
         e.stopPropagation();
         this.style.color = 'var(--text-black)';
     };
-    // remove file and label-row in table on click event
-    fileTrashElement.onclick = function(e) {
-        e.stopPropagation();
-        this.parentNode.parentNode.removeChild(this.parentNode);
-        deleteSingleFile(filename, part, previous);
-    };
 
-    // FOR VPAT if trash can has focus and key is pressed it will delete item
-    fileTrashElement.onkeypress = function(e) {
+    // onclick : remove file and label-row in table on click event
+    // onkeypress : FOR VPAT if trash can has focus and key is pressed it will delete item
+    fileTrashElement.onclick = fileTrashElement.onkeypress = function(e) {
         e.stopPropagation();
         this.parentNode.parentNode.removeChild(this.parentNode);
         deleteSingleFile(filename, part, previous);
+
+        const textArea = document.querySelector(`#reply_box_${part}`);
+        if (textArea) {
+            // Dispatch input event on existing forum textarea to disable forum reply button on empty input or no remaining files
+            textArea.dispatchEvent(new Event('input', { bubbles: false, cancelable: false }));
+        }
     };
 
     // adding the file in `table` in the parent div
