@@ -115,6 +115,11 @@ if not args.worker:
         grp.getgrnam(DAEMONCGI_GROUP)
     except KeyError:
         raise SystemExit("ERROR: Could not find group: " + DAEMONCGI_GROUP)
+    DAEMONPHPCGI_GROUP = 'submitty_daemonphpcgi'
+    try:
+        grp.getgrnam(DAEMONPHPCGI_GROUP)
+    except KeyError:
+        raise SystemExit("ERROR: Could not find group: " + DAEMONPHPCGI_GROUP)
 
 DAEMON_UID, DAEMON_GID = get_ids(DAEMON_USER)
 
@@ -419,6 +424,7 @@ else:
     config['cgi_user'] = CGI_USER
     config['daemonphp_group'] = DAEMONPHP_GROUP
     config['daemoncgi_group'] = DAEMONCGI_GROUP
+    config['daemonphpcgi_group'] = DAEMONPHPCGI_GROUP
     config['php_uid'] = PHP_UID
     config['php_gid'] = PHP_GID
 
@@ -651,6 +657,7 @@ if not args.worker:
     config['cgi_user'] = CGI_USER
     config['daemonphp_group'] = DAEMONPHP_GROUP
     config['daemoncgi_group'] = DAEMONCGI_GROUP
+    config['daemonphpcgi_group'] = DAEMONPHPCGI_GROUP
 else:
     config['supervisor_user'] = SUPERVISOR_USER
 
