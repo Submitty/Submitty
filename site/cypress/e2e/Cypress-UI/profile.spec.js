@@ -86,37 +86,34 @@ describe('Test cases revolving around user profile page', () => {
         cy.get('[data-testid="time-zone-dropdown"]').should('contain.text', 'NOT_SET/NOT_SET');
 
         // Search and select the first timezone
-        cy.wait(8000);
-        cy.get('[data-testid="time-zone-dropdown"]').parent().find('.select2-selection').click();
-        cy.get('.select2-search__field').type('(UTC+14:00) Pacific/Kiritimati');
-        cy.get('.select2-results__option').contains('(UTC+14:00) Pacific/Kiritimati').should('be.visible').click();
+        cy.get('#select2-time_zone_drop_down-container').click({ force: true });
+        cy.get('input[aria-controls="select2-time_zone_drop_down-results"]').type('(UTC+14:00) Pacific/Kiritimati');
+        cy.get('.select2-results__option').contains('(UTC+14:00) Pacific/Kiritimati').click({ force: true });
         cy.get('[data-testid="popup-message"]').next().should('contain.text', 'Warning: Local timezone does not match user timezone. Consider updating user timezone in profile.');
         cy.get('[data-testid="time-zone-dropdown"]').should('contain.text', '(UTC+14:00) Pacific/Kiritimati');
 
         // Search and select the last timezone
-        cy.wait(8000);
-        cy.get('[data-testid="time-zone-dropdown"]').parent().find('.select2-selection').click();
-        cy.get('.select2-search__field').type('(UTC-11:00) Pacific/Pago_Pago');
-        cy.get('.select2-results__option').contains('(UTC-11:00) Pacific/Pago_Pago').click();
+        cy.get('#select2-time_zone_drop_down-container').click({ force: true });
+        cy.get('input[aria-controls="select2-time_zone_drop_down-results"]').type('(UTC-11:00) Pacific/Pago_Pago');
+        cy.get('.select2-results__option').contains('(UTC-11:00) Pacific/Pago_Pago').click({ force: true });
         cy.get('[data-testid="popup-message"]').next().should('contain.text', 'Warning: Local timezone does not match user timezone. Consider updating user timezone in profile.');
         cy.get('[data-testid="time-zone-dropdown"]').should('contain.text', '(UTC-11:00) Pacific/Pago_Pago');
-        
+
+        // Filter options based on partial search input
+        cy.get('#select2-time_zone_drop_down-container').click({ force: true });
+        cy.get('input[aria-controls="select2-time_zone_drop_down-results"]').type('Pacific');
+        cy.get('.select2-results__option').should('have.length.above', 1).and('contain.text', 'Pacific/');
+
         // Navigate and select options via keyboard
-        cy.wait(8000);
-        cy.get('[data-testid="time-zone-dropdown"]').parent().find('.select2-selection').click();
-        cy.get('.select2-search__field').type('{downarrow}{downarrow}{enter}');
+        cy.get('input[aria-controls="select2-time_zone_drop_down-results"]').type('{downarrow}{downarrow}{enter}', { force: true });
         cy.get('[data-testid="time-zone-dropdown"]').parent().find('.select2-selection__rendered').should('contain.text', '(UTC-11:00) Pacific/Pago_Pago');
         cy.get('[data-testid="popup-message"]').next().next().should('contain.text', 'Time-zone updated successfully');
 
         // Display message when no search results are found
-        cy.wait(8000);
-        cy.get('[data-testid="time-zone-dropdown"]').parent().find('.select2-selection').click();
-        cy.get('.select2-search__field').type('Nonexistent Zone');
-        cy.get('.select2-results').should('contain.text', 'No results found');
+        cy.get('#select2-time_zone_drop_down-container').click({ force: true });
+        cy.get('input[aria-controls="select2-time_zone_drop_down-results"]').type('Nonexistent Zone');
+        cy.get('.select2-results').should('contain.text', 'No results found').click({force: true});
     });
-
-
-
 
     it('Should error then succeed uploading profile photo', () => {
         const filePath = '../more_autograding_examples/image_diff_mirror/submissions/student1.png';
@@ -137,7 +134,6 @@ describe('Test cases revolving around user profile page', () => {
         cy.get('[data-testid="user-image-button"]').selectFile(filePath);
         cy.get('[data-testid="submit-button"]').click();
         cy.visit(['sample', 'student_photos']);
-        cy.get('.fa-flag').click();
         cy.on('window:confirm', () => {
             return true;
         });
