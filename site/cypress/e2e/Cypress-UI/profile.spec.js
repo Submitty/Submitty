@@ -134,6 +134,7 @@ describe('Test cases revolving around user profile page', () => {
         cy.get('[data-testid="user-image-button"]').selectFile(filePath);
         cy.get('[data-testid="submit-button"]').click();
         cy.visit(['sample', 'student_photos']);
+        cy.get('.fa-flag').click({ force: true });
         cy.on('window:confirm', () => {
             return true;
         });
