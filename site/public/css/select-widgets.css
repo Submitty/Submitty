@@ -1,8 +1,9 @@
 
 /* stylelint-disable selector-class-pattern -- Select2 internal classes */
-#config-drop-down .select2-selection,
-#config-drop-down .select2-selection__rendered,
-#config-drop-down .select2-selection__arrow,
+.select2-container .select2-selection,
+.select2-container .select2-selection__rendered,
+.select2-container .select2-selection__arrow,
+.select2-container .select2-selection--single .select2-selection__rendered,
 .select2-container .select2-dropdown,
 .select2-container .select2-dropdown .select2-search .select2-search__field {
     color: var(--text-black);
