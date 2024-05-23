@@ -86,28 +86,30 @@ describe('Test cases revolving around user profile page', () => {
         cy.get('[data-testid="time-zone-dropdown"]').should('contain.text', 'NOT_SET/NOT_SET');
 
         // Search and select the first timezone
+        cy.wait(8000);
         cy.get('[data-testid="time-zone-dropdown"]').parent().find('.select2-selection').click();
-        cy.wait(2000);
-        cy.get('.select2-search__field', { timeout: 10000 }).type('(UTC+14:00) Pacific/Kiritimati');
-        cy.get('.select2-results__option', { timeout: 10000 }).contains('(UTC+14:00) Pacific/Kiritimati').should('be.visible').click();
+        cy.get('.select2-search__field').type('(UTC+14:00) Pacific/Kiritimati');
+        cy.get('.select2-results__option').contains('(UTC+14:00) Pacific/Kiritimati').should('be.visible').click();
         cy.get('[data-testid="popup-message"]').next().should('contain.text', 'Warning: Local timezone does not match user timezone. Consider updating user timezone in profile.');
         cy.get('[data-testid="time-zone-dropdown"]').should('contain.text', '(UTC+14:00) Pacific/Kiritimati');
 
-
         // Search and select the last timezone
+        cy.wait(8000);
         cy.get('[data-testid="time-zone-dropdown"]').parent().find('.select2-selection').click();
-        cy.get('.select2-search__field', { timeout: 10000 }).type('(UTC-11:00) Pacific/Pago_Pago');
-        cy.get('.select2-results__option', { timeout: 10000 }).contains('(UTC-11:00) Pacific/Pago_Pago').click();
+        cy.get('.select2-search__field').type('(UTC-11:00) Pacific/Pago_Pago');
+        cy.get('.select2-results__option').contains('(UTC-11:00) Pacific/Pago_Pago').click();
         cy.get('[data-testid="popup-message"]').next().should('contain.text', 'Warning: Local timezone does not match user timezone. Consider updating user timezone in profile.');
         cy.get('[data-testid="time-zone-dropdown"]').should('contain.text', '(UTC-11:00) Pacific/Pago_Pago');
-
+        
         // Navigate and select options via keyboard
+        cy.wait(8000);
         cy.get('[data-testid="time-zone-dropdown"]').parent().find('.select2-selection').click();
         cy.get('.select2-search__field').type('{downarrow}{downarrow}{enter}');
         cy.get('[data-testid="time-zone-dropdown"]').parent().find('.select2-selection__rendered').should('contain.text', '(UTC-11:00) Pacific/Pago_Pago');
         cy.get('[data-testid="popup-message"]').next().next().should('contain.text', 'Time-zone updated successfully');
 
         // Display message when no search results are found
+        cy.wait(8000);
         cy.get('[data-testid="time-zone-dropdown"]').parent().find('.select2-selection').click();
         cy.get('.select2-search__field').type('Nonexistent Zone');
         cy.get('.select2-results').should('contain.text', 'No results found');
