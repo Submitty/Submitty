@@ -58,6 +58,7 @@ const uploadAttachmentAndDelete = (title) => {
     cy.get('[data-testid="mark-for-delete-btn"]').should('contain', 'Delete').last().click();
     cy.get('[data-testid="mark-for-delete-btn"]').last().should('contain', 'Keep');
     cy.get('[data-testid="forum-update-post"]').contains('Update Post').click();
+};
 const replyDisabled = (title, attachment) => {
     cy.get('.thread-left-cont > .thread-list-item').contains(title).click();
     // Reply button should be disabled by default with no text
