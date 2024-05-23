@@ -1,25 +1,11 @@
 <div class="content">
 	<h1>Customize Website Theme</h1>
 	<div>
-        Instructors can upload simple html files to use as a wrapper around the Submitty website.<br>
-        They can be placed in any of the locations shown in the below diagram.<br>
+        Instructors can upload a JSON file to customize sidebar links.<br>
         Note that they are loaded in frames and will not be able to run scripts or affect the rest of Submitty.<br>
         <br>
         You can also upload a CSS file to override the default styles from Submitty.<br>
         <a target=_blank href="http://submitty.org/instructor/website_customization">More information about Website Customization <i style="font-style:normal;" class="fa-question-circle"></i></a>
-    </div>
-    <br>
-    <div>
-        Here is how the site will be laid out:
-        <div class="wrapper-example">
-            <div class="wrapper-top">Top Bar</div>
-            <div class="wrapper-center">
-                <div class="wrapper-left">Left<br>Sidebar</div>
-                <div class="wrapper-body">Submitty</div>
-                <div class="wrapper-right">Right<br>Sidebar</div>
-            </div>
-            <div class="wrapper-bottom">Bottom Bar</div>
-        </div>
     </div>
     <br>
     {# This is a data table #}
@@ -30,10 +16,6 @@
             <th class="layout_th_cell">Upload</th>
             <th class="layout_th_cell">Current File</th>
         </tr>
-        {{ _self.table_file(wrapper_files, "top_bar.html", "Top Bar", "HTML", "wrapper-top", "top_bar", csrf_token, upload_url, delete_url) }}
-        {{ _self.table_file(wrapper_files, "left_sidebar.html", "Left Sidebar", "HTML", "wrapper-left", "left_sidebar", csrf_token, upload_url, delete_url) }}
-        {{ _self.table_file(wrapper_files, "right_sidebar.html", "Right Sidebar", "HTML", "wrapper-right", "right_sidebar", csrf_token, upload_url, delete_url) }}
-        {{ _self.table_file(wrapper_files, "bottom_bar.html", "Bottom Bar", "HTML", "wrapper-bottom", "bottom_bar", csrf_token, upload_url, delete_url) }}
         {{ _self.table_file(wrapper_files, "override.css", "Custom Style", "CSS", "wrapper-css", "custom_style", csrf_token, upload_url, delete_url) }}
         {{ _self.table_file(wrapper_files, "sidebar.json", "Sidebar Links", "JSON", "wrapper-css", "sidebar_links", csrf_token, upload_url, delete_url) }}
     </table>
