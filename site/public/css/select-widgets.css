@@ -16,7 +16,7 @@
     background-color: var(--submitty-logo-blue);
 }
 
-/* stylelint-disable-next-line selector-class-pattern, selector-id-pattern */
+/* stylelint-disable-next-line selector-id-pattern */
 #select2-time_zone_drop_down-container.select2-selection__rendered {
     font-family: Arial;
     font-size: 16px;
