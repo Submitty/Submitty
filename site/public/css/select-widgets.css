@@ -17,8 +17,8 @@
 }
 /* stylelint-enable selector-descendant-combinator-no-non-space, selector-class-pattern */
 
-#select2-time_zone_drop_down-container.select2-selection__rendered {
-    font-family: Arial;
+#select2-time-zone-drop-down-container.select2-selection-rendered {
+    font-family: Arial, sans-serif;
     font-size: 16px;
     color: #555555;
     background-color: #FFFFFF;
