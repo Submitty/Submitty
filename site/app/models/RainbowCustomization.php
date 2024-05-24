@@ -17,7 +17,10 @@ class RainbowCustomization extends AbstractModel {
     /**/
     protected $core;
     private $bucket_counts = [];               // Keep track of how many items are in each bucket
-    private $bucket_remove_lowest = [];               // get how many droplowest are in each bucket
+    /**
+     * @var int[]
+     */
+    private array $bucket_remove_lowest = [];               // get how many droplowest are in each bucket
     private $customization_data = [];
     private $has_error;
     private $error_messages;
@@ -328,7 +331,10 @@ class RainbowCustomization extends AbstractModel {
         return $this->bucket_counts;
     }
 
-    public function getBucketRemoveLowest() {
+    /**
+     * @return int[]
+     */
+    public function getBucketRemoveLowest(): array {
         return $this->bucket_remove_lowest;
     }
 

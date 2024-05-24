@@ -218,6 +218,7 @@ hr {
     align-items: center;
 }
 
+/* stylelint-disable-next-line selector-class-pattern */
 div#gradeables.customization_item div input[type="text"] {
     width: 50px;
 }
