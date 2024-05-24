@@ -279,15 +279,6 @@ class RainbowCustomizationJSON extends AbstractModel {
         return $this->messages;
     }
 
-    /**
-     * Get messages
-     *
-     * @return array
-     */
-    public function getDroplowest() {
-        return $this->droplowest;
-    }
-
 
 
 
