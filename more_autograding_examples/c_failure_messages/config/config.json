@@ -7,7 +7,10 @@
 
     "allow_system_calls" : [
         "PROCESS_CONTROL_NEW_PROCESS_THREAD",
-        "PROCESS_CONTROL_SCHEDULING"
+        "PROCESS_CONTROL_SCHEDULING",
+        "COMMUNICATIONS_AND_NETWORKING_SIGNALS",
+        "FILE_MANAGEMENT_RARE",
+        "PROCESS_CONTROL_ADVANCED"
     ],
 
     "assignment_message" :

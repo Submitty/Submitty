@@ -107,7 +107,9 @@ describe('Test cases for the site\'s adherence to accessibility guidelines', () 
                             });
                         }
 
-                        expect(foundErrors).to.be.empty;
+                        if (foundErrors.length > 0) {
+                            throw new Error(`Accessibility errors at ${url}:\n${foundErrorMessages.join('\n')}`);
+                        }
                     });
                 });
             });
