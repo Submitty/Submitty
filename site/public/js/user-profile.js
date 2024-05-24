@@ -494,8 +494,8 @@ $(document).ready(() => {
             },
         });
     });
-    document.addEventListener('scroll', function() {
-        var dropdown = document.querySelector('.select2-container--open .select2-dropdown');
+    document.addEventListener('scroll', () => {
+        const dropdown = document.querySelector('.select2-container--open .select2-dropdown');
         if (dropdown) {
             // Close the dropdown menu
             $('#time_zone_drop_down').select2('close');
