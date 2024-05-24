@@ -120,9 +120,7 @@ class WebRouter {
             // Check if loadCourse returns true
             if (!$router->loadCourse()) {
                 // If loadCourse returns false, return an error response
-                return MultiResponse::JsonOnlyResponse(
-                    JsonResponse::getFailResponse("Failed to load course.")
-                );
+                return JsonResponse::getFailResponse("Failed to load course. Check course title and ensure it exists.");
             }
 
             $logged_in = $core->isApiLoggedIn($request);
@@ -185,9 +183,7 @@ class WebRouter {
             // Check if loadCourse returns true
             if (!$router->loadCourse()) {
                 // If loadCourse returns false, redirect to home page
-                return MultiResponse::RedirectOnlyResponse(
-                    new RedirectResponse($core->buildUrl(['home']))
-                );
+                return new RedirectResponse($core->buildUrl(['home']));
             }
 
             $logged_in = $core->isWebLoggedIn();
