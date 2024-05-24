@@ -771,6 +771,13 @@ class Core {
     }
 
     /**
+     * Gets the time for the given string in the config timezone
+     */
+    public function getDateTimeSpecific(string $time_string): \DateTime {
+        return new \DateTime($time_string, $this->getConfig()->getTimezone());
+    }
+
+    /**
      * Given a string URL, sets up a CURL request to that URL, wherein it'll either return the response
      * assuming that we
      *
