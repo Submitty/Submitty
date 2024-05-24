@@ -102,7 +102,7 @@ describe('Test cases revolving around user profile page', () => {
         // Filter options based on partial search input
         cy.get('#select2-time_zone_drop_down-container').click({ force: true });
         cy.get('input[aria-controls="select2-time_zone_drop_down-results"]').type('Pacific');
-        cy.get('.select2-results__option').should('have.length.above', 1).and('contain.text', 'Pacific/');
+        cy.get('.select2-results__option').should('have.length', 38).and('contain.text', 'Pacific/');
 
         // Navigate and select options via keyboard
         cy.get('input[aria-controls="select2-time_zone_drop_down-results"]').type('{downarrow}{downarrow}{enter}', { force: true });
