@@ -20,6 +20,6 @@
 #select2-time_zone_drop_down-container.select2-selection__rendered {
     font-family: Arial, sans-serif;
     font-size: 16px;
-    color: #555555;
-    background-color: #FFFFFF;
+    color: var(--standard-dark-gray);
+    background-color: var(--text-white);
 }
