@@ -1,18 +1,5 @@
 import {getCurrentSemester} from '../../support/utils';
-
-function getKey(user_id, password) {
-    return cy.request({
-        method: 'POST',
-        url: `${Cypress.config('baseUrl')}/api/token`,
-        body: {
-            user_id: user_id,
-            password: password,
-        },
-    }).then((response) => {
-        return response.body.data.token;
-    });
-}
-
+import {getApiKey} from '../../support/utils';
 describe('Tests cases revolving around gradeable access and submition', () => {
 
     it('Should upload file, submit, view gradeable', () => {
@@ -30,10 +17,15 @@ describe('Tests cases revolving around gradeable access and submition', () => {
         cy.get('[data-testid="submit"]').click();
         cy.get('[data-testid="upload-gradeable-btn"]', { timeout: 10000 }).should('not.exist');
         cy.get('body').should('contain.text', 'Edit Gradeable');
+        cy.get('[data-testid="ta_view_start_date"]').should('have.value', '2024-01-11 23:59:59');
+        cy.get('[data-testid="team_lock_date"]').should('have.value', '2024-01-15 23:59:59');
+        cy.get('[data-testid="submission_open_date"]').should('have.value', '2024-01-15 23:59:59');
+        cy.get('[data-testid="submission_due_date"]').should('have.value', '2024-02-15 23:59:59');
+        cy.get('[data-testid="release_date"]').should('have.value', '2024-03-15 23:59:59');
     });
 
     it('Should get error JSON responses', () => {
-        getKey('instructor', 'instructor').then((key) => {
+        getApiKey('instructor', 'instructor').then((key) => {
             // Gradeable already exists
             cy.request({
                 method: 'POST',
