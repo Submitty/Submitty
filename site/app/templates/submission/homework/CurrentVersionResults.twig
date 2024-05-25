@@ -21,7 +21,7 @@
                             {% set extension = file.relative_name|split('.')|last|lower %}
                             {% if student_download %}
                                 {% if '.' ~ extension in ['.pdf', '.jpg', '.jpeg', '.c', '.cpp', '.s', '.twig', '.py', '.java', '.png', '.txt', '.h', '.html', '.php', '.js', '.sql', '.sh', '.md', '.csv', '.salsa', '.erl', '.oz', '.pl', '.hs', '.gif'] %}
-                                    <button class = 'btn btn-default key_to_click' onclick='location += "/submitted_files/{{ display_version }}/{{ file.relative_name|url_encode }}"' aria-label="View {{file.relative_name}}"> View
+                                    <button class = 'btn btn-default key_to_click' onclick='open("submitted_files/{{ display_version }}/{{ file.relative_name|url_encode }}", "_blank")' aria-label="View {{file.relative_name}}"> View
                                         <i class="fas fa-window-restore" title="View the file"></i></button>
                                 {% endif %}
                                 <button class = 'btn btn-primary key_to_click' onclick='downloadFile("{{ file.path|url_encode }}", "submissions")' aria-label="Download {{file.relative_name}}"> Download
