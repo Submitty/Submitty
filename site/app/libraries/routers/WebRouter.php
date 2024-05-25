@@ -125,8 +125,11 @@ class WebRouter {
 
             $logged_in = $core->isApiLoggedIn($request);
 
-            // Prevent user that is not logged in from going anywhere except AuthenticationController
-            if (!$logged_in && !str_ends_with($router->parameters['_controller'], 'AuthenticationController')) {
+            // prevent user that is not logged in from going anywhere except AuthenticationController
+            if (
+                !$logged_in
+                && !str_ends_with($router->parameters['_controller'], 'AuthenticationController')
+            ) {
                 return new MultiResponse(JsonResponse::getFailResponse("Unauthenticated access. Please log in."));
             }
 
@@ -167,7 +170,6 @@ class WebRouter {
         $core->disableRedirects();
         return $router->run();
     }
-
 
     /**
      * @param Request $request
@@ -243,7 +245,6 @@ class WebRouter {
 
         return $router->run();
     }
-
 
     private function run() {
         $this->controller_name = $this->parameters['_controller'];
