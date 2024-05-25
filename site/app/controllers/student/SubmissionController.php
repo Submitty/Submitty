@@ -23,6 +23,7 @@ use app\models\GradingOrder;
 use Symfony\Component\Routing\Annotation\Route;
 use app\models\notebook\SubmissionCodeBox;
 use app\models\notebook\SubmissionMultipleChoice;
+use app\models\gradeable\AutoGradedTestcase;
 
 class SubmissionController extends AbstractController {
     private $upload_details = [
@@ -1052,6 +1053,31 @@ class SubmissionController extends AbstractController {
 
         $graded_gradeable = $graded_gradeable->getAutoGradedGradeable();
 
+        $testcase_array = [];
+        if ($graded_gradeable->hasActiveVersion()) {
+            $gradeable_version = $graded_gradeable->getAutoGradedVersions()[$graded_gradeable->getActiveVersion()] ?? null;
+            if ($gradeable_version !== null) {
+                // Gets arrays, and cleans empty arrays
+                $testcase_array = array_filter(array_map(function (AutoGradedTestcase $testcase) {
+                    $testcase_config = $testcase->getTestcase();
+                    if ($testcase->canView()) {
+                        return [
+                            'name' => $testcase_config->getName(),
+                            'details' => $testcase_config->getDetails(),
+                            'is_extra_credit' => $testcase_config->isExtraCredit(),
+                            'points_available' => $testcase_config->getPoints(),
+                            'has_extra_results' => $testcase->hasAutochecks(),
+                            'points_received' => $testcase->getPoints(),
+                            'testcase_message' => $testcase_config->canViewTestcaseMessage() ? $testcase->getMessage() : ''
+                        ];
+                    }
+                    else {
+                        return [];
+                    }
+                }, $gradeable_version->getTestcases()));
+            }
+        }
+
         return JsonResponse::getSuccessResponse([
             'is_queued' => $graded_gradeable->isQueued(),
             'queue_position' => $graded_gradeable->getQueuePosition(),
@@ -1061,7 +1087,8 @@ class SubmissionController extends AbstractController {
             'has_active_version' => $graded_gradeable->hasActiveVersion(),
             'highest_version' => $graded_gradeable->getHighestVersion(),
             'total_points' => ($graded_gradeable->hasActiveVersion() ? $graded_gradeable->getTotalPoints() : null),
-            'total_percent' => ($graded_gradeable->hasActiveVersion() ? $graded_gradeable->getTotalPercent() : null)
+            'total_percent' => ($graded_gradeable->hasActiveVersion() ? $graded_gradeable->getTotalPercent() : null),
+            'test_cases' => $testcase_array
         ]);
     }
 
