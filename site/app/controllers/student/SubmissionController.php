@@ -214,7 +214,7 @@ class SubmissionController extends AbstractController {
      * View a file submitted to a gradeable.
      */
     #[Route("/courses/{_semester}/{_course}/gradeable/{gradeable_id}/submitted_files/{gradeable_version}/{path}", requirements: ["gradeable_version" => "\d+", "path" => ".+"])]
-    public function viewSubmittedFile($gradeable_id, $gradeable_version, $path) {
+    public function viewSubmittedFile(string $gradeable_id, string $gradeable_version, string $path): array {
         $gradeable = $this->tryGetElectronicGradeable($gradeable_id);
         if ($gradeable === null) {
             $this->core->addErrorMessage('Could not find gradeable');
@@ -271,8 +271,6 @@ class SubmissionController extends AbstractController {
                 $contents
             );
         }
-
-        return ['error' => true, 'message' => "Something went wrong"];
     }
 
     /**
