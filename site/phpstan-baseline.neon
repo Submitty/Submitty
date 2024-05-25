@@ -937,21 +937,6 @@ parameters:
 			path: app/controllers/admin/AdminGradeableController.php
 
 		-
-			message: "#^Method app\\\\controllers\\\\admin\\\\AdminGradeableController\\:\\:enqueueGenerateRepos\\(\\) has parameter \\$course with no type specified\\.$#"
-			count: 1
-			path: app/controllers/admin/AdminGradeableController.php
-
-		-
-			message: "#^Method app\\\\controllers\\\\admin\\\\AdminGradeableController\\:\\:enqueueGenerateRepos\\(\\) has parameter \\$g_id with no type specified\\.$#"
-			count: 1
-			path: app/controllers/admin/AdminGradeableController.php
-
-		-
-			message: "#^Method app\\\\controllers\\\\admin\\\\AdminGradeableController\\:\\:enqueueGenerateRepos\\(\\) has parameter \\$semester with no type specified\\.$#"
-			count: 1
-			path: app/controllers/admin/AdminGradeableController.php
-
-		-
 			message: "#^Method app\\\\controllers\\\\admin\\\\AdminGradeableController\\:\\:exportComponentsRequest\\(\\) has no return type specified\\.$#"
 			count: 1
 			path: app/controllers/admin/AdminGradeableController.php

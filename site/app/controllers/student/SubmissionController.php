@@ -2095,10 +2095,29 @@ class SubmissionController extends AbstractController {
             );
         }
 
+        if (!$g->isVcs()) {
+            $this->core->addErrorMessage("Gradeable is not VCS.");
+            return new RedirectResponse(
+                $this->core->buildCourseUrl(['gradeable', $gradeable_id])
+            );
+        }
+
+        $vcs_partial_path = $g->getVcsPartialPath();
+        $vcs_partial_path = str_replace('{$vcs_type}', $this->core->getConfig()->getVcsType(), $vcs_partial_path);
+        $vcs_partial_path = str_replace('{$gradeable_id}', $g->getId(), $vcs_partial_path);
+        $vcs_partial_path = str_replace('{$user_id}', $this->core->getUser()->getId(), $vcs_partial_path);
+        if ($g->isTeamAssignment()) {
+            $gg = $this->tryGetGradedGradeable($g, $this->core->getUser()->getId());
+            $vcs_partial_path = str_replace('{$team_id}', $gg->getSubmitter()->getId(), $vcs_partial_path);
+        }
+        $path_parts = explode('/', $vcs_partial_path);
+        array_pop($path_parts);
+
         AdminGradeableController::enqueueGenerateRepos(
             $this->core->getConfig()->getTerm(),
             $this->core->getConfig()->getCourse(),
-            $gradeable_id
+            implode('/', $path_parts),
+            $g->getVcsSubdirectory()
         );
 
         $this->core->addSuccessMessage("Repository creation requested.");

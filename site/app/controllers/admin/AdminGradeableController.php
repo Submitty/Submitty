@@ -1300,7 +1300,8 @@ class AdminGradeableController extends AbstractController {
             $this->enqueueGenerateRepos(
                 $this->core->getConfig()->getTerm(),
                 $this->core->getConfig()->getCourse(),
-                $repo_name
+                $repo_name,
+                $subdir
             );
         }
 
@@ -1603,7 +1604,7 @@ class AdminGradeableController extends AbstractController {
         return null;
     }
 
-    public static function enqueueGenerateRepos($semester, $course, $g_id) {
+    public static function enqueueGenerateRepos(string $semester, string $course, string $g_id, string $subdirectory) {
         // FIXME:  should use a variable instead of hardcoded top level path
         $config_build_file = "/var/local/submitty/daemon_job_queue/generate_repos__" . $semester . "__" . $course . "__" . $g_id . ".json";
 
@@ -1611,7 +1612,8 @@ class AdminGradeableController extends AbstractController {
             "job" => "RunGenerateRepos",
             "semester" => $semester,
             "course" => $course,
-            "gradeable" => $g_id
+            "gradeable" => $g_id,
+            "subdirectory" => $subdirectory
         ];
 
         if (
