@@ -51,7 +51,6 @@ const uploadAttachmentAndDelete = (title) => {
     cy.get('[data-testid="thread-list-item"]').contains(title).click();
     cy.get('[data-testid="create-post-head"]').should('contain', title);
     cy.get('[data-testid="edit-post-button"]').first().click();
-    // cy.get('[data-testid="upload1"]').find('[for="input-file1"]').selectFile('cypress/fixtures/sea_animals.png');
     cy.get('[data-testid="input-file1"]').selectFile('cypress/fixtures/sea_animals.png');
     cy.get('[data-testid="file-upload-table-1"]').should('contain', 'sea_animals.png');
     cy.get('[data-testid="forum-update-post"]').contains('Update Post').click();
