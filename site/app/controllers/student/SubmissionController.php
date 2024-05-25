@@ -12,6 +12,7 @@ use app\libraries\GradingQueue;
 use app\libraries\Logger;
 use app\libraries\response\JsonResponse;
 use app\libraries\response\RedirectResponse;
+use app\libraries\response\WebResponse;
 use app\libraries\response\MultiResponse;
 use app\libraries\routers\AccessControl;
 use app\libraries\Utils;
@@ -23,6 +24,7 @@ use app\models\GradingOrder;
 use Symfony\Component\Routing\Annotation\Route;
 use app\models\notebook\SubmissionCodeBox;
 use app\models\notebook\SubmissionMultipleChoice;
+use app\views\MiscView;
 
 class SubmissionController extends AbstractController {
     private $upload_details = [
@@ -205,6 +207,71 @@ class SubmissionController extends AbstractController {
             );
         }
         return ['id' => $gradeable_id, 'error' => $error];
+    }
+
+    /**
+     * View a file submitted to a gradeable.
+     */
+    #[Route("/courses/{_semester}/{_course}/gradeable/{gradeable_id}/submitted_files/{gradeable_version}/{path}", requirements: ["gradeable_version" => "\d+", "path" => ".+"])]
+    public function viewSubmittedFile($gradeable_id, $gradeable_version, $path) {
+        $gradeable = $this->tryGetElectronicGradeable($gradeable_id);
+        if ($gradeable === null) {
+            $this->core->addErrorMessage('Could not find gradeable');
+            $this->core->redirect($this->core->buildCourseUrl() . "/gradeable/" . $gradeable_id);
+            return ['error' => true, 'message' => 'Could not find gradeable'];
+        }
+
+        $graded_gradeable = $this->core->getQueries()->getGradedGradeable($gradeable, $this->core->getUser()->getId());
+        $verify_permissions = $this->verifyHomeworkPagePermissions($gradeable_id, $gradeable, $graded_gradeable);
+        if ($verify_permissions['error']) {
+            return $verify_permissions;
+        }
+
+        if ($gradeable->isLocked($this->core->getUser()->getId()) && $this->core->getUser()->accessGrading() === false) {
+            $this->core->addErrorMessage('You have not unlocked this gradeable yet');
+            $this->core->redirect($this->core->buildCourseUrl());
+            return ['error' => true, 'message' => 'You have not completed the pre-requisite gradeable'];
+        }
+
+        $version = intval($gradeable_version ?? 0);
+        if ($version < 1 || $version > ($graded_gradeable !== null ? $graded_gradeable->getAutoGradedGradeable()->getHighestVersion() : 0) || (!$this->core->getUser()->accessGrading() && !$gradeable->isStudentSubmit())) {
+            $this->core->addErrorMessage('Could not find submission');
+            $this->core->redirect($this->core->buildCourseUrl() . "/gradeable/" . $gradeable_id);
+            return ['error' => true, 'message' => 'Could not find submission'];
+        }
+
+        $full_path = FileUtils::joinPaths($this->core->getConfig()->getCoursePath(), "submissions", $gradeable_id, $this->core->getUser()->getId(), $version, $path);
+
+        if (!$this->core->getAccess()->canI("path.read", ["dir" => "submissions", "path" => $full_path])) {
+            $this->core->addErrorMessage('Could not access file');
+            $this->core->redirect($this->core->buildCourseUrl() . "/gradeable/" . $gradeable_id);
+            return ['error' => true, 'message' => 'Could not access file'];
+        }
+
+        $file_name = basename($full_path);
+        $corrected_name = pathinfo($full_path, PATHINFO_DIRNAME) . "/" .  $file_name;
+        $mime_type = mime_content_type($corrected_name);
+        $file_type = FileUtils::getContentType($file_name);
+        $this->core->getOutput()->useHeader(false);
+        $this->core->getOutput()->useFooter(false);
+
+        if ($mime_type === "application/pdf" || (str_starts_with($mime_type, "image/") && $mime_type !== "image/svg+xml")) {
+            header("Content-type: " . $mime_type);
+            header('Content-Disposition: inline; filename="' . $file_name . '"');
+            readfile($corrected_name);
+            $this->core->getOutput()->renderString($full_path);
+            return ['error' => false];
+        }
+        else {
+            $contents = file_get_contents($corrected_name);
+            return new WebResponse(
+                MiscView::class,
+                "displayFile",
+                $contents
+            );
+        }
+
+        return ['error' => true, 'message' => "Something went wrong"];
     }
 
     /**
