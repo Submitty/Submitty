@@ -41,7 +41,7 @@ class Option {
     #[ORM\JoinColumn(name: "option_id", referencedColumnName: "option_id")]
     protected Collection $user_responses;
 
-    public function __construct(int $order_id, string $response, bool $is_correct, string $author_id = 'instructor') {
+    public function __construct(int $order_id, string $response, bool $is_correct, string $author_id = '') {
         $this->setOrderId($order_id);
         $this->setResponse($response);
         $this->setCorrect($is_correct);

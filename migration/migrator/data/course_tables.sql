@@ -1547,7 +1547,7 @@ CREATE TABLE public.polls (
     release_answer character varying(10) DEFAULT 'never'::character varying,
     duration integer DEFAULT 0,
     end_time timestamp with time zone,
-    is_visible boolean DEFAULT false NOT NULL
+    is_visible boolean DEFAULT false NOT NULL,
     allows_custom boolean DEFAULT false NOT NULL
 );
 

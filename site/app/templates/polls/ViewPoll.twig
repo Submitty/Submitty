@@ -101,22 +101,9 @@
                         </div>
                         <button type="button" class="btn btn-primary student-submit custom-response-submit" onclick = "addCustomResponse({{poll.getId()}},'{{base_url}}');">Add Custom Response</button>
                     <script>
-                        const custom_response = document.querySelector('.custom_poll_response');
-                        const custom_response_submit =  document.querySelector('.custom-response-submit');
-
-                        const validateCustomResponse = () => {
-                            if (custom_response.value.trim() !== '') {
-                                custom_response_submit.disabled = false;
-                            } else {
-                                custom_response_submit.disabled = true;
-                            }
-                        }
-
-                        custom_response.addEventListener('input', () => {
+                        document.addEventListener('DOMContentLoaded', function() {
                             validateCustomResponse();
                         });
-
-                        validateCustomResponse();
                     </script>
                 </div>
             {% endif %}

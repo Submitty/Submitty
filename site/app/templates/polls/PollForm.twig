@@ -149,7 +149,7 @@
         <h2> Responses: </h2>
         {% if poll is not null %}
             {% set is_survey = poll.getQuestionType() == "single-response-survey" or poll.getQuestionType() == "multiple-response-survey" %}
-            <input aria-label="" id = "toggle-all" type="checkbox" name="toggle-all-options" onchange = "toggleOptions()" {{ is_survey ? "style='display:none'" : "inline-block" }}>
+            <input aria-label="" id = "toggle-all" type="checkbox" name="toggle-all-options" onchange = "togglePollFormOptions()" {{ is_survey ? "style='display:none'" : "inline-block" }}>
         {% endif %}
         <div id="responses">
             {% if poll is not null %}

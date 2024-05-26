@@ -1,4 +1,4 @@
-/* exported newDeletePollForm updatePollAcceptingAnswers updatePollVisible updateDropdownStates importPolls toggleTimerInputs addCustomResponse removeCustomResponse */
+/* exported newDeletePollForm updatePollAcceptingAnswers updatePollVisible updateDropdownStates importPolls toggleTimerInputs togglePollFormOptions validateCustomResponse addCustomResponse removeCustomResponse */
 /* global csrfToken displaySuccessMessage displayErrorMessage */
 
 
@@ -107,6 +107,33 @@ function updateDropdownStates(curr_state, cookie_key) {
     Cookies.set(cookie_key, !curr_state, { expires: expiration_date, path: '/' });
 }
 
+function togglePollFormOptions() {
+    const correct_options = $('.correct-box');
+
+    correct_options.each(function() {
+        $(this).prop('checked', $('#toggle-all').prop('checked'));
+    });
+}
+
+function validateCustomResponse() {
+    const custom_response = document.querySelector('.custom_poll_response');
+    const custom_response_submit = document.querySelector('.custom-response-submit');
+
+    const validate = () => {
+        if (custom_response.value.trim() !== '') {
+            custom_response_submit.disabled = false;
+        } else {
+            custom_response_submit.disabled = true;
+        }
+    }
+
+    custom_response.addEventListener('input', () => {
+        validate();
+    });
+
+    validate();
+}
+
 function addCustomResponse(pollid, base_url) {
     const custom_response_text = document.querySelector('.custom_poll_response').value;
     const url = `${base_url}/addCustomResponse`;
@@ -132,10 +159,7 @@ function addCustomResponse(pollid, base_url) {
                     displayErrorMessage(msg.message);
                 }
                 else {
-                    displaySuccessMessage(msg.data.message);
-                    setTimeout(() => {
-                        window.location.reload();
-                    }, 1000);
+                    window.location.reload();
                 }
             }
             catch (err) {
