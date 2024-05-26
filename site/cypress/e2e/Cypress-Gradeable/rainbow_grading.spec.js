@@ -6,13 +6,14 @@ describe('Test Rainbow Grading', () => {
     });
     it('Enable viewing of rainbow grades and generating the rainbow grading', () => {
         // enabled the rainbow grades
-        cy.get('[data-testid="display-rainbow-grades-summary"]').should('be.visible').and('not.be.checked');
-        cy.get('[data-testid="display-rainbow-grades-summary"]').should('not.be.checked'); // remove one of this
-        cy.visit(['sample', 'grades']);
-        cy.get('[data-testid="rainbow-grades"]').should('contain', 'No grades are available...');
-        cy.visit(['sample', 'config']);
-        cy.get('[data-testid="display-rainbow-grades-summary"]').check();
+        cy.get('[data-testid="display-rainbow-grades-summary"]').then(($checkbox) => {
+            if (!$checkbox.prop('checked')) {
+                cy.get('[data-testid="display-rainbow-grades-summary"]').check();
+            }
+        });
         cy.get('[data-testid="display-rainbow-grades-summary"]').should('be.checked');
+        // cy.visit(['sample', 'grades']);
+        // cy.get('[data-testid="rainbow-grades"]').should('contain', 'No grades are available...');
         // generating the rainbow grading
         cy.visit(['sample', 'reports', 'rainbow_grades_customization']);
         cy.get('#display_grade_summary').then(($checkbox) => {
@@ -21,9 +22,9 @@ describe('Test Rainbow Grading', () => {
             }
         });
         cy.get('#display_grade_summary').should('be.checked');
-        cy.get('#display_benchmarks_average').check();
-        cy.get('#display_benchmarks_stddev').check();
-        cy.get('#display_benchmarks_perfect').check();
+        cy.get('[data-testid="display-benchmarks-average"]').check();
+        cy.get('[data-testid="display-benchmarks-stddev"]').check();
+        cy.get('[data-testid="display-benchmarks-perfect"]').check();
         cy.get('[data-testid="save-status-button"]').click();
         cy.get('[data-testid="save-status"]', { timeout: 500000 }).should('contain', 'Rainbow grades successfully generated!');
         cy.visit(['sample', 'grades']);
@@ -31,7 +32,7 @@ describe('Test Rainbow Grading', () => {
             cy.get('[data-testid="rainbow-grades"]').should('contain', fields);
         });
         cy.get('[data-testid="rainbow-grades"]').should('contain', 'Information last updated');
-        ['instructor', 'ta', 'student', 'grader'].forEach((username) => {
+        ['ta', 'student', 'grader', 'instructor'].forEach((username) => {
             cy.logout();
             cy.login(username);
             console.log(username);
@@ -50,6 +51,11 @@ describe('Test Rainbow Grading', () => {
                 checkRainbowGrades(10306042, 'Tim');
             }
         });
+        cy.visit(['sample', 'config']);
+        cy.get('[data-testid="display-rainbow-grades-summary"]').uncheck();
+        cy.get('[data-testid="display-rainbow-grades-summary"]').should('not.be.checked');
+        cy.visit(['sample', 'grades']);
+        cy.get('[data-testid="rainbow-grades"]').should('contain', 'No grades are available...');
     });
 });
 
