@@ -96,13 +96,12 @@
 		            <input type="text" id= "user_id" value ="" placeholder="{{ user_id }}"/>
                 </div>
             </div>
-            <div class="sub hide" id="pdf-submit-button">
+            <div id="pdf-submit-button" class="sub">
                 <div class="sub">
 
                     <div id="toggle-qr-split">
                         <label for="use-qr">Split by QR code?</label>
                         <input type="checkbox" id="use-qr">
-
                         {% if feature_flag_enabled('submitty_ocr') %}
                         <span id="toggle-id-scan">
                             <label id ="use-ocr-id"for ="use-ocr">Detect Student ID's?</label>
@@ -544,3 +543,36 @@
 </script>
 
 
+<script>
+    window.onload = function() {
+        // capture radio elements
+        let radioBulk = document.getElementById('radio-bulk');
+        let radioNormal = document.getElementById('radio-normal');
+        let radioStudent = document.getElementById('radio-student');
+        let numericUploadOpts = document.getElementById('numeric-split-opts');
+        let qrUploadOpts = document.getElementById('qr-split-opts');
+
+        // capture the div elements
+        let pdfSubmitButton = document.getElementById('pdf-submit-button');
+
+        // add change event listeners to radio buttons
+        radioBulk.addEventListener('change', togglePdfSubmitButton);
+        radioNormal.addEventListener('change', togglePdfSubmitButton);
+        radioStudent.addEventListener('change', togglePdfSubmitButton);
+
+        function togglePdfSubmitButton() {
+            if (radioBulk.checked) {
+                // if Bulk Upload is checked, show the div
+                pdfSubmitButton.style.display = 'block';
+                qrUploadOpts.style.display = 'none';
+
+            } else {
+                // if other option is checked, hide the div
+                pdfSubmitButton.style.display = 'none';
+            }
+        }
+
+        // call the function on page load to set initial state
+        togglePdfSubmitButton();
+    };
+</script>
