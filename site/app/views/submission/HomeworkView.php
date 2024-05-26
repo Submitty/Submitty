@@ -188,7 +188,7 @@ class HomeworkView extends AbstractView {
         // ALWAYS PRINT DEADLINE EXTENSION (IF ANY)
         if ($extensions > 0) {
             $messages[] = ['type' => 'extension', 'info' => [
-                'extensions' => $extensionsf
+                'extensions' => $extensions
             ]];
         }
 
@@ -200,14 +200,12 @@ class HomeworkView extends AbstractView {
 
         $daylight_message_required = false;
         $date = new \DateTime();
-        $daylight_spring = new \DateTime('2024-05-17', $this->core->getConfig()->getTimezone());
+        $daylight_spring = new \DateTime('2024-03-10', $this->core->getConfig()->getTimezone());
         $daylight_fall = new \DateTime('2024-11-03', $this->core->getConfig()->getTimezone());
 
 
         $diff = $date->diff($daylight_spring)->days;
         $diff2 = $date->diff($daylight_fall)->days;
-
-    
         
         if (abs($diff) <= 7 || abs($diff2) <= 7) {
             $daylight_message_required = true;
