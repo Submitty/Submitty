@@ -188,7 +188,7 @@ class HomeworkView extends AbstractView {
         // ALWAYS PRINT DEADLINE EXTENSION (IF ANY)
         if ($extensions > 0) {
             $messages[] = ['type' => 'extension', 'info' => [
-                'extensions' => $extensions
+                'extensions' => $extensionsf
             ]];
         }
 
@@ -198,19 +198,19 @@ class HomeworkView extends AbstractView {
         }
 
 
-        $DayLightSavingMessageRequired = false;
+        $daylight_message_required = false;
         $date = new \DateTime();
-        $daylightSpring = new \DateTime('2024-05-17', $this->core->getConfig()->getTimezone());
-        $daylightFall = new \DateTime('2024-11-03', $this->core->getConfig()->getTimezone());
+        $daylight_spring = new \DateTime('2024-05-17', $this->core->getConfig()->getTimezone());
+        $daylight_fall = new \DateTime('2024-11-03', $this->core->getConfig()->getTimezone());
 
 
-        $diff = $date->diff($daylightSpring)->days;
-        $diff2 = $date->diff($daylightFall)->days;
+        $diff = $date->diff($daylight_spring)->days;
+        $diff2 = $date->diff($daylight_fall)->days;
 
     
         
         if (abs($diff) <= 7 || abs($diff2) <= 7) {
-            $DayLightSavingMessageRequired = true;
+            $daylight_message_required = true;
         }
            
         // ------------------------------------------------------------
@@ -221,8 +221,6 @@ class HomeworkView extends AbstractView {
                 $error = true;
 
                 // AUTO ZERO BECAUSE INSUFFICIENT LATE DAYS REMAIN
-                
-
                 if ($active_days_late > $late_day_budget) {
                     $messages[] = ['type' => 'too_few_remain', 'info' => [
                         'late' => $active_days_late,
@@ -307,7 +305,7 @@ class HomeworkView extends AbstractView {
         return $this->core->getOutput()->renderTwigTemplate('submission/homework/LateDayMessage.twig', [
             'messages' => $messages,
             'error' => $error,
-            'daylight' => $DayLightSavingMessageRequired
+            'daylight' => $daylight_message_required
         ]);
     }
 
