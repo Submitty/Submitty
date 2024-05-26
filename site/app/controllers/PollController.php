@@ -15,6 +15,7 @@ use app\libraries\routers\Enabled;
 use app\libraries\FileUtils;
 use app\libraries\PollUtils;
 use app\views\PollView;
+use DateInterval;
 
 /**
  * @Enabled("polls")
@@ -191,7 +192,26 @@ class PollController extends AbstractController {
             return new RedirectResponse($this->core->buildCourseUrl(['polls']));
         }
 
-        $poll = new Poll($_POST['name'], $_POST['question'], $_POST['question_type'], $date, $_POST['release_histogram'], $_POST["release_answer"]);
+        //set to 0 if it is not found in $_POST.
+        $hours = intval($_POST['poll-hours'] ?? 0);
+        $minutes = intval($_POST['poll-minutes'] ?? 0);
+        $seconds = intval($_POST['poll-seconds'] ?? 0);
+        $duration = new DateInterval("PT{$hours}H{$minutes}M{$seconds}S");
+        //comparing with DateTimes because PHP doesn't support DateInterval comparison
+        $UserInputDuration = $this->core->getDateTimeNow();
+        $TwentyFourHourDateTime = clone $UserInputDuration;
+        $UserInputDuration->add($duration);
+        $twentyfourHourDuration = new DateInterval("PT24H");
+        $TwentyFourHourDateTime->add($twentyfourHourDuration);
+        if ($UserInputDuration > $TwentyFourHourDateTime) {
+            $this->core->addErrorMessage("Exceeded 24 hour limit");
+            return new RedirectResponse($this->core->buildCourseUrl(['polls/newPoll']));
+        }
+        if ($hours < 0 || $minutes < 0 || $seconds < 0) {
+            $this->core->addErrorMessage('Invalid time given');
+            return new RedirectResponse($this->core->buildCourseUrl(['polls']));
+        }
+        $poll = new Poll($_POST['name'], $_POST['question'], $_POST['question_type'], $duration, $date, $_POST['release_histogram'], $_POST["release_answer"]);
         $em->persist($poll);
         $poll->setAllowsCustomOptions(isset($_POST['poll_custom_options']));
 
@@ -307,9 +327,49 @@ class PollController extends AbstractController {
                 return new RedirectResponse($this->core->buildCourseUrl(['polls']));
             }
         }
-
-
         $date = \DateTime::createFromFormat("Y-m-d", $_POST["release_date"]);
+        $hours = intval($_POST['poll-hours'] ?? 0);
+        $minutes = intval($_POST['poll-minutes'] ?? 0);
+        $seconds = intval($_POST['poll-seconds'] ?? 0);
+        $enableTimer = isset($_POST['enable-timer']);
+        if (!$enableTimer) {
+            $hours = 0;
+            $minutes = 0;
+            $seconds = 0;
+        }
+        $prevHours = $poll->getDuration()->h;
+        $prevMinutes = $poll->getDuration()->i;
+        $prevSeconds = $poll->getDuration()->s;
+        $resetDuration = true;
+        if ($hours === $prevHours && $minutes === $prevMinutes && $seconds === $prevSeconds) {
+            $resetDuration = false;
+        }
+        $newDuration = new DateInterval("PT{$hours}H{$minutes}M{$seconds}S");
+        //comparing with DateTimes because PHP doesn't support DateInterval comparison
+        $UserInputDuration = $this->core->getDateTimeNow();
+        $TwentyFourHourDateTime = clone $UserInputDuration;
+        $UserInputDuration->add($newDuration);
+        $twentyfourHourDuration = new DateInterval("PT24H");
+        $TwentyFourHourDateTime->add($twentyfourHourDuration);
+        if ($UserInputDuration > $TwentyFourHourDateTime) {
+            $this->core->addErrorMessage("Exceeded 24 hour limit");
+            return new RedirectResponse($this->core->buildCourseUrl(['polls/newPoll']));
+        }
+        if ($hours < 0 || $minutes < 0 || $seconds < 0) {
+            $this->core->addErrorMessage('Invalid time given');
+            return new RedirectResponse($this->core->buildCourseUrl(['polls']));
+        }
+        if ($poll->isOpen() && $resetDuration) {
+            if ($newDuration->h > 0 || $newDuration->i > 0 || $newDuration->s > 0 || $newDuration->days > 0 || $newDuration->m > 0 || $newDuration->y > 0) {
+                $endDate = $this->core->getDateTimeNow();
+                $endDate->add($newDuration);
+                $poll->setEndTime($endDate);
+            }
+            else {
+                // Timer Disabled
+                $poll->setEndTime(null);
+            }
+        }
         if ($date === false) {
             $this->core->addErrorMessage("Invalid poll release date");
             return new RedirectResponse($returnUrl);
@@ -318,10 +378,10 @@ class PollController extends AbstractController {
             $this->core->addErrorMessage("Invalid poll question type");
             return new RedirectResponse($this->core->buildCourseUrl(['polls']));
         }
-
         $poll->setName($_POST['name']);
         $poll->setQuestion($_POST['question']);
         $poll->setQuestionType($_POST['question_type']);
+        $poll->setDuration($newDuration);
         $poll->setReleaseDate($date);
         $poll->setReleaseHistogram($_POST['release_histogram']);
         $poll->setReleaseAnswer($_POST['release_answer']);
@@ -431,9 +491,19 @@ class PollController extends AbstractController {
             $this->core->addErrorMessage("Invalid Poll ID");
             return new RedirectResponse($this->core->buildCourseUrl(['polls']));
         }
-        $poll->setOpen();
+        $poll->setVisible();
+        $duration = $poll->getDuration();
+        if ($duration->h > 0 || $duration->i > 0 || $duration->s > 0 || $duration->days > 0 || $duration->m > 0 || $duration->y > 0) {
+            $end_time = $this->core->getDateTimeNow();
+            $end_time->add($duration);
+            $poll->setEndTime($end_time);
+        }
+        else {
+            //If duration is 0, it means that the user wants to manually close it.
+            $end_time = null;
+            $poll->setEndTime($end_time);
+        }
         $em->flush();
-
         return new RedirectResponse($this->core->buildCourseUrl(['polls']));
     }
 
@@ -531,7 +601,8 @@ class PollController extends AbstractController {
             $this->core->addErrorMessage("Invalid Poll ID");
             return new RedirectResponse($this->core->buildCourseUrl(['polls']));
         }
-        $poll->setEnded();
+        $poll->setOpen();
+        $poll->setEndTime($this->core->getDateTimeNow());
         $em->flush();
 
         return new RedirectResponse($this->core->buildCourseUrl(['polls']));
@@ -552,7 +623,6 @@ class PollController extends AbstractController {
         }
         $poll->setClosed();
         $em->flush();
-
         return new RedirectResponse($this->core->buildCourseUrl(['polls']));
     }
 
@@ -737,6 +807,8 @@ class PollController extends AbstractController {
             $poll_entity = new Poll($poll['name'], $poll['question'], $question_type, \DateTime::createFromFormat("Y-m-d", $poll['release_date']), $poll['release_histogram'], $poll['release_answer']);
             $allows_custom = array_key_exists("allows_custom", $poll) ? $poll['allows_custom'] : false;
             $poll_entity->setAllowsCustomOptions($allows_custom);
+            $poll_entity = new Poll($poll['name'], $poll['question'], $question_type, new \DateInterval($poll['duration']), \DateTime::createFromFormat("Y-m-d", $poll['release_date']), $poll['release_histogram'], $poll['release_answer']);
+
             $em->persist($poll_entity);
             $order = 0;
             foreach ($poll['responses'] as $id => $response) {

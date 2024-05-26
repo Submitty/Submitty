@@ -1,5 +1,6 @@
-/* exported newDeletePollForm updatePollAcceptingAnswers updatePollVisible updateDropdownStates importPolls addCustomResponse removeCustomResponse */
+/* exported newDeletePollForm updatePollAcceptingAnswers updatePollVisible updateDropdownStates importPolls toggleTimerInputs addCustomResponse removeCustomResponse */
 /* global csrfToken displaySuccessMessage displayErrorMessage */
+
 
 $(document).ready(() => {
     $('.dropdown-bar').on('click', function() {
@@ -183,4 +184,13 @@ function removeCustomResponse(pollid, optionid, base_url) {
 
 function importPolls() {
     $('#import-polls-form').submit();
+}
+
+function toggleTimerInputs() {
+    if ($('#enable-timer').prop('checked')) {
+        $('#timer-inputs').show();
+    }
+    else {
+        $('#timer-inputs').hide();
+    }
 }
