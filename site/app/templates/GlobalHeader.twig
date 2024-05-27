@@ -21,6 +21,14 @@
             })
         }
     </script>
+    <script>
+        var browserTime = new Date().getTime();
+        var serverTime = {{ server_time }};
+        var timeDifference = serverTime * 1000 - browserTime;
+        if (Math.abs(timeDifference) > 120000) {
+            document.querySelector('#server-time-not-aligned').removeAttr('hidden');
+        }
+    </script>
 
     {% for css_ref in css %}
     <link rel='stylesheet' type='text/css' href='{{ css_ref }}' />
@@ -228,6 +236,10 @@
                 {{ system_message }}
             </div>
         {% endif %}
+        <div class="system-message danger" id="server-time-not-aligned" hidden>
+            Danger: The server time are not aligned with the browser time. 
+            Please check your system time settings.
+        </div>
         <div class="system-message warning" id="socket-server-system-message" hidden>
             Warning: Failed to connect to websocket server. This page will not dynamically update.
             Manually reload this page to see updates.{% if sysadmin_email is not empty %} Notify the
