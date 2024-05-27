@@ -92,7 +92,7 @@ class SelfRejoinController extends AbstractController {
      *
      * @return RedirectResponse Course url if the student met the conditions to be re-added.
      */
-    #[Route("/courses/{_semester}/{_course}/rejoin_course", methods = {"POST"})]
+    #[Route("/courses/{_semester}/{_course}/rejoin_course", methods: {"POST"})]
     public function rejoinCourse(): RedirectResponse {
 
         if (!$this->canRejoinCourse()) {

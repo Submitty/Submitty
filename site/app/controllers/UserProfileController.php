@@ -246,7 +246,7 @@ class UserProfileController extends AbstractController {
     /**
      * @return JsonResponse
      */
-    #Route("/user_profile/change_secondary_email", methods={"POST"})]
+    #[Route("/user_profile/change_secondary_email", methods: {"POST"})]
     public function changeSecondaryEmail(): JsonResponse {
         $user = $this->core->getUser();
 
