@@ -94,7 +94,7 @@ class HomePageController extends AbstractController {
 
     /**
      * Display the HomePageView to the student.
-     * 
+     *
      * @return MultiResponse
      */
     #[Route("/home")]

@@ -71,7 +71,7 @@ class NotificationController extends AbstractController {
     /**
      * @param string $nid
      * @param string|null $seen
-     * 
+     *
      * @return MultiResponse
      */
     #[Route("/courses/{_semester}/{_course}/notifications/{nid}", requirements: ["nid" => "[1-9]\d*"])]
@@ -89,7 +89,7 @@ class NotificationController extends AbstractController {
 
     /**
      * @param string $nid
-     * 
+     *
      * @return MultiResponse
      */
     #[Route("/courses/{_semester}/{_course}/notifications/{nid}/seen", requirements: ["nid" => "[1-9]\d*"])]

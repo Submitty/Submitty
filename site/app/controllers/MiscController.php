@@ -322,9 +322,7 @@ class MiscController extends AbstractController {
         }
     }
 
-    /**
-     * @Route("/courses/{_semester}/{_course}/gradeable/{gradeable_id}/download_zip")
-     */
+    #[Route("/courses/{_semester}/{_course}/gradeable/{gradeable_id}/download_zip")]
     public function downloadSubmissionZip($gradeable_id, $submitter_id, $version, $is_anon, $origin = null) {
 
         $anon_id = $submitter_id;

@@ -431,9 +431,7 @@ class TeamController extends AbstractController {
         $this->core->redirect($return_url);
     }
 
-    /**
-     * @Route("/courses/{_semester}/{_course}/gradeable/{gradeable_id}/team/seek/stop")
-     */
+    #[Route("/courses/{_semester}/{_course}/gradeable/{gradeable_id}/team/seek/stop")]
     public function stopSeekTeam($gradeable_id) {
         $user_id = $this->core->getUser()->getId();
 
@@ -455,9 +453,7 @@ class TeamController extends AbstractController {
         $this->core->redirect($return_url);
     }
 
-    /**
-     * @Route("/courses/{_semester}/{_course}/gradeable/{gradeable_id}/team/setname")
-     */
+    #[Route("/courses/{_semester}/{_course}/gradeable/{gradeable_id}/team/setname")]
     public function setTeamName($gradeable_id): RedirectResponse {
         $user_id = $this->core->getUser()->getId();
 

@@ -16,7 +16,7 @@ use app\views\ManageSessionsView;
 class ManageSessionsController extends AbstractController {
     /**
      * Show manage sessions page
-     * 
+     *
      * @return WebResponse
      */
     #[Route("/manage_sessions", methods: ["GET"])]
