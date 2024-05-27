@@ -1,5 +1,5 @@
-import {getApiKey} from '../../support/utils';
-import {getCurrentSemester} from '../../support/utils';
+import { getApiKey } from '../../support/utils';
+import { getCurrentSemester } from '../../support/utils';
 
 describe('Tests cases for the Student API', () => {
     it('Should get correct responses', () => {
@@ -52,16 +52,49 @@ describe('Tests cases for the Student API', () => {
             }).then((response) => {
                 expect(response.body.status).to.equal('success');
                 // Can't test exact values due to randomness of CI speed
-                const data = JSON.stringify(response.body.data);
-                expect(data).to.contain('is_queued');
-                expect(data).to.contain('queue_position'),
-                expect(data).to.contain('is_grading'),
-                expect(data).to.contain('has_submission'),
-                expect(data).to.contain('autograding_complete'),
-                expect(data).to.contain('has_active_version'),
-                expect(data).to.contain('highest_version'),
-                expect(data).to.contain('total_points'),
-                expect(data).to.contain('total_percent');
+                const data = response.body.data;
+                const data_string = JSON.stringify(response.body.data);
+                expect(data_string).to.contain('is_queued');
+                expect(data_string).to.contain('queue_position'),
+                expect(data_string).to.contain('is_grading'),
+                expect(data_string).to.contain('has_submission'),
+                expect(data_string).to.contain('autograding_complete'),
+                expect(data_string).to.contain('has_active_version'),
+                expect(data_string).to.contain('highest_version'),
+                expect(data_string).to.contain('total_points'),
+                expect(data_string).to.contain('total_percent');
+                expect(data_string).to.contain('test_cases');
+                // CI doesn't have grades
+                // Requires VCS Subdirectory gradeable to be graded
+                if (Cypress.env('run_area') !== 'CI') {
+                    const python_test = {
+                        'name': 'Python test',
+                        'details': 'python3 *.py',
+                        'is_extra_credit': false,
+                        'points_available': 5,
+                        'points_received': 5,
+                        'testcase_message': '',
+                    };
+                    const submitted_pdf = {
+                        'name': 'Submitted a .pdf file',
+                        'details': '',
+                        'is_extra_credit': false,
+                        'points_available': 1,
+                        'points_received': 1,
+                        'testcase_message': '',
+                    };
+                    const words = {
+                        'name': 'Required 500-1000 Words',
+                        'details': '',
+                        'is_extra_credit': false,
+                        'points_available': 1,
+                        'points_received': 0,
+                        'testcase_message': '',
+                    };
+                    expect(data.test_cases[0]).to.contain(python_test);
+                    expect(data.test_cases[1]).to.contain(submitted_pdf);
+                    expect(data.test_cases[2]).to.contain(words);
+                }
             });
 
             // Success, successfully sent to be graded
