@@ -295,7 +295,7 @@ class PollController extends AbstractController {
     /**
      * @AccessControl(role="INSTRUCTOR")
      */
-    #[Route("/courses/{_semester}/{_course}/polls/editPoll/submitEdits", methods = {"POST"})]
+    #[Route("/courses/{_semester}/{_course}/polls/editPoll/submitEdits", methods: {"POST"})]
     public function submitEdits(): RedirectResponse {
         $returnUrl = $this->core->buildCourseUrl(['polls']);
         $poll_id = (int) $_POST['poll_id'];
@@ -476,7 +476,7 @@ class PollController extends AbstractController {
     /**
      * @AccessControl(role="INSTRUCTOR")
      */
-    #[Route("/courses/{_semester}/{_course}/polls/setOpen", methods = {"POST"})]
+    #[Route("/courses/{_semester}/{_course}/polls/setOpen", methods: {"POST"})]
     public function openPoll(): RedirectResponse {
         $poll_id = intval($_POST['poll_id'] ?? -1);
         $em = $this->core->getCourseEntityManager();
@@ -505,7 +505,7 @@ class PollController extends AbstractController {
     /**
      * @AccessControl(role="INSTRUCTOR")
      */
-    #[Route("/courses/{_semester}/{_course}/polls/setEnded", methods = {"POST"})]
+    #[Route("/courses/{_semester}/{_course}/polls/setEnded", methods: {"POST"})]
     public function endPoll(): RedirectResponse {
         $poll_id = intval($_POST['poll_id'] ?? -1);
         $em = $this->core->getCourseEntityManager();
@@ -525,7 +525,7 @@ class PollController extends AbstractController {
     /**
      * @AccessControl(role="INSTRUCTOR")
      */
-    #[Route("/courses/{_semester}/{_course}/polls/setClosed", methods = {"POST"})]
+    #[Route("/courses/{_semester}/{_course}/polls/setClosed", methods: {"POST"})]
     public function closePoll(): RedirectResponse {
         $poll_id = intval($_POST['poll_id'] ?? -1);
         $em = $this->core->getCourseEntityManager();
@@ -540,7 +540,7 @@ class PollController extends AbstractController {
         return new RedirectResponse($this->core->buildCourseUrl(['polls']));
     }
 
-    #[Route("/courses/{_semester}/{_course}/polls/submitResponse", methods = {"POST"})]
+    #[Route("/courses/{_semester}/{_course}/polls/submitResponse", methods: {"POST"})]
     public function submitResponse(): RedirectResponse {
         $em = $this->core->getCourseEntityManager();
 
@@ -596,7 +596,7 @@ class PollController extends AbstractController {
     /**
      * @AccessControl(role="INSTRUCTOR")
      */
-    #[Route("/courses/{_semester}/{_course}/polls/deletePoll", methods = {"POST"})]
+    #[Route("/courses/{_semester}/{_course}/polls/deletePoll", methods: {"POST"})]
     public function deletePoll(): JsonResponse {
         $poll_id = intval($_POST['poll_id'] ?? -1);
         $em = $this->core->getCourseEntityManager();
@@ -632,7 +632,7 @@ class PollController extends AbstractController {
      * @AccessControl(role="INSTRUCTOR")
      * @return RedirectResponse|WebResponse
      */
-    #[Route("/courses/{_semester}/{_course}/polls/viewResults/{poll_id}", methods = {"GET"}, requirements = {"poll_id": "\d*"})]
+    #[Route("/courses/{_semester}/{_course}/polls/viewResults/{poll_id}", methods: {"GET"}, requirements = {"poll_id": "\d*"})]
     public function viewResults($poll_id) {
         if (!isset($poll_id)) {
             $this->core->addErrorMessage("Invalid Poll ID");
@@ -653,7 +653,7 @@ class PollController extends AbstractController {
     /**
      * @AccessControl(role="INSTRUCTOR")
      */
-    #[Route("/courses/{_semester}/{_course}/polls/hasAnswers", methods = {"POST"})]
+    #[Route("/courses/{_semester}/{_course}/polls/hasAnswers", methods: {"POST"})]
     public function hasAnswers() {
         $option_id  = (int) $_POST['option_id'];
         if (empty($option_id)) {
@@ -670,7 +670,7 @@ class PollController extends AbstractController {
     /**
      * @AccessControl(role="INSTRUCTOR")
      */
-    #[Route("/courses/{_semester}/{_course}/polls/export", methods = {"GET"})]
+    #[Route("/courses/{_semester}/{_course}/polls/export", methods: {"GET"})]
     public function getPollExportData() {
         /** @var Poll[] */
         $polls = $this->core->getCourseEntityManager()->getRepository(Poll::class)->findAll();
@@ -690,7 +690,7 @@ class PollController extends AbstractController {
     /**
      * @AccessControl(role="INSTRUCTOR")
      */
-    #[Route("/courses/{_semester}/{_course}/polls/import", methods = {"POST"})]
+    #[Route("/courses/{_semester}/{_course}/polls/import", methods: {"POST"})]
     public function importPollsFromJSON(): RedirectResponse {
         $em = $this->core->getCourseEntityManager();
         $filename = $_FILES["polls_file"]["tmp_name"];

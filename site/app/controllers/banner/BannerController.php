@@ -32,7 +32,7 @@ class BannerController extends AbstractController {
         return new WebResponse(BannerView::class, 'showEventBanners', $communityEventBanners);
     }
 
-    #[Route("/community_event/upload", methods = {"POST"})]
+    #[Route("/community_event/upload", methods: {"POST"})]
     public function ajaxUploadEventFiles(): JsonResponse {
         $upload_path = FileUtils::joinPaths($this->core->getConfig()->getSubmittyPath(), "community_events");
 
@@ -162,7 +162,7 @@ class BannerController extends AbstractController {
 
     /**
      */
-    #[Route("/community_events/delete", methods = {"POST"})]
+    #[Route("/community_events/delete", methods: {"POST"})]
     public function ajaxDeleteEventFiles(): JsonResponse {
         $entity_manager = $this->core->getSubmittyEntityManager();
         $event_repository = $entity_manager->getRepository(BannerImage::class);
