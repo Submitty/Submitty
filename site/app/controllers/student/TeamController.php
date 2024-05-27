@@ -74,7 +74,7 @@ class TeamController extends AbstractController {
 
         if ($gradeable->isVcs()) {
             $config = $this->core->getConfig();
-            AdminGradeableController::enqueueGenerateRepos($config->getTerm(), $config->getCourse(), $gradeable_id);
+            AdminGradeableController::enqueueGenerateRepos($config->getTerm(), $config->getCourse(), $gradeable_id, $gradeable->getVcsSubdirectory());
         }
 
         $this->core->redirect($return_url);
@@ -431,7 +431,9 @@ class TeamController extends AbstractController {
         $this->core->redirect($return_url);
     }
 
-    #[Route("/courses/{_semester}/{_course}/gradeable/{gradeable_id}/team/seek/stop", methods: ["POST"])]
+    /**
+     * @Route("/courses/{_semester}/{_course}/gradeable/{gradeable_id}/team/seek/stop")
+     */
     public function stopSeekTeam($gradeable_id) {
         $user_id = $this->core->getUser()->getId();
 
@@ -453,8 +455,9 @@ class TeamController extends AbstractController {
         $this->core->redirect($return_url);
     }
 
-
-    #[Route("/courses/{_semester}/{_course}/gradeable/{gradeable_id}/team/setname")]
+    /**
+     * @Route("/courses/{_semester}/{_course}/gradeable/{gradeable_id}/team/setname")
+     */
     public function setTeamName($gradeable_id): RedirectResponse {
         $user_id = $this->core->getUser()->getId();
 

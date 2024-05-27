@@ -16,6 +16,25 @@ export function getCurrentSemester() {
 }
 
 /**
+* Get the API key for the given user_id and password
+* @param {String} [password]
+* @param {String} [user_id]
+* @returns {String}
+*/
+export function getApiKey(user_id, password) {
+    return cy.request({
+        method: 'POST',
+        url: `${Cypress.config('baseUrl')}/api/token`,
+        body: {
+            user_id: user_id,
+            password: password,
+        },
+    }).then((response) => {
+        return response.body.data.token;
+    });
+}
+
+/**
 * Build a courseURL based on an array of 'parts', e.g [foo, bar] -> courses/s21/foo/bar
 *
 * @param {String[]} [parts=[]] array of parts to string together
