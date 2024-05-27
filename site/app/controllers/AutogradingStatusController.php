@@ -16,7 +16,7 @@ class AutogradingStatusController extends AbstractController {
     /**
      * @return WebResponse | MultiResponse
      */
-    #[Route("/autograding_status", methods={"GET"})]
+    #[Route("/autograding_status", methods = {"GET"})]
     public function getGradingDonePage(): ResponseInterface {
         if (empty($this->core->getQueries()->getInstructorLevelAccessCourse($this->core->getUser()->getId()))) {
             return new MultiResponse(
@@ -36,7 +36,7 @@ class AutogradingStatusController extends AbstractController {
      * Used to continuous in the page's continuous updates
      * @return JsonResponse
      */
-    #[Route("/autograding_status/get_update", methods={"GET"})]
+    #[Route("/autograding_status/get_update", methods = {"GET"})]
     public function getProgress(): JsonResponse {
         if (empty($this->core->getQueries()->getInstructorLevelAccessCourse($this->core->getUser()->getId()))) {
             return JsonResponse::getFailResponse("You do not have access to this endpoint.");
@@ -49,7 +49,7 @@ class AutogradingStatusController extends AbstractController {
      * Attempts to read the stack trace and find any error message
      * @return JsonResponse
      */
-    #[Route("/autograding_status/get_stack", methods={"GET"})]
+    #[Route("/autograding_status/get_stack", methods = {"GET"})]
     public function getErrorStackTrace(): JsonResponse {
         if (empty($this->core->getQueries()->getInstructorLevelAccessCourse($this->core->getUser()->getId()))) {
             return JsonResponse::getFailResponse("You do not have access to this endpoint.");

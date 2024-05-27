@@ -90,7 +90,7 @@ class CalendarController extends AbstractController {
 
     /**
      */
-    #[Route("/calendar/items/new", methods={"POST"})]
+    #[Route("/calendar/items/new", methods = {"POST"})]
     public function createMessage(): RedirectResponse {
         // Checks if the values exist that are set and returns an error message if not
         if (isset($_POST['type'])) {
@@ -165,7 +165,7 @@ class CalendarController extends AbstractController {
         return new RedirectResponse($this->core->buildUrl(['calendar']));
     }
 
-    #[Route("/calendar/items/edit", methods={"POST"})]
+    #[Route("/calendar/items/edit", methods = {"POST"})]
     public function editMessage(): RedirectResponse {
         // Checks if the values exist that are set and returns an error message if not
         if (isset($_POST['type'])) {
@@ -244,7 +244,7 @@ class CalendarController extends AbstractController {
         return new RedirectResponse($this->core->buildUrl(['calendar']));
     }
 
-    #[Route("/calendar/items/delete", methods={"POST"})]
+    #[Route("/calendar/items/delete", methods = {"POST"})]
     public function deleteMessage(): ResponseInterface {
         if (isset($_POST['id'])) {
             $id = $_POST['id'];
