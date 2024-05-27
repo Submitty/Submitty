@@ -2006,7 +2006,6 @@ function toggleMarkdown(post_box_id, triggered) {
     $(`#markdown_input_${post_box_id}`).val($(`#markdown_input_${post_box_id}`).val() == 0 ? '1':'0');
     $(`#markdown-info-${post_box_id}`).toggleClass('disabled');
     Cookies.set('markdown_enabled', $(`#markdown_input_${post_box_id}`).val(), { path: '/', expires: 365 });
-    console.log($(`#markdown_input_${post_box_id}`).val());
 }
 
 // eslint-disable-next-line no-unused-vars
