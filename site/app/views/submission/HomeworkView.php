@@ -206,11 +206,11 @@ class HomeworkView extends AbstractView {
 
         $diff = $date->diff($daylight_spring)->days;
         $diff2 = $date->diff($daylight_fall)->days;
-        
+
         if (abs($diff) <= 7 || abs($diff2) <= 7) {
             $daylight_message_required = true;
         }
-           
+  
         // ------------------------------------------------------------
         // IF STUDENT HAS ALREADY SUBMITTED AND THE ACTIVE VERSION IS LATE, PRINT LATE DAY INFORMATION FOR THE ACTIVE VERSION
         if ($active_version >= 1 && $active_days_late > 0) {
