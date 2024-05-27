@@ -5,23 +5,19 @@ describe('Test Rainbow Grading', () => {
 
     });
     it('Enable viewing of rainbow grades and generating the rainbow grading', () => {
-        // enabled the rainbow grades
         cy.get('[data-testid="display-rainbow-grades-summary"]').then(($checkbox) => {
             if (!$checkbox.prop('checked')) {
                 cy.get('[data-testid="display-rainbow-grades-summary"]').check();
             }
         });
         cy.get('[data-testid="display-rainbow-grades-summary"]').should('be.checked');
-        // cy.visit(['sample', 'grades']);
-        // cy.get('[data-testid="rainbow-grades"]').should('contain', 'No grades are available...');
-        // generating the rainbow grading
         cy.visit(['sample', 'reports', 'rainbow_grades_customization']);
-        cy.get('#display_grade_summary').then(($checkbox) => {
+        cy.get('[data-testid="display-grade_summary"]').then(($checkbox) => {
             if (!$checkbox.prop('checked')) {
-                cy.get('#display_grade_summary').check();
+                cy.get('[data-testid="display-grade_summary"]').check();
             }
         });
-        cy.get('#display_grade_summary').should('be.checked');
+        cy.get('[data-testid="display-grade_summary"]').should('be.checked');
         cy.get('[data-testid="display-benchmarks-average"]').check();
         cy.get('[data-testid="display-benchmarks-stddev"]').check();
         cy.get('[data-testid="display-benchmarks-perfect"]').check();
