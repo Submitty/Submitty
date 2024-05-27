@@ -121,10 +121,10 @@ const SubmitAndCheckMessage = (gradeable_type, upload_file1, invalid_late_day, v
 
 it('Check for a clock message near daylight savings times', () => {
     /*
-    First we set the date to a date close to the spring daylight savings time and then check that the message appears. 
+    First we set the date to a date close to the spring daylight savings time and then check that the message appears.
     Then we change the date to a month later, and check that the "daylight" message doesn't appear.
     */
-   
+
     const dateToSet = new Date();
     const daylight_spring = new Date('2024-03-10');
     const daylight_fall = new Date('2024-11-03');
@@ -147,7 +147,7 @@ it('Check for a clock message near daylight savings times', () => {
         cy.get('#daylight').should('not.exist');
     }
     cy.logout();
-    
+
 });
 
 describe('Test warning messages for non team gradeable', () => {
@@ -399,6 +399,6 @@ describe('Test warning messages for team gradeable', () => {
         });
     });
 
-    
+
     //TO DO https://github.com/Submitty/Submitty/issues/9549 , Add test case to make sure the bugfix worked
 });
