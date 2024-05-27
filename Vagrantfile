@@ -108,6 +108,14 @@ Vagrant.configure(2) do |config|
     config.env.enable
   end
 
+  # Warn the user if they attempt to re-provision
+  if ARGV[0] == 'provision' and not Dir.glob(".vagrant/machines/*/*/action_provision").empty?
+    print "\e[31mWarning: Re-provisioning will destroy the existing virtual machine state.\nAre you sure you would like to proceed?\e[0m [y/N] "
+    if STDIN.gets.chomp.downcase != 'y'
+      exit
+    end
+  end
+
   if ON_CI
     config.ssh.insert_key = false
   else 
