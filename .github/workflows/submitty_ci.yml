@@ -27,6 +27,36 @@ concurrency:
 
 
 jobs:
+  ansible-lint:
+    runs-on: ubuntu-22.04
+    defaults:
+      run:
+        working-directory: site
+    steps:
+      - uses: actions/checkout@v4
+      - name: Run ansible-lint
+        uses: ansible/ansible-lint@main
+        with:
+          args: ansible
+
+
+  ansible-molecule:
+    runs-on: ubuntu-22.04
+    defaults:
+      run:
+        working-directory: molecule
+    steps:
+      - uses: actions/checkout@v4
+      - name: Set up python 3
+        uses: actions/setup-python@v2
+        with:
+          python-version: 3.x
+      - name: Install dependencies
+        run: pip3 install ansible molecule molecule-plugins[docker]
+      - name: Run molecule tests
+        run: molecule test
+
+
   css-lint:
     runs-on: ubuntu-22.04
     defaults:
