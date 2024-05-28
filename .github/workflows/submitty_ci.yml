@@ -38,15 +38,15 @@ jobs:
         run: |
           pwd
           ls -la
-#      - name: Run ansible-lint
-#        uses: ansible/ansible-lint@main
+      - name: Run ansible-lint
+        uses: ansible/ansible-lint@main
 
 
   ansible-molecule:
     runs-on: ubuntu-22.04
     defaults:
       run:
-        working-directory: site/.setup/ansible
+        working-directory: .setup/ansible
     steps:
       - uses: actions/checkout@v4
       - name: Set up python 3
