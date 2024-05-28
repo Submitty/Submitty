@@ -31,18 +31,17 @@ const replyToThread = (title, reply) => {
 
 const upduckPost = (thread_title) => {
     cy.get('.thread-left-cont > .thread-list-item').contains(thread_title).click();
-    cy.wait(1000);
+    cy.get('.create-post-head').should('contain', thread_title);
+    cy.get('.post_box.first_post > [data-cy="like_count"]').should('have.text', 0);
     cy.get('.post_box.first_post').find('.upduck-button').click();
-    // For some reason the upduck isn't registered immediately
-    cy.wait(2000);
+    cy.get('.post_box.first_post > [data-cy="like_count"]').should('have.text', 1);
 };
 
 const checkStatsUpducks = (fullName, numUpducks) => {
     // Check the stats page for a user with fullName and
     // number of upducks numUpducks
-    cy.get('.dropdown.more-dropdown').contains(' More ').click();
+    cy.get('.dropdown.more-dropdown').contains('More').click();
     cy.get('#forum_stats').click();
-    cy.wait(1000);
     let found = false;
     cy.get('.user_stat').each(($el) => {
         const name = $el.find('td').first().text().trim();
@@ -55,7 +54,6 @@ const checkStatsUpducks = (fullName, numUpducks) => {
     }).then(() => {
         expect(found).to.be.true;
         cy.get('[title="Back to threads"]').click();
-        cy.wait(1000);
     });
 };
 
