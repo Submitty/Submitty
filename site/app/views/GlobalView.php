@@ -102,7 +102,7 @@ class GlobalView extends AbstractView {
             "imageDataArray" => $images_data_array,
             "errorImageData" => $error_image_data,
             "html_lang" => $html_lang,
-            "serverTime" => $serverTime,
+            "server_time" => time()
         ]);
     }
 
