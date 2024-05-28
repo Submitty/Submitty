@@ -26,7 +26,7 @@
         var serverTime = {{ server_time }};
         var timeDifference = serverTime * 1000 - browserTime;
         if (Math.abs(timeDifference) > 120000) {
-            document.querySelector('#server-time-not-aligned').removeAttr('hidden');
+            document.querySelector('#server-time-not-aligned').removeAttribute('hidden');
         }
     </script>
 
