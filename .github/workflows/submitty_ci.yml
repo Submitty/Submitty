@@ -48,6 +48,8 @@ jobs:
       - uses: actions/checkout@v4
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v1
+      - name: Pull Docker image
+        run: docker pull geerlingguy/docker-ubuntu2204-ansible
       - name: Set up python 3
         uses: actions/setup-python@v2
         with:
