@@ -8,8 +8,10 @@ use app\libraries\DateUtils;
 use app\libraries\GradeableType;
 use app\models\gradeable\Gradeable;
 use app\models\gradeable\Component;
+use app\models\gradeable\GradeableUtils;
 use app\models\gradeable\Mark;
 use app\libraries\FileUtils;
+use app\libraries\response\DownloadResponse;
 use app\libraries\response\JsonResponse;
 use app\libraries\routers\AccessControl;
 use Symfony\Component\Routing\Annotation\Route;
@@ -20,9 +22,7 @@ use Symfony\Component\Routing\Annotation\Route;
  * @AccessControl(role="INSTRUCTOR")
  */
 class AdminGradeableController extends AbstractController {
-    /**
-     * @Route("/courses/{_semester}/{_course}/gradeable/{gradeable_id}/update", methods={"GET"})
-     */
+    #[Route("/courses/{_semester}/{_course}/gradeable/{gradeable_id}/update", methods: ["GET"])]
     public function editGradeableRequest($gradeable_id, $nav_tab = 0) {
         try {
             $gradeable = $this->core->getQueries()->getGradeableConfig($gradeable_id);
@@ -52,12 +52,10 @@ class AdminGradeableController extends AbstractController {
 
     /**
      * Creates a gradeable based on uploaded JSON data
-     * @return JsonResponse
-     * @AccessControl(role="INSTRUCTOR")
-     * @Route("/api/{_semester}/{_course}/upload", methods={"POST"})
-     * @Route("/courses/{_semester}/{_course}/upload", methods={"POST"})
      */
-    public function uploadGradeable() {
+    #[Route("/api/{_semester}/{_course}/upload", methods: ["POST"])]
+    #[Route("/courses/{_semester}/{_course}/upload", methods: ["POST"])]
+    public function uploadGradeable(): JsonResponse {
         $values = [
             'title' => '',
             'instructions_url' => '',
@@ -123,16 +121,33 @@ class AdminGradeableController extends AbstractController {
         }
         if (array_key_exists('discussion_thread_id', $_POST)) {
             $values['discussion_based'] = $_POST['discussion_based'];
-            $values['discussion_tread_id'] = $_POST['discussion_thread_id'];
+            $values['discussion_thread_id'] = $_POST['discussion_thread_id'];
         }
         if (array_key_exists('ta_grading', $_POST)) {
             $values['ta_grading'] = $_POST['ta_grading'];
             if (array_key_exists('grade_inquiries', $_POST)) {
-                $values['grade_inquiry_allowed'] = $_POST['grade_inquiries'];
+                $values['grade_inquiry_allowed'] = $_POST['grade_inquiries'] ?? 'false';
                 $values['grade_inquiry_per_component_allowed'] = $_POST['grade_inquiries_per_component'] ?? 'false';
             }
         }
 
+        if (array_key_exists('dates', $_POST)) {
+            $dates = $_POST['dates'];
+            $values['ta_view_start_date'] = $dates['ta_view_start_date'] ?? null;
+            $values['grade_start_date'] = $dates['grade_start_date'] ?? null;
+            $values['grade_due_date'] = $dates['grade_due_date'] ?? null;
+            $values['grade_released_date'] = $dates['grade_released_date'] ?? null;
+            $values['team_lock_date'] = $dates['team_lock_date'] ?? null;
+            $values['submission_open_date'] = $dates['submission_open_date'] ?? null;
+            $values['submission_due_date'] = $dates['submission_due_date'] ?? null;
+            $values['grade_inquiry_start_date'] = $dates['grade_inquiry_start_date'] ?? null;
+            $values['grade_inquiry_due_date'] = $dates['grade_inquiry_due_date'] ?? null;
+
+            $values['has_due_date'] = $dates['has_due_date'] ?? 'true';
+            $values['has_release_date'] = $dates['has_released_date'] ??  'true';
+            $values['late_submission_allowed'] = $dates['late_submission_allowed'] ?? 'true';
+            $values['late_days'] = $dates['late_days'] ?? 0;
+        }
         $values['syllabus_bucket'] = $_POST['syllabus_bucket'] ?? 'Homework';
         try {
             $build_result = $this->createGradeable($_POST['id'], $values);
@@ -142,17 +157,167 @@ class AdminGradeableController extends AbstractController {
             }
             return JsonResponse::getSuccessResponse($_POST['id']);
         }
+        catch (ValidationException $e) {
+            return JsonResponse::getErrorResponse($e->getMessage());
+        }
         catch (\Exception $e) {
             return JsonResponse::getErrorResponse($e->getMessage());
         }
+    }
+
+    #[Route("/api/{_semester}/{_course}/{gradeable_id}/download", methods: ["GET"])]
+    public function apiDownloadJson(string $gradeable_id): JsonResponse {
+        try {
+            $gradeable = $this->core->getQueries()->getGradeableConfig($gradeable_id);
+        }
+        catch (\InvalidArgumentException $exception) {
+            return JsonResponse::getErrorResponse($exception->getMessage());
+        }
+        catch (\Exception $exception) {
+            return JsonResponse::getErrorResponse($exception->getMessage());
+        }
+        return JsonResponse::getSuccessResponse($this->getGradeableJson($gradeable));
+    }
+
+    #[Route("/courses/{_semester}/{_course}/{gradeable_id}/download", methods: ["GET"])]
+    public function webDownloadJson(string $gradeable_id): DownloadResponse {
+        $gradeable = $this->core->getQueries()->getGradeableConfig($gradeable_id);
+        return DownloadResponse::getDownloadResponse(
+            json_encode($this->getGradeableJson($gradeable), JSON_PRETTY_PRINT),
+            $gradeable->getId() . '.json'
+        );
+    }
+
+    /**
+     * Returns a JSON array to recreate the gradeable using
+     * the 'uploadGradeable' function.
+     * @param Gradeable $gradeable
+     * @return array{
+     *     title: string|mixed,
+     *     type: string|mixed,
+     *     id: string|mixed,
+     *     instructions_url: string|mixed,
+     *     syllabus_bucket: string|mixed,
+     *     autograding_config_path: string|mixed,
+     *     bulk_upload: boolean,
+     *     team_gradeable?: array{
+     *         team_max_size: int,
+     *         inherit_from: string|mixed,
+     *     },
+     *     ta_grading?: boolean,
+     *     grade_inquiries?: boolean,
+     *     grade_inquiries_per_component?: boolean,
+     *     discussion_based?: boolean,
+     *     discussion_thread_id?: boolean,
+     *     vcs?: array{
+     *         repository_type?: string|mixed,
+     *         vcs_path?: string|mixed,
+     *         vcs_subdirectory?: string|mixed,
+     *     },
+     *     dates: array{
+     *        ta_view_start_date: string|mixed,
+     *        grade_start_date: string|mixed,
+     *        grade_due_date: string|mixed,
+     *        grade_released_date: string|mixed,
+     *        team_lock_date: string|mixed,
+     *        submission_open_date: string|mixed,
+     *        submission_due_date: string|mixed,
+     *        grade_inquiry_start_date: string|mixed,
+     *        grade_inquiry_due_date: string|mixed,
+     *        has_due_date: boolean,
+     *        has_release_date: boolean,
+     *        late_submission_allowed: boolean,
+     *        late_days: integer,
+     *     }
+     * }
+     */
+    public function getGradeableJson(Gradeable $gradeable): array {
+        $return_json = [
+            'title' => $gradeable->getTitle(),
+            'type' => GradeableType::typeToString($gradeable->getType()),
+            'id' => $gradeable->getId(),
+            'instructions_url' => $gradeable->getInstructionsUrl(),
+            'syllabus_bucket' => $gradeable->getSyllabusBucket(),
+            'autograding_config_path' => $gradeable->getAutogradingConfigPath()
+        ];
+        if ($gradeable->getType() === GradeableType::ELECTRONIC_FILE) {
+            $return_json['bulk_upload'] = $gradeable->isBulkUpload();
+            if ($gradeable->isTeamAssignment()) {
+                $team_properties = [
+                    'team_max_size' => $gradeable->getTeamSizeMax(),
+                    'inherit_from' => ''
+                ];
+                $return_json['team_gradeable'] = $team_properties;
+            }
+            if ($gradeable->isTaGrading()) {
+                $return_json['ta_grading'] = true;
+                if ($gradeable->isGradeInquiryAllowed()) {
+                    $return_json['grade_inquiries'] = true;
+                    if ($gradeable->isGradeInquiryPerComponentAllowed()) {
+                        $return_json['grade_inquiries_per_component'] = true;
+                    }
+                }
+            }
+            if ($gradeable->isDiscussionBased()) {
+                $return_json['discussion_based'] = true;
+                $return_json['discussion_thread_id'] = $gradeable->getDiscussionThreadId();
+            }
+            if ($gradeable->isVcs()) {
+                $vcs_values = [];
+                switch ($gradeable->getVcsHostType()) {
+                    case 0:
+                        $vcs_values['repository_type'] = 'submitty-hosted';
+                        break;
+                    case 1:
+                        $vcs_values['repository_type'] = 'submitty-hosted-url';
+                        $vcs_values['vcs_path'] = $gradeable->getVcsPartialPath();
+                        break;
+                    case 2:
+                        $vcs_values['repository_type'] = 'public-github';
+                        break;
+                    case 3:
+                        $vcs_values['repository_type'] = 'private-github';
+                        break;
+                    case 4:
+                        $vcs_values['repository_type'] = 'self-hosted';
+                        $vcs_values['vcs_path'] = $gradeable->getVcsPartialPath();
+                        break;
+                    default:
+                        $vcs_values['repository_type'] = 'invalid-type';
+                        break;
+                }
+                if ($gradeable->isUsingSubdirectory()) {
+                    $vcs_values['subdirectory'] = $gradeable->getVcsSubdirectory();
+                }
+                $return_json['vcs'] = $vcs_values;
+            }
+
+            $dates = [];
+            $dates['ta_view_start_date'] = $gradeable->getTaViewStartDate()->format('Y-m-d H:i:s');
+            $dates['grade_start_date'] = $gradeable->getGradeStartDate()->format('Y-m-d H:i:s');
+            $dates['grade_due_date'] = $gradeable->getGradeDueDate()->format('Y-m-d H:i:s');
+            $dates['grade_released_date'] = $gradeable->getGradeReleasedDate()->format('Y-m-d H:i:s');
+            $dates['team_lock_date'] = $gradeable->getTeamLockDate()->format('Y-m-d H:i:s');
+            $dates['submission_open_date'] = $gradeable->getSubmissionOpenDate()->format('Y-m-d H:i:s');
+            $dates['submission_due_date'] = $gradeable->getSubmissionDueDate()->format('Y-m-d H:i:s');
+            $dates['grade_inquiry_start_date'] = $gradeable->getGradeInquiryStartDate()->format('Y-m-d H:i:s');
+            $dates['grade_inquiry_due_date'] = $gradeable->getGradeInquiryDueDate()->format('Y-m-d H:i:s');
+
+            $dates['has_due_date'] = $gradeable->hasDueDate();
+            $dates['has_release_date'] = $gradeable->hasReleaseDate();
+            $dates['late_submission_allowed'] = $gradeable->isLateSubmissionAllowed();
+            $dates['late_days'] = $gradeable->getLateDays();
+            $return_json['dates'] = $dates;
+        }
+        return $return_json;
     }
 
     /**
      * Displays the 'new' page, populating the first-page properties with the
      *  provided gradeable's data
      * @param string|null $template_id
-     * @Route("/courses/{_semester}/{_course}/gradeable", methods={"GET"})
      */
+    #[Route("/courses/{_semester}/{_course}/gradeable", methods: ["GET"])]
     public function newPage($template_id = null) {
         $this->core->getOutput()->addBreadcrumb("New Gradeable");
 
@@ -188,7 +353,6 @@ class AdminGradeableController extends AbstractController {
     //view the page with pulled data from the gradeable to be edited
     private function editPage(Gradeable $gradeable, $semester, $course, $nav_tab = 0) {
         $this->core->getOutput()->addBreadcrumb('Edit Gradeable');
-
         // Serialize the components for numeric/checkpoint rubrics
         $gradeable_components_enc = array_map(function (Component $c) {
             return $c->toArray();
@@ -359,6 +523,7 @@ class AdminGradeableController extends AbstractController {
             'vcs_base_url' => $vcs_base_url,
             'vcs_partial_path' => $gradeable->getVcsPartialPath(),
             'vcs_subdirectory' => $gradeable->getVcsSubdirectory(),
+            'download_url' => $this->core->buildCourseUrl([$gradeable->getId(), 'download']),
             'using_subdirectory' => $gradeable->isUsingSubdirectory(),
             'is_pdf_page' => $gradeable->isPdfUpload(),
             'is_pdf_page_student' => $gradeable->isStudentPdfUpload(),
@@ -400,9 +565,9 @@ class AdminGradeableController extends AbstractController {
      * Called when user presses submit on an Edit Students popup for peer matrix. Updates the database with
      *  the grader's new students.
      * @param String $gradeable_id
-     * @Route("/courses/{_semester}/{_course}/gradeable/{gradeable_id}/update_peer_assignment", methods={"POST"})
      * @AccessControl(role="INSTRUCTOR")
      */
+    #[Route("/courses/{_semester}/{_course}/gradeable/{gradeable_id}/update_peer_assignment", methods: ["POST"])]
     public function editGraderPeerSubmit($gradeable_id) {
         $grader_id = $_POST['grader_id'];
         //if entire grader row is removed, just remove grader and their students
@@ -435,9 +600,9 @@ class AdminGradeableController extends AbstractController {
      * Called when user presses submit on an Add New Grader to Matrix popup for peer matrix. Updates the
      * database with the grader's new students.
      * @param String $gradeable_id
-     * @Route("/courses/{_semester}/{_course}/gradeable/{gradeable_id}/new_peer_grader", methods={"POST"})
      * @AccessControl(role="INSTRUCTOR")
      */
+    #[Route("/courses/{_semester}/{_course}/gradeable/{gradeable_id}/new_peer_grader", methods: ["POST"])]
     public function newGraderPeerSubmit($gradeable_id) {
         $new_grader_id = $_POST['new_grader_id'];
         // add the new grader and all their students
@@ -548,9 +713,7 @@ class AdminGradeableController extends AbstractController {
         $gradeable->setComponents([$component]);
     }
 
-    /**
-     * @Route("/courses/{_semester}/{_course}/gradeable/{gradeable_id}/rubric", methods={"POST"})
-     */
+    #[Route("/courses/{_semester}/{_course}/gradeable/{gradeable_id}/rubric", methods: ["POST"])]
     public function updateRubricRequest($gradeable_id) {
         $gradeable = $this->tryGetGradeable($gradeable_id);
         if ($gradeable === false) {
@@ -836,9 +999,7 @@ class AdminGradeableController extends AbstractController {
         $this->core->getQueries()->updateGradeable($gradeable);
     }
 
-    /**
-     * @Route("/courses/{_semester}/{_course}/gradeable/{gradeable_id}/graders", methods={"POST"})
-     */
+    #[Route("/courses/{_semester}/{_course}/gradeable/{gradeable_id}/graders", methods: ["POST"])]
     public function updateGradersRequest($gradeable_id) {
         $gradeable = $this->tryGetGradeable($gradeable_id);
         if ($gradeable === false) {
@@ -868,9 +1029,7 @@ class AdminGradeableController extends AbstractController {
         $this->core->getQueries()->updateGradeable($gradeable);
     }
 
-    /**
-     * @Route("/courses/{_semester}/{_course}/gradeable", methods={"POST"})
-     */
+    #[Route("/courses/{_semester}/{_course}/gradeable", methods: ["POST"])]
     public function createGradeableRequest() {
         $gradeable_id = $_POST['id'] ?? '';
 
@@ -943,7 +1102,7 @@ class AdminGradeableController extends AbstractController {
                 'student_view_after_grades' => false,
                 'student_download' => true,
                 'student_submit' => true,
-                'late_days' => $default_late_days,
+                'late_days' => $details['late_days'] ?? $default_late_days,
                 'precision' => 0.5
             ];
             $gradeable_create_data = array_merge($gradeable_create_data, $non_template_property_values);
@@ -1008,7 +1167,7 @@ class AdminGradeableController extends AbstractController {
                 'vcs' => false,
                 'vcs_subdirectory' => $subdir,
                 'using_subdirectory' => $using_subdirectory,
-                'vcs_host_type' => -1,
+                'vcs_host_type' => GradeableUtils::VCS_TYPE_NONE,
                 'vcs_partial_path' => $vcs_partial_path
             ];
             $gradeable_create_data = array_merge($gradeable_create_data, $non_vcs_property_values);
@@ -1055,8 +1214,8 @@ class AdminGradeableController extends AbstractController {
                 'peer_blind' => 3,
                 'depends_on' => null,
                 'depends_on_points' => null,
-                'has_due_date' => true,
-                'has_release_date' => true
+                'has_due_date' => $details['has_due_date'] ?? true,
+                'has_release_date' => $details['has_release_date'] ?? true
             ]);
         }
         else {
@@ -1068,11 +1227,11 @@ class AdminGradeableController extends AbstractController {
                 'vcs_subdirectory' => '',
                 'using_subdirectory' => false,
                 'vcs_partial_path' => '',
-                'vcs_host_type' => -1,
+                'vcs_host_type' => GradeableUtils::VCS_TYPE_NONE,
                 'autograding_config_path' => '',
                 'peer_grading' => false,
                 'peer_grade_set' => 0,
-                'late_submission_allowed' => true,
+                'late_submission_allowed' => $details['late_submission_allowed'] ?? true,
                 'hidden_files' => ""
             ]);
         }
@@ -1083,17 +1242,30 @@ class AdminGradeableController extends AbstractController {
         if ($tonight->diff($this->core->getDateTimeNow())->h < 12) {
             $tonight->add(new \DateInterval('P1D'));
         }
-        $gradeable_create_data = array_merge($gradeable_create_data, [
-            'ta_view_start_date' => (clone $tonight),
-            'grade_start_date' => (clone $tonight)->add(new \DateInterval('P10D')),
-            'grade_due_date' => (clone $tonight)->add(new \DateInterval('P14D')),
-            'grade_released_date' => (clone $tonight)->add(new \DateInterval('P14D')),
-            'team_lock_date' => (clone $tonight)->add(new \DateInterval('P7D')),
-            'submission_open_date' => (clone $tonight),
-            'submission_due_date' => (clone $tonight)->add(new \DateInterval('P7D')),
-            'grade_inquiry_start_date' => (clone $tonight)->add(new \DateInterval('P15D')),
-            'grade_inquiry_due_date' => (clone $tonight)->add(new \DateInterval('P21D'))
-        ]);
+        $date_names = [
+            'ta_view_start_date' => '',
+            'grade_start_date' => 'P10D',
+            'grade_due_date' => 'P14D',
+            'grade_released_date' => 'P14D',
+            'team_lock_date' => 'P7D',
+            'submission_open_date' => '',
+            'submission_due_date' => 'P7D',
+            'grade_inquiry_start_date' => 'P15D',
+            'grade_inquiry_due_date' => 'P21D'
+        ];
+
+        foreach ($date_names as $time_string => $tonight_modifier) {
+            $gradeable_create_data = array_merge(
+                $gradeable_create_data,
+                [
+                    $time_string => $this->getDateTimeForGradeable(
+                        $details[$time_string] ?? '',
+                        $tonight,
+                        $tonight_modifier
+                    )
+                ]
+            );
+        }
 
         // Finally, construct the gradeable
         $gradeable = new Gradeable($this->core, $gradeable_create_data);
@@ -1128,16 +1300,27 @@ class AdminGradeableController extends AbstractController {
             $this->enqueueGenerateRepos(
                 $this->core->getConfig()->getTerm(),
                 $this->core->getConfig()->getCourse(),
-                $repo_name
+                $repo_name,
+                $subdir
             );
         }
 
         return $build_status;
     }
 
-    /**
-     * @Route("/courses/{_semester}/{_course}/gradeable/{gradeable_id}/update", methods={"POST"})
-     */
+    public function getDateTimeForGradeable(string $time_string, \DateTime $tonight, string $tonight_modifier = ''): \DateTime {
+        if ($time_string !== '') {
+            return $this->core->getDateTimeSpecific($time_string);
+        }
+        if ($tonight_modifier !== '') {
+            return (clone $tonight)->add(new \DateInterval($tonight_modifier));
+        }
+        else {
+            return (clone $tonight);
+        }
+    }
+
+    #[Route("/courses/{_semester}/{_course}/gradeable/{gradeable_id}/update", methods: ["POST"])]
     public function updateGradeableRequest($gradeable_id) {
         $gradeable = $this->tryGetGradeable($gradeable_id);
         if ($gradeable === false) {
@@ -1343,9 +1526,7 @@ class AdminGradeableController extends AbstractController {
         return $updated_properties;
     }
 
-    /**
-     * @Route("/courses/{_semester}/{_course}/gradeable/{gradeable_id}/delete", methods={"POST"})
-     */
+    #[Route("/courses/{_semester}/{_course}/gradeable/{gradeable_id}/delete", methods: ["POST"])]
     public function deleteGradeable($gradeable_id) {
         $gradeable = $this->tryGetGradeable($gradeable_id);
         if ($gradeable == false) {
@@ -1423,7 +1604,7 @@ class AdminGradeableController extends AbstractController {
         return null;
     }
 
-    public static function enqueueGenerateRepos($semester, $course, $g_id) {
+    public static function enqueueGenerateRepos(string $semester, string $course, string $g_id, string $subdirectory) {
         // FIXME:  should use a variable instead of hardcoded top level path
         $config_build_file = "/var/local/submitty/daemon_job_queue/generate_repos__" . $semester . "__" . $course . "__" . $g_id . ".json";
 
@@ -1431,7 +1612,8 @@ class AdminGradeableController extends AbstractController {
             "job" => "RunGenerateRepos",
             "semester" => $semester,
             "course" => $course,
-            "gradeable" => $g_id
+            "gradeable" => $g_id,
+            "subdirectory" => $subdirectory
         ];
 
         if (
@@ -1450,9 +1632,7 @@ class AdminGradeableController extends AbstractController {
         return $this->writeFormConfig($gradeable) ?? $this->enqueueBuildFile($gradeable->getId());
     }
 
-    /**
-     * @Route("/courses/{_semester}/{_course}/gradeable/{gradeable_id}/rebuild")
-     */
+    #[Route("/courses/{_semester}/{_course}/gradeable/{gradeable_id}/rebuild")]
     public function rebuildGradeableRequest($gradeable_id) {
         $gradeable = $this->core->getQueries()->getGradeableConfig($gradeable_id);
         $result = $this->enqueueBuild($gradeable);
@@ -1461,9 +1641,7 @@ class AdminGradeableController extends AbstractController {
         }
     }
 
-    /**
-     * @Route("/courses/{_semester}/{_course}/gradeable/{gradeable_id}/build_log", methods={"GET"})
-     */
+    #[Route("/courses/{_semester}/{_course}/gradeable/{gradeable_id}/build_log", methods: ["GET"])]
     public function getBuildLogs(string $gradeable_id): JsonResponse {
         $build_script_output_file = FileUtils::joinPaths($this->core->getConfig()->getCoursePath(), 'build', $gradeable_id, 'build_script_output.txt');
         $build_script_output = is_file($build_script_output_file) ? htmlentities(file_get_contents($build_script_output_file)) : null;
@@ -1473,9 +1651,7 @@ class AdminGradeableController extends AbstractController {
         return JsonResponse::getSuccessResponse([$build_script_output,$cmake_output]);
     }
 
-    /**
-     * @Route("/courses/{_semester}/{_course}/gradeable/{gradeable_id}/build_status", methods={"GET"})
-     */
+    #[Route("/courses/{_semester}/{_course}/gradeable/{gradeable_id}/build_status", methods: ["GET"])]
     public function getBuildStatusOfGradeable(string $gradeable_id): void {
         $queued_filename = $this->core->getConfig()->getTerm() . '__' . $this->core->getConfig()->getCourse() . '__' . $gradeable_id . '.json';
         $rebuilding_filename = 'PROCESSING_' . $this->core->getConfig()->getTerm() . '__' . $this->core->getConfig()->getCourse() . '__' . $gradeable_id . '.json';
@@ -1525,9 +1701,7 @@ class AdminGradeableController extends AbstractController {
         }
     }
 
-    /**
-     * @Route("/courses/{_semester}/{_course}/gradeable/{gradeable_id}/quick_link")
-     */
+    #[Route("/courses/{_semester}/{_course}/gradeable/{gradeable_id}/quick_link")]
     public function openquickLink($gradeable_id, $action) {
         $gradeable = $this->core->getQueries()->getGradeableConfig($gradeable_id);
         $dates = $gradeable->getDates();
@@ -1624,8 +1798,8 @@ class AdminGradeableController extends AbstractController {
 
     /**
      * Exports components to json and downloads for user
-     * @Route("/courses/{_semester}/{_course}/gradeable/{gradeable_id}/components/export")
      */
+    #[Route("/courses/{_semester}/{_course}/gradeable/{gradeable_id}/components/export")]
     public function exportComponentsRequest($gradeable_id) {
         $url = $this->core->buildCourseUrl();
 
@@ -1654,8 +1828,8 @@ class AdminGradeableController extends AbstractController {
 
     /**
      * Imports components from uploaded files into gradeable (single-depth array)
-     * @Route("/courses/{_semester}/{_course}/gradeable/{gradeable_id}/components/import", methods={"POST"})
      */
+    #[Route("/courses/{_semester}/{_course}/gradeable/{gradeable_id}/components/import", methods: ["POST"])]
     public function importComponents($gradeable_id) {
         // Get the gradeable
         $gradeable = $this->tryGetGradeable($gradeable_id);
@@ -1690,9 +1864,7 @@ class AdminGradeableController extends AbstractController {
         }
     }
 
-    /**
-     * @Route("/courses/{_semester}/{_course}/gradeable/{gradeable_id}/max_points")
-     */
+    #[Route("/courses/{_semester}/{_course}/gradeable/{gradeable_id}/max_points")]
     public function maxPoints($gradeable_id) {
         $gradeable = $this->tryGetGradeable($gradeable_id);
         if ($gradeable !== false) {
