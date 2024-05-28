@@ -27,19 +27,19 @@ concurrency:
 
 
 jobs:
-  ansible-lint:
-    runs-on: ubuntu-22.04
-    defaults:
-      run:
-        working-directory: .setup/ansible
-    steps:
-      - uses: actions/checkout@v4
-      - name: Print working directory
-        run: |
-          pwd
-          ls -la
-      - name: Run ansible-lint
-        uses: ansible/ansible-lint@main
+#  ansible-lint:
+#    runs-on: ubuntu-22.04
+#    defaults:
+#      run:
+#        working-directory: .setup/ansible
+#    steps:
+#      - uses: actions/checkout@v4
+#      - name: Print working directory
+#        run: |
+#          pwd
+#          ls -la
+#      - name: Run ansible-lint
+#        uses: ansible/ansible-lint@main
 
 
   ansible-molecule:
@@ -55,7 +55,9 @@ jobs:
           pwd
           ls -la
       - name: Install dependencies
-        run: pip3 install ansible molecule molecule-plugins[docker]
+        run: |
+          pip3 install ansible molecule molecule-plugins[docker]
+          pip3 install ansible-lint
       - name: Run molecule on submitty_install role
         run: molecule test
         working-directory: .setup/ansible/roles/submitty_install/
