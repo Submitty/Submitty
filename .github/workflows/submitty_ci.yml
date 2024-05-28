@@ -47,7 +47,7 @@ jobs:
     services:
       docker:
         image: docker:dind
-        options: --privileged --network host
+        options: --privileged
     steps:
       - uses: actions/checkout@v4
       - name: Set up Docker Buildx
