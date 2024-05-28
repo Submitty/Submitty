@@ -20,19 +20,43 @@ declare global {
 
 const warning_banner = document.getElementById('submission-mode-warning');
 
+// function initialsubmissionmode() {
+//     const radioBulk = document.getElementById('radio-bulk') as HTMLInputElement;
+//     const pdfSubmitButton = document.getElementById('pdf-submit-button');
+//
+//     if (radioBulk.checked && radioBulk != null) {
+//         // If 'radio-bulk' is checked, show the submit button
+//         pdfSubmitButton!.style.display = 'block';
+//         sessionStorage.setItem(`${window.gradeable_id}-submission_mode`, 'bulk-upload');
+//         const message = 'Warning: Submitting files for bulk upload!';
+//         warning_banner!.firstChild!.textContent = message;
+//     }
+//     else {
+//         pdfSubmitButton!.style.display = 'none';
+//     }
+// }
+
 function initialsubmissionmode() {
     const radioBulk = document.getElementById('radio-bulk') as HTMLInputElement;
     const pdfSubmitButton = document.getElementById('pdf-submit-button');
 
-    if (radioBulk.checked) {
-        // If 'radio-bulk' is checked, show the submit button
-        pdfSubmitButton!.style.display = 'block';
-        sessionStorage.setItem(`${window.gradeable_id}-submission_mode`, 'bulk-upload');
-        const message = 'Warning: Submitting files for bulk upload!';
-        warning_banner!.firstChild!.textContent = message;
-    }
-    else {
-        pdfSubmitButton!.style.display = 'none';
+    if (radioBulk !== null) {
+        if (radioBulk.checked) {
+            if (pdfSubmitButton !== null) {
+                pdfSubmitButton.style.display = 'block';
+            }
+            sessionStorage.setItem(`${window.gradeable_id}-submission_mode`, 'bulk-upload');
+            const warning_banner = document.getElementById('warning-banner');  // ensure warning_banner is defined
+            if (warning_banner !== null && warning_banner.firstChild !== null) {
+                const message = 'Warning: Submitting files for bulk upload!';
+                warning_banner.firstChild.textContent = message;
+            }
+        }
+        else {
+            if (pdfSubmitButton !== null) {
+                pdfSubmitButton.style.display = 'none';
+            }
+        }
     }
 }
 
