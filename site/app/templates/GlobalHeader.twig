@@ -22,12 +22,14 @@
         }
     </script>
     <script>
-        var browserTime = new Date().getTime();
-        var serverTime = {{ server_time|e('js') }};
-        var timeDifference = serverTime * 1000 - browserTime;
-        if (Math.abs(timeDifference) > 120000) {
-            document.querySelector('#server-time-not-aligned').removeAttribute('hidden');
-        }
+        document.addEventListener("DOMContentLoaded", function() {
+            var browserTime = new Date().getTime();
+            var serverTime = {{ server_time|e('js') }};
+            var timeDifference = serverTime * 1000 - browserTime;
+            if (Math.abs(timeDifference) > 120000) {
+                document.querySelector('#server-time-not-aligned').removeAttribute('hidden');
+            }
+        });
     </script>
 
     {% for css_ref in css %}
