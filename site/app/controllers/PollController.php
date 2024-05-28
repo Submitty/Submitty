@@ -99,7 +99,7 @@ class PollController extends AbstractController {
     /**
      * @return RedirectResponse|WebResponse
      */
-    #[Route("/courses/{_semester}/{_course}/polls/{poll_id}", methods: ["GET"], requirements: ["poll_id" => "\d*", ])]
+    #[Route("/courses/{_semester}/{_course}/polls/{poll_id}", methods: ["GET"], requirements: ["poll_id" => "\d*"])]
     public function showPoll(string $poll_id) {
         if (!is_numeric($poll_id)) {
             $this->core->addErrorMessage("Invalid Poll ID");
