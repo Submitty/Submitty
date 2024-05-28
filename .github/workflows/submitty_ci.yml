@@ -59,8 +59,11 @@ jobs:
           ls -la
       - name: Install dependencies
         run: pip3 install ansible molecule molecule-plugins[docker]
+      - name: test ansible playbook
+        run: ansible --version
       - name: Run molecule tests
         run: molecule test
+        working-directory: molecule
 
 
 #  css-lint:
