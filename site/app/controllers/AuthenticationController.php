@@ -207,7 +207,7 @@ class AuthenticationController extends AbstractController {
      *
      * @return MultiResponse
      */
-    #[Route("{_semester}/{_course}/authentication/vcs_qlogin")]
+    #[Route("{_semester}/{_course}/authentication/vcs_login")]
     public function vcsLogin() {
         if (
             empty($_POST['user_id'])
