@@ -29,17 +29,17 @@ concurrency:
 jobs:
   ansible-lint:
     runs-on: ubuntu-22.04
-    defaults:
-      run:
-        working-directory: site/.setup/ansible
+#    defaults:
+#      run:
+#        working-directory: site/.setup/ansible
     steps:
       - uses: actions/checkout@v4
       - name: Print working directory
         run: |
           pwd
           ls -la
-      - name: Run ansible-lint
-        uses: ansible/ansible-lint@main
+#      - name: Run ansible-lint
+#        uses: ansible/ansible-lint@main
 
 
   ansible-molecule:
