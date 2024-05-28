@@ -1271,6 +1271,8 @@ body.no-scroll {
 .simple-grade-grader,
 .simple-grade-date {
     display: none;
+    background-color: none;
+    color: inherit;
 }
 
 .tooltip {

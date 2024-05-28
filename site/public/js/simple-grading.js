@@ -19,6 +19,15 @@ function updateVisibility() {
         } else {
             gradeTimeElement.hide();
         }
+        // Trigger repaint by applying a temporary style
+        graderElement.css('opacity', '0.99');
+        dateElement.css('opacity', '0.99');
+
+        // Remove the temporary style
+        setTimeout(() => {
+            graderElement.css('opacity', '');
+            dateElement.css('opacity', '');
+        }, 0);
     });
 }
 
