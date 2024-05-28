@@ -6,27 +6,37 @@ function updateVisibility() {
     const showDates = $('#show-dates').is(':checked');
     $('.cell-grade').each(function() {
         const graderElement = $(this).find('.simple-grade-grader');
-        const gradeTimeElement = $(this).find('.simple-grade-date');
+        const dateElement = $(this).find('.simple-grade-date');
         
-        if (showGraders && $(this).data('grader')) {
-            graderElement.text($(this).data('grader')).show();
+        if (showGraders && graderElement.text().trim() !== "") {
+            graderElement.css('display', 'block');
         } else {
-            graderElement.hide();
+            graderElement.css('display', 'none');
         }
 
-        if (showDates && $(this).data('grade-time')) {
-            gradeTimeElement.text($(this).data('grade-time')).show();
+        if (showDates && dateElement.text().trim() !== "") {
+            dateElement.css('display', 'block');
         } else {
-            gradeTimeElement.hide();
+            dateElement.css('display', 'none');
         }
-        // Trigger repaint by applying a temporary style
-        graderElement.css('opacity', '0.99');
-        dateElement.css('opacity', '0.99');
+        
+        const parentCell = $(this);
+        if (showGraders || showDates) {
+            parentCell.css('height', 'auto'); // Expand to fit content
+        } else {
+            parentCell.css('height', ''); // Reset to default height
+        }
+        
+        // Force repaint by getting and setting the current color value
+        const graderColor = graderElement.css('color');
+        const dateColor = dateElement.css('color');
 
-        // Remove the temporary style
+        graderElement.css('color', graderColor);
+        dateElement.css('color', dateColor);
+
         setTimeout(() => {
-            graderElement.css('opacity', '');
-            dateElement.css('opacity', '');
+            graderElement.css('color', graderColor);
+            dateElement.css('color', dateColor);
         }, 0);
     });
 }
