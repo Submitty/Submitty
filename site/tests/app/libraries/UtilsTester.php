@@ -195,6 +195,7 @@ class UtilsTester extends \PHPUnit\Framework\TestCase {
 
     /**
      * @runInSeparateProcess
+     * @preserveGlobalState disabled
      */
     public function testCheckUploadedImageFileImageSizeFalse() {
         try {

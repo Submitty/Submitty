@@ -8,17 +8,19 @@
             {{ base_course_material_path~"/" }}
         </p>
         <label id="cm_path">
-            <span>
+            <span id="path-information">
                 <strong>Optional: amend the above path to use a sub directory</strong><br />
                 e.g. "optional/subdirectory" makes the full path:<br />
                 {{ base_course_material_path }}/optional/subdirectory
             </span>
-            <input type="text" id="input-provide-full-path" class="full-width" name="eg_config_path" value="" placeholder="optional/subdirectory" list="folder_paths"/>
-            <datalist id="folder_paths">
-                {% for folder_path in folder_paths %}
-                    <option value="{{ folder_path }}">
-                {% endfor %}
-            </datalist>
+            <span id="upload-location-drop-down">
+                <select name="eg_config_path" id="provide-full-path">
+                    <option value=""> (Top Directory) </option>
+                    {% for folder_path in folder_paths %}
+                        <option value="{{ folder_path }}">{{ folder_path }}</option>
+                    {% endfor %}
+                </select>
+            </span>
         </label>
         <fieldset>
             <legend class="black-message">
@@ -90,7 +92,7 @@
           <div id="upload-boxes">
               {# upload1 and input-file1 required for drag-and-drop.js #}
               <div id="upload1" class="file-input">
-                <label class="label key_to_click" for="input-file1" tabindex="0">"Drag your file(s) here or click to open file browser"</label>
+                <label class="label key_to_click" for="input-file1" tabindex="0">Drag your file(s) here or click to open file browser</label>
                 <input type="file" name="files" id="input-file1" onchange="addFilesFromInput(1,false)" multiple />
                 <table class="file-upload-table" id="file-upload-table-1">
                   <tr style="background:transparent; display:none;">
@@ -148,7 +150,7 @@
                 }
                 if(sections === null || sections.length > 0){
                     const cmPath = document.getElementById('cm_path').innerHTML;
-                    const requestedPath = document.getElementById("input-provide-full-path").value;
+                    const requestedPath = document.getElementById("provide-full-path").value;
                     const sections_lock = document.getElementById('all_Sections_Showing_yes').checked === true;
                     const overwrite_input = document.body.querySelector('input[name=overwrite-all]');
                     overwrite_all = overwrite_input ? (document.body.querySelector('input[name=overwrite-all]').value === 'true') : null;
@@ -181,7 +183,7 @@
                                 let date;
                                 switch (index) {
                                     case 0:
-                                        date = new Date('{{ begining_of_time_date }}');
+                                        date = new Date('{{ beginning_of_time_date }}');
                                         break;
                                     case 1:
                                         date = new Date();
@@ -220,6 +222,9 @@
         dropzone.addEventListener("dragover", draghandle, false);
         dropzone.addEventListener("dragleave", draghandle, false);
         dropzone.addEventListener("drop", dropWithMultipleZips, false);
+    </script>
+    <script>
+        registerSelect2Widget("provide-full-path", "upload-course-materials-form");
     </script>
 {% endblock %}
 {% block buttons %}
