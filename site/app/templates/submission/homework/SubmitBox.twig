@@ -96,7 +96,11 @@
 		            <input type="text" id= "user_id" value ="" placeholder="{{ user_id }}"/>
                 </div>
             </div>
-            <div class="sub hide" id="pdf-submit-button">
+            <div class="sub hide" id="pdf-submit-button"
+            {% if is_bulk_upload %}
+                style="display: revert;"
+            {% endif %}
+            >
                 <div class="sub">
 
                     <div id="toggle-qr-split">
@@ -111,7 +115,7 @@
                         {% endif %}
                     </div>
 
-                    <div id="qr-split-opts">
+                    <div id="qr-split-opts" style="display: none;">
                         <br>
 
                         <span id="prefix-prompt">QR code prefix/suffix:
@@ -127,7 +131,11 @@
                         </div>
                     </div>
 
-                    <div id="numeric-split-opts">
+                    <div id="numeric-split-opts"
+                    {% if is_bulk_upload %}
+                        style="display: revert;"
+                    {% endif %}
+                    >
                         <label id="pages-prompt" for="num_pages">Split by Page Count:</label>
                         <input type="number" id= "num_pages" placeholder="required"/>
                     </div>
@@ -306,7 +314,10 @@
 
                         //TODO: move logic for loading submission mode from session storage into module file
                         const getSubmissionType = document.querySelector('input[name="submission-type"]:checked');
-                        const selected_radio_id = getSubmissionType === null ? null : getSubmissionType.id;
+                        const selected_radio_id = getSubmissionType === null
+                            ? {% if is_bulk_upload %} 'radio-bulk' {% else %} null {% endif %}
+                            : getSubmissionType.id;
+
                         if(selected_radio_id !== null && selected_radio_id !== 'radio-normal'){
                             for(let idx = 1; idx <= window.num_submission_boxes; idx++){
                                 window.deleteFiles(idx);
