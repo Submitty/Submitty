@@ -1,0 +1,16 @@
+---
+- name: Verify
+  hosts: all
+  gather_facts: false
+
+  tasks:
+    - name: Check if Submitty is installed
+      command: submitty --version
+      register: submitty_output
+      changed_when: false
+
+    - name: Assert Submitty is installed
+      assert:
+        that:
+          - "'Submitty' in submitty_output.stdout"
+        fail_msg: "Submitty is not installed"

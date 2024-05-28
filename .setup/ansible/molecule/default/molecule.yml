@@ -1,0 +1,14 @@
+---
+dependency:
+  name: galaxy
+driver:
+  name: docker
+platforms:
+  - name: instance
+    image: ubuntu:22.04
+    command: ""
+provisioner:
+  name: ansible
+  playbook: submitty_install.yml
+verifier:
+  name: ansible
