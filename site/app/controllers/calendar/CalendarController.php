@@ -37,7 +37,7 @@ class CalendarController extends AbstractController {
         $courses = $this->core->getQueries()->getCourseForUserId($user->getId());
         $filtered_courses = [];
 
-        //If there arent any courses, don't filter
+        //If there aren't any courses, don't filter
         if (count($courses) != 0) {
             //Check if should see all courses
             $show_all_courses = '1';
