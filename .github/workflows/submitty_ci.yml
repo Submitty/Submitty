@@ -46,7 +46,7 @@ jobs:
     runs-on: ubuntu-22.04
     defaults:
       run:
-        working-directory: .setup/ansible
+        working-directory: .setup/ansible/molecule
     steps:
       - uses: actions/checkout@v4
       - name: Set up python 3
@@ -63,7 +63,6 @@ jobs:
         run: ansible --version
       - name: Run molecule tests
         run: molecule test
-        working-directory: molecule
 
 
 #  css-lint:
