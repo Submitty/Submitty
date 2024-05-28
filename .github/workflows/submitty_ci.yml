@@ -63,6 +63,8 @@ jobs:
           pip3 install ansible molecule molecule-plugins[docker]
           pip3 install ansible-lint
       - name: Run molecule on submitty_install role
+        env:
+          DOCKER_HOST: tcp://localhost:2375
         run: molecule test
         working-directory: .setup/ansible/roles/submitty_install/
 
