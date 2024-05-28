@@ -9,6 +9,5 @@ platforms:
     command: ""
 provisioner:
   name: ansible
-  playbook: submitty_install.yml
 verifier:
   name: ansible

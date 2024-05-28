@@ -44,9 +44,6 @@ jobs:
 
   ansible-molecule:
     runs-on: ubuntu-22.04
-    defaults:
-      run:
-        working-directory: .setup/ansible/molecule
     steps:
       - uses: actions/checkout@v4
       - name: Set up python 3
@@ -59,10 +56,9 @@ jobs:
           ls -la
       - name: Install dependencies
         run: pip3 install ansible molecule molecule-plugins[docker]
-      - name: test ansible playbook
-        run: ansible --version
-      - name: Run molecule tests
+      - name: Run molecule on submitty_install role
         run: molecule test
+        working-directory: .setup/ansible/roles/submitty_install/
 
 
 #  css-lint:
