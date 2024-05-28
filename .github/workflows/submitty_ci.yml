@@ -44,6 +44,10 @@ jobs:
 
   ansible-molecule:
     runs-on: ubuntu-22.04
+    services:
+      docker:
+        image: docker:dind
+        options: --privileged --network host
     steps:
       - uses: actions/checkout@v4
       - name: Set up Docker Buildx
