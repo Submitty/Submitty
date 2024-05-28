@@ -34,6 +34,10 @@ jobs:
         working-directory: site/.setup/ansible
     steps:
       - uses: actions/checkout@v4
+      - name: Print working directory
+        run: |
+          pwd
+          ls -la
       - name: Run ansible-lint
         uses: ansible/ansible-lint@main
 
@@ -49,6 +53,10 @@ jobs:
         uses: actions/setup-python@v2
         with:
           python-version: 3.x
+      - name: Print working directory
+        run: |
+          pwd
+          ls -la
       - name: Install dependencies
         run: pip3 install ansible molecule molecule-plugins[docker]
       - name: Run molecule tests
