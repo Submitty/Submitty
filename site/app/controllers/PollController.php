@@ -632,7 +632,7 @@ class PollController extends AbstractController {
      * @AccessControl(role="INSTRUCTOR")
      * @return RedirectResponse|WebResponse
      */
-    #[Route("/courses/{_semester}/{_course}/polls/viewResults/{poll_id}", methods: ["GET"], requirements: ["poll_id", "\d*"])]
+    #[Route("/courses/{_semester}/{_course}/polls/viewResults/{poll_id}", methods: ["GET"], requirements: ["poll_id" => "\d*"])]
     public function viewResults($poll_id) {
         if (!isset($poll_id)) {
             $this->core->addErrorMessage("Invalid Poll ID");
