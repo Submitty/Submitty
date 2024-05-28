@@ -21,16 +21,17 @@ declare global {
 const warning_banner = document.getElementById('submission-mode-warning');
 
 function initialsubmissionmode() {
-    let radioBulk = document.getElementById('radio-bulk') as HTMLInputElement;
-    let pdfSubmitButton = document.getElementById('pdf-submit-button');
+    const radioBulk = document.getElementById('radio-bulk') as HTMLInputElement;
+    const pdfSubmitButton = document.getElementById('pdf-submit-button');
 
     if (radioBulk.checked) {
         // If 'radio-bulk' is checked, show the submit button
         pdfSubmitButton!.style.display = 'block';
         sessionStorage.setItem(`${window.gradeable_id}-submission_mode`, 'bulk-upload');
-        let message = 'Warning: Submitting files for bulk upload!';
+        const message = 'Warning: Submitting files for bulk upload!';
         warning_banner!.firstChild!.textContent = message;
-    } else {
+    }
+    else {
         pdfSubmitButton!.style.display = 'none';
     }
 }
