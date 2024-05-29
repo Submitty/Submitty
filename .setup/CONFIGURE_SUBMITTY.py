@@ -497,10 +497,10 @@ IGNORED_FILES_AND_DIRS = ['saml', 'login.md']
 system_message = None
 # this prevents clobbered system_message
 try:
-    with open(SUBMITTY_JSON,"r") as submitty_config:
+    with open(SUBMITTY_JSON,'r') as submitty_config:
         load_submitty_json = json.load(submitty_config)
-        if "system_message" in load_submitty_json:
-            system_message = load_submitty_json["system_message"]
+        if 'system_message' in load_submitty_json:
+            system_message = load_submitty_json['system_message']
 except IOError:
     pass
 
