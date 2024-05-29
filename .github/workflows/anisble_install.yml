@@ -1,10 +1,16 @@
 name: Ansible-Install
 
-# Controls when the workflow will run
+## Controls when the workflow will run
+#on:
+#  # Triggers the workflow on push or pull request events but only for the "master" branch
+#  pull_request:
+
+#temporary so it runs every push  
 on:
-  # Triggers the workflow on push or pull request events but only for the "master" branch
+  push:
   pull_request:
-  
+  workflow_dispatch:
+
 # A workflow run is made up of one or more jobs that can run sequentially or in parallel
 jobs:
   ansible-lint:
