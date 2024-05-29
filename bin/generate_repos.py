@@ -26,6 +26,7 @@ CONFIG_PATH = os.path.join(os.path.dirname(os.path.realpath(__file__)), '..', 'c
 with open(os.path.join(CONFIG_PATH, 'submitty_users.json')) as open_file:
     JSON = json.load(open_file)
 DAEMONPHPCGI_GROUP = JSON['daemonphpcgi_group']
+CGI_USER = JSON['cgi_user']
 
 with open(os.path.join(CONFIG_PATH, 'database.json')) as open_file:
     JSON = json.load(open_file)
@@ -120,7 +121,8 @@ def create_or_update_repo(folder, subdirectory, which_branch):
     os.chdir(folder)
     for root, dirs, files in os.walk(folder):
         for entry in files + dirs:
-            shutil.chown(os.path.join(root, entry), group=DAEMONPHPCGI_GROUP)
+            shutil.chown(os.path.join(root, entry), user=CGI_USER, group=DAEMONPHPCGI_GROUP)
+    shutil.chown(folder, user=CGI_USER, group=DAEMONPHPCGI_GROUP)
 
 
 # =======================================================================
@@ -155,12 +157,12 @@ if course is None:
 vcs_semester = os.path.join(VCS_FOLDER, args.semester)
 if not os.path.isdir(vcs_semester):
     os.makedirs(vcs_semester, mode=0o770, exist_ok=True)
-    shutil.chown(vcs_semester, group=DAEMONPHPCGI_GROUP)
+    shutil.chown(vcs_semester, user=CGI_USER, group=DAEMONPHPCGI_GROUP)
 
 vcs_course = os.path.join(vcs_semester, args.course)
 if not os.path.isdir(vcs_course):
     os.makedirs(vcs_course, mode=0o770, exist_ok=True)
-    shutil.chown(vcs_course, group=DAEMONPHPCGI_GROUP)
+    shutil.chown(vcs_course, user=CGI_USER, group=DAEMONPHPCGI_GROUP)
 
 is_team = False
 
@@ -217,7 +219,7 @@ print ("The git autograding branch for this course is: " + course_git_autogradin
 
 if not os.path.isdir(os.path.join(vcs_course, args.repo_name)):
     os.makedirs(os.path.join(vcs_course, args.repo_name), mode=0o770)
-    shutil.chown(os.path.join(vcs_course, args.repo_name), group=DAEMONPHPCGI_GROUP)
+    shutil.chown(os.path.join(vcs_course, args.repo_name), user=CGI_USER, group=DAEMONPHPCGI_GROUP)
 
 if is_team:
     teams_table = Table('gradeable_teams', course_metadata, autoload=True)
