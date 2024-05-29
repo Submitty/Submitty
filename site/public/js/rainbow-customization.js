@@ -663,3 +663,28 @@ $(document).ready(() => {
         $('#rg_web_ui').show();
     });
 });
+
+
+document.addEventListener('DOMContentLoaded', function(){
+    document.getElementById('pencilIcon').addEventListener('click', function(event) {
+        event.stopPropagation();
+        var checkboxControls = document.getElementById('checkboxControls');
+        if (checkboxControls.style.display === "none") {
+            checkboxControls.style.display = "block";
+        } else {
+            checkboxControls.style.display = "none";
+            document.getElementById('dropLowestDiv').style.display = "none";
+        }
+    });
+
+    document.getElementById('drop_lowest_checkbox').addEventListener('change', function(event) {
+        event.stopPropagation();
+        // Fetch all the drop lowest div elements
+        let dropLowestDivs = document.querySelectorAll('div[id^="dropLowestDiv-"]');
+        let isChecked = this.checked;
+        // iterate over the fetched elements and adjust display based on checkbox status
+        dropLowestDivs.forEach(function (dropLowestDiv) {
+            dropLowestDiv.style.display = isChecked ? "block" : "none";
+        });
+    });
+});

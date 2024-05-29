@@ -286,36 +286,6 @@ To remove a curve simply blank all boxes."></i>
 
 
     <script>
-        document.getElementById('pencilIcon').addEventListener('click', function(event) {
-            event.stopPropagation();
-
-            var checkboxControls = document.getElementById('checkboxControls');
-            if (checkboxControls.style.display === "none") {
-                checkboxControls.style.display = "block";
-            } else {
-                checkboxControls.style.display = "none";
-
-                // Also hide 'dropLowestDiv' when we close the controls
-                document.getElementById('dropLowestDiv').style.display = "none";
-            }
-        });
-
-        document.getElementById('drop_lowest_checkbox').addEventListener('change', function(event) {
-            event.stopPropagation();
-
-            // Fetch all the drop lowest div elements
-            let dropLowestDivs = document.querySelectorAll('div[id^="dropLowestDiv-"]');
-
-            // Save the checked status of checkbox
-            let isChecked = this.checked;
-
-            // iterate over the fetched elements and adjust display based on checkbox status
-            dropLowestDivs.forEach(function (dropLowestDiv) {
-                dropLowestDiv.style.display = isChecked ? "block" : "none";
-            });
-        });
-
-
         $('.gradeable-li-info .tooltip').on('mouseenter', function(){
             const gradeable = $(this).closest('.gradeable-li');
             const override = gradeable.find('.override');
