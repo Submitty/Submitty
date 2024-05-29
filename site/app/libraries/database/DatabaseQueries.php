@@ -1193,7 +1193,7 @@ SQL;
                 WHERE t.id = p.thread_id and p.deleted=false and t.deleted=false) p_doc
             WHERE p_doc.document @@ plainto_tsquery('english', replace(:q, '.', ' '))
             ORDER BY timestamp_post DESC",
-        [':q' => $searchQuery]
+            [':q' => $searchQuery]
         );
         return $this->course_db->rows();
     }
