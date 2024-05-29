@@ -167,7 +167,7 @@
                         {%  for bucket in used_buckets %}
                             <li>
                                 <div class="bucket-percent" style="display: inline;">
-                                    <input aria-label="{{ bucket|capitalize }} percent" type="text" value="{{ bucket_percentages[bucket] }}" onblur="ClampPercent(this);" id="percent-{{ bucket }}"><span style="margin-right: 10px;">%</span>
+                                    <input aria-label="{{ bucket|capitalize }} percent" type="text" class="gradeable-custom-item-input" value="{{ bucket_percentages[bucket] }}" onblur="ClampPercent(this);" id="percent-{{ bucket }}"><span style="margin-right: 10px;">%</span>
                                 </div>
                                 {{ bucket|capitalize }} ({{ customization_data[bucket]|length }} items)
                             </li>
@@ -181,7 +181,7 @@
                         {%  for bucket in available_buckets %}
                             <li>
                                 <div class="bucket-percent" style="display: none;">
-                                    <input aria-label="{{ bucket|capitalize }} percent" type="text" value="0" onblur="ClampPercent(this);" id="percent-{{ bucket }}"><span style="margin-right: 10px;">%</span>
+                                    <input aria-label="{{ bucket|capitalize }} percent" type="text" class="gradeable-custom-item-input" value="0" onblur="ClampPercent(this);" id="percent-{{ bucket }}"><span style="margin-right: 10px;">%</span>
                                 </div>
                                 {{ bucket|capitalize }} ({{ customization_data[bucket]|length }} items)
                             </li>
@@ -206,11 +206,11 @@
                             <div id="config-{{ bucket }}" style="margin-top:25px;min-height:100px;display:none;" class="bucket_detail_div">
                                 <div class="input-field">
                                     <h3 style="display:inline">{{ bucket|capitalize }}</h3>:
-                                    <input type="text" aria-label="{{ bucket|capitalize }} config count" value="{{ bucket_counts[bucket] }}" id="config-count-{{ bucket }}"> items
+                                    <input type="text" class="gradeable-custom-item-input" aria-label="{{ bucket|capitalize }} config count" value="{{ bucket_counts[bucket] }}" id="config-count-{{ bucket }}"> items
                                     <span style="margin-left: 100px;"></span>
                                     <div id="dropLowestDiv-{{ bucket }}" style="display: none;">
                                         Remove lowest:
-                                        <input type="text" aria-label="{{ bucket|capitalize }} drop-howmany" value="{{ bucket_remove_lowest[bucket] }}" id="config-remove_lowest-{{ bucket }}"> items
+                                        <input type="text" class="gradeable-custom-item-input" aria-label="{{ bucket|capitalize }} drop-howmany" value="{{ bucket_remove_lowest[bucket] }}" id="config-remove_lowest-{{ bucket }}"> items
                                     </div>
                                 </div>
 
@@ -219,6 +219,7 @@
                                         {% for gradeable in gradeables %}
                                             <li class="gradeable-li pt-1" style="border-top: 1px solid #FFFFFF;">
                                                 <input type="text"
+                                                       class="gradeable-custom-item-input"
                                                        aria-label="{{gradeable["title"]}} max score"
                                                        class="{{ gradeable["override"] ? "override" : "" }}"
                                                        placeholder="{{ gradeable["max_score"] }}"
