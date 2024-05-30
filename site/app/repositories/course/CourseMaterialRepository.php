@@ -10,6 +10,6 @@ class CourseMaterialRepository extends EntityRepository {
      * @return CourseMaterial[]
      */
     public function getCourseMaterials(): array {
-        return $this->findBy([], ['priority' => 'ASC', 'path' => 'ASC']);
+        return $this->findBy(['is_deleted' => false], ['priority' => 'ASC', 'path' => 'ASC']);
     }
 }

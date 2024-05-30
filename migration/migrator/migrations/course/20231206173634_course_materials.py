@@ -13,13 +13,9 @@ def up(config, database, semester, course):
 
     # Add a column for soft deletion
     database.execute("""
-                     ALTER TABLE course_materials ADD COLUMN IF NOT EXISTS is_deleted BOOLEAN DEFAULT FALSE;
+                     ALTER TABLE course_materials ADD COLUMN IF NOT EXISTS is_deleted BOOLEAN DEFAULT FALSE NOT NULL;
                      """)
 
-    # Update existing data (optional, depending on your needs)
-    database.execute("""
-                     UPDATE course_materials SET is_deleted = FALSE;
-                     """)
 
 def down(config, database, semester, course):
     """
@@ -36,5 +32,7 @@ def down(config, database, semester, course):
 
     # Remove the added column
     database.execute("""
-                     ALTER TABLE course_materials DROP COLUMN IF EXISTS is_deleted;
+                     ALTER TABLE course_materials
+                     ALTER COLUMN is_deleted DROP NOT NULL,
+                     ALTER COLUMN is_deleted DROP DEFAULT;
                      """)

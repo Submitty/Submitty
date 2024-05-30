@@ -38,9 +38,12 @@ class CourseMaterial {
 
     #[ORM\Column(type: Types::BOOLEAN)]
     protected bool $hidden_from_students;
-    protected bool $deleted;
+
     #[ORM\Column(type: Types::FLOAT)]
     protected float $priority;
+
+    #[ORM\Column(type: Types::BOOLEAN)]
+    protected bool $is_deleted;
 
     /**
      * @var Collection<CourseMaterialAccess>
@@ -72,7 +75,7 @@ class CourseMaterial {
     #[ORM\Column(type: Types::STRING, nullable: true)]
     protected ?string $title;
 
-    public function __construct(int $type, string $path, \DateTime $release_date, bool $hidden_from_students, float $priority, ?string $url, ?string $title) {
+    public function __construct(int $type, string $path, \DateTime $release_date, bool $hidden_from_students, float $priority, ?string $url, ?string $title, bool $is_deleted) {
         $this->setType($type);
         $this->setPath($path);
         $this->setReleaseDate($release_date);
@@ -81,7 +84,7 @@ class CourseMaterial {
         $this->sections = new ArrayCollection();
         $this->url = $url;
         $this->title = $title;
-        $this->deleted = false;
+        $this->setIsDeleted($is_deleted);
     }
 
     /**
@@ -196,11 +199,10 @@ class CourseMaterial {
     public function setTitle(string $title): void {
         $this->title = $title;
     }
-    public function isDeleted():bool
-    {
-        return $this->deleted;
+    public function isDeleted(): bool {
+        return $this->is_deleted;
     }
-    public function setDeleted(bool $deleted): variant_mod{
-        $this->deleted  = $deleted;
+    public function setIsDeleted(bool $deleted): void{
+        $this->is_deleted  = $deleted;
     }
 }

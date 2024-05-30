@@ -124,11 +124,6 @@ class CourseMaterialsController extends AbstractController {
             $this->core->addErrorMessage("Failed to delete course material");
             return new RedirectResponse($this->core->buildCourseUrl(['course_materials']));
         }
-        //Mark the course material as deleted instead of physcially removing it 
-        $cm->setDeleted(true);
-        $this->core->getCourseEntityManager()->flush();
-        $this->core->addSuccessMessage(basename($path). " has been marked as deleted. ");
-        return new RedirectResponse($this->core->buildCourseUrl(['course_materials']));
         // security check
         $dir = "course_materials";
         $path = $this->core->getAccess()->resolveDirPath($dir, $cm->getPath());
@@ -152,12 +147,12 @@ class CourseMaterialsController extends AbstractController {
             $all_files = $this->core->getCourseEntityManager()->getRepository(CourseMaterial::class)->findAll();
             foreach ($all_files as $file) {
                 if (str_starts_with(pathinfo($file->getPath(), PATHINFO_DIRNAME), $path) || ($file->getPath() === $path)) {
-                    $this->core->getCourseEntityManager()->remove($file);
+                    $file->setIsDeleted(true);
                 }
             }
         }
         else {
-            $this->core->getCourseEntityManager()->remove($cm);
+            $cm->setIsDeleted(true);
         }
         $success = false;
         if (is_dir($path)) {
@@ -179,11 +174,12 @@ class CourseMaterialsController extends AbstractController {
                 }
                 foreach ($all_files as $file) {
                     if (str_starts_with($file->getPath(), $path)) {
-                        $this->core->getCourseEntityManager()->remove($file);
+                        $file->setIsDeleted(true);
                     }
                 }
             }
         }
+        $this->core->getCourseEntityManager()->persist($cm);
         $this->core->getCourseEntityManager()->flush();
         if ($success) {
             $this->core->addSuccessMessage(basename($path) . " has been successfully removed.");
