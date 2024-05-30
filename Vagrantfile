@@ -240,7 +240,7 @@ Vagrant.configure(2) do |config|
 
     libvirt.forward_ssh_port = true
 
-    mount_folders(override, [])
+    mount_folders_with_type(override, [], "rsync")
   end
 
   config.vm.provider "qemu" do |qe, override|
