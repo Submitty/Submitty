@@ -115,8 +115,10 @@ class MultipleChoiceWidget extends Widget {
         <div class="mc-inputs mc-row">
             <div class="mc-col"></div>
             <div class="mc-col-center"></div>
-            <div class="move-btn add-button">
-                <i class="fa-solid fa-plus"></i>
+            <div class="mc-col mc-buttons">
+                <div class="move-btn add-button">
+                    <i class="fa-solid fa-plus"></i>
+                </div>
             </div>
         </div>`;
     }
@@ -178,15 +180,15 @@ class MultipleChoiceWidget extends Widget {
             <textarea class="entered-description-input">${description}</textarea>
         </div>
         <div class="mc-col mc-buttons">
-        <div class="move-btn up-button">
-            <i class="fa fa-lg fa-chevron-up"></i>
-        </div>
-        <div class="move-btn down-button">
-            <i class="fa fa-lg fa-chevron-down"></i>
-        </div>
-        <div class="move-btn remove-button">
-            <i class="fa fa-lg fa-trash"></i>
-        </div>
+            <div class="move-btn up-button">
+                <i class="fa fa-lg fa-chevron-up"></i>
+            </div>
+            <div class="move-btn down-button">
+                <i class="fa fa-lg fa-chevron-down"></i>
+            </div>
+            <div class="move-btn remove-button">
+                <i class="fa fa-lg fa-trash"></i>
+            </div>
         </div>`;
     }
 

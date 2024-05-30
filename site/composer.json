@@ -33,7 +33,7 @@
     "onelogin/php-saml": "4.1.0",
     "php-ds/php-ds": "1.5.0",
     "ramsey/uuid": "4.7.4",
-    "symfony/cache": "6.4.2",
+    "symfony/cache": "6.4.7",
     "symfony/config": "6.4.4",
     "symfony/http-foundation": "6.3.2",
     "symfony/polyfill-php80": "1.27.0",

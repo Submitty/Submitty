@@ -72,6 +72,7 @@ class AbstractBuilder {
                 this.widgetAdd(widget);
             });
         }
+
         if (data.notebook) {
             data.notebook.forEach(cell => {
                 let widget;
@@ -101,8 +102,7 @@ class AbstractBuilder {
                     this.widgetAdd(widget);
                 }
             });
-        }
-        else {
+        } else {
             displayErrorMessage('The current configuration is missing the required "notebook" object. Please include a "notebook" object in your configuration');
         }
     }

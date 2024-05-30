@@ -166,6 +166,11 @@ class Access {
 
         $this->permissions["gradeable.submit.everyone"] = self::ALLOW_MIN_FULL_ACCESS_GRADER | self::CHECK_GRADEABLE_MIN_GROUP;
 
+        //community_events permissions
+        $this->permissions['path.read.community_events'] = self::ALLOW_MIN_STUDENT;
+        $this->permissions['path.write.community_events'] = self::ALLOW_MIN_INSTRUCTOR;
+
+
         //General path read/write checks
         $this->permissions["path.read"] = self::ALLOW_MIN_STUDENT | self::CHECK_FILE_DIRECTORY | self::CHECK_FILE_EXISTS;
         $this->permissions["path.write"] = self::ALLOW_MIN_STUDENT | self::CHECK_CSRF | self::CHECK_FILE_DIRECTORY;
@@ -243,6 +248,16 @@ class Access {
                 "path.write" => "path.write.submissions",
             ]
         ];
+
+        $this->directories["community_events"] = [
+            "base" => $this->core->getConfig()->getSubmittyPath() . "/community_events",
+            "subparts" => [],
+            "permissions" => [
+                "path.read" => "path.read.community_events",
+                "path.write" => "path.write.community_events",
+            ]
+        ];
+
         $this->directories["attachments"] = [
             "base" => $this->core->getConfig()->getCoursePath() . "/attachments",
             "subparts" => ["gradeable", "submitter", "grader"],
