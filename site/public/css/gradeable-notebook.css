@@ -107,11 +107,15 @@ img {
     border-radius: 4px !important;
     vertical-align: middle !important;
 }
+
+/* stylelint-disable-next-line selector-class-pattern */
 .small-mirror .CodeMirror {
     resize: horizontal;
     min-width: 150px;
     max-width: 50em;
 }
+
+/* stylelint-disable-next-line selector-class-pattern */
 .large-mirror .CodeMirror {
     resize: vertical;
     min-height: 30px;
