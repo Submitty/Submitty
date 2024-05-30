@@ -106,7 +106,7 @@ jobs:
         working-directory: site
     steps:
       - uses: actions/checkout@v4
-      - uses: shivammathur/setup-php@2.29.0
+      - uses: shivammathur/setup-php@2.30.4
         with:
           php-version: ${{ env.PHP_VER }}
       - name: Cache Composer
@@ -141,7 +141,7 @@ jobs:
         working-directory: site
     steps:
       - uses: actions/checkout@v4
-      - uses: shivammathur/setup-php@2.29.0
+      - uses: shivammathur/setup-php@2.30.4
         with:
           php-version: ${{ env.PHP_VER }}
           extensions: imagick
@@ -183,9 +183,10 @@ jobs:
               ${{ runner.os }}-${{ github.job }}-pip-
       - name: Install python libraries
         run: python3 -m pip install -r .setup/pip/dev_requirements.txt
-      - name: Run python linting
+      - name: Run flake8
         run: python3 -m flake8
-
+      - name: Run pylint
+        run: python3 -m pylint --recursive=y .
 
   python-unit:
     runs-on: ubuntu-22.04
