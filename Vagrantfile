@@ -235,6 +235,8 @@ Vagrant.configure(2) do |config|
       override.vm.box = base_boxes[:libvirt]
     end
 
+    libvirt.qemu_use_session = true
+
     libvirt.memory = 2048
     libvirt.cpus = 2
 
