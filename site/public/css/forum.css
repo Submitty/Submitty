@@ -232,13 +232,10 @@
 
 
 .post-action-container {
-    margin-top: 5px;
+    margin-top: 8px;
     margin-left: 10px;
     float: right;
-    display: flex;
-    align-items: center;
 }
-
 
 .post-email-toggle,
 .post-user-info {
@@ -247,14 +244,7 @@
 }
 
 .upduck-container{
-    width: fit-content;
-    height: 30px;
-    border: 1px solid var(--default-black);
-    border-radius: 6px;
-    padding-right: 5px;
-    margin-right: 8px;
-    box-sizing: border-box;
-    display: flex;
+    display: inline-block;
     align-items: center;
     justify-content: center;
 }
