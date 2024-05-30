@@ -102,7 +102,8 @@ class AbstractBuilder {
                     this.widgetAdd(widget);
                 }
             });
-        } else {
+        }
+        else {
             displayErrorMessage('The current configuration is missing the required "notebook" object. Please include a "notebook" object in your configuration');
         }
     }
@@ -133,6 +134,7 @@ class AbstractBuilder {
     collectValidJsons(widgets, valid_jsons) {
         widgets.forEach(widget => {
             const widget_json = widget.getJSON();
+
             if (Object.keys(widget_json).length > 0) {
                 valid_jsons.push(widget_json);
             }
