@@ -9,7 +9,6 @@ class EmailRepository extends EntityRepository {
     const MAX_SUBJECTS_PER_PAGE = 10;
 
     public function getEmailsByPage(int $page, $semester = null, $course = null): array {
-        $this->_em->getConnection()->getConfiguration()->setSQLLogger(null);
         $subjects = $this->getPageSubjects($page, $semester, $course);
         $result = [];
 

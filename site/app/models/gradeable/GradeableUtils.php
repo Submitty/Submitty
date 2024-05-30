@@ -9,6 +9,13 @@ use app\models\User;
 use app\views\NavigationView;
 
 class GradeableUtils {
+    const VCS_TYPE_NONE = -1;
+    const VCS_TYPE_SUBMITTY_HOSTED = 0;
+    const VCS_TYPE_SUBMITTY_HOSTED_URL = 1;
+    const VCS_TYPE_PUBLIC_GITHUB = 2;
+    const VCS_TYPE_PRIVATE_GITHUB = 3;
+    const VCS_TYPE_SELF_HOSTED = 4;
+
     /**
      * Get the gradeables of a specified course.
      *
@@ -72,7 +79,7 @@ class GradeableUtils {
      * gradeables in all courses of a single user.
      * The method loads from the database of all courses and get all gradeables information.
      * Only load once unless the user refreshes the page.
-     * NOTE: Calendar Messages is passed by refence in order to be changed in "getGradeablesFromCourse"
+     * NOTE: Calendar Messages is passed by reference in order to be changed in "getGradeablesFromCourse"
      *
      * @return array<string, array<string, Gradeable>|array<string, GradedGradeable>|array<string, Button>>
      * @throws \Exception if a Gradeable failed to load from the database

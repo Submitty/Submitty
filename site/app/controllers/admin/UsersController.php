@@ -26,10 +26,10 @@ use app\controllers\SelfRejoinController;
  */
 class UsersController extends AbstractController {
     /**
-     * @Route("/courses/{_semester}/{_course}/users", methods={"GET"})
-     * @Route("/api/courses/{_semester}/{_course}/users", methods={"GET"})
      * @return MultiResponse
      */
+    #[Route("/courses/{_semester}/{_course}/users", methods: ["GET"])]
+    #[Route("/api/courses/{_semester}/{_course}/users", methods: ["GET"])]
     public function getStudents() {
         $students = $this->core->getQueries()->getAllUsers();
         //Assemble students into sections
@@ -120,10 +120,10 @@ class UsersController extends AbstractController {
     }
 
     /**
-     * @Route("/courses/{_semester}/{_course}/graders", methods={"GET"})
-     * @Route("/api/courses/{_semester}/{_course}/graders", methods={"GET"})
      * @return MultiResponse
      */
+    #[Route("/courses/{_semester}/{_course}/graders", methods: ["GET"])]
+    #[Route("/api/courses/{_semester}/{_course}/graders", methods: ["GET"])]
     public function getGraders() {
         $graders = $this->core->getQueries()->getAllGraders();
         $graders_sorted = [
@@ -198,10 +198,7 @@ class UsersController extends AbstractController {
             )
         );
     }
-
-    /**
-     * @Route("/courses/{_semester}/{_course}/graders/assign_registration_sections", methods={"POST"})
-     */
+    #[Route("/courses/{_semester}/{_course}/graders/assign_registration_sections", methods: ["POST"])]
     public function reassignRegistrationSections() {
         $return_url = $this->core->buildCourseUrl(['graders']);
         $new_registration_information = [];
@@ -230,9 +227,7 @@ class UsersController extends AbstractController {
         $this->core->redirect($return_url);
     }
 
-    /**
-     * @Route("/courses/{_semester}/{_course}/users/details", methods={"GET"})
-     */
+    #[Route("/courses/{_semester}/{_course}/users/details", methods: ["GET"])]
     public function ajaxGetUserDetails($user_id) {
         $user = $this->core->getQueries()->getUserById($user_id);
         $this->core->getOutput()->renderJsonSuccess([
@@ -259,9 +254,7 @@ class UsersController extends AbstractController {
         ]);
     }
 
-    /**
-     * @Route("/courses/{_semester}/{_course}/user_information", methods={"GET"})
-     */
+    #[Route("/courses/{_semester}/{_course}/user_information", methods: ["GET"])]
     public function ajaxGetSubmittyUsers() {
         $submitty_users = $this->core->getQueries()->getAllSubmittyUsers();
         $user_ids = array_keys($submitty_users);
@@ -296,9 +289,7 @@ class UsersController extends AbstractController {
         $this->core->getOutput()->renderJsonSuccess($user_information);
     }
 
-    /**
-     * @Route("/courses/{_semester}/{_course}/users", methods={"POST"})
-     */
+    #[Route("/courses/{_semester}/{_course}/users", methods: ["POST"])]
     public function updateUser($type = 'users') {
         $return_url = $this->core->buildCourseUrl([$type]) . '#user-' . $_POST['user_id'];
         $authentication = $this->core->getAuthentication();
@@ -444,7 +435,7 @@ class UsersController extends AbstractController {
                     continue;
                 }
                 if ($gradeable->isVcs() && !$gradeable->isTeamAssignment()) {
-                    AdminGradeableController::enqueueGenerateRepos($semester, $course, $g_id);
+                    AdminGradeableController::enqueueGenerateRepos($semester, $course, $g_id, $gradeable->getVcsSubdirectory());
                 }
             }
         }
@@ -452,9 +443,9 @@ class UsersController extends AbstractController {
     }
 
     /**
-     * @Route("/courses/{_semester}/{_course}/delete_user", methods={"POST"})
      * @return RedirectResponse
      */
+    #[Route("/courses/{_semester}/{_course}/delete_user", methods: ["POST"])]
     public function deleteUser(): RedirectResponse {
         if (isset($_POST['user_id']) && isset($_POST['displayed_fullname'])) {
             $user_id = trim($_POST['user_id']);
@@ -480,9 +471,9 @@ class UsersController extends AbstractController {
     }
 
     /**
-     * @Route("/courses/{_semester}/{_course}/demote_grader", methods={"POST"})
      * @return RedirectResponse
      */
+    #[Route("/courses/{_semester}/{_course}/demote_grader", methods: ["POST"])]
     public function demoteGrader(): RedirectResponse {
         if (isset($_POST['user_id']) && isset($_POST['displayed_fullname'])) {
             $user_id = trim($_POST['user_id']);
@@ -507,9 +498,7 @@ class UsersController extends AbstractController {
         return new RedirectResponse($this->core->buildCourseUrl(['graders']));
     }
 
-    /**
-     * @Route("/courses/{_semester}/{_course}/sections", methods={"GET"})
-     */
+    #[Route("/courses/{_semester}/{_course}/sections", methods: ["GET"])]
     public function sectionsForm() {
         $students = $this->core->getQueries()->getAllUsers();
         $reg_sections = $this->core->getQueries()->getRegistrationSections();
@@ -542,9 +531,7 @@ class UsersController extends AbstractController {
         );
     }
 
-    /**
-     * @Route("/courses/{_semester}/{_course}/sections/registration", methods={"POST"})
-     */
+    #[Route("/courses/{_semester}/{_course}/sections/registration", methods: ["POST"])]
     public function updateRegistrationSections() {
         $return_url = $this->core->buildCourseUrl(['sections']);
 
@@ -600,9 +587,7 @@ class UsersController extends AbstractController {
         $this->core->redirect($return_url);
     }
 
-    /**
-     * @Route("/courses/{_semester}/{_course}/sections/rotating", methods={"POST"})
-     */
+    #[Route("/courses/{_semester}/{_course}/sections/rotating", methods: ["POST"])]
     public function updateRotatingSections() {
         $return_url = $this->core->buildCourseUrl(['sections']);
 
@@ -878,8 +863,8 @@ class UsersController extends AbstractController {
      * Upload user list data to database
      *
      * @param string $list_type "classlist" or "graderlist"
-     * @Route("/courses/{_semester}/{_course}/users/upload", methods={"POST"})
      */
+    #[Route("/courses/{_semester}/{_course}/users/upload", methods: ["POST"])]
     public function uploadUserList($list_type = "classlist") {
 
         /**
@@ -1294,8 +1279,8 @@ class UsersController extends AbstractController {
 
     /**
      * @AccessControl(role="INSTRUCTOR")
-     * @Route("/courses/{_semester}/{_course}/users/view_grades", methods={"POST"})
      **/
+    #[Route("/courses/{_semester}/{_course}/users/view_grades", methods: ["POST"])]
     public function viewStudentGrades() {
         if (!isset($_POST["student_id"])) {
             $this->core->addErrorMessage("No student ID provided");
