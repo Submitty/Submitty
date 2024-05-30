@@ -334,7 +334,7 @@ if [ "${WORKER}" == 0 ]; then
     chmod  770                                        "${SUBMITTY_DATA_DIR}/user_data"
     chown  "root:${DAEMONPHPCGI_GROUP}"               "${SUBMITTY_DATA_DIR}/vcs"
     chmod  770                                        "${SUBMITTY_DATA_DIR}/vcs"
-    chown  "root:${DAEMONPHPCGI_GROUP}"               "${SUBMITTY_DATA_DIR}/vcs/git"
+    chown  "${CGI_USER}:${DAEMONPHPCGI_GROUP}"        "${SUBMITTY_DATA_DIR}/vcs/git"
     chmod  770                                        "${SUBMITTY_DATA_DIR}/vcs/git"
 fi
 
