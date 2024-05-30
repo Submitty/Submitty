@@ -1,5 +1,5 @@
 ---
-# Submitty Course Creation Ansible script.
+# Submitty Course Creation Ansible script. 
 # Assumes that local user accounts for instructor and TA already exist.
 
 - name: Create new groups for "{{ course }}" course.
