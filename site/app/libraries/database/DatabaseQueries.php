@@ -924,7 +924,7 @@ SQL;
         $updates = '';
 
         foreach ($results as $key => $value) {
-            if ($value != 'false') {
+            if ($value !== 'false') {
                 $results[$key] = 'true';
             }
             $this->core->getUser()->updateUserNotificationSettings($key, $results[$key] == 'true');
@@ -4175,7 +4175,7 @@ VALUES(?, ?, ?, ?, 0, 0, 0, 0, ?)",
         );
         $teams = [];
         $rows = $this->course_db->rows();
-        if ($rows !== null) {
+        if (count($rows) > 0) {
             foreach ($rows as $row) {
                 $row['team_members'] = explode(',', $row['team_members']); // comma-separated string to an array
                 $teams[] = $row;
