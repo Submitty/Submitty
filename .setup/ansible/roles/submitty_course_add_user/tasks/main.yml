@@ -1,0 +1,23 @@
+---
+# Assumes that local user accounts already exist.
+
+- name: Add student to submitty users.
+  ansible.builtin.expect:
+    command: ./adduser.py "{{ username }}"
+    chdir: /usr/local/submitty/sbin/
+    echo: yes
+    responses:
+      (?m)^User givenname: "{{ username }}"
+      (?m)^User preferred name: "{{ firstname }}"
+      (?m)^User familyname: "{{ lastname }}"
+      (?m)^User email: "{{ email }}"
+      (?m)^User password: "{{ password }}"
+  become: true
+  become_user: root
+
+- name: Add existing students to the course database.
+  ansible.builtin.command:
+    cmd: ./adduser_course.py "{{ username }}" "{{ semester }}" "{{ course }}" "{{ user_group }}"
+    chdir: /usr/local/submitty/sbin/
+  become: true
+  become_user: root

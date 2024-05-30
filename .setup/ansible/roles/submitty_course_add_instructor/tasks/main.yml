@@ -3,7 +3,7 @@
 
 - name: Add instructors to the course groups.
   ansible.builtin.user:
-    name: "{{ instructor }}"
+    name: "{{ username }}"
     groups: "{{ submitty_course_add_instructor_groups }}"
     append: yes
   loop:
@@ -13,34 +13,28 @@
   loop_control:
     loop_var: submitty_course_add_instructor_groups
 
-- name: Give course management permissions to "{{ instructor }}".
+- name: Give course management permissions to "{{ username }}".
   ansible.builtin.user:
     name: "{{ submitty_course_add_instructor_users }}"
     groups: "submitty_course_builders"
     append: yes
   loop:
-    - "{{ instructor }}"
+    - "{{ username }}"
   loop_control:
     loop_var: submitty_course_add_instructor_users
-  notify: reload fpm
+  notify: Reload fpm
 
-- name: Add instructors to submitty users.
-  ansible.builtin.expect:
-    command: ./adduser.py "{{ instructor }}"
-    chdir: /usr/local/submitty/sbin/
-    echo: yes
-    responses:
-      (?m)^User givenname: "{{ firstname }}"
-      (?m)^User preferred name: "{{ firstname }}"
-      (?m)^User familyname: "{{ lastname }}"
-      (?m)^User email: "{{ email }}"
-      (?m)^User password: NotUsedWithLdap
-  become: true
-  become_user: root
 
-- name: Add existing instructors to the course database.
-  ansible.builtin.command:
-    cmd: ./adduser_course.py "{{ instructor }}" "{{ semester }}" "{{ course }}" "{{ user_group }}"
-    chdir: /usr/local/submitty/sbin/
-  become: true
-  become_user: root
+- name: Call add_user role
+  ansible.builtin.include_role:
+    name: submitty_course_add_user
+  # vars:
+  #   username: "{{ username }}"
+  #   firstname: "{{ firstname }}"
+  #   lastname: "{{ lastname }}"
+  #   email: "{{ email }}"
+  #   password: "{{ password }}"
+  #   semester: "{{ semester }}"
+  #   course: "{{ course }}"
+  #   user_group: "{{ user_group }}"
+

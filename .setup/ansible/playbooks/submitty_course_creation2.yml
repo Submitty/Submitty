@@ -16,7 +16,7 @@
         semester: y2024
         course: annual
         section: iii
-        instructor: fordet
+        username: fordet
         firstname: Ethan
         lastname: Ford
         email: fordet.cs.wallawalla.edu
@@ -25,7 +25,16 @@
       vars:
         semester: y2024
         course: annual
-        instructor: fordet
-        firstname: Ethan
+        username: carmpr
+        firstname: Cameron
+        lastname: Ford
+        email: fordet.cs.wallawalla.edu
+
+    - role: submitty_course_add_student
+      vars:
+        semester: y2024
+        course: annual
+        username: stacmi
+        firstname: Cameron
         lastname: Ford
         email: fordet.cs.wallawalla.edu
