@@ -348,25 +348,16 @@ class RainbowCustomization extends AbstractModel {
      *
      * @return array multidimensional array of display benchmark data
      */
-    public function getDisplayBenchmarks() {
-        // Get allowed benchmarks
-        $displayBenchmarks = RainbowCustomizationJSON::allowed_display_benchmarks;
-        $retArray = [];
-
-        // If json file available then collect used benchmarks from that, else get empty array
-        !is_null($this->RCJSON) ?
-            $usedDisplayBenchmarks = $this->RCJSON->getDisplayBenchmarks() :
-            $usedDisplayBenchmarks = [];
-
-        // Add data into retArray
-        foreach ($displayBenchmarks as $displayBenchmark) {
-            in_array($displayBenchmark, $usedDisplayBenchmarks) ? $isUsed = true : $isUsed = false;
-
-            // Add benchmark to return array
-            $retArray[] = ['id' => $displayBenchmark, 'isUsed' => $isUsed];
+    public function getDisplayBenchmarks(): array {
+        $allowedBenchmarks = RainbowCustomizationJSON::allowed_display_benchmarks;
+        // null safe operator
+        $usedBenchmarks = $this->RCJSON?->getDisplayBenchmarks() ?? [];
+        $benchmarksData = [];
+        foreach ($allowedBenchmarks as $benchmark) {
+            $benchmarkUsed = in_array($benchmark, $usedBenchmarks);
+            $benchmarksData[] = ['id' => $benchmark, 'isUsed' => $benchmarkUsed];
         }
-
-        return $retArray;
+        return $benchmarksData;
     }
 
     /**
@@ -404,24 +395,19 @@ class RainbowCustomization extends AbstractModel {
      * @return array<int, array<string, bool|string>> multidimensional array of display option data
      */
     public function getDisplay(): array {
-        // Get allowed benchmarks
-        $display = RainbowCustomizationJSON::allowed_display;
-        $retArray = [];
+        $allowed_display_options = RainbowCustomizationJSON::allowed_display;
+        $display_options = [];
 
-        // If json file available then collect used display option from that, else get empty array
-        !is_null($this->RCJSON) ?
-            $usedDisplay = $this->RCJSON->getDisplay() :
-            $usedDisplay = [];
+        $used_display_options = $this->RCJSON ? $this->RCJSON->getDisplay() : [];
 
-        // Add data into retArray
-        foreach ($display as $display_option) {
-            in_array($display_option, $usedDisplay) ? $isUsed = true : $isUsed = false;
-
-            // Add display to return array
-            $retArray[] = ['id' => $display_option, 'isUsed' => $isUsed];
+        foreach ($allowed_display_options as $option_id) {
+            $display_options[] = [
+                'id' => $option_id,
+                'isUsed' => in_array($option_id, $used_display_options)
+            ];
         }
 
-        return $retArray;
+        return $display_options;
     }
 
     /**

@@ -23,8 +23,6 @@ class MarkdownWidget extends Widget {
         label.setAttribute('for', `notebook-builder-markdown-${NUM_MARKDOWN}`);
         label.style.display = 'none';
         label.innerHTML =  `Markdown Input #${NUM_MARKDOWN}`;
-        // eslint-disable-next-line no-global-assign
-        NUM_MARKDOWN++;
 
         // Setup interactive area
         const interactive_area = container.getElementsByClassName('interactive-container')[0];
@@ -56,6 +54,8 @@ class MarkdownWidget extends Widget {
             },
         });
 
+        // eslint-disable-next-line no-global-assign
+        NUM_MARKDOWN++;
         this.dom_pointer = container;
         return container;
     }

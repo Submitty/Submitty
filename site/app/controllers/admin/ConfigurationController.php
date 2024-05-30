@@ -25,10 +25,10 @@ class ConfigurationController extends AbstractController {
     'Reports tab.  You may also manually create the file and upload it to your course\'s rainbow_grades directory.';
 
     /**
-     * @Route("/api/courses/{_semester}/{_course}/config", methods={"GET"})
-     * @Route("/courses/{_semester}/{_course}/config", methods={"GET"})
      * @return MultiResponse
      */
+    #[Route("/api/courses/{_semester}/{_course}/config", methods: ["GET"])]
+    #[Route("/courses/{_semester}/{_course}/config", methods: ["GET"])]
     public function viewConfiguration(): MultiResponse {
         $fields = [
             'course_name'                    => $this->core->getConfig()->getCourseName(),
@@ -94,10 +94,10 @@ class ConfigurationController extends AbstractController {
     }
 
     /**
-     * @Route("/api/courses/{_semester}/{_course}/config", methods={"POST"})
-     * @Route("/courses/{_semester}/{_course}/config", methods={"POST"})
      * @return MultiResponse
      */
+    #[Route("/api/courses/{_semester}/{_course}/config", methods: ["POST"])]
+    #[Route("/courses/{_semester}/{_course}/config", methods: ["POST"])]
     public function updateConfiguration(): MultiResponse {
         if (!isset($_POST['name'])) {
             return MultiResponse::JsonOnlyResponse(
