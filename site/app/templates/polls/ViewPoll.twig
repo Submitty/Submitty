@@ -1,18 +1,17 @@
 <div class="content">
-    <div class="header">
-        <h1>
-            {{ poll.getName() }}
-        </h1>
-        {% if timer_enabled %}
-        <!-- Invisible until JS renders -->
-        <div id="timer" class="timer" style="display:none">
+    <h1>
+        {{ poll.getName() }}
+    </h1>
+
+    {% if timer_enabled %}
+    <!-- Invisible until JS renders -->
+        <h2 id="timer" class="timer" style="display:none">
             <label for="timerDisplay">
-                    Time until Poll Ends:
+                Time until Poll Ends:
             </label>
             <span id="timerDisplay"></span>
-        </div>  
-        {% endif %}
-    </div>
+        </h2>
+    {% endif %}
     
     {% if user_admin or poll.isHistogramAvailable() %}
         <button class="btn btn-primary" id='toggle-info-button' onclick="toggle_section('poll-info')">Toggle Poll Info</button>
