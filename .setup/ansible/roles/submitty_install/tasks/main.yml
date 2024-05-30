@@ -68,8 +68,8 @@
   changed_when: submitty_install_output.rc != 0
 
 - name: Check to see if installation succeeded
-  ansible.builtin.cmd: grep "INSTALLATION SUCCESS!" /usr/local/submitty/install.log
-  changed_when: false
+  ansible.builtin.command: grep "INSTALLATION SUCCESS!" /usr/local/submitty/install.log
+  changed_when: False
 
 - name: Update the PHP disabled functions
   ansible.builtin.lineinfile:
