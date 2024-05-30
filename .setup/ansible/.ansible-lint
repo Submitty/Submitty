@@ -1,3 +1,3 @@
 ---
 skip_list:
-  - var-naming
+  - var-namin
