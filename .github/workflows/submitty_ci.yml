@@ -544,9 +544,9 @@ jobs:
 
   ansible-install:
     runs-on: ubuntu-22.04
-    steps: 
+    steps:
       - uses: actions/checkout@v4
-      - name: Setup SSH 
+      - name: Setup SSH
         shell: bash
         run: |
           ssh-keygen -t rsa -b 4096 -C "github_ci" -N '' -f /home/runner/.ssh/id_rsa
@@ -556,7 +556,7 @@ jobs:
           sudo systemctl start postgresql
 
       - name: Run ansible script
-        shell: bash 
+        shell: bash
         run: |
           cd .setup/ansible
           ansible-playbook --private-key /home/runner/.ssh/id_rsa -e 'ansible_user=runner' -i inventory/submitty playbooks/submitty_install.yml -vvv
