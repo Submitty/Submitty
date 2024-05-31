@@ -254,10 +254,11 @@ function deleteCalendarItem() {
                 const response = JSON.parse(res);
                 if (response.status === 'success') {
                     location.reload();
-                } else {
+                }
+                else {
                     alert(response.message);
                 }
-            }
+            },
         });
     }
 }
