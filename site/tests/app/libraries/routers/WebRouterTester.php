@@ -8,6 +8,7 @@ use Symfony\Component\HttpFoundation\Request;
 
 /**
  * @runTestsInSeparateProcesses
+ * @preserveGlobalState disabled
  */
 class WebRouterTester extends BaseUnitTest {
     public function testLogin() {
@@ -195,12 +196,12 @@ class WebRouterTester extends BaseUnitTest {
     public function testApiNotFaculty() {
         $core = $this->createMockCore(['logged_in' => true, 'access_faculty' => false]);
         $request = Request::create(
-            "/api/courses"
+            "/api/superuser/gradeables"
         );
         $response = WebRouter::getApiResponse($request, $core);
         $this->assertEquals([
             'status' => "fail",
-            'message' => "API is open to faculty only."
+            'message' => "You don't have access to this endpoint."
         ], $response->json_response->json);
     }
 

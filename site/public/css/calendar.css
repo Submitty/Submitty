@@ -60,6 +60,11 @@ a.cal-btn:focus {
     float: right;
 }
 
+#calendar-today-button{
+    float:right;
+    margin-right: 10px;
+}
+
 .cal-month-title {
     font-size: 26px;
     text-transform: uppercase;
@@ -154,6 +159,18 @@ h2.cal-month-title {
     height: 100px;
 }
 
+.cal-day-cell-twoweek{
+    min-height: 100px;
+    max-height: 390px;
+    height: 200px;
+}
+
+.cal-day-cell-week{
+    min-height: 100px;
+    max-height: 780px;
+    height: 400px;
+}
+
 .cal-cell-expand {
     height: 195px;
 }
@@ -202,6 +219,7 @@ a.cal-gradeable-status-text {
     padding: 0;
     border: none;
     box-shadow: none;
+    cursor: default;
 }
 
 a.cal-gradeable-status-text:hover {
@@ -224,12 +242,13 @@ a.cal-gradeable-status-ann {
     border-style: solid;
     border-width: 3px;
     box-shadow: none;
+    cursor: default;
 }
 
 a.cal-gradeable-status-ann:hover {
+    cursor: default;
     padding: 0;
     font-style: italic;
-    cursor: default;
     border-style: solid;
     border-width: 3px!important;
 }
