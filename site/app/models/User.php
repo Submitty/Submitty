@@ -390,18 +390,13 @@ class User extends AbstractModel {
     /**
      * Update the user's preferred locale.
      *
-     * @param string $locale The desired new locale, must be one of Core::getSupportedLocales()
-     * @return bool Whether or not the operation was successful
+     * @param string|null $locale The desired new locale, must be one of Core::getSupportedLocales()
      */
-    public function setPreferredLocale(string|null $locale): bool {
+    public function setPreferredLocale(string|null $locale): void {
         if (is_null($locale) || in_array($locale, $this->core->getSupportedLocales())) {
-            $success = $this->core->getQueries()->updateSubmittyUserPreferredLocale($this, $locale);
-            if ($success) {
-                $this->preferred_locale = $locale;
-                return true;
-            }
+            $this->core->getQueries()->updateSubmittyUserPreferredLocale($this, $locale);
+            $this->preferred_locale = $locale;
         }
-        return false;
     }
 
 

@@ -25,7 +25,8 @@ CONFIG_PATH = os.path.join(os.path.dirname(os.path.realpath(__file__)), '..', 'c
 
 with open(os.path.join(CONFIG_PATH, 'submitty_users.json')) as open_file:
     JSON = json.load(open_file)
-DAEMONCGI_GROUP = JSON['daemoncgi_group']
+DAEMONPHPCGI_GROUP = JSON['daemonphpcgi_group']
+CGI_USER = JSON['cgi_user']
 
 with open(os.path.join(CONFIG_PATH, 'database.json')) as open_file:
     JSON = json.load(open_file)
@@ -120,7 +121,8 @@ def create_or_update_repo(folder, subdirectory, which_branch):
     os.chdir(folder)
     for root, dirs, files in os.walk(folder):
         for entry in files + dirs:
-            shutil.chown(os.path.join(root, entry), group=DAEMONCGI_GROUP)
+            shutil.chown(os.path.join(root, entry), user=CGI_USER, group=DAEMONPHPCGI_GROUP)
+    shutil.chown(folder, user=CGI_USER, group=DAEMONPHPCGI_GROUP)
 
 
 # =======================================================================
@@ -130,6 +132,7 @@ parser.add_argument("--non-interactive", action='store_true', default=False)
 parser.add_argument("semester", help="semester")
 parser.add_argument("course", help="course code")
 parser.add_argument("repo_name", help="repository name")
+parser.add_argument("--subdirectory", help="vcs subdirectory", default="")
 args = parser.parse_args()
 
 conn_string = db_utils.generate_connect_string(
@@ -154,12 +157,12 @@ if course is None:
 vcs_semester = os.path.join(VCS_FOLDER, args.semester)
 if not os.path.isdir(vcs_semester):
     os.makedirs(vcs_semester, mode=0o770, exist_ok=True)
-    shutil.chown(vcs_semester, group=DAEMONCGI_GROUP)
+    shutil.chown(vcs_semester, user=CGI_USER, group=DAEMONPHPCGI_GROUP)
 
 vcs_course = os.path.join(vcs_semester, args.course)
 if not os.path.isdir(vcs_course):
     os.makedirs(vcs_course, mode=0o770, exist_ok=True)
-    shutil.chown(vcs_course, group=DAEMONCGI_GROUP)
+    shutil.chown(vcs_course, user=CGI_USER, group=DAEMONPHPCGI_GROUP)
 
 is_team = False
 
@@ -198,10 +201,7 @@ elif not args.non_interactive:
         print ("exiting")
         sys.exit()
 
-subdirectory = ''
-if eg.eg_vcs_subdirectory != '':
-    subdirectory = eg.eg_vcs_subdirectory
-
+subdirectory = args.subdirectory
 
 # Load the git branch for autgrading from the course config file
 course_config_file = os.path.join('/var/local/submitty/courses/',
@@ -219,7 +219,7 @@ print ("The git autograding branch for this course is: " + course_git_autogradin
 
 if not os.path.isdir(os.path.join(vcs_course, args.repo_name)):
     os.makedirs(os.path.join(vcs_course, args.repo_name), mode=0o770)
-    shutil.chown(os.path.join(vcs_course, args.repo_name), group=DAEMONCGI_GROUP)
+    shutil.chown(os.path.join(vcs_course, args.repo_name), user=CGI_USER, group=DAEMONPHPCGI_GROUP)
 
 if is_team:
     teams_table = Table('gradeable_teams', course_metadata, autoload=True)

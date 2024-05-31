@@ -1,8 +1,5 @@
 describe('Tests cases revolving around gradeable access and submition', () => {
     ['student', 'ta', 'grader', 'instructor'].forEach((user) => {
-        beforeEach(() => {
-            cy.visit('/');
-        });
         it('Should upload file, submit, and remove file', () => {
             cy.login(user);
             const testfile1 = 'cypress/fixtures/file1.txt';
