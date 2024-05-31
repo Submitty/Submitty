@@ -15,7 +15,7 @@
                     </td>
                     <td class="display-attachment-name">{{ attachment[2] }}</td>
                     <td class="file-trash">
-                        <a class="btn btn-default" onclick="markForDeletion(this)" id="delete_{{ attachment[2] }}">Delete</a>
+                        <a class="btn btn-default" onclick="markForDeletion(this)" id="delete_{{ attachment[2] }}" data-testid="mark-for-delete-btn">Delete</a>
                     </td>
                 </tr>
                 {% endif %}
