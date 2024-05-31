@@ -74,7 +74,7 @@
                     {% set displayName = course_material.getTitle|default(name) %}
                     <i class="fas fa-file" style="vertical-align: text-bottom;"></i>
                     {% set extension = name|split('.')|last|lower %}
-                    {% if '.' ~ extension in ['.pdf', '.jpg', '.jpeg', '.c', '.cpp', '.s', '.twig', '.py', '.java', '.png', '.txt', '.h', '.html', '.php', '.js', '.sql', '.sh', '.md', '.csv', '.salsa', '.erl', '.oz', '.pl', '.hs', '.gif'] %}
+                    {% if extension in ['pdf', 'jpg', 'jpeg', 'c', 'cpp', 's', 'twig', 'py', 'java', 'png', 'txt', 'h', 'html', 'php', 'js', 'sql', 'sh', 'md', 'csv', 'salsa', 'erl', 'oz', 'pl', 'hs', 'gif'] %}
                         <a class="popout-item" target="_blank" href="{{ links[course_material.getId] }}" aria-label="Pop up {{ displayName }} in a new window" tabindex="0" style="text-decoration: none;">{{ name }} <i class="fas fa-window-restore" title="Pop up the file in a new window"></i></a>
                     {% else %}
                         {{ displayName }}
