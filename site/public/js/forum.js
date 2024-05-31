@@ -2007,7 +2007,7 @@ function toggleMarkdown(post_box_id, triggered) {
     // eslint-disable-next-line eqeqeq
     $(`#markdown_input_${post_box_id}`).val($(`#markdown_input_${post_box_id}`).val() == 0 ? '1':'0');
     $(`#markdown-info-${post_box_id}`).toggleClass('disabled');
-    Cookies.set('markdown_enabled', $(`#markdown_input_${post_box_id}`).val(), { path: '/' });
+    Cookies.set('markdown_enabled', $(`#markdown_input_${post_box_id}`).val(), { path: '/', expires: 365 });
 }
 
 // eslint-disable-next-line no-unused-vars
