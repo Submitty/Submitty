@@ -1188,7 +1188,7 @@ SQL;
                 to_tsvector('english', replace(p.content, '.', ' '))
                 || to_tsvector('english', replace(t.title, '.', ' '))
                 as document FROM posts p, threads t
-                JOIN (SELECT thread_id, timestamp from posts where parent_id = -1) p2
+                JOIN (SELECT thread_id, timestamp FROM posts WHERE parent_id = -1) p2
                 ON p2.thread_id = t.id
                 WHERE t.id = p.thread_id and p.deleted=false and t.deleted=false) p_doc
             WHERE p_doc.document @@ plainto_tsquery('english', replace(:q, '.', ' '))
