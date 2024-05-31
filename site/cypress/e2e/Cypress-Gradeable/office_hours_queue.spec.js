@@ -66,7 +66,7 @@ const editAnnouncement = (text='') => {
         cy.get('#queue-announcement-message').type(text);
     }
     // saveAnnouncementSettings
-    cy.get('[data-testid="save_announcement"]').click();
+    cy.get('[data-testid="save-announcement"]').click();
 };
 describe('test office hours queue', () => {
     it('Testing queue as student', () => {
