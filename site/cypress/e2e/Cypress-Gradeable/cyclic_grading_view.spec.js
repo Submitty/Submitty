@@ -46,7 +46,7 @@ describe('Cyclic grading View Test', () => {
             cy.get('#page_3_nav').should('contain',  'Adan Fisher');
             cy.get('[data-testid="grading-panel-student-name"]').should('contain', 'Ben Bitdiddle').and('contain', 'Dannie Farrell').and('contain', 'Adan Fisher');
             cy.get('[data-testid="next-student-navlink"]').click();
-            cy.get('[data-testid="tab-bar-wrapper"]').children().its('length').should('be.eq', 3);
+            cy.get('[data-testid="tab-bar-wrapper"]').children().its('length').should('eq', 3);
             cy.get('[data-testid="grading-panel-student-name"]').should('contain', 'Eunice Hamill ').and('contain', 'Edison King').and('contain', 'Justice Kuhic');
         });
     });
