@@ -402,6 +402,10 @@ $(document).ready(() => {
         $('#flagged-message').addClass('show');
     }
 
+    /* adding select2 to the time_zone_drop_down element */
+    $('#time_zone_drop_down').select2({theme: 'bootstrap-5'});
+
+
     // Populate the time zone selector box with options
     const availableTimeZones = getAvailableTimeZones();
     availableTimeZones.forEach((elem) => {
@@ -489,5 +493,12 @@ $(document).ready(() => {
                 console.log(response);
             },
         });
+    });
+    document.addEventListener('scroll', () => {
+        const dropdown = document.querySelector('.select2-container--open .select2-dropdown');
+        if (dropdown) {
+            // Close the dropdown menu
+            $('#time_zone_drop_down').select2('close');
+        }
     });
 });

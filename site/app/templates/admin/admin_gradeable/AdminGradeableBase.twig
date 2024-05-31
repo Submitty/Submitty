@@ -15,9 +15,12 @@
                 <h1 id="myModalLabel">{{ action == 'edit' ? 'Edit Gradeable' : 'New Gradeable' }}
                     {% if action == 'new' %}
                     <button class="btn btn-primary" type="button" data-testid="upload-gradeable-btn" id="upload-gradeable-btn" style="float:right;" onclick="javascript:newGradeableJsonForm()" >Upload Gradeable JSON</button>
+                    {% elseif action == 'edit' %}
+                    <a class="btn btn-primary" data-testid="download-gradeable-btn" id="download-gradeable-btn" style="float:right;" href="{{ download_url }}">Download Gradeable JSON</a>
                     {% endif %}
                 </h1>
 			</div>
+           
             <div>
                 <b>
                     <a target=_blank href="http://submitty.org/instructor/create_edit_gradeable">Need help with creating/editing a gradeable? <i style="font-style:normal;" class="fa-question-circle"></i></a>

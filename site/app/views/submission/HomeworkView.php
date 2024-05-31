@@ -484,6 +484,22 @@ class HomeworkView extends AbstractView {
         $vcs_partial_path = str_replace('{$vcs_type}', $this->core->getConfig()->getVcsType(), $vcs_partial_path);
         $vcs_partial_path = str_replace('{$gradeable_id}', $gradeable->getId(), $vcs_partial_path);
         $vcs_partial_path = str_replace('{$user_id}', $this->core->getUser()->getId(), $vcs_partial_path);
+        if ($gradeable->isTeamAssignment()) {
+            $vcs_partial_path = str_replace('{$team_id}', $graded_gradeable->getSubmitter()->getId(), $vcs_partial_path);
+        }
+
+        $vcs_repo_exists = false;
+        if ($gradeable->isVcs()) {
+            $path = FileUtils::joinPaths(
+                $this->core->getConfig()->getSubmittyPath(),
+                'vcs',
+                'git',
+                $this->core->getConfig()->getTerm(),
+                $this->core->getConfig()->getCourse(),
+                $vcs_partial_path
+            );
+            $vcs_repo_exists = file_exists($path);
+        }
 
         $recent_version_url = $graded_gradeable ? $this->core->buildCourseUrl(['gradeable', $gradeable->getId()]) . '/' . $graded_gradeable->getAutoGradedGradeable()->getHighestVersion() : null;
         $numberUtils = new NumberUtils();
@@ -558,7 +574,9 @@ class HomeworkView extends AbstractView {
             'is_grader_view' => false,
             'recent_version_url' => $recent_version_url,
             'git_auth_token_url' => $this->core->buildUrl(['authentication_tokens']),
-            'git_auth_token_required' => false
+            'git_auth_token_required' => false,
+            'vcs_repo_exists' => $vcs_repo_exists,
+            'vcs_generate_repo_url' => $this->core->buildCourseUrl(['gradeable', $gradeable->getId(), 'generate_repo'])
         ]);
     }
 
