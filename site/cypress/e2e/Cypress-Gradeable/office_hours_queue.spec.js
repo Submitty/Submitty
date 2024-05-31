@@ -77,61 +77,61 @@ describe('test office hours queue', () => {
         deleteQueue();
         openNewQueue(queueName, queueCode);
         openNewQueue(queueName, queueCode1); // same name but used different code
-        cy.get('.alert-error').should('contain', 'Unable to add queue. Make sure you have a unique queue name');
+        cy.get('[data-testid="popup-message"]').should('contain', 'Unable to add queue. Make sure you have a unique queue name');
         openNewQueue(queueName_random);
         changeQueueCode(queueName_random);
-        cy.get('.alert-success').should('contain', 'Queue Access Code Changed');
+        cy.get('[data-testid="popup-message"]').should('contain', 'Queue Access Code Changed');
         changeQueueCode(queueName, newQueueCode);
-        cy.get('.alert-success').should('contain', 'Queue Access Code Changed');
+        cy.get('[data-testid="popup-message"]').should('contain', 'Queue Access Code Changed');
         openNewQueue(queueName1, queueCode1);
         // switch to student to join queue
         switchUser('student');
         // cy.get('#leave_queue').click();
         studentJoinQueue(queueName, newQueueCode);
-        cy.get('.alert-success').should('contain', 'Added to queue');
+        cy.get('[data-testid="popup-message"]').should('contain', 'Added to queue');
         cy.get('[data-testid="leave-queue"]').click(); // studentRemoveSelfFromQueue
-        cy.get('.alert-success').should('contain', 'Removed from queue');
+        cy.get('[data-testid="popup-message"]').should('contain', 'Removed from queue');
         studentJoinQueue(queueName, newQueueCode);
-        cy.get('.alert-success').should('contain', 'Added to queue');
+        cy.get('[data-testid="popup-message"]').should('contain', 'Added to queue');
         // switch to instructor to help first student
         switchUser('instructor');
         cy.get('.help_btn').first().click(); // helpFirstStudent
-        cy.get('.alert-success').should('contain', 'Started helping student');
+        cy.get('[data-testid="popup-message"]').should('contain', 'Started helping student');
         // switch to student for finishing help
         switchUser('student');
         cy.get('[data-testid="self-finish-help"]').click(); // studentFinishHelpSelf
-        cy.get('.alert-success').should('contain', 'Finished helping student');
+        cy.get('[data-testid="popup-message"]').should('contain', 'Finished helping student');
         studentJoinQueue(queueName1, queueCode1);
-        cy.get('.alert-success').should('contain', 'Added to queue');
+        cy.get('[data-testid="popup-message"]').should('contain', 'Added to queue');
         // switch to student (aphacker) for joining queue
         switchUser('aphacker');
         studentJoinQueue(queueName1, queueCode1);
-        cy.get('.alert-success').should('contain', 'Added to queue');
+        cy.get('[data-testid="popup-message"]').should('contain', 'Added to queue');
     });
-    it('switch to instructor for helping, removing student and toggle to other queue', () => {
+    it('Helping,removing student and toggle queue as Instructor', () => {
         switchUser('instructor');
         cy.get('.help_btn').first().click(); // help first student
-        cy.get('.alert-success').should('contain', 'Started helping student');
+        cy.get('[data-testid="popup-message"]').should('contain', 'Started helping student');
         cy.get('.finish_helping_btn').first().click(); // finished helping first student
-        cy.get('.alert-success').should('contain', 'Finished helping student');
+        cy.get('[data-testid="popup-message"]').should('contain', 'Finished helping student');
         cy.get('[data-testid="remove-from-queue-btn"]').first().click();  // remove First Student
-        cy.get('.alert-success').should('contain', 'Removed from queue');
+        cy.get('[data-testid="popup-message"]').should('contain', 'Removed from queue');
         cy.get('[data-testid="queue-restore-btn"]').first().click(); // restore first Student
-        cy.get('.alert-success').should('contain', 'Student restored');
+        cy.get('[data-testid="popup-message"]').should('contain', 'Student restored');
         cy.get('[data-testid="queue-restore-btn"]').first().click();
-        cy.get('.alert-success').should('contain', 'Student restored');
+        cy.get('[data-testid="popup-message"]').should('contain', 'Student restored');
         cy.get('[data-testid="queue-restore-btn"]').first().click();
-        cy.get('.alert-error').should('contain', 'Cannot restore a user that is currently in the queue. Please remove them first.');
+        cy.get('[data-testid="popup-message"]').should('contain', 'Cannot restore a user that is currently in the queue. Please remove them first.');
         cy.get('.filter-buttons').first().click(); // turn first "off"
         cy.get('.filter-buttons').first().click(); // turn first "on"
         cy.get('[data-testid="toggle-filter-settings"]').first().click();
         cy.get('[data-testid="toggle-queue-checkbox"]').first().click(); // closeFirstQueue
         cy.get('[data-testid="empty-queue-btn"]').first().click(); // emptyFirstQueue
         editAnnouncement('Submitty');
-        cy.get('.alert-success').should('contain', 'Updated announcement');
+        cy.get('[data-testid="popup-message"]').should('contain', 'Updated announcement');
         editAnnouncement('');
         cy.get('[data-testid="announcement"]').should('not.exist');
-        cy.get('.alert-success').should('contain', 'Updated announcement');
+        cy.get('[data-testid="popup-message"]').should('contain', 'Updated announcement');
         // diable and delete all queue
         disableQueue();
     });
