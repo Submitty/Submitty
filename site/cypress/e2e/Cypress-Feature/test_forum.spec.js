@@ -23,16 +23,16 @@ const createThread = (title, content, category) => {
 };
 
 const replyToThread = (title, reply) => {
-    cy.get('[data-testid="thread-item"]').contains(title).click();
-    cy.get('[data-testid="post-head"]').should('contain', title);
+    cy.get('[data-testid="thread-list-item"]').contains(title).click();
+    cy.get('[data-testid="create-post-head"]').should('contain', title);
     cy.get('#reply_box_3').type(reply);
     cy.get('[value="Submit Reply to All"]').should('not.be.disabled').click();
     cy.get('#posts_list').should('contain', reply);
 };
 
 const upduckPost = (thread_title) => {
-    cy.get('[data-testid="thread-item"]').contains(thread_title).click();
-    cy.get('[data-testid="post-head"]').should('contain', thread_title);
+    cy.get('[data-testid="thread-list-item"]').contains(thread_title).click();
+    cy.get('[data-testid="create-post-head"]').should('contain', thread_title);
     cy.get('.first_post > [data-testid="like-count"]').should('have.text', 0);
     cy.get('.first_post').find('[data-testid="upduck-button"]').click();
     cy.get('.first_post > [data-testid="like-count"]').should('have.text', 1);
@@ -60,7 +60,7 @@ const checkStatsUpducks = (fullName, numUpducks) => {
 
 const mergeThreads = (fromThread, toThread, mergedContent) => {
     // Add more to tests for uploading attachments
-    cy.get('[data-testid="thread-item"]').contains(fromThread).click({ force: true });
+    cy.get('[data-testid="thread-list-item"]').contains(fromThread).click({ force: true });
     cy.get('[title="Merge Thread Into Another Thread"]').click();
     cy.get('.chosen-single > span').click();
     cy.wait(500);
@@ -70,9 +70,9 @@ const mergeThreads = (fromThread, toThread, mergedContent) => {
 };
 
 const removeThread = (title) => {
-    cy.get('[data-testid="thread-item"]').contains(title).click();
+    cy.get('[data-testid="thread-list-item"]').contains(title).click();
     cy.get('.first_post > .post-action-container > .delete-post-button').click();
-    cy.get('[data-testid="thread-item"]').contains(title).should('not.exist');
+    cy.get('[data-testid="thread-list-item"]').contains(title).should('not.exist');
 };
 
 const uploadAttachmentAndDelete = (title) => {
@@ -88,7 +88,7 @@ const uploadAttachmentAndDelete = (title) => {
     cy.get('[data-testid="forum-update-post"]').contains('Update Post').click();
 };
 const replyDisabled = (title, attachment) => {
-    cy.get('[data-testid="thread-item"]').contains(title).click();
+    cy.get('[data-testid="thread-list-item"]').contains(title).click();
     // Reply button should be disabled by default with no text
     cy.get('[value="Submit Reply to All"]').should('be.disabled');
 
