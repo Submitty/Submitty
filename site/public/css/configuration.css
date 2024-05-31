@@ -20,6 +20,10 @@
     margin: 0 0 1em;
 }
 
+.config-row textarea {
+    resize: vertical;
+}
+
 .checkbox-row {
     display: flex;
     align-items: center;
