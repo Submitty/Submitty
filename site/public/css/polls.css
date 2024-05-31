@@ -116,6 +116,25 @@ form {
     margin-left: 0.5em;
 }
 
+#timer-inputs {
+    display: inline-block;
+}
+
+.poll-timer {
+    display: inline-block;
+    text-align: center;
+    width: 4em !important;
+}
+
+.poll-input {
+    display: inline-block;
+    text-align: center;
+    margin-right: 0.5em;
+    margin-bottom: 1em;
+    font-size: 0.8em;
+    width: 4em !important;
+}
+
 .correct-tag-background {
     color: var(--standard-dark-green);
 }

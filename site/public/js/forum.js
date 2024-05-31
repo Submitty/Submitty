@@ -1,4 +1,6 @@
-/* global displaySuccessMessage, hljs */
+/* global displaySuccessMessage */
+/* global luxon */
+/* global hljs */
 /* exported markForDeletion */
 /* exported unMarkForDeletion */
 /* exported  displayHistoryAttachment */
@@ -180,6 +182,10 @@ function testAndGetAttachments(post_box_id, dynamic_check) {
         return false;
     }
     else {
+        const submitButtons = document.querySelectorAll(`[data-post_box_id="${post_box_id}"] input[type="submit"]`);
+        submitButtons.forEach((button) => {
+            button.disabled = false;
+        });
         return files;
     }
 }
@@ -847,6 +853,7 @@ function modifyOrSplitPost(e) {
 
 // eslint-disable-next-line no-unused-vars
 function showEditPostForm(post_id, thread_id, shouldEditThread, render_markdown, csrf_token) {
+    const DateTime = luxon.DateTime;
     if (!checkAreYouSureForm()) {
         return;
     }
@@ -885,19 +892,19 @@ function showEditPostForm(post_id, thread_id, shouldEditThread, render_markdown,
             const change_anon = json.change_anon;
             // eslint-disable-next-line no-undef
             const user_id = escapeSpecialChars(json.user);
-            let time = Date.parse(json.post_time);
-            if (!time) {
+            const validIsoString = json.post_time.replace(' ', 'T');
+            let time = DateTime.fromISO(json.validIsoString, { zone: 'local' });
+            if (!time.isValid) {
                 // Timezone suffix ":00" might be missing
-                time = Date.parse(`${json.post_time}:00`);
+                time = DateTime.fromISO(`${validIsoString}:00`, { zone: 'local' });
             }
-            time = new Date(time);
             const categories_ids = json.categories_ids;
-            const date = time.toLocaleDateString();
-            time = time.toLocaleString('en-US', { hour: 'numeric', minute: 'numeric', hour12: true });
+            const date = time.toLocaleString(DateTime.DATE_SHORT);
+            const timeString = time.toLocaleString(DateTime.TIME_SIMPLE);
             const contentBox = form.find('[name=thread_post_content]')[0];
             contentBox.style.height = lines*14;
             const editUserPrompt = document.getElementById('edit_user_prompt');
-            editUserPrompt.innerHTML = `Editing a post by: ${user_id} on ${date} at ${time}`;
+            editUserPrompt.innerHTML = `Editing a post by: ${user_id} on ${date} at ${timeString}`;
             contentBox.value = post_content;
             document.getElementById('edit_post_id').value = post_id;
             document.getElementById('edit_thread_id').value = thread_id;
@@ -911,9 +918,7 @@ function showEditPostForm(post_id, thread_id, shouldEditThread, render_markdown,
             $('#edit-user-post').css('display', 'block');
             // eslint-disable-next-line no-undef
             captureTabInModal('edit-user-post');
-
             $('.cat-buttons input').prop('checked', false);
-
             if (json.markdown === true) {
                 $('#markdown_input_').val('1');
                 $('#markdown_toggle_').addClass('markdown-active');
@@ -946,7 +951,6 @@ function showEditPostForm(post_id, thread_id, shouldEditThread, render_markdown,
                     $('.expiration').show();
                 }
                 $('#expirationDate').val(json.expiration);
-
                 // Categories
                 $('.cat-buttons').removeClass('btn-selected');
                 $.each(categories_ids, (index, category_id) => {
@@ -1296,7 +1300,7 @@ function modifyThreadList(currentThreadId, currentCategoriesId, course, loadFirs
 function toggleLike(post_id, current_user) {
 
     // eslint-disable-next-line no-undef
-    const url = buildCourseUrl(['post', 'likes']);
+    const url = buildCourseUrl(['posts', 'likes']);
     $.ajax({
         url: url,
         type: 'POST',
@@ -2003,7 +2007,7 @@ function toggleMarkdown(post_box_id, triggered) {
     // eslint-disable-next-line eqeqeq
     $(`#markdown_input_${post_box_id}`).val($(`#markdown_input_${post_box_id}`).val() == 0 ? '1':'0');
     $(`#markdown-info-${post_box_id}`).toggleClass('disabled');
-    Cookies.set('markdown_enabled', $(`#markdown_input_${post_box_id}`).val(), { path: '/' });
+    Cookies.set('markdown_enabled', $(`#markdown_input_${post_box_id}`).val(), { path: '/', expires: 365 });
 }
 
 // eslint-disable-next-line no-unused-vars
@@ -2498,6 +2502,37 @@ function clearReplyBoxAutosave(replyBox) {
     }
 }
 
+function setupDisableReplyThreadForm() {
+    const threadPostForms = document.querySelectorAll('.thread-post-form');
+
+    threadPostForms.forEach((form) => {
+        //For all thread forms either reply's or posts, ensure that when text area is empty, the submit button appears to be disabled
+        const textArea = form.querySelector('textarea');
+
+        const submitButtons = form.querySelectorAll('input[type="submit"]');
+
+        if (textArea.id === 'reply_box_1' || textArea.id === 'reply_box_2') {
+            // Should not apply for first two reply_box's as they imply the post itself which should be handled by another controller due to extensive inputs
+            return;
+        }
+
+        const inputTest = () => {
+            const imageAttachments = form.querySelectorAll('.file-upload-table .file-label');
+
+            submitButtons.forEach((button) => {
+                button.disabled = textArea.value.trim() === '' && imageAttachments.length === 0;
+            });
+        };
+
+        textArea.addEventListener('input', () => {
+            // On any text area input, check if disabling the corresponding reply submit button is appropriate
+            inputTest();
+        });
+
+        inputTest();
+    });
+}
+
 function setupForumAutosave() {
     // Include both regular reply boxes on the forum as well as the "reply" box
     // on the create thread page.
@@ -2509,6 +2544,8 @@ function setupForumAutosave() {
         );
         $(replyBox).find('input.thread-anon-checkbox').change(() => saveReplyBoxToLocal(replyBox));
     });
+
+    setupDisableReplyThreadForm();
 }
 
 // eslint-disable-next-line no-unused-vars
