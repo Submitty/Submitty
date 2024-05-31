@@ -2351,7 +2351,8 @@ ORDER BY {$orderby}",
         $params = [$g_id];
         $where = "";
         if (count($sections) > 0) {
-            $where = "WHERE active_version > 0 AND ({$section_key} IN " . $this->createParameterList(count($sections)) . ") IS NOT FALSE";
+            $where = "WHERE active_version > 0 AND (? IN " . $this->createParameterList(count($sections)) . ") IS NOT FALSE";
+            $params[] = $section_key;
             $params = array_merge($params, $sections);
         }
 
