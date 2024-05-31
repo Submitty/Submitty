@@ -108,7 +108,7 @@
 
 <script>
 
-    if (document.getElementById('timer') !== null) {
+    {% if timer_enabled %}
 
         var endDate = new Date('{{ end_time }}');
         var timerId;
@@ -149,7 +149,7 @@
         }
 
         timerId = setInterval(updateTimer, 20);
-    }
+    {% endif %}
 
     function toggle_section(section_id) {
         $(`#${section_id}`).toggle('fast');
