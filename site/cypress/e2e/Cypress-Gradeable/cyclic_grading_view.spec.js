@@ -40,7 +40,7 @@ describe('Cyclic grading View Test', () => {
             cy.get('[data-testid="grading-setting-btn"]').should('exist');
             cy.get('[data-testid="grading-setting-btn"]').children().should('exist');
             cy.get('[data-testid="grading-scroll-message"]').should('exist');
-            cy.get('[data-testid="tab-bar-wrapper"]').children().its('length').should('be.eq', 3);
+            cy.get('[data-testid="tab-bar-wrapper"]').children().its('length').should('eq', 3);
             cy.get('#page_1_nav').should('contain', 'Ben Bitdiddle');
             cy.get('#page_2_nav').should('contain', 'Dannie Farrell');
             cy.get('#page_3_nav').should('contain',  'Adan Fisher');
