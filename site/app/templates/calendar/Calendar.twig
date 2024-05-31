@@ -79,31 +79,30 @@
             {% if show_all_cookie == 1 %}
                 {% for course in course_names %}
                 <div 
-                    name="{{course.course_name|replace({' ':''})}}" 
+                    name="{{ course.course_name|replace({' ':''}) }}" 
                     class="legend-color" 
-                    onclick="filter_course({{course.course_name}}, {{course.display_name}})" 
+                    onclick="filter_course('{{ course.course_name }}', '{{ course.display_name }}')" 
                     style="cursor: pointer;" 
                     title="Click to open Calendar options form"
                 ></div>
                 <p 
-                    for="{{course.course_name|replace({' ':''})}}-color" 
+                    for="{{ course.course_name|replace({' ':''}) }}-color" 
                     style="cursor: pointer;" 
-                    onclick="filter_course({{course.course_name}}, {{course.display_name}})" 
+                    onclick="filter_course('{{ course.course_name }}', '{{ course.display_name }}')" 
                     title="Click to filter course, click again to show all courses" 
                     class="legend-label"
-                    >{{course.display_name}}
-                </p>
+                >{{ course.display_name }}</p>
                 {% endfor %}
-            {% else %}
+                {% else %}
                 <div 
-                    name="{{calendar_course_cookie|replace({' ':''})}}" 
+                    name="{{ calendar_course_cookie|replace({' ':''}) }}" 
                     class="legend-color" 
                     onclick="filter_course('show all', '')"
                     style="cursor: pointer;" 
                     title="Click to open Calendar options form"
                 ></div>
                 <p 
-                    for="{{calendar_course_cookie|replace({' ':''})}}-color" 
+                    for="{{ calendar_course_cookie|replace({' ':''}) }}-color" 
                     style="cursor: pointer;" 
                     onclick="filter_course('show all', '')" 
                     title="Click to filter course, click again to show all courses" 
