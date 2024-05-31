@@ -90,25 +90,25 @@
     path: /etc/apache2/sites-available/submitty.conf
     regexp: '<VirtualHost \*:80>'
     replace: "{{ lookup('file', 'append_to_submitty.conf') }}"
-  when: ssl_enabled | bool
+  when: submitty_install_ssl_enabled | bool
 
 - name: Add ip to the Apache Submitty configuration
   ansible.builtin.replace:
     path: /etc/apache2/sites-available/submitty.conf
     regexp: "Require host __your_domain__"
-    replace: "Require ip {{ submitty_ip }}"
+    replace: "Require ip {{ submitty_install_submitty_ip }}"
 
 - name: Add domain to the Apache Submitty configuration
   ansible.builtin.replace:
     path: /etc/apache2/sites-available/submitty.conf
     regexp: "__your_domain__"
-    replace: "{{ submitty_url }}"
+    replace: "{{ submitty_install_submitty_url }}"
 
 - name: Add email
   ansible.builtin.replace:
     path: /etc/apache2/sites-available/submitty.conf
     regexp: "ADMIN@DOMAIN.HERE"
-    replace: "{{ submitty_email }}"
+    replace: "{{ submitty_install_submitty_email }}"
 
 - name: Uncomment ServerName
   ansible.builtin.replace:
