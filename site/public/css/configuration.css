@@ -1,21 +1,3 @@
-.config-row {
-    flex: 1 0 auto;
-    margin: 0 0 1em;
-}
-
-.config-row textarea {
-    resize: vertical;
-}
-
-.checkbox-row {
-    display: flex;
-    align-items: center;
-}
-
-.checkbox-row input[type="checkbox"] {
-    flex: none;
-    margin-right: 1em;
-}
 
 #config {
     display: flex;
@@ -32,6 +14,25 @@
 
 #config textarea {
     min-height: 7em;
+}
+
+.config-row {
+    flex: 1 0 auto;
+    margin: 0 0 1em;
+}
+
+textarea.config-row {
+    resize: vertical;
+}
+
+.checkbox-row {
+    display: flex;
+    align-items: center;
+}
+
+.checkbox-row input[type="checkbox"] {
+    flex: none;
+    margin-right: 1em;
 }
 
 #email-seating-assignment a {
