@@ -18,11 +18,11 @@ const deleteQueue = () => {
 const disableQueue = () => {
     cy.visit(['sample', 'config']);
     cy.get('[data-testid="queue-enabled"]').should('be.checked');
-    cy.get('[data-testid="queue-enabled"]').check();
+    cy.get('[data-testid="queue-enabled"]').uncheck();
 };
 const openNewQueue = (queueName, queueCode='') => {
     cy.get('#nav-sidebar-queue').click();
-    cy.get('[data-testid="toggle-new-queue"]').should('exist').click();
+    cy.get('[data-testid="toggle-new-queue"]').click();
     cy.get('[data-testid="popup-window"]').should('exist');
     cy.get('[data-testid="new-queue-code"]').type(queueName);
     if (queueCode.length > 0) {
@@ -35,7 +35,7 @@ const openNewQueue = (queueName, queueCode='') => {
 };
 
 const changeQueueCode = (queueName, queueCode='') => {
-    cy.get('[data-testid="toggle-filter-settings"]').should('exist').click();
+    cy.get('[data-testid="toggle-filter-settings"]').click();
     cy.get('[data-testid="popup-window"]').should('exist');
     cy.get('[data-testid="old-queue-code"]').select(queueName);
     if (queueCode.length > 0) {
@@ -69,7 +69,7 @@ const editAnnouncement = (text='') => {
     cy.get('[data-testid="save_announcement"]').click();
 };
 describe('test office hours queue', () => {
-    it('opened new queue, students joining queue, started and finished helping student', () => {
+    it('Testing queue as student', () => {
         cy.login();
         enableQueue();
         // deleting the Lab help and homework debugging
@@ -134,9 +134,5 @@ describe('test office hours queue', () => {
         cy.get('.alert-success').should('contain', 'Updated announcement');
         // diable and delete all queue
         disableQueue();
-        deleteQueue();
-        deleteQueue();
-        deleteQueue();
-        cy.logout();
     });
 });
