@@ -45,7 +45,7 @@
             </label>
             <label for="reason-for-exception">
                 Reason for Extension:
-                <span id="config-drop-down">
+                <span id="reason-drop-down">
                     <select name="reason_for_exception" id="reason-for-exception">
                         <option>{{ "unspecified" }}</option>
                         {% for reason in reasons %}
@@ -54,6 +54,8 @@
                     </select>
                 </span>
             </label>
+            <p><strong>Note:</strong> The optional reason for extension text will be displayed to the student on the Rainbow Grades page.</p>
+            <br>
             <a class="btn btn-primary" href="javascript:updateHomeworkExtension()">Submit</a>
         </fieldset>
         <fieldset>
@@ -135,7 +137,7 @@
                                 date = new Date();
                                 break;
                             case 1:
-                                date = new Date("01/01/9998");
+                                date = new Date('9998-01-01');
                                 break;
                         }
                         fp.setDate(date, true);

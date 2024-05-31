@@ -42,6 +42,10 @@ class GradedGradeable extends AbstractModel {
     protected $late_day_exceptions = [];
 
     /** @prop
+     * @var array<string> The reasons for exceptions indexed by user id */
+    protected $reasons_for_exceptions = [];
+
+    /** @prop
      * @var bool|null|SimpleGradeOverriddenUser Does this graded gradeable have overridden grades */
     protected $overridden_grades = false;
 
@@ -70,6 +74,8 @@ class GradedGradeable extends AbstractModel {
         $this->submitter = $submitter;
 
         $this->late_day_exceptions = $details['late_day_exceptions'] ?? [];
+
+        $this->reasons_for_exceptions = $details['reasons_for_exceptions'] ?? [];
     }
 
     /**
@@ -222,6 +228,21 @@ class GradedGradeable extends AbstractModel {
             return $this->late_day_exceptions[$this->submitter->getId()] ?? 0;
         }
         return $this->late_day_exceptions[$user->getId()] ?? 0;
+    }
+
+    /**
+     * Gets the reason of exception for a user
+     * @param User|null $user The user to get exception info for (can be null if not team assignment)
+     * @return string the reason for a user's excused absence extension
+     */
+    public function getReasonForException(?User $user = null): string {
+        if ($user === null) {
+            if ($this->gradeable->isTeamAssignment()) {
+                throw new \InvalidArgumentException('Must provide user if team assignment');
+            }
+            return $this->reasons_for_exceptions[$this->submitter->getId()] ?? '';
+        }
+        return $this->reasons_for_exceptions[$user->getId()] ?? '';
     }
 
     /**

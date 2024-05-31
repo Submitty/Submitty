@@ -14,10 +14,14 @@
         </table>
     </td></tr>
     <tr><td style="background-color:var(--always-default-white);">
-        {% if seating_config != null %}
-            {% include '@room_templates/'~user_seating_details.building~'/'~user_seating_details.room~'.twig' %}
-        {% else %}
-            No room template found for the room you have been assigned.
-        {% endif %}
+            {% if seating_config != null %}
+                {% if seating_config == 'empty-case-handling' %}
+                    Something went wrong, contact the instructor for assistance.
+                {% else %}
+                    {% include '@room_templates/'~user_seating_details.building~'/'~user_seating_details.room~'.twig' %}
+                {% endif %}
+            {% else %}
+                No room template found for the room you have been assigned.
+            {% endif %}
     </td></tr>
 </table>
