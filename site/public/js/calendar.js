@@ -145,20 +145,19 @@ function lighten(colorstr) {
         return colorstr;
     }
     else {
-        const hexcodestr = window.getComputedStyle(document.documentElement).getPropertyValue(colorstr.slice(4, -1)).toLowerCase();
-        const lighterstr = hexcodestr.split('');
-        for (let i = 1; i < hexcodestr.length; i++) {
-            if ((hexcodestr[i] >= '0' && hexcodestr[i] < '9') || (hexcodestr[i] >= 'a' && hexcodestr[i] < 'f')) {
-                lighterstr[i] = String.fromCharCode(hexcodestr.charCodeAt(i) + 2);
-            }
-            else if (hexcodestr[i] === '9') {
-                lighterstr[i] = 'b';
-            }
-            else if (hexcodestr[i] === '8') {
-                lighterstr[i] = 'a';
-            }
-        }
-        return lighterstr.join('');
+        const hexcodestr = window.getComputedStyle(document.documentElement).getPropertyValue(colorstr.slice(4, -1)).trim().toLowerCase();
+        const hex = hexcodestr.slice(1);
+        // Convert hex to RGB
+        const r = parseInt(hex.substring(0, 2), 16);
+        const g = parseInt(hex.substring(2, 4), 16);
+        const b = parseInt(hex.substring(4, 6), 16);
+        // Adjusting the brightness for stripes to visible (used only for future gradeables as of now)
+        const newR = Math.min(255, r + 40);
+        const newG = Math.min(255, g + 40);
+        const newB = Math.min(255, b + 40);
+        // Convert RGB back to hex
+        const lighterHex = `#${newR.toString(16).padStart(2, '0')}${newG.toString(16).padStart(2, '0')}${newB.toString(16).padStart(2, '0')}`;
+        return lighterHex;
     }
 }
 
