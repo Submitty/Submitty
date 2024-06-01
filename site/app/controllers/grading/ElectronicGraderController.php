@@ -995,7 +995,7 @@ class ElectronicGraderController extends AbstractController {
             foreach ($all_teams as $team) {
                 $student_ids = array_diff($student_ids, $team->getMembers());
                 $team_section = $gradeable->isGradeByRegistration() ? $team->getRegistrationSection() : $team->getRotatingSection();
-                if ($team->getSize() > 0 && (in_array($team_section, $sections) || $show_all)) {
+                if ($team->getSize() > 0 && (in_array((string) $team_section, $sections, true) || $show_all)) {
                     $student_ids[] = $team->getLeaderId();
                 }
                 if ($team->getSize() === 0 && $show_empty_teams) {

@@ -1211,7 +1211,7 @@ SQL;
 
         if (!$newStatus) {
             // On undelete, parent post must have deleted = false
-            if ($parent_id != -1) {
+            if ($parent_id !== -1) {
                 if ($this->getPost($parent_id)['deleted']) {
                     return null;
                 }
@@ -3573,7 +3573,7 @@ VALUES(?, ?, ?, ?, 0, 0, 0, 0, ?)",
         // Switch the column based on gradeable team-ness
         $type = $mark->getComponent()->getGradeable()->isTeamAssignment() ? 'team' : 'user';
         // TODO: anon teams?
-        $user_type = ($type == 'user' && $anon != 'unblind') ? 'anon' : $type;
+        $user_type = ($type == 'user' && $anon !== 'unblind') ? 'anon' : $type;
         $row_type = $user_type . "_id";
 
         $params = [$grader->getId(), $mark->getId()];
@@ -3619,9 +3619,9 @@ VALUES(?, ?, ?, ?, 0, 0, 0, 0, ?)",
     public function getAllSubmittersWhoGotMark($mark, $anon = 'unblind') {
         // Switch the column based on gradeable team-ness
         $type = $mark->getComponent()->getGradeable()->isTeamAssignment() ? 'team' : 'user';
-        $row_type = ($anon != 'unblind' && $type != 'team') ? 'anon_id' : "gd_" . $type . "_id";
+        $row_type = ($anon !== 'unblind' && $type !== 'team') ? 'anon_id' : "gd_" . $type . "_id";
         //TODO: anon teams?
-        if ($anon != 'unblind' && $type != 'team') {
+        if ($anon !== 'unblind' && $type !== 'team') {
             $table = $mark->getComponent()->getGradeable()->isTeamAssignment() ? 'gradeable_teams' : 'gradeable_anon';
             $this->course_db->query(
                 "
@@ -5591,7 +5591,7 @@ AND gc_id IN (
                   EXISTS (
                   SELECT user_id FROM notification_settings WHERE
                   user_id = author_user_id AND {$column} = 'true');";
-        if ($column != 'reply_in_post_thread' && $column != 'reply_in_post_thread_email') {
+        if ($column !== 'reply_in_post_thread' && $column !== 'reply_in_post_thread_email') {
             throw new DatabaseException("Given column, {$column}, is not a valid column", $query, $params);
         }
         $this->course_db->query($query, $params);
@@ -5727,7 +5727,7 @@ AND gc_id IN (
     public function markNotificationAsSeen($user_id, $notification_id, $thread_id = -1) {
         $parameters = [];
         $parameters[] = $user_id;
-        if ($thread_id != -1) {
+        if ($thread_id !== -1) {
             $id_query = "metadata::json->>'thread_id' = ?";
             $parameters[] = $thread_id;
         }
@@ -7636,7 +7636,7 @@ AND gc_id IN (
 
         $parameters = [];
         // Select which subquery to use
-        if ($component_id != "-1") {
+        if ($component_id !== "-1") {
             // Use this sub query to select users who do not have a specific component within this gradable graded
             $sub_query = "(select gd_$id_string
                 from gradeable_component_data left join gradeable_data on gradeable_component_data.gd_id = gradeable_data.gd_id
