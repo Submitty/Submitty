@@ -13,7 +13,8 @@ class CourseMaterialTester extends BaseUnitTest {
             'path' => '/tmp/file.txt',
             'release_date' => new \DateTime('9998-01-01 05:00:00'),
             'hidden_from_students' => false,
-            'priority' => 1.2
+            'priority' => 1.2,
+            'is_deleted' => false
         ];
         $course_material = new CourseMaterial(
             $details['type'],
@@ -22,7 +23,8 @@ class CourseMaterialTester extends BaseUnitTest {
             $details['hidden_from_students'],
             $details['priority'],
             null,
-            null
+            null,
+            $details['is_deleted']
         );
         $sections = ['1', '2'];
         foreach ($sections as $section) {
@@ -34,6 +36,7 @@ class CourseMaterialTester extends BaseUnitTest {
         $this->assertEquals($details['release_date'], $course_material->getReleaseDate());
         $this->assertEquals($details['hidden_from_students'], $course_material->isHiddenFromStudents());
         $this->assertEquals($details['priority'], $course_material->getPriority());
+        $this->assertEquals($details['is_deleted'], $course_material->isDeleted());
         $index = 0;
         foreach ($course_material->getSections()->toArray() as $section) {
             $this->assertEquals($sections[$index], $section->getSectionId());
@@ -47,7 +50,8 @@ class CourseMaterialTester extends BaseUnitTest {
             'path' => '/tmp/file.txt',
             'release_date' => new \DateTime('9998-01-01 05:00:00'),
             'hidden_from_students' => true,
-            'priority' => 2.4
+            'priority' => 2.4,
+            'is_deleted' => false
         ];
         $course_material = new CourseMaterial(
             $details['type'],
@@ -56,12 +60,14 @@ class CourseMaterialTester extends BaseUnitTest {
             $details['hidden_from_students'],
             $details['priority'],
             null,
-            null
+            null,
+            $details['is_deleted']
         );
         $this->assertEquals($details['type'], $course_material->getType());
         $this->assertEquals($details['path'], $course_material->getPath());
         $this->assertEquals($details['release_date'], $course_material->getReleaseDate());
         $this->assertEquals($details['hidden_from_students'], $course_material->isHiddenFromStudents());
         $this->assertEquals($details['priority'], $course_material->getPriority());
+        $this->assertEquals($details['is_deleted'], $course_material->isDeleted());
     }
 }

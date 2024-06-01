@@ -202,7 +202,7 @@ class CourseMaterial {
     public function isDeleted(): bool {
         return $this->is_deleted;
     }
-    public function setIsDeleted(bool $deleted): void{
+    public function setIsDeleted(bool $deleted): void {
         $this->is_deleted  = $deleted;
     }
 }
