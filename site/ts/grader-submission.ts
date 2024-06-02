@@ -20,48 +20,35 @@ declare global {
 
 const warning_banner = document.getElementById('submission-mode-warning');
 
-// function initialsubmissionmode() {
-//     const radioBulk = document.getElementById('radio-bulk') as HTMLInputElement;
-//     const pdfSubmitButton = document.getElementById('pdf-submit-button');
-//
-//     if (radioBulk.checked && radioBulk != null) {
-//         // If 'radio-bulk' is checked, show the submit button
-//         pdfSubmitButton!.style.display = 'block';
-//         sessionStorage.setItem(`${window.gradeable_id}-submission_mode`, 'bulk-upload');
-//         const message = 'Warning: Submitting files for bulk upload!';
-//         warning_banner!.firstChild!.textContent = message;
-//     }
-//     else {
-//         pdfSubmitButton!.style.display = 'none';
-//     }
-// }
 
-function initialsubmissionmode() {
-    const radioBulk = document.getElementById('radio-bulk') as HTMLInputElement;
-    const pdfSubmitButton = document.getElementById('pdf-submit-button');
+function initialSubmissionMode() {
+    const radioBulk = $('#radio-bulk');
+    const pdfSubmitButton = $('#pdf-submit-button');
+    const warningBanner = $('#warning-banner');
 
-    if (radioBulk !== null) {
-        if (radioBulk.checked) {
-            if (pdfSubmitButton !== null) {
-                pdfSubmitButton.style.display = 'block';
+    if (radioBulk.length) {
+        if (radioBulk.prop('checked')) {
+            if (pdfSubmitButton.length) {
+                pdfSubmitButton.show();
             }
             sessionStorage.setItem(`${window.gradeable_id}-submission_mode`, 'bulk-upload');
-            const warning_banner = document.getElementById('warning-banner');  // ensure warning_banner is defined
-            if (warning_banner !== null && warning_banner.firstChild !== null) {
+
+            if (warningBanner.length && warningBanner.children().length) {
                 const message = 'Warning: Submitting files for bulk upload!';
-                warning_banner.firstChild.textContent = message;
+                warningBanner.children().first().text(message);
             }
         }
         else {
-            if (pdfSubmitButton !== null) {
-                pdfSubmitButton.style.display = 'none';
+            if (pdfSubmitButton.length) {
+                pdfSubmitButton.hide();
             }
         }
     }
 }
 
+
 function init() {
-    initialsubmissionmode();
+    initialSubmissionMode();
 
 
     document.getElementsByName('submission-type')
@@ -186,7 +173,7 @@ function changeSubmissionMode(event: Event) {
                 useQRCheckBox.click();
             }
             else {
-                qrUploadOpts!.style.display = 'none';
+                $('#qrUploadOpts').hide();
                 numericUploadOpts!.style.display = 'inline';
                 sessionStorage.setItem(`${window.gradeable_id}-bulk_setting`, 'numeric');
 
