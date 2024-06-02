@@ -1,40 +1,66 @@
 describe('Test cases revolving around grade inquires', () => {
-    beforeEach(() => {
-        cy.visit(['sample']);
-        cy.login();
-    });
     const setGradeInquiriesForGradeable = (gradeableId, date = null, allowed = true) => {
-        cy.get(`#${gradeableId} .fa-pencil-alt`).click();
+        cy.visit(['sample', 'gradeable', gradeableId, 'update']);
 
         if (allowed) {
             cy.get('[data-testid="yes-grade-inquiry-allowed"]').click();
         }
         else {
-            cy.get('[data-testid="no_grade_inquiry_allowed"]').click();
+            cy.get('[data-testid="no-grade-inquiry-allowed"]').click();
         }
 
         if (date) {
             cy.contains('Dates').click();
-            cy.get('[data-testid="date_grade_inquiry_due"]').click();
+            cy.get('[data-testid="date-grade-inquiry-due"]').click();
 
-            cy.get('[data-testid="date_grade_inquiry_due"]').should('be.visible');
+            cy.get('[data-testid="date-grade-inquiry-due"]').should('be.visible');
 
-            cy.get('[data-testid="date_grade_inquiry_due"]').clear().type(date, { parseSpecialCharSequences: false, force: true });
+            cy.get('[data-testid="date-grade-inquiry-due"]').clear().type(date, { parseSpecialCharSequences: false, force: true });
         }
 
         cy.get('#nav-sidebar-submitty').click();
     };
 
     it('should test normal submission grade inquiry panel', () => {
+        cy.visit(['sample']);
+        cy.login();
         const gradeableId = 'grades_released_homework';
         const gradeInquiryDeadlineDate = '9998-01-01 00:00:00';
         setGradeInquiriesForGradeable(gradeableId, gradeInquiryDeadlineDate, true);
-
-        cy.get(`#${gradeableId} .btn-nav-grade`).click();
+        cy.visit(['sample', 'gradeable', gradeableId, 'grading', 'details']);
         cy.get('[data-testid="view-sections"]').click();
-        cy.get('[data-testid="grade-table"]').contains('td', 'Farrell').nextAll('td').find('[data-testid="grade-button"]').click();
-        cy.contains('span', 'Grade Inquiry').click();
-        cy.get('[data-testid= "submit"]').should('have.length', 1).and('contain', 'Submit Grade Inquiry');
-
+        cy.get('[data-testid="grade-button"]').first().click();
+        cy.get('[data-testid="grade-inquiry-info-btn"]').click();
+        cy.get('[data-testid="grading-label"]').should('contain', 'Grade Inquiry');
+        cy.get('[data-testid="grade-inquiry-submit-button"]').should('contain', 'Submit Grade Inquiry').and('be.disabled');
+        // typing some text in question box for confirming the 'Submit Grade Inquiry' button enabled/disabled
+        cy.get('#reply-text-area-0').click().type('Submitty');
+        cy.get('[data-testid="markdown-mode-tab-preview"]').first().should('exist');
+        cy.get('[data-testid="grade-inquiry-submit-button"]').should('contain', 'Submit Grade Inquiry').and('not.be.disabled');
+    });
+    ['grader', 'ta'].forEach((user) => {
+        it(`${user} can see grade inquiry panel`, () => {
+            cy.visit(['sample']);
+            cy.login(user);
+            const gradeableId = 'grades_released_homework';
+            // ta and grade do not have any access to change the grade inquiries date only instructor can do
+            cy.visit(['sample', 'gradeable', gradeableId, 'grading', 'details']);
+            cy.get('[data-testid="popup-window"]').should('exist');
+            cy.get('[data-testid="close-button"]').should('exist');
+            cy.get('[data-testid="close-hidden-button"]').should('exist');
+            cy.get('[data-testid="agree-popup-btn"]').click();
+            // grader do not have 'View All' button,but instructor and ta does have
+            if ( user === 'ta') {
+                cy.get('[data-testid="view-sections"]').click();
+            }
+            cy.get('[data-testid="grade-button"]').first().click();
+            cy.get('[data-testid="grade-inquiry-info-btn"]').click();
+            cy.get('[data-testid="grading-label"]').should('contain', 'Grade Inquiry');
+            cy.get('[data-testid="grade-inquiry-submit-button"]').should('contain', 'Submit Grade Inquiry').and('be.disabled');
+            // typing some text in question box for confirming the 'Submit Grade Inquiry' button enabled/disabled
+            cy.get('#reply-text-area-0').click().type('Submitty');
+            cy.get('[data-testid="markdown-mode-tab-preview"]').first().should('exist');
+            cy.get('[data-testid="grade-inquiry-submit-button"]').should('contain', 'Submit Grade Inquiry').and('not.be.disabled');
+        });
     });
 });
