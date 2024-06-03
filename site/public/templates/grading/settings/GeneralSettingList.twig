@@ -11,7 +11,7 @@
         <tr>
             <td>{{ option.name }}</td>
             <td>
-                <select class="ta-grading-setting-option" data-storage-code={{ option.storageCode }}>
+                <select class="ta-grading-setting-option" data-storage-code={{ option.storageCode }} data-testid="ta-grading-setting-option">
                 {% for key, value in option.options %}
                     <option value="{{ value }}"{% if option.currValue|default(null) == value %} selected="selected"{% endif %}>{{ key }}</option>
                 {% endfor %}
