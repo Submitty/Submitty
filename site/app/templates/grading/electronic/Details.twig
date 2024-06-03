@@ -185,7 +185,6 @@
                 <tbody class="details-content panel-content-active"{% if section.title in collapsed_sections %} style="display: none"{% endif %}>
                     {% if section.rows is defined %}
                         {% for info in section.rows %}
-                        {# sections.section.rows.info #}
                             {{ _self.render_student(_context, section, info.graded_gradeable, loop.index, info, columns, team_gradeable_view_history, overrides, anon_ids, max_team_name_length) }}
                         {% endfor %}
                     {% endif %}
@@ -201,22 +200,19 @@
         {# /Sections #}
         {# Empty teams #}
         {% if gradeable.isTeamAssignment() and empty_teams|length > 0 %}
-            {# Empty heading #}
             <tbody class="details-info-header{% if 'empty-teams' not in collapsed_sections %} panel-head-active{% endif %}" id="details-content-section-empty-teams" data-section-id="empty-teams">
                 <tr class="info">
-                    <td colspan="{{ columns|length }}" style="text-align: center">Empty Teams
-                        {% if core.getUser().accessGrading() %}
-                            <i class="collapse-icon fas fa-caret-right"></i>
-                            <i class="expand-icon fas fa-caret-down"></i>
-                        {% endif %}
+                    {% if core.getUser().accessGrading() %}
+                    <td colspan="{{ columns|length }}" style="text-align: center">
+                        <i class="collapse-icon fas fa-caret-right"></i>
+                        <i class="expand-icon fas fa-caret-down"></i>
                     </td>
+                    {% endif %}
                 </tr>
                 <tr class="info">
-                    <td colspan="{{ columns|length }}" style="text-align: center">Graders:Nobody</td>
+                    <td colspan="{{ columns|length }}" style="text-align: center">Empty teams</td>
                 </tr>
             </tbody>
-            {# /Empty heading #}
-            {# Empty Team list #}
             <tbody class="details-content panel-content-active">
                 {% for team in empty_teams %}
                     {% set reg_section = team.getRegistrationSection() ?? "NULL" %}
@@ -229,19 +225,16 @@
                         <td>
                             {{ display_section }}
                         </td>
-                        <td colspan="{{ 1 }}">
-                            {# this will be add back when "admin team form" function for empty team
+                        <td>
                             <a onclick="{{ empty_team_info[loop.index0].team_edit_onclick }}" aria-label="Edit Team" class="key_to_click" tabindex="0">
                                 <i class="fas fa-pencil-alt"></i>
                             </a>
-                            #}
                         </td>
                         <td>{{ team.getId() }}</td>
                         <td colspan="{{ columns|length - 4 }}"></td>
                     </tr>
                 {% endfor %}
             </tbody>
-            {# /Empty Team list #}
         {% endif %}
         {# /Empty teams #}
     </table>
