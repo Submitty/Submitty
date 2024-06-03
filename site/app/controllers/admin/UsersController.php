@@ -415,7 +415,7 @@ class UsersController extends AbstractController {
                     continue;
                 }
                 if ($gradeable->isVcs() && !$gradeable->isTeamAssignment()) {
-                    AdminGradeableController::enqueueGenerateRepos($semester, $course, $g_id);
+                    AdminGradeableController::enqueueGenerateRepos($semester, $course, $g_id, $gradeable->getVcsSubdirectory());
                 }
             }
         }

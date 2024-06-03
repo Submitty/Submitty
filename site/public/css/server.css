@@ -217,6 +217,20 @@ input[type="checkbox"]:checked::before {
     display: inline-block;
 }
 
+.rubric-question-mark {
+    /* stylelint-disable-next-line font-family-no-missing-generic-family-keyword */
+    font-family: "Font Awesome 5 Free";
+    content: "\f059";
+    color: var(--external-link-blue);
+    font-weight: 300;
+    display: inline-block;
+    position: absolute;
+    margin-bottom: 16px;
+    font-size: 16px;
+    margin-left: 3px;
+}
+
+
 .fa-question-circle.disabled,
 .fa-question-circle[disabled],
 .disabled > .fa-question-circle,
