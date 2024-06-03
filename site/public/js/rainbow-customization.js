@@ -665,27 +665,23 @@ $(document).ready(() => {
 });
 
 
-document.addEventListener('DOMContentLoaded', () => {
-    document.getElementById('pencilIcon').addEventListener('click', (event) => {
+$(document).ready(() => {
+    $('#pencilIcon').click((event) => {
         event.stopPropagation();
-        const checkboxControls = document.getElementById('checkboxControls');
-        if (checkboxControls.style.display === 'none') {
-            checkboxControls.style.display = 'block';
-        }
-        else {
-            checkboxControls.style.display = 'none';
-            document.getElementById('dropLowestDiv').style.display = 'none';
-        }
-    });
+        const checkboxControls = $('#checkboxControls');
+        const dropLowestDiv = $('#dropLowestDiv');
 
-    document.getElementById('drop_lowest_checkbox').addEventListener('change', function(event) {
+        checkboxControls.css('display') === 'none'
+            ? checkboxControls.show()
+            : checkboxControls.hide() && dropLowestDiv.hide();
+    });
+    $('#drop_lowest_checkbox').change(function(event) {
         event.stopPropagation();
-        // Fetch all the drop lowest div elements
-        const dropLowestDivs = document.querySelectorAll('div[id^="dropLowestDiv-"]');
-        const isChecked = this.checked;
-        // iterate over the fetched elements and adjust display based on checkbox status
-        dropLowestDivs.forEach((dropLowestDiv) => {
-            dropLowestDiv.style.display = isChecked ? 'block' : 'none';
+        const dropLowestDivs = $('div[id^="dropLowestDiv-"]');
+        const isChecked = $(this).is(':checked');
+
+        dropLowestDivs.each((index, dropLowestDiv) => {
+            $(dropLowestDiv).css('display', isChecked ? 'block' : 'none');
         });
     });
 });
