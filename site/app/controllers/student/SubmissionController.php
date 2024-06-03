@@ -2109,9 +2109,7 @@ class SubmissionController extends AbstractController {
         return JsonResponse::getErrorResponse("Cannot find gradeable with given id!");
     }
 
-    /**
-     * @Route("/courses/{_semester}/{_course}/gradeable/{gradeable_id}/generate_repo", methods={"POST"})
-     */
+    #[Route("/courses/{_semester}/{_course}/gradeable/{gradeable_id}/generate_repo", methods: ["POST"])]
     public function generateRepo(string $gradeable_id): RedirectResponse {
         $g = $this->tryGetElectronicGradeable($gradeable_id);
 
