@@ -280,8 +280,6 @@ class RainbowCustomizationJSON extends AbstractModel {
     }
 
 
-
-
     /**
      * Add a message to the message array
      *

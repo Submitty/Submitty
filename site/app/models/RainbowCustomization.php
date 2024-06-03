@@ -355,7 +355,6 @@ class RainbowCustomization extends AbstractModel {
     }
 
 
-
     /**
      * Get display benchmarks
      *
