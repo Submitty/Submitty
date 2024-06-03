@@ -409,6 +409,38 @@ function getBenchmarkPercent() {
     return benchmark_percent;
 }
 
+function getFinalBenchmarkPercent() {
+    // Collect benchmark percents
+    const final_cutoff = {};
+    const final_benchmarks = ['A', 'A-', 'B+', 'B', 'B-', 'C+', 'C', 'C-', 'D+', 'D'];
+
+    $('.benchmark_percent_input').each(function() {
+
+        // Get data
+        const benchmark = this.getAttribute('data-benchmark').toString();
+        const percent = this.value;
+
+        if (final_benchmarks.includes(benchmark)) {
+
+            // Verify percent is not empty
+            if (percent === '') {
+                throw 'All benchmark percents must have a value before saving.';
+            }
+
+            // Verify percent is a floating point number
+            if (isNaN(parseFloat(percent))) {
+                throw 'Benchmark percent input must be a floating point number.';
+            }
+
+            // Add to sections
+            final_cutoff[benchmark] = percent;
+
+        }
+    });
+
+    return final_cutoff;
+}
+
 // This function constructs a JSON representation of all the form input
 function buildJSON() {
 
@@ -417,6 +449,7 @@ function buildJSON() {
         'display': getDisplay(),
         'display_benchmark': getDisplayBenchmark(),
         'benchmark_percent': getBenchmarkPercent(),
+        'final_cutoff': getFinalBenchmarkPercent(),
         'section' : getSection(),
         'gradeables' : getGradeableBuckets(),
         'messages' : getMessages(),

@@ -84,8 +84,8 @@
                 <div id="benchmark_percents_collapse" class="collapsible_area">
                     <p class="rg_info_message">You may adjust the minimum percent required to receive certain final letter grades.  Enter this percentage as a decimal number.<br />As an example 90% would be entered as .9</p>
                     {% for benchmark in final_benchmarks_with_input_fields %}
-                        {% if final_benchmark_percents[benchmark] is defined %}
-                            {% set percent = final_benchmark_percents[benchmark] %}
+                        {% if final_cutoff[benchmark] is defined %}
+                            {% set percent = final_cutoff[benchmark] %}
                         {% else %}
                             {% set percent = '' %}
                         {% endif %}

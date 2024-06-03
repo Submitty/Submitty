@@ -386,16 +386,16 @@ class RainbowCustomization extends AbstractModel {
     }
 
     /**
-         * Get final benchmark percentages
+         * Get final grade cutoffs
          *
-         * @return object An object which maps final benchmarks to the percentage (as a decimal) that is needed to
+         * @return object An object which maps final grade cutoffs to the percentage (as a decimal) that is needed to
          *                obtain that letter grade
          */
-        public function getFinalBenchmarkPercent() {
+        public function getFinalCutoff() {
             if (!is_null($this->RCJSON)) {
-                $percent_obj = $this->RCJSON->getFinalBenchmarkPercent();
+                $percent_obj = $this->RCJSON->getFinalCutoff();
 
-                // If the RCJSON was found and it contains the final benchmark percent fields then return it
+                // If the RCJSON was found and it contains the final grade cutoff percent fields then return it
                 if ($percent_obj != (object) []) {
                     return $percent_obj;
                 }
