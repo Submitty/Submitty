@@ -193,11 +193,13 @@
                         <i id="pencilIcon" class="fas fa-pencil-alt black-btn"></i>
                     </h2>
                     <div id="checkboxControls" style="display: none;">
-                        Extra credit:
-                        <input id="extra_credit_checkbox" type="checkbox" name="extra_credit"><br>
+                        <label>Extra credit:
+                            <input id="extra_credit_checkbox" type="checkbox" name="extra_credit">
+                        </label><br>
 
-                        Remove lowest:
-                        <input id="drop_lowest_checkbox" type="checkbox" name="drop_lowest">
+                        <label>Remove lowest:
+                            <input id="drop_lowest_checkbox" type="checkbox" name="drop_lowest">
+                        </label>
                     </div>
 
 
@@ -216,14 +218,16 @@
                                     items
                                     <span style="margin-left: 100px;"></span>
                                     <div id="dropLowestDiv-{{ bucket }}" style="display: none;">
-                                        Remove lowest:
-                                        <input
-                                            type="text"
-                                            class="gradeable-custom-item-input"
-                                            aria-label="{{ bucket|capitalize }} drop-howmany"
-                                            value="{{ bucket_remove_lowest[bucket] }}"
-                                            id="config-remove_lowest-{{ bucket }}"
-                                        >
+                                        <label>
+                                            Remove lowest:
+                                            <input
+                                                type="text"
+                                                class="gradeable-custom-item-input"
+                                                aria-label="{{ bucket|capitalize }} drop-howmany"
+                                                value="{{ bucket_remove_lowest[bucket] }}"
+                                                id="config-remove_lowest-{{ bucket }}"
+                                            >
+                                        </label>
                                         items
                                     </div>
                                 </div>
