@@ -314,6 +314,7 @@ else:
         CREATE_NEW_ACCOUNT = get_input("Enable Create New Account feature? [y/n]", 'y')
         if (CREATE_NEW_ACCOUNT.lower() in ['yes', 'y']):
             create_new_account = True
+            break
         elif (CREATE_NEW_ACCOUNT.lower() in ['no', 'n']):
             create_new_account = False
             break
