@@ -1185,8 +1185,8 @@ SQL;
             FROM (SELECT t.id as thread_id, t.title as thread_title, p.id as p_id,
                 t.created_by as author, t.pinned_expiration as pin, p.timestamp as timestamp_post,
                 p.content as post_content, p.anonymous, p.author_user_id as p_author,
-                to_tsvector('english', replace(p.content, '.', ' '))
-                || to_tsvector('english', replace(t.title, '.', ' '))
+                to_tsvector('english', replace(replace(replace(p.content, '.', ' '), '-', ' '), '/', ' '))
+                || to_tsvector('english', replace(replace(replace(t.title, '.', ' '), '-', ' '), '/', ' '))
                 as document FROM posts p, threads t
                 JOIN (SELECT thread_id, timestamp FROM posts WHERE parent_id = -1) p2
                 ON p2.thread_id = t.id
