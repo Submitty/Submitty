@@ -60,6 +60,6 @@
 {% endblock %}
 {% block buttons %}
     <button class="btn btn-default close-button" onclick="gradeableMessageCancel()" type="button" id="cancel-button">Cancel</button>
-    <button class="btn btn-default close-button" type="button" style="display: none; float: right" id="close-hidden-button" onclick="hideGradeableMessage()">Close</button>
-    <input class="btn btn-primary" type="submit" value="Agree" id="agree-button">
+    <button class="btn btn-default close-button" type="button" style="display: none; float: right" id="close-hidden-button" onclick="hideGradeableMessage()" data-testid="close-hidden-button">Close</button>
+    <input class="btn btn-primary" type="submit" value="Agree" id="agree-button" data-testid="agree-popup-btn">
 {% endblock %}

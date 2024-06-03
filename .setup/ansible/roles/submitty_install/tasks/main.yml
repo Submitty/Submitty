@@ -29,35 +29,35 @@
     update: yes
 
 - name: Run install_system.sh script
-  ansible.builtin.shell: |
+  ansible.builtin.shell:
     executable: "/bin/bash"
     cmd: |
       set -o pipefail
       echo  "{{ db_host }}
         {{ db_port }}
-        "{{ submitty_dbuser }}"
-        "{{ submitty_dbuser_password }}"
-        "{{ submitty_course_dbuser }}"
-        "{{ submitty_course_dbuser_password }}"
-        "{{ timezone }}"
-        "{{ language }}"
-        "{{ 'https' if ssl_enabled else 'http' }}://{{ submitty_url }}"
-        "{{ vcs_url }}"
-        "{{ institution_name }}"
-        "{{ sysadmin_email }}"
-        "{{ submitty_email }}"
-        "{{ institution_url }}"
-        "{{ authentication_method }}"
-        "{{ admin_email }}"
-        "{{ email_enabled }}"
-        "{{ admin_email }}"
-        "{{ admin_password }}"
-        "{{ submitty_ip }}"
-        "{{ submitty_email }}"
-        "{{ noreply_email }}"
-        "{{ smtp_server }}"
-        "{{ smtp_port }}"
-        "{{ institution_url }}"
+        {{ submitty_dbuser }}
+        {{ submitty_dbuser_password }}
+        {{ submitty_course_dbuser }}
+        {{ submitty_course_dbuser_password }}
+        {{ timezone }}
+        {{ language }}
+        {{ 'https' if ssl_enabled else 'http' }}://{{ submitty_url }}
+        {{ vcs_url }}
+        {{ institution_name }}
+        {{ sysadmin_email }}
+        {{ submitty_email }}
+        {{ institution_url }}
+        {{ authentication_method }}
+        {{ admin_email }}
+        {{ email_enabled }}
+        {{ admin_email }}
+        {{ admin_password }}
+        {{ submitty_ip }}
+        {{ submitty_email }}
+        {{ noreply_email }}
+        {{ smtp_server }}
+        {{ smtp_port }}
+        {{ institution_url }}
         " | bash -p ./.setup/install_system.sh > /usr/local/submitty/install.log 2>&1
 
   args:
@@ -124,9 +124,4 @@
 - name: Ensure submitty_autograding_shipper is running
   ansible.builtin.service:
     name: submitty_autograding_shipper
-    state: started
-
-- name: Ensure submitty_daemon_jobs_handler is running
-  ansible.builtin.service:
-    name: submitty_daemon_jobs_handler
     state: started
