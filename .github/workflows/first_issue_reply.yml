@@ -7,7 +7,7 @@ on:
 jobs:
   firstIssueReply:
     # Only when it is an issue rather than a PR
-    if: ${{ !github.event.issue.pull_request }} && ${{ github.event.comment.author_association == NONE }}
+    if: ${{ !github.event.issue.pull_request }} && ${{ github.event.comment.author_association == 'NONE' }}
     name: First issue reply
     runs-on: ubuntu-latest
 
@@ -20,11 +20,8 @@ jobs:
 
       - name: First issue reply
         run: |
-          github.event.comment.author_association
           gh issue comment "$ISSUE" --body "Hi @$USERNAME,"$'\n\n'"$(cat .github/FIRST_ISSUE_REPLY.md)"
         env:
           ISSUE: ${{ github.event.issue.number }}
-          COMMENT: ${{ github.event.comment.id }}
-          USERNAME: ${{ github.event.actor }}
+          USERNAME: ${{ github.event.comment.user.login }}
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        shell: sh
