@@ -13,9 +13,7 @@ class NavigationController extends AbstractController {
         parent::__construct($core);
     }
 
-    /**
-     * @Route("/courses/{_semester}/{_course}", requirements={"_semester": "^(?!api)[^\/]+", "_course": "[^\/]+"})
-     */
+    #[Route('/courses/{_semester}/{_course}', requirements: ['_semester' => '^(?!api)[^\/]+', '_course' => '[^\/]+'])]
     public function navigationPage() {
         try {
             $gradeables_list = new GradeableList($this->core);
