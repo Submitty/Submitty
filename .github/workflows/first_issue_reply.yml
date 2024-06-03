@@ -7,7 +7,7 @@ on:
 jobs:
   firstIssueReply:
     # Only when it is an issue rather than a PR
-    if: ${{ !github.event.issue.pull_request }} && ${{ github.event.comment.author_association == 'NONE' }}
+    if: ${{ !github.event.issue.pull_request && github.event.comment.author_association == 'NONE' }}
     name: First issue reply
     runs-on: ubuntu-latest
 
