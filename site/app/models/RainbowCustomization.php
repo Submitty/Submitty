@@ -385,6 +385,36 @@ class RainbowCustomization extends AbstractModel {
             ];
     }
 
+    /**
+         * Get final benchmark percentages
+         *
+         * @return object An object which maps final benchmarks to the percentage (as a decimal) that is needed to
+         *                obtain that letter grade
+         */
+        public function getFinalBenchmarkPercent() {
+            if (!is_null($this->RCJSON)) {
+                $percent_obj = $this->RCJSON->getFinalBenchmarkPercent();
+
+                // If the RCJSON was found and it contains the final benchmark percent fields then return it
+                if ($percent_obj != (object) []) {
+                    return $percent_obj;
+                }
+            }
+
+            // Otherwise return a default benchmark percent object
+            return (object) [
+                    'A' => 0.93,
+                    'A-' => 0.90,
+                    'B+' => 0.87,
+                    'B' => 0.83,
+                    'B-' => 0.80,
+                    'C+' => 0.77,
+                    'C' => 0.73,
+                    'C-' => 0.70,
+                    'D+' => 0.67,
+                    'D' => 0.6,
+                ];
+        }
 
     /**
      * Get display options

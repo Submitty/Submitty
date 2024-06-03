@@ -79,6 +79,24 @@
                     {% endfor %}
                 </div>
             </div>
+            <div id="final_grade_benchmarks" class="customization_item">
+                <h2>Final Grade Benchmarks</h2>
+                <div id="benchmark_percents_collapse" class="collapsible_area">
+                    <p class="rg_info_message">You may adjust the minimum percent required to receive certain final letter grades.  Enter this percentage as a decimal number.<br />As an example 90% would be entered as .9</p>
+                    {% for benchmark in final_benchmarks_with_input_fields %}
+                        {% if final_benchmark_percents[benchmark] is defined %}
+                            {% set percent = final_benchmark_percents[benchmark] %}
+                        {% else %}
+                            {% set percent = '' %}
+                        {% endif %}
+
+                        <p>
+                            <label for="benchmark_{{ benchmark }}" class="{{ benchmark }}">{{ benchmark }}</label>
+                            <input type="text" id="benchmark_{{ benchmark }}" class="benchmark_percent_input {{ benchmark }}" data-benchmark="{{ benchmark }}" value="{{ percent }}">
+                        </p>
+                    {% endfor %}
+                </div>
+            </div>
             <div id="cust_messages" class="customization_item">
                 <h2>Messages</h2>
                 <div id="cust_messages_collapse" class="collapsible_area">

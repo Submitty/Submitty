@@ -25,6 +25,7 @@ class RainbowCustomizationJSON extends AbstractModel {
     private $messages = [];
     private $display = [];
     private $benchmark_percent;         // Init in constructor
+    private $final_benchmark_percent;
     private $gradeables = [];
     /**
      * @var object[]
@@ -61,6 +62,7 @@ class RainbowCustomizationJSON extends AbstractModel {
         // This is done so json_encode will properly encode the item when converting to json
         $this->section = (object) [];
         $this->benchmark_percent = (object) [];
+        $this->final_benchmark_percent = (object) [];
     }
 
     /**
@@ -100,6 +102,14 @@ class RainbowCustomizationJSON extends AbstractModel {
         return $this->benchmark_percent;
     }
 
+    /**
+         * Gets the final benchmark percentages object
+         *
+         * @return object The benchmark percentages object
+         */
+        public function getFinalBenchmarkPercent() {
+            return $this->final_benchmark_percent;
+        }
 
     /**
      * Gets an array of display
