@@ -39,6 +39,17 @@
     cursor: pointer;
 }
 
+.header {
+    display: flex; 
+    align-items: center;
+}
+
+.timer {
+    margin-bottom: 20px;
+    margin-left: auto;
+    font-size: 2em;
+}
+
 .option-btn {
     vertical-align: middle;
 }

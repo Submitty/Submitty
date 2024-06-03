@@ -3,6 +3,18 @@
         {{ poll.getName() }}
     </h1>
 
+    <hr>
+
+    {% if timer_enabled %}
+    <!-- Invisible until JS renders -->
+        <h2 id="timer" class="timer" style="display:none">
+            <label for="timerDisplay">
+                Time until Poll Ends:
+            </label>
+            <span id="timerDisplay"></span>
+        </h2>
+    {% endif %}
+
     {% if user_admin or poll.isHistogramAvailable() %}
         <button class="btn btn-primary" id='toggle-info-button' onclick="toggle_section('poll-info')">Toggle Poll Info</button>
         <button class="btn btn-primary" id='toggle-histogram-button' onclick="toggle_section('poll-histogram')">Toggle Histogram</button>
@@ -95,6 +107,50 @@
 </div>
 
 <script>
+
+    {% if timer_enabled %}
+
+        var endDate = new Date('{{ end_time }}');
+        var timerId;
+        var ended = false;
+
+        function updateTimer() {
+            var now = new Date();
+            var timeRemaining = endDate - now;
+            var timerDisplayElement = document.getElementById('timerDisplay');
+            var timerElement = document.getElementById('timer');
+
+            // Show the timer element once we're ready to start updating it
+            timerElement.style.display = 'block';
+
+            if (timeRemaining <= 0) {
+                if (timerElement) {
+                    timerElement.innerHTML = "Poll Ended";
+                }
+                clearInterval(timerId);
+                return;
+            }
+
+            if (!timerDisplayElement) {
+                clearInterval(timerId);
+                return;
+            }
+
+            var seconds = Math.floor((timeRemaining / 1000) % 60);
+            var minutes = Math.floor((timeRemaining / (1000 * 60)) % 60);
+            var hours = Math.floor((timeRemaining / (1000 * 60 * 60)) % 24);
+
+            var hoursUpdated = (hours < 10) ? "0" + hours : hours;
+            var minutesUpdated = (minutes < 10) ? "0" + minutes : minutes;
+            var secondsUpdated = (seconds < 10) ? "0" + seconds : seconds;
+            var timerDisplay = hoursUpdated + ':' + minutesUpdated + ':' + secondsUpdated;
+
+            timerDisplayElement.innerHTML = timerDisplay;
+        }
+
+        timerId = setInterval(updateTimer, 20);
+    {% endif %}
+
     function toggle_section(section_id) {
         $(`#${section_id}`).toggle('fast');
     }
