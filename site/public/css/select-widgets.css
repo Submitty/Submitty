@@ -15,4 +15,11 @@
 .select2-results__option.select2-results__option--selected {
     background-color: var(--submitty-logo-blue);
 }
-/* stylelint-enable selector-descendant-combinator-no-non-space, selector-class-pattern */
+
+/* stylelint-disable-next-line selector-id-pattern */
+#select2-time_zone_drop_down-container.select2-selection__rendered {
+    font-family: Arial, sans-serif;
+    font-size: 16px;
+    color: var(--standard-dark-gray);
+    background-color: var(--text-white);
+}
