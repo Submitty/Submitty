@@ -28,9 +28,9 @@ class SamlManagerController extends AbstractController {
     }
 
     /**
-     * @Route("/superuser/saml")
      * @return WebResponse
      */
+    #[Route("/superuser/saml")]
     public function showPage(): WebResponse {
         if ($this->checkSamlEnabled() === false) {
             return new WebResponse(
@@ -44,9 +44,9 @@ class SamlManagerController extends AbstractController {
     }
 
     /**
-     * @Route("/superuser/saml/new_user", methods={"POST"})
      * @return RedirectResponse
      */
+    #[Route("/superuser/saml/new_user", methods: ["POST"])]
     public function newProxyUser(): RedirectResponse {
         $return_url = $this->core->buildUrl(['superuser', 'saml']);
         $auth = $this->checkSamlEnabled();
@@ -113,9 +113,9 @@ class SamlManagerController extends AbstractController {
     }
 
     /**
-     * @Route("/superuser/saml/assign", methods={"POST"})
      * @return RedirectResponse
      */
+    #[Route("/superuser/saml/assign", methods: ["POST"])]
     public function assignProxyMapping(): RedirectResponse {
         $return_url = $this->core->buildUrl(['superuser', 'saml']);
         $auth = $this->checkSamlEnabled();
@@ -140,9 +140,9 @@ class SamlManagerController extends AbstractController {
     }
 
     /**
-     * @Route("/superuser/saml/update_active", methods={"POST"})
      * @return RedirectResponse
      */
+    #[Route("/superuser/saml/update_active", methods: ["POST"])]
     public function updateActiveSaml(): RedirectResponse {
         $return_url = $this->core->buildUrl(['superuser', 'saml']);
 
@@ -166,9 +166,9 @@ class SamlManagerController extends AbstractController {
     }
 
     /**
-     * @Route("/superuser/saml/delete", methods={"POST"})
      * @return RedirectResponse
      */
+    #[Route("/superuser/saml/delete", methods: ["POST"])]
     public function deleteSamlMapping(): RedirectResponse {
         $return_url = $this->core->buildUrl(['superuser', 'saml']);
 
@@ -190,9 +190,9 @@ class SamlManagerController extends AbstractController {
     }
 
     /**
-     * @Route("/superuser/saml/validate")
      * @return WebResponse
      */
+    #[Route("/superuser/saml/validate")]
     public function validate(): WebResponse {
         if ($this->checkSamlEnabled() === false) {
             return new WebResponse(
