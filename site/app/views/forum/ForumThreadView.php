@@ -1222,8 +1222,9 @@ class ForumThreadView extends AbstractView {
                 "display_pronouns" => $display_pronouns
             ];
         }
-        $post_user_info["is_OP"] = ($post["author_user_id"] === $first_post_author_id) && ($first_post_anonymous && $post["anonymous"]) || (!$first_post_anonymous && !$post["anonymous"]);
-
+        
+        $post_user_info["is_OP"] = ($post["author_user_id"] === $first_post_author_id) && ($first_post_anonymous === $post["anonymous"]);
+        
         $post_attachment = ForumUtils::getForumAttachments(
             $post_id,
             $thread_id,
