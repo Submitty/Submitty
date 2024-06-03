@@ -182,45 +182,45 @@
     }
 
     {% if user_admin or poll.isHistogramAvailable() %}
-    window.onload = function () {
-        const data = [{
-            type: "bar",
-            x: [],
-            y: [],
-            marker: {
-                color: [],
-            },
-        }];
-        const [correctColor, defaultColor] =
-        [window.getComputedStyle(document.body).getPropertyValue('--histogram-correct'),
-            window.getComputedStyle(document.body).getPropertyValue('--histogram-default')];
-        {% for option in poll.getOptions() %}
-        data[0].x.push("{{ option.getResponse()|replace({"\n": " ", "\r": " ", "\t": " "}) }}");
-        data[0].y.push({{ response_counts[option.getId()] }});
-        data[0].marker.color.push(
-            {{ option.isCorrect() and poll.isReleaseAnswer() ? 'correctColor': 'defaultColor' }}
-        );
-        {% endfor %}
-        const title_text = new DOMParser().parseFromString("{{ poll.getName() }}", "text/html");
-        const width = get_new_chart_width();
-        const layout = {
-            title: title_text.documentElement.textContent,
-            paper_bgcolor: $("body").css("--default-white"),
-            plot_bgcolor: $("body").css("--default-white"),
-            font: {
-                color: $("body").css("--text-black")
-            },
-            width: width
-        }
-        Plotly.newPlot("chartContainer", data, layout);
-        window.addEventListener('resize', function() {
+        window.onload = function () {
+            const data = [{
+                type: "bar",
+                x: [],
+                y: [],
+                marker: {
+                    color: [],
+                },
+            }];
+            const [correctColor, defaultColor] =
+            [window.getComputedStyle(document.body).getPropertyValue('--histogram-correct'),
+                window.getComputedStyle(document.body).getPropertyValue('--histogram-default')];
+            {% for option in poll.getOptions() %}
+                data[0].x.push("{{ option.getResponse()|replace({"\n": " ", "\r": " ", "\t": " "}) }}");
+                data[0].y.push({{ response_counts[option.getId()] }});
+                data[0].marker.color.push(
+                    {{ option.isCorrect() and poll.isReleaseAnswer() ? 'correctColor': 'defaultColor' }}
+                );
+            {% endfor %}
+            const title_text = new DOMParser().parseFromString("{{ poll.getName() }}", "text/html");
             const width = get_new_chart_width();
-            const container = document.getElementById('chartContainer');
-            const update = {
+            const layout = {
+                title: title_text.documentElement.textContent,
+                paper_bgcolor: $("body").css("--default-white"),
+                plot_bgcolor: $("body").css("--default-white"),
+                font: {
+                    color: $("body").css("--text-black")
+                },
                 width: width
             }
-            Plotly.relayout(container, update);
-        });
-    }
+            Plotly.newPlot("chartContainer", data, layout);
+            window.addEventListener('resize', function() {
+                const width = get_new_chart_width();
+                const container = document.getElementById('chartContainer');
+                const update = {
+                    width: width
+                }
+                Plotly.relayout(container, update);
+            });
+        }
     {% endif %}
 </script>
