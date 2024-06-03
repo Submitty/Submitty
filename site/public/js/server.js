@@ -6,15 +6,17 @@
    markViewed openDiv changeColor downloadCourseMaterialZip downloadSubmissionZip downloadStudentAnnotations
    downloadTestCaseResult downloadCourseMaterial downloadFile toggleDiv checkVersionChange versionChange gradeableChange
    removeMessagePopup validateHtml togglePageDetails copyToClipboard downloadCSV setFolderRelease
-   newEditCourseMaterialsForm newEditCourseMaterialsFolderForm newUploadCourseMaterialsForm newUploadImagesForm
+   newEditCourseMaterialsForm newEditCourseMaterialsFolderForm newUploadCourseMaterialsForm newUploadBanner newUploadImagesForm
    newOverwriteCourseMaterialForm newDeleteCourseMaterialForm displayCloseSubmissionsWarning newDeleteGradeableForm
    markAllViewed closePopup */
 /* global csrfToken my_window:writable file_path:writable updateBulkProgress icon:writable detectColorScheme
    createArray readPrevious disableFullUpdate registerSelect2Widget */
-
 ////////////Begin: Removed redundant link in breadcrumbs////////////////////////
 //See this pr for why we might want to remove this code at some point
 //https://github.com/Submitty/Submitty/pull/5071
+
+
+
 window.addEventListener('resize', () => {
     loadInBreadcrumbLinks();
     adjustBreadcrumbLinks();
@@ -271,7 +273,7 @@ function newOverwriteCourseMaterialForm(clashing_names, is_link, is_edit_form) {
 function newUploadImagesForm() {
     $('.popup-form').css('display', 'none');
     const form = $('#upload-images-form');
-    form.css('display', 'block');
+    showPopup('#upload-images-form');
     captureTabInModal('upload-images-form');
     form.find('.form-body').scrollTop(0);
     $('[name="upload"]', form).val(null);
@@ -303,6 +305,23 @@ function newUploadCourseMaterialsForm() {
     $('#overwrite-materials-flag').remove();
 }
 
+function newUploadBanner() {
+    createArray(1);
+    const files = [];
+    $('.popup-form').css('display', 'none');
+    const form = $('#upload-banner');
+
+    $('[name="existing-file-list"]', form).html('');
+
+    const stringifiedFiles = $('<b></b>').text(JSON.stringify(files));
+    $('[name="existing-file-list"]', form).append(stringifiedFiles);
+
+    form.css('display', 'block');
+    captureTabInModal('upload-banner');
+    form.find('.form-body').scrollTop(0);
+    $('[name="upload"]', form).val(null);
+}
+
 function newEditCourseMaterialsFolderForm(tag) {
     const id = $(tag).data('id');
     const dir = $(tag).data('priority');
@@ -312,7 +331,6 @@ function newEditCourseMaterialsFolderForm(tag) {
     const is_hidden = $(tag).data('hidden-state');
     const partially_hidden = 2;
     const form = $('#edit-course-materials-folder-form');
-
     const element = document.getElementById('edit-folder-picker');
     element._flatpickr.setDate(release_time);
 
@@ -482,11 +500,12 @@ function showPopup(selector) {
 
 function closePopup(id) {
     $(`#${id}`).hide();
-    //Checking if the body contains the class no scroll making the page locked, then unlocking it
+    // Checking if the body contains the class no scroll making the page locked, then unlocking it
     if (document.body.classList.contains('no-scroll')) {
         document.body.classList.remove('no-scroll');
     }
 }
+
 
 // eslint-disable-next-line no-var
 var lastActiveElement = null;
@@ -828,8 +847,8 @@ function downloadStudentAnnotations(url) {
     window.open(url, '_blank', 'toolbar=no, scrollbars=yes, resizable=yes, width=700, height=600');
 }
 
-function downloadSubmissionZip(grade_id, user_id, version, origin = null, is_anon = false) {
-    window.open(`${buildCourseUrl(['gradeable', grade_id, 'download_zip'])}?dir=submissions&user_id=${user_id}&version=${version}&origin=${origin}&is_anon=${is_anon}`, '_blank');
+function downloadSubmissionZip(grade_id, submitter_id, version, origin = null, is_anon = false) {
+    window.open(`${buildCourseUrl(['gradeable', grade_id, 'download_zip'])}?dir=submissions&submitter_id=${submitter_id}&version=${version}&origin=${origin}&is_anon=${is_anon}`, '_blank');
     return false;
 }
 
@@ -1905,6 +1924,7 @@ function renderMarkdown(markdownContainer, url, content) {
  *                      * `'link'`
  *                      * `'bold'`
  *                      * `'italic'`
+ *                      * `'blockquote'`
  */
 function addMarkdownCode(type) {
     const markdown_area = $(this).closest('.markdown-area');
@@ -1932,6 +1952,9 @@ function addMarkdownCode(type) {
             break;
         case 'italic':
             insert = '_italic text_';
+            break;
+        case 'blockquote':
+            insert = '> blockquote text\n\n';
             break;
     }
     $(this).val(text.substring(0, cursor) + insert + text.substring(cursor));

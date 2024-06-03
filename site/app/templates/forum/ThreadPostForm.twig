@@ -93,7 +93,7 @@
             "render_header" : render_markdown is defined and render_markdown ? render_markdown : false,
             "markdown_header_id" : "markdown_header_" ~ post_box_id,
             "min_height" : min_height,
-            "required" :  true,
+            "required" :  false,
             "textarea_maxlength" : post_content_limit is defined ? post_content_limit : null,
             "textarea_onkeydown" : "submitNearestForm(event,$(this))",
             "textarea_onpaste" : "pasteImageFromClipboard(event, $(this), " ~ post_box_id  ~ ")"
@@ -121,7 +121,7 @@
           <div id=id='categories-pick-list'>
             {% for category in categories %}
                 {# if diff > 0 then visible_Date is true
-                 diff is used for comparsion betweeen  the given date of category and the current date of user 
+                 diff is used for comparison between the given date of category and the current date of user 
                  when date is above then current date then output is less than zero.
                  and when date is below then current date the optput is greater then zero #}
                 {% if category.visible_date is null or category.diff > 0 %}
@@ -140,16 +140,18 @@
     </div>
 {% endif %}
 <div class="form-group row thread-attachment-container">
+    <div id="img-table-loc"></div>
+    <br style="margin-bottom:1rem;">
     {% if post_box_id %}
         <div class="inline-block">
             {# uploadID and input-file + Index required for drag-and-drop.js #}
             <div class="upload_attachment_box cursor-pointer key_to_click" id="upload{{ post_box_id }}">
                 <div id="file_input_label_{{post_box_id}}" class="btn btn-default" tabindex="0">
-                  <label for="input-file{{ post_box_id }}">Upload Attachment</label>
+                  <label for="input-file{{ post_box_id }}" data-testid="input-file{{ post_box_id }}">Upload Attachment</label>
                 </div>
                 <input type="file" accept="image/*" id="input-file{{ post_box_id }}" style="display: none;" onchange="addFilesFromInput({{ post_box_id }});testAndGetAttachments({{ post_box_id }}, true);" multiple />
                 <br>
-                <table class="file-upload-table" id="file-upload-table-{{ post_box_id }}"><th style="display:none">Files:</th></table>
+                <table class="file-upload-table" id="file-upload-table-{{ post_box_id }}" data-testid="file-upload-table-{{ post_box_id }}"><th style="display:none">Files:</th></table>
             </div>
         </div>
         <br style="margin-right:1rem;">
@@ -173,8 +175,6 @@
             </script>
         {% endif %}
     {% endif %}
-    <div id="img-table-loc"></div>
-    <br style="margin-bottom:1rem;">
     <fieldset class="inline-block right-zero">
       <legend style="display:none">Settings:</legend>
         <div class="new-thread-settings-wrapper">
@@ -207,9 +207,9 @@
         <br style="margin-bottom:1rem;">
         {% if show_cancel_edit_form is defined and show_cancel_edit_form %}
         <a onclick="cancelEditPostForum()"
-                     class="btn btn-default close-button key_to_click" tabindex="0">Cancel</a>
+                     class="btn btn-default close-button key_to_click" tabindex="0" data-testid="cancel-forum-btn">Cancel</a>
         {% endif %}
-        <input type="submit" name="post" value="{{ submit_label }}" class="btn btn-primary inline-block" />
+        <input type="submit" name="post" value="{{ submit_label }}" class="btn btn-primary inline-block" data-testid="forum-update-post"/>
 
         {% if thread_resolve_state is defined and thread_resolve_state == 1 and show_unresolve %}
             <input type="hidden" name="thread_status" id="thread_status_input{{ post_box_id | length > 0 ? "_" ~ post_box_id : ""  }}" value="{{ thread_resolve_state }}" data-ays-ignore="true" />

@@ -106,7 +106,7 @@ jobs:
         working-directory: site
     steps:
       - uses: actions/checkout@v4
-      - uses: shivammathur/setup-php@2.30.2
+      - uses: shivammathur/setup-php@2.30.4
         with:
           php-version: ${{ env.PHP_VER }}
       - name: Cache Composer
@@ -141,7 +141,7 @@ jobs:
         working-directory: site
     steps:
       - uses: actions/checkout@v4
-      - uses: shivammathur/setup-php@2.30.2
+      - uses: shivammathur/setup-php@2.30.4
         with:
           php-version: ${{ env.PHP_VER }}
           extensions: imagick
@@ -183,9 +183,10 @@ jobs:
               ${{ runner.os }}-${{ github.job }}-pip-
       - name: Install python libraries
         run: python3 -m pip install -r .setup/pip/dev_requirements.txt
-      - name: Run python linting
+      - name: Run flake8
         run: python3 -m flake8
-
+      - name: Run pylint
+        run: python3 -m pylint --recursive=y .
 
   python-unit:
     runs-on: ubuntu-22.04
@@ -539,3 +540,30 @@ jobs:
       - uses: ./.github/actions/e2e-Setup-Composite
       - name: Run integration tests
         run: sudo -E env "PATH=$PATH" python3 /usr/local/submitty/test_suite/integrationTests/run.py
+
+
+  ansible-install:
+    runs-on: ubuntu-22.04
+    steps:
+      - uses: actions/checkout@v4
+      - name: Setup SSH
+        shell: bash
+        run: |
+          ssh-keygen -t rsa -b 4096 -C "github_ci" -N '' -f /home/runner/.ssh/id_rsa
+          ssh-keyscan -t rsa localhost >> /home/runner/.ssh/known_hosts
+          cat /home/runner/.ssh/id_rsa.pub >> /home/runner/.ssh/authorized_keys
+          ssh -T localhost
+          sudo systemctl start postgresql
+
+      - name: Run ansible script
+        shell: bash
+        run: |
+          cd .setup/ansible
+          ansible-playbook --private-key /home/runner/.ssh/id_rsa -e 'ansible_user=runner' -i inventory/submitty playbooks/submitty_install.yml
+      - name: Validate image
+        run: curl --show-error --fail --include http://localhost/authentication/login
+      - uses: actions/upload-artifact@v4
+        if: failure()
+        with:
+          name: install-log
+          path: /usr/local/submitty/install.log
