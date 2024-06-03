@@ -1,9 +1,10 @@
 <div id='student_queue_history'>
     <br>
     <h2>Student's Queue History</h2>
+    <p>Input Student RCSID:</p>
     <div id='search-student-queue'>
         <input id='search-student-queue-input' type='text' placeholder="Enter student's name">
-        <button id='search-student-queue-btn' class="btn btn-primary">Search</button>
+        <button id='search-student-queue-btn' data-testid='search-student-queue-btn' class="btn btn-primary">Search</button>
     </div>
     <table id='student-queue-table' class="table table-striped" style="margin-top: 15px;">
         <caption style="padding: 5px; border: 1px solid var(--standard-light-gray); font-weight: 600;"></caption>
@@ -38,6 +39,7 @@
     const url = buildCourseUrl(['queue', 'student_search']);
     search_student_queue_btn.addEventListener('click', event => {
         table_body.innerHTML = '';
+        table_caption.innerHTML = '';
         $.ajax({
             url: url,
             type: 'POST',
