@@ -562,7 +562,7 @@ class FileUtils {
      * if $files is null returns failed => no files sent to validate
      */
     public static function validateUploadedFiles(array $files): array {
-        if (is_array($files) && count($files) === 0) {
+        if (count($files) === 0) {
             return ["failed" => "No files sent to validate"];
         }
 
