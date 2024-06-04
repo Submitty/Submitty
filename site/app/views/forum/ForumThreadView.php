@@ -447,6 +447,7 @@ class ForumThreadView extends AbstractView {
         $first_post = $this->core->getQueries()->getFirstPostForThread($thread_id);
         $first_post_id = $first_post["id"];
         $first_post_author_id = $first_post['author_user_id'];
+        $first_post_anonymous = ($first_post['anonymous'] === true);
 
         $first = true;
 
@@ -533,6 +534,7 @@ class ForumThreadView extends AbstractView {
 
                         $post_data[] = $this->createPost(
                             $first_post_author_id,
+                            $first_post_anonymous,
                             $activeThread,
                             $post,
                             $unviewed_posts,
@@ -568,6 +570,7 @@ class ForumThreadView extends AbstractView {
                 $taTrue = in_array($post["id"], $likedByTa, true);
                 $post_data[] = $this->createPost(
                     $first_post_author_id,
+                    $first_post_anonymous,
                     $activeThread,
                     $post,
                     $unviewed_posts,
@@ -1085,6 +1088,7 @@ class ForumThreadView extends AbstractView {
      * } $author_info
      * @param string[] $post_attachments
      */
+    public function createPost(string $first_post_author_id, bool $first_post_anonymous, array $thread, array $post, $unviewed_posts, $first, $reply_level, $display_option, int $counter, bool $isLiked, $includeReply, array $author_info, array $post_attachments, bool $has_history, bool $is_merged_thread, bool $render = false, bool $thread_announced = false, bool $isCurrentFavorite = false) {
 
     public function createPost(string $first_post_author_id, array $thread, array $post, $unviewed_posts, $first, $reply_level, $display_option, int $counter, bool $isLiked, bool $taTrue, $includeReply, array $author_info, array $post_attachments, bool $has_history, bool $is_merged_thread, bool $render = false, bool $thread_announced = false, bool $isCurrentFavorite = false) {
         $current_user = $this->core->getUser()->getId();
@@ -1232,7 +1236,7 @@ class ForumThreadView extends AbstractView {
             ];
         }
 
-        $post_user_info["is_OP"] = ($post["author_user_id"] === $first_post_author_id);
+        $post_user_info["is_OP"] = ($post["author_user_id"] === $first_post_author_id) && ($first_post_anonymous === $post["anonymous"]);
 
         $post_attachment = ForumUtils::getForumAttachments(
             $post_id,
