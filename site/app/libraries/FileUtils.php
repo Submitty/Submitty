@@ -562,7 +562,7 @@ class FileUtils {
      * if $files is null returns failed => no files sent to validate
      */
     public static function validateUploadedFiles(array $files): array {
-        if (empty($files)) {
+        if (is_array($files) && count($files) === 0) {
             return ["failed" => "No files sent to validate"];
         }
 
@@ -574,7 +574,7 @@ class FileUtils {
             $errors = [];
 
             // Check if temporary file name is empty before calling mime_content_type
-            if (empty($tmp_name)) {
+            if ($tmp_name === '') {
                 // Handle empty file case (e.g., throw exception or return error message)
                 $errors[] = "Empty file uploaded for $name";
             }
