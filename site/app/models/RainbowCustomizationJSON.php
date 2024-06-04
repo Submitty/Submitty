@@ -200,6 +200,10 @@ class RainbowCustomizationJSON extends AbstractModel {
             $this->benchmark_percent = $json->benchmark_percent;
         }
 
+        if (isset($json->final_cutoff)) {
+                    $this->final_cutoff = $json->final_cutoff;
+                }
+
         if (isset($json->gradeables)) {
             $this->gradeables = $json->gradeables;
         }
@@ -253,6 +257,21 @@ class RainbowCustomizationJSON extends AbstractModel {
         }
 
         $this->benchmark_percent->$benchmark = (float) $percent;
+    }
+
+    /**
+     * Add a final cutoff
+     *
+     * @param string $benchmark The benchmark - this is the key for this json field
+     * @param float $percent The percent - this is the value for this json field
+     * @throws BadArgumentException The passed in percent was empty
+     */
+    public function addFinalCutoff($benchmark, $percent) {
+        if (empty($percent)) {
+            throw new BadArgumentException('The final cutoff may not be empty.');
+        }
+
+        $this->final_cutoff->$benchmark = (float) $percent;
     }
 
     /**

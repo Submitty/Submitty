@@ -414,7 +414,7 @@ function getFinalBenchmarkPercent() {
     const final_cutoff = {};
     const final_benchmarks = ['A', 'A-', 'B+', 'B', 'B-', 'C+', 'C', 'C-', 'D+', 'D'];
 
-    $('.benchmark_percent_input').each(function() {
+    $('.final_cutoff_input').each(function() {
 
         // Get data
         const benchmark = this.getAttribute('data-benchmark').toString();

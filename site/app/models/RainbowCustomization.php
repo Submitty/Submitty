@@ -544,6 +544,12 @@ class RainbowCustomization extends AbstractModel {
             }
         }
 
+        if (isset($form_json->final_cutoff)) {
+                    foreach ($form_json->final_cutoff as $key => $value) {
+                        $this->RCJSON->addFinalCutoff((string) $key, $value);
+                    }
+                }
+
         if (isset($form_json->section)) {
             foreach ($form_json->section as $key => $value) {
                 $this->RCJSON->addSection((string) $key, $value);
