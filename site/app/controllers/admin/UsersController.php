@@ -84,7 +84,7 @@ class UsersController extends AbstractController {
             }
         }
 
-        $can_rejoin_in_null = [];
+        $can_rejoin = [];
         $self_rejoin_tester = new SelfRejoinController($this->core);
         $course = $this->core->getConfig()->getCourse();
         $term = $this->core->getConfig()->getTerm();
@@ -95,10 +95,10 @@ class UsersController extends AbstractController {
                 && $student->getGroup() === User::GROUP_STUDENT
                 && $self_rejoin_tester->canRejoinCourse($user_id, $course, $term)
             ) {
-                $can_rejoin_in_null[$user_id] = true;
+                $can_rejoin[$user_id] = true;
             }
             else {
-                $can_rejoin_in_null[$user_id] = false;
+                $can_rejoin[$user_id] = false;
             }
         }
 
@@ -110,7 +110,7 @@ class UsersController extends AbstractController {
                 $sorted_students,
                 $this->core->getQueries()->getRegistrationSections(),
                 $this->core->getQueries()->getRotatingSections(),
-                $can_rejoin_in_null,
+                $can_rejoin,
                 $download_info,
                 $formatted_tzs,
                 $this->core->getAuthentication() instanceof DatabaseAuthentication,

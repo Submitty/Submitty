@@ -10,7 +10,7 @@ class UsersView extends AbstractView {
      * @param array  $sorted_students students sorted by registration sections
      * @param array  $reg_sections associative array representing registration sections in the system
      * @param array  $rot_sections associative array representing rotating sections in the system
-     * @param array<string, bool> $can_rejoin_in_null Maps users' names in the null section
+     * @param array<string, bool> $can_rejoin Maps users' names in the null section
      * to whether they can rejoin the course or not.
      * @param array  $download_info user information for downloading
      * @param array  $formatted_tzs array containing a formatted time zone string for each user
@@ -22,7 +22,7 @@ class UsersView extends AbstractView {
         array $sorted_students,
         array $reg_sections,
         array $rot_sections,
-        array $can_rejoin_in_null,
+        array $can_rejoin,
         array $download_info,
         array $formatted_tzs,
         bool $use_database = false,
@@ -43,7 +43,7 @@ class UsersView extends AbstractView {
             "formatted_tzs" => $formatted_tzs,
             "reg_sections" => $reg_sections,
             "rot_sections" => $rot_sections,
-            "can_rejoin_in_null" => $can_rejoin_in_null,
+            "can_rejoin" => $can_rejoin,
             "use_database" => $use_database,
             'update_url' => $this->core->buildCourseUrl(['users']) . '?' . http_build_query(['type' => 'users']),
             "delete_user_url" => $this->core->buildCourseUrl(['delete_user']),
