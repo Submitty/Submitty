@@ -486,8 +486,6 @@ class ForumController extends AbstractController {
 
         $markdown = !empty($_POST['markdown_status']);
 
-        setcookie("markdown_enabled", strval($markdown ? 1 : 0), time() + (86400 * 30), "/");
-
         $display_option = (!empty($_POST["display_option"])) ? htmlentities($_POST["display_option"], ENT_QUOTES | ENT_HTML5, 'UTF-8') : "tree";
         $anon = (isset($_POST["Anon"]) && $_POST["Anon"] == "Anon") ? 1 : 0;
         if (!$this->core->getQueries()->existsThread($thread_id)) {
@@ -580,6 +578,7 @@ class ForumController extends AbstractController {
         $thread = $this->core->getQueries()->getThread($thread_id);
         $first_post = $this->core->getQueries()->getFirstPostForThread($thread_id);
         $first_post_author_id = $first_post['author_user_id'];
+        $first_post_anonymous = ($first_post['anonymous'] === true);
         $upduck_count = $this->core->getQueries()->getUpduckInfoForPosts([$post_id])[$post_id];
         $upduck_liked_by_user = array_key_exists($post_id, $this->core->getQueries()->getUserLikesForPosts(
             [$post_id],
@@ -596,6 +595,7 @@ class ForumController extends AbstractController {
             'forum\ForumThread',
             'createPost',
             $first_post_author_id,
+            $first_post_anonymous,
             $thread,
             $post,
             $unviewed_posts,
