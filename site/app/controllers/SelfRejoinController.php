@@ -36,10 +36,16 @@ class SelfRejoinController extends AbstractController {
      *
      * @return bool True if can re-add, false otherwise.
      */
-    public function canRejoinCourse(string $user_id, string $course, string $term): bool {
-        $user = $this->core->getUser();
-        if ($user_id !== $user->getId()) {
-            $user = $this->core->getQueries()->getUserById($user_id);
+    public function canRejoinCourse(string $user_id, string $course, string $term, User $user = null): bool {
+
+        // Attempt to get the user if they haven't been passed in
+        if (!$user)
+        {
+            $user = $this->core->getUser();
+            if ($user_id !== $user->getId())
+            {
+                $user = $this->core->getQueries()->getUserById($user_id);
+            }
         }
 
         $reload_previous_course = false;

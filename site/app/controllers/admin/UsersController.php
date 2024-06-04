@@ -93,7 +93,7 @@ class UsersController extends AbstractController {
             if (
                 $user_id !== null
                 && $student->getGroup() === User::GROUP_STUDENT
-                && $self_rejoin_tester->canRejoinCourse($user_id, $course, $term)
+                && $self_rejoin_tester->canRejoinCourse($user_id, $course, $term, $student)
             ) {
                 $can_rejoin[$user_id] = true;
             }
