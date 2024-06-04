@@ -2356,7 +2356,7 @@ ORDER BY {$orderby}",
                 JOIN ".$unit." ON (gd.gd_".$id." = ".$unit.".".$id.")
             WHERE
                 gd.g_id = ?
-                AND ".$unit.".".$section_key." = ANY (ARRAY[".implode(",", array_map(function($v) { return "'".$v."'"; }, $sections))."])
+                AND CAST (".$unit.".".$section_key." AS TEXT) = ANY (ARRAY[".implode(",", array_map(function($v) { return "'".$v."'"; }, $sections))."])
                 AND gcd.gcd_verifier_id IS NOT NULL
             GROUP BY
                 ".$unit.".".$section_key."
@@ -2367,7 +2367,7 @@ ORDER BY {$orderby}",
         $return = [];
 
         foreach ($this->course_db->rows() as $row) {
-            $return[$row['registration_section']] = $row['verified_components_count'];
+            $return[$row[$section_key]] = $row['verified_components_count'];
         }
 
         return $return;
