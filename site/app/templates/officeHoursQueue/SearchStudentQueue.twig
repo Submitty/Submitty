@@ -3,7 +3,7 @@
     <h2>Student's Queue History</h2>
     <p>Input Student RCSID:</p>
     <div id='search-student-queue'>
-        <input id='search-student-queue-input' type='text' placeholder="Enter student's name">
+        <input id='search-student-queue-input' data-testid='search-student-queue-input' type='text' placeholder="Enter student's name">
         <button id='search-student-queue-btn' data-testid='search-student-queue-btn' class="btn btn-primary">Search</button>
     </div>
     <table id='student-queue-table' class="table table-striped" style="margin-top: 15px;">
@@ -66,7 +66,7 @@
                     const helper = student_data[i].help_started_by === null ? '-' : student_data[i].help_started_by;
                     const removal_method = student_data[i].removal_type === null ? '-' : student_data[i].removal_type;
                     detail_row.innerHTML = `
-                        <td>${j}</td>
+                        <td data-testid='student-row'>${j}</td>
                         <td>${student_data[i].current_state}</td>
                         <td>${student_data[i].queue_code}</td>
                         <td>${time_start}</td>

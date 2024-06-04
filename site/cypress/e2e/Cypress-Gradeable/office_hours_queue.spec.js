@@ -132,6 +132,10 @@ describe('test office hours queue', () => {
         editAnnouncement('');
         cy.get('[data-testid="announcement"]').should('not.exist');
         cy.get('[data-testid="popup-message"]').should('contain', 'Updated announcement');
+        // confirm student queue history 
+        cy.get('[data-testid="search-student-queue-input"]').first().type('student');
+        cy.get('[data-testid="search-student-queue-btn"]').first().click();
+        cy.get('[data-testid="student-row"]').should('exist');
         // diable and delete all queue
         disableQueue();
     });
