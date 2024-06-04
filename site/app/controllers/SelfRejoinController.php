@@ -11,12 +11,12 @@ use app\models\User;
 
 class SelfRejoinController extends AbstractController {
     /**
-     * @Route("/courses/{_semester}/{_course}/no_access")
      *
      * Creates the No Access page that gives the student a chance to rejoin
      * if they meet the right conditions.
      * @return void
      */
+    #[Route("/courses/{_semester}/{_course}/no_access")]
     public function noAccess(): void {
         $user_id = $this->core->getUser()->getId();
         $course = $this->core->getConfig()->getCourse();
@@ -34,7 +34,7 @@ class SelfRejoinController extends AbstractController {
      * Returns if the user is allowed to self-readd to a course after being dropped.
      * This function can be called from a non-coure context.
      *
-     * @return bool True if can readd, false otherwise.
+     * @return bool True if can re-add, false otherwise.
      */
     public function canRejoinCourse(string $user_id, string $course, string $term): bool {
         $user = $this->core->getUser();
@@ -140,10 +140,10 @@ class SelfRejoinController extends AbstractController {
     }
 
     /**
-     * @Route("/courses/{_semester}/{_course}/rejoin_course", methods={"POST"})
      *
      * @return RedirectResponse Course url if the student met the conditions to be re-added.
      */
+    #[Route("/courses/{_semester}/{_course}/rejoin_course", methods: ["POST"])]
     public function rejoinCourse(): RedirectResponse {
         $user = $this->core->getUser();
         $user_id = $user->getId();
