@@ -577,7 +577,8 @@ class FileUtils {
             if (empty($tmp_name)) {
                 // Handle empty file case (e.g., throw exception or return error message)
                 $errors[] = "Empty file uploaded for $name";
-            } else {
+            }
+            else {
                 $type = mime_content_type($tmp_name);
                 $zip_status = FileUtils::getZipFileStatus($tmp_name);
 
@@ -593,7 +594,8 @@ class FileUtils {
                         if ($err_tmp != "No error.") {
                             $errors[] = $err_tmp;
                         }
-                    } else {
+                    }
+                    else {
                         $size = FileUtils::getZipSize($tmp_name);
                         if (!FileUtils::checkFileInZipName($tmp_name)) {
                             $errors[] = "Invalid filename within zip file";
@@ -630,7 +632,8 @@ class FileUtils {
         $ret = [];
         if (!is_array($files['name'])) {
             $ret[] = $validator($files);
-        } else {
+        }
+        else {
             $num_files = count($files['name']);
             for ($i = 0; $i < $num_files; $i++) {
                 // Construct single file from uploaded file array
