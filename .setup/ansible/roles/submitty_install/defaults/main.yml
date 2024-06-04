@@ -1,0 +1,25 @@
+---
+submitty_version: main
+db_host: localhost
+db_port: 5432
+submitty_dbuser: submitty_dbuser
+submitty_dbuser_password: submitty_password
+submitty_course_dbuser: submitty_course_dbuser
+submitty_course_dbuser_password: submitty_password
+timezone: America/New_York
+language: en_US
+submitty_url: localhost
+vcs_url: git.localhost
+institution_name: Example University
+sysadmin_email: sysadmin@localhost
+submitty_email: submitty@localhost
+institution_url: localhost
+authentication_method: 1
+email_enabled: y
+ssl_enabled: false
+admin_email: admin@localhost
+submitty_ip: 127.0.0.1
+admin_password: admin_password
+noreply_email: noreply_email@localhost
+smtp_server: mail.localhost
+smtp_port: 25

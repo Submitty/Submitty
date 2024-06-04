@@ -22,13 +22,13 @@ class CalendarController extends AbstractController {
      * on a calendar. The calendar is accessible through the side bar button in a
      * global scope.
      *
-     * @Route("/calendar")
      *
      * @return WebResponse
      * @throws \Exception if a Gradeable failed to load from the database
      * @see GlobalController::prep_user_sidebar
      * @see CalendarView::showCalendar
      */
+    #[Route("/calendar")]
     public function viewCalendar(): WebResponse {
         $user = $this->core->getUser();
 
@@ -37,7 +37,7 @@ class CalendarController extends AbstractController {
         $courses = $this->core->getQueries()->getCourseForUserId($user->getId());
         $filtered_courses = [];
 
-        //If there arent any courses, don't filter
+        //If there aren't any courses, don't filter
         if (count($courses) != 0) {
             //Check if should see all courses
             $show_all_courses = '1';
@@ -89,8 +89,8 @@ class CalendarController extends AbstractController {
     }
 
     /**
-     * @Route("/calendar/items/new", methods={"POST"})
      */
+    #[Route("/calendar/items/new", methods: ["POST"])]
     public function createMessage(): RedirectResponse {
         // Checks if the values exist that are set and returns an error message if not
         if (isset($_POST['type'])) {
@@ -165,9 +165,7 @@ class CalendarController extends AbstractController {
         return new RedirectResponse($this->core->buildUrl(['calendar']));
     }
 
-    /**
-     * @Route("/calendar/items/edit", methods={"POST"})
-     */
+    #[Route("/calendar/items/edit", methods: ["POST"])]
     public function editMessage(): RedirectResponse {
         // Checks if the values exist that are set and returns an error message if not
         if (isset($_POST['type'])) {
@@ -246,9 +244,7 @@ class CalendarController extends AbstractController {
         return new RedirectResponse($this->core->buildUrl(['calendar']));
     }
 
-    /**
-     * @Route("/calendar/items/delete", methods={"POST"})
-     */
+    #[Route("/calendar/items/delete", methods: ["POST"])]
     public function deleteMessage(): ResponseInterface {
         if (isset($_POST['id'])) {
             $id = $_POST['id'];
