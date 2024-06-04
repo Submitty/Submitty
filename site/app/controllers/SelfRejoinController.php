@@ -39,11 +39,9 @@ class SelfRejoinController extends AbstractController {
     public function canRejoinCourse(string $user_id, string $course, string $term, User $user = null): bool {
 
         // Attempt to get the user if they haven't been passed in
-        if (!$user)
-        {
+        if (!$user) {
             $user = $this->core->getUser();
-            if ($user_id !== $user->getId())
-            {
+            if ($user_id !== $user->getId()) {
                 $user = $this->core->getQueries()->getUserById($user_id);
             }
         }
