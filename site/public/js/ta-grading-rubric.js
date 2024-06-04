@@ -1771,10 +1771,10 @@ function onRestoreMark(me) {
 function onDeleteComponent(me) {
     const componentCount = $('.component-container').length;
     if (componentCount === 1) {
-        alert("Cannot delete the only component.");
+        alert('Cannot delete the only component.');
         return;
     }
-    
+
     if (!confirm('Are you sure you want to delete this component?')) {
         return;
     }
