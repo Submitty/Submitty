@@ -82,140 +82,157 @@ def log_message(message):
 log_message("Start processing " + semester + " " + course)
 
 
-# Verify user exists
-users = pwd.getpwall()
+# Define the log_file_path
+log_file_path = Path(data_dir, 'logs', 'rainbow_grades', "debugging.txt")
 
-user_found = False
+# Open the file at log_file_path in write mode and redirect stdout
+with open(log_file_path, 'w') as f:
+    sys.stdout = f
 
-for item in users:
-    if user in item:
-        user_found = True
 
-if user_found is False:
-    raise Exception('Unable to locate the specified user {}'.format(user))
+    # Verify user exists
+    users = pwd.getpwall()
 
-print('Started build at {}'.format(datetime.datetime.now()), flush=True)
+    user_found = False
 
-# Generate path information
-rg_course_path = os.path.join(courses_path, semester, course, 'rainbow_grades')
+    for item in users:
+        if user in item:
+            user_found = True
 
-# Verify that customization.json or custom_customization.json exist
-if os.path.exists(rg_course_path + '/customization.json') or \
-        os.path.exists(rg_course_path + '/' + PROVIDED_JSON_NAME):
-    pass
+    if user_found is False:
+        raise Exception('Unable to locate the specified user {}'.format(user))
 
-else:
-    raise Exception('Unable to find a customization file')
+    print('Started build at {}'.format(datetime.datetime.now()), flush=True)
 
-# If makefile does not exist then copy and configure one from the main rainbow grades
-# repo
-if not os.path.exists(rg_course_path + '/Makefile'):
+    # Generate path information
+    rg_course_path = os.path.join(courses_path, semester, course, 'rainbow_grades')
 
-    # Copy Makefile from master rainbow grades directory
-    # to course specific directory
-    print('Copying initial files', flush=True)
-    shutil.copyfile(rainbow_grades_path + '/SAMPLE_Makefile',
-                    rg_course_path + '/Makefile')
+    # Verify that customization.json or custom_customization.json exist
+    if os.path.exists(rg_course_path + '/customization.json') or \
+            os.path.exists(rg_course_path + '/' + PROVIDED_JSON_NAME):
+        pass
 
-    # Setup Makefile path
-    print('Configuring Makefile', flush=True)
-    makefile_path = os.path.join(rg_course_path, 'Makefile')
+    else:
+        raise Exception('Unable to find a customization file')
 
-    # Read in the file
-    with open(makefile_path, 'r') as file:
-        filedata = file.read()
+    # If makefile does not exist then copy and configure one from the main rainbow grades
+    # repo
+    if not os.path.exists(rg_course_path + '/Makefile'):
 
-    # Replace the target strings
-    filedata = filedata.replace('username', user)
-    filedata = filedata.replace('/<PATH_TO_SUBMITTY_REPO>/RainbowGrades',
-                                rainbow_grades_path)
-    filedata = filedata.replace('submitty.cs.rpi.edu', 'localhost')
-    filedata = filedata.replace('<SEMESTER>/<COURSE>', '{}/{}'.format(semester, course))
+        # Copy Makefile from master rainbow grades directory
+        # to course specific directory
+        print('Copying initial files', flush=True)
+        shutil.copyfile(rainbow_grades_path + '/SAMPLE_Makefile',
+                        rg_course_path + '/Makefile')
 
-    # Write the file out again
-    with open(makefile_path, 'w') as file:
-        file.write(filedata)
+        # Setup Makefile path
+        print('Configuring Makefile', flush=True)
+        makefile_path = os.path.join(rg_course_path, 'Makefile')
 
-else:
+        # Read in the file
+        with open(makefile_path, 'r') as file:
+            filedata = file.read()
 
-    print('Previously configured Makefile detected', flush=True)
+        # Replace the target strings
+        filedata = filedata.replace('username', user)
+        filedata = filedata.replace('/<PATH_TO_SUBMITTY_REPO>/RainbowGrades',
+                                    rainbow_grades_path)
+        filedata = filedata.replace('submitty.cs.rpi.edu', 'localhost')
+        filedata = filedata.replace('<SEMESTER>/<COURSE>', '{}/{}'.format(semester, course))
 
-# Determine if the instructor has provided a custom_customization.json
-# If so make a copy of that and rename as 'customization.json' so it will be used
-if os.path.exists(rg_course_path + '/' + PROVIDED_JSON_NAME):
+        # Write the file out again
+        with open(makefile_path, 'w') as file:
+            file.write(filedata)
 
-    shutil.copy(rg_course_path + '/' + PROVIDED_JSON_NAME,
-                rg_course_path + '/customization.json')
+    else:
 
-# Change directory to course specific directory
-os.chdir(rg_course_path)
+        print('Previously configured Makefile detected', flush=True)
 
-# Verify submitty_admin file exists
-creds_file = os.path.join(install_dir, 'config', 'submitty_admin.json')
 
-if not os.path.exists(creds_file):
-    raise Exception('Unable to locate submitty_admin.json credentials file')
+    # Get the current username (print debug)
+    username = getpass.getuser()
 
-# Load credentials out of admin file
-with open(creds_file, 'r') as file:
-    creds = json.load(file)
+    print(f'The script is being run by: {username}')
 
-# Take this path if we DID NOT get an auth token
-if 'token' not in creds or not creds['token']:
 
-    print('Attempting to continue with previously generated grade summaries',
-          flush=True)
+    # Determine if the instructor has provided a custom_customization.json
+    # If so make a copy of that and rename as 'customization.json' so it will be used
+    if os.path.exists(rg_course_path + '/' + PROVIDED_JSON_NAME):
 
-    # We may still continue execution if grade summaries had been previously manually
-    # generated, Check grade summaries directory to see if it contains any summaries
-    reports_path = os.path.join(courses_path, semester, course, 'reports', 'all_grades')
-    file_count = sum([len(files) for r, d, files in os.walk(reports_path)])
+        shutil.copy(rg_course_path + '/' + PROVIDED_JSON_NAME,
+                    rg_course_path + '/customization.json')
 
-    if file_count == 0:
-        raise Exception('Failure - The grade summaries directory is empty')
+    # Change directory to course specific directory
+    os.chdir(rg_course_path)
+    print('flag 167', flush=True)
 
-# Take this path if we DID get an auth token
-else:
+    # Verify submitty_admin file exists
+    creds_file = os.path.join(install_dir, 'config', 'submitty_admin.json')
 
-    # Construct cmd string
-    cmd = [
-        '{}/sbin/generate_grade_summaries.py'.format(install_dir),
-        semester,
-        course
-    ]
+    if not os.path.exists(creds_file):
+        raise Exception('Unable to locate submitty_admin.json credentials file')
 
-    # Call generate_grade_summaries.py script to generate grade summaries for the
-    # course
-    print('Generating grade summaries', flush=True)
-    cmd_return_code = subprocess.call(cmd)
+    # Load credentials out of admin file
+    with open(creds_file, 'r') as file:
+        creds = json.load(file)
+        print('flag 178', flush=True)
 
-    # Check return code of generate_grade_summaries.py execution
-    if cmd_return_code != 0:
-        raise Exception('Failure generating grade summaries')
+    # Take this path if we DID NOT get an auth token
+    if 'token' not in creds or not creds['token']:
 
-# Run make pull_test (command outputs capture in cmd_output for debugging)
-print('Pulling in grade summaries', flush=True)
-cmd_output = os.popen('make pull_test').read()
+        print('Attempting to continue with previously generated grade summaries',
+              flush=True)
 
-# Run make
-print('Compiling rainbow grades', flush=True)
-cmd_output = os.popen('make').read()
+        # We may still continue execution if grade summaries had been previously manually
+        # generated, Check grade summaries directory to see if it contains any summaries
+        reports_path = os.path.join(courses_path, semester, course, 'reports', 'all_grades')
+        file_count = sum([len(files) for r, d, files in os.walk(reports_path)])
 
-# Run make push_test
-print('Exporting to summary_html', flush=True)
-cmd_output = os.popen('make push_test').read()
+        if file_count == 0:
+            raise Exception('Failure - The grade summaries directory is empty')
 
-# Recursively update permissions for all files in the rainbow_grades directory
-print('Updating permissions', flush=True)
-cmd_output = os.popen('chmod -R --silent o-rwx ' + rg_course_path).read()
+    # Take this path if we DID get an auth token
+    else:
 
-summary_html_path = os.path.join(courses_path,
-                                 semester,
-                                 course,
-                                 'reports',
-                                 'summary_html')
-cmd_output = os.popen('chmod -R --silent o-rwx ' + summary_html_path).read()
+        # Construct cmd string
+        cmd = [
+            '{}/sbin/generate_grade_summaries.py'.format(install_dir),
+            semester,
+            course
+        ]
 
-print('Done', flush=True)
+        # Call generate_grade_summaries.py script to generate grade summaries for the
+        # course
+        print('Generating grade summaries', flush=True)
+        cmd_return_code = subprocess.call(cmd)
+
+        # Check return code of generate_grade_summaries.py execution
+        if cmd_return_code != 0:
+            raise Exception('Failure generating grade summaries')
+
+    # Run make pull_test (command outputs capture in cmd_output for debugging)
+    print('Pulling in grade summaries', flush=True)
+    cmd_output = os.popen('make pull_test').read()
+
+    # Run make
+    print('Compiling rainbow grades', flush=True)
+    cmd_output = os.popen('make').read()
+
+    # Run make push_test
+    print('Exporting to summary_html', flush=True)
+    cmd_output = os.popen('make push_test').read()
+
+    # Recursively update permissions for all files in the rainbow_grades directory
+    print('Updating permissions', flush=True)
+    cmd_output = os.popen('chmod -R --silent o-rwx ' + rg_course_path).read()
+
+    summary_html_path = os.path.join(courses_path,
+                                     semester,
+                                     course,
+                                     'reports',
+                                     'summary_html')
+    cmd_output = os.popen('chmod -R --silent o-rwx ' + summary_html_path).read()
+
+    print('Done', flush=True)
 
 log_message("Finished         " + semester + " " + course)

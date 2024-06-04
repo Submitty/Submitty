@@ -1,0 +1,175 @@
+{
+    "section": {
+        "1": "1",
+        "2": "2",
+        "3": "3",
+        "4": "4",
+        "5": "5",
+        "6": "6",
+        "7": "7",
+        "8": "8",
+        "9": "9",
+        "10": "10"
+    },
+    "display_benchmark": [
+        "average",
+        "stddev"
+    ],
+    "messages": [],
+    "display": [
+        "grade_summary",
+        "grade_details"
+    ],
+    "benchmark_percent": {},
+    "gradeables": [
+        {
+            "type": "homework",
+            "count": 28,
+            "percent": 1,
+            "remove_lowest": 3,
+            "ids": [
+                {
+                    "max": 10,
+                    "release_date": "1974-01-01 23:59:59-0500",
+                    "id": "grades_released_homework"
+                },
+                {
+                    "max": 28,
+                    "release_date": "1974-01-01 23:59:59-0500",
+                    "id": "grades_released_homework_autohiddenEC"
+                },
+                {
+                    "max": 22,
+                    "release_date": "1974-01-01 23:59:59-0500",
+                    "id": "grades_released_homework_autota"
+                },
+                {
+                    "max": 22,
+                    "release_date": "1974-01-01 23:59:59-0500",
+                    "id": "grades_released_homework_onlyauto"
+                },
+                {
+                    "max": 5,
+                    "release_date": "1974-01-01 23:59:59-0500",
+                    "id": "grades_released_homework_onlyta"
+                },
+                {
+                    "max": 12,
+                    "release_date": "1974-01-01 23:59:59-0500",
+                    "id": "grades_released_homework_onlytaEC"
+                },
+                {
+                    "max": 12,
+                    "release_date": "1974-01-01 23:59:59-0500",
+                    "id": "grades_released_homework_onlytaPenalty"
+                },
+                {
+                    "max": 13,
+                    "release_date": "1974-01-01 23:59:59-0500",
+                    "id": "grading_pdf_peer_homework"
+                },
+                {
+                    "max": 13,
+                    "release_date": "1974-01-01 23:59:59-0500",
+                    "id": "grading_pdf_peer_team_homework"
+                },
+                {
+                    "max": 5,
+                    "release_date": "9998-12-31 23:59:59-0500",
+                    "id": "bulk_upload_test"
+                },
+                {
+                    "max": 12,
+                    "release_date": "9998-12-31 23:59:59-0500",
+                    "id": "closed_homework"
+                },
+                {
+                    "max": 28,
+                    "release_date": "9998-12-31 23:59:59-0500",
+                    "id": "closed_peer_team_homework"
+                },
+                {
+                    "max": 28,
+                    "release_date": "9998-12-31 23:59:59-0500",
+                    "id": "closed_team_homework"
+                },
+                {
+                    "max": 12,
+                    "release_date": "9998-12-31 23:59:59-0500",
+                    "id": "future_no_tas_homework"
+                },
+                {
+                    "max": 12,
+                    "release_date": "9998-12-31 23:59:59-0500",
+                    "id": "future_peer_grading"
+                },
+                {
+                    "max": 12,
+                    "release_date": "9998-12-31 23:59:59-0500",
+                    "id": "future_tas_homework"
+                },
+                {
+                    "max": 12,
+                    "release_date": "9998-12-31 23:59:59-0500",
+                    "id": "grading_homework"
+                },
+                {
+                    "max": 14,
+                    "release_date": "9998-12-31 23:59:59-0500",
+                    "id": "grading_homework_pdf"
+                },
+                {
+                    "max": 14,
+                    "release_date": "9998-12-31 23:59:59-0500",
+                    "id": "grading_homework_team_pdf"
+                },
+                {
+                    "max": 12,
+                    "release_date": "9998-12-31 23:59:59-0500",
+                    "id": "grading_only_peer_team_homework"
+                },
+                {
+                    "max": 12,
+                    "release_date": "9998-12-31 23:59:59-0500",
+                    "id": "grading_team_homework"
+                },
+                {
+                    "max": 5,
+                    "release_date": "9998-12-31 23:59:59-0500",
+                    "id": "late_allowed_homework"
+                },
+                {
+                    "max": 12,
+                    "release_date": "9998-12-31 23:59:59-0500",
+                    "id": "open_homework"
+                },
+                {
+                    "max": 12,
+                    "release_date": "9998-12-31 23:59:59-0500",
+                    "id": "open_peer_homework"
+                },
+                {
+                    "max": 12,
+                    "release_date": "9998-12-31 23:59:59-0500",
+                    "id": "open_team_homework"
+                },
+                {
+                    "max": 19,
+                    "release_date": "9998-12-31 23:59:59-0500",
+                    "id": "open_vcs_homework"
+                },
+                {
+                    "max": 19,
+                    "release_date": "9998-12-31 23:59:59-0500",
+                    "id": "subdirectory_vcs_homework"
+                },
+                {
+                    "max": 2,
+                    "release_date": "9999-01-01 23:59:59-0500",
+                    "id": "no_due_date_no_release"
+                }
+            ]
+        }
+    ],
+    "plagiarism": []
+}
