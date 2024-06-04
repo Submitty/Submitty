@@ -1,10 +1,31 @@
-/* exported prevMonth, nextMonth, loadCalendar, loadFullCalendar, editCalendarItemForm, deleteCalendarItem, deleteGlobalCalendarItem, openNewItemModal, openNewGlobalEventModal, openOptionsModal, updateCalendarOptions, colorLegend */
+/* exported prevMonth, nextMonth, loadCalendar, loadFullCalendar, editCalendarItemForm, deleteCalendarItem, deleteGlobalCalendarItem, openNewItemModal, openNewGlobalEventModal, openOptionsModal, updateCalendarOptions, colorLegend, setDateToToday */
 /* global curr_day, curr_month, curr_year, gradeables_by_date, global_items_by_date, instructor_courses, is_superuser, buildUrl */
 /* global csrfToken */
+/* global luxon */
 
 // List of names of months in English
 const monthNames = ['December', 'January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
 const monthNamesShort = ['Dec', 'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sept', 'Oct', 'Nov', 'Dec'];
+
+const DateTime = luxon.DateTime;
+
+/**
+ * Sets the current date to today and then changes the calendar
+ * @returns {void} : only changes cookies and calendar date
+ */
+function setDateToToday() {
+    const type = $('#calendar-item-type-edit').val();
+    const currentDay = new Date();
+    Cookies.set('calendar_year', currentDay.getFullYear());
+    Cookies.set('calendar_month', currentDay.getMonth()+1);
+    Cookies.set('calendar_day', currentDay.getDate());
+
+    const cookie_year = currentDay.getFullYear();
+    const cookie_month = currentDay.getMonth()+1;
+    const cookie_day = currentDay.getDate();
+
+    loadCalendar(cookie_month, cookie_year, cookie_day, type);
+}
 
 /**
  * Gets the previous month of a given month
@@ -45,15 +66,9 @@ function nextMonth(month, year, day) {
  * @returns {view_info[]} : array {previous_month, year_of_previous_month}
  */
 function prevWeek(month, year, day) {
-    const currentDay = new Date(year, month - 1, day);
-    // Move the date back by 7 days
-    currentDay.setDate(currentDay.getDate() - 7);
-    // Get the new month, year, and day
-    month = currentDay.getMonth();
-    year = currentDay.getFullYear();
-    day = currentDay.getDate();
-
-    return [month + 1, year, day];
+    const currentDay = DateTime.local(year, month, day).minus({ days: 7 });
+    const [newYear, newMonth, newDay] = [currentDay.year, currentDay.month, currentDay.day];
+    return [newMonth, newYear, newDay];
 }
 
 /**
@@ -64,14 +79,9 @@ function prevWeek(month, year, day) {
  * @returns {view_info[]} : array {next_month, year_of_next_month}
  */
 function nextWeek(month, year, day) {
-    const currentDay = new Date(year, month - 1, day);
-    // Move the date forward by 7 days
-    currentDay.setDate(currentDay.getDate() + 7);
-    // Get the new month, year, and day
-    month = currentDay.getMonth();
-    year = currentDay.getFullYear();
-    day = currentDay.getDate();
-    return [month + 1, year, day];
+    const currentDay = luxon.DateTime.local(year, month, day).plus({ days: 7 });
+    const [newYear, newMonth, newDay] = [currentDay.year, currentDay.month, currentDay.day];
+    return [newMonth, newYear, newDay];
 }
 
 /**
@@ -81,8 +91,7 @@ function nextWeek(month, year, day) {
  * @returns {Date} a Date object containing the specified date
  */
 function parseDate(datestr) {
-    const temp = datestr.split('-');
-    return new Date(parseInt(temp[0]), parseInt(temp[1])-1, parseInt(temp[2]));
+    return luxon.DateTime.fromFormat(datestr, 'yyyy-MM-dd', { zone: 'local' }).toJSDate();
 }
 
 /**
@@ -126,27 +135,63 @@ function darken(colorstr) {
 }
 
 /**
+ * This function returns a slightly lighter color than the color variable name passed.
+ *
+ * @param colorstr : string the color to lighten in the form "var(--color-name)"
+ * @returns {string} a hex code for a slightly lighter shade
+ */
+function lighten(colorstr) {
+    if (typeof colorstr !== 'string') {
+        return colorstr;
+    }
+    else {
+        const hexcodestr = window.getComputedStyle(document.documentElement).getPropertyValue(colorstr.slice(4, -1)).trim().toLowerCase();
+        const hex = hexcodestr.slice(1);
+        // Convert hex to RGB
+        const r = parseInt(hex.substring(0, 2), 16);
+        const g = parseInt(hex.substring(2, 4), 16);
+        const b = parseInt(hex.substring(4, 6), 16);
+        // Adjusting the brightness for stripes to visible (used only for future gradeables as of now)
+        const newR = Math.min(255, r + 40);
+        const newG = Math.min(255, g + 40);
+        const newB = Math.min(255, b + 40);
+        // Convert RGB back to hex
+        const lighterHex = `#${newR.toString(16).padStart(2, '0')}${newG.toString(16).padStart(2, '0')}${newB.toString(16).padStart(2, '0')}`;
+        return lighterHex;
+    }
+}
+
+/**
  * Create a HTML element that contains the calendar item (button/link/text).
  *
  * @param item : array the calendar item
  * @returns {HTMLElement} the HTML Element for the calendar item
  */
 function generateCalendarItem(item) {
-    // When hovering over an item, shows the name and due date
-    // Due date information
-    let due_string = '';
-    if (item['submission'] !== '') {
-        due_string = `Due: ${item['submission']}`;
+    let tooltip = '';
+    if (!item['submission_open'] && item['is_student']) {
+        // Student shouldn't be able to access this item
+        // When hovering over an item, shows the below message
+        tooltip = 'You can access this gradeable once the submission opens';
+        item['disabled'] = true;
     }
+    else {
+        // When hovering over an item, shows the name and due date
+        // Due-date information
+        let due_string = '';
+        if (item['submission'] !== '') {
+            due_string = `Due: ${item['submission']}`;
+        }
 
-    // Put detail in the tooltip
-    let tooltip = `Course: ${item['course']}&#10;` +
-        `Title: ${item['title']}&#10;`;
-    if (item['status_note'] !== '') {
-        tooltip += `Status: ${item['status_note']}&#10;`;
-    }
-    if (due_string !== '') {
-        tooltip += `${due_string}`;
+        // Put detail in the tooltip
+        tooltip = `Course: ${item['course']}&#10;` +
+            `Title: ${item['title']}&#10;`;
+        if (item['status_note'] !== '') {
+            tooltip += `Status: ${item['status_note']}&#10;`;
+        }
+        if (due_string !== '') {
+            tooltip += `${due_string}`;
+        }
     }
     // Put the item in the day cell
     const link = (!item['disabled']) ? item['url'] : '';
@@ -168,8 +213,15 @@ function generateCalendarItem(item) {
     if (item['status'] === 'text' || item['status'] === 'ann') {
         element.style.setProperty('background-color', item['color']);
     }
-    if (exists) {
+    // Displaying striped background if submission is not open irrespective of access level
+    if (!item['submission_open']) {
+        element.style.setProperty('background', `repeating-linear-gradient(45deg, ${item['color']}, ${item['color']} 10px, ${lighten(item['color'])} 10px, ${lighten(item['color'])} 15px)`);
+    }
+    if (!item['disabled'] || exists) {
         element.style.setProperty('cursor', 'pointer');
+    }
+    else {
+        element.style.setProperty('cursor', 'default');
     }
     element.title = tooltip;
     if (link !== '') {
@@ -323,11 +375,24 @@ function deleteGlobalCalendarItem() {
  * @param view_semester : boolean if the calendar is viewing the entire semester. If so, the day cell would show both the month and date
  * @returns {HTMLElement} the HTML Element containing the cell
  */
-function generateDayCell(year, month, day, curr_view_month, view_semester=false) {
+function generateDayCell(year, month, day, curr_view_month, view_mode, view_semester=false) {
     const cell_date_str = dateToStr(year, month, day);
 
     const content = document.createElement('td');
-    content.classList.add('cal-day-cell');
+    //change the css of the cell based on the view mode:
+    if (view_mode === 'month') {
+        content.classList.add('cal-day-cell');
+    }
+    else if (view_mode === 'twoweek') {
+        content.classList.add('cal-day-cell-twoweek');
+    }
+    else if (view_mode === 'week') {
+        content.classList.add('cal-day-cell-week');
+    }
+    else {
+        content.classList.add('cal-day-cell');
+    }
+
     content.id = `cell-${cell_date_str}`;
     if (view_semester) {
         content.classList.add('cal-cell-expand');
@@ -526,7 +591,7 @@ function buildSemesterHeader(semester_name) {
  * @returns {HTMLElement} the HTML Element with the entire calendar
  */
 function generateCalendarOfMonth(view_year, view_month, view_day) {
-    const startWeekday = new Date(view_year, view_month - 1, 1).getDay();
+    const startWeekday = DateTime.local(view_year, view_month, 1).weekday % 7;
     const title = buildSwitchingHeader(view_year, view_month, view_day, 'month');
     const table = generateCalendarHeader(title);
     const tableBody = document.createElement('tbody');
@@ -534,18 +599,18 @@ function generateCalendarOfMonth(view_year, view_month, view_day) {
 
     // Show days at the end of last month that belongs to the first week of current month
     if (startWeekday !== 0) {
-        const lastMonthEnd = new Date(view_year, view_month - 1, 0).getDate();
+        const lastMonthEnd = DateTime.local(view_year, view_month, 1).minus({ days: 1 }).day;
         const lastMonthStart = lastMonthEnd + 1 - startWeekday;
         for (let day = lastMonthStart; day <= lastMonthEnd; day++) {
-            curRow.appendChild(generateDayCell(view_year, view_month - 1, day, view_month));
+            curRow.appendChild(generateDayCell(view_year, view_month - 1, day, view_month, 'month'));
         }
     }
 
     // Shows each day of current month
-    const daysInMonth = new Date(view_year, view_month, 0).getDate();
+    const daysInMonth = luxon.DateTime.local(view_year, view_month).daysInMonth;
     let weekday = startWeekday;
     for (let day = 1; day <= daysInMonth; day++) {
-        curRow.appendChild(generateDayCell(view_year, view_month, day, view_month));
+        curRow.appendChild(generateDayCell(view_year, view_month, day, view_month, 'month'));
         if (weekday === 6) {
             weekday = 0;
             // Next week should show on next line
@@ -561,7 +626,7 @@ function generateCalendarOfMonth(view_year, view_month, view_day) {
     if (weekday !== 0) {
         const remain = 7 - weekday;
         for (let day = 1; day <= remain; day++) {
-            curRow.appendChild(generateDayCell(view_year, view_month + 1, day, view_month));
+            curRow.appendChild(generateDayCell(view_year, view_month + 1, day, view_month, 'month'));
             if (weekday === 6) {
                 weekday = 0;
             }
@@ -593,17 +658,17 @@ function generateCalendarOfMonthWeek(view_year, view_month, view_day) {
     const curRow = document.createElement('tr');
 
     // Show days at the end of last month that belongs to the first week of current month
-    const startWeekday = new Date(view_year, view_month - 1, 1).getDay();
-    const currentDay = new Date(view_year, view_month - 1, view_day).getDay();
-    const lastMonthEnd = new Date(view_year, view_month - 1, 0).getDate();
+    const startWeekday = DateTime.local(view_year, view_month, 1).weekday % 7;
+    const currentDay = DateTime.local(view_year, view_month, view_day).weekday % 7;
+    const lastMonthEnd = DateTime.local(view_year, view_month, 1).minus({ days: 1 }).day;
     const lastMonthStart = lastMonthEnd + 1 - startWeekday;
-    const daysInMonth = new Date(view_year, view_month, 0).getDate();
+    const daysInMonth = DateTime.local(view_year, view_month).daysInMonth;
     let print_day = 0;
 
     // Show days at the end of last month that belongs to the first week of current month
     if (view_day-currentDay <= 0) {
         for (let day = lastMonthStart; day <= lastMonthEnd; day++) {
-            curRow.appendChild(generateDayCell(view_year, view_month - 1, day, view_month));
+            curRow.appendChild(generateDayCell(view_year, view_month - 1, day, view_month, 'week'));
             print_day++;
         }
     }
@@ -611,20 +676,20 @@ function generateCalendarOfMonthWeek(view_year, view_month, view_day) {
     // Make the day cells before the "current" date
     if (print_day < currentDay) {
         for (let day = view_day - currentDay + print_day; print_day < currentDay; day++) {
-            curRow.appendChild(generateDayCell(view_year, view_month, day, view_month));
+            curRow.appendChild(generateDayCell(view_year, view_month, day, view_month, 'week'));
             print_day++;
         }
     }
 
     // Make the "current" day, and the days after in the month
     for (let day = view_day; print_day <= 6 && day <= daysInMonth; day++) {
-        curRow.appendChild(generateDayCell(view_year, view_month, day, view_month));
+        curRow.appendChild(generateDayCell(view_year, view_month, day, view_month, 'week'));
         print_day++;
     }
 
     // Makes any days that spill into the next month
     for (let day = 1; print_day <= 6; day++) {
-        curRow.appendChild(generateDayCell(view_year, view_month + 1, day, view_month));
+        curRow.appendChild(generateDayCell(view_year, view_month + 1, day, view_month, 'week'));
         print_day++;
     }
     tableBody.appendChild(curRow);
@@ -650,17 +715,17 @@ function generateCalendarOfMonthTwoWeek(view_year, view_month, view_day) {
     let curRow = document.createElement('tr');
 
     // Show days at the end of last month that belongs to the first week of current month
-    const startWeekday = new Date(view_year, view_month - 1, 1).getDay();
-    const currentDay = new Date(view_year, view_month - 1, view_day).getDay();
-    const lastMonthEnd = new Date(view_year, view_month - 1, 0).getDate();
+    const startWeekday = DateTime.local(view_year, view_month, 1).weekday % 7;
+    const currentDay = DateTime.local(view_year, view_month, view_day).weekday % 7;
+    const lastMonthEnd = DateTime.local(view_year, view_month, 1).minus({ days: 1 }).day;
     const lastMonthStart = lastMonthEnd + 1 - startWeekday;
-    const daysInMonth = new Date(view_year, view_month, 0).getDate();
+    const daysInMonth = DateTime.local(view_year, view_month).daysInMonth;
     let print_day = 0;
 
     // Show days at the end of last month that belongs to the first week of current month
     if (view_day-currentDay <= 0) {
         for (let day = lastMonthStart; day <= lastMonthEnd; day++) {
-            curRow.appendChild(generateDayCell(view_year, view_month - 1, day, view_month));
+            curRow.appendChild(generateDayCell(view_year, view_month - 1, day, view_month, 'twoweek'));
             print_day++;
         }
     }
@@ -668,14 +733,14 @@ function generateCalendarOfMonthTwoWeek(view_year, view_month, view_day) {
     // Make the day cells before the "current" date
     if (print_day < currentDay) {
         for (let day = view_day - currentDay + print_day; print_day < currentDay; day++) {
-            curRow.appendChild(generateDayCell(view_year, view_month, day, view_month));
+            curRow.appendChild(generateDayCell(view_year, view_month, day, view_month, 'twoweek'));
             print_day++;
         }
     }
 
     // Make the "current" day, and the days after in the month
     for (let day = view_day; print_day <= 13 && day <= daysInMonth; day++) {
-        curRow.appendChild(generateDayCell(view_year, view_month, day, view_month));
+        curRow.appendChild(generateDayCell(view_year, view_month, day, view_month, 'twoweek'));
         print_day++;
         // If the day is the last day of the week, then make a new row
         if (print_day === 7) {
@@ -687,7 +752,7 @@ function generateCalendarOfMonthTwoWeek(view_year, view_month, view_day) {
 
     // Makes any days that spill into the next month
     for (let day = 1; print_day <= 13; day++) {
-        curRow.appendChild(generateDayCell(view_year, view_month + 1, day, view_month));
+        curRow.appendChild(generateDayCell(view_year, view_month + 1, day, view_month, 'twoweek'));
         print_day++;
         // If the day is the last day of the week, then make a new row
         if (print_day === 7) {
