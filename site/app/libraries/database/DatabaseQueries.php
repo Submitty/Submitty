@@ -2339,51 +2339,37 @@ ORDER BY {$orderby}",
      * @return array<int|string,int>
      */
     public function getVerifiedComponentsCountByGradingSections(string $g_id, array $sections, string $section_key, bool $is_team): array {
-        $u_or_t = "u";
-        $users_or_teams = "users";
-        $user_or_team_id = "user_id";
+        $unit = "users";
+        $id = "user_id";
         if ($is_team) {
-            $u_or_t = "t";
-            $users_or_teams = "gradeable_teams";
-            $user_or_team_id = "team_id";
-        }
-        $return = [];
-        $params = [$g_id];
-        $where = "";
-        if (count($sections) > 0) {
-            $where = "WHERE active_version > 0 AND (? IN " . $this->createParameterList(count($sections)) . ") IS NOT FALSE";
-            $params[] = $section_key;
-            $params = array_merge($params, $sections);
+            $unit = "gradeable_teams";
+            $id = "team_id";
         }
 
         $this->course_db->query(
             "
-            SELECT {$u_or_t}.{$section_key}, count({$u_or_t}.*) as cnt
-            FROM {$users_or_teams} AS {$u_or_t}
-            INNER JOIN (
-            SELECT * FROM gradeable_data AS gd
-            INNER JOIN (SELECT g_id, $user_or_team_id, max(active_version) as active_version FROM electronic_gradeable_version GROUP BY g_id, $user_or_team_id) AS egd on egd.g_id = gd.g_id AND egd.{$user_or_team_id} = gd.gd_{$user_or_team_id}
-            LEFT JOIN (
-            gradeable_component_data AS gcd
-            INNER JOIN gradeable_component AS gc ON gc.gc_id = gcd.gc_id AND gc.gc_is_peer = {$this->course_db->convertBoolean(false)}
-            )AS gcd ON gcd.gd_id = gd.gd_id WHERE gcd.g_id=? AND GCD_VERIFIER_ID IS NOT NULL
-            ) AS gd ON {$u_or_t}.{$user_or_team_id} = gd.gd_{$user_or_team_id}
-            {$where}
-            GROUP BY {$u_or_t}.{$section_key}
-            ORDER BY {$u_or_t}.{$section_key}
-        ",
-            $params
+            SELECT 
+                ".$unit.".".$section_key.", COUNT(".$unit.".".$id.") as verified_components_count
+            FROM 
+                gradeable_data as gd
+                JOIN gradeable_component_data as gcd ON (gd.gd_id = gcd.gd_id)
+                JOIN ".$unit." ON (gd.gd_".$id." = ".$unit.".".$id.")
+            WHERE
+                gd.g_id = ?
+                AND ".$unit.".".$section_key." = ANY (ARRAY[".implode(",", array_map(function($v) { return "'".$v."'"; }, $sections))."])
+                AND gcd.gcd_verifier_id IS NOT NULL
+            GROUP BY
+                ".$unit.".".$section_key."
+            ;
+            ",
+            [$g_id]
         );
+        $return = [];
+
         foreach ($this->course_db->rows() as $row) {
-            if ($row[$section_key] === null) {
-                $row[$section_key] = "NULL";
-            }
-            $return[$row[$section_key]] = intval($row['cnt']);
+            $return[$row['registration_section']] = $row['verified_components_count'];
         }
 
-        if (!array_key_exists('NULL', $return)) {
-            $return['NULL'] = 0;
-        }
         return $return;
     }
 
