@@ -300,9 +300,7 @@ class CalendarController extends AbstractController {
         return JsonResponse::getErrorResponse("Failed to delete message");
     }
 
-    /**
-     * @Route("/calendar/global_items/new", methods={"POST"})
-     */
+    #[Route(path: "/calendar/global_items/new", methods: ["POST"])]
     public function createGlobalEvent(): RedirectResponse {
         // Checks if the values exist that are set and returns an error message if not
         if (isset($_POST['type'])) {
@@ -354,9 +352,7 @@ class CalendarController extends AbstractController {
     }
 
 
-    /**
-     * @Route("/calendar/global_items/edit", methods={"POST"})
-     */
+    #[Route(path: "/calendar/global_items/edit", methods: ["POST"])]
     public function editGlobalEvent(): RedirectResponse {
         // Checks if the values exist that are set and returns an error message if not
         if (isset($_POST['type'])) {
@@ -419,9 +415,7 @@ class CalendarController extends AbstractController {
         return new RedirectResponse($this->core->buildUrl(['calendar']));
     }
 
-    /**
-     * @Route("/calendar/global_items/delete", methods={"POST"})
-     */
+    #[Route(path: "/calendar/global_items/delete", methods: ["POST"])]
     public function deleteGlobalEvent(): ResponseInterface {
         if (isset($_POST['id'])) {
             $id = $_POST['id'];
