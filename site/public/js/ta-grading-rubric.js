@@ -1,9 +1,9 @@
-/* exported ajaxGetOverallComment PDF_PAGE_STUDENT showVerifyComponent getPeerGradingScore getOverallCommentFromDOM
+* exported ajaxGetOverallComment PDF_PAGE_STUDENT showVerifyComponent getPeerGradingScore getOverallCommentFromDOM
    getNextComponentId getPrevComponentId getMarkIdFromOrder onAddNewMark onDeleteMark onRestoreMark onDeleteComponent
    onAddComponent importComponentsFromFile onMarkPointsChange onGetMarkStats onClickComponent onCancelComponent
    onCancelEditRubricComponent onChangeOverallComment onToggleMark onCustomMarkChange onToggleCustomMark onVerifyComponent
    onVerifyAll onToggleEditMode onClickCountUp onClickCountDown onComponentPointsChange onComponentTitleChange
-   onComponentPageNumberChange onMarkPublishChange setPdfPageAssignment renderGradingGradeable reloadPeerRubric
+   onComponentPageNumberChange onMarkPublishChange setPdfPageAssignment renderGaradingGradeable reloadPeerRubric
    graded_gradeable open_overall_comment_tab scrollToOverallComment refreshComponent refreshComponent */
 
 /* global buildCourseUrl csrfToken displayErrorMessage renderGradingGradeable renderPeerGradeable renderInstructorEditGradeable
@@ -1771,7 +1771,7 @@ function onRestoreMark(me) {
 function onDeleteComponent(me) {
     const componentCount = $('.component-container').length;
     if (componentCount === 1) {
-        displayErrorMessage('Can not delete the only component.');
+        displayErrorMessage('Cannot delete the only component.');
         return;
     }
 
