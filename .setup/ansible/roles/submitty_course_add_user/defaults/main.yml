@@ -1,10 +1,11 @@
 ---
-username: username
-submitty_course_add_instructor_groups: submitty_course_add_instructor_groups
-course: course
-submitty_course_add_instructor_users: submitty_course_add_instructor_users
-firstname: firstname
-lastname: lastname
-email: email
-semester: semester
-user_group: 4
+submitty_course_add_user_username: username
+submitty_course_add_user_submitty_course_add_instructor_groups: submitty_course_add_instructor_groups
+submitty_course_add_user_course: course
+submitty_course_add_user_submitty_course_add_instructors_users: submitty_course_add_instructor_users
+submitty_course_add_user_firstname: firstname
+submitty_course_add_user_lastname: lastname
+submitty_course_add_user_email: email
+submitty_course_add_user_password: password
+submitty_course_add_user_semester: semester
+submitty_course_add_user_user_group: 4

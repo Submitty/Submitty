@@ -5,7 +5,7 @@
   ansible.builtin.expect:
     command: ./adduser.py "{{ username }}"
     chdir: /usr/local/submitty/sbin/
-    echo: yes
+    echo: true
     responses:
       (?m)^User givenname: "{{ username }}"
       (?m)^User preferred name: "{{ firstname }}"
@@ -19,5 +19,7 @@
   ansible.builtin.command:
     cmd: ./adduser_course.py "{{ username }}" "{{ semester }}" "{{ course }}" "{{ user_group }}"
     chdir: /usr/local/submitty/sbin/
+  register: add_user_result
   become: true
   become_user: root
+  changed_when: "'User added' in add_user_result.stdout"

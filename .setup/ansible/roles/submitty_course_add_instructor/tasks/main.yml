@@ -5,7 +5,7 @@
   ansible.builtin.user:
     name: "{{ username }}"
     groups: "{{ submitty_course_add_instructor_groups }}"
-    append: yes
+    append: true
   loop:
     - "{{ course }}"
     - "{{ course }}_tas_www"
@@ -17,7 +17,7 @@
   ansible.builtin.user:
     name: "{{ submitty_course_add_instructor_users }}"
     groups: "submitty_course_builders"
-    append: yes
+    append: true
   loop:
     - "{{ username }}"
   loop_control:
@@ -25,16 +25,15 @@
   notify: Reload fpm
 
 
-- name: Call add_user role
+- name: Run add_user role
   ansible.builtin.include_role:
     name: submitty_course_add_user
-  # vars:
-  #   username: "{{ username }}"
-  #   firstname: "{{ firstname }}"
-  #   lastname: "{{ lastname }}"
-  #   email: "{{ email }}"
-  #   password: "{{ password }}"
-  #   semester: "{{ semester }}"
-  #   course: "{{ course }}"
-  #   user_group: "{{ user_group }}"
-
+  vars:
+    submitty_course_add_user_username: "{{ username }}"
+    submitty_course_add_user_firstname: "{{ firstname }}"
+    submitty_course_add_user_lastname: "{{ lastname }}"
+    submitty_course_add_user_email: "{{ email }}"
+    submitty_course_add_user_password: "{{ password }}"
+    submitty_course_add_user_semester: "{{ semester }}"
+    submitty_course_add_user_course: "{{ course }}"
+    submitty_course_add_user_user_group: "{{ user_group }}"
