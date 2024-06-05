@@ -1778,7 +1778,7 @@ function onDeleteComponent(me) {
     if (!confirm('Are you sure you want to delete this component?')) {
         return;
     }
-    
+
     deleteComponent(getComponentIdFromDOMElement(me))
         .catch((err) => {
             console.error(err);
