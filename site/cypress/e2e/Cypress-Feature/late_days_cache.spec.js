@@ -58,7 +58,7 @@ const CheckStatusUpdated = (exceptions_given, late_days_remaining) => {
         cy.login(user_id);
         cy.visit(['sample', 'late_table']);
         // Wait for login change to take place
-        const status = predictedStatus(1 ,Math.max(0,all_late_users[user_id]-exceptions_given), late_days_remaining);
+        const status = predictedStatus(1, Math.max(0, all_late_users[user_id]-exceptions_given), late_days_remaining);
 
         // Find late day status within the row in the late day usage table
         cy.get('td[data-before-content="Event/Assignment"]')
@@ -130,7 +130,7 @@ describe('Test cases involving late day cache updates', () => {
             const testfile = 'cypress/fixtures/file1.txt';
             // Make a new submission
             cy.get('#startnew').click();
-            cy.get('#upload1').selectFile(testfile,{action: 'drag-drop'});
+            cy.get('#upload1').selectFile(testfile, {action: 'drag-drop'});
             cy.waitPageChange(() => {
                 cy.get('#submit').click();
             });
@@ -162,7 +162,7 @@ describe('Test cases involving late day cache updates', () => {
             }
             checkStudentsInCache();
             cy.logout();
-            CheckStatusUpdated(0,2);
+            CheckStatusUpdated(0, 2);
             //Adding late days represents a timestamp, which is a new entry in the cache
             //Should check that there a new header with the title of the datestamp
             cy.login('instructor');
@@ -208,7 +208,7 @@ describe('Test cases involving late day cache updates', () => {
             }
             checkStudentsInCache();
             cy.logout();
-            CheckStatusUpdated(2,0);
+            CheckStatusUpdated(2, 0);
             cy.visit(['sample', 'extensions']);
             cy.login('instructor');
 

@@ -1,5 +1,6 @@
 import { defineConfig } from 'cypress'
 import * as fs from 'fs'
+const path = require('path');
 
 export default defineConfig({
   video: true,
@@ -20,8 +21,13 @@ export default defineConfig({
             test.attempts.some((attempt) => attempt.state === 'failed')
           )
           if (!failures) {
-            // delete the video if the spec passed and no tests retried
-            fs.unlinkSync(results.video)
+            // Specify the full path to the video file
+            const videoPath = path.resolve(results.video);            
+            // Check if the video file exists before attempting to delete it
+            if (fs.existsSync(videoPath)) {
+              // delete the video if the spec passed and no tests retried
+              fs.unlinkSync(videoPath)
+            }
           }
         }
       })

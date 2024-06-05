@@ -1,13 +1,15 @@
 /* exported toggleColumnsForm, updateManageStudentsColumns, fillAllCheckboxes
 */
+/*global showPopup */
+
 
 //Data structure for active columns
 const checkboxes = document.getElementsByClassName('toggle-columns-box');
 
 //opens modal with initial settings for new student
 function toggleColumnsForm() {
-    const form = $('#toggle-columns-form');
-    form.css('display', 'block');
+    // i
+    showPopup('#toggle-columns-form');
     checkProperTicks();
 }
 
@@ -31,7 +33,7 @@ function updateManageStudentsColumns() {
 
 //Gets the values of all the checkboxes
 function getCheckboxValues() {
-    const selectedColumns = new Array(12);
+    const selectedColumns = new Array(17);
     for (let i = 0; i<checkboxes.length; i++) {
         if (checkboxes[i].checked === true) {
             selectedColumns[i] = 1;

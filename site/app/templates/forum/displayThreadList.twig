@@ -3,7 +3,7 @@
         <div class="{{ thread.class }}">
             <div class="flex-row">
                 <span class="thread-left-cont">
-                    <span class="thread-list-item">
+                    <span class="thread-list-item" data-testid="thread-list-item">
                         {% if thread.current_user_posted %}
                             <i class="fas fa-comments" title="You have contributed" aria-label="You have contributed"></i>
                         {% endif %}
@@ -92,7 +92,7 @@
                         {% endif %}
                         <strong class="post_user_id">{{ thread.author_info.name}}</strong>
                         {% if thread.author_info.pronouns and thread.author_info.display_pronouns and thread.author_info.name != "Anonymous" %}
-                            ({{thread.author_info.pronouns}})
+                            <strong class="post_user_pronouns">({{thread.author_info.pronouns}})</strong>
                         {% endif %}
 
                     </span>

@@ -29,9 +29,9 @@ class UserProfileController extends AbstractController {
     /**
      * Show User's profile data
      *
-     * @Route("/user_profile", methods={"GET"})
      * @return MultiResponse
      */
+    #[Route("/user_profile", methods: ["GET"])]
     public function showUserProfile() {
         $this->core->getOutput()->addBreadcrumb("My Profile");
         return new MultiResponse(
@@ -47,13 +47,13 @@ class UserProfileController extends AbstractController {
     }
 
     /**
-     * @Route("/user_profile/change_time_zone", methods={"POST"})
-     * @return JsonResponse
      *
      * Handle ajax request to update the currently logged in user's time zone data.
      *
      * Will return a json success or failure response depending on the result of the operation.
+     * @return JsonResponse
      */
+    #[Route("/user_profile/change_time_zone", methods: ["POST"])]
     public function changeTimeZone() {
         if (isset($_POST['time_zone'])) {
             $updated = $this->core->getUser()->setTimeZone($_POST['time_zone']);
@@ -76,25 +76,23 @@ class UserProfileController extends AbstractController {
     }
 
     /**
-     * @Route("/user_profile/set_pref_locale", methods={"POST"})
      * @return JsonResponse
      */
+    #[Route("/user_profile/set_pref_locale", methods: ["POST"])]
     public function setPrefLocale() {
         if (isset($_POST['locale'])) {
             $user = $this->core->getUser();
-            $success = $user->setPreferredLocale(empty($_POST['locale']) ? null : $_POST['locale']);
-            if ($success) {
-                return JsonResponse::getSuccessResponse([ 'locale' => $user->getPreferredLocale() ]);
-            }
+            $user->setPreferredLocale(empty($_POST['locale']) ? null : $_POST['locale']);
+            return JsonResponse::getSuccessResponse([ 'locale' => $user->getPreferredLocale() ]);
         }
 
         return JsonResponse::getFailResponse('Failed to update user locale.');
     }
 
     /**
-     * @Route("/user_profile/change_password", methods={"POST"})
      * @return MultiResponse
      */
+    #[Route("/user_profile/change_password", methods: ["POST"])]
     public function changePassword() {
         $user = $this->core->getUser();
         if (
@@ -116,9 +114,9 @@ class UserProfileController extends AbstractController {
 
 
     /**
-     * @Route("/user_profile/change_pronouns", methods={"POST"})
      * @return JsonResponse
      */
+    #[Route("/user_profile/change_pronouns", methods: ["POST"])]
     public function changePronouns() {
         $user = $this->core->getUser();
         if (isset($_POST['pronouns'])) {
@@ -146,9 +144,9 @@ class UserProfileController extends AbstractController {
     }
 
     /**
-     * @Route("/user_profile/change_preferred_names", methods={"POST"})
      * @return JsonResponse
      */
+    #[Route("/user_profile/change_preferred_names", methods: ["POST"])]
     public function changeUserName() {
         $user = $this->core->getUser();
         if (isset($_POST['given_name']) && isset($_POST['family_name']) && !empty($_POST['given_name']) && !empty($_POST['family_name'])) {
@@ -178,9 +176,9 @@ class UserProfileController extends AbstractController {
     }
 
     /**
-     * @Route("/user_profile/update_last_initial_format", methods={"POST"})
      * @return JsonResponse
      */
+    #[Route("/user_profile/update_last_initial_format", methods: ["POST"])]
     public function updateLastInitialFormat() {
         $user = $this->core->getUser();
         if (isset($_POST['format'])) {
@@ -206,10 +204,10 @@ class UserProfileController extends AbstractController {
     }
 
     /**
-     * @Route("/user_profile/change_profile_photo", methods={"POST"})
      * @return JsonResponse
      * @throws \ImagickException
      */
+    #[Route("/user_profile/change_profile_photo", methods: ["POST"])]
     public function changeProfilePhoto() {
         $user = $this->core->getUser();
         // No image uploaded
@@ -246,9 +244,9 @@ class UserProfileController extends AbstractController {
     }
 
     /**
-     * @Route("/user_profile/change_secondary_email", methods={"POST"})
      * @return JsonResponse
      */
+    #[Route("/user_profile/change_secondary_email", methods: ["POST"])]
     public function changeSecondaryEmail(): JsonResponse {
         $user = $this->core->getUser();
 

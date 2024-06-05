@@ -53,22 +53,23 @@ class SessionManager {
             return false;
         }
 
-        // Only refresh the session once per day
-        if ($this->shouldSessionBeUpdated()) {
-            $this->session->updateSessionExpiration($this->core->getDateTimeNow());
-            $em->flush();
-        }
-
         return $this->session->getUserId();
     }
 
     /**
      * Sessions should only be updated once per day to reduce load on the server.
-     * Check whether a day has passed since we last updated this session
+     * Updates the session if needed and returns if the update was performed.
      */
-    public function shouldSessionBeUpdated(): bool {
+    public function checkAndUpdateSession(): bool {
         $day_before_expiration = (new DateTime())->add(DateInterval::createFromDateString(self::SESSION_EXPIRATION))->sub(DateInterval::createFromDateString('1 day'));
-        return $this->session->getSessionExpires() < $day_before_expiration;
+        $needs_update = $this->session->getSessionExpires() < $day_before_expiration;
+
+        if ($needs_update) {
+            $this->session->updateSessionExpiration($this->core->getDateTimeNow());
+            $this->core->getSubmittyEntityManager()->flush();
+        }
+
+        return $needs_update;
     }
 
     /**

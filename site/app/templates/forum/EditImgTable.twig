@@ -1,0 +1,26 @@
+{% if post_attachments.params is defined %}
+    <div id="display-existing-attachments">
+        <table class="file-upload-table edit-imgs-table">
+            <thead>
+                <tr>
+                    <th>Attached Images</th>
+                </tr>
+            </thead>
+            <tbody>
+            {% for attachment in post_attachments.params.unencoded_data %}
+                {% if attachment[2] is defined %}
+                <tr>
+                    <td>
+                        <img src="{{ attachment[0] }}" class="thumbnail" alt="{{ attachment[2] }}"/>
+                    </td>
+                    <td class="display-attachment-name">{{ attachment[2] }}</td>
+                    <td class="file-trash">
+                        <a class="btn btn-default" onclick="markForDeletion(this)" id="delete_{{ attachment[2] }}" data-testid="mark-for-delete-btn">Delete</a>
+                    </td>
+                </tr>
+                {% endif %}
+            {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    {% endif %}

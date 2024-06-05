@@ -23,9 +23,8 @@ class MiscController extends AbstractController {
      *
      * Returns a json string which contains the current server time broken up into year, month, day, hour, minute,
      * second
-     *
-     * @Route("/server_time")
      */
+    #[Route("/server_time")]
     public function getServerTime(): JsonResponse {
         return JsonResponse::getSuccessResponse(DateUtils::getServerTimeJson($this->core));
     }
@@ -47,9 +46,9 @@ class MiscController extends AbstractController {
     }
 
     /**
-     * @Route("/courses/{_semester}/{_course}/gradeable/{gradeable_id}/encode_pdf")
      * @return MultiResponse
      */
+    #[Route("/courses/{_semester}/{_course}/gradeable/{gradeable_id}/encode_pdf")]
     public function encodePDF($gradeable_id) {
         $id = $_POST['user_id'] ?? null;
         $file_name = $_POST['filename'] ?? null;
@@ -93,9 +92,7 @@ class MiscController extends AbstractController {
         );
     }
 
-    /**
-     * @Route("/courses/{_semester}/{_course}/display_file")
-     */
+    #[Route("/courses/{_semester}/{_course}/display_file")]
     public function displayFile($dir = null, $path = null, $gradeable_id = null, $user_id = null, $ta_grading = null, $course_material_id = null) {
         $cm = null;
         //Is this per-gradeable?
@@ -190,9 +187,7 @@ class MiscController extends AbstractController {
         }
     }
 
-    /**
-     * @Route("/courses/{_semester}/{_course}/read_file")
-     */
+    #[Route("/courses/{_semester}/{_course}/read_file")]
     public function readFile($dir, $path, $csrf_token = null) {
         // security check
         if (!$this->core->getAccess()->canI("path.read", ["dir" => $dir, "path" => $path])) {
@@ -226,9 +221,7 @@ class MiscController extends AbstractController {
         return true;
     }
 
-    /**
-     * @Route("/courses/{_semester}/{_course}/download")
-     */
+    #[Route("/courses/{_semester}/{_course}/download")]
     public function downloadCourseFile($dir = null, $path = null, $course_material_id = null, $gradeable_id = null) {
         // security check
         $cm = null;
@@ -286,9 +279,7 @@ class MiscController extends AbstractController {
         readfile($path);
     }
 
-    /**
-     * @Route("/courses/{_semester}/{_course}/gradeable/{gradeable_id}/downloadTestCaseResult")
-     */
+    #[Route("/courses/{_semester}/{_course}/gradeable/{gradeable_id}/downloadTestCaseResult")]
     public function downloadTestCaseResult(string $gradeable_id, int $version, int $test_case, string $file_name, string $user_id) {
         $gradeable = $this->tryGetGradeable($gradeable_id);
         $graded_gradeable = $this->tryGetGradedGradeable($gradeable, $user_id, false);
@@ -331,14 +322,12 @@ class MiscController extends AbstractController {
         }
     }
 
-    /**
-     * @Route("/courses/{_semester}/{_course}/gradeable/{gradeable_id}/download_zip")
-     */
-    public function downloadSubmissionZip($gradeable_id, $user_id, $version, $is_anon, $origin = null) {
+    #[Route("/courses/{_semester}/{_course}/gradeable/{gradeable_id}/download_zip")]
+    public function downloadSubmissionZip($gradeable_id, $submitter_id, $version, $is_anon, $origin = null) {
 
-        $anon_id = $user_id;
+        $anon_id = $submitter_id;
         if ($is_anon === "true") {
-            $user_id = $this->core->getQueries()->getSubmitterIdFromAnonId($anon_id, $gradeable_id);
+            $submitter_id = $this->core->getQueries()->getSubmitterIdFromAnonId($anon_id, $gradeable_id);
         }
 
         $gradeable = $this->core->getQueries()->getGradeableConfig($gradeable_id);
@@ -348,11 +337,9 @@ class MiscController extends AbstractController {
             $this->core->redirect($this->core->buildCourseUrl());
         }
 
-        $graded_gradeable = $this->core->getQueries()->getGradedGradeable($gradeable, $user_id, $gradeable->isTeamAssignment());
+        $is_team = $gradeable->isTeamAssignment();
 
-        if ($gradeable->isTeamAssignment()) {
-            $graded_gradeable = $this->core->getQueries()->getGradedGradeable($gradeable, null, $user_id);
-        }
+        $graded_gradeable = $this->core->getQueries()->getGradedGradeable($gradeable, $is_team ? null : $submitter_id, $is_team ? $submitter_id : null);
 
         if ($graded_gradeable === null) {
             $message = "You do not have access to that page.";
@@ -407,7 +394,7 @@ class MiscController extends AbstractController {
             $zip_file_name = $gradeable_id . "_" . $anon_id . "_v" . $version . ".zip";
         }
         else {
-            $zip_file_name = $gradeable_id . "_" . $user_id . "_v" . $version . ".zip";
+            $zip_file_name = $gradeable_id . "_" . $submitter_id . "_v" . $version . ".zip";
         }
 
         // create a new zipstream object
@@ -453,9 +440,9 @@ class MiscController extends AbstractController {
     }
 
     /**
-     * @Route("/courses/{_semester}/{_course}/gradeable/{gradeable_id}/grading/download_zip")
      * @AccessControl(role="LIMITED_ACCESS_GRADER")
      */
+    #[Route("/courses/{_semester}/{_course}/gradeable/{gradeable_id}/grading/download_zip")]
     public function downloadAssignedZips($gradeable_id, $type = null) {
         $zip_file_name = $gradeable_id . "_section_students_" . date("m-d-Y") . ".zip";
         $this->core->getOutput()->useHeader(false);
@@ -652,9 +639,9 @@ class MiscController extends AbstractController {
     }
 
     /**
-     * @Route("/courses/{_semester}/{_course}/gradeable/{gradeable_id}/bulk/progress")
      * @AccessControl(role="FULL_ACCESS_GRADER")
      */
+    #[Route("/courses/{_semester}/{_course}/gradeable/{gradeable_id}/bulk/progress")]
     public function checkBulkProgress($gradeable_id) {
         $job_path = "/var/local/submitty/daemon_job_queue/";
         $result = [];

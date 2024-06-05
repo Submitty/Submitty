@@ -134,7 +134,7 @@ def construct_mail_client():
 
 def get_email_queue(db):
     """Get an active queue of internal emails waiting to be sent."""
-    query = """SELECT id, user_id, email_address, subject, body FROM emails
+    query = """SELECT id, user_id, to_name, email_address, subject, body FROM emails
     WHERE email_address SIMILAR TO :format AND sent is NULL AND
     error = '' ORDER BY id LIMIT 100;"""
     domain_format = '%@(%.' + EMAIL_INTERNAL_DOMAIN + '|' + EMAIL_INTERNAL_DOMAIN + ')'
@@ -144,9 +144,10 @@ def get_email_queue(db):
         queued_emails.append({
             'id': row[0],
             'user_id': row[1],
-            'send_to': row[2],
-            'subject': row[3],
-            'body': row[4]
+            'to_name': row[2],
+            'send_to': row[3],
+            'subject': row[4],
+            'body': row[5]
             })
 
     return queued_emails
@@ -158,7 +159,7 @@ def get_external_queue(db, num):
     email_address NOT SIMILAR TO :format"""
     domain_format = '%@(%.' + EMAIL_INTERNAL_DOMAIN + '|' + EMAIL_INTERNAL_DOMAIN + ')'
     result = db.execute(text(query), format=domain_format)
-    query = """SELECT id, user_id, email_address, subject, body FROM emails
+    query = """SELECT id, user_id, to_name, email_address, subject, body FROM emails
     WHERE sent is NULL AND email_address NOT SIMILAR TO :format AND
     error = '' ORDER BY id LIMIT :lim;"""
     result = db.execute(text(query), format=domain_format,
@@ -168,9 +169,10 @@ def get_external_queue(db, num):
         queued_emails.append({
             'id': row[0],
             'user_id': row[1],
-            'send_to': row[2],
-            'subject': row[3],
-            'body': row[4]
+            'to_name': row[2],
+            'send_to': row[3],
+            'subject': row[4],
+            'body': row[5]
             })
     return queued_emails
 
@@ -222,10 +224,13 @@ def send_email():
         return
 
     for email_data in queued_emails:
+        name = email_data["user_id"]
+        if name is None:
+            name = email_data["to_name"]
         if email_data["send_to"] == "":
             store_error(email_data["id"], db, metadata, "WARNING: empty email address")
             e = "[{}] WARNING: empty email address for recipient {}".format(
-                str(datetime.datetime.now()), email_data["user_id"])
+                str(datetime.datetime.now()), name)
             LOG_FILE.write(e+"\n")
             continue
 
@@ -243,7 +248,7 @@ def send_email():
                         + str(email_send_error))
             e = "[{}] ERROR: sending email to recipient {}, email {}: {}".format(
                 str(datetime.datetime.now()),
-                email_data["user_id"],
+                name,
                 email_data["send_to"],
                 str(email_send_error))
             LOG_FILE.write(e+"\n")

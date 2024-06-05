@@ -65,34 +65,34 @@ function updateSuperuserEmailOptions(which) {
 
     if (which === 'instructor') {
         if (!instructor.prop('checked')) {
-            full.prop('checked',false);
-            limited.prop('checked',false);
-            student.prop('checked',false);
+            full.prop('checked', false);
+            limited.prop('checked', false);
+            student.prop('checked', false);
         }
     }
     else if (which === 'full-access') {
         if (full.prop('checked')) {
-            instructor.prop('checked',true);
+            instructor.prop('checked', true);
         }
         else {
-            limited.prop('checked',false);
-            student.prop('checked',false);
+            limited.prop('checked', false);
+            student.prop('checked', false);
         }
     }
     else if (which === 'limited-access') {
         if (limited.prop('checked')) {
-            instructor.prop('checked',true);
-            full.prop('checked',true);
+            instructor.prop('checked', true);
+            full.prop('checked', true);
         }
         else {
-            student.prop('checked',false);
+            student.prop('checked', false);
         }
     }
     else if (which === 'student') {
         if (student.prop('checked')) {
-            instructor.prop('checked',true);
-            full.prop('checked',true);
-            limited.prop('checked',true);
+            instructor.prop('checked', true);
+            full.prop('checked', true);
+            limited.prop('checked', true);
         }
     }
 

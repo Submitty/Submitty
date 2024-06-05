@@ -40,28 +40,30 @@ function instructorSidebar() {
 }
 
 function notHaveInstructorSidebars() {
-    cy.get('[data-testid="sidebar"]').contains('New Gradeable').should('not.exist');
-    cy.get('[data-testid="sidebar"]').contains('Course Settings').should('not.exist');
-    cy.get('[data-testid="sidebar"]').contains('Email Status').should('not.exist');
+    const sidebarItems = [
+        'New Gradeable',
+        'Course Settings',
+        'Email Status',
+        'Manage Students',
+        'Manage Graders',
+        'Manage Sections',
+        'Student Activity Dashboard',
+        'Late Days Allowed',
+        'Excused Absence Extensions',
+        'Grade Override',
+        'Plagiarism Detection',
+        'Grade Reports',
+        'Docker',
+        'New Course',
+        'Autograding Status',
+    ];
 
-    cy.get('[data-testid="sidebar"]').contains('Manage Students').should('not.exist');
-    cy.get('[data-testid="sidebar"]').contains('Manage Graders').should('not.exist');
-    cy.get('[data-testid="sidebar"]').contains('Manage Sections').should('not.exist');
-    cy.get('[data-testid="sidebar"]').contains('Email Status').should('not.exist');
-    cy.get('[data-testid="sidebar"]').contains('Student Activity Dashboard').should('not.exist');
-
-    cy.get('[data-testid="sidebar"]').contains('Late Days Allowed').should('not.exist');
-    cy.get('[data-testid="sidebar"]').contains('Excused Absence Extensions').should('not.exist');
-    cy.get('[data-testid="sidebar"]').contains('Grade Override').should('not.exist');
-    cy.get('[data-testid="sidebar"]').contains('Plagiarism Detection').should('not.exist');
-    cy.get('[data-testid="sidebar"]').contains('Grade Reports').should('not.exist');
-
-    cy.get('[data-testid="sidebar"]').contains('Docker').should('not.exist');
-    cy.get('[data-testid="sidebar"]').contains('New Course').should('not.exist');
-    cy.get('[data-testid="sidebar"]').contains('Autograding Status').should('not.exist');
+    sidebarItems.forEach((item) => {
+        cy.get('[data-testid="sidebar"]').contains(item).should('not.exist');
+    });
 }
+
 function baseCourseSidebar(user, course) {
-    cy.visit('/');
     cy.login(user);
     cy.visit([course]);
     sidebarContains('Gradeables', `/courses/${currentSemester}/sample`);

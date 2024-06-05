@@ -95,7 +95,9 @@ class SimpleGraderView extends AbstractView {
             "grading_url" => $this->core->buildCourseUrl(['gradeable', $gradeable->getId(), 'grading']),
             "gradeable_url" => $gradeable->getInstructionsUrl(),
             "user_id" => $this->core->getUser()->getId(),
-            "anon_ids" => $anon_ids
+            "anon_ids" => $anon_ids,
+            'show_grader' => isset($_COOKIE['show_grader']) ? ($_COOKIE['show_grader'] === 'true') : false,
+            'show_dates' => isset($_COOKIE['show_dates']) ? ($_COOKIE['show_dates'] === 'true') : false
         ]);
 
         $return .= $this->core->getOutput()->renderTwigTemplate("grading/simple/StatisticsForm.twig", [

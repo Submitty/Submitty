@@ -47,7 +47,7 @@
 }
 
 .divider {
-    border-top: 1px solid black;
+    border-top: 1px solid var(--default-black);
 }
 
 .pagination {
@@ -66,9 +66,8 @@
 }
 
 .page-btn {
-    background-color: var(--text-black);
-    color: var(--focus-actionable-blue);
-    border: 1px solid var(--text-black);
+    background-color: transparent;
+    color: var(--text-black);
     font-size: 16px;
 }
 

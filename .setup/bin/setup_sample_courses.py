@@ -57,7 +57,7 @@ from sample_courses.models import User
 from sample_courses.models.course import Course
 
 
-def main():
+def main() -> None:
     """
     Main program execution. This gets us our commandline arguments, reads in the data files,
     and then sets us up to run the create methods for the users and courses.
@@ -77,8 +77,8 @@ def main():
     os.system("systemctl stop submitty_daemon_jobs_handler")
     os.system("systemctl stop submitty_websocket_server")
 
-    courses = {}  # dict[str, Course]
-    users = {}  # dict[str, User]
+    courses: dict = {}  # dict[str, Course]
+    users: dict = {}  # dict[str, User]
     for course_file in sorted(glob.iglob(os.path.join(args.courses_path, '*.yml'))):
         # only create the plagiarism course if we have a local LichenTestData repo
         if os.path.basename(course_file) == "plagiarism.yml" and not os.path.isdir(

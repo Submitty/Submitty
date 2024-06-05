@@ -363,9 +363,13 @@
         var bad_submissions_status = '{{ include_bad_submissions }}';
         if (bad_submissions_status == 'omit') {
             document.cookie = "include_bad_submissions=include;";
+            const cookie_string = "include_bad_submissions__{{ gradeable_id }}";
+            Cookies.set(cookie_string, "include", { path: "/courses/" + '{{ semester }}' + "/" + '{{ course }}', expires: 365 });
         }
         else {
             document.cookie = "include_bad_submissions=omit;";
+            const cookie_string = "include_bad_submissions__{{ gradeable_id }}";
+            Cookies.set(cookie_string, "omit", { path: "/courses/" + '{{ semester }}' + "/" + '{{ course }}', expires: 365 });
         }
     }
 
@@ -373,9 +377,13 @@
         var bad_submissions_status = '{{ include_null_section }}';
         if (bad_submissions_status == 'omit') {
             document.cookie = "include_null_section=include;";
+            const cookie_string = "include_null_section__{{ gradeable_id }}";
+            Cookies.set(cookie_string, "include", { path: "/courses/" + '{{ semester }}' + "/" + '{{ course }}', expires: 365 });
         }
         else {
             document.cookie = "include_null_section=omit;";
+            const cookie_string = "include_null_section__{{ gradeable_id }}";
+            Cookies.set(cookie_string, "omit", { path: "/courses/" + '{{ semester }}' + "/" + '{{ course }}', expires: 365 });
         }
     }    
 

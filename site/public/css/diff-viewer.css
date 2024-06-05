@@ -29,8 +29,8 @@
 
 /* stylelint-disable-next-line selector-class-pattern */
 .line_number {
-    color: gray;
-    border-right: 1px solid lightgrey;
+    color: var(--standard-medium-gray);
+    border-right: 1px solid var(--standard-light-gray);
     text-align: right;
     width: auto;
 }

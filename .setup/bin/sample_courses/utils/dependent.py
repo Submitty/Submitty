@@ -17,17 +17,17 @@ from sample_courses import SUBMITTY_DATA_DIR
 from sample_courses.utils.create_or_generate import create_gradeable_submission, create_group
 
 
-def add_to_group(group, user_id):
+def add_to_group(group, user_id) -> None:
     """
     Adds the user to the specified group, creating the group if it does not exist.
     :param group:
     :param user_id:
     """
     create_group(group)
-    os.system("usermod -a -G {} {}".format(group, user_id))
+    os.system(f"usermod -a -G {group} {user_id}")
 
 
-def commit_submission_to_repo(user_id, src_file, repo_path, vcs_subdirectory):
+def commit_submission_to_repo(user_id, src_file, repo_path, vcs_subdirectory) -> None:
     # a function to commit and push a file to a user's submitty-hosted repository
     my_cwd = os.getcwd()
     with TemporaryDirectory() as temp_dir:
@@ -37,7 +37,7 @@ def commit_submission_to_repo(user_id, src_file, repo_path, vcs_subdirectory):
         os.system('git checkout main')
         os.system('git pull')
         # use the above function to copy the files into the git repo for us
-        dst = os.getcwd()
+        dst: str = os.getcwd()
         if vcs_subdirectory != '':
             dst = os.path.join(dst, vcs_subdirectory)
 

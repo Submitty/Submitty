@@ -1,4 +1,4 @@
-/* global WebSocketClient, registerKeyHandler, student_full, csrfToken, buildCourseUrl, submitAJAX, captureTabInModal */
+/* global WebSocketClient, registerKeyHandler, student_full, csrfToken, buildCourseUrl, submitAJAX, captureTabInModal, luxon */
 /* exported setupSimpleGrading, checkpointRollTo, showSimpleGraderStats */
 
 function calcSimpleGraderStats(action) {
@@ -285,9 +285,10 @@ function getCheckpointHistory(g_id) {
 }
 
 function setCheckpointHistory(g_id, history) {
-    const expiration_date = new Date();
-    expiration_date.setDate(expiration_date.getDate() + 1);
-    Cookies.set(`${g_id}_history`, JSON.stringify(history), { expires: expiration_date });
+    const DateTime = luxon.DateTime;
+    const now = DateTime.now();
+    const expiration_date = now.plus({ days: 1 });
+    Cookies.set(`${g_id}_history`, JSON.stringify(history), { expires: expiration_date.toJSDate() });
 }
 
 function generateCheckpointCookie(user_id, g_id, old_scores, new_scores) {
@@ -322,24 +323,40 @@ function setupCheckboxCells() {
         updateCheckpointCells(this);
     });
 
-    // show all the hidden grades when this checkbox is clicked
-    $('#show-graders').on('change', function() {
+    // Initialize based on cookies
+    const showGradersCheckbox = $('#show-graders');
+    const showDatesGradedCheckbox = $('#show-dates');
+
+    if (Cookies.get('show_grader') === 'true') {
+        $('.simple-grade-grader').css('display', 'block');
+        showGradersCheckbox.prop('checked', true);
+    }
+
+    if (Cookies.get('show_dates') === 'true') {
+        $('.simple-grade-date').css('display', 'block');
+        showDatesGradedCheckbox.prop('checked', true);
+    }
+
+    // show all the hidden grades when showGradersCheckbox is clicked
+    showGradersCheckbox.on('change', function() {
         if ($(this).is(':checked')) {
             $('.simple-grade-grader').css('display', 'block');
         }
         else {
             $('.simple-grade-grader').css('display', 'none');
         }
+        Cookies.set('show_grader', showGradersCheckbox.is(':checked'));
     });
 
-    // show all the hidden dates when that checkbox is clicked
-    $('#show-dates').on('change', function() {
+    // show all the hidden dates when showDatesGradedCheckbox is clicked
+    showDatesGradedCheckbox.on('change', function() {
         if ($(this).is(':checked')) {
             $('.simple-grade-date').css('display', 'block');
         }
         else {
             $('.simple-grade-date').css('display', 'none');
         }
+        Cookies.set('show_dates', showDatesGradedCheckbox.is(':checked'));
     });
 }
 

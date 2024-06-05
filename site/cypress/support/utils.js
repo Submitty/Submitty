@@ -9,10 +9,29 @@
 */
 export function getCurrentSemester() {
     const today = new Date();
-    const year = today.getFullYear().toString().slice(2,4);	//get last two digits
+    const year = today.getFullYear().toString().slice(2, 4);	//get last two digits
     const semester = ((today.getMonth() + 1) < 7) ? 's' : 'f';	//first half of year 'spring' rest is fall
 
     return semester + year;
+}
+
+/**
+* Get the API key for the given user_id and password
+* @param {String} [password]
+* @param {String} [user_id]
+* @returns {String}
+*/
+export function getApiKey(user_id, password) {
+    return cy.request({
+        method: 'POST',
+        url: `${Cypress.config('baseUrl')}/api/token`,
+        body: {
+            user_id: user_id,
+            password: password,
+        },
+    }).then((response) => {
+        return response.body.data.token;
+    });
 }
 
 /**

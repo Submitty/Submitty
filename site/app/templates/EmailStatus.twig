@@ -36,14 +36,18 @@
                     {% endfor %}
                     {% for row in pending[subject] %}
                         <li class="status status-warning">
-                            <div class="status-message">Recipient: {{row.getUserId()}}</div>
+                            <div class="status-message">Recipient: {{
+                                row.isToSubmittyUser() ? row.getUserId() : row.getToName()
+                            }}</div>
                             <div class="status-message">Time Sent: Not Sent</div>
                             <div class="status-message">Email Address: {{row.getEmailAddress()}} </div>
                         </li>
                     {% endfor %}
                     {% for row in successes[subject] %}
                         <li class="status status-success"> 
-                            <div class="status-message">Recipient: {{row.getUserId()}}</div> 
+                            <div class="status-message">Recipient: {{
+                                row.isToSubmittyUser() ? row.getUserId() : row.getToName()
+                            }}</div>
                             <div class="status-message">Time Sent: {{row.getSent().format('Y-m-d H:i:s')|slice(0,19)}}</div>
                             <div class="status-message">Email Address: {{row.getEmailAddress()}} </div>
                         </li>

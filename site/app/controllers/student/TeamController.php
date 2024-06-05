@@ -6,12 +6,19 @@ use app\controllers\AbstractController;
 use app\controllers\admin\AdminGradeableController;
 use app\libraries\FileUtils;
 use app\libraries\response\RedirectResponse;
+use app\models\Team;
 use Symfony\Component\Routing\Annotation\Route;
 
 class TeamController extends AbstractController {
     /**
-     * @Route("/courses/{_semester}/{_course}/gradeable/{gradeable_id}/team/new")
+     * Check if a string has special characters.
      */
+    public static function hasSpecialCharacters(string $str): bool {
+        $pattern = '/[^a-zA-Z0-9\-_ ]/';
+        return preg_match($pattern, $str) === 1;
+    }
+
+    #[Route("/courses/{_semester}/{_course}/gradeable/{gradeable_id}/team/new")]
     public function createNewTeam($gradeable_id) {
         $user_id = $this->core->getUser()->getId();
 
@@ -67,16 +74,14 @@ class TeamController extends AbstractController {
 
         if ($gradeable->isVcs()) {
             $config = $this->core->getConfig();
-            AdminGradeableController::enqueueGenerateRepos($config->getTerm(), $config->getCourse(), $gradeable_id);
+            AdminGradeableController::enqueueGenerateRepos($config->getTerm(), $config->getCourse(), $gradeable_id, $gradeable->getVcsSubdirectory());
         }
 
         $this->core->redirect($return_url);
         return $this->core->getOutput()->renderJsonSuccess();
     }
 
-    /**
-     * @Route("/courses/{_semester}/{_course}/gradeable/{gradeable_id}/team/leave")
-     */
+    #[Route("/courses/{_semester}/{_course}/gradeable/{gradeable_id}/team/leave")]
     public function leaveTeam($gradeable_id) {
         $user_id = $this->core->getUser()->getId();
 
@@ -124,9 +129,7 @@ class TeamController extends AbstractController {
         $this->core->redirect($return_url);
     }
 
-    /**
-     * @Route("/courses/{_semester}/{_course}/gradeable/{gradeable_id}/team/invitation/new", methods={"POST"})
-     */
+    #[Route("/courses/{_semester}/{_course}/gradeable/{gradeable_id}/team/invitation/new", methods: ["POST"])]
     public function sendInvitation($gradeable_id) {
         $user_id = $this->core->getUser()->getId();
 
@@ -222,9 +225,7 @@ class TeamController extends AbstractController {
         $this->core->redirect($return_url);
     }
 
-    /**
-     * @Route("/courses/{_semester}/{_course}/gradeable/{gradeable_id}/team/invitation/accept", methods={"POST"})
-     */
+    #[Route("/courses/{_semester}/{_course}/gradeable/{gradeable_id}/team/invitation/accept", methods: ["POST"])]
     public function acceptInvitation($gradeable_id) {
         $user_id = $this->core->getUser()->getId();
 
@@ -296,9 +297,7 @@ class TeamController extends AbstractController {
         $this->core->redirect($return_url);
     }
 
-    /**
-     * @Route("/courses/{_semester}/{_course}/gradeable/{gradeable_id}/team/invitation/cancel", methods={"POST"})
-     */
+    #[Route("/courses/{_semester}/{_course}/gradeable/{gradeable_id}/team/invitation/cancel", methods: ["POST"])]
     public function cancelInvitation($gradeable_id) {
         $user_id = $this->core->getUser()->getId();
 
@@ -352,9 +351,7 @@ class TeamController extends AbstractController {
         $this->core->redirect($return_url);
     }
 
-    /**
-     * @Route("/courses/{_semester}/{_course}/gradeable/{gradeable_id}/team/seek/new")
-     */
+    #[Route("/courses/{_semester}/{_course}/gradeable/{gradeable_id}/team/seek/new")]
     public function seekTeam($gradeable_id) {
         $user_id = $this->core->getUser()->getId();
         $message = $this->core->getUser()->getSeekMessage($gradeable_id);
@@ -384,9 +381,7 @@ class TeamController extends AbstractController {
         $this->core->redirect($return_url);
     }
 
-    /**
-     * @Route("/courses/{_semester}/{_course}/gradeable/{gradeable_id}/team/seek/message", methods={"POST"})
-     */
+    #[Route("/courses/{_semester}/{_course}/gradeable/{gradeable_id}/team/seek/message", methods: ["POST"])]
     public function editSeekMessage($gradeable_id) {
         $user_id = $this->core->getUser()->getId();
 
@@ -414,9 +409,7 @@ class TeamController extends AbstractController {
         $this->core->redirect($return_url);
     }
 
-    /**
-     * @Route("/courses/{_semester}/{_course}/gradeable/{gradeable_id}/team/seek/message/remove")
-     */
+    #[Route("/courses/{_semester}/{_course}/gradeable/{gradeable_id}/team/seek/message/remove")]
     public function removeSeekMessage($gradeable_id) {
         $user_id = $this->core->getUser()->getId();
 
@@ -438,9 +431,7 @@ class TeamController extends AbstractController {
         $this->core->redirect($return_url);
     }
 
-    /**
-     * @Route("/courses/{_semester}/{_course}/gradeable/{gradeable_id}/team/seek/stop")
-     */
+    #[Route("/courses/{_semester}/{_course}/gradeable/{gradeable_id}/team/seek/stop")]
     public function stopSeekTeam($gradeable_id) {
         $user_id = $this->core->getUser()->getId();
 
@@ -462,9 +453,7 @@ class TeamController extends AbstractController {
         $this->core->redirect($return_url);
     }
 
-    /**
-     * @Route("/courses/{_semester}/{_course}/gradeable/{gradeable_id}/team/setname")
-     */
+    #[Route("/courses/{_semester}/{_course}/gradeable/{gradeable_id}/team/setname")]
     public function setTeamName($gradeable_id): RedirectResponse {
         $user_id = $this->core->getUser()->getId();
 
@@ -496,6 +485,17 @@ class TeamController extends AbstractController {
         if ($_POST['team_name'] == '') {
             $_POST['team_name'] = null;
         }
+        else {
+            if (strlen($_POST['team_name']) > Team::MAX_TEAM_NAME_LENGTH) {
+                $this->core->addErrorMessage("Number of characters in team name must be less than " . Team::MAX_TEAM_NAME_LENGTH);
+                return new RedirectResponse($return_url);
+            }
+
+            if (self::hasSpecialCharacters($_POST['team_name'])) {
+                $this->core->addErrorMessage("Team name should not contain special characters");
+                return new RedirectResponse($return_url);
+            }
+        }
 
         if ($_POST['team_name'] === $team->getTeamName()) {
             $this->core->addErrorMessage("No changes detected in team name");
@@ -522,9 +522,7 @@ class TeamController extends AbstractController {
         return new RedirectResponse($return_url);
     }
 
-    /**
-     * @Route("/courses/{_semester}/{_course}/gradeable/{gradeable_id}/team")
-     */
+    #[Route("/courses/{_semester}/{_course}/gradeable/{gradeable_id}/team")]
     public function showPage($gradeable_id) {
         $user_id = $this->core->getUser()->getId();
 
