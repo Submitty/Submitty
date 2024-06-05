@@ -12,7 +12,7 @@ describe('Test Rainbow Grading', () => {
         });
         cy.get('[data-testid="display-rainbow-grades-summary"]').should('be.checked');
         cy.visit(['sample', 'reports', 'rainbow_grades_customization']);
-        cy.get('[data-testid="display-grade_summary"]').then(($checkbox) => {
+        cy.get('[data-testid="display-grade-summary"]').then(($checkbox) => {
             if (!$checkbox.prop('checked')) {
                 cy.get('[data-testid="display-grade_summary"]').check();
             }
