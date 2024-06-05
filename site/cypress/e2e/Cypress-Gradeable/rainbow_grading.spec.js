@@ -22,7 +22,7 @@ describe('Test Rainbow Grading', () => {
         cy.get('[data-testid="display-benchmarks-stddev"]').check();
         cy.get('[data-testid="display-benchmarks-perfect"]').check();
         cy.get('[data-testid="save-status-button"]').click();
-        cy.get('[data-testid="save-status"]', { timeout: 500000 }).should('contain', 'Rainbow grades successfully generated!');
+        cy.get('[data-testid="save-status"]', { timeout: 15000 }).should('contain', 'Rainbow grades successfully generated!');
         cy.visit(['sample', 'grades']);
         ['USERNAME', 'NUMERIC ID', 'AVERAGE', 'STDDEV', 'PERFECT'].forEach((fields) => {
             cy.get('[data-testid="rainbow-grades"]').should('contain', fields);
