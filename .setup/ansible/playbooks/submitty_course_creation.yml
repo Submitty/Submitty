@@ -1,40 +1,41 @@
 ---
 - name: Submitty Course Creation
   hosts: submitty
-  become: yes
+  become: true
 
   roles:
-    # - role: submitty_term_creation
-    #   vars:
-    #     semester: spring2024
-    #     semester_name: spring2024
-    #     start_date: 01/01/2024
-    #     end_date: 06/06/2024
+    - role: submitty_course_creation
+      vars:
+        submitty_course_creation_semester: spring2024
+        submitty_course_creation_course: seniorproject
+        submitty_course_creation_section: iii
+        submitty_course_creation_instructor: fordet
+        submitty_course_creation_firstname: Ethan
+        submitty_course_creation_lastname: Ford
+        submitty_course_creation_email: fordet.cs.wallawalla.edu
 
-    # - role: submitty_course_creation
-    #   vars:
-    #     semester: spring2024
-    #     course: seniorproject
-    #     section: iii
-    #     instructor: fordet
-    #     firstname: Ethan
-    #     lastname: Ford
-    #     email: fordet.cs.wallawalla.edu
+    - role: submitty_term_creation
+      vars:
+        submitty_term_creation_semester: spring2024
+        submitty_term_creation_semester_name: spring2024
+        submitty_term_creation_start_date: 01/01/2024
+        submitty_term_creation_end_date: 06/06/2024
+
 
     - role: submitty_course_add_instructor
       vars:
-        semester: spring2024
-        course: seniorproject
-        username: cobeed
-        firstname: Mike
-        lastname: Staci
-        email: fordet.cs.wallawalla.edu
-    
-    # - role: submitty_course_add_user
-    #   vars:
-    #     semester: y2024
-    #     course: annual
-    #     username: cobeed
-    #     firstname: Cameron
-    #     lastname: Ford
-    #     email: fordet.cs.wallawalla.edu
+        submitty_course_add_instructor_semester: spring2024
+        submitty_course_add_instructor_course: seniorproject
+        submitty_course_add_instructor_username: cobeed
+        submitty_course_add_instructor_firstname: Mike
+        submitty_course_add_instructor_lastname: Staci
+        submitty_course_add_instructor_email: fordet.cs.wallawalla.edu
+
+    - role: submitty_course_add_user
+      vars:
+        submitty_course_add_user_semester: y2024
+        submitty_course_add_user_course: annual
+        submitty_course_add_user_username: cobeed
+        submitty_course_add_user_firstname: Cameron
+        submitty_course_add_user_lastname: Ford
+        submitty_course_add_user_email: fordet.cs.wallawalla.edu

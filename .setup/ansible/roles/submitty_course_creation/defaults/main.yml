@@ -1,10 +1,10 @@
 ---
-course: course
-instructor: instructor
+submitty_course_creation_course: course
+submitty_course_creation_instructor: instructor
 submitty_course_creation_groups: submitty_course_creation_groups
 submitty_course_creation_users: fordet
-firstname: firstname
-lastname: lastname
-email: email
-semester: semester
-user_group: 1
+submitty_course_creation_firstname: firstname
+submitty_course_creation_lastname: lastname
+submitty_course_creation_email: email
+submitty_course_creation_semester: semester
+submitty_course_creation_user_group: 1

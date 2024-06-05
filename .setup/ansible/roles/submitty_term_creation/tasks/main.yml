@@ -5,4 +5,5 @@
     chdir: /usr/local/submitty/sbin/
   become: true
   become_user: root
+  changed_when: "'Term created' in create_term_result.stdout"
   notify: Reload fpm
