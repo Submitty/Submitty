@@ -8,7 +8,7 @@
             {% endif %}
         </h1>
         <div>
-            {% if show_summary and extra_label is defined and is_gradebook is defined and is_gradebook %}
+            {% if show_summary and extra_label is defined and extra_label == "For All Students" %}
                 <div class="btn-wrapper" style="margin:auto;">
                     <button
                         id="rainbow-grade-download-button"
@@ -33,7 +33,7 @@
       {% if show_summary %}
           {{ grade_file|raw }}
       {% else %}
-          No Grades Are Available...
+          No grades are available...
       {% endif %}
     </div>
 </div>
