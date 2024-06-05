@@ -7051,7 +7051,6 @@ AND gc_id IN (
                     ",
                     $params
                 );
-
             }
         }
 
