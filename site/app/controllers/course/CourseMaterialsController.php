@@ -507,7 +507,7 @@ class CourseMaterialsController extends AbstractController {
                                     null,
                                     null,
                                     $course_material->getUploadedBy(),
-                                    $course_material->getUploadDate(),
+                                    $course_material->getUploadedDate(),
                                     null,
                                     null
                                 );
@@ -871,7 +871,7 @@ class CourseMaterialsController extends AbstractController {
                 $value === CourseMaterial::LINK ? $url_url : null,
                 $value === CourseMaterial::LINK ? $title_name : null,
                 uploaded_by: $this->core->getUser()->getId(),
-                upload_date: DateUtils::parseDateTime($this->core->getDateTimeNow(), $this->core->getDateTimeNow()->getTimezone()),
+                uploaded_date: DateUtils::parseDateTime($this->core->getDateTimeNow(), $this->core->getDateTimeNow()->getTimezone()),
                 last_edit_by: null,
                 last_edit_date: null
             );

@@ -76,7 +76,7 @@ class CourseMaterial {
     protected ?string $uploaded_by;
 
     #[ORM\Column(type: Types::DATETIMETZ_MUTABLE, nullable: true)]
-    protected ?DateTime $upload_date;
+    protected ?DateTime $uploaded_date;
 
     #[ORM\Column(type: Types::STRING, nullable: true)]
     protected ?string $last_edit_by;
@@ -95,11 +95,11 @@ class CourseMaterial {
      * @param ?string $url The URL of the course material, applicable if it's a link type.
      * @param ?string $title The title of the course material.
      * @param ?string $uploaded_by The user ID of the person who uploaded the course material.
-     * @param ?\DateTime $upload_date The date and time when the course material was uploaded.
+     * @param ?\DateTime $uploaded_date The date and time when the course material was uploaded.
      * @param ?string $last_edit_by The user ID of the last person who edited the course material.
      * @param ?\DateTime $last_edit_date The date and time when the course material was last edited.
      */
-    public function __construct(int $type, string $path, \DateTime $release_date, bool $hidden_from_students, float $priority, ?string $url, ?string $title, ?string $uploaded_by, ?\DateTime $upload_date, ?string $last_edit_by, ?\DateTime $last_edit_date) {
+    public function __construct(int $type, string $path, \DateTime $release_date, bool $hidden_from_students, float $priority, ?string $url, ?string $title, ?string $uploaded_by, ?\DateTime $uploaded_date, ?string $last_edit_by, ?\DateTime $last_edit_date) {
         $this->setType($type);
         $this->setPath($path);
         $this->setReleaseDate($release_date);
@@ -109,7 +109,7 @@ class CourseMaterial {
         $this->url = $url;
         $this->title = $title;
         $this->uploaded_by = $uploaded_by;
-        $this->upload_date = $upload_date;
+        $this->uploaded_date = $uploaded_date;
         $this->last_edit_by = $last_edit_by;
         $this->last_edit_date = $last_edit_date;
     }
@@ -148,19 +148,19 @@ class CourseMaterial {
         return $this->release_date;
     }
 
-    public function getUploadedBy(): string {
+    public function getUploadedBy(): string | null {
         return $this->uploaded_by;
     }
 
-    public function getUploadDate(): \DateTime {
-        return $this->upload_date;
+    public function getUploadedDate(): \DateTime | null {
+        return $this->uploaded_date;
     }
 
-    public function getLastEditBy(): string {
+    public function getLastEditBy(): string | null {
         return $this->last_edit_by;
     }
 
-    public function getLastEditDate(): \DateTime {
+    public function getLastEditDate(): \DateTime | null {
         return $this->last_edit_date;
     }
 
@@ -246,8 +246,8 @@ class CourseMaterial {
         $this->uploaded_by = $uploaded_by;
     }
 
-    public function setUploadDate(\DateTime $upload_date): void {
-        $this->upload_date = $upload_date;
+    public function setUploadDate(\DateTime $uploaded_date): void {
+        $this->uploaded_date = $uploaded_date;
     }
 
     public function setLastEditBy(string $last_edit_by): void {
