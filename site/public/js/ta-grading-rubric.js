@@ -1,4 +1,4 @@
-* exported ajaxGetOverallComment PDF_PAGE_STUDENT showVerifyComponent getPeerGradingScore getOverallCommentFromDOM
+/* exported ajaxGetOverallComment PDF_PAGE_STUDENT showVerifyComponent getPeerGradingScore getOverallCommentFromDOM
    getNextComponentId getPrevComponentId getMarkIdFromOrder onAddNewMark onDeleteMark onRestoreMark onDeleteComponent
    onAddComponent importComponentsFromFile onMarkPointsChange onGetMarkStats onClickComponent onCancelComponent
    onCancelEditRubricComponent onChangeOverallComment onToggleMark onCustomMarkChange onToggleCustomMark onVerifyComponent
