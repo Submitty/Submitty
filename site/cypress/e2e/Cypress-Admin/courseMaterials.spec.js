@@ -18,7 +18,7 @@ describe('Test cases revolving around course material uploading and access contr
         const fileTgt = buildUrl(['sample', 'course_material', 'file1.txt']);
 
         cy.visit(fileTgt);
-        cy.get('pre').should('have.text', 'a\n');
+        cy.get('pre').should('have.text', 'alpha\n');
         cy.visit(['sample', 'course_materials']);
 
         //a href tags should be for navigation only, workaround to prevent cypress from expecting a page change
@@ -43,7 +43,7 @@ describe('Test cases revolving around course material uploading and access contr
         const fileTgt = buildUrl(['sample', 'course_material', 'option1', 'file1.txt']);
 
         cy.visit(fileTgt);
-        cy.get('pre').should('have.text', 'a\n');
+        cy.get('pre').should('have.text', 'alpha\n');
         cy.visit(['sample', 'course_materials']);
 
         cy.get('[onclick="newUploadCourseMaterialsForm()"]').click();
@@ -59,7 +59,7 @@ describe('Test cases revolving around course material uploading and access contr
 
         const fileTgt2 = buildUrl(['sample', 'course_material', 'option1', '1234', encodeURIComponent('!@#$%^&*()'), 'file1.txt']);
         cy.visit(fileTgt2);
-        cy.get('pre').should('have.text', 'a\n');
+        cy.get('pre').should('have.text', 'alpha\n');
         cy.visit(['sample', 'course_materials']);
 
         cy.get('.div-viewer > [id^=option1]').parent().find('.fa-trash').click();
@@ -113,7 +113,7 @@ describe('Test cases revolving around course material uploading and access contr
         const fileTgt = buildUrl(['sample', 'course_material', 'file2.txt']);
 
         cy.visit(fileTgt);
-        cy.get('pre').should('have.text', 'b\n');
+        cy.get('pre').should('have.text', 'bravo\n');
         cy.visit(['sample', 'course_materials']);
 
         const fileTgt2 = buildUrl(['sample', 'course_material', 'file1.txt']);
@@ -160,7 +160,7 @@ describe('Test cases revolving around course material uploading and access contr
         cy.get('.file-viewer').should('have.length', 6);
         const fileTgt = buildUrl(['sample', 'course_material', 'file1.txt']);
         cy.visit(fileTgt);
-        cy.get('pre').should('have.text', 'a\n');
+        cy.get('pre').should('have.text', 'alpha\n');
         cy.visit(['sample', 'course_materials']);
 
         const fileTgt2 = buildUrl(['sample', 'course_material', 'option1', 'file2.txt']);
@@ -216,7 +216,7 @@ describe('Test cases revolving around course material uploading and access contr
 
         const fileTgt = buildUrl(['sample', 'course_material', 'zip', '2', '3', '7', '9', '10', '10_1.txt']);
         cy.visit(fileTgt);
-        cy.get('body').should('have.text', '');
+        cy.get('body').should('have.text', 'zippy!');
 
         const fileTgt2 = buildUrl(['sample', 'course_material', 'zip', '1_1.txt']);
         cy.visit(fileTgt2);
@@ -610,7 +610,7 @@ describe('Test cases revolving around course material uploading and access contr
         // Check that a student can view the files through a URL
         const fileTgt = buildUrl(['sample', 'course_material', 'a', 'file1.txt']);
         cy.visit(fileTgt);
-        cy.get('pre').should('have.text', 'a\n');
+        cy.get('pre').should('have.text', 'alpha\n');
         cy.visit(['sample', 'course_materials']);
 
         cy.logout();
