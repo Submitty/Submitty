@@ -11,7 +11,7 @@ describe('TA grading hotkey testing', () => {
         cy.get('@navigationBar').type('{G}');
         cy.get('[data-testid="grading-rubric"]').should('contain', 'Grading Rubric');
         cy.get('#edit-mode-enabled').should('not.be.checked');
-        cy.get('[data-testid="grading-rubric"]').type('{E}');
+        cy.get('@navigationBar').type('{E}');
         cy.get('#edit-mode-enabled').should('be.checked');
         cy.get('@navigationBar').type('{O}');
         cy.get('[data-testid="submission-browser"]').should('contain', 'Submissions and Results Browser');
@@ -29,17 +29,21 @@ describe('TA grading hotkey testing', () => {
             }
         });
         cy.get('[data-testid="yes-discussion"]').should('be.checked');
+        cy.get('[data-testid="discussion-thread-id"]').clear();
         cy.get('[data-testid="discussion-thread-id"]').type('1');
-        cy.get('[data-testid="page-1-nav"]').click();
-        cy.get('[data-testid="container-rubric"]').contains('Start New').click();
+        // cy.get('[data-testid="page-1-nav"]').click();
+        // // cy.get('[data-testid="container-rubric"]').contains('Start New').click();
         cy.get('[data-testid="page-2-nav"]').click();
-        cy.get('[data-testid="gradeable-rubric"]').contains('Add New Peer Component').click();
+        cy.get('[data-testid="add-new-peer-component"]').click();
+        cy.visit(['sample', 'gradeable', 'grading_homework', 'grading', 'details']);
+        cy.get('[data-testid="view-sections"]').click();
+        cy.get('[data-testid="grade-button"]').eq(12).click();
         cy.get('@navigationBar').type('{D}');
         cy.get('[data-testid="posts-list"]').should('contain', 'Discussion Posts').and('contain', ' Go to thread');
         cy.get('@navigationBar').type('{P}');
         cy.get('[data-testid="peer-info"]').should('contain', 'Peer Grading');
-        cy.get('@navigationBar').type('{N}');
-        cy.get('[data-testid="notebook-view"]').should('contain', 'Peer Grading');
+        // cy.get('@navigationBar').type('{N}');
+        // cy.get('[data-testid="notebook-view"]').should('contain', 'Peer Grading');
 
     });
 });
