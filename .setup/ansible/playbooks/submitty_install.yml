@@ -12,8 +12,4 @@
         name: submitty_install
       vars:
         # add overriding variables here
-        # submitty_version: v24.02.00 # uncomment to specify version
-        institution_name: Walla Walla University
-        submitty_url: fordet.cs.wallawalla.edu
-        ssl_enabled: true
-        submitty_ip: 172.27.23.13
+        submitty_install_submitty_version: main  # Replace main with version, eg. v24.02.00
