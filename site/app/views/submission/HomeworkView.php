@@ -484,6 +484,9 @@ class HomeworkView extends AbstractView {
         $vcs_partial_path = str_replace('{$vcs_type}', $this->core->getConfig()->getVcsType(), $vcs_partial_path);
         $vcs_partial_path = str_replace('{$gradeable_id}', $gradeable->getId(), $vcs_partial_path);
         $vcs_partial_path = str_replace('{$user_id}', $this->core->getUser()->getId(), $vcs_partial_path);
+        if ($gradeable->isTeamAssignment()) {
+            $vcs_partial_path = str_replace('{$team_id}', $graded_gradeable->getSubmitter()->getId(), $vcs_partial_path);
+        }
 
         $vcs_repo_exists = false;
         if ($gradeable->isVcs()) {
@@ -493,8 +496,7 @@ class HomeworkView extends AbstractView {
                 'git',
                 $this->core->getConfig()->getTerm(),
                 $this->core->getConfig()->getCourse(),
-                $gradeable->getId(),
-                $student_id
+                $vcs_partial_path
             );
             $vcs_repo_exists = file_exists($path);
         }

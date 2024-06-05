@@ -230,6 +230,7 @@
     text-decoration: none !important;
 }
 
+
 .post-action-container {
     margin-top: 8px;
     margin-left: 10px;
@@ -242,6 +243,12 @@
     display: inline-block;
 }
 
+.upduck-container{
+    display: inline-block;
+    align-items: center;
+    justify-content: center;
+}
+
 .upduck-button {
     position: relative;
     display: inline-block;
@@ -251,6 +258,11 @@
     cursor: pointer; 
     outline: none;
     vertical-align: middle;
+}
+
+.like-counter{
+    font-size: 15px;
+    margin-left: 4px;
 }
 
 .delete-post-button,
@@ -716,7 +728,7 @@
 .thread-box-full {
     padding: 10px 20px;
     margin: 5px auto;
-    box-shadow: 4px 7px 5px #cccccc;
+    border: 1px solid #808080;
 }
 /* stylelint-disable-next-line selector-class-pattern */
 .thread_box .flex-row,

@@ -16,9 +16,9 @@ use app\models\SuperuserEmail;
  */
 class SuperuserEmailController extends AbstractController {
     /**
-     * @Route("/superuser/email")
      * @return MultiResponse
      */
+    #[Route("/superuser/email")]
     public function showEmailPage(): MultiResponse {
         $query_result = $this->core->getQueries()->countActiveUsersByGroup();
         $num_faculty = $query_result['faculty'];
@@ -39,9 +39,9 @@ class SuperuserEmailController extends AbstractController {
         );
     }
     /**
-     * @Route("/superuser/email/send", methods={"POST"})
      * @return JsonResponse
      */
+    #[Route("/superuser/email/send", methods: ["POST"])]
     public function sendEmail(): JsonResponse {
         if (!isset($_POST['email_content']) || $_POST['email_content'] == '') {
             return JsonResponse::getFailResponse("Email content is empty.");

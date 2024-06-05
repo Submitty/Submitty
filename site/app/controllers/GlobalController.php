@@ -20,7 +20,6 @@ class GlobalController extends AbstractController {
                 'csrf_token' => $this->core->getCsrfToken()
             ]);
         }, $wrapper_files);
-
         $breadcrumbs = $this->core->getOutput()->getBreadcrumbs();
         $page_name = $this->core->getOutput()->getPageName();
         $css = $this->core->getOutput()->getCss();

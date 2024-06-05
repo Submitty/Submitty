@@ -1936,6 +1936,7 @@ function renderMarkdown(markdownContainer, url, content) {
  *                      * `'link'`
  *                      * `'bold'`
  *                      * `'italic'`
+ *                      * `'blockquote'`
  */
 function addMarkdownCode(type) {
     const markdown_area = $(this).closest('.markdown-area');
@@ -1963,6 +1964,9 @@ function addMarkdownCode(type) {
             break;
         case 'italic':
             insert = '_italic text_';
+            break;
+        case 'blockquote':
+            insert = '> blockquote text\n\n';
             break;
     }
     $(this).val(text.substring(0, cursor) + insert + text.substring(cursor));

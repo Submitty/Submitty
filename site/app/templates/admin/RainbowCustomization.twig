@@ -11,7 +11,7 @@
                     manually generated prior to each use of this interface.  To generate grade summaries navigate to the Grade
                     Reports page, and click the "Generate Grade Summaries" button.</p>
                 <p>For more information about limited functionality mode visit the
-                    <a href="http://www.submitty.org/instructor/rainbow_grades/automatic_setup">rainbow grades documentation</a>.</p>
+                    <a href="http://www.submitty.org/instructor/course_settings/rainbow_grades/automatic_setup">rainbow grades documentation</a>.</p>
             </div>
         {% endif %}
 
@@ -219,7 +219,7 @@
                                                                     <br><br>
                                                                     Actual Max Score: {{ gradeable["max_score"] }}
                                                                     <br>
-                                                                    Override Max Score: <span id="override-maxscore-{{ gradeable["id"] }}"><span>
+                                                                    Override Max Score: <span id="override-maxscore-{{ gradeable["id"] }}"></span>
                                                                 </span>
                                                             </i>
                                                             <i class="fas fa-chart-line fa-gradeable-curve fa-rb" id="gradeable-curve-button-{{ gradeable['id'] }}"></i>
