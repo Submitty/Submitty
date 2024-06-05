@@ -8,7 +8,7 @@
    removeMessagePopup validateHtml togglePageDetails copyToClipboard downloadCSV setFolderRelease
    newEditCourseMaterialsForm newEditCourseMaterialsFolderForm newUploadCourseMaterialsForm newUploadBanner newUploadImagesForm
    newOverwriteCourseMaterialForm newDeleteCourseMaterialForm displayCloseSubmissionsWarning newDeleteGradeableForm
-   markAllViewed closePopup */
+   markAllViewed closePopup loadAttempt showIncentiveMessage */
 /* global csrfToken my_window:writable file_path:writable updateBulkProgress icon:writable detectColorScheme
    createArray readPrevious disableFullUpdate registerSelect2Widget */
 ////////////Begin: Removed redundant link in breadcrumbs////////////////////////
@@ -809,15 +809,15 @@ function toggleDiv(id) {
 
 function loadAttempt() {
     const params = new URLSearchParams(window.location.search);
-    const loadAttempt = Number(params.get("loadAttempt") ?? "0");
+    const loadAttempt = Number(params.get('loadAttempt') ?? '0');
     if (loadAttempt < 3) {
-        params.set("loadAttempt", loadAttempt + 1);
+        params.set('loadAttempt', loadAttempt + 1);
         window.location.search = params.toString();
     }
 }
 
 function showIncentiveMessage() {
-    $("#incentive_message").show();
+    $('#incentive_message').show();
 }
 
 function checkRefreshPage(url) {
