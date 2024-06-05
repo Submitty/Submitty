@@ -1153,7 +1153,7 @@ registerKeyHandler({ name: 'Toggle Peer Panel', code: 'KeyP' }, () => {
 });
 
 registerKeyHandler({ name: 'Toggle Notebook Panel', code: 'KeyN' }, () => {
-    $('#grading_rubric_btn button').trigger('click');
+    $('#notebook-view-btn button').trigger('click');
     updateCookies();
 });
 registerKeyHandler({ name: 'Toggle Solution/TA-Notes Panel', code: 'KeyT' }, () => {
