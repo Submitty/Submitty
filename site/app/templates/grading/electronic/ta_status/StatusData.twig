@@ -65,23 +65,19 @@
                     {% for key, section in sections %}
                         {% if key != "peer_stu_grad"%}
                                 {% if include_bad_submissions  == 'include'  %}
-                                    {% if key == "NULL" and include_null_section != 'include' %}
-                                        {# Skip rendering this section #}
-                                     {% else %}
-                                        Section {{ key }}: Graded: {{ section.graded }} / {{ section.total }} ({{ section.percentage }}%) 
-                                        {% if isVerified > 0 %}
-                                            <span>Verified: {{ section.verified }} / {{ section.total }} ({{ section.verified_percentage }}%)</span>
-                                        {% endif %}
+                                    {% if not (key == "NULL" and include_null_section != 'include') %}
+                                        <span>
+                                            Section {{ key }}: {{ section.graded }} / {{ section.total }} ({{ section.percentage }}% graded), 
+                                            {{ section.verified }} / {{ section.total }} ({{ section.verified_percentage }}% verified)
+                                        </span>
                                         <br />
                                     {% endif %}
                                 {% else %}
-                                    {% if key == "NULL" and include_null_section != 'include' %}
-                                        {# Skip rendering this section #}
-                                     {% else %}
-                                        Section {{ key }}: Graded: {{ section.non_late_graded }} / {{ section.non_late_total }} ({{ section.non_late_percentage }}%) 
-                                        {% if isNonLateVerified > 0 %}
-                                            <span>Verified: {{ section.non_late_verified }} / {{ section.non_late_total }} ({{ section.non_late_verified_percentage }}%) </span>
-                                        {% endif %}
+                                    {% if not (key == "NULL" and include_null_section != 'include') %}
+                                        <span>
+                                            Section {{ key }}: {{ section.non_late_graded }} / {{ section.non_late_total }} ({{ section.non_late_percentage }}% graded), 
+                                            {{ section.non_late_verified }} / {{ section.non_late_total }} ({{ section.non_late_verified_percentage }}% verified)
+                                        </span>
                                         <br />
                                     {% endif %}
                             {% endif %}
