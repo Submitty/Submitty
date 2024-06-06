@@ -108,8 +108,7 @@ function onPrecisionChange() {
 
 function updateGradeableErrorCallback(message, response_data) {
     for (const key in response_data) {
-        // eslint-disable-next-line no-prototype-builtins
-        if (response_data.hasOwnProperty(key)) {
+        if (Object.prototype.hasOwnProperty.call(response_data, key)) {
             setError(key, response_data[key]);
         }
     }
@@ -249,15 +248,13 @@ $(document).ready(() => {
             (response_data) => {
                 // Clear errors by setting new values
                 for (const key in response_data) {
-                    // eslint-disable-next-line no-prototype-builtins
-                    if (response_data.hasOwnProperty(key)) {
+                    if (Object.prototype.hasOwnProperty.call(response_data, key)) {
                         clearError(key, response_data[key]);
                     }
                 }
                 // Clear errors by just removing red background
                 for (const key in data) {
-                    // eslint-disable-next-line no-prototype-builtins
-                    if (data.hasOwnProperty(key)) {
+                    if (Object.prototype.hasOwnProperty.call(data, key)) {
                         clearError(key);
                     }
                 }
@@ -274,15 +271,13 @@ $(document).ready(() => {
                     setRandomGraders($('#g_id').val(), data, (response_data) => {
                         // Clear errors by setting new values
                         for (const key in response_data) {
-                            // eslint-disable-next-line no-prototype-builtins
-                            if (response_data.hasOwnProperty(key)) {
+                            if (Object.prototype.hasOwnProperty.call(response_data, key)) {
                                 clearError(key, response_data[key]);
                             }
                         }
                         // Clear errors by just removing red background
                         for (const key in data) {
-                            // eslint-disable-next-line no-prototype-builtins
-                            if (data.hasOwnProperty(key)) {
+                            if (Object.prototype.hasOwnProperty.call(data, key)) {
                                 clearError(key);
                             }
                         }
@@ -297,15 +292,13 @@ $(document).ready(() => {
                 setRandomGraders($('#g_id').val(), data, (response_data) => {
                 // Clear errors by setting new values
                     for (const key in response_data) {
-                        // eslint-disable-next-line no-prototype-builtins
-                        if (response_data.hasOwnProperty(key)) {
+                        if (Object.prototype.hasOwnProperty.call(response_data, key)) {
                             clearError(key, response_data[key]);
                         }
                     }
                     // Clear errors by setting custom validity to ''
                     for (const key in data) {
-                        // eslint-disable-next-line no-prototype-builtins
-                        if (data.hasOwnProperty(key)) {
+                        if (Object.prototype.hasOwnProperty.call(data, key)) {
                             clearError(key);
                         }
                     }
