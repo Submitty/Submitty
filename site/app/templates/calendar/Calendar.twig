@@ -102,7 +102,7 @@
                 </button>
                 <select id="calendar-year-edit" onchange="changeYear(this);">
                     {# create options based on current year #}
-                    {% for year in range(curr_year -100, curr_year +100) %}
+                    {% for year in range(curr_year -5, curr_year +1) %}
                         <option value="{{ year }}" {% if curr_year == year %} selected {% endif %}>{{ year }}</option>
                     {% endfor %}
                 </select>
