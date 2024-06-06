@@ -38,10 +38,8 @@ function initialSubmissionMode() {
                 warningBanner.children().first().text(message);
             }
         }
-        else {
-            if (pdfSubmitButton.length) {
-                pdfSubmitButton.hide();
-            }
+        else if (pdfSubmitButton.length) {
+            pdfSubmitButton.hide();
         }
     }
 }
