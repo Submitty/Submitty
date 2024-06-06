@@ -18,10 +18,10 @@ describe('Test cases revolving around grade inquires', () => {
         cy.get('[data-testid="grade-button"]').eq(3).click();
         cy.get('[data-testid="grade-inquiry-info-btn"]').click();
         cy.get('[data-testid="grading-label"]').should('contain', 'Grade Inquiry');
-        cy.get('[data-testid="grade-inquiry-actions"]').contains('Submit Grade Inquiry').and('be.disabled');
+        cy.get('[data-testid="grade-inquiry-actions"]').contains('Submit Grade Inquiry').should('be.disabled');
         cy.get('[data-testid="reply-text-area-0"]').click().type('Submitty');
         cy.get('[data-testid="markdown-mode-tab-preview"]').first().should('exist');
-        cy.get('[data-testid="grade-inquiry-actions"]').contains('Submit Grade Inquiry').and('not.be.disabled');
+        cy.get('[data-testid="grade-inquiry-actions"]').contains('Submit Grade Inquiry').should('not.be.disabled');
     });
     ['ta', 'grader'].forEach((user) => {
         it(`${user} can see grade inquiry panel`, () => {
@@ -38,10 +38,10 @@ describe('Test cases revolving around grade inquires', () => {
             cy.get('[data-testid="grade-button"]').eq(3).click();
             cy.get('[data-testid="grade-inquiry-info-btn"]').click();
             cy.get('[data-testid="grading-label"]').should('contain', 'Grade Inquiry');
-            cy.get('[data-testid="grade-inquiry-actions"]').contains('Submit Grade Inquiry').and('be.disabled');
+            cy.get('[data-testid="grade-inquiry-actions"]').contains('Submit Grade Inquiry').should('be.disabled');
             cy.get('[data-testid="reply-text-area-0"]').click().type('Submitty');
             cy.get('[data-testid="markdown-mode-tab-preview"]').first().should('exist');
-            cy.get('[data-testid="grade-inquiry-actions"]').contains('Submit Grade Inquiry').and('not.be.disabled');
+            cy.get('[data-testid="grade-inquiry-actions"]').contains('Submit Grade Inquiry').should('not.be.disabled');
         });
     });
 });
