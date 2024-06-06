@@ -915,9 +915,9 @@ class Access {
         $path = implode(DIRECTORY_SEPARATOR, $parts);
 
         // Different base path for downloading output.csv of rainbow grades
-        if ($dir === "rainbow_grades" && substr($path, -11) === "/output.csv") {
+        if ($dir === "rainbow_grades" && str_ends_with($path, "/output.csv")) {
             // Removing "/upload" from path
-            $base = substr($info["base"], 0, -23) . "/rainbow_grades";
+            $base = substr($info["base"], 0, -1 * strlen("/uploads/rainbow_grades")) . "/rainbow_grades";
             //checking the path
             if (!str_starts_with($path, $base)) {
                 $path = $base . $path;
