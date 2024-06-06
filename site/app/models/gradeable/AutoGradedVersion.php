@@ -22,7 +22,7 @@ use app\models\AbstractModel;
  * @method \DateTime getSubmissionTime()
  * @method bool isAutogradingComplete()
  * @method string getAutograderMachine()
- * @method bool getDockerErrorFileExist()
+ * @method bool dockerErrorFileExists()
  * @method array|null getDockerErrorFileData()
  */
 class AutoGradedVersion extends AbstractModel {

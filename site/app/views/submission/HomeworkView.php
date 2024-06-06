@@ -1012,7 +1012,7 @@ class HomeworkView extends AbstractView {
 
 
         $param = array_merge($param, [
-            'docker_error' => $version_instance->getDockerErrorFileExist(),
+            'docker_error' => $version_instance->dockerErrorFileExists(),
             'docker_error_data' => null,
             'gradeable_id' => $gradeable->getId(),
             'hide_test_details' => $gradeable->getAutogradingConfig()->getHideTestDetails(),
