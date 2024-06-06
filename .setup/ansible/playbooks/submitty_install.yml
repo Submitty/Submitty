@@ -13,4 +13,3 @@
       vars:
         # add overriding variables here
         submitty_install_submitty_version: main  # Replace main with version, eg. v24.02.00
-        submitty_install_authentication_method: 1
