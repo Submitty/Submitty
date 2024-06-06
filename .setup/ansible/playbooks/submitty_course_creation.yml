@@ -6,7 +6,7 @@
   roles:
     - role: submitty_term_creation
       vars:
-        submitty_term_creation_key: winter2024
+        submitty_term_creation_key: term
         submitty_term_creation_name: winter2024
         submitty_term_creation_start_date: 01/01/2024
         submitty_term_creation_end_date: 06/07/2024
