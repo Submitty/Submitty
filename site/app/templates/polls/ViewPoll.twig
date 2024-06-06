@@ -125,7 +125,7 @@
 
             if (timeRemaining <= 0) {
                 if (timerElement) {
-                    timerElement.innerHTML = "Poll Ended";
+                    timerElement.textContent = "Poll Ended";
                 }
                 clearInterval(timerId);
                 return;
@@ -145,7 +145,7 @@
             var secondsUpdated = (seconds < 10) ? "0" + seconds : seconds;
             var timerDisplay = hoursUpdated + ':' + minutesUpdated + ':' + secondsUpdated;
 
-            timerDisplayElement.innerHTML = timerDisplay;
+            timerDisplayElement.textContent = timerDisplay;
         }
 
         timerId = setInterval(updateTimer, 20);
