@@ -24,6 +24,7 @@
   ansible.builtin.include_role:
     name: submitty_course_add_user
   vars:
+    submitty_course_add_user_term: "{{ submitty_course_add_instructor_term }}"
     submitty_course_add_user_username: "{{ submitty_course_add_instructor_username }}"
     submitty_course_add_user_firstname: "{{ submitty_course_add_instructor_firstname }}"
     submitty_course_add_user_lastname: "{{ submitty_course_add_instructor_lastname }}"
