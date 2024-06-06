@@ -129,14 +129,14 @@ class RainbowCustomizationJSON extends AbstractModel {
     }
 
     /**
-     * Determine the existence of a custom_customization.json inside the course rainbow_grades directory
+     * Determine the existence of a manual_customization.json inside the course rainbow_grades directory
      *
-     * @return bool Indicates if a custom_customization.json exists
+     * @return bool Indicates if a manual_customization.json exists
      */
-    public function doesCustomCustomizationExist() {
-        // Get path to custom_customization.json
+    public function doesManualCustomizationExist() {
+        // Get path to manual_customization.json
         $course_path = $this->core->getConfig()->getCoursePath();
-        $file_path = FileUtils::joinPaths($course_path, 'rainbow_grades', 'custom_customization.json');
+        $file_path = FileUtils::joinPaths($course_path, 'rainbow_grades', 'manual_customization.json');
 
         return file_exists($file_path);
     }
@@ -352,5 +352,6 @@ class RainbowCustomizationJSON extends AbstractModel {
 
         // Write to file
         file_put_contents($course_path, $json);
+        chmod($course_path, 0660);
     }
 }

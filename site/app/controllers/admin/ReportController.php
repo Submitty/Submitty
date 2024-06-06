@@ -46,7 +46,7 @@ class ReportController extends AbstractController {
         $grade_summaries_last_run = $this->getGradeSummariesLastRun();
         $this->core->getOutput()->enableMobileViewport();
         $json = null;
-        $customization_path = FileUtils::joinPaths($this->core->getConfig()->getCoursePath(), "rainbow_grades", "custom_customization.json");
+        $customization_path = FileUtils::joinPaths($this->core->getConfig()->getCoursePath(), "rainbow_grades", "manual_customization.json");
         if (file_exists($customization_path)) {
             $json = file_get_contents($customization_path);
         }
@@ -675,7 +675,7 @@ class ReportController extends AbstractController {
 
         $rainbow_grades_dir = FileUtils::joinPaths($this->core->getConfig()->getCoursePath(), "rainbow_grades");
 
-        if (!move_uploaded_file($upload['tmp_name'], FileUtils::joinPaths($rainbow_grades_dir, 'custom_customization.json'))) {
+        if (!move_uploaded_file($upload['tmp_name'], FileUtils::joinPaths($rainbow_grades_dir, 'manual_customization.json'))) {
             $msg = 'Upload failed: Could not copy file';
             $this->core->addErrorMessage($msg);
             return new MultiResponse(
