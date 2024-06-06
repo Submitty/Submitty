@@ -481,6 +481,14 @@ WORKERS_JSON = os.path.join(CONFIG_INSTALL_DIR, 'autograding_workers.json')
 CONTAINERS_JSON = os.path.join(CONFIG_INSTALL_DIR, 'autograding_containers.json')
 SECRETS_PHP_JSON = os.path.join(CONFIG_INSTALL_DIR, 'secrets_submitty_php.json')
 
+# Rescue submitty config data
+submitty_config = OrderedDict()
+try:
+    with open(SUBMITTY_JSON, 'r') as json_file:
+        submitty_config = json.load(json_file, object_pairs_hook=OrderedDict)
+except FileNotFoundError:
+    pass
+
 #Rescue the autograding_workers and _containers files if they exist.
 rescued = list()
 tmp_folder = tempfile.mkdtemp()
@@ -493,17 +501,6 @@ if not args.worker:
             rescued.append((full_file_name, tmp_file))
 
 IGNORED_FILES_AND_DIRS = ['saml', 'login.md']
-
-system_message = None
-# this prevents clobbered system_message
-try:
-    with open(SUBMITTY_JSON,'r') as submitty_config:
-        load_submitty_json = json.load(submitty_config)
-        if 'system_message' in load_submitty_json:
-            system_message = load_submitty_json['system_message']
-except IOError:
-    pass
-
 
 if os.path.isdir(CONFIG_INSTALL_DIR):
     for file in os.scandir(CONFIG_INSTALL_DIR):
@@ -620,7 +617,7 @@ if not args.worker:
 ##############################################################################
 # Write submitty json
 
-config = OrderedDict()
+config = submitty_config
 config['submitty_install_dir'] = SUBMITTY_INSTALL_DIR
 config['submitty_repository'] = SUBMITTY_REPOSITORY
 config['submitty_data_dir'] = SUBMITTY_DATA_DIR
@@ -643,10 +640,6 @@ if not args.worker:
     config['duck_special_effects'] = False
 
 config['worker'] = True if args.worker == 1 else False
-
-# this prevents a clobbered system message
-if system_message != None:
-    config['system_message'] = system_message
 
 with open(SUBMITTY_JSON, 'w') as json_file:
     json.dump(config, json_file, indent=2)
