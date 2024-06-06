@@ -792,6 +792,7 @@ class ReportController extends AbstractController {
 
     /**
      * Download CSV file for Rainbow Grades
+     * @return void
      */
     #[Route("/courses/{_semester}/{_course}/reports/rainbow_grades_csv")]
     public function downloadRainbowGradesCSVFile() {
