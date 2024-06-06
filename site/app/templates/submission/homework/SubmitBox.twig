@@ -102,6 +102,7 @@
                     <div id="toggle-qr-split">
                         <label for="use-qr">Split by QR code?</label>
                         <input type="checkbox" id="use-qr">
+
                         {% if feature_flag_enabled('submitty_ocr') %}
                         <span id="toggle-id-scan" class="hide">
                             <label id ="use-ocr-id"for ="use-ocr">Detect Student ID's?</label>
@@ -541,3 +542,5 @@
     });
     initializeTimer('{{ gradeable_id }}', {{ is_timed }});
 </script>
+
+
