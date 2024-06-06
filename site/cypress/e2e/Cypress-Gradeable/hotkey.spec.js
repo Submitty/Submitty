@@ -1,4 +1,3 @@
-/// <reference types="Cypress" />
 describe('TA grading hotkey testing', () => {
     it('toggle keyboard shortcut', () => {
         cy.login();
