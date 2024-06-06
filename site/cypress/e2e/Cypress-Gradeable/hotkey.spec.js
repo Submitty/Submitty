@@ -31,10 +31,13 @@ describe('TA grading hotkey testing', () => {
         cy.get('[data-testid="yes-discussion"]').should('be.checked');
         cy.get('[data-testid="discussion-thread-id"]').clear();
         cy.get('[data-testid="discussion-thread-id"]').type('1');
-        // cy.get('[data-testid="page-1-nav"]').click();
-        // // cy.get('[data-testid="container-rubric"]').contains('Start New').click();
         cy.get('[data-testid="page-2-nav"]').click();
         cy.get('[data-testid="add-new-peer-component"]').click();
+        cy.get('[data-testid="page-1-nav"]').click();
+        cy.get('[data-testid="start-new-notebook"]').click();
+        cy.get('[data-testid="markdown"]').click();
+        cy.get('[data-testid="notebook-builder-markdown-0"]').click().type('Notebook-Cypress-Test');
+        cy.get('[data-testid="notebook-save"]').click();
         cy.visit(['sample', 'gradeable', 'grading_homework', 'grading', 'details']);
         cy.get('[data-testid="view-sections"]').click();
         cy.get('[data-testid="grade-button"]').eq(12).click();
@@ -42,8 +45,8 @@ describe('TA grading hotkey testing', () => {
         cy.get('[data-testid="posts-list"]').should('contain', 'Discussion Posts').and('contain', ' Go to thread');
         cy.get('@navigationBar').type('{P}');
         cy.get('[data-testid="peer-info"]').should('contain', 'Peer Grading');
-        // cy.get('@navigationBar').type('{N}');
-        // cy.get('[data-testid="notebook-view"]').should('contain', 'Peer Grading');
+        cy.get('@navigationBar').type('{N}');
+        cy.get('[data-testid="notebook-view"]').should('contain', 'NotebookTesting');
 
     });
 });
