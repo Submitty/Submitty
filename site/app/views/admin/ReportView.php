@@ -35,7 +35,8 @@ class ReportView extends AbstractView {
             "show_summary" => $display_rainbow_grades_summary && $grade_file !== null,
             "grade_file" => $grade_file,
             "extra_label" => "For All Students",
-            "grade_summaries_last_run" => $grade_summaries_last_run
+            "grade_summaries_last_run" => $grade_summaries_last_run,
+            'rainbow_grades_csv_url' => $this->core->buildCourseUrl(['reports', 'rainbow_grades_csv']),
         ]);
     }
 }
