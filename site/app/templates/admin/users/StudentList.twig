@@ -108,6 +108,9 @@
                                     {% if student.isManualRegistration() %}
                                         <i class="fas fa-hammer" title="Manually Registered"></i>
                                     {% endif %}
+                                    {% if student.getRegistrationSection() == null and can_rejoin[student.getId()] == true %}
+                                        <i class="fa-solid fa-circle-arrow-down" title="Recently Dropped"></i>
+                                    {% endif %}
                                 </td>
                             {% endif %}
                             {% if active_student_columns[1] %}
