@@ -27,6 +27,16 @@ concurrency:
 
 
 jobs:
+  ansible-lint:
+    runs-on: ubuntu-22.04
+    steps:
+      - uses: actions/checkout@v4
+      - name: Run ansible-lint
+        uses: ansible/ansible-lint@main
+        with:
+          args: .setup/ansible
+
+
   css-lint:
     runs-on: ubuntu-22.04
     defaults:
@@ -38,7 +48,7 @@ jobs:
         with:
           node-version: ${{ env.NODE_VERSION }}
       - name: Cache Node Modules
-        uses: actions/cache@v3
+        uses: actions/cache@v4
         with:
           path: ~/.npm
           key: ${{ runner.os }}-cache-node-modules-${{ hashFiles('**/package-lock.json') }}
@@ -60,7 +70,7 @@ jobs:
         with:
           node-version: ${{ env.NODE_VERSION }}
       - name: Cache Node Modules
-        uses: actions/cache@v3
+        uses: actions/cache@v4
         with:
           path: ~/.npm
           key: ${{ runner.os }}-cache-node-modules-${{ hashFiles('**/package-lock.json') }}
@@ -84,7 +94,7 @@ jobs:
         with:
           node-version: ${{ env.NODE_VERSION }}
       - name: Cache Node Modules
-        uses: actions/cache@v3
+        uses: actions/cache@v4
         with:
           path: ~/.npm
           key: ${{ runner.os }}-cache-node-modules-${{ hashFiles('**/package-lock.json') }}
@@ -106,14 +116,14 @@ jobs:
         working-directory: site
     steps:
       - uses: actions/checkout@v4
-      - uses: shivammathur/setup-php@2.28.0
+      - uses: shivammathur/setup-php@2.30.4
         with:
           php-version: ${{ env.PHP_VER }}
       - name: Cache Composer
         id: composer-cache
         run: echo "dir=$(composer config cache-files-dir)" >> $GITHUB_OUTPUT
       - name: Install Composer
-        uses: actions/cache@v3
+        uses: actions/cache@v4
         with:
           path: ${{ steps.composer-cache.outputs.dir }}
           key: ${{ runner.os }}-composer-${{ hashFiles('**/composer.lock') }}
@@ -141,7 +151,7 @@ jobs:
         working-directory: site
     steps:
       - uses: actions/checkout@v4
-      - uses: shivammathur/setup-php@2.28.0
+      - uses: shivammathur/setup-php@2.30.4
         with:
           php-version: ${{ env.PHP_VER }}
           extensions: imagick
@@ -150,7 +160,7 @@ jobs:
         id: composer-cache
         run: echo "dir=$(composer config cache-files-dir)" >> $GITHUB_OUTPUT
       - name: Install Composer
-        uses: actions/cache@v3
+        uses: actions/cache@v4
         with:
           path: ${{ steps.composer-cache.outputs.dir }}
           key: ${{ runner.os }}-composer-${{ hashFiles('**/composer.lock') }}
@@ -175,7 +185,7 @@ jobs:
         with:
           python-version: ${{ env.PYTHON_VERSION }}
       - name: Cache Pip
-        uses: actions/cache@v3
+        uses: actions/cache@v4
         with:
           path: ~/.cache/pip
           key: ${{ runner.os }}-${{ github.job }}-pip-${{ github.sha }}
@@ -183,9 +193,10 @@ jobs:
               ${{ runner.os }}-${{ github.job }}-pip-
       - name: Install python libraries
         run: python3 -m pip install -r .setup/pip/dev_requirements.txt
-      - name: Run python linting
+      - name: Run flake8
         run: python3 -m flake8
-
+      - name: Run pylint
+        run: python3 -m pylint --recursive=y .
 
   python-unit:
     runs-on: ubuntu-22.04
@@ -195,7 +206,7 @@ jobs:
         with:
           python-version: ${{ env.PYTHON_VERSION }}
       - name: Cache Pip
-        uses: actions/cache@v3
+        uses: actions/cache@v4
         with:
           path: ~/.cache/pip
           key: ${{ runner.os }}-${{ github.job }}-pip-${{ hashFiles('**/system_requirements.txt') }}
@@ -308,7 +319,7 @@ jobs:
       - uses: ./.github/actions/e2e-Setup-Composite
       # TODO: Remove this block after upgrading jsPDF
       - name: Cache Node Modules
-        uses: actions/cache@v3
+        uses: actions/cache@v4
         with:
           path: ~/.npm
           key: ${{ runner.os }}-cache-node-modules-dev-${{ hashFiles('**/package-lock.json') }}
@@ -475,7 +486,7 @@ jobs:
       - uses: ./.github/actions/e2e-Setup-Composite
       # TODO: Remove this block after upgrading jsPDF
       - name: Cache Node Modules
-        uses: actions/cache@v3
+        uses: actions/cache@v4
         with:
           path: ~/.npm
           key: ${{ runner.os }}-cache-node-modules-dev-${{ hashFiles('**/package-lock.json') }}
@@ -539,3 +550,30 @@ jobs:
       - uses: ./.github/actions/e2e-Setup-Composite
       - name: Run integration tests
         run: sudo -E env "PATH=$PATH" python3 /usr/local/submitty/test_suite/integrationTests/run.py
+
+
+  ansible-install:
+    runs-on: ubuntu-22.04
+    steps:
+      - uses: actions/checkout@v4
+      - name: Setup SSH
+        shell: bash
+        run: |
+          ssh-keygen -t rsa -b 4096 -C "github_ci" -N '' -f /home/runner/.ssh/id_rsa
+          ssh-keyscan -t rsa localhost >> /home/runner/.ssh/known_hosts
+          cat /home/runner/.ssh/id_rsa.pub >> /home/runner/.ssh/authorized_keys
+          ssh -T localhost
+          sudo systemctl start postgresql
+
+      - name: Run ansible script
+        shell: bash
+        run: |
+          cd .setup/ansible
+          ansible-playbook --private-key /home/runner/.ssh/id_rsa -e 'ansible_user=runner' -i inventory/submitty playbooks/submitty_install.yml
+      - name: Validate image
+        run: curl --show-error --fail --include http://localhost/authentication/login
+      - uses: actions/upload-artifact@v4
+        if: failure()
+        with:
+          name: install-log
+          path: /usr/local/submitty/install.log
