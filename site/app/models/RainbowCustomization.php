@@ -403,16 +403,16 @@ class RainbowCustomization extends AbstractModel {
 
             // Otherwise return a default benchmark percent object
             return (object) [
-                    'A' => 0.93,
-                    'A-' => 0.90,
-                    'B+' => 0.87,
-                    'B' => 0.83,
-                    'B-' => 0.80,
-                    'C+' => 0.77,
-                    'C' => 0.73,
-                    'C-' => 0.70,
-                    'D+' => 0.67,
-                    'D' => 0.6,
+                    'A' => 93.0,
+                    'A-' => 90.0,
+                    'B+' => 87.0,
+                    'B' => 83.0,
+                    'B-' => 80.0,
+                    'C+' => 77.0,
+                    'C' => 73.0,
+                    'C-' => 70.0,
+                    'D+' => 67.0,
+                    'D' => 60.0,
                 ];
         }
 
