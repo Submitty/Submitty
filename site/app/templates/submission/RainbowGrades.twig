@@ -7,20 +7,18 @@
                 Rainbow Grades
             {% endif %}
         </h1>
-        <div>
+        <div id="rainbow-grades-header">
             {% if show_summary and extra_label is defined and extra_label == "For All Students" %}
-                <div class="btn-wrapper" style="margin:auto;">
+                <div class="btn-wrapper">
                     <button
-                        id="rainbow-grade-download-button"
                         class="btn btn-primary"
                         onclick='downloadFile("/output.csv","rainbow_grades")'
                         tabindex="0"
-                        style="padding:auto;"
                     >
                         Download CSV of grades
                     </button>
                 </div>
-                <p style="float:right">
+                <p>
                     Grades last updated on: 
                     <b>
                     <span>{{ grade_summaries_last_run }}</span>
