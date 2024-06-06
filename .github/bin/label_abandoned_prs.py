@@ -21,12 +21,12 @@ et_today = today.astimezone(eastern)
 
 for json_data in json_output:
     already_warned = False
-    string = json_data['updatedAt']
     for comment in json_data['comments']:
         if comment['body'] == inactive_comment:
             already_warned = True
 
-    json_time = datetime.datetime.fromisoformat(string.replace('Z', '+00:00'))
+    time_string = json_data['updatedAt']
+    json_time = datetime.datetime.fromisoformat(time_string.replace('Z', '+00:00'))
     et_time_update = json_time.astimezone(eastern)
 
     tdiff = et_today - et_time_update
