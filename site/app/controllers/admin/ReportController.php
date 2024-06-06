@@ -757,7 +757,6 @@ class ReportController extends AbstractController {
 
     /**
      * Generate full rainbow grades view for instructors
-     * @return MultiResponse
      * @AccessControl(role="INSTRUCTOR")
      */
     #[Route("/courses/{_semester}/{_course}/gradebook")]
@@ -793,7 +792,6 @@ class ReportController extends AbstractController {
 
     /**
      * Download CSV file for Rainbow Grades
-     * @return null
      */
     #[Route("/courses/{_semester}/{_course}/reports/rainbow_grades_csv")]
     public function downloadRainbowGradesCSVFile() {
