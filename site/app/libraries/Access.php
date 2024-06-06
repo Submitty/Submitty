@@ -930,7 +930,7 @@ class Access {
                 $path = substr($path, 1);
             }
 
-            $path = $info["base"] . "/" . $path;
+            $path = FileUtils::joinPaths($info["base"], $path);
         }
 
         return $path;
