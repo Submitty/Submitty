@@ -72,8 +72,6 @@ class GlobalView extends AbstractView {
         }
 
         $html_lang = str_replace('_', '-', $this->core->getConfig()->getLocale()->getName());
-        $serverTime = new \DateTime();
-        $serverTime = $serverTime->format('U');
 
         return $this->core->getOutput()->renderTwigTemplate("GlobalHeader.twig", [
             "messages" => $messages,
