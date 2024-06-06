@@ -1,5 +1,5 @@
 /* exported redirectToEdit closeButton userFormChange demoteGraderForm deleteUserForm newStudentForm newGraderForm */
-/* global captureTabInModal buildCourseUrl */
+/* global captureTabInModal buildCourseUrl, showPopup, closePopup */
 
 $('#edit-user-form').ready(() => {
     const url = buildCourseUrl(['user_information']);
@@ -54,7 +54,7 @@ function newGraderForm() {
 function newUserForm() {
     $('.popup-form').css('display', 'none');
     const form = $('#edit-user-form');
-    form.css('display', 'block');
+    showPopup('#edit-user-form');
     form.find('.form-body').scrollTop(0);
     $('#edit-student-modal-title').css('display', 'none');
     $('#edit-grader-modal-title').css('display', 'none');
@@ -94,7 +94,7 @@ function editUserForm(user_id) {
             // will help to check whether the userForm is edited or not
             $('[name="edit_user"]', form).attr('data-user', data);
 
-            form.css('display', 'block');
+            showPopup('#edit-user-form');
             form.find('.form-body').scrollTop(0);
             // eslint-disable-next-line eqeqeq
             if (json['user_group'] == 4) {
@@ -131,7 +131,7 @@ function deleteUserForm(user_id, givenname, familyname) {
     $('[name="user_id"]', form).val(user_id);
     $('[name="displayed_fullname"]', form).val(`${givenname} ${familyname}`);
     $('#user-fullname', form).text(`${givenname} ${familyname}`);
-    form.css('display', 'block');
+    showPopup('#delete-user-form');
 }
 
 function demoteGraderForm(user_id, givenname, familyname) {
@@ -140,7 +140,7 @@ function demoteGraderForm(user_id, givenname, familyname) {
     $('[name="user_id"]', form).val(user_id);
     $('[name="displayed_fullname"]', form).val(`${givenname} ${familyname}`);
     $('#grader-fullname', form).text(`${givenname} ${familyname}`);
-    form.css('display', 'block');
+    showPopup('#demote-grader-form');
 }
 
 function userFormChange() {
@@ -432,7 +432,7 @@ function closeButton() {
     }
     if (closeForm) {
         clearUserFormInformation();
-        $('#edit-user-form').css('display', 'none');
+        closePopup('edit-user-form');
     }
 }
 
