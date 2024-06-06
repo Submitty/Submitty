@@ -831,7 +831,8 @@ class ReportController extends AbstractController {
             // Output the file content
             readfile($csvFilePath);
             exit;
-        } else {
+        }
+        else {
             // Handle the case where the file does not exist
             $this->core->getOutput()->showError($csvFilePath . " was not found or was not readable.\nMaybe you have not <a\thref='https://submitty.org/instructor/course_settings/rainbow_grades/automatic_setup'>generated the rainbow grades</a> yet?");
         }
