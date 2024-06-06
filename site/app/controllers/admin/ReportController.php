@@ -135,13 +135,10 @@ class ReportController extends AbstractController {
 
     /**
      * Generates and offers download of CSV grade report
+     * @AccessControl(role="INSTRUCTOR")
      */
     #[Route("/courses/{_semester}/{_course}/reports/csv")]
     public function generateCSVReport() {
-        if (!$this->core->getUser()->accessAdmin()) {
-            $this->core->getOutput()->showError("This account cannot access admin pages");
-        }
-
         $g_sort_keys = [
             'syllabus_bucket',
             'g_id',
@@ -797,9 +794,8 @@ class ReportController extends AbstractController {
     /**
      * Download CSV file for Rainbow Grades
      * @return null
-     *
-     * @Route("/courses/{_semester}/{_course}/reports/rainbow_grades_csv")
      */
+    #[Route("/courses/{_semester}/{_course}/reports/rainbow_grades_csv")]
     public function downloadRainbowGradesCSVFile() {
         // Check if the user has the necessary permissions (e.g., admin access)
         if (!$this->core->getUser()->accessAdmin()) {
