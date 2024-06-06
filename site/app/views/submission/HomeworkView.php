@@ -198,19 +198,14 @@ class HomeworkView extends AbstractView {
         }
 
 
-        $daylight_message_required = false;
         $date = new \DateTime();
-        $daylight_spring = new \DateTime('2024-03-10', $this->core->getConfig()->getTimezone());
-        $daylight_fall = new \DateTime('2024-11-03', $this->core->getConfig()->getTimezone());
+        $future_date = clone $date;
+        $future_date->modify('+7 days');
+        $past_date = clone $date;
+        $past_date->modify('-7 days');
+        $daylight_message_required = ($future_date->format("I") != $past_date->format("I"));
 
-
-        $diff = $date->diff($daylight_spring)->days;
-        $diff2 = $date->diff($daylight_fall)->days;
-
-        if (abs($diff) <= 7 || abs($diff2) <= 7) {
-            $daylight_message_required = true;
-        }
-
+           
         // ------------------------------------------------------------
         // IF STUDENT HAS ALREADY SUBMITTED AND THE ACTIVE VERSION IS LATE, PRINT LATE DAY INFORMATION FOR THE ACTIVE VERSION
         if ($active_version >= 1 && $active_days_late > 0) {
@@ -219,6 +214,8 @@ class HomeworkView extends AbstractView {
                 $error = true;
 
                 // AUTO ZERO BECAUSE INSUFFICIENT LATE DAYS REMAIN
+                
+
                 if ($active_days_late > $late_day_budget) {
                     $messages[] = ['type' => 'too_few_remain', 'info' => [
                         'late' => $active_days_late,
@@ -499,9 +496,6 @@ class HomeworkView extends AbstractView {
         $vcs_partial_path = str_replace('{$vcs_type}', $this->core->getConfig()->getVcsType(), $vcs_partial_path);
         $vcs_partial_path = str_replace('{$gradeable_id}', $gradeable->getId(), $vcs_partial_path);
         $vcs_partial_path = str_replace('{$user_id}', $this->core->getUser()->getId(), $vcs_partial_path);
-        if ($gradeable->isTeamAssignment()) {
-            $vcs_partial_path = str_replace('{$team_id}', $graded_gradeable->getSubmitter()->getId(), $vcs_partial_path);
-        }
 
         $vcs_repo_exists = false;
         if ($gradeable->isVcs()) {
@@ -511,7 +505,8 @@ class HomeworkView extends AbstractView {
                 'git',
                 $this->core->getConfig()->getTerm(),
                 $this->core->getConfig()->getCourse(),
-                $vcs_partial_path
+                $gradeable->getId(),
+                $graded_gradeable->getSubmitter()->getId()
             );
             $vcs_repo_exists = file_exists($path);
         }

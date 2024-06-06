@@ -24,7 +24,6 @@
         {% endif %}
     >
         {% for message in messages %}
-
             {% if message.type == 'extension' %}
                 You have a {{ message.info.extensions }} day deadline extension for this assignment.
             {% elseif message.type == 'too_few_remain' %}

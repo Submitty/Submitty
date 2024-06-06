@@ -124,23 +124,23 @@ it('Check for a clock message near daylight savings times', () => {
     First we set the date to a date close to the spring daylight savings time and then check that the message appears.
     Then we change the date to a month later, and check that the "daylight" message doesn't appear.
     */
+    const currentDate = new Date();
 
-    const dateToSet = new Date();
-    const daylight_spring = new Date('2024-03-10');
-    const daylight_fall = new Date('2024-11-03');
+    const futureDate = new Date(currentDate);
+    futureDate.setDate(currentDate.getDate() + 7);
+    
+    const pastDate = new Date(currentDate);
+    pastDate.setDate(currentDate.getDate() - 7);
 
-    // Check if daylight_spring is 7 days away from dateToSet
-    const isSpringSevenDaysAway = Math.abs((daylight_spring - dateToSet) / (24 * 60 * 60 * 1000)) <= 7;
-
-    // Check if daylight_fall is 7 days away from dateToSet
-    const isFallSevenDaysAway = Math.abs((daylight_fall - dateToSet) / (24 * 60 * 60 * 1000)) <= 7;
+    const daylightSavingsChange =
+    (futureDate.getTimezoneOffset() < 0 && pastDate.getTimezoneOffset() >= 0) ||
+    (futureDate.getTimezoneOffset() >= 0 && pastDate.getTimezoneOffset() < 0);
 
 
-    cy.clock(dateToSet.getTime());
     cy.login('instructor');
     cy.visit(['sample', 'gradeable', 'open_homework']);
 
-    if (isSpringSevenDaysAway || isFallSevenDaysAway) {
+    if (daylightSavingsChanges) {
         cy.get('#daylight').should('exist');
     }
     else {
@@ -398,7 +398,5 @@ describe('Test warning messages for team gradeable', () => {
             }
         });
     });
-
-
     //TO DO https://github.com/Submitty/Submitty/issues/9549 , Add test case to make sure the bugfix worked
 });
