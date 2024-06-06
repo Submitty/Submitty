@@ -6,8 +6,6 @@ This role adds a new user to a course in the Submitty course management system.
 
 You need to set the following variables in your playbook to ensure the user is added as expected:
 
-
-
 - `submitty_course_add_user_username`: The username for the user. This needs to be a unique identifier for the user.
 - `submitty_course_add_user_course`: The course to add the user to.
 - `submitty_course_add_user_firstname`: The first name of the user.

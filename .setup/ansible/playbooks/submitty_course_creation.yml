@@ -6,15 +6,19 @@
   vars:
     submitty_common_php_version: 8.1
 
-  roles:
-    - role: submitty_term_creation
+  tasks:
+    - name: Term Creation
+      ansible.builtin.include_role:
+        name: submitty_term_creation
       vars:
         submitty_term_creation_key: term
         submitty_term_creation_name: term
         submitty_term_creation_start_date: 01/01/2024
         submitty_term_creation_end_date: 06/07/2024
 
-    - role: submitty_course_creation
+    - name: Course Creation
+      ansible.builtin.include_role:
+        name: submitty_course_creation
       vars:
         submitty_course_creation_term: term
         submitty_course_creation_course: course
@@ -24,7 +28,9 @@
         submitty_course_creation_lastname: lastname
         submitty_course_creation_email: email
 
-    - role: submitty_course_add_instructor
+    - name: Add Instructors
+      ansible.builtin.include_role:
+        name: submitty_course_add_instructor
       vars:
         submitty_course_add_instructor_term: term
         submitty_course_add_instructor_course: course
@@ -33,33 +39,32 @@
         submitty_course_add_instructor_lastname: lastname
         submitty_course_add_instructor_email: email
         submitty_course_add_instructor_password: password
-
-    - role: submitty_course_add_user
+    - name: Add Users
+      ansible.builtin.include_role:
+        name: submitty_course_add_user
       vars:
         submitty_course_add_user_term: term
         submitty_course_add_user_course: course
-        submitty_course_add_user_username: aphacker
-        submitty_course_add_user_firstname: firstname
-        submitty_course_add_user_lastname: lastname
-        submitty_course_add_user_email: email
-        submitty_course_add_user_password: password
-
-    - role: submitty_course_add_user
-      vars:
-        submitty_course_add_user_term: term
-        submitty_course_add_user_course: course
-        submitty_course_add_user_username: bitddle
-        submitty_course_add_user_firstname: firstname
-        submitty_course_add_user_lastname: lastname
-        submitty_course_add_user_email: email
-        submitty_course_add_user_password: password
-
-    - role: submitty_course_add_user
-      vars:
-        submitty_course_add_user_term: term
-        submitty_course_add_user_course: course
-        submitty_course_add_user_username: adamsg
-        submitty_course_add_user_firstname: firstname
-        submitty_course_add_user_lastname: lastname
-        submitty_course_add_user_email: email
-        submitty_course_add_user_password: password
+        submitty_course_add_user_username: "{{ user.username }}"
+        submitty_course_add_user_firstname: "{{ user.firstname }}"
+        submitty_course_add_user_lastname: "{{ user.lastname }}"
+        submitty_course_add_user_email: "{{ user.email }}"
+        submitty_course_add_user_password: "{{ user.password }}"
+      loop:
+        - username: aphacker
+          firstname: firstname
+          lastname: lastname
+          email: email
+          password: password
+        - username: bitddle
+          firstname: firstname
+          lastname: lastname
+          email: email
+          password: password
+        - username: adamsg
+          firstname: firstname
+          lastname: lastname
+          email: email
+          password: password
+      loop_control:
+        loop_var: user
