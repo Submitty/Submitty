@@ -38,8 +38,8 @@
     times_helped_row.appendChild(times_helped_cell);
     const url = buildCourseUrl(['queue', 'student_search']);
     search_student_queue_btn.addEventListener('click', event => {
-        table_body.innerHTML = '';
-        table_caption.innerHTML = '';
+        table_body.textContent = '';
+        table_caption.textContent = '';
         $.ajax({
             url: url,
             type: 'POST',
@@ -53,7 +53,7 @@
                 let help_counter = 0;
                 const data = JSON.parse(response).data;
                 const student_data = JSON.parse(data);
-                table_caption.innerHTML = `${student_data[0].name} - (ID:${student_data[0].user_id}) - Contact: ${student_data[0].contact_info}`;
+                table_caption.textContent = `${student_data[0].name} - (ID:${student_data[0].user_id}) - Contact: ${student_data[0].contact_info}`;
                 while (i < student_data.length){
                     const detail_row = document.createElement('tr');
                     let j = i + 1;
@@ -65,20 +65,44 @@
                     const removed_by = student_data[i].removed_by === null ? '-' : student_data[i].removed_by;
                     const helper = student_data[i].help_started_by === null ? '-' : student_data[i].help_started_by;
                     const removal_method = student_data[i].removal_type === null ? '-' : student_data[i].removal_type;
-                    detail_row.innerHTML = `
-                        <td data-testid='student-row'>${j}</td>
-                        <td>${student_data[i].current_state}</td>
-                        <td>${student_data[i].queue_code}</td>
-                        <td>${time_start}</td>
-                        <td>${time_end}</td>
-                        <td>${removed_by}</td>
-                        <td>${helper}</td>
-                        <td>${removal_method}</td>
-                    `;
+
+                    const row_index = document.createElement('td');
+                    row_index.setAttribute('data-testid', 'student-row');
+                    row_index.textContent = j;
+                    detail_row.appendChild(row_index);
+
+                    const row_current_state = document.createElement('td');
+                    row_current_state.textContent = student_data[i].current_state;
+                    detail_row.appendChild(row_current_state);
+
+                    const row_queue_code = document.createElement('td');
+                    row_queue_code.textContent = student_data[i].queue_code;
+                    detail_row.appendChild(row_queue_code);
+
+                    const row_time_start = document.createElement('td');
+                    row_time_start.textContent = time_start;
+                    detail_row.appendChild(row_time_start);
+
+                    const row_time_end = document.createElement('td');
+                    row_time_end.textContent = time_end;
+                    detail_row.appendChild(row_time_end);
+
+                    const row_removed_by = document.createElement('td');
+                    row_removed_by.textContent = removed_by;
+                    detail_row.appendChild(row_removed_by);
+
+                    const row_helper = document.createElement('td');
+                    row_helper.textContent = helper;
+                    detail_row.appendChild(row_helper);
+
+                    const row_removal_method = document.createElement('td');
+                    row_removal_method.textContent = removal_method;
+                    detail_row.appendChild(row_removal_method);
+
                     table_body.appendChild(detail_row);
                     i++;
                 }
-                times_helped_cell.innerHTML = help_counter + ' times helped.';
+                times_helped_cell.textContent = help_counter + ' times helped.';
                 table_body.appendChild(times_helped_row);
             },
             error: function() {
