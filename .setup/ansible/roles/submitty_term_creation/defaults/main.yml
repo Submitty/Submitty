@@ -1,5 +1,5 @@
 ---
-submitty_term_creation_semester: semester
-submitty_term_creation_semester_name: semester_name
+submitty_term_creation_key: term
+submitty_term_creation_name: term_name
 submitty_term_creation_start_date: start_date
 submitty_term_creation_end_date: end_date

@@ -25,13 +25,8 @@
     repo: https://github.com/Submitty/Submitty.git
     dest: /usr/local/submitty/GIT_CHECKOUT/Submitty
     version: "{{ submitty_install_submitty_version }}"
-<<<<<<< HEAD
-    force: yes
-    update: yes
-=======
     force: true
     update: true
->>>>>>> ethan/test
 
 - name: Run install_system.sh script
   ansible.builtin.shell:
