@@ -584,6 +584,8 @@ class ForumController extends AbstractController {
             [$post_id],
             $this->core->getUser()->getId()
         ));
+        $staffLiked = $this->core->getQueries()->getInstructorUpduck($post_id);
+        $boolStaffLiked = in_array($post["id"], $staffLiked, true);
         $GLOBALS['totalAttachments'] = 0;
         $GLOBALS['post_box_id'] = $_POST['post_box_id'];
         $unviewed_posts = [$post_id];
@@ -604,6 +606,7 @@ class ForumController extends AbstractController {
             'tree',
             $upduck_count,
             $upduck_liked_by_user,
+            $boolStaffLiked,
             true,
             $author_info[$post["author_user_id"]],
             $post_attachments[$post["id"]][0],

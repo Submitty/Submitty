@@ -770,7 +770,7 @@ SQL;
 
     /**
      * get what posts should be loaded in with "staff upduck" upduck
-     * returns array that links each post with a bool if it is staff upducked or not
+     * returns array of posts that the staff upducked
      *
      * @param int[] $post_ids
      * @return int[]
@@ -786,7 +786,7 @@ SQL;
                 FROM forum_upducks f
                 JOIN users u ON f.user_id = u.user_id
                 WHERE f.post_id IN {$placeholders}
-                AND u.user_group IN (1, 2, 3)
+                AND u.user_group <= 3
                 GROUP BY f.post_id";
 
         // Execute the query with the post_ids as parameters
