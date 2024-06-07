@@ -203,7 +203,7 @@ class HomeworkView extends AbstractView {
         $future_date->modify('+7 days');
         $past_date = clone $date;
         $past_date->modify('-7 days');
-        $daylight_message_required = ($future_date->format("I") != $past_date->format("I"));
+        $daylight_message_required = ($future_date->format("I") !== $past_date->format("I"));
 
         // ------------------------------------------------------------
         // IF STUDENT HAS ALREADY SUBMITTED AND THE ACTIVE VERSION IS LATE, PRINT LATE DAY INFORMATION FOR THE ACTIVE VERSION
@@ -493,6 +493,9 @@ class HomeworkView extends AbstractView {
         $vcs_partial_path = str_replace('{$vcs_type}', $this->core->getConfig()->getVcsType(), $vcs_partial_path);
         $vcs_partial_path = str_replace('{$gradeable_id}', $gradeable->getId(), $vcs_partial_path);
         $vcs_partial_path = str_replace('{$user_id}', $this->core->getUser()->getId(), $vcs_partial_path);
+        if ($gradeable->isTeamAssignment()) {
+            $vcs_partial_path = str_replace('{$team_id}', $graded_gradeable->getSubmitter()->getId(), $vcs_partial_path);
+        }
 
         $vcs_repo_exists = false;
         if ($gradeable->isVcs()) {
@@ -502,8 +505,7 @@ class HomeworkView extends AbstractView {
                 'git',
                 $this->core->getConfig()->getTerm(),
                 $this->core->getConfig()->getCourse(),
-                $gradeable->getId(),
-                $graded_gradeable->getSubmitter()->getId()
+                $vcs_partial_path
             );
             $vcs_repo_exists = file_exists($path);
         }
