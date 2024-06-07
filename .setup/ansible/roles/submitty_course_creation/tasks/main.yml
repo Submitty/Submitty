@@ -117,9 +117,9 @@
   register: submitty_course_creation
   changed_when: submitty_course_creation.rc != 0
 
-- name: Restart php8.1-fpm service.
+- name: Restart "php{{ submitty_common_php_version }}-fpm" service.
   ansible.builtin.systemd:
-    name: php8.1-fpm
+    name: "php{{ submitty_common_php_version }}-fpm"
     state: restarted
   become: true
   become_user: root
