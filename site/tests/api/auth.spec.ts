@@ -1,5 +1,5 @@
 import { describe, expect, it } from '@jest/globals';
-import { postRequest, getRequest } from './utils';
+import {postRequest, getRequest} from './utils';
 
 describe('Test cases revolving around the API', () => {
     it('should authenticate a user', async () => {
