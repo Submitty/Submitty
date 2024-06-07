@@ -15,6 +15,7 @@
     display: flex;
     flex-direction: column;
     align-items: center;
+    margin-top: 5px;
 }
 
 .cal-month-title {
@@ -39,6 +40,10 @@
     padding: 0;
     font-family: "Source Sans Pro", sans-serif;
     color: var(--text-black);
+}
+
+[data-theme="dark"] .dropdown-custom option {
+    background-color: var(--background-blue);
 }
 
 .cal-btn {

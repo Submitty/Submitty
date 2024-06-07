@@ -458,133 +458,8 @@ function buildSwitchingHeader(view_year, view_month, view_day, type) {
     let prev;
     if (type === 'month') {
         prev = prevMonth(view_month, view_year, view_day);
-    } else {
-        prev = prevWeek(view_month, view_year, view_day);
-        prev.push(type);
-    }
-    a.onclick = () => loadCalendar.apply(this, prev);
-    a.innerHTML = '<i class="fas fa-angle-left"></i>';
-
-    // Append to header
-    div.appendChild(a);
-    th1.appendChild(div);
-
-    // Build second header column
-    const th2 = document.createElement('th');
-    th2.colSpan = 1;
-    div = document.createElement('div');
-    div.classList.add('cal-title');
-
-    // Create the month dropdown
-    const monthSelect = document.createElement('select');
-    monthSelect.id = 'month-dropdown';
-    for (let itermonth = 1; itermonth <= 12; itermonth++) {
-        const monthOption = document.createElement('option');
-        monthOption.value = itermonth;
-        monthOption.textContent = monthNames[itermonth];
-        monthSelect.appendChild(monthOption);
-    }
-    monthSelect.classList.add('cal-month-title');
-    monthSelect.value = view_month;
-
-    monthSelect.onchange = function() {
-        const type = $('#calendar-item-type-edit').val();
-        let newMonth = parseInt(this.value);
-        let newYear = parseInt(document.getElementById('year-dropdown').value);
-
-        Cookies.set('calendar_month', newMonth);
-        Cookies.set('calendar_year', newYear);
-
-        loadCalendar(newMonth, newYear, view_day, type);
-    };
-
-    // Create the year dropdown
-    let currentYear = new Date().getFullYear();
-    const yearSelect = document.createElement('select');
-    yearSelect.id = 'year-dropdown';
-    for (let year = 2014; year <= currentYear + 5; year++) {
-        const yearOption = document.createElement('option');
-        yearOption.value = year;
-        yearOption.textContent = year;
-        yearSelect.appendChild(yearOption);
-    }
-    yearSelect.classList.add('cal-year-title');
-    yearSelect.value = view_year;
-
-    yearSelect.onchange = function() {
-        const type = $('#calendar-item-type-edit').val();
-        let newYear = parseInt(this.value);
-        let newMonth = parseInt(document.getElementById('month-dropdown').value);
-
-        Cookies.set('calendar_year', newYear);
-        Cookies.set('calendar_month', newMonth);
-
-        loadCalendar(newMonth, newYear, view_day, type);
-    };
-
-    // Add the month and year dropdowns side by side
-    const dropdownContainer = document.createElement('div');
-    dropdownContainer.style.display = 'flex';
-    dropdownContainer.style.alignItems = 'center';
-    dropdownContainer.appendChild(monthSelect);
-    dropdownContainer.appendChild(yearSelect);
-
-    div.appendChild(dropdownContainer);
-    th2.appendChild(div);
-
-    // Build third header column
-    const th3 = document.createElement('th');
-    th3.colSpan = 3;
-    div = document.createElement('div');
-    div.classList.add('cal-switch');
-    div.id = 'next-month-switch';
-    a = document.createElement('a');
-    a.classList.add('cal-btn', 'cal-next-btn');
-
-    // Change onclick based on type
-    let next;
-    if (type === 'month') {
-        next = nextMonth(view_month, view_year, view_day);
-    } else {
-        next = nextWeek(view_month, view_year, view_day);
-        next.push(type);
-    }
-    a.onclick = () => loadCalendar.apply(this, next);
-    a.innerHTML = '<i class="fas fa-angle-right"></i>';
-
-    // Append to header
-    div.appendChild(a);
-    th3.appendChild(div);
-
-    fragment.appendChild(th1);
-    fragment.appendChild(th2);
-    fragment.appendChild(th3);
-    return fragment;
-}
-
-/**
- * Builds a title/header for semester calendar
- *
- * @param semester_name the name of the semester
- * @returns {DocumentFragment} the HTML element containing the title/header
- */
-function buildSwitchingHeader(view_year, view_month, view_day, type) {
-    const fragment = document.createDocumentFragment();
-
-    // Build first header column
-    const th1 = document.createElement('th');
-    th1.colSpan = 3;
-    let div = document.createElement('div');
-    div.classList.add('cal-switch');
-    div.id = 'prev-month-switch';
-    let a = document.createElement('a');
-    a.classList.add('cal-btn', 'cal-prev-btn');
-
-    // Change onclick based on type
-    let prev;
-    if (type === 'month') {
-        prev = prevMonth(view_month, view_year, view_day);
-    } else {
+    } 
+    else {
         prev = prevWeek(view_month, view_year, view_day);
         prev.push(type);
     }
@@ -673,7 +548,8 @@ function buildSwitchingHeader(view_year, view_month, view_day, type) {
     let next;
     if (type === 'month') {
         next = nextMonth(view_month, view_year, view_day);
-    } else {
+    } 
+    else {
         next = nextWeek(view_month, view_year, view_day);
         next.push(type);
     }
@@ -884,7 +760,7 @@ function generateCalendarOfMonthTwoWeek(view_year, view_month, view_day) {
  */
 function generateFullCalendar(start, end, semester_name) {
     // Header area: two buttons to move, and month
-    const table = generateCalendarHeader(buildSemesterHeader(semester_name));
+    const table = generateCalendarHeader(semester_name);
     const tableBody = document.createElement('tbody');
     const startDate = parseDate(start);
     const endDate = parseDate(end);
