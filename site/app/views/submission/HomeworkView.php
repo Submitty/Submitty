@@ -205,7 +205,6 @@ class HomeworkView extends AbstractView {
         $past_date->modify('-7 days');
         $daylight_message_required = ($future_date->format("I") != $past_date->format("I"));
 
-           
         // ------------------------------------------------------------
         // IF STUDENT HAS ALREADY SUBMITTED AND THE ACTIVE VERSION IS LATE, PRINT LATE DAY INFORMATION FOR THE ACTIVE VERSION
         if ($active_version >= 1 && $active_days_late > 0) {

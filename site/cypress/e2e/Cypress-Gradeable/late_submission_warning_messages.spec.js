@@ -127,7 +127,7 @@ it('Check for a clock message near daylight savings times', () => {
     const currentDate = new Date();
     const futureDate = new Date(currentDate);
     futureDate.setDate(currentDate.getDate() + 7);
-    
+
     const pastDate = new Date(currentDate);
     pastDate.setDate(currentDate.getDate() - 7);
 
