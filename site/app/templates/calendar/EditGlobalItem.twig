@@ -1,0 +1,61 @@
+{% extends 'generic/Popup.twig' %}
+{% block popup_id %}edit-global-item-form{% endblock %}
+{% block title %}Edit Global Item{% endblock %}
+{% block body %}
+    <p class="std-margin">
+        Edit or delete this calendar item.
+    </p>
+
+    <label for="calendar-item-type">
+        Message Type
+        <i style="font-style:normal;" class="fa-question-circle" title="Announcements are italized, notes are normal text."></i> 
+    </label>
+    <select id="global-calendar-item-type-edit" name="type">
+        <option value="text">Note</option>
+        <option value="ann">Announcement</option>
+    </select><br>
+    <label for="global-calendar-item-text-edit">Message Text</label>
+    <input type="text" id="global-calendar-item-text-edit" name="text"><br>
+    <label for="edit-global-picker">Date</label>
+    <input id="edit-global-picker" class="edit-picker" type="text" name="date">
+    <input hidden name="csrf_token" value="{{ core.getCsrfToken() }}">
+    <input hidden id="global-calendar-item-id" name="id">
+    <script>
+        flatpickr('.edit-global-picker', {
+            plugins: [ShortcutButtonsPlugin(
+                    {
+                        button: [
+                            {
+                                label: "Today"
+                            }
+                        ],
+                        onClick: (index, fp) => {
+                            let date;
+                            switch (index) {
+                                case 0:
+                                    date = new Date();
+                                    break;
+                            }
+                            fp.setDate(date);
+                        }
+                    }
+            )],
+            allowInput: true,
+            time_24hr: true,
+            dateFormat: "Y-m-d",
+            onReady: (a, b, fp) => {
+                fp.calendarContainer.firstChild.childNodes[1].firstChild.firstChild.setAttribute('aria-label', 'Month');
+            }
+        });
+    </script>
+{% endblock %}
+{% block form %}
+    <form method="post" action="/calendar/global_items/edit">
+        {{ parent() }}
+    </form>
+{% endblock %}
+{% block buttons %}
+    <input class="btn btn-danger" type="button" value="Delete" style="float: left;" onclick="deleteGlobalCalendarItem()">
+    {{ block('close_button') }}
+    <input class="btn btn-primary" type="submit" value="Submit" />
+{% endblock %}
