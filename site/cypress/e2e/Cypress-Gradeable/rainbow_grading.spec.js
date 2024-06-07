@@ -25,7 +25,6 @@ describe('Test Rainbow Grading', () => {
         ['ta', 'student', 'grader', 'instructor'].forEach((username) => {
             cy.logout();
             cy.login(username);
-            console.log(username);
             cy.visit(['sample', 'grades']);
             cy.get('[data-testid="rainbow-grades"]').should('contain', `Lecture Participation Polls for: ${username}`);
             if (username==='instructor') {
