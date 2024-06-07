@@ -3,38 +3,40 @@ import { postRequest, getRequest } from './utils';
 import { getCurrentSemester } from './utils';
 
 test('Should get correct responses', async () => {
-    const instructor_key = await postRequest('/api/token', {
+    Promise.resolve(postRequest('/api/token', {
         user_id: 'instructor',
         password: 'instructor',
+    })).then(response => {
+        getRequest(
+            `/api/${getCurrentSemester(false)}/sample/gradeable/subdirectory_vcs_homework/values?user_id=student`,
+            response.data.token,
+        ).then(instructors_values_request => {
+            console.log(instructors_values_request);
+            expect(instructors_values_request).toHaveProperty('status', 'success');
+            // Can't test exact values due to randomness of CI speed
+            const data = JSON.stringify(instructors_values_request.data);
+            expect(data).toContain('is_queued');
+            expect(data).toContain('queue_position');
+            expect(data).toContain('is_grading');
+            expect(data).toContain('has_submission');
+            expect(data).toContain('autograding_complete');
+            expect(data).toContain('has_active_version');
+            expect(data).toContain('highest_version');
+            expect(data).toContain('total_points');
+            expect(data).toContain('total_percent');
+        });
+        
+        getRequest(
+            `/api/${getCurrentSemester(false)}/sample/gradeable/subdirectory_vcs_homework/values?user_id=not_a_student`,
+            response.data.token,
+        ).then(instructors_bad_values_request=> {
+            expect(instructors_bad_values_request).toHaveProperty('status', 'fail');
+            expect(instructors_bad_values_request).toHaveProperty(
+                'message',
+                'Graded gradeable for user with id not_a_student does not exist',
+            );
+        });
     });
-
-    getRequest(
-        `/api/${getCurrentSemester(false)}/sample/gradeable/subdirectory_vcs_homework/values?user_id=student`,
-        instructor_key.data.token,
-    ).then(instructors_values_request => {
-        expect(instructors_values_request).toHaveProperty('status', 'success');
-        // Can't test exact values due to randomness of CI speed
-        const data = JSON.stringify(instructors_values_request.data);
-        expect(data).toContain('is_queued');
-        expect(data).toContain('queue_position'),
-        expect(data).toContain('is_grading'),
-        expect(data).toContain('has_submission'),
-        expect(data).toContain('autograding_complete'),
-        expect(data).toContain('has_active_version'),
-        expect(data).toContain('highest_version'),
-        expect(data).toContain('total_points'),
-        expect(data).toContain('total_percent');
-    });
-
-    const instructors_bad_values_request = await getRequest(
-        `/api/${getCurrentSemester(false)}/sample/gradeable/subdirectory_vcs_homework/values?user_id=not_a_student`,
-        instructor_key.data.token,
-    );
-    expect(instructors_bad_values_request).toHaveProperty('status', 'fail');
-    expect(instructors_bad_values_request).toHaveProperty(
-        'message',
-        'Graded gradeable for user with id not_a_student does not exist',
-    );
 
     const student_key = await postRequest('/api/token', {
         user_id: 'student',
@@ -117,7 +119,7 @@ test('Should get correct responses', async () => {
 
     // Gradeable doesn't exist
     getRequest(
-        `api/${getCurrentSemester(false)}/sample/gradeable/not_found_gradeable/values?user_id=student`,
+        `/api/${getCurrentSemester(false)}/sample/gradeable/not_found_gradeable/values?user_id=student`,
         student_key.data.token,
     ).then((response) => {
         expect(response).toHaveProperty('status', 'success');

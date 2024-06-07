@@ -1,6 +1,6 @@
 import fetch, { HeadersInit } from 'node-fetch';
 
-const BASE_URL = process.env.BASE_URL || "http://localhost:1511";
+const BASE_URL = process.env.BASE_URL || "http://127.0.0.1:1511";
 
 function getHeaders(auth: string | null = null) {
     const headers: HeadersInit = {'Content-Type': 'application/json'};
