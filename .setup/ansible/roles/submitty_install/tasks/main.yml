@@ -24,7 +24,7 @@
   ansible.builtin.git:
     repo: https://github.com/Submitty/Submitty.git
     dest: /usr/local/submitty/GIT_CHECKOUT/Submitty
-    version: "{{ submitty_version }}"
+    version: "{{ submitty_install_submitty_version }}"
     force: yes
     update: yes
 
@@ -33,40 +33,43 @@
     executable: "/bin/bash"
     cmd: |
       set -o pipefail
-      echo  "{{ db_host }}
-        {{ db_port }}
-        {{ submitty_dbuser }}
-        {{ submitty_dbuser_password }}
-        {{ submitty_course_dbuser }}
-        {{ submitty_course_dbuser_password }}
-        {{ timezone }}
-        {{ language }}
-        {{ 'https' if ssl_enabled else 'http' }}://{{ submitty_url }}
-        {{ vcs_url }}
-        {{ institution_name }}
-        {{ sysadmin_email }}
-        {{ submitty_email }}
-        {{ institution_url }}
-        {{ authentication_method }}
-        {{ admin_email }}
-        {{ email_enabled }}
-        {{ admin_email }}
-        {{ admin_password }}
-        {{ submitty_ip }}
-        {{ submitty_email }}
-        {{ noreply_email }}
-        {{ smtp_server }}
-        {{ smtp_port }}
-        {{ institution_url }}
+      echo  "{{ submitty_install_db_host }}
+        {{ submitty_install_db_port }}
+        {{ submitty_install_submitty_dbuser }}
+        {{ submitty_install_submitty_dbuser_password }}
+        {{ submitty_install_submitty_course_dbuser }}
+        {{ submitty_install_submitty_course_dbuser_password }}
+        {{ submitty_install_timezone }}
+        {{ submitty_install_language }}
+        {{ 'https' if submitty_install_ssl_enabled else 'http' }}://{{ submitty_install_submitty_url }}
+        {{ submitty_install_vcs_url }}
+        {{ submitty_install_institution_name }}
+        {{ submitty_install_sysadmin_email }}
+        {{ submitty_install_submitty_email }}
+        {{ submitty_install_institution_url }}
+        {{ submitty_install_authentication_method }}
+        {{ submitty_install_admin_email }}
+        {{ submitty_install_email_enabled }}
+        {{ submitty_install_admin_email }}
+        {{ submitty_install_admin_password }}
+        {{ submitty_install_submitty_ip }}
+        {{ submitty_install_submitty_email }}
+        {{ submitty_install_noreply_email }}
+        {{ submitty_install_smtp_server }}
+        {{ submitty_install_smtp_port }}
+        {{ submitty_install_institution_url }}
         " | bash -p ./.setup/install_system.sh > /usr/local/submitty/install.log 2>&1
 
   args:
     chdir: /usr/local/submitty/GIT_CHECKOUT/Submitty
   become: true
   become_user: root
+  register: submitty_install_output
+  changed_when: submitty_install_output.rc != 0
 
 - name: Check to see if installation succeeded
-  ansible.builtin.shell: grep "INSTALLATION SUCCESS!" /usr/local/submitty/install.log
+  ansible.builtin.command: grep "INSTALLATION SUCCESS!" /usr/local/submitty/install.log
+  changed_when: False
 
 - name: Update the PHP disabled functions
   ansible.builtin.lineinfile:
@@ -87,25 +90,25 @@
     path: /etc/apache2/sites-available/submitty.conf
     regexp: '<VirtualHost \*:80>'
     replace: "{{ lookup('file', 'append_to_submitty.conf') }}"
-  when: ssl_enabled | bool
+  when: submitty_install_ssl_enabled | bool
 
 - name: Add ip to the Apache Submitty configuration
   ansible.builtin.replace:
     path: /etc/apache2/sites-available/submitty.conf
     regexp: "Require host __your_domain__"
-    replace: "Require ip {{ submitty_ip }}"
+    replace: "Require ip {{ submitty_install_submitty_ip }}"
 
 - name: Add domain to the Apache Submitty configuration
   ansible.builtin.replace:
     path: /etc/apache2/sites-available/submitty.conf
     regexp: "__your_domain__"
-    replace: "{{ submitty_url }}"
+    replace: "{{ submitty_install_submitty_url }}"
 
 - name: Add email
   ansible.builtin.replace:
     path: /etc/apache2/sites-available/submitty.conf
     regexp: "ADMIN@DOMAIN.HERE"
-    replace: "{{ submitty_email }}"
+    replace: "{{ submitty_install_submitty_email }}"
 
 - name: Uncomment ServerName
   ansible.builtin.replace:
@@ -115,6 +118,8 @@
 
 - name: Run a2ensite submitty
   ansible.builtin.command: a2ensite submitty
+  register: submitty_install_output
+  changed_when: submitty_install_output.rc != 0
 
 - name: Restart service apache2
   ansible.builtin.service:
