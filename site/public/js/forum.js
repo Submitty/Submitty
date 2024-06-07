@@ -1297,7 +1297,7 @@ function modifyThreadList(currentThreadId, currentCategoriesId, course, loadFirs
     });
 }
 
-function toggleLike(post_id, current_user, userGroup) {
+function toggleLike(post_id, current_user) {
     // eslint-disable-next-line no-undef
     const url = buildCourseUrl(['posts', 'likes']);
     $.ajax({
@@ -1324,11 +1324,10 @@ function toggleLike(post_id, current_user, userGroup) {
                 displayErrorMessage(json['message']);
                 return;
             }
-            console.log(json);
             json=json['data'];
             const likes = json['likesCount'];
             const liked = json['status'];
-            const taLiked = json['likesFromStaff'];
+            const staffLiked = json['likesFromStaff'];
 
             const likeCounterElement = document.getElementById(`likeCounter_${post_id}`);
             let likeCounter = parseInt(likeCounterElement.innerText);
@@ -1337,15 +1336,14 @@ function toggleLike(post_id, current_user, userGroup) {
             const likeIconSrc = document.getElementById(`likeIcon_${post_id}`);
             let likeIconSrcElement = likeIconSrc.src;
 
-            if (liked ==='unlike') {
+            if (liked === 'unlike') {
                 likeIconSrcElement = likeIconSrcElement.replace('on-duck-button.svg', 'light-mode-off-duck.svg');
-                if (userGroup === 1 || userGroup === 2 || userGroup === 3) {
-                    if (taLiked>0) {
-                        $(`#likedByInstructor_${post_id}`).show();
-                    }
-                    else {
-                        $(`#likedByInstructor_${post_id}`).hide();
-                    }
+
+                if (staffLiked > 0) {
+                    $(`#likedByInstructor_${post_id}`).show();
+                }
+                else {
+                    $(`#likedByInstructor_${post_id}`).hide();
                 }
 
                 likeCounter=likes;//set to the sql like value
@@ -1355,13 +1353,11 @@ function toggleLike(post_id, current_user, userGroup) {
             }
             else if (liked ==='like') {
                 likeIconSrcElement = likeIconSrcElement.replace('light-mode-off-duck.svg', 'on-duck-button.svg');
-                if (userGroup === 1 || userGroup === 2 || userGroup === 3) {
-                    if (taLiked>0) {
-                        $(`#likedByInstructor_${post_id}`).show();
-                    }
-                    else {
-                        $(`#likedByInstructor_${post_id}`).hide();
-                    }
+                if (staffLiked > 0) {
+                    $(`#likedByInstructor_${post_id}`).show();
+                }
+                else {
+                    $(`#likedByInstructor_${post_id}`).hide();
                 }
                 likeCounter=likes;
                 likeIconSrc.src = likeIconSrcElement; // Update the state

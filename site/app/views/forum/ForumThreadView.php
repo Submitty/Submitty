@@ -485,7 +485,7 @@ class ForumThreadView extends AbstractView {
         $upDuckCounter_map = [];
         $upDuckCounter_map = $this->core->getQueries()->getUpduckInfoForPosts($post_ids);
         $userLiked = $this->core->getQueries()->getUserLikesForPosts($post_ids, $current_user);
-        $likedByTa = $this->core->getQueries()->getInstructorUpduck($post_ids);
+        $staffLiked = $this->core->getQueries()->getInstructorUpduck($post_ids);
         if ($display_option == "tree") {
             $order_array = [];
             $reply_level_array = [];
@@ -529,8 +529,7 @@ class ForumThreadView extends AbstractView {
 
                         $boolLiked = in_array($post["id"], $userLiked, true);
 
-                        $taTrue = true;
-                        $taTrue = in_array($post["id"], $likedByTa, true);
+                        $boolStaffLiked = in_array($post["id"], $staffLiked, true);
 
                         $post_data[] = $this->createPost(
                             $first_post_author_id,
@@ -543,7 +542,7 @@ class ForumThreadView extends AbstractView {
                             $display_option,
                             $upDuckCounter_map[$post["id"]],
                             $boolLiked,
-                            $taTrue,
+                            $boolStaffLiked,
                             $includeReply,
                             $authors_display_info[$post['author_user_id']],
                             $post_attachments[$post["id"]][0],
@@ -567,7 +566,7 @@ class ForumThreadView extends AbstractView {
             foreach ($posts as $post) {
                 $post["author_user_group"] = $author_user_groups_map[$post["author_user_id"]];
                 $boolLiked = in_array($post["id"], $userLiked, true);
-                $taTrue = in_array($post["id"], $likedByTa, true);
+                $boolStaffLiked = in_array($post["id"], $staffLiked, true);
                 $post_data[] = $this->createPost(
                     $first_post_author_id,
                     $first_post_anonymous,
@@ -579,7 +578,7 @@ class ForumThreadView extends AbstractView {
                     $display_option,
                     $upDuckCounter_map[$post["id"]],
                     $boolLiked,
-                    $taTrue,
+                    $boolStaffLiked,
                     $includeReply,
                     $authors_display_info[$post['author_user_id']],
                     $post_attachments[$post["id"]][0],

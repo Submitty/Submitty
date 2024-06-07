@@ -819,6 +819,6 @@
     font-size: 15px;
     vertical-align: middle;
     font-style: italic;
-    color: #ffba00;
+    color: var(--important-post);
     font-weight: bold;
 }

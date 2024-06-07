@@ -741,7 +741,7 @@ SQL;
                              FROM forum_upducks f
                              JOIN users u ON f.user_id = u.user_id
                              WHERE f.post_id = ?
-                             AND u.user_group IN (1, 2, 3)";
+                             AND u.user_group <= 3";
             if ($inDatabase) {
                 $this->course_db->query("DELETE FROM forum_upducks WHERE post_id = ? AND user_id = ?", [$post_id, $current_user]);
                 $action = "unlike";
