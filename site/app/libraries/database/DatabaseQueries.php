@@ -2365,32 +2365,6 @@ ORDER BY {$orderby}",
     }
 
     /**
-     * Returns a boolean to indicate whether the given gradable has limited access graders or not
-     * @param string $g_id
-     * @return boolean
-     */
-    public function getUsesLimitedAccessGraders(string $g_id){
-        $this->course_db->query(
-            "
-            SELECT
-                g.g_min_grading_group >= 3 as val
-            FROM
-                gradeable as g
-            WHERE
-                g.g_id = ?
-            ;
-            ",
-            [$g_id]
-        );
-
-        foreach ($this->course_db->rows() as $row) {
-            return $row['val'];
-        }
-        
-        return false;
-    }
-
-    /**
      * Gets the number of bad (late) graded components associated with this gradeable.
      *
      * @param  int $g_id gradeable id we are looking up

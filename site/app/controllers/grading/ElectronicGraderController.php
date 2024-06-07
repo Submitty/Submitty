@@ -584,7 +584,6 @@ class ElectronicGraderController extends AbstractController {
         $total_users_who_submitted = [];
         $graders_of_inquiries = [];
         $verified_components = [];
-        $uses_limited_access_graders = $this->core->getQueries()->getUsesLimitedAccessGraders($gradeable_id);
 
         // Assure late day cache is calculated
         $this->core->getQueries()->generateLateDayCacheForUsers();
@@ -919,8 +918,7 @@ class ElectronicGraderController extends AbstractController {
             $grade_inquiries,
             $graders_of_inquiries,
             $show_warnings,
-            $submissions_in_queue,
-            $uses_limited_access_graders
+            $submissions_in_queue
         );
     }
 

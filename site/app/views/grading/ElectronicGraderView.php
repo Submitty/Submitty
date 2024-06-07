@@ -56,8 +56,7 @@ class ElectronicGraderView extends AbstractView {
         int $grade_inquiries,
         array $graders_of_inquiries,
         bool $show_warnings,
-        int $submissions_in_queue,
-        bool $uses_limited_access_graders
+        int $submissions_in_queue
     ) {
 
         $peer = $gradeable->hasPeerComponent();
@@ -372,7 +371,6 @@ class ElectronicGraderView extends AbstractView {
             "warnings" => $warnings,
             "submissions_in_queue" => $submissions_in_queue,
             "can_manage_teams" => $this->core->getAccess()->canI('grading.electronic.show_edit_teams', ["gradeable" => $gradeable]),
-            "uses_limited_access_graders" => $uses_limited_access_graders
         ]);
     }
 
