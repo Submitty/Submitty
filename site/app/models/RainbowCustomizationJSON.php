@@ -26,6 +26,10 @@ class RainbowCustomizationJSON extends AbstractModel {
     private $display = [];
     private $benchmark_percent;         // Init in constructor
     private $gradeables = [];
+    /**
+     * @var object[]
+     */
+    private array $plagiarism = [];
 
     // The order of allowed_display and allowed_display_description has to match
     const allowed_display = ['grade_summary', 'grade_details', 'benchmark_percent',
@@ -67,6 +71,16 @@ class RainbowCustomizationJSON extends AbstractModel {
     public function getGradeables() {
         return $this->gradeables;
     }
+
+    /**
+     * Get array of plagiarism
+     *
+     * @return array<object>
+     */
+    public function getPlagiarism(): array {
+        return $this->plagiarism;
+    }
+
 
     /**
      * Gets an array of display benchmarks
@@ -179,6 +193,10 @@ class RainbowCustomizationJSON extends AbstractModel {
         if (isset($json->gradeables)) {
             $this->gradeables = $json->gradeables;
         }
+
+        if (isset($json->plagiarism)) {
+            $this->plagiarism = $json->plagiarism;
+        }
     }
 
     /**
@@ -274,6 +292,34 @@ class RainbowCustomizationJSON extends AbstractModel {
 
         $this->messages[] = $message;
     }
+
+
+    /**
+     * Add plagiarism entry to existing array
+     *
+     * @param object{
+     *     "user": string,
+     *     "gradeable": string,
+     *     "penalty": int
+     * } $plagiarismEntry
+     */
+    public function addPlagiarismEntry(object $plagiarismEntry): void {
+        $emptyArray = [
+            "user" => "",
+            "gradeable" => "",
+            "penalty" => 0
+        ];
+
+        $plagiarismArray = json_decode(json_encode($plagiarismEntry), true);
+
+        if ($plagiarismArray === $emptyArray) {
+            throw new BadArgumentException('Plagiarism entry may not be empty.');
+        }
+
+        $this->plagiarism[] = $plagiarismEntry;
+    }
+
+
 
     /**
      * Save the contents in this objects properties to the customization.json for the current course

@@ -373,7 +373,62 @@ CREATE FUNCTION public.sync_user() RETURNS trigger
         $$;
 
 
+--
+-- Name: update_previous_registration_section(); Type: FUNCTION; Schema: public; Owner: -
+--
+
+CREATE FUNCTION public.update_previous_registration_section() RETURNS trigger
+    LANGUAGE plpgsql
+    AS $$
+BEGIN
+	IF (
+		(NEW.registration_section IS NULL AND OLD.registration_section IS NOT NULL)
+		OR NEW.registration_section != OLD.registration_section
+	) THEN
+		NEW.previous_registration_section := OLD.registration_section;
+	END IF;
+	RETURN NEW;
+END;
+$$;
+
+
 SET default_tablespace = '';
+
+
+--
+-- Name: community_events; Type: TABLE; Schema: public; Owner: -
+--
+
+CREATE TABLE public.community_events (
+    id integer NOT NULL,
+    community_path character varying(255) NOT NULL,
+    name character varying(255) NOT NULL,
+    folder_name character varying(255) NOT NULL,
+    extra_info character varying(255),
+    link_name character varying(255),
+    release_date timestamp(6) without time zone,
+    closing_date timestamp(6) without time zone
+);
+
+
+--
+-- Name: community_events_id_seq; Type: SEQUENCE; Schema: public; Owner: -
+--
+
+CREATE SEQUENCE public.community_events_id_seq
+    AS integer
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+--
+-- Name: community_events_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: -
+--
+
+ALTER SEQUENCE public.community_events_id_seq OWNED BY public.community_events.id;
 
 
 --
@@ -416,6 +471,7 @@ CREATE TABLE public.courses_users (
     registration_section character varying(255),
     registration_type character varying(255) DEFAULT 'graded'::character varying,
     manual_registration boolean DEFAULT false,
+    previous_registration_section character varying(255),
     CONSTRAINT check_registration_type CHECK (((registration_type)::text = ANY (ARRAY[('graded'::character varying)::text, ('audit'::character varying)::text, ('withdrawn'::character varying)::text, ('staff'::character varying)::text]))),
     CONSTRAINT users_user_group_check CHECK (((user_group >= 1) AND (user_group <= 4)))
 );
@@ -625,6 +681,13 @@ ALTER SEQUENCE public.vcs_auth_tokens_id_seq OWNED BY public.vcs_auth_tokens.id;
 
 
 --
+-- Name: community_events id; Type: DEFAULT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.community_events ALTER COLUMN id SET DEFAULT nextval('public.community_events_id_seq'::regclass);
+
+
+--
 -- Name: emails id; Type: DEFAULT; Schema: public; Owner: -
 --
 
@@ -643,6 +706,14 @@ ALTER TABLE ONLY public.saml_mapped_users ALTER COLUMN id SET DEFAULT nextval('p
 --
 
 ALTER TABLE ONLY public.vcs_auth_tokens ALTER COLUMN id SET DEFAULT nextval('public.vcs_auth_tokens_id_seq'::regclass);
+
+
+--
+-- Name: community_events community_events_pkey; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.community_events
+    ADD CONSTRAINT community_events_pkey PRIMARY KEY (id);
 
 
 --
@@ -769,6 +840,13 @@ CREATE TRIGGER after_delete_sync_delete_user_cleanup AFTER DELETE ON public.cour
 --
 
 CREATE TRIGGER before_delete_sync_delete_user BEFORE DELETE ON public.courses_users FOR EACH ROW EXECUTE PROCEDURE public.sync_delete_user();
+
+
+--
+-- Name: courses_users before_update_courses_update_previous_registration_section; Type: TRIGGER; Schema: public; Owner: -
+--
+
+CREATE TRIGGER before_update_courses_update_previous_registration_section BEFORE UPDATE OF registration_section ON public.courses_users FOR EACH ROW EXECUTE PROCEDURE public.update_previous_registration_section();
 
 
 --
