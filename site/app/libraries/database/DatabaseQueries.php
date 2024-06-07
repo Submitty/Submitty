@@ -2340,17 +2340,22 @@ ORDER BY {$orderby}",
         $this->course_db->query(
             "
             SELECT 
-                ".$unit.".".$section_key.", COUNT(".$unit.".".$id.") as verified_components_count
+                " . $unit . "." . $section_key . ", COUNT(" . $unit . "." . $id . ") as verified_components_count
             FROM 
                 gradeable_data as gd
                 JOIN gradeable_component_data as gcd ON (gd.gd_id = gcd.gd_id)
-                JOIN ".$unit." ON (gd.gd_".$id." = ".$unit.".".$id.")
+                JOIN " . $unit . " ON (gd.gd_" . $id . " = " . $unit . "." . $id . ")
             WHERE
                 gd.g_id = ?
-                AND CAST (".$unit.".".$section_key." AS TEXT) = ANY (ARRAY[".implode(",", array_map(function($v) { return "'".$v."'"; }, $sections))."])
+                AND CAST (" . $unit . "." . $section_key . " AS TEXT) = ANY (ARRAY[" . implode(",", array_map(
+                    function ($v) {
+                        return "'" . $v . "'";
+                    },
+                    $sections
+                )) . "])
                 AND gcd.gcd_verifier_id IS NOT NULL
             GROUP BY
-                ".$unit.".".$section_key."
+                " . $unit . "." . $section_key . "
             ;
             ",
             [$g_id]
