@@ -84,7 +84,7 @@
                             Display Name Order:
                         </span>
                         <button id='display_name_order_val' class="icon" tabindex="0" onclick="showDisplayNameOrderForm()" aria-label="Edit user display name order" title="Edit user display name order">
-                            <i class="fas fa-pencil-alt"></i> {{ user.getDisplayNameOrder() }}
+                            <i class="fas fa-pencil-alt"></i> {% if user.getDisplayNameOrder() is same as("GIVEN_F")%}Given Name First{% else %}Family Name First{% endif %}
                         </button>
                     </div>
                     <div class="flex-row" id="email-row" data-testid="email-row">
