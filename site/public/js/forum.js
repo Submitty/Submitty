@@ -1324,6 +1324,7 @@ function toggleLike(post_id, current_user, userGroup) {
                 displayErrorMessage(json['message']);
                 return;
             }
+            console.log(json);
             json=json['data'];
             const likes = json['likesCount'];
             const liked = json['status'];
@@ -1336,7 +1337,7 @@ function toggleLike(post_id, current_user, userGroup) {
             const likeIconSrc = document.getElementById(`likeIcon_${post_id}`);
             let likeIconSrcElement = likeIconSrc.src;
 
-            if (liked==='unlike') {
+            if (liked ==='unlike') {
                 likeIconSrcElement = likeIconSrcElement.replace('on-duck-button.svg', 'light-mode-off-duck.svg');
                 if (userGroup === 1 || userGroup === 2 || userGroup === 3) {
                     if (taLiked>0) {

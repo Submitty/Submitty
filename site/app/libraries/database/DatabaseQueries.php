@@ -744,9 +744,7 @@ SQL;
                              AND u.user_group IN (1, 2, 3)";
             if ($inDatabase) {
                 $this->course_db->query("DELETE FROM forum_upducks WHERE post_id = ? AND user_id = ?", [$post_id, $current_user]);
-                $this->course_db->query("SELECT COUNT(*) AS likes_count FROM forum_upducks WHERE post_id = ?", [$post_id]);
-                $likesCount = intval($this->course_db->row()['likes_count']);
-                return ['unlike',$likesCount];
+                $action = "unlike";
             }
             else {
                 $this->course_db->query("INSERT INTO forum_upducks (post_id, user_id) VALUES (?, ?)", [$post_id, $current_user]);
