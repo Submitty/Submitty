@@ -45,6 +45,7 @@ const urls = [
     '/courses/{}/{}/plagiarism',
     '/courses/{}/{}/plagiarism/configuration/new',
     '/courses/{}/{}/reports',
+    '/courses/{}/{}/reports/rainbow_grades_customization',
     '/courses/{}/{}/late_table',
     '/courses/{}/{}/grades',
     '/courses/{}/{}/polls',
