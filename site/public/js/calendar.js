@@ -458,7 +458,7 @@ function buildSwitchingHeader(view_year, view_month, view_day, type) {
     let prev;
     if (type === 'month') {
         prev = prevMonth(view_month, view_year, view_day);
-    } 
+    }
     else {
         prev = prevWeek(view_month, view_year, view_day);
         prev.push(type);
@@ -491,8 +491,8 @@ function buildSwitchingHeader(view_year, view_month, view_day, type) {
 
     monthSelect.onchange = function() {
         const type = $('#calendar-item-type-edit').val();
-        let newMonth = parseInt(this.value);
-        let newYear = parseInt(document.getElementById('year-dropdown').value);
+        const newMonth = parseInt(this.value);
+        const newYear = parseInt(document.getElementById('year-dropdown').value);
 
         Cookies.set('calendar_month', newMonth);
         Cookies.set('calendar_year', newYear);
@@ -501,7 +501,7 @@ function buildSwitchingHeader(view_year, view_month, view_day, type) {
     };
 
     // Create the year dropdown
-    let currentYear = new Date().getFullYear();
+    const currentYear = new Date().getFullYear();
     const yearSelect = document.createElement('select');
     yearSelect.id = 'year-dropdown';
     yearSelect.classList.add('dropdown-custom'); // Add custom class
@@ -516,8 +516,8 @@ function buildSwitchingHeader(view_year, view_month, view_day, type) {
 
     yearSelect.onchange = function() {
         const type = $('#calendar-item-type-edit').val();
-        let newYear = parseInt(this.value);
-        let newMonth = parseInt(document.getElementById('month-dropdown').value);
+        const newYear = parseInt(this.value);
+        const newMonth = parseInt(document.getElementById('month-dropdown').value);
 
         Cookies.set('calendar_year', newYear);
         Cookies.set('calendar_month', newMonth);
@@ -548,7 +548,7 @@ function buildSwitchingHeader(view_year, view_month, view_day, type) {
     let next;
     if (type === 'month') {
         next = nextMonth(view_month, view_year, view_day);
-    } 
+    }
     else {
         next = nextWeek(view_month, view_year, view_day);
         next.push(type);
