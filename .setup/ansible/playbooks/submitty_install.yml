@@ -12,4 +12,4 @@
         name: submitty_install
       vars:
         # add overriding variables here
-        submitty_version: main  # Replace main with version, eg. v24.02.00
+        submitty_install_submitty_version: main  # Replace main with version, eg. v24.02.00
