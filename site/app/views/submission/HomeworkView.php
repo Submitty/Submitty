@@ -214,8 +214,6 @@ class HomeworkView extends AbstractView {
                 $error = true;
 
                 // AUTO ZERO BECAUSE INSUFFICIENT LATE DAYS REMAIN
-                
-
                 if ($active_days_late > $late_day_budget) {
                     $messages[] = ['type' => 'too_few_remain', 'info' => [
                         'late' => $active_days_late,
