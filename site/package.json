@@ -18,7 +18,7 @@
     "@codemirror/lang-json": "6.0.1",
     "@codemirror/lang-python": "6.1.6",
     "@codemirror/language": "6.10.1",
-    "@codemirror/language-data": "6.3.1",
+    "@codemirror/language-data": "6.5.1",
     "@codemirror/legacy-modes": "6.3.3",
     "@codemirror/lint": "6.4.2",
     "@codemirror/search": "6.5.6",
@@ -58,7 +58,7 @@
     "@types/jqueryui": "^1.12.22",
     "@types/twig": "^1.12.14",
     "@typescript-eslint/eslint-plugin": "^7.7.1",
-    "@typescript-eslint/parser": "^7.7.1",
+    "@typescript-eslint/parser": "^7.11.0",
     "babel-jest": "^29.7.0",
     "cypress": "^13.6.4",
     "cypress-file-upload": "^5.0.8",
@@ -72,7 +72,7 @@
     "regenerator-runtime": "^0.14.0",
     "stylelint": "^15.11.0",
     "stylelint-config-standard": "^33.0.0",
-    "typescript": "^5.3.3",
+    "typescript": "^5.4.5",
     "vnu-jar": "^23.4.11"
   },
   "scripts": {
