@@ -37,6 +37,7 @@ for json_data in json_output:
         if labels['name'] == 'Abandoned PR - Needs New Owner':
             already_abandoned = True
 
+    approved = False
     for review in json_data['reviews']:
         if review["state"] == "APPROVED":
             approved = True
