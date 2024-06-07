@@ -42,7 +42,7 @@ function showDisplayNameOrderForm() {
     const form = $('#edit-display-name-order-form');
     form.css('display', 'block');
     form.find('.form-body').scrollTop(0);
-    if (pronounsLastVal !== null && document.getElementById('display-name-order-change').value === '') {
+    if (displayNameOrderLast !== null && document.getElementById('display-name-order-change').value === '') {
         document.getElementById('display-name-order-change').value = displayNameOrderLast;
     }
 }
@@ -161,10 +161,9 @@ function updateUserPronouns(e) {
 
 }
 
-
-//update user pronouns and display pronouns option
+//update user name order and display name order option
 function updateDisplayNameOrder(e) {
-    //update user pronouns
+    //update user name order
     e.preventDefault();
     const displayNameOrder = $('#display-name-order-change');
     displayNameOrderLast = displayNameOrder.val();
@@ -189,7 +188,7 @@ function updateDisplayNameOrder(e) {
                 // eslint-disable-next-line no-undef
                 displaySuccessMessage(data.message);
                 const icon = '<i class="fas fa-pencil-alt"></i>';
-                // update the pronouns and display (true or false)
+                // update the name order and display (true or false)
                 console.log(data);
                 $('#display_name_order_val').html(`${icon} ${data['display-name-order']}`);
 
@@ -204,7 +203,7 @@ function updateDisplayNameOrder(e) {
         },
         error: function() {
             // eslint-disable-next-line no-undef
-            displayErrorMessage('Some went wrong while updating pronouns!');
+            displayErrorMessage('Some went wrong while updating name order!');
         },
     });
 

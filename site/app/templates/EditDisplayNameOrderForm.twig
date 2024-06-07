@@ -9,12 +9,12 @@
         <div class="edit_user_row ui-front">
     <select name="display-name-order-change" id="display-name-order-change">
         {% if user.getDisplayNameOrder() != 'REVERSED_F' %}
-        <option value="GIVEN_F">GIVEN_F</option>
-        <option value="REVERSED_F">REVERSED_F</option>
+        <option value="GIVEN_F">Given Name First</option>
+        <option value="REVERSED_F">Family Name First</option>
         {% endif %}
         {% if user.getDisplayNameOrder() != 'GIVEN_F' %}
-        <option value="REVERSED_F">REVERSED_F</option>
-        <option value="GIVEN_F">GIVEN_F</option>
+        <option value="REVERSED_F">Family Name First</option>
+        <option value="GIVEN_F">Given Name First</option>
         {% endif %}
     </select>
         </div>
