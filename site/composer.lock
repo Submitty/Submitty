@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "ab199c5b9ec45728e850588f89764b41",
+    "content-hash": "382be59fd5aa035596df2e9dfb77b193",
     "packages": [
         {
             "name": "aptoma/twig-markdown",
@@ -1105,16 +1105,16 @@
         },
         {
             "name": "doctrine/orm",
-            "version": "2.18.2",
+            "version": "2.19.5",
             "source": {
                 "type": "git",
                 "url": "https://github.com/doctrine/orm.git",
-                "reference": "52a6a21387380b09419a66a7ec1c66f6cab69b20"
+                "reference": "94986af28452da42a46a4489d1c958a2e5d710e5"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/doctrine/orm/zipball/52a6a21387380b09419a66a7ec1c66f6cab69b20",
-                "reference": "52a6a21387380b09419a66a7ec1c66f6cab69b20",
+                "url": "https://api.github.com/repos/doctrine/orm/zipball/94986af28452da42a46a4489d1c958a2e5d710e5",
+                "reference": "94986af28452da42a46a4489d1c958a2e5d710e5",
                 "shasum": ""
             },
             "require": {
@@ -1200,9 +1200,9 @@
             ],
             "support": {
                 "issues": "https://github.com/doctrine/orm/issues",
-                "source": "https://github.com/doctrine/orm/tree/2.18.2"
+                "source": "https://github.com/doctrine/orm/tree/2.19.5"
             },
-            "time": "2024-03-01T09:47:18+00:00"
+            "time": "2024-04-30T06:49:54+00:00"
         },
         {
             "name": "doctrine/persistence",
@@ -7867,5 +7867,5 @@
     "platform-overrides": {
         "php": "8.1"
     },
-    "plugin-api-version": "2.6.0"
+    "plugin-api-version": "2.1.0"
 }
