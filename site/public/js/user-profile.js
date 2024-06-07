@@ -172,8 +172,6 @@ function updateDisplayNameOrder(e) {
     // eslint-disable-next-line no-undef
     data.append('csrf_token', csrfToken);
     data.append('display-name-order', displayNameOrder.val());
-    console.log(displayNameOrder);
-    // eslint-disable-next-line no-undef
     const url = buildUrl(['user_profile', 'change_display_name_order']);
     $.ajax({
         url,
@@ -185,24 +183,24 @@ function updateDisplayNameOrder(e) {
             const response = JSON.parse(res);
             if (response.status === 'success') {
                 const {data} = response;
-                // eslint-disable-next-line no-undef
                 displaySuccessMessage(data.message);
                 const icon = '<i class="fas fa-pencil-alt"></i>';
-                // update the name order and display (true or false)
-                console.log(data);
-                $('#display_name_order_val').html(`${icon} ${data['display-name-order']}`);
+                if (data['display-name-order'] === 'GIVEN_F') {
+                    $('#display_name_order_val').html(`${icon} Given Name First`);
+                }
+                else {
+                    $('#display_name_order_val').html(`${icon} Family Name First`);
+                }
 
                 // update the data attributes
-                displayNameOrder.data('current-display-name-order',  data['display-name-order']);
+                displayNameOrder.data('current-display-name-order', data['display-name-order']);
                 $('#edit-display-name-order-form').hide();
             }
             else {
-                // eslint-disable-next-line no-undef
                 displayErrorMessage(response.message);
             }
         },
         error: function() {
-            // eslint-disable-next-line no-undef
             displayErrorMessage('Some went wrong while updating name order!');
         },
     });
