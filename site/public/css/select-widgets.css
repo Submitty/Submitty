@@ -21,5 +21,9 @@
     font-family: Arial, sans-serif;
     font-size: 16px;
     color: var(--standard-dark-gray);
-    background-color: var(--text-white);
+}
+
+/* stylelint-disable-next-line selector-id-pattern */
+[data-theme="dark"] #select2-time_zone_drop_down-container.select2-selection__rendered {
+    color: var(--text-black);
 }
