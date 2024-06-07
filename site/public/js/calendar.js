@@ -505,12 +505,12 @@ function buildSwitchingHeader(view_year, view_month, view_day, type) {
     const yearSelect = document.createElement('select');
     yearSelect.id = 'year-dropdown';
     yearSelect.classList.add('dropdown-custom'); // Add custom class
-    for (let year = 2014; year <= currentYear + 5; year++) {
+    for (let year = currentYear - 4; year <= currentYear + 1; year++) {
         const yearOption = document.createElement('option');
         yearOption.value = year;
         yearOption.textContent = year;
         yearSelect.appendChild(yearOption);
-    }
+    }    
     yearSelect.classList.add('cal-year-title');
     yearSelect.value = view_year;
 
