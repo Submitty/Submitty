@@ -881,10 +881,10 @@ function filter_course(course_val, display_name) {
     else {
         Cookies.set('calendar_show_all', '0', { expires: 365 });
         if (display_name) {
-            Cookies.set('calendar_display_name', display_name, { expires: 365 });
+            Cookies.set('display_name', display_name, { expires: 365 });
         }
         else {
-            Cookies.set('calendar_display_name', course_val, { expires: 365 });
+            Cookies.set('display_name', course_val, { expires: 365 });
         }
         Cookies.set('calendar_course', course_val, { expires: 365 });
     }

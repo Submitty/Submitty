@@ -66,8 +66,8 @@
                 </button>
                 <select id="calendar-item-type-edit" name="type" onchange="changeView(this);">
                     <option value="month" {% if (view_cookie is defined) and view_cookie == "month" %} selected {% endif %}>Month</option>
-                    <option value="two_week" {% if (view_cookie is defined) and view_cookie == "two_week" %} selected {% endif %}>Two Week</option>
-                    <option value="one_week" {% if (view_cookie is defined) and view_cookie == "one_week" %} selected {% endif %}>One Week</option>
+                    <option value="two_week" {% if (view_cookie is defined)  and view_cookie == "two_week" %} selected {% endif %}>Two Week</option>
+                    <option value="one_week" {% if (view_cookie is defined)  and view_cookie == "one_week" %} selected {% endif %}>One Week</option>
                 </select>
                 <button id="calendar-today-button" type="button" onclick="setDateToToday()" class="btn btn-primary">
                     <i class="fas fa-clock"></i> Today
