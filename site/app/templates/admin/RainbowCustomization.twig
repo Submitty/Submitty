@@ -116,35 +116,25 @@
                             <option value="{{value['g_id']}}" >{{ value['g_title'] }}</option>
                         {% endfor %}
                     </select>
-                    <label for="penalty">
+                    <label for="marks">
                         <span>Penalty:</span>
                         <input class="option-input" type="text" name="marks" id="marks">
                     </label>
-                    <button type="submit" class="btn btn-primary" onclick="addToTable()">
+                    <button type="submit" class="btn btn-primary" onclick="addToTable()" aria-label="submit">
                         <i class="fas fa-plus"></i>
                     </button>
                     {# This is a data table #}
-                    <style>
-                        #plagiarism-table th:first-child,
-                        #plagiarism-table td:first-child {
-                            text-align: left;
-                        }
-                        #plagiarism-table th:nth-child(2),
-                        #plagiarism-table td:nth-child(2) {
-                            text-align: left;
-                        }
-                    </style>
                     <table id="plagiarism-table" class="table table-striped table-bordered persist-area mobile-table">
                         <caption id="title"></caption>
                         <thead>
-                        <tr>
+                        <tr style="text-align:left">
                             <th>USER ID</th>
                             <th>Gradeable</th>
                             <th>Penalty</th>
                             <th>Delete</th>
                         </tr>
                         </thead>
-                        <tbody id="table-body">
+                        <tbody id="table-body" style="text-align:left">
                         {% for entry in plagiarism %}
                             <tr>
                                 <td>{{ entry.user }}</td>
@@ -161,88 +151,123 @@
 
             <div id="gradeables" class="customization_item">
                 <h2>Gradeables</h2>
-                <div id="gradeables_collapse" class="collapsible_area">
-                    <div style="width:45%;float:left;" id="buckets_used">
-                        <h3>Assigned Buckets</h3>
-                        <ol id="buckets_used_list" style="min-height:50px;background-color:var(--standard-beige);">
-                            {%  for bucket in used_buckets %}
-                                <li>
-                                    <div class="bucket-percent" style="display: inline;">
-                                        <input aria-label="{{ bucket|capitalize }} percent" type="text" value="{{ bucket_percentages[bucket] }}" onblur="ClampPercent(this);" id="percent-{{ bucket }}"><span style="margin-right: 10px;">%</span>
-                                    </div>
-                                    {{ bucket|capitalize }} ({{ customization_data[bucket]|length }} items)
-                                </li>
-                            {% endfor %}
-                        </ol>
-                        Total: <span id="used_percentage">{% if 'used_percentage' in bucket_percentages|keys %}{{ bucket_percentages['used_percentage'] }}{% else %}0{% endif %}%</span>
-                    </div>
-                    <div style="width:45%;display:inline-block;margin-left:50px;" id="buckets_available">
-                        <h3>Available Buckets</h3>
-                        <ol id="buckets_available_list" style="min-height:50px;background-color:var(--standard-light-green);">
-                            {%  for bucket in available_buckets %}
-                                <li>
-                                    <div class="bucket-percent" style="display: none;">
-                                        <input aria-label="{{ bucket|capitalize }} percent" type="text" value="0" onblur="ClampPercent(this);" id="percent-{{ bucket }}"><span style="margin-right: 10px;">%</span>
-                                    </div>
-                                    {{ bucket|capitalize }} ({{ customization_data[bucket]|length }} items)
-                                </li>
-                            {% endfor %}
-                        </ol>
-                    </div>
-                    <div id="gradeable_config" style="background-color:var(--standard-peachpuff);margin-top:50px;width:1000px;padding:5px;">
-                        <h2>Category/Gradeable Configuration:</h2>
-                        <div id="config-wrapper">
-                            {% for bucket, gradeables in customization_data %}
+                <div style="width:45%;float:left;" id="buckets_used">
+                    <h3>Assigned Buckets</h3>
+                    <ol id="buckets_used_list" style="min-height:50px;background-color:var(--standard-beige);">
+                        {%  for bucket in used_buckets %}
+                            <li>
+                                <div class="bucket-percent" style="display: inline;">
+                                    <input aria-label="{{ bucket|capitalize }} percent" type="text" class="gradeable-custom-item-input" value="{{ bucket_percentages[bucket] }}" onblur="ClampPercent(this);" id="percent-{{ bucket }}"><span style="margin-right: 10px;">%</span>
+                                </div>
+                                {{ bucket|capitalize }} ({{ customization_data[bucket]|length }} items)
+                            </li>
+                        {% endfor %}
+                    </ol>
+                    Total: <span id="used_percentage">{% if 'used_percentage' in bucket_percentages|keys %}{{ bucket_percentages['used_percentage'] }}{% else %}0{% endif %}%</span>
+                </div>
+                <div style="width:45%;display:inline-block;margin-left:50px;" id="buckets_available">
+                    <h3>Available Buckets</h3>
+                    <ol id="buckets_available_list" style="min-height:50px;background-color:var(--standard-light-green);">
+                        {%  for bucket in available_buckets %}
+                            <li>
+                                <div class="bucket-percent" style="display: none;">
+                                    <input aria-label="{{ bucket|capitalize }} percent" type="text" class="gradeable-custom-item-input" value="0" onblur="ClampPercent(this);" id="percent-{{ bucket }}"><span style="margin-right: 10px;">%</span>
+                                </div>
+                                {{ bucket|capitalize }} ({{ customization_data[bucket]|length }} items)
+                            </li>
+                        {% endfor %}
+                    </ol>
+                </div>
+                <div id="gradeable_config" style="background-color:var(--standard-peachpuff);margin-top:50px;width:1000px;padding:5px;">
+                    <h2>Category/Gradeable Configuration:
+                        <i id="pencilIcon" class="fas fa-pencil-alt black-btn"></i>
+                    </h2>
+                    <div id="checkboxControls" style="display: none;">
+                        <label>Extra credit:
+                            <input id="extra_credit_checkbox" type="checkbox" name="extra_credit">
+                        </label><br>
 
-                                <div id="config-{{ bucket }}" style="margin-top:25px;min-height:100px;display:none;" class="bucket_detail_div">
+                        <label>Remove lowest:
+                            <input id="drop_lowest_checkbox" type="checkbox" name="drop_lowest">
+                        </label>
+                    </div>
+
+
+                    <div id="config-wrapper">
+                        {% for bucket, gradeables in customization_data %}
+                            <div id="config-{{ bucket }}" style="margin-top:25px;min-height:100px;display:none;" class="bucket_detail_div">
+                                <div class="input-field">
                                     <h3 style="display:inline">{{ bucket|capitalize }}</h3>:
-                                    <input type="text" aria-label="{{ bucket|capitalize }} config count" value="{{ bucket_counts[bucket] }}" id="config-count-{{ bucket }}" style="display:inline;"> items
-                                    <div style="margin-top:10px">
-                                        <ol style="list-style-type: none;" id="gradeables-list-{{ bucket }}">
-                                            {% for gradeable in gradeables %}
-                                                <li class="gradeable-li pt-1" style="border-top: 1px solid #FFFFFF;">
-                                                    <input type="text"
-                                                           aria-label="{{gradeable["title"]}} max score"
-                                                           class="{{ gradeable["override"] ? "override" : "" }}"
-                                                           placeholder="{{ gradeable["max_score"] }}"
-                                                           value="{{ gradeable["override"] ? gradeable["override_max"] : gradeable["max_score"] }}"
-                                                           id="maxscore-{{ gradeable["id"] }}"
-                                                           data-grade-release-date="{{ gradeable["grade_release_date"] }}"
-                                                           style="margin-right: 10px;"
-                                                           onblur="ClampPoints(this);"
-                                                           onkeyup="DetectMaxOverride(this);">
-                                                    <div class="gradeable-li-right-of-input">
-                                                            <div class="gradeable-li-info">
-                                                            <i class="fas fa-exclamation-triangle fa-rb tooltip">
-                                                                <span class="tooltiptext tooltipbottom">
-                                                                    WARNING: Max Score has been overridden in Rainbow Grades
-                                                                    <br><br>
-                                                                    Actual Max Score: {{ gradeable["max_score"] }}
-                                                                    <br>
-                                                                    Override Max Score: <span id="override-maxscore-{{ gradeable["id"] }}"></span>
-                                                                </span>
-                                                            </i>
-                                                            <i class="fas fa-chart-line fa-gradeable-curve fa-rb" id="gradeable-curve-button-{{ gradeable['id'] }}"></i>
-                                                            {{ gradeable["title"] }}
-                                                            <span style="font-style: italic;font-size: 0.8em;" class="gradeable-id">{{ gradeable["id"] }}</span>
-                                                        </div>
-                                                        <div class="gradeable-li-curve" id="gradeable-curve-div-{{ gradeable['id'] }}">
-                                                            {# Generate input boxes for each per-gradeable curve input #}
-                                                            {% set curve_points = ['A-', 'B-', 'C-', 'D'] %}
+                                    <input
+                                        type="text"
+                                        class="gradeable-custom-item-input"
+                                        aria-label="{{ bucket|capitalize }} config count"
+                                        value="{{ bucket_counts[bucket] }}"
+                                        id="config-count-{{ bucket }}"
+                                    >
+                                    items
+                                    <span style="margin-left: 100px;"></span>
+                                    <div id="dropLowestDiv-{{ bucket }}" style="display: none;">
+                                        <label>
+                                            Remove lowest:
+                                            <input
+                                                type="text"
+                                                class="gradeable-custom-item-input"
+                                                aria-label="{{ bucket|capitalize }} drop-howmany"
+                                                value="{{ bucket_remove_lowest[bucket] }}"
+                                                id="config-remove_lowest-{{ bucket }}"
+                                            >
+                                        </label>
+                                        items
+                                    </div>
+                                </div>
+                                <div style="margin-top:10px">
+                                    <ol style="list-style-type: none;" id="gradeables-list-{{ bucket }}">
+                                        {% for gradeable in gradeables %}
+                                            <li class="gradeable-li pt-1" style="border-top: 1px solid #FFFFFF;">
+                                                <input type="text"
+                                                       class="gradeable-custom-item-input"
+                                                       aria-label="{{gradeable["title"]}} max score"
+                                                       class="{{ gradeable["override"] ? "override" : "" }}"
+                                                       placeholder="{{ gradeable["max_score"] }}"
+                                                       value="{{ gradeable["override"] ? gradeable["override_max"] : gradeable["max_score"] }}"
+                                                       id="maxscore-{{ gradeable["id"] }}"
+                                                       data-grade-release-date="{{ gradeable["grade_release_date"] }}"
+                                                       style="margin-right: 10px;"
+                                                       onblur="ClampPoints(this);"
+                                                       onkeyup="DetectMaxOverride(this);">
+                                                <div class="gradeable-li-right-of-input">
+                                                        <div class="gradeable-li-info">
+                                                        <i class="fas fa-exclamation-triangle fa-rb tooltip">
+                                                            <span class="tooltiptext tooltipbottom">
+                                                                WARNING: Max Score has been overridden in Rainbow Grades
+                                                                <br><br>
+                                                                Actual Max Score: {{ gradeable["max_score"] }}
+                                                                <br>
+                                                                Override Max Score: <span id="override-maxscore-{{ gradeable["id"] }}"></span>
+                                                            </span>
+                                                        </i>
+                                                        <i class="fas fa-chart-line fa-gradeable-curve fa-rb" id="gradeable-curve-button-{{ gradeable['id'] }}"></i>
+                                                        {{ gradeable["title"] }}
+                                                        <span style="font-style: italic;font-size: 0.8em;" class="gradeable-id">{{ gradeable["id"] }}</span>
+                                                    </div>
+                                                    <div class="gradeable-li-curve" id="gradeable-curve-div-{{ gradeable['id'] }}">
+                                                        {# Generate input boxes for each per-gradeable curve input #}
+                                                        {% set curve_points = ['A-', 'B-', 'C-', 'D'] %}
 
-                                                            {% if per_gradeable_curves[bucket][gradeable['id']] is defined %}
-                                                                {% set curve_point_value = per_gradeable_curves[bucket][gradeable['id']] %}
-                                                            {% else %}
-                                                                {% set curve_point_value = ['', '', '', ''] %}
-                                                            {% endif %}
+                                                        {% if per_gradeable_curves[bucket][gradeable['id']] is defined %}
+                                                            {% set curve_point_value = per_gradeable_curves[bucket][gradeable['id']] %}
+                                                        {% else %}
+                                                            {% set curve_point_value = ['', '', '', ''] %}
+                                                        {% endif %}
 
-                                                            {% for i in range(0, 3) %}
-                                                                {% set html_id = 'per-gradeable-curve-' ~ gradeable['id'] ~ '-' ~ benchmarks_with_input_fields[i] %}
+                                                        {% for i in range(0, 3) %}
+                                                            {% set html_id = 'per-gradeable-curve-' ~ gradeable['id'] ~ '-' ~ benchmarks_with_input_fields[i] %}
 
-                                                                <label for="{{ html_id }}" class="{{ benchmarks_with_input_fields[i] }}">{{ curve_points[i] }} :</label>
-                                                                <input type="text" id="{{ html_id }}" class="per-gradeable-curve-input {{ benchmarks_with_input_fields[i] }}" data-benchmark="{{ benchmarks_with_input_fields[i] }}" value="{{ curve_point_value[i] }}">
-                                                            {% endfor %}
-                                                            <i class="far fa-question-circle fa-rb" title="You may apply a curve on a per gradeable basis.
+                                                            <label for="{{ html_id }}" class="{{ benchmarks_with_input_fields[i] }}">{{ curve_points[i] }} :</label>
+                                                            <input type="text" id="{{ html_id }}" class="per-gradeable-curve-input {{ benchmarks_with_input_fields[i] }}" data-benchmark="{{ benchmarks_with_input_fields[i] }}" value="{{ curve_point_value[i] }}">
+                                                        {% endfor %}
+                                                        <i class="far fa-question-circle fa-rb" title="You may apply a curve on a per gradeable basis.
 
 These values should be entered in points, not percentages.
 
@@ -252,15 +277,14 @@ the minimum percent needed to earn an A- on this gradeable
 to 50%, you would enter 10 in the A- box.
 
 To remove a curve simply blank all boxes."></i>
-                                                        </div>
                                                     </div>
-                                                </li>
-                                            {% endfor %}
-                                        </ol>
-                                    </div>
+                                                </div>
+                                            </li>
+                                        {% endfor %}
+                                    </ol>
                                 </div>
-                            {% endfor %}
-                        </div>
+                            </div>
+                        {% endfor %}
                     </div>
                 </div>
             </div>
