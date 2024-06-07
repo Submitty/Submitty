@@ -125,22 +125,18 @@ it('Check for a clock message near daylight savings times', () => {
     Then we change the date to a month later, and check that the "daylight" message doesn't appear.
     */
     const currentDate = new Date();
-
     const futureDate = new Date(currentDate);
     futureDate.setDate(currentDate.getDate() + 7);
     
     const pastDate = new Date(currentDate);
     pastDate.setDate(currentDate.getDate() - 7);
 
-    const daylightSavingsChange =
-    (futureDate.getTimezoneOffset() < 0 && pastDate.getTimezoneOffset() >= 0) ||
-    (futureDate.getTimezoneOffset() >= 0 && pastDate.getTimezoneOffset() < 0);
-
+    const daylightSavingsChange = pastDate.getTimezoneOffset() !== futureDate.getTimezoneOffset();
 
     cy.login('instructor');
     cy.visit(['sample', 'gradeable', 'open_homework']);
 
-    if (daylightSavingsChanges) {
+    if (daylightSavingsChange) {
         cy.get('#daylight').should('exist');
     }
     else {
