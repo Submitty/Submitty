@@ -54,7 +54,7 @@ class ImageWidget extends Widget {
     getJSON() {
         this.commitState();
 
-        if (this.state.image) {
+        if (this.state.type) {
             return this.state;
         }
     }

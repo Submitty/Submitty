@@ -1,4 +1,4 @@
-/* global MultipleChoiceWidget, MarkdownWidget, ShortAnswerWidget, ImageWidget, ItempoolWidget, ItemWidget, getBadItemNames */
+/* global MultipleChoiceWidget, MarkdownWidget, ShortAnswerWidget, ImageWidget, ItempoolWidget, ItemWidget, getBadItemNames, displayErrorMessage */
 /* exported AbstractBuilder */
 
 class AbstractBuilder {
@@ -102,6 +102,9 @@ class AbstractBuilder {
                     this.widgetAdd(widget);
                 }
             });
+        }
+        else {
+            displayErrorMessage('The current configuration is missing the required "notebook" object. Please include a "notebook" object in your configuration');
         }
     }
 
