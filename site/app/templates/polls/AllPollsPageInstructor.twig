@@ -119,12 +119,7 @@
                         <td id="poll_{{ poll.getId() }}_responses"> {{ poll.getId() not in response_counts|keys ? 0 : response_counts[poll.getId()] }} </td>
                         <td>
                             <a href="{{base_url}}/{{ poll.getId() }}" class="btn btn-primary">
-                                {% if poll.isHistogramAvailable() %}
-                                    <i class="fas fa-lock-open">
-                                {% else %}
-                                    <i class="fas fa-lock">
-                                {% endif %}
-                                </i>
+                                <i class="fas fa-lock{% if poll.isHistogramAvailable() %}-open{% endif %}"></i>
                                 &nbsp;View Poll
                             </a>
                         </td>
