@@ -3,7 +3,7 @@ showUpdatePronounsForm, showUpdatePasswordForm, showUpdateProfilePhotoForm, show
 updateUserPreferredNames, updateUserLastInitialFormat, updateUserProfilePhoto, updateUserSecondaryEmail,
 changeSecondaryEmail, previewUserLastInitialFormat, clearPronounsBox
  */
-/* global displaySuccessMessage, displayErrorMessage, buildUrl */
+/* global displaySuccessMessage, displayErrorMessage, buildUrl, showPopup */
 
 //This variable is to store changes to the pronouns form that have not been submitted
 let pronounsLastVal = null;
