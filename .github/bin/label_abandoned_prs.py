@@ -46,5 +46,5 @@ for json_data in json_output:
         subprocess.run(['gh', 'pr', 'comment', num, '--body', inactive_comment])
     if ((tdiff > two_weeks and not already_abandoned) or (tdiff > two_days and already_warned)) and not approved:
         subprocess.run(['gh', 'pr', 'edit', num, '--add-label', 'Abandoned PR - Needs New Owner'])
-    if approved:
+    if approved and already_abandoned:
         subprocess.run(['gh', 'pr', 'edit', num, '--remove-label', 'Abandoned PR - Needs New Owner'])
