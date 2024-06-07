@@ -579,6 +579,24 @@ function setInputsVisibility(elem) {
     }
 }
 
+/**
+ * Sets the visibility for 'final grade cutoffs' input boxes
+ * based on the 'final_grade' boxes in 'display' being selected / un-selected
+ * */
+function setFinalGradeCutoffsVisibility(elem) {
+    const benchmark = elem.value;
+
+    if (benchmark === 'final_grade') {
+        // Sets visibility of 'final grade cutoffs' based on 'display_final_grade'
+        if ($("input[value='final_grade']:checked").val()) {
+            $('#final_grade_cutoffs').show();
+        }
+        else {
+            $('#final_grade_cutoffs').hide();
+        }
+    }
+}
+
 $(document).ready(() => {
 
     // Setup click handlers to handle collapsing and expanding each item
@@ -641,6 +659,22 @@ $(document).ready(() => {
         // Register a click handler to adjust visibility when boxes are selected / un-selected
         $(this).change(function() {
             setInputsVisibility(this);
+        });
+
+    });
+
+    /**
+     * Configure visibility handler for final grade cutoff boxes
+     * Visibility is controlled by whether the final_grade box is selected in the display area
+     */
+    $('#display_collapse input').each(function() {
+
+        // Set the initial visibility on load
+        setFinalGradeCutoffsVisibility(this);
+
+        // Register a click handler to adjust visibility when boxes are selected / un-selected
+        $(this).change(function() {
+            setFinalGradeCutoffsVisibility(this);
         });
 
     });
