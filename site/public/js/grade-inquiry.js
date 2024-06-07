@@ -1,7 +1,7 @@
 /* global buildCourseUrl, WebSocketClient */
-/* exported initGradingInquirySocketClient, onComponentTabClicked, onGradeInquirySubmitClicked, onReady, onReplyTextAreaKeyUp */
+/* exported saveDraft, initGradingInquirySocketClient, onComponentTabClicked, onGradeInquirySubmitClicked, onReady, onReplyTextAreaKeyUp */
 
-function saveDraft() { 
+function saveDraft() {
     //saveDraft function displays the saved draft text on grade inquiry box
     let draftContent = localStorage.getItem('content');
     if (draftContent === null) {
@@ -15,9 +15,8 @@ function saveDraft() {
         const element = elements[i];
         const elementId = element.getAttribute('id');
         const reply_text_area = $(element);
-        if (draftContent.hasOwnProperty(elementId)){
-            var value = draftContent[elementId];
-            reply_text_area.val(value);
+        if (Object.prototype.hasOwnProperty.call(draftContent, elementId)) {
+            reply_text_area.val(draftContent[elementId]);
         }
     }
 }
@@ -83,8 +82,10 @@ function onReplyTextAreaKeyUp(textarea) {
     let draftContent = localStorage.getItem('content');
     if (draftContent === null) {
         draftContent = {};
-    } else {
-        draftContent = JSON.parse(draftContent);}
+    }
+    else {
+        draftContent = JSON.parse(draftContent);
+    }
     // notice that from Discussion.twig file, all elementId start with this string pattern (i.e. 'reply-text-area-')
     const key = 'reply-text-area-';
     draftContent[key+component_id] = reply_text_area.val();
