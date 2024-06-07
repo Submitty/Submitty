@@ -135,27 +135,63 @@ function darken(colorstr) {
 }
 
 /**
+ * This function returns a slightly lighter color than the color variable name passed.
+ *
+ * @param colorstr : string the color to lighten in the form "var(--color-name)"
+ * @returns {string} a hex code for a slightly lighter shade
+ */
+function lighten(colorstr) {
+    if (typeof colorstr !== 'string') {
+        return colorstr;
+    }
+    else {
+        const hexcodestr = window.getComputedStyle(document.documentElement).getPropertyValue(colorstr.slice(4, -1)).trim().toLowerCase();
+        const hex = hexcodestr.slice(1);
+        // Convert hex to RGB
+        const r = parseInt(hex.substring(0, 2), 16);
+        const g = parseInt(hex.substring(2, 4), 16);
+        const b = parseInt(hex.substring(4, 6), 16);
+        // Adjusting the brightness for stripes to visible (used only for future gradeables as of now)
+        const newR = Math.min(255, r + 40);
+        const newG = Math.min(255, g + 40);
+        const newB = Math.min(255, b + 40);
+        // Convert RGB back to hex
+        const lighterHex = `#${newR.toString(16).padStart(2, '0')}${newG.toString(16).padStart(2, '0')}${newB.toString(16).padStart(2, '0')}`;
+        return lighterHex;
+    }
+}
+
+/**
  * Create a HTML element that contains the calendar item (button/link/text).
  *
  * @param item : array the calendar item
  * @returns {HTMLElement} the HTML Element for the calendar item
  */
 function generateCalendarItem(item) {
-    // When hovering over an item, shows the name and due date
-    // Due date information
-    let due_string = '';
-    if (item['submission'] !== '') {
-        due_string = `Due: ${item['submission']}`;
+    let tooltip = '';
+    if (!item['submission_open'] && item['is_student']) {
+        // Student shouldn't be able to access this item
+        // When hovering over an item, shows the below message
+        tooltip = 'You can access this gradeable once the submission opens';
+        item['disabled'] = true;
     }
+    else {
+        // When hovering over an item, shows the name and due date
+        // Due-date information
+        let due_string = '';
+        if (item['submission'] !== '') {
+            due_string = `Due: ${item['submission']}`;
+        }
 
-    // Put detail in the tooltip
-    let tooltip = `Course: ${item['course']}&#10;` +
-        `Title: ${item['title']}&#10;`;
-    if (item['status_note'] !== '') {
-        tooltip += `Status: ${item['status_note']}&#10;`;
-    }
-    if (due_string !== '') {
-        tooltip += `${due_string}`;
+        // Put detail in the tooltip
+        tooltip = `Course: ${item['course']}&#10;` +
+            `Title: ${item['title']}&#10;`;
+        if (item['status_note'] !== '') {
+            tooltip += `Status: ${item['status_note']}&#10;`;
+        }
+        if (due_string !== '') {
+            tooltip += `${due_string}`;
+        }
     }
     // Put the item in the day cell
     const link = (!item['disabled']) ? item['url'] : '';
@@ -177,8 +213,15 @@ function generateCalendarItem(item) {
     if (item['status'] === 'text' || item['status'] === 'ann') {
         element.style.setProperty('background-color', item['color']);
     }
-    if (exists) {
+    // Displaying striped background if submission is not open irrespective of access level
+    if (!item['submission_open']) {
+        element.style.setProperty('background', `repeating-linear-gradient(45deg, ${item['color']}, ${item['color']} 10px, ${lighten(item['color'])} 10px, ${lighten(item['color'])} 15px)`);
+    }
+    if (!item['disabled'] || exists) {
         element.style.setProperty('cursor', 'pointer');
+    }
+    else {
+        element.style.setProperty('cursor', 'default');
     }
     element.title = tooltip;
     if (link !== '') {
