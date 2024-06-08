@@ -16,7 +16,7 @@ run_php_cs() {
 }
 
 
-if [ "$1" == "help" ] || [ -z "$1" ]; then
+if [ -z "$1" ] || [ "$1" == "help" ]; then
     echo "
           phpstan : php static analysis [option: --memory-limit 4G, --generate-baseline ...]
           phpcs   : php CodeSniffer
