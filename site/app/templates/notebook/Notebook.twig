@@ -3,11 +3,13 @@
         const USER_ID = "{{student_id}}";
     </script>
 
+
     {# Render content #}
     {% set num_codeboxes = 0 %}
     {% set num_multiple_choice = 0 %}
     {% set num_file_submissions = 0 %}
     {% set data_non_item_ref = 0 %}
+    {% set instructor_view = instructor_view|default(false) %}
     {% if is_timed and allowed_minutes > 25 %}
         <div class="notebook-submit-popup">
             Submit often and save your progress !<br>
@@ -82,15 +84,20 @@
                     {% endif %}
                 >
                 </div>
-                <button type="button" id="codebox_{{ num_codeboxes }}_clear_button" class="btn btn-primary codebox-clear-reset"
-                    data-older_version = "{{ viewing_inactive_version ? true : false }}">
-                    {{ cell.initial_value == "" ? 'Clear' : 'Reset'}}
-                </button>
+                {% if not instructor_view   %}
+                    <button type="button" id="codebox_{{ num_codeboxes }}_clear_button" class="btn btn-primary codebox-clear-reset"
+                            data-older_version = "{{ viewing_inactive_version ? true : false }}">
+                        {{ cell.initial_value == "" ? 'Clear' : 'Reset'}}
+                    </button>
 
-                <button type="button" id="codebox_{{ num_codeboxes }}_recent_button" class="btn btn-primary codebox-clear-reset">Use Most Recent Submission</button>
+                    <button type="button" id="codebox_{{ num_codeboxes }}_recent_button" class="btn btn-primary codebox-clear-reset">Use Most Recent Submission</button>
+                {% endif %}
 
                 <script>
                     const config_{{ num_codeboxes }} = {};
+
+                    {% set instructor_view = instructor_view|default(false) %}
+                    config_{{ num_codeboxes }}.readOnly = {{ instructor_view|json_encode() }};
 
                     var theme = localStorage.getItem("theme");
                     if(theme == null && window.matchMedia("(prefers-color-scheme: dark)").matches){
@@ -143,7 +150,8 @@
                 <fieldset id="mc_field_{{ num_multiple_choice }}"
                           class="mc"
                           data-filename="{{ cell.filename }}"
-                          {% if cell.recent_submission is defined %}data-prev_checked="{{ cell.version_submission }}"{% endif %}>
+                          {% if cell.recent_submission is defined %}data-prev_checked="{{ cell.version_submission }}"{% endif %}
+               {% if instructor_view %} disabled {%  endif %} >
                     {% if cell.allow_multiple == true %}
                         <legend>
                             {% if cell.label %}
@@ -201,8 +209,10 @@
                 </fieldset>
 
                 {# Create reset to recent submission button #}
-                <button type="button" id="mc_{{ num_multiple_choice }}_clear_button" class="btn btn-primary mc-clear">Clear</button>
-                <button type="button" id="mc_{{ num_multiple_choice }}_recent_button" class="btn btn-primary mc-recent">Use Most Recent Submission</button>
+                {% if not instructor_view  %}
+                    <button type="button" id="mc_{{ num_multiple_choice }}_clear_button" class="btn btn-primary mc-clear">Clear</button>
+                    <button type="button" id="mc_{{ num_multiple_choice }}_recent_button" class="btn btn-primary mc-recent">Use Most Recent Submission</button>
+                {% endif %}
                 <script>
                     $("multiple_choice_{{ num_multiple_choice }}_1").attr("disabled", true);
                     {# Populate checkboxes initially #}
@@ -279,7 +289,6 @@
     //interval is 20 percent of overall time allowed or 10 minutes, whichever is greater
     let interval = Math.floor(((({{ allowed_minutes }}) / 5) > 10 ? ({{ allowed_minutes }}) / 5 : 10));
     let loadTime = 0;
-    let showPopup = false;
 
     function notebookPopupSubmitKey(){
         return `${gradeable_id}-${USER_ID}`;
