@@ -24,8 +24,6 @@ describe('TA grading hotkey testing', () => {
     it('testing discussion, peer and notebook', () => {
         cy.login();
         cy.visit(['sample', 'config']);
-        cy.get('[data-testid="forum-enabled"]').should('not.be.checked');
-        cy.get('[data-testid="forum-enabled"]').check();
         cy.get('[data-testid="forum-enabled"]').should('be.checked');
         cy.visit(['sample', 'gradeable', 'grading_homework', 'update']);
         // adding the peer grading panel, discussion panel, notebook panel
