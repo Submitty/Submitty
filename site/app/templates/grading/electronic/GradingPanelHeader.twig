@@ -71,7 +71,7 @@
             {{ self.renderPanelPositionSelector('solution_ta_notes') }}
         </span>
         {% if isPeerPanel %}
-            <span class="grade-panel" id="peer_info_btn">
+            <span class="grade-panel" id="peer_info_btn" data-testid="peer-info-btn">
                 <button title="Show/Hide Peer Information (Press P)"
                         class="invisible-btn key_to_click"
                         tabindex="0"
@@ -82,7 +82,7 @@
             </span>
         {% endif %}
         {% if isDiscussionPanel %}
-            <span class="grade-panel" id="discussion_browser_btn">
+            <span class="grade-panel" id="discussion_browser_btn" data-testid="discussion-browser-btn">
                 <button title="Show/Hide Discussion Posts"
                         class="invisible-btn key_to_click"
                         tabindex="0"
