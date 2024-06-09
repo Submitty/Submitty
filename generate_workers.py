@@ -5,11 +5,15 @@ import glob
 import ipaddress
 import json
 import os
+import random
+import platform
+import subprocess
 from collections import OrderedDict
 from typing import Union, cast
+from tempfile import TemporaryDirectory
 
 
-def get_args():
+def get_args(m_series = False):
     parser = argparse.ArgumentParser(
         description='Script to generate configuration for '
         'development worker machines')
@@ -20,12 +24,16 @@ def get_args():
                         help='IP address range for workers')
     parser.add_argument('--base-port', default=2240, type=int,
                         help='Base ssh port (ports will be assigned incrementally)')
+    if m_series:
+        parser.add_argument('--mac-prefix', default='52:54:00', type=str,
+                            help='MAC address prefix for workers (QEMU only)')
 
     return parser.parse_args()
 
 
 def main():
-    args = get_args()
+    m_series = platform.processor() == 'arm' and platform.system() == 'Darwin'
+    args = get_args(m_series)
     workers = OrderedDict()
     rootdir = os.path.dirname(os.path.realpath(__file__))
     workerfile = os.path.join(rootdir, '.vagrant', 'workers.json')
@@ -56,7 +64,10 @@ def main():
 
         data = OrderedDict()
         data['ip_addr'] = str(ip)
-        data['ssh_port'] = args.base_port + i
+        if m_series:
+            data['mac_addr'] = args.mac_prefix + ":%02x:%02x:%02x" % tuple(random.randint(0, 255) for v in range(3))
+        else:
+            data['ssh_port'] = args.base_port + i
         workers[f'worker-{i}'] = data
 
     os.makedirs(os.path.dirname(workerfile), exist_ok=True)
@@ -64,6 +75,26 @@ def main():
         json.dump(workers, file, indent=4)
 
     print('Wrote new configuration to ' + workerfile)
+
+    if m_series:
+        print('Updating Bootstrap configuration...')
+        body = ['%%\n']
+        for name, data in workers.items():
+            body.append(name + ' 1 ' + data['ip_addr'] + ' ' + data['mac_addr'] + '\n')
+        with TemporaryDirectory() as tmpdir:
+            os.chdir(tmpdir)
+            filepath = os.path.join(tmpdir, 'bootpd')
+            with open(filepath, 'x') as file:
+                file.writelines(body)
+            w1 = subprocess.run(['sudo', 'mv', filepath, '/etc/bootptab'])
+            if w1.returncode != 0:
+                print('Failed to save configuration')
+                exit(1)
+            w2 = subprocess.run(['sudo', 'launchctl', 'kickstart', '-k', 'system/com.apple.bootpd'])
+            if w2.returncode != 0:
+                print('Failed to restart Bootstrap service')
+                exit(1)
+        print('Configuration saved')
 
 
 if __name__ == '__main__':
