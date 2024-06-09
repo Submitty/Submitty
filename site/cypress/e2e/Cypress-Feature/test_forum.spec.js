@@ -33,9 +33,9 @@ const replyToThread = (title, reply) => {
 const upduckPost = (thread_title) => {
     cy.get('[data-testid="thread-list-item"]').contains(thread_title).click();
     cy.get('[data-testid="create-post-head"]').should('contain', thread_title);
-    cy.get('.first_post > [data-testid="like-count"]').should('have.text', 0);
-    cy.get('.first_post').find('[data-testid="upduck-button"]').click();
-    cy.get('.first_post > [data-testid="like-count"]').should('have.text', 1);
+    cy.get('[data-testid="like-count"]').first().should('have.text', 0);
+    cy.get('[data-testid="upduck-button"]').first().click();
+    cy.get('[data-testid="like-count"]').first().should('have.text', 1);
 };
 
 const checkStatsUpducks = (fullName, numUpducks) => {
