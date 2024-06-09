@@ -5,7 +5,8 @@ describe('Test cases revolving around grade inquires', () => {
         cy.contains('Dates').click();
         cy.get('[data-testid="grade-inquiry-due-date"]').click();
         cy.get('[data-testid="grade-inquiry-due-date"]').should('be.visible');
-        cy.get('[data-testid="grade-inquiry-due-date"]').clear().type(date, { parseSpecialCharSequences: false, force: true });
+        cy.get('[data-testid="grade-inquiry-due-date"]').clear().type(date);
+        cy.get('[data-testid="grade-inquiry-due-date"]').type('{enter}');
     };
 
     it('should test normal submission grade inquiry panel', () => {
