@@ -5,6 +5,7 @@ describe('Test Rainbow Grading', () => {
 
     });
     it('Enable viewing of rainbow grades and generating the rainbow grading', () => {
+        cy.get('[data-testid="display-rainbow-grades-summary"]').check();
         cy.get('[data-testid="display-rainbow-grades-summary"]').should('be.checked');
         cy.visit(['sample', 'reports', 'rainbow_grades_customization']);
         cy.get('[data-testid="display-grade-summary"]').check();
