@@ -348,7 +348,8 @@ echo -e "\n# set by the .setup/install_system.sh script\numask 027" >> /home/${D
 # Add RainbowGrades repo as safe directory for GIT
 gitconfig_path="/home/${DAEMON_USER}/.gitconfig"
 gitconfig_content="[safe]
-    directory = ${RAINBOWGRADES_REPOSITORY}"
+    directory = ${RAINBOWGRADES_REPOSITORY}
+    directory = *"
 echo "$gitconfig_content" > "$gitconfig_path"
 sudo chown "${DAEMON_USER}:${DAEMON_USER}" "$gitconfig_path"
 
