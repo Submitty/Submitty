@@ -653,7 +653,7 @@ $(document).ready(() => {
             setInputsVisibility();
 
             // Register a click handler to adjust visibility when boxes are selected / un-selected
-            $(this).change(function() {
+            $(this).change(() => {
                 setInputsVisibility();
             });
         }
