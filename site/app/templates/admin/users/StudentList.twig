@@ -90,7 +90,7 @@
             {% for registration, students in sections %}
                 <tbody id="section-{{ registration }}">
                     <tr class="info">
-                        <th class="section-break" colspan="{{ count }}">Students Enrolled in Registration Section {{ registration }}</td>
+                        <th class="section-break" colspan="{{ count }}">Students Enrolled in Registration Section {{ registration }}</th>
                     </tr>
                     {% for student in students %}
                         {% set class = "" %}
