@@ -27,6 +27,16 @@ concurrency:
 
 
 jobs:
+  ansible-lint:
+    runs-on: ubuntu-22.04
+    steps:
+      - uses: actions/checkout@v4
+      - name: Run ansible-lint
+        uses: ansible/ansible-lint@main
+        with:
+          args: .setup/ansible
+
+
   css-lint:
     runs-on: ubuntu-22.04
     defaults:
