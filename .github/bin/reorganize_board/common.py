@@ -51,7 +51,7 @@ class _StatusNames:
             ).stdout
         )
 
-    names = __get_status_names()
+    names = __get_status_names(None)
 
 
 class Status(Enum):
