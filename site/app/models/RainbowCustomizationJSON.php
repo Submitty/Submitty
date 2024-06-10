@@ -103,13 +103,13 @@ class RainbowCustomizationJSON extends AbstractModel {
     }
 
     /**
-         * Gets the final cutoffs object
-         *
-         * @return object The final cutoffs object
-         */
-        public function getFinalCutoff() {
-            return $this->final_cutoff;
-        }
+     * Gets the final cutoffs object
+     *
+     * @return object The final cutoffs object
+     */
+    public function getFinalCutoff() {
+        return $this->final_cutoff;
+    }
 
     /**
      * Gets an array of display
@@ -201,8 +201,8 @@ class RainbowCustomizationJSON extends AbstractModel {
         }
 
         if (isset($json->final_cutoff)) {
-                    $this->final_cutoff = $json->final_cutoff;
-                }
+            $this->final_cutoff = $json->final_cutoff;
+        }
 
         if (isset($json->gradeables)) {
             $this->gradeables = $json->gradeables;
