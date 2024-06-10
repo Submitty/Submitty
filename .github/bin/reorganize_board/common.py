@@ -2,28 +2,8 @@ from enum import Enum
 import subprocess
 import json
 
+
 project_id = "PVT_kwDOAKRRkc4AfZil"
-
-
-def __get_status_names():
-    return json.loads(
-        subprocess.run(
-            [
-                "gh",
-                "project",
-                "field-list",
-                "--owner",
-                "Submitty",
-                "1",
-                "--format",
-                "json",
-                "--jq",
-                '.fields | .[] | select(.id == "PVTSSF_lADOAKRRkc4AfZilzgUwVMs").options | map( { (.id): .name }) | add',
-            ],
-            capture_output=True,
-            text=True,
-        ).stdout
-    )
 
 
 class Field(Enum):
@@ -41,6 +21,29 @@ class Field(Enum):
 
 
 _Status__status_names = {}
+
+
+def __get_status_names():
+    return json.loads(
+        subprocess.run(
+            [
+                "gh",
+                "project",
+                "field-list",
+                "--owner",
+                "Submitty",
+                "1",
+                "--format",
+                "json",
+                "--jq",
+                '.fields | .[] | select(.id == "'
+                + str(Field.Status)
+                + '").options | map( { (.id): .name }) | add',
+            ],
+            capture_output=True,
+            text=True,
+        ).stdout
+    )
 
 
 class Status(Enum):
