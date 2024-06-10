@@ -1,6 +1,9 @@
+"""Helper functions for Github project automation."""
+
 from enum import Enum
 import subprocess
 import json
+import sys
 
 
 PROJECT_ID = "PVT_kwDOAKRRkc4AfZil"
@@ -8,6 +11,7 @@ PROJECT_ID = "PVT_kwDOAKRRkc4AfZil"
 
 class Field(Enum):
     """Project item field IDs for gh cli."""
+
     def __str__(self):
         return self.value
 
@@ -23,6 +27,7 @@ class Field(Enum):
 
 class _StatusNames:
     """Internal class for getting and storing status names."""
+
     def __get_status_names(self):
         return json.loads(
             subprocess.run(
@@ -37,11 +42,12 @@ class _StatusNames:
                     "json",
                     "--jq",
                     '.fields | .[] | select(.id == "'
-                    + str(Field.Status)
+                    + str(Field.STATUS)
                     + '").options | map( { (.id): .name }) | add',
                 ],
                 capture_output=True,
                 text=True,
+                check=True,
             ).stdout
         )
 
@@ -50,10 +56,11 @@ class _StatusNames:
 
 class Status(Enum):
     """Project item status IDs for gh cli."""
+
     def __str__(self):
         return self.value
 
-    def Name(self):
+    def name(self):
         return _StatusNames.names[str(self)]
 
     ABANDONED = "bd56a271"
@@ -80,21 +87,23 @@ def get_items():
                 "--format",
                 "json",
                 "--jq",
-                "[.items[] | {id, labels, status, title: .content.title, repo: .content.repository, number: .content.number}]",
+                "[.items[] | {id, labels, status, title: .content.title, "
+                "repo: .content.repository, number: .content.number}]",
             ],
             capture_output=True,
             text=True,
+            check=True,
         ).stdout
     )
 
 
 def set_status(item, status):
-    if item["status"] == status.Name():
+    if item["status"] == status.name():
         return
     print(
-        "Moving {}#{} {} ({} -> {})".format(
-            item["repo"], item["number"], item["title"], item["status"], status.Name()
-        )
+        f'Moving {item["repo"]}#{item["number"]} {item["title"]} '
+        '({item["status"]} -> {status.name()}',
+        file=sys.stderr,
     )
     subprocess.run(
         [
@@ -112,6 +121,7 @@ def set_status(item, status):
         ],
         capture_output=True,
         text=True,
+        check=True,
     )
 
 
@@ -120,4 +130,4 @@ def check_label(item, label):
 
 
 def check_status(item, status):
-    return item["status"] == status.Name()
+    return item["status"] == status.name()
