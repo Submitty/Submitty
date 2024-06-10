@@ -20,7 +20,7 @@ class Field(Enum):
     Reviewers = "PVTF_lADOAKRRkc4AfZilzgUwVNM"
 
 
-_Status__status_names = {}
+__status_names = {}
 
 
 def __get_status_names():
@@ -120,4 +120,4 @@ def check_status(item, status):
     return item["status"] == status.Name()
 
 
-_Status__status_names = __get_status_names()
+__status_names = __get_status_names()
