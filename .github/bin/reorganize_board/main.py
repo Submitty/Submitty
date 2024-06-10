@@ -6,9 +6,9 @@ def main():
     items = common.get_items()
     for item in items:
         if check_label(item, "Abandoned PR - Needs New Owner"):
-            set_status(item, Status.Abandoned)
+            set_status(item, Status.ABANDONED)
         elif not check_label(item, "Abandoned PR - Needs New Owner") and check_status(
-            item, Status.Abandoned
+            item, Status.ABANDONED
         ):
             set_status(item, Status.WIP)
 
