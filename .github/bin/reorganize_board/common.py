@@ -20,30 +20,30 @@ class Field(Enum):
     Reviewers = "PVTF_lADOAKRRkc4AfZilzgUwVNM"
 
 
-__status_names = {}
+class _StatusNames:
+    def __get_status_names():
+        return json.loads(
+            subprocess.run(
+                [
+                    "gh",
+                    "project",
+                    "field-list",
+                    "--owner",
+                    "Submitty",
+                    "1",
+                    "--format",
+                    "json",
+                    "--jq",
+                    '.fields | .[] | select(.id == "'
+                    + str(Field.Status)
+                    + '").options | map( { (.id): .name }) | add',
+                ],
+                capture_output=True,
+                text=True,
+            ).stdout
+        )
 
-
-def __get_status_names():
-    return json.loads(
-        subprocess.run(
-            [
-                "gh",
-                "project",
-                "field-list",
-                "--owner",
-                "Submitty",
-                "1",
-                "--format",
-                "json",
-                "--jq",
-                '.fields | .[] | select(.id == "'
-                + str(Field.Status)
-                + '").options | map( { (.id): .name }) | add',
-            ],
-            capture_output=True,
-            text=True,
-        ).stdout
-    )
+    names = __get_status_names()
 
 
 class Status(Enum):
@@ -51,8 +51,7 @@ class Status(Enum):
         return self.value
 
     def Name(self):
-        global __status_names
-        return __status_names[str(self)]
+        return _StatusNames.names[str(self)]
 
     Abandoned = "bd56a271"
     WIP = "26e8e6b2"
@@ -119,6 +118,3 @@ def check_label(item, label):
 
 def check_status(item, status):
     return item["status"] == status.Name()
-
-
-__status_names = __get_status_names()
