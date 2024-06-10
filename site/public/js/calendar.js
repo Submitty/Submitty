@@ -572,7 +572,7 @@ function buildSwitchingHeader(view_year, view_month, view_day, type) {
         yearOption.value = year;
         yearOption.textContent = year;
         yearSelect.appendChild(yearOption);
-    }    
+    }
     yearSelect.classList.add('cal-year-title');
     yearSelect.value = view_year;
 
