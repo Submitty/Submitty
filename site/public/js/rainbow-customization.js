@@ -583,17 +583,13 @@ function setInputsVisibility(elem) {
  * Sets the visibility for 'final grade cutoffs' input boxes
  * based on the 'final_grade' boxes in 'display' being selected / un-selected
  * */
-function setFinalGradeCutoffsVisibility(elem) {
-    const benchmark = elem.value;
-
-    if (benchmark === 'final_grade') {
-        // Sets visibility of 'final grade cutoffs' based on 'display_final_grade'
-        if ($("input[value='final_grade']:checked").val()) {
-            $('#final_grade_cutoffs').show();
-        }
-        else {
-            $('#final_grade_cutoffs').hide();
-        }
+function setFinalGradeCutoffsVisibility() {
+    // Sets visibility of 'final grade cutoffs' based on 'display_final_grade'
+    if ($("input[value='final_grade']:checked").val()) {
+        $('#final_grade_cutoffs').show();
+    }
+    else {
+        $('#final_grade_cutoffs').hide();
     }
 }
 
@@ -652,15 +648,15 @@ $(document).ready(() => {
      * Visibility is controlled by which boxes are selected in the display benchmarks area
      */
     $('#display_benchmarks_collapse input').each(function() {
+        if (this.value === 'final_grade') {
+            // Set the initial visibility on load
+            setInputsVisibility();
 
-        // Set the initial visibility on load
-        setInputsVisibility(this);
-
-        // Register a click handler to adjust visibility when boxes are selected / un-selected
-        $(this).change(function() {
-            setInputsVisibility(this);
-        });
-
+            // Register a click handler to adjust visibility when boxes are selected / un-selected
+            $(this).change(function() {
+                setInputsVisibility();
+            });
+        }
     });
 
     /**
