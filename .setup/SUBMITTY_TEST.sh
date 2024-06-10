@@ -6,6 +6,7 @@ pushd /usr/local/submitty/GIT_CHECKOUT/Submitty/site  > /dev/null || {
 }
 
 COMPOSER_ALLOW_SUPERUSER=1 composer install
+npm install
 
 run_php_stan() {
     COMPOSER_ALLOW_SUPERUSER=1 composer run-script static-analysis "${@:2}" 2>/dev/null
@@ -15,7 +16,13 @@ run_php_cs() {
     COMPOSER_ALLOW_SUPERUSER=1 composer run-script lint 2>/dev/null
 }
 
+run_js_es() {
+    npm run eslint
+}
 
+run_css_style() {
+    npm run css-stylelint
+}
 if [ "$1" == "phpstan" ]; then
     run_php_stan "$@"
 elif [ "$1" == "phpcs" ]; then
@@ -23,13 +30,19 @@ elif [ "$1" == "phpcs" ]; then
 elif [ "$1" == "php-lint" ]; then
     run_php_cs
     run_php_stan "$@"
+elif [ "$1" == "js-lint" ]; then
+    run_js_es
+elif [ "$1" == "css-lint" ]; then
+    run_css_style
 elif [ "$1" == "help" ]; then
     echo "phpstan: php static analysis [option: --memory-limit 4G, --generate-baseline ...]
           phpcs  : php CodeSniffer
-          php-lint: phpcs & phpstan"
+          php-lint: phpcs & phpstan
+          js-lint: eslint
+          css-lint: css-stylelint"
 else
     echo "Unknown test type: $1
-        use phpstan, phpcs, php-lint
+        use phpstan, phpcs, php-lint, js-lint, css-lint
         or help for detail"
 fi
 
