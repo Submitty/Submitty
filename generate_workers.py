@@ -41,11 +41,11 @@ def main():
     if len(glob.glob(os.path.join(rootdir, '.vagrant', 'machines', '*', '*', 'action_provision'))):
         if input("Warning: There are existing vagrant machines in this project that may conflict"
                  " with new configuration. Are you sure you would like to proceed? [y/N] "
-                 )[0].lower() != 'y':
+                 ).lower().strip() != 'y':
             return
 
     if os.path.isfile(workerfile):
-        if input('Overwrite existing worker configuration? [y/N] ')[0].lower() != 'y':
+        if input('Overwrite existing worker configuration? [y/N] ').lower().strip() != 'y':
             return
 
     ips = cast(Union[ipaddress.IPv4Network, ipaddress.IPv6Network], args.ip_range).hosts()
