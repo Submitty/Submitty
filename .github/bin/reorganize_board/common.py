@@ -51,6 +51,7 @@ class Status(Enum):
         return self.value
 
     def Name(self):
+        global __status_names
         return __status_names[str(self)]
 
     Abandoned = "bd56a271"
