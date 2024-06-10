@@ -60,7 +60,7 @@ class Status(Enum):
     def __str__(self):
         return self.value
 
-    def name(self):
+    def get_name(self):
         return _StatusNames.names[str(self)]
 
     ABANDONED = "bd56a271"
@@ -98,11 +98,11 @@ def get_items():
 
 
 def set_status(item, status):
-    if item["status"] == status.name():
+    if item["status"] == status.get_name():
         return
     print(
         f'Moving {item["repo"]}#{item["number"]} {item["title"]} '
-        '({item["status"]} -> {status.name()}',
+        '({item["status"]} -> {status.get_name()}',
         file=sys.stderr,
     )
     subprocess.run(
@@ -130,4 +130,4 @@ def check_label(item, label):
 
 
 def check_status(item, status):
-    return item["status"] == status.name()
+    return item["status"] == status.get_name()
