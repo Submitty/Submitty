@@ -185,6 +185,10 @@ function getGradeableBuckets() {
             const count = $(`#config-count-${type}`).val();
             bucket.count = parseInt(count);
 
+            // // Extract remove_lowest
+            const remove_lowest = $(`#config-remove_lowest-${type}`).val();
+            bucket['remove_lowest'] = parseInt(remove_lowest);
+
             // Extract percent
             let percent = $(`#percent-${type}`).val();
             percent = percent / 100;
@@ -657,5 +661,27 @@ $(document).ready(() => {
     $(document).ready(() => {
         $('#rg_web_ui_loading').hide();
         $('#rg_web_ui').show();
+    });
+});
+
+
+$(document).ready(() => {
+    $('#pencilIcon').click((event) => {
+        event.stopPropagation();
+        const checkboxControls = $('#checkboxControls');
+        const dropLowestDiv = $('#dropLowestDiv');
+
+        checkboxControls.css('display') === 'none'
+            ? checkboxControls.show()
+            : checkboxControls.hide() && dropLowestDiv.hide();
+    });
+    $('#drop_lowest_checkbox').change(function(event) {
+        event.stopPropagation();
+        const dropLowestDivs = $('div[id^="dropLowestDiv-"]');
+        const isChecked = $(this).is(':checked');
+
+        dropLowestDivs.each((index, dropLowestDiv) => {
+            $(dropLowestDiv).css('display', isChecked ? 'block' : 'none');
+        });
     });
 });
