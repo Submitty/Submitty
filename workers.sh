@@ -42,7 +42,7 @@ if [[ $COMMAND == "start" ]]; then
 fi
 
 if [[ $COMMAND == "up" ]]; then
-  WORKER_MODE=1 GATEWAY_IP=${GATEWAY_IP} "${HOMEBREW_PREFIX}/opt/socket_vmnet/bin/socket_vmnet_client" "${HOMEBREW_PREFIX}/var/run/socket_vmnet" vagrant up
+  WORKER_MODE=1 GATEWAY_IP=${GATEWAY_IP} "${HOMEBREW_PREFIX}/opt/socket_vmnet/bin/socket_vmnet_client" "${HOMEBREW_PREFIX}/var/run/socket_vmnet" vagrant up "${@:2}"
   exit 0
 fi
 
