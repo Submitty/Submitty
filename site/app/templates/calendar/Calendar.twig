@@ -6,6 +6,8 @@
     const curr_month = {{ curr_month }};
     const curr_day = {{ curr_day }};
     const instructor_courses = {{ instructor_courses|json_encode|raw }};
+    const global_items_by_date = {{global_items_by_date|json_encode|raw }};
+    const is_superuser = {{ is_superuser ? "true" : "false" }};
 
     $( document ).ready(function() {
         // Get value of the type dropdown
@@ -59,6 +61,11 @@
             {% if instructor_courses|length > 0 %}
                 <button type="button" onclick="openNewItemModal()" class="btn btn-primary">
                     <i class="fas fa-plus"></i> New Item
+                </button>
+            {% endif %}
+            {% if is_superuser %}
+                <button type="button" onclick="openNewGlobalEventModal()" class="btn btn-primary">
+                    <i class="fas fa-plus"></i> New Global Event
                 </button>
             {% endif %}
                 <button type="button" onclick="openOptionsModal()" class="btn btn-primary">
@@ -144,3 +151,5 @@
 {{ include('calendar/NewCalendarItem.twig') }}
 {{ include('calendar/EditCalendarItem.twig') }}
 {{ include('calendar/CalendarOptions.twig') }}
+{{ include('calendar/NewGlobalItem.twig') }}
+{{ include('calendar/EditGlobalItem.twig') }}
