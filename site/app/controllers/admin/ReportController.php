@@ -651,7 +651,7 @@ class ReportController extends AbstractController {
 
     #[Route("/courses/{_semester}/{_course}/reports/rainbow_grades_customization/upload", methods: ["POST"])]
     public function uploadRainbowConfig() {
-        $redirect_url =  $this->core->buildCourseUrl((['reports']));
+        $redirect_url = $this->core->buildCourseUrl(['reports']);
         if (empty($_FILES) || !isset($_FILES['config_upload'])) {
             $msg = 'Upload failed: No file to upload';
             $this->core->addErrorMessage($msg);
@@ -674,8 +674,9 @@ class ReportController extends AbstractController {
         }
 
         $rainbow_grades_dir = FileUtils::joinPaths($this->core->getConfig()->getCoursePath(), "rainbow_grades");
+        $destination_path = FileUtils::joinPaths($rainbow_grades_dir, 'manual_customization.json');
 
-        if (!move_uploaded_file($upload['tmp_name'], FileUtils::joinPaths($rainbow_grades_dir, 'manual_customization.json'))) {
+        if (!copy($upload['tmp_name'], $destination_path)) {
             $msg = 'Upload failed: Could not copy file';
             $this->core->addErrorMessage($msg);
             return new MultiResponse(
@@ -684,6 +685,15 @@ class ReportController extends AbstractController {
                 new RedirectResponse($redirect_url)
             );
         }
+
+        // Remove the temporary upload file
+        unlink($upload['tmp_name']);
+//
+//        // Get the group of the rainbow_grades directory
+//        $directory_group = filegroup($rainbow_grades_dir);
+//
+//        // Change the group ownership of the uploaded file to match the directory
+//        chgrp($destination_path, $directory_group);
 
         $msg = 'Rainbow Grades Customization uploaded';
         $this->core->addSuccessMessage($msg);
@@ -695,6 +705,7 @@ class ReportController extends AbstractController {
             new RedirectResponse($redirect_url)
         );
     }
+
 
     #[Route("/courses/{_semester}/{_course}/reports/rainbow_grades_status")]
     public function autoRainbowGradesStatus() {
