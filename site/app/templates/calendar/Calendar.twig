@@ -88,6 +88,7 @@
                 {% for course in course_names %}
                 <div 
                     name="{{ course.course_name|replace({' ':''}) }}" 
+                    aria-label="Filter course {{ course.display_name }}"
                     class="legend-color" 
                     onclick="filter_course('{{ course.course_name }}', '{{ course.display_name }}')" 
                     style="cursor: pointer;" 
@@ -104,6 +105,7 @@
                 {% else %}
                 <div 
                     name="{{ calendar_course_cookie|replace({' ':''}) }}" 
+                    aria-label="Filter course {{ course.display_name }}"
                     class="legend-color" 
                     onclick="filter_course('show all', '')"
                     style="cursor: pointer;" 
