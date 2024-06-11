@@ -1,0 +1,32 @@
+name: Reorganize project board
+
+on:
+  pull_request:
+    types:
+      - assigned
+      - unassigned
+      - labeled
+      - unlabeled
+      - edited
+      - reopened
+      - synchronize
+      - converted_to_draft
+      - ready_for_review
+      - review_requested
+      - review_request_removed
+
+jobs:
+  reorganize-board:
+    name: Reorganize project board
+    runs-on: ubuntu-latest
+    permissions: write-all
+
+    steps:
+      - name: Checkout main repo
+        uses: actions/checkout@v4
+
+      - name: Reorganize project board
+        run: python .github/bin/reorganize_board/main.py
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        shell: sh
