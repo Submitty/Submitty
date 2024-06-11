@@ -359,23 +359,30 @@ function isUserFormEdited() {
             current_grading_sections.push(+$(this).val());
         }
     });
-    // check if there is any changes made in the grading checkboxes.
-    const grading_sections_edited = !(current_grading_sections.length === current_grading_sections.length && current_grading_sections.every((num, idx) => num === user_grading_sections[idx]));
+    current_grading_sections.sort();
 
-    return (
+    // Check if there are any changes made in the grading checkboxes.
+    const grading_sections_edited = !(current_grading_sections.length === user_grading_sections.length && current_grading_sections.every((num, idx) => num === user_grading_sections[idx]));
+
+    // Adjust comparison logic to handle undefined values
+    const registration_subsection_form_value = $('[name="registration_subsection"]', form).val() || '';
+    const registration_subsection_user_value = user['registration_subsection'] || '';
+
+    const formEdited = (
         $('[name="user_numeric_id"]', form).val() !== user['user_numeric_id'] ||
-    $('[name="user_givenname"]', form).val() !== user['user_givenname'] ||
-    $('[name="user_familyname"]', form).val() !== user['user_familyname'] ||
-    $('[name="user_preferred_givenname"]', form).val() !== user['user_preferred_givenname'] ||
-    $('[name="user_preferred_familyname"]', form).val() !== user['user_preferred_familyname'] ||
-    $('[name="user_email"]', form).val() !== user['user_email'] ||
-    ! $(`[name="user_group"]  option[value="${user['user_group']}"]`).prop('selected')  ||
-    $('[name="manual_registration"]', form).prop('checked') !==  user['manual_registration'] ||
-    ! $(`[name="registered_section"] option[value="${registration_section}"]`).prop('selected') ||
-    ! $(`[name="rotating_section"] option[value="${rotating_section}"]`).prop('selected') ||
-    $('[name="registration_subsection"]', form).val() !== user['registration_subsection'] ||
-    grading_sections_edited
+        $('[name="user_givenname"]', form).val() !== user['user_givenname'] ||
+        $('[name="user_familyname"]', form).val() !== user['user_familyname'] ||
+        $('[name="user_preferred_givenname"]', form).val() !== user['user_preferred_givenname'] ||
+        $('[name="user_preferred_familyname"]', form).val() !== user['user_preferred_familyname'] ||
+        $('[name="user_email"]', form).val() !== user['user_email'] ||
+        !$(`[name="user_group"] option[value="${user['user_group']}"]`).prop('selected') ||
+        $('[name="manual_registration"]', form).prop('checked') !== user['manual_registration'] ||
+        !$(`[name="registered_section"] option[value="${registration_section}"]`).prop('selected') ||
+        !$(`[name="rotating_section"] option[value="${rotating_section}"]`).prop('selected') ||
+        registration_subsection_form_value !== registration_subsection_user_value ||
+        grading_sections_edited
     );
+    return formEdited;
 }
 
 function clearUserFormInformation() {
