@@ -495,6 +495,7 @@ class SubmissionController extends AbstractController {
                 curl_setopt($ch, CURLOPT_URL, $this->core->getConfig()->getCgiUrl() . "pdf_page_check.cgi?pdf_path={$pdf_full_path}&num_page={$num_pages}&file_name={$job_data['filename']}");
                 curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
                 $output = curl_exec($ch);
+                curl_close($ch);
                 $response = json_decode($output);
 
                 if (!$response->success) {
