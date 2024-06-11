@@ -7,19 +7,20 @@ function updateVisibility() {
     $('.cell-grade').each(function() {
         const graderElement = $(this).find('.simple-grade-grader');
         const dateElement = $(this).find('.simple-grade-date');
-        
-        if (showGraders && graderElement.text().trim() !== "") {
+        if (showGraders && graderElement.text().trim() !== '') {
             graderElement.css('display', 'block');
-        } else {
+        }
+        else {
             graderElement.css('display', 'none');
         }
 
-        if (showDates && dateElement.text().trim() !== "") {
+        if (showDates && dateElement.text().trim() !== '') {
             dateElement.css('display', 'block');
-        } else {
+        }
+        else {
             dateElement.css('display', 'none');
         }
-        
+
         // Force repaint by getting and setting the current color value
         const graderColor = graderElement.css('color');
         const dateColor = dateElement.css('color');
@@ -271,13 +272,11 @@ function updateCheckpointCells(elems, scores, no_cookie) {
         },
         (returned_data) => {
             console.log('AJAX response received:', returned_data);
-    
-            if (returned_data.data && returned_data.data.date) {  // Corrected this line
-                const currentDate = new Date(returned_data.data.date);  // Access nested date
+            if (returned_data.data && returned_data.data.date) {
+                const currentDate = new Date(returned_data.data.date);
                 if (!isNaN(currentDate.getTime())) {
                     const formattedDate = `${currentDate.getFullYear()}-${('0' + (currentDate.getMonth() + 1)).slice(-2)}-${('0' + currentDate.getDate()).slice(-2)} ${('0' + currentDate.getHours()).slice(-2)}:${('0' + currentDate.getMinutes()).slice(-2)}:${('0' + currentDate.getSeconds()).slice(-2)}`;
                     console.log('Formatted Date:', formattedDate);
-    
                     elems.each((idx, elem) => {
                         elem = $(elem);
                         elem.animate({'border-right-width': '0px'}, 400);
@@ -287,7 +286,6 @@ function updateCheckpointCells(elems, scores, no_cookie) {
                         elem.find('.simple-grade-grader').text(elem.data('grader'));
                         elem.find('.simple-grade-date').text(formattedDate);
                     });
-    
                     const message = {
                         'type': 'update_checkpoint', 
                         'elem': elems.attr('id').split('-')[3], 
@@ -306,7 +304,6 @@ function updateCheckpointCells(elems, scores, no_cookie) {
             else {
                 console.log('Date not found in response:', returned_data);
             }
-    
             updateVisibility();
         },
         () => {
@@ -403,7 +400,6 @@ function setupCheckboxCells() {
         }
         Cookies.set('show_dates', showDatesGradedCheckbox.is(':checked'));
     });
-    updateVisibility();
 }
 
 function setupNumericTextCells() {
@@ -479,7 +475,6 @@ function setupNumericTextCells() {
                 }
 
                 window.socketClient.send({'type': 'update_numeric', 'elem': split_id[3], 'user': row_el.data('anon'), 'value': value, 'total': total});
-                updateVisibility();
             },
             () => {
                 elem.css('background-color', '--standard-light-pink');
@@ -605,14 +600,12 @@ function setupNumericTextCells() {
                                         }
                                     }
                                 });
-                                updateVisibility();
                             },
                             () => {
                                 alert('submission error');
                             },
                         );
                     }
-
                     if (breakOut) {
                         alert('CSV upload failed! Format file incorrect.');
                     }
@@ -624,7 +617,6 @@ function setupNumericTextCells() {
             f.replaceWith(f = f.clone(true));
         }
     });
-    updateVisibility();
 }
 
 function setupSimpleGrading(action) {
@@ -978,7 +970,6 @@ function checkpointSocketHandler(elem_id, anon_id, score, grader, date) {
         elem.css('border-right', `60px solid ${getComputedStyle(elem.parent()[0]).getPropertyValue('background-color')}`);
         elem.animate({'border-right-width': '0px'}, 400);
     }
-    updateVisibility();
 }
 
 function numericSocketHandler(elem_id, anon_id, value, total) {
@@ -1002,10 +993,4 @@ function numericSocketHandler(elem_id, anon_id, value, total) {
             elem.parent().siblings('.option-small-output').children('.cell-total').text(total).hide().fadeIn('slow');
         }
     }
-    updateVisibility();
 }
-
-// Attach event listener to checkboxes
-$(document).on('change', '#show-graders, #show-dates', function() {
-    updateVisibility();
-});
