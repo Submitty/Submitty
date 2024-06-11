@@ -117,15 +117,15 @@
         function updateTimer() {
             var now = new Date();
             var timeRemaining = endDate - now;
-            var timerDisplayElement = document.getElementById('timerDisplay');
-            var timerElement = document.getElementById('timer');
+            var timerDisplayElement = $('#timerDisplay');
+            var timerElement = $('#timer');
 
             // Show the timer element once we're ready to start updating it
-            timerElement.style.display = 'block';
+            timerElement.css('display', 'block');
 
             if (timeRemaining <= 0) {
                 if (timerElement) {
-                    timerElement.textContent = "Poll Ended";
+                    timerElement.text('Poll Ended');
                 }
                 clearInterval(timerId);
                 return;
@@ -143,9 +143,8 @@
             var hoursUpdated = (hours < 10) ? "0" + hours : hours;
             var minutesUpdated = (minutes < 10) ? "0" + minutes : minutes;
             var secondsUpdated = (seconds < 10) ? "0" + seconds : seconds;
-            var timerDisplay = hoursUpdated + ':' + minutesUpdated + ':' + secondsUpdated;
 
-            timerDisplayElement.textContent = timerDisplay;
+            timerDisplayElement.text(hoursUpdated + ':' + minutesUpdated + ':' + secondsUpdated);
         }
 
         timerId = setInterval(updateTimer, 20);
