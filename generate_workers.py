@@ -13,7 +13,7 @@ from typing import Union, cast
 from tempfile import TemporaryDirectory
 
 
-def get_args(m_series = False):
+def get_args(m_series=False):
     parser = argparse.ArgumentParser(
         description='Script to generate configuration for '
         'development worker machines')
