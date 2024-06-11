@@ -282,20 +282,37 @@ function updateCheckpointCells(elems, scores, no_cookie) {
             'scores': new_scores,
         },
         (returned_data) => {
+            console.log('AJAX response received:', returned_data);
             // Validate that the Simple Grader backend correctly saved components before updating
             const expected_vals = JSON.stringify(Object.entries(new_scores).map(String));
             const returned_vals = JSON.stringify(Object.entries(returned_data['data']).map(String));
             if (expected_vals === returned_vals) {
+                // Format the received date correctly
+                const currentDate = new Date(returned_data['date']);
+                const formattedDate = `${currentDate.getFullYear()}-${('0' + (currentDate.getMonth() + 1)).slice(-2)}-${('0' + currentDate.getDate()).slice(-2)} ${('0' + currentDate.getHours()).slice(-2)}:${('0' + currentDate.getMinutes()).slice(-2)}:${('0' + currentDate.getSeconds()).slice(-2)}`;
+                console.log('Formatted Date:', formattedDate);
+    
                 elems.each((idx, elem) => {
                     elem = $(elem);
                     elem.animate({'border-right-width': '0px'}, 400); // animate the box
                     elem.attr('data-score', elem.data('score'));      // update the score
                     elem.attr('data-grader', elem.data('grader'));    // update new grader
+                    elem.attr('data-date', formattedDate);              // update new date
                     elem.find('.simple-grade-grader').text(elem.data('grader'));
+                    elem.find('.simple-grade-date').text(formattedDate);
                 });
                 window.socketClient.send({'type': 'update_checkpoint', 'elem': elems.attr('id').split('-')[3], 'user': parent.data('anon'), 'score': elems.data('score'), 'grader': elems.data('grader')});
-            }
-            else {
+                const message = {
+                    'type': 'update_checkpoint', 
+                    'elem': elems.attr('id').split('-')[3], 
+                    'user': parent.data('anon'), 
+                    'score': elems.data('score'), 
+                    'grader': elems.data('grader'), 
+                    'date': formattedDate  // Ensure date is being sent
+                };
+                console.log('Sending WebSocket message:', message); // Log the message
+                window.socketClient.send(message);
+            } else {
                 console.log('Save error: returned data:', returned_vals, 'does not match expected new data:', expected_vals);
                 elems.each((idx, elem) => {
                     elem = $(elem);
@@ -312,8 +329,7 @@ function updateCheckpointCells(elems, scores, no_cookie) {
                 elem.css('border-right', '60px solid #DA4F49');
             });
         },
-    );
-    updateVisibility();
+    );    
 }
 
 function getCheckpointHistory(g_id) {
