@@ -182,8 +182,10 @@ function testAndGetAttachments(post_box_id, dynamic_check) {
         return false;
     }
     else {
-        const submitButton = document.querySelector(`[data-post_box_id="${post_box_id}"] input[type="submit"]`);
-        submitButton.disabled = false;
+        const submitButtons = document.querySelectorAll(`[data-post_box_id="${post_box_id}"] input[type="submit"]`);
+        submitButtons.forEach((button) => {
+            button.disabled = false;
+        });
         return files;
     }
 }
@@ -1298,7 +1300,7 @@ function modifyThreadList(currentThreadId, currentCategoriesId, course, loadFirs
 function toggleLike(post_id, current_user) {
 
     // eslint-disable-next-line no-undef
-    const url = buildCourseUrl(['post', 'likes']);
+    const url = buildCourseUrl(['posts', 'likes']);
     $.ajax({
         url: url,
         type: 'POST',
@@ -2005,7 +2007,7 @@ function toggleMarkdown(post_box_id, triggered) {
     // eslint-disable-next-line eqeqeq
     $(`#markdown_input_${post_box_id}`).val($(`#markdown_input_${post_box_id}`).val() == 0 ? '1':'0');
     $(`#markdown-info-${post_box_id}`).toggleClass('disabled');
-    Cookies.set('markdown_enabled', $(`#markdown_input_${post_box_id}`).val(), { path: '/' });
+    Cookies.set('markdown_enabled', $(`#markdown_input_${post_box_id}`).val(), { path: '/', expires: 365 });
 }
 
 // eslint-disable-next-line no-unused-vars
@@ -2507,7 +2509,7 @@ function setupDisableReplyThreadForm() {
         //For all thread forms either reply's or posts, ensure that when text area is empty, the submit button appears to be disabled
         const textArea = form.querySelector('textarea');
 
-        const submitButton = form.querySelector('input[type="submit"]');
+        const submitButtons = form.querySelectorAll('input[type="submit"]');
 
         if (textArea.id === 'reply_box_1' || textArea.id === 'reply_box_2') {
             // Should not apply for first two reply_box's as they imply the post itself which should be handled by another controller due to extensive inputs
@@ -2517,12 +2519,9 @@ function setupDisableReplyThreadForm() {
         const inputTest = () => {
             const imageAttachments = form.querySelectorAll('.file-upload-table .file-label');
 
-            if (textArea.value.trim() === '' && imageAttachments.length === 0) {
-                submitButton.disabled = true;
-            }
-            else {
-                submitButton.disabled = false;
-            }
+            submitButtons.forEach((button) => {
+                button.disabled = textArea.value.trim() === '' && imageAttachments.length === 0;
+            });
         };
 
         textArea.addEventListener('input', () => {

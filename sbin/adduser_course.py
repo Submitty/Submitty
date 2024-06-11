@@ -31,7 +31,7 @@ def parse_args():
     parser.add_argument('course', help='title of the course')
     parser.add_argument('registration_section', nargs='?', default=None,
                         help='registration section that the user is added into')
-    parser.add_argument('user_group', default=1,
+    parser.add_argument('--user_group', default=1,
                         help='group the user belongs to 1:Instructor 2:Full Access Grader 3:Limited Access Grader 4:Student')
 
     return parser.parse_args()
