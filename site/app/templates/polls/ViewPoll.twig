@@ -110,15 +110,14 @@
 
     {% if timer_enabled %}
 
-        var endDate = new Date('{{ end_time }}');
-        var timerId;
-        var ended = false;
+        const endDate = new Date('{{ end_time }}');
+        let timerId;
 
         function updateTimer() {
-            var now = new Date();
-            var timeRemaining = endDate - now;
-            var timerDisplayElement = $('#timerDisplay');
-            var timerElement = $('#timer');
+            const now = new Date();
+            const timeRemaining = endDate - now;
+            const timerDisplayElement = $('#timerDisplay');
+            const timerElement = $('#timer');
 
             // Show the timer element once we're ready to start updating it
             timerElement.css('display', 'block');
@@ -136,15 +135,15 @@
                 return;
             }
 
-            var seconds = Math.floor((timeRemaining / 1000) % 60);
-            var minutes = Math.floor((timeRemaining / (1000 * 60)) % 60);
-            var hours = Math.floor((timeRemaining / (1000 * 60 * 60)) % 24);
+            const seconds = Math.floor((timeRemaining / 1000) % 60);
+            const minutes = Math.floor((timeRemaining / (1000 * 60)) % 60);
+            const hours = Math.floor((timeRemaining / (1000 * 60 * 60)) % 24);
 
-            var hoursUpdated = (hours < 10) ? "0" + hours : hours;
-            var minutesUpdated = (minutes < 10) ? "0" + minutes : minutes;
-            var secondsUpdated = (seconds < 10) ? "0" + seconds : seconds;
+            const hoursUpdated = (hours < 10) ? `0${hours}` : hours;
+            const minutesUpdated = (minutes < 10) ? `0${minutes}` : minutes;
+            const secondsUpdated = (seconds < 10) ? `0${seconds}` : seconds;
 
-            timerDisplayElement.text(hoursUpdated + ':' + minutesUpdated + ':' + secondsUpdated);
+            timerDisplayElement.text(`${hoursUpdated}:${minutesUpdated}:${secondsUpdated}`);
         }
 
         timerId = setInterval(updateTimer, 20);
