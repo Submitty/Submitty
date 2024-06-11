@@ -32,6 +32,8 @@ def commit_submission_to_repo(user_id, src_file, repo_path, vcs_subdirectory) ->
     my_cwd = os.getcwd()
     with TemporaryDirectory() as temp_dir:
         os.chdir(temp_dir)
+        # os.system(f'git config --global --add safe.directory {SUBMITTY_DATA_DIR}/vcs/git/{repo_path}')
+        os.system(f'git init --shared=all {SUBMITTY_DATA_DIR}/vcs/git/{repo_path}')
         os.system(f'git clone {SUBMITTY_DATA_DIR}/vcs/git/{repo_path}')
         os.chdir(os.path.join(temp_dir, user_id))
         os.system('git checkout main')
