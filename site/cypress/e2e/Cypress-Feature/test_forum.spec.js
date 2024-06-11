@@ -44,18 +44,8 @@ const checkStatsUpducks = (fullName, numUpducks) => {
     cy.get('[data-testid="more-dropdown"]').click();
     cy.get('#forum_stats').click();
     let found = false;
-    cy.get('[data-testid="user-stat"]').each(($el) => {
-        const name = $el.find('td').first().text().trim();
-        if (name === fullName) {
-            found = true;
-            const upducks = parseInt($el.find('[data-testid="upduck-stat"]').text().trim());
-            expect(upducks).to.eq(numUpducks);
-            return false;
-        }
-    }).then(() => {
-        expect(found).to.be.true;
-        cy.get('[title="Back to threads"]').click();
-    });
+    cy.get('[data-testid="user-stat"]').contains(fullName).siblings('[data-testid="upduck-stat"]').should('contain.text', numUpducks);
+    cy.get('[title="Back to threads"]').click();
 };
 
 const mergeThreads = (fromThread, toThread, mergedContent) => {
