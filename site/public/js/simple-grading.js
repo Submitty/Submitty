@@ -20,24 +20,12 @@ function updateVisibility() {
             dateElement.css('display', 'none');
         }
         
-        const parentCell = $(this);
-        if (showGraders || showDates) {
-            parentCell.css('height', 'auto'); // Expand to fit content
-        } else {
-            parentCell.css('height', ''); // Reset to default height
-        }
-        
         // Force repaint by getting and setting the current color value
         const graderColor = graderElement.css('color');
         const dateColor = dateElement.css('color');
 
         graderElement.css('color', graderColor);
         dateElement.css('color', dateColor);
-
-        setTimeout(() => {
-            graderElement.css('color', graderColor);
-            dateElement.css('color', dateColor);
-        }, 0);
     });
 }
 
@@ -283,43 +271,42 @@ function updateCheckpointCells(elems, scores, no_cookie) {
         },
         (returned_data) => {
             console.log('AJAX response received:', returned_data);
-            // Validate that the Simple Grader backend correctly saved components before updating
-            const expected_vals = JSON.stringify(Object.entries(new_scores).map(String));
-            const returned_vals = JSON.stringify(Object.entries(returned_data['data']).map(String));
-            if (expected_vals === returned_vals) {
-                // Format the received date correctly
-                const currentDate = new Date(returned_data['date']);
-                const formattedDate = `${currentDate.getFullYear()}-${('0' + (currentDate.getMonth() + 1)).slice(-2)}-${('0' + currentDate.getDate()).slice(-2)} ${('0' + currentDate.getHours()).slice(-2)}:${('0' + currentDate.getMinutes()).slice(-2)}:${('0' + currentDate.getSeconds()).slice(-2)}`;
-                console.log('Formatted Date:', formattedDate);
     
-                elems.each((idx, elem) => {
-                    elem = $(elem);
-                    elem.animate({'border-right-width': '0px'}, 400); // animate the box
-                    elem.attr('data-score', elem.data('score'));      // update the score
-                    elem.attr('data-grader', elem.data('grader'));    // update new grader
-                    elem.attr('data-date', formattedDate);              // update new date
-                    elem.find('.simple-grade-grader').text(elem.data('grader'));
-                    elem.find('.simple-grade-date').text(formattedDate);
-                });
-                window.socketClient.send({'type': 'update_checkpoint', 'elem': elems.attr('id').split('-')[3], 'user': parent.data('anon'), 'score': elems.data('score'), 'grader': elems.data('grader')});
-                const message = {
-                    'type': 'update_checkpoint', 
-                    'elem': elems.attr('id').split('-')[3], 
-                    'user': parent.data('anon'), 
-                    'score': elems.data('score'), 
-                    'grader': elems.data('grader'), 
-                    'date': formattedDate  // Ensure date is being sent
-                };
-                console.log('Sending WebSocket message:', message); // Log the message
-                window.socketClient.send(message);
-            } else {
-                console.log('Save error: returned data:', returned_vals, 'does not match expected new data:', expected_vals);
-                elems.each((idx, elem) => {
-                    elem = $(elem);
-                    elem.stop(true, true);
-                    elem.css('border-right', '60px solid #DA4F49');
-                });
+            if (returned_data.data && returned_data.data.date) {  // Corrected this line
+                const currentDate = new Date(returned_data.data.date);  // Access nested date
+                if (!isNaN(currentDate.getTime())) {
+                    const formattedDate = `${currentDate.getFullYear()}-${('0' + (currentDate.getMonth() + 1)).slice(-2)}-${('0' + currentDate.getDate()).slice(-2)} ${('0' + currentDate.getHours()).slice(-2)}:${('0' + currentDate.getMinutes()).slice(-2)}:${('0' + currentDate.getSeconds()).slice(-2)}`;
+                    console.log('Formatted Date:', formattedDate);
+    
+                    elems.each((idx, elem) => {
+                        elem = $(elem);
+                        elem.animate({'border-right-width': '0px'}, 400);
+                        elem.attr('data-score', elem.data('score'));
+                        elem.attr('data-grader', elem.data('grader'));
+                        elem.attr('data-date', formattedDate);
+                        elem.find('.simple-grade-grader').text(elem.data('grader'));
+                        elem.find('.simple-grade-date').text(formattedDate);
+                    });
+    
+                    const message = {
+                        'type': 'update_checkpoint', 
+                        'elem': elems.attr('id').split('-')[3], 
+                        'user': parent.data('anon'), 
+                        'score': elems.data('score'), 
+                        'grader': elems.data('grader'), 
+                        'date': formattedDate
+                    };
+                    console.log('Sending WebSocket message:', message);
+                    window.socketClient.send(message);
+                }
+                else {
+                    console.log('Invalid date received:', returned_data.data.date);
+                }
             }
+            else {
+                console.log('Date not found in response:', returned_data);
+            }
+    
             updateVisibility();
         },
         () => {
@@ -329,7 +316,7 @@ function updateCheckpointCells(elems, scores, no_cookie) {
                 elem.css('border-right', '60px solid #DA4F49');
             });
         },
-    );    
+    );
 }
 
 function getCheckpointHistory(g_id) {
@@ -946,7 +933,7 @@ function initSocketClient() {
     window.socketClient.onmessage = (msg) => {
         switch (msg.type) {
             case 'update_checkpoint':
-                checkpointSocketHandler(msg.elem, msg.user, msg.score, msg.grader);
+                checkpointSocketHandler(msg.elem, msg.user, msg.score, msg.grader, msg.date);
                 break;
             case 'update_numeric':
                 numericSocketHandler(msg.elem, msg.user, msg.value, msg.total);
@@ -960,10 +947,8 @@ function initSocketClient() {
     updateVisibility();
 }
 
-function checkpointSocketHandler(elem_id, anon_id, score, grader) {
-    // search for the user within the table
+function checkpointSocketHandler(elem_id, anon_id, score, grader, date) {
     const tr_elem = $(`table tbody tr[data-anon="${anon_id}"]`);
-    // if a match is found, then use it to find animate the correct cell
     if (tr_elem.length > 0) {
         const split_id = tr_elem.attr('id').split('-');
         const elem = $(`#cell-${split_id[1]}-${split_id[2]}-${elem_id}`);
@@ -971,7 +956,11 @@ function checkpointSocketHandler(elem_id, anon_id, score, grader) {
         elem.attr('data-score', score);
         elem.data('grader', grader);
         elem.attr('data-grader', grader);
+        elem.data('date', date);
+        elem.attr('data-date', date);
         elem.find('.simple-grade-grader').text(grader);
+        elem.find('.simple-grade-date').text(date);
+
         switch (score) {
             case 1.0:
                 elem.addClass('simple-full-credit');
