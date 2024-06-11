@@ -19,7 +19,9 @@ jobs:
   reorganize-board:
     name: Reorganize project board
     runs-on: ubuntu-latest
-    permissions: write-all
+    permissions:
+      content: write
+      repository-projects: write
 
     steps:
       - name: Checkout main repo
