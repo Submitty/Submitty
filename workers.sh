@@ -2,12 +2,13 @@
 
 COMMAND=$1
 
-if [[ $1 == "generate" ]]; then
-  python3 ./generate_workers.py ${@:2}
+if [[ $COMMAND == "generate" ]]; then
+  python3 ./generate_workers.py "${@:2}"
   exit $?
 fi
 
-if [[ $1 == "start" ]]; then
+if [[ $COMMAND == "start" ]]; then
+  # shellcheck disable=SC1091
   source .vagrant/.workervars 2>/dev/null
   if [[ -z $GATEWAY_IP ]]; then
     echo "Worker configuration not created, please run 'workers.sh generate'."
@@ -22,16 +23,16 @@ if [[ $1 == "start" ]]; then
     if [[ ! -f "${HOMEBREW_PREFIX}/opt/socket_vmnet/bin/socket_vmnet" ]]; then
       brew install socket_vmnet
     fi
-    mkdir -p ${HOMEBREW_PREFIX}/var/run
+    mkdir -p "${HOMEBREW_PREFIX}/var/run"
     stop_server() {
-      if [[ ! -z $SOCKET_PID ]]; then
+      if [[ -n $SOCKET_PID && ! $SOCKET_PID -eq 0 ]]; then
         echo "Stopping socket vmnet server..."
-        sudo kill -9 $SOCKET_PID
+        sudo kill -9 "$SOCKET_PID"
       fi
     }
     trap stop_server EXIT
     echo "Starting socket vmnet server..."
-    sudo ${HOMEBREW_PREFIX}/opt/socket_vmnet/bin/socket_vmnet --vmnet-mode=host --vmnet-gateway=${GATEWAY_IP} ${HOMEBREW_PREFIX}/var/run/socket_vmnet 1>/dev/null &
+    sudo "${HOMEBREW_PREFIX}/opt/socket_vmnet/bin/socket_vmnet" --vmnet-mode=host --vmnet-gateway="${GATEWAY_IP}" "${HOMEBREW_PREFIX}/var/run/socket_vmnet" 1>/dev/null &
     SOCKET_PID=$!
     echo "Server running, pid=$SOCKET_PID"
     sleep 2
@@ -40,9 +41,9 @@ if [[ $1 == "start" ]]; then
   exit 0
 fi
 
-if [[ $1 == "up" ]]; then
-  WORKER_MODE=1 GATEWAY_IP=${GATEWAY_IP} ${HOMEBREW_PREFIX}/opt/socket_vmnet/bin/socket_vmnet_client ${HOMEBREW_PREFIX}/var/run/socket_vmnet vagrant up
+if [[ $COMMAND == "up" ]]; then
+  WORKER_MODE=1 GATEWAY_IP=${GATEWAY_IP} "${HOMEBREW_PREFIX}/opt/socket_vmnet/bin/socket_vmnet_client" "${HOMEBREW_PREFIX}/var/run/socket_vmnet" vagrant up
   exit 0
 fi
 
-WORKER_MODE=1 WORKERS_ONLY=1 vagrant $@
+WORKER_MODE=1 WORKERS_ONLY=1 vagrant "$@"

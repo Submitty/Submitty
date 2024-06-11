@@ -52,6 +52,10 @@ def main():
     if isinstance(ips, list):
         ips = iter(ips)
 
+    gateway_ip = next(ips)
+    with open(os.path.join(rootdir, '.vagrant', '.workervars'), 'w') as file:
+        file.write(f"export GATEWAY_IP={gateway_ip}\n")
+
     for i in range(1, args.num+1):
         ip = next(ips, None)
         while (ip is not None
