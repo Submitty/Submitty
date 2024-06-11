@@ -46,4 +46,4 @@ if [[ $COMMAND == "up" ]]; then
   exit 0
 fi
 
-WORKER_MODE=1 WORKERS_ONLY=1 vagrant "$@"
+WORKER_MODE=1 vagrant "$@"

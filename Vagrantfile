@@ -139,15 +139,7 @@ Vagrant.configure(2) do |config|
     exec("bash", "workers.sh", *ARGV[1..])
   end
 
-  show_workers = true
-  show_main = ENV.fetch('WORKERS_ONLY', '0') != '1'
-
-  if ARGV[0] == 'up'
-    show_workers = ENV.fetch('WORKER_MODE', '0') == '1'
-    show_main = !show_workers
-  end
-
-  if show_workers
+  if ENV.fetch('WORKER_MODE', '0') == '1'
     get_workers.map do |worker_name, data|
       config.vm.define worker_name do |ubuntu|
         ubuntu.vm.network 'private_network', ip: data[:ip_addr]
@@ -163,9 +155,7 @@ Vagrant.configure(2) do |config|
         end
       end
     end
-  end
-
-  if show_main
+  else
     vm_name = 'ubuntu-22.04'
     config.vm.define vm_name, primary: true do |ubuntu|
       ubuntu.vm.network 'forwarded_port', guest: 1511, host: ENV.fetch('VM_PORT_SITE', 1511)
