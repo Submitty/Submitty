@@ -212,3 +212,12 @@ hr {
 .override + div.gradeable-li-right-of-input i.fa-exclamation-triangle {
     display: inline-block;
 }
+
+.input-field {
+    display: flex;
+    align-items: center;
+}
+
+#gradeables .gradeable-custom-item-input {
+    width: 3em;
+}
