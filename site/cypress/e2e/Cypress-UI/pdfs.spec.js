@@ -23,7 +23,7 @@ function select_gradeable() {
 function pdf_buttons(student=false) {
     cy.get('[data-testid="save-pdf-btn"]').should('be.visible');
     cy.get('[data-testid="clear-pdf-btn"]').should('be.visible');
-    if(!student){
+    if (!student) {
         cy.get('[data-testid="download-annotations-btn"]').should('be.visible');
         cy.get('[data-testid="toggle-annotations-btn"]').should('be.visible');
     }
