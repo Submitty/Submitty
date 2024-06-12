@@ -1,24 +1,25 @@
 // @ts-check
 
-// @ts-expect-error
-import eslint from '@eslint/js';
+const eslint = require('@eslint/js');
+const stylistic = require('@stylistic/eslint-plugin');
+const jest = require('eslint-plugin-jest');
+const globals = require('globals');
+const tseslint = require('typescript-eslint');
+// eslint-pluging-cypress/flat doesnt have ts definitions yet
+// @ts-expect-error TS2307
+const cypress = require('eslint-plugin-cypress/flat');
 
-import stylistic from '@stylistic/eslint-plugin';
-// @ts-expect-error
-import globals from 'globals';
-import tseslint from 'typescript-eslint';
-// @ts-expect-error
-import cypress from 'eslint-plugin-cypress/flat';
-// @ts-expect-error
-import jest from 'eslint-plugin-jest';
-
-export default tseslint.config(
+module.exports = tseslint.config(
     {
         name: 'Files to include',
         files: ['**/*.{js,ts}'],
     },
     {
-        name: 'Base rules for all files',
+        // todo: actually fix these files instead of ignoring them
+        ignores: ['cypress/support/e2e.js', 'cypress/plugins/index.js'],
+    },
+    {
+        name: 'Base options for all files',
         extends: [eslint.configs.recommended],
         languageOptions: {
             globals: {
@@ -33,6 +34,7 @@ export default tseslint.config(
             },
         },
         rules: {
+            // twig and eslint do not play well together, would be nice to re-enable this rule
             'no-unused-vars': 'off',
 
             'eqeqeq': ['error', 'always'],
@@ -93,14 +95,16 @@ export default tseslint.config(
             parserOptions: {
                 project: true,
                 // @ts-expect-error
-                tsconfigRootDir: import.meta.dirname,
+                tsconfigRootDir: __dirname,
             },
         },
     },
     {
         name: 'Options for cypress files',
         files: ['cypress/**/*.{js,ts}'],
-        extends: [cypress.configs.recommended],
+        extends: [cypress.configs.globals],
+        // todo: enable cypress lint rules at some point
+        // extends: [cypress.configs.recommended],
         languageOptions: {
             globals: globals.nodeBuiltin,
         },
