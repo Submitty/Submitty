@@ -185,6 +185,10 @@ function showSimpleGraderStats(action) {
     }
 }
 
+function padNumber(num) {
+    return num.toString().padStart(2, '0');
+}
+
 function updateCheckpointCells(elems, scores, no_cookie) {
     // see if we're setting all of a row to one score
     let singleScore = null;
@@ -275,7 +279,7 @@ function updateCheckpointCells(elems, scores, no_cookie) {
             if (returned_data.data && returned_data.data.date) {
                 const currentDate = new Date(returned_data.data.date);
                 if (!isNaN(currentDate.getTime())) {
-                    const formattedDate = `${currentDate.getFullYear()}-${('0' + (currentDate.getMonth() + 1)).slice(-2)}-${('0' + currentDate.getDate()).slice(-2)} ${('0' + currentDate.getHours()).slice(-2)}:${('0' + currentDate.getMinutes()).slice(-2)}:${('0' + currentDate.getSeconds()).slice(-2)}`;
+                    const formattedDate = `${currentDate.getFullYear()}-${padNumber(currentDate.getMonth() + 1)}-${padNumber(currentDate.getDate())} ${padNumber(currentDate.getHours())}:${padNumber(currentDate.getMinutes())}:${padNumber(currentDate.getSeconds())}`;
                     console.log('Formatted Date:', formattedDate);
                     elems.each((idx, elem) => {
                         elem = $(elem);
@@ -287,11 +291,11 @@ function updateCheckpointCells(elems, scores, no_cookie) {
                         elem.find('.simple-grade-date').text(formattedDate);
                     });
                     const message = {
-                        'type': 'update_checkpoint', 
-                        'elem': elems.attr('id').split('-')[3], 
-                        'user': parent.data('anon'), 
-                        'score': elems.data('score'), 
-                        'grader': elems.data('grader'), 
+                        'type': 'update_checkpoint',
+                        'elem': elems.attr('id').split('-')[3],
+                        'user': parent.data('anon'),
+                        'score': elems.data('score'),
+                        'grader': elems.data('grader'),
                         'date': formattedDate
                     };
                     console.log('Sending WebSocket message:', message);
