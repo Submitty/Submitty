@@ -3,7 +3,7 @@ showUpdatePronounsForm, showUpdatePasswordForm, showUpdateProfilePhotoForm, show
 updateUserPreferredNames, updateUserLastInitialFormat, updateUserProfilePhoto, updateUserSecondaryEmail,
 changeSecondaryEmail, previewUserLastInitialFormat, clearPronounsBox
  */
-/* global displaySuccessMessage, displayErrorMessage, buildUrl */
+/* global displaySuccessMessage, displayErrorMessage, buildUrl, showPopup */
 
 //This variable is to store changes to the pronouns form that have not been submitted
 let pronounsLastVal = null;
@@ -11,7 +11,7 @@ let pronounsLastVal = null;
 function showUpdatePrefNameForm() {
     $('.popup-form').css('display', 'none');
     const form = $('#edit-username-form');
-    form.css('display', 'block');
+    showPopup('#edit-username-form');
     form.find('.form-body').scrollTop(0);
     $('[name="user_name_change"]', form).val('');
     $('#user-givenname-change').focus();
@@ -20,7 +20,7 @@ function showUpdatePrefNameForm() {
 function showUpdateLastInitialFormatForm() {
     $('.popup-form').css('display', 'none');
     const form = $('#edit-last-initial-format-form');
-    form.css('display', 'block');
+    showPopup('#edit-last-initial-format-form');
     form.find('.form-body').scrollTop(0);
     const dropdown = $('#user-last-initial-format-change');
     dropdown.val(dropdown.data().default || 0);
@@ -29,7 +29,7 @@ function showUpdateLastInitialFormatForm() {
 function showUpdatePronounsForm() {
     $('.popup-form').css('display', 'none');
     const form = $('#edit-pronouns-form');
-    form.css('display', 'block');
+    showPopup('#edit-pronouns-form');
     form.find('.form-body').scrollTop(0);
     if (pronounsLastVal !== null && document.getElementById('user-pronouns-change').value === '') {
         document.getElementById('user-pronouns-change').value = pronounsLastVal;
@@ -39,7 +39,7 @@ function showUpdatePronounsForm() {
 function showUpdatePasswordForm() {
     $('.popup-form').css('display', 'none');
     const form = $('#change-password-form');
-    form.css('display', 'block');
+    showPopup('#change-password-form');
     form.find('.form-body').scrollTop(0);
     $('[name="new_password"]', form).val('');
     $('[name="confirm_new_password"]', form).val('');
@@ -49,14 +49,14 @@ function showUpdatePasswordForm() {
 function showUpdateProfilePhotoForm() {
     $('.popup-form').css('display', 'none');
     const form = $('#edit-profile-photo-form');
-    form.css('display', 'block');
+    showPopup('#edit-profile-photo-form');
     form.find('.form-body').scrollTop(0);
 }
 
 function showUpdateSecondaryEmailForm() {
     $('.popup-form').css('display', 'none');
     const form = $('#edit-secondary-email-form');
-    form.css('display', 'block');
+    showPopup('#edit-secondary-email-form');
     form.find('.form-body').scrollTop(0);
 }
 
