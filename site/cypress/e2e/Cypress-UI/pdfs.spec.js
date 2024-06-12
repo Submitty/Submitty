@@ -27,6 +27,10 @@ function pdf_buttons(student=false) {
         cy.get('[data-testid="download-annotations-btn"]').should('be.visible');
         cy.get('[data-testid="toggle-annotations-btn"]').should('be.visible');
     }
+    else {
+        cy.get('[data-testid="download-annotations-btn"]').should('not.exist');
+        cy.get('[data-testid="toggle-annotations-btn"]').should('not.exist');
+    }
 }
 
 function check_pdf_access(gradeable_id) {
