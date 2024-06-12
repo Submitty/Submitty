@@ -92,6 +92,7 @@
                     onclick="filter_course('{{ course.course_name }}', '{{ course.display_name }}')" 
                     style="cursor: pointer;" 
                     title="Click to filter course, click again to show all courses"
+                    aria-label="Filter course {{ course.display_name }}"
                 ></div>
                 <p 
                     for="{{ course.course_name|replace({' ':''}) }}-color" 
@@ -108,6 +109,7 @@
                     onclick="filter_course('show all', '')"
                     style="cursor: pointer;" 
                     title="Click to open Calendar options form"
+                    aria-label="Show all courses"
                 ></div>
                 <p 
                     for="{{ calendar_course_cookie|replace({' ':''}) }}-color" 
