@@ -135,7 +135,6 @@ class ReportController extends AbstractController {
 
     /**
      * Generates and offers download of CSV grade report
-     * @AccessControl(role="INSTRUCTOR")
      */
     #[Route("/courses/{_semester}/{_course}/reports/csv")]
     public function generateCSVReport() {
