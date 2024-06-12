@@ -396,7 +396,7 @@ class RainbowCustomization extends AbstractModel {
             $percent_obj = $this->RCJSON->getFinalCutoff();
 
             // If the RCJSON was found and it contains the final grade cutoff percent fields then return it
-            if ($percent_obj != (object) []) {
+            if ($percent_obj !== (object) []) {
                 return $percent_obj;
             }
         }

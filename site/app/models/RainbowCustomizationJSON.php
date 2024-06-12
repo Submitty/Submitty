@@ -25,7 +25,7 @@ class RainbowCustomizationJSON extends AbstractModel {
     private $messages = [];
     private $display = [];
     private $benchmark_percent;         // Init in constructor
-    private $final_cutoff;
+    private object $final_cutoff;       // Init in constructor
     private $gradeables = [];
     /**
      * @var object[]
@@ -264,14 +264,12 @@ class RainbowCustomizationJSON extends AbstractModel {
      *
      * @param string $benchmark The benchmark - this is the key for this json field
      * @param float $percent The percent - this is the value for this json field
-     * @throws BadArgumentException The passed in percent was empty
      */
-    public function addFinalCutoff($benchmark, $percent) {
-        if (empty($percent)) {
-            throw new BadArgumentException('The final cutoff may not be empty.');
-        }
-
-        $this->final_cutoff->$benchmark = (float) $percent;
+    public function addFinalCutoff(string $benchmark, float $percent): void {
+        // To satisfy php-lint, add the pair to an array, then cast the array back to an object
+        $final_cutoff_array = (array) $this->final_cutoff;
+        $final_cutoff_array[$benchmark] = $percent;
+        $this->final_cutoff = (object) $final_cutoff_array;
     }
 
     /**
