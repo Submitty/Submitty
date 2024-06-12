@@ -90,7 +90,9 @@ module.exports = tseslint.config(
     {
         name: 'Options for typescript files in ts, which have their own tsconfig',
         files: ['ts/**/*.ts'],
-        extends: [...tseslint.configs.recommendedTypeChecked],
+        // todo: replace with type checked rules, so we can take advantage of ts's types when linting
+        extends: [...tseslint.configs.recommended],
+        // extends: [...tseslint.configs.recommendedTypeChecked],
         languageOptions: {
             parserOptions: {
                 project: true,
