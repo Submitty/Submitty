@@ -216,5 +216,7 @@ class SimpleGraderControllerTester extends BaseUnitTest {
             ],
             $response->json
         );
+        $this->assertArrayHasKey('date', $response->json['data'], "Expected 'date' key to exist in data");
+        $this->assertIsString($response->json['data']['date'], "Expected 'date' to be a string");
     }
 }
