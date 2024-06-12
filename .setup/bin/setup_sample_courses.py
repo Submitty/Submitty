@@ -230,12 +230,12 @@ def main() -> None:
     os.system("systemctl restart submitty_autograding_worker")
     os.system("systemctl restart submitty_daemon_jobs_handler")
     os.system("systemctl restart submitty_websocket_server")
-    specific_course = ""
+    regrade_extras = ""
     if TEST_ONLY_GRADING:
-        specific_course = "testing"
+        regrade_extras = "*/testing/"
     if not (NO_GRADING or TEST_ONLY_GRADING):
         # queue up all of the newly created submissions to grade!
-        os.system(f"{SUBMITTY_INSTALL_DIR}/bin/regrade.py --no_input {SUBMITTY_DATA_DIR}/courses/{specific_course}")
+        os.system(f"{SUBMITTY_INSTALL_DIR}/bin/regrade.py --no_input {SUBMITTY_DATA_DIR}/courses/{regrade_extras}")
 
 
 if __name__ == "__main__":

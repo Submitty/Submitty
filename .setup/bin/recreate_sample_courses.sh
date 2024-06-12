@@ -11,7 +11,7 @@ while :; do
             EXTRA="--no_submissions"
             ;;
         --test_only_grading)
-            EXTRA="--test_only_grading testing"
+            EXTRA="--test_only_grading"
             ;;
         *) # No more options, so break out of the loop.
             break

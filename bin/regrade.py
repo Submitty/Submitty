@@ -158,7 +158,7 @@ def main():
         pattern_semester="*"
         if len(dirs) > len(data_dirs):
             pattern_semester=dirs[len(data_dirs)]
-        pattern_course="*"
+        pattern_course="*"  
         if len(dirs) > len(data_dirs)+1:
             pattern_course=dirs[len(data_dirs)+1]
         if len(dirs) > len(data_dirs)+2:
