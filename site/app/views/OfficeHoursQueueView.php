@@ -3,6 +3,7 @@
 namespace app\views;
 
 use app\models\OfficeHoursQueueModel;
+use app\libraries\Utils;
 
 class OfficeHoursQueueView extends AbstractView {
     public function showTheQueue($viewer) {
@@ -68,7 +69,8 @@ class OfficeHoursQueueView extends AbstractView {
           'csrf_token' => $this->core->getCsrfToken(),
           'access_full_grading' => $this->core->getUser()->accessFullGrading(),
           'viewer' => $viewer,
-          'base_url' => $this->core->buildCourseUrl() . '/office_hours_queue'
+          'base_url' => $this->core->buildCourseUrl() . '/office_hours_queue',
+          'student_full' => Utils::getAutoFillData($this->core->getQueries()->getAllUsers())
         ]);
     }
 }

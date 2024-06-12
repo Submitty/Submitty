@@ -27,6 +27,9 @@
 </div>
 
 <script>
+    $('#search-student-queue-input').autocomplete({
+        source: {{ student_full|raw }}
+    });
     const search_student_queue = document.getElementById('search-student-queue-input');
     const search_student_queue_btn = document.getElementById('search-student-queue-btn');
     const table_body = document.getElementById('search-student-tbody');
