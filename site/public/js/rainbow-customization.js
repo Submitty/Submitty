@@ -424,12 +424,12 @@ function getFinalBenchmarkPercent() {
 
             // Verify percent is not empty
             if (percent === '') {
-                throw 'All benchmark percents must have a value before saving.';
+                throw 'All final cutoffs must have a value before saving.';
             }
 
             // Verify percent is a floating point number
             if (isNaN(parseFloat(percent))) {
-                throw 'Benchmark percent input must be a floating point number.';
+                throw 'Final cutoff input must be a floating point number.';
             }
 
             // Add to sections
