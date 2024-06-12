@@ -648,15 +648,13 @@ $(document).ready(() => {
      * Visibility is controlled by which boxes are selected in the display benchmarks area
      */
     $('#display_benchmarks_collapse input').each(function() {
-        if (this.value === 'final_grade') {
-            // Set the initial visibility on load
-            setInputsVisibility();
+        // Set the initial visibility on load
+        setInputsVisibility(this);
 
-            // Register a click handler to adjust visibility when boxes are selected / un-selected
-            $(this).change(() => {
-                setInputsVisibility();
-            });
-        }
+        // Register a click handler to adjust visibility when boxes are selected / un-selected
+        $(this).change(function() {
+            setInputsVisibility(this);
+        });
     });
 
     /**
@@ -665,13 +663,15 @@ $(document).ready(() => {
      */
     $('#display_collapse input').each(function() {
 
-        // Set the initial visibility on load
-        setFinalGradeCutoffsVisibility(this);
+        if (this.value === 'final_grade') {
+            // Set the initial visibility on load
+            setFinalGradeCutoffsVisibility();
 
-        // Register a click handler to adjust visibility when boxes are selected / un-selected
-        $(this).change(function() {
-            setFinalGradeCutoffsVisibility(this);
-        });
+            // Register a click handler to adjust visibility when boxes are selected / un-selected
+            $(this).change(() => {
+                setFinalGradeCutoffsVisibility();
+            });
+        }
 
     });
 
