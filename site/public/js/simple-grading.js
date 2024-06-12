@@ -296,7 +296,7 @@ function updateCheckpointCells(elems, scores, no_cookie) {
                         'user': parent.data('anon'),
                         'score': elems.data('score'),
                         'grader': elems.data('grader'),
-                        'date': formattedDate
+                        'date': formattedDate,
                     };
                     console.log('Sending WebSocket message:', message);
                     window.socketClient.send(message);
