@@ -437,27 +437,6 @@
     margin-bottom: 5px;
 }
 
-.history-container {
-    margin-left: 0;
-    display: none;
-}
-
-.history-container hr {
-    margin-bottom: 3px;
-}
-
-.history-container span {
-    margin-top: 8px;
-    margin-left: 10px;
-    float: right;
-}
-
-/* stylelint-disable-next-line selector-type-no-unknown */
-.history-container span h7 {
-    position: relative;
-    right: 5px;
-}
-
 .history-attachment-table {
     background-color: var(--attachment-box-color);
     border: 1px solid var(--standard-light-gray);
