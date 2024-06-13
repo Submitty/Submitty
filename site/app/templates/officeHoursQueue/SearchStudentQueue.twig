@@ -36,9 +36,6 @@
 
     const table_body = $('#search-student-tbody');
     const table_caption = $('#student-queue-table caption')
-    const times_helped_row = $('<tr class="times_helped_row"></tr>');
-    const times_helped_cell = times_helped_row.append('<td class="times_helped_cell" colspan="8"></td>');
-    times_helped_row.append(times_helped_cell);
 
     search_student_queue_btn.on('click', event => {
         $.ajax({
@@ -79,8 +76,9 @@
                     i++;
                 });
 
-                times_helped_cell.text(`${help_counter} times helped.`);
-                table_body.append(times_helped_row);
+                table_body.append($('<tr class="times_helped_row"></tr>')
+                    .append($('<td class="times_helped_cell" colspan="8"></td>')
+                    .text(`${help_counter} times helped.`)));
             },
             error: function() {
                 window.alert('Something went wrong while searching for students!');
