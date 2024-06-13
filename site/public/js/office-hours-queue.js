@@ -59,3 +59,50 @@ function adjustRows() {
     }
 }
 
+function displayStudentHistory() {
+    $.ajax({
+        url: buildCourseUrl(['queue', 'student_search']),
+        type: 'POST',
+        data: {
+            student_id: $('#search-student-queue-input').val(),
+            // eslint-disable-next-line no-undef
+            csrf_token: csrfToken
+        },
+        success: function(response) {
+            let help_counter = 0;
+            console.log(response);
+            const data = JSON.parse(response).data;
+            const student_data = JSON.parse(data);
+            $('#student-queue-table caption').text(`${student_data[0].name} - (ID:${student_data[0].user_id}) - Contact: ${student_data[0].contact_info}`);
+
+            student_data.forEach(function(student, i) {
+                if (student.removal_type === 'helped') {
+                    help_counter++;
+                }
+                const time_start = student.time_in;
+                const time_end = student.time_out === null ? '-' : student.time_out;
+                const removed_by = student.removed_by === null ? '-' : student.removed_by;
+                const helper = student.help_started_by === null ? '-' : student.help_started_by;
+                const removal_method = student.removal_type === null ? '-' : student.removal_type;
+
+                table_body.append($('<tr></tr>')
+                    .append($('<td></td>').attr('data-testid', 'student-row').text(i+1))
+                    .append($('<td></td>').text(student.current_state))
+                    .append($('<td></td>').text(student.queue_code))
+                    .append($('<td></td>').text(time_start))
+                    .append($('<td></td>').text(time_end))
+                    .append($('<td></td>').text(removed_by))
+                    .append($('<td></td>').text(helper))
+                    .append($('<td></td>').text(removal_method)));
+                i++;
+            });
+
+            table_body.append($("<tr class='times-helped-row'></tr>")
+                .append($("<td class='times-helped-cell' colspan='8'></td>")
+                .text(`${help_counter} times helped.`)));
+        },
+        error: function() {
+            window.alert('Something went wrong while searching for students!');
+        },
+    });
+}
