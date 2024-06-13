@@ -798,7 +798,14 @@ class ReportController extends AbstractController {
     public function downloadRainbowGradesCSVFile(): void {
 
         // Path to the CSV file for Rainbow Grades
-        $csvFilePath = '/var/local/submitty/courses/' . $this->core->getConfig()->getTerm() . '/' . $this->core->getConfig()->getCourse() . '/rainbow_grades/output.csv';
+        $csvFilePath = FileUtils::joinPaths(
+    '/var/local/submitty/courses',
+    $this->core->getConfig()->getTerm(),
+    $this->core->getConfig()->getCourse(),
+    'rainbow_grades',
+    'output.csv'
+);
+
 
         // Check if the file exists
         if (file_exists($csvFilePath)) {
