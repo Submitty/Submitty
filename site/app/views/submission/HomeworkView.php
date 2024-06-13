@@ -203,6 +203,7 @@ class HomeworkView extends AbstractView {
         $future_date->modify('+7 days');
         $past_date = clone $date;
         $past_date->modify('-7 days');
+        {# format("I") returns whether the given date is in daylight savings #}
         $daylight_message_required = ($future_date->format("I") !== $past_date->format("I"));
 
         // ------------------------------------------------------------
