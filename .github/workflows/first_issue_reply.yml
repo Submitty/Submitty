@@ -6,12 +6,10 @@ on:
 
 jobs:
   firstIssueReply:
-    # Only when it is an issue rather than a PR
     if: ${{ !github.event.issue.pull_request && github.event.comment.author_association == 'NONE' }}
     name: First issue reply
     runs-on: ubuntu-latest
 
-    # For some reason, with only issue:write perms the action fails even though that's all we're doing
     permissions: write-all
 
     steps:
@@ -22,7 +20,7 @@ jobs:
         id: check-comments
         run: |
           ISSUE_NUMBER=${{ github.event.issue.number }}
-          CHECK_TEXT="Thank you for your interest in the Submitty open source project."
+          CHECK_TEXT="Testing: Thank you for your interest in the Submitty open source project."
           COMMENTS=$(gh issue view "$ISSUE_NUMBER" --json comments --jq '.comments[].body')
           echo "Comments on the issue: $COMMENTS"
           if echo "$COMMENTS" | grep -Fq "$CHECK_TEXT"; then
@@ -37,7 +35,7 @@ jobs:
       - name: First issue reply
         if: env.bot_comment_exists == 'false'
         run: |
-          gh issue comment "$ISSUE" --body "Hi @$USERNAME,"$'\n\n'"$(cat .github/FIRST_ISSUE_REPLY.md)"
+          gh issue comment "$ISSUE" --body "Hi @$USERNAME,"$'\n\n'"Testing: Thank you for your interest in the Submitty open source project.\n\nWe welcome contributions from new developers!\n\nHowever we do not use the Github issue 'assign' feature for first time prospective contributors."
         env:
           ISSUE: ${{ github.event.issue.number }}
           USERNAME: ${{ github.event.comment.user.login }}
