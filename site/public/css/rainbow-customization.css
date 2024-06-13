@@ -20,11 +20,6 @@
     font-size: 1.1em;
 }
 
-/* stylelint-disable-next-line selector-class-pattern */
-.collapsible_area {
-    margin-bottom: 10px;
-}
-
 /* stylelint-disable-next-line selector-id-pattern */
 #cust_messages_textarea {
     width: 80%;
