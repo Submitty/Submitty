@@ -1,4 +1,5 @@
-/* exported toggleSort */
+/* exported toggleSort, displayStudentHistory */
+/* global buildCourseUrl */
 //this helps update the frontend when the page refreshes because without this the sort icon would reset and the sort state would not
 document.addEventListener('DOMContentLoaded', () => {
     const sortIndicator = document.getElementById('sort-indicator-oh-queue');
