@@ -119,7 +119,7 @@ const SubmitAndCheckMessage = (gradeable_type, upload_file1, invalid_late_day, v
 };
 
 
-it('Check for a clock message near daylight savings times', () => {
+it('Checks whether daylight savings warning message should be appearing at current date.', () => {
     /*
     First we set the date to a date close to the spring daylight savings time and then check that the message appears.
     Then we change the date to a month later, and check that the "daylight" message doesn't appear.
