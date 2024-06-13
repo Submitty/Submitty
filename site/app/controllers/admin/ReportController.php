@@ -790,10 +790,9 @@ class ReportController extends AbstractController {
 
     /**
      * Download CSV file for Rainbow Grades
-     * @return void
      */
     #[Route("/courses/{_semester}/{_course}/reports/rainbow_grades_csv")]
-    public function downloadRainbowGradesCSVFile() {
+    public function downloadRainbowGradesCSVFile(): void {
         // Check if the user has the necessary permissions (e.g., admin access)
         if (!$this->core->getUser()->accessAdmin()) {
             $this->core->getOutput()->showError("This account cannot access admin pages");
