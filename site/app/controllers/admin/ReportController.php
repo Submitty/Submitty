@@ -141,7 +141,6 @@ class ReportController extends AbstractController {
         if (!$this->core->getUser()->accessAdmin()) {
             $this->core->getOutput()->showError("This account cannot access admin pages");
         }
-        
         $g_sort_keys = [
             'syllabus_bucket',
             'g_id',
