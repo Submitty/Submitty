@@ -138,6 +138,10 @@ class ReportController extends AbstractController {
      */
     #[Route("/courses/{_semester}/{_course}/reports/csv")]
     public function generateCSVReport() {
+        if (!$this->core->getUser()->accessAdmin()) {
+            $this->core->getOutput()->showError("This account cannot access admin pages");
+        }
+        
         $g_sort_keys = [
             'syllabus_bucket',
             'g_id',
