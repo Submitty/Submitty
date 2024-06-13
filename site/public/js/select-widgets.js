@@ -5,7 +5,7 @@ function registerSelect2Widget(widget_id, belongingModalId = 'off') {
     const options = {
         tags: true,
         theme: 'bootstrap-5',
-        createTag: (params) => ({
+        createTag: params => ({
             id: params.term,
             text: params.term,
         }),

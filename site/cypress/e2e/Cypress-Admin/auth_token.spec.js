@@ -1,4 +1,4 @@
-import {getCurrentSemester} from '../../support/utils';
+import { getCurrentSemester } from '../../support/utils';
 
 describe('Test cases revolving around authentication tokens', () => {
     beforeEach(() => {
@@ -21,13 +21,13 @@ describe('Test cases revolving around authentication tokens', () => {
 
         let cookie;
 
-        cy.getCookie('submitty_session').then(c => {
+        cy.getCookie('submitty_session').then((c) => {
             cookie = c.value;
         });
         // Clear the cookie so we can access the vcs_login route
         cy.clearCookies();
 
-        cy.get('#new-token-banner > p:nth-child(6)').invoke('text').then(text => {
+        cy.get('#new-token-banner > p:nth-child(6)').invoke('text').then((text) => {
             const token = text.trim().split(' ')[1];
             // Verify the token works as a password
             cy.request({
@@ -40,7 +40,7 @@ describe('Test cases revolving around authentication tokens', () => {
                     gradeable_id: 'vcstest',
                     id: 'instructor',
                 },
-            }).then(res => {
+            }).then((res) => {
                 const body = JSON.parse(res.body);
                 expect(res.status).to.eq(200);
                 expect(body.status).to.eq('success');
@@ -57,7 +57,7 @@ describe('Test cases revolving around authentication tokens', () => {
                     gradeable_id: 'vcstest',
                     id: 'instructor',
                 },
-            }).then(res => {
+            }).then((res) => {
                 const body = JSON.parse(res.body);
                 expect(res.status).to.eq(200);
                 expect(body.status).to.eq('success');
@@ -74,7 +74,7 @@ describe('Test cases revolving around authentication tokens', () => {
                     gradeable_id: 'vcstest',
                     id: 'instructor',
                 },
-            }).then(res => {
+            }).then((res) => {
                 const body = JSON.parse(res.body);
                 expect(res.status).to.eq(200);
                 expect(body.status).to.eq('fail');
@@ -88,7 +88,6 @@ describe('Test cases revolving around authentication tokens', () => {
 
             cy.get('#main > div.content > table > tbody > tr:nth-child(2) > td:nth-child(3) > form > input.btn.btn-danger').click();
             cy.get('#main > div.content > p:nth-child(16)').should('have.text', 'You don\'t have any Authentication Tokens.');
-
         });
     });
 });

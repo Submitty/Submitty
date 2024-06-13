@@ -91,7 +91,6 @@ const replyDisabled = (title, attachment) => {
 };
 
 describe('Test cases revolving around creating, replying to, merging, and removing discussion forum threads', () => {
-
     beforeEach(() => {
         cy.login('instructor');
         cy.visit(['sample']);

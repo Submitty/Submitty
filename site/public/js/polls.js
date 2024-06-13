@@ -2,7 +2,7 @@
 /* global csrfToken */
 
 $(document).ready(() => {
-    $('.dropdown-bar').on('click', function() {
+    $('.dropdown-bar').on('click', function () {
         $(this).siblings('table').toggle();
         $(this).find('i').toggleClass('down');
     });
@@ -21,7 +21,7 @@ function newDeletePollForm(pollid, pollname, base_url) {
             processData: false,
             cache: false,
             contentType: false,
-            success: function(data) {
+            success: function (data) {
                 try {
                     const msg = JSON.parse(data);
                     if (msg.status !== 'success') {
@@ -37,7 +37,7 @@ function newDeletePollForm(pollid, pollname, base_url) {
                     window.alert('Something went wrong. Please try again.');
                 }
             },
-            error: function(err) {
+            error: function (err) {
                 console.error(err);
                 window.alert('Something went wrong. Please try again.');
             },
@@ -66,7 +66,7 @@ function updatePollAcceptingAnswers(pollid, base_url) {
         processData: false,
         cache: false,
         contentType: false,
-        error: function(err) {
+        error: function (err) {
             console.error(err);
             window.alert('Something went wrong. Please try again.');
         },
@@ -94,7 +94,7 @@ function updatePollVisible(pollid, base_url) {
         processData: false,
         cache: false,
         contentType: false,
-        error: function(err) {
+        error: function (err) {
             console.error(err);
             window.alert('Something went wrong. Please try again.');
         },
@@ -102,7 +102,7 @@ function updatePollVisible(pollid, base_url) {
 }
 
 function updateDropdownStates(curr_state, cookie_key) {
-    const expiration_date = new Date(new Date().getFullYear(), new Date().getMonth(), new Date().getDate()+7);
+    const expiration_date = new Date(new Date().getFullYear(), new Date().getMonth(), new Date().getDate() + 7);
     Cookies.set(cookie_key, !curr_state, { expires: expiration_date, path: '/' });
 }
 
