@@ -1347,6 +1347,8 @@ class ForumController extends AbstractController {
     public function showStats() {
         $posts = $this->core->getQueries()->getPosts();
         $num_posts = count($posts);
+        $upducks = $this->core->getQueries()->getUpDucks();
+        $num_users_with_upducks = count($upducks);
         $users = [];
         for ($i = 0; $i < $num_posts; $i++) {
             $user = $posts[$i]["author_user_id"];
@@ -1361,6 +1363,7 @@ class ForumController extends AbstractController {
                 $users[$user]["timestamps"] = [];
                 $users[$user]["total_threads"] = 0;
                 $users[$user]["num_deleted_posts"] = count($this->core->getQueries()->getDeletedPostsByUser($user));
+                $users[$user]["total_upducks"] = 0;
             }
             if ($posts[$i]["parent_id"] == -1) {
                 $users[$user]["total_threads"]++;
@@ -1370,6 +1373,10 @@ class ForumController extends AbstractController {
             $users[$user]["timestamps"][] = DateUtils::parseDateTime($posts[$i]["timestamp"], $this->core->getConfig()->getTimezone())->format("n/j g:i A");
             $users[$user]["thread_id"][] = $posts[$i]["thread_id"];
             $users[$user]["thread_title"][] = $this->core->getQueries()->getThreadTitle($posts[$i]["thread_id"]);
+        }
+        for ($i = 0; $i < $num_users_with_upducks; $i++) {
+            $user = $upducks[$i]["author_user_id"];
+            $users[$user]["total_upducks"] = $upducks[$i]["upducks"];
         }
         ksort($users);
         $this->core->getOutput()->renderOutput('forum\ForumThread', 'statPage', $users);

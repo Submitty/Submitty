@@ -185,6 +185,10 @@ function getGradeableBuckets() {
             const count = $(`#config-count-${type}`).val();
             bucket.count = parseInt(count);
 
+            // // Extract remove_lowest
+            const remove_lowest = $(`#config-remove_lowest-${type}`).val();
+            bucket['remove_lowest'] = parseInt(remove_lowest);
+
             // Extract percent
             let percent = $(`#percent-${type}`).val();
             percent = percent / 100;
@@ -595,27 +599,6 @@ function setFinalGradeCutoffsVisibility() {
 
 $(document).ready(() => {
 
-    // Setup click handlers to handle collapsing and expanding each item
-    $('#display_benchmarks h2').click(() => {
-        $('#display_benchmarks_collapse').toggle();
-    });
-
-    $('#benchmark_percents h2').click(() => {
-        $('#benchmark_percents_collapse').toggle();
-    });
-
-    $('#section_labels h2').click(() => {
-        $('#section_labels_collapse').toggle();
-    });
-
-    $('#gradeables h2').click(() => {
-        $('#gradeables_collapse').toggle();
-    });
-
-    $('#cust_messages h2').click(() => {
-        $('#cust_messages_collapse').toggle();
-    });
-
     // Make the per-gradeable curve inputs toggle when the icon is clicked
     // eslint-disable-next-line no-unused-vars
     $('.fa-gradeable-curve').click(function(event) {
@@ -647,7 +630,8 @@ $(document).ready(() => {
      * Curve input boxes include the benchmark percent input boxes and also the per-gradeable curve input boxes
      * Visibility is controlled by which boxes are selected in the display benchmarks area
      */
-    $('#display_benchmarks_collapse input').each(function() {
+    $('#display_benchmarks input').each(function() {
+
         // Set the initial visibility on load
         setInputsVisibility(this);
 
@@ -720,5 +704,27 @@ $(document).ready(() => {
     $(document).ready(() => {
         $('#rg_web_ui_loading').hide();
         $('#rg_web_ui').show();
+    });
+});
+
+
+$(document).ready(() => {
+    $('#pencilIcon').click((event) => {
+        event.stopPropagation();
+        const checkboxControls = $('#checkboxControls');
+        const dropLowestDiv = $('#dropLowestDiv');
+
+        checkboxControls.css('display') === 'none'
+            ? checkboxControls.show()
+            : checkboxControls.hide() && dropLowestDiv.hide();
+    });
+    $('#drop_lowest_checkbox').change(function(event) {
+        event.stopPropagation();
+        const dropLowestDivs = $('div[id^="dropLowestDiv-"]');
+        const isChecked = $(this).is(':checked');
+
+        dropLowestDivs.each((index, dropLowestDiv) => {
+            $(dropLowestDiv).css('display', isChecked ? 'block' : 'none');
+        });
     });
 });
