@@ -1,4 +1,12 @@
 describe('TA grading hotkey testing', () => {
+    after(() => {
+        cy.login();
+        cy.visit(['sample', 'gradeable', 'grading_homework', 'update?nav_tab=2']);
+        cy.get('[data-testid="peer-component-container"]').should('exist');
+        cy.get('[data-testid="peer-component-container"]').find('[data-testid="delete-gradable-component"]').click();
+        cy.logout();
+    });
+
     it('toggle keyboard shortcut', () => {
         cy.login();
         cy.visit(['sample', 'gradeable', 'grading_homework', 'grading', 'details']);

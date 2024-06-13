@@ -7,7 +7,7 @@
 
 {% block components_block %}
     {% for component in gradeable.components %}
-        <div class="component-container edit-component-container{{ (component.peer_component) ? ' peer-component-container' : '' }}">
+        <div class="component-container edit-component-container{{ (component.peer_component) ? ' peer-component-container' : '' }}" {{ (component.peer_component) ? 'data-testid="peer-component-container"' : '' }}>
             {% include "EditComponent.twig" with {
                 'precision': gradeable.precision,
                 'show_mark_list': false,
