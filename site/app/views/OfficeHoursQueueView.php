@@ -79,7 +79,7 @@ class OfficeHoursQueueView extends AbstractView {
     }
 
     /*
-     * @param OfficeHoursQueueModel $viewer 
+     * @param OfficeHoursQueueModel $viewer
      * @param string $student_full
      */
     public function renderNewAnnouncement($viewer, string $student_full) {
@@ -87,7 +87,7 @@ class OfficeHoursQueueView extends AbstractView {
     }
 
     /*
-     * @param OfficeHoursQueueModel $viewer 
+     * @param OfficeHoursQueueModel $viewer
      * @param string $twig_location
      * @param string $student_full
      */
