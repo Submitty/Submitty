@@ -958,6 +958,32 @@ SQL;
         return $this->course_db->rows();
     }
 
+    /**
+     * Retrieves the number of upducks per user.
+     *
+     * @return array<array<string, string>>
+     */
+    public function getUpDucks(): array {
+        $this->course_db->query("
+            SELECT 
+                p.author_user_id, 
+                COUNT(f.*) AS upducks 
+            FROM 
+                posts p 
+            JOIN 
+                forum_upducks f 
+            ON 
+                p.id = f.post_id 
+            WHERE 
+                p.deleted = FALSE 
+            GROUP BY 
+                p.author_user_id 
+            ORDER BY 
+                upducks DESC
+        ");
+        return $this->course_db->rows();
+    }
+
     public function getPostsInThreads($thread_ids) {
         if (count($thread_ids) === 0) {
             return [];
@@ -2314,9 +2340,9 @@ ORDER BY {$orderby}",
 
             $this->course_db->query(
                 "
-                SELECT gt.team_id, gt.registration_section, gt.rotating_section, gt.team_name, json_agg(u) AS users
+                SELECT gt.team_id, gt.registration_section, gt.rotating_section, gt.team_name, COALESCE(NULLIF(jsonb_agg(u)::text, '[null]'), '[]')::jsonb AS users
                 FROM gradeable_teams gt
-                  JOIN
+                  LEFT JOIN
                     (SELECT t.team_id, t.state, u.*
                      FROM teams t
                        JOIN users u ON t.user_id = u.user_id
@@ -2353,9 +2379,9 @@ ORDER BY {$orderby}",
 
             $this->course_db->query(
                 "
-                SELECT gt.team_id, gt.registration_section, gt.rotating_section, gt.team_name, json_agg(u) AS users
+                SELECT gt.team_id, gt.registration_section, gt.rotating_section, gt.team_name, COALESCE(NULLIF(jsonb_agg(u)::text, '[null]'), '[]')::jsonb AS users
                 FROM gradeable_teams gt
-                  JOIN
+                  LEFT JOIN
                     (SELECT t.team_id, t.state, u.*
                      FROM teams t
                        JOIN users u ON t.user_id = u.user_id
@@ -4012,9 +4038,9 @@ VALUES(?, ?, ?, ?, 0, 0, 0, 0, ?)",
     public function getTeamById($team_id) {
         $this->course_db->query(
             "
-            SELECT gt.team_id, gt.registration_section, gt.rotating_section, gt.team_name, json_agg(u) AS users
+            SELECT gt.team_id, gt.registration_section, gt.rotating_section, gt.team_name, COALESCE(NULLIF(jsonb_agg(u)::text, '[null]'), '[]')::jsonb AS users
             FROM gradeable_teams gt
-              JOIN
+              LEFT JOIN
               (SELECT t.team_id, t.state, u.*
                FROM teams t
                  JOIN users u ON t.user_id = u.user_id
@@ -4041,9 +4067,9 @@ VALUES(?, ?, ?, ?, 0, 0, 0, 0, ?)",
     public function getTeamByGradeableAndUser($g_id, $user_id) {
         $this->course_db->query(
             "
-            SELECT gt.team_id, gt.registration_section, gt.rotating_section, gt.team_name, json_agg(u) AS users
+            SELECT gt.team_id, gt.registration_section, gt.rotating_section, gt.team_name, COALESCE(NULLIF(jsonb_agg(u)::text, '[null]'), '[]')::jsonb AS users
             FROM gradeable_teams gt
-              JOIN
+              LEFT JOIN
               (SELECT t.team_id, t.state, u.*
                FROM teams t
                  JOIN users u ON t.user_id = u.user_id
@@ -4092,9 +4118,9 @@ VALUES(?, ?, ?, ?, 0, 0, 0, 0, ?)",
     public function getTeamsByGradeableId($g_id) {
         $this->course_db->query(
             "
-            SELECT gt.team_id, gt.registration_section, gt.rotating_section, gt.team_name, json_agg(u) AS users
+            SELECT gt.team_id, gt.registration_section, gt.rotating_section, gt.team_name, COALESCE(NULLIF(jsonb_agg(u)::text, '[null]'), '[]')::jsonb AS users
             FROM gradeable_teams gt
-              JOIN
+              LEFT JOIN
                 (SELECT t.team_id, t.state, u.*
                  FROM teams t
                    JOIN users u ON t.user_id = u.user_id
@@ -6456,9 +6482,9 @@ AND gc_id IN (
         // Generate placeholders for each team id
         $place_holders = implode(',', array_fill(0, count($team_ids), '?'));
         $query = "
-            SELECT gt.team_id, gt.registration_section, gt.rotating_section, gt.team_name, json_agg(u) AS users
+            SELECT gt.team_id, gt.registration_section, gt.rotating_section, gt.team_name, COALESCE(NULLIF(jsonb_agg(u)::text, '[null]'), '[]')::jsonb AS users
             FROM gradeable_teams gt
-              JOIN
+              LEFT JOIN
                 (SELECT t.team_id, t.state, u.*
                  FROM teams t
                    JOIN users u ON t.user_id = u.user_id
