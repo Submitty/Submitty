@@ -18,7 +18,24 @@ jobs:
       - name: Checkout main repository
         uses: actions/checkout@v4
 
+      - name: Check for existing bot comments
+        id: check-comments
+        run: |
+          ISSUE_NUMBER=${{ github.event.issue.number }}
+          CHECK_TEXT="Thank you for your interest in the Submitty open source project."
+          COMMENTS=$(gh issue view "$ISSUE_NUMBER" --json comments --jq '.comments[].body')
+          echo "Comments on the issue: $COMMENTS"
+          if echo "$COMMENTS" | grep -Fq "$CHECK_TEXT"; then
+            echo "bot_comment_exists=true" >> $GITHUB_ENV
+          else
+            echo "bot_comment_exists=false" >> $GITHUB_ENV
+          fi
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          USERNAME: ${{ github.event.comment.user.login }}
+
       - name: First issue reply
+        if: env.bot_comment_exists == 'false'
         run: |
           gh issue comment "$ISSUE" --body "Hi @$USERNAME,"$'\n\n'"$(cat .github/FIRST_ISSUE_REPLY.md)"
         env:
