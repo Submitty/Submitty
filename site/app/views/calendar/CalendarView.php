@@ -26,7 +26,6 @@ class CalendarView extends AbstractView {
 
         $year = (isset($_GET['year']) && $_GET['year'] != "")  ?  (int) $_GET['year']  : (int) date("Y");
         $month = (isset($_GET['month']) && $_GET['month'] != "") ?  (int) $_GET['month'] : (int) date("n");
-
         $show_table = (isset($_GET['show_table'])) ? (int) $_GET['show_table'] : 0; // not showing the table by default
 
         // Error checking
