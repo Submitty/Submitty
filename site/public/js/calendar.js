@@ -1,5 +1,5 @@
-/* exported prevMonth, nextMonth, loadCalendar, loadFullCalendar, editCalendarItemForm, deleteCalendarItem, openNewItemModal, openOptionsModal, updateCalendarOptions, colorLegend, setDateToToday */
-/* global curr_day, curr_month, curr_year, gradeables_by_date, instructor_courses, buildUrl */
+/* exported prevMonth, nextMonth, loadCalendar, loadFullCalendar, editCalendarItemForm, deleteCalendarItem, deleteGlobalCalendarItem, openNewItemModal, openNewGlobalEventModal, openOptionsModal, updateCalendarOptions, colorLegend, setDateToToday */
+/* global curr_day, curr_month, curr_year, gradeables_by_date, global_items_by_date, instructor_courses, is_superuser, buildUrl */
 /* global csrfToken */
 /* global luxon */
 
@@ -135,27 +135,63 @@ function darken(colorstr) {
 }
 
 /**
+ * This function returns a slightly lighter color than the color variable name passed.
+ *
+ * @param colorstr : string the color to lighten in the form "var(--color-name)"
+ * @returns {string} a hex code for a slightly lighter shade
+ */
+function lighten(colorstr) {
+    if (typeof colorstr !== 'string') {
+        return colorstr;
+    }
+    else {
+        const hexcodestr = window.getComputedStyle(document.documentElement).getPropertyValue(colorstr.slice(4, -1)).trim().toLowerCase();
+        const hex = hexcodestr.slice(1);
+        // Convert hex to RGB
+        const r = parseInt(hex.substring(0, 2), 16);
+        const g = parseInt(hex.substring(2, 4), 16);
+        const b = parseInt(hex.substring(4, 6), 16);
+        // Adjusting the brightness for stripes to visible (used only for future gradeables as of now)
+        const newR = Math.min(255, r + 40);
+        const newG = Math.min(255, g + 40);
+        const newB = Math.min(255, b + 40);
+        // Convert RGB back to hex
+        const lighterHex = `#${newR.toString(16).padStart(2, '0')}${newG.toString(16).padStart(2, '0')}${newB.toString(16).padStart(2, '0')}`;
+        return lighterHex;
+    }
+}
+
+/**
  * Create a HTML element that contains the calendar item (button/link/text).
  *
  * @param item : array the calendar item
  * @returns {HTMLElement} the HTML Element for the calendar item
  */
 function generateCalendarItem(item) {
-    // When hovering over an item, shows the name and due date
-    // Due date information
-    let due_string = '';
-    if (item['submission'] !== '') {
-        due_string = `Due: ${item['submission']}`;
+    let tooltip = '';
+    if (!item['submission_open'] && item['is_student']) {
+        // Student shouldn't be able to access this item
+        // When hovering over an item, shows the below message
+        tooltip = 'You can access this gradeable once the submission opens';
+        item['disabled'] = true;
     }
+    else {
+        // When hovering over an item, shows the name and due date
+        // Due-date information
+        let due_string = '';
+        if (item['submission'] !== '') {
+            due_string = `Due: ${item['submission']}`;
+        }
 
-    // Put detail in the tooltip
-    let tooltip = `Course: ${item['course']}&#10;` +
-        `Title: ${item['title']}&#10;`;
-    if (item['status_note'] !== '') {
-        tooltip += `Status: ${item['status_note']}&#10;`;
-    }
-    if (due_string !== '') {
-        tooltip += `${due_string}`;
+        // Put detail in the tooltip
+        tooltip = `Course: ${item['course']}&#10;` +
+            `Title: ${item['title']}&#10;`;
+        if (item['status_note'] !== '') {
+            tooltip += `Status: ${item['status_note']}&#10;`;
+        }
+        if (due_string !== '') {
+            tooltip += `${due_string}`;
+        }
     }
     // Put the item in the day cell
     const link = (!item['disabled']) ? item['url'] : '';
@@ -177,8 +213,15 @@ function generateCalendarItem(item) {
     if (item['status'] === 'text' || item['status'] === 'ann') {
         element.style.setProperty('background-color', item['color']);
     }
-    if (exists) {
+    // Displaying striped background if submission is not open irrespective of access level
+    if (!item['submission_open']) {
+        element.style.setProperty('background', `repeating-linear-gradient(45deg, ${item['color']}, ${item['color']} 10px, ${lighten(item['color'])} 10px, ${lighten(item['color'])} 15px)`);
+    }
+    if (!item['disabled'] || exists) {
         element.style.setProperty('cursor', 'pointer');
+    }
+    else {
+        element.style.setProperty('cursor', 'default');
     }
     element.title = tooltip;
     if (link !== '') {
@@ -190,10 +233,20 @@ function generateCalendarItem(item) {
             element.style.setProperty('background-color', item['color']);
         });
     }
-    if (onclick !== '' && instructor_courses.length > 0) {
+
+    if (onclick !== '' && instructor_courses.length > 0 && item['course'] !== 'Superuser') {
         if (!item['show_due']) {
             element.style.cursor = 'pointer';
             element.onclick = () => editCalendarItemForm(item['status'], item['title'], item['id'], item['date'], item['semester'], item['course']);
+        }
+        else {
+            element.onclick = onclick;
+        }
+    }
+    else if (onclick !== '' && is_superuser && item['course'] === 'Superuser') {
+        if (!item['show_due']) {
+            element.style.cursor = 'pointer';
+            element.onclick = () => editGlobalCalendarItemForm(item['status'], item['title'], item['id'], item['date']);
         }
         else {
             element.onclick = onclick;
@@ -230,6 +283,24 @@ function editCalendarItemForm(itemType, itemText, itemId, date, semester, course
 }
 
 /**
+ * The form for editing Global calendar items.
+ *
+ * @param itemType : string the Global calendar item type
+ * @param itemText : string the text the item shoukd contain
+ * @param itemId : (Not sure, possibly string or int) the item ID
+ * @param date : string the item date
+ * @returns {void} : only has to update existing variables
+ */
+function editGlobalCalendarItemForm(itemType, itemText, itemId, date) {
+    $(`#global-calendar-item-type-edit>option[value=${itemType}]`).attr('selected', true);
+    $('#global-calendar-item-text-edit').val(itemText);
+    $('#edit-global-picker').val(date);
+    $('#global-calendar-item-id').val(itemId);
+
+    $('#edit-global-item-form').show();
+}
+
+/**
  * Deletes the selected calendar item.
  *
  * @returns {void} : Just deleting.
@@ -262,6 +333,37 @@ function deleteCalendarItem() {
         });
     }
 }
+
+/**
+ * Deletes the selected global calendar item.
+ *
+ * @returns {void} : Just deleting.
+ */
+function deleteGlobalCalendarItem() {
+    const id = $('#global-calendar-item-id').val();
+    if (id !== '') {
+        const data = new FormData();
+        data.append('id', id);
+        data.append('csrf_token', csrfToken);
+        $.ajax({
+            url: buildUrl(['calendar', 'global_items', 'delete']),
+            type: 'POST',
+            processData: false,
+            contentType: false,
+            data: data,
+            success: function (res) {
+                const response = JSON.parse(res);
+                if (response.status === 'success') {
+                    location.reload();
+                }
+                else {
+                    alert(response.message);
+                }
+            },
+        });
+    }
+}
+
 
 /**
  * Creates a HTML table cell that contains a date.
@@ -324,6 +426,9 @@ function generateDayCell(year, month, day, curr_view_month, view_mode, view_seme
     content.appendChild(div);
     const itemList = document.createElement('div');
     itemList.classList.add('cal-cell-items-panel');
+    for (const i in global_items_by_date[cell_date_str]) {
+        itemList.appendChild(generateCalendarItem(global_items_by_date[cell_date_str][i]));
+    }
     for (const i in gradeables_by_date[cell_date_str]) {
         itemList.appendChild(generateCalendarItem(gradeables_by_date[cell_date_str][i]));
     }
@@ -753,6 +858,10 @@ function loadFullCalendar(start, end, semester_name) {
 
 function openNewItemModal() {
     $('#new-calendar-item-form').css('display', 'block');
+}
+
+function openNewGlobalEventModal() {
+    $('#new-global-event-form').css('display', 'block');
 }
 
 function openOptionsModal() {

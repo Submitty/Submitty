@@ -87,6 +87,9 @@
         "Attribute “name” not allowed on element “span” at this point."
     ],
     "/courses/{}/{}/reports": [],
+    "/courses/{}/{}/reports/rainbow_grades_customization": [
+        "Attribute “unselectable” not allowed on element “ul” at this point."
+    ],
     "/courses/{}/{}/late_table": [],
     "/courses/{}/{}/grades": []
 }
