@@ -22,6 +22,7 @@ describe('Test cases for grading stats', () => {
             cy.get('#left-grading-stats').as('left-chunk-stats');
             cy.get('#right-grading-stats').as('right-chunk-stats');
             cy.get('#grader-info').as('right-chunk-grader-info');
+            cy.get('@left-chunk-stats').should('not.contain', 'verified');
             cy.get('@left-chunk-stats').should('contain', 'Students on a team: 101/101 (100%)');
             cy.get('@left-chunk-stats').should('contain', 'Number of teams: 36');
             cy.get('@left-chunk-stats').should('contain', 'Teams who have submitted on time: 25 / 36 (69.4%)');
@@ -43,6 +44,7 @@ describe('Test cases for grading stats', () => {
             cy.get('#left-grading-stats').as('left-chunk-stats');
             cy.get('#right-grading-stats').as('right-chunk-stats');
             cy.get('#grader-info').as('right-chunk-grader-info');
+            cy.get('@left-chunk-stats').should('not.contain', 'verified');
             cy.get('@left-chunk-stats').should('contain', 'Students who have submitted on time: 59 / 101 (58.4%)');
             cy.get('@left-chunk-stats').should('contain', 'Current percentage of TA grading done: 30 / 59 (50.8%)');
             cy.get('@left-chunk-stats').should('contain', 'Section 3: 3 / 7 (42.9% graded)');
@@ -85,6 +87,7 @@ describe('Test cases for grading stats', () => {
             cy.get('#left-grading-stats').as('left-chunk-stats');
             cy.get('#right-grading-stats').as('right-chunk-stats');
             cy.get('#grader-info').as('right-chunk-grader-info');
+            cy.get('@left-chunk-stats').should('not.contain', 'verified');
             cy.get('@left-chunk-stats').should('contain', 'Students who have submitted on time: 71 / 101 (70.3%)');
             cy.get('@left-chunk-stats').should('contain', 'Current percentage of TA grading done: 71 / 71 (100.0%)');
             cy.get('@left-chunk-stats').should('contain', 'Section 10: 4 / 4 (100.0% graded)');
@@ -126,6 +129,7 @@ describe('Test cases for grading stats', () => {
             cy.get('#left-grading-stats').as('left-chunk-stats');
             cy.get('#right-grading-stats').as('right-chunk-stats');
             cy.get('#grader-info').as('right-chunk-grader-info');
+            cy.get('@left-chunk-stats').should('not.contain', 'verified');
             cy.get('@left-chunk-stats').should('contain', 'Students who have submitted on time: 64 / 101 (63.4%)');
             cy.get('@left-chunk-stats').should('contain', 'Current percentage of TA grading done: 64 / 64 (100.0%)');
             cy.get('@left-chunk-stats').should('contain', 'Section 10: 3 / 3 (100.0% graded)');
