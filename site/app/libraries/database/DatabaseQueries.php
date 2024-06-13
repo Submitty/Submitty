@@ -349,7 +349,7 @@ GROUP BY user_id", [$user_id]);
      */
     public function getAllUsers($section_key = "registration_section") {
         $keys = ["registration_section", "rotating_section"];
-        $section_key = (in_array($section_key, $keys, true)) ? $section_key : "registration_section";
+        $section_key = (in_array($section_key, $keys)) ? $section_key : "registration_section";
         $orderBy = "";
         if ($section_key == "registration_section") {
             $orderBy = "SUBSTRING(u.registration_section, '^[^0-9]*'), COALESCE(SUBSTRING(u.registration_section, '[0-9]+')::INT, -1), SUBSTRING(u.registration_section, '[^0-9]*$'), u.user_id";
@@ -2454,7 +2454,7 @@ ORDER BY {$u_or_t}.{$section_key}
             $id = "team_id";
         }
 
-        if (! in_array($section_key, ["registration_section", "rotating_section"])) {
+        if (! in_array($section_key, ["registration_section", "rotating_section"], true)) {
             return [];
         }
 
@@ -2468,7 +2468,7 @@ ORDER BY {$u_or_t}.{$section_key}
                 JOIN $unit ON (gd.gd_$id = $unit.$id)
             WHERE
                 gd.g_id = ?
-                AND CAST ($unit.$section_key AS TEXT) = ANY (ARRAY[" . $this->createParameterList(count($sections)) . "])
+                AND CAST ($unit.$section_key AS TEXT) = ANY (ARRAY[" . implode(',', array_fill(0, count($sections), '?')) . "])
                 AND gcd.gcd_verifier_id IS NOT NULL
             GROUP BY
                 $unit.$section_key
