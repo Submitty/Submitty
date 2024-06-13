@@ -28,7 +28,7 @@
 
 <script>
     $('#search-student-queue-input').autocomplete({
-        source: {{ student_full|raw }}
+        source: {{ student_full| raw }}
     });
     const url = buildCourseUrl(['queue', 'student_search']);
     const search_student_queue = $('#search-student-queue-input');
@@ -38,20 +38,21 @@
     const table_caption = $('#student-queue-table caption')
     const times_helped_row = $('<tr class="times_helped_row"></tr>');
     const times_helped_cell = times_helped_row.append('<td class="times_helped_cell" colspan="8"></td>');
-    times_helped_row.appendChild(times_helped_cell);
+    times_helped_row.append(times_helped_cell);
 
-    search_student_queue_btn.addEventListener('click', event => {
+    search_student_queue_btn.on('click', event => {
         $.ajax({
             url: url,
             type: 'POST',
             data: {
-                student_id: search_student_queue.value,
+                student_id: search_student_queue.val(),
                 // eslint-disable-next-line no-undef
                 csrf_token: csrfToken
             },
             success: function(response) {
                 let i = 0;
                 let help_counter = 0;
+                console.log(response);
                 const data = JSON.parse(response).data;
                 const student_data = JSON.parse(data);
                 table_caption.text(`${student_data[0].name} - (ID:${student_data[0].user_id}) - Contact: ${student_data[0].contact_info}`);
@@ -66,20 +67,20 @@
                     const helper = student.help_started_by === null ? '-' : student.help_started_by;
                     const removal_method = student.removal_type === null ? '-' : student.removal_type;
 
-                    table_body.appendChild($('<tr></tr>')
-                        .appendChild($('<td></td>').setAttribute('data-testid', 'student-row').text(j))
-                        .appendChild($('<td></td>').text(student_data[i].current_state))
-                        .appendChild($('<td></td>').text(student_data[i].queue_code))
-                        .appendChild($('<td></td>').text(time_start))
-                        .appendChild($('<td></td>').text(time_end))
-                        .appendChild($('<td></td>').text(removed_by))
-                        .appendChild($('<td></td>').text(helper))
-                        .appendChild($('<td></td>').text(removal_method)));
+                    table_body.append($('<tr></tr>')
+                        .append($('<td></td>').attr('data-testid', 'student-row').text(i+1))
+                        .append($('<td></td>').text(student.current_state))
+                        .append($('<td></td>').text(student.queue_code))
+                        .append($('<td></td>').text(time_start))
+                        .append($('<td></td>').text(time_end))
+                        .append($('<td></td>').text(removed_by))
+                        .append($('<td></td>').text(helper))
+                        .append($('<td></td>').text(removal_method)));
                     i++;
                 });
 
-                times_helped_cell.textContent = help_counter + ' times helped.';
-                table_body.appendChild(times_helped_row);
+                times_helped_cell.text(`${help_counter} times helped.`);
+                table_body.append(times_helped_row);
             },
             error: function() {
                 window.alert('Something went wrong while searching for students!');
