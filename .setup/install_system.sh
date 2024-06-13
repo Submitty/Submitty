@@ -127,6 +127,7 @@ The vagrant box comes with some handy aliases:
     submitty_install_site        - runs .setup/INSTALL_SUBMITTY_HELPER_SITE.sh
     submitty_install_bin         - runs .setup/INSTALL_SUBMITTY_HELPER_BIN.sh
     submitty_code_watcher        - runs .setup/bin/code_watcher.py
+    submitty_test                - runs .setup/SUBMITTY_TEST.sh
     submitty_restart_autograding - restart systemctl for autograding
     submitty_restart_services    - restarts all Submitty related systemctl
     lichen_install               - runs Lichen/install_lichen.sh
