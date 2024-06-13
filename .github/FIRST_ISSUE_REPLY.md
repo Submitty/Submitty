@@ -1,6 +1,6 @@
 Thank you for your interest in the Submitty open source project!
 
-We also encourage you to join our
+We encourage you to join our
 [Zulip](https://submitty.org/index/contact) server
 to discuss new features requests, bug reports, and technical implementation questions.
 
