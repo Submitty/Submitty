@@ -29,7 +29,8 @@ class OfficeHoursQueueController extends AbstractController {
             new WebResponse(
                 'OfficeHoursQueue',
                 'showTheQueue',
-                new OfficeHoursQueueModel($this->core, $full_history)
+                new OfficeHoursQueueModel($this->core, $full_history),
+                $this->core->getQueries()->getAllUsers()
             )
         );
     }
