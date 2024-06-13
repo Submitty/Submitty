@@ -783,7 +783,7 @@ class ReportController extends AbstractController {
      */
     private function generateCustomFilename(): string {
         $course = $this->core->getConfig()->getCourse();
-        $timestamp = date("ymdHis");
+        $timestamp = DateUtils::getFileNameTimeStamp();
         return "{$course}_rainbow_grades_{$timestamp}.csv";
     }
 
