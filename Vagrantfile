@@ -77,7 +77,7 @@ base_boxes[:libvirt]       = "generic/ubuntu2204"
 base_boxes[:arm_mac_qemu]  = "perk/ubuntu-2204-arm64"
 
 
-def mount_folders_with_type(config, mount_options, type)
+def mount_folders(config, mount_options, type = nil)
  # ideally we would use submitty_daemon or something as the owner/group, but since that user doesn't exist
   # till post-provision (and this is mounted before provisioning), we want the group to be 'vagrant'
   # which is guaranteed to exist and that during install_system.sh we add submitty_daemon/submitty_php/etc to the
@@ -93,10 +93,6 @@ def mount_folders_with_type(config, mount_options, type)
       config.vm.synced_folder repo_path, "/usr/local/submitty/GIT_CHECKOUT/" + repo, owner: owner, group: group, mount_options: mount_options, smb_host: '10.0.2.2', smb_username: `whoami`.chomp, type:type
     end
   }
-end
-
-def mount_folders(config, mount_options)
- mount_folders_with_type(config, mount_options, nil)
 end
 
 def get_workers()
@@ -242,7 +238,7 @@ Vagrant.configure(2) do |config|
 
     libvirt.forward_ssh_port = true
 
-    mount_folders_with_type(override, [], "rsync")
+    mount_folders(override, [], "rsync")
   end
 
   config.vm.provider "qemu" do |qe, override|
