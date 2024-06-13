@@ -117,7 +117,7 @@ module.exports = tseslint.config(
         // todo: enable jest lint rules at some point
         // extends: [jest.configs['flat/recommended']],
         languageOptions: {
-            globals: {...globals.nodeBuiltin, ...jest.environments.globals.globals},
+            globals: { ...globals.nodeBuiltin, ...jest.environments.globals.globals },
         },
     },
 );
