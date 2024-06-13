@@ -709,6 +709,9 @@ class OfficeHoursQueueController extends AbstractController {
         }
     }
 
+    /**
+     * @AccessControl(role="INSTRUCTOR")
+     */
     #[Route("/courses/{_semester}/{_course}/queue/student_search", methods: ["POST"])]
     public function studentSearch(): JsonResponse {
         $user_id = $_POST['student_id'];
