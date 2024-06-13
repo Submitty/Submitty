@@ -114,3 +114,7 @@ th {
     border: 1px solid var(--standard-light-gray);
     font-weight: 600;
 }
+
+.times_helped_cell {
+    background-color: var(--standard-vibrant-green);
+}
