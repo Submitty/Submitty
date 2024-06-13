@@ -58,7 +58,7 @@ jobs:
       - name: First issue reply
         if: env.bot_comment_exists == 'false'
         run: |
-          gh issue comment "$ISSUE" --body "Hi @$USERNAME,"$'\n\n'"Testing: Thank you for your interest in the Submitty open source project.\n\nWe welcome contributions from new developers!\n\nHowever we do not use the Github issue 'assign' feature for first time prospective contributors."
+          gh issue comment "$ISSUE" --body "Hiiiiiiiiiiiiiiiiiiiiiii"
         env:
           ISSUE: ${{ github.event.issue.number }}
           USERNAME: ${{ github.event.comment.user.login }}
