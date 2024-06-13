@@ -958,6 +958,32 @@ SQL;
         return $this->course_db->rows();
     }
 
+    /**
+     * Retrieves the number of upducks per user.
+     *
+     * @return array<array<string, string>>
+     */
+    public function getUpDucks(): array {
+        $this->course_db->query("
+            SELECT 
+                p.author_user_id, 
+                COUNT(f.*) AS upducks 
+            FROM 
+                posts p 
+            JOIN 
+                forum_upducks f 
+            ON 
+                p.id = f.post_id 
+            WHERE 
+                p.deleted = FALSE 
+            GROUP BY 
+                p.author_user_id 
+            ORDER BY 
+                upducks DESC
+        ");
+        return $this->course_db->rows();
+    }
+
     public function getPostsInThreads($thread_ids) {
         if (count($thread_ids) === 0) {
             return [];
