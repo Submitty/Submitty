@@ -1,6 +1,16 @@
 {
 	"required_capabilities": "python",
 
+    "autograding_method": "docker",
+
+	"autograding": {
+        "submission_to_compilation": ["**/*.py"]
+    },
+
+	"container_options": {
+        "container_image": "submitty/python:3.6"
+	},
+    
     "testcases" : [
         {
             "title" : "Lab 1 Checkpoint 1",
