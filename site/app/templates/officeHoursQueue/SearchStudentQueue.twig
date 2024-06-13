@@ -4,9 +4,9 @@
     <p>Student ID</p>
     <div id='search-student-queue'>
         <input id='search-student-queue-input' data-testid='search-student-queue-input' type='text' placeholder="Enter student's name">
-        <button id='search-student-queue-btn' data-testid='search-student-queue-btn' class="btn btn-primary">Search</button>
+        <button id='search-student-queue-btn' data-testid='search-student-queue-btn' class='btn btn-primary'>Search</button>
     </div>
-    <table id='student-queue-table'>
+    <table id='student-queue-table' class='table table-striped'>
         <caption></caption>
         <thead>
             <tr>
@@ -20,7 +20,7 @@
                 <th scope='col'>Removal Type</th>
             </tr>
         </thead>
-        <tbody id="search-student-tbody">
+        <tbody id='search-student-tbody'>
 
         </tbody>
     </table>
@@ -76,8 +76,8 @@
                     i++;
                 });
 
-                table_body.append($('<tr class="times_helped_row"></tr>')
-                    .append($('<td class="times_helped_cell" colspan="8"></td>')
+                table_body.append($("<tr class='times_helped_row'></tr>")
+                    .append($("<td class='times_helped_cell' colspan='8'></td>")
                     .text(`${help_counter} times helped.`)));
             },
             error: function() {
