@@ -6,11 +6,7 @@ use app\models\OfficeHoursQueueModel;
 use app\libraries\Utils;
 
 class OfficeHoursQueueView extends AbstractView {
-    /*
-     * @param OfficeHoursQueueModel $viewer
-     * @param mixed[] $students
-     */
-    public function showTheQueue($viewer, array $students) {
+    public function showTheQueue(OfficeHoursQueueModel $viewer, User[] $students) {
         $this->core->getOutput()->addBreadcrumb("Office Hours Queue");
         $this->core->getOutput()->addInternalCss('officeHoursQueue.css');
         $this->core->getOutput()->addInternalJs('office-hours-queue.js');
@@ -23,27 +19,15 @@ class OfficeHoursQueueView extends AbstractView {
         return $this->renderPart($viewer, "officeHoursQueue/QueueHeader.twig", $student_full);
     }
 
-    /*
-     * @param OfficeHoursQueueModel $viewer
-     * @param string $student_full
-     */
-    public function renderCurrentQueue($viewer, string $student_full) {
+    public function renderCurrentQueue(OfficeHoursQueueModel $viewer, string $student_full) {
         return $this->renderPart($viewer, "officeHoursQueue/CurrentQueue.twig", $student_full);
     }
 
-    /*
-     * @param OfficeHoursQueueModel $viewer
-     * @param string $student_full
-     */
-    public function renderQueueHistory($viewer, string $student_full) {
+    public function renderQueueHistory(OfficeHoursQueueModel $viewer, string $student_full) {
         return $this->renderPart($viewer, "officeHoursQueue/QueueHistory.twig", $student_full);
     }
 
-    /*
-     * @param OfficeHoursQueueModel $viewer
-     * @param string $student_full
-     */
-    public function renderNewStatus($viewer, string $student_full) {
+    public function renderNewStatus(OfficeHoursQueueModel $viewer, string $student_full) {
         return $this->renderPart($viewer, "officeHoursQueue/QueueStatus.twig", $student_full);
     }
 
@@ -78,20 +62,11 @@ class OfficeHoursQueueView extends AbstractView {
         ]);
     }
 
-    /*
-     * @param OfficeHoursQueueModel $viewer
-     * @param string $student_full
-     */
-    public function renderNewAnnouncement($viewer, string $student_full) {
+    public function renderNewAnnouncement(OfficeHoursQueueModel $viewer, string $student_full) {
         return $this->renderPart($viewer, "officeHoursQueue/AnnouncementMsg.twig", $student_full);
     }
 
-    /*
-     * @param OfficeHoursQueueModel $viewer
-     * @param string $twig_location
-     * @param string $student_full
-     */
-    private function renderPart($viewer, string $twig_location, string $student_full) {
+    private function renderPart(OfficeHoursQueueModel $viewer, string $twig_location, string $student_full) {
         return $this->core->getOutput()->renderTwigTemplate($twig_location, [
           'csrf_token' => $this->core->getCsrfToken(),
           'access_full_grading' => $this->core->getUser()->accessFullGrading(),
