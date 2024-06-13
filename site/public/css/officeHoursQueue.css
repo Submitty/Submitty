@@ -115,6 +115,6 @@ th {
     font-weight: 600;
 }
 
-.times_helped_cell {
+.times-helped-cell {
     background-color: var(--standard-vibrant-green);
 }

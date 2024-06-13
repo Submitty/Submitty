@@ -47,7 +47,6 @@
                 csrf_token: csrfToken
             },
             success: function(response) {
-                let i = 0;
                 let help_counter = 0;
                 console.log(response);
                 const data = JSON.parse(response).data;
@@ -76,8 +75,8 @@
                     i++;
                 });
 
-                table_body.append($("<tr class='times_helped_row'></tr>")
-                    .append($("<td class='times_helped_cell' colspan='8'></td>")
+                table_body.append($("<tr class='times-helped-row'></tr>")
+                    .append($("<td class='times-helped-cell' colspan='8'></td>")
                     .text(`${help_counter} times helped.`)));
             },
             error: function() {
