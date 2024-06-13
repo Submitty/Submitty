@@ -8,7 +8,7 @@ use app\libraries\Utils;
 class OfficeHoursQueueView extends AbstractView {
     /*
      * @param OfficeHoursQueueModel $viewer
-     * @param User[] $students
+     * @param mixed[] $students
      */
     public function showTheQueue($viewer, array $students) {
         $this->core->getOutput()->addBreadcrumb("Office Hours Queue");

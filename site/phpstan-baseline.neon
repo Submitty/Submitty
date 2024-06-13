@@ -12637,11 +12637,6 @@ parameters:
 			path: app/views/OfficeHoursQueueView.php
 
 		-
-			message: "#^Method app\\\\views\\\\OfficeHoursQueueView\\:\\:renderPart\\(\\) has parameter \\$twig_location with no type specified\\.$#"
-			count: 1
-			path: app/views/OfficeHoursQueueView.php
-
-		-
 			message: "#^Method app\\\\views\\\\OfficeHoursQueueView\\:\\:renderPart\\(\\) has parameter \\$viewer with no type specified\\.$#"
 			count: 1
 			path: app/views/OfficeHoursQueueView.php
