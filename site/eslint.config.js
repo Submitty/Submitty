@@ -1,7 +1,6 @@
 // @ts-check
 
 const eslint = require('@eslint/js');
-const stylistic = require('@stylistic/eslint-plugin');
 const jest = require('eslint-plugin-jest');
 const globals = require('globals');
 const tseslint = require('typescript-eslint');
@@ -57,21 +56,22 @@ module.exports = tseslint.config(
     },
     {
         name: 'Style rules for all files',
-        extends: [
-            /** @type {import("typescript-eslint").Config} */
-            /** @type {unknown} */
-            (
-                stylistic.configs.customize({
-                    braceStyle: 'stroustrup',
-                    indent: 4,
-                    semi: true,
-                })
-            ),
-        ],
         rules: {
-            '@stylistic/linebreak-style': ['error', 'unix'],
-            '@stylistic/quotes': ['error', 'single', { avoidEscape: true }],
-            '@stylistic/semi-style': ['error'],
+            'arrow-spacing': ['error'],
+            'block-spacing': ['error'],
+            'brace-style': ['error', 'stroustrup'],
+            'comma-dangle': ['error', 'always-multiline'],
+            'comma-spacing': ['error', {'before': false, 'after': true}],
+            'eol-last': ['error'],
+            'indent': ['error', 4, {'SwitchCase': 1}],
+            'keyword-spacing': ['error', {'before': true, 'after': true}],
+            'space-before-blocks': ['error', 'always'],
+            'no-trailing-spaces': ['error'],
+            'semi': ['error', 'always'],
+            'template-curly-spacing': ['error', 'never'],
+            'linebreak-style': ['error', 'unix'],
+            'quotes': ['error', 'single', { avoidEscape: true }],
+            'semi-style': ['error'],
         },
     },
     {
