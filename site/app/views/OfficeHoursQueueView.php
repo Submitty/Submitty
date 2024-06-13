@@ -3,6 +3,7 @@
 namespace app\views;
 
 use app\models\OfficeHoursQueueModel;
+use app\models\User;
 use app\libraries\Utils;
 
 class OfficeHoursQueueView extends AbstractView {
