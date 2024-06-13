@@ -278,12 +278,6 @@
     right: 5px;
 }
 
-.forum-file-open {
-    text-decoration: none;
-    display: inline-block;
-    white-space: nowrap;
-}
-
 .current-favorite i.fas,
 .active-thread-remove-announcement i.fas,
 .active-thread-remove-expiring-announcement i.fas {
