@@ -67,7 +67,7 @@ function displayStudentHistory() {
         data: {
             student_id: $('#search-student-queue-input').val(),
             // eslint-disable-next-line no-undef
-            csrf_token: csrfToken
+            csrf_token: csrfToken,
         },
         success: function(response) {
             let help_counter = 0;
@@ -77,7 +77,7 @@ function displayStudentHistory() {
             $('#student-queue-table caption').text(`${student_data[0].name} - (ID:${student_data[0].user_id}) - Contact: ${student_data[0].contact_info}`);
             const table_body = $('#search-student-tbody');
 
-            student_data.forEach(function(student, i) {
+            student_data.forEach((student, i) => {
                 if (student.removal_type === 'helped') {
                     help_counter++;
                 }
@@ -101,7 +101,7 @@ function displayStudentHistory() {
 
             table_body.append($("<tr class='times-helped-row'></tr>")
                 .append($("<td class='times-helped-cell' colspan='8'></td>")
-                .text(`${help_counter} times helped.`)));
+                    .text(`${help_counter} times helped.`)));
         },
         error: function() {
             window.alert('Something went wrong while searching for students!');
