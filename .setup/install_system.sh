@@ -118,6 +118,8 @@ if [ ${DEV_VM} == 1 ] && [ ${WORKER} == 0 ]; then
 
     sed -i -e "s/PermitRootLogin prohibit-password/PermitRootLogin yes/g" /etc/ssh/sshd_config
 
+    chmod 755 -R /usr/local/submitty/GIT_CHECKOUT
+
     # Set up some convinence stuff for the root user on ssh
 
     INSTALL_HELP=$(cat <<'EOF'
