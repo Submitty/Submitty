@@ -1,7 +1,7 @@
 import { defineConfig } from 'cypress';
+import cypressPlugins from './cypress/plugins/index.js';
 import fs = require('fs');
 import path = require('path');
-import cypressPlugins = require('./cypress/plugins/index.js');
 
 export default defineConfig({
     video: true,
