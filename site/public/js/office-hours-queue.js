@@ -90,10 +90,10 @@ function displayStudentHistory() {
                     .append($('<td></td>').attr('data-testid', 'row-label').text(i+1))
                     .append($('<td></td>').attr('data-testid', 'current-state').text(student.current_state))
                     .append($('<td></td>').attr('data-testid', 'queue').text(student.queue_code))
-                    .append($('<td></td>').attr('data-testid', 'start-time').text(time_start))
-                    .append($('<td></td>').attr('data-testid', 'end-time').text(time_end))
-                    .append($('<td></td>').attr('data-testid', 'removed-by').text(removed_by))
+                    .append($('<td></td>').attr('data-testid', 'time-entered').text(time_start))
+                    .append($('<td></td>').attr('data-testid', 'time-removed').text(time_end))
                     .append($('<td></td>').attr('data-testid', 'helped-by').text(helper))
+                    .append($('<td></td>').attr('data-testid', 'removed-by').text(removed_by))
                     .append($('<td></td>').attr('data-testid', 'removal-method').text(removal_method)));
             });
 
