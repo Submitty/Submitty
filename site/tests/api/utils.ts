@@ -13,7 +13,7 @@ function getHeaders(auth: string | null = null) {
 /**
 * Build a dictionary that can be sent as a POST request, with either fetch or cy.request
 */
-export async function postRequest<T = any>(url: string, body: Record<string, any>, auth: string | null = null): Promise<T> {
+export async function postRequest<T, R>(url: string, body: Record<string, R>, auth: string | null = null): Promise<T> {
     const req = await fetch(`${BASE_URL}${url}`, {
         method: 'POST',
         headers: getHeaders(auth),
@@ -34,7 +34,7 @@ export async function postRequest<T = any>(url: string, body: Record<string, any
 * @param {String} [auth=null] optional authentication token to be put in the Authorization header
 * @returns {Object}
 */
-export async function getRequest<T = any>(url: string, auth: string | null = null): Promise<T> {
+export async function getRequest<T>(url: string, auth: string | null = null): Promise<T> {
     const req = await fetch(`${BASE_URL}${url}`, {
         method: 'GET',
         headers: getHeaders(auth),

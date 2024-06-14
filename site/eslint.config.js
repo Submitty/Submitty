@@ -96,7 +96,6 @@ module.exports = tseslint.config(
         languageOptions: {
             parserOptions: {
                 project: true,
-                // @ts-expect-error
                 tsconfigRootDir: __dirname,
             },
         },

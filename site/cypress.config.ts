@@ -1,6 +1,7 @@
 import { defineConfig } from 'cypress';
-import * as fs from 'fs';
-const path = require('path');
+import fs = require('fs');
+import path = require('path');
+import cypressPlugins = require('./cypress/plugins/index.js');
 
 export default defineConfig({
     video: true,
@@ -31,7 +32,7 @@ export default defineConfig({
                     }
                 }
             });
-            return require('./cypress/plugins/index.js')(on, config);
+            return cypressPlugins(on, config);
         },
         baseUrl: 'http://localhost:1511',
         specPattern: 'cypress/e2e/**/*.spec.js',
