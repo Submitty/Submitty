@@ -74,7 +74,7 @@ function displayStudentHistory() {
             const data = JSON.parse(response).data;
             const student_data = JSON.parse(data);
             $('#student-queue-table caption').text(`${student_data[0].name} - (ID:${student_data[0].user_id}) - Contact: ${student_data[0].contact_info}`);
-            const table_body = $('#search-student-tbody');
+            const table_body = $('#search-student-tbody').empty();
 
             student_data.forEach((student, i) => {
                 if (student.removal_type === 'helped') {
