@@ -577,7 +577,8 @@ class OfficeHoursQueueController extends AbstractController {
             new WebResponse(
                 'OfficeHoursQueue',
                 'renderCurrentQueue',
-                new OfficeHoursQueueModel($this->core)
+                new OfficeHoursQueueModel($this->core),
+                $this->core->getQueries()->getAllUsers()
             )
         );
     }
@@ -594,7 +595,8 @@ class OfficeHoursQueueController extends AbstractController {
             new WebResponse(
                 'OfficeHoursQueue',
                 'renderQueueHistory',
-                new OfficeHoursQueueModel($this->core, $full_history)
+                new OfficeHoursQueueModel($this->core, $full_history),
+                $this->core->getQueries()->getAllUsers()
             )
         );
     }
@@ -610,7 +612,8 @@ class OfficeHoursQueueController extends AbstractController {
             new WebResponse(
                 'OfficeHoursQueue',
                 'renderNewStatus',
-                new OfficeHoursQueueModel($this->core)
+                new OfficeHoursQueueModel($this->core),
+                $this->core->getQueries()->getAllUsers()
             )
         );
     }
@@ -672,7 +675,8 @@ class OfficeHoursQueueController extends AbstractController {
             new WebResponse(
                 'OfficeHoursQueue',
                 'renderNewAnnouncement',
-                new OfficeHoursQueueModel($this->core)
+                new OfficeHoursQueueModel($this->core),
+                $this->core->getQueries()->getAllUsers()
             )
         );
     }
@@ -690,7 +694,8 @@ class OfficeHoursQueueController extends AbstractController {
         return new WebResponse(
             'OfficeHoursQueue',
             'showQueueStudentStats',
-            $viewer->getQueueDataStudent()
+            $viewer->getQueueDataStudent(),
+            $this->core->getQueries()->getAllUsers()
         );
     }
 
