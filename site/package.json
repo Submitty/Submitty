@@ -79,8 +79,8 @@
   "scripts": {
     "css-stylelint": "stylelint \"**/*.css\"",
     "css-stylelint:fix": "stylelint \"**/*.css\" --fix",
-    "eslint": "eslint \"public/js/**/*.js\" \"cypress/**/*.js\" \"ts/**/*.js\" \"ts/**/*.ts\" \"tests/ts/**/*.js\"",
-    "eslint:fix": "eslint \"public/js/**/*.js\" \"cypress/**/*.js\" \"ts/**/*.js\" \"ts/**/*.ts\" \"tests/ts/**/*.js\" --fix",
+    "eslint": "eslint .",
+    "eslint:fix": "eslint . --fix",
     "test": "jest",
     "test:api": "jest --config jest.config.api.js",
     "build": "tsc -p . && node .build.js"
