@@ -30,74 +30,64 @@
             <div id="display" class="customization_item">
                 <fieldset>
                     <legend><h2>Display</h2></legend>
-                    <div id="display_collapse" class="collapsible_area">
-                        {% set counter = 0 %}
-                        {% for display_option in display %}
-                            {% set description = display_description[counter] %}
-                            <div style="display: table;">
-                                <input type="checkbox" id="display_{{ display_option.id }}" name="display" value="{{ display_option.id }}"
-                                       {% if display_option.isUsed == true %}checked{% endif %}
-                                >
-                                <label style="display: table-cell; width: 150px;" for="display_{{ display_option.id }}">{{ display_option.id }}</label>
-                                <span style=" display: table-cell;"><em>{{ description | raw }}</em></span>
-                            </div>
-                            {% set counter = counter + 1 %}
-                        {% endfor %}
-                    </div>
+                    {% set counter = 0 %}
+                    {% for display_option in display %}
+                        {% set description = display_description[counter] %}
+                        <div style="display: table;">
+                            <input type="checkbox" id="display_{{ display_option.id }}" name="display" value="{{ display_option.id }}"
+                                   {% if display_option.isUsed == true %}checked{% endif %}
+                            >
+                            <label style="display: table-cell; width: 150px;" for="display_{{ display_option.id }}">{{ display_option.id }}</label>
+                            <span style=" display: table-cell;"><em>{{ description | raw }}</em></span>
+                        </div>
+                        {% set counter = counter + 1 %}
+                    {% endfor %}
                 </fieldset>
             </div>
             <div id="display_benchmarks" class="customization_item">
                 <fieldset>
                     <legend><h2>Display Benchmarks</h2></legend>
-                    <div id="display_benchmarks_collapse" class="collapsible_area">
-                        {% for benchmark in display_benchmarks %}
-                            <p>
-                                <input type="checkbox" id="display_benchmarks_{{ benchmark.id }}" name="display_benchmarks" value="{{ benchmark.id }}"
-                                       {% if benchmark.isUsed == true %}checked{% endif %}
-                                >
-                                <label for="display_benchmarks_{{ benchmark.id }}">{{ benchmark.id }}</label>
-                            </p>
-                        {% endfor %}
-                    </div>
+                    {% for benchmark in display_benchmarks %}
+                        <p>
+                            <input type="checkbox" id="display_benchmarks_{{ benchmark.id }}" name="display_benchmarks" value="{{ benchmark.id }}"
+                                   {% if benchmark.isUsed == true %}checked{% endif %}
+                            >
+                            <label for="display_benchmarks_{{ benchmark.id }}">{{ benchmark.id }}</label>
+                        </p>
+                    {% endfor %}
                 </fieldset>
             </div>
             <div id="benchmark_percents" class="customization_item">
                 <h2>Benchmark Percents</h2>
-                <div id="benchmark_percents_collapse" class="collapsible_area">
-                    <p class="rg_info_message">You may adjust the minimum percent required to receive certain letter grades.  Enter this percentage as a decimal number.<br />As an example 90% would be entered as .9</p>
-                    {% for benchmark in benchmarks_with_input_fields %}
-                        {% if benchmark_percents[benchmark] is defined %}
-                            {% set percent = benchmark_percents[benchmark] %}
-                        {% else %}
-                            {% set percent = '' %}
-                        {% endif %}
+                <p class="rg_info_message">You may adjust the minimum percent required to receive certain letter grades.  Enter this percentage as a decimal number.<br />As an example 90% would be entered as .9</p>
+                {% for benchmark in benchmarks_with_input_fields %}
+                    {% if benchmark_percents[benchmark] is defined %}
+                        {% set percent = benchmark_percents[benchmark] %}
+                    {% else %}
+                        {% set percent = '' %}
+                    {% endif %}
 
-                        <p>
-                            <label for="benchmark_{{ benchmark }}" class="{{ benchmark }}">{{ benchmark }}</label>
-                            <input type="text" id="benchmark_{{ benchmark }}" class="benchmark_percent_input {{ benchmark }}" data-benchmark="{{ benchmark }}" value="{{ percent }}">
-                        </p>
-                    {% endfor %}
-                </div>
+                    <p>
+                        <label for="benchmark_{{ benchmark }}" class="{{ benchmark }}">{{ benchmark }}</label>
+                        <input type="text" id="benchmark_{{ benchmark }}" class="benchmark_percent_input {{ benchmark }}" data-benchmark="{{ benchmark }}" value="{{ percent }}">
+                    </p>
+                {% endfor %}
             </div>
             <div id="cust_messages" class="customization_item">
                 <h2>Messages</h2>
-                <div id="cust_messages_collapse" class="collapsible_area">
-                    <label for="cust_messages_textarea" class="rg_info_message">You may enter a message that will appear above the student's rainbow grades.</label>
-                    <textarea id="cust_messages_textarea">{% if 0 in messages|keys %}{{ messages[0] }}{% endif %}</textarea>
-                </div>
+                <label for="cust_messages_textarea" class="rg_info_message">You may enter a message that will appear above the student's rainbow grades.</label>
+                <textarea id="cust_messages_textarea">{% if 0 in messages|keys %}{{ messages[0] }}{% endif %}</textarea>
             </div>
             <div id="section_labels" class="customization_item">
                 <h2>Section Labels</h2>
-                <div id="section_labels_collapse" class="collapsible_area">
-                    <p class="rg_info_message">You may use this area to assign a label to each section number, for example the name of the TA or TAs
-                        handling the section.  You may also leave it as the default but it may not be blank.</p>
-                    {% for section, label in sections_and_labels %}
-                        <p>
-                            <label for="section_and_labels_{{ section }}">{{ section }}</label>
-                            <input type="text" data-section="{{ section }}" class="sections_and_labels" id="section_and_labels_{{ section }}" name="section_and_labels_{{ section }}" value="{{ label }}">
-                        </p>
-                    {% endfor %}
-                </div>
+                <p class="rg_info_message">You may use this area to assign a label to each section number, for example the name of the TA or TAs
+                    handling the section.  You may also leave it as the default, but it may not be blank.</p>
+                {% for section, label in sections_and_labels %}
+                    <p>
+                        <label for="section_and_labels_{{ section }}">{{ section }}</label>
+                        <input type="text" data-section="{{ section }}" class="sections_and_labels" id="section_and_labels_{{ section }}" name="section_and_labels_{{ section }}" value="{{ label }}">
+                    </p>
+                {% endfor %}
             </div>
             <div id="plagiarism" class="customization_item">
                 <h2>Penalties for Academic Dishonesty and Plagiarism</h2>
