@@ -132,10 +132,59 @@ describe('test office hours queue', () => {
         editAnnouncement('');
         cy.get('[data-testid="announcement"]').should('not.exist');
         cy.get('[data-testid="popup-message"]').should('contain', 'Updated announcement');
-        // confirm student queue history
+
+        // Confirm student queue history
         cy.get('[data-testid="search-student-queue-input"]').first().type('student');
         cy.get('[data-testid="search-student-queue-btn"]').first().click();
-        cy.get('[data-testid="student-row"]').should('exist');
+        cy.get('[data-testid="student-row-1"]')
+            .contains('[data-testid=row-label]', '1').siblings()
+            .contains('[data-testid=current-state]', 'done').siblings()
+            .contains('[data-testid=queue]', 'Lab Help').siblings()
+            // This checks if time entered and time removed are in fact times.
+            // We do not check for a specific time because this may change.
+            .contains('[data-testid=time-entered]', /\d{4}-\d\d-\d\d \d\d:\d\d:\d\d/).siblings()
+            .contains('[data-testid=time-removed]', /\d{4}-\d\d-\d\d \d\d:\d\d:\d\d/).siblings()
+            .contains('[data-testid=helped-by]', 'grader').siblings()
+            .contains('[data-testid=removed-by]', 'grader').siblings()
+            .contains('[data-testid=removal-method]', 'helped').siblings();
+        cy.get('[data-testid="student-row-2"]').contains('[data-testid=row-label]', '2')
+            .contains('[data-testid=row-label]', '2').siblings()
+            .contains('[data-testid=current-state]', 'done').siblings()
+            .contains('[data-testid=queue]', 'Lab Help').siblings()
+            .contains('[data-testid=time-entered]', /\d{4}-\d\d-\d\d \d\d:\d\d:\d\d/).siblings()
+            .contains('[data-testid=time-removed]', /\d{4}-\d\d-\d\d \d\d:\d\d:\d\d/).siblings()
+            .contains('[data-testid=helped-by]', '-').siblings()
+            .contains('[data-testid=removed-by]', 'instructor').siblings()
+            .contains('[data-testid=removal-method]', 'emptied').siblings();
+        cy.get('[data-testid="student-row-3"]').contains('[data-testid=row-label]', '3')
+            .contains('[data-testid=row-label]', '3').siblings()
+            .contains('[data-testid=current-state]', 'done').siblings()
+            .contains('[data-testid=queue]', 'Cypress Office Hour Queue 1').siblings()
+            .contains('[data-testid=time-entered]', /\d{4}-\d\d-\d\d \d\d:\d\d:\d\d/).siblings()
+            .contains('[data-testid=time-removed]', /\d{4}-\d\d-\d\d \d\d:\d\d:\d\d/).siblings()
+            .contains('[data-testid=helped-by]', '-').siblings()
+            .contains('[data-testid=removed-by]', 'student').siblings()
+            .contains('[data-testid=removal-method]', 'self').siblings();
+        cy.get('[data-testid="student-row-4"]').contains('[data-testid=row-label]', '4')
+            .contains('[data-testid=row-label]', '4').siblings()
+            .contains('[data-testid=current-state]', 'done').siblings()
+            .contains('[data-testid=queue]', 'Cypress Office Hour Queue 1').siblings()
+            .contains('[data-testid=time-entered]', /\d{4}-\d\d-\d\d \d\d:\d\d:\d\d/).siblings()
+            .contains('[data-testid=time-removed]', /\d{4}-\d\d-\d\d \d\d:\d\d:\d\d/).siblings()
+            .contains('[data-testid=helped-by]', 'instructor').siblings()
+            .contains('[data-testid=removed-by]', 'student').siblings()
+            .contains('[data-testid=removal-method]', 'self_helped').siblings();
+        cy.get('[data-testid="student-row-5"]').contains('[data-testid=row-label]', '5')
+            .contains('[data-testid=row-label]', '5').siblings()
+            .contains('[data-testid=current-state]', 'waiting').siblings()
+            .contains('[data-testid=queue]', 'Cypress Office Hour Queue 2').siblings()
+            .contains('[data-testid=time-entered]', /\d{4}-\d\d-\d\d \d\d:\d\d:\d\d/).siblings()
+            .contains('[data-testid=time-removed]', '-').siblings()
+            .contains('[data-testid=helped-by]', '-').siblings()
+            .contains('[data-testid=removed-by]', '-').siblings()
+            .contains('[data-testid=removal-method]', '-').siblings();
+        cy.get('#times-helped-cell').should('contain', '1 times helped.');
+
         // diable and delete all queue
         disableQueue();
     });
