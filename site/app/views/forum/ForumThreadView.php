@@ -1451,6 +1451,7 @@ class ForumThreadView extends AbstractView {
             $thread_ids = json_encode($details["thread_id"]);
             $thread_titles = json_encode($details["thread_title"]);
             $num_deleted = ($details["num_deleted_posts"]);
+            $total_upducks = ($details["total_upducks"]);
 
             $userData[] = [
                 "family_name" => $family_name,
@@ -1462,7 +1463,8 @@ class ForumThreadView extends AbstractView {
                 "ids" => $ids,
                 "timestamps" => $timestamps,
                 "thread_ids" => $thread_ids,
-                "thread_titles" => $thread_titles
+                "thread_titles" => $thread_titles,
+                "total_upducks" => $total_upducks
             ];
         }
 
