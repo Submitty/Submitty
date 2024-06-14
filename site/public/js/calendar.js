@@ -508,28 +508,41 @@ function buildSwitchingHeader(view_year, view_month, view_day, type) {
     const fragment = document.createDocumentFragment();
 
     // Build first header column
-    const th1 = $('<th>').attr('colSpan', 3);
-    let div = $('<div>');
-    let a = $('<a>', {
-        class: 'cal-btn cal-prev-btn',
-        html: '<i class="fas fa-angle-left"></i>',
-        click: () => {
-            const prev = (type === 'month') ? prevMonth(view_month, view_year, view_day) : prevWeek(view_month, view_year, view_day).concat(type);
-            loadCalendar.apply(this, prev);
-        },
-    });
-    div.append(a);
-    th1.append(div);
+    const th1 = document.createElement('th');
+    th1.colSpan = 3;
+    let div = document.createElement('div');
+    div.classList.add('cal-switch');
+    div.id = 'prev-month-switch';
+    let a = document.createElement('a');
+    a.classList.add('cal-btn', 'cal-prev-btn');
+
+    // Change onclick based on type
+    let prev;
+    if (type === 'month') {
+        prev = prevMonth(view_month, view_year, view_day);
+    }
+    else {
+        prev = prevWeek(view_month, view_year, view_day);
+        prev.push(type);
+    }
+    a.onclick = () => loadCalendar.apply(this, prev);
+    a.innerHTML = '<i class="fas fa-angle-left"></i>';
+
+    // Append to header
+    div.appendChild(a);
+    th1.appendChild(div);
 
     // Build second header column
-    const th2 = $('<th>').attr('colSpan', 1);
-    div = $('<div>').addClass('cal-title');
+    const th2 = document.createElement('th');
+    th2.colSpan = 1;
+    div = document.createElement('div');
+    div.classList.add('cal-title');
 
-    // Create the month dropdown with jQuery
+    // Create the month dropdown
     const monthSelect = $('<select>', {
         id: 'month-dropdown',
         class: 'dropdown-custom cal-month-title',
-        change: function() {
+        change: function () {
             const type = $('#calendar-item-type-edit').val();
             const newMonth = parseInt(this.value);
             const newYear = parseInt($('#year-dropdown').val());
@@ -538,19 +551,20 @@ function buildSwitchingHeader(view_year, view_month, view_day, type) {
     });
 
     for (let itermonth = 1; itermonth <= 12; itermonth++) {
-        monthSelect.append($('<option>', {
+        const monthOption = $('<option>', {
             value: itermonth,
-            text: monthNames[itermonth],
-        }));
+            text: monthNames[itermonth]
+        });
+        monthSelect.append(monthOption);
     }
     monthSelect.val(view_month);
 
-    // Create the year dropdown with jQuery
+    // Create the year dropdown
     const currentYear = new Date().getFullYear();
     const yearSelect = $('<select>', {
         id: 'year-dropdown',
         class: 'dropdown-custom cal-year-title',
-        change: function() {
+        change: function () {
             const type = $('#calendar-item-type-edit').val();
             const newYear = parseInt(this.value);
             const newMonth = parseInt($('#month-dropdown').val());
@@ -559,10 +573,11 @@ function buildSwitchingHeader(view_year, view_month, view_day, type) {
     });
 
     for (let year = currentYear - 4; year <= currentYear + 1; year++) {
-        yearSelect.append($('<option>', {
+        const yearOption = $('<option>', {
             value: year,
-            text: year,
-        }));
+            text: year
+        });
+        yearSelect.append(yearOption);
     }
     yearSelect.val(view_year);
 
@@ -570,31 +585,42 @@ function buildSwitchingHeader(view_year, view_month, view_day, type) {
     const dropdownContainer = $('<div>', {
         css: {
             display: 'flex',
-            alignItems: 'center',
-        },
-    }).append(monthSelect).append(yearSelect);
-
-    div.append(dropdownContainer);
-    th2.append(div);
+            alignItems: 'center'
+        }
+    });
+    dropdownContainer.append(monthSelect).append(yearSelect);
+    div.appendChild(dropdownContainer[0]);
+    th2.appendChild(div);
 
     // Build third header column
-    const th3 = $('<th>').attr('colSpan', 3);
-    div = $('<div>');
-    a = $('<a>', {
-        class: 'cal-btn cal-next-btn',
-        html: '<i class="fas fa-angle-right"></i>',
-        click: () => {
-            const next = (type === 'month') ? nextMonth(view_month, view_year, view_day) : nextWeek(view_month, view_year, view_day).concat(type);
-            loadCalendar.apply(this, next);
-        },
-    });
-    div.append(a);
-    th3.append(div);
+    const th3 = document.createElement('th');
+    th3.colSpan = 3;
+    div = document.createElement('div');
+    div.classList.add('cal-switch');
+    div.id = 'next-month-switch';
+    a = document.createElement('a');
+    a.classList.add('cal-btn', 'cal-next-btn');
+
+    // Change onclick based on type
+    let next;
+    if (type === 'month') {
+        next = nextMonth(view_month, view_year, view_day);
+    }
+    else {
+        next = nextWeek(view_month, view_year, view_day);
+        next.push(type);
+    }
+    a.onclick = () => loadCalendar.apply(this, next);
+    a.innerHTML = '<i class="fas fa-angle-right"></i>';
+
+    // Append to header
+    div.appendChild(a);
+    th3.appendChild(div);
 
     // Append all elements to fragment
-    fragment.append(th1[0]);
-    fragment.append(th2[0]);
-    fragment.append(th3[0]);
+    fragment.appendChild(th1);
+    fragment.appendChild(th2);
+    fragment.appendChild(th3);
 
     return fragment;
 }
