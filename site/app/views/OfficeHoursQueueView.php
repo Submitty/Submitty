@@ -19,15 +19,15 @@ class OfficeHoursQueueView extends AbstractView {
         return $this->renderPart($viewer, "officeHoursQueue/QueueHeader.twig", $student_full);
     }
 
-    public function renderCurrentQueue(OfficeHoursQueueModel $viewer, string $student_full): string {
+    public function renderCurrentQueue(OfficeHoursQueueModel $viewer, mixed $student_full): string {
         return $this->renderPart($viewer, "officeHoursQueue/CurrentQueue.twig", $student_full);
     }
 
-    public function renderQueueHistory(OfficeHoursQueueModel $viewer, string $student_full): string {
+    public function renderQueueHistory(OfficeHoursQueueModel $viewer, mixed $student_full): string {
         return $this->renderPart($viewer, "officeHoursQueue/QueueHistory.twig", $student_full);
     }
 
-    public function renderNewStatus(OfficeHoursQueueModel $viewer, string $student_full): string {
+    public function renderNewStatus(OfficeHoursQueueModel $viewer, mixed $student_full): string {
         return $this->renderPart($viewer, "officeHoursQueue/QueueStatus.twig", $student_full);
     }
 
@@ -62,11 +62,11 @@ class OfficeHoursQueueView extends AbstractView {
         ]);
     }
 
-    public function renderNewAnnouncement(OfficeHoursQueueModel $viewer, string $student_full): string {
+    public function renderNewAnnouncement(OfficeHoursQueueModel $viewer, mixed $student_full): string {
         return $this->renderPart($viewer, "officeHoursQueue/AnnouncementMsg.twig", $student_full);
     }
 
-    private function renderPart(OfficeHoursQueueModel $viewer, string $twig_location, string $student_full): string {
+    private function renderPart(OfficeHoursQueueModel $viewer, string $twig_location, mixed $student_full): string {
         return $this->core->getOutput()->renderTwigTemplate($twig_location, [
           'csrf_token' => $this->core->getCsrfToken(),
           'access_full_grading' => $this->core->getUser()->accessFullGrading(),
