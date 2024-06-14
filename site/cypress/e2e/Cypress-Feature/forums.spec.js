@@ -31,11 +31,12 @@ const replyToThread = (title, reply) => {
 
 const mergeThreads = (fromThread, toThread, mergedContent) => {
     // Add more to tests for uploading attachments
-    cy.get('.thread-left-cont > .thread-list-item').contains(fromThread).click();
+    cy.get('.thread-left-cont > .thread-list-item').contains(fromThread).click({ force: true });
     cy.get('[title="Merge Thread Into Another Thread"]').click();
     cy.get('.chosen-single > span').click();
+    cy.wait(500);
     cy.get('.active-result').contains(toThread).click({ force: true });
-    cy.get('[value="Merge Thread"]').click();
+    cy.get('[value="Merge Thread"]').click({ force: true });
     cy.get('.pre-forum > .post_content').should('contain', mergedContent);
 };
 

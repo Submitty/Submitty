@@ -17,10 +17,10 @@ use Symfony\Component\Routing\Annotation\Route;
  */
 class DockerInterfaceController extends AbstractController {
     /**
-     * @Route("/admin/docker", methods={"GET"})
-     * @Route("/api/docker", methods={"GET"})
      * @return MultiResponse
      */
+    #[Route("/admin/docker", methods: ["GET"])]
+    #[Route("/api/docker", methods: ["GET"])]
     public function showDockerInterface(): MultiResponse {
         $user = $this->core->getUser();
         if (is_null($user) || !$user->accessFaculty()) {
@@ -58,10 +58,10 @@ class DockerInterfaceController extends AbstractController {
         );
     }
     /**
-     * @Route("/admin/add_image", methods={"POST"})
-     * @Route("/api/admin/add_image", methods={"GET"})
      * @return JsonResponse | MultiResponse
      */
+    #[Route("/admin/add_image", methods: ["POST"])]
+    #[Route("/api/admin/add_image", methods: ["GET"])]
     public function addImage() {
         $user = $this->core->getUser();
         if (is_null($user) || !$user->accessFaculty()) {
@@ -154,9 +154,9 @@ class DockerInterfaceController extends AbstractController {
     }
 
     /**
-     * @Route("/admin/update_docker", methods={"GET"})
      * @return JsonResponse
      */
+    #[Route("/admin/update_docker", methods: ["GET"])]
     public function updateDockerCall() {
         $user = $this->core->getUser();
         if (is_null($user) || !$user->accessFaculty()) {
