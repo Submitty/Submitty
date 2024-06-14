@@ -147,7 +147,7 @@ describe('test office hours queue', () => {
             .contains('[data-testid="helped-by"]', 'grader').siblings()
             .contains('[data-testid="removed-by"]', 'grader').siblings()
             .contains('[data-testid="removal-method"]', 'helped');
-        cy.get('[data-testid="student-row-2"]').contains('[data-testid=row-label"]', '2')
+        cy.get('[data-testid="student-row-2"]').contains('[data-testid="row-label"]', '2')
             .contains('[data-testid="row-label"]', '2').siblings()
             .contains('[data-testid="current-state"]', 'done').siblings()
             .contains('[data-testid="queue"]', 'Lab Help').siblings()
@@ -156,7 +156,7 @@ describe('test office hours queue', () => {
             .contains('[data-testid="helped-by"]', '-').siblings()
             .contains('[data-testid="removed-by"]', 'instructor').siblings()
             .contains('[data-testid="removal-method"]', 'emptied');
-        cy.get('[data-testid="student-row-3"]').contains('[data-testid=row-label"]', '3')
+        cy.get('[data-testid="student-row-3"]').contains('[data-testid="row-label"]', '3')
             .contains('[data-testid="row-label"]', '3').siblings()
             .contains('[data-testid="current-state"]', 'done').siblings()
             .contains('[data-testid="queue"]', 'Cypress Office Hour Queue 1').siblings()
@@ -165,7 +165,7 @@ describe('test office hours queue', () => {
             .contains('[data-testid="helped-by"]', '-').siblings()
             .contains('[data-testid="removed-by"]', 'student').siblings()
             .contains('[data-testid="removal-method"]', 'self');
-        cy.get('[data-testid="student-row-4"]').contains('[data-testid=row-label"]', '4')
+        cy.get('[data-testid="student-row-4"]').contains('[data-testid="row-label"]', '4')
             .contains('[data-testid="row-label"]', '4').siblings()
             .contains('[data-testid="current-state"]', 'done').siblings()
             .contains('[data-testid="queue"]', 'Cypress Office Hour Queue 1').siblings()
@@ -174,7 +174,7 @@ describe('test office hours queue', () => {
             .contains('[data-testid="helped-by"]', 'instructor').siblings()
             .contains('[data-testid="removed-by"]', 'student').siblings()
             .contains('[data-testid="removal-method"]', 'self_helped');
-        cy.get('[data-testid="student-row-5"]').contains('[data-testid=row-label"]', '5')
+        cy.get('[data-testid="student-row-5"]').contains('[data-testid="row-label"]', '5')
             .contains('[data-testid="row-label"]', '5').siblings()
             .contains('[data-testid="current-state"]', 'waiting').siblings()
             .contains('[data-testid="queue"]', 'Cypress Office Hour Queue 2').siblings()
@@ -200,7 +200,7 @@ describe('test office hours queue', () => {
             .contains('[data-testid="helped-by"]', 'ta').siblings()
             .contains('[data-testid="removed-by"]', 'instructor').siblings()
             .contains('[data-testid="removal-method"]', 'emptied');
-        cy.get('[data-testid="student-row-2"]').contains('[data-testid=row-label"]', '2')
+        cy.get('[data-testid="student-row-2"]').contains('[data-testid="row-label"]', '2')
             .contains('[data-testid="row-label"]', '2').siblings()
             .contains('[data-testid="current-state"]', 'waiting').siblings()
             .contains('[data-testid="queue"]', 'Cypress Office Hour Queue 2').siblings()
