@@ -71,7 +71,6 @@ function displayStudentHistory() {
         },
         success: function(response) {
             let help_counter = 0;
-            console.log(response);
             const data = JSON.parse(response).data;
             const student_data = JSON.parse(data);
             $('#student-queue-table caption').text(`${student_data[0].name} - (ID:${student_data[0].user_id}) - Contact: ${student_data[0].contact_info}`);
@@ -88,15 +87,14 @@ function displayStudentHistory() {
                 const removal_method = student.removal_type === null ? '-' : student.removal_type;
 
                 table_body.append($('<tr></tr>').attr('data-testid', 'student-row-'+(i+1))
-                    .append($('<td></td>').text(i+1))
-                    .append($('<td></td>').text(student.current_state))
-                    .append($('<td></td>').text(student.queue_code))
-                    .append($('<td></td>').text(time_start))
-                    .append($('<td></td>').text(time_end))
-                    .append($('<td></td>').text(removed_by))
-                    .append($('<td></td>').text(helper))
-                    .append($('<td></td>').text(removal_method)));
-                i++;
+                    .append($('<td></td>').attr('data-testid', 'row-label').text(i+1))
+                    .append($('<td></td>').attr('data-testid', 'current-state').text(student.current_state))
+                    .append($('<td></td>').attr('data-testid', 'queue').text(student.queue_code))
+                    .append($('<td></td>').attr('data-testid', 'start-time').text(time_start))
+                    .append($('<td></td>').attr('data-testid', 'end-time').text(time_end))
+                    .append($('<td></td>').attr('data-testid', 'removed-by').text(removed_by))
+                    .append($('<td></td>').attr('data-testid', 'helped-by').text(helper))
+                    .append($('<td></td>').attr('data-testid', 'removal-method').text(removal_method)));
             });
 
             table_body.append($('<tr></tr>')
