@@ -538,93 +538,78 @@ function buildSwitchingHeader(view_year, view_month, view_day, type) {
     div = document.createElement('div');
     div.classList.add('cal-title');
 
-    // Create the month dropdown
-    const monthSelect = document.createElement('select');
-    monthSelect.id = 'month-dropdown';
-    monthSelect.classList.add('dropdown-custom'); // Add custom class
+    // Create the month dropdown with jQuery
+    const monthSelect = $('<select>', {
+        id: 'month-dropdown',
+        class: 'dropdown-custom cal-month-title',
+        change: function() {
+            const type = $('#calendar-item-type-edit').val();
+            const newMonth = parseInt(this.value);
+            const newYear = parseInt($('#year-dropdown').val());
+
+            Cookies.set('calendar_month', newMonth);
+            Cookies.set('calendar_year', newYear);
+
+            loadCalendar(newMonth, newYear, view_day, type);
+        }
+    });
+
     for (let itermonth = 1; itermonth <= 12; itermonth++) {
-        const monthOption = document.createElement('option');
-        monthOption.value = itermonth;
-        monthOption.textContent = monthNames[itermonth];
-        monthSelect.appendChild(monthOption);
+        const monthOption = $('<option>', {
+            value: itermonth,
+            text: monthNames[itermonth]
+        });
+        monthSelect.append(monthOption);
     }
-    monthSelect.classList.add('cal-month-title');
-    monthSelect.value = view_month;
-
-    monthSelect.onchange = function() {
-        const type = $('#calendar-item-type-edit').val();
-        const newMonth = parseInt(this.value);
-        const newYear = parseInt(document.getElementById('year-dropdown').value);
-
-        Cookies.set('calendar_month', newMonth);
-        Cookies.set('calendar_year', newYear);
-
-        loadCalendar(newMonth, newYear, view_day, type);
-    };
+    monthSelect.val(view_month);
 
     // Create the year dropdown
     const currentYear = new Date().getFullYear();
-    const yearSelect = document.createElement('select');
-    yearSelect.id = 'year-dropdown';
-    yearSelect.classList.add('dropdown-custom'); // Add custom class
+    const yearSelect = $('<select>', {
+        id: 'year-dropdown',
+        class: 'dropdown-custom cal-year-title',
+        change: function() {
+            const type = $('#calendar-item-type-edit').val();
+            const newYear = parseInt(this.value);
+            const newMonth = parseInt($('#month-dropdown').val());
+
+            Cookies.set('calendar_year', newYear);
+            Cookies.set('calendar_month', newMonth);
+
+            loadCalendar(newMonth, newYear, view_day, type);
+        }
+    });
+
     for (let year = currentYear - 4; year <= currentYear + 1; year++) {
-        const yearOption = document.createElement('option');
-        yearOption.value = year;
-        yearOption.textContent = year;
-        yearSelect.appendChild(yearOption);
+        const yearOption = $('<option>', {
+            value: year,
+            text: year
+        });
+        yearSelect.append(yearOption);
     }
-    yearSelect.classList.add('cal-year-title');
-    yearSelect.value = view_year;
-
-    yearSelect.onchange = function() {
-        const type = $('#calendar-item-type-edit').val();
-        const newYear = parseInt(this.value);
-        const newMonth = parseInt(document.getElementById('month-dropdown').value);
-
-        Cookies.set('calendar_year', newYear);
-        Cookies.set('calendar_month', newMonth);
-
-        loadCalendar(newMonth, newYear, view_day, type);
-    };
+    yearSelect.val(view_year);
 
     // Add the month and year dropdowns side by side
-    const dropdownContainer = document.createElement('div');
-    dropdownContainer.style.display = 'flex';
-    dropdownContainer.style.alignItems = 'center';
-    dropdownContainer.appendChild(monthSelect);
-    dropdownContainer.appendChild(yearSelect);
-
-    div.appendChild(dropdownContainer);
+    const dropdownContainer = $('<div>', {
+        css: {
+            display: 'flex',
+            alignItems: 'center'
+        }
+    });
+    dropdownContainer.append(monthSelect).append(yearSelect);
+    div.appendChild(dropdownContainer[0]);
     th2.appendChild(div);
 
     // Build third header column
     const th3 = document.createElement('th');
     th3.colSpan = 3;
     div = document.createElement('div');
-    div.classList.add('cal-switch');
-    div.id = 'next-month-switch';
-    a = document.createElement('a');
-    a.classList.add('cal-btn', 'cal-next-btn');
 
-    // Change onclick based on type
-    let next;
-    if (type === 'month') {
-        next = nextMonth(view_month, view_year, view_day);
-    }
-    else {
-        next = nextWeek(view_month, view_year, view_day);
-        next.push(type);
-    }
-    a.onclick = () => loadCalendar.apply(this, next);
-    a.innerHTML = '<i class="fas fa-angle-right"></i>';
-
-    // Append to header
-    div.appendChild(a);
-    th3.appendChild(div);
-
+    // Append all elements to fragment
     fragment.appendChild(th1);
     fragment.appendChild(th2);
     fragment.appendChild(th3);
+
     return fragment;
 }
 
