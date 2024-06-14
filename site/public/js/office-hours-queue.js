@@ -69,13 +69,18 @@ function displayStudentHistory() {
             // eslint-disable-next-line no-undef
             csrf_token: csrfToken,
         },
-        success: function(response) {
-            let help_counter = 0;
-            const data = JSON.parse(response).data;
+        success: function(response_str) {
+            const table_body = $('#search-student-tbody').empty();
+            const response = JSON.parse(response_str);
+            if(response.status === 'fail') {
+                displayErrorMessage(response.message);
+            }
+
+            const data = response.data;
             const student_data = JSON.parse(data);
             $('#student-queue-table caption').text(`${student_data[0].name} - (ID:${student_data[0].user_id}) - Contact: ${student_data[0].contact_info}`);
-            const table_body = $('#search-student-tbody').empty();
 
+            let help_counter = 0;
             student_data.forEach((student, i) => {
                 if (student.removal_type === 'helped') {
                     help_counter++;
