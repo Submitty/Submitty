@@ -516,7 +516,7 @@ function buildSwitchingHeader(view_year, view_month, view_day, type) {
         click: () => {
             const prev = (type === 'month') ? prevMonth(view_month, view_year, view_day) : prevWeek(view_month, view_year, view_day).concat(type);
             loadCalendar.apply(this, prev);
-        }
+        },
     });
     div.append(a);
     th1.append(div);
@@ -534,13 +534,13 @@ function buildSwitchingHeader(view_year, view_month, view_day, type) {
             const newMonth = parseInt(this.value);
             const newYear = parseInt($('#year-dropdown').val());
             loadCalendar(newMonth, newYear, view_day, type);
-        }
+        },
     });
 
     for (let itermonth = 1; itermonth <= 12; itermonth++) {
         monthSelect.append($('<option>', {
             value: itermonth,
-            text: monthNames[itermonth]
+            text: monthNames[itermonth],
         }));
     }
     monthSelect.val(view_month);
@@ -555,13 +555,13 @@ function buildSwitchingHeader(view_year, view_month, view_day, type) {
             const newYear = parseInt(this.value);
             const newMonth = parseInt($('#month-dropdown').val());
             loadCalendar(newMonth, newYear, view_day, type);
-        }
+        },
     });
 
     for (let year = currentYear - 4; year <= currentYear + 1; year++) {
         yearSelect.append($('<option>', {
             value: year,
-            text: year
+            text: year,
         }));
     }
     yearSelect.val(view_year);
@@ -570,8 +570,8 @@ function buildSwitchingHeader(view_year, view_month, view_day, type) {
     const dropdownContainer = $('<div>', {
         css: {
             display: 'flex',
-            alignItems: 'center'
-        }
+            alignItems: 'center',
+        },
     }).append(monthSelect).append(yearSelect);
 
     div.append(dropdownContainer);
@@ -586,7 +586,7 @@ function buildSwitchingHeader(view_year, view_month, view_day, type) {
         click: () => {
             const next = (type === 'month') ? nextMonth(view_month, view_year, view_day) : nextWeek(view_month, view_year, view_day).concat(type);
             loadCalendar.apply(this, next);
-        }
+        },
     });
     div.append(a);
     th3.append(div);
