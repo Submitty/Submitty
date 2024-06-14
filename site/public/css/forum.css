@@ -821,4 +821,5 @@
     font-style: italic;
     color: var(--important-post);
     font-weight: bold;
+    white-space: nowrap;
 }
