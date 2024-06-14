@@ -99,8 +99,11 @@ function displayStudentHistory() {
                 i++;
             });
 
-            table_body.append($("<tr class='times-helped-row'></tr>")
-                .append($("<td class='times-helped-cell' colspan='8'></td>")
+            table_body.append($('<tr></tr>')
+                .attr('id', 'times-helped-row')
+                .append($('<td></td>')
+                    .attr('id', 'times-helped-cell')
+                    .attr('colspan', '8')
                     .text(`${help_counter} times helped.`)));
         },
         error: function() {
