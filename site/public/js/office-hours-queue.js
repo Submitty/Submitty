@@ -87,8 +87,8 @@ function displayStudentHistory() {
                 const helper = student.help_started_by === null ? '-' : student.help_started_by;
                 const removal_method = student.removal_type === null ? '-' : student.removal_type;
 
-                table_body.append($('<tr></tr>')
-                    .append($('<td></td>').attr('data-testid', 'student-row').text(i+1))
+                table_body.append($('<tr></tr>').attr('data-testid', 'student-row-'+(i+1))
+                    .append($('<td></td>').text(i+1))
                     .append($('<td></td>').text(student.current_state))
                     .append($('<td></td>').text(student.queue_code))
                     .append($('<td></td>').text(time_start))
