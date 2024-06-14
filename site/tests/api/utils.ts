@@ -1,10 +1,10 @@
 import fetch, { HeadersInit } from 'node-fetch';
 
-const BASE_URL = process.env.BASE_URL || "http://localhost:1511";
+const BASE_URL = process.env.BASE_URL || 'http://localhost:1511';
 
 function getHeaders(auth: string | null = null) {
-    const headers: HeadersInit = {'Content-Type': 'application/json'};
-    if (auth !== null){
+    const headers: HeadersInit = { 'Content-Type': 'application/json' };
+    if (auth !== null) {
         headers['Authorization'] = auth;
     }
     return headers;
@@ -35,7 +35,6 @@ export async function postRequest<T = any>(url: string, body: Record<string, any
 * @returns {Object}
 */
 export async function getRequest<T = any>(url: string, auth: string | null = null): Promise<T> {
-
     const req = await fetch(`${BASE_URL}${url}`, {
         method: 'GET',
         headers: getHeaders(auth),
