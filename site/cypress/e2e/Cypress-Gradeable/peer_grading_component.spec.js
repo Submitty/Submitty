@@ -1,4 +1,13 @@
 describe('Peer Grading Component testing', () => {
+    after(() => {
+        cy.login();
+        ['grading_homework', 'grading_homework_pdf'].forEach((option) => {
+            cy.visit(['sample', 'gradeable', option, 'update?nav_tab=2']);
+            cy.get('[data-testid="peer-component-container"]').should('exist');
+            cy.get('[data-testid="peer-component-container"]').find('[data-testid="delete-gradable-component"]').click();
+        });
+        cy.logout();
+    });
     it('Add Peer grading component', () => {
         cy.login();
         ['grading_homework', 'grading_homework_pdf'].forEach((option) => {
