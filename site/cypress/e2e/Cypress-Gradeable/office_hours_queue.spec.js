@@ -197,10 +197,10 @@ describe('test office hours queue', () => {
             .contains('[data-testid=queue]', 'Homework Debugging').siblings()
             .contains('[data-testid=time-entered]', /\d{4}-\d\d-\d\d \d\d:\d\d:\d\d/).siblings()
             .contains('[data-testid=time-removed]', /\d{4}-\d\d-\d\d \d\d:\d\d:\d\d/).siblings()
-            .contains('[data-testid=helped-by]', 'grader').siblings()
-            .contains('[data-testid=removed-by]', 'grader').siblings()
+            .contains('[data-testid=helped-by]', 'ta').siblings()
+            .contains('[data-testid=removed-by]', 'instructor').siblings()
             .contains('[data-testid=removal-method]', 'emptied');
-        cy.get('[data-testid="student-row-2"]').contains('[data-testid=row-label]', '5')
+        cy.get('[data-testid="student-row-2"]').contains('[data-testid=row-label]', '2')
             .contains('[data-testid=row-label]', '2').siblings()
             .contains('[data-testid=current-state]', 'waiting').siblings()
             .contains('[data-testid=queue]', 'Cypress Office Hour Queue 2').siblings()
