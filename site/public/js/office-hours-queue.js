@@ -72,7 +72,7 @@ function displayStudentHistory() {
         success: function(response_str) {
             const table_body = $('#search-student-tbody').empty();
             const response = JSON.parse(response_str);
-            if(response.status === 'fail') {
+            if (response.status === 'fail') {
                 displayErrorMessage(response.message);
             }
 
