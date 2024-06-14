@@ -553,7 +553,7 @@ function buildSwitchingHeader(view_year, view_month, view_day, type) {
     for (let itermonth = 1; itermonth <= 12; itermonth++) {
         const monthOption = $('<option>', {
             value: itermonth,
-            text: monthNames[itermonth]
+            text: monthNames[itermonth],
         });
         monthSelect.append(monthOption);
     }
@@ -575,7 +575,7 @@ function buildSwitchingHeader(view_year, view_month, view_day, type) {
     for (let year = currentYear - 4; year <= currentYear + 1; year++) {
         const yearOption = $('<option>', {
             value: year,
-            text: year
+            text: year,
         });
         yearSelect.append(yearOption);
     }
@@ -585,8 +585,8 @@ function buildSwitchingHeader(view_year, view_month, view_day, type) {
     const dropdownContainer = $('<div>', {
         css: {
             display: 'flex',
-            alignItems: 'center'
-        }
+            alignItems: 'center',
+        },
     });
     dropdownContainer.append(monthSelect).append(yearSelect);
     div.appendChild(dropdownContainer[0]);
