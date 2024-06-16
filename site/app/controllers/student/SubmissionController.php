@@ -360,7 +360,7 @@ class SubmissionController extends AbstractController {
             return $this->uploadResult("Invalid gradeable id '{$gradeable_id}'", false);
         }
 
-        $num_pages = $_POST['num_pages'];
+        $num_pages = rawurlencode($_POST['num_pages']);
 
         // making sure files have been uploaded
         if (!isset($_FILES["files1"])) {
@@ -486,7 +486,7 @@ class SubmissionController extends AbstractController {
                     "is_qr"     => false
                 ];
 
-                $bulk_upload_job  = FileUtils::joinPaths("/var/local/submitty/daemon_job_queue/bulk_upload_", $uploaded_file["name"][$i], ".json");
+                $bulk_upload_job  = rawurlencode("/var/local/submitty/daemon_job_queue/bulk_upload_". $uploaded_file["name"][$i]. ".json");
 
                 // exec() and similar functions are disabled by security policy,
                 // so we are using a python script via CGI to validate whether file is divisible by num_page or not.
