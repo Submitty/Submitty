@@ -5,7 +5,7 @@
 - name: Install Submitty
   hosts: submitty
   remote_user: ubuntu
-  become: yes
+  become: true
   tasks:
     - name: Install Submitty
       ansible.builtin.include_role:
