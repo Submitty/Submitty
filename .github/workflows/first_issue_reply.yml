@@ -1,0 +1,27 @@
+name: First issue reply
+
+on:
+  issue_comment:
+    types: [created]
+
+jobs:
+  firstIssueReply:
+    # Only when it is an issue rather than a PR
+    if: ${{ !github.event.issue.pull_request && github.event.comment.author_association == 'NONE' }}
+    name: First issue reply
+    runs-on: ubuntu-latest
+
+    # For some reason, with only issue:write perms the action fails even though that's all we're doing
+    permissions: write-all
+
+    steps:
+      - name: Checkout main repository
+        uses: actions/checkout@v4
+
+      - name: First issue reply
+        run: |
+          gh issue comment "$ISSUE" --body "Hi @$USERNAME,"$'\n\n'"$(cat .github/FIRST_ISSUE_REPLY.md)"
+        env:
+          ISSUE: ${{ github.event.issue.number }}
+          USERNAME: ${{ github.event.comment.user.login }}
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}

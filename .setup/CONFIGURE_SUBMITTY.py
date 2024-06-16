@@ -481,6 +481,14 @@ WORKERS_JSON = os.path.join(CONFIG_INSTALL_DIR, 'autograding_workers.json')
 CONTAINERS_JSON = os.path.join(CONFIG_INSTALL_DIR, 'autograding_containers.json')
 SECRETS_PHP_JSON = os.path.join(CONFIG_INSTALL_DIR, 'secrets_submitty_php.json')
 
+# Rescue submitty config data
+submitty_config = OrderedDict()
+try:
+    with open(SUBMITTY_JSON, 'r') as json_file:
+        submitty_config = json.load(json_file, object_pairs_hook=OrderedDict)
+except FileNotFoundError:
+    pass
+
 #Rescue the autograding_workers and _containers files if they exist.
 rescued = list()
 tmp_folder = tempfile.mkdtemp()
@@ -609,7 +617,7 @@ if not args.worker:
 ##############################################################################
 # Write submitty json
 
-config = OrderedDict()
+config = submitty_config
 config['submitty_install_dir'] = SUBMITTY_INSTALL_DIR
 config['submitty_repository'] = SUBMITTY_REPOSITORY
 config['submitty_data_dir'] = SUBMITTY_DATA_DIR
