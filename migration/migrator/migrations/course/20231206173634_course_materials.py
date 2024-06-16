@@ -17,7 +17,7 @@ def up(config, database, semester, course):
     
     # Add columns to the course_materials table.
     database.execute("ALTER TABLE course_materials ADD COLUMN IF NOT EXISTS uploaded_by character varying(255) REFERENCES users(user_id) DEFAULT NULL;")
-    database.execute("ALTER TABLE course_materials ADD COLUMN IF NOT EXISTS upload_date TIMESTAMP WITH TIME ZONE DEFAULT NULL;")
+    database.execute("ALTER TABLE course_materials ADD COLUMN IF NOT EXISTS uploaded_date TIMESTAMP WITH TIME ZONE DEFAULT NULL;")
     database.execute("ALTER TABLE course_materials ADD COLUMN IF NOT EXISTS last_edit_by character varying(255) REFERENCES users(user_id) DEFAULT NULL;")
     database.execute("ALTER TABLE course_materials ADD COLUMN IF NOT EXISTS last_edit_date TIMESTAMP WITH TIME ZONE DEFAULT NULL;")
 
