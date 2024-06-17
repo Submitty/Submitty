@@ -645,7 +645,7 @@ $(document).ready(() => {
      * Configure visibility handler for final grade cutoff boxes
      * Visibility is controlled by whether the final_grade box is selected in the display area
      */
-    $('#display_collapse input').each(function() {
+    $('#display input').each(function() {
 
         if (this.value === 'final_grade') {
             // Set the initial visibility on load
