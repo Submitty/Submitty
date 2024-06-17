@@ -97,7 +97,7 @@ end
 def get_workers()
   worker_file = File.join(__dir__, '.vagrant', 'workers.json')
   if File.file?(worker_file)
-    return JSON.parse(File.read(worker_file), symbolize_names: true)
+    return JSON.parse(File.read(worker_file), symbolize_names: true)[:workers]
   else
     return Hash[]
   end

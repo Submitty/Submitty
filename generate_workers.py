@@ -18,8 +18,14 @@ def get_args(m_series=False):
         description='Script to generate configuration for '
         'development worker machines')
 
+    default_provider = 'virtualbox'
+    if m_series:
+        default_provider = 'qemu'
+
     parser.add_argument('-n', '--num', default=1, type=int,
                         help='Number of worker machines to configure')
+    parser.add_argument('--provider', default=default_provider, type=str,
+                        help='The VM provider (default on this machine is ' + default_provider + ')')
     parser.add_argument('--ip-range', default='192.168.56.0/24', type=ipaddress.ip_network,
                         help='IP address range for workers')
     parser.add_argument('--base-port', default=2240, type=int,
@@ -68,19 +74,27 @@ def main():
 
         data = OrderedDict()
         data['ip_addr'] = str(ip)
-        if m_series:
+        if args.provider == 'qemu':
             data['mac_addr'] = args.mac_prefix + ":%02x:%02x:%02x" % tuple(random.randint(0, 255) for v in range(3))
         else:
             data['ssh_port'] = args.base_port + i
         workers[f'worker-{i}'] = data
 
+
+    full_data = OrderedDict()
+    full_data['version'] = 2
+    full_data['provider'] = args.provider
+    if args.provider == 'qemu':
+        full_data['gateway'] = str(gateway_ip)
+    full_data['workers'] = workers
+
     os.makedirs(os.path.dirname(workerfile), exist_ok=True)
     with open(workerfile, 'w') as file:
-        json.dump(workers, file, indent=4)
+        json.dump(full_data, file, indent=4)
 
     print('Wrote new configuration to ' + workerfile)
 
-    if m_series:
+    if args.provider == 'qemu':
         print('Updating Bootstrap configuration...')
         body = ['%%\n']
         for name, data in workers.items():
