@@ -84,8 +84,6 @@ class Widget {
         const button = document.createElement('input');
         button.setAttribute('type', 'button');
         button.setAttribute('value', value);
-        button.dataset.testid = value.toLowerCase().split(' ').join('-');
-
         return button;
     }
 

@@ -19,7 +19,7 @@
     });
 </script>
 
-<div id="grading-panel-header" data-testid="grading-panel-header">
+<div id="grading-panel-header">
     <div class="panel-header-box">
         <span class="grade-panel" id="autograding_results_btn">
             <button title="Show/Hide Autograding Testcases (Press A)"
@@ -71,7 +71,7 @@
             {{ self.renderPanelPositionSelector('solution_ta_notes') }}
         </span>
         {% if isPeerPanel %}
-            <span class="grade-panel" id="peer_info_btn" data-testid="peer-info-btn">
+            <span class="grade-panel" id="peer_info_btn" >
                 <button title="Show/Hide Peer Information (Press P)"
                         class="invisible-btn key_to_click"
                         tabindex="0"
@@ -82,7 +82,7 @@
             </span>
         {% endif %}
         {% if isDiscussionPanel %}
-            <span class="grade-panel" id="discussion_browser_btn" data-testid="discussion-browser-btn">
+            <span class="grade-panel" id="discussion_browser_btn" >
                 <button title="Show/Hide Discussion Posts"
                         class="invisible-btn key_to_click"
                         tabindex="0"
