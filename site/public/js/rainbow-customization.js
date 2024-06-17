@@ -414,6 +414,22 @@ function getBenchmarkPercent() {
 }
 
 function getFinalCutoffPercent() {
+    // Verify that final_grade is used, otherwise set values to default (which will be unused)
+    if (!$("input[value='final_grade']:checked").val()) {
+        return {
+            'A': 93.0,
+            'A-': 90.0,
+            'B+': 87.0,
+            'B': 83.0,
+            'B-': 80.0,
+            'C+': 77.0,
+            'C': 73.0,
+            'C-': 70.0,
+            'D+': 67.0,
+            'D': 60.0,
+        };
+    }
+
     // Collect benchmark percents
     const final_cutoff = {};
     const letter_grades = ['A', 'A-', 'B+', 'B', 'B-', 'C+', 'C', 'C-', 'D+', 'D'];
