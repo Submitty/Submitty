@@ -17,6 +17,72 @@ th {
     margin-bottom: 0.5rem;
 }
 
+/*
+Start
+ */
+
+.span-switch {
+    font-family: Arial, sans-serif;
+}
+
+label input[role="switch"] {
+    opacity: 0;
+}
+
+label input[role="switch"] ~ .state {
+    display: inline-block;
+    user-select: none;
+}
+
+label input[role="switch"] ~ .state > .container {
+    position: relative;
+    top: 2px;
+    display: inline-block;
+    border: 2px solid black;
+    width: 40px;
+    height: 20px;
+    border-radius: 11px;
+    background: white;
+    opacity: 1;
+}
+
+label input[role="switch"] ~ .state > .container > .position {
+    position: absolute;
+    top: 1px;
+    left: 2px;
+    display: inline-block;
+    border: 2px solid black;
+    border-radius: 9px;
+    width: 14px;
+    height: 14px;
+    background: black;
+    opacity: 0.6;
+}
+
+label input[role="switch"]:not(:checked) ~ .state span.on {
+    display: none;
+}
+
+label input[role="switch"]:checked ~ .state > span.off {
+    display: none;
+}
+
+label input[role="switch"]:checked ~ .state > .container > .position {
+    left: 20px;
+    border-color: darkgreen;
+    background: darkgreen;
+    opacity: 1;
+}
+
+label input[role="switch"]:checked ~ .state > .container {
+    background: greenyellow;
+    opacity: 1;
+}
+
+/*
+End
+ */
+
 .enable-audible,
 .disable-audible {
     display: none;

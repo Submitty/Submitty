@@ -16,18 +16,37 @@
   <button id="toggle_queue_message" class="btn btn-primary filter_btn" type="button" onclick="$('#queue-socket-message').show()">
     Send Message
   </button>
-  <button id="notification_btn" class="btn btn-default filter_btn" type="button" onclick="enableNotifications()">
-    Enable Notifications
-  </button>
+  <fieldset>
+    <label class="btn btn-primary filter_btn">
+      <span class="span-switch">
+        Visible Notifications
+      </span>
+      <input id="notifications_switch_visible" type="checkbox" role="switch">
+      <span class="state">
+        <span class="container">
+          <span class="position"></span>
+        </span>
+        <span class="on" aria-hidden="true">On</span>
+        <span class="off" aria-hidden="true">Off</span>
+      </span>
+    </label>
+    <label class="btn btn-primary filter_btn">
+      <span class="span-switch">
+        Audible Notifications
+      </span>
+      <input id="notifications_switch_audible" type="checkbox" role="switch">
+      <span class="state">
+        <span class="container">
+          <span class="position"></span>
+        </span>
+        <span class="on" aria-hidden="true">On</span>
+        <span class="off" aria-hidden="true">Off</span>
+      </span>
+    </label>
+  </fieldset>
   <a id="view-stats" class="btn btn-default filter_btn" href="{{base_url}}/stats">
     View Queue Stats
   </a>
-  <button class="btn btn-default filter_btn enable-audible" title="Enable audible alert when queue changes" onclick="toggleAudibleAlert()">
-    <i class="fas fa-bell" ></i>
-  </button>
-  <button class="btn btn-default filter_btn disable-audible" title="Disable audible alert when queue changes" onclick="toggleAudibleAlert()">
-    <i class="fas fa-bell-slash"></i>
-  </button>
 </div>
 
 <style>
