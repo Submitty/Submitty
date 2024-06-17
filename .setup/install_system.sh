@@ -118,6 +118,8 @@ if [ ${DEV_VM} == 1 ] && [ ${WORKER} == 0 ]; then
 
     sed -i -e "s/PermitRootLogin prohibit-password/PermitRootLogin yes/g" /etc/ssh/sshd_config
 
+    chmod 755 -R /usr/local/submitty/GIT_CHECKOUT
+
     # Set up some convinence stuff for the root user on ssh
 
     INSTALL_HELP=$(cat <<'EOF'
@@ -127,6 +129,7 @@ The vagrant box comes with some handy aliases:
     submitty_install_site        - runs .setup/INSTALL_SUBMITTY_HELPER_SITE.sh
     submitty_install_bin         - runs .setup/INSTALL_SUBMITTY_HELPER_BIN.sh
     submitty_code_watcher        - runs .setup/bin/code_watcher.py
+    submitty_test                - runs .setup/SUBMITTY_TEST.sh
     submitty_restart_autograding - restart systemctl for autograding
     submitty_restart_services    - restarts all Submitty related systemctl
     lichen_install               - runs Lichen/install_lichen.sh
@@ -348,7 +351,8 @@ echo -e "\n# set by the .setup/install_system.sh script\numask 027" >> /home/${D
 # Add RainbowGrades repo as safe directory for GIT
 gitconfig_path="/home/${DAEMON_USER}/.gitconfig"
 gitconfig_content="[safe]
-    directory = ${RAINBOWGRADES_REPOSITORY}"
+    directory = ${RAINBOWGRADES_REPOSITORY}
+    directory = *"
 echo "$gitconfig_content" > "$gitconfig_path"
 sudo chown "${DAEMON_USER}:${DAEMON_USER}" "$gitconfig_path"
 
