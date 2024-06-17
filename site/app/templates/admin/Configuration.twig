@@ -54,7 +54,7 @@
         <h2>Office Hours Queue</h2>
         <hr>
         <div id="queue-enabled-wrapper" class="config-row checkbox-row">
-            <input type="checkbox" name="queue_enabled" id="queue-enabled" value="true" {{ fields['queue_enabled'] ? 'checked': '' }} />
+            <input type="checkbox" name="queue_enabled" id="queue-enabled" value="true" {{ fields['queue_enabled'] ? 'checked': '' }} data-testid="queue-enabled"/>
             <label for="queue-enabled">
                 <span class="option-title">Enable Office Hours Queue</span>
                 <br>
