@@ -1863,6 +1863,8 @@ function previewMarkdown(mode) {
         markdown_preview.show();
         markdown_preview_load_spinner.show();
         markdown_toolbar.hide();
+        $('.markdown-write-mode').removeClass('active');
+        $('.markdown-preview-mode').addClass('active');
         $.ajax({
             url: buildUrl(['markdown']),
             type: 'POST',
@@ -1887,6 +1889,8 @@ function previewMarkdown(mode) {
         markdown_toolbar.show();
         markdown_header.attr('data-mode', 'edit');
         accessibility_message.show();
+        $('.markdown-write-mode').addClass('active');
+        $('.markdown-preview-mode').removeClass('active');
     }
 }
 
