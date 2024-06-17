@@ -26,7 +26,7 @@ describe('Test cases revolving around authentication tokens', () => {
         });
         // Clear the cookie so we can access the vcs_login route
         cy.clearCookies();
-        cy.get('[data-testid="new-vcs-token"]').invoke('text').then(text => {
+        cy.get('[data-testid="new-vcs-token"]').invoke('text').then((text) => {
             const token = text.trim().split(' ')[1];
             // Verify the token works as a password
             cy.request({
