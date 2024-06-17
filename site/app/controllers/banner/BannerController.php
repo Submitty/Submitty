@@ -21,22 +21,18 @@ use app\libraries\routers\AccessControl;
 class BannerController extends AbstractController {
     /**
      *
-     * @Route("/community_events")
      *
      * @return WebResponse
      * @see GlobalController::prep_user_sidebar
      * @see BannerView::showEventBanners
      */
+    #[Route("/community_events")]
     public function viewCommunityEvents(): WebResponse {
         $communityEventBanners = $this->core->getSubmittyEntityManager()->getRepository(BannerImage::class)->findAll();
         return new WebResponse(BannerView::class, 'showEventBanners', $communityEventBanners);
     }
 
-
-
-    /**
-     * @Route("/community_event/upload", methods={"POST"})
-     */
+    #[Route("/community_event/upload", methods: ["POST"])]
     public function ajaxUploadEventFiles(): JsonResponse {
         $upload_path = FileUtils::joinPaths($this->core->getConfig()->getSubmittyPath(), "community_events");
 
@@ -165,8 +161,8 @@ class BannerController extends AbstractController {
     }
 
     /**
-     * @Route("/community_events/delete", methods={"POST"})
      */
+    #[Route("/community_events/delete", methods: ["POST"])]
     public function ajaxDeleteEventFiles(): JsonResponse {
         $entity_manager = $this->core->getSubmittyEntityManager();
         $event_repository = $entity_manager->getRepository(BannerImage::class);
