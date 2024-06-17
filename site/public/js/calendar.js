@@ -18,7 +18,7 @@ const DateTime = luxon.DateTime;
  * @returns {void} : loads the updated calendar
  */
 function changeView(view_type, view_year, view_month, view_day) {
-    Cookies.set('view', view_type.value);
+    Cookies.set('view', view_type);
 
     let cookie_year = parseInt(Cookies.get('calendar_year'));
     let cookie_month = parseInt(Cookies.get('calendar_month'));
@@ -33,7 +33,7 @@ function changeView(view_type, view_year, view_month, view_day) {
         cookie_day = view_day;
     }
     // Load the calendar to the correct day
-    loadCalendar(cookie_month, cookie_year, cookie_day, view_type.value);
+    loadCalendar(cookie_month, cookie_year, cookie_day, view_type);
 }
 
 /**
