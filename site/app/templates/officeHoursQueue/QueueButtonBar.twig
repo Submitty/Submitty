@@ -17,32 +17,20 @@
     Send Message
   </button>
   <fieldset>
-    <label class="btn btn-primary filter_btn">
-      <span class="span-switch">
-        Visible Notifications
-      </span>
-      <input id="notifications_switch_visible" type="checkbox" role="switch">
-      <span class="state">
-        <span class="container">
-          <span class="position"></span>
-        </span>
-        <span class="on" aria-hidden="true">On</span>
-        <span class="off" aria-hidden="true">Off</span>
-      </span>
-    </label>
-    <label class="btn btn-primary filter_btn">
-      <span class="span-switch">
-        Audible Notifications
-      </span>
-      <input id="notifications_switch_audible" type="checkbox" role="switch">
-      <span class="state">
-        <span class="container">
-          <span class="position"></span>
-        </span>
-        <span class="on" aria-hidden="true">On</span>
-        <span class="off" aria-hidden="true">Off</span>
-      </span>
-    </label>
+    <div class="switch-container">
+      <span class="switch-label">Push Notifications</span>
+      <label class="switch">
+        <input type="checkbox" id="notification_switch_visible" onclick="enableNotifications()">
+        <span class="slider"></span>
+      </label>
+    </div>
+    <div class="switch-container">
+      <span class="switch-label">Notification Sounds</span>
+      <label class="switch">
+        <input type="checkbox" id="notification_switch_audible" onclick="toggleAudibleAlert()">
+        <span class="slider"></span>
+      </label>
+    </div>
   </fieldset>
   <a id="view-stats" class="btn btn-default filter_btn" href="{{base_url}}/stats">
     View Queue Stats
