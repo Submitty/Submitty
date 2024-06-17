@@ -97,9 +97,7 @@ module.exports = tseslint.config(
     {
         name: 'Options for cypress files',
         files: ['cypress/**/*.{js,ts}'],
-        extends: [cypress.configs.globals],
-        // todo: enable cypress lint rules at some point
-        // extends: [cypress.configs.recommended],
+        extends: [cypress.configs.recommended],
         languageOptions: {
             globals: globals.nodeBuiltin,
         },
@@ -107,8 +105,7 @@ module.exports = tseslint.config(
     {
         name: 'Options for jest files',
         files: ['tests/**/*.{js,ts}'],
-        // todo: enable jest lint rules at some point
-        // extends: [jest.configs['flat/recommended']],
+        extends: [jest.configs['flat/recommended']],
         languageOptions: {
             globals: { ...globals.nodeBuiltin, ...jest.environments.globals.globals },
         },
