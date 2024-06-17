@@ -92,11 +92,6 @@ input:checked + .slider::after {
 End of slider switch
  */
 
-.enable-audible,
-.disable-audible {
-    display: none;
-}
-
 /* stylelint-disable selector-class-pattern */
 .current_queue_row,
 .current_queue_row a > i.fas {
