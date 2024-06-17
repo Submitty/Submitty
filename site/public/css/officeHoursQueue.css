@@ -36,8 +36,8 @@ Start of slider switch
 .switch {
     position: relative;
     display: inline-block;
-    width: 60px;
-    height: 34px;
+    width: 3em;
+    height: 1.7em;
 }
 
 .switch input {
@@ -58,10 +58,10 @@ Start of slider switch
 .slider::before {
     position: absolute;
     content: "";
-    height: 26px;
-    width: 26px;
-    left: 4px;
-    bottom: 4px;
+    height: 1.3em;
+    width: 1.3em;
+    left: 0.2em;
+    bottom: 0.2em;
     background-color: white;
     transition: .4s;
     border-radius: 50%;
@@ -71,7 +71,7 @@ Start of slider switch
     position: absolute;
     color: white;
     top: 50%;
-    left: 10px;
+    left: 0.5em;
     transform: translateY(-50%);
     transition: .4s;
 }
@@ -81,11 +81,11 @@ input:checked + .slider {
 }
 
 input:checked + .slider::before {
-    transform: translateX(26px);
+    transform: translateX(1.3em);
 }
 
 input:checked + .slider::after {
-    left: 35px
+    left: 1.75em;
 }
 
 /*
