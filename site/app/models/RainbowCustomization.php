@@ -416,7 +416,7 @@ class RainbowCustomization extends AbstractModel {
             }
         }
 
-        // Otherwise return a default benchmark percent object
+        // Otherwise return a default final cutoff percent object
         return (object) [
                 'A' => 93.0,
                 'A-' => 90.0,

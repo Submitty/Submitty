@@ -262,13 +262,13 @@ class RainbowCustomizationJSON extends AbstractModel {
     /**
      * Add a final cutoff
      *
-     * @param string $benchmark The benchmark - this is the key for this json field
+     * @param string $cutoff The cutoff - this is the key for this json field
      * @param float $percent The percent - this is the value for this json field
      */
-    public function addFinalCutoff(string $benchmark, float $percent): void {
+    public function addFinalCutoff(string $cutoff, float $percent): void {
         // To satisfy php-lint, add the pair to an array, then cast the array back to an object
         $final_cutoff_array = (array) $this->final_cutoff;
-        $final_cutoff_array[$benchmark] = $percent;
+        $final_cutoff_array[$cutoff] = $percent;
         $this->final_cutoff = (object) $final_cutoff_array;
     }
 

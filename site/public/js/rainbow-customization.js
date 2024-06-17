@@ -413,18 +413,18 @@ function getBenchmarkPercent() {
     return benchmark_percent;
 }
 
-function getFinalBenchmarkPercent() {
+function getFinalCutoffPercent() {
     // Collect benchmark percents
     const final_cutoff = {};
-    const final_benchmarks = ['A', 'A-', 'B+', 'B', 'B-', 'C+', 'C', 'C-', 'D+', 'D'];
+    const letter_grades = ['A', 'A-', 'B+', 'B', 'B-', 'C+', 'C', 'C-', 'D+', 'D'];
 
     $('.final_cutoff_input').each(function() {
 
         // Get data
-        const benchmark = this.getAttribute('data-benchmark').toString();
+        const letter_grade = this.getAttribute('data-benchmark').toString();
         const percent = this.value;
 
-        if (final_benchmarks.includes(benchmark)) {
+        if (letter_grades.includes(letter_grade)) {
 
             // Verify percent is not empty
             if (percent === '') {
@@ -437,7 +437,7 @@ function getFinalBenchmarkPercent() {
             }
 
             // Add to sections
-            final_cutoff[benchmark] = percent;
+            final_cutoff[letter_grade] = percent;
 
         }
     });
@@ -453,7 +453,7 @@ function buildJSON() {
         'display': getDisplay(),
         'display_benchmark': getDisplayBenchmark(),
         'benchmark_percent': getBenchmarkPercent(),
-        'final_cutoff': getFinalBenchmarkPercent(),
+        'final_cutoff': getFinalCutoffPercent(),
         'section' : getSection(),
         'gradeables' : getGradeableBuckets(),
         'messages' : getMessages(),
