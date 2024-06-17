@@ -5,6 +5,7 @@ describe('Peer Grading Component testing', () => {
             cy.visit(['sample', 'gradeable', option, 'update?nav_tab=2']);
             cy.get('[data-testid="peer-component-container"]').should('exist');
             cy.get('[data-testid="peer-component-container"]').find('[data-testid="delete-gradable-component"]').click();
+            cy.get('[data-testid="peer-component-container"]').should('not.exist');
         });
         cy.logout();
     });
@@ -43,7 +44,7 @@ describe('Peer Grading Component testing', () => {
             // testing select csv file
             if (option==='grading_homework_pdf') {
                 cy.get('[data-testid="upload-peer-graders-list"]').selectFile('cypress/fixtures/peer_assign_file.csv');
-                cy.get('.table-wrapper').contains('aphacker');
+                cy.get('[data-testid="table-wrapper"]').should('contain', 'aphacker');
             }
         });
     });
@@ -54,8 +55,8 @@ describe('Peer Grading Component testing', () => {
             cy.get('[data-testid="popup-window"]').should('exist');
             cy.get('[data-testid="agree-popup-btn"]').click();
             cy.get('[data-testid="grade-button"]').eq(0).click();
-            cy.get('#grading-panel-header').type('{G}');
-            cy.get('[data-testid="grading-rubric-label"]').should('exist', 'Grading Rubric');
+            cy.get('body').type('{G}');
+            cy.get('[data-testid="grading-rubric-label"]').should('contain', 'Grading Rubric');
         });
     });
 });
