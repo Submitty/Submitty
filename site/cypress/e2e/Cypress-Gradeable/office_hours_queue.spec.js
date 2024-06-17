@@ -136,54 +136,60 @@ describe('test office hours queue', () => {
         // Confirm student queue history
         cy.get('[data-testid="search-student-queue-input"]').first().type('student');
         cy.get('[data-testid="search-student-queue-btn"]').first().click();
-        cy.get('[data-testid="student-row-1"]')
-            .contains('[data-testid="row-label"]', '1').siblings()
-            .contains('[data-testid="current-state"]', 'done').siblings()
-            .contains('[data-testid="queue"]', 'Lab Help').siblings()
-            // This checks if time entered and time removed are in fact times.
-            // We do not check for a specific time because this may change.
-            .contains('[data-testid="time-entered"]', /\d{4}-\d\d-\d\d \d\d:\d\d:\d\d/).siblings()
-            .contains('[data-testid="time-removed"]', /\d{4}-\d\d-\d\d \d\d:\d\d:\d\d/).siblings()
-            .contains('[data-testid="helped-by"]', 'grader').siblings()
-            .contains('[data-testid="removed-by"]', 'grader').siblings()
-            .contains('[data-testid="removal-method"]', 'helped');
-        cy.get('[data-testid="student-row-2"]').contains('[data-testid="row-label"]', '2')
-            .contains('[data-testid="row-label"]', '2').siblings()
-            .contains('[data-testid="current-state"]', 'done').siblings()
-            .contains('[data-testid="queue"]', 'Lab Help').siblings()
-            .contains('[data-testid="time-entered"]', /\d{4}-\d\d-\d\d \d\d:\d\d:\d\d/).siblings()
-            .contains('[data-testid="time-removed"]', /\d{4}-\d\d-\d\d \d\d:\d\d:\d\d/).siblings()
-            .contains('[data-testid="helped-by"]', '-').siblings()
-            .contains('[data-testid="removed-by"]', 'instructor').siblings()
-            .contains('[data-testid="removal-method"]', 'emptied');
-        cy.get('[data-testid="student-row-3"]').contains('[data-testid="row-label"]', '3')
-            .contains('[data-testid="row-label"]', '3').siblings()
-            .contains('[data-testid="current-state"]', 'done').siblings()
-            .contains('[data-testid="queue"]', 'Cypress Office Hour Queue 1').siblings()
-            .contains('[data-testid="time-entered"]', /\d{4}-\d\d-\d\d \d\d:\d\d:\d\d/).siblings()
-            .contains('[data-testid="time-removed"]', /\d{4}-\d\d-\d\d \d\d:\d\d:\d\d/).siblings()
-            .contains('[data-testid="helped-by"]', '-').siblings()
-            .contains('[data-testid="removed-by"]', 'student').siblings()
-            .contains('[data-testid="removal-method"]', 'self');
-        cy.get('[data-testid="student-row-4"]').contains('[data-testid="row-label"]', '4')
-            .contains('[data-testid="row-label"]', '4').siblings()
-            .contains('[data-testid="current-state"]', 'done').siblings()
-            .contains('[data-testid="queue"]', 'Cypress Office Hour Queue 1').siblings()
-            .contains('[data-testid="time-entered"]', /\d{4}-\d\d-\d\d \d\d:\d\d:\d\d/).siblings()
-            .contains('[data-testid="time-removed"]', /\d{4}-\d\d-\d\d \d\d:\d\d:\d\d/).siblings()
-            .contains('[data-testid="helped-by"]', 'instructor').siblings()
-            .contains('[data-testid="removed-by"]', 'student').siblings()
-            .contains('[data-testid="removal-method"]', 'self_helped');
-        cy.get('[data-testid="student-row-5"]').contains('[data-testid="row-label"]', '5')
-            .contains('[data-testid="row-label"]', '5').siblings()
-            .contains('[data-testid="current-state"]', 'waiting').siblings()
-            .contains('[data-testid="queue"]', 'Cypress Office Hour Queue 2').siblings()
-            .contains('[data-testid="time-entered"]', /\d{4}-\d\d-\d\d \d\d:\d\d:\d\d/).siblings()
-            .contains('[data-testid="time-removed"]', '-').siblings()
-            .contains('[data-testid="helped-by"]', '-').siblings()
-            .contains('[data-testid="removed-by"]', '-').siblings()
-            .contains('[data-testid="removal-method"]', '-');
-        cy.get('#times-helped-cell').should('contain', '1 times helped.');
+
+        cy.get('[data-testid="student-row-1"]').first().as('row-1');
+        cy.get('@row-1').find('[data-testid="row-label"]').should('contain', '1');
+        cy.get('@row-1').find('[data-testid="current-state"]').should('contain', 'done');
+        cy.get('@row-1').find('[data-testid="queue"]').should('contain', 'Lab Help');
+        // This checks if time entered and time removed are in fact times.
+        // We do not check for a specific time because this may change.
+        cy.get('@row-1').find('[data-testid="time-entered"]').should('contain', /\d{4}-\d\d-\d\d \d\d:\d\d:\d\d/);
+        cy.get('@row-1').find('[data-testid="time-removed"]').should('contain', /\d{4}-\d\d-\d\d \d\d:\d\d:\d\d/);
+        cy.get('@row-1').find('[data-testid="helped-by"]').should('contain', 'grader');
+        cy.get('@row-1').find('[data-testid="removed-by"]').should('contain', 'grader');
+        cy.get('@row-1').find('[data-testid="removal-method"]').should('contain', 'helped');
+
+        cy.get('[data-testid="student-row-2"]').first().as('row-2');
+        cy.get('@row-2').find('[data-testid="row-label"]').should('contain', '2');
+        cy.get('@row-2').find('[data-testid="current-state"]').should('contain', 'done');
+        cy.get('@row-2').find('[data-testid="queue"]').should('contain', 'Lab Help');
+        cy.get('@row-2').find('[data-testid="time-entered"]').should('contain', /\d{4}-\d\d-\d\d \d\d:\d\d:\d\d/);
+        cy.get('@row-2').find('[data-testid="time-removed"]').should('contain', /\d{4}-\d\d-\d\d \d\d:\d\d:\d\d/);
+        cy.get('@row-2').find('[data-testid="helped-by"]').should('contain', '-');
+        cy.get('@row-2').find('[data-testid="removed-by"]').should('contain', 'instructor');
+        cy.get('@row-2').find('[data-testid="removal-method"]').should('contain', 'emptied');
+
+        cy.get('[data-testid="student-row-3"]').first().as('row-3');
+        cy.get('@row-3').find('[data-testid="row-label"]').should('contain', '3');
+        cy.get('@row-3').find('[data-testid="current-state"]').should('contain', 'done');
+        cy.get('@row-3').find('[data-testid="queue"]').should('contain', 'Cypress Office Hour Queue 1');
+        cy.get('@row-3').find('[data-testid="time-entered"]').should('contain', /\d{4}-\d\d-\d\d \d\d:\d\d:\d\d/);
+        cy.get('@row-3').find('[data-testid="time-removed"]').should('contain', /\d{4}-\d\d-\d\d \d\d:\d\d:\d\d/);
+        cy.get('@row-3').find('[data-testid="helped-by"]').should('contain', '-');
+        cy.get('@row-3').find('[data-testid="removed-by"]').should('contain', 'student');
+        cy.get('@row-3').find('[data-testid="removal-method"]').should('contain', 'self');
+
+        cy.get('[data-testid="student-row-4"]').first().as('row-4');
+        cy.get('@row-4').find('[data-testid="row-label"]').should('contain', '4');
+        cy.get('@row-4').find('[data-testid="current-state"]').should('contain', 'done');
+        cy.get('@row-4').find('[data-testid="queue"]').should('contain', 'Cypress Office Hour Queue 1');
+        cy.get('@row-4').find('[data-testid="time-entered"]').should('contain', /\d{4}-\d\d-\d\d \d\d:\d\d:\d\d/);
+        cy.get('@row-4').find('[data-testid="time-removed"]').should('contain', /\d{4}-\d\d-\d\d \d\d:\d\d:\d\d/);
+        cy.get('@row-4').find('[data-testid="helped-by"]').should('contain', 'instructor');
+        cy.get('@row-4').find('[data-testid="removed-by"]').should('contain', 'student');
+        cy.get('@row-4').find('[data-testid="removal-method"]').should('contain', 'self_helped');
+
+        cy.get('[data-testid="student-row-5"]').first().as('row-5');
+        cy.get('@row-5').find('[data-testid="row-label"]').should('contain', '5');
+        cy.get('@row-5').find('[data-testid="current-state"]').should('contain', 'waiting');
+        cy.get('@row-5').find('[data-testid="queue"]').should('contain', 'Cypress Office Hour Queue 2');
+        cy.get('@row-5').find('[data-testid="time-entered"]').should('contain', /\d{4}-\d\d-\d\d \d\d:\d\d:\d\d/);
+        cy.get('@row-5').find('[data-testid="time-removed"]').should('contain', '-');
+        cy.get('@row-5').find('[data-testid="helped-by"]').should('contain', '-');
+        cy.get('@row-5').find('[data-testid="removed-by"]').should('contain', '-');
+        cy.get('@row-5').find('[data-testid="removal-method"]').should('contain', '-');
+
+        cy.get('#times-helped-cell').should('contain').should('contain', '1 times helped.');
 
         // Confirm aphacker queue history
         // Use search autocomplete feature
@@ -191,24 +197,27 @@ describe('test office hours queue', () => {
         cy.get('#ui-id-1').first().click();
         cy.get('[data-testid="search-student-queue-input"]').first().should('have.value', 'aphacker');
         cy.get('[data-testid="search-student-queue-btn"]').first().click();
-        cy.get('[data-testid="student-row-1"]')
-            .contains('[data-testid="row-label"]', '1').siblings()
-            .contains('[data-testid="current-state"]', 'done').siblings()
-            .contains('[data-testid="queue"]', 'Homework Debugging').siblings()
-            .contains('[data-testid="time-entered"]', /\d{4}-\d\d-\d\d \d\d:\d\d:\d\d/).siblings()
-            .contains('[data-testid="time-removed"]', /\d{4}-\d\d-\d\d \d\d:\d\d:\d\d/).siblings()
-            .contains('[data-testid="helped-by"]', 'ta').siblings()
-            .contains('[data-testid="removed-by"]', 'instructor').siblings()
-            .contains('[data-testid="removal-method"]', 'emptied');
-        cy.get('[data-testid="student-row-2"]').contains('[data-testid="row-label"]', '2')
-            .contains('[data-testid="row-label"]', '2').siblings()
-            .contains('[data-testid="current-state"]', 'waiting').siblings()
-            .contains('[data-testid="queue"]', 'Cypress Office Hour Queue 2').siblings()
-            .contains('[data-testid="time-entered"]', /\d{4}-\d\d-\d\d \d\d:\d\d:\d\d/).siblings()
-            .contains('[data-testid="time-removed"]', '-').siblings()
-            .contains('[data-testid="helped-by"]', '-').siblings()
-            .contains('[data-testid="removed-by"]', '-').siblings()
-            .contains('[data-testid="removal-method"]', '-');
+
+        cy.get('[data-testid="student-row-1"]').first().as('row-1');
+        cy.get('@row-1').find('[data-testid="row-label"]').should('contain', '1');
+        cy.get('@row-1').find('[data-testid="current-state"]').should('contain', 'done');
+        cy.get('@row-1').find('[data-testid="queue"]').should('contain', 'Homework Debugging');
+        cy.get('@row-1').find('[data-testid="time-entered"]').should('contain', /\d{4}-\d\d-\d\d \d\d:\d\d:\d\d/);
+        cy.get('@row-1').find('[data-testid="time-removed"]').should('contain', /\d{4}-\d\d-\d\d \d\d:\d\d:\d\d/);
+        cy.get('@row-1').find('[data-testid="helped-by"]').should('contain', 'ta');
+        cy.get('@row-1').find('[data-testid="removed-by"]').should('contain', 'instructor');
+        cy.get('@row-1').find('[data-testid="removal-method"]').should('contain', 'emptied');
+
+        cy.get('[data-testid="student-row-2"]').first().as('row-2');
+        cy.get('@row-2').find('[data-testid="row-label"]').should('contain', '2');
+        cy.get('@row-2').find('[data-testid="current-state"]').should('contain', 'waiting');
+        cy.get('@row-2').find('[data-testid="queue"]').should('contain', 'Cypress Office Hour Queue 2');
+        cy.get('@row-2').find('[data-testid="time-entered"]').should('contain', /\d{4}-\d\d-\d\d \d\d:\d\d:\d\d/);
+        cy.get('@row-2').find('[data-testid="time-removed"]').should('contain', '-');
+        cy.get('@row-2').find('[data-testid="helped-by"]').should('contain', '-');
+        cy.get('@row-2').find('[data-testid="removed-by"]').should('contain', '-');
+        cy.get('@row-2').find('[data-testid="removal-method"]').should('contain', '-');
+
         cy.get('#times-helped-cell').should('contain', '0 times helped.');
 
         // Disable and delete all queue
