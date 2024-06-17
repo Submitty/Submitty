@@ -631,7 +631,7 @@ class ReportController extends AbstractController {
                 'display_benchmarks' => $customization->getDisplayBenchmarks(),
                 'benchmark_percents' => (array) $customization->getBenchmarkPercent(),
                 'benchmarks_with_input_fields' => ['lowest_a-', 'lowest_b-', 'lowest_c-', 'lowest_d'],
-                'final_benchmarks_with_input_fields' => ["A", "A-", "B+", "B", "B-", "C+", "C", "C-", "D+", "D"],
+                'final_cutoff_input_fields' => ["A", "A-", "B+", "B", "B-", "C+", "C", "C-", "D+", "D"],
                 'final_cutoff' => (array) $customization->getFinalCutoff(),
                 'display' => $customization->getDisplay(),
                 'display_description' => $customization->getDisplayDescription(),
