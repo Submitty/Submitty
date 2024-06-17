@@ -45,7 +45,6 @@ describe('Docker UI Test', () => {
         cy.get('#update-machines')
             .should('have.text', ' Update dockers and machines')
             .click();
-        cy.wait(100);
         // Should prompt a success message
         cy.get('.alert-success')
             .invoke('text')
@@ -90,7 +89,8 @@ describe('Docker UI Test', () => {
     it('Should not add invalid image', () => {
         // Check invalid format
         cy.get('#add-field')
-            .clear()
+            .clear();
+        cy.get('#add-field')
             .type('submitty/invalid-image');
         cy.get('#docker-warning')
             .should('be.visible');
@@ -99,13 +99,13 @@ describe('Docker UI Test', () => {
 
         // Check valid format but invalid image
         cy.get('#add-field')
-            .clear()
+            .clear();
+        cy.get('#add-field')
             .type('submitty/invalid-image:0.0');
         cy.get('#send-button')
             .should('not.be.disabled')
             .click();
 
-        cy.wait(100);
         cy.get('.alert-error')
             .should('have.text', 'submitty/invalid-image not found on DockerHub');
     });
@@ -118,13 +118,13 @@ describe('Docker UI Test', () => {
         cy.get('#capability-form')
             .select('cpp');
         cy.get('#add-field')
-            .clear()
+            .clear();
+        cy.get('#add-field')
             .type('submitty/autograding-default:latest');
         cy.get('#send-button')
             .should('not.be.disabled')
             .click();
 
-        cy.wait(100);
         cy.get('.alert-success')
             .should('have.text', 'submitty/autograding-default:latest'
             + ' found on DockerHub and queued to be added!');
@@ -144,13 +144,13 @@ describe('Docker UI Test', () => {
 
         // Try to add it again, should fail
         cy.get('#add-field')
-            .clear()
+            .clear();
+        cy.get('#add-field')
             .type('submitty/autograding-default:latest');
         cy.get('#send-button')
             .should('not.be.disabled')
             .click();
 
-        cy.wait(100);
         cy.get('.alert-error')
             .should('have.text', 'submitty/autograding-default:latest '
             + 'already exists in capability cpp');
@@ -162,7 +162,8 @@ describe('Docker UI Test', () => {
         cy.get('#capability-form')
             .select('python');
         cy.get('#add-field')
-            .clear()
+            .clear();
+        cy.get('#add-field')
             .type('submitty/python:2.7');
         cy.get('#send-button')
             .should('not.be.disabled')

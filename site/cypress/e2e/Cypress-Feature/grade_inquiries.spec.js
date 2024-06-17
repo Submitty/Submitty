@@ -5,7 +5,8 @@ describe('Test cases revolving around grade inquires', () => {
         cy.contains('Dates').click();
         cy.get('[data-testid="grade-inquiry-due-date"]').click();
         cy.get('[data-testid="grade-inquiry-due-date"]').should('be.visible');
-        cy.get('[data-testid="grade-inquiry-due-date"]').clear().type(date);
+        cy.get('[data-testid="grade-inquiry-due-date"]').clear();
+        cy.get('[data-testid="grade-inquiry-due-date"]').type(date);
         cy.get('[data-testid="grade-inquiry-due-date"]').type('{enter}');
     };
 
@@ -20,7 +21,8 @@ describe('Test cases revolving around grade inquires', () => {
         cy.get('[data-testid="grade-inquiry-info-btn"]').click();
         cy.get('[data-testid="grading-label"]').should('contain', 'Grade Inquiry');
         cy.get('[data-testid="grade-inquiry-actions"]').contains('Submit Grade Inquiry').should('be.disabled');
-        cy.get('[data-testid="reply-text-area-0"]').click().type('Submitty');
+        cy.get('[data-testid="reply-text-area-0"]').click();
+        cy.get('[data-testid="reply-text-area-0"]').type('Submitty');
         cy.get('[data-testid="markdown-mode-tab-preview"]').first().should('exist');
         cy.get('[data-testid="grade-inquiry-actions"]').contains('Submit Grade Inquiry').should('not.be.disabled');
     });
@@ -40,7 +42,8 @@ describe('Test cases revolving around grade inquires', () => {
             cy.get('[data-testid="grade-inquiry-info-btn"]').click();
             cy.get('[data-testid="grading-label"]').should('contain', 'Grade Inquiry');
             cy.get('[data-testid="grade-inquiry-actions"]').contains('Submit Grade Inquiry').should('be.disabled');
-            cy.get('[data-testid="reply-text-area-0"]').click().type('Submitty');
+            cy.get('[data-testid="reply-text-area-0"]').click();
+            cy.get('[data-testid="reply-text-area-0"]').type('Submitty');
             cy.get('[data-testid="markdown-mode-tab-preview"]').first().should('exist');
             cy.get('[data-testid="grade-inquiry-actions"]').contains('Submit Grade Inquiry').should('not.be.disabled');
         });

@@ -52,7 +52,8 @@ const switchUser = (account) => {
     cy.visit(['sample', 'office_hours_queue']);
 };
 const studentJoinQueue = (queueName, queueCode) => {
-    cy.get('[data-testid="queue-code"]').select(queueName).invoke('val'); // in which queue you want to join
+    cy.get('[data-testid="queue-code"]').select(queueName);
+    cy.get('[data-testid="queue-code"]').invoke('val'); // in which queue you want to join
     cy.get('[data-testid="queue-code"]').should('contain', queueName);
     cy.get('#token-box').type(queueCode);
     cy.get('[data-testid="join-queue-btn"]').click();

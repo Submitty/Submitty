@@ -118,7 +118,6 @@ Cypress.Commands.add('checkLogoutInAfterEach', () => {
  * @param {int} wait
  */
 Cypress.Commands.add('waitAndReloadUntil', (condition, timeout, wait = 100) => {
-    cy.wait(wait);
     cy.reload();
     cy.then(() => {
         return condition().then((result) => {
