@@ -217,7 +217,7 @@ class Config extends AbstractModel {
      * @var string Text shown to all users for system announcement */
     protected $system_message = '';
 
-   /** @prop
+    /** @prop
      * @var bool Create New Account shown to at login page */
     protected $create_new_account;
 
@@ -426,7 +426,7 @@ class Config extends AbstractModel {
         $this->sys_admin_url = $submitty_json['sys_admin_url'] ?? '';
 
         $this->create_new_account = $submitty_json['create_new_account'] === false;
-        
+
         if (isset($submitty_json['timezone'])) {
             if (!in_array($submitty_json['timezone'], \DateTimeZone::listIdentifiers())) {
                 throw new ConfigException("Invalid Timezone identifier: {$submitty_json['timezone']}");

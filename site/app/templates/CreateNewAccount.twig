@@ -1,26 +1,26 @@
 <div class="content shadow" id="login-box">
     <div id="login-guest">
         {% include "misc/Markdown.twig" with {
-            "content": login_content
+            "content": signup_content
         } only %}
     </div>
 
-    <form action="{{ login_url }}" method="post" id="signup">
+    <form action="{{ signup_url }}" method="post" id="login">
         <label>
             Email
             <input type="email" name="email" onchange="$(this).val($(this).val().trim())" required autofocus/>
         </label>
         <label>
             User ID
-            <input type="text" name="user_id" required />
+            <input type="text" name="new_username" required />
         </label>
         <label>
             Password
-            <input type="password" name="password" required />
+            <input type="password" name="new_password" required />
         </label>
         <label>
             Re-Enter Password
-            <input type="password" name="password" required />
+            <input type="password" name="confirm_password" required />
         </label>
         <input type="submit" name="signup" value="Sign Up" class="btn btn-primary" />
     </form>

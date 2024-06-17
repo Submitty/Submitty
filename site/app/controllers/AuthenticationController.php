@@ -81,7 +81,7 @@ class AuthenticationController extends AbstractController {
             $old = null;
         }
         $is_saml_auth = $this->core->getAuthentication() instanceof SamlAuthentication;
-        return new WebResponse('Authentication', 'loginForm', $old, $is_saml_auth);
+        return new WebResponse(AuthenticationView::class, 'loginForm', $old, $is_saml_auth);
     }
 
     /**
@@ -319,26 +319,24 @@ class AuthenticationController extends AbstractController {
      *
      * @return ResponseInterface
      */
-    public function createAccountForm() {
+    public function signupForm() {
         // Check if the user is already logged in, if yes, redirect to home or another appropriate page
         if ($this->logged_in) {
             return new RedirectResponse($this->core->buildUrl(['home']));
         }
-        // Check if the creating a new account is allowed, if yes, redirect to create account page
-        if ($this->create_new_account) {
-            return new WebResponse('Authentication', 'createAccountForm'); 
-        }
+        return new WebResponse(AuthenticationView::class, 'signupForm');
     }
 
     /**
      * Handles the submission of the new account creation form
      *
-     * @Route("/authentication/checkNewUser")
+     * @Route("/authentication/check_new_user")
      *
      * @return MultiResponse
      */
     public function checkNewUser() {
         // Check if the user is already logged in, if yes, redirect to home or another appropriate page
+
         if ($this->logged_in) {
             return MultiResponse::RedirectOnlyResponse(
                 new RedirectResponse($this->core->buildUrl(['home']))
@@ -347,8 +345,19 @@ class AuthenticationController extends AbstractController {
         // Handle the form submission here
         $username = $_POST['new_username'];
         $password = $_POST['new_password'];
+        $confirm_password = $_POST['confirm_password'];
+
+        // TODO: Add email confirmation
+
+        if (!($password === $confirm_password)) {
+            $this->core->addErrorMessage('Passwords did not match.');
+            return MultiResponse::RedirectOnlyResponse(
+                new RedirectResponse($this->core->buildUrl(['authentication', 'create_account']))
+            );
+        }
 
         // Call the UserModel or authentication service to create the new account
+        // TODO: Make this function!
         $success = $this->core->getAuthentication()->createUser($username, $password);
 
         if ($success) {
@@ -357,7 +366,8 @@ class AuthenticationController extends AbstractController {
             return MultiResponse::RedirectOnlyResponse(
                 new RedirectResponse($this->core->buildUrl(['authentication', 'login']))
             );
-        } else {
+        }
+        else {
             // Handle account creation failure
             $this->core->addErrorMessage('Failed to create the account.');
             return MultiResponse::RedirectOnlyResponse(

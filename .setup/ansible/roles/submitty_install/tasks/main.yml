@@ -44,6 +44,7 @@
         {{ 'https' if ssl_enabled else 'http' }}://{{ submitty_url }}
         {{ vcs_url }}
         {{ institution_name }}
+        {{ create_new_account }}
         {{ sysadmin_email }}
         {{ submitty_email }}
         {{ institution_url }}

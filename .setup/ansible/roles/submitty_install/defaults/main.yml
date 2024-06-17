@@ -11,6 +11,7 @@ language: en_US
 submitty_url: localhost
 vcs_url: git.localhost
 institution_name: Example University
+create_new_account: n
 sysadmin_email: sysadmin@localhost
 submitty_email: submitty@localhost
 institution_url: localhost
