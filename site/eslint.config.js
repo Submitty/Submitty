@@ -4,7 +4,7 @@ const eslint = require('@eslint/js');
 const jest = require('eslint-plugin-jest');
 const globals = require('globals');
 const tseslint = require('typescript-eslint');
-// eslint-pluging-cypress/flat doesnt have ts definitions yet
+// eslint-plugin-cypress/flat doesnt have ts definitions yet
 // @ts-expect-error TS2307
 const cypress = require('eslint-plugin-cypress/flat');
 
@@ -15,7 +15,11 @@ module.exports = tseslint.config(
     },
     {
         // todo: actually fix these files instead of ignoring them
-        ignores: ['cypress/support/e2e.js', 'cypress/plugins/index.js', 'public/js/notebook_builder/widgets/widget.js'],
+        ignores: [
+            'cypress/support/e2e.js',
+            'cypress/plugins/index.js',
+            'public/js/notebook_builder/widgets/widget.js',
+        ],
     },
     {
         name: 'Base options for all files',
