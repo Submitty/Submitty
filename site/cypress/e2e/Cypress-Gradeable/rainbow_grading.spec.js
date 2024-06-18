@@ -10,6 +10,7 @@ describe('Test Rainbow Grading', () => {
         cy.visit(['sample', 'reports', 'rainbow_grades_customization']);
         cy.get('[data-testid="display-grade-summary"]').check();
         cy.get('[data-testid="display-grade-summary"]').should('be.checked');
+        cy.get('#display_grade_details').check();
         cy.get('[data-testid="display-benchmarks-average"]').check();
         cy.get('[data-testid="display-benchmarks-stddev"]').check();
         cy.get('[data-testid="display-benchmarks-perfect"]').check();
@@ -26,16 +27,20 @@ describe('Test Rainbow Grading', () => {
             cy.visit(['sample', 'grades']);
             cy.get('[data-testid="rainbow-grades"]').should('contain', `Lecture Participation Polls for: ${username}`);
             if (username==='instructor') {
-                checkRainbowGrades(801516157, 'Quinn');
+                checkRainbowGrades( 'instructor', 801516157, 'Quinn', 'Instructor');
+                checkRainbowGradesOption();
             }
             else if (username === 'ta') {
-                checkRainbowGrades(281179137, 'Jill');
+                checkRainbowGrades('ta', 281179137, 'Jill', 'TA');
+                checkRainbowGradesOption();
             }
             else if (username === 'student') {
-                checkRainbowGrades(410853871, 'Joe');
+                checkRainbowGrades('student', 'student', 410853871, 'Joe', 'Student');
+                checkRainbowGradesOption();
             }
             else if (username === 'grader') {
-                checkRainbowGrades(10306042, 'Tim');
+                checkRainbowGrades('grader', 10306042, 'Tim', 'Grader');
+                checkRainbowGradesOption();
             }
         });
         cy.visit(['sample', 'config']);
@@ -46,9 +51,21 @@ describe('Test Rainbow Grading', () => {
     });
 });
 
-const checkRainbowGrades = (numericId, firstName) => {
-    [numericId, firstName].forEach((value) => {
+const checkRainbowGrades = (username, numericId, firstName, lastname) => {
+    [username, numericId, firstName, lastname].forEach((value) => {
         cy.get('[data-testid="rainbow-grades"]').should('contain', value);
     });
 };
+const checkRainbowGradesOption = () => {
+    cy.get('[data-testid="rainbow-grades"]')
+        .should('contain', 'USERNAME')
+        .and('contain', 'NUMERIC ID')
+        .and('contain', 'FIRST')
+        .and('contain', 'LAST')
+        .and('contain', 'OVERALL')
+        .and('contain', 'AVERAGE')
+        .and('contain', 'STDDEV')
+        .and('contain', 'PERFECT');
+};
+
 
