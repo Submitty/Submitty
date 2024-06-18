@@ -275,12 +275,10 @@ function updateCheckpointCells(elems, scores, no_cookie) {
             'scores': new_scores,
         },
         (returned_data) => {
-            console.log('AJAX response received:', returned_data);
             if (returned_data.data && returned_data.data.date) {
                 const currentDate = new Date(returned_data.data.date);
                 if (!isNaN(currentDate.getTime())) {
                     const formattedDate = `${currentDate.getFullYear()}-${padNumber(currentDate.getMonth() + 1)}-${padNumber(currentDate.getDate())} ${padNumber(currentDate.getHours())}:${padNumber(currentDate.getMinutes())}:${padNumber(currentDate.getSeconds())}`;
-                    console.log('Formatted Date:', formattedDate);
                     elems.each((idx, elem) => {
                         elem = $(elem);
                         elem.animate({'border-right-width': '0px'}, 400);
@@ -290,16 +288,14 @@ function updateCheckpointCells(elems, scores, no_cookie) {
                         elem.find('.simple-grade-grader').text(elem.data('grader'));
                         elem.find('.simple-grade-date').text(formattedDate);
                     });
-                    const message = {
+                    window.socketClient.send({
                         'type': 'update_checkpoint',
                         'elem': elems.attr('id').split('-')[3],
                         'user': parent.data('anon'),
                         'score': elems.data('score'),
                         'grader': elems.data('grader'),
                         'date': formattedDate,
-                    };
-                    console.log('Sending WebSocket message:', message);
-                    window.socketClient.send(message);
+                    });
                 }
                 else {
                     console.log('Invalid date received:', returned_data.data.date);
@@ -307,15 +303,13 @@ function updateCheckpointCells(elems, scores, no_cookie) {
             }
             else {
                 console.log('Date not found in response:', returned_data);
+                elems.each((idx, elem) => {
+                    elem = $(elem);
+                    elem.stop(true, true);
+                    elem.css('border-right', '60px solid var(--simple-save-error-red)');
+                });
             }
             updateVisibility();
-        },
-        () => {
-            elems.each((idx, elem) => {
-                elem = $(elem);
-                elem.stop(true, true);
-                elem.css('border-right', '60px solid #DA4F49');
-            });
         },
     );
 }
