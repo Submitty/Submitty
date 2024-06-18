@@ -510,6 +510,44 @@ function ajaxUpdateJSON(successCallback, errorCallback) {
 }
 
 
+$(document).ready(() => {
+    // Attach a change event handler to your radio buttons. If they are dynamically loaded, use event delegation.
+    $(document).on('change', "input[name='customization']", function() {
+        // Get the value of the selected radio button
+        const selected_value = $("input[name='customization']:checked").val();
+
+        console.log("Selected value: " + selected_value);
+        // eslint-disable-next-line no-undef
+        const url = buildCourseUrl(['reports', 'rainbow_grades_customization', 'manual_or_gui']);
+        console.log("URL: " + url);
+        const formData = new FormData();
+        formData.append('csrf_token', csrfToken);
+        formData.append('selected_value', selected_value);
+        $.ajax({
+            url: url,
+            type: 'POST',
+            data: formData,
+            processData: false,  // Do not process data
+            contentType: false,  // Do not set any content type header
+            success: function (data) {
+                // handle the server response
+                console.log("Data: " + JSON.stringify(data));
+                if (data['status'] === 'fail') {
+                    alert(data['message']);
+                    $("input[name='customization']:checked").focus();
+                }
+            },
+            error: function (jqXHR, textStatus, errorThrown) {
+                // handle request errors
+                console.log("Error status: " + textStatus);
+                console.log("Error thrown: " + errorThrown);
+                console.log("Server response: " + jqXHR.status + " " + jqXHR.statusText);
+            },
+
+        });
+    });
+});
+
 function displayChangeDetectedMessage() {
     $('#save_status').text('Changes detected, press "Save Changes" to save them.');
 }

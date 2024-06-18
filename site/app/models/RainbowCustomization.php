@@ -580,4 +580,9 @@ class RainbowCustomization extends AbstractModel {
     public function getErrorMessages() {
         return $this->error_messages;
     }
+
+    public function doesManualCustomizationExist(): bool
+    {
+        return $this->RCJSON->doesManualCustomizationExist();
+    }
 }

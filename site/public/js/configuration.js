@@ -15,6 +15,7 @@ $(document).ready(() => {
         }
         formData.append('name', elem.name);
         formData.append('entry', entry);
+
         $.ajax({
             url: buildCourseUrl(['config']),
             data: formData,
@@ -24,7 +25,6 @@ $(document).ready(() => {
             success: function(response) {
                 try {
                     response = JSON.parse(response);
-
                 }
                 catch (exc) {
                     console.log(response);
@@ -47,6 +47,9 @@ $(document).ready(() => {
             },
         });
     });
+});
+
+$(document).ready(() => {
 
     function updateForumMessage() {
         $('#forum-enabled-message').toggle();
@@ -77,3 +80,4 @@ $(document).ready(() => {
 
     $(document).on('change', '#room-seating-gradeable-id', updateEmailSeatingOption);
 });
+

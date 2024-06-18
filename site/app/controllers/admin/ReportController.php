@@ -24,6 +24,7 @@ use app\models\gradeable\Submitter;
 use app\models\User;
 use Symfony\Component\Routing\Annotation\Route;
 use app\models\RainbowCustomization;
+use app\models\RainbowCustomizationJSON;
 use app\exceptions\ValidationException;
 
 /**
@@ -623,6 +624,7 @@ class ReportController extends AbstractController {
 
             // Print the form
             $this->core->getOutput()->renderTwigOutput('admin/RainbowCustomization.twig', [
+                "manual_customization_exists" => $customization->doesManualCustomizationExist(),
                 "customization_data" => $customization->getCustomizationData(),
                 "available_buckets" => $customization->getAvailableBuckets(),
                 'bucket_counts' => $customization->getBucketCounts(),
@@ -686,14 +688,8 @@ class ReportController extends AbstractController {
             );
         }
 
-        // Remove the temporary upload file
-        unlink($upload['tmp_name']);
-//
-//        // Get the group of the rainbow_grades directory
-//        $directory_group = filegroup($rainbow_grades_dir);
-//
-//        // Change the group ownership of the uploaded file to match the directory
-//        chgrp($destination_path, $directory_group);
+        // Remove the temp uploaded file
+//        unlink($upload['tmp_name']);
 
         $msg = 'Rainbow Grades Customization uploaded';
         $this->core->addSuccessMessage($msg);
@@ -704,6 +700,58 @@ class ReportController extends AbstractController {
             null,
             new RedirectResponse($redirect_url)
         );
+    }
+
+
+
+    #[Route('/courses/{_semester}/{_course}/reports/rainbow_grades_customization/manual_or_gui', methods: ['POST'])]
+    public function setRainbowGradeCustomization(): JsonResponse
+    {
+        // Debug: Check if the method is hit
+        error_log("setRainbowGradeCustomization method called", 3, "/var/local/submitty/courses/s24/sample/rainbow_grades/checkerror.txt");
+
+        // Extract the value
+        // Extract the value from $_POST
+        $selectedValue = $_POST['selected_value'] ?? null;
+
+
+        // Handle invalid data
+        if (!$selectedValue) {
+            $msg = 'Invalid request: No selected value provided.';
+            $this->core->addErrorMessage($msg);
+            return JsonResponse::getErrorResponse($msg);
+        }
+
+        $rainbow_grades_dir = FileUtils::joinPaths($this->core->getConfig()->getCoursePath(), "rainbow_grades");
+        $customization_src = null;
+        $customization_dest = FileUtils::joinPaths($rainbow_grades_dir, 'customization.json');
+
+        // Determine the source file based on the selected value
+        switch ($selectedValue) {
+            case 'manual':
+                $customization_src = FileUtils::joinPaths($rainbow_grades_dir, 'manual_customization.json');
+                break;
+            case 'gui':
+                $customization_src = FileUtils::joinPaths($rainbow_grades_dir, 'gui_customization.json');
+                break;
+            default:
+                $msg = 'Invalid request: Unknown selected value.';
+                $this->core->addErrorMessage($msg);
+                return JsonResponse::getErrorResponse($msg);
+        }
+
+        // Copy the source file to the destination
+        if (!copy($customization_src, $customization_dest)) {
+            $msg = 'File copy failed: Could not copy file.';
+            $this->core->addErrorMessage($msg);
+            return JsonResponse::getErrorResponse($msg);
+        }
+
+        $msg = 'Rainbow Grades Customization set successfully';
+        $this->core->addSuccessMessage($msg);
+
+        // Response as JsonResponse using getSuccessResponse
+        return JsonResponse::getSuccessResponse(['status' => 'success', 'selected_value' => $selectedValue]);
     }
 
 

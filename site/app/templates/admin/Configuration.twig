@@ -250,6 +250,18 @@
                         </span>
                     </label>
                 </div>
+                <div class="config-row checkbox-row">
+                    <input type="checkbox" name="manual_customization" id="manual-customization-checkbox" value="true" {{ fields['manual_customization'] ? 'checked' : '' }} />
+                    <label for="manual-customization-checkbox">
+                        <span class="option-title">Use Manual Customization</span>
+                    </label>
+                </div>
+                <div class="config-row checkbox-row">
+                    <input type="checkbox" name="gui_customization" id="gui-customization-checkbox" value="true" {{ fields['gui_customization'] ? 'checked' : '' }} />
+                    <label for="gui-customization-checkbox">
+                        <span class="option-title">Use GUI Customization</span>
+                    </label>
+                </div>
             {% else %}
             <div class="option-title">Automatic Nightly Processing for Rainbow Grades Generation</div>
             <div class="option-alt">

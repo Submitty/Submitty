@@ -4,6 +4,23 @@
     </div>
     <div id="rg_web_ui">
         <h1>Rainbow Grades Customization</h1>
+        <input type="hidden" name="csrf_token" value="{{ csrfToken }}" />
+        <form id="customizationForm">
+            {% if manual_customization_exists %}
+                <p>It appears that a manual customization file has been provided. Please specify the preferred file to be utilized for rendering Rainbow Grades:</p>
+
+                <p>Kindly note, in case the 'Automatic Nightly Processing for Rainbow Grades Generation' cron job has been enabled from the configuration page, the selected option will be applied to that scheduled task as well.</p>
+
+                <div>
+                    <input type="radio" id="manual_customization" name="customization" value="manual">
+                    <label for="manual_customization">Manual Customization</label>
+                </div>
+                <div>
+                    <input type="radio" id="gui_customization" name="customization" value="gui">
+                    <label for="gui_customization">GUI Customization</label>
+                </div>
+            {% endif %}
+        </form>
 
         {% if limited_functionality_mode %}
             <div id="limited_func_messages">
