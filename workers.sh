@@ -1,7 +1,5 @@
 #!/bin/bash
 
-[[ $(uname -s) == "Darwin" && $(uname -p) == "arm" ]] && M_SERIES=1 || M_SERIES=0
-
 if [[ $1 == "generate" ]]; then
   python3 ./generate_workers.py "${@:2}"
   exit $?
@@ -94,10 +92,10 @@ if [[ $(uname -s) == "Darwin" && $1 == "up" ]]; then
       echo "Updating QEMU plugin..."
       DIR=$(pwd)
       TMPDIR=$(mktemp -d)
-      cd "$TMPDIR"
+      cd "$TMPDIR" || exit
       curl -L -o qemu.gem "https://github.com/Submitty/vagrant-qemu/releases/download/v${PLUGIN_VERSION}/vagrant-qemu-${PLUGIN_VERSION}.gem" &>/dev/null
       vagrant plugin install qemu.gem
-      cd "$DIR"
+      cd "$DIR" || exit
       rm -rf "$TMPDIR"
       echo "Successfully updated"
     fi
