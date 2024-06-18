@@ -464,7 +464,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        containers: ["Gradeable", "Admin", "UI", "Feature"]
+        containers: ["Admin", "Feature", "Gradeable", "TAGrading", "UI"]
     services:
       postgres:
         image: postgres
