@@ -54,7 +54,7 @@ class ImageWidget extends Widget {
     getJSON() {
         this.commitState();
 
-        if (this.state.image) {
+        if (this.state.type) {
             return this.state;
         }
     }
@@ -74,7 +74,7 @@ class ImageWidget extends Widget {
     getImageTemplate(width, height, alt_text) {
         return `
         <div class="image-container"></div>
-        <input type="file" accept="image/*">
+        <input type="file" class="image-input" accept="image/*">
         <div class="image-options">
             <div class="image-col-small">
                 <label>

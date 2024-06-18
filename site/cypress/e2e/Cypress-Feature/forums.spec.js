@@ -1,6 +1,7 @@
 const title1 = 'Cypress Title 1 Cypress';
 const title2 = 'Cypress Title 2 Cypress';
 const title3 = 'Cypress Title 3 Cypress';
+const title4 = 'Python Tutorials';
 const content1 = 'Cypress Content 1 Cypress';
 const content2 = 'Cypress Content 2 Cypress';
 const content3 = 'Cypress Content 3 Cypress';
@@ -22,16 +23,33 @@ const createThread = (title, content, category) => {
 };
 
 const replyToThread = (title, reply) => {
-    cy.get('.thread-left-cont > .thread-list-item').contains(title).click();
-    cy.get('.create-post-head').should('contain', title);
+    cy.get('[data-testid="thread-list-item"]').contains(title).click();
+    cy.get('[data-testid="create-post-head"]').should('contain', title);
     cy.get('#reply_box_3').type(reply);
     cy.get('[value="Submit Reply to All"]').should('not.be.disabled').click();
     cy.get('#posts_list').should('contain', reply);
 };
 
+const upduckPost = (thread_title) => {
+    cy.get('[data-testid="thread-list-item"]').contains(thread_title).click();
+    cy.get('[data-testid="create-post-head"]').should('contain', thread_title);
+    cy.get('[data-testid="like-count"]').first().should('have.text', 0);
+    cy.get('[data-testid="upduck-button"]').first().click();
+    cy.get('[data-testid="like-count"]').first().should('have.text', 1);
+};
+
+const checkStatsUpducks = (fullName, numUpducks) => {
+    // Check the stats page for a user with fullName and
+    // number of upducks numUpducks
+    cy.get('[data-testid="more-dropdown"]').click();
+    cy.get('#forum_stats').click();
+    cy.get('[data-testid="user-stat"]').contains(fullName).siblings('[data-testid="upduck-stat"]').should('contain.text', numUpducks);
+    cy.get('[title="Back to threads"]').click();
+};
+
 const mergeThreads = (fromThread, toThread, mergedContent) => {
     // Add more to tests for uploading attachments
-    cy.get('.thread-left-cont > .thread-list-item').contains(fromThread).click({ force: true });
+    cy.get('[data-testid="thread-list-item"]').contains(fromThread).click({ force: true });
     cy.get('[title="Merge Thread Into Another Thread"]').click();
     cy.get('.chosen-single > span').click();
     cy.wait(500);
@@ -41,9 +59,9 @@ const mergeThreads = (fromThread, toThread, mergedContent) => {
 };
 
 const removeThread = (title) => {
-    cy.get('.thread-left-cont > .thread-list-item').contains(title).click();
+    cy.get('[data-testid="thread-list-item"]').contains(title).click();
     cy.get('.first_post > .post-action-container > .delete-post-button').click();
-    cy.get('.thread-left-cont > .thread-list-item').contains(title).should('not.exist');
+    cy.get('[data-testid="thread-list-item"]').contains(title).should('not.exist');
 };
 
 describe('Visuals', () => {
@@ -59,8 +77,21 @@ describe('Visuals', () => {
         });
     });
 });
+
+const uploadAttachmentAndDelete = (title) => {
+    cy.get('[data-testid="thread-list-item"]').contains(title).click();
+    cy.get('[data-testid="create-post-head"]').should('contain', title);
+    cy.get('[data-testid="edit-post-button"]').first().click();
+    cy.get('[data-testid="input-file1"]').selectFile('cypress/fixtures/sea_animals.png');
+    cy.get('[data-testid="file-upload-table-1"]').should('contain', 'sea_animals.png');
+    cy.get('[data-testid="forum-update-post"]').contains('Update Post').click();
+    cy.get('[data-testid="edit-post-button"]').first().click();
+    cy.get('[data-testid="mark-for-delete-btn"]').should('contain', 'Delete').click();
+    cy.get('[data-testid="mark-for-delete-btn"]').should('contain', 'Keep');
+    cy.get('[data-testid="forum-update-post"]').contains('Update Post').click();
+};
 const replyDisabled = (title, attachment) => {
-    cy.get('.thread-left-cont > .thread-list-item').contains(title).click();
+    cy.get('[data-testid="thread-list-item"]').contains(title).click();
     // Reply button should be disabled by default with no text
     cy.get('[value="Submit Reply to All"]').should('be.disabled');
 
@@ -89,6 +120,8 @@ describe('Test cases revolving around creating, replying to, merging, and removi
     });
 
     it('Create, reply to, merge, and delete threads', () => {
+        // Add and Delete Image Attachment
+        uploadAttachmentAndDelete(title4);
         // Comment
         createThread(title1, content1, 'Comment');
         // Question
@@ -102,6 +135,14 @@ describe('Test cases revolving around creating, replying to, merging, and removi
         replyToThread(title2, reply2);
         // Tutorial
         replyToThread(title3, reply3);
+
+        // Upduck the first post of each thread
+        upduckPost(title1);
+        upduckPost(title2);
+        upduckPost(title3);
+
+        // Check the stats page for instructor with 3 upducks
+        checkStatsUpducks('Instructor, Quinn', 3);
 
         // Tutorial into Questions
         mergeThreads(title3, title2, merged1);

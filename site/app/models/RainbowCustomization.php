@@ -17,6 +17,10 @@ class RainbowCustomization extends AbstractModel {
     /**/
     protected $core;
     private $bucket_counts = [];               // Keep track of how many items are in each bucket
+    /**
+     * @var int[]
+     */
+    private array $bucket_remove_lowest = [];               // get how many droplowest are in each bucket
     private $customization_data = [];
     private $has_error;
     private $error_messages;
@@ -67,6 +71,7 @@ class RainbowCustomization extends AbstractModel {
         foreach (self::syllabus_buckets as $bucket) {
             $this->customization_data[$bucket] = [];
             $this->bucket_counts[$bucket] = 0;
+            $this->bucket_remove_lowest[$bucket] = 0;
         }
 
         $gradeables = $this->core->getQueries()->getGradeableConfigs(null);
@@ -116,6 +121,8 @@ class RainbowCustomization extends AbstractModel {
                 if ($json_bucket->count > $this->bucket_counts[$bucket]) {
                     $this->bucket_counts[$bucket] = $json_bucket->count;
                 }
+
+                $this->bucket_remove_lowest[$bucket] = $json_bucket->remove_lowest;
             }
         }
 
@@ -324,6 +331,13 @@ class RainbowCustomization extends AbstractModel {
         return $this->bucket_counts;
     }
 
+    /**
+     * @return int[]
+     */
+    public function getBucketRemoveLowest(): array {
+        return $this->bucket_remove_lowest;
+    }
+
     public function getCustomizationData() {
         return $this->customization_data;
     }
@@ -339,6 +353,7 @@ class RainbowCustomization extends AbstractModel {
     public function getMessages() {
         return !is_null($this->RCJSON) ? $this->RCJSON->getMessages() : [];
     }
+
 
     /**
      * Get display benchmarks
@@ -395,24 +410,19 @@ class RainbowCustomization extends AbstractModel {
      * @return array<int, array<string, bool|string>> multidimensional array of display option data
      */
     public function getDisplay(): array {
-        // Get allowed benchmarks
-        $display = RainbowCustomizationJSON::allowed_display;
-        $retArray = [];
+        $allowed_display_options = RainbowCustomizationJSON::allowed_display;
+        $display_options = [];
 
-        // If json file available then collect used display option from that, else get empty array
-        !is_null($this->RCJSON) ?
-            $usedDisplay = $this->RCJSON->getDisplay() :
-            $usedDisplay = [];
+        $used_display_options = $this->RCJSON ? $this->RCJSON->getDisplay() : [];
 
-        // Add data into retArray
-        foreach ($display as $display_option) {
-            in_array($display_option, $usedDisplay) ? $isUsed = true : $isUsed = false;
-
-            // Add display to return array
-            $retArray[] = ['id' => $display_option, 'isUsed' => $isUsed];
+        foreach ($allowed_display_options as $option_id) {
+            $display_options[] = [
+                'id' => $option_id,
+                'isUsed' => in_array($option_id, $used_display_options)
+            ];
         }
 
-        return $retArray;
+        return $display_options;
     }
 
     /**
