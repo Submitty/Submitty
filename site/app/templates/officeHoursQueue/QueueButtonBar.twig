@@ -16,6 +16,9 @@
   <button id="toggle_queue_message" class="btn btn-primary filter_btn" type="button" onclick="$('#queue-socket-message').show()">
     Send Message
   </button>
+  <a id="view-stats" class="btn btn-default filter_btn" href="{{base_url}}/stats">
+    View Queue Stats
+  </a>
   <div class="switch-container">
     <span class="switch-label">Push Notifications</span>
     <label class="switch" aria-label="Slider Switch for Push Notifications">
@@ -30,9 +33,6 @@
       <span class="slider"></span>
     </label>
   </div>
-  <a id="view-stats" class="btn btn-default filter_btn" href="{{base_url}}/stats">
-    View Queue Stats
-  </a>
 </div>
 
 <style>
