@@ -33,6 +33,8 @@ coverage.xml
 /site/public/mjs/
 /site/report/
 /site/incremental_build/
+/site/cypress-image-diff-screenshots/comparison/
+/site/cypress-image-diff-screenshots/diff/
 
 db_update.php
 .setup/data/random_users.txt
