@@ -214,7 +214,8 @@ describe('test office hours queue', () => {
         // Confirm aphacker queue history
         // Use search autocomplete feature
         cy.get('[data-testid="search-student-queue-input"]').first().clear().type('hack');
-        cy.get('#ui-id-1').first().click();
+        cy.get('#ui-id-1').first().should('be.visible');
+        cy.get('#ui-id-1').click();
         cy.get('[data-testid="search-student-queue-input"]').first().should('have.value', 'aphacker');
         cy.get('[data-testid="search-student-queue-btn"]').first().click();
 
