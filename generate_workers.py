@@ -16,7 +16,7 @@ from tempfile import TemporaryDirectory
 def get_args(m_series=False):
     parser = argparse.ArgumentParser(
         description='Script to generate configuration for '
-        'development worker machines')
+        'development worker machines', prog='vagrant workers generate')
 
     default_provider = 'virtualbox'
     if m_series:
@@ -30,9 +30,8 @@ def get_args(m_series=False):
                         help='IP address range for workers')
     parser.add_argument('--base-port', default=2240, type=int,
                         help='Base ssh port (ports will be assigned incrementally)')
-    if m_series:
-        parser.add_argument('--mac-prefix', default='52:54:00', type=str,
-                            help='MAC address prefix for workers (QEMU only)')
+    parser.add_argument('--mac-prefix', default='52:54:00', type=str,
+                        help='MAC address prefix for workers (QEMU only)')
 
     return parser.parse_args()
 
