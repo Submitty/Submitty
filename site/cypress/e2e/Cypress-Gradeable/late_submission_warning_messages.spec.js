@@ -144,7 +144,7 @@ describe('Test warning messages for non team gradeable', () => {
         cy.get('#save_status', {timeout:20000}).should('have.text', 'All Changes Saved');
     });
 
-    it('should show a warning message before late submission with 0 allowed and 0 remaining late days', () => {
+    it('Warning before submission with 0 allowed and 0 remaining late days', () => {
         //0 allowed late days and 0 remaining late days for student ==> Warning message
         cy.login('instructor');
         cy.visit(['sample', 'gradeable', gradeable, 'update?nav_tab=5']);
@@ -157,7 +157,7 @@ describe('Test warning messages for non team gradeable', () => {
         SubmitAndCheckMessage('non_team', 'upload_file1', 'invalid_1_day_late');
     });
 
-    it('should show a warning message before late submission with 1 allowed and 0 remaining late days ', () => {
+    it('Warning before submission with 1 allowed and 0 remaining late days ', () => {
         /*1 allowed late day and 0 remaining late day for student ==> Warning message
         This is a basic case which is already included in part of the testing
         below with extensions (3 days in the past test)
@@ -178,7 +178,7 @@ describe('Test warning messages for non team gradeable', () => {
         SubmitAndCheckMessage('non_team', 'upload_file2', 'invalid_1_day_late');
     });
 
-    it('should show a confirmation message before late submission with 1 allowed and 1 remaining late days', () => {
+    it('Confirmation before submission with 1 allowed and 1 remaining late days', () => {
         //1 allowed late day and 1 remaining late day for student ==> Confirmation message
         cy.login('instructor');
         giveLateDays(getCurrentTime(), 'student');
@@ -192,7 +192,7 @@ describe('Test warning messages for non team gradeable', () => {
         SubmitAndCheckMessage('non_team', 'upload_file2', 'valid_usage', '1_day_late');
     });
 
-    it('should show a warning message before late submission with 0 allowed and 1 remaining late day', () => {
+    it('Warning before submission with 0 allowed and 1 remaining late day', () => {
         //0 allowed late day and 1 remaining late day for student ==> Warning message
         cy.login('instructor');
         cy.visit(['sample', 'gradeable', gradeable, 'update?nav_tab=5']);
@@ -215,7 +215,7 @@ describe('Test warning messages for non team gradeable', () => {
         cy.get('#do_not_grade').click();
     });
 
-    it('should show a confirmation message for the first submission with 2 remaining late days and 1 extension', () => {
+    it('Confirmation for the first submission with 2 remaining late days and 1 extension', () => {
         //Part 1/2 of a test case
         //The first submission will be done 2 days after the due date and use 2 valid late days
         cy.login('instructor');
@@ -235,7 +235,7 @@ describe('Test warning messages for non team gradeable', () => {
         cy.logout();
         SubmitAndCheckMessage('non_team', 'upload_file1', 'valid_usage', '2_days_late+extension');
     });
-    it('should show a warning message for the second submission with 0 valid remaining late day ', () => {
+    it('Warning message for the second submission with 0 valid remaining late day ', () => {
         /*Part 2/2 of a test case
         This submission is invalid because the late days remaining are earned at the extension date,
         not the original due date.*/
@@ -298,7 +298,7 @@ describe('Test warning messages for team gradeable', () => {
         cy.get('#accept_invitation').click();
     });
 
-    it('should show a confirmation message for the first submission with 2 remaining late days and 1 extension for both team members', () => {
+    it('Confirmation for the first submission with 2 remaining late days and 1 extension for teams', () => {
         //Part 1/2 of a test case
         //The first submission will be done 2 days after the due date and use 2 valid late days for each team member
         cy.login('instructor');
@@ -315,7 +315,7 @@ describe('Test warning messages for team gradeable', () => {
         SubmitAndCheckMessage('team', 'upload_file1', 'valid_usage', '2_days_late+extension');
     });
 
-    it('should show team warning message for the second submission with one team member having 0 remaining late days ', () => {
+    it('Warning message for the second submission with one team member having 0 remaining late days ', () => {
         /* Second submission happens after 3 days have passed. For student, it will be a valid submission,
         so student will see a confirmation message first. However since aphacker doesn't have enough late days,
         student will see a second warning message saying that aphacker will have a bad submission.*/
