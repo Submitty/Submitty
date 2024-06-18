@@ -19,19 +19,21 @@
   <a id="view-stats" class="btn btn-default filter_btn" href="{{base_url}}/stats">
     View Queue Stats
   </a>
-  <div class="switch-container">
-    <span class="switch-label">Push Notifications</span>
-    <label class="switch" aria-label="Slider Switch for Push Notifications">
-      <input type="checkbox" id="notification_switch_visible" onclick="enableNotifications()">
-      <span class="slider"></span>
-    </label>
-  </div>
-  <div class="switch-container">
-    <span class="switch-label">Notification Sounds</span>
-    <label class="switch" aria-label="Slider Switch for Notification Sounds">
-      <input type="checkbox" id="notification_switch_audible" onclick="toggleAudibleAlert()">
-      <span class="slider"></span>
-    </label>
+  <div class="super-switch-container">
+    <div class="switch-container">
+      <span class="switch-label">Push Notifications</span>
+      <label class="switch" aria-label="Slider Switch for Push Notifications">
+        <input type="checkbox" id="notification_switch_visible" onclick="enableNotifications()">
+        <span class="slider"></span>
+      </label>
+    </div>
+    <div class="switch-container">
+      <span class="switch-label">Notification Sounds</span>
+      <label class="switch" aria-label="Slider Switch for Notification Sounds">
+        <input type="checkbox" id="notification_switch_audible" onclick="toggleAudibleAlert()">
+        <span class="slider"></span>
+      </label>
+    </div>
   </div>
 </div>
 

@@ -21,6 +21,10 @@ th {
 Start of slider switch
  */
 
+.super-switch-container {
+    display: flex;
+}
+
 .switch-container {
     display: flex;
     align-items: center;
