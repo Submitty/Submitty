@@ -163,8 +163,8 @@ describe('test office hours queue', () => {
         cy.get('@row-1').find('[data-testid="queue"]').should('contain', 'Lab Help');
         // This checks if time entered and time removed are in fact times.
         // We do not check for a specific time because this may change.
-        cy.get('@row-1').find('[data-testid="time-entered"]').should('match', /\d{4}-\d\d-\d\d \d\d:\d\d:\d\d/);
-        cy.get('@row-1').find('[data-testid="time-removed"]').should('match', /\d{4}-\d\d-\d\d \d\d:\d\d:\d\d/);
+        cy.get('@row-1').find('[data-testid="time-entered"]').invoke('text').should('match', /\d{4}-\d\d-\d\d \d\d:\d\d:\d\d.*/);
+        cy.get('@row-1').find('[data-testid="time-removed"]').invoke('text').should('match', /\d{4}-\d\d-\d\d \d\d:\d\d:\d\d.*/);
         cy.get('@row-1').find('[data-testid="helped-by"]').should('contain', 'grader');
         cy.get('@row-1').find('[data-testid="removed-by"]').should('contain', 'grader');
         cy.get('@row-1').find('[data-testid="removal-method"]').should('contain', 'helped');
@@ -173,8 +173,8 @@ describe('test office hours queue', () => {
         cy.get('@row-2').find('[data-testid="row-label"]').should('contain', '2');
         cy.get('@row-2').find('[data-testid="current-state"]').should('contain', 'done');
         cy.get('@row-2').find('[data-testid="queue"]').should('contain', 'Lab Help');
-        cy.get('@row-2').find('[data-testid="time-entered"]').should('match', /\d{4}-\d\d-\d\d \d\d:\d\d:\d\d/);
-        cy.get('@row-2').find('[data-testid="time-removed"]').should('match', /\d{4}-\d\d-\d\d \d\d:\d\d:\d\d/);
+        cy.get('@row-2').find('[data-testid="time-entered"]').invoke('text').should('match', /\d{4}-\d\d-\d\d \d\d:\d\d:\d\d.*/);
+        cy.get('@row-2').find('[data-testid="time-removed"]').invoke('text').should('match', /\d{4}-\d\d-\d\d \d\d:\d\d:\d\d.*/);
         cy.get('@row-2').find('[data-testid="helped-by"]').should('contain', '-');
         cy.get('@row-2').find('[data-testid="removed-by"]').should('contain', 'instructor');
         cy.get('@row-2').find('[data-testid="removal-method"]').should('contain', 'emptied');
@@ -183,8 +183,8 @@ describe('test office hours queue', () => {
         cy.get('@row-3').find('[data-testid="row-label"]').should('contain', '3');
         cy.get('@row-3').find('[data-testid="current-state"]').should('contain', 'done');
         cy.get('@row-3').find('[data-testid="queue"]').should('contain', queueName);
-        cy.get('@row-3').find('[data-testid="time-entered"]').should('match', /\d{4}-\d\d-\d\d \d\d:\d\d:\d\d/);
-        cy.get('@row-3').find('[data-testid="time-removed"]').should('match', /\d{4}-\d\d-\d\d \d\d:\d\d:\d\d/);
+        cy.get('@row-3').find('[data-testid="time-entered"]').invoke('text').should('match', /\d{4}-\d\d-\d\d \d\d:\d\d:\d\d.*/);
+        cy.get('@row-3').find('[data-testid="time-removed"]').invoke('text').should('match', /\d{4}-\d\d-\d\d \d\d:\d\d:\d\d.*/);
         cy.get('@row-3').find('[data-testid="helped-by"]').should('contain', '-');
         cy.get('@row-3').find('[data-testid="removed-by"]').should('contain', 'student');
         cy.get('@row-3').find('[data-testid="removal-method"]').should('contain', 'self');
@@ -193,8 +193,8 @@ describe('test office hours queue', () => {
         cy.get('@row-4').find('[data-testid="row-label"]').should('contain', '4');
         cy.get('@row-4').find('[data-testid="current-state"]').should('contain', 'done');
         cy.get('@row-4').find('[data-testid="queue"]').should('contain', queueName);
-        cy.get('@row-4').find('[data-testid="time-entered"]').should('match', /\d{4}-\d\d-\d\d \d\d:\d\d:\d\d/);
-        cy.get('@row-4').find('[data-testid="time-removed"]').should('match', /\d{4}-\d\d-\d\d \d\d:\d\d:\d\d/);
+        cy.get('@row-4').find('[data-testid="time-entered"]').invoke('text').should('match', /\d{4}-\d\d-\d\d \d\d:\d\d:\d\d.*/);
+        cy.get('@row-4').find('[data-testid="time-removed"]').invoke('text').should('match', /\d{4}-\d\d-\d\d \d\d:\d\d:\d\d.*/);
         cy.get('@row-4').find('[data-testid="helped-by"]').should('contain', 'instructor');
         cy.get('@row-4').find('[data-testid="removed-by"]').should('contain', 'student');
         cy.get('@row-4').find('[data-testid="removal-method"]').should('contain', 'self_helped');
@@ -203,13 +203,13 @@ describe('test office hours queue', () => {
         cy.get('@row-5').find('[data-testid="row-label"]').should('contain', '5');
         cy.get('@row-5').find('[data-testid="current-state"]').should('contain', 'waiting');
         cy.get('@row-5').find('[data-testid="queue"]').should('contain', queueName1);
-        cy.get('@row-5').find('[data-testid="time-entered"]').should('match', /\d{4}-\d\d-\d\d \d\d:\d\d:\d\d/);
+        cy.get('@row-5').find('[data-testid="time-entered"]').invoke('text').should('match', /\d{4}-\d\d-\d\d \d\d:\d\d:\d\d.*/);
         cy.get('@row-5').find('[data-testid="time-removed"]').should('contain', '-');
         cy.get('@row-5').find('[data-testid="helped-by"]').should('contain', '-');
         cy.get('@row-5').find('[data-testid="removed-by"]').should('contain', '-');
         cy.get('@row-5').find('[data-testid="removal-method"]').should('contain', '-');
 
-        cy.get('#times-helped-cell').should('contain').should('contain', '1 times helped.');
+        cy.get('#times-helped-cell').should('contain', '1 times helped.');
 
         // Confirm aphacker queue history
         // Use search autocomplete feature
@@ -222,8 +222,8 @@ describe('test office hours queue', () => {
         cy.get('@row-1').find('[data-testid="row-label"]').should('contain', '1');
         cy.get('@row-1').find('[data-testid="current-state"]').should('contain', 'done');
         cy.get('@row-1').find('[data-testid="queue"]').should('contain', 'Homework Debugging');
-        cy.get('@row-1').find('[data-testid="time-entered"]').should('match', /\d{4}-\d\d-\d\d \d\d:\d\d:\d\d/);
-        cy.get('@row-1').find('[data-testid="time-removed"]').should('match', /\d{4}-\d\d-\d\d \d\d:\d\d:\d\d/);
+        cy.get('@row-1').find('[data-testid="time-entered"]').invoke('text').should('match', /\d{4}-\d\d-\d\d \d\d:\d\d:\d\d.*/);
+        cy.get('@row-1').find('[data-testid="time-removed"]').invoke('text').should('match', /\d{4}-\d\d-\d\d \d\d:\d\d:\d\d.*/);
         cy.get('@row-1').find('[data-testid="helped-by"]').should('contain', 'ta');
         cy.get('@row-1').find('[data-testid="removed-by"]').should('contain', 'instructor');
         cy.get('@row-1').find('[data-testid="removal-method"]').should('contain', 'emptied');
@@ -232,7 +232,7 @@ describe('test office hours queue', () => {
         cy.get('@row-2').find('[data-testid="row-label"]').should('contain', '2');
         cy.get('@row-2').find('[data-testid="current-state"]').should('contain', 'waiting');
         cy.get('@row-2').find('[data-testid="queue"]').should('contain', 'Cypress Office Hour Queue 2');
-        cy.get('@row-2').find('[data-testid="time-entered"]').should('match', /\d{4}-\d\d-\d\d \d\d:\d\d:\d\d/);
+        cy.get('@row-2').find('[data-testid="time-entered"]').invoke('text').should('match', /\d{4}-\d\d-\d\d \d\d:\d\d:\d\d.*/);
         cy.get('@row-2').find('[data-testid="time-removed"]').should('contain', '-');
         cy.get('@row-2').find('[data-testid="helped-by"]').should('contain', '-');
         cy.get('@row-2').find('[data-testid="removed-by"]').should('contain', '-');
