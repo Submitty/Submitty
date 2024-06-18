@@ -88,6 +88,20 @@ if [[ $(uname -s) == "Darwin" && $1 == "up" ]]; then
   VM_PROVIDER=$(jq -r '.provider' .vagrant/workers.json)
   GATEWAY_IP=$(jq -r '.gateway' .vagrant/workers.json)
   if [[ $VM_PROVIDER == "qemu" ]]; then
+    PLUGIN_VERSION=24.06.00
+    PLUGIN_INFO=$(vagrant plugin list --machine-readable | grep vagrant-qemu,plugin-version,)
+    if [[ ! $PLUGIN_INFO == *"plugin-version,${PLUGIN_VERSION}%"* ]]; then
+      echo "Updating QEMU plugin..."
+      DIR=$(pwd)
+      TMPDIR=$(mktemp -d)
+      cd "$TMPDIR"
+      curl -L -o qemu.gem "https://github.com/Submitty/vagrant-qemu/releases/download/v${PLUGIN_VERSION}/vagrant-qemu-${PLUGIN_VERSION}.gem" &>/dev/null
+      vagrant plugin install qemu.gem
+      cd "$DIR"
+      rm -rf "$TMPDIR"
+      echo "Successfully updated"
+    fi
+
     PID=$(cat "${LOCKDIR}/pid") &>/dev/null
     SOCKET_PID=$(cat "${LOCKDIR}/socket_pid") &>/dev/null
     if ps -p "$PID" &>/dev/null; then
