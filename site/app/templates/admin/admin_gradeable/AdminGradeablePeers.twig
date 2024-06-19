@@ -12,14 +12,14 @@
             <div>
                 Enter number of peers for one student to grade and randomly assign peer grading in class.
                 <hr>
-                <div><input type="radio" id="all_grade" name="all_grade" class= "ignore" value="All Grade All" checked> <label data-testid="all-grade">All Grade All</label></div>
+                <div data-testid="all-grade"><input type="radio" id="all_grade" name="all_grade" class= "ignore" value="All Grade All" checked>All Grade All</div>
                 <div>
                     <input type="radio" name="all_grade" class="ignore" value="Number of Students">
                     <input type="number" min="1" id="number_to_peer_grade" placeholder="Number of Students" data-testid="number-to-peer-grade">
                 </div>
-                <div class="mt-3"><input type="checkbox" class="ignore" name="restrict-to-registration" id="restrict-to-registration" value="Restrict to Registration Sections"> <label data-testid="restrict-registration-sections">Restrict to Registration Sections</label></div>
+                <div class="mt-3" data-testid="restrict-registration-sections"><input type="checkbox" class="ignore" name="restrict-to-registration" id="restrict-to-registration" value="Restrict to Registration Sections">Restrict to Registration Sections</div>
                 {% if not gradeable.isTeamAssignment() %}
-                    <div><input type="checkbox" class="ignore" name="submit-before-grading" id="submit-before-grading" value="Submit Before Grading"> <label data-testid="submit-before-grading">Submit Before Grading</label></div>
+                    <div data-testid="submit-before-grading"><input type="checkbox" class="ignore" name="submit-before-grading" id="submit-before-grading" value="Submit Before Grading">Submit Before Grading</div>
                 {% endif %}
                 <div class="mt-3"><input type="button" name="random_peer_graders_list" class="btn btn-primary key_to_click" id="random_peer_graders_list" tabindex="0" value="Generate"></div>
             </div>
@@ -282,7 +282,7 @@
             }
         });
         $('[name="add_user_id_0"]').autocomplete( "option", "appendTo", form);
-        grader_students_div.append('<p id="add_student_button" style="cursor: pointer;" onclick="addStudentTextbox(\'#admin-gradeable-add-peers-form\',\'#new-grader-students\');" aria-label="Add More Users"><i class="fas fa-plus-square"></i><label data-testid="add-more-users">Add More Users</label><br></p>');
+        grader_students_div.append('<p id="add_student_button" style="cursor: pointer;" onclick="addStudentTextbox(\'#admin-gradeable-add-peers-form\',\'#new-grader-students\');" aria-label="Add More Users" data-testid="add-more-users"><i class="fas fa-plus-square"></i>Add More Users<br></p>');
     }
 
     function checkNewGraderValid(user_input) {

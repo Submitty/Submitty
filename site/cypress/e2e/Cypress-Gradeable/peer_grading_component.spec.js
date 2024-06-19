@@ -17,7 +17,7 @@ describe('Peer Grading Component testing', () => {
             cy.get('[data-testid="peer-component-title"]').eq(4).clear();
             cy.get('[data-testid="peer-component-title"]').eq(4).type('Peer Grading Component');
             cy.get('[data-testid="ta-comment-box"]').eq(4).type('Note to TAs');
-            cy.get('[data-testid="student-comment-box"]').eq(4).type('Note to Stuents');
+            cy.get('[data-testid="student-comment-box"]').eq(4).type('Note to Students');
             cy.get('[data-testid="max-points-box"]').eq(4).clear();
             cy.get('[data-testid="max-points-box"]').eq(4).type(5);
             cy.get('[data-testid="add-new-mark-button"]').eq(4).should('exist');
@@ -41,22 +41,19 @@ describe('Peer Grading Component testing', () => {
                 cy.get('[data-testid="new-peer-grader"]').click();
                 cy.get('[data-testid="admin-gradeable-add-peers-submit"]').click();
             }
-            // testing select csv file
             if (option==='grading_homework_pdf') {
                 cy.get('[data-testid="upload-peer-graders-list"]').selectFile('cypress/fixtures/peer_assign_file.csv');
                 cy.get('[data-testid="table-wrapper"]').should('contain', 'aphacker');
             }
-        });
-    });
-    it('student can peer grade for added component', () => {
-        cy.login('student');
-        ['grading_homework', 'grading_homework_pdf'].forEach((option) => {
-            cy.visit(['sample', 'gradeable', option, 'grading', 'details']);
-            cy.get('[data-testid="popup-window"]').should('exist');
-            cy.get('[data-testid="agree-popup-btn"]').click();
-            cy.get('[data-testid="grade-button"]').eq(0).click();
-            cy.get('body').type('{G}');
-            cy.get('[data-testid="grading-rubric-label"]').should('contain', 'Grading Rubric');
+            cy.login('student');
+            ['grading_homework', 'grading_homework_pdf'].forEach((option) => {
+                cy.visit(['sample', 'gradeable', option, 'grading', 'details']);
+                cy.get('[data-testid="popup-window"]').should('exist');
+                cy.get('[data-testid="agree-popup-btn"]').click();
+                cy.get('[data-testid="grade-button"]').eq(0).click();
+                cy.get('body').type('{G}');
+                cy.get('[data-testid="grading-rubric-label"]').should('contain', 'Grading Rubric');
+            });
         });
     });
 });
