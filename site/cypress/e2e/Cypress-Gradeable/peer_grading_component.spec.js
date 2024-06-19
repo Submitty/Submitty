@@ -45,6 +45,7 @@ describe('Peer Grading Component testing', () => {
                 cy.get('[data-testid="upload-peer-graders-list"]').selectFile('cypress/fixtures/peer_assign_file.csv');
                 cy.get('[data-testid="table-wrapper"]').should('contain', 'aphacker');
             }
+            cy.logout();
             cy.login('student');
             ['grading_homework', 'grading_homework_pdf'].forEach((option) => {
                 cy.visit(['sample', 'gradeable', option, 'grading', 'details']);
