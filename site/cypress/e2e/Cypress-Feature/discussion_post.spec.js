@@ -10,7 +10,7 @@ describe('test for discussion post panel', () => {
         cy.get('[data-testid="discussion-browser-btn"]').type('{D}');
         cy.get('[data-testid="posts-list"]').should('contain', 'Discussion Posts');
         cy.get('[data-testid="posts-list"]').should('contain', 'No thread id specified.');
-        cy.get('[data-testid="posts-list"]').should('not.contain', ' Go to thread');
+        cy.get('[data-testid="posts-list"]').should('not.contain', 'Go to thread');
         cy.visit(['sample', 'gradeable', 'grading_homework', 'update']);
         cy.get('[data-testid="discussion-thread-id"]').type('1,2,3');
         cy.get('[data-testid="discussion-thread-id"]').type('{enter}');
@@ -18,7 +18,7 @@ describe('test for discussion post panel', () => {
         cy.get('[data-testid="posts-list"]').should('contain', 'No posts for thread id: 1');
         cy.get('[data-testid="create-post-head"]').first().should('contain', '(2) Homework 1 print clarification');
         cy.get('[data-testid="create-post-head"]').eq(1).should('contain', '(3) Homework 1 not running');
-        cy.get('[data-testid="posts-list"]').should('contain', ' Go to thread');
+        cy.get('[data-testid="posts-list"]').should('contain', 'Go to thread');
         cy.get('[data-testid="go-to-thread"]').its('length').should('eq', 3);
         cy.get('[data-testid="go-to-thread"]').eq(1).click({force: true});
         cy.url().should('include', 'sample/forum/threads/2');
