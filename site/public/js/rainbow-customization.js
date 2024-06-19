@@ -684,6 +684,10 @@ $(document).ready(() => {
         displayChangeDetectedMessage();
     });
 
+    $("input[name*='final_grade_cutoffs']").change(() => {
+        displayChangeDetectedMessage();
+    });
+
     $('#cust_messages_textarea').on('change keyup paste', () => {
         displayChangeDetectedMessage();
     });

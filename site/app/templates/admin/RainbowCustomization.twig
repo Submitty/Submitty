@@ -85,7 +85,7 @@
                         {% endif %}
 
                         <label for="cutoff_{{ cutoff_input }}" class="{{ cutoff_input }} cutoff-label">{{ cutoff_input }}</label>
-                        <input type="text" id="cutoff_{{ cutoff_input }}" class="final_cutoff_input {{ cutoff_input }}" data-benchmark="{{ cutoff_input }}" value="{{ percent }}">
+                        <input type="text" id="cutoff_{{ cutoff_input }}" class="final_cutoff_input {{ cutoff_input }}" name="final_grade_cutoffs" data-benchmark="{{ cutoff_input }}" value="{{ percent }}">
                     {% endfor %}
                 </div>
             </div>
