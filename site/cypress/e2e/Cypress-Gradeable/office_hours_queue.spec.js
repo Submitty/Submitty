@@ -149,6 +149,5 @@ describe('test office hours queue', () => {
         cy.get('[data-testid="sound-notification-switch"]').click();
         cy.window().its('notifications_enabled').should('equal', false);
         cy.window().its('isAudibleAlertEnabled').should('equal', false);
-
     });
 });
