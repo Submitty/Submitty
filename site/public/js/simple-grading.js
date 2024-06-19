@@ -8,17 +8,17 @@ function updateVisibility() {
         const graderElement = $(this).find('.simple-grade-grader');
         const dateElement = $(this).find('.simple-grade-date');
         if (showGraders && graderElement.text().trim() !== '') {
-            graderElement.css('display', 'block');
+            graderElement.show();
         }
         else {
-            graderElement.css('display', 'none');
+            graderElement.hide();
         }
 
         if (showDates && dateElement.text().trim() !== '') {
-            dateElement.css('display', 'block');
+            dateElement.show()
         }
         else {
-            dateElement.css('display', 'none');
+            dateElement.hide()
         }
 
         // Force repaint by getting and setting the current color value
@@ -604,6 +604,7 @@ function setupNumericTextCells() {
                             },
                         );
                     }
+
                     if (breakOut) {
                         alert('CSV upload failed! Format file incorrect.');
                     }

@@ -281,10 +281,9 @@ class SimpleGraderController extends AbstractController {
 
         $this->core->getQueries()->saveTaGradedGradeable($ta_graded_gradeable);
 
-        return JsonResponse::getSuccessResponse([
-            'data' => $return_data,
-            'date' => $this->core->getDateTimeNow()->format('c')
-        ]);
+        $return_data['date'] = $this->core->getDateTimeNow()->format('c');
+
+        return JsonResponse::getSuccessResponse($return_data);
     }
 
     /**
