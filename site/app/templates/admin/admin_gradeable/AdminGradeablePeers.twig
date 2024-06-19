@@ -311,7 +311,8 @@
     *   editing an existing grader popup
     * @param {boolean} grader_removed true if existing grader was removed
     * @param {String} button_id the ID of the submit button to be enabled / disabled
-    * @param (String) error_div_id the ID of the error message to be displayed if submit is disabled
+    * @param {String} error_div_id the ID of the error message to be displayed if submit is disabled
+    * @param {boolean} self_grading true if the student and grader is different
     */
     function updateSubmitButton(valid_grader, valid_students, new_grader, grader_removed, button_id, error_div_id, self_grading) {
         if (grader_removed || (valid_grader && !valid_students.includes(false) && (!new_grader || valid_students.includes(true)))) {
