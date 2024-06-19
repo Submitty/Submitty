@@ -132,7 +132,23 @@ describe('test office hours queue', () => {
         editAnnouncement('');
         cy.get('[data-testid="announcement"]').should('not.exist');
         cy.get('[data-testid="popup-message"]').should('contain', 'Updated announcement');
-        // diable and delete all queue
+        // disable and delete all queue
         disableQueue();
+    });
+    it('Enabling push and sound notifications as Instructor', () => {
+        switchUser('instructor');
+        cy.get('[data-testid="push-notification-switch"]').should('exist');
+        cy.get('[data-testid="sound-notification-switch"]').should('exist');
+        cy.window().its('notifications_enabled').should('equal', false);
+        cy.window().its('isAudibleAlertEnabled').should('equal', false);
+        cy.get('[data-testid="push-notification-switch"]').first().click();
+        cy.get('[data-testid="sound-notification-switch"]').first().click();
+        cy.window().its('notifications_enabled').should('equal', true);
+        cy.window().its('isAudibleAlertEnabled').should('equal', true);
+        cy.get('[data-testid="push-notification-switch"]').first().click();
+        cy.get('[data-testid="sound-notification-switch"]').first().click();
+        cy.window().its('notifications_enabled').should('equal', false);
+        cy.window().its('isAudibleAlertEnabled').should('equal', false);
+
     });
 });
