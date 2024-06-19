@@ -54,7 +54,7 @@ Start of slider switch
     position: absolute;
     cursor: pointer;
     inset: 0;
-    background-color: #cccccc;
+    background-color: var(--standard-light-medium-gray);
     transition: .4s;
     border-radius: 34px;
 }
@@ -66,14 +66,14 @@ Start of slider switch
     width: 1.3em;
     left: 0.2em;
     bottom: 0.2em;
-    background-color: white;
+    background-color: var(--always-default-white);
     transition: .4s;
     border-radius: 50%;
 }
 
 .slider::after {
     position: absolute;
-    color: white;
+    color: var(--always-default-white);
     top: 50%;
     left: 0.5em;
     transform: translateY(-50%);
@@ -81,7 +81,7 @@ Start of slider switch
 }
 
 input:checked + .slider {
-    background-color: #2196F3;
+    background-color: var(--actionable-blue);
 }
 
 input:checked + .slider::before {
