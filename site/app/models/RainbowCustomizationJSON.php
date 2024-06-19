@@ -150,7 +150,7 @@ class RainbowCustomizationJSON extends AbstractModel {
     public function loadFromJsonFile() {
         // Get contents of file and decode
         $course_path = $this->core->getConfig()->getCoursePath();
-        $course_path = FileUtils::joinPaths($course_path, 'rainbow_grades', 'customization.json');
+        $course_path = FileUtils::joinPaths($course_path, 'rainbow_grades', 'gui_customization.json');
 
         if (!file_exists($course_path)) {
             throw new FileReadException('Unable to locate the file to read');
@@ -327,7 +327,7 @@ class RainbowCustomizationJSON extends AbstractModel {
     public function saveToJsonFile() {
         // Get path of where to save file
         $course_path = $this->core->getConfig()->getCoursePath();
-        $course_path = FileUtils::joinPaths($course_path, 'rainbow_grades', 'customization.json');
+        $course_path = FileUtils::joinPaths($course_path, 'rainbow_grades', 'gui_customization.json');
 
         // If display was empty then just add defaults
         if (empty($this->display)) {
