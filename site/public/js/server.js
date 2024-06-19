@@ -1942,26 +1942,26 @@ function addMarkdownCode(type) {
     const end = $(this).prop('selectionEnd');
     const text = $(this).val();
     let insert = '';
-    let selectedText = text.substring(start, end);
+    const selectedText = text.substring(start, end);
 
     switch (type) {
         case 'code':
             if (text.substring(text.substring(0, start).split('').lastIndexOf('\n'), start).length !== 1) {
                 insert = '\n';
             }
-            insert += '```\n' + selectedText + '\n```\n';
+            insert += `\`\`\`\n${selectedText}\n\`\`\`\n`;
             break;
         case 'link':
-            insert = '[' + selectedText + '](url)';
+            insert = `[${selectedText}](url)`;
             break;
         case 'bold':
-            insert = selectedText ? '__' + selectedText + '__' : '____';
+            insert = selectedText ? `__${selectedText}__` : '____';
             break;
         case 'italic':
-            insert = selectedText ? '_' + selectedText + '_' : '__';
+            insert = selectedText ? `_${selectedText}_` : '__';
             break;
         case 'blockquote':
-            insert = '> ' + selectedText + '\n\n';
+            insert = `> ${selectedText}\n\n`;
             break;
     }
 
@@ -1970,7 +1970,8 @@ function addMarkdownCode(type) {
         $(this).val(text.substring(0, start) + insert + text.substring(end));
         $(this).focus();
         $(this)[0].setSelectionRange(start + 1, start + 1);
-    } else {
+    }
+    else {
         // Insert the markdown with the selected text wrapped
         $(this).val(text.substring(0, start) + insert + text.substring(end));
         $(this).focus();
