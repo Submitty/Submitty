@@ -15,10 +15,10 @@ function updateVisibility() {
         }
 
         if (showDates && dateElement.text().trim() !== '') {
-            dateElement.show()
+            dateElement.show();
         }
         else {
-            dateElement.hide()
+            dateElement.hide();
         }
 
         // Force repaint by getting and setting the current color value
