@@ -141,12 +141,12 @@ describe('test office hours queue', () => {
         cy.get('[data-testid="sound-notification-switch"]').should('exist');
         cy.window().its('notifications_enabled').should('equal', false);
         cy.window().its('isAudibleAlertEnabled').should('equal', false);
-        cy.get('[data-testid="push-notification-switch"]').first().click();
-        cy.get('[data-testid="sound-notification-switch"]').first().click();
+        cy.get('[data-testid="push-notification-switch"]').click();
+        cy.get('[data-testid="sound-notification-switch"]').click();
         cy.window().its('notifications_enabled').should('equal', true);
         cy.window().its('isAudibleAlertEnabled').should('equal', true);
-        cy.get('[data-testid="push-notification-switch"]').first().click();
-        cy.get('[data-testid="sound-notification-switch"]').first().click();
+        cy.get('[data-testid="push-notification-switch"]').click();
+        cy.get('[data-testid="sound-notification-switch"]').click();
         cy.window().its('notifications_enabled').should('equal', false);
         cy.window().its('isAudibleAlertEnabled').should('equal', false);
 
