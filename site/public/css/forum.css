@@ -265,6 +265,8 @@
 .like-counter{
     font-size: 15px;
     margin-left: 4px;
+    margin-right: 3px; 
+    vertical-align: middle;
 }
 
 .delete-post-button,
@@ -810,4 +812,14 @@
     display: flex;
     flex-direction: row;
     align-items: center;
+}
+
+.liked-by-instructor {
+    margin-left: 5px;
+    font-size: 15px;
+    vertical-align: middle;
+    font-style: italic;
+    color: var(--upduck-yellow);
+    font-weight: bold;
+    white-space: nowrap;
 }

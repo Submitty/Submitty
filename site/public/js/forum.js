@@ -4,8 +4,8 @@
 /* exported markForDeletion */
 /* exported unMarkForDeletion */
 /* exported  displayHistoryAttachment */
+/* exported toggleUpduck */
 /* exported toggleLike */
-
 // eslint-disable-next-line no-unused-vars
 function categoriesFormEvents() {
     $('#ui-category-list').sortable({
@@ -1323,7 +1323,7 @@ function toggleLike(post_id, current_user) {
             json = json['data'];
             const likes = json['likesCount'];
             const liked = json['status'];
-            console.log(json['status']);
+            const staffLiked = json['likesFromStaff'];
 
             const likeCounterElement = document.getElementById(`likeCounter_${post_id}`);
             let likeCounter = parseInt(likeCounterElement.innerText);
@@ -1332,28 +1332,30 @@ function toggleLike(post_id, current_user) {
             const likeIconSrc = document.getElementById(`likeIcon_${post_id}`);
             let likeIconSrcElement = likeIconSrc.src;
 
-            const theme = localStorage.getItem('theme');
             if (liked === 'unlike') {
-                if (theme === 'light' && likeIconSrcElement.endsWith('/img/on-duck-button.svg')) {
-                    likeIconSrcElement = likeIconSrcElement.replace('on-duck-button.svg', 'light-mode-off-duck.svg');
+                likeIconSrcElement = likeIconSrcElement.replace('on-duck-button.svg', 'light-mode-off-duck.svg');
+
+                if (staffLiked > 0) {
+                    $(`#likedByInstructor_${post_id}`).show();
                 }
                 else {
-                    likeIconSrcElement = likeIconSrcElement.replace('on-duck-button.svg', 'light-mode-off-duck.svg');
+                    $(`#likedByInstructor_${post_id}`).hide();
                 }
+
                 likeCounter = likes;// set to the sql like value
 
                 likeIconSrc.src = likeIconSrcElement; // Update the state
                 likeCounterElement.innerText = likeCounter;
             }
             else if (liked === 'like') {
-                if (theme === 'light') {
-                    likeIconSrcElement = likeIconSrcElement.replace('light-mode-off-duck.svg', 'on-duck-button.svg');
+                likeIconSrcElement = likeIconSrcElement.replace('light-mode-off-duck.svg', 'on-duck-button.svg');
+                if (staffLiked > 0) {
+                    $(`#likedByInstructor_${post_id}`).show();
                 }
                 else {
-                    likeIconSrcElement = likeIconSrcElement.replace('light-mode-off-duck.svg', 'on-duck-button.svg');
+                    $(`#likedByInstructor_${post_id}`).hide();
                 }
                 likeCounter = likes;
-
                 likeIconSrc.src = likeIconSrcElement; // Update the state
                 likeCounterElement.innerText = likeCounter;
             }
