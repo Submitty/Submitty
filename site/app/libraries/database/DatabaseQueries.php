@@ -2493,7 +2493,7 @@ ORDER BY {$u_or_t}.{$section_key}",
                 JOIN $unit ON (gd.gd_$id = $unit.$id)
             WHERE
                 gd.g_id = ?
-                AND CAST ($unit.$section_key AS TEXT) = ANY (ARRAY[" . implode(',', array_fill(0, count($sections), '?')) . "])
+                AND CAST ($unit.$section_key AS TEXT) IN " . $this.createParameterList(count($sections))  . "
                 AND gcd.gcd_verifier_id IS NOT NULL
             GROUP BY
                 $unit.$section_key
