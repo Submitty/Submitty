@@ -443,6 +443,9 @@
             {% if not viewing_inactive_version %}
                 initMaxNoFiles({{max_file_uploads}});
                 initializeDropZone("upload{{ index }}");
+                var part = "{{ index }}";
+                initializeDragAndDrop();
+                createArray(part);
             {% endif %}
         });
     </script>
