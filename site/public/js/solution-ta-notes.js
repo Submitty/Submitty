@@ -35,13 +35,13 @@ function updateSolutionTaNotes(gradeable_id, component_id, itempool_item) {
                 displayErrorMessage('Something went wrong while updating the solution');
             }
         },
-        error: function(err) {
+        error: function (err) {
             console.log(err);
         },
     });
 }
 
-//set Save button class depending on if the solution has been altered from the previous solution
+// set Save button class depending on if the solution has been altered from the previous solution
 function detectSolutionChange() {
     const textarea = $(this);
     const solution_div = textarea.closest('.solution-cont');

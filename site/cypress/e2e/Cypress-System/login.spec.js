@@ -2,7 +2,7 @@ import { buildUrl } from '../../support/utils.js';
 
 function loginViaUI(username = 'instructor') {
     cy.get('body')
-        .then(body => {
+        .then((body) => {
             if (body.find('input[name=user_id]').length > 0) {
                 cy.get('input[name=user_id]').type(username, { force: true });
                 cy.get('input[name=password]').type(username, { force: true });
@@ -21,17 +21,16 @@ function loginViaUI(username = 'instructor') {
         });
 }
 
-
 describe('Test cases revolving around the logging in functionality of the site', () => {
     describe('Test cases where the user should successfully login', () => {
         it('should log in through root endpoint, using UI', () => {
-            //should hit the login form
+            // should hit the login form
             cy.visit('/');
             cy.url().should('eq', `${Cypress.config('baseUrl')}/authentication/login`);
 
             loginViaUI();
 
-            //should now be logged in as instructor and have a loggout button
+            // should now be logged in as instructor and have a loggout button
             cy.get('#logout .icon-title').should((val) => {
                 expect(val.text().trim()).to.equal('Logout Quinn');
             });
@@ -51,16 +50,14 @@ describe('Test cases revolving around the logging in functionality of the site',
             });
         });
 
-
         it('should redirect after logging in', () => {
-            //try to visit a page not logged in, then log in and see where we are
+            // try to visit a page not logged in, then log in and see where we are
             const full_url = buildUrl(['sample', 'config'], true);
             cy.visit(['sample', 'config']);
             cy.url().should('eq', `${Cypress.config('baseUrl')}/authentication/login?old=${encodeURIComponent(full_url)}`);
             loginViaUI();
             cy.url().should('eq', full_url);
         });
-
 
         it('should check if you can access a course', () => {
             cy.visit('authentication/login');
@@ -71,7 +68,6 @@ describe('Test cases revolving around the logging in functionality of the site',
             cy.get('.content').contains('You don\'t have access to this course.');
         });
 
-
         it('logout button should successfully logout and end up at login screen', () => {
             cy.visit('/');
             loginViaUI();
@@ -80,7 +76,6 @@ describe('Test cases revolving around the logging in functionality of the site',
         });
     });
 
-
     describe('Test cases where the user should not be able to login', () => {
         it('should reject bad passwords', () => {
             cy.checkLogoutInAfterEach();
@@ -88,7 +83,7 @@ describe('Test cases revolving around the logging in functionality of the site',
             cy.url().should('eq', `${Cypress.config('baseUrl')}/authentication/login`);
 
             cy.get('body')
-                .then(body => {
+                .then((body) => {
                     if (body.find('input[name=user_id]').length > 0) {
                         cy.get('input[name=user_id]').type('instructor');
                         cy.get('input[name=password]').type('bad-password');
@@ -109,14 +104,13 @@ describe('Test cases revolving around the logging in functionality of the site',
                 });
         });
 
-
         it('should reject bad usernames', () => {
             cy.checkLogoutInAfterEach();
             cy.visit([]);
             cy.url().should('eq', `${Cypress.config('baseUrl')}/authentication/login`);
 
             cy.get('body')
-                .then(body => {
+                .then((body) => {
                     if (body.find('input[name=user_id]').length > 0) {
                         cy.get('input[name=user_id]').type('bad-username');
                         cy.get('input[name=password]').type('instructor');

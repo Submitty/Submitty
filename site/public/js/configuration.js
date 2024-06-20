@@ -1,8 +1,7 @@
 /* global csrfToken, buildCourseUrl */
 
 $(document).ready(() => {
-
-    $('input,textarea,select').on('change', function() {
+    $('input,textarea,select').on('change', function () {
         const elem = this;
         const formData = new FormData();
         formData.append('csrf_token', csrfToken);
@@ -21,10 +20,9 @@ $(document).ready(() => {
             type: 'POST',
             processData: false,
             contentType: false,
-            success: function(response) {
+            success: function (response) {
                 try {
                     response = JSON.parse(response);
-
                 }
                 catch (exc) {
                     console.log(response);

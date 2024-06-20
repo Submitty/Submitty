@@ -16,7 +16,7 @@
  * @param {boolean} isHorizontalResize If set true, horizontal resizing is initiated (top and bottom) else resizing is vertical
  * @param {resizeCallback} callback
  */
-function initializeResizablePanels (panelSel, dragBarSel, isHorizontalResize= false, callback = null) {
+function initializeResizablePanels(panelSel, dragBarSel, isHorizontalResize = false, callback = null) {
     // Select all the DOM elements for dragging in two-panel-mode
     const panelEle = document.querySelector(panelSel);
     const panelCont = panelEle.parentElement;

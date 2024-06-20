@@ -10,7 +10,7 @@
    initializeResizablePanels initializeResizablePanels closeAllComponents component_id:writable isSilentEditModeEnabled
    loadTAGradingSettingData */
 
-//Used to reset users cookies
+// Used to reset users cookies
 const cookie_version = 1;
 
 // Width of mobile and Tablet screens width
@@ -129,7 +129,7 @@ $(() => {
             if (settingsCallbacks && Object.prototype.hasOwnProperty.call(settingsCallbacks, storageCode)) {
                 settingsCallbacks[storageCode](this.value);
                 if (this.value !== 'active-inquiry') {
-                    //if user change setting to non-grade inquiry option, change the inquiry_status to off and set inquiry_status to off in grading index page
+                    // if user change setting to non-grade inquiry option, change the inquiry_status to off and set inquiry_status to off in grading index page
                     Cookies.set('inquiry_status', 'off');
                 }
                 else {
@@ -194,7 +194,6 @@ $(() => {
         }
     }
 
-
     // Remove the select options which are open
     // eslint-disable-next-line no-unused-vars
     function hidePanelPositionSelect() {
@@ -220,8 +219,8 @@ function changeStudentArrowTooltips(data) {
         data = 'active-inquiry';
     }
     else {
-        //if inquiry_status is off, and data equals active inquiry means the user set setting to active-inquiry manually
-        //and need to set back to default since user also manually changed inquiry_status to off.
+        // if inquiry_status is off, and data equals active inquiry means the user set setting to active-inquiry manually
+        // and need to set back to default since user also manually changed inquiry_status to off.
         if (data === 'active-inquiry') {
             data = 'default';
         }
@@ -478,7 +477,7 @@ function updatePanelOptions() {
     }
     $('.grade-panel .panel-position-cont').attr('size', taLayoutDet.numOfPanelsEnabled);
     const panelOptions = $('.grade-panel .panel-position-cont option');
-    panelOptions.each(idx => {
+    panelOptions.each((idx) => {
         if (panelOptions[idx].value === 'leftTop') {
             if (taLayoutDet.numOfPanelsEnabled === 2 || (taLayoutDet.numOfPanelsEnabled === 3 && taLayoutDet.dividedColName === 'RIGHT')) {
                 panelOptions[idx].text = 'Open as left panel';
@@ -566,7 +565,6 @@ function adjustGradingPanelHeader() {
 function onAjaxInit() { }
 
 function readCookies() {
-
     const silent_edit_enabled = Cookies.get('silent_edit_enabled') || '';
 
     const autoscroll = Cookies.get('autoscroll') || '';
@@ -646,7 +644,7 @@ function updateCookies() {
     Cookies.set('cookie_version', cookie_version, { path: '/' });
 }
 
-//-----------------------------------------------------------------------------
+// -----------------------------------------------------------------------------
 // Student navigation
 
 function waitForAllAjaxToComplete() {
@@ -656,7 +654,6 @@ function waitForAllAjaxToComplete() {
 }
 
 function gotoMainPage() {
-
     const window_location = $('#main-page')[0].dataset.href;
 
     if (getGradeableId() !== '') {
@@ -791,7 +788,7 @@ function gotoNextStudent() {
         window.location = window_location;
     }
 }
-//Navigate to the prev / next student buttons
+// Navigate to the prev / next student buttons
 registerKeyHandler({ name: 'Previous Student', code: 'ArrowLeft' }, () => {
     gotoPrevStudent();
 });
@@ -799,7 +796,7 @@ registerKeyHandler({ name: 'Next Student', code: 'ArrowRight' }, () => {
     gotoNextStudent();
 });
 
-//-----------------------------------------------------------------------------
+// -----------------------------------------------------------------------------
 // Panel show/hide
 //
 
@@ -819,7 +816,7 @@ function resetSinglePanelLayout() {
     const leftBottomPanelId = taLayoutDet.currentTwoPanels.leftBottom;
     const rightTopPanelId = taLayoutDet.currentTwoPanels.rightTop;
     const rightBottomPanelId = taLayoutDet.currentTwoPanels.rightBottom;
-    //Now Fetch the panels from DOM
+    // Now Fetch the panels from DOM
     const leftTopPanel = document.getElementById(leftTopPanelId);
     const leftBottomPanel = document.getElementById(leftBottomPanelId);
     const rightTopPanel = document.getElementById(rightTopPanelId);
@@ -919,7 +916,7 @@ function setPanelsVisibilities(ele, forceVisible = null, position = null) {
             && taLayoutDet.currentTwoPanels.rightBottom !== panel.str
             && taLayoutDet.currentTwoPanels.leftTop !== panel.str
             && taLayoutDet.currentTwoPanels.leftBottom !== panel.str) || panel.str !== ele) {
-            //only hide those panels which are not given panel and not in taLayoutDet.currentTwoPanels if the twoPanelMode is enabled
+            // only hide those panels which are not given panel and not in taLayoutDet.currentTwoPanels if the twoPanelMode is enabled
             $(`#${panel.str}`).hide();
             $(panel.icon).removeClass('icon-selected');
             $(id_str).removeClass('active');
@@ -941,7 +938,7 @@ function toggleFullScreenMode() {
 
     // update the dragging event for two panels
     initializeResizablePanels(leftSelector, verticalDragBarSelector, false, saveResizedColsDimensions);
-    //Save the taLayoutDetails in LS
+    // Save the taLayoutDetails in LS
     saveTaLayoutDetails();
 }
 
@@ -960,7 +957,6 @@ function toggleFullLeftColumnMode(forceVal = false) {
     panelsContSelector = newPanelsContSelector;
 
     $('#grading-panel-student-name').hide();
-
 }
 
 /**
@@ -1062,7 +1058,7 @@ function togglePanelLayoutModes(forceVal = false) {
 
 // Handles the DOM manipulation to update the two panel layout
 function updatePanelLayoutModes() {
-    //remove all panel instructions
+    // remove all panel instructions
     $('.panel-instructions').remove();
     setMultiPanelModeVisiblities();
     for (const panelIdx in panelsBucket) {
@@ -1073,16 +1069,16 @@ function updatePanelLayoutModes() {
         }
     }
 
-    //loop through panel positions (topLeft, topRight, etc)
+    // loop through panel positions (topLeft, topRight, etc)
     for (const panel in taLayoutDet.currentTwoPanels) {
-        //if the panel isn't active, skip it
+        // if the panel isn't active, skip it
         if (!taLayoutDet.currentActivePanels[panel]) {
             continue;
         }
         const panel_type = taLayoutDet.currentTwoPanels[panel];
-        //get panel corresponding with the layout position
+        // get panel corresponding with the layout position
         const layout_panel = $(`${panelsBucket[`${panel}Selector`]}`);
-        //get panel corresponding with what the user selected to use for this spot (autograding, rubric, etc)
+        // get panel corresponding with what the user selected to use for this spot (autograding, rubric, etc)
         const dom_panel = document.getElementById(`${panel_type}`);
         if (dom_panel) {
             $(layout_panel).append(dom_panel);
@@ -1160,7 +1156,7 @@ registerKeyHandler({ name: 'Toggle Solution/TA-Notes Panel', code: 'KeyT' }, () 
     $('#solution_ta_notes_btn button').trigger('click');
     updateCookies();
 });
-//-----------------------------------------------------------------------------
+// -----------------------------------------------------------------------------
 // Show/hide components
 
 registerKeyHandler({ name: 'Open Next Component', code: 'ArrowDown' }, (e) => {
@@ -1204,7 +1200,7 @@ registerKeyHandler({ name: 'Open Previous Component', code: 'ArrowUp' }, (e) => 
     if (openComponentId === NO_COMPONENT_ID) {
         // No Component is open, so open the overall comment
         // Targets the box outside of the container, can use tab to focus comment
-        //TODO: Add "Overall Comment" focusing, control
+        // TODO: Add "Overall Comment" focusing, control
         scrollToOverallComment();
     }
     else if (openComponentId === getComponentIdByOrder(0)) {
@@ -1226,7 +1222,7 @@ registerKeyHandler({ name: 'Open Previous Component', code: 'ArrowUp' }, (e) => 
     e.preventDefault();
 });
 
-//-----------------------------------------------------------------------------
+// -----------------------------------------------------------------------------
 // Misc rubric options
 registerKeyHandler({ name: 'Toggle Rubric Edit Mode', code: 'KeyE' }, () => {
     const editBox = $('#edit-mode-enabled');
@@ -1235,7 +1231,7 @@ registerKeyHandler({ name: 'Toggle Rubric Edit Mode', code: 'KeyE' }, () => {
     updateCookies();
 });
 
-//-----------------------------------------------------------------------------
+// -----------------------------------------------------------------------------
 // Selecting marks
 
 registerKeyHandler({ name: 'Select Full/No Credit Mark', code: 'Digit0', locked: true }, () => {
@@ -1273,7 +1269,7 @@ function checkOpenComponentMark(index) {
     const component_id = getFirstOpenComponentId();
     if (component_id !== NO_COMPONENT_ID) {
         const mark_id = getMarkIdFromOrder(component_id, index);
-        //TODO: Custom mark id is zero as well, should use something unique
+        // TODO: Custom mark id is zero as well, should use something unique
         if (mark_id === CUSTOM_MARK_ID || mark_id === 0) {
             return;
         }
@@ -1285,17 +1281,15 @@ function checkOpenComponentMark(index) {
     }
 }
 
-
 // expand all files in Submissions and Results section
 function openAll(click_class, class_modifier) {
-
     const toClose = $(`#div_viewer_${$(`.${click_class}${class_modifier}`).attr('data-viewer_id')}`).hasClass('open');
 
     $('#submission_browser').find(`.${click_class}${class_modifier}`).each(function () {
         // Check that the file is not a PDF before clicking on it
         const viewerID = $(this).attr('data-viewer_id');
-        if (($(this).parent().hasClass('file-viewer') && $(`#file_viewer_${viewerID}`).hasClass('shown') === toClose) ||
-            ($(this).parent().hasClass('div-viewer') && $(`#div_viewer_${viewerID}`).hasClass('open') === toClose)) {
+        if (($(this).parent().hasClass('file-viewer') && $(`#file_viewer_${viewerID}`).hasClass('shown') === toClose)
+            || ($(this).parent().hasClass('div-viewer') && $(`#div_viewer_${viewerID}`).hasClass('open') === toClose)) {
             const innerText = Object.values($(this))[0].innerText;
             if (innerText.slice(-4) !== '.pdf') {
                 $(this).click();
@@ -1313,7 +1307,6 @@ function updateValue(obj, option1, option2) {
             return oldText.replace(option2, option1);
         }
     });
-
 }
 function openAutoGrading(num) {
     $(`#tc_${num}`).click();
@@ -1392,7 +1385,7 @@ function findOpenTestcases() {
     return testcase_num;
 }
 
-//finds all the open files and folder and stores them in stored_paths
+// finds all the open files and folder and stores them in stored_paths
 function findAllOpenedFiles(elem, current_path, path, stored_paths, first) {
     if (first === true) {
         current_path += path;
@@ -1413,7 +1406,6 @@ function findAllOpenedFiles(elem, current_path, path, stored_paths, first) {
                 stored_paths.push((`${current_path}#$SPLIT#$${$(this)[0].dataset.file_name}`));
             }
         });
-
     });
 
     $(elem).children().each(function () {
@@ -1571,7 +1563,6 @@ function imageRotateIcons(iframe) {
                 rotateImage(iframeTarget.attr('src'), 'none');
             }
         }
-
     }
 }
 
@@ -1634,7 +1625,7 @@ function openFrame(html_file, url_file, num, pdf_full_panel = true, panel = 'sub
 }
 
 const fileFullPanelOptions = {
-    submission: { //Main viewer (submission panel)
+    submission: { // Main viewer (submission panel)
         viewer: '#viewer',
         fileView: '#file-view',
         gradingFileName: '#grading_file_name',
@@ -1647,14 +1638,14 @@ const fileFullPanelOptions = {
         imageRotateBar: '#image-rotate-icons-bar',
         pdf: true,
     },
-    notebook: { //Notebook panel
+    notebook: { // Notebook panel
         viewer: '#notebook-viewer',
         fileView: '#notebook-file-view',
         gradingFileName: '#notebook_grading_file_name',
         panel: '#notebook_view',
         innerPanel: '#notebook-main-view',
-        pdfAnnotationBar: '#notebook_pdf_annotation_bar', //TODO
-        saveStatus: '#notebook_save_status', //TODO
+        pdfAnnotationBar: '#notebook_pdf_annotation_bar', // TODO
+        saveStatus: '#notebook_save_status', // TODO
         fileContent: '#notebook-file-content',
         fullPanel: 'notebook_full_panel',
         imageRotateBar: '#notebook-image-rotate-icons-bar',
@@ -1675,9 +1666,9 @@ function viewFileFullPanel(name, path, page_num = 0, panel = 'submission') {
     $(fileFullPanelOptions[panel]['gradingFileName']).html(name);
     const precision = $(fileFullPanelOptions[panel]['panel']).width() - $(fileFullPanelOptions[panel]['innerPanel']).width();
     const offset = $(fileFullPanelOptions[panel]['panel']).width() - precision;
-    $(fileFullPanelOptions[panel]['innerPanel']).animate({ 'left': `+=${-offset}px` }, 200);
+    $(fileFullPanelOptions[panel]['innerPanel']).animate({ left: `+=${-offset}px` }, 200);
     $(fileFullPanelOptions[panel]['innerPanel']).hide();
-    $(fileFullPanelOptions[panel]['fileView']).animate({ 'left': `+=${-offset}px` }, 200).promise();
+    $(fileFullPanelOptions[panel]['fileView']).animate({ left: `+=${-offset}px` }, 200).promise();
     return promise;
 }
 
@@ -1694,12 +1685,12 @@ function loadPDF(name, path, page_num, panel = 'submission') {
             type: 'POST',
             url: buildCourseUrl(['gradeable', gradeable_id, 'grading', 'pdf']),
             data: {
-                'user_id': anon_submitter_id,
-                'filename': name,
-                'file_path': path,
-                'page_num': page_num,
-                'is_anon': true,
-                'csrf_token': csrfToken,
+                user_id: anon_submitter_id,
+                filename: name,
+                file_path: path,
+                page_num: page_num,
+                is_anon: true,
+                csrf_token: csrfToken,
             },
             success: function (data) {
                 $('#file-content').append(data);
@@ -1722,7 +1713,7 @@ function loadPDF(name, path, page_num, panel = 'submission') {
 }
 
 function collapseFile(panel = 'submission') {
-    //Removing these two to reset the full panel viewer.
+    // Removing these two to reset the full panel viewer.
     $(`#file_viewer_${fileFullPanelOptions[panel]['fullPanel']}`).remove();
     if (fileFullPanelOptions[panel]['pdf']) {
         $('#content-wrapper').remove();
@@ -1733,8 +1724,8 @@ function collapseFile(panel = 'submission') {
     $(fileFullPanelOptions[panel]['innerPanel']).show();
     const offset1 = $(fileFullPanelOptions[panel]['innerPanel']).css('left');
     const offset2 = $(fileFullPanelOptions[panel]['innerPanel']).width();
-    $(fileFullPanelOptions[panel]['innerPanel']).animate({ 'left': `-=${offset1}` }, 200);
-    $(fileFullPanelOptions[panel]['fileView']).animate({ 'left': `+=${offset2}px` }, 200, () => {
+    $(fileFullPanelOptions[panel]['innerPanel']).animate({ left: `-=${offset1}` }, 200);
+    $(fileFullPanelOptions[panel]['fileView']).animate({ left: `+=${offset2}px` }, 200, () => {
         $(fileFullPanelOptions[panel]['fileView']).css('left', '');
         $(fileFullPanelOptions[panel]['fileView']).hide();
     });

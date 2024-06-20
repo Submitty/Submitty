@@ -1,5 +1,5 @@
 /* exported NUM_MARKDOWN, Widget */
-let NUM_MARKDOWN = 0;
+const NUM_MARKDOWN = 0;
 
 class Widget {
     /**
@@ -97,7 +97,7 @@ class Widget {
         const container = document.createElement('div');
         container.classList.add('widget-controls');
 
-        ['Up', 'Down', 'Remove'].forEach(label => {
+        ['Up', 'Down', 'Remove'].forEach((label) => {
             const btn = this.getButton(label);
             btn.widget = this;
             container.appendChild(btn);

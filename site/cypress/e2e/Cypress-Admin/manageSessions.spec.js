@@ -17,9 +17,9 @@ describe('Test cases revolving around session management page', () => {
         cy.url().should('include', 'authentication/login');
         cy.login();
         cy.visit('/manage_sessions');
-        cy.get('table[id=sessions-table] tbody tr').its('length').then(numSessions => {
+        cy.get('table[id=sessions-table] tbody tr').its('length').then((numSessions) => {
             cy.get('tr[id="current-session-row"]').siblings().eq(0).find('input[value="Logout"]').click();
-            cy.get('table[id=sessions-table] tbody tr').should('have.length', numSessions-1);
+            cy.get('table[id=sessions-table] tbody tr').should('have.length', numSessions - 1);
         });
     });
 

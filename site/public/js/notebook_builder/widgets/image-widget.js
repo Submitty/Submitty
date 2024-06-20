@@ -111,12 +111,12 @@ class ImageWidget extends Widget {
 
         this.attachImageOnLoadHandler(image, image_container);
 
-        reader.onload = event => {
+        reader.onload = (event) => {
             image.src = event.target.result;
             image_container.prepend(image);
         };
 
-        file_selector.onchange = event => {
+        file_selector.onchange = (event) => {
             const file = event.target.files[0];
 
             if (file) {

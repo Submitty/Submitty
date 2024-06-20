@@ -43,7 +43,7 @@ describe('Cyclic grading View Test', () => {
             cy.get('[data-testid="tab-bar-wrapper"]').children().its('length').should('eq', 3);
             cy.get('#page_1_nav').should('contain', 'Ben Bitdiddle');
             cy.get('#page_2_nav').should('contain', 'Dannie Farrell');
-            cy.get('#page_3_nav').should('contain',  'Adan Fisher');
+            cy.get('#page_3_nav').should('contain', 'Adan Fisher');
             cy.get('[data-testid="grading-panel-student-name"]').should('contain', 'Ben Bitdiddle').and('contain', 'Dannie Farrell').and('contain', 'Adan Fisher');
             cy.get('[data-testid="next-student-navlink"]').click();
             cy.get('[data-testid="tab-bar-wrapper"]').children().its('length').should('eq', 3);

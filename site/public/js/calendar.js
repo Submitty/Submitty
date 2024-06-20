@@ -44,11 +44,11 @@ function setDateToToday() {
     const type = $('#calendar-item-type-edit').val();
     const currentDay = new Date();
     Cookies.set('calendar_year', currentDay.getFullYear());
-    Cookies.set('calendar_month', currentDay.getMonth()+1);
+    Cookies.set('calendar_month', currentDay.getMonth() + 1);
     Cookies.set('calendar_day', currentDay.getDate());
 
     const cookie_year = currentDay.getFullYear();
-    const cookie_month = currentDay.getMonth()+1;
+    const cookie_month = currentDay.getMonth() + 1;
     const cookie_day = currentDay.getDate();
 
     loadCalendar(cookie_month, cookie_year, cookie_day, type);
@@ -211,8 +211,8 @@ function generateCalendarItem(item) {
         }
 
         // Put detail in the tooltip
-        tooltip = `Course: ${item['course']}&#10;` +
-            `Title: ${item['title']}&#10;`;
+        tooltip = `Course: ${item['course']}&#10;`
+        + `Title: ${item['title']}&#10;`;
         if (item['status_note'] !== '') {
             tooltip += `Status: ${item['status_note']}&#10;`;
         }
@@ -391,7 +391,6 @@ function deleteGlobalCalendarItem() {
     }
 }
 
-
 /**
  * Creates a HTML table cell that contains a date.
  *
@@ -402,11 +401,11 @@ function deleteGlobalCalendarItem() {
  * @param view_semester : boolean if the calendar is viewing the entire semester. If so, the day cell would show both the month and date
  * @returns {HTMLElement} the HTML Element containing the cell
  */
-function generateDayCell(year, month, day, curr_view_month, view_mode, view_semester=false) {
+function generateDayCell(year, month, day, curr_view_month, view_mode, view_semester = false) {
     const cell_date_str = dateToStr(year, month, day);
 
     const content = document.createElement('td');
-    //change the css of the cell based on the view mode:
+    // change the css of the cell based on the view mode:
     if (view_mode === 'month') {
         content.classList.add('cal-day-cell');
     }
@@ -709,7 +708,7 @@ function generateCalendarOfMonthWeek(view_year, view_month, view_day) {
     let print_day = 0;
 
     // Show days at the end of last month that belongs to the first week of current month
-    if (view_day-currentDay <= 0) {
+    if (view_day - currentDay <= 0) {
         for (let day = lastMonthStart; day <= lastMonthEnd; day++) {
             curRow.appendChild(generateDayCell(view_year, view_month - 1, day, view_month, 'week'));
             print_day++;
@@ -766,7 +765,7 @@ function generateCalendarOfMonthTwoWeek(view_year, view_month, view_day) {
     let print_day = 0;
 
     // Show days at the end of last month that belongs to the first week of current month
-    if (view_day-currentDay <= 0) {
+    if (view_day - currentDay <= 0) {
         for (let day = lastMonthStart; day <= lastMonthEnd; day++) {
             curRow.appendChild(generateDayCell(view_year, view_month - 1, day, view_month, 'twoweek'));
             print_day++;
@@ -836,7 +835,7 @@ function generateFullCalendar(start, end, semester_name) {
     let weekday = startWeekday;
     while ((endDate.getTime() - startDate.getTime()) >= 0) {
         // Shows each day of current month
-        curRow.appendChild(generateDayCell(currDate.getFullYear(), currDate.getMonth()+1, currDate.getDate(), 0, true));
+        curRow.appendChild(generateDayCell(currDate.getFullYear(), currDate.getMonth() + 1, currDate.getDate(), 0, true));
         if (weekday === 6) {
             weekday = 0;
             // Next week should show on next line
@@ -859,7 +858,6 @@ function generateFullCalendar(start, end, semester_name) {
     table.appendChild(tableBody);
     return table;
 }
-
 
 /**
  * Changes the calendar div to the required month and year.
@@ -910,24 +908,24 @@ function openNewGlobalEventModal() {
 function openOptionsModal() {
     $('#calendar-options-form').css('display', 'block');
     setOptionsValues();
-    //Make color dropdowns change colors when values are changed
+    // Make color dropdowns change colors when values are changed
     $('.course-color-picker').on('change', function () {
         $(this).css('background-color', $(this).val());
     });
 }
 
-//checks proper tick marks in modal
+// checks proper tick marks in modal
 function setOptionsValues() {
-    //Courses filter
+    // Courses filter
     const showAll = loadShowAllCoursesCookie();
-    if (showAll) { //if show all is true, tick off show all
+    if (showAll) { // if show all is true, tick off show all
         document.getElementById('filter-courses-menu').value = 'show all';
     }
-    else { //if show all if false, select a specific course
+    else { // if show all if false, select a specific course
         document.getElementById('filter-courses-menu').value = loadCurrentCourseCookie();
     }
-    //Course Colors
-    $('.course-color-picker').each(function() {
+    // Course Colors
+    $('.course-color-picker').each(function () {
         const selected_color = Cookies.get(`calendar_color_${$(this).attr('id').slice(6)}`);
         $(this).css('background-color', selected_color);
         $(this).val(selected_color);
@@ -949,7 +947,7 @@ function updateCalendarOptions() {
 }
 
 function saveOptions() {
-    //Courses Filter
+    // Courses Filter
     const courses_val = document.getElementById('filter-courses-menu').value;
     if (courses_val === 'show all') {
         Cookies.set('calendar_show_all', '1', { expires: 365 });
@@ -958,12 +956,12 @@ function saveOptions() {
         Cookies.set('calendar_show_all', '0', { expires: 365 });
         Cookies.set('calendar_course', courses_val, { expires: 365 });
     }
-    //Course Colors
-    $('.course-color-picker').each(function() {
+    // Course Colors
+    $('.course-color-picker').each(function () {
         const cname = `calendar_color_${$(this).attr('id').slice(6)}`;
         Cookies.set(cname, $(this).val(), { expires: 365 });
     });
-    //Legend
+    // Legend
     const legend_val = document.getElementById('show-legend-box').checked;
     if (legend_val) {
         Cookies.set('show_legend', '1', { expires: 365 });
@@ -973,9 +971,9 @@ function saveOptions() {
     }
 }
 
-//Adds Color to Legend
+// Adds Color to Legend
 function colorLegend() {
-    $('.legend-color').each( function () {
+    $('.legend-color').each(function () {
         $(this).css('background-color', Cookies.get(`calendar_color_${$(this).attr('name')}`));
     });
 }

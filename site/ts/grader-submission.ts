@@ -5,15 +5,14 @@
  * like bulk upload, so for certain UI elements their presence needs to be checked like the QR input fields or file dropzones
  */
 
-
 // TODO: this should be removed as the file upload logic is moved into a module
 declare global {
-    interface Window{
+    interface Window {
         file_array: File[][];
         num_submission_boxes: number;
         deleteFiles(part: number): void;
-        addFile(file: File, part: number, check_duplicate_zip: boolean):void;
-        loadPreviousFilesOnDropBoxes():void;
+        addFile(file: File, part: number, check_duplicate_zip: boolean): void;
+        loadPreviousFilesOnDropBoxes(): void;
         gradeable_id: string;
     }
 }
@@ -25,10 +24,10 @@ function init() {
         .forEach(radio_btn => radio_btn.addEventListener('click', changeSubmissionMode));
 
     if (warning_banner) {
-        warning_banner!.textContent = '';
+        warning_banner.textContent = '';
     }
 
-    //load previous setting if any
+    // load previous setting if any
     const prevSetting = sessionStorage.getItem(`${window.gradeable_id}-submission_mode`);
     if (prevSetting) {
         if (prevSetting === 'normal') {
@@ -49,10 +48,10 @@ function init() {
 
     if (qrPrefixInput) {
         qrPrefixInput.addEventListener('change', (event: Event) => {
-            sessionStorage.setItem(`${window.gradeable_id}-qr-prefix`, (event.target as HTMLInputElement).value );
+            sessionStorage.setItem(`${window.gradeable_id}-qr-prefix`, (event.target as HTMLInputElement).value);
         });
         qrSuffixInput.addEventListener('change', (event: Event) => {
-            sessionStorage.setItem(`${window.gradeable_id}-qr-suffix`, (event.target as HTMLInputElement).value );
+            sessionStorage.setItem(`${window.gradeable_id}-qr-suffix`, (event.target as HTMLInputElement).value);
         });
     }
 
@@ -82,7 +81,6 @@ function init() {
     }
 }
 
-
 /**
  * handle switching between normal, submit for student, and bulk upload modes
  */
@@ -104,13 +102,13 @@ function changeSubmissionMode(event: Event) {
         useScanIdsCheckBox.checked = false;
     }
 
-    if (window.file_array[0] && window.file_array[0].length > 0) {
+    if (window.file_array[0] && (window.file_array as File[][])[0].length > 0) {
         if (!confirm('Switching submission modes will remove all unsubmitted files, are you sure?')) {
             return;
         }
     }
 
-    //remove all files in each submission box
+    // remove all files in each submission box
     for (let idx = 1; idx <= window.num_submission_boxes; idx++) {
         window.deleteFiles(idx);
     }
@@ -153,24 +151,23 @@ function changeSubmissionMode(event: Event) {
     }
 
     if (warning_banner) {
-        if (!warning_banner!.hasChildNodes()) {
-            const child = warning_banner!.appendChild( document.createElement('h2') );
+        if (!warning_banner.hasChildNodes()) {
+            const child = warning_banner.appendChild(document.createElement('h2'));
             child.classList.add('warning');
         }
 
-        warning_banner!.firstChild!.textContent = message;
+        warning_banner.firstChild!.textContent = message;
     }
 }
 
-
-function switchBulkUploadOptions(event : Event) {
+function switchBulkUploadOptions(event: Event) {
     const element = event.target as HTMLInputElement;
     const scanIdsOpts = document.getElementById('toggle-id-scan');
     const useScanIdsCheckBox = document.getElementById('use-ocr') as HTMLInputElement | null;
     const numericUploadOpts = document.getElementById('numeric-split-opts');
     const qrUploadOpts = document.getElementById('qr-split-opts');
 
-    sessionStorage.setItem(`${window.gradeable_id}-bulk_setting`, element.checked ? 'qr' : 'numeric' );
+    sessionStorage.setItem(`${window.gradeable_id}-bulk_setting`, element.checked ? 'qr' : 'numeric');
 
     if (useScanIdsCheckBox !== null) {
         useScanIdsCheckBox.checked = sessionStorage.getItem(`${window.gradeable_id}-scan_setting`) === 'true';
@@ -197,6 +194,4 @@ document.addEventListener('DOMContentLoaded', () => init());
 
 // export or import statement required to modify Window interface to global scope
 // otherwise TypeScript will assume everything in the file is in the global scope
-export {
-
-};
+export { };

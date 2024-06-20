@@ -8,8 +8,8 @@ class ItemWidget extends Widget {
         this.dom_pointer;
 
         this.state = {
-            'type': 'item',
-            'from_pool': [],
+            type: 'item',
+            from_pool: [],
         };
     }
 
@@ -33,7 +33,7 @@ class ItemWidget extends Widget {
         }
 
         this.state.from_pool = [];
-        this.dom_pointer.querySelectorAll('input[type=checkbox]:checked').forEach(checkbox => {
+        this.dom_pointer.querySelectorAll('input[type=checkbox]:checked').forEach((checkbox) => {
             this.state.from_pool.push(checkbox.value);
         });
 
@@ -66,7 +66,7 @@ class ItemWidget extends Widget {
 
         const from_pool_div = interactive_area.querySelector('.from-pool-div');
 
-        document.querySelectorAll('.item-name-input').forEach(item_name_input => {
+        document.querySelectorAll('.item-name-input').forEach((item_name_input) => {
             const checkbox = document.createElement('input');
             checkbox.type = 'checkbox';
             checkbox.value = item_name_input.value;

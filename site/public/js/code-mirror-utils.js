@@ -20,7 +20,7 @@ function getLargeCodeMirror(attachment_elem, codemirror_config) {
     // highlight.  This is not desirable when collecting plain text.
     if (!codemirror_config.mode) {
         CodeMirrorSpellChecker({
-            codeMirrorInstance:  CodeMirror,
+            codeMirrorInstance: CodeMirror,
         });
         codemirror_config.lineWrapping = true;
         codemirror_config.mode = 'spell-checker';
@@ -46,7 +46,7 @@ function getSmallCodeMirror(attachment_elem, codemirror_config) {
     codemirror_config.mode = 'spell-checker';
 
     CodeMirrorSpellChecker({
-        codeMirrorInstance:  CodeMirror,
+        codeMirrorInstance: CodeMirror,
     });
 
     const cm = CodeMirror(attachment_elem, codemirror_config);
@@ -100,7 +100,7 @@ function makeCodeMirrorAccessible(cm, advance_key) {
  */
 function disableEnterKey(cm) {
     cm.addKeyMap({
-        'Enter': () => { /** Pass */ },
+        Enter: () => { /** Pass */ },
     });
 }
 
@@ -112,7 +112,6 @@ function disableEnterKey(cm) {
  * @returns {number} A pixel value which can be used to control the height of the codemirror box.
  */
 function rowsToPixels(rows) {
-
     // Originally was 16 (set to look good on Linux ?)
     // return rows * 16;
 

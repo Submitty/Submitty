@@ -37,7 +37,7 @@ function syncWithServer(criticalSync) {
         type: 'GET',
         processData: false,
         contentType: false,
-        success: function(res) {
+        success: function (res) {
             lastTime = Date.now();
             let response = {};
 
@@ -99,21 +99,20 @@ function syncWithServer(criticalSync) {
     }
 }
 function checkDeadline() {
-
     if (Math.abs(Date.now() - lastTime) > 5000) {
-        //we need to sync back up
+        // we need to sync back up
         syncWithServer(true);
     }
     if (ticks_till_update <= 0) {
         syncWithServer(false);
     }
     else {
-        curTime += (Date.now()-lastTime);
+        curTime += (Date.now() - lastTime);
         const time = Math.abs(Math.floor((curTime - deadline) / 1000));
         const days = Math.floor(time / (3600 * 24));
         if (document.getElementById('gradeable-time-remaining-text') !== null) {
             if (curTime > deadline) {
-                return 1+days;
+                return 1 + days;
             }
         }
     }
@@ -122,34 +121,34 @@ function checkDeadline() {
 
 function updateTime() {
     if (Math.abs(Date.now() - lastTime) > 5000) {
-        //we need to sync back up
+        // we need to sync back up
         syncWithServer(true);
     }
     if (ticks_till_update <= 0) {
         syncWithServer(false);
     }
     else {
-        curTime += (Date.now()-lastTime);
-        ticks_till_update -= (Date.now()-lastTime);
+        curTime += (Date.now() - lastTime);
+        ticks_till_update -= (Date.now() - lastTime);
         lastTime = Date.now();
         if (document.getElementById('gradeable-time-remaining-text') !== null) {
             if (curTime > deadline) {
                 document.getElementById('gradeable-time-remaining-text').textContent = 'Gradeable Time Remaining: Past Due';
             }
             else {
-                const time = Math.floor((deadline - curTime)/1000);
+                const time = Math.floor((deadline - curTime) / 1000);
                 seconds = time % 60;
                 mins = Math.floor(time / 60) % 60;
                 hours = Math.floor(time / 3600) % 24;
-                days = Math.floor(time / (3600*24));
+                days = Math.floor(time / (3600 * 24));
                 if (days > 0) {
-                    document.getElementById('gradeable-time-remaining-text').textContent = `Gradeable Time Remaining: ${days.toLocaleString('en-US', {minimumIntegerDigits: 2, useGrouping: false})} days ${hours.toLocaleString('en-US', {minimumIntegerDigits: 2, useGrouping: false})} hours`;
+                    document.getElementById('gradeable-time-remaining-text').textContent = `Gradeable Time Remaining: ${days.toLocaleString('en-US', { minimumIntegerDigits: 2, useGrouping: false })} days ${hours.toLocaleString('en-US', { minimumIntegerDigits: 2, useGrouping: false })} hours`;
                 }
                 else if (hours > 0) {
-                    document.getElementById('gradeable-time-remaining-text').textContent = `Gradeable Time Remaining: ${hours.toLocaleString('en-US', {minimumIntegerDigits: 2, useGrouping: false})} hours ${mins.toLocaleString('en-US', {minimumIntegerDigits: 2, useGrouping: false})} mins`;
+                    document.getElementById('gradeable-time-remaining-text').textContent = `Gradeable Time Remaining: ${hours.toLocaleString('en-US', { minimumIntegerDigits: 2, useGrouping: false })} hours ${mins.toLocaleString('en-US', { minimumIntegerDigits: 2, useGrouping: false })} mins`;
                 }
                 else {
-                    document.getElementById('gradeable-time-remaining-text').textContent = `Gradeable Time Remaining: ${mins.toLocaleString('en-US', {minimumIntegerDigits: 2, useGrouping: false})} mins ${seconds.toLocaleString('en-US', {minimumIntegerDigits: 2, useGrouping: false})} seconds`;
+                    document.getElementById('gradeable-time-remaining-text').textContent = `Gradeable Time Remaining: ${mins.toLocaleString('en-US', { minimumIntegerDigits: 2, useGrouping: false })} mins ${seconds.toLocaleString('en-US', { minimumIntegerDigits: 2, useGrouping: false })} seconds`;
                 }
             }
         }
@@ -161,11 +160,11 @@ function updateTime() {
                     document.getElementById('gradeable-progress-bar').style.width = '100%';
                 }
                 else {
-                    const time = Math.floor((user_deadline - curTime)/1000);
+                    const time = Math.floor((user_deadline - curTime) / 1000);
                     seconds = time % 60;
                     mins = Math.floor(time / 60) % 60;
                     hours = Math.floor(time / 3600) % 24;
-                    days = Math.floor(time / (3600*24));
+                    days = Math.floor(time / (3600 * 24));
                     width = ((Date.now() - startTime) / 1000 / 60 / allowedTime * 100) * 0.95 + 5;
                     if (width > 75 && width < 90) {
                         document.getElementById('gradeable-progress-bar').style.backgroundColor = 'var(--standard-vibrant-yellow)';
@@ -175,13 +174,13 @@ function updateTime() {
                     }
                     document.getElementById('gradeable-progress-bar').style.width = `${width}%`;
                     if (days > 0) {
-                        document.getElementById('time-remaining-text').textContent = `Your Time Remaining: ${days.toLocaleString('en-US', {minimumIntegerDigits: 2, useGrouping: false})} days ${hours.toLocaleString('en-US', {minimumIntegerDigits: 2, useGrouping: false})} hours`;
+                        document.getElementById('time-remaining-text').textContent = `Your Time Remaining: ${days.toLocaleString('en-US', { minimumIntegerDigits: 2, useGrouping: false })} days ${hours.toLocaleString('en-US', { minimumIntegerDigits: 2, useGrouping: false })} hours`;
                     }
                     else if (hours > 0) {
-                        document.getElementById('time-remaining-text').textContent = `Your Time Remaining: ${hours.toLocaleString('en-US', {minimumIntegerDigits: 2, useGrouping: false})} hours ${mins.toLocaleString('en-US', {minimumIntegerDigits: 2, useGrouping: false})} mins`;
+                        document.getElementById('time-remaining-text').textContent = `Your Time Remaining: ${hours.toLocaleString('en-US', { minimumIntegerDigits: 2, useGrouping: false })} hours ${mins.toLocaleString('en-US', { minimumIntegerDigits: 2, useGrouping: false })} mins`;
                     }
                     else {
-                        document.getElementById('time-remaining-text').textContent = `Your Time Remaining: ${mins.toLocaleString('en-US', {minimumIntegerDigits: 2, useGrouping: false})} mins ${seconds.toLocaleString('en-US', {minimumIntegerDigits: 2, useGrouping: false})} seconds`;
+                        document.getElementById('time-remaining-text').textContent = `Your Time Remaining: ${mins.toLocaleString('en-US', { minimumIntegerDigits: 2, useGrouping: false })} mins ${seconds.toLocaleString('en-US', { minimumIntegerDigits: 2, useGrouping: false })} seconds`;
                     }
                 }
             }

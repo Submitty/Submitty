@@ -58,7 +58,7 @@ export async function runSqlQuery() {
         data.forEach((row, idx) => {
             const bodyRow = document.createElement('tr');
             const cell = document.createElement('td');
-            cell.textContent = idx+1;
+            cell.textContent = idx + 1;
             bodyRow.appendChild(cell);
             Object.values(row).forEach((val) => {
                 const cell = document.createElement('td');
@@ -79,7 +79,7 @@ export async function runSqlQuery() {
 export function generateCSV(id) {
     const results = document.getElementById(id);
     let csv = '';
-    //Add headers to CSV string
+    // Add headers to CSV string
     const header = results.children.item(0);
     const row = header.children.item(0);
     for (let i = 1; i < row.children.length; i++) {
@@ -87,7 +87,7 @@ export function generateCSV(id) {
     }
     csv += '\n';
 
-    //Add data to CSV string
+    // Add data to CSV string
     const data = results.children.item(1);
     for (let i = 0; i < data.children.length; i++) {
         const row = data.children.item(i);
@@ -101,7 +101,7 @@ export function generateCSV(id) {
 
 export async function downloadSqlResult(id) {
     const csv = generateCSV(id);
-    //Encode and download the CSV string
+    // Encode and download the CSV string
     const address = `data:text/csv;charset=utf-8,${encodeURIComponent(csv)}`;
     const filename = 'submitty.csv';
     const temp_element = document.createElement('a');
@@ -116,15 +116,17 @@ export async function downloadSqlResult(id) {
 export function init() {
     document.getElementById('run-sql-btn').addEventListener('click', () => runSqlQuery());
     document.getElementById('sql-database-schema').addEventListener('click', () => {
-        document.getElementById('sql-database-schema-content').style.display =
-            document.getElementById('sql-database-schema-content').style.display === 'block'
-                ? 'none' : 'block';
+        document.getElementById('sql-database-schema-content').style.display
+            = document.getElementById('sql-database-schema-content').style.display === 'block'
+                ? 'none'
+                : 'block';
     });
     document.querySelectorAll('.sql-database-table').forEach((elem) => {
         elem.addEventListener('click', (e) => {
-            e.target.nextElementSibling.style.display =
-                e.target.nextElementSibling.style.display === 'block'
-                    ? 'none' : 'block';
+            e.target.nextElementSibling.style.display
+                = e.target.nextElementSibling.style.display === 'block'
+                    ? 'none'
+                    : 'block';
         });
     });
     document.getElementById('download-sql-btn').addEventListener('click', () => downloadSqlResult('query-results'));

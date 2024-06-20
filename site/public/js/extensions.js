@@ -24,7 +24,7 @@ function updateHomeworkExtension() {
         processData: false,
         cache: false,
         contentType: false,
-        success: function(data) {
+        success: function (data) {
             let json;
             try {
                 json = JSON.parse(data);
@@ -40,7 +40,7 @@ function updateHomeworkExtension() {
                 window.location = window.location; // pseudo post/redirect/get pattern
             }
         },
-        error: function() {
+        error: function () {
             window.alert('Something went wrong. Please try again.');
         },
     });
