@@ -7,7 +7,7 @@ use app\libraries\database\AbstractDatabase;
 use app\libraries\database\PostgresqlDatabase;
 use app\libraries\database\SqliteDatabase;
 use app\libraries\FileUtils;
-use PDO;
+use Doctrine\DBAL\Connection;
 
 class AbstractDatabaseTester extends \PHPUnit\Framework\TestCase {
     private $queries = [
@@ -27,7 +27,7 @@ class AbstractDatabaseTester extends \PHPUnit\Framework\TestCase {
     public function testGetConnection() {
         $database = new SqliteDatabase(['memory' => true]);
         $database->connect();
-        $this->assertInstanceOf(PDO::class, $database->getConnection());
+        $this->assertInstanceOf(Connection::class, $database->getConnection());
     }
 
     public function testThrowsOnNoConnection() {
@@ -41,7 +41,7 @@ class AbstractDatabaseTester extends \PHPUnit\Framework\TestCase {
         $database = new SqliteDatabase(['memory' => true]);
 
         $this->assertFalse($database->isConnected());
-        $database->connect();
+        $database->connect(true);
         $this->assertTrue($database->isConnected());
 
         $this->setupDatabase($database);
@@ -181,7 +181,7 @@ SELECT * FROM test");
 
     public function testPrintQueries() {
         $database = new SqliteDatabase(['memory' => true]);
-        $database->connect();
+        $database->connect(true);
         $database->query("CREATE TABLE test(pid integer PRIMARY KEY, tcol text NOT NULL)");
         $database->query("INSERT INTO test VALUES (?, ?)", [1, 'a']);
         $this->assertEquals([
@@ -278,44 +278,11 @@ SELECT * FROM test ORDER BY pid");
         $this->assertNull($iterator->next());
     }
 
-    public function testTransform() {
-        $columns = [
-            'pid' => [
-                'native_type' => 'integer',
-                'table' => 'test',
-                'flags' => [],
-                'name' => 'pid',
-                'pdo_type' => \PDO::PARAM_STR
-            ],
-            'tcol' => [
-                'native_type' => 'string',
-                'table' => 'test',
-                'flags' => [],
-                'name' => 'tcol',
-                'pdo_type' => \PDO::PARAM_STR
-            ],
-            'bcol' => [
-                'native_type' => 'boolean',
-                'table' => 'test',
-                'flags' => [],
-                'name' => 'bcol',
-                'pdo_type' => \PDO::PARAM_STR
-            ]
-        ];
-        $result = [
-            'pid' => '1',
-            'tcol' => 'a',
-            'bcol' => 'true'
-        ];
-        $database = new SqliteDatabase();
-        $result = $database->transformResult($result, $columns);
-        $this->assertSame(['pid' => 1, 'tcol' => 'a', 'bcol' => true], $result);
-    }
-
     public function testInvalidDSN() {
         $database = new PostgresqlDatabase(['dbname' => 'invalid_db']);
         $this->expectException(\app\exceptions\DatabaseException::class);
         $database->connect();
+        $database->query("SELECT * FROM test");
     }
 
     public function testBadQuery() {

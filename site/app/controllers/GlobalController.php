@@ -6,6 +6,7 @@ use app\libraries\FileUtils;
 use app\models\Button;
 use app\models\NavButton;
 use app\models\User;
+use app\entities\banner\BannerImage;
 
 class GlobalController extends AbstractController {
     public function header() {
@@ -19,7 +20,6 @@ class GlobalController extends AbstractController {
                 'csrf_token' => $this->core->getCsrfToken()
             ]);
         }, $wrapper_files);
-
         $breadcrumbs = $this->core->getOutput()->getBreadcrumbs();
         $page_name = $this->core->getOutput()->getPageName();
         $css = $this->core->getOutput()->getCss();
@@ -60,8 +60,23 @@ class GlobalController extends AbstractController {
 
         $now = $this->core->getDateTimeNow();
         $duck_img = $this->getDuckImage($now);
+        $repo = $this->core->getSubmittyEntityManager()->getRepository(BannerImage::class);
+        $bannerImages = $repo->getValidBannerImages();
 
-        return $this->core->getOutput()->renderTemplate('Global', 'header', $breadcrumbs, $wrapper_urls, $sidebar_buttons, $unread_notifications_count, $css->toArray(), $js->toArray(), $duck_img, $page_name, $content_only);
+        return $this->core->getOutput()->renderTemplate(
+            'Global',
+            'header',
+            $breadcrumbs,
+            $wrapper_urls,
+            $sidebar_buttons,
+            $unread_notifications_count,
+            $css->toArray(),
+            $js->toArray(),
+            $duck_img,
+            $page_name,
+            $content_only,
+            $bannerImages
+        );
     }
 
     // ==========================================================================================
@@ -419,6 +434,12 @@ class GlobalController extends AbstractController {
         // SUPERUSERS ONLY
         if ($this->core->getUser()->getAccessLevel() === User::LEVEL_SUPERUSER) {
             $sidebar_buttons[] = new NavButton($this->core, [
+                "href" => $this->core->buildUrl(['community_events']),
+                "title" => "Community Events",
+                "icon" => "fa-paper-plane"
+            ]);
+
+            $sidebar_buttons[] = new NavButton($this->core, [
                 "href" => $this->core->buildUrl(['superuser', 'gradeables']),
                 "title" => "Pending Gradeables",
                 "id" => "nav-sidebar-submitty",
@@ -493,7 +514,6 @@ class GlobalController extends AbstractController {
         switch ($month) {
             case 12:
                 //December (Christmas, Hanukkah)
-
                 $hanukkahStartDateTime = $this->calculateHanukkahDate($yearint);
                 $hanukkahEndDateTime = $this->calculateHanukkahDate($yearint);
                 $hanukkahEndDateTime->modify('+8 days');
@@ -556,14 +576,23 @@ class GlobalController extends AbstractController {
                 }
                 break;
             case 2:
+                $februaryImages = ['moorthy_duck/black-history-duck.svg'];
+                if ($day <= 3) {
+                    $februaryImages[] = 'moorthy_duck/party-duck/party-duck-10th.svg';
+                }
                 //Valentines (Hearts)
                 if ($day >= 11 && $day <= 17) {
-                    $duck_img = 'moorthy_duck/02-february.svg';
+                    $februaryImages[] = 'moorthy_duck/02-february.svg';
                 }
+                $duck_img = $februaryImages[array_rand($februaryImages)];
                 break;
             case 1:
                 //January (Snowflakes)
                 $duck_img = 'moorthy_duck/01-january.svg';
+
+                if ($day >= 28) {
+                    $duck_img = 'moorthy_duck/party-duck/party-duck-10th.svg';
+                }
                 break;
             default:
                 break;
