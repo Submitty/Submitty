@@ -16,7 +16,11 @@ module.exports = tseslint.config(
     },
     {
         // todo: actually fix these files instead of ignoring them
-        ignores: ['cypress/support/e2e.js', 'cypress/plugins/index.js', 'public/js/notebook_builder/widgets/widget.js'],
+        ignores: [
+            'cypress/support/e2e.js',
+            'cypress/plugins/index.js',
+            'public/js/notebook_builder/widgets/widget.js',
+        ],
     },
     {
         name: 'Base options for all files',
