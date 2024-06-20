@@ -119,7 +119,7 @@ describe('Test cases revolving around polls functionality', () => {
         cy.contains('Poll 1').siblings().last().click();
         // make sure all the page elements are there
         cy.get('.content > h1').contains('Poll 1');
-        cy.get('[data-cy="timer"]').contains('Poll Ended');
+        cy.get('[data-testid="timer"]').contains('Poll Ended');
         cy.get('.markdown').contains('What animals swim in the sea?');
         cy.get('#chartContainer').contains('Poll 1');
         cy.get('#chartContainer').contains('Dolphin');
