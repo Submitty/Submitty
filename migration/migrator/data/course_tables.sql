@@ -79,6 +79,7 @@ CREATE TABLE public.late_day_cache (
     late_day_exceptions integer,
     late_day_status integer,
     late_days_change integer NOT NULL,
+    reason_for_exception character varying(255),
     CONSTRAINT ldc_gradeable_info CHECK (((g_id IS NULL) OR ((submission_days_late IS NOT NULL) AND (late_day_exceptions IS NOT NULL))))
 );
 
@@ -414,7 +415,8 @@ CREATE FUNCTION public.grab_late_day_gradeables_for_user(user_id text) RETURNS S
 				CASE
 					WHEN lde.late_day_exceptions IS NULL THEN 0
 					ELSE lde.late_day_exceptions
-				END AS late_day_exceptions
+				END AS late_day_exceptions,
+				lde.reason_for_exception
 			FROM valid_gradeables vg
 			LEFT JOIN submitted_gradeables sg
 				ON vg.g_id=sg.g_id
@@ -430,6 +432,7 @@ CREATE FUNCTION public.grab_late_day_gradeables_for_user(user_id text) RETURNS S
 		returnrow.late_day_date = var_row.late_day_date;
 		returnrow.submission_days_late = var_row.submission_days_late;
 		returnrow.late_day_exceptions = var_row.late_day_exceptions;
+		returnrow.reason_for_exception = var_row.reason_for_exception;
 		RETURN NEXT returnrow;
         END LOOP;
         RETURN;	
@@ -595,6 +598,25 @@ CREATE FUNCTION public.random_string(length integer) RETURNS text
 
 
 --
+-- Name: update_previous_rotating_section(); Type: FUNCTION; Schema: public; Owner: -
+--
+
+CREATE FUNCTION public.update_previous_rotating_section() RETURNS trigger
+    LANGUAGE plpgsql
+    AS $$
+BEGIN
+	IF (
+		(NEW.rotating_section IS NULL AND OLD.rotating_section IS NOT NULL)
+		OR NEW.rotating_section != OLD.rotating_section
+	) THEN
+		NEW.previous_rotating_section := OLD.rotating_section;
+	END IF;
+	RETURN NEW;
+END;
+$$;
+
+
+--
 -- Name: autograding_metrics; Type: TABLE; Schema: public; Owner: -
 --
 
@@ -754,8 +776,29 @@ ALTER SEQUENCE public.course_materials_id_seq OWNED BY public.course_materials.i
 
 CREATE TABLE public.course_materials_sections (
     course_material_id integer NOT NULL,
-    section_id character varying(255) NOT NULL
+    section_id character varying(255) NOT NULL,
+    id integer NOT NULL
 );
+
+
+--
+-- Name: course_materials_sections_id_seq; Type: SEQUENCE; Schema: public; Owner: -
+--
+
+CREATE SEQUENCE public.course_materials_sections_id_seq
+    AS integer
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+--
+-- Name: course_materials_sections_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: -
+--
+
+ALTER SEQUENCE public.course_materials_sections_id_seq OWNED BY public.course_materials_sections.id;
 
 
 --
@@ -840,6 +883,18 @@ CREATE TABLE public.electronic_gradeable_version (
 
 
 --
+-- Name: forum_attachments; Type: TABLE; Schema: public; Owner: -
+--
+
+CREATE TABLE public.forum_attachments (
+    post_id integer NOT NULL,
+    file_name character varying NOT NULL,
+    version_added integer DEFAULT 1 NOT NULL,
+    version_deleted integer DEFAULT 0 NOT NULL
+);
+
+
+--
 -- Name: forum_posts_history; Type: TABLE; Schema: public; Owner: -
 --
 
@@ -847,7 +902,19 @@ CREATE TABLE public.forum_posts_history (
     post_id integer NOT NULL,
     edit_author character varying NOT NULL,
     content text NOT NULL,
-    edit_timestamp timestamp(0) with time zone NOT NULL
+    edit_timestamp timestamp(0) with time zone NOT NULL,
+    has_attachment boolean DEFAULT false,
+    version_id integer
+);
+
+
+--
+-- Name: forum_upducks; Type: TABLE; Schema: public; Owner: -
+--
+
+CREATE TABLE public.forum_upducks (
+    post_id integer NOT NULL,
+    user_id character varying(255) NOT NULL
 );
 
 
@@ -1227,7 +1294,8 @@ CREATE TABLE public.grading_rotating (
 CREATE TABLE public.late_day_exceptions (
     user_id character varying(255) NOT NULL,
     g_id character varying(255) NOT NULL,
-    late_day_exceptions integer NOT NULL
+    late_day_exceptions integer NOT NULL,
+    reason_for_exception character varying(255) DEFAULT ''::character varying
 );
 
 
@@ -1491,12 +1559,15 @@ CREATE TABLE public.polls (
     poll_id integer NOT NULL,
     name text NOT NULL,
     question text NOT NULL,
-    status text NOT NULL,
+    status text,
     release_date date NOT NULL,
     image_path text,
     question_type character varying(35) DEFAULT 'single-response-multiple-correct'::character varying,
     release_histogram character varying(10) DEFAULT 'never'::character varying,
-    release_answer character varying(10) DEFAULT 'never'::character varying
+    release_answer character varying(10) DEFAULT 'never'::character varying,
+    duration integer DEFAULT 0,
+    end_time timestamp with time zone,
+    is_visible boolean DEFAULT false NOT NULL
 );
 
 
@@ -1536,7 +1607,8 @@ CREATE TABLE public.posts (
     endorsed_by character varying,
     type integer NOT NULL,
     has_attachment boolean NOT NULL,
-    render_markdown boolean DEFAULT false NOT NULL
+    render_markdown boolean DEFAULT false NOT NULL,
+    version_id integer DEFAULT 1
 );
 
 
@@ -1810,6 +1882,7 @@ CREATE TABLE public.users (
     display_name_order character varying(255) DEFAULT 'GIVEN_F'::character varying NOT NULL,
     display_pronouns boolean DEFAULT false,
     user_preferred_locale character varying,
+    previous_rotating_section integer,
     CONSTRAINT check_registration_type CHECK (((registration_type)::text = ANY (ARRAY[('graded'::character varying)::text, ('audit'::character varying)::text, ('withdrawn'::character varying)::text, ('staff'::character varying)::text]))),
     CONSTRAINT users_user_group_check CHECK (((user_group >= 1) AND (user_group <= 4))),
     CONSTRAINT users_user_last_initial_format_check CHECK (((user_last_initial_format >= 0) AND (user_last_initial_format <= 3)))
@@ -1853,6 +1926,13 @@ ALTER TABLE ONLY public.course_materials ALTER COLUMN id SET DEFAULT nextval('pu
 --
 
 ALTER TABLE ONLY public.course_materials_access ALTER COLUMN id SET DEFAULT nextval('public.course_materials_access_id_seq'::regclass);
+
+
+--
+-- Name: course_materials_sections id; Type: DEFAULT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.course_materials_sections ALTER COLUMN id SET DEFAULT nextval('public.course_materials_sections_id_seq'::regclass);
 
 
 --
@@ -1982,6 +2062,14 @@ ALTER TABLE ONLY public.threads ALTER COLUMN id SET DEFAULT nextval('public.thre
 
 
 --
+-- Name: gradeable_teams anon_id_unique; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.gradeable_teams
+    ADD CONSTRAINT anon_id_unique UNIQUE (anon_id);
+
+
+--
 -- Name: autograding_metrics autograding_metrics_pkey; Type: CONSTRAINT; Schema: public; Owner: -
 --
 
@@ -2022,6 +2110,14 @@ ALTER TABLE ONLY public.course_materials
 
 
 --
+-- Name: course_materials_sections course_materials_sections_pkey; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.course_materials_sections
+    ADD CONSTRAINT course_materials_sections_pkey PRIMARY KEY (id);
+
+
+--
 -- Name: electronic_gradeable_data egd_g_user_team_id_unique; Type: CONSTRAINT; Schema: public; Owner: -
 --
 
@@ -2043,6 +2139,14 @@ ALTER TABLE ONLY public.electronic_gradeable_version
 
 ALTER TABLE ONLY public.electronic_gradeable
     ADD CONSTRAINT electronic_gradeable_g_id_pkey PRIMARY KEY (g_id);
+
+
+--
+-- Name: forum_upducks forum_upducks_user_id_post_id_key; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.forum_upducks
+    ADD CONSTRAINT forum_upducks_user_id_post_id_key UNIQUE (user_id, post_id);
 
 
 --
@@ -2302,14 +2406,6 @@ ALTER TABLE ONLY public.peer_feedback
 
 
 --
--- Name: course_materials_sections pk_course_material_section; Type: CONSTRAINT; Schema: public; Owner: -
---
-
-ALTER TABLE ONLY public.course_materials_sections
-    ADD CONSTRAINT pk_course_material_section PRIMARY KEY (course_material_id, section_id);
-
-
---
 -- Name: poll_options poll_options_pkey; Type: CONSTRAINT; Schema: public; Owner: -
 --
 
@@ -2411,6 +2507,14 @@ ALTER TABLE ONLY public.thread_categories
 
 ALTER TABLE ONLY public.threads
     ADD CONSTRAINT threads_pk PRIMARY KEY (id);
+
+
+--
+-- Name: course_materials_sections unique_course_material_section; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.course_materials_sections
+    ADD CONSTRAINT unique_course_material_section UNIQUE (course_material_id, section_id);
 
 
 --
@@ -2540,6 +2644,13 @@ CREATE INDEX users_user_numeric_id_idx ON public.users USING btree (user_numeric
 --
 
 CREATE TRIGGER add_course_user AFTER INSERT OR UPDATE ON public.users FOR EACH ROW EXECUTE PROCEDURE public.add_course_user();
+
+
+--
+-- Name: users before_update_users_update_previous_rotating_section; Type: TRIGGER; Schema: public; Owner: -
+--
+
+CREATE TRIGGER before_update_users_update_previous_rotating_section BEFORE UPDATE OF rotating_section ON public.users FOR EACH ROW EXECUTE PROCEDURE public.update_previous_rotating_section();
 
 
 --
@@ -2719,6 +2830,22 @@ ALTER TABLE ONLY public.forum_posts_history
 
 ALTER TABLE ONLY public.forum_posts_history
     ADD CONSTRAINT forum_posts_history_post_id_fk FOREIGN KEY (post_id) REFERENCES public.posts(id);
+
+
+--
+-- Name: forum_upducks forum_upducks_post_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.forum_upducks
+    ADD CONSTRAINT forum_upducks_post_id_fkey FOREIGN KEY (post_id) REFERENCES public.posts(id) ON UPDATE CASCADE ON DELETE CASCADE;
+
+
+--
+-- Name: forum_upducks forum_upducks_user_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.forum_upducks
+    ADD CONSTRAINT forum_upducks_user_id_fkey FOREIGN KEY (user_id) REFERENCES public.users(user_id) ON UPDATE CASCADE ON DELETE CASCADE;
 
 
 --

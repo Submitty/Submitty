@@ -8,17 +8,19 @@
             {{ base_course_material_path~"/" }}
         </p>
         <label id="cm_path">
-            <span>
+            <span id="path-information">
                 <strong>Optional: amend the above path to use a sub directory</strong><br />
                 e.g. "optional/subdirectory" makes the full path:<br />
                 {{ base_course_material_path }}/optional/subdirectory
             </span>
-            <input type="text" id="input-provide-full-path" class="full-width" name="eg_config_path" value="" placeholder="optional/subdirectory" list="folder_paths"/>
-            <datalist id="folder_paths">
-                {% for folder_path in folder_paths %}
-                    <option value="{{ folder_path }}">
-                {% endfor %}
-            </datalist>
+            <span id="upload-location-drop-down">
+                <select name="eg_config_path" id="provide-full-path">
+                    <option value=""> (Top Directory) </option>
+                    {% for folder_path in folder_paths %}
+                        <option value="{{ folder_path }}">{{ folder_path }}</option>
+                    {% endfor %}
+                </select>
+            </span>
         </label>
         <fieldset>
             <legend class="black-message">
@@ -60,12 +62,14 @@
             </span>
             <input id="upload_sort" value="0.0" type="text" size="26"/>
         </label>
-        <label>
+        <label class="my-0">
             <input id="hide-materials-checkbox" type="checkbox" value="off">
-            Hide from Students<br>
+            Hide from Students
+        </label>
+         <p class="my-0">
             <em><strong>Note:</strong> Hidden course materials are omitted from the course materials directory listing; however, these materials can still be accessed via the URL. </em> <br>
             <em>These materials will always be available to course staff (full and limited access graders), regardless of release date. </em>
-        </label>
+        </p>
         <input type="hidden" name="csrf_token" value="{{ csrf_token }}" />
         <fieldset>
             <legend class="black-message">
@@ -88,7 +92,7 @@
           <div id="upload-boxes">
               {# upload1 and input-file1 required for drag-and-drop.js #}
               <div id="upload1" class="file-input">
-                <label class="label key_to_click" for="input-file1" tabindex="0">"Drag your file(s) here or click to open file browser"</label>
+                <label class="label key_to_click" for="input-file1" tabindex="0">Drag your file(s) here or click to open file browser</label>
                 <input type="file" name="files" id="input-file1" onchange="addFilesFromInput(1,false)" multiple />
                 <table class="file-upload-table" id="file-upload-table-1">
                   <tr style="background:transparent; display:none;">
@@ -146,7 +150,7 @@
                 }
                 if(sections === null || sections.length > 0){
                     const cmPath = document.getElementById('cm_path').innerHTML;
-                    const requestedPath = document.getElementById("input-provide-full-path").value;
+                    const requestedPath = document.getElementById("provide-full-path").value;
                     const sections_lock = document.getElementById('all_Sections_Showing_yes').checked === true;
                     const overwrite_input = document.body.querySelector('input[name=overwrite-all]');
                     overwrite_all = overwrite_input ? (document.body.querySelector('input[name=overwrite-all]').value === 'true') : null;
@@ -175,11 +179,11 @@
                                     label: "End of time"
                                 }
                             ],
-                            onClick: (index, fp) => {
+                            onClick: (index, upload_fp) => {
                                 let date;
                                 switch (index) {
                                     case 0:
-                                        date = new Date("1001-01-01 00:00:00");
+                                        date = new Date('{{ beginning_of_time_date }}');
                                         break;
                                     case 1:
                                         date = new Date();
@@ -189,10 +193,10 @@
                                         date.setDate(date.getDate() + 1);
                                         break;
                                     case 3:
-                                        date = new Date("9998-01-01 00:00:00");
+                                        date = new Date("9998-01-01T00:00:00");
                                         break;
                                 }
-                                fp.setDate(date);
+                                upload_fp.setDate(date);
                             }
                         }
                     )],
@@ -202,9 +206,9 @@
                     enableSeconds: true,
                     time_24hr: true,
                     dateFormat: "Y-m-d H:i:S",
-                    onReady: (a, b, fp) => {
-                      fp.calendarContainer.firstChild.childNodes[1].firstChild.firstChild.setAttribute('aria-label', 'Month');
-                      fp.calendarContainer.childNodes[2].childNodes[4].firstChild.setAttribute('aria-label', 'Seconds');
+                    onReady: (a, b, upload_fp) => {
+                      upload_fp.calendarContainer.firstChild.childNodes[1].firstChild.firstChild.setAttribute('aria-label', 'Month');
+                      upload_fp.calendarContainer.childNodes[2].childNodes[4].firstChild.setAttribute('aria-label', 'Seconds');
                     }
                     });
     $('.form-body').on('scroll', function() {
@@ -218,6 +222,9 @@
         dropzone.addEventListener("dragover", draghandle, false);
         dropzone.addEventListener("dragleave", draghandle, false);
         dropzone.addEventListener("drop", dropWithMultipleZips, false);
+    </script>
+    <script>
+        registerSelect2Widget("provide-full-path", "upload-course-materials-form");
     </script>
 {% endblock %}
 {% block buttons %}

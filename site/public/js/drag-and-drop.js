@@ -1,8 +1,8 @@
-/* exported initializeDropZone, handleEditCourseMaterials, handleUploadCourseMaterials, handleDownloadImages,
+/* exported handleUploadBanner, initializeDropZone, handleEditCourseMaterials, handleUploadCourseMaterials, handleDownloadImages,
             handleSubmission, handleRegrade, handleBulk, deleteSplitItem, submitSplitItem, displayPreviousSubmissionOptions
             displaySubmissionMessage, validateUserId, openFile, handle_input_keypress, addFilesFromInput,
             dropWithMultipleZips, initMaxNoFiles, setUsePrevious, readPrevious, createArray, initializeDragAndDrop */
-/* global buildCourseUrl, getFileExtension, csrfToken, removeMessagePopup, newOverwriteCourseMaterialForm*/
+/* global buildCourseUrl, buildUrl, getFileExtension, csrfToken, removeMessagePopup, newOverwriteCourseMaterialForm, displayErrorMessage*/
 
 /*
 References:
@@ -165,6 +165,59 @@ function addFilesFromInput(part, check_duplicate_zip=true) {
     }
     $(`#input-file${part}`).val('');
 }
+
+
+function handleUploadBanner(closeTime, releaseTime, extraName, linkName) {
+    const formData = new FormData();
+    formData.append('csrf_token', window.csrfToken);
+    formData.append('close_time', closeTime);
+    formData.append('release_time', releaseTime);
+    formData.append('extra_name', extraName);
+    formData.append('link_name', linkName);
+    for (let i = 0; i < file_array.length; i++) {
+        for (let j = 0; j < file_array[i].length; j++) {
+            if (!/^[a-zA-Z0-9_.-]+$/.test(file_array[i][j].name)) {
+                alert(`ERROR! Filename "${file_array[i][j].name}" contains invalid characters. Please use only alphanumeric characters, underscores, and dashes.`);
+                return;
+            }
+            const k = fileExists(`/${file_array[i][j].name}`, 1);
+            // Check conflict here
+            if ( k[0] === 1 ) {
+                if (!confirm(`Note: ${file_array[i][j].name} already exists. Do you want to replace it?`)) {
+                    continue;
+                }
+            }
+            formData.append(`files${i + 1}[]`, file_array[i][j], file_array[i][j].name);
+        }
+    }
+    $.ajax({
+        url: buildUrl(['banner', 'upload']),
+        data: formData,
+        processData: false,
+        contentType: false,
+        type: 'POST',
+        success: function(data) {
+            try {
+                const jsondata = JSON.parse(data);
+
+                if (jsondata['status'] === 'success') {
+                    window.location.href = buildUrl(['banner']);
+                }
+                else {
+                    alert(jsondata['message']);
+                }
+            }
+            catch (e) {
+                alert('Failed to upload a banner!');
+                console.log(data);
+            }
+        },
+        error: function() {
+            window.location.href = buildUrl(['banner']);
+        },
+    });
+}
+
 
 // Check for duplicate file names. This function returns an array.
 // First element:
@@ -383,18 +436,19 @@ function addLabel(filename, filesize, part, previous) {
         e.stopPropagation();
         this.style.color = 'var(--text-black)';
     };
-    // remove file and label-row in table on click event
-    fileTrashElement.onclick = function(e) {
-        e.stopPropagation();
-        this.parentNode.parentNode.removeChild(this.parentNode);
-        deleteSingleFile(filename, part, previous);
-    };
 
-    // FOR VPAT if trash can has focus and key is pressed it will delete item
-    fileTrashElement.onkeypress = function(e) {
+    // onclick : remove file and label-row in table on click event
+    // onkeypress : FOR VPAT if trash can has focus and key is pressed it will delete item
+    fileTrashElement.onclick = fileTrashElement.onkeypress = function(e) {
         e.stopPropagation();
         this.parentNode.parentNode.removeChild(this.parentNode);
         deleteSingleFile(filename, part, previous);
+
+        const textArea = document.querySelector(`#reply_box_${part}`);
+        if (textArea) {
+            // Dispatch input event on existing forum textarea to disable forum reply button on empty input or no remaining files
+            textArea.dispatchEvent(new Event('input', { bubbles: false, cancelable: false }));
+        }
     };
 
     // adding the file in `table` in the parent div
@@ -418,7 +472,7 @@ function handle_input_keypress(inactive_version) {
 // BULK UPLOAD
 //========================================================================================
 function openFile(url_full) {
-    window.open(url_full,'_blank','toolbar=no,scrollbars=yes,resizable=yes, width=700, height=600');
+    window.open(url_full, '_blank', 'toolbar=no,scrollbars=yes,resizable=yes, width=700, height=600');
 }
 
 // HANDLE SUBMISSION
@@ -442,8 +496,7 @@ function isValidSubmission() {
     }
 
     // If is_notebook is set then always valid submission
-    // eslint-disable-next-line no-prototype-builtins
-    if (window.hasOwnProperty('is_notebook')) {
+    if (Object.prototype.hasOwnProperty.call(window, 'is_notebook')) {
         return true;
     }
 
@@ -802,7 +855,7 @@ function handleBulk(gradeable_id, max_file_size, max_post_size, num_pages, use_q
                         window.location.href = return_url;
                     }
                     else {
-                        alert(`ERROR! \n\n${data['message']}`);
+                        displayErrorMessage(`ERROR! ${data['message']}`);
                     }
                 }
             }
@@ -927,7 +980,7 @@ function handleRegrade(versions_used, csrf_token, gradeable_id, user_id, regrade
  * @param num_components
  * @param merge_previous
  */
-function handleSubmission(gradeable_status, remaining_late_days_for_gradeable, charged_late_days, days_past_deadline, late_day_exceptions, late_days_allowed, is_team_assignment, min_team_member_late_days, versions_used, versions_allowed, csrf_token, vcs_checkout, num_inputs, gradeable_id, user_id, git_user_id, git_repo_id, student_page, num_components, merge_previous=false, clobber=false, viewing_inactive_version = false) {
+function handleSubmission(gradeable_status, remaining_late_days_for_gradeable, charged_late_days, days_past_deadline, late_day_exceptions, late_days_allowed, is_team_assignment, min_team_member_late_days, min_team_member_late_days_exception, versions_used, versions_allowed, csrf_token, vcs_checkout, num_inputs, gradeable_id, user_id, git_user_id, git_repo_id, student_page, num_components, merge_previous=false, clobber=false, viewing_inactive_version = false) {
     $('#submit').prop('disabled', true);
     const submit_url = `${buildCourseUrl(['gradeable', gradeable_id, 'upload'])}?merge=${merge_previous.toString()}&clobber=${clobber.toString()}`;
     const return_url = buildCourseUrl(['gradeable', gradeable_id]);
@@ -943,7 +996,7 @@ function handleSubmission(gradeable_status, remaining_late_days_for_gradeable, c
 
     let late_warning_seen = false;
 
-    const days_to_be_charged = Math.max(0,days_past_deadline-late_day_exceptions);
+    const days_to_be_charged = Math.max(0, days_past_deadline-late_day_exceptions);
     // gradeable_status == 3 is a bad submission (too many late days used) and therefore no need to show a warning message anymore
 
     if ( days_past_deadline > 0 && gradeable_status !== 3 ) {
@@ -959,18 +1012,19 @@ function handleSubmission(gradeable_status, remaining_late_days_for_gradeable, c
         }
         else if ( ( days_to_be_charged > late_days_allowed || remaining_late_days_for_gradeable === 0 )  && days_to_be_charged !== charged_late_days  && days_to_be_charged>0  ) {
             late_warning_seen = true;
-            message = `Your submission will be ${days_past_deadline} days late. You are not supposed to submit unless you have an excused absence. Are you sure you want to continue?`;
+            message = `Your submission will be ${days_past_deadline} day(s) late. You are not supposed to submit unless you have an excused absence. Are you sure you want to continue?`;
             if (!confirm(message)) {
                 $('#submit').prop('disabled', false);
                 return;
             }
         }
-    }
-    // check team date
-    if (!late_warning_seen && is_team_assignment && min_team_member_late_days - days_to_be_charged + charged_late_days < 0) {
-        message = 'There is at least 1 member on your team that does not have enough late days for this submission. This will result in them receiving a marked grade of zero. Are you sure you want to continue?';
-        if (!confirm(message)) {
-            return;
+
+        // check team date
+        if (!late_warning_seen && is_team_assignment && (min_team_member_late_days - days_to_be_charged + charged_late_days < 0 || min_team_member_late_days_exception + days_to_be_charged < days_past_deadline ) ) {
+            message = 'There is at least 1 member on your team that does not have enough late days for this submission. This will result in them receiving a marked grade of zero. Are you sure you want to continue?';
+            if (!confirm(message)) {
+                return;
+            }
         }
     }
 
@@ -1030,7 +1084,7 @@ function handleSubmission(gradeable_status, remaining_late_days_for_gradeable, c
     const multiple_choice_object = gatherInputAnswersByType('multiple_choice');
     const codebox_object         = gatherInputAnswersByType('codebox');
     formData.append('multiple_choice_answers', JSON.stringify(multiple_choice_object));
-    formData.append('codebox_answers'        , JSON.stringify(codebox_object));
+    formData.append('codebox_answers', JSON.stringify(codebox_object));
 
     if (student_page) {
         const pages = [];
@@ -1058,7 +1112,7 @@ function handleSubmission(gradeable_status, remaining_late_days_for_gradeable, c
         xhr: function() {
             const myXhr = $.ajaxSettings.xhr();
             if (myXhr.upload) {
-                myXhr.upload.addEventListener('progress',progress, false);
+                myXhr.upload.addEventListener('progress', progress, false);
             }
             return myXhr;
         },
@@ -1180,8 +1234,8 @@ function handleUploadCourseMaterials(csrf_token, expand_zip, hide_from_students,
     formData.append('expand_zip', expand_zip);
     formData.append('hide_from_students', hide_from_students);
     formData.append('requested_path', requested_path);
-    formData.append('release_time',cmTime);
-    formData.append('sort_priority',priority);
+    formData.append('release_time', cmTime);
+    formData.append('sort_priority', priority);
     formData.append('sections_lock', sections_lock);
 
     if (sections !== null) {
@@ -1327,8 +1381,8 @@ function handleEditCourseMaterials(csrf_token, hide_from_students, id, sectionsE
 
     formData.append('csrf_token', csrf_token);
     formData.append('id', id);
-    formData.append('release_time',cmTime);
-    formData.append('sort_priority',priority);
+    formData.append('release_time', cmTime);
+    formData.append('sort_priority', priority);
     formData.append('sections_lock', sections_lock);
 
     if (hide_from_students !== null) {

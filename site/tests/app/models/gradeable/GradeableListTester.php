@@ -8,6 +8,7 @@ use app\libraries\database\DatabaseQueries;
 use app\models\gradeable\Gradeable;
 use app\models\gradeable\GradeableList;
 use app\models\Config;
+use app\models\gradeable\GradeableUtils;
 use app\models\User;
 use tests\BaseUnitTest;
 
@@ -780,7 +781,7 @@ class GradeableListTester extends BaseUnitTest {
             'using_subdirectory' => false,
             'vcs_subdirectory' => '',
             'vcs_partial_path' => '',
-            'vcs_host_type' => -1,
+            'vcs_host_type' => GradeableUtils::VCS_TYPE_NONE,
             'team_assignment' => false,
             'team_size_max' => 1,
             'ta_grading' => $ta_grading,
@@ -811,7 +812,8 @@ class GradeableListTester extends BaseUnitTest {
             'allowed_minutes' => null,
             'depends_on' => null,
             'depends_on_points' => null,
-            'allow_custom_marks' => true
+            'allow_custom_marks' => true,
+            'any_manual_grades' => false
         ];
 
         return new Gradeable($core, $details);

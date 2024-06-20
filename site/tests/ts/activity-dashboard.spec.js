@@ -329,7 +329,7 @@ test('sort', () => {
             </tr>
         </tbody>
     </table>`;
-    sortTable(0,'asc');
+    sortTable(0, 'asc');
     expect(document.body.innerHTML).toEqual(expectedSort0Asc);
     const expectedSort0Desc = `<table id="data-table" class="table table-striped mobile-table directory-table sortable">
         <thead>
@@ -423,7 +423,7 @@ test('sort', () => {
             </tr>
         </tbody>
     </table>`;
-    sortTable(0,'desc');
+    sortTable(0, 'desc');
     expect(document.body.innerHTML).toEqual(expectedSort0Desc);
 
     const expectedSort1Asc = `<table id="data-table" class="table table-striped mobile-table directory-table sortable">

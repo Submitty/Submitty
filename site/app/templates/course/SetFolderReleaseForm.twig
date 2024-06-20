@@ -6,6 +6,7 @@
 
 
     <div style="margin: auto; text-align: center;">
+    <br/>
         <label for="date_to_release">
             <b>Change the release date for all contents in <span id="release_title" data-path="" ></span>: </b>
             <script>
@@ -17,9 +18,9 @@
                 }
             </script>
         </label>
-    <br/>
-    <br/>
+    <br/><br/>
     <input name="release_date" id="date_to_release" class="date_picker" type="text" size="26" value='9998-01-01 00:00:00' data-fp=" " onChange="getNewDateTime('date_to_release')"/>
+    <br/><br/>
     </div>
     <script>
 
@@ -67,7 +68,7 @@
         }
 
 
-        const release_date_folder_fp = flatpickr("#date_to_release", {
+        const folder_release_fp = flatpickr("#date_to_release", {
                     plugins: [ShortcutButtonsPlugin(
                         {
                             button: [
@@ -84,11 +85,11 @@
                                     label: "End of time"
                                 }
                             ],
-                            onClick: (index, fp) => {
+                            onClick: (index, folder_release_fp) => {
                                 let date;
                                 switch (index) {
                                     case 0:
-                                        date = new Date("1001-01-01 00:00:00");
+                                        date = new Date('{{ beginning_of_time_date }}');
                                         break;
                                     case 1:
                                         date = new Date();
@@ -98,10 +99,10 @@
                                         date.setDate(date.getDate() + 1);
                                         break;
                                     case 3:
-                                        date = new Date("9998-01-01 00:00:00");
+                                        date = new Date("9998-01-01T00:00:00");
                                         break;
                                 }
-                                fp.setDate(date);
+                                folder_release_fp.setDate(date);
                             }
                         }
                     )],
@@ -111,13 +112,13 @@
                     enableSeconds: true,
                     time_24hr: true,
                     dateFormat: "Y-m-d H:i:S",
-                    onReady: (a, b, fp) => {
-                      fp.calendarContainer.firstChild.childNodes[1].firstChild.firstChild.setAttribute('aria-label', 'Month');
-                      fp.calendarContainer.childNodes[2].childNodes[4].firstChild.setAttribute('aria-label', 'Seconds');
+                    onReady: (a, b, folder_release_fp) => {
+                      folder_release_fp.calendarContainer.firstChild.childNodes[1].firstChild.firstChild.setAttribute('aria-label', 'Month');
+                      folder_release_fp.calendarContainer.childNodes[2].childNodes[4].firstChild.setAttribute('aria-label', 'Seconds');
                     }
                     });
     $('.form-body').on('scroll', function() {
-        release_date_folder_fp._positionCalendar();
+        folder_release_fp._positionCalendar();
     });
     </script>
 

@@ -42,6 +42,7 @@ void allow_system_calls(scmp_filter_ctx sc, const std::set<std::string> &categor
   ALLOW_SYSCALL(memfd_create);
 #endif
   ALLOW_SYSCALL(futex);
+  ALLOW_SYSCALL(mincore);
 
   // RESTRICTED : PROCESS_CONTROL_MEMORY_ADVANCED
   if (categories.find("PROCESS_CONTROL_MEMORY_ADVANCED") != categories.end()) {
@@ -175,6 +176,8 @@ void allow_system_calls(scmp_filter_ctx sc, const std::set<std::string> &categor
 
   // SAFELIST : FILE_MANAGEMENT
   ALLOW_SYSCALL(access);
+  ALLOW_SYSCALL(faccessat);
+  ALLOW_SYSCALL(faccessat2);
   ALLOW_SYSCALL(_llseek);
   ALLOW_SYSCALL(close);
   ALLOW_SYSCALL(creat);
@@ -472,8 +475,6 @@ void allow_system_calls(scmp_filter_ctx sc, const std::set<std::string> &categor
     ALLOW_SYSCALL(afs_syscall);
     ALLOW_SYSCALL(bdflush);
     ALLOW_SYSCALL(break);
-    ALLOW_SYSCALL(faccessat);
-    ALLOW_SYSCALL(faccessat2);
     ALLOW_SYSCALL(fallocate);
     ALLOW_SYSCALL(fanotify_init);
     ALLOW_SYSCALL(fanotify_mark);
@@ -492,7 +493,6 @@ void allow_system_calls(scmp_filter_ctx sc, const std::set<std::string> &categor
 #endif
     ALLOW_SYSCALL(keyctl);
     ALLOW_SYSCALL(lookup_dcookie);
-    ALLOW_SYSCALL(mincore);
     ALLOW_SYSCALL(mlock);
 #ifdef __NR_mlock2
     ALLOW_SYSCALL(mlock2);
@@ -529,6 +529,7 @@ void allow_system_calls(scmp_filter_ctx sc, const std::set<std::string> &categor
     ALLOW_SYSCALL(vm86old);
     ALLOW_SYSCALL(vmsplice);
     ALLOW_SYSCALL(vserver);
+    ALLOW_SYSCALL(copy_file_range);
   }
 
   // RESTRICTED : UNKNOWN_MODULE

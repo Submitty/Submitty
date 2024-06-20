@@ -1,4 +1,4 @@
-/* exported newDeletePollForm updatePollAcceptingAnswers updatePollVisible updateDropdownStates importPolls */
+/* exported newDeletePollForm updatePollAcceptingAnswers updatePollVisible updateDropdownStates importPolls toggleTimerInputs */
 /* global csrfToken */
 
 $(document).ready(() => {
@@ -81,7 +81,7 @@ function updatePollVisible(pollid, base_url) {
     fd.append('csrf_token', csrfToken);
     fd.append('poll_id', pollid);
     if (!$(visible_checkbox).is(':checked')) {
-        $(accepting_answers_checkbox).prop('checked',false);
+        $(accepting_answers_checkbox).prop('checked', false);
         url += '/setClosed';
     }
     else {
@@ -108,4 +108,13 @@ function updateDropdownStates(curr_state, cookie_key) {
 
 function importPolls() {
     $('#import-polls-form').submit();
+}
+
+function toggleTimerInputs() {
+    if ($('#enable-timer').prop('checked')) {
+        $('#timer-inputs').show();
+    }
+    else {
+        $('#timer-inputs').hide();
+    }
 }

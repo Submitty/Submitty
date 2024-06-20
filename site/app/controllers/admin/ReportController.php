@@ -13,6 +13,7 @@ use app\libraries\response\JsonResponse;
 use app\libraries\response\RedirectResponse;
 use app\libraries\response\WebResponse;
 use app\libraries\PollUtils;
+use app\libraries\Utils;
 use app\models\gradeable\AutoGradedGradeable;
 use app\models\gradeable\Gradeable;
 use app\models\gradeable\GradedGradeable;
@@ -36,9 +37,7 @@ class ReportController extends AbstractController {
 
     private $all_overrides = [];
 
-    /**
-     * @Route("/courses/{_semester}/{_course}/reports")
-     */
+    #[Route("/courses/{_semester}/{_course}/reports")]
     public function showReportPage() {
         if (!$this->core->getUser()->accessAdmin()) {
             $this->core->getOutput()->showError("This account cannot access admin pages");
@@ -56,10 +55,9 @@ class ReportController extends AbstractController {
 
     /**
      * Generates grade summary files for every user
-     *
-     * @Route("/courses/{_semester}/{_course}/reports/summaries")
-     * @Route("/api/courses/{_semester}/{_course}/reports/summaries", methods={"POST"})
      */
+    #[Route("/courses/{_semester}/{_course}/reports/summaries")]
+    #[Route("/api/courses/{_semester}/{_course}/reports/summaries", methods: ["POST"])]
     public function generateGradeSummaries() {
         if (!$this->core->getUser()->accessAdmin()) {
             $this->core->getOutput()->showError("This account cannot access admin pages");
@@ -137,9 +135,8 @@ class ReportController extends AbstractController {
 
     /**
      * Generates and offers download of CSV grade report
-     *
-     * @Route("/courses/{_semester}/{_course}/reports/csv")
      */
+    #[Route("/courses/{_semester}/{_course}/reports/csv")]
     public function generateCSVReport() {
         if (!$this->core->getUser()->accessAdmin()) {
             $this->core->getOutput()->showError("This account cannot access admin pages");
@@ -474,9 +471,13 @@ class ReportController extends AbstractController {
 
                     // Only include late day info if the submission was late
                     $late_days_charged = $ldi->getLateDaysCharged();
+                    $late_day_exceptions = $ldi->getLateDayException();
+                    if ($late_day_exceptions > 0) {
+                        $entry['late_day_exceptions'] = $late_day_exceptions;
+                        $entry['reason_for_exception'] = $ldi->getReasonForException();
+                    }
                     if ($late_days_charged > 0) {
                         $entry['days_after_deadline'] = $ldi->getDaysLate();
-                        $entry['extensions'] = $ldi->getLateDayException();
                         $entry['days_charged'] = $late_days_charged;
                     }
                 }
@@ -507,6 +508,7 @@ class ReportController extends AbstractController {
                     }
                     else {
                         $entry['note'] = 'Score is set to 0 because there are version conflicts.';
+                        $entry['version_conflict'] = 'true';
                     }
                 }
             }
@@ -587,9 +589,7 @@ class ReportController extends AbstractController {
         }
     }
 
-    /**
-     * @Route("/courses/{_semester}/{_course}/reports/rainbow_grades_customization")
-     */
+    #[Route("/courses/{_semester}/{_course}/reports/rainbow_grades_customization")]
     public function generateCustomization() {
         //Build a new model, pull in defaults for the course
         $customization = new RainbowCustomization($this->core);
@@ -615,14 +615,18 @@ class ReportController extends AbstractController {
         else {
             $this->core->getOutput()->addInternalJs('rainbow-customization.js');
             $this->core->getOutput()->addInternalCss('rainbow-customization.css');
-
             $this->core->getOutput()->addBreadcrumb('Rainbow Grades Customization');
+            $students = $this->core->getQueries()->getAllUsers();
+            $student_full = Utils::getAutoFillData($students);
+            $this->core->getOutput()->enableMobileViewport();
+            $gradeables = $this->core->getQueries()->getAllGradeablesIdsAndTitles();
 
             // Print the form
             $this->core->getOutput()->renderTwigOutput('admin/RainbowCustomization.twig', [
                 "customization_data" => $customization->getCustomizationData(),
                 "available_buckets" => $customization->getAvailableBuckets(),
                 'bucket_counts' => $customization->getBucketCounts(),
+                'bucket_remove_lowest' => $customization->getBucketRemoveLowest(),
                 "used_buckets" => $customization->getUsedBuckets(),
                 'display_benchmarks' => $customization->getDisplayBenchmarks(),
                 'benchmark_percents' => (array) $customization->getBenchmarkPercent(),
@@ -632,6 +636,9 @@ class ReportController extends AbstractController {
                 'sections_and_labels' => (array) $customization->getSectionsAndLabels(),
                 'bucket_percentages' => $customization->getBucketPercentages(),
                 'messages' => $customization->getMessages(),
+                'plagiarism' => $customization->getPlagiarism(),
+                "gradeables" => $gradeables,
+                "student_full" => $student_full,
                 'per_gradeable_curves' => $customization->getPerGradeableCurves(),
                 'limited_functionality_mode' => !$this->core->getQueries()->checkIsInstructorInCourse(
                     $this->core->getConfig()->getVerifiedSubmittyAdminUser(),
@@ -643,9 +650,7 @@ class ReportController extends AbstractController {
         }
     }
 
-    /**
-     * @Route("/courses/{_semester}/{_course}/reports/rainbow_grades_customization/upload", methods={"POST"})
-     */
+    #[Route("/courses/{_semester}/{_course}/reports/rainbow_grades_customization/upload", methods: ["POST"])]
     public function uploadRainbowConfig() {
         $redirect_url =  $this->core->buildCourseUrl((['reports']));
         if (empty($_FILES) || !isset($_FILES['config_upload'])) {
@@ -692,9 +697,7 @@ class ReportController extends AbstractController {
         );
     }
 
-    /**
-     * @Route("/courses/{_semester}/{_course}/reports/rainbow_grades_status")
-     */
+    #[Route("/courses/{_semester}/{_course}/reports/rainbow_grades_status")]
     public function autoRainbowGradesStatus() {
         // Create path to the file we expect to find in the jobs queue
         $jobs_file = '/var/local/submitty/daemon_job_queue/auto_rainbow_' .
@@ -758,9 +761,9 @@ class ReportController extends AbstractController {
 
     /**
      * Generate full rainbow grades view for instructors
-     * @Route("/courses/{_semester}/{_course}/gradebook")
      * @AccessControl(role="INSTRUCTOR")
      */
+    #[Route("/courses/{_semester}/{_course}/gradebook")]
     public function displayGradebook() {
         $grade_path = $this->core->getConfig()->getCoursePath() . "/rainbow_grades/output.html";
 

@@ -5,41 +5,28 @@ declare(strict_types=1);
 namespace app\entities\calendar;
 
 use DateTime;
+use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
 
-/**
- * @ORM\Entity
- * @ORM\Table(name="calendar_messages")
- */
+#[ORM\Entity]
+#[ORM\Table(name: "calendar_messages")]
 class CalendarItem {
     const TEXT = 0;
     const ANNOUNCEMENT = 1;
 
-    /**
-     * @ORM\Id
-     * @ORM\Column(type="integer")
-     * @ORM\GeneratedValue(strategy="AUTO")
-     * @var int
-     */
-    protected $id;
+    #[ORM\Id]
+    #[ORM\Column(type: Types::INTEGER)]
+    #[ORM\GeneratedValue(strategy: "AUTO")]
+    protected int $id;
 
-    /**
-     * @ORM\Column(type="integer")
-     * @var int
-     */
-    protected $type;
+    #[ORM\Column(type: Types::INTEGER)]
+    protected int $type;
 
-    /**
-     * @ORM\Column(type="string")
-     * @var string
-     */
-    protected $text;
+    #[ORM\Column(type: Types::STRING)]
+    protected string $text;
 
-    /**
-     * @ORM\Column(type="date")
-     * @var DateTime
-     */
-    protected $date;
+    #[ORM\Column(type: Types::DATE_MUTABLE)]
+    protected DateTime $date;
 
     public function getId(): int {
         return $this->id;

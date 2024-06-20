@@ -24,7 +24,7 @@
 .docker-table th,
 .machine-table td,
 .machine-table th {
-    border: 1px solid #dddddd;
+    border: 1px solid var(--standard-light-gray);
     padding: 8px;
 }
 
@@ -78,7 +78,7 @@
 }
 
 .filter-buttons {
-    color: black;
+    color: var(--default-black);
 }
 
 .filter-buttons:hover,

@@ -48,8 +48,12 @@
 
 /* stylelint-disable-next-line selector-class-pattern, no-descending-specificity */
 .post_content {
+    display: flex;
     margin-right: 5px;
+    margin-top: 5px;
     white-space: pre-wrap;
+    overflow-x: auto;
+    padding-bottom: 1em;
 }
 
 /* stylelint-disable-next-line selector-class-pattern */
@@ -76,8 +80,7 @@
     padding: 7px;
     margin-top: 20px;
     word-wrap: break-word;
-    overflow-y: auto;
-    overflow-x: hidden;
+    overflow: hidden auto;
 }
 
 /* stylelint-disable-next-line selector-class-pattern */
@@ -229,6 +232,7 @@
     text-decoration: none !important;
 }
 
+
 .post-action-container {
     margin-top: 8px;
     margin-left: 10px;
@@ -239,6 +243,30 @@
 .post-user-info {
     margin-right: 2px;
     display: inline-block;
+}
+
+.upduck-container{
+    display: inline-block;
+    align-items: center;
+    justify-content: center;
+}
+
+.upduck-button {
+    position: relative;
+    display: inline-block;
+    background: none; 
+    border: none; 
+    padding: 0; 
+    cursor: pointer; 
+    outline: none;
+    vertical-align: middle;
+}
+
+.like-counter{
+    font-size: 15px;
+    margin-left: 4px;
+    margin-right: 3px; 
+    vertical-align: middle;
 }
 
 .delete-post-button,
@@ -287,6 +315,17 @@
 #thread_form {
     margin-right: 15px;
     margin-left: 15px;
+}
+
+#display-existing-attachments {
+    display: block;
+    float: none;
+    overflow: hidden;
+}
+
+.file-upload-table.edit-imgs-table {
+    margin-left: 0;
+    margin-right: auto;
 }
 
 .create-thread-title {
@@ -423,6 +462,25 @@
 .history-container span h7 {
     position: relative;
     right: 5px;
+}
+
+.history-attachment-table {
+    background-color: var(--attachment-box-color);
+    border: 1px solid var(--standard-light-gray);
+}
+
+.attachment-name-history {
+    vertical-align: middle;
+}
+
+.history-attachment-btn {
+    vertical-align: bottom;
+    float: right;
+}
+
+.history-buffer {
+    margin-bottom: 3px;
+    margin-top: 1.5em;
 }
 
 /* stylelint-disable-next-line selector-id-pattern */
@@ -610,6 +668,16 @@
     max-width: 100%;
 }
 
+/* stylelint-disable-next-line selector-class-pattern */
+.post_content p:first-child {
+    margin-top: 0;
+}
+
+/* stylelint-disable-next-line selector-class-pattern */
+.post_content p:last-child {
+    margin-bottom: 0;
+}
+
 .markdown-inactive {
     color: var(--standard-light-gray);
 }
@@ -664,7 +732,7 @@
 .thread-box-full {
     padding: 10px 20px;
     margin: 5px auto;
-    box-shadow: 4px 7px 5px #cccccc;
+    border: 1px solid #808080;
 }
 /* stylelint-disable-next-line selector-class-pattern */
 .thread_box .flex-row,
@@ -738,4 +806,20 @@
     margin-right: 10px;
     padding: unset;
     cursor: pointer;
+}
+
+.button-row {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+}
+
+.liked-by-instructor {
+    margin-left: 5px;
+    font-size: 15px;
+    vertical-align: middle;
+    font-style: italic;
+    color: var(--upduck-yellow);
+    font-weight: bold;
+    white-space: nowrap;
 }
