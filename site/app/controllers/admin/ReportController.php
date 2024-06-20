@@ -8,6 +8,7 @@ use app\libraries\DateUtils;
 use app\libraries\FileUtils;
 use app\libraries\GradeableType;
 use app\libraries\routers\AccessControl;
+use app\libraries\response\DownloadResponse;
 use app\libraries\response\MultiResponse;
 use app\libraries\response\JsonResponse;
 use app\libraries\response\RedirectResponse;
@@ -795,7 +796,7 @@ class ReportController extends AbstractController {
      * Download CSV file for Rainbow Grades
      */
     #[Route("/courses/{_semester}/{_course}/reports/rainbow_grades_csv")]
-    public function downloadRainbowGradesCSVFile(): void {
+    public function downloadRainbowGradesCSVFile(): ?DownloadResponse {
         // Path to the CSV file for Rainbow Grades
         $csvFilePath = FileUtils::joinPaths(
             '/var/local/submitty/courses',
@@ -808,22 +809,16 @@ class ReportController extends AbstractController {
 
         // Check if the file exists
         if (file_exists($csvFilePath)) {
-            // Set appropriate headers for file download with a custom filename
-            header('Content-Description: File Transfer');
-            header('Content-Type: application/csv');
-            header('Content-Disposition: attachment; filename="' . $this->generateCustomFilename() . '"');
-            header('Expires: 0');
-            header('Cache-Control: must-revalidate');
-            header('Pragma: public');
-            header('Content-Length: ' . filesize($csvFilePath));
-
-            // Output the file content
-            readfile($csvFilePath);
-            exit;
+            return DownloadResponse::getDownloadResponse(
+                file_get_contents($csvFilePath),
+                $this->generateCustomFilename(),
+                "application/csv"
+            );
         }
         else {
             // Handle the case where the file does not exist
             $this->core->getOutput()->showError($csvFilePath . " was not found or was not readable.\nMaybe you have not <a\thref='https://submitty.org/instructor/course_settings/rainbow_grades/automatic_setup'>generated the rainbow grades</a> yet?");
+            return null;
         }
     }
 }
