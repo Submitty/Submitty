@@ -1946,10 +1946,7 @@ function addMarkdownCode(type) {
 
     switch (type) {
         case 'code':
-            if (text.substring(text.substring(0, start).split('').lastIndexOf('\n'), start).length !== 1) {
-                insert = '\n';
-            }
-            insert += `\`\`\`\n${selectedText}\n\`\`\`\n`;
+            insert = selectedText ? `\`\`\`\n${selectedText}\n\`\`\`\n` : '```\n\n```';
             break;
         case 'link':
             insert = `[${selectedText}](url)`;
@@ -1969,7 +1966,15 @@ function addMarkdownCode(type) {
         // Insert the markdown with the cursor in between the symbols
         $(this).val(text.substring(0, start) + insert + text.substring(end));
         $(this).focus();
-        $(this)[0].setSelectionRange(start + 1, start + 1);
+        if (type === 'bold') {
+            $(this)[0].setSelectionRange(start + 2, start + 2);
+        }
+        else if (type === 'code') {
+            $(this)[0].setSelectionRange(start + 4, start + 4);
+        }
+        else {
+            $(this)[0].setSelectionRange(start + 1, start + 1);
+        }
     }
     else {
         // Insert the markdown with the selected text wrapped
