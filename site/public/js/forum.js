@@ -727,6 +727,13 @@ function initSocketClient() {
                 }
                 socketNewOrEditThreadHandler(msg.new_thread_id, false);
                 break;
+            case 'edit_likes':
+                updateLikesDisplay(msg.post_id, {
+                    likesCount: msg.likesCount,
+                    likesFromStaff: msg.likesFromStaff,
+                    status: msg.status,
+                });
+                break;
             default:
                 console.log('Undefined message received.');
         }
@@ -1296,50 +1303,55 @@ function toggleLike(post_id, current_user) {
                 displayErrorMessage(json['message']);
                 return;
             }
-            json=json['data'];
-            const likes = json['likesCount'];
-            const liked = json['status'];
-            const staffLiked = json['likesFromStaff'];
-
-            const likeCounterElement = document.getElementById(`likeCounter_${post_id}`);
-            let likeCounter = parseInt(likeCounterElement.innerText);
-
-            // eslint-disable-next-line no-useless-concat
-            const likeIconSrc = document.getElementById(`likeIcon_${post_id}`);
-            let likeIconSrcElement = likeIconSrc.src;
-
-            if (liked === 'unlike') {
-                likeIconSrcElement = likeIconSrcElement.replace('on-duck-button.svg', 'light-mode-off-duck.svg');
-
-                if (staffLiked > 0) {
-                    $(`#likedByInstructor_${post_id}`).show();
-                }
-                else {
-                    $(`#likedByInstructor_${post_id}`).hide();
-                }
-
-                likeCounter=likes;//set to the sql like value
-
-                likeIconSrc.src = likeIconSrcElement; // Update the state
-                likeCounterElement.innerText = likeCounter;
-            }
-            else if (liked ==='like') {
-                likeIconSrcElement = likeIconSrcElement.replace('light-mode-off-duck.svg', 'on-duck-button.svg');
-                if (staffLiked > 0) {
-                    $(`#likedByInstructor_${post_id}`).show();
-                }
-                else {
-                    $(`#likedByInstructor_${post_id}`).hide();
-                }
-                likeCounter=likes;
-                likeIconSrc.src = likeIconSrcElement; // Update the state
-                likeCounterElement.innerText = likeCounter;
+            else {
+                updateLikesDisplay(post_id, json.data);
             }
         },
         error: function(err) {
             console.log(err);
         },
     });
+}
+
+function updateLikesDisplay(post_id, data) {
+    const likes = data['likesCount'];
+    const liked = data['status'];
+    const staffLiked = data['likesFromStaff'];
+
+    const likeCounterElement = document.getElementById(`likeCounter_${post_id}`);
+    let likeCounter = parseInt(likeCounterElement.innerText);
+
+    // eslint-disable-next-line no-useless-concat
+    const likeIconSrc = document.getElementById(`likeIcon_${post_id}`);
+    let likeIconSrcElement = likeIconSrc.src;
+
+    if (liked === 'unlike') {
+        likeIconSrcElement = likeIconSrcElement.replace('on-duck-button.svg', 'light-mode-off-duck.svg');
+
+        if (staffLiked > 0) {
+            $(`#likedByInstructor_${post_id}`).show();
+        }
+        else {
+            $(`#likedByInstructor_${post_id}`).hide();
+        }
+
+        likeCounter=likes;//set to the sql like value
+
+        likeIconSrc.src = likeIconSrcElement; // Update the state
+        likeCounterElement.innerText = likeCounter;
+    }
+    else if (liked ==='like') {
+        likeIconSrcElement = likeIconSrcElement.replace('light-mode-off-duck.svg', 'on-duck-button.svg');
+        if (staffLiked > 0) {
+            $(`#likedByInstructor_${post_id}`).show();
+        }
+        else {
+            $(`#likedByInstructor_${post_id}`).hide();
+        }
+        likeCounter=likes;
+        likeIconSrc.src = likeIconSrcElement; // Update the state
+        likeCounterElement.innerText = likeCounter;
+    }
 }
 
 function displayHistoryAttachment(edit_id) {

@@ -1511,6 +1511,15 @@ class ForumController extends AbstractController {
         if ($output['status'] === "false") {
             return JsonResponse::getErrorResponse('Catch Fail in Query');
         }
+
+        $this->sendSocketMessage([
+            'type' => 'edit_likes',
+            'post_id' => $_POST['post_id'],
+            'status' => $output['status'],
+            'likesCount' => $output['likesCount'],
+            'likesFromStaff' => $output['likesFromStaff']
+        ]);
+
         return JsonResponse::getSuccessResponse([
             'status' => $output['status'], // 'like' or 'unlike'
             'likesCount' => $output['likesCount'], // Total likes count
