@@ -16,6 +16,8 @@ class PollTester extends BaseUnitTest {
     private $my_polls;
 
     public function setUp(): void {
+        DateUtils::setTimezone(new \DateTimeZone("America/New_York"));
+
         $this->my_polls = [
             0 => new Poll(
                 "Poll #1",
@@ -49,6 +51,7 @@ class PollTester extends BaseUnitTest {
                 "Poll #4",
                 "How was your break?",
                 "multiple-response-survey",
+                new DateInterval("PT1M30S"),
                 new DateTime('now'),
                 "when_ended",
                 "when_ended",
