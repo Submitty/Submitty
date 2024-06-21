@@ -200,22 +200,24 @@ class FCFSScheduler(BaseScheduler):
         # 4. Ppath name
         jobs.sort(key=lambda j:
                   (
-                    not("vcs_checkout" in j.queue_obj and j.queue_obj["vcs_checkout"] and not("checkout_total_size" in j.queue_obj)),
+                    not ("vcs_checkout" in j.queue_obj and
+                         j.queue_obj["vcs_checkout"] and
+                         not ("checkout_total_size" in j.queue_obj)),
                     "regrade" in j.queue_obj and j.queue_obj["regrade"],
                     j.queue_obj['queue_time'],
                     j.path
                   ),
                   reverse=False
-        )
+                 )
 
         # for testing / debugging
-        print ("JOBS QUEUE count=" + len(jobs))
-        position=0
+        print("JOBS QUEUE count=" + len(jobs))
+        position = 0
         for j in jobs:
-            position+=1
+            position + =1
             regrade = "regrade" in j.queue_obj and j.queue_obj["regrade"]
             qt = j.queue_obj['queue_time']
-            print("JOB " + str(position) + " " + str(regrade) + " " + str(qt) + " " + j.path )
+            print("JOB " + str(position) + " " + str(regrade) + " " + str(qt) + " " + j.path)
 
         for job in jobs:
             if len(idle_workers) == 0:
