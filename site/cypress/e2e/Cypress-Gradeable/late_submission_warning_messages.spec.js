@@ -118,7 +118,6 @@ const SubmitAndCheckMessage = (gradeable_type, upload_file1, invalid_late_day, v
     cy.logout();
 };
 
-
 it('Checks whether daylight savings warning message should be appearing at current date.', () => {
     /*
     First we set the date to a date close to the spring daylight savings time and then check that the message appears.
@@ -143,7 +142,6 @@ it('Checks whether daylight savings warning message should be appearing at curre
         cy.get('#daylight').should('not.exist');
     }
     cy.logout();
-
 });
 
 describe('Test warning messages for non team gradeable', () => {

@@ -423,14 +423,12 @@ function getFinalCutoffPercent() {
     const final_cutoff = {};
     const letter_grades = ['A', 'A-', 'B+', 'B', 'B-', 'C+', 'C', 'C-', 'D+', 'D'];
 
-    $('.final_cutoff_input').each(function() {
-
+    $('.final_cutoff_input').each(() => {
         // Get data
         const letter_grade = this.getAttribute('data-benchmark').toString();
         const percent = this.value;
 
         if (letter_grades.includes(letter_grade)) {
-
             // Verify percent is not empty
             if (percent === '') {
                 throw 'All final cutoffs must have a value before saving.';
@@ -443,7 +441,6 @@ function getFinalCutoffPercent() {
 
             // Add to sections
             final_cutoff[letter_grade] = percent;
-
         }
     });
 
