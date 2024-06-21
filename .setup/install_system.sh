@@ -133,9 +133,10 @@ The vagrant box comes with some handy aliases:
     submitty_restart_autograding - restart systemctl for autograding
     submitty_restart_services    - restarts all Submitty related systemctl
     lichen_install               - runs Lichen/install_lichen.sh
-    migrator                     - run the migrator tool
+    migrator                     - runs the migrator tool
     vagrant_info                 - print out the MotD again
     ntp_sync                     - Re-syncs NTP in case of time drift
+    recreate_sample_courses      - runs .setup/bin/recreate_sample_courses.sh
 
 Saved variables:
     SUBMITTY_REPOSITORY, LICHEN_REPOSITORY, RAINBOWGRADES_REPOSITORY,
@@ -180,6 +181,7 @@ alias submitty_test='bash /usr/local/submitty/GIT_CHECKOUT/Submitty/.setup/SUBMI
 alias migrator='python3 ${SUBMITTY_REPOSITORY}/migration/run_migrator.py -c ${SUBMITTY_INSTALL_DIR}/config'
 alias vagrant_info='cat /etc/motd'
 alias ntp_sync='service ntp stop && ntpd -gq && service ntp start'
+alias recreate_sample_courses='sudo bash /usr/local/submitty/GIT_CHECKOUT/Submitty/.setup/bin/recreate_sample_courses.sh'
 systemctl start submitty_autograding_shipper
 systemctl start submitty_autograding_worker
 systemctl start submitty_daemon_jobs_handler
