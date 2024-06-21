@@ -518,6 +518,38 @@ ALTER SEQUENCE public.emails_id_seq OWNED BY public.emails.id;
 
 
 --
+-- Name: global_calendar_items; Type: TABLE; Schema: public; Owner: -
+--
+
+CREATE TABLE public.global_calendar_items (
+    id integer NOT NULL,
+    type integer NOT NULL,
+    text character varying(255) NOT NULL,
+    date date NOT NULL
+);
+
+
+--
+-- Name: global_calendar_items_id_seq; Type: SEQUENCE; Schema: public; Owner: -
+--
+
+CREATE SEQUENCE public.global_calendar_items_id_seq
+    AS integer
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+--
+-- Name: global_calendar_items_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: -
+--
+
+ALTER SEQUENCE public.global_calendar_items_id_seq OWNED BY public.global_calendar_items.id;
+
+
+--
 -- Name: mapped_courses; Type: TABLE; Schema: public; Owner: -
 --
 
@@ -692,6 +724,13 @@ ALTER TABLE ONLY public.community_events ALTER COLUMN id SET DEFAULT nextval('pu
 --
 
 ALTER TABLE ONLY public.emails ALTER COLUMN id SET DEFAULT nextval('public.emails_id_seq'::regclass);
+
+
+--
+-- Name: global_calendar_items id; Type: DEFAULT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.global_calendar_items ALTER COLUMN id SET DEFAULT nextval('public.global_calendar_items_id_seq'::regclass);
 
 
 --
