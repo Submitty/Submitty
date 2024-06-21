@@ -98,12 +98,12 @@
                 <h2>Section Labels</h2>
                 <p class="rg_info_message">You may use this area to assign a label to each section number, for example the name of the TA or TAs
                     handling the section.  You may also leave it as the default, but it may not be blank.</p>
-                {% for section, label in sections_and_labels %}
-                    <p>
-                        <label for="section_and_labels_{{ section }}">{{ section }}</label>
+                <div class="input-percents">
+                    {% for section, label in sections_and_labels %}
+                        <label for="section_and_labels_{{ section }}" class="cutoff-label">{{ section }}</label>
                         <input type="text" data-section="{{ section }}" class="sections_and_labels" id="section_and_labels_{{ section }}" name="section_and_labels_{{ section }}" value="{{ label }}">
-                    </p>
-                {% endfor %}
+                    {% endfor %}
+                </div>
             </div>
             <div id="plagiarism" class="customization_item">
                 <h2>Penalties for Academic Dishonesty and Plagiarism</h2>
