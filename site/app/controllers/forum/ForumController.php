@@ -584,6 +584,8 @@ class ForumController extends AbstractController {
             [$post_id],
             $this->core->getUser()->getId()
         ));
+        $staffLiked = $this->core->getQueries()->getInstructorUpduck($post_id);
+        $boolStaffLiked = in_array($post["id"], $staffLiked, true);
         $GLOBALS['totalAttachments'] = 0;
         $GLOBALS['post_box_id'] = $_POST['post_box_id'];
         $unviewed_posts = [$post_id];
@@ -604,6 +606,7 @@ class ForumController extends AbstractController {
             'tree',
             $upduck_count,
             $upduck_liked_by_user,
+            $boolStaffLiked,
             true,
             $author_info[$post["author_user_id"]],
             $post_attachments[$post["id"]][0],
@@ -1390,17 +1393,15 @@ class ForumController extends AbstractController {
                 return JsonResponse::getErrorResponse('Missing required key in POST data: ' . $key);
             }
         }
-        $output = [];
-        $output = $this->core->getQueries()->toggleLikes($_POST['post_id'], $this->core->getUser()->getId());//so isLiked is the frontend value
+        $output = $this->core->getQueries()->toggleLikes($_POST['post_id'], $this->core->getUser()->getId());
 
-        $responseData = [
-            'status' => $output[0], // 'like'
-            'likesCount' => $output[1] // The likes count
-        ];
-
-        if ($responseData['status'] === "false") {
+        if ($output['status'] === "false") {
             return JsonResponse::getErrorResponse('Catch Fail in Query');
         }
-        return JsonResponse::getSuccessResponse($responseData);
+        return JsonResponse::getSuccessResponse([
+            'status' => $output['status'], // 'like' or 'unlike'
+            'likesCount' => $output['likesCount'], // Total likes count
+            'likesFromStaff' => $output['likesFromStaff'] // Likes from staff
+        ]);
     }
 }
