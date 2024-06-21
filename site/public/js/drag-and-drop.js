@@ -2,7 +2,7 @@
             handleSubmission, handleRegrade, handleBulk, deleteSplitItem, submitSplitItem, displayPreviousSubmissionOptions
             displaySubmissionMessage, validateUserId, openFile, handle_input_keypress, addFilesFromInput,
             dropWithMultipleZips, initMaxNoFiles, setUsePrevious, readPrevious, createArray, initializeDragAndDrop */
-/* global buildCourseUrl, buildUrl, getFileExtension, csrfToken, removeMessagePopup, newOverwriteCourseMaterialForm*/
+/* global buildCourseUrl, buildUrl, getFileExtension, csrfToken, removeMessagePopup, newOverwriteCourseMaterialForm, displayErrorMessage*/
 
 /*
 References:
@@ -855,7 +855,7 @@ function handleBulk(gradeable_id, max_file_size, max_post_size, num_pages, use_q
                         window.location.href = return_url;
                     }
                     else {
-                        alert(`ERROR! \n\n${data['message']}`);
+                        displayErrorMessage(`ERROR! ${data['message']}`);
                     }
                 }
             }
