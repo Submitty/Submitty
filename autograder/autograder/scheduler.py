@@ -214,7 +214,7 @@ class FCFSScheduler(BaseScheduler):
         print("JOBS QUEUE count=" + len(jobs))
         position = 0
         for j in jobs:
-            position + =1
+            position += 1
             regrade = "regrade" in j.queue_obj and j.queue_obj["regrade"]
             qt = j.queue_obj['queue_time']
             print("JOB " + str(position) + " " + str(regrade) + " " + str(qt) + " " + j.path)
