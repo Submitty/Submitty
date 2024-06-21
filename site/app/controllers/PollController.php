@@ -513,7 +513,6 @@ class PollController extends AbstractController {
         $poll_response = $_POST['custom_response'];
         $user_id = $this->core->getUser()->getId();
         $em = $this->core->getCourseEntityManager();
-        /** @var \app\repositories\poll\PollRepository */
         $repo = $em->getRepository(Poll::class);
         /** @var Poll|null */
         $poll = $repo->findByIDWithOptions($poll_id);
