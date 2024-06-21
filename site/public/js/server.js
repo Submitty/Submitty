@@ -6,15 +6,17 @@
    markViewed openDiv changeColor downloadCourseMaterialZip downloadSubmissionZip downloadStudentAnnotations
    downloadTestCaseResult downloadCourseMaterial downloadFile toggleDiv checkVersionChange versionChange gradeableChange
    removeMessagePopup validateHtml togglePageDetails copyToClipboard downloadCSV setFolderRelease
-   newEditCourseMaterialsForm newEditCourseMaterialsFolderForm newUploadCourseMaterialsForm newUploadImagesForm
+   newEditCourseMaterialsForm newEditCourseMaterialsFolderForm newUploadCourseMaterialsForm newUploadBanner newUploadImagesForm
    newOverwriteCourseMaterialForm newDeleteCourseMaterialForm displayCloseSubmissionsWarning newDeleteGradeableForm
    markAllViewed closePopup */
 /* global csrfToken my_window:writable file_path:writable updateBulkProgress icon:writable detectColorScheme
    createArray readPrevious disableFullUpdate registerSelect2Widget */
-
 ////////////Begin: Removed redundant link in breadcrumbs////////////////////////
 //See this pr for why we might want to remove this code at some point
 //https://github.com/Submitty/Submitty/pull/5071
+
+
+
 window.addEventListener('resize', () => {
     loadInBreadcrumbLinks();
     adjustBreadcrumbLinks();
@@ -303,6 +305,23 @@ function newUploadCourseMaterialsForm() {
     $('#overwrite-materials-flag').remove();
 }
 
+function newUploadBanner() {
+    createArray(1);
+    const files = [];
+    $('.popup-form').css('display', 'none');
+    const form = $('#upload-banner');
+
+    $('[name="existing-file-list"]', form).html('');
+
+    const stringifiedFiles = $('<b></b>').text(JSON.stringify(files));
+    $('[name="existing-file-list"]', form).append(stringifiedFiles);
+
+    form.css('display', 'block');
+    captureTabInModal('upload-banner');
+    form.find('.form-body').scrollTop(0);
+    $('[name="upload"]', form).val(null);
+}
+
 function newEditCourseMaterialsFolderForm(tag) {
     const id = $(tag).data('id');
     const dir = $(tag).data('priority');
@@ -312,7 +331,6 @@ function newEditCourseMaterialsFolderForm(tag) {
     const is_hidden = $(tag).data('hidden-state');
     const partially_hidden = 2;
     const form = $('#edit-course-materials-folder-form');
-
     const element = document.getElementById('edit-folder-picker');
     element._flatpickr.setDate(release_time);
 
@@ -1845,6 +1863,8 @@ function previewMarkdown(mode) {
         markdown_preview.show();
         markdown_preview_load_spinner.show();
         markdown_toolbar.hide();
+        $('.markdown-write-mode').removeClass('active');
+        $('.markdown-preview-mode').addClass('active');
         $.ajax({
             url: buildUrl(['markdown']),
             type: 'POST',
@@ -1869,6 +1889,8 @@ function previewMarkdown(mode) {
         markdown_toolbar.show();
         markdown_header.attr('data-mode', 'edit');
         accessibility_message.show();
+        $('.markdown-write-mode').addClass('active');
+        $('.markdown-preview-mode').removeClass('active');
     }
 }
 
@@ -1906,38 +1928,60 @@ function renderMarkdown(markdownContainer, url, content) {
  *                      * `'link'`
  *                      * `'bold'`
  *                      * `'italic'`
+ *                      * `'blockquote'`
  */
 function addMarkdownCode(type) {
     const markdown_area = $(this).closest('.markdown-area');
     const markdown_header = markdown_area.find('.markdown-area-header');
-    //don't allow markdown insertion if we are in preview mode
+    // Don't allow markdown insertion if we are in preview mode
     if (markdown_header.attr('data-mode') === 'preview') {
         return;
     }
 
-    const cursor = $(this).prop('selectionStart');
+    const start = $(this).prop('selectionStart');
+    const end = $(this).prop('selectionEnd');
     const text = $(this).val();
     let insert = '';
+    const selectedText = text.substring(start, end);
+
     switch (type) {
         case 'code':
-            if (text.substring(text.substring(0, cursor).split('').lastIndexOf('\n'), cursor).length !== 1) {
-                insert = '\n';
-            }
-            insert += '```\ncode\n```\n';
+            insert = selectedText ? `\`\`\`\n${selectedText}\n\`\`\`\n` : '```\n\n```';
             break;
         case 'link':
-            insert = '[display text](url)';
+            insert = `[${selectedText}](url)`;
             break;
         case 'bold':
-            insert = '__bold text__';
+            insert = selectedText ? `__${selectedText}__` : '____';
             break;
         case 'italic':
-            insert = '_italic text_';
+            insert = selectedText ? `_${selectedText}_` : '__';
+            break;
+        case 'blockquote':
+            insert = `> ${selectedText}\n\n`;
             break;
     }
-    $(this).val(text.substring(0, cursor) + insert + text.substring(cursor));
-    $(this).focus();
-    $(this)[0].setSelectionRange(cursor + insert.length, cursor + insert.length);
+
+    if (!selectedText) {
+        // Insert the markdown with the cursor in between the symbols
+        $(this).val(text.substring(0, start) + insert + text.substring(end));
+        $(this).focus();
+        if (type === 'bold') {
+            $(this)[0].setSelectionRange(start + 2, start + 2);
+        }
+        else if (type === 'code') {
+            $(this)[0].setSelectionRange(start + 4, start + 4);
+        }
+        else {
+            $(this)[0].setSelectionRange(start + 1, start + 1);
+        }
+    }
+    else {
+        // Insert the markdown with the selected text wrapped
+        $(this).val(text.substring(0, start) + insert + text.substring(end));
+        $(this).focus();
+        $(this)[0].setSelectionRange(start + insert.length, start + insert.length);
+    }
 }
 
 /**
