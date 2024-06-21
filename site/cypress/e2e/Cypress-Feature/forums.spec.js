@@ -11,6 +11,41 @@ const reply3 = 'Cypress Reply 3 Cypress';
 const merged1 = 'Merged Thread Title: '.concat(title3, '\n\n', content3);
 const merged2 = 'Merged Thread Title: '.concat(title2, '\n\n', content2);
 const attachment1 = 'sea_animals.png';
+const isVisible = 'be.visible';
+const notVisible = 'be.not.visible';
+
+const goToForum = (user) => {
+    cy.login(user);
+    cy.visit(['sample']);
+    cy.get('#nav-sidebar-forum').click();
+};
+
+const uploadAttachmentAndDelete = (title) => {
+    cy.get('[data-testid="thread-list-item"]').contains(title).click();
+    cy.get('[data-testid="create-post-head"]').should('contain', title);
+    cy.get('[data-testid="edit-post-button"]').first().click();
+    cy.get('[data-testid="input-file1"]').selectFile('cypress/fixtures/sea_animals.png');
+    cy.get('[data-testid="file-upload-table-1"]').should('contain', 'sea_animals.png');
+    cy.get('[data-testid="forum-update-post"]').contains('Update Post').click();
+    cy.get('[data-testid="edit-post-button"]').first().click();
+    cy.get('[data-testid="mark-for-delete-btn"]').should('contain', 'Delete').click();
+    cy.get('[data-testid="mark-for-delete-btn"]').should('contain', 'Keep');
+    cy.get('[data-testid="forum-update-post"]').contains('Update Post').click();
+};
+
+const replyDisabled = (title, attachment) => {
+    cy.get('[data-testid="thread-list-item"]').contains(title).click();
+    // Reply button should be disabled by default with no text
+    cy.get('[value="Submit Reply to All"]').should('be.disabled');
+
+    // Ensure reply button is not disabled when attachments are added
+    cy.get('#input-file3').attachFile(attachment);
+    cy.get('[value="Submit Reply to All"]').should('not.be.disabled').click();
+
+    // Wait for submission and ensure attachment with no text is visible
+    cy.get('.attachment-btn').click();
+    cy.contains('p', attachment).should('be.visible');
+};
 
 const createThread = (title, content, category) => {
     // Add more to tests for uploading attachments
@@ -30,22 +65,6 @@ const replyToThread = (title, reply) => {
     cy.get('#posts_list').should('contain', reply);
 };
 
-const upduckPost = (thread_title) => {
-    cy.get('[data-testid="thread-list-item"]').contains(thread_title).click();
-    cy.get('[data-testid="create-post-head"]').should('contain', thread_title);
-    cy.get('[data-testid="like-count"]').first().should('have.text', 0);
-    cy.get('[data-testid="upduck-button"]').first().click();
-    cy.get('[data-testid="like-count"]').first().should('have.text', 1);
-};
-
-const checkStatsUpducks = (fullName, numUpducks) => {
-    // Check the stats page for a user with fullName and
-    // number of upducks numUpducks
-    cy.get('[data-testid="more-dropdown"]').click();
-    cy.get('#forum_stats').click();
-    cy.get('[data-testid="user-stat"]').contains(fullName).siblings('[data-testid="upduck-stat"]').should('contain.text', numUpducks);
-    cy.get('[title="Back to threads"]').click();
-};
 
 const mergeThreads = (fromThread, toThread, mergedContent) => {
     // Add more to tests for uploading attachments
@@ -64,38 +83,56 @@ const removeThread = (title) => {
     cy.get('[data-testid="thread-list-item"]').contains(title).should('not.exist');
 };
 
-const uploadAttachmentAndDelete = (title) => {
+const upduckPost = (thread_title) => {
+    cy.get('[data-testid="create-post-head"]').should('contain', thread_title);
+    cy.get('[data-testid="like-count"]').first().should('have.text', 0);
+    cy.get('[data-testid="upduck-button"]').first().click();
+    cy.get('[data-testid="like-count"]').first().should('have.text', 1);
+};
+
+const removeUpduckPost = (thread_title) => {
+    cy.get('[data-testid="create-post-head"]').should('contain', thread_title);
+    cy.get('[data-testid="like-count"]').first().should('have.text', 1);
+    cy.get('[data-testid="upduck-button"]').first().click();
+    cy.get('[data-testid="like-count"]').first().should('have.text', 0);
+};
+
+const staffUpduckPost = (user, thread_title) => {
+    checkStaffUpduck(thread_title, notVisible);
+    upduckPost(thread_title);
+    checkStaffUpduck(thread_title, isVisible);
+
+    if (user !== 'instructor') {
+        removeUpduckPost(thread_title);
+    }
+};
+
+const studentUpduckPost = (thread_title) => {
+    checkStaffUpduck(thread_title, notVisible);
+    upduckPost(thread_title);
+    checkStaffUpduck(thread_title, notVisible);
+    removeUpduckPost(thread_title);
+};
+
+const checkStaffUpduck = (title, visible) => {
     cy.get('[data-testid="thread-list-item"]').contains(title).click();
     cy.get('[data-testid="create-post-head"]').should('contain', title);
-    cy.get('[data-testid="edit-post-button"]').first().click();
-    cy.get('[data-testid="input-file1"]').selectFile('cypress/fixtures/sea_animals.png');
-    cy.get('[data-testid="file-upload-table-1"]').should('contain', 'sea_animals.png');
-    cy.get('[data-testid="forum-update-post"]').contains('Update Post').click();
-    cy.get('[data-testid="edit-post-button"]').first().click();
-    cy.get('[data-testid="mark-for-delete-btn"]').should('contain', 'Delete').click();
-    cy.get('[data-testid="mark-for-delete-btn"]').should('contain', 'Keep');
-    cy.get('[data-testid="forum-update-post"]').contains('Update Post').click();
-};
-const replyDisabled = (title, attachment) => {
-    cy.get('[data-testid="thread-list-item"]').contains(title).click();
-    // Reply button should be disabled by default with no text
-    cy.get('[value="Submit Reply to All"]').should('be.disabled');
-
-    // Ensure reply button is not disabled when attachments are added
-    cy.get('#input-file3').attachFile(attachment);
-    cy.get('[value="Submit Reply to All"]').should('not.be.disabled').click();
-
-    // Wait for submission and ensure attachment with no text is visible
-    cy.get('.attachment-btn').click();
-    cy.contains('p', attachment).should('be.visible');
+    cy.get('[data-testid="instructor-like"]').first().should(visible);
 };
 
-describe('Test cases revolving around creating, replying to, merging, and removing discussion forum threads', () => {
+const checkStatsUpducks = (fullName, numUpducks) => {
+    // Check the stats page for a user with fullName and
+    // number of upducks numUpducks
+    cy.get('[data-testid="more-dropdown"]').click();
+    cy.get('#forum_stats').click();
+    cy.get('[data-testid="user-stat"]').contains(fullName).siblings('[data-testid="upduck-stat"]').should('contain.text', numUpducks);
+    cy.get('[title="Back to threads"]').click();
+};
+
+describe('Test cases revolving around creating, replying to, merging, upducking, and removing discussion forum threads', () => {
 
     beforeEach(() => {
-        cy.login('instructor');
-        cy.visit(['sample']);
-        cy.get('#nav-sidebar-forum').click();
+        goToForum('instructor');
         cy.get('#nav-sidebar-collapse-sidebar').click();
     });
 
@@ -122,12 +159,26 @@ describe('Test cases revolving around creating, replying to, merging, and removi
         // Tutorial
         replyToThread(title3, reply3);
 
-        // Upduck the first post of each thread
-        upduckPost(title1);
-        upduckPost(title2);
-        upduckPost(title3);
+        // Student upduck
+        cy.logout();
+        goToForum('student');
+        studentUpduckPost(title1);
+        studentUpduckPost(title2);
+        studentUpduckPost(title3);
 
-        // Check the stats page for instructor with 3 upducks
+        // TA upduck
+        cy.logout();
+        goToForum('ta');
+        staffUpduckPost('ta', title1);
+        staffUpduckPost('ta', title2);
+        staffUpduckPost('ta', title3);
+
+        // Instructor upduck and check the stats page for instructor with 3 upducks
+        cy.logout();
+        goToForum('instructor');
+        staffUpduckPost('instructor', title1);
+        staffUpduckPost('instructor', title2);
+        staffUpduckPost('instructor', title3);
         checkStatsUpducks('Instructor, Quinn', 3);
 
         // Tutorial into Questions
