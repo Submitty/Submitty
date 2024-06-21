@@ -608,6 +608,7 @@ function setCustomizationItemVisibility(elem) {
     const checkbox_to_cust_item = new Map([
         ['final_grade', '#final_grade_cutoffs'],
         ['messages', '#cust_messages'],
+        ['section', '#section_labels'],
     ]);
     const checkbox_name = elem.value;
     const cust_item_id = checkbox_to_cust_item.get(checkbox_name);
@@ -669,9 +670,10 @@ $(document).ready(() => {
      * Configure visibility handler for all customization items other than benchmark percents
      * Visibility is controlled by whether the corresponding boxes are selected in the display area
      */
+    const dropdown_checkboxes = ['final_grade', 'messages', 'section'];
     $('#display input').each(function() {
 
-        if (this.value === 'final_grade' || this.value === 'messages') {
+        if (dropdown_checkboxes.includes(this.value)) {
             // Set the initial visibility on load
             setCustomizationItemVisibility(this);
 
