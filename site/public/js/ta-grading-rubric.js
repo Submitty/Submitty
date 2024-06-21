@@ -3,7 +3,7 @@
    onAddComponent importComponentsFromFile onMarkPointsChange onGetMarkStats onClickComponent onCancelComponent
    onCancelEditRubricComponent onChangeOverallComment onToggleMark onCustomMarkChange onToggleCustomMark onVerifyComponent
    onVerifyAll onToggleEditMode onClickCountUp onClickCountDown onComponentPointsChange onComponentTitleChange
-   onComponentPageNumberChange onMarkPublishChange setPdfPageAssignment renderGradingGradeable reloadPeerRubric
+   onComponentPageNumberChange onMarkPublishChange setPdfPageAssignment renderGaradingGradeable reloadPeerRubric
    graded_gradeable open_overall_comment_tab scrollToOverallComment refreshComponent refreshComponent */
 
 /* global buildCourseUrl csrfToken displayErrorMessage renderGradingGradeable renderPeerGradeable renderInstructorEditGradeable
@@ -1769,9 +1769,16 @@ function onRestoreMark(me) {
  * @param me DOM Element of the delete button
  */
 function onDeleteComponent(me) {
+    const componentCount = $('.component-container').length;
+    if (componentCount === 1) {
+        displayErrorMessage('Cannot delete the only component.');
+        return;
+    }
+
     if (!confirm('Are you sure you want to delete this component?')) {
         return;
     }
+
     deleteComponent(getComponentIdFromDOMElement(me))
         .catch((err) => {
             console.error(err);

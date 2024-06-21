@@ -498,18 +498,19 @@ SQL;
     }
 
     /**
-     * Returns the date of the current term's start date.
-     * @return string The start date of the current term.
+     * Returns the provided term's start date in the given user's timezone.
+     * @param string $term Id of term we are checking.
+     * @param User $user whose timezone we get the date in.
+     * @return string The start date of the term.
      */
-    public function getCurrentTermStartDate(): string {
+    public function getTermStartDate(string $term, User $user): string {
         $this->submitty_db->query("
             SELECT start_date
             FROM terms
-            ORDER BY start_date DESC
-            LIMIT 1
-        ");
-        $timestamp = $this->submitty_db->row()['start_date'];
-        return DateUtils::convertTimeStamp($this->core->getUser(), $timestamp, 'Y-m-d H:i:s');
+            WHERE term_id=?
+        ", [$term]);
+        $timestamp = $this->submitty_db->rows()[0]['start_date'];
+        return DateUtils::convertTimeStamp($user, $timestamp, 'Y-m-d H:i:s');
     }
 
     /**
@@ -722,34 +723,87 @@ SQL;
     }
 
     /**
-     * @return array<string|int>
+     * toggles a like from upduck to off or off to upduck
+     *
+     * @param int $post_id The ID of the post.
+     * @param string $current_user The ID of the current user.
+     * @return array{ status: string, likesCount: int, likesFromStaff: int}
+     * 'status' indicating 'like' or 'unlike',
+     * 'likesCount' indicating the total number of likes,
+     * 'likesFromStaff' indicating the number of likes from staff members.
      */
     public function toggleLikes(int $post_id, string $current_user): array {
         try {
             $this->course_db->query("SELECT * FROM forum_upducks WHERE post_id = ? AND user_id = ?", [$post_id, $current_user]);
             $inDatabase = isset($this->course_db->rows()[0]);
+
+            $sqlFilteredCount = "SELECT COUNT(*) AS filtered_likes_count
+                             FROM forum_upducks f
+                             JOIN users u ON f.user_id = u.user_id
+                             WHERE f.post_id = ?
+                             AND u.user_group <= 3";
             if ($inDatabase) {
                 $this->course_db->query("DELETE FROM forum_upducks WHERE post_id = ? AND user_id = ?", [$post_id, $current_user]);
-                $this->course_db->query("SELECT COUNT(*) AS likes_count FROM forum_upducks WHERE post_id = ?", [$post_id]);
-                $likesCount = intval($this->course_db->row()['likes_count']);
-                return ['unlike',$likesCount];
+                $action = "unlike";
             }
             else {
                 $this->course_db->query("INSERT INTO forum_upducks (post_id, user_id) VALUES (?, ?)", [$post_id, $current_user]);
-                $this->course_db->query("SELECT COUNT(*) AS likes_count FROM forum_upducks WHERE post_id = ?", [$post_id]);
-                $likesCount = intval($this->course_db->row()['likes_count']);
-                return ['like',$likesCount];
+                $action = "like";
             }
+            $this->course_db->query("SELECT COUNT(*) AS likes_count FROM forum_upducks WHERE post_id = ?", [$post_id]);
+            $likesCount = intval($this->course_db->row()['likes_count']);
+            $this->course_db->query($sqlFilteredCount, [$post_id]);
+            $filteredLikesCount = intval($this->course_db->row()['filtered_likes_count']);
+            return [
+                'status' => $action, // 'like' or 'unlike'
+                'likesCount' => $likesCount, // Total likes count
+                'likesFromStaff' => $filteredLikesCount // Likes from staff
+            ];
         }
         catch (DatabaseException $dbException) {
             if ($this->course_db->inTransaction()) {
                 $this->course_db->rollback();
             }
-            return ["false",0];
+            return ['status' => "false", 'likesCount' => 0, 'likesFromStaff' => 0];
         }
     }
 
     /**
+     * get what posts should be loaded in with "staff upduck" upduck
+     * returns array of posts that the staff upducked
+     *
+     * @param int[] $post_ids
+     * @return int[]
+     */
+    public function getInstructorUpduck(array $post_ids): array {
+        if (count($post_ids) === 0) {
+            return [];
+        }
+        $placeholders = $this->createParameterList(count($post_ids));
+
+        // SQL to join the forum_upducks and users tables, filter by user_group, and check against provided post_ids
+        $sql = "SELECT f.post_id
+                FROM forum_upducks f
+                JOIN users u ON f.user_id = u.user_id
+                WHERE f.post_id IN {$placeholders}
+                AND u.user_group <= 3
+                GROUP BY f.post_id";
+
+        // Execute the query with the post_ids as parameters
+        $this->course_db->query($sql, $post_ids);
+        $result = [];
+
+        // Fetch the rows and store the post_id in the result array
+        foreach ($this->course_db->rows() as $row) {
+            $result[] = $row['post_id'];
+        }
+        return $result;
+    }
+
+    /**
+     * Gets total number of upducks for each post
+     * returns an array that links each post_id with their total upducks
+     *
      * @param int[] $post_ids
      * @return int[]
      */
@@ -773,6 +827,9 @@ SQL;
     }
 
     /**
+     * Gets what posts the user has upducked
+     * returns an array of what posts the user liked and what should be shown as upducked on the frontend
+     *
      * @param int[] $post_ids
      * @param string $current_user
      * @return int[]
@@ -954,6 +1011,32 @@ SQL;
 
     public function getPosts() {
         $this->course_db->query("SELECT * FROM posts where deleted = false ORDER BY timestamp ASC");
+        return $this->course_db->rows();
+    }
+
+    /**
+     * Retrieves the number of upducks per user.
+     *
+     * @return array<array<string, string>>
+     */
+    public function getUpDucks(): array {
+        $this->course_db->query("
+            SELECT 
+                p.author_user_id, 
+                COUNT(f.*) AS upducks 
+            FROM 
+                posts p 
+            JOIN 
+                forum_upducks f 
+            ON 
+                p.id = f.post_id 
+            WHERE 
+                p.deleted = FALSE 
+            GROUP BY 
+                p.author_user_id 
+            ORDER BY 
+                upducks DESC
+        ");
         return $this->course_db->rows();
     }
 
@@ -1180,7 +1263,21 @@ SQL;
     }
 
     public function searchThreads($searchQuery) {
-        $this->course_db->query("SELECT post_content, p_id, p_author, thread_id, thread_title, author, pin, anonymous, timestamp_post FROM (SELECT t.id as thread_id, t.title as thread_title, p.id as p_id, t.created_by as author, t.pinned_expiration as pin, p.timestamp as timestamp_post, p.content as post_content, p.anonymous, p.author_user_id as p_author, to_tsvector(p.content) || to_tsvector(t.title) as document from posts p, threads t JOIN (SELECT thread_id, timestamp from posts where parent_id = -1) p2 ON p2.thread_id = t.id where t.id = p.thread_id and p.deleted=false and t.deleted=false) p_doc where p_doc.document @@ plainto_tsquery(:q) ORDER BY timestamp_post DESC", [':q' => $searchQuery]);
+        $this->course_db->query(
+            "SELECT post_content, p_id, p_author, thread_id, thread_title, author, pin, anonymous, timestamp_post
+            FROM (SELECT t.id as thread_id, t.title as thread_title, p.id as p_id,
+                t.created_by as author, t.pinned_expiration as pin, p.timestamp as timestamp_post,
+                p.content as post_content, p.anonymous, p.author_user_id as p_author,
+                to_tsvector('english', replace(replace(replace(p.content, '.', ' '), '-', ' '), '/', ' '))
+                || to_tsvector('english', replace(replace(replace(t.title, '.', ' '), '-', ' '), '/', ' '))
+                as document FROM posts p, threads t
+                JOIN (SELECT thread_id, timestamp FROM posts WHERE parent_id = -1) p2
+                ON p2.thread_id = t.id
+                WHERE t.id = p.thread_id and p.deleted=false and t.deleted=false) p_doc
+            WHERE p_doc.document @@ plainto_tsquery('english', replace(:q, '.', ' '))
+            ORDER BY timestamp_post DESC",
+            [':q' => $searchQuery]
+        );
         return $this->course_db->rows();
     }
 
@@ -2299,9 +2396,9 @@ ORDER BY {$orderby}",
 
             $this->course_db->query(
                 "
-                SELECT gt.team_id, gt.registration_section, gt.rotating_section, gt.team_name, json_agg(u) AS users
+                SELECT gt.team_id, gt.registration_section, gt.rotating_section, gt.team_name, COALESCE(NULLIF(jsonb_agg(u)::text, '[null]'), '[]')::jsonb AS users
                 FROM gradeable_teams gt
-                  JOIN
+                  LEFT JOIN
                     (SELECT t.team_id, t.state, u.*
                      FROM teams t
                        JOIN users u ON t.user_id = u.user_id
@@ -2338,9 +2435,9 @@ ORDER BY {$orderby}",
 
             $this->course_db->query(
                 "
-                SELECT gt.team_id, gt.registration_section, gt.rotating_section, gt.team_name, json_agg(u) AS users
+                SELECT gt.team_id, gt.registration_section, gt.rotating_section, gt.team_name, COALESCE(NULLIF(jsonb_agg(u)::text, '[null]'), '[]')::jsonb AS users
                 FROM gradeable_teams gt
-                  JOIN
+                  LEFT JOIN
                     (SELECT t.team_id, t.state, u.*
                      FROM teams t
                        JOIN users u ON t.user_id = u.user_id
@@ -3997,9 +4094,9 @@ VALUES(?, ?, ?, ?, 0, 0, 0, 0, ?)",
     public function getTeamById($team_id) {
         $this->course_db->query(
             "
-            SELECT gt.team_id, gt.registration_section, gt.rotating_section, gt.team_name, json_agg(u) AS users
+            SELECT gt.team_id, gt.registration_section, gt.rotating_section, gt.team_name, COALESCE(NULLIF(jsonb_agg(u)::text, '[null]'), '[]')::jsonb AS users
             FROM gradeable_teams gt
-              JOIN
+              LEFT JOIN
               (SELECT t.team_id, t.state, u.*
                FROM teams t
                  JOIN users u ON t.user_id = u.user_id
@@ -4026,9 +4123,9 @@ VALUES(?, ?, ?, ?, 0, 0, 0, 0, ?)",
     public function getTeamByGradeableAndUser($g_id, $user_id) {
         $this->course_db->query(
             "
-            SELECT gt.team_id, gt.registration_section, gt.rotating_section, gt.team_name, json_agg(u) AS users
+            SELECT gt.team_id, gt.registration_section, gt.rotating_section, gt.team_name, COALESCE(NULLIF(jsonb_agg(u)::text, '[null]'), '[]')::jsonb AS users
             FROM gradeable_teams gt
-              JOIN
+              LEFT JOIN
               (SELECT t.team_id, t.state, u.*
                FROM teams t
                  JOIN users u ON t.user_id = u.user_id
@@ -4077,9 +4174,9 @@ VALUES(?, ?, ?, ?, 0, 0, 0, 0, ?)",
     public function getTeamsByGradeableId($g_id) {
         $this->course_db->query(
             "
-            SELECT gt.team_id, gt.registration_section, gt.rotating_section, gt.team_name, json_agg(u) AS users
+            SELECT gt.team_id, gt.registration_section, gt.rotating_section, gt.team_name, COALESCE(NULLIF(jsonb_agg(u)::text, '[null]'), '[]')::jsonb AS users
             FROM gradeable_teams gt
-              JOIN
+              LEFT JOIN
                 (SELECT t.team_id, t.state, u.*
                  FROM teams t
                    JOIN users u ON t.user_id = u.user_id
@@ -4919,16 +5016,21 @@ SQL;
      * Instructors may access all of their courses
      * Inactive courses may only be accessed by the instructor
      *
-     * @param  string $user_id
-     * @param  bool   $archived
+     * If $dropped is true, we return null section courses as well.
+     *
+     * @param  string $user_id  User Id of user we're getting courses for.
+     * @param  bool   $archived True if we want archived courses.
+     * @param  bool   $dropped  True if we want null section courses.
      * @return Course[] archived courses (and their details) accessible by $user_id
      */
-    public function getCourseForUserId($user_id, bool $archived = false): array {
+    public function getCourseForUserId($user_id, bool $archived = false, bool $dropped = false): array {
+        $include_archived = "AND c.status=1";
         if ($archived) {
-            $extra = "AND c.status=2 AND u.user_group=1";
+            $include_archived = "AND c.status=2 AND u.user_group=1";
         }
-        else {
-            $extra = "AND c.status=1";
+        $force_nonnull = "";
+        if ($dropped) {
+            $force_nonnull = "NOT";
         }
 
         $query = <<<SQL
@@ -4936,7 +5038,7 @@ SELECT t.name AS term_name, u.term, u.course, u.user_group, u.registration_secti
 FROM courses_users u
 INNER JOIN courses c ON u.course=c.course AND u.term=c.term
 INNER JOIN terms t ON u.term=t.term_id
-WHERE u.user_id=? ${extra} AND (u.registration_section IS NOT NULL OR u.user_group<>4)
+WHERE u.user_id=? ${include_archived} AND ${force_nonnull} (u.registration_section IS NOT NULL OR u.user_group<>4)
 ORDER BY u.user_group ASC, t.start_date DESC, u.course ASC
 SQL;
         $this->submitty_db->query($query, [$user_id]);
@@ -6446,9 +6548,9 @@ AND gc_id IN (
         // Generate placeholders for each team id
         $place_holders = implode(',', array_fill(0, count($team_ids), '?'));
         $query = "
-            SELECT gt.team_id, gt.registration_section, gt.rotating_section, gt.team_name, json_agg(u) AS users
+            SELECT gt.team_id, gt.registration_section, gt.rotating_section, gt.team_name, COALESCE(NULLIF(jsonb_agg(u)::text, '[null]'), '[]')::jsonb AS users
             FROM gradeable_teams gt
-              JOIN
+              LEFT JOIN
                 (SELECT t.team_id, t.state, u.*
                  FROM teams t
                    JOIN users u ON t.user_id = u.user_id
