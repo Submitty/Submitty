@@ -213,6 +213,16 @@ hr {
     align-items: center;
 }
 
+.input-percents {
+    display: inline-grid;
+    grid-template-columns: auto auto; /* two columns */
+    grid-gap: 0 0.2em;
+}
+
+.cutoff-label {
+    padding: 4px 6px;
+}
+
 #gradeables .gradeable-custom-item-input {
     width: 3em;
 }
