@@ -60,7 +60,7 @@ const mergeThreads = (fromThread, toThread, mergedContent) => {
 
 const removeThread = (title) => {
     cy.get('[data-testid="thread-list-item"]').contains(title).click();
-    cy.get('.first_post > .post-action-container > .delete-post-button').click();
+    cy.get('.delete-post-button').first().click();
     cy.get('[data-testid="thread-list-item"]').contains(title).should('not.exist');
 };
 
