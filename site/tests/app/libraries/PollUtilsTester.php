@@ -14,6 +14,7 @@ class PollUtilsTester extends \PHPUnit\Framework\TestCase {
     use \phpmock\phpunit\PHPMock;
 
     public function setUp(): void {
+        DateUtils::setTimezone(new \DateTimeZone("America/New_York"));
     }
 
     public function tearDown(): void {
@@ -60,6 +61,7 @@ class PollUtilsTester extends \PHPUnit\Framework\TestCase {
                 "Poll #4",
                 "Is this the fifth poll?",
                 "single-response-survey",
+                new DateInterval("PT1M"),
                 new DateTime("2020-01-13"),
                 "when_ended",
                 "when_ended"
@@ -177,8 +179,9 @@ class PollUtilsTester extends \PHPUnit\Framework\TestCase {
                 "question_type" => "single-response-survey",
                 "responses" => ["Yes", "100%", "Undoubtedly", "Not sure"],
                 "correct_responses" => [0, 1, 2, 3],
+                "duration" => "P0Y0M0DT0H1M0S",
+                "end_time" => null,
                 "release_date" => "2020-01-13",
-                "status" => "open",
                 "release_histogram" => "when_ended",
                 "release_answer" => "when_ended",
                 "image_path" => null,
