@@ -15,6 +15,13 @@ module.exports = tseslint.config(
         files: ['**/*.{js,ts}'],
     },
     {
+        // name: 'Files to ignore', (this line can be uncommented with eslint >=9.0)
+        ignores: [
+            'node_modules/**',
+            'public/{mjs,vendor}/**',
+        ],
+    },
+    {
         name: 'Base options for all files',
         extends: [eslint.configs.recommended],
         languageOptions: {
