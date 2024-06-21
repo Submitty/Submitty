@@ -817,7 +817,7 @@ class ReportController extends AbstractController {
         }
         else {
             // Handle the case where the file does not exist
-            $this->core->getOutput()->showError($csvFilePath . " was not found or was not readable.\nMaybe you have not <a\thref='https://submitty.org/instructor/course_settings/rainbow_grades/automatic_setup'>generated the rainbow grades</a> yet?");
+            $this->core->getOutput()->showError($csvFilePath . " was not found or was not readable.\nMaybe you have not <a\thref='./rainbow_grades_customization'>generated the rainbow grades</a> yet?");
             return null;
         }
     }
