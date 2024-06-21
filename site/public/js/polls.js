@@ -122,10 +122,11 @@ function validateCustomResponse() {
     const validate = () => {
         if (custom_response.value.trim() !== '') {
             custom_response_submit.disabled = false;
-        } else {
+        }
+        else {
             custom_response_submit.disabled = true;
         }
-    }
+    };
 
     custom_response.addEventListener('input', () => {
         validate();
