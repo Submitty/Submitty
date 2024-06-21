@@ -208,7 +208,7 @@ class FCFSScheduler(BaseScheduler):
                     j.path
                   ),
                   reverse=False
-                 )
+                  )
 
         # for testing / debugging
         print("JOBS QUEUE count=" + len(jobs))
