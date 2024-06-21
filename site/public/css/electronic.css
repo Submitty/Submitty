@@ -590,16 +590,6 @@ progress::-webkit-progress-value {
     border: 5px solid var(--standard-vibrant-pink-red);
 }
 
-/* stylelint-disable-next-line selector-id-pattern */
-#autograding_results .box-block .red-message {
-    margin-left: 5px;
-}
-
-/* stylelint-disable-next-line selector-id-pattern */
-#autograding_results .box-block .diff-element .red-message {
-    margin-left: 0;
-}
-
 /* stylelint-disable-next-line selector-id-pattern, selector-class-pattern */
 #grading_rubric.rubric_panel {
     border: 5px solid var(--standard-dark-mint-green);
