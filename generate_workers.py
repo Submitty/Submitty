@@ -79,7 +79,6 @@ def main():
             data['ssh_port'] = args.base_port + i
         workers[f'worker-{i}'] = data
 
-
     full_data = OrderedDict()
     full_data['version'] = 2
     full_data['provider'] = args.provider
