@@ -1,4 +1,4 @@
-/* exported prevMonth, nextMonth, loadCalendar, loadFullCalendar, editCalendarItemForm, deleteCalendarItem, deleteGlobalCalendarItem, openNewItemModal, openNewGlobalEventModal, openOptionsModal, updateCalendarOptions, colorLegend, setDateToToday, filter_course */
+/* exported prevMonth, nextMonth, loadCalendar, loadFullCalendar, editCalendarItemForm, deleteCalendarItem, deleteGlobalCalendarItem, openNewItemModal, openNewGlobalEventModal, openOptionsModal, updateCalendarOptions, colorLegend, setDateToToday, filter_course, changeView */
 /* global curr_day, curr_month, curr_year, gradeables_by_date, global_items_by_date, instructor_courses, is_superuser, buildUrl */
 /* global csrfToken */
 /* global luxon */
@@ -8,6 +8,33 @@ const monthNames = ['December', 'January', 'February', 'March', 'April', 'May', 
 const monthNamesShort = ['Dec', 'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sept', 'Oct', 'Nov', 'Dec'];
 
 const DateTime = luxon.DateTime;
+
+/**
+ * Changes the view and updates cookies and loads the calendar
+ * @param view_type : string the value of the view to change to
+ * @param view_year : int year that is currently being viewed
+ * @param view_month : int month that is currently being viewed
+ * @param view_day : int day that is currently being viewed
+ * @returns {void} : loads the updated calendar
+ */
+function changeView(view_type, view_year, view_month, view_day) {
+    Cookies.set('view', view_type);
+
+    let cookie_year = parseInt(Cookies.get('calendar_year'));
+    let cookie_month = parseInt(Cookies.get('calendar_month'));
+    let cookie_day = parseInt(Cookies.get('calendar_day'));
+    if (isNaN(cookie_year)) {
+        cookie_year = view_year;
+    }
+    if (isNaN(cookie_month)) {
+        cookie_month = view_month;
+    }
+    if (isNaN(cookie_day)) {
+        cookie_day = view_day;
+    }
+    // Load the calendar to the correct day
+    loadCalendar(cookie_month, cookie_year, cookie_day, view_type);
+}
 
 /**
  * Sets the current date to today and then changes the calendar
@@ -480,7 +507,7 @@ function generateCalendarHeader(title_area) {
 function buildSwitchingHeader(view_year, view_month, view_day, type) {
     const fragment = document.createDocumentFragment();
 
-    // Build first header
+    // Build first header column
     const th1 = document.createElement('th');
     th1.colSpan = 3;
     let div = document.createElement('div');
@@ -489,7 +516,7 @@ function buildSwitchingHeader(view_year, view_month, view_day, type) {
     let a = document.createElement('a');
     a.classList.add('cal-btn', 'cal-prev-btn');
 
-    // Change onlick based on type
+    // Change onclick based on type
     let prev;
     if (type === 'month') {
         prev = prevMonth(view_month, view_year, view_day);
@@ -505,22 +532,67 @@ function buildSwitchingHeader(view_year, view_month, view_day, type) {
     div.appendChild(a);
     th1.appendChild(div);
 
-    // Build second header
+    // Build second header column
     const th2 = document.createElement('th');
     th2.colSpan = 1;
     div = document.createElement('div');
     div.classList.add('cal-title');
-    const h2 = document.createElement('h2');
-    h2.classList.add('cal-month-title');
-    h2.textContent = monthNames[view_month];
-    div.appendChild(h2);
-    const h3 = document.createElement('h3');
-    h3.classList.add('cal-year-title');
-    h3.textContent = `${view_year}`;
-    div.appendChild(h3);
+
+    // Create the month dropdown
+    const monthSelect = $('<select>', {
+        id: 'month-dropdown',
+        class: 'dropdown-custom cal-month-title',
+        change: function () {
+            const type = $('#calendar-item-type-edit').val();
+            const newMonth = parseInt(this.value);
+            const newYear = parseInt($('#year-dropdown').val());
+            loadCalendar(newMonth, newYear, view_day, type);
+        },
+    });
+
+    for (let itermonth = 1; itermonth <= 12; itermonth++) {
+        const monthOption = $('<option>', {
+            value: itermonth,
+            text: monthNames[itermonth],
+        });
+        monthSelect.append(monthOption);
+    }
+    monthSelect.val(view_month);
+
+    // Create the year dropdown
+    const currentYear = new Date().getFullYear();
+    const yearSelect = $('<select>', {
+        id: 'year-dropdown',
+        class: 'dropdown-custom cal-year-title',
+        change: function () {
+            const type = $('#calendar-item-type-edit').val();
+            const newYear = parseInt(this.value);
+            const newMonth = parseInt($('#month-dropdown').val());
+            loadCalendar(newMonth, newYear, view_day, type);
+        },
+    });
+
+    for (let year = currentYear - 4; year <= currentYear + 1; year++) {
+        const yearOption = $('<option>', {
+            value: year,
+            text: year,
+        });
+        yearSelect.append(yearOption);
+    }
+    yearSelect.val(view_year);
+
+    // Add the month and year dropdowns side by side
+    const dropdownContainer = $('<div>', {
+        css: {
+            display: 'flex',
+            alignItems: 'center',
+        },
+    });
+    dropdownContainer.append(monthSelect).append(yearSelect);
+    div.appendChild(dropdownContainer[0]);
     th2.appendChild(div);
 
-    // Build third header
+    // Build third header column
     const th3 = document.createElement('th');
     th3.colSpan = 3;
     div = document.createElement('div');
@@ -545,40 +617,11 @@ function buildSwitchingHeader(view_year, view_month, view_day, type) {
     div.appendChild(a);
     th3.appendChild(div);
 
+    // Append all elements to fragment
     fragment.appendChild(th1);
     fragment.appendChild(th2);
     fragment.appendChild(th3);
-    return fragment;
-}
 
-/**
- * Builds a title/header for semester calendar
- *
- * @param semester_name the name of the semester
- * @returns {DocumentFragment} the HTML element containing the title/header
- */
-function buildSemesterHeader(semester_name) {
-    const fragment = document.createDocumentFragment();
-    const th1 = document.createElement('th');
-    th1.colSpan = 3;
-    const th2 = document.createElement('th');
-    th2.colSpan = 1;
-    const div = document.createElement('div');
-    div.classList.add('cal-title');
-    const h2 = document.createElement('h2');
-    h2.classList.add('cal-month-title');
-    h2.textContent = semester_name.split(' ')[0];
-    div.appendChild(h2);
-    const h3 = document.createElement('h3');
-    h3.classList.add('cal-year-title');
-    h3.textContent = semester_name.split(' ')[1];
-    const th3 = document.createElement('th');
-    th3.colSpan = 3;
-    div.appendChild(h3);
-    th2.appendChild(div);
-    fragment.appendChild(th1);
-    fragment.appendChild(th2);
-    fragment.appendChild(th3);
     return fragment;
 }
 
@@ -776,7 +819,7 @@ function generateCalendarOfMonthTwoWeek(view_year, view_month, view_day) {
  */
 function generateFullCalendar(start, end, semester_name) {
     // Header area: two buttons to move, and month
-    const table = generateCalendarHeader(buildSemesterHeader(semester_name));
+    const table = generateCalendarHeader(semester_name);
     const tableBody = document.createElement('tbody');
     const startDate = parseDate(start);
     const endDate = parseDate(end);
