@@ -211,7 +211,7 @@ class FCFSScheduler(BaseScheduler):
                   )
 
         # for testing / debugging
-        print("JOBS QUEUE count=" + len(jobs))
+        print("JOBS QUEUE count=" + str(len(jobs)))
         position = 0
         for j in jobs:
             position += 1
