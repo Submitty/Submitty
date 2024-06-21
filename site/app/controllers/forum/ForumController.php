@@ -585,8 +585,10 @@ class ForumController extends AbstractController {
                             $place = array_search($post["parent_id"], $order_array, true);
                             $tmp_array = [$post["id"]];
                             $parent_reply_level = $reply_level_array[$place];
-                            while ($place !== false && $place + 1 < count($reply_level_array) && $reply_level_array[$place + 1] > $parent_reply_level) {
-                                $place++;
+                            if ($place !== false) {
+                                while (array_key_exists($place + 1, $reply_level_array) && $reply_level_array[$place + 1] > $parent_reply_level) {
+                                    $place++;
+                                }
                             }
                             array_splice($order_array, $place + 1, 0, $tmp_array);
                             array_splice($reply_level_array, $place + 1, 0, $parent_reply_level + 1);
@@ -856,8 +858,10 @@ class ForumController extends AbstractController {
                         $place = array_search($post_["parent_id"], $order_array, true);
                         $tmp_array = [$post_["id"]];
                         $parent_reply_level = $reply_level_array[$place];
-                        while ($place !== false && $place + 1 < count($reply_level_array) && $reply_level_array[$place + 1] > $parent_reply_level) {
-                            $place++;
+                        if ($place !== false) {
+                            while (array_key_exists($place + 1, $reply_level_array) && $reply_level_array[$place + 1] > $parent_reply_level) {
+                                $place++;
+                            }
                         }
                         array_splice($order_array, $place + 1, 0, $tmp_array);
                         array_splice($reply_level_array, $place + 1, 0, $parent_reply_level + 1);
