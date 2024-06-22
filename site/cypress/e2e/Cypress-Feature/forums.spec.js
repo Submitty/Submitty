@@ -16,8 +16,7 @@ const notVisible = 'be.not.visible';
 
 const goToForum = (user) => {
     cy.login(user);
-    cy.visit(['sample']);
-    cy.get('#nav-sidebar-forum').click();
+    cy.visit(['sample', 'forum']);
 };
 
 const uploadAttachmentAndDelete = (title) => {
