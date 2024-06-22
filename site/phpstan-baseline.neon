@@ -2227,11 +2227,6 @@ parameters:
 			path: app/controllers/forum/ForumController.php
 
 		-
-			message: "#^Call to function in_array\\(\\) requires parameter \\#3 to be set\\.$#"
-			count: 5
-			path: app/controllers/grading/ElectronicGraderController.php
-
-		-
 			message: "#^Construct empty\\(\\) is not allowed\\. Use more strict comparison\\.$#"
 			count: 12
 			path: app/controllers/grading/ElectronicGraderController.php
@@ -5308,11 +5303,6 @@ parameters:
 		-
 			message: "#^Instanceof between app\\\\models\\\\gradeable\\\\Gradeable and app\\\\models\\\\gradeable\\\\Gradeable will always evaluate to true\\.$#"
 			count: 1
-			path: app/libraries/database/DatabaseQueries.php
-
-		-
-			message: "#^Loose comparison via \"\\!\\=\" is not allowed\\.$#"
-			count: 16
 			path: app/libraries/database/DatabaseQueries.php
 
 		-
