@@ -213,13 +213,13 @@ hr {
     align-items: center;
 }
 
-.input-percents {
+.input-boxes {
     display: inline-grid;
     grid-template-columns: auto auto; /* two columns */
     grid-gap: 0 0.2em;
 }
 
-.cutoff-label {
+.input-label {
     padding: 4px 6px;
 }
 

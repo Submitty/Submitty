@@ -128,9 +128,5 @@
     "strace":                  { "path": "/usr/bin/strace" },
 
     // Matlab
-    "matlab":                  { "path": "/usr/local/bin/matlab" },
-
-    // only for docker
-    "bash":                    { "path": "/bin/bash", "onlyDocker": true },
-    "php":                     { "path": "/usr/bin/php", "onlyDocker": true }
+    "matlab":                  { "path": "/usr/local/bin/matlab" }
 }
