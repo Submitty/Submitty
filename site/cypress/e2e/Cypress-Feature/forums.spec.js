@@ -12,11 +12,6 @@ const merged1 = 'Merged Thread Title: '.concat(title3, '\n\n', content3);
 const merged2 = 'Merged Thread Title: '.concat(title2, '\n\n', content2);
 const attachment1 = 'sea_animals.png';
 
-const goToForum = (user) => {
-    cy.login(user);
-    cy.visit(['sample', 'forum']);
-};
-
 const createThread = (title, content, category) => {
     // Add more to tests for uploading attachments
     cy.get('[title="Create Thread"]').click();
@@ -36,6 +31,7 @@ const replyToThread = (title, reply) => {
 };
 
 const upduckPost = (thread_title) => {
+    cy.get('[data-testid="thread-list-item"]').contains(thread_title).click();
     cy.get('[data-testid="create-post-head"]').should('contain', thread_title);
     cy.get('[data-testid="like-count"]').first().should('have.text', 0);
     cy.get('[data-testid="upduck-button"]').first().click();
@@ -125,10 +121,11 @@ const checkStaffUpduck = (title, visible) => {
     cy.get('[data-testid="instructor-like"]').first().should(visible);
 };
 
-describe('Test cases revolving around creating, replying to, merging, upducking, and removing discussion forum threads', () => {
+describe('Should test creating, replying, merging, removing, and upducks in forum', () => {
 
     beforeEach(() => {
-        goToForum('instructor');
+        cy.login('instructor');
+        cy.visit(['sample', 'forum']);
         cy.get('#nav-sidebar-collapse-sidebar').click();
     });
 
@@ -157,21 +154,24 @@ describe('Test cases revolving around creating, replying to, merging, upducking,
 
         // Student upduck
         cy.logout();
-        goToForum('student');
+        cy.login('student');
+        cy.visit(['sample', 'forum']);
         studentUpduckPost(title1);
         studentUpduckPost(title2);
         studentUpduckPost(title3);
 
         // TA upduck
         cy.logout();
-        goToForum('ta');
+        cy.login('ta');
+        cy.visit(['sample', 'forum']);
         staffUpduckPost('ta', title1);
         staffUpduckPost('ta', title2);
         staffUpduckPost('ta', title3);
 
         // Instructor upduck and check the stats page for instructor with 3 upducks
         cy.logout();
-        goToForum('instructor');
+        cy.login('instructor');
+        cy.visit(['sample', 'forum']);
         staffUpduckPost('instructor', title1);
         staffUpduckPost('instructor', title2);
         staffUpduckPost('instructor', title3);
