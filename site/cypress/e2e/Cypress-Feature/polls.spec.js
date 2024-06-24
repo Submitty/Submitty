@@ -119,6 +119,7 @@ describe('Test cases revolving around polls functionality', () => {
         cy.contains('Poll 1').siblings().last().click();
         // make sure all the page elements are there
         cy.get('.content > h1').contains('Poll 1');
+        cy.get('[data-testid="timer"]').contains('Poll Ended');
         cy.get('.markdown').contains('What animals swim in the sea?');
         cy.get('#chartContainer').contains('Poll 1');
         cy.get('#chartContainer').contains('Dolphin');
@@ -132,6 +133,7 @@ describe('Test cases revolving around polls functionality', () => {
         cy.contains('Poll 2').siblings().last().click();
         // make sure all the page elements are there
         cy.get('.content > h1').contains('Poll 2');
+        cy.get('[data-testid="timer"]').contains('Poll Ended');
         cy.get('.markdown').contains('What color is the sky?');
         cy.get('#chartContainer').contains('Poll 2');
         cy.get('#chartContainer').contains('Green');
@@ -144,6 +146,7 @@ describe('Test cases revolving around polls functionality', () => {
         cy.contains('Poll 3').siblings().last().click();
         // make sure all the page elements are there
         cy.get('.content > h1').contains('Poll 3');
+        cy.get('[data-testid="timer"]').should('not.exist');
         cy.get('.markdown').contains('What is your favorite food?');
         cy.get('#chartContainer').contains('Poll 3');
         cy.get('#chartContainer').contains('Pizza');
