@@ -525,7 +525,7 @@ class PollController extends AbstractController {
         elseif ($poll_response === null || trim($poll_response) === '') {
             return JsonResponse::getFailResponse("No associated text provided for custom response");
         }
-        elseif ($poll->allowsCustomResponses() === false) {
+        elseif ($poll->getAllowsCustomResponses() === false) {
             return JsonResponse::getFailResponse("Poll is currently not accepting custom responses");
         }
         $exists_response = $this->core->getQueries()->existsCustomResponse($poll->getId(), $poll_response);

@@ -163,7 +163,7 @@ class Poll {
         $this->allows_custom = $allows_custom;
     }
 
-    public function allowsCustomResponses(): bool {
+    public function getAllowsCustomResponses(): bool {
         return $this->allows_custom;
     }
 

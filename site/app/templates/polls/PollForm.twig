@@ -144,7 +144,7 @@
         <label for = "poll_custom_options" class="option-title credit-form-item">
             Allow custom answers from students
         </label>
-        <input id ="poll_custom_options" class="credit-box credit-form-item" type="checkbox" name="poll_custom_options"  {{ poll is not null and poll.allowsCustomResponses() ? "checked" : "" }}>
+        <input id ="poll_custom_options" class="credit-box credit-form-item" type="checkbox" name="poll_custom_options"  {{ poll is not null and poll.getAllowsCustomResponses() ? "checked" : "" }}>
         <hr>
         <h2> Responses: </h2>
         {% if poll is not null %}
