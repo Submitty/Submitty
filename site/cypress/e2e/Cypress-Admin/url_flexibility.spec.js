@@ -13,7 +13,7 @@ describe('Tests for auto removal of trailing slash in url', () => {
         `${BASE_URL}/forum`,
         `${BASE_URL}/course_materials`,
         `${BASE_URL}/office_hours_queue`,
-    ].forEach(url =>
+    ].forEach((url) =>
         it(`removes trailing slash for ${url}`, () => {
             cy.visit(`${url}/`);
             cy.location('pathname').should('eq', url);

@@ -301,7 +301,7 @@ function addToTable() {
     }
 
     // eslint-disable-next-line no-undef
-    const studentFullDataValues = studentFullData.map(item => item.value);
+    const studentFullDataValues = studentFullData.map((item) => item.value);
     if (!studentFullDataValues.includes(USERID)) {
         alert('Invalid User ID. Please enter a valid one.');
         return;

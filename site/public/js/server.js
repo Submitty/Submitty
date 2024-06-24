@@ -173,7 +173,7 @@ function newDeleteCourseMaterialForm(id, file_name, str_id = null) {
     const current_y_offset = window.pageYOffset;
     Cookies.set('jumpToScrollPosition', current_y_offset);
 
-    const cm_ids = (Cookies.get('cm_data') || '').split('|').filter(n => n.length);
+    const cm_ids = (Cookies.get('cm_data') || '').split('|').filter((n) => n.length);
 
     $('[id^=div_viewer_]').each(function () {
         const cm_id = this.id.replace('div_viewer_', '').trim();
@@ -1983,7 +1983,7 @@ function tzWarn() {
     if (!user_offstr) {
         return;
     }
-    const [h, m] = user_offstr.match(/\d+/g)?.map(n => +n) || [NaN, NaN];
+    const [h, m] = user_offstr.match(/\d+/g)?.map((n) => +n) || [NaN, NaN];
     if (isNaN(h) || isNaN(m)) {
         return;
     }

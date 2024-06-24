@@ -13,10 +13,10 @@ const testFormOpening = (rowId, formId) => {
 const getVisibleData = () => {
     const data = {};
 
-    cy.get('#givenname-row > button').invoke('text').then(text => data.givenName = text.trim());
-    cy.get('#familyname-row > button').invoke('text').then(text => data.familyName = text.trim());
-    cy.get('#pronouns-row > button').invoke('text').then(text => data.pronouns = text.trim());
-    cy.get('#secondary-email-row > button').invoke('text').then(text => data.secondaryEmail = text.trim());
+    cy.get('#givenname-row > button').invoke('text').then((text) => data.givenName = text.trim());
+    cy.get('#familyname-row > button').invoke('text').then((text) => data.familyName = text.trim());
+    cy.get('#pronouns-row > button').invoke('text').then((text) => data.pronouns = text.trim());
+    cy.get('#secondary-email-row > button').invoke('text').then((text) => data.secondaryEmail = text.trim());
 
     return data;
 };

@@ -2332,7 +2332,7 @@ function updateThread(e) {
 
     e.preventDefault();
     const cat = [];
-    $('input[name="cat[]"]:checked').each(item => cat.push($('input[name="cat[]"]:checked')[item].value));
+    $('input[name="cat[]"]:checked').each((item) => cat.push($('input[name="cat[]"]:checked')[item].value));
 
     const form = $(this);
     const formData = new FormData(form[0]);
@@ -2547,7 +2547,7 @@ function saveCreateThreadToLocal() {
     // eslint-disable-next-line no-undef
     if (autosaveEnabled) {
         const title = $('#title').val();
-        const categories = $('div.cat-buttons.btn-selected').get().map(e => e.innerText);
+        const categories = $('div.cat-buttons.btn-selected').get().map((e) => e.innerText);
         const status = $('#thread_status').val();
         const data = {
             timestamp: Date.now(),
