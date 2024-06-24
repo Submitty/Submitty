@@ -129,6 +129,8 @@
     display: flex;
     margin-left: auto;
     align-items: center;
+    flex-wrap: wrap;
+    margin-bottom: 1px;
 }
 
 .markdown-mode-buttons {
