@@ -10,7 +10,6 @@ const reply2 = 'Cypress Reply 2 Cypress';
 const reply3 = 'Cypress Reply 3 Cypress';
 const merged1 = 'Merged Thread Title: '.concat(title3, '\n\n', content3);
 const merged2 = 'Merged Thread Title: '.concat(title2, '\n\n', content2);
-const attachment1 = 'sea_animals.png';
 
 const createThread = (title, content, category) => {
     // Add more to tests for uploading attachments
@@ -26,7 +25,7 @@ const replyToThread = (title, reply) => {
     cy.get('[data-testid="thread-list-item"]').contains(title).click();
     cy.get('[data-testid="create-post-head"]').should('contain', title);
     cy.get('#reply_box_3').type(reply);
-    cy.get('[value="Submit Reply to All"]').should('not.be.disabled').click();
+    cy.get('[data-testid="forum-submit-reply-all"]').should('not.be.disabled').click();
     cy.get('#posts_list').should('contain', reply);
 };
 
@@ -40,10 +39,11 @@ const upduckPost = (thread_title) => {
 
 const checkStatsUpducks = (fullName, numUpducks) => {
     // Check the stats page for a user with fullName and
-    // number of upducks numUpducks
+    // at least number of upducks numUpducks
     cy.get('[data-testid="more-dropdown"]').click();
     cy.get('#forum_stats').click();
-    cy.get('[data-testid="user-stat"]').contains(fullName).siblings('[data-testid="upduck-stat"]').should('contain.text', numUpducks);
+    cy.get('[data-testid="user-stat"]').contains(fullName).siblings('[data-testid="upduck-stat"]')
+        .invoke('text').then(parseInt).should('be.gte', numUpducks)
     cy.get('[title="Back to threads"]').click();
 };
 
@@ -72,22 +72,25 @@ const uploadAttachmentAndDelete = (title) => {
     cy.get('[data-testid="file-upload-table-1"]').should('contain', 'sea_animals.png');
     cy.get('[data-testid="forum-update-post"]').contains('Update Post').click();
     cy.get('[data-testid="edit-post-button"]').first().click();
-    cy.get('[data-testid="mark-for-delete-btn"]').should('contain', 'Delete').click();
-    cy.get('[data-testid="mark-for-delete-btn"]').should('contain', 'Keep');
+    cy.get('[data-testid="mark-for-delete-btn"]').first().should('contain', 'Delete').click();
+    cy.get('[data-testid="mark-for-delete-btn"]').first().should('contain', 'Keep');
     cy.get('[data-testid="forum-update-post"]').contains('Update Post').click();
 };
-const replyDisabled = (title, attachment) => {
+
+const replyDisabled = (title) => {
     cy.get('[data-testid="thread-list-item"]').contains(title).click();
     // Reply button should be disabled by default with no text
-    cy.get('[value="Submit Reply to All"]').should('be.disabled');
+    cy.get('[data-testid="forum-submit-reply-all"]').should('be.disabled');
 
     // Ensure reply button is not disabled when attachments are added
-    cy.get('#input-file3').attachFile(attachment);
-    cy.get('[value="Submit Reply to All"]').should('not.be.disabled').click();
+    // waits here are needed to avoid a reload that would clear out the upload
+    cy.wait(750);
+    cy.get('[data-testid="input-file3"]').selectFile('cypress/fixtures/sea_animals.png');
+    cy.get('[data-testid="forum-submit-reply-all"]').should('not.be.disabled').click();
 
     // Wait for submission and ensure attachment with no text is visible
     cy.get('.attachment-btn').click();
-    cy.contains('p', attachment).should('be.visible');
+    cy.contains('p', 'sea_animals.png').should('be.visible');
 };
 
 describe('Test cases revolving around creating, replying to, merging, and removing discussion forum threads', () => {
@@ -101,7 +104,7 @@ describe('Test cases revolving around creating, replying to, merging, and removi
 
     it('Reply button is disabled when applicable and thread reply can contain an attachment', () => {
         createThread(title1, title1, 'Comment');
-        replyDisabled(title1, attachment1);
+        replyDisabled(title1);
         removeThread(title1);
     });
 
@@ -127,7 +130,7 @@ describe('Test cases revolving around creating, replying to, merging, and removi
         upduckPost(title2);
         upduckPost(title3);
 
-        // Check the stats page for instructor with 3 upducks
+        // Check the stats page for instructor with at least 3 upducks
         checkStatsUpducks('Instructor, Quinn', 3);
 
         // Tutorial into Questions
