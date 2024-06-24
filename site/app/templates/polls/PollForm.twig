@@ -147,10 +147,8 @@
         <input id ="poll_custom_options" class="credit-box credit-form-item" type="checkbox" name="poll_custom_options"  {{ poll is not null and poll.getAllowsCustomResponses() ? "checked" : "" }}>
         <hr>
         <h2> Responses: </h2>
-        {% if poll is not null %}
-            {% set is_survey = poll.getQuestionType() == "single-response-survey" or poll.getQuestionType() == "multiple-response-survey" %}
-            <input aria-label="" id = "toggle-all" type="checkbox" name="toggle-all-options" onchange = "togglePollFormOptions()" {{ is_survey ? "style='display:none'" : "inline-block" }}>
-        {% endif %}
+        <input aria-label="Toggle All" id = "toggle-all" type="checkbox" name="toggle-all-options" onchange = "togglePollFormOptions()" {{ is_survey ? "style='display:none'" : "inline-block" }}>
+        <label for="toggle-all" id="toggle-all-label" {{ is_survey ? "style='display:none'" : "inline-block" }}>Toggle All</label>
         <div id="responses">
             {% if poll is not null %}
                 {% for option in poll.getOptions() %}
@@ -221,11 +219,13 @@
             if ($("#poll-type-single-response-survey").is(":checked")
                 || $("#poll-type-multiple-response-survey").is(":checked")) {
                 $($(".correct-box")[i]).prop('checked', true);
-                $($(".correct-box")[i]).css({"display":"none"});
-                $("#toggle-all").css({"display":"none"});
+                $($(".correct-box")[i]).hide();
+                $("#toggle-all").hide();
+                $("#toggle-all-label").hide();
             } else {
-                $($(".correct-box")[i]).css({"display":"inline-block"});
-                $("#toggle-all").css({"display":"inline-block"});
+                $($(".correct-box")[i]).show();
+                $("#toggle-all").show();
+                $("#toggle-all-label").show();
             }
         }
     }
