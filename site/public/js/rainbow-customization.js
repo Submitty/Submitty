@@ -605,13 +605,13 @@ function setInputsVisibility(elem) {
  * */
 function setCustomizationItemVisibility(elem) {
     //maps a checkbox name to the corresponding customization item id
-    const checkbox_to_cust_item = new Map([
-        ['final_grade', '#final_grade_cutoffs'],
-        ['messages', '#cust_messages'],
-        ['section', '#section_labels'],
-    ]);
+    const checkbox_to_cust_item = {
+        'final_grade': '#final_grade_cutoffs',
+        'messages': '#cust_messages',
+        'section': '#section_labels',
+    };
     const checkbox_name = elem.value;
-    const cust_item_id = checkbox_to_cust_item.get(checkbox_name);
+    const cust_item_id = checkbox_to_cust_item[checkbox_name];
     const is_checked = elem.checked;
 
     if (is_checked) {
