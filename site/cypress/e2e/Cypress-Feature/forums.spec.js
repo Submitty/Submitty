@@ -11,8 +11,6 @@ const reply3 = 'Cypress Reply 3 Cypress';
 const merged1 = 'Merged Thread Title: '.concat(title3, '\n\n', content3);
 const merged2 = 'Merged Thread Title: '.concat(title2, '\n\n', content2);
 const attachment1 = 'sea_animals.png';
-const isVisible = 'be.visible';
-const notVisible = 'be.not.visible';
 
 const goToForum = (user) => {
     cy.login(user);
@@ -97,19 +95,20 @@ const removeUpduckPost = (thread_title) => {
 };
 
 const staffUpduckPost = (user, thread_title) => {
-    checkStaffUpduck(thread_title, notVisible);
+    checkStaffUpduck(thread_title, 'be.not.visible');
     upduckPost(thread_title);
-    checkStaffUpduck(thread_title, isVisible);
+    checkStaffUpduck(thread_title, 'be.visible');
 
     if (user !== 'instructor') {
         removeUpduckPost(thread_title);
+        checkStaffUpduck(thread_title, 'be.not.visible');
     }
 };
 
 const studentUpduckPost = (thread_title) => {
-    checkStaffUpduck(thread_title, notVisible);
+    checkStaffUpduck(thread_title, 'be.not.visible');
     upduckPost(thread_title);
-    checkStaffUpduck(thread_title, notVisible);
+    checkStaffUpduck(thread_title, 'be.not.visible');
     removeUpduckPost(thread_title);
 };
 
