@@ -5,6 +5,7 @@ namespace app\models;
 use app\libraries\Core;
 use app\libraries\database\DatabaseQueries;
 use app\libraries\DateUtils;
+use app\libraries\FileUtils;
 
 /**
  * Class RainbowCustomization
@@ -494,7 +495,8 @@ class RainbowCustomization extends AbstractModel {
 
 
     // This function handles processing the incoming post data
-    public function processForm() {
+    public function processForm()
+    {
 
         // Get a new customization file
         $this->RCJSON = new RainbowCustomizationJSON($this->core);
@@ -510,13 +512,13 @@ class RainbowCustomization extends AbstractModel {
 
         if (isset($form_json->benchmark_percent)) {
             foreach ($form_json->benchmark_percent as $key => $value) {
-                $this->RCJSON->addBenchmarkPercent((string) $key, $value);
+                $this->RCJSON->addBenchmarkPercent((string)$key, $value);
             }
         }
 
         if (isset($form_json->section)) {
             foreach ($form_json->section as $key => $value) {
-                $this->RCJSON->addSection((string) $key, $value);
+                $this->RCJSON->addSection((string)$key, $value);
             }
         }
 
@@ -547,6 +549,11 @@ class RainbowCustomization extends AbstractModel {
         // Write to customization file
         $this->RCJSON->saveToJsonFile();
 
+    }
+
+    public function BuildForm() {
+
+
         // Configure json to go into jobs queue
         $job_json = (object) [];
         $job_json->job = 'RunAutoRainbowGrades';
@@ -565,12 +572,6 @@ class RainbowCustomization extends AbstractModel {
 
         // Place in queue
         file_put_contents($path, $job_json);
-
-//        $this->has_error = "true";
-//        foreach($_POST as $field => $value){
-//            $this->error_messages[] = "$field: $value";
-//        }
-//        throw new ValidationException('Debug Rainbow Grades error', $this->error_messages);
     }
 
     public function error() {
@@ -583,6 +584,12 @@ class RainbowCustomization extends AbstractModel {
 
     public function doesManualCustomizationExist(): bool
     {
-        return $this->RCJSON->doesManualCustomizationExist();
+        // using RCJSON will have issue because constructor will call loadFromJsonFile
+        // which will return null if gui_customization is not found.
+        // return $this->RCJSON->doesManualCustomizationExist();
+        $course_path = $this->core->getConfig()->getCoursePath();
+        $file_path = FileUtils::joinPaths($course_path, 'rainbow_grades', 'manual_customization.json');
+
+        return file_exists($file_path);
     }
 }

@@ -101,7 +101,7 @@ with open(log_file_path, 'w') as f:
     rg_course_path = os.path.join(courses_path, semester, course, 'rainbow_grades')
 
     # Verify that customization.json exist
-    if os.path.exists(rg_course_path + '/customization.json')
+    if os.path.exists(rg_course_path + '/customization.json'):
         pass
 
     else:

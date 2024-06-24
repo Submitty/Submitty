@@ -468,6 +468,8 @@ function checkAutoRGStatus() {
 }
 
 
+
+
 //This function attempts to create a new customization.json server-side based on form input
 // eslint-disable-next-line no-unused-vars
 function ajaxUpdateJSON(successCallback, errorCallback) {
@@ -519,7 +521,6 @@ $(document).ready(() => {
         console.log("Selected value: " + selected_value);
         // eslint-disable-next-line no-undef
         const url = buildCourseUrl(['reports', 'rainbow_grades_customization', 'manual_or_gui']);
-        console.log("URL: " + url);
         const formData = new FormData();
         formData.append('csrf_token', csrfToken);
         formData.append('selected_value', selected_value);
@@ -547,6 +548,109 @@ $(document).ready(() => {
         });
     });
 });
+
+
+// $(document).ready(() => {
+//     // Attach a change event handler to the entire content container
+//     $(document).on('change', ".content input", function(event) {
+//         // Build the URL for the AJAX request
+//         const url = buildCourseUrl(['reports', 'rainbow_grades_customizationnn']);
+//
+//         // Prepare form data to be sent with the AJAX request
+//         const formData = new FormData();
+//         formData.append('csrf_token', csrfToken);
+//
+//         // Optionally, you can send additional data such as the changed element's value
+//         if ($(event.target).is("input[name='customization']")) {
+//             const selected_value = $("input[name='customization']:checked").val();
+//             formData.append('selected_value', selected_value);
+//         }
+//
+//         // Perform the AJAX request
+//         $.ajax({
+//             url: url,
+//             type: 'POST',
+//             data: formData,
+//             processData: false,  // Do not process data
+//             contentType: false,  // Do not set any content type header
+//             beforeSend: function(xhr) {
+//                 xhr.setRequestHeader('X-Requested-With', 'XMLHttpRequest');  // Mark request as AJAX
+//             },
+//             success: function(response) {
+//                 // Handle the server response
+//                 console.log(`Response: ${response}`);
+//                 if (response === "success") {
+//                     alert("Customization successfully generated.");
+//                 } else {
+//                     alert("An error occurred while generating the customization.");
+//                 }
+//             },
+//             error: function(jqXHR, textStatus, errorThrown) {
+//                 // Handle request errors
+//                 console.error(`Error status: ${textStatus}`);
+//                 console.error(`Error thrown: ${errorThrown}`);
+//                 console.error(`Server response: ${jqXHR.status} ${jqXHR.statusText}`);
+//             },
+//         });
+//     });
+// });
+
+
+
+$(document).ready(() => {
+    // Attach a change event handler to the entire content container
+    $(document).on('change', ".content input", function(event) {
+        // Build the URL for the AJAX request
+        const url = buildCourseUrl(['reports', 'rainbow_grades_customizationnn']);
+
+        // Prepare form data to be sent with the AJAX request
+        const formData = new FormData();
+        formData.append('csrf_token', csrfToken);
+        // data: {json_string: buildJSON(), csrf_token: csrfToken},
+        // Collect data to be sent
+        const jsonData = collectFormData(); // Function to collect necessary form data as JSON string
+        // formData.append('json_string', JSON.stringify(jsonData));
+        formData.append('json_string', buildJSON());
+
+        // Perform the AJAX request
+        $.ajax({
+            url: url,
+            type: 'POST',
+            data: formData,
+            processData: false,  // Do not process data
+            contentType: false,  // Do not set any content type header
+            beforeSend: function(xhr) {
+                xhr.setRequestHeader('X-Requested-With', 'XMLHttpRequest');  // Mark request as AJAX
+            },
+            success: function(response) {
+                // Handle the server response
+                console.log(`Response: ${response}`);
+                if (response === "success") {
+                    alert("Customization successfully generated.");
+                } else {
+                    alert("An error occurred: " + response);
+                }
+            },
+            error: function(jqXHR, textStatus, errorThrown) {
+                // Handle request errors
+                console.error(`Error status: ${textStatus}`);
+                console.error(`Error thrown: ${errorThrown}`);
+                console.error(`Server response: ${jqXHR.status} ${jqXHR.statusText}`);
+            },
+        });
+    });
+
+    function collectFormData() {
+        // Collect form data and return it as an object
+        let formData = {};
+        $(".content input").each(function() {
+            formData[$(this).attr('name')] = $(this).val();
+        });
+        return formData;
+    }
+});
+
+
 
 function displayChangeDetectedMessage() {
     $('#save_status').text('Changes detected, press "Save Changes" to save them.');
@@ -656,7 +760,7 @@ $(document).ready(() => {
 
     // Register change handlers to update the status message when form inputs change
     $("input[name*='display_benchmarks']").change(() => {
-        displayChangeDetectedMessage();
+        displayChangeDetectedMessage();s
     });
 
     $('#cust_messages_textarea').on('change keyup paste', () => {
@@ -695,5 +799,54 @@ $(document).ready(() => {
     $(document).ready(() => {
         $('#rg_web_ui_loading').hide();
         $('#rg_web_ui').show();
+    });
+});
+
+$(document).ready(() => {
+
+    // Button click event
+    $('#btn-upload-customization').click(() => {
+        $('#config-upload').click();
+    });
+
+    // File input change event
+    $('#config-upload').on('change', function() {
+        const selected_file = $(this)[0].files[0];
+        console.log("Selected File: ", selected_file);
+
+        // eslint-disable-next-line no-undef
+        const url = buildCourseUrl(['reports', 'rainbow_grades_customization', 'upload']);
+        console.log("URL: ", url);
+
+        const formData = new FormData();
+        formData.append('csrf_token', csrfToken);
+        formData.append('config_upload', selected_file);
+
+        $.ajax({
+            url: url,
+            type: 'POST',
+            data: formData,
+            processData: false,  // Do not process data
+            contentType: false,  // Do not set any content type header
+            success: function (data) {
+                console.log("Data: " + JSON.stringify(data));
+
+                // Error handling based on your previous example
+                if (data['status'] === 'fail') {
+                    alert(data['message']);
+                    $("#config-upload").focus();
+                } else {
+                    alert('File uploaded successfully');
+                }
+            },
+            error: function (jqXHR, textStatus, errorThrown) {
+                console.log("Error status: " + textStatus);
+                console.log("Error thrown: " + errorThrown);
+                console.log("Server response: " + jqXHR.status + " " + jqXHR.statusText);
+            },
+        });
+
+        // Clear file input value after file is selected
+        $(this).val('');
     });
 });

@@ -590,6 +590,35 @@ class ReportController extends AbstractController {
         }
     }
 
+
+    #[Route("/courses/{_semester}/{_course}/reports/rainbow_grades_customizationnn", methods: ["POST"])]
+    public function generateCustomizationnn() {
+        // Check if this is an AJAX request
+        if (!empty($_SERVER['HTTP_X_REQUESTED_WITH']) && strtolower($_SERVER['HTTP_X_REQUESTED_WITH']) == 'xmlhttprequest') {
+            // Build a new model, pull in defaults for the course
+            $customization = new RainbowCustomization($this->core);
+            $customization->buildCustomization();
+
+            if (isset($_POST["json_string"])) {
+                // Handle user input (the form) being submitted
+                try {
+                    $customization->processForm();
+                    // Send response back to JS
+                    die("success");
+                } catch (Exception $e) {
+                    // Handle exception and send error response
+                    die("error");
+                }
+            } else {
+                die("error: no json_string provided");
+            }
+        } else {
+            die("error: not an AJAX request");
+        }
+    }
+
+
+
     #[Route("/courses/{_semester}/{_course}/reports/rainbow_grades_customization")]
     public function generateCustomization() {
         //Build a new model, pull in defaults for the course
@@ -624,6 +653,7 @@ class ReportController extends AbstractController {
 
             // Print the form
             $this->core->getOutput()->renderTwigOutput('admin/RainbowCustomization.twig', [
+                'customization_upload_url' => $this->core->buildCourseUrl(['reports', 'rainbow_grades_customization', 'upload']),
                 "manual_customization_exists" => $customization->doesManualCustomizationExist(),
                 "customization_data" => $customization->getCustomizationData(),
                 "available_buckets" => $customization->getAvailableBuckets(),
@@ -755,7 +785,7 @@ class ReportController extends AbstractController {
     }
 
 
-    #[Route("/courses/{_semester}/{_course}/reports/rainbow_grades_status")]
+    #[Route("/courFses/{_semester}/{_course}/reports/rainbow_grades_status")]
     public function autoRainbowGradesStatus() {
         // Create path to the file we expect to find in the jobs queue
         $jobs_file = '/var/local/submitty/daemon_job_queue/auto_rainbow_' .
