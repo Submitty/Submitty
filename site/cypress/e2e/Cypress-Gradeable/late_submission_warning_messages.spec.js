@@ -118,6 +118,34 @@ const SubmitAndCheckMessage = (gradeable_type, upload_file1, invalid_late_day, v
     cy.logout();
 };
 
+
+it('Checks whether daylight savings warning message should be appearing at current date.', () => {
+    /*
+    First we set the date to a date close to the spring daylight savings time and then check that the message appears.
+    Then we change the date to a month later, and check that the "daylight" message doesn't appear.
+    */
+    const currentDate = new Date();
+    const futureDate = new Date(currentDate);
+    futureDate.setDate(currentDate.getDate() + 7);
+
+    const pastDate = new Date(currentDate);
+    pastDate.setDate(currentDate.getDate() - 7);
+
+    const daylightSavingsChange = pastDate.getTimezoneOffset() !== futureDate.getTimezoneOffset();
+
+    cy.login('instructor');
+    cy.visit(['sample', 'gradeable', 'open_homework']);
+
+    if (daylightSavingsChange) {
+        cy.get('#daylight').should('exist');
+    }
+    else {
+        cy.get('#daylight').should('not.exist');
+    }
+    cy.logout();
+
+});
+
 describe('Test warning messages for non team gradeable', () => {
 
     it('should create non-team gradeable for testing', () => {
