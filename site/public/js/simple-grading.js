@@ -4,7 +4,7 @@
 function updateVisibility() {
     const showGraders = $('#show-graders').is(':checked');
     const showDates = $('#show-dates').is(':checked');
-    $('.cell-grade').each(function() {
+    $('.cell-grade').each(() => {
         const graderElement = $(this).find('.simple-grade-grader');
         const dateElement = $(this).find('.simple-grade-date');
         if (showGraders && graderElement.text().trim() !== '') {
@@ -280,7 +280,7 @@ function updateCheckpointCells(elems, scores, no_cookie) {
                     const formattedDate = `${currentDate.getFullYear()}-${padNumber(currentDate.getMonth() + 1)}-${padNumber(currentDate.getDate())} ${padNumber(currentDate.getHours())}:${padNumber(currentDate.getMinutes())}:${padNumber(currentDate.getSeconds())}`;
                     elems.each((idx, elem) => {
                         elem = $(elem);
-                        elem.animate({'border-right-width': '0px'}, 400);
+                        elem.animate({ 'border-right-width': '0px' }, 400);
                         elem.attr('data-score', elem.data('score'));
                         elem.attr('data-grader', elem.data('grader'));
                         elem.attr('data-date', formattedDate);
@@ -288,12 +288,12 @@ function updateCheckpointCells(elems, scores, no_cookie) {
                         elem.find('.simple-grade-date').text(formattedDate);
                     });
                     window.socketClient.send({
-                        'type': 'update_checkpoint',
-                        'elem': elems.attr('id').split('-')[3],
-                        'user': parent.data('anon'),
-                        'score': elems.data('score'),
-                        'grader': elems.data('grader'),
-                        'date': formattedDate,
+                        type: 'update_checkpoint',
+                        elem: elems.attr('id').split('-')[3],
+                        user: parent.data('anon'),
+                        score: elems.data('score'),
+                        grader: elems.data('grader'),
+                        date: formattedDate,
                     });
                 }
                 else {
