@@ -1,3 +1,11 @@
 #rainbow-grades > table {
     color: black;
 }
+
+#rainbow-grades-header > .btn-wrapper {
+    margin: auto;
+}
+
+#rainbow-grades-last-update {
+    float: right;
+}

@@ -193,7 +193,31 @@ class FCFSScheduler(BaseScheduler):
     def _assign_jobs(self, jobs: List[Job]):
         idle_workers = [worker for worker in self.workers if worker.is_idle()]
 
-        jobs.sort(key=lambda j: os.stat(j.path).st_ctime_ns)
+        # sort jobs by priority
+        # 1. VCS gradeable that has not yet been checked out
+        # 2. Interative / non-regrade job
+        # 3. Time entering queue
+        # 4. Ppath name
+        jobs.sort(key=lambda j:
+                  (
+                    not ("vcs_checkout" in j.queue_obj and
+                         j.queue_obj["vcs_checkout"] and
+                         not ("checkout_total_size" in j.queue_obj)),
+                    "regrade" in j.queue_obj and j.queue_obj["regrade"],
+                    j.queue_obj['queue_time'],
+                    j.path
+                  ),
+                  reverse=False
+                  )
+
+        # for testing / debugging
+        print("JOBS QUEUE count=" + str(len(jobs)))
+        position = 0
+        for j in jobs:
+            position += 1
+            regrade = "regrade" in j.queue_obj and j.queue_obj["regrade"]
+            qt = j.queue_obj['queue_time']
+            print("JOB " + str(position) + " " + str(regrade) + " " + str(qt) + " " + j.path)
 
         for job in jobs:
             if len(idle_workers) == 0:
