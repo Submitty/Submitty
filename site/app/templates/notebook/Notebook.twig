@@ -82,12 +82,13 @@
                     {% endif %}
                 >
                 </div>
-                <button type="button" id="codebox_{{ num_codeboxes }}_clear_button" class="btn btn-primary codebox-clear-reset"
-                    data-older_version = "{{ viewing_inactive_version ? true : false }}">
-                    {{ cell.initial_value == "" ? 'Clear' : 'Reset'}}
-                </button>
-
-                <button type="button" id="codebox_{{ num_codeboxes }}_recent_button" class="btn btn-primary codebox-clear-reset">Use Most Recent Submission</button>
+                {% if not is_grader_view %}
+                    <button type="button" id="codebox_{{ num_codeboxes }}_clear_button" class="btn btn-primary codebox-clear-reset"
+                        data-older_version = "{{ viewing_inactive_version ? true : false }}">
+                        {{ cell.initial_value == "" ? 'Clear' : 'Reset'}}
+                    </button>
+                    <button type="button" id="codebox_{{ num_codeboxes }}_recent_button" class="btn btn-primary codebox-clear-reset">Use Most Recent Submission</button>
+                {% endif %}
 
                 <script>
                     const config_{{ num_codeboxes }} = {};
@@ -201,8 +202,10 @@
                 </fieldset>
 
                 {# Create reset to recent submission button #}
-                <button type="button" id="mc_{{ num_multiple_choice }}_clear_button" class="btn btn-primary mc-clear">Clear</button>
-                <button type="button" id="mc_{{ num_multiple_choice }}_recent_button" class="btn btn-primary mc-recent">Use Most Recent Submission</button>
+                {% if not is_grader_view %}
+                    <button type="button" id="mc_{{ num_multiple_choice }}_clear_button" class="btn btn-primary mc-clear">Clear</button>
+                    <button type="button" id="mc_{{ num_multiple_choice }}_recent_button" class="btn btn-primary mc-recent">Use Most Recent Submission</button>
+                {% endif %}
                 <script>
                     $("multiple_choice_{{ num_multiple_choice }}_1").attr("disabled", true);
                     {# Populate checkboxes initially #}
@@ -253,17 +256,19 @@
                         {% endif %}
                     {% endfor %}
                 {% endif %}
-                <button type="button" class="btn btn-primary
-                    sa-clear-reset" onclick="deleteFiles({{num_file_submissions}});"
-                    {% if viewing_inactive_version %}
-                        disabled = "disabled"
-                    {% endif %}>
-                    Clear
-                </button>
-                <button type="button" 
-                    onclick="populatePreviousFiles({{num_file_submissions}});"
-                    class="btn btn-primary mc-recent fs-recent">Use Most Recent Submission
-                </button>
+                {% if not is_grader_view %}
+                    <button type="button" class="btn btn-primary
+                        sa-clear-reset" onclick="deleteFiles({{num_file_submissions}});"
+                        {% if viewing_inactive_version %}
+                            disabled = "disabled"
+                        {% endif %}>
+                        Clear
+                    </button>
+                    <button type="button"
+                        onclick="populatePreviousFiles({{num_file_submissions}});"
+                        class="btn btn-primary mc-recent fs-recent">Use Most Recent Submission
+                    </button>
+                {% endif %}
             {% endif %}
 
         </div>
