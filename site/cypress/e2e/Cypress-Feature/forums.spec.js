@@ -39,7 +39,7 @@ const upduckPost = (thread_title) => {
 
 const checkStatsUpducks = (fullName, numUpducks) => {
     // Check the stats page for a user with fullName and
-    // at least number of upducks numUpducks
+    // number of upducks numUpducks
     cy.get('[data-testid="more-dropdown"]').click();
     cy.get('#forum_stats').click();
     cy.get('[data-testid="user-stat"]').contains(fullName).siblings('[data-testid="upduck-stat"]').should('contain.text', numUpducks);
@@ -129,7 +129,7 @@ describe('Test cases revolving around creating, replying to, merging, and removi
         upduckPost(title2);
         upduckPost(title3);
 
-        // Check the stats page for instructor with at least 3 upducks
+        // Check the stats page for instructor with 3 upducks
         checkStatsUpducks('Instructor, Quinn', 3);
 
         // Tutorial into Questions
