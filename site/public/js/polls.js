@@ -1,6 +1,5 @@
-/* exported newDeletePollForm updatePollAcceptingAnswers updatePollVisible updateDropdownStates importPolls toggleTimerInputs togglePollFormOptions validateCustomResponse addCustomResponse removeCustomResponse */
+/* exported newDeletePollForm updatePollAcceptingAnswers updatePollVisible updateDropdownStates importPolls toggleTimerInputs togglePollFormOptions validateCustomResponse addCustomResponse removeCustomResponse toggle_section get_new_chart_width disableNoResponse clearResponses */
 /* global csrfToken displaySuccessMessage displayErrorMessage */
-
 
 $(document).ready(() => {
     $('.dropdown-bar').on('click', function() {
@@ -217,5 +216,35 @@ function toggleTimerInputs() {
     }
     else {
         $('#timer-inputs').hide();
+    }
+}
+
+function toggle_section(section_id) {
+    $(`#${section_id}`).toggle('fast');
+}
+
+function get_new_chart_width() {
+    const MIN_CHART_WIDTH = 400;
+    const DESIRED_CHART_FACTOR = 0.75;
+    const table_size = $('#info-histogram-table').width();
+    const desired_size = table_size * DESIRED_CHART_FACTOR;
+    // if the width of the viewport is small enough
+    if (desired_size < MIN_CHART_WIDTH) {
+        // set the width of poll-info to 100%
+        $('#poll-info').css('max-width', '100%');
+        return Math.max(MIN_CHART_WIDTH, table_size);
+    }
+    // reset width of poll-info
+    $('#poll-info').css('max-width', '');
+    return desired_size;
+}
+
+function disableNoResponse() {
+    $('.no-response-radio').prop('checked', false);
+}
+
+function clearResponses() {
+    if ($('.no-response-radio').is(':checked')) {
+        $('.response-radio').prop('checked', false);
     }
 }

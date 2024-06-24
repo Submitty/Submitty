@@ -39,6 +39,12 @@
     cursor: pointer;
 }
 
+.timer {
+    margin-bottom: 20px;
+    margin-left: auto;
+    font-size: 2em;
+}
+
 .option-btn {
     vertical-align: middle;
 }
