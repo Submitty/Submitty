@@ -245,7 +245,7 @@ function build_homework {
         test_output_dir="${hw_build_path}/test_output"
         instructor_solution_executable_dir="${hw_build_path}/instructor_solution_executable"
         instructor_cmake_file="${hw_build_path}/instructor_CMakeLists.txt"
-        log_instructor_output="${hw_build_path}/build_log.txt"
+        log_instructor_output="${hw_build_path}/log_instructor_output.txt"
         config_file="${hw_build_path}/config.json"
 
         # Ensure the necessary directories exist
@@ -261,16 +261,23 @@ function build_homework {
            exit 1
         fi
 
+        instructor_solution_compile_command=$(sed 's://.*$::' config.json | jq -r '.instructor_solution_compile_command') >> $log_instructor_output
+
+        if [ -z "${instructor_solution_compile_command}" ] || [ "${instructor_solution_compile_command}" == "null" ]; then
+            echo "No instructor_solution_compile_command found in ${config_file}."
+            exit 1
+        fi
+
         find "$instructor_solution_executable_dir" -type d -exec chmod -f ug+rwx,g+s,o= {} \;
         find "$instructor_solution_executable_dir" -type f -exec chmod -f ug+rw,o= {} \;
 
         # Compile each instructor solution file using the provided compilation command
         for file in "${instructor_solution_dir}"/*; do
-            echo "Iterating instructor file : $file" >> log_instructor_output
+            echo "Iterating instructor file : $file" >> $log_instructor_output
             if [ -f "${file}" ] && [[ "${file}" == *.cpp ]]; then
                 executable="${instructor_solution_executable_dir}/$(basename ${file} .cpp)"
-                compile_command="g++ -std=c++11 -Wall -Wextra ${file} -o ${executable}"
-                echo "Compiling ${file} using command: ${compile_command}"
+                compile_command="${instructor_solution_compile_command} ${file} -o ${executable}"
+                echo "Compiling ${file} using command: ${compile_command}" >> $log_instructor_output
                 eval "${compile_command}"
                 if [ $? -ne 0 ]; then
                     echo -e "\nCOMPILE ERROR\n\n"
@@ -294,11 +301,11 @@ function build_homework {
                     input_filename=$(basename "${input_file}")
                     output_file="${test_output_dir}/${executable_base}_${input_filename%.txt}.txt"
                     echo "Running ${executable_file} with input ${input_file}..."
-                    "${executable_file}" < "${input_file}" > "${output_file}" 2>> log_instructor_output
+                    "${executable_file}" < "${input_file}" > "${output_file}" 2>> $log_instructor_output
                     if [ $? -eq 0 ]; then
-                        echo "Ran on ${input_file} successfully" >> log_instructor_output
+                        echo "Ran on ${input_file} successfully" >> $log_instructor_output
                     else
-                        echo "Error running ${executable_file} on ${input_file}" >> log_instructor_output
+                        echo "Error running ${executable_file} on ${input_file}" >> $log_instructor_output
                         exit 1
                     fi
                   fi
