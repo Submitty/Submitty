@@ -76,7 +76,7 @@
         <label for="image-file" class="option-title">
             Optional Image:
         </label>
-        <input type="file" id="image-file" name="image_file" accept="image/jpeg, image/jpg, image/gif, image/png" onchange="checkSize(this)"/>
+        <input type="file" id="image-file" name="image_file" accept="image/jpeg, image/jpg, image/gif, image/png" onchange="checkImageSize(this)"/>
         <br/>
         {% if poll is not null and poll.getImagePath() != null %}
             Current Image: {{ poll.getImagePath() }}
@@ -205,14 +205,6 @@
         }
     });
 
-    function toggleOptions() {
-        const correct_options = $('.correct-box');
-
-        correct_options.each(function() {
-            $(this).prop('checked', $('#toggle-all').prop('checked'));
-        });
-    }
-
     function changePollType() {
         let count = $(".option_id").length;
         for (let i = 0; i < count; i++) {
@@ -230,7 +222,7 @@
         }
     }
 
-    function checkSize(uploadedFile) {
+    function checkImageSize(uploadedFile) {
         if (uploadedFile.files[0].size > MAX_SIZE) {
             size_is_valid = false;
         } else {
