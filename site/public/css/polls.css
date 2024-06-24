@@ -144,7 +144,7 @@ form {
     width: 4em !important;
 }
 
-.response-container .poll_response {
+.response-container .poll-response {
     resize: none;
     min-height: 50px;
     max-height: 300px;

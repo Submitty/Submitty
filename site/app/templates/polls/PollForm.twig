@@ -158,7 +158,7 @@
                         <input type="hidden" class="order order-{{option.getOrderId()}}" name="option[{{option.getId()}}][order]" value="{{option.getOrderId()}}"/>
                         <input type="hidden" class="option_id" name="option[{{option.getId()}}][id]" value="{{option.getId()}}"/>
                         <input aria-label="Is correct" class="correct-box" type="checkbox" name="option[{{option.getId()}}][is_correct]" {{ option.isCorrect() or is_survey ? "checked": "" }} {{ is_survey ? "style='display:none'" : "" }}>
-                        <textarea aria-label="Response text" class="poll_response" name="option[{{option.getId()}}][response]" rows="10" cols="30">{{option.getResponse()}}</textarea>
+                        <textarea aria-label="Response text" class="poll-response" name="option[{{option.getId()}}][response]" rows="10" cols="30">{{option.getResponse()}}</textarea>
                         <div class="move-btn up-btn">
                             <i class="fa fa-lg fa-chevron-up"></i>
                         </div>
@@ -259,7 +259,7 @@
                 <input type="hidden" class="order order-${count}" name="option[${first_free_id}][order]" value="${count}"/>
                 <input type="hidden" class="option_id" name="option[${first_free_id}][id]" value=""/>
                 <input aria-label="Is correct" class="correct-box" type="checkbox" name="option[${first_free_id}][is_correct]" ${hidden_style} ${is_checked}>
-                <textarea aria-label="Response text" class="poll_response" name="option[${first_free_id}][response]" placeholder="Enter response here..."
+                <textarea aria-label="Response text" class="poll-response" name="option[${first_free_id}][response]" placeholder="Enter response here..."
                 rows="10" cols="30"></textarea>
                 <div class="move-btn up-btn">
                     <i class="fa fa-lg fa-chevron-up"></i>
@@ -278,8 +278,8 @@
 
     function submitErrorChecks() {
         let empty_responses = false;
-        for (let i = 0; i < $(".poll_response").length; i++) {
-            if ($($(".poll_response")[i]).val() === "") {
+        for (let i = 0; i < $(".poll-response").length; i++) {
+            if ($($(".poll-response")[i]).val() === "") {
                 empty_responses = true;
             }
         }
@@ -350,7 +350,7 @@
         $(".down-btn").off("click");
         $(".down-btn").on("click", function() {
             let curr_pos = parseInt($($(this).siblings(".order")[0]).attr("value"));
-            if (curr_pos == $(".poll_response").length - 1) {
+            if (curr_pos == $(".poll-response").length - 1) {
                 return;
             }
             $(".order-" + (curr_pos + 1)).parent().insertBefore($(this).parent());
@@ -384,7 +384,7 @@
                             "This response cannot be deleted unless they switch their answers to the poll.");
                     } else {
                         // delete the response
-                        let count = $(".poll_response").length;
+                        let count = $(".poll-response").length;
                         let curr_pos = parseInt($(my_this.siblings(".order")[0]).attr("value"));
                         let wrapper_id = parseInt(my_this.parent().attr("id").match("response_(.*)?_wrapper")[1]);
                         for(let i=curr_pos + 1; i < count; i++) {
