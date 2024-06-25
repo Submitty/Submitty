@@ -87,7 +87,7 @@ class Option {
     }
 
     public function isCustom(): bool {
-        return $this->author_id !== "instructor";
+        return $this->author_id !== '';
     }
 
     public function setPoll(Poll $poll): void {
