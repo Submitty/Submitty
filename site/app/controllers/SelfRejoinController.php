@@ -90,7 +90,7 @@ class SelfRejoinController extends AbstractController {
      * @param string $term Term the course is in.
      * @return bool True if we can rejoin the course.
      */
-    private function canRejoinCourseHelper(User $user, string $course, string $term): bool {
+    public function canRejoinCourseHelper(User $user, string $course, string $term): bool {
         $user_id = $user->getId();
         $course = $this->core->getConfig()->getCourse();
         $term = $this->core->getConfig()->getTerm();
