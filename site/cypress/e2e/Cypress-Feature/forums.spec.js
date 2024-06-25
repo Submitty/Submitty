@@ -10,6 +10,7 @@ const reply2 = 'Cypress Reply 2 Cypress';
 const reply3 = 'Cypress Reply 3 Cypress';
 const merged1 = 'Merged Thread Title: '.concat(title3, '\n\n', content3);
 const merged2 = 'Merged Thread Title: '.concat(title2, '\n\n', content2);
+const attachment1 = 'sea_animals.png';
 
 const createThread = (title, content, category) => {
     // Add more to tests for uploading attachments
@@ -63,12 +64,12 @@ const removeThread = (title) => {
     cy.get('[data-testid="thread-list-item"]').contains(title).should('not.exist');
 };
 
-const uploadAttachmentAndDelete = (title) => {
+const uploadAttachmentAndDelete = (title, attachment) => {
     cy.get('[data-testid="thread-list-item"]').contains(title).click();
     cy.get('[data-testid="create-post-head"]').should('contain', title);
     cy.get('[data-testid="edit-post-button"]').first().click();
-    cy.get('[data-testid="input-file1"]').selectFile('cypress/fixtures/sea_animals.png');
-    cy.get('[data-testid="file-upload-table-1"]').should('contain', 'sea_animals.png');
+    cy.get('[data-testid="input-file1"]').selectFile('cypress/fixtures/' + attachment);
+    cy.get('[data-testid="file-upload-table-1"]').should('contain', attachment);
     cy.get('[data-testid="forum-update-post"]').contains('Update Post').click();
     cy.get('[data-testid="edit-post-button"]').first().click();
     cy.get('[data-testid="mark-for-delete-btn"]').first().should('contain', 'Delete').click();
@@ -76,7 +77,7 @@ const uploadAttachmentAndDelete = (title) => {
     cy.get('[data-testid="forum-update-post"]').contains('Update Post').click();
 };
 
-const replyDisabled = (title) => {
+const replyDisabled = (title, attachment) => {
     cy.get('[data-testid="thread-list-item"]').contains(title).click();
     // Reply button should be disabled by default with no text
     cy.get('[data-testid="forum-submit-reply-all"]').should('be.disabled');
@@ -84,12 +85,12 @@ const replyDisabled = (title) => {
     // Ensure reply button is not disabled when attachments are added
     // waits here are needed to avoid a reload that would clear out the upload
     cy.wait(750);
-    cy.get('[data-testid="input-file3"]').selectFile('cypress/fixtures/sea_animals.png');
+    cy.get('[data-testid="input-file3"]').selectFile('cypress/fixtures/' + attachment);
     cy.get('[data-testid="forum-submit-reply-all"]').should('not.be.disabled').click();
 
     // Wait for submission and ensure attachment with no text is visible
     cy.get('.attachment-btn').click();
-    cy.contains('p', 'sea_animals.png').should('be.visible');
+    cy.contains('p', attachment).should('be.visible');
 };
 
 describe('Test cases revolving around creating, replying to, merging, and removing discussion forum threads', () => {
@@ -103,13 +104,13 @@ describe('Test cases revolving around creating, replying to, merging, and removi
 
     it('Reply button is disabled when applicable and thread reply can contain an attachment', () => {
         createThread(title1, title1, 'Comment');
-        replyDisabled(title1);
+        replyDisabled(title1, attachment1);
         removeThread(title1);
     });
 
     it('Create, reply to, merge, and delete threads', () => {
         // Add and Delete Image Attachment
-        uploadAttachmentAndDelete(title4);
+        uploadAttachmentAndDelete(title4, attachment1);
         // Comment
         createThread(title1, content1, 'Comment');
         // Question
