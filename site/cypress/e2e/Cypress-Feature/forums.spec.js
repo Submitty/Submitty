@@ -68,7 +68,7 @@ const uploadAttachmentAndDelete = (title, attachment) => {
     cy.get('[data-testid="thread-list-item"]').contains(title).click();
     cy.get('[data-testid="create-post-head"]').should('contain', title);
     cy.get('[data-testid="edit-post-button"]').first().click();
-    cy.get('[data-testid="input-file1"]').selectFile('cypress/fixtures/' + attachment);
+    cy.get('[data-testid="input-file1"]').selectFile(`cypress/fixtures/${attachment}`);
     cy.get('[data-testid="file-upload-table-1"]').should('contain', attachment);
     cy.get('[data-testid="forum-update-post"]').contains('Update Post').click();
     cy.get('[data-testid="edit-post-button"]').first().click();
@@ -85,7 +85,7 @@ const replyDisabled = (title, attachment) => {
     // Ensure reply button is not disabled when attachments are added
     // waits here are needed to avoid a reload that would clear out the upload
     cy.wait(750);
-    cy.get('[data-testid="input-file3"]').selectFile('cypress/fixtures/' + attachment);
+    cy.get('[data-testid="input-file3"]').selectFile(`cypress/fixtures/${attachment}`);
     cy.get('[data-testid="forum-submit-reply-all"]').should('not.be.disabled').click();
 
     // Wait for submission and ensure attachment with no text is visible
