@@ -1,9 +1,9 @@
 /* global buildCourseUrl, WebSocketClient */
-/* exported saveDraft, initGradingInquirySocketClient, onComponentTabClicked, onGradeInquirySubmitClicked, onReady, onReplyTextAreaKeyUp */
+/* exported loadDraft, initGradingInquirySocketClient, onComponentTabClicked, onGradeInquirySubmitClicked, onReady, onReplyTextAreaKeyUp */
 
-function saveDraft() {
-    //saveDraft function displays the saved draft text on grade inquiry box
-    let draftContent = localStorage.getItem('content');
+function loadDraft() {
+    //loadDraft function displays the saved draft text on grade inquiry box
+    let draftContent = localStorage.getItem('draftContent');
     if (draftContent === null) {
         draftContent = {};
     }
@@ -50,7 +50,6 @@ function onReady() {
 
 function onComponentTabClicked(tab) {
     const component_id = $(tab).data('component_id');
-
     // show posts that pertain to this component_id
     $('.grade-inquiry').each(function() {
         if ($(this).data('component_id') !== component_id) {
@@ -80,7 +79,7 @@ function onReplyTextAreaKeyUp(textarea) {
     const component_selected = $('.btn-selected');
     const component_id = component_selected.length ? component_selected.data('component_id') : 0;
     localStorage.setItem('selected_tab', `.component-${component_id}`);
-    let draftContent = localStorage.getItem('content');
+    let draftContent = localStorage.getItem('draftContent');
     if (draftContent === null) {
         draftContent = {};
     }
@@ -90,7 +89,7 @@ function onReplyTextAreaKeyUp(textarea) {
     // notice that from Discussion.twig file, all elementId start with this string pattern (i.e. 'reply-text-area-')
     const key = 'reply-text-area-';
     draftContent[key+component_id] = reply_text_area.val();
-    localStorage.setItem('content', JSON.stringify(draftContent));
+    localStorage.setItem('draftContent', JSON.stringify(draftContent));
     if (reply_text_area.val() === '') {
         $('.gi-show-empty').show();
         $('.gi-show-not-empty').hide();
@@ -147,7 +146,6 @@ function onGradeInquirySubmitClicked(button) {
                 const json = JSON.parse(response);
                 if (json['status'] === 'success') {
                     const data = json['data'];
-
                     // inform other open websocket clients
                     const submitter_id = form.children('#submitter_id').val();
                     if (data.type === 'new_post') {
