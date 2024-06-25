@@ -47,23 +47,23 @@
     {% endif %}
     <div class="inner-container" id="file-container">
         {{ _self.display_files(course_materials, links, user_group, user_section, "s", 0, display_file_url, "", base_course_material_path, directory_priorities, 
-        material_list, date_format, folder_ids, seen, folder_visibilities, "root") }}
+        material_list, date_format, folder_ids, seen, folder_visibilities, "root", allowed_extensions) }}
 
     </div>
 </div>
 
-{% macro display_files(course_materials, links, user_group, user_section, id, indent, display_file_url, path, folder_path, directory_priorities, material_list, date_format, folder_ids, seen,  folder_visibilities, current_path) %}
+{% macro display_files(course_materials, links, user_group, user_section, id, indent, display_file_url, path, folder_path, directory_priorities, material_list, date_format, folder_ids, seen,  folder_visibilities, current_path, allowed_extensions) %}
     {% for name, course_material in course_materials %}
         {% set sub_path = "#{current_path}/#{name}" %}
         {% if course_material is iterable %}
-            {{ _self.display_folder(name, course_material, links, user_group, user_section, id ~ "d" ~ loop.index, indent, display_file_url, path ~ "/" ~ name, folder_path ~ "/" ~ name, directory_priorities, material_list, date_format, folder_ids, seen,  folder_visibilities, sub_path) }}
+            {{ _self.display_folder(name, course_material, links, user_group, user_section, id ~ "d" ~ loop.index, indent, display_file_url, path ~ "/" ~ name, folder_path ~ "/" ~ name, directory_priorities, material_list, date_format, folder_ids, seen,  folder_visibilities, sub_path, allowed_extensions) }}
         {% else %}
-            {{ _self.display_file(name, course_material, links, user_group, user_section, id ~ "f" ~ loop.index, indent, display_file_url, path ~ "/" ~ name, date_format, folder_ids, seen) }}
+            {{ _self.display_file(name, course_material, links, user_group, user_section, id ~ "f" ~ loop.index, indent, display_file_url, path ~ "/" ~ name, date_format, folder_ids, seen, allowed_extensions) }}
         {% endif %}
     {% endfor %}
 {% endmacro %}
 
-{% macro display_file(name, course_material, links, user_group, user_section, id, indent, display_file_url, path, date_format, folder_ids, seen) %}
+{% macro display_file(name, course_material, links, user_group, user_section, id, indent, display_file_url, path, date_format, folder_ids, seen, allowed_extensions) %}
     {% if user_group < 4 or ( not course_material.isHiddenFromStudents and (course_material.isSectionAllowed(user_section)) ) %}
         <div class="file-container">
             <div class="file-viewer">
@@ -74,7 +74,7 @@
                     {% set displayName = course_material.getTitle|default(name) %}
                     <i class="fas fa-file" style="vertical-align: text-bottom;"></i>
                     {% set extension = name|split('.')|last|lower %}
-                    {% if extension in ['pdf', 'jpg', 'jpeg', 'c', 'cpp', 's', 'twig', 'py', 'java', 'png', 'txt', 'h', 'html', 'php', 'js', 'sql', 'sh', 'md', 'csv', 'salsa', 'erl', 'oz', 'pl', 'hs', 'gif'] %}
+                    {% if extension in allowed_extensions %}
                         <a class="popout-item" target="_blank" href="{{ links[course_material.getId] }}" aria-label="Pop up {{ displayName }} in a new window" tabindex="0" style="text-decoration: none;">{{ name }} <i class="fas fa-window-restore" title="Pop up the file in a new window"></i></a>
                     {% else %}
                         {{ displayName }}
@@ -162,10 +162,10 @@
     {% endif %}
 {% endmacro %}
 
-{% macro display_folder(name, course_materials, links, user_group, user_section, id, indent, display_file_url, path, folder_path, directory_priorities, material_list, date_format, folder_ids, seen, folder_visibilities, current_path) %}
+{% macro display_folder(name, course_materials, links, user_group, user_section, id, indent, display_file_url, path, folder_path, directory_priorities, material_list, date_format, folder_ids, seen, folder_visibilities, current_path, allowed_extensions) %}
     {% if indent == -1 %}
         {{ _self.display_files(course_materials, links, user_group, user_section, id, indent + 1, display_file_url, path, folder_path, directory_priorities,
-        material_list, date_format, folder_ids, seen, folder_visibilities, current_path) }}
+        material_list, date_format, folder_ids, seen, folder_visibilities, current_path, allowed_extensions) }}
     {% elseif user_group < 4 or folder_visibilities[current_path] %}
         <div class="folder-container">
             <div class="div-viewer view-row">
@@ -185,7 +185,7 @@
             </div>
             <div id="div_viewer_{{ id }}" style="margin-left: 15px; display: none" data-file_name="{{ name }}">
                 {{ _self.display_files(course_materials, links, user_group, user_section, id, indent + 1, display_file_url, path, folder_path,
-                directory_priorities, material_list, date_format, folder_ids, seen, folder_visibilities, current_path) }}
+                directory_priorities, material_list, date_format, folder_ids, seen, folder_visibilities, current_path, allowed_extensions) }}
             </div>
         </div>
     {% endif %}

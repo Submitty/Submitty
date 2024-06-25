@@ -159,7 +159,8 @@ class CourseMaterialsView extends AbstractView {
             "folder_ids" => $folder_ids,
             "links" => $links,
             "folder_paths" => $folder_paths,
-            "beginning_of_time_date" => $beginning_of_time_date
+            "beginning_of_time_date" => $beginning_of_time_date,
+            "allowed_extensions" => FileUtils::ALLOWED_EXTENSIONS
         ]);
     }
 

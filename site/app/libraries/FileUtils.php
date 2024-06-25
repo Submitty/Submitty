@@ -13,6 +13,7 @@ class FileUtils {
     const IGNORE_FOLDERS = [".svn", ".git", ".idea", "__macosx"];
     const IGNORE_FILES = ['.ds_store'];
     const ALLOWED_IMAGE_TYPES = ['jpg', 'jpeg', 'png', 'gif'];
+    const ALLOWED_EXTENSIONS = ['pdf', 'jpg', 'jpeg', 'c', 'cpp', 's', 'twig', 'py', 'java', 'png', 'txt', 'h', 'html', 'php', 'js', 'sql', 'sh', 'md', 'csv', 'salsa', 'erl', 'oz', 'pl', 'hs', 'gif'];
 
     /**
      * Return all files from a given directory.  All subdirectories

@@ -1479,7 +1479,8 @@ HTML;
             "anon_mode" => $anon_mode,
             'toolbar_css' => $toolbar_css,
             "display_file_url" => $this->core->buildCourseUrl(['display_file']),
-            "user_assignment_settings_path" => $uas
+            "user_assignment_settings_path" => $uas,
+            "allowed_extensions" => FileUtils::ALLOWED_EXTENSIONS 
         ]);
     }
 
@@ -1801,7 +1802,8 @@ HTML;
             "max_file_uploads" => ini_get('max_file_uploads'),
             "toolbar_css" => $this->core->getOutput()->timestampResource(FileUtils::joinPaths('pdf', 'toolbar_embedded.css'), 'css'),
             "is_timed" => $is_timed,
-            "allowed_minutes" => $allowed_minutes
+            "allowed_minutes" => $allowed_minutes,
+            "allowed_extensions" => FileUtils::ALLOWED_EXTENSIONS
             ]
         );
     }

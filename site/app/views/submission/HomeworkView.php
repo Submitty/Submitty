@@ -586,7 +586,8 @@ class HomeworkView extends AbstractView {
             'git_auth_token_url' => $this->core->buildUrl(['authentication_tokens']),
             'git_auth_token_required' => false,
             'vcs_repo_exists' => $vcs_repo_exists,
-            'vcs_generate_repo_url' => $this->core->buildCourseUrl(['gradeable', $gradeable->getId(), 'generate_repo'])
+            'vcs_generate_repo_url' => $this->core->buildCourseUrl(['gradeable', $gradeable->getId(), 'generate_repo']),
+            'allowed_extensions' => FileUtils::ALLOWED_EXTENSIONS
         ]);
     }
 
@@ -1161,7 +1162,8 @@ class HomeworkView extends AbstractView {
             'ta_grades_incomplete' => $gradeable->isTaGrading() && $gradeable->isTaGradeReleased() && !$graded_gradeable->isTaGradingComplete(),
             'csrf_token' => $this->core->getCsrfToken(),
             'date_time_format' => $this->core->getConfig()->getDateTimeFormat()->getFormat('gradeable_with_seconds'),
-            'after_ta_open' => $gradeable->getGradeStartDate() < $this->core->getDateTimeNow()
+            'after_ta_open' => $gradeable->getGradeStartDate() < $this->core->getDateTimeNow(),
+            'allowed_extensions' => FileUtils::ALLOWED_EXTENSIONS
         ]);
 
         $this->core->getOutput()->addInternalJs('confetti.js');
