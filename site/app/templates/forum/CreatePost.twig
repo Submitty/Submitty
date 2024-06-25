@@ -79,7 +79,7 @@
             <img id="likeIcon_{{post.id}}" src="{{ post_up_duck.upduck_user_liked ? '/img/on-duck-button.svg' : '/img/light-mode-off-duck.svg' }}" alt="Like" width="30" height="30">
         </button>
         <span data-testid="like-count" id="likeCounter_{{post.id}}" class="like-counter">{{ post_up_duck.upduck_count }}</span>
-        <span id="likedByInstructor_{{post.id}}" class="liked-by-instructor" style = "{{ post_up_duck.taTrue ? '' : 'display: none;' }}">
+        <span data-testid="instructor-like" id="likedByInstructor_{{post.id}}" class="liked-by-instructor" style = "{{ post_up_duck.taTrue ? '' : 'display: none;' }}">
             liked by teaching staff
         </span>
     </span>
