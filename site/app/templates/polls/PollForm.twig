@@ -110,15 +110,15 @@
                 Expected Duration of Poll:
             </label>
             <div class="poll-input">
-                <label class="option"> Hours </label><br>
+                <label for="poll-hours" class="option"> Hours </label><br>
                 <input type="number" name="poll-hours" id="poll-hours" class="poll-timer" placeholder="hrs" max="24" min="0" value="{{ poll is not null ? poll.getDuration().h }}" />
             </div>
             <div class="poll-input">
-                <label class="option"> Minutes </label><br>
+                <label for="poll-minutes" class="option"> Minutes </label><br>
                 <input type="number" name="poll-minutes" id="poll-minutes" class="poll-timer" placeholder="min" min="0" value="{{ poll is not null ? poll.getDuration().i }}"/>
             </div>
             <div class="poll-input">
-                <label class="option"> Seconds </label><br>
+                <label for="poll-seconds" class="option"> Seconds </label><br>
                 <input type="number" name="poll-seconds" id="poll-seconds" class="poll-timer" placeholder="sec" min="0" value="{{ poll is not null ? poll.getDuration().s }}"/>
             </div>
         </div>
@@ -147,8 +147,10 @@
         <input id ="poll_custom_options" class="credit-box credit-form-item" type="checkbox" name="poll_custom_options"  {{ poll is not null and poll.getAllowsCustomResponses() ? "checked" : "" }}>
         <hr>
         <h2> Responses: </h2>
-        <input aria-label="Toggle All" id = "toggle-all" type="checkbox" name="toggle-all-options" onchange = "togglePollFormOptions()" {{ is_survey ? "style='display:none'" : "inline-block" }}>
-        <label for="toggle-all" id="toggle-all-label" {{ is_survey ? "style='display:none'" : "inline-block" }}>Toggle All</label>
+        <div {{ is_survey ? "style='display:none'" : "style='display:inline-block'" }}> <!-- Show/Hide 'Toggle All' based on whether the poll is a survey -->
+            <input aria-label="Toggle All" id = "toggle-all" type="checkbox" name="toggle-all-options" onchange = "togglePollFormOptions()">
+            <label for="toggle-all" id="toggle-all-label">Toggle All</label>
+        </div>
         <div id="responses">
             {% if poll is not null %}
                 {% for option in poll.getOptions() %}
