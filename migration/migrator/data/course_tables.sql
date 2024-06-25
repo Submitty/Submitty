@@ -776,8 +776,29 @@ ALTER SEQUENCE public.course_materials_id_seq OWNED BY public.course_materials.i
 
 CREATE TABLE public.course_materials_sections (
     course_material_id integer NOT NULL,
-    section_id character varying(255) NOT NULL
+    section_id character varying(255) NOT NULL,
+    id integer NOT NULL
 );
+
+
+--
+-- Name: course_materials_sections_id_seq; Type: SEQUENCE; Schema: public; Owner: -
+--
+
+CREATE SEQUENCE public.course_materials_sections_id_seq
+    AS integer
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+--
+-- Name: course_materials_sections_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: -
+--
+
+ALTER SEQUENCE public.course_materials_sections_id_seq OWNED BY public.course_materials_sections.id;
 
 
 --
@@ -1541,12 +1562,15 @@ CREATE TABLE public.polls (
     poll_id integer NOT NULL,
     name text NOT NULL,
     question text NOT NULL,
-    status text NOT NULL,
+    status text,
     release_date date NOT NULL,
     image_path text,
     question_type character varying(35) DEFAULT 'single-response-multiple-correct'::character varying,
     release_histogram character varying(10) DEFAULT 'never'::character varying,
-    release_answer character varying(10) DEFAULT 'never'::character varying
+    release_answer character varying(10) DEFAULT 'never'::character varying,
+    duration integer DEFAULT 0,
+    end_time timestamp with time zone,
+    is_visible boolean DEFAULT false NOT NULL
 );
 
 
@@ -1908,6 +1932,13 @@ ALTER TABLE ONLY public.course_materials_access ALTER COLUMN id SET DEFAULT next
 
 
 --
+-- Name: course_materials_sections id; Type: DEFAULT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.course_materials_sections ALTER COLUMN id SET DEFAULT nextval('public.course_materials_sections_id_seq'::regclass);
+
+
+--
 -- Name: grade_inquiries id; Type: DEFAULT; Schema: public; Owner: -
 --
 
@@ -2079,6 +2110,14 @@ ALTER TABLE ONLY public.course_materials
 
 ALTER TABLE ONLY public.course_materials
     ADD CONSTRAINT course_materials_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: course_materials_sections course_materials_sections_pkey; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.course_materials_sections
+    ADD CONSTRAINT course_materials_sections_pkey PRIMARY KEY (id);
 
 
 --
@@ -2370,14 +2409,6 @@ ALTER TABLE ONLY public.peer_feedback
 
 
 --
--- Name: course_materials_sections pk_course_material_section; Type: CONSTRAINT; Schema: public; Owner: -
---
-
-ALTER TABLE ONLY public.course_materials_sections
-    ADD CONSTRAINT pk_course_material_section PRIMARY KEY (course_material_id, section_id);
-
-
---
 -- Name: poll_options poll_options_pkey; Type: CONSTRAINT; Schema: public; Owner: -
 --
 
@@ -2479,6 +2510,14 @@ ALTER TABLE ONLY public.thread_categories
 
 ALTER TABLE ONLY public.threads
     ADD CONSTRAINT threads_pk PRIMARY KEY (id);
+
+
+--
+-- Name: course_materials_sections unique_course_material_section; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.course_materials_sections
+    ADD CONSTRAINT unique_course_material_section UNIQUE (course_material_id, section_id);
 
 
 --
