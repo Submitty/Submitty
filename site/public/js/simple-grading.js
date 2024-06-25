@@ -1,6 +1,35 @@
 /* global WebSocketClient, registerKeyHandler, student_full, csrfToken, buildCourseUrl, submitAJAX, captureTabInModal, luxon */
 /* exported setupSimpleGrading, checkpointRollTo, showSimpleGraderStats */
 
+function updateVisibility() {
+    const showGraders = $('#show-graders').is(':checked');
+    const showDates = $('#show-dates').is(':checked');
+    $('.cell-grade').each(function() {
+        const graderElement = $(this).find('.simple-grade-grader');
+        const dateElement = $(this).find('.simple-grade-date');
+        if (showGraders && graderElement.text().trim() !== '') {
+            graderElement.show();
+        }
+        else {
+            graderElement.hide();
+        }
+
+        if (showDates && dateElement.text().trim() !== '') {
+            dateElement.show();
+        }
+        else {
+            dateElement.hide();
+        }
+
+        // Force repaint by getting and setting the current color value
+        const graderColor = graderElement.css('color');
+        const dateColor = dateElement.css('color');
+
+        graderElement.css('color', graderColor);
+        dateElement.css('color', dateColor);
+    });
+}
+
 function calcSimpleGraderStats(action) {
     // start variable declarations
     let average = 0;                // overall average
@@ -156,6 +185,10 @@ function showSimpleGraderStats(action) {
     }
 }
 
+function padNumber(num) {
+    return num.toString().padStart(2, '0');
+}
+
 function updateCheckpointCells(elems, scores, no_cookie) {
     // see if we're setting all of a row to one score
     let singleScore = null;
@@ -242,34 +275,41 @@ function updateCheckpointCells(elems, scores, no_cookie) {
             'scores': new_scores,
         },
         (returned_data) => {
-            // Validate that the Simple Grader backend correctly saved components before updating
-            const expected_vals = JSON.stringify(Object.entries(new_scores).map(String));
-            const returned_vals = JSON.stringify(Object.entries(returned_data['data']).map(String));
-            if (expected_vals === returned_vals) {
-                elems.each((idx, elem) => {
-                    elem = $(elem);
-                    elem.animate({'border-right-width': '0px'}, 400); // animate the box
-                    elem.attr('data-score', elem.data('score'));      // update the score
-                    elem.attr('data-grader', elem.data('grader'));    // update new grader
-                    elem.find('.simple-grade-grader').text(elem.data('grader'));
-                });
-                window.socketClient.send({'type': 'update_checkpoint', 'elem': elems.attr('id').split('-')[3], 'user': parent.data('anon'), 'score': elems.data('score'), 'grader': elems.data('grader')});
+            if (returned_data.data && returned_data.data.date) {
+                const currentDate = new Date(returned_data.data.date);
+                if (!isNaN(currentDate.getTime())) {
+                    const formattedDate = `${currentDate.getFullYear()}-${padNumber(currentDate.getMonth() + 1)}-${padNumber(currentDate.getDate())} ${padNumber(currentDate.getHours())}:${padNumber(currentDate.getMinutes())}:${padNumber(currentDate.getSeconds())}`;
+                    elems.each((idx, elem) => {
+                        elem = $(elem);
+                        elem.animate({'border-right-width': '0px'}, 400);
+                        elem.attr('data-score', elem.data('score'));
+                        elem.attr('data-grader', elem.data('grader'));
+                        elem.attr('data-date', formattedDate);
+                        elem.find('.simple-grade-grader').text(elem.data('grader'));
+                        elem.find('.simple-grade-date').text(formattedDate);
+                    });
+                    window.socketClient.send({
+                        'type': 'update_checkpoint',
+                        'elem': elems.attr('id').split('-')[3],
+                        'user': parent.data('anon'),
+                        'score': elems.data('score'),
+                        'grader': elems.data('grader'),
+                        'date': formattedDate,
+                    });
+                }
+                else {
+                    console.log('Invalid date received:', returned_data.data.date);
+                }
             }
             else {
-                console.log('Save error: returned data:', returned_vals, 'does not match expected new data:', expected_vals);
+                console.log('Date not found in response:', returned_data);
                 elems.each((idx, elem) => {
                     elem = $(elem);
                     elem.stop(true, true);
-                    elem.css('border-right', '60px solid #DA4F49');
+                    elem.css('border-right', '60px solid var(--simple-save-error-red)');
                 });
             }
-        },
-        () => {
-            elems.each((idx, elem) => {
-                elem = $(elem);
-                elem.stop(true, true);
-                elem.css('border-right', '60px solid #DA4F49');
-            });
+            updateVisibility();
         },
     );
 }
@@ -884,7 +924,7 @@ function initSocketClient() {
     window.socketClient.onmessage = (msg) => {
         switch (msg.type) {
             case 'update_checkpoint':
-                checkpointSocketHandler(msg.elem, msg.user, msg.score, msg.grader);
+                checkpointSocketHandler(msg.elem, msg.user, msg.score, msg.grader, msg.date);
                 break;
             case 'update_numeric':
                 numericSocketHandler(msg.elem, msg.user, msg.value, msg.total);
@@ -895,12 +935,11 @@ function initSocketClient() {
     };
     const gradeable_id = window.location.pathname.split('gradeable/')[1].split('/')[0];
     window.socketClient.open(gradeable_id);
+    updateVisibility();
 }
 
-function checkpointSocketHandler(elem_id, anon_id, score, grader) {
-    // search for the user within the table
+function checkpointSocketHandler(elem_id, anon_id, score, grader, date) {
     const tr_elem = $(`table tbody tr[data-anon="${anon_id}"]`);
-    // if a match is found, then use it to find animate the correct cell
     if (tr_elem.length > 0) {
         const split_id = tr_elem.attr('id').split('-');
         const elem = $(`#cell-${split_id[1]}-${split_id[2]}-${elem_id}`);
@@ -908,7 +947,11 @@ function checkpointSocketHandler(elem_id, anon_id, score, grader) {
         elem.attr('data-score', score);
         elem.data('grader', grader);
         elem.attr('data-grader', grader);
+        elem.data('date', date);
+        elem.attr('data-date', date);
         elem.find('.simple-grade-grader').text(grader);
+        elem.find('.simple-grade-date').text(date);
+
         switch (score) {
             case 1.0:
                 elem.addClass('simple-full-credit');
