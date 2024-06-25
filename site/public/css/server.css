@@ -664,6 +664,14 @@ td > a.active-sort {
     background-color: var(--standard-light-gray);
 }
 
+.results-box .box-block .red-message {
+    margin-left: 5px;
+}
+
+.results-box .box-block .diff-element .red-message {
+    margin-left: 0;
+}
+
 .box-title > h4 {
     margin-left: 90px;
 }

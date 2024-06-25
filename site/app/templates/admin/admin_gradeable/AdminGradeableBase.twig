@@ -13,6 +13,7 @@
         <div class="modal-header" style="overflow: auto;">
             <div>
                 <h1 id="myModalLabel">{{ action == 'edit' ? 'Edit Gradeable' : 'New Gradeable' }}
+                    <span id="modal_label_title"></span>
                     {% if action == 'new' %}
                     <button class="btn btn-primary" type="button" data-testid="upload-gradeable-btn" id="upload-gradeable-btn" style="float:right;" onclick="javascript:newGradeableJsonForm()" >Upload Gradeable JSON</button>
                     {% elseif action == 'edit' %}
@@ -123,10 +124,10 @@
     function onTitleChange() {
         let title = $('#g_title').val();
         let my_id = $('#g_id').val();
-        if (title !== '') {
+        if (title !== '' || my_id !== '') {
             title = ': [' + my_id + '] ' + title;
         }
-        $('#modal_label_title').html(title);
+        $('#modal_label_title').text(title);
     }
 
     $(document).ready(function() {
