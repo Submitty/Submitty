@@ -58,6 +58,7 @@ except KeyError as config_fail_error:
     print(e)
     sys.exit(1)
 
+
 def connect_db(db_name):
     """Set up a connection with the specific database."""
     if os.path.isdir(DB_HOST):
