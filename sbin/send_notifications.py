@@ -8,7 +8,7 @@ date in the past with no notification sent to students.
 import json
 import os
 import datetime
-from sqlalchemy import create_engine # pylint: disable=import-error
+from sqlalchemy import create_engine  # pylint: disable=import-error
 import sys
 import getpass
 
@@ -44,21 +44,7 @@ log_file_path = os.path.join(
     f"{TODAY.year:04d}{TODAY.month:02d}{TODAY.day:02d}.txt",
 )
 
-with open(log_file_path, "a") as LOG_FILE:
-    try:
-        total_notified_gradeables = notify_pending_gradeables()
-        success_message = (
-            f"[{datetime.datetime.now()}] Successfully released "
-            f"{total_notified_gradeables} gradeable notifications"
-        )
-        LOG_FILE.write(success_message + "\n")
-    except (RuntimeError, KeyError, ValueError) as notification_send_error:
-        error_message = (
-            f"[{datetime.datetime.now()}] Error Sending Notification(s): "
-            f"{notification_send_error}"
-        )
-        LOG_FILE.write(error_message + "\n")
-        print(error_message)
+
 
 try:
     DB_HOST = DATABASE_CONFIG["database_host"]
@@ -69,7 +55,8 @@ except KeyError as config_fail_error:
         f"[{datetime.datetime.now()}] ERROR: "
         f"Missing database configuration key: {config_fail_error}"
     )
-    LOG_FILE.write(e + "\n")
+    with open(log_file_path, "a") as LOG_FILE:
+        LOG_FILE.write(e + "\n")
     print(e)
     sys.exit(1)
 
