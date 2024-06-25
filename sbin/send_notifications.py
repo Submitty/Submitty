@@ -138,15 +138,17 @@ def notify_pending_gradeables():
             email_list = []
             email_subject = f"[Submitty {course}] Grade Released: {gradeable['title']}"
 
-            email_body = (f"An Instructor has released scores in:\n{course}\n\n"
-                        f"Scores have been released for {gradeable['title']}.\n\n"
-                        f"Author: System\n"
-                        f"Click here for more info: {gradeable_url}\n\n"
-                        "--\n"
-                        "NOTE: This is an automated email notification, "
-                        "which is unable to receive replies.\n"
-                        "Please refer to the course syllabus for contact "
-                        "information for your teaching staff.")
+            email_body = (
+                f"An Instructor has released scores in:\n{course}\n\n"
+                f"Scores have been released for {gradeable['title']}.\n\n"
+                f"Author: System\n"
+                f"Click here for more info: {gradeable_url}\n\n"
+                "--\n"
+                "NOTE: This is an automated email notification, "
+                "which is unable to receive replies.\n"
+                "Please refer to the course syllabus for contact "
+                "information for your teaching staff."
+            )
 
             email_recipients = course_db.execute(
                 """
