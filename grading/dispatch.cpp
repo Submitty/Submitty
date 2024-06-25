@@ -1382,8 +1382,8 @@ bool dispatch::tolerance_diff(
 
   // iterating over expected lines; `line' should not exceed expected and student lines
   for (std::size_t line = 0; line < expected_lines && line < student_lines; line++) {
-    std::vector<std::string> expected_line_words = expected_file_words[i];
-    std::vector<std::string>  student_line_words =  student_file_words[i];
+    std::vector<std::string> expected_line_words = expected_file_words[line];
+    std::vector<std::string>  student_line_words =  student_file_words[line];
 
     std::size_t expected_words = expected_line_words.size();
     std::size_t  student_words =  student_line_words.size();
@@ -1395,9 +1395,9 @@ bool dispatch::tolerance_diff(
     for (std::size_t word = 0; word < expected_words; word++) {
       student_char_index += student_line_words[word].size();
       // move past spaces
-      if (j != 0)   student_char_index += student_spaces[line][j - 1];
+      if (word != 0)   student_char_index += student_spaces[line][word - 1];
 
-      if (j >= student_words) { // student has fewer words than expected
+      if (word >= student_words) { // student has fewer words than expected
         line_has_diff = true;   // mark line as having a diff
         break;                  // break to next line
       }
