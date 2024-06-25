@@ -8,7 +8,7 @@ date in the past with no notification sent to students.
 import json
 import os
 import datetime
-from sqlalchemy import create_engine
+from sqlalchemy import create_engine # pylint: disable=import-error
 import sys
 import getpass
 
@@ -39,19 +39,36 @@ BASE_URL_PATH = SUBMITTY_CONFIG["submission_url"]
 
 NOTIFICATION_LOG_PATH = os.path.join(DATA_DIR_PATH, "logs", "notifications")
 TODAY = datetime.datetime.now()
-LOG_FILE = open(
-    os.path.join(
-        NOTIFICATION_LOG_PATH,
-        f"{TODAY.year:04d}{TODAY.month:02d}{TODAY.day:02d}.txt",
-    ),
-    "a",
+log_file_path = os.path.join(
+    NOTIFICATION_LOG_PATH,
+    f"{TODAY.year:04d}{TODAY.month:02d}{TODAY.day:02d}.txt",
 )
+
+with open(log_file_path, "a") as LOG_FILE:
+    try:
+        total_notified_gradeables = notify_pending_gradeables()
+        success_message = (
+            f"[{datetime.datetime.now()}] Successfully released "
+            f"{total_notified_gradeables} gradeable notifications"
+        )
+        LOG_FILE.write(success_message + "\n")
+    except (RuntimeError, KeyError, ValueError) as notification_send_error:
+        error_message = (
+            f"[{datetime.datetime.now()}] Error Sending Notification(s): "
+            f"{notification_send_error}"
+        )
+        LOG_FILE.write(error_message + "\n")
+        print(error_message)
+
 try:
     DB_HOST = DATABASE_CONFIG["database_host"]
     DB_USER = DATABASE_CONFIG["database_user"]
     DB_PASSWORD = DATABASE_CONFIG["database_password"]
 except KeyError as config_fail_error:
-    e = f"[{datetime.datetime.now()}] ERROR: Missing database configuration key: {config_fail_error}"
+    e = (
+        f"[{datetime.datetime.now()}] ERROR: "
+        f"Missing database configuration key: {config_fail_error}"
+    )
     LOG_FILE.write(e + "\n")
     print(e)
     sys.exit(1)
@@ -64,9 +81,9 @@ def connect_db(db_name):
     else:
         conn_string = f"postgresql://{DB_USER}:{DB_PASSWORD}@{DB_HOST}/{db_name}"
 
-        engine = create_engine(conn_string)
-        db = engine.connect()
-        return db
+    engine = create_engine(conn_string)
+    db = engine.connect()
+    return db
 
 
 def notify_pending_gradeables():
@@ -127,11 +144,12 @@ def notify_pending_gradeables():
 
             # Send notifications to all potential recipients
             if len(notification_list) > 0:
+                values = ", ".join(notification_list)
                 course_db.execute(
-                    """INSERT INTO notifications
+                    f"""INSERT INTO notifications
                     (component, metadata, content, created_at, from_user_id,
                     to_user_id)
-                    VALUES {};""".format(", ".join(notification_list))
+                    VALUES {values};"""
                 )
 
             # Send out emails using both course and master database
@@ -163,7 +181,8 @@ def notify_pending_gradeables():
         for recipient in email_recipients:
             user_id, user_email = recipient[0], recipient[1]
             email_list.append(
-                f"('{email_subject}', '{email_body}', '{timestamp}', '{user_id}', '{user_email}', '{term}', '{course}')"
+                f"('{email_subject}', '{email_body}', '{timestamp}', '{user_id}', "
+                f"'{user_email}', '{term}', '{course}')"
             )
 
         if len(email_list) > 0:
@@ -194,10 +213,16 @@ def notify_pending_gradeables():
 def main():
     try:
         total_notified_gradeables = notify_pending_gradeables()
-        success_message = f"[{datetime.datetime.now()}] Successfully released {total_notified_gradeables} gradeable notifications"
+        success_message = (
+            f"[{datetime.datetime.now()}] Successfully released "
+            f"{total_notified_gradeables} gradeable notifications"
+        )
         LOG_FILE.write(success_message + "\n")
-    except Exception as notification_send_error:
-        error_message = f"[{datetime.datetime.now()}] Error Sending Notification(s): {notification_send_error}"
+    except (RuntimeError, KeyError, ValueError) as notification_send_error:
+        error_message = (
+            f"[{datetime.datetime.now()}] Error Sending Notification(s): "
+            f"{notification_send_error}"
+        )
         LOG_FILE.write(error_message + "\n")
         print(error_message)
 
