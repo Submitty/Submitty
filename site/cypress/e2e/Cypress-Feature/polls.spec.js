@@ -1,5 +1,5 @@
 /*
- * This test relies on the polls and their initital state in the sample course
+ * This test relies on the polls and their initial state in the sample course
  * when running vagrant up. Modifications made to those polls will result in the
  * the failure of the tests below; however, any other existing polls should not
  * interfere with the tests.
@@ -346,11 +346,11 @@ describe('Test cases revolving around polls functionality', () => {
         // release histogram/answer's default values should be "never"
         cy.get('#student-histogram-release-setting').invoke('val').should('eq', 'never');
         cy.get('#student-answer-release-setting').invoke('val').should('eq', 'never');
-        cy.get('.poll_response').should('contain', 'Answer 1');
+        cy.get('.poll-response').should('contain', 'Answer 1');
         cy.get('.correct-box').eq(0).should('be.checked');
-        cy.get('.poll_response').should('contain', 'Answer 2');
+        cy.get('.poll-response').should('contain', 'Answer 2');
         cy.get('.correct-box').eq(1).should('not.be.checked');
-        cy.get('.poll_response').should('contain', 'Answer 3');
+        cy.get('.poll-response').should('contain', 'Answer 3');
         cy.get('.correct-box').eq(2).should('be.checked');
         cy.get('textarea').contains('Answer 1').clear().type('Answer 0');
         cy.get('#responses').children(':nth-child(3)').children(':nth-child(5)').click();
@@ -652,15 +652,15 @@ describe('Test cases revolving around polls functionality', () => {
         cy.url().should('include', 'sample/polls/editPoll');
 
         // Should contain original and custom options
-        cy.get('.poll_response').should('contain', 'Answer 1');
-        cy.get('.poll_response').should('contain', 'Second Custom Response');
+        cy.get('.poll-response').should('contain', 'Answer 1');
+        cy.get('.poll-response').should('contain', 'Second Custom Response');
 
         // Attempt to delete custom poll option, but it should not be deleted if a given student has chosen it like as standard option
         cy.on('window:alert', (alertText) => {
             expect(alertText).to.equal('Students and/or other staff users have already submitted this response as their answer. This response cannot be deleted unless they switch their answers to the poll.');
         });
         cy.get('.delete-btn').eq(1).should('be.visible').click();
-        cy.get('.poll_response').should('contain', 'Second Custom Response');
+        cy.get('.poll-response').should('contain', 'Second Custom Response');
 
         // Close custom poll, ensuring no future custom options are possible to be added or deleted
         cy.visit(['sample', 'polls']);
