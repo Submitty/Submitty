@@ -44,8 +44,6 @@ log_file_path = os.path.join(
     f"{TODAY.year:04d}{TODAY.month:02d}{TODAY.day:02d}.txt",
 )
 
-
-
 try:
     DB_HOST = DATABASE_CONFIG["database_host"]
     DB_USER = DATABASE_CONFIG["database_user"]
@@ -59,7 +57,6 @@ except KeyError as config_fail_error:
         LOG_FILE.write(e + "\n")
     print(e)
     sys.exit(1)
-
 
 def connect_db(db_name):
     """Set up a connection with the specific database."""
