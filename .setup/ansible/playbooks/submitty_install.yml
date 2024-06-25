@@ -1,0 +1,15 @@
+---
+# Example playbook
+# Customize the submitty install by overriding the variable defaults found in `roles/submitty_install/defaults/main.yml`
+
+- name: Install Submitty
+  hosts: submitty
+  remote_user: ubuntu
+  become: true
+  tasks:
+    - name: Install Submitty
+      ansible.builtin.include_role:
+        name: submitty_install
+      vars:
+        # add overriding variables here
+        submitty_install_submitty_version: main  # Replace main with version, eg. v24.02.00
