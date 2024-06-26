@@ -3671,11 +3671,6 @@ parameters:
 			path: app/entities/poll/Poll.php
 
 		-
-			message: "#^Property app\\\\entities\\\\poll\\\\Poll\\:\\:\\$status has no type specified\\.$#"
-			count: 1
-			path: app/entities/poll/Poll.php
-
-		-
 			message: "#^Call to function is_array\\(\\) with array will always evaluate to true\\.$#"
 			count: 1
 			path: app/exceptions/BaseException.php
