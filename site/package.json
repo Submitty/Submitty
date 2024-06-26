@@ -52,6 +52,7 @@
     "@babel/preset-env": "^7.24.3",
     "@babel/preset-typescript": "^7.22.11",
     "@cypress/skip-test": "^2.6.1",
+    "@stylistic/eslint-plugin": "^2.1.0",
     "@types/jest": "^29.5.4",
     "@types/jquery": "^3.5.29",
     "@types/jquery.are-you-sure": "^0.0.34",

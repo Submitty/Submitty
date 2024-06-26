@@ -1,7 +1,6 @@
 /* exported deleteBannerImage, imageSelectionUpdate, urlSelectionUpdate */
 /* global buildUrl */
 
-
 /**
  * @param csrf_token
  */
@@ -21,7 +20,7 @@ function deleteBannerImage(csrf_token, id, imageName, imagePath, description, re
         processData: false,
         contentType: false,
         type: 'POST',
-        success: function(data) {
+        success: function (data) {
             try {
                 const jsondata = JSON.parse(data);
 
@@ -37,7 +36,7 @@ function deleteBannerImage(csrf_token, id, imageName, imagePath, description, re
                 console.log(data);
             }
         },
-        error: function() {
+        error: function () {
             window.location.href = buildUrl(['banner']);
         },
     });
@@ -52,9 +51,7 @@ function imageSelectionUpdate() {
     }
 }
 
-
 function urlSelectionUpdate() {
-
     if ($('#url_link_address').is(':visible')) {
         $('#url_link_address').hide();
     }
