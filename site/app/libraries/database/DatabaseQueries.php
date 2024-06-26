@@ -7836,6 +7836,17 @@ AND gc_id IN (
         return $this->course_db->rows();
     }
 
+    /**
+     * Return all queue information for a certain student
+     *
+     * @param string $user_id
+     * @return array<string, mixed[]> user info, indexed by user id.
+     */
+    public function studentQueueSearch(string $user_id): array {
+        $this->course_db->query("SELECT * FROM queue WHERE user_id = ?", [$user_id]);
+        return $this->course_db->rows();
+    }
+
 
     public function isAnyQueueOpen() {
         $this->course_db->query("SELECT COUNT(*) AS num_open FROM queue_settings WHERE open = true");
