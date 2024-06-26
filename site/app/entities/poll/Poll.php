@@ -32,9 +32,6 @@ class Poll {
     #[ORM\Column(type: Types::INTEGER)]
     protected int $duration;
 
-    #[ORM\Column(type: Types::TEXT)]
-    protected $status;
-
     #[ORM\Column(type: Types::DATETIME_MUTABLE, nullable: true)]
     protected ?DateTime $end_time;
 
@@ -197,13 +194,6 @@ class Poll {
         $this->question_type = $question_type;
     }
 
-    public function setReleaseHistogram(string $status): void {
-        if ($status !== "never" && $status !== "always" && $status !== "when_ended") {
-            throw new \RuntimeException("Invalid release histogram status");
-        }
-        $this->release_histogram = $status;
-    }
-
     /**
      * Note: This function should only be used if the actual string is desired.  (exporting poll data for example)
      *       isHistogramAvailable() is preferred if at all possible.
@@ -214,18 +204,6 @@ class Poll {
 
     public function isHistogramAvailable(): bool {
         return ($this->release_histogram === "always" && !$this->isClosed()) || ($this->release_histogram === "when_ended" && $this->isEnded());
-    }
-
-    /**
-     * Note: This function should only be used if the actual string is desired.  (exporting poll data for example)
-     *       isReleaseAnswer() is preferred if at all possible.
-     */
-
-    public function setReleaseAnswer(string $status): void {
-        if ($status !== "never" && $status !== "always" && $status !== "when_ended") {
-            throw new \RuntimeException("Invalid release answer status");
-        }
-        $this->release_answer = $status;
     }
 
     public function getReleaseAnswer(): string {
