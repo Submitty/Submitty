@@ -562,65 +562,69 @@ class FileUtils {
      * if $files is null returns failed => no files sent to validate
      */
     public static function validateUploadedFiles(array $files): array {
-        if (empty($files)) {
+        if (count($files) === 0) {
             return ["failed" => "No files sent to validate"];
         }
 
-        $validator = function ($file) {
-            $max_size = Utils::returnBytes(ini_get('upload_max_filesize'));
+        $max_size = Utils::returnBytes(ini_get('upload_max_filesize'));
+
+        $validator = function ($file) use ($max_size) {
             $name = $file['name'];
             $tmp_name = $file['tmp_name'];
-
-            $type = mime_content_type($tmp_name);
-            $zip_status = FileUtils::getZipFileStatus($tmp_name);
             $errors = [];
-            if ($file['error'] !== UPLOAD_ERR_OK) {
-                $errors[] = ErrorMessages::uploadErrors($file['error']);
-            }
 
-            //check if its a zip file
-            $is_zip = $type === 'application/zip';
-            if ($is_zip) {
+            // Check if temporary file name is empty before calling mime_content_type
+            if ($tmp_name === '') {
+                // Handle empty file case (e.g., throw exception or return error message)
+                $errors[] = "Empty file uploaded for $name";
+            }
+            else {
+                $type = mime_content_type($tmp_name);
                 $zip_status = FileUtils::getZipFileStatus($tmp_name);
-                if ($zip_status !== \ZipArchive::ER_OK) {
-                    $err_tmp = ErrorMessages::getZipErrorMessage($zip_status);
-                    if ($err_tmp != "No error.") {
-                        $errors[] = $err_tmp;
+
+                if ($file['error'] !== UPLOAD_ERR_OK) {
+                    $errors[] = ErrorMessages::uploadErrors($file['error']);
+                }
+
+                // Check if it's a zip file
+                $is_zip = $type === 'application/zip';
+                if ($is_zip) {
+                    if ($zip_status !== \ZipArchive::ER_OK) {
+                        $err_tmp = ErrorMessages::getZipErrorMessage($zip_status);
+                        if ($err_tmp != "No error.") {
+                            $errors[] = $err_tmp;
+                        }
+                    }
+                    else {
+                        $size = FileUtils::getZipSize($tmp_name);
+                        if (!FileUtils::checkFileInZipName($tmp_name)) {
+                            $errors[] = "Invalid filename within zip file";
+                        }
                     }
                 }
-                else {
-                    $size = FileUtils::getZipSize($tmp_name);
-                    if (!FileUtils::checkFileInZipName($tmp_name)) {
-                        $errors[] = "Invalid filename within zip file";
-                    }
+
+                // For zip files use the size of the contents in case it gets extracted
+                $size = $is_zip ? FileUtils::getZipSize($tmp_name) : $file['size'];
+
+                // Manually check against set size limit in case the max POST size is greater than max file size
+                if ($size > $max_size) {
+                    $errors[] = "File \"" . $name . "\" too large got (" . Utils::formatBytes("mb", $size) . ")";
+                }
+
+                // Check filename
+                if (!FileUtils::isValidFileName($name)) {
+                    $errors[] = "Invalid filename";
                 }
             }
 
-            //for zip files use the size of the contents in case it gets extracted
-            $size = $is_zip ? FileUtils::getZipSize($tmp_name) : $file['size'];
-
-            //manually check against set size limit
-            //in case the max POST size is greater than max file size
-            if ($size > $max_size) {
-                $errors[] = "File \"" . $name . "\" too large got (" . Utils::formatBytes("mb", $size) . ")";
-            }
-
-            //check filename
-            if (!FileUtils::isValidFileName($name)) {
-                $errors[] = "Invalid filename";
-            }
-
-            $success = true;
-            if (count($errors) > 0) {
-                $success = false;
-            }
+            $success = count($errors) === 0;
 
             return [
                 'name' => $name,
-                'type' => $type,
+                'type' => $type ?? 'unknown', // Default to 'unknown' if $type is not set
                 'error' => $success ? "No error." : implode(" ", $errors),
-                'size' => $size,
-                'is_zip' => $is_zip,
+                'size' => $size ?? 0, // Default to 0 if $size is not set
+                'is_zip' => $is_zip ?? false, // Default to false if $is_zip is not set
                 'success' => $success,
             ];
         };
@@ -631,9 +635,8 @@ class FileUtils {
         }
         else {
             $num_files = count($files['name']);
-
             for ($i = 0; $i < $num_files; $i++) {
-                //construct single file from uploaded file array
+                // Construct single file from uploaded file array
                 $file = [
                     'name' => $files['name'][$i],
                     'type' => $files['type'][$i],
@@ -641,7 +644,6 @@ class FileUtils {
                     'error' => $files['error'][$i],
                     'size' => $files['size'][$i]
                 ];
-
                 $ret[] = $validator($file);
             }
         }
