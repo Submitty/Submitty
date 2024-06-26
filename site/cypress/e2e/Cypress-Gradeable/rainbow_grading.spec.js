@@ -8,9 +8,9 @@ describe('Test Rainbow Grading', () => {
         cy.get('[data-testid="display-rainbow-grades-summary"]').check();
         cy.get('[data-testid="display-rainbow-grades-summary"]').should('be.checked');
         cy.visit(['sample', 'reports', 'rainbow_grades_customization']);
-        cy.get('[data-testid="display-grade-summary"]').check();
+        // cy.get('[data-testid="display-grade-summary"]').check();
         cy.get('[data-testid="display-grade-summary"]').should('be.checked');
-        cy.get('#display_grade_details').check();
+        cy.get('[data-testid="display-grade-details"]').check();
         cy.get('[data-testid="display-benchmarks-average"]').check();
         cy.get('[data-testid="display-benchmarks-stddev"]').check();
         cy.get('[data-testid="display-benchmarks-perfect"]').check();
@@ -57,15 +57,9 @@ const checkRainbowGrades = (username, numericId, firstName, lastname) => {
     });
 };
 const checkRainbowGradesOption = () => {
-    cy.get('[data-testid="rainbow-grades"]')
-        .should('contain', 'USERNAME')
-        .and('contain', 'NUMERIC ID')
-        .and('contain', 'FIRST')
-        .and('contain', 'LAST')
-        .and('contain', 'OVERALL')
-        .and('contain', 'AVERAGE')
-        .and('contain', 'STDDEV')
-        .and('contain', 'PERFECT');
+    ['USERNAME', 'NUMERIC ID', 'FIRST', 'LAST', 'OVERALL', 'AVERAGE', 'STDDEV', 'PERFECT'].forEach((element) => {
+        cy.get('[data-testid="rainbow-grades"]').should('contain', element);
+    });
 };
 
 
