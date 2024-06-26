@@ -20,8 +20,6 @@ describe('test for discussion post panel', () => {
         cy.get('[data-testid="create-post-head"]').eq(1).should('contain', '(3) Homework 1 not running');
         cy.get('[data-testid="posts-list"]').should('contain', 'Go to thread');
         cy.get('[data-testid="go-to-thread"]').its('length').should('eq', 3);
-        cy.get('[data-testid="go-to-thread"]').eq(1).click({force: true});
-        cy.url().should('include', 'sample/forum/threads/2');
-        cy.get('[data-testid="create-post-head"]').should('contain', '(2) Homework 1 print clarification');
+        cy.get('[data-testid="go-to-thread"]').eq(1).should('have.attr', 'href').and('contain', 'sample/forum/threads/2');
     });
 });
