@@ -13,6 +13,8 @@ use app\libraries\routers\AccessControl;
 use app\libraries\routers\Enabled;
 use app\libraries\response\JsonResponse;
 use Symfony\Component\Routing\Annotation\Route;
+use app\libraries\socket\Client;
+use WebSocket;
 
 /**
  * Class ForumHomeController
@@ -88,6 +90,7 @@ class ForumController extends AbstractController {
         }
         if ($this->core->getQueries()->getAuthorOfThread($thread_id) === $this->core->getUser()->getId() || $this->core->getUser()->accessGrading()) {
             if ($this->core->getQueries()->updateResolveState($thread_id, $status)) {
+                $this->sendSocketMessage(['type' => 'resolve_thread', 'thread_id' => $thread_id]);
                 return $this->core->getOutput()->renderJsonSuccess();
             }
             else {
@@ -412,6 +415,7 @@ class ForumController extends AbstractController {
                 }
 
                 $result['next_page'] = $this->core->buildCourseUrl(['forum', 'threads', $thread_id]);
+                 $this->sendSocketMessage(['type' => 'new_thread', 'thread_id' => $thread_id]);
             }
         }
         return $this->core->getOutput()->renderJsonSuccess($result);
@@ -560,6 +564,51 @@ class ForumController extends AbstractController {
                 $result['next_page'] = $this->core->buildCourseUrl(['forum', 'threads', $thread_id]) . '?' . http_build_query(['option' => $display_option]);
                 $result['post_id'] = $post_id;
                 $result['thread_id'] = $thread_id;
+                $posts = $this->core->getQueries()->getPostsInThreads([$result['thread_id']]);
+                $first = true;
+                $first_post_id = 1;
+                $order_array = [];
+                $reply_level_array = [];
+                if ($display_option !== 'tree') {
+                    $reply_level = 1;
+                }
+                else {
+                    foreach ($posts as $post) {
+                        if ($thread_id == -1) {
+                            $thread_id = $post["thread_id"];
+                        }
+                        if ($first) {
+                            $first = false;
+                            $first_post_id = $post["id"];
+                        }
+                        if ($post["parent_id"] > $first_post_id) {
+                            $place = array_search($post["parent_id"], $order_array, true);
+                            $tmp_array = [$post["id"]];
+                            $parent_reply_level = $reply_level_array[$place];
+                            if ($place !== false) {
+                                while (array_key_exists($place + 1, $reply_level_array) && $reply_level_array[$place + 1] > $parent_reply_level) {
+                                    $place++;
+                                }
+                            }
+                            array_splice($order_array, $place + 1, 0, $tmp_array);
+                            array_splice($reply_level_array, $place + 1, 0, $parent_reply_level + 1);
+                        }
+                        else {
+                            array_push($order_array, $post["id"]);
+                            array_push($reply_level_array, 1);
+                        }
+                    }
+                }
+                $place = array_search($post_id, $order_array, true);
+                $reply_level = $reply_level_array[$place];
+                $max_post_box_id = count($posts);
+                $this->sendSocketMessage([
+                    'type' => 'new_post',
+                    'thread_id' => $thread_id,
+                    'post_id' => $post_id,
+                    'reply_level' => $reply_level,
+                    'post_box_id' => $max_post_box_id
+                ]);
             }
         }
         return $this->core->getOutput()->renderJsonSuccess($result);
@@ -584,7 +633,7 @@ class ForumController extends AbstractController {
             [$post_id],
             $this->core->getUser()->getId()
         ));
-        $staffLiked = $this->core->getQueries()->getInstructorUpduck($post_id);
+        $staffLiked = $this->core->getQueries()->getInstructorUpduck([$post_id]);
         $boolStaffLiked = in_array($post["id"], $staffLiked, true);
         $GLOBALS['totalAttachments'] = 0;
         $GLOBALS['post_box_id'] = $_POST['post_box_id'];
@@ -624,8 +673,13 @@ class ForumController extends AbstractController {
     #[Route("/courses/{_semester}/{_course}/forum/announcements", methods: ["POST"])]
     public function alterAnnouncement(bool $type) {
         $thread_id = $_POST["thread_id"];
+        if ($type) {
+            $this->sendSocketMessage(['type' => 'announce_thread', 'thread_id' => $thread_id]);
+        }
+        else {
+            $this->sendSocketMessage(['type' => 'unpin_thread', 'thread_id' => $thread_id]);
+        }
         $this->core->getQueries()->setAnnouncement($thread_id, $type);
-
         //TODO: notify on edited announcement
     }
 
@@ -686,8 +740,14 @@ class ForumController extends AbstractController {
             $content = "In " . $full_course_name . "\n\nThread: " . $thread_title . "\n\nPost:\n" . $post["content"] . " was deleted.";
             $event = [ 'component' => 'forum', 'metadata' => $metadata, 'content' => $content, 'subject' => $subject, 'recipient' => $post_author_id, 'preference' => 'all_modifications_forum'];
             $this->core->getNotificationFactory()->onPostModified($event);
-
             $this->core->getQueries()->removeNotificationsPost($post_id);
+            if ($type === "thread") {
+                $this->sendSocketMessage(['type' => 'delete_thread', 'thread_id' => $thread_id]);
+            }
+            if ($type === "post") {
+                $post_id = $_POST["post_id"];
+                $this->sendSocketMessage(['type' => 'delete_post', 'thread_id' => $thread_id, 'post_id' => $post_id]);
+            }
             return $this->core->getOutput()->renderJsonSuccess(['type' => $type]);
         }
         elseif ($modify_type == 2) { //undelete post or thread
@@ -779,6 +839,58 @@ class ForumController extends AbstractController {
             }
             if ($isError) {
                 return $this->core->getOutput()->renderJsonFail($messageString);
+            }
+            if ($type === 'Post') {
+                $posts = $this->core->getQueries()->getPostsInThreads([$thread_id]);
+                $first = true;
+                $first_post_id = 1;
+                $order_array = [];
+                $reply_level_array = [];
+                foreach ($posts as $post_) {
+                    if ($thread_id == -1) {
+                        $thread_id = $post_["thread_id"];
+                    }
+                    if ($first) {
+                        $first = false;
+                        $first_post_id = $post_["id"];
+                    }
+                    if ($post_["parent_id"] > $first_post_id) {
+                        $place = array_search($post_["parent_id"], $order_array, true);
+                        $tmp_array = [$post_["id"]];
+                        $parent_reply_level = $reply_level_array[$place];
+                        if ($place !== false) {
+                            while (array_key_exists($place + 1, $reply_level_array) && $reply_level_array[$place + 1] > $parent_reply_level) {
+                                $place++;
+                            }
+                        }
+                        array_splice($order_array, $place + 1, 0, $tmp_array);
+                        array_splice($reply_level_array, $place + 1, 0, $parent_reply_level + 1);
+                    }
+                    else {
+                        array_push($order_array, $post_["id"]);
+                        array_push($reply_level_array, 1);
+                    }
+                }
+                $place = array_search($post["id"], $order_array, true);
+                $reply_level = $reply_level_array[$place];
+                $post_box_id = 1;
+
+                $this->sendSocketMessage([
+                    'type' => 'edit_post',
+                    'thread_id' => $thread_id,
+                    'post_id' => $post_id,
+                    'reply_level' => $reply_level,
+                    'post_box_id' => $post_box_id,
+                ]);
+            }
+            elseif ($type === 'Thread and Post') {
+                $this->sendSocketMessage([
+                    'type' => 'edit_thread',
+                    'thread_id' => $thread_id,
+                    'post_id' => $post_id,
+                    'reply_level' => 1,
+                    'post_box_id' => 1,
+                ]);
             }
             return $this->core->getOutput()->renderJsonSuccess(['type' => $type]);
         }
@@ -884,6 +996,7 @@ class ForumController extends AbstractController {
                 $result['next'] = $this->core->buildCourseUrl(['forum', 'threads', $thread_id]);
                 $result['new_thread_id'] = $thread_id;
                 $result['old_thread_id'] = $thread_ids[0];
+                $this->sendSocketMessage(['type' => 'split_post', 'new_thread_id' =>  $result['new_thread_id'], 'thread_id' => $result['old_thread_id'], 'post_id' => $post_id]);
                 return $this->core->getOutput()->renderJsonSuccess($result);
             }
             else {
@@ -1224,7 +1337,7 @@ class ForumController extends AbstractController {
         $post_id = $_POST["post_id"];
         $result = $this->core->getQueries()->getPostOldThread($post_id);
         $result["all_categories_list"] = $this->core->getQueries()->getCategories();
-        if ($result["merged_thread_id"] == -1) {
+        if ($result["merged_thread_id"] === -1) {
             $post = $this->core->getQueries()->getPost($post_id);
             $result["categories_list"] = $this->core->getQueries()->getCategoriesIdForThread($post["thread_id"]);
             $result["title"] = $this->core->getQueries()->getThreadTitle($post["thread_id"]);
@@ -1251,7 +1364,7 @@ class ForumController extends AbstractController {
         $GLOBALS['totalAttachments'] = 0;
         $edit_id = 0;
         foreach ($older_posts as $post) {
-            $_post['user'] = !$this->modifyAnonymous($oc) && $oc == $post["edit_author"] && $anon ? '' : $post["edit_author"];
+            $_post['user'] = !$this->modifyAnonymous($oc) && $oc === $post["edit_author"] && $anon ? '' : $post["edit_author"];
             $_post['content'] = $this->core->getOutput()->renderTwigTemplate("forum/RenderPost.twig", [
                 "post_content" => $post["content"],
                 "render_markdown" => false,
@@ -1268,7 +1381,7 @@ class ForumController extends AbstractController {
             $output[] = $_post;
             $edit_id++;
         }
-        if (count($output) == 0) {
+        if (count($output) === 0) {
             // Current post
             $_post['user'] = !$this->modifyAnonymous($oc) && $anon ? '' : $oc;
             $_post['content'] = $this->core->getOutput()->renderTwigTemplate("forum/RenderPost.twig", [
@@ -1368,7 +1481,7 @@ class ForumController extends AbstractController {
                 $users[$user]["num_deleted_posts"] = count($this->core->getQueries()->getDeletedPostsByUser($user));
                 $users[$user]["total_upducks"] = 0;
             }
-            if ($posts[$i]["parent_id"] == -1) {
+            if ($posts[$i]["parent_id"] === -1) {
                 $users[$user]["total_threads"]++;
             }
             $users[$user]["posts"][] = $content;
@@ -1398,10 +1511,35 @@ class ForumController extends AbstractController {
         if ($output['status'] === "false") {
             return JsonResponse::getErrorResponse('Catch Fail in Query');
         }
+
+        $this->sendSocketMessage([
+            'type' => 'edit_likes',
+            'post_id' => $_POST['post_id'],
+            'status' => $output['status'],
+            'likesCount' => $output['likesCount'],
+            'likesFromStaff' => $output['likesFromStaff']
+        ]);
+
         return JsonResponse::getSuccessResponse([
             'status' => $output['status'], // 'like' or 'unlike'
             'likesCount' => $output['likesCount'], // Total likes count
             'likesFromStaff' => $output['likesFromStaff'] // Likes from staff
         ]);
+    }
+
+    /**
+     * this function opens a WebSocket client and sends a message with the corresponding update
+     * @param array<mixed> $msg_array
+     */
+    private function sendSocketMessage(array $msg_array): void {
+        $msg_array['user_id'] = $this->core->getUser()->getId();
+        $msg_array['page'] = $this->core->getConfig()->getTerm() . '-' . $this->core->getConfig()->getCourse() . "-discussion_forum";
+        try {
+            $client = new Client($this->core);
+            $client->json_send($msg_array);
+        }
+        catch (WebSocket\ConnectionException $e) {
+            $this->core->addNoticeMessage("WebSocket Server is down, page won't load dynamically.");
+        }
     }
 }
