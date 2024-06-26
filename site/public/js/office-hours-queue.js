@@ -1,5 +1,6 @@
-/* exported toggleSort */
-//this helps update the frontend when the page refreshes because without this the sort icon would reset and the sort state would not
+/* exported toggleSort, displayStudentHistory */
+/* global buildCourseUrl, displayErrorMessage */
+// this helps update the frontend when the page refreshes because without this the sort icon would reset and the sort state would not
 document.addEventListener('DOMContentLoaded', () => {
     const sortIndicator = document.getElementById('sort-indicator-oh-queue');
     let sortState = localStorage.getItem('sort-indicator-oh-queue');
@@ -47,15 +48,13 @@ function adjustRows() {
         }
         else if (localStorage.getItem('sort-indicator-oh-queue') === 'down') {
             return $(a).find('.help-started').text() > $(b).find('.help-started').text() ? 1 : -1;
-
         }
         else {
             return parseInt($(a).find('.number-count').text()) < parseInt($(b).find('.number-count').text()) ? -1 : 1;
         }
     });
     $('#queue-history-table').empty();
-    for (let i=0; i < rows.length; i++) {
+    for (let i = 0; i < rows.length; i++) {
         $('#queue-history-table').append($(rows[i]));
     }
 }
-

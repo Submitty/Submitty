@@ -11,11 +11,9 @@
    markAllViewed closePopup */
 /* global csrfToken my_window:writable file_path:writable updateBulkProgress icon:writable detectColorScheme
    createArray readPrevious disableFullUpdate registerSelect2Widget */
-////////////Begin: Removed redundant link in breadcrumbs////////////////////////
-//See this pr for why we might want to remove this code at some point
-//https://github.com/Submitty/Submitty/pull/5071
-
-
+/// /////////Begin: Removed redundant link in breadcrumbs////////////////////////
+// See this pr for why we might want to remove this code at some point
+// https://github.com/Submitty/Submitty/pull/5071
 
 window.addEventListener('resize', () => {
     loadInBreadcrumbLinks();
@@ -45,7 +43,7 @@ function adjustBreadcrumbLinks() {
         $('#desktop_home_link').attr('href', '');
     }
 }
-////////////End: Removed redundant link in breadcrumbs//////////////////////////
+/// /////////End: Removed redundant link in breadcrumbs//////////////////////////
 
 /**
  * Acts in a similar fashion to Core->buildUrl() function within the PHP code
@@ -94,11 +92,11 @@ function changeDiffView(div_name, gradeable_id, who_id, version, index, autochec
         $(`#show_char_${index}_${autocheck_cnt}`).html('Visualize whitespace characters');
         option = 'original';
     }
-    //Insert actual and expected one at a time
+    // Insert actual and expected one at a time
     let url = `${buildCourseUrl(['gradeable', gradeable_id, 'grading', 'student_output', 'remove'])
     }?who_id=${who_id}&version=${version}&index=${index}&autocheck_cnt=${autocheck_cnt}&option=${option}&which=expected`;
 
-    const assertSuccess = function(data) {
+    const assertSuccess = function (data) {
         if (data.status === 'fail') {
             alert(`Error loading diff: ${data.message}`);
             return false;
@@ -147,7 +145,6 @@ function changeDiffView(div_name, gradeable_id, who_id, version, index, autochec
             alert('Could not load diff, please refresh the page and try again.');
         },
     });
-
 }
 
 function newDeleteGradeableForm(form_action, gradeable_name) {
@@ -176,9 +173,9 @@ function newDeleteCourseMaterialForm(id, file_name, str_id = null) {
     const current_y_offset = window.pageYOffset;
     Cookies.set('jumpToScrollPosition', current_y_offset);
 
-    const cm_ids = (Cookies.get('cm_data') || '').split('|').filter(n => n.length);
+    const cm_ids = (Cookies.get('cm_data') || '').split('|').filter((n) => n.length);
 
-    $('[id^=div_viewer_]').each(function() {
+    $('[id^=div_viewer_]').each(function () {
         const cm_id = this.id.replace('div_viewer_', '').trim();
         const elem = $(`#div_viewer_${cm_id}`);
         if (!cm_id.length || !elem) {
@@ -280,13 +277,12 @@ function newUploadImagesForm() {
 }
 
 function newUploadCourseMaterialsForm() {
-
     createArray(1);
 
     const fileList = document.getElementsByClassName('file-viewer-data');
 
     const files = [];
-    for (let i=0;i<fileList.length;i++) {
+    for (let i = 0; i < fileList.length; i++) {
         const file = fileList[i];
         files.push(file.getAttribute('data-file_url'));
         readPrevious(file.getAttribute('data-file_url'), 1);
@@ -327,7 +323,7 @@ function newEditCourseMaterialsFolderForm(tag) {
     const dir = $(tag).data('priority');
     const folder_sections = $(tag).data('sections');
     const partial_sections = $(tag).data('partial-sections');
-    const release_time =  $(tag).data('release-time');
+    const release_time = $(tag).data('release-time');
     const is_hidden = $(tag).data('hidden-state');
     const partially_hidden = 2;
     const form = $('#edit-course-materials-folder-form');
@@ -347,7 +343,7 @@ function newEditCourseMaterialsFolderForm(tag) {
     }
 
     $('#show-some-section-selection-folder-edit :checkbox:enabled').prop('checked', false);
-    const showSections = function() {
+    const showSections = function () {
         $('#all-sections-showing-no-folder', form).prop('checked', false);
         $('#all-sections-showing-yes-folder', form).prop('checked', true);
         $('#show-some-section-selection-folder-edit', form).show();
@@ -384,7 +380,6 @@ function newEditCourseMaterialsFolderForm(tag) {
     disableFullUpdate();
     showPopup('#edit-course-materials-folder-form');
     captureTabInModal('edit-course-materials-folder-form');
-
 }
 
 function newEditCourseMaterialsForm(tag) {
@@ -506,28 +501,27 @@ function closePopup(id) {
     }
 }
 
-
 // eslint-disable-next-line no-var
 var lastActiveElement = null;
-function captureTabInModal(formName, resetFocus=true) {
+function captureTabInModal(formName, resetFocus = true) {
     if (resetFocus) {
         lastActiveElement = document.activeElement;
     }
 
     const form = $('#'.concat(formName));
-    form.off('keydown');//Remove any old redirects
+    form.off('keydown');// Remove any old redirects
 
-    /*get all the elements to tab through*/
+    /* get all the elements to tab through */
     const inputs = form.find(':tabbable').filter(':visible');
     const firstInput = inputs.first();
     const lastInput = inputs.last();
 
-    /*set focus on first element*/
+    /* set focus on first element */
     if (resetFocus) {
         firstInput.focus();
     }
 
-    /*redirect last tab to first element*/
+    /* redirect last tab to first element */
     form.on('keydown', (e) => {
         if ((e.which === 9 && !e.shiftKey && $(lastInput).is(':focus'))) {
             firstInput.focus();
@@ -539,7 +533,7 @@ function captureTabInModal(formName, resetFocus=true) {
         }
     });
 
-    //Watch for the modal to be hidden
+    // Watch for the modal to be hidden
     const observer = new MutationObserver(() => {
         if (form[0].style.display === 'none') {
             releaseTabFromModal(formName);
@@ -566,14 +560,13 @@ function setFolderRelease(changeActionVariable, releaseDates, id, cm_id) {
 
     $('[name="submit"]', form).attr('data-iden', id);
     $('[name="submit"]', form).attr('data-id', cm_id);
-
 }
 
 function copyToClipboard(code) {
     const download_info = JSON.parse($('#download_info_json_id').val());
     let required_emails = [];
 
-    $('#download-form input:checkbox').each(function() {
+    $('#download-form input:checkbox').each(function () {
         if ($(this).is(':checked')) {
             const thisVal = $(this).val();
 
@@ -638,7 +631,7 @@ function downloadCSV(code) {
     let csv_data = 'Given Name,Family Name,User ID,Email,Secondary Email,UTC Offset,Time Zone,Registration Section,Rotation Section,Group\n';
     const required_user_id = [];
 
-    $('#download-form input:checkbox').each(function() {
+    $('#download-form input:checkbox').each(function () {
         if ($(this).is(':checked')) {
             const thisVal = $(this).val();
 
@@ -730,7 +723,7 @@ function togglePageDetails() {
  * Opens a new tab on https://validator.w3.org with the contents of the current html page
  */
 function validateHtml() {
-    //Code copied from https://validator.w3.org/nu/about.html under "Check serialized DOM of current page" section
+    // Code copied from https://validator.w3.org/nu/about.html under "Check serialized DOM of current page" section
     function c(a, b) {
         const c = document.createElement('textarea');
         c.name = a;
@@ -807,7 +800,6 @@ function toggleDiv(id) {
     return true;
 }
 
-
 function checkRefreshPage(url) {
     setTimeout(() => {
         check_server(url);
@@ -840,7 +832,7 @@ function downloadCourseMaterial(id) {
 }
 
 function downloadTestCaseResult(testcase, name, version, gradeable, user) {
-    window.location = `${buildCourseUrl(['gradeable', gradeable, 'downloadTestCaseResult'])}?version=${version}&test_case=${testcase+1}&file_name=${name}&user_id=${user}`;
+    window.location = `${buildCourseUrl(['gradeable', gradeable, 'downloadTestCaseResult'])}?version=${version}&test_case=${testcase + 1}&file_name=${name}&user_id=${user}`;
 }
 
 function downloadStudentAnnotations(url) {
@@ -954,7 +946,6 @@ function markAllViewed() {
             console.error(e);
         },
     });
-
 }
 
 function toggleCMFolder(id, open) {
@@ -1024,7 +1015,7 @@ function changeName(element, user, visible_username, anon) {
     }
 }
 
-function openFrame(url, id, filename, ta_grading_interpret=false) {
+function openFrame(url, id, filename, ta_grading_interpret = false) {
     const iframe = $(`#file_viewer_${id}`);
     if (!iframe.hasClass('open')) {
         const iframeId = `file_viewer_${id}_iframe`;
@@ -1091,7 +1082,7 @@ function resizeFrame(id, max_height = 500, force_height = -1) {
         }
         height = parseInt($(`iframe#${id}`).contents().find('body').css('height').slice(0, -2));
     }
-    else { //Handling issue with FireFox and jQuery not being able to access iframe contents for PDF reader
+    else { // Handling issue with FireFox and jQuery not being able to access iframe contents for PDF reader
         height = max_height;
     }
     if (force_height !== -1) {
@@ -1103,7 +1094,7 @@ function resizeFrame(id, max_height = 500, force_height = -1) {
     else {
         $(`iframe#${id}`).height(height + 18);
     }
-    //Workarounds for FireFox changing height/width of img sometime after this code runs
+    // Workarounds for FireFox changing height/width of img sometime after this code runs
     if (img.length !== 0) {
         const observer = new ResizeObserver((mutationsList, observer) => {
             img.removeAttr('width');
@@ -1119,7 +1110,7 @@ function resizeFrame(id, max_height = 500, force_height = -1) {
             if ($(`iframe#${id}`).is(':visible')) {
                 $(`iframe#${id}`).removeAttr('height');
                 const iframeFunc = $(`iframe#${id}`)[0].contentWindow.iFrameInit;
-                if (typeof(iframeFunc) === 'function') {
+                if (typeof (iframeFunc) === 'function') {
                     iframeFunc();
                 }
                 observer.disconnect();
@@ -1184,7 +1175,7 @@ $(() => {
     if (window.location.hash !== '') {
         if ($(window.location.hash).offset().top > 0) {
             const minus = 60;
-            $('html, body').animate({scrollTop: ($(window.location.hash).offset().top - minus)}, 800);
+            $('html, body').animate({ scrollTop: ($(window.location.hash).offset().top - minus) }, 800);
         }
     }
 
@@ -1196,7 +1187,7 @@ $(() => {
 });
 
 function getFileExtension(filename) {
-    return (filename.substring(filename.lastIndexOf('.')+1)).toLowerCase();
+    return (filename.substring(filename.lastIndexOf('.') + 1)).toLowerCase();
 }
 
 function openPopUp(css, title, count, testcase_num, side) {
@@ -1256,12 +1247,12 @@ function displayMessage(message, type) {
  */
 function enableTabsInTextArea(jQuerySelector) {
     const t = $(jQuerySelector);
-    t.on('input', function() {
+    t.on('input', function () {
         $(this).outerHeight(38).outerHeight(this.scrollHeight);
     });
     t.trigger('input');
-    t.keydown(function(event) {
-        if (event.which === 27) {  //ESC was pressed, proceed to next control element.
+    t.keydown(function (event) {
+        if (event.which === 27) { // ESC was pressed, proceed to next control element.
             // Next control element may not be a sibling, so .next().focus() is not guaranteed
             // to work.  There is also no guarantee that controls are properly wrapped within
             // a <form>.  Therefore, retrieve a master list of all visible controls and switch
@@ -1270,12 +1261,12 @@ function enableTabsInTextArea(jQuerySelector) {
             controls.eq(controls.index(this) + 1).focus();
             return false;
         }
-        else if (!event.shiftKey && event.code === 'Tab') { //TAB was pressed without SHIFT, text indent
+        else if (!event.shiftKey && event.code === 'Tab') { // TAB was pressed without SHIFT, text indent
             const text = this.value;
             const beforeCurse = this.selectionStart;
             const afterCurse = this.selectionEnd;
             this.value = `${text.substring(0, beforeCurse)}\t${text.substring(afterCurse)}`;
-            this.selectionStart = this.selectionEnd = beforeCurse+1;
+            this.selectionStart = this.selectionEnd = beforeCurse + 1;
             return false;
         }
         // No need to test for SHIFT+TAB as it is not being redefined.
@@ -1298,7 +1289,7 @@ function updateGradeOverride() {
         processData: false,
         cache: false,
         contentType: false,
-        success: function(data) {
+        success: function (data) {
             let json = {};
             try {
                 json = JSON.parse(data);
@@ -1317,7 +1308,7 @@ function updateGradeOverride() {
             $('#comment').val(this.defaultValue);
             displaySuccessMessage(`Updated overridden Grades for ${json['data']['gradeable_id']}`);
         },
-        error: function() {
+        error: function () {
             window.alert('Something went wrong. Please try again.');
         },
     });
@@ -1328,7 +1319,7 @@ function loadOverriddenGrades(g_id) {
     const url = buildCourseUrl(['grade_override', g_id]);
     $.ajax({
         url: url,
-        success: function(data) {
+        success: function (data) {
             let json = {};
             try {
                 json = JSON.parse(data);
@@ -1343,7 +1334,7 @@ function loadOverriddenGrades(g_id) {
             }
             refreshOnResponseOverriddenGrades(json);
         },
-        error: function() {
+        error: function () {
             window.alert('Something went wrong. Please try again.');
         },
     });
@@ -1380,7 +1371,7 @@ function deleteOverriddenGrades(user_id, g_id) {
                 csrf_token: csrfToken,
                 user_id: user_id,
             },
-            success: function(data) {
+            success: function (data) {
                 const json = JSON.parse(data);
                 if (json['status'] === 'fail') {
                     displayErrorMessage(json['message']);
@@ -1389,7 +1380,7 @@ function deleteOverriddenGrades(user_id, g_id) {
                 displaySuccessMessage('Overridden Grades deleted.');
                 refreshOnResponseOverriddenGrades(json);
             },
-            error: function() {
+            error: function () {
                 window.alert('Something went wrong. Please try again.');
             },
         });
@@ -1415,13 +1406,13 @@ function escapeSpecialChars(text) {
 }
 
 function setChildNewDateTime(path, changeDate, handleData) {
-    //change the date and time of the subfiles in the folder with the time chosen for the whole
-    //folder (passed in)
+    // change the date and time of the subfiles in the folder with the time chosen for the whole
+    // folder (passed in)
     let success;
     success = false;
-    success  = changeFolderNewDateTime(path, changeDate, (output) => {
+    success = changeFolderNewDateTime(path, changeDate, (output) => {
         if (output) {
-            success =true;
+            success = true;
             if (handleData) {
                 handleData(success);
             }
@@ -1438,7 +1429,7 @@ function setAllRelease(newdatatime) {
     $.ajax({
         type: 'POST',
         url: url,
-        data: {'csrf_token': csrfToken, 'newdatatime': newdatatime},
+        data: { csrf_token: csrfToken, newdatatime: newdatatime },
         success: function (res) {
             const jsondata = JSON.parse(res);
             if (jsondata.status !== 'success') {
@@ -1455,8 +1446,8 @@ function changeFolderNewDateTime(id, newdatatime, handleData) {
     $.ajax({
         type: 'POST',
         url: url,
-        data: {'id':id, 'csrf_token': csrfToken},
-        success: function(data) {
+        data: { id: id, csrf_token: csrfToken },
+        success: function (data) {
             const jsondata = JSON.parse(data);
             if (jsondata.status === 'fail') {
                 alert('ERROR: Invalid date.');
@@ -1468,7 +1459,7 @@ function changeFolderNewDateTime(id, newdatatime, handleData) {
             }
             return true;
         },
-        error: function() {
+        error: function () {
             alert('Encounter saving the NewDateTime.');
             return false;
         },
@@ -1478,12 +1469,12 @@ function changeFolderNewDateTime(id, newdatatime, handleData) {
 // edited slightly from https://stackoverflow.com/a/40658647
 // returns a boolean value indicating whether or not the element is entirely in the viewport
 // i.e. returns false iff there is some part of the element outside the viewport
-$.fn.isInViewport = function() {                                        // jQuery method: use as $(selector).isInViewPort()
-    const elementTop = $(this).offset().top;                              // get top offset of element
-    const elementBottom = elementTop + $(this).outerHeight();             // add height to top to get bottom
+$.fn.isInViewport = function () { // jQuery method: use as $(selector).isInViewPort()
+    const elementTop = $(this).offset().top; // get top offset of element
+    const elementBottom = elementTop + $(this).outerHeight(); // add height to top to get bottom
 
-    const viewportTop = $(window).scrollTop();                            // get top of window
-    const viewportBottom = viewportTop + $(window).height();              // add height to get bottom
+    const viewportTop = $(window).scrollTop(); // get top of window
+    const viewportBottom = viewportTop + $(window).height(); // add height to get bottom
 
     return elementTop > viewportTop && elementBottom < viewportBottom;
 };
@@ -1521,7 +1512,7 @@ function updateTheme() {
         localStorage.setItem('theme', 'dark');
         localStorage.setItem('black_mode', 'black');
     }
-    else { //choice === "system"
+    else { // choice === "system"
         localStorage.removeItem('black_mode');
         localStorage.removeItem('theme');
     }
@@ -1551,14 +1542,13 @@ $(document).ready(() => {
     }
 });
 
-
 function updateSidebarPreference() {
     const collapse_preference = $('#desktop_sidebar_preference option:selected').val();
     // Update local storage with the selected preference
     localStorage.setItem('desktop-sidebar-preference', collapse_preference);
 }
 
-//Called from the DOM collapse button, toggle collapsed and save to localStorage
+// Called from the DOM collapse button, toggle collapsed and save to localStorage
 function toggleSidebar() {
     const sidebar = $('aside');
     const shown = sidebar.hasClass('collapsed');
@@ -1567,7 +1557,7 @@ function toggleSidebar() {
 }
 
 $(document).ready(() => {
-    //Collapsed sidebar tooltips with content depending on state of sidebar
+    // Collapsed sidebar tooltips with content depending on state of sidebar
     $('[data-toggle="tooltip"]').tooltip({
         position: { my: 'right+0 bottom+0' },
         content: function () {
@@ -1601,11 +1591,11 @@ function checkBulkProgress(gradeable_id) {
         url: url,
         data: null,
         type: 'GET',
-        success: function(data) {
+        success: function (data) {
             data = JSON.parse(data)['data'];
             updateBulkProgress(data['job_data'], data['count']);
         },
-        error: function() {
+        error: function () {
             console.log('Failed to check job queue');
         },
     });
@@ -1622,7 +1612,7 @@ function auto_grow(element) {
  */
 function resizeNoScrollTextareas() {
     // Make sure textareas resize correctly
-    $('textarea.noscroll').each(function() {
+    $('textarea.noscroll').each(function () {
         auto_grow(this);
     });
 }
@@ -1650,7 +1640,7 @@ function keyToClickKeyup(event) {
 function enableKeyToClick() {
     const key_to_click = document.getElementsByClassName('key_to_click');
     for (let i = 0; i < key_to_click.length; i++) {
-    //In case this function is run multiple times, we need to remove the old event listeners
+    // In case this function is run multiple times, we need to remove the old event listeners
         key_to_click[i].removeEventListener('keyup', keyToClickKeyup);
         key_to_click[i].removeEventListener('keydown', keyToClickKeydown);
 
@@ -1674,7 +1664,7 @@ function peerFeedbackUpload(grader_id, user_id, g_id, feedback) {
         processData: false,
         cache: false,
         contentType: false,
-        success: function(data) {
+        success: function (data) {
             if (data.status === 'success') {
                 $('#save_status').html('All Changes Saved');
             }
@@ -1682,7 +1672,7 @@ function peerFeedbackUpload(grader_id, user_id, g_id, feedback) {
                 $('#save_status').html('Error Saving Changes');
             }
         },
-        error: function() {
+        error: function () {
             window.alert('Something went wrong. Please try again.');
             $('#save_status').html('<span style="color: red">Some Changes Failed!</span>');
         },
@@ -1710,7 +1700,7 @@ function popOutSubmittedFile(html_file, url_file) {
     else if (url_file.includes('attachments')) {
         directory = 'attachments';
     }
-    file_path= `${display_file_url}?dir=${encodeURIComponent(directory)}&file=${encodeURIComponent(html_file)}&path=${encodeURIComponent(url_file)}&ta_grading=true`;
+    file_path = `${display_file_url}?dir=${encodeURIComponent(directory)}&file=${encodeURIComponent(html_file)}&path=${encodeURIComponent(url_file)}&ta_grading=true`;
     if ($('#submission_browser').length > 0) {
         file_path += `&gradeable_id=${$('#submission_browser').data('gradeable-id')}`;
     }
@@ -1758,7 +1748,7 @@ function flagUserImage(user_id, flag) {
             image_container.removeChild(image_container.firstElementChild);
             image_container.prepend(working_message);
 
-            const response = await fetch(url, {method: 'POST', body: form_data});
+            const response = await fetch(url, { method: 'POST', body: form_data });
             const result = await response.json();
 
             if (result.status === 'success') {
@@ -1831,23 +1821,23 @@ function previewMarkdown(mode) {
         content: markdown_textarea.val(),
     };
 
-    //basic sanity checking
-    if (!(typeof mode === 'string'))   {
+    // basic sanity checking
+    if (!(typeof mode === 'string')) {
         throw new TypeError(`Expected type 'string' for 'mode'. Got '${typeof mode}'`);
     }
-    if (!(typeof data === 'object'))   {
+    if (!(typeof data === 'object')) {
         throw new TypeError (`Expected type 'object' for 'data'. Got '${typeof data}'`);
     }
-    if (!markdown_area.length)         {
+    if (!markdown_area.length) {
         throw new Error('Could not obtain markdown_area.');
     }
-    if (!markdown_header.length)       {
+    if (!markdown_header.length) {
         throw new Error('Could not obtain markdown_header.');
     }
-    if (!markdown_textarea.length)     {
+    if (!markdown_textarea.length) {
         throw new Error('Could not obtain markdown_textarea');
     }
-    if (!markdown_preview.length)      {
+    if (!markdown_preview.length) {
         throw new Error('Could not obtain markdown_preview');
     }
     if (!accessibility_message.length) {
@@ -1872,12 +1862,12 @@ function previewMarkdown(mode) {
                 ...data,
                 csrf_token: csrfToken,
             },
-            success: function(markdown_data) {
+            success: function (markdown_data) {
                 markdown_preview_load_spinner.hide();
                 markdown_preview.html(markdown_data);
                 markdown_header.attr('data-mode', 'preview');
             },
-            error: function() {
+            error: function () {
                 displayErrorMessage('Something went wrong while trying to preview markdown. Please try again.');
             },
         });
@@ -1910,11 +1900,11 @@ function renderMarkdown(markdownContainer, url, content) {
             content: content,
             csrf_token: csrfToken,
         },
-        success: function(data) {
+        success: function (data) {
             markdownContainer.empty();
             markdownContainer.append(data);
         },
-        error: function() {
+        error: function () {
             displayErrorMessage('Something went wrong while trying to preview markdown. Please try again.');
         },
     });
@@ -1933,6 +1923,7 @@ function renderMarkdown(markdownContainer, url, content) {
 function addMarkdownCode(type) {
     const markdown_area = $(this).closest('.markdown-area');
     const markdown_header = markdown_area.find('.markdown-area-header');
+
     // Don't allow markdown insertion if we are in preview mode
     if (markdown_header.attr('data-mode') === 'preview') {
         return;
@@ -1992,7 +1983,7 @@ function tzWarn() {
     if (!user_offstr) {
         return;
     }
-    const [ h, m ] = user_offstr.match(/\d+/g)?.map(n => +n) || [ NaN, NaN ];
+    const [h, m] = user_offstr.match(/\d+/g)?.map((n) => +n) || [NaN, NaN];
     if (isNaN(h) || isNaN(m)) {
         return;
     }
@@ -2004,7 +1995,7 @@ function tzWarn() {
         return;
     }
 
-    const THRESHOLD = 60*60*1000; // will wait one hour after each warning
+    const THRESHOLD = 60 * 60 * 1000; // will wait one hour after each warning
     // retrieve timestamp cookie
     const last = Number(Cookies.get('last_tz_warn_time'));
     const elapsed = isNaN(last) ? Infinity : Date.now() - last;
