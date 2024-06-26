@@ -195,6 +195,10 @@
     tab-size: 4;
 }
 
+.markdown-area textarea[id^="reply_box"] {
+    resize: vertical;
+}
+
 .markdown-preview {
     border: none;
     background-color: var(--default-white);
