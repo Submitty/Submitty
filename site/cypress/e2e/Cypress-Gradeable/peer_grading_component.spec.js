@@ -9,7 +9,7 @@ describe('Peer Grading Component testing', () => {
         });
         cy.logout();
     });
-    it('Add Peer grading component', () => {
+    it('Test peer grading components', () => {
         cy.login();
         ['grading_homework', 'grading_homework_pdf'].forEach((option) => {
             cy.visit(['sample', 'gradeable', option, 'update?nav_tab=2']);
