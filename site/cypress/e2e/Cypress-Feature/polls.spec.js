@@ -573,7 +573,7 @@ describe('Test cases revolving around polls functionality', () => {
     });
 
     it('Should verify that polls allowing custom student options are functional', () => {
-        const tzoffset = (new Date()).getTimezoneOffset() * 60000; //offset in milliseconds
+        const tzoffset = (new Date()).getTimezoneOffset() * 60000; // Offset in milliseconds
         const today = new Date(new Date() - tzoffset);
         cy.logout();
         cy.visit(['sample', 'polls']);
@@ -583,8 +583,8 @@ describe('Test cases revolving around polls functionality', () => {
         cy.contains('New Poll').click();
         cy.get('#poll-name').type('Custom Poll Today');
         cy.get('#poll-question').type('# Question goes here...?');
-        cy.get('#poll-date').clear({force: true});
-        cy.get('#poll-date').type(today.toISOString().substring(0, 10), {force: true});
+        cy.get('#poll-date').clear({ force: true });
+        cy.get('#poll-date').type(today.toISOString().substring(0, 10), { force: true });
         cy.get('h1').click(); // get rid of the date picker
         cy.contains('Add Response').click();
         cy.get('#response_0_wrapper').children(':nth-child(3)').check();

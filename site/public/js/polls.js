@@ -109,7 +109,7 @@ function updateDropdownStates(curr_state, cookie_key) {
 function togglePollFormOptions() {
     const correct_options = $('.correct-box');
 
-    correct_options.each(function() {
+    correct_options.each(() => {
         $(this).prop('checked', $('#toggle-all').prop('checked'));
     });
 }
@@ -148,11 +148,11 @@ function addCustomResponse(pollid, base_url) {
         processData: false,
         cache: false,
         contentType: false,
-        error: function(err) {
+        error: (err) => {
             console.error(err);
             window.alert('Something went wrong. Please try again.');
         },
-        success: function(data) {
+        success: (data) => {
             try {
                 const msg = JSON.parse(data);
                 if (msg.status !== 'success') {
@@ -183,11 +183,11 @@ function removeCustomResponse(pollid, optionid, base_url) {
         processData: false,
         cache: false,
         contentType: false,
-        error: function(err) {
+        error: (err) => {
             console.error(err);
             window.alert('Something went wrong. Please try again.');
         },
-        success: function(data) {
+        success: (data) => {
             try {
                 const msg = JSON.parse(data);
                 if (msg.status !== 'success') {
