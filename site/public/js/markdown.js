@@ -1,5 +1,7 @@
+/* global enableTabsInTextArea */
+
 $(document).ready(() => {
-    $('textarea[id^="reply_box"]').each(function() {
+    $('textarea[id^="reply_box"]').each(function () {
         const markdownAreaId = $(this).attr('id');
         if (markdownAreaId !== 'reply_box_1') {
             enableTabsInTextArea(`#${markdownAreaId}`);
@@ -8,14 +10,14 @@ $(document).ready(() => {
         }
     });
 
-    $('.markdown-mode-tab').on('click', function() {
+    $('.markdown-mode-tab').on('click', function () {
         $(this).addClass('active');
         const markdown_area = $(this).closest('.markdown-area');
         markdown_area.find('.markdown-mode-tab').not(this).removeClass('active');
     });
 
     $(document).ajaxComplete(() => {
-        $('textarea[id^="reply_box"]').each(function() {
+        $('textarea[id^="reply_box"]').each(function () {
             const markdownAreaId = $(this).attr('id');
             if (markdownAreaId !== 'reply_box_1') {
                 enableTabsInTextArea(`#${markdownAreaId}`);
@@ -48,7 +50,7 @@ $(document).ready(() => {
         textarea.style.overflowY = 'hidden';
     };
 
-    targetTextarea.on('input', function() {
+    targetTextarea.on('input', function () {
         resizeTextarea(this);
     });
 
