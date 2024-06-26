@@ -8,7 +8,7 @@ describe('Test Rainbow Grading', () => {
         cy.get('[data-testid="display-rainbow-grades-summary"]').check();
         cy.get('[data-testid="display-rainbow-grades-summary"]').should('be.checked');
         cy.visit(['sample', 'reports', 'rainbow_grades_customization']);
-        // cy.get('[data-testid="display-grade-summary"]').check();
+        cy.get('[data-testid="display-grade-summary"]').check();
         cy.get('[data-testid="display-grade-summary"]').should('be.checked');
         cy.get('[data-testid="display-grade-details"]').check();
         cy.get('[data-testid="display-benchmarks-average"]').check();
