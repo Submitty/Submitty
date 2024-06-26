@@ -160,19 +160,19 @@ function ajaxSaveComponent(gradeable_id, component_id, title, ta_comment, studen
             async: AJAX_USE_ASYNC,
             url: buildCourseUrl(['gradeable', gradeable_id, 'components', 'save']),
             data: {
-                'csrf_token': csrfToken,
-                'component_id': component_id,
-                'title': title,
-                'ta_comment': ta_comment,
-                'student_comment': student_comment,
-                'page_number': page,
-                'lower_clamp': lower_clamp,
-                'default': default_value,
-                'max_value': max_value,
-                'upper_clamp': upper_clamp,
-                'is_itempool_linked': is_itempool_linked,
-                'itempool_option': itempool_option === 'null' ? undefined : itempool_option,
-                'peer': false,
+                csrf_token: csrfToken,
+                component_id: component_id,
+                title: title,
+                ta_comment: ta_comment,
+                student_comment: student_comment,
+                page_number: page,
+                lower_clamp: lower_clamp,
+                default: default_value,
+                max_value: max_value,
+                upper_clamp: upper_clamp,
+                is_itempool_linked: is_itempool_linked,
+                itempool_option: itempool_option === 'null' ? undefined : itempool_option,
+                peer: false,
             },
             success: function (response) {
                 if (response.status !== 'success') {
@@ -303,14 +303,14 @@ function ajaxSaveGradedComponent(gradeable_id, component_id, anon_id, graded_ver
             async: AJAX_USE_ASYNC,
             url: buildCourseUrl(['gradeable', gradeable_id, 'grading', 'graded_gradeable', 'graded_component']),
             data: {
-                'csrf_token': csrfToken,
-                'component_id': component_id,
-                'anon_id': anon_id,
-                'graded_version': graded_version,
-                'custom_points': custom_points,
-                'custom_message': custom_message,
-                'silent_edit': silent_edit,
-                'mark_ids': mark_ids,
+                csrf_token: csrfToken,
+                component_id: component_id,
+                anon_id: anon_id,
+                graded_version: graded_version,
+                custom_points: custom_points,
+                custom_message: custom_message,
+                silent_edit: silent_edit,
+                mark_ids: mark_ids,
             },
             success: function (response) {
                 if (response.status !== 'success') {
@@ -373,10 +373,10 @@ function ajaxSaveOverallComment(gradeable_id, anon_id, overall_comment) {
             async: AJAX_USE_ASYNC,
             url: buildCourseUrl(['gradeable', gradeable_id, 'grading', 'comments']),
             data: {
-                'csrf_token': csrfToken,
-                'gradeable_id': gradeable_id,
-                'anon_id': anon_id,
-                'overall_comment': overall_comment,
+                csrf_token: csrfToken,
+                gradeable_id: gradeable_id,
+                anon_id: anon_id,
+                overall_comment: overall_comment,
             },
             success: function (response) {
                 if (response.status !== 'success') {
@@ -411,11 +411,11 @@ function ajaxAddNewMark(gradeable_id, component_id, title, points, publish) {
             async: AJAX_USE_ASYNC,
             url: buildCourseUrl(['gradeable', gradeable_id, 'components', 'marks', 'add']),
             data: {
-                'csrf_token': csrfToken,
-                'component_id': component_id,
-                'title': title,
-                'points': points,
-                'publish': publish,
+                csrf_token: csrfToken,
+                component_id: component_id,
+                title: title,
+                points: points,
+                publish: publish,
             },
             success: function (response) {
                 if (response.status !== 'success') {
@@ -448,9 +448,9 @@ function ajaxDeleteMark(gradeable_id, component_id, mark_id) {
             async: AJAX_USE_ASYNC,
             url: buildCourseUrl(['gradeable', gradeable_id, 'components', 'marks', 'delete']),
             data: {
-                'csrf_token': csrfToken,
-                'component_id': component_id,
-                'mark_id': mark_id,
+                csrf_token: csrfToken,
+                component_id: component_id,
+                mark_id: mark_id,
             },
             success: function (response) {
                 if (response.status !== 'success') {
@@ -486,12 +486,12 @@ function ajaxSaveMark(gradeable_id, component_id, mark_id, title, points, publis
             async: AJAX_USE_ASYNC,
             url: buildCourseUrl(['gradeable', gradeable_id, 'components', 'marks', 'save']),
             data: {
-                'csrf_token': csrfToken,
-                'component_id': component_id,
-                'mark_id': mark_id,
-                'points': points,
-                'title': title,
-                'publish': publish,
+                csrf_token: csrfToken,
+                component_id: component_id,
+                mark_id: mark_id,
+                points: points,
+                title: title,
+                publish: publish,
             },
             success: function (response) {
                 if (response.status !== 'success') {
@@ -524,9 +524,9 @@ function ajaxGetMarkStats(gradeable_id, component_id, mark_id) {
             async: AJAX_USE_ASYNC,
             url: buildCourseUrl(['gradeable', gradeable_id, 'components', 'marks', 'stats']),
             data: {
-                'component_id': component_id,
-                'mark_id': mark_id,
-                'csrf_token': csrfToken,
+                component_id: component_id,
+                mark_id: mark_id,
+                csrf_token: csrfToken,
             },
             success: function (response) {
                 if (response.status !== 'success') {
@@ -559,9 +559,9 @@ function ajaxSaveMarkOrder(gradeable_id, component_id, order) {
             async: AJAX_USE_ASYNC,
             url: buildCourseUrl(['gradeable', gradeable_id, 'components', 'marks', 'save_order']),
             data: {
-                'csrf_token': csrfToken,
-                'component_id': component_id,
-                'order': JSON.stringify(order),
+                csrf_token: csrfToken,
+                component_id: component_id,
+                order: JSON.stringify(order),
             },
             success: function (response) {
                 if (response.status !== 'success') {
@@ -593,8 +593,8 @@ function ajaxSaveComponentPages(gradeable_id, pages) {
             async: AJAX_USE_ASYNC,
             url: buildCourseUrl(['gradeable', gradeable_id, 'components', 'save_pages']),
             data: {
-                'csrf_token': csrfToken,
-                'pages': JSON.stringify(pages),
+                csrf_token: csrfToken,
+                pages: JSON.stringify(pages),
             },
             success: function (response) {
                 if (response.status !== 'success') {
@@ -626,8 +626,8 @@ function ajaxSaveComponentOrder(gradeable_id, order) {
             async: AJAX_USE_ASYNC,
             url: buildCourseUrl(['gradeable', gradeable_id, 'components', 'order']),
             data: {
-                'csrf_token': csrfToken,
-                'order': JSON.stringify(order),
+                csrf_token: csrfToken,
+                order: JSON.stringify(order),
             },
             success: function (response) {
                 if (response.status !== 'success') {
@@ -658,8 +658,8 @@ function ajaxAddComponent(gradeable_id, peer) {
             async: AJAX_USE_ASYNC,
             url: buildCourseUrl(['gradeable', gradeable_id, 'components', 'new']),
             data: {
-                'csrf_token': csrfToken,
-                'peer': peer,
+                csrf_token: csrfToken,
+                peer: peer,
             },
             success: function (response) {
                 if (response.status !== 'success') {
@@ -691,8 +691,8 @@ function ajaxDeleteComponent(gradeable_id, component_id) {
             async: AJAX_USE_ASYNC,
             url: buildCourseUrl(['gradeable', gradeable_id, 'components', 'delete']),
             data: {
-                'csrf_token': csrfToken,
-                'component_id': component_id,
+                csrf_token: csrfToken,
+                component_id: component_id,
             },
             success: function (response) {
                 if (response.status !== 'success') {
@@ -725,9 +725,9 @@ function ajaxVerifyComponent(gradeable_id, component_id, anon_id) {
             async: true,
             url: buildCourseUrl(['gradeable', gradeable_id, 'components', 'verify']),
             data: {
-                'csrf_token': csrfToken,
-                'component_id': component_id,
-                'anon_id': anon_id,
+                csrf_token: csrfToken,
+                component_id: component_id,
+                anon_id: anon_id,
             },
             success: function (response) {
                 if (response.status !== 'success') {
@@ -759,8 +759,8 @@ function ajaxVerifyAllComponents(gradeable_id, anon_id) {
             async: true,
             url: `${buildCourseUrl(['gradeable', gradeable_id, 'components', 'verify'])}?verify_all=true`,
             data: {
-                'csrf_token': csrfToken,
-                'anon_id': anon_id,
+                csrf_token: csrfToken,
+                anon_id: anon_id,
             },
             success: function (response) {
                 if (response.status !== 'success') {
@@ -1386,7 +1386,6 @@ function getPeerGradingEarned() {
     return total;
 }
 
-
 /**
  * Gets the number of ta grading points that can be earned
  * @return {number}
@@ -1730,7 +1729,6 @@ function disableEditModeBox(disabled) {
     $('#edit-mode-enabled').prop('disabled', disabled);
 }
 
-
 /**
  * DOM Callback methods
  *
@@ -1852,8 +1850,8 @@ function importComponentsFromFile() {
         },
         error: function (e) {
             console.log(e);
-            alert('Error parsing response from server. Please copy the contents of your Javascript Console and ' +
-                'send it to an administrator, as well as what you were doing and what files you were uploading. - [handleUploadGradeableComponents]');
+            alert('Error parsing response from server. Please copy the contents of your Javascript Console and '
+            + 'send it to an administrator, as well as what you were doing and what files you were uploading. - [handleUploadGradeableComponents]');
         },
     });
 }
@@ -2146,7 +2144,6 @@ function onComponentPointsChange(me) {
             });
     }
     else {
-
         // Make box red to indicate error
         $(me).css('background-color', '#ff7777');
     }
@@ -2200,7 +2197,6 @@ function onMarkPublishChange(me) {
  * Put all of the primary logic of the TA grading rubric here
  *
  */
-
 
 /**
  * Verifies a component with the grader and reloads the component
@@ -2263,7 +2259,7 @@ function setPdfPageAssignment(page) {
 
     return closeAllComponents(true, true)
         .then(() => {
-            return ajaxSaveComponentPages(getGradeableId(), { 'page': page });
+            return ajaxSaveComponentPages(getGradeableId(), { page: page });
         })
         .then(() => {
             // Reload the gradeable to refresh all the component's display
@@ -2323,7 +2319,6 @@ function reloadGradingRubric(gradeable_id, anon_id) {
             alert(`Could not render gradeable: ${err.message}`);
             console.error(err);
         });
-
 }
 /**
 * Call this to save components and graded components to global list
@@ -2375,7 +2370,6 @@ function updateTotals(gradeable_id, anon_id) {
             setRubricDOMElements(elements);
         });
 }
-
 
 /**
  * Call this once on page load to load the peer panel.
@@ -2545,7 +2539,7 @@ function open_overall_comment_tab(user) {
     comment_root.show();
     $(`#overall-comment-tab-${user}`).addClass('active-btn');
 
-    //if the tab is for the main user of the page
+    // if the tab is for the main user of the page
     if (!textarea.hasClass('markdown-preview')) {
         if ($(`#overall-comment-markdown-preview-${user}`).is(':hidden')) {
             textarea.show();
@@ -2584,7 +2578,6 @@ function open_overall_comment_tab(user) {
 
         attachmentsList.attr('data-active-user', user);
     }
-
 }
 
 /**
@@ -2799,7 +2792,6 @@ function closeComponentInstructorEdit(component_id, saveChanges) {
                     const mark_title = 'No Penalty Points';
                     component.marks[0].title = mark_title;
                     $(`#mark-${component.marks[0].id.toString()}`).find(':input')[1].value = 'No Penalty Points';
-
                 }
                 // eslint-disable-next-line eqeqeq
                 else if (component.max_value == 0 && component.upper_clamp > 0 && component.lower_clamp == 0) {
@@ -2811,7 +2803,6 @@ function closeComponentInstructorEdit(component_id, saveChanges) {
                     const mark_title = 'No Credit';
                     component.marks[0].title = mark_title;
                     $(`#mark-${component.marks[0].id.toString()}`).find(':input')[1].value = 'No Credit';
-
                 }
                 return saveMarkList(component_id);
             })
@@ -2892,7 +2883,6 @@ function closeComponent(component_id, saveChanges = true, edit_mode = false) {
                     else {
                         return updateTotals(gradeable_id, anon_id);
                     }
-
                 }
             });
     }
@@ -3175,9 +3165,8 @@ function saveComponent(component_id) {
         // The grader unchecked the custom mark, but didn't delete the text.  This shouldn't happen too often,
         //  so prompt the grader if this is what they really want since it will delete the text / score.
         const gradedComponent = getGradedComponentFromDOM(component_id);
-        //only show error if custom marks are allowed
+        // only show error if custom marks are allowed
         if (gradedComponent.custom_mark_enabled && gradedComponent.comment !== '' && !gradedComponent.custom_mark_selected && getAllowCustomMarks()) {
-
             if (!confirm('Are you sure you want to delete the custom mark?')) {
                 return Promise.reject();
             }
@@ -3259,7 +3248,6 @@ function refreshGradedComponentHeader(component_id, showMarkList) {
         getComponentFromDOM(component_id),
         getGradedComponentFromDOM(component_id), showMarkList);
 }
-
 
 /**
  * Re-renders the graded component with the data in the DOM
@@ -3410,7 +3398,7 @@ function injectTotalScoreBox(scores) {
     return renderTotalScoreBox(scores)
         .then((elements) => {
             setTotalScoreBoxContents(elements);
-        }).catch(error => {
+        }).catch((error) => {
             console.error('Failed to render:', error);
         });
 }

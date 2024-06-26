@@ -125,7 +125,6 @@ const checkStaffUpduck = (title, visible) => {
 };
 
 describe('Should test creating, replying, merging, removing, and upducks in forum', () => {
-
     beforeEach(() => {
         cy.login('instructor');
         cy.visit(['sample', 'forum']);

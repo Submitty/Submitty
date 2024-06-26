@@ -24,7 +24,7 @@ const disableQueue = () => {
     cy.get('[data-testid="queue-enabled"]').uncheck();
 };
 
-const openNewQueue = (queueName, queueCode='') => {
+const openNewQueue = (queueName, queueCode = '') => {
     cy.get('#nav-sidebar-queue').click();
     cy.get('[data-testid="toggle-new-queue"]').click();
     cy.get('[data-testid="popup-window"]').should('exist');
@@ -38,7 +38,7 @@ const openNewQueue = (queueName, queueCode='') => {
     cy.get('[data-testid="open-new-queue-btn"]').click();
 };
 
-const changeQueueCode = (queueName, queueCode='') => {
+const changeQueueCode = (queueName, queueCode = '') => {
     cy.get('[data-testid="toggle-filter-settings"]').click();
     cy.get('[data-testid="popup-window"]').should('exist');
     cy.get('[data-testid="old-queue-code"]').select(queueName);
@@ -63,8 +63,7 @@ const studentJoinQueue = (queueName, queueCode) => {
     cy.get('#token-box').type(queueCode);
     cy.get('[data-testid="join-queue-btn"]').click();
 };
-
-const editAnnouncement = (text='') => {
+const editAnnouncement = (text = '') => {
     // openAnnouncementSettings
     cy.get('[data-testid="toggle-announcement-settings"]').click();
     cy.get('#announcement-settings').should('exist');
@@ -132,7 +131,7 @@ describe('test office hours queue', () => {
         cy.get('[data-testid="popup-message"]').should('contain', 'Started helping student');
         cy.get('.finish_helping_btn').first().click(); // finished helping first student
         cy.get('[data-testid="popup-message"]').should('contain', 'Finished helping student');
-        cy.get('[data-testid="remove-from-queue-btn"]').first().click();  // remove First Student
+        cy.get('[data-testid="remove-from-queue-btn"]').first().click(); // remove First Student
         cy.get('[data-testid="popup-message"]').should('contain', 'Removed from queue');
         cy.get('[data-testid="queue-restore-btn"]').first().click(); // restore first Student
         cy.get('[data-testid="popup-message"]').should('contain', 'Student restored');

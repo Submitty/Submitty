@@ -4,7 +4,7 @@
 function updateVisibility() {
     const showGraders = $('#show-graders').is(':checked');
     const showDates = $('#show-dates').is(':checked');
-    $('.cell-grade').each(function() {
+    $('.cell-grade').each(() => {
         const graderElement = $(this).find('.simple-grade-grader');
         const dateElement = $(this).find('.simple-grade-date');
         if (showGraders && graderElement.text().trim() !== '') {
@@ -32,20 +32,20 @@ function updateVisibility() {
 
 function calcSimpleGraderStats(action) {
     // start variable declarations
-    let average = 0;                // overall average
-    let stddev = 0;                 // overall stddev
-    const component_averages = [];    // average of each component
-    const component_stddevs = [];     // stddev of each component
-    const section_counts = {};        // counts of the number of users in each section    (used to calc average per section)
-    const section_sums = {};          // sum of scores per section                        (used with ^ to calc average per section)
-    const section_sums_sqrs = {};     // sum of squares of scores per section             (used with ^ and ^^ to calc stddev per section)
-    let num_graded = 0;             // count how many students have a nonzero grade
-    let c = 0;                      // count the current component number
-    let num_users = 0;              // count the number of users
-    const has_graded = [];            // keeps track of whether or not each user already has a nonzero grade
-    let elems;                      // the elements of the current component
-    let elem_type;                  // the type of element that has the scores
-    let data_attr;                  // the data attribute in which the score is stored
+    let average = 0; // overall average
+    let stddev = 0; // overall stddev
+    const component_averages = []; // average of each component
+    const component_stddevs = []; // stddev of each component
+    const section_counts = {}; // counts of the number of users in each section    (used to calc average per section)
+    const section_sums = {}; // sum of scores per section                        (used with ^ to calc average per section)
+    const section_sums_sqrs = {}; // sum of squares of scores per section             (used with ^ and ^^ to calc stddev per section)
+    let num_graded = 0; // count how many students have a nonzero grade
+    let c = 0; // count the current component number
+    let num_users = 0; // count the number of users
+    const has_graded = []; // keeps track of whether or not each user already has a nonzero grade
+    let elems; // the elements of the current component
+    let elem_type; // the type of element that has the scores
+    let data_attr; // the data attribute in which the score is stored
     // end variable declarations
 
     // start initial setup: use action to assign values to elem_type and data_attr
@@ -70,35 +70,35 @@ function calcSimpleGraderStats(action) {
     while (elems.length > 0) {
         // eslint-disable-next-line eqeqeq
         if (action === 'lab' || elems.data('num') == true) { // do all components for lab and ignore text components for numeric
-            let sum = 0;                            // sum of the scores
-            let sum_sqrs = 0;                       // sum of the squares of the scores
-            let user_num = 0;                       // the index for has_graded so that it can be tracked whether or not there is a grade
-            let section;                            // the section of the current user (registration or rotating)
-            let reg_section;                        // the registration section of the current user
-            elems.each(function() {
+            let sum = 0; // sum of the scores
+            let sum_sqrs = 0; // sum of the squares of the scores
+            let user_num = 0; // the index for has_graded so that it can be tracked whether or not there is a grade
+            let section; // the section of the current user (registration or rotating)
+            let reg_section; // the registration section of the current user
+            elems.each(function () {
                 if (action === 'lab') {
-                    reg_section = $(this).parent().find('td:nth-child(2)').text();              // second child of parent has registration section as text
-                    section = $(this).parent().parent().attr('id').split('-')[1];               // grandparent id has section
+                    reg_section = $(this).parent().find('td:nth-child(2)').text(); // second child of parent has registration section as text
+                    section = $(this).parent().parent().attr('id').split('-')[1]; // grandparent id has section
                 }
                 else if (action === 'numeric') {
-                    reg_section = $(this).parent().parent().find('td:nth-child(2)').text();     // second child of grandparent has registration section as text
-                    section = $(this).parent().parent().parent().attr('id').split('-')[1];      // great-grandparent id has section
+                    reg_section = $(this).parent().parent().find('td:nth-child(2)').text(); // second child of grandparent has registration section as text
+                    section = $(this).parent().parent().parent().attr('id').split('-')[1]; // great-grandparent id has section
                 }
 
-                if (reg_section !== '') {                 // if section is not null
+                if (reg_section !== '') { // if section is not null
                     if (!(section in section_counts)) {
                         section_counts[section] = 0;
                         section_sums[section] = 0;
                         section_sums_sqrs[section] = 0;
                     }
-                    if (c === 0) {                    // on the first iteration of the while loop...
-                        num_users++;                // ...sum up the number of users...
-                        section_counts[section]++;  // ...sum up the number of users per section...
-                        has_graded.push(false);     // ...and populate the has_graded array with false
+                    if (c === 0) { // on the first iteration of the while loop...
+                        num_users++; // ...sum up the number of users...
+                        section_counts[section]++; // ...sum up the number of users per section...
+                        has_graded.push(false); // ...and populate the has_graded array with false
 
                         // for the first component, calculate total stats by section.
-                        let score_elems;            // the score elements for this user
-                        let score = 0;              // the total score of this user
+                        let score_elems; // the score elements for this user
+                        let score = 0; // the total score of this user
                         if (action === 'lab') {
                             score_elems = $(this).parent().find('td.cell-grade');
                         }
@@ -106,31 +106,31 @@ function calcSimpleGraderStats(action) {
                             score_elems = $(this).parent().parent().find('input[data-num=true]');
                         }
 
-                        score_elems.each(function() {
+                        score_elems.each(function () {
                             score += parseFloat($(this).attr(data_attr));
                         });
 
                         // add to the sums and sums_sqrs
                         section_sums[section] += score;
-                        section_sums_sqrs[section] += score**2;
+                        section_sums_sqrs[section] += score ** 2;
                     }
                     const score = parseFloat($(this).attr(data_attr));
-                    if (!has_graded[user_num]) {     // if they had no nonzero score previously...
+                    if (!has_graded[user_num]) { // if they had no nonzero score previously...
                         has_graded[user_num] = score !== 0;
-                        if (has_graded[user_num]) {  // ...but they have one now
+                        if (has_graded[user_num]) { // ...but they have one now
                             num_graded++;
                         }
                     }
                     // add to the sum and sum_sqrs
                     sum += score;
-                    sum_sqrs += score**2;
+                    sum_sqrs += score ** 2;
                 }
                 user_num++;
             });
 
             // calculate average and stddev from sums and sum_sqrs
-            component_averages.push(sum/num_users);
-            component_stddevs.push(Math.sqrt(Math.max(0, (sum_sqrs - sum**2 / num_users) / num_users)));
+            component_averages.push(sum / num_users);
+            component_stddevs.push(Math.sqrt(Math.max(0, (sum_sqrs - sum ** 2 / num_users) / num_users)));
         }
 
         // get the elements for the next component
@@ -141,24 +141,23 @@ function calcSimpleGraderStats(action) {
     // start finalizing: find total stats place all stats into their proper elements
     const stats_popup = $('#simple-stats-popup'); // the popup with all the stats in it.
     for (c = 0; c < component_averages.length; c++) {
-        average += component_averages[c];                                                               // sum up component averages to get the total average
-        stddev += component_stddevs[c]**2;                                                              // sum up squares of component stddevs (sqrt after all summed) to get the total stddev
-        stats_popup.find(`#avg-component-${c.toString()}`).text(component_averages[c].toFixed(2));      // set the display text of the proper average element
-        stats_popup.find(`#stddev-component-${c.toString()}`).text(component_stddevs[c].toFixed(2));    // set the display text of the proper stddev element
+        average += component_averages[c]; // sum up component averages to get the total average
+        stddev += component_stddevs[c] ** 2; // sum up squares of component stddevs (sqrt after all summed) to get the total stddev
+        stats_popup.find(`#avg-component-${c.toString()}`).text(component_averages[c].toFixed(2)); // set the display text of the proper average element
+        stats_popup.find(`#stddev-component-${c.toString()}`).text(component_stddevs[c].toFixed(2)); // set the display text of the proper stddev element
     }
 
-    stddev = Math.sqrt(stddev);                                 // take sqrt of sum of squared stddevs to get total stddev
-    stats_popup.find('#avg-total').text(average.toFixed(2));    // set the display text of the proper average element
-    stats_popup.find('#stddev-total').text(stddev.toFixed(2));  // set the display text of the proper stddev element
-
+    stddev = Math.sqrt(stddev); // take sqrt of sum of squared stddevs to get total stddev
+    stats_popup.find('#avg-total').text(average.toFixed(2)); // set the display text of the proper average element
+    stats_popup.find('#stddev-total').text(stddev.toFixed(2)); // set the display text of the proper stddev element
 
     let section_average;
     let section_stddev;
     for (const section in section_counts) {
         section_average = section_sums[section] / section_counts[section];
-        section_stddev = Math.sqrt(Math.max(0, (section_sums_sqrs[section] - section_sums[section]**2 / section_counts[section]) / section_counts[section]));
-        stats_popup.find(`#avg-section-${section}`).text(section_average.toFixed(2));         // set the display text of the proper average element
-        stats_popup.find(`#stddev-section-${section}`).text(section_stddev.toFixed(2));       // set the display text of the proper stddev element
+        section_stddev = Math.sqrt(Math.max(0, (section_sums_sqrs[section] - section_sums[section] ** 2 / section_counts[section]) / section_counts[section]));
+        stats_popup.find(`#avg-section-${section}`).text(section_average.toFixed(2)); // set the display text of the proper average element
+        stats_popup.find(`#stddev-section-${section}`).text(section_stddev.toFixed(2)); // set the display text of the proper stddev element
     }
     const num_graded_elem = stats_popup.find('#num-graded');
     $(num_graded_elem).text(`${num_graded.toString()}/${num_users.toString()}`);
@@ -171,11 +170,11 @@ function showSimpleGraderStats(action) {
         $('.popup').css('display', 'none');
         $('#simple-stats-popup').css('display', 'block');
         captureTabInModal('simple-stats-popup');
-        $(document).on('click', (e) => {                                           // event handler: when clicking on the document...
-            if ($(e.target).attr('id') !== 'simple-stats-btn'                             // ...if neither the stats button..
-               && $(e.target).closest('div').attr('id') !== 'simple-stats-popup') {      // ...nor the stats popup are being clicked...
-                $('#simple-stats-popup').css('display', 'none');                        // ...hide the stats popup...
-                $(document).off('click');                                               // ...and remove this event handler
+        $(document).on('click', (e) => { // event handler: when clicking on the document...
+            if ($(e.target).attr('id') !== 'simple-stats-btn' // ...if neither the stats button..
+                && $(e.target).closest('div').attr('id') !== 'simple-stats-popup') { // ...nor the stats popup are being clicked...
+                $('#simple-stats-popup').css('display', 'none'); // ...hide the stats popup...
+                $(document).off('click'); // ...and remove this event handler
             }
         });
     }
@@ -248,7 +247,7 @@ function updateCheckpointCells(elems, scores, no_cookie) {
                 elem.css('background-color', '');
             }
 
-            //set new grader data
+            // set new grader data
             elem.data('grader', $('#data-table').data('current-grader'));
 
             // create border we can animate to reflect ajax status
@@ -269,10 +268,10 @@ function updateCheckpointCells(elems, scores, no_cookie) {
     submitAJAX(
         buildCourseUrl(['gradeable', g_id, 'grading']),
         {
-            'csrf_token': csrfToken,
-            'user_id': user_id,
-            'old_scores': old_scores,
-            'scores': new_scores,
+            csrf_token: csrfToken,
+            user_id: user_id,
+            old_scores: old_scores,
+            scores: new_scores,
         },
         (returned_data) => {
             if (returned_data.data && returned_data.data.date) {
@@ -281,7 +280,7 @@ function updateCheckpointCells(elems, scores, no_cookie) {
                     const formattedDate = `${currentDate.getFullYear()}-${padNumber(currentDate.getMonth() + 1)}-${padNumber(currentDate.getDate())} ${padNumber(currentDate.getHours())}:${padNumber(currentDate.getMinutes())}:${padNumber(currentDate.getSeconds())}`;
                     elems.each((idx, elem) => {
                         elem = $(elem);
-                        elem.animate({'border-right-width': '0px'}, 400);
+                        elem.animate({ 'border-right-width': '0px' }, 400);
                         elem.attr('data-score', elem.data('score'));
                         elem.attr('data-grader', elem.data('grader'));
                         elem.attr('data-date', formattedDate);
@@ -289,12 +288,12 @@ function updateCheckpointCells(elems, scores, no_cookie) {
                         elem.find('.simple-grade-date').text(formattedDate);
                     });
                     window.socketClient.send({
-                        'type': 'update_checkpoint',
-                        'elem': elems.attr('id').split('-')[3],
-                        'user': parent.data('anon'),
-                        'score': elems.data('score'),
-                        'grader': elems.data('grader'),
-                        'date': formattedDate,
+                        type: 'update_checkpoint',
+                        elem: elems.attr('id').split('-')[3],
+                        user: parent.data('anon'),
+                        score: elems.data('score'),
+                        grader: elems.data('grader'),
+                        date: formattedDate,
                     });
                 }
                 else {
@@ -338,7 +337,7 @@ function generateCheckpointCookie(user_id, g_id, old_scores, new_scores) {
     let history = getCheckpointHistory(g_id);
 
     // erase future snapshots on write
-    if (history[0] < history.length-1) {
+    if (history[0] < history.length - 1) {
         history = history.slice(0, history[0]);
     }
 
@@ -351,7 +350,7 @@ function generateCheckpointCookie(user_id, g_id, old_scores, new_scores) {
         history.splice(1, 2);
     }
     else {
-        history[0] = history.length-1; // increment to latest new_scores
+        history[0] = history.length - 1; // increment to latest new_scores
     }
 
     setCheckpointHistory(g_id, history);
@@ -359,7 +358,7 @@ function generateCheckpointCookie(user_id, g_id, old_scores, new_scores) {
 
 function setupCheckboxCells() {
     // jQuery for the elements with the class cell-grade (those in the component columns)
-    $('td.cell-grade').click(function() {
+    $('td.cell-grade').click(function () {
         updateCheckpointCells(this);
     });
 
@@ -378,7 +377,7 @@ function setupCheckboxCells() {
     }
 
     // show all the hidden grades when showGradersCheckbox is clicked
-    showGradersCheckbox.on('change', function() {
+    showGradersCheckbox.on('change', function () {
         if ($(this).is(':checked')) {
             $('.simple-grade-grader').css('display', 'block');
         }
@@ -389,7 +388,7 @@ function setupCheckboxCells() {
     });
 
     // show all the hidden dates when showDatesGradedCheckbox is clicked
-    showDatesGradedCheckbox.on('change', function() {
+    showDatesGradedCheckbox.on('change', function () {
         if ($(this).is(':checked')) {
             $('.simple-grade-date').css('display', 'block');
         }
@@ -401,7 +400,7 @@ function setupCheckboxCells() {
 }
 
 function setupNumericTextCells() {
-    $('.cell-grade').change(function() {
+    $('.cell-grade').change(function () {
         let elem = $(this);
         const split_id = elem.attr('id').split('-');
         const row_el = $(`tr#row-${split_id[1]}-${split_id[2]}`);
@@ -431,7 +430,7 @@ function setupNumericTextCells() {
             }
         }
 
-        //eslint-disable-next-line eqeqeq
+        // eslint-disable-next-line eqeqeq
         if (this.value == 0) {
             elem.css('color', '--standard-light-medium-gray');
         }
@@ -439,7 +438,7 @@ function setupNumericTextCells() {
             elem.css('color', '');
         }
 
-        row_el.find('.cell-grade').each(function() {
+        row_el.find('.cell-grade').each(function () {
             elem = $(this);
             if (elem.data('num')) {
                 total += parseFloat(elem.val());
@@ -459,20 +458,20 @@ function setupNumericTextCells() {
         submitAJAX(
             buildCourseUrl(['gradeable', row_el.data('gradeable'), 'grading']),
             {
-                'csrf_token': csrfToken,
-                'user_id': row_el.data('user'),
-                'old_scores': old_scores,
-                'scores': scores,
+                csrf_token: csrfToken,
+                user_id: row_el.data('user'),
+                old_scores: old_scores,
+                scores: scores,
             },
 
             () => {
                 // Finds the element that stores the total and updates it to reflect increase
-                //eslint-disable-next-line eqeqeq
+                // eslint-disable-next-line eqeqeq
                 if (row_el.find('.cell-total').text() != total) {
                     row_el.find('.cell-total').text(total).hide().fadeIn('slow');
                 }
 
-                window.socketClient.send({'type': 'update_numeric', 'elem': split_id[3], 'user': row_el.data('anon'), 'value': value, 'total': total});
+                window.socketClient.send({ type: 'update_numeric', elem: split_id[3], user: row_el.data('anon'), value: value, total: total });
             },
             () => {
                 elem.css('background-color', '--standard-light-pink');
@@ -481,22 +480,22 @@ function setupNumericTextCells() {
     });
 
     $('input[class=csvButtonUpload]').change(() => {
-        const confirmation = window.confirm('WARNING! \nPreviously entered data may be overwritten! ' +
-        'This action is irreversible! Are you sure you want to continue?\n\n Do not include a header row in your CSV. Format CSV using one column for ' +
-        'student id and one column for each field. Columns and field types must match.');
+        const confirmation = window.confirm('WARNING! \nPreviously entered data may be overwritten! '
+            + 'This action is irreversible! Are you sure you want to continue?\n\n Do not include a header row in your CSV. Format CSV using one column for '
+            + 'student id and one column for each field. Columns and field types must match.');
         if (confirmation) {
             const f = $('#csvUpload').get(0).files[0];
             if (f) {
                 const reader = new FileReader();
                 reader.readAsText(f);
-                reader.onload = function() {
-                    let breakOut = false; //breakOut is used to break out of the function and alert the user the format is wrong
+                reader.onload = function () {
+                    let breakOut = false; // breakOut is used to break out of the function and alert the user the format is wrong
                     const lines = (reader.result).trim().split(/\r\n|\n|\r/);
                     let tempArray = lines[0].split(',');
-                    const csvLength = tempArray.length; //gets the length of the array, all the tempArray should be the same length
+                    const csvLength = tempArray.length; // gets the length of the array, all the tempArray should be the same length
                     for (let k = 0; k < lines.length && !breakOut; k++) {
                         tempArray = lines[k].split(',');
-                        breakOut = tempArray.length !== csvLength; //if tempArray is not the same length, break out
+                        breakOut = tempArray.length !== csvLength; // if tempArray is not the same length, break out
                     }
                     let textChecker = 0;
                     let num_numeric = 0;
@@ -505,7 +504,7 @@ function setupNumericTextCells() {
                     let get_once = true;
                     let gradeable_id = '';
                     if (!breakOut) {
-                        $('.cell-all').each(function() {
+                        $('.cell-all').each(function () {
                             user_ids.push($(this).parent().data('user'));
                             if (get_once) {
                                 num_numeric = $(this).parent().parent().data('numnumeric');
@@ -516,7 +515,7 @@ function setupNumericTextCells() {
                                     breakOut = true;
                                     return false;
                                 }
-                                let k = 3; //checks if the file has the right number of numerics
+                                let k = 3; // checks if the file has the right number of numerics
                                 tempArray = lines[0].split(',');
                                 if (num_numeric > 0) {
                                     for (k = 3; k < num_numeric + 4; k++) {
@@ -527,7 +526,7 @@ function setupNumericTextCells() {
                                     }
                                 }
 
-                                //checks if the file has the right number of texts
+                                // checks if the file has the right number of texts
                                 while (k < csvLength) {
                                     textChecker++;
                                     k++;
@@ -542,10 +541,10 @@ function setupNumericTextCells() {
                     if (!breakOut) {
                         submitAJAX(
                             buildCourseUrl(['gradeable', gradeable_id, 'grading', 'csv']),
-                            {'csrf_token': csrfToken, 'users': user_ids,
-                                'num_numeric' : num_numeric, 'big_file': reader.result},
+                            { csrf_token: csrfToken, users: user_ids,
+                                num_numeric: num_numeric, big_file: reader.result },
                             (returned_data) => {
-                                $('.cell-all').each(function() {
+                                $('.cell-all').each(function () {
                                     for (let x = 0; x < returned_data['data'].length; x++) {
                                         if ($(this).parent().data('user') === returned_data['data'][x]['username']) {
                                             const starting_index1 = 0;
@@ -556,12 +555,12 @@ function setupNumericTextCells() {
                                             let status_temp_str = 'status_';
                                             let total = 0;
                                             let y = starting_index1;
-                                            let z = starting_index2; //3 is the starting index of the grades in the csv
-                                            //puts all the data in the form
+                                            let z = starting_index2; // 3 is the starting index of the grades in the csv
+                                            // puts all the data in the form
                                             for (z = starting_index2; z < num_numeric + starting_index2; z++, y++) {
                                                 value_temp_str = value_str + y;
                                                 status_temp_str = status_str + y;
-                                                const elem = $(`#cell-${$(this).parent().parent().data('section')}-${$(this).parent().data('row')}-${z-starting_index2}`);
+                                                const elem = $(`#cell-${$(this).parent().parent().data('section')}-${$(this).parent().data('row')}-${z - starting_index2}`);
                                                 elem.val(returned_data['data'][x][value_temp_str]);
                                                 if (returned_data['data'][x][status_temp_str] === 'OK') {
                                                     elem.css('background-color', '--main-body-white');
@@ -588,7 +587,7 @@ function setupNumericTextCells() {
                                             while (counter < num_text) {
                                                 value_temp_str = value_str + y;
                                                 status_temp_str = status_str + y;
-                                                $(`#cell-${$(this).parent().data('row')}-${z-starting_index2-1}`).val(returned_data['data'][x][value_temp_str]);
+                                                $(`#cell-${$(this).parent().data('row')}-${z - starting_index2 - 1}`).val(returned_data['data'][x][value_temp_str]);
                                                 z++;
                                                 y++;
                                                 counter++;
@@ -720,7 +719,7 @@ function setupSimpleGrading(action) {
                     new_cell.select(); // used to select text in input cells
 
                     if ((direction === 'up' || direction === 'down') && !new_cell.isInViewport()) {
-                        $('html, body').animate( { scrollTop: new_cell.offset().top - $(window).height()/2}, 50);
+                        $('html, body').animate({ scrollTop: new_cell.offset().top - $(window).height() / 2 }, 50);
                     }
                 }
             }
@@ -736,7 +735,7 @@ function setupSimpleGrading(action) {
                         new_cell.select(); // used to select text in input cells
 
                         if ((direction === 'up' || direction === 'down') && !new_cell.isInViewport()) {
-                            $('html, body').animate( { scrollTop: new_cell.offset().top - $(window).height()/2}, 50);
+                            $('html, body').animate({ scrollTop: new_cell.offset().top - $(window).height() / 2 }, 50);
                         }
                         break;
                     }
@@ -813,11 +812,11 @@ function setupSimpleGrading(action) {
     });
 
     // register empty function locked event handlers for "enter" so they show up in the hotkeys menu
-    registerKeyHandler({name: 'Search', code: 'Enter', locked: true}, () => {});
-    registerKeyHandler({name: 'Move Right', code: 'ArrowRight', locked: true}, () => {});
-    registerKeyHandler({name: 'Move Left', code: 'ArrowLeft', locked: true}, () => {});
-    registerKeyHandler({name: 'Move Up', code: 'ArrowUp', locked: true}, () => {});
-    registerKeyHandler({name: 'Move Down', code: 'ArrowDown', locked: true}, () => {});
+    registerKeyHandler({ name: 'Search', code: 'Enter', locked: true }, () => {});
+    registerKeyHandler({ name: 'Move Right', code: 'ArrowRight', locked: true }, () => {});
+    registerKeyHandler({ name: 'Move Left', code: 'ArrowLeft', locked: true }, () => {});
+    registerKeyHandler({ name: 'Move Up', code: 'ArrowUp', locked: true }, () => {});
+    registerKeyHandler({ name: 'Move Down', code: 'ArrowDown', locked: true }, () => {});
 
     // check if a cell is focused, then update value
     function keySetCurrentCell(event, options) {
@@ -837,18 +836,18 @@ function setupSimpleGrading(action) {
 
     // register keybinds for grading controls
     if (action === 'lab') {
-        registerKeyHandler({ name: 'Set Cell to 0', code: 'KeyZ', options: {score: 0} }, keySetCurrentCell);
-        registerKeyHandler({ name: 'Set Cell to 0.5', code: 'KeyX', options: {score: 0.5} }, keySetCurrentCell);
-        registerKeyHandler({ name: 'Set Cell to 1', code: 'KeyC', options: {score: 1} }, keySetCurrentCell);
-        registerKeyHandler({ name: 'Cycle Cell Value', code: 'KeyV', options: {score: null} }, keySetCurrentCell);
-        registerKeyHandler({ name: 'Set Row to 0', code: 'KeyA', options: {score: 0} }, keySetCurrentRow);
-        registerKeyHandler({ name: 'Set Row to 0.5', code: 'KeyS', options: {score: 0.5} }, keySetCurrentRow);
-        registerKeyHandler({ name: 'Set Row to 1', code: 'KeyD', options: {score: 1} }, keySetCurrentRow);
-        registerKeyHandler({ name: 'Cycle Row Value', code: 'KeyF', options: {score: null} }, keySetCurrentRow);
+        registerKeyHandler({ name: 'Set Cell to 0', code: 'KeyZ', options: { score: 0 } }, keySetCurrentCell);
+        registerKeyHandler({ name: 'Set Cell to 0.5', code: 'KeyX', options: { score: 0.5 } }, keySetCurrentCell);
+        registerKeyHandler({ name: 'Set Cell to 1', code: 'KeyC', options: { score: 1 } }, keySetCurrentCell);
+        registerKeyHandler({ name: 'Cycle Cell Value', code: 'KeyV', options: { score: null } }, keySetCurrentCell);
+        registerKeyHandler({ name: 'Set Row to 0', code: 'KeyA', options: { score: 0 } }, keySetCurrentRow);
+        registerKeyHandler({ name: 'Set Row to 0.5', code: 'KeyS', options: { score: 0.5 } }, keySetCurrentRow);
+        registerKeyHandler({ name: 'Set Row to 1', code: 'KeyD', options: { score: 1 } }, keySetCurrentRow);
+        registerKeyHandler({ name: 'Cycle Row Value', code: 'KeyF', options: { score: null } }, keySetCurrentRow);
     }
 
     // make sure to show focused cell when covered by student info
-    $('.scrollable-table td[class^="option-"] > .cell-grade').on('focus', function() {
+    $('.scrollable-table td[class^="option-"] > .cell-grade').on('focus', function () {
         const lastInfoBox = $(this).parent().parent().children('td:not([class^="option-"])').last();
         const boxRect = lastInfoBox[0].getBoundingClientRect();
         const inputRect = $(this).parent()[0].getBoundingClientRect();
@@ -862,7 +861,7 @@ function setupSimpleGrading(action) {
     });
 
     // when pressing enter in the search bar, go to the corresponding element
-    $('#student-search-input').on('keyup', function(event) {
+    $('#student-search-input').on('keyup', function (event) {
         if (event.code === 'Enter') { // Enter
             this.blur();
             const value = $(this).val();
@@ -876,7 +875,7 @@ function setupSimpleGrading(action) {
                     const new_cell = $(`#cell-${split_id[1]}-${split_id[2]}-0`);
                     prev_cell.blur();
                     new_cell.focus();
-                    $('html, body').animate( { scrollTop: new_cell.offset().top - $(window).height()/2}, 50);
+                    $('html, body').animate({ scrollTop: new_cell.offset().top - $(window).height() / 2 }, 50);
                 }
                 else {
                     // if no match is found and there is at least 1 matching autocomplete label, find its matching value
@@ -884,7 +883,7 @@ function setupSimpleGrading(action) {
                     if (first_match.length === 1) {
                         const first_match_label = first_match.text();
                         let first_match_value = '';
-                        for (let i = 0; i < student_full.length; i++) {      // NOTE: student_full comes from StudentSearch.twig script
+                        for (let i = 0; i < student_full.length; i++) { // NOTE: student_full comes from StudentSearch.twig script
                             if (student_full[i]['label'] === first_match_label) {
                                 first_match_value = student_full[i]['value'];
                                 break;
@@ -892,11 +891,11 @@ function setupSimpleGrading(action) {
                         }
                         this.focus();
                         $(this).val(first_match_value); // reset the value...
-                        $(this).trigger(event);    // ...and retrigger the event
+                        $(this).trigger(event); // ...and retrigger the event
                     }
                     else {
                         alert('ERROR:\n\nInvalid user.');
-                        this.focus();                       // refocus on the input field
+                        this.focus(); // refocus on the input field
                     }
                 }
             }
@@ -911,12 +910,11 @@ function setupSimpleGrading(action) {
     });
 
     // clear the input field when it is focused
-    $('#student-search-input').on('focus', function() {
+    $('#student-search-input').on('focus', function () {
         $(this).val('');
     });
 
     initSocketClient();
-
 }
 
 function initSocketClient() {
@@ -967,7 +965,7 @@ function checkpointSocketHandler(elem_id, anon_id, score, grader, date) {
                 break;
         }
         elem.css('border-right', `60px solid ${getComputedStyle(elem.parent()[0]).getPropertyValue('background-color')}`);
-        elem.animate({'border-right-width': '0px'}, 400);
+        elem.animate({ 'border-right-width': '0px' }, 400);
     }
 }
 
