@@ -600,16 +600,25 @@ function setInputsVisibility(elem) {
 }
 
 /**
- * Sets the visibility for 'final grade cutoffs' input boxes
- * based on the 'final_grade' boxes in 'display' being selected / un-selected
+ * Sets the visibility for input boxes other than benchmark percents
+ * based on the corresponding boxes in 'display' being selected / un-selected
  * */
-function setFinalGradeCutoffsVisibility() {
-    // Sets visibility of 'final grade cutoffs' based on 'display_final_grade'
-    if ($("input[value='final_grade']:checked").val()) {
-        $('#final_grade_cutoffs').show();
+function setCustomizationItemVisibility(elem) {
+    //maps a checkbox name to the corresponding customization item id
+    const checkbox_to_cust_item = {
+        'final_grade': '#final_grade_cutoffs',
+        'messages': '#cust_messages',
+        'section': '#section_labels',
+    };
+    const checkbox_name = elem.value;
+    const cust_item_id = checkbox_to_cust_item[checkbox_name];
+    const is_checked = elem.checked;
+
+    if (is_checked) {
+        $(cust_item_id).show();
     }
     else {
-        $('#final_grade_cutoffs').hide();
+        $(cust_item_id).hide();
     }
 }
 
@@ -658,18 +667,19 @@ $(document).ready(() => {
     });
 
     /**
-     * Configure visibility handler for final grade cutoff boxes
-     * Visibility is controlled by whether the final_grade box is selected in the display area
+     * Configure visibility handler for all customization items other than benchmark percents
+     * Visibility is controlled by whether the corresponding boxes are selected in the display area
      */
+    const dropdown_checkboxes = ['final_grade', 'messages', 'section'];
     $('#display input').each(function() {
 
-        if (this.value === 'final_grade') {
+        if (dropdown_checkboxes.includes(this.value)) {
             // Set the initial visibility on load
-            setFinalGradeCutoffsVisibility();
+            setCustomizationItemVisibility(this);
 
             // Register a click handler to adjust visibility when boxes are selected / un-selected
-            $(this).change(() => {
-                setFinalGradeCutoffsVisibility();
+            $(this).change(function() {
+                setCustomizationItemVisibility(this);
             });
         }
 
