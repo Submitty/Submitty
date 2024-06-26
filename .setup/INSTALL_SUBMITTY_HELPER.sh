@@ -37,6 +37,8 @@ if [ -d "${THIS_DIR}/../.utm" ]; then
     UTM=1
 fi
 
+echo ${0}
+exit 1
 
 SUBMITTY_REPOSITORY=$(jq -r '.submitty_repository' "${CONF_DIR}/submitty.json")
 SUBMITTY_INSTALL_DIR=$(jq -r '.submitty_install_dir' "${CONF_DIR}/submitty.json")

@@ -68,6 +68,8 @@ parser.add_argument('--worker', action='store_true', default=False, help='Config
 parser.add_argument('--install-dir', default='/usr/local/submitty', help='Set the install directory for Submitty')
 parser.add_argument('--data-dir', default='/var/local/submitty', help='Set the data directory for Submitty')
 parser.add_argument('--websocket-port', default=8443, type=int, help='Port to use for websocket')
+parser.add_argument('--ci', default=False, help='Flag only to be set if on CI')
+
 
 args = parser.parse_args()
 
@@ -462,7 +464,10 @@ with open(INSTALL_FILE, 'w') as open_file:
         print(x, file=open_file)
     write('#!/bin/bash')
     write()
-    write(f'bash {SETUP_REPOSITORY_DIR}/INSTALL_SUBMITTY_HELPER.sh  "$@"')
+    helper_args = ''
+    if args.ci:
+        helper_args = 'ci'
+    write(f'bash {SETUP_REPOSITORY_DIR}/INSTALL_SUBMITTY_HELPER.sh  "$@" {helper_args}')
 
 os.chmod(INSTALL_FILE, 0o700)
 
