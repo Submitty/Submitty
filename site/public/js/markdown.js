@@ -19,19 +19,23 @@ $(document).ready(() => {
         textarea.style.overflowY = 'hidden';
     };
 
-    $('textarea[id^="reply_box"]').each(function() {
-        const targetTextarea = $(this);
-        targetTextarea.on('input', function() {
-            resizeTextarea(this);
-        });
+    const applyResizeListeners = () => {
+        $('textarea[id^="reply_box"]').each(function() {
+            const targetTextarea = $(this);
+            targetTextarea.off('input').on('input', function() {
+                resizeTextarea(this);
+            });
 
-        $(document).ajaxComplete(() => {
             resizeTextarea(targetTextarea.get(0));
         });
+    };
 
-        // Resize the specific textarea immediately when the page loads
-        resizeTextarea(targetTextarea.get(0));
+    $(document).ajaxComplete(() => {
+        applyResizeListeners();
     });
+
+    // Initial application of listeners when the page loads
+    applyResizeListeners();
 
     const observer = new MutationObserver((mutations) => {
         mutations.forEach((mutation) => {
