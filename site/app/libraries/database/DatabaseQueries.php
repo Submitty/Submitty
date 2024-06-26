@@ -5616,6 +5616,13 @@ AND gc_id IN (
         return $this->course_db->rows();
     }
 
+    /**
+     * Given a poll and a response, returns whether the response is custom
+     *
+     * @param int $poll_id
+     * @param string $poll_response
+     * @return bool Response in Poll is custom
+     */
     public function existsCustomResponse(int $poll_id, string $poll_response): bool {
         $params = [$poll_id, $poll_response];
         $query = "SELECT *
