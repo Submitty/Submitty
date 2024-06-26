@@ -23,6 +23,8 @@ class PollTester extends BaseUnitTest {
                 "single-response-single-correct",
                 new DateInterval("PT1H"),
                 new DateTime("2021-01-11"),
+                "never",
+                "never"
             ),
             1 => new Poll(
                 "Poll #2",
@@ -30,6 +32,8 @@ class PollTester extends BaseUnitTest {
                 "single-response-multiple-correct",
                 new DateInterval("PT1M"),
                 new DateTime("9999-12-31"),
+                "always",
+                "always"
             ),
             2 => new Poll(
                 "Poll #3",
@@ -37,6 +41,8 @@ class PollTester extends BaseUnitTest {
                 "multiple-response-survey",
                 new DateInterval("PT1M30S"),
                 new DateTime('now'),
+                "when_ended",
+                "when_ended",
                 "/var/local/submitty/courses/s21/sample/uploads/polls/poll_image_3_colors.png"
             )
         ];
@@ -298,5 +304,29 @@ class PollTester extends BaseUnitTest {
 
         $this->my_polls[0]->setEndTime(new DateTime(DateUtils::MAX_TIME));
         $this->assertEquals($this->my_polls[0]->getEndTime()->format("Y-m-d H:i:s"), DateUtils::MAX_TIME);
+    }
+
+    public function testHistogramRelease(): void {
+        $this->assertEquals($this->my_polls[0]->getReleaseHistogram(), "never");
+        $this->assertEquals($this->my_polls[1]->getReleaseHistogram(), "always");
+        $this->assertEquals($this->my_polls[2]->getReleaseHistogram(), "when_ended");
+
+        $this->my_polls[0]->setReleaseHistogram("always");
+        $this->assertEquals("always", $this->my_polls[0]->getReleaseHistogram());
+
+        $this->expectException(\RuntimeException::class);
+        $this->my_polls[0]->setReleaseHistogram("aaaaaaaaa");
+    }
+
+    public function testAnswerRelease(): void {
+        $this->assertEquals($this->my_polls[0]->getReleaseAnswer(), "never");
+        $this->assertEquals($this->my_polls[1]->getReleaseAnswer(), "always");
+        $this->assertEquals($this->my_polls[2]->getReleaseAnswer(), "when_ended");
+
+        $this->my_polls[0]->setReleaseAnswer("always");
+        $this->assertEquals("always", $this->my_polls[0]->getReleaseAnswer());
+
+        $this->expectException(\RuntimeException::class);
+        $this->my_polls[0]->setReleaseAnswer("AnInvalidStatusMessage");
     }
 }
