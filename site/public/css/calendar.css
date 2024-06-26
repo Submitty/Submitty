@@ -12,6 +12,38 @@
 
 .cal-title {
     text-align: center;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    margin-top: 5px;
+}
+
+.cal-month-title {
+    text-align: center;
+    font-size: 25px;
+    font-weight: 600;
+    width: auto;
+    height: 50px;
+    background: 1px solid var(--standard-light-gray);
+    padding: 0;
+    font-family: "Source Sans Pro", sans-serif;
+    color: var(--text-black);
+}
+
+.cal-year-title {
+    text-align: center;
+    font-size: 20px;
+    font-weight: 600;
+    width: 65px;
+    height: 50px;
+    background: 1px solid var(--standard-light-gray);
+    padding: 0;
+    font-family: "Source Sans Pro", sans-serif;
+    color: var(--text-black);
+}
+
+[data-theme="dark"] .dropdown-custom option {
+    background-color: var(--background-blue);
 }
 
 .cal-btn {
@@ -65,32 +97,12 @@ a.cal-btn:focus {
     margin-right: 10px;
 }
 
-.cal-month-title {
-    font-size: 26px;
-    text-transform: uppercase;
-    border: 0;
-    margin-top: 0;
-    margin-bottom: 0;
-    line-height: 100%;
-}
-
 .cal-toolbar {
     margin-bottom: 2px;
     margin-top: 0;
 }
 
-h2.cal-month-title {
-    margin-top: 0;
-    margin-bottom: 0;
-    line-height: 100%;
-}
 
-.cal-year-title {
-    font-size: 18px;
-    margin-top: 0;
-    margin-bottom: 0;
-    line-height: 100%;
-}
 
 /* the row of Monday, Tuesday, ... */
 .cal-week-title-row {

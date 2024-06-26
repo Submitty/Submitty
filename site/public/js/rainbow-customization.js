@@ -413,6 +413,54 @@ function getBenchmarkPercent() {
     return benchmark_percent;
 }
 
+function getFinalCutoffPercent() {
+    // Verify that final_grade is used, otherwise set values to default (which will be unused)
+    if (!$("input[value='final_grade']:checked").val()) {
+        return {
+            'A': 93.0,
+            'A-': 90.0,
+            'B+': 87.0,
+            'B': 83.0,
+            'B-': 80.0,
+            'C+': 77.0,
+            'C': 73.0,
+            'C-': 70.0,
+            'D+': 67.0,
+            'D': 60.0,
+        };
+    }
+
+    // Collect benchmark percents
+    const final_cutoff = {};
+    const letter_grades = ['A', 'A-', 'B+', 'B', 'B-', 'C+', 'C', 'C-', 'D+', 'D'];
+
+    $('.final_cutoff_input').each(function() {
+
+        // Get data
+        const letter_grade = this.getAttribute('data-benchmark').toString();
+        const percent = this.value;
+
+        if (letter_grades.includes(letter_grade)) {
+
+            // Verify percent is not empty
+            if (percent === '') {
+                throw 'All final cutoffs must have a value before saving.';
+            }
+
+            // Verify percent is a floating point number
+            if (isNaN(parseFloat(percent))) {
+                throw 'Final cutoff input must be a floating point number.';
+            }
+
+            // Add to sections
+            final_cutoff[letter_grade] = percent;
+
+        }
+    });
+
+    return final_cutoff;
+}
+
 // This function constructs a JSON representation of all the form input
 function buildJSON() {
 
@@ -421,6 +469,7 @@ function buildJSON() {
         'display': getDisplay(),
         'display_benchmark': getDisplayBenchmark(),
         'benchmark_percent': getBenchmarkPercent(),
+        'final_cutoff': getFinalCutoffPercent(),
         'section' : getSection(),
         'gradeables' : getGradeableBuckets(),
         'messages' : getMessages(),
@@ -550,6 +599,29 @@ function setInputsVisibility(elem) {
     }
 }
 
+/**
+ * Sets the visibility for input boxes other than benchmark percents
+ * based on the corresponding boxes in 'display' being selected / un-selected
+ * */
+function setCustomizationItemVisibility(elem) {
+    //maps a checkbox name to the corresponding customization item id
+    const checkbox_to_cust_item = {
+        'final_grade': '#final_grade_cutoffs',
+        'messages': '#cust_messages',
+        'section': '#section_labels',
+    };
+    const checkbox_name = elem.value;
+    const cust_item_id = checkbox_to_cust_item[checkbox_name];
+    const is_checked = elem.checked;
+
+    if (is_checked) {
+        $(cust_item_id).show();
+    }
+    else {
+        $(cust_item_id).hide();
+    }
+}
+
 $(document).ready(() => {
 
     // Make the per-gradeable curve inputs toggle when the icon is clicked
@@ -592,6 +664,24 @@ $(document).ready(() => {
         $(this).change(function() {
             setInputsVisibility(this);
         });
+    });
+
+    /**
+     * Configure visibility handler for all customization items other than benchmark percents
+     * Visibility is controlled by whether the corresponding boxes are selected in the display area
+     */
+    const dropdown_checkboxes = ['final_grade', 'messages', 'section'];
+    $('#display input').each(function() {
+
+        if (dropdown_checkboxes.includes(this.value)) {
+            // Set the initial visibility on load
+            setCustomizationItemVisibility(this);
+
+            // Register a click handler to adjust visibility when boxes are selected / un-selected
+            $(this).change(function() {
+                setCustomizationItemVisibility(this);
+            });
+        }
 
     });
 
@@ -601,6 +691,10 @@ $(document).ready(() => {
 
     // Register change handlers to update the status message when form inputs change
     $("input[name*='display_benchmarks']").change(() => {
+        displayChangeDetectedMessage();
+    });
+
+    $("input[name*='final_grade_cutoffs']").change(() => {
         displayChangeDetectedMessage();
     });
 
