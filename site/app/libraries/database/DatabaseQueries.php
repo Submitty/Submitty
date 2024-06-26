@@ -2432,7 +2432,6 @@ ORDER BY {$orderby}",
             $placeholders = implode(",", array_fill(0, count($sections), "?"));
             $params = [$g_id];
             $params = array_merge($params, $sections);
-
             $this->course_db->query(
                 "
                 SELECT gt.team_id, gt.registration_section, gt.rotating_section, gt.team_name, COALESCE(NULLIF(jsonb_agg(u)::text, '[null]'), '[]')::jsonb AS users
@@ -2549,7 +2548,7 @@ ORDER BY {$u_or_t}.{$section_key}",
                 JOIN $unit ON (gd.gd_$id = $unit.$id)
             WHERE
                 gd.g_id = ?
-                AND CAST ($unit.$section_key AS TEXT) IN " . $this.createParameterList(count($sections))  . "
+                AND CAST ($unit.$section_key AS TEXT) IN " . $this->createParameterList(count($sections))  . "
                 AND gcd.gcd_verifier_id IS NOT NULL
             GROUP BY
                 $unit.$section_key
