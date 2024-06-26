@@ -32,7 +32,7 @@ function displayStudentHistory() {
             // eslint-disable-next-line no-undef
             csrf_token: csrfToken,
         },
-        success: function(response_str) {
+        success: function (response_str) {
             const table_body = $('#search-student-tbody').empty();
             const response = JSON.parse(response_str);
             if (response.status === 'fail') {
@@ -54,8 +54,8 @@ function displayStudentHistory() {
                 const helper = student.help_started_by === null ? '-' : student.help_started_by;
                 const removal_method = student.removal_type === null ? '-' : student.removal_type;
 
-                table_body.append($('<tr></tr>').attr('data-testid', `student-row-${i+1}`)
-                    .append($('<td></td>').attr('data-testid', 'row-label').text(i+1))
+                table_body.append($('<tr></tr>').attr('data-testid', `student-row-${i + 1}`)
+                    .append($('<td></td>').attr('data-testid', 'row-label').text(i + 1))
                     .append($('<td></td>').attr('data-testid', 'current-state').text(student.current_state))
                     .append($('<td></td>').attr('data-testid', 'queue').text(student.queue_code))
                     .append($('<td></td>').attr('data-testid', 'time-entered').text(time_start))
@@ -72,7 +72,7 @@ function displayStudentHistory() {
                     .attr('colspan', '8')
                     .text(`${help_counter} times helped.`)));
         },
-        error: function() {
+        error: function () {
             window.alert('Something went wrong while searching for students!');
         },
     });
