@@ -90,12 +90,42 @@ const replyDisabled = (title, attachment) => {
     cy.contains('p', attachment).should('be.visible');
 };
 
-describe('Test cases revolving around creating, replying to, merging, and removing discussion forum threads', () => {
+const removeUpduckPost = (thread_title) => {
+    cy.get('[data-testid="create-post-head"]').should('contain', thread_title);
+    cy.get('[data-testid="like-count"]').first().should('have.text', 1);
+    cy.get('[data-testid="upduck-button"]').first().click();
+    cy.get('[data-testid="like-count"]').first().should('have.text', 0);
+};
+
+const staffUpduckPost = (user, thread_title) => {
+    checkStaffUpduck(thread_title, 'be.not.visible');
+    upduckPost(thread_title);
+    checkStaffUpduck(thread_title, 'be.visible');
+
+    if (user !== 'instructor') {
+        removeUpduckPost(thread_title);
+        checkStaffUpduck(thread_title, 'be.not.visible');
+    }
+};
+
+const studentUpduckPost = (thread_title) => {
+    checkStaffUpduck(thread_title, 'be.not.visible');
+    upduckPost(thread_title);
+    checkStaffUpduck(thread_title, 'be.not.visible');
+    removeUpduckPost(thread_title);
+};
+
+const checkStaffUpduck = (title, visible) => {
+    cy.get('[data-testid="thread-list-item"]').contains(title).click();
+    cy.get('[data-testid="create-post-head"]').should('contain', title);
+    cy.get('[data-testid="instructor-like"]').first().should(visible);
+};
+
+describe('Should test creating, replying, merging, removing, and upducks in forum', () => {
 
     beforeEach(() => {
         cy.login('instructor');
-        cy.visit(['sample']);
-        cy.get('#nav-sidebar-forum').click();
+        cy.visit(['sample', 'forum']);
         cy.get('#nav-sidebar-collapse-sidebar').click();
     });
 
@@ -122,12 +152,29 @@ describe('Test cases revolving around creating, replying to, merging, and removi
         // Tutorial
         replyToThread(title3, reply3);
 
-        // Upduck the first post of each thread
-        upduckPost(title1);
-        upduckPost(title2);
-        upduckPost(title3);
+        // Student upduck
+        cy.logout();
+        cy.login('student');
+        cy.visit(['sample', 'forum']);
+        studentUpduckPost(title1);
+        studentUpduckPost(title2);
+        studentUpduckPost(title3);
 
-        // Check the stats page for instructor with 3 upducks
+        // TA upduck
+        cy.logout();
+        cy.login('ta');
+        cy.visit(['sample', 'forum']);
+        staffUpduckPost('ta', title1);
+        staffUpduckPost('ta', title2);
+        staffUpduckPost('ta', title3);
+
+        // Instructor upduck and check the stats page for instructor with 3 upducks
+        cy.logout();
+        cy.login('instructor');
+        cy.visit(['sample', 'forum']);
+        staffUpduckPost('instructor', title1);
+        staffUpduckPost('instructor', title2);
+        staffUpduckPost('instructor', title3);
         checkStatsUpducks('Instructor, Quinn', 3);
 
         // Tutorial into Questions
