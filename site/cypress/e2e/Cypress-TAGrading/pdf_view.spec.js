@@ -1,5 +1,4 @@
 describe('Test cases involving pdf view and annotations', () => {
-    
     beforeEach(() => {
         cy.login('instructor');
         cy.visit(['sample', 'gradeable', 'grading_homework_pdf', 'grading', 'details']);
