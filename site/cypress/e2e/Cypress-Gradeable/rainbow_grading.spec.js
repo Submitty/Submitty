@@ -2,7 +2,6 @@ describe('Test Rainbow Grading', () => {
     beforeEach(() => {
         cy.login('instructor');
         cy.visit(['sample', 'config']);
-
     });
     it('Enable viewing of rainbow grades and generating the rainbow grading', () => {
         cy.get('[data-testid="display-rainbow-grades-summary"]').check();
@@ -26,8 +25,8 @@ describe('Test Rainbow Grading', () => {
             cy.login(username);
             cy.visit(['sample', 'grades']);
             cy.get('[data-testid="rainbow-grades"]').should('contain', `Lecture Participation Polls for: ${username}`);
-            if (username==='instructor') {
-                checkRainbowGrades( 'instructor', 801516157, 'Quinn', 'Instructor');
+            if (username === 'instructor') {
+                checkRainbowGrades('instructor', 801516157, 'Quinn', 'Instructor');
                 checkRainbowGradesOption();
             }
             else if (username === 'ta') {
@@ -61,5 +60,3 @@ const checkRainbowGradesOption = () => {
         cy.get('[data-testid="rainbow-grades"]').should('contain', element);
     });
 };
-
-
