@@ -94,7 +94,7 @@ describe('Test cases for the site\'s adherence to accessibility guidelines', () 
                         ];
 
                         for (const error of output.messages) {
-                            if (skipMessages.some(txt => error.message.startsWith(txt))
+                            if (skipMessages.some((txt) => error.message.startsWith(txt))
                                 || (baseline.get(url) || []).includes(error.message)
                                 || foundErrorMessages.includes(error.message)) {
                                 continue;

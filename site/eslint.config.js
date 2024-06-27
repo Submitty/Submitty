@@ -68,6 +68,7 @@ module.exports = tseslint.config(
                     braceStyle: 'stroustrup',
                     indent: 4,
                     semi: true,
+                    arrowParens: true,
                 })
             ),
         ],

@@ -460,7 +460,7 @@ function repairPDF() {
                 // loop through all annotations
                 for (let i = annotations.length - 1; i >= 0; i--) {
                     // gather properties with null values
-                    const faulty_properties = Object.keys(annotations[i]).filter(prop => annotations[i][prop] === null);
+                    const faulty_properties = Object.keys(annotations[i]).filter((prop) => annotations[i][prop] === null);
                     if (annotations[i] && faulty_properties.length > 0) {
                         if (from_other_user) {
                             alert(`Faulty annotations from user ${annotator} have been detected. \nThey will be temporarily repaired for you, but please contact them so they can come to this page and repair them fully.`);

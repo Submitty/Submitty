@@ -21,7 +21,7 @@ const warning_banner = document.getElementById('submission-mode-warning');
 
 function init() {
     document.getElementsByName('submission-type')
-        .forEach(radio_btn => radio_btn.addEventListener('click', changeSubmissionMode));
+        .forEach((radio_btn) => radio_btn.addEventListener('click', changeSubmissionMode));
 
     if (warning_banner) {
         warning_banner.textContent = '';
@@ -96,7 +96,7 @@ function changeSubmissionMode(event: Event) {
     const scanIdsOpts = document.getElementById('toggle-id-scan');
     const SubmitButton = document.getElementById('submit');
 
-    [submitForStudentOpts, bulkUploadOpts, qrUploadOpts, numericUploadOpts].forEach(element => element!.style.display = 'none');
+    [submitForStudentOpts, bulkUploadOpts, qrUploadOpts, numericUploadOpts].forEach((element) => element!.style.display = 'none');
     useQRCheckBox.checked = false;
     if (useScanIdsCheckBox !== null) {
         useScanIdsCheckBox.checked = false;
