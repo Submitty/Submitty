@@ -79,6 +79,10 @@ while :; do
             export DEV_VM=1
             echo "utm"
             ;;
+        --ci)
+            export CI=1
+            echo "ci"
+            ;;
         --vagrant)
             export VAGRANT=1
             export DEV_VM=1
@@ -106,6 +110,10 @@ fi
 
 if [ ${UTM} == 1 ]; then
     mkdir ${SUBMITTY_REPOSITORY}/.utm
+fi
+
+if [ ${CI} == 1]; then
+    mkdir ${SUBMITTY_REPOSITORY}/.ci
 fi
 
 if [ ${DEV_VM} == 1 ] && [ ${WORKER} == 0 ]; then
@@ -719,7 +727,7 @@ submitty@vagrant
 do-not-reply@vagrant
 localhost
 25
-" | python3 ${SUBMITTY_REPOSITORY}/.setup/CONFIGURE_SUBMITTY.py --debug --setup-for-sample-courses --websocket-port ${WEBSOCKET_PORT}
+" | python3 ${SUBMITTY_REPOSITORY}/.setup/CONFIGURE_SUBMITTY.py --debug --setup-for-sample-courses --websocket-port ${WEBSOCKET_PORT} --ci
 
         # Set these manually as they're not asked about during CONFIGURE_SUBMITTY.py
         sed -i -e 's/"url": ""/"url": "ldap:\/\/localhost"/g' ${SUBMITTY_INSTALL_DIR}/config/authentication.json
