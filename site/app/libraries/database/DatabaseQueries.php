@@ -7502,6 +7502,26 @@ AND gc_id IN (
     }
 
     /**
+     * Changes the graded version of a gradeable for a particular student
+     *
+     * @param string $gradeable_id
+     * @param int    $submitter_id User or Team id
+     */
+    public function changeGradedVersionOfGradeable($gradeable_id, $submitter_id, $version) {
+        $this->course_db->query(
+            'UPDATE gradeable_component_data AS gcd
+            SET gcd_graded_version = ?
+            FROM gradeable_data AS gd
+            WHERE (
+                gd.g_id = ?
+                AND gd.gd_user_id = ?
+                AND gd.gd_id = gcd.gd_id
+            )',
+            [$version, $gradeable_id, $submitter_id]
+        );
+    }
+
+    /**
      * Gets if the provided submitter has a submission for a particular gradeable
      *
      * @param  \app\models\gradeable\Gradeable $gradeable
