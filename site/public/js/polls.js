@@ -109,7 +109,7 @@ function updateDropdownStates(curr_state, cookie_key) {
 function togglePollFormOptions() {
     const correct_options = $('.correct-box');
 
-    correct_options.each(function() {
+    correct_options.each(function () {
         $(this).prop('checked', $('#toggle-all').prop('checked'));
     });
 }
