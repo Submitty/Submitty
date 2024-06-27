@@ -112,10 +112,6 @@ if [ ${UTM} == 1 ]; then
     mkdir ${SUBMITTY_REPOSITORY}/.utm
 fi
 
-if [ ${CI} == 1]; then
-    mkdir ${SUBMITTY_REPOSITORY}/.ci
-fi
-
 if [ ${DEV_VM} == 1 ] && [ ${WORKER} == 0 ]; then
     # Setting it up to allow SSH as root by default
     mkdir -p -m 700 /root/.ssh

@@ -38,7 +38,7 @@ if [ -d "${THIS_DIR}/../.utm" ]; then
 fi
 
 CI=0
-if [ -d "${THIS_DIR}/../.ci" ]; then
+if [ -d "${THIS_DIR}/../.github_actions_ci_flag" ]; then
     CI=1
 fi
 

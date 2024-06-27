@@ -13,6 +13,16 @@ SUBMITTY_REPOSITORY=/usr/local/submitty/GIT_CHECKOUT/Submitty
 if [ -x "$(command -v pip3)" ]; then
     python3 ${SUBMITTY_REPOSITORY}/.setup/bin/reset_system.py
 fi
+OPTSTRING=":c"
+while getopts ${OPTSTRING} opt; do
+    case ${opt} in
+    c) CI="1";;
+    esac
+done
+if [[ "${CI}" == "1" ]]; then
+    echo "This file is used to check if Submitty is being run in the Github Actions CI." > ${SUBMITTY_REPOSITORY}/.github_actions_ci_flag
+    echo "This file is used to check if Submitty is being run in the Github Actions CI."
+fi
 
 # Expand the default logical volume for Ubuntu
 lvresize -l +100%FREE /dev/mapper/ubuntu--vg-ubuntu--lv

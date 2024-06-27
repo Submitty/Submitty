@@ -464,10 +464,7 @@ with open(INSTALL_FILE, 'w') as open_file:
         print(x, file=open_file)
     write('#!/bin/bash')
     write()
-    helper_args = ''
-    if args.ci:
-        helper_args = 'ci'
-    write(f'bash {SETUP_REPOSITORY_DIR}/INSTALL_SUBMITTY_HELPER.sh  "$@" {helper_args}')
+    write(f'bash {SETUP_REPOSITORY_DIR}/INSTALL_SUBMITTY_HELPER.sh  "$@"')
 
 os.chmod(INSTALL_FILE, 0o700)
 
