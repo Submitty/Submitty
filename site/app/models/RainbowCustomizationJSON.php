@@ -31,6 +31,7 @@ class RainbowCustomizationJSON extends AbstractModel {
      * @var object[]
      */
     private array $plagiarism = [];
+    private array $manual_grades = [];
 
     // The order of allowed_display and allowed_display_description has to match
     const allowed_display = ['grade_summary', 'grade_details', 'benchmark_percent',
@@ -83,6 +84,14 @@ class RainbowCustomizationJSON extends AbstractModel {
         return $this->plagiarism;
     }
 
+    /**
+     * Get array of manual grades
+     *
+     * @return array<object>
+     */
+    public function getManualGrades(): array {
+        return $this->manual_grades;
+    }
 
     /**
      * Gets an array of display benchmarks

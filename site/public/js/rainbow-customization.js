@@ -289,8 +289,8 @@ function getPlagiarism() {
     return plagiarismData;
 }
 
-function addToTable() {
-    const USERID = document.getElementById('user_id').value.trim();
+function addToPlagiarismTable() {
+    const USERID = document.getElementById('plagiarism_user_id').value.trim();
     const gradeable = document.getElementById('g_id').value.trim();
     const penalty = document.getElementById('marks').value.trim();
 
@@ -313,7 +313,7 @@ function addToTable() {
         return;
     }
 
-    const tableBody = document.getElementById('table-body');
+    const tableBody = document.getElementById('plagiarism-table-body');
 
     // Check for duplicate entries
     const rows = tableBody.getElementsByTagName('tr');
@@ -351,9 +351,78 @@ function addToTable() {
     cellDelete.appendChild(deleteLink);
 
     // Clear the form fields
-    document.getElementById('user_id').value = '';
+    document.getElementById('plagiarism_user_id').value = '';
     document.getElementById('g_id').value = '';
     document.getElementById('marks').value = '';
+}
+
+function addToManualGradingTable() {
+    const USERID = document.getElementById('manual_grading_user_id').value.trim();
+    const grade = document.getElementById('manual_grading_grade').value.trim();
+    const note = document.getElementById('manual_grading_note').value.trim();
+
+    // Check for empty fields
+    if (USERID === '' || grade === '' || note === '') {
+        alert('Please fill in all the fields.');
+        return;
+    }
+
+    // eslint-disable-next-line no-undef
+    const studentFullDataValues = studentFullData.map((item) => item.value);
+    if (!studentFullDataValues.includes(USERID)) {
+        alert('Invalid User ID. Please enter a valid one.');
+        return;
+    }
+
+    const allowed_grades = ['A', 'A-', 'B+', 'B', 'B-', 'C+', 'C', 'C-', 'D+', 'D', 'F'];
+
+    // Check for final grade
+    if (!allowed_grades.includes(grade)) {
+        alert('Grade must be one of the following: A, A-, B+, B, C+, C, C-, D+, D, F');
+        return;
+    }
+
+    const tableBody = document.getElementById('manual-grading-table-body');
+
+    // Check for duplicate entries
+    const rows = tableBody.getElementsByTagName('tr');
+    for (let i = 0; i < rows.length; i++) {
+        const row = rows[i];
+        const existingUSERID = row.cells[0].textContent.trim();
+        const existingGrade = row.cells[1].textContent.trim();
+
+        if (USERID === existingUSERID && grade === existingGrade) {
+            alert('Entry with the same Student ID and Grade already exists.');
+            return;
+        }
+    }
+
+    // Create a new row and cells
+    const newRow = tableBody.insertRow();
+
+    const cellUSERID = newRow.insertCell();
+    cellUSERID.textContent = USERID;
+
+    const cellGradeable = newRow.insertCell();
+    cellGradeable.textContent = grade;
+
+    const cellPenalty = newRow.insertCell();
+    cellPenalty.textContent = note;
+
+    const cellDelete = newRow.insertCell();
+    const deleteLink = document.createElement('a');
+    const deleteIcon = document.createElement('i');
+    deleteIcon.className = 'fas fa-trash';
+    deleteLink.appendChild(deleteIcon);
+    deleteLink.onclick = function () {
+        deleteRow(this);
+    };
+    cellDelete.appendChild(deleteLink);
+
+    // Clear the form fields
+    document.getElementById('manual_grading_user_id').value = '';
+    document.getElementById('manual_grading_grade').value = '';
+    document.getElementById('manual_grading_note').value = '';
 }
 
 function deleteRow(button) {
