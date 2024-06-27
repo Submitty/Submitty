@@ -2340,6 +2340,64 @@ class ElectronicGraderController extends AbstractController {
     }
 
     /**
+     * Route for saving the marks the submitter received for a component
+     */
+    #[Route("/courses/{_semester}/{_course}/gradeable/{gradeable_id}/grading/graded_gradeable/change_grade_version", methods: ["POST"])]
+    public function ajaxUpdateGradedVersionForStudent($gradeable_id){
+        $anon_id = $_POST['anon_id'] ?? null;
+        $graded_version = intval($_POST['graded_version'] ?? null);
+
+        if ($anon_id === null) {
+            $this->core->getOutput()->renderJsonFail('Missing anon_id parameter');
+            return;
+        }
+        if ($graded_version === null || $graded_version < 1) {
+            $this->core->getOutput()->renderJsonFail('Invalid graded_version parameter');
+            return;
+        }
+
+        // Get the gradeable
+        $gradeable = $this->tryGetGradeable($gradeable_id);
+        if ($gradeable === false) {
+            return;
+        }
+
+        // Get user id from the anon id
+        $submitter_id = $this->tryGetSubmitterIdFromAnonId($anon_id, $gradeable_id);
+        if ($submitter_id === false) {
+            return;
+        }
+
+        // checks if user has permission
+        if (!$this->core->getAccess()->canI("grading.electronic.grade", ["gradeable" => $gradeable])) {
+            $this->core->getOutput()->renderJsonFail('Insufficient permissions to change graded version');
+            return;
+        }
+
+        $logger_params = [
+            "course_semester" => $this->core->getConfig()->getTerm(),
+            "course_name" => $this->core->getDisplayedCourseName(),
+            "gradeable_id" => $gradeable_id,
+            "grader_id" => $this->core->getUser()->getId(),
+            "action" => "CHANGE_GRADEABLE_GRADED_VERSION",
+            "submitter_id" => $submitter_id
+        ];
+        Logger::logTAGrading($logger_params);
+
+        try {
+            // do thing
+            $this->core->getQueries()->changeGradedVersionOfGradeable($gradeable_id, $submitter_id, $graded_version);
+            $this->core->getOutput()->renderJsonSuccess();
+        }
+        catch (\InvalidArgumentException $e) {
+            $this->core->getOutput()->renderJsonFail($e->getMessage());
+        }
+        catch (\Exception $e) {
+            $this->core->getOutput()->renderJsonError($e->getMessage());
+        } 
+    }
+
+    /**
      * Route for saving a component's properties (not its marks)
      */
     #[Route("/courses/{_semester}/{_course}/gradeable/{gradeable_id}/components/save", methods: ["POST"])]
