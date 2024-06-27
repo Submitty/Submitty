@@ -33,7 +33,7 @@ describe('Peer Grading Component testing', () => {
             cy.get('[data-testid="add-peer-grader"]').should('exist');
             cy.get('[data-testid="clear-peer-matrix"]').should('exist');
             cy.get('[data-testid="download-peer-csv"]').should('exist');
-            if (option==='grading_homework') {
+            if (option === 'grading_homework') {
                 cy.get('[data-testid="add-peer-grader"]').click();
                 cy.get('[data-testid="new-peer-grader"]').click().type('student');
                 cy.get('[data-testid="add-user-id-0"]').click().type('aphacker');
@@ -41,7 +41,7 @@ describe('Peer Grading Component testing', () => {
                 cy.get('[data-testid="new-peer-grader"]').click();
                 cy.get('[data-testid="admin-gradeable-add-peers-submit"]').click();
             }
-            if (option==='grading_homework_pdf') {
+            if (option === 'grading_homework_pdf') {
                 cy.get('[data-testid="upload-peer-graders-list"]').selectFile('cypress/fixtures/peer_assign_file.csv');
                 cy.get('[data-testid="table-wrapper"]').should('contain', 'aphacker');
             }
