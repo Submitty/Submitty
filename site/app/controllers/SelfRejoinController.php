@@ -71,6 +71,9 @@ class SelfRejoinController extends AbstractController {
         // Wrap logic in helper so that we can then clean up afterwards.
         $answer = $this->canRejoinCourseHelper($user, $course, $term);
 
+        // Unload the course we're checking
+        $this->core->getConfig()->setCourseLoaded(false);
+
         if ($reload_previous_course) {
             $this->core->loadCourseConfig($previous_course_term, $previous_course_name);
             $this->core->loadCourseDatabase();
@@ -87,7 +90,7 @@ class SelfRejoinController extends AbstractController {
      * @param string $term Term the course is in.
      * @return bool True if we can rejoin the course.
      */
-    private function canRejoinCourseHelper(User $user, string $course, string $term): bool {
+    public function canRejoinCourseHelper(User $user, string $course, string $term): bool {
         $user_id = $user->getId();
         $course = $this->core->getConfig()->getCourse();
         $term = $this->core->getConfig()->getTerm();

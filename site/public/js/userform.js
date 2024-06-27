@@ -5,7 +5,7 @@ $('#edit-user-form').ready(() => {
     const url = buildCourseUrl(['user_information']);
     $.ajax({
         url: url,
-        success: function(data) {
+        success: function (data) {
             const json = JSON.parse(data)['data'];
             $('[name="user_id"]').change(() => {
                 autoCompleteOnUserId(json);
@@ -20,13 +20,13 @@ $('#edit-user-form').ready(() => {
 
             $(':text', $('#edit-user-form')).change(checkValidEntries);
         },
-        error: function() {
+        error: function () {
             alert('Could not load user data, please refresh the page and try again.');
         },
     });
 });
 
-//opens modal with initial settings for new student
+// opens modal with initial settings for new student
 function newStudentForm() {
     $('[name="user_group"] option[value="4"]').prop('selected', true);
     $('#user-form-assigned-sections').hide();
@@ -38,7 +38,7 @@ function newStudentForm() {
     newUserForm();
 }
 
-//opens modal with initial settings for new grader
+// opens modal with initial settings for new grader
 function newGraderForm() {
     $('[name="user_group"] option[value="3"]').prop('selected', true);
     $('#user-form-student-error-message').hide();
@@ -50,7 +50,7 @@ function newGraderForm() {
     newUserForm();
 }
 
-//opens modal with initial settings for new user (student and grader)
+// opens modal with initial settings for new user (student and grader)
 function newUserForm() {
     $('.popup-form').css('display', 'none');
     const form = $('#edit-user-form');
@@ -88,7 +88,7 @@ function editUserForm(user_id) {
     const url = `${buildCourseUrl(['users', 'details'])}?user_id=${user_id}`;
     $.ajax({
         url: url,
-        success: function(data) {
+        success: function (data) {
             const json = JSON.parse(data)['data'];
             const form = $('#edit-user-form');
             // will help to check whether the userForm is edited or not
@@ -119,7 +119,7 @@ function editUserForm(user_id) {
             clearValidityWarnings();
             captureTabInModal('edit-user-form');
         },
-        error: function() {
+        error: function () {
             alert('Could not load user data, please refresh the page and try again.');
         },
     });
@@ -217,9 +217,9 @@ function checkValidEntries() {
             break;
     }
 
-    //disable submit button if anything is invalid
+    // disable submit button if anything is invalid
     let has_invalid_entry = false;
-    $(':text', $('#edit-user-form')).each( function() {
+    $(':text', $('#edit-user-form')).each(function () {
         if (!this.checkValidity()) {
             has_invalid_entry = true;
         }
@@ -330,12 +330,12 @@ function isUserFormEmpty() {
     const form = document.querySelectorAll('form')[0];
     let isFormEmpty = true;
     for (const formElement of form.elements) {
-        const {name, value, type, checked} = formElement;
+        const { name, value, type, checked } = formElement;
         // skipping all the hidden fields, user-group and manual-registration
         if (type === 'hidden' || name === 'user_group' || name === 'manual_registration') {
             continue;
         }
-        else if ((type === 'text' && value.length) || (type === 'select-one' && value !=='null') || checked) {
+        else if ((type === 'text' && value.length) || (type === 'select-one' && value !== 'null') || checked) {
             isFormEmpty = false;
             break;
         }
@@ -369,18 +369,18 @@ function isUserFormEdited() {
     const registration_subsection_user_value = user['registration_subsection'] || '';
 
     const formEdited = (
-        $('[name="user_numeric_id"]', form).val() !== user['user_numeric_id'] ||
-        $('[name="user_givenname"]', form).val() !== user['user_givenname'] ||
-        $('[name="user_familyname"]', form).val() !== user['user_familyname'] ||
-        $('[name="user_preferred_givenname"]', form).val() !== user['user_preferred_givenname'] ||
-        $('[name="user_preferred_familyname"]', form).val() !== user['user_preferred_familyname'] ||
-        $('[name="user_email"]', form).val() !== user['user_email'] ||
-        !$(`[name="user_group"] option[value="${user['user_group']}"]`).prop('selected') ||
-        $('[name="manual_registration"]', form).prop('checked') !== user['manual_registration'] ||
-        !$(`[name="registered_section"] option[value="${registration_section}"]`).prop('selected') ||
-        !$(`[name="rotating_section"] option[value="${rotating_section}"]`).prop('selected') ||
-        registration_subsection_form_value !== registration_subsection_user_value ||
-        grading_sections_edited
+        $('[name="user_numeric_id"]', form).val() !== user['user_numeric_id']
+        || $('[name="user_givenname"]', form).val() !== user['user_givenname']
+        || $('[name="user_familyname"]', form).val() !== user['user_familyname']
+        || $('[name="user_preferred_givenname"]', form).val() !== user['user_preferred_givenname']
+        || $('[name="user_preferred_familyname"]', form).val() !== user['user_preferred_familyname']
+        || $('[name="user_email"]', form).val() !== user['user_email']
+        || !$(`[name="user_group"] option[value="${user['user_group']}"]`).prop('selected')
+        || $('[name="manual_registration"]', form).prop('checked') !== user['manual_registration']
+        || !$(`[name="registered_section"] option[value="${registration_section}"]`).prop('selected')
+        || !$(`[name="rotating_section"] option[value="${rotating_section}"]`).prop('selected')
+        || registration_subsection_form_value !== registration_subsection_user_value
+        || grading_sections_edited
     );
     return formEdited;
 }
@@ -388,7 +388,7 @@ function isUserFormEdited() {
 function clearUserFormInformation() {
     const form = document.querySelectorAll('form')[0];
     for (const formElement of form.elements) {
-        const {name, type} = formElement;
+        const { name, type } = formElement;
         if (type === 'text') {
             formElement.value = '';
         }
@@ -404,7 +404,7 @@ function clearUserFormInformation() {
 }
 
 function clearValidityWarnings() {
-    $(':text', $('#edit-user-form')).each( function() {
+    $(':text', $('#edit-user-form')).each(function () {
         $(this)[0].setCustomValidity('');
     });
     $('#user-form-submit').prop('disabled', false);
