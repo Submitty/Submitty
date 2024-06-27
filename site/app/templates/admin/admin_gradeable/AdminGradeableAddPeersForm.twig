@@ -10,5 +10,5 @@
 {% block buttons %}
     {{ block('close_button') }}
     <div id="submit-error2" style="width:70%; display:inline-block; text-align:left; float:left; color:red;">Please enter a valid new grader that is in the course and not already in the matrix.</div>
-    <input onclick="submitFormAjax2();" class="btn btn-primary" type="submit" value="Submit" id="admin-gradeable-add-peers-submit" />
+    <input onclick="submitFormAjax2();" class="btn btn-primary" type="submit" value="Submit" id="admin-gradeable-add-peers-submit" data-testid="admin-gradeable-add-peers-submit" />
 {% endblock %}
