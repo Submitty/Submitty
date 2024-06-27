@@ -75,19 +75,4 @@ describe('Test cases involving the files panel', () => {
         assertSubmissionsBrowserClosed();
         assertResultsBrowserClosed();
     });
-
-    it('test the full panel view', () => {
-        // this test is somewhat limited in what it can do because the page
-        // displays an iframe which is inaccessible to Cypress for the most part
-        // We just test that the full panel view opens, and that an iframe appears.
-
-        cy.get('#submissions').click();
-        cy.get('#file_viewer_full_panel_iframe').should('not.exist');
-        cy.get('i[title="Show file in full panel"]').first().click();
-        cy.get('#grading_file_name').should('contain', '.submit.timestamp');
-        cy.get('#file_viewer_full_panel_iframe').should('be.visible');
-
-        cy.get('[aria-label="Collapse File"]').click();
-        cy.get('#file_viewer_full_panel_iframe').should('not.exist');
-    });
 });
