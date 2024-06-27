@@ -160,9 +160,9 @@ function updateUserPronouns(e) {
     }
 }
 
-//update user name order and display name order option
+// update user name order and display name order option
 function updateDisplayNameOrder(e) {
-    //update user name order
+    // update user name order
     e.preventDefault();
     const displayNameOrder = $('#display-name-order-change');
     displayNameOrderLast = displayNameOrder.val();
@@ -178,10 +178,10 @@ function updateDisplayNameOrder(e) {
         data,
         processData: false,
         contentType: false,
-        success: function(res) {
+        success: function (res) {
             const response = JSON.parse(res);
             if (response.status === 'success') {
-                const {data} = response;
+                const { data } = response;
                 displaySuccessMessage(data.message);
                 const icon = '<i class="fas fa-pencil-alt"></i>';
                 if (data['display-name-order'] === 'GIVEN_F') {
@@ -199,11 +199,10 @@ function updateDisplayNameOrder(e) {
                 displayErrorMessage(response.message);
             }
         },
-        error: function() {
+        error: function () {
             displayErrorMessage('Some went wrong while updating name order!');
         },
     });
-
 }
 
 function updateUserPreferredNames() {
