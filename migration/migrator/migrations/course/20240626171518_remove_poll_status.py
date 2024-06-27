@@ -30,4 +30,4 @@ def down(config, database, semester, course):
     :param course: Code of course being migrated
     :type course: str
     """
-    database.execute("ALTER TABLE ONLY polls ADD COLUMN IF NOT EXISTS status TEXT NOT NULL")
+    database.execute("ALTER TABLE ONLY polls ADD COLUMN IF NOT EXISTS status TEXT")
