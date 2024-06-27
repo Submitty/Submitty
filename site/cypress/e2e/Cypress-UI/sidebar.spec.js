@@ -100,5 +100,4 @@ describe('Test sidebars', () => {
         cy.visit(['sample']);
         sidebarContains('Student Photos', `/courses/${currentSemester}/sample/student_photos`);
     });
-
 });

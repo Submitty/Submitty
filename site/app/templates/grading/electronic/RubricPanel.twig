@@ -1,11 +1,11 @@
-<div id="grading_rubric" class="rubric_panel {{ is_ta_grading ? "" : "empty" }}">
+<div id="grading_rubric" class="rubric_panel {{ is_ta_grading ? "" : "empty" }}" data-testid="grading-rubric">
     <div id="allow_custom_marks" data-gradeable_custom_marks="{{ allow_custom_marks }}"></div>
     <div>
         {% if is_ta_grading %}
             <div id="rubric-container" class="container">
                 <div class="row row-wrap vertical-center">
                     <span id="gradeable-version-container" data-gradeable_version="{{ display_version }}" hidden></span>
-                    <span class="col grading_label">Grading Rubric</span>
+                    <span class="col grading_label" data-testid="grading-rubric-label">Grading Rubric</span>
                     {# Wrong version warnings #}
                     {% if not has_active_version %}
                         {% if has_submission %}

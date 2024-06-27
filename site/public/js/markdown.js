@@ -22,7 +22,7 @@ $(document).ready(() => {
         textarea.style.overflowY = 'hidden';
     };
 
-    targetTextarea.on('input', function() {
+    targetTextarea.on('input', function () {
         resizeTextarea(this);
     });
 
