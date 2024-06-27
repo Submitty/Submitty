@@ -5,7 +5,6 @@ skipOn(Cypress.env('run_area') === 'CI', () => {
         beforeEach(() => {
             cy.visit(['sample', 'gradeable', 'closed_team_homework']);
             cy.login('student');
-
         });
 
         it('Should display confetti', () => {
@@ -16,25 +15,25 @@ skipOn(Cypress.env('run_area') === 'CI', () => {
 
         it('Should show and hide details', () => {
             cy.scrollTo('bottom');
-            //Open
+            // Open
             cy.get('#testcase_1').scrollIntoView().should('not.be.visible');
             cy.get('.loading-tools-show').eq(1).scrollIntoView().click();
             cy.get('#testcase_1').scrollIntoView().should('be.visible');
-            //Close
+            // Close
             cy.get('.loading-tools-hide').eq(1).scrollIntoView().click();
             cy.get('#testcase_1').scrollIntoView().should('not.be.visible');
         });
 
         it('Should expand and collapse all test cases', () => {
             cy.scrollTo('bottom');
-            //Open all
+            // Open all
             cy.get('.loading-tools-show').first().click();
             cy.get('#testcase_1').scrollIntoView().should('be.visible');
             cy.get('#testcase_2').scrollIntoView().should('be.visible');
             cy.get('#testcase_3').scrollIntoView().should('be.visible');
             cy.get('#testcase_6').scrollIntoView().should('be.visible');
             cy.get('#testcase_8').scrollIntoView().should('be.visible');
-            //Close all
+            // Close all
             cy.get('.loading-tools-hide').first().click();
             cy.get('#testcase_1').scrollIntoView().should('not.be.visible');
             cy.get('#testcase_2').scrollIntoView().should('not.be.visible');
@@ -45,12 +44,11 @@ skipOn(Cypress.env('run_area') === 'CI', () => {
 
         it('Should cancel loading', () => {
             cy.scrollTo('bottom');
-            //Open
+            // Open
             cy.get('#testcase_1').should('not.be.visible');
             cy.get('.loading-tools-show').eq(1).click();
-            cy.get('.loading-tools-in-progress').first().click(); //cancel
+            cy.get('.loading-tools-in-progress').first().click(); // cancel
             cy.get('#testcase_1').should('not.be.visible');
         });
-
     });
 });
