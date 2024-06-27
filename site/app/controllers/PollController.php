@@ -528,8 +528,7 @@ class PollController extends AbstractController {
         elseif ($poll->getAllowsCustomResponses() === false) {
             return JsonResponse::getFailResponse("Poll is currently not accepting custom responses");
         }
-        $exists_response = $this->core->getQueries()->existsCustomResponse($poll->getId(), $poll_response);
-        if ($exists_response) {
+        elseif ($poll->existsCustomResponse($poll_response) === true) {
             return JsonResponse::getFailResponse("A similar response already exists");
         }
 

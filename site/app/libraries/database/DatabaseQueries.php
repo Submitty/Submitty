@@ -5617,23 +5617,6 @@ AND gc_id IN (
     }
 
     /**
-     * Given a poll and a response, returns whether the response is custom
-     *
-     * @param int $poll_id
-     * @param string $poll_response
-     * @return bool Response in Poll is custom
-     */
-    public function existsCustomResponse(int $poll_id, string $poll_response): bool {
-        $params = [$poll_id, $poll_response];
-        $query = "SELECT *
-                  FROM poll_options
-                  WHERE poll_id = ? AND response = ?";
-
-        $this->course_db->query($query, $params);
-        return count($this->course_db->rows()) >= 1;
-    }
-
-    /**
      * Gets All Parent Authors who this user responded to
      *
      * @param string $post_author_id current_user_id

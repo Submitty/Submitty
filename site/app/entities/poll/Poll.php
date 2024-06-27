@@ -301,4 +301,19 @@ class Poll {
         }
         return $selected_options;
     }
+
+    /**
+     * Given a poll and a response, returns whether the response already exists
+     *
+     * @param string $custom_response
+     * @return bool Response in Poll already exists
+     */
+    public function existsCustomResponse(string $custom_response): bool {
+        foreach ($this->getOptions() as $option) {
+            if ($option->getResponse() === $custom_response) {
+                return true;
+            }
+        }
+        return false;
+    }
 }
