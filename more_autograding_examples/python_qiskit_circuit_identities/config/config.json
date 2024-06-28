@@ -1,0 +1,56 @@
+{
+	"required_capabilities": "python",
+    "grading_parameters": {
+        "TOTAL_POINTS": 15,
+        "AUTO_POINTS": 15
+    },
+    "autograding_method": "docker",
+    "container_options": {
+        "container_image": "submitty/qiskit:latest"
+    },
+    "resource_limits" : {
+        "RLIMIT_NPROC" : 10
+    },
+
+    "testcases" : [
+        {
+            "title" : "X-Gate Identity",
+            "command" : "python3 *.py x_gate_identity",
+            "points" : 5,
+            "validation" : [
+                {
+                    "method" : "diff",
+                    "actual_file" : "STDOUT.txt",
+                    "description" : "Program Output",
+                    "expected_file" : "x.txt"
+                }
+            ]
+        },
+        {
+            "title" : "Toffoli Gate Identity",
+            "command" : "python3 *.py toffoli_identity",
+            "points" : 5,
+            "validation" : [
+                {
+                    "method" : "diff",
+                    "actual_file" : "STDOUT.txt",
+                    "description" : "Program Output",
+                    "expected_file" : "toffoli.txt"
+                }
+            ]
+        },
+        {
+            "title" : "Toffoli Gate Identity (No Z Rotation)",
+            "command" : "python3 *.py toffoli_identity_no_z",
+            "points" : 5,
+            "validation" : [
+                {
+                    "method" : "diff",
+                    "actual_file" : "STDOUT.txt",
+                    "description" : "Program Output",
+                    "expected_file" : "toffoli.txt"
+                }
+            ]
+        }
+    ]
+}
