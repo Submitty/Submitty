@@ -15,11 +15,10 @@ module.exports = tseslint.config(
         files: ['**/*.{js,ts}'],
     },
     {
-        // todo: actually fix these files instead of ignoring them
+        // name: 'Files to ignore', (this line can be uncommented with eslint >=9.0)
         ignores: [
-            'cypress/support/e2e.js',
-            'cypress/plugins/index.js',
-            'public/js/notebook_builder/widgets/widget.js',
+            'node_modules/**',
+            'public/{mjs,vendor}/**',
         ],
     },
     {
@@ -95,13 +94,10 @@ module.exports = tseslint.config(
     {
         name: 'Options for typescript files in ts, which have their own tsconfig',
         files: ['ts/**/*.ts'],
-        // todo: replace with type checked rules, so we can take advantage of ts's types when linting
-        extends: [...tseslint.configs.recommended],
-        // extends: [...tseslint.configs.recommendedTypeChecked],
+        extends: [...tseslint.configs.recommendedTypeChecked],
         languageOptions: {
             parserOptions: {
                 project: true,
-                // @ts-expect-error
                 tsconfigRootDir: __dirname,
             },
         },

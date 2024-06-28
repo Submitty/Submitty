@@ -24,7 +24,7 @@ function init() {
         .forEach((radio_btn) => radio_btn.addEventListener('click', changeSubmissionMode));
 
     if (warning_banner) {
-        warning_banner!.textContent = '';
+        warning_banner.textContent = '';
     }
 
     // load previous setting if any
@@ -102,7 +102,7 @@ function changeSubmissionMode(event: Event) {
         useScanIdsCheckBox.checked = false;
     }
 
-    if (window.file_array[0] && window.file_array[0].length > 0) {
+    if (window.file_array[0] && (window.file_array as File[][])[0].length > 0) {
         if (!confirm('Switching submission modes will remove all unsubmitted files, are you sure?')) {
             return;
         }
@@ -151,12 +151,12 @@ function changeSubmissionMode(event: Event) {
     }
 
     if (warning_banner) {
-        if (!warning_banner!.hasChildNodes()) {
-            const child = warning_banner!.appendChild(document.createElement('h2'));
+        if (!warning_banner.hasChildNodes()) {
+            const child = warning_banner.appendChild(document.createElement('h2'));
             child.classList.add('warning');
         }
 
-        warning_banner!.firstChild!.textContent = message;
+        warning_banner.firstChild!.textContent = message;
     }
 }
 
@@ -194,6 +194,4 @@ document.addEventListener('DOMContentLoaded', () => init());
 
 // export or import statement required to modify Window interface to global scope
 // otherwise TypeScript will assume everything in the file is in the global scope
-export {
-
-};
+export { };
