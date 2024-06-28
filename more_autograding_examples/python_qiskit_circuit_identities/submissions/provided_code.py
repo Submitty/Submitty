@@ -3,47 +3,78 @@ from qiskit.primitives import Sampler
 from qiskit.visualization import plot_histogram
 import sys
 
-def x_gate_identity():
-    qc = QuantumCircuit(1)
-
-    # Student code goes here!
-
+def check(qc, name):
     qc.measure_all()
-    qc.draw("mpl", filename="x_gate_identity_circuit")
+    qc.draw("mpl", filename=repr(name + "_circuit"))
     results = Sampler().run(qc, shots=1, seed=0).result()
     statistics = results.quasi_dists[0].binary_probabilities()
-    plot_histogram(statistics, filename="x_gate_identity_histogram")
+    plot_histogram(statistics, filename=repr(name + "_histogram"))
     print(statistics)
+    return
+
+# CHECKPOINT 1: Write an identity for the X gate.
+def x_gate(qc):
+    # Student code goes here!
+    return
+
+def x_gate_identity():
+    qc = QuantumCircuit(1)
+    x_gate(qc)
+    check(qc, "x_gate_identity")
+    return
+
+# CHECKPOINT 2: Write an identity for the Toffoli gate.
+def toffoli(qc):
+    # Student code goes here!
     return
 
 def toffoli_identity():
     qc = QuantumCircuit(3)
-    qc.x([0, 1])
+    toffoli(qc)
+    check(qc, "toffoli_identity")
 
-    # Student code goes here!
-
-    qc.measure_all()
-    qc.draw("mpl", filename="toffoli_gate_identity_circuit")
-    results = Sampler().run(qc, shots=1, seed=0).result()
-    statistics = results.quasi_dists[0].binary_probabilities()
-    plot_histogram(statistics, filename="toffoli_gate_identity_histogram")
-    print(statistics)
+    qc = QuantumCircuit(3)
+    qc.x(0)
+    toffoli(qc)
+    check(qc, "toffoli_identity")
     
+    qc = QuantumCircuit(3)
+    qc.x(1)
+    toffoli(qc)
+    check(qc, "toffoli_identity")
+    
+    qc = QuantumCircuit(3)
+    qc.x([0, 1])
+    toffoli(qc)
+    check(qc, "toffoli_identity")
+    
+    return
+
+# CHECKPOINT 3: Write an identity for the Toffoli gate without any explicit Z rotations (Z, S, T, etc.)
+def toffoli_no_z(qc):
+    # Student code goes here!
     return
 
 def toffoli_identity_no_z():
     qc = QuantumCircuit(3)
-    qc.x([0, 1])
+    toffoli_no_z(qc)
+    check(qc, "toffoli_identity_no_z")
 
-    # Student code goes here!
-
-    qc.measure_all()
-    qc.draw("mpl", filename="toffoli_gate_no_z_identity_circuit")
-    results = Sampler().run(qc, shots=1, seed=0).result()
-    statistics = results.quasi_dists[0].binary_probabilities()
-    plot_histogram(statistics, filename="toffoli_gate_no_z_identity_histogram")
-    print(statistics)
+    qc = QuantumCircuit(3)
+    qc.x(0)
+    toffoli_no_z(qc)
+    check(qc, "toffoli_identity_no_z")
     
+    qc = QuantumCircuit(3)
+    qc.x(1)
+    toffoli_no_z(qc)
+    check(qc, "toffoli_identity_no_z")
+    
+    qc = QuantumCircuit(3)
+    qc.x([0, 1])
+    toffoli_no_z(qc)
+    check(qc, "toffoli_identity_no_z")
+
     return
 
 if __name__=="__main__": 
