@@ -20,7 +20,6 @@ while getopts ${OPTSTRING} opt; do
     c)
     echo "This file is used to check if Submitty is being run in the Github Actions CI." > ${SUBMITTY_REPOSITORY}/.github_actions_ci_flag
     echo "Submitty is being run in the Github Actions CI."
-    exit 1
     ;;
     esac
 done
