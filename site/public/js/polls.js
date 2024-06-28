@@ -115,7 +115,7 @@ function togglePollFormOptions() {
 }
 
 function validateCustomResponse() {
-    const custom_response = document.querySelector('.custom_poll_response');
+    const custom_response = document.querySelector('.custom-poll-response');
     const custom_response_submit = document.querySelector('.custom-response-submit');
 
     const validate = () => {
@@ -135,12 +135,12 @@ function validateCustomResponse() {
 }
 
 function addCustomResponse(pollid, base_url) {
-    const custom_response_text = document.querySelector('.custom_poll_response').value;
+    const custom_response_text = document.querySelector('.custom-poll-response').value;
     const url = `${base_url}/addCustomResponse`;
     const fd = new FormData();
     fd.append('csrf_token', csrfToken);
     fd.append('poll_id', pollid);
-    fd.append('custom_response', custom_response_text);
+    fd.append('custom-response', custom_response_text);
     $.ajax({
         url: url,
         type: 'POST',

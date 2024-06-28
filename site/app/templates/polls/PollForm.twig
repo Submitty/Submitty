@@ -142,10 +142,10 @@
         </select>
         <br><br>
         <div>
-            <label for = "poll_custom_options" class="option-title credit-form-item">
+            <label for = "poll-custom-options" class="option-title credit-form-item">
                 Allow student-written responses?
             </label>
-            <input id ="poll_custom_options" class="credit-box credit-form-item" type="checkbox" name="poll_custom_options"  {{ poll is not null and poll.getAllowsCustomResponses() ? "checked" : "" }}>
+            <input id ="poll-custom-options" class="credit-box credit-form-item" type="checkbox" name="poll-custom-options"  {{ poll is not null and poll.getAllowsCustomResponses() ? "checked" : "" }}>
             <i>
                 <br />
                 Are you certain you want to allow student-written responses? Students will be able to submit responses that will be visible to other students.<br />

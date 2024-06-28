@@ -211,7 +211,7 @@ class PollController extends AbstractController {
         }
         $poll = new Poll($_POST['name'], $_POST['question'], $_POST['question_type'], $duration, $date, $_POST['release_histogram'], $_POST["release_answer"]);
         $em->persist($poll);
-        $poll->setAllowsCustomOptions(isset($_POST['poll_custom_options']));
+        $poll->setAllowsCustomOptions(isset($_POST['poll-custom-options']));
 
         // Need to run this after persist so that we can use getId() below
         if (isset($_FILES['image_file']) && $_FILES["image_file"]["name"] !== "") {
@@ -383,7 +383,7 @@ class PollController extends AbstractController {
         $poll->setReleaseDate($date);
         $poll->setReleaseHistogram($_POST['release_histogram']);
         $poll->setReleaseAnswer($_POST['release_answer']);
-        $poll->setAllowsCustomOptions(isset($_POST['poll_custom_options']));
+        $poll->setAllowsCustomOptions(isset($_POST['poll-custom-options']));
 
         if (isset($_FILES['image_file']) && $_FILES["image_file"]["name"] !== "") {
             $file = $_FILES["image_file"];
@@ -510,7 +510,7 @@ class PollController extends AbstractController {
      */
     public function addCustomResponse(): JsonResponse {
         $poll_id = intval($_POST['poll_id'] ?? -1);
-        $poll_response = $_POST['custom_response'];
+        $poll_response = $_POST['custom-response'];
         $user_id = $this->core->getUser()->getId();
         $em = $this->core->getCourseEntityManager();
         $repo = $em->getRepository(Poll::class);

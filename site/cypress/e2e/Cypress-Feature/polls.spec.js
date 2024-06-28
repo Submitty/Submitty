@@ -590,7 +590,7 @@ describe('Test cases revolving around polls functionality', () => {
         cy.get('#response_0_wrapper').children(':nth-child(3)').check();
         cy.get('#response_0_wrapper').children(':nth-child(4)').type('Answer 1');
         cy.get('h1').click();
-        cy.get('#poll_custom_options').click();
+        cy.get('#poll-custom-options').click();
         cy.get('#poll-form-submit').click();
 
         // Open the poll
