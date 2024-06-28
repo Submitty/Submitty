@@ -55,29 +55,29 @@ def toffoli_identity():
     qc.x(0)
     toffoli(qc)
     check(qc, "toffoli_identity")
-    
+
     qc = QuantumCircuit(3)
     qc.x(1)
     toffoli(qc)
     check(qc, "toffoli_identity")
-    
+
     qc = QuantumCircuit(3)
     qc.x([0, 1])
     toffoli(qc)
     check(qc, "toffoli_identity")
-    
+
     qc = QuantumCircuit(3)
     qc.h(0)
     toffoli(qc)
     qc.h(0)
     check(qc, "toffoli_identity")
-    
+
     # qc = QuantumCircuit(3)
     # qc.h([0, 1])
     # toffoli(qc)
     # qc.h([0, 1])
     # check(qc, "toffoli_identity_no_z")
-    
+
     return
 
 # CHECKPOINT 3: Write an identity for the Toffoli gate without any explicit Z rotations (Z, S, T, etc.)
@@ -125,23 +125,23 @@ def toffoli_identity_no_z():
     qc.x(0)
     toffoli_no_z(qc)
     check(qc, "toffoli_identity_no_z")
-    
+
     qc = QuantumCircuit(3)
     qc.x(1)
     toffoli_no_z(qc)
     check(qc, "toffoli_identity_no_z")
-    
+
     qc = QuantumCircuit(3)
     qc.x([0, 1])
     toffoli_no_z(qc)
     check(qc, "toffoli_identity_no_z")
-    
+
     qc = QuantumCircuit(3)
     qc.h(0)
     toffoli(qc)
     qc.h(0)
     check(qc, "toffoli_identity_no_z")
-    
+
     # qc = QuantumCircuit(3)
     # qc.h([0, 1])
     # toffoli(qc)
