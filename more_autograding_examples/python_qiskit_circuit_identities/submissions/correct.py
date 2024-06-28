@@ -2,6 +2,7 @@ from qiskit import QuantumCircuit
 from qiskit.primitives import Sampler
 from qiskit.visualization import plot_histogram
 import sys
+import numpy as np
 
 def check(qc, name):
     qc.measure_all()
@@ -27,7 +28,22 @@ def x_gate_identity():
 
 # CHECKPOINT 2: Write an identity for the Toffoli gate.
 def toffoli(qc):
-    # Student code goes here!
+    qc.h(2)
+    qc.cx(0, 2)
+    qc.tdg(2)
+    qc.cx(1, 2)
+    qc.t(2)
+    qc.cx(0, 2)
+    qc.tdg(2)
+    qc.cx(1, 2)
+    qc.t(2)
+    qc.tdg(0)
+    qc.h(2)
+    qc.cx(1, 0)
+    qc.tdg(0)
+    qc.cx(1, 0)
+    qc.s(0)
+    qc.t(1)
     return
 
 def toffoli_identity():
@@ -50,11 +66,48 @@ def toffoli_identity():
     toffoli(qc)
     check(qc, "toffoli_identity")
     
+    qc = QuantumCircuit(3)
+    qc.h(0)
+    toffoli(qc)
+    qc.h(0)
+    check(qc, "toffoli_identity")
+    
     return
 
 # CHECKPOINT 3: Write an identity for the Toffoli gate without any explicit Z rotations (Z, S, T, etc.)
 def toffoli_no_z(qc):
-    # Student code goes here!
+    qc.h(2)
+    qc.cx(0, 2)
+    qc.h(2)
+    qc.rx(-np.pi/4, 2)
+    qc.h(2)
+    qc.cx(1, 2)
+    qc.h(2)
+    qc.rx(np.pi/4, 2)
+    qc.h(2)
+    qc.cx(0, 2)
+    qc.h(2)
+    qc.rx(-np.pi/4, 2)
+    qc.h(2)
+    qc.cx(1, 2)
+    qc.h(2)
+    qc.rx(np.pi/4, 2)
+    qc.h(2)
+    qc.h(0)
+    qc.rx(-np.pi/4, 0)
+    qc.h(0)
+    qc.h(2)
+    qc.cx(1, 0)
+    qc.h(0)
+    qc.rx(-np.pi/4, 0)
+    qc.h(0)
+    qc.cx(1, 0)
+    qc.h(0)
+    qc.rx(np.pi/2, 0)
+    qc.h(0)
+    qc.h(1)
+    qc.rx(np.pi/4, 1)
+    qc.h(1)
     return
 
 def toffoli_identity_no_z():
@@ -75,6 +128,12 @@ def toffoli_identity_no_z():
     qc = QuantumCircuit(3)
     qc.x([0, 1])
     toffoli_no_z(qc)
+    check(qc, "toffoli_identity_no_z")
+    
+    qc = QuantumCircuit(3)
+    qc.h(0)
+    toffoli(qc)
+    qc.h(0)
     check(qc, "toffoli_identity_no_z")
     
     # qc = QuantumCircuit(3)

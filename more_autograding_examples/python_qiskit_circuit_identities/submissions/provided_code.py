@@ -6,7 +6,7 @@ import sys
 def check(qc, name):
     qc.measure_all()
     qc.draw("mpl", filename=repr(name + "_circuit"))
-    results = Sampler().run(qc, shots=1, seed=0).result()
+    results = Sampler().run(qc, shots=10, seed=0).result()
     statistics = results.quasi_dists[0].binary_probabilities()
     plot_histogram(statistics, filename=repr(name + "_histogram"))
     print(statistics)
@@ -74,6 +74,12 @@ def toffoli_identity_no_z():
     qc.x([0, 1])
     toffoli_no_z(qc)
     check(qc, "toffoli_identity_no_z")
+    
+    # qc = QuantumCircuit(3)
+    # qc.h([0, 1])
+    # toffoli(qc)
+    # qc.h([0, 1])
+    # check(qc, "toffoli_identity_no_z")
 
     return
 
