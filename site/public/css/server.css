@@ -2025,7 +2025,7 @@ Start of slider switch
 }
 
 input:checked + .slider {
-    background-color: var(--actionable-blue);
+    background-color: var(--good-green);
 }
 
 input:checked + .slider::before {
