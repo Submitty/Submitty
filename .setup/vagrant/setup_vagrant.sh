@@ -18,7 +18,7 @@ CI=0
 PARAMS=""
 while (( "$#" )); do
   case "$1" in
-    -c|--ci)
+    --ci)
       CI=1
       shift
       ;;
