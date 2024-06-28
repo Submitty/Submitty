@@ -1856,7 +1856,7 @@ class Gradeable extends AbstractModel {
         $graded_components = [];
         if ($this->isGradeByRegistration()) {
             $sections = $grader->getGradingRegistrationSections();
-            if ($this->core->getAccess()->canI("grading.electronic.grade.if_no_sections_exist") && !isset($sections)) {
+            if ($this->core->getAccess()->canI("grading.electronic.grade.if_no_sections_exist") && $sections === []) {
                 $sections = $this->core->getQueries()->getRegistrationSections();
                 foreach ($sections as $i => $section) {
                     $sections[$i] = $section['sections_registration_id'];
@@ -2298,7 +2298,7 @@ class Gradeable extends AbstractModel {
 
         if ($this->isVcs()) {
             $config = $this->core->getConfig();
-            AdminGradeableController::enqueueGenerateRepos($config->getTerm(), $config->getCourse(), $gradeable_id);
+            AdminGradeableController::enqueueGenerateRepos($config->getTerm(), $config->getCourse(), $gradeable_id, $this->getVcsSubdirectory());
         }
     }
 

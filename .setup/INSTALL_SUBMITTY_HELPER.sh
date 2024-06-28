@@ -52,17 +52,6 @@ else
     RESTART_DAEMONS=( )
 fi
 
-########################################################################################################################
-########################################################################################################################
-# FORCE CORRECT TIME SKEW
-# This may happen on a development virtual machine
-# SEE GITHUB ISSUE #7885 - https://github.com/Submitty/Submitty/issues/7885
-if [ "${UTM}" == 1 ]; then
-    sudo service ntp stop
-    sudo ntpd -gq
-    sudo service ntp start
-    sudo timedatectl set-timezone America/New_York
-fi
 
 ########################################################################################################################
 ########################################################################################################################
@@ -91,6 +80,17 @@ if [[ "$#" -ge 1 && "$1" != "test" && "$1" != "clean" && "$1" != "test_rainbow"
     exit 1
 fi
 
+########################################################################################################################
+########################################################################################################################
+# FORCE CORRECT TIME SKEW
+# This may happen on a development virtual machine
+# SEE GITHUB ISSUE #7885 - https://github.com/Submitty/Submitty/issues/7885
+if [ "${VAGRANT}" == 1 ] || [ "${UTM}" == 1 ]; then
+    sudo service ntp stop
+    sudo ntpd -gq
+    sudo service ntp start
+    sudo timedatectl set-timezone America/New_York
+fi
 
 ########################################################################################################################
 ########################################################################################################################
@@ -206,6 +206,7 @@ else
     DAEMONPHP_GROUP="${DAEMON_GROUP}"
 fi
 DAEMONCGI_GROUP=$(jq -r '.daemoncgi_group' "${SUBMITTY_INSTALL_DIR}/config/submitty_users.json")
+DAEMONPHPCGI_GROUP=$(jq -r '.daemonphpcgi_group' "${SUBMITTY_INSTALL_DIR}/config/submitty_users.json")
 SUPERVISOR_USER=$(jq -r '.supervisor_user' "${SUBMITTY_INSTALL_DIR}/config/submitty_users.json")
 
 ########################################################################################################################
@@ -331,9 +332,9 @@ if [ "${WORKER}" == 0 ]; then
     chmod  751                                        "${SUBMITTY_DATA_DIR}/courses"
     chown  "${PHP_USER}:${PHP_USER}"                  "${SUBMITTY_DATA_DIR}/user_data"
     chmod  770                                        "${SUBMITTY_DATA_DIR}/user_data"
-    chown  "root:${DAEMONCGI_GROUP}"                  "${SUBMITTY_DATA_DIR}/vcs"
+    chown  "root:${DAEMONPHPCGI_GROUP}"               "${SUBMITTY_DATA_DIR}/vcs"
     chmod  770                                        "${SUBMITTY_DATA_DIR}/vcs"
-    chown  "root:${DAEMONCGI_GROUP}"                  "${SUBMITTY_DATA_DIR}/vcs/git"
+    chown  "${CGI_USER}:${DAEMONPHPCGI_GROUP}"        "${SUBMITTY_DATA_DIR}/vcs/git"
     chmod  770                                        "${SUBMITTY_DATA_DIR}/vcs/git"
 fi
 
