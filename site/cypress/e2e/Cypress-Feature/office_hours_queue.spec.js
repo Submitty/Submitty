@@ -244,7 +244,9 @@ describe('test office hours queue', () => {
         disableQueue();
     });
     it('Enabling push and sound notifications as Instructor', () => {
-        switchUser('instructor');
+        cy.login('instructor');
+        enableQueue();
+        cy.visit(['sample', 'office_hours_queue']);
 
         // Assert that switches exist and assign aliases
         cy.get('[data-testid="notification-switch-container"]').first().as('switch-container');
@@ -265,5 +267,7 @@ describe('test office hours queue', () => {
         cy.get('@sound-switch').click();
         cy.window().its('push_notifications_enabled').should('equal', false);
         cy.window().its('audible_notifications_enabled').should('equal', false);
+
+        disableQueue();
     });
 });
