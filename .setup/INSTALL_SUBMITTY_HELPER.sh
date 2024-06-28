@@ -56,20 +56,6 @@ else
     RESTART_DAEMONS=( )
 fi
 
-########################################################################################################################
-########################################################################################################################
-# FORCE CORRECT TIME SKEW
-# This may happen on a development virtual machine
-# SEE GITHUB ISSUE #7885 - https://github.com/Submitty/Submitty/issues/7885
-if [[[ "${VAGRANT}" == 1 ] || [ "${UTM}" == 1 ]] && [ "${CI}" == 0 ]]; then
-    sudo service ntp stop
-    sudo ntpd -gq
-    sudo service ntp start
-    sudo timedatectl set-timezone America/New_York
-fi
-
-########################################################################################################################
-########################################################################################################################
 # this script must be run by root or sudo
 if [[ "$UID" -ne "0" ]] ; then
     echo "ERROR: This script must be run by root or sudo"
@@ -95,6 +81,17 @@ if [[ "$#" -ge 1 && "$1" != "test" && "$1" != "clean" && "$1" != "test_rainbow"
     exit 1
 fi
 
+########################################################################################################################
+########################################################################################################################
+# FORCE CORRECT TIME SKEW
+# This may happen on a development virtual machine
+# SEE GITHUB ISSUE #7885 - https://github.com/Submitty/Submitty/issues/7885
+if [[[ "${VAGRANT}" == 1 ] || [ "${UTM}" == 1 ]] && [ "${CI}" == 0 ]]; then
+    sudo service ntp stop
+    sudo ntpd -gq
+    sudo service ntp start
+    sudo timedatectl set-timezone America/New_York
+fi
 
 ########################################################################################################################
 ########################################################################################################################
