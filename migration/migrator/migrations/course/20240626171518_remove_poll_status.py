@@ -14,7 +14,7 @@ def up(config, database, semester, course):
     :param course: Code of course being migrated
     :type course: str
     """
-    database.execute("ALTER TABLE ONLY polls DROP COLUMN IF EXISTS status")
+    database.execute("ALTER TABLE polls DROP COLUMN IF EXISTS status")
 
 
 def down(config, database, semester, course):
@@ -30,4 +30,4 @@ def down(config, database, semester, course):
     :param course: Code of course being migrated
     :type course: str
     """
-    database.execute("ALTER TABLE ONLY polls ADD COLUMN IF NOT EXISTS status TEXT")
+    database.execute("ALTER TABLE polls ADD COLUMN IF NOT EXISTS status TEXT")
