@@ -152,6 +152,10 @@ form {
     width: calc(100% - 200px)
 }
 
+.response-container .poll-response-custom {
+    background-color: var(--standard-light-blue-gray);
+}
+
 .correct-tag-background {
     color: var(--standard-dark-green);
 }
