@@ -597,6 +597,12 @@ class RainbowCustomization extends AbstractModel {
             }
         }
 
+        if (isset($form_json->manual_grades)) {
+            foreach ($form_json->manual_grades as $manual_grade) {
+                $this->RCJSON->addManualGradeEntry($manual_grade);
+            }
+        }
+
         if (isset($form_json->display)) {
             foreach ($form_json->display as $display_option) {
                 $this->RCJSON->addDisplay($display_option);

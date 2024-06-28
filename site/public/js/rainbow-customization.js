@@ -270,7 +270,7 @@ function getGradeableBuckets() {
 function getPlagiarism() {
     const plagiarismData = [];
 
-    const tableBody = document.getElementById('table-body');
+    const tableBody = document.getElementById('plagiarism-table-body');
     const rows = tableBody.getElementsByTagName('tr');
 
     for (let i = 0; i < rows.length; i++) {
@@ -356,6 +356,28 @@ function addToPlagiarismTable() {
     document.getElementById('marks').value = '';
 }
 
+function getManualGrades() {
+    const manualGradeData = [];
+
+    const tableBody = document.getElementById('manual-grading-table-body');
+    const rows = tableBody.getElementsByTagName('tr');
+
+    for (let i = 0; i < rows.length; i++) {
+        const row = rows[i];
+        const user = row.cells[0].textContent;
+        const grade = row.cells[1].textContent;
+        const note = row.cells[2].textContent;
+
+        manualGradeData.push({
+            user: user,
+            grade: grade,
+            note: note,
+        });
+    }
+
+    return manualGradeData;
+}
+
 function addToManualGradingTable() {
     const USERID = document.getElementById('manual_grading_user_id').value.trim();
     const grade = document.getElementById('manual_grading_grade').value.trim();
@@ -403,11 +425,11 @@ function addToManualGradingTable() {
     const cellUSERID = newRow.insertCell();
     cellUSERID.textContent = USERID;
 
-    const cellGradeable = newRow.insertCell();
-    cellGradeable.textContent = grade;
+    const cellGrade = newRow.insertCell();
+    cellGrade.textContent = grade;
 
-    const cellPenalty = newRow.insertCell();
-    cellPenalty.textContent = note;
+    const cellNote = newRow.insertCell();
+    cellNote.textContent = note;
 
     const cellDelete = newRow.insertCell();
     const deleteLink = document.createElement('a');
@@ -527,6 +549,7 @@ function buildJSON() {
         gradeables: getGradeableBuckets(),
         messages: getMessages(),
         plagiarism: getPlagiarism(),
+        manual_grades: getManualGrades(),
     };
 
     ret = JSON.stringify(ret);

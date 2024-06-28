@@ -46,7 +46,7 @@ class RainbowCustomizationJSON extends AbstractModel {
         "Display the optional text message at the top of the page.", //messages
         "not used", //warning
         "Configure cutoffs and display the student's final term letter grade.", //final_grade
-        "not used", //manual_grade
+        "Manually assign final grades to specific students.", //manual_grade
         "Display the histogram of average overall grade and count of students with each final term letter grade.", //final_cutoff
         "Optional message for specific students that are only visible on the instructor gradebook, these messages are never displayed to students." //instructor_notes
     ];
@@ -220,6 +220,10 @@ class RainbowCustomizationJSON extends AbstractModel {
         if (isset($json->plagiarism)) {
             $this->plagiarism = $json->plagiarism;
         }
+
+        if (isset($json->manual_grades)) {
+            $this->manual_grades = $json->manual_grades;
+        }
     }
 
     /**
@@ -355,6 +359,31 @@ class RainbowCustomizationJSON extends AbstractModel {
         $this->plagiarism[] = $plagiarismEntry;
     }
 
+
+    /**
+     * Add a manual grade entry to existing array
+     *
+     * @param object{
+     *     "user": string,
+     *     "grade": string,
+     *     "note": string
+     * } $plagiarismEntry
+     */
+    public function addManualGradeEntry(object $manualGradeEntry): void {
+        $emptyArray = [
+            "user" => "",
+            "grade" => "",
+            "note" => ""
+        ];
+
+        $manualGradeArray = json_decode(json_encode($manualGradeEntry), true);
+
+        if ($manualGradeArray === $emptyArray) {
+            throw new BadArgumentException('Plagiarism entry may not be empty.');
+        }
+
+        $this->manual_grades[] = $manualGradeEntry;
+    }
 
 
     /**
