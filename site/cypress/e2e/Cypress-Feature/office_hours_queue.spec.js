@@ -260,10 +260,12 @@ describe('test office hours queue', () => {
         cy.window().its('audible_notifications_enabled').should('equal', false);
         cy.get('@push-switch').click();
         cy.get('@sound-switch').click();
+        cy.wait(3000); // Transition takes 0.4 s
         cy.window().its('push_notifications_enabled').should('equal', true);
         cy.window().its('audible_notifications_enabled').should('equal', true);
         cy.get('@push-switch').click();
         cy.get('@sound-switch').click();
+        cy.wait(3000); // Transition takes 0.4 s
         cy.window().its('push_notifications_enabled').should('equal', false);
         cy.window().its('audible_notifications_enabled').should('equal', false);
 
