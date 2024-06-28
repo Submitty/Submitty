@@ -23,7 +23,6 @@ const disableQueue = () => {
     cy.get('[data-testid="queue-enabled"]').should('be.checked');
     cy.get('[data-testid="queue-enabled"]').uncheck();
 };
-
 const openNewQueue = (queueName, queueCode = '') => {
     cy.get('#nav-sidebar-queue').click();
     cy.get('[data-testid="toggle-new-queue"]').click();
