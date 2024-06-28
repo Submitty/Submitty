@@ -72,12 +72,6 @@ def toffoli_identity():
     qc.h(0)
     check(qc, "toffoli_identity")
     
-    qc = QuantumCircuit(3)
-    qc.h(0)
-    toffoli(qc)
-    qc.h(0)
-    check(qc, "toffoli_identity_no_z")
-    
     # qc = QuantumCircuit(3)
     # qc.h([0, 1])
     # toffoli(qc)
