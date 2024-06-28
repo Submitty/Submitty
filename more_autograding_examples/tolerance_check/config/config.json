@@ -2,17 +2,25 @@
   "assignment_message": "Calculate average and standard deviation given a list of number by filtering only positive numbers. Result expected with a precision of three decimal places.",
   "testcases": [
     {
-      "title" : "Avg and SD -- With and without Tolerance/Whitespace Comparison",
+      "title" : "Without Tolerance",
       "command" : [ "python3 *.py test_input.txt" ],
-      "points" : 5,
+      "points" : 10,
       "validation": [
         {
           "description": "Avg and SD -- without Tolerance",
           "method": "diff",
           "actual_file": "STDOUT.txt",
           "expected_file": "test_output.txt",
-          "deduction": 0.2
-        },
+          "deduction": 1,
+          "failure_message":"These files do not exactly match."
+        }
+      ]
+    },
+    {
+      "title" : "Ignoring Whitespace without Tolerance",
+      "command" : [ "python3 *.py test_input.txt" ],
+      "points" : 10,
+      "validation": [
         {
           "description": "Avg and SD -- Ignoring Whitespace without Tolerance",
           "method": "diff",
@@ -20,25 +28,42 @@
           "expected_file": "test_output.txt",
           "comparison" : "byLine",
           "ignoreWhitespace": true,
-          "deduction": 0.1
-        },
+          "deduction": 1,
+          "failure_message":"These files have non-whitespace differences."
+         }
+      ]
+    },
+    {
+      "title" : "Ignoring Whitespace with Tolerance",
+      "command" : [ "python3 *.py test_input.txt" ],
+      "points" : 10,
+      "validation": [
         {
           "description": "Avg and SD -- Ignoring Whitespace with Tolerance",
           "method": "diff",
           "tolerance": 0.05,
-		      "comparison" : "byLine",
+	  "comparison" : "byLine",
           "ignoreWhitespace": true,
           "actual_file": "STDOUT.txt",
           "expected_file": "test_output.txt",
-          "deduction": 0.6
-        },
+          "deduction": 1,
+          "failure_message":"These files have differences that exceed floating point tolerance."
+        }
+      ]
+    },
+    {
+      "title" : "Whitespace Comparison with Tolerance",
+      "command" : [ "python3 *.py test_input.txt" ],
+      "points" : 10,
+      "validation": [
         {
           "description": "Avg and SD -- Whitespace Comparison with Tolerance",
           "method": "diff",
           "tolerance": 0.05,
           "actual_file": "STDOUT.txt",
           "expected_file": "test_output.txt",
-          "deduction": 0.1
+          "deduction": 1,
+          "failure_message":"These files have difference in whitespace and/or exceed floating point tolerance."
         }
       ]
     }
