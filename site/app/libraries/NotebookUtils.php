@@ -1,6 +1,7 @@
 <?php
 
 declare(strict_types=1);
+
 namespace app\libraries;
 
 class NotebookUtils {
@@ -17,14 +18,13 @@ class NotebookUtils {
 
         foreach ($filedata['cells'] as $cell) {
             switch ($cell['cell_type']) {
-                case 'markdown': {
+                case 'markdown':
                     $cells[] = [
                         'type' => 'markdown',
                         'markdown_data' => implode($cell['source']),
                     ];
                     break;
-                }
-                case 'code': {
+                case 'code':
                     $cells[] = [
                         'type' => 'short_answer',
                         'label' => '',
@@ -37,7 +37,6 @@ class NotebookUtils {
                         'codemirror_mode' => $filedata['language_info']['codemirror_mode']['name'] ?? 'ipython',
                     ];
                     break;
-                }
                 default:
                     break;
             }

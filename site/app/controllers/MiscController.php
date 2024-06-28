@@ -173,8 +173,7 @@ class MiscController extends AbstractController {
             readfile($corrected_name);
             $this->core->getOutput()->renderString($path);
         }
-        // TODO: Do this "properly" by determining a better MIME type via FileUtils::getContentType()
-        elseif (pathinfo($path, PATHINFO_EXTENSION) === 'ipynb') {
+        elseif (pathinfo($path, PATHINFO_EXTENSION) === 'ipynb') { // TODO: Do this "properly" by determining a better MIME type via FileUtils::getContentType()
             $this->core->getOutput()->setContentOnly(true);
             CodeMirrorUtils::loadDefaultDependencies($this->core);
             $this->core->getOutput()->addInternalJs('gradeable-notebook.js');
