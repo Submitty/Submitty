@@ -2,7 +2,7 @@
 
 namespace app\libraries;
 
-use League\CommonMark\Block\Renderer\FencedCodeRenderer;
+use League\CommonMark\Extension\CommonMark\Renderer\Block\FencedCodeRenderer;
 
 class CustomFencedCodeRenderer extends CustomCodeBlockRenderer {
     public function __construct() {

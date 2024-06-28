@@ -4,19 +4,18 @@ namespace app\libraries;
 
 use app\controllers\GlobalController;
 use app\exceptions\OutputException;
-use app\libraries\FileUtils;
 use app\models\Breadcrumb;
 use app\views\ErrorView;
 use League\CommonMark\Extension\Autolink\AutolinkExtension;
 use League\CommonMark\Extension\Table\TableExtension;
-use League\CommonMark\Block\Element\FencedCode;
-use League\CommonMark\Block\Element\IndentedCode;
-use League\CommonMark\Inline\Element\Code;
-use League\CommonMark\CommonMarkConverter;
-use League\CommonMark\Environment;
-use app\libraries\CustomCodeInlineRenderer;
-use Aptoma\Twig\Extension\MarkdownEngine\PHPLeagueCommonMarkEngine;
-use Aptoma\Twig\Extension\MarkdownExtension;
+use League\CommonMark\Extension\CommonMark\Node\Inline\Code;
+use League\CommonMark\MarkdownConverter;
+use League\CommonMark\Environment\Environment;
+use League\CommonMark\Extension\CommonMark\CommonMarkCoreExtension;
+use League\CommonMark\Extension\CommonMark\Node\Block\FencedCode;
+use League\CommonMark\Extension\CommonMark\Node\Block\IndentedCode;
+use Submitty\Twig\Extension\PHPLeagueMarkdownEngine;
+use Submitty\Twig\Extension\MarkdownExtension;
 use Ds\Set;
 
 /**
@@ -159,16 +158,21 @@ HTML;
             }));
         }
 
-        $environment = Environment::createCommonMarkEnvironment();
+        $config = [
+            'html_input' => 'escape',
+            'allow_unsafe_links' => false,
+            'max_nesting_level' => 10
+        ];
+        $environment = new Environment($config);
         $environment->addExtension(new AutolinkExtension());
         $environment->addExtension(new TableExtension());
-        $environment->addBlockRenderer(FencedCode::class, new CustomFencedCodeRenderer());
-        $environment->addBlockRenderer(IndentedCode::class, new CustomIndentedCodeRenderer());
-        $environment->addInlineRenderer(Code::class, new CustomCodeInlineRenderer());
-        $environment->mergeConfig([]);
+        $environment->addExtension(new CommonMarkCoreExtension());
+        $environment->addRenderer(FencedCode::class, new CustomFencedCodeRenderer());
+        $environment->addRenderer(IndentedCode::class, new CustomIndentedCodeRenderer());
+        $environment->addRenderer(Code::class, new CustomCodeInlineRenderer()); //Inline renderer
 
-        $converter = new CommonMarkConverter(['html_input' => 'escape', 'allow_unsafe_links' => false, 'max_nesting_level' => 10], $environment);
-        $engine = new PHPLeagueCommonMarkEngine($converter);
+        $converter = new MarkdownConverter($environment);
+        $engine = new PHPLeagueMarkdownEngine($converter);
         $this->twig->addExtension(new MarkdownExtension($engine));
     }
 

@@ -2,7 +2,7 @@
 
 namespace app\libraries;
 
-use League\CommonMark\Block\Renderer\IndentedCodeRenderer;
+use League\CommonMark\Extension\CommonMark\Renderer\Block\IndentedCodeRenderer;
 
 class CustomIndentedCodeRenderer extends CustomCodeBlockRenderer {
     public function __construct() {

@@ -2,22 +2,24 @@
 
 namespace app\libraries;
 
-use League\CommonMark\Block\Element\AbstractBlock;
-use League\CommonMark\Block\Renderer\BlockRendererInterface;
-use League\CommonMark\ElementRendererInterface;
-use League\CommonMark\HtmlElement;
+use League\CommonMark\Extension\CommonMark\Renderer\Block\IndentedCodeRenderer;
+use League\CommonMark\Renderer\NodeRendererInterface;
+use League\CommonMark\Renderer\ChildNodeRendererInterface;
+use League\CommonMark\Extension\CommonMark\Renderer\Block\FencedCodeRenderer;
+use League\CommonMark\Node\Node;
+use League\CommonMark\Util\HtmlElement;
 
-class CustomCodeBlockRenderer implements BlockRendererInterface {
-    /** @var \League\CommonMark\Block\Renderer\IndentedCodeRenderer|\League\CommonMark\Block\Renderer\FencedCodeRenderer */
+class CustomCodeBlockRenderer implements NodeRendererInterface {
+    /** @var IndentedCodeRenderer|FencedCodeRenderer */
     protected $baseRenderer;
 
     public function __construct($baseRenderer) {
         $this->baseRenderer = new $baseRenderer(['default']);
     }
 
-    public function render(AbstractBlock $block, ElementRendererInterface $htmlRenderer, bool $inTightList = false) {
-        $element = $this->baseRenderer->render($block, $htmlRenderer, $inTightList);
-        $num_lines = substr_count($element->getContents(), "\n");
+    public function render(Node $node, ChildNodeRendererInterface $childRenderer, bool $inTightList = false) {
+        $element = $this->baseRenderer->render($node, $childRenderer);
+        $num_lines = substr_count($element, "\n");
         return new HtmlElement('div', ["style" => "position: relative;"], $this->addLineNumbers($element, $num_lines));
     }
 
