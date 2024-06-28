@@ -2343,7 +2343,7 @@ class ElectronicGraderController extends AbstractController {
      * Route for saving the marks the submitter received for a component
      */
     #[Route("/courses/{_semester}/{_course}/gradeable/{gradeable_id}/grading/graded_gradeable/change_grade_version", methods: ["POST"])]
-    public function ajaxUpdateGradedVersionForStudent($gradeable_id){
+    public function ajaxUpdateGradedVersionForStudent(string $gradeable_id): void {
         $anon_id = $_POST['anon_id'] ?? null;
         $graded_version = intval($_POST['graded_version'] ?? null);
 
@@ -2351,7 +2351,7 @@ class ElectronicGraderController extends AbstractController {
             $this->core->getOutput()->renderJsonFail('Missing anon_id parameter');
             return;
         }
-        if ($graded_version === null || $graded_version < 1) {
+        if ($graded_version < 1) {
             $this->core->getOutput()->renderJsonFail('Invalid graded_version parameter');
             return;
         }
@@ -2386,7 +2386,7 @@ class ElectronicGraderController extends AbstractController {
 
         try {
             // do thing
-            $this->core->getQueries()->changeGradedVersionOfGradeable($gradeable_id, $submitter_id, $graded_version);
+            $this->core->getQueries()->changeGradedVersionOfGradeable($gradeable_id, intval($submitter_id), $graded_version);
             $this->core->getOutput()->renderJsonSuccess();
         }
         catch (\InvalidArgumentException $e) {
@@ -2394,7 +2394,7 @@ class ElectronicGraderController extends AbstractController {
         }
         catch (\Exception $e) {
             $this->core->getOutput()->renderJsonError($e->getMessage());
-        } 
+        }
     }
 
     /**

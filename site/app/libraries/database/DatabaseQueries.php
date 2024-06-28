@@ -7563,7 +7563,7 @@ AND gc_id IN (
      * @param string $gradeable_id
      * @param int    $submitter_id User or Team id
      */
-    public function changeGradedVersionOfGradeable($gradeable_id, $submitter_id, $version) {
+    public function changeGradedVersionOfGradeable($gradeable_id, $submitter_id, int $version): void {
         $this->course_db->query(
             'UPDATE gradeable_component_data AS gcd
             SET gcd_graded_version = ?

@@ -785,7 +785,7 @@ function ajaxVerifyAllComponents(gradeable_id, anon_id) {
  * @param {string} anon_id
  * @return {Promise} Rejects except when the response returns status 'success'
  */
-function ajaxChangeGradedVersion(gradeable_id, anon_id, component_version){
+function ajaxChangeGradedVersion(gradeable_id, anon_id, component_version) {
     return new Promise((resolve, reject) => {
         $.getJSON({
             type: 'POST',
@@ -793,8 +793,8 @@ function ajaxChangeGradedVersion(gradeable_id, anon_id, component_version){
             url: buildCourseUrl(['gradeable', gradeable_id, 'grading', 'graded_gradeable', 'change_grade_version']),
             data: {
                 anon_id,
-                'graded_version': component_version,
-                'csrf_token': csrfToken,
+                graded_version: component_version,
+                csrf_token: csrfToken,
             },
             success: function (response) {
                 if (response.status !== 'success') {
@@ -3286,11 +3286,11 @@ function refreshGradedComponentHeader(component_id, showMarkList) {
 /**
  * Resolves all version conflicts for the gradeable by re-submitting the current marks for every component
  */
-function updateAllComponentVersions(){
-    if(confirm("Are you sure you want to update the version for all components without separately inspecting each component?")){
+function updateAllComponentVersions() {
+    if (confirm('Are you sure you want to update the version for all components without separately inspecting each component?')) {
         ajaxChangeGradedVersion(getGradeableId(), getAnonId(), getDisplayVersion()).then(() => {
             location.reload();
-        })
+        });
     }
 }
 
