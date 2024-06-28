@@ -1,4 +1,6 @@
 /* exported addToTable, deleteRow */
+/* global buildCourseUrl csrfToken displayErrorMessage displaySuccessMessage*/
+
 const benchmarks_with_input_fields = ['lowest_a-', 'lowest_b-', 'lowest_c-', 'lowest_d'];
 
 // eslint-disable-next-line no-unused-vars
@@ -433,140 +435,174 @@ function showLogButton(responseData) {
     $('#save_status_log').append(`<pre>${responseData}</pre>`);
 }
 
-function checkAutoRGStatus() {
-    // Send request
-    $.getJSON({
-        type: 'POST',
-        // eslint-disable-next-line no-undef
-        url: buildCourseUrl(['reports', 'rainbow_grades_status']),
-        // eslint-disable-next-line no-undef
-        data: {csrf_token: csrfToken},
-        success: function (response) {
-            if (response.status === 'success') {
-
-                $('#save_status').html('Rainbow grades successfully generated!');
-                showLogButton(response.data);
-
-            }
-            else if (response.status === 'fail') {
-
-                $('#save_status').html('A failure occurred generating rainbow grades');
-                showLogButton(response.message);
-
-            }
-            else {
-
-                $('#save_status').html('Internal Server Error');
-                console.log(response);
-
-            }
-        },
-        error: function (response) {
-            console.error(`Failed to parse response from server: ${response}`);
-        },
-    });
-}
 
 
-
-
-//This function attempts to create a new customization.json server-side based on form input
-// eslint-disable-next-line no-unused-vars
-function ajaxUpdateJSON(successCallback, errorCallback) {
-
-    try {
-        $('#save_status').html('Saving...');
-
-        // eslint-disable-next-line no-undef
-        const url = buildCourseUrl(['reports', 'rainbow_grades_customization']);
-        $.getJSON({
-            type: 'POST',
-            url: url,
-            // eslint-disable-next-line no-undef
-            data: {json_string: buildJSON(), csrf_token: csrfToken},
-            success: function (response) {
-                if (response.status === 'success') {
-                    $('#save_status').html('Generating rainbow grades, please wait...');
-
-                    // Call the server to see if auto_rainbow_grades has completed
-                    checkAutoRGStatus();
-                    //successCallback(response.data);
-                }
-                else if (response.status === 'fail') {
-                    $('#save_status').html('A failure occurred saving customization data');
-                    //errorCallback(response.message, response.data);
-                }
-                else {
-                    $('#save_status').html('Internal Server Error');
-                    console.error(response.message);
-                }
-            },
-            error: function (response) {
-                console.error(`Failed to parse response from server: ${response}`);
-            },
-        });
-    }
-    catch (err) {
-        $('#save_status').html(err);
-    }
-}
-
-
-$(document).ready(() => {
-    // Attach a change event handler to your radio buttons. If they are dynamically loaded, use event delegation.
-    $(document).on('change', "input[name='customization']", function() {
-        // Get the value of the selected radio button
+function sendSelectedValue() {
+    return new Promise((resolve, reject) => {
         const selected_value = $("input[name='customization']:checked").val();
-
-        console.log("Selected value: " + selected_value);
         // eslint-disable-next-line no-undef
         const url = buildCourseUrl(['reports', 'rainbow_grades_customization', 'manual_or_gui']);
         const formData = new FormData();
+        // eslint-disable-next-line no-undef
         formData.append('csrf_token', csrfToken);
         formData.append('selected_value', selected_value);
+
         $.ajax({
             url: url,
             type: 'POST',
             data: formData,
-            processData: false,  // Do not process data
-            contentType: false,  // Do not set any content type header
+            processData: false,
+            contentType: false,
+            dataType: 'json',
             success: function (data) {
-                // handle the server response
-                console.log("Data: " + JSON.stringify(data));
-                if (data['status'] === 'fail') {
-                    alert(data['message']);
-                    $("input[name='customization']:checked").focus();
+                console.log(data);
+                if (data['status'] === 'success') {
+                    resolve(data);
+                }
+                else {
+                    reject(data['message']);
                 }
             },
             error: function (jqXHR, textStatus, errorThrown) {
-                // handle request errors
-                console.log("Error status: " + textStatus);
-                console.log("Error thrown: " + errorThrown);
-                console.log("Server response: " + jqXHR.status + " " + jqXHR.statusText);
+                console.log('AJAX error:', jqXHR, textStatus, errorThrown);
+                let errorMsg = `An error occurred: Server response: ${jqXHR.status} ${jqXHR.statusText}`;
+                try {
+                    // Attempt to parse JSON, if there's HTML, this will fail
+                    const responseText = jqXHR.responseText;
+                    const jsonStartIndex = responseText.indexOf('{');
+                    if (jsonStartIndex !== -1) {
+                        const jsonResponse = JSON.parse(responseText.substring(jsonStartIndex));
+                        errorMsg = `${jsonResponse.message || jsonResponse.status}`;
+                    }
+                } catch (e) {
+                    console.error('Failed to parse JSON response', e);
+                }
+                reject(errorMsg);
             },
-
         });
     });
-});
+}
+
+// eslint-disable-next-line no-unused-vars
+function runBuild() {
+    // eslint-disable-next-line no-undef
+    const url = buildCourseUrl(['reports', 'build_form']);
+
+    sendSelectedValue()
+        .then(() => {
+            $.ajax({
+                type: 'POST',
+                url: url,
+                data: {csrf_token: csrfToken},
+                dataType: 'json',
+                success: function(response) {
+                    console.log(response);
+                    if (response.status === 'success') {
+                        $('#save_status').html('Generating rainbow grades, please wait...');
+                        checkBuildStatus();
+                    }
+                    else {
+                        $('#save_status').html('An error occurred while building');
+                    }
+                },
+                error: function(jqXHR, textStatus, errorThrown) {
+                    console.log('AJAX error:', jqXHR, textStatus, errorThrown);
+                    $('#save_status').html('An error occurred while making the request');
+                },
+            });
+        })
+        .catch((error) => {
+            console.error('Caught error:', error);
+            $('#save_status').html(`An error occurred: ${error}`);
+        });
+}
 
 
+
+function checkBuildStatus() {
+    $.ajax({
+        type: 'POST',
+        url: buildCourseUrl(['reports', 'rainbow_grades_status']),
+        data: { csrf_token: csrfToken },
+        dataType: 'json',
+        success: function (response) {
+            console.log(response);
+            if (response.status === 'success') {
+                $('#save_status').html('Rainbow grades successfully generated!');
+                showLogButton(response.data.data);
+            }
+            else if (response.status === 'fail') {
+                $('#save_status').html('A failure occurred generating rainbow grades');
+                showLogButton(response.message);
+            }
+            else {
+                $('#save_status').html('Internal Server Error');
+                console.log(response);
+            }
+        },
+        error: function (xhr, status, error) {
+            console.error(`Failed to parse response from server: ${xhr.responseText}`);
+        }
+    });
+}
+
+//This function attempts to create a new customization.json server-side based on form input
+// eslint-disable-next-line no-unused-vars
+// function ajaxUpdateJSON(successCallback, errorCallback) {
+//
+//     try {
+//         $('#save_status').html('Saving...');
+//
+//         // eslint-disable-next-line no-undef
+//         const url = buildCourseUrl(['reports', 'rainbow_grades_customization']);
+//         $.getJSON({
+//             type: 'POST',
+//             url: url,
+//             // eslint-disable-next-line no-undef
+//             data: {json_string: buildJSON(), csrf_token: csrfToken},
+//             success: function (response) {
+//                 if (response.status === 'success') {
+//                     $('#save_status').html('Generating rainbow grades, please wait...');
+//
+//                     // Call the server to see if auto_rainbow_grades has completed
+//                     checkAutoRGStatus();
+//                     //successCallback(response.data);
+//                 }
+//                 else if (response.status === 'fail') {
+//                     $('#save_status').html('A failure occurred saving customization data');
+//                     //errorCallback(response.message, response.data);
+//                 }
+//                 else {
+//                     $('#save_status').html('Internal Server Error');
+//                     console.error(response.message);
+//                 }
+//             },
+//             error: function (response) {
+//                 console.error(`Failed to parse response from server: ${response}`);
+//             },
+//         });
+//     }
+//     catch (err) {
+//         $('#save_status').html(err);
+//     }
+// }
+
+
+
+//
+//
 // $(document).ready(() => {
 //     // Attach a change event handler to the entire content container
-//     $(document).on('change', ".content input", function(event) {
+//     $(document).on('change', '.content input', (event) => {
 //         // Build the URL for the AJAX request
+//         $('#save_status').html('Change detected Saving ...');
+//         // eslint-disable-next-line no-undef
 //         const url = buildCourseUrl(['reports', 'rainbow_grades_customizationnn']);
 //
 //         // Prepare form data to be sent with the AJAX request
 //         const formData = new FormData();
 //         formData.append('csrf_token', csrfToken);
-//
-//         // Optionally, you can send additional data such as the changed element's value
-//         if ($(event.target).is("input[name='customization']")) {
-//             const selected_value = $("input[name='customization']:checked").val();
-//             formData.append('selected_value', selected_value);
-//         }
-//
-//         // Perform the AJAX request
+//         formData.append('json_string', buildJSON());
 //         $.ajax({
 //             url: url,
 //             type: 'POST',
@@ -579,10 +615,12 @@ $(document).ready(() => {
 //             success: function(response) {
 //                 // Handle the server response
 //                 console.log(`Response: ${response}`);
-//                 if (response === "success") {
-//                     alert("Customization successfully generated.");
-//                 } else {
-//                     alert("An error occurred while generating the customization.");
+//                 if (response === 'success') {
+//                     $('#save_status').html('All changes saved');
+//                     // alert("Customization successfully generated.");
+//                 }
+//                 else {
+//                     alert(`An error occurred: ${response}`);
 //                 }
 //             },
 //             error: function(jqXHR, textStatus, errorThrown) {
@@ -596,59 +634,113 @@ $(document).ready(() => {
 // });
 
 
+//
+// $(document).ready(() => {
+//     // A list of input ids we want to listen to
+//     const ids = ['input1', 'input2', 'input3'];
+//
+//     // Attach a change event handler to each specific input element
+//     ids.forEach(id => {
+//         $(`#${id}`).on('change', (event) => {
+//             saveChanges();
+//         });
+//     });
+//
+//
+//     // If textarea content has changed and it loses focus, save it
+//     $('#cust_messages_textarea').on('change', () => {
+//         saveChanges();
+//     });
+//     const target = document.querySelector('#buckets_used_list');
+//     // create an observer instance
+//     // eslint-disable-next-line no-unused-vars
+//     const observer = new MutationObserver((mutations) => {
+//         saveChanges();
+//     });
+//     // configuration of the observer:
+//     const config = { attributes: true, childList: true, characterData: true };
+//     // pass in the target node, as well as the observer options
+//     observer.observe(target, config);
+//
+//
+//
+//
+// });
+
 
 $(document).ready(() => {
-    // Attach a change event handler to the entire content container
-    $(document).on('change', ".content input", function(event) {
-        // Build the URL for the AJAX request
-        const url = buildCourseUrl(['reports', 'rainbow_grades_customizationnn']);
+    // A list of input ids we want to listen to
+    const ids = ['input1', 'input2', 'input3'];
 
-        // Prepare form data to be sent with the AJAX request
-        const formData = new FormData();
-        formData.append('csrf_token', csrfToken);
-        // data: {json_string: buildJSON(), csrf_token: csrfToken},
-        // Collect data to be sent
-        const jsonData = collectFormData(); // Function to collect necessary form data as JSON string
-        // formData.append('json_string', JSON.stringify(jsonData));
-        formData.append('json_string', buildJSON());
-
-        // Perform the AJAX request
-        $.ajax({
-            url: url,
-            type: 'POST',
-            data: formData,
-            processData: false,  // Do not process data
-            contentType: false,  // Do not set any content type header
-            beforeSend: function(xhr) {
-                xhr.setRequestHeader('X-Requested-With', 'XMLHttpRequest');  // Mark request as AJAX
-            },
-            success: function(response) {
-                // Handle the server response
-                console.log(`Response: ${response}`);
-                if (response === "success") {
-                    alert("Customization successfully generated.");
-                } else {
-                    alert("An error occurred: " + response);
-                }
-            },
-            error: function(jqXHR, textStatus, errorThrown) {
-                // Handle request errors
-                console.error(`Error status: ${textStatus}`);
-                console.error(`Error thrown: ${errorThrown}`);
-                console.error(`Server response: ${jqXHR.status} ${jqXHR.statusText}`);
-            },
+    // Attach a change event handler to each specific input element
+    ids.forEach(id => {
+        $(`#${id}`).on('change', (event) => {
+            saveChanges();
         });
     });
 
-    function collectFormData() {
-        // Collect form data and return it as an object
-        let formData = {};
-        $(".content input").each(function() {
-            formData[$(this).attr('name')] = $(this).val();
+    // Attach a change, keyup, and paste event handler to the textarea
+    $('#cust_messages_textarea').on('change keyup paste', () => {
+        displayChangeDetectedMessage();
+        // If textarea content has changed and it loses focus, save it
+        $('#cust_messages_textarea').on('change', () => {
+            saveChanges();
         });
-        return formData;
-    }
+    });
+
+    // Attach a focusout event handler to all input and textarea elements within #gradeables after user finishes typing
+    $('#gradeables').find('input, textarea').on('focusout', () => {
+        saveChanges();
+    });
+
+    // create an observer instance to observe changes within #gradeables
+    const target = document.querySelector('#gradeables');
+    const observer = new MutationObserver((mutations) => {
+        displayChangeDetectedMessage();
+    });
+
+    // Configure the observer and start observing
+    observer.observe(target, {
+        childList: true, // report changes to direct children
+        subtree: true, // also observe all descendants,
+        attributes: true // observe change in attributes
+    });
 });
+
+
+function saveChanges() {
+    $('#save_status').html('Change detected Saving ...');
+    const url = buildCourseUrl(['reports', 'rainbow_grades_customizationnn']);
+    const formData = new FormData();
+    formData.append('csrf_token', csrfToken);
+    formData.append('json_string', buildJSON());
+
+    $.ajax({
+        url: url,
+        type: 'POST',
+        data: formData,
+        processData: false,
+        contentType: false,
+        beforeSend: function(xhr) {
+            xhr.setRequestHeader('X-Requested-With', 'XMLHttpRequest');
+        },
+        success: function(response) {
+            console.log(`Response: ${response}`);
+            if (response === 'success') {
+                $('#save_status').html('All changes saved');
+            }
+            else {
+                alert(`An error occurred: ${response}`);
+            }
+        },
+        error: function(jqXHR, textStatus, errorThrown) {
+            console.error(`Error status: ${textStatus}`);
+            console.error(`Error thrown: ${errorThrown}`);
+            console.error(`Server response: ${jqXHR.status} ${jqXHR.statusText}`);
+        },
+    });
+}
+
 
 
 
@@ -675,6 +767,8 @@ function setInputsVisibility(elem) {
             $(`.${benchmark}`).hide();
         }
     }
+
+
 
     // If all boxes are unchecked can hide benchmark percent box and all per-gradeable curve options
     if (getSelectedCurveBenchmarks().length === 0) {
@@ -760,7 +854,7 @@ $(document).ready(() => {
 
     // Register change handlers to update the status message when form inputs change
     $("input[name*='display_benchmarks']").change(() => {
-        displayChangeDetectedMessage();s
+        displayChangeDetectedMessage();
     });
 
     $('#cust_messages_textarea').on('change keyup paste', () => {
@@ -812,11 +906,11 @@ $(document).ready(() => {
     // File input change event
     $('#config-upload').on('change', function() {
         const selected_file = $(this)[0].files[0];
-        console.log("Selected File: ", selected_file);
+        console.log('Selected File: ', selected_file);
 
         // eslint-disable-next-line no-undef
         const url = buildCourseUrl(['reports', 'rainbow_grades_customization', 'upload']);
-        console.log("URL: ", url);
+        console.log('URL: ', url);
 
         const formData = new FormData();
         formData.append('csrf_token', csrfToken);
@@ -826,23 +920,36 @@ $(document).ready(() => {
             url: url,
             type: 'POST',
             data: formData,
-            processData: false,  // Do not process data
-            contentType: false,  // Do not set any content type header
-            success: function (data) {
-                console.log("Data: " + JSON.stringify(data));
+            processData: false,
+            contentType: false,
+            success: function (jsonData) {
+                const data = JSON.parse(jsonData);
+                console.log(`Data: ${JSON.stringify(data)}`);
 
-                // Error handling based on your previous example
+                // Check if server reports that file exists
+                const manual_customization_exists = data['data']['manual_customization_exists'];
+                console.log(`manual_customization_exists: ${manual_customization_exists}`);
+
                 if (data['status'] === 'fail') {
-                    alert(data['message']);
-                    $("#config-upload").focus();
-                } else {
-                    alert('File uploaded successfully');
+                    displayErrorMessage(data['message']);
+                    $('#config-upload').focus();
+                }
+                else {
+                    displaySuccessMessage('Manual Customization uploaded successfully');
+                    // Toggle visibility of an element based on whether manual_customization_exists
+                    // Replace '#element-selector' with the actual selector of your element.
+                    if (manual_customization_exists) {
+                        $('#customization-options').show();   // Show if true
+                    }
+                    else {
+                        $('#customization-options').hide();   // Hide if false
+                    }
                 }
             },
             error: function (jqXHR, textStatus, errorThrown) {
-                console.log("Error status: " + textStatus);
-                console.log("Error thrown: " + errorThrown);
-                console.log("Server response: " + jqXHR.status + " " + jqXHR.statusText);
+                console.log(`Error status: ${textStatus}`);
+                console.log(`Error thrown: ${errorThrown}`);
+                console.log(`Server response: ${jqXHR.status} ${jqXHR.statusText}`);
             },
         });
 
@@ -850,3 +957,21 @@ $(document).ready(() => {
         $(this).val('');
     });
 });
+
+
+
+$(document).ready(() => {
+
+    $('#toggle-json').on('click', function(e) {
+        e.preventDefault();
+        $('#customization-json').toggle();
+        if ($('#customization-json').is(':visible')) {
+            $(this).html('Hide JSON');
+        }
+        else {
+            $(this).html('Show JSON');
+        }
+    });
+});
+
+

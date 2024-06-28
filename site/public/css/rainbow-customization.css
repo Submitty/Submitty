@@ -212,3 +212,25 @@ hr {
 .override + div.gradeable-li-right-of-input i.fa-exclamation-triangle {
     display: inline-block;
 }
+
+
+/*#btn-build-customization {*/
+/*    background-image: linear-gradient(to right, red, orange, yellow, green, blue, indigo, violet);*/
+/*    color: white; !* Make the text color white to ensure it's readable against the rainbow background *!*/
+/*    border: none; !* Remove the default border *!*/
+/*}*/
+
+/*#btn-build-customization:hover {*/
+/*    filter: brightness(85%); !* Slightly darken button on hover *!*/
+/*}*/
+
+#btn-build-customization {
+
+    border: none; /* Remove the default border */
+}
+
+#btn-build-customization:hover {
+    background-image: linear-gradient(to right, red, orange, yellow, green, blue, indigo, violet);
+    color: white; /* Make the text color white to ensure it's readable against the rainbow background */
+    filter: brightness(85%); /* Slightly darken button on hover */
+}

@@ -650,9 +650,17 @@ class ReportController extends AbstractController {
             $student_full = Utils::getAutoFillData($students);
             $this->core->getOutput()->enableMobileViewport();
             $gradeables = $this->core->getQueries()->getAllGradeablesIdsAndTitles();
-
+            $json = null;
+            $customization_path = FileUtils::joinPaths($this->core->getConfig()->getCoursePath(), "rainbow_grades", "manual_customization.json");
+//            if (file_exists($customization_path)) {
+//                $json = file_get_contents($customization_path);
+//            }
             // Print the form
             $this->core->getOutput()->renderTwigOutput('admin/RainbowCustomization.twig', [
+                'manual_customization_download_url' => $this->core->buildCourseUrl(['reports', 'rainbow_grades_customization', 'manual_download']),
+                'gui_customization_download_url' => $this->core->buildCourseUrl(['reports', 'rainbow_grades_customization', 'gui_download']),
+
+                'json' => $json,
                 'customization_upload_url' => $this->core->buildCourseUrl(['reports', 'rainbow_grades_customization', 'upload']),
                 "manual_customization_exists" => $customization->doesManualCustomizationExist(),
                 "customization_data" => $customization->getCustomizationData(),
@@ -679,6 +687,43 @@ class ReportController extends AbstractController {
                 'csrfToken' => $this->core->getCsrfToken(),
             ]);
         }
+    }
+
+
+    #[Route("/courses/{_semester}/{_course}/reports/build_form", methods: ['POST'])]
+    public function executeBuildForm() {
+        // Execute your function
+        $this->BuildForm();
+
+        // Send a success response
+        return new MultiResponse(
+            JsonResponse::getSuccessResponse(['status' => 'success']),
+            null
+        );
+    }
+
+
+    public function BuildForm() {
+
+        // Configure json to go into jobs queue
+        $job_json = (object) [];
+        $job_json->job = 'RunAutoRainbowGrades';
+        $job_json->semester = $this->core->getConfig()->getTerm();
+        $job_json->course = $this->core->getConfig()->getCourse();
+
+        // Encode
+        $job_json = json_encode($job_json, JSON_PRETTY_PRINT);
+
+        // Create path to new jobs queue json
+        $path = '/var/local/submitty/daemon_job_queue/auto_rainbow_' .
+            $this->core->getConfig()->getTerm() .
+            '_' .
+            $this->core->getConfig()->getCourse() .
+            '.json';
+
+        // Place in queue
+        file_put_contents($path, $job_json);
+        file_put_contents('/var/local/submitty/courses/s24/sample/rainbow_grades/works.json', $job_json);
     }
 
     #[Route("/courses/{_semester}/{_course}/reports/rainbow_grades_customization/upload", methods: ["POST"])]
@@ -720,35 +765,114 @@ class ReportController extends AbstractController {
 
         // Remove the temp uploaded file
 //        unlink($upload['tmp_name']);
+        $manual_customization_exists =  file_exists($destination_path);
 
         $msg = 'Rainbow Grades Customization uploaded';
         $this->core->addSuccessMessage($msg);
-        return new MultiResponse(
-            JsonResponse::getSuccessResponse([
-                'customization_path' => $rainbow_grades_dir
-            ]),
-            null,
-            new RedirectResponse($redirect_url)
-        );
+
+//        return new MultiResponse(
+//            JsonResponse::getSuccessResponse([
+//                'customization_path' => $rainbow_grades_dir,
+//                'manual_customization_exists' => $manual_customization_exists
+//            ]),
+//            null,
+//            new RedirectResponse($redirect_url)
+//        );
+        if (!empty($_SERVER['HTTP_X_REQUESTED_WITH']) && strtolower($_SERVER['HTTP_X_REQUESTED_WITH']) === 'xmlhttprequest') {
+            // This is an AJAX request, respond with JSON
+            return JsonResponse::getSuccessResponse([
+                'customization_path' => $rainbow_grades_dir,
+                'manual_customization_exists' => $manual_customization_exists
+            ]);
+        } else {
+            // This is not an AJAX request, redirect accordingly
+            return new MultiResponse(
+                JsonResponse::getSuccessResponse([
+                    'customization_path' => $rainbow_grades_dir,
+                    'manual_customization_exists' => $manual_customization_exists
+                ]),
+                null,
+                new RedirectResponse($redirect_url)
+            );
+        }
+    }
+
+
+    #[Route("/courses/{_semester}/{_course}/reports/rainbow_grades_customization/manual_download", methods: ["GET"])]
+    public function downloadRainbowConfig() {
+        $rainbow_grades_dir = FileUtils::joinPaths($this->core->getConfig()->getCoursePath(), "rainbow_grades");
+        $file_path = FileUtils::joinPaths($rainbow_grades_dir, 'manual_customization.json');
+
+        if (!file_exists($file_path)) {
+            $msg = 'Download failed: File not found';
+            $this->core->addErrorMessage($msg);
+            $redirect_url = $this->core->buildCourseUrl(['reports', 'rainbow_grades_customization']);
+            return new MultiResponse(
+                JsonResponse::getErrorResponse($msg),
+                null,
+                new RedirectResponse($redirect_url)
+            );
+        }
+
+        // Set headers and read the file
+        header('Content-Type: application/json');
+        header("Content-Transfer-Encoding: Binary");
+        header("Content-disposition: attachment; filename=\"" . basename($file_path) . "\"");
+
+        readfile($file_path);
+    }
+
+    #[Route("/courses/{_semester}/{_course}/reports/rainbow_grades_customization/gui_download", methods: ["GET"])]
+    public function downloadGUIRainbowConfig() {
+        $rainbow_grades_dir = FileUtils::joinPaths($this->core->getConfig()->getCoursePath(), "rainbow_grades");
+        $file_path = FileUtils::joinPaths($rainbow_grades_dir, 'gui_customization.json');
+
+        if (!file_exists($file_path)) {
+            $msg = 'Download failed: File not found';
+            $redirect_url = $this->core->buildCourseUrl(['reports']);
+            return new MultiResponse(
+                JsonResponse::getErrorResponse($msg),
+                null,
+                new RedirectResponse($redirect_url)
+            );
+        }
+
+        // Set headers and read the file
+        header('Content-Type: application/json');
+        header("Content-Transfer-Encoding: Binary");
+        header("Content-disposition: attachment; filename=\"" . basename($file_path) . "\"");
+
+        readfile($file_path);
     }
 
 
 
+    /**
+     * Handles the setting of Rainbow Grades customization based on user selection.
+     *
+     * This method is triggered via a POST request to set the customization option
+     * for Rainbow Grades to either 'manual' or 'gui'. It performs the following steps:
+     * 1. Logs the method call for debugging purposes.
+     * 2. Extracts the 'selected_value' from the POST data.
+     * 3. Validates the 'selected_value' to ensure it's provided and valid.
+     * 4. Determines the source file path based on the selected customization type.
+     * 5. Copies the source customization file to the destination path.
+     * 6. Returns a success response if the operation is successful, otherwise returns an error response.
+     *
+     * @return JsonResponse
+     */
     #[Route('/courses/{_semester}/{_course}/reports/rainbow_grades_customization/manual_or_gui', methods: ['POST'])]
     public function setRainbowGradeCustomization(): JsonResponse
     {
         // Debug: Check if the method is hit
         error_log("setRainbowGradeCustomization method called", 3, "/var/local/submitty/courses/s24/sample/rainbow_grades/checkerror.txt");
 
-        // Extract the value
         // Extract the value from $_POST
         $selectedValue = $_POST['selected_value'] ?? null;
-
 
         // Handle invalid data
         if (!$selectedValue) {
             $msg = 'Invalid request: No selected value provided.';
-            $this->core->addErrorMessage($msg);
             return JsonResponse::getErrorResponse($msg);
         }
 
@@ -766,67 +890,56 @@ class ReportController extends AbstractController {
                 break;
             default:
                 $msg = 'Invalid request: Unknown selected value.';
-                $this->core->addErrorMessage($msg);
                 return JsonResponse::getErrorResponse($msg);
         }
 
         // Copy the source file to the destination
         if (!copy($customization_src, $customization_dest)) {
             $msg = 'File copy failed: Could not copy file.';
-            $this->core->addErrorMessage($msg);
             return JsonResponse::getErrorResponse($msg);
         }
 
         $msg = 'Rainbow Grades Customization set successfully';
-        $this->core->addSuccessMessage($msg);
 
         // Response as JsonResponse using getSuccessResponse
-        return JsonResponse::getSuccessResponse(['status' => 'success', 'selected_value' => $selectedValue]);
+        return JsonResponse::getSuccessResponse(['status' => 'success', 'selected_value' => $selectedValue, 'message' => $msg ]);
     }
 
 
-    #[Route("/courFses/{_semester}/{_course}/reports/rainbow_grades_status")]
+
+    #[Route('/courses/{_semester}/{_course}/reports/rainbow_grades_status', methods: ['POST'])]
     public function autoRainbowGradesStatus() {
-        // Create path to the file we expect to find in the jobs queue
         $jobs_file = '/var/local/submitty/daemon_job_queue/auto_rainbow_' .
             $this->core->getConfig()->getTerm() .
             '_' .
             $this->core->getConfig()->getCourse() .
             '.json';
 
-        // Create path to 'processing' file in jobs queue
         $processing_jobs_file = '/var/local/submitty/daemon_job_queue/PROCESSING_auto_rainbow_' .
             $this->core->getConfig()->getTerm() .
             '_' .
             $this->core->getConfig()->getCourse() .
             '.json';
 
-        // Get the max time to wait before timing out
         $max_wait_time = self::MAX_AUTO_RG_WAIT_TIME;
 
-        // Check the jobs queue every second to see if the job has finished yet
         while (file_exists($jobs_file) && $max_wait_time) {
             sleep(1);
             $max_wait_time--;
             clearstatcache();
         }
 
-        // Jobs queue daemon actually changes the name of the job by prepending PROCESSING onto the filename
-        // We must also wait for that file to be removed
-        // Check the jobs queue every second to see if the job has finished yet
         while (file_exists($processing_jobs_file) && $max_wait_time) {
             sleep(1);
             $max_wait_time--;
             clearstatcache();
         }
 
-        // Check the course auto_debug_output.txt to ensure no exceptions were thrown
         $debug_output_path = '/var/local/submitty/courses/' .
             $this->core->getConfig()->getTerm() . '/' .
             $this->core->getConfig()->getCourse() .
             '/rainbow_grades/auto_debug_output.txt';
 
-        // Look over the output file to see if any part of the process failed
         try {
             $failure_detected = FileUtils::areWordsInFile($debug_output_path, ['Exception', 'Aborted', 'failed']);
         }
@@ -835,17 +948,106 @@ class ReportController extends AbstractController {
         }
 
         $debug_contents = file_get_contents($debug_output_path);
+        $debug_contents = trim($debug_contents);
+        $was_successful = strrpos($debug_contents, 'Done') === (strlen($debug_contents) - strlen('Done'));
 
-        // If we finished the previous loops before max_wait_time hit 0 then the file successfully left the jobs queue
-        // implying that it finished
-        if ($max_wait_time && $failure_detected == false) {
-            $this->core->getOutput()->renderJsonSuccess($debug_contents);
+        if ($max_wait_time && $failure_detected === false && $was_successful) {
+            return JsonResponse::getSuccessResponse(['status' => 'success', 'data' => $debug_contents]);
         }
         else {
-            // Else we timed out or something else went wrong
-            $this->core->getOutput()->renderJsonFail($debug_contents);
+            return JsonResponse::getFailResponse($debug_contents);
         }
+
     }
+
+
+
+
+//    #[Route("/courFses/{_semester}/{_course}/reports/rainbow_grades_status")]
+//    public function autoRainbowGradesStatus() {
+//        // Create path to the file we expect to find in the jobs queue
+//        $jobs_file = '/var/local/submitty/daemon_job_queue/auto_rainbow_' .
+//            $this->core->getConfig()->getTerm() .
+//            '_' .
+//            $this->core->getConfig()->getCourse() .
+//            '.json';
+//
+//        // Create path to 'processing' file in jobs queue
+//        $processing_jobs_file = '/var/local/submitty/daemon_job_queue/PROCESSING_auto_rainbow_' .
+//            $this->core->getConfig()->getTerm() .
+//            '_' .
+//            $this->core->getConfig()->getCourse() .
+//            '.json';
+//
+//        // Get the max time to wait before timing out
+//        $max_wait_time = self::MAX_AUTO_RG_WAIT_TIME;
+//
+//        // Check the jobs queue every second to see if the job has finished yet
+//        while (file_exists($jobs_file) && $max_wait_time) {
+//            sleep(1);
+//            $max_wait_time--;
+//            clearstatcache();
+//        }
+//
+//        // Jobs queue daemon actually changes the name of the job by prepending PROCESSING onto the filename
+//        // We must also wait for that file to be removed
+//        // Check the jobs queue every second to see if the job has finished yet
+//        while (file_exists($processing_jobs_file) && $max_wait_time) {
+//            sleep(1);
+//            $max_wait_time--;
+//            clearstatcache();
+//        }
+//
+//        // Check the course auto_debug_output.txt to ensure no exceptions were thrown
+//        $debug_output_path = '/var/local/submitty/courses/' .
+//            $this->core->getConfig()->getTerm() . '/' .
+//            $this->core->getConfig()->getCourse() .
+//            '/rainbow_grades/auto_debug_output.txt';
+//
+//        // Look over the output file to see if any part of the process failed
+//        try {
+//            $failure_detected = FileUtils::areWordsInFile($debug_output_path, ['Exception', 'Aborted', 'failed']);
+//        }
+//        catch (\Exception $e) {
+//            $failure_detected = true;
+//        }
+//
+//        $debug_contents = file_get_contents($debug_output_path);
+//
+//        // If we finished the previous loops before max_wait_time hit 0 then the file successfully left the jobs queue
+//        // implying that it finished
+//        if ($max_wait_time && $failure_detected == false) {
+////            $this->core->getOutput()->renderJsonSuccess($debug_contents);
+////            return JsonResponse::getSuccessResponse($debug_contents);
+//
+//            $debug_output_path = '/var/local/submitty/courses/' .
+//                $this->core->getConfig()->getTerm() . '/' .
+//                $this->core->getConfig()->getCourse() .
+//                '/rainbow_grades/passed.txt';
+//            // Send a success response
+//            return new MultiResponse(
+//                JsonResponse::getSuccessResponse(['status' => 'success']),
+//                null
+//            );
+//        }
+//        else {
+//            // Else we timed out or something else went wrong
+//            $this->core->getOutput()->renderJsonFail($debug_contents);
+////            return JsonResponse::getErrorResponse($debug_contents);
+//            $debug_output_path = '/var/local/submitty/courses/' .
+//                $this->core->getConfig()->getTerm() . '/' .
+//                $this->core->getConfig()->getCourse() .
+//                '/rainbow_grades/failed.txt';
+//
+//            // Send a success response
+//            return new MultiResponse(
+//                JsonResponse::getErrorResponse($debug_contents),
+//                null
+//            );
+//        }
+//    }
+
+
 
     /**
      * Generate full rainbow grades view for instructors
@@ -868,4 +1070,6 @@ class ReportController extends AbstractController {
             )
         );
     }
+
+
 }

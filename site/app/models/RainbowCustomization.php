@@ -551,28 +551,7 @@ class RainbowCustomization extends AbstractModel {
 
     }
 
-    public function BuildForm() {
-
-
-        // Configure json to go into jobs queue
-        $job_json = (object) [];
-        $job_json->job = 'RunAutoRainbowGrades';
-        $job_json->semester = $this->core->getConfig()->getTerm();
-        $job_json->course = $this->core->getConfig()->getCourse();
-
-        // Encode
-        $job_json = json_encode($job_json, JSON_PRETTY_PRINT);
-
-        // Create path to new jobs queue json
-        $path = '/var/local/submitty/daemon_job_queue/auto_rainbow_' .
-            $this->core->getConfig()->getTerm() .
-            '_' .
-            $this->core->getConfig()->getCourse() .
-            '.json';
-
-        // Place in queue
-        file_put_contents($path, $job_json);
-    }
+    
 
     public function error() {
         return $this->has_error;

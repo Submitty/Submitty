@@ -2,49 +2,8 @@
     <div id="rg_web_ui_loading">
         <p>Loading...</p>
     </div>
-
-    <div id="grade-report-customization-upload" class="card">
-        <div class="title-cont">
-            Upload a Rainbow Grades customization.json directly to Submitty
-        </div>
-        <div class="card-btn-cont">
-            <form action="{{ customization_upload_url }}" method="POST" enctype="multipart/form-data">
-                <input type="hidden" name="csrf_token" value="{{csrfToken}}">
-                <input type="file" id="config-upload" name="config_upload" style="display:none">
-
-                <button
-                    id="btn-upload-customization"
-                    class="btn btn-primary key_to_click"
-                    tabindex="0"
-                    type="button"
-                >
-                    Upload Customization
-                </button>
-            </form>
-        </div>
-    </div>
-
-
     <div id="rg_web_ui">
         <h1>Rainbow Grades Customization</h1>
-        <input type="hidden" name="csrf_token" value="{{ csrfToken }}" />
-        <form id="customizationForm">
-            {% if manual_customization_exists %}
-                <p>It appears that a manual customization file has been provided. Please specify the preferred file to be utilized for rendering Rainbow Grades:</p>
-
-                <p>Kindly note, in case the 'Automatic Nightly Processing for Rainbow Grades Generation' cron job has been enabled from the configuration page, the selected option will be applied to that scheduled task as well.</p>
-
-                <div>
-                    <input type="radio" id="manual_customization" name="customization" value="manual">
-                    <label for="manual_customization">Manual Customization</label>
-                </div>
-                <div>
-                    <input type="radio" id="gui_customization" name="customization" value="gui">
-                    <label for="gui_customization">GUI Customization</label>
-                </div>
-            {% endif %}
-        </form>
-
         {% if limited_functionality_mode %}
             <div id="limited_func_messages">
                 <p><strong>Notice:</strong> Rainbow Grades tools are running in limited functionality mode.  This means that grades summaries must be
@@ -56,17 +15,118 @@
         {% endif %}
 
         <div id="save_status_container" class="customization_item">
+            <button
+                id="btn-build-customization"
+                class="btn btn-primary key_to_click"
+                tabindex="0"
+                type="button"
+                onclick="runBuild()";
+            >
+                <i class="fas fa-magic-wand-sparkles" title="Download the file"></i>
+                Build
+            </button>
+
+
             <span id="status_label">Status: </span>
             <div id="save_status">
                 No changes to save
             </div>
             <div id="save_status_buttons">
-                <input id="save_status_button" class="key_to_click" tabindex="0" type="button" value="Save Changes" onclick="ajaxUpdateJSON();" />
                 <input id="show_log_button" type="button" value="Log" />
             </div>
             <div id="save_status_log"></div>
+
+
+
+{#            <span id="status_label">Status: </span>#}
+{#            <div id="save_status">#}
+{#                No changes to save#}
+{#            </div>#}
+{#            <div id="save_status_buttons">#}
+{#                <input id="save_status_button" class="key_to_click" tabindex="0" type="button" value="Save Changes" onclick="ajaxUpdateJSON();" />#}
+{#                <input id="show_log_button" type="button" value="Log" />#}
+{#            </div>#}
+{#            <div id="save_status_log"></div>#}
         </div>
+
+
+
+        <div id="manman" class="customization_item">
+            <div id="grade-report-customization-upload" class="card">
+                <div class="title-cont">
+                </div>
+                <div class="card-btn-cont">
+                    <form action="{{ customization_upload_url }}" method="POST" enctype="multipart/form-data">
+                        <input type="hidden" name="csrf_token" value="{{csrfToken}}">
+                        <input type="file" id="config-upload" name="config_upload" style="display:none">
+
+                        <button
+                            id="btn-upload-customization"
+                            class="btn btn-default key_to_click"
+                            tabindex="0"
+                            type="button"
+                            title="Upload a Rainbow Grades customization.json directly to Submitty"
+                        >
+                            <i class="fas fa-upload" title="Download the file"></i>
+                            Upload Manual Customization
+                        </button>
+                        <button id="btn-download-customization" class="btn btn-default key_to_click" tabindex="0" type="button"
+                                onclick="window.location.href='{{ manual_customization_download_url }}'">
+                            <i class="fas fa-download" title="Download the file"></i>
+                            Download Manual Customization
+                        </button>
+
+                        <button id="btn-download-gui-customization" class="btn btn-default key_to_click" tabindex="0" type="button"
+                                onclick="window.location.href='{{ gui_customization_download_url }}'">
+                            <i class="fas fa-download" title="Download the file"></i>
+                            Download GUI Customization
+                        </button>
+
+                    </form>
+                </div>
+            </div>
+        </div>
+
+
+        <div id="ask_which_customization" class="customization_item">
+            <fieldset>
+                <legend><h2>Customization</h2></legend>
+                <input type="hidden" name="csrf_token" value="{{ csrfToken }}" />
+                <form id="customizationForm">
+                    {% if manual_customization_exists %}
+                    <div id="customization-options" style="display:block;">
+                        {% else %}
+                        <div id="customization-options" style="display:none;">
+                            {% endif %}
+                            <p>It appears that a manual customization file has been provided. Please specify the preferred file to be utilized for rendering Rainbow Grades:</p>
+                            <div>
+                                <input type="radio" id="manual_customization" name="customization" value="manual" {{ manual_customization_exists ? 'checked' : '' }}>
+                                <label for="manual_customization">Manual Customization</label>
+                            </div>
+                            <div>
+                                <input type="radio" id="gui_customization" name="customization" value="gui" {{ manual_customization_exists ? '' : 'checked' }}>
+                                <label for="gui_customization">GUI Customization</label>
+                            </div>
+                        </div>
+
+                        {% if json is not null %}
+                            <button id="toggle-json">Show JSON</button>
+                            <div id="customization-json" style="display:none;">
+                                {% include 'misc/Markdown.twig' with {
+                                    content: '```json\n' ~ json ~ '\n```\n'
+                                } only %}
+                            </div>
+                        {% endif %}
+                    </div>
+                </form>
+            </fieldset>
+        </div>
+
+
+
+
         <div id="list_wrapper">
+
             <div id="display" class="customization_item">
                 <fieldset>
                     <legend><h2>Display</h2></legend>
