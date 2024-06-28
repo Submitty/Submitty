@@ -30,6 +30,7 @@
             "title" : "Toffoli Gate Identity",
             "command" : "python3 *.py toffoli_identity",
             "points" : 5,
+            "partial_credit": false,
             "validation" : [
                 {
                     "method" : "diff",
@@ -43,6 +44,7 @@
             "title" : "Toffoli Gate Identity (No Z Rotation)",
             "command" : "python3 *.py toffoli_identity_no_z",
             "points" : 5,
+            "partial_credit": false,
             "validation" : [
                 {
                     "method" : "diff",
