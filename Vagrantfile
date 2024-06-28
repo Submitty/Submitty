@@ -48,7 +48,7 @@ def gen_script(machine_name, worker: false, base: false)
         setup_cmd += ' --no_submissions'
       end
       if ON_CI
-        setup_cmd += ' -c'
+        setup_cmd += ' --ci'
       end
     end
   else

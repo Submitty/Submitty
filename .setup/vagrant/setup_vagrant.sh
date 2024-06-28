@@ -14,15 +14,26 @@ if [ -x "$(command -v pip3)" ]; then
     python3 ${SUBMITTY_REPOSITORY}/.setup/bin/reset_system.py
 fi
 
-OPTSTRING=":c"
-while getopts ${OPTSTRING} opt; do
-    case ${opt} in
-    c)
+CI=0
+PARAMS=""
+while (( "$#" )); do
+  case "$1" in
+    -c|--ci)
+      CI=1
+      shift
+      ;;
+    *) # preserve positional arguments
+      PARAMS="$PARAMS $1"
+      shift
+      ;;
+  esac
+done
+# set positional arguments in their proper place
+eval set -- "$PARAMS"
+if [[ "$CI" -ne "0" ]] ; then
     echo "This file is used to check if Submitty is being run in the Github Actions CI." > ${SUBMITTY_REPOSITORY}/.github_actions_ci_flag
     echo "Submitty is being run in the Github Actions CI."
-    ;;
-    esac
-done
+fi
 
 # Expand the default logical volume for Ubuntu
 lvresize -l +100%FREE /dev/mapper/ubuntu--vg-ubuntu--lv
