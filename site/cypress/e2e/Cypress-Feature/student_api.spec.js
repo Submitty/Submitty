@@ -3,7 +3,6 @@ import { getCurrentSemester } from '../../support/utils';
 
 describe('Tests cases for the Student API', () => {
     it('Should get correct responses', () => {
-
         getApiKey('instructor', 'instructor').then((key) => {
             cy.request({
                 method: 'GET',
@@ -68,28 +67,28 @@ describe('Tests cases for the Student API', () => {
                 // Requires VCS Subdirectory gradeable to be graded
                 if (Cypress.env('run_area') !== 'CI') {
                     const python_test = {
-                        'name': 'Python test',
-                        'details': 'python3 *.py',
-                        'is_extra_credit': false,
-                        'points_available': 5,
-                        'points_received': 5,
-                        'testcase_message': '',
+                        name: 'Python test',
+                        details: 'python3 *.py',
+                        is_extra_credit: false,
+                        points_available: 5,
+                        points_received: 5,
+                        testcase_message: '',
                     };
                     const submitted_pdf = {
-                        'name': 'Submitted a .pdf file',
-                        'details': '',
-                        'is_extra_credit': false,
-                        'points_available': 1,
-                        'points_received': 1,
-                        'testcase_message': '',
+                        name: 'Submitted a .pdf file',
+                        details: '',
+                        is_extra_credit: false,
+                        points_available: 1,
+                        points_received: 1,
+                        testcase_message: '',
                     };
                     const words = {
-                        'name': 'Required 500-1000 Words',
-                        'details': '',
-                        'is_extra_credit': false,
-                        'points_available': 1,
-                        'points_received': 0,
-                        'testcase_message': '',
+                        name: 'Required 500-1000 Words',
+                        details: '',
+                        is_extra_credit: false,
+                        points_available: 1,
+                        points_received: 0,
+                        testcase_message: '',
                     };
                     expect(data.test_cases[0]).to.contain(python_test);
                     expect(data.test_cases[1]).to.contain(submitted_pdf);
@@ -104,9 +103,9 @@ describe('Tests cases for the Student API', () => {
                 headers: {
                     Authorization: key,
                 }, body: {
-                    'user_id': 'student',
-                    'vcs_checkout': 'true',
-                    'git_repo_id': 'none',
+                    user_id: 'student',
+                    vcs_checkout: 'true',
+                    git_repo_id: 'none',
                 },
             }).then((response) => {
                 expect(response.body.status).to.equal('success');
@@ -118,7 +117,7 @@ describe('Tests cases for the Student API', () => {
                 url: `${Cypress.config('baseUrl')}/api/${getCurrentSemester()}/sample/gradeable/subdirectory_vcs_homework/values`,
                 headers: {
                     Authorization: key,
-                }, body:{},
+                }, body: {},
             }).then((response) => {
                 expect(response.body.status).to.equal('fail');
                 expect(response.body.message).to.equal('Method not allowed.');
@@ -130,7 +129,7 @@ describe('Tests cases for the Student API', () => {
                 url: `${Cypress.config('baseUrl')}/api/${getCurrentSemester()}/sample/gradeable/subdirectory_vcs_homework/values`,
                 headers: {
                     Authorization: 'key',
-                }, body:{},
+                }, body: {},
             }).then((response) => {
                 expect(response.body.status).to.equal('fail');
                 expect(response.body.message).to.equal('Unauthenticated access. Please log in.');
@@ -141,7 +140,7 @@ describe('Tests cases for the Student API', () => {
                 url: `${Cypress.config('baseUrl')}/api/${getCurrentSemester()}/sample/gradeable/subdirectory_vcs_homework/values?user_id=not_a_student`,
                 headers: {
                     Authorization: key,
-                }, body:{
+                }, body: {
                 },
             }).then((response) => {
                 expect(response.body.status).to.equal('fail');
@@ -153,7 +152,7 @@ describe('Tests cases for the Student API', () => {
                 url: `${Cypress.config('baseUrl')}/api/not/found/url`,
                 headers: {
                     Authorization: key,
-                }, body:{},
+                }, body: {},
             }).then((response) => {
                 expect(response.body.status).to.equal('fail');
                 expect(response.body.message).to.equal('Endpoint not found.');
