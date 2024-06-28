@@ -13,10 +13,10 @@ const testFormOpening = (rowId, formId) => {
 const getVisibleData = () => {
     const data = {};
 
-    cy.get('#givenname-row > button').invoke('text').then(text => data.givenName = text.trim());
-    cy.get('#familyname-row > button').invoke('text').then(text => data.familyName = text.trim());
-    cy.get('#pronouns-row > button').invoke('text').then(text => data.pronouns = text.trim());
-    cy.get('#secondary-email-row > button').invoke('text').then(text => data.secondaryEmail = text.trim());
+    cy.get('#givenname-row > button').invoke('text').then((text) => data.givenName = text.trim());
+    cy.get('#familyname-row > button').invoke('text').then((text) => data.familyName = text.trim());
+    cy.get('#pronouns-row > button').invoke('text').then((text) => data.pronouns = text.trim());
+    cy.get('#secondary-email-row > button').invoke('text').then((text) => data.secondaryEmail = text.trim());
 
     return data;
 };
@@ -44,8 +44,8 @@ const fillData = (data) => {
         cy.get('#user-secondary-email-change')
             .clear()
             .as('secondaryEmailInput');
-        data.secondaryEmail &&
-            cy.get('@secondaryEmailInput').type(data.secondaryEmail);
+        data.secondaryEmail
+        && cy.get('@secondaryEmailInput').type(data.secondaryEmail);
     });
 };
 
@@ -112,7 +112,7 @@ describe('Test cases revolving around user profile page', () => {
         // Display message when no search results are found
         cy.get('#select2-time_zone_drop_down-container').click({ force: true });
         cy.get('input[aria-controls="select2-time_zone_drop_down-results"]').type('Nonexistent Zone');
-        cy.get('.select2-results').should('contain.text', 'No results found').click({force: true});
+        cy.get('.select2-results').should('contain.text', 'No results found').click({ force: true });
     });
 
     it('Should error then succeed uploading profile photo', () => {

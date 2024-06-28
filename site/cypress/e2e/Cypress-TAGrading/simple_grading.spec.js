@@ -42,12 +42,9 @@ describe('Test cases revolving around simple grading lab', () => {
             cy.get('#simple-stats-popup').should('have.attr', 'style', 'display: block;');
             cy.get('#simple-stats-popup').find('[data-testid="close-button"]').click({ multiple: true });
             cy.get('#settings-popup').should('have.attr', 'style', 'display: none;');
-
         });
-
     });
 });
-
 
 describe('Test cases revolving around simple grading test', () => {
     before(() => {
@@ -94,6 +91,5 @@ describe('Test cases revolving around simple grading test', () => {
             cy.get('#simple-stats-popup').find('[data-testid="close-button"]').click({ multiple: true });
             cy.get('#settings-popup').should('have.attr', 'style', 'display: none;');
         });
-
     });
 });

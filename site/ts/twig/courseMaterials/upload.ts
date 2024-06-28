@@ -1,9 +1,9 @@
 export {};
 
 declare global {
-  interface Window {
-    isValidFileName: typeof isValidFileName;
-  }
+    interface Window {
+        isValidFileName: typeof isValidFileName;
+    }
 }
 
 function isValidFileName(file_name: string) {
@@ -16,7 +16,5 @@ function isValidFileName(file_name: string) {
     }
     return true;
 }
-
-
 
 window.isValidFileName = isValidFileName;
