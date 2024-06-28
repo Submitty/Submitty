@@ -65,6 +65,10 @@ rsync -rtz  ${SUBMITTY_REPOSITORY}/autograder/* ${SUBMITTY_INSTALL_DIR}/autograd
 find ${SUBMITTY_INSTALL_DIR}/sbin -type f -exec chown root:root {} \;
 find ${SUBMITTY_INSTALL_DIR}/sbin -type f -exec chmod 500 {} \;
 
+# allow the php site to run the pdf preview generator
+chown root:submitty_php ${SUBMITTY_INSTALL_DIR}/sbin/pdf_preview.sh
+chmod 550 ${SUBMITTY_INSTALL_DIR}/sbin/pdf_preview.sh
+
 # www-data needs to have access to this so that it can authenticate for git
 chown root:www-data ${SUBMITTY_INSTALL_DIR}/sbin/authentication.py
 chmod 550 ${SUBMITTY_INSTALL_DIR}/sbin/authentication.py

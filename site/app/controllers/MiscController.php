@@ -163,6 +163,35 @@ class MiscController extends AbstractController {
         $corrected_name = pathinfo($path, PATHINFO_DIRNAME) . "/" .  $file_name;
         $mime_type = mime_content_type($corrected_name);
         $file_type = FileUtils::getContentType($file_name);
+
+        if ($mime_type === "application/vnd.openxmlformats-officedocument.wordprocessingml.document") {
+            $course_path = $this->core->getConfig()->getCoursePath();
+            $doc_path = realpath($corrected_name);
+
+            if (str_starts_with($doc_path, $course_path)) {
+                $doc_subpath = substr($doc_path, strlen($course_path));
+                $pdf_name = "X" . str_replace('=', '_', base64_encode($doc_subpath)) . "X.pdf";
+                $pdf_path = FileUtils::joinPaths($course_path, "doc_previews", $pdf_name);
+
+                $script_file = realpath(FileUtils::joinPaths($this->core->getConfig()->getSubmittyInstallPath(), "sbin", "pdf_preview.sh"));
+
+                if (!file_exists($pdf_path)) {
+                    $script = $script_file . ' ' . escapeshellarg($doc_path) . ' ' . escapeshellarg($pdf_path);
+                    $output = `$script`;
+                }
+
+                if (file_exists($pdf_path)) {
+                    $this->core->getOutput()->useHeader(false);
+                    $this->core->getOutput()->useFooter(false);
+                    header("Content-type: " . "application/pdf");
+                    header('Content-Disposition: inline; filename="' . $file_name . '"');
+                    readfile($pdf_path);
+                    $this->core->getOutput()->renderString($pdf_path);
+                    return;
+                }
+            }
+        }
+
         if ($mime_type === "application/pdf" || (str_starts_with($mime_type, "image/") && $mime_type !== "image/svg+xml")) {
             $this->core->getOutput()->useHeader(false);
             $this->core->getOutput()->useFooter(false);
