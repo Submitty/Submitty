@@ -145,7 +145,7 @@
             <label for = "poll-custom-options" class="option-title credit-form-item">
                 Allow student-written responses?
             </label>
-            <input id ="poll-custom-options" class="credit-box credit-form-item" type="checkbox" name="poll-custom-options"  {{ poll is not null and poll.getAllowsCustomResponses() ? "checked" : "" }}>
+            <input id ="poll-custom-options" class="credit-box credit-form-item" type="checkbox" name="poll-custom-options" {{poll is not null and poll.getAllowsCustomResponses() ? "checked" : ""}}>
             <i>
                 <br />
                 Are you certain you want to allow student-written responses? Students will be able to submit responses that will be visible to other students.<br />
@@ -155,7 +155,7 @@
 
         <hr>
         <h2> Responses: </h2>
-        <div {{ is_survey ? "style='display:none'" : "style='display:inline-block'" }}> <!-- Show/Hide 'Toggle All' based on whether the poll is a survey -->
+        <div {{is_survey ? "style='display:none'" : "style='display:inline-block'"}}> <!-- Show/Hide 'Toggle All' based on whether the poll is a survey -->
             <input aria-label="Toggle All" id = "toggle-all" type="checkbox" name="toggle-all-options" onchange = "togglePollFormOptions()">
             <label for="toggle-all" id="toggle-all-label">Toggle All</label>
         </div>
