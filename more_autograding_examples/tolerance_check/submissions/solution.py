@@ -20,6 +20,8 @@ def average(lst):
 def standard_deviation(lst, avg):
     v = 0
     n = len(lst)
+    if (n<2):
+        return 0
     for element in lst:
         v += (element - avg)**2
     return (v/(n - 1))**0.5
@@ -27,9 +29,9 @@ def standard_deviation(lst, avg):
 
 def print_line(numneg, sd, avg):
     if (numneg == 0):
-        print("| NONE |" + "%10.3f" % avg + " |" + "%10.3f" % sd + " |")
+        print("|   NONE |" + "%10.3f" % avg + " |" + "%10.3f" % sd + " |")
     else:
-        print("|" + "%5d" % numneg + " |" + "%10.3f" % avg + " |" + "%10.3f" % sd + " |")
+        print("|" + "%7d" % numneg + " |" + "%10.3f" % avg + " |" + "%10.3f" % sd + " |")
 
 
 args = len(sys.argv)
@@ -43,8 +45,8 @@ txt_file = open(file, "r")
 
 content_list = txt_file.readlines()
 
-print ("  #neg         AVG          SD  ")
-print ("+------------------------------+")
+print (" #nonpos         AVG          SD  ")
+print ("+--------------------------------+")
 
 for line in content_list:
     tmp = list(filter(lambda x: not(is_positive_float(x)), line.rstrip().split(",")))
@@ -54,7 +56,6 @@ for line in content_list:
     lst = list(map(float, lst))
     avg = average(lst)
     sd = standard_deviation(lst, avg)
-
     print_line(numneg,avg,sd)
 
 print ("+------------------------------+")
