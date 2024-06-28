@@ -17,13 +17,13 @@ fi
 OPTSTRING=":c"
 while getopts ${OPTSTRING} opt; do
     case ${opt} in
-    c) CI="1";;
-    esac
-done
-if [[ "${CI}" == "1" ]]; then
+    c)
     echo "This file is used to check if Submitty is being run in the Github Actions CI." > ${SUBMITTY_REPOSITORY}/.github_actions_ci_flag
     echo "Submitty is being run in the Github Actions CI."
-fi
+    exit 1
+    ;;
+    esac
+done
 
 # Expand the default logical volume for Ubuntu
 lvresize -l +100%FREE /dev/mapper/ubuntu--vg-ubuntu--lv
