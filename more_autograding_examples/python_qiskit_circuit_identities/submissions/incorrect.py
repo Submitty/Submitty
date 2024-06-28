@@ -76,12 +76,17 @@ def toffoli_identity_no_z():
     toffoli_no_z(qc)
     check(qc, "toffoli_identity_no_z")
     
+    qc = QuantumCircuit(3)
+    qc.h(0)
+    toffoli(qc)
+    qc.h(0)
+    check(qc, "toffoli_identity_no_z")
+    
     # qc = QuantumCircuit(3)
     # qc.h([0, 1])
     # toffoli(qc)
     # qc.h([0, 1])
     # check(qc, "toffoli_identity_no_z")
-
     return
 
 if __name__=="__main__": 
