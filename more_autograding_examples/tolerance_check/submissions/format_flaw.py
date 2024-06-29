@@ -26,12 +26,13 @@ def standard_deviation(lst, avg):
         v += (element - avg)**2
     return (v/(n - 1))**0.5
 
+
 def print_line(numneg, avg, sd):
     if (numneg == 0):
         print(f"|   NONE |",end='')
     else:
         print(f"|{numneg:7d} |",end='')
-    print("%10.3f" % avg + " |" + "%10.3f" % sd + " |")
+    print(f" {str(round(avg, 3)):>9} | {str(round(sd, 3)):>9} |")
 
 
 args = len(sys.argv)
@@ -51,7 +52,7 @@ print ("+--------------------------------+")
 for line in content_list:
     tmp = list(filter(lambda x: not(is_positive_float(x)), line.rstrip().split(",")))
     numneg = len(tmp)
-    lst = list(filter(lambda x: True, line.rstrip().split(",")))
+    lst = list(filter(lambda x: is_positive_float(x), line.rstrip().split(",")))
     lst = list(map(float, lst))
     avg = average(lst)
     sd = standard_deviation(lst, avg)
