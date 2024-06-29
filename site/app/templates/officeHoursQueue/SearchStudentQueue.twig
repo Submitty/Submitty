@@ -1,0 +1,34 @@
+<div id='student_queue_history'>
+    <br>
+    <h2>Student's Queue History</h2>
+    <p>Student ID</p>
+    <div id='search-student-queue'>
+        <input id='search-student-queue-input' data-testid='search-student-queue-input' type='text' placeholder="Enter student's name">
+        <button id='search-student-queue-btn' data-testid='search-student-queue-btn' class='btn btn-primary' onclick='displayStudentHistory()'>Search</button>
+    </div>
+    <table id='student-queue-table' class='table table-striped'>
+        <caption></caption>
+        <thead>
+            <tr>
+                <th scope='col'>#</th>
+                <th scope='col'>Current State</th>
+                <th scope='col'>Queue</th>
+                <th scope='col'>Time Entered</th>
+                <th scope='col'>Time Removed</th>
+                <th scope='col'>Helped By</th>
+                <th scope='col'>Removed By</th>
+                <th scope='col'>Removal Method</th>
+            </tr>
+        </thead>
+        <tbody id='search-student-tbody'>
+
+        </tbody>
+    </table>
+</div>
+
+<script>
+    $('#search-student-queue-input').autocomplete({
+        source: {{ student_full | raw }}
+    });
+</script>
+
