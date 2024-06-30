@@ -12,7 +12,7 @@
  * @returns {CodeMirror}
  */
 function getLargeCodeMirror(attachment_elem, codemirror_config, show_accessibility_msg = true) {
-    if(show_accessibility_msg){
+    if (show_accessibility_msg) {
         const accessibility_msg = document.createElement('i');
         accessibility_msg.innerText = 'Press TAB to indent. Press ESC to advance from answer area.';
         accessibility_msg.style.fontSize = '75%';
