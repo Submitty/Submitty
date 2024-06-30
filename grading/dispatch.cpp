@@ -1330,7 +1330,6 @@ TestResults* dispatch::diff_doit (const TestCase &tc, const nlohmann::json& j) {
     }
   }
   if (comparison == std::string("byLinebyChar")) {
-    bool extraStudentOutputOk = j.value("extra_student_output",false);
     vectorOfLines text_a = stringToLines( student_file_contents, j );
     vectorOfLines text_b = stringToLines( expected_file_contents, j );
     answer = ses(j, &text_a, &text_b, true, extraStudentOutputOk );
