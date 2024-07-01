@@ -2,7 +2,7 @@
 /* exported loadDraft, initGradingInquirySocketClient, onComponentTabClicked, onGradeInquirySubmitClicked, onReady, onReplyTextAreaKeyUp */
 
 function loadDraft() {
-    //loadDraft function displays the saved draft text on grade inquiry box
+    // loadDraft function displays the saved draft text on grade inquiry box
     let draftContent = localStorage.getItem('draftContent');
     if (draftContent === null) {
         draftContent = {};
@@ -10,15 +10,13 @@ function loadDraft() {
     else {
         draftContent = JSON.parse(draftContent);
     }
-    const elements = document.getElementsByClassName('markdown-textarea fill-available ');
-    for (let i = 0; i < elements.length; i++) {
-        const element = elements[i];
-        const elementId = element.getAttribute('id');
-        const reply_text_area = $(element);
-        if (Object.prototype.hasOwnProperty.call(draftContent, elementId)) {
-            reply_text_area.val(draftContent[elementId]);
+    const elements = $('.markdown-textarea.fill-available');
+    elements.each(function () {
+        const elementId = $(this).attr('id');
+        if (draftContent.hasOwnProperty(elementId)) {
+            $(this).val(draftContent[elementId]);
         }
-    }
+    });
 }
 
 function onReady() {
