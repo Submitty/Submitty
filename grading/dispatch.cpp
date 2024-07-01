@@ -1299,8 +1299,6 @@ TestResults* dispatch::diffLineSwapOk_doit (const nlohmann::json& j,const std::s
 
 // ===================================================================
 
-
-
 TestResults* dispatch::diff_doit (const TestCase &tc, const nlohmann::json& j) {
   std::vector<std::pair<TEST_RESULTS_MESSAGE_TYPE, std::string> > messages;
   std::string student_file_contents;
@@ -1368,12 +1366,12 @@ bool dispatch::tolerance_diff(
   const bool &extraStudentOutputOk
 ) {
   // split student and expected files into words and an space count array
+  vectorOfWords  student_file_words;
+  vectorOfWords  expected_file_words;
   vectorOfSpaces student_spaces;
   vectorOfSpaces expected_spaces;
-  vectorOfWords  expected_file_words =
-    stringToWordsAndSpaceList(expected_file_contents, expected_spaces);
-  vectorOfWords  student_file_words =
-    stringToWordsAndSpaceList(student_file_contents, student_spaces);
+  stringToWordsAndSpaceList(student_file_contents, student_file_words, student_spaces);
+  stringToWordsAndSpaceList(expected_file_contents, expected_file_words, expected_spaces);
 
   std::size_t expected_lines = expected_file_words.size();
   std::size_t  student_lines =  student_file_words.size();
@@ -1384,8 +1382,15 @@ bool dispatch::tolerance_diff(
     std::vector<std::string> expected_line_words = expected_file_words[line];
     std::vector<std::string>  student_line_words =  student_file_words[line];
 
+    std::vector<int> expected_line_spaces = expected_spaces[line];
+    std::vector<int>  student_line_spaces =  student_spaces[line];
+
     std::size_t expected_words = expected_line_words.size();
     std::size_t  student_words =  student_line_words.size();
+
+    if (expected_words != student_words) {
+      std::cout << "number of words mismatch: " << expected_words << " != " << student_words << std::endl;
+    }
 
     std::size_t student_char_index = 0;
     bool line_has_diff = false;
@@ -1397,6 +1402,7 @@ bool dispatch::tolerance_diff(
       if (word != 0)   student_char_index += student_spaces[line][word - 1];
 
       if (word >= student_words) { // student has fewer words than expected
+        std::cout << "TOLERANCE: word count mismatch" << std::endl;
         line_has_diff = true;   // mark line as having a diff
         break;                  // break to next line
       }
@@ -1406,6 +1412,7 @@ bool dispatch::tolerance_diff(
       // we got two different words here: check if they are numbers
       // if not, mark line as having a diff and continue to next line
       if (!isNumber(expected_line_words[word]) || !isNumber(student_line_words[word])) {
+        std::cout << "TOLERANCE: isnumber mismatch" << std::endl;
         line_has_diff = true;
         break;
       }
@@ -1416,6 +1423,7 @@ bool dispatch::tolerance_diff(
       )};
 
       if (diff >= tolerance) {  // numbers are not within tolerance
+        std::cout << "TOLERANCE: tolerance mismatch" << std::endl;
         line_has_diff = true;   // mark line as having a diff
         break;                  // break to next line
       }
@@ -1434,6 +1442,11 @@ bool dispatch::tolerance_diff(
         }
       } // if (expected_line_words[word].size() != student_line_words[word].size())
     } // for (std::size_t word = 0; word < expected_words; word++)
+
+    bool wsle = whiteSpaceListsEqual(expected_spaces[line], student_spaces[line]);
+    if (!wsle) {
+      std::cout << "TOLERANCE: whitespacelines not equal" << std::endl;
+    }
 
     // if line doesn't have a diff other than values within tolerence,
     // ignore white spaces if needed, and increment equal_lines

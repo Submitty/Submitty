@@ -98,7 +98,7 @@ vectorOfLines wordsToLines(vectorOfWords text);
  * and each element in the vector is a vector containing the words  in each line.
  * Sets the spaceVector to a vector containing number of spaces between two words in line
  */
-vectorOfWords stringToWordsAndSpaceList(std::string const &input, vectorOfSpaces &spaceVector);
+void stringToWordsAndSpaceList(std::string const &input, vectorOfWords &contents, vectorOfSpaces &spaceVector);
 
 /* METHOD: recreateStudentFile
  * ARGS: studentFileWords: updated student words vector
