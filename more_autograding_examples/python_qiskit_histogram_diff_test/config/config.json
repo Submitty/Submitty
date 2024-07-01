@@ -1,0 +1,37 @@
+{
+	"required_capabilities": "python",
+    "grading_parameters": {
+        "TOTAL_POINTS": 5,
+        "AUTO_POINTS": 5
+    },
+    "autograding" : {
+        "work_to_details" : [ "*.png" ]
+    },
+    "autograding_method": "docker",
+    "container_options": {
+        "container_image": "submitty/qiskit:latest"
+    },
+    
+    "resource_limits" : {
+        "RLIMIT_NPROC" : 10
+    },
+
+    "testcases" : [
+        {
+            "title" : "Double H Gate Probabilities",
+            "command" : "python3 *.py",
+            "points" : 5,
+            "validation" : [
+                {
+                    "actual_file": "histogram.png",
+                    "expected_file": "expected.png",
+                    "method": "ImageDiff",
+                    "acceptable_threshold": ".01",
+                    "show_difference_image" : "always",
+                    "show_actual": "always",
+                    "show_expected":"always"
+                }
+            ]
+        }
+    ]
+}
