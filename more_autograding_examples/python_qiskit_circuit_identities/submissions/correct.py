@@ -6,10 +6,11 @@ import numpy as np
 
 def check(qc, name):
     qc.measure_all()
-    qc.draw("mpl", filename=repr(name + "_circuit"))
+    qc.draw("mpl", filename=str(name + "_circuit"))
+    qc.draw(filename=str(name + "_circuit"))
     results = Sampler().run(qc, shots=10, seed=0).result()
     statistics = results.quasi_dists[0].binary_probabilities()
-    plot_histogram(statistics, filename=repr(name + "_histogram"))
+    plot_histogram(statistics, filename=str(name + "_histogram"))
     print(statistics)
     return
 
