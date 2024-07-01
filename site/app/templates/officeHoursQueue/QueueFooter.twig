@@ -161,7 +161,6 @@
   function setNotificationState(turnOn){
     push_notifications_enabled = turnOn;
     localStorage.setItem('office_hour_queue_notifications', turnOn ? "true":"false");
-    $('#notification_btn').html(turnOn ? "Disable Notifications":"Enable Notifications");
   }
 
   function enableNotifications() {
