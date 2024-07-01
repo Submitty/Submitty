@@ -31,6 +31,9 @@ class RainbowCustomizationJSON extends AbstractModel {
      * @var object[]
      */
     private array $plagiarism = [];
+    /**
+     * @var object[]
+     */
     private array $manual_grade = [];
 
     // The order of allowed_display and allowed_display_description has to match
@@ -367,7 +370,7 @@ class RainbowCustomizationJSON extends AbstractModel {
      *     "user": string,
      *     "grade": string,
      *     "note": string
-     * } $plagiarismEntry
+     * } $manualGradeEntry
      */
     public function addManualGradeEntry(object $manualGradeEntry): void {
         $emptyArray = [
