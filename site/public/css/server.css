@@ -786,23 +786,18 @@ td > a.active-sort {
 }
 
 .dark-green-background{
-    background-color: #00ff11;
-    color: #000000;
+    background-color: var(--good-green);
+    color: --btn-text-black;
 }
 
 .dark-yellow-background{
-    background-color: #ffff00;
-    color: #000000;
+    background-color: var(--standard-light-yellow);
+    color: --btn-text-black;
 }
 
 .dark-red-background{
-    background-color: #ff2222;
-    color: #000000;
-}
-
-.dark-blue-background{
-    background-color: #0066ff;
-    color: #000000;
+    background-color: var(--error-alert-dark-red);
+    color: --btn-text-black;
 }
 
 .badge-container {
