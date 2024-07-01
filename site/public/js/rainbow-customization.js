@@ -549,7 +549,7 @@ function buildJSON() {
         gradeables: getGradeableBuckets(),
         messages: getMessages(),
         plagiarism: getPlagiarism(),
-        manual_grades: getManualGrades(),
+        manual_grade: getManualGrades(),
     };
 
     ret = JSON.stringify(ret);

@@ -31,7 +31,7 @@ class RainbowCustomizationJSON extends AbstractModel {
      * @var object[]
      */
     private array $plagiarism = [];
-    private array $manual_grades = [];
+    private array $manual_grade = [];
 
     // The order of allowed_display and allowed_display_description has to match
     const allowed_display = ['grade_summary', 'grade_details', 'benchmark_percent',
@@ -90,7 +90,7 @@ class RainbowCustomizationJSON extends AbstractModel {
      * @return array<object>
      */
     public function getManualGrades(): array {
-        return $this->manual_grades;
+        return $this->manual_grade;
     }
 
     /**
@@ -221,8 +221,8 @@ class RainbowCustomizationJSON extends AbstractModel {
             $this->plagiarism = $json->plagiarism;
         }
 
-        if (isset($json->manual_grades)) {
-            $this->manual_grades = $json->manual_grades;
+        if (isset($json->manual_grade)) {
+            $this->manual_grade = $json->manual_grade;
         }
     }
 
@@ -382,7 +382,7 @@ class RainbowCustomizationJSON extends AbstractModel {
             throw new BadArgumentException('Plagiarism entry may not be empty.');
         }
 
-        $this->manual_grades[] = $manualGradeEntry;
+        $this->manual_grade[] = $manualGradeEntry;
     }
 
 
