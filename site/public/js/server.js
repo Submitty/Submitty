@@ -2012,7 +2012,7 @@ document.addEventListener('DOMContentLoaded', tzWarn);
 function scorePillDark() {
     const html_element = document.querySelector('html');
     const badges = document.querySelectorAll('span.badge');
-    if (html_element.getAttribute('dark-theme') === 'dark' || html_element.getAttribute('data-black_mode') === 'black') {
+    if (html_element.getAttribute('data-theme') === 'dark' || html_element.getAttribute('data-black_mode') === 'black') {
         badges.forEach(badge => {
             if (badge.classList.contains('green-background')) {
                 badge.classList.remove('green-background');
