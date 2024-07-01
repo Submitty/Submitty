@@ -254,20 +254,22 @@ describe('test office hours queue', () => {
         cy.get('@switch-container').find('[data-testid="sound-notification-switch"]').first().as('sound-switch');
         cy.get('@push-switch').should('exist');
         cy.get('@sound-switch').should('exist');
+        cy.window().its('push_notifications_enabled').as('push-enabled');
+        cy.window().its('audible_notifications_enabled').as('audio-enabled');
 
         // Turn notification switches on, then turn them off
-        cy.window().its('push_notifications_enabled').should('equal', false);
-        cy.window().its('audible_notifications_enabled').should('equal', false);
+        cy.get('@push-enabled').should('equal', false);
+        cy.get('@audio-enabled').should('equal', false);
         cy.get('@push-switch').click();
         cy.get('@sound-switch').click();
         cy.wait(3000); // Transition takes 0.4 s
-        cy.window().its('push_notifications_enabled').should('equal', true);
-        cy.window().its('audible_notifications_enabled').should('equal', true);
+        cy.get('@push-enabled').should('equal', true);
+        cy.get('@audio-enabled').should('equal', true);
         cy.get('@push-switch').click();
         cy.get('@sound-switch').click();
         cy.wait(3000); // Transition takes 0.4 s
-        cy.window().its('push_notifications_enabled').should('equal', false);
-        cy.window().its('audible_notifications_enabled').should('equal', false);
+        cy.get('@push-enabled').should('equal', false);
+        cy.get('@audio-enabled').should('equal', false);
 
         disableQueue();
     });
