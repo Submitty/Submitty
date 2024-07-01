@@ -360,11 +360,13 @@ function addToTable() {
     document.getElementById('user_id').value = '';
     document.getElementById('g_id').value = '';
     document.getElementById('marks').value = '';
+    saveChanges();
 }
 
 function deleteRow(button) {
     const row = button.parentNode.parentNode;
     row.parentNode.removeChild(row);
+    saveChanges();
 }
 
 function getMessages() {
@@ -546,165 +548,41 @@ function checkBuildStatus() {
     });
 }
 
-//This function attempts to create a new customization.json server-side based on form input
-// eslint-disable-next-line no-unused-vars
-// function ajaxUpdateJSON(successCallback, errorCallback) {
-//
-//     try {
-//         $('#save_status').html('Saving...');
-//
-//         // eslint-disable-next-line no-undef
-//         const url = buildCourseUrl(['reports', 'rainbow_grades_customization']);
-//         $.getJSON({
-//             type: 'POST',
-//             url: url,
-//             // eslint-disable-next-line no-undef
-//             data: {json_string: buildJSON(), csrf_token: csrfToken},
-//             success: function (response) {
-//                 if (response.status === 'success') {
-//                     $('#save_status').html('Generating rainbow grades, please wait...');
-//
-//                     // Call the server to see if auto_rainbow_grades has completed
-//                     checkAutoRGStatus();
-//                     //successCallback(response.data);
-//                 }
-//                 else if (response.status === 'fail') {
-//                     $('#save_status').html('A failure occurred saving customization data');
-//                     //errorCallback(response.message, response.data);
-//                 }
-//                 else {
-//                     $('#save_status').html('Internal Server Error');
-//                     console.error(response.message);
-//                 }
-//             },
-//             error: function (response) {
-//                 console.error(`Failed to parse response from server: ${response}`);
-//             },
-//         });
-//     }
-//     catch (err) {
-//         $('#save_status').html(err);
-//     }
-// }
-
-
-
-//
-//
-// $(document).ready(() => {
-//     // Attach a change event handler to the entire content container
-//     $(document).on('change', '.content input', (event) => {
-//         // Build the URL for the AJAX request
-//         $('#save_status').html('Change detected Saving ...');
-//         // eslint-disable-next-line no-undef
-//         const url = buildCourseUrl(['reports', 'rainbow_grades_customizationnn']);
-//
-//         // Prepare form data to be sent with the AJAX request
-//         const formData = new FormData();
-//         formData.append('csrf_token', csrfToken);
-//         formData.append('json_string', buildJSON());
-//         $.ajax({
-//             url: url,
-//             type: 'POST',
-//             data: formData,
-//             processData: false,  // Do not process data
-//             contentType: false,  // Do not set any content type header
-//             beforeSend: function(xhr) {
-//                 xhr.setRequestHeader('X-Requested-With', 'XMLHttpRequest');  // Mark request as AJAX
-//             },
-//             success: function(response) {
-//                 // Handle the server response
-//                 console.log(`Response: ${response}`);
-//                 if (response === 'success') {
-//                     $('#save_status').html('All changes saved');
-//                     // alert("Customization successfully generated.");
-//                 }
-//                 else {
-//                     alert(`An error occurred: ${response}`);
-//                 }
-//             },
-//             error: function(jqXHR, textStatus, errorThrown) {
-//                 // Handle request errors
-//                 console.error(`Error status: ${textStatus}`);
-//                 console.error(`Error thrown: ${errorThrown}`);
-//                 console.error(`Server response: ${jqXHR.status} ${jqXHR.statusText}`);
-//             },
-//         });
-//     });
-// });
-
-
-//
-// $(document).ready(() => {
-//     // A list of input ids we want to listen to
-//     const ids = ['input1', 'input2', 'input3'];
-//
-//     // Attach a change event handler to each specific input element
-//     ids.forEach(id => {
-//         $(`#${id}`).on('change', (event) => {
-//             saveChanges();
-//         });
-//     });
-//
-//
-//     // If textarea content has changed and it loses focus, save it
-//     $('#cust_messages_textarea').on('change', () => {
-//         saveChanges();
-//     });
-//     const target = document.querySelector('#buckets_used_list');
-//     // create an observer instance
-//     // eslint-disable-next-line no-unused-vars
-//     const observer = new MutationObserver((mutations) => {
-//         saveChanges();
-//     });
-//     // configuration of the observer:
-//     const config = { attributes: true, childList: true, characterData: true };
-//     // pass in the target node, as well as the observer options
-//     observer.observe(target, config);
-//
-//
-//
-//
-// });
 
 
 $(document).ready(() => {
-    // A list of input ids we want to listen to
-    const ids = ['input1', 'input2', 'input3'];
-
-    // Attach a change event handler to each specific input element
-    ids.forEach(id => {
-        $(`#${id}`).on('change', (event) => {
-            saveChanges();
-        });
+    $("input[name*='display']").change(() => {
+        saveChanges();
     });
-
-    // Attach a change, keyup, and paste event handler to the textarea
-    $('#cust_messages_textarea').on('change keyup paste', () => {
-        displayChangeDetectedMessage();
-        // If textarea content has changed and it loses focus, save it
-        $('#cust_messages_textarea').on('change', () => {
-            saveChanges();
-        });
+    // Register change handlers to update the status message when form inputs change
+    $("input[name*='display_benchmarks']").change(() => {
+        saveChanges();
     });
-
+    $('#cust_messages_textarea').on('change keyup paste focusout', () => {
+        saveChanges();
+    });
+    $('.sections_and_labels').on('change keyup paste', () => {
+        saveChanges();
+    });
     // Attach a focusout event handler to all input and textarea elements within #gradeables after user finishes typing
     $('#gradeables').find('input, textarea').on('focusout', () => {
         saveChanges();
     });
 
-    // create an observer instance to observe changes within #gradeables
-    const target = document.querySelector('#gradeables');
-    const observer = new MutationObserver((mutations) => {
-        displayChangeDetectedMessage();
-    });
 
-    // Configure the observer and start observing
-    observer.observe(target, {
-        childList: true, // report changes to direct children
-        subtree: true, // also observe all descendants,
-        attributes: true // observe change in attributes
+    // https://stackoverflow.com/questions/15657686/jquery-event-detect-changes-to-the-html-text-of-a-div
+    // More Details https://developer.mozilla.org/en-US/docs/Web/API/MutationObserver
+    // select the target node
+    const target = document.querySelector('#buckets_used_list');
+    // create an observer instance
+    // eslint-disable-next-line no-unused-vars
+    const observer = new MutationObserver((mutations) => {
+        saveChanges();
     });
+    // configuration of the observer:
+    const config = { attributes: true, childList: true, characterData: true };
+    // pass in the target node, as well as the observer options
+    observer.observe(target, config);
 });
 
 
@@ -730,6 +608,7 @@ function saveChanges() {
                 $('#save_status').html('All changes saved');
             }
             else {
+                // lets keep the alert, because users may not notice it even if it fails
                 alert(`An error occurred: ${response}`);
             }
         },
@@ -741,12 +620,12 @@ function saveChanges() {
     });
 }
 
+$(document).ready(function() {
+    $("input[name='customization']").change(function() {
+        $('#save_status').html('Switched customization, need to rebuild');
+    });
+});
 
-
-
-function displayChangeDetectedMessage() {
-    $('#save_status').text('Changes detected, press "Save Changes" to save them.');
-}
 
 /**
  * Sets the visibility for 'benchmark percent' input boxes and also per-gradeable curve input boxes
@@ -848,41 +727,8 @@ $(document).ready(() => {
 
     });
 
-    $("input[name*='display']").change(() => {
-        displayChangeDetectedMessage();
-    });
-
-    // Register change handlers to update the status message when form inputs change
-    $("input[name*='display_benchmarks']").change(() => {
-        displayChangeDetectedMessage();
-    });
-
-    $('#cust_messages_textarea').on('change keyup paste', () => {
-        displayChangeDetectedMessage();
-    });
-
-    $('.sections_and_labels').on('change keyup paste', () => {
-        displayChangeDetectedMessage();
-    });
-    // plagiarism option-input
-    $('.option-input').on('change keyup paste', () => {
-        displayChangeDetectedMessage();
-    });
 
 
-    // https://stackoverflow.com/questions/15657686/jquery-event-detect-changes-to-the-html-text-of-a-div
-    // More Details https://developer.mozilla.org/en-US/docs/Web/API/MutationObserver
-    // select the target node
-    const target = document.querySelector('#buckets_used_list');
-    // create an observer instance
-    // eslint-disable-next-line no-unused-vars
-    const observer = new MutationObserver((mutations) => {
-        displayChangeDetectedMessage();
-    });
-    // configuration of the observer:
-    const config = { attributes: true, childList: true, characterData: true };
-    // pass in the target node, as well as the observer options
-    observer.observe(target, config);
 
     // Display auto rainbow grades log on button click
     $('#show_log_button').click(() => {
@@ -936,13 +782,15 @@ $(document).ready(() => {
                 }
                 else {
                     displaySuccessMessage('Manual Customization uploaded successfully');
-                    // Toggle visibility of an element based on whether manual_customization_exists
-                    // Replace '#element-selector' with the actual selector of your element.
                     if (manual_customization_exists) {
-                        $('#customization-options').show();   // Show if true
+                        $('#customization-options').show();
+                        $('#manual_customization').prop('checked', true);
+                        $('#gui_customization').prop('checked', false);
                     }
                     else {
-                        $('#customization-options').hide();   // Hide if false
+                        $('#customization-options').hide();
+                        $('#manual_customization').prop('checked', false);
+                        $('#gui_customization').prop('checked', true);
                     }
                 }
             },
@@ -952,26 +800,9 @@ $(document).ready(() => {
                 console.log(`Server response: ${jqXHR.status} ${jqXHR.statusText}`);
             },
         });
-
-        // Clear file input value after file is selected
         $(this).val('');
     });
 });
 
-
-
-$(document).ready(() => {
-
-    $('#toggle-json').on('click', function(e) {
-        e.preventDefault();
-        $('#customization-json').toggle();
-        if ($('#customization-json').is(':visible')) {
-            $(this).html('Hide JSON');
-        }
-        else {
-            $(this).html('Show JSON');
-        }
-    });
-});
 
 

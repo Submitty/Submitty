@@ -108,15 +108,6 @@
                                 <label for="gui_customization">GUI Customization</label>
                             </div>
                         </div>
-
-                        {% if json is not null %}
-                            <button id="toggle-json">Show JSON</button>
-                            <div id="customization-json" style="display:none;">
-                                {% include 'misc/Markdown.twig' with {
-                                    content: '```json\n' ~ json ~ '\n```\n'
-                                } only %}
-                            </div>
-                        {% endif %}
                     </div>
                 </form>
             </fieldset>

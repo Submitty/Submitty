@@ -650,17 +650,10 @@ class ReportController extends AbstractController {
             $student_full = Utils::getAutoFillData($students);
             $this->core->getOutput()->enableMobileViewport();
             $gradeables = $this->core->getQueries()->getAllGradeablesIdsAndTitles();
-            $json = null;
-            $customization_path = FileUtils::joinPaths($this->core->getConfig()->getCoursePath(), "rainbow_grades", "manual_customization.json");
-//            if (file_exists($customization_path)) {
-//                $json = file_get_contents($customization_path);
-//            }
             // Print the form
             $this->core->getOutput()->renderTwigOutput('admin/RainbowCustomization.twig', [
                 'manual_customization_download_url' => $this->core->buildCourseUrl(['reports', 'rainbow_grades_customization', 'manual_download']),
                 'gui_customization_download_url' => $this->core->buildCourseUrl(['reports', 'rainbow_grades_customization', 'gui_download']),
-
-                'json' => $json,
                 'customization_upload_url' => $this->core->buildCourseUrl(['reports', 'rainbow_grades_customization', 'upload']),
                 "manual_customization_exists" => $customization->doesManualCustomizationExist(),
                 "customization_data" => $customization->getCustomizationData(),

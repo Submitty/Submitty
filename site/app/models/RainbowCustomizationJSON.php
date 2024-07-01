@@ -352,6 +352,5 @@ class RainbowCustomizationJSON extends AbstractModel {
 
         // Write to file
         file_put_contents($course_path, $json);
-        chmod($course_path, 0660);
     }
 }
