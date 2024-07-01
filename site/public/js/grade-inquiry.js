@@ -48,6 +48,7 @@ function onReady() {
 
 function onComponentTabClicked(tab) {
     const component_id = $(tab).data('component_id');
+
     // show posts that pertain to this component_id
     $('.grade-inquiry').each(function() {
         if ($(this).data('component_id') !== component_id) {
@@ -143,6 +144,7 @@ function onGradeInquirySubmitClicked(button) {
             try {
                 const json = JSON.parse(response);
                 if (json['status'] === 'success') {
+
                     const data = json['data'];
                     // inform other open websocket clients
                     const submitter_id = form.children('#submitter_id').val();
