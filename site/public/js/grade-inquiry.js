@@ -2,18 +2,17 @@
 /* exported loadDraft, initGradingInquirySocketClient, onComponentTabClicked, onGradeInquirySubmitClicked, onReady, onReplyTextAreaKeyUp */
 
 function loadDraft() {
-    // loadDraft function displays the saved draft text on grade inquiry box
+    // LoadDraft function displays the saved draft text on grade inquiry box
     let draftContent = localStorage.getItem('draftContent');
     if (draftContent === null) {
         draftContent = {};
-    }
-    else {
+    } else {
         draftContent = JSON.parse(draftContent);
     }
     const elements = $('.markdown-textarea.fill-available');
     elements.each(function () {
         const elementId = $(this).attr('id');
-        if (draftContent.hasOwnProperty(elementId)) {
+        if (Object.prototype.hasOwnProperty.call(draftContent, elementId)) {
             $(this).val(draftContent[elementId]);
         }
     });
@@ -68,7 +67,7 @@ function onComponentTabClicked(tab) {
 }
 
 function onReplyTextAreaKeyUp(textarea) {
-    //save the draft input on grade inquiry box
+    // save the draft input on grade inquiry box
     const reply_text_area = $(textarea);
     const must_have_text_buttons = $('.gi-submit:not(.gi-ignore-disabled)');
     must_have_text_buttons.prop('disabled', reply_text_area.val() === '');
@@ -87,7 +86,7 @@ function onReplyTextAreaKeyUp(textarea) {
     }
     // notice that from Discussion.twig file, all elementId start with this string pattern (i.e. 'reply-text-area-')
     const key = 'reply-text-area-';
-    draftContent[key+component_id] = reply_text_area.val();
+    draftContent[key + component_id] = reply_text_area.val();
     localStorage.setItem('draftContent', JSON.stringify(draftContent));
     if (reply_text_area.val() === '') {
         $('.gi-show-empty').show();
@@ -144,8 +143,8 @@ function onGradeInquirySubmitClicked(button) {
             try {
                 const json = JSON.parse(response);
                 if (json['status'] === 'success') {
-
                     const data = json['data'];
+
                     // inform other open websocket clients
                     const submitter_id = form.children('#submitter_id').val();
                     if (data.type === 'new_post') {
