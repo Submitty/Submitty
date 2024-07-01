@@ -67,8 +67,9 @@ def schema_validation(test):
         traceback.print_exc()
         raise
 
+
 @testcase
-def correct(test):
+def solution(test):
     cleanup(test)
     subprocess.call(["cp",
                      os.path.join(SAMPLE_SUBMISSIONS, "solution.py"),
@@ -78,11 +79,13 @@ def correct(test):
     test.diff("test01/STDOUT.txt","data/test_output/test_output.txt")
     test.empty_file("test01/STDERR.txt")
     test.empty_json_diff("test01/0_diff.json")
-    test.diff("grade.txt", "grade.txt_correct", "-b")
-    test.json_diff("results.json", "results.json_correct")
+    test.diff("grade.txt", "grade.txt_solution", "-b")
+    test.json_diff("results.json", "results.json_solution")
+
 
 @testcase
 def tolerance(test):
+    pass
     cleanup(test)
     subprocess.call(["cp",
                      os.path.join(SAMPLE_SUBMISSIONS, "tolerance.py"),
@@ -92,8 +95,10 @@ def tolerance(test):
     test.diff("grade.txt", "grade.txt_tolerance", "-b")
     test.json_diff("results.json", "results.json_tolerance")
 
+
 @testcase
 def buggy(test):
+    pass
     cleanup(test)
     subprocess.call(["cp",
                      os.path.join(SAMPLE_SUBMISSIONS, "buggy.py"),
@@ -102,3 +107,15 @@ def buggy(test):
     test.run_validator()
     test.diff("grade.txt", "grade.txt_buggy", "-b")
     test.json_diff("results.json", "results.json_buggy")
+
+@testcase
+def format_flaw(test):
+    pass
+    cleanup(test)
+    subprocess.call(["cp",
+                     os.path.join(SAMPLE_SUBMISSIONS, "format_flaw.py"),
+                     os.path.join(test.testcase_path, "data")])
+    test.run_run()
+    test.run_validator()
+    test.diff("grade.txt", "grade.txt_format_flaw", "-b")
+    test.json_diff("results.json", "results.json_format_flaw")
