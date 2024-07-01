@@ -4,10 +4,14 @@
         "TOTAL_POINTS": 15,
         "AUTO_POINTS": 15
     },
+    "autograding" : {
+        "work_to_details" : [ "*_circuit", "*_circuit.png", "*_histogram.png" ]
+    },
     "autograding_method": "docker",
     "container_options": {
         "container_image": "submitty/qiskit:latest"
     },
+    
     "resource_limits" : {
         "RLIMIT_NPROC" : 10
     },
@@ -23,6 +27,21 @@
                     "actual_file" : "STDOUT.txt",
                     "description" : "Program Output",
                     "expected_file" : "x.txt"
+                },
+                {
+                    "actual_file": "x_gate_identity_circuit",
+                    "method": "fileExists",
+                    "show_actual": "always"
+                },
+                {
+                    "actual_file": "x_gate_identity_circuit.png",
+                    "method": "fileExists",
+                    "show_actual": "always"
+                },
+                {
+                    "actual_file": "x_gate_identity_histogram.png",
+                    "method": "fileExists",
+                    "show_actual": "always"
                 }
             ]
         },
@@ -37,6 +56,21 @@
                     "actual_file" : "STDOUT.txt",
                     "description" : "Program Output",
                     "expected_file" : "toffoli.txt"
+                },
+                {
+                    "actual_file": "toffoli_identity_circuit",
+                    "method": "fileExists",
+                    "show_actual": "always"
+                },
+                {
+                    "actual_file": "toffoli_identity_circuit.png",
+                    "method": "fileExists",
+                    "show_actual": "always"
+                },
+                {
+                    "actual_file": "toffoli_identity_histogram.png",
+                    "method": "fileExists",
+                    "show_actual": "always"
                 }
             ]
         },
@@ -51,6 +85,21 @@
                     "actual_file" : "STDOUT.txt",
                     "description" : "Program Output",
                     "expected_file" : "toffoli.txt"
+                },
+                {
+                    "actual_file": "toffoli_identity_no_z_circuit",
+                    "method": "fileExists",
+                    "show_actual": "always"
+                },
+                {
+                    "actual_file": "toffoli_identity_no_z_circuit.png",
+                    "method": "fileExists",
+                    "show_actual": "always"
+                },
+                {
+                    "actual_file": "toffoli_identity_no_z_histogram.png",
+                    "method": "fileExists",
+                    "show_actual": "always"
                 }
             ]
         }
