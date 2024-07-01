@@ -260,16 +260,18 @@ describe('test office hours queue', () => {
         // Turn notification switches on, then turn them off
         cy.get('@push-enabled').should('equal', false);
         cy.get('@audio-enabled').should('equal', false);
-        cy.get('@push-switch').click();
-        cy.get('@sound-switch').click();
-        cy.wait(3000); // Transition takes 0.4 s
-        cy.get('@push-enabled').should('equal', true);
-        cy.get('@audio-enabled').should('equal', true);
-        cy.get('@push-switch').click();
-        cy.get('@sound-switch').click();
-        cy.wait(3000); // Transition takes 0.4 s
-        cy.get('@push-enabled').should('equal', false);
-        cy.get('@audio-enabled').should('equal', false);
+        cy.get('@push-switch').click().then(() => {
+            cy.get('@push-enabled').should('equal', true);
+            cy.get('@push-switch').click().then(() => {
+                cy.get('@push-enabled').should('equal', false);
+            });
+        });
+        cy.get('@sound-switch').click().then(() => {
+            cy.get('@audio-enabled').should('equal', true);
+            cy.get('@sound-switch').click().then(() => {
+                cy.get('@audio-enabled').should('equal', false);
+            });
+        });
 
         disableQueue();
     });
