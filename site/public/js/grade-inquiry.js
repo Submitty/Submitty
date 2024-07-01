@@ -6,7 +6,8 @@ function loadDraft() {
     let draftContent = localStorage.getItem('draftContent');
     if (draftContent === null) {
         draftContent = {};
-    } else {
+    }
+    else {
         draftContent = JSON.parse(draftContent);
     }
     const elements = $('.markdown-textarea.fill-available');
