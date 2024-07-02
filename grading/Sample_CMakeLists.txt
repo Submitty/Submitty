@@ -76,10 +76,10 @@ endif(ASSIGNMENT_INSTALLATION)
 include(instructor_CMakeLists.txt OPTIONAL RESULT_VARIABLE instructor_cmakelists)
 
 if (instructor_cmakelists)
-message("DETECTED INSTRUCTOR CUSTOMIZATIONS in ${instructor_cmakelists}")
-message("  custom_files: ${custom_files}")
+  message("DETECTED INSTRUCTOR CUSTOMIZATIONS in ${instructor_cmakelists}")
+  message("  custom_files: ${custom_files}")
 else()
-set (custom_files ${GRADINGCODE}/grading/empty_custom_function.cpp)
+  set (custom_files ${GRADINGCODE}/grading/empty_custom_function.cpp)
 endif(instructor_cmakelists)
 
 
