@@ -719,7 +719,11 @@ CREATE TABLE public.course_materials (
     uploaded_date timestamp with time zone,
     last_edit_by character varying(255) DEFAULT NULL::character varying,
     last_edit_date timestamp with time zone,
-    CONSTRAINT check_dates CHECK (((uploaded_date IS NULL) OR (last_edit_date IS NULL) OR (uploaded_date <= last_edit_date)))
+    CONSTRAINT check_dates CHECK (
+        (uploaded_date IS NOT NULL AND last_edit_date IS NULL) OR 
+        (uploaded_date IS NULL AND last_edit_date IS NULL) OR 
+        (uploaded_date IS NOT NULL AND uploaded_date <= last_edit_date)
+    )
 );
 
 
