@@ -746,6 +746,10 @@ class ReportController extends AbstractController {
         $rainbow_grades_dir = FileUtils::joinPaths($this->core->getConfig()->getCoursePath(), "rainbow_grades");
         $destination_path = FileUtils::joinPaths($rainbow_grades_dir, 'manual_customization.json');
 
+        // this is changed from move_uploaded_file to copy because of permission issue (bits not carried over)
+        // copy is expensive, but we are OK because it is small file.
+        // setgid (sticky-bit) gets ignored and doesn't inherit the parent (rainbowgrades dir) permissions
+        // known issue: look https://www.php.net/manual/en/function.move-uploaded-file.php for more details
         if (!copy($upload['tmp_name'], $destination_path)) {
             $msg = 'Upload failed: Could not copy file';
             $this->core->addErrorMessage($msg);
@@ -763,31 +767,31 @@ class ReportController extends AbstractController {
         $msg = 'Rainbow Grades Customization uploaded';
         $this->core->addSuccessMessage($msg);
 
-//        return new MultiResponse(
-//            JsonResponse::getSuccessResponse([
-//                'customization_path' => $rainbow_grades_dir,
-//                'manual_customization_exists' => $manual_customization_exists
-//            ]),
-//            null,
-//            new RedirectResponse($redirect_url)
-//        );
-        if (!empty($_SERVER['HTTP_X_REQUESTED_WITH']) && strtolower($_SERVER['HTTP_X_REQUESTED_WITH']) === 'xmlhttprequest') {
-            // This is an AJAX request, respond with JSON
-            return JsonResponse::getSuccessResponse([
+        return new MultiResponse(
+            JsonResponse::getSuccessResponse([
                 'customization_path' => $rainbow_grades_dir,
                 'manual_customization_exists' => $manual_customization_exists
-            ]);
-        } else {
-            // This is not an AJAX request, redirect accordingly
-            return new MultiResponse(
-                JsonResponse::getSuccessResponse([
-                    'customization_path' => $rainbow_grades_dir,
-                    'manual_customization_exists' => $manual_customization_exists
-                ]),
-                null,
-                new RedirectResponse($redirect_url)
-            );
-        }
+            ]),
+            null,
+            new RedirectResponse($redirect_url)
+        );
+//        if (!empty($_SERVER['HTTP_X_REQUESTED_WITH']) && strtolower($_SERVER['HTTP_X_REQUESTED_WITH']) === 'xmlhttprequest') {
+//            // This is an AJAX request, respond with JSON
+//            return JsonResponse::getSuccessResponse([
+//                'customization_path' => $rainbow_grades_dir,
+//                'manual_customization_exists' => $manual_customization_exists
+//            ]);
+//        } else {
+//            // This is not an AJAX request, redirect accordingly
+//            return new MultiResponse(
+//                JsonResponse::getSuccessResponse([
+//                    'customization_path' => $rainbow_grades_dir,
+//                    'manual_customization_exists' => $manual_customization_exists
+//                ]),
+//                null,
+//                new RedirectResponse($redirect_url)
+//            );
+//        }
     }
 
 
@@ -839,21 +843,6 @@ class ReportController extends AbstractController {
     }
 
 
-
-    /**
-     * Handles the setting of Rainbow Grades customization based on user selection.
-     *
-     * This method is triggered via a POST request to set the customization option
-     * for Rainbow Grades to either 'manual' or 'gui'. It performs the following steps:
-     * 1. Logs the method call for debugging purposes.
-     * 2. Extracts the 'selected_value' from the POST data.
-     * 3. Validates the 'selected_value' to ensure it's provided and valid.
-     * 4. Determines the source file path based on the selected customization type.
-     * 5. Copies the source customization file to the destination path.
-     * 6. Returns a success response if the operation is successful, otherwise returns an error response.
-     *
-     * @return JsonResponse
-     */
     #[Route('/courses/{_semester}/{_course}/reports/rainbow_grades_customization/manual_or_gui', methods: ['POST'])]
     public function setRainbowGradeCustomization(): JsonResponse
     {
@@ -894,7 +883,6 @@ class ReportController extends AbstractController {
 
         $msg = 'Rainbow Grades Customization set successfully';
 
-        // Response as JsonResponse using getSuccessResponse
         return JsonResponse::getSuccessResponse(['status' => 'success', 'selected_value' => $selectedValue, 'message' => $msg ]);
     }
 
