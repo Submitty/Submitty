@@ -15,7 +15,6 @@ $(document).ready(() => {
         }
         formData.append('name', elem.name);
         formData.append('entry', entry);
-
         $.ajax({
             url: buildCourseUrl(['config']),
             data: formData,
@@ -47,10 +46,7 @@ $(document).ready(() => {
             },
         });
     });
-});
-
-$(document).ready(() => {
-
+    
     function updateForumMessage() {
         $('#forum-enabled-message').toggle();
     }
