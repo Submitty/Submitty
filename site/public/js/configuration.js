@@ -24,6 +24,7 @@ $(document).ready(() => {
             success: function(response) {
                 try {
                     response = JSON.parse(response);
+
                 }
                 catch (exc) {
                     console.log(response);
@@ -46,6 +47,7 @@ $(document).ready(() => {
             },
         });
     });
+
     function updateForumMessage() {
         $('#forum-enabled-message').toggle();
     }
