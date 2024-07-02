@@ -1,8 +1,8 @@
-/* exported newDeletePollForm updatePollAcceptingAnswers updatePollVisible updateDropdownStates importPolls toggleTimerInputs */
+/* exported newDeletePollForm updatePollAcceptingAnswers updatePollVisible updateDropdownStates importPolls toggleTimerInputs toggle_section get_new_chart_width disableNoResponse clearResponses */
 /* global csrfToken */
 
 $(document).ready(() => {
-    $('.dropdown-bar').on('click', function() {
+    $('.dropdown-bar').on('click', function () {
         $(this).siblings('table').toggle();
         $(this).find('i').toggleClass('down');
     });
@@ -21,7 +21,7 @@ function newDeletePollForm(pollid, pollname, base_url) {
             processData: false,
             cache: false,
             contentType: false,
-            success: function(data) {
+            success: function (data) {
                 try {
                     const msg = JSON.parse(data);
                     if (msg.status !== 'success') {
@@ -37,7 +37,7 @@ function newDeletePollForm(pollid, pollname, base_url) {
                     window.alert('Something went wrong. Please try again.');
                 }
             },
-            error: function(err) {
+            error: function (err) {
                 console.error(err);
                 window.alert('Something went wrong. Please try again.');
             },
@@ -66,7 +66,7 @@ function updatePollAcceptingAnswers(pollid, base_url) {
         processData: false,
         cache: false,
         contentType: false,
-        error: function(err) {
+        error: function (err) {
             console.error(err);
             window.alert('Something went wrong. Please try again.');
         },
@@ -94,7 +94,7 @@ function updatePollVisible(pollid, base_url) {
         processData: false,
         cache: false,
         contentType: false,
-        error: function(err) {
+        error: function (err) {
             console.error(err);
             window.alert('Something went wrong. Please try again.');
         },
@@ -102,7 +102,7 @@ function updatePollVisible(pollid, base_url) {
 }
 
 function updateDropdownStates(curr_state, cookie_key) {
-    const expiration_date = new Date(new Date().getFullYear(), new Date().getMonth(), new Date().getDate()+7);
+    const expiration_date = new Date(new Date().getFullYear(), new Date().getMonth(), new Date().getDate() + 7);
     Cookies.set(cookie_key, !curr_state, { expires: expiration_date, path: '/' });
 }
 
@@ -116,5 +116,35 @@ function toggleTimerInputs() {
     }
     else {
         $('#timer-inputs').hide();
+    }
+}
+
+function toggle_section(section_id) {
+    $(`#${section_id}`).toggle('fast');
+}
+
+function get_new_chart_width() {
+    const MIN_CHART_WIDTH = 400;
+    const DESIRED_CHART_FACTOR = 0.75;
+    const table_size = $('#info-histogram-table').width();
+    const desired_size = table_size * DESIRED_CHART_FACTOR;
+    // if the width of the viewport is small enough
+    if (desired_size < MIN_CHART_WIDTH) {
+        // set the width of poll-info to 100%
+        $('#poll-info').css('max-width', '100%');
+        return Math.max(MIN_CHART_WIDTH, table_size);
+    }
+    // reset width of poll-info
+    $('#poll-info').css('max-width', '');
+    return desired_size;
+}
+
+function disableNoResponse() {
+    $('.no-response-radio').prop('checked', false);
+}
+
+function clearResponses() {
+    if ($('.no-response-radio').is(':checked')) {
+        $('.response-radio').prop('checked', false);
     }
 }

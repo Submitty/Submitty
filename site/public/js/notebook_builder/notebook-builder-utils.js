@@ -21,7 +21,7 @@ async function uploadFile(file, g_id, directory) {
     form_data.append('operation', 'upload');
     form_data.append('file', file, file.name);
 
-    const response = await fetch(url, {method: 'POST', body: form_data});
+    const response = await fetch(url, { method: 'POST', body: form_data });
     const result = await response.json();
 
     if (result.status === 'success') {
@@ -32,7 +32,7 @@ async function uploadFile(file, g_id, directory) {
         console.error(result.message);
 
         if (result.data && Array.isArray(result.data)) {
-            result.data.forEach(msg => console.error(msg));
+            result.data.forEach((msg) => console.error(msg));
         }
     }
 }
@@ -65,7 +65,7 @@ function getBadItemNames() {
     const bad_item_names = new Set();
 
     const item_name_inputs = document.querySelectorAll('.item-name-input');
-    item_name_inputs.forEach(item_name_input => {
+    item_name_inputs.forEach((item_name_input) => {
         if (item_name_input.value === '' || used_item_names.has(item_name_input.value)) {
             bad_item_names.add(item_name_input.value);
         }
@@ -86,7 +86,7 @@ function getBadImageInputs() {
     const bad_image_inputs = new Set();
     const image_inputs = document.querySelectorAll('.image-input');
 
-    image_inputs.forEach(image_input => {
+    image_inputs.forEach((image_input) => {
         if (image_input.files.length === 0) {
             bad_image_inputs.add(image_input);
         }
@@ -105,7 +105,7 @@ function getBadMarkdownContents() {
     const bad_markdown_conents = new Set();
     const markdown_contents = document.querySelectorAll('.markdown-input');
 
-    markdown_contents.forEach(markdown_content => {
+    markdown_contents.forEach((markdown_content) => {
         if (markdown_content.value === '') {
             bad_markdown_conents.add(markdown_content);
         }

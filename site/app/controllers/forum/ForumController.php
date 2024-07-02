@@ -584,6 +584,8 @@ class ForumController extends AbstractController {
             [$post_id],
             $this->core->getUser()->getId()
         ));
+        $staffLiked = $this->core->getQueries()->getInstructorUpduck($post_id);
+        $boolStaffLiked = in_array($post["id"], $staffLiked, true);
         $GLOBALS['totalAttachments'] = 0;
         $GLOBALS['post_box_id'] = $_POST['post_box_id'];
         $unviewed_posts = [$post_id];
@@ -604,6 +606,7 @@ class ForumController extends AbstractController {
             'tree',
             $upduck_count,
             $upduck_liked_by_user,
+            $boolStaffLiked,
             true,
             $author_info[$post["author_user_id"]],
             $post_attachments[$post["id"]][0],
@@ -1347,6 +1350,8 @@ class ForumController extends AbstractController {
     public function showStats() {
         $posts = $this->core->getQueries()->getPosts();
         $num_posts = count($posts);
+        $upducks = $this->core->getQueries()->getUpDucks();
+        $num_users_with_upducks = count($upducks);
         $users = [];
         for ($i = 0; $i < $num_posts; $i++) {
             $user = $posts[$i]["author_user_id"];
@@ -1361,6 +1366,7 @@ class ForumController extends AbstractController {
                 $users[$user]["timestamps"] = [];
                 $users[$user]["total_threads"] = 0;
                 $users[$user]["num_deleted_posts"] = count($this->core->getQueries()->getDeletedPostsByUser($user));
+                $users[$user]["total_upducks"] = 0;
             }
             if ($posts[$i]["parent_id"] == -1) {
                 $users[$user]["total_threads"]++;
@@ -1370,6 +1376,10 @@ class ForumController extends AbstractController {
             $users[$user]["timestamps"][] = DateUtils::parseDateTime($posts[$i]["timestamp"], $this->core->getConfig()->getTimezone())->format("n/j g:i A");
             $users[$user]["thread_id"][] = $posts[$i]["thread_id"];
             $users[$user]["thread_title"][] = $this->core->getQueries()->getThreadTitle($posts[$i]["thread_id"]);
+        }
+        for ($i = 0; $i < $num_users_with_upducks; $i++) {
+            $user = $upducks[$i]["author_user_id"];
+            $users[$user]["total_upducks"] = $upducks[$i]["upducks"];
         }
         ksort($users);
         $this->core->getOutput()->renderOutput('forum\ForumThread', 'statPage', $users);
@@ -1383,17 +1393,15 @@ class ForumController extends AbstractController {
                 return JsonResponse::getErrorResponse('Missing required key in POST data: ' . $key);
             }
         }
-        $output = [];
-        $output = $this->core->getQueries()->toggleLikes($_POST['post_id'], $this->core->getUser()->getId());//so isLiked is the frontend value
+        $output = $this->core->getQueries()->toggleLikes($_POST['post_id'], $this->core->getUser()->getId());
 
-        $responseData = [
-            'status' => $output[0], // 'like'
-            'likesCount' => $output[1] // The likes count
-        ];
-
-        if ($responseData['status'] === "false") {
+        if ($output['status'] === "false") {
             return JsonResponse::getErrorResponse('Catch Fail in Query');
         }
-        return JsonResponse::getSuccessResponse($responseData);
+        return JsonResponse::getSuccessResponse([
+            'status' => $output['status'], // 'like' or 'unlike'
+            'likesCount' => $output['likesCount'], // Total likes count
+            'likesFromStaff' => $output['likesFromStaff'] // Likes from staff
+        ]);
     }
 }

@@ -45,6 +45,7 @@ const urls = [
     '/courses/{}/{}/plagiarism',
     '/courses/{}/{}/plagiarism/configuration/new',
     '/courses/{}/{}/reports',
+    '/courses/{}/{}/reports/rainbow_grades_customization',
     '/courses/{}/{}/late_table',
     '/courses/{}/{}/grades',
     '/courses/{}/{}/polls',
@@ -57,7 +58,7 @@ describe('Test cases for the site\'s adherence to accessibility guidelines', () 
     let baseline;
 
     before(() => {
-        cy.fixture('accessibility_baseline').then(data => {
+        cy.fixture('accessibility_baseline').then((data) => {
             expect(data).to.be.an('object');
             baseline = new Map(Object.entries(data));
         });
@@ -76,9 +77,9 @@ describe('Test cases for the site\'s adherence to accessibility guidelines', () 
     for (const url of urls) {
         it(`Path: "${url}"`, () => {
             cy.visit(url.replace('{}/{}', `${semester}/${course}`));
-            cy.get('html:root').eq(0).invoke('prop', 'outerHTML').then(content => {
+            cy.get('html:root').eq(0).invoke('prop', 'outerHTML').then((content) => {
                 cy.writeFile('cypress/tmp/doc.html', `<!DOCTYPE html>\n${content}`, 'utf8').then(() => {
-                    cy.exec(`java -jar "${vnu}" --format json cypress/tmp/doc.html`, { failOnNonZeroExit: false }).then(result => {
+                    cy.exec(`java -jar "${vnu}" --format json cypress/tmp/doc.html`, { failOnNonZeroExit: false }).then((result) => {
                         console.log(result.stderr);
                         const output = JSON.parse(result.stderr);
 
@@ -93,7 +94,7 @@ describe('Test cases for the site\'s adherence to accessibility guidelines', () 
                         ];
 
                         for (const error of output.messages) {
-                            if (skipMessages.some(txt => error.message.startsWith(txt))
+                            if (skipMessages.some((txt) => error.message.startsWith(txt))
                                 || (baseline.get(url) || []).includes(error.message)
                                 || foundErrorMessages.includes(error.message)) {
                                 continue;
