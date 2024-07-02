@@ -29,7 +29,6 @@ class UserProfileController extends AbstractController {
     /**
      * Show User's profile data
      *
-     * @return MultiResponse
      */
     #[Route("/user_profile", methods: ["GET"])]
     public function showUserProfile(): MultiResponse {
@@ -51,7 +50,6 @@ class UserProfileController extends AbstractController {
      * Handle ajax request to update the currently logged in user's time zone data.
      *
      * Will return a json success or failure response depending on the result of the operation.
-     * @return JsonResponse
      */
     #[Route("/user_profile/change_time_zone", methods: ["POST"])]
     public function changeTimeZone(): JsonResponse {
@@ -75,9 +73,6 @@ class UserProfileController extends AbstractController {
         return JsonResponse::getFailResponse('Error encountered updating user time zone.');
     }
 
-    /**
-     * @return JsonResponse
-     */
     #[Route("/user_profile/set_pref_locale", methods: ["POST"])]
     public function setPrefLocale(): JsonResponse {
         if (isset($_POST['locale'])) {
@@ -89,9 +84,6 @@ class UserProfileController extends AbstractController {
         return JsonResponse::getFailResponse('Failed to update user locale.');
     }
 
-    /**
-     * @return MultiResponse
-     */
     #[Route("/user_profile/change_password", methods: ["POST"])]
     public function changePassword(): MultiResponse {
         $user = $this->core->getUser();
@@ -112,10 +104,6 @@ class UserProfileController extends AbstractController {
         );
     }
 
-
-    /**
-     * @return JsonResponse
-     */
     #[Route("/user_profile/change_pronouns", methods: ["POST"])]
     public function changePronouns(): JsonResponse {
         $user = $this->core->getUser();
@@ -143,9 +131,6 @@ class UserProfileController extends AbstractController {
         }
     }
 
-    /**
-     * @return JsonResponse
-     */
     #[Route("/user_profile/change_display_name_order", methods: ["POST"])]
     public function changeDisplayNameOrder(): JsonResponse {
         $user = $this->core->getUser();
@@ -164,9 +149,6 @@ class UserProfileController extends AbstractController {
         }
     }
 
-    /**
-     * @return JsonResponse
-     */
     #[Route("/user_profile/change_preferred_names", methods: ["POST"])]
     public function changeUserName(): JsonResponse {
         $user = $this->core->getUser();
@@ -196,9 +178,6 @@ class UserProfileController extends AbstractController {
         }
     }
 
-    /**
-     * @return JsonResponse
-     */
     #[Route("/user_profile/update_last_initial_format", methods: ["POST"])]
     public function updateLastInitialFormat(): JsonResponse {
         $user = $this->core->getUser();
@@ -225,7 +204,6 @@ class UserProfileController extends AbstractController {
     }
 
     /**
-     * @return JsonResponse
      * @throws \ImagickException
      */
     #[Route("/user_profile/change_profile_photo", methods: ["POST"])]
@@ -264,9 +242,6 @@ class UserProfileController extends AbstractController {
         }
     }
 
-    /**
-     * @return JsonResponse
-     */
     #[Route("/user_profile/change_secondary_email", methods: ["POST"])]
     public function changeSecondaryEmail(): JsonResponse {
         $user = $this->core->getUser();
