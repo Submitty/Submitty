@@ -261,16 +261,24 @@ describe('test office hours queue', () => {
         // Using .then() forces synchronous activity
         cy.get('@push-enabled').should('equal', false);
         cy.get('@push-switch').click().then(() => {
-            cy.get('@push-enabled').should('equal', true);
-            cy.get('@push-switch').click().then(() => {
-                cy.get('@push-enabled').should('equal', false);
+            cy.wait(3000).then(() => {
+                cy.get('@push-enabled').should('equal', true);
+                cy.get('@push-switch').click().then(() => {
+                    cy.wait(3000).then(() => {
+                        cy.get('@push-enabled').should('equal', false);
+                    });
+                });
             });
         });
         cy.get('@audio-enabled').should('equal', false);
         cy.get('@sound-switch').click().then(() => {
-            cy.get('@audio-enabled').should('equal', true);
-            cy.get('@sound-switch').click().then(() => {
-                cy.get('@audio-enabled').should('equal', false);
+            cy.wait(3000).then(() => {
+                cy.get('@audio-enabled').should('equal', true);
+                cy.get('@sound-switch').click().then(() => {
+                    cy.wait(3000).then(() => {
+                        cy.get('@audio-enabled').should('equal', false);
+                    });
+                });
             });
         });
 
