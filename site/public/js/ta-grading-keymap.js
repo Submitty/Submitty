@@ -6,7 +6,7 @@
  * https://developer.mozilla.org/en-US/docs/Web/API/KeyboardEvent
  */
 
-//-----------------------------------------------------------------------------
+// -----------------------------------------------------------------------------
 // Keyboard shortcut handling
 
 // eslint-disable-next-line no-var
@@ -38,7 +38,7 @@ const settingsData = [
             {
                 name: 'Prev/Next buttons navigate through',
                 storageCode: 'general-setting-navigate-assigned-students-only',
-                options: function() {
+                options: function () {
                     if ($('#ta-grading-settings-list').attr('data-full_access') !== 'true') {
                         return {};
                     }
@@ -59,8 +59,8 @@ const settingsData = [
                 name: 'Expand files in notebook file submission on page load',
                 storageCode: 'notebook-setting-file-submission-expand',
                 options: {
-                    'No': 'false',
-                    'Yes': 'true',
+                    No: 'false',
+                    Yes: 'true',
                 },
                 default: 'No',
             },
@@ -68,7 +68,7 @@ const settingsData = [
     },
 ];
 
-window.onkeyup = function(e) {
+window.onkeyup = function (e) {
     if (remapping.active) {
         remapFinish(remapping.index, eventToKeyCode(e));
         e.preventDefault();
@@ -76,13 +76,13 @@ window.onkeyup = function(e) {
     }
 };
 
-window.onkeydown = function(e) {
+window.onkeydown = function (e) {
     if (remapping.active) {
         e.preventDefault();
         return;
     }
 
-    //Disable hotkeys in the menu so we don't accidentally press anything
+    // Disable hotkeys in the menu so we don't accidentally press anything
     if (isSettingsVisible()) {
         return;
     }
@@ -112,7 +112,7 @@ function registerKeyHandler(parameters, fn) {
     parameters.originalCode = parameters.code;
     parameters.fn = fn;
 
-    //Check local storage
+    // Check local storage
     if (remapGetLS(parameters.name) !== null) {
         parameters.code = remapGetLS(parameters.name);
     }
@@ -128,7 +128,7 @@ function registerKeyHandler(parameters, fn) {
 function unregisterKeyHandler(code, fn) {
     for (let i = 0; i < keymap.length; i++) {
         if (keymap[i].code === code || keymap[i].fn === fn) {
-            //Delete 1 at i
+            // Delete 1 at i
             keymap.splice(i, 1);
             i--;
         }
@@ -196,15 +196,14 @@ function generateSettingList() {
 function loadTAGradingSettingData() {
     for (let i = 0; i < settingsData.length; i++) {
         for (let x = 0; x < settingsData[i].values.length; x++) {
-            if (typeof(settingsData[i].values[x].options) === 'function') {
+            if (typeof (settingsData[i].values[x].options) === 'function') {
                 settingsData[i].values[x].options = settingsData[i].values[x].options();
             }
             const inquiry = Cookies.get('inquiry_status');
             if (inquiry === 'on') {
-                settingsData[i].values[x].currValue =  'active-inquiry';
+                settingsData[i].values[x].currValue = 'active-inquiry';
             }
             else {
-
                 if (localStorage.getItem(settingsData[i].values[x].storageCode) !== 'default' && localStorage.getItem(settingsData[i].values[x].storageCode) !== 'active-inquiry') {
                     settingsData[i].values[x].currValue = localStorage.getItem(settingsData[i].values[x].storageCode);
                 }
@@ -246,13 +245,13 @@ function remapHotkey(i) {
  * @param {string} code New keycode for the hotkey
  */
 function remapFinish(index, code) {
-    //Check if code is already used
+    // Check if code is already used
     for (let i = 0; i < keymap.length; i++) {
         if (index === i) {
             continue;
         }
         if (keymap[i].code === code) {
-            //Oh no
+            // Oh no
             const button = $(`#remap-${index}`);
             button.text('Enter Unique Key...');
             button.addClass('btn-danger');
@@ -335,7 +334,7 @@ function remapSetLS(mapName, code) {
 function eventToKeyCode(e) {
     let codeName = e.code;
 
-    //Apply modifiers to code name in reverse alphabetical order so they come out alphabetical
+    // Apply modifiers to code name in reverse alphabetical order so they come out alphabetical
     if (e.shiftKey && (e.code !== 'ShiftLeft' && e.code !== 'ShiftRight')) {
         codeName = `Shift ${codeName}`;
     }
