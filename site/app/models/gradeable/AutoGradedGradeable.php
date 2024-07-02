@@ -148,6 +148,25 @@ class AutoGradedGradeable extends AbstractModel {
         return $instance->getTotalPoints();
     }
 
+    public function getSloc() {
+        $instance = $this->getActiveVersionInstance();
+        if ($instance === null) {
+            return NAN;
+        }
+        return $instance->getSloc();
+    }
+
+    /**
+     * @return float|string
+     */
+    public function getSubmitterId() {
+        $instance = $this->getActiveVersionInstance();
+        if ($instance === null) {
+            return NAN;
+        }
+        return $instance->getSubmitterId();
+    }
+
     /**
      * Gets the highest submitted version number
      * @return int
