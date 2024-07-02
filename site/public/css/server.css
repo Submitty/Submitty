@@ -1976,6 +1976,85 @@ header > * {
     background: var(--default-white);
 }
 
+/*
+Start of slider switch
+ */
+
+.super-switch-container {
+    display: flex;
+}
+
+.switch-container {
+    display: flex;
+    align-items: center;
+    padding: 6px 12px;
+}
+
+.switch-label {
+    font-size: 14px;
+    font-family: Arial, sans-serif;
+    margin-right: 10px;
+}
+
+.switch {
+    position: relative;
+    display: inline-block;
+    width: 3em;
+    height: 1.7em;
+}
+
+.switch input {
+    opacity: 0;
+    width: 0;
+    height: 0;
+}
+
+.slider {
+    position: absolute;
+    cursor: pointer;
+    inset: 0;
+    background-color: var(--standard-light-medium-gray);
+    transition: .4s;
+    border-radius: 34px;
+}
+
+.slider::before {
+    position: absolute;
+    content: "";
+    height: 1.3em;
+    width: 1.3em;
+    left: 0.2em;
+    bottom: 0.2em;
+    background-color: var(--always-default-white);
+    transition: .4s;
+    border-radius: 50%;
+}
+
+.slider::after {
+    position: absolute;
+    color: var(--always-default-white);
+    top: 50%;
+    left: 0.5em;
+    transform: translateY(-50%);
+    transition: .4s;
+}
+
+input:checked + .slider {
+    background-color: var(--good-green);
+}
+
+input:checked + .slider::before {
+    transform: translateX(1.3em);
+}
+
+input:checked + .slider::after {
+    left: 1.75em;
+}
+
+/*
+End of slider switch
+ */
+
 .badge-1 {
     background-color: var(--category-color-1);
     color: var(--text-black);

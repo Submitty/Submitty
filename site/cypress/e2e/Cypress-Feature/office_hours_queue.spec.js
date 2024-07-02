@@ -242,4 +242,46 @@ describe('test office hours queue', () => {
         // Disable and delete all queue
         disableQueue();
     });
+    it('Enabling push and sound notifications as Instructor', () => {
+        cy.login('instructor');
+        enableQueue();
+        cy.visit(['sample', 'office_hours_queue']);
+
+        // Assert that switches exist and assign aliases
+        cy.get('[data-testid="notification-switch-container"]').first().as('switch-container');
+        cy.get('@switch-container').should('exist');
+        cy.get('@switch-container').find('[data-testid="push-notification-switch"]').first().as('push-switch');
+        cy.get('@switch-container').find('[data-testid="sound-notification-switch"]').first().as('sound-switch');
+        cy.get('@push-switch').should('exist');
+        cy.get('@sound-switch').should('exist');
+        cy.window().its('push_notifications_enabled').as('push-enabled');
+        cy.window().its('audible_notifications_enabled').as('audio-enabled');
+
+        // Turn notification switches on, then turn them off
+        // Using .then() forces synchronous activity
+        cy.get('@push-enabled').should('equal', false);
+        cy.get('@push-switch').click().then(() => {
+            cy.wait(50000).then(() => {
+                cy.get('@push-enabled', { timeout: 10000 }).should('equal', true);
+                cy.get('@push-switch').click().then(() => {
+                    cy.wait(50000).then(() => {
+                        cy.get('@push-enabled', { timeout: 10000 }).should('equal', false);
+                    });
+                });
+            });
+        });
+        cy.get('@audio-enabled').should('equal', false);
+        cy.get('@sound-switch').click().then(() => {
+            cy.wait(50000).then(() => {
+                cy.get('@audio-enabled', { timeout: 10000 }).should('equal', true);
+                cy.get('@sound-switch').click().then(() => {
+                    cy.wait(50000).then(() => {
+                        cy.get('@audio-enabled', { timeout: 10000 }).should('equal', false);
+                    });
+                });
+            });
+        });
+
+        disableQueue();
+    });
 });
