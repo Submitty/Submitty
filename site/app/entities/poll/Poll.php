@@ -53,6 +53,8 @@ class Poll {
     #[ORM\Column(type: Types::STRING)]
     protected $release_answer;
 
+    #[ORM\Column(name: "allows_custom", type: Types::BOOLEAN)]
+    protected bool $allows_custom;
     /**
      * @var Collection<Option>
      */
@@ -79,6 +81,9 @@ class Poll {
         $this->setReleaseHistogram($release_histogram);
         $this->setReleaseAnswer($release_answer);
         $this->setImagePath($image_path);
+        $this->setAllowsCustomOptions(false);
+        $this->setClosed();
+
         $this->options = new ArrayCollection();
         $this->responses = new ArrayCollection();
     }
@@ -145,6 +150,18 @@ class Poll {
 
     public function getEndTime(): ?\DateTime {
         return $this->end_time;
+    }
+
+    public function isSurvey(): bool {
+        return $this->getQuestionType() === "single-response-survey" || $this->getQuestionType() === "multiple-response-survey";
+    }
+
+    public function setAllowsCustomOptions(bool $allows_custom): void {
+        $this->allows_custom = $allows_custom;
+    }
+
+    public function getAllowsCustomResponses(): bool {
+        return $this->allows_custom;
     }
 
     public function getReleaseDate(): \DateTime {
@@ -279,5 +296,20 @@ class Poll {
             $selected_options[] = $r->getOption()->getId();
         }
         return $selected_options;
+    }
+
+    /**
+     * Given a poll and a response, returns whether the response already exists
+     *
+     * @param string $custom_response
+     * @return bool Response in Poll already exists
+     */
+    public function existsCustomResponse(string $custom_response): bool {
+        foreach ($this->getOptions() as $option) {
+            if ($option->getResponse() === $custom_response) {
+                return true;
+            }
+        }
+        return false;
     }
 }

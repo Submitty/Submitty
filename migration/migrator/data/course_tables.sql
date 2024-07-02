@@ -1495,7 +1495,8 @@ CREATE TABLE public.poll_options (
     poll_id integer,
     response text NOT NULL,
     correct boolean NOT NULL,
-    option_id integer NOT NULL
+    option_id integer NOT NULL,
+    author_id character varying(255) DEFAULT ''::character varying NOT NULL
 );
 
 
@@ -1566,7 +1567,8 @@ CREATE TABLE public.polls (
     release_answer character varying(10) DEFAULT 'never'::character varying,
     duration integer DEFAULT 0,
     end_time timestamp with time zone,
-    is_visible boolean DEFAULT false NOT NULL
+    is_visible boolean DEFAULT false NOT NULL,
+    allows_custom boolean DEFAULT false NOT NULL
 );
 
 
