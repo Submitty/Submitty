@@ -2005,3 +2005,28 @@ function tzWarn() {
     }
 }
 document.addEventListener('DOMContentLoaded', tzWarn);
+
+/**
+ * Change the class of span.badge.<color>-background to span.badge.dark-<color>-background if html tag contains data-theme='dark' or data-black_mode='black'.
+ */
+function scorePillDark() {
+    const html_element = document.querySelector('html');
+    const badges = document.querySelectorAll('span.badge');
+    if (html_element.getAttribute('data-theme') === 'dark' || html_element.getAttribute('data-black_mode') === 'black') {
+        badges.forEach((badge) => {
+            if (badge.classList.contains('green-background')) {
+                badge.classList.remove('green-background');
+                badge.classList.add('dark-green-background');
+            }
+            else if (badge.classList.contains('yellow-background')) {
+                badge.classList.remove('yellow-background');
+                badge.classList.add('dark-yellow-background');
+            }
+            else if (badge.classList.contains('red-background')) {
+                badge.classList.remove('red-background');
+                badge.classList.add('dark-red-background');
+            }
+        });
+    }
+}
+document.addEventListener('DOMContentLoaded', scorePillDark);
