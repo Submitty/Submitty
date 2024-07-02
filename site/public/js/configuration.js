@@ -46,7 +46,6 @@ $(document).ready(() => {
             },
         });
     });
-    
     function updateForumMessage() {
         $('#forum-enabled-message').toggle();
     }
@@ -76,4 +75,3 @@ $(document).ready(() => {
 
     $(document).on('change', '#room-seating-gradeable-id', updateEmailSeatingOption);
 });
-
