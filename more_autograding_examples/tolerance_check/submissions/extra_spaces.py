@@ -31,7 +31,10 @@ def print_line(numneg, avg, sd):
         print(f"|   NONE |",end='')
     else:
         print(f"|{numneg:7d} |",end='')
-    print("%11.3f" % avg + " |" + "%11.3f" % sd + " |")
+    if (avg > 100):
+        print("%11.2f" % avg + " |" + "%11.2f" % sd + " |")
+    else:
+        print("%11.3f" % avg + " |" + "%11.3f" % sd + " |")
 
 
 args = len(sys.argv)

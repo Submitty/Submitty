@@ -92,6 +92,7 @@ def tolerance(test):
                      os.path.join(test.testcase_path, "data")])
     test.run_run()
     test.run_validator()
+    test.diff("test01/STDOUT.txt","STDOUT_tolerance.txt")
     test.diff("grade.txt", "grade.txt_tolerance", "-b")
     test.json_diff("results.json", "results.json_tolerance")
 
@@ -105,6 +106,7 @@ def buggy(test):
                      os.path.join(test.testcase_path, "data")])
     test.run_run()
     test.run_validator()
+    test.diff("test01/STDOUT.txt","STDOUT_buggy.txt")
     test.diff("grade.txt", "grade.txt_buggy", "-b")
     test.json_diff("results.json", "results.json_buggy")
 
@@ -117,5 +119,32 @@ def format_flaw(test):
                      os.path.join(test.testcase_path, "data")])
     test.run_run()
     test.run_validator()
+    test.diff("test01/STDOUT.txt","STDOUT_format_flaw.txt")
     test.diff("grade.txt", "grade.txt_format_flaw", "-b")
     test.json_diff("results.json", "results.json_format_flaw")
+
+@testcase
+def extra_spaces(test):
+    pass
+    cleanup(test)
+    subprocess.call(["cp",
+                     os.path.join(SAMPLE_SUBMISSIONS, "extra_spaces.py"),
+                     os.path.join(test.testcase_path, "data")])
+    test.run_run()
+    test.run_validator()
+    test.diff("test01/STDOUT.txt","STDOUT_extra_spaces.txt")
+    test.diff("grade.txt", "grade.txt_extra_spaces", "-b")
+    test.json_diff("results.json", "results.json_extra_spaces")
+
+@testcase
+def fewer_spaces(test):
+    pass
+    cleanup(test)
+    subprocess.call(["cp",
+                     os.path.join(SAMPLE_SUBMISSIONS, "fewer_spaces.py"),
+                     os.path.join(test.testcase_path, "data")])
+    test.run_run()
+    test.run_validator()
+    test.diff("test01/STDOUT.txt","STDOUT_fewer_spaces.txt")
+    test.diff("grade.txt", "grade.txt_fewer_spaces", "-b")
+    test.json_diff("results.json", "results.json_fewer_spaces")
