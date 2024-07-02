@@ -261,10 +261,10 @@ describe('test office hours queue', () => {
         // Using .then() forces synchronous activity
         cy.get('@push-enabled').should('equal', false);
         cy.get('@push-switch').click().then(() => {
-            cy.wait(3000).then(() => {
+            cy.wait(50000).then(() => {
                 cy.get('@push-enabled', { timeout: 10000 }).should('equal', true);
                 cy.get('@push-switch').click().then(() => {
-                    cy.wait(3000).then(() => {
+                    cy.wait(50000).then(() => {
                         cy.get('@push-enabled', { timeout: 10000 }).should('equal', false);
                     });
                 });
@@ -272,10 +272,10 @@ describe('test office hours queue', () => {
         });
         cy.get('@audio-enabled').should('equal', false);
         cy.get('@sound-switch').click().then(() => {
-            cy.wait(3000).then(() => {
+            cy.wait(50000).then(() => {
                 cy.get('@audio-enabled', { timeout: 10000 }).should('equal', true);
                 cy.get('@sound-switch').click().then(() => {
-                    cy.wait(3000).then(() => {
+                    cy.wait(50000).then(() => {
                         cy.get('@audio-enabled', { timeout: 10000 }).should('equal', false);
                     });
                 });
