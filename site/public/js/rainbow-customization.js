@@ -476,7 +476,8 @@ function sendSelectedValue() {
                         const jsonResponse = JSON.parse(responseText.substring(jsonStartIndex));
                         errorMsg = `${jsonResponse.message || jsonResponse.status}`;
                     }
-                } catch (e) {
+                }
+                catch (e) {
                     console.error('Failed to parse JSON response', e);
                 }
                 reject(errorMsg);
@@ -544,7 +545,7 @@ function checkBuildStatus() {
         },
         error: function (xhr, status, error) {
             console.error(`Failed to parse response from server: ${xhr.responseText}`);
-        }
+        },
     });
 }
 
@@ -620,8 +621,8 @@ function saveChanges() {
     });
 }
 
-$(document).ready(function() {
-    $("input[name='customization']").change(function() {
+$(document).ready(() => {
+    $("input[name='customization']").change(() => {
         $('#save_status').html('Switched customization, need to rebuild');
     });
 });
