@@ -794,6 +794,7 @@ function ajaxChangeGradedVersion(gradeable_id, anon_id, component_version) {
             data: {
                 anon_id,
                 graded_version: component_version,
+                component_ids: getAllComponentsFromDOM().map((x) => x.id),
                 csrf_token: csrfToken,
             },
             success: function (response) {

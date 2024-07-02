@@ -2346,6 +2346,7 @@ class ElectronicGraderController extends AbstractController {
     public function ajaxUpdateGradedVersionForStudent(string $gradeable_id): void {
         $anon_id = $_POST['anon_id'] ?? null;
         $graded_version = intval($_POST['graded_version'] ?? null);
+        $component_ids = $_POST['component_ids'] ?? [];
 
         if ($anon_id === null) {
             $this->core->getOutput()->renderJsonFail('Missing anon_id parameter');
@@ -2356,22 +2357,40 @@ class ElectronicGraderController extends AbstractController {
             return;
         }
 
+        if (sizeof($component_ids) < 1) {
+            $this->core->getOutput()->renderJsonFail('Missing component_ids parameter');
+            return;
+        }
+
         // Get the gradeable
         $gradeable = $this->tryGetGradeable($gradeable_id);
         if ($gradeable === false) {
             return;
         }
-
         // Get user id from the anon id
         $submitter_id = $this->tryGetSubmitterIdFromAnonId($anon_id, $gradeable_id);
         if ($submitter_id === false) {
             return;
         }
 
-        // checks if user has permission
-        if (!$this->core->getAccess()->canI("grading.electronic.grade", ["gradeable" => $gradeable])) {
-            $this->core->getOutput()->renderJsonFail('Insufficient permissions to change graded version');
+        // Get the graded gradeable
+        $graded_gradeable = $this->tryGetGradedGradeable($gradeable, $submitter_id);
+        if ($graded_gradeable === false) {
             return;
+        }
+
+
+        // check if all the components provided are real and the user has permission
+        foreach ($component_ids as &$component_id) {
+            $component = $this->tryGetComponent($gradeable, $component_id);
+            if ($component === false) {
+                $this->core->getOutput()->renderJsonFail("Invalid component id \"$component_id\"");
+                return;
+            }
+            else if (!$this->core->getAccess()->canI("grading.electronic.save_graded_component", ["gradeable" => $gradeable, "graded_gradeable" => $graded_gradeable, "component" => $component])) {
+                $this->core->getOutput()->renderJsonFail("Insufficient permissions to change graded version of component $component_id");
+                return;
+            }
         }
 
         $logger_params = [
@@ -2379,6 +2398,7 @@ class ElectronicGraderController extends AbstractController {
             "course_name" => $this->core->getDisplayedCourseName(),
             "gradeable_id" => $gradeable_id,
             "grader_id" => $this->core->getUser()->getId(),
+            "component_ids" => implode(",", $component_ids),
             "action" => "CHANGE_GRADEABLE_GRADED_VERSION",
             "submitter_id" => $submitter_id
         ];
@@ -2386,7 +2406,7 @@ class ElectronicGraderController extends AbstractController {
 
         try {
             // do thing
-            $this->core->getQueries()->changeGradedVersionOfGradeable($gradeable_id, $submitter_id, $graded_version);
+            $this->core->getQueries()->changeGradedVersionOfComponents($gradeable_id, $submitter_id, $graded_version, $component_ids);
             $this->core->getOutput()->renderJsonSuccess();
         }
         catch (\InvalidArgumentException $e) {
