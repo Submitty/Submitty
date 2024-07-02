@@ -785,7 +785,7 @@ function ajaxVerifyAllComponents(gradeable_id, anon_id) {
  * @param {string} anon_id
  * @return {Promise} Rejects except when the response returns status 'success'
  */
-function ajaxChangeGradedVersion(gradeable_id, anon_id, component_version) {
+function ajaxChangeGradedVersion(gradeable_id, anon_id, component_version, component_ids) {
     return new Promise((resolve, reject) => {
         $.getJSON({
             type: 'POST',
@@ -794,7 +794,7 @@ function ajaxChangeGradedVersion(gradeable_id, anon_id, component_version) {
             data: {
                 anon_id,
                 graded_version: component_version,
-                component_ids: getAllComponentsFromDOM().map((x) => x.id),
+                component_ids,
                 csrf_token: csrfToken,
             },
             success: function (response) {
@@ -3289,7 +3289,7 @@ function refreshGradedComponentHeader(component_id, showMarkList) {
  */
 function updateAllComponentVersions() {
     if (confirm('Are you sure you want to update the version for all components without separately inspecting each component?')) {
-        ajaxChangeGradedVersion(getGradeableId(), getAnonId(), getDisplayVersion()).then(() => {
+        ajaxChangeGradedVersion(getGradeableId(), getAnonId(), getDisplayVersion(), getAllComponentsFromDOM().map((x) => x.id)).then(() => {
             location.reload();
         });
     }
