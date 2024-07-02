@@ -37,7 +37,4 @@ class ReportView extends AbstractView {
             "extra_label" => "For All Students"
         ]);
     }
-
-
-
 }

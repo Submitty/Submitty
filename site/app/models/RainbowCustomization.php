@@ -495,8 +495,7 @@ class RainbowCustomization extends AbstractModel {
 
 
     // This function handles processing the incoming post data
-    public function processForm()
-    {
+    public function processForm() {
 
         // Get a new customization file
         $this->RCJSON = new RainbowCustomizationJSON($this->core);
@@ -512,13 +511,13 @@ class RainbowCustomization extends AbstractModel {
 
         if (isset($form_json->benchmark_percent)) {
             foreach ($form_json->benchmark_percent as $key => $value) {
-                $this->RCJSON->addBenchmarkPercent((string)$key, $value);
+                $this->RCJSON->addBenchmarkPercent((string) $key, $value);
             }
         }
 
         if (isset($form_json->section)) {
             foreach ($form_json->section as $key => $value) {
-                $this->RCJSON->addSection((string)$key, $value);
+                $this->RCJSON->addSection((string) $key, $value);
             }
         }
 
@@ -548,10 +547,9 @@ class RainbowCustomization extends AbstractModel {
 
         // Write to customization file
         $this->RCJSON->saveToJsonFile();
-
     }
 
-    
+
 
     public function error() {
         return $this->has_error;
@@ -561,8 +559,7 @@ class RainbowCustomization extends AbstractModel {
         return $this->error_messages;
     }
 
-    public function doesManualCustomizationExist(): bool
-    {
+    public function doesManualCustomizationExist(): bool {
         // using RCJSON will have issue because constructor will call loadFromJsonFile
         // which will return null if gui_customization is not found.
         // return $this->RCJSON->doesManualCustomizationExist();
