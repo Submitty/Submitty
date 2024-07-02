@@ -47,6 +47,9 @@ def gen_script(machine_name, worker: false, base: false)
       if no_submissions
         setup_cmd += ' --no_submissions'
       end
+      if ON_CI
+        setup_cmd += ' --ci'
+      end
     end
   else
     setup_cmd += 'install_success_from_cloud.sh'
