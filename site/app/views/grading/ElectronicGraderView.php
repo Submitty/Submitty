@@ -1348,7 +1348,7 @@ HTML;
             }
 
             $posts_view .= <<<HTML
-                    <a href="{$this->core->buildCourseUrl(['forum', 'threads', $threadId])}" target="_blank" rel="noopener nofollow" class="btn btn-default btn-sm" style="margin-top:15px; text-decoration: none;" onClick=""> Go to thread</a>
+                    <a href="{$this->core->buildCourseUrl(['forum', 'threads', $threadId])}" target="_blank" rel="noopener nofollow" class="btn btn-default btn-sm" style="margin-top:15px; text-decoration: none;" onClick="" data-testid="go-to-thread"> Go to thread</a>
                     <hr style="border-top:1px solid #999;margin-bottom: 5px;" /> <br/>
 HTML;
         }
