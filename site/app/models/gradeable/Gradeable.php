@@ -96,6 +96,16 @@ use app\controllers\admin\AdminGradeableController;
  * @method int getLimitedAccessBlind()
  * @method void setPeerBlind($peer_blind)
  * @method int getPeerBlind()
+ * @method void setPeerAutograding($peer_autograding)
+ * @method boolean getPeerAutograding()
+ * @method void setPeerRubric($peer_rubric)
+ * @method boolean getPeerRubric()
+ * @method void setPeerFiles($peer_files)
+ * @method boolean getPeerFiles()
+ * @method void setPeerSolutions($peer_solutions)
+ * @method boolean getPeerSolutions()
+ * @method void setPeerDiscussion($peer_discussion)
+ * @method boolean getPeerDiscussion()
  * @method void setInstructorBlind($instructor_blind)
  * @method int getInstructorBlind()
  * @method bool getAllowCustomMarks()
@@ -320,6 +330,21 @@ class Gradeable extends AbstractModel {
      * @var bool will peer graders grade the gradeable blindly*/
     protected $peer_blind = 3;
     /** @prop
+     * @var bool will peer graders access the autograding panel*/
+    protected $peer_autograding = true;
+    /** @prop
+     * @var bool will peer graders access the rubric panel*/
+    protected $peer_rubric = true;
+    /** @prop
+     * @var bool will peer graders access the files panel*/
+    protected $peer_files = true;
+    /** @prop
+     * @var bool will peer graders access the solution/notes panel*/
+    protected $peer_solutions = true;
+    /** @prop
+     * @var bool will peer graders access the discussion panel*/
+    protected $peer_discussion = true;
+    /** @prop
      * @var bool will instructors have blind peer grading enabled*/
     protected $instructor_blind = 1;
 
@@ -351,6 +376,26 @@ class Gradeable extends AbstractModel {
 
         if (array_key_exists('peer_blind', $details)) {
             $this->setPeerBlind($details['peer_blind']);
+        }
+
+        if (array_key_exists('autograding', $details)) {
+            $this->setPeerAutograding($details['autograding'] !== null ? $details['autograding'] : true);
+        }
+
+        if (array_key_exists('rubric', $details)) {
+            $this->setPeerRubric($details['rubric'] !== null ? $details['rubric'] : true);
+        }
+
+        if (array_key_exists('files', $details)) {
+            $this->setPeerFiles($details['files'] !== null ? $details['files'] : true);
+        }
+
+        if (array_key_exists('solution_notes', $details)) {
+            $this->setPeerSolutions($details['solution_notes'] !== null ? $details['solution_notes'] : true);
+        }
+
+        if (array_key_exists('discussion', $details)) {
+            $this->setPeerDiscussion($details['discussion'] !== null ? $details['discussion'] : true);
         }
 
         if (array_key_exists('limited_access_blind', $details)) {

@@ -112,6 +112,29 @@ Form
             {{ (gradeable.getPeerBlind() == 3 or action == "new") ? 'checked' : '' }}><label for="double_blind_peer_grading">Double Blinded Grading</label>
 
     </fieldset>
+    <br />
+    <fieldset>
+        <legend>
+            Which tabs should be visible to peer graders?
+        </legend>
+        <input type="checkbox" name="peer_panel" value="1" id="peer_autograding"
+            {{ (gradeable.getPeerAutograding() == true) ? 'checked' : ''}}><label for="autograding">Autograding</label>
+        <input type="checkbox" name="peer_panel" value="2" id="peer_rubric"
+            {{ (gradeable.getPeerRubric() == true) ? 'checked' : '' }}> <label for="rubric">Rubric</label>
+
+        <input type="checkbox" name="peer_panel" value="3" id="peer_files"
+            {{ (gradeable.getPeerFiles() == true) ? 'checked' : '' }}><label for="files">Files</label>
+
+        <input type="checkbox" name="peer_panel" value="4" id="peer_solutions"
+            {{ (gradeable.getPeerSolutions() == true) ? 'checked' : '' }}><label for="solutions">Solution/Notes</label>
+
+        {% if isDiscussionPanel %}
+
+            <input type="checkbox" name="peer_panel" value="5" id="peer_discussion"
+                {{ (gradeable.getPeerDiscussion() == true) ? 'checked' : '' }}><label for="discussion">Discussion</label>
+
+        {% endif %}
+    </fieldset>
 
 {% endif %}
 
