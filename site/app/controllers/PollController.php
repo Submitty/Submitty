@@ -569,7 +569,7 @@ class PollController extends AbstractController {
         elseif ($custom_option->getAuthorId() !== $user_id && !$this->core->getUser()->accessFaculty()) {
             return JsonResponse::getErrorResponse("You have no access to remove this custom response");
         }
-        elseif (($custom_option->getUserResponses()->count() > 1) || ($custom_option->getUserResponses()->count() === 1 && $custom_option->getUserResponses()->first()->getStudentId() !== $user_id)) {
+        elseif ($custom_option->getUserResponses()->count() > 1 || ($custom_option->getUserResponses()->count() === 1 && $custom_option->getUserResponses()->first()->getStudentId() !== $user_id)) {
             return JsonResponse::getErrorResponse("Cannot delete response option that has already been submitted as an answer by another individual");
         }
 
