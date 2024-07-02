@@ -1,5 +1,23 @@
 /* global buildCourseUrl, WebSocketClient */
-/* exported initGradingInquirySocketClient, onComponentTabClicked, onGradeInquirySubmitClicked, onReady, onReplyTextAreaKeyUp */
+/* exported loadDraft, initGradingInquirySocketClient, onComponentTabClicked, onGradeInquirySubmitClicked, onReady, onReplyTextAreaKeyUp */
+
+function loadDraft() {
+    // LoadDraft function displays the saved draft text on grade inquiry box
+    let draftContent = localStorage.getItem('draftContent');
+    if (draftContent === null) {
+        draftContent = {};
+    }
+    else {
+        draftContent = JSON.parse(draftContent);
+    }
+    const elements = $('.markdown-textarea.fill-available');
+    elements.each(function () {
+        const elementId = $(this).attr('id');
+        if (Object.prototype.hasOwnProperty.call(draftContent, elementId)) {
+            $(this).val(draftContent[elementId]);
+        }
+    });
+}
 
 function onReady() {
     // open last opened grade inquiry or open first component with grade inquiry
@@ -50,12 +68,27 @@ function onComponentTabClicked(tab) {
 }
 
 function onReplyTextAreaKeyUp(textarea) {
+    // save the draft input on grade inquiry box
     const reply_text_area = $(textarea);
     const must_have_text_buttons = $('.gi-submit:not(.gi-ignore-disabled)');
     must_have_text_buttons.prop('disabled', reply_text_area.val() === '');
     const must_be_empty_buttons = $('.gi-submit-empty:not(.gi-ignore-disabled)');
     must_be_empty_buttons.prop('disabled', reply_text_area.val() !== '');
 
+    const component_selected = $('.btn-selected');
+    const component_id = component_selected.length ? component_selected.data('component_id') : 0;
+    localStorage.setItem('selected_tab', `.component-${component_id}`);
+    let draftContent = localStorage.getItem('draftContent');
+    if (draftContent === null) {
+        draftContent = {};
+    }
+    else {
+        draftContent = JSON.parse(draftContent);
+    }
+    // notice that from Discussion.twig file, all elementId start with this string pattern (i.e. 'reply-text-area-')
+    const key = 'reply-text-area-';
+    draftContent[key + component_id] = reply_text_area.val();
+    localStorage.setItem('draftContent', JSON.stringify(draftContent));
     if (reply_text_area.val() === '') {
         $('.gi-show-empty').show();
         $('.gi-show-not-empty').hide();
