@@ -33,6 +33,10 @@
         });
     </script>
 
+    {% for audio_ref in audio %}
+    <audio preload src='{{ audio_ref }}'></audio>
+    {% endfor %}
+
     {% for css_ref in css %}
     <link rel='stylesheet' type='text/css' href='{{ css_ref }}' />
     {% endfor %}

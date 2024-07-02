@@ -7,7 +7,7 @@ class NotificationSound {
             throw 'Unable to produce notification sounds.  Browser doesn\'t support mp3 audio files.';
         }
 
-        this.sound.src = 'site/public/audio/quack-alert.mp3';
+        this.sound.src = 'quack-alert.mp3';
     }
 
     async play() {

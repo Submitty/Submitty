@@ -40,6 +40,8 @@ class Output {
     private $loaded_views = [];
 
     /** @var Set */
+    private $audio;
+    /** @var Set */
     private $css;
     /** @var Set */
     private $js;
@@ -75,6 +77,7 @@ class Output {
         $this->start_time = microtime(true);
         $this->controller = new GlobalController($core);
 
+        $this->audio = new Set();
         $this->css = new Set();
         $this->js = new Set();
         $this->module_js = new Set();
@@ -526,6 +529,14 @@ HTML;
         return $this->getOutput();
     }
 
+    public function addAudio(string $url): void {
+        $this->audio->add($url);
+    }
+
+    public function addInternalAudio($file, $folder = 'audio') {
+        $this->addAudio($this->timestampResource($file, $folder));
+    }
+
     public function addInternalCss($file, $folder = 'css') {
         $this->addCss($this->timestampResource($file, $folder));
     }
@@ -624,6 +635,10 @@ HTML;
             return $this->page_name;
         }
         return end($this->breadcrumbs)->getTitle();
+    }
+
+    public function getAudio(): Set {
+        return $this->audio;
     }
 
     public function getCss(): Set {
