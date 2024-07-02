@@ -85,11 +85,11 @@ class CalendarView extends AbstractView {
         $this->core->getOutput()->addBreadcrumb($in_course ? "Course Calendar" : "Calendar");
         return $this->core->getOutput()->renderTwigTemplate("calendar/Calendar.twig", [
             "show_table" => $show_table,
-            "view_year" => $year,          // the year that the calendar is viewing
-            "view_month" => $month,        // the month that the calendar is viewing
-            "curr_year" => date("Y"),  // the current year
-            "curr_month" => date("n"), // the current month
-            "curr_day" => date("d"),   // the current date
+            "view_year" => $year,
+            "view_month" => $month,
+            "curr_year" => date("Y"),
+            "curr_month" => date("n"),
+            "curr_day" => date("d"),
             'date_format' => $this->core->getConfig()->getDateTimeFormat()->getFormat('gradeable'),
             "gradeables_by_date" => $info->getItemsByDateInCourses(),
             "global_items_by_date" => $global_info->getGlobalItemsByDate(),
@@ -100,12 +100,15 @@ class CalendarView extends AbstractView {
             "is_superuser" => $this->core->getUser()->getAccessLevel() === User::LEVEL_SUPERUSER,
             "colors" => $info->getColors(),
             "instructor_courses" => $this->core->getQueries()->getInstructorLevelUnarchivedCourses($this->core->getUser()->getId()),
-            "view_cookie" => isset($_COOKIE['view']) ? $_COOKIE['view'] : "month",
+            "view_cookie" => $_COOKIE['view'] ?? $_COOKIE['view'] ?? "month",
+            "month_cookie" => $_COOKIE['calendar_month'] ?? $month,
+            "year_cookie" => $_COOKIE['calendar_year'] ?? $year,
             "course_names" => $courseWithName,
             "show_legend" => $show_legend,
             "color_options" => $course_colors,
             "show_all_cookie" => isset($_COOKIE['calendar_show_all']) ? $_COOKIE['calendar_show_all'] : 1,
             "calendar_course_cookie" => $_COOKIE['calendar_course'] ?? ($formatted_courses[0] ?? null),
+            "display_name_cookie" => $_COOKIE['calendar_course'] ?? '',
         ]);
     }
 }

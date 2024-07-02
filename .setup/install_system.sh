@@ -118,6 +118,8 @@ if [ ${DEV_VM} == 1 ] && [ ${WORKER} == 0 ]; then
 
     sed -i -e "s/PermitRootLogin prohibit-password/PermitRootLogin yes/g" /etc/ssh/sshd_config
 
+    chmod 755 -R /usr/local/submitty/GIT_CHECKOUT
+
     # Set up some convinence stuff for the root user on ssh
 
     INSTALL_HELP=$(cat <<'EOF'
@@ -127,12 +129,14 @@ The vagrant box comes with some handy aliases:
     submitty_install_site        - runs .setup/INSTALL_SUBMITTY_HELPER_SITE.sh
     submitty_install_bin         - runs .setup/INSTALL_SUBMITTY_HELPER_BIN.sh
     submitty_code_watcher        - runs .setup/bin/code_watcher.py
+    submitty_test                - runs .setup/SUBMITTY_TEST.sh
     submitty_restart_autograding - restart systemctl for autograding
     submitty_restart_services    - restarts all Submitty related systemctl
     lichen_install               - runs Lichen/install_lichen.sh
-    migrator                     - run the migrator tool
+    migrator                     - runs the migrator tool
     vagrant_info                 - print out the MotD again
     ntp_sync                     - Re-syncs NTP in case of time drift
+    recreate_sample_courses      - runs .setup/bin/recreate_sample_courses.sh
 
 Saved variables:
     SUBMITTY_REPOSITORY, LICHEN_REPOSITORY, RAINBOWGRADES_REPOSITORY,
@@ -177,6 +181,7 @@ alias submitty_test='bash /usr/local/submitty/GIT_CHECKOUT/Submitty/.setup/SUBMI
 alias migrator='python3 ${SUBMITTY_REPOSITORY}/migration/run_migrator.py -c ${SUBMITTY_INSTALL_DIR}/config'
 alias vagrant_info='cat /etc/motd'
 alias ntp_sync='service ntp stop && ntpd -gq && service ntp start'
+alias recreate_sample_courses='sudo bash /usr/local/submitty/GIT_CHECKOUT/Submitty/.setup/bin/recreate_sample_courses.sh'
 systemctl start submitty_autograding_shipper
 systemctl start submitty_autograding_worker
 systemctl start submitty_daemon_jobs_handler
@@ -296,12 +301,12 @@ grep -q "^UMASK 027" /etc/login.defs || (echo "ERROR! failed to set umask" && ex
 #add users not needed on a worker machine.
 if [ ${WORKER} == 0 ]; then
     if ! cut -d ':' -f 1 /etc/passwd | grep -q ${PHP_USER} ; then
-        useradd -m -c "First Last,RoomNumber,WorkPhone,HomePhone" "${PHP_USER}"
+        useradd -m -c "First Last,RoomNumber,WorkPhone,HomePhone" "${PHP_USER}" -s /bin/bash
     fi
     usermod -a -G "${DAEMONPHP_GROUP}" "${PHP_USER}"
     usermod -a -G "${DAEMONPHPCGI_GROUP}" "${PHP_USER}"
     if ! cut -d ':' -f 1 /etc/passwd | grep -q ${CGI_USER} ; then
-        useradd -m -c "First Last,RoomNumber,WorkPhone,HomePhone" "${CGI_USER}"
+        useradd -m -c "First Last,RoomNumber,WorkPhone,HomePhone" "${CGI_USER}" -s /bin/bash
     fi
     usermod -a -G "${PHP_GROUP}" "${CGI_USER}"
     usermod -a -G "${DAEMONCGI_GROUP}" "${CGI_USER}"
@@ -323,7 +328,7 @@ if [ ${WORKER} == 0 ]; then
 fi
 
 if ! cut -d ':' -f 1 /etc/passwd | grep -q ${DAEMON_USER} ; then
-    useradd -m -c "First Last,RoomNumber,WorkPhone,HomePhone" "${DAEMON_USER}"
+    useradd -m -c "First Last,RoomNumber,WorkPhone,HomePhone" "${DAEMON_USER}" -s /bin/bash
     if [ ${WORKER} == 0 ] && [ ${DEV_VM} == 1 ] && [ -f ${SUBMITTY_REPOSITORY}/.vagrant/workers.json ]; then
         echo -e "attempting to create ssh key for submitty_daemon..."
         su submitty_daemon -c "cd ~/"

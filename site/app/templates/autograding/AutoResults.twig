@@ -116,7 +116,7 @@
                     {% set can_view = (not testcase.hidden or show_hidden) %}
                     {% set can_view_details = (not testcase.hidden or ((show_hidden_details or testcase.release_hidden_details) and show_hidden)) %}
 
-                    <div class="box" {{ testcase.hidden and show_hidden ? "style='background-color:var(--standard-hover-light-gray);'" : "" }}>
+                    <div class="box results-box" {{ testcase.hidden and show_hidden ? "style='background-color:var(--standard-hover-light-gray);'" : "" }}>
                         <div id='tc_{{ loop.index0 }}' class="box-title key_to_click" tabindex="0"
 
                                 {% if can_view_details and testcase.has_extra_results %}
