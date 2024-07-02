@@ -75,8 +75,6 @@ def log_message(message):
 log_message("Start processing " + semester + " " + course)
 
 
-
-
 # Verify user exists
 users = pwd.getpwall()
 
@@ -135,15 +133,8 @@ else:
     print('Previously configured Makefile detected', flush=True)
 
 
-# Get the current username (print debug)
-username = getpass.getuser()
-
-print(f'The script is being run by: {username}')
-
-
 # Change directory to course specific directory
 os.chdir(rg_course_path)
-print('flag 167', flush=True)
 
 # Verify submitty_admin file exists
 creds_file = os.path.join(install_dir, 'config', 'submitty_admin.json')
@@ -154,7 +145,6 @@ if not os.path.exists(creds_file):
 # Load credentials out of admin file
 with open(creds_file, 'r') as file:
     creds = json.load(file)
-    print('flag 178', flush=True)
 
 # Take this path if we DID NOT get an auth token
 if 'token' not in creds or not creds['token']:
