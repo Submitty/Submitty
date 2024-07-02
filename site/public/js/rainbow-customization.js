@@ -270,7 +270,7 @@ function getGradeableBuckets() {
 function getPlagiarism() {
     const plagiarismData = [];
 
-    const tableBody = document.getElementById('table-body');
+    const tableBody = document.getElementById('plagiarism-table-body');
     const rows = tableBody.getElementsByTagName('tr');
 
     for (let i = 0; i < rows.length; i++) {
@@ -289,8 +289,8 @@ function getPlagiarism() {
     return plagiarismData;
 }
 
-function addToTable() {
-    const USERID = document.getElementById('user_id').value.trim();
+function addToPlagiarismTable() {
+    const USERID = document.getElementById('plagiarism_user_id').value.trim();
     const gradeable = document.getElementById('g_id').value.trim();
     const penalty = document.getElementById('marks').value.trim();
 
@@ -313,7 +313,7 @@ function addToTable() {
         return;
     }
 
-    const tableBody = document.getElementById('table-body');
+    const tableBody = document.getElementById('plagiarism-table-body');
 
     // Check for duplicate entries
     const rows = tableBody.getElementsByTagName('tr');
@@ -351,9 +351,100 @@ function addToTable() {
     cellDelete.appendChild(deleteLink);
 
     // Clear the form fields
-    document.getElementById('user_id').value = '';
+    document.getElementById('plagiarism_user_id').value = '';
     document.getElementById('g_id').value = '';
     document.getElementById('marks').value = '';
+}
+
+function getManualGrades() {
+    const manualGradeData = [];
+
+    const tableBody = document.getElementById('manual-grading-table-body');
+    const rows = tableBody.getElementsByTagName('tr');
+
+    for (let i = 0; i < rows.length; i++) {
+        const row = rows[i];
+        const user = row.cells[0].textContent;
+        const grade = row.cells[1].textContent;
+        const note = row.cells[2].textContent;
+
+        manualGradeData.push({
+            user: user,
+            grade: grade,
+            note: note,
+        });
+    }
+
+    return manualGradeData;
+}
+
+function addToManualGradingTable() {
+    const USERID = document.getElementById('manual_grading_user_id').value.trim();
+    const grade = document.getElementById('manual_grading_grade').value.trim();
+    const note = document.getElementById('manual_grading_note').value.trim();
+
+    // Check for empty fields
+    if (USERID === '' || grade === '' || note === '') {
+        alert('Please fill in all the fields.');
+        return;
+    }
+
+    // eslint-disable-next-line no-undef
+    const studentFullDataValues = studentFullData.map((item) => item.value);
+    if (!studentFullDataValues.includes(USERID)) {
+        alert('Invalid User ID. Please enter a valid one.');
+        return;
+    }
+
+    const allowed_grades = ['A', 'A-', 'B+', 'B', 'B-', 'C+', 'C', 'C-', 'D+', 'D', 'F'];
+
+    // Check for final grade
+    if (!allowed_grades.includes(grade)) {
+        alert('Grade must be one of the following: A, A-, B+, B, C+, C, C-, D+, D, F');
+        return;
+    }
+
+    const tableBody = document.getElementById('manual-grading-table-body');
+
+    // Check for duplicate entries
+    const rows = tableBody.getElementsByTagName('tr');
+    for (let i = 0; i < rows.length; i++) {
+        const row = rows[i];
+        const existingUSERID = row.cells[0].textContent.trim();
+        const existingGrade = row.cells[1].textContent.trim();
+
+        if (USERID === existingUSERID && grade === existingGrade) {
+            alert('Entry with the same Student ID and Grade already exists.');
+            return;
+        }
+    }
+
+    // Create a new row and cells
+    const newRow = tableBody.insertRow();
+
+    const cellUSERID = newRow.insertCell();
+    cellUSERID.textContent = USERID;
+
+    const cellGrade = newRow.insertCell();
+    cellGrade.textContent = grade;
+
+    const cellNote = newRow.insertCell();
+    cellNote.textContent = note;
+
+    const cellDelete = newRow.insertCell();
+    const deleteLink = document.createElement('a');
+    const deleteIcon = document.createElement('i');
+    deleteIcon.className = 'fas fa-trash';
+    deleteLink.appendChild(deleteIcon);
+    deleteLink.onclick = function () {
+        deleteRow(this);
+    };
+    cellDelete.appendChild(deleteLink);
+
+    // Clear the form fields
+    document.getElementById('manual_grading_user_id').value = '';
+    document.getElementById('manual_grading_grade').value = '';
+    document.getElementById('manual_grading_note').value = '';
 }
 
 function deleteRow(button) {
@@ -458,6 +549,7 @@ function buildJSON() {
         gradeables: getGradeableBuckets(),
         messages: getMessages(),
         plagiarism: getPlagiarism(),
+        manual_grade: getManualGrades(),
     };
 
     ret = JSON.stringify(ret);
@@ -584,6 +676,7 @@ function setCustomizationItemVisibility(elem) {
         final_grade: '#final_grade_cutoffs',
         messages: '#cust_messages',
         section: '#section_labels',
+        manual_grade: '#manual-grading',
     };
     const checkbox_name = elem.value;
     const cust_item_id = checkbox_to_cust_item[checkbox_name];
@@ -642,7 +735,7 @@ $(document).ready(() => {
      * Configure visibility handler for all customization items other than benchmark percents
      * Visibility is controlled by whether the corresponding boxes are selected in the display area
      */
-    const dropdown_checkboxes = ['final_grade', 'messages', 'section'];
+    const dropdown_checkboxes = ['final_grade', 'messages', 'section', 'manual_grade'];
     $('#display input').each(function () {
         if (dropdown_checkboxes.includes(this.value)) {
             // Set the initial visibility on load
