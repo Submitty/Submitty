@@ -1121,10 +1121,12 @@ class HomeworkView extends AbstractView {
         // If its not git checkout
         $can_download = !$gradeable->isVcs();
 
+        $current_graded_version = -1;
         $active_same_as_graded = true;
         if ($active_version_number !== 0 || $display_version !== 0) {
             if ($graded_gradeable->hasTaGradingInfo() && $graded_gradeable->isTaGradingComplete()) {
-                $active_same_as_graded = $graded_gradeable->getTaGradedGradeable()->getGradedVersion() === $active_version_number;
+                $current_graded_version = $graded_gradeable->getTaGradedGradeable()->getGradedVersion();
+                $active_same_as_graded = $current_graded_version === $active_version_number;
             }
         }
 
@@ -1161,9 +1163,11 @@ class HomeworkView extends AbstractView {
             'ta_grades_incomplete' => $gradeable->isTaGrading() && $gradeable->isTaGradeReleased() && !$graded_gradeable->isTaGradingComplete(),
             'csrf_token' => $this->core->getCsrfToken(),
             'date_time_format' => $this->core->getConfig()->getDateTimeFormat()->getFormat('gradeable_with_seconds'),
-            'after_ta_open' => $gradeable->getGradeStartDate() < $this->core->getDateTimeNow()
+            'after_ta_open' => $gradeable->getGradeStartDate() < $this->core->getDateTimeNow(),
+            'current_graded_version' => $current_graded_version
         ]);
 
+        // Note Here:
         $this->core->getOutput()->addInternalJs('confetti.js');
         return $this->core->getOutput()->renderTwigTemplate('submission/homework/CurrentVersionBox.twig', $param);
     }
