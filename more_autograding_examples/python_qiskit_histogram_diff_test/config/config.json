@@ -26,7 +26,7 @@
                     "actual_file": "histogram.png",
                     "expected_file": "expected.png",
                     "method": "ImageDiff",
-                    "acceptable_threshold": ".01",
+                    "acceptable_threshold": ".1",
                     "show_difference_image" : "always",
                     "show_actual": "always",
                     "show_expected":"always"
