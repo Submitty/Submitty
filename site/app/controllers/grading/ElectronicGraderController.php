@@ -2386,7 +2386,7 @@ class ElectronicGraderController extends AbstractController {
 
         try {
             // do thing
-            $this->core->getQueries()->changeGradedVersionOfGradeable($gradeable_id, intval($submitter_id), $graded_version);
+            $this->core->getQueries()->changeGradedVersionOfGradeable($gradeable_id, $submitter_id, $graded_version);
             $this->core->getOutput()->renderJsonSuccess();
         }
         catch (\InvalidArgumentException $e) {
