@@ -4,7 +4,7 @@
         Limited grader does not have "View All" option
         If nothing to grade, Instructor will see all sections
     #}
-    <div class="row details-header-row">
+    <div class="details-header-row">
     <h1>Grade Details for {{ gradeable.getTitle() }}</h1>
         <div class="markers-container">
             <ul id="details-legend">
@@ -40,10 +40,10 @@
                     {{ view_all ? "View Your Sections" : "View All" }}
                 </button>
                 {% endif %}
-                <a class="btn btn-default"
-                   href="" onclick="changeSortOrder()">
+                <button class="btn btn-default"
+                   onclick="changeSortOrder()">
                     {{ sort == 'random' ? "Switch to Default Order" : "Switch to Random Order" }}
-                </a>
+                </button>
                 {% if toggle_anon_button %}
                 <button class="btn btn-default" id="toggle-anon-button"
                     onclick="changeAnon('{{ gradeable.getId() }}')">
@@ -202,19 +202,18 @@
         {% if gradeable.isTeamAssignment() and empty_teams|length > 0 %}
             <tbody class="details-info-header{% if 'empty-teams' not in collapsed_sections %} panel-head-active{% endif %}" id="details-content-section-empty-teams" data-section-id="empty-teams">
                 <tr class="info">
-                    <td colspan="{{ columns|length }}" style="text-align: center">Empty Teams</td>
                     {% if core.getUser().accessGrading() %}
-                        <td colspan="{{ columns|length }}" style="text-align: center">
-                            <i class="collapse-icon fas fa-caret-right"></i>
-                            <i class="expand-icon fas fa-caret-down"></i>
-                        </td>
+                    <td colspan="{{ columns|length }}" style="text-align: center">
+                        <i class="collapse-icon fas fa-caret-right"></i>
+                        <i class="expand-icon fas fa-caret-down"></i>
+                    </td>
                     {% endif %}
                 </tr>
                 <tr class="info">
-                    <td colspan="{{ columns|length }}" style="text-align: center">Empty Teams</td>
+                    <td colspan="{{ columns|length }}" style="text-align: center">Empty teams</td>
                 </tr>
             </tbody>
-            <tbody class="details-content panel-content-active"{% if section.title in collapsed_sections %} style="display: none"{% endif %}>
+            <tbody class="details-content panel-content-active">
                 {% for team in empty_teams %}
                     {% set reg_section = team.getRegistrationSection() ?? "NULL" %}
                     {% set rot_section = team.getRotatingSection() ?? "NULL" %}

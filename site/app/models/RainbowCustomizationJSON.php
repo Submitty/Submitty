@@ -25,6 +25,7 @@ class RainbowCustomizationJSON extends AbstractModel {
     private $messages = [];
     private $display = [];
     private $benchmark_percent;         // Init in constructor
+    private object $final_cutoff;       // Init in constructor
     private $gradeables = [];
     /**
      * @var object[]
@@ -43,7 +44,7 @@ class RainbowCustomizationJSON extends AbstractModel {
         "Display the students registration section.", //section
         "Display the optional text message at the top of the page.", //messages
         "not used", //warning
-        "Display the student's final term letter grade.", //final_grade
+        "Configure cutoffs and display the student's final term letter grade.", //final_grade
         "not used", //manual_grade
         "Display the histogram of average overall grade and count of students with each final term letter grade.", //final_cutoff
         "Optional message for specific students that are only visible on the instructor gradebook, these messages are never displayed to students." //instructor_notes
@@ -61,6 +62,7 @@ class RainbowCustomizationJSON extends AbstractModel {
         // This is done so json_encode will properly encode the item when converting to json
         $this->section = (object) [];
         $this->benchmark_percent = (object) [];
+        $this->final_cutoff = (object) [];
     }
 
     /**
@@ -100,6 +102,14 @@ class RainbowCustomizationJSON extends AbstractModel {
         return $this->benchmark_percent;
     }
 
+    /**
+     * Gets the final cutoffs object
+     *
+     * @return object The final cutoffs object
+     */
+    public function getFinalCutoff() {
+        return $this->final_cutoff;
+    }
 
     /**
      * Gets an array of display
@@ -190,6 +200,10 @@ class RainbowCustomizationJSON extends AbstractModel {
             $this->benchmark_percent = $json->benchmark_percent;
         }
 
+        if (isset($json->final_cutoff)) {
+            $this->final_cutoff = $json->final_cutoff;
+        }
+
         if (isset($json->gradeables)) {
             $this->gradeables = $json->gradeables;
         }
@@ -243,6 +257,19 @@ class RainbowCustomizationJSON extends AbstractModel {
         }
 
         $this->benchmark_percent->$benchmark = (float) $percent;
+    }
+
+    /**
+     * Add a final cutoff
+     *
+     * @param string $cutoff The cutoff - this is the key for this json field
+     * @param float $percent The percent - this is the value for this json field
+     */
+    public function addFinalCutoff(string $cutoff, float $percent): void {
+        // To satisfy php-lint, add the pair to an array, then cast the array back to an object
+        $final_cutoff_array = (array) $this->final_cutoff;
+        $final_cutoff_array[$cutoff] = $percent;
+        $this->final_cutoff = (object) $final_cutoff_array;
     }
 
     /**
