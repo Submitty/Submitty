@@ -2357,7 +2357,7 @@ class ElectronicGraderController extends AbstractController {
             return;
         }
 
-        if (sizeof($component_ids) < 1) {
+        if (count($component_ids) < 1) {
             $this->core->getOutput()->renderJsonFail('Missing component_ids parameter');
             return;
         }
@@ -2387,7 +2387,7 @@ class ElectronicGraderController extends AbstractController {
                 $this->core->getOutput()->renderJsonFail("Invalid component id \"$component_id\"");
                 return;
             }
-            else if (!$this->core->getAccess()->canI("grading.electronic.save_graded_component", ["gradeable" => $gradeable, "graded_gradeable" => $graded_gradeable, "component" => $component])) {
+            elseif (!$this->core->getAccess()->canI("grading.electronic.save_graded_component", ["gradeable" => $gradeable, "graded_gradeable" => $graded_gradeable, "component" => $component])) {
                 $this->core->getOutput()->renderJsonFail("Insufficient permissions to change graded version of component $component_id");
                 return;
             }

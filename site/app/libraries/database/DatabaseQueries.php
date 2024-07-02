@@ -7559,6 +7559,8 @@ AND gc_id IN (
 
     /**
      * Changes the graded version of a gradeable for a particular student
+     *
+     * @param int[] $component_ids
      */
     public function changeGradedVersionOfComponents(string $gradeable_id, string $submitter_id, int $version, array $component_ids): void {
         $this->course_db->query(
