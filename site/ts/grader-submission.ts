@@ -19,7 +19,6 @@ declare global {
 
 const warning_banner = document.getElementById('submission-mode-warning');
 
-
 function initialSubmissionMode() {
     const radioBulk = $('#radio-bulk');
     const pdfSubmitButton = $('#pdf-submit-button');
@@ -43,10 +42,8 @@ function initialSubmissionMode() {
     }
 }
 
-
 function init() {
     initialSubmissionMode();
-
 
     document.getElementsByName('submission-type')
         .forEach((radio_btn) => radio_btn.addEventListener('click', changeSubmissionMode));
