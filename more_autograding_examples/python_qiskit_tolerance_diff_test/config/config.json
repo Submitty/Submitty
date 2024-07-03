@@ -1,11 +1,11 @@
 {
 	"required_capabilities": "python",
     "grading_parameters": {
-        "TOTAL_POINTS": 5,
-        "AUTO_POINTS": 5
+        "TOTAL_POINTS": 25,
+        "AUTO_POINTS": 25
     },
     "autograding" : {
-        "work_to_details" : [ "*.png" ]
+        "work_to_details" : [ "**/*.png, **/*.txt, **/*.json" ]
     },
     "autograding_method": "docker",
     "container_options": {
@@ -18,7 +18,7 @@
 
     "testcases" : [
         {
-            "title" : "Double H Gate Probabilities",
+            "title" : "Double H Gate Probabilities - Histogram Diff",
             "command" : "python3 *.py",
             "points" : 5,
             "validation" : [
@@ -30,6 +30,61 @@
                     "show_difference_image" : "always",
                     "show_actual": "always",
                     "show_expected":"always"
+                }
+            ]
+        },
+        {
+            "title" : "Double H Gate Probabilities - Float Diff",
+            "command" : "python3 *.py",
+            "points" : 5,
+            "validation": [
+                {
+                    "description": "diff",
+                    "method": "diff",
+                    "actual_file": "STDOUT.txt",
+                    "expected_file": "expected.txt",
+                    "deduction": 1,
+                    "failure_message":"These files do not exactly match."
+                }
+            ]
+        },
+        {
+            "title" : "Double H Gate Probabilities - Float Diff (Tolerance = .025)",
+            "command" : "python3 *.py",
+            "points" : 5,
+            "validation": [
+                {
+                    "method": "diff",
+                    "tolerance": 0.025,
+                    "actual_file": "STDOUT.txt",
+                    "expected_file": "expected.txt"
+                }
+            ]
+        },
+        {
+            "title" : "Double H Gate Probabilities - Float Diff (ignore whitespace)",
+            "command" : "python3 *.py",
+            "points" : 5,
+            "validation": [
+                {
+                    "method": "diff",
+                    "ignoreWhitespace": true,
+                    "actual_file": "STDOUT.txt",
+                    "expected_file": "expected.txt"
+                }
+            ]
+        },
+        {
+            "title" : "Double H Gate Probabilities - Float Diff (Tolerance = .025, ignore whitespace)",
+            "command" : "python3 *.py",
+            "points" : 5,
+            "validation": [
+                {
+                    "method": "diff",
+                    "ignoreWhitespace": true,
+                    "tolerance": 0.025,
+                    "actual_file": "STDOUT.txt",
+                    "expected_file": "expected.txt"
                 }
             ]
         }
