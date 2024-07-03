@@ -1125,6 +1125,7 @@ class HomeworkView extends AbstractView {
         $active_same_as_graded = true;
         if ($active_version_number !== 0 || $display_version !== 0) {
             if ($graded_gradeable->hasTaGradingInfo() && $graded_gradeable->isTaGradingComplete()) {
+            // if ($graded_gradeable->hasTaGradingInfo()){
                 $current_graded_version = $graded_gradeable->getTaGradedGradeable()->getGradedVersion();
                 $active_same_as_graded = $current_graded_version === $active_version_number;
             }
@@ -1167,7 +1168,6 @@ class HomeworkView extends AbstractView {
             'current_graded_version' => $current_graded_version
         ]);
 
-        // Note Here:
         $this->core->getOutput()->addInternalJs('confetti.js');
         return $this->core->getOutput()->renderTwigTemplate('submission/homework/CurrentVersionBox.twig', $param);
     }

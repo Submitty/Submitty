@@ -58,6 +58,7 @@
             {% endif %}
 
             <div class="sub submission-message">
+                Hello {{ current_graded_version|default('null') }} {{ after_ta_open|default('null') }}
                 {% if active_version == 0 and display_version == 0 %}
                     <p class="red-message">
                         Note: You have selected to NOT GRADE THIS ASSIGNMENT.<br />
@@ -75,7 +76,6 @@
                         Note: The version you have selected to be graded, Version #{{ active_version }}, is not the version graded by the instructor/TAs, Version #{{ current_graded_version }}.<br />
                         If the graded version does not match your selected version, a zero will be recorded in the gradebook.<br />
                     </p>
-                    {# Note here #}
                 {% elseif active_version > 0 and active_version == display_version %}
                     <p class="green-message">
                         Note: This version of your assignment will be graded by the instructor/TAs and the score recorded in the gradebook.
