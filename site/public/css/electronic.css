@@ -967,6 +967,11 @@ tr.is_publish {
     padding: 4px;
 }
 
+.ta-grading-setting-list td.button-cell {
+    display: flex;
+    justify-content: center; /* Center horizontally */
+}
+
 .remap-button {
     width: 100%;
     text-align: center;

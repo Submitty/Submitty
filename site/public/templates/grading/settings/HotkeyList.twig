@@ -1,11 +1,12 @@
 <table id="hotkeys-list" class="ta-grading-setting-list">
-        <tr>
-          <th>Action</th>
-          <th>Hotkey</th>
-        </tr>
+    <tr>
+        <th>Action</th>
+        <th>Hotkey</th>
+        <th>Remove</th>
+    </tr>
     {% for hotkey in keymap %}
         <tr>
-            <td>{{ hotkey.name }}</td>
+            <td>{{ hotkey.name | default('Unnamed Action') }}</td>
             <td>
                 {% if hotkey.locked %}
                     <button id="remap-{{ loop.index0 }}" class="btn btn-default remap-button" disabled="disabled">{{ hotkey.code }}</button>
@@ -14,10 +15,8 @@
                     <button id="remap-{{ loop.index0 }}" class="btn {{ class }} remap-button remap-disable key_to_click" tabindex="0" onclick="remapHotkey({{ loop.index0 }});">{{ hotkey.code }}</button>
                 {% endif %}
             </td>
-            <td>
-                {% if hotkey.code != hotkey.originalCode %}
-                    <button id="remap-unset-{{ loop.index0 }}" class="btn btn-danger remap-disable key_to_click" tabindex="0" onclick="remapUnset({{ loop.index0 }});">&times;</button>
-                {% endif %}
+            <td class="button-cell" style="display: flex; justify-content: center; align-items: center;">
+                <button id="remap-unset-{{ loop.index0 }}" class="btn btn-danger remap-disable key_to_click" tabindex="0" onclick="remapUnset({{ loop.index0 }});">&times;</button>
             </td>
         </tr>
     {% endfor %}

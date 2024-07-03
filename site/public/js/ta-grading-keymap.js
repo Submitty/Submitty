@@ -169,7 +169,10 @@ function generateHotkeysList() {
     parent.replaceWith(Twig.twig({
         ref: 'HotkeyList',
     }).render({
-        keymap: keymap,
+        keymap: keymap.map(hotkey => ({
+            ...hotkey,
+            code: hotkey.code || "Unset",
+        })),
     }));
 }
 
@@ -245,18 +248,19 @@ function remapHotkey(i) {
  * @param {string} code New keycode for the hotkey
  */
 function remapFinish(index, code) {
-    // Check if code is already used
-    for (let i = 0; i < keymap.length; i++) {
-        if (index === i) {
-            continue;
-        }
-        if (keymap[i].code === code) {
-            // Oh no
-            const button = $(`#remap-${index}`);
-            button.text('Enter Unique Key...');
-            button.addClass('btn-danger');
-            button.removeClass('btn-success');
-            return;
+    // Check if code is already used (ignore if code is empty)
+    if (code !== "") {
+        for (let i = 0; i < keymap.length; i++) {
+            if (index === i) {
+                continue;
+            }
+            if (keymap[i].code === code) {
+                const button = $(`#remap-${index}`);
+                button.text('Enter Unique Key...');
+                button.addClass('btn-danger');
+                button.removeClass('btn-success');
+                return;
+            }
         }
     }
 
@@ -274,8 +278,8 @@ function remapFinish(index, code) {
  * Revert a hotkey to its original code
  * @param {int} i Index of hotkey
  */
-function remapUnset(i) {
-    remapFinish(i, keymap[i].originalCode);
+function remapUnset(index) {
+    remapFinish(index, ""); // Set to empty string to unset
 }
 
 /**
