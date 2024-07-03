@@ -37,6 +37,10 @@ if [ -d "${THIS_DIR}/../.utm" ]; then
     UTM=1
 fi
 
+CI=0
+if [ -d "${THIS_DIR}/../.github_actions_ci_flag" ]; then
+    CI=1
+fi
 
 SUBMITTY_REPOSITORY=$(jq -r '.submitty_repository' "${CONF_DIR}/submitty.json")
 SUBMITTY_INSTALL_DIR=$(jq -r '.submitty_install_dir' "${CONF_DIR}/submitty.json")
@@ -85,7 +89,7 @@ fi
 # FORCE CORRECT TIME SKEW
 # This may happen on a development virtual machine
 # SEE GITHUB ISSUE #7885 - https://github.com/Submitty/Submitty/issues/7885
-if [ "${VAGRANT}" == 1 ] || [ "${UTM}" == 1 ]; then
+if [[[ "${VAGRANT}" == 1 ] || [ "${UTM}" == 1 ]] && [ "${CI}" == 0 ]]; then
     sudo service ntp stop
     sudo ntpd -gq
     sudo service ntp start
