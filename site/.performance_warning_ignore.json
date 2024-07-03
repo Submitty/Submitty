@@ -46,5 +46,6 @@
   "/courses/<term>/<course>/polls/deletePoll",
   "/courses/<term>/<course>/upload",
   "/courses/<term>/<course>/email_status_page",
-  "/courses/<term>/<course>/users"
+  "/courses/<term>/<course>/users",
+  "/courses/<term>/<course>/queue/student_search"
 ]

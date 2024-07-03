@@ -11,7 +11,7 @@ function updateTable() {
     $.ajax({
         url: buildUrl(['autograding_status', 'get_update']),
         type: 'GET',
-        success: function(response) {
+        success: function (response) {
             try {
                 const data = $('#data');
                 let json = JSON.parse(response);
@@ -33,9 +33,9 @@ function updateTable() {
                 // Update Class Statistics table
                 let table = document.getElementById('course-table');
                 $('#course-table tbody').html('');
-                Object.keys(json.course_info).forEach(key1 => {
+                Object.keys(json.course_info).forEach((key1) => {
                     const course_name = key1.split('__');
-                    Object.keys(json.course_info[key1]).forEach(key2 => {
+                    Object.keys(json.course_info[key1]).forEach((key2) => {
                         const info = json.course_info[key1][key2];
                         const new_row = table.getElementsByTagName('tbody')[0].insertRow(-1);
                         new_row.insertCell().innerHTML = course_name[0];
@@ -57,9 +57,9 @@ function updateTable() {
                 // Update Machine Statistics table
                 table = document.getElementById('machine-table');
                 $('#machine-table tbody').html('');
-                Object.keys(json.ongoing_job_info).forEach(key => {
+                Object.keys(json.ongoing_job_info).forEach((key) => {
                     const info = json.ongoing_job_info[key];
-                    info.forEach(elem => {
+                    info.forEach((elem) => {
                         const new_row = table.getElementsByTagName('tbody')[0].insertRow(-1);
                         new_row.insertCell().innerHTML = key;
                         new_row.insertCell().innerHTML = elem.semester;
@@ -120,7 +120,7 @@ function updateTable() {
                     }
                 });
 
-                Object.keys(json.capability_queue_counts).forEach(key => {
+                Object.keys(json.capability_queue_counts).forEach((key) => {
                     const new_cell = new_row.insertCell();
                     // eslint-disable-next-line eqeqeq
                     if (json.capability_queue_counts[key] != 0) {

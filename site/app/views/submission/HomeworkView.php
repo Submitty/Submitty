@@ -197,6 +197,15 @@ class HomeworkView extends AbstractView {
             $active_days_charged = max(0, $active_days_late - $extensions);
         }
 
+
+        $date = new \DateTime();
+        $future_date = clone $date;
+        $future_date->modify('+7 days');
+        $past_date = clone $date;
+        $past_date->modify('-7 days');
+        // format("I") returns whether the given date is in daylight savings
+        $daylight_message_required = ($future_date->format("I") !== $past_date->format("I"));
+
         // ------------------------------------------------------------
         // IF STUDENT HAS ALREADY SUBMITTED AND THE ACTIVE VERSION IS LATE, PRINT LATE DAY INFORMATION FOR THE ACTIVE VERSION
         if ($active_version >= 1 && $active_days_late > 0) {
@@ -288,7 +297,8 @@ class HomeworkView extends AbstractView {
 
         return $this->core->getOutput()->renderTwigTemplate('submission/homework/LateDayMessage.twig', [
             'messages' => $messages,
-            'error' => $error
+            'error' => $error,
+            'daylight' => $daylight_message_required
         ]);
     }
 

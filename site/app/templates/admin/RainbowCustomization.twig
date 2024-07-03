@@ -60,23 +60,23 @@
             <div id="benchmark_percents" class="customization_item">
                 <h2>Benchmark Percents</h2>
                 <p class="rg_info_message">You may adjust the minimum percent required to receive certain letter grades.  Enter this percentage as a decimal number.<br />As an example 90% would be entered as .9</p>
-                {% for benchmark in benchmarks_with_input_fields %}
-                    {% if benchmark_percents[benchmark] is defined %}
-                        {% set percent = benchmark_percents[benchmark] %}
-                    {% else %}
-                        {% set percent = '' %}
-                    {% endif %}
+                <div class="input-boxes">
+                    {% for benchmark in benchmarks_with_input_fields %}
+                        {% if benchmark_percents[benchmark] is defined %}
+                            {% set percent = benchmark_percents[benchmark] %}
+                        {% else %}
+                            {% set percent = '' %}
+                        {% endif %}
 
-                    <p>
-                        <label for="benchmark_{{ benchmark }}" class="{{ benchmark }}">{{ benchmark }}</label>
+                        <label for="benchmark_{{ benchmark }}" class="{{ benchmark }} input-label">{{ benchmark }}</label>
                         <input type="text" id="benchmark_{{ benchmark }}" class="benchmark_percent_input {{ benchmark }}" data-benchmark="{{ benchmark }}" value="{{ percent }}">
-                    </p>
-                {% endfor %}
+                    {% endfor %}
+                </div>
             </div>
             <div id="final_grade_cutoffs" class="customization_item">
                 <h2>Final Grade Cutoffs</h2>
                 <p class="rg_info_message">You may adjust the minimum percent required to receive certain final letter grades.  Enter this percentage as a decimal number out of 100.<br />As an example 90% would be entered as 90.0</p>
-                <div class="input-percents">
+                <div class="input-boxes">
                     {% for cutoff_input in final_cutoff_input_fields %}
                         {% if final_cutoff[cutoff_input] is defined %}
                             {% set percent = final_cutoff[cutoff_input] %}
@@ -84,7 +84,7 @@
                             {% set percent = '' %}
                         {% endif %}
 
-                        <label for="cutoff_{{ cutoff_input }}" class="{{ cutoff_input }} cutoff-label">{{ cutoff_input }}</label>
+                        <label for="cutoff_{{ cutoff_input }}" class="{{ cutoff_input }} input-label">{{ cutoff_input }}</label>
                         <input type="text" id="cutoff_{{ cutoff_input }}" class="final_cutoff_input {{ cutoff_input }}" name="final_grade_cutoffs" data-benchmark="{{ cutoff_input }}" value="{{ percent }}">
                     {% endfor %}
                 </div>
@@ -98,12 +98,12 @@
                 <h2>Section Labels</h2>
                 <p class="rg_info_message">You may use this area to assign a label to each section number, for example the name of the TA or TAs
                     handling the section.  You may also leave it as the default, but it may not be blank.</p>
-                {% for section, label in sections_and_labels %}
-                    <p>
-                        <label for="section_and_labels_{{ section }}">{{ section }}</label>
+                <div class="input-boxes">
+                    {% for section, label in sections_and_labels %}
+                        <label for="section_and_labels_{{ section }}" class="input-label">{{ section }}</label>
                         <input type="text" data-section="{{ section }}" class="sections_and_labels" id="section_and_labels_{{ section }}" name="section_and_labels_{{ section }}" value="{{ label }}">
-                    </p>
-                {% endfor %}
+                    {% endfor %}
+                </div>
             </div>
             <div id="plagiarism" class="customization_item">
                 <h2>Penalties for Academic Dishonesty and Plagiarism</h2>

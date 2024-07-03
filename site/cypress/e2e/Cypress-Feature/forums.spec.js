@@ -26,7 +26,7 @@ const replyToThread = (title, reply) => {
     cy.get('[data-testid="thread-list-item"]').contains(title).click();
     cy.get('[data-testid="create-post-head"]').should('contain', title);
     cy.get('#reply_box_3').type(reply);
-    cy.get('[value="Submit Reply to All"]').should('not.be.disabled').click();
+    cy.get('[data-testid="forum-submit-reply-all"]').should('not.be.disabled').click();
     cy.get('#posts_list').should('contain', reply);
 };
 
@@ -60,42 +60,74 @@ const mergeThreads = (fromThread, toThread, mergedContent) => {
 
 const removeThread = (title) => {
     cy.get('[data-testid="thread-list-item"]').contains(title).click();
-    cy.get('.first_post > .post-action-container > .delete-post-button').click();
+    cy.get('.delete-post-button').first().click();
     cy.get('[data-testid="thread-list-item"]').contains(title).should('not.exist');
 };
 
-const uploadAttachmentAndDelete = (title) => {
+const uploadAttachmentAndDelete = (title, attachment) => {
     cy.get('[data-testid="thread-list-item"]').contains(title).click();
     cy.get('[data-testid="create-post-head"]').should('contain', title);
     cy.get('[data-testid="edit-post-button"]').first().click();
-    cy.get('[data-testid="input-file1"]').selectFile('cypress/fixtures/sea_animals.png');
-    cy.get('[data-testid="file-upload-table-1"]').should('contain', 'sea_animals.png');
+    cy.get('[data-testid="input-file1"]').selectFile(`cypress/fixtures/${attachment}`);
+    cy.get('[data-testid="file-upload-table-1"]').should('contain', attachment);
     cy.get('[data-testid="forum-update-post"]').contains('Update Post').click();
     cy.get('[data-testid="edit-post-button"]').first().click();
-    cy.get('[data-testid="mark-for-delete-btn"]').should('contain', 'Delete').click();
-    cy.get('[data-testid="mark-for-delete-btn"]').should('contain', 'Keep');
+    cy.get('[data-testid="mark-for-delete-btn"]').first().should('contain', 'Delete').click();
+    cy.get('[data-testid="mark-for-delete-btn"]').first().should('contain', 'Keep');
     cy.get('[data-testid="forum-update-post"]').contains('Update Post').click();
 };
+
 const replyDisabled = (title, attachment) => {
     cy.get('[data-testid="thread-list-item"]').contains(title).click();
     // Reply button should be disabled by default with no text
-    cy.get('[value="Submit Reply to All"]').should('be.disabled');
+    cy.get('[data-testid="forum-submit-reply-all"]').should('be.disabled');
 
     // Ensure reply button is not disabled when attachments are added
-    cy.get('#input-file3').attachFile(attachment);
-    cy.get('[value="Submit Reply to All"]').should('not.be.disabled').click();
+    // waits here are needed to avoid a reload that would clear out the upload
+    cy.wait(750);
+    cy.get('[data-testid="input-file3"]').selectFile(`cypress/fixtures/${attachment}`);
+    cy.get('[data-testid="forum-submit-reply-all"]').should('not.be.disabled').click();
 
     // Wait for submission and ensure attachment with no text is visible
     cy.get('.attachment-btn').click();
     cy.contains('p', attachment).should('be.visible');
 };
 
-describe('Test cases revolving around creating, replying to, merging, and removing discussion forum threads', () => {
+const removeUpduckPost = (thread_title) => {
+    cy.get('[data-testid="create-post-head"]').should('contain', thread_title);
+    cy.get('[data-testid="like-count"]').first().should('have.text', 1);
+    cy.get('[data-testid="upduck-button"]').first().click();
+    cy.get('[data-testid="like-count"]').first().should('have.text', 0);
+};
 
+const staffUpduckPost = (user, thread_title) => {
+    checkStaffUpduck(thread_title, 'be.not.visible');
+    upduckPost(thread_title);
+    checkStaffUpduck(thread_title, 'be.visible');
+
+    if (user !== 'instructor') {
+        removeUpduckPost(thread_title);
+        checkStaffUpduck(thread_title, 'be.not.visible');
+    }
+};
+
+const studentUpduckPost = (thread_title) => {
+    checkStaffUpduck(thread_title, 'be.not.visible');
+    upduckPost(thread_title);
+    checkStaffUpduck(thread_title, 'be.not.visible');
+    removeUpduckPost(thread_title);
+};
+
+const checkStaffUpduck = (title, visible) => {
+    cy.get('[data-testid="thread-list-item"]').contains(title).click();
+    cy.get('[data-testid="create-post-head"]').should('contain', title);
+    cy.get('[data-testid="instructor-like"]').first().should(visible);
+};
+
+describe('Should test creating, replying, merging, removing, and upducks in forum', () => {
     beforeEach(() => {
         cy.login('instructor');
-        cy.visit(['sample']);
-        cy.get('#nav-sidebar-forum').click();
+        cy.visit(['sample', 'forum']);
         cy.get('#nav-sidebar-collapse-sidebar').click();
     });
 
@@ -107,7 +139,7 @@ describe('Test cases revolving around creating, replying to, merging, and removi
 
     it('Create, reply to, merge, and delete threads', () => {
         // Add and Delete Image Attachment
-        uploadAttachmentAndDelete(title4);
+        uploadAttachmentAndDelete(title4, attachment1);
         // Comment
         createThread(title1, content1, 'Comment');
         // Question
@@ -122,12 +154,29 @@ describe('Test cases revolving around creating, replying to, merging, and removi
         // Tutorial
         replyToThread(title3, reply3);
 
-        // Upduck the first post of each thread
-        upduckPost(title1);
-        upduckPost(title2);
-        upduckPost(title3);
+        // Student upduck
+        cy.logout();
+        cy.login('student');
+        cy.visit(['sample', 'forum']);
+        studentUpduckPost(title1);
+        studentUpduckPost(title2);
+        studentUpduckPost(title3);
 
-        // Check the stats page for instructor with 3 upducks
+        // TA upduck
+        cy.logout();
+        cy.login('ta');
+        cy.visit(['sample', 'forum']);
+        staffUpduckPost('ta', title1);
+        staffUpduckPost('ta', title2);
+        staffUpduckPost('ta', title3);
+
+        // Instructor upduck and check the stats page for instructor with 3 upducks
+        cy.logout();
+        cy.login('instructor');
+        cy.visit(['sample', 'forum']);
+        staffUpduckPost('instructor', title1);
+        staffUpduckPost('instructor', title2);
+        staffUpduckPost('instructor', title3);
         checkStatsUpducks('Instructor, Quinn', 3);
 
         // Tutorial into Questions
