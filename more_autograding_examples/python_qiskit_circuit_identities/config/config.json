@@ -4,9 +4,6 @@
         "TOTAL_POINTS": 15,
         "AUTO_POINTS": 15
     },
-    "autograding" : {
-        "work_to_details" : [ "**/*_circuit", "**/*_circuit.png", "**/*_histogram.png" ]
-    },
     "autograding_method": "docker",
     "container_options": {
         "container_image": "submitty/qiskit:latest"

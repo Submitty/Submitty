@@ -1,21 +1,12 @@
 {
 	"required_capabilities": "python",
-    "grading_parameters": {
-        "TOTAL_POINTS": 25,
-        "AUTO_POINTS": 25
-    },
-    "autograding" : {
-        "work_to_details" : [ "**/*.png, **/*.txt, **/*.json" ]
-    },
     "autograding_method": "docker",
     "container_options": {
         "container_image": "submitty/qiskit:latest"
     },
-    
     "resource_limits" : {
         "RLIMIT_NPROC" : 10
     },
-
     "testcases" : [
         {
             "title" : "Double H Gate Probabilities - Histogram Diff",
