@@ -419,6 +419,10 @@
           "type" : "string"
         }
       },
+      "instructor_solution_compile_command" : {
+        "type" : "string",
+        "description" : "Specifies the command to compile instructor solution for the case of random input/output"
+      },
       "display_testcase_runtime_memory": {
         "type": "boolean",
         "description": "Specifies whether the amount of time to run/memory used by each testcase should be displayed to students"
