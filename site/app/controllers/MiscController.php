@@ -65,7 +65,7 @@ class MiscController extends AbstractController {
         elseif (strpos($file_path, 'checkout') !== false) {
             $directory = 'checkout';
         }
-        $check_path = FileUtils::joinPaths($this->core->getConfig()->getCoursePath(), $directory, $gradeable_id, $id, $active_version);
+        $check_path = FileUtils::joinPaths($this->core->getConfig()->getCoursePath(), $directory, $gradeable_id, $id);
 
         if ($gradeable->isGradeByRegistration()) {
             $section = $submitter->getRegistrationSection();
