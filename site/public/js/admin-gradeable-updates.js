@@ -220,7 +220,7 @@ $(document).ready(() => {
             data[this.name] = $(this).val();
         }
         // Retrieve status for each of the panels
-        $('input[name="peer_panel"]').each (function() {
+        $('input[name="peer_panel"]').each(function () {
             data[$(this).attr('id')] = $(this).is(':checked');
         });
         const addDataToRequest = function (i, val) {
