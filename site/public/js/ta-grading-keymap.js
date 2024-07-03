@@ -169,9 +169,9 @@ function generateHotkeysList() {
     parent.replaceWith(Twig.twig({
         ref: 'HotkeyList',
     }).render({
-        keymap: keymap.map(hotkey => ({
+        keymap: keymap.map((hotkey) => ({
             ...hotkey,
-            code: hotkey.code || "Unset",
+            code: hotkey.code || 'Unset',
         })),
     }));
 }
@@ -249,7 +249,7 @@ function remapHotkey(i) {
  */
 function remapFinish(index, code) {
     // Check if code is already used (ignore if code is empty)
-    if (code !== "") {
+    if (code !== '') {
         for (let i = 0; i < keymap.length; i++) {
             if (index === i) {
                 continue;
@@ -279,7 +279,7 @@ function remapFinish(index, code) {
  * @param {int} i Index of hotkey
  */
 function remapUnset(index) {
-    remapFinish(index, ""); // Set to empty string to unset
+    remapFinish(index, ''); // Set to empty string to unset
 }
 
 /**
