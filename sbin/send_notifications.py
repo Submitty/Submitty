@@ -4,14 +4,12 @@ gradeable scores.This script scans over all current courses, determining
 if any current electronic gradeable with student view has a grade release
 date in the past with no notification sent to students.
 """
-
 import json
 import os
 import datetime
-from sqlalchemy import create_engine  # pylint: disable=import-error
+from sqlalchemy import create_engine # pylint: disable=import-error
 import sys
 import getpass
-
 try:
     CONFIG_PATH = os.path.join(
         os.path.dirname(os.path.realpath(__file__)), "..", "config"
@@ -21,44 +19,38 @@ try:
 
         # Confirm that submitty_daemon user is running this script
         if USER_DATA["daemon_user"] != getpass.getuser():
-            raise PermissionError("- script must be run by the submitty_daemon user")
+            raise Exception("- script must be run by the submitty_daemon user")
     with open(os.path.join(CONFIG_PATH, "submitty.json")) as open_file:
         SUBMITTY_CONFIG = json.load(open_file)
 
     with open(os.path.join(CONFIG_PATH, "database.json")) as open_file:
         DATABASE_CONFIG = json.load(open_file)
-except (FileNotFoundError, PermissionError) as config_fail_error:
+except Exception as config_fail_error:
     print(
         f"[{datetime.datetime.now()}] ERROR: CORE SUBMITTY CONFIGURATION ERROR {config_fail_error}"
     )
     sys.exit(1)
 
-
 DATA_DIR_PATH = SUBMITTY_CONFIG["submitty_data_dir"]
 BASE_URL_PATH = SUBMITTY_CONFIG["submission_url"]
-
 NOTIFICATION_LOG_PATH = os.path.join(DATA_DIR_PATH, "logs", "notifications")
 TODAY = datetime.datetime.now()
-log_file_path = os.path.join(
-    NOTIFICATION_LOG_PATH,
-    f"{TODAY.year:04d}{TODAY.month:02d}{TODAY.day:02d}.txt",
+LOG_FILE = open(
+    os.path.join(
+        NOTIFICATION_LOG_PATH,
+        f"{TODAY.year:04d}{TODAY.month:02d}{TODAY.day:02d}.txt",
+    ),
+    "a",
 )
-
 try:
     DB_HOST = DATABASE_CONFIG["database_host"]
     DB_USER = DATABASE_CONFIG["database_user"]
     DB_PASSWORD = DATABASE_CONFIG["database_password"]
-except KeyError as config_fail_error:
-    e = (
-        f"[{datetime.datetime.now()}] ERROR: "
-        f"Missing database configuration key: {config_fail_error}"
-    )
-    with open(log_file_path, "a") as LOG_FILE:
-        LOG_FILE.write(e + "\n")
+except Exception as config_fail_error:
+    e = f"[{datetime.datetime.now()}] ERROR: Database Configuration Failed {config_fail_error}"
+    LOG_FILE.write(e + "\n")
     print(e)
     sys.exit(1)
-
-
 def connect_db(db_name):
     """Set up a connection with the specific database."""
     if os.path.isdir(DB_HOST):
@@ -71,7 +63,7 @@ def connect_db(db_name):
     return db
 
 
-def notify_pending_gradeables():
+def notifyPendingGradeables():
     master_db = connect_db("submitty")
     course_query = "SELECT term, course FROM courses WHERE status = '1';"
     courses = master_db.execute(course_query)
@@ -91,7 +83,6 @@ def notify_pending_gradeables():
             AND gradeable.g_notification_state = false;
         """
         )
-
         for row in gradeables:
             gradeable = {"id": row[0], "title": row[1]}
             timestamp = str(datetime.datetime.now())
@@ -103,11 +94,9 @@ def notify_pending_gradeables():
             # Send out notifications
             notification_list = []
             notification_content = "Grade Released: " + gradeable["title"]
-
             if len(notification_content) > 40:
                 # Max length for content of notification is 40
                 notification_content = notification_content[:36] + "..."
-
             notification_recipients = course_db.execute(
                 """
                 SELECT users.user_id , users.user_email
@@ -117,41 +106,32 @@ def notify_pending_gradeables():
                 WHERE all_released_grades = true;
             """
             )
-
             for recipient in notification_recipients:
                 user_id = recipient[0]
-                values = "('grading','{}','{}','{}','submitty-admin','{}')"
-                notification_list.append(
-                    values.format(
-                        metadata, notification_content, timestamp, user_id
-                    )
-                )
-
+                values = f"('grading','{metadata}','{notification_content}','{timestamp}','submitty-admin','{user_id}')"
+                notification_list.append(values)
             # Send notifications to all potential recipients
             if len(notification_list) > 0:
-                values = ", ".join(notification_list)
                 course_db.execute(
                     f"""INSERT INTO notifications
                     (component, metadata, content, created_at, from_user_id,
                     to_user_id)
-                    VALUES {values};"""
+                    VALUES {", ".join(notification_list)};"""
                 )
 
             # Send out emails using both course and master database
             email_list = []
             email_subject = f"[Submitty {course}] Grade Released: {gradeable['title']}"
 
-            email_body = (
-                f"An Instructor has released scores in:\n{course}\n\n"
-                f"Scores have been released for {gradeable['title']}.\n\n"
-                f"Author: System\n"
-                f"Click here for more info: {gradeable_url}\n\n"
-                "--\n"
-                "NOTE: This is an automated email notification, "
-                "which is unable to receive replies.\n"
-                "Please refer to the course syllabus for contact "
-                "information for your teaching staff."
-            )
+            email_body = (f"An Instructor has released scores in:\n{course}\n\n"
+                          f"Scores have been released for {gradeable['title']}.\n\n"
+                          f"Author: System\n"
+                          f"Click here for more info: {gradeable_url}\n\n"
+                          "--\n"
+                          "NOTE: This is an automated email notification, "
+                          "which is unable to receive replies.\n"
+                          "Please refer to the course syllabus for contact "
+                          "information for your teaching staff.")
 
             email_recipients = course_db.execute(
                 """
@@ -163,53 +143,44 @@ def notify_pending_gradeables():
             """
             )
 
-        for recipient in email_recipients:
-            user_id, user_email = recipient[0], recipient[1]
-            email_list.append(
-                f"('{email_subject}', '{email_body}', '{timestamp}', '{user_id}', "
-                f"'{user_email}', '{term}', '{course}')"
-            )
+            for recipient in email_recipients:
+                user_id, user_email = recipient[0], recipient[1]
+                email_list.append(
+                    f"('{email_subject}', '{email_body}', '{timestamp}', '{user_id}', '{user_email}', '{term}', '{course}')"
+                )
 
-        if len(email_list) > 0:
-            master_db.execute(
-                f"""INSERT INTO emails
-                (subject, body, created, user_id, email_address, term,
-                course)
-                VALUES {', '.join(email_list)};"""
-            )
+            if len(email_list) > 0:
+                master_db.execute(
+                    f"""INSERT INTO emails
+                    (subject, body, created, user_id, email_address, term,
+                    course)
+                    VALUES {", ".join(email_list)};"""
+                )
 
-        # Add successfully notified gradeables to update state
-        notified_gradeables.append(f"'{gradeable['id']}'")
+            # Add successfully notified gradeables to update state
+            notified_gradeables.append(f"'{gradeable['id']}'")
 
         # Update all successfully sent notifications for current course
         if len(notified_gradeables) > 0:
             course_db.execute(
                 f"""UPDATE gradeable SET g_notification_state = true
-                WHERE g_id in ({', '.join(notified_gradeables)})"""
+                WHERE g_id in ({", ".join(notified_gradeables)})"""
             )
             total_notified_gradeables += 1
 
         # Close the course database connection
         course_db.close()
-
     return total_notified_gradeables
-
 
 def main():
     try:
-        total_notified_gradeables = notify_pending_gradeables()
-        success_message = (
-            f"[{datetime.datetime.now()}] Successfully released "
-            f"{total_notified_gradeables} gradeable notifications"
-        )
-        LOG_FILE.write(success_message + "\n")
-    except (RuntimeError, KeyError, ValueError) as notification_send_error:
-        error_message = (
-            f"[{datetime.datetime.now()}] Error Sending Notification(s): "
-            f"{notification_send_error}"
-        )
-        LOG_FILE.write(error_message + "\n")
-        print(error_message)
+        total_notified_gradeables = notifyPendingGradeables()
+        e = f"[{datetime.datetime.now()}] Successfully released {total_notified_gradeables} gradeable notifications"
+        LOG_FILE.write(e+"\n")
+    except Exception as notification_send_error:
+        e = f"[{datetime.datetime.now()}] Error Sending Notification(s): {str(notification_send_error)}"
+        LOG_FILE.write(e + "\n")
+        print(e)
 
 
 if __name__ == "__main__":
