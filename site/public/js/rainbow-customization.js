@@ -1,5 +1,5 @@
 /* exported addToTable, deleteRow */
-/* global buildCourseUrl csrfToken displayErrorMessage displaySuccessMessage*/
+/* global buildCourseUrl csrfToken displayErrorMessage displaySuccessMessage */
 
 const benchmarks_with_input_fields = ['lowest_a-', 'lowest_b-', 'lowest_c-', 'lowest_d'];
 
@@ -475,8 +475,6 @@ function showLogButton(responseData) {
     $('#save_status_log').append(`<pre>${responseData}</pre>`);
 }
 
-
-
 function sendSelectedValue() {
     return new Promise((resolve, reject) => {
         const selected_value = $("input[name='customization']:checked").val();
@@ -534,9 +532,9 @@ function runBuild() {
             $.ajax({
                 type: 'POST',
                 url: url,
-                data: {csrf_token: csrfToken},
+                data: { csrf_token: csrfToken },
                 dataType: 'json',
-                success: function(response) {
+                success: function (response) {
                     console.log(response);
                     if (response.status === 'success') {
                         $('#save_status').html('Generating rainbow grades, please wait...');
@@ -546,7 +544,7 @@ function runBuild() {
                         $('#save_status').html('An error occurred while building');
                     }
                 },
-                error: function(jqXHR, textStatus, errorThrown) {
+                error: function (jqXHR, textStatus, errorThrown) {
                     console.log('AJAX error:', jqXHR, textStatus, errorThrown);
                     $('#save_status').html('An error occurred while making the request');
                 },
@@ -557,8 +555,6 @@ function runBuild() {
             $('#save_status').html(`An error occurred: ${error}`);
         });
 }
-
-
 
 function checkBuildStatus() {
     $.ajax({
@@ -606,7 +602,6 @@ $(document).ready(() => {
         saveChanges();
     });
 
-
     // https://stackoverflow.com/questions/15657686/jquery-event-detect-changes-to-the-html-text-of-a-div
     // More Details https://developer.mozilla.org/en-US/docs/Web/API/MutationObserver
     // select the target node
@@ -622,7 +617,6 @@ $(document).ready(() => {
     observer.observe(target, config);
 });
 
-
 function saveChanges() {
     $('#save_status').html('Change detected Saving ...');
     const url = buildCourseUrl(['reports', 'rainbow_grades_customizationnn']);
@@ -636,10 +630,10 @@ function saveChanges() {
         data: formData,
         processData: false,
         contentType: false,
-        beforeSend: function(xhr) {
+        beforeSend: function (xhr) {
             xhr.setRequestHeader('X-Requested-With', 'XMLHttpRequest');
         },
-        success: function(response) {
+        success: function (response) {
             console.log(`Response: ${response}`);
             if (response === 'success') {
                 $('#save_status').html('All changes saved');
@@ -649,7 +643,7 @@ function saveChanges() {
                 alert(`An error occurred: ${response}`);
             }
         },
-        error: function(jqXHR, textStatus, errorThrown) {
+        error: function (jqXHR, textStatus, errorThrown) {
             console.error(`Error status: ${textStatus}`);
             console.error(`Error thrown: ${errorThrown}`);
             console.error(`Server response: ${jqXHR.status} ${jqXHR.statusText}`);
@@ -662,7 +656,6 @@ $(document).ready(() => {
         $('#save_status').html('Switched customization, need to rebuild');
     });
 });
-
 
 /**
  * Sets the visibility for 'benchmark percent' input boxes and also per-gradeable curve input boxes
@@ -683,8 +676,6 @@ function setInputsVisibility(elem) {
             $(`.${benchmark}`).hide();
         }
     }
-
-
 
     // If all boxes are unchecked can hide benchmark percent box and all per-gradeable curve options
     if (getSelectedCurveBenchmarks().length === 0) {
@@ -779,8 +770,6 @@ $(document).ready(() => {
         }
     });
 
-
-
     // Display auto rainbow grades log on button click
     $('#show_log_button').click(() => {
         $('#save_status_log').toggle();
@@ -800,7 +789,7 @@ $(document).ready(() => {
     });
 
     // File input change event
-    $('#config-upload').on('change', function() {
+    $('#config-upload').on('change', function () {
         const selected_file = $(this)[0].files[0];
         console.log('Selected File: ', selected_file);
 
@@ -854,8 +843,6 @@ $(document).ready(() => {
     });
 });
 
-
-
 $(document).ready(() => {
     $('#pencilIcon').click((event) => {
         event.stopPropagation();
@@ -876,4 +863,3 @@ $(document).ready(() => {
         });
     });
 });
-
