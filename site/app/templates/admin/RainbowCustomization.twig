@@ -28,7 +28,7 @@
 
 
             <span id="status_label">Status: </span>
-            <div id="save_status">
+            <div id="save_status" data-testid="save-status">
                 No changes to save
             </div>
             <div id="save_status_buttons">
@@ -125,7 +125,7 @@
                     {% for display_option in display %}
                         {% set description = display_description[counter] %}
                         <div style="display: table;">
-                            <input type="checkbox" id="display_{{ display_option.id }}" name="display" value="{{ display_option.id }}"
+                            <input type="checkbox" id="display_{{ display_option.id }}" name="display" value="{{ display_option.id }}" data-testid="display-{{ display_option.id|replace({'_': '-'}) }}"
                                    {% if display_option.isUsed == true %}checked{% endif %}
                             >
                             <label style="display: table-cell; width: 150px;" for="display_{{ display_option.id }}">{{ display_option.id }}</label>
@@ -140,7 +140,7 @@
                     <legend><h2>Display Benchmarks</h2></legend>
                     {% for benchmark in display_benchmarks %}
                         <p>
-                            <input type="checkbox" id="display_benchmarks_{{ benchmark.id }}" name="display_benchmarks" value="{{ benchmark.id }}"
+                            <input type="checkbox" id="display_benchmarks_{{ benchmark.id }}" name="display_benchmarks" value="{{ benchmark.id }}" data-testid="display-benchmarks-{{ benchmark.id }}"
                                    {% if benchmark.isUsed == true %}checked{% endif %}
                             >
                             <label for="display_benchmarks_{{ benchmark.id }}">{{ benchmark.id }}</label>
