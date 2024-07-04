@@ -31,7 +31,7 @@ class NotebookUtils {
                         'programming_language' => $filedata['metadata']['language_info']['name'] ?? 'python',
                         'initial_value' => implode($cell['source']),
                         'rows' => count($cell['source']),
-                        'filename' => $cell['id'],
+                        'filename' => $cell['id'] ?? md5($cell['source']),
                         'recent_submission' => '',
                         'version_submission' => '',
                         'codemirror_mode' => $filedata['language_info']['codemirror_mode']['name'] ?? 'ipython',
