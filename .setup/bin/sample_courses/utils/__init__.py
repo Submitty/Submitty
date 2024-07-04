@@ -91,5 +91,6 @@ def mimic_checkout(repo_path, checkout_path, vcs_subdirectory):
         file_path = os.path.join(f'{checkout_path}/tmp', vcs_subdirectory)
     else:
         file_path = os.path.join(f'{checkout_path}/tmp')
+
     shutil.copytree(file_path, f'{checkout_path}', dirs_exist_ok=True)
     shutil.rmtree(f'{checkout_path}/tmp')

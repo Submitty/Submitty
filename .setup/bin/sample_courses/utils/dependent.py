@@ -41,11 +41,12 @@ def commit_submission_to_repo(user_id, src_file, repo_path, vcs_subdirectory) ->
         dst: str = os.getcwd()
         if vcs_subdirectory != '':
             dst = os.path.join(dst, vcs_subdirectory)
+
         create_gradeable_submission(src_file, dst)
         os.system("chown -R submitty_daemon "+temp_dir)
         os.system("su -c 'git add --all' submitty_daemon")
-        os.system(f"su -c 'git config user.email \'user@example.com\'' submitty_daemon")
-        os.system(f"su -c 'git config user.name \'username\'' submitty_daemon")
+        os.system("su -c 'git config user.email \'user@example.com\'' submitty_daemon")
+        os.system("su -c 'git config user.name \'username\'' submitty_daemon")
         my_command = ("git commit -a --allow-empty -m \"adding submission files\" "
                       "--author=\"username <user@example.com>\"")
         os.system("su -c '"+my_command+"' submitty_daemon")
