@@ -411,10 +411,9 @@ function addToManualGradingTable() {
     for (let i = 0; i < rows.length; i++) {
         const row = rows[i];
         const existingUSERID = row.cells[0].textContent.trim();
-        const existingGrade = row.cells[1].textContent.trim();
 
-        if (USERID === existingUSERID && grade === existingGrade) {
-            alert('Entry with the same Student ID and Grade already exists.');
+        if (USERID === existingUSERID) {
+            alert('Entry with the same Student ID already exists.');
             return;
         }
     }
