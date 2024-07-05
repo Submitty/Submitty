@@ -384,8 +384,8 @@ function addToManualGradingTable() {
     const note = document.getElementById('manual_grading_note').value.trim();
 
     // Check for empty fields
-    if (USERID === '' || grade === '' || note === '') {
-        alert('Please fill in all the fields.');
+    if (USERID === '' || grade === '') {
+        alert('Please fill in both user ID and final grade.');
         return;
     }
 
