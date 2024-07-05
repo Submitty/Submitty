@@ -450,6 +450,7 @@ function addToManualGradingTable() {
 function deleteRow(button) {
     const row = button.parentNode.parentNode;
     row.parentNode.removeChild(row);
+    displayChangeDetectedMessage();
 }
 
 function getMessages() {
@@ -768,7 +769,7 @@ $(document).ready(() => {
     $('.sections_and_labels').on('change keyup paste', () => {
         displayChangeDetectedMessage();
     });
-    // plagiarism option-input
+    // plagiarism / manual-grading option-input
     $('.option-input').on('change keyup paste', () => {
         displayChangeDetectedMessage();
     });
