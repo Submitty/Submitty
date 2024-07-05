@@ -7,6 +7,8 @@ namespace app\libraries;
 class NotebookUtils {
     /**
      * Accepts a path to a .ipynb file and returns an array in the Submitty notebook format.
+     *
+     * @return array<int,array<string,mixed>>
      */
     public static function jupyterToSubmittyNotebook(string $filepath): array {
         $filedata = FileUtils::readJsonFile($filepath);
