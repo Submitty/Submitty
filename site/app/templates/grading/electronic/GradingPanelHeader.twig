@@ -1,20 +1,20 @@
 {% import _self as self %}
 <script>
-    let autograding_results = {% if not isPeerGrader or (isPeerGrader and isPeerAutograding) %} true {% else %} false {% endif %};
-    let grading_rubric = {% if not isPeerGrader or (isPeerGrader and isPeerRubric) %} true {% else %} false {% endif %};
-    let submission_browser = {% if not isPeerGrader or (isPeerGrader and isPeerFiles) %} true {% else %} false {% endif %};
-    let solution_ta_notes = {% if not isPeerGrader or (isPeerGrader and isPeerSolutions) %} true {% else %} false {% endif %};
-    let student_info = {% if isStudentInfoPanel %} true {% else %} false {% endif %};
-    let grade_inquiry_info = {% if isGradeInquiryPanel %} true {% else %} false {% endif %};
-    let discussion_browser = {% if isDiscussionPanel and (not isPeerGrader or (isPeerGrader and isPeerDiscussion)) %} true {% else %} false {% endif %};
-    let peer_info = {% if isPeerPanel %} true {% else %} false {% endif %};
-    let is_notebook = {% if is_notebook %} true {% else %} false {% endif %};
+    const autograding_results = {% if not isPeerGrader or (isPeerGrader and isPeerAutograding) %} true {% else %} false {% endif %};
+    const grading_rubric = {% if not isPeerGrader or (isPeerGrader and isPeerRubric) %} true {% else %} false {% endif %};
+    const submission_browser = {% if not isPeerGrader or (isPeerGrader and isPeerFiles) %} true {% else %} false {% endif %};
+    const solution_ta_notes = {% if not isPeerGrader or (isPeerGrader and isPeerSolutions) %} true {% else %} false {% endif %};
+    const student_info = {% if isStudentInfoPanel %} true {% else %} false {% endif %};
+    const grade_inquiry_info = {% if isGradeInquiryPanel %} true {% else %} false {% endif %};
+    const discussion_browser = {% if isDiscussionPanel and (not isPeerGrader or (isPeerGrader and isPeerDiscussion)) %} true {% else %} false {% endif %};
+    const peer_info = {% if isPeerPanel %} true {% else %} false {% endif %};
+    const is_notebook = {% if is_notebook %} true {% else %} false {% endif %};
 
     updateThePanelsElements({
-        autograding_results: autograding_results,
-        grading_rubric: grading_rubric,
-        submission_browser: submission_browser,
-        solution_ta_notes: solution_ta_notes,
+        autograding_results,
+        grading_rubric,
+        submission_browser,
+        solution_ta_notes,
         student_info,
         grade_inquiry_info,
         discussion_browser,

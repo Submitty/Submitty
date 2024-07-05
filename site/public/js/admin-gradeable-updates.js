@@ -243,7 +243,8 @@ $(document).ready(() => {
             || $(this).hasClass('date-related')) {
             $('#gradeable-dates :input:enabled,.date-related').each(addDataToRequest);
         }
-        delete data.peer_panel; // remove unwanted key
+        // Redundant to send this data
+        delete data.peer_panel;
         ajaxUpdateGradeableProperty($('#g_id').val(), data,
             (response_data) => {
                 // Clear errors by setting new values
