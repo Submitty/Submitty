@@ -160,6 +160,22 @@ Twig.twig({
     async: true,
 });
 
+function restoreAllHotkeys() {
+    keymap = keymap.map((hotkey) => ({
+        ...hotkey,
+        code: hotkey.originalCode, // Restore to original code
+    }));
+    generateHotkeysList();
+}
+
+function removeAllHotkeys() {
+    keymap = keymap.map((hotkey) => ({
+        ...hotkey,
+        code: "Unset", // Set to "Unset" or any other value indicating no hotkey
+    }));
+    generateHotkeysList();
+}
+
 /**
  * Generate list of hotkeys on the ui
  */
