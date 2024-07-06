@@ -969,7 +969,7 @@ tr.is_publish {
 
 .ta-grading-setting-list td.button-cell {
     display: flex;
-    justify-content: center; /* Center horizontally */
+    justify-content: center;
 }
 
 .remap-button {

@@ -279,7 +279,7 @@ function remapFinish(index, code) {
  * @param {int} i Index of hotkey
  */
 function remapUnset(index) {
-    remapFinish(index, ''); // Set to empty string to unset
+    remapFinish(index, '');
 }
 
 /**
