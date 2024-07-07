@@ -27,6 +27,10 @@
     background-color: var(--focus-danger-red);
 }
 
+.highlight-char-success {
+    background-color: var(--good-green);
+}
+
 /* stylelint-disable-next-line selector-class-pattern */
 .line_number {
     color: var(--standard-medium-gray);

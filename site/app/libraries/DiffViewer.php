@@ -601,19 +601,19 @@ class DiffViewer {
                     $test2 = str_replace("\0", "null", $html_orig_error);
                     if ($option == self::SPECIAL_CHARS_ORIGINAL) {
                         $html .= $html_orig;
-                        $html .= "<span class='highlight-char'>" . $html_orig_error . "</span>";
+                        $html .= $type === "expected" ? "<span class='highlight-char-success'>" . $html_orig_error . "</span>" :  "<span class='highlight-char'>" . $html_orig_error . "</span>";
                     }
                     elseif ($option == self::SPECIAL_CHARS_UNICODE) {
                         $html_no_empty = $this->replaceEmptyChar($html_orig, false);
                         $html_no_empty_error = $this->replaceEmptyChar($html_orig_error, false);
                         $html .= $html_no_empty;
-                        $html .= "<span class='highlight-char'>" . $html_no_empty_error . "</span>";
+                        $html .= $type === "expected" ? "<span class='highlight-char-success'>" . $html_no_empty_error . "</span>" : "<span class='highlight-char'>" . $html_no_empty_error . "</span>";
                     }
                     elseif ($option == self::SPECIAL_CHARS_ESCAPE) {
                         $html_no_empty = $this->replaceEmptyChar($html_orig, true);
                         $html_no_empty_error = $this->replaceEmptyChar($html_orig_error, true);
                         $html .= $html_no_empty;
-                        $html .= "<span class='highlight-char'>" . $html_no_empty_error . "</span>";
+                        $html .= $type === "expected" ? "<span class='highlight-char-success'>" . $html_no_empty_error . "</span>" : "<span class='highlight-char'>" . $html_no_empty_error . "</span>";
                     }
                     $current = $diff[1] + 1;
                 }
