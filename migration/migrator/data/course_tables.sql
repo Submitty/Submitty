@@ -631,6 +631,7 @@ CREATE TABLE public.autograding_metrics (
     points integer NOT NULL,
     passed boolean NOT NULL,
     hidden boolean NOT NULL,
+    CONSTRAINT elapsed_time_nonnegative CHECK ((elapsed_time >= (0)::double precision)),
     CONSTRAINT max_rss_size_nonnegative CHECK ((max_rss_size >= 0)),
     CONSTRAINT metrics_user_team_id_check CHECK (((user_id IS NOT NULL) OR (team_id IS NOT NULL)))
 );
