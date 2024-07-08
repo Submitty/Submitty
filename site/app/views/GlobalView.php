@@ -7,7 +7,7 @@ use app\entities\banner\BannerImage;
 
 class GlobalView extends AbstractView {
     /**
-     * @param array<string> $audio
+     * @param array<array<string>> $audio
      * @param array<BannerImage> $eventBannerImages
      */
     public function header($breadcrumbs, $wrapper_urls, $sidebar_buttons, $notifications_info, array $audio, $css, $js, $duck_img, $page_name, $content_only, array $eventBannerImages) {
