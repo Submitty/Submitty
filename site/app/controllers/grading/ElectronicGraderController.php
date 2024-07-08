@@ -2405,7 +2405,6 @@ class ElectronicGraderController extends AbstractController {
         Logger::logTAGrading($logger_params);
 
         try {
-            // do thing
             $this->core->getQueries()->changeGradedVersionOfComponents($gradeable_id, $submitter_id, $graded_version, $component_ids);
             $this->core->getOutput()->renderJsonSuccess();
         }
