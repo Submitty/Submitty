@@ -2401,13 +2401,13 @@ class ElectronicGraderController extends AbstractController {
 
         try {
             $this->core->getQueries()->changeGradedVersionOfComponents($gradeable_id, $submitter_id, $graded_version, $component_ids);
-            $this->core->getOutput()->renderJsonSuccess();
+            return JsonResponse::getSuccessResponse();
         }
         catch (\InvalidArgumentException $e) {
             return JsonResponse::getFailResponse($e->getMessage());
         }
         catch (\Exception $e) {
-            $this->core->getOutput()->renderJsonError($e->getMessage());
+            return JsonResponse::getErrorResponse($e->getMessage());
         }
     }
 
