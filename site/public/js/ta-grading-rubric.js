@@ -3290,7 +3290,9 @@ function refreshGradedComponentHeader(component_id, showMarkList) {
 function updateAllComponentVersions() {
     if (confirm('Are you sure you want to update the version for all components without separately inspecting each component?')) {
         ajaxChangeGradedVersion(getGradeableId(), getAnonId(), getDisplayVersion(), getAllComponentsFromDOM().map((x) => x.id)).then(() => {
-            location.reload();
+            Promise.all(getAllComponentsFromDOM().map((x) => reloadGradingComponent(x.id, false, false))).then(() => {
+                $('#change-graded-version').hide();
+            });
         });
     }
 }
