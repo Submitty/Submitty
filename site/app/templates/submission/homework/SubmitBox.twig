@@ -96,7 +96,7 @@
 		            <input type="text" id= "user_id" value ="" placeholder="{{ user_id }}"/>
                 </div>
             </div>
-            <div class="sub hide" id="pdf-submit-button">
+            <div id="pdf-submit-button" class="sub hide">
                 <div class="sub">
 
                     <div id="toggle-qr-split">
@@ -104,14 +104,14 @@
                         <input type="checkbox" id="use-qr">
 
                         {% if feature_flag_enabled('submitty_ocr') %}
-                        <span id="toggle-id-scan">
+                        <span id="toggle-id-scan" class="hide">
                             <label id ="use-ocr-id"for ="use-ocr">Detect Student ID's?</label>
                             <input type="checkbox" id="use-ocr">
                         </span>
                         {% endif %}
                     </div>
 
-                    <div id="qr-split-opts">
+                    <div id="qr-split-opts" class="hide">
                         <br>
 
                         <span id="prefix-prompt">QR code prefix/suffix:
