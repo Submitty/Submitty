@@ -1302,6 +1302,10 @@ function updateGradeOverride() {
                 displayErrorMessage(json['message']);
                 return;
             }
+            if (json['data'] && json['data']['is_team']) {
+                overridePopup(json);
+                return;
+            }
             refreshOnResponseOverriddenGrades(json);
             $('#user_id').val(this.defaultValue);
             $('#marks').val(this.defaultValue);
@@ -1386,6 +1390,21 @@ function deleteOverriddenGrades(user_id, g_id) {
         });
     }
     return false;
+}
+
+function confirmOverride(option) {
+    $('.popup-form').css('display', 'none');
+    $('input[name="option"]').val(option);
+    updateGradeOverride();
+    $('input[name="option"]').val(-1);
+}
+
+function overridePopup(json) {
+    $('.popup-form').css('display', 'none');
+    const form = $('#more_override_popup');
+    form[0].outerHTML = json['data']['popup'];
+    $('#more_override_popup').css('display', 'block');
+    $('#team-override-cancel').focus();
 }
 
 /**
