@@ -1,13 +1,11 @@
 /* exported NotificationSound */
 class NotificationSound {
     constructor() {
-        this.sound = document.createElement('audio');
+        this.sound = document.getElementById('quack-alert.mp3');
 
         if (this.sound.canPlayType('audio/mpeg') === '') {
             throw 'Unable to produce notification sounds.  Browser doesn\'t support mp3 audio files.';
         }
-
-        this.sound.src = 'quack-alert.mp3';
     }
 
     async play() {

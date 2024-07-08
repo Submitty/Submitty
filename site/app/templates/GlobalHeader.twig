@@ -34,7 +34,12 @@
     </script>
 
     {% for audio_ref in audio %}
-    <audio preload src='{{ audio_ref }}'></audio>
+        {# get filename as id #}
+        {% set split_on_version = audio_ref|split('?v=') %}
+        {% set split_left = split_on_version[0] %}
+        {% set split_on_audio = split_left|split('/audio/') %}
+        {% set id = split_on_audio[1] %}
+    <audio preload id='{{ id }}' src='{{ audio_ref }}'></audio>
     {% endfor %}
 
     {% for css_ref in css %}
