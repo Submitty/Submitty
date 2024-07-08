@@ -259,7 +259,7 @@ function updateKeymapAndStorage(index, code) {
     const keymapObject = keymap.reduce((obj, hotkey) => {
         obj[hotkey.name] = {
             code: hotkey.code,
-            originalCode: hotkey.originalCode
+            originalCode: hotkey.originalCode,
         };
         return obj;
     }, {});
