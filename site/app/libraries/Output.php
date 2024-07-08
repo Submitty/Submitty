@@ -39,7 +39,7 @@ class Output {
     private $page_name = "";
     private $loaded_views = [];
 
-    /** @var Set */
+    /** @var Set<string> */
     private $audio;
     /** @var Set */
     private $css;
@@ -533,7 +533,7 @@ HTML;
         $this->audio->add($url);
     }
 
-    public function addInternalAudio($file, $folder = 'audio') {
+    public function addInternalAudio(string $file, string $folder = 'audio'): void {
         $this->addAudio($this->timestampResource($file, $folder));
     }
 
@@ -637,6 +637,9 @@ HTML;
         return end($this->breadcrumbs)->getTitle();
     }
 
+    /**
+     * @return Set<string>
+     */
     public function getAudio(): Set {
         return $this->audio;
     }
