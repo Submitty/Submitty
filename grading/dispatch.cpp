@@ -1419,7 +1419,7 @@ bool dispatch::tolerance_diff(
 
       // we got two different numbers here: check if they are within tolerance
       auto diff {static_cast<float>(
-        std::abs(std::stod(expected_line_words[word]) - std::stod(student_line_words[word]))
+        std::abs(std::stod(isolateAlphanumAndDot(expected_line_words[word])) - std::stod(isolateAlphanumAndDot(student_line_words[word])))
       )};
 
       if (diff >= tolerance) {  // numbers are not within tolerance

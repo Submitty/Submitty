@@ -292,9 +292,14 @@ std::string recreateStudentFile(vectorOfWords studentFileWords, vectorOfSpaces s
 }
 
 bool isNumber(const std::string &str) {
+  if (str.length() == 0)
+  {
+    return false;
+  }
+  std::string stripped_str = isolateAlphanumAndDot(str);
   bool atLeastOneDigit = false;
   bool dotFound = false;
-  for (char const &c : str) {
+  for (char const &c : stripped_str) {
     if (std::isdigit(c)) {
       atLeastOneDigit = true;
     }
@@ -308,7 +313,23 @@ bool isNumber(const std::string &str) {
       return false;
     }
   }
-  return true == atLeastOneDigit;
+  return atLeastOneDigit;
+}
+
+std::string isolateAlphanumAndDot(const std::string &str) {
+  std::string::const_iterator begin = str.begin();
+  while (!isalnum(*begin) && !(*begin == '.')) {
+    begin++;
+    if (begin == str.end())
+    {
+      return str;
+    }
+  }
+  std::string::const_reverse_iterator end = str.rbegin();
+  while (!isalnum(*end) && !(*end == '.')) {
+    end++;
+  }
+  return std::string(begin, end.base());
 }
 
 bool whiteSpaceListsEqual(const std::vector<int> &expectedSpaces, const std::vector<int> &studentSpaces) {
