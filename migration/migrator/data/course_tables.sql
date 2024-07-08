@@ -631,9 +631,10 @@ CREATE TABLE public.autograding_metrics (
     points integer NOT NULL,
     passed boolean NOT NULL,
     hidden boolean NOT NULL,
-    CONSTRAINT elapsed_time_nonnegative CHECK ((elapsed_time >= (0)::double precision)),
+    source_line_of_code integer,
     CONSTRAINT max_rss_size_nonnegative CHECK ((max_rss_size >= 0)),
-    CONSTRAINT metrics_user_team_id_check CHECK (((user_id IS NOT NULL) OR (team_id IS NOT NULL)))
+    CONSTRAINT metrics_user_team_id_check CHECK (((user_id IS NOT NULL) OR (team_id IS NOT NULL))),
+    CONSTRAINT sloc_nonnegative CHECK ((source_line_of_code >= 0))
 );
 
 
@@ -1882,6 +1883,7 @@ CREATE TABLE public.users (
     display_pronouns boolean DEFAULT false,
     user_preferred_locale character varying,
     previous_rotating_section integer,
+    color_theme character varying(255) DEFAULT ''::character varying,
     CONSTRAINT check_registration_type CHECK (((registration_type)::text = ANY (ARRAY[('graded'::character varying)::text, ('audit'::character varying)::text, ('withdrawn'::character varying)::text, ('staff'::character varying)::text]))),
     CONSTRAINT users_user_group_check CHECK (((user_group >= 1) AND (user_group <= 4))),
     CONSTRAINT users_user_last_initial_format_check CHECK (((user_last_initial_format >= 0) AND (user_last_initial_format <= 3)))
