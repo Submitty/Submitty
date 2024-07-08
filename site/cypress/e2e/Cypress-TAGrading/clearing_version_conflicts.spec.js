@@ -35,7 +35,7 @@ describe('Test cases for checking the clear version conflicts button in the TA g
 
         // reset state
         cy.window().then(async (win) => {
-            await win.ajaxChangeGradedVersion(win.getGradeableId(), win.getAnonId(), 2);
+            await win.ajaxChangeGradedVersion(win.getGradeableId(), win.getAnonId(), 2, win.getAllComponentsFromDOM().map((x) => x.id));
         });
 
         cy.reload();
