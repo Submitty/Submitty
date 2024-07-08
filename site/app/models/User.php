@@ -243,9 +243,6 @@ class User extends AbstractModel {
         if (isset($details['display_name_order'])) {
             $this->setDisplayNameOrder($details['display_name_order']);
         }
-        else {
-            $this->setDisplayNameOrder("GIVEN_F");
-        }
 
         if (isset($details['display_pronouns'])) {
             $this->setDisplayPronouns($details['display_pronouns']);
