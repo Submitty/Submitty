@@ -173,9 +173,9 @@ function updateDisplayNameOrder(e) {
     data.append('display-name-order', displayNameOrder.val());
     const url = buildUrl(['user_profile', 'change_display_name_order']);
     $.ajax({
-        url,
+        url: url,
         type: 'POST',
-        data,
+        data: data,
         processData: false,
         contentType: false,
         success: function (res) {
