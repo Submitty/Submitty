@@ -223,6 +223,10 @@ hr {
     padding: 4px 6px;
 }
 
+.note-input {
+    width: 32.5em !important;
+}
+
 #gradeables .gradeable-custom-item-input {
     width: 3em;
 }
