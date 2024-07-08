@@ -209,7 +209,7 @@ function replace_fillin_variables {
     # FIXME: Add some error checking to make sure these values were filled in correctly
 }
 
-/bin/bash "${SUBMITTY_REPOSITORY}/.setup/install_submitty/setup_directories.sh"
+/bin/bash -v "${SUBMITTY_REPOSITORY}/.setup/install_submitty/setup_directories.sh"
 
 ########################################################################################################################
 ########################################################################################################################
