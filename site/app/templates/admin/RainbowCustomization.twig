@@ -157,9 +157,9 @@
 
             <div id="manual-grading" class="customization_item">
                 <h2>Manual Grading</h2>
-                <p class="rg_info_message">You may manually assign final grades to specific students. The note is only visible to the instructor.</p>
-                <input type="hidden" name="csrf_token" value="{{ csrfToken }}" /> <!-- I'm not confident I know what this does -->
-                <input type="hidden" name="option" value="-1" /> <!-- I'm not confident I know what this does -->
+                <p class="rg_info_message">You may manually assign final grades to specific students. The note is only visible to the instructor, and it will only appear if instructor_notes is enabled under Display.</p>
+                <input type="hidden" name="csrf_token" value="{{ csrfToken }}" />
+                <input type="hidden" name="option" value="-1" />
                 <div class="option">
                     <label for="manual_grading_user_id">
                         <span>USER ID:</span>
