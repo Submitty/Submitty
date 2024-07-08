@@ -32,9 +32,6 @@ class Poll {
     #[ORM\Column(type: Types::INTEGER)]
     protected int $duration;
 
-    #[ORM\Column(type: Types::TEXT)]
-    protected $status;
-
     #[ORM\Column(type: Types::DATETIME_MUTABLE, nullable: true)]
     protected ?DateTime $end_time;
 
@@ -220,7 +217,6 @@ class Poll {
      * Note: This function should only be used if the actual string is desired.  (exporting poll data for example)
      *       isReleaseAnswer() is preferred if at all possible.
      */
-
     public function setReleaseAnswer(string $status): void {
         if ($status !== "never" && $status !== "always" && $status !== "when_ended") {
             throw new \RuntimeException("Invalid release answer status");

@@ -173,6 +173,11 @@ protected:
 
 };
 
+struct ToleranceChange {
+  std::size_t char_start;
+  std::size_t num_change;
+};
+
 // ===================================================================================
 
 #endif

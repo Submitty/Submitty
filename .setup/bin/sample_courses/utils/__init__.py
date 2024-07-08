@@ -84,7 +84,7 @@ def get_current_semester():
 
 
 def mimic_checkout(repo_path, checkout_path, vcs_subdirectory):
-    os.system(f'git clone {SUBMITTY_DATA_DIR}/vcs/git/{repo_path} {checkout_path}/tmp -b main')
+    os.system(f"su -c 'git clone {SUBMITTY_DATA_DIR}/vcs/git/{repo_path} {checkout_path}/tmp -b main' submitty_daemon")
     if vcs_subdirectory != '':
         if vcs_subdirectory[0] == '/':
             vcs_subdirectory = vcs_subdirectory[1:]
