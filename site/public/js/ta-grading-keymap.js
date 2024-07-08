@@ -113,8 +113,12 @@ function registerKeyHandler(parameters, fn) {
     parameters.fn = fn;
 
     // Check local storage
-    if (remapGetLS(parameters.name) !== null) {
-        parameters.code = remapGetLS(parameters.name);
+    const storedCode = remapGetLS(parameters.name);
+    if (storedCode !== null) {
+        parameters.code = storedCode;
+    }
+    else {
+        parameters.code = 'Unset';
     }
 
     keymap.push(parameters);
@@ -161,19 +165,11 @@ Twig.twig({
 });
 
 function restoreAllHotkeys() {
-    keymap = keymap.map((hotkey) => ({
-        ...hotkey,
-        code: hotkey.originalCode, // Restore to original code
-    }));
-    generateHotkeysList();
+    keymap.forEach((hotkey, index) => updateKeymapAndStorage(index, hotkey.originalCode));
 }
 
 function removeAllHotkeys() {
-    keymap = keymap.map((hotkey) => ({
-        ...hotkey,
-        code: "Unset", // Set to "Unset" or any other value indicating no hotkey
-    }));
-    generateHotkeysList();
+    keymap.forEach((hotkey, index) => updateKeymapAndStorage(index, 'Unset'));
 }
 
 /**
@@ -258,34 +254,37 @@ function remapHotkey(i) {
     button.addClass('btn-success');
 }
 
+function updateKeymapAndStorage(index, code) {
+    keymap[index].code = code;
+    const keymapObject = keymap.reduce((obj, hotkey) => {
+        obj[hotkey.name] = {
+            code: hotkey.code,
+            originalCode: hotkey.originalCode
+        };
+        return obj;
+    }, {});
+    localStorage.setItem('keymap', JSON.stringify(keymapObject));
+    generateHotkeysList();
+}
+
 /**
  * Called when remapping has finished and should save (or discard) a pressed key
  * @param {int} index Index of the hotkey
  * @param {string} code New keycode for the hotkey
  */
 function remapFinish(index, code) {
-    // Check if code is already used (ignore if code is empty)
-    if (code !== '') {
-        for (let i = 0; i < keymap.length; i++) {
-            if (index === i) {
-                continue;
-            }
-            if (keymap[i].code === code) {
-                const button = $(`#remap-${index}`);
-                button.text('Enter Unique Key...');
-                button.addClass('btn-danger');
-                button.removeClass('btn-success');
-                return;
-            }
+    for (let i = 0; i < keymap.length; i++) {
+        if (index !== i && keymap[i].code === code && code !== 'Unset') {
+            const button = $(`#remap-${index}`);
+            button.text('Enter Unique Key...');
+            button.addClass('btn-danger');
+            button.removeClass('btn-success');
+            return;
         }
     }
 
-    keymap[index].code = code;
-    remapSetLS(keymap[index].name, code);
-
+    updateKeymapAndStorage(index, code);
     remapping.active = false;
-    generateHotkeysList();
-
     $('.remap-disable').attr('disabled', null);
     $('#settings-close').attr('disabled', null);
 }
@@ -295,7 +294,7 @@ function remapFinish(index, code) {
  * @param {int} i Index of hotkey
  */
 function remapUnset(index) {
-    remapFinish(index, '');
+    remapFinish(index, 'Unset');
 }
 
 /**
