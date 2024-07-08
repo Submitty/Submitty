@@ -2343,40 +2343,37 @@ class ElectronicGraderController extends AbstractController {
      * Route for saving the marks the submitter received for a component
      */
     #[Route("/courses/{_semester}/{_course}/gradeable/{gradeable_id}/grading/graded_gradeable/change_grade_version", methods: ["POST"])]
-    public function ajaxUpdateGradedVersionForStudent(string $gradeable_id): void {
+    public function ajaxUpdateGradedVersionForStudent(string $gradeable_id): ?Jsonresponse {
         $anon_id = $_POST['anon_id'] ?? null;
         $graded_version = intval($_POST['graded_version'] ?? null);
         $component_ids = $_POST['component_ids'] ?? [];
 
         if ($anon_id === null) {
-            $this->core->getOutput()->renderJsonFail('Missing anon_id parameter');
-            return;
+            return JsonResponse::getFailResponse('Missing anon_id parameter');
         }
         if ($graded_version < 1) {
-            $this->core->getOutput()->renderJsonFail('Invalid graded_version parameter');
-            return;
+            return JsonResponse::getFailResponse('Invalid graded_version parameter');
         }
 
         if (count($component_ids) < 1) {
-            $this->core->getOutput()->renderJsonFail('Missing component_ids parameter');
-            return;
+            return JsonResponse::getFailResponse('Missing component_ids parameter');
         }
 
         // Get the gradeable
         $gradeable = $this->tryGetGradeable($gradeable_id);
         if ($gradeable === false) {
-            return;
+            return null;
         }
         // Get user id from the anon id
         $submitter_id = $this->tryGetSubmitterIdFromAnonId($anon_id, $gradeable_id);
         if ($submitter_id === false) {
-            return;
+            return null;
         }
 
         // Get the graded gradeable
         $graded_gradeable = $this->tryGetGradedGradeable($gradeable, $submitter_id);
         if ($graded_gradeable === false) {
-            return;
+            return null;
         }
 
 
@@ -2384,12 +2381,10 @@ class ElectronicGraderController extends AbstractController {
         foreach ($component_ids as &$component_id) {
             $component = $this->tryGetComponent($gradeable, $component_id);
             if ($component === false) {
-                $this->core->getOutput()->renderJsonFail("Invalid component id \"$component_id\"");
-                return;
+                return JsonResponse::getFailResponse("Invalid component id \"$component_id\"");
             }
             elseif (!$this->core->getAccess()->canI("grading.electronic.save_graded_component", ["gradeable" => $gradeable, "graded_gradeable" => $graded_gradeable, "component" => $component])) {
-                $this->core->getOutput()->renderJsonFail("Insufficient permissions to change graded version of component $component_id");
-                return;
+                return JsonResponse::getFailResponse("Insufficient permissions to change graded version of component $component_id");
             }
         }
 
@@ -2409,7 +2404,7 @@ class ElectronicGraderController extends AbstractController {
             $this->core->getOutput()->renderJsonSuccess();
         }
         catch (\InvalidArgumentException $e) {
-            $this->core->getOutput()->renderJsonFail($e->getMessage());
+            return JsonResponse::getFailResponse($e->getMessage());
         }
         catch (\Exception $e) {
             $this->core->getOutput()->renderJsonError($e->getMessage());
