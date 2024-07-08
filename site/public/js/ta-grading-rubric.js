@@ -3215,6 +3215,11 @@ function saveComponent(component_id) {
             }
             GRADED_COMPONENTS_LIST[component_id].verifier_id = '';
         }
+        else if (gradedComponent.graded_version !== getDisplayVersion()) {
+            ajaxChangeGradedVersion(getGradeableId(), getAnonId(), getDisplayVersion(), [component_id]).then(async () => {
+                await reloadGradingComponent(component_id, false, false);
+            });
+        }
         return Promise.resolve();
     }
 }
@@ -3412,6 +3417,7 @@ function injectInstructorEditComponentHeader(component, showMarkList) {
  */
 function injectGradingComponent(component, graded_component, editable, showMarkList) {
     const student_grader = $('#student-grader').attr('is-student-grader');
+    console.log('rendering:', graded_component);
     return renderGradingComponent(getGraderId(), component, graded_component, isGradingDisabled(), canVerifyGraders(), getPointPrecision(), editable, showMarkList, getComponentVersionConflict(graded_component), student_grader, TA_GRADING_PEER, getAllowCustomMarks())
         .then((elements) => {
             setComponentContents(component.id, elements);
