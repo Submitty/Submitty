@@ -18,7 +18,8 @@ module.exports = tseslint.config(
         // name: 'Files to ignore', (this line can be uncommented with eslint >=9.0)
         ignores: [
             'node_modules/**',
-            'public/{mjs,vendor}/**',
+            'public/mjs/**',
+            '**/vendor/**',
         ],
     },
     {
