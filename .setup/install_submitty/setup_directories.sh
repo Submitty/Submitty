@@ -1,4 +1,5 @@
-#!/usr/bin/env bash -ve
+#!/usr/bin/env bash
+set -ve
 
 source "$( dirname "${BASH_SOURCE[0]}" )/get_globals.sh"
 

@@ -1,4 +1,5 @@
-#!/usr/bin/env bash -ve
+#!/usr/bin/env bash
+set -ve
 
 # We assume a relative path from this repository to the installation
 # directory and configuration directory.
