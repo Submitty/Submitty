@@ -590,23 +590,48 @@ class ReportController extends AbstractController {
     }
 
 
+//    #[Route("/courses/{_semester}/{_course}/reports/rainbow_grades_customizationnn", methods: ["POST"])]
+//    public function generateCustomizationnn() {
+//        // Check if this is an AJAX request
+//        if (!empty($_SERVER['HTTP_X_REQUESTED_WITH']) && strtolower($_SERVER['HTTP_X_REQUESTED_WITH']) == 'xmlhttprequest') {
+//            // Build a new model, pull in defaults for the course
+//            $customization = new RainbowCustomization($this->core);
+//            $customization->buildCustomization();
+//
+//            if (isset($_POST["json_string"])) {
+//                // Handle user input (the form) being submitted
+//                try {
+//                    $customization->processForm();
+//                    // Send response back to JS
+//                    die("success");
+//                }
+//                catch (Exception $e) {
+//                    // Handle exception and send error response
+//                    die("error");
+//                }
+//            }
+//            else {
+//                die("error: no json_string provided");
+//            }
+//        }
+//        else {
+//            die("error: not an AJAX request");
+//        }
+//    }
+
     #[Route("/courses/{_semester}/{_course}/reports/rainbow_grades_customizationnn", methods: ["POST"])]
-    public function generateCustomizationnn() {
+    public function generateCustomizationnn(): void {
         // Check if this is an AJAX request
         if (!empty($_SERVER['HTTP_X_REQUESTED_WITH']) && strtolower($_SERVER['HTTP_X_REQUESTED_WITH']) == 'xmlhttprequest') {
             // Build a new model, pull in defaults for the course
             $customization = new RainbowCustomization($this->core);
             $customization->buildCustomization();
-
             if (isset($_POST["json_string"])) {
-                // Handle user input (the form) being submitted
                 try {
                     $customization->processForm();
-                    // Send response back to JS
                     die("success");
                 }
-                catch (Exception $e) {
-                    // Handle exception and send error response
+                catch (\Exception $e) {
                     die("error");
                 }
             }
@@ -618,6 +643,7 @@ class ReportController extends AbstractController {
             die("error: not an AJAX request");
         }
     }
+
 
 
 
@@ -688,21 +714,44 @@ class ReportController extends AbstractController {
     }
 
 
+
+//
+//    #[Route("/courses/{_semester}/{_course}/reports/build_form", methods: ['POST'])]
+//    public function executeBuildForm() {
+//        $this->BuildForm();
+//
+//        // Send a success response
+//        return new MultiResponse(
+//            JsonResponse::getSuccessResponse(['status' => 'success']),
+//            null
+//        );
+//    }
+//
+//
+//    public function BuildForm() {
+//        // Configure json to go into jobs queue
+//        $job_json = (object) [];
+//        $job_json->job = 'RunAutoRainbowGrades';
+//        $job_json->semester = $this->core->getConfig()->getTerm();
+//        $job_json->course = $this->core->getConfig()->getCourse();
+//
+//        // Encode
+//        $job_json = json_encode($job_json, JSON_PRETTY_PRINT);
+//
+//        // Create path to new jobs queue json
+//        $path = '/var/local/submitty/daemon_job_queue/auto_rainbow_' .
+//            $this->core->getConfig()->getTerm() .
+//            '_' .
+//            $this->core->getConfig()->getCourse() .
+//            '.json';
+//
+//        // Place in queue
+//        file_put_contents($path, $job_json);
+//        file_put_contents('/var/local/submitty/courses/s24/sample/rainbow_grades/works.json', $job_json);
+//    }
+
     #[Route("/courses/{_semester}/{_course}/reports/build_form", methods: ['POST'])]
-    public function executeBuildForm() {
-        // Execute your function
-        $this->BuildForm();
-
-        // Send a success response
-        return new MultiResponse(
-            JsonResponse::getSuccessResponse(['status' => 'success']),
-            null
-        );
-    }
-
-
-    public function BuildForm() {
-
+    public function executeBuildForm(): MultiResponse {
         // Configure json to go into jobs queue
         $job_json = (object) [];
         $job_json->job = 'RunAutoRainbowGrades';
@@ -722,7 +771,14 @@ class ReportController extends AbstractController {
         // Place in queue
         file_put_contents($path, $job_json);
         file_put_contents('/var/local/submitty/courses/s24/sample/rainbow_grades/works.json', $job_json);
+
+        // Send a success response
+        return new MultiResponse(
+            JsonResponse::getSuccessResponse(['status' => 'success']),
+            null
+        );
     }
+
 
     #[Route("/courses/{_semester}/{_course}/reports/rainbow_grades_customization/upload", methods: ["POST"])]
     public function uploadRainbowConfig() {
@@ -738,7 +794,7 @@ class ReportController extends AbstractController {
         }
 
         $upload = $_FILES['config_upload'];
-        if (empty($upload['tmp_name'])) {
+        if (!isset($upload['tmp_name']) || trim($upload['tmp_name']) === '') {
             $msg = 'Upload failed: Empty tmp name for file';
             $this->core->addErrorMessage($msg);
             return new MultiResponse(
@@ -765,8 +821,6 @@ class ReportController extends AbstractController {
             );
         }
 
-        // Remove the temp uploaded file
-//        unlink($upload['tmp_name']);
         $manual_customization_exists =  file_exists($destination_path);
 
         $msg = 'Rainbow Grades Customization uploaded';
@@ -780,28 +834,11 @@ class ReportController extends AbstractController {
             null,
             new RedirectResponse($redirect_url)
         );
-//        if (!empty($_SERVER['HTTP_X_REQUESTED_WITH']) && strtolower($_SERVER['HTTP_X_REQUESTED_WITH']) === 'xmlhttprequest') {
-//            // This is an AJAX request, respond with JSON
-//            return JsonResponse::getSuccessResponse([
-//                'customization_path' => $rainbow_grades_dir,
-//                'manual_customization_exists' => $manual_customization_exists
-//            ]);
-//        } else {
-//            // This is not an AJAX request, redirect accordingly
-//            return new MultiResponse(
-//                JsonResponse::getSuccessResponse([
-//                    'customization_path' => $rainbow_grades_dir,
-//                    'manual_customization_exists' => $manual_customization_exists
-//                ]),
-//                null,
-//                new RedirectResponse($redirect_url)
-//            );
-//        }
     }
 
 
     #[Route("/courses/{_semester}/{_course}/reports/rainbow_grades_customization/manual_download", methods: ["GET"])]
-    public function downloadRainbowConfig() {
+    public function downloadRainbowConfig(): MultiResponse {
         $rainbow_grades_dir = FileUtils::joinPaths($this->core->getConfig()->getCoursePath(), "rainbow_grades");
         $file_path = FileUtils::joinPaths($rainbow_grades_dir, 'manual_customization.json');
 
@@ -822,10 +859,15 @@ class ReportController extends AbstractController {
         header("Content-disposition: attachment; filename=\"" . basename($file_path) . "\"");
 
         readfile($file_path);
+        return new MultiResponse(
+            JsonResponse::getSuccessResponse('File downloaded successfully'),
+            null,
+            null
+        );
     }
 
     #[Route("/courses/{_semester}/{_course}/reports/rainbow_grades_customization/gui_download", methods: ["GET"])]
-    public function downloadGUIRainbowConfig() {
+    public function downloadGUIRainbowConfig(): MultiResponse {
         $rainbow_grades_dir = FileUtils::joinPaths($this->core->getConfig()->getCoursePath(), "rainbow_grades");
         $file_path = FileUtils::joinPaths($rainbow_grades_dir, 'gui_customization.json');
 
@@ -845,6 +887,11 @@ class ReportController extends AbstractController {
         header("Content-disposition: attachment; filename=\"" . basename($file_path) . "\"");
 
         readfile($file_path);
+        return new MultiResponse(
+            JsonResponse::getSuccessResponse('File downloaded successfully'),
+            null,
+            null
+        );
     }
 
 
@@ -855,7 +902,7 @@ class ReportController extends AbstractController {
         $selectedValue = $_POST['selected_value'] ?? null;
 
         // Handle invalid data
-        if (!$selectedValue) {
+        if (!isset($selectedValue) || trim($selectedValue) === '') {
             $msg = 'Invalid request: No selected value provided.';
             return JsonResponse::getErrorResponse($msg);
         }
