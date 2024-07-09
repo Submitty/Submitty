@@ -29,6 +29,7 @@ describe('TA grading hotkey testing', () => {
         cy.get('body').type('{T}');
         cy.get('[data-testid="solution-ta-notes"]').should('contain', 'Solution/TA Notes');
     });
+
     it('testing discussion, peer and notebook', () => {
         cy.login();
         cy.visit(['sample', 'config']);
@@ -47,4 +48,22 @@ describe('TA grading hotkey testing', () => {
         cy.get('body').type('{D}');
         cy.get('[data-testid="posts-list"]').should('contain', 'Discussion Posts');
     });
+
+    it('allows user to remove hotkey', () => {
+        cy.login();
+        cy.visit(['sample', 'gradeable', 'grading_homework', 'grading', 'details']);
+        cy.get('[data-testid="view-sections"]').click();
+        cy.get('[data-testid="grade-button"]').eq(12).click();
+        cy.get('[data-testid="grading-setting-btn"]').click();
+        cy.get('#remap-unset-0').click();
+        cy.get('#remap-0').should('contain', 'Unassigned');
+        cy.get('[data-testid="remove-all-hotkeys"]').click();
+        cy.get('#remap-1').should('contain', 'Unassigned');
+        cy.get('#remap-2').should('contain', 'Unassigned');
+        cy.get('[data-testid="restore-all-hotkeys"]').click();
+        cy.get('#remap-0').should('not.contain', 'Unassigned');
+        cy.get('#remap-1').should('not.contain', 'Unassigned');
+        cy.get('#remap-2').should('not.contain', 'Unassigned');
+    });
+    
 });

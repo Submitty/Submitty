@@ -109,16 +109,15 @@ window.onkeydown = function (e) {
  * @param {Function} fn Function / callable
  */
 function registerKeyHandler(parameters, fn) {
-    parameters.originalCode = parameters.code;
+    parameters.originalCode = parameters.code || 'Unassigned';
     parameters.fn = fn;
 
-    // Check local storage
     const storedCode = remapGetLS(parameters.name);
     if (storedCode !== null) {
         parameters.code = storedCode;
     }
     else {
-        parameters.code = 'Unset';
+        parameters.code = parameters.originalCode;
     }
 
     keymap.push(parameters);
@@ -165,11 +164,13 @@ Twig.twig({
 });
 
 function restoreAllHotkeys() {
-    keymap.forEach((hotkey, index) => updateKeymapAndStorage(index, hotkey.originalCode));
+    keymap.forEach((hotkey, index) => {
+        updateKeymapAndStorage(index, hotkey.originalCode);
+    });
 }
 
 function removeAllHotkeys() {
-    keymap.forEach((hotkey, index) => updateKeymapAndStorage(index, 'Unset'));
+    keymap.forEach((hotkey, index) => updateKeymapAndStorage(index, 'Unassigned'));
 }
 
 /**
@@ -183,7 +184,7 @@ function generateHotkeysList() {
     }).render({
         keymap: keymap.map((hotkey) => ({
             ...hotkey,
-            code: hotkey.code || 'Unset',
+            code: hotkey.code || hotkey.originalCode || 'Unassigned',
         })),
     }));
 }
@@ -274,7 +275,7 @@ function updateKeymapAndStorage(index, code) {
  */
 function remapFinish(index, code) {
     for (let i = 0; i < keymap.length; i++) {
-        if (index !== i && keymap[i].code === code && code !== 'Unset') {
+        if (index !== i && keymap[i].code === code && code !== 'Unassigned') {
             const button = $(`#remap-${index}`);
             button.text('Enter Unique Key...');
             button.addClass('btn-danger');
@@ -294,7 +295,7 @@ function remapFinish(index, code) {
  * @param {int} i Index of hotkey
  */
 function remapUnset(index) {
-    remapFinish(index, 'Unset');
+    remapFinish(index, 'Unassigned');
 }
 
 /**
