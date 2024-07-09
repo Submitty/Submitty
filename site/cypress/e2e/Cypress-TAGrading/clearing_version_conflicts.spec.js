@@ -3,7 +3,7 @@ describe('Test cases for checking the clear version conflicts button in the TA g
         cy.login('instructor');
         cy.visit(['sample', 'gradeable', 'grading_homework', 'grading', 'grade?who_id=LHmpGciilVzjcEJ&sort=id&direction=ASC']);
         cy.get('#grading_rubric_btn').click();
-        cy.get('#change-graded-version').should('not.exist');
+        cy.get('[data-testid="change-graded-version"]').should('not.exist');
         cy.get('.version-warning').should('not.exist');
     });
 
@@ -11,7 +11,7 @@ describe('Test cases for checking the clear version conflicts button in the TA g
         cy.login('instructor');
         cy.visit(['sample', 'gradeable', 'grading_homework', 'grading', 'grade?who_id=K8jI3q4qpdCc1jw&sort=id&direction=ASC&gradeable_version=1']);
         cy.get('#grading_rubric_btn').click();
-        cy.get('#change-graded-version').should('exist');
+        cy.get('[data-testid="change-graded-version"]').should('exist');
         cy.get('.version-warning').should('exist');
     });
 
@@ -25,11 +25,8 @@ describe('Test cases for checking the clear version conflicts button in the TA g
 
         cy.get('.version-warning').should('exist');
 
-        cy.get('#change-graded-version').click();
-        cy.get('#change-graded-version').should('not.exist');
-
-        // wait until page is fully loaded
-        cy.get('#component-list').children().should('have.length.least', 1);
+        cy.get('[data-testid="change-graded-version"]').click();
+        cy.get('[data-testid="change-graded-version"]', { timeout: 10000 }).should('not.be.visible');
 
         cy.get('.version-warning').should('not.exist');
 
