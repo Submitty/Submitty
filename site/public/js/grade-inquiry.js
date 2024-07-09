@@ -5,7 +5,7 @@ function loadDraft() {
     const gradeableId = $('#gradeable_id').val();
     const draftContentKeyPrefix = `draftContent-${gradeableId}-`;
     const draftContentRaw = localStorage.getItem(draftContentKeyPrefix);
-    let draftContent = draftContentRaw ? JSON.parse(draftContentRaw) : {};
+    const draftContent = draftContentRaw ? JSON.parse(draftContentRaw) : {};
 
     const elements = $('.markdown-textarea.fill-available');
     elements.each(function () {
@@ -79,8 +79,8 @@ function onReplyTextAreaKeyUp(textarea) {
     const must_be_empty_buttons = $('.gi-submit-empty:not(.gi-ignore-disabled)');
     must_be_empty_buttons.prop('disabled', reply_text_area.val() !== '');
 
-    let draftContentRaw = localStorage.getItem(draftContentKeyPrefix);
-    let draftContent = draftContentRaw ? JSON.parse(draftContentRaw) : {};
+    const draftContentRaw = localStorage.getItem(draftContentKeyPrefix);
+    const draftContent = draftContentRaw ? JSON.parse(draftContentRaw) : {};
 
     draftContent[uniqueKey] = reply_text_area.val();
     localStorage.setItem(draftContentKeyPrefix, JSON.stringify(draftContent));
