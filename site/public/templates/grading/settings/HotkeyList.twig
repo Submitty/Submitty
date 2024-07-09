@@ -6,7 +6,7 @@
     </tr>
     {% for hotkey in keymap %}
         <tr>
-            <td>{{ hotkey.name | default('Unnamed Action') }}</td>
+            <td>{{ hotkey.name | default('Unassigned') }}</td>
             <td>
                 {% if hotkey.locked %}
                     <button id="remap-{{ loop.index0 }}" class="btn btn-default remap-button" disabled="disabled">{{ hotkey.code }}</button>
