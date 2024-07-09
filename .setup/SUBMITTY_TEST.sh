@@ -30,6 +30,8 @@ if [ -z "$1" ] || [ "$1" == "help" ]; then
           phpstan : php static analysis [option: --memory-limit 4G, --generate-baseline ...]
           phpcs   : php CodeSniffer
           php-lint: phpcs & phpstan
+          js-lint: eslint
+          css-lint: css-stylelint
           "
 elif [ "$1" == "phpstan" ]; then
     run_php_stan "$@"
@@ -42,12 +44,6 @@ elif [ "$1" == "js-lint" ]; then
     run_js_es
 elif [ "$1" == "css-lint" ]; then
     run_css_style
-elif [ "$1" == "help" ]; then
-    echo "phpstan: php static analysis [option: --memory-limit 4G, --generate-baseline ...]
-          phpcs  : php CodeSniffer
-          php-lint: phpcs & phpstan
-          js-lint: eslint
-          css-lint: css-stylelint"
 else
     echo "Unknown test type: $1
         use phpstan, phpcs, php-lint, js-lint, css-lint
