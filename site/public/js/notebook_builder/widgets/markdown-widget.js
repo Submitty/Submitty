@@ -18,11 +18,11 @@ class MarkdownWidget extends Widget {
         const container = this.getContainer('Markdown');
         container.classList.add('markdown-widget');
 
-        //Add hidden label for screen reader
+        // Add hidden label for screen reader
         const label = document.createElement('label');
         label.setAttribute('for', `notebook-builder-markdown-${NUM_MARKDOWN}`);
         label.style.display = 'none';
-        label.innerHTML =  `Markdown Input #${NUM_MARKDOWN}`;
+        label.innerHTML = `Markdown Input #${NUM_MARKDOWN}`;
 
         // Setup interactive area
         const interactive_area = container.getElementsByClassName('interactive-container')[0];
@@ -33,23 +33,23 @@ class MarkdownWidget extends Widget {
             type: 'POST',
             data: {
                 data: {
-                    markdown_area_id : `notebook-builder-markdown-${NUM_MARKDOWN}`,
-                    markdown_area_name : '',
-                    markdown_area_value : this.state.markdown_string,
-                    class : 'markdown-input',
-                    placeholder : 'Enter text or markdown...',
-                    preview_div_id : `notebook-builder-markdown-preview-${NUM_MARKDOWN}`,
-                    preview_div_name : `notebook-builder-markdown-preview-${NUM_MARKDOWN}`,
-                    preview_button_id : `notebook-builder-preview-button-${NUM_MARKDOWN}`,
-                    render_header : true,
-                    min_height : '100px',
+                    markdown_area_id: `notebook-builder-markdown-${NUM_MARKDOWN}`,
+                    markdown_area_name: '',
+                    markdown_area_value: this.state.markdown_string,
+                    class: 'markdown-input',
+                    placeholder: 'Enter text or markdown...',
+                    preview_div_id: `notebook-builder-markdown-preview-${NUM_MARKDOWN}`,
+                    preview_div_name: `notebook-builder-markdown-preview-${NUM_MARKDOWN}`,
+                    preview_button_id: `notebook-builder-preview-button-${NUM_MARKDOWN}`,
+                    render_header: true,
+                    min_height: '100px',
                 },
                 csrf_token: csrfToken,
             },
-            success: function(data) {
+            success: function (data) {
                 $(interactive_area).append(data);
             },
-            error: function() {
+            error: function () {
                 displayErrorMessage('Something went wrong while trying to preview markdown. Please try again.');
             },
         });
