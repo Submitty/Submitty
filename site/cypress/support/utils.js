@@ -1,5 +1,4 @@
-
-//These functions are defined in normal JS and can be imported into a spec file
+// These functions are defined in normal JS and can be imported into a spec file
 
 /**
 * Generate a 3 letter semester code e.g s21, f20 based on today's data
@@ -9,8 +8,8 @@
 */
 export function getCurrentSemester() {
     const today = new Date();
-    const year = today.getFullYear().toString().slice(2, 4);	//get last two digits
-    const semester = ((today.getMonth() + 1) < 7) ? 's' : 'f';	//first half of year 'spring' rest is fall
+    const year = today.getFullYear().toString().slice(2, 4); // get last two digits
+    const semester = ((today.getMonth() + 1) < 7) ? 's' : 'f'; // first half of year 'spring' rest is fall
 
     return semester + year;
 }

@@ -37,6 +37,10 @@ if [ -d "${THIS_DIR}/../.utm" ]; then
     UTM=1
 fi
 
+CI=0
+if [ -f "${THIS_DIR}/../.github_actions_ci_flag" ]; then
+    CI=1
+fi
 
 SUBMITTY_REPOSITORY=$(jq -r '.submitty_repository' "${CONF_DIR}/submitty.json")
 SUBMITTY_INSTALL_DIR=$(jq -r '.submitty_install_dir' "${CONF_DIR}/submitty.json")
@@ -52,17 +56,6 @@ else
     RESTART_DAEMONS=( )
 fi
 
-########################################################################################################################
-########################################################################################################################
-# FORCE CORRECT TIME SKEW
-# This may happen on a development virtual machine
-# SEE GITHUB ISSUE #7885 - https://github.com/Submitty/Submitty/issues/7885
-if [ "${UTM}" == 1 ]; then
-    sudo service ntp stop
-    sudo ntpd -gq
-    sudo service ntp start
-    sudo timedatectl set-timezone America/New_York
-fi
 
 ########################################################################################################################
 ########################################################################################################################
@@ -91,6 +84,18 @@ if [[ "$#" -ge 1 && "$1" != "test" && "$1" != "clean" && "$1" != "test_rainbow"
     exit 1
 fi
 
+########################################################################################################################
+########################################################################################################################
+# FORCE CORRECT TIME SKEW
+# This may happen on a development virtual machine
+# SEE GITHUB ISSUE #7885 - https://github.com/Submitty/Submitty/issues/7885
+
+if [[( "${VAGRANT}" == 1  ||  "${UTM}" == 1 ) &&  "${CI}" == 0 ]]; then
+    sudo service ntp stop
+    sudo ntpd -gq
+    sudo service ntp start
+    sudo timedatectl set-timezone America/New_York
+fi
 
 ########################################################################################################################
 ########################################################################################################################
@@ -334,7 +339,7 @@ if [ "${WORKER}" == 0 ]; then
     chmod  770                                        "${SUBMITTY_DATA_DIR}/user_data"
     chown  "root:${DAEMONPHPCGI_GROUP}"               "${SUBMITTY_DATA_DIR}/vcs"
     chmod  770                                        "${SUBMITTY_DATA_DIR}/vcs"
-    chown  "root:${DAEMONPHPCGI_GROUP}"               "${SUBMITTY_DATA_DIR}/vcs/git"
+    chown  "${CGI_USER}:${DAEMONPHPCGI_GROUP}"        "${SUBMITTY_DATA_DIR}/vcs/git"
     chmod  770                                        "${SUBMITTY_DATA_DIR}/vcs/git"
 fi
 

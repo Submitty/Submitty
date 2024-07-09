@@ -197,6 +197,15 @@ class HomeworkView extends AbstractView {
             $active_days_charged = max(0, $active_days_late - $extensions);
         }
 
+
+        $date = new \DateTime();
+        $future_date = clone $date;
+        $future_date->modify('+7 days');
+        $past_date = clone $date;
+        $past_date->modify('-7 days');
+        // format("I") returns whether the given date is in daylight savings
+        $daylight_message_required = ($future_date->format("I") !== $past_date->format("I"));
+
         // ------------------------------------------------------------
         // IF STUDENT HAS ALREADY SUBMITTED AND THE ACTIVE VERSION IS LATE, PRINT LATE DAY INFORMATION FOR THE ACTIVE VERSION
         if ($active_version >= 1 && $active_days_late > 0) {
@@ -288,7 +297,8 @@ class HomeworkView extends AbstractView {
 
         return $this->core->getOutput()->renderTwigTemplate('submission/homework/LateDayMessage.twig', [
             'messages' => $messages,
-            'error' => $error
+            'error' => $error,
+            'daylight' => $daylight_message_required
         ]);
     }
 
@@ -484,6 +494,9 @@ class HomeworkView extends AbstractView {
         $vcs_partial_path = str_replace('{$vcs_type}', $this->core->getConfig()->getVcsType(), $vcs_partial_path);
         $vcs_partial_path = str_replace('{$gradeable_id}', $gradeable->getId(), $vcs_partial_path);
         $vcs_partial_path = str_replace('{$user_id}', $this->core->getUser()->getId(), $vcs_partial_path);
+        if ($gradeable->isTeamAssignment()) {
+            $vcs_partial_path = str_replace('{$team_id}', $graded_gradeable->getSubmitter()->getId(), $vcs_partial_path);
+        }
 
         $vcs_repo_exists = false;
         if ($gradeable->isVcs()) {
@@ -493,8 +506,7 @@ class HomeworkView extends AbstractView {
                 'git',
                 $this->core->getConfig()->getTerm(),
                 $this->core->getConfig()->getCourse(),
-                $gradeable->getId(),
-                $graded_gradeable->getSubmitter()->getId()
+                $vcs_partial_path
             );
             $vcs_repo_exists = file_exists($path);
         }

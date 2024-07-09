@@ -1,0 +1,58 @@
+{% extends 'generic/Popup.twig' %}
+{% block popup_id %}new-global-event-form{% endblock %}
+{% block title %}New Global Event{% endblock %}
+{% block body %}
+    <p class="std-margin">
+        Please select the type of item, when it should be, and the text it should display.
+    </p>
+    <label for="calendar-item-type">
+        Message Type
+        <i style="font-style:normal;" class="fa-question-circle" title="Announcements are italized, notes are normal text."></i> 
+    </label>
+    <select id="calendar-item-type" name="type">
+        <option value="text">Note</option>
+        <option value="ann">Announcement</option>
+    </select><br>
+    <label for="calendar-item-text">Message Text</label>
+    <input type="text" id="calendar-item-text" name="text"><br>
+    <label for="edit-picker">Date</label>
+    <input id="edit-picker" class="edit-picker" type="text" name="date">
+    <input hidden name="csrf_token" value="{{ core.getCsrfToken() }}">
+    <script>
+        flatpickr('.edit-picker', {
+            plugins: [ShortcutButtonsPlugin(
+                    {
+                        button: [
+                            {
+                                label: "Today"
+                            }
+                        ],
+                        onClick: (index, fp) => {
+                            let date;
+                            switch (index) {
+                                case 0:
+                                    date = new Date();
+                                    break;
+                            }
+                            fp.setDate(date);
+                        }
+                    }
+            )],
+            allowInput: true,
+            time_24hr: true,
+            dateFormat: "Y-m-d",
+            onReady: (a, b, fp) => {
+                fp.calendarContainer.firstChild.childNodes[1].firstChild.firstChild.setAttribute('aria-label', 'Month');
+            }
+        });
+    </script>
+{% endblock %}
+{% block form %}
+    <form method="post" action="/calendar/global_items/new">
+        {{ parent() }}
+    </form>
+{% endblock %}
+{% block buttons %}
+    {{ block('close_button') }}
+    <input class="btn btn-primary" type="submit" value="Submit" />
+{% endblock %}
