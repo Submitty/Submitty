@@ -1128,12 +1128,13 @@ class HomeworkView extends AbstractView {
         if ($active_version_number !== 0 || $display_version !== 0) {
             if ($graded_gradeable->hasTaGradingInfo()) {
                 // TA grading is done
-                if($graded_gradeable->isTaGradingComplete()){
+                if ($graded_gradeable->isTaGradingComplete()) {
                     $finished_grading_version = $graded_gradeable->getTaGradedGradeable()->getGradedVersion();
                     $display_same_as_graded = $finished_grading_version === $display_version;
                     $active_same_as_graded = $finished_grading_version === $active_version_number;
-                // TA Grading in progress, get first version number
-                } else {
+                }
+                else {
+                    // TA grading is in progress
                     $ta_grading_in_progress_version = $graded_gradeable->getTaGradedGradeable()->getGradedVersion(false);
                     $display_same_as_graded = $ta_grading_in_progress_version === $display_version;
                     $active_same_as_graded = $ta_grading_in_progress_version === $active_version_number;
