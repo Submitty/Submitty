@@ -47,10 +47,13 @@ function updateHomeworkExtension() {
 }
 
 function deleteHomeworkExtension(user) {
-    $('#user_id').val(user);
-    $('#late-days').val(0);
-    $('#reason-for-exception').val('');
-    updateHomeworkExtension();
+    const confirm = window.confirm('Are you sure you would like to delete this entry?');
+    if (confirm) {
+        $('#user_id').val(user);
+        $('#late-days').val(0);
+        $('#reason-for-exception').val('');
+        updateHomeworkExtension();
+    }
 }
 
 function clearDate() {
