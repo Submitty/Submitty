@@ -40,8 +40,42 @@ class GradeOverrideController extends AbstractController {
 
     #[Route("/courses/{_semester}/{_course}/grade_override/{gradeable_id}/delete", methods: ["POST"])]
     public function deleteOverriddenGrades($gradeable_id) {
-        $this->core->getQueries()->deleteOverriddenGrades($_POST['user_id'], $gradeable_id);
-        return $this->getOverriddenGrades($gradeable_id);
+        $team = $this->core->getQueries()->getTeamByGradeableAndUser($gradeable_id, $_POST['user_id']);
+        //0 is for single submission, 1 is for team submission
+        $option = isset($_POST['option']) ? $_POST['option'] : -1;
+        if ($team != null && $team->getSize() > 1) {
+            if ($option == 0) {
+                $this->core->getQueries()->deleteOverriddenGrades($_POST['user_id'], $gradeable_id);
+                return $this->getOverriddenGrades($gradeable_id);
+            }
+            elseif ($option == 1) {
+                $team_member_ids = explode(", ", $team->getMemberList());
+                for ($i = 0; $i < count($team_member_ids); $i++) {
+                    $this->core->getQueries()->deleteOverriddenGrades($team_member_ids[$i], $gradeable_id);
+                }
+                return $this->getOverriddenGrades($gradeable_id);
+            }
+            else {
+                $team_member_ids = explode(", ", $team->getMemberList());
+                $team_members = [];
+                for ($i = 0; $i < count($team_member_ids); $i++) {
+                    $team_members[$team_member_ids[$i]] = $this->core->getQueries()->getUserById($team_member_ids[$i])->getDisplayedGivenName() . " " .
+                        $this->core->getQueries()->getUserById($team_member_ids[$i])->getDisplayedFamilyName();
+                }
+                $popup_html = $this->core->getOutput()->renderTwigTemplate(
+                    "admin/users/MoreGradeOverrides.twig",
+                    ['member_list' => $team_members, 'is_delete' => true]
+                );
+                return $this->core->getOutput()->renderJsonSuccess([
+                    'is_team' => true,
+                    'popup' => $popup_html
+                ]);
+            }
+        }
+        else {
+            $this->core->getQueries()->deleteOverriddenGrades($_POST['user_id'], $gradeable_id);
+            return $this->getOverriddenGrades($gradeable_id);
+        }
     }
 
     #[Route("/courses/{_semester}/{_course}/grade_override/{gradeable_id}/update", methods: ["POST"])]
@@ -54,11 +88,11 @@ class GradeOverrideController extends AbstractController {
         }
 
         if (((!isset($_POST['marks'])) || $_POST['marks'] == "" || is_float($_POST['marks']))) {
-            $error = "Marks be a integer";
+            $error = "Marks must be an integer";
             return $this->core->getOutput()->renderJsonFail($error);
         }
 
-        $team = $this->core->getQueries()->getTeamByGradeableAndUser($_POST['g_id'], $_POST['user_id']);
+        $team = $this->core->getQueries()->getTeamByGradeableAndUser($gradeable_id, $_POST['user_id']);
         //0 is for single submission, 1 is for team submission
         $option = isset($_POST['option']) ? $_POST['option'] : -1;
         if ($team != null && $team->getSize() > 1) {
@@ -82,7 +116,7 @@ class GradeOverrideController extends AbstractController {
                 }
                 $popup_html = $this->core->getOutput()->renderTwigTemplate(
                     "admin/users/MoreGradeOverrides.twig",
-                    ['member_list' => $team_members]
+                    ['member_list' => $team_members, 'is_delete' => false]
                 );
                 return $this->core->getOutput()->renderJsonSuccess([
                     'is_team' => true,

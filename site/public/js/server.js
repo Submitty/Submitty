@@ -1355,7 +1355,7 @@ function refreshOnResponseOverriddenGrades(json) {
     }
     else {
         json['data']['users'].forEach((elem) => {
-            const delete_button = `<a onclick="deleteOverriddenGrades('${elem['user_id']}');"><i class='fas fa-trash'></i></a>`;
+            const delete_button = `<a onclick="deleteOverriddenGrades('${elem['user_id']}', -1);"><i class='fas fa-trash'></i></a>`;
             const bits = [`<tr><td class="align-left">${elem['user_id']}`, elem['user_givenname'], elem['user_familyname'], elem['marks'], elem['comment'], `${delete_button}</td></tr>`];
             $('#grade-override-table').append(bits.join('</td><td class="align-left">'));
         });
@@ -1364,9 +1364,9 @@ function refreshOnResponseOverriddenGrades(json) {
     }
 }
 
-function deleteOverriddenGrades(user_id) {
+function deleteOverriddenGrades(user_id, option) {
     const url = buildCourseUrl(['grade_override', $('#g_id').val(), 'delete']);
-    const confirm = window.confirm('Are you sure you would like to delete this entry?');
+    const confirm = option > -1 ? true : window.confirm('Are you sure you would like to delete this entry?');
     if (confirm) {
         $.ajax({
             url: url,
@@ -1374,11 +1374,17 @@ function deleteOverriddenGrades(user_id) {
             data: {
                 csrf_token: csrfToken,
                 user_id: user_id,
+                option: option,
             },
             success: function (data) {
                 const json = JSON.parse(data);
                 if (json['status'] === 'fail') {
                     displayErrorMessage(json['message']);
+                    return;
+                }
+                if (json['data'] && json['data']['is_team']) {
+                    $('#user_id').val(user_id);
+                    overridePopup(json);
                     return;
                 }
                 displaySuccessMessage('Overridden Grades deleted.');
@@ -1392,11 +1398,17 @@ function deleteOverriddenGrades(user_id) {
     return false;
 }
 
-function confirmOverride(option) {
+function confirmOverride(option, isDelete) {
     $('.popup-form').css('display', 'none');
-    $('input[name="option"]').val(option);
-    updateGradeOverride();
-    $('input[name="option"]').val(-1);
+    if (isDelete) {
+        deleteOverriddenGrades($('#user_id').val(), option);
+        $('#user_id').val('');
+    }
+    else {
+        $('input[name="option"]').val(option);
+        updateGradeOverride();
+        $('input[name="option"]').val(-1);
+    }
 }
 
 function overridePopup(json) {

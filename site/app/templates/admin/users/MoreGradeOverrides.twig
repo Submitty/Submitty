@@ -13,9 +13,15 @@
     </ul>
 {% endblock %}
 {% block close_button_id %}id="team-override-cancel"{% endblock %}
-{% block close_click_action %}javascript:confirmOverride(0){% endblock %}
+{% block close_click_action %}
+    {% if is_delete is defined %}
+        javascript:confirmOverride(0, {{ is_delete }})
+    {% endif %}
+{% endblock %}
 {% block close_button_text %}No{% endblock %}
 {% block buttons %}
     {{ block('close_button') }}
-    <a class="btn btn-primary" id="apply-to-all" href="javascript:confirmOverride(1)">Yes</a>
+    {% if is_delete is defined %}
+        <a class="btn btn-primary" id="apply-to-all" href="javascript:confirmOverride(1, {{ is_delete }})">Yes</a>
+    {% endif %}
 {% endblock %}
