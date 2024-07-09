@@ -189,7 +189,7 @@ function testAndGetAttachments(post_box_id, dynamic_check) {
     }
 }
 
-function publishFormWithAttachments(form, test_category, error_message) {
+function publishFormWithAttachments(form, test_category, error_message, is_thread) {
     if (!form[0].checkValidity()) {
         form[0].reportValidity();
         return false;
