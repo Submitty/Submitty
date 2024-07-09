@@ -1332,7 +1332,7 @@ function toggleLike(post_id, current_user) {
                 updateLikesDisplay(post_id, json.data);
             }
         },
-        error: function(err) {
+        error: function (err) {
             console.log(err);
         },
     });
@@ -1360,12 +1360,12 @@ function updateLikesDisplay(post_id, data) {
             $(`#likedByInstructor_${post_id}`).hide();
         }
 
-        likeCounter=likes;//set to the sql like value
+        likeCounter = likes;// set to the sql like value
 
         likeIconSrc.src = likeIconSrcElement; // Update the state
         likeCounterElement.innerText = likeCounter;
     }
-    else if (liked ==='like') {
+    else if (liked === 'like') {
         likeIconSrcElement = likeIconSrcElement.replace('light-mode-off-duck.svg', 'on-duck-button.svg');
         if (staffLiked > 0) {
             $(`#likedByInstructor_${post_id}`).show();
@@ -1373,7 +1373,7 @@ function updateLikesDisplay(post_id, data) {
         else {
             $(`#likedByInstructor_${post_id}`).hide();
         }
-        likeCounter=likes;
+        likeCounter = likes;
         likeIconSrc.src = likeIconSrcElement; // Update the state
         likeCounterElement.innerText = likeCounter;
     }
