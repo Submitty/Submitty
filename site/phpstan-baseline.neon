@@ -1249,8 +1249,13 @@ parameters:
 			path: app/controllers/admin/GradeOverrideController.php
 
 		-
+			message: "#^Loose comparison via \"\\!\\=\" is not allowed\\.$#"
+			count: 1
+			path: app/controllers/admin/GradeOverrideController.php
+	
+		-
 			message: "#^Loose comparison via \"\\=\\=\" is not allowed\\.$#"
-			count: 2
+			count: 4
 			path: app/controllers/admin/GradeOverrideController.php
 
 		-
