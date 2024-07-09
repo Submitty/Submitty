@@ -124,7 +124,8 @@ class RainbowCustomization extends AbstractModel {
 
                 if (property_exists($json_bucket, 'remove_lowest')) {
                     $this->bucket_remove_lowest[$bucket] = $json_bucket->remove_lowest;
-                } else {
+                }
+                else {
                     $this->bucket_remove_lowest[$bucket] = 0;
                 }
             }
