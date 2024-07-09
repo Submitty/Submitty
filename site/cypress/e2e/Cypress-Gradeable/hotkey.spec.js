@@ -61,8 +61,8 @@ describe('TA grading hotkey testing', () => {
         cy.get('[data-testid="remap-1"]').should('contain', 'Unassigned');
         cy.get('[data-testid="remap-2"]').should('contain', 'Unassigned');
         cy.get('[data-testid="restore-all-hotkeys"]').click();
-        cy.get('[data-testid="remap-0"]').should('not.contain', 'Unassigned');
-        cy.get('[data-testid="remap-1"]').should('not.contain', 'Unassigned');
-        cy.get('[data-testid="remap-2"]').should('not.contain', 'Unassigned');
+        cy.get('[data-testid="remap-0"]').should('contain', 'ArrowLeft');
+        cy.get('[data-testid="remap-1"]').should('contain', 'ArrowRight');
+        cy.get('[data-testid="remap-2"]').should('contain', 'KeyA');
     });
 });
