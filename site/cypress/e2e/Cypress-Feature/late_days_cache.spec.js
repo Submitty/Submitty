@@ -34,7 +34,7 @@ const calculateCache = () => {
 
     for (const user_id of all_user_ids) {
         cy.get(`[USER_ID="${user_id}"] > [ld_id="Late Days Remaining"]`)
-            .then(cell => expect(cell.text().trim()).not.to.equal(''));
+            .then((cell) => expect(cell.text().trim()).not.to.equal(''));
     }
 };
 
@@ -43,11 +43,11 @@ const checkStudentsInCache = () => {
     for (const user_id of all_user_ids) {
         // Gradeable # of late days used should be empty
         cy.get(`[USER_ID="${user_id}"] > [id="Late Allowed Homework"]`)
-            .then(cell => expect(cell.text().trim()).to.equal(''));
+            .then((cell) => expect(cell.text().trim()).to.equal(''));
 
         // Remaining late days isnt known, should be empty
         cy.get(`[USER_ID="${user_id}"] > [ld_id="Late Days Remaining"]`)
-            .then(cell => expect(cell.text().trim()).to.equal(''));
+            .then((cell) => expect(cell.text().trim()).to.equal(''));
     }
 };
 
@@ -244,7 +244,7 @@ describe('Test cases involving late day cache updates', () => {
             cy.get('#save_status', { timeout: 10000 }).should('have.text', 'All Changes Saved');
             cy.visit(['sample', 'bulk_late_days']);
             // Gradeable # of late days used should be empty
-            cy.get('[id="Late Allowed Homework"]').then(cell => expect(cell.text().trim()).to.equal(''));
+            cy.get('[id="Late Allowed Homework"]').then((cell) => expect(cell.text().trim()).to.equal(''));
 
             // Changes due date back
             EditGradeablePage();
@@ -257,7 +257,7 @@ describe('Test cases involving late day cache updates', () => {
             cy.get('#late_days').click(); // Dismiss calender and trigger save
             cy.get('#save_status', { timeout: 10000 }).should('have.text', 'All Changes Saved');
             cy.visit(['sample', 'bulk_late_days']);
-            cy.get('[id="Late Allowed Homework"]').then(cell => expect(cell.text().trim()).to.equal(''));
+            cy.get('[id="Late Allowed Homework"]').then((cell) => expect(cell.text().trim()).to.equal(''));
 
             // Disables due date
             EditGradeablePage();
@@ -303,7 +303,7 @@ describe('Test cases involving late day cache updates', () => {
             cy.get('#date_due').click(); // Dismiss calender and trigger save
             cy.get('#save_status', { timeout: 10000 }).should('have.text', 'All Changes Saved');
             cy.visit(['sample', 'bulk_late_days']);
-            cy.get('[id="Late Allowed Homework"]').then(cell => expect(cell.text().trim()).to.equal(''));
+            cy.get('[id="Late Allowed Homework"]').then((cell) => expect(cell.text().trim()).to.equal(''));
 
             // Changes late days allowed number back
             EditGradeablePage();
@@ -316,7 +316,7 @@ describe('Test cases involving late day cache updates', () => {
             cy.get('#date_due').click(); // Dismiss calender and trigger save
             cy.get('#save_status', { timeout: 10000 }).should('have.text', 'All Changes Saved');
             cy.visit(['sample', 'bulk_late_days']);
-            cy.get('[id="Late Allowed Homework"]').then(cell => expect(cell.text().trim()).to.equal(''));
+            cy.get('[id="Late Allowed Homework"]').then((cell) => expect(cell.text().trim()).to.equal(''));
         });
     });
 

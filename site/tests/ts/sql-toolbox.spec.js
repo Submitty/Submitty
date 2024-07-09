@@ -1,4 +1,3 @@
-import { runSqlQuery, init, generateCSV } from '../../ts/sql-toolbox';
 import { test } from '@jest/globals';
 import { generateCSV, init, runSqlQuery } from '../../ts/sql-toolbox';
 import { mockFetch } from './utils';
