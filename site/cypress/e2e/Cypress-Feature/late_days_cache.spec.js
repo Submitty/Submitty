@@ -336,7 +336,7 @@ describe('Test cases involving late day cache updates', () => {
             cy.visit(['sample', 'bulk_late_days']);
 
             cy.get('[initial_ld_id="Initial Late Days"]')
-                .each(cell => expect(cell.text().trim()).to.equal('1'));
+                .each((cell) => expect(cell.text().trim()).to.equal('1'));
             // Change back
             cy.visit(['sample', 'config']);
             cy.get('#default-student-late-days')

@@ -19,9 +19,34 @@ declare global {
 
 const warning_banner = document.getElementById('submission-mode-warning');
 
+function initialSubmissionMode() {
+    const radioBulk = $('#radio-bulk');
+    const pdfSubmitButton = $('#pdf-submit-button');
+    const warningBanner = $('#warning-banner');
+
+    if (radioBulk.length) {
+        if (radioBulk.prop('checked')) {
+            if (pdfSubmitButton.length) {
+                pdfSubmitButton.show();
+            }
+            sessionStorage.setItem(`${window.gradeable_id}-submission_mode`, 'bulk-upload');
+
+            if (warningBanner.length && warningBanner.children().length) {
+                const message = 'Warning: Submitting files for bulk upload!';
+                warningBanner.children().first().text(message);
+            }
+        }
+        else if (pdfSubmitButton.length) {
+            pdfSubmitButton.hide();
+        }
+    }
+}
+
 function init() {
+    initialSubmissionMode();
+
     document.getElementsByName('submission-type')
-        .forEach(radio_btn => radio_btn.addEventListener('click', changeSubmissionMode));
+        .forEach((radio_btn) => radio_btn.addEventListener('click', changeSubmissionMode));
 
     if (warning_banner) {
         warning_banner.textContent = '';
@@ -96,7 +121,7 @@ function changeSubmissionMode(event: Event) {
     const scanIdsOpts = document.getElementById('toggle-id-scan');
     const SubmitButton = document.getElementById('submit');
 
-    [submitForStudentOpts, bulkUploadOpts, qrUploadOpts, numericUploadOpts].forEach(element => element!.style.display = 'none');
+    [submitForStudentOpts, bulkUploadOpts, qrUploadOpts, numericUploadOpts].forEach((element) => element!.style.display = 'none');
     useQRCheckBox.checked = false;
     if (useScanIdsCheckBox !== null) {
         useScanIdsCheckBox.checked = false;
@@ -141,6 +166,7 @@ function changeSubmissionMode(event: Event) {
                 useQRCheckBox.click();
             }
             else {
+                $('#qrUploadOpts').hide();
                 numericUploadOpts!.style.display = 'inline';
                 sessionStorage.setItem(`${window.gradeable_id}-bulk_setting`, 'numeric');
 

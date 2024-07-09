@@ -88,12 +88,12 @@ class FormOptionsWidget extends Widget {
                 this.appendStatusMessage(result.message);
 
                 if (result.data && Array.isArray(result.data)) {
-                    result.data.forEach(msg => this.appendStatusMessage(msg));
+                    result.data.forEach((msg) => this.appendStatusMessage(msg));
                 }
             }
         };
 
-        makeRequest().catch(err => console.error(err));
+        makeRequest().catch((err) => console.error(err));
     }
 
     /**
@@ -168,7 +168,7 @@ class FormOptionsWidget extends Widget {
      */
     validateFileNames() {
         const filename_inputs = Array.from(document.querySelectorAll('.filename-input'));
-        const filenames = filename_inputs.map(input => input.value);
+        const filenames = filename_inputs.map((input) => input.value);
 
         // Duplicated filename check
         const duplicated_filenames = this.getDuplicatedFileNames(filenames);

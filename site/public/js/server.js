@@ -173,7 +173,7 @@ function newDeleteCourseMaterialForm(id, file_name, str_id = null) {
     const current_y_offset = window.pageYOffset;
     Cookies.set('jumpToScrollPosition', current_y_offset);
 
-    const cm_ids = (Cookies.get('cm_data') || '').split('|').filter(n => n.length);
+    const cm_ids = (Cookies.get('cm_data') || '').split('|').filter((n) => n.length);
 
     $('[id^=div_viewer_]').each(function () {
         const cm_id = this.id.replace('div_viewer_', '').trim();
@@ -1923,37 +1923,56 @@ function renderMarkdown(markdownContainer, url, content) {
 function addMarkdownCode(type) {
     const markdown_area = $(this).closest('.markdown-area');
     const markdown_header = markdown_area.find('.markdown-area-header');
-    // don't allow markdown insertion if we are in preview mode
+
+    // Don't allow markdown insertion if we are in preview mode
     if (markdown_header.attr('data-mode') === 'preview') {
         return;
     }
 
-    const cursor = $(this).prop('selectionStart');
+    const start = $(this).prop('selectionStart');
+    const end = $(this).prop('selectionEnd');
     const text = $(this).val();
     let insert = '';
+    const selectedText = text.substring(start, end);
+
     switch (type) {
         case 'code':
-            if (text.substring(text.substring(0, cursor).split('').lastIndexOf('\n'), cursor).length !== 1) {
-                insert = '\n';
-            }
-            insert += '```\ncode\n```\n';
+            insert = selectedText ? `\`\`\`\n${selectedText}\n\`\`\`\n` : '```\n\n```';
             break;
         case 'link':
-            insert = '[display text](url)';
+            insert = `[${selectedText}](url)`;
             break;
         case 'bold':
-            insert = '__bold text__';
+            insert = selectedText ? `__${selectedText}__` : '____';
             break;
         case 'italic':
-            insert = '_italic text_';
+            insert = selectedText ? `_${selectedText}_` : '__';
             break;
         case 'blockquote':
-            insert = '> blockquote text\n\n';
+            insert = `> ${selectedText}\n\n`;
             break;
     }
-    $(this).val(text.substring(0, cursor) + insert + text.substring(cursor));
-    $(this).focus();
-    $(this)[0].setSelectionRange(cursor + insert.length, cursor + insert.length);
+
+    if (!selectedText) {
+        // Insert the markdown with the cursor in between the symbols
+        $(this).val(text.substring(0, start) + insert + text.substring(end));
+        $(this).focus();
+        if (type === 'bold') {
+            $(this)[0].setSelectionRange(start + 2, start + 2);
+        }
+        else if (type === 'code') {
+            $(this)[0].setSelectionRange(start + 4, start + 4);
+        }
+        else {
+            $(this)[0].setSelectionRange(start + 1, start + 1);
+        }
+    }
+    else {
+        // Insert the markdown with the selected text wrapped
+        $(this).val(text.substring(0, start) + insert + text.substring(end));
+        $(this).focus();
+        $(this)[0].setSelectionRange(start + insert.length, start + insert.length);
+    }
 }
 
 /**
@@ -1964,7 +1983,7 @@ function tzWarn() {
     if (!user_offstr) {
         return;
     }
-    const [h, m] = user_offstr.match(/\d+/g)?.map(n => +n) || [NaN, NaN];
+    const [h, m] = user_offstr.match(/\d+/g)?.map((n) => +n) || [NaN, NaN];
     if (isNaN(h) || isNaN(m)) {
         return;
     }
@@ -1986,3 +2005,28 @@ function tzWarn() {
     }
 }
 document.addEventListener('DOMContentLoaded', tzWarn);
+
+/**
+ * Change the class of span.badge.<color>-background to span.badge.dark-<color>-background if html tag contains data-theme='dark' or data-black_mode='black'.
+ */
+function scorePillDark() {
+    const html_element = document.querySelector('html');
+    const badges = document.querySelectorAll('span.badge');
+    if (html_element.getAttribute('data-theme') === 'dark' || html_element.getAttribute('data-black_mode') === 'black') {
+        badges.forEach((badge) => {
+            if (badge.classList.contains('green-background')) {
+                badge.classList.remove('green-background');
+                badge.classList.add('dark-green-background');
+            }
+            else if (badge.classList.contains('yellow-background')) {
+                badge.classList.remove('yellow-background');
+                badge.classList.add('dark-yellow-background');
+            }
+            else if (badge.classList.contains('red-background')) {
+                badge.classList.remove('red-background');
+                badge.classList.add('dark-red-background');
+            }
+        });
+    }
+}
+document.addEventListener('DOMContentLoaded', scorePillDark);

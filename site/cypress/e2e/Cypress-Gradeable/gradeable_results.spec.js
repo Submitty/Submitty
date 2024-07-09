@@ -15,7 +15,7 @@ skipOn(Cypress.env('run_area') === 'CI', () => {
 
         it('Should show and hide details', () => {
             cy.scrollTo('bottom');
-            // Open
+            //  Open
             cy.get('#testcase_1').scrollIntoView();
             cy.get('#testcase_1').should('not.be.visible');
             cy.get('.loading-tools-show').eq(1).as('loading-tool-show');
@@ -23,7 +23,7 @@ skipOn(Cypress.env('run_area') === 'CI', () => {
             cy.get('@loading-tool-show').click();
             cy.get('#testcase_1').scrollIntoView();
             cy.get('#testcase_1').should('be.visible');
-            // Close
+            //  Close
             cy.get('.loading-tools-hide').eq(1).as('loading-tool-hide');
             cy.get('@loading-tool-hide').scrollIntoView();
             cy.get('@loading-tool-hide').click();
@@ -45,7 +45,7 @@ skipOn(Cypress.env('run_area') === 'CI', () => {
             cy.get('#testcase_6').should('be.visible');
             cy.get('#testcase_8').scrollIntoView();
             cy.get('#testcase_8').should('be.visible');
-            // Close all
+            //  Close all
             cy.get('.loading-tools-hide').first().click();
             cy.get('#testcase_1').scrollIntoView();
             cy.get('#testcase_1').should('not.be.visible');

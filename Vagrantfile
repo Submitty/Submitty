@@ -47,6 +47,9 @@ def gen_script(machine_name, worker: false, base: false)
       if no_submissions
         setup_cmd += ' --no_submissions'
       end
+      if ON_CI
+        setup_cmd += ' --ci'
+      end
     end
   else
     setup_cmd += 'install_success_from_cloud.sh'
@@ -130,9 +133,9 @@ Vagrant.configure(2) do |config|
   arch = `uname -m`.chomp
   arm = arch == 'arm64' || arch == 'aarch64'
   apple_silicon = Vagrant::Util::Platform.darwin? && (arm || (`sysctl -n machdep.cpu.brand_string`.chomp.start_with? 'Apple M'))
-  
+  use_prebuilt_version = !ENV.fetch('PREBUILT_VERSION', '').empty?
   custom_box = ENV.has_key?('VAGRANT_BOX') 
-  base_box = ENV.has_key?('BASE_BOX') || apple_silicon || arm
+  base_box = ENV.has_key?('BASE_BOX') || ENV.has_key?('FROM_SCRATCH') || apple_silicon || arm
   # The time in seconds that Vagrant will wait for the machine to boot and be accessible.
   config.vm.boot_timeout = 600
 
@@ -165,6 +168,9 @@ Vagrant.configure(2) do |config|
         override.vm.box = base_boxes[:base]
       else
         config.ssh.username = 'root'
+        if use_prebuilt_version
+          override.vm.box_version = ENV.fetch('PREBUILT_VERSION')
+        end
       end
     end
 

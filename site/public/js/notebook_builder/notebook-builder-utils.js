@@ -32,7 +32,7 @@ async function uploadFile(file, g_id, directory) {
         console.error(result.message);
 
         if (result.data && Array.isArray(result.data)) {
-            result.data.forEach(msg => console.error(msg));
+            result.data.forEach((msg) => console.error(msg));
         }
     }
 }
