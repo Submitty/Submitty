@@ -1121,13 +1121,23 @@ class HomeworkView extends AbstractView {
         // If its not git checkout
         $can_download = !$gradeable->isVcs();
 
-        $current_graded_version = -1;
+        $finished_grading_version = 0;
+        $ta_grading_in_progress_version = 0;
+        $display_same_as_graded = true;
         $active_same_as_graded = true;
         if ($active_version_number !== 0 || $display_version !== 0) {
-            if ($graded_gradeable->hasTaGradingInfo() && $graded_gradeable->isTaGradingComplete()) {
-            // if ($graded_gradeable->hasTaGradingInfo()){
-                $current_graded_version = $graded_gradeable->getTaGradedGradeable()->getGradedVersion();
-                $active_same_as_graded = $current_graded_version === $active_version_number;
+            if ($graded_gradeable->hasTaGradingInfo()) {
+                // TA grading is done
+                if($graded_gradeable->isTaGradingComplete()){
+                    $finished_grading_version = $graded_gradeable->getTaGradedGradeable()->getGradedVersion();
+                    $display_same_as_graded = $finished_grading_version === $display_version;
+                    $active_same_as_graded = $finished_grading_version === $active_version_number;
+                // TA Grading in progress, get first version number
+                } else {
+                    $ta_grading_in_progress_version = $graded_gradeable->getTaGradedGradeable()->getGradedVersion(false);
+                    $display_same_as_graded = $ta_grading_in_progress_version === $display_version;
+                    $active_same_as_graded = $ta_grading_in_progress_version === $active_version_number;
+                }
             }
         }
 
@@ -1161,11 +1171,13 @@ class HomeworkView extends AbstractView {
             'can_change_submissions' => $gradeable->isStudentSubmit(),
             'can_see_all_versions' => $gradeable->isStudentSubmit(),
             'active_same_as_graded' => $active_same_as_graded,
+            'display_same_as_graded' => $display_same_as_graded,
             'ta_grades_incomplete' => $gradeable->isTaGrading() && $gradeable->isTaGradeReleased() && !$graded_gradeable->isTaGradingComplete(),
             'csrf_token' => $this->core->getCsrfToken(),
             'date_time_format' => $this->core->getConfig()->getDateTimeFormat()->getFormat('gradeable_with_seconds'),
             'after_ta_open' => $gradeable->getGradeStartDate() < $this->core->getDateTimeNow(),
-            'current_graded_version' => $current_graded_version
+            'ta_finished_grading_version' => $finished_grading_version,
+            'ta_grading_in_progress_version' => $ta_grading_in_progress_version
         ]);
 
         $this->core->getOutput()->addInternalJs('confetti.js');

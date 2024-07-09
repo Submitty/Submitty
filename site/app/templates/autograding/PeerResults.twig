@@ -78,7 +78,7 @@ function switch_feedback_modes() {
                     {% if peer_score >= peer_max %}
                         onclick="addConfetti();" style="cursor:pointer;"
                     {% endif %}>
-                    {{ Badge.render(peer_score, peer_max, false) }}
+                    {{ Badge.render(peer_score, peer_max, false, true) }}
                     <h4>Peer Grading Total</h4>
                 </div>
             </div>
@@ -120,7 +120,7 @@ function switch_feedback_modes() {
 {%- macro renderManyPeerResults(component, num_decimals) -%}
     <div class="box grade-results">
         <div class="no-border-box-badge">
-            {{ Badge.render(component.total_score, component.points_possible, component.extra_credit) }}
+            {{ Badge.render(component.total_score, component.points_possible, component.extra_credit, true) }}
         </div>
         <div class="no-border-box-info" style="width:100%">
             <h4>
@@ -167,7 +167,7 @@ function switch_feedback_modes() {
 {%- macro renderFewPeerResults(component, peer_aliases, ordered_graders, num_decimals) -%}
     <div class="box grade-results">
         <div class="no-border-box-badge">
-            {{ Badge.render(component.total_score, component.points_possible, component.extra_credit) }}
+            {{ Badge.render(component.total_score, component.points_possible, component.extra_credit, true) }}
         </div>
         <div class="no-border-box-info" style="width:100%">
             <h4>

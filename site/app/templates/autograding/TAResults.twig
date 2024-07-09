@@ -9,21 +9,23 @@ $( document ).ready(function() {
         $("#gradeInquiryBoxSection").show();
         $("#ShowGradeInquiryButton").hide();
     }
+    {% if not active_same_as_graded %}
+        $(".ta-results-box").css('background-color', '#d9534f')
+    {% endif %}
 });
 </script>
 
 {% if not been_ta_graded %}
     <br>
-    <h3>This assignment has not been graded yet</h3>
+    <h3>This assignment has not been graded yet, please contact an instructor/grader.</h3>
 {% elseif not grading_complete %}
     <br>
-    <h3>Grading not complete, please contact an instructor/grader</h3>
+    <h3>Grading not complete, please contact an instructor/grader.</h3>
 {% else %}
     <div class="sub">
-
         {% if not active_same_as_graded %}
-            <h3>The version you have selected to be graded above does not match the version graded by your TA/instructor, please contact TA/instructor if necessary to resolve the problem.</h3>
             <br>
+            <h3>The version you have selected to be graded above does not match the version graded by your TA/instructor, please contact TA/instructor if necessary to resolve the problem.</h3>
         {% endif %}
 
         {% if ta_components | length > 0 %}
@@ -31,15 +33,19 @@ $( document ).ready(function() {
             <div class="box submission-page-total-header">
                 <div class="box-title-total key_to_click" tabindex="0">
 
-                    {{ Badge.render(ta_score, ta_max, false) }}
-                    <h4>TA / Instructor Grading Total For Version #{{ ta_graded_version }}</h4>
+                    {{ Badge.render(ta_score, ta_max, false, active_same_as_graded) }}
+                    <h4>TA / Instructor Grading Total 
+                    {% if not active_same_as_graded %}
+                        For Version #{{ ta_graded_version }}
+                    {% endif %}
+                    </h4>
                 </div>
             </div>
             {# /TA/Instructor Manual total #}
 
             {# TA Component boxes #}
             {% for component in ta_components %}
-                {{ TAResultsFunctions.renderComponent(component, false, num_decimals) }}
+                {{ TAResultsFunctions.renderComponent(component, false, num_decimals, active_same_as_graded) }}
             {% endfor %}
         {% endif %}
 
@@ -108,14 +114,16 @@ $( document ).ready(function() {
         </div>
         {# Overview #}
         {# /Component boxes #}
-    {% if is_grade_inquiry_yet_to_start %}
-        <i>Grade Inquiries will start from</i> <b>{{ grade_inquiry_start_date|date(date_time_format)  }}</b>
-    {% elseif grade_inquiry_available %}
-        <i>Grade inquiries are due by</i> <b>{{ grade_inquiry_due_date|date(date_time_format)  }}</b>
-        <div id="ShowGradeInquiryButton">
-            <button type="button" title="Open Grade Inquiry" onclick="$('#gradeInquiryBoxSection').show();$([document.documentElement, document.body]).animate({scrollTop: $('#gradeInquiryBoxSection').offset().top}, 1000);$(this).hide()" style="margin-right:10px;" class="btn btn-default key_to_click" tabindex="0">Open Grade Inquiry</button>
-        </div>
-    {% elseif is_grade_inquiry_ended %}
-        <i>Grade inquiries closed on</i> <b>{{ grade_inquiry_due_date|date(date_time_format)  }}</b>
+    {% if active_same_as_graded %}
+        {% if is_grade_inquiry_yet_to_start %}
+            <i>Grade Inquiries will start from</i> <b>{{ grade_inquiry_start_date|date(date_time_format)  }}</b>
+        {% elseif grade_inquiry_available %}
+            <i>Grade inquiries are due by</i> <b>{{ grade_inquiry_due_date|date(date_time_format)  }}</b>
+            <div id="ShowGradeInquiryButton">
+                <button type="button" title="Open Grade Inquiry" onclick="$('#gradeInquiryBoxSection').show();$([document.documentElement, document.body]).animate({scrollTop: $('#gradeInquiryBoxSection').offset().top}, 1000);$(this).hide()" style="margin-right:10px;" class="btn btn-default key_to_click" tabindex="0">Open Grade Inquiry</button>
+            </div>
+        {% elseif is_grade_inquiry_ended %}
+            <i>Grade inquiries closed on</i> <b>{{ grade_inquiry_due_date|date(date_time_format)  }}</b>
+        {% endif %}
     {% endif %}
 {% endif %}
