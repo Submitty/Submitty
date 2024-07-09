@@ -267,3 +267,8 @@ function newDiscussionRender(discussion) {
         $('#gradeInquiryBoxSection').html(discussion).hide().fadeIn('slow');
     }
 }
+
+$(document).ready(() => {
+    loadDraft();
+    onReady();
+});
