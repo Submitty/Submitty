@@ -1,4 +1,5 @@
 describe('TA grading hotkey testing', () => {
+
     after(() => {
         cy.login();
         cy.visit(['sample', 'gradeable', 'grading_homework', 'update?nav_tab=2']);
