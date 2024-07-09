@@ -64,14 +64,14 @@ class GradeOverrideController extends AbstractController {
         if ($team != null && $team->getSize() > 1) {
             if ($option == 0) {
                 $this->core->getQueries()->updateGradeOverride($_POST['user_id'], $gradeable_id, $_POST['marks'], $_POST['comment']);
-                $this->getOverriddenGrades($gradeable_id);
+                return $this->getOverriddenGrades($gradeable_id);
             }
             elseif ($option == 1) {
                 $team_member_ids = explode(", ", $team->getMemberList());
                 for ($i = 0; $i < count($team_member_ids); $i++) {
                     $this->core->getQueries()->updateGradeOverride($team_member_ids[$i], $gradeable_id, $_POST['marks'], $_POST['comment']);
                 }
-                $this->getOverriddenGrades($gradeable_id);
+                return $this->getOverriddenGrades($gradeable_id);
             }
             else {
                 $team_member_ids = explode(", ", $team->getMemberList());
@@ -92,7 +92,7 @@ class GradeOverrideController extends AbstractController {
         }
         else {
             $this->core->getQueries()->updateGradeOverride($_POST['user_id'], $gradeable_id, $_POST['marks'], $_POST['comment']);
-            $this->getOverriddenGrades($gradeable_id);
+            return $this->getOverriddenGrades($gradeable_id);
         }
     }
 }
