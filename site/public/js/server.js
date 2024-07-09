@@ -1355,7 +1355,7 @@ function refreshOnResponseOverriddenGrades(json) {
     }
     else {
         json['data']['users'].forEach((elem) => {
-            const delete_button = `<a onclick="deleteOverriddenGrades('${elem['user_id']}', '${json['data']['gradeable_id']}');"><i class='fas fa-trash'></i></a>`;
+            const delete_button = `<a onclick="deleteOverriddenGrades('${elem['user_id']}');"><i class='fas fa-trash'></i></a>`;
             const bits = [`<tr><td class="align-left">${elem['user_id']}`, elem['user_givenname'], elem['user_familyname'], elem['marks'], elem['comment'], `${delete_button}</td></tr>`];
             $('#grade-override-table').append(bits.join('</td><td class="align-left">'));
         });
@@ -1364,8 +1364,8 @@ function refreshOnResponseOverriddenGrades(json) {
     }
 }
 
-function deleteOverriddenGrades(user_id, g_id) {
-    const url = buildCourseUrl(['grade_override', g_id, 'delete']);
+function deleteOverriddenGrades(user_id) {
+    const url = buildCourseUrl(['grade_override', $('#g_id').val(), 'delete']);
     const confirm = window.confirm('Are you sure you would like to delete this entry?');
     if (confirm) {
         $.ajax({

@@ -82,7 +82,7 @@ class GradeOverrideController extends AbstractController {
                 }
                 $popup_html = $this->core->getOutput()->renderTwigTemplate(
                     "admin/users/MoreGradeOverrides.twig",
-                    ['g_id' => $_POST['g_id'], 'member_list' => $team_members]
+                    ['member_list' => $team_members]
                 );
                 return $this->core->getOutput()->renderJsonSuccess([
                     'is_team' => true,

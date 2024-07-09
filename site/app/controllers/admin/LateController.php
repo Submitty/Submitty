@@ -270,7 +270,7 @@ class LateController extends AbstractController {
                     }
                     $popup_html = $this->core->getOutput()->renderTwigTemplate(
                         "admin/users/MoreExtensions.twig",
-                        ['g_id' => $_POST['g_id'], 'member_list' => $team_members]
+                        ['member_list' => $team_members]
                     );
                     return MultiResponse::JsonOnlyResponse(
                         JsonResponse::getSuccessResponse(['is_team' => true, 'popup' => $popup_html])
