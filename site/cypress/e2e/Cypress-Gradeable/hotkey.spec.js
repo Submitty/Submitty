@@ -65,5 +65,5 @@ describe('TA grading hotkey testing', () => {
         cy.get('#remap-1').should('not.contain', 'Unassigned');
         cy.get('#remap-2').should('not.contain', 'Unassigned');
     });
-    
+
 });
