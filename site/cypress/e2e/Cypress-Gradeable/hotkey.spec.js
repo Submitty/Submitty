@@ -1,5 +1,4 @@
 describe('TA grading hotkey testing', () => {
-
     after(() => {
         cy.login();
         cy.visit(['sample', 'gradeable', 'grading_homework', 'update?nav_tab=2']);
@@ -66,5 +65,4 @@ describe('TA grading hotkey testing', () => {
         cy.get('#remap-1').should('not.contain', 'Unassigned');
         cy.get('#remap-2').should('not.contain', 'Unassigned');
     });
-
 });
