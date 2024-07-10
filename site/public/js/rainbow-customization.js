@@ -822,12 +822,12 @@ $(document).ready(() => {
                 else {
                     displaySuccessMessage('Manual Customization uploaded successfully');
                     if (manual_customization_exists) {
-                        $('#customization-options').show();
+                        $('#ask_which_customization').show();
                         $('#manual_customization').prop('checked', true);
                         $('#gui_customization').prop('checked', false);
                     }
                     else {
-                        $('#customization-options').hide();
+                        $('#ask_which_customization').hide();
                         $('#manual_customization').prop('checked', false);
                         $('#gui_customization').prop('checked', true);
                     }

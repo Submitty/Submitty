@@ -56,7 +56,8 @@
 
 /* stylelint-disable-next-line selector-id-pattern */
 #save_status_container {
-    display: inline-block;
+    display: flex;
+    align-items: center;
     width: 100%;
     background-color: var(--standard-hover-light-gray);
     border: none;
@@ -228,5 +229,6 @@ hr {
 }
 
 #btn-build-customization {
-    border: none; /* Remove the default border */
+    border: none;
+    margin-right: 20px;
 }

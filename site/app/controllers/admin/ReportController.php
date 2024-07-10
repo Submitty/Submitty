@@ -770,7 +770,6 @@ class ReportController extends AbstractController {
 
         // Place in queue
         file_put_contents($path, $job_json);
-        file_put_contents('/var/local/submitty/courses/s24/sample/rainbow_grades/works.json', $job_json);
 
         // Send a success response
         return new MultiResponse(
@@ -786,22 +785,14 @@ class ReportController extends AbstractController {
         if (empty($_FILES) || !isset($_FILES['config_upload'])) {
             $msg = 'Upload failed: No file to upload';
             $this->core->addErrorMessage($msg);
-            return new MultiResponse(
-                JsonResponse::getErrorResponse($msg),
-                null,
-                new RedirectResponse($redirect_url)
-            );
+            return JsonResponse::getErrorResponse($msg);
         }
 
         $upload = $_FILES['config_upload'];
         if (!isset($upload['tmp_name']) || trim($upload['tmp_name']) === '') {
             $msg = 'Upload failed: Empty tmp name for file';
             $this->core->addErrorMessage($msg);
-            return new MultiResponse(
-                JsonResponse::getErrorResponse($msg),
-                null,
-                new RedirectResponse($redirect_url)
-            );
+            return JsonResponse::getErrorResponse($msg);
         }
 
         $rainbow_grades_dir = FileUtils::joinPaths($this->core->getConfig()->getCoursePath(), "rainbow_grades");
@@ -814,11 +805,7 @@ class ReportController extends AbstractController {
         if (!copy($upload['tmp_name'], $destination_path)) {
             $msg = 'Upload failed: Could not copy file';
             $this->core->addErrorMessage($msg);
-            return new MultiResponse(
-                JsonResponse::getErrorResponse($msg),
-                null,
-                new RedirectResponse($redirect_url)
-            );
+            return JsonResponse::getErrorResponse($msg);
         }
 
         $manual_customization_exists =  file_exists($destination_path);
@@ -826,14 +813,10 @@ class ReportController extends AbstractController {
         $msg = 'Rainbow Grades Customization uploaded';
         $this->core->addSuccessMessage($msg);
 
-        return new MultiResponse(
-            JsonResponse::getSuccessResponse([
-                'customization_path' => $rainbow_grades_dir,
-                'manual_customization_exists' => $manual_customization_exists
-            ]),
-            null,
-            new RedirectResponse($redirect_url)
-        );
+        return JsonResponse::getSuccessResponse([
+            'customization_path' => $rainbow_grades_dir,
+            'manual_customization_exists' => $manual_customization_exists
+        ]);
     }
 
 
@@ -901,7 +884,6 @@ class ReportController extends AbstractController {
         // Extract the value from $_POST
         $selectedValue = $_POST['selected_value'] ?? null;
 
-        // Handle invalid data
         if (!isset($selectedValue) || trim($selectedValue) === '') {
             $msg = 'Invalid request: No selected value provided.';
             return JsonResponse::getErrorResponse($msg);
