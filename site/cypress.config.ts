@@ -1,5 +1,5 @@
 import { defineConfig } from 'cypress';
-import { cypressBrowserPermissionsPlugin } from 'cypress-browser-permissions'
+import { cypressBrowserPermissionsPlugin } from 'cypress-browser-permissions';
 import cypressPlugins from './cypress/plugins/index.js';
 import fs = require('fs');
 import path = require('path');
@@ -41,12 +41,12 @@ export default defineConfig({
         projectId: 'es51qa',
     },
     env: {
-        "browserPermissions": {
-            "notifications": "allow",
-            "geolocation": "allow",
-            "camera": "block",
-            "microphone": "block",
-            "images": "allow"
+        'browserPermissions': {
+            notifications: 'allow',
+            geolocation: 'allow',
+            camera: 'block',
+            microphone: 'block',
+            images: 'allow'
         },
     },
 });
