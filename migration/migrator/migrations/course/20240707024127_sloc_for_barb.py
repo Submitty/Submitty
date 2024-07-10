@@ -18,7 +18,7 @@ def up(config, database, semester, course):
         ALTER TABLE autograding_metrics
         ADD COLUMN IF NOT EXISTS source_lines_of_code integer;
         ALTER TABLE autograding_metrics
-        ADD CONSTRAINT sloc_non_negative CHECK (source_line_of_code >= 0);
+        ADD CONSTRAINT sloc_non_negative CHECK (source_lines_of_code >= 0);
     """)
 
 def down(config, database, semester, course):
