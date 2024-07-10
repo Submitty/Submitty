@@ -64,7 +64,8 @@ fi
 # FORCE CORRECT TIME SKEW
 # This may happen on a development virtual machine
 # SEE GITHUB ISSUE #7885 - https://github.com/Submitty/Submitty/issues/7885
-if [[[ "${VAGRANT}" == 1 ] || [ "${UTM}" == 1 ]] && [ "${CI}" == 0 ]]; then
+
+if [[( "${VAGRANT}" == 1  ||  "${UTM}" == 1 ) &&  "${CI}" == 0 ]]; then
     sudo service ntp stop
     sudo ntpd -gq
     sudo service ntp start

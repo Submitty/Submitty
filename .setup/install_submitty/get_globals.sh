@@ -16,6 +16,10 @@ if [ -d "${THIS_DIR}/../.utm" ]; then
     UTM=1
 fi
 
+CI=0
+if [ -f "${THIS_DIR}/../.github_actions_ci_flag" ]; then
+    CI=1
+fi
 
 SUBMITTY_REPOSITORY=$(jq -r '.submitty_repository' "${CONF_DIR}/submitty.json")
 SUBMITTY_INSTALL_DIR=$(jq -r '.submitty_install_dir' "${CONF_DIR}/submitty.json")
@@ -67,6 +71,7 @@ export THIS_DIR
 export CONF_DIR
 export VAGRANT
 export UTM
+export CI
 export SUBMITTY_REPOSITORY
 export SUBMITTY_INSTALL_DIR
 export WORKER
@@ -77,7 +82,7 @@ export SUBMITTY_DATA_DIR
 export COURSE_BUILDERS_GROUP
 export NUM_UNTRUSTED
 export FIRST_UNTRUSTED_UID
-export FIRST_UNTRISTED_GID
+export FIRST_UNTRUSTED_GID
 export DAEMON_USER
 export DAEMON_GROUP
 export DAEMON_UID
