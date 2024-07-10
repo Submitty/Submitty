@@ -383,6 +383,7 @@
         $('#admin-gradeable-edit-peers-form').on('blur', ":text.add_user_ids", function() {
             const grader_id = $("#admin-gradeable-edit-peers-title").text().substr(18);
             checkNewStudentsValid(grader_id, $(this), valid_students, false);
+            self_grading = grader_id === $(this).val();
             updateSubmitButton(valid_grader, valid_students, false, false, "#admin-gradeable-edit-peers-submit", "#submit-error", self_grading);
         });
         $('#admin-gradeable-edit-peers-form').on('focus blur', '#remove_grader', function() {
@@ -400,6 +401,7 @@
         $('#admin-gradeable-add-peers-form').on('blur', ':text.add_user_ids', function() {
             const grader_id = $(":text#new_peer_grader").val();
             checkNewStudentsValid(grader_id, $(this), valid_students, true);
+            self_grading = grader_id === $(this).val();
             updateSubmitButton(valid_grader, valid_students, true, false, "#admin-gradeable-add-peers-submit", "#submit-error2", self_grading);
         });
     });
