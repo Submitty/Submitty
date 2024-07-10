@@ -16,7 +16,7 @@ def up(config, database, semester, course):
     """
     database.execute("""
         ALTER TABLE autograding_metrics
-        ADD COLUMN IF NOT EXISTS source_line_of_code integer;
+        ADD COLUMN IF NOT EXISTS source_lines_of_code integer;
         ALTER TABLE autograding_metrics
         ADD CONSTRAINT sloc_non_negative CHECK (source_line_of_code >= 0);
     """)
