@@ -297,8 +297,7 @@ class HomeworkView extends AbstractView {
      * Render the daylight savings days banner
      * @return string
      */
-
-    public function renderDaylightSavingsMessage(){
+    public function renderDaylightSavingsMessage() {
         $date = new \DateTime();
         $future_date = clone $date;
         $future_date->modify('+7 days');
@@ -306,7 +305,6 @@ class HomeworkView extends AbstractView {
         $past_date->modify('-7 days');
         // format("I") returns whether the given date is in daylight savings
         $daylight_message_required = ($future_date->format("I") !== $past_date->format("I"));
-        
         return $this->core->getOutput()->renderTwigTemplate("submission/homework/DaylightSavingsMessage.twig", [
             "daylight" => $daylight_message_required
         ]);
