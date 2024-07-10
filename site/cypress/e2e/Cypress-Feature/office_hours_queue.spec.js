@@ -1,3 +1,5 @@
+import { isPermissionAllowed } from "cypress-browser-permissions";
+
 const queueName = 'Cypress Office Hour Queue 1';
 const queueName_random = 'Cypress Office Hour Queue Random';
 const queueName1 = 'Cypress Office Hour Queue 2';
@@ -243,6 +245,9 @@ describe('test office hours queue', () => {
         disableQueue();
     });
     it('Enabling push and sound notifications as Instructor', () => {
+        // Ensure notifications are allowed
+        expect(isPermissionAllowed('notifications')).to.be.true;
+
         cy.login('instructor');
         enableQueue();
         cy.visit(['sample', 'office_hours_queue']);
