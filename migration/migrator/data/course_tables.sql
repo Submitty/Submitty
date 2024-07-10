@@ -714,16 +714,7 @@ CREATE TABLE public.course_materials (
     hidden_from_students boolean,
     priority double precision NOT NULL,
     url text,
-    title character varying(255),
-    uploaded_by character varying(255) DEFAULT NULL::character varying,
-    uploaded_date timestamp with time zone,
-    last_edit_by character varying(255) DEFAULT NULL::character varying,
-    last_edit_date timestamp with time zone,
-    CONSTRAINT check_dates CHECK (
-        (uploaded_date IS NOT NULL AND last_edit_date IS NULL) OR 
-        (uploaded_date IS NULL AND last_edit_date IS NULL) OR 
-        (uploaded_date IS NOT NULL AND uploaded_date <= last_edit_date)
-    )
+    title character varying(255)
 );
 
 
@@ -1568,7 +1559,6 @@ CREATE TABLE public.polls (
     poll_id integer NOT NULL,
     name text NOT NULL,
     question text NOT NULL,
-    status text,
     release_date date NOT NULL,
     image_path text,
     question_type character varying(35) DEFAULT 'single-response-multiple-correct'::character varying,
@@ -2695,22 +2685,6 @@ CREATE TRIGGER late_day_extension_change AFTER INSERT OR DELETE OR UPDATE ON pub
 --
 
 CREATE TRIGGER late_days_allowed_change AFTER INSERT OR DELETE OR UPDATE ON public.late_days FOR EACH ROW EXECUTE PROCEDURE public.late_days_allowed_change();
-
-
---
--- Name: course_materials course_materials_last_edit_by_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
---
-
-ALTER TABLE ONLY public.course_materials
-    ADD CONSTRAINT course_materials_last_edit_by_fkey FOREIGN KEY (last_edit_by) REFERENCES public.users(user_id);
-
-
---
--- Name: course_materials course_materials_uploaded_by_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
---
-
-ALTER TABLE ONLY public.course_materials
-    ADD CONSTRAINT course_materials_uploaded_by_fkey FOREIGN KEY (uploaded_by) REFERENCES public.users(user_id);
 
 
 --
