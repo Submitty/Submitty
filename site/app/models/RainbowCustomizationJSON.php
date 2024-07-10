@@ -38,7 +38,7 @@ class RainbowCustomizationJSON extends AbstractModel {
 
     // The order of allowed_display and allowed_display_description has to match
     const allowed_display = ['grade_summary', 'grade_details', 'exam_seating', 'section',
-        'messages', 'warning', 'final_grade', 'manual_grade', 'final_cutoff', 'instructor_notes'];
+        'messages', 'warning', 'final_grade', 'final_cutoff', 'instructor_notes'];
 
     const allowed_display_description = [
         "Display a column(row) for each gradeable bucket on the syllabus.", //grade_summary
@@ -48,7 +48,6 @@ class RainbowCustomizationJSON extends AbstractModel {
         "Display the optional text message at the top of the page.", //messages
         "not used", //warning
         "Configure cutoffs and display the student's final term letter grade.", //final_grade
-        "Manually assign final grades to specific students.", //manual_grade
         "Display the histogram of average overall grade and count of students with each final term letter grade.", //final_cutoff
         "Optional message for specific students that are only visible on the instructor gradebook, these messages are never displayed to students." //instructor_notes
     ];

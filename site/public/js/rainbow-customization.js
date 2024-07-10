@@ -689,6 +689,11 @@ function setCustomizationItemVisibility(elem) {
     else {
         $(cust_item_id).hide();
     }
+
+    // manual grading is dependent on final grade cutoffs
+    if (checkbox_name === 'final_grade') {
+        $('#manual-grading').toggle();
+    }
 }
 
 $(document).ready(() => {
@@ -736,7 +741,7 @@ $(document).ready(() => {
      * Configure visibility handler for all customization items other than benchmark percents
      * Visibility is controlled by whether the corresponding boxes are selected in the display area
      */
-    const dropdown_checkboxes = ['final_grade', 'messages', 'section', 'manual_grade'];
+    const dropdown_checkboxes = ['final_grade', 'messages', 'section'];
     $('#display input').each(function () {
         if (dropdown_checkboxes.includes(this.value)) {
             // Set the initial visibility on load
