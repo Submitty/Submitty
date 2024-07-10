@@ -20,7 +20,7 @@ function select_gradeable() {
     cy.get('#pageContainer1').should('be.visible');
 }
 
-function pdf_buttons(student=false) {
+function pdf_buttons(student = false) {
     cy.get('[data-testid="save-pdf-btn"]').should('be.visible');
     cy.get('[data-testid="clear-pdf-btn"]').should('be.visible');
     if (!student) {
@@ -115,5 +115,4 @@ describe('Test cases for PDFs access', () => {
             minimum_pdf_access(gradeable_id);
         });
     });
-
 });
