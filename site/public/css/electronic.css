@@ -967,9 +967,31 @@ tr.is_publish {
     padding: 4px;
 }
 
+.ta-grading-setting-list td.button-cell {
+    display: flex;
+    justify-content: center;
+}
+
 .remap-button {
     width: 100%;
     text-align: center;
+}
+
+.hotkeys-title-buttons {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-top: 10px;
+    margin-bottom: 10px;
+}
+
+.hotkeys-buttons {
+    display: flex;
+    gap: 10px;
+}
+
+.hotkeys-title-buttons h2 {
+    margin: 0;
 }
 
 /* Gradeable */
