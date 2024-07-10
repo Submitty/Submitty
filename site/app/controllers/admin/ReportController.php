@@ -590,35 +590,6 @@ class ReportController extends AbstractController {
     }
 
 
-//    #[Route("/courses/{_semester}/{_course}/reports/rainbow_grades_customizationnn", methods: ["POST"])]
-//    public function generateCustomizationnn() {
-//        // Check if this is an AJAX request
-//        if (!empty($_SERVER['HTTP_X_REQUESTED_WITH']) && strtolower($_SERVER['HTTP_X_REQUESTED_WITH']) == 'xmlhttprequest') {
-//            // Build a new model, pull in defaults for the course
-//            $customization = new RainbowCustomization($this->core);
-//            $customization->buildCustomization();
-//
-//            if (isset($_POST["json_string"])) {
-//                // Handle user input (the form) being submitted
-//                try {
-//                    $customization->processForm();
-//                    // Send response back to JS
-//                    die("success");
-//                }
-//                catch (Exception $e) {
-//                    // Handle exception and send error response
-//                    die("error");
-//                }
-//            }
-//            else {
-//                die("error: no json_string provided");
-//            }
-//        }
-//        else {
-//            die("error: not an AJAX request");
-//        }
-//    }
-
     #[Route("/courses/{_semester}/{_course}/reports/rainbow_grades_customizationnn", methods: ["POST"])]
     public function generateCustomizationnn(): void {
         // Check if this is an AJAX request
@@ -713,42 +684,6 @@ class ReportController extends AbstractController {
         }
     }
 
-
-
-//
-//    #[Route("/courses/{_semester}/{_course}/reports/build_form", methods: ['POST'])]
-//    public function executeBuildForm() {
-//        $this->BuildForm();
-//
-//        // Send a success response
-//        return new MultiResponse(
-//            JsonResponse::getSuccessResponse(['status' => 'success']),
-//            null
-//        );
-//    }
-//
-//
-//    public function BuildForm() {
-//        // Configure json to go into jobs queue
-//        $job_json = (object) [];
-//        $job_json->job = 'RunAutoRainbowGrades';
-//        $job_json->semester = $this->core->getConfig()->getTerm();
-//        $job_json->course = $this->core->getConfig()->getCourse();
-//
-//        // Encode
-//        $job_json = json_encode($job_json, JSON_PRETTY_PRINT);
-//
-//        // Create path to new jobs queue json
-//        $path = '/var/local/submitty/daemon_job_queue/auto_rainbow_' .
-//            $this->core->getConfig()->getTerm() .
-//            '_' .
-//            $this->core->getConfig()->getCourse() .
-//            '.json';
-//
-//        // Place in queue
-//        file_put_contents($path, $job_json);
-//        file_put_contents('/var/local/submitty/courses/s24/sample/rainbow_grades/works.json', $job_json);
-//    }
 
     #[Route("/courses/{_semester}/{_course}/reports/build_form", methods: ['POST'])]
     public function executeBuildForm(): MultiResponse {
