@@ -677,7 +677,6 @@ function setCustomizationItemVisibility(elem) {
         final_grade: '#final_grade_cutoffs',
         messages: '#cust_messages',
         section: '#section_labels',
-        manual_grade: '#manual-grading',
     };
     const checkbox_name = elem.value;
     const cust_item_id = checkbox_to_cust_item[checkbox_name];
@@ -692,7 +691,12 @@ function setCustomizationItemVisibility(elem) {
 
     // manual grading is dependent on final grade cutoffs
     if (checkbox_name === 'final_grade') {
-        $('#manual-grading').toggle();
+        if (is_checked) {
+            $('#manual-grading').show();
+        }
+        else {
+            $('#manual-grading').hide();
+        }
     }
 }
 
