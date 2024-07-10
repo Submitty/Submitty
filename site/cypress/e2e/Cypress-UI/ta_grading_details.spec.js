@@ -22,5 +22,11 @@ describe('TA Grading details page', () => {
         cy.get('[data-testid="expand-all-sections"]').should('contain', 'Expand All Sections');
         cy.get('[data-testid="expand-all-sections"]').click();
         cy.get('[data-testid="grade-button"]').should('be.visible');
+        // randomly re-assign will be present only for rotating section
+        cy.visit(['sample', 'gradeable', 'grading_homework_team_pdf', 'grading', 'details']);
+        cy.get('[data-testid="randomly-reassign-teams"]').should('contain', 'Randomly Re-Assign Teams to Rotating Sections');
+        cy.get('[data-testid="export-team-members"]').should('contain', 'Export Teams Members');
+        cy.visit(['sample', 'gradeable', 'grading_team_homework', 'grading', 'details']);
+        cy.get('[data-testid="export-team-members"]').should('contain', 'Export Teams Members');
     });
 });
