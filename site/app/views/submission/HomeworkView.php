@@ -56,7 +56,6 @@ class HomeworkView extends AbstractView {
             $late_days = LateDays::fromUser($this->core, $this->core->getUser());
             $return .= $this->renderLateDayMessage($late_days, $gradeable, $graded_gradeable);
             $return .= $this->renderDaylightSavingsMessage();
-            return $return;
         }
         if (!$gradeable->canStudentSubmit() && $gradeable->getSubmissionOpenDate() < $this->core->getDateTimeNow()) {
             $return .= $this->renderSubmissionsClosedBox();
