@@ -9,5 +9,5 @@ describe('Visual testing', () => {
             capture: 'viewport',
             clip: { x: 0, y: 0, width: 1100, height: 1050 },
         });
-    })
-})
+    });
+});
