@@ -41,12 +41,12 @@ export default defineConfig({
         projectId: 'es51qa',
     },
     env: {
-        'browserPermissions': {
+        browserPermissions: {
             notifications: 'allow',
             geolocation: 'allow',
             camera: 'block',
             microphone: 'block',
-            images: 'allow'
+            images: 'allow',
         },
     },
 });
