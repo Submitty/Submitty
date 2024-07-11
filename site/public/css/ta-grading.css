@@ -2,11 +2,6 @@
     min-height: 0 !important;
 }
 
-.hotkeys-buttons {
-    display: flex;
-    gap: 10px;
-}
-
 .hotkeys-button {
     width: 125px;
 }
