@@ -82,15 +82,6 @@
         Plotly.newPlot('myDiv4', data, layout, {displayModeBar: false,displaylogo: false});
 
     </script>
-    <div id="mySmallDiv4">
-        <script>
-            document.write('<b>Mean: </b>'+{{ overall_average.getAverageScore() }}+'&nbsp&nbsp&nbsp&nbsp'+'<b>Mode: </b>'
-            +mode+'&nbsp&nbsp&nbsp&nbsp'+'<b>Median: </b>'+median+'&nbsp&nbsp&nbsp&nbsp'+ '<b>Maximum: </b>'+maxM+
-            '&nbsp&nbsp&nbsp&nbsp'+'<b>Minimum: </b>'+minM+'&nbsp&nbsp&nbsp&nbsp'+'<b>Standard Deviation: </b>'+
-            {{ overall_average.getStandardDeviation()  }}+'&nbsp&nbsp&nbsp&nbsp'+'<b>Range: </b>'+rangeM);
-        </script>
-    </div>
-
     <br />
     Version Conflicts: {{ histograms['VerConf'] }}
     <br />

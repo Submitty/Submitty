@@ -190,7 +190,7 @@
                 <div class="page-content" id="page_1_content">{{ include('grading/electronic/ta_status/StatusComponentAverages.twig')   }}</div>
             {% endif %}
 
-            {% if (overall_average != null and overall_average.getCount() != 0) or component_averages|length != 0 %}
+            {% if component_averages|length != 0 %}
                 <div class="page-content" id="page_2_content">{{ include('grading/electronic/ta_status/StatusManualGradingHistogram.twig')  }}</div>
             {% endif %}
 
