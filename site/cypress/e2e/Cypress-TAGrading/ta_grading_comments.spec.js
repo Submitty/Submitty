@@ -2,7 +2,7 @@ describe('Test cases for TA grading page', () => {
     it('Grader should be able to add and remove overall comments', () => {
         cy.login('instructor');
         cy.visit(['sample', 'gradeable', 'grading_homework', 'grading', 'grade?who_id=jKjodWaRdEV9pBb&sort=id&direction=ASC']);
-        cy.get('[data-testid="grading_rubric_btn"]').click();
+        cy.get('[data-testid="grading-rubric-btn"]').click();
         cy.get('[data-testid="overall-comment-instructor"]').should('have.value', '');
         cy.get('[data-testid="overall-comment-instructor"]').type('Comment1');
         cy.get('[data-testid="overall-comment-instructor"]').blur();
