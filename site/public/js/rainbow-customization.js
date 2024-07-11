@@ -283,7 +283,7 @@ function getTableData(table) {
     const tableMap = {
         0: 'plagiarism-table-body',
         1: 'manual-grading-table-body',
-    }
+    };
     const tableBody = document.getElementById(tableMap[table]);
     const rows = tableBody.getElementsByTagName('tr');
 
