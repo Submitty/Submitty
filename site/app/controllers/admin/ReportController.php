@@ -777,10 +777,11 @@ class ReportController extends AbstractController {
         header("Content-disposition: attachment; filename=\"" . basename($file_path) . "\"");
 
         readfile($file_path);
+        exit;
         // Do not add return type, for example if you add :MultiResponse
         // php-stan will start yelling that missing return statement
         // if we add return statement, it will be written into the downloaded file as json
-        // then it will break the Make remove_json_comments, so no linting is OK here. 
+        // then it will break the Make remove_json_comments, so no linting is OK here.
     }
 
     #[Route("/courses/{_semester}/{_course}/reports/rainbow_grades_customization/gui_download", methods: ["GET"])]
@@ -804,6 +805,7 @@ class ReportController extends AbstractController {
         header("Content-disposition: attachment; filename=\"" . basename($file_path) . "\"");
 
         readfile($file_path);
+        exit;
         // Do not add return type, for example if you add :MultiResponse
         // php-stan will start yelling that missing return statement
         // if we add return statement, it will be written into the downloaded file as json
