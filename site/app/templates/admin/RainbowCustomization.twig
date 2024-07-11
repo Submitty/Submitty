@@ -165,23 +165,17 @@
                         <span>USER ID:</span>
                         <input class="option-input" type="text" name="manual_grading_user_id" id="manual_grading_user_id">
                     </label>
-                    <label for="manual_grading_grade">
-                        <span>Final Grade:</span>
-                        <select name="manual_grading_grade" id="manual_grading_grade">
-                            <option disabled selected value> -- select an option -- </option>
-                            <option value="A">A</option>
-                            <option value="A-">A-</option>
-                            <option value="B+">B+</option>
-                            <option value="B">B</option>
-                            <option value="B-">B-</option>
-                            <option value="C+">C+</option>
-                            <option value="C">C</option>
-                            <option value="C-">C-</option>
-                            <option value="D+">D+</option>
-                            <option value="D">D</option>
-                            <option value="F">F</option>
-                        </select>
-                    </label>
+<label for="manual_grading_grade">
+    <span>Final Grade:</span>
+    <select name="manual_grading_grade" id="manual_grading_grade">
+        <option disabled selected value> -- select an option -- </option>
+        {% set grades = ["A", "A-", "B+", "B", "B-", "C+", "C", "C-", "D+", "D", "F"] %}
+        {% for grade in grades %}
+            <option value="{{ grade }}">{{ grade }}</option>
+        {% endfor %}
+    </select>
+</label>
+
                     <label for="manual_grading_note">
                         <span>Note:</span>
                         <input class="option-input note-input" type="text" name="manual_grading_note" id="manual_grading_note">
