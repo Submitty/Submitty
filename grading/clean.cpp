@@ -296,7 +296,7 @@ bool isNumber(const std::string &str) {
   {
     return false;
   }
-  std::string stripped_str = isolateAlphanumAndDot(str);
+  std::string stripped_str = isolateAlphanumAndNumberPunctuation(str);
   bool atLeastOneDigit = false;
   bool dotFound = false;
   for (char const &c : stripped_str) {
@@ -316,7 +316,7 @@ bool isNumber(const std::string &str) {
   return atLeastOneDigit;
 }
 
-std::string isolateAlphanumAndDot(const std::string &str) {
+std::string isolateAlphanumAndNumberPunctuation(const std::string &str) {
   std::string::const_iterator begin = str.begin();
   while (!isalnum(*begin) && !(*begin == '.')) {
     begin++;
