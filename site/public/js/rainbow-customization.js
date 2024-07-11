@@ -280,12 +280,11 @@ function getTableData(table) {
 
     const data = [];
 
-    const tableBody
-        = table === 0
-            ? document.getElementById('plagiarism-table-body')
-            : table === 1
-                ? document.getElementById('manual-grading-table-body')
-                : null;
+    const tableMap = {
+        0: 'plagiarism-table-body',
+        1: 'manual-grading-table-body',
+    }
+    const tableBody = document.getElementById(tableMap[table]);
     const rows = tableBody.getElementsByTagName('tr');
 
     for (let i = 0; i < rows.length; i++) {
