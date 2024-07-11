@@ -631,9 +631,11 @@ CREATE TABLE public.autograding_metrics (
     points integer NOT NULL,
     passed boolean NOT NULL,
     hidden boolean NOT NULL,
+    source_lines_of_code integer,
     CONSTRAINT elapsed_time_nonnegative CHECK ((elapsed_time >= (0)::double precision)),
     CONSTRAINT max_rss_size_nonnegative CHECK ((max_rss_size >= 0)),
-    CONSTRAINT metrics_user_team_id_check CHECK (((user_id IS NOT NULL) OR (team_id IS NOT NULL)))
+    CONSTRAINT metrics_user_team_id_check CHECK (((user_id IS NOT NULL) OR (team_id IS NOT NULL))),
+    CONSTRAINT sloc_non_negative CHECK ((source_lines_of_code >= 0))
 );
 
 
@@ -1559,7 +1561,6 @@ CREATE TABLE public.polls (
     poll_id integer NOT NULL,
     name text NOT NULL,
     question text NOT NULL,
-    status text,
     release_date date NOT NULL,
     image_path text,
     question_type character varying(35) DEFAULT 'single-response-multiple-correct'::character varying,
