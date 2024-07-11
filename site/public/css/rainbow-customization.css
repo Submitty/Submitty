@@ -77,7 +77,8 @@
 #save_status_buttons {
     display: flex;
     flex-direction: row;
-    margin-top: 10px;
+    margin-right: 10px;
+    border: none;
 }
 
 /* stylelint-disable-next-line selector-id-pattern */
@@ -230,5 +231,5 @@ hr {
 
 #btn-build-customization {
     border: none;
-    margin-right: 20px;
+    margin-right: 10px;
 }
