@@ -1,30 +1,30 @@
 {# Graph Setup for Manual Grading #}
 
-<div id="autograding-score-histogram" class="page-content">
+<div id="manual-grading-score-histogram" class="page-content">
     <br>
     <input style='width: auto' type='text' id='bucket-size-auto' name='bucket-val' value="" placeholder="Enter bucket size" />
-    <input name = "sub-auto" class="btn btn-primary key_to_click" tabindex="0" id="submit_bucket_auto" value="Submit Bucket Size for Auto" onclick="createNewBuckets(rangeA,buckets,xValue,yValue,xBuckets,mode,modeCount,maxA,minA)"/>
-    <div id="myDiv3"><!-- Plotly chart will be drawn inside this DIV --></div>
+    <input name = "sub-manual" class="btn btn-primary key_to_click" tabindex="0" id="submit_bucket_manual" value="Submit Bucket Size for Manual" onclick="createNewBuckets(rangeM,buckets,xValue,yValue,xBuckets,mode,modeCount,maxM,minM)"/>
+    <div id="myDiv4"><!-- Plotly chart will be drawn inside this DIV --></div>
     <script>
         var buckets = new Map();
         var buttonLayerHeight = 1.0;
         var ct = 0;
-        var maxA = 0;
-        var minA = {{ overall_total }} + 50;
+        var maxM = 0;
+        var minM = {{ overall_total }} + 50;
         var median = 0;
         var mode = 0;
         var modeCount = 0;
-        var rangeA = 0;
+        var rangeM = 0;
 
         var xValue = [];
         var yValue = [];
         var xBuckets = [];
 
-        xValue = [{{ histograms['bAuto'] | join(',') }}]
+        xValue = [{{ histograms['tTA'] | join(',') }}]
         xValue.sort((a, b) => a - b);
         if (xValue.length > 0) {
-            minA = xValue[0];
-            maxA = xValue[xValue.length - 1];
+            minM = xValue[0];
+            maxM = xValue[xValue.length - 1];
             let pivot = Math.floor((xValue.length - 1) / 2);
             if (xValue.length % 2 === 0) {
                 median = (xValue[pivot] + xValue[pivot+1]) / 2;
@@ -34,14 +34,14 @@
             }
         }
 
-        if (maxA!=0 && minA!=50) {
-            rangeA = maxA-minA;
+        if (maxM!=0 && minM!=50) {
+            rangeM = maxM-minM;
         }
 
-        mode = fillBucketsForRange(rangeA,buckets,xValue,yValue,xBuckets,mode,modeCount,maxA,minA);
+        mode = fillBucketsForRange(rangeM,buckets,xValue,yValue,xBuckets,mode,modeCount,maxM,minM);
 
-        if (minA==50 && maxA==0) {
-            minA=0;
+        if (minM==50 && maxM==0) {
+            minM=0;
         }
 
         var trace1 = {
@@ -79,15 +79,15 @@
             }
         };
 
-        Plotly.newPlot('myDiv3', data, layout, {displayModeBar: false,displaylogo: false});
+        Plotly.newPlot('myDiv4', data, layout, {displayModeBar: false,displaylogo: false});
 
     </script>
-    <div id="mySmallDiv3">
+    <div id="mySmallDiv4">
         <script>
-            document.write('<b>Mean: </b>'+{{ autograded_average.getAverageScore() }}+'&nbsp&nbsp&nbsp&nbsp'+'<b>Mode: </b>'
-            +mode+'&nbsp&nbsp&nbsp&nbsp'+'<b>Median: </b>'+median+'&nbsp&nbsp&nbsp&nbsp'+ '<b>Maximum: </b>'+maxA+
-            '&nbsp&nbsp&nbsp&nbsp'+'<b>Minimum: </b>'+minA+'&nbsp&nbsp&nbsp&nbsp'+'<b>Standard Deviation: </b>'+
-            {{ autograded_average.getStandardDeviation()  }}+'&nbsp&nbsp&nbsp&nbsp'+'<b>Range: </b>'+rangeA);
+            document.write('<b>Mean: </b>'+{{ overall_average.getAverageScore() }}+'&nbsp&nbsp&nbsp&nbsp'+'<b>Mode: </b>'
+            +mode+'&nbsp&nbsp&nbsp&nbsp'+'<b>Median: </b>'+median+'&nbsp&nbsp&nbsp&nbsp'+ '<b>Maximum: </b>'+maxM+
+            '&nbsp&nbsp&nbsp&nbsp'+'<b>Minimum: </b>'+minM+'&nbsp&nbsp&nbsp&nbsp'+'<b>Standard Deviation: </b>'+
+            {{ overall_average.getStandardDeviation()  }}+'&nbsp&nbsp&nbsp&nbsp'+'<b>Range: </b>'+rangeM);
         </script>
     </div>
 
