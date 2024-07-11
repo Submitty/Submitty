@@ -13,7 +13,7 @@ public class TestRunner {
     private static String TESTS_SUFFIX = "Test";
 
     /*
-    doc
+    doc test
     @param: relative name of the folder where the tests are
     @effects: runs all tests in folder ./$homework/test/ with JUnit
     */
