@@ -21,6 +21,17 @@
             })
         }
     </script>
+    <script>
+        document.addEventListener("DOMContentLoaded", function() {
+            const browserTime = Date.now();
+            const serverTime = {{ server_time|e('js') }} * 1000;
+            const timeDifference = serverTime - browserTime;
+            // Warn if time difference is greater than 2 minutes (120000 milliseconds)
+            if (Math.abs(timeDifference) > 120000) {
+                document.querySelector('#server-time-not-aligned').removeAttribute('hidden');
+            }
+        });
+    </script>
 
     {% for css_ref in css %}
     <link rel='stylesheet' type='text/css' href='{{ css_ref }}' />
@@ -30,6 +41,10 @@
     {% if use_mobile_viewport %}
       <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no" />
     {% endif %}
+
+    {% for audio_ref in audio %}
+    <audio preload id='{{ audio_ref[0] }}' src='{{ audio_ref[1] }}'></audio>
+    {% endfor %}
 
     {% for js_ref in js %}
     <script src='{{ js_ref }}'></script>
@@ -228,6 +243,10 @@
                 {{ system_message }}
             </div>
         {% endif %}
+        <div class="system-message warning" id="server-time-not-aligned" hidden>
+            Warning: The server time is not aligned with the browser time. 
+            Please check your system time settings.
+        </div>
         <div class="system-message warning" id="socket-server-system-message" hidden>
             Warning: Failed to connect to websocket server. This page will not dynamically update.
             Manually reload this page to see updates.{% if sysadmin_email is not empty %} Notify the

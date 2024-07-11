@@ -77,17 +77,18 @@
                     data-recent_submission="{{ cell.recent_submission }}"
                     data-version_submission="{{ cell.version_submission }}"
                     onkeyup="handle_input_keypress();"
-                    {% if viewing_inactive_version %}
+                    {% if viewing_inactive_version or is_grader_view %}
                         style="pointer-events:none;"
                     {% endif %}
                 >
                 </div>
-                <button type="button" id="codebox_{{ num_codeboxes }}_clear_button" class="btn btn-primary codebox-clear-reset"
-                    data-older_version = "{{ viewing_inactive_version ? true : false }}">
-                    {{ cell.initial_value == "" ? 'Clear' : 'Reset'}}
-                </button>
-
-                <button type="button" id="codebox_{{ num_codeboxes }}_recent_button" class="btn btn-primary codebox-clear-reset">Use Most Recent Submission</button>
+                {% if not is_grader_view %}
+                    <button type="button" id="codebox_{{ num_codeboxes }}_clear_button" class="btn btn-primary codebox-clear-reset"
+                        data-older_version = "{{ viewing_inactive_version ? true : false }}">
+                        {{ cell.initial_value == "" ? 'Clear' : 'Reset'}}
+                    </button>
+                    <button type="button" id="codebox_{{ num_codeboxes }}_recent_button" class="btn btn-primary codebox-clear-reset">Use Most Recent Submission</button>
+                {% endif %}
 
                 <script>
                     const config_{{ num_codeboxes }} = {};
@@ -112,9 +113,11 @@
                     if ({{ cell.rows }} > 0) {
                         var editor_{{ num_codeboxes }} = getLargeCodeMirror(document.getElementById("codebox_{{ num_codeboxes }}"), config_{{ num_codeboxes }});
                         editor_{{ num_codeboxes }}.setSize(null, rowsToPixels({{ cell.rows }}));
+                        $('#codebox_{{ num_codeboxes }}').addClass("large-mirror");
                     }
                     else {
                         var editor_{{ num_codeboxes }} = getSmallCodeMirror(document.getElementById("codebox_{{ num_codeboxes }}"), config_{{ num_codeboxes }});
+                        $('#codebox_{{ num_codeboxes }}').addClass("small-mirror");
                     }
 
                     {# Populate codebox and set state of buttons initially #}
@@ -124,7 +127,7 @@
                         document.getElementById("codebox_{{ num_codeboxes }}_recent_button").style.visibility = 'hidden';
                     {% else %}
                         setCodeBox("codebox_{{ num_codeboxes }}", "recent");
-                        document.getElementById("codebox_{{ num_codeboxes }}_clear_button").disabled = {{ viewing_inactive_version ? 'true' : 'false'}}
+                        document.getElementById("codebox_{{ num_codeboxes }}_clear_button").disabled = {{ viewing_inactive_version or is_grader_view ? 'true' : 'false'}}
                         document.getElementById("codebox_{{ num_codeboxes }}_recent_button").disabled = true;
                     {% endif %}
                 </script>
@@ -161,8 +164,8 @@
                                        name="multiple_choice_{{ num_multiple_choice }}"
                                        id="multiple_choice_{{ num_multiple_choice }}_{{ loop.index0 }}"
                                        value="{{ cell.choices[idx].value }}"
-                                       onclick="handle_input_keypress({{ viewing_inactive_version }});"
-                                       {% if viewing_inactive_version %}
+                                       onclick="handle_input_keypress({{ viewing_inactive_version or is_grader_view }});"
+                                       {% if viewing_inactive_version or is_grader_view %}
                                            disabled = "disabled"
                                        {% endif %}
                                 />
@@ -188,7 +191,7 @@
                                        name="multiple_choice_{{ num_multiple_choice }}"
                                        id="multiple_choice_{{ num_multiple_choice }}_{{ loop.index0 }}"
                                        value="{{ cell.choices[idx].value }}"
-                                       onclick="handle_input_keypress({{ viewing_inactive_version }});"
+                                       onclick="handle_input_keypress({{ viewing_inactive_version or is_grader_view }});"
                                 />
                                 {% include "misc/Markdown.twig" with {
                                     "content" : cell.choices[idx].description
@@ -199,13 +202,15 @@
                 </fieldset>
 
                 {# Create reset to recent submission button #}
-                <button type="button" id="mc_{{ num_multiple_choice }}_clear_button" class="btn btn-primary mc-clear">Clear</button>
-                <button type="button" id="mc_{{ num_multiple_choice }}_recent_button" class="btn btn-primary mc-recent">Use Most Recent Submission</button>
+                {% if not is_grader_view %}
+                    <button type="button" id="mc_{{ num_multiple_choice }}_clear_button" class="btn btn-primary mc-clear">Clear</button>
+                    <button type="button" id="mc_{{ num_multiple_choice }}_recent_button" class="btn btn-primary mc-recent">Use Most Recent Submission</button>
+                {% endif %}
                 <script>
                     $("multiple_choice_{{ num_multiple_choice }}_1").attr("disabled", true);
                     {# Populate checkboxes initially #}
                     {% if cell.recent_submission is defined %}
-                        setMultipleChoices("mc_field_{{ num_multiple_choice }}", {{ viewing_inactive_version }});
+                        setMultipleChoices("mc_field_{{ num_multiple_choice }}", {{ viewing_inactive_version or is_grader_view }});
                     {% endif %}
 
                     {# Configure initial state for the button #}
@@ -251,17 +256,19 @@
                         {% endif %}
                     {% endfor %}
                 {% endif %}
-                <button type="button" class="btn btn-primary
-                    sa-clear-reset" onclick="deleteFiles({{num_file_submissions}});"
-                    {% if viewing_inactive_version %}
-                        disabled = "disabled"
-                    {% endif %}>
-                    Clear
-                </button>
-                <button type="button" 
-                    onclick="populatePreviousFiles({{num_file_submissions}});"
-                    class="btn btn-primary mc-recent fs-recent">Use Most Recent Submission
-                </button>
+                {% if not is_grader_view %}
+                    <button type="button" class="btn btn-primary
+                        sa-clear-reset" onclick="deleteFiles({{num_file_submissions}});"
+                        {% if viewing_inactive_version %}
+                            disabled = "disabled"
+                        {% endif %}>
+                        Clear
+                    </button>
+                    <button type="button"
+                        onclick="populatePreviousFiles({{num_file_submissions}});"
+                        class="btn btn-primary mc-recent fs-recent">Use Most Recent Submission
+                    </button>
+                {% endif %}
             {% endif %}
 
         </div>
@@ -441,6 +448,9 @@
             {% if not viewing_inactive_version %}
                 initMaxNoFiles({{max_file_uploads}});
                 initializeDropZone("upload{{ index }}");
+                var part = "{{ index }}";
+                initializeDragAndDrop();
+                createArray(part);
             {% endif %}
         });
     </script>

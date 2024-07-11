@@ -50,7 +50,7 @@ $(document).ready(() => {
         time_24hr: true,
         dateFormat: 'Y-m-d',
         // eslint-disable-next-line no-unused-vars
-        onChange: function(selectedDates, dateStr, instance) {
+        onChange: function (selectedDates, dateStr, instance) {
             calculateLateDays(selectedDates[0]);
         },
     });
@@ -68,10 +68,10 @@ function updateLateDays(data) {
         data: fd,
         processData: false,
         contentType: false,
-        success: function() {
+        success: function () {
             window.location.reload();
         },
-        error: function() {
+        error: function () {
             window.alert('Something went wrong. Please try again.');
         },
     });
@@ -81,7 +81,7 @@ function updateLateDays(data) {
 // eslint-disable-next-line no-unused-vars
 function deleteLateDays(user_id, datestamp) {
     // Convert 'MM/DD/YYYY HH:MM:SS A' to 'MM/DD/YYYY'
-    //datestamp_mmddyy = datestamp.split(" ")[0];
+    // datestamp_mmddyy = datestamp.split(" ")[0];
     // eslint-disable-next-line no-undef
     const url = buildCourseUrl(['late_days', 'delete']);
     const confirm = window.confirm('Are you sure you would like to delete this entry?');
@@ -95,10 +95,10 @@ function deleteLateDays(user_id, datestamp) {
                 user_id: user_id,
                 datestamp: datestamp,
             },
-            success: function() {
+            success: function () {
                 window.location.reload();
             },
-            error: function() {
+            error: function () {
                 window.alert('Something went wrong. Please try again.');
             },
         });
@@ -119,10 +119,10 @@ function updateCacheBuildStatus(url, confirm_message, status) {
 
         $.ajax({
             url: url,
-            success: function() {
+            success: function () {
                 window.location.reload();
             },
-            error: function() {
+            error: function () {
                 window.alert('Something went wrong. Please try again.');
             },
         });

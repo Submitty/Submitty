@@ -17,6 +17,10 @@ class RainbowCustomization extends AbstractModel {
     /**/
     protected $core;
     private $bucket_counts = [];               // Keep track of how many items are in each bucket
+    /**
+     * @var int[]
+     */
+    private array $bucket_remove_lowest = [];               // get how many droplowest are in each bucket
     private $customization_data = [];
     private $has_error;
     private $error_messages;
@@ -67,6 +71,7 @@ class RainbowCustomization extends AbstractModel {
         foreach (self::syllabus_buckets as $bucket) {
             $this->customization_data[$bucket] = [];
             $this->bucket_counts[$bucket] = 0;
+            $this->bucket_remove_lowest[$bucket] = 0;
         }
 
         $gradeables = $this->core->getQueries()->getGradeableConfigs(null);
@@ -116,6 +121,8 @@ class RainbowCustomization extends AbstractModel {
                 if ($json_bucket->count > $this->bucket_counts[$bucket]) {
                     $this->bucket_counts[$bucket] = $json_bucket->count;
                 }
+
+                $this->bucket_remove_lowest[$bucket] = $json_bucket->remove_lowest ?? 0;
             }
         }
 
@@ -324,6 +331,13 @@ class RainbowCustomization extends AbstractModel {
         return $this->bucket_counts;
     }
 
+    /**
+     * @return int[]
+     */
+    public function getBucketRemoveLowest(): array {
+        return $this->bucket_remove_lowest;
+    }
+
     public function getCustomizationData() {
         return $this->customization_data;
     }
@@ -339,6 +353,7 @@ class RainbowCustomization extends AbstractModel {
     public function getMessages() {
         return !is_null($this->RCJSON) ? $this->RCJSON->getMessages() : [];
     }
+
 
     /**
      * Get display benchmarks
@@ -385,6 +400,36 @@ class RainbowCustomization extends AbstractModel {
             ];
     }
 
+    /**
+     * Get final grade cutoffs
+     *
+     * @return object An object which maps final grade cutoffs to the percentage (as a decimal) that is needed to
+     *                obtain that letter grade
+     */
+    public function getFinalCutoff() {
+        if (!is_null($this->RCJSON)) {
+            $percent_obj = $this->RCJSON->getFinalCutoff();
+
+            // If the RCJSON was found and it contains the final grade cutoff percent fields then return it
+            if ($percent_obj !== (object) []) {
+                return $percent_obj;
+            }
+        }
+
+        // Otherwise return a default final cutoff percent object
+        return (object) [
+                'A' => 93.0,
+                'A-' => 90.0,
+                'B+' => 87.0,
+                'B' => 83.0,
+                'B-' => 80.0,
+                'C+' => 77.0,
+                'C' => 73.0,
+                'C-' => 70.0,
+                'D+' => 67.0,
+                'D' => 60.0,
+            ];
+    }
 
     /**
      * Get display options
@@ -511,6 +556,12 @@ class RainbowCustomization extends AbstractModel {
         if (isset($form_json->benchmark_percent)) {
             foreach ($form_json->benchmark_percent as $key => $value) {
                 $this->RCJSON->addBenchmarkPercent((string) $key, $value);
+            }
+        }
+
+        if (isset($form_json->final_cutoff)) {
+            foreach ($form_json->final_cutoff as $key => $value) {
+                $this->RCJSON->addFinalCutoff((string) $key, $value);
             }
         }
 
