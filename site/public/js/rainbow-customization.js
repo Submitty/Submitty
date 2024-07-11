@@ -275,16 +275,17 @@ function getGradeableBuckets() {
  */
 function getTableData(table) {
     if (table !== 0 && table !== 1) {
-        console.log("table value invalid");
         return;
     }
 
     const data = [];
 
-    const tableBody =
-        table === 0 ? document.getElementById('plagiarism-table-body')
-        : table === 1 ? document.getElementById('manual-grading-table-body')
-        : null;
+    const tableBody
+        = table === 0
+            ? document.getElementById('plagiarism-table-body')
+            : table === 1
+                ? document.getElementById('manual-grading-table-body')
+                : null;
     const rows = tableBody.getElementsByTagName('tr');
 
     for (let i = 0; i < rows.length; i++) {
@@ -299,7 +300,8 @@ function getTableData(table) {
                 gradeable: secondInput,
                 penalty: parseFloat(thirdInput),
             });
-        } else if (table === 1) {
+        }
+        else if (table === 1) {
             data.push({
                 user: firstInput,
                 grade: secondInput,
