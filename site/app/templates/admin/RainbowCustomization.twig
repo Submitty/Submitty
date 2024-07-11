@@ -366,11 +366,10 @@ To remove a curve simply blank all boxes."></i>
             $(`#override-${gradeable_id}`).html(override.val());
         });
 
-        $("#plagiarism_user_id").autocomplete({
-            source: {{ student_full|raw }}
-        });
-        $("#manual_grading_user_id").autocomplete({
-            source: {{ student_full|raw }}
+        ["#plagiarism_user_id", "#manual_grading_user_id"].forEach(function(user_id) {
+            $(user_id).autocomplete({
+                source: {{ student_full|raw }}
+            });
         });
         var studentFullData = {{ student_full|raw }};
         var old_index;
