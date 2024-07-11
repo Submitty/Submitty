@@ -312,56 +312,99 @@ function getTableData(table) {
     return data;
 }
 
-function addToPlagiarismTable() {
-    const USERID = document.getElementById('plagiarism_user_id').value.trim();
-    const gradeable = document.getElementById('g_id').value.trim();
-    const penalty = document.getElementById('marks').value.trim();
-
-    // Check for empty fields
-    if (USERID === '' || gradeable === '' || penalty === '') {
-        alert('Please fill in all the fields.');
+/**
+ * Adds input data to plagiarism and manual grade tables
+ * @param {int} table
+ *      0 -> plagiarism table
+ *      1 -> manual grading table
+ */
+function addToTable(table) {
+    if (table !== 0 && table !== 1) {
         return;
     }
 
+    const tableMap = {
+        0: ['plagiarism-table-body', 'plagiarism_user_id', 'g_id', 'marks'],
+        1: ['manual-grading-table-body', 'manual_grading_user_id', 'manual_grading_grade', 'manual_grading_note'],
+    };
+
+    const firstInput = document.getElementById(tableMap[table][1]).value.trim();
+    const secondInput = document.getElementById(tableMap[table][2]).value.trim();
+    const thirdInput = document.getElementById(tableMap[table][3]).value.trim();
+
+    // Check whether input is allowed
     // eslint-disable-next-line no-undef
     const studentFullDataValues = studentFullData.map((item) => item.value);
-    if (!studentFullDataValues.includes(USERID)) {
-        alert('Invalid User ID. Please enter a valid one.');
-        return;
-    }
-
-    // Check for penalty
-    if (penalty > 1 || penalty < 0) {
-        alert('Penalty must be between 0 - 1');
-        return;
-    }
-
-    const tableBody = document.getElementById('plagiarism-table-body');
-
-    // Check for duplicate entries
+    const tableBody = document.getElementById(tableMap[table][0]);
     const rows = tableBody.getElementsByTagName('tr');
-    for (let i = 0; i < rows.length; i++) {
-        const row = rows[i];
-        const existingUSERID = row.cells[0].textContent.trim();
-        const existingGradeable = row.cells[1].textContent.trim();
+    switch (table) {
+        case 0: { // plagiarism table
+            if (firstInput === '' || secondInput === '' || thirdInput === '') {
+                alert('Please fill in all the fields.');
+                return;
+            }
+            if (!studentFullDataValues.includes(firstInput)) {
+                alert('Invalid User ID. Please enter a valid one.');
+                return;
+            }
+            if (thirdInput > 1 || thirdInput < 0) {
+                alert('Penalty must be between 0 - 1');
+                return;
+            }
 
-        if (USERID === existingUSERID && gradeable === existingGradeable) {
-            alert('Entry with the same Student ID and Gradeable already exists.');
-            return;
+            // Check for duplicate entries
+            for (let i = 0; i < rows.length; i++) {
+                const row = rows[i];
+                const existingFirstInput = row.cells[0].textContent.trim();
+                const existingSecondInput = row.cells[1].textContent.trim();
+
+                if (firstInput === existingFirstInput && secondInput === existingSecondInput) {
+                    alert('Entry with the same Student ID and Gradeable already exists.');
+                    return;
+                }
+            }
+            break;
+        }
+        case 1: { // manual grading table
+            if (firstInput === '' || secondInput === '') {
+                alert('Please fill in both user ID and final grade.');
+                return;
+            }
+            if (!studentFullDataValues.includes(firstInput)) {
+                alert('Invalid User ID. Please enter a valid one.');
+                return;
+            }
+            const allowed_grades = ['A', 'A-', 'B+', 'B', 'B-', 'C+', 'C', 'C-', 'D+', 'D', 'F'];
+            if (!allowed_grades.includes(secondInput)) {
+                alert('Grade must be one of the following: A, A-, B+, B, C+, C, C-, D+, D, F');
+                return;
+            }
+
+            // Check for duplicate entries
+            for (let i = 0; i < rows.length; i++) {
+                const row = rows[i];
+                const existingFirstInput = row.cells[0].textContent.trim();
+
+                if (firstInput === existingFirstInput) {
+                    alert('Entry with the same Student ID already exists.');
+                    return;
+                }
+            }
+            break;
         }
     }
 
     // Create a new row and cells
     const newRow = tableBody.insertRow();
 
-    const cellUSERID = newRow.insertCell();
-    cellUSERID.textContent = USERID;
+    const cellFirstInput = newRow.insertCell();
+    cellFirstInput.textContent = firstInput;
 
-    const cellGradeable = newRow.insertCell();
-    cellGradeable.textContent = gradeable;
+    const cellSecondInput = newRow.insertCell();
+    cellSecondInput.textContent = secondInput;
 
-    const cellPenalty = newRow.insertCell();
-    cellPenalty.textContent = penalty;
+    const cellThirdInput = newRow.insertCell();
+    cellThirdInput.textContent = thirdInput;
 
     const cellDelete = newRow.insertCell();
     const deleteLink = document.createElement('a');
@@ -374,77 +417,9 @@ function addToPlagiarismTable() {
     cellDelete.appendChild(deleteLink);
 
     // Clear the form fields
-    document.getElementById('plagiarism_user_id').value = '';
-    document.getElementById('g_id').value = '';
-    document.getElementById('marks').value = '';
-}
-
-function addToManualGradingTable() {
-    const USERID = document.getElementById('manual_grading_user_id').value.trim();
-    const grade = document.getElementById('manual_grading_grade').value.trim();
-    const note = document.getElementById('manual_grading_note').value.trim();
-
-    // Check for empty fields
-    if (USERID === '' || grade === '') {
-        alert('Please fill in both user ID and final grade.');
-        return;
-    }
-
-    // eslint-disable-next-line no-undef
-    const studentFullDataValues = studentFullData.map((item) => item.value);
-    if (!studentFullDataValues.includes(USERID)) {
-        alert('Invalid User ID. Please enter a valid one.');
-        return;
-    }
-
-    const allowed_grades = ['A', 'A-', 'B+', 'B', 'B-', 'C+', 'C', 'C-', 'D+', 'D', 'F'];
-
-    // Check for final grade
-    if (!allowed_grades.includes(grade)) {
-        alert('Grade must be one of the following: A, A-, B+, B, C+, C, C-, D+, D, F');
-        return;
-    }
-
-    const tableBody = document.getElementById('manual-grading-table-body');
-
-    // Check for duplicate entries
-    const rows = tableBody.getElementsByTagName('tr');
-    for (let i = 0; i < rows.length; i++) {
-        const row = rows[i];
-        const existingUSERID = row.cells[0].textContent.trim();
-
-        if (USERID === existingUSERID) {
-            alert('Entry with the same Student ID already exists.');
-            return;
-        }
-    }
-
-    // Create a new row and cells
-    const newRow = tableBody.insertRow();
-
-    const cellUSERID = newRow.insertCell();
-    cellUSERID.textContent = USERID;
-
-    const cellGrade = newRow.insertCell();
-    cellGrade.textContent = grade;
-
-    const cellNote = newRow.insertCell();
-    cellNote.textContent = note;
-
-    const cellDelete = newRow.insertCell();
-    const deleteLink = document.createElement('a');
-    const deleteIcon = document.createElement('i');
-    deleteIcon.className = 'fas fa-trash';
-    deleteLink.appendChild(deleteIcon);
-    deleteLink.onclick = function () {
-        deleteRow(this);
-    };
-    cellDelete.appendChild(deleteLink);
-
-    // Clear the form fields
-    document.getElementById('manual_grading_user_id').value = '';
-    document.getElementById('manual_grading_grade').value = '';
-    document.getElementById('manual_grading_note').value = '';
+    document.getElementById(tableMap[table][1]).value = '';
+    document.getElementById(tableMap[table][2]).value = '';
+    document.getElementById(tableMap[table][3]).value = '';
 }
 
 function deleteRow(button) {
