@@ -107,6 +107,10 @@ def main():
                 print('Failed to save configuration')
                 exit(1)
             w2 = subprocess.run(['sudo', 'launchctl', 'kickstart', '-k', 'system/com.apple.bootpd'])
+            if w2.returncode == 113:
+                w3 = subprocess.run(['sudo', 'launchctl', 'load' '-w', '/System/Library/LaunchDaemons/bootps.plist'])
+                if w3.returncode == 0:
+                    w2 = subprocess.run(['sudo', 'launchctl', 'kickstart', '-k', 'system/com.apple.bootpd'])
             if w2.returncode != 0:
                 print('Failed to restart Bootstrap service')
                 exit(1)
