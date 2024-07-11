@@ -756,7 +756,7 @@ class ReportController extends AbstractController {
 
 
     #[Route("/courses/{_semester}/{_course}/reports/rainbow_grades_customization/manual_download", methods: ["GET"])]
-    public function downloadRainbowConfig(): MultiResponse {
+    public function downloadRainbowConfig() {
         $rainbow_grades_dir = FileUtils::joinPaths($this->core->getConfig()->getCoursePath(), "rainbow_grades");
         $file_path = FileUtils::joinPaths($rainbow_grades_dir, 'manual_customization.json');
 
@@ -777,15 +777,14 @@ class ReportController extends AbstractController {
         header("Content-disposition: attachment; filename=\"" . basename($file_path) . "\"");
 
         readfile($file_path);
-        return new MultiResponse(
-            JsonResponse::getSuccessResponse('File downloaded successfully'),
-            null,
-            null
-        );
+        // Do not add return type, for example if you add :MultiResponse
+        // php-stan will start yelling that missing return statement
+        // if we add return statement, it will be written into the downloaded file as json
+        // then it will break the Make remove_json_comments, so no linting is OK here. 
     }
 
     #[Route("/courses/{_semester}/{_course}/reports/rainbow_grades_customization/gui_download", methods: ["GET"])]
-    public function downloadGUIRainbowConfig(): MultiResponse {
+    public function downloadGUIRainbowConfig() {
         $rainbow_grades_dir = FileUtils::joinPaths($this->core->getConfig()->getCoursePath(), "rainbow_grades");
         $file_path = FileUtils::joinPaths($rainbow_grades_dir, 'gui_customization.json');
 
@@ -805,11 +804,10 @@ class ReportController extends AbstractController {
         header("Content-disposition: attachment; filename=\"" . basename($file_path) . "\"");
 
         readfile($file_path);
-        return new MultiResponse(
-            JsonResponse::getSuccessResponse('File downloaded successfully'),
-            null,
-            null
-        );
+        // Do not add return type, for example if you add :MultiResponse
+        // php-stan will start yelling that missing return statement
+        // if we add return statement, it will be written into the downloaded file as json
+        // then it will break the Make remove_json_comments, so no linting is OK here.
     }
 
 
