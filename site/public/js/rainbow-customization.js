@@ -274,7 +274,8 @@ function getGradeableBuckets() {
  *      1 -> manual grading table
  */
 function getTableData(table) {
-    if (table !== 0 || table !== 1) {
+    if (table !== 0 && table !== 1) {
+        console.log("table value invalid");
         return;
     }
 
