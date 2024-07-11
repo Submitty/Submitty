@@ -267,26 +267,47 @@ function getGradeableBuckets() {
     return gradeables;
 }
 
-function getPlagiarism() {
-    const plagiarismData = [];
+/**
+ * Gets data to add to the JSON for the plagiarism and manual grade tables
+ * @param {int} table
+ *      0 -> plagiarism table
+ *      1 -> manual grading table
+ */
+function getTableData(table) {
+    if (table !== 0 || table !== 1) {
+        return;
+    }
 
-    const tableBody = document.getElementById('plagiarism-table-body');
+    const data = [];
+
+    const tableBody =
+        table === 0 ? document.getElementById('plagiarism-table-body')
+        : table === 1 ? document.getElementById('manual-grading-table-body')
+        : null;
     const rows = tableBody.getElementsByTagName('tr');
 
     for (let i = 0; i < rows.length; i++) {
         const row = rows[i];
-        const user = row.cells[0].textContent;
-        const gradeable = row.cells[1].textContent;
-        const penalty = parseFloat(row.cells[2].textContent);
+        const firstInput = row.cells[0].textContent;
+        const secondInput = row.cells[1].textContent;
+        const thirdInput = row.cells[2].textContent;
 
-        plagiarismData.push({
-            user: user,
-            gradeable: gradeable,
-            penalty: penalty,
-        });
+        if (table === 0) {
+            data.push({
+                user: firstInput,
+                gradeable: secondInput,
+                penalty: parseFloat(thirdInput),
+            });
+        } else if (table === 1) {
+            data.push({
+                user: firstInput,
+                grade: secondInput,
+                note: thirdInput,
+            });
+        }
     }
 
-    return plagiarismData;
+    return data;
 }
 
 function addToPlagiarismTable() {
@@ -354,28 +375,6 @@ function addToPlagiarismTable() {
     document.getElementById('plagiarism_user_id').value = '';
     document.getElementById('g_id').value = '';
     document.getElementById('marks').value = '';
-}
-
-function getManualGrades() {
-    const manualGradeData = [];
-
-    const tableBody = document.getElementById('manual-grading-table-body');
-    const rows = tableBody.getElementsByTagName('tr');
-
-    for (let i = 0; i < rows.length; i++) {
-        const row = rows[i];
-        const user = row.cells[0].textContent;
-        const grade = row.cells[1].textContent;
-        const note = row.cells[2].textContent;
-
-        manualGradeData.push({
-            user: user,
-            grade: grade,
-            note: note,
-        });
-    }
-
-    return manualGradeData;
 }
 
 function addToManualGradingTable() {
@@ -549,8 +548,8 @@ function buildJSON() {
         section: getSection(),
         gradeables: getGradeableBuckets(),
         messages: getMessages(),
-        plagiarism: getPlagiarism(),
-        manual_grade: getManualGrades(),
+        plagiarism: getTableData(0),
+        manual_grade: getTableData(1),
     };
 
     ret = JSON.stringify(ret);
