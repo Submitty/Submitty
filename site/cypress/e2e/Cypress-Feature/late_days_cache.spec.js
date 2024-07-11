@@ -195,10 +195,11 @@ describe('Test cases involving late day cache updates', () => {
                 cy.get('#user_id').type(user_id);
                 cy.get('#late-days').type(2, { force: true });
                 cy.get('#extensions-form')
-                    .find('a')
-                    .contains('Submit')
-                    .should('exist')
-                    .click();
+                    .find('a').as('ext-form-link');
+
+                cy.get('@ext-form-link').contains('Submit');
+                cy.get('@ext-form-link').should('exist');
+                cy.get('@ext-form-link').click();
             }
             checkStudentsInCache();
             cy.logout();
