@@ -272,6 +272,15 @@ Vagrant.configure(2) do |config|
 
   config.vm.provision :shell, :inline => " sudo timedatectl set-timezone America/New_York", run: "once"
 
+
+  # to use the command below, first install the vagrant plugin:
+  #
+  #   vagrant plugin install vagrant-timezone
+  #
+  if Vagrant.has_plugin?("vagrant-timezone")
+    config.timezone.value = "America/New_York"
+  end
+
   if ARGV.include?('ssh')
     config.ssh.username = 'root'
     config.ssh.password = 'vagrant'
