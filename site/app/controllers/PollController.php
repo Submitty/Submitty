@@ -515,7 +515,7 @@ class PollController extends AbstractController {
         $em = $this->core->getCourseEntityManager();
         $repo = $em->getRepository(Poll::class);
         /** @var Poll|null */
-        $poll = $repo->findByIDWithOptions($poll_id);
+        $poll = $repo->findByID($poll_id);
         if ($poll === null) {
             return JsonResponse::getFailResponse("Invalid Poll ID");
         }
