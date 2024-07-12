@@ -2,6 +2,8 @@ from datetime import datetime, timedelta, timezone
 from zoneinfo import ZoneInfo
 from unittest import TestCase
 from unittest.mock import patch
+import unittest
+import tzlocal
 
 from submitty_utils import dateutils
 
@@ -19,18 +21,16 @@ class TestDateUtils(TestCase):
 
     @patch(
         "submitty_utils.dateutils.get_current_time",
-        return_value=datetime(2016, 10, 14, 22, 11, 32, 0, tzinfo=ZoneInfo("America/New_York"))
+        return_value=datetime(
+            2016, 10, 14, 22, 11, 32, 0, tzinfo=ZoneInfo("America/New_York")
+        ),
     )
     def test_write_submitty_date_default(self, current_time):
         date = dateutils.write_submitty_date()
         self.assertTrue(current_time.called)
         self.assertEqual("2016-10-14 22:11:32-0400", date)
 
-    @patch(
-        "submitty_utils.dateutils.get_timezone",
-        return_value=ZoneInfo("America/New_York"),
-    )
-    def test_write_submitty_date(self, _get_timezone):
+    def test_write_submitty_date(self):
         testcases = (
             (
                 datetime(2020, 6, 12, 3, 21, 30, tzinfo=ZoneInfo("UTC")),
@@ -44,8 +44,14 @@ class TestDateUtils(TestCase):
                 datetime(2020, 6, 12, 3, 21, 30, 123, tzinfo=ZoneInfo("UTC")),
                 "2020-06-12 03:21:30+0000",
             ),
-            (datetime(2020, 6, 12, 3, 21, 30), "2020-06-12 03:21:30-0400"),
-            (datetime(2020, 12, 12, 3, 21, 30), "2020-12-12 03:21:30-0500"),
+            (
+                datetime(2020, 6, 12, 3, 21, 30, tzinfo=ZoneInfo("America/New_York")),
+                "2020-06-12 03:21:30-0400",
+            ),
+            (
+                datetime(2020, 12, 12, 3, 21, 30, tzinfo=ZoneInfo("America/New_York")),
+                "2020-12-12 03:21:30-0500",
+            ),
         )
         for testcase in testcases:
             with self.subTest(i=testcase[0]):
@@ -53,11 +59,7 @@ class TestDateUtils(TestCase):
                     testcase[1], dateutils.write_submitty_date(testcase[0])
                 )
 
-    @patch(
-        "submitty_utils.dateutils.get_timezone",
-        return_value=ZoneInfo("America/New_York"),
-    )
-    def test_write_submitty_date_microseconds(self, _get_timezone):
+    def test_write_submitty_date_microseconds(self):
         testcases = (
             (
                 datetime(2020, 6, 12, 3, 21, 30, tzinfo=ZoneInfo("UTC")),
@@ -67,7 +69,12 @@ class TestDateUtils(TestCase):
                 datetime(2020, 6, 12, 3, 21, 30, 123500, tzinfo=ZoneInfo("UTC")),
                 "2020-06-12 03:21:30.123+0000",
             ),
-            (datetime(2020, 6, 12, 3, 21, 30, 211500), "2020-06-12 03:21:30.211-0400"),
+            (
+                datetime(
+                    2020, 6, 12, 3, 21, 30, 211500, tzinfo=ZoneInfo("America/New_York")
+                ),
+                "2020-06-12 03:21:30.211-0400",
+            ),
         )
         for testcase in testcases:
             with self.subTest(i=testcase[0]):
@@ -137,13 +144,9 @@ class TestDateUtils(TestCase):
 
         self.assertEqual(f"ERROR: unexpected date format {date}", str(cm.exception))
 
-    @patch(
-        "submitty_utils.dateutils.get_timezone",
-        return_value=ZoneInfo("America/New_York"),
-    )
-    def test_read_submitty_date_no_timezone(self, _get_timezone):
+    def test_read_submitty_date_no_timezone(self):
         parsed_date = dateutils.read_submitty_date("2020-06-12 03:21:30")
-        expected_date = datetime(2020, 6, 12, 3, 21, 30, tzinfo=ZoneInfo("America/New_York"))
+        expected_date = datetime(2020, 6, 12, 3, 21, 30, tzinfo=tzlocal.get_localzone())
 
         self.assertEqual(expected_date, parsed_date)
 
@@ -171,13 +174,12 @@ class TestDateUtils(TestCase):
 
     @patch(
         "submitty_utils.dateutils.get_current_time",
-        return_value=datetime(2016, 10, 14, 22, 11, 32, 0, tzinfo=ZoneInfo("America/New_York"))
+        return_value=datetime(
+            2016, 10, 14, 22, 11, 32, 0, tzinfo=tzlocal.get_localzone()
+        ),
     )
-    @patch(
-        "submitty_utils.dateutils.get_timezone",
-        return_value=ZoneInfo("America/New_York"),
-    )
-    def test_parse_datetime(self, _current_time, _get_timezone):
+    def test_parse_datetime(self, _current_time):
+        local_zone = tzlocal.get_localzone()
         testcases = (
             (
                 "2016-10-14 22:11:32+0200",
@@ -185,35 +187,35 @@ class TestDateUtils(TestCase):
             ),
             (
                 "2016-10-14 22:11:32",
-                datetime(2016, 10, 14, 22, 11, 32, 0, timezone(timedelta(hours=-4))),
+                datetime(2016, 10, 14, 22, 11, 32, 0, tzinfo=local_zone),
             ),
             (
                 "2016-10-14",
-                datetime(2016, 10, 14, 23, 59, 59, 0, timezone(timedelta(hours=-4))),
+                datetime(2016, 10, 14, 23, 59, 59, 0, tzinfo=local_zone),
             ),
             (
                 "+1 days",
-                datetime(2016, 10, 15, 23, 59, 59, 0, timezone(timedelta(hours=-4))),
+                datetime(2016, 10, 15, 23, 59, 59, 0, tzinfo=local_zone),
             ),
             (
                 "+3 day",
-                datetime(2016, 10, 17, 23, 59, 59, 0, timezone(timedelta(hours=-4))),
+                datetime(2016, 10, 17, 23, 59, 59, 0, tzinfo=local_zone),
             ),
             (
                 "+0 days",
-                datetime(2016, 10, 14, 23, 59, 59, 0, timezone(timedelta(hours=-4))),
+                datetime(2016, 10, 14, 23, 59, 59, 0, tzinfo=local_zone),
             ),
             (
                 "-1 days",
-                datetime(2016, 10, 13, 23, 59, 59, 0, timezone(timedelta(hours=-4))),
+                datetime(2016, 10, 13, 23, 59, 59, 0, tzinfo=local_zone),
             ),
             (
                 "-10 day",
-                datetime(2016, 10, 4, 23, 59, 59, 0, timezone(timedelta(hours=-4))),
+                datetime(2016, 10, 4, 23, 59, 59, 0, tzinfo=local_zone),
             ),
             (
                 "+1 day at 10:30:00",
-                datetime(2016, 10, 15, 10, 30, 0, 0, timezone(timedelta(hours=-4))),
+                datetime(2016, 10, 15, 10, 30, 0, 0, tzinfo=local_zone),
             ),
             (
                 datetime(2016, 10, 4, 23, 59, 59, 0, timezone(timedelta(hours=+1))),
@@ -221,7 +223,7 @@ class TestDateUtils(TestCase):
             ),
             (
                 datetime(2016, 10, 4, 23, 59, 59, 0),
-                datetime(2016, 10, 4, 23, 59, 59, 0, timezone(timedelta(hours=-4))),
+                datetime(2016, 10, 4, 23, 59, 59, 0, tzinfo=local_zone),
             ),
         )
 
@@ -264,3 +266,7 @@ class TestDateUtils(TestCase):
             with self.subTest(testcase[1]):
                 mock.today.return_value = testcase[0]
                 self.assertEqual(testcase[1], dateutils.get_current_semester())
+
+
+if __name__ == "__main__":
+    unittest.main()
