@@ -31,7 +31,7 @@
             </button>
             {{ self.renderPanelPositionSelector('autograding_results') }}
         </span>
-        <span class="grade-panel" id="grading_rubric_btn">
+        <span class="grade-panel" id="grading_rubric_btn" data-testid="grading-rubric-btn">
             <button title="Show/Hide Grading Rubric (Press G)"
                     class="invisible-btn key_to_click"
                     tabindex="0"
@@ -40,7 +40,7 @@
             </button>
             {{ self.renderPanelPositionSelector('grading_rubric') }}
         </span>
-        <span class="grade-panel" id="submission_browser_btn">
+        <span class="grade-panel" id="submission_browser_btn" data-testid="submission-browser-btn">
             <button title="Show/Hide Submission and Results Browser (Press O)"
                     class="invisible-btn key_to_click"
                     tabindex="0"
@@ -61,7 +61,7 @@
             {{ self.renderPanelPositionSelector('student_info') }}
             </span>
         {% endif %}
-        <span class="grade-panel" id="solution_ta_notes_btn">
+        <span class="grade-panel" id="solution_ta_notes_btn" data-testid="solution-ta-notes-btn">
             <button title="Show Solution and TA notes"
                     class="invisible-btn key_to_click"
                     tabindex="0"
@@ -71,7 +71,7 @@
             {{ self.renderPanelPositionSelector('solution_ta_notes') }}
         </span>
         {% if isPeerPanel %}
-            <span class="grade-panel" id="peer_info_btn">
+            <span class="grade-panel" id="peer_info_btn" data-testid="peer-info-btn">
                 <button title="Show/Hide Peer Information (Press P)"
                         class="invisible-btn key_to_click"
                         tabindex="0"
@@ -105,7 +105,7 @@
             </span>
         {% endif %}
         {% if is_notebook %}
-            <span class="grade-panel" id="notebook-view-btn">
+            <span class="grade-panel" id="notebook-view-btn" data-testid="notebook-view-btn">
                 <button title="Open student's view of their notebook gradeable"
                         class="invisible-btn"
                         tabindex="0"
