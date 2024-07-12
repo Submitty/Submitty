@@ -1399,7 +1399,7 @@ function deleteOverriddenGrades(user_id, option) {
 }
 
 function confirmOverride(option, isDelete) {
-    $('.popup-form').css('display', 'none');
+    $('.popup-form').hide();
     if (isDelete) {
         deleteOverriddenGrades($('#user_id').val(), option);
         $('#user_id').val('');
@@ -1412,10 +1412,10 @@ function confirmOverride(option, isDelete) {
 }
 
 function overridePopup(json) {
-    $('.popup-form').css('display', 'none');
-    const form = $('#more_override_popup');
+    $('.popup-form').hide();
+    const form = $('#override_team_popup');
     form[0].outerHTML = json['data']['popup'];
-    $('#more_override_popup').css('display', 'block');
+    $('#override_team_popup').css('display', 'block');
     $('#team-override-cancel').focus();
 }
 

@@ -239,24 +239,24 @@ class LateController extends AbstractController {
                     }
                 }
             }
-            if (($simple_late_user == null && intval($late_days) == 0) || $no_change) {
+            if (($simple_late_user === null && intval($late_days) === 0) || $no_change) {
                 $this->core->addNoticeMessage("User already has " . $late_days . " extensions; no changes made");
                 return MultiResponse::JsonOnlyResponse(JsonResponse::getSuccessResponse());
             }
 
             $team = $this->core->getQueries()->getTeamByGradeableAndUser($_POST['g_id'], $_POST['user_id']);
             //0 is for single submission, 1 is for team submission
-            $option = isset($_POST['option']) ? $_POST['option'] : -1;
-            if ($team != null && $team->getSize() > 1) {
-                if ($option == 0) {
+            $option = $_POST['option'] ?? -1;
+            if ($team !== null && $team->getSize() > 1) {
+                if (intval($option) === 0) {
                     $this->core->getQueries()->updateExtensions($_POST['user_id'], $_POST['g_id'], $late_days, $reason_for_exception);
                     $this->core->addSuccessMessage("Extensions have been updated");
                     return MultiResponse::JsonOnlyResponse(JsonResponse::getSuccessResponse());
                 }
-                elseif ($option == 1) {
+                elseif (intval($option) === 1) {
                     $team_member_ids = explode(", ", $team->getMemberList());
-                    for ($i = 0; $i < count($team_member_ids); $i++) {
-                        $this->core->getQueries()->updateExtensions($team_member_ids[$i], $_POST['g_id'], $late_days, $reason_for_exception);
+                    foreach ($team_member_ids as $member_id) {
+                        $this->core->getQueries()->updateExtensions($member_id, $_POST['g_id'], $late_days, $reason_for_exception);
                     }
                     $this->core->addSuccessMessage("Extensions have been updated");
                     return MultiResponse::JsonOnlyResponse(JsonResponse::getSuccessResponse());
@@ -264,12 +264,12 @@ class LateController extends AbstractController {
                 else {
                     $team_member_ids = explode(", ", $team->getMemberList());
                     $team_members = [];
-                    for ($i = 0; $i < count($team_member_ids); $i++) {
-                        $team_members[$team_member_ids[$i]] = $this->core->getQueries()->getUserById($team_member_ids[$i])->getDisplayedGivenName() . " " .
-                            $this->core->getQueries()->getUserById($team_member_ids[$i])->getDisplayedFamilyName();
+                    foreach ($team_member_ids as $member_id) {
+                        $member = $this->core->getQueries()->getUserById($member_id);
+                        $team_members[$member_id] = $member->getDisplayedGivenName() . " " . $member->getDisplayedFamilyName();
                     }
                     $popup_html = $this->core->getOutput()->renderTwigTemplate(
-                        "admin/users/MoreExtensions.twig",
+                        "admin/users/ExtensionsTeamPrompt.twig",
                         ['member_list' => $team_members]
                     );
                     return MultiResponse::JsonOnlyResponse(

@@ -57,7 +57,7 @@ const giveExtensions = (gradeable_name) => {
         .contains('Submit')
         .click();
     if (gradeable_name.includes('_team')) {
-        cy.get('#more_extension_popup', { timeout: 20000 });
+        cy.get('#extension_team_popup', { timeout: 20000 });
         cy.get('#apply-to-all').click();
     }
 };
@@ -377,7 +377,7 @@ describe('Test warning messages for team gradeable', () => {
         cy.get('body').then((body) => {
             if (body.find('#extensions-table').length > 0) {
                 cy.wrap(body).find('#Delete').first().click();
-                cy.get('#more_extension_popup', { timeout: 20000 });
+                cy.get('#extension_team_popup', { timeout: 20000 });
                 cy.get('#apply-to-all').click();
             }
         });
