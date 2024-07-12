@@ -52,7 +52,7 @@
                 {% endif %}
                 {% if grade_inquiry_only_button %}
                 <button class="btn btn-default" id="inquiryButton" onclick="change_inquiry()">
-                    {{ inquiry_status ? "Grade Inquiry Only: Off" : "Grade Inquiry Only: On" }}
+                    {{ inquiry_status ? "Grade Inquiry Only: On" : "Grade Inquiry Only: Off" }}
                 </button>
                 {% endif %}
             </div>
@@ -60,7 +60,9 @@
     </div>
     {% if grade_inquiry_only_button %}
         <script>
-            inquiry_update();
+            $(document).ready(function(){
+                inquiry_update();
+            })
         </script>
     {% endif %}
     {% if not is_student %}
@@ -763,25 +765,13 @@
     }
 
     function change_inquiry() {
-        var button = document.getElementById('inquiryButton');
-        var status = Cookies.get('inquiry_status');
-        if(status === 'on') {
-            status = 'off'
-        }
-        else{
-            status = 'on';
-        }
-        if(status === 'on') {
-            Cookies.set('inquiry_status', 'on');
-            var inquiry = Cookies.get('inquiry_status');
-            grade_inquiry_only();
-            button.textContent = "Grade Inquiry Only: On";
-        } else {
+        var status = {{ inquiry_status ? 1 : 0}};
+        if(status) {
             Cookies.set('inquiry_status', 'off');
-            var inquiry = Cookies.get('inquiry_status');
-            reverse_inquiry_only();
-            button.textContent = "Grade Inquiry Only: Off";
+        } else {
+            Cookies.set('inquiry_status', 'on');
         }
+        location.reload();
     }
 
     
