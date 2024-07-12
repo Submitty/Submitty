@@ -1,6 +1,6 @@
 import vue from '@vitejs/plugin-vue';
 import { fileURLToPath, URL } from 'node:url';
-import { resolve } from 'path';
+import path, { resolve } from 'path';
 import { defineConfig } from 'vite';
 
 // https://vitejs.dev/config/
@@ -16,7 +16,7 @@ export default defineConfig({
     },
     build: {
         lib: {
-            entry: resolve(import.meta.url, 'src/main.ts'),
+            entry: resolve(path.dirname(fileURLToPath(import.meta.url)), 'src/main.ts'),
             fileName: 'submitty-vue3-frontend',
 
             formats: ['es'],
