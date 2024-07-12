@@ -150,8 +150,8 @@
           document.getElementById('change_queue_token').action = '{{base_url}}/'+encodeURIComponent(this.value)+'/change_token';
       });
 
-      var notifications_enabled = localStorage.getItem('office_hour_queue_notifications') === "true";
-      if ("Notification" in window && Notification.permission === "granted" && notifications_enabled) {
+      var push_notifications_enabled = localStorage.getItem('office_hour_queue_notifications') === "true";
+      if ("Notification" in window && Notification.permission === "granted" && push_notifications_enabled) {
           setNotificationState(true);
       }else{
           setNotificationState(false);
@@ -159,13 +159,12 @@
   {% endif %}
 
   function setNotificationState(turnOn){
-    notifications_enabled = turnOn;
+    push_notifications_enabled = turnOn;
     localStorage.setItem('office_hour_queue_notifications', turnOn ? "true":"false");
-    $('#notification_btn').html(turnOn ? "Disable Notifications":"Enable Notifications");
   }
 
   function enableNotifications() {
-    if(notifications_enabled){
+    if(push_notifications_enabled){
       setNotificationState(false);
       return;
     }
@@ -234,27 +233,21 @@
   }
 
   {% if viewer.isGrader() %}
-    window.isAudibleAlertEnabled = false;
+    window.audible_notifications_enabled = false;
 
     try {
         window.notificationSound = new NotificationSound();
-        document.querySelector('.disable-audible').style.display = 'none';
-        document.querySelector('.enable-audible').style.display = 'inline-block';
     } catch (e) {
         console.error(e);
     }
   {% endif %}
 
   function toggleAudibleAlert() {
-      if (window.isAudibleAlertEnabled) {
-          document.querySelector('.disable-audible').style.display = 'none';
-          document.querySelector('.enable-audible').style.display = 'inline-block';
-          window.isAudibleAlertEnabled = false;
+      if (window.audible_notifications_enabled) {
+          window.audible_notifications_enabled = false;
       }
       else {
-          document.querySelector('.disable-audible').style.display = 'inline-block';
-          document.querySelector('.enable-audible').style.display = 'none';
-          window.isAudibleAlertEnabled = true;
+          window.audible_notifications_enabled = true;
       }
   }
 
@@ -268,12 +261,12 @@
           var queue_empty_after = $( '.help_btn:visible[data-ready="true"]' ).length === 0;
           var helping_student = $( '.finish_helping_btn.btn-success:visible').length > 0;
 
-          if(notifications_enabled && queue_empty_before && !queue_empty_after && !helping_student) {
+          if(push_notifications_enabled && queue_empty_before && !queue_empty_after && !helping_student) {
               new Notification("A student is now waiting for help.");
           }
       });
 
-      if (window.isAudibleAlertEnabled) {
+      if (window.audible_notifications_enabled) {
           window.notificationSound.play();
       }
   }

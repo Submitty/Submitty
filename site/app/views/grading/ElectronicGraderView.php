@@ -63,6 +63,7 @@ class ElectronicGraderView extends AbstractView {
 
         $graded = 0;
         $non_late_graded = 0;
+        $verified = 0;
         $total = 0;
         $non_late_total = 0;
         $no_team_total = 0;
@@ -105,6 +106,7 @@ class ElectronicGraderView extends AbstractView {
                 continue;
             }
             $graded += $section['graded_components'];
+            $verified += $section['verified_components'];
             $total += $section['total_components'];
             $non_late_graded += $section['non_late_graded_components'];
             $non_late_total += $section['non_late_total_components'];
@@ -220,22 +222,28 @@ class ElectronicGraderView extends AbstractView {
                 $non_peer_components_count = count($gradeable->getNonPeerComponents());
                 $non_zero_non_peer_components_count = $non_peer_components_count != 0 ? $non_peer_components_count : 1;
                 $section['graded'] = round($section['graded_components'] / $non_zero_non_peer_components_count, 1);
+                $section['verified'] = round($section['verified_components'] / $non_zero_non_peer_components_count, 1);
                 $section['total'] = $section['total_components'];
                 $section['non_late_graded'] = round($section['non_late_graded_components'] / $non_zero_non_peer_components_count, 1);
+                $section['non_late_verified'] = round($section['non_late_verified_components'] / $non_zero_non_peer_components_count, 1);
                 $section['non_late_total'] = $section['non_late_total_components'];// / $non_zero_non_peer_components_count;
 
                 if ($section['total_components'] == 0) {
                     $section['percentage'] = 0;
+                    $section['verified_percentage'] = 0;
                 }
                 else {
                     $section['percentage'] = number_format(($section['graded'] / $section['total']) * 100, 1);
+                    $section['verified_percentage'] = number_format(($section['verified'] / $section['total']) * 100, 1);
                 }
 
                 if ($section['non_late_total'] == 0) {
                     $section['non_late_percentage'] = 0;
+                    $section['non_late_verified_percentage'] = 0;
                 }
                 else {
                     $section['non_late_percentage'] = number_format(($section['non_late_graded'] / $section['non_late_total']) * 100, 1);
+                    $section['non_late_verified_percentage'] = number_format(($section['non_late_verified'] / $section['non_late_total']) * 100, 1);
                 }
             }
                 unset($section); // Clean up reference
