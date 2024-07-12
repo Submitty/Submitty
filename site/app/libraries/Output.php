@@ -561,6 +561,22 @@ HTML;
         $this->addJs($this->timestampResource($file, $folder));
     }
 
+    public function renderVue(string $page, array $args = []) {
+        $this->css->add($this->timestampResource('style.css', 'mjs/vue'));
+        $this->module_js->add($this->timestampResource('submitty-vue3-frontend.mjs', 'mjs/vue'));
+
+        return
+            "<script>" .
+                "window.addEventListener('load', () => {" .
+                    "window.submitty.render('div#vue-content', '$page', " . json_encode($args) . ");" .
+                "})" .
+            "</script>" .
+            "<div id=\"vue-content\">" .
+                "<noscript>You need Javascript enabled to see this page.</noscript>" .
+            "</div>"
+        ;
+    }
+
     public function addVendorJs($file) {
         $this->addJs($this->timestampResource($file, "vendor"));
     }
