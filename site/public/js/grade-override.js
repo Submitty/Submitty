@@ -1,3 +1,5 @@
+/* global loadOverriddenGrades */
+
 function setCookie(name, value, days) {
     Cookies.set(name, value, { expires: days, path: '/' });
 }
@@ -16,7 +18,7 @@ function checkSelectedGradeable() {
 
 $(document).ready(() => {
     checkSelectedGradeable();
-    $('#g_id').change(function() {  // Use function here to access 'this'
+    $('#g_id').change(function () {
         const selectedGradable = $(this).val();
         if (selectedGradable) {
             setCookie('selectedGradable', selectedGradable, 365);
