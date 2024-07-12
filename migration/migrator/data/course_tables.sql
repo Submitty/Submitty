@@ -1498,7 +1498,7 @@ CREATE TABLE public.poll_options (
     response text NOT NULL,
     correct boolean NOT NULL,
     option_id integer NOT NULL,
-    author_id character varying(255) DEFAULT ''::character varying NOT NULL
+    author_id character varying(255) DEFAULT NULL::character varying
 );
 
 

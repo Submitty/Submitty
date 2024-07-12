@@ -18,8 +18,8 @@ class Option {
     #[ORM\GeneratedValue]
     protected int $id;
 
-    #[ORM\Column(name: "author_id", type: Types::TEXT)]
-    protected string $author_id;
+    #[ORM\Column(name: "author_id", type: Types::TEXT, nullable: true)]
+    protected ?string $author_id;
 
     #[ORM\Column(name: "order_id", type: Types::INTEGER)]
     protected int $order_id;
@@ -41,7 +41,7 @@ class Option {
     #[ORM\JoinColumn(name: "option_id", referencedColumnName: "option_id")]
     protected Collection $user_responses;
 
-    public function __construct(int $order_id, string $response, bool $is_correct, string $author_id = '') {
+    public function __construct(int $order_id, string $response, bool $is_correct, ?string $author_id = NULL) {
         $this->setOrderId($order_id);
         $this->setResponse($response);
         $this->setCorrect($is_correct);
@@ -62,11 +62,11 @@ class Option {
         return $this->order_id;
     }
 
-    public function setAuthorId(string $author_id): void {
+    public function setAuthorId(?string $author_id): void {
         $this->author_id = $author_id;
     }
 
-    public function getAuthorId(): string {
+    public function getAuthorId(): ?string {
         return $this->author_id;
     }
 
@@ -87,7 +87,7 @@ class Option {
     }
 
     public function isCustom(): bool {
-        return $this->author_id !== '';
+        return $this->author_id !== NULL;
     }
 
     public function setPoll(Poll $poll): void {
