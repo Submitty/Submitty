@@ -46,5 +46,8 @@ def down(config, database, semester, course):
         """
         ALTER TABLE poll_options
         DROP CONSTRAINT IF EXISTS poll_options_fkey;
+
+        ALTER TABLE poll_options
+        DROP COLUMN IF EXISTS author_id;
         """
     )
