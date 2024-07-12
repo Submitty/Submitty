@@ -255,6 +255,8 @@
             || $("#poll-type-multiple-response-survey").is(":checked")) {
             hidden_style = "style='display:none'";
             is_checked = "checked";
+            $("#toggle-all").hide();
+            $("#toggle-all-label").hide();
         }
         $("#responses").append(`
             <div class="response-container" id="response_${first_free_id}_wrapper">
