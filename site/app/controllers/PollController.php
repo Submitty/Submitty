@@ -513,9 +513,10 @@ class PollController extends AbstractController {
         $poll_response = $_POST['custom-response'];
         $user_id = $this->core->getUser()->getId();
         $em = $this->core->getCourseEntityManager();
-        $repo = $em->getRepository(Poll::class);
+        $poll_repo = $em->getRepository(Poll::class);
+        $option_repo = $em->getRepository(Option::class);
         /** @var Poll|null */
-        $poll = $repo->findByID($poll_id);
+        $poll = $poll_repo->findByID($poll_id);
         if ($poll === null) {
             return JsonResponse::getFailResponse("Invalid Poll ID");
         }
@@ -528,7 +529,7 @@ class PollController extends AbstractController {
         elseif ($poll->getAllowsCustomResponses() === false) {
             return JsonResponse::getFailResponse("Poll is currently not accepting custom responses");
         }
-        elseif ($poll->existsCustomResponse($poll_response) === true) {
+        elseif ($option_repo->existsByPollAndResponse($poll_id, $poll_response)) {
             return JsonResponse::getFailResponse("A similar response already exists");
         }
 
