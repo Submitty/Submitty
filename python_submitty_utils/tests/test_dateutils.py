@@ -1,8 +1,7 @@
 from datetime import datetime, timedelta, timezone
+from zoneinfo import ZoneInfo
 from unittest import TestCase
 from unittest.mock import patch
-
-from pytz import timezone as pytz_timezone
 
 from submitty_utils import dateutils
 
@@ -20,9 +19,7 @@ class TestDateUtils(TestCase):
 
     @patch(
         "submitty_utils.dateutils.get_current_time",
-        return_value=pytz_timezone("America/New_York").localize(
-            datetime(2016, 10, 14, 22, 11, 32, 0)
-        ),
+        return_value=datetime(2016, 10, 14, 22, 11, 32, 0, tzinfo=ZoneInfo("America/New_York"))
     )
     def test_write_submitty_date_default(self, current_time):
         date = dateutils.write_submitty_date()
@@ -31,20 +28,20 @@ class TestDateUtils(TestCase):
 
     @patch(
         "submitty_utils.dateutils.get_timezone",
-        return_value=pytz_timezone("America/New_York"),
+        return_value=ZoneInfo("America/New_York"),
     )
     def test_write_submitty_date(self, _get_timezone):
         testcases = (
             (
-                datetime(2020, 6, 12, 3, 21, 30, tzinfo=pytz_timezone("UTC")),
+                datetime(2020, 6, 12, 3, 21, 30, tzinfo=ZoneInfo("UTC")),
                 "2020-06-12 03:21:30+0000",
             ),
             (
-                datetime(2020, 12, 25, 3, 21, 30, tzinfo=pytz_timezone("UTC")),
+                datetime(2020, 12, 25, 3, 21, 30, tzinfo=ZoneInfo("UTC")),
                 "2020-12-25 03:21:30+0000",
             ),
             (
-                datetime(2020, 6, 12, 3, 21, 30, 123, tzinfo=pytz_timezone("UTC")),
+                datetime(2020, 6, 12, 3, 21, 30, 123, tzinfo=ZoneInfo("UTC")),
                 "2020-06-12 03:21:30+0000",
             ),
             (datetime(2020, 6, 12, 3, 21, 30), "2020-06-12 03:21:30-0400"),
@@ -58,16 +55,16 @@ class TestDateUtils(TestCase):
 
     @patch(
         "submitty_utils.dateutils.get_timezone",
-        return_value=pytz_timezone("America/New_York"),
+        return_value=ZoneInfo("America/New_York"),
     )
     def test_write_submitty_date_microseconds(self, _get_timezone):
         testcases = (
             (
-                datetime(2020, 6, 12, 3, 21, 30, tzinfo=pytz_timezone("UTC")),
+                datetime(2020, 6, 12, 3, 21, 30, tzinfo=ZoneInfo("UTC")),
                 "2020-06-12 03:21:30.000+0000",
             ),
             (
-                datetime(2020, 6, 12, 3, 21, 30, 123500, tzinfo=pytz_timezone("UTC")),
+                datetime(2020, 6, 12, 3, 21, 30, 123500, tzinfo=ZoneInfo("UTC")),
                 "2020-06-12 03:21:30.123+0000",
             ),
             (datetime(2020, 6, 12, 3, 21, 30, 211500), "2020-06-12 03:21:30.211-0400"),
@@ -94,11 +91,11 @@ class TestDateUtils(TestCase):
         test_cases = (
             (
                 "2020-06-12 03:21:30+0000",
-                datetime(2020, 6, 12, 3, 21, 30, tzinfo=pytz_timezone("UTC")),
+                datetime(2020, 6, 12, 3, 21, 30, tzinfo=ZoneInfo("UTC")),
             ),
             (
                 "2020-12-25 03:21:30+0000",
-                datetime(2020, 12, 25, 3, 21, 30, tzinfo=pytz_timezone("UTC")),
+                datetime(2020, 12, 25, 3, 21, 30, tzinfo=ZoneInfo("UTC")),
             ),
             (
                 "2020-06-12 03:21:30-0400",
@@ -142,13 +139,11 @@ class TestDateUtils(TestCase):
 
     @patch(
         "submitty_utils.dateutils.get_timezone",
-        return_value=pytz_timezone("America/New_York"),
+        return_value=ZoneInfo("America/New_York"),
     )
     def test_read_submitty_date_no_timezone(self, _get_timezone):
         parsed_date = dateutils.read_submitty_date("2020-06-12 03:21:30")
-        expected_date = pytz_timezone("America/New_York").localize(
-            datetime(2020, 6, 12, 3, 21, 30)
-        )
+        expected_date = datetime(2020, 6, 12, 3, 21, 30, tzinfo=ZoneInfo("America/New_York"))
 
         self.assertEqual(expected_date, parsed_date)
 
@@ -176,13 +171,11 @@ class TestDateUtils(TestCase):
 
     @patch(
         "submitty_utils.dateutils.get_current_time",
-        return_value=pytz_timezone("America/New_York").localize(
-            datetime(2016, 10, 14, 22, 11, 32, 0)
-        ),
+        return_value=datetime(2016, 10, 14, 22, 11, 32, 0, tzinfo=ZoneInfo("America/New_York"))
     )
     @patch(
         "submitty_utils.dateutils.get_timezone",
-        return_value=pytz_timezone("America/New_York"),
+        return_value=ZoneInfo("America/New_York"),
     )
     def test_parse_datetime(self, _current_time, _get_timezone):
         testcases = (
