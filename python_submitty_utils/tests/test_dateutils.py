@@ -174,7 +174,7 @@ class TestDateUtils(TestCase):
         return_value=datetime(2016, 10, 14, 22, 11, 32, 0, tzinfo=ZoneInfo("America/New_York"))
     )
     @patch(
-        "tzlocal.get_localzone",
+        "submitty_utils.dateutils.get_timezone",
         return_value=ZoneInfo("America/New_York"),
     )
     def test_parse_datetime(self, _current_time, _get_timezone):

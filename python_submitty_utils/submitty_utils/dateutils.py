@@ -102,13 +102,13 @@ def parse_datetime(date_string):
     :return:
     :rtype: datetime
     """
+    local_timezone = get_timezone()
     if date_string is None:
         return None
     elif isinstance(date_string, datetime):
         my_timezone = date_string.tzinfo
         if my_timezone is None:
-            my_timezone = get_timezone()
-            date_string = date_string.astimezone(my_timezone)
+            date_string = date_string.astimezone(local_timezone)
 
         return date_string
     elif not isinstance(date_string, str):
@@ -120,7 +120,7 @@ def parse_datetime(date_string):
         pass
 
     try:
-        return datetime.strptime(date_string, '%Y-%m-%d %H:%M:%S').astimezone(get_timezone())
+        return datetime.strptime(date_string, '%Y-%m-%d %H:%M:%S').astimezone(local_timezone)
     except ValueError:
         pass
 
@@ -129,7 +129,7 @@ def parse_datetime(date_string):
                 hour=23,
                 minute=59,
                 second=59,
-            ).astimezone(get_timezone())
+            ).astimezone(local_timezone)
     except ValueError:
         pass
 
