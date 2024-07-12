@@ -1,5 +1,5 @@
 import { createApp } from 'vue';
-import Unknown from './views/Unknown.vue';
+import Unknown from './pages/Unknown.vue';
 
 const apps: Record<string, Parameters<typeof createApp>[0]> = {
     // "name": component import
