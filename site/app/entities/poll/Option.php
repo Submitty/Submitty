@@ -41,7 +41,7 @@ class Option {
     #[ORM\JoinColumn(name: "option_id", referencedColumnName: "option_id")]
     protected Collection $user_responses;
 
-    public function __construct(int $order_id, string $response, bool $is_correct, ?string $author_id = NULL) {
+    public function __construct(int $order_id, string $response, bool $is_correct, ?string $author_id = null) {
         $this->setOrderId($order_id);
         $this->setResponse($response);
         $this->setCorrect($is_correct);
@@ -87,7 +87,7 @@ class Option {
     }
 
     public function isCustom(): bool {
-        return $this->author_id !== NULL;
+        return $this->author_id !== null;
     }
 
     public function setPoll(Poll $poll): void {
