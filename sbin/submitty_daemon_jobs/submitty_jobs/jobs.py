@@ -11,7 +11,9 @@ import subprocess
 import stat
 import traceback
 import datetime
+import mimetypes
 from urllib.parse import unquote
+from tempfile import TemporaryDirectory
 from . import bulk_qr_split
 from . import bulk_upload_split
 from . import INSTALL_DIR, DATA_DIR
@@ -416,3 +418,46 @@ class UpdateSystemInfo(AbstractJob):
 
     def cleanup_job(self):
         pass
+
+
+class DocToPDF(AbstractJob):
+    def run_job(self):
+        log_dir = os.path.join(DATA_DIR, "logs", "doc_to_pdf")
+        today = datetime.datetime.now()
+        log_file = os.path.join(log_dir, "{:04d}{:02d}{:02d}.txt".format(today.year, today.month, today.day))
+
+        flag = os.O_EXCL | os.O_WRONLY
+        if not os.path.exists(log_file):
+            flag |= os.O_CREAT
+        log = os.open(log_file, flag)
+
+        term = self.job_details['term']
+        course = self.job_details['course']
+        gradeable = self.job_details['gradeable']
+        user = self.job_details['user']
+        version = self.job_details['version']
+
+        submission_path = os.path.join(DATA_DIR, 'courses', term, course, 'submissions', gradeable, user, version)
+
+        DOC_MIME_TYPES = ['application/vnd.openxmlformats-officedocument.wordprocessingml.document']
+
+        doc_files = []
+
+        for root, _, files in os.walk(submission_path):
+            for file in files:
+                file_path = os.path.join(root, file)
+                mimetype, _ = mimetypes.guess_type(file_path)
+                if mimetype in DOC_MIME_TYPES:
+                    doc_files.append(file_path)
+
+        for doc_file in doc_files:
+            with TemporaryDirectory() as tmpdir:
+                with os.fdopen(log, 'a') as output_file:
+                    result = subprocess.run(["libreoffice", "--headless", "--convert-to", "pdf", "--outdir", tmpdir, doc_file], stdout=output_file, stderr=output_file)
+                if result.returncode != 0:
+                    continue 
+                file = os.listdir(tmpdir)[0]
+                os.rename(file, os.path.join(os.path.dirname(doc_file), '.' + os.path.basename(doc_file) + '.pdf'))
+
+        log_msg = f"[Last ran on: {today.isoformat()}]\n"
+        logger.write_to_log(log_file, log_msg)
