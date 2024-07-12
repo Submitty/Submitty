@@ -92,6 +92,6 @@
     "eslint:fix": "eslint . --fix",
     "test": "jest",
     "test:api": "jest --config jest.config.api.js",
-    "build": "tsc -p . && node .build.js"
+    "build": "tsc -p . && node .build.js && vite build vue3-frontend"
   }
 }

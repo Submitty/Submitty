@@ -6,6 +6,9 @@ import { defineConfig } from 'vite';
 // https://vitejs.dev/config/
 export default defineConfig({
     plugins: [vue()],
+    define: {
+        'process.env.NODE_ENV': '"production"',
+    },
     resolve: {
         alias: {
             '@': fileURLToPath(new URL('./src', import.meta.url)),
@@ -13,9 +16,12 @@ export default defineConfig({
     },
     build: {
         lib: {
-            entry: resolve(__dirname, 'src/main.ts'),
+            entry: resolve(import.meta.url, 'src/main.ts'),
             fileName: 'submitty-vue3-frontend',
+
             formats: ['es'],
         },
+        outDir: '../public/mjs/vue/',
+        emptyOutDir: true,
     },
 });
