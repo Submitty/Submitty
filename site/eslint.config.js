@@ -12,7 +12,7 @@ const cypress = require('eslint-plugin-cypress/flat');
 module.exports = tseslint.config(
     {
         name: 'Files to include',
-        files: ['**/*.{js,ts}'],
+        files: ['**/*.{js,ts,mts}'],
     },
     {
         // name: 'Files to ignore', (this line can be uncommented with eslint >=9.0)
