@@ -1,4 +1,5 @@
 import { defineConfig } from 'cypress';
+import { cypressBrowserPermissionsPlugin } from 'cypress-browser-permissions';
 import cypressPlugins from './cypress/plugins/index.js';
 import fs = require('fs');
 import path = require('path');
@@ -32,10 +33,20 @@ export default defineConfig({
                     }
                 }
             });
+            config = cypressBrowserPermissionsPlugin(on, config);
             return cypressPlugins(on, config);
         },
         baseUrl: 'http://localhost:1511',
         specPattern: 'cypress/e2e/**/*.spec.js',
         projectId: 'es51qa',
+    },
+    env: {
+        browserPermissions: {
+            notifications: 'allow',
+            geolocation: 'allow',
+            camera: 'block',
+            microphone: 'block',
+            images: 'allow',
+        },
     },
 });
