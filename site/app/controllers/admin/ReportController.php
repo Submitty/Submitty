@@ -590,8 +590,8 @@ class ReportController extends AbstractController {
     }
 
 
-    #[Route("/courses/{_semester}/{_course}/reports/rainbow_grades_customizationnn", methods: ["POST"])]
-    public function generateCustomizationnn(): void {
+    #[Route("/courses/{_semester}/{_course}/reports/rainbow_grades_customization_build", methods: ["POST"])]
+    public function generateCustomizationBuild(): void {
         // Check if this is an AJAX request
         if (!empty($_SERVER['HTTP_X_REQUESTED_WITH']) && strtolower($_SERVER['HTTP_X_REQUESTED_WITH']) == 'xmlhttprequest') {
             // Build a new model, pull in defaults for the course
