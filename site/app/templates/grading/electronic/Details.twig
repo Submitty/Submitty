@@ -765,10 +765,11 @@
     }
 
     function change_inquiry() {
-        var status = {{ inquiry_status ? 1 : 0}};
-        if(status) {
+        const status = {{ inquiry_status ? 1 : 0}};
+        if (status) {
             Cookies.set('inquiry_status', 'off');
-        } else {
+        } 
+        else {
             Cookies.set('inquiry_status', 'on');
         }
         location.reload();
