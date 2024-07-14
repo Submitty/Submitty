@@ -6,6 +6,7 @@ from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.types import SmallInteger, String, TIMESTAMP
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy.sql import func
+from sqlalchemy.sql import text
 
 
 class Database:
@@ -77,9 +78,9 @@ class Database:
 
         :param query: raw query string to execute
         :type query: str
-        :rtype: sqlalchemy.engine.ResultProxy
+        :rtype: sqlalchemy.engine.row.Row
         """
-        return self.session.execute(query)
+        return self.session.execute(text(query))
 
     def commit(self):
         """Run commit on the current session."""
