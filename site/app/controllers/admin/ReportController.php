@@ -849,7 +849,11 @@ class ReportController extends AbstractController {
 
         $msg = 'Rainbow Grades Customization set successfully';
 
-        return JsonResponse::getSuccessResponse(['status' => 'success', 'selected_value' => $selectedValue, 'message' => $msg ]);
+        return JsonResponse::getSuccessResponse([
+            'status' => 'success',
+            'selected_value' => $selectedValue,
+            'message' => $msg,
+        ]);
     }
 
 
