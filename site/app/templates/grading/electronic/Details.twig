@@ -517,6 +517,9 @@
     {% elseif graded_gradeable.getAutoGradedGradeable().getActiveVersion() == 0 %}
         {% set contents = "Cancelled Submission" %}
         {% set btn_class = "btn-default" %}
+    {% elseif info.on_time_submission == false %}
+        {% set contents = "Too Many Days Late" %}
+        {% set btn_class = "btn-danger" %}
     {% elseif graded_gradeable.getGradeable().isTaGrading() %}
         {% set contents = "Grade" %}
         {% set btn_class = "btn-primary" %}
