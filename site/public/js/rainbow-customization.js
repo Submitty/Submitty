@@ -2,6 +2,7 @@
 const benchmarks_with_input_fields = ['lowest_a-', 'lowest_b-', 'lowest_c-', 'lowest_d'];
 const allowed_grades = ['A', 'A-', 'B+', 'B', 'B-', 'C+', 'C', 'C-', 'D+', 'D', 'F'];
 const allowed_grades_excluding_f = ['A', 'A-', 'B+', 'B', 'B-', 'C+', 'C', 'C-', 'D+', 'D'];
+const tables = ['plagiarism', 'manualGrade']
 
 // eslint-disable-next-line no-unused-vars
 function ExtractBuckets() {
@@ -271,20 +272,20 @@ function getGradeableBuckets() {
 
 /**
  * Gets data to add to the JSON for the plagiarism and manual grade tables
- * @param {int} table
- *      0 -> plagiarism table
- *      1 -> manual grading table
+ * @param {string} table
+ *      'plagiarism'
+ *      'manualGrade'
  */
 function getTableData(table) {
-    if (table !== 0 && table !== 1) {
+    if (!tables.includes(table)) {
         return;
     }
 
     const data = [];
 
     const tableMap = {
-        0: 'plagiarism-table-body',
-        1: 'manual-grading-table-body',
+        plagiarism: 'plagiarism-table-body',
+        manualGrade: 'manual-grading-table-body',
     };
     const tableBody = document.getElementById(tableMap[table]);
     const rows = tableBody.getElementsByTagName('tr');
@@ -295,14 +296,14 @@ function getTableData(table) {
         const secondInput = row.cells[1].textContent;
         const thirdInput = row.cells[2].textContent;
 
-        if (table === 0) {
+        if (table === 'plagiarism') {
             data.push({
                 user: firstInput,
                 gradeable: secondInput,
                 penalty: parseFloat(thirdInput),
             });
         }
-        else if (table === 1) {
+        else if (table === 'manualGrade') {
             data.push({
                 user: firstInput,
                 grade: secondInput,
@@ -316,18 +317,18 @@ function getTableData(table) {
 
 /**
  * Adds input data to plagiarism and manual grade tables
- * @param {int} table
- *      0 -> plagiarism table
- *      1 -> manual grading table
+ * @param {string} table
+ *     'plagiarism'
+ *     'manualGrade'
  */
 function addToTable(table) {
-    if (table !== 0 && table !== 1) {
+    if (!tables.includes(table)) {
         return;
     }
 
     const tableMap = {
-        0: ['plagiarism-table-body', 'plagiarism_user_id', 'g_id', 'marks'],
-        1: ['manual-grading-table-body', 'manual-grading-user-id', 'manual-grading-grade', 'manual-grading-note'],
+        plagiarism: ['plagiarism-table-body', 'plagiarism_user_id', 'g_id', 'marks'],
+        manualGrade: ['manual-grading-table-body', 'manual-grading-user-id', 'manual-grading-grade', 'manual-grading-note'],
     };
 
     const firstInput = document.getElementById(tableMap[table][1]).value.trim();
@@ -340,7 +341,7 @@ function addToTable(table) {
     const tableBody = document.getElementById(tableMap[table][0]);
     const rows = tableBody.getElementsByTagName('tr');
     switch (table) {
-        case 0: { // plagiarism table
+        case 'plagiarism': {
             if (firstInput === '' || secondInput === '' || thirdInput === '') {
                 alert('Please fill in all the fields.');
                 return;
@@ -367,7 +368,7 @@ function addToTable(table) {
             }
             break;
         }
-        case 1: { // manual grading table
+        case 'manualGrade': {
             if (firstInput === '' || secondInput === '') {
                 alert('Please fill in both user ID and final grade.');
                 return;
@@ -377,7 +378,7 @@ function addToTable(table) {
                 return;
             }
             if (!allowed_grades.includes(secondInput)) {
-                alert('Grade must be one of the following: A, A-, B+, B, C+, C, C-, D+, D, F');
+                alert('Grade must be one of the following: ${allowed_grades.join(\', \')}');
                 return;
             }
 
@@ -525,8 +526,8 @@ function buildJSON() {
         section: getSection(),
         gradeables: getGradeableBuckets(),
         messages: getMessages(),
-        plagiarism: getTableData(0),
-        manual_grade: getTableData(1),
+        plagiarism: getTableData('plagiarism'),
+        manual_grade: getTableData('manualGrade'),
     };
 
     ret = JSON.stringify(ret);
