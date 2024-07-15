@@ -205,12 +205,14 @@ describe('Test cases revolving around polls functionality', () => {
         cy.get('#timer-inputs').should('be.visible');
         cy.get('#enable-timer').should('be.checked');
         // Add 5 seconds to timer
-        cy.get('#poll-hours').clear();
-        cy.get('#poll-hours').type('0');
-        cy.get('#poll-minutes').clear();
-        cy.get('#poll-minutes').type('0');
-        cy.get('#poll-seconds').clear();
-        cy.get('#poll-seconds').type('5');
+        cy.get('#timer-inputs').within(() => {
+            cy.get('#poll-hours').clear();
+            cy.get('#poll-hours').type('0');
+            cy.get('#poll-minutes').clear();
+            cy.get('#poll-minutes').type('0');
+            cy.get('#poll-seconds').clear();
+            cy.get('#poll-seconds').type('5');
+        });
 
         cy.get('h1').click(); // get rid of the date picker
         // test default release histogram and answer settings
@@ -288,12 +290,17 @@ describe('Test cases revolving around polls functionality', () => {
         cy.contains('Poll Cypress Test').siblings(':nth-child(1)').children().click();
         // Checking if user input for duration saved
         cy.get('#enable-timer').should('be.checked');
-        cy.get('#poll-hours').invoke('val').should('eq', '0');
-        cy.get('#poll-minutes').invoke('val').should('eq', '0');
-        cy.get('#poll-seconds').invoke('val').should('eq', '5');
-        cy.get('#poll-seconds').clear();
-        cy.get('#enable-timer').get('#poll-hours').clear();
-        cy.get('#enable-timer').get('#poll-hours').type('3');
+        cy.get('#timer-inputs').within(() => {
+            cy.get('#poll-hours').invoke('val').should('eq', '0');
+            cy.get('#poll-minutes').invoke('val').should('eq', '0');
+            cy.get('#poll-seconds').invoke('val').should('eq', '5');
+            cy.get('#poll-seconds').clear();
+        });
+        cy.get('#enable-timer').within(() => {
+            cy.get('#poll-hours').clear();
+            cy.get('#poll-hours').type('3');
+        });
+
         cy.get('button[type=submit]').click();
         cy.contains('Poll Cypress Test').siblings(':nth-child(6)').children().should('not.be.checked');
         cy.contains('Poll Cypress Test').siblings(':nth-child(6)').children().check();
