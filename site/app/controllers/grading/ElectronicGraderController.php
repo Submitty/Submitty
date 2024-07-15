@@ -2404,7 +2404,7 @@ class ElectronicGraderController extends AbstractController {
 
 
         // check if all the components provided are real and the user has permission
-        foreach ($component_ids as &$component_id) {
+        foreach ($component_ids as $component_id) {
             $component = $this->tryGetComponent($gradeable, $component_id);
             if ($component === false) {
                 return JsonResponse::getFailResponse("Invalid component id \"$component_id\"");
