@@ -292,10 +292,6 @@ std::string recreateStudentFile(vectorOfWords studentFileWords, vectorOfSpaces s
 }
 
 bool isNumber(const std::string &str) {
-  if (str.length() == 0)
-  {
-    return false;
-  }
   std::string stripped_str = isolateAlphanumAndNumberPunctuation(str);
   bool atLeastOneDigit = false;
   bool dotFound = false;
@@ -316,13 +312,22 @@ bool isNumber(const std::string &str) {
   return atLeastOneDigit;
 }
 
+/* METHOD: isolateAlphanumAndNumberPunctuation
+ * ARGS: str: string
+ * RETURN: string
+ * PURPOSE: remove non-alphanum, non-dot characters from around a string
+ */
 std::string isolateAlphanumAndNumberPunctuation(const std::string &str) {
+  if (str.empty())
+  {
+    return str;
+  }
   std::string::const_iterator begin = str.begin();
   while (!isalnum(*begin) && !(*begin == '.')) {
     begin++;
     if (begin == str.end())
     {
-      return str;
+      return "";
     }
   }
   std::string::const_reverse_iterator end = str.rbegin();
