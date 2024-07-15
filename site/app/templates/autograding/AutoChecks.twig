@@ -37,7 +37,7 @@
             </div>
           {% endif %}
         </div>
-        <div class="box-block">
+        <div class="box-block" data-testid="test-box-block">
             {% if not check.actual is defined and check.description is defined and check.messages is defined%}
                <h4 style="margin-bottom: 0">{{ check.description }}</h4>
                <div>
