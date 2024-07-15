@@ -111,23 +111,21 @@ function collapseAllSections() {
 }
 
 function inquiry_update() {
-    $(document).ready(() => {
-        const button = document.getElementById('inquiryButton');
-        const status = Cookies.get('inquiry_status');
+    const button = document.getElementById('inquiryButton');
+    const status = Cookies.get('inquiry_status');
 
-        if (status === 'on') {
-            $('.grade-button').each(function () {
-                if (typeof $(this).attr('data-grade-inquiry') === 'undefined') {
-                    $(this).closest('.grade-table').hide(); // hide gradeable items without active inquiries
-                }
-            });
-            button.textContent = 'Grade Inquiry Only: On';
-        }
-        else {
-            $('.grade-button').each(function () {
-                $(this).closest('.grade-table').show(); // show all gradeable items
-            });
-            button.textContent = 'Grade Inquiry Only: Off';
-        }
-    });
+    if (status === 'on') {
+        $('.grade-button').each(function () {
+            if (typeof $(this).attr('data-grade-inquiry') === 'undefined') {
+                $(this).closest('.grade-table').hide(); // hide gradeable items without active inquiries
+            }
+        });
+        button.textContent = 'Grade Inquiry Only: On';
+    }
+    else {
+        $('.grade-button').each(function () {
+            $(this).closest('.grade-table').show(); // show all gradeable items
+        });
+        button.textContent = 'Grade Inquiry Only: Off';
+    }
 }
