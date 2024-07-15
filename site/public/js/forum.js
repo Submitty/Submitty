@@ -1,4 +1,4 @@
-/* global displaySuccessMessage, hljs, buildCourseUrl, csrfToken,
+/* global displaySuccessMessage, hljs, luxon, buildCourseUrl, csrfToken,
     displayErrorMessage, escapeSpecialChars */
 /* exported markForDeletion */
 /* exported unMarkForDeletion */
