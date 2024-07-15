@@ -25,54 +25,12 @@
             ]
         },
         {
-            "title" : "Double H Gate Probabilities - Float Diff",
-            "command" : "python3 *.py",
-            "points" : 5,
-            "validation": [
-                {
-                    "description": "diff",
-                    "method": "diff",
-                    "actual_file": "STDOUT.txt",
-                    "expected_file": "expected.txt",
-                    "deduction": 1,
-                    "failure_message":"These files do not exactly match."
-                }
-            ]
-        },
-        {
             "title" : "Double H Gate Probabilities - Float Diff (Tolerance = .025)",
             "command" : "python3 *.py",
             "points" : 5,
             "validation": [
                 {
                     "method": "diff",
-                    "tolerance": 0.025,
-                    "actual_file": "STDOUT.txt",
-                    "expected_file": "expected.txt"
-                }
-            ]
-        },
-        {
-            "title" : "Double H Gate Probabilities - Float Diff (ignore whitespace)",
-            "command" : "python3 *.py",
-            "points" : 5,
-            "validation": [
-                {
-                    "method": "diff",
-                    "ignoreWhitespace": true,
-                    "actual_file": "STDOUT.txt",
-                    "expected_file": "expected.txt"
-                }
-            ]
-        },
-        {
-            "title" : "Double H Gate Probabilities - Float Diff (Tolerance = .025, ignore whitespace)",
-            "command" : "python3 *.py",
-            "points" : 5,
-            "validation": [
-                {
-                    "method": "diff",
-                    "ignoreWhitespace": true,
                     "tolerance": 0.025,
                     "actual_file": "STDOUT.txt",
                     "expected_file": "expected.txt"
