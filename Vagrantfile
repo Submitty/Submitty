@@ -79,7 +79,7 @@ base_boxes[:arm_bento]     = "bento/ubuntu-22.04-arm64"
 base_boxes[:libvirt]       = "generic/ubuntu2204"
 base_boxes[:arm_mac_qemu]  = "perk/ubuntu-2204-arm64"
 
-def mount_folders(config, mount_options, host = '10.0.2.2', type = nil)
+def mount_folders(config, mount_options, type = nil, host = '10.0.2.2')
  # ideally we would use submitty_daemon or something as the owner/group, but since that user doesn't exist
   # till post-provision (and this is mounted before provisioning), we want the group to be 'vagrant'
   # which is guaranteed to exist and that during install_system.sh we add submitty_daemon/submitty_php/etc to the
@@ -157,12 +157,12 @@ Vagrant.configure(2) do |config|
         ubuntu.vm.network 'forwarded_port', guest: 22, host: data[:ssh_port], id: 'ssh' unless data[:ssh_port].nil?
         ubuntu.vm.provision 'shell', inline: gen_script(worker_name, worker: true, base: base_box)
 
-        ubuntu.vm.provider "qemu" do |qe|
+        ubuntu.vm.provider "qemu" do |qe, override|
           qe.ssh_host = data[:ip_addr]
           qe.ssh_port = 22
           qe.socket_fd = 3
           qe.mac_address = data[:mac_addr]
-          mount_folders(qe, [], ENV.fetch('GATEWAY_IP', '10.0.2.2'))
+          mount_folders(override, [], 'smb', ENV.fetch('GATEWAY_IP', '10.0.2.2'))
         end
       end
     end
@@ -176,9 +176,9 @@ Vagrant.configure(2) do |config|
       ubuntu.vm.network 'forwarded_port', guest:   22, host: ENV.fetch('VM_PORT_SSH',  2222), id: 'ssh'
       ubuntu.vm.provision 'shell', inline: gen_script(vm_name, base: base_box)
 
-      ubuntu.vm.provider "qemu" do |qe|
-        qe.ssh_port = 2222
-        mount_folders(qe, [])
+      ubuntu.vm.provider "qemu" do |qe, override|
+        qe.ssh_port = ENV.fetch('VM_PORT_SSH', 2222)
+        mount_folders(override, [], 'smb')
       end
     end
   end
