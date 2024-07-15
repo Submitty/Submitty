@@ -9,7 +9,7 @@
 # Submitty util module depends on:
 
 # For QR bulk upload
-opencv-python-headless==4.9.0.80
+opencv-python-headless==4.10.0.84
 
 # jsonschema & jsonref & pytz & tzlocal
 pytz==2023.3.post1 # Submitty-util specific.
@@ -30,7 +30,7 @@ paramiko==3.4.0
 tzlocal==2.1
 PyPDF2==3.0.1
 distro==1.9.0
-jsonschema==4.19.2
+jsonschema==4.22.0
 jsonref==1.1.0
 docker==7.1.0
 urllib3==2.2.2
@@ -42,4 +42,4 @@ numpy==1.26.4
 
 # python libraries for OCR for digit recognition
 onnx==1.16.0
-onnxruntime==1.18.0
+onnxruntime==1.18.1
