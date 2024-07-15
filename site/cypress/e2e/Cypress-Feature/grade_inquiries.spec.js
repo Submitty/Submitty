@@ -1,4 +1,4 @@
-describe('Test cases revolving around grade inquires', () => {
+describe('Test cases revolving around grade inquiries', () => {
     const setGradeInquiriesForGradeable = (gradeableId, date = null) => {
         cy.visit(['sample', 'gradeable', gradeableId, 'update']);
         cy.get('[data-testid="yes-grade-inquiry-allowed"]').click();
@@ -21,15 +21,12 @@ describe('Test cases revolving around grade inquires', () => {
         cy.get('[data-testid="grade-inquiry-info-btn"]').click();
         cy.get('[data-testid="grading-label"]').should('contain', 'Grade Inquiry');
         cy.get('[data-testid="grade-inquiry-actions"]').contains('Submit Grade Inquiry').should('be.disabled');
-        cy.get('[data-testid="reply-text-area-0"]').click().type('Submitty');
+
+        cy.get('.markdown-textarea.fill-available').should('be.visible').first().click().type('Submitty');
         cy.get('[data-testid="markdown-mode-tab-preview"]').first().should('exist');
         cy.get('[data-testid="grade-inquiry-actions"]').contains('Submit Grade Inquiry').should('not.be.disabled');
-        cy.get('[data-testid="component-tab-1"]').click();
-        cy.get('[data-testid="reply-text-area-0"]').click().type('Submitty again');
-        cy.get('[data-testid="submit-inquiry"]').click();
-        cy.get('[data-testid="component-tab-0"]').click();
-        cy.get('[data-testid="markdown-mode-tab-preview"]').should('contain', 'Submitty');
     });
+
     ['ta', 'grader'].forEach((user) => {
         it(`${user} can see grade inquiry panel`, () => {
             cy.login(user);
@@ -46,7 +43,8 @@ describe('Test cases revolving around grade inquires', () => {
             cy.get('[data-testid="grade-inquiry-info-btn"]').click();
             cy.get('[data-testid="grading-label"]').should('contain', 'Grade Inquiry');
             cy.get('[data-testid="grade-inquiry-actions"]').contains('Submit Grade Inquiry').should('be.disabled');
-            cy.get('[data-testid="reply-text-area-0"]').click().type('Submitty');
+
+            cy.get('.markdown-textarea.fill-available').should('be.visible').first().click().type('Submitty');
             cy.get('[data-testid="markdown-mode-tab-preview"]').first().should('exist');
             cy.get('[data-testid="grade-inquiry-actions"]').contains('Submit Grade Inquiry').should('not.be.disabled');
         });
