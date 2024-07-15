@@ -537,22 +537,22 @@ function runBuild() {
                 success: function (response) {
                     console.log(response);
                     if (response.status === 'success') {
-                        $('#save_status').html('Generating rainbow grades, please wait...');
+                        $('#save_status').text('Generating rainbow grades, please wait...');
                         checkBuildStatus();
                     }
                     else {
-                        $('#save_status').html('An error occurred while building');
+                        $('#save_status').text('An error occurred while building');
                     }
                 },
                 error: function (jqXHR, textStatus, errorThrown) {
                     console.log('AJAX error:', jqXHR, textStatus, errorThrown);
-                    $('#save_status').html('An error occurred while making the request');
+                    $('#save_status').text('An error occurred while making the request');
                 },
             });
         })
         .catch((error) => {
             console.error('Caught error:', error);
-            $('#save_status').html(`An error occurred: ${error}`);
+            $('#save_status').text(`An error occurred: ${error}`);
         });
 }
 
@@ -565,15 +565,15 @@ function checkBuildStatus() {
         success: function (response) {
             console.log(response);
             if (response.status === 'success') {
-                $('#save_status').html('Rainbow grades successfully generated!');
+                $('#save_status').text('Rainbow grades successfully generated!');
                 showLogButton(response.data.data);
             }
             else if (response.status === 'fail') {
-                $('#save_status').html('A failure occurred generating rainbow grades');
+                $('#save_status').text('A failure occurred generating rainbow grades');
                 showLogButton(response.message);
             }
             else {
-                $('#save_status').html('Internal Server Error');
+                $('#save_status').text('Internal Server Error');
                 console.log(response);
             }
         },
@@ -618,7 +618,7 @@ $(document).ready(() => {
 });
 
 function saveChanges() {
-    $('#save_status').html('Change detected Saving ...');
+    $('#save_status').text('Change detected Saving ...');
     const url = buildCourseUrl(['reports', 'rainbow_grades_customization_build']);
     const formData = new FormData();
     formData.append('csrf_token', csrfToken);
@@ -636,7 +636,7 @@ function saveChanges() {
         success: function (response) {
             console.log(`Response: ${response}`);
             if (response === 'success') {
-                $('#save_status').html('All changes saved');
+                $('#save_status').text('All changes saved');
             }
             else {
                 // lets keep the alert, because users may not notice it even if it fails
@@ -653,7 +653,7 @@ function saveChanges() {
 
 $(document).ready(() => {
     $("input[name='customization']").change(() => {
-        $('#save_status').html('Switched customization, need to rebuild');
+        $('#save_status').text('Switched customization, need to rebuild');
     });
 });
 
