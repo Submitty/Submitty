@@ -55,6 +55,7 @@ use app\libraries\FileUtils;
  * @method string getSysAdminEmail()
  * @method string getSysAdminUrl()
  * @method string getCourseEmail()
+ * @method bool isUserCreateAccount()
  * @method string getVcsUser()
  * @method string getVcsType()
  * @method string getPrivateRepository()
@@ -219,7 +220,7 @@ class Config extends AbstractModel {
 
     /** @prop
      * @var bool Create New Account shown to at login page */
-    protected $create_new_account;
+    protected $user_create_account;
 
     /** @prop
      * @var array */
@@ -425,8 +426,8 @@ class Config extends AbstractModel {
         $this->sys_admin_email = $submitty_json['sys_admin_email'] ?? '';
         $this->sys_admin_url = $submitty_json['sys_admin_url'] ?? '';
 
-        $this->create_new_account = $submitty_json['create_new_account'] === false;
-
+        // $this->user_create_account = $submitty_json['user_create_account'] === false;
+        $this->user_create_account = true;
         if (isset($submitty_json['timezone'])) {
             if (!in_array($submitty_json['timezone'], \DateTimeZone::listIdentifiers())) {
                 throw new ConfigException("Invalid Timezone identifier: {$submitty_json['timezone']}");

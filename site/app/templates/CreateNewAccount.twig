@@ -8,15 +8,23 @@
     <form action="{{ signup_url }}" method="post" id="login">
         <label>
             Email
-            <input type="email" name="email" onchange="$(this).val($(this).val().trim())" required autofocus/>
+            <input type="text" name="email" required />
         </label>
         <label>
             User ID
-            <input type="text" name="new_username" required />
+            <input type="text" name="user_id" required />
+        </label>
+        <label>
+            Given Name
+            <input type="text" name="given_name" required />
+        </label>
+        <label>
+            Family Name
+            <input type="text" name="family_name" required />
         </label>
         <label>
             Password
-            <input type="password" name="new_password" required />
+            <input type="password" name="password" required />
         </label>
         <label>
             Re-Enter Password

@@ -12,7 +12,7 @@
         "cgi_url": "https://submitty.test.com/cgi-bin",
         "websocket_port": 8443,
         "institution_name": "Test University",
-        "create_new_account": false,
+        "user_create_account": false,
         "institution_homepage": "https://test.com",
         "timezone": "America/Los_Angeles",
         "duck_special_effects": false,

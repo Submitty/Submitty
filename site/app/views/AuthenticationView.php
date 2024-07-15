@@ -2,6 +2,7 @@
 
 namespace app\views;
 
+use app\authentication\DatabaseAuthentication;
 use app\libraries\Access;
 use app\libraries\FileUtils;
 
@@ -33,8 +34,9 @@ class AuthenticationView extends AbstractView {
             "saml_url" => $this->core->buildUrl(['authentication', 'saml_start']) . '?' . http_build_query(['old' => $old]),
             "saml_name" => $this->core->getConfig()->getSamlOptions()['name'],
             "login_content" => $login_content,
+            "user_create_account" => $this->core->getConfig()->isUserCreateAccount(),
             "new_account_url" => $this->core->buildUrl(['authentication', 'create_account']),
-            "new_account_text" => $new_account_text
+            "new_account_text" =>$this->core->getAuthentication() instanceof DatabaseAuthentication
         ]);
     }
 
@@ -60,7 +62,7 @@ class AuthenticationView extends AbstractView {
         }
 
         return $this->core->getOutput()->renderTwigTemplate("CreateNewAccount.twig", [
-            "signup_url" => $this->core->buildUrl(['authentication', 'check_new_user']),
+            "signup_url" => $this->core->buildUrl(['authentication', 'self_add_user']),
             "signup_content" => $signup_content
         ]);
     }

@@ -185,7 +185,7 @@ defaults = {
     'authentication_method': 0,
     'institution_name' : '',
     'institution_homepage' : '',
-    'create_new_account' : False,
+    'user_create_account' : False,
     'timezone' : tzlocal.get_localzone().zone,
     'submitty_admin_username': '',
     'email_user': '',
@@ -311,12 +311,12 @@ else:
         print()
 
     while True:
-        CREATE_NEW_ACCOUNT = get_input("Enable Create New Account feature? [y/n]", 'y')
-        if (CREATE_NEW_ACCOUNT.lower() in ['yes', 'y']):
-            create_new_account = True
+        user_create_account = get_input("Enable Create New Account feature? [y/n]", 'y')
+        if (user_create_account.lower() in ['yes', 'y']):
+            USER_CREATE_ACCOUNT = True
             break
-        elif (CREATE_NEW_ACCOUNT.lower() in ['no', 'n']):
-            create_new_account = False
+        elif (USER_CREATE_ACCOUNT.lower() in ['no', 'n']):
+            USER_CREATE_ACCOUNT = False
             break
     print()
     
@@ -455,7 +455,7 @@ else:
 
     config['institution_name'] = INSTITUTION_NAME
     config['institution_homepage'] = INSTITUTION_HOMEPAGE
-    config['create_new_account'] = CREATE_NEW_ACCOUNT
+    config['user_create_account'] = USER_CREATE_ACCOUNT
     config['debugging_enabled'] = DEBUGGING_ENABLED
 
 # site_log_path is a holdover name. This could more accurately be called the "log_path"
@@ -649,7 +649,7 @@ if not args.worker:
     config['timezone'] = TIMEZONE
     config['default_locale'] = DEFAULT_LOCALE
     config['duck_special_effects'] = False
-    config['create_new_account'] = CREATE_NEW_ACCOUNT
+    config['user_create_account'] = USER_CREATE_ACCOUNT
 
 config['worker'] = True if args.worker == 1 else False
 
