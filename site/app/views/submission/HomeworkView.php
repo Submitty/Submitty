@@ -197,6 +197,7 @@ class HomeworkView extends AbstractView {
             $active_days_charged = max(0, $active_days_late - $extensions);
         }
 
+        
         $date = new \DateTime();
         $future_date = clone $date;
         $future_date->modify('+7 days');
