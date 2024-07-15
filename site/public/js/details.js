@@ -111,10 +111,10 @@ function collapseAllSections() {
 }
 
 function inquiry_update() {
-    $(function(){
+    $(document).ready(() => {
         const button = document.getElementById('inquiryButton');
         const status = Cookies.get('inquiry_status');
-    
+
         if (status === 'on') {
             $('.grade-button').each(function () {
                 if (typeof $(this).attr('data-grade-inquiry') === 'undefined') {
