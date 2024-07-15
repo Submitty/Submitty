@@ -26,7 +26,6 @@ describe('testing grade override', () => {
             }
             cy.visit(['sample', 'grade_override']);
             cy.get('[data-testid="grade-override-select-gradeable"]').select(selectGradeable);
-            cy.get('[data-testid="overridden-grades-apply"]').click();
             if (gradeable === 'grading_homework') {
                 cy.get('[data-testid="grade-override-delete"]').click();
             }
