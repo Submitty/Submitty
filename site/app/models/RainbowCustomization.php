@@ -614,9 +614,11 @@ class RainbowCustomization extends AbstractModel {
         // using RCJSON will have issue because constructor will call loadFromJsonFile
         // which will return null if gui_customization is not found.
         // return $this->RCJSON->doesManualCustomizationExist();
-        $course_path = $this->core->getConfig()->getCoursePath();
-        $file_path = FileUtils::joinPaths($course_path, 'rainbow_grades', 'manual_customization.json');
-
-        return file_exists($file_path);
+        return file_exists(FileUtils::joinPaths(
+            $this->core->getConfig()->getCoursePath(),
+            'rainbow_grades',
+            'manual_customization.json'
+        ));
     }
+
 }
