@@ -38,6 +38,16 @@ class NotebookUtils {
                         'version_submission' => '',
                         'codemirror_mode' => $filedata['language_info']['codemirror_mode']['name'] ?? 'ipython',
                     ];
+
+                    foreach ($cell['outputs'] ?? [] as $output) {
+                        if (($output['output_type'] ?? '') === 'stream') {
+                            $cells[] = [
+                                'type' => 'output',
+                                'output_text' => implode($output['text'] ?? []),
+                            ];
+                        }
+                    }
+
                     break;
                 default:
                     break;
