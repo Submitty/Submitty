@@ -1388,6 +1388,9 @@
             },
             "extra_student_output" : {
               "type" : "boolean"
+            },
+            "tolerance" : {
+              "type" : "number"
             }
           }
         },

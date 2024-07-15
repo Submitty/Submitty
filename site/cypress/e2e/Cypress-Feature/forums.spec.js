@@ -49,7 +49,7 @@ const checkStatsUpducks = (fullName, numUpducks) => {
 
 const mergeThreads = (fromThread, toThread, mergedContent) => {
     // Add more to tests for uploading attachments
-    cy.get('[data-testid="thread-list-item"]').contains(fromThread).click({ force: true });
+    cy.get('[data-testid="thread-list-item"]').contains(fromThread).click();
     cy.get('[title="Merge Thread Into Another Thread"]').click();
     cy.get('.chosen-single > span').click();
     cy.wait(500);
