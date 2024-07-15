@@ -82,9 +82,9 @@
                                 "style": "display: inline"
                             } only %}
                             {% if ((poll.getAllowsCustomResponses() and option.isCustom()) and (user_id == option.getAuthorId())) %}
-                                <div class="move-btn delete-btn" style = "border:0; padding:0;" onclick = "removeCustomResponse({{ poll.getId() }}, {{ option.getId() }}, '{{ base_url }}');">
+                                <button type="button" class="move-btn delete-btn" aria-label="Delete Custom Response" style="border:0; padding:0;" onclick="removeCustomResponse({{ poll.getId() }}, {{ option.getId() }}, '{{ base_url }}');">
                                     <i class="fas fa-trash black-btn"></i>
-                                </div>
+                                </button>
                             {% endif %}
                             {% if option.isCorrect() and poll.isReleaseAnswer()%}
                                 <span class="fa-stack fa-2xs correct-tag">
