@@ -184,14 +184,14 @@
                     {# This is a data table #}
                     <table id="manual-grading-table" class="table table-striped table-bordered persist-area mobile-table">
                         <thead>
-                            <tr style="text-align:left">
+                            <tr>
                                 <th>USER ID</th>
                                 <th>Final Grade</th>
                                 <th>Note</th>
                                 <th>Delete</th>
                             </tr>
                         </thead>
-                        <tbody id="manual-grading-table-body" style="text-align:left">
+                        <tbody id="manual-grading-table-body">
                             {% for entry in manual_grade %}
                                 <tr>
                                     <td>{{ entry.user }}</td>

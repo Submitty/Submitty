@@ -227,6 +227,10 @@ hr {
     width: 32.5em !important;
 }
 
+#manual-grading-table {
+    text-align: left;
+}
+
 #gradeables .gradeable-custom-item-input {
     width: 3em;
 }
