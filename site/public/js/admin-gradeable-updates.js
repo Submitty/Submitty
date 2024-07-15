@@ -238,7 +238,7 @@ $(document).ready(() => {
         else if (data['depends_on_points'] !== null) {
             data['depends_on'] = gradeable;
         }
-        
+
         // If its date-related, then submit all date data
         if ($('#gradeable-dates').find(`input[name="${this.name}"]:enabled`).length > 0
             || $(this).hasClass('date-related')) {
