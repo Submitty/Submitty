@@ -21,7 +21,7 @@ set_permissions () {
     extension="${filename##*.}"
     # filename="${filename%.*}"
     case "${extension}" in
-        css|otf|jpg|png|ico|txt|twig|map)
+        css|otf|jpg|png|mp3|ico|txt|twig|map)
             chmod 444 ${fullpath}
             ;;
         bcmap|ttf|eot|svg|woff|woff2|js|cgi)

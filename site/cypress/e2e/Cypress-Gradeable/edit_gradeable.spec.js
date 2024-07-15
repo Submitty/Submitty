@@ -21,20 +21,19 @@ const beVisible = (button_selectors, selectors) => {
     }
 };
 
-const logoutLogin = ((user, url) => {
+const logoutLogin = (user, url) => {
     cy.logout();
     cy.login(user);
     cy.visit(url);
-});
+};
 
-const updateDates = ((inputSelector, date, saveText) => {
+const updateDates = (inputSelector, date, saveText) => {
     cy.get(inputSelector).clear();
     cy.get(inputSelector).type(date);
-    //clicks out of the calendar
+    // clicks out of the calendar
     cy.get('body').click(0, 0);
     cy.get('#save_status').should('have.text', saveText);
-});
-
+};
 
 describe('Tests cases revolving around modifying gradeables', () => {
     beforeEach(() => {
@@ -51,11 +50,9 @@ describe('Tests cases revolving around modifying gradeables', () => {
         updateDates('#date_grade_due', future_date, 'All Changes Saved');
         updateDates('#date_grade', future_date, 'All Changes Saved');
         updateDates('#date_due', future_date, 'All Changes Saved');
-
     });
 
     it('Should test settings page 0-2', () => {
-
         notBeVisible(['#no_ta_grade'], ['#discussion_grading_enable_container', '#grade_inquiry_enable_container']);
 
         beVisible(['#yes_ta_grade'], ['#discussion_grading_enable_container', '#grade_inquiry_enable_container']);
@@ -87,7 +84,7 @@ describe('Tests cases revolving around modifying gradeables', () => {
 
         cy.get('#gradeable-lock').contains('Select prerequisite gradeable (Off)');
 
-        //Change to button when the link changes to button
+        // Change to button when the link changes to button
         cy.get('[data-testid="config-button"]').click();
         cy.get('[data-testid="back-to-autograding"]').should('be.visible');
         cy.get('[data-testid="back-to-autograding"]').click();
@@ -169,7 +166,7 @@ describe('Tests cases revolving around modifying gradeables', () => {
     it('Should test the change of settings in student view', () => {
         cy.get('#page_1_nav').click();
         cy.get('#no_student_view').click();
-        //student should not be able to see open_peer_homework
+        // student should not be able to see open_peer_homework
         logoutLogin('student', ['sample']);
         cy.get('#open_peer_homework').should('not.exist');
 
@@ -183,7 +180,7 @@ describe('Tests cases revolving around modifying gradeables', () => {
         cy.get('#submission-version-select').should('not.exist');
         cy.contains('Submissions are no longer being accepted for this assignment').should('exist');
 
-        //Makes sure we can undo the setting change
+        // Makes sure we can undo the setting change
         logoutLogin('instructor', ['sample', 'gradeable', 'open_peer_homework', 'update']);
         cy.get('#page_1_nav').click();
         cy.get('#yes_student_download').click();
@@ -197,14 +194,14 @@ describe('Tests cases revolving around modifying gradeables', () => {
     });
 
     it('Should test locking the gradeable', () => {
-        //testing
+        // testing
         cy.get('#page_1_nav').click();
-        //Locking the gradeable
+        // Locking the gradeable
         cy.get('#gradeable-lock').select('Autograde and TA Homework (C System Calls) [ grades_released_homework_autota ]');
         cy.get('#gradeable-lock-points').should('be.visible');
-        //unlocking the gradeable
+        // unlocking the gradeable
         cy.get('#gradeable-lock').select('');
-        //Relocks the gradeable
+        // Relocks the gradeable
         cy.get('#gradeable-lock').select('Autograde and TA Homework (C System Calls) [ grades_released_homework_autota ]');
         cy.get('#gradeable-lock-points').type('10');
         cy.get('body').click(0, 0);
@@ -217,7 +214,6 @@ describe('Tests cases revolving around modifying gradeables', () => {
         logoutLogin('instructor', ['sample', 'gradeable', 'open_peer_homework', 'update']);
         cy.get('#page_1_nav').click();
         cy.get('#gradeable-lock').select('');
-
     });
 
     it('Should test the dates page', () => {

@@ -1480,7 +1480,7 @@ VALUES (?,?,?,?,?,?)",
      */
     public function updateUser(User $user, $semester = null, $course = null) {
         $params = [$user->getNumericId(), $user->getPronouns(), $user->getDisplayPronouns(), $user->getLegalGivenName(), $user->getPreferredGivenName(),
-                       $user->getLegalFamilyName(), $user->getPreferredFamilyName(), $user->getLastInitialFormat(), $user->getEmail(),
+                       $user->getLegalFamilyName(), $user->getPreferredFamilyName(), $user->getLastInitialFormat(), $user->getDisplayNameOrder(), $user->getEmail(),
                        $user->getSecondaryEmail(), $this->submitty_db->convertBoolean($user->getEmailBoth()),
                        $this->submitty_db->convertBoolean($user->isUserUpdated()),
                        $this->submitty_db->convertBoolean($user->isInstructorUpdated())];
@@ -1502,7 +1502,7 @@ VALUES (?,?,?,?,?,?)",
 UPDATE users
 SET
   user_numeric_id=?, user_pronouns=?, display_pronouns=?, user_givenname=?, user_preferred_givenname=?,
-  user_familyname=?, user_preferred_familyname=?, user_last_initial_format=?,
+  user_familyname=?, user_preferred_familyname=?, user_last_initial_format=?, display_name_order=?,
   user_email=?, user_email_secondary=?, user_email_secondary_notify=?,
   user_updated=?, instructor_updated=?{$extra}
 WHERE user_id=? /* AUTH: \"{$logged_in}\" */",
@@ -2543,6 +2543,52 @@ ORDER BY merged_data.{$section_key}
         if (!array_key_exists('NULL', $return)) {
             $return['NULL'] = 0;
         }
+        return $return;
+    }
+
+
+    /**
+     * Returns an array of Verified components for each Section
+     *
+     * @param  array<int>  $sections
+     * @return array<int|string,int>
+     */
+    public function getVerifiedComponentsCountByGradingSections(string $g_id, array $sections, string $section_key, bool $is_team): array {
+        $unit = "users";
+        $id = "user_id";
+        if ($is_team) {
+            $unit = "gradeable_teams";
+            $id = "team_id";
+        }
+
+        if (! in_array($section_key, ["registration_section", "rotating_section"], true)) {
+            return [];
+        }
+
+        $this->course_db->query(
+            "
+            SELECT 
+                $unit.$section_key, COUNT($unit.$id) as verified_components_count
+            FROM 
+                gradeable_data as gd
+                JOIN gradeable_component_data as gcd ON (gd.gd_id = gcd.gd_id)
+                JOIN $unit ON (gd.gd_$id = $unit.$id)
+            WHERE
+                gd.g_id = ?
+                AND CAST ($unit.$section_key AS TEXT) IN " . $this->createParameterList(count($sections))  . "
+                AND gcd.gcd_verifier_id IS NOT NULL
+            GROUP BY
+                $unit.$section_key
+            ;
+            ",
+            array_merge([$g_id], $sections)
+        );
+        $return = [];
+
+        foreach ($this->course_db->rows() as $row) {
+            $return[$row[$section_key]] = $row['verified_components_count'];
+        }
+
         return $return;
     }
 
@@ -7860,6 +7906,17 @@ AND gc_id IN (
         ";
         $current_date = $this->core->getDateTimeNow()->format('Y-m-d');
         $this->course_db->query($query, [$current_date, $current_date, $current_date]);
+        return $this->course_db->rows();
+    }
+
+    /**
+     * Return all queue information for a certain student
+     *
+     * @param string $user_id
+     * @return array<string, mixed[]> user info, indexed by user id.
+     */
+    public function studentQueueSearch(string $user_id): array {
+        $this->course_db->query("SELECT * FROM queue WHERE user_id = ?", [$user_id]);
         return $this->course_db->rows();
     }
 
