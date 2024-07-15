@@ -826,7 +826,6 @@ class ReportController extends AbstractController {
         }
 
         $rainbow_grades_dir = FileUtils::joinPaths($this->core->getConfig()->getCoursePath(), "rainbow_grades");
-        $customization_src = null;
         $customization_dest = FileUtils::joinPaths($rainbow_grades_dir, 'customization.json');
 
         // Determine the source file based on the selected value
