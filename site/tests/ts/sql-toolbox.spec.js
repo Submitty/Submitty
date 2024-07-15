@@ -1,4 +1,4 @@
-import {runSqlQuery, init, generateCSV} from '../../ts/sql-toolbox';
+import { runSqlQuery, init, generateCSV } from '../../ts/sql-toolbox';
 import { test } from '@jest/globals';
 import { mockFetch } from './utils';
 
@@ -59,9 +59,9 @@ test('csv generation', () => {
             </tbody>
         </table>
     `;
-    expect(generateCSV('table-foo')).toEqual('"col_1","col_2",\n' +
-        '"foo","bar",\n' +
-        '"baz","qux",\n');
+    expect(generateCSV('table-foo')).toEqual('"col_1","col_2",\n'
+    + '"foo","bar",\n'
+    + '"baz","qux",\n');
 });
 
 test('success with results', async () => {

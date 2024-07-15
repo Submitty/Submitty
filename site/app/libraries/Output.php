@@ -39,6 +39,8 @@ class Output {
     private $page_name = "";
     private $loaded_views = [];
 
+    /** @var Set<array{string,string}> */
+    private $audio;
     /** @var Set */
     private $css;
     /** @var Set */
@@ -75,6 +77,7 @@ class Output {
         $this->start_time = microtime(true);
         $this->controller = new GlobalController($core);
 
+        $this->audio = new Set();
         $this->css = new Set();
         $this->js = new Set();
         $this->module_js = new Set();
@@ -526,6 +529,14 @@ HTML;
         return $this->getOutput();
     }
 
+    public function addAudio(string $filename, string $url): void {
+        $this->audio->add([$filename, $url]);
+    }
+
+    public function addInternalAudio(string $file, string $folder = 'audio'): void {
+        $this->addAudio($file, $this->timestampResource($file, $folder));
+    }
+
     public function addInternalCss($file, $folder = 'css') {
         $this->addCss($this->timestampResource($file, $folder));
     }
@@ -624,6 +635,13 @@ HTML;
             return $this->page_name;
         }
         return end($this->breadcrumbs)->getTitle();
+    }
+
+    /**
+     * @return Set<array{string,string}>
+     */
+    public function getAudio(): Set {
+        return $this->audio;
     }
 
     public function getCss(): Set {

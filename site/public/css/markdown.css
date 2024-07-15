@@ -119,6 +119,7 @@
     background-color: var(--standard-pale-gray);
     padding: 0 10px;
     border-radius: 6px 6px 0 0;
+    overflow-x: hidden;
 }
 
 [data-theme="dark"] .markdown-area-header {
@@ -129,11 +130,14 @@
     display: flex;
     margin-left: auto;
     align-items: center;
+    flex-wrap: wrap;
+    margin-bottom: 1px;
 }
 
 .markdown-mode-buttons {
     display: flex;
     margin-top: 10px;
+    flex-wrap: wrap;
 }
 
 .markdown-mode-tab {
