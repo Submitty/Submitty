@@ -23,6 +23,9 @@ def up(config, database, semester, course):
         ADD COLUMN IF NOT EXISTS author_id VARCHAR(255) DEFAULT NULL;
 
         ALTER TABLE poll_options
+        DROP CONSTRAINT IF EXISTS poll_options_fkey;
+
+        ALTER TABLE poll_options
         ADD CONSTRAINT poll_options_fkey
         FOREIGN KEY (author_id) REFERENCES users(user_id) ON UPDATE CASCADE;
         """
@@ -42,12 +45,4 @@ def down(config, database, semester, course):
     :param course: Code of course being migrated
     :type course: str
     """
-    database.execute(
-        """
-        ALTER TABLE poll_options
-        DROP CONSTRAINT IF EXISTS poll_options_fkey;
-
-        ALTER TABLE poll_options
-        DROP COLUMN IF EXISTS author_id;
-        """
-    )
+    pass
