@@ -543,7 +543,7 @@ class RainbowCustomization extends AbstractModel {
      * @return array<object>  array of manual grades JSON object
      */
     public function getManualGrades(): array {
-        return !is_null($this->RCJSON) ? $this->RCJSON->getManualGrades() : [];
+        return $this->RCJSON->getManualGrades() ?? [];
     }
 
     // This function handles processing the incoming post data
