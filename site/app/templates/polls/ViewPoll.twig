@@ -104,16 +104,16 @@
             </form>
             {% if not user_admin and poll.isOpen() and poll.getAllowsCustomResponses() %}
                 <div class = 'info-wrapper custom-response-wrapper'>
-                        <input type="hidden" name="csrf_token" value="{{ csrf_token }}"/>
-                        <input type="hidden" name="poll_id" value="{{ poll.getId() }}"/>
-                        <br />
-                        <div class="response-container">
-                            <textarea aria-label="Response text" class="poll-response custom-poll-response" name="custom-response" placeholder="Enter response here..." rows="10" cols="30"></textarea>
-                        </div>
-                        <i>
-                            Are you certain you want to add a response? It will be visible to every student.<br />
-                        </i>
-                        <button type="button" class="btn btn-primary student-submit custom-response-submit" onclick = "addCustomResponse({{poll.getId()}},'{{base_url}}');">Add Response</button>
+                    <input type="hidden" name="csrf_token" value="{{ csrf_token }}"/>
+                    <input type="hidden" name="poll_id" value="{{ poll.getId() }}"/>
+                    <br />
+                    <div class="response-container">
+                        <textarea aria-label="Response text" class="poll-response custom-poll-response" name="custom-response" placeholder="Enter response here..." rows="10" cols="30"></textarea>
+                    </div>
+                    <i>
+                        Are you certain you want to add a response? It will be visible to every student.<br />
+                    </i>
+                    <button type="button" class="btn btn-primary student-submit custom-response-submit" onclick = "addCustomResponse({{poll.getId()}},'{{base_url}}');">Add Response</button>
                     <script>
                         $(document).ready(() => {
                             validateCustomResponse();
