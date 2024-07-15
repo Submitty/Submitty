@@ -6240,6 +6240,7 @@ AND gc_id IN (
 
         // Generate the ORDER BY clause
         $order = self::generateOrderByClause($sort_keys, []);
+
         $query = "
             SELECT
               g.g_id AS id,
@@ -7358,6 +7359,7 @@ AND gc_id IN (
             VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?)";
         $this->course_db->query($query, $param);
     }
+
     /**
      * Updates an existing graded component in the database
      *
