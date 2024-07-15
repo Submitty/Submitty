@@ -9,6 +9,14 @@ cat << EOF
 # SETTING UP DIRECTORIES
 EOF
 
+########################################################################################################################
+########################################################################################################################
+# this script must be run by root or sudo
+if [[ "$UID" -ne "0" ]] ; then
+    echo "ERROR: This script must be run by root or sudo"
+    exit 1
+fi
+
 # if the top level INSTALL directory does not exist, then make it
 mkdir -p "${SUBMITTY_INSTALL_DIR}"
 
