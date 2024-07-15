@@ -60,9 +60,7 @@
     </div>
     {% if grade_inquiry_only_button %}
         <script>
-            $(document).ready(function(){
-                inquiry_update();
-            })
+            inquiry_update();
         </script>
     {% endif %}
     {% if not is_student %}
@@ -766,13 +764,7 @@
     }
 
     function change_inquiry() {
-        const status = {{ inquiry_status ? 1 : 0}};
-        if (status) {
-            Cookies.set('inquiry_status', 'off');
-        } 
-        else {
-            Cookies.set('inquiry_status', 'on');
-        }
+        Cookies.set('inquiry_status', '{{ inquiry_status ? "off" : "on"}}');
         location.reload();
     }
 
