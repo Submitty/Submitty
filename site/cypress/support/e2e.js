@@ -28,6 +28,6 @@ afterEach(() => {
     });
 });
 
-
+// eslint-disable-next-line no-undef
 const compareSnapshotCommand = require('cypress-image-diff-js/command');
 compareSnapshotCommand();
