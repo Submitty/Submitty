@@ -115,14 +115,14 @@ function togglePollFormOptions() {
 }
 
 function validateCustomResponse() {
-    const custom_response = document.querySelector('.custom-poll-response');
-    const custom_response_submit = document.querySelector('.custom-response-submit');
+    const custom_response = $('.custom-poll-response');
+    const custom_response_submit = $('.custom-response-submit');
 
     const validate = () => {
-        custom_response_submit.disabled = custom_response.value.trim() === '';
+        custom_response_submit.prop('disabled', custom_response.val().trim() === '');
     };
 
-    custom_response.addEventListener('input', () => {
+    custom_response.on('input', () => {
         validate();
     });
 
