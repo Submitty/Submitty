@@ -39,7 +39,7 @@
     } only %}
 </span>
 {% if component_version_conflict is same as(true) and not grading_disabled %}
-    <span class="version-warning col-5">
+    <span class="version-warning col-5" data-testid="version-warning">
         Please edit or ensure that comments from version {{ graded_component.graded_version }} still apply.
     </span>
 {% else %}
