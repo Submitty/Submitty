@@ -1,6 +1,14 @@
 #!/usr/bin/env bash
 set -ve
 
+########################################################################################################################
+########################################################################################################################
+# this script must be run by root or sudo
+if [[ "$UID" -ne "0" ]] ; then
+    echo "ERROR: This script must be run by root or sudo"
+    exit 1
+fi
+
 # We assume a relative path from this repository to the installation
 # directory and configuration directory.
 THIS_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null && pwd )/.."

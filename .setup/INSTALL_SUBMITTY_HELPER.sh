@@ -32,14 +32,6 @@ source "${SUBMITTY_REPOSITORY}/.setup/install_submitty/get_globals.sh"
 
 
 
-########################################################################################################################
-########################################################################################################################
-# this script must be run by root or sudo
-if [[ "$UID" -ne "0" ]] ; then
-    echo "ERROR: This script must be run by root or sudo"
-    exit 1
-fi
-
 # check optional argument
 if [[ "$#" -ge 1 && "$1" != "test" && "$1" != "clean" && "$1" != "test_rainbow"
        && "$1" != "skip_web_restart" && "$1" != "disable_shipper_worker" ]]; then
