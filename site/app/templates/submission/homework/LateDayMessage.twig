@@ -89,6 +89,10 @@
 </div>
 {% endif %}
 
+{% if daylight %}
+    {% include 'submission/homework/DaylightSavingsMessage.twig' %}
+{% endif %}
+
 {% macro line_breaks(count) %}
     {% if count > 0 %}
         {% for i in 1..count %}
