@@ -2,7 +2,7 @@
 const benchmarks_with_input_fields = ['lowest_a-', 'lowest_b-', 'lowest_c-', 'lowest_d'];
 const allowed_grades = ['A', 'A-', 'B+', 'B', 'B-', 'C+', 'C', 'C-', 'D+', 'D', 'F'];
 const allowed_grades_excluding_f = ['A', 'A-', 'B+', 'B', 'B-', 'C+', 'C', 'C-', 'D+', 'D'];
-const tables = ['plagiarism', 'manualGrade']
+const tables = ['plagiarism', 'manualGrade'];
 
 // eslint-disable-next-line no-unused-vars
 function ExtractBuckets() {
