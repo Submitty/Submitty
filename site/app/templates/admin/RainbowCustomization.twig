@@ -90,31 +90,28 @@
 
             {% if manual_customization_exists %}
             <div id="ask_which_customization" class="customization_item" style="display:block;">
-                {% else %}
-                <div id="ask_which_customization" class="customization_item" style="display:none;">
-                    {% endif %}
-                    <fieldset>
-                        <legend><h2>Customization</h2></legend>
-                        <input type="hidden" name="csrf_token" value="{{ csrfToken }}" />
-                        <form id="customizationForm">
-                            <div id="customization-options" style="display:block;">
-                                <p>It appears that a manual customization file has been provided. Please specify the preferred file to be utilized for rendering Rainbow Grades:</p>
-                                <div>
-                                    <input type="radio" id="manual_customization" name="customization" value="manual" {{ manual_customization_exists ? 'checked' : '' }}>
-                                    <label for="manual_customization">Manual Customization</label>
-                                </div>
-                                <div>
-                                    <input type="radio" id="gui_customization" name="customization" value="gui" {{ manual_customization_exists ? '' : 'checked' }}>
-                                    <label for="gui_customization">GUI Customization</label>
-                                </div>
+            {% else %}
+            <div id="ask_which_customization" class="customization_item" style="display:none;">
+            {% endif %}
+                <fieldset>
+                    <legend><h2>Customization</h2></legend>
+                    <input type="hidden" name="csrf_token" value="{{ csrfToken }}" />
+                    <form id="customizationForm">
+                        <div id="customization-options" style="display:block;">
+                            <p>It appears that a manual customization file has been provided. Please specify the preferred file to be utilized for rendering Rainbow Grades:</p>
+                            <div>
+                                <input type="radio" id="manual_customization" name="customization" value="manual" {{ manual_customization_exists ? 'checked' : '' }}>
+                                <label for="manual_customization">Manual Customization</label>
                             </div>
-                        </form>
-                    </fieldset>
-
+                            <div>
+                                <input type="radio" id="gui_customization" name="customization" value="gui" {{ manual_customization_exists ? '' : 'checked' }}>
+                                <label for="gui_customization">GUI Customization</label>
+                            </div>
+                        </div>
+                    </form>
+                </fieldset>
             </div>
-
-
-
+                
             <div id="display" class="customization_item">
                 <fieldset>
                     <legend><h2>Display</h2></legend>
