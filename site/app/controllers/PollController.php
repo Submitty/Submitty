@@ -209,9 +209,8 @@ class PollController extends AbstractController {
             $this->core->addErrorMessage('Invalid time given');
             return new RedirectResponse($this->core->buildCourseUrl(['polls']));
         }
-        $poll = new Poll($_POST['name'], $_POST['question'], $_POST['question_type'], $duration, $date, $_POST['release_histogram'], $_POST["release_answer"]);
+        $poll = new Poll($_POST['name'], $_POST['question'], $_POST['question_type'], $duration, $date, $_POST['release_histogram'], $_POST["release_answer"], null, isset($_POST['poll-custom-options']));
         $em->persist($poll);
-        $poll->setAllowsCustomOptions(isset($_POST['poll-custom-options']));
 
         // Need to run this after persist so that we can use getId() below
         if (isset($_FILES['image_file']) && $_FILES["image_file"]["name"] !== "") {
@@ -801,9 +800,7 @@ class PollController extends AbstractController {
                 implemented don't have this data. At the time, there
                 only existed questions of type single response. */
             $question_type = array_key_exists("question_type", $poll) ? $poll['question_type'] : 'single-response-multiple-correct';
-            $poll_entity = new Poll($poll['name'], $poll['question'], $question_type, new \DateInterval($poll['duration']), \DateTime::createFromFormat("Y-m-d", $poll['release_date']), $poll['release_histogram'], $poll['release_answer']);
-            $allows_custom = $poll['allows_custom'] ?? false;
-            $poll_entity->setAllowsCustomOptions($allows_custom);
+            $poll_entity = new Poll($poll['name'], $poll['question'], $question_type, new \DateInterval($poll['duration']), \DateTime::createFromFormat("Y-m-d", $poll['release_date']), $poll['release_histogram'], $poll['release_answer'], $poll['image_path'], $poll['allows_custom']);
 
             $em->persist($poll_entity);
             $order = 0;

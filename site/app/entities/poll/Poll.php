@@ -70,7 +70,7 @@ class Poll {
     #[ORM\JoinColumn(name: "poll_id", referencedColumnName: "poll_id")]
     protected Collection $responses;
 
-    public function __construct(string $name, string $question, string $question_type, \DateInterval $duration, \DateTime $release_date, string $release_histogram, string $release_answer, string $image_path = null) {
+    public function __construct(string $name, string $question, string $question_type, \DateInterval $duration, \DateTime $release_date, string $release_histogram, string $release_answer, string $image_path = null, bool $allows_custom = false) {
         $this->setName($name);
         $this->setQuestion($question);
         $this->setQuestionType($question_type);
@@ -81,7 +81,7 @@ class Poll {
         $this->setReleaseHistogram($release_histogram);
         $this->setReleaseAnswer($release_answer);
         $this->setImagePath($image_path);
-        $this->setAllowsCustomOptions(false);
+        $this->setAllowsCustomOptions($allows_custom);
         $this->setClosed();
 
         $this->options = new ArrayCollection();
