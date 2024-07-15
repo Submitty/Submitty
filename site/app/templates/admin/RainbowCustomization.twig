@@ -161,13 +161,13 @@
                 <input type="hidden" name="csrf_token" value="{{ csrfToken }}" />
                 <input type="hidden" name="option" value="-1" />
                 <div class="option">
-                    <label for="manual_grading_user_id">
+                    <label for="manual-grading-user-id">
                         <span>USER ID:</span>
-                        <input class="option-input" type="text" name="manual_grading_user_id" id="manual_grading_user_id">
+                        <input class="option-input" type="text" name="manual-grading-user-id" id="manual_grading_user_id">
                     </label>
-                    <label for="manual_grading_grade">
+                    <label for="manual-grading-grade">
                         <span>Final Grade:</span>
-                        <select name="manual_grading_grade" id="manual_grading_grade">
+                        <select name="manual-grading-grade" id="manual-grading-grade">
                             <option disabled selected value> -- select an option -- </option>
                             {% for grade in allowed_grades %}
                                 <option value="{{ grade }}">{{ grade }}</option>
@@ -358,7 +358,7 @@ To remove a curve simply blank all boxes."></i>
             $(`#override-${gradeable_id}`).html(override.val());
         });
 
-        ["#plagiarism_user_id", "#manual_grading_user_id"].forEach(function(user_id) {
+        ["#plagiarism_user_id", "#manual-grading-user-id"].forEach(function(user_id) {
             $(user_id).autocomplete({
                 source: {{ student_full|raw }}
             });
