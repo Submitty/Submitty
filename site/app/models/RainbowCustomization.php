@@ -600,8 +600,6 @@ class RainbowCustomization extends AbstractModel {
         $this->RCJSON->saveToJsonFile();
     }
 
-
-
     public function error() {
         return $this->has_error;
     }
