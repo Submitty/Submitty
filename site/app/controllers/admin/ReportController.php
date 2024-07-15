@@ -688,10 +688,11 @@ class ReportController extends AbstractController {
     #[Route("/courses/{_semester}/{_course}/reports/build_form", methods: ['POST'])]
     public function executeBuildForm(): MultiResponse {
         // Configure json to go into jobs queue
-        $job_json = (object) [];
-        $job_json->job = 'RunAutoRainbowGrades';
-        $job_json->semester = $this->core->getConfig()->getTerm();
-        $job_json->course = $this->core->getConfig()->getCourse();
+        $job_json = [
+            'job' => 'RunAutoRainbowGrades',
+            'semester' => $this->core->getConfig()->getTerm(),
+            'course' => $this->core->getConfig()->getCourse(),
+        ];
 
         // Encode
         $job_json = json_encode($job_json, JSON_PRETTY_PRINT);
