@@ -615,9 +615,6 @@ class ReportController extends AbstractController {
         }
     }
 
-
-
-
     #[Route("/courses/{_semester}/{_course}/reports/rainbow_grades_customization")]
     public function generateCustomization() {
         //Build a new model, pull in defaults for the course
@@ -686,7 +683,7 @@ class ReportController extends AbstractController {
 
 
     #[Route("/courses/{_semester}/{_course}/reports/build_form", methods: ['POST'])]
-    public function executeBuildForm(): MultiResponse {
+    public function executeBuildForm(): JsonResponse {
         // Configure json to go into jobs queue
         $job_json = [
             'job' => 'RunAutoRainbowGrades',
@@ -706,12 +703,7 @@ class ReportController extends AbstractController {
 
         // Place in queue
         file_put_contents($path, $job_json);
-
-        // Send a success response
-        return new MultiResponse(
-            JsonResponse::getSuccessResponse(['status' => 'success']),
-            null
-        );
+        return JsonResponse::getSuccessResponse(['status' => 'success']);
     }
 
 
@@ -756,34 +748,64 @@ class ReportController extends AbstractController {
     }
 
 
+//    #[Route("/courses/{_semester}/{_course}/reports/rainbow_grades_customization/manual_download", methods: ["GET"])]
+//    public function downloadRainbowConfig() {
+//        $rainbow_grades_dir = FileUtils::joinPaths($this->core->getConfig()->getCoursePath(), "rainbow_grades");
+//        $file_path = FileUtils::joinPaths($rainbow_grades_dir, 'manual_customization.json');
+//
+//        if (!file_exists($file_path)) {
+//            $msg = 'Download failed: File not found';
+//            $this->core->addErrorMessage($msg);
+//            $redirect_url = $this->core->buildCourseUrl(['reports', 'rainbow_grades_customization']);
+//            return new MultiResponse(
+//                JsonResponse::getErrorResponse($msg),
+//                null,
+//                new RedirectResponse($redirect_url)
+//            );
+//        }
+//
+//        // Set headers and read the file
+//        header('Content-Type: application/json');
+//        header("Content-Transfer-Encoding: Binary");
+//        header("Content-disposition: attachment; filename=\"" . basename($file_path) . "\"");
+//
+//        readfile($file_path);
+//        exit;
+//        // Do not add return type, for example if you add :MultiResponse
+//        // php-stan will start yelling that missing return statement
+//        // if we add return statement, it will be written into the downloaded file as json
+//        // then it will break the Make remove_json_comments, so no linting is OK here.
+//    }
+
     #[Route("/courses/{_semester}/{_course}/reports/rainbow_grades_customization/manual_download", methods: ["GET"])]
-    public function downloadRainbowConfig() {
+    public function downloadRainbowConfig(): DownloadResponse
+    {
         $rainbow_grades_dir = FileUtils::joinPaths($this->core->getConfig()->getCoursePath(), "rainbow_grades");
         $file_path = FileUtils::joinPaths($rainbow_grades_dir, 'manual_customization.json');
 
         if (!file_exists($file_path)) {
             $msg = 'Download failed: File not found';
             $this->core->addErrorMessage($msg);
-            $redirect_url = $this->core->buildCourseUrl(['reports', 'rainbow_grades_customization']);
-            return new MultiResponse(
-                JsonResponse::getErrorResponse($msg),
-                null,
-                new RedirectResponse($redirect_url)
-            );
+            return DownloadResponse::getErrorResponse($msg);
         }
 
-        // Set headers and read the file
-        header('Content-Type: application/json');
-        header("Content-Transfer-Encoding: Binary");
-        header("Content-disposition: attachment; filename=\"" . basename($file_path) . "\"");
-
-        readfile($file_path);
-        exit;
-        // Do not add return type, for example if you add :MultiResponse
-        // php-stan will start yelling that missing return statement
-        // if we add return statement, it will be written into the downloaded file as json
-        // then it will break the Make remove_json_comments, so no linting is OK here.
+        try {
+            $fileContent = file_get_contents($file_path);
+            if ($fileContent === false) {
+                throw new RuntimeException('Failed to read file');
+            }
+            return DownloadResponse::getDownloadResponse(
+                $fileContent,
+                'application/json',
+                'manual_customization.json'
+            );
+        } catch (RuntimeException $e) {
+            $this->core->addErrorMessage($e->getMessage());
+            return DownloadResponse::getErrorResponse($e->getMessage());
+        }
     }
+
+
 
     #[Route("/courses/{_semester}/{_course}/reports/rainbow_grades_customization/gui_download", methods: ["GET"])]
     public function downloadGUIRainbowConfig() {
