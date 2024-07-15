@@ -52,7 +52,7 @@ describe('Test cases for checking the clear version conflicts button in the TA g
             cy.get('.version-warning').should('exist');
             cy.get('.box-title').click();
 
-            cy.get('.save-tools-save').contains('Save (and resolve version conflict)');
+            cy.get('.save-tools-save').contains('Save and resolve version conflict');
             cy.get('.save-tools-save').click();
 
             cy.get('.version-warning', { timeout: 10000 }).should('not.exist');
