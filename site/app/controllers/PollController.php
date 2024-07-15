@@ -510,7 +510,7 @@ class PollController extends AbstractController {
      */
     public function addCustomResponse(): JsonResponse {
         $poll_id = intval($_POST['poll_id'] ?? -1);
-        $poll_response = $_POST['custom-response'];
+        $poll_response = $_POST['custom-response'] ?? '';
         $user_id = $this->core->getUser()->getId();
         $em = $this->core->getCourseEntityManager();
         $poll_repo = $em->getRepository(Poll::class);
@@ -550,7 +550,7 @@ class PollController extends AbstractController {
      */
     public function removeCustomResponse(): JsonResponse {
         $poll_id = intval($_POST['poll_id'] ?? -1);
-        $option_id = $_POST['option_id'];
+        $option_id = intval($_POST['option_id'] ?? -1);
         $user_id = $this->core->getUser()->getId();
         $em = $this->core->getCourseEntityManager();
         /** @var Poll|null */
