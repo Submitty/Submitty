@@ -315,7 +315,7 @@ else:
         if (user_create_account.lower() in ['yes', 'y']):
             USER_CREATE_ACCOUNT = True
             break
-        elif (USER_CREATE_ACCOUNT.lower() in ['no', 'n']):
+        elif (user_create_account.lower() in ['no', 'n']):
             USER_CREATE_ACCOUNT = False
             break
     print()
