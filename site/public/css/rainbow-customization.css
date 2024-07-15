@@ -223,8 +223,8 @@ hr {
     padding: 4px 6px;
 }
 
-.note-input {
-    width: 32.5em !important;
+#manual-grading-note {
+    width: 32.5em;
 }
 
 #manual-grading-table {

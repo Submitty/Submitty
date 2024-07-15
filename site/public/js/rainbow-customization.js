@@ -327,7 +327,7 @@ function addToTable(table) {
 
     const tableMap = {
         0: ['plagiarism-table-body', 'plagiarism_user_id', 'g_id', 'marks'],
-        1: ['manual-grading-table-body', 'manual_grading_user_id', 'manual_grading_grade', 'manual_grading_note'],
+        1: ['manual-grading-table-body', 'manual_grading_user_id', 'manual_grading_grade', 'manual-grading-note'],
     };
 
     const firstInput = document.getElementById(tableMap[table][1]).value.trim();
