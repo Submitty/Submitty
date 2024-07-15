@@ -377,7 +377,7 @@ class RainbowCustomizationJSON extends AbstractModel {
             "note" => ""
         ];
 
-        $manualGradeArray = json_decode(json_encode($manualGradeEntry), true);
+        $manualGradeArray = (array) $manualGradeEntry;
 
         if ($manualGradeArray === $emptyArray) {
             throw new BadArgumentException('Manual grading entry may not be empty.');
