@@ -169,8 +169,7 @@
                         <span>Final Grade:</span>
                         <select name="manual_grading_grade" id="manual_grading_grade">
                             <option disabled selected value> -- select an option -- </option>
-                            {% set grades = ["A", "A-", "B+", "B", "B-", "C+", "C", "C-", "D+", "D", "F"] %}
-                            {% for grade in grades %}
+                            {% for grade in allowed_grades %}
                                 <option value="{{ grade }}">{{ grade }}</option>
                             {% endfor %}
                         </select>

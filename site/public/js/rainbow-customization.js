@@ -1,5 +1,7 @@
 /* exported addToTable, deleteRow */
 const benchmarks_with_input_fields = ['lowest_a-', 'lowest_b-', 'lowest_c-', 'lowest_d'];
+const allowed_grades = ['A', 'A-', 'B+', 'B', 'B-', 'C+', 'C', 'C-', 'D+', 'D', 'F'];
+const allowed_grades_excluding_f = ['A', 'A-', 'B+', 'B', 'B-', 'C+', 'C', 'C-', 'D+', 'D'];
 
 // eslint-disable-next-line no-unused-vars
 function ExtractBuckets() {
@@ -374,7 +376,6 @@ function addToTable(table) {
                 alert('Invalid User ID. Please enter a valid one.');
                 return;
             }
-            const allowed_grades = ['A', 'A-', 'B+', 'B', 'B-', 'C+', 'C', 'C-', 'D+', 'D', 'F'];
             if (!allowed_grades.includes(secondInput)) {
                 alert('Grade must be one of the following: A, A-, B+, B, C+, C, C-, D+, D, F');
                 return;
@@ -488,14 +489,13 @@ function getFinalCutoffPercent() {
 
     // Collect benchmark percents
     const final_cutoff = {};
-    const letter_grades = ['A', 'A-', 'B+', 'B', 'B-', 'C+', 'C', 'C-', 'D+', 'D'];
 
     $('.final_cutoff_input').each(function () {
         // Get data
         const letter_grade = this.getAttribute('data-benchmark').toString();
         const percent = this.value;
 
-        if (letter_grades.includes(letter_grade)) {
+        if (allowed_grades_excluding_f.includes(letter_grade)) {
             // Verify percent is not empty
             if (percent === '') {
                 throw 'All final cutoffs must have a value before saving.';
