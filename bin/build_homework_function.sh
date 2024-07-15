@@ -230,23 +230,17 @@ function build_homework {
         exit 1
     fi
 
+    log_instructor_output="${hw_build_path}/log_instructor_output.txt"
+    config_file="${hw_build_path}/config.json"
 
-    instructor_solution_dir="${hw_build_path}/instructor_solution"
-    is_instructor_solution=false
-    for file in "${instructor_solution_dir}"/*; do
-        if [ -f "${file}" ] && [[ "${file}" == *.cpp ]]; then
-            is_instructor_solution=true
-            break
-        fi
-    done
+    instructor_solution_compile_command=$(sed 's://.*$::' "${config_file}" | jq -r '.instructor_solution_compile_command') >> $log_instructor_output
 
-    if [ "${is_instructor_solution}" = true ]; then
+    if [ -n "${instructor_solution_compile_command}" ] && [ "${instructor_solution_compile_command}" != "null" ]; then
         test_input_dir="${hw_build_path}/test_input"
         test_output_dir="${hw_build_path}/test_output"
         instructor_solution_executable_dir="${hw_build_path}/instructor_solution_executable"
         instructor_cmake_file="${hw_build_path}/instructor_CMakeLists.txt"
-        log_instructor_output="${hw_build_path}/log_instructor_output.txt"
-        config_file="${hw_build_path}/config.json"
+        instructor_solution_dir="${hw_build_path}/instructor_solution"
 
         # Ensure the necessary directories exist
         mkdir -p "${test_output_dir}"
@@ -259,13 +253,6 @@ function build_homework {
         if [ ! -f "${config_file}" ]; then
            echo "Config file ${config_file} does not exist."
            exit 1
-        fi
-
-        instructor_solution_compile_command=$(sed 's://.*$::' config.json | jq -r '.instructor_solution_compile_command') >> $log_instructor_output
-
-        if [ -z "${instructor_solution_compile_command}" ] || [ "${instructor_solution_compile_command}" == "null" ]; then
-            echo "No instructor_solution_compile_command found in ${config_file}."
-            exit 1
         fi
 
         find "$instructor_solution_executable_dir" -type d -exec chmod -f ug+rwx,g+s,o= {} \;
@@ -315,7 +302,6 @@ function build_homework {
 
         echo "Outputs are stored in ${test_output_dir}."
         echo "Executables are stored in ${instructor_solution_executables_dir}."
-
     fi
 
 
