@@ -523,7 +523,7 @@ class PollController extends AbstractController {
         elseif (!$poll->isOpen() && !$this->core->getUser()->accessFaculty()) {
             return JsonResponse::getFailResponse("Poll is closed");
         }
-        elseif ($poll_response === null || trim($poll_response) === '') {
+        elseif (trim($poll_response) === '') {
             return JsonResponse::getFailResponse("No associated text provided for custom response");
         }
         elseif ($poll->getAllowsCustomResponses() === false) {
