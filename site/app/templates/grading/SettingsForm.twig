@@ -5,7 +5,14 @@
     <div id="ta-grading-settings-list" data-full_access="{{ core.getUser().getGroup() <= 2 ? 'true' : 'false' }}">
         <div id="ta-grading-general-settings"></div>
     </div>
-    <h2>Hotkeys</h2>
-    <br>
+    <div class="hotkeys-header">
+        <div class="hotkeys-title-buttons">
+            <h2>Hotkeys</h2>
+            <div class="hotkeys-buttons">
+                <button id="restore-all-hotkeys" class="btn btn-primary hotkeys-button" data-testid="restore-all-hotkeys" onclick="restoreAllHotkeys()">Restore Default</button>
+                <button id="remove-all-hotkeys" class="btn btn-danger hotkeys-button" data-testid="remove-all-hotkeys" onclick="removeAllHotkeys()">Remove All</button>
+            </div>
+        </div>
+    </div>
     <div id="hotkeys-list"></div>
 {% endblock %}
