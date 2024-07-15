@@ -119,12 +119,7 @@ function validateCustomResponse() {
     const custom_response_submit = document.querySelector('.custom-response-submit');
 
     const validate = () => {
-        if (custom_response.value.trim() !== '') {
-            custom_response_submit.disabled = false;
-        }
-        else {
-            custom_response_submit.disabled = true;
-        }
+        custom_response_submit.disabled = custom_response.value.trim() === '';
     };
 
     custom_response.addEventListener('input', () => {
