@@ -819,7 +819,7 @@ class ReportController extends AbstractController {
         // Extract the value from $_POST
         $selectedValue = $_POST['selected_value'] ?? null;
 
-        if (!isset($selectedValue) || trim($selectedValue) === '') {
+        if ($selectedValue === null || trim($selectedValue) === '') {
             $msg = 'Invalid request: No selected value provided.';
             return JsonResponse::getErrorResponse($msg);
         }
