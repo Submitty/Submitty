@@ -41,12 +41,11 @@ const mergeThreads = (fromThread, toThread, mergedContent) => {
 
 const removeThread = (title) => {
     cy.get('.thread-left-cont > .thread-list-item').contains(title).click();
-    cy.get('.first_post > .post-action-container > .dropdown-menu ').find(':contains("Delete")').click({force: true});
+    cy.get('.first_post > .post-action-container > .dropdown-menu ').find(':contains("Delete")').click({ force: true });
     cy.get('.thread-left-cont > .thread-list-item').contains(title).should('not.exist');
 };
 
 describe('Test cases revolving around creating, replying to, merging, and removing discussion forum threads', () => {
-
     beforeEach(() => {
         cy.login('instructor');
         cy.visit(['sample']);

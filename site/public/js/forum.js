@@ -38,7 +38,7 @@ function categoriesFormEvents() {
 }
 
 // eslint-disable-next-line no-unused-vars
-function openFileForum(directory, file, path ) {
+function openFileForum(directory, file, path) {
     const url = `${buildCourseUrl(['display_file'])}?dir=${directory}&file=${file}&path=${path}`;
     window.open(url, '_blank', 'toolbar=no,scrollbars=yes,resizable=yes, width=700, height=600');
 }
@@ -248,7 +248,7 @@ function publishFormWithAttachments(form, test_category, error_message, is_threa
 
             window.location.href = json['data']['next_page'];
         },
-        error: function() {
+        error: function () {
             displayErrorMessage(error_message);
         },
     });
@@ -1214,7 +1214,7 @@ function modifyThreadList(currentThreadId, currentCategoriesId, course, loadFirs
     Cookies.set(`${course}_forum_categories`, categories_value, { path: '/' });
     Cookies.set('forum_thread_status', thread_status_value, { path: '/' });
     Cookies.set('unread_select_value', unread_select_value, { path: '/' });
-    const url = `${buildCourseUrl(['forum', 'threads'])}?page_number=${(loadFirstPage?'1':'-1')}`;
+    const url = `${buildCourseUrl(['forum', 'threads'])} ? page_number=${(loadFirstPage ? '1' : '-1')}`;
     $.ajax({
         url: url,
         type: 'POST',
@@ -1385,8 +1385,8 @@ function generateCodeMirrorBlocks(container_element) {
 
 // eslint-disable-next-line no-unused-vars
 function showSplit(post_id) {
-    //If a thread was merged in the database earlier, we want to reuse the thread id and information
-    //so we don't have any loose ends
+    //  If a thread was merged in the database earlier, we want to reuse the thread id and information
+    //  so we don't have any loose ends
     const url = buildCourseUrl(['forum', 'posts', 'splitinfo']);
     $.ajax({
         url: url,
@@ -1843,11 +1843,11 @@ function deletePostToggle(isDeletion, thread_id, post_id, author, time, csrf_tok
                 let new_url = '';
                 switch (json['data']['type']) {
                     case 'thread':
-                        window.socketClient.send({'type': 'delete_thread', 'thread_id': thread_id});
+                        window.socketClient.send({ type: 'delete_thread', thread_id: thread_id });
                         new_url = buildCourseUrl(['forum']);
                         break;
                     case 'post':
-                        window.socketClient.send({'type': 'delete_post', 'thread_id': thread_id, 'post_id': post_id});
+                        window.socketClient.send({ type: 'delete_post', thread_id: thread_id, post_id: post_id });
                         new_url = buildCourseUrl(['forum', 'threads', thread_id]);
                         break;
                     default:
@@ -1904,7 +1904,7 @@ function bookmarkThread(thread_id, type) {
             csrf_token: csrfToken,
         },
         // eslint-disable-next-line no-unused-vars
-        success: function(data) {
+        success: function (data) {
             window.location.replace(buildCourseUrl(['forum', 'threads', thread_id]));
         },
         error: function () {
@@ -1923,11 +1923,11 @@ function markThreadUnread(thread_id) {
             thread_id: thread_id,
             csrf_token: csrfToken,
         },
-        success: function() {
+        success: function () {
             $(`#thread_box_link_${thread_id}`).children().addClass('new_thread');
             $('.post_box').removeClass('viewed_post').addClass('new_post');
         },
-        error: function() {
+        error: function () {
             window.alert('Something went wrong while trying to mark the thread as unread. Please try again.');
         },
     });
@@ -1945,11 +1945,11 @@ function markPostUnread(thread_id, post_id, last_viewed_timestamp) {
             last_viewed_timestamp: last_viewed_timestamp,
             csrf_token: csrfToken,
         },
-        success: function() {
+        success: function () {
             $(`#thread_box_link_${thread_id}`).children().addClass('new_thread');
             $(`#${post_id}`).removeClass('viewed_post').addClass('new_post');
         },
-        error: function() {
+        error: function () {
             window.alert('Something went wrong while trying to mark the post as unread. Please try again.');
         },
     });
@@ -2370,10 +2370,10 @@ function checkUnread() {
 function updateSelectedThreadContent(selected_thread_first_post_id) {
     const url = buildCourseUrl(['forum', 'posts', 'get']);
     $.ajax({
-        url : url,
-        type : 'POST',
-        data : {
-            post_id : selected_thread_first_post_id,
+        url: url,
+        type: 'POST',
+        data: {
+            post_id: selected_thread_first_post_id,
             csrf_token: csrfToken,
         },
         success: function (data) {
