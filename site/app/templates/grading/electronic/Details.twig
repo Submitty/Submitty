@@ -40,18 +40,18 @@
                     {{ view_all ? "View Your Sections" : "View All" }}
                 </button>
                 {% endif %}
-                <button class="btn btn-default"
+                <button class="btn btn-default" data-testid="random-default-order"
                    onclick="changeSortOrder()">
                     {{ sort == 'random' ? "Switch to Default Order" : "Switch to Random Order" }}
                 </button>
                 {% if toggle_anon_button %}
-                <button class="btn btn-default" id="toggle-anon-button"
+                <button class="btn btn-default" id="toggle-anon-button" data-testid="toggle-anon-button"
                     onclick="changeAnon('{{ gradeable.getId() }}')">
                     {{ anon_mode ? "Disable Anonymous Mode" : "Enable Anonymous Mode" }}
                 </button>
                 {% endif %}
                 {% if grade_inquiry_only_button %}
-                <button class="btn btn-default" id="inquiryButton" onclick="change_inquiry()">
+                <button class="btn btn-default" id="inquiryButton" data-testid="toggle-grade-inquiry" onclick="change_inquiry()">
                     {{ inquiry_status ? "Grade Inquiry Only: Off" : "Grade Inquiry Only: On" }}
                 </button>
                 {% endif %}
@@ -64,10 +64,10 @@
         </script>
     {% endif %}
     {% if not is_student %}
-        <a href="{{ stats_url }}" class="btn btn-primary">Grading Stats</a>
+        <a href="{{ stats_url }}" class="btn btn-primary" data-testid="grading-stats">Grading Stats</a>
     {% endif %}
     {% if not is_instructor %}
-        <button class="btn btn-default" onclick="showGradeableMessage()">Responsibilities as a Grader</button>
+        <button class="btn btn-default" onclick="showGradeableMessage()" data-testid="grader-responsibility">Responsibilities as a Grader</button>
     {% endif %}
     {% if can_regrade %}
         <div class="btn-group">
@@ -80,8 +80,8 @@
             </div>
         </div>
     {% endif %}
-    <button type="button" class="btn btn-primary" onclick="collapseAllSections()">Collapse All Sections</button>
-    <button type="button" class="btn btn-primary" onclick="expandAllSections()">Expand All Sections</button>
+    <button type="button" class="btn btn-primary" onclick="collapseAllSections()" data-testid="collapse-all-sections">Collapse All Sections</button>
+    <button type="button" class="btn btn-primary" onclick="expandAllSections()" data-testid="expand-all-sections">Expand All Sections</button>
     {% if message is not empty %}
     <div class="details-warning-box{% if message_warning %} details-warning-highlight{% else %} details-warning-neutral{% endif %}">
         {{ message|nl2br }}
@@ -90,7 +90,7 @@
     <div class="details-action-box">
         {# Import+Export teams buttons #}
         {% if show_import_teams_button %}
-            <a class="btn btn-primary"
+            <a class="btn btn-primary" data-testid="export-team-members"
                href="{{ export_teams_url }}"
             >Export Teams Members</a>
         {% endif %}
@@ -109,6 +109,7 @@
             {% if past_grade_start_date %}
                 <button class="btn btn-default key_to_click"
                         tabindex="0"
+                        data-testid="randomly-reassign-teams"
                         onclick="randomizeRotatingGroupsButton()"
                 >
                     Randomly Re-Assign Teams to Rotating Sections
