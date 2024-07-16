@@ -361,6 +361,10 @@
     /* poll histogram colors */
     --histogram-default: var(--standard-light-blue);
     --histogram-correct: var(--standard-medium-dark-lime-green);
+
+    --sloc-for-barb: #220000;
+    --update-fileutils-php: #002211;
+    --tzlocal: #990011;
 }
 
 /* Dark Theme Versions of Colors */
