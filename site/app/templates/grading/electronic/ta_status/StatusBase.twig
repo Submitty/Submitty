@@ -76,6 +76,7 @@
     function createNewBuckets(range,buckets,xValue,yValue,xBuckets,mode,modeCount,max,min) {
         var bucketInputTotal = document.getElementById("bucket-size-total");
         var bucketInputAuto = document.getElementById("bucket-size-auto");
+        var bucketInputManual = document.getElementById("bucket-size-manual");
 
         xBuckets = [];
         yValue=[];
@@ -115,6 +116,23 @@
                 +mode+'&nbsp&nbsp&nbsp&nbsp'+'<b>Median: </b>'+median+'&nbsp&nbsp&nbsp&nbsp'+ '<b>Maximum: </b>'+max+
                 '&nbsp&nbsp&nbsp&nbsp'+'<b>Minimum: </b>'+min+'&nbsp&nbsp&nbsp&nbsp'+'<b>Standard Deviation: </b>'+
                 {{ autograded_average.getStandardDeviation()  }}+'&nbsp&nbsp&nbsp&nbsp'+'<b>Range: </b>'+range;
+                return mode;
+            }
+        {% endif %}
+        {% if component_averages|length != 0  %}
+            let bucketInputManualValue = parseFloat(bucketInputManual.value);
+            if(bucketInputManual.value!=''){
+                if (isNaN(bucketInputManualValue) || bucketInputManualValue === 0) {
+                    alert('Error: Invalid bucket size.');
+                    return ;
+                }
+                mode=fillBuckets(range,bucketInputManualValue,betterBuckets,xValue,yValue,xBuckets,mode,modeCount,max,min);
+                var dataAuto = tracing(xBuckets,yValue);
+                Plotly.newPlot('myDiv4', dataAuto, layout, {displayModeBar: false,displaylogo: false});
+                bucketInputManual.value='';
+                document.getElementById("mySmallDiv4").innerHTML='<b>Mode: </b>'
+                +mode+'&nbsp&nbsp&nbsp&nbsp'+'<b>Median: </b>'+median+'&nbsp&nbsp&nbsp&nbsp'+ '<b>Maximum: </b>'+max+
+                '&nbsp&nbsp&nbsp&nbsp'+'<b>Minimum: </b>'+min+'&nbsp&nbsp&nbsp&nbsp'+'<b>Range: </b>'+range;
                 return mode;
             }
         {% endif %}
@@ -190,7 +208,7 @@
                 <div class="page-content" id="page_1_content">{{ include('grading/electronic/ta_status/StatusComponentAverages.twig')   }}</div>
             {% endif %}
 
-            {% if component_averages|length != 0 %}
+            {% if component_averages|length != 0 and histograms['tTA']|length != 0 %}
                 <div class="page-content" id="page_2_content">{{ include('grading/electronic/ta_status/StatusManualGradingHistogram.twig')  }}</div>
             {% endif %}
 
