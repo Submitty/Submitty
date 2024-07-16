@@ -7700,7 +7700,7 @@ AND gc_id IN (
         return $this->course_db->rows();
     }
 
-     /**
+    /**
      * Gets a list of emails with user ids for all active particpants in Submitty
      */
     public function getFullEmailList() {

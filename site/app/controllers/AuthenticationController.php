@@ -325,7 +325,7 @@ class AuthenticationController extends AbstractController {
     /**
      * Check if password has at least one of the following, Upper case letter, Lower case letter, Special character, and number
      */
-    function checkChars($str): bool {
+    public function checkChars($str): bool {
         $upperCase = preg_match('/[A-Z]/', $str);
         $lowerCase = preg_match('/[a-z]/', $str);
         $specialChar = preg_match('/[^A-Za-z0-9]/', $str);
@@ -350,12 +350,13 @@ class AuthenticationController extends AbstractController {
         // Check if the file was read successfully
         try {
             $email_extension = explode('@', $email)[1];
-        } catch (\Error $error) {
+        } 
+        catch (\Error $error) {
             return false;
         }
 
         if ($json === false) {
-           return false;
+            return false;
         }
 
         // Decode the JSON file
@@ -392,12 +393,12 @@ class AuthenticationController extends AbstractController {
 
         $queried_list = $this->core->getQueries()->getFullEmailList();
 
-        if (array_search($email, array_column($queried_list, 'user_email')) !== FALSE) {
+        if (array_search($email, array_column($queried_list, 'user_email')) !== false) {
             $this->core->addErrorMessage('Email already exists');
             return new RedirectResponse($this->core->buildUrl(['authentication', 'create_account']));
         }
 
-        if (array_search($user_id, array_column($queried_list, 'user_id')) !== FALSE) {
+        if (array_search($user_id, array_column($queried_list, 'user_id')) !== false) {
             $this->core->addErrorMessage('User ID already exists');
             return new RedirectResponse($this->core->buildUrl(['authentication', 'create_account']));
         }
@@ -416,7 +417,7 @@ class AuthenticationController extends AbstractController {
             $this->core->addErrorMessage('This email is not accepted.');
             return new RedirectResponse($this->core->buildUrl(['authentication', 'create_account']));
         }
-        
+
         $user = new User($this->core, [
             'user_id' => $user_id,
             'user_givenname' => $_POST['given_name'],
@@ -434,10 +435,9 @@ class AuthenticationController extends AbstractController {
             $this->core->addSuccessMessage('Account created successfully!');
             return new RedirectResponse($this->core->buildUrl(['authentication', 'login']));
         }
-        catch(Error $e) {
+        catch (Error $e) {
             $this->core->addErrorMessage('Failed to create the account.');
             return new RedirectResponse($this->core->buildUrl(['authentication', 'create_account']));
         }
     }
-
 }
