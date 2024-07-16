@@ -659,21 +659,11 @@ function setCustomizationItemVisibility(elem) {
     const cust_item_id = checkbox_to_cust_item[checkbox_name];
     const is_checked = elem.checked;
 
-    if (is_checked) {
-        $(cust_item_id).show();
-    }
-    else {
-        $(cust_item_id).hide();
-    }
+    $(cust_item_id).toggle(is_checked);
 
     // manual grading is dependent on final grade cutoffs
     if (checkbox_name === 'final_grade') {
-        if (is_checked) {
-            $('#manual-grading').show();
-        }
-        else {
-            $('#manual-grading').hide();
-        }
+        $('#manual-grading').toggle(is_checked);
     }
 }
 
