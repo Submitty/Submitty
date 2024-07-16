@@ -3,6 +3,18 @@
         {{ poll.getName() }}
     </h1>
 
+    <hr>
+
+    {% if timer_enabled %}
+    <!-- Invisible until JS renders -->
+        <h2 id="timer" class="timer" style="display:none" data-testid="timer">
+            <label for="timerDisplay">
+                Time until Poll Ends:
+            </label>
+            <span id="timerDisplay"></span>
+        </h2>
+    {% endif %}
+
     {% if user_admin or poll.isHistogramAvailable() %}
         <button class="btn btn-primary" id='toggle-info-button' onclick="toggle_section('poll-info')">Toggle Poll Info</button>
         <button class="btn btn-primary" id='toggle-histogram-button' onclick="toggle_section('poll-histogram')">Toggle Histogram</button>
@@ -95,76 +107,88 @@
 </div>
 
 <script>
-    function toggle_section(section_id) {
-        $(`#${section_id}`).toggle('fast');
-    }
 
-    function get_new_chart_width() {
-        const MIN_CHART_WIDTH = 400;
-        const DESIRED_CHART_FACTOR = 0.75;
-        const table_size = $("#info-histogram-table").width();
-        const desired_size = table_size * DESIRED_CHART_FACTOR;
-        // if the width of the viewport is small enough
-        if (desired_size < MIN_CHART_WIDTH) {
-            // set the width of poll-info to 100%
-            $("#poll-info").css("max-width", "100%");
-            return Math.max(MIN_CHART_WIDTH, table_size);
+    {% if timer_enabled %}
+
+        const endDate = new Date('{{ end_time }}');
+        let timerId;
+
+        function updateTimer() {
+            const now = new Date();
+            const timeRemaining = endDate - now;
+            const timerDisplayElement = $('#timerDisplay');
+            const timerElement = $('#timer');
+
+            // Show the timer element once we're ready to start updating it
+            timerElement.show();
+
+            if (timeRemaining <= 0) {
+                if (timerElement) {
+                    timerElement.text('Poll Ended');
+                }
+                clearInterval(timerId);
+                return;
+            }
+
+            if (!timerDisplayElement) {
+                clearInterval(timerId);
+                return;
+            }
+
+            const seconds = Math.floor((timeRemaining / 1000) % 60);
+            const minutes = Math.floor((timeRemaining / (1000 * 60)) % 60);
+            const hours = Math.floor((timeRemaining / (1000 * 60 * 60)) % 24);
+
+            const hoursUpdated = (hours < 10) ? `0${hours}` : hours;
+            const minutesUpdated = (minutes < 10) ? `0${minutes}` : minutes;
+            const secondsUpdated = (seconds < 10) ? `0${seconds}` : seconds;
+
+            timerDisplayElement.text(`${hoursUpdated}:${minutesUpdated}:${secondsUpdated}`);
         }
-        // reset width of poll-info
-        $("#poll-info").css("max-width", '');
-        return desired_size;
-    }
 
-    function disableNoResponse() {
-        $(".no-response-radio").prop("checked", false);
-    }
-
-    function clearResponses() {
-        if ($(".no-response-radio").is(':checked')) {
-            $(".response-radio").prop("checked", false);
-        }
-    }
+        timerId = setInterval(updateTimer, 20);
+    {% endif %}
 
     {% if user_admin or poll.isHistogramAvailable() %}
-    window.onload = function () {
-        const data = [{
-            type: "bar",
-            x: [],
-            y: [],
-            marker: {
-                color: [],
-            },
-        }];
-        const [correctColor, defaultColor] =
-        [window.getComputedStyle(document.body).getPropertyValue('--standard-deep-dark-green'),
-            window.getComputedStyle(document.body).getPropertyValue('--standard-vibrant-dark-blue')];
-        {% for option in poll.getOptions() %}
-        data[0].x.push("{{ option.getResponse()|replace({"\n": " ", "\r": " ", "\t": " "}) }}");
-        data[0].y.push({{ response_counts[option.getId()] }});
-        data[0].marker.color.push(
-            {{ option.isCorrect() and poll.isReleaseAnswer() ? 'correctColor': 'defaultColor' }}
-        );
-        {% endfor %}
-        const title_text = new DOMParser().parseFromString("{{ poll.getName() }}", "text/html");
-        const width = get_new_chart_width();
-        const layout = {
-            title: title_text.documentElement.textContent,
-            paper_bgcolor: $("body").css("--default-white"),
-            plot_bgcolor: $("body").css("--default-white"),
-            font: {
-                color: $("body").css("--text-black")
-            },
-            width: width
-        }
-        Plotly.newPlot("chartContainer", data, layout);
-        window.addEventListener('resize', function() {
+        window.onload = function () {
+            const data = [{
+                type: "bar",
+                x: [],
+                y: [],
+                marker: {
+                    color: [],
+                },
+            }];
+            const [correctColor, defaultColor] =
+            [window.getComputedStyle(document.body).getPropertyValue('--histogram-correct'),
+                window.getComputedStyle(document.body).getPropertyValue('--histogram-default')];
+            {% for option in poll.getOptions() %}
+                data[0].x.push("{{ option.getResponse()|replace({"\n": " ", "\r": " ", "\t": " "}) }}");
+                data[0].y.push({{ response_counts[option.getId()] }});
+                data[0].marker.color.push(
+                    {{ option.isCorrect() and poll.isReleaseAnswer() ? 'correctColor': 'defaultColor' }}
+                );
+            {% endfor %}
+            const title_text = new DOMParser().parseFromString("{{ poll.getName() }}", "text/html");
             const width = get_new_chart_width();
-            const container = document.getElementById('chartContainer');
-            const update = {
+            const layout = {
+                title: title_text.documentElement.textContent,
+                paper_bgcolor: $("body").css("--default-white"),
+                plot_bgcolor: $("body").css("--default-white"),
+                font: {
+                    color: $("body").css("--text-black")
+                },
                 width: width
             }
-            Plotly.relayout(container, update);
-        });
-    }
+            Plotly.newPlot("chartContainer", data, layout);
+            window.addEventListener('resize', function() {
+                const width = get_new_chart_width();
+                const container = document.getElementById('chartContainer');
+                const update = {
+                    width: width
+                }
+                Plotly.relayout(container, update);
+            });
+        }
     {% endif %}
 </script>

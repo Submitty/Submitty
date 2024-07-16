@@ -496,7 +496,7 @@ parameters:
 			path: app/controllers/MiscController.php
 
 		-
-			message: "#^Method app\\\\controllers\\\\MiscController\\:\\:downloadSubmissionZip\\(\\) has parameter \\$user_id with no type specified\\.$#"
+			message: "#^Method app\\\\controllers\\\\MiscController\\:\\:downloadSubmissionZip\\(\\) has parameter \\$submitter_id with no type specified\\.$#"
 			count: 1
 			path: app/controllers/MiscController.php
 
@@ -933,21 +933,6 @@ parameters:
 
 		-
 			message: "#^Method app\\\\controllers\\\\admin\\\\AdminGradeableController\\:\\:enqueueGenerateRepos\\(\\) has no return type specified\\.$#"
-			count: 1
-			path: app/controllers/admin/AdminGradeableController.php
-
-		-
-			message: "#^Method app\\\\controllers\\\\admin\\\\AdminGradeableController\\:\\:enqueueGenerateRepos\\(\\) has parameter \\$course with no type specified\\.$#"
-			count: 1
-			path: app/controllers/admin/AdminGradeableController.php
-
-		-
-			message: "#^Method app\\\\controllers\\\\admin\\\\AdminGradeableController\\:\\:enqueueGenerateRepos\\(\\) has parameter \\$g_id with no type specified\\.$#"
-			count: 1
-			path: app/controllers/admin/AdminGradeableController.php
-
-		-
-			message: "#^Method app\\\\controllers\\\\admin\\\\AdminGradeableController\\:\\:enqueueGenerateRepos\\(\\) has parameter \\$semester with no type specified\\.$#"
 			count: 1
 			path: app/controllers/admin/AdminGradeableController.php
 
@@ -3686,11 +3671,6 @@ parameters:
 			path: app/entities/poll/Poll.php
 
 		-
-			message: "#^Property app\\\\entities\\\\poll\\\\Poll\\:\\:\\$status has no type specified\\.$#"
-			count: 1
-			path: app/entities/poll/Poll.php
-
-		-
 			message: "#^Call to function is_array\\(\\) with array will always evaluate to true\\.$#"
 			count: 1
 			path: app/exceptions/BaseException.php
@@ -5822,21 +5802,6 @@ parameters:
 
 		-
 			message: "#^Method app\\\\libraries\\\\database\\\\DatabaseQueries\\:\\:deleteMarks\\(\\) has no return type specified\\.$#"
-			count: 1
-			path: app/libraries/database/DatabaseQueries.php
-
-		-
-			message: "#^Method app\\\\libraries\\\\database\\\\DatabaseQueries\\:\\:deleteOverallComment\\(\\) has no return type specified\\.$#"
-			count: 1
-			path: app/libraries/database/DatabaseQueries.php
-
-		-
-			message: "#^Method app\\\\libraries\\\\database\\\\DatabaseQueries\\:\\:deleteOverallComment\\(\\) has parameter \\$gradeable_id with no type specified\\.$#"
-			count: 1
-			path: app/libraries/database/DatabaseQueries.php
-
-		-
-			message: "#^Method app\\\\libraries\\\\database\\\\DatabaseQueries\\:\\:deleteOverallComment\\(\\) has parameter \\$grader_id with no type specified\\.$#"
 			count: 1
 			path: app/libraries/database/DatabaseQueries.php
 
@@ -12632,111 +12597,6 @@ parameters:
 			path: app/views/NotificationView.php
 
 		-
-			message: "#^Method app\\\\views\\\\OfficeHoursQueueView\\:\\:renderCurrentQueue\\(\\) has no return type specified\\.$#"
-			count: 1
-			path: app/views/OfficeHoursQueueView.php
-
-		-
-			message: "#^Method app\\\\views\\\\OfficeHoursQueueView\\:\\:renderCurrentQueue\\(\\) has parameter \\$viewer with no type specified\\.$#"
-			count: 1
-			path: app/views/OfficeHoursQueueView.php
-
-		-
-			message: "#^Method app\\\\views\\\\OfficeHoursQueueView\\:\\:renderNewAnnouncement\\(\\) has no return type specified\\.$#"
-			count: 1
-			path: app/views/OfficeHoursQueueView.php
-
-		-
-			message: "#^Method app\\\\views\\\\OfficeHoursQueueView\\:\\:renderNewAnnouncement\\(\\) has parameter \\$viewer with no type specified\\.$#"
-			count: 1
-			path: app/views/OfficeHoursQueueView.php
-
-		-
-			message: "#^Method app\\\\views\\\\OfficeHoursQueueView\\:\\:renderNewStatus\\(\\) has no return type specified\\.$#"
-			count: 1
-			path: app/views/OfficeHoursQueueView.php
-
-		-
-			message: "#^Method app\\\\views\\\\OfficeHoursQueueView\\:\\:renderNewStatus\\(\\) has parameter \\$viewer with no type specified\\.$#"
-			count: 1
-			path: app/views/OfficeHoursQueueView.php
-
-		-
-			message: "#^Method app\\\\views\\\\OfficeHoursQueueView\\:\\:renderPart\\(\\) has no return type specified\\.$#"
-			count: 1
-			path: app/views/OfficeHoursQueueView.php
-
-		-
-			message: "#^Method app\\\\views\\\\OfficeHoursQueueView\\:\\:renderPart\\(\\) has parameter \\$twig_location with no type specified\\.$#"
-			count: 1
-			path: app/views/OfficeHoursQueueView.php
-
-		-
-			message: "#^Method app\\\\views\\\\OfficeHoursQueueView\\:\\:renderPart\\(\\) has parameter \\$viewer with no type specified\\.$#"
-			count: 1
-			path: app/views/OfficeHoursQueueView.php
-
-		-
-			message: "#^Method app\\\\views\\\\OfficeHoursQueueView\\:\\:renderQueueHistory\\(\\) has no return type specified\\.$#"
-			count: 1
-			path: app/views/OfficeHoursQueueView.php
-
-		-
-			message: "#^Method app\\\\views\\\\OfficeHoursQueueView\\:\\:renderQueueHistory\\(\\) has parameter \\$viewer with no type specified\\.$#"
-			count: 1
-			path: app/views/OfficeHoursQueueView.php
-
-		-
-			message: "#^Method app\\\\views\\\\OfficeHoursQueueView\\:\\:showQueueStats\\(\\) has parameter \\$overallData with no type specified\\.$#"
-			count: 1
-			path: app/views/OfficeHoursQueueView.php
-
-		-
-			message: "#^Method app\\\\views\\\\OfficeHoursQueueView\\:\\:showQueueStats\\(\\) has parameter \\$queueData with no type specified\\.$#"
-			count: 1
-			path: app/views/OfficeHoursQueueView.php
-
-		-
-			message: "#^Method app\\\\views\\\\OfficeHoursQueueView\\:\\:showQueueStats\\(\\) has parameter \\$todayData with no type specified\\.$#"
-			count: 1
-			path: app/views/OfficeHoursQueueView.php
-
-		-
-			message: "#^Method app\\\\views\\\\OfficeHoursQueueView\\:\\:showQueueStats\\(\\) has parameter \\$weekDayData with no type specified\\.$#"
-			count: 1
-			path: app/views/OfficeHoursQueueView.php
-
-		-
-			message: "#^Method app\\\\views\\\\OfficeHoursQueueView\\:\\:showQueueStats\\(\\) has parameter \\$weekDayThisWeekData with no type specified\\.$#"
-			count: 1
-			path: app/views/OfficeHoursQueueView.php
-
-		-
-			message: "#^Method app\\\\views\\\\OfficeHoursQueueView\\:\\:showQueueStats\\(\\) has parameter \\$weekNumberData with no type specified\\.$#"
-			count: 1
-			path: app/views/OfficeHoursQueueView.php
-
-		-
-			message: "#^Method app\\\\views\\\\OfficeHoursQueueView\\:\\:showQueueStudentStats\\(\\) has no return type specified\\.$#"
-			count: 1
-			path: app/views/OfficeHoursQueueView.php
-
-		-
-			message: "#^Method app\\\\views\\\\OfficeHoursQueueView\\:\\:showQueueStudentStats\\(\\) has parameter \\$studentData with no type specified\\.$#"
-			count: 1
-			path: app/views/OfficeHoursQueueView.php
-
-		-
-			message: "#^Method app\\\\views\\\\OfficeHoursQueueView\\:\\:showTheQueue\\(\\) has no return type specified\\.$#"
-			count: 1
-			path: app/views/OfficeHoursQueueView.php
-
-		-
-			message: "#^Method app\\\\views\\\\OfficeHoursQueueView\\:\\:showTheQueue\\(\\) has parameter \\$viewer with no type specified\\.$#"
-			count: 1
-			path: app/views/OfficeHoursQueueView.php
-
-		-
 			message: "#^Method app\\\\views\\\\PDFView\\:\\:downloadPDFEmbedded\\(\\) has parameter \\$annotation_jsons with no value type specified in iterable type array\\.$#"
 			count: 1
 			path: app/views/PDFView.php
@@ -13233,7 +13093,7 @@ parameters:
 
 		-
 			message: "#^Loose comparison via \"\\=\\=\" is not allowed\\.$#"
-			count: 17
+			count: 16
 			path: app/views/forum/ForumThreadView.php
 
 		-

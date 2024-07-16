@@ -83,6 +83,10 @@ select {
     color: white;
 }
 
+.new-gradeable {
+    font-family: monospace;
+}
+
 a.nav-bar {
     padding: 6px 12px;
     text-decoration: none;

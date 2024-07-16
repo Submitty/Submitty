@@ -1,0 +1,158 @@
+{% extends 'generic/Popup.twig' %}
+{% block popup_id %}upload-banner{% endblock %}
+{% block title %}New Community Event{% endblock %}
+{% block body %}
+    <input type="hidden" name="csrf_token" value="{{ csrf_token }}" />
+    <div> Select Banner Image </div>
+
+    <div id="upload-boxes">
+        <div id="upload1" class="file-input">
+            <label class="label key_to_click" for="input-file1" tabindex="0">"Drag your file here or click to open file browser"</label>
+            <input type="file" name="files" id="input-file1" onchange="addFilesFromInput(1,false)" multiple />
+            <table class="file-upload-table" id="file-upload-table-1">
+                <tr style="background:transparent; display:none;">
+                    <th>File Name:</th>
+                    <th>Size:</th>
+                </tr>
+            </table>
+        </div>
+
+        <label class="upload_dt" style="pointer-events:none;">
+            <span>
+                <strong>Choose a time to release the files being uploaded:</strong>
+            </span>
+            <input id = "release_date" class="upload_picker date_picker" type="text" size="26" value='9998-01-01 00:00:00' style="pointer-events:auto;"><br>
+            <span>
+        </label>
+
+        <label class="upload_dt" style="pointer-events:none;">
+            <span>
+                <strong>Choose a time to close the files to be removed:</strong>
+            </span>
+            <input  id = "closing_date" class="upload_picker date_picker" type="text" size="26" value='9998-01-01 00:00:00' style="pointer-events:auto;"><br>
+            <span>
+        </label>
+
+            <label class = "radio" for="image_selection_radio">
+                <input id="url_selection_radio" name="course_material_type" type="checkbox" onchange="imageSelectionUpdate();">
+                Add Banner with More Info
+            </label>
+            </br>
+            <label class = "radio" for="url_selection_radio">
+                <input id="url_selection_radio" name="course_material_type" type="checkbox" onchange="urlSelectionUpdate();">
+                Link a Website to the Banner
+            </label>
+
+        <br>
+        <br>
+
+        <label id="extra_name">
+            <span>
+                <strong>Name of additional Information</strong><br />
+                Only required if you are adding an additional file:<br />
+            </span>
+            <input type="text" id="input-provide-name" class="full-width" name="eg_config_path" value="" placeholder="Write the name of the png file here ex: biggerBanner.png"/>
+            <span><em>If you want a bigger banner with more information to pop up when you click on an advertisement, then add a bigger banner png file to your uploaded files, and write the name of it here!</em></span>
+            </br>
+        </label>
+
+        <label id="url_link_address">
+            <span>
+                <strong>Address link</strong><br />
+            </span>
+            <input type="text" id="input-provide-url" class="full-width" name="eg_config_path" value="" placeholder="Add a link to the banner for when it gets pressed. ex: https://submitty.org"/>
+            <span><em>Add a link address here if you want the user to go to a website when they click on the banner! (If you upload a bigger banner, then clicking the bigger banner will activate the link)</em></span>
+            </br>
+        </label>
+    </div>
+
+    <script>
+        $('#url_link_address').hide();
+        $('#extra_name').hide();
+        function makeSubmission() {
+            var releaseTime = $("#release_date").val();
+            var closeTime = $("#closing_date").val();
+            var extraName = "";
+            if ($('#extra_name').is(':visible')) extraName = document.getElementById("input-provide-name").value;
+            var linkName = "";
+            if ($('#url_link_address').is(':visible')) linkName = document.getElementById("input-provide-url").value;
+            handleUploadBanner(closeTime, releaseTime, extraName, linkName);
+        }
+        $(function() {
+            $("#submit-banner").click(function(e){ // Submit button
+                makeSubmission();
+                e.stopPropagation();
+            });
+        });
+
+        createArray(1);
+        var dropzone = document.getElementById("upload1");
+        dropzone.addEventListener("dragenter", draghandle, false);
+        dropzone.addEventListener("dragover", draghandle, false);
+        dropzone.addEventListener("dragleave", draghandle, false);
+        dropzone.addEventListener("drop", dropWithMultipleZips, false);
+
+        const upload_fp = flatpickr('.upload_picker', {
+            plugins: [ShortcutButtonsPlugin(
+                {
+                    button: [
+                        {
+                            label: "Beginning of time"
+                        },
+                        {
+                            label: "Now"
+                        },
+                        {
+                            label: "Tomorrow"
+                        },
+                        {
+                            label: "End of time"
+                        }
+                    ],
+                    onClick: (index, fp) => {
+                        let date;
+                        switch (index) {
+                            case 0:
+                                date = new Date("1001-01-01 00:00:00");
+                                break;
+                            case 1:
+                                date = new Date();
+                                break;
+                            case 2:
+                                date = new Date();
+                                date.setDate(date.getDate() + 1);
+                                break;
+                            case 3:
+                                date = new Date("9998-01-01 00:00:00");
+                                break;
+                            default:
+                                date = new Date();
+                        }
+                        fp.setDate(date);
+                    }
+                }
+            )],
+            appendTo: document.getElementById('upload-banner'),
+            allowInput: true,
+            enableTime: true,
+            enableSeconds: true,
+            time_24hr: true,
+            dateFormat: "Y-m-d H:i:S",
+            onReady: (a, b, fp) => {
+            fp.calendarContainer.firstChild.childNodes[1].firstChild.firstChild.setAttribute('aria-label', 'Month');
+            fp.calendarContainer.childNodes[2].childNodes[4].firstChild.setAttribute('aria-label', 'Seconds');
+            }
+            });
+        $('.form-body').on('scroll', function() {
+            upload_fp._positionCalendar();
+        });
+
+
+    </script>
+
+
+{% endblock %}
+{% block buttons %}
+    {{ block('close_button') }}
+    <input class="close-button btn btn-primary" id="submit-banner" type="submit" value="Submit"/>
+{% endblock %}
