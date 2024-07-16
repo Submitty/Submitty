@@ -378,25 +378,20 @@ class Gradeable extends AbstractModel {
             $this->setPeerBlind($details['peer_blind']);
         }
 
-        if (array_key_exists('autograding', $details)) {
-            $this->setPeerAutograding($details['autograding'] !== null ? $details['autograding'] : true);
-        }
+$mapping = [
+    'autograding' => 'setPeerAutograding',
+    'rubric' => 'setPeerRubric',
+    'files' => 'setPeerFiles',
+    'solution_notes' => 'setPeerSolutions',
+    'discussion' => 'setPeerDiscussion'
+];
 
-        if (array_key_exists('rubric', $details)) {
-            $this->setPeerRubric($details['rubric'] !== null ? $details['rubric'] : true);
-        }
+foreach ($mapping as $key => $method) {
+    if (array_key_exists($key, $details)) {
+        $this->$method($details[$key] ?? true);
+    }
+}
 
-        if (array_key_exists('files', $details)) {
-            $this->setPeerFiles($details['files'] !== null ? $details['files'] : true);
-        }
-
-        if (array_key_exists('solution_notes', $details)) {
-            $this->setPeerSolutions($details['solution_notes'] !== null ? $details['solution_notes'] : true);
-        }
-
-        if (array_key_exists('discussion', $details)) {
-            $this->setPeerDiscussion($details['discussion'] !== null ? $details['discussion'] : true);
-        }
 
         if (array_key_exists('limited_access_blind', $details)) {
             $this->setLimitedAccessBlind($details['limited_access_blind']);
