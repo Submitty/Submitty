@@ -933,9 +933,8 @@ class ReportController extends AbstractController {
         $was_successful = str_ends_with($debug_contents, 'Done');
 
         if ($max_wait_time && $failure_detected === false && $was_successful) {
-            return JsonResponse::getSuccessResponse(['status' => 'success', 'data' => $debug_contents]);
-        }
-        else {
+            return JsonResponse::getSuccessResponse($debug_contents);
+        } else {
             return JsonResponse::getFailResponse($debug_contents);
         }
     }
