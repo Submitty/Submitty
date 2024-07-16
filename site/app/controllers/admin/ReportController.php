@@ -602,7 +602,7 @@ class ReportController extends AbstractController {
             if (isset($_POST["json_string"])) {
                 try {
                     $customization->processForm();
-                    return JsonResponse::getSuccessResponse();
+                    return JsonResponse::getSuccessResponse(['status' => 'success']);
                 } catch (\Exception $e) {
                     $msg = 'Error processing form';
                     $this->core->addErrorMessage($msg);

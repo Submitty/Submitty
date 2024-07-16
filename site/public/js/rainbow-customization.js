@@ -628,6 +628,7 @@ function saveChanges() {
         url: url,
         type: 'POST',
         data: formData,
+        dataType: 'json',
         processData: false,
         contentType: false,
         beforeSend: function (xhr) {
@@ -635,12 +636,12 @@ function saveChanges() {
         },
         success: function (response) {
             console.log(`Response: ${response}`);
-            if (response === 'success') {
+            if (response['status'] === 'success') {
                 $('#save_status').text('All changes saved');
             }
             else {
                 // lets keep the alert, because users may not notice it even if it fails
-                alert(`An error occurred: ${response}`);
+                alert(`An error occurred: ${response.data}`);
             }
         },
         error: function (jqXHR, textStatus, errorThrown) {
