@@ -619,7 +619,7 @@ $(document).ready(() => {
 
 function saveChanges() {
     $('#save_status').text('Change detected Saving ...');
-    const url = buildCourseUrl(['reports', 'rainbow_grades_customization_build']);
+    const url = buildCourseUrl(['reports', 'rainbow_grades_customization_save']);
     const formData = new FormData();
     formData.append('csrf_token', csrfToken);
     formData.append('json_string', buildJSON());

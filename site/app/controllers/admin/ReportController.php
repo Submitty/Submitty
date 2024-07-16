@@ -590,30 +590,37 @@ class ReportController extends AbstractController {
     }
 
 
-    #[Route("/courses/{_semester}/{_course}/reports/rainbow_grades_customization_build", methods: ["POST"])]
-    public function generateCustomizationBuild(): void {
-        // Check if this is an AJAX request
+
+    #[Route("/courses/{_semester}/{_course}/reports/rainbow_grades_customization_save", methods: ["POST"])]
+    public function writetocustomization(): JsonResponse
+    {
         if (!empty($_SERVER['HTTP_X_REQUESTED_WITH']) && strtolower($_SERVER['HTTP_X_REQUESTED_WITH']) == 'xmlhttprequest') {
             // Build a new model, pull in defaults for the course
             $customization = new RainbowCustomization($this->core);
             $customization->buildCustomization();
+
             if (isset($_POST["json_string"])) {
                 try {
                     $customization->processForm();
-                    die("success");
+                    return JsonResponse::getSuccessResponse();
+                } catch (\Exception $e) {
+                    $msg = 'Error processing form';
+                    $this->core->addErrorMessage($msg);
+                    return JsonResponse::getErrorResponse($msg);
                 }
-                catch (\Exception $e) {
-                    die("error");
-                }
+            } else {
+                $msg = 'No JSON string provided';
+                $this->core->addErrorMessage($msg);
+                return JsonResponse::getErrorResponse($msg);
             }
-            else {
-                die("error: no json_string provided");
-            }
-        }
-        else {
-            die("error: not an AJAX request");
+        } else {
+            $msg = 'Not an AJAX request';
+            $this->core->addErrorMessage($msg);
+            return JsonResponse::getErrorResponse($msg);
         }
     }
+
+
 
     #[Route("/courses/{_semester}/{_course}/reports/rainbow_grades_customization")]
     public function generateCustomization() {
@@ -934,7 +941,8 @@ class ReportController extends AbstractController {
 
         if ($max_wait_time && $failure_detected === false && $was_successful) {
             return JsonResponse::getSuccessResponse($debug_contents);
-        } else {
+        }
+        else {
             return JsonResponse::getFailResponse($debug_contents);
         }
     }
