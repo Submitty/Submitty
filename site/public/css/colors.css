@@ -242,6 +242,9 @@
     --code-box-background-light-gray: #fafafa;
     --code-box-font-color-dark-gray: #343a42;
     --invisible: #00000000;
+
+    /* color for barb */
+    --color-for-barb: #33661177;
 }
 
 [data-black_mode="black"][data-theme="dark"] {
