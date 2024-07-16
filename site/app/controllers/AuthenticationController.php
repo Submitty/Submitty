@@ -81,7 +81,7 @@ class AuthenticationController extends AbstractController {
             $old = null;
         }
         $is_saml_auth = $this->core->getAuthentication() instanceof SamlAuthentication;
-        return new WebResponse(AuthenticationView::class, 'loginForm', $old, $is_saml_auth);
+        return new WebResponse('Authentication', 'loginForm', $old, $is_saml_auth);
     }
 
     /**

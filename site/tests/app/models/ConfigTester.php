@@ -331,7 +331,7 @@ class ConfigTester extends \PHPUnit\Framework\TestCase {
             'vcs_url' => 'http://example.com/{$vcs_type}/',
             'wrapper_files' => [],
             'system_message' => 'Some system message',
-            'user_create_account' => false,
+            'user_create_account' => true,
             'secret_session' => 'LIW0RT5XAxOn2xjVY6rrLTcb6iacl4IDNRyPw58M0Kn0haQbHtNvPfK18xpvpD93',
             'email_enabled' => true,
             'auto_rainbow_grades' => false,
