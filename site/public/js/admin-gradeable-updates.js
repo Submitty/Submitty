@@ -3,7 +3,7 @@
           isItempoolAvailable, getGradeableId, closeAllComponents, onHasDueDate, setPdfPageAssignment,
           PDF_PAGE_INSTRUCTOR, PDF_PAGE_STUDENT, PDF_PAGE_NONE */
 /* exported showBuildLog, ajaxRebuildGradeableButton, onPrecisionChange, onItemPoolOptionChange, updatePdfPageSettings,
-          loadGradeableEditor, saveGradeableConfigEdit*/
+          loadGradeableEditor, saveGradeableConfigEdit */
 
 let updateInProgressCount = 0;
 const errors = {};
@@ -852,7 +852,7 @@ function loadGradeableEditor(g_id, file_path) {
             file_path: file_path,
             csrf_token: csrfToken,
         },
-        success: function(data) {
+        success: function (data) {
             try {
                 let json = JSON.parse(data);
                 if (json['status'] === 'fail') {
@@ -874,7 +874,7 @@ function loadGradeableEditor(g_id, file_path) {
                 return;
             }
         },
-        error: function() {
+        error: function () {
             window.alert('Something went wrong while loading the gradeable config. Please try again.');
         },
     });
@@ -895,7 +895,7 @@ function saveGradeableConfigEdit(g_id) {
             write_content: content,
             csrf_token: csrfToken,
         },
-        success: function(data) {
+        success: function (data) {
             try {
                 const json = JSON.parse(data);
                 if (json['status'] === 'fail') {
@@ -910,7 +910,7 @@ function saveGradeableConfigEdit(g_id) {
                 return;
             }
         },
-        error: function() {
+        error: function () {
             window.alert('Something went wrong while saving the gradeable config. Please try again.');
         },
     });
