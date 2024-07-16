@@ -1881,7 +1881,7 @@ class AdminGradeableController extends AbstractController {
     /**
      * Loads config info for a gradeable to allow editing
      */
-    #[Route("/courses/{_semester}/{_course}/gradeable/edit/load", methods={"POST"})]
+    #[Route("/courses/{_semester}/{_course}/gradeable/edit/load", methods: ["POST"])]
     public function loadConfigEditor(): void {
         $gradeable = $this->tryGetGradeable($_POST['gradeable_id']);
 
@@ -1910,7 +1910,7 @@ class AdminGradeableController extends AbstractController {
     /**
      * Saves config info from a gradeable edit
      */
-    #[Route("/courses/{_semester}/{_course}/gradeable/edit/save", methods={"POST"})]
+    #[Route("/courses/{_semester}/{_course}/gradeable/edit/save", methods: ["POST"])]
     public function saveConfigEdit(): void {
         $gradeable = $this->tryGetGradeable($_POST['gradeable_id']);
         if ($gradeable === false) {
