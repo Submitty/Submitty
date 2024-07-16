@@ -112,11 +112,11 @@
 
     <div class="raw-config-info">
         <div class="option-title">Or:</div>
-        <a class="btn btn-primary" tabindex="0" id="edit-gradeable" onclick="openDiv('gradeable-config-structure'); ">Manually edit config</a>
+        <a class="btn btn-primary" tabindex="0" id="edit-gradeable" onclick="cancelGradeableConfigEdit(); openDiv('gradeable-config-structure'); ">Manually edit config</a>
         <ul class="config-folder-view" id="gradeable-config-structure">
             {{ _self.display_config_files(config_files, 1, gradeable.getId()) }}
         </ul>
-        <div id = "gradeable-config-edit-bar">
+        <div id="gradeable-config-edit-bar">
             <textarea id="gradeable-config-edit"></textarea>
             <br>
             <a class="btn btn-primary" onclick="saveGradeableConfigEdit('{{ gradeable.getId() }}')">Save</a>
