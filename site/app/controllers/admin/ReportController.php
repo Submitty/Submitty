@@ -882,37 +882,45 @@ class ReportController extends AbstractController {
 
     #[Route('/courses/{_semester}/{_course}/reports/rainbow_grades_status', methods: ['POST'])]
     public function autoRainbowGradesStatus() {
+        // Create path to the file we expect to find in the jobs queue
         $jobs_file = '/var/local/submitty/daemon_job_queue/auto_rainbow_' .
             $this->core->getConfig()->getTerm() .
             '_' .
             $this->core->getConfig()->getCourse() .
             '.json';
-
+        // Create path to 'processing' file in jobs queue
         $processing_jobs_file = '/var/local/submitty/daemon_job_queue/PROCESSING_auto_rainbow_' .
             $this->core->getConfig()->getTerm() .
             '_' .
             $this->core->getConfig()->getCourse() .
             '.json';
 
+        // Get the max time to wait before timing out
         $max_wait_time = self::MAX_AUTO_RG_WAIT_TIME;
 
+        // Check the jobs queue every second to see if the job has finished yet
         while (file_exists($jobs_file) && $max_wait_time) {
             sleep(1);
             $max_wait_time--;
             clearstatcache();
         }
 
+        // Jobs queue daemon actually changes the name of the job by prepending PROCESSING onto the filename
+        // We must also wait for that file to be removed
+        // Check the jobs queue every second to see if the job has finished yet
         while (file_exists($processing_jobs_file) && $max_wait_time) {
             sleep(1);
             $max_wait_time--;
             clearstatcache();
         }
 
+        // Check the course auto_debug_output.txt to ensure no exceptions were thrown
         $debug_output_path = '/var/local/submitty/courses/' .
             $this->core->getConfig()->getTerm() . '/' .
             $this->core->getConfig()->getCourse() .
             '/rainbow_grades/auto_debug_output.txt';
 
+        // Look over the output file to see if any part of the process failed
         try {
             $failure_detected = FileUtils::areWordsInFile($debug_output_path, ['Exception', 'Aborted', 'failed']);
         }
@@ -922,7 +930,7 @@ class ReportController extends AbstractController {
 
         $debug_contents = file_get_contents($debug_output_path);
         $debug_contents = trim($debug_contents);
-        $was_successful = strrpos($debug_contents, 'Done') === (strlen($debug_contents) - strlen('Done'));
+        $was_successful = str_ends_with($debug_contents, 'Done');
 
         if ($max_wait_time && $failure_detected === false && $was_successful) {
             return JsonResponse::getSuccessResponse(['status' => 'success', 'data' => $debug_contents]);
