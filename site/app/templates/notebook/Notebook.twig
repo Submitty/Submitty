@@ -29,6 +29,10 @@
                 } only %}
                 {{ _self.render_testcase_messages(cell, testcase_messages) }}
 
+            {# Handle "output" cells #}
+            {% elseif cell.type == "output" %}
+                <pre class="notebook-output-cell">{{ cell.output_text }}</pre>
+
             {# Handle if cell is image #}
             {% elseif cell.type == "image" %}
 
