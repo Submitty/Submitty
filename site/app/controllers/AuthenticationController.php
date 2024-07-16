@@ -350,7 +350,7 @@ class AuthenticationController extends AbstractController {
         // Check if the file was read successfully
         try {
             $email_extension = explode('@', $email)[1];
-        } 
+        }
         catch (\Error $error) {
             return false;
         }
@@ -364,7 +364,7 @@ class AuthenticationController extends AbstractController {
 
         // Check if the JSON was decoded successfully
         if ($json_data === null) {
-           return false;
+            return false;
         }
 
         return in_array($email_extension, array_keys($json_data));
