@@ -1,14 +1,14 @@
 {% import _self as self %}
 <script>
-    const autograding_results = {% if not isPeerGrader or (isPeerGrader and isPeerAutograding) %} true {% else %} false {% endif %};
-    const grading_rubric = {% if not isPeerGrader or (isPeerGrader and isPeerRubric) %} true {% else %} false {% endif %};
-    const submission_browser = {% if not isPeerGrader or (isPeerGrader and isPeerFiles) %} true {% else %} false {% endif %};
-    const solution_ta_notes = {% if not isPeerGrader or (isPeerGrader and isPeerSolutions) %} true {% else %} false {% endif %};
-    const student_info = {% if isStudentInfoPanel %} true {% else %} false {% endif %};
-    const grade_inquiry_info = {% if isGradeInquiryPanel %} true {% else %} false {% endif %};
-    const discussion_browser = {% if isDiscussionPanel and (not isPeerGrader or (isPeerGrader and isPeerDiscussion)) %} true {% else %} false {% endif %};
-    const peer_info = {% if isPeerPanel %} true {% else %} false {% endif %};
-    const is_notebook = {% if is_notebook %} true {% else %} false {% endif %};
+    const autograding_results = {{ not isPeerGrader or (isPeerGrader and isPeerAutograding) ? true : false }};
+    const grading_rubric = {{ not isPeerGrader or (isPeerGrader and isPeerRubric) ? true : false }};
+    const submission_browser = {{ not isPeerGrader or (isPeerGrader and isPeerFiles) ? true : false }};
+    const solution_ta_notes = {{ not isPeerGrader or (isPeerGrader and isPeerSolutions) ? true : false }};
+    const student_info = {{ isStudentInfoPanel ? true : false }};
+    const grade_inquiry_info = {{ isGradeInquiryPanel ? true : false }};
+    const discussion_browser = {{ isDiscussionPanel and (not isPeerGrader or (isPeerGrader and isPeerDiscussion)) ? true : false }};
+    const peer_info = {{ isPeerPanel ? true : false }};
+    const is_notebook = {{ is_notebook ? true : false }};
 
     updateThePanelsElements({
         autograding_results,
