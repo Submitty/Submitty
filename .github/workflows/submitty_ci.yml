@@ -297,24 +297,44 @@ jobs:
 
 
   colors-css:
-    name: colors.css check
+    name: colors.css Check
     runs-on: ubuntu-22.04
+
     steps:
-      - name: Fetch main branch
+      - name: Checkout main branch
         uses: actions/checkout@v4
         with:
           ref: main
           path: MAIN
-      - name: Fetch PR branch
+
+      - name: Checkout PR branch
         uses: actions/checkout@v4
         with:
           path: PR
-      - name: Check file size change
+
+      - name: Compare file size
         run: |
           FILEPATH="site/public/css/colors.css"
-          LINES_DIFF="$(($(wc -l < PR/$FILEPATH) - $(wc -l < MAIN/$FILEPATH)))"
-          if test $LINES_DIFF -gt 0; then
+          MAIN_FILE="MAIN/$FILEPATH"
+          PR_FILE="PR/$FILEPATH"
+
+          if [ ! -f "$MAIN_FILE" ]; then
+            echo "Main file $MAIN_FILE does not exist."
+            exit 1
+          fi
+
+          if [ ! -f "$PR_FILE" ]; then
+            echo "PR file $PR_FILE does not exist."
+            exit 1
+          fi
+
+          LINES_DIFF=$(($(wc -l < "$PR_FILE") - $(wc -l < "$MAIN_FILE")))
+
+          if [ $LINES_DIFF -gt 0 ]; then
+            echo "Line difference: $LINES_DIFF"
             exit $LINES_DIFF
+          else
+            echo "No lines added."
           fi
 
 
