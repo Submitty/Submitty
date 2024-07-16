@@ -394,12 +394,12 @@ class AuthenticationController extends AbstractController {
 
         $queried_list = $this->core->getQueries()->getFullEmailList();
 
-        if (array_search($email, array_column($queried_list, 'user_email')) !== false) {
+        if (array_search($email, array_column($queried_list, 'user_email'), true) !== false) {
             $this->core->addErrorMessage('Email already exists');
             return new RedirectResponse($this->core->buildUrl(['authentication', 'create_account']));
         }
 
-        if (array_search($user_id, array_column($queried_list, 'user_id')) !== false) {
+        if (array_search($user_id, array_column($queried_list, 'user_id'), true) !== false) {
             $this->core->addErrorMessage('User ID already exists');
             return new RedirectResponse($this->core->buildUrl(['authentication', 'create_account']));
         }

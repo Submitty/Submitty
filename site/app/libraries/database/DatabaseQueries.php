@@ -7702,6 +7702,8 @@ AND gc_id IN (
 
     /**
      * Gets a list of emails with user ids for all active particpants in Submitty
+     * array
+     * @return array<mixed>
      */
     public function getFullEmailList(): array {
         $parameters = [];
