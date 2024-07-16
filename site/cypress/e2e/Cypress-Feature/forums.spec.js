@@ -66,13 +66,12 @@ const removeThread = (title) => {
 
 describe('Visuals', () => {
     it('should compare screenshot of the entire page', () => {
-        cy.viewport(1000, 1000);
+        cy.viewport(1000, 920);
         cy.login('instructor');
         cy.visit(['sample', 'forum', 'threads', '9']);
         cy.get('[data-testid="markdown-post-list"]').scrollIntoView();
-        cy.get('[data-testid="markdown-post-list"]').compareSnapshot('forum-threads-9', 1.0, {
+        cy.get('[data-testid="markdown-post-list"]').compareSnapshot('forum-threads-9', 0.02, {
             capture: 'viewport',
-            clip: { x: 0, y: 0, width: 1000, height: 1000 },
         });
     });
 });
