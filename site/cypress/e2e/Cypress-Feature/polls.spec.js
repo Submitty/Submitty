@@ -282,8 +282,8 @@ describe('Test cases revolving around polls functionality', () => {
         // Waiting for duration to reach 0, so poll ends.
         // eslint-disable-next-line cypress/no-unnecessary-waiting
         cy.wait(5000);
-        cy.reload(); // Will not need this after websockets.
 
+        cy.reload(); // Will not need this after websockets.
         cy.contains('Poll Cypress Test').siblings(':nth-child(6)').children().should('not.be.checked');
         // Removing duration to continue testing
         // Editing the poll to remove timer
@@ -295,12 +295,9 @@ describe('Test cases revolving around polls functionality', () => {
             cy.get('#poll-minutes').invoke('val').should('eq', '0');
             cy.get('#poll-seconds').invoke('val').should('eq', '5');
             cy.get('#poll-seconds').clear();
-        });
-        cy.get('#enable-timer').within(() => {
             cy.get('#poll-hours').clear();
             cy.get('#poll-hours').type('3');
         });
-
         cy.get('button[type=submit]').click();
         cy.contains('Poll Cypress Test').siblings(':nth-child(6)').children().should('not.be.checked');
         cy.contains('Poll Cypress Test').siblings(':nth-child(6)').children().check();
@@ -365,9 +362,10 @@ describe('Test cases revolving around polls functionality', () => {
         cy.get('.correct-box').eq(1).should('not.be.checked');
         cy.get('.poll_response').should('contain', 'Answer 3');
         cy.get('.correct-box').eq(2).should('be.checked');
-        cy.get('textarea').contains('Answer 1');
-        cy.get('textarea').clear();
-        cy.get('textarea').type('Answer 0');
+        cy.get('textarea').contains('Answer 1').then(($el) => {
+            cy.wrap($el).clear();
+            cy.wrap($el).type('Answer 0');
+        });
         cy.get('#responses').children(':nth-child(3)').children(':nth-child(5)').click();
         cy.get('#responses').children(':nth-child(2)').children(':nth-child(4)').contains('Answer 3');
         cy.get('#responses').children(':nth-child(3)').children(':nth-child(4)').contains('Answer 2');
@@ -477,8 +475,10 @@ describe('Test cases revolving around polls functionality', () => {
         cy.login();
         cy.visit(['sample', 'polls']);
         cy.contains('Poll Cypress Test').siblings(':nth-child(2)').click();
+
+        // short wait must be inserted here to support the stability of poll deletion
         // eslint-disable-next-line cypress/no-unnecessary-waiting
-        cy.wait(500); // short wait must be inserted here to support the stability of poll deletion
+        cy.wait(500);
 
         // log into student and verify the poll is no longer there
         cy.logout();
