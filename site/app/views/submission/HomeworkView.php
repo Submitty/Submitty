@@ -197,14 +197,15 @@ class HomeworkView extends AbstractView {
             $active_days_charged = max(0, $active_days_late - $extensions);
         }
 
+        // process daylight savings banner
+        $due_date = $gradeable->getSubmissionDueDate();
+        $future_due_date = clone $due_date;
+        $future_due_date->modify('+' . $late_days_allowed . ' days');
+        $current_date = new \DateTime();
 
-        $date = new \DateTime();
-        $future_date = clone $date;
-        $future_date->modify('+7 days');
-        $past_date = clone $date;
-        $past_date->modify('-7 days');
-        // format("I") returns whether the given date is in daylight savings
-        $daylight_message_required = ($future_date->format("I") !== $past_date->format("I"));
+        // check if we have excessive amounts of late days or if the due date and due date + late days is in different time zones
+        // and if the user can submit without it being too late
+        $daylight_message_required = ($future_due_date->format("I") !== $due_date->format("I") || $late_days_allowed > 180) && $current_date < $future_due_date;
 
         // ------------------------------------------------------------
         // IF STUDENT HAS ALREADY SUBMITTED AND THE ACTIVE VERSION IS LATE, PRINT LATE DAY INFORMATION FOR THE ACTIVE VERSION
