@@ -163,3 +163,7 @@ form {
 .correct-tag-checkmark {
     color: var(--text-white);
 }
+
+.break-above {
+    margin-top: 1.5em;
+}
