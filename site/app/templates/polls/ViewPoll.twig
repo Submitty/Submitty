@@ -82,7 +82,12 @@
                                 "style": "display: inline"
                             } only %}
                             {% if ((poll.getAllowsCustomResponses() and option.isCustom()) and (user_id == option.getAuthorId())) %}
-                                <button type="button" class="move-btn delete-btn" aria-label="Delete Custom Response" style="border:0; padding:0;" onclick="removeCustomResponse({{ poll.getId() }}, {{ option.getId() }}, '{{ base_url }}');">
+                                <button
+                                    type="button"
+                                    class="move-btn delete-btn"
+                                    aria-label="Delete Custom Response"
+                                    style="border:0; padding:0;"
+                                    onclick="removeCustomResponse({{ poll.getId() }}, {{ option.getId() }}, '{{ base_url }}');">
                                     <i class="fas fa-trash black-btn"></i>
                                 </button>
                             {% endif %}
@@ -108,12 +113,21 @@
                     <input type="hidden" name="poll_id" value="{{ poll.getId() }}"/>
                     <br />
                     <div class="response-container">
-                        <textarea aria-label="Response text" class="poll-response custom-poll-response" name="custom-response" placeholder="Enter response here..." rows="10" cols="30"></textarea>
+                        <textarea
+                            aria-label="Response text"
+                            class="poll-response custom-poll-response"
+                            name="custom-response"
+                            placeholder="Enter response here..."
+                            rows="10" cols="30"></textarea>
                     </div>
                     <i>
                         Are you certain you want to add a response? It will be visible to every student.<br />
                     </i>
-                    <button type="button" class="btn btn-primary student-submit custom-response-submit" onclick = "addCustomResponse({{poll.getId()}},'{{base_url}}');">Add Response</button>
+                    <button
+                        type="button"
+                        class="btn btn-primary student-submit custom-response-submit"
+                        onclick = "addCustomResponse({{poll.getId()}},'{{base_url}}');">
+                        Add Response</button>
                     <script>
                         $(document).ready(() => {
                             validateCustomResponse();
