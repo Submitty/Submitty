@@ -324,26 +324,27 @@ class AuthenticationController extends AbstractController {
 
     /**
      * Check if password has at least one of the following, Upper case letter, Lower case letter, Special character, and number
+     * @param string $str
      */
     public function checkChars($str): bool {
         $upperCase = preg_match('/[A-Z]/', $str);
         $lowerCase = preg_match('/[a-z]/', $str);
         $specialChar = preg_match('/[^A-Za-z0-9]/', $str);
         $numericVal = preg_match('/[0-9]/', $str);
-        return strlen($upperCase) > 1 && strlen($lowerCase) > 1 && strlen($specialChar) > 1 && strlen($numericVal) > 1;
+        return $upperCase >= 1 && $lowerCase >= 1 && $specialChar >= 1 && $numericVal >= 1;
     }
 
     /**
      * Returns true if the password is greater than or equal to 12 characters, and has the required characters
+     * @param string $password
      */
     public function isGoodPassword($password): bool {
         return strlen($password) >= 12 && $this->checkChars($password);
     }
 
     /**
-     *
      * Checks if the email extension is in the accepted emails JSON file
-     *
+     * @param string $email
      */
     public function isAcceptedEmail($email): bool {
         $json = file_get_contents('/usr/local/submitty/GIT_CHECKOUT/Submitty/.setup/accepted_emails.json');
@@ -367,7 +368,7 @@ class AuthenticationController extends AbstractController {
             return false;
         }
 
-        return in_array($email_extension, array_keys($json_data));
+        return in_array($email_extension, array_keys($json_data), true);
     }
 
     /**
@@ -435,7 +436,7 @@ class AuthenticationController extends AbstractController {
             $this->core->addSuccessMessage('Account created successfully!');
             return new RedirectResponse($this->core->buildUrl(['authentication', 'login']));
         }
-        catch (Error $e) {
+        catch (\Error $e) {
             $this->core->addErrorMessage('Failed to create the account.');
             return new RedirectResponse($this->core->buildUrl(['authentication', 'create_account']));
         }

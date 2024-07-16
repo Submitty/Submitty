@@ -7703,7 +7703,7 @@ AND gc_id IN (
     /**
      * Gets a list of emails with user ids for all active particpants in Submitty
      */
-    public function getFullEmailList() {
+    public function getFullEmailList(): array {
         $parameters = [];
         $this->submitty_db->query('SELECT user_id, user_email FROM users', $parameters);
 
