@@ -2,7 +2,7 @@
 	"required_capabilities": "python",
     "autograding_method": "docker",
     "container_options": {
-        "container_image": "submitty/qiskit:latest"
+        "container_image": "submitty/qiskit:qiskit"
     },
     "resource_limits" : {
         "RLIMIT_NPROC" : 10
