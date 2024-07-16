@@ -42,28 +42,28 @@ describe('Test cases for checking the clear version conflicts button in the TA g
     it('Clicking "save" on a component with a version conflict should resolve the conflict for that component', () => {
         cy.login('instructor');
         cy.visit(['sample', 'gradeable', 'grading_homework', 'grading', 'grade?who_id=K8jI3q4qpdCc1jw&sort=id&direction=ASC&gradeable_version=1']);
-        cy.get('#grading_rubric_btn').click();
+        cy.get('[data-testid="grading-rubric-btn"]').click();
 
         // wait until page is fully loaded
-        cy.get('#component-list').children().should('have.length.least', 1);
-        cy.get('#component-list').children().eq(0).as('test-component');
+        cy.get('[data-testid="component-list"]').children().should('have.length.least', 1);
+        cy.get('[data-testid="component-list"]').children().eq(0).as('test-component');
 
         cy.get('@test-component').within(() => {
-            cy.get('.version-warning').should('exist');
-            cy.get('.box-title').click();
+            cy.get('[data-testid="version-warning"]').should('exist');
+            cy.get('@test-component').children().eq(0).children().eq(0).click();
 
-            cy.get('.save-tools-save').contains('Save and resolve version conflict');
-            cy.get('.save-tools-save').click();
+            cy.get('[data-testid="save-tools-save"]').contains('Save and resolve version conflict');
+            cy.get('[data-testid="save-tools-save"]').click();
 
-            cy.get('.version-warning', { timeout: 10000 }).should('not.exist');
+            cy.get('[data-testid="version-warning"]', { timeout: 10000 }).should('not.exist');
         });
 
         cy.reload();
 
-        cy.get('#component-list').children().should('have.length.least', 1);
-        cy.get('#component-list').children().eq(0).as('test-component');
+        cy.get('[data-testid="component-list"]').children().should('have.length.least', 1);
+        cy.get('[data-testid="component-list"]').children().eq(0).as('test-component');
         cy.get('@test-component').within(() => {
-            cy.get('.version-warning').should('not.exist');
+            cy.get('[data-testid="version-warning"]').should('not.exist');
         });
 
         // reset state
@@ -75,10 +75,10 @@ describe('Test cases for checking the clear version conflicts button in the TA g
 
         cy.reload();
 
-        cy.get('#component-list').children().should('have.length.least', 1);
-        cy.get('#component-list').children().eq(0).as('test-component');
+        cy.get('[data-testid="component-list"]').children().should('have.length.least', 1);
+        cy.get('[data-testid="component-list"]').children().eq(0).as('test-component');
         cy.get('@test-component').within(() => {
-            cy.get('.version-warning').should('exist');
+            cy.get('[data-testid="version-warning"]').should('exist');
         });
     });
 });
