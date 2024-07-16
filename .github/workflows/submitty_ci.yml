@@ -296,6 +296,28 @@ jobs:
         run: python3 run_shellcheck.py  # Uses the default Python installed with Ubuntu
 
 
+  colors-css:
+    name: colors.css check
+    runs-on: ubuntu-22.04
+    steps:
+      - name: Fetch main branch
+        uses: actions/checkout@v4
+        with:
+          ref: main
+          path: MAIN
+      - name: Fetch PR branch
+        uses: actions/checkout@v4
+        with:
+          path: PR
+      - name: Check file size change
+        run: |
+          FILEPATH="site/public/css/colors.css"
+          LINES_DIFF="$(($(wc -l < PR/$FILEPATH) - $(wc -l < MAIN/$FILEPATH)))"
+          if test $LINES_DIFF -gt 0; then
+            exit $LINES_DIFF
+          fi
+
+
   Cypress-System:
     runs-on: ubuntu-22.04
     services:
