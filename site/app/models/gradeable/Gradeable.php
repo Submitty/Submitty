@@ -378,20 +378,19 @@ class Gradeable extends AbstractModel {
             $this->setPeerBlind($details['peer_blind']);
         }
 
-$mapping = [
-    'autograding' => 'setPeerAutograding',
-    'rubric' => 'setPeerRubric',
-    'files' => 'setPeerFiles',
-    'solution_notes' => 'setPeerSolutions',
-    'discussion' => 'setPeerDiscussion'
-];
+        $mapping = [
+            'autograding' => 'setPeerAutograding',
+            'rubric' => 'setPeerRubric',
+            'files' => 'setPeerFiles',
+            'solution_notes' => 'setPeerSolutions',
+            'discussion' => 'setPeerDiscussion'
+        ];
 
-foreach ($mapping as $key => $method) {
-    if (array_key_exists($key, $details)) {
-        $this->$method($details[$key] ?? true);
-    }
-}
-
+        foreach ($mapping as $key => $method) {
+            if (array_key_exists($key, $details)) {
+                $this->$method($details[$key] ?? true);
+            }
+        }
 
         if (array_key_exists('limited_access_blind', $details)) {
             $this->setLimitedAccessBlind($details['limited_access_blind']);
