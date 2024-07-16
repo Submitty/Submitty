@@ -75,11 +75,11 @@ function removeImage(url, id) {
         url: url,
         type: 'POST',
         data: {
-            'image': id,
+            image: id,
             // eslint-disable-next-line no-undef
             csrf_token: csrfToken,
         },
-        success: function(data) {
+        success: (data) => {
             const json = JSON.parse(data);
             if (json.status === 'success') {
                 location.reload();
@@ -91,7 +91,7 @@ function removeImage(url, id) {
                 displayErrorMessage(json.message);
             }
         },
-        error: function(err) {
+        error: (err) => {
             console.error(err);
             window.alert('Something went wrong. Please try again.');
         },
@@ -110,7 +110,7 @@ function addImage(url) {
             // eslint-disable-next-line no-undef
             csrf_token: csrfToken,
         },
-        success: function (data) {
+        success: (data) => {
             const json = JSON.parse(data);
             if (json.status === 'success') {
                 $('#add-field').val('');
@@ -122,7 +122,7 @@ function addImage(url) {
                 displayErrorMessage(json.message);
             }
         },
-        error: function (err) {
+        error: (err) => {
             console.error(err);
             window.alert('Something went wrong. Please try again.');
         },
@@ -137,7 +137,7 @@ function updateImage(url) {
             // eslint-disable-next-line no-undef
             csrf_token: csrfToken,
         },
-        success: function (data) {
+        success: (data) => {
             const json = JSON.parse(data);
             if (json.status === 'success') {
                 // eslint-disable-next-line no-undef
@@ -148,7 +148,7 @@ function updateImage(url) {
                 displayErrorMessage(json.message);
             }
         },
-        error: function (err) {
+        error: (err) => {
             console.error(err);
             window.alert('Something went wrong. Please try again.');
         },
