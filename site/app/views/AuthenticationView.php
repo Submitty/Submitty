@@ -35,8 +35,9 @@ class AuthenticationView extends AbstractView {
             "saml_name" => $this->core->getConfig()->getSamlOptions()['name'],
             "login_content" => $login_content,
             "user_create_account" => $this->core->getConfig()->isUserCreateAccount(),
+            "is_database_auth" => $this->core->getAuthentication() instanceof DatabaseAuthentication,
             "new_account_url" => $this->core->buildUrl(['authentication', 'create_account']),
-            "new_account_text" =>$this->core->getAuthentication() instanceof DatabaseAuthentication
+            "new_account_text" => "New to Submitty? Sign up now!"
         ]);
     }
 

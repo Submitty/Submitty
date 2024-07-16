@@ -312,12 +312,9 @@ class AuthenticationController extends AbstractController {
 
     /**
      * Display the form for creating a new account
-     *
-     * @Route("/authentication/create_account")
-     *
-     * @return ResponseInterface
      */
-    public function signupForm() {
+    #[Route("/authentication/create_account")]
+    public function signupForm(): ResponseInterface {
         // Check if the user is already logged in, if yes, redirect to home or another appropriate page
         if ($this->logged_in) {
             return new RedirectResponse($this->core->buildUrl(['home']));
@@ -326,19 +323,63 @@ class AuthenticationController extends AbstractController {
     }
 
     /**
-     * Handles the submission of the new account creation form
-     *
-     * @Route("/authentication/self_add_user")
-     *
-     * @return MultiResponse
+     * Check if password has at least one of the following, Upper case letter, Lower case letter, Special character, and number
      */
-    public function addNewUser() {
+    function checkChars($str): bool {
+        $upperCase = preg_match('/[A-Z]/', $str);
+        $lowerCase = preg_match('/[a-z]/', $str);
+        $specialChar = preg_match('/[^A-Za-z0-9]/', $str);
+        $numericVal = preg_match('/[0-9]/', $str);
+        return strlen($upperCase) > 1 && strlen($lowerCase) > 1 && strlen($specialChar) > 1 && strlen($numericVal) > 1;
+    }
+
+    /**
+     * Returns true if the password is greater than or equal to 12 characters, and has the required characters
+     */
+    public function isGoodPassword($password): bool {
+        return strlen($password) >= 12 && $this->checkChars($password);
+    }
+
+    /**
+     *
+     * Checks if the email extension is in the accepted emails JSON file
+     *
+     */
+    public function isAcceptedEmail($email): bool {
+        $json = file_get_contents('/usr/local/submitty/GIT_CHECKOUT/Submitty/.setup/accepted_emails.json');
+        // Check if the file was read successfully
+        try {
+            $email_extension = explode('@', $email)[1];
+        } catch (\Error $error) {
+            return false;
+        }
+
+        if ($json === false) {
+           return false;
+        }
+
+        // Decode the JSON file
+        $json_data = json_decode($json, true);
+
+        // Check if the JSON was decoded successfully
+        if ($json_data === null) {
+           return false;
+        }
+
+        return in_array($email_extension, array_keys($json_data));
+    }
+
+    /**
+     * Handles the submission of the new account creation form
+     */
+    #[Route("/authentication/self_add_user")]
+    public function addNewUser(): RedirectResponse {
         // Check if the user is already logged in, if yes, redirect to home or another appropriate page
         if ($this->logged_in) {
             return new RedirectResponse($this->core->buildUrl(['home']));
         }
 
-        // Should never happen, as the user 
+        // Should never happen, however they can visit this URL manually, so this is to prevent unwanted account creation.
         if (!$this->core->getConfig()->isUserCreateAccount()) {
             $this->core->addErrorMessage('Users cannot create their own account, Please have your system administrator add you.');
             return new RedirectResponse($this->core->buildUrl(['authentication', 'login']));
@@ -353,16 +394,26 @@ class AuthenticationController extends AbstractController {
 
         if (array_search($email, array_column($queried_list, 'user_email')) !== FALSE) {
             $this->core->addErrorMessage('Email already exists');
-            return true;
+            return new RedirectResponse($this->core->buildUrl(['authentication', 'create_account']));
         }
 
         if (array_search($user_id, array_column($queried_list, 'user_id')) !== FALSE) {
             $this->core->addErrorMessage('User ID already exists');
-            return true;
+            return new RedirectResponse($this->core->buildUrl(['authentication', 'create_account']));
+        }
+
+        if (!$this->isGoodPassword($password)) {
+            $this->core->addErrorMessage('Password does not meet the requirements.');
+            return new RedirectResponse($this->core->buildUrl(['authentication', 'create_account']));
         }
 
         if (!($password === $confirm_password)) {
             $this->core->addErrorMessage('Passwords did not match.');
+            return new RedirectResponse($this->core->buildUrl(['authentication', 'create_account']));
+        }
+
+        if (!$this->isAcceptedEmail($email)) {
+            $this->core->addErrorMessage('This email is not accepted.');
             return new RedirectResponse($this->core->buildUrl(['authentication', 'create_account']));
         }
         
@@ -373,7 +424,7 @@ class AuthenticationController extends AbstractController {
             'user_password' => $password,
             'user_pronouns' => '',
             'display_pronouns' => false,
-            'user_email' => $_POST['email'],
+            'user_email' => $email,
             'user_email_secondary' => '',
             'user_email_secondary_notify' => false
         ]);

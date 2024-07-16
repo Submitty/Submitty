@@ -126,6 +126,7 @@ jobs:
               echo "http://localhost"             # submitty url
               echo ""                             # vcs url
               echo ""                             # institution name
+              echo "y"                            # user create account
               echo ""                             # sysadmin email
               echo ""                             # where to report
               echo "1"                            # PamAuth
