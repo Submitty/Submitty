@@ -16,11 +16,8 @@ use Symfony\Component\Routing\Annotation\Route;
  *
  */
 class DockerInterfaceController extends AbstractController {
-    /**
-     * @Route("/admin/docker", methods={"GET"})
-     * @Route("/api/docker", methods={"GET"})
-     * @return MultiResponse
-     */
+    #[Route("/admin/docker", methods: ["GET"])]
+    #[Route("/api/docker", methods: ["GET"])]
     public function showDockerInterface(): MultiResponse {
         $user = $this->core->getUser();
         if (is_null($user) || !$user->accessFaculty()) {
@@ -67,12 +64,9 @@ class DockerInterfaceController extends AbstractController {
             )
         );
     }
-    /**
-     * @Route("/admin/add_image", methods={"POST"})
-     * @Route("/api/admin/add_image", methods={"GET"})
-     * @AccessControl(level="FACULTY")
-     * @return JsonResponse
-     */
+
+    #[Route("/admin/add_image", methods: ["POST"])]
+    #[Route("/api/admin/add_image", methods: ["GET"])]
     public function addImage(): JsonResponse {
         $user = $this->core->getUser();
         $user_id = $this->core->getUser()->getId();
@@ -159,11 +153,7 @@ class DockerInterfaceController extends AbstractController {
         }
     }
 
-    /**
-     * @Route("/admin/remove_image", methods={"POST"})
-     * @AccessControl(level="FACULTY")
-     * @return JsonResponse
-     */
+    #[Route("/admin/remove_image", methods: ["POST"])]
     public function removeImage(): JsonResponse {
         $pattern = '/^[a-z0-9]+[a-z0-9._(__)-]*[a-z0-9]+\/[a-z0-9]+[a-z0-9._(__)-]*[a-z0-9]+:[a-zA-Z0-9][a-zA-Z0-9._-]{0,127}$/';
         $user = $this->core->getUser();
@@ -200,12 +190,8 @@ class DockerInterfaceController extends AbstractController {
         }
     }
 
-
-    /**
-     * @Route("/admin/update_docker", methods={"GET"})
-     * @return JsonResponse
-     */
-    public function updateDockerCall() {
+    #[Route("/admin/update_docker", methods: ["GET"])]
+    public function updateDockerCall(): JsonResponse {
         $user = $this->core->getUser();
         if (is_null($user) || !$user->accessFaculty()) {
             return JsonResponse::getFailResponse("You don't have access to this endpoint.");
@@ -216,10 +202,7 @@ class DockerInterfaceController extends AbstractController {
         return JsonResponse::getSuccessResponse("Successfully queued the system to update docker, please refresh the page in a bit.");
     }
 
-    /**
-     * @return bool
-     */
-    private function updateDocker() {
+    private function updateDocker(): bool {
         $now = $this->core->getDateTimeNow()->format('Ymd');
         $docker_job_file = FileUtils::joinPaths($this->core->getConfig()->getSubmittyPath(), "daemon_job_queue/docker" . $now . ".json");
         $docker_data = [

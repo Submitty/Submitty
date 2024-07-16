@@ -27,7 +27,7 @@ function filterOnClick() {
 
     $(this).removeClass('fully-transparent');
 
-    $('.image-row').each(function() {
+    $('.image-row').each(function () {
         const this_row = $(this);
         let hide = true;
         $(this).find('.badge').each(function () {
@@ -105,12 +105,12 @@ function addImage(url) {
         url: url,
         type: 'POST',
         data: {
-            'capability': capability,
-            'image': image,
+            capability: capability,
+            image: image,
             // eslint-disable-next-line no-undef
             csrf_token: csrfToken,
         },
-        success: function(data) {
+        success: function (data) {
             const json = JSON.parse(data);
             if (json.status === 'success') {
                 $('#add-field').val('');
@@ -122,7 +122,7 @@ function addImage(url) {
                 displayErrorMessage(json.message);
             }
         },
-        error: function(err) {
+        error: function (err) {
             console.error(err);
             window.alert('Something went wrong. Please try again.');
         },
@@ -137,7 +137,7 @@ function updateImage(url) {
             // eslint-disable-next-line no-undef
             csrf_token: csrfToken,
         },
-        success: function(data) {
+        success: function (data) {
             const json = JSON.parse(data);
             if (json.status === 'success') {
                 // eslint-disable-next-line no-undef
@@ -148,7 +148,7 @@ function updateImage(url) {
                 displayErrorMessage(json.message);
             }
         },
-        error: function(err) {
+        error: function (err) {
             console.error(err);
             window.alert('Something went wrong. Please try again.');
         },

@@ -53,7 +53,7 @@ Required Input:
         {% endblock %}
         {% if edit_marks_enabled %}
             <div class="add-new-mark-container">
-                <input type="button" class="btn btn-primary add-new-mark key_to_click" tabindex="0" value="Add New Mark" onclick="onAddNewMark(this)"/>
+                <input type="button" class="btn btn-primary add-new-mark key_to_click" data-testid="add-new-mark-button" tabindex="0" value="Add New Mark" onclick="onAddNewMark(this)"/>
             </div>
         {% endif %}
         {% block extra_mark_rows %}

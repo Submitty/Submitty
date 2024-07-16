@@ -4,30 +4,38 @@
 {% include('officeHoursQueue/QueueSocketMessage.twig') %}
 <br>
 <div>
-<button id="toggle_new_queue" class="btn btn-primary filter_btn" type="button" onclick="$('#new-queue').show()">
-    Open New Queue
+<button id="toggle_new_queue" class="btn btn-primary filter_btn" type="button" onclick="$('#new-queue').show()" data-testid="toggle-new-queue">
+    Create Queue
 </button>
-  <button id="toggle_filter_settings" class="btn btn-primary filter_btn" type="button" onclick="$('#filter-settings').show()">
-    Edit Existing Queue
+  <button id="toggle_filter_settings" class="btn btn-primary filter_btn" type="button" onclick="$('#filter-settings').show()" data-testid="toggle-filter-settings">
+    Edit Queue
   </button>
-  <button id="toggle_announcement_settings" class="btn btn-primary filter_btn" type="button" onclick="$('#announcement-settings').show()">
+  <button id="toggle_announcement_settings" class="btn btn-primary filter_btn" type="button" onclick="$('#announcement-settings').show()" data-testid="toggle-announcement-settings">
     Edit Announcement
   </button>
   <button id="toggle_queue_message" class="btn btn-primary filter_btn" type="button" onclick="$('#queue-socket-message').show()">
     Send Message
   </button>
-  <button id="notification_btn" class="btn btn-default filter_btn" type="button" onclick="enableNotifications()">
-    Enable Notifications
-  </button>
   <a id="view-stats" class="btn btn-default filter_btn" href="{{base_url}}/stats">
     View Queue Stats
   </a>
-  <button class="btn btn-default filter_btn enable-audible" title="Enable audible alert when queue changes" onclick="toggleAudibleAlert()">
-    <i class="fas fa-bell" ></i>
-  </button>
-  <button class="btn btn-default filter_btn disable-audible" title="Disable audible alert when queue changes" onclick="toggleAudibleAlert()">
-    <i class="fas fa-bell-slash"></i>
-  </button>
+  <div class="super-switch-container" data-testid="notification-switch-container">
+    <div class="switch-container">
+      <span class="switch-label">Push Notifications</span>
+      <label class="switch" aria-label="Slider Switch for Push Notifications" data-testid="push-notification-switch">
+        <input type="checkbox" id="push-notification-switch" onclick="enableNotifications();">
+        <span class="slider"></span>
+      </label>
+    </div>
+    <div class="switch-container">
+      <span class="switch-label">Notification Sounds</span>
+      <label class="switch" aria-label="Slider Switch for Notification Sounds" data-testid="sound-notification-switch">
+        <input type="checkbox" id="sound-notification-switch" onclick="toggleAudibleAlert();">
+        <span class="slider"></span>
+      </label>
+    </div>
+  </div>
+  <br>
 </div>
 
 <style>

@@ -1,0 +1,12 @@
+---
+- name: Run the create_term script to create a term.
+  ansible.builtin.command:
+    cmd: ./create_term.sh --amend "{{ submitty_term_creation_key }}"
+      "{{ submitty_term_creation_name }}" "{{ submitty_term_creation_start_date }}"
+      "{{ submitty_term_creation_end_date }}"
+    chdir: /usr/local/submitty/sbin/
+  become: true
+  become_user: root
+  notify: Reload fpm
+  register: create_term_creation_output
+  changed_when: create_term_creation_output.rc != 0

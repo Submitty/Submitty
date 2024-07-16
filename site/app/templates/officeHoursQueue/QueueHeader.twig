@@ -100,4 +100,9 @@
   {% endif %}
 
   {% include 'officeHoursQueue/QueueHistory.twig' %}
+
+  {% if viewer.isGrader() %}
+    {% include 'officeHoursQueue/SearchStudentQueue.twig' %}
+  {% endif  %}
+
   {% include 'officeHoursQueue/QueueFooter.twig' %}
