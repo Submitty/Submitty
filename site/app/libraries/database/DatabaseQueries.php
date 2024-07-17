@@ -5144,8 +5144,8 @@ SQL;
         return $this->submitty_db->rows();
     }
 
-    public function getAllCourses(): array {
-        $this->submitty_db->query("SELECT term, course FROM courses");
+    public function getSelfRegisterCourses(): array {
+        $this->submitty_db->query("SELECT term, course FROM courses where self_registration=true");
         return $this->submitty_db->rows();
     }
 

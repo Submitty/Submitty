@@ -48,14 +48,7 @@ class HomePageController extends AbstractController {
         $unarchived_courses = $this->core->getQueries()->getCourseForUserId($user_id);
         $archived_courses = $this->core->getQueries()->getCourseForUserId($user_id, true);
         $dropped_courses = $this->core->getQueries()->getCourseForUserId($user_id, false, true);
-        $self_register_courses = [];
-        $all_courses = $this->core->getQueries()->getAllCourses();
-        foreach($all_courses as $course){
-            $this->core->loadCourseConfig($course['term'], $course['course']);
-            if ($this->core->getConfig()->isSelfRegistration()) {
-                array_merge($self_register_courses, $course);
-            }
-        }
+        $self_register_courses = $this->core->getQueries()->getSelfRegisterCourses();
         if ($as_instructor) {
             foreach (['archived_courses', 'unarchived_courses'] as $var) {
                 $$var = array_filter($$var, function (Course $course) use ($user_id) {
