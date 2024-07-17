@@ -66,14 +66,14 @@ echo -e "Make top level SUBMITTY DATA directories & set permissions"
 
 mkdir -p "${SUBMITTY_DATA_DIR}"
 
-if [ "${WORKER}" == 1 ]; then
-    echo -e "INSTALLING SUBMITTY IN WORKER MODE"
+if [ "${IS_WORKER}" == 1 ]; then
+    echo -e "INSTALLING SUBMITTY IN IS_WORKER MODE"
 else
     echo -e "INSTALLING PRIMARY SUBMITTY"
 fi
 
 #Make a courses and checkouts directory if not in worker mode.
-if [ "${WORKER}" == 0 ]; then
+if [ "${IS_WORKER}" == 0 ]; then
     mkdir -p "${SUBMITTY_DATA_DIR}/courses"
     mkdir -p "${SUBMITTY_DATA_DIR}/user_data"
     mkdir -p "${SUBMITTY_DATA_DIR}/vcs"
@@ -87,7 +87,7 @@ mkdir -p "${SUBMITTY_DATA_DIR}/logs"
 mkdir -p "${SUBMITTY_DATA_DIR}/logs/autograding"
 mkdir -p "${SUBMITTY_DATA_DIR}/logs/autograding_stack_traces"
 # Create the logs directories that only exist on the primary machine
-if [ "${WORKER}" == 0 ]; then
+if [ "${IS_WORKER}" == 0 ]; then
     mkdir -p "${SUBMITTY_DATA_DIR}/logs/access"
     mkdir -p "${SUBMITTY_DATA_DIR}/logs/bulk_uploads"
     mkdir -p "${SUBMITTY_DATA_DIR}/logs/emails"
@@ -111,7 +111,7 @@ chown  "root:${COURSE_BUILDERS_GROUP}"                "${SUBMITTY_DATA_DIR}"
 chmod  751                                            "${SUBMITTY_DATA_DIR}"
 
 #Set up courses and version control ownership if not in worker mode
-if [ "${WORKER}" == 0 ]; then
+if [ "${IS_WORKER}" == 0 ]; then
     chown  "root:${COURSE_BUILDERS_GROUP}"            "${SUBMITTY_DATA_DIR}/courses"
     chmod  751                                        "${SUBMITTY_DATA_DIR}/courses"
     chown  "${PHP_USER}:${PHP_USER}"                  "${SUBMITTY_DATA_DIR}/user_data"
@@ -130,7 +130,7 @@ chown  -R "${DAEMON_USER}":"${DAEMONPHP_GROUP}"         "${SUBMITTY_DATA_DIR}/lo
 chown  -R "${DAEMON_USER}":"${DAEMONPHP_GROUP}"         "${SUBMITTY_DATA_DIR}/logs/autograding_stack_traces"
 
 # Set owner/group for logs directories that exist only on the primary machine
-if [ "${WORKER}" == 0 ]; then
+if [ "${IS_WORKER}" == 0 ]; then
     chown  -R "${PHP_USER}":"${COURSE_BUILDERS_GROUP}"    "${SUBMITTY_DATA_DIR}/logs/access"
     chown  -R "${DAEMON_USER}":"${COURSE_BUILDERS_GROUP}" "${SUBMITTY_DATA_DIR}/logs/bulk_uploads"
     chown  -R "${DAEMON_USER}":"${COURSE_BUILDERS_GROUP}" "${SUBMITTY_DATA_DIR}/logs/emails"
@@ -168,7 +168,7 @@ chmod 751 "${SUBMITTY_DATA_DIR}/logs/"
 
 
 #Set up shipper grading directories if not in worker mode.
-if [ "${WORKER}" == 0 ]; then
+if [ "${IS_WORKER}" == 0 ]; then
     # if the to_be_graded directories do not exist, then make them
     mkdir -p "$SUBMITTY_DATA_DIR/to_be_graded_queue"
     mkdir -p "$SUBMITTY_DATA_DIR/daemon_job_queue"
