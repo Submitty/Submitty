@@ -353,6 +353,9 @@ if echo "{$result}" | grep -E -q "package(-lock)?.json"; then
     # js-cookie
     mkdir ${VENDOR_FOLDER}/js-cookie
     cp ${NODE_FOLDER}/js-cookie/dist/js.cookie.min.js ${VENDOR_FOLDER}/js-cookie
+    #vue
+    mkdir ${VENDOR_FOLDER}/vue
+    cp ${NODE_FOLDER}/vue/dist/vue.runtime.global.prod.js ${VENDOR_FOLDER}/vue
 
     find ${NODE_FOLDER} -type d -exec chmod 551 {} \;
     find ${NODE_FOLDER} -type f -exec chmod 440 {} \;

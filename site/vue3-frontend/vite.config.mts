@@ -15,11 +15,20 @@ export default defineConfig({
         },
     },
     build: {
+        rollupOptions: {
+            external: ['vue'],
+            output: {
+                globals: {
+                    vue: 'Vue',
+                },
+            },
+        },
         lib: {
+            name: 'submitty-vue3-frontend',
             entry: resolve(path.dirname(fileURLToPath(import.meta.url)), 'src/main.ts'),
             fileName: 'submitty-vue3-frontend',
 
-            formats: ['es'],
+            formats: ['umd'],
         },
         outDir: '../public/mjs/vue/',
         emptyOutDir: true,
