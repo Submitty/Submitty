@@ -3,9 +3,11 @@
 namespace app\controllers;
 
 use app\entities\course\CourseMaterial;
+use app\libraries\CodeMirrorUtils;
 use app\libraries\CourseMaterialsUtils;
 use app\libraries\DateUtils;
 use app\libraries\FileUtils;
+use app\libraries\NotebookUtils;
 use app\libraries\response\RedirectResponse;
 use app\libraries\response\WebResponse;
 use app\libraries\routers\AccessControl;
@@ -170,6 +172,27 @@ class MiscController extends AbstractController {
             header('Content-Disposition: inline; filename="' . $file_name . '"');
             readfile($corrected_name);
             $this->core->getOutput()->renderString($path);
+        }
+        elseif (pathinfo($path, PATHINFO_EXTENSION) === 'ipynb') { // TODO: Do this "properly" by determining a better MIME type via FileUtils::getContentType()
+            $this->core->getOutput()->setContentOnly(true);
+            CodeMirrorUtils::loadDefaultDependencies($this->core);
+            $this->core->getOutput()->addInternalJs('gradeable-notebook.js');
+            $this->core->getOutput()->renderString(
+                $this->core->getOutput()->renderTwigTemplate(
+                    "notebook/Notebook.twig",
+                    [
+                        'notebook' => NotebookUtils::jupyterToSubmittyNotebook($path),
+                        'student_id' => $user_id,
+                        'is_timed' => false,
+                        'allowed_minutes' => 0,
+                        'old_files' => [],
+                        'is_grader_view' => true,
+                        'testcase_messages' => [],
+                        'viewing_inactive_version' => false,
+                        'highest_version' => 0,
+                    ]
+                )
+            );
         }
         else {
             $contents = file_get_contents($corrected_name);
