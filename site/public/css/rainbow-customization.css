@@ -223,6 +223,14 @@ hr {
     padding: 4px 6px;
 }
 
+#manual-grading-note {
+    width: 32.5em;
+}
+
+#manual-grading-table {
+    text-align: left;
+}
+
 #gradeables .gradeable-custom-item-input {
     width: 3em;
 }
