@@ -5,7 +5,7 @@ const exports = {
     async render(target: string, page: string, args: Record<string, unknown> = {}) {
         const root_component = await (async () => {
             try {
-                return (await import(`./pages/${page}.vue`)).default as Parameters<typeof createApp>[0];
+                return (await import(`./pages/${page}.vue`) as { default: Parameters<typeof createApp>[0] }).default;
             }
             catch {
                 return Unknown;
