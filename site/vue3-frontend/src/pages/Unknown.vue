@@ -1,6 +1,6 @@
 <script setup lang="ts">
 defineProps<{
-  page: string
+    page: string;
 }>();
 </script>
 
