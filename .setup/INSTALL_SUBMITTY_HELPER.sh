@@ -33,8 +33,7 @@ fi
 # We assume a relative path from this repository to the installation
 # directory and configuration directory.
 THIS_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null && pwd )"
-CONF_DIR="${THIS_DIR}/../../../config"
-SUBMITTY_REPOSITORY=$(jq -r '.submitty_repository' "${CONF_DIR}/submitty.json")
+SUBMITTY_REPOSITORY=$(jq -r '.submitty_repository' "${THIS_DIR}/../../../config/submitty.json")
 
 source "${SUBMITTY_REPOSITORY}/.setup/install_submitty/get_globals.sh"
 
@@ -109,7 +108,7 @@ fi
 # VALIDATE DATABASE SUPERUSERS
 
 if [ "${IS_WORKER}" == 0 ]; then
-    DATABASE_FILE="$CONF_DIR/database.json"
+    DATABASE_FILE="$SUBMITTY_CONFIGURATION_DIR/database.json"
     DATABASE_HOST=$(jq -r '.database_host' $DATABASE_FILE)
     DATABASE_PORT=$(jq -r '.database_port' $DATABASE_FILE)
     GLOBAL_DBUSER=$(jq -r '.database_user' $DATABASE_FILE)
