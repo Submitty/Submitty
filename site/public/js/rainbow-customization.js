@@ -1,5 +1,8 @@
 /* exported addToTable, deleteRow */
 const benchmarks_with_input_fields = ['lowest_a-', 'lowest_b-', 'lowest_c-', 'lowest_d'];
+const allowed_grades = ['A', 'A-', 'B+', 'B', 'B-', 'C+', 'C', 'C-', 'D+', 'D', 'F'];
+const allowed_grades_excluding_f = ['A', 'A-', 'B+', 'B', 'B-', 'C+', 'C', 'C-', 'D+', 'D'];
+const tables = ['plagiarism', 'manualGrade'];
 
 // eslint-disable-next-line no-unused-vars
 function ExtractBuckets() {
@@ -267,78 +270,143 @@ function getGradeableBuckets() {
     return gradeables;
 }
 
-function getPlagiarism() {
-    const plagiarismData = [];
+/**
+ * Gets data to add to the JSON for the plagiarism and manual grade tables
+ * @param {string} table
+ *      'plagiarism'
+ *      'manualGrade'
+ */
+function getTableData(table) {
+    if (!tables.includes(table)) {
+        return;
+    }
 
-    const tableBody = document.getElementById('table-body');
+    const data = [];
+
+    const tableMap = {
+        plagiarism: 'plagiarism-table-body',
+        manualGrade: 'manual-grading-table-body',
+    };
+    const tableBody = document.getElementById(tableMap[table]);
     const rows = tableBody.getElementsByTagName('tr');
 
     for (let i = 0; i < rows.length; i++) {
         const row = rows[i];
-        const user = row.cells[0].textContent;
-        const gradeable = row.cells[1].textContent;
-        const penalty = parseFloat(row.cells[2].textContent);
+        const firstInput = row.cells[0].textContent;
+        const secondInput = row.cells[1].textContent;
+        const thirdInput = row.cells[2].textContent;
 
-        plagiarismData.push({
-            user: user,
-            gradeable: gradeable,
-            penalty: penalty,
-        });
+        if (table === 'plagiarism') {
+            data.push({
+                user: firstInput,
+                gradeable: secondInput,
+                penalty: parseFloat(thirdInput),
+            });
+        }
+        else if (table === 'manualGrade') {
+            data.push({
+                user: firstInput,
+                grade: secondInput,
+                note: thirdInput,
+            });
+        }
     }
 
-    return plagiarismData;
+    return data;
 }
 
-function addToTable() {
-    const USERID = document.getElementById('user_id').value.trim();
-    const gradeable = document.getElementById('g_id').value.trim();
-    const penalty = document.getElementById('marks').value.trim();
-
-    // Check for empty fields
-    if (USERID === '' || gradeable === '' || penalty === '') {
-        alert('Please fill in all the fields.');
+/**
+ * Adds input data to plagiarism and manual grade tables
+ * @param {string} table
+ *     'plagiarism'
+ *     'manualGrade'
+ */
+function addToTable(table) {
+    if (!tables.includes(table)) {
         return;
     }
 
+    const tableMap = {
+        plagiarism: ['plagiarism-table-body', 'plagiarism_user_id', 'g_id', 'marks'],
+        manualGrade: ['manual-grading-table-body', 'manual-grading-user-id', 'manual-grading-grade', 'manual-grading-note'],
+    };
+
+    const firstInput = document.getElementById(tableMap[table][1]).value.trim();
+    const secondInput = document.getElementById(tableMap[table][2]).value.trim();
+    const thirdInput = document.getElementById(tableMap[table][3]).value.trim();
+
+    // Check whether input is allowed
     // eslint-disable-next-line no-undef
     const studentFullDataValues = studentFullData.map((item) => item.value);
-    if (!studentFullDataValues.includes(USERID)) {
-        alert('Invalid User ID. Please enter a valid one.');
-        return;
-    }
-
-    // Check for penalty
-    if (penalty > 1 || penalty < 0) {
-        alert('Penalty must be between 0 - 1');
-        return;
-    }
-
-    const tableBody = document.getElementById('table-body');
-
-    // Check for duplicate entries
+    const tableBody = document.getElementById(tableMap[table][0]);
     const rows = tableBody.getElementsByTagName('tr');
-    for (let i = 0; i < rows.length; i++) {
-        const row = rows[i];
-        const existingUSERID = row.cells[0].textContent.trim();
-        const existingGradeable = row.cells[1].textContent.trim();
+    switch (table) {
+        case 'plagiarism': {
+            if (firstInput === '' || secondInput === '' || thirdInput === '') {
+                alert('Please fill in all the fields.');
+                return;
+            }
+            if (!studentFullDataValues.includes(firstInput)) {
+                alert('Invalid User ID. Please enter a valid one.');
+                return;
+            }
+            if (thirdInput > 1 || thirdInput < 0) {
+                alert('Penalty must be between 0 - 1');
+                return;
+            }
 
-        if (USERID === existingUSERID && gradeable === existingGradeable) {
-            alert('Entry with the same Student ID and Gradeable already exists.');
-            return;
+            // Check for duplicate entries
+            for (let i = 0; i < rows.length; i++) {
+                const row = rows[i];
+                const existingFirstInput = row.cells[0].textContent.trim();
+                const existingSecondInput = row.cells[1].textContent.trim();
+
+                if (firstInput === existingFirstInput && secondInput === existingSecondInput) {
+                    alert('Entry with the same Student ID and Gradeable already exists.');
+                    return;
+                }
+            }
+            break;
+        }
+        case 'manualGrade': {
+            if (firstInput === '' || secondInput === '') {
+                alert('Please fill in both user ID and final grade.');
+                return;
+            }
+            if (!studentFullDataValues.includes(firstInput)) {
+                alert('Invalid User ID. Please enter a valid one.');
+                return;
+            }
+            if (!allowed_grades.includes(secondInput)) {
+                alert('Grade must be one of the following: ${allowed_grades.join(\', \')}');
+                return;
+            }
+
+            // Check for duplicate entries
+            for (let i = 0; i < rows.length; i++) {
+                const row = rows[i];
+                const existingFirstInput = row.cells[0].textContent.trim();
+
+                if (firstInput === existingFirstInput) {
+                    alert('Entry with the same Student ID already exists.');
+                    return;
+                }
+            }
+            break;
         }
     }
 
     // Create a new row and cells
     const newRow = tableBody.insertRow();
 
-    const cellUSERID = newRow.insertCell();
-    cellUSERID.textContent = USERID;
+    const cellFirstInput = newRow.insertCell();
+    cellFirstInput.textContent = firstInput;
 
-    const cellGradeable = newRow.insertCell();
-    cellGradeable.textContent = gradeable;
+    const cellSecondInput = newRow.insertCell();
+    cellSecondInput.textContent = secondInput;
 
-    const cellPenalty = newRow.insertCell();
-    cellPenalty.textContent = penalty;
+    const cellThirdInput = newRow.insertCell();
+    cellThirdInput.textContent = thirdInput;
 
     const cellDelete = newRow.insertCell();
     const deleteLink = document.createElement('a');
@@ -351,14 +419,15 @@ function addToTable() {
     cellDelete.appendChild(deleteLink);
 
     // Clear the form fields
-    document.getElementById('user_id').value = '';
-    document.getElementById('g_id').value = '';
-    document.getElementById('marks').value = '';
+    document.getElementById(tableMap[table][1]).value = '';
+    document.getElementById(tableMap[table][2]).value = '';
+    document.getElementById(tableMap[table][3]).value = '';
 }
 
 function deleteRow(button) {
     const row = button.parentNode.parentNode;
     row.parentNode.removeChild(row);
+    displayChangeDetectedMessage();
 }
 
 function getMessages() {
@@ -421,14 +490,13 @@ function getFinalCutoffPercent() {
 
     // Collect benchmark percents
     const final_cutoff = {};
-    const letter_grades = ['A', 'A-', 'B+', 'B', 'B-', 'C+', 'C', 'C-', 'D+', 'D'];
 
     $('.final_cutoff_input').each(function () {
         // Get data
         const letter_grade = this.getAttribute('data-benchmark').toString();
         const percent = this.value;
 
-        if (letter_grades.includes(letter_grade)) {
+        if (allowed_grades_excluding_f.includes(letter_grade)) {
             // Verify percent is not empty
             if (percent === '') {
                 throw 'All final cutoffs must have a value before saving.';
@@ -458,7 +526,8 @@ function buildJSON() {
         section: getSection(),
         gradeables: getGradeableBuckets(),
         messages: getMessages(),
-        plagiarism: getPlagiarism(),
+        plagiarism: getTableData('plagiarism'),
+        manual_grade: getTableData('manualGrade'),
     };
 
     ret = JSON.stringify(ret);
@@ -590,11 +659,11 @@ function setCustomizationItemVisibility(elem) {
     const cust_item_id = checkbox_to_cust_item[checkbox_name];
     const is_checked = elem.checked;
 
-    if (is_checked) {
-        $(cust_item_id).show();
-    }
-    else {
-        $(cust_item_id).hide();
+    $(cust_item_id).toggle(is_checked);
+
+    // manual grading is dependent on final grade cutoffs
+    if (checkbox_name === 'final_grade') {
+        $('#manual-grading').toggle(is_checked);
     }
 }
 
@@ -676,7 +745,7 @@ $(document).ready(() => {
     $('.sections_and_labels').on('change keyup paste', () => {
         displayChangeDetectedMessage();
     });
-    // plagiarism option-input
+    // plagiarism / manual-grading option-input
     $('.option-input').on('change keyup paste', () => {
         displayChangeDetectedMessage();
     });
