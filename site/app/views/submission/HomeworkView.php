@@ -199,13 +199,31 @@ class HomeworkView extends AbstractView {
 
         // process daylight savings banner
         $due_date = $gradeable->getSubmissionDueDate();
-        $future_due_date = clone $due_date;
-        $future_due_date->modify('+' . $late_days_allowed . ' days');
-        $current_date = new \DateTime();
+
+        // check if we ever change daylight savings
+        if ($late_days_allowed <= 365) {
+            $future_due_date = clone $due_date;
+            $daylight_message_required = false;
+            
+            // check every interval of 100
+            for($i = 0; $i < intdiv($late_days_allowed, 100) && !$daylight_message_required; $i += 1){
+                $future_due_date->modify('+100 days');
+                $daylight_message_required = $future_due_date->format('I') !== $due_date->format('I');
+            }
+
+            // less than 100 days or is not a multiple of 100 or daylight savings hasnt changed
+            if (!$daylight_message_required) {
+                $future_due_date->modify('+' . $late_days_allowed%100 . ' days');
+                $daylight_message_required = $future_due_date->format('I') !== $due_date->format('I');
+            }
+
+        } else {
+            // more than 365 days, always true
+            $daylight_message_required = true;
+        }
 
         // check if we have excessive amounts of late days or if the due date and due date + late days is in different time zones
         // and if the user can submit without it being too late
-        $daylight_message_required = ($future_due_date->format("I") !== $due_date->format("I") || $late_days_allowed > 180) && $current_date < $future_due_date;
 
         // ------------------------------------------------------------
         // IF STUDENT HAS ALREADY SUBMITTED AND THE ACTIVE VERSION IS LATE, PRINT LATE DAY INFORMATION FOR THE ACTIVE VERSION
