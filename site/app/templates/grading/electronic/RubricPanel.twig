@@ -35,7 +35,15 @@
                     {% if show_clear_conflicts and not version_conflict %}
                         <div class="col-no-gutters">
                             <label for="change-graded-version" tabIndex="0" class="screen-reader">Clear Version Conflicts</label>
-                            <input id="change-graded-version" data-testid="change-graded-version" type="button" class="btn btn-default key_to_click mx-1" tabindex="0" value="Clear Version Conflicts" onclick="updateAllComponentVersions()"/>
+                            <input 
+                                id="change-graded-version" 
+                                data-testid="change-graded-version" 
+                                type="button" 
+                                class="btn btn-default key_to_click mx-1" 
+                                tabindex="0" 
+                                value="Clear Version Conflicts" 
+                                onclick="updateAllComponentVersions()"
+                            />
                         </div>
                     {% endif %}
 
