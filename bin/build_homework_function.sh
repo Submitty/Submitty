@@ -238,7 +238,7 @@ function build_homework {
     if [ -n "${instructor_solution_compile_command}" ] && [ "${instructor_solution_compile_command}" != "null" ]; then
         test_input_dir="${hw_build_path}/test_input"
         test_output_dir="${hw_build_path}/test_output"
-        instructor_solution_executable_dir="${hw_build_path}/instructor_solution_executable"
+        instructor_solution_executable_dir="${course_dir}/instructor_solution_executable/$assignment"
         instructor_cmake_file="${hw_build_path}/instructor_CMakeLists.txt"
         instructor_solution_dir="${hw_build_path}/instructor_solution"
 
