@@ -15,13 +15,15 @@ class HomePageView extends AbstractView {
         User $user,
         array $unarchived_courses,
         array $dropped_courses,
-        array $archived_courses
+        array $archived_courses,
+        array $self_register_courses,
     ) {
         $statuses = [];
         $course_types = [
             "unarchived_courses" => $unarchived_courses,
             "dropped_courses" => $dropped_courses,
-            "archived_courses" => $archived_courses
+            "archived_courses" => $archived_courses,
+            "self_register_courses" => $self_register_courses
         ];
         $rank_titles = [
             User::GROUP_INSTRUCTOR              => "Instructor:",

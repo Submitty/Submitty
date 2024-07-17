@@ -48,7 +48,14 @@ class HomePageController extends AbstractController {
         $unarchived_courses = $this->core->getQueries()->getCourseForUserId($user_id);
         $archived_courses = $this->core->getQueries()->getCourseForUserId($user_id, true);
         $dropped_courses = $this->core->getQueries()->getCourseForUserId($user_id, false, true);
-
+        $self_register_courses = [];
+        $all_courses = $this->core->getQueries()->getAllCourses();
+        foreach($all_courses as $course){
+            $this->core->loadCourseConfig($course['term'], $course['course']);
+            if ($this->core->getConfig()->isSelfRegistration()) {
+                array_merge($self_register_courses, $course);
+            }
+        }
         if ($as_instructor) {
             foreach (['archived_courses', 'unarchived_courses'] as $var) {
                 $$var = array_filter($$var, function (Course $course) use ($user_id) {
@@ -73,7 +80,8 @@ class HomePageController extends AbstractController {
             JsonResponse::getSuccessResponse([
                 "unarchived_courses" => array_map($callback, $unarchived_courses),
                 "archived_courses" => array_map($callback, $archived_courses),
-                "dropped_courses" => array_map($callback, $dropped_courses)
+                "dropped_courses" => array_map($callback, $dropped_courses),
+                "self_register_courses" => array_map($callback, $self_register_courses)
             ])
         );
     }
@@ -120,7 +128,8 @@ class HomePageController extends AbstractController {
                 $this->core->getUser(),
                 $courses["data"]["unarchived_courses"],
                 $courses["data"]["dropped_courses"],
-                $courses["data"]["archived_courses"]
+                $courses["data"]["archived_courses"],
+                $courses["data"]["self_register_courses"]
             )
         );
     }

@@ -304,5 +304,13 @@
                 <span class="option-alt">Show a custom message to students at the top of the navigation page.</span>
             </label>
         </div>
+        <div class="config-row checkbox-row">
+            <input type="checkbox" name="self_registration" id="self-registration" value="true" {{ fields['self_registration'] ? 'checked' : '' }} />
+            <label for="self-registration">
+                <span class="option-title">Enable Self Registration</span>
+                <br>
+                <span class="option-alt">Allow users to self register for this course</span>
+            </label>
+        </div>
     </div>
 </div>

@@ -5144,6 +5144,11 @@ SQL;
         return $this->submitty_db->rows();
     }
 
+    public function getAllCourses(): array {
+        $this->submitty_db->query("SELECT term, course FROM courses");
+        return $this->submitty_db->rows();
+    }
+
     /**
      * Get all unarchived courses where the user with the specified user_id is assigned as an instructor
      */
