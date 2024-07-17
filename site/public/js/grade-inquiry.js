@@ -1,5 +1,23 @@
 /* global buildCourseUrl, WebSocketClient */
-/* exported initGradingInquirySocketClient, onComponentTabClicked, onGradeInquirySubmitClicked, onReady, onReplyTextAreaKeyUp */
+/* exported loadDraft, initGradingInquirySocketClient, onComponentTabClicked, onGradeInquirySubmitClicked, onReady, onReplyTextAreaKeyUp */
+
+function loadDraft() {
+    const gradeableId = $('#gradeable_id').val();
+    const draftContentKeyPrefix = `draftContent-${gradeableId}-`;
+    const draftContentRaw = localStorage.getItem(draftContentKeyPrefix);
+    const draftContent = draftContentRaw ? JSON.parse(draftContentRaw) : {};
+
+    const elements = $('.markdown-textarea.fill-available');
+    elements.each(function () {
+        const elementId = $(this).attr('id');
+        const componentId = $(this).closest('.reply-text-form').find('#gc_id').val();
+        const uniqueKey = `reply-text-area-${componentId}`;
+
+        if (Object.prototype.hasOwnProperty.call(draftContent, uniqueKey)) {
+            $(this).val(draftContent[uniqueKey]);
+        }
+    });
+}
 
 function onReady() {
     // open last opened grade inquiry or open first component with grade inquiry
@@ -51,10 +69,21 @@ function onComponentTabClicked(tab) {
 
 function onReplyTextAreaKeyUp(textarea) {
     const reply_text_area = $(textarea);
+    const gradeableId = $('#gradeable_id').val();
+    const componentId = reply_text_area.closest('.reply-text-form').find('#gc_id').val();
+    const draftContentKeyPrefix = `draftContent-${gradeableId}-`;
+    const uniqueKey = `reply-text-area-${componentId}`;
+
     const must_have_text_buttons = $('.gi-submit:not(.gi-ignore-disabled)');
     must_have_text_buttons.prop('disabled', reply_text_area.val() === '');
     const must_be_empty_buttons = $('.gi-submit-empty:not(.gi-ignore-disabled)');
     must_be_empty_buttons.prop('disabled', reply_text_area.val() !== '');
+
+    const draftContentRaw = localStorage.getItem(draftContentKeyPrefix);
+    const draftContent = draftContentRaw ? JSON.parse(draftContentRaw) : {};
+
+    draftContent[uniqueKey] = reply_text_area.val();
+    localStorage.setItem(draftContentKeyPrefix, JSON.stringify(draftContent));
 
     if (reply_text_area.val() === '') {
         $('.gi-show-empty').show();
@@ -232,3 +261,8 @@ function newDiscussionRender(discussion) {
         $('#gradeInquiryBoxSection').html(discussion).hide().fadeIn('slow');
     }
 }
+
+$(document).ready(() => {
+    loadDraft();
+    onReady();
+});
