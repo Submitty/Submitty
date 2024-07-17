@@ -569,10 +569,10 @@ HTML;
         return
             "<script>" .
                 "window.addEventListener('load', () => {" .
-                    "window.submitty.render('div#vue-content', '$page', " . json_encode($args) . ");" .
+                    "window.submitty.render('[data-vuemount]', '$page', " . json_encode($args) . ");" .
                 "})" .
             "</script>" .
-            "<div id=\"vue-content\">" .
+            "<div class=\"content\" data-vuemount>" .
                 "<noscript>You need Javascript enabled to see this page.</noscript>" .
             "</div>"
         ;
