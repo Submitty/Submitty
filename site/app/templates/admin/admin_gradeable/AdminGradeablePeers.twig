@@ -315,7 +315,6 @@
     * @param {boolean} self_grading true if the student and grader is same
     */
     function updateSubmitButton(valid_grader, valid_students, new_grader, grader_removed, button_id, error_div_id, self_grading) {
-        console.log(self_grading);
         if (grader_removed || (valid_grader && !valid_students.includes(false) && (!new_grader || valid_students.includes(true))) && !self_grading) {
             $(error_div_id).hide();
             $(button_id).prop('disabled', false);
