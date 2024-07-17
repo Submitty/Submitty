@@ -369,11 +369,21 @@ HTML;
     public function renderFile($contents, $filename, $filetype = "text/plain") {
         $this->useFooter(false);
         $this->useHeader(false);
+ // Add theme-related CSS
+ $theme_css = $this->getThemeCss();
+ $this->output_buffer = $theme_css . $contents;
+
         $this->output_buffer = $contents;
         header("Content-Type: " . $filetype);
         header("Content-Disposition: attachment; filename=" . $filename);
-        header("Content-Length: " . strlen($contents));
+        header("Content-Length: " . strlen($this->output_buffer));
     }
+    // New method to get theme CSS
+private function getThemeCss() {
+    $theme = $this->core->getUser()->getTheme();
+    $css_path = FileUtils::joinPaths($this->core->getConfig()->getBaseUrl(), 'css', $theme . '.css');
+    return "<style>" . file_get_contents($css_path) . "</style>";
+
 
     /**
      * Render a Twig template from the templates directory
