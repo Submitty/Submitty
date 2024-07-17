@@ -1,14 +1,18 @@
 import { createApp } from 'vue';
 import Unknown from './pages/Unknown.vue';
 
-const apps: Record<string, Parameters<typeof createApp>[0]> = {
-    // "name": component import
-
-};
-
 const exports = {
-    render(target: string, page: string, args: Record<string, unknown> = {}) {
-        const app = createApp(apps[page] ?? Unknown, { page });
+    async render(target: string, page: string, args: Record<string, unknown> = {}) {
+        const root_component = await (async () => {
+            try {
+                return (await import(`./pages/${page}.vue`)).default as Parameters<typeof createApp>[0];
+            }
+            catch {
+                return Unknown;
+            }
+        })();
+
+        const app = createApp(root_component, { page });
 
         for (const [key, value] of Object.entries(args)) {
             app.provide(key, value);
