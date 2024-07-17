@@ -152,21 +152,14 @@
       var pushNotificationState = Cookies.get('push_notification');
       var push_notifications_enabled = pushNotificationState === 'true' || localStorage.getItem('office_hour_queue_notifications') === "true";
 
-      if ("Notification" in window && Notification.permission === "granted") {
-          setNotificationState(push_notifications_enabled);
-      }
-      else {
-          setNotificationState(false);
-      }
-
-      document.getElementById('push-notification-switch').checked = push_notifications_enabled;
-      document.getElementById('sound-notification-switch').checked = window.audible_notifications_enabled;
+      $('#push-notification-switch').prop('checked', push_notifications_enabled);
+      $('#sound-notification-switch').prop('checked', window.audible_notifications_enabled);
 
       $('#old_queue_code').change(function(){
           document.getElementById('change_queue_token').action = '{{base_url}}/'+encodeURIComponent(this.value)+'/change_token';
       });
 
-      var push_notifications_enabled = localStorage.getItem('office_hour_queue_notifications') === "true";
+      push_notifications_enabled = localStorage.getItem('office_hour_queue_notifications') === "true";
       if ("Notification" in window && Notification.permission === "granted" && push_notifications_enabled) {
           setNotificationState(true);
       }else{
@@ -175,10 +168,10 @@
   {% endif %}
 
   function setNotificationState(turnOn){
-      Cookies.set('push_notification', turnOn, { path: '/', expires: 365 });
-      push_notifications_enabled = turnOn;
-      localStorage.setItem('office_hour_queue_notifications', turnOn ? "true" : "false");
-      document.getElementById('push-notification-switch').checked = turnOn;
+    Cookies.set('push_notification', turnOn, { path: '/', expires: 365 });
+    push_notifications_enabled = turnOn;
+    localStorage.setItem('office_hour_queue_notifications', turnOn ? "true" : "false");
+    $('#push-notification-switch').prop('checked', turnOn);
   }
 
   function enableNotifications() {
@@ -261,10 +254,10 @@
   {% endif %}
 
   function toggleAudibleAlert() {
-      window.audible_notifications_enabled = (Cookies.get('notification_sound') === 'true');
-      window.audible_notifications_enabled = !window.audible_notifications_enabled;
-      Cookies.set('notification_sound', window.audible_notifications_enabled, { path: '/', expires: 365 });
-      document.getElementById('sound-notification-switch').checked = window.audible_notifications_enabled;
+    window.audible_notifications_enabled = (Cookies.get('notification_sound') === 'true');
+    window.audible_notifications_enabled = !window.audible_notifications_enabled;
+    Cookies.set('notification_sound', window.audible_notifications_enabled, { path: '/', expires: 365 });
+    $('#sound-notification-switch').prop('checked', window.audible_notifications_enabled);
   }
 
   function updateCurrentQueue() {
