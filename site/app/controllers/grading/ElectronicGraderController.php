@@ -2371,7 +2371,7 @@ class ElectronicGraderController extends AbstractController {
     #[Route("/courses/{_semester}/{_course}/gradeable/{gradeable_id}/grading/graded_gradeable/change_grade_version", methods: ["POST"])]
     public function ajaxUpdateGradedVersionForStudent(string $gradeable_id): ?Jsonresponse {
         $anon_id = $_POST['anon_id'] ?? null;
-        $graded_version = intval($_POST['graded_version'] ?? null);
+        $graded_version = intval($_POST['graded_version'] ?? 0);
         $component_ids = $_POST['component_ids'] ?? [];
 
         if ($anon_id === null) {
