@@ -3,33 +3,33 @@ set -ve
 
 # We assume a relative path from this repository to the installation
 # directory and configuration directory.
-THIS_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null && pwd )/.."
-CONF_DIR="${THIS_DIR}/../../../config"
+SETUP_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null && pwd )/.."
+SUBMITTY_CONFIGURATION_DIR="${SETUP_DIR}/../../../config"
 
-VAGRANT=0
-if [ -d "${THIS_DIR}/../.vagrant" ]; then
-    VAGRANT=1
+IS_VAGRANT=0
+if [ -d "${SETUP_DIR}/../.vagrant" ]; then
+    IS_VAGRANT=1
 fi
 
-UTM=0
-if [ -d "${THIS_DIR}/../.utm" ]; then
-    UTM=1
+IS_UTM=0
+if [ -d "${SETUP_DIR}/../.utm" ]; then
+    IS_UTM=1
 fi
 
-CI=0
-if [ -f "${THIS_DIR}/../.github_actions_ci_flag" ]; then
-    CI=1
+IS_CI=0
+if [ -f "${SETUP_DIR}/../.github_actions_ci_flag" ]; then
+    IS_CI=1
 fi
 
-SUBMITTY_REPOSITORY=$(jq -r '.submitty_repository' "${CONF_DIR}/submitty.json")
-SUBMITTY_INSTALL_DIR=$(jq -r '.submitty_install_dir' "${CONF_DIR}/submitty.json")
-WORKER=$([[ $(jq -r '.worker' "${CONF_DIR}/submitty.json") == "true" ]] && echo 1 || echo 0)
+SUBMITTY_REPOSITORY=$(jq -r '.submitty_repository' "${SUBMITTY_CONFIGURATION_DIR}/submitty.json")
+SUBMITTY_INSTALL_DIR=$(jq -r '.submitty_install_dir' "${SUBMITTY_CONFIGURATION_DIR}/submitty.json")
+IS_WORKER=$([[ $(jq -r '.worker' "${SUBMITTY_CONFIGURATION_DIR}/submitty.json") == "true" ]] && echo 1 || echo 0)
 
 # Because shellcheck is run with the python wrapper we need to disable the 'Not following' error
 # shellcheck disable=SC1091
-source "${THIS_DIR}/bin/versions.sh"
+source "${SETUP_DIR}/bin/versions.sh"
 
-if [ "${WORKER}" == 0 ]; then
+if [ "${IS_WORKER}" == 0 ]; then
     ALL_DAEMONS=( submitty_websocket_server submitty_autograding_shipper submitty_autograding_worker submitty_daemon_jobs_handler )
     RESTART_DAEMONS=( submitty_websocket_server submitty_daemon_jobs_handler )
 else
@@ -43,7 +43,7 @@ fi
 
 SUBMITTY_DATA_DIR=$(jq -r '.submitty_data_dir' "${SUBMITTY_INSTALL_DIR}/config/submitty.json")
 # Worker does not need course builders so just use root
-if [ "${WORKER}" == 0 ]; then
+if [ "${IS_WORKER}" == 0 ]; then
     COURSE_BUILDERS_GROUP=$(jq -r '.course_builders_group' "${SUBMITTY_INSTALL_DIR}/config/submitty_users.json")
 else
     COURSE_BUILDERS_GROUP=root
@@ -58,7 +58,7 @@ DAEMON_GID=$(jq -r '.daemon_gid' "${SUBMITTY_INSTALL_DIR}/config/submitty_users.
 PHP_USER=$(jq -r '.php_user' "${SUBMITTY_INSTALL_DIR}/config/submitty_users.json")
 CGI_USER=$(jq -r '.cgi_user' "${SUBMITTY_INSTALL_DIR}/config/submitty_users.json")
 # Worker does not have daemon PHP so just use daemon group
-if [ "${WORKER}" == 0 ]; then
+if [ "${IS_WORKER}" == 0 ]; then
     DAEMONPHP_GROUP=$(jq -r '.daemonphp_group' "${SUBMITTY_INSTALL_DIR}/config/submitty_users.json")
 else
     DAEMONPHP_GROUP="${DAEMON_GROUP}"
@@ -67,14 +67,14 @@ DAEMONCGI_GROUP=$(jq -r '.daemoncgi_group' "${SUBMITTY_INSTALL_DIR}/config/submi
 DAEMONPHPCGI_GROUP=$(jq -r '.daemonphpcgi_group' "${SUBMITTY_INSTALL_DIR}/config/submitty_users.json")
 SUPERVISOR_USER=$(jq -r '.supervisor_user' "${SUBMITTY_INSTALL_DIR}/config/submitty_users.json")
 
-export THIS_DIR
-export CONF_DIR
-export VAGRANT
-export UTM
-export CI
+export SETUP_DIR
+export SUBMITTY_CONFIGURATION_DIR
+export IS_VAGRANT
+export IS_UTM
+export IS_CI
 export SUBMITTY_REPOSITORY
 export SUBMITTY_INSTALL_DIR
-export WORKER
+export IS_WORKER
 export ALL_DAEMONS
 export RESTART_DAEMONS
 

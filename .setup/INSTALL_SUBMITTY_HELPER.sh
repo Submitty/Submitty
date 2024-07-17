@@ -65,7 +65,7 @@ fi
 # This may happen on a development virtual machine
 # SEE GITHUB ISSUE #7885 - https://github.com/Submitty/Submitty/issues/7885
 
-if [[( "${VAGRANT}" == 1  ||  "${UTM}" == 1 ) &&  "${CI}" == 0 ]]; then
+if [[( "${IS_VAGRANT}" == 1  ||  "${IS_UTM}" == 1 ) &&  "${IS_CI}" == 0 ]]; then
     sudo service ntp stop
     sudo ntpd -gq
     sudo service ntp start
@@ -91,7 +91,7 @@ set -e
 ################################################################################################################
 # RUN THE SYSTEM AND DATABASE MIGRATIONS
 
-if [ "${WORKER}" == 0 ]; then
+if [ "${IS_WORKER}" == 0 ]; then
     echo -e 'Checking for system and database migrations'
 
     mkdir -p "${SUBMITTY_INSTALL_DIR}/migrations"
@@ -108,7 +108,7 @@ fi
 ################################################################################################################
 # VALIDATE DATABASE SUPERUSERS
 
-if [ "${WORKER}" == 0 ]; then
+if [ "${IS_WORKER}" == 0 ]; then
     DATABASE_FILE="$CONF_DIR/database.json"
     DATABASE_HOST=$(jq -r '.database_host' $DATABASE_FILE)
     DATABASE_PORT=$(jq -r '.database_port' $DATABASE_FILE)
@@ -284,7 +284,7 @@ chmod g+wrx           "${SUBMITTY_INSTALL_DIR}/src/grading/python/submitty_route
 
 
 #Set up sample files if not in worker mode.
-if [ "${WORKER}" == 0 ]; then
+if [ "${IS_WORKER}" == 0 ]; then
     ########################################################################################################################
     ########################################################################################################################
     # COPY THE SAMPLE FILES FOR COURSE MANAGEMENT
@@ -464,7 +464,7 @@ popd > /dev/null
 ################################################################################################################
 ################################################################################################################
 # COPY THE 1.0 Grading Website if not in worker mode
-if [ "${WORKER}" == 0 ]; then
+if [ "${IS_WORKER}" == 0 ]; then
     bash "${SUBMITTY_REPOSITORY}/.setup/install_submitty/install_site.sh" browscap
 fi
 
@@ -564,7 +564,7 @@ find "${SUBMITTY_INSTALL_DIR}/GIT_CHECKOUT/RainbowGrades" -type f -exec chmod o+
 
 #####################################
 # Obtain API auth token for submitty-admin user
-if [ "${WORKER}" == 0 ]; then
+if [ "${IS_WORKER}" == 0 ]; then
     python3 "${SUBMITTY_INSTALL_DIR}/.setup/bin/init_auto_rainbow.py"
 fi
 #####################################
@@ -624,7 +624,7 @@ for i in "${ALL_DAEMONS[@]}"; do
     fi
 done
 
-if [ "${WORKER}" == 0 ]; then
+if [ "${IS_WORKER}" == 0 ]; then
     # Stop all workers on remote machines
     echo -e -n "Stopping all remote machine workers...\n"
     sudo -H -u "${DAEMON_USER}" python3 "${SUBMITTY_INSTALL_DIR}/sbin/shipper_utils/systemctl_wrapper.py" stop --target perform_on_all_workers
@@ -632,7 +632,7 @@ if [ "${WORKER}" == 0 ]; then
 fi
 
 # force kill any other shipper processes that may be manually running on the primary machine
-if [ "${WORKER}" == 0 ]; then
+if [ "${IS_WORKER}" == 0 ]; then
     for i in $(ps -ef | grep submitty_autograding_shipper | grep -v grep | awk '{print $2}'); do
         echo "ERROR: Also kill shipper pid $i";
         kill "$i" || true;
@@ -705,7 +705,7 @@ done
 # receipts that were successfully sent at least 360 days ago, with no
 # errors, and delete them from the table.  A maximum of 10,000 email
 # receipts will be deleted.
-if [ "${WORKER}" == 0 ]; then
+if [ "${IS_WORKER}" == 0 ]; then
     "${SUBMITTY_INSTALL_DIR}/sbin/cleanup_old_email.py" 360 10000
 fi
 
@@ -713,7 +713,7 @@ fi
 # Delete expired sessions
 
 # Deletes all expired sessions from the main Submitty database
-if [ "${WORKER}" == 0 ]; then
+if [ "${IS_WORKER}" == 0 ]; then
     "${SUBMITTY_INSTALL_DIR}/sbin/delete_expired_sessions.py"
 fi
 
@@ -734,7 +734,7 @@ fi
 #############################################################################
 
 # Restart php-fpm and apache
-if [ "${WORKER}" == 0 ]; then
+if [ "${IS_WORKER}" == 0 ]; then
     if [[ "$#" == 0 || ("$#" == 1 && "$1" != "skip_web_restart") || ("$#" -ge 2  && ("$1" != "skip_web_restart" && "$2" != "skip_web_restart")) ]]; then
         PHP_VERSION=$(php -r 'print PHP_MAJOR_VERSION.".".PHP_MINOR_VERSION;')
         echo -n "restarting php${PHP_VERSION}-fpm..."
@@ -770,7 +770,7 @@ done
 ################################################################################################################
 ################################################################################################################
 # INSTALL TEST SUITE if not in worker mode
-if [ "${WORKER}" == 0 ]; then
+if [ "${IS_WORKER}" == 0 ]; then
     # one optional argument installs & runs test suite
     if [[ "$#" -ge 1 && "$1" == "test" ]]; then
 
@@ -797,7 +797,7 @@ fi
 ################################################################################################################
 
 # INSTALL RAINBOW GRADES TEST SUITE if not in worker mode
-if [ "${WORKER}" == 0 ]; then
+if [ "${IS_WORKER}" == 0 ]; then
     # one optional argument installs & runs test suite
     if [[ "$#" -ge 1 && "$1" == "test_rainbow" ]]; then
 
@@ -834,13 +834,13 @@ fi
 ################################################################################################################
 ################################################################################################################
 # confirm permissions on the repository (to allow push updates from primary to worker)
-if [ "${WORKER}" == 1 ]; then
+if [ "${IS_WORKER}" == 1 ]; then
     # the supervisor user/group must have write access on the worker machine
     echo -e -n "Update/confirm worker repository permissions"
     chgrp -R "${SUPERVISOR_USER}" "${SUBMITTY_REPOSITORY}"
     chmod -R g+rw "${SUBMITTY_REPOSITORY}"
 else
-    if [ "${VAGRANT}" == 0 ]; then
+    if [ "${IS_VAGRANT}" == 0 ]; then
         # in order to update the submitty source files on the worker machines
         # the DAEMON_USER/DAEMON_GROUP must have read access to the repo on the primary machine
         echo -e -n "Update/confirm primary repository permissions"
