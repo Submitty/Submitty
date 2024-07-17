@@ -584,7 +584,7 @@ class ForumController extends AbstractController {
             [$post_id],
             $this->core->getUser()->getId()
         ));
-        $staffLiked = $this->core->getQueries()->getInstructorUpduck($post_id);
+        $staffLiked = $this->core->getQueries()->getInstructorUpduck([$post_id]);
         $boolStaffLiked = in_array($post["id"], $staffLiked, true);
         $GLOBALS['totalAttachments'] = 0;
         $GLOBALS['post_box_id'] = $_POST['post_box_id'];
