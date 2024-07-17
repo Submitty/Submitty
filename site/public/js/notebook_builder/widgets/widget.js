@@ -1,5 +1,4 @@
-/* exported NUM_MARKDOWN, Widget */
-let NUM_MARKDOWN = 0;
+/* exported Widget */
 
 class Widget {
     /**

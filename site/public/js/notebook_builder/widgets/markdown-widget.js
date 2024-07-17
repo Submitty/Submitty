@@ -1,6 +1,6 @@
 /* global Widget, NUM_MARKDOWN, buildUrl, csrfToken, displayErrorMessage */
 /* exported MarkdownWidget */
-
+let NUM_MARKDOWN = 0;
 class MarkdownWidget extends Widget {
     constructor() {
         super();
