@@ -2,7 +2,7 @@
 const settings_divs = ['#cal-gradeable-div', '#cal-date-div'];
 
 function setCalendarMenuValues(div_class) {
-    let set_visiblity = function () {
+    const set_visibility = function () {
         settings_divs.forEach((cur_div) => {
             if (!cur_div.includes($(this).val())) {
                 $(`.${div_class} ${cur_div}`).hide();
