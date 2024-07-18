@@ -572,7 +572,7 @@ describe('Test cases revolving around polls functionality', () => {
         cy.get('Poll Future').should('not.exist');
     });
 
-    it.only('Should verify that polls allowing custom student options are functional', () => {
+    it('Should verify that polls allowing custom student options are functional', () => {
         const tzoffset = (new Date()).getTimezoneOffset() * 60000; // Offset in milliseconds
         const today = new Date(new Date() - tzoffset);
         cy.logout();
