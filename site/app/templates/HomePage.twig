@@ -13,6 +13,7 @@
             {% elseif course_type == "archived_courses" %}
                 {% set course_type_message = "Archived " %}
             {% endif %}
+            {{ course_type }}
             <h1>My {{ course_type_message }}Courses</h1>
             {% for rank in ranks %}
                 {% if course_type != "dropped_courses" %}

@@ -1,5 +1,7 @@
 """Migration for a given Submitty course database."""
-def up(config, database):
+
+
+def up(config, database, semester, course):
     """
     Run up migration.
 
@@ -12,9 +14,23 @@ def up(config, database):
     :param course: Code of course being migrated
     :type course: str
     """
-    database.execute("ALTER TABLE courses ADD COLUMN IF NOT EXISTS self_registration_allowed bool default false")
+    print(database)
+    print(config)
+    print(semester)
+    print(course)
+    """
+    ALTER TABLE courses ADD COLUMN IF NOT EXISTS self_registration_allowed bool default false
+    
+    CONSTRAINT fk_user_id
+            FOREIGN KEY(user_id)
+                REFERENCES users(user_id),
+        UNIQUE(saml_id, user_id)
 
-def down(config, database):
+    """
+    pass
+
+
+def down(config, database, semester, course):
     """
     Run down migration (rollback).
 

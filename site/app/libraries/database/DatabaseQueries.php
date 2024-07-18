@@ -5145,8 +5145,23 @@ SQL;
     }
 
     public function getSelfRegisterCourses(): array {
-        $this->submitty_db->query("SELECT term, course FROM courses where self_registration=true");
-        return $this->submitty_db->rows();
+        $this->submitty_db->query("SELECT term, course FROM courses where self_registration_allowed=true");
+        foreach ($this->submitty_db->rows() as $row) {
+            $course = new Course($this->core, $row);
+            $course->loadDisplayName();
+            $return[] = $course;
+        }
+        return $return;
+    }
+
+    public function isSelfRegistrationAllowed($course) {
+        $this->submitty_db->query("SELECT self_registration_allowed FROM courses WHERE course=?", [$course]);
+        return $this->submitty_db->row()['self_registration_allowed'];
+    }
+
+    public function setSelfRegistrationAllowed($course, $self_registration_allowed) {
+        $this->submitty_db->query("UPDATE courses set self_registration_allowed=? WHERE course=?", [$self_registration_allowed, $course]);
+        return $this->submitty_db->row();
     }
 
     /**
