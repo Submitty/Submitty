@@ -504,9 +504,7 @@ class PollController extends AbstractController {
         return new RedirectResponse($this->core->buildCourseUrl(['polls']));
     }
 
-    /**
-     * @Route("/courses/{_semester}/{_course}/polls/addCustomResponse", methods={"POST"})
-     */
+    #[Route("/courses/{_semester}/{_course}/polls/addCustomResponse", methods: ["POST"])]
     public function addCustomResponse(): JsonResponse {
         $poll_id = intval($_POST['poll_id'] ?? -1);
         $poll_response = $_POST['custom-response'] ?? '';
@@ -544,9 +542,7 @@ class PollController extends AbstractController {
         return JsonResponse::getSuccessResponse(["message" => "Successfully added custom response"]);
     }
 
-    /**
-     * @Route("/courses/{_semester}/{_course}/polls/removeCustomResponse", methods={"POST"})
-     */
+    #[Route("/courses/{_semester}/{_course}/polls/removeCustomResponse", methods: ["POST"])]
     public function removeCustomResponse(): JsonResponse {
         $poll_id = intval($_POST['poll_id'] ?? -1);
         $option_id = intval($_POST['option_id'] ?? -1);
@@ -586,7 +582,6 @@ class PollController extends AbstractController {
     }
 
     /**
-     * @Route("/courses/{_semester}/{_course}/polls/setEnded", methods={"POST"})
      * @AccessControl(role="INSTRUCTOR")
      */
     #[Route("/courses/{_semester}/{_course}/polls/setEnded", methods: ["POST"])]
