@@ -65,23 +65,28 @@
 <script>
     $(document).ready(function () {
         renderPDFToolbar();
+
+        let colorEvent;
+        if(document.createEvent){
+            colorEvent = document.createEvent("HTMLEvents");
+            colorEvent.initEvent('colorchange', true, true);
+        }
+        else {
+            colorEvent = document.createEventObject();
+            colorEvent.eventType = "colorchange";
+        }
+
+        colorEvent.eventName = "colorchange";
+
+        function emitEvent(elem){
+            if(document.createEvent){
+                elem.dispatchEvent(colorEvent);
+                console.log(elem);
+                console.log(document.createEvent);
+                console.log(elem.dispatchEvent(colorEvent));
+            }
+        }
     });
     //TODO: move to js file
-    let colorEvent;
-    if(document.createEvent){
-        colorEvent = document.createEvent("HTMLEvents");
-        colorEvent.initEvent('colorchange', true, true);
-    }
-    else {
-        colorEvent = document.createEventObject();
-        colorEvent.eventType = "colorchange";
-    }
 
-    colorEvent.eventName = "colorchange";
-
-    function emitEvent(elem){
-        if(document.createEvent){
-            elem.dispatchEvent(colorEvent);
-        }
-    }
 </script>
