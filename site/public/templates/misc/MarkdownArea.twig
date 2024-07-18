@@ -71,6 +71,7 @@
         <label for="{{ markdown_area_id }}" tabindex="-1" class="screen-reader">{{ markdown_area_id }}</label>
         {% include "./AccessibilityMessage.twig" %}
         <textarea
+            data-testid="{{ markdown_area_id }}"
             id="{{ markdown_area_id }}"
             class="markdown-textarea fill-available {{ class is defined ? class }}"
             name="{{ markdown_area_name is defined ? markdown_area_name : "markdown_area" }}"

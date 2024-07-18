@@ -1,4 +1,4 @@
-import {getCurrentSemester} from '../../support/utils';
+import { getCurrentSemester } from '../../support/utils';
 
 function getKey(user_id, password) {
     return cy.request({
@@ -14,7 +14,6 @@ function getKey(user_id, password) {
 }
 
 describe('Tests cases revolving around gradeable access and submition', () => {
-
     it('Should download file, and have the correct values', () => {
         cy.login('instructor');
 
@@ -22,7 +21,7 @@ describe('Tests cases revolving around gradeable access and submition', () => {
 
         cy.get('[data-testid="download-gradeable-btn"]').click();
 
-        cy.readFile('cypress/downloads/bulk_upload_test.json').then(test_json => {
+        cy.readFile('cypress/downloads/bulk_upload_test.json').then((test_json) => {
             expect(test_json.title).to.eql('Bulk Upload Scanned Exam');
             expect(test_json.type).to.eql('Electronic File');
             expect(test_json.id).to.eql('bulk_upload_test');
@@ -37,7 +36,7 @@ describe('Tests cases revolving around gradeable access and submition', () => {
 
         cy.get('[data-testid="download-gradeable-btn"]').click();
 
-        cy.readFile('cypress/downloads/subdirectory_vcs_homework.json').then(test_json => {
+        cy.readFile('cypress/downloads/subdirectory_vcs_homework.json').then((test_json) => {
             expect(test_json.title).to.eql('Subdirectory VCS Homework');
             expect(test_json.type).to.eql('Electronic File');
             expect(test_json.id).to.eql('subdirectory_vcs_homework');
@@ -55,7 +54,7 @@ describe('Tests cases revolving around gradeable access and submition', () => {
 
         cy.get('[data-testid="download-gradeable-btn"]').click();
 
-        cy.readFile('cypress/downloads/open_team_homework.json').then(test_json => {
+        cy.readFile('cypress/downloads/open_team_homework.json').then((test_json) => {
             expect(test_json.title).to.eql('Open Team Homework');
             expect(test_json.type).to.eql('Electronic File');
             expect(test_json.id).to.eql('open_team_homework');
