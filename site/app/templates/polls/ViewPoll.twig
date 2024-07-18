@@ -71,6 +71,7 @@
                                    value="{{ option.getId() }}"
                                    name="answers[]"
                                    id="answer-{{index}}"
+                                   data-testid="answer-{{index}}"
                                    {{ not user_admin and option.getId() in user_selections ? "checked" : "" }}
                                    {{ (not user_admin and poll.isOpen()) ? "" : "disabled" }}
                                    onchange="disableNoResponse();"
@@ -84,6 +85,7 @@
                             {% if ((poll.getAllowsCustomResponses() and option.isCustom()) and (user_id == option.getAuthorId())) %}
                                 <button
                                     type="button"
+                                    data-testid="custom-response-delete"
                                     class="move-btn delete-btn"
                                     aria-label="Delete Custom Response"
                                     style="border:0; padding:0;"
@@ -104,7 +106,7 @@
                     </table>
                 </fieldset>
                 {% if not user_admin and poll.isOpen() %}
-                    <button type="submit" class="btn btn-primary student-submit">Submit</button>
+                    <button type="submit" data-testid="submit-answer" class="btn btn-primary student-submit">Submit</button>
                 {% endif %}
             </form>
             {% if not user_admin and poll.isOpen() and poll.getAllowsCustomResponses() %}
@@ -115,6 +117,7 @@
                     <div class="response-container">
                         <textarea
                             aria-label="Response text"
+                            data-testid="custom-response-text"
                             class="poll-response custom-poll-response"
                             name="custom-response"
                             placeholder="Enter response here..."
@@ -125,6 +128,7 @@
                     </i>
                     <button
                         type="button"
+                        data-testid="custom-response-submit"
                         class="btn btn-primary student-submit custom-response-submit"
                         onclick = "addCustomResponse({{poll.getId()}},'{{base_url}}');">
                         Add Response</button>

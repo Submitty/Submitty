@@ -13,7 +13,7 @@
         <label for="poll-name" class="option-title">
             Poll Name:
         </label>
-        <input type="text" name="name" id="poll-name" placeholder="Enter name here..." value="{{ poll is not null ? poll.getName() }}" />
+        <input type="text" name="name" id="poll-name" data-testid="poll-name" placeholder="Enter name here..." value="{{ poll is not null ? poll.getName() }}" />
         <br/> <br/>
 
         <p class="option-title">Question:</p>
@@ -92,6 +92,7 @@
         </label>
         <input
             id="poll-date"
+            data-testid="poll-date"
             class="poll-date"
             name="release_date"
             autocomplete="off"
@@ -144,7 +145,7 @@
             <label for="poll-custom-options" class="option-title credit-form-item">
                 Allow student-written responses?
             </label>
-            <input id="poll-custom-options" class="credit-box credit-form-item" type="checkbox" name="poll-custom-options" {{poll is not null and poll.getAllowsCustomResponses() ? "checked" : ""}}>
+            <input id="poll-custom-options" data-testid="poll-custom-options" class="credit-box credit-form-item" type="checkbox" name="poll-custom-options" {{poll is not null and poll.getAllowsCustomResponses() ? "checked" : ""}}>
             <i>
                 <br />
                 Are you certain you want to allow student-written responses? Students will be able to submit responses that will be visible to other students.
@@ -161,11 +162,11 @@
         <div id="responses">
             {% if poll is not null %}
                 {% for option in poll.getOptions() %}
-                    <div class="response-container" id="response_{{option.getId()}}_wrapper">
+                    <div class="response-container" id="response_{{option.getId()}}_wrapper" data-testid="response_{{option.getId()}}_wrapper">
                         <input type="hidden" class="order order-{{option.getOrderId()}}" name="option[{{option.getId()}}][order]" value="{{option.getOrderId()}}"/>
                         <input type="hidden" class="option_id" name="option[{{option.getId()}}][id]" value="{{option.getId()}}"/>
                         <input aria-label="Is correct" class="correct-box" type="checkbox" name="option[{{option.getId()}}][is_correct]" {{ option.isCorrect() or is_survey ? "checked": "" }} {{ is_survey ? "style='display:none'" : "" }}>
-                        <textarea aria-label="Response text" class="poll-response {{option.isCustom() ? 'poll-response-custom' : ''}}" name="option[{{option.getId()}}][response]" rows="10" cols="30">{{option.getResponse()}}</textarea>
+                        <textarea aria-label="Response text" data-testid="poll-response" class="poll-response {{option.isCustom() ? 'poll-response-custom' : ''}}" name="option[{{option.getId()}}][response]" rows="10" cols="30">{{option.getResponse()}}</textarea>
                         <div class="move-btn up-btn">
                             <i class="fa fa-lg fa-chevron-up"></i>
                         </div>
@@ -196,7 +197,7 @@
         <span id="empty-response-error" class="red-message polls-submit-error" hidden>Please make sure all responses are filled in.<br/></span>
         <span id="file-size-error" class="red-message polls-submit-error" hidden>Please make sure to upload a file that does not exceed the maximum size.<br/></span>
         <a href="{{base_url}}" class="btn btn-danger">Cancel</a>
-        <button type="submit" id="poll-form-submit" class="btn btn-primary" {{ poll is null ? 'disabled' }}>{{ poll is null ? 'Add' : 'Save' }} Poll</button>
+        <button type="submit" id="poll-form-submit" data-testid="poll-form-submit" class="btn btn-primary" {{ poll is null ? 'disabled' }}>{{ poll is null ? 'Add' : 'Save' }} Poll</button>
     </form>
 </div>
 
@@ -258,11 +259,11 @@
             $("#toggle-all-label").hide();
         }
         $("#responses").append(`
-            <div class="response-container" id="response_${first_free_id}_wrapper">
+            <div class="response-container" id="response_${first_free_id}_wrapper" data-testid="response_${first_free_id}_wrapper">
                 <input type="hidden" class="order order-${count}" name="option[${first_free_id}][order]" value="${count}"/>
                 <input type="hidden" class="option_id" name="option[${first_free_id}][id]" value=""/>
                 <input aria-label="Is correct" class="correct-box" type="checkbox" name="option[${first_free_id}][is_correct]" ${hidden_style} ${is_checked}>
-                <textarea aria-label="Response text" class="poll-response" name="option[${first_free_id}][response]" placeholder="Enter response here..."
+                <textarea aria-label="Response text" data-testid="poll-response" class="poll-response" name="option[${first_free_id}][response]" placeholder="Enter response here..."
                 rows="10" cols="30"></textarea>
                 <div class="move-btn up-btn">
                     <i class="fa fa-lg fa-chevron-up"></i>
