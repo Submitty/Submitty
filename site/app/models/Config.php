@@ -424,8 +424,6 @@ class Config extends AbstractModel {
 
         $this->user_create_account = $submitty_json['user_create_account'] === true;
 
-        $this->user_create_account = true;
-
         if (isset($submitty_json['timezone'])) {
             if (!in_array($submitty_json['timezone'], \DateTimeZone::listIdentifiers())) {
                 throw new ConfigException("Invalid Timezone identifier: {$submitty_json['timezone']}");

@@ -13,8 +13,8 @@ def up(config, database):
     """
     with open('/usr/local/submitty/config/submitty.json', 'r') as conf:
         SUBMITTY_CONFIG_JSON = json.load(conf)
-    if 'self_create_account' not in SUBMITTY_CONFIG_JSON:
-        SUBMITTY_CONFIG_JSON['self_create_account'] = False
+    if 'user_create_account' not in SUBMITTY_CONFIG_JSON:
+        SUBMITTY_CONFIG_JSON['user_create_account'] = False
     
     dump = open('/usr/local/submitty/config/submitty.json', 'w')
     json.dump(SUBMITTY_CONFIG_JSON, dump, indent=4)
