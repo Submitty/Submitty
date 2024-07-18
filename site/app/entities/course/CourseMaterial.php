@@ -211,11 +211,11 @@ class CourseMaterial {
     public function setTitle(string $title): void {
         $this->title = $title;
     }
-    public function setIsOnCalendar(bool $value): bool {
+    public function setIsOnCalendar(bool $value): void {
         $this->on_calendar = $value;
     }
 
-    public function setGradeable(string $gradeableString): string {
+    public function setGradeable(string $gradeableString): void {
         $this->gradeable = $gradeableString;
     }
 }
