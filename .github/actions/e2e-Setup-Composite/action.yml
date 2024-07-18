@@ -125,6 +125,7 @@ runs:
         sudo apt-get install php${PHP_VER}-fpm
         sudo apt-get install poppler-utils
         sudo apt-get install valgrind
+        sudo apt-get install ca-certificates
         sudo apt-get install moreutils
       shell: bash
 
@@ -151,7 +152,7 @@ runs:
       shell: bash
 
     - name: Set up sample course
-      run: sudo -E env "PATH=$PATH" python3 /usr/local/submitty/GIT_CHECKOUT/Submitty/.setup/bin/setup_sample_courses.py --no_grading sample
+      run: sudo -E env "PATH=$PATH" python3 /usr/local/submitty/GIT_CHECKOUT/Submitty/.setup/bin/setup_sample_courses.py --test_only_grading sample testing
       shell: bash
 
     - name: Set up test suite
@@ -163,7 +164,7 @@ runs:
     - name: Set up apache
       run: |
         cd $SUBMITTY_REPOSITORY
-        sudo a2enmod include rewrite actions cgi alias headers suexec authnz_external headers proxy_fcgi proxy_http proxy_wstunnel
+        sudo a2enmod include rewrite actions cgi alias headers suexec authnz_external headers proxy_fcgi proxy_http proxy_wstunnel ssl
         sudo cp .setup/php-fpm/pool.d/submitty.conf /etc/php/$PHP_VER/fpm/php-fpm.conf
         sudo mkdir -p /run/php
         sudo chown www-data:www-data /run/php

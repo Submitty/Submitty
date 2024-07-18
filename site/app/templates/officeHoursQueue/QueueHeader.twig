@@ -66,6 +66,7 @@
   {% include 'officeHoursQueue/AnnouncementMsg.twig' %}
 
   {% if not viewer.isGrader() %}
+    <br>
     {% include 'officeHoursQueue/QueueStatus.twig' %}
       <br>
       <a id="view_queue_occupancy" onclick="toggleQueueOccupancy()"><button  type="button" class="btn btn-primary">View Queue Occupancy</button></a>
@@ -99,4 +100,9 @@
   {% endif %}
 
   {% include 'officeHoursQueue/QueueHistory.twig' %}
+
+  {% if viewer.isGrader() %}
+    {% include 'officeHoursQueue/SearchStudentQueue.twig' %}
+  {% endif  %}
+
   {% include 'officeHoursQueue/QueueFooter.twig' %}

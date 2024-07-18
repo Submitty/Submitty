@@ -3,7 +3,7 @@
         <div class="{{ thread.class }}">
             <div class="flex-row">
                 <span class="thread-left-cont">
-                    <span class="thread-list-item">
+                    <span class="thread-list-item" data-testid="thread-list-item">
                         {% if thread.current_user_posted %}
                             <i class="fas fa-comments" title="You have contributed" aria-label="You have contributed"></i>
                         {% endif %}

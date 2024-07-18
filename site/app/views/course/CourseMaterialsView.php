@@ -9,6 +9,7 @@ use app\libraries\DateUtils;
 
 class CourseMaterialsView extends AbstractView {
     public function listCourseMaterials(array $course_materials_db) {
+        $this->core->getOutput()->addSelect2WidgetCSSAndJs();
         $this->core->getOutput()->addInternalCss(FileUtils::joinPaths('fileinput.css'));
         $this->core->getOutput()->addInternalCss(FileUtils::joinPaths('course-materials.css'));
         $this->core->getOutput()->addVendorJs(FileUtils::joinPaths('flatpickr', 'flatpickr.min.js'));
@@ -28,7 +29,7 @@ class CourseMaterialsView extends AbstractView {
         $folder_ids = [];
         $links = [];
         $base_view_url = $this->core->buildCourseUrl(['course_material']);
-        $begining_of_time_date = DateUtils::BEGINING_OF_TIME;
+        $beginning_of_time_date = DateUtils::BEGINNING_OF_TIME;
         /** @var CourseMaterial $course_material */
         foreach ($course_materials_db as $course_material) {
             $rel_path = substr($course_material->getPath(), strlen($base_course_material_path) + 1);
@@ -161,7 +162,7 @@ class CourseMaterialsView extends AbstractView {
             "folder_paths" => $folder_paths,
             "gradeables" => $this->core->getQueries()->getAllElectronicGradeablesIds(),
             "current_gradeable" => null,
-            "begining_of_time_date" => $begining_of_time_date
+            "beginning_of_time_date" => $beginning_of_time_date
         ]);
     }
 

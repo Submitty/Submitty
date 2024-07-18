@@ -8,19 +8,21 @@
  * @param {HTMLElement} attachment_elem The instructional message and codemirror will be appended to this element.
  * @param {Object} codemirror_config A javascript object which defines the configuration the codemirror should be
  *                                   instantiated with.
+ * @param {boolean} show_accessibility_msg Indicates whether to display an accessibility message above the codemirror.
  * @returns {CodeMirror}
  */
-function getLargeCodeMirror(attachment_elem, codemirror_config) {
-    const accessibility_msg = document.createElement('i');
-    accessibility_msg.innerText = 'Press TAB to indent. Press ESC to advance from answer area.';
-    accessibility_msg.style.fontSize = '75%';
-    attachment_elem.appendChild(accessibility_msg);
-
+function getLargeCodeMirror(attachment_elem, codemirror_config, show_accessibility_msg = true) {
+    if (show_accessibility_msg) {
+        const accessibility_msg = document.createElement('i');
+        accessibility_msg.innerText = 'Press TAB to indent. Press ESC to advance from answer area.';
+        accessibility_msg.style.fontSize = '75%';
+        attachment_elem.appendChild(accessibility_msg);
+    }
     // If no mode is set must explicitly set it to null otherwise codemirror will attempt to guess the language and
     // highlight.  This is not desirable when collecting plain text.
     if (!codemirror_config.mode) {
         CodeMirrorSpellChecker({
-            codeMirrorInstance:  CodeMirror,
+            codeMirrorInstance: CodeMirror,
         });
         codemirror_config.lineWrapping = true;
         codemirror_config.mode = 'spell-checker';
@@ -46,7 +48,7 @@ function getSmallCodeMirror(attachment_elem, codemirror_config) {
     codemirror_config.mode = 'spell-checker';
 
     CodeMirrorSpellChecker({
-        codeMirrorInstance:  CodeMirror,
+        codeMirrorInstance: CodeMirror,
     });
 
     const cm = CodeMirror(attachment_elem, codemirror_config);
@@ -100,7 +102,7 @@ function makeCodeMirrorAccessible(cm, advance_key) {
  */
 function disableEnterKey(cm) {
     cm.addKeyMap({
-        'Enter': () => { /** Pass */ },
+        Enter: () => { /** Pass */ },
     });
 }
 
@@ -112,7 +114,6 @@ function disableEnterKey(cm) {
  * @returns {number} A pixel value which can be used to control the height of the codemirror box.
  */
 function rowsToPixels(rows) {
-
     // Originally was 16 (set to look good on Linux ?)
     // return rows * 16;
 
