@@ -110,6 +110,15 @@ module.exports = tseslint.config(
         languageOptions: {
             globals: globals.nodeBuiltin,
         },
+        rules: {
+            'no-restricted-syntax': [
+                'error',
+                {
+                    selector: '[type=CallExpression][callee.object.name=cy][callee.property.name=waitAndReloadUntil]',
+                    message: 'Do not wait for arbitrary time periods',
+                },
+            ],
+        },
     },
     {
         name: 'Options for jest files',

@@ -126,6 +126,7 @@ Cypress.Commands.add('waitAndReloadUntil', (condition, timeout, wait = 100) => {
             if (result || timeout <= 0) {
                 return result;
             }
+            // eslint-disable-next-line no-restricted-syntax
             return cy.waitAndReloadUntil(condition, timeout - wait, wait);
         });
     });

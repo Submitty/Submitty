@@ -52,6 +52,7 @@ describe('Docker UI Test', () => {
             + ' docker, please refresh the page in a bit.');
 
         // Allow the system to update the info and reload
+        // eslint-disable-next-line no-restricted-syntax
         cy.waitAndReloadUntil(() => {
             return cy.get('[data-testid="docker_version"]')
                 .invoke('text')
@@ -130,6 +131,7 @@ describe('Docker UI Test', () => {
             + ' found on DockerHub and queued to be added!');
 
         // Allow the system to update the info and reload
+        // eslint-disable-next-line no-restricted-syntax
         cy.waitAndReloadUntil(() => {
             return cy.get('#capabilities-list')
                 .invoke('text')
