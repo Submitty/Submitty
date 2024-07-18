@@ -17,7 +17,6 @@ function ExtractBuckets() {
 }
 
 // Forces element's value to be non-negative
-// Forces element's value to be non-negative
 // eslint-disable-next-line no-unused-vars
 function ClampPoints(el) {
     if (el.value === '') {
@@ -707,6 +706,23 @@ $(document).ready(() => {
         $(this).change(function () {
             setInputsVisibility(this);
         });
+    });
+
+    /**
+     * Configure visibility handler for all customization items other than benchmark percents
+     * Visibility is controlled by whether the corresponding boxes are selected in the display area
+     */
+    const dropdown_checkboxes = ['final_grade', 'messages', 'section'];
+    $('#display input').each(function () {
+        if (dropdown_checkboxes.includes(this.value)) {
+            // Set the initial visibility on load
+            setCustomizationItemVisibility(this);
+
+            // Register a click handler to adjust visibility when boxes are selected / un-selected
+            $(this).change(function () {
+                setCustomizationItemVisibility(this);
+            });
+        }
     });
 
     $("input[name*='display']").change(() => {
