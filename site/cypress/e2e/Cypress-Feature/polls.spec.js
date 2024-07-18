@@ -643,7 +643,7 @@ describe('Test cases revolving around polls functionality', () => {
         cy.logout();
 
         // Edit the poll, ensuring custom option is visible within edit poll form
-        cy.login();
+        cy.login('instructor');
         cy.visit(['sample', 'polls']);
         cy.contains('Custom Poll Today').siblings(':nth-child(1)').children().click();
         cy.url().should('include', 'sample/polls/editPoll');
@@ -656,7 +656,7 @@ describe('Test cases revolving around polls functionality', () => {
         cy.on('window:alert', (alertText) => {
             expect(alertText).to.equal('Students and/or other staff users have already submitted this response as their answer. This response cannot be deleted unless they switch their answers to the poll.');
         });
-        cy.get('[data-testid="custom-response-delete"]').eq(1).should('be.visible').click();
+        cy.get('[data-testid="response-delete-button"]').eq(1).should('be.visible').click();
         cy.get('[data-testid="poll-response"]').should('contain', 'Second Custom Response');
 
         // Close custom poll, ensuring no future custom options are possible to be added or deleted
@@ -673,7 +673,7 @@ describe('Test cases revolving around polls functionality', () => {
         cy.logout();
 
         // Remove the custom poll
-        cy.login();
+        cy.login('instructor');
         cy.visit(['sample', 'polls']);
         cy.contains('Custom Poll Today').siblings(':nth-child(2)').click();
     });
