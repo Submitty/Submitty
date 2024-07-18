@@ -199,6 +199,7 @@ class Access {
         $this->permissions["path.write.split_pdf"] = self::ALLOW_MIN_FULL_ACCESS_GRADER | self::CHECK_CSRF;
         $this->permissions["path.write.uploads"] = self::ALLOW_MIN_INSTRUCTOR | self::CHECK_CSRF;
         $this->permissions["path.write.site"] = self::ALLOW_MIN_INSTRUCTOR | self::CHECK_CSRF;
+        $this->permissions["path.write.processed_submissions"] = self::DENY_ALL | self::CHECK_CSRF;
         $this->permissions["path.write.checkout"] = self::DENY_ALL | self::CHECK_CSRF;
         $this->permissions["path.write.results"] = self::DENY_ALL | self::CHECK_CSRF;
         $this->permissions["path.write.results_public"] = self::DENY_ALL | self::CHECK_CSRF;
@@ -288,6 +289,14 @@ class Access {
             "permissions" => [
                 "path.read" => "path.read.submission_versions",
                 "path.write" => "path.write.submission_versions"
+            ]
+        ];
+        $this->directories["processed_submissions"] = [
+            "base" => $this->core->getConfig()->getCoursePath() . "/processed_submissions",
+            "subparts" => ["gradeable", "submitter", "version"],
+            "permissions" => [
+                "path.read" => "path.read.submissions",
+                "path.write" => "path.write.processed_submissions"
             ]
         ];
         $this->directories["results"] = [

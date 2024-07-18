@@ -1116,6 +1116,22 @@ class HomeworkView extends AbstractView {
                 // could be increased if the failed files need more tips/messages
                 $failed_file = (strlen($failed_file) > 1000) ? substr($failed_file, 0, 1000) : $failed_file;
             }
+
+            // Check which files have PDF previews
+            foreach ($param['files'] as &$file) {
+                // If this file is in submissions, check if there is a processed submission pdf for it
+                $course_path = $this->core->getConfig()->getCoursePath();
+                $submissions_path = FileUtils::joinPaths($course_path, 'submissions');
+                $processed_submissions_path = FileUtils::joinPaths($course_path, 'processed_submissions');
+                if (str_starts_with($file['path'], $submissions_path)) {
+                    $subpath = substr($file['path'], strlen($submissions_path));
+                    $subpath = substr($subpath, 0, strlen($subpath) - strlen($file['name']));
+                    $target = FileUtils::joinPaths($processed_submissions_path, $subpath, 'pdf', $file['name'] . '.pdf');
+                    if (file_exists($target)) {
+                        $file['target_pdf'] = $target;
+                    }
+                }
+            }
         }
 
         // If its not git checkout

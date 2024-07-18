@@ -439,16 +439,13 @@ class DocToPDF(AbstractJob):
 
         course_dir = os.path.join(DATA_DIR, 'courses', term, course)
         submissions_dir = os.path.join(course_dir, 'submissions')
-        results_public_dir = os.path.join(course_dir, 'results_public')
+        processed_submissions_dir = os.path.join(course_dir, 'processed_submissions')
 
         submission_path = os.path.join(submissions_dir, gradeable, user, str(version))
-        results_public_path = os.path.join(results_public_dir, gradeable, user, str(version), 'pdf')
+        processed_submission_path = os.path.join(processed_submissions_dir, gradeable, user, str(version), 'pdf')
 
-        logger.write_to_log(log_file, "checking dir: " + results_public_path)
-        if not os.path.isdir(results_public_path):
-            logger.write_to_log(log_file, "creating")
-            os.makedirs(results_public_path)
-        logger.write_to_log(log_file, "done")
+        if not os.path.isdir(processed_submission_path):
+            os.makedirs(processed_submission_path)
 
         DOC_MIME_TYPES = ['application/vnd.openxmlformats-officedocument.wordprocessingml.document']
 
@@ -461,7 +458,7 @@ class DocToPDF(AbstractJob):
                 if mimetype in DOC_MIME_TYPES:
                     doc_files.append(file_path)
 
-        stat_parent = os.stat(results_public_path)
+        stat_parent = os.stat(processed_submission_path)
         for doc_file in doc_files:
             with TemporaryDirectory() as tmpdir:
                 with os.fdopen(log, 'a') as output_file:
@@ -470,7 +467,7 @@ class DocToPDF(AbstractJob):
                     result = subprocess.run(["libreoffice", "--headless", "--convert-to", "pdf", "--outdir", tmpdir, doc_file], stdout=output_file, stderr=output_file)
                 if result.returncode != 0:
                     continue
-                dest = results_public_dir + doc_file[len(submissions_dir):] + '.pdf'
+                dest = os.path.join(processed_submission_path, os.path.basename(doc_file) + '.pdf')
                 tmpfile = os.listdir(tmpdir)[0]
                 os.rename(os.path.join(tmpdir, tmpfile), dest)
                 os.chown(dest, stat_parent.st_uid, stat_parent.st_gid)
