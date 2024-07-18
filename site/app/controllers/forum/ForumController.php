@@ -673,12 +673,10 @@ class ForumController extends AbstractController {
     #[Route("/courses/{_semester}/{_course}/forum/announcements", methods: ["POST"])]
     public function alterAnnouncement(bool $type) {
         $thread_id = $_POST["thread_id"];
-        if ($type) {
-            $this->sendSocketMessage(['type' => 'announce_thread', 'thread_id' => $thread_id]);
-        }
-        else {
-            $this->sendSocketMessage(['type' => 'unpin_thread', 'thread_id' => $thread_id]);
-        }
+        $this->sendSocketMessage([
+            'type' => $type ? 'announce_thread' : 'unpin_thread',
+            'thread_id' => $thread_id,
+        ]);
         $this->core->getQueries()->setAnnouncement($thread_id, $type);
         //TODO: notify on edited announcement
     }
