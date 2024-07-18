@@ -46,7 +46,7 @@ class CourseMaterial {
     protected bool $on_calendar;
 
     #[ORM\Column(type: Types::STRING)]
-    protected string $gradeable;    
+    protected string $gradeable;
 
     /**
      * @var Collection<CourseMaterialAccess>
