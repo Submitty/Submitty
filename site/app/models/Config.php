@@ -294,6 +294,9 @@ class Config extends AbstractModel {
      * @var bool */
     protected $seating_only_for_instructor;
     /** @prop
+     * @var bool */
+    protected $user_create_account;
+    /** @prop
      * @var string|null */
     protected $room_seating_gradeable_id;
     /** @prop
