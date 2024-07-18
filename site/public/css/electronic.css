@@ -171,13 +171,25 @@ button > i.fas:hover {
     color: initial;
 }
 
+:root {
+    --default-border-color: black;
+    --default-box-shadow: 2px 2px 4px black;
+}
+
+@media (prefers-color-scheme: dark) {
+    :root {
+        --default-border-color: grey;
+        --default-box-shadow: 2px 2px 4px grey;
+    }
+}
+
 /* stylelint-disable-next-line no-descending-specificity */
 .ta-navlink-cont {
     position: relative;
     margin-right: 4px;
-    /*border: 2px solid var(--default-black);*/
+    border: 2px solid var(--default-border-color);
     border-radius: 5px;
-    /*box-shadow: 2px 2px 4px;*/
+    box-shadow: var(--default-box-shadow);
 }
 
 #prev-student-navlink i,
