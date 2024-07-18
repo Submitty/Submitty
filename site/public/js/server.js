@@ -2035,7 +2035,7 @@ function broadcastThemeToIframes() {
     const theme = document.querySelector('html').getAttribute('data-theme');
     const blackMode = document.querySelector('html').getAttribute('data-black_mode');
     const iframes = document.querySelectorAll('iframe');
-    iframes.forEach(iframe => {
+    iframes.forEach((iframe) => {
         iframe.contentWindow.postMessage({ type: 'theme-change', theme, blackMode }, '*');
     });
 }
@@ -2044,8 +2044,8 @@ document.addEventListener('DOMContentLoaded', scorePillDark);
 
 const observer = new MutationObserver((mutations) => {
     mutations.forEach((mutation) => {
-        if (mutation.type === 'attributes' && 
-            (mutation.attributeName === 'data-theme' || mutation.attributeName === 'data-black_mode')) {
+        if ((mutation.type === 'attributes')
+         &&  (mutation.attributeName === 'data-theme' || mutation.attributeName === 'data-black_mode')) {
             scorePillDark();
         }
     });
@@ -2053,5 +2053,6 @@ const observer = new MutationObserver((mutations) => {
 
 observer.observe(document.querySelector('html'), {
     attributes: true,
-    attributeFilter: ['data-theme', 'data-black_mode']
-});document.addEventListener('DOMContentLoaded', scorePillDark);
+    attributeFilter: ['data-theme', 'data-black_mode'],
+});
+document.addEventListener('DOMContentLoaded', scorePillDark);
