@@ -65,7 +65,6 @@ describe('Test cases involving the late days allowed page', () => {
             cy.get('#user_id').click(); // dismiss the calendar view
             cy.get('#late_days').type('3');
             cy.get('input[type=submit]').click();
-            cy.reload(); // make sure the late day registered
 
             // make sure table has right values
             cy.get('#late-day-table > tbody > tr > :nth-child(1)').contains('bitdiddle');
