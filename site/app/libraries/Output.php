@@ -383,6 +383,7 @@ private function getThemeCss() {
     $theme = $this->core->getUser()->getTheme();
     $css_path = FileUtils::joinPaths($this->core->getConfig()->getBaseUrl(), 'css', $theme . '.css');
     return "<style>" . file_get_contents($css_path) . "</style>";
+}
 
 
     /**
