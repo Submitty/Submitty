@@ -334,6 +334,8 @@ body::-webkit-scrollbar-track {
 
 #gradeable-config-edit {
     min-height: 500px;
+    margin-top: 0.5em;
+    margin-bottom: 0.5em;
 }
 
 #gradeable-config-edit-bar {
