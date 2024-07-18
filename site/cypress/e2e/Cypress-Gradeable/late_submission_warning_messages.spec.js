@@ -29,9 +29,20 @@ const getRandomGradeableName = () => {
     }
     return randomString;
 };
+const makeNonTeamGradeable = (gradeableName) => {
+    cy.login('instructor');
+    cy.visit(['sample', 'gradeable']);
+    // Enter gradeable info
+    cy.get('#g_title').type(gradeableName);
+    cy.get('#g_id').type(gradeableName);
+    cy.get('#radio_ef_student_upload').check().click();
+    // Create Gradeable
+    cy.get('#create-gradeable-btn').click();
+};
 
 const gradeable = getRandomGradeableName();
 const team_gradeable = `${gradeable}_team`;
+const daylight_gradeable = `${gradeable}_daylight`;
 
 const giveLateDays = (timestamp, student_id, late_days = 2) => {
     // Give a student a specific number of late days
@@ -118,43 +129,84 @@ const SubmitAndCheckMessage = (gradeable_type, upload_file1, invalid_late_day, v
     cy.logout();
 };
 
-it('Checks whether daylight savings warning message should be appearing at current date.', () => {
-    /*
-    First we set the date to a date close to the spring daylight savings time and then check that the message appears.
-    Then we change the date to a month later, and check that the "daylight" message doesn't appear.
-    */
-    const currentDate = new Date();
-    const futureDate = new Date(currentDate);
-    futureDate.setDate(currentDate.getDate() + 7);
-
-    const pastDate = new Date(currentDate);
-    pastDate.setDate(currentDate.getDate() - 7);
-
-    const daylightSavingsChange = pastDate.getTimezoneOffset() !== futureDate.getTimezoneOffset();
-
+const checkDaylightBanner = (late_days, existence) => {
     cy.login('instructor');
-    cy.visit(['sample', 'gradeable', 'open_homework']);
-
-    if (daylightSavingsChange) {
-        cy.get('#daylight').should('exist');
-    }
-    else {
-        cy.get('#daylight').should('not.exist');
-    }
+    cy.visit(['sample', 'gradeable', daylight_gradeable, 'update?nav_tab=5']);
+    cy.get('#late_days')
+        .clear()
+        .type(late_days)
+        .type('{enter}');
+    cy.get('#save_status', { timeout: 20000 }).should('have.text', 'All Changes Saved');
+    cy.visit(['sample', 'gradeable', daylight_gradeable]);
+    cy.get('[data-testid=daylight-savings-banner]').should(existence);
     cy.logout();
+};
+
+const calculateAndCheckDaylightBanner = (late_days) => {
+    const today = new Date();
+    const newDate = new Date(today);
+
+    newDate.setDate(today.getDate() + late_days);
+    console.log(newDate.toISOString());
+
+    checkDaylightBanner(late_days, newDate.getTimezoneOffset() !== today.getTimezoneOffset() ? 'exist' : 'not.exist');
+};
+
+describe('Checks whether daylight savings warning message should be appearing given varying amounts of late days.', () => {
+    it('should create non-team gradeable for testing daylight savings', () => {
+        makeNonTeamGradeable(daylight_gradeable);
+
+        // date page
+        cy.get('#page_5_nav').click();
+        const date = new Date().toISOString();
+
+        // change all the due dates to today
+        cy.get('[data-testid="ta_view_start_date"]')
+            .clear()
+            .type(date)
+            .type('{enter}');
+        cy.get('#save_status', { timeout: 20000 }).should('have.text', 'All Changes Saved');
+        cy.get('[data-testid="submission_open_date"]')
+            .clear()
+            .type(date)
+            .type('{enter}');
+        cy.get('#save_status', { timeout: 20000 }).should('have.text', 'All Changes Saved');
+        cy.get('[data-testid="submission_due_date"]')
+            .clear()
+            .type(date)
+            .type('{enter}');
+        cy.get('#save_status', { timeout: 20000 }).should('have.text', 'All Changes Saved');
+        cy.logout();
+    });
+
+    it('Daylight savings banner should always appear for a large amount of late days', () => {
+        checkDaylightBanner(1000, 'exist');
+    });
+
+    it('Daylight savings banner should never appear for no late days', () => {
+        checkDaylightBanner(0, 'not.exist');
+    });
+
+    it('Testing if Daylight savings banner should appear for 1 late day', () => {
+        calculateAndCheckDaylightBanner(1);
+    });
+
+    it('Testing if Daylight savings banner should appear for 99 late day', () => {
+        calculateAndCheckDaylightBanner(99);
+    });
+
+    it('Testing if Daylight savings banner should appear for 100 late day', () => {
+        calculateAndCheckDaylightBanner(100);
+    });
+
+    it('Testing if Daylight savings banner should appear for 101 late day', () => {
+        calculateAndCheckDaylightBanner(101);
+    });
 });
 
 describe('Test warning messages for non team gradeable', () => {
     it('should create non-team gradeable for testing', () => {
-        cy.login('instructor');
-        cy.visit(['sample', 'gradeable']);
-        // Enter gradeable info
-        cy.get('#g_title').type(gradeable);
-        cy.get('#g_id').type(gradeable);
-        cy.get('#radio_ef_student_upload').check().click();
-        // Create Gradeable
-        cy.get('#create-gradeable-btn').click();
-
+        makeNonTeamGradeable(gradeable);
         // Date page, input 2 old dates for opening dates (Ta and students)
         cy.get('#page_5_nav').click();
         cy.get('#date_ta_view')
