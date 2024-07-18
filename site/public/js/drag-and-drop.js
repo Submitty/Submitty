@@ -1221,7 +1221,6 @@ function handleUploadCourseMaterials(csrf_token, expand_zip, hide_from_students,
         return;
     }
 
-
     formData.append('calenderMenu', calenderMenu);
     formData.append('gradeableInputValue', gradeableInputValue);
     formData.append('csrf_token', csrf_token);

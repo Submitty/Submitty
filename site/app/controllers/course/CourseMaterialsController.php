@@ -878,7 +878,7 @@ class CourseMaterialsController extends AbstractController {
                 $details['priority'],
                 $value === CourseMaterial::LINK ? $url_url : null,
                 $value === CourseMaterial::LINK ? $title_name : null,
-                $on_calendar, 
+                $on_calendar,
                 $connected_gradeable
             );
             $this->core->getCourseEntityManager()->persist($course_material);

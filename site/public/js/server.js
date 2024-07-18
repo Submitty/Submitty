@@ -8,7 +8,7 @@
    removeMessagePopup validateHtml togglePageDetails copyToClipboard downloadCSV setFolderRelease
    newEditCourseMaterialsForm newEditCourseMaterialsFolderForm newUploadCourseMaterialsForm newUploadBanner newUploadImagesForm
    newOverwriteCourseMaterialForm newDeleteCourseMaterialForm displayCloseSubmissionsWarning newDeleteGradeableForm
-   markAllViewed closePopup */
+   markAllViewed closePopup setCalendarMenuValues */
 /* global csrfToken my_window:writable file_path:writable updateBulkProgress icon:writable detectColorScheme
    createArray readPrevious disableFullUpdate registerSelect2Widget */
 /// /////////Begin: Removed redundant link in breadcrumbs////////////////////////
@@ -377,7 +377,7 @@ function newEditCourseMaterialsFolderForm(tag) {
         }
     }
 
-    //Calendar Form
+    // Calendar form
     setCalendarMenuValues('edit-cm-folder-cal-menu');
 
     $('#material-folder-edit-form', form).attr('data-id', id);
