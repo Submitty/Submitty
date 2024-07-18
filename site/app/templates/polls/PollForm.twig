@@ -162,7 +162,7 @@
         <div id="responses">
             {% if poll is not null %}
                 {% for option in poll.getOptions() %}
-                    <div class="response-container" id="response_{{option.getId()}}_wrapper" data-testid="response_{{option.getId()}}_wrapper">
+                    <div class="response-container" id="response_{{option.getId()}}_wrapper" data-testid="response-{{option.getId()}}-wrapper">
                         <input type="hidden" class="order order-{{option.getOrderId()}}" name="option[{{option.getId()}}][order]" value="{{option.getOrderId()}}"/>
                         <input type="hidden" class="option_id" name="option[{{option.getId()}}][id]" value="{{option.getId()}}"/>
                         <input aria-label="Is correct" class="correct-box" type="checkbox" name="option[{{option.getId()}}][is_correct]" {{ option.isCorrect() or is_survey ? "checked": "" }} {{ is_survey ? "style='display:none'" : "" }}>
@@ -259,7 +259,7 @@
             $("#toggle-all-label").hide();
         }
         $("#responses").append(`
-            <div class="response-container" id="response_${first_free_id}_wrapper" data-testid="response_${first_free_id}_wrapper">
+            <div class="response-container" id="response_${first_free_id}_wrapper" data-testid="response-${first_free_id}-wrapper">
                 <input type="hidden" class="order order-${count}" name="option[${first_free_id}][order]" value="${count}"/>
                 <input type="hidden" class="option_id" name="option[${first_free_id}][id]" value=""/>
                 <input aria-label="Is correct" class="correct-box" type="checkbox" name="option[${first_free_id}][is_correct]" ${hidden_style} ${is_checked}>

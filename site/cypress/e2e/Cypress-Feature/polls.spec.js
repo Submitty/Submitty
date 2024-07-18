@@ -215,11 +215,11 @@ describe('Test cases revolving around polls functionality', () => {
         cy.contains('Add Response').click();
         cy.contains('Add Response').click();
         cy.contains('Add Response').click();
-        cy.get('[data-testid="response_0_wrapper"]').children(':nth-child(3)').check();
-        cy.get('[data-testid="response_0_wrapper"]').children(':nth-child(4)').type('Answer 1');
-        cy.get('[data-testid="response_1_wrapper"]').children(':nth-child(4)').type('Answer 2');
-        cy.get('[data-testid="response_2_wrapper"]').children(':nth-child(3)').check();
-        cy.get('[data-testid="response_2_wrapper"]').children(':nth-child(4)').type('Answer 3');
+        cy.get('[data-testid="response-0-wrapper"]').children(':nth-child(3)').check();
+        cy.get('[data-testid="response-0-wrapper"]').children(':nth-child(4)').type('Answer 1');
+        cy.get('[data-testid="response-1-wrapper"]').children(':nth-child(4)').type('Answer 2');
+        cy.get('[data-testid="response-2-wrapper"]').children(':nth-child(3)').check();
+        cy.get('[data-testid="response-2-wrapper"]').children(':nth-child(4)').type('Answer 3');
         cy.get('#new-poll-title').click();
 
         // submit and verify on main polls page, poll should be closed
@@ -493,8 +493,8 @@ describe('Test cases revolving around polls functionality', () => {
         cy.get('[data-testid="poll-date"]').type(today.toISOString().substring(0, 10), { force: true });
         cy.get('#new-poll-title').click(); // get rid of the date picker
         cy.contains('Add Response').click();
-        cy.get('[data-testid="response_0_wrapper"]').children(':nth-child(3)').check();
-        cy.get('[data-testid="response_0_wrapper"]').children(':nth-child(4)').type('Answer 1');
+        cy.get('[data-testid="response-0-wrapper"]').children(':nth-child(3)').check();
+        cy.get('[data-testid="response-0-wrapper"]').children(':nth-child(4)').type('Answer 1');
         cy.get('#new-poll-title').click();
         cy.get('[data-testid="poll-form-submit"]').click();
 
@@ -506,8 +506,8 @@ describe('Test cases revolving around polls functionality', () => {
         cy.get('[data-testid="poll-date"]').type(tomorrow.toISOString().substring(0, 10), { force: true });
         cy.get('#new-poll-title').click();
         cy.contains('Add Response').click();
-        cy.get('[data-testid="response_0_wrapper"]').children(':nth-child(3)').check();
-        cy.get('[data-testid="response_0_wrapper"]').children(':nth-child(4)').type('Data Structures');
+        cy.get('[data-testid="response-0-wrapper"]').children(':nth-child(3)').check();
+        cy.get('[data-testid="response-0-wrapper"]').children(':nth-child(4)').type('Data Structures');
         cy.get('#new-poll-title').click();
         cy.get('[data-testid="poll-form-submit"]').click();
 
@@ -519,8 +519,8 @@ describe('Test cases revolving around polls functionality', () => {
         cy.get('[data-testid="poll-date"]').type('2049-06-30', { force: true });
         cy.get('#new-poll-title').click();
         cy.contains('Add Response').click();
-        cy.get('[data-testid="response_0_wrapper"]').children(':nth-child(3)').check();
-        cy.get('[data-testid="response_0_wrapper"]').children(':nth-child(4)').type('Answer 1');
+        cy.get('[data-testid="response-0-wrapper"]').children(':nth-child(3)').check();
+        cy.get('[data-testid="response-0-wrapper"]').children(':nth-child(4)').type('Answer 1');
         cy.get('#new-poll-title').click();
         cy.get('[data-testid="poll-form-submit"]').click();
 
@@ -587,8 +587,8 @@ describe('Test cases revolving around polls functionality', () => {
         cy.get('[data-testid="poll-date"]').type(today.toISOString().substring(0, 10), { force: true });
         cy.get('h1').click(); // get rid of the date picker
         cy.contains('Add Response').click();
-        cy.get('[data-testid="response_0_wrapper"]').children(':nth-child(3)').check();
-        cy.get('[data-testid="response_0_wrapper"]').children(':nth-child(4)').type('Answer 1');
+        cy.get('[data-testid="response-0-wrapper"]').children(':nth-child(3)').check();
+        cy.get('[data-testid="response-0-wrapper"]').children(':nth-child(4)').type('Answer 1');
         cy.get('h1').click();
         cy.get('[data-testid="poll-custom-options"]').click();
         cy.get('[data-testid="poll-form-submit"]').click();
