@@ -219,10 +219,6 @@ class Config extends AbstractModel {
     protected $system_message = '';
 
     /** @prop
-     * @var bool Create New Account shown to at login page */
-    protected $user_create_account;
-
-    /** @prop
      * @var array */
     protected $submitty_database_params = [];
 
@@ -426,8 +422,10 @@ class Config extends AbstractModel {
         $this->sys_admin_email = $submitty_json['sys_admin_email'] ?? '';
         $this->sys_admin_url = $submitty_json['sys_admin_url'] ?? '';
 
-        // $this->user_create_account = $submitty_json['user_create_account'] === false;
+        $this->user_create_account = $submitty_json['user_create_account'] === true;
+
         $this->user_create_account = true;
+
         if (isset($submitty_json['timezone'])) {
             if (!in_array($submitty_json['timezone'], \DateTimeZone::listIdentifiers())) {
                 throw new ConfigException("Invalid Timezone identifier: {$submitty_json['timezone']}");
