@@ -1,13 +1,28 @@
 {% import _self as self %}
 
-{% if messages|length > 0 %}
+{% if messages|length > 0 or daylight %}
 {# WRAP THE LATE DAY INFORMATION IN A DIV #}
 <div class="content"
-    {% if error %}
-        style="background-color: #d9534f;"
-    {% endif %}
 >
+    {% if daylight %}
+    <div class = "daylight" id = "daylight" style="background: lightgrey; margin-bottom: 1em;"> 
+
     <h4>
+    WARNING: Daylight savings is THIS WEEK! Please note that a late day is 24 HOURS.
+    <br>
+    This means that if an assignment is due at 10 pm a day BEFORE daylight savings in the spring, and you plan to use a late day, you must submit your assignment before 9 pm.
+    <br>
+    As for when an assignment is due at 10 pm a day AFTER daylight savings ends in the fall, you must submit your assignment by 11 pm.
+    </h4>
+
+    </div>
+    {% endif %}
+
+    <h4
+        {% if error %}
+            style="background-color: #d9534f;"
+        {% endif %}
+    >
         {% for message in messages %}
             {% if message.type == 'extension' %}
                 You have a {{ message.info.extensions }} day deadline extension for this assignment.

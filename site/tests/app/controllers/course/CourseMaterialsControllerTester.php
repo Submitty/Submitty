@@ -254,6 +254,7 @@ class CourseMaterialsControllerTester extends BaseUnitTest {
 
     /**
      * @runInSeparateProcess
+     * @preserveGlobalState disabled
      */
     public function testModifyCourseMaterials() {
         $this->getFunctionMock('app\controllers\course', 'is_uploaded_file')
@@ -325,6 +326,7 @@ class CourseMaterialsControllerTester extends BaseUnitTest {
 
     /**
      * @runInSeparateProcess
+     * @preserveGlobalState disabled
      */
     public function testUpdateCourseMaterial() {
         $this->getFunctionMock('app\controllers\course', 'is_uploaded_file')
@@ -400,6 +402,7 @@ class CourseMaterialsControllerTester extends BaseUnitTest {
 
     /**
      * @runInSeparateProcess
+     * @preserveGlobalState disabled
      */
     public function testDeleteCourseMaterial() {
         $this->getFunctionMock('app\controllers\course', 'is_uploaded_file')
