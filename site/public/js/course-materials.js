@@ -11,7 +11,7 @@ function setCalendarMenuValues(div_class) {
                 $(`.${div_class} ${cur_div}`).show();
             }
         });
-    }
+    };
 
     // First sets the proper values
     $(`.${div_class} #show-menu`).each(set_visibility);
