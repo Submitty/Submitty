@@ -1,6 +1,8 @@
 #!/usr/bin/env bash
 set -ve
 
+# Because shellcheck is run with the python wrapper we need to disable the 'Not following' error
+# shellcheck disable=SC1091
 source "$( dirname "${BASH_SOURCE[0]}" )/get_globals.sh"
 
 cat << EOF
