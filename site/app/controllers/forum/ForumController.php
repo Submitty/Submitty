@@ -83,6 +83,40 @@ class ForumController extends AbstractController {
         return [-1, $url];
     }
 
+    private function getPostsOrderAndReplies(array $posts, int $thread_id): array {
+        $first = true;
+        $first_post_id = 1;
+        $order_array = [];
+        $reply_level_array = [];
+        foreach ($posts as $post_) {
+            if ($thread_id == -1) {
+                $thread_id = $post_["thread_id"];
+            }
+            if ($first) {
+                $first = false;
+                $first_post_id = $post_["id"];
+            }
+            if ($post_["parent_id"] > $first_post_id) {
+                $place = array_search($post_["parent_id"], $order_array, true);
+                $tmp_array = [$post_["id"]];
+                $parent_reply_level = $reply_level_array[$place];
+                if ($place !== false) {
+                    while (array_key_exists($place + 1, $reply_level_array) && $reply_level_array[$place + 1] > $parent_reply_level) {
+                        $place++;
+                    }
+                }
+                array_splice($order_array, $place + 1, 0, $tmp_array);
+                array_splice($reply_level_array, $place + 1, 0, $parent_reply_level + 1);
+            }
+            else {
+                array_push($order_array, $post_["id"]);
+                array_push($reply_level_array, 1);
+            }
+        }
+
+        return [$order_array, $reply_level_array];
+    }
+
     #[Route("/courses/{_semester}/{_course}/forum/threads/status", methods: ["POST"])]
     public function changeThreadStatus($status, $thread_id = null) {
         if (is_null($thread_id)) {
@@ -564,41 +598,19 @@ class ForumController extends AbstractController {
                 $result['next_page'] = $this->core->buildCourseUrl(['forum', 'threads', $thread_id]) . '?' . http_build_query(['option' => $display_option]);
                 $result['post_id'] = $post_id;
                 $result['thread_id'] = $thread_id;
-                $posts = $this->core->getQueries()->getPostsInThreads([$result['thread_id']]);
-                $first = true;
-                $first_post_id = 1;
+
+                $posts = $this->core->getQueries()->getPostsInThreads([$thread_id]);
                 $order_array = [];
                 $reply_level_array = [];
                 if ($display_option !== 'tree') {
                     $reply_level = 1;
                 }
                 else {
-                    foreach ($posts as $post) {
-                        if ($thread_id == -1) {
-                            $thread_id = $post["thread_id"];
-                        }
-                        if ($first) {
-                            $first = false;
-                            $first_post_id = $post["id"];
-                        }
-                        if ($post["parent_id"] > $first_post_id) {
-                            $place = array_search($post["parent_id"], $order_array, true);
-                            $tmp_array = [$post["id"]];
-                            $parent_reply_level = $reply_level_array[$place];
-                            if ($place !== false) {
-                                while (array_key_exists($place + 1, $reply_level_array) && $reply_level_array[$place + 1] > $parent_reply_level) {
-                                    $place++;
-                                }
-                            }
-                            array_splice($order_array, $place + 1, 0, $tmp_array);
-                            array_splice($reply_level_array, $place + 1, 0, $parent_reply_level + 1);
-                        }
-                        else {
-                            array_push($order_array, $post["id"]);
-                            array_push($reply_level_array, 1);
-                        }
-                    }
+                    $order_and_replies = $this->getPostsOrderAndReplies($posts, $thread_id);
+                    $order_array = $order_and_replies[0];
+                    $reply_level_array = $order_and_replies[1];
                 }
+
                 $place = array_search($post_id, $order_array, true);
                 $reply_level = $reply_level_array[$place];
                 $max_post_box_id = count($posts);
@@ -840,35 +852,10 @@ class ForumController extends AbstractController {
             }
             if ($type === 'Post') {
                 $posts = $this->core->getQueries()->getPostsInThreads([$thread_id]);
-                $first = true;
-                $first_post_id = 1;
-                $order_array = [];
-                $reply_level_array = [];
-                foreach ($posts as $post_) {
-                    if ($thread_id == -1) {
-                        $thread_id = $post_["thread_id"];
-                    }
-                    if ($first) {
-                        $first = false;
-                        $first_post_id = $post_["id"];
-                    }
-                    if ($post_["parent_id"] > $first_post_id) {
-                        $place = array_search($post_["parent_id"], $order_array, true);
-                        $tmp_array = [$post_["id"]];
-                        $parent_reply_level = $reply_level_array[$place];
-                        if ($place !== false) {
-                            while (array_key_exists($place + 1, $reply_level_array) && $reply_level_array[$place + 1] > $parent_reply_level) {
-                                $place++;
-                            }
-                        }
-                        array_splice($order_array, $place + 1, 0, $tmp_array);
-                        array_splice($reply_level_array, $place + 1, 0, $parent_reply_level + 1);
-                    }
-                    else {
-                        array_push($order_array, $post_["id"]);
-                        array_push($reply_level_array, 1);
-                    }
-                }
+                $order_and_replies = $this->getPostsOrderAndReplies($posts, $thread_id);
+                $order_array = $order_and_replies[0];
+                $reply_level_array = $order_and_replies[1];
+                
                 $place = array_search($post["id"], $order_array, true);
                 $reply_level = $reply_level_array[$place];
                 $post_box_id = 1;
