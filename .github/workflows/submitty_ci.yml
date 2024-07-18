@@ -28,7 +28,7 @@ concurrency:
 
 jobs:
   ansible-lint:
-    name: Ansible lint
+    name: Ansible Lint
     runs-on: ubuntu-22.04
     steps:
       - uses: actions/checkout@v4
@@ -39,7 +39,7 @@ jobs:
 
 
   css-lint:
-    name: CSS lint
+    name: CSS Lint
     runs-on: ubuntu-22.04
     defaults:
       run:
@@ -62,7 +62,7 @@ jobs:
 
 
   js-lint:
-    name: JavaScript lint
+    name: JavaScript Lint
     runs-on: ubuntu-22.04
     defaults:
       run:
@@ -87,7 +87,7 @@ jobs:
 
 
   js-unit:
-    name: JavaScript unit tests
+    name: JavaScript Unit
     runs-on: ubuntu-22.04
     defaults:
       run:
@@ -114,7 +114,7 @@ jobs:
 
 
   php-lint:
-    name: PHP lint & static analysis
+    name: PHP Lint & Static Analysis
     runs-on: ubuntu-22.04
     defaults:
       run:
@@ -150,7 +150,7 @@ jobs:
 
 
   php-unit:
-    name: PHP unit tests
+    name: PHP Unit
     runs-on: ubuntu-22.04
     defaults:
       run:
@@ -184,7 +184,7 @@ jobs:
 
 
   python-lint:
-    name: Python lint & static analysis
+    name: Python Lint & Static Analysis
     runs-on: ubuntu-22.04
     steps:
       - uses: actions/checkout@v4
@@ -206,7 +206,7 @@ jobs:
         run: python3 -m pylint --recursive=y .
 
   python-unit:
-    name: Python unit tests
+    name: Python Unit
     runs-on: ubuntu-22.04
     steps:
       - uses: actions/checkout@v4
@@ -283,7 +283,7 @@ jobs:
           flags: submitty_daemon_jobs
 
   yaml-lint:
-    name: YAML lint
+    name: YAML Lint
     runs-on: ubuntu-22.04
     steps:
       - uses: actions/checkout@v4
@@ -578,7 +578,7 @@ jobs:
 
 
   Integration:
-    name: Integration tests
+    name: Integration
     runs-on: ubuntu-22.04
     # Postgres should not be needed for the integration tests.
     # But unfortunately Configure test suite seems to use it at the moment, and
@@ -607,7 +607,7 @@ jobs:
 
 
   ansible-install:
-    name: Ansible install test
+    name: Ansible Install
     runs-on: ubuntu-22.04
     steps:
       - uses: actions/checkout@v4

@@ -9,6 +9,7 @@ on:
 
 jobs:
   title-check:
+    name: Title Check
     runs-on: ubuntu-latest
     steps:
       #
