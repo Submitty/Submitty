@@ -1,5 +1,5 @@
-def answer(w, l):
-    return w + l
+def answer(w, L):
+    return w + L
 
 
 lengths = [i for i in range(10)]

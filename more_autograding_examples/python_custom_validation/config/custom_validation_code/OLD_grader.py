@@ -125,7 +125,7 @@ def get_actual_files():
             testcase = json.load(json_file)
             # Grab the folder housing the files.
             prefix = testcase["testcase_prefix"]
-    except Exception as e:
+    except Exception:
         return_error("Could not open custom_validator_input.json")
 
     # There can be either one actual file (a string) or a list of actual files.
@@ -155,7 +155,6 @@ def grade_a_single_file(file, number_of_numbers):
     """
     For a file and a number of numbers, see if they sum correctly.
     """
-    data = list()
     try:
         with open(file) as f:
             # Read in all of the lines of the file (there is one number on each line)
@@ -166,7 +165,7 @@ def grade_a_single_file(file, number_of_numbers):
         numbers[-1] = numbers[-1].split()
 
         # Make sure that the last line had 'total' in it.
-        if not "total" in numbers[-1]:
+        if "total" not in numbers[-1]:
             return_result(
                 score=0, message="ERROR: total is not included", status="failure"
             )
@@ -194,7 +193,7 @@ def grade_a_single_file(file, number_of_numbers):
                 ),
                 status="failure",
             )
-    except Exception as e:
+    except Exception:
         return_result(
             score=0, message="ERROR: Could not open output file.", status="failure"
         )
@@ -213,7 +212,7 @@ def do_the_grading():
         # Parse command line arguments. In this assignment, this is how we learn
         # how many numbers the student was supposed to sum together.
         args = parse_args()
-    except Exception as e:
+    except Exception:
         # If we can't parse the command line arguments, we must have done something
         # wrong, so we'll return a failure message.
         return_error(message="ERROR: Incorrect arguments to custom validator")
@@ -232,7 +231,7 @@ def do_the_grading():
         data = grade_a_single_file(file, number_of_numbers)
         # If we are on the first file, save the this output so that we can check that the next
         # run is different (random).
-        if prev_data == None:
+        if prev_data is None:
             prev_data = data
         else:
             # If two runs of the student program yield the same random output, then the program
