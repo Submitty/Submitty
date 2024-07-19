@@ -24,9 +24,9 @@ export default defineConfig({
             },
         },
         lib: {
-            name: 'submitty-vue3-frontend',
+            name: 'submitty-vue',
             entry: resolve(path.dirname(fileURLToPath(import.meta.url)), 'src/main.ts'),
-            fileName: 'submitty-vue3-frontend',
+            fileName: 'submitty-vue',
 
             formats: ['umd'],
         },

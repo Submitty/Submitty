@@ -567,7 +567,7 @@ HTML;
     public function renderVue(string $page, array $args = []): string {
         $this->addVendorJs(FileUtils::joinPaths('vue', 'vue.runtime.global.prod.js'));
         $this->css->add($this->timestampResource('style.css', 'mjs/vue'));
-        $this->js->add($this->timestampResource('submitty-vue3-frontend.umd.js', 'mjs/vue'));
+        $this->js->add($this->timestampResource('submitty-vue.umd.js', 'mjs/vue'));
 
         return "<script>" .
                 "window.addEventListener('load', () => {" .
