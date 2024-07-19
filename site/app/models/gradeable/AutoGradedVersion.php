@@ -515,6 +515,63 @@ class AutoGradedVersion extends AbstractModel {
         return $this->getGradedGradeable()->getSubmitter()->getId();
     }
 
+//    public function getMetrics() {
+//        $who = $this->getGradedGradeable()->getSubmitter()->getId();
+//        $gradeable = $this->graded_gradeable->getGradeable();
+//        $version = $this->version;
+//
+//        $metrics = $this->core->getQueries()->getMetricsss($who, $gradeable->getId(), $version);
+//        if (($metrics['elapsed_time'] ?? null) && ($metrics['max_rss_size'] ?? null)) {
+//            return $metrics;
+//        }
+//    }
+
+    public function getMetrics_runtime() {
+        $who = $this->getGradedGradeable()->getSubmitter()->getId();
+        $gradeable = $this->graded_gradeable->getGradeable();
+        $version = $this->version;
+
+        $metrics = $this->core->getQueries()->getMetricsss($who, $gradeable->getId(), $version);
+//        var_dump($who, $metrics);
+//        var_dump($who, $metrics['total_elapsed_time']);
+        if (!empty($metrics) && isset($metrics[0]['total_elapsed_time'])) {
+            return $metrics[0]['total_elapsed_time'];
+        }
+
+        return null;
+    }
+
+    public function getMetrics_memory() {
+        $who = $this->getGradedGradeable()->getSubmitter()->getId();
+        $gradeable = $this->graded_gradeable->getGradeable();
+        $version = $this->version;
+
+        $metrics = $this->core->getQueries()->getMetricsss($who, $gradeable->getId(), $version);
+        if (!empty($metrics) && isset($metrics[0]['total_max_rss_size'])) {
+            return $metrics[0]['total_max_rss_size'];
+        }
+
+        return null;
+    }
+
+
+
+    /**
+     * Gets the autograding metrics for a testcase
+     *
+     * @param string $user_id
+     * @param string $gradeable_id
+     * @param string $testcase_id
+     * @param int $version the submission version that is currently being looked at
+     */
+//$autogradingConfig = $gradeable->getAutogradingConfig();
+//if (!is_null($autogradingConfig) && $autogradingConfig->getDisplayTestcaseRuntimeMemory()) {
+//$metrics = $this->core->getQueries()->getMetrics($who, $gradeable->getId(), sprintf('test%02d', $testcase->getTestcase()->getIndex() + 1), $version->getVersion());
+//$check["metrics"] = [
+//"elapsed_time" => $metrics['elapsed_time'] ?? null,
+//"max_rss_size" => $metrics['max_rss_size'] ?? null
+//];
+//}
     /**
      * Gets the number of days late this version is
      * @return int result clamped to be >= 0

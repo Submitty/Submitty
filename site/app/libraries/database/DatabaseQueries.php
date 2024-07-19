@@ -9279,6 +9279,30 @@ SQL;
         return $this->course_db->row();
     }
 
+
+    /**
+     * Gets the autograding metrics for a specific version and testcase
+     *
+     * @param string $user_id
+     * @param string $gradeable_id
+     * @param int $version
+     * @return array Array containing summed elapsed_time and max_rss_size for each testcase_id
+     */
+    public function getMetricsss(string $user_id, string $gradeable_id, int $version): array {
+        $query = "
+        SELECT SUM(elapsed_time) AS total_elapsed_time, SUM(max_rss_size) AS total_max_rss_size
+        FROM autograding_metrics
+        WHERE user_id = ?
+            AND g_id = ?
+            AND g_version = cast(? AS int)
+    ";
+
+        $this->course_db->query($query, [$user_id, $gradeable_id, $version]);
+        return $this->course_db->rows();
+    }
+
+
+
     /**
      * Gets a gradeable leaderboard
      * TODO get this working for teams

@@ -180,6 +180,8 @@
             <a class="nav-bar key_to_click" id="page_2_nav" onclick="onChangeNavTab(2);">Autograding Histogram</a>
             <a class="nav-bar key_to_click" id="page_3_nav" onclick="onChangeNavTab(3);">Overall Histogram</a>
             <a class="nav-bar key_to_click" id="page_4_nav" onclick="onChangeNavTab(4);">Static Analysis</a>
+            <a class="nav-bar key_to_click" id="page_5_nav" onclick="onChangeNavTab(5);">Static Analysis</a>
+            <a class="nav-bar key_to_click" id="page_6_nav" onclick="onChangeNavTab(6);">Static Analysis</a>
         </div>
         <br/>
         <div class="modal-body">
@@ -190,10 +192,21 @@
                 <div class="page-content" id="page_1_content">{{ include('grading/electronic/ta_status/StatusComponentAverages.twig')   }}</div>
             {% endif %}
 
+            {% if histograms['runtime']|length != 0 and histograms['runtime'][0] != 0 %}
+                <div class="page-content" id="page_6_content">{{ include('grading/electronic/ta_status/StatusRuntime.twig') }}</div>
+            {% endif %}
+
+
             {% if autograded_average != null and autograded_average.getCount() != 0 and histograms['bAuto']|length != 0 %}
                 <div class="page-content" id="page_2_content">{{ include('grading/electronic/ta_status/StatusAutogradingHistogram.twig')  }}</div>
                 {% if histograms['sloc']|length != 0 and histograms['sloc'][0] != 0 %}
                     <div class="page-content" id="page_4_content">{{ include('grading/electronic/ta_status/StatusSloc.twig') }}</div>
+                {% endif %}
+                {% if histograms['memory']|length != 0 and histograms['memory'][0] != 0 %}
+                    <div class="page-content" id="page_5_content">{{ include('grading/electronic/ta_status/StatusSloc.twig') }}</div>
+                {% endif %}
+                {% if histograms['runtime']|length != 0 and histograms['runtime'][0] != 0 %}
+                    <div class="page-content" id="page_6_content">{{ include('grading/electronic/ta_status/StatusRuntime.twig') }}</div>
                 {% endif %}
             {% endif %}
 
@@ -291,7 +304,7 @@
     let adminGradeableNavTab = 0;
 
     function onChangeNavTab(tab) {
-        if (tab > 4 || tab < 0) {
+        if (tab > 6 || tab < 0) {
             alert('Invalid Navigation');
             return;
         }
