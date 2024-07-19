@@ -1933,10 +1933,34 @@ function markThreadUnread(thread_id) {
     });
 }
 
-// eslint-disable-next-line no-unused-vars
+function getPostTimestamp(postId) {
+    if (!postId) {
+        return;
+    }
+    const postElement = document.getElementById(postId);
+
+    const timestampElement = postElement.querySelector('.last-edit');
+    return new Date(timestampElement.textContent.trim()).getTime();
+}
+
+function updateLaterPostsToViewed(unreadPostId) {
+    const unreadPostTimestamp = getPostTimestamp(unreadPostId);
+
+    const allPosts = document.querySelectorAll('.post_box');
+    allPosts.forEach(post => {
+        const postId = post.id;
+        
+        const postTimestamp = getPostTimestamp(postId);
+
+        if (postTimestamp > unreadPostTimestamp) {
+            post.classList.remove('viewed_post');
+            post.classList.add('new_post');
+        }
+    });
+}
+
 function markPostUnread(thread_id, post_id, last_viewed_timestamp) {
     const url = `${buildCourseUrl(['forum', 'posts', 'unread'])}`;
-    // format the timestamp to be in the correct format
     $.ajax({
         url: url,
         type: 'POST',
@@ -1948,6 +1972,7 @@ function markPostUnread(thread_id, post_id, last_viewed_timestamp) {
         success: function () {
             $(`#thread_box_link_${thread_id}`).children().addClass('new_thread');
             $(`#${post_id}`).removeClass('viewed_post').addClass('new_post');
+            updateLaterPostsToViewed(post_id);
         },
         error: function () {
             window.alert('Something went wrong while trying to mark the post as unread. Please try again.');
