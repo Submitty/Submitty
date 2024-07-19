@@ -1,0 +1,149 @@
+<div id="static-analysis" class="page-content">
+    <div>
+        <label for="x-axis-selector">Select X-Axis:</label>
+        <select id="x-axis-selector">
+            <option value="runtime">Runtime</option>
+            <option value="memory">Memory</option>
+            <option value="sloc">SLOC</option>
+        </select>
+    </div>
+    <div id="myDiv4"></div>
+    <script>
+        var runtime = [{{ histograms['runtime'] | join(',') }}];
+        var memory = [{{ histograms['memory'] | join(',') }}];
+        {#var sloc = [{{ histograms['sloc'] | join(',') }}];#}
+        var scores = [{{ histograms['bAuto'] | join(',') }}];
+
+        var submitters = [
+            {% for submitter in histograms['submitters'] %}
+            "{{ submitter }}"{% if not loop.last %},{% endif %}
+            {% endfor %}
+        ];
+
+        function updatePlot(xData, xLabel) {
+            var x1 = [], y1 = [], x2 = [], y2 = [], x3 = [], y3 = [];
+            var text1 = [], text2 = [], text3 = [];
+
+            for (let i = 0; i < submitters.length; i++) {
+                if (scores[i] >= {{ autograding_non_extra_credit }}) {
+                    x1.push(xData[i]);
+                    y1.push(scores[i]);
+                    text1.push(submitters[i]);
+                }
+                else if (scores[i] < 0.5 * {{ autograding_non_extra_credit }}) {
+                    x3.push(xData[i]);
+                    y3.push(scores[i]);
+                    text3.push(submitters[i]);
+                }
+                else {
+                    x2.push(xData[i]);
+                    y2.push(scores[i]);
+                    text2.push(submitters[i]);
+                }
+            }
+
+            var trace1 = {
+                x: x1,
+                y: y1,
+                name: '100% or higher (for EC)',
+                type: 'scatter',
+                mode: 'markers',
+                text: text1,
+                textposition: 'auto',
+                marker: {
+                    color: getComputedStyle(document.documentElement).getPropertyValue('--standard-deep-dark-green'),
+                    opacity: 1,
+                    line: {
+                        color: 'rgb(170,170,170)',
+                        width: 0.5
+                    }
+                }
+            }
+
+            var trace2 = {
+                x: x2,
+                y: y2,
+                name: '51-99%',
+                type: 'scatter',
+                mode: 'markers',
+                text: text2,
+                textposition: 'auto',
+                marker: {
+                    color: getComputedStyle(document.documentElement).getPropertyValue('--standard-light-yellow-brown'),
+                    opacity: 1,
+                    line: {
+                        color: 'rgb(170,170,170)',
+                        width: 0.5
+                    }
+                }
+            }
+
+            var trace3 = {
+                x: x3,
+                y: y3,
+                name: '0-50% or lower (for penalty)',
+                type: 'scatter',
+                mode: 'markers',
+                text: text3,
+                textposition: 'auto',
+                marker: {
+                    color: getComputedStyle(document.documentElement).getPropertyValue('--error-alert-dark-red'),
+                    opacity: 1,
+                    line: {
+                        color: 'rgb(170,170,170)',
+                        width: 0.5
+                    }
+                }
+            }
+
+            var data = [trace1, trace2, trace3];
+
+            var layout = {
+                title: `${xLabel} vs. Autograding Scores`,
+                barmode: 'overlay',
+                xaxis: {
+                    title: xLabel
+                },
+                yaxis:{
+                    title: 'Autograding Scores'
+                },
+                font: {
+                    family: '"Source Sans Pro", sans-serif',
+                }
+            };
+
+            Plotly.newPlot('myDiv4', data, layout, { displayModeBar: false, displaylogo: false });
+        }
+
+        document.getElementById('x-axis-selector').addEventListener('change', function() {
+            var selectedValue = this.value;
+            if (selectedValue === 'runtime') {
+                updatePlot(runtime, 'Total Runtime');
+            } else if (selectedValue === 'memory') {
+                updatePlot(memory, 'Memory Usage');
+            } else if (selectedValue === 'sloc') {
+                updatePlot(sloc, 'Source Lines of Code');
+            }
+        });
+
+        // Initial plot
+        updatePlot(runtime, 'Total Runtime');
+    </script>
+    <div id="mySmallDiv4">
+        <script>
+            var sum = runtime.reduce((a, b) => a + b, 0);
+            var average = Math.floor(sum / runtime.length);
+            var max = Math.max(...runtime);
+            var min = Math.min(...runtime);
+            document.write(`<b>Total Runtime: </b>` + "<br>" + `Maximum: ` + `${max}` + '&nbsp&nbsp&nbsp&nbsp' +
+                `Minimum: ` + `${min}` + '&nbsp&nbsp&nbsp&nbsp' + 'Average: ' + `${average}`);
+            document.write("<br>" + "<br>");
+            document.write(`<b>Autograding: </b>` + "<br>" + `Maximum possible: ` + {{ autograding_non_extra_credit }} +
+                '&nbsp&nbsp&nbsp&nbsp' + 'Average: ' + {{ autograded_average.getAverageScore() }});
+        </script>
+    </div>
+    <br/>
+    <br/>
+    Double-click on the chart to zoom out
+    <hr>
+</div>

@@ -62,6 +62,9 @@ class ElectronicGraderController extends AbstractController {
             "bTA" => [],
             "tTA" => [],
             "bAuto" => [],
+            "runtime" => [],
+            "memory" => [],
+            "submitters" => [],
             "VerConf" => 0,
             "noSub" => 0,
             "noActive" => 0,
@@ -82,6 +85,15 @@ class ElectronicGraderController extends AbstractController {
                     if ($ov->getGradeable()->getAutogradingConfig()->getTotalNonExtraCredit() != 0) {
                         if ($ov->getAutoGradedGradeable()->getTotalPoints() >= 0 || $ov->getAutoGradedGradeable()->getTotalPoints() < 0) {
                             $histogram["bAuto"] = array_merge($histogram["bAuto"], [$ov->getAutoGradedGradeable()->getTotalPoints()]);
+                            $metrics = $ov->getAutoGradedGradeable()->getMetrics_Sum();
+                            $histogram["runtime"] = array_merge($histogram["runtime"], [$metrics['runtime']]);
+                            $histogram["memory"] = array_merge($histogram["memory"], [$metrics['memory']]);
+//                            $histogram["runtime"] = array_merge($histogram["runtime"], [$ov->getAutoGradedGradeable()->getMetrics_runtime()]);
+//                            $histogram["memory"] = array_merge($histogram["memory"], [$ov->getAutoGradedGradeable()->getMetrics_memory()]);
+                            $histogram["submitters"] = array_merge($histogram["submitters"], [$ov->getAutoGradedGradeable()->getSubmitterId()]);
+//                            var_dump($histogram["runtime"]);
+//                            var_dump([$ov->getAutoGradedGradeable()->getMetrics_runtime()]);
+
                         }
                         else {
                             $histogram["cancelledSub"] += 1;

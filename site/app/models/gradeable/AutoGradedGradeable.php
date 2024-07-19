@@ -222,4 +222,49 @@ class AutoGradedGradeable extends AbstractModel {
         }
         return $instance->getQueuePosition();
     }
+
+
+    public function getMetrics() {
+        $instance = $this->getActiveVersionInstance();
+        if ($instance === null) {
+            return NAN;
+        }
+        return $instance->getMetrics();
+    }
+
+    public function getMetrics_runtime() {
+        $instance = $this->getActiveVersionInstance();
+        if ($instance === null) {
+            return NAN;
+        }
+        return $instance->getMetrics_runtime();
+    }
+
+    public function getMetrics_memory() {
+        $instance = $this->getActiveVersionInstance();
+        if ($instance === null) {
+            return NAN;
+        }
+        return $instance->getMetrics_memory();
+    }
+
+    public function getMetrics_Sum() {
+        $instance = $this->getActiveVersionInstance();
+        if ($instance === null) {
+            return NAN;
+        }
+        return $instance->getMetrics_Sum();
+    }
+
+    /**
+     * @return float|string
+     */
+    public function getSubmitterId() {
+        $instance = $this->getActiveVersionInstance();
+        if ($instance === null) {
+            return NAN;
+        }
+        return $instance->getSubmitterId();
+    }
+
 }
