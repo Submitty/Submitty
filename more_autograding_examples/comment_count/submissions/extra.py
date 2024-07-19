@@ -12,4 +12,3 @@ def isPrime(x):
         if x % i == 0:
             return False
     return True
-

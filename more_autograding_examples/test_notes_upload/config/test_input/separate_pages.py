@@ -18,5 +18,5 @@ max = int(sys.argv[1])
 
 # if the student submitted fewer than the max number of pages, create
 # a copy of the blank page as a substitute
-for i in range(len(inputpdf.pages),max):
-    copyfile ("blank_page.pdf","student_file_page_%s.pdf" % i)
+for i in range(len(inputpdf.pages), max):
+    copyfile("blank_page.pdf", "student_file_page_%s.pdf" % i)
