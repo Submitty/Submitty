@@ -569,14 +569,7 @@ HTML;
         $this->css->add($this->timestampResource('style.css', 'mjs/vue'));
         $this->js->add($this->timestampResource('submitty-vue.umd.js', 'mjs/vue'));
 
-        return "<script>" .
-                "window.addEventListener('load', () => {" .
-                    "window.submitty.render('[data-vuemount]', '$page', " . json_encode($args) . ");" .
-                "})" .
-            "</script>" .
-            "<div class=\"content\" data-vuemount>" .
-                "<noscript>You need Javascript enabled to see this page.</noscript>" .
-            "</div>";
+        return $this->renderTwigTemplate('Vue.twig', ["page" => $page, "args" => $args]);
     }
 
     public function addVendorJs($file) {
