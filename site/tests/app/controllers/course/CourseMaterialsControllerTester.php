@@ -92,7 +92,8 @@ class CourseMaterialsControllerTester extends BaseUnitTest {
             false,
             0,
             null,
-            null
+            null,
+            false
         );
         $course_material->setId(0);
         return $course_material;
@@ -415,9 +416,9 @@ class CourseMaterialsControllerTester extends BaseUnitTest {
         $this->buildFakeFile($name);
 
         $course_material = $this->buildCourseMaterial("/$name");
-
+        $course_material->setIsDeleted(false);
         $this->core->getCourseEntityManager()
-            ->expects($this->once())
+            ->expects($this->exactly(2))
             ->method('persist')
             ->with($this->callback(
                 function (CourseMaterial $c) use ($course_material) {
@@ -459,16 +460,10 @@ class CourseMaterialsControllerTester extends BaseUnitTest {
         $path = $this->upload_path . "/" . $name;
 
         $this->core->getAccess()->method('resolveDirPath')->willReturn($path);
-
-        $this->core->getCourseEntityManager()
-            ->expects($this->once())
-            ->method('remove')
-            ->with($course_material);
-
         $id = $course_material->getId();
 
         $controller->deleteCourseMaterial($id);
-
+        $this->assertTrue($course_material->isDeleted() === true);
         $files = FileUtils::getAllFiles($this->upload_path);
         $this->assertEquals(0, count($files));
     }

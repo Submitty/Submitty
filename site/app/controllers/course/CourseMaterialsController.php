@@ -147,12 +147,12 @@ class CourseMaterialsController extends AbstractController {
             $all_files = $this->core->getCourseEntityManager()->getRepository(CourseMaterial::class)->findAll();
             foreach ($all_files as $file) {
                 if (str_starts_with(pathinfo($file->getPath(), PATHINFO_DIRNAME), $path) || ($file->getPath() === $path)) {
-                    $this->core->getCourseEntityManager()->remove($file);
+                    $file->setIsDeleted(true);
                 }
             }
         }
         else {
-            $this->core->getCourseEntityManager()->remove($cm);
+            $cm->setIsDeleted(true);
         }
         $success = false;
         if (is_dir($path)) {
@@ -174,11 +174,12 @@ class CourseMaterialsController extends AbstractController {
                 }
                 foreach ($all_files as $file) {
                     if (str_starts_with($file->getPath(), $path)) {
-                        $this->core->getCourseEntityManager()->remove($file);
+                        $file->setIsDeleted(true);
                     }
                 }
             }
         }
+        $this->core->getCourseEntityManager()->persist($cm);
         $this->core->getCourseEntityManager()->flush();
         if ($success) {
             $this->core->addSuccessMessage(basename($path) . " has been successfully removed.");
@@ -504,7 +505,8 @@ class CourseMaterialsController extends AbstractController {
                                     $course_material->isHiddenFromStudents(),
                                     $course_material->getPriority(),
                                     null,
-                                    null
+                                    null,
+                                    $course_material->isDeleted()
                                 );
                                 $this->core->getCourseEntityManager()->persist($course_material_dir);
                                 $all_sections = $course_material->getSections()->getValues();
@@ -865,7 +867,8 @@ class CourseMaterialsController extends AbstractController {
                 $details['hidden_from_students'],
                 $details['priority'],
                 $value === CourseMaterial::LINK ? $url_url : null,
-                $value === CourseMaterial::LINK ? $title_name : null
+                $value === CourseMaterial::LINK ? $title_name : null,
+                false
             );
             $this->core->getCourseEntityManager()->persist($course_material);
             if ($details['section_lock']) {

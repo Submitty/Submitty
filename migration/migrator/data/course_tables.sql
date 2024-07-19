@@ -716,7 +716,8 @@ CREATE TABLE public.course_materials (
     hidden_from_students boolean,
     priority double precision NOT NULL,
     url text,
-    title character varying(255)
+    title character varying(255),
+    is_deleted boolean DEFAULT false NOT NULL
 );
 
 
