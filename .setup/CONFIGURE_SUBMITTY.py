@@ -186,7 +186,7 @@ defaults = {
     'institution_name' : '',
     'institution_homepage' : '',
     'user_create_account' : False,
-    'timezone' : tzlocal.get_localzone().zone,
+    'timezone' : str(tzlocal.get_localzone()),
     'submitty_admin_username': '',
     'email_user': '',
     'email_password': '',
