@@ -5,7 +5,7 @@ import mimetypes
 
 def list_files(startpath):
     script_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), startpath)
-    for root, dirs, files in os.walk(script_path):
+    for root, _dirs, files in os.walk(script_path):
         level = root.replace(script_path, "").count(os.sep)
         indent = " " * 4 * (level)
         print("{}{}/".format(indent, os.path.basename(root)))
@@ -17,7 +17,7 @@ def list_files(startpath):
 def contents(path):
     script_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), path)
     matches = []
-    for root, dirnames, filenames in os.walk(script_path):
+    for root, _dirnames, filenames in os.walk(script_path):
         for filename in fnmatch.filter(filenames, "*.*"):
             matches.append(os.path.join(root, filename))
 
@@ -25,7 +25,7 @@ def contents(path):
         print("-----------------------------------------------------------------")
         print("Opening :-")
         print(os.path.relpath(file, script_path))
-        if mimetypes.guess_type(file)[0] != None:
+        if mimetypes.guess_type(file)[0] is not None:
             f = open(file, "r")
             print(f.read())
         else:

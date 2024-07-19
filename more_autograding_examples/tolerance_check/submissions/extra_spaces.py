@@ -31,7 +31,7 @@ def standard_deviation(lst, avg):
 
 def print_line(numneg, avg, sd):
     if numneg == 0:
-        print(f"|   NONE |", end="")
+        print("|   NONE |", end="")
     else:
         print(f"|{numneg:7d} |", end="")
     if avg > 100:
