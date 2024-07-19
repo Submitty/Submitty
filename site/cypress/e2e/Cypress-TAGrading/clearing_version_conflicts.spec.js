@@ -1,23 +1,20 @@
 describe('Test cases for checking the clear version conflicts button in the TA grading interface', () => {
-    it('Button should not appear if there are no version conflicts', () => {
+    it('Clear conflict button should appear only when there is a version conflict, and work', () => {
         cy.login('instructor');
+
+        cy.log('Button should not exist if there is no version conflict');
         cy.visit(['sample', 'gradeable', 'grading_homework', 'grading', 'grade?who_id=LHmpGciilVzjcEJ&sort=id&direction=ASC']);
         cy.get('[data-testid="grading-rubric-btn"]').click();
         cy.get('[data-testid="change-graded-version"]').should('not.exist');
         cy.get('[data-testid="version-warning"]').should('not.exist');
-    });
 
-    it('Button should appear if there are version conflicts', () => {
-        cy.login('instructor');
+        cy.log('Button should exist if there is a version conflict');
         cy.visit(['sample', 'gradeable', 'grading_homework', 'grading', 'grade?who_id=K8jI3q4qpdCc1jw&sort=id&direction=ASC&gradeable_version=1']);
         cy.get('[data-testid="grading-rubric-btn"]').click();
         cy.get('[data-testid="change-graded-version"]').should('exist');
         cy.get('[data-testid="version-warning"]').should('exist');
-    });
 
-    it('Clicking the button should resolve those version conflicts', () => {
-        cy.login('instructor');
-        cy.visit(['sample', 'gradeable', 'grading_homework', 'grading', 'grade?who_id=K8jI3q4qpdCc1jw&sort=id&direction=ASC&gradeable_version=1']);
+        cy.log('Clicking the button should resolve the version conflict');
         cy.get('[data-testid="grading-rubric-btn"]').click();
 
         // wait until page is fully loaded

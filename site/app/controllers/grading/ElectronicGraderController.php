@@ -2369,9 +2369,9 @@ class ElectronicGraderController extends AbstractController {
      * Route for saving the marks the submitter received for a component
      */
     #[Route("/courses/{_semester}/{_course}/gradeable/{gradeable_id}/grading/graded_gradeable/change_grade_version", methods: ["POST"])]
-    public function ajaxUpdateGradedVersionForStudent(string $gradeable_id): ?Jsonresponse {
+    public function ajaxUpdateGradedVersionForStudent(string $gradeable_id): JsonResponse {
         $anon_id = $_POST['anon_id'] ?? null;
-        $graded_version = intval($_POST['graded_version'] ?? 0);
+        $graded_version = intval($_POST['graded_version'] ?? null);
         $component_ids = $_POST['component_ids'] ?? [];
 
         if ($anon_id === null) {
@@ -2386,20 +2386,20 @@ class ElectronicGraderController extends AbstractController {
         }
 
         // Get the gradeable
-        $gradeable = $this->tryGetGradeable($gradeable_id);
+        $gradeable = $this->tryGetGradeable($gradeable_id, false);
         if ($gradeable === false) {
-            return null;
+            return JsonResponse::getFailResponse('Missing gradeable_id parameter');
         }
         // Get user id from the anon id
-        $submitter_id = $this->tryGetSubmitterIdFromAnonId($anon_id, $gradeable_id);
+        $submitter_id = $this->tryGetSubmitterIdFromAnonId($anon_id, $gradeable_id, false);
         if ($submitter_id === false) {
-            return null;
+            return JsonResponse::getFailResponse('Missing anon_id parameter');
         }
 
         // Get the graded gradeable
-        $graded_gradeable = $this->tryGetGradedGradeable($gradeable, $submitter_id);
+        $graded_gradeable = $this->tryGetGradedGradeable($gradeable, $submitter_id, false);
         if ($graded_gradeable === false) {
-            return null;
+            return JsonResponse::getFailResponse('Missing gradeable_id parameter');
         }
 
 
