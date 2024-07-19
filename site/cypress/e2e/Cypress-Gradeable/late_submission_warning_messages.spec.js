@@ -147,8 +147,6 @@ const calculateAndCheckDaylightBanner = (late_days) => {
     const newDate = new Date(today);
 
     newDate.setDate(today.getDate() + late_days);
-    console.log(newDate.toISOString());
-
     checkDaylightBanner(late_days, newDate.getTimezoneOffset() !== today.getTimezoneOffset() ? 'exist' : 'not.exist');
 };
 
