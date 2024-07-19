@@ -252,7 +252,7 @@
   }
 
 
-  let wasQueueEmpty = 0;
+  let previousQueueLength = $('.help_btn:visible[data-ready="true"]').length;
 
   function updateCurrentQueue() {
     const helping_student = $('.finish_helping_btn.btn-success:visible').length > 0;
@@ -261,9 +261,9 @@
         $("#current_queue").replaceWith(newQueue);
         filterQueues();
 
-        const currentQueueCount = $('.help_btn:visible[data-ready="true"]').length;
+        const currentQueueLength = $('.help_btn:visible[data-ready="true"]').length;
 
-        if (currentQueueCount > wasQueueEmpty && !helping_student) {
+        if (currentQueueLength > previousQueueLength && !helping_student) {
             if (push_notifications_enabled) {
                 new Notification("A student has joined the queue.");
             }
@@ -271,7 +271,7 @@
                 window.notificationSound.play();
             }
         }
-        wasQueueEmpty = currentQueueCount;
+        previousQueueLength = currentQueueLength;
     });
 }
 
