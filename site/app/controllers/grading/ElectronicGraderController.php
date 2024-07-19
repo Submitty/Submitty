@@ -62,6 +62,8 @@ class ElectronicGraderController extends AbstractController {
             "bTA" => [],
             "tTA" => [],
             "bAuto" => [],
+            "memory" => [],
+            "runtime" => [],
             "sloc" => [],
             "submitters" => [],
             "VerConf" => 0,
@@ -86,7 +88,12 @@ class ElectronicGraderController extends AbstractController {
                             $histogram["bAuto"] = array_merge($histogram["bAuto"], [$ov->getAutoGradedGradeable()->getTotalPoints()]);
                             $histogram["submitters"] = array_merge($histogram["submitters"], [$ov->getAutoGradedGradeable()->getSubmitterId()]);
                             // add line count for autograded gradeables
+
                             $histogram["sloc"] = array_merge($histogram["sloc"], [$ov->getAutoGradedGradeable()->getSloc()]);
+                            $histogram["runtime"] = array_merge($histogram["runtime"], [$ov->getAutoGradedGradeable()->getMetrics_runtime()]);
+//                            var_dump($histogram["runtime"]);
+//                            var_dump([$ov->getAutoGradedGradeable()->getMetrics_runtime()]);
+                            $histogram["memory"] = array_merge($histogram["memory"], [$ov->getAutoGradedGradeable()->getMetrics_memory()]);
                         }
                         else {
                             $histogram["cancelledSub"] += 1;
