@@ -1511,7 +1511,8 @@ CREATE TABLE public.poll_options (
     poll_id integer,
     response text NOT NULL,
     correct boolean NOT NULL,
-    option_id integer NOT NULL
+    option_id integer NOT NULL,
+    author_id character varying(255) DEFAULT NULL::character varying
 );
 
 
@@ -1582,7 +1583,8 @@ CREATE TABLE public.polls (
     release_answer character varying(10) DEFAULT 'never'::character varying,
     duration integer DEFAULT 0,
     end_time timestamp with time zone,
-    is_visible boolean DEFAULT false NOT NULL
+    is_visible boolean DEFAULT false NOT NULL,
+    allows_custom boolean DEFAULT false NOT NULL
 );
 
 
@@ -3301,6 +3303,14 @@ ALTER TABLE ONLY public.peer_feedback
 
 ALTER TABLE ONLY public.peer_grading_panel
     ADD CONSTRAINT peer_grading_panel_g_id_fkey FOREIGN KEY (g_id) REFERENCES public.electronic_gradeable(g_id);
+
+
+--
+-- Name: poll_options poll_options_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.poll_options
+    ADD CONSTRAINT poll_options_fkey FOREIGN KEY (author_id) REFERENCES public.users(user_id) ON UPDATE CASCADE;
 
 
 --

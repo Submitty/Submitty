@@ -327,7 +327,7 @@ function addToTable(table) {
     }
 
     const tableMap = {
-        plagiarism: ['plagiarism-table-body', 'plagiarism_user_id', 'g_id', 'marks'],
+        plagiarism: ['plagiarism-table-body', 'plagiarism-user-id', 'g_id', 'marks'],
         manualGrade: ['manual-grading-table-body', 'manual-grading-user-id', 'manual-grading-grade', 'manual-grading-note'],
     };
 

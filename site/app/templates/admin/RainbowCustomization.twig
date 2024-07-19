@@ -299,9 +299,9 @@ To remove a curve simply blank all boxes."></i>
                 <input type="hidden" name="csrf_token" value="{{ csrfToken }}" />
                 <input type="hidden" name="option" value="-1" />
                 <div class="option">
-                    <label for="user_id">
+                    <label for="plagiarism-user-id">
                         <span>USER ID:</span>
-                        <input class="option-input" type="text" name="user_id" id="user_id">
+                        <input class="option-input" type="text" name="plagiarism-user-id" id="plagiarism-user-id">
                     </label>
                     <label for="g_id" class="option">Gradeable:</label>
                     <select name="g_id" id="g_id">
@@ -314,7 +314,7 @@ To remove a curve simply blank all boxes."></i>
                         <span>Penalty:</span>
                         <input class="option-input" type="text" name="marks" id="marks">
                     </label>
-                    <button type="submit" class="btn btn-primary" onclick="addToTable()" aria-label="submit">
+                    <button type="submit" class="btn btn-primary" onclick="addToTable('plagiarism')" aria-label="submit">
                         <i class="fas fa-plus"></i>
                     </button>
                     {# This is a data table #}
@@ -328,7 +328,7 @@ To remove a curve simply blank all boxes."></i>
                             <th>Delete</th>
                         </tr>
                         </thead>
-                        <tbody id="table-body" style="text-align:left">
+                        <tbody id="plagiarism-table-body" style="text-align:left">
                         {% for entry in plagiarism %}
                             <tr>
                                 <td>{{ entry.user }}</td>
@@ -354,7 +354,7 @@ To remove a curve simply blank all boxes."></i>
             $(`#override-${gradeable_id}`).html(override.val());
         });
 
-        ["#plagiarism_user_id", "#manual-grading-user-id"].forEach(function(user_id) {
+        ["#plagiarism-user-id", "#manual-grading-user-id"].forEach(function(user_id) {
             $(user_id).autocomplete({
                 source: {{ student_full|raw }}
             });
