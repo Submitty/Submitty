@@ -1,14 +1,14 @@
 {% import _self as self %}
 <script>
-    const autograding_results = {{ not isPeerGrader or (isPeerGrader and isPeerAutograding) ? true : false }};
-    const grading_rubric = {{ not isPeerGrader or (isPeerGrader and isPeerRubric) ? true : false }};
-    const submission_browser = {{ not isPeerGrader or (isPeerGrader and isPeerFiles) ? true : false }};
-    const solution_ta_notes = {{ not isPeerGrader or (isPeerGrader and isPeerSolutions) ? true : false }};
-    const student_info = {{ isStudentInfoPanel ? true : false }};
-    const grade_inquiry_info = {{ isGradeInquiryPanel ? true : false }};
-    const discussion_browser = {{ isDiscussionPanel and (not isPeerGrader or (isPeerGrader and isPeerDiscussion)) ? true : false }};
-    const peer_info = {{ isPeerPanel ? true : false }};
-    const is_notebook = {{ is_notebook ? true : false }};
+    const autograding_results = {{ not isPeerGrader or (isPeerGrader and isPeerAutograding) ? 1 : 0 }};
+    const grading_rubric = {{ not isPeerGrader or (isPeerGrader and isPeerRubric) ? 1 : 0 }};
+    const submission_browser = {{ not isPeerGrader or (isPeerGrader and isPeerFiles) ? 1 : 0 }};
+    const solution_ta_notes = {{ not isPeerGrader or (isPeerGrader and isPeerSolutions) ? 1 : 0 }};
+    const student_info = {{ isStudentInfoPanel ? 1 : 0 }};
+    const grade_inquiry_info = {{ isGradeInquiryPanel ? 1 : 0 }};
+    const discussion_browser = {{ isDiscussionPanel and (not isPeerGrader or (isPeerGrader and isPeerDiscussion)) ? 1 : 0 }};
+    const peer_info = {{ isPeerPanel ? 1 : 0 }};
+    const is_notebook = {{ is_notebook ? 1 : 0 }};
 
     updateThePanelsElements({
         autograding_results,
