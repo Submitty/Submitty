@@ -2,7 +2,7 @@ import sys
 
 
 def read_words(words_file):
-    return [word for line in open(words_file, 'r') for word in line.split()]
+    return [word for line in open(words_file, "r") for word in line.split()]
 
 
 def main():
@@ -27,9 +27,9 @@ def main():
     # sort them
     data_filtered_unique_sorted = sorted(data_filtered_unique)
 
-    with open(sys.argv[2], 'w') as output_file:
+    with open(sys.argv[2], "w") as output_file:
         for item in data_filtered_unique_sorted:
-            output_file.write(item+"\n")
+            output_file.write(item + "\n")
 
 
 if __name__ == "__main__":

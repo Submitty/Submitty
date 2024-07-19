@@ -2,7 +2,7 @@ import sys
 
 
 def read_words(words_file):
-    return [word for line in open(words_file, 'r') for word in line.split()]
+    return [word for line in open(words_file, "r") for word in line.split()]
 
 
 def main():
@@ -10,11 +10,11 @@ def main():
     data_filtered_unique = list(set(data_filtered))
 
     x = 0
-    with open(sys.argv[2], 'a') as output_file:
+    with open(sys.argv[2], "a") as output_file:
         for item in data_filtered_unique:
             x = (x + 1) % 4
             if not x == 0:
-                output_file.write(item+"\n")
+                output_file.write(item + "\n")
 
 
 if __name__ == "__main__":
