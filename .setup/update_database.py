@@ -3,7 +3,6 @@
 #
 # Run this file to upgrade all course databases from v.1.0.1 to v.1.0.2 (November 2017)
 #
-#!/usr/bin/env python3
 
 # Changes:
 #  v.1.0.2
@@ -15,7 +14,6 @@
 #    Switch component fields to allow floating point (not just integers)
 #
 
-from datetime import datetime
 import json
 import os
 import urllib.parse
@@ -284,7 +282,7 @@ for term in os.scandir(os.path.join(settings["submitty_data_dir"], "courses")):
             print("created directory:" + forum_dir)
         else:
             # Legacy fix for spaces in attachment file names for the forum
-            for root, dir_cur, files in os.walk(forum_dir):
+            for root, _dir_cur, files in os.walk(forum_dir):
                 for filename in files:
                     os.rename(
                         os.path.join(root, filename),

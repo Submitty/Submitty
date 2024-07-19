@@ -119,7 +119,7 @@ def main():
         del os.environ["PGPASSWORD"]
 
         psql_version = subprocess.check_output(
-            "psql -V | egrep -o '[0-9]{1,}\.[0-9]{1,}'", shell=True
+            "psql -V | egrep -o '[0-9]{1,}.[0-9]{1,}'", shell=True
         ).strip()
 
         try:

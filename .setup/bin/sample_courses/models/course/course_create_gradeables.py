@@ -12,13 +12,18 @@ import random
 import shutil
 import subprocess
 import os.path
-import random
 from tempfile import TemporaryDirectory
 from submitty_utils import dateutils
 
 from sqlalchemy import Table, select
 
-from sample_courses import *
+from sample_courses import (
+    SUBMITTY_INSTALL_DIR,
+    NO_SUBMISSIONS,
+    NOW,
+    SUBMITTY_DATA_DIR,
+    SUBMITTY_REPOSITORY,
+)
 from sample_courses.utils import mimic_checkout
 from sample_courses.utils.dependent import commit_submission_to_repo
 from sample_courses.utils.create_or_generate import (
@@ -622,8 +627,8 @@ class Course_create_gradeables:
                                     for mark in component.marks:
                                         if (
                                             random.random() < 0.5
-                                            and first_set == False
-                                            and first == False
+                                            and not first_set
+                                            and not first
                                         ) or random.random() < 0.2:
                                             self.conn.execute(
                                                 self.gradeable_component_mark_data.insert(),
@@ -746,7 +751,7 @@ class Course_create_gradeables:
             course_materials_table = Table(
                 "course_materials", self.metadata, autoload=True
             )
-            for dpath, dirs, files in os.walk(course_materials_source):
+            for dpath, _dirs, files in os.walk(course_materials_source):
                 inner_dir = os.path.relpath(dpath, course_materials_source)
                 if inner_dir != ".":
                     dir_to_make = os.path.join(course_materials_folder, inner_dir)

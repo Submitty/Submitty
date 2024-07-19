@@ -16,7 +16,6 @@ optional arguments:
   -h, --help  show this help message and exit
 """
 
-from argparse import ArgumentParser
 import os
 from pathlib import Path
 from subprocess import run
@@ -60,9 +59,6 @@ class FileHandler(FileSystemEventHandler):
 def main():
     if int(os.getuid()) != 0:
         raise SystemExit("ERROR: this script should be run as root")
-
-    parser = ArgumentParser(description="Watch a directory and install the code")
-    args = parser.parse_args()
 
     current_path = Path(__file__).resolve().parent
     setup_path = Path(current_path, "..").resolve()

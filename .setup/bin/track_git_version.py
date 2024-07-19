@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 
+import sys
 import os
 import json
 import subprocess
@@ -13,7 +14,7 @@ if __name__ == "__main__":
     try:
         with open(submitty_config, "r") as infile:
             config_dict = json.load(infile)
-    except:
+    except Exception:
         print("ERROR: could not locate submitty json")
         sys.exit(1)
 
@@ -36,7 +37,7 @@ if __name__ == "__main__":
                 current_commit_hash
             )
         )
-    except:
+    except Exception:
         print("ERROR: could not determine commit hash.")
         current_commit_hash = "unknown"
 
@@ -47,7 +48,7 @@ if __name__ == "__main__":
         )
         current_git_tag = current_git_tag.decode("ascii").strip()
         print("Tag {0} is the most recent git tag.".format(current_git_tag))
-    except:
+    except Exception:
         print("ERROR: could not determine current git tag.")
         current_git_tag = "unknown"
 
@@ -61,5 +62,5 @@ if __name__ == "__main__":
         # Update config/submitty.json to reflect the current commit hash.
         with open(json_dir, "w") as outfile:
             json.dump(output_dict, outfile, indent=2)
-    except:
+    except Exception:
         print("ERROR: could not write to {0}".format(json_dir))
