@@ -68,7 +68,21 @@
         </script>
         <input type="hidden" name="csrf_token" value="{{ csrf_token }}" />
     </div>
+    <hr>
+    {% include "course/CourseMaterialsCalendarMenu.twig" with {
+        "div_class": 'edit-cm-folder-cal-menu',
+        "gradeables" : gradeables,
+        "current_gradeable" : current_gradeable,
+    } only %}
     <script>
+            showMenu.addEventListener('change', function () {
+                var showMenu = document.getElementById('show-menu');
+                console.log('Showing On Calendar:', showMenu.value);
+            });
+                var showMenu = document.getElementById('show-menu');
+                console.log('ShowingING On Calendar:', showMenu.value);
+
+                if (showMenu == null) console.log("aw");
         function submitFolderEdit(fullUpdate){ // Submit button
             let sectionsEdit = [];
             let partialSections = [];

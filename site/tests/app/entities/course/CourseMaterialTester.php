@@ -22,6 +22,8 @@ class CourseMaterialTester extends BaseUnitTest {
             $details['hidden_from_students'],
             $details['priority'],
             null,
+            null,
+            false,
             null
         );
         $sections = ['1', '2'];
@@ -56,6 +58,8 @@ class CourseMaterialTester extends BaseUnitTest {
             $details['hidden_from_students'],
             $details['priority'],
             null,
+            null,
+            false,
             null
         );
         $this->assertEquals($details['type'], $course_material->getType());

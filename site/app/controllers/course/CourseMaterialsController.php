@@ -504,6 +504,8 @@ class CourseMaterialsController extends AbstractController {
                                     $course_material->isHiddenFromStudents(),
                                     $course_material->getPriority(),
                                     null,
+                                    null,
+                                    false,
                                     null
                                 );
                                 $this->core->getCourseEntityManager()->persist($course_material_dir);
@@ -564,6 +566,16 @@ class CourseMaterialsController extends AbstractController {
      */
     #[Route("/courses/{_semester}/{_course}/course_materials/upload", methods: ["POST"])]
     public function ajaxUploadCourseMaterialsFiles(): JsonResponse {
+        $on_calendar = false;
+        if (isset($_POST['calenderMenu'])) {
+            $on_calendar = $_POST['calenderMenu'];
+        }
+
+        $connected_gradeable = 'none';
+        if (isset($_POST['gradeableInputValue'])) {
+            $connected_gradeable = $_POST['gradeableInputValue'];
+        }
+
         $details = [];
         $expand_zip = "";
         if (isset($_POST['expand_zip'])) {
@@ -865,7 +877,9 @@ class CourseMaterialsController extends AbstractController {
                 $details['hidden_from_students'],
                 $details['priority'],
                 $value === CourseMaterial::LINK ? $url_url : null,
-                $value === CourseMaterial::LINK ? $title_name : null
+                $value === CourseMaterial::LINK ? $title_name : null,
+                $on_calendar,
+                $connected_gradeable
             );
             $this->core->getCourseEntityManager()->persist($course_material);
             if ($details['section_lock']) {

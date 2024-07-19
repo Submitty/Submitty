@@ -19,6 +19,7 @@ class CourseMaterialsView extends AbstractView {
         $this->core->getOutput()->addBreadcrumb("Course Materials");
         $this->core->getOutput()->enableMobileViewport();
         $this->core->getOutput()->addInternalJs("drag-and-drop.js");
+        $this->core->getOutput()->addInternalJs("course-materials.js");
 
         $base_course_material_path = FileUtils::joinPaths($this->core->getConfig()->getCoursePath(), 'uploads', 'course_materials');
         $directories = [];
@@ -159,6 +160,8 @@ class CourseMaterialsView extends AbstractView {
             "folder_ids" => $folder_ids,
             "links" => $links,
             "folder_paths" => $folder_paths,
+            "gradeables" => $this->core->getQueries()->getAllElectronicGradeablesIds(),
+            "current_gradeable" => null,
             "beginning_of_time_date" => $beginning_of_time_date
         ]);
     }
