@@ -27,7 +27,6 @@ import os
 import sys
 import argparse
 import json
-import traceback
 
 """
 This is the agreed upon name for the input data to the custom validator.

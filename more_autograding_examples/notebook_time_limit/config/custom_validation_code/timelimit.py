@@ -8,11 +8,8 @@
 import os
 import sys
 import json
-import traceback
-import re
-import tzlocal
 import math
-from datetime import datetime, timedelta
+from datetime import datetime
 
 
 def return_result(score, message, status):

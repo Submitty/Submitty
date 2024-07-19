@@ -1,5 +1,4 @@
 import sys
-import decimal
 
 
 def is_positive_float(num):
