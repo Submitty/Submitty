@@ -537,6 +537,14 @@ class RainbowCustomization extends AbstractModel {
         return !is_null($this->RCJSON) ? $this->RCJSON->getPlagiarism() : [];
     }
 
+    /**
+     * Get manual grades from json file if there are any
+     *
+     * @return array<object>  array of manual grades JSON object
+     */
+    public function getManualGrades(): array {
+        return $this->RCJSON?->getManualGrades() ?? [];
+    }
 
     // This function handles processing the incoming post data
     public function processForm() {
@@ -586,6 +594,12 @@ class RainbowCustomization extends AbstractModel {
         if (isset($form_json->plagiarism)) {
             foreach ($form_json->plagiarism as $plagiarism_single) {
                 $this->RCJSON->addPlagiarismEntry($plagiarism_single);
+            }
+        }
+
+        if (isset($form_json->manual_grade)) {
+            foreach ($form_json->manual_grade as $manual_grade) {
+                $this->RCJSON->addManualGradeEntry($manual_grade);
             }
         }
 
