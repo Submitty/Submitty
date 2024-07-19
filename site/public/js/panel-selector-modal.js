@@ -121,7 +121,6 @@ $(() => {
 
     tallLeftFourPanelCanvasCTX.fillRect(153, 20, 140, 58);
     tallLeftFourPanelCanvasCTX.fillRect(153, 82, 140, 58);
-
 });
 
 function togglePanelSelectorModal(show) {

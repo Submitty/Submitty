@@ -1,4 +1,3 @@
-
 describe('Test cases revolving around non bulk uploading', () => {
     ['ta', 'instructor'].forEach((user) => {
         it(`${user} should have grader submission options`, () => {
@@ -8,7 +7,6 @@ describe('Test cases revolving around non bulk uploading', () => {
             cy.get('#user_id').should('be.visible');
             cy.get('#submission-mode-warning > .warning').should('have.text', 'Warning: Submitting files for a student!');
         });
-
     });
 });
 
@@ -26,6 +24,5 @@ describe('Test cases revolving around bulk uploading', () => {
             cy.get('#num_pages').should('be.visible');
             cy.get('#submission-mode-warning > .warning').should('have.text', 'Warning: Submitting files for bulk upload!');
         });
-
     });
 });

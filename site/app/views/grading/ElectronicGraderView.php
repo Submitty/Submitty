@@ -63,6 +63,7 @@ class ElectronicGraderView extends AbstractView {
 
         $graded = 0;
         $non_late_graded = 0;
+        $verified = 0;
         $total = 0;
         $non_late_total = 0;
         $no_team_total = 0;
@@ -105,6 +106,7 @@ class ElectronicGraderView extends AbstractView {
                 continue;
             }
             $graded += $section['graded_components'];
+            $verified += $section['verified_components'];
             $total += $section['total_components'];
             $non_late_graded += $section['non_late_graded_components'];
             $non_late_total += $section['non_late_total_components'];
@@ -220,22 +222,28 @@ class ElectronicGraderView extends AbstractView {
                 $non_peer_components_count = count($gradeable->getNonPeerComponents());
                 $non_zero_non_peer_components_count = $non_peer_components_count != 0 ? $non_peer_components_count : 1;
                 $section['graded'] = round($section['graded_components'] / $non_zero_non_peer_components_count, 1);
+                $section['verified'] = round($section['verified_components'] / $non_zero_non_peer_components_count, 1);
                 $section['total'] = $section['total_components'];
                 $section['non_late_graded'] = round($section['non_late_graded_components'] / $non_zero_non_peer_components_count, 1);
+                $section['non_late_verified'] = round($section['non_late_verified_components'] / $non_zero_non_peer_components_count, 1);
                 $section['non_late_total'] = $section['non_late_total_components'];// / $non_zero_non_peer_components_count;
 
                 if ($section['total_components'] == 0) {
                     $section['percentage'] = 0;
+                    $section['verified_percentage'] = 0;
                 }
                 else {
                     $section['percentage'] = number_format(($section['graded'] / $section['total']) * 100, 1);
+                    $section['verified_percentage'] = number_format(($section['verified'] / $section['total']) * 100, 1);
                 }
 
                 if ($section['non_late_total'] == 0) {
                     $section['non_late_percentage'] = 0;
+                    $section['non_late_verified_percentage'] = 0;
                 }
                 else {
                     $section['non_late_percentage'] = number_format(($section['non_late_graded'] / $section['non_late_total']) * 100, 1);
+                    $section['non_late_verified_percentage'] = number_format(($section['non_late_verified'] / $section['non_late_total']) * 100, 1);
                 }
             }
                 unset($section); // Clean up reference
@@ -594,8 +602,6 @@ HTML;
             }
         }
 
-        // Generate late days
-        $this->core->getQueries()->generateLateDayCacheForUsers();
         //Convert rows into sections and prepare extra row info for things that
         // are too messy to calculate in the template.
         $sections = [];
@@ -1350,7 +1356,7 @@ HTML;
             }
 
             $posts_view .= <<<HTML
-                    <a href="{$this->core->buildCourseUrl(['forum', 'threads', $threadId])}" target="_blank" rel="noopener nofollow" class="btn btn-default btn-sm" style="margin-top:15px; text-decoration: none;" onClick=""> Go to thread</a>
+                    <a href="{$this->core->buildCourseUrl(['forum', 'threads', $threadId])}" target="_blank" rel="noopener nofollow" class="btn btn-default btn-sm" style="margin-top:15px; text-decoration: none;" onClick="" data-testid="go-to-thread"> Go to thread</a>
                     <hr style="border-top:1px solid #999;margin-bottom: 5px;" /> <br/>
 HTML;
         }
@@ -1586,6 +1592,7 @@ HTML;
         $has_active_version = $graded_gradeable->getAutoGradedGradeable()->hasActiveVersion();
         $has_submission = $graded_gradeable->getAutoGradedGradeable()->hasSubmission();
         $has_overridden_grades = $graded_gradeable->hasOverriddenGrades();
+        $show_clear_conflicts = $graded_gradeable->getTaGradedGradeable()->hasVersionConflict();
 
         $this->core->getOutput()->addVendorJs(FileUtils::joinPaths('twigjs', 'twig.min.js'));
         $this->core->getOutput()->addInternalJs('ta-grading-keymap.js');
@@ -1612,6 +1619,7 @@ HTML;
                 "has_active_version" => $has_active_version,
                 "version_conflict" => $version_conflict,
                 "show_silent_edit" => $show_silent_edit,
+                "show_clear_conflicts" => $show_clear_conflicts,
                 "student_grader" => $this->core->getUser()->getGroup() == User::GROUP_STUDENT,
                 "grader_id" => $this->core->getUser()->getId(),
                 "display_version" => $display_version,

@@ -23,6 +23,7 @@ use app\models\GradingOrder;
 use Symfony\Component\Routing\Annotation\Route;
 use app\models\notebook\SubmissionCodeBox;
 use app\models\notebook\SubmissionMultipleChoice;
+use app\models\gradeable\AutoGradedTestcase;
 
 class SubmissionController extends AbstractController {
     private $upload_details = [
@@ -359,7 +360,7 @@ class SubmissionController extends AbstractController {
             return $this->uploadResult("Invalid gradeable id '{$gradeable_id}'", false);
         }
 
-        $num_pages = $_POST['num_pages'];
+        $num_pages = rawurlencode($_POST['num_pages']);
 
         // making sure files have been uploaded
         if (!isset($_FILES["files1"])) {
@@ -485,7 +486,24 @@ class SubmissionController extends AbstractController {
                     "is_qr"     => false
                 ];
 
-                $bulk_upload_job  = "/var/local/submitty/daemon_job_queue/bulk_upload_" . $uploaded_file["name"][$i] . ".json";
+                $bulk_upload_job  = rawurlencode("/var/local/submitty/daemon_job_queue/bulk_upload_" . $uploaded_file["name"][$i] . ".json");
+
+                // exec() and similar functions are disabled by security policy,
+                // so we are using a python script via CGI to validate whether file is divisible by num_page or not.
+                $pdf_full_path = FileUtils::joinPaths($pdf_path, $job_data["timestamp"], $job_data["filename"]);
+                $ch = curl_init();
+                curl_setopt($ch, CURLOPT_URL, $this->core->getConfig()->getCgiUrl() . "pdf_page_check.cgi?pdf_path={$pdf_full_path}&num_page={$num_pages}&file_name={$job_data['filename']}");
+                curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+                $output = curl_exec($ch);
+                curl_close($ch);
+                $response = json_decode($output);
+
+                if (!$response->success) {
+                    if (!isset($response->error_message)) {
+                        return $this->core->getOutput()->renderJsonFail("Unknown error occurred.");
+                    }
+                    return $this->core->getOutput()->renderJsonFail($response->error_message);
+                }
 
                 //add new job to queue
                 if (!file_put_contents($bulk_upload_job, json_encode($job_data, JSON_PRETTY_PRINT))) {
@@ -1052,6 +1070,31 @@ class SubmissionController extends AbstractController {
 
         $graded_gradeable = $graded_gradeable->getAutoGradedGradeable();
 
+        $testcase_array = [];
+        if ($graded_gradeable->hasActiveVersion()) {
+            $gradeable_version = $graded_gradeable->getAutoGradedVersions()[$graded_gradeable->getActiveVersion()] ?? null;
+            if ($gradeable_version !== null) {
+                // Gets arrays, and cleans empty arrays
+                $testcase_array = array_filter(array_map(function (AutoGradedTestcase $testcase) {
+                    $testcase_config = $testcase->getTestcase();
+                    if ($testcase->canView()) {
+                        return [
+                            'name' => $testcase_config->getName(),
+                            'details' => $testcase_config->getDetails(),
+                            'is_extra_credit' => $testcase_config->isExtraCredit(),
+                            'points_available' => $testcase_config->getPoints(),
+                            'has_extra_results' => $testcase->hasAutochecks(),
+                            'points_received' => $testcase->getPoints(),
+                            'testcase_message' => $testcase_config->canViewTestcaseMessage() ? $testcase->getMessage() : ''
+                        ];
+                    }
+                    else {
+                        return [];
+                    }
+                }, $gradeable_version->getTestcases()));
+            }
+        }
+
         return JsonResponse::getSuccessResponse([
             'is_queued' => $graded_gradeable->isQueued(),
             'queue_position' => $graded_gradeable->getQueuePosition(),
@@ -1061,7 +1104,8 @@ class SubmissionController extends AbstractController {
             'has_active_version' => $graded_gradeable->hasActiveVersion(),
             'highest_version' => $graded_gradeable->getHighestVersion(),
             'total_points' => ($graded_gradeable->hasActiveVersion() ? $graded_gradeable->getTotalPoints() : null),
-            'total_percent' => ($graded_gradeable->hasActiveVersion() ? $graded_gradeable->getTotalPercent() : null)
+            'total_percent' => ($graded_gradeable->hasActiveVersion() ? $graded_gradeable->getTotalPercent() : null),
+            'test_cases' => $testcase_array
         ]);
     }
 
@@ -2082,9 +2126,7 @@ class SubmissionController extends AbstractController {
         return JsonResponse::getErrorResponse("Cannot find gradeable with given id!");
     }
 
-    /**
-     * @Route("/courses/{_semester}/{_course}/gradeable/{gradeable_id}/generate_repo", methods={"POST"})
-     */
+    #[Route("/courses/{_semester}/{_course}/gradeable/{gradeable_id}/generate_repo", methods: ["POST"])]
     public function generateRepo(string $gradeable_id): RedirectResponse {
         $g = $this->tryGetElectronicGradeable($gradeable_id);
 
@@ -2095,10 +2137,29 @@ class SubmissionController extends AbstractController {
             );
         }
 
+        if (!$g->isVcs()) {
+            $this->core->addErrorMessage("Gradeable is not VCS.");
+            return new RedirectResponse(
+                $this->core->buildCourseUrl(['gradeable', $gradeable_id])
+            );
+        }
+
+        $vcs_partial_path = $g->getVcsPartialPath();
+        $vcs_partial_path = str_replace('{$vcs_type}', $this->core->getConfig()->getVcsType(), $vcs_partial_path);
+        $vcs_partial_path = str_replace('{$gradeable_id}', $g->getId(), $vcs_partial_path);
+        $vcs_partial_path = str_replace('{$user_id}', $this->core->getUser()->getId(), $vcs_partial_path);
+        if ($g->isTeamAssignment()) {
+            $gg = $this->tryGetGradedGradeable($g, $this->core->getUser()->getId());
+            $vcs_partial_path = str_replace('{$team_id}', $gg->getSubmitter()->getId(), $vcs_partial_path);
+        }
+        $path_parts = explode('/', $vcs_partial_path);
+        array_pop($path_parts);
+
         AdminGradeableController::enqueueGenerateRepos(
             $this->core->getConfig()->getTerm(),
             $this->core->getConfig()->getCourse(),
-            $gradeable_id
+            implode('/', $path_parts),
+            $g->getVcsSubdirectory()
         );
 
         $this->core->addSuccessMessage("Repository creation requested.");
