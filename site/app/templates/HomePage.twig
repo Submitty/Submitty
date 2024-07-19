@@ -8,15 +8,14 @@
             {% set course_type_message = "" %}
             {% if course_type == "dropped_courses" %}
                 {% set course_type_message = "Recently Dropped " %}
-            {% elseif course_type == "self_register_courses" %}
+            {% elseif course_type == "self_registeration_courses" %}
                 {% set course_type_message = "Self Register " %}
             {% elseif course_type == "archived_courses" %}
                 {% set course_type_message = "Archived " %}
             {% endif %}
-            {{ course_type }}
             <h1>My {{ course_type_message }}Courses</h1>
             {% for rank in ranks %}
-                {% if course_type != "dropped_courses" %}
+                {% if course_type != "dropped_courses" and course_type != "self_registeration_courses" %}
                     <h2>As {{ rank.title }}</h2>
                 {% endif %}
                 {% set display_semester = '' %}

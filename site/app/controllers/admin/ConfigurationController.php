@@ -151,7 +151,6 @@ class ConfigurationController extends AbstractController {
                     'queue_enabled',
                     'seek_message_enabled',
                     'polls_enabled',
-                    "self_registration_allowed"
                 ]
             )
         ) {

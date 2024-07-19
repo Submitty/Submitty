@@ -12,7 +12,7 @@ def up(config, database):
     :param course: Code of course being migrated
     :type course: str
     """
-    database.execute("ALTER TABLE courses ADD COLUMN IF NOT EXISTS self_registration_allowed bool default false")
+    database.execute("ALTER TABLE courses ADD COLUMN IF NOT EXISTS self_registration_allowed smallint default 0")
 
 def down(config, database):
     """

@@ -5144,21 +5144,14 @@ SQL;
         return $this->submitty_db->rows();
     }
 
-    public function getSelfRegisterCourses(): array {
-//         $query = <<<SQL
-// SELECT t.name AS term_name, u.term, u.course, u.user_group, u.registration_section
-// FROM courses_users u
-// INNER JOIN courses c ON u.course=c.course AND u.term=c.term
-// INNER JOIN terms t ON u.term=t.term_id
-// WHERE c.self_registration_allowed=true and (u.registration_section IS NOT NULL OR u.user_group<>4)
-// ORDER BY u.user_group ASC, t.start_date DESC, u.course ASC
-// SQL;
-
+    public function getSelfRegisterCourses($user_id): array {
         $query = <<<SQL
-Select * from courses where self_registration_allowed=true
-UNION select t.name as  from courses_users where course = (select course from courses where self_registration_allowed=true)
+Select *, t.name as term_name from courses c, terms t where (c.self_registration_allowed=1 or c.self_registration_allowed=2) and c.course not in (
+    select course from courses_users where user_id = ?
+)
 SQL;
-        $this->submitty_db->query($query);
+        $this->submitty_db->query($query, [$user_id]);
+        $return = [];
         foreach ($this->submitty_db->rows() as $row) {
             $course = new Course($this->core, $row);
             $course->loadDisplayName();
