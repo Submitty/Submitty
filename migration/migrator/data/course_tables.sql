@@ -631,9 +631,11 @@ CREATE TABLE public.autograding_metrics (
     points integer NOT NULL,
     passed boolean NOT NULL,
     hidden boolean NOT NULL,
+    source_lines_of_code integer,
     CONSTRAINT elapsed_time_nonnegative CHECK ((elapsed_time >= (0)::double precision)),
     CONSTRAINT max_rss_size_nonnegative CHECK ((max_rss_size >= 0)),
-    CONSTRAINT metrics_user_team_id_check CHECK (((user_id IS NOT NULL) OR (team_id IS NOT NULL)))
+    CONSTRAINT metrics_user_team_id_check CHECK (((user_id IS NOT NULL) OR (team_id IS NOT NULL))),
+    CONSTRAINT sloc_non_negative CHECK ((source_lines_of_code >= 0))
 );
 
 
@@ -1500,7 +1502,8 @@ CREATE TABLE public.poll_options (
     poll_id integer,
     response text NOT NULL,
     correct boolean NOT NULL,
-    option_id integer NOT NULL
+    option_id integer NOT NULL,
+    author_id character varying(255) DEFAULT NULL::character varying
 );
 
 
@@ -1572,7 +1575,7 @@ CREATE TABLE public.polls (
     duration integer DEFAULT 0,
     end_time timestamp with time zone,
     is_visible boolean DEFAULT false NOT NULL,
-    status text
+    allows_custom boolean DEFAULT false NOT NULL
 );
 
 
@@ -3291,6 +3294,14 @@ ALTER TABLE ONLY public.peer_feedback
 
 ALTER TABLE ONLY public.peer_feedback
     ADD CONSTRAINT peer_feedback_user_id_fkey FOREIGN KEY (user_id) REFERENCES public.users(user_id) ON DELETE CASCADE;
+
+
+--
+-- Name: poll_options poll_options_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.poll_options
+    ADD CONSTRAINT poll_options_fkey FOREIGN KEY (author_id) REFERENCES public.users(user_id) ON UPDATE CASCADE;
 
 
 --

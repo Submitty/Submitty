@@ -1351,7 +1351,7 @@ function refreshOnResponseOverriddenGrades(json) {
     }
     else {
         json['data']['users'].forEach((elem) => {
-            const delete_button = `<a onclick="deleteOverriddenGrades('${elem['user_id']}', '${json['data']['gradeable_id']}');"><i class='fas fa-trash'></i></a>`;
+            const delete_button = `<a onclick="deleteOverriddenGrades('${elem['user_id']}', '${json['data']['gradeable_id']}');" data-testid="grade-override-delete"><i class='fas fa-trash'></i></a>`;
             const bits = [`<tr><td class="align-left">${elem['user_id']}`, elem['user_givenname'], elem['user_familyname'], elem['marks'], elem['comment'], `${delete_button}</td></tr>`];
             $('#grade-override-table').append(bits.join('</td><td class="align-left">'));
         });
@@ -2005,3 +2005,28 @@ function tzWarn() {
     }
 }
 document.addEventListener('DOMContentLoaded', tzWarn);
+
+/**
+ * Change the class of span.badge.<color>-background to span.badge.dark-<color>-background if html tag contains data-theme='dark' or data-black_mode='black'.
+ */
+function scorePillDark() {
+    const html_element = document.querySelector('html');
+    const badges = document.querySelectorAll('span.badge');
+    if (html_element.getAttribute('data-theme') === 'dark' || html_element.getAttribute('data-black_mode') === 'black') {
+        badges.forEach((badge) => {
+            if (badge.classList.contains('green-background')) {
+                badge.classList.remove('green-background');
+                badge.classList.add('dark-green-background');
+            }
+            else if (badge.classList.contains('yellow-background')) {
+                badge.classList.remove('yellow-background');
+                badge.classList.add('dark-yellow-background');
+            }
+            else if (badge.classList.contains('red-background')) {
+                badge.classList.remove('red-background');
+                badge.classList.add('dark-red-background');
+            }
+        });
+    }
+}
+document.addEventListener('DOMContentLoaded', scorePillDark);

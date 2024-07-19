@@ -47,6 +47,9 @@ def gen_script(machine_name, worker: false, base: false)
       if no_submissions
         setup_cmd += ' --no_submissions'
       end
+      if ON_CI
+        setup_cmd += ' --ci'
+      end
     end
   else
     setup_cmd += 'install_success_from_cloud.sh'
@@ -268,6 +271,15 @@ Vagrant.configure(2) do |config|
   end
 
   config.vm.provision :shell, :inline => " sudo timedatectl set-timezone America/New_York", run: "once"
+
+
+  # to use the command below, first install the vagrant plugin:
+  #
+  #   vagrant plugin install vagrant-timezone
+  #
+  if Vagrant.has_plugin?("vagrant-timezone")
+    config.timezone.value = "America/New_York"
+  end
 
   if ARGV.include?('ssh')
     config.ssh.username = 'root'
