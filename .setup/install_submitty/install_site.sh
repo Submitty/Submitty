@@ -381,9 +381,9 @@ chmod a+x ${NODE_FOLDER}/typescript/bin/tsc
 chmod a+x ${NODE_FOLDER}/vite/bin/vite.js
 chmod g+w "${SUBMITTY_INSTALL_DIR}/site/incremental_build"
 chmod -R u+w "${SUBMITTY_INSTALL_DIR}/site/incremental_build"
-chmod +w "${SUBMITTY_INSTALL_DIR}/site/vue3-frontend"
+chmod +w "${SUBMITTY_INSTALL_DIR}/site/vue"
 su - ${PHP_USER} -c "cd ${SUBMITTY_INSTALL_DIR}/site && npm run build"
-chmod -w "${SUBMITTY_INSTALL_DIR}/site/vue3-frontend"
+chmod -w "${SUBMITTY_INSTALL_DIR}/site/vue"
 chmod a-x ${NODE_FOLDER}/esbuild/bin/esbuild
 chmod a-x ${NODE_FOLDER}/typescript/bin/tsc
 chmod g-w "${SUBMITTY_INSTALL_DIR}/site/incremental_build"

@@ -106,7 +106,7 @@ module.exports = tseslint.config(
     },
     {
         name: 'Options for Vue files',
-        files: ['vue3-frontend/**/*.{js,ts,vue}'],
+        files: ['vue/**/*.{js,ts,vue}'],
         // @ts-expect-error vuelint doesnt have ts types yet
         extends: [...(vuelint.configs['flat/recommended']), ...tseslint.configs.recommendedTypeChecked],
         languageOptions: {
@@ -116,7 +116,7 @@ module.exports = tseslint.config(
                 parser: '@typescript-eslint/parser',
                 project: 'tsconfig.app.json',
                 extraFileExtensions: ['.vue'],
-                tsconfigRootDir: `${__dirname}/vue3-frontend`,
+                tsconfigRootDir: `${__dirname}/vue`,
             },
         },
         rules: {
