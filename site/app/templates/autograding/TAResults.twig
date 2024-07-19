@@ -10,7 +10,7 @@ $( document ).ready(function() {
         $("#ShowGradeInquiryButton").hide();
     }
     {% if not active_same_as_graded %}
-        $(".ta-results-box").css('background-color', '#d9534f')
+        $(".ta-results-box").css('background-color', 'var(--standard-light-red)')
     {% endif %}
 });
 </script>
@@ -34,11 +34,7 @@ $( document ).ready(function() {
                 <div class="box-title-total key_to_click" tabindex="0">
 
                     {{ Badge.render(ta_score, ta_max, false, active_same_as_graded) }}
-                    <h4>TA / Instructor Grading Total 
-                    {% if not active_same_as_graded %}
-                        For Version #{{ ta_graded_version }}
-                    {% endif %}
-                    </h4>
+                    <h4>TA / Instructor Grading Total</h4>
                 </div>
             </div>
             {# /TA/Instructor Manual total #}

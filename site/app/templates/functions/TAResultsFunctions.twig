@@ -13,6 +13,9 @@
                 {% if component.graders|length != 0 and not anonymous %}
                     <i>(Graded by: {{ component.graders|join(' / ') }})</i>
                 {% endif %}
+                {% if component.version_graded > 0 and not active_same_as_graded %}
+                    For Version #{{ component.version_graded }}
+                {% endif %}
             </h4>
             <div style="float:left;">
                 <p style="padding-bottom: 10px;">{{ component.student_comment|nl2br }}</p>
