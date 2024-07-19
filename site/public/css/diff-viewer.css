@@ -16,7 +16,15 @@
 }
 
 .diff-code .bad {
-    background-color: var(--alert-background-bronze);
+    background-color: #2e1b20;
+    /*background-color: #fceae9; Dark*/
+    /*color: #ffffff;*/
+}
+
+.diff-code .bad-expected {
+    background-color: #16261e;
+    /*background-color: #defae1; Dark*/
+    /*color: #ffffff;*/
 }
 
 .highlight-hover {
@@ -24,11 +32,15 @@
 }
 
 .highlight-char {
-    background-color: var(--focus-danger-red);
+    /*background-color: #fbc1c0; Dark*/
+    background-color: #7a3133;
+    font-weight: 900;
 }
 
-.highlight-char-success {
-    background-color: var(--good-green);
+.highlight-char-expected {
+    /*background-color: #b5eebb; Dark*/
+    background-color: #29562d;
+    font-weight: 900;
 }
 
 /* stylelint-disable-next-line selector-class-pattern */

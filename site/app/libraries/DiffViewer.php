@@ -556,7 +556,7 @@ class DiffViewer {
                 $num_blanks = $this->add[$type][-1];
                 $html .= "\t<div class='highlight' id='{$this->id}{$type}_{$this->link[$type][-1]}'>\n";
                 for ($k = 0; $k < $num_blanks; $k++) {
-                    $html .= "\t<div class='row bad'><div class='empty_line'>&nbsp;</div></div>\n";
+                    $html .= $type === "expected" ? "\t<div class='row bad-expected'><div class='empty_line'>&nbsp;</div></div>\n" : "\t<div class='row bad'><div class='empty_line'>&nbsp;</div></div>\n";
                 }
                 $html .= "\t</div>\n";
             }
@@ -578,7 +578,7 @@ class DiffViewer {
                 $html .= "\t<div class='highlight' id='{$this->id}{$type}_{$this->link[$type][$start]}'>\n";
             }
             if (isset($this->diff[$type][$i])) {
-                $html .= "\t<div class='bad'>";
+                $html .= $type === "expected" ? "\t<div class='bad-expected'>" : "\t<div class='bad'>";
             }
             else {
                 $html .= "\t<div>";
@@ -601,19 +601,19 @@ class DiffViewer {
                     $test2 = str_replace("\0", "null", $html_orig_error);
                     if ($option == self::SPECIAL_CHARS_ORIGINAL) {
                         $html .= $html_orig;
-                        $html .= $type === "expected" ? "<span class='highlight-char-success'>" . $html_orig_error . "</span>" :  "<span class='highlight-char'>" . $html_orig_error . "</span>";
+                        $html .= $type === "expected" ? "<span class='highlight-char-expected'>" . $html_orig_error . "</span>" :  "<span class='highlight-char'>" . $html_orig_error . "</span>";
                     }
                     elseif ($option == self::SPECIAL_CHARS_UNICODE) {
                         $html_no_empty = $this->replaceEmptyChar($html_orig, false);
                         $html_no_empty_error = $this->replaceEmptyChar($html_orig_error, false);
                         $html .= $html_no_empty;
-                        $html .= $type === "expected" ? "<span class='highlight-char-success'>" . $html_no_empty_error . "</span>" : "<span class='highlight-char'>" . $html_no_empty_error . "</span>";
+                        $html .= $type === "expected" ? "<span class='highlight-char-expected'>" . $html_no_empty_error . "</span>" : "<span class='highlight-char'>" . $html_no_empty_error . "</span>";
                     }
                     elseif ($option == self::SPECIAL_CHARS_ESCAPE) {
                         $html_no_empty = $this->replaceEmptyChar($html_orig, true);
                         $html_no_empty_error = $this->replaceEmptyChar($html_orig_error, true);
                         $html .= $html_no_empty;
-                        $html .= $type === "expected" ? "<span class='highlight-char-success'>" . $html_no_empty_error . "</span>" : "<span class='highlight-char'>" . $html_no_empty_error . "</span>";
+                        $html .= $type === "expected" ? "<span class='highlight-char-expected'>" . $html_no_empty_error . "</span>" : "<span class='highlight-char'>" . $html_no_empty_error . "</span>";
                     }
                     $current = $diff[1] + 1;
                 }
@@ -653,7 +653,7 @@ class DiffViewer {
                     $html .= "\t<div class='highlight' id='{$this->id}{$type}_{$this->link[$type][$i]}'>\n";
                 }
                 for ($k = 0; $k < $this->add[$type][$i]; $k++) {
-                    $html .= "\t<div class='bad'><td class='empty_line' colspan='2'>&nbsp;</td></div>\n";
+                    $html .= $type === "expected" ? "\t<div class='bad-expected'><td class='empty_line' colspan='2'>&nbsp;</td></div>\n" : "\t<div class='bad'><td class='empty_line' colspan='2'>&nbsp;</td></div>\n";
                 }
                 if ($start === null) {
                     $html .= "\t</div>\n";
