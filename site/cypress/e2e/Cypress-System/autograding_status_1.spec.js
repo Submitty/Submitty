@@ -27,7 +27,6 @@ skipOn(Cypress.env('run_area') === 'CI', () => {
             // Check that the table is gaining new entries
             cy.wait(7500);
             cy.get('#autograding-status-table tbody tr').eq(1).should('exist');
-
         });
         // FIXME
         it('Should show newly added autograding jobs', () => {
@@ -87,7 +86,6 @@ skipOn(Cypress.env('run_area') === 'CI', () => {
             // cy.get('#autograding-status-table tbody tr td').eq(8).then(element => cy.get(element).should('contain', ''));
             // cy.get('#autograding-status-table tbody tr td').eq(9).then(element => cy.get(element).should('contain', ''));
             // cy.get('#autograding-status-table tbody tr td').eq(10).then(element => cy.get(element).should('contain', '102'));
-
         });
 
         it('should only allow instructor level users', () => {

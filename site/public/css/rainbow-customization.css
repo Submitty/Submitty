@@ -213,6 +213,24 @@ hr {
     align-items: center;
 }
 
+.input-boxes {
+    display: inline-grid;
+    grid-template-columns: auto auto; /* two columns */
+    grid-gap: 0 0.2em;
+}
+
+.input-label {
+    padding: 4px 6px;
+}
+
+#manual-grading-note {
+    width: 32.5em;
+}
+
+#manual-grading-table {
+    text-align: left;
+}
+
 #gradeables .gradeable-custom-item-input {
     width: 3em;
 }

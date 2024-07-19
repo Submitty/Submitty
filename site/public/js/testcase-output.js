@@ -9,7 +9,6 @@ const expand_all_toggle_div_name = '#tc_expand_all';
 // String containing the name of the div for collapse all toggle
 const collapse_all_toggle_div_name = '#tc_collapse_all';
 
-
 /**
  * Collapses test case output. If all test cases have been collapsed,
  * enables "Expand All Test Cases" toggle and disables "Collapse All Test Cases" toggle.
@@ -168,7 +167,7 @@ function loadTestCaseOutput(div_name, gradeable_id, who_id, index, num_test_case
         loading_test_cases_xml_http_requests.set(orig_div_name, $.getJSON({
             url: url,
             async: true,
-            success: function(response) {
+            success: function (response) {
                 if (response.status !== 'success') {
                     alert(`Error getting file diff: ${response.message}`);
                     return;
@@ -186,7 +185,7 @@ function loadTestCaseOutput(div_name, gradeable_id, who_id, index, num_test_case
                 // eslint-disable-next-line no-undef
                 enableKeyToClick();
             },
-            error: function(e) {
+            error: function (e) {
                 // Check if error was occurred by candelling a test case
                 if (loading_test_cases_xml_http_requests.has(orig_div_name) && loading_test_cases_xml_http_requests.get(orig_div_name).readyState === 0) {
                     loading_test_cases_xml_http_requests.delete(orig_div_name);

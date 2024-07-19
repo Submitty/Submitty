@@ -35,7 +35,7 @@ class MultipleChoiceWidget extends Widget {
 
         this.state.choices = [];
         for (let i = 0; i < values.length; i++) {
-            this.state.choices.push({value: values[i].value, description: descriptions[i].value});
+            this.state.choices.push({ value: values[i].value, description: descriptions[i].value });
         }
 
         // Others
@@ -80,7 +80,7 @@ class MultipleChoiceWidget extends Widget {
             insertOption('', '');
         }
         else {
-            this.state.choices.forEach(option_json => {
+            this.state.choices.forEach((option_json) => {
                 insertOption(option_json.value, option_json.description);
             });
         }
