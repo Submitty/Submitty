@@ -2,6 +2,7 @@
 None of the functions should be imported here directly, but from
 the class Course
 """
+
 import os
 import json
 import random

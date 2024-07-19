@@ -17,7 +17,7 @@ import tempfile
 
 from ruamel.yaml import YAML
 
-yaml = YAML(typ='safe')
+yaml = YAML(typ="safe")
 
 CURRENT_PATH = os.path.dirname(os.path.realpath(__file__))
 SETUP_DATA_PATH = os.path.join(CURRENT_PATH, "..", "data")
@@ -51,7 +51,7 @@ def remove_lines(filename, lines):
     if not isinstance(lines, list) or not lines:
         return
     stat = os.stat(filename)
-    with tempfile.NamedTemporaryFile(mode='w', delete=False) as tmp_file:
+    with tempfile.NamedTemporaryFile(mode="w", delete=False) as tmp_file:
         with open(filename, "r") as read_file:
             for line in read_file:
                 if line.strip() in lines:
@@ -101,26 +101,32 @@ def main():
     remove_file("/etc/motd")
 
     # Scrub out the network interfaces that were created for Vagrant
-    #subprocess.call(["ifdown", "enp0s8", "enp0s8:1", "enp0s8:2"])
-    #remove_file("/etc/network/interfaces.d/enp0s8.cfg")
+    # subprocess.call(["ifdown", "enp0s8", "enp0s8:1", "enp0s8:2"])
+    # remove_file("/etc/network/interfaces.d/enp0s8.cfg")
 
     # Remove the data directories for submitty
-    shutil.rmtree('/usr/local/submitty/.setup', True)
-    shutil.rmtree('/var/local/submitty', True)
+    shutil.rmtree("/usr/local/submitty/.setup", True)
+    shutil.rmtree("/var/local/submitty", True)
 
     # If we have psql cmd available, then PostgreSQL is installed so we should scrub out any
     # submitty DBs
-    if cmd_exists('psql'):
-        os.environ['PGPASSWORD'] = 'submitty_dbuser'
-        os.system("psql -h localhost -U submitty_dbuser --list | grep submitty_* | awk '{print $1}' | "
-                  "xargs -I \"@@\" dropdb -h localhost -U submitty_dbuser \"@@\"")
-        del os.environ['PGPASSWORD']
+    if cmd_exists("psql"):
+        os.environ["PGPASSWORD"] = "submitty_dbuser"
+        os.system(
+            "psql -h localhost -U submitty_dbuser --list | grep submitty_* | awk '{print $1}' | "
+            'xargs -I "@@" dropdb -h localhost -U submitty_dbuser "@@"'
+        )
+        del os.environ["PGPASSWORD"]
 
-        psql_version = subprocess.check_output("psql -V | egrep -o '[0-9]{1,}\.[0-9]{1,}'",
-                                               shell=True).strip()
+        psql_version = subprocess.check_output(
+            "psql -V | egrep -o '[0-9]{1,}\.[0-9]{1,}'", shell=True
+        ).strip()
 
         try:
-            shutil.move('/etc/postgresql/' + str(psql_version) + '/main/pg_hba.conf.backup', '/etc/postgresql/' + str(psql_version) + '/main/pg_hba.conf')
+            shutil.move(
+                "/etc/postgresql/" + str(psql_version) + "/main/pg_hba.conf.backup",
+                "/etc/postgresql/" + str(psql_version) + "/main/pg_hba.conf",
+            )
         except FileNotFoundError:
             pass
 
@@ -129,11 +135,11 @@ def main():
         os.system("userdel untrusted" + j)
 
     auths = ["#%PAM-1.0", "auth required pam_unix.so", "account required pam_unix.so"]
-    remove_lines('/etc/pam.d/httpd', auths)
+    remove_lines("/etc/pam.d/httpd", auths)
 
     # Scrub some stuff from apache
-    shutil.rmtree('/etc/apache2/ssl', True)
-    remove_file('/etc/apache2/suexec/www-data')
+    shutil.rmtree("/etc/apache2/ssl", True)
+    remove_file("/etc/apache2/suexec/www-data")
 
     for folder in ["/etc/apache2/sites-enabled", "/etc/apache2/sites-available"]:
         if os.path.isdir(folder):
@@ -143,27 +149,28 @@ def main():
                 file_path = os.path.join(folder, the_file)
                 remove_file(file_path)
 
-    #remove_lines('/etc/apache2/apache2.conf', ["ServerName 10.0.2.15"])
+    # remove_lines('/etc/apache2/apache2.conf', ["ServerName 10.0.2.15"])
 
-    shutil.rmtree('/root/bin', True)
+    shutil.rmtree("/root/bin", True)
 
     for user_file in glob.iglob(os.path.join(SETUP_DATA_PATH, "users", "*.yml")):
         user = load_data_yaml(user_file)
-        delete_user(user['user_id'])
+        delete_user(user["user_id"])
 
-    os.system('pkill -u submitty_daemon')
+    os.system("pkill -u submitty_daemon")
     for user in ["submitty_cgi", "submitty_php", "submitty_daemon"]:
         delete_user(user)
 
     groups = ["submitty_daemonphp", "submitty_course_builders"]
     for course_file in glob.iglob(os.path.join(SETUP_DATA_PATH, "courses", "*.yml")):
         course = load_data_yaml(course_file)
-        groups.append(course['code'])
-        groups.append(course['code'] + "_archive")
-        groups.append(course['code'] + "_tas_www")
+        groups.append(course["code"])
+        groups.append(course["code"] + "_archive")
+        groups.append(course["code"] + "_tas_www")
 
     for group in groups:
-        os.system('groupdel ' + group)
+        os.system("groupdel " + group)
 
-if __name__ == '__main__':
+
+if __name__ == "__main__":
     main()

@@ -2,6 +2,7 @@
 None of the functions should be imported here directly, but from
 the class Course
 """
+
 import hashlib
 import random
 import os
@@ -209,9 +210,9 @@ class Course_generate_utils:
             gradeables_json_output["display_benchmark"].append(
                 "lowest_" + benchmarks[i]
             )
-            gradeables_json_output["benchmark_percent"][
-                "lowest_" + benchmarks[i]
-            ] = 0.9 - (0.1 * i)
+            gradeables_json_output["benchmark_percent"]["lowest_" + benchmarks[i]] = (
+                0.9 - (0.1 * i)
+            )
 
         gradeables_json_output["section"] = section_ta_mapping
         messages = [

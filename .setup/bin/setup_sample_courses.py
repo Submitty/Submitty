@@ -39,18 +39,19 @@ import random
 from sqlalchemy import create_engine, Table, MetaData
 
 from sample_courses import (
-    args, SUBMITTY_INSTALL_DIR,
-    DB_HOST, DB_PORT,
-    DB_USER, DB_PASS,
-    NOW, NO_GRADING,
+    args,
+    SUBMITTY_INSTALL_DIR,
+    DB_HOST,
+    DB_PORT,
+    DB_USER,
+    DB_PASS,
+    NOW,
+    NO_GRADING,
     TEST_ONLY_GRADING,
-    SUBMITTY_DATA_DIR
+    SUBMITTY_DATA_DIR,
 )
 
-from sample_courses.utils import (
-    load_data_yaml,
-    get_php_db_password
-)
+from sample_courses.utils import load_data_yaml, get_php_db_password
 from sample_courses.models import generate_random_users
 from sample_courses.utils.create_or_generate import create_group
 
@@ -80,25 +81,31 @@ def main() -> None:
 
     courses: dict = {}  # dict[str, Course]
     users: dict = {}  # dict[str, User]
-    for course_file in sorted(glob.iglob(os.path.join(args.courses_path, '*.yml'))):
+    for course_file in sorted(glob.iglob(os.path.join(args.courses_path, "*.yml"))):
         # only create the plagiarism course if we have a local LichenTestData repo
         if os.path.basename(course_file) == "plagiarism.yml" and not os.path.isdir(
-                os.path.join(SUBMITTY_INSTALL_DIR, "GIT_CHECKOUT", "LichenTestData")):
+            os.path.join(SUBMITTY_INSTALL_DIR, "GIT_CHECKOUT", "LichenTestData")
+        ):
             continue
 
         course_json = load_data_yaml(course_file)
 
-        if len(use_courses) == 0 or course_json['code'] in use_courses:
+        if len(use_courses) == 0 or course_json["code"] in use_courses:
             course = Course(course_json)
             courses[course.code] = course
 
     create_group("submitty_course_builders")
 
-    for user_file in sorted(glob.iglob(os.path.join(args.users_path, '*.yml'))):
+    for user_file in sorted(glob.iglob(os.path.join(args.users_path, "*.yml"))):
         user = User(load_data_yaml(user_file))
-        if user.id in ['submitty_php', 'submitty_daemon', 'submitty_cgi',
-                       'submitty_dbuser', 'vagrant', 'postgres'] or \
-                user.id.startswith("untrusted"):
+        if user.id in [
+            "submitty_php",
+            "submitty_daemon",
+            "submitty_cgi",
+            "submitty_dbuser",
+            "vagrant",
+            "postgres",
+        ] or user.id.startswith("untrusted"):
 
             continue
         user.create()
@@ -119,44 +126,55 @@ def main() -> None:
     extra_students = 0
     for course_id in sorted(courses.keys()):
         course = courses[course_id]
-        tmp = course.registered_students + course.unregistered_students + \
-            course.no_rotating_students + course.no_registration_students
+        tmp = (
+            course.registered_students
+            + course.unregistered_students
+            + course.no_rotating_students
+            + course.no_registration_students
+        )
 
         extra_students = max(tmp, extra_students)
     extra_students = generate_random_users(extra_students, users)
 
-    submitty_engine = create_engine("postgresql:///submitty?host={}&port={}&user={}&password={}"
-                                    .format(DB_HOST, DB_PORT, DB_USER, DB_PASS))
+    submitty_engine = create_engine(
+        "postgresql:///submitty?host={}&port={}&user={}&password={}".format(
+            DB_HOST, DB_PORT, DB_USER, DB_PASS
+        )
+    )
     submitty_conn = submitty_engine.connect()
     submitty_metadata = MetaData(bind=submitty_engine)
-    user_table = Table('users', submitty_metadata, autoload=True)
+    user_table = Table("users", submitty_metadata, autoload=True)
     for user_id in sorted(users.keys()):
         user = users[user_id]
-        submitty_conn.execute(user_table.insert(),
-                              user_id=user.id,
-                              user_numeric_id=user.numeric_id,
-                              user_password=get_php_db_password(user.password),
-                              user_givenname=user.givenname,
-                              user_preferred_givenname=user.preferred_givenname,
-                              user_familyname=user.familyname,
-                              user_preferred_familyname=user.preferred_familyname,
-                              user_email=user.email,
-                              user_access_level=user.access_level,
-                              user_pronouns=user.pronouns,
-                              last_updated=NOW.strftime("%Y-%m-%d %H:%M:%S%z"))
+        submitty_conn.execute(
+            user_table.insert(),
+            user_id=user.id,
+            user_numeric_id=user.numeric_id,
+            user_password=get_php_db_password(user.password),
+            user_givenname=user.givenname,
+            user_preferred_givenname=user.preferred_givenname,
+            user_familyname=user.familyname,
+            user_preferred_familyname=user.preferred_familyname,
+            user_email=user.email,
+            user_access_level=user.access_level,
+            user_pronouns=user.pronouns,
+            last_updated=NOW.strftime("%Y-%m-%d %H:%M:%S%z"),
+        )
 
     for user in extra_students:
-        submitty_conn.execute(user_table.insert(),
-                              user_id=user.id,
-                              user_numeric_id=user.numeric_id,
-                              user_password=get_php_db_password(user.password),
-                              user_givenname=user.givenname,
-                              user_preferred_givenname=user.preferred_givenname,
-                              user_familyname=user.familyname,
-                              user_preferred_familyname=user.preferred_familyname,
-                              user_email=user.email,
-                              user_pronouns=user.pronouns,
-                              last_updated=NOW.strftime("%Y-%m-%d %H:%M:%S%z"))
+        submitty_conn.execute(
+            user_table.insert(),
+            user_id=user.id,
+            user_numeric_id=user.numeric_id,
+            user_password=get_php_db_password(user.password),
+            user_givenname=user.givenname,
+            user_preferred_givenname=user.preferred_givenname,
+            user_familyname=user.familyname,
+            user_preferred_familyname=user.preferred_familyname,
+            user_email=user.email,
+            user_pronouns=user.pronouns,
+            last_updated=NOW.strftime("%Y-%m-%d %H:%M:%S%z"),
+        )
 
     # INSERT term into terms table, based on today's date.
     today = datetime.today()
@@ -173,45 +191,59 @@ def main() -> None:
         term_end = "12/23/" + year
 
     terms_table = Table("terms", submitty_metadata, autoload=True)
-    submitty_conn.execute(terms_table.insert(),
-                          term_id=term_id,
-                          name=term_name,
-                          start_date=term_start,
-                          end_date=term_end)
+    submitty_conn.execute(
+        terms_table.insert(),
+        term_id=term_id,
+        name=term_name,
+        start_date=term_start,
+        end_date=term_end,
+    )
 
     submitty_conn.close()
 
     for course_id in sorted(courses.keys()):
         course = courses[course_id]
-        total_students = course.registered_students + course.no_registration_students + \
-            course.no_rotating_students + course.unregistered_students
+        total_students = (
+            course.registered_students
+            + course.no_registration_students
+            + course.no_rotating_students
+            + course.unregistered_students
+        )
         students = extra_students[:total_students]
         key = 0
         for i in range(course.registered_students):
             reg_section = (i % course.registration_sections) + 1
             rot_section = (i % course.rotating_sections) + 1
-            students[key].courses[course.code] = {"registration_section": reg_section,
-                                                  "rotating_section": rot_section}
+            students[key].courses[course.code] = {
+                "registration_section": reg_section,
+                "rotating_section": rot_section,
+            }
             course.users.append(students[key])
             key += 1
 
         for i in range(course.no_rotating_students):
             reg_section = (i % course.registration_sections) + 1
-            students[key].courses[course.code] = {"registration_section": reg_section,
-                                                  "rotating_section": None}
+            students[key].courses[course.code] = {
+                "registration_section": reg_section,
+                "rotating_section": None,
+            }
             course.users.append(students[key])
             key += 1
 
         for i in range(course.no_registration_students):
             rot_section = (i % course.rotating_sections) + 1
-            students[key].courses[course.code] = {"registration_section": None,
-                                                  "rotating_section": rot_section}
+            students[key].courses[course.code] = {
+                "registration_section": None,
+                "rotating_section": rot_section,
+            }
             course.users.append(students[key])
             key += 1
 
         for _ in range(course.unregistered_students):
-            students[key].courses[course.code] = {"registration_section": None,
-                                                  "rotating_section": None}
+            students[key].courses[course.code] = {
+                "registration_section": None,
+                "rotating_section": None,
+            }
             course.users.append(students[key])
             key += 1
 
@@ -235,7 +267,9 @@ def main() -> None:
         regrade_extras = "*/testing/"
     if (not NO_GRADING) or TEST_ONLY_GRADING:
         # queue up all of the newly created submissions to grade!
-        os.system(f"{SUBMITTY_INSTALL_DIR}/bin/regrade.py --no_input {SUBMITTY_DATA_DIR}/courses/{regrade_extras}")
+        os.system(
+            f"{SUBMITTY_INSTALL_DIR}/bin/regrade.py --no_input {SUBMITTY_DATA_DIR}/courses/{regrade_extras}"
+        )
 
 
 if __name__ == "__main__":

@@ -1,6 +1,7 @@
 """
 Contains the Mark class and User class
 """
+
 from pathlib import Path
 import random
 import os

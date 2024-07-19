@@ -27,15 +27,17 @@ from watchdog.events import FileSystemEventHandler
 
 
 class FileHandler(FileSystemEventHandler):
-    def __init__(self, setup_path, helper='site'):
+    def __init__(self, setup_path, helper="site"):
         super(FileSystemEventHandler, self).__init__()
         self.setup_path = setup_path
         self.helper = helper
 
     def run_installer(self, event):
-        print('Running INSTALL_SUBMITTY_HELPER_{}.sh'.format(self.helper.upper()))
-        installer = Path(self.setup_path, 'INSTALL_SUBMITTY_HELPER_{}.sh'.format(self.helper.upper()))
-        if event.src_path.endswith('.swp') or event.src_path == '.DS_Store':
+        print("Running INSTALL_SUBMITTY_HELPER_{}.sh".format(self.helper.upper()))
+        installer = Path(
+            self.setup_path, "INSTALL_SUBMITTY_HELPER_{}.sh".format(self.helper.upper())
+        )
+        if event.src_path.endswith(".swp") or event.src_path == ".DS_Store":
             return
         run(["bash", str(installer)], stdout=sys.stdout, stderr=sys.stderr)
         print("DONE\n")
@@ -59,17 +61,19 @@ def main():
     if int(os.getuid()) != 0:
         raise SystemExit("ERROR: this script should be run as root")
 
-    parser = ArgumentParser(description='Watch a directory and install the code')
+    parser = ArgumentParser(description="Watch a directory and install the code")
     args = parser.parse_args()
 
     current_path = Path(__file__).resolve().parent
-    setup_path = Path(current_path, '..').resolve()
-    git_path = Path(current_path, '..', '..').resolve()
+    setup_path = Path(current_path, "..").resolve()
+    git_path = Path(current_path, "..", "..").resolve()
 
     observer = Observer()
-    observer.schedule(FileHandler(setup_path, 'site'), str(Path(git_path, 'site')), True)
-    observer.schedule(FileHandler(setup_path, 'bin'), str(Path(git_path, 'bin')), True)
-    observer.schedule(FileHandler(setup_path, 'bin'), str(Path(git_path, 'sbin')), True)
+    observer.schedule(
+        FileHandler(setup_path, "site"), str(Path(git_path, "site")), True
+    )
+    observer.schedule(FileHandler(setup_path, "bin"), str(Path(git_path, "bin")), True)
+    observer.schedule(FileHandler(setup_path, "bin"), str(Path(git_path, "sbin")), True)
 
     observer.start()
     try:

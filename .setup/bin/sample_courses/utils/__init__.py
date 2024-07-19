@@ -17,7 +17,7 @@ from sample_courses import SUBMITTY_DATA_DIR, SETUP_DATA_PATH, yaml
 
 def get_random_text_from_file(filename):
     line: str = ""
-    with open(os.path.join(SETUP_DATA_PATH, 'random', filename)) as comment:
+    with open(os.path.join(SETUP_DATA_PATH, "random", filename)) as comment:
         line = next(comment)
         for num, alternate_line in enumerate(comment):
             if random.randrange(num + 2):
@@ -63,9 +63,11 @@ def get_php_db_password(password):
     """
     proc = subprocess.Popen(
         ["php", "-r", f"print(password_hash('{password}', PASSWORD_DEFAULT));"],
-        stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+        stdout=subprocess.PIPE,
+        stderr=subprocess.PIPE,
+    )
     (out, err) = proc.communicate()
-    return out.decode('utf-8')
+    return out.decode("utf-8")
 
 
 def get_current_semester():
@@ -84,13 +86,15 @@ def get_current_semester():
 
 
 def mimic_checkout(repo_path, checkout_path, vcs_subdirectory):
-    os.system(f"su -c 'git clone {SUBMITTY_DATA_DIR}/vcs/git/{repo_path} {checkout_path}/tmp -b main' submitty_daemon")
-    if vcs_subdirectory != '':
-        if vcs_subdirectory[0] == '/':
+    os.system(
+        f"su -c 'git clone {SUBMITTY_DATA_DIR}/vcs/git/{repo_path} {checkout_path}/tmp -b main' submitty_daemon"
+    )
+    if vcs_subdirectory != "":
+        if vcs_subdirectory[0] == "/":
             vcs_subdirectory = vcs_subdirectory[1:]
-        file_path = os.path.join(f'{checkout_path}/tmp', vcs_subdirectory)
+        file_path = os.path.join(f"{checkout_path}/tmp", vcs_subdirectory)
     else:
-        file_path = os.path.join(f'{checkout_path}/tmp')
+        file_path = os.path.join(f"{checkout_path}/tmp")
 
-    shutil.copytree(file_path, f'{checkout_path}', dirs_exist_ok=True)
-    shutil.rmtree(f'{checkout_path}/tmp')
+    shutil.copytree(file_path, f"{checkout_path}", dirs_exist_ok=True)
+    shutil.rmtree(f"{checkout_path}/tmp")

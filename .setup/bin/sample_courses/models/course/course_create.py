@@ -2,6 +2,7 @@
 None of the functions should be imported here directly, but from
 the class Course
 """
+
 from __future__ import print_function, division
 import hashlib
 import json

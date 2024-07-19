@@ -19,7 +19,7 @@ import subprocess
 
 from ruamel.yaml import YAML
 
-yaml = YAML(typ='safe')
+yaml = YAML(typ="safe")
 
 CURRENT_PATH = Path(__file__).resolve().parent
 SETUP_DATA_PATH = Path(CURRENT_PATH, "..", "data").resolve()
@@ -53,8 +53,8 @@ def delete_user(user_id):
     try:
         pwd.getpwnam(user_id)
         os.system("userdel " + user_id)
-        if Path('/home', user_id).is_dir():
-            shutil.rmtree(str(Path('/home', user_id)))
+        if Path("/home", user_id).is_dir():
+            shutil.rmtree(str(Path("/home", user_id)))
         return True
     except KeyError:
         pass
@@ -71,33 +71,45 @@ def cmd_exists(cmd):
 def parse_args():
     """Generate arguments for the CLI"""
     parser = argparse.ArgumentParser(description="")
-    parser.add_argument("--force", action="store_true",
-                        help="Run this script skipping the 'are you sure' prompts. These are also "
-                             "bypassed if .vagrant folder is detected.")
-    parser.add_argument("--users_path", default=str(SETUP_DATA_PATH / "users"),
-                        help="Path to folder that contains .yml files to use for user creation. "
-                             "Defaults to ../data/users")
-    parser.add_argument("--courses_path", default=str(SETUP_DATA_PATH / "courses"),
-                        help="Path to the folder that contains .yml files to use for course "
-                             "creation. Defaults to ../data/courses")
+    parser.add_argument(
+        "--force",
+        action="store_true",
+        help="Run this script skipping the 'are you sure' prompts. These are also "
+        "bypassed if .vagrant folder is detected.",
+    )
+    parser.add_argument(
+        "--users_path",
+        default=str(SETUP_DATA_PATH / "users"),
+        help="Path to folder that contains .yml files to use for user creation. "
+        "Defaults to ../data/users",
+    )
+    parser.add_argument(
+        "--courses_path",
+        default=str(SETUP_DATA_PATH / "courses"),
+        help="Path to the folder that contains .yml files to use for course "
+        "creation. Defaults to ../data/courses",
+    )
     return parser.parse_args()
 
 
 def main():
     """Primary function"""
-    if not cmd_exists('psql'):
-        raise SystemExit('Postgresql must be installed for this script to run!')
+    if not cmd_exists("psql"):
+        raise SystemExit("Postgresql must be installed for this script to run!")
 
     args = parse_args()
-    if not Path(CURRENT_PATH, '..', '..', '.vagrant').is_dir() and not args.force:
+    if not Path(CURRENT_PATH, "..", "..", ".vagrant").is_dir() and not args.force:
         inp = input("Do you really want to reset the system? There's no undo! [y/n]")
         if inp.lower() not in ["yes", "y"]:
             raise SystemExit("Aborting...")
 
-    services = subprocess.check_output(
-        ["systemctl", "list-units", "--type=service"],
-        universal_newlines=True
-    ).strip().split("\n")
+    services = (
+        subprocess.check_output(
+            ["systemctl", "list-units", "--type=service"], universal_newlines=True
+        )
+        .strip()
+        .split("\n")
+    )
     running_services = []
     for service in services:
         service = service[2:].strip()
@@ -109,62 +121,74 @@ def main():
         running_services.append(service)
         subprocess.check_call(["systemctl", "stop", service])
 
-    shutil.rmtree('/var/local/submitty', True)
-    Path(SUBMITTY_DATA_DIR, 'courses').mkdir(parents=True)
+    shutil.rmtree("/var/local/submitty", True)
+    Path(SUBMITTY_DATA_DIR, "courses").mkdir(parents=True)
 
-    with Path(SUBMITTY_INSTALL_DIR, 'config', 'database.json').open() as submitty_config:
+    with Path(
+        SUBMITTY_INSTALL_DIR, "config", "database.json"
+    ).open() as submitty_config:
         submitty_config_json = json.load(submitty_config)
-        os.environ['PGPASSWORD'] = submitty_config_json["database_password"]
+        os.environ["PGPASSWORD"] = submitty_config_json["database_password"]
         db_user = submitty_config_json["database_user"]
     query = """
 SELECT pg_terminate_backend(pg_stat_activity.pid)
 FROM pg_stat_activity
 WHERE pg_stat_activity.datname LIKE \'Submitty%\' AND pid <> pg_backend_pid();
 """
-    subprocess.check_call(['psql', '-d', 'postgres', '-U', db_user, '-c', query])
+    subprocess.check_call(["psql", "-d", "postgres", "-U", db_user, "-c", query])
     db_list = subprocess.check_output(
-        ['psql', '-U', db_user, '--list'],
-        universal_newlines=True
+        ["psql", "-U", db_user, "--list"], universal_newlines=True
     ).split("\n")[3:]
     for db_row in db_list:
-        db_name = db_row.strip().split('|')[0].strip()
-        if not db_name.startswith('submitty'):
+        db_name = db_row.strip().split("|")[0].strip()
+        if not db_name.startswith("submitty"):
             continue
-        subprocess.check_call(['dropdb', '-h', 'localhost', '-U', db_user, db_name])
+        subprocess.check_call(["dropdb", "-h", "localhost", "-U", db_user, db_name])
     subprocess.check_call(
-        ['psql', '-d', 'postgres', '-U', db_user, '-c', 'CREATE DATABASE submitty']
+        ["psql", "-d", "postgres", "-U", db_user, "-c", "CREATE DATABASE submitty"]
     )
-    migrator_script = str(SUBMITTY_REPOSITORY / 'migration' / 'run_migrator.py')
+    migrator_script = str(SUBMITTY_REPOSITORY / "migration" / "run_migrator.py")
     subprocess.check_call(
-        ['python3', migrator_script, '-e', 'system', '-e', 'master', 'migrate', '--initial']
+        [
+            "python3",
+            migrator_script,
+            "-e",
+            "system",
+            "-e",
+            "master",
+            "migrate",
+            "--initial",
+        ]
     )
-    del os.environ['PGPASSWORD']
+    del os.environ["PGPASSWORD"]
 
-    subprocess.check_call(['bash', str(SUBMITTY_INSTALL_DIR / '.setup' / 'INSTALL_SUBMITTY.sh')])
+    subprocess.check_call(
+        ["bash", str(SUBMITTY_INSTALL_DIR / ".setup" / "INSTALL_SUBMITTY.sh")]
+    )
 
-    for user_file in Path(args.users_path).glob('*.yml'):
+    for user_file in Path(args.users_path).glob("*.yml"):
         user = load_data_yaml(user_file)
-        delete_user(user['user_id'])
+        delete_user(user["user_id"])
 
-    random_users = SETUP_DATA_PATH / 'random_users.txt'
+    random_users = SETUP_DATA_PATH / "random_users.txt"
     if random_users.is_file():
         with random_users.open() as open_file:
             for line in open_file:
                 delete_user(line.strip())
 
     groups = []
-    for course_file in Path(args.courses_path).glob('*.yml'):
+    for course_file in Path(args.courses_path).glob("*.yml"):
         course = load_data_yaml(course_file)
-        groups.append(course['code'])
-        groups.append(course['code'] + "_archive")
-        groups.append(course['code'] + "_tas_www")
-        for queue in ['to_be_graded_queue']:
+        groups.append(course["code"])
+        groups.append(course["code"] + "_archive")
+        groups.append(course["code"] + "_tas_www")
+        for queue in ["to_be_graded_queue"]:
             queue_path = Path(SUBMITTY_DATA_DIR, queue)
-            for queue_file in queue_path.glob("*__{}__*".format(course['code'])):
+            for queue_file in queue_path.glob("*__{}__*".format(course["code"])):
                 queue_file.unlink()
 
     for group in groups:
-        os.system('groupdel ' + group)
+        os.system("groupdel " + group)
 
 
 if __name__ == "__main__":

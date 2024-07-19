@@ -1,4 +1,3 @@
-
 import json
 import os
 import random
@@ -33,7 +32,7 @@ def create_gradeable_submission(src: str, dst: str) -> None:
     zip_dst = None
     if os.path.isdir(src):
         zip_dst: str = os.path.join("/tmp", str(uuid.uuid4()))
-        zip_dst: str = shutil.make_archive(zip_dst, 'zip', src)
+        zip_dst: str = shutil.make_archive(zip_dst, "zip", src)
         src = zip_dst
 
     if src[-3:] == "zip":
@@ -45,7 +44,9 @@ def create_gradeable_submission(src: str, dst: str) -> None:
         os.remove(zip_dst)
 
 
-def create_pdf_annotations(file_name: str, file_path: str, src: str, dst: str, grader_id) -> None:
+def create_pdf_annotations(
+    file_name: str, file_path: str, src: str, dst: str, grader_id
+) -> None:
     """
     Specifically designed helper function that copies a annotation from the
     source to the destination.
@@ -60,14 +61,14 @@ def create_pdf_annotations(file_name: str, file_path: str, src: str, dst: str, g
     :param dst: path to the folder where we should copy the annotation to
     :param grader_id: grader of the annotation
     """
-    with open(src, 'r') as open_file:
+    with open(src, "r") as open_file:
         annotation_json = json.load(open_file)
-        annotation_json['file_path'] = file_path
-        annotation_json['grader_id'] = grader_id
-        for annotation in annotation_json['annotations']:
-            annotation['userId'] = grader_id
+        annotation_json["file_path"] = file_path
+        annotation_json["grader_id"] = grader_id
+        for annotation in annotation_json["annotations"]:
+            annotation["userId"] = grader_id
 
-    with open(os.path.join(dst, file_name), 'w') as f:
+    with open(os.path.join(dst, file_name), "w") as f:
         json.dump(annotation_json, f, indent=2)
 
 
@@ -85,33 +86,42 @@ def create_group(group) -> None:
 
 
 def generate_random_user_id(length: int = 15) -> str:
-    return ''.join(random.choice(string.ascii_lowercase + string.ascii_uppercase
-                                 + string.digits) for _ in range(length))
+    return "".join(
+        random.choice(string.ascii_lowercase + string.ascii_uppercase + string.digits)
+        for _ in range(length)
+    )
 
 
 def generate_random_ta_comment() -> str:
-    return get_random_text_from_file('TAComment.txt')
+    return get_random_text_from_file("TAComment.txt")
 
 
 def generate_random_ta_note() -> str:
-    return get_random_text_from_file('TANote.txt')
+    return get_random_text_from_file("TANote.txt")
 
 
 def generate_random_student_note():
-    return get_random_text_from_file('StudentNote.txt')
+    return get_random_text_from_file("StudentNote.txt")
 
 
 def generate_pronouns() -> str:
     pronoun_num = random.random()
-    if pronoun_num <= .05:
-        pronoun_list = ["Ze/Zir", "Xe/Xem", "Ne/Nem", "Vi/Vir",
-                        "Ne/Nir" "Nix/Nix", "Xy/Xyr", "Zhe/Zhim"]
+    if pronoun_num <= 0.05:
+        pronoun_list = [
+            "Ze/Zir",
+            "Xe/Xem",
+            "Ne/Nem",
+            "Vi/Vir",
+            "Ne/Nir" "Nix/Nix",
+            "Xy/Xyr",
+            "Zhe/Zhim",
+        ]
         return random.choice(pronoun_list)
-    elif pronoun_num <= .30:
+    elif pronoun_num <= 0.30:
         return ""
-    elif pronoun_num <= .60:
+    elif pronoun_num <= 0.60:
         return "She/Her"
-    elif pronoun_num <= .70:
+    elif pronoun_num <= 0.70:
         return "They/Them"
     else:
         return "He/Him"
@@ -121,9 +131,9 @@ def generate_versions_to_submit(num=3, original_value=3):
     if num == 1:
         return original_value
     if random.random() < 0.3:
-        return generate_versions_to_submit(num-1, original_value)
+        return generate_versions_to_submit(num - 1, original_value)
     else:
-        return original_value-(num-1)
+        return original_value - (num - 1)
 
 
 def generate_probability_space(probability_dict, default=0):
