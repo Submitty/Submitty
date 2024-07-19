@@ -751,13 +751,15 @@ class ForumController extends AbstractController {
             $event = [ 'component' => 'forum', 'metadata' => $metadata, 'content' => $content, 'subject' => $subject, 'recipient' => $post_author_id, 'preference' => 'all_modifications_forum'];
             $this->core->getNotificationFactory()->onPostModified($event);
             $this->core->getQueries()->removeNotificationsPost($post_id);
-            if ($type === "thread") {
-                $this->sendSocketMessage(['type' => 'delete_thread', 'thread_id' => $thread_id]);
-            }
-            if ($type === "post") {
-                $post_id = $_POST["post_id"];
-                $this->sendSocketMessage(['type' => 'delete_post', 'thread_id' => $thread_id, 'post_id' => $post_id]);
-            }
+            // $type === "thread"
+            // $type === "post"
+            
+            $post_id = $_POST["post_id"];
+            $this->sendSocketMessage(array_merge(
+                ['type' => 'delete_post', 'thread_id' => $thread_id], 
+                $type==="post" ? ['post_id' => $post_id] : []
+            ));
+            
             return $this->core->getOutput()->renderJsonSuccess(['type' => $type]);
         }
         elseif ($modify_type == 2) { //undelete post or thread
