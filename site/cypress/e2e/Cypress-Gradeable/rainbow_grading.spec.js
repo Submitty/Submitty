@@ -7,6 +7,7 @@ skipOn(Cypress.env('run_area') === 'CI', () => {
             checkCheckbox('[data-testid="display-rainbow-grades-summary"]');
             cy.visit(['sample', 'reports', 'rainbow_grades_customization']);
             cy.wait(1000);
+            reset();
         });
         it('Web-Based Rainbow Grades Customization should work', () => {
             // Ensure that elements requiring a build are hidden
@@ -91,28 +92,25 @@ skipOn(Cypress.env('run_area') === 'CI', () => {
 
             // Ensure tables can be added to and removed from
             //TODO: add checks for other tables once features are implemented
-            //TODO: figure out how to check what got added and delete
             cy.get('[data-testid="manual-grading-user-id"]').type('adamsg');
             cy.get('[data-testid="manual-grading-grade"]').select(1);
             cy.get('[data-testid="manual-grading-note"]').type('MESSAGE');
             cy.get('[data-testid="manual-grading-submit"]').click();
+
+            cy.get('[data-testid="manual-grading-table-body"] > tr > td').eq(0).should('contain', 'adamsg');
+            cy.get('[data-testid="manual-grading-table-body"] > tr > td').eq(1).should('contain', 'A');
+            cy.get('[data-testid="manual-grading-table-body"] > tr > td').eq(2).should('contain', 'MESSAGE');
+            cy.get('[data-testid="manual-grading-table-body"] > tr > td').eq(3).find('a').click();
 
             cy.get('[data-testid="plagiarism"]').should('be.visible'); // Visibility not based on checkbox
             cy.get('[data-testid="plagiarism-user-id"]').type('adamsg');
             cy.get('[data-testid="plagiarism-gradeable-id"]').select(1);
             cy.get('[data-testid="plagiarism-marks"]').type('1');
             cy.get('[data-testid="plagiarism-submit"]').click();
-
-            /*
-            // Ensure build button exists, then build using GUI customization
-            cy.get('[data-testid="btn-build-customization"]').should('exist');
-            cy.get('[data-testid="btn-build-customization"]').click();
-
-            // Ensure log appears
-            cy.get('[data-testid="log-button"]').should('not.be.hidden');
-             */
-
-            reset()
+            cy.get('[data-testid="plagiarism-table-body"] > tr > td').eq(0).should('contain', 'adamsg');
+            cy.get('[data-testid="plagiarism-table-body"] > tr > td').eq(1).should('contain', 'grades_released_homework_autota');
+            cy.get('[data-testid="plagiarism-table-body"] > tr > td').eq(2).should('contain', '1');
+            cy.get('[data-testid="plagiarism-table-body"] > tr > td').eq(3).find('a').click();
         });
         it('Manual Customization upload should work', () => {
             // Upload manual customization
@@ -172,8 +170,6 @@ skipOn(Cypress.env('run_area') === 'CI', () => {
             cy.get('[data-testid="display-rainbow-grades-summary"]').should('not.be.checked');
             cy.visit(['sample', 'grades']);
             cy.get('[data-testid="rainbow-grades"]').should('contain', 'No grades are available...');
-
-            reset();
         });
     });
 });
