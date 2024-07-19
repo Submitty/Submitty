@@ -215,6 +215,8 @@ class HomeworkView extends AbstractView {
             // check every interval of 100
             for ($i = 0; $i < intdiv($late_days_allowed, 100) && !$daylight_message_required; $i += 1) {
                 $future_due_date->modify('+100 days');
+                // The format specifier 'I' is used to extract a single character representing the DST indicator for the date. 
+                // This will be either a '0' (DST not in effect) or a '1' (DST in effect).
                 $daylight_message_required = $future_due_date->format('I') !== $due_date->format('I');
             }
 
