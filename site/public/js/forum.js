@@ -1947,9 +1947,8 @@ function updateLaterPostsToViewed(unreadPostId) {
     const unreadPostTimestamp = getPostTimestamp(unreadPostId);
 
     const allPosts = document.querySelectorAll('.post_box');
-    allPosts.forEach(post => {
+    allPosts.forEach((post) => {
         const postId = post.id;
-        
         const postTimestamp = getPostTimestamp(postId);
 
         if (postTimestamp > unreadPostTimestamp) {
