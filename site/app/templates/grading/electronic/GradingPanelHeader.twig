@@ -23,7 +23,7 @@
     <div class="panel-header-box">
         <span class="grade-panel" id="autograding_results_btn">
             <button title="Show/Hide Autograding Testcases (Press A)"
-                    class="invisible-btn key_to_click"
+                    class="invisible-btn"
                     tabindex="0"
                     data-testid="show-autograding"
             >
@@ -33,7 +33,7 @@
         </span>
         <span class="grade-panel" id="grading_rubric_btn" data-testid="grading-rubric-btn">
             <button title="Show/Hide Grading Rubric (Press G)"
-                    class="invisible-btn key_to_click"
+                    class="invisible-btn"
                     tabindex="0"
             >
                 <i class="fas fa-edit"></i><span>Rubric</span>
@@ -42,7 +42,7 @@
         </span>
         <span class="grade-panel" id="submission_browser_btn" data-testid="submission-browser-btn">
             <button title="Show/Hide Submission and Results Browser (Press O)"
-                    class="invisible-btn key_to_click"
+                    class="invisible-btn"
                     tabindex="0"
                     data-testid="show-submission"
             >
@@ -53,7 +53,7 @@
         {% if isStudentInfoPanel %}
             <span class="grade-panel" id="student_info_btn" data-testid="student-info-btn">
                 <button title="Show/Hide Student Information (Press S)"
-                        class="invisible-btn key_to_click"
+                        class="invisible-btn"
                         tabindex="0"
                 >
                     <i class="fas fa-user"></i><span>Student Info</span>
@@ -63,7 +63,7 @@
         {% endif %}
         <span class="grade-panel" id="solution_ta_notes_btn" data-testid="solution-ta-notes-btn">
             <button title="Show Solution and TA notes"
-                    class="invisible-btn key_to_click"
+                    class="invisible-btn"
                     tabindex="0"
             >
                 <i class="fas fa-check"></i><span>Solutions/Notes</span>
@@ -73,7 +73,7 @@
         {% if isPeerPanel %}
             <span class="grade-panel" id="peer_info_btn" data-testid="peer-info-btn">
                 <button title="Show/Hide Peer Information (Press P)"
-                        class="invisible-btn key_to_click"
+                        class="invisible-btn"
                         tabindex="0"
                 >
                     <i class="fas fa-users"></i><span>Peer</span>
@@ -84,7 +84,7 @@
         {% if isDiscussionPanel %}
             <span class="grade-panel" id="discussion_browser_btn" data-testid="discussion-browser-btn">
                 <button title="Show/Hide Discussion Posts"
-                        class="invisible-btn key_to_click"
+                        class="invisible-btn"
                         tabindex="0"
                 >
                     <i class="fas fa-comment-alt"></i><span>Discussion</span>
@@ -95,7 +95,7 @@
         {% if isGradeInquiryPanel and not student_grader %}
             <span class="grade-panel" id="grade_inquiry_info_btn" data-testid="grade-inquiry-info-btn">
                 <button title="Show/Hide Grade Inquiry Information (Press X)"
-                        class="invisible-btn key_to_click"
+                        class="invisible-btn"
                         tabindex="0"
                 >
                    <i class="fas {{ grade_inquiry_pending is defined ? 'fa-exclamation' : 'fa-hand-paper' }} grade_inquiry_icon"></i>
