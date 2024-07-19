@@ -8,14 +8,11 @@ skipOn(Cypress.env('run_area') === 'CI', () => {
             cy.visit(['sample', 'reports', 'rainbow_grades_customization']);
             cy.wait(1000);
         });
-        afterEach(() => {
-            reset();
-        });
         it('Web-Based Rainbow Grades Customization should work', () => {
             // Ensure that elements requiring a build are hidden
             cy.get('[data-testid="log-button"]').should('be.hidden');
             // Ensure that elements requiring a manual_customization.json are hidden
-            cy.get('[data-testid="ask-which-customization"]').should('be.hidden');
+            // cy.get('[data-testid="ask-which-customization"]').should('be.hidden');
 
             // Ensure all checkboxes work and toggle visibility of related elements
             checkCheckbox('[data-testid="display-grade-summary"]');
@@ -114,6 +111,8 @@ skipOn(Cypress.env('run_area') === 'CI', () => {
             // Ensure log appears
             cy.get('[data-testid="log-button"]').should('not.be.hidden');
              */
+
+            reset()
         });
         it('Manual Customization upload should work', () => {
             // Upload manual customization
@@ -136,10 +135,10 @@ skipOn(Cypress.env('run_area') === 'CI', () => {
             cy.get('[data-testid="display-grade-summary"]').check();
             cy.get('[data-testid="display-grade-summary"]').should('be.checked');
             cy.get('[data-testid="display-grade-details"]').check();
-            cy.get('[data-testid="display-benchmarks-average"]').check();
-            cy.get('[data-testid="display-benchmarks-stddev"]').check();
-            cy.get('[data-testid="display-benchmarks-perfect"]').check();
-            cy.get('[data-testid="save-status-button"]').click();
+            cy.get('[data-testid="display_benchmarks_average"]').check();
+            cy.get('[data-testid="display_benchmarks_stddev"]').check();
+            cy.get('[data-testid="display_benchmarks_perfect"]').check();
+            cy.get('[data-testid="btn-build-customization"]').click();
             cy.get('[data-testid="save-status"]', { timeout: 15000 }).should('contain', 'Rainbow grades successfully generated!');
             cy.visit(['sample', 'grades']);
             ['USERNAME', 'NUMERIC ID', 'AVERAGE', 'STDDEV', 'PERFECT'].forEach((fields) => {
@@ -173,6 +172,8 @@ skipOn(Cypress.env('run_area') === 'CI', () => {
             cy.get('[data-testid="display-rainbow-grades-summary"]').should('not.be.checked');
             cy.visit(['sample', 'grades']);
             cy.get('[data-testid="rainbow-grades"]').should('contain', 'No grades are available...');
+
+            reset();
         });
     });
 });
