@@ -47,9 +47,17 @@ if [[ $1 == "socket" ]]; then
       brew install socket_vmnet
     fi
 
+    MODE=host
+    if [[ $3 == "--public" ]]; then
+      MODE=shared
+    fi
+
     mkdir -p "${HOMEBREW_PREFIX}/var/run"
     echo "Starting socket vmnet server..."
-    sudo "${HOMEBREW_PREFIX}/opt/socket_vmnet/bin/socket_vmnet" --vmnet-mode=host --vmnet-gateway="${GATEWAY_IP}" "${HOMEBREW_PREFIX}/var/run/socket_vmnet" 1>/dev/null &
+    if [[ $MODE == "shared" ]]; then
+      echo "Using public networking"
+    fi
+    sudo "${HOMEBREW_PREFIX}/opt/socket_vmnet/bin/socket_vmnet" --vmnet-mode="${MODE}" --vmnet-gateway="${GATEWAY_IP}" "${HOMEBREW_PREFIX}/var/run/socket_vmnet" 1>/dev/null &
     echo $! > "${LOCKDIR}/socket_pid"
     echo "Server running"
 
