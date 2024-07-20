@@ -6,7 +6,11 @@
     width: 125px;
 }
 
-/* New styles for centering text in panel position selector */
-.panel-position-cont option {
-    text-align: center;
+.grade-panel button {
+    padding: 4px 12px 5px 25px;
+}
+
+.grade-panel button i {
+    top: 3px;
+    left: 5px;
 }
