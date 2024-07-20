@@ -173,13 +173,13 @@ button > i.fas:hover {
 
 :root {
     --default-border-color: black;
-    --default-box-shadow: 2px 2px 4px black;
+    --default-box-shadow: 1px 1px 2px black;
 }
 
 @media (prefers-color-scheme: dark) {
     :root {
         --default-border-color: grey;
-        --default-box-shadow: 2px 2px 4px grey;
+        --default-box-shadow: 1px 1px 2px grey;
     }
 }
 
