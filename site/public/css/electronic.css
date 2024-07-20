@@ -236,7 +236,7 @@ progress::-webkit-progress-value {
     color: var(--text-black);
     position: relative;
     cursor: pointer;
-    padding: 2px 6px 5px 24px;
+    padding: 4px 12px 5px 25px;
     white-space: nowrap;
     outline: none;
 }
@@ -244,8 +244,8 @@ progress::-webkit-progress-value {
 /* stylelint-disable-next-line no-descending-specificity */
 .grade-panel button i {
     position: absolute;
-    top: 1px;
-    left: 4px;
+    top: 3px;
+    left: 5px;
     font-size: 14px;
 }
 
