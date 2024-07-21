@@ -2,7 +2,7 @@
 namespace app\views;
 
 class MarkdownView extends AbstractView {
-    // Add this new function
+    
     private function preprocessMarkdown($markdown) {
         $lines = explode("\n", $markdown);
         $inCodeBlock = false;
@@ -60,15 +60,19 @@ class MarkdownView extends AbstractView {
             'textarea_onkeydown',
             'textarea_onpaste',
         ];
+        
         foreach ($keys as $key) {
             if (isset($data[$key])) {
                 $args[$key] = $data[$key];
             }
         }
+        
         // If there's a markdown_area_value, preprocess it
         if (isset($args['markdown_area_value'])) {
             $args['markdown_area_value'] = $this->preprocessMarkdown($args['markdown_area_value']);
         }
+        
         return $this->core->getOutput()->renderTwigTemplate("misc/MarkdownArea.twig", $args);
     }
+    
 }
