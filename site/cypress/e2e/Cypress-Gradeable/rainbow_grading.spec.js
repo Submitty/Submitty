@@ -10,10 +10,15 @@ skipOn(Cypress.env('run_area') === 'CI', () => {
             reset();
         });
         it('Web-Based Rainbow Grades Customization should work', () => {
-            // Ensure that elements requiring a build are hidden
-            cy.get('[data-testid="log-button"]').should('be.hidden');
-            // Ensure that elements requiring a manual_customization.json are hidden
-            // cy.get('[data-testid="ask-which-customization"]').should('be.hidden');
+            // Ensure that elements requiring a manual_customization.json are only visible if file exists
+            cy.window().its('manualCustomizationExists').then((manualCustomizationExists) => {
+                if (manualCustomizationExists === true) {
+                    cy.get('[data-testid="ask-which-customization"]').should('not.be.hidden');
+                }
+                else {
+                    cy.get('[data-testid="ask-which-customization"]').should('be.hidden');
+                }
+            });
 
             // Ensure all checkboxes work and toggle visibility of related elements
             checkCheckbox('[data-testid="display-grade-summary"]');

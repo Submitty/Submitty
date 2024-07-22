@@ -434,6 +434,8 @@ To remove a curve simply blank all boxes."></i>
 
 
     <script>
+        window.manualCustomizationExists = {{ manual_customization_exists ? 'true' : 'false' }};
+
         $('.gradeable-li-info .tooltip').on('mouseenter', function(){
             const gradeable = $(this).closest('.gradeable-li');
             const override = gradeable.find('.override');
