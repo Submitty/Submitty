@@ -61,8 +61,8 @@ class MiscController extends AbstractController {
         $active_version = $graded_gradeable->getAutoGradedGradeable()->getActiveVersion();
         $file_path = $this->decodeAnonPath(urldecode($_POST['file_path']), $gradeable_id);
         $directory = 'invalid';
-        if (strpos($file_path, 'processed_submissions') !== false) {
-            $directory = 'processed_submissions';
+        if (strpos($file_path, 'submissions_processed') !== false) {
+            $directory = 'submissions_processed';
         }
         elseif (strpos($file_path, 'submissions') !== false) {
             $directory = 'submissions';

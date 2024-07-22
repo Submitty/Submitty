@@ -20,9 +20,9 @@ def up(config, database, semester, course):
     :type course: str
     """
     course_dir = Path(config.submitty['submitty_data_dir'], 'courses', semester, course)
-    processed_submission_dir = Path(course_dir, 'processed_submissions')
+    submissions_processed_dir = Path(course_dir, 'submissions_processed')
 
-    os.makedirs(str(processed_submission_dir), exist_ok=True)
+    os.makedirs(str(submissions_processed_dir), exist_ok=True)
 
     daemon_user = config.submitty_users['daemon_user']
     daemon_user_id = pwd.getpwnam(daemon_user).pw_uid
@@ -30,8 +30,8 @@ def up(config, database, semester, course):
     stat_info = os.stat(str(course_dir))
     course_group_id = stat_info.st_gid
 
-    os.chown(processed_submission_dir, daemon_user_id, course_group_id)
-    os.chmod(processed_submission_dir, stat.S_IRWXU | stat.S_IRWXG | stat.S_ISGID)
+    os.chown(submissions_processed_dir, daemon_user_id, course_group_id)
+    os.chmod(submissions_processed_dir, stat.S_IRWXU | stat.S_IRWXG | stat.S_ISGID)
 
 
 def down(config, database, semester, course):
