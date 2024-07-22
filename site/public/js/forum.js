@@ -1951,7 +1951,7 @@ function updateLaterPostsToViewed(unreadPostId) {
         const postId = post.id;
         const postTimestamp = getPostTimestamp(postId);
 
-        if (postTimestamp > unreadPostTimestamp) {
+        if (postTimestamp >= unreadPostTimestamp) {
             post.classList.remove('viewed_post');
             post.classList.add('new_post');
         }
