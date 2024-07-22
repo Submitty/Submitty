@@ -121,7 +121,7 @@
             {% endif %}
         </span>
 
-        <a class="pinned-thread key_to_click" tabindex="0" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" title="Options">
+        <a class="pinned-thread key_to_click" tabindex="0" data-testid="thread-dropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" title="Options">
             <i class="fas fa-ellipsis-v"></i>
         </a>
         <div class="dropdown-menu custom-dropdown-menu" aria-labelledby="dropdownMenuButton">
@@ -130,8 +130,8 @@
                 {% if not (isThreadLocked != 1 or userAccessFullGrading == true) %}
                     {#pass#}
                 {% else %}
-                    <a class="dropdown-item key_to_click" tabindex = "1" onClick="deletePostToggle({{ post_buttons.delete.ud_toggle_status }}, {{ post.thread_id }}, {{ post.id }}, '{{ post.author_user_id }}', '{{ post_date }}', '{{ csrf_token }}' ); return false;" title="{{ post_buttons.delete.ud_button_title }}" aria-label="{{ post_buttons.delete.ud_button_title }}">Delete</a>
-                    <a class="dropdown-item key_to_click" tabindex = "2" onClick="showEditPostForm({{ post.id }}, {{ post.thread_id }}, {{ post_buttons.edit.shouldEditThread }}, {{ render_markdown?1:0 }}, '{{ csrf_token }}')" title="{{ post_buttons.edit.edit_button_title }}" aria-label="{{ post_buttons.edit.edit_button_title }}">Edit</a>
+                    <a class="dropdown-item key_to_click" tabindex = "1" data-testid="delete-post-button" onClick="deletePostToggle({{ post_buttons.delete.ud_toggle_status }}, {{ post.thread_id }}, {{ post.id }}, '{{ post.author_user_id }}', '{{ post_date }}', '{{ csrf_token }}' ); return false;" title="{{ post_buttons.delete.ud_button_title }}" aria-label="{{ post_buttons.delete.ud_button_title }}">Delete</a>
+                    <a class="dropdown-item key_to_click" tabindex = "2" data-testid="edit-post-button" onClick="showEditPostForm({{ post.id }}, {{ post.thread_id }}, {{ post_buttons.edit.shouldEditThread }}, {{ render_markdown?1:0 }}, '{{ csrf_token }}')" title="{{ post_buttons.edit.edit_button_title }}" aria-label="{{ post_buttons.edit.edit_button_title }}">Edit</a>
                 {% endif %}
             {% endif %}
         </div>

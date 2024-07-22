@@ -60,17 +60,20 @@ const mergeThreads = (fromThread, toThread, mergedContent) => {
 
 const removeThread = (title) => {
     cy.get('[data-testid="thread-list-item"]').contains(title).click();
-    cy.get('.delete-post-button').first().click();
+    cy.get('[data-testid="thread-dropdown"]').first().click();
+    cy.get('[data-testid="delete-post-button"]').first().click();
     cy.get('[data-testid="thread-list-item"]').contains(title).should('not.exist');
 };
 
 const uploadAttachmentAndDelete = (title, attachment) => {
     cy.get('[data-testid="thread-list-item"]').contains(title).click();
     cy.get('[data-testid="create-post-head"]').should('contain', title);
+    cy.get('[data-testid="thread-dropdown"]').first().click();
     cy.get('[data-testid="edit-post-button"]').first().click();
     cy.get('[data-testid="input-file1"]').selectFile(`cypress/fixtures/${attachment}`);
     cy.get('[data-testid="file-upload-table-1"]').should('contain', attachment);
     cy.get('[data-testid="forum-update-post"]').contains('Update Post').click();
+    cy.get('[data-testid="thread-dropdown"]').first().click();
     cy.get('[data-testid="edit-post-button"]').first().click();
     cy.get('[data-testid="mark-for-delete-btn"]').first().should('contain', 'Delete').click();
     cy.get('[data-testid="mark-for-delete-btn"]').first().should('contain', 'Keep');
