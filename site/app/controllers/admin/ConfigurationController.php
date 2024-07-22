@@ -186,7 +186,7 @@ class ConfigurationController extends AbstractController {
         }
 
         if($name === 'self_registration'){
-            $this->core->getQueries()->setSelfRegistrationAllowed($this->core->getConfig()->getCourse(), $entry);
+            $this->core->getQueries()->setSelfRegistrationAllowed($this->core->getConfig()->getCourse(), $entry === 'true' ? 1 : 0);
         }
         if ($name === 'forum_enabled' && $entry == 1) {
             // Only create default categories when there is no existing categories (only happens when first enabled)
