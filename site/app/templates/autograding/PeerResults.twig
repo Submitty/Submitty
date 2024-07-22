@@ -56,16 +56,16 @@ function switch_feedback_modes() {
 </script>
 
 {% if not been_ta_graded %}
-    <br>
     <h3>This assignment has not been graded yet</h3>
-{% elseif not grading_complete %}
     <br>
+{% elseif not grading_complete %}
     <h3>Grading not complete, please contact an instructor/grader</h3>
+    <br>
 {% else %}
     <div class="sub">
         {% if not active_same_as_graded %}
+            <h3>The version you have selected to be graded above does not match the version graded by your peers. </h3>
             <br>
-            <h3>The version you have selected to be graded above does not match the version graded by your TA/instructor, please contact TA/instructor if necessary to resolve the problem.</h3>
         {% endif %}
 
         <button class = 'btn btn-default' id = "switch_feedback_button" onclick='switch_feedback_modes()'>Switch to Feedback Mode</button>
