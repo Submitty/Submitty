@@ -64,7 +64,11 @@ skipOn(Cypress.env('run_area') === 'CI', () => {
             cy.get('[data-testid="benchmark-percents"]').should('be.visible');
 
             // Ensure gradeables can be added
-            //TODO: figure out how drag/drop works
+            //TODO: test drag/drop functionality
+            cy.get('[data-testid="gradeables"]').should('be.visible')
+            cy.get('[data-testid="buckets-used-list"]').should('be.visible')
+            cy.get('[data-testid="buckets-available-list"]').should('be.visible')
+            cy.get('[data-testid="gradeable-config"]').should('be.visible')
 
             // Ensure textboxes have correct initial values and can be modified
             checkTextbox('[data-testid="cust-messages-textarea"]', '', 'message');
@@ -72,7 +76,7 @@ skipOn(Cypress.env('run_area') === 'CI', () => {
             checkTextbox('[data-testid="benchmark_lowest_b-"]', '0.8', '0.7');
             checkTextbox('[data-testid="benchmark_lowest_c-"]', '0.7', '0.6');
             checkTextbox('[data-testid="benchmark_lowest_d"]', '0.6', '0.5');
-            /* TODO: once uncaught saving issue is fixing, include the commented out bits
+            /* TODO: once uncaught saving issue is fixed, include the below tests for section labels
             checkTextbox('[data-testid="section_and_labels_1"]', '1', 'TA 1');
             checkTextbox('[data-testid="section_and_labels_2"]', '2', 'TA 2');
             checkTextbox('[data-testid="section_and_labels_3"]', '3', 'TA 3');
@@ -121,8 +125,8 @@ skipOn(Cypress.env('run_area') === 'CI', () => {
             // Upload manual customization
             cy.get('[data-testid="btn-upload-customization"]').should('exist');
             cy.get('[data-testid="config-upload"]').should('exist');
-            //TODO: figure out how to do this using the button instead of force
-            cy.get('[data-testid="config-upload"]').selectFile('cypress/fixtures/manual_customization.json', {force: true}); //TODO: fix file path
+            //TODO: select file using the Upload button instead of force clicking a hidden element
+            cy.get('[data-testid="config-upload"]').selectFile('cypress/fixtures/manual_customization.json', {force: true});
             // Ensure that elements requiring a manual_customization.json appear
             cy.get('[data-testid="ask-which-customization"]').should('not.be.hidden');
 
@@ -132,7 +136,8 @@ skipOn(Cypress.env('run_area') === 'CI', () => {
             cy.get('[data-testid="manual-customization-option"]').should('not.be.checked');
             cy.get('[data-testid="gui-customization-option"]').should('be.checked');
 
-            //download manual customization and gui customization, check file names??? //TODO: figure out how to do this, once previous step is done
+            // Ensure manual_customization and gui_customization can be downloaded
+            // TODO: implement this test
         });
         it('Enable viewing of rainbow grades and generating the rainbow grading', () => {
             cy.get('[data-testid="display-grade-summary"]').check();

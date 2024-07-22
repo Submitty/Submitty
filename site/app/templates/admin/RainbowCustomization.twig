@@ -136,12 +136,12 @@
                 <label for="cust_messages_textarea" class="rg_info_message">You may enter a message that will appear above the student's rainbow grades.</label>
                 <textarea id="cust_messages_textarea" data-testid="cust-messages-textarea">{% if 0 in messages|keys %}{{ messages[0] }}{% endif %}</textarea>
             </div>
-            <div id="gradeables" class="customization_item">
+            <div id="gradeables" data-testid="gradeables" class="customization_item">
                 <h2>Gradeables</h2>
                 <div style="width:45%;float:left;" id="buckets_used">
                     <h3>Assigned Buckets</h3>
-                    <ol id="buckets_used_list" style="min-height:50px;background-color:var(--standard-beige);">
-                        {%  for bucket in used_buckets %}
+                    <ol id="buckets_used_list" data-testid="buckets-used-list" style="min-height:50px;background-color:var(--standard-beige);">
+                        {% for bucket in used_buckets %}
                             <li>
                                 <div class="bucket-percent" style="display: inline;">
                                     <input aria-label="{{ bucket|capitalize }} percent" type="text" class="gradeable-custom-item-input" value="{{ bucket_percentages[bucket] }}" onblur="ClampPercent(this);" id="percent-{{ bucket }}"><span style="margin-right: 10px;">%</span>
@@ -154,8 +154,8 @@
                 </div>
                 <div style="width:45%;display:inline-block;margin-left:50px;" id="buckets_available">
                     <h3>Available Buckets</h3>
-                    <ol id="buckets_available_list" style="min-height:50px;background-color:var(--standard-light-green);">
-                        {%  for bucket in available_buckets %}
+                    <ol id="buckets_available_list" data-testid="buckets-available-list" style="min-height:50px;background-color:var(--standard-light-green);">
+                        {% for bucket in available_buckets %}
                             <li>
                                 <div class="bucket-percent" style="display: none;">
                                     <input aria-label="{{ bucket|capitalize }} percent" type="text" class="gradeable-custom-item-input" value="0" onblur="ClampPercent(this);" id="percent-{{ bucket }}"><span style="margin-right: 10px;">%</span>
@@ -165,7 +165,7 @@
                         {% endfor %}
                     </ol>
                 </div>
-                <div id="gradeable_config" style="background-color:var(--standard-peachpuff);margin-top:50px;width:1000px;padding:5px;">
+                <div id="gradeable_config" data-testid="gradeable-config" style="background-color:var(--standard-peachpuff);margin-top:50px;width:1000px;padding:5px;">
                     <h2>Category/Gradeable Configuration:
                         <i id="pencilIcon" class="fas fa-pencil-alt black-btn"></i>
                     </h2>
