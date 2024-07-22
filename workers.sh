@@ -5,6 +5,12 @@ if [[ $1 == "generate" ]]; then
   exit $?
 fi
 
+if [[ ! -f ".vagrant/workers.json" ]]; then
+  echo "No worker configuration has been generated."
+  echo "Please run 'vagrant workers generate'."
+  exit 1
+fi
+
 if [[ $1 == "socket" ]]; then
   if [[ ! $(uname -s) == "Darwin" ]]; then
     echo "Socket networking is only for macOS using QEMU"
@@ -39,7 +45,7 @@ if [[ $1 == "socket" ]]; then
     echo $$ > "${LOCKDIR}/pid"
 
     if [[ -z $GATEWAY_IP ]]; then
-      echo "Worker configuration is not valid, please run 'workers.sh generate'."
+      echo "Worker configuration is not valid, please run 'vagrant workers generate'."
       exit 0
     fi
 
