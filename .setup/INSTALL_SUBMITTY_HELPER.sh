@@ -163,22 +163,6 @@ popd > /dev/null
 
 echo -e "\nBeginning installation of Submitty\n"
 
-
-#this function takes a single argument, the name of the file to be edited
-function replace_fillin_variables {
-    sed -i -e "s|__INSTALL__FILLIN__SUBMITTY_INSTALL_DIR__|$SUBMITTY_INSTALL_DIR|g" "$1"
-    sed -i -e "s|__INSTALL__FILLIN__SUBMITTY_DATA_DIR__|$SUBMITTY_DATA_DIR|g" "$1"
-
-    sed -i -e "s|__INSTALL__FILLIN__NUM_UNTRUSTED__|$NUM_UNTRUSTED|g" "$1"
-    sed -i -e "s|__INSTALL__FILLIN__FIRST_UNTRUSTED_UID__|$FIRST_UNTRUSTED_UID|g" "$1"
-    sed -i -e "s|__INSTALL__FILLIN__FIRST_UNTRUSTED_GID__|$FIRST_UNTRUSTED_GID|g" "$1"
-
-    sed -i -e "s|__INSTALL__FILLIN__DAEMON_UID__|$DAEMON_UID|g" "$1"
-    sed -i -e "s|__INSTALL__FILLIN__DAEMON_GID__|$DAEMON_GID|g" "$1"
-
-    # FIXME: Add some error checking to make sure these values were filled in correctly
-}
-
 /bin/bash "${SUBMITTY_REPOSITORY}/.setup/install_submitty/setup_directories.sh" "$@"
 
 ########################################################################################################################
