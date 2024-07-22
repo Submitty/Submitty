@@ -83,7 +83,11 @@ class ForumController extends AbstractController {
         return [-1, $url];
     }
 
-    private function getPostsOrderAndReplies(array $posts, int $thread_id): array {
+    /**
+     * @param mixed[] $posts
+     * @return mixed[]
+     */
+    private function getPostsOrderAndReplies(array $posts, string $thread_id): array {
         $first = true;
         $first_post_id = 1;
         $order_array = [];
@@ -753,13 +757,13 @@ class ForumController extends AbstractController {
             $this->core->getQueries()->removeNotificationsPost($post_id);
             // $type === "thread"
             // $type === "post"
-            
+
             $post_id = $_POST["post_id"];
             $this->sendSocketMessage(array_merge(
-                ['type' => 'delete_post', 'thread_id' => $thread_id], 
-                $type==="post" ? ['post_id' => $post_id] : []
+                ['type' => 'delete_post', 'thread_id' => $thread_id],
+                $type === "post" ? ['post_id' => $post_id] : []
             ));
-            
+
             return $this->core->getOutput()->renderJsonSuccess(['type' => $type]);
         }
         elseif ($modify_type == 2) { //undelete post or thread
@@ -857,7 +861,7 @@ class ForumController extends AbstractController {
                 $order_and_replies = $this->getPostsOrderAndReplies($posts, $thread_id);
                 $order_array = $order_and_replies[0];
                 $reply_level_array = $order_and_replies[1];
-                
+
                 $place = array_search($post["id"], $order_array, true);
                 $reply_level = $reply_level_array[$place];
                 $post_box_id = 1;
