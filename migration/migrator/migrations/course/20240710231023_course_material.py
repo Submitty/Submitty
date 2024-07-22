@@ -20,6 +20,8 @@ def up(config, database, semester, course):
         ALTER TABLE course_materials ADD COLUMN IF NOT EXISTS last_edit_by character varying(255) REFERENCES users(user_id) DEFAULT NULL;
         ALTER TABLE course_materials ADD COLUMN IF NOT EXISTS last_edit_date TIMESTAMP WITH TIME ZONE DEFAULT NULL;
         ALTER TABLE course_materials
+        DROP CONSTRAINT IF EXISTS check_dates;
+        ALTER TABLE course_materials
         ADD CONSTRAINT check_dates
         CHECK (
             uploaded_date IS NULL
