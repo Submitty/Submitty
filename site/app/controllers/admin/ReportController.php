@@ -592,8 +592,7 @@ class ReportController extends AbstractController {
 
 
     #[Route("/courses/{_semester}/{_course}/reports/rainbow_grades_customization_save", methods: ["POST"])]
-    public function writetocustomization(): JsonResponse
-    {
+    public function writetocustomization(): JsonResponse {
         if (!empty($_SERVER['HTTP_X_REQUESTED_WITH']) && strtolower($_SERVER['HTTP_X_REQUESTED_WITH']) == 'xmlhttprequest') {
             // Build a new model, pull in defaults for the course
             $customization = new RainbowCustomization($this->core);
@@ -603,17 +602,20 @@ class ReportController extends AbstractController {
                 try {
                     $customization->processForm();
                     return JsonResponse::getSuccessResponse(['status' => 'success']);
-                } catch (\Exception $e) {
+                }
+                catch (\Exception $e) {
                     $msg = 'Error processing form';
                     $this->core->addErrorMessage($msg);
                     return JsonResponse::getErrorResponse($msg);
                 }
-            } else {
+            }
+            else {
                 $msg = 'No JSON string provided';
                 $this->core->addErrorMessage($msg);
                 return JsonResponse::getErrorResponse($msg);
             }
-        } else {
+        }
+        else {
             $msg = 'Not an AJAX request';
             $this->core->addErrorMessage($msg);
             return JsonResponse::getErrorResponse($msg);
