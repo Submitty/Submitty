@@ -72,6 +72,9 @@ class AutoGradedVersion extends AbstractModel {
      */
     private $files = null;
     /** @prop
+     * @var array[] An array of all the processed submission files  */
+    private $processed_submission_files = null;
+    /** @prop
      * @var array[] An array of all the autograded results files  */
     private $results_files = null;
     /** @prop
@@ -181,6 +184,23 @@ class AutoGradedVersion extends AbstractModel {
                     }
                 }
             }
+        }
+    }
+
+    /**
+     * Loads information about processed submission files
+     */
+    private function loadProcessedSubmissionFiles() {
+        $submitter_id = $this->graded_gradeable->getSubmitter()->getId();
+        $gradeable = $this->graded_gradeable->getGradeable();
+        $course_path = $this->core->getConfig()->getCoursePath();
+        $config = $gradeable->getAutogradingConfig();
+
+        $processed_submission_path = FileUtils::joinPaths($course_path, 'processed_submissions', $gradeable->getId(), $submitter_id, $this->version);
+
+        $processed_submission_files = FileUtils::getAllFiles($processed_submission_path, [], true);
+        foreach ($processed_submission_files as $file => $details) {
+            $this->processed_submission_files[$file] = $details;
         }
     }
 
@@ -344,6 +364,16 @@ class AutoGradedVersion extends AbstractModel {
             $this->loadSubmissionFiles();
         }
         return ['submissions' => $this->meta_files['submissions'], 'checkout' => ($this->graded_gradeable->getGradeable()->isVcs()) ? $this->meta_files['checkout'] : []];
+    }
+
+    /**
+     * Gets an array of file details (indexed by file name) for all processed submission files
+     */
+    public function getProcessedFiles() {
+        if ($this->processed_submission_files === null) {
+            $this->loadProcessedSubmissionFiles();
+        }
+        return $this->processed_submission_files;
     }
 
     /**
