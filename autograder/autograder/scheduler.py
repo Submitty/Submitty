@@ -190,6 +190,13 @@ class FCFSScheduler(BaseScheduler):
     def __init__(self, config: Config, workers: List[Worker]):
         super().__init__(config, workers)
 
+
+    def _dump_error_to_results(self, job, error_message):
+        results_dir = os.path.join(self.config.submitty['submitty_data_dir'], 'results', job.path)
+        os.makedirs(results_dir, exist_ok=True)
+        with open(os.path.join(results_dir, 'error_message.txt'), 'w') as f:
+            f.write(error_message)
+
     def _assign_jobs(self, jobs: List[Job]):
         idle_workers = [worker for worker in self.workers if worker.is_idle()]
 
@@ -228,21 +235,16 @@ class FCFSScheduler(BaseScheduler):
                 # If no registered worker can handle this job, then print a message to the log
                 # and remove the queue entry. This will trigger the "Something has gone wrong"
                 # message on the student's side.
-                #
-                # TODO: This should dump an error message to the `results` directory that
-                #       exposes the error message in the UI, but that's for a future PR.
                 if not any(worker.can_run(job) for worker in self.workers):
                     if job.queue_obj is not None:
-                        self.config.logger.log_message(
-                            f"ERROR: no worker compatible with job {job.path}: no worker has "
+                        error_message = \
+                            f"ERROR: no worker compatible with job {job.path}: no worker has " \
                             f"capability {job.queue_obj['required_capabilities']}. Removing."
-                        )
-                          self._dump_error_to_results(job, error_message)
+                        self.config.logger.log_message(error_message)
+                        self._dump_error_to_results(job, error_message)
                     else:
-                        self.config.logger.log_message(
-                            f"ERROR: could not load queue object for job {job.path}. Removing."
-                        )
-                  self._dump_error_to_results(job, error_message)
+                        error_message = f"ERROR: could not load queue object for job {job.path}. Removing."
+                        self._dump_error_to_results(job, error_message)
                     with contextlib.suppress(FileNotFoundError):
                         os.remove(job.path)
                 continue
@@ -250,9 +252,3 @@ class FCFSScheduler(BaseScheduler):
             dest = random.choice(matching_workers)
             shutil.move(job.path, dest.folder)
             idle_workers.remove(dest)
-
-            def _dump_error_to_results(self, job, error_message):
-    results_dir = os.path.join(self.config.submitty['submitty_data_dir'], 'results', job.job_id)
-    os.makedirs(results_dir, exist_ok=True)
-    with open(os.path.join(results_dir, 'error_message.txt'), 'w') as f:
-        f.write(error_message)
