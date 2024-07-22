@@ -67,6 +67,21 @@ DAEMONCGI_GROUP=$(jq -r '.daemoncgi_group' "${SUBMITTY_INSTALL_DIR}/config/submi
 DAEMONPHPCGI_GROUP=$(jq -r '.daemonphpcgi_group' "${SUBMITTY_INSTALL_DIR}/config/submitty_users.json")
 SUPERVISOR_USER=$(jq -r '.supervisor_user' "${SUBMITTY_INSTALL_DIR}/config/submitty_users.json")
 
+#this function takes a single argument, the name of the file to be edited
+function replace_fillin_variables {
+    sed -i -e "s|__INSTALL__FILLIN__SUBMITTY_INSTALL_DIR__|$SUBMITTY_INSTALL_DIR|g" "$1"
+    sed -i -e "s|__INSTALL__FILLIN__SUBMITTY_DATA_DIR__|$SUBMITTY_DATA_DIR|g" "$1"
+
+    sed -i -e "s|__INSTALL__FILLIN__NUM_UNTRUSTED__|$NUM_UNTRUSTED|g" "$1"
+    sed -i -e "s|__INSTALL__FILLIN__FIRST_UNTRUSTED_UID__|$FIRST_UNTRUSTED_UID|g" "$1"
+    sed -i -e "s|__INSTALL__FILLIN__FIRST_UNTRUSTED_GID__|$FIRST_UNTRUSTED_GID|g" "$1"
+
+    sed -i -e "s|__INSTALL__FILLIN__DAEMON_UID__|$DAEMON_UID|g" "$1"
+    sed -i -e "s|__INSTALL__FILLIN__DAEMON_GID__|$DAEMON_GID|g" "$1"
+
+    # FIXME: Add some error checking to make sure these values were filled in correctly
+}
+
 export IS_VAGRANT
 export IS_UTM
 export IS_CI
@@ -91,3 +106,5 @@ export DAEMONPHP_GROUP
 export DAEMONCGI_GROUP
 export DAEMONPHPCGI_GROUP
 export SUPERVISOR_USER
+
+export -f replace_fillin_variables
