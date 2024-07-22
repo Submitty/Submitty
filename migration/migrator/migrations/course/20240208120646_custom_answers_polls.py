@@ -14,14 +14,23 @@ def up(config, database, semester, course):
     :param course: Code of course being migrated
     :type course: str
     """
-    database.execute("""
-        ALTER TABLE autograding_metrics
-        ADD COLUMN IF NOT EXISTS source_lines_of_code integer;
-        ALTER TABLE autograding_metrics
-        DROP CONSTRAINT IF EXISTS sloc_non_negative;
-        ALTER TABLE autograding_metrics
-        ADD CONSTRAINT sloc_non_negative CHECK (source_lines_of_code >= 0);
-    """)
+    database.execute(
+        """
+        ALTER TABLE polls
+        ADD COLUMN IF NOT EXISTS allows_custom boolean NOT NULL DEFAULT false;
+
+        ALTER TABLE poll_options
+        ADD COLUMN IF NOT EXISTS author_id VARCHAR(255) DEFAULT NULL;
+
+        ALTER TABLE poll_options
+        DROP CONSTRAINT IF EXISTS poll_options_fkey;
+
+        ALTER TABLE poll_options
+        ADD CONSTRAINT poll_options_fkey
+        FOREIGN KEY (author_id) REFERENCES users(user_id) ON UPDATE CASCADE;
+        """
+    )
+
 
 def down(config, database, semester, course):
     """
