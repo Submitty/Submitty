@@ -128,6 +128,7 @@ function getSection() {
         const label = this.value;
 
         if (label === '') {
+            $('#save_status').text('\'All sections MUST have a label before saving');
             throw 'All sections MUST have a label before saving';
         }
 
