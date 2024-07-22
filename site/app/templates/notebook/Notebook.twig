@@ -29,6 +29,10 @@
                 } only %}
                 {{ _self.render_testcase_messages(cell, testcase_messages) }}
 
+            {# Handle "output" cells #}
+            {% elseif cell.type == "output" %}
+                <pre class="notebook-output-cell">{{ cell.output_text }}</pre>
+
             {# Handle if cell is image #}
             {% elseif cell.type == "image" %}
 
@@ -111,12 +115,13 @@
                     {% endif %}
 
                     if ({{ cell.rows }} > 0) {
-                        var editor_{{ num_codeboxes }} = getLargeCodeMirror(document.getElementById("codebox_{{ num_codeboxes }}"), config_{{ num_codeboxes }});
+                        var show_accessbility_message = {{ is_grader_view ? "false" : "true" }}
+                        var editor_{{ num_codeboxes }} = getLargeCodeMirror(document.getElementById("codebox_{{ num_codeboxes }}"), config_{{ num_codeboxes }}, show_accessbility_message);
                         editor_{{ num_codeboxes }}.setSize(null, rowsToPixels({{ cell.rows }}));
                         $('#codebox_{{ num_codeboxes }}').addClass("large-mirror");
                     }
                     else {
-                        var editor_{{ num_codeboxes }} = getSmallCodeMirror(document.getElementById("codebox_{{ num_codeboxes }}"), config_{{ num_codeboxes }});
+                        var editor_{{ num_codeboxes }} = getSmallCodeMirror(document.getElementById("codebox_{{ num_codeboxes }}"), config_{{ num_codeboxes }}, show_accessbility_message);
                         $('#codebox_{{ num_codeboxes }}').addClass("small-mirror");
                     }
 
