@@ -108,4 +108,4 @@ export DAEMONCGI_GROUP
 export DAEMONPHPCGI_GROUP
 export SUPERVISOR_USER
 
-export -f replace_fillin_values
+export -f replace_fillin_variables
