@@ -780,6 +780,41 @@ function ajaxVerifyAllComponents(gradeable_id, anon_id) {
 }
 
 /**
+ * ajax call to change the graded version of the gradeable
+ * @param {string} gradeable_id
+ * @param {string} anon_id
+ * @return {Promise} Rejects except when the response returns status 'success'
+ */
+function ajaxChangeGradedVersion(gradeable_id, anon_id, component_version, component_ids) {
+    return new Promise((resolve, reject) => {
+        $.getJSON({
+            type: 'POST',
+            async: AJAX_USE_ASYNC,
+            url: buildCourseUrl(['gradeable', gradeable_id, 'grading', 'graded_gradeable', 'change_grade_version']),
+            data: {
+                anon_id,
+                graded_version: component_version,
+                component_ids,
+                csrf_token: csrfToken,
+            },
+            success: function (response) {
+                if (response.status !== 'success') {
+                    console.error(`Something went wrong changing graded version: ${response.message}`);
+                    reject(new Error(response.message));
+                }
+                else {
+                    resolve(response.data);
+                }
+            },
+            error: function (err) {
+                displayAjaxError(err);
+                reject(err);
+            },
+        });
+    });
+}
+
+/**
  * Gets if the 'verify' button should show up for a component
  * @param {Object} graded_component
  * @param {string} grader_id
@@ -3247,6 +3282,19 @@ function refreshGradedComponentHeader(component_id, showMarkList) {
     return injectGradingComponentHeader(
         getComponentFromDOM(component_id),
         getGradedComponentFromDOM(component_id), showMarkList);
+}
+
+/**
+ * Resolves all version conflicts for the gradeable by re-submitting the current marks for every component
+ */
+function updateAllComponentVersions() {
+    if (confirm('Are you sure you want to update the version for all components without separately inspecting each component?')) {
+        ajaxChangeGradedVersion(getGradeableId(), getAnonId(), getDisplayVersion(), getAllComponentsFromDOM().map((x) => x.id)).then(() => {
+            Promise.all(getAllComponentsFromDOM().map((x) => reloadGradingComponent(x.id, false, false))).then(() => {
+                $('#change-graded-version').hide();
+            });
+        });
+    }
 }
 
 /**
