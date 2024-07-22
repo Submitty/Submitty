@@ -93,7 +93,8 @@ def main():
     print('Wrote new configuration to ' + workerfile)
 
     if args.provider == 'qemu':
-        print('Updating Bootstrap configuration...')
+        print('Updating Bootstrap configuration... (see log below)')
+        print('---')
         body = ['%%\n']
         for name, data in workers.items():
             body.append(name + ' 1 ' + data['ip_addr'] + ' ' + data['mac_addr'] + '\n')
@@ -107,13 +108,17 @@ def main():
                 print('Failed to save configuration')
                 exit(1)
             w2 = subprocess.run(['sudo', 'launchctl', 'kickstart', '-k', 'system/com.apple.bootpd'])
-            if w2.returncode == 113:
-                w3 = subprocess.run(['sudo', 'launchctl', 'load' '-w', '/System/Library/LaunchDaemons/bootps.plist'])
+            if w2.returncode == 113 or w2.returncode == 1:
+                if w2.returncode == 1:
+                    subprocess.run(['sudo', 'launchctl', 'bootout', 'system/com.apple.bootpd'])
+                w3 = subprocess.run(['sudo', 'launchctl', 'load', '-w', '/System/Library/LaunchDaemons/bootps.plist'])
                 if w3.returncode == 0:
                     w2 = subprocess.run(['sudo', 'launchctl', 'kickstart', '-k', 'system/com.apple.bootpd'])
+            print('---')
             if w2.returncode != 0:
                 print('Failed to restart Bootstrap service')
                 exit(1)
+            print('Successfully restarted Boostrap service')
         print('Configuration saved')
 
 
