@@ -9,7 +9,7 @@ def get_timezone():
     further information on what timezone we should be using
 
     :return:
-    :rtype: pytz.tzinfo.DstTzInfo
+    :rtype: zoneinfo.ZoneInfo
     """
     # noinspection PyUnresolvedReferences
     return tzlocal.get_localzone()
@@ -39,7 +39,7 @@ def write_submitty_date(d=None, milliseconds=False):
             f"Invalid type. Expected datetime or datetime string, got {type(d)}."
         )
     if d.tzinfo is None:
-        d = get_timezone().localize(d)
+        d = d.astimezone(get_timezone())
 
     if milliseconds:
         mlsec = d.strftime("%f")[0:3]
@@ -68,8 +68,7 @@ def read_submitty_date(s):
         try:
             # hoping to find no timezone
             without_timezone = datetime.strptime(thedatetime, '%Y-%m-%d %H:%M:%S')
-            my_timezone = get_timezone()
-            with_timezone = my_timezone.localize(without_timezone)
+            with_timezone = without_timezone.astimezone(get_timezone())
         except ValueError:
             try:
                 # hoping to find timezone -04
@@ -102,13 +101,13 @@ def parse_datetime(date_string):
     :return:
     :rtype: datetime
     """
+    local_timezone = get_timezone()
     if date_string is None:
         return None
     elif isinstance(date_string, datetime):
         my_timezone = date_string.tzinfo
         if my_timezone is None:
-            my_timezone = get_timezone()
-            date_string = my_timezone.localize(date_string)
+            date_string = date_string.astimezone(local_timezone)
 
         return date_string
     elif not isinstance(date_string, str):
@@ -120,21 +119,16 @@ def parse_datetime(date_string):
         pass
 
     try:
-        return get_timezone().localize(
-            datetime.strptime(date_string, '%Y-%m-%d %H:%M:%S')
-        )
-        return
+        return datetime.strptime(date_string, '%Y-%m-%d %H:%M:%S').astimezone(local_timezone)
     except ValueError:
         pass
 
     try:
-        return get_timezone().localize(
-            datetime.strptime(date_string, '%Y-%m-%d').replace(
+        return datetime.strptime(date_string, '%Y-%m-%d').replace(
                 hour=23,
                 minute=59,
                 second=59,
-            )
-        )
+            ).astimezone(local_timezone)
     except ValueError:
         pass
 

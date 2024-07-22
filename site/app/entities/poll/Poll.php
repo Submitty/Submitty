@@ -53,6 +53,8 @@ class Poll {
     #[ORM\Column(type: Types::STRING)]
     protected $release_answer;
 
+    #[ORM\Column(name: "allows_custom", type: Types::BOOLEAN)]
+    protected bool $allows_custom;
     /**
      * @var Collection<Option>
      */
@@ -68,7 +70,7 @@ class Poll {
     #[ORM\JoinColumn(name: "poll_id", referencedColumnName: "poll_id")]
     protected Collection $responses;
 
-    public function __construct(string $name, string $question, string $question_type, \DateInterval $duration, \DateTime $release_date, string $release_histogram, string $release_answer, string $image_path = null) {
+    public function __construct(string $name, string $question, string $question_type, \DateInterval $duration, \DateTime $release_date, string $release_histogram, string $release_answer, string $image_path = null, bool $allows_custom = false) {
         $this->setName($name);
         $this->setQuestion($question);
         $this->setQuestionType($question_type);
@@ -79,6 +81,9 @@ class Poll {
         $this->setReleaseHistogram($release_histogram);
         $this->setReleaseAnswer($release_answer);
         $this->setImagePath($image_path);
+        $this->setAllowsCustomOptions($allows_custom);
+        $this->setClosed();
+
         $this->options = new ArrayCollection();
         $this->responses = new ArrayCollection();
     }
@@ -145,6 +150,18 @@ class Poll {
 
     public function getEndTime(): ?\DateTime {
         return $this->end_time;
+    }
+
+    public function isSurvey(): bool {
+        return $this->getQuestionType() === "single-response-survey" || $this->getQuestionType() === "multiple-response-survey";
+    }
+
+    public function setAllowsCustomOptions(bool $allows_custom): void {
+        $this->allows_custom = $allows_custom;
+    }
+
+    public function getAllowsCustomResponses(): bool {
+        return $this->allows_custom;
     }
 
     public function getReleaseDate(): \DateTime {
