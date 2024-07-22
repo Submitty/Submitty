@@ -632,5 +632,4 @@ class RainbowCustomization extends AbstractModel {
             'manual_customization.json'
         ));
     }
-
 }
