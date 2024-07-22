@@ -1592,6 +1592,7 @@ HTML;
         $has_active_version = $graded_gradeable->getAutoGradedGradeable()->hasActiveVersion();
         $has_submission = $graded_gradeable->getAutoGradedGradeable()->hasSubmission();
         $has_overridden_grades = $graded_gradeable->hasOverriddenGrades();
+        $show_clear_conflicts = $graded_gradeable->getTaGradedGradeable()->hasVersionConflict();
 
         $this->core->getOutput()->addVendorJs(FileUtils::joinPaths('twigjs', 'twig.min.js'));
         $this->core->getOutput()->addInternalJs('ta-grading-keymap.js');
@@ -1618,6 +1619,7 @@ HTML;
                 "has_active_version" => $has_active_version,
                 "version_conflict" => $version_conflict,
                 "show_silent_edit" => $show_silent_edit,
+                "show_clear_conflicts" => $show_clear_conflicts,
                 "student_grader" => $this->core->getUser()->getGroup() == User::GROUP_STUDENT,
                 "grader_id" => $this->core->getUser()->getId(),
                 "display_version" => $display_version,
