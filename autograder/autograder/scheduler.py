@@ -189,7 +189,7 @@ class FCFSScheduler(BaseScheduler):
 
     def __init__(self, config: Config, workers: List[Worker]):
         super().__init__(config, workers)
-        
+
     def _dump_error_to_results(self, job, error_message):
         results_dir = os.path.join(self.config.submitty['submitty_data_dir'], 'results', job.path)
         os.makedirs(results_dir, exist_ok=True)
