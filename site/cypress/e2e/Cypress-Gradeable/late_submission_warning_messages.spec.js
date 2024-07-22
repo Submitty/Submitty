@@ -48,28 +48,28 @@ const giveLateDays = (timestamp, student_id, late_days = 2) => {
     // Give a student a specific number of late days
     cy.login('instructor');
     cy.visit(['sample', 'late_days']);
-    cy.get('#user_id').type(student_id);
-    cy.get('#datestamp').type(timestamp, { force: true });
-    cy.get('#user_id').click();
-    cy.get('#late_days').clear();
-    cy.get('#late_days').type(late_days);
-    cy.get('input[type=submit]').click();
+    cy.get('[data-testid=user-id]').type(student_id);
+    cy.get('[data-testid=datestamp]').type(timestamp, { force: true });
+    cy.get('[data-testid=user-id]').click();
+    cy.get('[data-testid=late-days]').clear();
+    cy.get('[data-testid=late-days]').type(late_days);
+    cy.get('[data-testid=submit-btn]').click();
 };
 
 const giveExtensions = (gradeable_name) => {
     // Grant an extension to the student
     cy.login('instructor');
     cy.visit(['sample', 'extensions']);
-    cy.get('#gradeable-select').select(gradeable_name);
-    cy.get('#user_id').type('student');
-    cy.get('#late-days').clear().type(1, { force: true });
-    cy.get('#extensions-form')
+    cy.get('[data-testid=gradeable-select]').select(gradeable_name);
+    cy.get('[data-testid=extension-user-id]').type('student');
+    cy.get('[data-testid=extension-late-days]').clear().type(1, { force: true });
+    cy.get('[data-testid=extensions-form]')
         .find('a')
         .contains('Submit')
         .click();
     if (gradeable_name.includes('_team')) {
         cy.get('#more_extension_popup', { timeout: 20000 });
-        cy.get('#apply-to-all').click();
+        cy.get('[data-testid=more-extension-apply-to-all').click();
     }
 };
 
@@ -148,6 +148,12 @@ const calculateAndCheckDaylightBanner = (late_days) => {
     newDate.setDate(today.getDate() + late_days);
     checkDaylightBanner(late_days, newDate.getTimezoneOffset() !== today.getTimezoneOffset() ? 'exist' : 'not.exist');
 };
+
+// describe('test', () => {
+//     it('test2', () => {
+//         giveLateDays(getCurrentTime(), 'student');
+//     });
+// });
 
 describe('Checks whether daylight savings warning message should be appearing given varying amounts of late days.', () => {
     it('should create non-team gradeable for testing daylight savings', () => {
