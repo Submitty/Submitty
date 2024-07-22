@@ -91,7 +91,13 @@ if [[ $1 == "socket" ]]; then
     exit 0
   fi
 
-  echo "Expected a command ('start', 'stop')"
+  if [[ $2 == "restart" ]]; then
+    $0 socket stop
+    $0 socket start "${@:3}"
+    exit $?
+  fi
+
+  echo "Expected a command ('start', 'stop', 'restart')"
   exit 1
 fi
 
