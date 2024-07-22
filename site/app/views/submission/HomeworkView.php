@@ -50,7 +50,7 @@ class HomeworkView extends AbstractView {
             $this->core->getOutput()->addInternalModuleJs('grader-submission.js');
         }
 
-        // Only show the late banner if the submission has a due date
+        // Only show the late banner and daylight savings banner if the submission has a due date
         // Instructors shouldn't see this banner if they're not on a team (they won't have proper information)
         if (LateDays::filterCanView($this->core, $gradeable) && !($is_admin && !$on_team && $is_team_assignment)) {
             $late_days = LateDays::fromUser($this->core, $this->core->getUser());
