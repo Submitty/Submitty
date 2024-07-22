@@ -126,7 +126,7 @@ skipOn(Cypress.env('run_area') === 'CI', () => {
             cy.get('[data-testid="btn-upload-customization"]').should('exist');
             cy.get('[data-testid="config-upload"]').should('exist');
             // TODO: select file using the Upload button instead of force clicking a hidden element
-            cy.get('[data-testid="config-upload"]').selectFile('cypress/fixtures/manual_customization.json', {force: true});
+            cy.get('[data-testid="config-upload"]').selectFile('cypress/fixtures/manual_customization.json', { force: true });
             // Ensure that elements requiring a manual_customization.json appear
             cy.get('[data-testid="ask-which-customization"]').should('not.be.hidden');
 
@@ -203,11 +203,11 @@ skipOn(Cypress.env('run_area') === 'CI', () => {
 const checkCheckbox = (testId) => {
     cy.get(testId).as('checkbox');
     cy.get('@checkbox').check();
-    cy.get('@checkbox').should('be.checked')
+    cy.get('@checkbox').should('be.checked');
     cy.get('@checkbox').uncheck();
-    cy.get('@checkbox').should('not.be.checked')
+    cy.get('@checkbox').should('not.be.checked');
     cy.get('@checkbox').check();
-    cy.get('@checkbox').should('be.checked')
+    cy.get('@checkbox').should('be.checked');
 };
 const checkTextbox = (testId, expectedInitial, input) => {
     cy.get(testId).as('textbox');
@@ -216,7 +216,7 @@ const checkTextbox = (testId, expectedInitial, input) => {
     cy.get('@textbox').type(input);
     cy.get('@textbox').should('have.value', input);
     cy.get('@textbox').type('{selectAll}{backspace}');
-    if (expectedInitial !== "") {
+    if (expectedInitial !== '') {
         cy.get('@textbox').type(expectedInitial);
     }
     cy.get('@textbox').should('have.value', expectedInitial);
