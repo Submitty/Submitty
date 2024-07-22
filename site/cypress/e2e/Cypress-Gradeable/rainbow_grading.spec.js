@@ -137,7 +137,24 @@ skipOn(Cypress.env('run_area') === 'CI', () => {
             cy.get('[data-testid="gui-customization-option"]').should('be.checked');
 
             // Ensure manual_customization and gui_customization can be downloaded
-            // TODO: implement this test
+            // TODO: expand the expected values of this test
+            cy.get('[data-testid="btn-download-manual-customization"]').click();
+            cy.readFile('cypress/downloads/manual_customization.json').then((manual_json) => {
+                expect(manual_json.display).to.exist;
+                expect(manual_json.gradeables).to.exist;
+            });
+            cy.get('[data-testid="btn-download-gui-customization"]').click();
+            cy.readFile('cypress/downloads/gui_customization.json').then((gui_json) => {
+                expect(gui_json.display).to.exist;
+                expect(gui_json.display_benchmark).to.exist;
+                expect(gui_json.section).to.exist;
+                expect(gui_json.messages).to.exist;
+                expect(gui_json.final_cutoff).to.exist;
+                expect(gui_json.gradeables).to.exist;
+                expect(gui_json.plagiarism).to.exist;
+                expect(gui_json.manual_grade).to.exist;
+                expect(gui_json.benchmark_percent).to.exist;
+            });
         });
         it('Enable viewing of rainbow grades and generating the rainbow grading', () => {
             cy.get('[data-testid="display-grade-summary"]').check();
