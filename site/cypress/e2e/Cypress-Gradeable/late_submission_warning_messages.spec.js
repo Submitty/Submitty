@@ -35,7 +35,7 @@ const makeNonTeamGradeable = (gradeableName) => {
     // Enter gradeable info
     cy.get('[data-testid=create-gradeable-title]').type(gradeableName);
     cy.get('[data-testid=create-gradeable-id]').type(gradeableName);
-    cy.get('[data-testid=radio-student-upload]').check({force: true});
+    cy.get('[data-testid=radio-student-upload]').check({ force: true });
     // Create Gradeable
     cy.get('[data-testid=create-gradeable-btn]').click();
 };
@@ -132,8 +132,8 @@ const SubmitAndCheckMessage = (gradeable_type, upload_file1, invalid_late_day, v
 const checkDaylightBanner = (late_days, existence) => {
     cy.login('instructor');
     cy.visit(['sample', 'gradeable', daylight_gradeable, 'update?nav_tab=5']);
-    cy.get('[data-testid=late-days]').clear()
-    cy.get('[data-testid=late-days]').type(late_days)
+    cy.get('[data-testid=late-days]').clear();
+    cy.get('[data-testid=late-days]').type(late_days);
     cy.get('[data-testid=late-days]').type('{enter}');
     cy.get('[data-testid=save-status]', { timeout: 20000 }).should('have.text', 'All Changes Saved');
     cy.visit(['sample', 'gradeable', daylight_gradeable]);
@@ -158,16 +158,16 @@ describe('Checks whether daylight savings warning message should be appearing gi
         const date = new Date().toISOString();
 
         // change all the due dates to today
-        cy.get('[data-testid=ta-view-start-date]').clear()
-        cy.get('[data-testid=ta-view-start-date]').type(date)
+        cy.get('[data-testid=ta-view-start-date]').clear();
+        cy.get('[data-testid=ta-view-start-date]').type(date);
         cy.get('[data-testid=ta-view-start-date]').type('{enter}');
         cy.get('[data-testid=save-status]', { timeout: 20000 }).should('have.text', 'All Changes Saved');
-        cy.get('[data-testid="submission-open-date"]').clear()
-        cy.get('[data-testid="submission-open-date"]').type(date)
+        cy.get('[data-testid="submission-open-date"]').clear();
+        cy.get('[data-testid="submission-open-date"]').type(date);
         cy.get('[data-testid="submission-open-date"]').type('{enter}');
         cy.get('[data-testid=save-status]', { timeout: 20000 }).should('have.text', 'All Changes Saved');
-        cy.get('[data-testid=submission-due-date]').clear()
-        cy.get('[data-testid=submission-due-date]').type(date)
+        cy.get('[data-testid=submission-due-date]').clear();
+        cy.get('[data-testid=submission-due-date]').type(date);
         cy.get('[data-testid=submission-due-date]').type('{enter}');
         cy.get('[data-testid=save-status]', { timeout: 20000 }).should('have.text', 'All Changes Saved');
         cy.logout();
@@ -188,12 +188,12 @@ describe('Test warning messages for non team gradeable', () => {
         makeNonTeamGradeable(gradeable);
         // Date page, input 2 old dates for opening dates (Ta and students)
         cy.get('#page_5_nav').click();
-        cy.get('[data-testid=ta-view-start-date]').clear()
-        cy.get('[data-testid=ta-view-start-date]').type('1992-06-15')
+        cy.get('[data-testid=ta-view-start-date]').clear();
+        cy.get('[data-testid=ta-view-start-date]').type('1992-06-15');
         cy.get('[data-testid=ta-view-start-date]').type('{enter}');
         cy.get('[data-testid=save-status]', { timeout: 20000 }).should('have.text', 'All Changes Saved');
-        cy.get('[data-testid=submission-open-date]').clear()
-        cy.get('[data-testid=submission-open-date]').type('2004-12-18')
+        cy.get('[data-testid=submission-open-date]').clear();
+        cy.get('[data-testid=submission-open-date]').type('2004-12-18');
         cy.get('[data-testid=submission-open-date]').type('{enter}');
         cy.get('[data-testid=save-status]', { timeout: 20000 }).should('have.text', 'All Changes Saved');
     });
@@ -202,8 +202,8 @@ describe('Test warning messages for non team gradeable', () => {
         // 0 allowed late days and 0 remaining late days for student ==> Warning message
         cy.login('instructor');
         cy.visit(['sample', 'gradeable', gradeable, 'update?nav_tab=5']);
-        cy.get('[data-testid=submission-due-date]').clear()
-        cy.get('[data-testid=submission-due-date]').type(getCurrentTime('few_seconds_future'))
+        cy.get('[data-testid=submission-due-date]').clear();
+        cy.get('[data-testid=submission-due-date]').type(getCurrentTime('few_seconds_future'));
         cy.get('[data-testid=submission-due-date]').type('{enter}');
         cy.get('[data-testid=save-status]', { timeout: 20000 }).should('have.text', 'All Changes Saved');
         cy.logout();
@@ -217,8 +217,8 @@ describe('Test warning messages for non team gradeable', () => {
         If testing runs for too long, you can remove this test bloc */
         cy.login('instructor');
         cy.visit(['sample', 'gradeable', gradeable, 'update?nav_tab=5']);
-        cy.get('[data-testid=late-days]').clear()
-        cy.get('[data-testid=late-days]').type(1, { force: true })
+        cy.get('[data-testid=late-days]').clear();
+        cy.get('[data-testid=late-days]').type(1, { force: true });
         cy.get('[data-testid=late-days]').type('{enter}');
         cy.get('[data-testid=save-status]', { timeout: 20000 }).should('have.text', 'All Changes Saved');
         cy.get('[data-testid=submission-due-date]')
@@ -235,8 +235,8 @@ describe('Test warning messages for non team gradeable', () => {
         cy.login('instructor');
         giveLateDays(getCurrentTime(), 'student');
         cy.visit(['sample', 'gradeable', gradeable, 'update?nav_tab=5']);
-        cy.get('[data-testid=submission-due-date]').clear()
-        cy.get('[data-testid=submission-due-date]').type(getCurrentTime())
+        cy.get('[data-testid=submission-due-date]').clear();
+        cy.get('[data-testid=submission-due-date]').type(getCurrentTime());
         cy.get('[data-testid=submission-due-date]').type('{enter}');
         cy.get('[data-testid=save-status]', { timeout: 20000 }).should('have.text', 'All Changes Saved');
         cy.logout();
@@ -248,13 +248,13 @@ describe('Test warning messages for non team gradeable', () => {
         cy.login('instructor');
         cy.visit(['sample', 'gradeable', gradeable, 'update?nav_tab=5']);
 
-        cy.get('[data-testid=late-days]').clear()
-        cy.get('[data-testid=late-days]').type(0)
+        cy.get('[data-testid=late-days]').clear();
+        cy.get('[data-testid=late-days]').type(0);
         cy.get('[data-testid=late-days]').type('{enter}');
         cy.get('[data-testid=save-status]', { timeout: 20000 }).should('have.text', 'All Changes Saved');
 
-        cy.get('[data-testid=submission-due-date]').clear()
-        cy.get('[data-testid=submission-due-date]').type(getCurrentTime())
+        cy.get('[data-testid=submission-due-date]').clear();
+        cy.get('[data-testid=submission-due-date]').type(getCurrentTime());
         cy.get('[data-testid=submission-due-date]').type('{enter}');
         cy.get('[data-testid=save-status]', { timeout: 20000 }).should('have.text', 'All Changes Saved');
         cy.logout();
@@ -271,12 +271,12 @@ describe('Test warning messages for non team gradeable', () => {
         giveExtensions(gradeable);
         giveLateDays(getCurrentTime('threeDaysAgo'), 'student'); // Give valid late days (the current ones are after the original due date)
         cy.visit(['sample', 'gradeable', gradeable, 'update?nav_tab=5']);
-        cy.get('[data-testid=late-days]').clear()
-        cy.get('[data-testid=late-days]').type(3)
+        cy.get('[data-testid=late-days]').clear();
+        cy.get('[data-testid=late-days]').type(3);
         cy.get('[data-testid=late-days]').type('{enter}');
         cy.get('[data-testid=save-status]', { timeout: 20000 }).should('have.text', 'All Changes Saved');
-        cy.get('[data-testid=submission-due-date]').clear()
-        cy.get('[data-testid=submission-due-date]').type(getCurrentTime('twoDaysAgo'))
+        cy.get('[data-testid=submission-due-date]').clear();
+        cy.get('[data-testid=submission-due-date]').type(getCurrentTime('twoDaysAgo'));
         cy.get('[data-testid=submission-due-date]').type('{enter}');
         cy.get('[data-testid=save-status]', { timeout: 20000 }).should('have.text', 'All Changes Saved');
         cy.logout();
@@ -288,8 +288,8 @@ describe('Test warning messages for non team gradeable', () => {
         not the original due date. */
         cy.login('instructor');
         cy.visit(['sample', 'gradeable', gradeable, 'update?nav_tab=5']);
-        cy.get('[data-testid=submission-due-date]').clear()
-        cy.get('[data-testid=submission-due-date]').type(getCurrentTime('threeDaysAgo'))
+        cy.get('[data-testid=submission-due-date]').clear();
+        cy.get('[data-testid=submission-due-date]').type(getCurrentTime('threeDaysAgo'));
         cy.get('[data-testid=submission-due-date]').type('{enter}');
         cy.get('[data-testid=save-status]', { timeout: 20000 }).should('have.text', 'All Changes Saved');
         cy.logout();
@@ -315,17 +315,17 @@ describe('Test warning messages for team gradeable', () => {
 
         // Date page
         cy.get('#page_5_nav').click();
-        cy.get('[data-testid=ta-view-start-date]').clear()
-        cy.get('[data-testid=ta-view-start-date]').type('1992-06-15')
+        cy.get('[data-testid=ta-view-start-date]').clear();
+        cy.get('[data-testid=ta-view-start-date]').type('1992-06-15');
         cy.get('[data-testid=ta-view-start-date]').type('{enter}');
         cy.get('[data-testid=save-status]', { timeout: 20000 }).should('have.text', 'All Changes Saved');
 
-        cy.get('[data-testid=submission-open-date]').clear()
-        cy.get('[data-testid=submission-open-date]').type('2004-12-18')
+        cy.get('[data-testid=submission-open-date]').clear();
+        cy.get('[data-testid=submission-open-date]').type('2004-12-18');
         cy.get('[data-testid=submission-open-date]').type('{enter}');
         cy.get('[data-testid=save-status]', { timeout: 20000 }).should('have.text', 'All Changes Saved');
-        cy.get('[data-testid=late-days]').clear()
-        cy.get('[data-testid=late-days]').type(3)
+        cy.get('[data-testid=late-days]').clear();
+        cy.get('[data-testid=late-days]').type(3);
         cy.get('[data-testid=late-days]').type('{enter}');
         cy.get('[data-testid=save-status]', { timeout: 20000 }).should('have.text', 'All Changes Saved');
         // Create team
@@ -348,8 +348,8 @@ describe('Test warning messages for team gradeable', () => {
         giveLateDays(getCurrentTime('threeDaysAgo'), 'student', 3); // this is important for part 2/2
         giveLateDays(getCurrentTime('threeDaysAgo'), 'aphacker', 2);
         cy.visit(['sample', 'gradeable', team_gradeable, 'update?nav_tab=5']);
-        cy.get('[data-testid=submission-due-date]').clear()
-        cy.get('[data-testid=submission-due-date]').type(getCurrentTime('twoDaysAgo'))
+        cy.get('[data-testid=submission-due-date]').clear();
+        cy.get('[data-testid=submission-due-date]').type(getCurrentTime('twoDaysAgo'));
         cy.get('[data-testid=submission-due-date]').type('{enter}');
         cy.get('[data-testid=save-status]', { timeout: 20000 }).should('have.text', 'All Changes Saved');
         cy.logout();
@@ -362,8 +362,8 @@ describe('Test warning messages for team gradeable', () => {
         student will see a second warning message saying that aphacker will have a bad submission. */
         cy.login('instructor');
         cy.visit(['sample', 'gradeable', team_gradeable, 'update?nav_tab=5']);
-        cy.get('[data-testid=submission-due-date]').clear()
-        cy.get('[data-testid=submission-due-date]').type(getCurrentTime('threeDaysAgo'))
+        cy.get('[data-testid=submission-due-date]').clear();
+        cy.get('[data-testid=submission-due-date]').type(getCurrentTime('threeDaysAgo'));
         cy.get('[data-testid=submission-due-date]').type('{enter}');
         cy.get('[data-testid=save-status]', { timeout: 20000 }).should('have.text', 'All Changes Saved');
         cy.logout();
