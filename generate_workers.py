@@ -26,7 +26,7 @@ def get_args(m_series=False):
                         help='Number of worker machines to configure')
     parser.add_argument('--provider', default=default_provider, type=str,
                         help='The VM provider (default on this machine is ' + default_provider + ')')
-    parser.add_argument('--ip-range', default='192.168.56.0/24', type=ipaddress.ip_network,
+    parser.add_argument('--ip-range', default='192.168.{}.0/24'.format(random.randint(100, 200)), type=ipaddress.ip_network,
                         help='IP address range for workers')
     parser.add_argument('--base-port', default=2240, type=int,
                         help='Base ssh port (ports will be assigned incrementally)')
