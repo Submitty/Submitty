@@ -36,7 +36,7 @@ skipOn(Cypress.env('run_area') === 'CI', () => {
             checkCheckbox('[data-testid="display-messages"]');
             cy.get('[data-testid="cust-messages"]').should('be.visible');
 
-            //TODO: add checks for warning once feature is implemented
+            // TODO: add checks for warning once feature is implemented
             checkCheckbox('[data-testid="display-warning"]');
 
             cy.get('[data-testid="display-final-grade"]').should('not.be.checked');
@@ -46,7 +46,7 @@ skipOn(Cypress.env('run_area') === 'CI', () => {
             cy.get('[data-testid="final-grade-cutoffs"]').should('be.visible');
             cy.get('[data-testid="manual-grading"]').should('be.visible');
 
-            //TODO: add checks for instructor notes once feature is implemented
+            // TODO: add checks for instructor notes once feature is implemented
             checkCheckbox('[data-testid="display-instructor-notes"]');
 
             cy.get('[data-testid="display_benchmarks_lowest_a-"]').should('not.be.checked');
@@ -64,11 +64,11 @@ skipOn(Cypress.env('run_area') === 'CI', () => {
             cy.get('[data-testid="benchmark-percents"]').should('be.visible');
 
             // Ensure gradeables can be added
-            //TODO: test drag/drop functionality
-            cy.get('[data-testid="gradeables"]').should('be.visible')
-            cy.get('[data-testid="buckets-used-list"]').should('be.visible')
-            cy.get('[data-testid="buckets-available-list"]').should('be.visible')
-            cy.get('[data-testid="gradeable-config"]').should('be.visible')
+            // TODO: test drag/drop functionality
+            cy.get('[data-testid="gradeables"]').should('be.visible');
+            cy.get('[data-testid="buckets-used-list"]').should('be.visible');
+            cy.get('[data-testid="buckets-available-list"]').should('be.visible');
+            cy.get('[data-testid="gradeable-config"]').should('be.visible');
 
             // Ensure textboxes have correct initial values and can be modified
             checkTextbox('[data-testid="cust-messages-textarea"]', '', 'message');
@@ -100,7 +100,7 @@ skipOn(Cypress.env('run_area') === 'CI', () => {
             checkTextbox('[data-testid="cutoff_D"]', '60', '50');
 
             // Ensure tables can be added to and removed from
-            //TODO: add checks for other tables once features are implemented
+            // TODO: add checks for other tables once features are implemented
             cy.get('[data-testid="manual-grading-user-id"]').type('adamsg');
             cy.get('[data-testid="manual-grading-grade"]').select(1);
             cy.get('[data-testid="manual-grading-note"]').type('MESSAGE');
@@ -125,7 +125,7 @@ skipOn(Cypress.env('run_area') === 'CI', () => {
             // Upload manual customization
             cy.get('[data-testid="btn-upload-customization"]').should('exist');
             cy.get('[data-testid="config-upload"]').should('exist');
-            //TODO: select file using the Upload button instead of force clicking a hidden element
+            // TODO: select file using the Upload button instead of force clicking a hidden element
             cy.get('[data-testid="config-upload"]').selectFile('cypress/fixtures/manual_customization.json', {force: true});
             // Ensure that elements requiring a manual_customization.json appear
             cy.get('[data-testid="ask-which-customization"]').should('not.be.hidden');
