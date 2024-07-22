@@ -635,7 +635,7 @@ function checkBuildStatus() {
             console.log(response);
             if (response.status === 'success') {
                 $('#save_status').text('Rainbow grades successfully generated!');
-                showLogButton(response.data.data);
+                showLogButton(response.data);
             }
             else if (response.status === 'fail') {
                 $('#save_status').text('A failure occurred generating rainbow grades');
