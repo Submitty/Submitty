@@ -7,7 +7,8 @@ const exports = {
             try {
                 return (await import(`./pages/${page}.vue`) as { default: Parameters<typeof createApp>[0] }).default;
             }
-            catch {
+            catch (e) {
+                console.error(`Could not render vue page ${page}:`, e);
                 return Unknown;
             }
         })();
