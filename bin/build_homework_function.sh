@@ -231,77 +231,92 @@ function build_homework {
     fi
 
     log_instructor_output="${hw_build_path}/log_instructor_output.txt"
-    config_file="${hw_build_path}/config.json"
+    # clean up the config file (remove comments for parsing)
+    config_file=$(sed 's://.*$::' "${hw_build_path}/config.json")
+    instructor_solution_compile_commands=$(echo "${config_file}" | jq -r '.instructor_solution_compile_command[]') >> $log_instructor_output
 
-    instructor_solution_compile_command=$(sed 's://.*$::' "${config_file}" | jq -r '.instructor_solution_compile_command') >> $log_instructor_output
+    # only enter if it has property: instructor_solution_compile_command in config
+    if [ -n "${instructor_solution_compile_commands}" ]; then
 
-    if [ -n "${instructor_solution_compile_command}" ] && [ "${instructor_solution_compile_command}" != "null" ]; then
+        instructor_executable=$(echo "${config_file}" | jq -r '.instructor_executable[]')
+        echo "${instructor_executable}" >> $log_instructor_output
+
+        if [ -z "${instructor_executable}" ]; then
+            echo "No instructor_executable property exists inside config." >> $log_instructor_output
+            exit 0
+        fi
+
+        # assign all the required directories
         test_input_dir="${hw_build_path}/test_input"
         test_output_dir="${hw_build_path}/test_output"
         instructor_solution_executable_dir="${course_dir}/instructor_solution_executable/$assignment"
         instructor_cmake_file="${hw_build_path}/instructor_CMakeLists.txt"
         instructor_solution_dir="${hw_build_path}/instructor_solution"
 
-        # Ensure the necessary directories exist
+        # ensure that necessary directories exist
         mkdir -p "${test_output_dir}"
         mkdir -p "${instructor_solution_executable_dir}"
 
-        # Check if directories exist and are accessible
-        find "$config_file" -type d -exec chmod -f ug+rwx,g+s,o= {} \;
-        find "$config_file" -type f -exec chmod -f ug+rw,o= {} \;
-
-        if [ ! -f "${config_file}" ]; then
-           echo "Config file ${config_file} does not exist."
-           exit 1
-        fi
-
+        # check if directories exist and are accessible
         find "$instructor_solution_executable_dir" -type d -exec chmod -f ug+rwx,g+s,o= {} \;
         find "$instructor_solution_executable_dir" -type f -exec chmod -f ug+rw,o= {} \;
 
-        # Compile each instructor solution file using the provided compilation command
-        for file in "${instructor_solution_dir}"/*; do
-            echo "Iterating instructor file : $file" >> $log_instructor_output
-            if [ -f "${file}" ] && [[ "${file}" == *.cpp ]]; then
-                executable="${instructor_solution_executable_dir}/$(basename ${file} .cpp)"
-                compile_command="${instructor_solution_compile_command} ${file} -o ${executable}"
-                echo "Compiling ${file} using command: ${compile_command}" >> $log_instructor_output
-                eval "${compile_command}"
-                if [ $? -ne 0 ]; then
-                    echo -e "\nCOMPILE ERROR\n\n"
-                    fix_permissions "$hw_config" "$hw_bin_path" "$hw_build_path" "$course_dir" "$assignment" "$course_group"
-                    exit 1
-                fi
+        # run commands using the provided compilation commands
+        while IFS= read -r compile_command; do
+
+            # extract the executable name
+            executable_name=$(echo "${compile_command}" | awk '{print $NF}')
+            echo "executable_name ${executable_name}" >> $log_instructor_output
+            executable_path="${instructor_solution_executable_dir}/${executable_name}" >> $log_instructor_output
+
+            # modify the compile command to use the full path for the instructor_solution and executable files
+            source_file=$(echo "${compile_command}" | awk '{for(i=1;i<=NF;i++) if ($i ~ /\.cpp$/) print $i}') >> $log_instructor_output
+            modified_source_file="${instructor_solution_dir}/$(basename ${source_file})"
+            echo "Modified source file ${modified_source_file}" >> $log_instructor_output
+
+            # replace the file names with the file paths using sed in compilation command
+            modified_compile_command=$(echo "${compile_command}" | sed "s|${source_file}|${modified_source_file}|; s|${executable_name}|${executable_path}|")
+
+            echo "Running compile command: ${modified_compile_command}" >> $log_instructor_output
+            eval "${modified_compile_command}"
+            if [ $? -ne 0 ]; then
+                echo -e "\nCOMPILE ERROR\n\n" >> $log_instructor_output
+                exit 1
             fi
-        done
-        echo "Instructor solutions compiled successfully."
+        done <<< "${instructor_solution_compile_commands}"
+
+        echo "Instructor solutions compiled successfully." >> $log_instructor_output
+        echo "Executables are stored in ${instructor_solution_executable_dir}."
 
         find "$test_output_dir" -type d -exec chmod -f ug+rwx,g+s,o= {} \;
         find "$test_output_dir" -type f -exec chmod -f ug+rw,o= {} \;
 
-        # Execute each compiled solution with input files and store the outputs
-        for executable_file in "${instructor_solution_executable_dir}"/*; do
-            if [[ -x "${executable_file}" ]]; then  # Check if it's executable or not
-                executable_name=$(basename "${executable_file}")
-                executable_base="${executable_name%.*}"
+        # run executables on input files and store the outputs
+        while IFS= read -r executable_file; do
+            executable_path="${instructor_solution_executable_dir}/${executable_file}"
+            # check if it's executable or not
+            if [ -x "${executable_path}" ]; then
                 for input_file in "${test_input_dir}"/*; do
-                  if [ -f "${input_file}" ] && [[ "${input_file}" == *.txt ]]; then
-                    input_filename=$(basename "${input_file}")
-                    output_file="${test_output_dir}/${executable_base}_${input_filename%.txt}.txt"
-                    echo "Running ${executable_file} with input ${input_file}..."
-                    "${executable_file}" < "${input_file}" > "${output_file}" 2>> $log_instructor_output
-                    if [ $? -eq 0 ]; then
-                        echo "Ran on ${input_file} successfully" >> $log_instructor_output
-                    else
-                        echo "Error running ${executable_file} on ${input_file}" >> $log_instructor_output
-                        exit 1
+                    if [ -f "${input_file}" ] && [[ "${input_file}" == *.txt ]]; then
+                        input_filename=$(basename "${input_file}")
+                        output_file="${test_output_dir}/$(basename ${executable_path})_${input_filename%.txt}.txt"
+                        echo "Running ${executable_path} with input ${input_file}..." >> $log_instructor_output
+                        "${executable_path}" < "${input_file}" > "${output_file}" 2>> $log_instructor_output
+                        if [ $? -eq 0 ]; then
+                            echo "Ran on ${input_file} successfully" >> $log_instructor_output
+                        else
+                            echo "Error running ${executable_path} on ${input_file}" >> $log_instructor_output
+                            exit 1
+                        fi
                     fi
-                  fi
                 done
+                # for now, only run the first executable on inputs which is enough for c++
+                break
+            else
+                echo "Executable ${executable_path} is not found or not executable." >> $log_instructor_output
             fi
-        done
-
+        done <<< "${instructor_executable}"
         echo "Outputs are stored in ${test_output_dir}."
-        echo "Executables are stored in ${instructor_solution_executables_dir}."
     fi
 
 

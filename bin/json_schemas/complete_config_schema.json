@@ -420,8 +420,20 @@
         }
       },
       "instructor_solution_compile_command" : {
-        "type" : "string",
-        "description" : "Specifies the command to compile instructor solution for the case of random input/output"
+        "description" : "The array of commands to compile instructor solution for the case of random input/output",
+        "type" : "array",
+        "minItems" : 1,
+        "items" : {
+          "type": "string"
+        }
+      },
+      "instructor_executable" : {
+        "description" : "The array of names of produced executables after compilation in instructor_solution_compile_command",
+        "type" : "array",
+        "minItems" : 1,
+        "items" : {
+          "type" : "string"
+        }
       },
       "display_testcase_runtime_memory": {
         "type": "boolean",
