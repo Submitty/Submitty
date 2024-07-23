@@ -1150,7 +1150,7 @@ class ForumThreadView extends AbstractView {
             else {
                 $classes[] = "important";
             }
-        }        
+        }
         if ($post["deleted"]) {
             $classes[] = "deleted";
             if ($isNewPost) {
