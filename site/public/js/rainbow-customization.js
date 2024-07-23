@@ -30,7 +30,6 @@ function ClampPoints(el) {
 function ClampPercents(el) {
     if (el.value === '') {
         el.value = el.placeholder;
-        el.classList.remove('override');
     }
     el.value = Math.min(Math.max(el.value, 0.0), 100.0);
 }

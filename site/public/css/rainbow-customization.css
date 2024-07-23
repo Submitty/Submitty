@@ -204,7 +204,7 @@ hr {
     color: var(--standard-vibrant-orange) !important;
 }
 
-.override + div.gradeable-li-right-of-input i.fa-exclamation-triangle {
+div:has(.override) ~ div.gradeable-li-right-of-input i.fa-exclamation-triangle {
     display: inline-block;
 }
 
