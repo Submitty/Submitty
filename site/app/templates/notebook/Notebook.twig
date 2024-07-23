@@ -36,7 +36,7 @@
             {# Handle if cell is image #}
             {% elseif cell.type == "image" %}
 
-                <img src="{{ attribute(image_data, cell.image) }}"
+                <img src="{{ image_data is defined ? attribute(image_data, cell.image) : cell.image }}"
 
                 {% if cell.width > 0 %}
                     width="{{ cell.width }}"
