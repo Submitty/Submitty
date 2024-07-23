@@ -92,6 +92,12 @@ def main() -> None:
             course = Course(course_json)
             courses[course.code] = course
 
+    for repo_course_file in sorted(os.path.join(SUBMITTY_INSTALL_DIR, "GIT_CHECKOUT", "course.yml")):
+        if len(use_courses) == 0 or course_json['code'] in use_courses:
+            course_json = load_data_yaml(repo_course_file)
+            course = Course(course_json)
+            courses[course.code] = course
+
     create_group("submitty_course_builders")
 
     for user_file in sorted(glob.iglob(os.path.join(args.users_path, '*.yml'))):
