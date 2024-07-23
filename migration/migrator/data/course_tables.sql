@@ -1489,6 +1489,20 @@ CREATE TABLE public.peer_feedback (
 
 
 --
+-- Name: peer_grading_panel; Type: TABLE; Schema: public; Owner: -
+--
+
+CREATE TABLE public.peer_grading_panel (
+    g_id character varying(255) NOT NULL,
+    autograding boolean DEFAULT true NOT NULL,
+    rubric boolean DEFAULT true NOT NULL,
+    files boolean DEFAULT true NOT NULL,
+    solution_notes boolean DEFAULT true NOT NULL,
+    discussion boolean DEFAULT true NOT NULL
+);
+
+
+--
 -- Name: poll_options; Type: TABLE; Schema: public; Owner: -
 --
 
@@ -2409,6 +2423,14 @@ ALTER TABLE ONLY public.peer_feedback
 
 
 --
+-- Name: peer_grading_panel peer_grading_panel_pkey; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.peer_grading_panel
+    ADD CONSTRAINT peer_grading_panel_pkey PRIMARY KEY (g_id);
+
+
+--
 -- Name: poll_options poll_options_pkey; Type: CONSTRAINT; Schema: public; Owner: -
 --
 
@@ -3273,6 +3295,14 @@ ALTER TABLE ONLY public.peer_feedback
 
 ALTER TABLE ONLY public.peer_feedback
     ADD CONSTRAINT peer_feedback_user_id_fkey FOREIGN KEY (user_id) REFERENCES public.users(user_id) ON DELETE CASCADE;
+
+
+--
+-- Name: peer_grading_panel peer_grading_panel_g_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.peer_grading_panel
+    ADD CONSTRAINT peer_grading_panel_g_id_fkey FOREIGN KEY (g_id) REFERENCES public.electronic_gradeable(g_id);
 
 
 --
