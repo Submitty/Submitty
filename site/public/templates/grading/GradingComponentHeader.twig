@@ -31,13 +31,6 @@
 
 <span class="divider col"> </span>
 
-<span class="col-no-gutters">
-    {# Saving status #}
-    {% include "SavingTools.twig" with {
-        'show_save_tools': show_mark_list,
-        'cancel_on_click': 'onCancelComponent(this)'
-    } only %}
-</span>
 {% if component_version_conflict is same as(true) and not grading_disabled %}
     <span class="version-warning col-5" data-testid="version-warning">
         Please edit or ensure that comments from version {{ graded_component.graded_version }} still apply.
@@ -49,6 +42,15 @@
         </span>
     {% endif %}
 {% endif %}
+
+<span class="col-no-gutters">
+    {# Saving status #}
+    {% include "SavingTools.twig" with {
+        'show_save_tools': show_mark_list,
+        'cancel_on_click': 'onCancelComponent(this)',
+        'component_version_conflict': component_version_conflict
+    } only %}
+</span>
 
 <span class="graded-by col-no-gutters">
     {% if graded_component.grader_id is defined %}
