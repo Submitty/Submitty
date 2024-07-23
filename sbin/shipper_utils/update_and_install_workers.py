@@ -54,16 +54,19 @@ def update_docker_images(user, host, worker, autograding_workers, autograding_co
         client = docker.from_env()
         try:
             # List all images
-            image_current_list = client.images.list()
-            image_set = set()
-            
-            for image in image_current_list:
-                for image_name in image.attrs['RepoTags']:
-                    image_set.add(image_name)
+            image_set = {
+                image_name
+                for image in client.images.list()
+                for image_name in image.attrs["RepoTags"]
+            }
+
             images_to_remove = set.difference(image_set, images_to_update)
-            #lichen container doesn't appear in autograding json, but its still important so don't remove it.
-            images_to_remove.remove("submitty/lichen:latest")
-            images_to_remove.remove("lichen:latest")
+
+            # Prevent removal of system docker containers
+            with open("/usr/local/submitty/GIT_CHECKOUT/Submitty/.setup/data/system_docker_containers.json") as json_file:
+                system_docker_containers = json.load(json_file)
+
+            images_to_remove = set.difference(images_to_remove, set(system_docker_containers))
 
             # Remove images
             for imageRemoved in images_to_remove:
