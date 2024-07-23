@@ -44,10 +44,10 @@ describe('Test cases for TA grading page', () => {
             .should('contain', 'Extra credit is acceptable');
         cy.get('body').type('{0}');
         cy.get('[data-testid="save-tools-save"]').click();
-        cy.get('#grading_total').eq(1).should('contain', '2 / 2');
-        cy.get('#grading_total').eq(2).should('contain', '2 / 5');
-        cy.get('#grading_total').eq(3).should('contain', '2 / 5');
-        cy.get('#grading_total').eq(4).should('contain', '0 / 0');
-        cy.get('#grading_total').eq(5).should('contain', '6 / 12').should('contain', 'Total');
+        cy.get('[data-testid="grading_total"]').eq(1).should('contain', '2 / 2');
+        cy.get('[data-testid="grading_total"]').eq(2).should('contain', '2 / 5');
+        cy.get('[data-testid="grading_total"]').eq(3).should('contain', '2 / 5');
+        cy.get('[data-testid="grading_total"]').eq(4).should('contain', '0 / 0');
+        cy.get('[data-testid="score-total"]').eq(5).should('contain', '6 / 12').should('contain', 'Total');
     });
 });
