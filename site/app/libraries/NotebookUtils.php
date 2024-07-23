@@ -45,7 +45,8 @@ class NotebookUtils {
                                 'type' => 'output',
                                 'output_text' => implode($output['text'] ?? []),
                             ];
-                        } elseif (($output['output_type'] ?? '') === 'display_data' && isset($output['data'])) {
+                        }
+                        elseif (($output['output_type'] ?? '') === 'display_data' && isset($output['data'])) {
                             // Note: SVG files are not supported due to XSS risks
                             $mime_types = [
                                 'image/png',
@@ -69,7 +70,8 @@ class NotebookUtils {
                                     'type' => 'output',
                                     'output_text' => $output['data']['text/plain'],
                                 ];
-                            } elseif ($output_type !== null) {
+                            }
+                            elseif ($output_type !== null) {
                                 $cells[] = [
                                     'type' => 'image',
                                     'image' => 'data:' . $output_type . ';base64, ' . $output['data'][$output_type],
