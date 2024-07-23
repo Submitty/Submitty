@@ -213,13 +213,13 @@ class HomeworkView extends AbstractView {
             $daylight_due_date = intval($due_date->format("I"));
             $daylight_due_date_with_late_days = intval($due_date_with_late_days->format("I"));
             // DST is different, DST message always required
-            if ($daylight_due_date != $daylight_due_date_with_late_days) {
+            if ($daylight_due_date !== $daylight_due_date_with_late_days) {
                 $daylight_message_required = true;
             }
             else { // check if we walked in and then out of DST
                 // same year, only need to check due date outside DST (0) and late day + due date outside of DST but on the other side (0)
-                if ($due_date->format("y") == $due_date_with_late_days->format("y")) {
-                    if ($daylight_due_date == 1 || $daylight_due_date_with_late_days == 1) {
+                if ($due_date->format("y") === $due_date_with_late_days->format("y")) {
+                    if ($daylight_due_date === 1 || $daylight_due_date_with_late_days === 1) {
                         $daylight_message_required = false;
                     }
                     else {
@@ -230,8 +230,8 @@ class HomeworkView extends AbstractView {
                 }
                 else {
                     if (
-                        $daylight_message_required = 0
-                        && $daylight_due_date_with_late_days = 0
+                        $daylight_due_date === 0
+                        && $daylight_due_date_with_late_days === 0
                         && intval($due_date->format("m")) > 6
                         && intval($due_date_with_late_days->format("m")) < 6
                     ) {
