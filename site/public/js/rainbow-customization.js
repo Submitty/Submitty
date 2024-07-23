@@ -17,7 +17,6 @@ function ExtractBuckets() {
 }
 
 // Forces element's value to be non-negative
-// eslint-disable-next-line no-unused-vars
 function ClampPoints(el) {
     if (el.value === '') {
         el.value = el.placeholder;
@@ -26,7 +25,16 @@ function ClampPoints(el) {
     el.value = Math.max(0.0, el.value);
 }
 
-// eslint-disable-next-line no-unused-vars
+// Forces element's value to be non-negative and between 0.0 - 100.0
+// Distinct from ClampPercent(), this is for Per Gradeable Percents
+function ClampPercents(el) {
+    if (el.value === '') {
+        el.value = el.placeholder;
+        el.classList.remove('override');
+    }
+    el.value = Math.min(Math.max(el.value, 0.0), 100.0);
+}
+
 function DetectMaxOverride(el) {
     if (el.value !== el.placeholder) {
         el.classList.add('override');
@@ -50,7 +58,6 @@ function ExtractBucketName(s, offset) {
 }
 
 // Forces element's value to be in range [0.0,100.0]
-// eslint-disable-next-line no-unused-vars
 function ClampPercent(el) {
     el.value = Math.min(Math.max(el.value, 0.0), 100.0);
     UpdateUsedPercentage();
@@ -793,6 +800,15 @@ $(document).ready(() => {
 
         dropLowestDivs.each((index, dropLowestDiv) => {
             $(dropLowestDiv).css('display', isChecked ? 'block' : 'none');
+        });
+    });
+    $('#per-gradeable-percents-checkbox').change(function (event) {
+        event.stopPropagation();
+        const percentsInputs = $('div[id^="gradeable-percents-div-"]');
+        const isChecked = $(this).is(':checked');
+
+        percentsInputs.each((index, percentInput) => {
+            $(percentInput).toggle(isChecked);
         });
     });
 });

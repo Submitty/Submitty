@@ -234,3 +234,12 @@ hr {
 #gradeables .gradeable-custom-item-input {
     width: 3em;
 }
+
+[id^="gradeable-pts-div-"],
+[id^="gradeable-percents-div-"] {
+    margin-right: 2em;
+}
+
+[id^="gradeable-percents-div-"] {
+    display: none;
+}

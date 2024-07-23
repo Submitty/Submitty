@@ -89,6 +89,10 @@
 
                         <label>Remove lowest:
                             <input id="drop_lowest_checkbox" type="checkbox" name="drop_lowest">
+                        </label><br>
+
+                        <label>Per Gradeable Percents:
+                            <input id="per-gradeable-percents-checkbox" type="checkbox" name="per-gradeable-percents">
                         </label>
                     </div>
 
@@ -125,17 +129,31 @@
                                     <ol style="list-style-type: none;" id="gradeables-list-{{ bucket }}">
                                         {% for gradeable in gradeables %}
                                             <li class="gradeable-li pt-1" style="border-top: 1px solid #FFFFFF;">
-                                                <input type="text"
-                                                       class="gradeable-custom-item-input"
-                                                       aria-label="{{gradeable["title"]}} max score"
-                                                       class="{{ gradeable["override"] ? "override" : "" }}"
-                                                       placeholder="{{ gradeable["max_score"] }}"
-                                                       value="{{ gradeable["override"] ? gradeable["override_max"] : gradeable["max_score"] }}"
-                                                       id="maxscore-{{ gradeable["id"] }}"
-                                                       data-grade-release-date="{{ gradeable["grade_release_date"] }}"
-                                                       style="margin-right: 10px;"
-                                                       onblur="ClampPoints(this);"
-                                                       onkeyup="DetectMaxOverride(this);">
+                                                <div id="gradeable-pts-div-{{ gradeable["id"] }}">
+                                                    <input type="text"
+                                                           class="gradeable-custom-item-input {{ gradeable["override"] ? "override" : "" }}"
+                                                           aria-label="{{gradeable["title"]}} max score"
+                                                           placeholder="{{ gradeable["max_score"] }}"
+                                                           value="{{ gradeable["override"] ? gradeable["override_max"] : gradeable["max_score"] }}"
+                                                           id="maxscore-{{ gradeable["id"] }}"
+                                                           data-grade-release-date="{{ gradeable["grade_release_date"] }}"
+                                                           onblur="ClampPoints(this);"
+                                                           onkeyup="DetectMaxOverride(this);">
+                                                    <span>pts</span>
+                                                </div>
+                                                <div id="gradeable-percents-div-{{ gradeable["id"] }}">
+                                                    <input type="text"
+                                                           {% set default_percent = (1 / gradeables|length) * 100 %}
+                                                           class="gradeable-custom-item-input {{ gradeable["override"] ? "override" : "" }}"
+                                                           aria-label="{{gradeable["title"]}} percent"
+                                                           placeholder="{{ default_percent }}"
+                                                           value="{{ gradeable["override"] ? default_percent : default_percent }}"
+                                                           id="percents-{{ gradeable["id"] }}"
+                                                           data-grade-release-date="{{ gradeable["grade_release_date"] }}"
+                                                           onblur="ClampPercents(this);"
+                                                           onkeyup="DetectMaxOverride(this);">
+                                                    <span>%</span>
+                                                </div>
                                                 <div class="gradeable-li-right-of-input">
                                                     <div class="gradeable-li-info">
                                                         <i class="fas fa-exclamation-triangle fa-rb tooltip">
