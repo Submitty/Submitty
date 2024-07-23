@@ -219,6 +219,10 @@ $(document).ready(() => {
         else {
             data[this.name] = $(this).val();
         }
+        // Retrieve status for each of the panels
+        $('input[name="peer_panel"]').each(function () {
+            data[$(this).attr('id')] = $(this).is(':checked');
+        });
         const addDataToRequest = function (i, val) {
             if (val.type === 'radio' && !$(val).is(':checked')) {
                 return;
@@ -240,6 +244,8 @@ $(document).ready(() => {
             || $(this).hasClass('date-related')) {
             $('#gradeable-dates :input:enabled,.date-related').each(addDataToRequest);
         }
+        // Redundant to send this data
+        delete data.peer_panel;
         ajaxUpdateGradeableProperty($('#g_id').val(), data,
             (response_data) => {
                 // Clear errors by setting new values
