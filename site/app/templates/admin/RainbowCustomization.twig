@@ -33,7 +33,7 @@
                 No changes to save
             </div>
             <div id="save_status_buttons">
-                <button style="display: inline-block; padding-left: 4px; padding: 5px 12px;" class="btn" id="show_log_button" type="button">
+                <button style="margin-left: 60px; padding: 5px 12px;" class="btn btn-default" id="show_log_button" type="button">
                     Log
                 </button>
             </div>
@@ -50,6 +50,18 @@
                             <input type="hidden" name="csrf_token" value="{{csrfToken}}">
                             <input type="file" id="config-upload" name="config_upload" style="display:none">
 
+                            <button
+                                id="btn-download-gui-customization"
+                                class="btn btn-default key_to_click"
+                                tabindex="0"
+                                type="button"
+                                title="Download the GUI customization"
+                                onclick="window.location.href='{{ gui_customization_download_url }}'"
+                                style="margin-right: 50px"
+                            >
+                                <i class="fas fa-download" title="Download the file"></i>
+                                Download GUI Customization
+                            </button>
                             <button
                                 id="btn-upload-customization"
                                 class="btn btn-default key_to_click"
@@ -70,18 +82,6 @@
                             >
                                 <i class="fas fa-download" title="Download the file"></i>
                                 Download Manual Customization
-                            </button>
-
-                            <button
-                                id="btn-download-gui-customization"
-                                class="btn btn-default key_to_click"
-                                tabindex="0"
-                                type="button"
-                                title="Download the GUI customization"
-                                onclick="window.location.href='{{ gui_customization_download_url }}'"
-                            >
-                                <i class="fas fa-download" title="Download the file"></i>
-                                Download GUI Customization
                             </button>
                         </form>
                     </div>
