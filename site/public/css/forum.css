@@ -781,7 +781,7 @@
     background-color: var(--viewed-content);
 }
 
-/* stylelint-disable-next-line selector-class-pattern */
+/* stylelint-disable selector-class-pattern */
 .post_box.important.new_post,
 .post_box.new_post.important-new {
     background-color: var(--viewed-content);
@@ -789,6 +789,8 @@
     border-width: 4px;
     border-color: var(--important-post);
 }
+/* stylelint-enable selector-class-pattern */
+
 
 .important {
     /* THIS IS WHERE THE BACKGROUND COLOR FOR POSTS IS */

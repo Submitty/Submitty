@@ -1135,7 +1135,7 @@ class ForumThreadView extends AbstractView {
                 $classes[] = "new_post";
                 $isNewPost = true;
             }
-            elseif ($current_user == $post["author_user_id"]) {
+            elseif ($current_user === $post["author_user_id"]) {
                 $classes[] = "new_post";
                 $isNewPost = true;
             }
