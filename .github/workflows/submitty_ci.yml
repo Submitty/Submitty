@@ -114,7 +114,7 @@ jobs:
 
 
   php-lint:
-    name: PHP Lint & Static Analysis
+    name: PHP Lint
     runs-on: ubuntu-22.04
     defaults:
       run:
@@ -184,7 +184,7 @@ jobs:
 
 
   python-lint:
-    name: Python Lint & Static Analysis
+    name: Python Lint
     runs-on: ubuntu-22.04
     steps:
       - uses: actions/checkout@v4
