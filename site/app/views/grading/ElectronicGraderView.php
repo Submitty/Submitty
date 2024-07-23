@@ -971,6 +971,11 @@ HTML;
         $isStudentInfoPanel = true;
         $isDiscussionPanel = false;
         $isGradeInquiryPanel = false;
+        $isPeerAutograding = $gradeable->getPeerAutograding();
+        $isPeerRubric = $gradeable->getPeerRubric();
+        $isPeerFiles = $gradeable->getPeerFiles();
+        $isPeerSolutions = $gradeable->getPeerSolutions();
+        $isPeerDiscussion = $gradeable->getPeerDiscussion();
         $is_peer_grader = false;
         // WIP: Replace this logic when there is a definitive way to get my peer-ness
         // If this is a peer gradeable but I am not allowed to view the peer panel, then I must be a peer.
@@ -985,6 +990,7 @@ HTML;
                 $is_peer_grader = true;
             }
         }
+        $isPeerGrader = $is_peer_grader;
         if ($graded_gradeable->getGradeable()->isDiscussionBased()) {
             $isDiscussionPanel = true;
         }
@@ -1091,6 +1097,12 @@ HTML;
                 ['grading', 'ElectronicGrader'],
                 'renderGradingPanelHeader',
                 $isPeerPanel,
+                $isPeerGrader,
+                $isPeerAutograding,
+                $isPeerRubric,
+                $isPeerFiles,
+                $isPeerSolutions,
+                $isPeerDiscussion,
                 $isStudentInfoPanel,
                 $isDiscussionPanel,
                 $isGradeInquiryPanel,
@@ -1258,9 +1270,15 @@ HTML;
         ]);
     }
 
-    public function renderGradingPanelHeader(bool $isPeerPanel, bool $isStudentInfoPanel, bool $isDiscussionPanel, bool $isGradeInquiryPanel, bool $is_notebook, string $error_color, string $error_message): string {
+    public function renderGradingPanelHeader(bool $isPeerPanel, bool $isPeerGrader, bool $isPeerAutograding, bool $isPeerRubric, bool $isPeerFiles, bool $isPeerSolutions, bool $isPeerDiscussion, bool $isStudentInfoPanel, bool $isDiscussionPanel, bool $isGradeInquiryPanel, bool $is_notebook, string $error_color, string $error_message): string {
         return $this->core->getOutput()->renderTwigTemplate("grading/electronic/GradingPanelHeader.twig", [
             'isPeerPanel' => $isPeerPanel,
+            'isPeerGrader' => $isPeerGrader,
+            'isPeerAutograding' => $isPeerAutograding,
+            'isPeerRubric' => $isPeerRubric,
+            'isPeerFiles' => $isPeerFiles,
+            'isPeerSolutions' => $isPeerSolutions,
+            'isPeerDiscussion' => $isPeerDiscussion,
             'isStudentInfoPanel' => $isStudentInfoPanel,
             'isDiscussionPanel' => $isDiscussionPanel,
             'isGradeInquiryPanel' => $isGradeInquiryPanel,
@@ -1592,6 +1610,7 @@ HTML;
         $has_active_version = $graded_gradeable->getAutoGradedGradeable()->hasActiveVersion();
         $has_submission = $graded_gradeable->getAutoGradedGradeable()->hasSubmission();
         $has_overridden_grades = $graded_gradeable->hasOverriddenGrades();
+        $show_clear_conflicts = $graded_gradeable->getTaGradedGradeable()->hasVersionConflict();
 
         $this->core->getOutput()->addVendorJs(FileUtils::joinPaths('twigjs', 'twig.min.js'));
         $this->core->getOutput()->addInternalJs('ta-grading-keymap.js');
@@ -1618,6 +1637,7 @@ HTML;
                 "has_active_version" => $has_active_version,
                 "version_conflict" => $version_conflict,
                 "show_silent_edit" => $show_silent_edit,
+                "show_clear_conflicts" => $show_clear_conflicts,
                 "student_grader" => $this->core->getUser()->getGroup() == User::GROUP_STUDENT,
                 "grader_id" => $this->core->getUser()->getId(),
                 "display_version" => $display_version,

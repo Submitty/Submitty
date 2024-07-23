@@ -58,11 +58,6 @@
             </div>
         </div>
     </div>
-    {% if grade_inquiry_only_button %}
-        <script>
-            inquiry_update();
-        </script>
-    {% endif %}
     {% if not is_student %}
         <a href="{{ stats_url }}" class="btn btn-primary" data-testid="grading-stats">Grading Stats</a>
     {% endif %}
@@ -742,6 +737,10 @@
 
 {# /Column functions #}
 <script>
+    {% if grade_inquiry_only_button %}
+        inquiry_update();
+    {% endif %}
+    
     function changeSections() {
         const status = {{ view_all ? 1 : 0 }};
         if (status) {
@@ -767,25 +766,8 @@
     }
 
     function change_inquiry() {
-        var button = document.getElementById('inquiryButton');
-        var status = Cookies.get('inquiry_status');
-        if(status === 'on') {
-            status = 'off'
-        }
-        else{
-            status = 'on';
-        }
-        if(status === 'on') {
-            Cookies.set('inquiry_status', 'on');
-            var inquiry = Cookies.get('inquiry_status');
-            grade_inquiry_only();
-            button.textContent = "Grade Inquiry Only: On";
-        } else {
-            Cookies.set('inquiry_status', 'off');
-            var inquiry = Cookies.get('inquiry_status');
-            reverse_inquiry_only();
-            button.textContent = "Grade Inquiry Only: Off";
-        }
+        Cookies.set('inquiry_status', '{{ inquiry_status ? "off" : "on"}}');
+        location.reload();
     }
 
     

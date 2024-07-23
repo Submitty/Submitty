@@ -81,6 +81,7 @@ class PollView extends AbstractView {
             'is_single_response' => PollUtils::isSingleResponse($poll->getQuestionType()),
             'end_time' => $poll->getEndTime()?->format('Y-m-d\TH:i:s'),
             'timer_enabled' => $poll->isTimerEnabled(),
+            'user_id' => $this->core->getUser()->getId()
         ]);
     }
 
@@ -90,11 +91,13 @@ class PollView extends AbstractView {
         $this->core->getOutput()->addVendorCss(FileUtils::joinPaths('flatpickr', 'flatpickr.min.css'));
         $this->core->getOutput()->addVendorJs(FileUtils::joinPaths('flatpickr', 'plugins', 'shortcutButtons', 'shortcut-buttons-flatpickr.min.js'));
         $this->core->getOutput()->addVendorCss(FileUtils::joinPaths('flatpickr', 'plugins', 'shortcutButtons', 'themes', 'light.min.css'));
+        $is_survey = $poll?->isSurvey() ?? false;
         return $this->core->getOutput()->renderTwigTemplate("polls/PollForm.twig", [
             'csrf_token' => $this->core->getCsrfToken(),
             'base_url' => $this->core->buildCourseUrl() . '/polls',
             'poll' => $poll,
             'max_size' => Utils::returnBytes(ini_get('upload_max_filesize')),
+            'is_survey' => $is_survey,
           ]);
     }
 }
