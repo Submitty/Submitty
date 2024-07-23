@@ -43,7 +43,7 @@
     </div>
 
     <div class="option-input col-md-6">
-        <input type='text' name='title' id='g_title' data-testid='create-gradeable-title' class="required auto_save new-gradeable" style="overflow:hidden" placeholder="(Required)" required value="{{ action != 'new' ? gradeable.getTitle() : '' }}" />
+        <input type='text' name='title' id='g_title' data-testid="create-gradeable-title" class="required auto_save new-gradeable" style="overflow:hidden" placeholder="(Required)" required value="{{ action != 'new' ? gradeable.getTitle() : '' }}" />
     </div>
 </div>
 
@@ -74,7 +74,7 @@
         </label>
     </div>
     <div class="option-input col-md-6">
-        <input type='text' name='id' id="g_id" data-testid='create-gradeable-id' class="required new-gradeable"
+        <input type='text' name='id' id="g_id" data-testid="create-gradeable-id" class="required new-gradeable"
         value="{{ action != 'new' ? gradeable.getId() : '' }}" placeholder="(Required)"
         {{ action == 'edit' ? 'readonly' : 'required' }} />
     </div>
