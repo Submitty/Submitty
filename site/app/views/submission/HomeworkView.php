@@ -205,7 +205,6 @@ class HomeworkView extends AbstractView {
         $due_date_with_late_days->modify('+' . $late_days_allowed . ' days');
         $today = new \DateTime();
 
-
         // if we are past the due date + late days
         if ($today > $due_date_with_late_days) {
             $daylight_message_required = false;
