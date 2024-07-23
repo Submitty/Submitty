@@ -44,6 +44,7 @@
 
     {% for audio_ref in audio %}
     <audio preload id='{{ audio_ref[0] }}' src='{{ audio_ref[1] }}'></audio>
+    <audio preload id='{{ audio_ref[0] }}' src='{{ audio_ref[1] }}' autoplay></audio>
     {% endfor %}
 
     {% for js_ref in js %}
