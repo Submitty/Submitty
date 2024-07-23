@@ -589,6 +589,7 @@
 .thread-content {
     display: block;
     margin-bottom: 0.25em;
+    word-break: break-all;
 }
 
 .attachment-btn {
