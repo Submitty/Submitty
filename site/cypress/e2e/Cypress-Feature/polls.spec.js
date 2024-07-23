@@ -1,5 +1,5 @@
 /*
- * This test relies on the polls and their initital state in the sample course
+ * This test relies on the polls and their initial state in the sample course
  * when running vagrant up. Modifications made to those polls will result in the
  * the failure of the tests below; however, any other existing polls should not
  * interfere with the tests.
@@ -178,7 +178,7 @@ describe('Test cases revolving around polls functionality', () => {
         cy.contains('New Poll').click();
         cy.url().should('include', 'sample/polls/newPoll');
         cy.get('#breadcrumbs > :nth-child(7) > span').should('have.text', 'New Poll');
-        cy.get('#poll-name').type('TEST');
+        cy.get('[data-testid="poll-name"]').type('TEST');
         cy.get('#poll-type-single-response-single-correct').should('not.be.checked');
         cy.get('#poll-type-single-response-multiple-correct').should('be.checked');
         cy.get('#poll-type-single-response-survey').should('not.be.checked');
@@ -193,11 +193,11 @@ describe('Test cases revolving around polls functionality', () => {
 
         // make a poll
         cy.contains('New Poll').click();
-        cy.get('#poll-name').type('Poll Cypress Test');
-        cy.get('#poll-question').type('# Question goes here...?');
-        cy.get('#poll-date').clear({ force: true });
+        cy.get('[data-testid="poll-name"]').type('Poll Cypress Test');
+        cy.get('[data-testid="poll-question"]').type('# Question goes here...?');
+        cy.get('[data-testid="poll-date"]').clear({ force: true });
         // manually setting the release date to some time in the past
-        cy.get('#poll-date').type('1970-01-01', { force: true });
+        cy.get('[data-testid="poll-date"]').type('1970-01-01', { force: true });
         // Testing the poll timer
         cy.get('#timer-inputs').should('not.be.visible');
         cy.get('#enable-timer').should('not.be.checked');
@@ -215,15 +215,15 @@ describe('Test cases revolving around polls functionality', () => {
         cy.contains('Add Response').click();
         cy.contains('Add Response').click();
         cy.contains('Add Response').click();
-        cy.get('#response_0_wrapper').children(':nth-child(3)').check();
-        cy.get('#response_0_wrapper').children(':nth-child(4)').type('Answer 1');
-        cy.get('#response_1_wrapper').children(':nth-child(4)').type('Answer 2');
-        cy.get('#response_2_wrapper').children(':nth-child(3)').check();
-        cy.get('#response_2_wrapper').children(':nth-child(4)').type('Answer 3');
+        cy.get('[data-testid="response-0-wrapper"]').children(':nth-child(3)').check();
+        cy.get('[data-testid="response-0-wrapper"]').children(':nth-child(4)').type('Answer 1');
+        cy.get('[data-testid="response-1-wrapper"]').children(':nth-child(4)').type('Answer 2');
+        cy.get('[data-testid="response-2-wrapper"]').children(':nth-child(3)').check();
+        cy.get('[data-testid="response-2-wrapper"]').children(':nth-child(4)').type('Answer 3');
         cy.get('#new-poll-title').click();
 
         // submit and verify on main polls page, poll should be closed
-        cy.get('#poll-form-submit').click();
+        cy.get('[data-testid="poll-form-submit"]').click();
         cy.url().should('include', 'sample/polls');
         cy.contains('Poll Cypress Test').siblings(':nth-child(5)').should('not.be.checked');
         cy.contains('Poll Cypress Test').siblings(':nth-child(6)').should('not.be.checked');
@@ -324,8 +324,8 @@ describe('Test cases revolving around polls functionality', () => {
         cy.contains('Poll Cypress Test').siblings(':nth-child(1)').children().click();
         cy.url().should('include', 'sample/polls/editPoll');
         cy.get('#breadcrumbs > :nth-child(7) > span').should('have.text', 'Edit Poll');
-        cy.get('#poll-name').invoke('val').should('eq', 'Poll Cypress Test');
-        cy.get('#poll-question').contains('Question goes here...?');
+        cy.get('[data-testid="poll-name"]').invoke('val').should('eq', 'Poll Cypress Test');
+        cy.get('[data-testid="poll-question"]').contains('Question goes here...?');
         cy.get('#poll-type-single-response-single-correct').should('not.be.checked');
         cy.get('#poll-type-single-response-multiple-correct').should('be.checked');
         cy.get('#poll-type-single-response-survey').should('not.be.checked');
@@ -339,15 +339,15 @@ describe('Test cases revolving around polls functionality', () => {
         cy.get('#poll-seconds').invoke('val').should('eq', '0');
         cy.get('#poll-hours').clear();
         cy.get('#poll-seconds').clear().type('10');
-        cy.get('#poll-date').invoke('val').should('eq', '1970-01-01');
+        cy.get('[data-testid="poll-date"]').invoke('val').should('eq', '1970-01-01');
         // release histogram/answer's default values should be "never"
         cy.get('#student-histogram-release-setting').invoke('val').should('eq', 'never');
         cy.get('#student-answer-release-setting').invoke('val').should('eq', 'never');
-        cy.get('.poll_response').should('contain', 'Answer 1');
+        cy.get('.poll-response').should('contain', 'Answer 1');
         cy.get('.correct-box').eq(0).should('be.checked');
-        cy.get('.poll_response').should('contain', 'Answer 2');
+        cy.get('.poll-response').should('contain', 'Answer 2');
         cy.get('.correct-box').eq(1).should('not.be.checked');
-        cy.get('.poll_response').should('contain', 'Answer 3');
+        cy.get('.poll-response').should('contain', 'Answer 3');
         cy.get('.correct-box').eq(2).should('be.checked');
         cy.get('textarea').contains('Answer 1').clear().type('Answer 0');
         cy.get('#responses').children(':nth-child(3)').children(':nth-child(5)').click();
@@ -487,42 +487,42 @@ describe('Test cases revolving around polls functionality', () => {
 
         // make a poll, set release date to today
         cy.contains('New Poll').click();
-        cy.get('#poll-name').type('Poll Today');
-        cy.get('#poll-question').type('# Question goes here...?');
-        cy.get('#poll-date').clear({ force: true });
-        cy.get('#poll-date').type(today.toISOString().substring(0, 10), { force: true });
+        cy.get('[data-testid="poll-name"]').type('Poll Today');
+        cy.get('[data-testid="poll-question"]').type('# Question goes here...?');
+        cy.get('[data-testid="poll-date"]').clear({ force: true });
+        cy.get('[data-testid="poll-date"]').type(today.toISOString().substring(0, 10), { force: true });
         cy.get('#new-poll-title').click(); // get rid of the date picker
         cy.contains('Add Response').click();
-        cy.get('#response_0_wrapper').children(':nth-child(3)').check();
-        cy.get('#response_0_wrapper').children(':nth-child(4)').type('Answer 1');
+        cy.get('[data-testid="response-0-wrapper"]').children(':nth-child(3)').check();
+        cy.get('[data-testid="response-0-wrapper"]').children(':nth-child(4)').type('Answer 1');
         cy.get('#new-poll-title').click();
-        cy.get('#poll-form-submit').click();
+        cy.get('[data-testid="poll-form-submit"]').click();
 
         // make a poll, set release date to tomorrow
         cy.contains('New Poll').click();
-        cy.get('#poll-name').type('Poll Tomorrow');
-        cy.get('#poll-question').type('What is your favorite class?');
-        cy.get('#poll-date').clear({ force: true });
-        cy.get('#poll-date').type(tomorrow.toISOString().substring(0, 10), { force: true });
+        cy.get('[data-testid="poll-name"]').type('Poll Tomorrow');
+        cy.get('[data-testid="poll-question"]').type('What is your favorite class?');
+        cy.get('[data-testid="poll-date"]').clear({ force: true });
+        cy.get('[data-testid="poll-date"]').type(tomorrow.toISOString().substring(0, 10), { force: true });
         cy.get('#new-poll-title').click();
         cy.contains('Add Response').click();
-        cy.get('#response_0_wrapper').children(':nth-child(3)').check();
-        cy.get('#response_0_wrapper').children(':nth-child(4)').type('Data Structures');
+        cy.get('[data-testid="response-0-wrapper"]').children(':nth-child(3)').check();
+        cy.get('[data-testid="response-0-wrapper"]').children(':nth-child(4)').type('Data Structures');
         cy.get('#new-poll-title').click();
-        cy.get('#poll-form-submit').click();
+        cy.get('[data-testid="poll-form-submit"]').click();
 
         // make a poll, set release date to some time in the future
         cy.contains('New Poll').click();
-        cy.get('#poll-name').type('Poll Future');
-        cy.get('#poll-question').type('Why do you want to pick this date?');
-        cy.get('#poll-date').clear({ force: true });
-        cy.get('#poll-date').type('2049-06-30', { force: true });
+        cy.get('[data-testid="poll-name"]').type('Poll Future');
+        cy.get('[data-testid="poll-question"]').type('Why do you want to pick this date?');
+        cy.get('[data-testid="poll-date"]').clear({ force: true });
+        cy.get('[data-testid="poll-date"]').type('2049-06-30', { force: true });
         cy.get('#new-poll-title').click();
         cy.contains('Add Response').click();
-        cy.get('#response_0_wrapper').children(':nth-child(3)').check();
-        cy.get('#response_0_wrapper').children(':nth-child(4)').type('Answer 1');
+        cy.get('[data-testid="response-0-wrapper"]').children(':nth-child(3)').check();
+        cy.get('[data-testid="response-0-wrapper"]').children(':nth-child(4)').type('Answer 1');
         cy.get('#new-poll-title').click();
-        cy.get('#poll-form-submit').click();
+        cy.get('[data-testid="poll-form-submit"]').click();
 
         // verify on main polls page, three newly created polls should be in their own time section
         cy.url().should('include', 'sample/polls');
@@ -533,26 +533,26 @@ describe('Test cases revolving around polls functionality', () => {
         // change the release date of Poll Future to tomorrow
         cy.contains('Poll Future').siblings(':nth-child(1)').children().click();
         cy.url().should('include', 'sample/polls/editPoll');
-        cy.get('#poll-date').clear({ force: true });
-        cy.get('#poll-date').type(tomorrow.toISOString().substring(0, 10), { force: true });
+        cy.get('[data-testid="poll-date"]').clear({ force: true });
+        cy.get('[data-testid="poll-date"]').type(tomorrow.toISOString().substring(0, 10), { force: true });
         cy.get('#new-poll-title').click();
-        cy.get('#poll-form-submit').click();
+        cy.get('[data-testid="poll-form-submit"]').click();
 
         // change the release date of Poll tomorrow to today
         cy.contains('Poll Tomorrow').siblings(':nth-child(1)').children().click();
         cy.url().should('include', 'sample/polls/editPoll');
-        cy.get('#poll-date').clear({ force: true });
-        cy.get('#poll-date').type(today.toISOString().substring(0, 10), { force: true });
+        cy.get('[data-testid="poll-date"]').clear({ force: true });
+        cy.get('[data-testid="poll-date"]').type(today.toISOString().substring(0, 10), { force: true });
         cy.get('#new-poll-title').click();
-        cy.get('#poll-form-submit').click();
+        cy.get('[data-testid="poll-form-submit"]').click();
 
         // change the release date of Poll today to tomorrow
         cy.contains('Poll Today').siblings(':nth-child(1)').children().click();
         cy.url().should('include', 'sample/polls/editPoll');
-        cy.get('#poll-date').clear({ force: true });
-        cy.get('#poll-date').type(tomorrow.toISOString().substring(0, 10), { force: true });
+        cy.get('[data-testid="poll-date"]').clear({ force: true });
+        cy.get('[data-testid="poll-date"]').type(tomorrow.toISOString().substring(0, 10), { force: true });
         cy.get('#new-poll-title').click();
-        cy.get('#poll-form-submit').click();
+        cy.get('[data-testid="poll-form-submit"]').click();
 
         // changed Poll Future => tomorrow, Poll Tomorrow => today, Poll Today => tomorrow and verify
         cy.url().should('include', 'sample/polls');
@@ -570,6 +570,112 @@ describe('Test cases revolving around polls functionality', () => {
         cy.contains('Poll Future').siblings(':nth-child(2)').click();
         cy.wait(500);
         cy.get('Poll Future').should('not.exist');
+    });
+
+    it('Should verify that polls allowing custom student options are functional', () => {
+        const tzoffset = (new Date()).getTimezoneOffset() * 60000; // Offset in milliseconds
+        const today = new Date(new Date() - tzoffset);
+        cy.logout();
+        cy.visit(['sample', 'polls']);
+        cy.login();
+
+        // Creates poll allowing custom options
+        cy.contains('New Poll').click();
+        cy.get('[data-testid="poll-name"]').type('Custom Poll Today');
+        cy.get('[data-testid="poll-question"]').type('# Question goes here...?');
+        cy.get('[data-testid="poll-date"]').clear({ force: true });
+        cy.get('[data-testid="poll-date"]').type(today.toISOString().substring(0, 10), { force: true });
+        cy.get('h1').click(); // get rid of the date picker
+        cy.contains('Add Response').click();
+        cy.get('[data-testid="response-0-wrapper"]').children(':nth-child(3)').check();
+        cy.get('[data-testid="response-0-wrapper"]').children(':nth-child(4)').type('Answer 1');
+        cy.get('h1').click();
+        cy.get('[data-testid="poll-custom-options"]').click();
+        cy.get('[data-testid="poll-form-submit"]').click();
+
+        // Open the poll
+        cy.visit(['sample', 'polls']);
+        cy.contains('Custom Poll Today').siblings(':nth-child(5)').children().click();
+
+        // Login as student to answer with custom response that can be chosen by others
+        cy.logout();
+        cy.login('student');
+        cy.visit(['sample', 'polls']);
+        cy.contains('Custom Poll Today').siblings(':nth-child(3)').contains('Answer').click();
+
+        cy.get('[data-testid="custom-response-text"]').type('Student Custom Response');
+        cy.get('[data-testid="custom-response-submit"]').should('not.be.disabled').click();
+
+        // Ensure custom option is selected by default and students can delete them
+        cy.get('[data-testid="answer-1"]').should('be.checked');
+        cy.get('[data-testid="custom-response-delete"]').should('be.visible').click();
+        cy.get('[data-testid="answer-1"]').should('not.exist');
+
+        cy.visit(['sample', 'polls']);
+        cy.contains('Custom Poll Today').siblings(':nth-child(3)').contains('Answer').click();
+
+        // Create new option for other students to select
+        cy.get('[data-testid="custom-response-text"]').type('Second Custom Response');
+        cy.get('[data-testid="custom-response-submit"]').should('not.be.disabled').click();
+        cy.logout();
+
+        // Login as other student
+        cy.login('adamsg');
+        cy.visit(['sample', 'polls']);
+        cy.contains('Custom Poll Today').siblings(':nth-child(3)').contains('Answer').click();
+
+        // Ensure response is present with no delete option for other student
+        cy.contains('p', 'Second Custom Response').should('be.visible');
+        cy.get('[data-testid="custom-response-delete"]').should('not.exist');
+
+        // Choose custom option created by other student
+        cy.get('[data-testid="answer-1"]').check();
+        cy.get('[data-testid="submit-answer"]').first().click();
+        cy.logout();
+
+        // Login as original poster, but removal of custom option is not possible as other student has chosen it
+        cy.login('student');
+        cy.visit(['sample', 'polls']);
+        cy.contains('Custom Poll Today').siblings(':nth-child(3)').contains('Edit Answer').click();
+        cy.get('[data-testid="custom-response-delete"]').should('be.visible').click();
+        cy.contains('Cannot delete response option that has already been submitted as an answer by another individual').should('exist');
+        cy.contains('p', 'Second Custom Response').should('be.visible');
+        cy.logout();
+
+        // Edit the poll, ensuring custom option is visible within edit poll form
+        cy.login('instructor');
+        cy.visit(['sample', 'polls']);
+        cy.contains('Custom Poll Today').siblings(':nth-child(1)').children().click();
+        cy.url().should('include', 'sample/polls/editPoll');
+
+        // Should contain original and custom options
+        cy.get('[data-testid="poll-response"]').should('contain', 'Answer 1');
+        cy.get('[data-testid="poll-response"]').should('contain', 'Second Custom Response');
+
+        // Attempt to delete custom poll option, but it should not be deleted if a given student has chosen it like as standard option
+        cy.on('window:alert', (alertText) => {
+            expect(alertText).to.equal('Students and/or other staff users have already submitted this response as their answer. This response cannot be deleted unless they switch their answers to the poll.');
+        });
+        cy.get('[data-testid="response-delete-button"]').eq(1).should('be.visible').click();
+        cy.get('[data-testid="poll-response"]').should('contain', 'Second Custom Response');
+
+        // Close custom poll, ensuring no future custom options are possible to be added or deleted
+        cy.visit(['sample', 'polls']);
+        cy.contains('Custom Poll Today').siblings(':nth-child(5)').children().click();
+        cy.logout();
+
+        cy.login('student');
+        cy.visit(['sample', 'polls']);
+        cy.contains('Custom Poll Today').siblings(':nth-child(3)').contains('View Poll').click();
+        cy.get('[data-testid="custom-response-text"]').should('not.exist');
+        cy.get('[data-testid="custom-response-delete"]').should('exist').click();
+        cy.contains('Poll is closed').should('be.visible');
+        cy.logout();
+
+        // Remove the custom poll
+        cy.login('instructor');
+        cy.visit(['sample', 'polls']);
+        cy.contains('Custom Poll Today').siblings(':nth-child(2)').click();
     });
 
     // Done.
