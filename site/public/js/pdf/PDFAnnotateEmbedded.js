@@ -29,8 +29,8 @@ function buildCourseUrl(parts = []) {
     return `${document.body.dataset.courseUrl}/${parts.join('/')}`;
 }
 
-//For the student popup window, buildURL doesn't work because the context switched. Therefore, we need to pass in the url
-//as a parameter.
+// For the student popup window, buildURL doesn't work because the context switched. Therefore, we need to pass in the url
+// as a parameter.
 function render_student(gradeable_id, user_id, file_name, file_path, pdf_url) {
     // set the values for default view through submission page
     window.RENDER_OPTIONS.scale = 1;
@@ -39,8 +39,8 @@ function render_student(gradeable_id, user_id, file_name, file_path, pdf_url) {
     render(gradeable_id, user_id, '', file_name, file_path, 1, pdf_url);
 }
 
-//For the student popup window, buildURL doesn't work because the context switched. Therefore, we need to pass in the url
-//as a parameter.
+// For the student popup window, buildURL doesn't work because the context switched. Therefore, we need to pass in the url
+// as a parameter.
 function download_student(gradeable_id, user_id, file_name, file_path, pdf_url, rerender_pdf) {
     // set the values for default view through submission page
     window.RENDER_OPTIONS.scale = 1;
@@ -58,11 +58,11 @@ function download(gradeable_id, user_id, grader_id, file_name, file_path, page_n
         file_name: file_name,
         file_path: file_path,
     };
-    //TODO: Replace this with rerender_pdf, only rerender if rerender_pdf is set to true
+    // TODO: Replace this with rerender_pdf, only rerender if rerender_pdf is set to true
     // eslint-disable-next-line no-constant-condition
     if (true) {
         window.RENDER_OPTIONS.documentId = file_name;
-        //TODO: Duplicate user_id in both RENDER_OPTIONS and GENERAL_INFORMATION, also grader_id = user_id in this context.
+        // TODO: Duplicate user_id in both RENDER_OPTIONS and GENERAL_INFORMATION, also grader_id = user_id in this context.
         window.RENDER_OPTIONS.userId = grader_id;
         if (url === '') {
             url = buildCourseUrl(['gradeable', gradeable_id, 'encode_pdf']);
@@ -115,7 +115,7 @@ function renderPageForDownload(pdf, doc, num, targetNum, file_name) {
             doc.addPage();
         }
         pdf.getPage(num).then((page) => {
-            const viewport = page.getViewport({scale: scale});
+            const viewport = page.getViewport({ scale: scale });
             const canvas = document.createElement('canvas');
             const ctx = canvas.getContext('2d');
             canvas.height = viewport.height;
@@ -156,8 +156,8 @@ function renderPageForDownload(pdf, doc, num, targetNum, file_name) {
                     const height = doc.internal.pageSize.getHeight();
                     doc.addImage(imgData, 'JPEG', 0, 0, width, height);
                     renderPageForDownload(pdf, doc, num + 1, targetNum, file_name);
-                    //TODO: Get the saving and loading from annotated_pdfs working
-                    /*console.log("CHECK2");
+                    // TODO: Get the saving and loading from annotated_pdfs working
+                    /* console.log("CHECK2");
                     var fd = new FormData();
                     var pdfToSave = btoa(doc.output());
                     let GENERAL_INFORMATION = window.GENERAL_INFORMATION;
@@ -189,7 +189,7 @@ function renderPageForDownload(pdf, doc, num, targetNum, file_name) {
                         error: function(){
                             alert("Something went wrong, please contact a administrator.");
                         }
-                    });*/
+                    }); */
                 });
             });
         });
@@ -214,7 +214,7 @@ function render(gradeable_id, user_id, grader_id, file_name, file_path, page_num
         });
 
         window.RENDER_OPTIONS.documentId = file_name;
-        //TODO: Duplicate user_id in both RENDER_OPTIONS and GENERAL_INFORMATION, also grader_id = user_id in this context.
+        // TODO: Duplicate user_id in both RENDER_OPTIONS and GENERAL_INFORMATION, also grader_id = user_id in this context.
         window.RENDER_OPTIONS.userId = grader_id;
         if (url === '') {
             url = buildCourseUrl(['gradeable', gradeable_id, 'encode_pdf']);
@@ -253,7 +253,7 @@ function render(gradeable_id, user_id, grader_id, file_name, file_path, page_num
                     }
                     const viewer = document.getElementById('viewer');
                     $(viewer).on('touchstart touchmove', (e) => {
-                        //Let touchscreen work
+                        // Let touchscreen work
                         if (currentTool === 'pen' || currentTool === 'text') {
                             e.preventDefault();
                         }
@@ -290,7 +290,7 @@ function render(gradeable_id, user_id, grader_id, file_name, file_path, page_num
                                 }
                             });
                             document.getElementById(`pageContainer${page_id}`).addEventListener('mouseleave', () => {
-                                //disable pen when mouse leaves the pdf page to allow for selecting inputs (like pen size)
+                                // disable pen when mouse leaves the pdf page to allow for selecting inputs (like pen size)
                                 const selected = $($('.tool-selected')[0]).attr('value');
                                 if (selected === 'pen') {
                                     PDFAnnotate.UI.disablePen();
@@ -308,7 +308,6 @@ function render(gradeable_id, user_id, grader_id, file_name, file_path, page_num
     repairPDF();
     updateAnnotations();
 }
-
 
 // TODO: Stretch goal, find a better solution to load/unload annotation. Maybe use session storage?
 // the code below will remove the annotation info from local storage when a new window pops up
@@ -430,17 +429,17 @@ function repairPDF() {
 
         $('#grading-pdf-repair').hide();
         for (let i = 0; i < localStorage.length; i++) {
-            //if the current localStorage property contains annotations
+            // if the current localStorage property contains annotations
             if (localStorage.key(i).includes('annotations')) {
                 const annotator = localStorage.key(i).split('/')[1];
                 const from_other_user = annotator !== window.GENERAL_INFORMATION.grader_id;
                 const annotations = JSON.parse(localStorage.getItem(localStorage.key(i)));
-                //if the annotations are damaged beyond repair (and they belong to the current user)
+                // if the annotations are damaged beyond repair (and they belong to the current user)
                 if (!Array.isArray(annotations) && !from_other_user) {
                     found_faulty = true;
-                    //set broken flag to stop pdf from rendering
+                    // set broken flag to stop pdf from rendering
                     window.GENERAL_INFORMATION.broken = true;
-                    //ask user if they would like to reset their annotations to
+                    // ask user if they would like to reset their annotations to
                     const irreparable = confirm('The annotations for this pdf are in an irreparable state.\nWould you like to reset them and refresh the page?');
                     if (irreparable) {
                         localStorage.setItem(localStorage.key(i), '[]');
@@ -449,7 +448,7 @@ function repairPDF() {
                         return;
                     }
                     else {
-                        //if they decline, remove the container for the pdf and show a repair button + warning message
+                        // if they decline, remove the container for the pdf and show a repair button + warning message
                         $('#viewer').remove();
                         if (!$('#grading-pdf-repair-btn').length) {
                             $('#file-view').find('.file-view-header').append('<button id="grading-pdf-repair-btn" class="btn btn-primary" onclick="repairPDF()">Repair <i class="fas fa-tools"></i></button>');
@@ -458,31 +457,31 @@ function repairPDF() {
                         return;
                     }
                 }
-                //loop through all annotations
-                for (let i = annotations.length-1; i >= 0; i--) {
-                    //gather properties with null values
-                    const faulty_properties = Object.keys(annotations[i]).filter(prop => annotations[i][prop] === null);
+                // loop through all annotations
+                for (let i = annotations.length - 1; i >= 0; i--) {
+                    // gather properties with null values
+                    const faulty_properties = Object.keys(annotations[i]).filter((prop) => annotations[i][prop] === null);
                     if (annotations[i] && faulty_properties.length > 0) {
                         if (from_other_user) {
                             alert(`Faulty annotations from user ${annotator} have been detected. \nThey will be temporarily repaired for you, but please contact them so they can come to this page and repair them fully.`);
                         }
-                        //if we haven't asked them about a repair yet and the annotations belong to the current user
+                        // if we haven't asked them about a repair yet and the annotations belong to the current user
                         if (!repair_faulty && !from_other_user) {
                             found_faulty = true;
                             repair_faulty = confirm(`One of your annotations has been detected as faulty which may cause features on this page to not work properly. Would you like to reset all of your faulty annotations to their default values and refresh the page?\n\nFile: ${window.RENDER_OPTIONS.documentId}`);
-                            //if they decline to repair, move on to the next set of annotations
+                            // if they decline to repair, move on to the next set of annotations
                             if (!repair_faulty) {
                                 break;
                             }
                         }
-                        //if they accepted a repair or the annotations are from another user (which are always temporarily repaired)
+                        // if they accepted a repair or the annotations are from another user (which are always temporarily repaired)
                         if (repair_faulty || from_other_user) {
-                            //attempt to set a default value for each faulty property
+                            // attempt to set a default value for each faulty property
                             for (const faulty_property of faulty_properties) {
                                 if (Object.prototype.hasOwnProperty.call(ANNOTATION_DEFAULTS, faulty_property)) {
                                     annotations[i][faulty_property] = ANNOTATION_DEFAULTS[faulty_property];
                                 }
-                                //if there is no default value for this property, just delete the annotation
+                                // if there is no default value for this property, just delete the annotation
                                 else {
                                     annotations.splice(i, 1);
                                 }
@@ -490,7 +489,7 @@ function repairPDF() {
                         }
                     }
                 }
-                //update the annotations in storage
+                // update the annotations in storage
                 localStorage.setItem(localStorage.key(i), JSON.stringify(annotations));
             }
         }
@@ -498,26 +497,26 @@ function repairPDF() {
     catch (e) {
         // Ignore the identifier error
     }
-    //if the user specified to repair their faulty annotations, we should save the file for them now.
+    // if the user specified to repair their faulty annotations, we should save the file for them now.
     if (repair_faulty) {
         saveFile();
         window.location.reload();
     }
-    //if faulty annotations from the current user were found but they declined, show Repair button
-    //and a warning message
+    // if faulty annotations from the current user were found but they declined, show Repair button
+    // and a warning message
     else if (found_faulty) {
         $('#grading-pdf-repair').show();
         if (!$('#grading-pdf-repair-btn').length) {
             $('#file-view').find('.file-view-header').append('<button id="grading-pdf-repair-btn" class="btn btn-primary" onclick="repairPDF()">Repair <i class="fas fa-tools"></i></button>');
         }
     }
-    //if everything looks good
+    // if everything looks good
     else {
         $('#grading-pdf-repair').hide();
         $('#grading-pdf-repair-btn').remove();
     }
 }
 
-function saveFile () {
+function saveFile() {
     $('#save-pdf-btn').click();
 }

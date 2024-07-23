@@ -1,4 +1,4 @@
-import {skipOn} from '@cypress/skip-test';
+import { skipOn } from '@cypress/skip-test';
 
 const autograding_status_path = 'autograding_status';
 

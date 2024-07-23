@@ -22,6 +22,7 @@ class GlobalController extends AbstractController {
         }, $wrapper_files);
         $breadcrumbs = $this->core->getOutput()->getBreadcrumbs();
         $page_name = $this->core->getOutput()->getPageName();
+        $audio = $this->core->getOutput()->getAudio();
         $css = $this->core->getOutput()->getCss();
         $js = $this->core->getOutput()->getJs();
         $content_only = $this->core->getOutput()->isContentOnly();
@@ -70,6 +71,7 @@ class GlobalController extends AbstractController {
             $wrapper_urls,
             $sidebar_buttons,
             $unread_notifications_count,
+            $audio->toArray(),
             $css->toArray(),
             $js->toArray(),
             $duck_img,
