@@ -1,0 +1,54 @@
+from shutil import copy2
+from pathlib import Path
+
+def up(config, database, semester, course):
+    """
+    Run up migration.
+
+    :param config: Object holding configuration details about Submitty
+    :type config: migrator.config.Config
+    :param database: Object for interacting with given database for environment
+    :type database: migrator.db.Database
+    :param semester: Semester of the course being migrated
+    :type semester: str
+    :param course: Code of course being migrated
+    :type course: str
+    """
+    course_dir = Path(config.submitty['submitty_data_dir'], 'courses', semester, course, 'rainbow_grades')
+    customization_file = course_dir / 'customization.json'
+    backup_file = course_dir / 'backup_customization.json'
+    gui_custom_file = course_dir / 'gui_customization.json'
+
+    if customization_file.exists():
+        # Rename the file to backup_customization.json
+        customization_file.rename(backup_file)
+
+        # Copy backup_customization.json to gui_customization.json
+        copy2(str(backup_file), str(gui_custom_file))
+
+def down(config, database, semester, course):
+    """
+    Run down migration (rollback).
+
+    :param config: Object holding configuration details about Submitty
+    :type config: migrator.config.Config
+    :param database: Object for interacting with given database for environment
+    :type database: migrator.db.Database
+    :param semester: Semester of the course being migrated
+    :type semester: str
+    :param course: Code of course being migrated
+    :type course: str
+    """
+    course_dir = Path(config.submitty['submitty_data_dir'], 'courses', semester, course, 'rainbowgrades')
+
+    gui_custom_file = course_dir / 'gui_customization.json'
+    backup_file = course_dir / 'backup_customization.json'
+    customization_file = course_dir / 'customization.json'
+
+    # Delete the gui_customization.json file
+    if gui_custom_file.exists():
+        gui_custom_file.unlink()
+
+    # Rename backup_customization.json back to customization.json
+    if backup_file.exists():
+        backup_file.rename(customization_file)
