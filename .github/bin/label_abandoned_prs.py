@@ -13,39 +13,26 @@ two_weeks = timedelta(weeks=2)
 et_today = today.astimezone(eastern)
 
 for json_data in json_output:
-    updated_at_string = json_data["updatedAt"]
-    json_time = datetime.datetime.fromisoformat(
-        updated_at_string.replace("Z", "+00:00")
-    )
+    updated_at_string = json_data['updatedAt']
+    json_time = datetime.datetime.fromisoformat(updated_at_string.replace('Z', '+00:00'))
     et_time_update = json_time.astimezone(eastern)
 
     tdiff = et_today - et_time_update
-    num = str(json_data["number"])
 
+    num = str(json_data['number'])
     already_abandoned = False
-    for labels in json_data["labels"]:
-        if labels["name"] == "Abandoned PR - Needs New Owner":
+    for labels in json_data['labels']:
+        if labels['name'] == 'Abandoned PR - Needs New Owner':
             already_abandoned = True
 
     approved = False
-    for review in json_data["reviews"]:
+    for review in json_data['reviews']:
         if review["state"] == "APPROVED":
             approved = True
         if review["state"] == "CHANGES_REQUESTED":
             approved = False
 
     if tdiff > two_weeks and not already_abandoned and not approved:
-        subprocess.run(
-            ["gh", "pr", "edit", num, "--add-label", "Abandoned PR - Needs New Owner"]
-        )
+        subprocess.run(['gh', 'pr', 'edit', num, '--add-label', 'Abandoned PR - Needs New Owner'])
     if approved and already_abandoned:
-        subprocess.run(
-            [
-                "gh",
-                "pr",
-                "edit",
-                num,
-                "--remove-label",
-                "Abandoned PR - Needs New Owner",
-            ]
-        )
+        subprocess.run(['gh', 'pr', 'edit', num, '--remove-label', 'Abandoned PR - Needs New Owner'])
