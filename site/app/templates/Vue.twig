@@ -1,5 +1,5 @@
 <script> 
-    window.addEventListener('load', () => {
+    $('document').ready(() => {
         window.submitty.render('[data-vuemount]', "{{ page }}",  {{ args | json_encode() | raw() }});
     })
 </script>
