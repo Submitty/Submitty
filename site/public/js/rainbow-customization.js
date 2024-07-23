@@ -207,9 +207,17 @@ function getGradeableBuckets() {
                 const gradeable = {};
 
                 const children = $(this).children();
+                // children[0] represents <div id="gradeable-pts-div-*">
+                // children[1] represents <div id="gradeable-percents-div-*">
+                // replace divs with inputs
+                children[0] = children[0].children[0];
+                children[1] = children[1].children[0];
 
                 // Get max points
                 gradeable.max = parseFloat(children[0].value);
+
+                // Get gradeable grade percent of bucket
+                gradeable.percent = parseFloat(children[1].value);
 
                 // Get gradeable release date
                 gradeable.release_date = children[0].dataset.gradeReleaseDate;
