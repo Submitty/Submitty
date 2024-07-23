@@ -781,6 +781,14 @@
     background-color: var(--viewed-content);
 }
 
+.post_box.important.new_post,
+.post_box.new_post.important-new {
+    background-color: var(--viewed-content);
+    border-style: solid;
+    border-width: 4px;
+    border-color: var(--important-post);
+}
+
 .important {
     /* THIS IS WHERE THE BACKGROUND COLOR FOR POSTS IS */
     border-style: solid;

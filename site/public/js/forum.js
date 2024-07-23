@@ -1489,8 +1489,12 @@ function showHistory(post_id) {
                 // eslint-disable-next-line no-undef
                 box.find('.post_content').html(post['content']);
                 if (post.is_staff_post) {
-                    // eslint-disable-next-line no-undef
-                    box.addClass('important');
+                    if (box.hasClass('new_post')) {
+                        box.addClass('important-new');
+                    }
+                    else{
+                        box.addClass('important');
+                    }
                 }
 
                 const given_name = post['user_info']['given_name'].trim();
