@@ -1489,10 +1489,13 @@ function showHistory(post_id) {
                 // eslint-disable-next-line no-undef
                 box.find('.post_content').html(post['content']);
                 if (post.is_staff_post) {
+                    // eslint-disable-next-line no-undef
                     if (box.hasClass('new_post')) {
+                        // eslint-disable-next-line no-undef
                         box.addClass('important-new');
                     }
-                    else{
+                    else {
+                        // eslint-disable-next-line no-undef
                         box.addClass('important');
                     }
                 }

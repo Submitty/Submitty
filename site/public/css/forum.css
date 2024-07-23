@@ -781,6 +781,7 @@
     background-color: var(--viewed-content);
 }
 
+/* stylelint-disable-next-line selector-class-pattern */
 .post_box.important.new_post,
 .post_box.new_post.important-new {
     background-color: var(--viewed-content);
