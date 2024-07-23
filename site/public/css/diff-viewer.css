@@ -8,38 +8,35 @@
 
 .diff-code {
     font-family: monospace;
-    color: var(--btn-text-black);
+    color: var(--diff-char);
+    background-color: var(--default-white);
 }
 
 .diff-code .row {
     width: 100%;
 }
 
-.diff-code .bad {
-    background-color: #2e1b20;
-    /*background-color: #fceae9; Dark*/
-    /*color: #ffffff;*/
+.diff-code .bad-actual {
+    background-color: var(--diff-background-actual);
+    color: var(--diff-char);
 }
 
 .diff-code .bad-expected {
-    background-color: #16261e;
-    /*background-color: #defae1; Dark*/
-    /*color: #ffffff;*/
+    background-color: var(--diff-background-expected);
+    color: var(--diff-char);
 }
 
 .highlight-hover {
     background-color: var(--standard-light-blue-gray) !important;
 }
 
-.highlight-char {
-    /*background-color: #fbc1c0; Dark*/
-    background-color: #7a3133;
+.highlight-char-actual {
+    background-color: var(--diff-char-background-actual);
     font-weight: 900;
 }
 
 .highlight-char-expected {
-    /*background-color: #b5eebb; Dark*/
-    background-color: #29562d;
+    background-color: var(--diff-char-background-expected);
     font-weight: 900;
 }
 
