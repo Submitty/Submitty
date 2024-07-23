@@ -205,26 +205,43 @@ class HomeworkView extends AbstractView {
         $due_date_with_late_days->modify('+' . $late_days_allowed . ' days');
         $today = new \DateTime();
 
+
         // if we are past the due date + late days
         if ($today > $due_date_with_late_days) {
             $daylight_message_required = false;
         }
         elseif ($late_days_allowed <= 365) {
-            $future_due_date = clone $due_date;
-            $daylight_message_required = false;
-            // check every interval of 100
-            for ($i = 0; $i < intdiv($late_days_allowed, 100) && !$daylight_message_required; $i += 1) {
-                $future_due_date->modify('+100 days');
-
-                // The format specifier 'I' is used to extract a single character representing the DST indicator for the date.
-                // This will be either a '0' (DST not in effect) or a '1' (DST in effect).
-                $daylight_message_required = $future_due_date->format('I') !== $due_date->format('I');
+            $daylight_due_date = intval($due_date->format("I"));
+            $daylight_due_date_with_late_days = intval($due_date_with_late_days->format("I"));
+            // DST is different, DST message always required
+            if ($daylight_due_date != $daylight_due_date_with_late_days) {
+                $daylight_message_required = true;
             }
+            else { // check if we walked in and then out of DST
+                // same year, only need to check due date outside DST (0) and late day + due date outside of DST but on the other side (0)
+                if ($due_date->format("y") == $due_date_with_late_days->format("y")) {
+                    if ($daylight_due_date == 1 || $daylight_due_date_with_late_days == 1) {
+                        $daylight_message_required = false;
+                    }
+                    else {
+                        $daylight_message_required = intval($due_date->format("m")) < 6 && intval($due_date_with_late_days->format("m")) > 6;
+                    }
 
-            // less than 100 days or is not a multiple of 100 or daylight savings hasnt changed
-            if (!$daylight_message_required) {
-                $future_due_date->modify('+' . $late_days_allowed % 100 . ' days');
-                $daylight_message_required = $future_due_date->format('I') !== $due_date->format('I');
+                // different year, only false if we go from second non-DST to first non-DST
+                }
+                else {
+                    if (
+                        $daylight_message_required = 0
+                        && $daylight_due_date_with_late_days = 0
+                        && intval($due_date->format("m")) > 6
+                        && intval($due_date_with_late_days->format("m")) < 6
+                    ) {
+                        $daylight_message_required = false;
+                    }
+                    else {
+                        $daylight_message_required = true;
+                    }
+                }
             }
         }
         else {
