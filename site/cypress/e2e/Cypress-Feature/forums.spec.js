@@ -73,6 +73,10 @@ describe('Visuals', () => {
         cy.get('[data-testid="markdown-post-list"]').compareSnapshot('forum-threads-9', 0.02, {
             capture: 'viewport',
         });
+        cy.get('[data-testid="markdown-post-list"]').scrollTo('center');
+        cy.get('[data-testid="markdown-post-list"]').compareSnapshot('forum-threads-10', 0.02, {
+            capture: 'viewport',
+        });
     });
 });
 
