@@ -166,7 +166,7 @@ class GradedComponentContainer extends AbstractModel {
      * @return bool
      */
     public function anyGradedComponents(User $grader = null) {
-        if ($grader !== null && $grader->getGroup() === 4) { // If grader is a peer grader
+        if ($grader !== null && $grader->getGroup() === User::GROUP_STUDENT) { // If grader is a peer grader
             foreach ($this->graded_components as $graded_component) {
                 if ($graded_component->getGrader()->getId() === $grader->getId()) {
                     return true;
@@ -296,7 +296,7 @@ class GradedComponentContainer extends AbstractModel {
      */
     public function isComplete(User $grader = null) {
         if ($this->component->isPeerComponent()) {
-            if ($grader !== null && $grader->getGroup() === 4) { // If grader is a peer grader
+            if ($grader !== null && $grader->getGroup() === User::GROUP_STUDENT) { // If grader is a peer grader
                 // A peer component might be graded by multiple graders, so we need to check if the $grader has graded it
                 foreach ($this->graded_components as $graded_component) {
                     if ($graded_component->getGrader()->getId() === $grader->getId()) {
