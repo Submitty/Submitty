@@ -176,11 +176,9 @@ button > i.fas:hover {
     --default-box-shadow: 1px 1px 2px black;
 }
 
-@media (prefers-color-scheme: dark) {
-    :root {
-        --default-border-color: grey;
-        --default-box-shadow: 1px 1px 2px grey;
-    }
+[data-black_mode="black"][data-theme="dark"]  {
+    --default-border-color: grey;
+    --default-box-shadow: 1px 1px 2px grey;
 }
 
 /* stylelint-disable-next-line no-descending-specificity */
