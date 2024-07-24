@@ -3215,6 +3215,11 @@ function saveComponent(component_id) {
             }
             GRADED_COMPONENTS_LIST[component_id].verifier_id = '';
         }
+        else if (gradedComponent.graded_version !== getDisplayVersion()) {
+            ajaxChangeGradedVersion(getGradeableId(), getAnonId(), getDisplayVersion(), [component_id]).then(async () => {
+                await reloadGradingComponent(component_id, false, false);
+            });
+        }
         return Promise.resolve();
     }
 }
