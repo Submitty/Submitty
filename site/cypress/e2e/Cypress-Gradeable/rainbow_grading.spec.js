@@ -6,7 +6,6 @@ skipOn(Cypress.env('run_area') === 'CI', () => {
             cy.visit(['sample', 'config']);
             checkCheckbox('[data-testid="display-rainbow-grades-summary"]');
             cy.visit(['sample', 'reports', 'rainbow_grades_customization']);
-            cy.wait(1000);
             reset();
         });
         it('Web-Based Rainbow Grades Customization should work', () => {
@@ -76,7 +75,6 @@ skipOn(Cypress.env('run_area') === 'CI', () => {
             checkTextbox('[data-testid="benchmark_lowest_b-"]', '0.8', '0.7');
             checkTextbox('[data-testid="benchmark_lowest_c-"]', '0.7', '0.6');
             checkTextbox('[data-testid="benchmark_lowest_d"]', '0.6', '0.5');
-            /* TODO: once uncaught saving issue is fixed, include the below tests for section labels
             checkTextbox('[data-testid="section_and_labels_1"]', '1', 'TA 1');
             checkTextbox('[data-testid="section_and_labels_2"]', '2', 'TA 2');
             checkTextbox('[data-testid="section_and_labels_3"]', '3', 'TA 3');
@@ -87,7 +85,6 @@ skipOn(Cypress.env('run_area') === 'CI', () => {
             checkTextbox('[data-testid="section_and_labels_8"]', '8', 'TA 8');
             checkTextbox('[data-testid="section_and_labels_9"]', '9', 'TA 9');
             checkTextbox('[data-testid="section_and_labels_10"]', '10', 'TA 10');
-             */
             checkTextbox('[data-testid="cutoff_A"]', '93', '87');
             checkTextbox('[data-testid="cutoff_A-"]', '90', '80');
             checkTextbox('[data-testid="cutoff_B+"]', '87', '77');
@@ -232,7 +229,6 @@ const checkRainbowGradesOption = () => {
     });
 };
 const reset = () => {
-    cy.visit(['sample', 'reports', 'rainbow_grades_customization']);
     cy.get('[data-testid="display-grade-summary"]').uncheck();
     cy.get('[data-testid="display-grade-details"]').uncheck();
     cy.get('[data-testid="display-exam-seating"]').uncheck();
