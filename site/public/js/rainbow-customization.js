@@ -16,6 +16,16 @@ function ExtractBuckets() {
     $('#custom_form').submit();
 }
 
+// Forces the number of expected gradeables to be greater than or equal to the current number of gradeables
+function ClampGradeablesInBucket(el, num_gradeables) {
+    if (el.value === '') {
+        el.value = num_gradeables;
+    }
+    else {
+        el.value = Math.max(num_gradeables, el.value);
+    }
+}
+
 // Forces element's value to be non-negative
 // eslint-disable-next-line no-unused-vars
 function ClampPoints(el) {
