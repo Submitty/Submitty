@@ -772,7 +772,7 @@ class ReportController extends AbstractController {
 
 
     #[Route("/courses/{_semester}/{_course}/reports/rainbow_grades_customization/gui_download", methods: ["GET"])]
-    public function downloadGUIRainbowConfig(): MultiResponse|DownloadResponse{
+    public function downloadGUIRainbowConfig(): MultiResponse|DownloadResponse {
         $rainbow_grades_dir = FileUtils::joinPaths($this->core->getConfig()->getCoursePath(), "rainbow_grades");
         $file_path = FileUtils::joinPaths($rainbow_grades_dir, 'gui_customization.json');
 
@@ -797,7 +797,7 @@ class ReportController extends AbstractController {
 
 
     #[Route("/courses/{_semester}/{_course}/reports/rainbow_grades_customization/manual_download", methods: ["GET"])]
-    public function downloadRainbowConfig(): MultiResponse|DownloadResponse{
+    public function downloadRainbowConfig(): MultiResponse|DownloadResponse {
         $rainbow_grades_dir = FileUtils::joinPaths($this->core->getConfig()->getCoursePath(), "rainbow_grades");
         $file_path = FileUtils::joinPaths($rainbow_grades_dir, 'manual_customization.json');
 
