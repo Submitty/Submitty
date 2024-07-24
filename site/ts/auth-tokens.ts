@@ -9,7 +9,7 @@ function copyToken() {
     const icon = document.getElementById('token-copy-button');
     if (icon !== null) {
         const token = icon.dataset.val;
-        navigator.clipboard.writeText(token || '');
+        void navigator.clipboard.writeText(token || '');
     }
 }
 

@@ -14,10 +14,10 @@
 <!-- Provide template of download / view all button to copy over to toolbar since this page is the only one that gets the necessary info -->
 <template id="permission-annotations-btn-template">
     {% if can_download is defined and can_download %}
-        <button id="download-annotations-btn" class='btn btn-default key_to_click' aria-label="Download the file">
+        <button id="download-annotations-btn" class='btn btn-default' aria-label="Download the file" data-testid="download-annotations-btn">
             Download <i class="fas fa-download" title="Download the file"></i>
         </button>
-        <button id="toggle-annotations-btn" aria-label="Toggle Annotations" value="toggle-annotations" class="btn btn-default toolbar-action">Show All Annotations <i class="fas fa-eye"></i></button>
+        <button id="toggle-annotations-btn" aria-label="Toggle Annotations" value="toggle-annotations" class="btn btn-default toolbar-action" data-testid="toggle-annotations-btn">Show All Annotations <i class="fas fa-eye"></i></button>
     {% endif %}
 </template>
 

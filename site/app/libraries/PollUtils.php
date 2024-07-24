@@ -22,11 +22,13 @@ class PollUtils {
                 'question_type' => $poll->getQuestionType(),
                 'responses' => [],
                 'correct_responses' => [],
+                'duration' => $poll->getDuration()->format('P%yY%mM%dDT%hH%iM%sS'),
+                'end_time' => $poll->getEndTime()?->format('Y-m-d'),
                 'release_date' => $poll->getReleaseDate()->format('Y-m-d'),
-                'status' => $poll->getStatus(),
                 'release_histogram' => $poll->getReleaseHistogram(),
                 'release_answer' => $poll->getReleaseAnswer(),
-                'image_path' => $poll->getImagePath()
+                'image_path' => $poll->getImagePath(),
+                'allows_custom' => $poll->getAllowsCustomResponses()
             ];
             foreach ($poll->getOptions() as $option) {
                 $poll_data['responses'][$option->getOrderId()] = $option->getResponse();

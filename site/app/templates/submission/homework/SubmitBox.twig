@@ -96,7 +96,7 @@
 		            <input type="text" id= "user_id" value ="" placeholder="{{ user_id }}"/>
                 </div>
             </div>
-            <div class="sub hide" id="pdf-submit-button">
+            <div id="pdf-submit-button" class="sub hide">
                 <div class="sub">
 
                     <div id="toggle-qr-split">
@@ -104,14 +104,14 @@
                         <input type="checkbox" id="use-qr">
 
                         {% if feature_flag_enabled('submitty_ocr') %}
-                        <span id="toggle-id-scan">
+                        <span id="toggle-id-scan" class="hide">
                             <label id ="use-ocr-id"for ="use-ocr">Detect Student ID's?</label>
                             <input type="checkbox" id="use-ocr">
                         </span>
                         {% endif %}
                     </div>
 
-                    <div id="qr-split-opts">
+                    <div id="qr-split-opts" class="hide">
                         <br>
 
                         <span id="prefix-prompt">QR code prefix/suffix:
@@ -141,21 +141,32 @@
     {# /Admin submission type selector #}
 
     {% if is_vcs %}
-        {% if vcs_host_type == 0 or vcs_host_type == 1 %}
-            <h3>To access your Repository:</h3>
-            <span><em>Note: There may be a delay before your repository is prepared, please refer to assignment instructions.</em></span><br />
-            <samp>git  clone  {{ repository_path }}  SPECIFY_TARGET_DIRECTORY</samp>
-            {# Below will get uncommented once SAML is active #}
-            {# <p>You will need to use an Authentication Token.</p> #}
-            <br><br>
-            {% if git_auth_token_required %}
-                <span>Note: Your school requires that you use Authentication Tokens.</span><br>
+        {% if vcs_host_type == constant('app\\models\\gradeable\\GradeableUtils::VCS_TYPE_SUBMITTY_HOSTED')
+            or vcs_host_type == constant('app\\models\\gradeable\\GradeableUtils::VCS_TYPE_SUBMITTY_HOSTED_URL') %}
+            {% if vcs_repo_exists %}
+                <h3>To access your Repository:</h3>
+                <span><em>Note: There may be a delay before your repository is prepared, please refer to assignment instructions.</em></span><br />
+                <samp>git  clone  {{ repository_path }}  SPECIFY_TARGET_DIRECTORY</samp>
+                {# Below will get uncommented once SAML is active #}
+                {# <p>You will need to use an Authentication Token.</p> #}
+                <br><br>
+                {% if git_auth_token_required %}
+                    <span>Note: Your school requires that you use Authentication Tokens.</span><br>
+                {% endif %}
+                <a href="{{ git_auth_token_url }}" class="btn btn-primary">Create and Manage Authentication Tokens</a>
+                <br><br>
+            {% else %}
+                <h3>Your repository does not exist.</h3>
+                <p>Please click the button below and refresh the page in a minute.</p><br>
+                <form method="POST" action="{{ vcs_generate_repo_url }}">
+                    <input type="hidden" name="csrf_token" value="{{ csrf_token }}" />
+                    <button type="submit" class="btn btn-primary">Generate Repository</button>
+                </form>
             {% endif %}
-            <a href="{{ git_auth_token_url }}" class="btn btn-primary">Create and Manage Authentication Tokens</a>
-            <br><br>
         {% endif %}
 
-        {% if vcs_host_type == 2 or vcs_host_type == 3 %}
+        {% if vcs_host_type == constant('app\\models\\gradeable\\GradeableUtils::VCS_TYPE_PUBLIC_GITHUB')
+            or vcs_host_type == constant('app\\models\\gradeable\\GradeableUtils::VCS_TYPE_PRIVATE_GITHUB') %}
             <h3>Please enter your GitHub URL: </h3>
 
             GitHub URL: &nbsp;&nbsp; <kbd>https://www.github.com/</kbd>
@@ -163,7 +174,7 @@
             <kbd>/</kbd>
             <input type="text" id="github-repo-id" name="git_repo_id" class="required github-id" value="{{ github_repo_id }}" placeholder="repo_name"/>
 
-            {% if vcs_host_type == 2 %}
+            {% if vcs_host_type == constant('app\\models\\gradeable\\GradeableUtils::VCS_TYPE_PUBLIC_GITHUB') %}
             Note: This should be a <em>public repository</em>, visible to everyone.
             {% else %}
             Note: If this is not a <em>public repository</em>, please ensure that you have granted read access to INCOMPLETE! FIXME! SPECIAL USER.
@@ -171,24 +182,25 @@
 
         {% endif %}
 
-        {% if vcs_host_type == 4 %}
+        {% if vcs_host_type == constant('app\\models\\gradeable\\GradeableUtils::VCS_TYPE_SELF_HOSTED') %}
             <h3>To access your Repository:</h3>
             <span><em>Note: Please push all changes before grading.</em></span><br />
             <samp> git clone {{ vcs_partial_path }} SPECIFY_TARGET_DIRECTORY  </samp>
             <br><br>
         {% endif %}
         
-        
-        <h3>Grade your repository:</h3>
-        {% if using_subdirectory %}
-        <em>Note: Only files located in the '<b>{{ vcs_subdirectory }}</b>' subdirectory will be collected for submission and grading. If this subdirectory does not already exist within your repository, you will have to create it. </em>
+        {% if vcs_repo_exists and (vcs_host_type == 0 or vcs_host_type == 1) %}
+            <h3>Grade your repository:</h3>
+            {% if using_subdirectory %}
+            <em>Note: Only files located in the '<b>{{ vcs_subdirectory }}</b>' subdirectory will be collected for submission and grading. If this subdirectory does not already exist within your repository, you will have to create it. </em>
+            {% endif %}
+            <div class="upload-message">
+                {% include "misc/Markdown.twig" with {
+                    "content" : upload_message
+                } only %}
+            </div>
+            <input type="submit" id="submit" class="submit-gradeable btn btn-success" value="Grade My Repository" />
         {% endif %}
-        <div class="upload-message">
-            {% include "misc/Markdown.twig" with {
-                "content" : upload_message
-            } only %}
-        </div>
-        <input type="submit" id="submit" class="submit-gradeable btn btn-success" value="Grade My Repository" />
     
     {% else %}
         {% if is_notebook %}
@@ -384,7 +396,8 @@
         });
     });
 
-    window.num_submission_boxes = {{ part_names | length }};
+    // set for all but vcs as it has no box submission
+    window.num_submission_boxes = {{ is_vcs ? 0 : part_names | length }};
     window.gradeable_id = "{{ gradeable_id }}";
 
     function makeSubmission(user_id, highest_version, is_pdf, path, git_user_id, git_repo_id, merge_previous=false, clobber=false) {
