@@ -156,7 +156,6 @@ describe('Test cases involving late day cache updates', () => {
                 cy.get('#late_days').clear();
                 cy.get('#late_days').type(2);
                 cy.get('input[type=submit]').click();
-                cy.wait(2000);
             }
             checkStudentsInCache();
             cy.logout();
@@ -172,7 +171,6 @@ describe('Test cases involving late day cache updates', () => {
                 cy.get('div.content').then((table) => {
                     if (table.find('#Delete').length > 0) {
                         cy.wrap(table).find('#Delete').first().click();
-                        cy.wait(2000);
                         deleteLateDays();
                     }
                 });
@@ -197,11 +195,11 @@ describe('Test cases involving late day cache updates', () => {
                 cy.get('#user_id').type(user_id);
                 cy.get('#late-days').type(2, { force: true });
                 cy.get('#extensions-form')
-                    .find('a')
-                    .contains('Submit')
-                    .should('exist')
-                    .click();
-                cy.wait(2000);
+                    .find('a').as('ext-form-link');
+
+                cy.get('@ext-form-link').contains('Submit');
+                cy.get('@ext-form-link').should('exist');
+                cy.get('@ext-form-link').click();
             }
             checkStudentsInCache();
             cy.logout();
@@ -213,7 +211,6 @@ describe('Test cases involving late day cache updates', () => {
                 cy.get('body').then((body) => {
                     if (body.find('#extensions-table').length > 0) {
                         cy.wrap(body).find('#Delete').first().click();
-                        cy.wait(2000);
                         deleteExtensions();
                     }
                 });
@@ -239,8 +236,10 @@ describe('Test cases involving late day cache updates', () => {
             // Changes due date
             EditGradeablePage();
             cy.get('#date_due')
-                .clear()
-                .type('1972-01-02 11:59:59')
+                .clear();
+            cy.get('#date_due')
+                .type('1972-01-02 11:59:59');
+            cy.get('#date_due')
                 .click();
             cy.get('#late_days').click(); // Dismiss calender and trigger save
             cy.get('#save_status', { timeout: 10000 }).should('have.text', 'All Changes Saved');
@@ -251,8 +250,10 @@ describe('Test cases involving late day cache updates', () => {
             // Changes due date back
             EditGradeablePage();
             cy.get('#date_due')
-                .clear()
-                .type('1972-01-01 03:59:59')
+                .clear();
+            cy.get('#date_due')
+                .type('1972-01-01 03:59:59');
+            cy.get('#date_due')
                 .click();
             cy.get('#late_days').click(); // Dismiss calender and trigger save
             cy.get('#save_status', { timeout: 10000 }).should('have.text', 'All Changes Saved');
@@ -295,8 +296,10 @@ describe('Test cases involving late day cache updates', () => {
             // Changes late days allowed number
             EditGradeablePage();
             cy.get('#late_days')
-                .clear()
-                .type('20000')
+                .clear();
+            cy.get('#late_days')
+                .type('20000');
+            cy.get('#late_days')
                 .click();
             cy.get('#date_due').click(); // Dismiss calender and trigger save
             cy.get('#save_status', { timeout: 10000 }).should('have.text', 'All Changes Saved');
@@ -306,8 +309,10 @@ describe('Test cases involving late day cache updates', () => {
             // Changes late days allowed number back
             EditGradeablePage();
             cy.get('#late_days')
-                .clear()
-                .type('1')
+                .clear();
+            cy.get('#late_days')
+                .type('1');
+            cy.get('#late_days')
                 .click();
             cy.get('#date_due').click(); // Dismiss calender and trigger save
             cy.get('#save_status', { timeout: 10000 }).should('have.text', 'All Changes Saved');
@@ -322,7 +327,8 @@ describe('Test cases involving late day cache updates', () => {
             cy.login('instructor');
 
             cy.get('#default-student-late-days')
-                .clear()
+                .clear();
+            cy.get('#default-student-late-days')
                 .type('1');
 
             // Remove focus to trigger config change
@@ -335,7 +341,8 @@ describe('Test cases involving late day cache updates', () => {
             // Change back
             cy.visit(['sample', 'config']);
             cy.get('#default-student-late-days')
-                .clear()
+                .clear();
+            cy.get('#default-student-late-days')
                 .type('0');
             cy.get('#default-hw-late-days').click();
         });
