@@ -102,21 +102,22 @@ skipOn(Cypress.env('run_area') === 'CI', () => {
             cy.get('[data-testid="manual-grading-grade"]').select(1);
             cy.get('[data-testid="manual-grading-note"]').type('MESSAGE');
             cy.get('[data-testid="manual-grading-submit"]').click();
-
-            cy.get('[data-testid="manual-grading-table-body"] > tr > td').eq(0).should('contain', 'adamsg');
-            cy.get('[data-testid="manual-grading-table-body"] > tr > td').eq(1).should('contain', 'A');
-            cy.get('[data-testid="manual-grading-table-body"] > tr > td').eq(2).should('contain', 'MESSAGE');
-            cy.get('[data-testid="manual-grading-table-body"] > tr > td').eq(3).find('a').click();
+            cy.get('[data-testid="manual-grading-table-body"] > tr > td').as('manual-grading-table-elements');
+            cy.get('@manual-grading-table-elements').eq(0).should('contain', 'adamsg');
+            cy.get('@manual-grading-table-elements').eq(1).should('contain', 'A');
+            cy.get('@manual-grading-table-elements').eq(2).should('contain', 'MESSAGE');
+            cy.get('@manual-grading-table-elements').eq(3).find('a').click();
 
             cy.get('[data-testid="plagiarism"]').should('be.visible'); // Visibility not based on checkbox
             cy.get('[data-testid="plagiarism-user-id"]').type('adamsg');
             cy.get('[data-testid="plagiarism-gradeable-id"]').select(1);
             cy.get('[data-testid="plagiarism-marks"]').type('1');
             cy.get('[data-testid="plagiarism-submit"]').click();
-            cy.get('[data-testid="plagiarism-table-body"] > tr > td').eq(0).should('contain', 'adamsg');
-            cy.get('[data-testid="plagiarism-table-body"] > tr > td').eq(1).should('contain', 'grades_released_homework_autota');
-            cy.get('[data-testid="plagiarism-table-body"] > tr > td').eq(2).should('contain', '1');
-            cy.get('[data-testid="plagiarism-table-body"] > tr > td').eq(3).find('a').click();
+            cy.get('[data-testid="plagiarism-table-body"] > tr > td').as('plagiarism-table-elements');
+            cy.get('@plagiarism-table-elements').eq(0).should('contain', 'adamsg');
+            cy.get('@plagiarism-table-elements').eq(1).should('contain', 'grades_released_homework_autota');
+            cy.get('@plagiarism-table-elements').eq(2).should('contain', '1');
+            cy.get('@plagiarism-table-elements').eq(3).find('a').click();
         });
         it('Manual Customization upload should work', () => {
             // Upload manual customization
