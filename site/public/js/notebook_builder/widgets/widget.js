@@ -97,6 +97,7 @@ class Widget {
     getControls() {
         const container = document.createElement('div');
         container.classList.add('widget-controls');
+        container.dataset.testid = 'widget-controls';
 
         ['Up', 'Down', 'Remove'].forEach((label) => {
             const btn = this.getButton(label);

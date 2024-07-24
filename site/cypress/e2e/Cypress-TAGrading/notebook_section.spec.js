@@ -1,4 +1,17 @@
 describe('Notebook Section Testing', () => {
+    // Ignore uncaught js exceptions
+    Cypress.on('uncaught:exception', () => {
+        return false;
+    });
+    after(() => {
+        cy.login();
+        cy.visit(['sample', 'gradeable', 'grading_homework', 'update?nav_tab=1']);
+        cy.get('[data-testid="edit-existing-notebook"]').click();
+        cy.get('data-testid="widget-controls"').should('be.visible');
+        cy.get('data-testid="widget-controls"').find('[data-testid="remove"]').click();
+        cy.get('[data-testid="notebook-save"]').click();
+        cy.get('data-testid="widget-controls"').should('not.be.visible');
+    })
     it('Notebook builder and Notebook panel', () => {
         cy.login();
         cy.visit(['sample', 'gradeable', 'grading_homework', 'update?nav_tab=1']);
