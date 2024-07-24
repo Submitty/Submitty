@@ -12,7 +12,6 @@ function validate_navigation_page_sections(sections) {
 describe('navigation page', () => {
     beforeEach(() => {
         cy.visit('/');
-        cy.wait(500);
         cy.viewport(1920, 1200);
     });
 
@@ -36,9 +35,8 @@ describe('navigation page', () => {
         validate_navigation_page_sections(sections);
 
         cy.get(`#${gradeable_id}`).find('a[href*="quick_link?action=open_ta_now"]').then(($el) => {
-            const el = cy.wrap($el);
-            el.find('.subtitle').should('contain.text', 'OPEN TO TAS NOW');
-            el.click();
+            (cy.wrap($el)).find('.subtitle').should('contain.text', 'OPEN TO TAS NOW');
+            (cy.wrap($el)).click();
 
             sections['future']--;
             sections['beta']++;
@@ -46,9 +44,8 @@ describe('navigation page', () => {
         });
 
         cy.get(`#${gradeable_id}`).find('a[href*="quick_link?action=open_students_now"]').then(($el) => {
-            const el = cy.wrap($el);
-            el.find('.subtitle').should('contain.text', 'OPEN NOW');
-            el.click();
+            (cy.wrap($el)).find('.subtitle').should('contain.text', 'OPEN NOW');
+            (cy.wrap($el)).click();
 
             sections['beta']--;
             sections['open']++;
@@ -56,21 +53,21 @@ describe('navigation page', () => {
         });
 
         cy.get(`#${gradeable_id}`).find('a[onclick*="quick_link?action=close_submissions"]').then(($el) => {
-            const el = cy.wrap($el);
-            el.find('.subtitle').should('contain.text', 'CLOSE SUBMISSIONS NOW');
-            el.click();
+            (cy.wrap($el)).find('.subtitle').should('contain.text', 'CLOSE SUBMISSIONS NOW');
+            (cy.wrap($el)).click();
         });
 
-        cy.get('#close-submissions-form').find('input[value="Close Submissions"]').click().then(() => {
+        cy.get('#close-submissions-form').find('input[value="Close Submissions"]').as('close-submissions-form-input');
+        cy.get('@close-submissions-form-input').click();
+        cy.get('@close-submissions-form-input').then(() => {
             sections['open']--;
             sections['closed']++;
             validate_navigation_page_sections(sections);
         });
 
         cy.get(`#${gradeable_id}`).find('a[href*="quick_link?action=open_grading_now"]').then(($el) => {
-            const el = cy.wrap($el);
-            el.find('.subtitle').should('contain.text', 'OPEN TO GRADING NOW');
-            el.click();
+            (cy.wrap($el)).find('.subtitle').should('contain.text', 'OPEN TO GRADING NOW');
+            (cy.wrap($el)).click();
 
             sections['closed']--;
             sections['items_being_graded']++;
@@ -78,9 +75,8 @@ describe('navigation page', () => {
         });
 
         cy.get(`#${gradeable_id}`).find('a[href*="quick_link?action=release_grades_now"]').then(($el) => {
-            const el = cy.wrap($el);
-            el.find('.subtitle').should('contain.text', 'RELEASE GRADES NOW');
-            el.click();
+            (cy.wrap($el)).find('.subtitle').should('contain.text', 'RELEASE GRADES NOW');
+            (cy.wrap($el)).click();
 
             sections['items_being_graded']--;
             sections['graded']++;
@@ -98,11 +94,15 @@ describe('navigation page', () => {
             ['#date_ta_view', '9994-12-31 23:59:59'],
         ];
         for (const [id, value] of inputs) {
-            cy.get(id).focus().should('have.class', 'active').clear().type(`${value}{enter}`);
+            cy.get(id).focus();
+            cy.get(id).should('have.class', 'active').clear();
+            cy.get(id).type(`${value}{enter}`);
             // Must wait for change to save or else next date input could get mangled
             cy.get('#save_status').should('contain.text', 'All Changes Saved');
         }
-        cy.get('a[id="nav-sidebar-submitty"]').click().then(() => {
+        cy.get('a[id="nav-sidebar-submitty"]').as('nav-sidebar-submitty');
+        cy.get('@nav-sidebar-submitty').click();
+        cy.get('@nav-sidebar-submitty').then(() => {
             sections['graded']--;
             sections['future']++;
         });

@@ -25,27 +25,31 @@ describe('Test cases involving the late days allowed page', () => {
         });
 
         it('check invalid user ID', () => {
-            cy.get('#user_id').type('nonexistentuser123').blur();
+            cy.get('#user_id').type('nonexistentuser123');
+            cy.get('#user_id').blur();
             cy.get('input[type=submit]').click();
             cy.get('#error-0 > span').should('be.visible');
         });
 
         it('check invalid datestamp', () => {
-            cy.get('#user_id').type('bitdiddle').blur();
+            cy.get('#user_id').type('bitdiddle');
+            cy.get('#user_id').blur();
             cy.get('#datestamp').type("this/isn't/a/date");
             cy.get('input[type=submit]').click();
             cy.get('#error-0 > span').should('be.visible');
         });
 
         it('blank late days are invalid', () => {
-            cy.get('#user_id').type('bitdiddle').blur();
+            cy.get('#user_id').type('bitdiddle');
+            cy.get('#user_id').blur();
             cy.get('#datestamp').type('2021-01-01');
             cy.get('input[type=submit]').click();
             cy.get('#error-0 > span').should('be.visible');
         });
 
         it('negative late days are invalid', () => {
-            cy.get('#user_id').type('bitdiddle').blur();
+            cy.get('#user_id').type('bitdiddle');
+            cy.get('#user_id').blur();
             cy.get('#datestamp').type('2021-01-01');
             cy.get('#user_id').click(); // dismiss the calendar view
             cy.get('#late_days').type('-1');
@@ -55,12 +59,12 @@ describe('Test cases involving the late days allowed page', () => {
 
         it('correctly add a late day and then update it', () => {
             // add some late days for bitdiddle
-            cy.get('#user_id').type('bitdiddle').blur();
+            cy.get('#user_id').type('bitdiddle');
+            cy.get('#user_id').blur();
             cy.get('#datestamp').type('2021-01-01');
             cy.get('#user_id').click(); // dismiss the calendar view
             cy.get('#late_days').type('3');
             cy.get('input[type=submit]').click();
-            cy.wait(1000); // make sure the late day registered
 
             // make sure table has right values
             cy.get('#late-day-table > tbody > tr > :nth-child(1)').contains('bitdiddle');
@@ -83,13 +87,14 @@ describe('Test cases involving the late days allowed page', () => {
             cy.visit(['sample', 'late_days']);
 
             // update the number of late days
-            cy.get('#user_id').type('bitdiddle').blur();
+            cy.get('#user_id').type('bitdiddle');
+            cy.get('#user_id').blur();
             cy.get('#datestamp').type('2021-01-01');
             cy.get('#user_id').click(); // dismiss the calendar view
             cy.get('#late_days').clear();
             cy.get('#late_days').type('5');
             cy.get('input[type=submit]').click();
-            cy.wait(1000); // make sure the late day registered
+            cy.reload(); // make sure the late day registered
 
             // make sure the table has the updated values
             cy.get('#late-day-table > tbody > tr > :nth-child(1)').contains('bitdiddle');
@@ -113,7 +118,7 @@ describe('Test cases involving the late days allowed page', () => {
 
             // delete the late day
             cy.get('#Delete').click();
-            cy.wait(1000); // make sure the late day removal was registered
+            cy.reload(); // make sure the late day removal was registered
 
             // assert that the table is now empty
             cy.get('#empty-table').contains('No late days are currently entered');
@@ -122,7 +127,7 @@ describe('Test cases involving the late days allowed page', () => {
             cy.logout();
             cy.login('bitdiddle');
             cy.visit(['sample', 'late_table']);
-            cy.wait(1000); // just a quick pause to make sure the page has loaded fully
+            cy.reload(); // just a quick pause to make sure the page has loaded fully
             cy.get('#late-day-table > tbody > tr').last(':nth-child(8)').contains('0');
         });
     });

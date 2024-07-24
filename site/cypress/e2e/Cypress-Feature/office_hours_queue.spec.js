@@ -59,7 +59,8 @@ const switchUser = (account) => {
 };
 
 const studentJoinQueue = (queueName, queueCode) => {
-    cy.get('[data-testid="queue-code"]').select(queueName).invoke('val'); // in which queue you want to join
+    cy.get('[data-testid="queue-code"]').select(queueName);
+    cy.get('[data-testid="queue-code"]').invoke('val'); // in which queue you want to join
     cy.get('[data-testid="queue-code"]').should('contain', queueName);
     cy.get('#token-box').type(queueCode);
     cy.get('[data-testid="join-queue-btn"]').click();
@@ -213,7 +214,10 @@ describe('test office hours queue', () => {
 
         // Confirm aphacker queue history
         // Use search autocomplete feature
-        cy.get('[data-testid="search-student-queue-input"]').first().clear().type('hack');
+        cy.get('[data-testid="search-student-queue-input"]').first().as('queue-search');
+        cy.get('@queue-search').clear();
+        cy.get('@queue-search').type('hack');
+
         cy.get('#ui-id-1').first().should('be.visible');
         cy.get('#ui-id-1').click();
         cy.get('[data-testid="search-student-queue-input"]').first().should('have.value', 'aphacker');
