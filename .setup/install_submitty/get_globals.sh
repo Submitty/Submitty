@@ -28,7 +28,7 @@ IS_CI=$(! [ -f "${SUBMITTY_INSTALL_DIR}/.github_actions_ci_flag" ])
 
 # Because shellcheck is run with the python wrapper we need to disable the 'Not following' error
 # shellcheck disable=SC1091
-source "${SETUP_DIR}/bin/versions.sh"
+source "${SUBMITTY_INSTALL_DIR}/.setup/bin/versions.sh"
 
 if [ "${IS_WORKER}" == 0 ]; then
     ALL_DAEMONS=( submitty_websocket_server submitty_autograding_shipper submitty_autograding_worker submitty_daemon_jobs_handler )
