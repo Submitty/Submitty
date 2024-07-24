@@ -601,7 +601,7 @@ class ReportController extends AbstractController {
             if (isset($_POST["json_string"])) {
                 try {
                     $customization->processForm();
-                    return JsonResponse::getSuccessResponse(['status' => 'success']);
+                    return JsonResponse::getSuccessResponse();
                 }
                 catch (\Exception $e) {
                     $msg = 'Error processing form';
@@ -714,7 +714,7 @@ class ReportController extends AbstractController {
 
         // Place in queue
         file_put_contents($path, $job_json);
-        return JsonResponse::getSuccessResponse(['status' => 'success']);
+        return JsonResponse::getSuccessResponse();
     }
 
 
