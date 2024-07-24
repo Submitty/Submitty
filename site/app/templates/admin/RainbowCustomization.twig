@@ -89,7 +89,15 @@
                         <input id="drop_lowest_checkbox" type="checkbox" name="drop_lowest">
                         <label for="drop_lowest_checkbox">Remove lowest</label><br>
 
-                        <input id="per-gradeable-percents-checkbox" type="checkbox" name="per-gradeable-percents">
+                        {% set per_gradeable_percents_checked = false %}
+                        {% for bucket, gradeables in customization_data %}
+                            {% for gradeable in gradeables %}
+                                {% if gradeable["override_percent"] %}
+                                    {% set per_gradeable_percents_checked = true %}
+                                {% endif %}
+                            {% endfor %}
+                        {% endfor %}
+                        <input id="per-gradeable-percents-checkbox" type="checkbox" name="per-gradeable-percents" {{ per_gradeable_percents_checked ? 'checked' : '' }}>
                         <label for="per-gradeable-percents-checkbox">Per Gradeable Percents</label>
                     </div>
                     <div id="config-wrapper">

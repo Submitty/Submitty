@@ -811,9 +811,16 @@ $(document).ready(() => {
             $(dropLowestDiv).css('display', isChecked ? 'block' : 'none');
         });
     });
-    $('#per-gradeable-percents-checkbox').change(function (event) {
+
+    // Control visibility of per gradeable percent input boxes
+    const perGradeablePercentsCheckbox = $('#per-gradeable-percents-checkbox');
+    const percentsInputs = $('div[id^="gradeable-percents-div-"]');
+    const isChecked = perGradeablePercentsCheckbox.is(':checked');
+    percentsInputs.each((index, percentInput) => {
+        $(percentInput).toggle(isChecked);
+    });
+    perGradeablePercentsCheckbox.change(function (event) {
         event.stopPropagation();
-        const percentsInputs = $('div[id^="gradeable-percents-div-"]');
         const isChecked = $(this).is(':checked');
 
         percentsInputs.each((index, percentInput) => {
