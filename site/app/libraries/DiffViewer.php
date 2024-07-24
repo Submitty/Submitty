@@ -556,7 +556,7 @@ class DiffViewer {
                 $num_blanks = $this->add[$type][-1];
                 $html .= "\t<div class='highlight' id='{$this->id}{$type}_{$this->link[$type][-1]}'>\n";
                 for ($k = 0; $k < $num_blanks; $k++) {
-                    $html .= "\t<div class='row bad-{$type}'><div class='empty_line'>&nbsp;</div></div>\n" ;
+                    $html .= "\t<div class='row bad-{$type}'><div class='empty_line'>&nbsp;</div></div>\n";
                 }
                 $html .= "\t</div>\n";
             }
