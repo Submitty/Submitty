@@ -48,18 +48,18 @@ skipOn(Cypress.env('run_area') === 'CI', () => {
             // TODO: add checks for instructor notes once feature is implemented
             checkCheckbox('[data-testid="display-instructor-notes"]');
 
-            cy.get('[data-testid="display_benchmarks_lowest_a-"]').should('not.be.checked');
-            cy.get('[data-testid="display_benchmarks_lowest_b-"]').should('not.be.checked');
-            cy.get('[data-testid="display_benchmarks_lowest_c-"]').should('not.be.checked');
-            cy.get('[data-testid="display_benchmarks_lowest_d"]').should('not.be.checked');
+            cy.get('[data-testid="display-benchmarks-lowest_a-"]').should('not.be.checked');
+            cy.get('[data-testid="display-benchmarks-lowest_b-"]').should('not.be.checked');
+            cy.get('[data-testid="display-benchmarks-lowest_c-"]').should('not.be.checked');
+            cy.get('[data-testid="display-benchmarks-lowest_d"]').should('not.be.checked');
             cy.get('[data-testid="benchmark-percents"]').should('not.be.visible');
-            checkCheckbox('[data-testid="display_benchmarks_average"]');
-            checkCheckbox('[data-testid="display_benchmarks_stddev"]');
-            checkCheckbox('[data-testid="display_benchmarks_perfect"]');
-            checkCheckbox('[data-testid="display_benchmarks_lowest_a-"]');
-            checkCheckbox('[data-testid="display_benchmarks_lowest_b-"]');
-            checkCheckbox('[data-testid="display_benchmarks_lowest_c-"]');
-            checkCheckbox('[data-testid="display_benchmarks_lowest_d"]');
+            checkCheckbox('[data-testid="display-benchmarks-average"]');
+            checkCheckbox('[data-testid="display-benchmarks-stddev"]');
+            checkCheckbox('[data-testid="display-benchmarks-perfect"]');
+            checkCheckbox('[data-testid="display-benchmarks-lowest_a-"]');
+            checkCheckbox('[data-testid="display-benchmarks-lowest_b-"]');
+            checkCheckbox('[data-testid="display-benchmarks-lowest_c-"]');
+            checkCheckbox('[data-testid="display-benchmarks-lowest_d"]');
             cy.get('[data-testid="benchmark-percents"]').should('be.visible');
 
             // Ensure gradeables can be added
@@ -71,30 +71,30 @@ skipOn(Cypress.env('run_area') === 'CI', () => {
 
             // Ensure textboxes have correct initial values and can be modified
             checkTextbox('[data-testid="cust-messages-textarea"]', '', 'message');
-            checkTextbox('[data-testid="benchmark_lowest_a-"]', '0.9', '0.8');
-            checkTextbox('[data-testid="benchmark_lowest_b-"]', '0.8', '0.7');
-            checkTextbox('[data-testid="benchmark_lowest_c-"]', '0.7', '0.6');
-            checkTextbox('[data-testid="benchmark_lowest_d"]', '0.6', '0.5');
-            checkTextbox('[data-testid="section_and_labels_1"]', '1', 'TA 1');
-            checkTextbox('[data-testid="section_and_labels_2"]', '2', 'TA 2');
-            checkTextbox('[data-testid="section_and_labels_3"]', '3', 'TA 3');
-            checkTextbox('[data-testid="section_and_labels_4"]', '4', 'TA 4');
-            checkTextbox('[data-testid="section_and_labels_5"]', '5', 'TA 5');
-            checkTextbox('[data-testid="section_and_labels_6"]', '6', 'TA 6');
-            checkTextbox('[data-testid="section_and_labels_7"]', '7', 'TA 7');
-            checkTextbox('[data-testid="section_and_labels_8"]', '8', 'TA 8');
-            checkTextbox('[data-testid="section_and_labels_9"]', '9', 'TA 9');
-            checkTextbox('[data-testid="section_and_labels_10"]', '10', 'TA 10');
-            checkTextbox('[data-testid="cutoff_A"]', '93', '87');
-            checkTextbox('[data-testid="cutoff_A-"]', '90', '80');
-            checkTextbox('[data-testid="cutoff_B+"]', '87', '77');
-            checkTextbox('[data-testid="cutoff_B"]', '83', '73');
-            checkTextbox('[data-testid="cutoff_B-"]', '80', '70');
-            checkTextbox('[data-testid="cutoff_C+"]', '77', '67');
-            checkTextbox('[data-testid="cutoff_C"]', '73', '63');
-            checkTextbox('[data-testid="cutoff_C-"]', '70', '60');
-            checkTextbox('[data-testid="cutoff_D+"]', '67', '55');
-            checkTextbox('[data-testid="cutoff_D"]', '60', '50');
+            checkTextbox('[data-testid="benchmark-lowest_a-"]', '0.9', '0.8');
+            checkTextbox('[data-testid="benchmark-lowest_b-"]', '0.8', '0.7');
+            checkTextbox('[data-testid="benchmark-lowest_c-"]', '0.7', '0.6');
+            checkTextbox('[data-testid="benchmark-lowest_d"]', '0.6', '0.5');
+            checkTextbox('[data-testid="section-and-labels-1"]', '1', 'TA 1');
+            checkTextbox('[data-testid="section-and-labels-2"]', '2', 'TA 2');
+            checkTextbox('[data-testid="section-and-labels-3"]', '3', 'TA 3');
+            checkTextbox('[data-testid="section-and-labels-4"]', '4', 'TA 4');
+            checkTextbox('[data-testid="section-and-labels-5"]', '5', 'TA 5');
+            checkTextbox('[data-testid="section-and-labels-6"]', '6', 'TA 6');
+            checkTextbox('[data-testid="section-and-labels-7"]', '7', 'TA 7');
+            checkTextbox('[data-testid="section-and-labels-8"]', '8', 'TA 8');
+            checkTextbox('[data-testid="section-and-labels-9"]', '9', 'TA 9');
+            checkTextbox('[data-testid="section-and-labels-10"]', '10', 'TA 10');
+            checkTextbox('[data-testid="cutoff-A"]', '93', '87');
+            checkTextbox('[data-testid="cutoff-A-"]', '90', '80');
+            checkTextbox('[data-testid="cutoff-B+"]', '87', '77');
+            checkTextbox('[data-testid="cutoff-B"]', '83', '73');
+            checkTextbox('[data-testid="cutoff-B-"]', '80', '70');
+            checkTextbox('[data-testid="cutoff-C+"]', '77', '67');
+            checkTextbox('[data-testid="cutoff-C"]', '73', '63');
+            checkTextbox('[data-testid="cutoff-C-"]', '70', '60');
+            checkTextbox('[data-testid="cutoff-D+"]', '67', '55');
+            checkTextbox('[data-testid="cutoff-D"]', '60', '50');
 
             // Ensure tables can be added to and removed from
             // TODO: add checks for other tables once features are implemented
@@ -158,9 +158,9 @@ skipOn(Cypress.env('run_area') === 'CI', () => {
             cy.get('[data-testid="display-grade-summary"]').check();
             cy.get('[data-testid="display-grade-summary"]').should('be.checked');
             cy.get('[data-testid="display-grade-details"]').check();
-            cy.get('[data-testid="display_benchmarks_average"]').check();
-            cy.get('[data-testid="display_benchmarks_stddev"]').check();
-            cy.get('[data-testid="display_benchmarks_perfect"]').check();
+            cy.get('[data-testid="display-benchmarks-average"]').check();
+            cy.get('[data-testid="display-benchmarks-stddev"]').check();
+            cy.get('[data-testid="display-benchmarks-perfect"]').check();
             cy.get('[data-testid="btn-build-customization"]').click();
             cy.get('[data-testid="save-status"]', { timeout: 15000 }).should('contain', 'Rainbow grades successfully generated!');
             cy.visit(['sample', 'grades']);
@@ -239,11 +239,11 @@ const reset = () => {
     cy.get('[data-testid="display-final-grade"]').uncheck();
     cy.get('[data-testid="display-final-cutoff"]').uncheck();
     cy.get('[data-testid="display-instructor-notes"]').uncheck();
-    cy.get('[data-testid="display_benchmarks_average"]').uncheck();
-    cy.get('[data-testid="display_benchmarks_stddev"]').uncheck();
-    cy.get('[data-testid="display_benchmarks_perfect"]').uncheck();
-    cy.get('[data-testid="display_benchmarks_lowest_a-"]').uncheck();
-    cy.get('[data-testid="display_benchmarks_lowest_b-"]').uncheck();
-    cy.get('[data-testid="display_benchmarks_lowest_c-"]').uncheck();
-    cy.get('[data-testid="display_benchmarks_lowest_d"]').uncheck();
+    cy.get('[data-testid="display-benchmarks-average"]').uncheck();
+    cy.get('[data-testid="display-benchmarks-stddev"]').uncheck();
+    cy.get('[data-testid="display-benchmarks-perfect"]').uncheck();
+    cy.get('[data-testid="display-benchmarks-lowest_a-"]').uncheck();
+    cy.get('[data-testid="display-benchmarks-lowest_b-"]').uncheck();
+    cy.get('[data-testid="display-benchmarks-lowest_c-"]').uncheck();
+    cy.get('[data-testid="display-benchmarks-lowest_d"]').uncheck();
 };

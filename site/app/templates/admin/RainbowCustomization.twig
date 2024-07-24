@@ -282,7 +282,7 @@ To remove a curve simply blank all boxes."></i>
                     <legend><h2>Display Benchmarks</h2></legend>
                     {% for benchmark in display_benchmarks %}
                         <p>
-                            <input type="checkbox" id="display_benchmarks_{{ benchmark.id }}" name="display_benchmarks" value="{{ benchmark.id }}" data-testid="display_benchmarks_{{ benchmark.id }}"
+                            <input type="checkbox" id="display_benchmarks_{{ benchmark.id }}" name="display_benchmarks" value="{{ benchmark.id }}" data-testid="display-benchmarks-{{ benchmark.id }}"
                                    {% if benchmark.isUsed == true %}checked{% endif %}
                             >
                             <label for="display_benchmarks_{{ benchmark.id }}">{{ benchmark.id }}</label>
@@ -302,7 +302,7 @@ To remove a curve simply blank all boxes."></i>
                         {% endif %}
 
                         <label for="benchmark_{{ benchmark }}" class="{{ benchmark }} input-label">{{ benchmark }}</label>
-                        <input type="text" id="benchmark_{{ benchmark }}" data-testid="benchmark_{{ benchmark }}" class="benchmark_percent_input {{ benchmark }}" data-benchmark="{{ benchmark }}" value="{{ percent }}">
+                        <input type="text" id="benchmark_{{ benchmark }}" data-testid="benchmark-{{ benchmark }}" class="benchmark_percent_input {{ benchmark }}" data-benchmark="{{ benchmark }}" value="{{ percent }}">
                     {% endfor %}
                 </div>
             </div>
@@ -313,7 +313,7 @@ To remove a curve simply blank all boxes."></i>
                 <div class="input-boxes">
                     {% for section, label in sections_and_labels %}
                         <label for="section_and_labels_{{ section }}" class="input-label">{{ section }}</label>
-                        <input type="text" data-section="{{ section }}" class="sections_and_labels" id="section_and_labels_{{ section }}" data-testid="section_and_labels_{{ section }}" name="section_and_labels_{{ section }}" value="{{ label }}">
+                        <input type="text" data-section="{{ section }}" class="sections_and_labels" id="section_and_labels_{{ section }}" data-testid="section-and-labels-{{ section }}" name="section_and_labels_{{ section }}" value="{{ label }}">
                     {% endfor %}
                 </div>
             </div>
@@ -329,7 +329,7 @@ To remove a curve simply blank all boxes."></i>
                         {% endif %}
 
                         <label for="cutoff_{{ cutoff_input }}" class="{{ cutoff_input }} input-label">{{ cutoff_input }}</label>
-                        <input type="text" id="cutoff_{{ cutoff_input }}" data-testid="cutoff_{{ cutoff_input }}" class="final_cutoff_input {{ cutoff_input }}" name="final_grade_cutoffs" data-benchmark="{{ cutoff_input }}" value="{{ percent }}">
+                        <input type="text" id="cutoff_{{ cutoff_input }}" data-testid="cutoff-{{ cutoff_input }}" class="final_cutoff_input {{ cutoff_input }}" name="final_grade_cutoffs" data-benchmark="{{ cutoff_input }}" value="{{ percent }}">
                     {% endfor %}
                 </div>
             </div>
