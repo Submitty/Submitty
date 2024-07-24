@@ -216,8 +216,10 @@ function getGradeableBuckets() {
                 // Get max points
                 gradeable.max = parseFloat(children[0].value);
 
-                // Get gradeable grade percent of bucket
-                gradeable.percent = parseFloat(children[1].value) / 100.0;
+                // Get gradeable final grade percent, but only if Per Gradeable Percents was selected
+                if ($(children[1]).is(':visible')) {
+                    gradeable.percent = parseFloat(children[1].value) / 100.0;
+                }
 
                 // Get gradeable release date
                 gradeable.release_date = children[0].dataset.gradeReleaseDate;
