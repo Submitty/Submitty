@@ -703,7 +703,6 @@ function saveChanges() {
             xhr.setRequestHeader('X-Requested-With', 'XMLHttpRequest');
         },
         success: function (response) {
-            console.log(`Response: ${response}`);
             if (response['status'] === 'success') {
                 $('#save_status').text('All changes saved');
             }

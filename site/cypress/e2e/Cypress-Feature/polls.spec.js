@@ -205,9 +205,14 @@ describe('Test cases revolving around polls functionality', () => {
         cy.get('#timer-inputs').should('be.visible');
         cy.get('#enable-timer').should('be.checked');
         // Add 5 seconds to timer
-        cy.get('#timer-inputs').get('#poll-hours').clear().type('0');
-        cy.get('#timer-inputs').get('#poll-minutes').clear().type('0');
-        cy.get('#timer-inputs').get('#poll-seconds').clear().type('5');
+        cy.get('#timer-inputs').within(() => {
+            cy.get('#poll-hours').clear();
+            cy.get('#poll-hours').type('0');
+            cy.get('#poll-minutes').clear();
+            cy.get('#poll-minutes').type('0');
+            cy.get('#poll-seconds').clear();
+            cy.get('#poll-seconds').type('5');
+        });
 
         cy.get('h1').click(); // get rid of the date picker
         // test default release histogram and answer settings
@@ -273,7 +278,11 @@ describe('Test cases revolving around polls functionality', () => {
         cy.login();
         cy.visit(['sample', 'polls']);
         cy.contains('Poll Cypress Test').siblings(':nth-child(6)').children().click();
-        cy.wait(5000); // Waiting for duration to reach 0, so poll ends.
+
+        // Waiting for duration to reach 0, so poll ends.
+        // eslint-disable-next-line cypress/no-unnecessary-waiting
+        cy.wait(5000);
+
         cy.reload(); // Will not need this after websockets.
         cy.contains('Poll Cypress Test').siblings(':nth-child(6)').children().should('not.be.checked');
         // Removing duration to continue testing
@@ -281,11 +290,14 @@ describe('Test cases revolving around polls functionality', () => {
         cy.contains('Poll Cypress Test').siblings(':nth-child(1)').children().click();
         // Checking if user input for duration saved
         cy.get('#enable-timer').should('be.checked');
-        cy.get('#timer-inputs').get('#poll-hours').invoke('val').should('eq', '0');
-        cy.get('#timer-inputs').get('#poll-minutes').invoke('val').should('eq', '0');
-        cy.get('#timer-inputs').get('#poll-seconds').invoke('val').should('eq', '5');
-        cy.get('#poll-seconds').clear();
-        cy.get('#enable-timer').get('#poll-hours').clear().type('3');
+        cy.get('#timer-inputs').within(() => {
+            cy.get('#poll-hours').invoke('val').should('eq', '0');
+            cy.get('#poll-minutes').invoke('val').should('eq', '0');
+            cy.get('#poll-seconds').invoke('val').should('eq', '5');
+            cy.get('#poll-seconds').clear();
+            cy.get('#poll-hours').clear();
+            cy.get('#poll-hours').type('3');
+        });
         cy.get('button[type=submit]').click();
         cy.contains('Poll Cypress Test').siblings(':nth-child(6)').children().should('not.be.checked');
         cy.contains('Poll Cypress Test').siblings(':nth-child(6)').children().check();
@@ -338,7 +350,8 @@ describe('Test cases revolving around polls functionality', () => {
         cy.get('#poll-minutes').invoke('val').should('eq', '0');
         cy.get('#poll-seconds').invoke('val').should('eq', '0');
         cy.get('#poll-hours').clear();
-        cy.get('#poll-seconds').clear().type('10');
+        cy.get('#poll-seconds').clear();
+        cy.get('#poll-seconds').type('10');
         cy.get('[data-testid="poll-date"]').invoke('val').should('eq', '1970-01-01');
         // release histogram/answer's default values should be "never"
         cy.get('#student-histogram-release-setting').invoke('val').should('eq', 'never');
@@ -349,7 +362,10 @@ describe('Test cases revolving around polls functionality', () => {
         cy.get('.correct-box').eq(1).should('not.be.checked');
         cy.get('.poll-response').should('contain', 'Answer 3');
         cy.get('.correct-box').eq(2).should('be.checked');
-        cy.get('textarea').contains('Answer 1').clear().type('Answer 0');
+        cy.get('textarea').contains('Answer 1').then(($el) => {
+            cy.wrap($el).clear();
+            cy.wrap($el).type('Answer 0');
+        });
         cy.get('#responses').children(':nth-child(3)').children(':nth-child(5)').click();
         cy.get('#responses').children(':nth-child(2)').children(':nth-child(4)').contains('Answer 3');
         cy.get('#responses').children(':nth-child(3)').children(':nth-child(4)').contains('Answer 2');
@@ -401,6 +417,7 @@ describe('Test cases revolving around polls functionality', () => {
         cy.login();
         cy.visit(['sample', 'polls']);
         // Wait 6 seconds to wait out the time remaining for poll to close
+        // eslint-disable-next-line cypress/no-unnecessary-waiting
         cy.wait(6000);
         cy.reload();
         // Validate that the poll is closed.
@@ -458,7 +475,10 @@ describe('Test cases revolving around polls functionality', () => {
         cy.login();
         cy.visit(['sample', 'polls']);
         cy.contains('Poll Cypress Test').siblings(':nth-child(2)').click();
-        cy.wait(500); // short wait must be inserted here to support the stability of poll deletion
+
+        // short wait must be inserted here to support the stability of poll deletion
+        // eslint-disable-next-line cypress/no-unnecessary-waiting
+        cy.wait(500);
 
         // log into student and verify the poll is no longer there
         cy.logout();
@@ -562,13 +582,10 @@ describe('Test cases revolving around polls functionality', () => {
 
         // delete the new polls
         cy.contains('Poll Today').siblings(':nth-child(2)').click();
-        cy.wait(500);
         cy.get('Poll Today').should('not.exist');
         cy.contains('Poll Tomorrow').siblings(':nth-child(2)').click();
-        cy.wait(500);
         cy.get('Poll Tomorrow').should('not.exist');
         cy.contains('Poll Future').siblings(':nth-child(2)').click();
-        cy.wait(500);
         cy.get('Poll Future').should('not.exist');
     });
 

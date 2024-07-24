@@ -80,6 +80,18 @@ class ReportController extends AbstractController {
             $this->core->redirect($this->core->buildCourseUrl(['reports']));
         }
 
+        $url_base_path = FileUtils::joinPaths($this->core->getConfig()->getCoursePath(), 'reports', 'base_url.json');
+        $base_url = $this->core->getConfig()->getBaseUrl();
+
+        // Encode $base_url as a json string
+        $json_data = json_encode(['base_url' => $base_url]);
+
+        // Write the json string to the file
+        if (!file_put_contents($url_base_path, $json_data)) {
+            $this->core->addErrorMessage('Unable to write to base_url.json');
+            $this->core->redirect($this->core->buildCourseUrl(['reports']));
+        }
+
         $g_sort_keys = [
             'type',
             'CASE WHEN submission_due_date IS NOT NULL THEN submission_due_date ELSE g.g_grade_released_date END',
@@ -601,7 +613,7 @@ class ReportController extends AbstractController {
             if (isset($_POST["json_string"])) {
                 try {
                     $customization->processForm();
-                    return JsonResponse::getSuccessResponse(['status' => 'success']);
+                    return JsonResponse::getSuccessResponse();
                 }
                 catch (\Exception $e) {
                     $msg = 'Error processing form';
@@ -714,7 +726,7 @@ class ReportController extends AbstractController {
 
         // Place in queue
         file_put_contents($path, $job_json);
-        return JsonResponse::getSuccessResponse(['status' => 'success']);
+        return JsonResponse::getSuccessResponse();
     }
 
 
@@ -854,7 +866,6 @@ class ReportController extends AbstractController {
         $msg = 'Rainbow Grades Customization set successfully';
 
         return JsonResponse::getSuccessResponse([
-            'status' => 'success',
             'selected_value' => $selectedValue,
             'message' => $msg,
         ]);
