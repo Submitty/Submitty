@@ -3,27 +3,28 @@ set -ve
 
 # We assume a relative path from this repository to the installation
 # directory and configuration directory.
-SETUP_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null && pwd )/.."
-SUBMITTY_CONFIGURATION_DIR="${SETUP_DIR}/../../../config"
+SUBMITTY_INSTALL_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null && pwd )/../.."
 
-IS_VAGRANT=0
-if [ -d "${SETUP_DIR}/../.vagrant" ]; then
-    IS_VAGRANT=1
-fi
+# Get absolute paths from relative paths
+SUBMITTY_INSTALL_DIR="$(readlink -ne "$SUBMITTY_INSTALL_DIR")"
+SUBMITTY_CONFIGURATION_DIR="$(readlink -ne "${SUBMITTY_INSTALL_DIR}/../../config")"
 
-IS_UTM=0
-if [ -d "${SETUP_DIR}/../.utm" ]; then
-    IS_UTM=1
-fi
-
-IS_CI=0
-if [ -f "${SETUP_DIR}/../.github_actions_ci_flag" ]; then
-    IS_CI=1
+# Check that Submitty intall dir in submitty.json matches
+JSON_SUBMITTY_INSTALL_DIR="$(readlink -ne "$(jq -r '.submitty_install_dir' "${SUBMITTY_CONFIGURATION_DIR}/submitty.json")")"
+if [[ "$SUBMITTY_INSTALL_DIR" != "$JSON_SUBMITTY_INSTALL_DIR" ]]; then
+    echo "SUBMITTY_INSTALL_DIR does not match JSON_SUBMITTY_INSTALL_DIR!" >&2
+    echo "SUBMITTY_INSTALL_DIR=$SUBMITTY_INSTALL_DIR" >&2
+    echo "JSON_SUBMITTY_INSTALL_DIR=$JSON_SUBMITTY_INSTALL_DIR" >&2
+    echo "Exiting..." >&2
+    exit 1
 fi
 
 SUBMITTY_REPOSITORY=$(jq -r '.submitty_repository' "${SUBMITTY_CONFIGURATION_DIR}/submitty.json")
-SUBMITTY_INSTALL_DIR=$(jq -r '.submitty_install_dir' "${SUBMITTY_CONFIGURATION_DIR}/submitty.json")
+
 IS_WORKER=$([[ $(jq -r '.worker' "${SUBMITTY_CONFIGURATION_DIR}/submitty.json") == "true" ]] && echo 1 || echo 0)
+IS_VAGRANT=$(! [ -d "${SUBMITTY_INSTALL_DIR}/.vagrant" ])
+IS_UTM=$(! [ -d "${SUBMITTY_INSTALL_DIR}/.utm" ])
+IS_CI=$(! [ -f "${SUBMITTY_INSTALL_DIR}/.github_actions_ci_flag" ])
 
 # Because shellcheck is run with the python wrapper we need to disable the 'Not following' error
 # shellcheck disable=SC1091
@@ -48,6 +49,7 @@ if [ "${IS_WORKER}" == 0 ]; then
 else
     COURSE_BUILDERS_GROUP=root
 fi
+
 NUM_UNTRUSTED=$(jq -r '.num_untrusted' "${SUBMITTY_INSTALL_DIR}/config/submitty_users.json")
 FIRST_UNTRUSTED_UID=$(jq -r '.first_untrusted_uid' "${SUBMITTY_INSTALL_DIR}/config/submitty_users.json")
 FIRST_UNTRUSTED_GID=$(jq -r '.first_untrusted_gid' "${SUBMITTY_INSTALL_DIR}/config/submitty_users.json")
@@ -57,12 +59,14 @@ DAEMON_UID=$(jq -r '.daemon_uid' "${SUBMITTY_INSTALL_DIR}/config/submitty_users.
 DAEMON_GID=$(jq -r '.daemon_gid' "${SUBMITTY_INSTALL_DIR}/config/submitty_users.json")
 PHP_USER=$(jq -r '.php_user' "${SUBMITTY_INSTALL_DIR}/config/submitty_users.json")
 CGI_USER=$(jq -r '.cgi_user' "${SUBMITTY_INSTALL_DIR}/config/submitty_users.json")
+
 # Worker does not have daemon PHP so just use daemon group
 if [ "${IS_WORKER}" == 0 ]; then
     DAEMONPHP_GROUP=$(jq -r '.daemonphp_group' "${SUBMITTY_INSTALL_DIR}/config/submitty_users.json")
 else
     DAEMONPHP_GROUP="${DAEMON_GROUP}"
 fi
+
 DAEMONCGI_GROUP=$(jq -r '.daemoncgi_group' "${SUBMITTY_INSTALL_DIR}/config/submitty_users.json")
 DAEMONPHPCGI_GROUP=$(jq -r '.daemonphpcgi_group' "${SUBMITTY_INSTALL_DIR}/config/submitty_users.json")
 SUPERVISOR_USER=$(jq -r '.supervisor_user' "${SUBMITTY_INSTALL_DIR}/config/submitty_users.json")
