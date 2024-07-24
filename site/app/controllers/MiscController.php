@@ -473,9 +473,7 @@ class MiscController extends AbstractController {
         $zip_stream->finish();
     }
 
-    /**
-     * @AccessControl(role="LIMITED_ACCESS_GRADER")
-     */
+    #[AccessControl(role: "LIMITED_ACCESS_GRADER")]
     #[Route("/courses/{_semester}/{_course}/gradeable/{gradeable_id}/grading/download_zip")]
     public function downloadAssignedZips($gradeable_id, $type = null) {
         $zip_file_name = $gradeable_id . "_section_students_" . date("m-d-Y") . ".zip";
@@ -672,9 +670,7 @@ class MiscController extends AbstractController {
         unlink($zip_name); //deletes the random zip file
     }
 
-    /**
-     * @AccessControl(role="FULL_ACCESS_GRADER")
-     */
+    #[AccessControl(role: "FULL_ACCESS_GRADER")]
     #[Route("/courses/{_semester}/{_course}/gradeable/{gradeable_id}/bulk/progress")]
     public function checkBulkProgress($gradeable_id) {
         $job_path = "/var/local/submitty/daemon_job_queue/";

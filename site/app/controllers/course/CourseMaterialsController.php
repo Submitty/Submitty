@@ -113,9 +113,7 @@ class CourseMaterialsController extends AbstractController {
         return JsonResponse::getSuccessResponse();
     }
 
-    /**
-     * @AccessControl(role="INSTRUCTOR")
-     */
+    #[AccessControl(role: "INSTRUCTOR")]
     #[Route("/courses/{_semester}/{_course}/course_materials/delete")]
     public function deleteCourseMaterial($id) {
         $cm = $this->core->getCourseEntityManager()->getRepository(CourseMaterial::class)
@@ -262,9 +260,9 @@ class CourseMaterialsController extends AbstractController {
     }
 
     /**
-     * @AccessControl(role="INSTRUCTOR")
      * @return JsonResponse
      */
+    #[AccessControl(role: "INSTRUCTOR")]
     #[Route("/courses/{_semester}/{_course}/course_materials/release_all")]
     public function setReleaseAll(): JsonResponse {
         $newdatetime = $_POST['newdatatime'];
@@ -295,9 +293,7 @@ class CourseMaterialsController extends AbstractController {
         }
     }
 
-    /**
-     * @AccessControl(role="INSTRUCTOR")
-     */
+    #[AccessControl(role: "INSTRUCTOR")]
     #[Route("/courses/{_semester}/{_course}/course_materials/modify_timestamp")]
     public function modifyCourseMaterialsFileTimeStamp($newdatatime): JsonResponse {
         if (!isset($_POST['id'])) {
@@ -357,9 +353,7 @@ class CourseMaterialsController extends AbstractController {
         }
     }
 
-    /**
-     * @AccessControl(role="INSTRUCTOR")
-     */
+    #[AccessControl(role: "INSTRUCTOR")]
     #[Route("/courses/{_semester}/{_course}/course_materials/edit", methods: ["POST"])]
     public function ajaxEditCourseMaterialsFiles(bool $flush = true): JsonResponse {
         $id = $_POST['id'] ?? '';
@@ -567,9 +561,7 @@ class CourseMaterialsController extends AbstractController {
         return JsonResponse::getSuccessResponse("Successfully uploaded!");
     }
 
-    /**
-     * @AccessControl(role="INSTRUCTOR")
-     */
+    #[AccessControl(role: "INSTRUCTOR")]
     #[Route("/courses/{_semester}/{_course}/course_materials/upload", methods: ["POST"])]
     public function ajaxUploadCourseMaterialsFiles(): JsonResponse {
         $details = [];
