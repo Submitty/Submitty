@@ -15,8 +15,8 @@ use Symfony\Component\Routing\Annotation\Route;
 /**
  * Class ConfigurationController
  * @package app\controllers\admin
- * @AccessControl(role="INSTRUCTOR")
  */
+#[AccessControl(role: "INSTRUCTOR")]
 class ConfigurationController extends AbstractController {
     // The message that should be returned to the user if they fail the required validation to enable the nightly
     // rainbow grades build checkbox

@@ -27,8 +27,8 @@ use app\entities\plagiarism\PlagiarismConfig;
 /**
  * Class PlagiarismController
  * @package app\controllers\admin
- * @AccessControl(role="INSTRUCTOR")
  */
+#[AccessControl(role: "INSTRUCTOR")]
 class PlagiarismController extends AbstractController {
     /**
      * This function validates a given gradeable and config ID to make sure they are valid.

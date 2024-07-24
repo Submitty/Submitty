@@ -12,9 +12,7 @@ use app\libraries\Utils;
 use app\libraries\routers\AccessControl;
 
 class ImagesController extends AbstractController {
-    /**
-     * @AccessControl(role="LIMITED_ACCESS_GRADER")
-     */
+    #[AccessControl(role: "LIMITED_ACCESS_GRADER")]
     #[Route("/courses/{_semester}/{_course}/student_photos")]
     public function viewImagesPage() {
         $view = 'sections';
@@ -175,9 +173,7 @@ class ImagesController extends AbstractController {
         return $this->core->getOutput()->renderResultMessage($message, true);
     }
 
-    /**
-     * @AccessControl(role="FULL_ACCESS_GRADER")
-     */
+    #[AccessControl(role: "FULL_ACCESS_GRADER")]
     #[Route("/courses/{_semester}/{_course}/flag_user_image", methods: ["POST"])]
     public function flagUserImage(): JsonResponse {
         $user_id = $_POST['user_id'];
