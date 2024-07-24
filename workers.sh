@@ -128,7 +128,7 @@ if [[ $(uname -s) == "Darwin" && $1 == "up" ]]; then
       wait "$PID"
     fi
     if ! ps -p "$SOCKET_PID" &>/dev/null; then
-      echo "Socket not running, run 'socket start'"
+      echo "Socket not running, run 'vagrant workers socket start'"
       exit 1
     fi
     WORKER_MODE=1 GATEWAY_IP="${GATEWAY_IP}" "${HOMEBREW_PREFIX}/opt/socket_vmnet/bin/socket_vmnet_client" "${HOMEBREW_PREFIX}/var/run/socket_vmnet" vagrant up "${@:2}"
