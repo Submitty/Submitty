@@ -7,7 +7,6 @@ skipOn(Cypress.env('run_area') === 'CI', () => {
     describe('Pre autograding test', () => {
         before(() => {
             cy.login();
-            cy.wait(500);
             cy.visit(autograding_status_path);
         });
 
