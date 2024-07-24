@@ -92,8 +92,9 @@ if [[ $1 == "socket" ]]; then
   fi
 
   if [[ $2 == "restart" ]]; then
-    $0 socket stop
-    $0 socket start "${@:3}"
+    sudo echo "Restarting..."
+    bash $0 socket stop
+    bash $0 socket start "${@:3}"
     exit $?
   fi
 
