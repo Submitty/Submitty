@@ -69,12 +69,16 @@ describe('Visuals', () => {
         cy.viewport(1000, 920);
         cy.login('instructor');
         cy.visit(['sample', 'forum', 'threads', '9']);
-        cy.get('[data-testid="markdown-post-list"]').scrollIntoView();
-        cy.get('[data-testid="markdown-post-list"]').compareSnapshot('forum-threads-9', 0.02, {
+        cy.get('[data-testid="markdown-post-list"]').scrollTo('top');
+        cy.get('[data-testid="markdown-post-list"]').compareSnapshot('forum-threads-top', 0.02, {
             capture: 'viewport',
         });
         cy.get('[data-testid="markdown-post-list"]').scrollTo('center');
-        cy.get('[data-testid="markdown-post-list"]').compareSnapshot('forum-threads-10', 0.02, {
+        cy.get('[data-testid="markdown-post-list"]').compareSnapshot('forum-threads-center', 0.02, {
+            capture: 'viewport',
+        });
+        cy.get('[data-testid="markdown-post-list"]').scrollTo('bottom');
+        cy.get('[data-testid="markdown-post-list"]').compareSnapshot('forum-threads-bottom', 0.02, {
             capture: 'viewport',
         });
     });
