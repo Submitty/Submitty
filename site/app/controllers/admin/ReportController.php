@@ -615,15 +615,14 @@ class ReportController extends AbstractController {
             }
             catch (\Exception $e) {
                 $msg = 'Error processing form';
-                $this->core->addErrorMessage($msg);
-                return JsonResponse::getErrorResponse($msg);
             }
         }
         else {
             $msg = 'No JSON string provided';
-            $this->core->addErrorMessage($msg);
-            return JsonResponse::getErrorResponse($msg);
         }
+
+        $this->core->addErrorMessage($msg);
+        return JsonResponse::getErrorResponse($msg);
     }
 
 
