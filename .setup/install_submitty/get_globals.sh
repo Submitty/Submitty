@@ -32,9 +32,9 @@ if [[ "$SUBMITTY_REPOSITORY" != "$JSON_SUBMITTY_REPOSITORY" ]]; then
 fi
 
 IS_WORKER="$([[ "$(jq -r '.worker' "${SUBMITTY_INSTALL_DIR}/config/submitty.json")" == "true" ]] && echo 1 || echo 0)"
-IS_VAGRANT="$(! [ -d "${SUBMITTY_REPOSITORY}/.vagrant" ])"
-IS_UTM="$(! [ -d "${SUBMITTY_REPOSITORY}/.utm" ])"
-IS_CI="$(! [ -f "${SUBMITTY_REPOSITORY}/.github_actions_ci_flag" ])"
+IS_VAGRANT="$([[ -d "${SUBMITTY_REPOSITORY}/.vagrant" ]] && echo 1 || echo 0)"
+IS_UTM="$([[ -d "${SUBMITTY_REPOSITORY}/.utm" ]] && echo 1 || echo 0)"
+IS_CI="$([[ -f "${SUBMITTY_REPOSITORY}/.github_actions_ci_flag" ]] && echo 1 || echo 0)"
 
 # Because shellcheck is run with the python wrapper we need to disable the 'Not following' error
 # shellcheck disable=SC1091
