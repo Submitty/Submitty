@@ -92,9 +92,15 @@ def main() -> None:
             course = Course(course_json)
             courses[course.code] = course
 
-    for course_json in [load_data_yaml(os.path.join(repo, "course_config.yml"))
-                        for repo in sorted(os.path.join(SUBMITTY_INSTALL_DIR, "GIT_CHECKOUT"))
-                        if os.path.isfile(os.path.join(repo, "course_config.yml"))]:
+    git_checkout_dir = os.path.join(SUBMITTY_INSTALL_DIR, "GIT_CHECKOUT")
+    for course_json in [
+        load_data_yaml(course_yml)
+        for course_yml in [
+            os.path.join(git_checkout_dir, repo, "course_config.yml")
+            for repo in sorted(os.listdir(git_checkout_dir))
+        ]
+        if os.path.isfile(course_yml)
+    ]:
         if len(use_courses) == 0 or course_json["code"] in use_courses:
             course = Course(course_json)
             courses[course.code] = course
