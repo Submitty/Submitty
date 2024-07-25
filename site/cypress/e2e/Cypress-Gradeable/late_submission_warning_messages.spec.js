@@ -168,7 +168,7 @@ const changeAllDates = (gradeable_name, date) => {
 };
 
 describe('Checks whether daylight savings warning message should be appearing given varying amounts of late days.', () => {
-    it('should create non-team gradeable for testing daylight savings', () => {
+    before(() => {
         makeNonTeamGradeable(daylight_gradeable);
 
         const date = new Date().toISOString();
@@ -190,7 +190,6 @@ describe('Checks whether daylight savings warning message should be appearing gi
 
         // first day in 2001
         const date = new Date('2001').toISOString();
-        console.log(date);
         changeAllDates(daylight_gradeable, date);
         checkDaylightBanner(0, 'not.exist');
         checkDaylightBanner(200, 'not.exist');
@@ -199,7 +198,7 @@ describe('Checks whether daylight savings warning message should be appearing gi
 });
 
 describe('Test warning messages for non team gradeable', () => {
-    it('should create non-team gradeable for testing', () => {
+    before(() => {
         makeNonTeamGradeable(gradeable);
         // Date page, input 2 old dates for opening dates (Ta and students)
         cy.get('#page_5_nav').click();
@@ -316,7 +315,7 @@ describe('Test warning messages for non team gradeable', () => {
 });
 
 describe('Test warning messages for team gradeable', () => {
-    it('should create team gradeable for testing', () => {
+    before(() => {
         cy.login('instructor');
         cy.visit(['sample', 'gradeable']);
         // Enter gradeable info
