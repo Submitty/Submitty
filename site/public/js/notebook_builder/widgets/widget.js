@@ -100,6 +100,7 @@ class Widget {
         ['Up', 'Down', 'Remove'].forEach((label) => {
             const btn = this.getButton(label);
             btn.widget = this;
+            btn.classList.add('btn', 'btn-primary', 'btn-nav', 'btn-nav-submit');
             container.appendChild(btn);
         });
 
