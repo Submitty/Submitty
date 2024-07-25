@@ -92,7 +92,7 @@
                     <legend><h2>Customization</h2></legend>
                     <input type="hidden" name="csrf_token" value="{{ csrfToken }}" />
                     <form id="customizationForm">
-                        <div id="customization-options" style="display:block;">
+                        <div id="customization-options">
                             <p> A manual customization file is available. Please choose the file for rendering Rainbow Grades:</p>
                             <div>
                                 <input type="radio" id="manual_customization" name="customization" value="manual" {{ manual_customization_exists ? 'checked' : '' }}>
