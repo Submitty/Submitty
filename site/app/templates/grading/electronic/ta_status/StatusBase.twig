@@ -213,11 +213,11 @@
             {% endif %}
 
             {% if autograded_average != null and autograded_average.getCount() != 0 and histograms['bAuto']|length != 0 %}
-                <div class="page-content" id="page_3_content">{{ include('grading/electronic/ta_status/StatusHistogram.twig, {'type': 'auto'})  }}</div>
+                <div class="page-content" id="page_3_content">{{ include('grading/electronic/ta_status/StatusHistogram.twig', {'type': 'auto'})  }}</div>
             {% endif %}
 
             {% if (overall_average != null and overall_average.getCount() != 0) or component_averages|length != 0 %}
-                <div class="page-content" id="page_4_content">{{ include('grading/electronic/ta_status/StatusHistogram.twig, {'type': 'total'}')  }}</div>
+                <div class="page-content" id="page_4_content">{{ include('grading/electronic/ta_status/StatusHistogram.twig', {'type': 'total'})  }}</div>
             {% endif %}
         </div>
         <br/>

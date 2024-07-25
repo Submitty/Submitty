@@ -2,8 +2,23 @@
 <div id="{{ type == 'manual' ? 'manual-grading-score-histogram' : type == 'total' ? 'total-score-histogram' : type == 'auto' ? 'autograding-score-histogram' }}" class="page-content">
 
     <br>
-    <input style='width: auto' type='text' id='bucket-size-{{ type }}' name='bucket-val' value="" placeholder="Enter bucket size" />
-    <input name="sub-{{ type }}" class="btn btn-primary key_to_click" tabindex="0" id="submit_bucket_{{ type }}" value="Submit Bucket Size for {{ type|capitalize }}" onclick="createNewBuckets(range{{ type|upper[0] }},buckets,xValue,yValue,xBuckets,mode,modeCount,max{{ type|upper[0] }},min{{ type|upper[0] }})"/>
+    <input
+        style='width: auto'
+        type='text'
+        id='bucket-size-{{ type }}'
+        name='bucket-val'
+        value=""
+        placeholder="Enter bucket size"
+    />
+
+    <input
+        name="sub-{{ type }}"
+        class="btn btn-primary key_to_click"
+        tabindex="0"
+        id="submit_bucket_{{ type }}"
+        value="Submit Bucket Size for {{ type|capitalize }}"
+        onclick="createNewBuckets(range{{type}},buckets,xValue,yValue,xBuckets,mode,modeCount,max{{ type }},min{{ type }})"
+    />
 
     <div id="myDiv{{ type == 'auto' ? '3' : (type == 'manual' ? '4' : '') }}"><!-- Plotly chart will be drawn inside this DIV --></div>
     
@@ -11,13 +26,13 @@
         var buckets = new Map();
         var buttonLayerHeight = 1.0;
         var ct = 0;
-        var max{{ type|upper[0] }} = 0;
-        var min{{ type|upper[0] }} = {{ overall_total }} + 50;
+        var max{{ type }} = 0;
+        var min{{ type }} = {{ overall_total }} + 50;
         var median = 0;
         var mode = 0;
         var modeCount = 0;
 
-        var range{{ type|upper[0] }} = 0;
+        var range{{ type }} = 0;
         var xValue = [];
         var yValue = [];
         var xBuckets = [];
@@ -26,9 +41,9 @@
         xValue.sort((a, b) => a - b);
 
         if (xValue.length > 0) {
-            min = xValue[0];
-            max = xValue[xValue.length-1];
-            range = max - min;
+            min{{ type }} = xValue[0];
+            max{{ type }} = xValue[xValue.length-1];
+            // range = max - min;
             let pivot = Math.floor((xValue.length - 1) / 2);
             if (xValue.length % 2 === 0) {
                 median = (xValue[pivot] + xValue[pivot+1]) / 2;
@@ -38,10 +53,14 @@
             }
         }
 
-        mode = fillBucketsForRange(range, betterBuckets, xValue, yValue, xBuckets, mode, modeCount, max, min);
+        if (max{{ type }}!=0 && min{{ type }}!=50) {
+            range{{ type }} = max{{ type }}-min{{ type }};
+        }
 
-        if (max==0 && min==50) {
-            min=0;
+        mode = fillBucketsForRange(range{{ type }}, betterBuckets, xValue, yValue, xBuckets, mode, modeCount, max{{ type }}, min{{ type }});
+
+        if (max{{ type }}==0 && min{{ type }}==50) {
+            min{{ type }}=0;
         }
 
         var trace1 = {
