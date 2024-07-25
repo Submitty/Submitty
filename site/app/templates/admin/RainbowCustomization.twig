@@ -41,7 +41,6 @@
             <div id="save_status_log"></div>
         </div>
         <div id="list_wrapper">
-
             <div id="upload_and_download" class="customization_item">
                 <div id="grade-report-customization-upload" class="card">
                     <div class="title-cont">
@@ -92,17 +91,13 @@
                 </div>
             </div>
 
-            {% if manual_customization_exists %}
-            <div id="ask_which_customization" data-testid="ask-which-customization" class="customization_item" style="display:block;">
-            {% else %}
-            <div id="ask_which_customization" data-testid="ask-which-customization" class="customization_item" style="display:none;">
-            {% endif %}
+            <div id="ask_which_customization" data-testid="ask-which-customization" class="customization_item" style="display: {{ manual_customization_exists ? 'block' : 'none' }};">
                 <fieldset>
                     <legend><h2>Customization</h2></legend>
                     <input type="hidden" name="csrf_token" value="{{ csrfToken }}" />
                     <form id="customizationForm">
-                        <div id="customization-options" style="display:block;">
-                            <p>It appears that a manual customization file has been provided. Please specify the preferred file to be utilized for rendering Rainbow Grades:</p>
+                        <div id="customization-options">
+                            <p> A manual customization file is available. Please choose the file for rendering Rainbow Grades:</p>
                             <div>
                                 <input type="radio" id="manual_customization" data-testid="manual-customization-option" name="customization" value="manual" {{ manual_customization_exists ? 'checked' : '' }}>
                                 <label for="manual_customization">Manual Customization</label>
