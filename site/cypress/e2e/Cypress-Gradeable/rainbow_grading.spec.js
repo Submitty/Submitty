@@ -210,10 +210,10 @@ const checkCheckbox = (testId) => {
 const checkTextbox = (testId, expectedInitial, input) => {
     cy.get(testId).as('textbox');
     cy.get('@textbox').should('have.value', expectedInitial);
-    cy.get('@textbox').type('{selectAll}{backspace}');
+    cy.get('@textbox').clear();
     cy.get('@textbox').type(input);
     cy.get('@textbox').should('have.value', input);
-    cy.get('@textbox').type('{selectAll}{backspace}');
+    cy.get('@textbox').clear();
     if (expectedInitial !== '') {
         cy.get('@textbox').type(expectedInitial);
     }
