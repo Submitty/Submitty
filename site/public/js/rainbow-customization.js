@@ -66,7 +66,7 @@ function ClampPercent(el) {
 // Updates the sum of percentage points accounted for by the buckets being used
 function UpdateUsedPercentage() {
     let val = 0.0;
-    $("input[id^='percent']").filter(function () {
+    $("input[id^='percent-']").filter(function () {
         return $(this).parent().css('display') !== 'none';
     }).each(function () {
         val += parseFloat($(this).val());
