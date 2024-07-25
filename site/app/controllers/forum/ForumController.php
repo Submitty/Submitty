@@ -93,7 +93,7 @@ class ForumController extends AbstractController {
         $order_array = [];
         $reply_level_array = [];
         foreach ($posts as $post_) {
-            if (((int)$thread_id) === -1) {
+            if (((int) $thread_id) === -1) {
                 $thread_id = $post_["thread_id"];
             }
             if ($first) {
