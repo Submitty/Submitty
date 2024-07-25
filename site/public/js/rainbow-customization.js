@@ -699,9 +699,6 @@ function saveChanges() {
         dataType: 'json',
         processData: false,
         contentType: false,
-        beforeSend: function (xhr) {
-            xhr.setRequestHeader('X-Requested-With', 'XMLHttpRequest');
-        },
         success: function (response) {
             if (response['status'] === 'success') {
                 $('#save_status').text('All changes saved');
