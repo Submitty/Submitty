@@ -87,13 +87,13 @@ class ForumController extends AbstractController {
      * @param mixed[] $posts
      * @return mixed[]
      */
-    private function getPostsOrderAndReplies(array $posts, string $thread_id): array {
+    private static function getPostsOrderAndReplies(array $posts, string $thread_id): array {
         $first = true;
         $first_post_id = 1;
         $order_array = [];
         $reply_level_array = [];
         foreach ($posts as $post_) {
-            if ($thread_id == -1) {
+            if (((int)$thread_id) === -1) {
                 $thread_id = $post_["thread_id"];
             }
             if ($first) {
@@ -610,7 +610,7 @@ class ForumController extends AbstractController {
                     $reply_level = 1;
                 }
                 else {
-                    $order_and_replies = $this->getPostsOrderAndReplies($posts, $thread_id);
+                    $order_and_replies = self::getPostsOrderAndReplies($posts, $thread_id);
                     $order_array = $order_and_replies[0];
                     $reply_level_array = $order_and_replies[1];
                 }
@@ -755,8 +755,6 @@ class ForumController extends AbstractController {
             $event = [ 'component' => 'forum', 'metadata' => $metadata, 'content' => $content, 'subject' => $subject, 'recipient' => $post_author_id, 'preference' => 'all_modifications_forum'];
             $this->core->getNotificationFactory()->onPostModified($event);
             $this->core->getQueries()->removeNotificationsPost($post_id);
-            // $type === "thread"
-            // $type === "post"
 
             $post_id = $_POST["post_id"];
             $this->sendSocketMessage(array_merge(
@@ -858,7 +856,7 @@ class ForumController extends AbstractController {
             }
             if ($type === 'Post') {
                 $posts = $this->core->getQueries()->getPostsInThreads([$thread_id]);
-                $order_and_replies = $this->getPostsOrderAndReplies($posts, $thread_id);
+                $order_and_replies = self::getPostsOrderAndReplies($posts, $thread_id);
                 $order_array = $order_and_replies[0];
                 $reply_level_array = $order_and_replies[1];
 
