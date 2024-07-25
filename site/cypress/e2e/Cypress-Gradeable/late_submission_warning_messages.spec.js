@@ -63,7 +63,8 @@ const giveExtensions = (gradeable_name) => {
     cy.visit(['sample', 'extensions']);
     cy.get('[data-testid=gradeable-select]').select(gradeable_name);
     cy.get('[data-testid=extension-user-id]').type('student');
-    cy.get('[data-testid=extension-late-days]').clear().type(1, { force: true });
+    cy.get('[data-testid=extension-late-days]').clear();
+    cy.get('[data-testid=extension-late-days]').type(1, { force: true });
     cy.get('[data-testid=extensions-form]')
         .find('a')
         .contains('Submit')
@@ -236,10 +237,9 @@ describe('Test warning messages for non team gradeable', () => {
         cy.get('[data-testid=late-days]').type(1, { force: true });
         cy.get('[data-testid=late-days]').type('{enter}');
         cy.get('[data-testid=save-status]', { timeout: 20000 }).should('have.text', 'All Changes Saved');
-        cy.get('[data-testid=submission-due-date]')
-            .clear()
-            .type(getCurrentTime())
-            .type('{enter}');
+        cy.get('[data-testid=submission-due-date]').clear();
+        cy.get('[data-testid=submission-due-date]').type(getCurrentTime());
+        cy.get('[data-testid=submission-due-date]').type('{enter}');
         cy.get('[data-testid=save-status]', { timeout: 20000 }).should('have.text', 'All Changes Saved');
         cy.logout();
         SubmitAndCheckMessage('non_team', 'upload_file2', 'invalid_1_day_late');
