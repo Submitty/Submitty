@@ -1,16 +1,19 @@
 #!/usr/bin/env bash
 set -ve
 
-# We assume a relative path from this repository to the installation
-# directory and configuration directory.
-SUBMITTY_INSTALL_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null && pwd )/../.."
+# First, we determine SUBMITTY_REPOSITORY from BASH_SOURCE, as this
+# script is run from within GIT_CHECKOUT/Submitty. We use readlink to
+# get an absolute path from a relative path here.
+SUBMITTY_REPOSITORY="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null && pwd )/../.."
+SUBMITTY_REPOSITORY="$(readlink -ne "$SUBMITTY_INSTALL_DIR")"
 
-# Get absolute paths from relative paths
+SUBMITTY_INSTALL_DIR="$(readlink -ne "${SUBMITTY_REPOSITORY}/../..")"
 SUBMITTY_INSTALL_DIR="$(readlink -ne "$SUBMITTY_INSTALL_DIR")"
-SUBMITTY_CONFIGURATION_DIR="$(readlink -ne "${SUBMITTY_INSTALL_DIR}/../../config")"
 
-# Check that Submitty intall dir in submitty.json matches
-JSON_SUBMITTY_INSTALL_DIR="$(readlink -ne "$(jq -r '.submitty_install_dir' "${SUBMITTY_CONFIGURATION_DIR}/submitty.json")")"
+JSON_SUBMITTY_INSTALL_DIR="$(jq -r '.submitty_install_dir' "${SUBMITTY_INSTALL_DIR}/config/submitty.json")"
+JSON_SUBMITTY_REPOSITORY="$(jq -r '.submitty_repository' "${SUBMITTY_INSTALL_DIR}/config/submitty.json")"
+
+# Check that install dir in submitty.json matches
 if [[ "$SUBMITTY_INSTALL_DIR" != "$JSON_SUBMITTY_INSTALL_DIR" ]]; then
     echo "SUBMITTY_INSTALL_DIR does not match JSON_SUBMITTY_INSTALL_DIR!" >&2
     echo "SUBMITTY_INSTALL_DIR=$SUBMITTY_INSTALL_DIR" >&2
@@ -19,16 +22,23 @@ if [[ "$SUBMITTY_INSTALL_DIR" != "$JSON_SUBMITTY_INSTALL_DIR" ]]; then
     exit 1
 fi
 
-SUBMITTY_REPOSITORY=$(jq -r '.submitty_repository' "${SUBMITTY_CONFIGURATION_DIR}/submitty.json")
+# Check that Submitty repo dir in submitty.json matches
+if [[ "$SUBMITTY_REPOSITORY" != "$JSON_SUBMITTY_REPOSITORY" ]]; then
+    echo "SUBMITTY_REPOSITORY does not match JSON_SUBMITTY_REPOSITORY!" >&2
+    echo "SUBMITTY_REPOSITORY=$SUBMITTY_REPOSITORY" >&2
+    echo "JSON_SUBMITTY_REPOSITORY=$JSON_SUBMITTY_REPOSITORY" >&2
+    echo "Exiting..." >&2
+    exit 1
+fi
 
-IS_WORKER=$([[ $(jq -r '.worker' "${SUBMITTY_CONFIGURATION_DIR}/submitty.json") == "true" ]] && echo 1 || echo 0)
-IS_VAGRANT=$(! [ -d "${SUBMITTY_INSTALL_DIR}/.vagrant" ])
-IS_UTM=$(! [ -d "${SUBMITTY_INSTALL_DIR}/.utm" ])
-IS_CI=$(! [ -f "${SUBMITTY_INSTALL_DIR}/.github_actions_ci_flag" ])
+IS_WORKER=$([[ "$(jq -r '.worker' "${SUBMITTY_INSTALL_DIR}/config/submitty.json")" == "true" ]] && echo 1 || echo 0)
+IS_VAGRANT=$(! [ -d "${SUBMITTY_REPOSITORY}/.vagrant" ])
+IS_UTM=$(! [ -d "${SUBMITTY_REPOSITORY}/.utm" ])
+IS_CI=$(! [ -f "${SUBMITTY_REPOSITORY}/.github_actions_ci_flag" ])
 
 # Because shellcheck is run with the python wrapper we need to disable the 'Not following' error
 # shellcheck disable=SC1091
-source "${SUBMITTY_INSTALL_DIR}/.setup/bin/versions.sh"
+source "${SUBMITTY_REPOSITORY}/.setup/bin/versions.sh"
 
 if [ "${IS_WORKER}" == 0 ]; then
     ALL_DAEMONS=( submitty_websocket_server submitty_autograding_shipper submitty_autograding_worker submitty_daemon_jobs_handler )
@@ -45,31 +55,31 @@ fi
 SUBMITTY_DATA_DIR=$(jq -r '.submitty_data_dir' "${SUBMITTY_INSTALL_DIR}/config/submitty.json")
 # Worker does not need course builders so just use root
 if [ "${IS_WORKER}" == 0 ]; then
-    COURSE_BUILDERS_GROUP=$(jq -r '.course_builders_group' "${SUBMITTY_INSTALL_DIR}/config/submitty_users.json")
+    COURSE_BUILDERS_GROUP="$(jq -r '.course_builders_group' "${SUBMITTY_INSTALL_DIR}/config/submitty_users.json")"
 else
     COURSE_BUILDERS_GROUP=root
 fi
 
-NUM_UNTRUSTED=$(jq -r '.num_untrusted' "${SUBMITTY_INSTALL_DIR}/config/submitty_users.json")
-FIRST_UNTRUSTED_UID=$(jq -r '.first_untrusted_uid' "${SUBMITTY_INSTALL_DIR}/config/submitty_users.json")
-FIRST_UNTRUSTED_GID=$(jq -r '.first_untrusted_gid' "${SUBMITTY_INSTALL_DIR}/config/submitty_users.json")
-DAEMON_USER=$(jq -r '.daemon_user' "${SUBMITTY_INSTALL_DIR}/config/submitty_users.json")
-DAEMON_GROUP=${DAEMON_USER}
-DAEMON_UID=$(jq -r '.daemon_uid' "${SUBMITTY_INSTALL_DIR}/config/submitty_users.json")
-DAEMON_GID=$(jq -r '.daemon_gid' "${SUBMITTY_INSTALL_DIR}/config/submitty_users.json")
-PHP_USER=$(jq -r '.php_user' "${SUBMITTY_INSTALL_DIR}/config/submitty_users.json")
-CGI_USER=$(jq -r '.cgi_user' "${SUBMITTY_INSTALL_DIR}/config/submitty_users.json")
+NUM_UNTRUSTED="$(jq -r '.num_untrusted' "${SUBMITTY_INSTALL_DIR}/config/submitty_users.json")"
+FIRST_UNTRUSTED_UID="$(jq -r '.first_untrusted_uid' "${SUBMITTY_INSTALL_DIR}/config/submitty_users.json")"
+FIRST_UNTRUSTED_GID="$(jq -r '.first_untrusted_gid' "${SUBMITTY_INSTALL_DIR}/config/submitty_users.json")"
+DAEMON_USER="$(jq -r '.daemon_user' "${SUBMITTY_INSTALL_DIR}/config/submitty_users.json")"
+DAEMON_GROUP="${DAEMON_USER}"
+DAEMON_UID="$(jq -r '.daemon_uid' "${SUBMITTY_INSTALL_DIR}/config/submitty_users.json")"
+DAEMON_GID="$(jq -r '.daemon_gid' "${SUBMITTY_INSTALL_DIR}/config/submitty_users.json")"
+PHP_USER="$(jq -r '.php_user' "${SUBMITTY_INSTALL_DIR}/config/submitty_users.json")"
+CGI_USER="$(jq -r '.cgi_user' "${SUBMITTY_INSTALL_DIR}/config/submitty_users.json")"
 
 # Worker does not have daemon PHP so just use daemon group
 if [ "${IS_WORKER}" == 0 ]; then
-    DAEMONPHP_GROUP=$(jq -r '.daemonphp_group' "${SUBMITTY_INSTALL_DIR}/config/submitty_users.json")
+    DAEMONPHP_GROUP="$(jq -r '.daemonphp_group' "${SUBMITTY_INSTALL_DIR}/config/submitty_users.json")"
 else
     DAEMONPHP_GROUP="${DAEMON_GROUP}"
 fi
 
-DAEMONCGI_GROUP=$(jq -r '.daemoncgi_group' "${SUBMITTY_INSTALL_DIR}/config/submitty_users.json")
-DAEMONPHPCGI_GROUP=$(jq -r '.daemonphpcgi_group' "${SUBMITTY_INSTALL_DIR}/config/submitty_users.json")
-SUPERVISOR_USER=$(jq -r '.supervisor_user' "${SUBMITTY_INSTALL_DIR}/config/submitty_users.json")
+DAEMONCGI_GROUP="$(jq -r '.daemoncgi_group' "${SUBMITTY_INSTALL_DIR}/config/submitty_users.json")"
+DAEMONPHPCGI_GROUP="$(jq -r '.daemonphpcgi_group' "${SUBMITTY_INSTALL_DIR}/config/submitty_users.json")"
+SUPERVISOR_USER="$(jq -r '.supervisor_user' "${SUBMITTY_INSTALL_DIR}/config/submitty_users.json")"
 
 # This function takes a single argument, the name of the file to be edited
 function replace_fillin_variables {
