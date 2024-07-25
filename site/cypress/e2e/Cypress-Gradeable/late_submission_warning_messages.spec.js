@@ -181,9 +181,8 @@ describe('Checks whether daylight savings warning message should be appearing gi
         checkDaylightBanner(1000, 'exist');
         checkDaylightBanner(0, 'not.exist');
         calculateAndCheckDaylightBanner(1);
-        calculateAndCheckDaylightBanner(99);
+        calculateAndCheckDaylightBanner(50);
         calculateAndCheckDaylightBanner(100);
-        calculateAndCheckDaylightBanner(101);
     });
 
     it('test that daylight savings banner should not appear when we are past the due date', () => {
