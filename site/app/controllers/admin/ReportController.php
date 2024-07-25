@@ -759,9 +759,8 @@ class ReportController extends AbstractController {
         }
 
         $manual_customization_exists =  file_exists($destination_path);
-
-        $msg = 'Rainbow Grades Customization uploaded';
-        $this->core->addSuccessMessage($msg);
+        
+        $this->core->addSuccessMessage('Rainbow Grades Customization uploaded');
 
         return JsonResponse::getSuccessResponse([
             'customization_path' => $rainbow_grades_dir,
