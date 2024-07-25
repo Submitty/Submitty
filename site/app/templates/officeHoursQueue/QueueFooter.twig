@@ -145,22 +145,46 @@
 
 
   {% if viewer.isGrader() %}
-
-      $('#old_queue_code').change(function(){
-          document.getElementById('change_queue_token').action = '{{base_url}}/'+encodeURIComponent(this.value)+'/change_token';
-      });
-
-      var push_notifications_enabled = localStorage.getItem('office_hour_queue_notifications') === "true";
-      if ("Notification" in window && Notification.permission === "granted" && push_notifications_enabled) {
-          setNotificationState(true);
-      }else{
-          setNotificationState(false);
+    function initializeAudibleNotifications() {
+      var notificationSoundState = Cookies.get('notification_sound');
+      if (notificationSoundState === undefined) {
+        notificationSoundState = 'false';
+        Cookies.set('notification_sound', notificationSoundState, { path: '/', expires: 365 });
       }
+      window.audible_notifications_enabled = notificationSoundState === 'true';
+      $('#sound-notification-switch').prop('checked', window.audible_notifications_enabled);
+    }
+
+    initializeAudibleNotifications();
+
+    var pushNotificationState = Cookies.get('push_notification');
+    var push_notifications_enabled = pushNotificationState === 'true' || localStorage.getItem('office_hour_queue_notifications') === "true";
+
+    $('#push-notification-switch').prop('checked', push_notifications_enabled);
+
+    $('#old_queue_code').change(function(){
+      document.getElementById('change_queue_token').action = '{{base_url}}/'+encodeURIComponent(this.value)+'/change_token';
+    });
+
+    push_notifications_enabled = localStorage.getItem('office_hour_queue_notifications') === "true";
+    if ("Notification" in window && Notification.permission === "granted" && push_notifications_enabled) {
+      setNotificationState(true);
+    } else {
+      setNotificationState(false);
+    }
+
+    try {
+      window.notificationSound = new NotificationSound();
+    } catch (e) {
+      console.error(e);
+    }
   {% endif %}
 
   function setNotificationState(turnOn){
+    Cookies.set('push_notification', turnOn, { path: '/', expires: 365 });
     push_notifications_enabled = turnOn;
-    localStorage.setItem('office_hour_queue_notifications', turnOn ? "true":"false");
+    localStorage.setItem('office_hour_queue_notifications', turnOn ? "true" : "false");
+    $('#push-notification-switch').prop('checked', turnOn);
   }
 
   function enableNotifications() {
@@ -233,7 +257,6 @@
   }
 
   {% if viewer.isGrader() %}
-    window.audible_notifications_enabled = false;
 
     try {
         window.notificationSound = new NotificationSound();
@@ -243,12 +266,9 @@
   {% endif %}
 
   function toggleAudibleAlert() {
-      if (window.audible_notifications_enabled) {
-          window.audible_notifications_enabled = false;
-      }
-      else {
-          window.audible_notifications_enabled = true;
-      }
+    window.audible_notifications_enabled = !window.audible_notifications_enabled;
+    Cookies.set('notification_sound', window.audible_notifications_enabled, { path: '/', expires: 365 });
+    $('#sound-notification-switch').prop('checked', window.audible_notifications_enabled);
   }
 
 
@@ -349,6 +369,5 @@
   }
 
 
-  
 </script>
 </div>
