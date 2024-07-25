@@ -2396,11 +2396,14 @@ End of slider switch
 }
 /* stylelint-enable no-descending-specificity */
 
-.notebook-output-cell {
+.notebook-output-cell-content {
     background-color: var(--standard-light-gray);
     padding: 1em;
     margin-bottom: 1em;
-    border-radius: 0 0 0.5em 0.5em;
     overflow-wrap: anywhere;
     white-space: pre-wrap;
+}
+
+.notebook-cell {
+    padding: 0 0.5em;
 }
