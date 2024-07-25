@@ -5,18 +5,19 @@ set -ve
 # script is run from within GIT_CHECKOUT/Submitty. We use readlink to
 # get an absolute path from a relative path here.
 SUBMITTY_REPOSITORY="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null && pwd )/../.."
-SUBMITTY_REPOSITORY="$(readlink -ne "$SUBMITTY_INSTALL_DIR")"
+SUBMITTY_REPOSITORY="$(readlink -ne "$SUBMITTY_REPOSITORY")"
+echo "SUBMITTY_REPOSITORY=${SUBMITTY_REPOSITORY}" >&2
 
 SUBMITTY_INSTALL_DIR="$(readlink -ne "${SUBMITTY_REPOSITORY}/../..")"
 SUBMITTY_INSTALL_DIR="$(readlink -ne "$SUBMITTY_INSTALL_DIR")"
+echo "INSTALL_DIR=${SUBMITTY_REPOSITORY}" >&2
 
 JSON_SUBMITTY_INSTALL_DIR="$(jq -r '.submitty_install_dir' "${SUBMITTY_INSTALL_DIR}/config/submitty.json")"
 JSON_SUBMITTY_REPOSITORY="$(jq -r '.submitty_repository' "${SUBMITTY_INSTALL_DIR}/config/submitty.json")"
 
 # Check that install dir in submitty.json matches
 if [[ "$SUBMITTY_INSTALL_DIR" != "$JSON_SUBMITTY_INSTALL_DIR" ]]; then
-    echo "SUBMITTY_INSTALL_DIR does not match JSON_SUBMITTY_INSTALL_DIR!" >&2
-    echo "SUBMITTY_INSTALL_DIR=$SUBMITTY_INSTALL_DIR" >&2
+    echo "SUBMITTY_INSTALL_DIR does not match submitty.config!" >&2
     echo "JSON_SUBMITTY_INSTALL_DIR=$JSON_SUBMITTY_INSTALL_DIR" >&2
     echo "Exiting..." >&2
     exit 1
@@ -24,8 +25,7 @@ fi
 
 # Check that Submitty repo dir in submitty.json matches
 if [[ "$SUBMITTY_REPOSITORY" != "$JSON_SUBMITTY_REPOSITORY" ]]; then
-    echo "SUBMITTY_REPOSITORY does not match JSON_SUBMITTY_REPOSITORY!" >&2
-    echo "SUBMITTY_REPOSITORY=$SUBMITTY_REPOSITORY" >&2
+    echo "SUBMITTY_REPOSITORY does not match submitty.config!" >&2
     echo "JSON_SUBMITTY_REPOSITORY=$JSON_SUBMITTY_REPOSITORY" >&2
     echo "Exiting..." >&2
     exit 1
@@ -96,6 +96,8 @@ function replace_fillin_variables {
     # FIXME: Add some error checking to make sure these values were filled in correctly
 }
 
+# Enable expand-verbose mode so global values are visible in log
+set -x
 
 export IS_VAGRANT
 export IS_UTM
@@ -123,3 +125,5 @@ export DAEMONPHPCGI_GROUP
 export SUPERVISOR_USER
 
 export -f replace_fillin_variables
+
+set +x
