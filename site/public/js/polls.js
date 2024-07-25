@@ -254,78 +254,86 @@ function submitErrorChecks() {
 }
 
 function setEventHandlers() {
-    $(".up-btn").off("click");
-    $(".up-btn").on("click", function() {
-        let curr_pos = parseInt($($(this).siblings(".order")[0]).attr("value"));
-        if (curr_pos == 0) {
+    const up_btn = $('.up-btn');
+    const down_btn = $('.down-btn');
+    const delete_btn = $('.delete-btn');
+    up_btn.off('click');
+    up_btn.on('click', function () {
+        const curr_pos = parseInt($($(this).siblings('.order')[0]).attr('value'));
+        if (curr_pos === 0) {
             return;
         }
-        $(".order-" + (curr_pos - 1)).parent().insertAfter($(this).parent());
-        $(".order-" + (curr_pos - 1)).attr("value", curr_pos);
-        $(".order-" + (curr_pos - 1)).addClass("order-" + curr_pos);
-        $(".order-" + (curr_pos - 1)).removeClass("order-" + (curr_pos - 1));
-        $($(this).siblings(".order")[0]).attr("value", curr_pos - 1);
-        $($(this).siblings(".order")[0]).addClass("order-" + (curr_pos - 1));
-        $($(this).siblings(".order")[0]).removeClass("order-" + (curr_pos));
+        const prev_response = $(`.order-${curr_pos - 1}`);
+        prev_response.parent().insertAfter($(this).parent());
+        prev_response.attr('value', curr_pos);
+        prev_response.addClass(`order-${curr_pos}`);
+        prev_response.removeClass(`order-${curr_pos - 1}`);
+        $($(this).siblings('.order')[0]).attr('value', curr_pos - 1);
+        $($(this).siblings('.order')[0]).addClass(`order-${curr_pos - 1}`);
+        $($(this).siblings('.order')[0]).removeClass(`order-${curr_pos}`);
     });
-    $(".down-btn").off("click");
-    $(".down-btn").on("click", function() {
-        let curr_pos = parseInt($($(this).siblings(".order")[0]).attr("value"));
-        if (curr_pos == $(".poll-response").length - 1) {
+    down_btn.off('click');
+    down_btn.on('click', function () {
+        const curr_pos = parseInt($($(this).siblings('.order')[0]).attr('value'));
+        if (curr_pos === $('.poll-response').length - 1) {
             return;
         }
-        $(".order-" + (curr_pos + 1)).parent().insertBefore($(this).parent());
-        $(".order-" + (curr_pos + 1)).attr("value", curr_pos);
-        $(".order-" + (curr_pos + 1)).addClass("order-" + curr_pos);
-        $(".order-" + (curr_pos + 1)).removeClass("order-" + (curr_pos + 1));
-        $($(this).siblings(".order")[0]).attr("value", curr_pos + 1);
-        $($(this).siblings(".order")[0]).addClass("order-" + (curr_pos + 1));
-        $($(this).siblings(".order")[0]).removeClass("order-" + (curr_pos));
+        const next_response = $(`.order-${curr_pos + 1}`);
+        next_response.parent().insertBefore($(this).parent());
+        next_response.attr('value', curr_pos);
+        next_response.addClass(`order-${curr_pos}`);
+        next_response.removeClass(`order-${curr_pos + 1}`);
+        $($(this).siblings('.order')[0]).attr('value', curr_pos + 1);
+        $($(this).siblings('.order')[0]).addClass(`order-${curr_pos + 1}`);
+        $($(this).siblings('.order')[0]).removeClass(`order-${curr_pos}`);
     });
-    $(".delete-btn").off("click");
-    $(".delete-btn").on("click", function() {
+    delete_btn.off('click');
+    delete_btn.on('click', function () {
         // first we check if the response option that is about to be deleted
         // has responses by users, via an ajax request
-        let my_this = $(this);
-        let my_url = base_url + "/hasAnswers";
+        const my_this = $(this);
+        const my_url = `${base_url}/hasAnswers`;
         $.ajax({
             url: my_url,
-            type: "POST",
+            type: 'POST',
             data: {
                 csrf_token: csrfToken,
                 poll_id: poll_id,
-                option_id: my_this.siblings(".option_id").attr("value")
+                option_id: my_this.siblings('.option_id').attr('value'),
             },
-            success: function(data) {
+            success: function (data) {
                 // the result is a boolean -- whether or not this options has responses
-                let parsed_result = JSON.parse(data);
+                const parsed_result = JSON.parse(data);
                 if (parsed_result.data) {
                     // we cannot delete. send an error to the instructor
-                    alert("Students and/or other staff users have already submitted this response as their answer. " +
-                        "This response cannot be deleted unless they switch their answers to the poll.");
-                } else {
+                    alert('Students and/or other staff users have already submitted this response as their answer. '
+                    + 'This response cannot be deleted unless they switch their answers to the poll.');
+                }
+                else {
                     // delete the response
-                    let count = $(".poll-response").length;
-                    let curr_pos = parseInt($(my_this.siblings(".order")[0]).attr("value"));
-                    let wrapper_id = parseInt(my_this.parent().attr("id").match("response_(.*)?_wrapper")[1]);
-                    for(let i=curr_pos + 1; i < count; i++) {
-                        $(".order-" + i).attr("value", i - 1);
-                        $(".order-" + i).addClass("order-" + (i - 1));
-                        $(".order-" + i).removeClass("order-" + i);
+                    const count = $('.poll-response').length;
+                    const curr_pos = parseInt($(my_this.siblings('.order')[0]).attr('value'));
+                    const wrapper_id = parseInt(my_this.parent().attr('id').match('response_(.*)?_wrapper')[1]);
+                    for (let i = curr_pos + 1; i < count; i++) {
+                        const response = $(`.order-${i}`);
+                        response.attr('value', i - 1);
+                        response.addClass(`order-${i - 1}`);
+                        response.removeClass(`order-${i}`);
                     }
-                    for(let i=wrapper_id + 1; i < count; i++) {
-                        $("#response_" + i + "_wrapper").children('[name="is_correct_' + i + '"]').attr("name", "is_correct_" + (i - 1));
-                        $("#response_" + i + "_wrapper").children('[name="order_' + i + '"]').attr("name", "order_" + (i - 1));
-                        $("#response_" + i + "_wrapper").children('[name="response_' + i + '"]').attr("name", "response_" + (i - 1));
-                        $("#response_" + i + "_wrapper").children('[name="option_id_' + i + '"]').attr("name", "option_id_" + (i - 1));
-                        $("#response_" + i + "_wrapper").attr("id", "response_" + (i - 1) + "_wrapper");
+                    for (let i = wrapper_id + 1; i < count; i++) {
+                        const response_wrapper = $(`#response_${i}_wrapper`);
+                        response_wrapper.children(`[name="is_correct_${i}"]`).attr('name', `is_correct_${i - 1}`);
+                        response_wrapper.children(`[name="order_${i}"]`).attr('name', `order_${i - 1}`);
+                        response_wrapper.children(`[name="response_${i}"]`).attr('name', `response_${i - 1}`);
+                        response_wrapper.children(`[name="option_id_${i}"]`).attr('name', `option_id_${i - 1}`);
+                        response_wrapper.attr('id', `response_${i - 1}_wrapper`);
                     }
                     my_this.parent().remove();
                 }
             },
-            error: function(e) {
-                alert("Error occurred when requesting via ajax. Please refresh the page and try again.");
-            }
+            error: function (e) {
+                alert('Error occurred when requesting via ajax. Please refresh the page and try again.');
+            },
         });
     });
 }
