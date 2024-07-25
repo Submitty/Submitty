@@ -813,18 +813,23 @@ $(document).ready(() => {
     });
 
     // Control visibility of per gradeable percent input boxes
-    const perGradeablePercentsCheckbox = $('#per-gradeable-percents-checkbox');
-    const percentsInputs = $('div[id^="gradeable-percents-div-"]');
-    const isChecked = perGradeablePercentsCheckbox.is(':checked');
-    percentsInputs.each((index, percentInput) => {
-        $(percentInput).toggle(isChecked);
-    });
-    perGradeablePercentsCheckbox.change(function (event) {
-        event.stopPropagation();
-        const isChecked = $(this).is(':checked');
+    const perGradeablePercentsCheckboxes = $('input[id^="per-gradeable-percents-checkbox-"]');
+    perGradeablePercentsCheckboxes.each((index, perGradeablePercentsCheckboxDOMElement) => {
+        const perGradeablePercentsCheckbox = $(perGradeablePercentsCheckboxDOMElement);
+        const bucket = perGradeablePercentsCheckbox[0].id.match(/^per-gradeable-percents-checkbox-(.+)$/)[1];
+        const percentsInputsInBucket = $(`div[id^="gradeable-percents-div-${bucket}"]`);
 
-        percentsInputs.each((index, percentInput) => {
+        const isChecked = perGradeablePercentsCheckbox.is(':checked');
+        percentsInputsInBucket.each((index, percentInput) => {
             $(percentInput).toggle(isChecked);
+        });
+
+        perGradeablePercentsCheckbox.change(function (event) {
+            event.stopPropagation();
+            const isChecked = $(this).is(':checked');
+            percentsInputsInBucket.each((index, percentInput) => {
+                $(percentInput).toggle(isChecked);
+            });
         });
     });
 });

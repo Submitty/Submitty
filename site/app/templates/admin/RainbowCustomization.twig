@@ -88,17 +88,6 @@
 
                         <input id="drop_lowest_checkbox" type="checkbox" name="drop_lowest">
                         <label for="drop_lowest_checkbox">Remove lowest</label><br>
-
-                        {% set per_gradeable_percents_checked = false %}
-                        {% for bucket, gradeables in customization_data %}
-                            {% for gradeable in gradeables %}
-                                {% if gradeable["override_percent"] %}
-                                    {% set per_gradeable_percents_checked = true %}
-                                {% endif %}
-                            {% endfor %}
-                        {% endfor %}
-                        <input id="per-gradeable-percents-checkbox" type="checkbox" name="per-gradeable-percents" {{ per_gradeable_percents_checked ? 'checked' : '' }}>
-                        <label for="per-gradeable-percents-checkbox">Per Gradeable Percents</label>
                     </div>
                     <div id="config-wrapper">
                         {% for bucket, gradeables in customization_data %}
@@ -114,6 +103,17 @@
                                     >
                                     items
                                     <span style="margin-left: 100px;"></span>
+
+                                    {% set per_gradeable_percents_checked = false %}
+                                    {% for gradeable in gradeables %}
+                                        {% if gradeable["override_percent"] %}
+                                            {% set per_gradeable_percents_checked = true %}
+                                        {% endif %}
+                                    {% endfor %}
+                                    <input id="per-gradeable-percents-checkbox-{{ bucket }}" type="checkbox" name="per-gradeable-percents-{{ bucket }}" {{ per_gradeable_percents_checked ? 'checked' : '' }}>
+                                    <label for="per-gradeable-percents-checkbox-{{ bucket }}">Per Gradeable Percents</label>
+                                    <span style="margin-left: 100px;"></span>
+
                                     <div id="dropLowestDiv-{{ bucket }}" style="display: none;">
                                         <label>
                                             Remove lowest:
@@ -144,7 +144,7 @@
                                                            onkeyup="DetectMaxOverride(this);">
                                                     <span>pts</span>
                                                 </div>
-                                                <div id="gradeable-percents-div-{{ gradeable["id"] }}">
+                                                <div id="gradeable-percents-div-{{ bucket }}-{{ gradeable["id"] }}">
                                                     <input type="text"
                                                            {% set default_percent = (1 / gradeables|length) * 100 %}
                                                            class="gradeable-custom-item-input"
