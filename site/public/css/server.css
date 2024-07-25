@@ -2395,3 +2395,15 @@ End of slider switch
     float: none;
 }
 /* stylelint-enable no-descending-specificity */
+
+.notebook-output-cell-content {
+    background-color: var(--standard-light-gray);
+    padding: 1em;
+    margin-bottom: 1em;
+    overflow-wrap: anywhere;
+    white-space: pre-wrap;
+}
+
+.notebook-cell {
+    padding: 0 0.5em;
+}

@@ -80,6 +80,18 @@ class ReportController extends AbstractController {
             $this->core->redirect($this->core->buildCourseUrl(['reports']));
         }
 
+        $url_base_path = FileUtils::joinPaths($this->core->getConfig()->getCoursePath(), 'reports', 'base_url.json');
+        $base_url = $this->core->getConfig()->getBaseUrl();
+
+        // Encode $base_url as a json string
+        $json_data = json_encode(['base_url' => $base_url]);
+
+        // Write the json string to the file
+        if (!file_put_contents($url_base_path, $json_data)) {
+            $this->core->addErrorMessage('Unable to write to base_url.json');
+            $this->core->redirect($this->core->buildCourseUrl(['reports']));
+        }
+
         $g_sort_keys = [
             'type',
             'CASE WHEN submission_due_date IS NOT NULL THEN submission_due_date ELSE g.g_grade_released_date END',
@@ -632,6 +644,7 @@ class ReportController extends AbstractController {
                 'benchmark_percents' => (array) $customization->getBenchmarkPercent(),
                 'benchmarks_with_input_fields' => ['lowest_a-', 'lowest_b-', 'lowest_c-', 'lowest_d'],
                 'final_cutoff_input_fields' => ["A", "A-", "B+", "B", "B-", "C+", "C", "C-", "D+", "D"],
+                'allowed_grades' => ['A', 'A-', 'B+', 'B', 'B-', 'C+', 'C', 'C-', 'D+', 'D', 'F'],
                 'final_cutoff' => (array) $customization->getFinalCutoff(),
                 'display' => $customization->getDisplay(),
                 'display_description' => $customization->getDisplayDescription(),
@@ -639,6 +652,7 @@ class ReportController extends AbstractController {
                 'bucket_percentages' => $customization->getBucketPercentages(),
                 'messages' => $customization->getMessages(),
                 'plagiarism' => $customization->getPlagiarism(),
+                'manual_grade' => $customization->getManualGrades(),
                 "gradeables" => $gradeables,
                 "student_full" => $student_full,
                 'per_gradeable_curves' => $customization->getPerGradeableCurves(),

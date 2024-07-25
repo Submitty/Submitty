@@ -20,11 +20,11 @@
                         {% if student_download %}
                             <div>
                                 {% set extension = file.relative_name|split('.')|last|lower %}
-                                {% if extension in ['pdf', 'jpg', 'jpeg', 'c', 'cpp', 's', 'twig', 'py', 'java', 'png', 'txt', 'h', 'html', 'php', 'js', 'sql', 'sh', 'md', 'csv', 'salsa', 'erl', 'oz', 'pl', 'hs', 'gif'] %}
-                                    <button class = 'btn btn-default key_to_click' onclick='popOutSubmittedFile("{{ file.name|url_encode }}", "{{ file.path|url_encode }}")' aria-label="Pop up the file in a new window"> View
+                                {% if extension in ['pdf', 'jpg', 'jpeg', 'c', 'cpp', 's', 'twig', 'py', 'java', 'png', 'txt', 'h', 'html', 'php', 'js', 'sql', 'sh', 'md', 'csv', 'salsa', 'erl', 'oz', 'pl', 'hs', 'gif', 'ipynb'] %}
+                                    <button class = 'btn btn-default' onclick='popOutSubmittedFile("{{ file.name|url_encode }}", "{{ file.path|url_encode }}")' aria-label="Pop up the file in a new window"> View
                                         <i class="fas fa-window-restore" title="Pop up the file in a new window"></i></button>
                                 {% endif %}
-                                <button class = 'btn btn-primary key_to_click' onclick='downloadFile("{{ file.path|url_encode }}", "submissions")' aria-label="Download {{file.relative_name}}"> Download
+                                <button class = 'btn btn-primary' onclick='downloadFile("{{ file.path|url_encode }}", "submissions")' aria-label="Download {{file.relative_name}}"> Download
                                     <i class="fas fa-download" title="Download the file"></i></button>
                             </div>
                         {% endif %}
@@ -35,9 +35,8 @@
                 <br />
                 <div class="flex-row">
                     <span>Download all files:</span>
-                     <button class = 'btn btn-primary key_to_click' 
+                     <button class = 'btn btn-primary' 
                         onclick='downloadSubmissionZip("{{ gradeable_id }}", "{{ submitter_id }}", "{{ display_version }}", "submission")'
-                        class="key_to_click"
                         tabindex="0"
                         aria-label="Download"
                         > Download all files
