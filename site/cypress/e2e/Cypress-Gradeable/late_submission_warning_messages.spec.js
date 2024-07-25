@@ -96,7 +96,9 @@ const SubmitAndCheckMessage = (gradeable_type, upload_file1, invalid_late_day, v
     let counter = 0;
 
     cy.waitPageChange(() => {
-        cy.wait(1000); // we need to wait here because if the submission is made exactly at the moment the deadline is past due, it will be flaky
+        // we need to wait here because if the submission is made exactly at the moment the deadline is past due, it will be flaky
+        // eslint-disable-next-line cypress/no-unnecessary-waiting
+        cy.wait(1000);
         cy.get('#submit').click();
         cy.on('window:confirm', (t) => {
             if (invalid_late_day === 'invalid_1_day_late') {
@@ -321,8 +323,10 @@ describe('Test warning messages for team gradeable', () => {
         // Enter gradeable info
         cy.get('#g_title').type(team_gradeable);
         cy.get('#g_id').type(team_gradeable);
-        cy.get('#radio_ef_student_upload').check().click();
-        cy.get('#team_yes_radio', { timeout: 20000 }).check().click();
+        cy.get('#radio_ef_student_upload').check();
+        cy.get('#radio_ef_student_upload').click();
+        cy.get('#team_yes_radio', { timeout: 20000 }).check();
+        cy.get('#team_yes_radio').click();
         // Create Gradeable
         cy.get('#create-gradeable-btn').click();
 
@@ -346,7 +350,8 @@ describe('Test warning messages for team gradeable', () => {
         cy.login('student');
         cy.visit(['sample', 'gradeable', team_gradeable, 'team']);
         cy.get('#create_new_team').click();
-        cy.get('#invite_id').type('aphacker').type('{enter}');
+        cy.get('#invite_id').type('aphacker');
+        cy.get('#invite_id').type('{enter}');
         cy.logout();
         cy.login('aphacker');
         cy.visit(['sample', 'gradeable', team_gradeable, 'team']);
