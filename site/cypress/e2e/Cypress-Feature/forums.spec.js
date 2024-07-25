@@ -52,7 +52,6 @@ const mergeThreads = (fromThread, toThread, mergedContent) => {
     cy.get('[data-testid="thread-list-item"]').contains(fromThread).click();
     cy.get('[title="Merge Thread Into Another Thread"]').click();
     cy.get('.chosen-single > span').click();
-    cy.wait(500);
     cy.get('.active-result').contains(toThread).click({ force: true });
     cy.get('[value="Merge Thread"]').click({ force: true });
     cy.get('.pre-forum > .post_content').should('contain', mergedContent);
@@ -84,6 +83,7 @@ const replyDisabled = (title, attachment) => {
 
     // Ensure reply button is not disabled when attachments are added
     // waits here are needed to avoid a reload that would clear out the upload
+    // eslint-disable-next-line cypress/no-unnecessary-waiting
     cy.wait(750);
     cy.get('[data-testid="input-file3"]').selectFile(`cypress/fixtures/${attachment}`);
     cy.get('[data-testid="forum-submit-reply-all"]').should('not.be.disabled').click();
