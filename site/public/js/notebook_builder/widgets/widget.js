@@ -1,7 +1,6 @@
 /* exported NUM_MARKDOWN, Widget */
 // eslint-disable-next-line prefer-const
 let NUM_MARKDOWN = 0;
-
 class Widget {
     /**
      * Get the html representation of the widget.
