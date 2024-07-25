@@ -31,10 +31,10 @@ if [[ "$SUBMITTY_REPOSITORY" != "$JSON_SUBMITTY_REPOSITORY" ]]; then
     exit 1
 fi
 
-IS_WORKER=$([[ "$(jq -r '.worker' "${SUBMITTY_INSTALL_DIR}/config/submitty.json")" == "true" ]] && echo 1 || echo 0)
-IS_VAGRANT=$(! [ -d "${SUBMITTY_REPOSITORY}/.vagrant" ])
-IS_UTM=$(! [ -d "${SUBMITTY_REPOSITORY}/.utm" ])
-IS_CI=$(! [ -f "${SUBMITTY_REPOSITORY}/.github_actions_ci_flag" ])
+IS_WORKER="$([[ "$(jq -r '.worker' "${SUBMITTY_INSTALL_DIR}/config/submitty.json")" == "true" ]] && echo 1 || echo 0)"
+IS_VAGRANT="$(! [ -d "${SUBMITTY_REPOSITORY}/.vagrant" ])"
+IS_UTM="$(! [ -d "${SUBMITTY_REPOSITORY}/.utm" ])"
+IS_CI="$(! [ -f "${SUBMITTY_REPOSITORY}/.github_actions_ci_flag" ])"
 
 # Because shellcheck is run with the python wrapper we need to disable the 'Not following' error
 # shellcheck disable=SC1091
@@ -52,7 +52,7 @@ fi
 # Re-Read other variables from submitty.json and submitty_users.json
 # (eventually will remove these from the /usr/local/submitty/.setup/INSTALL_SUBMITTY.sh script)
 
-SUBMITTY_DATA_DIR=$(jq -r '.submitty_data_dir' "${SUBMITTY_INSTALL_DIR}/config/submitty.json")
+SUBMITTY_DATA_DIR="$(jq -r '.submitty_data_dir' "${SUBMITTY_INSTALL_DIR}/config/submitty.json")"
 # Worker does not need course builders so just use root
 if [ "${IS_WORKER}" == 0 ]; then
     COURSE_BUILDERS_GROUP="$(jq -r '.course_builders_group' "${SUBMITTY_INSTALL_DIR}/config/submitty_users.json")"
