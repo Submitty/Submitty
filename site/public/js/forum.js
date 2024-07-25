@@ -761,7 +761,7 @@ function changeThreadStatus(thread_id) {
             }
             catch (err) {
                 // eslint-disable-next-line no-undef
-                displayErrorMessage('Error parsing> data. Please try again.');
+                displayErrorMessage('Error parsing data. Please try again.');
                 return;
             }
             if (json['status'] === 'fail') {
