@@ -87,11 +87,7 @@
                 </div>
             </div>
 
-            {% if manual_customization_exists %}
-            <div id="ask_which_customization" class="customization_item" style="display:block;">
-            {% else %}
-            <div id="ask_which_customization" class="customization_item" style="display:none;">
-            {% endif %}
+            <div id="ask_which_customization" class="customization_item" style="display: {{ manual_customization_exists ? 'block' : 'none' }};">
                 <fieldset>
                     <legend><h2>Customization</h2></legend>
                     <input type="hidden" name="csrf_token" value="{{ csrfToken }}" />
