@@ -333,9 +333,8 @@ class TaGradedGradeable extends AbstractModel {
 
     /**
      * Gets if this graded gradeable is completely graded
-     * @return bool
      */
-    public function isComplete(User $grader = null) {
+    public function isComplete(User $grader = null): bool {
         /** @var GradedComponentContainer $container */
         foreach ($this->graded_component_containers as $container) {
             if (!$container->isComplete($grader)) {
@@ -348,9 +347,8 @@ class TaGradedGradeable extends AbstractModel {
     /**
      * Gets if this graded gradeable has any grades
      * @param User|null $grader If provided, only checks if this grader has any grades
-     * @return bool
      */
-    public function anyGrades(User $grader = null) {
+    public function anyGrades(User $grader = null): bool {
         /** @var GradedComponentContainer $container */
         foreach ($this->graded_component_containers as $container) {
             if ($container->anyGradedComponents($grader)) {
