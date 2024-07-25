@@ -1382,10 +1382,10 @@ function toggleLike(post_id, current_user, isLiked) {
                 likeIconSrc.src = likeIconSrcElement; // Update the state
                 likeCounterElement.innerText = likeCounter;
             }
-            
-            error: function (err) {
-                console.log(err);
-            },
+        },
+        error: function (err) {
+            console.log(err);
+        }
     });
 }
 
