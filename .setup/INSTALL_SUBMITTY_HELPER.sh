@@ -108,7 +108,7 @@ fi
 # VALIDATE DATABASE SUPERUSERS
 
 if [ "${IS_WORKER}" == 0 ]; then
-    DATABASE_FILE="$SUBMITTY_CONFIGURATION_DIR/database.json"
+    DATABASE_FILE="$SUBMITTY_INSTALL_DIR/config/database.json"
     DATABASE_HOST=$(jq -r '.database_host' $DATABASE_FILE)
     DATABASE_PORT=$(jq -r '.database_port' $DATABASE_FILE)
     GLOBAL_DBUSER=$(jq -r '.database_user' $DATABASE_FILE)
