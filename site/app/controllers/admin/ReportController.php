@@ -602,7 +602,6 @@ class ReportController extends AbstractController {
     }
 
 
-
     #[Route("/courses/{_semester}/{_course}/reports/rainbow_grades_customization_save", methods: ["POST"])]
     public function writetocustomization(): JsonResponse {
         if (!empty($_SERVER['HTTP_X_REQUESTED_WITH']) && strtolower($_SERVER['HTTP_X_REQUESTED_WITH']) == 'xmlhttprequest') {
@@ -633,7 +632,6 @@ class ReportController extends AbstractController {
             return JsonResponse::getErrorResponse($msg);
         }
     }
-
 
 
     #[Route("/courses/{_semester}/{_course}/reports/rainbow_grades_customization")]
