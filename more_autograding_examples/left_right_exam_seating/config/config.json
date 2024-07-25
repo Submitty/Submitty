@@ -4,7 +4,7 @@
     "autograding_method": "docker",
 
 	"container_options": {
-        "container_image": "ubuntu:custom"
+        "container_image": "submitty/autograding-default:latest"
 	},
 
     "assignment_message" : "To better accommodate students for the tests and final exam, please let us know if you are left-handed or right-handed.  \nWe will use this information to make the seating assignments.",

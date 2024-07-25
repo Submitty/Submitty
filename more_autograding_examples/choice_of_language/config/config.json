@@ -22,7 +22,7 @@
             "containers": [
                 {
                     "container_name" : "container1",
-                    "container_image": "submitty/python:3.6",
+                    "container_image": "submitty/python:latest",
                     "commands" : ["python3 part2/*.py"]
                 }
             ],
@@ -45,7 +45,7 @@
             "containers": [
                 {
                     "container_name" : "container2",
-                    "container_image": "submitty/clang:8",
+                    "container_image": "submitty/clang:latest",
                     "commands" : ["clang -Wall -o p3.out -- part3/*.c"]
                 }
             ],
@@ -59,7 +59,7 @@
             "containers": [
                 {
                     "container_name" : "container3",
-                    "container_image": "submitty/clang:8",
+                    "container_image": "submitty/clang:latest",
                     "commands" : ["./p3.out"]
                 }
             ],
@@ -81,7 +81,7 @@
             "containers": [
                 {
                     "container_name" : "container4",
-                    "container_image": "submitty/clang:8",
+                    "container_image": "submitty/clang:latest",
                     "commands" : ["clang++ -Wall -o p4.out -- part4/*.cpp"]
                 }
             ],
@@ -94,7 +94,7 @@
             "containers": [
                 {
                     "container_name" : "container5",
-                    "container_image": "submitty/clang:8",
+                    "container_image": "submitty/clang:latest",
                     "commands" : ["./p4.out"]
                 }
             ],

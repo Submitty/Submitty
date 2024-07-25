@@ -4,7 +4,7 @@
     "autograding_method": "docker",
 
 	"container_options": {
-        "container_image": "ubuntu:custom"
+        "container_image": "submitty/autograding-default:latest"
 	},
     // 20 mb maximum submission size
     "max_submission_size" : 20000000,

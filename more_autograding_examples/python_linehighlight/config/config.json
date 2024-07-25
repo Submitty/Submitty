@@ -8,7 +8,7 @@
     },
 
 	"container_options": {
-        "container_image": "submitty/python:3.6"
+        "container_image": "submitty/python:latest"
 	},
 
     "grading_parameters" : {

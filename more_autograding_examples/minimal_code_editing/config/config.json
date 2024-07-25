@@ -10,7 +10,7 @@
     },
 
 	"container_options": {
-        "container_image": "submitty/clang:8"
+        "container_image": "submitty/clang:latest"
 	},
 
     "testcases" : 

@@ -2,7 +2,7 @@
     "required_capabilities": "cpp",
     "autograding_method": "docker",
     "container_options": {
-        "container_image": "submitty/clang:8"
+        "container_image": "submitty/clang:latest"
     },
     "resource_limits" : {
         "RLIMIT_NPROC" : 10

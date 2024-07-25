@@ -1,4 +1,11 @@
 {
+
+    "autograding_method": "docker",
+
+	"container_options": {
+        "container_image": "submitty/autograding-default:latest"
+	},
+
     "testcases" : [
         {
             "title" : "Comment counting",

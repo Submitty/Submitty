@@ -9,7 +9,7 @@
     },
 
 	"container_options": {
-        "container_image": "submitty/clang:8"
+        "container_image": "submitty/clang:latest"
 	},
     
     "assignment_message" : "You should not modify the provided main.cpp",

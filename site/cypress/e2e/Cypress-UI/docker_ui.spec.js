@@ -13,10 +13,10 @@ const docker_ui_path = '/admin/docker';
  * If `sponge' command is missing, install `moreutils' package, or edit the file manually:
  * {
  *     "default": [
- *         "submitty/clang:6.0",
+ *         "submitty/clang:latest",
  *         "submitty/autograding-default:latest",
- *         "submitty/java:11",
- *         "submitty/python:3.6",
+ *         "submitty/java:latest",
+ *         "submitty/python:latest",
  *         "submittyrpi/csci1200:default"
  *     ]
  * }
