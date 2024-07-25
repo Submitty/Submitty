@@ -96,34 +96,38 @@ function replace_fillin_variables {
     # FIXME: Add some error checking to make sure these values were filled in correctly
 }
 
-# Enable expand-verbose mode so global values are visible in log
-set -x
+function export_and_print {
+    echo "export $1=${!1}"
+    export "$1"
+}
 
-export IS_VAGRANT
-export IS_UTM
-export IS_CI
-export SUBMITTY_REPOSITORY
-export SUBMITTY_INSTALL_DIR
-export IS_WORKER
-export ALL_DAEMONS
-export RESTART_DAEMONS
+set +v
 
-export SUBMITTY_DATA_DIR
-export COURSE_BUILDERS_GROUP
-export NUM_UNTRUSTED
-export FIRST_UNTRUSTED_UID
-export FIRST_UNTRUSTED_GID
-export DAEMON_USER
-export DAEMON_GROUP
-export DAEMON_UID
-export DAEMON_GID
-export PHP_USER
-export CGI_USER
-export DAEMONPHP_GROUP
-export DAEMONCGI_GROUP
-export DAEMONPHPCGI_GROUP
-export SUPERVISOR_USER
+export_and_print IS_VAGRANT
+export_and_print IS_UTM
+export_and_print IS_CI
+export_and_print SUBMITTY_REPOSITORY
+export_and_print SUBMITTY_INSTALL_DIR
+export_and_print IS_WORKER
+export_and_print ALL_DAEMONS
+export_and_print RESTART_DAEMONS
+
+export_and_print SUBMITTY_DATA_DIR
+export_and_print COURSE_BUILDERS_GROUP
+export_and_print NUM_UNTRUSTED
+export_and_print FIRST_UNTRUSTED_UID
+export_and_print FIRST_UNTRUSTED_GID
+export_and_print DAEMON_USER
+export_and_print DAEMON_GROUP
+export_and_print DAEMON_UID
+export_and_print DAEMON_GID
+export_and_print PHP_USER
+export_and_print CGI_USER
+export_and_print DAEMONPHP_GROUP
+export_and_print DAEMONCGI_GROUP
+export_and_print DAEMONPHPCGI_GROUP
+export_and_print SUPERVISOR_USER
+
+set -v
 
 export -f replace_fillin_variables
-
-set +x
