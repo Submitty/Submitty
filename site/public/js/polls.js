@@ -1,4 +1,4 @@
-/* exported newDeletePollForm updatePollAcceptingAnswers updatePollVisible updateDropdownStates importPolls toggleTimerInputs togglePollFormOptions validateCustomResponse addCustomResponse removeCustomResponse toggle_section get_new_chart_width disableNoResponse clearResponses */
+/* exported newDeletePollForm updatePollAcceptingAnswers updatePollVisible updateDropdownStates importPolls toggleTimerInputs togglePollFormOptions changePollType addResponse submitErrorChecks validateCustomResponse addCustomResponse removeCustomResponse toggle_section get_new_chart_width disableNoResponse clearResponses */
 /* global csrfToken displaySuccessMessage displayErrorMessage */
 
 $(document).ready(() => {
@@ -7,6 +7,10 @@ $(document).ready(() => {
         $(this).find('i').toggleClass('down');
     });
 });
+
+/*
+ * Beginning of AllPollsPageInstructor.twig functions
+ */
 
 function newDeletePollForm(pollid, pollname, base_url) {
     if (confirm(`This will delete poll '${pollname}'. Are you sure?`)) {
@@ -106,6 +110,13 @@ function updateDropdownStates(curr_state, cookie_key) {
     Cookies.set(cookie_key, !curr_state, { expires: expiration_date, path: '/' });
 }
 
+/*
+ * End of AllPollsPageInstructor.twig functions
+ * Beginning of PollForm.twig functions
+ */
+
+let size_is_valid = true;
+
 function togglePollFormOptions() {
     const correct_options = $('.correct-box');
 
@@ -113,6 +124,132 @@ function togglePollFormOptions() {
         $(this).prop('checked', $('#toggle-all').prop('checked'));
     });
 }
+
+function changePollType() {
+    let count = $(".option_id").length;
+    for (let i = 0; i < count; i++) {
+        if ($("#poll-type-single-response-survey").is(":checked")
+            || $("#poll-type-multiple-response-survey").is(":checked")) {
+            $($(".correct-box")[i]).prop('checked', true);
+            $($(".correct-box")[i]).hide();
+            $("#toggle-all").hide();
+            $("#toggle-all-label").hide();
+        } else {
+            $($(".correct-box")[i]).show();
+            $("#toggle-all").show();
+            $("#toggle-all-label").show();
+        }
+    }
+}
+
+function checkImageSize(uploadedFile) {
+    if (uploadedFile.files[0].size > MAX_SIZE) {
+        size_is_valid = false;
+    } else {
+        size_is_valid = true;
+    }
+    submitErrorChecks();
+};
+
+function addResponse() {
+    let count = $(".option_id").length;
+    let curr_max_id = -1;
+    for (let i = 0; i < count; i++) {
+        const option_id = $($(".option_id")[i]).val();
+        curr_max_id = Math.max(parseInt(option_id === "" ? i : option_id, 10), curr_max_id);
+    }
+    const first_free_id = curr_max_id + 1;
+    let hidden_style = "";
+    let is_checked = "";
+    if ($("#poll-type-single-response-survey").is(":checked")
+        || $("#poll-type-multiple-response-survey").is(":checked")) {
+        hidden_style = "style='display:none'";
+        is_checked = "checked";
+        $("#toggle-all").hide();
+        $("#toggle-all-label").hide();
+    }
+    $("#responses").append(`
+            <div class="response-container" id="response_${first_free_id}_wrapper" data-testid="response-${first_free_id}-wrapper">
+                <input type="hidden" class="order order-${count}" name="option[${first_free_id}][order]" value="${count}"/>
+                <input type="hidden" class="option_id" name="option[${first_free_id}][id]" value=""/>
+                <input aria-label="Is correct" class="correct-box" type="checkbox" name="option[${first_free_id}][is_correct]" ${hidden_style} ${is_checked}>
+                <textarea aria-label="Response text" data-testid="poll-response" class="poll-response" name="option[${first_free_id}][response]" placeholder="Enter response here..."
+                rows="10" cols="30"></textarea>
+                <div class="move-btn up-btn">
+                    <i class="fa fa-lg fa-chevron-up"></i>
+                </div>
+                <div class="move-btn down-btn">
+                    <i class="fa fa-lg fa-chevron-down"></i>
+                </div>
+                <div class="move-btn delete-btn" data-testid="response-delete-button">
+                    <i class="fa fa-lg fa-trash"></i>
+                </div>
+                <br/>
+            </div>
+        `);
+    setEventHandlers();
+}
+
+function submitErrorChecks() {
+    let empty_responses = false;
+    for (let i = 0; i < $(".poll-response").length; i++) {
+        if ($($(".poll-response")[i]).val() === "") {
+            empty_responses = true;
+        }
+    }
+
+    if ($("#poll-name").val().length === 0) {
+        $("#poll-form-submit").prop("disabled", true);
+        $(".polls-submit-error").hide();
+        $("#empty-name-error").show();
+    } else if ($("#poll-question").val().length === 0) {
+        $("#poll-form-submit").prop("disabled", true);
+        $(".polls-submit-error").hide();
+        $("#empty-question-error").show();
+    } else if (!$('#poll-type-single-response-single-correct').is(':checked')
+        && !$('#poll-type-single-response-multiple-correct').is(':checked')
+        && !$('#poll-type-single-response-survey').is(':checked')
+        && !$('#poll-type-multiple-response-exact').is(':checked')
+        && !$('#poll-type-multiple-response-flexible').is(':checked')
+        && !$('#poll-type-multiple-response-survey').is(':checked')) {
+        $("#poll-form-submit").prop("disabled", true);
+        $(".polls-submit-error").hide();
+        $("#question-type-error").show();
+    } else if (!size_is_valid) {
+        $("#poll-form-submit").prop("disabled", true);
+        $(".polls-submit-error").hide();
+        $("#file-size-error").show();
+    } else if ($("#poll-date").val().length === 0) {
+        $("#poll-form-submit").prop("disabled", true);
+        $(".polls-submit-error").hide();
+        $("#empty-date-error").show();
+    } else if ($(".response-container").length === 0) {
+        $("#poll-form-submit").prop("disabled", true);
+        $(".polls-submit-error").hide();
+        $("#response-count-error").show();
+    } else if ($(".correct-box:checked").length === 0) {
+        $("#poll-form-submit").prop("disabled", true);
+        $(".polls-submit-error").hide();
+        $("#correct-response-count-error").show();
+    } else if ($(".correct-box:checked").length > 1
+        && $('#poll-type-single-response-single-correct').is(':checked')) {
+        $("#poll-form-submit").prop("disabled", true);
+        $(".polls-submit-error").hide();
+        $("#single-response-error").show();
+    } else if (empty_responses) {
+        $("#poll-form-submit").prop("disabled", true);
+        $(".polls-submit-error").hide();
+        $("#empty-response-error").show();
+    } else {
+        $("#poll-form-submit").prop("disabled", false);
+        $(".polls-submit-error").hide();
+    }
+}
+
+/*
+ * End of PollForm.twig functions
+ * Beginning of ViewPoll.twig functions
+ */
 
 function validateCustomResponse() {
     const custom_response = $('.custom-poll-response');
