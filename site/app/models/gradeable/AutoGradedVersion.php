@@ -596,7 +596,6 @@ class AutoGradedVersion extends AbstractModel {
         }
     }
 
-
     public function getMetrics_Sum() {
         $who = $this->getGradedGradeable()->getSubmitter()->getId();
         $gradeable = $this->graded_gradeable->getGradeable();
@@ -615,11 +614,9 @@ class AutoGradedVersion extends AbstractModel {
         ];
     }
 
-
     public function getSubmitterId() {
         return $this->getGradedGradeable()->getSubmitter()->getId();
     }
-
 
     /**
      * Sets whether or not autograding has been completed for this version
