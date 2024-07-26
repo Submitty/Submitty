@@ -48,6 +48,10 @@
             {% if is_full_page is defined and is_full_page %}
                 <div class="post-action-container">
                     <span>
+                    <strong class="post_user_id">{{ thread.author_info.name}}</strong>
+                        {% if thread.author_info.pronouns and thread.author_info.display_pronouns and thread.author_info.name != "Anonymous" %}
+                            <strong class="post_user_pronouns">({{thread.author_info.pronouns}})</strong>
+                        {% endif %}
                     </span>
                 </div>
             {% endif %}
