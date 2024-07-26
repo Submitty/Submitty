@@ -419,7 +419,6 @@ def grade_from_zip(
 
         with open(os.path.join(tmp_logs, "overall.txt"), 'a') as overall_log:
             os.chdir(tmp_work)
-
             run_compilation(testcases, config, which_untrusted, separator, overall_log)
             generate_input(testcases, config, which_untrusted, separator, overall_log)
             run_execution(testcases, config, which_untrusted, separator, overall_log)
