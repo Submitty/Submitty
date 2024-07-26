@@ -18,7 +18,7 @@
         </div>
     {% endif %}
     {% for cell in notebook %}
-        <div id="content_{{ loop.index0 }}" class="{{ cell.type }}" {% if cell.item_ref is defined %}data-item-ref={{ cell.item_ref }}{% else %}data-non-item-ref={{data_non_item_ref}}{% set data_non_item_ref = data_non_item_ref + 1 %}{% endif %}>
+        <div id="content_{{ loop.index0 }}" class="{{ cell.type }} notebook-cell" {% if cell.item_ref is defined %}data-item-ref={{ cell.item_ref }}{% else %}data-non-item-ref={{data_non_item_ref}}{% set data_non_item_ref = data_non_item_ref + 1 %}{% endif %}>
 
             {# Handle if cell is markdown #}
             {% if cell.type == "markdown" %}
@@ -31,7 +31,7 @@
 
             {# Handle "output" cells #}
             {% elseif cell.type == "output" %}
-                <pre class="notebook-output-cell">{{ cell.output_text }}</pre>
+                <pre class="notebook-output-cell-content">{{ cell.output_text }}</pre>
 
             {# Handle if cell is image #}
             {% elseif cell.type == "image" %}
@@ -277,6 +277,7 @@
             {% endif %}
 
         </div>
+        <hr>
 
     {% endfor %}
 
