@@ -88,12 +88,7 @@ class ElectronicGraderController extends AbstractController {
                             $metrics = $ov->getAutoGradedGradeable()->getMetrics_Sum();
                             $histogram["runtime"] = array_merge($histogram["runtime"], [$metrics['runtime']]);
                             $histogram["memory"] = array_merge($histogram["memory"], [$metrics['memory']]);
-//                            $histogram["runtime"] = array_merge($histogram["runtime"], [$ov->getAutoGradedGradeable()->getMetrics_runtime()]);
-//                            $histogram["memory"] = array_merge($histogram["memory"], [$ov->getAutoGradedGradeable()->getMetrics_memory()]);
                             $histogram["submitters"] = array_merge($histogram["submitters"], [$ov->getAutoGradedGradeable()->getSubmitterId()]);
-//                            var_dump($histogram["runtime"]);
-//                            var_dump([$ov->getAutoGradedGradeable()->getMetrics_runtime()]);
-
                         }
                         else {
                             $histogram["cancelledSub"] += 1;

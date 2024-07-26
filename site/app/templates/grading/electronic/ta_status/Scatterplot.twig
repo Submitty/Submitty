@@ -4,14 +4,12 @@
         <select id="x-axis-selector">
             <option value="runtime">Runtime</option>
             <option value="memory">Memory</option>
-            <option value="sloc">SLOC</option>
         </select>
     </div>
     <div id="myDiv4"></div>
     <script>
         var runtime = [{{ histograms['runtime'] | join(',') }}];
         var memory = [{{ histograms['memory'] | join(',') }}];
-        {#var sloc = [{{ histograms['sloc'] | join(',') }}];#}
         var scores = [{{ histograms['bAuto'] | join(',') }}];
 
         var submitters = [
