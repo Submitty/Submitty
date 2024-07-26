@@ -59,7 +59,6 @@ const giveLateDays = (timestamp, student_id, late_days = 2) => {
 
 const giveExtensions = (gradeable_name) => {
     // Grant an extension to the student
-    cy.login('instructor');
     cy.visit(['sample', 'extensions']);
     cy.get('[data-testid=gradeable-select]').select(gradeable_name);
     cy.get('[data-testid=extension-user-id]').type('student');
