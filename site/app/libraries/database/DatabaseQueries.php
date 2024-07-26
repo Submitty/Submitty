@@ -6370,6 +6370,7 @@ AND gc_id IN (
               eg.*,
               gamo.*,
               gc.*,
+              pgp.*,
               (SELECT COUNT(*) AS cnt FROM grade_inquiries WHERE g_id=g.g_id AND status = -1) AS active_grade_inquiries_count,
               (SELECT EXISTS (SELECT 1 FROM gradeable_data WHERE g_id=g.g_id)) AS any_manual_grades
             FROM gradeable g
@@ -6411,6 +6412,17 @@ AND gc_id IN (
                   eg_depends_on_points as depends_on_points
                 FROM electronic_gradeable
               ) AS eg ON g.g_id=eg.eg_g_id
+                LEFT JOIN (
+                SELECT
+                  g_id AS pgp_g_id,
+                  autograding, 
+                  rubric, 
+                  files,
+                  solution_notes,
+                  discussion
+                FROM peer_grading_panel
+                GROUP BY pgp_g_id
+              ) AS pgp ON g.g_id=pgp.pgp_g_id
               LEFT JOIN (
                 SELECT
                   g_id AS gamo_g_id,
@@ -7144,6 +7156,27 @@ AND gc_id IN (
                 VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
                 $params
             );
+            $params = [
+                $gradeable->getId(),
+                $gradeable->getPeerAutograding(),
+                $gradeable->getPeerRubric(),
+                $gradeable->getPeerFiles(),
+                $gradeable->getPeerSolutions(),
+                $gradeable->getPeerDiscussion(),
+            ];
+            $this->course_db->query(
+                "
+                INSERT INTO peer_grading_panel(
+                    g_id,
+                    autograding,
+                    rubric,
+                    files,
+                    solution_notes,
+                    discussion
+                )
+                VALUES(?, ?, ?, ?, ?, ?)",
+                $params
+            );
         }
 
         // Make sure to create the rotating sections
@@ -7309,6 +7342,29 @@ AND gc_id IN (
                       eg_depends_on=?,
                       eg_depends_on_points=?
                     WHERE g_id=?",
+                    $params
+                );
+                // Below params contain grading interface panels
+                $params = [
+                    $gradeable->getId(),
+                    $gradeable->getPeerAutograding(),
+                    $gradeable->getPeerRubric(),
+                    $gradeable->getPeerFiles(),
+                    $gradeable->getPeerSolutions(),
+                    $gradeable->getPeerDiscussion()
+                ];
+                // Update row if exists, else Insert row
+                $this->course_db->query(
+                    "
+                    INSERT INTO peer_grading_panel (g_id, autograding, rubric, files, solution_notes, discussion)
+                    VALUES (?, ?, ?, ?, ?, ?)
+                    ON CONFLICT (g_id) DO UPDATE
+                    SET autograding = EXCLUDED.autograding,
+                        rubric = EXCLUDED.rubric,
+                        files = EXCLUDED.files,
+                        solution_notes = EXCLUDED.solution_notes,
+                        discussion = EXCLUDED.discussion
+                    ",
                     $params
                 );
             }

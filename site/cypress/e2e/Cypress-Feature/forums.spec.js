@@ -86,6 +86,7 @@ const replyDisabled = (title, attachment) => {
 
     // Ensure reply button is not disabled when attachments are added
     // waits here are needed to avoid a reload that would clear out the upload
+    // eslint-disable-next-line cypress/no-unnecessary-waiting
     cy.wait(750);
     cy.get('[data-testid="input-file3"]').selectFile(`cypress/fixtures/${attachment}`);
     cy.get('[data-testid="forum-submit-reply-all"]').should('not.be.disabled').click();
