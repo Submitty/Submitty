@@ -394,12 +394,12 @@
         });
         $('#admin-gradeable-edit-peers-form').on('blur', ":text.add_user_ids", function() {
             const grader_id = $("#admin-gradeable-edit-peers-title").text().substr(18);
-            checkNewStudentsValid(grader_id, $(this), valid_students, false);
+            checkNewStudentsValid(grader_id, $(this), valid_students, false, team_grading);
             self_grading = grader_id === $(this).val();
-            updateSubmitButton(valid_grader, valid_students, false, false, "#admin-gradeable-edit-peers-submit", "#submit-error", self_grading);
+            updateSubmitButton(valid_grader, valid_students, false, false, "#admin-gradeable-edit-peers-submit", "#submit-error", self_grading, team_grading);
         });
         $('#admin-gradeable-edit-peers-form').on('focus blur', '#remove_grader', function() {
-            updateSubmitButton(valid_grader, valid_students, false, true, "#admin-gradeable-edit-peers-submit", "#submit-error", self_grading);
+            updateSubmitButton(valid_grader, valid_students, false, true, "#admin-gradeable-edit-peers-submit", "#submit-error", self_grading, team_grading);
         })
         $('#add-grader-btn-container').on("click", ".btn", function() {
             addGraderPeerForm();
@@ -410,13 +410,13 @@
             const grader_id = $(":text#new_peer_grader").val();
             valid_grader = checkNewGraderValid($(this));
             self_grading = grader_id === $(":text.add_user_ids").val();
-            updateSubmitButton(valid_grader, valid_students, true, false, "#admin-gradeable-add-peers-submit", "#submit-error2", self_grading);
+            updateSubmitButton(valid_grader, valid_students, true, false, "#admin-gradeable-add-peers-submit", "#submit-error2", self_grading, team_grading);
         });
         $('#admin-gradeable-add-peers-form').on('blur', ':text.add_user_ids', function() {
             const grader_id = $(":text#new_peer_grader").val();
-            checkNewStudentsValid(grader_id, $(this), valid_students, true);
+            checkNewStudentsValid(grader_id, $(this), valid_students, true, team_grading);
             self_grading = grader_id === $(this).val();
-            updateSubmitButton(valid_grader, valid_students, true, false, "#admin-gradeable-add-peers-submit", "#submit-error2", self_grading);
+            updateSubmitButton(valid_grader, valid_students, true, false, "#admin-gradeable-add-peers-submit", "#submit-error2", self_grading, team_grading);
         });
     });
     function downloadPeerDataAsCsv(table_id) {
