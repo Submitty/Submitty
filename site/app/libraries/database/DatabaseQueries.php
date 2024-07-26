@@ -3753,7 +3753,7 @@ VALUES(?, ?, ?, ?, 0, 0, 0, 0, ?)",
         // Switch the column based on gradeable team-ness
         $type = $mark->getComponent()->getGradeable()->isTeamAssignment() ? 'team' : 'user';
         // TODO: anon teams?
-        $user_type = ($type == 'user' && $anon !== 'unblind') ? 'anon' : $type;
+        $user_type = ($type === 'user' && $anon !== 'unblind') ? 'anon' : $type;
         $row_type = $user_type . "_id";
 
         $params = [$grader->getId(), $mark->getId()];
