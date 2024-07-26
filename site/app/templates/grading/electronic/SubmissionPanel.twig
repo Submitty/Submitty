@@ -84,37 +84,107 @@
 
 {% macro display_file(dir, path, id, indent, title, blind_grader) %}
     {% if not (blind_grader and (dir == 'queue_file.json' or dir == '.user_assignment_access.json')) %}
-    <div>
+    <div class="file-container">
         <div class="file-viewer">
-            <a class='openAllFile{{ title }} openable-element-{{ title }} key_to_click' file-url="{{ path|url_encode }}" onclick='openFrame("{{ dir|url_encode|e('js') }}", "{{ path|url_encode|e('js') }}", "{{ id }}"); updateCookies();' data-viewer_id="{{ id }}">
+            <a class='openAllFile{{ title }} openable-element{{ title }} key_to_click' file-url="{{ path|url_encode }}" onclick='openFrame("{{ dir|url_encode|e("js") }}", "{{ path|url_encode|e("js") }}", "{{ id }}"); updateCookies();' data-viewer_id="{{ id }}">
                 <span class="fas fa-plus-circle" style='vertical-align:text-bottom;'></span>
-                {{ dir }}</a> &nbsp;
-            <a id = 'open_file_{{ dir|url_encode }}' onclick='popOutSubmittedFile("{{ dir|url_encode }}", "{{ path|url_encode }}")' aria-label="Pop up the file in a new window" class="key_to_click" tabindex="0"><i class="fas fa-window-restore" title="Pop up the file in a new window"></i></a>
-            <a onclick='viewFileFullPanel("{{ dir|url_encode|e('js') }}", "{{ path|url_encode|e('js') }}")' aria-label="Show file in full panel" class="key_to_click" tabindex="0"><i class="fas fa-share" title="Show file in full panel"></i></a>
-            <a onclick='downloadFile("{{ path|url_encode }}", "{{ dir == "user_assignment_settings.json" ? "submission_versions" : title }}")' aria-label="Download the file" class="key_to_click" tabindex="0">
-    <i class="fas fa-download" title="Download the file"></i>
-</a>
-
+                {{ dir }}
+            </a>
+            <div class="file-icons">
+                <a id='open_file_{{ dir|url_encode }}' onclick='popOutSubmittedFile("{{ dir|url_encode }}", "{{ path|url_encode }}")' aria-label="Pop up the file in a new window" class="key_to_click" tabindex="0">
+                    <i class="fas fa-window-restore" title="Pop up the file in a new window"></i>
+                </a>
+                <a onclick='viewFileFullPanel("{{ dir|url_encode|e("js") }}", "{{ path|url_encode|e("js") }}")' aria-label="Show file in full panel" class="key_to_click" tabindex="0">
+                    <i class="fas fa-share" title="Show file in full panel"></i>
+                </a>
+                <a onclick='downloadFile("{{ path|url_encode }}", "{{ dir == "user_assignment_settings.json" ? "submission_versions" : title }}")' aria-label="Download the file" class="key_to_click" tabindex="0">
+                    <i class="fas fa-download" title="Download the file"></i>
+                </a>
+            </div>
         </div>
-        <div id="file_viewer_{{ id }}" style="margin-left:{{ indent * -15 }}px" data-file_name="{{ dir }}" data-file_url="{{ path }}"></div>
+        <div id="file_viewer_{{ id }}" class="subfile-container" style="margin-left:{{ indent * -15 }}px" data-file_name="{{ dir }}" data-file_url="{{ path }}"></div>
     </div>
     {% endif %}
 {% endmacro %}
 
 {% macro display_dir(dir, contents, id, indent, title, blind_grader) %}
-    <div>
+    <div class="directory-container">
         <div class="div-viewer">
-            <a data-testid="folders" class='openAllDiv openAllDiv{{ title }} openable-element-{{ title }} key_to_click' id='{{ dir }}' onclick='openDiv("{{ id }}"); updateCookies();' data-viewer_id="{{ id }}">
-                <span class="fas fa-folder open-all-folder" style='vertical-align:text-top;'></span>
+            <a data-testid="folders" class='openAllDiv openAllDiv{{ title }} openable-element{{ title }} key_to_click' id='{{ dir }}' onclick='openDiv("{{ id }}"); updateCookies();' data-viewer_id="{{ id }}">
+                <span id="{{ id }}-span" class="fa-solid fa-folder open-all-folder" style='vertical-align:text-top;'></span>
                 {{ dir }}
             </a>
+            <i class="fa-solid fa-folder-tree" id="{{ id }}-toggle-icon" onclick='toggleAll("{{ id }}")' title="Toggle All" style="cursor: pointer; margin-left: 10px;"></i>
         </div>
         <br/>
-        <div id='div_viewer_{{ id }}' style='margin-left:15px; display: none' data-file_name="{{ dir }}">
-
+        <div id='div_viewer_{{ id }}' class="subfile-container" style='margin-left:15px; display: none' data-file_name="{{ dir }}">
             {# Recurse #}
             {{ _self.display_files(contents, id, indent + 1, title, blind_grader) }}
-
         </div>
     </div>
 {% endmacro %}
+
+<script>
+function toggleAll(id) {
+    const divViewer = document.getElementById(`div_viewer_${id}`);
+    const folderIcon = document.getElementById(id + '-span');
+    
+    if (divViewer.style.display === 'none' || divViewer.style.display === '') {
+        // Open all
+        divViewer.style.display = 'block';
+        if (folderIcon) {
+            folderIcon.className = 'fa-regular fa-folder-open';
+        }
+        document.querySelectorAll(`#div_viewer_${id} .div-viewer a, #div_viewer_${id} .file-viewer`).forEach(function(element) {
+            const viewerId = element.getAttribute('data-viewer_id');
+            if (viewerId) {
+                const subDivViewer = document.getElementById(`div_viewer_${viewerId}`);
+                if (subDivViewer) {
+                    subDivViewer.style.display = 'block';
+                    const subFolderIcon = document.getElementById(viewerId + '-span');
+                    if (subFolderIcon) {
+                        subFolderIcon.className = 'fa-regular fa-folder-open';
+                    }
+                }
+            }
+        });
+    } else {
+        // Collapse all
+        divViewer.style.display = 'none';
+        if (folderIcon) {
+            folderIcon.className = 'fa-solid fa-folder';
+        }
+        document.querySelectorAll(`#div_viewer_${id} .div-viewer a, #div_viewer_${id} .file-viewer`).forEach(function(element) {
+            const viewerId = element.getAttribute('data-viewer_id');
+            if (viewerId) {
+                const subDivViewer = document.getElementById(`div_viewer_${viewerId}`);
+                if (subDivViewer) {
+                    subDivViewer.style.display = 'none';
+                    const subFolderIcon = document.getElementById(viewerId + '-span');
+                    if (subFolderIcon) {
+                        subFolderIcon.className = 'fa-solid fa-folder';
+                    }
+                }
+            }
+        });
+    }
+}
+
+function openDiv(id) {
+    const element = document.getElementById('div_viewer_' + id);
+    const icon = document.getElementById(id + '-span');
+    if (element) {
+        if (element.style.display === 'none') {
+            element.style.display = 'block';
+            if (icon) {
+                icon.className = 'fa-regular fa-folder-open';
+            }
+        } else {
+            element.style.display = 'none';
+            if (icon) {
+                icon.className = 'fa-solid fa-folder';
+            }
+        }
+    }
+}
+</script>
