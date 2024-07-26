@@ -9516,7 +9516,7 @@ SQL;
      */
     public function getMetricSum(string $user_id, string $gradeable_id, int $version): array {
         $query = "
-        SELECT SUM(elapsed_time) AS total_elapsed_time, SUM(max_rss_size) AS total_max_rss_size
+        SELECT SUM(elapsed_time) AS total_elapsed_time, MAX(max_rss_size) AS total_max_rss_size
         FROM autograding_metrics
         WHERE user_id = ?
             AND g_id = ?
