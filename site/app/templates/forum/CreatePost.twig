@@ -96,16 +96,6 @@
             <a class="post-user-info key_to_click" tabindex = "0" onClick='changeName(this.parentNode, {{ post_user_info.info_name }}, {{ post_user_info.visible_user_json}}, {{ post_user_info.jscriptAnonFix}})' title="Show full user information" aria-label="Show full user information"><i class="fas fa-eye"></i></a>
         {% endif %}
 
-        {% if userGroup <= 3 or post.author_user_id == current_user %}
-            {% if not (isThreadLocked != 1 or userAccessFullGrading == true) %}
-                {#pass#}
-            {% else %}
-                {# Removing the delete and edit icons as they are included in the dropdown now #}
-                {# <a class="post_button delete-post-button key_to_click" tabindex = "0" onClick="deletePostToggle({{ post_buttons.delete.ud_toggle_status }}, {{ post.thread_id }}, {{ post.id }}, '{{ post.author_user_id }}', '{{ post_date }}', '{{ csrf_token }}' )" title="{{ post_buttons.delete.ud_button_title }}" aria-label="{{ post_buttons.delete.ud_button_title }}"><i class="fa {{ post_buttons.delete.ud_button_icon }}"></i></a>
-                <a class="post_button edit-post-button key_to_click" data-testid="edit-post-button" tabindex = "0" onClick="showEditPostForm({{ post.id }}, {{ post.thread_id }}, {{ post_buttons.edit.shouldEditThread }}, {{ render_markdown?1:0 }}, '{{ csrf_token }}')" title="{{ post_buttons.edit.edit_button_title }}" aria-label="{{ post_buttons.edit.edit_button_title }}"><i class="fas fa-edit"></i></a> #}
-            {% endif %}
-        {% endif %}
-
         <span class="last-edit">
             {% if post_user_info.is_OP == true and first == false %}
 			    <strong class="post_user_id" title="Original Poster">{{ visible_username }} <span style="color: var(--standard-medium-vibrant-blue);"><strong>OP</strong></span></strong>

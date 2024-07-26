@@ -639,11 +639,8 @@ class ForumController extends AbstractController {
         return $this->core->getOutput()->renderJsonSuccess($response);
     }
 
-    /**
-     * @Route("/courses/{_semester}/{_course}/forum/threads/unread", methods={"POST"})
-     * @return JsonResponse
-     */
-    public function markThreadUnread() {
+    #[Route("/courses/{_semester}/{_course}/forum/threads/unread", methods: ["POST"])]
+    public function markThreadUnread(): JsonResponse {
         $thread_id = $_POST["thread_id"];
         $current_user = $this->core->getUser()->getId();
         $this->core->getQueries()->unreadThread($current_user, $thread_id);
@@ -651,11 +648,8 @@ class ForumController extends AbstractController {
         return JsonResponse::getSuccessResponse($response);
     }
 
-    /**
-     * @Route("/courses/{_semester}/{_course}/forum/posts/unread", methods={"POST"})
-     * @return JsonResponse
-     */
-    public function markPostUnread() {
+    #[Route("/courses/{_semester}/{_course}/forum/posts/unread", methods: ["POST"])]
+    public function markPostUnread(): JsonResponse {
         $thread_id = $_POST["thread_id"];
         $last_viewed_timestamp = $_POST["last_viewed_timestamp"];
         // format the last viewed timestamp to be in the same format as the database
