@@ -52,7 +52,6 @@ const mergeThreads = (fromThread, toThread, mergedContent) => {
     cy.get('[data-testid="thread-list-item"]').contains(fromThread).click();
     cy.get('[title="Merge Thread Into Another Thread"]').click();
     cy.get('.chosen-single > span').click();
-    cy.wait(500);
     cy.get('.active-result').contains(toThread).click({ force: true });
     cy.get('[value="Merge Thread"]').click({ force: true });
     cy.get('.pre-forum > .post_content').should('contain', mergedContent);
@@ -143,18 +142,12 @@ describe('Should test creating, replying, merging, removing, and upducks in foru
     it('Create, reply to, merge, and delete threads', () => {
         // Add and Delete Image Attachment
         uploadAttachmentAndDelete(title4, attachment1);
-        // Comment
         createThread(title1, content1, 'Comment');
-        // Question
         createThread(title2, content2, 'Question');
-        // Tutorials
         createThread(title3, content3, 'Tutorials');
 
-        // Comment
         replyToThread(title1, reply1);
-        // Question
         replyToThread(title2, reply2);
-        // Tutorial
         replyToThread(title3, reply3);
 
         // Student upduck

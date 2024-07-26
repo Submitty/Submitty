@@ -1305,7 +1305,7 @@ SQL;
                 DO UPDATE SET timestamp = ?
             ", [$thread_id, $current_user, $last_viewed_post_time, $last_viewed_post_time]);
         }
-    }    
+    }
 
     /**
      * @param string $current_user
