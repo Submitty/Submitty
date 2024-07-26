@@ -147,7 +147,7 @@ describe('Test cases involving late day cache updates', () => {
         it('should give late days and check new status', () => {
             cy.login('instructor');
             cy.visit(['sample', 'late_days']);
-            cy.intercept('GET', buildUrl(['sample', 'late_days'])).as('late_day');
+            cy.intercept('GET', buildUrl(['sample', 'late_days'])).as('late_days');
 
             for (const user_id of all_user_ids) {
                 // update the number of late days
@@ -157,7 +157,7 @@ describe('Test cases involving late day cache updates', () => {
                 cy.get('#late_days').clear();
                 cy.get('#late_days').type(2);
                 cy.get('input[type=submit]').click();
-                cy.wait('@late_day');
+                cy.wait('@late_days');
             }
             checkStudentsInCache();
             cy.logout();
@@ -167,9 +167,10 @@ describe('Test cases involving late day cache updates', () => {
             cy.login('instructor');
             cy.visit(['sample', 'bulk_late_days']);
             cy.get('#1972-01-01').should('have.length.gt', 0);
-
             cy.visit(['sample', 'late_days']);
-            cy.intercept('GET', buildUrl(['sample', 'late_days'])).as('late_days');
+
+            // align the interception
+            cy.wait('@late_days');
             const deleteLateDays = () => {
                 cy.get('div.content').then((table) => {
                     if (table.find('#Delete').length > 0) {
@@ -213,6 +214,8 @@ describe('Test cases involving late day cache updates', () => {
             CheckStatusUpdated(2, 0);
             cy.login('instructor');
             cy.visit(['sample', 'extensions']);
+
+            // align the interception
             cy.wait('@extensions');
 
             const deleteExtensions = () => {
