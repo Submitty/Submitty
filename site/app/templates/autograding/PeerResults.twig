@@ -56,14 +56,11 @@ function switch_feedback_modes() {
 </script>
 
 {% if not been_ta_graded %}
-    <h3>This assignment has not been graded yet</h3>
-    <br>
+    <h3>This assignment has not been graded yet.</h3>
 {% elseif not active_same_as_graded %}
-    <h3>The version you have selected to be graded above does not match the version graded by your TA/instructor, please contact TA/instructor if necessary to resolve the problem.</h3>
-    <br>
+    <h3>The version you have selected to be graded above does not match the version graded by your peers.</h3>
 {% elseif not grading_complete %}
-    <h3>Grading not complete, please contact an instructor/grader</h3>
-    <br>
+    <h3>Grading not complete, please contact an instructor/grader.</h3>
 {% else %}
     <div class="sub">
 

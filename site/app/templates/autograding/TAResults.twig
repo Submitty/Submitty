@@ -14,13 +14,10 @@ $( document ).ready(function() {
     {% endif %}
 });
 </script>
-
 {% if not been_ta_graded %}
     <h3>This assignment has not been graded yet, please contact an instructor/grader.</h3>
-    <br>
 {% elseif not grading_complete %}
     <h3>Grading not complete, please contact an instructor/grader.</h3>
-    <br>
 {% else %}
     <div class="sub">
         {% if not active_same_as_graded %}
