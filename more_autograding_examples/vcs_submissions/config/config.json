@@ -2,7 +2,7 @@
     "required_capabilities": "python",
     "autograding_method": "docker",
 	"container_options": {
-        "container_image": "python:latest"
+        "container_image": "submitty/python:latest"
 	},
     "autograding": {
         "submission_to_compilation" : [ "*.pdf" ],

@@ -16,7 +16,7 @@
             "containers" : [
                 {
                     "container_name" : "container0",
-                    "container_image": "submitty/autograding-default:latest",
+                    "container_image": "submitty/python:latest",
                     "commands" : ["python3 *.py"]
                 }
             ],

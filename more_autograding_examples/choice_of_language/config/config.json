@@ -5,7 +5,8 @@
 
     "container_options" : {
         //States that a given testcase uses a router by default. (Default value is true)
-        "use_router" : false
+        "use_router" : false,
+        "container_image": "submitty/autograding-default:latest"
       },
 
     "assignment_message" : "Please submit your assignment in one of 4 languages.  Only submit to a single bucket.",
