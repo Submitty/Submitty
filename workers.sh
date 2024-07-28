@@ -1,5 +1,10 @@
 #!/bin/bash
 
+if ! which python3 >/dev/null; then
+  echo "Python 3 has not been configured. Make sure to install it and add it to your PATH."
+  exit 1
+fi
+
 if [[ $1 == "generate" ]]; then
   python3 ./generate_workers.py "${@:2}"
   exit $?
@@ -11,8 +16,8 @@ if [[ ! -f ".vagrant/workers.json" ]]; then
   exit 1
 fi
 
-VM_PROVIDER=$(jq -r '.provider' .vagrant/workers.json)
-GATEWAY_IP=$(jq -r '.gateway' .vagrant/workers.json)
+VM_PROVIDER=$(python3 -c "import json;print(json.load(open('.vagrant/workers.json'))['provider'])")
+GATEWAY_IP=$(python3 -c "import json;print(json.load(open('.vagrant/workers.json'))['gateway'])")
 
 if [[ -z $VM_PROVIDER || -z $GATEWAY_IP ]]; then
   echo "Worker configuration is not valid, please run 'vagrant workers generate'."
@@ -30,11 +35,7 @@ if [[ $1 == "socket" ]]; then
     exit 1
   fi
 
-  if [[ ! -f "${HOMEBREW_PREFIX}/bin/jq" ]]; then
-    brew install jq
-  fi
-
-  if [[ ! $VM_PROVIDER == "qemu" ]]; then
+  if [[ $VM_PROVIDER != "qemu" ]]; then
     echo "Socket networking is only for QEMU. Your configuration is set to '$VM_PROVIDER'."
     exit 1
   fi
@@ -44,11 +45,6 @@ if [[ $1 == "socket" ]]; then
 
     if [[ -n $PIDS ]]; then
       echo "There is a socket server already running on this machine. Run 'vagrant workers socket stop' to stop it."
-      exit 1
-    fi
-
-    if [[ -z $GATEWAY_IP || -z $VM_PROVIDER ]]; then
-      echo "Worker configuration is not valid, please run 'vagrant workers generate'."
       exit 1
     fi
 
