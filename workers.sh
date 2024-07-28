@@ -86,7 +86,10 @@ if [[ $1 == "socket" ]]; then
       echo "Successfully stopped"
       exit 0
     fi
-    
+
+    # Just in case, kill any other socket process
+    sudo kill -4 $(pgrep -f "/opt/homebrew/opt/socket_vmnet/bin/socket_vmnet")
+
     echo "Socket server is not running."
     exit 0
   fi
