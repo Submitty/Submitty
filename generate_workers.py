@@ -30,6 +30,36 @@ def get_args():
     return parser.parse_args()
 
 
+def update_bootstrap(workers):
+    print('Updating Bootstrap configuration... (see log below)')
+    print('---')
+    body = ['%%\n']
+    for name, data in workers.items():
+        body.append(name + ' 1 ' + data['ip_addr'] + ' ' + data['mac_addr'] + '\n')
+    with TemporaryDirectory() as tmpdir:
+        os.chdir(tmpdir)
+        filepath = os.path.join(tmpdir, 'bootpd')
+        with open(filepath, 'x') as file:
+            file.writelines(body)
+        w1 = subprocess.run(['sudo', 'mv', filepath, '/etc/bootptab'])
+        if w1.returncode != 0:
+            print('\033[31mFailed to save configuration\033[0m')
+            exit(1)
+        w2 = subprocess.run(['sudo', 'launchctl', 'kickstart', '-k', 'system/com.apple.bootpd'])
+        if w2.returncode == 113 or w2.returncode == 1:
+            if w2.returncode == 1:
+                subprocess.run(['sudo', 'launchctl', 'bootout', 'system/com.apple.bootpd'])
+            w3 = subprocess.run(['sudo', 'launchctl', 'load', '-w', '/System/Library/LaunchDaemons/bootps.plist'])
+            if w3.returncode == 0:
+                w2 = subprocess.run(['sudo', 'launchctl', 'kickstart', '-k', 'system/com.apple.bootpd'])
+        print('---')
+        if w2.returncode != 0:
+            print('\033[31mFailed to restart Bootstrap service\033[0m')
+            exit(1)
+        print('\033[32mSuccessfully restarted Boostrap service\033[0m')
+    print('Configuration saved')
+
+
 def main():
     args = get_args()
     workers = OrderedDict()
@@ -102,33 +132,7 @@ def main():
     print('Wrote new configuration to ' + workerfile)
 
     if provider == 'qemu':
-        print('Updating Bootstrap configuration... (see log below)')
-        print('---')
-        body = ['%%\n']
-        for name, data in workers.items():
-            body.append(name + ' 1 ' + data['ip_addr'] + ' ' + data['mac_addr'] + '\n')
-        with TemporaryDirectory() as tmpdir:
-            os.chdir(tmpdir)
-            filepath = os.path.join(tmpdir, 'bootpd')
-            with open(filepath, 'x') as file:
-                file.writelines(body)
-            w1 = subprocess.run(['sudo', 'mv', filepath, '/etc/bootptab'])
-            if w1.returncode != 0:
-                print('\033[31mFailed to save configuration\033[0m')
-                exit(1)
-            w2 = subprocess.run(['sudo', 'launchctl', 'kickstart', '-k', 'system/com.apple.bootpd'])
-            if w2.returncode == 113 or w2.returncode == 1:
-                if w2.returncode == 1:
-                    subprocess.run(['sudo', 'launchctl', 'bootout', 'system/com.apple.bootpd'])
-                w3 = subprocess.run(['sudo', 'launchctl', 'load', '-w', '/System/Library/LaunchDaemons/bootps.plist'])
-                if w3.returncode == 0:
-                    w2 = subprocess.run(['sudo', 'launchctl', 'kickstart', '-k', 'system/com.apple.bootpd'])
-            print('---')
-            if w2.returncode != 0:
-                print('\033[31mFailed to restart Bootstrap service\033[0m')
-                exit(1)
-            print('\033[32mSuccessfully restarted Boostrap service\033[0m')
-        print('Configuration saved')
+        update_bootstrap(workers)
 
 
 if __name__ == '__main__':
