@@ -13,19 +13,13 @@ from typing import Union, cast
 from tempfile import TemporaryDirectory
 
 
-def get_args(m_series=False):
+def get_args():
     parser = argparse.ArgumentParser(
         description='Script to generate configuration for '
         'development worker machines', prog='vagrant workers generate')
 
-    default_provider = 'virtualbox'
-    if m_series:
-        default_provider = 'qemu'
-
     parser.add_argument('-n', '--num', default=1, type=int,
                         help='Number of worker machines to configure')
-    parser.add_argument('--provider', default=default_provider, type=str,
-                        help='The VM provider (default on this machine is ' + default_provider + ')')
     parser.add_argument('--ip-range', default='192.168.{}.0/24'.format(random.randint(100, 200)), type=ipaddress.ip_network,
                         help='IP address range for workers')
     parser.add_argument('--base-port', default=2240, type=int,
@@ -37,11 +31,16 @@ def get_args(m_series=False):
 
 
 def main():
-    m_series = platform.processor() == 'arm' and platform.system() == 'Darwin'
-    args = get_args(m_series)
+    args = get_args()
     workers = OrderedDict()
     rootdir = os.path.dirname(os.path.realpath(__file__))
     workerfile = os.path.join(rootdir, '.vagrant', 'workers.json')
+
+    action_provision = glob.glob(os.path.join(os.path.dirname(os.path.realpath(__file__)), '.vagrant', 'machines', 'ubuntu*', '*', 'action_provision'))
+    if not len(action_provision):
+        print("\033[31mThe main virtual machine has not been configured.\033[0m")
+        exit(1)
+    provider = os.path.basename(os.path.dirname(action_provision[0]))
 
     with open(workerfile) as file:
         existing_config = json.load(file)
@@ -91,8 +90,8 @@ def main():
 
     full_data = OrderedDict()
     full_data['version'] = 2
-    full_data['provider'] = args.provider
-    if args.provider == 'qemu':
+    full_data['provider'] = provider
+    if provider == 'qemu':
         full_data['gateway'] = str(gateway_ip)
     full_data['workers'] = workers
 
@@ -102,7 +101,7 @@ def main():
 
     print('Wrote new configuration to ' + workerfile)
 
-    if args.provider == 'qemu':
+    if provider == 'qemu':
         print('Updating Bootstrap configuration... (see log below)')
         print('---')
         body = ['%%\n']
@@ -115,7 +114,7 @@ def main():
                 file.writelines(body)
             w1 = subprocess.run(['sudo', 'mv', filepath, '/etc/bootptab'])
             if w1.returncode != 0:
-                print('Failed to save configuration')
+                print('\033[31mFailed to save configuration\033[0m')
                 exit(1)
             w2 = subprocess.run(['sudo', 'launchctl', 'kickstart', '-k', 'system/com.apple.bootpd'])
             if w2.returncode == 113 or w2.returncode == 1:
@@ -126,9 +125,9 @@ def main():
                     w2 = subprocess.run(['sudo', 'launchctl', 'kickstart', '-k', 'system/com.apple.bootpd'])
             print('---')
             if w2.returncode != 0:
-                print('Failed to restart Bootstrap service')
+                print('\033[31mFailed to restart Bootstrap service\033[0m')
                 exit(1)
-            print('Successfully restarted Boostrap service')
+            print('\033[32mSuccessfully restarted Boostrap service\033[0m')
         print('Configuration saved')
 
 
