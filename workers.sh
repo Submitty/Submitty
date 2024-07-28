@@ -38,7 +38,7 @@ if [[ $1 == "socket" ]]; then
 
   if [[ $2 == "start" ]]; then
     if ! mkdir "$LOCKDIR" 2>/dev/null; then
-      echo "There is a socket server already running on this machine. Run 'socket stop' to stop it."
+      echo "There is a socket server already running on this machine. Run 'vagrant workers socket stop' to stop it."
       exit 0
     fi
 
