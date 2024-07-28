@@ -43,11 +43,21 @@ def main():
     rootdir = os.path.dirname(os.path.realpath(__file__))
     workerfile = os.path.join(rootdir, '.vagrant', 'workers.json')
 
-    if len(glob.glob(os.path.join(rootdir, '.vagrant', 'machines', '*', '*', 'action_provision'))):
-        if input("Warning: There are existing vagrant machines in this project that may conflict"
-                 " with new configuration. Are you sure you would like to proceed? [y/N] "
-                 ).lower().strip() != 'y':
-            return
+    with open(workerfile) as file:
+        existing_config = json.load(file)
+
+    version = 1
+    if 'version' in existing_config and type(existing_config['version']) == int:
+        version = existing_config['version']
+
+    for worker_name in (existing_config if version == 1 else existing_config['workers']):
+        if len(glob.glob(os.path.join(rootdir, '.vagrant', 'machines', worker_name, '*', 'action_provision'))):
+            if input("\033[93mWarning: There are existing worker machines that may conflict with new configuration.\n"
+                     "They can be removed safely with 'vagrant workers destroy'.\n"
+                     "Are you sure you would like to proceed without removing them? [y/N]\033[0m "
+                    ).lower().strip() != 'y':
+                return
+            break
 
     if os.path.isfile(workerfile):
         if input('Overwrite existing worker configuration? [y/N] ').lower().strip() != 'y':
