@@ -11,42 +11,45 @@ if [[ ! -f ".vagrant/workers.json" ]]; then
   exit 1
 fi
 
+VM_PROVIDER=$(jq -r '.provider' .vagrant/workers.json)
+GATEWAY_IP=$(jq -r '.gateway' .vagrant/workers.json)
+
+if [[ -z $VM_PROVIDER || -z $GATEWAY_IP ]]; then
+  echo "Worker configuration is not valid, please run 'vagrant workers generate'."
+  exit 1
+fi
+
 if [[ $1 == "socket" ]]; then
   if [[ ! $(uname -s) == "Darwin" ]]; then
     echo "Socket networking is only for macOS using QEMU"
-    exit 0
+    exit 1
   fi
 
   if [[ -z "${HOMEBREW_PREFIX}" ]]; then
-    echo "Homebrew has not been installed."
-    exit 0
+    echo "Homebrew has not been configured. Make sure to install homebrew and follow the instructions at the end to add it to your PATH."
+    exit 1
   fi
 
   if [[ ! -f "${HOMEBREW_PREFIX}/bin/jq" ]]; then
     brew install jq
   fi
 
-  VM_PROVIDER=$(jq -r '.provider' .vagrant/workers.json)
-  GATEWAY_IP=$(jq -r '.gateway' .vagrant/workers.json)
-
   if [[ ! $VM_PROVIDER == "qemu" ]]; then
     echo "Socket networking is only for QEMU. Your configuration is set to '$VM_PROVIDER'."
-    exit 0
+    exit 1
   fi
 
-  LOCKDIR=/tmp/submitty-workers-socket.lock
-
   if [[ $2 == "start" ]]; then
-    if ! mkdir "$LOCKDIR" 2>/dev/null; then
+    PIDS=$(pgrep -f "${HOMEBREW_PREFIX}/opt/socket_vmnet/bin/socket_vmnet")
+
+    if [[ -n $PIDS ]]; then
       echo "There is a socket server already running on this machine. Run 'vagrant workers socket stop' to stop it."
-      exit 0
+      exit 1
     fi
 
-    echo $$ > "${LOCKDIR}/pid"
-
-    if [[ -z $GATEWAY_IP ]]; then
+    if [[ -z $GATEWAY_IP || -z $VM_PROVIDER ]]; then
       echo "Worker configuration is not valid, please run 'vagrant workers generate'."
-      exit 0
+      exit 1
     fi
 
     if [[ ! -f "${HOMEBREW_PREFIX}/opt/socket_vmnet/bin/socket_vmnet" ]]; then
@@ -59,38 +62,27 @@ if [[ $1 == "socket" ]]; then
     fi
 
     mkdir -p "${HOMEBREW_PREFIX}/var/run"
-    echo "Starting socket vmnet server..."
+    sudo echo "Starting socket vmnet server..."
     if [[ $MODE == "shared" ]]; then
       echo "Using public networking"
     fi
     sudo "${HOMEBREW_PREFIX}/opt/socket_vmnet/bin/socket_vmnet" --vmnet-mode="${MODE}" --vmnet-gateway="${GATEWAY_IP}" "${HOMEBREW_PREFIX}/var/run/socket_vmnet" 1>/dev/null &
-    echo $! > "${LOCKDIR}/socket_pid"
     echo "Server running"
 
     exit 0
   fi
 
   if [[ $2 == "stop" ]]; then
-    # Kill the 'socket start' process if running
-    if [[ -f "${LOCKDIR}/pid" ]]; then
-      PID=$(cat "${LOCKDIR}/pid")
-      ps -p "$PID" 1>/dev/null && kill -9 "$PID"
+    PIDS=$(pgrep -f "${HOMEBREW_PREFIX}/opt/socket_vmnet/bin/socket_vmnet")
+
+    if [[ -z $PIDS ]]; then
+      echo "Socket server is not running."
+      exit 1
     fi
 
-    # Kill the socket
-    if [[ -f "${LOCKDIR}/socket_pid" ]]; then
-      echo "Stopping socket vmnet server..."
-      SOCKET_PID=$(cat "${LOCKDIR}/socket_pid")
-      ps -p "$SOCKET_PID" 1>/dev/null && sudo kill -2 "$SOCKET_PID"
-      rm -rf "$LOCKDIR"
-      echo "Successfully stopped"
-      exit 0
-    fi
+    sudo kill -4 $PIDS
+    echo "Successfully stopped socket server"
 
-    # Just in case, kill any other socket process
-    sudo kill -4 $(pgrep -f "/opt/homebrew/opt/socket_vmnet/bin/socket_vmnet")
-
-    echo "Socket server is not running."
     exit 0
   fi
 
@@ -106,10 +98,8 @@ if [[ $1 == "socket" ]]; then
 fi
 
 if [[ $(uname -s) == "Darwin" && $1 == "up" ]]; then
-  LOCKDIR=/tmp/submitty-workers-socket.lock
-  VM_PROVIDER=$(jq -r '.provider' .vagrant/workers.json)
-  GATEWAY_IP=$(jq -r '.gateway' .vagrant/workers.json)
   if [[ $VM_PROVIDER == "qemu" ]]; then
+    # Install Submitty/vagrant-qemu plugin
     PLUGIN_VERSION=24.06.00
     PLUGIN_INFO=$(vagrant plugin list --machine-readable | grep vagrant-qemu,plugin-version,)
     if [[ ! $PLUGIN_INFO == *"plugin-version,${PLUGIN_VERSION}%"* ]]; then
@@ -124,19 +114,19 @@ if [[ $(uname -s) == "Darwin" && $1 == "up" ]]; then
       echo "Successfully updated"
     fi
 
-    PID=$(cat "${LOCKDIR}/pid") &>/dev/null
-    SOCKET_PID=$(cat "${LOCKDIR}/socket_pid") &>/dev/null
-    if ps -p "$PID" &>/dev/null; then
-      echo "Waiting for socket to start..."
-      wait "$PID"
-    fi
-    if ! ps -p "$SOCKET_PID" &>/dev/null; then
-      echo "Socket not running, run 'vagrant workers socket start'"
+    # Exit if socket is not running
+    PIDS=$(pgrep -f "${HOMEBREW_PREFIX}/opt/socket_vmnet/bin/socket_vmnet")
+    if [[ -z $PIDS ]]; then
+      echo "Socket server is not running, to start it run 'vagrant workers socket start'."
       exit 1
     fi
-    WORKER_MODE=1 GATEWAY_IP="${GATEWAY_IP}" "${HOMEBREW_PREFIX}/opt/socket_vmnet/bin/socket_vmnet_client" "${HOMEBREW_PREFIX}/var/run/socket_vmnet" vagrant up --provider="${VM_PROVIDER}" "${@:2}"
-    exit 0
+
+    WORKER_MODE=1 GATEWAY_IP="${GATEWAY_IP}" "${HOMEBREW_PREFIX}/opt/socket_vmnet/bin/socket_vmnet_client" "${HOMEBREW_PREFIX}/var/run/socket_vmnet" vagrant up --provider=qemu "${@:2}"
+    exit $?
   fi
+
+  vagrant up --provider="$VM_PROVIDER" "${@:2}"
+  exit $?
 fi
 
 WORKER_MODE=1 vagrant "$@"
