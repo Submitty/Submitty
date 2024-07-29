@@ -1,6 +1,6 @@
 {   
-    "all": false,
-    "require_name": true,
+    "all": true,
+    "require_name": false,
     "length": -1,
     "name_requirements": {
         "given_first": false,

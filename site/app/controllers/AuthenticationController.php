@@ -339,7 +339,7 @@ class AuthenticationController extends AbstractController {
      * @param string $str
      */
     public function isAcceptedUserId(string $user_id, string $given_name, string $family_name, string $email): bool {
-        $json = file_get_contents('/usr/local/submitty/GIT_CHECKOUT/Submitty/.setup/requirements.json');
+        $json = file_get_contents('/usr/local/submitty/GIT_CHECKOUT/Submitty/.setup/user_id_requirements.json');
         // Check if the file was read successfully
         if ($json === false) {
             return false;
@@ -364,10 +364,11 @@ class AuthenticationController extends AbstractController {
             $name_requirements = $requirements['name_requirements'];
             $given_first = $name_requirements['given_first'];
 
-            $id_given_name = substr($user_id, ($given_first ? 0 : $name_requirements['given_name']), ($given_first ? $name_requirements['given_name'] : strlen($user_id)));
-            $id_family_name = substr($user_id, ($given_first ? $name_requirements['given_name'] : 0), ($given_first ? strlen($user_id) : $name_requirements['given_name']) );
-            
-            if (($id_given_name === substr($given_name, 0, $name_requirements['given_name'])) && ($id_family_name === substr($family_name, 0, $name_requirements['family_name'])) ) {
+            $id_given_name = substr($user_id, ($given_first ? 0 : $name_requirements['family_name']), ($given_first ? $name_requirements['given_name'] : strlen($user_id)));
+            $id_family_name = substr($user_id, ($given_first ? $name_requirements['given_name'] : 0), ($given_first ? strlen($user_id) : $name_requirements['family_name']));
+            $is_given_name = (strtolower($id_given_name) === substr(strtolower($given_name), 0, $name_requirements['given_name']));
+            $is_family_name = (strtolower($id_family_name) === substr(strtolower($family_name), 0, $name_requirements['family_name']));
+            if ($is_family_name && $is_given_name) {
                 return true;
             }
 
@@ -440,12 +441,12 @@ class AuthenticationController extends AbstractController {
 
         $queried_list = $this->core->getQueries()->getFullEmailList();
 
-        if (array_search($email, array_column($queried_list, 'user_email'), true) !== false) {
+        if (in_array($email, array_column($queried_list, 'user_email'), true)) {
             $this->core->addErrorMessage('Email already exists');
             return new RedirectResponse($this->core->buildUrl(['authentication', 'create_account']));
         }
 
-        if (array_search($user_id, array_column($queried_list, 'user_id'), true) !== false) {
+        if (in_array($user_id, array_column($queried_list, 'user_id'), true)) {
             $this->core->addErrorMessage('User ID already exists');
             return new RedirectResponse($this->core->buildUrl(['authentication', 'create_account']));
         }
@@ -466,7 +467,7 @@ class AuthenticationController extends AbstractController {
         }
 
         if (!$this->isAcceptedUserId($user_id, $_POST['given_name'], $_POST['family_name'], $email)) {
-            $this->core->addErrorMessage('This user id is not accepted.');
+            $this->core->addErrorMessage('This user id does not meet requirements.');
             return new RedirectResponse($this->core->buildUrl(['authentication', 'create_account']));
         }
 
