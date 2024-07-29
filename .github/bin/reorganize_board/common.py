@@ -102,7 +102,7 @@ def set_status(item, status):
         return
     print(
         f'Moving {item["repo"]}#{item["number"]} {item["title"]} '
-        '({item["status"]} -> {status.get_name()}',
+        f'({item["status"]} -> {status.get_name()})',
         file=sys.stderr,
     )
     subprocess.run(
