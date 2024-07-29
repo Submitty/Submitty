@@ -504,11 +504,6 @@ fieldset[disabled] .btn-link:focus {
     width: 100%;
 }
 
-.btn-95 {
-    /* display: block; */
-    width: 95%;
-}
-
 .btn-block + .btn-block {
     margin-top: 5px;
 }

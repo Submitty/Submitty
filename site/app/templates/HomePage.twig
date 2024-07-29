@@ -29,7 +29,7 @@
                         <ul class="bare-list course-list">
                     {% endif %}
                     <li>
-                        <a id="{{ course['semester'] }}_{{ course['title'] }}" class="btn btn-primary {{ course_type == 'self_registeration_courses' ? 'btn-95' : 'btn-block' }} btn-course" href="{{ core.buildUrl(['courses', course['semester'], course['title']]) }}">
+                        <a id="{{ course['semester'] }}_{{ course['title'] }}" class="btn btn-primary btn-block btn-course" href="{{ core.buildUrl(['courses', course['semester'], course['title']]) }}">
                             {{ course['display_semester'] }} &nbsp; &nbsp;
                             {{ course['title'] | upper }} &nbsp; &nbsp;
                             {% if course['display_name'] != "" %}
@@ -40,9 +40,6 @@
                             {% endif %}
                             {{ user.accessAdmin() }}
                         </a>
-                        {% if course_type == 'self_registeration_courses' %}
-                            <button class="btn btn-course">Join Course</button>
-                        {% endif %}
                     </li>
                 {% endfor %}
                 {% if display_semester != '' %}

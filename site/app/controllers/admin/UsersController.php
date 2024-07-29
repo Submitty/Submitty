@@ -289,12 +289,6 @@ class UsersController extends AbstractController {
         $this->core->getOutput()->renderJsonSuccess($user_information);
     }
 
-    #[Route("/courses/{semester}/{course}/self_register", methods: ["POST"])]
-    public function selfRegister(User $user) {
-        $this->core->getQueries()->insertCourseUser($user, $semester, $course);
-    }
-
-
     #[Route("/courses/{_semester}/{_course}/users", methods: ["POST"])]
     public function updateUser($type = 'users') {
         $return_url = $this->core->buildCourseUrl([$type]) . '#user-' . $_POST['user_id'];
