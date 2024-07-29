@@ -1299,8 +1299,6 @@ TestResults* dispatch::diffLineSwapOk_doit (const nlohmann::json& j,const std::s
 
 // ===================================================================
 
-
-
 TestResults* dispatch::diff_doit (const TestCase &tc, const nlohmann::json& j) {
   std::vector<std::pair<TEST_RESULTS_MESSAGE_TYPE, std::string> > messages;
   std::string student_file_contents;
@@ -1320,12 +1318,21 @@ TestResults* dispatch::diff_doit (const TestCase &tc, const nlohmann::json& j) {
   std::string comparison = j.value("comparison","byLinebyChar");
   bool ignoreWhitespace = j.value("ignoreWhitespace",false);
   bool lineSwapOk = j.value("lineSwapOk",false);
+  float tolerance = j.value("tolerance", 0.0);
+  bool extraStudentOutputOk = j.value("extra_student_output",false);
+  std::map<unsigned int,std::vector<ToleranceChange>> t_changes;
+  if (tolerance != 0.0) {
+    bool within_tolerance = tolerance_diff(expected_file_contents, student_file_contents, tolerance, t_changes, ignoreWhitespace, extraStudentOutputOk);
+    if (within_tolerance) {
+      return new TestResults(1);
+    }
+  }
   if (comparison == std::string("byLinebyChar")) {
-    bool extraStudentOutputOk = j.value("extra_student_output",false);
     vectorOfLines text_a = stringToLines( student_file_contents, j );
     vectorOfLines text_b = stringToLines( expected_file_contents, j );
     answer = ses(j, &text_a, &text_b, true, extraStudentOutputOk );
     ((Difference*)answer)->type = ByLineByChar;
+    update_difference(answer, t_changes);
   } else if (comparison == std::string("byLine")) {
     if (lineSwapOk) {
       answer = diffLineSwapOk_doit(j,student_file_contents,expected_file_contents);
@@ -1337,9 +1344,9 @@ TestResults* dispatch::diff_doit (const TestCase &tc, const nlohmann::json& j) {
     } else {
       vectorOfLines text_a = stringToLines( student_file_contents, j );
       vectorOfLines text_b = stringToLines( expected_file_contents, j );
-      bool extraStudentOutputOk = j.value("extra_student_output",false);
       answer = ses(j, &text_a, &text_b, false,extraStudentOutputOk);
       ((Difference*)answer)->type = ByLineByChar;
+      update_difference(answer, t_changes);
     }
   } else {
     std::cout << "ERROR!  UNKNOWN COMPARISON" << comparison << std::endl;
@@ -1348,4 +1355,141 @@ TestResults* dispatch::diff_doit (const TestCase &tc, const nlohmann::json& j) {
   }
   assert (answer != NULL);
   return answer;
+}
+
+bool dispatch::tolerance_diff(
+  const std::string &expected_file_contents,
+  std::string &student_file_contents,
+  const float &tolerance,
+  std::map<unsigned int,std::vector<ToleranceChange>> &t_changes,
+  const bool &ignoreWhitespace,
+  const bool &extraStudentOutputOk
+) {
+  // split student and expected files into words and an space count array
+  vectorOfWords  student_file_words;
+  vectorOfWords  expected_file_words;
+  vectorOfSpaces student_spaces;
+  vectorOfSpaces expected_spaces;
+  stringToWordsAndSpaceList(student_file_contents, student_file_words, student_spaces);
+  stringToWordsAndSpaceList(expected_file_contents, expected_file_words, expected_spaces);
+
+  std::size_t expected_lines = expected_file_words.size();
+  std::size_t  student_lines =  student_file_words.size();
+  std::size_t  equal_lines = 0;
+
+  // iterating over expected lines; `line' should not exceed expected and student lines
+  for (std::size_t line = 0; line < expected_lines && line < student_lines; line++) {
+    std::vector<std::string> expected_line_words = expected_file_words[line];
+    std::vector<std::string>  student_line_words =  student_file_words[line];
+
+    std::vector<int> expected_line_spaces = expected_spaces[line];
+    std::vector<int>  student_line_spaces =  student_spaces[line];
+
+    std::size_t expected_words = expected_line_words.size();
+    std::size_t  student_words =  student_line_words.size();
+
+    if (expected_words != student_words) {
+      std::cout << "number of words mismatch: " << expected_words << " != " << student_words << std::endl;
+    }
+
+    std::size_t student_char_index = 0;
+    bool line_has_diff = false;
+
+    // iterating over expected words
+    for (std::size_t word = 0; word < expected_words; word++) {
+      student_char_index += student_line_words[word].size();
+      // move past spaces
+      if (word != 0)   student_char_index += student_spaces[line][word - 1];
+
+      if (word >= student_words) { // student has fewer words than expected
+        std::cout << "TOLERANCE: word count mismatch" << std::endl;
+        line_has_diff = true;   // mark line as having a diff
+        break;                  // break to next line
+      }
+
+      if (expected_line_words[word] == student_line_words[word])  continue;
+
+      // we got two different words here: check if they are numbers
+      // if not, mark line as having a diff and continue to next line
+      if (!isNumber(expected_line_words[word]) || !isNumber(student_line_words[word])) {
+        std::cout << "TOLERANCE: isnumber mismatch" << std::endl;
+        line_has_diff = true;
+        break;
+      }
+
+      // we got two different numbers here: check if they are within tolerance
+      auto diff {static_cast<float>(
+        std::abs(std::stod(isolateAlphanumAndNumberPunctuation(expected_line_words[word])) - std::stod(isolateAlphanumAndNumberPunctuation(student_line_words[word])))
+      )};
+
+      if (diff >= tolerance) {  // numbers are not within tolerance
+        std::cout << "TOLERANCE: tolerance mismatch" << std::endl;
+        line_has_diff = true;   // mark line as having a diff
+        break;                  // break to next line
+      }
+
+      // we got two different numbers but within the tolerence, replace
+      // student number with expected number
+      student_file_words[line][word] = expected_line_words[word];
+      if (expected_line_words[word].size() != student_line_words[word].size()) {
+        ToleranceChange t_change;
+        t_change.char_start = student_char_index;
+        t_change.num_change = expected_line_words[word].size() - student_line_words[word].size();
+        if (t_changes.find(line) != t_changes.end())  t_changes[line].push_back(t_change);
+        else {
+          std::vector<ToleranceChange> line_changes { t_change };
+          t_changes[line] = line_changes;
+        }
+      } // if (expected_line_words[word].size() != student_line_words[word].size())
+    } // for (std::size_t word = 0; word < expected_words; word++)
+
+    bool wsle = whiteSpaceListsEqual(expected_spaces[line], student_spaces[line]);
+    if (!wsle) {
+      std::cout << "TOLERANCE: whitespacelines not equal" << std::endl;
+    }
+
+    // if line doesn't have a diff other than values within tolerence,
+    // ignore white spaces if needed, and increment equal_lines
+    if (!line_has_diff
+        && (ignoreWhitespace || wsle)
+    )   equal_lines++;
+
+  } // for (std::size_t line = 0; line < expected_lines && line < student_lines; line++)
+
+  if (equal_lines == expected_lines) {
+    int64_t extra_lines = student_lines - expected_lines;
+    if (extra_lines == 0 || extraStudentOutputOk) {
+      return true;
+    }
+  }
+
+  student_file_contents = recreateStudentFile(student_file_words, student_spaces);
+  return false;
+} // bool dispatch::tolerance_diff(...)
+
+
+void dispatch::update_difference(TestResults* answer, std::map<unsigned int, std::vector<ToleranceChange>> &t_changes) {
+  if (!t_changes.empty()) {
+    std::vector<Change> &changes = ((Difference*)answer)->changes;
+    for (unsigned int block = 0; block < changes.size(); block++) {
+      for (unsigned int line = 0; line < changes[block].a_changes.size(); line++) {
+        int cur_line = changes[block].a_changes[line];
+        if (t_changes.find(cur_line) == t_changes.end()) {
+          continue;
+        }
+        std::vector<ToleranceChange> line_changes = t_changes[cur_line];
+        int cur = 0;
+        int num_change = t_changes[cur_line][cur].num_change;
+        for (int &character_index: changes[block].a_characters[line]) {
+          if (line_changes[cur].char_start < character_index) {
+            while (cur + 1 < line_changes.size() && line_changes[cur + 1].char_start < character_index) {
+              cur += 1;
+              num_change += line_changes[cur].num_change;
+            }
+            character_index += num_change;
+          }
+        }
+      }
+    }
+  }
 }

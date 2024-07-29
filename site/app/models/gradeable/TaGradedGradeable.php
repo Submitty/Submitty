@@ -333,12 +333,11 @@ class TaGradedGradeable extends AbstractModel {
 
     /**
      * Gets if this graded gradeable is completely graded
-     * @return bool
      */
-    public function isComplete() {
+    public function isComplete(User $grader = null): bool {
         /** @var GradedComponentContainer $container */
         foreach ($this->graded_component_containers as $container) {
-            if (!$container->isComplete()) {
+            if (!$container->isComplete($grader)) {
                 return false;
             }
         }
@@ -347,12 +346,12 @@ class TaGradedGradeable extends AbstractModel {
 
     /**
      * Gets if this graded gradeable has any grades
-     * @return bool
+     * @param User|null $grader If provided, only checks if this grader has any grades
      */
-    public function anyGrades() {
+    public function anyGrades(User $grader = null): bool {
         /** @var GradedComponentContainer $container */
         foreach ($this->graded_component_containers as $container) {
-            if ($container->anyGradedComponents()) {
+            if ($container->anyGradedComponents($grader)) {
                 return true;
             }
         }

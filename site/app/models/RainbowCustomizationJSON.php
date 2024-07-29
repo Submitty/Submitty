@@ -25,26 +25,29 @@ class RainbowCustomizationJSON extends AbstractModel {
     private $messages = [];
     private $display = [];
     private $benchmark_percent;         // Init in constructor
+    private object $final_cutoff;       // Init in constructor
     private $gradeables = [];
     /**
      * @var object[]
      */
     private array $plagiarism = [];
+    /**
+     * @var object[]
+     */
+    private array $manual_grade = [];
 
     // The order of allowed_display and allowed_display_description has to match
-    const allowed_display = ['grade_summary', 'grade_details', 'benchmark_percent',
-        'exam_seating', 'section', 'messages', 'warning', 'final_grade', 'manual_grade', 'final_cutoff', 'instructor_notes'];
+    const allowed_display = ['grade_summary', 'grade_details', 'exam_seating', 'section',
+        'messages', 'warning', 'final_grade', 'final_cutoff', 'instructor_notes'];
 
     const allowed_display_description = [
         "Display a column(row) for each gradeable bucket on the syllabus.", //grade_summary
         "Display a column(row) for each gradeable within each gradeable bucket on the syllabus.", //grade_details
-        "not used", //benchmark_percent
         "Used for assigned seating for exams, see also:  <a href='https://submitty.org/instructor/course_settings/rainbow_grades/exam_seating'>Exam Seating</a> ", //exam_seating
         "Display the students registration section.", //section
         "Display the optional text message at the top of the page.", //messages
         "not used", //warning
-        "Display the student's final term letter grade.", //final_grade
-        "not used", //manual_grade
+        "Configure cutoffs and display the student's final term letter grade.", //final_grade
         "Display the histogram of average overall grade and count of students with each final term letter grade.", //final_cutoff
         "Optional message for specific students that are only visible on the instructor gradebook, these messages are never displayed to students." //instructor_notes
     ];
@@ -61,6 +64,7 @@ class RainbowCustomizationJSON extends AbstractModel {
         // This is done so json_encode will properly encode the item when converting to json
         $this->section = (object) [];
         $this->benchmark_percent = (object) [];
+        $this->final_cutoff = (object) [];
     }
 
     /**
@@ -81,6 +85,14 @@ class RainbowCustomizationJSON extends AbstractModel {
         return $this->plagiarism;
     }
 
+    /**
+     * Get array of manual grades
+     *
+     * @return array<object>
+     */
+    public function getManualGrades(): array {
+        return $this->manual_grade;
+    }
 
     /**
      * Gets an array of display benchmarks
@@ -100,6 +112,14 @@ class RainbowCustomizationJSON extends AbstractModel {
         return $this->benchmark_percent;
     }
 
+    /**
+     * Gets the final cutoffs object
+     *
+     * @return object The final cutoffs object
+     */
+    public function getFinalCutoff() {
+        return $this->final_cutoff;
+    }
 
     /**
      * Gets an array of display
@@ -190,12 +210,20 @@ class RainbowCustomizationJSON extends AbstractModel {
             $this->benchmark_percent = $json->benchmark_percent;
         }
 
+        if (isset($json->final_cutoff)) {
+            $this->final_cutoff = $json->final_cutoff;
+        }
+
         if (isset($json->gradeables)) {
             $this->gradeables = $json->gradeables;
         }
 
         if (isset($json->plagiarism)) {
             $this->plagiarism = $json->plagiarism;
+        }
+
+        if (isset($json->manual_grade)) {
+            $this->manual_grade = $json->manual_grade;
         }
     }
 
@@ -243,6 +271,19 @@ class RainbowCustomizationJSON extends AbstractModel {
         }
 
         $this->benchmark_percent->$benchmark = (float) $percent;
+    }
+
+    /**
+     * Add a final cutoff
+     *
+     * @param string $cutoff The cutoff - this is the key for this json field
+     * @param float $percent The percent - this is the value for this json field
+     */
+    public function addFinalCutoff(string $cutoff, float $percent): void {
+        // To satisfy php-lint, add the pair to an array, then cast the array back to an object
+        $final_cutoff_array = (array) $this->final_cutoff;
+        $final_cutoff_array[$cutoff] = $percent;
+        $this->final_cutoff = (object) $final_cutoff_array;
     }
 
     /**
@@ -319,6 +360,31 @@ class RainbowCustomizationJSON extends AbstractModel {
         $this->plagiarism[] = $plagiarismEntry;
     }
 
+
+    /**
+     * Add a manual grade entry to existing array
+     *
+     * @param object{
+     *     "user": string,
+     *     "grade": string,
+     *     "note": string
+     * } $manualGradeEntry
+     */
+    public function addManualGradeEntry(object $manualGradeEntry): void {
+        $emptyArray = [
+            "user" => "",
+            "grade" => "",
+            "note" => ""
+        ];
+
+        $manualGradeArray = (array) $manualGradeEntry;
+
+        if ($manualGradeArray === $emptyArray) {
+            throw new BadArgumentException('Manual grading entry may not be empty.');
+        }
+
+        $this->manual_grade[] = $manualGradeEntry;
+    }
 
 
     /**

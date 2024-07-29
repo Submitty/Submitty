@@ -3,7 +3,7 @@ const page_window = 5;
 function loadPage(page, load_page_url) {
     $(`#${page}`).addClass('selected');
     $(`#${page}`).attr('disabled', 'disabled');
-    $('.page-btn').each(function() {
+    $('.page-btn').each(function () {
         const id = parseInt($(this).attr('id'));
         // To avoid race condition of what gets displayed first when buttons are spammed
         $(this).attr('disabled', 'disabled');
@@ -22,12 +22,12 @@ function loadPage(page, load_page_url) {
         url: load_page_url,
         data: {
             // eslint-disable-next-line no-undef
-            'csrf_token': csrfToken,
-            'page': page,
+            csrf_token: csrfToken,
+            page: page,
         },
-        success: function(data) {
+        success: function (data) {
             $('#email-statuses').html(data);
-            $('.page-btn').each(function() {
+            $('.page-btn').each(function () {
                 const id = parseInt($(this).attr('id'));
                 if (parseInt(page) - page_window <= id && id <= parseInt(page) + page_window && id !== parseInt(page)) {
                     $(this).removeAttr('disabled');

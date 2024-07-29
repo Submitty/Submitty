@@ -12,12 +12,27 @@ function revert_settings(gradeable_id, setting) {
 
 function select_gradeable() {
     // This gets a gradeable that has been graded already, so there are submissions available.
-    cy.get('[data-testid="grade-table"]').contains('/ 12').click({ force: true });
+    const button_labels = ['/ 12', 'Grade', 'Incomplete'];
+    const button_labels_regex = new RegExp(button_labels.join('|'));
+    cy.get('[data-testid="grade-table"]').contains(button_labels_regex).click({ force: true });
     cy.get('[data-testid="show-autograding"]').click();
     cy.get('[data-testid="show-submission"]').click();
     cy.get('[data-testid="folders"]').contains('submissions').click();
     cy.get('#div_viewer_sd1').contains('words_').click();
     cy.get('#pageContainer1').should('be.visible');
+}
+
+function pdf_buttons(student = false) {
+    cy.get('[data-testid="save-pdf-btn"]').should('be.visible');
+    cy.get('[data-testid="clear-pdf-btn"]').should('be.visible');
+    if (!student) {
+        cy.get('[data-testid="download-annotations-btn"]').should('be.visible');
+        cy.get('[data-testid="toggle-annotations-btn"]').should('be.visible');
+    }
+    else {
+        cy.get('[data-testid="download-annotations-btn"]').should('not.exist');
+        cy.get('[data-testid="toggle-annotations-btn"]').should('not.exist');
+    }
 }
 
 function check_pdf_access(gradeable_id) {
@@ -74,6 +89,7 @@ describe('Test cases for PDFs access', () => {
         cy.login('ta');
         gradeable_type.forEach((gradeable_id) => {
             check_pdf_access(gradeable_id);
+            pdf_buttons();
         });
     });
 
@@ -81,13 +97,16 @@ describe('Test cases for PDFs access', () => {
         cy.login('instructor');
         gradeable_type.forEach((gradeable_id) => {
             check_pdf_access(gradeable_id);
+            pdf_buttons();
         });
     });
 
     it('student should have access to some pdfs', () => {
         cy.login('student');
         minimum_pdf_access('grading_pdf_peer_homework');
+        pdf_buttons(true);
         minimum_pdf_access('grading_pdf_peer_team_homework');
+        pdf_buttons(true);
         no_pdf_access('grading_homework_team_pdf');
         no_pdf_access('grading_homework_pdf');
     });
@@ -98,5 +117,4 @@ describe('Test cases for PDFs access', () => {
             minimum_pdf_access(gradeable_id);
         });
     });
-
 });
