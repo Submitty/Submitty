@@ -155,7 +155,7 @@ Vagrant.configure(2) do |config|
       config.vm.define worker_name do |ubuntu|
         ubuntu.vm.network 'private_network', ip: data[:ip_addr]
         ubuntu.vm.network 'forwarded_port', guest: 22, host: data[:ssh_port], id: 'ssh' unless data[:ssh_port].nil?
-        ubuntu.vm.provision 'shell', inline: gen_script(worker_name, worker: true, base: base_box)
+        ubuntu.vm.provision 'shell', inline: gen_script(worker_name, worker: true, base: true)
 
         ubuntu.vm.provider "qemu" do |qe, override|
           qe.ssh_host = data[:ip_addr]
