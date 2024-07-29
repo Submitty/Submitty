@@ -324,7 +324,6 @@ class AuthenticationController extends AbstractController {
 
     /**
      * Check if password has at least one of the following, Upper case letter, Lower case letter, Special character, and number
-     * @param string $str
      */
     public function checkChars(string $password): bool {
         $upperCase = preg_match('/[A-Z]/', $password);
@@ -336,7 +335,6 @@ class AuthenticationController extends AbstractController {
 
     /**
      * Check if the user ID is valid
-     * @param string $str
      */
     public function isAcceptedUserId(string $user_id, string $given_name, string $family_name, string $email): bool {
         $json = file_get_contents('/usr/local/submitty/GIT_CHECKOUT/Submitty/.setup/user_id_requirements.json');
@@ -361,7 +359,7 @@ class AuthenticationController extends AbstractController {
         }
         elseif ($requirements['require_name'] === true) {
             $name_requirements = $requirements['name_requirements'];
-            $given_first = $name_requirements['given_first'];
+            $given_first = $name_requirements['given_first'] === 'true';
 
             $id_given_name = substr($user_id, ($given_first ? 0 : $name_requirements['family_name']), ($given_first ? $name_requirements['given_name'] : strlen($user_id)));
             $id_family_name = substr($user_id, ($given_first ? $name_requirements['given_name'] : 0), ($given_first ? strlen($user_id) : $name_requirements['family_name']));
