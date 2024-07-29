@@ -42,20 +42,19 @@ describe('Test cases revolving around simple grading lab', () => {
             cy.get('#simple-stats-popup').should('have.attr', 'style', 'display: block;');
             cy.get('#simple-stats-popup').find('[data-testid="close-button"]').click({ multiple: true });
             cy.get('#settings-popup').should('have.attr', 'style', 'display: none;');
-
         });
-
     });
 });
-
 
 describe('Test cases revolving around simple grading test', () => {
     before(() => {
         cy.visit(['sample', 'gradeable', 'grading_test', 'grading']);
         cy.login('instructor');
         // reset values
-        cy.get('#cell-1-0-0').clear().type('2');
-        cy.get('#cell-1-0-1').clear().type('2.5');
+        cy.get('#cell-1-0-0').clear();
+        cy.get('#cell-1-0-0').type('2');
+        cy.get('#cell-1-0-1').clear();
+        cy.get('#cell-1-0-1').type('2.5');
         cy.get('#total-1-0').click();
         cy.logout();
     });
@@ -78,9 +77,12 @@ describe('Test cases revolving around simple grading test', () => {
             });
 
             // Test different people can grade the same cell
-            cy.get('#cell-1-0-0').clear().type('3.4');
-            cy.get('#cell-1-0-1').clear().type('3.4');
-            cy.get('#total-1-0').click().should('contain.text', '6.8');
+            cy.get('#cell-1-0-0').clear();
+            cy.get('#cell-1-0-0').type('3.4');
+            cy.get('#cell-1-0-1').clear();
+            cy.get('#cell-1-0-1').type('3.4');
+            cy.get('#total-1-0').click();
+            cy.get('#total-1-0').should('contain.text', '6.8');
 
             // Check Settings Tab
             cy.get('#settings-btn').click({ force: true });
@@ -94,6 +96,5 @@ describe('Test cases revolving around simple grading test', () => {
             cy.get('#simple-stats-popup').find('[data-testid="close-button"]').click({ multiple: true });
             cy.get('#settings-popup').should('have.attr', 'style', 'display: none;');
         });
-
     });
 });

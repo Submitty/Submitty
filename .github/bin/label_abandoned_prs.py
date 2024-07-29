@@ -22,9 +22,8 @@ et_today = today.astimezone(eastern)
 for json_data in json_output:
     already_warned = False
     updated_at_string = json_data['updatedAt']
-    for comment in json_data['comments']:
-        if comment['body'] == inactive_comment:
-            already_warned = True
+    if json_data["comments"] and json_data["comments"][-1]["body"] == inactive_comment:
+        already_warned = True
 
     json_time = datetime.datetime.fromisoformat(updated_at_string.replace('Z', '+00:00'))
     et_time_update = json_time.astimezone(eastern)

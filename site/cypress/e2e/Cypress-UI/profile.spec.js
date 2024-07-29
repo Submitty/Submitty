@@ -13,10 +13,10 @@ const testFormOpening = (rowId, formId) => {
 const getVisibleData = () => {
     const data = {};
 
-    cy.get('#givenname-row > button').invoke('text').then(text => data.givenName = text.trim());
-    cy.get('#familyname-row > button').invoke('text').then(text => data.familyName = text.trim());
-    cy.get('#pronouns-row > button').invoke('text').then(text => data.pronouns = text.trim());
-    cy.get('#secondary-email-row > button').invoke('text').then(text => data.secondaryEmail = text.trim());
+    cy.get('#givenname-row > button').invoke('text').then((text) => data.givenName = text.trim());
+    cy.get('#familyname-row > button').invoke('text').then((text) => data.familyName = text.trim());
+    cy.get('#pronouns-row > button').invoke('text').then((text) => data.pronouns = text.trim());
+    cy.get('#secondary-email-row > button').invoke('text').then((text) => data.secondaryEmail = text.trim());
 
     return data;
 };
@@ -31,21 +31,22 @@ const testModification = (formId, cb) => {
 
 const fillData = (data) => {
     testModification('#edit-username-form', () => {
-        cy.get('#user-givenname-change').clear().type(data.givenName);
-        cy.get('#user-familyname-change').clear().type(data.familyName);
+        cy.get('#user-givenname-change').clear();
+        cy.get('#user-givenname-change').type(data.givenName);
+        cy.get('#user-familyname-change').clear();
+        cy.get('#user-familyname-change').type(data.familyName);
     });
 
     testModification('#edit-pronouns-form', () => {
-        cy.get('#user-pronouns-change').clear().as('pronounsInput');
+        cy.get('#user-pronouns-change').clear();
+        cy.get('#user-pronouns-change').as('pronounsInput');
         data.pronouns && cy.get('@pronounsInput').type(data.pronouns);
     });
 
     testModification('#edit-secondary-email-form', () => {
-        cy.get('#user-secondary-email-change')
-            .clear()
-            .as('secondaryEmailInput');
-        data.secondaryEmail &&
-            cy.get('@secondaryEmailInput').type(data.secondaryEmail);
+        cy.get('#user-secondary-email-change').clear();
+        cy.get('#user-secondary-email-change').as('secondaryEmailInput');
+        data.secondaryEmail && cy.get('@secondaryEmailInput').type(data.secondaryEmail);
     });
 };
 
@@ -112,7 +113,7 @@ describe('Test cases revolving around user profile page', () => {
         // Display message when no search results are found
         cy.get('#select2-time_zone_drop_down-container').click({ force: true });
         cy.get('input[aria-controls="select2-time_zone_drop_down-results"]').type('Nonexistent Zone');
-        cy.get('.select2-results').should('contain.text', 'No results found').click({force: true});
+        cy.get('.select2-results').should('contain.text', 'No results found').click({ force: true });
     });
 
     it('Should error then succeed uploading profile photo', () => {

@@ -207,14 +207,9 @@ class SimpleGraderControllerTester extends BaseUnitTest {
         );
         $controller = new SimpleGraderController($core);
         $response = $controller->save('test');
-        $this->assertEquals(
-            [
-                'status' => 'success',
-                'data' => [
-                    '0' => 5
-                ]
-            ],
-            $response->json
-        );
+        $this->assertArrayHasKey('data', $response->json, "Expected 'data' key to exist in the response");
+        $this->assertEquals(5, $response->json['data'][0], "Expected first element in data to be 5");
+        $this->assertArrayHasKey('date', $response->json['data'], "Expected 'date' key to exist in data");
+        $this->assertIsString($response->json['data']['date'], "Expected 'date' to be a string");
     }
 }

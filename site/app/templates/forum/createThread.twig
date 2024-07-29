@@ -8,7 +8,8 @@
         "show_threads" : false,
         "thread_exists" : thread_exists,
         "show_more" : false,
-        "show_filter": false
+        "show_filter": false,
+        "activeThread": null
     } %}
     {% if not create_thread_message is empty %}
         {% include "misc/Markdown.twig" with {
@@ -39,7 +40,8 @@
             "manage_categories_url" : manage_categories_url,
             "email_enabled": email_enabled,
             "expiration_placeholder" : expiration_placeholder,
-            "render_markdown" : render_markdown
+            "render_markdown" : render_markdown,
+            "data_testid" : "forum-publish-thread"
         } %}
 
     </form>

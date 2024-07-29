@@ -265,6 +265,8 @@
 .like-counter{
     font-size: 15px;
     margin-left: 4px;
+    margin-right: 3px; 
+    vertical-align: middle;
 }
 
 .delete-post-button,
@@ -279,7 +281,6 @@
 
 .last-edit {
     position: relative;
-    right: 5px;
 }
 
 .forum-file-open {
@@ -587,6 +588,7 @@
 .thread-content {
     display: block;
     margin-bottom: 0.25em;
+    word-break: break-all;
 }
 
 .attachment-btn {
@@ -780,6 +782,17 @@
     background-color: var(--viewed-content);
 }
 
+/* stylelint-disable selector-class-pattern */
+.post_box.important.new_post,
+.post_box.new_post.important-new {
+    background-color: var(--viewed-content);
+    border-style: solid;
+    border-width: 4px;
+    border-color: var(--important-post);
+}
+/* stylelint-enable selector-class-pattern */
+
+
 .important {
     /* THIS IS WHERE THE BACKGROUND COLOR FOR POSTS IS */
     border-style: solid;
@@ -810,4 +823,37 @@
     display: flex;
     flex-direction: row;
     align-items: center;
+}
+
+.liked-by-instructor {
+    margin-left: 5px;
+    font-size: 15px;
+    vertical-align: middle;
+    font-style: italic;
+    color: var(--upduck-yellow);
+    font-weight: bold;
+    white-space: nowrap;
+}
+
+.pinned-thread {
+    display: inline-block;
+    padding: 5px;
+    cursor: pointer;
+}
+
+.pinned-thread .fa-ellipsis-v {
+    font-size: 1.2em;
+    color: var(--default-black) !important;
+}
+
+.custom-dropdown-menu {
+    background-color: var(--default-white);
+    border: 1px solid var(--solution-text-background);
+    border-radius: 4px; /* Rounded corners */
+}
+
+.custom-dropdown-menu a.dropdown-item {
+    color: var(--standard-gray-black);
+    display: block;
+    font-size: 14px;
 }
