@@ -1,0 +1,28 @@
+{
+    "automatic_grading_total": 5,
+    "nonhidden_automatic_grading_total": 5,
+    "testcases": [
+        {
+            "autochecks": [
+                {
+                    "actual_file": "test01/STDOUT.txt",
+                    "description": "Program Output",
+                    "difference_file": "test01/0_diff.json",
+                    "expected_file": "test_output/qiskit_circuit_draw_diff/output_circuit.txt"
+                }
+            ],
+            "metrics": {
+                "elapsed_time": 1.9000003337860107,
+                "max_rss_size": 5824
+            },
+            "points_awarded": 5,
+            "test_name": "Circuit Comparison"
+        },
+        {
+            "metrics": null,
+            "points_awarded": 0,
+            "test_name": "Submission Limit",
+            "view_testcase": false
+        }
+    ]
+}
