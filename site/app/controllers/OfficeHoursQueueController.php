@@ -21,7 +21,7 @@ use WebSocket;
  */
 class OfficeHoursQueueController extends AbstractController {
     /**
-     * @return MultiResponse
+     * @return WebResponse
      */
     #[Route("/courses/{_semester}/{_course}/office_hours_queue", methods: ["GET"])]
     public function showQueue($full_history = false) {
@@ -32,6 +32,19 @@ class OfficeHoursQueueController extends AbstractController {
                 new OfficeHoursQueueModel($this->core, $full_history),
                 $this->core->getQueries()->getAllUsers()
             )
+        );
+    }
+
+    /**
+     * @return WebResponse
+     */
+    #[Route("/courses/{_semester}/{_course}/office_hours_queue2", methods: ["GET"])]
+    public function showQueue2($full_history = false) {
+        return new WebResponse(
+            'OfficeHoursQueue',
+            'showTheQueue2',
+            new OfficeHoursQueueModel($this->core, $full_history),
+            $this->core->getQueries()->getAllUsers()
         );
     }
 

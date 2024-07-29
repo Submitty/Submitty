@@ -20,6 +20,40 @@ class OfficeHoursQueueView extends AbstractView {
         return $this->renderPart($viewer, "officeHoursQueue/QueueHeader.twig", $student_full);
     }
 
+    public function showTheQueue2(OfficeHoursQueueModel $viewer, mixed $students): string {
+        $this->core->getOutput()->addBreadcrumb("Office Hours Queue");
+        $this->core->getOutput()->addInternalAudio('quack-alert.mp3');
+        // $this->core->getOutput()->addInternalCss('officeHoursQueue.css');
+        // $this->core->getOutput()->addInternalJs('office-hours-queue.js');
+        // $this->core->getOutput()->addInternalJs('websocket.js');
+        // $this->core->getOutput()->addInternalJs('notification-sound.js');
+        $this->core->getOutput()->enableMobileViewport();
+
+        $student_full = Utils::getAutoFillData($students);
+
+        // return $this->renderPart($viewer, "officeHoursQueue/QueueHeader.twig", $student_full);
+        
+        $queues = $viewer->getAllQueues();
+        $codes = [];
+
+        foreach ($queues as $queue) {
+          $codes[$queue['code']] = $viewer->getColorFromCode($queue['code']);
+        }
+
+        return $this->core->getOutput()->renderVue('OfficeHoursQueue', [
+          'csrf_token' => $this->core->getCsrfToken(),
+          'access_full_grading' => $this->core->getUser()->accessFullGrading(),
+          'viewer' => [
+            'is_grader' => $viewer->isGrader(),
+            'queues' => $viewer->getAllQueues(),
+            'announcement_msg' => $viewer->getQueueAnnouncementMessage()
+          ],
+          'color_codes' => $codes,
+          'base_url' => $this->core->buildCourseUrl() . '/office_hours_queue',
+          'student_full' => $student_full
+        ]);
+    }
+
     public function renderCurrentQueue(OfficeHoursQueueModel $viewer, mixed $student_full): string {
         return $this->renderPart($viewer, "officeHoursQueue/CurrentQueue.twig", $student_full);
     }
