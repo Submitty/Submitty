@@ -1294,8 +1294,8 @@ class ForumThreadView extends AbstractView {
                 $created_post['activeThreadTitle'] = $activeThreadTitle;
                 $activeThreadAnnouncement = $thread['pinned_expiration'] > date("Y-m-d H:i:s");
                 $created_post['activeThreadAnnouncement'] = $activeThreadAnnouncement;
-                $created_post['activeThread'] = $thread;
             }
+            $created_post['activeThread'] = $thread;
             $created_post['isCurrentFavorite'] = $isCurrentFavorite;
             $created_post['csrf_token'] = $this->core->getCsrfToken();
             return $this->core->getOutput()->renderTwigTemplate("forum/CreatePost.twig", $created_post);
