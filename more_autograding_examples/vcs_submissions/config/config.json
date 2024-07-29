@@ -1,4 +1,10 @@
 {
+    "autograding_method": "docker",
+
+	"container_options": {
+        "container_image": "submitty/autograding-default:latest"
+	},
+    
     "required_capabilities": "python",
     "autograding": {
         "submission_to_compilation" : [ "*.pdf" ],

@@ -1,4 +1,9 @@
 {
+  "autograding_method": "docker",
+
+  "container_options": {
+        "container_image": "submitty/python:3.6"
+  },
   "assignment_message": "Calculate average and standard deviation given a list of number by filtering only positive numbers. Result expected with a precision of three decimal places.",
   "testcases": [
     {

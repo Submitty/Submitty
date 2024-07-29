@@ -6,7 +6,7 @@
     },
 
 	"container_options": {
-        "container_image": "ubuntu:custom"
+        "container_image": "submitty/autograding-default:latest"
 	},
 
   "testcases": [
