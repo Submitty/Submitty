@@ -326,12 +326,58 @@ class AuthenticationController extends AbstractController {
      * Check if password has at least one of the following, Upper case letter, Lower case letter, Special character, and number
      * @param string $str
      */
-    public function checkChars($str): bool {
-        $upperCase = preg_match('/[A-Z]/', $str);
-        $lowerCase = preg_match('/[a-z]/', $str);
-        $specialChar = preg_match('/[^A-Za-z0-9]/', $str);
-        $numericVal = preg_match('/[0-9]/', $str);
+    public function checkChars(string $password): bool {
+        $upperCase = preg_match('/[A-Z]/', $password);
+        $lowerCase = preg_match('/[a-z]/', $password);
+        $specialChar = preg_match('/[^A-Za-z0-9]/', $password);
+        $numericVal = preg_match('/[0-9]/', $password);
         return $upperCase >= 1 && $lowerCase >= 1 && $specialChar >= 1 && $numericVal >= 1;
+    }
+
+    /**
+     * Check if the user ID is valid
+     * @param string $str
+     */
+    public function isAcceptedUserId(string $user_id, string $given_name, string $family_name, string $email): bool {
+        $json = file_get_contents('/usr/local/submitty/GIT_CHECKOUT/Submitty/.setup/requirements.json');
+        // Check if the file was read successfully
+        if ($json === false) {
+            return false;
+        }
+
+        $requirements = json_decode($json, true);
+
+        if ($requirements === null) {
+            return false;
+        }
+
+         // If length is -1, allow any length
+        if ($requirements['length'] !== -1 && strlen($user_id) > $requirements['length']) {
+            return false;
+        }
+
+        if ($requirements['all'] === true) {
+            return true;
+        }
+         
+        else if ($requirements['require_name'] === true) {
+            $name_requirements = $requirements['name_requirements'];
+            $given_first = $name_requirements['given_first'];
+
+            $id_given_name = substr($user_id, ($given_first ? 0 : $name_requirements['given_name']), ($given_first ? $name_requirements['given_name'] : strlen($user_id)));
+            $id_family_name = substr($user_id, ($given_first ? $name_requirements['given_name'] : 0), ($given_first ? strlen($user_id) : $name_requirements['given_name']) );
+            
+            if (($id_given_name === substr($given_name, 0, $name_requirements['given_name'])) && ($id_family_name === substr($family_name, 0, $name_requirements['family_name'])) ) {
+                return true;
+            }
+
+            return false;
+        } else if ($requirements['require_email'] === true) {
+
+            return true;
+        } else {
+            return false;
+        }
     }
 
     /**
@@ -409,13 +455,18 @@ class AuthenticationController extends AbstractController {
             return new RedirectResponse($this->core->buildUrl(['authentication', 'create_account']));
         }
 
-        if (!($password === $confirm_password)) {
+        if ($password !== $confirm_password) {
             $this->core->addErrorMessage('Passwords did not match.');
             return new RedirectResponse($this->core->buildUrl(['authentication', 'create_account']));
         }
 
         if (!$this->isAcceptedEmail($email)) {
             $this->core->addErrorMessage('This email is not accepted.');
+            return new RedirectResponse($this->core->buildUrl(['authentication', 'create_account']));
+        }
+
+        if (!$this->isAcceptedUserId($user_id, $_POST['given_name'], $_POST['family_name'], $email)) {
+            $this->core->addErrorMessage('This user id is not accepted.');
             return new RedirectResponse($this->core->buildUrl(['authentication', 'create_account']));
         }
 
