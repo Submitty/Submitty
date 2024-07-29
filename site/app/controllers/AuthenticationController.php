@@ -359,8 +359,7 @@ class AuthenticationController extends AbstractController {
         if ($requirements['all'] === true) {
             return true;
         }
-         
-        else if ($requirements['require_name'] === true) {
+        elseif ($requirements['require_name'] === true) {
             $name_requirements = $requirements['name_requirements'];
             $given_first = $name_requirements['given_first'];
 
@@ -371,12 +370,12 @@ class AuthenticationController extends AbstractController {
             if ($is_family_name && $is_given_name) {
                 return true;
             }
-
             return false;
-        } else if ($requirements['require_email'] === true) {
-
+        }
+        elseif ($requirements['require_email'] === true) {
             return true;
-        } else {
+        }
+        else {
             return false;
         }
     }
