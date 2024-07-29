@@ -19,16 +19,20 @@ jobs:
   reorganize-board:
     name: Reorganize project board
     runs-on: ubuntu-latest
-    permissions:
-      content: write
-      repository-projects: write
 
     steps:
+      - name: Generate token
+        id: generate-token
+        uses: actions/create-github-app-token@v1
+        with:
+          app-id: ${{ vars.APP_ID }}
+          private-key: ${{ secrets.APP_PEM }}
+
       - name: Checkout main repo
         uses: actions/checkout@v4
 
       - name: Reorganize project board
         run: python .github/bin/reorganize_board/main.py
         env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GH_TOKEN: ${{ steps.generate-token.outputs.token }}
         shell: sh
