@@ -1325,31 +1325,21 @@ function updateLikesDisplay(post_id, data) {
 
     if (liked === 'unlike') {
         likeIconSrcElement = likeIconSrcElement.replace('on-duck-button.svg', 'light-mode-off-duck.svg');
-
-        if (staffLiked > 0) {
-            $(`#likedByInstructor_${post_id}`).show();
-        }
-        else {
-            $(`#likedByInstructor_${post_id}`).hide();
-        }
-
-        likeCounter = likes;// set to the sql like value
-
-        likeIconSrc.src = likeIconSrcElement; // Update the state
-        likeCounterElement.innerText = likeCounter;
     }
     else if (liked === 'like') {
         likeIconSrcElement = likeIconSrcElement.replace('light-mode-off-duck.svg', 'on-duck-button.svg');
-        if (staffLiked > 0) {
-            $(`#likedByInstructor_${post_id}`).show();
-        }
-        else {
-            $(`#likedByInstructor_${post_id}`).hide();
-        }
-        likeCounter = likes;
-        likeIconSrc.src = likeIconSrcElement; // Update the state
-        likeCounterElement.innerText = likeCounter;
     }
+
+    if (staffLiked > 0) {
+        $(`#likedByInstructor_${post_id}`).show();
+    }
+    else {
+        $(`#likedByInstructor_${post_id}`).hide();
+    }
+
+    likeCounter = likes;
+    likeIconSrc.src = likeIconSrcElement; // Update the state
+    likeCounterElement.innerText = likeCounter;
 }
 
 function displayHistoryAttachment(edit_id) {
