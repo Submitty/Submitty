@@ -9,6 +9,7 @@
 .diff-code {
     font-family: monospace;
     color: var(--btn-text-black);
+    line-height: 1.8;
 }
 
 .diff-code .row {

@@ -2366,6 +2366,78 @@ class ElectronicGraderController extends AbstractController {
     }
 
     /**
+     * Route for saving the marks the submitter received for a component
+     */
+    #[Route("/courses/{_semester}/{_course}/gradeable/{gradeable_id}/grading/graded_gradeable/change_grade_version", methods: ["POST"])]
+    public function ajaxUpdateGradedVersionForStudent(string $gradeable_id): JsonResponse {
+        $anon_id = $_POST['anon_id'] ?? null;
+        $graded_version = intval($_POST['graded_version'] ?? null);
+        $component_ids = $_POST['component_ids'] ?? [];
+
+        if ($anon_id === null) {
+            return JsonResponse::getFailResponse('Missing anon_id parameter');
+        }
+        if ($graded_version < 1) {
+            return JsonResponse::getFailResponse('Invalid graded_version parameter');
+        }
+
+        if (count($component_ids) < 1) {
+            return JsonResponse::getFailResponse('Missing component_ids parameter');
+        }
+
+        // Get the gradeable
+        $gradeable = $this->tryGetGradeable($gradeable_id, false);
+        if ($gradeable === false) {
+            return JsonResponse::getFailResponse('Missing gradeable_id parameter');
+        }
+        // Get user id from the anon id
+        $submitter_id = $this->tryGetSubmitterIdFromAnonId($anon_id, $gradeable_id, false);
+        if ($submitter_id === false) {
+            return JsonResponse::getFailResponse('Missing anon_id parameter');
+        }
+
+        // Get the graded gradeable
+        $graded_gradeable = $this->tryGetGradedGradeable($gradeable, $submitter_id, false);
+        if ($graded_gradeable === false) {
+            return JsonResponse::getFailResponse('Missing gradeable_id parameter');
+        }
+
+
+        // check if all the components provided are real and the user has permission
+        foreach ($component_ids as $component_id) {
+            $component = $this->tryGetComponent($gradeable, $component_id);
+            if ($component === false) {
+                return JsonResponse::getFailResponse("Invalid component id \"$component_id\"");
+            }
+            elseif (!$this->core->getAccess()->canI("grading.electronic.save_graded_component", ["gradeable" => $gradeable, "graded_gradeable" => $graded_gradeable, "component" => $component])) {
+                return JsonResponse::getFailResponse("Insufficient permissions to change graded version of component $component_id");
+            }
+        }
+
+        $logger_params = [
+            "course_semester" => $this->core->getConfig()->getTerm(),
+            "course_name" => $this->core->getDisplayedCourseName(),
+            "gradeable_id" => $gradeable_id,
+            "grader_id" => $this->core->getUser()->getId(),
+            "component_ids" => implode(",", $component_ids),
+            "action" => "CHANGE_GRADEABLE_GRADED_VERSION",
+            "submitter_id" => $submitter_id
+        ];
+        Logger::logTAGrading($logger_params);
+
+        try {
+            $this->core->getQueries()->changeGradedVersionOfComponents($gradeable_id, $submitter_id, $graded_version, $component_ids);
+            return JsonResponse::getSuccessResponse();
+        }
+        catch (\InvalidArgumentException $e) {
+            return JsonResponse::getFailResponse($e->getMessage());
+        }
+        catch (\Exception $e) {
+            return JsonResponse::getErrorResponse($e->getMessage());
+        }
+    }
+
+    /**
      * Route for saving a component's properties (not its marks)
      */
     #[Route("/courses/{_semester}/{_course}/gradeable/{gradeable_id}/components/save", methods: ["POST"])]
