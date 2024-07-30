@@ -35,11 +35,16 @@ os.makedirs("/tmp/worker_keys", 0o500)
 daemon_stat = pwd.getpwnam(DAEMON_USER)
 os.chown("/tmp/worker_keys", daemon_stat.pw_uid, daemon_stat.pw_gid)
 
-subprocess.run(['su', DAEMON_USER, '-c', "rm -rf ~/.ssh"], check=True)
+DAEMON_HOME = os.path.realpath(subprocess.check_output(['su', DAEMON_USER, '-c', 'echo $HOME']).strip())
+if not os.path.exists(DAEMON_HOME):
+  print("Error: could not find home directory for daemon user")
+
+shutil.rmtree(os.path.join(DAEMON_HOME, b'.ssh'), True)
 subprocess.run(['su', DAEMON_USER, '-c', "ssh-keygen -b 2048 -t rsa -f ~/.ssh/id_rsa -q -N ''"], check=True)
 print("Done generating")
 print()
 
+ssh_config = ''
 successful_machines = []
 for name, data in vagrant_workers_data.items():
   print("Attempting to connect to " + name)
@@ -51,11 +56,17 @@ for name, data in vagrant_workers_data.items():
   if w.returncode == 0:
     print("Connected to " + name)
     successful_machines.append(name)
+    ssh_config += f"Host {name}\n  HostName {data['ip_addr']}\n  IdentityFile ~/.ssh/id_rsa\n  User submitty\n"
   else:
     print("Failed to connect to " + name)
 
 shutil.rmtree("/tmp/worker_keys", True)
 print()
+
+print("Updating SSH configuration...")
+with open(os.path.join(DAEMON_HOME, b'.ssh', b'config'), 'w') as file:
+  file.write(ssh_config)
+print("Successfully updated")
 
 print("Writing new autograding configuration...")
 new_autograding_data = OrderedDict()
