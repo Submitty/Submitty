@@ -96,7 +96,7 @@ fi
 if [[ $(uname -s) == "Darwin" && $1 == "up" ]]; then
   if [[ $VM_PROVIDER == "qemu" ]]; then
     # Install Submitty/vagrant-qemu plugin
-    PLUGIN_VERSION=24.06.00
+    PLUGIN_VERSION=24.07.00
     PLUGIN_INFO=$(vagrant plugin list --machine-readable | grep vagrant-qemu,plugin-version,)
     if [[ ! $PLUGIN_INFO == *"plugin-version,${PLUGIN_VERSION}%"* ]]; then
       echo "Updating QEMU plugin..."
