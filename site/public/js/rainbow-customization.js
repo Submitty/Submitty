@@ -734,13 +734,6 @@ function saveChanges() {
 }
 
 
-"<br />
-<b>Warning</b>:  file_put_contents(/var/local/submitty/courses/f24/sample/rainbow_grades/gui_customization.json): Failed to open stream: Permission denied in <b>/usr/local/submitty/site/app/models/RainbowCustomizationJSON.php</b> on line <b>420</b><br />
-{
-    "status": "success",
-    "data": null
-}"
-
 $(document).ready(() => {
     $("input[name='customization']").change(() => {
         $('#save_status').text('Switched customization, need to rebuild');
