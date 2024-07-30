@@ -24,7 +24,9 @@ def up(config, database, semester, course):
 
     if customization_file.exists():
         # Rename the file to backup_customization.json
-        customization_file.rename(backup_file)
+#         customization_file.rename(backup_file)
+        copy2(str(customization_file), str(backup_file))
+
 
         # Copy backup_customization.json to gui_customization.json
         copy2(str(backup_file), str(gui_custom_file))
