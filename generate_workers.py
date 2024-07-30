@@ -112,7 +112,7 @@ def main():
 
         data = OrderedDict()
         data['ip_addr'] = str(ip)
-        if args.provider == 'qemu':
+        if provider == 'qemu':
             data['mac_addr'] = args.mac_prefix + ":%02x:%02x:%02x" % tuple(random.randint(0, 255) for v in range(3))
         else:
             data['ssh_port'] = args.base_port + i
