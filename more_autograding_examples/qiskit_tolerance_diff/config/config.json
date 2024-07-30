@@ -4,6 +4,9 @@
     "container_options": {
         "container_image": "submitty/qiskit:qiskit"
     },
+    "autograding" : {
+        "work_to_details" : ["**/*.png","**.*"]
+    },
     "resource_limits" : {
         "RLIMIT_NPROC" : 10
     },
@@ -21,6 +24,12 @@
                     "show_difference_image" : "always",
                     "show_actual": "always",
                     "show_expected":"always"
+                },
+                {
+                    "method": "fileExists",
+                    "actual_file": "STDOUT.txt",
+                    "show_actual" : "never",
+                    "show_message" : "never"
                 }
             ]
         },
