@@ -330,18 +330,6 @@ fi
 
 if ! cut -d ':' -f 1 /etc/passwd | grep -q ${DAEMON_USER} ; then
     useradd -m -c "First Last,RoomNumber,WorkPhone,HomePhone" "${DAEMON_USER}" -s /bin/bash
-    if [ ${WORKER} == 0 ] && [ ${DEV_VM} == 1 ] && [ -f ${SUBMITTY_REPOSITORY}/.vagrant/workers.json ]; then
-        echo -e "attempting to create ssh key for submitty_daemon..."
-        su submitty_daemon -c "cd ~/"
-        su submitty_daemon -c "ssh-keygen -b 2048 -t rsa -f ~/.ssh/id_rsa -q -N ''"
-        su submitty_daemon -c "echo 'successfully created ssh key'"
-
-        while read -r IP
-        do
-            su submitty_daemon -c "sshpass -p 'submitty' ssh-copy-id -i ~/.ssh/id_rsa.pub -o StrictHostKeyChecking=no submitty@${IP}"
-        done <<< "$(jq -r ".[].ip_addr" "${SUBMITTY_REPOSITORY}/.vagrant/workers.json")"
-        echo "DONE"
-    fi
 fi
 
 # The VCS directories (/var/local/submitty/vcs) are owned by root:$DAEMONCGI_GROUP
