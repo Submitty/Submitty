@@ -639,6 +639,27 @@ class ForumController extends AbstractController {
         return $this->core->getOutput()->renderJsonSuccess($response);
     }
 
+    #[Route("/courses/{_semester}/{_course}/forum/threads/unread", methods: ["POST"])]
+    public function markThreadUnread(): JsonResponse {
+        $thread_id = $_POST["thread_id"];
+        $current_user = $this->core->getUser()->getId();
+        $this->core->getQueries()->unreadThread($current_user, $thread_id);
+        $response = ['user' => $current_user, 'thread' => $thread_id];
+        return JsonResponse::getSuccessResponse($response);
+    }
+
+    #[Route("/courses/{_semester}/{_course}/forum/posts/unread", methods: ["POST"])]
+    public function markPostUnread(): JsonResponse {
+        $thread_id = $_POST["thread_id"];
+        $last_viewed_timestamp = $_POST["last_viewed_timestamp"];
+        // format the last viewed timestamp to be in the same format as the database
+        $last_viewed_timestamp = DateUtils::parseDateTime($last_viewed_timestamp, $this->core->getUser()->getUsableTimeZone())->format("Y-m-d H:i:sO");
+        $current_user = $this->core->getUser()->getId();
+        $this->core->getQueries()->visitThread($current_user, $thread_id, $last_viewed_timestamp);
+        $response = ['user' => $current_user, 'last_viewed_timestamp' => $last_viewed_timestamp];
+        return JsonResponse::getSuccessResponse($response);
+    }
+
     /**
      * Alter content/delete/undelete post of a thread
      *
