@@ -700,6 +700,7 @@ function saveChanges() {
         processData: false,
         contentType: false,
         success: function (response) {
+            console.log(response);
             if (response['status'] === 'success') {
                 $('#save_status').text('All changes saved');
             }
@@ -708,13 +709,37 @@ function saveChanges() {
                 alert(`An error occurred: ${response.data}`);
             }
         },
+        // error: function (jqXHR, textStatus, errorThrown) {
+        //     console.error(`Error status: ${textStatus}`);
+        //     console.error(`Error thrown: ${errorThrown}`);
+        //     console.error(`Server response: ${jqXHR.status} ${jqXHR.statusText}`);
+        // },
         error: function (jqXHR, textStatus, errorThrown) {
-            console.error(`Error status: ${textStatus}`);
-            console.error(`Error thrown: ${errorThrown}`);
-            console.error(`Server response: ${jqXHR.status} ${jqXHR.statusText}`);
+            console.log('AJAX error:', jqXHR, textStatus, errorThrown);
+            let errorMsg = `An error occurred: Server response: ${jqXHR.status} ${jqXHR.statusText}`;
+            try {
+                // Attempt to parse JSON, if there's HTML, this will fail
+                const responseText = jqXHR.responseText;
+                const jsonStartIndex = responseText.indexOf('{');
+                if (jsonStartIndex !== -1) {
+                    const jsonResponse = JSON.parse(responseText.substring(jsonStartIndex));
+                    errorMsg = `${jsonResponse.message || jsonResponse.status}`;
+                }
+            }
+            catch (e) {
+                console.error('Failed to parse JSON response', e);
+            }
         },
     });
 }
+
+
+"<br />
+<b>Warning</b>:  file_put_contents(/var/local/submitty/courses/f24/sample/rainbow_grades/gui_customization.json): Failed to open stream: Permission denied in <b>/usr/local/submitty/site/app/models/RainbowCustomizationJSON.php</b> on line <b>420</b><br />
+{
+    "status": "success",
+    "data": null
+}"
 
 $(document).ready(() => {
     $("input[name='customization']").change(() => {
