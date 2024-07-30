@@ -1,4 +1,4 @@
-name: Submitty DB Check
+name: DB Check
 
 on:
   pull_request:
