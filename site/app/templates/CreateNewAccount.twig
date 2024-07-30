@@ -23,7 +23,15 @@
             <input type="text" name="family_name" required />
         </label>
         <label>
-            Password
+           <p style="display:block">Password <i style="font-style:normal;" class="fa-question-circle hover-marker"></i></p>
+            <div class="password-helper">
+                Password Requires at least:<br/>
+                1 Capital Letter<br/>
+                1 Lowercase Letter<br/>
+                1 Number<br/>
+                1 Special Character<br/>
+                12 Characters<br/>
+            </div>
             <input type="password" name="password" required />
         </label>
         <label>
@@ -33,3 +41,15 @@
         <input type="submit" name="signup" value="Sign Up" class="btn btn-primary" />
     </form>
 </div>
+
+
+<script>
+
+$('.hover-marker').hover(()=>{
+    $('.password-helper').show();
+}, ()=>{
+    $('.password-helper').hide();
+})
+
+</script>
+

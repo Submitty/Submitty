@@ -50,3 +50,15 @@
 #saml-login {
     color: var(--btn-text-white);
 }
+
+.password-helper {
+    display: none;
+    position: absolute;
+    background-color: lightgrey;
+    left: 42%;
+    height: 150px;
+    width: 225px;
+    padding-left: 10px;
+    padding-top: 10px;
+    border-radius: 20px;
+}
