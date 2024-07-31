@@ -107,6 +107,7 @@ class Course_create:
                 term=self.semester,
                 course=self.code,
                 registration_section_id=str(section),
+                self_register_allowed=self.self_register_allowed
             )
 
         print("Creating rotating sections ", end="")
