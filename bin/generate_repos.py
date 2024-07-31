@@ -10,7 +10,6 @@ sudo /usr/local/submitty/bin/generate_repos.py <semester> <course_code> <project
 
 """
 
-
 import argparse
 import json
 import os
