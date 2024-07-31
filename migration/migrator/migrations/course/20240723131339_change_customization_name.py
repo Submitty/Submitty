@@ -74,15 +74,3 @@ def down(config, database, semester, course):
     # Rename backup_customization.json back to customization.json
     if backup_file.exists():
         backup_file.rename(customization_file)
-
-    daemon_user = config.submitty_users['daemon_user']
-    daemon_uid = pwd.getpwnam(daemon_user).pw_uid
-
-    # Get course group
-    stat_info = os.stat(str(course_dir))
-    course_group_id = stat_info.st_gid
-
-    # Set ownership and permissions for all customization JSON files
-    for file in course_dir.glob('*customization*.json'):
-        os.chown(file, daemon_uid, course_group_id)
-        os.ch
