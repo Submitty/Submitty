@@ -156,7 +156,6 @@ class DockerInterfaceController extends AbstractController {
     public function removeImage(): JsonResponse {
         $pattern = '/^[a-z0-9]+[a-z0-9._(__)-]*[a-z0-9]+\/[a-z0-9]+[a-z0-9._(__)-]*[a-z0-9]+:[a-zA-Z0-9][a-zA-Z0-9._-]{0,127}$/';
         $user = $this->core->getUser();
-        $user_id = $user->getId();
         $jsonFilePath = FileUtils::joinPaths(
             $this->core->getConfig()->getSubmittyInstallPath(),
             "config",
