@@ -23,18 +23,11 @@ def up(config, database, semester, course):
     gui_custom_file = course_dir / 'gui_customization.json'
 
     if customization_file.exists():
-        # Rename the file to backup_customization.json
-#         customization_file.rename(backup_file)
+        # copy the file to backup_customization.json
         copy2(str(customization_file), str(backup_file))
-
 
         # Copy backup_customization.json to gui_customization.json
         copy2(str(backup_file), str(gui_custom_file))
-    else:
-        # Create an empty customization.json file if it doesn't exist
-        # for permission purpose
-        customization_file.touch()
-        gui_custom_file.touch()
 
     daemon_user = config.submitty_users['daemon_user']
     daemon_uid = pwd.getpwnam(daemon_user).pw_uid
