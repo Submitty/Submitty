@@ -22,6 +22,7 @@
   "/courses/<term>/<course>/gradeable/<gradeable>/grading/graded_gradeable",
   "/courses/<term>/<course>/gradeable/<gradeable>/grading/status",
   "/courses/<term>/<course>/gradeable/<gradeable>/update",
+  "/courses/<term>/<course>/gradeable/<gradeable>/download_zip",
   "/courses/<term>/<course>/forum",
   "/courses/<term>/<course>/forum/threads/new",
   "/courses/<term>/<course>/forum/threads/[0-9]+",
