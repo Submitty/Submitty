@@ -319,7 +319,7 @@ class AuthenticationController extends AbstractController {
         if ($this->logged_in) {
             return new RedirectResponse($this->core->buildUrl(['home']));
         }
-        return new WebResponse('Authentication', 'signupForm');
+        return new WebResponse('Authentication', 'signupForm', ['email' => $this->getAcceptedEmails(), 'user_id' => $this->getUserIdRequirements()]);
     }
 
     /**
@@ -334,20 +334,31 @@ class AuthenticationController extends AbstractController {
     }
 
     /**
-     * Check if the user ID is valid
+     * @return  array<mixed>
      */
-    public function isAcceptedUserId(string $user_id, string $given_name, string $family_name, string $email): bool {
-        $json = file_get_contents('/usr/local/submitty/GIT_CHECKOUT/Submitty/.setup/user_id_requirements.json');
+    public function getUserIdRequirements(): array {
+        // Change to /usr/local/submitty/.setup 
+        $json = file_get_contents('/usr/local/submitty/site/public/user_id_requirements.json');
         // Check if the file was read successfully
         if ($json === false) {
-            return false;
+            return ['all' => true, 'length' => -1];
         }
 
         $requirements = json_decode($json, true);
 
         if ($requirements === null) {
-            return false;
+            return ['all' => true, 'length' => -1];
         }
+
+        return $requirements;
+    }
+
+    /**
+     * Check if the user ID is valid
+     */
+    public function isAcceptedUserId(string $user_id, string $given_name, string $family_name, string $email): bool {
+        
+        $requirements = $this->getUserIdRequirements();
 
          // If length is -1, allow any length
         if ($requirements['length'] !== -1 && strlen($user_id) > $requirements['length']) {
@@ -380,28 +391,18 @@ class AuthenticationController extends AbstractController {
 
     /**
      * Returns true if the password is greater than or equal to 12 characters, and has the required characters
-     * @param string $password
      */
-    public function isGoodPassword($password): bool {
+    public function isGoodPassword(string $password): bool {
         return strlen($password) >= 12 && $this->checkChars($password);
     }
 
     /**
-     * Checks if the email extension is in the accepted emails JSON file
-     * @param string $email
+     * @return array<string>
      */
-    public function isAcceptedEmail($email): bool {
-        $json = file_get_contents('/usr/local/submitty/GIT_CHECKOUT/Submitty/.setup/accepted_emails.json');
-        // Check if the file was read successfully
-        try {
-            $email_extension = explode('@', $email)[1];
-        }
-        catch (\Error $error) {
-            return false;
-        }
-
+    public function getAcceptedEmails(): array {
+        $json = file_get_contents('/usr/local/submitty/site/public/accepted_emails.json');
         if ($json === false) {
-            return false;
+            return ['' => true];
         }
 
         // Decode the JSON file
@@ -409,9 +410,23 @@ class AuthenticationController extends AbstractController {
 
         // Check if the JSON was decoded successfully
         if ($json_data === null) {
+            return ['' => true];
+        }
+        return $json_data;  
+    }
+
+    /**
+     * Checks if the email extension is in the accepted emails JSON file
+     */
+    public function isAcceptedEmail(string $email): bool {
+        $json_data = $this->getAcceptedEmails();
+        // Check if the file was read successfully
+        try {
+            $email_extension = explode('@', $email)[1];
+        }
+        catch (\Error $error) {
             return false;
         }
-
         return in_array($email_extension, array_keys($json_data), true);
     }
 

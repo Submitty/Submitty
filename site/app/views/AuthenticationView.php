@@ -50,7 +50,7 @@ class AuthenticationView extends AbstractView {
         ]);
     }
 
-    public function signupForm(): string {
+    public function signupForm($content): string {
         $this->core->getOutput()->addInternalCss("input.css");
         $this->core->getOutput()->addInternalCss("links.css");
         $this->core->getOutput()->addInternalCss("authentication.css");
@@ -61,10 +61,10 @@ class AuthenticationView extends AbstractView {
         if (file_exists($path) && is_readable($path)) {
             $signup_content = file_get_contents($path);
         }
-
         return $this->core->getOutput()->renderTwigTemplate("CreateNewAccount.twig", [
             "signup_url" => $this->core->buildUrl(['authentication', 'self_add_user']),
-            "signup_content" => $signup_content
+            "signup_content" => $signup_content,
+            "requirements" => $content
         ]);
     }
 }

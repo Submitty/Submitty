@@ -51,7 +51,7 @@
     color: var(--btn-text-white);
 }
 
-.password-helper {
+.hidden-helper {
     display: none;
     position: absolute;
     background-color: lightgrey;
@@ -62,3 +62,18 @@
     padding-top: 10px;
     border-radius: 20px;
 }
+
+@media (prefers-color-scheme: dark) {
+    .hidden-helper {
+        display: none;
+        position: absolute;
+        background-color: gray;
+        left: 42%;
+        height: 150px;
+        width: 225px;
+        padding-left: 10px;
+        padding-top: 10px;
+        border-radius: 20px;
+    }
+}
+

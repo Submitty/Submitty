@@ -6,12 +6,28 @@
     </div>
 
     <form action="{{ signup_url }}" method="post" id="login">
-        <label>
-            Email
+        <label><p style="display:block">Email <i style="font-style:normal;" class="fa-question-circle hover-marker-email"></i></p>
+            <div class="hidden-helper" id="email-helper">
+                Accepted Email Extensions:<br/>
+                {% for email, bool in requirements['email'] %}
+                    @{{ email }}<br/>
+                {% endfor %}
+            </div>
             <input type="text" name="email" required />
         </label>
         <label>
-            User ID
+            <p style="display:block">User ID <i style="font-style:normal;" class="fa-question-circle hover-marker-userid"></i></p>
+            <div class="hidden-helper" id="userid-helper">
+                UserID Requirements:<br/>
+                {% if requirements['user_id']['all'] == true %}
+                    All user ids of {{ requirements['user_id']['length'] == -1 ? 'any length' : "length:  requirements['user_id']['length']" }} are accepted
+                {% elseif requirements['user_id']['require_name'] == true %}
+                    Must start with {{ requirements['user_id']['name_requirements']['givenname_first'] ? (requirements['user_id']['name_requirements']['given_name'] + 'characters of your given name') : (requirements['user_id']['name_requirements']['family_name'] + 'characters of your family name')}}
+                {% elseif requirements['user_id']['require_email'] == true %}
+
+              
+                {% endif %}
+            </div>
             <input type="text" name="user_id" required />
         </label>
         <label>
@@ -23,8 +39,8 @@
             <input type="text" name="family_name" required />
         </label>
         <label>
-           <p style="display:block">Password <i style="font-style:normal;" class="fa-question-circle hover-marker"></i></p>
-            <div class="password-helper">
+           <p style="display:block">Password <i style="font-style:normal;" class="fa-question-circle hover-marker-password"></i></p>
+            <div class="hidden-helper" id="password-helper">
                 Password Requires at least:<br/>
                 1 Capital Letter<br/>
                 1 Lowercase Letter<br/>
@@ -45,10 +61,22 @@
 
 <script>
 
-$('.hover-marker').hover(()=>{
-    $('.password-helper').show();
+$('.hover-marker-password').hover(()=>{
+    $('#password-helper').show();
 }, ()=>{
-    $('.password-helper').hide();
+    $('#password-helper').hide();
+})
+
+$('.hover-marker-email').hover(()=>{
+    $('#email-helper').show();
+}, ()=>{
+    $('#email-helper').hide();
+})
+
+$('.hover-marker-userid').hover(()=>{
+    $('#userid-helper').show();
+}, ()=>{
+    $('#userid-helper').hide();
 })
 
 </script>
