@@ -11,9 +11,7 @@ use app\views\superuser\SuperuserEmailView;
 use Symfony\Component\Routing\Annotation\Route;
 use app\models\SuperuserEmail;
 
-/**
- * @AccessControl(level="SUPERUSER")
- */
+#[AccessControl(level: "SUPERUSER")]
 class SuperuserEmailController extends AbstractController {
     /**
      * @return MultiResponse

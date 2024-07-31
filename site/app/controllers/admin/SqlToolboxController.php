@@ -17,9 +17,9 @@ use Symfony\Component\Routing\Annotation\Route;
 /**
  * Class UsersController
  * @package app\controllers\admin
- * @AccessControl(role="INSTRUCTOR")
  */
 
+#[AccessControl(role: "INSTRUCTOR")]
 class SqlToolboxController extends AbstractController {
     #[Route("/courses/{_semester}/{_course}/sql_toolbox", methods: ["GET"])]
     public function showToolbox(): WebResponse {

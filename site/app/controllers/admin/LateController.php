@@ -15,8 +15,8 @@ use app\models\gradeable\LateDays;
 /**
  * Class LateController
  * @package app\controllers\admin
- * @AccessControl(role="INSTRUCTOR")
  */
+#[AccessControl(role: "INSTRUCTOR")]
 class LateController extends AbstractController {
     /**
      * @return WebResponse
@@ -286,9 +286,9 @@ class LateController extends AbstractController {
     }
 
     /**
-     * @AccessControl(role="INSTRUCTOR")
      * @return RedirectResponse|WebResponse
      **/
+    #[AccessControl(role: "INSTRUCTOR")]
     #[Route("/courses/{_semester}/{_course}/users/view_latedays", methods: ["GET"])]
     public function viewStudentLatedays() {
         if (!isset($_GET['student_id'])) {

@@ -9,8 +9,8 @@ use Symfony\Component\Routing\Annotation\Route;
 /**
  * Class GradeOverrideController
  * @package app\controllers\admin
- * @AccessControl(role="INSTRUCTOR")
  */
+#[AccessControl(role: "INSTRUCTOR")]
 class GradeOverrideController extends AbstractController {
     #[Route("/courses/{_semester}/{_course}/grade_override")]
     public function viewOverriddenGrades() {

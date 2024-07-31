@@ -2,12 +2,10 @@
 
 namespace app\libraries\routers;
 
-use Doctrine\Common\Annotations\Annotation;
-
 /**
- * Annotation class for @AccessControl().
+ * Attribute class for #[AccessControl()].
  *
- * The annotation checks if users have access to a class or method.
+ * The attribute checks if users have access to a class or method.
  *
  * By setting $role, the class or method will only be accessible to users
  * with a higher or equal rank to that role. Roles include INSTRUCTOR,
@@ -23,7 +21,7 @@ use Doctrine\Common\Annotations\Annotation;
  * instructors.
  *
  * ```php
- * @AccessControl(role="FULL_ACCESS_GRADER")
+ * #[AccessControl(role: "FULL_ACCESS_GRADER")]
  * public function foo() {...}
  * ```
  * Example (permission only):
@@ -33,7 +31,7 @@ use Doctrine\Common\Annotations\Annotation;
  * canI("grading.simple") being true.
  *
  * ```php
- * @AccessControl(permission="grading.simple")
+ * #[AccessControl(permission: "grading.simple")]
  * class SomeController extends AbstractController {...}
  * ```
  *
@@ -43,13 +41,13 @@ use Doctrine\Common\Annotations\Annotation;
  * and instructors with "grading.simple" permission.
  *
  * ```php
- * @AccessControl(role="FULL_ACCESS_GRADER", permission="grading.simple")
+ * #[AccessControl(role: "FULL_ACCESS_GRADER", permission: "grading.simple")]
  * public function foo() {...}
  * ```
  *
- * Note that if you use method level @AccessControl() annotation, the class
- * level @AccessControl() annotation will not be considered at the same time.
- * For clarity, it is recommended not to have class and method level annotations
+ * Note that if you use method level #[AccessControl()] attribute, the class
+ * level #[AccessControl()] attribute will not be considered at the same time.
+ * For clarity, it is recommended not to have class and method level attribute
  * at the same time.
  *
  * Example (class & method):
@@ -58,20 +56,19 @@ use Doctrine\Common\Annotations\Annotation;
  * role, and will NOT check the "grading.simple" permission.
  *
  * ```php
- * @AccessControl(permission="grading.simple")
+ * #[AccessControl(permission: "grading.simple")]
  * class SomeController extends AbstractController {}
  * ```
  *
  * and then in the class:
  *
  * ```php
- * @AccessControl(role="INSTRUCTOR")
+ * #[AccessControl(role: "INSTRUCTOR")]
  * public function foo() {...}
  * ```
- *
- * @Annotation
- * @Target({"CLASS", "METHOD"})
  */
+
+#[Attribute]
 class AccessControl {
     /**
      * @var string|null "INSTRUCTOR", "FULL_ACCESS_GRADER", "LIMITED_
@@ -94,7 +91,7 @@ class AccessControl {
         foreach ($data as $key => $value) {
             $method = 'set' . str_replace('_', '', $key);
             if (!method_exists($this, $method)) {
-                throw new \BadMethodCallException(sprintf('Unknown property "%s" on annotation "%s".', $key, \get_class($this)));
+                throw new \BadMethodCallException(sprintf('Unknown property "%s" on attribute "%s".', $key, \get_class($this)));
             }
             $this->$method($value);
         }
