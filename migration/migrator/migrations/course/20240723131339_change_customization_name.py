@@ -30,6 +30,11 @@ def up(config, database, semester, course):
 
         # Copy backup_customization.json to gui_customization.json
         copy2(str(backup_file), str(gui_custom_file))
+    else:
+        # Create an empty customization.json file if it doesn't exist
+        # for permission purpose
+        customization_file.touch()
+        gui_custom_file.touch()
 
     daemon_user = config.submitty_users['daemon_user']
     daemon_uid = pwd.getpwnam(daemon_user).pw_uid

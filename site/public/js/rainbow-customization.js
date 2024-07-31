@@ -733,7 +733,6 @@ function saveChanges() {
     });
 }
 
-
 $(document).ready(() => {
     $("input[name='customization']").change(() => {
         $('#save_status').text('Switched customization, need to rebuild');
