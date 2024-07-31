@@ -194,7 +194,7 @@ cmd_output = os.popen('make push_test').read()
 # Recursively update permissions for all files in the rainbow_grades directory
 print('Updating permissions', flush=True)
 cmd_output = os.popen('chmod -R --silent o-rwx ' + rg_course_path).read()
-cmd_output = os.popen('find ' + rg_course_path + ' -type f -name "*customization*.json" -exec chmod g+rw {} \\;').read()
+# cmd_output = os.popen('find ' + rg_course_path + ' -type f -name "*customization*.json" -exec chmod g+rw {} \\;').read()
 
 summary_html_path = os.path.join(courses_path,
                                  semester,
