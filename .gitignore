@@ -31,6 +31,7 @@ coverage.xml
 /site/cypress/screenshots/
 /site/cypress/videos/
 /site/public/mjs/
+/site/public/vue/
 /site/report/
 /site/incremental_build/
 
@@ -45,3 +46,4 @@ Pipfile.lock
 .phpunit.result.cache
 
 .env
+.github_actions_ci_flag

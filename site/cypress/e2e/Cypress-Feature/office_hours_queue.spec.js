@@ -1,3 +1,5 @@
+import { isPermissionAllowed } from 'cypress-browser-permissions';
+
 const queueName = 'Cypress Office Hour Queue 1';
 const queueName_random = 'Cypress Office Hour Queue Random';
 const queueName1 = 'Cypress Office Hour Queue 2';
@@ -57,7 +59,8 @@ const switchUser = (account) => {
 };
 
 const studentJoinQueue = (queueName, queueCode) => {
-    cy.get('[data-testid="queue-code"]').select(queueName).invoke('val'); // in which queue you want to join
+    cy.get('[data-testid="queue-code"]').select(queueName);
+    cy.get('[data-testid="queue-code"]').invoke('val'); // in which queue you want to join
     cy.get('[data-testid="queue-code"]').should('contain', queueName);
     cy.get('#token-box').type(queueCode);
     cy.get('[data-testid="join-queue-btn"]').click();
@@ -211,7 +214,10 @@ describe('test office hours queue', () => {
 
         // Confirm aphacker queue history
         // Use search autocomplete feature
-        cy.get('[data-testid="search-student-queue-input"]').first().clear().type('hack');
+        cy.get('[data-testid="search-student-queue-input"]').first().as('queue-search');
+        cy.get('@queue-search').clear();
+        cy.get('@queue-search').type('hack');
+
         cy.get('#ui-id-1').first().should('be.visible');
         cy.get('#ui-id-1').click();
         cy.get('[data-testid="search-student-queue-input"]').first().should('have.value', 'aphacker');
@@ -240,6 +246,38 @@ describe('test office hours queue', () => {
         cy.get('#times-helped-cell').should('contain', '0 times helped.');
 
         // Disable and delete all queue
+        disableQueue();
+    });
+    it('Enabling push and sound notifications as Instructor', () => {
+        // Ensure notifications are allowed
+        expect(isPermissionAllowed('notifications')).to.be.true;
+
+        cy.login('instructor');
+        enableQueue();
+        cy.visit(['sample', 'office_hours_queue']);
+
+        // Assert that switches exist and assign aliases
+        cy.get('[data-testid="notification-switch-container"]').first().as('switch-container');
+        cy.get('@switch-container').should('exist');
+        cy.get('@switch-container').find('[data-testid="push-notification-switch"]').first().as('push-switch');
+        cy.get('@switch-container').find('[data-testid="sound-notification-switch"]').first().as('sound-switch');
+        cy.get('@push-switch').should('exist');
+        cy.get('@sound-switch').should('exist');
+        cy.window().its('push_notifications_enabled').as('push-enabled');
+        cy.window().its('audible_notifications_enabled').as('audio-enabled');
+
+        // Turn notification switches on, then turn them off
+        cy.get('@push-enabled').should('equal', false);
+        cy.get('@audio-enabled').should('equal', false);
+        cy.get('@push-switch').click();
+        cy.get('@sound-switch').click();
+        cy.get('@push-enabled').should('equal', true);
+        cy.get('@audio-enabled').should('equal', true);
+        cy.get('@push-switch').click();
+        cy.get('@sound-switch').click();
+        cy.get('@push-enabled').should('equal', false);
+        cy.get('@audio-enabled').should('equal', false);
+
         disableQueue();
     });
 });

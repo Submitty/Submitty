@@ -54,23 +54,24 @@
 <div class="markdown-area fill-available {{ root_class|default('') ? root_class : '' }}">
     <div {{ markdown_header_id is defined ? 'id=' ~ markdown_header_id: ''}}  class="markdown-area-header" style="display: {{ render_header|default(false) ? "flex" : "none" }}" data-mode="edit">
         <div class="markdown-mode-buttons">
-            <button title="Edit Markdown" type="button" onclick="previewMarkdown.call(this, 'edit')" class="markdown-mode-tab markdown-write-mode active key_to_click">Write</button>
-            <button title="Preview Markdown" type="button" onclick="previewMarkdown.call(this, 'preview')" class="markdown-mode-tab markdown-preview-mode key_to_click" tabindex="0" data-initialize-preview="{{initialize_preview|default(false)}}">Preview</button>
+            <button title="Edit Markdown" type="button" onclick="previewMarkdown.call(this, 'edit')" class="markdown-mode-tab markdown-write-mode active">Write</button>
+            <button title="Preview Markdown" type="button" onclick="previewMarkdown.call(this, 'preview')" class="markdown-mode-tab markdown-preview-mode" tabindex="0" data-initialize-preview="{{initialize_preview|default(false)}}">Preview</button>
         </div>
         <div class="markdown-area-toolbar">
             <a target="_blank" href="https://submitty.org/student/communication/markdown">
                 <i style="font-style:normal;" class="fa-question-circle"></i>
             </a>
-            <button type="button" title="Insert a link" onclick="addMarkdownCode.call($('#{{ markdown_area_id }}'), 'link')" class="btn btn-default btn-markdown btn-markdown-link key_to_click"  tabindex="0">Link <i class="fas fa-link fa-1x"></i></button>
-            <button title="Insert a code segment" type="button" onclick="addMarkdownCode.call($('#{{ markdown_area_id }}'), 'code')" class="btn btn-default btn-markdown btn-markdown-code key_to_click"  tabindex="0">Code <i class="fas fa-code fa-1x"></i></button>
-            <button title="Insert bold text" type="button" onclick="addMarkdownCode.call($('#{{ markdown_area_id }}'), 'bold')" class="btn btn-default btn-markdown btn-markdown-bold key_to_click"  tabindex="0">Bold <i class="fas fa-bold fa-1x"></i></button>
-            <button title="Insert italic text" type="button" onclick="addMarkdownCode.call($('#{{ markdown_area_id }}'), 'italic')" class="btn btn-default btn-markdown btn-markdown-italic key_to_click"  tabindex="0">Italics <i class="fas fa-italic fa-1x"></i></button>
+            <button type="button" title="Insert a link" onclick="addMarkdownCode.call($('#{{ markdown_area_id }}'), 'link')" class="btn btn-default btn-markdown btn-markdown-link"  tabindex="0">Link <i class="fas fa-link fa-1x"></i></button>
+            <button title="Insert a code segment" type="button" onclick="addMarkdownCode.call($('#{{ markdown_area_id }}'), 'code')" class="btn btn-default btn-markdown btn-markdown-code"  tabindex="0">Code <i class="fas fa-code fa-1x"></i></button>
+            <button title="Insert bold text" type="button" onclick="addMarkdownCode.call($('#{{ markdown_area_id }}'), 'bold')" class="btn btn-default btn-markdown btn-markdown-bold"  tabindex="0">Bold <i class="fas fa-bold fa-1x"></i></button>
+            <button title="Insert italic text" type="button" onclick="addMarkdownCode.call($('#{{ markdown_area_id }}'), 'italic')" class="btn btn-default btn-markdown btn-markdown-italic"  tabindex="0">Italics <i class="fas fa-italic fa-1x"></i></button>
         </div>
     </div>
     <div class="markdown-area-body">
         <label for="{{ markdown_area_id }}" tabindex="-1" class="screen-reader">{{ markdown_area_id }}</label>
         {% include "./AccessibilityMessage.twig" %}
         <textarea
+            data-testid="{{ markdown_area_id }}"
             id="{{ markdown_area_id }}"
             class="markdown-textarea fill-available {{ class is defined ? class }}"
             name="{{ markdown_area_name is defined ? markdown_area_name : "markdown_area" }}"
