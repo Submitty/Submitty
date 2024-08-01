@@ -1,4 +1,5 @@
 // MODEL + CONTROLLERS /////////////////////////////////////////////////////////
+/* global initializeResizablePanels, buildCourseUrl */
 /**
  * On document.ready, JS in PlagiarismResult.twig will call this function
  * @param {string} gradeable_id
@@ -8,7 +9,6 @@
  */
 // eslint-disable-next-line no-unused-vars
 function setUpPlagView(gradeable_id, term_course_gradeable, config_id, user_1_list) {
-    // eslint-disable-next-line no-undef
     initializeResizablePanels('.left-sub-item', '.plag-drag-bar');
 
     // initialize editors
@@ -281,7 +281,6 @@ function loadConcatenatedFileForEditor(state, editor) {
     // to the selected user + version in panel number #editor
     let url = '';
     if (editor === 1) {
-        // eslint-disable-next-line no-undef
         url = `${buildCourseUrl(['plagiarism', 'gradeable', state.gradeable_id, state.config_id, 'concat'])}?user_id=${state.user_1_selected.user_id}&version=${state.user_1_selected.version}`;
     }
     else { // editor 2
@@ -290,7 +289,6 @@ function loadConcatenatedFileForEditor(state, editor) {
             state.editor2.refresh();
             return;
         }
-        // eslint-disable-next-line no-undef
         url = `${buildCourseUrl(['plagiarism', 'gradeable', state.gradeable_id, state.config_id, 'concat'])}?user_id=${state.user_2_selected.user_id}&version=${state.user_2_selected.version}&source_gradeable=${state.user_2_selected.source_gradeable}`;
     }
     requestAjaxData(url, (data) => {
@@ -328,7 +326,6 @@ function loadColorInfo(state) {
         return;
     }
 
-    // eslint-disable-next-line no-undef
     const url = `${buildCourseUrl(['plagiarism', 'gradeable', state.gradeable_id, state.config_id, 'colorinfo'])}?user_id_1=${state.user_1_selected.user_id}&version_user_1=${state.user_1_selected.version}&user_id_2=${state.user_2_selected.user_id}&version_user_2=${state.user_2_selected.version}&source_gradeable_user_2=${state.user_2_selected.source_gradeable}`;
     requestAjaxData(url, (data) => {
         state.color_info = data;

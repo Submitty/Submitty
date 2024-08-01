@@ -1,4 +1,5 @@
 /* exported collapseSection, addImage, updateImage */
+/* global csrfToken, displaySuccessMessage, displayErrorMessage */
 /**
 * toggles visibility of a content sections on the Docker UI
 * @param {string} id of the section to toggle
@@ -73,18 +74,15 @@ function addImage(url) {
         data: {
             capability: capability,
             image: image,
-            // eslint-disable-next-line no-undef
             csrf_token: csrfToken,
         },
         success: function (data) {
             const json = JSON.parse(data);
             if (json.status === 'success') {
                 $('#add-field').val('');
-                // eslint-disable-next-line no-undef
                 displaySuccessMessage(json.data);
             }
             else {
-                // eslint-disable-next-line no-undef
                 displayErrorMessage(json.message);
             }
         },
@@ -100,17 +98,14 @@ function updateImage(url) {
         url: url,
         type: 'GET',
         data: {
-            // eslint-disable-next-line no-undef
             csrf_token: csrfToken,
         },
         success: function (data) {
             const json = JSON.parse(data);
             if (json.status === 'success') {
-                // eslint-disable-next-line no-undef
                 displaySuccessMessage(json.data);
             }
             else {
-                // eslint-disable-next-line no-undef
                 displayErrorMessage(json.message);
             }
         },

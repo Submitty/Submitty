@@ -1,5 +1,5 @@
 /* exported toggleSort, displayStudentHistory */
-/* global buildCourseUrl, displayErrorMessage */
+/* global buildCourseUrl, displayErrorMessage , csrfToken */
 // this helps update the frontend when the page refreshes because without this the sort icon would reset and the sort state would not
 document.addEventListener('DOMContentLoaded', () => {
     const sortIndicator = document.getElementById('sort-indicator-oh-queue');
@@ -29,7 +29,6 @@ function displayStudentHistory() {
         type: 'POST',
         data: {
             student_id: $('#search-student-queue-input').val(),
-            // eslint-disable-next-line no-undef
             csrf_token: csrfToken,
         },
         success: function (response_str) {

@@ -3,13 +3,13 @@
 *
 * @param {String} current_tag - tag Submitty is currently running on
 */
+/* global displayMessage, buildUrl, csrfToken, displayErrorMessage*/
 // eslint-disable-next-line no-unused-vars
 async function getReleases(current_tag) {
     try {
         const response = await fetch('https://api.github.com/repos/Submitty/Submitty/releases');
 
         if (response.status !== 200) {
-            // eslint-disable-next-line no-undef
             displayMessage(' Failed to get latest version info.'
             + ` (Status Code : ${response.status.toString()})<br>`
             + `Message : ${response.statusText}`, 'error',
@@ -24,7 +24,6 @@ async function getReleases(current_tag) {
     }
     catch (error) {
         console.error(error);
-        // eslint-disable-next-line no-undef
         displayMessage(error.toString(), 'error');
     }
 }
@@ -48,12 +47,10 @@ function updateReleaseNotes(data, current_tag) {
     const latest = data[0];
 
     $.ajax({
-        // eslint-disable-next-line no-undef
         url: buildUrl(['markdown']),
         type: 'POST',
         data: {
             content: addPRLinks(updates),
-            // eslint-disable-next-line no-undef
             csrf_token: csrfToken,
         },
         success: function (markdown_data) {
@@ -120,7 +117,6 @@ function updateReleaseNotes(data, current_tag) {
             $('#loading-text').hide();
         },
         error: function () {
-            // eslint-disable-next-line no-undef
             displayErrorMessage('Something went wrong while trying to render markdown. Please try again.');
         },
     });

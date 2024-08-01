@@ -1,4 +1,5 @@
 /* exported addToTable, deleteRow */
+/* global studentFullData, buildCourseUrl, csrfToken*/
 const benchmarks_with_input_fields = ['lowest_a-', 'lowest_b-', 'lowest_c-', 'lowest_d'];
 const allowed_grades = ['A', 'A-', 'B+', 'B', 'B-', 'C+', 'C', 'C-', 'D+', 'D', 'F'];
 const allowed_grades_excluding_f = ['A', 'A-', 'B+', 'B', 'B-', 'C+', 'C', 'C-', 'D+', 'D'];
@@ -336,7 +337,6 @@ function addToTable(table) {
     const thirdInput = document.getElementById(tableMap[table][3]).value.trim();
 
     // Check whether input is allowed
-    // eslint-disable-next-line no-undef
     const studentFullDataValues = studentFullData.map((item) => item.value);
     const tableBody = document.getElementById(tableMap[table][0]);
     const rows = tableBody.getElementsByTagName('tr');
@@ -544,9 +544,7 @@ function checkAutoRGStatus() {
     // Send request
     $.getJSON({
         type: 'POST',
-        // eslint-disable-next-line no-undef
         url: buildCourseUrl(['reports', 'rainbow_grades_status']),
-        // eslint-disable-next-line no-undef
         data: { csrf_token: csrfToken },
         success: function (response) {
             if (response.status === 'success') {
@@ -574,12 +572,10 @@ function ajaxUpdateJSON(successCallback, errorCallback) {
     try {
         $('#save_status').html('Saving...');
 
-        // eslint-disable-next-line no-undef
         const url = buildCourseUrl(['reports', 'rainbow_grades_customization']);
         $.getJSON({
             type: 'POST',
             url: url,
-            // eslint-disable-next-line no-undef
             data: { json_string: buildJSON(), csrf_token: csrfToken },
             success: function (response) {
                 if (response.status === 'success') {

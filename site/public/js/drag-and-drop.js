@@ -1,7 +1,7 @@
 /* exported handleUploadBanner, initializeDropZone, handleEditCourseMaterials, handleUploadCourseMaterials, handleDownloadImages,
             handleSubmission, handleRegrade, handleBulk, deleteSplitItem, submitSplitItem, displayPreviousSubmissionOptions
             displaySubmissionMessage, validateUserId, openFile, handle_input_keypress, addFilesFromInput,
-            dropWithMultipleZips, initMaxNoFiles, setUsePrevious, readPrevious, createArray, initializeDragAndDrop */
+            dropWithMultipleZips, initMaxNoFiles, setUsePrevious, readPrevious, createArray, initializeDragAndDrop, showPopup */
 /* global buildCourseUrl, buildUrl, getFileExtension, csrfToken, removeMessagePopup, newOverwriteCourseMaterialForm, displayErrorMessage */
 
 /*
@@ -457,7 +457,6 @@ function addLabel(filename, filesize, part, previous) {
 
 function handle_input_keypress(inactive_version) {
     empty_inputs = false;
-    // eslint-disable-next-line no-undef
     showPopup = true;
     if (!inactive_version) {
         setButtonStatus();

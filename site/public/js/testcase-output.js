@@ -1,3 +1,4 @@
+/* global toggleDiv, buildCourseUrl, enableKeyToClick, displayAjaxError */
 // Map to store the XMLHttpRequest object returned by getJSON when getting the
 // output to display in loadTestCaseOutput()
 // Key: div_name ("testcase_" + index)   Value: XMLHttpRequest object
@@ -24,7 +25,6 @@ const collapse_all_toggle_div_name = '#tc_collapse_all';
 function CollapseTestCaseOutput(div_name, index, num_test_cases, loadingTools, check_all_test_cases_states) {
     $(`#show_char_${index}`).toggle();
     $(`#${div_name}`).empty();
-    // eslint-disable-next-line no-undef
     toggleDiv(div_name);
 
     loadingTools.find('.loading-tools-hide').hide();
@@ -153,7 +153,6 @@ function loadTestCaseOutput(div_name, gradeable_id, who_id, index, num_test_case
     // Output is not visible - Expand test case output
     else {
         $(`#show_char_${index}`).toggle();
-        // eslint-disable-next-line no-undef
         const url = `${buildCourseUrl(['gradeable', gradeable_id, 'grading', 'student_output'])}?who_id=${who_id}&index=${index}&version=${version}`;
 
         loadingTools.find('.loading-tools-show').hide();
@@ -176,13 +175,11 @@ function loadTestCaseOutput(div_name, gradeable_id, who_id, index, num_test_case
 
                 $(div_name).empty();
                 $(div_name).html(response.data);
-                // eslint-disable-next-line no-undef
                 toggleDiv(orig_div_name);
 
                 loadingTools.find('.loading-tools-in-progress').hide();
                 loadingTools.find('.loading-tools-hide').show();
 
-                // eslint-disable-next-line no-undef
                 enableKeyToClick();
             },
             error: function (e) {
@@ -197,7 +194,6 @@ function loadTestCaseOutput(div_name, gradeable_id, who_id, index, num_test_case
                     if (loading_test_cases_xml_http_requests.size === 0) {
                         alert('Could not load diff, please refresh the page and try again.');
                         console.log(e);
-                        // eslint-disable-next-line no-undef
                         displayAjaxError(e);
                     }
                 }
