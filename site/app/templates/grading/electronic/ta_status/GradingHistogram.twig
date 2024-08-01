@@ -105,8 +105,9 @@
     <div id="mySmallDiv{{ type == 'auto' ? '3' : (type == 'manual' ? '4' : '') }}">
         <script>
             document.write('<b>Mean: </b>' +
-                {{ type == 'total' ? overall_average.getAverageScore()
-                : (type == 'auto' ? autograded_average.getAverageScore())
+                {{ type == 'total' ? overall_average.getAverageScore() 
+                : (type == 'auto' ? autograded_average.getAverageScore() 
+                : (type == 'manual' ? manual_average))
                 }} + '&nbsp;&nbsp;&nbsp;&nbsp;' +
                 '<b>Mode: </b>' + mode + '&nbsp;&nbsp;&nbsp;&nbsp;' +
                 '<b>Median: </b>' + median + '&nbsp;&nbsp;&nbsp;&nbsp;' +
