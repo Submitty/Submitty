@@ -22,9 +22,9 @@ const props = withDefaults(defineProps<{
 
 const emit = defineEmits<{
     /** The user clicked out of the popup, or hit cancel/discard  */
-    dismiss: [ev: MouseEvent];
+    dismiss: [ev: MouseEvent | KeyboardEvent];
     /** The user clicked the save button  */
-    save: [ev: MouseEvent];
+    save: [ev: MouseEvent | KeyboardEvent];
 }>();
 
 watch(
@@ -36,7 +36,7 @@ watch(
                     'keydown.popup',
                     (event) => {
                         if (event.key === 'Escape' && props.visible) {
-                            emit('dismiss', event.originalEvent as MouseEvent);
+                            emit('dismiss', event.originalEvent as KeyboardEvent);
                         }
                     });
             }
