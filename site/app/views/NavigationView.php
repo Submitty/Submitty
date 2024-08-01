@@ -585,7 +585,7 @@ class NavigationView extends AbstractView {
             }
             elseif (
                 $gradeable->isTaGrading()
-                    && $gradeable->isTaGradeReleased() || !$gradeable->hasReleaseDate()
+                    && ($gradeable->isTaGradeReleased() || !$gradeable->hasReleaseDate())
                     && $graded_gradeable->isTaGradingComplete()
                     && $ta_graded_gradeable->hasVersionConflict()
                     && $list_section == GradeableList::GRADED
