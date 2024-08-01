@@ -308,4 +308,4 @@ class AuthenticationController extends AbstractController {
 
         return new WebResponse(AuthenticationView::class, 'userSelection', $users);
     }
-}
+}   
