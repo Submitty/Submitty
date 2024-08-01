@@ -3,10 +3,15 @@
         "RLIMIT_NPROC" : 100,
         "RLIMIT_DATA": 2000000
     },
+    "autograding": {
+        "submission_to_runner": [
+            "**/*"
+        ]
+    },
     "testcases" : [
         {
             "title" : "Networking with wget",
-            "command" : [ "wget https://www.google.com/", "grep gbqf index.html" ],
+            "command" : [ "wget -i *.url", "grep gbqf index.html" ],
             "points" : 5,
             "validation" : [
                 {
