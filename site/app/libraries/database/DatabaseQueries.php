@@ -6322,6 +6322,7 @@ AND gc_id IN (
                   json_agg(gc_upper_clamp) AS array_upper_clamp,
                   json_agg(gc_is_text) AS array_text,
                   json_agg(gc_is_peer) AS array_peer_component,
+                  json_agg(gc_is_curve) AS array_curve_component,
                   json_agg(gc_order) AS array_order,
                   json_agg(gc_page) AS array_page,
                   json_agg(gc_is_itempool_linked) AS array_is_itempool_linked,
@@ -6389,6 +6390,7 @@ AND gc_id IN (
                 'upper_clamp',
                 'text',
                 'peer_component',
+                'curve_component',
                 'order',
                 'page',
                 'is_itempool_linked',
@@ -6761,6 +6763,7 @@ AND gc_id IN (
             $component->isText(),
             $component->getOrder(),
             $component->isPeerComponent(),
+            $component->isCurveComponent(),
             $component->getPage(),
             $component->getIsItempoolLinked(),
             $component->getItempool()
@@ -6779,10 +6782,11 @@ AND gc_id IN (
               gc_is_text,
               gc_order,
               gc_is_peer,
+              gc_is_curve,
               gc_page,
               gc_is_itempool_linked,
               gc_itempool)
-            VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
+            VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ? , ?)",
             $params
         );
 
@@ -6847,6 +6851,7 @@ AND gc_id IN (
                 $component->isText(),
                 $component->getOrder(),
                 $component->isPeerComponent(),
+                $component->isCurveComponent(),
                 $component->getPage(),
                 $component->getIsItempoolLinked(),
                 $component->getItempool(),
@@ -6865,6 +6870,7 @@ AND gc_id IN (
                   gc_is_text=?,
                   gc_order=?,
                   gc_is_peer=?,
+                  gc_is_curve=?,
                   gc_page=?,
                   gc_is_itempool_linked=?,
                   gc_itempool=?
