@@ -152,43 +152,6 @@ class DockerInterfaceController extends AbstractController {
         }
     }
 
-    #[Route("/admin/remove_image", methods: ["POST"])]
-    public function removeImage(): JsonResponse {
-        $pattern = '/^[a-z0-9]+[a-z0-9._(__)-]*[a-z0-9]+\/[a-z0-9]+[a-z0-9._(__)-]*[a-z0-9]+:[a-zA-Z0-9][a-zA-Z0-9._-]{0,127}$/';
-        $user = $this->core->getUser();
-        $user_id = $user->getId();
-        $jsonFilePath = FileUtils::joinPaths(
-            $this->core->getConfig()->getSubmittyInstallPath(),
-            "config",
-            "autograding_containers.json"
-        );
-        $json = json_decode(file_get_contents($jsonFilePath), true);
-        if (preg_match($pattern, $_POST['image'])) {
-            if ($this->core->getQueries()->getDockerImageOwner($_POST['image']) !== false) {
-                $Verify = $this->core->getQueries()->removeDockerImageOwner($_POST['image'], $user);
-                if ($Verify) {
-                    foreach ($json as $capability_key => $capability) {
-                        $key = array_search($_POST['image'], $capability, true);
-                        if ($key !== false) {
-                            unset($json[$capability_key][$key]);
-                        }
-                    }
-                    file_put_contents($jsonFilePath, json_encode($json, JSON_PRETTY_PRINT));
-                    return JsonResponse::getSuccessResponse($_POST['image'] . ' removed from docker images!');
-                }
-                else {
-                    return JsonResponse::getFailResponse('This image is owned/managed by another instructor/superuser.');
-                }
-            }
-            else {
-                return JsonResponse::getFailResponse('This image is not listed.');
-            }
-        }
-        else {
-            return JsonResponse::getFailResponse('Invalid Docker image name.');
-        }
-    }
-
     #[Route("/admin/update_docker", methods: ["GET"])]
     public function updateDockerCall(): JsonResponse {
         $user = $this->core->getUser();
@@ -229,4 +192,40 @@ class DockerInterfaceController extends AbstractController {
         }
         return true;
     }
+
+    #[Route("/admin/remove_image", methods: ["POST"])]
+    public function removeImage(): JsonResponse {
+        $pattern = '/^[a-z0-9]+[a-z0-9._(__)-]*[a-z0-9]+\/[a-z0-9]+[a-z0-9._(__)-]*[a-z0-9]+:[a-zA-Z0-9][a-zA-Z0-9._-]{0,127}$/';
+        $image = $_POST['image'] ?? '';
+
+        if (!preg_match($pattern, $image)) {
+            return JsonResponse::getFailResponse('Invalid Docker image name.');
+        }
+
+        if ($this->core->getQueries()->getDockerImageOwner($image) === false) {
+            return JsonResponse::getFailResponse('This image is not listed.');
+        }
+
+        $user = $this->core->getUser();
+        if (!$this->core->getQueries()->removeDockerImageOwner($image, $user)) {
+            return JsonResponse::getFailResponse('This image is owned/managed by another instructor/superuser.');
+        }
+
+        $jsonFilePath = FileUtils::joinPaths(
+            $this->core->getConfig()->getSubmittyInstallPath(),
+            "config",
+            "autograding_containers.json"
+        );
+        $json = json_decode(file_get_contents($jsonFilePath), true);
+
+        foreach ($json as $capability_key => $capability) {
+            if (($key = array_search($image, $capability, true)) !== false) {
+                unset($json[$capability_key][$key]);
+            }
+        }
+
+        file_put_contents($jsonFilePath, json_encode($json, JSON_PRETTY_PRINT));
+        return JsonResponse::getSuccessResponse($image . ' removed from docker images!');
+    }
+
 }
