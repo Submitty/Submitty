@@ -83,6 +83,11 @@ select {
     color: white;
 }
 
+.curve-button {
+    background-color: var(--standard-vibrant-orange);
+    color: white;
+}
+
 .new-gradeable {
     font-family: monospace;
 }
