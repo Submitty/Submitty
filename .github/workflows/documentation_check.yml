@@ -1,4 +1,4 @@
-name: 'PR Title Check'
+name: 'Documentation'
 on:
   pull_request:
     # check when PR
