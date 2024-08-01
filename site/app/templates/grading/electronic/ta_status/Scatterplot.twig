@@ -149,8 +149,15 @@
     </script>
     <div id="mySmallDiv4">
         <script>
-            var runtime = [{{ histograms['runtime'] | join(',') }}];
-            var memory = [{{ histograms['memory'] | join(',') }}];
+            {#var runtime = [{{ histograms['runtime'] | join(',') }}];#}
+            {#var memory = [{{ histograms['memory'] | join(',') }}];#}
+            {#var scores = [{{ histograms['bAuto'] | join(',') }}];#}
+            function truncateToThreeDecimals(num) {
+                return Math.floor(num * 1000) / 1000;
+            }
+
+            var runtime = [{{ histograms['runtime'] | join(',') }}].map(truncateToThreeDecimals);
+            var memory = [{{ histograms['memory'] | join(',') }}].map(truncateToThreeDecimals);
             var scores = [{{ histograms['bAuto'] | join(',') }}];
 
             runtime = runtime.filter(n => n !== undefined);
@@ -158,20 +165,20 @@
             scores = scores.filter(n => n !== undefined);
 
             var sumR = runtime.reduce((a, b) => a + b, 0);
-            var averageR = sumR / runtime.length;
+            var averageR = truncateToThreeDecimals(sumR / runtime.length);
             var maxR = Math.max(...runtime);
             var minR = Math.min(...runtime);
             var sumM = memory.reduce((a, b) => a + b, 0);
-            var averageM = sumM / memory.length;
+            var averageM = truncateToThreeDecimals(sumM / memory.length);
             var maxM = Math.max(...memory);
             var minM = Math.min(...memory);
-            document.write(`<b>Total Runtime: </b>` + "<br>" + `Maximum: ` + `${maxR}` + '&nbsp&nbsp&nbsp&nbsp' +
+            document.write(`<b>Total Runtime (seconds): </b>` + "<br>" + `Maximum: ` + `${maxR}` + '&nbsp&nbsp&nbsp&nbsp' +
                 `Minimum: ` + `${minR}` + '&nbsp&nbsp&nbsp&nbsp' + 'Average: ' + `${averageR}`);
             document.write("<br>" + "<br>");
-            document.write(`<b>Peak time: </b>` + "<br>" + `Maximum: ` + `${maxM}` + '&nbsp&nbsp&nbsp&nbsp' +
+            document.write(`<b>Peak Memory (bytes): </b>` + "<br>" + `Maximum: ` + `${maxM}` + '&nbsp&nbsp&nbsp&nbsp' +
                 `Minimum: ` + `${minM}` + '&nbsp&nbsp&nbsp&nbsp' + 'Average: ' + `${averageM}`);
             document.write("<br>" + "<br>");
-            document.write(`<b>Autograding: </b>` + "<br>" + `Maximum possible: ` + {{ autograding_non_extra_credit }} +
+            document.write(`<b>Autograding Scores: </b>` + "<br>" + `Maximum possible: ` + {{ autograding_non_extra_credit }} +
                 '&nbsp&nbsp&nbsp&nbsp' + 'Average: ' + {{ autograded_average.getAverageScore() }});
         </script>
     </div>

@@ -223,7 +223,6 @@ class AutoGradedGradeable extends AbstractModel {
         return $instance->getQueuePosition();
     }
 
-
     public function getMetrics() {
         $instance = $this->getActiveVersionInstance();
         if ($instance === null) {
