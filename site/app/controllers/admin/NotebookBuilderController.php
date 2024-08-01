@@ -28,6 +28,16 @@ class NotebookBuilderController extends AbstractController {
 
     /**
      * @param string $g_id Gradeable ID
+     * notebook builder know to save a new configuration or edit the existing one.
+     * @AccessControl(role="INSTRUCTOR")
+     */
+    #[Route("/courses/{_semester}/{_course}/notebook_builder/{g_id}/notebook_preview", methods: ["GET"])]
+    public function preview(string $g_id) {
+        $this->core->getOutput()->renderTwigOutput('notebook/NotebookPreview.twig');
+    }
+
+    /**
+     * @param string $g_id Gradeable ID
      * @param string $mode The mode notebook builder should open in.  May be either 'new' or 'edit', this lets
      * notebook builder know to save a new configuration or edit the existing one.
      * @AccessControl(role="INSTRUCTOR")
