@@ -1,4 +1,5 @@
 /* global toggleDiv, buildCourseUrl, enableKeyToClick, displayAjaxError */
+
 // Map to store the XMLHttpRequest object returned by getJSON when getting the
 // output to display in loadTestCaseOutput()
 // Key: div_name ("testcase_" + index)   Value: XMLHttpRequest object

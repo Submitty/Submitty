@@ -1,5 +1,5 @@
-// MODEL + CONTROLLERS /////////////////////////////////////////////////////////
 /* global initializeResizablePanels, buildCourseUrl */
+// MODEL + CONTROLLERS /////////////////////////////////////////////////////////
 /**
  * On document.ready, JS in PlagiarismResult.twig will call this function
  * @param {string} gradeable_id
