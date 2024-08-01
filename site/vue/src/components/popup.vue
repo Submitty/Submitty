@@ -2,26 +2,29 @@
 import { watch } from 'vue';
 
 const props = withDefaults(defineProps<{
+    /** The id of the displayed popup, for styling purposes */
     id?: string;
-    visible?: boolean;
-    closeButton?: {
-        id: string;
-        classes: string[];
-    };
+    /** The title text of the popup */
+    title: string;
+    /** Whether to show the popup or not */
+    visible: boolean;
+    /** Whether the popup should show 'discard' and 'save' options or just one 'close' option */
+    savable?: boolean;
+    /** The text to show for the close/discard button */
+    dismissText?: string;
+    /** The text to show for the save button */
+    saveText?: string;
 }>(), {
     id: 'popup',
-    title: 'popup title',
-    closeButton() {
-        return {
-            id: 'close_button',
-            classes: ['btn-default'],
-        };
-    },
-
+    dismissText: (props) => props.savable ? 'Discard' : 'Close',
+    saveText: 'Save',
 });
 
 const emit = defineEmits<{
-    dismiss: [];
+    /** The user clicked out of the popup, or hit cancel/discard  */
+    dismiss: [ev: MouseEvent];
+    /** The user clicked the save button  */
+    save: [ev: MouseEvent];
 }>();
 
 watch(
@@ -33,7 +36,7 @@ watch(
                     'keydown.popup',
                     (event) => {
                         if (event.key === 'Escape' && props.visible) {
-                            emit('dismiss');
+                            emit('dismiss', event.originalEvent as MouseEvent);
                         }
                     });
             }
@@ -50,66 +53,74 @@ watch(
 <template>
   <div
     v-if="visible"
-    :id="id"
     class="popup-form"
   >
     <div
       class="popup-box"
-      @click="$emit('dismiss')"
+      @click="$emit('dismiss', $event)"
     >
       <div
-        class="popup-window"
-        @click.prevent
+        :id="id"
+        class="popup-window d-flex flex-col"
+        data-testid="popup-window"
+        @click.stop
       >
-        <slot name="title_panel">
-          <div class="form-title">
-            <slot name="title_tag">
-              <h1>
-                <slot name="title">
-                  Untitled Form
-                </slot>
-              </h1>
-            </slot>
+        <div class="form-title d-flex justify-content-space-between">
+          <h1>{{ title }}</h1>
+          <div>
             <button
+              class="btn close-button"
               data-testid="close-button"
-              class="btn btn-default close-button"
-              tabindex="-1"
-              type="button"
-              @click="$emit('dismiss')"
+              tabindex="0"
+              @click="$emit('dismiss', $event)"
             >
-              Close
+              {{ dismissText }}
+            </button>
+            <button
+              v-if="savable"
+              class="btn btn-primary"
+              data-testid="save-button"
+              tabindex="1"
+              @click="$emit('save', $event)"
+            >
+              {{ saveText }}
             </button>
           </div>
-        </slot>
-        <slot name="body_panel">
-          <div class="form-body">
-            <slot name="body">
-              Be sure to override the body slot.
-            </slot>
-            <slot name="buttons_panel">
-              <div class="form-buttons">
-                <div class="form-button-container">
-                  <slot name="buttons">
-                    <slot name="close_button">
-                      <a
-                        :id="closeButton.id"
-                        class="btn close-button key_to_click"
-                        :class="closeButton.classes.join(' ')"
-                        tabindex="0"
-                        @click="$emit('dismiss')"
-                      >
-                        <slot name="close_button_text">
-                          Close
-                        </slot>
-                      </a>
-                    </slot>
-                  </slot>
-                </div>
-              </div>
-            </slot>
-          </div>
-        </slot>
+        </div>
+
+        <slot>Default popup content (you should probably override this)</slot>
+
+        <div class="form-button-container">
+          <button
+            v-if="savable"
+            class="btn btn-primary"
+            data-testid="save-button"
+            tabindex="1"
+            @click="$emit('save', $event)"
+          >
+            {{ saveText }}
+          </button>
+          <button
+            v-else
+            class="btn close-button"
+            data-testid="close-button"
+            tabindex="0"
+            @click="$emit('dismiss', $event)"
+          >
+            {{ dismissText }}
+          </button>
+        </div>
       </div>
     </div>
   </div>
 </template>
+
+<style>
+h1 {
+  margin-bottom: 0 !important;
+}
+
+.popup-window {
+  gap: 0.25em;
+}
+</style>
