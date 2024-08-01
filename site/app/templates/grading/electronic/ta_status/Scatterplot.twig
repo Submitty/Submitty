@@ -4,13 +4,22 @@
         <select id="x-axis-selector">
             <option value="runtime">Runtime</option>
             <option value="memory">Memory</option>
+            <option value="scores">Scores</option>
+        </select>
+
+        <label for="y-axis-selector">Select Y-Axis:</label>
+        <select id="y-axis-selector">
+            <option value="runtime">Runtime</option>
+            <option value="memory">Memory</option>
+            <option value="scores">Scores</option>
         </select>
     </div>
     <div id="myDiv4"></div>
     <script>
-        var runtime = [{{ histograms['runtime'] | join(',') }}];
+        var runtime = [{{ histograms['runtime'] | join(',') }}].map(num => Math.floor(num * 1000) / 1000);
         var memory = [{{ histograms['memory'] | join(',') }}];
         var scores = [{{ histograms['bAuto'] | join(',') }}];
+
 
         var submitters = [
             {% for submitter in histograms['submitters'] %}
@@ -18,24 +27,24 @@
             {% endfor %}
         ];
 
-        function updatePlot(xData, xLabel) {
+        function updatePlot(xData, yData, xLabel, yLabel) {
             var x1 = [], y1 = [], x2 = [], y2 = [], x3 = [], y3 = [];
             var text1 = [], text2 = [], text3 = [];
 
             for (let i = 0; i < submitters.length; i++) {
                 if (scores[i] >= {{ autograding_non_extra_credit }}) {
                     x1.push(xData[i]);
-                    y1.push(scores[i]);
+                    y1.push(yData[i]);
                     text1.push(submitters[i]);
                 }
                 else if (scores[i] < 0.5 * {{ autograding_non_extra_credit }}) {
                     x3.push(xData[i]);
-                    y3.push(scores[i]);
+                    y3.push(yData[i]);
                     text3.push(submitters[i]);
                 }
                 else {
                     x2.push(xData[i]);
-                    y2.push(scores[i]);
+                    y2.push(yData[i]);
                     text2.push(submitters[i]);
                 }
             }
@@ -97,13 +106,13 @@
             var data = [trace1, trace2, trace3];
 
             var layout = {
-                title: `${xLabel} vs. Autograding Scores`,
+                title: `${xLabel} vs. ${yLabel}`,
                 barmode: 'overlay',
                 xaxis: {
                     title: xLabel
                 },
                 yaxis:{
-                    title: 'Autograding Scores'
+                    title: yLabel
                 },
                 font: {
                     family: '"Source Sans Pro", sans-serif',
@@ -113,28 +122,54 @@
             Plotly.newPlot('myDiv4', data, layout, { displayModeBar: false, displaylogo: false });
         }
 
+        function getDataArray(value) {
+            if (value === 'runtime') return runtime;
+            if (value === 'memory') return memory;
+            if (value === 'scores') return scores;
+        }
+
         document.getElementById('x-axis-selector').addEventListener('change', function() {
-            var selectedValue = this.value;
-            if (selectedValue === 'runtime') {
-                updatePlot(runtime, 'Total Runtime');
-            } else if (selectedValue === 'memory') {
-                updatePlot(memory, 'Memory Usage');
-            } else if (selectedValue === 'sloc') {
-                updatePlot(sloc, 'Source Lines of Code');
-            }
+            var xValue = this.value;
+            var yValue = document.getElementById('y-axis-selector').value;
+            updatePlot(getDataArray(xValue), getDataArray(yValue), xValue.charAt(0).toUpperCase() + xValue.slice(1), yValue.charAt(0).toUpperCase() + yValue.slice(1));
         });
 
+        document.getElementById('y-axis-selector').addEventListener('change', function() {
+            var xValue = document.getElementById('x-axis-selector').value;
+            var yValue = this.value;
+            updatePlot(getDataArray(xValue), getDataArray(yValue), xValue.charAt(0).toUpperCase() + xValue.slice(1), yValue.charAt(0).toUpperCase() + yValue.slice(1));
+        });
+
+        // Set default selected values for both selectors
+        document.getElementById('x-axis-selector').value = 'runtime';
+        document.getElementById('y-axis-selector').value = 'scores';
+
         // Initial plot
-        updatePlot(runtime, 'Total Runtime');
+        updatePlot(runtime, scores, 'Runtime', 'Scores');
     </script>
     <div id="mySmallDiv4">
         <script>
-            var sum = runtime.reduce((a, b) => a + b, 0);
-            var average = Math.floor(sum / runtime.length);
-            var max = Math.max(...runtime);
-            var min = Math.min(...runtime);
-            document.write(`<b>Total Runtime: </b>` + "<br>" + `Maximum: ` + `${max}` + '&nbsp&nbsp&nbsp&nbsp' +
-                `Minimum: ` + `${min}` + '&nbsp&nbsp&nbsp&nbsp' + 'Average: ' + `${average}`);
+            var runtime = [{{ histograms['runtime'] | join(',') }}];
+            var memory = [{{ histograms['memory'] | join(',') }}];
+            var scores = [{{ histograms['bAuto'] | join(',') }}];
+
+            runtime = runtime.filter(n => n !== undefined);
+            memory = memory.filter(n => n !== undefined);
+            scores = scores.filter(n => n !== undefined);
+
+            var sumR = runtime.reduce((a, b) => a + b, 0);
+            var averageR = sumR / runtime.length;
+            var maxR = Math.max(...runtime);
+            var minR = Math.min(...runtime);
+            var sumM = memory.reduce((a, b) => a + b, 0);
+            var averageM = sumM / memory.length;
+            var maxM = Math.max(...memory);
+            var minM = Math.min(...memory);
+            document.write(`<b>Total Runtime: </b>` + "<br>" + `Maximum: ` + `${maxR}` + '&nbsp&nbsp&nbsp&nbsp' +
+                `Minimum: ` + `${minR}` + '&nbsp&nbsp&nbsp&nbsp' + 'Average: ' + `${averageR}`);
+            document.write("<br>" + "<br>");
+            document.write(`<b>Peak time: </b>` + "<br>" + `Maximum: ` + `${maxM}` + '&nbsp&nbsp&nbsp&nbsp' +
+                `Minimum: ` + `${minM}` + '&nbsp&nbsp&nbsp&nbsp' + 'Average: ' + `${averageM}`);
             document.write("<br>" + "<br>");
             document.write(`<b>Autograding: </b>` + "<br>" + `Maximum possible: ` + {{ autograding_non_extra_credit }} +
                 '&nbsp&nbsp&nbsp&nbsp' + 'Average: ' + {{ autograded_average.getAverageScore() }});
@@ -145,3 +180,5 @@
     Double-click on the chart to zoom out
     <hr>
 </div>
+
+
