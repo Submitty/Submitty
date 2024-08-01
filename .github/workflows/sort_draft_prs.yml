@@ -40,7 +40,7 @@ jobs:
     name: Move drafts to Work-in-Progress and non-drafts to Seeking Reviewer
     needs: get-token-and-pr-id
     env:
-      GITHUB_TOKEN: ${{ needs.get-token-and-pr-id.outputs.token }}
+      GH_TOKEN: ${{ needs.get-token-and-pr-id.outputs.token }}
       PR_PROJECT_ID: ${{ needs.get-token-and-pr-id.outputs.pr-project-id }}
     runs-on: ubuntu-latest
     steps:
