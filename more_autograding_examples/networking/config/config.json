@@ -6,23 +6,17 @@
     "testcases" : [
         {
             "title" : "Networking with wget",
-            "command" : [ "wget https://www.google.com/" ],
+            "command" : [ "wget https://www.google.com/", "grep gbqf index.html" ],
             "points" : 5,
             "validation" : [
                 {
                     "method" : "diff",
-                    "actual_file" : "index.html",
+                    "actual_file" : "STDOUT_1.txt",
                     "expected_file" : "google.txt"
                 },
                 {
                     "method" : "fileExists",
-                    "actual_file" : "STDERR.txt"
-                },
-                {
-                    "method" : "fileExists",
-                    "actual_file" : "STDOUT.txt",
-                    "show_actual" : "never",
-                    "show_message" : "never"
+                    "actual_file" : "STDERR_0.txt"
                 }
             ]
         }
