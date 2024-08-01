@@ -552,6 +552,7 @@ class GlobalController extends AbstractController {
                 $duck_img = 'moorthy_duck/09-september.svg';
                 break;
             case 8:
+                $duck_img = 'moorthy_duck/quantum-duck-dark.svg';
                 break;
             case 7:
                 //July (Independence)
@@ -569,7 +570,12 @@ class GlobalController extends AbstractController {
                 break;
             case 4:
                 //April (Flowers)
-                $duck_img = 'moorthy_duck/04-april.svg';
+                if($day === 5) {
+                    $duck_img = 'moorthy_duck/quantum-duck-dark.svg';
+                } else {
+                    //April (Flowers)
+                    $duck_img = 'moorthy_duck/04-april.svg';
+                }
                 break;
             case 3:
                 //Saint Patrick's Day (Shamrock)
