@@ -44,7 +44,7 @@ jobs:
       - name: Move ready for review to Seeking Reviewer
         if: ${{ github.event.action == 'ready_for_review' }}
         env:
-          PR_PROJECT_ID: ${{ steps.get-pr-id.outputs.id }}
+          PR_PROJECT_ID: ${{ steps.get-pr-id.outputs.pr-project-id }}
           GH_TOKEN: ${{ steps.generate-token.outputs.token }}
         run: |
           gh project item-edit --project-id "$PROJECT_ID" --id "$PR_PROJECT_ID" --field-id "$STATUS_FIELD_ID" --single-select-option-id "$SEEKING_REVIEWER_ID"
