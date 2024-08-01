@@ -48,72 +48,68 @@ watch(
 </script>
 
 <template>
-  <Teleport
+  <div
     v-if="visible"
-    to="body"
+    :id="id"
+    class="popup-form"
   >
     <div
-      :id="id"
-      class="popup-form"
+      class="popup-box"
+      @click="$emit('dismiss')"
     >
       <div
-        class="popup-box"
-        @click="$emit('dismiss')"
+        class="popup-window"
+        @click.prevent
       >
-        <div
-          class="popup-window"
-          @click.prevent
-        >
-          <slot name="title_panel">
-            <div class="form-title">
-              <slot name="title_tag">
-                <h1>
-                  <slot name="title">
-                    Untitled Form
-                  </slot>
-                </h1>
-              </slot>
-              <button
-                data-testid="close-button"
-                class="btn btn-default close-button"
-                tabindex="-1"
-                type="button"
-                @click="$emit('dismiss')"
-              >
-                Close
-              </button>
-            </div>
-          </slot>
-          <slot name="body_panel">
-            <div class="form-body">
-              <slot name="body">
-                Be sure to override the body slot.
-              </slot>
-              <slot name="buttons_panel">
-                <div class="form-buttons">
-                  <div class="form-button-container">
-                    <slot name="buttons">
-                      <slot name="close_button">
-                        <a
-                          :id="closeButton.id"
-                          class="btn close-button key_to_click"
-                          :class="closeButton.classes.join(' ')"
-                          tabindex="0"
-                          @click="$emit('dismiss')"
-                        >
-                          <slot name="close_button_text">
-                            Close
-                          </slot>
-                        </a>
-                      </slot>
+        <slot name="title_panel">
+          <div class="form-title">
+            <slot name="title_tag">
+              <h1>
+                <slot name="title">
+                  Untitled Form
+                </slot>
+              </h1>
+            </slot>
+            <button
+              data-testid="close-button"
+              class="btn btn-default close-button"
+              tabindex="-1"
+              type="button"
+              @click="$emit('dismiss')"
+            >
+              Close
+            </button>
+          </div>
+        </slot>
+        <slot name="body_panel">
+          <div class="form-body">
+            <slot name="body">
+              Be sure to override the body slot.
+            </slot>
+            <slot name="buttons_panel">
+              <div class="form-buttons">
+                <div class="form-button-container">
+                  <slot name="buttons">
+                    <slot name="close_button">
+                      <a
+                        :id="closeButton.id"
+                        class="btn close-button key_to_click"
+                        :class="closeButton.classes.join(' ')"
+                        tabindex="0"
+                        @click="$emit('dismiss')"
+                      >
+                        <slot name="close_button_text">
+                          Close
+                        </slot>
+                      </a>
                     </slot>
-                  </div>
+                  </slot>
                 </div>
-              </slot>
-            </div>
-          </slot>
-        </div>
+              </div>
+            </slot>
+          </div>
+        </slot>
       </div>
     </div>
-  </Teleport>
+  </div>
 </template>
