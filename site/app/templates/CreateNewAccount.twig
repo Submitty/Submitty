@@ -1,12 +1,13 @@
 <div class="content shadow" id="login-box">
     <div id="login-guest">
-        {% include "misc/Markdown.twig" with {
-            "content": signup_content
-        } only %}
+     <!-- Add correct URL eventually -->
+        <h1> Sign Up <a target=_blank href="https://submitty.org">
+        <i style="font-style:normal;" class="fa-question-circle"></i>
+        </a> </h1>
     </div>
 
     <form action="{{ signup_url }}" method="post" id="login">
-        <label><p style="display:block">Email <i style="font-style:normal;" class="fa-question-circle hover-marker-email"></i></p>
+        <div class="display-box"><p style="display:block">Email <button class="requirements-button" type="button" onclick="showRequirements(this.id)" id="email">Show Requirements</button></p></p>
             <div class="hidden-helper" id="email-helper">
                 Accepted Email Extensions:<br/>
                 {% for email, bool in requirements['email'] %}
@@ -14,9 +15,9 @@
                 {% endfor %}
             </div>
             <input type="text" name="email" required />
-        </label>
-        <label>
-            <p style="display:block">User ID <i style="font-style:normal;" class="fa-question-circle hover-marker-userid"></i></p>
+        </div>
+        <div class="display-box">
+            <p style="display:block">User ID <button class="requirements-button" type="button" onclick="showRequirements(this.id)" id="userid">Show Requirements</button></p>
             <div class="hidden-helper" id="userid-helper">
                 UserID Requirements:<br/>
                 {% if requirements['user_id']['all'] == true %}
@@ -25,21 +26,20 @@
                     Must start with {{ requirements['user_id']['name_requirements']['givenname_first'] ? (requirements['user_id']['name_requirements']['given_name'] + 'characters of your given name') : (requirements['user_id']['name_requirements']['family_name'] + 'characters of your family name')}}
                 {% elseif requirements['user_id']['require_email'] == true %}
 
-              
                 {% endif %}
             </div>
             <input type="text" name="user_id" required />
-        </label>
-        <label>
+        </div>
+        <div class="display-box">
             Given Name
             <input type="text" name="given_name" required />
-        </label>
+        </div>
         <label>
             Family Name
             <input type="text" name="family_name" required />
         </label>
-        <label>
-           <p style="display:block">Password <i style="font-style:normal;" class="fa-question-circle hover-marker-password"></i></p>
+        <div class="display-box">
+           <p style="display:block">Password <button class="requirements-button" type="button" onclick="showRequirements(this.id)" id="password">Show Requirements</button></p>
             <div class="hidden-helper" id="password-helper">
                 Password Requires at least:<br/>
                 1 Capital Letter<br/>
@@ -49,7 +49,7 @@
                 12 Characters<br/>
             </div>
             <input type="password" name="password" required />
-        </label>
+        </div>
         <label>
             Re-Enter Password
             <input type="password" name="confirm_password" required />
@@ -61,23 +61,17 @@
 
 <script>
 
-$('.hover-marker-password').hover(()=>{
-    $('#password-helper').show();
-}, ()=>{
-    $('#password-helper').hide();
-})
-
-$('.hover-marker-email').hover(()=>{
-    $('#email-helper').show();
-}, ()=>{
-    $('#email-helper').hide();
-})
-
-$('.hover-marker-userid').hover(()=>{
-    $('#userid-helper').show();
-}, ()=>{
-    $('#userid-helper').hide();
-})
+function showRequirements(id_string) {
+    id_string = id_string + '-helper';
+    if (document.getElementById(id_string).style.display === '' || document.getElementById(id_string).style.display === 'none') {
+        console.log(1);
+        document.getElementById(id_string).style.display = 'block';
+    } else {
+        console.log(document.getElementById(id_string).style.display );
+        document.getElementById(id_string).style.display = 'none';
+    }
+   
+}
 
 </script>
 

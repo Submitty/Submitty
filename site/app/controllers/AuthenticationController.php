@@ -338,7 +338,7 @@ class AuthenticationController extends AbstractController {
      */
     public function getUserIdRequirements(): array {
         // Change to /usr/local/submitty/.setup 
-        $json = file_get_contents('/usr/local/submitty/site/public/user_id_requirements.json');
+        $json = file_get_contents('/usr/local/submitty/site/user_id_requirements.json');
         // Check if the file was read successfully
         if ($json === false) {
             return ['all' => true, 'length' => -1];
@@ -400,7 +400,7 @@ class AuthenticationController extends AbstractController {
      * @return array<string>
      */
     public function getAcceptedEmails(): array {
-        $json = file_get_contents('/usr/local/submitty/site/public/accepted_emails.json');
+        $json = file_get_contents('/usr/local/submitty/site/accepted_emails.json');
         if ($json === false) {
             return ['' => true];
         }
