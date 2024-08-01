@@ -157,3 +157,10 @@ describe('navigation page', () => {
         });
     });
 });
+
+describe('tests navigation buttons for each level of access', () => {
+    // Grading Homework, Grade released homework
+    it('should display instructor buttons correctly', () => {
+        throw new Error("failed test");
+    })
+});
