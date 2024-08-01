@@ -234,18 +234,18 @@ progress::-webkit-progress-value {
 
 .grade-panel button {
     color: var(--text-black);
-    position: relative;
     cursor: pointer;
-    padding: 4px 12px 5px 25px;
+    padding: 4px 12px;
     white-space: nowrap;
     outline: none;
+    display: flex;
+    align-items: center;
+    justify-content: center;
 }
 
 /* stylelint-disable-next-line no-descending-specificity */
 .grade-panel button i {
-    position: absolute;
-    top: 3px;
-    left: 5px;
+    margin-right: 5px;
     font-size: 14px;
 }
 
