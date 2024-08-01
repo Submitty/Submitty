@@ -149,9 +149,6 @@
     </script>
     <div id="mySmallDiv4">
         <script>
-            {#var runtime = [{{ histograms['runtime'] | join(',') }}];#}
-            {#var memory = [{{ histograms['memory'] | join(',') }}];#}
-            {#var scores = [{{ histograms['bAuto'] | join(',') }}];#}
             function truncateToThreeDecimals(num) {
                 return Math.floor(num * 1000) / 1000;
             }
