@@ -1,6 +1,5 @@
-/* global displaySuccessMessage */
-/* global luxon */
-/* global hljs */
+/* global displaySuccessMessage, hljs, luxon, buildCourseUrl, csrfToken,
+    displayErrorMessage, escapeSpecialChars */
 /* exported markForDeletion */
 /* exported unMarkForDeletion */
 /* exported  displayHistoryAttachment */
@@ -40,7 +39,6 @@ function categoriesFormEvents() {
 
 // eslint-disable-next-line no-unused-vars
 function openFileForum(directory, file, path) {
-    // eslint-disable-next-line no-undef
     const url = `${buildCourseUrl(['display_file'])}?dir=${directory}&file=${file}&path=${path}`;
     window.open(url, '_blank', 'toolbar=no,scrollbars=yes,resizable=yes, width=700, height=600');
 }
@@ -70,16 +68,13 @@ function resetForumFileUploadAfterError(displayPostId) {
 
 // eslint-disable-next-line no-unused-vars
 function checkNumFilesForumUpload(input, post_id) {
-    // eslint-disable-next-line no-undef
     const displayPostId = (typeof post_id !== 'undefined') ? `_${escapeSpecialChars(post_id)}` : '';
     if (input.files.length > 5) {
-        // eslint-disable-next-line no-undef
         displayErrorMessage('Max file upload size is 5. Please try again.');
         resetForumFileUploadAfterError(displayPostId);
     }
     else {
         if (!checkForumFileExtensions(input.files)) {
-            // eslint-disable-next-line no-undef
             displayErrorMessage('Invalid file type. Please upload only image files. (PNG, JPG, GIF, BMP...)');
             resetForumFileUploadAfterError(displayPostId);
             return;
@@ -160,18 +155,15 @@ function testAndGetAttachments(post_box_id, dynamic_check) {
 
     let valid = true;
     if (!checkForumFileExtensions(post_box_id, files)) {
-        // eslint-disable-next-line no-undef
         displayErrorMessage('Invalid file type. Please upload only image files. (PNG, JPG, GIF, BMP...)');
         valid = false;
     }
 
     if (files.length > 5) {
         if (dynamic_check) {
-            // eslint-disable-next-line no-undef
             displayErrorMessage('Max file upload size is 5. Please remove attachments accordingly.');
         }
         else {
-            // eslint-disable-next-line no-undef
             displayErrorMessage('Max file upload size is 5. Please try again.');
         }
         valid = false;
@@ -226,13 +218,11 @@ function publishFormWithAttachments(form, test_category, error_message, is_threa
                 var json = JSON.parse(data);
 
                 if (json['status'] === 'fail') {
-                    // eslint-disable-next-line no-undef
                     displayErrorMessage(json['message']);
                     return;
                 }
             }
             catch (err) {
-                // eslint-disable-next-line no-undef
                 displayErrorMessage('Error parsing data. Please try again.');
                 return;
             }
@@ -259,7 +249,6 @@ function publishFormWithAttachments(form, test_category, error_message, is_threa
             window.location.href = json['data']['next_page'];
         },
         error: function () {
-            // eslint-disable-next-line no-undef
             displayErrorMessage(error_message);
         },
     });
@@ -294,7 +283,6 @@ function publishPost(e) {
 function socketNewOrEditPostHandler(post_id, reply_level, post_box_id = null, edit = false) {
     $.ajax({
         type: 'POST',
-        // eslint-disable-next-line no-undef
         url: buildCourseUrl(['forum', 'posts', 'single']),
         data: { post_id: post_id, reply_level: reply_level, post_box_id: post_box_id, edit: edit, csrf_token: window.csrfToken },
         success: function (response) {
@@ -358,7 +346,6 @@ function socketNewOrEditPostHandler(post_id, reply_level, post_box_id = null, ed
                 hljs.highlightAll();
             }
             catch (error) {
-                // eslint-disable-next-line no-undef
                 displayErrorMessage('Error parsing new post. Please refresh the page.');
             }
         },
@@ -388,7 +375,6 @@ function socketDeletePostHandler(post_id) {
 function socketNewOrEditThreadHandler(thread_id, edit = false) {
     $.ajax({
         type: 'POST',
-        // eslint-disable-next-line no-undef
         url: buildCourseUrl(['forum', 'threads', 'single']),
         data: { thread_id: thread_id, csrf_token: window.csrfToken },
         success: function (response) {
@@ -432,7 +418,6 @@ function socketNewOrEditThreadHandler(thread_id, edit = false) {
                 }
             }
             catch (err) {
-                // eslint-disable-next-line no-undef
                 displayErrorMessage('Error parsing new thread. Please refresh the page.');
                 return;
             }
@@ -454,11 +439,11 @@ function socketDeleteOrMergeThreadHandler(thread_id, merge = false, merge_thread
     // eslint-disable-next-line eqeqeq
     if ($('#current-thread').val() == thread_id) {
         if (merge) {
-            // eslint-disable-next-line no-var, no-undef
+            // eslint-disable-next-line no-var
             var new_url = buildCourseUrl(['forum', 'threads', merge_thread_id]);
         }
         else {
-            // eslint-disable-next-line no-var, no-undef, no-redeclare
+            // eslint-disable-next-line no-var, no-redeclare
             var new_url = buildCourseUrl(['forum', 'threads']);
         }
         window.location.replace(new_url);
@@ -751,14 +736,12 @@ function initSocketClient() {
 
 // eslint-disable-next-line no-unused-vars
 function changeThreadStatus(thread_id) {
-    // eslint-disable-next-line no-undef
     const url = `${buildCourseUrl(['forum', 'threads', 'status'])}?status=1`;
     $.ajax({
         url: url,
         type: 'POST',
         data: {
             thread_id: thread_id,
-            // eslint-disable-next-line no-undef
             csrf_token: csrfToken,
         },
         success: function (data) {
@@ -767,19 +750,16 @@ function changeThreadStatus(thread_id) {
                 var json = JSON.parse(data);
             }
             catch (err) {
-                // eslint-disable-next-line no-undef
                 displayErrorMessage('Error parsing data. Please try again.');
                 return;
             }
             if (json['status'] === 'fail') {
-                // eslint-disable-next-line no-undef
                 displayErrorMessage(json['message']);
                 return;
             }
 
             window.socketClient.send({ type: 'resolve_thread', thread_id: thread_id });
             window.location.reload();
-            // eslint-disable-next-line no-undef
             displaySuccessMessage('Thread marked as resolved.');
         },
         error: function () {
@@ -816,12 +796,10 @@ function modifyOrSplitPost(e) {
                 var json = JSON.parse(response);
             }
             catch (e) {
-                // eslint-disable-next-line no-undef
                 displayErrorMessage('Error parsing data. Please try again.');
                 return;
             }
             if (json['status'] === 'fail') {
-                // eslint-disable-next-line no-undef
                 displayErrorMessage(json['message']);
                 return;
             }
@@ -856,7 +834,6 @@ function showEditPostForm(post_id, thread_id, shouldEditThread, render_markdown,
         return;
     }
     const form = $('#thread_form');
-    // eslint-disable-next-line no-undef
     const url = buildCourseUrl(['forum', 'posts', 'get']);
     $.ajax({
         url: url,
@@ -874,12 +851,10 @@ function showEditPostForm(post_id, thread_id, shouldEditThread, render_markdown,
                 var json = JSON.parse(data);
             }
             catch (err) {
-                // eslint-disable-next-line no-undef
                 displayErrorMessage('Error parsing data. Please try again');
                 return;
             }
             if (json['status'] === 'fail') {
-                // eslint-disable-next-line no-undef
                 displayErrorMessage(json['message']);
                 return;
             }
@@ -888,7 +863,6 @@ function showEditPostForm(post_id, thread_id, shouldEditThread, render_markdown,
             const lines = post_content.split(/\r|\r\n|\n/).length;
             const anon = json.anon;
             const change_anon = json.change_anon;
-            // eslint-disable-next-line no-undef
             const user_id = escapeSpecialChars(json.user);
             const validIsoString = json.post_time.replace(' ', 'T');
             let time = DateTime.fromISO(json.validIsoString, { zone: 'local' });
@@ -1240,8 +1214,7 @@ function modifyThreadList(currentThreadId, currentCategoriesId, course, loadFirs
     Cookies.set(`${course}_forum_categories`, categories_value, { path: '/' });
     Cookies.set('forum_thread_status', thread_status_value, { path: '/' });
     Cookies.set('unread_select_value', unread_select_value, { path: '/' });
-    // eslint-disable-next-line no-undef
-    const url = `${buildCourseUrl(['forum', 'threads'])}?page_number=${(loadFirstPage ? '1' : '-1')}`;
+    const url = `${buildCourseUrl(['forum', 'threads'])} ? page_number=${(loadFirstPage ? '1' : '-1')}`;
     $.ajax({
         url: url,
         type: 'POST',
@@ -1251,7 +1224,6 @@ function modifyThreadList(currentThreadId, currentCategoriesId, course, loadFirs
             unread_select: unread_select_value,
             currentThreadId: currentThreadId,
             currentCategoriesId: currentCategoriesId,
-            // eslint-disable-next-line no-undef
             csrf_token: csrfToken,
         },
         success: function (r) {
@@ -1413,16 +1385,14 @@ function generateCodeMirrorBlocks(container_element) {
 
 // eslint-disable-next-line no-unused-vars
 function showSplit(post_id) {
-    // If a thread was merged in the database earlier, we want to reuse the thread id and information
-    // so we don't have any loose ends
-    // eslint-disable-next-line no-undef
+    //  If a thread was merged in the database earlier, we want to reuse the thread id and information
+    //  so we don't have any loose ends
     const url = buildCourseUrl(['forum', 'posts', 'splitinfo']);
     $.ajax({
         url: url,
         type: 'POST',
         data: {
             post_id: post_id,
-            // eslint-disable-next-line no-undef
             csrf_token: csrfToken,
         },
         success: function (data) {
@@ -1431,12 +1401,10 @@ function showSplit(post_id) {
                 var json = JSON.parse(data);
             }
             catch (err) {
-                // eslint-disable-next-line no-undef
                 displayErrorMessage('Error parsing data. Please try again.');
                 return;
             }
             if (json['status'] === 'fail') {
-                // eslint-disable-next-line no-undef
                 displayErrorMessage(json['message']);
                 return;
             }
@@ -1482,14 +1450,12 @@ function showSplit(post_id) {
 
 // eslint-disable-next-line no-unused-vars
 function showHistory(post_id) {
-    // eslint-disable-next-line no-undef
     const url = buildCourseUrl(['forum', 'posts', 'history']);
     $.ajax({
         url: url,
         type: 'POST',
         data: {
             post_id: post_id,
-            // eslint-disable-next-line no-undef
             csrf_token: csrfToken,
         },
         success: function (data) {
@@ -1498,12 +1464,10 @@ function showHistory(post_id) {
                 var json = JSON.parse(data);
             }
             catch (err) {
-                // eslint-disable-next-line no-undef
                 displayErrorMessage('Error parsing data. Please try again.');
                 return;
             }
             if (json['status'] === 'fail') {
-                // eslint-disable-next-line no-undef
                 displayErrorMessage(json['message']);
                 return;
             }
@@ -1526,7 +1490,14 @@ function showHistory(post_id) {
                 box.find('.post_content').html(post['content']);
                 if (post.is_staff_post) {
                     // eslint-disable-next-line no-undef
-                    box.addClass('important');
+                    if (box.hasClass('new_post')) {
+                        // eslint-disable-next-line no-undef
+                        box.addClass('important-new');
+                    }
+                    else {
+                        // eslint-disable-next-line no-undef
+                        box.addClass('important');
+                    }
                 }
 
                 const given_name = post['user_info']['given_name'].trim();
@@ -1560,7 +1531,6 @@ function showHistory(post_id) {
 function addNewCategory(csrf_token) {
     const newCategory = $('#new_category_text').val();
     const visibleDate = $('#category_visible_date').val();
-    // eslint-disable-next-line no-undef
     const url = buildCourseUrl(['forum', 'categories', 'new']);
     $.ajax({
         url: url,
@@ -1577,12 +1547,10 @@ function addNewCategory(csrf_token) {
                 var json = JSON.parse(data);
             }
             catch (err) {
-                // eslint-disable-next-line no-undef
                 displayErrorMessage('Error parsing data. Please try again.');
                 return;
             }
             if (json['status'] === 'fail') {
-                // eslint-disable-next-line no-undef
                 displayErrorMessage(json['message']);
                 return;
             }
@@ -1626,7 +1594,6 @@ function addNewCategory(csrf_token) {
 
 // eslint-disable-next-line no-unused-vars
 function deleteCategory(category_id, category_desc, csrf_token) {
-    // eslint-disable-next-line no-undef
     const url = buildCourseUrl(['forum', 'categories', 'delete']);
     $.ajax({
         url: url,
@@ -1641,16 +1608,13 @@ function deleteCategory(category_id, category_desc, csrf_token) {
                 var json = JSON.parse(data);
             }
             catch (err) {
-                // eslint-disable-next-line no-undef
                 displayErrorMessage('Error parsing data. Please try again.');
                 return;
             }
             if (json['status'] === 'fail') {
-                // eslint-disable-next-line no-undef
                 displayErrorMessage(json['message']);
                 return;
             }
-            // eslint-disable-next-line no-undef
             displaySuccessMessage(`Successfully deleted category ${escapeSpecialChars(category_desc)}.`);
             $(`#categorylistitem-${category_id}`).remove();
             refreshCategories();
@@ -1680,7 +1644,6 @@ function editCategory(category_id, category_desc, category_color, category_date,
 
         data['visibleDate'] = category_date;
     }
-    // eslint-disable-next-line no-undef
     const url = buildCourseUrl(['forum', 'categories', 'edit']);
     $.ajax({
         url: url,
@@ -1692,16 +1655,13 @@ function editCategory(category_id, category_desc, category_color, category_date,
                 var json = JSON.parse(data);
             }
             catch (err) {
-                // eslint-disable-next-line no-undef
                 displayErrorMessage('Error parsing data. Please try again.');
                 return;
             }
             if (json['status'] === 'fail') {
-                // eslint-disable-next-line no-undef
                 displayErrorMessage(json['message']);
                 return;
             }
-            // eslint-disable-next-line no-undef
             displaySuccessMessage(`Successfully updated category "${category_desc}"!`);
             setTimeout(() => {
                 // eslint-disable-next-line no-undef
@@ -1816,7 +1776,6 @@ function changeColorClass() {
 function reorderCategories(csrf_token) {
     let data = $('#ui-category-list').sortable('serialize');
     data += `&csrf_token=${csrf_token}`;
-    // eslint-disable-next-line no-undef
     const url = buildCourseUrl(['forum', 'categories', 'reorder']);
     $.ajax({
         url: url,
@@ -1828,16 +1787,13 @@ function reorderCategories(csrf_token) {
                 var json = JSON.parse(data);
             }
             catch (err) {
-                // eslint-disable-next-line no-undef
                 displayErrorMessage('Error parsing data. Please try again');
                 return;
             }
             if (json['status'] === 'fail') {
-                // eslint-disable-next-line no-undef
                 displayErrorMessage(json['message']);
                 return;
             }
-            // eslint-disable-next-line no-undef
             displaySuccessMessage('Successfully reordered categories.');
             setTimeout(() => {
                 // eslint-disable-next-line no-undef
@@ -1869,7 +1825,6 @@ function deletePostToggle(isDeletion, thread_id, post_id, author, time, csrf_tok
 
     const confirm = window.confirm(`Are you sure you would like to ${message} this post?: \n\nWritten by:  ${author}  @  ${time}\n\nPlease note: The replies to this comment will also be ${message}d. \n\nIf you ${message} the first post in a thread this will ${message} the entire thread.`);
     if (confirm) {
-        // eslint-disable-next-line no-undef
         const url = `${buildCourseUrl(['forum', 'posts', 'modify'])}?modify_type=${type}`;
         $.ajax({
             url: url,
@@ -1885,12 +1840,10 @@ function deletePostToggle(isDeletion, thread_id, post_id, author, time, csrf_tok
                     var json = JSON.parse(data);
                 }
                 catch (err) {
-                    // eslint-disable-next-line no-undef
                     displayErrorMessage('Error parsing data. Please try again');
                     return;
                 }
                 if (json['status'] === 'fail') {
-                    // eslint-disable-next-line no-undef
                     displayErrorMessage(json['message']);
                     return;
                 }
@@ -1898,16 +1851,13 @@ function deletePostToggle(isDeletion, thread_id, post_id, author, time, csrf_tok
                 switch (json['data']['type']) {
                     case 'thread':
                         window.socketClient.send({ type: 'delete_thread', thread_id: thread_id });
-                        // eslint-disable-next-line no-undef
                         new_url = buildCourseUrl(['forum']);
                         break;
                     case 'post':
                         window.socketClient.send({ type: 'delete_post', thread_id: thread_id, post_id: post_id });
-                        // eslint-disable-next-line no-undef
                         new_url = buildCourseUrl(['forum', 'threads', thread_id]);
                         break;
                     default:
-                        // eslint-disable-next-line no-undef
                         new_url = buildCourseUrl(['forum']);
                         break;
                 }
@@ -1924,7 +1874,6 @@ function deletePostToggle(isDeletion, thread_id, post_id, author, time, csrf_tok
 function alterAnnouncement(thread_id, confirmString, type, csrf_token) {
     const confirm = window.confirm(confirmString);
     if (confirm) {
-        // eslint-disable-next-line no-undef
         const url = `${buildCourseUrl(['forum', 'announcements'])}?type=${type}`;
         $.ajax({
             url: url,
@@ -1953,23 +1902,86 @@ function alterAnnouncement(thread_id, confirmString, type, csrf_token) {
 
 // eslint-disable-next-line no-unused-vars
 function bookmarkThread(thread_id, type) {
-    // eslint-disable-next-line no-undef
     const url = `${buildCourseUrl(['forum', 'threads', 'bookmark'])}?type=${type}`;
     $.ajax({
         url: url,
         type: 'POST',
         data: {
             thread_id: thread_id,
-            // eslint-disable-next-line no-undef
             csrf_token: csrfToken,
         },
         // eslint-disable-next-line no-unused-vars
         success: function (data) {
-            // eslint-disable-next-line no-undef
             window.location.replace(buildCourseUrl(['forum', 'threads', thread_id]));
         },
         error: function () {
             window.alert('Something went wrong while trying to update the bookmark. Please try again.');
+        },
+    });
+}
+
+// eslint-disable-next-line no-unused-vars
+function markThreadUnread(thread_id) {
+    const url = `${buildCourseUrl(['forum', 'threads', 'unread'])}`;
+    $.ajax({
+        url: url,
+        type: 'POST',
+        data: {
+            thread_id: thread_id,
+            csrf_token: csrfToken,
+        },
+        success: function () {
+            $(`#thread_box_link_${thread_id}`).children().addClass('new_thread');
+            $('.post_box').removeClass('viewed_post').addClass('new_post');
+        },
+        error: function () {
+            window.alert('Something went wrong while trying to mark the thread as unread. Please try again.');
+        },
+    });
+}
+
+function getPostTimestamp(postId) {
+    if (!postId) {
+        return;
+    }
+    const postElement = document.getElementById(postId);
+
+    const timestampElement = postElement.querySelector('.last-edit');
+    return new Date(timestampElement.textContent.trim()).getTime();
+}
+
+function updateLaterPostsToViewed(unreadPostId) {
+    const unreadPostTimestamp = getPostTimestamp(unreadPostId);
+
+    const allPosts = document.querySelectorAll('.post_box');
+    allPosts.forEach((post) => {
+        const postId = post.id;
+        const postTimestamp = getPostTimestamp(postId);
+
+        if (postTimestamp >= unreadPostTimestamp) {
+            post.classList.remove('viewed_post');
+            post.classList.add('new_post');
+        }
+    });
+}
+
+function markPostUnread(thread_id, post_id, last_viewed_timestamp) {
+    const url = `${buildCourseUrl(['forum', 'posts', 'unread'])}`;
+    $.ajax({
+        url: url,
+        type: 'POST',
+        data: {
+            thread_id: thread_id,
+            last_viewed_timestamp: last_viewed_timestamp,
+            csrf_token: csrfToken,
+        },
+        success: function () {
+            $(`#thread_box_link_${thread_id}`).children().addClass('new_thread');
+            $(`#${post_id}`).removeClass('viewed_post').addClass('new_post');
+            updateLaterPostsToViewed(post_id);
+        },
+        error: function () {
+            window.alert('Something went wrong while trying to mark the post as unread. Please try again.');
         },
     });
 }
@@ -2063,7 +2075,6 @@ function sortTable(sort_element_index, reverse = false) {
 function loadThreadHandler() {
     $('a.thread_box_link').click(function (event) {
         // if a thread is clicked on the full-forum-page just follow normal GET request else continue with ajax request
-        // eslint-disable-next-line no-undef
         if (window.location.origin + window.location.pathname === buildCourseUrl(['forum'])) {
             return;
         }
@@ -2072,7 +2083,6 @@ function loadThreadHandler() {
         const thread_id = $(obj).data('thread_id');
         const thread_title = $(obj).data('thread_title');
 
-        // eslint-disable-next-line no-undef
         const url = buildCourseUrl(['forum', 'threads', thread_id]);
         $.ajax({
             url: url,
@@ -2080,7 +2090,6 @@ function loadThreadHandler() {
             data: {
                 thread_id: thread_id,
                 ajax: 'true',
-                // eslint-disable-next-line no-undef
                 csrf_token: csrfToken,
             },
             success: function (data) {
@@ -2089,12 +2098,10 @@ function loadThreadHandler() {
                     var json = JSON.parse(data);
                 }
                 catch (err) {
-                    // eslint-disable-next-line no-undef
                     displayErrorMessage('Error parsing data. Please try again');
                     return;
                 }
                 if (json['status'] === 'fail') {
-                    // eslint-disable-next-line no-undef
                     displayErrorMessage(json['message']);
                     return;
                 }
@@ -2190,7 +2197,6 @@ function loadInlineImages(encoded_data) {
             const attachment = data[i];
             const url = attachment[0];
             const img = $(`<img src="${url}" alt="Click to view attachment in popup" title="Click to view attachment in popup" class="attachment-img">`);
-            // eslint-disable-next-line no-undef
             const title = $(`<p>${escapeSpecialChars(decodeURI(attachment[2]))}</p>`);
             img.click(function () {
                 const url = $(this).attr('src');
@@ -2325,7 +2331,6 @@ function getDeletedAttachments() {
 
 function updateThread(e) {
     // Only proceed if its full forum page
-    // eslint-disable-next-line no-undef
     if (buildCourseUrl(['forum']) !== window.location.origin + window.location.pathname) {
         return;
     }
@@ -2348,7 +2353,6 @@ function updateThread(e) {
     }
 
     $.ajax({
-        // eslint-disable-next-line no-undef
         url: `${buildCourseUrl(['forum', 'posts', 'modify'])}?modify_type=1`,
         type: 'POST',
         data: formData,
@@ -2358,24 +2362,20 @@ function updateThread(e) {
             try {
                 response = JSON.parse(response);
                 if (response.status === 'success') {
-                    // eslint-disable-next-line no-undef
                     displaySuccessMessage('Thread post updated successfully!');
                 }
                 else {
-                    // eslint-disable-next-line no-undef
                     displayErrorMessage('Failed to update thread post');
                 }
             }
             catch (e) {
                 console.log(e);
-                // eslint-disable-next-line no-undef
                 displayErrorMessage('Something went wrong while updating thread post');
             }
             window.location.reload();
         },
         error: function (err) {
             console.log(err);
-            // eslint-disable-next-line no-undef
             displayErrorMessage('Something went wrong while updating thread post');
             window.location.reload();
         },
@@ -2399,14 +2399,12 @@ function checkUnread() {
 // modal.
 // eslint-disable-next-line no-unused-vars
 function updateSelectedThreadContent(selected_thread_first_post_id) {
-    // eslint-disable-next-line no-undef
     const url = buildCourseUrl(['forum', 'posts', 'get']);
     $.ajax({
         url: url,
         type: 'POST',
         data: {
             post_id: selected_thread_first_post_id,
-            // eslint-disable-next-line no-undef
             csrf_token: csrfToken,
         },
         success: function (data) {
@@ -2415,13 +2413,11 @@ function updateSelectedThreadContent(selected_thread_first_post_id) {
                 var json = JSON.parse(data);
             }
             catch (err) {
-                // eslint-disable-next-line no-undef
                 displayErrorMessage(`Error parsing data. Please try again. Error is ${err}`);
                 return;
             }
 
             if (json['status'] === 'fail') {
-                // eslint-disable-next-line no-undef
                 displayErrorMessage(json['message']);
                 return;
             }
@@ -2649,7 +2645,6 @@ function sendAnnouncement(id) {
     $('.pin-and-email-message').attr('disabled', 'disabled');
     $.ajax({
         type: 'POST',
-        // eslint-disable-next-line no-undef
         url: buildCourseUrl(['forum', 'make_announcement']),
         data: { id: id, csrf_token: window.csrfToken },
         success: function (data) {
@@ -2674,7 +2669,6 @@ function sendAnnouncement(id) {
 
 function pinAnnouncement(thread_id, type, csrf_token) {
     if (confirm) {
-        // eslint-disable-next-line no-undef
         const url = `${buildCourseUrl(['forum', 'announcements'])}?type=${type}`;
         $.ajax({
             url: url,
