@@ -1286,8 +1286,35 @@ SQL;
         return count($this->course_db->rows()) == 1;
     }
 
-    public function visitThread($current_user, $thread_id) {
-        $this->course_db->query("INSERT INTO viewed_responses(thread_id,user_id,timestamp) VALUES(?, ?, current_timestamp) ON CONFLICT (thread_id, user_id) DO UPDATE SET timestamp = current_timestamp", [$thread_id, $current_user]);
+    public function visitThread($current_user, $thread_id, string $last_viewed_post_time = null) {
+        // If the user has already visited the thread, set timestamp to current time
+        if ($last_viewed_post_time === null) {
+            $this->course_db->query("
+                INSERT INTO viewed_responses(thread_id, user_id, timestamp)
+                VALUES(?, ?, current_timestamp)
+                ON CONFLICT (thread_id, user_id)
+                DO UPDATE SET timestamp = current_timestamp
+            ", [$thread_id, $current_user]);
+        }
+        else {
+            // Else set timestamp to the last view timestamp which is the post date of the last post viewed by user
+            $this->course_db->query("
+                INSERT INTO viewed_responses(thread_id, user_id, timestamp)
+                VALUES(?, ?, ?)
+                ON CONFLICT (thread_id, user_id)
+                DO UPDATE SET timestamp = ?
+            ", [$thread_id, $current_user, $last_viewed_post_time, $last_viewed_post_time]);
+        }
+    }
+
+    /**
+     * @param string $current_user
+     * @param int $thread_id
+     * @return null
+     */
+    public function unreadThread(string $current_user, int $thread_id) {
+        $this->course_db->query("DELETE FROM viewed_responses where thread_id = ? and user_id = ?", [$thread_id, $current_user]);
+        return null;
     }
     /**
      * Set delete status for given post and all descendant
@@ -1480,7 +1507,7 @@ VALUES (?,?,?,?,?,?)",
      */
     public function updateUser(User $user, $semester = null, $course = null) {
         $params = [$user->getNumericId(), $user->getPronouns(), $user->getDisplayPronouns(), $user->getLegalGivenName(), $user->getPreferredGivenName(),
-                       $user->getLegalFamilyName(), $user->getPreferredFamilyName(), $user->getLastInitialFormat(), $user->getEmail(),
+                       $user->getLegalFamilyName(), $user->getPreferredFamilyName(), $user->getLastInitialFormat(), $user->getDisplayNameOrder(), $user->getEmail(),
                        $user->getSecondaryEmail(), $this->submitty_db->convertBoolean($user->getEmailBoth()),
                        $this->submitty_db->convertBoolean($user->isUserUpdated()),
                        $this->submitty_db->convertBoolean($user->isInstructorUpdated())];
@@ -1502,7 +1529,7 @@ VALUES (?,?,?,?,?,?)",
 UPDATE users
 SET
   user_numeric_id=?, user_pronouns=?, display_pronouns=?, user_givenname=?, user_preferred_givenname=?,
-  user_familyname=?, user_preferred_familyname=?, user_last_initial_format=?,
+  user_familyname=?, user_preferred_familyname=?, user_last_initial_format=?, display_name_order=?,
   user_email=?, user_email_secondary=?, user_email_secondary_notify=?,
   user_updated=?, instructor_updated=?{$extra}
 WHERE user_id=? /* AUTH: \"{$logged_in}\" */",
@@ -2473,8 +2500,13 @@ ORDER BY {$orderby}",
         return intval($this->course_db->row()['cnt']);
     }
 
+    /**
+     * First half of query will count all user / team submissions that have been graded
+     * Second half of query will count all user submissions that have been overriden
+     * These counts are added and returned.
+     */
     public function getGradedComponentsCountByGradingSections($g_id, $sections, $section_key, $is_team) {
-         $u_or_t = "u";
+        $u_or_t = "u";
         $users_or_teams = "users";
         $user_or_team_id = "user_id";
         if ($is_team) {
@@ -2489,21 +2521,53 @@ ORDER BY {$orderby}",
             $where = "WHERE active_version > 0 AND ({$section_key} IN " . $this->createParameterList(count($sections)) . ") IS NOT FALSE";
             $params = array_merge($params, $sections);
         }
+        // Because go.team_id does not exist right now, only perform override calculations for non-team assignments
+        $go_create = "";
+        $go_check = "";
+        $go_select = "";
+        if (!$is_team) {
+            $go_create = "LEFT JOIN grade_override AS go ON gd.g_id = go.g_id AND gd.gd_{$user_or_team_id} = go.{$user_or_team_id}";
+            $go_check = "AND go.g_id IS NULL AND go.user_id IS NULL";
+            $go_select = "UNION ALL
+                        SELECT {$users_or_teams}.{$section_key}, count({$users_or_teams}.*) * component_count.num AS cnt
+                        FROM grade_override AS go
+                                INNER JOIN {$users_or_teams} ON go.{$user_or_team_id} = {$users_or_teams}.{$user_or_team_id} AND go.g_id=?
+                                INNER JOIN (
+                                        SELECT gc.g_id, count(*) AS num
+                                        FROM gradeable_component AS gc
+                                        GROUP BY gc.g_id
+                                    ) AS component_count ON go.g_id = component_count.g_id
+                        GROUP BY {$users_or_teams}.{$section_key}, component_count.num";
+            array_push($params, $g_id);
+        }
         $this->course_db->query(
             "
-SELECT {$u_or_t}.{$section_key}, count({$u_or_t}.*) as cnt
-FROM {$users_or_teams} AS {$u_or_t}
-INNER JOIN (
-  SELECT * FROM gradeable_data AS gd
-  INNER JOIN (SELECT g_id, $user_or_team_id, max(active_version) as active_version FROM electronic_gradeable_version GROUP BY g_id, $user_or_team_id) AS egd on egd.g_id = gd.g_id AND egd.{$user_or_team_id} = gd.gd_{$user_or_team_id}
-  LEFT JOIN (
-  gradeable_component_data AS gcd
-  INNER JOIN gradeable_component AS gc ON gc.gc_id = gcd.gc_id AND gc.gc_is_peer = {$this->course_db->convertBoolean(false)}
-  )AS gcd ON gcd.gd_id = gd.gd_id WHERE gcd.g_id=?
-) AS gd ON {$u_or_t}.{$user_or_team_id} = gd.gd_{$user_or_team_id}
-{$where}
-GROUP BY {$u_or_t}.{$section_key}
-ORDER BY {$u_or_t}.{$section_key}",
+SELECT merged_data.{$section_key}, SUM(cnt) as cnt
+FROM (
+    SELECT {$u_or_t}.{$section_key}, count({$u_or_t}.*) as cnt
+    FROM {$users_or_teams} AS {$u_or_t}
+        INNER JOIN (
+                SELECT *
+                FROM gradeable_data AS gd
+                    INNER JOIN (SELECT g_id, $user_or_team_id, max(active_version) AS active_version
+                                FROM electronic_gradeable_version
+                                GROUP BY g_id, $user_or_team_id) AS egd
+                                ON egd.g_id = gd.g_id AND egd.{$user_or_team_id} = gd.gd_{$user_or_team_id}
+                    {$go_create}
+                    LEFT JOIN (
+                        gradeable_component_data AS gcd
+                        INNER JOIN gradeable_component AS gc
+                        ON gc.gc_id = gcd.gc_id AND gc.gc_is_peer = {$this->course_db->convertBoolean(false)}
+                    ) AS gcd ON gcd.gd_id = gd.gd_id
+                WHERE gcd.g_id=? {$go_check}
+        ) AS gd ON {$u_or_t}.{$user_or_team_id} = gd.gd_{$user_or_team_id}
+    {$where}
+    GROUP BY {$u_or_t}.{$section_key}
+    {$go_select}
+    ) AS merged_data
+GROUP BY merged_data.{$section_key}
+ORDER BY merged_data.{$section_key}
+    ",
             $params
         );
         foreach ($this->course_db->rows() as $row) {
@@ -2516,6 +2580,52 @@ ORDER BY {$u_or_t}.{$section_key}",
         if (!array_key_exists('NULL', $return)) {
             $return['NULL'] = 0;
         }
+        return $return;
+    }
+
+
+    /**
+     * Returns an array of Verified components for each Section
+     *
+     * @param  array<int>  $sections
+     * @return array<int|string,int>
+     */
+    public function getVerifiedComponentsCountByGradingSections(string $g_id, array $sections, string $section_key, bool $is_team): array {
+        $unit = "users";
+        $id = "user_id";
+        if ($is_team) {
+            $unit = "gradeable_teams";
+            $id = "team_id";
+        }
+
+        if (! in_array($section_key, ["registration_section", "rotating_section"], true)) {
+            return [];
+        }
+
+        $this->course_db->query(
+            "
+            SELECT 
+                $unit.$section_key, COUNT($unit.$id) as verified_components_count
+            FROM 
+                gradeable_data as gd
+                JOIN gradeable_component_data as gcd ON (gd.gd_id = gcd.gd_id)
+                JOIN $unit ON (gd.gd_$id = $unit.$id)
+            WHERE
+                gd.g_id = ?
+                AND CAST ($unit.$section_key AS TEXT) IN " . $this->createParameterList(count($sections))  . "
+                AND gcd.gcd_verifier_id IS NOT NULL
+            GROUP BY
+                $unit.$section_key
+            ;
+            ",
+            array_merge([$g_id], $sections)
+        );
+        $return = [];
+
+        foreach ($this->course_db->rows() as $row) {
+            $return[$row[$section_key]] = $row['verified_components_count'];
+        }
+
         return $return;
     }
 
@@ -6260,6 +6370,7 @@ AND gc_id IN (
               eg.*,
               gamo.*,
               gc.*,
+              pgp.*,
               (SELECT COUNT(*) AS cnt FROM grade_inquiries WHERE g_id=g.g_id AND status = -1) AS active_grade_inquiries_count,
               (SELECT EXISTS (SELECT 1 FROM gradeable_data WHERE g_id=g.g_id)) AS any_manual_grades
             FROM gradeable g
@@ -6301,6 +6412,17 @@ AND gc_id IN (
                   eg_depends_on_points as depends_on_points
                 FROM electronic_gradeable
               ) AS eg ON g.g_id=eg.eg_g_id
+                LEFT JOIN (
+                SELECT
+                  g_id AS pgp_g_id,
+                  autograding, 
+                  rubric, 
+                  files,
+                  solution_notes,
+                  discussion
+                FROM peer_grading_panel
+                GROUP BY pgp_g_id
+              ) AS pgp ON g.g_id=pgp.pgp_g_id
               LEFT JOIN (
                 SELECT
                   g_id AS gamo_g_id,
@@ -7034,6 +7156,27 @@ AND gc_id IN (
                 VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
                 $params
             );
+            $params = [
+                $gradeable->getId(),
+                $gradeable->getPeerAutograding(),
+                $gradeable->getPeerRubric(),
+                $gradeable->getPeerFiles(),
+                $gradeable->getPeerSolutions(),
+                $gradeable->getPeerDiscussion(),
+            ];
+            $this->course_db->query(
+                "
+                INSERT INTO peer_grading_panel(
+                    g_id,
+                    autograding,
+                    rubric,
+                    files,
+                    solution_notes,
+                    discussion
+                )
+                VALUES(?, ?, ?, ?, ?, ?)",
+                $params
+            );
         }
 
         // Make sure to create the rotating sections
@@ -7199,6 +7342,29 @@ AND gc_id IN (
                       eg_depends_on=?,
                       eg_depends_on_points=?
                     WHERE g_id=?",
+                    $params
+                );
+                // Below params contain grading interface panels
+                $params = [
+                    $gradeable->getId(),
+                    $gradeable->getPeerAutograding(),
+                    $gradeable->getPeerRubric(),
+                    $gradeable->getPeerFiles(),
+                    $gradeable->getPeerSolutions(),
+                    $gradeable->getPeerDiscussion()
+                ];
+                // Update row if exists, else Insert row
+                $this->course_db->query(
+                    "
+                    INSERT INTO peer_grading_panel (g_id, autograding, rubric, files, solution_notes, discussion)
+                    VALUES (?, ?, ?, ?, ?, ?)
+                    ON CONFLICT (g_id) DO UPDATE
+                    SET autograding = EXCLUDED.autograding,
+                        rubric = EXCLUDED.rubric,
+                        files = EXCLUDED.files,
+                        solution_notes = EXCLUDED.solution_notes,
+                        discussion = EXCLUDED.discussion
+                    ",
                     $params
                 );
             }
@@ -7554,6 +7720,26 @@ AND gc_id IN (
         $this->course_db->query(
             'DELETE FROM gradeable_data WHERE g_id=? AND (gd_user_id=? OR gd_team_id=?)',
             [$gradeable_id, $submitter_id, $submitter_id]
+        );
+    }
+
+    /**
+     * Changes the graded version of a gradeable for a particular student
+     *
+     * @param int[] $component_ids
+     */
+    public function changeGradedVersionOfComponents(string $gradeable_id, string $submitter_id, int $version, array $component_ids): void {
+        $this->course_db->query(
+            'UPDATE gradeable_component_data AS gcd
+            SET gcd_graded_version = ?
+            FROM gradeable_data AS gd
+            WHERE (
+                gd.g_id = ?
+                AND gd.gd_user_id = ?
+                AND gcd.gc_id IN ' . $this->createParameterList(count($component_ids)) . '
+                AND gd.gd_id = gcd.gd_id
+            )',
+            array_merge([$version, $gradeable_id, $submitter_id], $component_ids)
         );
     }
 

@@ -21,42 +21,34 @@
         <input type="hidden" name="option" value="-1" />
         <div class="option">
             <label for="g_id" class="option-title">Select Gradeable:</label>
-            <select name="g_id" id="g_id">
+            <select name="g_id" id="g_id" data-testid="grade-override-select-gradeable">
                 <option disabled selected value> -- select an option -- </option>
                 {% for index, value in gradeables %}
                     <option value="{{value['g_id']}}" >{{ value['g_title'] }}</option>
                 {% endfor %}
             </select>
-            <button type="button"
-                    class="btn btn-primary key_to_click"
-                    tabindex="0"
-                    style="margin-top: 10px"
-                    onclick="loadOverriddenGrades($('#g_id').val())"
-            >
-                Apply Changes
-            </button>
         </div>
         <input type="hidden" name="csrf_token" value="{{ csrf_token }}" />
         <fieldset class="single-student">
             <legend class="option-title">Single Student Entry</legend><br>
             <label for="user_id">
                 <span>Student ID:</span>
-                <input class="option-input" type="text" name="user_id" id="user_id" >
+                <input class="option-input" type="text" name="user_id" id="user_id" data-testid="student-grade-override">
             </label>
             <label for="marks">
                 <span>New total score:</span>
-                <input class="option-input" type="text" name="marks" id="marks"  >
+                <input class="option-input" type="text" name="marks" id="marks" data-testid="grade-override-score" >
             </label>
             <label for="comment">
                 <span>Comments (optional)</span>
                 <textarea name="comment" id="comment" class="option-input"></textarea>
             </label>
         </fieldset>
-        <input class="btn btn-primary" type="submit" value="Submit" >
-        <p id="empty-table" class="warning">
+        <input class="btn btn-primary" type="submit" value="Submit" data-testid="grade-override-submit">
+        <p id="empty-table" class="warning" data-testid="grade-override-message-box">
             No gradeable has been selected
         </p>
-        <div id="load-overridden-grades" class="d-none">
+        <div id="load-overridden-grades" class="d-none" data-testid="load-overridden-grades">
             {# This is a data table #}
             <table id="grade-override-table" class="table table-striped table-bordered persist-area mobile-table">
                 <caption id="title"></caption>

@@ -12473,7 +12473,7 @@ parameters:
 
 		-
 			message: "#^Loose comparison via \"\\=\\=\" is not allowed\\.$#"
-			count: 20
+			count: 21
 			path: app/views/NavigationView.php
 
 		-
