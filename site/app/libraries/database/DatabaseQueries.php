@@ -1286,8 +1286,35 @@ SQL;
         return count($this->course_db->rows()) == 1;
     }
 
-    public function visitThread($current_user, $thread_id) {
-        $this->course_db->query("INSERT INTO viewed_responses(thread_id,user_id,timestamp) VALUES(?, ?, current_timestamp) ON CONFLICT (thread_id, user_id) DO UPDATE SET timestamp = current_timestamp", [$thread_id, $current_user]);
+    public function visitThread($current_user, $thread_id, string $last_viewed_post_time = null) {
+        // If the user has already visited the thread, set timestamp to current time
+        if ($last_viewed_post_time === null) {
+            $this->course_db->query("
+                INSERT INTO viewed_responses(thread_id, user_id, timestamp)
+                VALUES(?, ?, current_timestamp)
+                ON CONFLICT (thread_id, user_id)
+                DO UPDATE SET timestamp = current_timestamp
+            ", [$thread_id, $current_user]);
+        }
+        else {
+            // Else set timestamp to the last view timestamp which is the post date of the last post viewed by user
+            $this->course_db->query("
+                INSERT INTO viewed_responses(thread_id, user_id, timestamp)
+                VALUES(?, ?, ?)
+                ON CONFLICT (thread_id, user_id)
+                DO UPDATE SET timestamp = ?
+            ", [$thread_id, $current_user, $last_viewed_post_time, $last_viewed_post_time]);
+        }
+    }
+
+    /**
+     * @param string $current_user
+     * @param int $thread_id
+     * @return null
+     */
+    public function unreadThread(string $current_user, int $thread_id) {
+        $this->course_db->query("DELETE FROM viewed_responses where thread_id = ? and user_id = ?", [$thread_id, $current_user]);
+        return null;
     }
     /**
      * Set delete status for given post and all descendant
@@ -6369,6 +6396,7 @@ AND gc_id IN (
               eg.*,
               gamo.*,
               gc.*,
+              pgp.*,
               (SELECT COUNT(*) AS cnt FROM grade_inquiries WHERE g_id=g.g_id AND status = -1) AS active_grade_inquiries_count,
               (SELECT EXISTS (SELECT 1 FROM gradeable_data WHERE g_id=g.g_id)) AS any_manual_grades
             FROM gradeable g
@@ -6410,6 +6438,17 @@ AND gc_id IN (
                   eg_depends_on_points as depends_on_points
                 FROM electronic_gradeable
               ) AS eg ON g.g_id=eg.eg_g_id
+                LEFT JOIN (
+                SELECT
+                  g_id AS pgp_g_id,
+                  autograding, 
+                  rubric, 
+                  files,
+                  solution_notes,
+                  discussion
+                FROM peer_grading_panel
+                GROUP BY pgp_g_id
+              ) AS pgp ON g.g_id=pgp.pgp_g_id
               LEFT JOIN (
                 SELECT
                   g_id AS gamo_g_id,
@@ -7143,6 +7182,27 @@ AND gc_id IN (
                 VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
                 $params
             );
+            $params = [
+                $gradeable->getId(),
+                $gradeable->getPeerAutograding(),
+                $gradeable->getPeerRubric(),
+                $gradeable->getPeerFiles(),
+                $gradeable->getPeerSolutions(),
+                $gradeable->getPeerDiscussion(),
+            ];
+            $this->course_db->query(
+                "
+                INSERT INTO peer_grading_panel(
+                    g_id,
+                    autograding,
+                    rubric,
+                    files,
+                    solution_notes,
+                    discussion
+                )
+                VALUES(?, ?, ?, ?, ?, ?)",
+                $params
+            );
         }
 
         // Make sure to create the rotating sections
@@ -7308,6 +7368,29 @@ AND gc_id IN (
                       eg_depends_on=?,
                       eg_depends_on_points=?
                     WHERE g_id=?",
+                    $params
+                );
+                // Below params contain grading interface panels
+                $params = [
+                    $gradeable->getId(),
+                    $gradeable->getPeerAutograding(),
+                    $gradeable->getPeerRubric(),
+                    $gradeable->getPeerFiles(),
+                    $gradeable->getPeerSolutions(),
+                    $gradeable->getPeerDiscussion()
+                ];
+                // Update row if exists, else Insert row
+                $this->course_db->query(
+                    "
+                    INSERT INTO peer_grading_panel (g_id, autograding, rubric, files, solution_notes, discussion)
+                    VALUES (?, ?, ?, ?, ?, ?)
+                    ON CONFLICT (g_id) DO UPDATE
+                    SET autograding = EXCLUDED.autograding,
+                        rubric = EXCLUDED.rubric,
+                        files = EXCLUDED.files,
+                        solution_notes = EXCLUDED.solution_notes,
+                        discussion = EXCLUDED.discussion
+                    ",
                     $params
                 );
             }
@@ -7663,6 +7746,26 @@ AND gc_id IN (
         $this->course_db->query(
             'DELETE FROM gradeable_data WHERE g_id=? AND (gd_user_id=? OR gd_team_id=?)',
             [$gradeable_id, $submitter_id, $submitter_id]
+        );
+    }
+
+    /**
+     * Changes the graded version of a gradeable for a particular student
+     *
+     * @param int[] $component_ids
+     */
+    public function changeGradedVersionOfComponents(string $gradeable_id, string $submitter_id, int $version, array $component_ids): void {
+        $this->course_db->query(
+            'UPDATE gradeable_component_data AS gcd
+            SET gcd_graded_version = ?
+            FROM gradeable_data AS gd
+            WHERE (
+                gd.g_id = ?
+                AND gd.gd_user_id = ?
+                AND gcd.gc_id IN ' . $this->createParameterList(count($component_ids)) . '
+                AND gd.gd_id = gcd.gd_id
+            )',
+            array_merge([$version, $gradeable_id, $submitter_id], $component_ids)
         );
     }
 

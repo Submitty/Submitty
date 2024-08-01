@@ -31,6 +31,7 @@ coverage.xml
 /site/cypress/screenshots/
 /site/cypress/videos/
 /site/public/mjs/
+/site/public/vue/
 /site/report/
 /site/incremental_build/
 

@@ -68,6 +68,8 @@
 #
 # These next fields are only if the gradeable is of type 0 (electronic gradeable) and can be ignored otherwise):
 #
+#     eg_config_path: Path to gradeable config. Do not use with gradeable_config.
+#
 #     eg_submission_open_date: Timestamp on when does the gradeable open to students for submission. Should be before
 #         grading start date and submission due date, but after the TA view date.
 #

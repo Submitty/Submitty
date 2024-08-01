@@ -137,7 +137,7 @@ class Gradeable(object):
         else:
             self.id = gradeable["g_id"]
             self.type = int(gradeable["g_type"])
-            self.config_path = None
+            self.config_path = gradeable.get("eg_config_path", None)
             self.sample_path = None
 
         # To make Rainbow Grades testing possible, need to seed random

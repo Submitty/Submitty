@@ -116,28 +116,26 @@ class GradedGradeable extends AbstractModel {
 
     /**
      * Gets whether any TA grading information exists for this submitter/gradeable
-     * @return bool
      */
-    public function hasTaGradingInfo() {
+    public function hasTaGradingInfo(): bool {
         return $this->ta_graded_gradeable !== null && $this->ta_graded_gradeable->anyGrades();
     }
 
     /**
      * Gets whether the TA grading has been completed for this submitter/gradeable
-     * @return bool
      */
-    public function isTaGradingComplete() {
+    public function isTaGradingComplete(): bool {
         return $this->hasTaGradingInfo() && $this->ta_graded_gradeable->isComplete();
     }
 
     /**
      * Gets whether a peer grader has graded all of the peer components for this submitter/gradeable
      * Later this will take in a userId and determine if that user graded all components
-     * @return bool
+     * @param User|null $grader Peer grader to check if all peer components associated with this grader has been graded.
      */
-    public function isPeerGradingComplete() {
+    public function isPeerGradingComplete(User $grader = null): bool {
         foreach ($this->ta_graded_gradeable->getGradedComponentContainers() as $container) {
-            if (!$container->isComplete() && $container->getComponent() != null && $container->getComponent()->isPeerComponent()) {
+            if (!$container->isComplete($grader) && $container->getComponent() != null && $container->getComponent()->isPeerComponent()) {
                 return false;
             }
         }
