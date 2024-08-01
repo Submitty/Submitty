@@ -178,7 +178,7 @@ is_team = False
 course_conn_string = db_utils.generate_connect_string(
     DATABASE_HOST,
     DATABASE_PORT,
-    f"submitty_{args.semester}_{args.course}", # database name
+    f"submitty_{args.semester}_{args.course}",
     DATABASE_USER,
     DATABASE_PASS,
 )
@@ -208,7 +208,7 @@ elif not args.non_interactive:
     for gradeable in gradeables:
         # the eg_vcs_partial_path has pattern like `gradeable_id/user_id`, so we need to use regex to match the gradeable_id
         if gradeable.eg_vcs_host_type == 1 and re.match(f'^{args.repo_name}/', gradeable.eg_vcs_partial_path):
-            print("Find matching gradeable_id '{}' in the course.".format(gradeable.g_id))
+            print("Found matching gradeable_id '{}' in the course that uses the requested repo name.".format(gradeable.g_id))
             is_repo_name_in_gradeables = True
             response = input ("Should we continue and make individual repositories named '"+args.repo_name+"' for each student/team? (y/n) ")
             if not response.lower() == 'y':
@@ -216,7 +216,7 @@ elif not args.non_interactive:
                 sys.exit()
 
     if is_repo_name_in_gradeables == False:
-        print ("Warning: Please make the gradeable before attempting to run this script!")
+        print ("ERROR: Please make the gradeable before attempting to run this script!")
         print ("exiting")
         sys.exit()
 
