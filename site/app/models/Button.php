@@ -22,6 +22,7 @@ use app\libraries\Core;
  * @method string|null getBadge()
  * @method string|null getIcon()
  * @method bool getPrefix()
+ * @method bool getTestid()
  *
  * @method void setTitle(string $title)
  * @method void setSubtitle(string|null $subtitle)
@@ -84,6 +85,9 @@ class Button extends AbstractModel {
     /** @prop
      * @var string|null $prefix */
     protected $prefix;
+    /** @prop
+     * @var string|null $prefix */
+    protected $testid;
 
     /**
      * @param Core $core
@@ -109,6 +113,7 @@ class Button extends AbstractModel {
         $this->badge = $details["badge"] ?? null;
         $this->icon = $details["icon"] ?? null;
         $this->prefix = $details["prefix"] ?? "fa";
+        $this->testid = $details["testid"] ?? null;
     }
 
     /**

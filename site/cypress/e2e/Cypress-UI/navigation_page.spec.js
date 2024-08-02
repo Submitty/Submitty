@@ -9,6 +9,50 @@ function validate_navigation_page_sections(sections) {
     });
 }
 
+const white = 'rgb(255, 255, 255)';
+const blue = 'rgb(0, 99, 152)';
+const red = 'rgb(220, 53, 69)';
+const green = 'rgb(95, 183, 96)';
+const buttonOrder = ['team-btn', 'submit-btn', 'grade-btn', 'quick-link-btn'];
+
+function checkButtons(courseID, buttonText, buttonColor) {
+    for (let i = 0; i < buttonOrder.length; i++) {
+        if (buttonText[i]) {
+            cy.get(`[data-testid="${courseID}"]`).find(`[data-testid="${buttonOrder[i]}"]`).contains(buttonText[i]);
+            cy.get(`[data-testid="${courseID}"]`).find(`[data-testid="${buttonOrder[i]}"]`).should('have.css', 'background-color', buttonColor[i]);
+        }
+        else {
+            cy.get(`[data-testid="${courseID}"]`).find(`[data-testid="${buttonOrder[i]}"]`).should('not.exist');
+        }
+    }
+}
+
+describe('tests navigation buttons for each level of access', () => {
+    beforeEach(() => {
+        cy.visit('/');
+        cy.viewport(1920, 1200);
+    });
+    // Future (No TAs) Homework, Future(TAs) Homework, Open Homework, Open Team Homework, Closed Homework, Closed Team Homework
+    // grading homework, Grading Lab
+    // Grade Released Homework, Grade Released Test,
+    it('should display instructor buttons correctly', () => {
+        cy.login('instructor');
+        cy.visit(`/courses/${getCurrentSemester()}/sample`);
+
+        checkButtons('future_no_tas_homework', [null, 'ALPHA SUBMIT', 'PREVIEW GRADING', 'OPEN TO TAS NOW'], [null, white, white, blue]);
+        checkButtons('future_tas_homework', [null, 'BETA SUBMIT', 'PREVIEW GRADING', 'OPEN NOW'], [null, white, white, blue]);
+        checkButtons('open_homework', [null, 'SUBMIT', 'PREVIEW GRADING', 'CLOSE SUBMISSIONS NOW'], [null, blue, white, white]);
+        checkButtons('open_team_homework', ['CREATE TEAM', 'MUST BE ON A TEAM TO SUBMIT', 'PREVIEW GRADING', 'CLOSE SUBMISSIONS NOW'], [blue, blue, white, white]);
+        checkButtons('closed_homework', [null, 'LATE RESUBMIT', 'PREVIEW GRADING', 'OPEN TO GRADING NOW'], [null, white, white, blue]);
+        checkButtons('closed_team_homework', ['CREATE TEAM', 'MUST BE ON A TEAM TO SUBMIT', 'PREVIEW GRADING', 'OPEN TO GRADING NOW'], [red, red, white, blue]);
+        checkButtons('grading_homework', [null, 'VIEW SUBMISSION', 'GRADE', 'RELEASE GRADES NOW'], [null, white, blue, blue]);
+        checkButtons('grading_lab', [null, null, 'GRADE', 'RELEASE GRADES NOW'], [null, null, white, blue]);
+        checkButtons('grades_released_homework_autota', [null, 'VIEW GRADE', 'REGRADE', null], [null, green, white, null]);
+        checkButtons('grades_released_homework', [null, 'VIEW GRADE', 'REGRADE', null], [null, white, white, null]);
+        checkButtons('grades_released_lab', [null, null, 'REGRADE', null], [null, null, white, null]);
+    });
+});
+
 describe('navigation page', () => {
     beforeEach(() => {
         cy.visit('/');
@@ -156,11 +200,4 @@ describe('navigation page', () => {
             cy.wrap($el).find('.course-button').should('have.length', count);
         });
     });
-});
-
-describe('tests navigation buttons for each level of access', () => {
-    // Grading Homework, Grade released homework
-    it('should display instructor buttons correctly', () => {
-        throw new Error("failed test");
-    })
 });
