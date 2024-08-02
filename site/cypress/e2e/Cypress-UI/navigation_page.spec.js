@@ -43,12 +43,12 @@ describe('tests navigation buttons for each level of access', () => {
         checkButtons('future_tas_homework', [null, 'BETA SUBMIT', 'PREVIEW GRADING', 'OPEN NOW'], [null, white, white, blue]);
         checkButtons('open_homework', [null, 'SUBMIT', 'PREVIEW GRADING', 'CLOSE SUBMISSIONS NOW'], [null, blue, white, white]);
         checkButtons('open_team_homework', ['CREATE TEAM', 'MUST BE ON A TEAM TO SUBMIT', 'PREVIEW GRADING', 'CLOSE SUBMISSIONS NOW'], [blue, blue, white, white]);
-        checkButtons('closed_homework', [null, 'LATE RESUBMIT', 'PREVIEW GRADING', 'OPEN TO GRADING NOW'], [null, white, white, blue]);
+        checkButtons('closed_homework', [null, 'LATE SUBMIT', 'PREVIEW GRADING', 'OPEN TO GRADING NOW'], [null, red, white, blue]);
         checkButtons('closed_team_homework', ['CREATE TEAM', 'MUST BE ON A TEAM TO SUBMIT', 'PREVIEW GRADING', 'OPEN TO GRADING NOW'], [red, red, white, blue]);
-        checkButtons('grading_homework', [null, 'VIEW SUBMISSION', 'GRADE', 'RELEASE GRADES NOW'], [null, white, blue, blue]);
+        checkButtons('grading_homework', [null, 'OVERDUE SUBMISSION', 'GRADE', 'RELEASE GRADES NOW'], [null, red, blue, blue]);
         checkButtons('grading_lab', [null, null, 'GRADE', 'RELEASE GRADES NOW'], [null, null, white, blue]);
         checkButtons('grades_released_homework_autota', [null, 'VIEW GRADE', 'REGRADE', null], [null, green, white, null]);
-        checkButtons('grades_released_homework', [null, 'VIEW GRADE', 'REGRADE', null], [null, white, white, null]);
+        checkButtons('grades_released_homework', [null, 'OVERDUE SUBMISSION', 'REGRADE', null], [null, red, white, null]);
         checkButtons('grades_released_lab', [null, null, 'REGRADE', null], [null, null, white, null]);
     });
 });
