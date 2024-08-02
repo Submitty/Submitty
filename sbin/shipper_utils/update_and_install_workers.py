@@ -23,6 +23,7 @@ DAEMON_UID = OPEN_JSON['daemon_uid']
 with open(os.path.join(SUBMITTY_CONFIG_PATH)) as open_file:
     SUBMITTY_CONFIG = json.load(open_file)
 SUBMITTY_INSTALL_DIR = SUBMITTY_CONFIG['submitty_install_dir']
+SUBMITTY_REPOSITORY_DIR = SUBMITTY_CONFIG['submitty_repository']
 
 SYSTEMCTL_WRAPPER_SCRIPT = os.path.join(SUBMITTY_INSTALL_DIR, 'sbin', 'shipper_utils','systemctl_wrapper.py')
 
@@ -63,7 +64,7 @@ def update_docker_images(user, host, worker, autograding_workers, autograding_co
             images_to_remove = set.difference(image_set, images_to_update)
 
             # Prevent removal of system docker containers
-            with open("/usr/local/submitty/GIT_CHECKOUT/Submitty/.setup/data/system_docker_containers.json") as json_file:
+            with open(os.path.join(SUBMITTY_REPOSITORY_DIR, ".setup", "data", "system_docker_containers.json")) as json_file:
                 system_docker_containers = json.load(json_file)
 
             images_to_remove = set.difference(images_to_remove, set(system_docker_containers))
