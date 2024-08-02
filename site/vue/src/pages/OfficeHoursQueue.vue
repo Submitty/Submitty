@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import Markdown from '@/components/markdown.vue';
 import QueueTools from '@/components/office_hours_queue/queueTools.vue';
-import { inject } from 'vue';
+import { inject, onBeforeMount, onBeforeUnmount, reactive } from 'vue';
 
 type Queue = {
     id: number;
@@ -18,6 +18,7 @@ type Queue = {
 const viewer = inject<{
     is_grader: boolean;
     queues: Queue[];
+    current_queue: Record<string, string | undefined>[];
     announcement_msg: string;
 }>('viewer')!;
 
@@ -26,6 +27,40 @@ const base_url = inject<string>('base_url') ?? location.href;
 
 const open_queues = viewer.queues.filter((v) => v.open);
 const closed_queues = viewer.queues.filter((v) => !v.open);
+
+// for live updating help timers
+const timers = reactive<{ [key: number]: [Date, string] }>({});
+
+let timerInterval: number;
+onBeforeMount(() => {
+    for (const entry of viewer.current_queue) {
+        if (entry.row_number !== undefined && entry.time_help_start !== undefined && entry.current_state === 'being_helped') {
+            timers[Number(entry.row_number)] = [new Date(entry.time_help_start), 'loading...'];
+        }
+    }
+
+    timerInterval = setInterval(updateTimers, 1000);
+    updateTimers();
+});
+
+onBeforeUnmount(() => {
+    if (timerInterval !== undefined) {
+        clearInterval(timerInterval);
+    }
+});
+
+function updateTimers() {
+    for (const [id, [date]] of Object.entries(timers)) {
+        const timediff = (Date.now() - date.valueOf()) / 1000;
+        const min = Number(Math.floor(timediff / 60));
+        const sec = Math.floor(timediff % 60).toString().padStart(2, '0');
+        let timerstring = `${min}:${sec}`;
+        if (min >= 100) {
+            timerstring = '∞';
+        }
+        timers[Number(id)] = [date, timerstring];
+    }
+}
 
 </script>
 
@@ -105,6 +140,66 @@ const closed_queues = viewer.queues.filter((v) => !v.open);
       v-if="viewer.is_grader"
       :base-url="base_url"
     />
+
+    <p
+      v-for="entry in viewer.current_queue"
+      :key="entry.row_number"
+    >
+      {{ JSON.stringify(entry, undefined, 2) }}
+    </p>
+
+    <table class="table table-striped">
+      <thead>
+        <tr>
+          <th scope="col">
+            #
+          </th>
+          <th scope="col">
+            Name
+          </th>
+          <th scope="col">
+            Status
+          </th>
+          <th scope="col">
+            Time
+          </th>
+          <th scope="col">
+            Total Time Paused
+          </th>
+          <th scope="col">
+            Times Helped Today
+          </th>
+          <th scope="col">
+            Queue
+          </th>
+          <th scope="col">
+            Remove
+          </th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr
+          v-for="entry in viewer.current_queue"
+          :key="entry.row_number"
+        >
+          <td>{{ entry.row_number }}</td>
+          <td>{{ entry.name }}</td>
+          <td>{{ entry.current_state }}</td>
+
+          <td v-if="entry.current_state == 'being_helped'">
+            {{ timers[Number(entry.row_number)][1] }}
+          </td>
+          <td v-else>
+            {{ new Date(entry.time_in ?? "1970-01-01").toLocaleTimeString(undefined, {timeStyle: "short"}) }}
+          </td>
+
+          <td>{{ entry.current_state }}</td>
+          <td>{{ entry.current_state }}</td>
+          <td>{{ entry.queue_code }}</td>
+          <td>{{ entry.current_state }}</td>
+        </tr>
+      </tbody>
+    </table>
   </div>
 </template>
 

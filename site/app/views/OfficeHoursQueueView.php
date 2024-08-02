@@ -46,6 +46,7 @@ class OfficeHoursQueueView extends AbstractView {
           'viewer' => [
             'is_grader' => $viewer->isGrader(),
             'queues' => $viewer->getAllQueues(),
+            'current_queue' => $viewer->getCurrentQueue(),
             'announcement_msg' => $viewer->getQueueAnnouncementMessage()
           ],
           'color_codes' => $codes,
