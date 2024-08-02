@@ -74,20 +74,26 @@ def update_docker_images(user, host, worker, autograding_workers, autograding_co
                     image_id = client.images.get(imageRemoved).id
                     print("Removed image " + imageRemoved)
                 except docker.errors.ImageNotFound as e:
-                    print("Couldn't find image ", e)
+                    print(f"ERROR: Couldn't find image {imageRemoved}", file=sys.stderr)
                     continue
-                client.images.remove(image_id, True)
+                try:
+                    client.images.remove(image_id, True)
+                except Exception as e:
+                    print(f"ERROR: An error occurred while removing image by ID {image_id}: {e}", file=sys.stderr)
+                    traceback.print_exc(file=sys.stderr)
+
         except Exception as e:
-            # Handle the exception
-            print("An error occurred:", e)
+            print(f"ERROR: An error occurred: {e}", file=sys.stderr)
+            traceback.print_exc(file=sys.stderr)
+
         for image in images_to_update:
             print(f"locally pulling the image '{image}'")
             try:
                 repo, tag = image.split(':')
                 client.images.pull(repository=repo, tag=tag)
             except Exception as e:
-              print(f"ERROR: Could not pull {image}")
-              traceback.print_exc()
+                print(f"ERROR: Could not pull {image}: {e}", file=sys.stderr)
+                traceback.print_exc(file=sys.stderr)
 
               # check for machine
               if platform.machine() == "aarch64":
