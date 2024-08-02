@@ -3,7 +3,9 @@ showUpdatePronounsForm, showDisplayNameOrderForm, showUpdatePasswordForm, showUp
 updateUserPreferredNames, updateUserLastInitialFormat, updateUserProfilePhoto, updateUserSecondaryEmail, updateDisplayNameOrder,
 changeSecondaryEmail, previewUserLastInitialFormat, clearPronounsBox
  */
-/* global displaySuccessMessage, displayErrorMessage, buildUrl, showPopup */
+/* global displaySuccessMessage, displayErrorMessage, buildUrl, showPopup, csrfToken,
+    updateSidebarPreference, DisableAutomaticCollapse, updateTheme, displayWarningMessage,
+    */
 
 // This variable is to store changes to the pronouns form that have not been submitted
 let pronounsLastVal = null;
@@ -110,18 +112,15 @@ function updateUserPronouns(e) {
     const forumDisplay = $('#pronouns-forum-display');
     pronounsLastVal = pronouns.val();
     if (pronouns.data('current-pronouns') === pronouns.val() && pronouns.data('pronouns-forum-display') === forumDisplay.val()) {
-        // eslint-disable-next-line no-undef
         displayErrorMessage('No changes detected to update pronouns!');
         $('#edit-pronouns-form').hide();
     }
     else {
         const data = new FormData();
         const isForumDisplayChecked = forumDisplay.prop('checked');
-        // eslint-disable-next-line no-undef
         data.append('csrf_token', csrfToken);
         data.append('pronouns', pronouns.val());
         data.append('pronouns-forum-display', isForumDisplayChecked);
-        // eslint-disable-next-line no-undef
         const url = buildUrl(['user_profile', 'change_pronouns']);
         $.ajax({
             url,
@@ -134,7 +133,6 @@ function updateUserPronouns(e) {
                 const response = JSON.parse(res);
                 if (response.status === 'success') {
                     const { data } = response;
-                    // eslint-disable-next-line no-undef
                     displaySuccessMessage(data.message);
                     const icon = '<i class="fas fa-pencil-alt"></i>';
                     // update the pronouns and display (true or false)
@@ -148,12 +146,10 @@ function updateUserPronouns(e) {
                     $('#edit-pronouns-form').hide();
                 }
                 else {
-                    // eslint-disable-next-line no-undef
                     displayErrorMessage(response.message);
                 }
             },
             error: function () {
-                // eslint-disable-next-line no-undef
                 displayErrorMessage('Some went wrong while updating pronouns!');
             },
         });
@@ -168,7 +164,6 @@ function updateDisplayNameOrder(e) {
     displayNameOrderLast = displayNameOrder.val();
 
     const data = new FormData();
-    // eslint-disable-next-line no-undef
     data.append('csrf_token', csrfToken);
     data.append('display-name-order', displayNameOrder.val());
     const url = buildUrl(['user_profile', 'change_display_name_order']);
@@ -210,16 +205,13 @@ function updateUserPreferredNames() {
     const family_name_field = $('#user-familyname-change');
     // If the names are not updated just display an error message and return without making any API call
     if (given_name_field.data('current-name') === given_name_field.val() && family_name_field.data('current-name') === family_name_field.val()) {
-        // eslint-disable-next-line no-undef
         displayErrorMessage('No changes detected to update preferred names!');
     }
     else {
         const data = new FormData();
-        // eslint-disable-next-line no-undef
         data.append('csrf_token', csrfToken);
         data.append('given_name', given_name_field.val());
         data.append('family_name', family_name_field.val());
-        // eslint-disable-next-line no-undef
         const url = buildUrl(['user_profile', 'change_preferred_names']);
         $.ajax({
             url,
@@ -231,7 +223,6 @@ function updateUserPreferredNames() {
                 const response = JSON.parse(res);
                 if (response.status === 'success') {
                     const { data } = response;
-                    // eslint-disable-next-line no-undef
                     displaySuccessMessage(data.message);
                     // update the preferred names
                     const icon = '<i class="fas fa-pencil-alt"></i>';
@@ -242,13 +233,11 @@ function updateUserPreferredNames() {
                     family_name_field.data('current-name', data.family_name);
                 }
                 else {
-                    // eslint-disable-next-line no-undef
                     displayErrorMessage(response.message);
                 }
             },
             error: function () {
                 // display error message
-                // eslint-disable-next-line no-undef
                 displayErrorMessage('Some went wrong while updating preferred names!');
             },
         });
@@ -299,7 +288,7 @@ function updateUserProfilePhoto() {
     const data = new FormData();
     data.append('csrf_token', $('#user-profile-photo-csrf').val());
     data.append('user_image', $('#user-image-button').prop('files')[0]);
-    // eslint-disable-next-line no-undef
+
     const url = buildUrl(['user_profile', 'change_profile_photo']);
 
     $.ajax({
@@ -314,7 +303,6 @@ function updateUserProfilePhoto() {
 
             if (response.status === 'success') {
                 const { data } = response;
-                // eslint-disable-next-line no-undef
                 displaySuccessMessage(data.message);
                 let updated_element = '<span class="center-img-tag">N/A</span>';
                 // create a new image node
@@ -328,13 +316,11 @@ function updateUserProfilePhoto() {
                 $('.user-img-cont').html(updated_element);
             }
             else {
-                // eslint-disable-next-line no-undef
                 displayErrorMessage(response.message);
             }
         },
         error: function () {
             // display error message
-            // eslint-disable-next-line no-undef
             displayErrorMessage('Some went wrong while updating profile photo!');
         },
     });
@@ -348,21 +334,17 @@ function updateUserSecondaryEmail() {
     const second_email = $('#user-secondary-email-change');
     const second_email_notify = $('#user-secondary-email-notify-change');
     if (second_email.data('current-second-email') === second_email.val() && second_email_notify.get(0).checked === (second_email_notify.data('current-second-email-notify') === 1)) {
-        // eslint-disable-next-line no-undef
         displayErrorMessage('No changes detected to secondary email');
     }
     else {
         if (second_email.val() === '' && second_email_notify.get(0).checked) {
-            // eslint-disable-next-line no-undef
             displayErrorMessage('Please disable second email notifications or add a valid second email');
         }
         else {
             const data = new FormData();
-            // eslint-disable-next-line no-undef
             data.append('csrf_token', csrfToken);
             data.append('secondary_email', second_email.val());
             data.append('secondary_email_notify', second_email_notify.get(0).checked);
-            // eslint-disable-next-line no-undef
             const url = buildUrl(['user_profile', 'change_secondary_email']);
             $.ajax({
                 url,
@@ -374,7 +356,6 @@ function updateUserSecondaryEmail() {
                     const response = JSON.parse(res);
                     if (response.status === 'success') {
                         const { data } = response;
-                        // eslint-disable-next-line no-undef
                         displaySuccessMessage(data.message);
                         const icon = '<i class="fas fa-pencil-alt"></i>';
                         $('#secondary-email-row .icon').html(`${icon} ${data.secondary_email}`);
@@ -383,13 +364,11 @@ function updateUserSecondaryEmail() {
                         second_email_notify.data('current-second-email-notify', data.secondary_email_notify === 'True' ? 1 : 0);
                     }
                     else if (response.status === 'error') {
-                        // eslint-disable-next-line no-undef
                         displayErrorMessage(response.message);
                     }
                 },
                 error: function () {
                     // display error message
-                    // eslint-disable-next-line no-undef
                     displayErrorMessage('Something went wrong while updating secondary email address!');
                 },
             });
@@ -421,23 +400,19 @@ function previewUserLastInitialFormat() {
 
 $(document).ready(() => {
     $('#desktop_sidebar_preference').change(() => {
-        // eslint-disable-next-line no-undef
         updateSidebarPreference();
         location.reload();
     });
     if (localStorage.getItem('desktop-sidebar-preference')) {
         if (localStorage.getItem('desktop-sidebar-preference') === 'automatic') {
-            // eslint-disable-next-line no-undef
             CollapseSidebarOnNarrowView();
         }
         else {
-            // eslint-disable-next-line no-undef
             DisableAutomaticCollapse();
         }
     }
 
     $('#theme_change_select').change(() => {
-        // eslint-disable-next-line no-undef
         updateTheme();
         if (JSON.parse(localStorage.getItem('rainbow-mode')) === true) {
             $(document.body).find('#rainbow-mode').remove();
@@ -472,10 +447,8 @@ $(document).ready(() => {
 
         $.getJSON({
             type: 'POST',
-            // eslint-disable-next-line no-undef
             url: buildUrl(['user_profile', 'change_time_zone']),
             data: {
-                // eslint-disable-next-line no-undef
                 csrf_token: csrfToken,
                 time_zone,
             },
@@ -483,26 +456,22 @@ $(document).ready(() => {
                 // Update page elements if the data was successfully saved server-side
                 if (response.status === 'success') {
                     $('#user_utc_offset').text(response.data.utc_offset);
-                    $('#time_zone_selector_label').attr('data-user_time_zone', response.data.user_time_zone_with_offset);
-                    // eslint-disable-next-line no-undef
+                    $('#time_zone_selector_label').attr('data-user_time_zone', response.data.user_time_zone_with_offset);     
                     displaySuccessMessage('Time-zone updated successfully!');
 
                     // Check user's current time zone, give a warning message if the user's current time zone differs from systems' time-zone
                     const offset = getCurrentUTCOffset();
                     if (response.data.utc_offset !== offset) {
-                        // eslint-disable-next-line no-undef
                         displayWarningMessage('Selected time-zone does not match system time-zone.');
                     }
                 }
                 else {
                     console.log(response);
-                    // eslint-disable-next-line no-undef
                     displayErrorMessage('Time-zone is not updated!');
                 }
             },
             error: function (response) {
                 console.error('Failed to parse response from server!');
-                // eslint-disable-next-line no-undef
                 displayErrorMessage('Failed to parse response from server!');
                 console.log(response);
             },
@@ -525,7 +494,6 @@ $(document).ready(() => {
             type: 'POST',
             url: buildUrl(['user_profile', 'set_pref_locale']),
             data: {
-                // eslint-disable-next-line no-undef
                 csrf_token: csrfToken,
                 locale: $(this).val(),
             },

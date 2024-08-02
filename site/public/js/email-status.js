@@ -1,4 +1,5 @@
 /* exported loadPage */
+/* global csrfToken */
 const page_window = 5;
 function loadPage(page, load_page_url) {
     $(`#${page}`).addClass('selected');
@@ -21,7 +22,6 @@ function loadPage(page, load_page_url) {
         type: 'GET',
         url: load_page_url,
         data: {
-            // eslint-disable-next-line no-undef
             csrf_token: csrfToken,
             page: page,
         },

@@ -1,5 +1,5 @@
 /* global render, PDFAnnotate, csrfToken, GENERAL_INFORMATION, buildCourseUrl,
-   buildCourseUrl, toggleOtherAnnotations */
+   buildCourseUrl, toggleOtherAnnotations, currentTool */
 /* exported loaded, renderPDFToolbar */
 
 if (PDFAnnotate.default) {
@@ -47,17 +47,14 @@ function renderPDFToolbar() {
             }
             switch (option) {
                 case 'pen':
-                    // eslint-disable-next-line no-undef
                     currentTool = 'pen';
                     PDFAnnotate.UI.enablePen();
                     break;
                 case 'eraser':
-                    // eslint-disable-next-line no-undef
                     currentTool = 'eraser';
                     PDFAnnotate.UI.enableEraser();
                     break;
                 case 'cursor':
-                    // eslint-disable-next-line no-undef
                     currentTool = 'cursor';
                     PDFAnnotate.UI.enableEdit();
                     break;
@@ -92,7 +89,6 @@ function renderPDFToolbar() {
                     rotate(270);
                     break;
                 case 'text':
-                    // eslint-disable-next-line no-undef
                     currentTool = 'text';
                     PDFAnnotate.UI.enableText();
                     break;

@@ -1,6 +1,7 @@
 /* exported openActionsPopup */
 /* exported initializeTimer */
 /* exported checkDeadline */
+/* global buildCourseUrl, initializePopupTimer, displayErrorMessage*/
 function openActionsPopup(popup_css, element_id) {
     let elem_html = `<link rel="stylesheet" type="text/css" href="${popup_css}" />`;
     elem_html += document.getElementById(element_id).innerHTML;
@@ -30,7 +31,6 @@ function initializeTimer(gradeableID, is_timed) {
 }
 
 function syncWithServer(criticalSync) {
-    // eslint-disable-next-line no-undef
     const url = buildCourseUrl(['gradeable', gradeable_id, 'time_remaining_data']);
     $.ajax({
         url,
@@ -65,13 +65,11 @@ function syncWithServer(criticalSync) {
                 deadline = data.deadline;
                 updateTime();
                 if (!popUpTimerStarted && isTimed && allowedTime > 25) {
-                    // eslint-disable-next-line no-undef
                     initializePopupTimer();
                     popUpTimerStarted = true;
                 }
             }
             else {
-                // eslint-disable-next-line no-undef
                 displayErrorMessage('Something went wrong while starting the timer');
             }
         },
