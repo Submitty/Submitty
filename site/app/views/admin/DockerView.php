@@ -19,7 +19,6 @@ class DockerView extends AbstractView {
         $this->core->getOutput()->addInternalCss('table.css');
         $this->core->getOutput()->enableMobileViewport();
 
-        $user_id = $this->core->getUser()->getId();
         $images = [];
         foreach ($docker_data['autograding_containers'] as $capability => $image_list) {
             foreach ($image_list as $image) {
