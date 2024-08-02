@@ -87,7 +87,7 @@ class ForumController extends AbstractController {
      * @param mixed[] $posts
      * @return mixed[]
      */
-    private static function getPostsOrderAndReplies(array $posts, string $thread_id): array {
+    public static function getPostsOrderAndReplies(array $posts, string $thread_id): array {
         $first = true;
         $first_post_id = 1;
         $order_array = [];

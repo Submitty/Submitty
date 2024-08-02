@@ -7,6 +7,7 @@ use app\views\AbstractView;
 use app\libraries\FileUtils;
 use app\libraries\ForumUtils;
 use app\models\User;
+use app\controllers\forum\ForumController;
 
 class ForumThreadView extends AbstractView {
     private function getSavedForumCategories($current_course, $categories) {
@@ -482,31 +483,9 @@ class ForumThreadView extends AbstractView {
         $userLiked = $this->core->getQueries()->getUserLikesForPosts($post_ids, $current_user);
         $staffLiked = $this->core->getQueries()->getInstructorUpduck($post_ids);
         if ($display_option == "tree") {
-            $order_array = [];
-            $reply_level_array = [];
-            foreach ($posts as $post) {
-                if ($thread_id == -1) {
-                    $thread_id = $post["thread_id"];
-                }
-                if ($first) {
-                    $first = false;
-                    $first_post_id = $post["id"];
-                }
-                if ($post["parent_id"] > $first_post_id) {
-                    $place = array_search($post["parent_id"], $order_array);
-                    $tmp_array = [$post["id"]];
-                    $parent_reply_level = $reply_level_array[$place];
-                    while ($place !== false && $place + 1 < count($reply_level_array) && $reply_level_array[$place + 1] > $parent_reply_level) {
-                        $place++;
-                    }
-                    array_splice($order_array, $place + 1, 0, $tmp_array);
-                    array_splice($reply_level_array, $place + 1, 0, $parent_reply_level + 1);
-                }
-                else {
-                    array_push($order_array, $post["id"]);
-                    array_push($reply_level_array, 1);
-                }
-            }
+            $order_reply_level_array = ForumController::getPostsOrderAndReplies($posts, $thread_id);
+            $order_array = $order_reply_level_array[0];
+            $reply_level_array = $order_reply_level_array[1];
             $i = 0;
             $first = true;
 
