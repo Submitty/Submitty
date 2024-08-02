@@ -393,6 +393,7 @@ class AutoGradingView extends AbstractView {
                 'points_possible' => $component->getMaxValue(),
                 'student_comment' => $component->getStudentComment(),
 
+                'version_graded' => $container->getGradedVersion(),
                 'total_score' => $container->getTotalScore(),
                 'custom_mark_score' => $container->getScore(),
                 'comment' => $container->getComment(),
@@ -597,6 +598,7 @@ class AutoGradingView extends AbstractView {
                 'points_possible' => $component->getMaxValue(),
                 'student_comment' => $component->getStudentComment(),
 
+                'version_graded' => $container->getGradedVersion(),
                 'total_score' => $container->getTotalScore(),
                 'custom_mark_score' => $container->getScore(),
                 'comment' => $container->getComment(),
