@@ -20,11 +20,10 @@ function ExtractBuckets() {
 
 // Forces the number of expected gradeables to be greater than or equal to the current number of gradeables
 function ClampGradeablesInBucket(el, num_gradeables) {
-    if (el.value === '') {
+    if (isNaN(el.value) || el.value < num_gradeables) {
         el.value = num_gradeables;
-    }
-    else {
-        el.value = Math.max(num_gradeables, el.value);
+        displayErrorMessage('The expected number of gradeables must be greater than or equal to the current number of gradeables.');
+        saveChanges();
     }
 }
 
