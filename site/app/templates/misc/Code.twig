@@ -11,5 +11,18 @@
     }
     $(document).ready(function() {
         iFrameInit();
+
+ // Get theme from URL parameter
+        const urlParams = new URLSearchParams(window.location.search);
+        const theme = urlParams.get('theme') || 'light';
+        applyTheme(theme);
+
+        // Listen for theme changes from parent window
+        window.addEventListener('message', function(event) {
+            if (event.data.type === 'setTheme') {
+                applyTheme(event.data.theme);
+            }
+        }, false);
+
     });
 </script>

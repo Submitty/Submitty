@@ -17,6 +17,9 @@ class DockerView extends AbstractView {
         $this->core->getOutput()->addInternalJs('docker_interface.js');
         $this->core->getOutput()->addInternalCss('table.css');
         $this->core->getOutput()->enableMobileViewport();
+        // Add theme-related CSS and JS
+        $this->core->getOutput()->addInternalCss($this->core->getUser()->getTheme() . '.css');
+        $this->core->getOutput()->addInternalJs('theme_manager.js');
 
         $images = [];
         foreach ($docker_data['autograding_containers'] as $capability => $image_list) {
