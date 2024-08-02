@@ -22,7 +22,7 @@ use app\libraries\Core;
  * @method string|null getBadge()
  * @method string|null getIcon()
  * @method bool getPrefix()
- * @method bool getTestid()
+ * @method string|null getTestid()
  *
  * @method void setTitle(string $title)
  * @method void setSubtitle(string|null $subtitle)
@@ -86,7 +86,7 @@ class Button extends AbstractModel {
      * @var string|null $prefix */
     protected $prefix;
     /** @prop
-     * @var string|null $prefix */
+     * @var string|null $testid */
     protected $testid;
 
     /**
