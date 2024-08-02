@@ -14,5 +14,6 @@ abstract class AbstractView {
     public function __construct(Core $core, Output $output) {
         $this->core = $core;
         $this->output = $output;
+        $this->output->addInternalJs('iframe-content.js');
     }
 }

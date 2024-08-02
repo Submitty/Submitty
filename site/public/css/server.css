@@ -2404,3 +2404,23 @@ End of slider switch
     overflow-wrap: anywhere;
     white-space: pre-wrap;
 }
+/* Theme-specific styles for iframe content */
+body {
+    background-color: var(--background-primary);
+    color: var(--text-primary);
+}
+
+[data-theme="dark"] body {
+    background-color: var(--background-primary-dark);
+    color: var(--text-primary-dark);
+}
+
+.query-warning {
+    background-color: var(--alert-background-warning);
+    color: var(--text-alert);
+}
+
+[data-theme="dark"] .query-warning {
+    background-color: var(--alert-background-warning-dark);
+    color: var(--text-alert-dark);
+}

@@ -1042,6 +1042,8 @@ function openFrame(url, id, filename, ta_grading_interpret = false) {
         if ($('#submission_browser').length > 0) {
             url += `&gradeable_id=${$('#submission_browser').data('gradeable-id')}`;
         }
+        // Add theme parameter
+        url += `&theme=${$('body').attr('data-theme') || 'light'}`;
         // handle pdf
         if (filename.substring(filename.length - 3) === 'pdf') {
             iframe.html(`<iframe id='${iframeId}' src='${url}' width='750px' height='1200px' style='border: 0'></iframe>`);
