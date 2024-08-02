@@ -1103,7 +1103,8 @@ CREATE TABLE public.gradeable_component (
     gc_order integer NOT NULL,
     gc_page integer NOT NULL,
     gc_is_itempool_linked boolean DEFAULT false NOT NULL,
-    gc_itempool character varying(100) DEFAULT ''::character varying NOT NULL
+    gc_itempool character varying(100) DEFAULT ''::character varying NOT NULL,
+    gc_is_curve boolean DEFAULT false NOT NULL
 );
 
 
