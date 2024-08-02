@@ -27,7 +27,7 @@ def up(config, database, semester, course):
         copy2(str(customization_file), str(backup_file))
 
         # Copy backup_customization.json to gui_customization.json
-        copy2(str(backup_file), str(gui_custom_file))
+        copy2(str(customization_file), str(gui_custom_file))
 
     daemon_user = config.submitty_users['daemon_user']
     daemon_uid = pwd.getpwnam(daemon_user).pw_uid
@@ -54,16 +54,4 @@ def down(config, database, semester, course):
     :param course: Code of course being migrated
     :type course: str
     """
-    course_dir = Path(config.submitty['submitty_data_dir'], 'courses', semester, course, 'rainbow_grades')
-
-    gui_custom_file = course_dir / 'gui_customization.json'
-    backup_file = course_dir / 'backup_customization.json'
-    customization_file = course_dir / 'customization.json'
-
-    # Delete the gui_customization.json file
-    if gui_custom_file.exists():
-        gui_custom_file.unlink()
-
-    # Rename backup_customization.json back to customization.json
-    if backup_file.exists():
-        backup_file.rename(customization_file)
+    pass
