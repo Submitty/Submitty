@@ -8,10 +8,13 @@ SUBMITTY_REPOSITORY="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null && pwd 
 SUBMITTY_REPOSITORY="$(readlink -ne "$SUBMITTY_REPOSITORY")"
 echo "SUBMITTY_REPOSITORY=${SUBMITTY_REPOSITORY}" >&2
 
-SUBMITTY_INSTALL_DIR="$(readlink -ne "${SUBMITTY_REPOSITORY}/../..")"
-SUBMITTY_INSTALL_DIR="$(readlink -ne "$SUBMITTY_INSTALL_DIR")"
-echo "INSTALL_DIR=${SUBMITTY_REPOSITORY}" >&2
+# Hardcoding this is undesirable but not avoidable without changing
+# how SUBMITTY_INSTALL.sh works; this script's content is hardcoded
+# in CONFIGURE_SUBMITTY.py.
+SUBMITTY_INSTALL_DIR="/usr/local/submitty"
+echo "SUBMITTY_INSTALL_DIR=${SUBMITTY_REPOSITORY}" >&2
 
+# Read config file and check for consistency
 JSON_SUBMITTY_INSTALL_DIR="$(jq -r '.submitty_install_dir' "${SUBMITTY_INSTALL_DIR}/config/submitty.json")"
 JSON_SUBMITTY_REPOSITORY="$(jq -r '.submitty_repository' "${SUBMITTY_INSTALL_DIR}/config/submitty.json")"
 
