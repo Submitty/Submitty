@@ -5191,10 +5191,20 @@ SQL;
         $this->submitty_db->query("SELECT self_registration_allowed FROM courses WHERE course=?", [$course]);
         return $this->submitty_db->row()['self_registration_allowed'];
     }
-
+    
     public function setSelfRegistrationAllowed($course, $self_registration_allowed) {
         $this->submitty_db->query("UPDATE courses set self_registration_allowed=? WHERE course=?", [$self_registration_allowed, $course]);
         return $this->submitty_db->row();
+    }
+    
+    public function getSelfRegistrationDefaultCourse() {
+        $this->course_db->query("SELECT sections_registration_id FROM sections_registration WHERE default_course=t", [$course]);
+        return $this->course_db->row()['sections_registration_id'];
+    }
+
+    public function setSelfRegistrationDefaultCourse($course, $value) {
+        $this->course_db->query("UPDATE sections_registration set default_course=? WHERE course=?", [$value, $course]);
+        return $this->course_db->row();
     }
 
     /**

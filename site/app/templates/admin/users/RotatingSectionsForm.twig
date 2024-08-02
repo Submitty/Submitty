@@ -51,6 +51,9 @@
                             <th>Section</th>
                             <th>Course ID</th>
                             <th>Count</th>
+                            {% if is_self_register_course %}
+                            <th>Default Course</th>
+                            {% endif %}
                         </tr>
                     </thead>
                     <tbody>
@@ -61,13 +64,19 @@
                             <tr>
                                 <td>Section {{ section['sections_registration_id'] }} </td>
                                 <td> {{ section['course_section_id'] }} </td>
-                                <td>{{ reg_sections_count[section['sections_registration_id']] }}</td>
+                                <td> {{ reg_sections_count[section['sections_registration_id']] }} </td>
+                                {% if is_self_register_course %}
+                                    <td><input type="checkbox" name="{{ section }}" {{ section['default_section'] == 't' ? 'checked' : '' }}/></td>
+                                {% endif %}
                             </tr>
                             {% else %}
                             <tr>
                                 <td>Section {{ section['sections_registration_id'] }}</td>
                                 <td> {{ section['course_section_id'] }} </td>
                                 <td>0</td>
+                                {% if is_self_register_course %}
+                                    <td><input type="checkbox" name="{{ section }}"{{ section['default_section'] == 't' ? 'checked' : '' }} name="/></td>
+                                {% endif %}
                             </tr>
                             {% endif %}
                             {% endif %}
@@ -77,12 +86,14 @@
                             <td>Section NULL</td>
                             <td>NULL</td>
                             <td>{{ reg_sections_count['NULL'] }}</td>
+                            <td><input type="checkbox" disabled/></td>
                         </tr>
                         {% else %}
                         <tr>
                             <td>Section NULL</td>
                             <td>0</td>
                             <td>0</td>
+                            <td><input type="checkbox" disabled/></td>
                         </tr>
                         {% endif %}
                     </tbody>

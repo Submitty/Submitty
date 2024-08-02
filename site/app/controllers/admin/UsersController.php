@@ -530,6 +530,14 @@ class UsersController extends AbstractController {
             $max_section
         );
     }
+    
+
+    #[Route("/courses/{_semester}/{_course}/sections", methods: ["POST"])]
+    public function testing() {
+        if (true) {
+            $this->core->getQueries()->setSelfRegistrationSection($this->core->getConfig()->getCourse(), $_POST['self_register'] === 'true' ? 1 : 0);
+        }
+    }
 
     #[Route("/courses/{_semester}/{_course}/sections/registration", methods: ["POST"])]
     public function updateRegistrationSections() {
