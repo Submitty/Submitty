@@ -15,7 +15,6 @@ use app\libraries\response\MultiResponse;
 use app\libraries\response\JsonResponse;
 use app\views\MiscView;
 use Symfony\Component\Routing\Annotation\Route;
-use app\models\User;
 
 class MiscController extends AbstractController {
     const GENERIC_NO_ACCESS_MSG = 'You do not have access to this file';
@@ -413,12 +412,7 @@ class MiscController extends AbstractController {
 
         // TODO: Zip file anonymization is currently done based on access level (students==peers)
         // When single/double blind grading is merged, this will need to be updated.
-        if ($this->core->getUser()->getGroup() === User::GROUP_STUDENT) {
-            $zip_file_name = $gradeable_id . "_" . $anon_id . "_v" . $version . ".zip";
-        }
-        else {
-            $zip_file_name = $gradeable_id . "_" . $submitter_id . "_v" . $version . ".zip";
-        }
+        $zip_file_name = $gradeable_id . "_" . $anon_id . "_v" . $version . ".zip";
 
         // create a new zipstream object
         $zip_stream = new \ZipStream\ZipStream(

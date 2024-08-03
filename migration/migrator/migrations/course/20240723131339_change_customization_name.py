@@ -1,5 +1,8 @@
 from shutil import copy2
 from pathlib import Path
+import os
+import grp
+import pwd
 
 def up(config, database, semester, course):
     """
@@ -20,11 +23,23 @@ def up(config, database, semester, course):
     gui_custom_file = course_dir / 'gui_customization.json'
 
     if customization_file.exists():
-        # Rename the file to backup_customization.json
-        customization_file.rename(backup_file)
+        # copy the file to backup_customization.json
+        copy2(str(customization_file), str(backup_file))
 
         # Copy backup_customization.json to gui_customization.json
-        copy2(str(backup_file), str(gui_custom_file))
+        copy2(str(customization_file), str(gui_custom_file))
+
+    daemon_user = config.submitty_users['daemon_user']
+    daemon_uid = pwd.getpwnam(daemon_user).pw_uid
+
+    # Get course group
+    stat_info = os.stat(str(course_dir))
+    course_group_id = stat_info.st_gid
+
+    # Set ownership and permissions for all customization JSON files
+    for file in course_dir.glob('*customization*.json'):
+        os.chown(file, daemon_uid, course_group_id)
+        os.chmod(file, 0o660)  # -rw-rw----
 
 def down(config, database, semester, course):
     """
@@ -39,16 +54,4 @@ def down(config, database, semester, course):
     :param course: Code of course being migrated
     :type course: str
     """
-    course_dir = Path(config.submitty['submitty_data_dir'], 'courses', semester, course, 'rainbowgrades')
-
-    gui_custom_file = course_dir / 'gui_customization.json'
-    backup_file = course_dir / 'backup_customization.json'
-    customization_file = course_dir / 'customization.json'
-
-    # Delete the gui_customization.json file
-    if gui_custom_file.exists():
-        gui_custom_file.unlink()
-
-    # Rename backup_customization.json back to customization.json
-    if backup_file.exists():
-        backup_file.rename(customization_file)
+    pass
