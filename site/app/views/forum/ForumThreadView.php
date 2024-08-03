@@ -1135,12 +1135,21 @@ class ForumThreadView extends AbstractView {
                 $classes[] = "new_post";
                 $isNewPost = true;
             }
+            elseif ($current_user === $post["author_user_id"]) {
+                $classes[] = "new_post";
+                $isNewPost = true;
+            }
         }
         else {
             $classes[] = "viewed_post";
         }
         if ($author_info['is_staff']) {
-            $classes[] = "important";
+            if (in_array($post_id, $unviewed_posts, true)) {
+                $classes[] = "important new_post important-new";
+            }
+            else {
+                $classes[] = "important";
+            }
         }
         if ($post["deleted"]) {
             $classes[] = "deleted";

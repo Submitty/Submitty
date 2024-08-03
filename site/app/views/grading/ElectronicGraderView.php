@@ -692,7 +692,7 @@ HTML;
                 $graded_component = $row->getOrCreateTaGradedGradeable()->getGradedComponent($component, $this->core->getUser());
                 $grade_inquiry = $graded_component !== null ? $row->getGradeInquiryByGcId($graded_component->getComponentId()) : null;
 
-                if ($component->isPeerComponent() && $row->getOrCreateTaGradedGradeable()->isComplete()) {
+                if ($component->isPeerComponent() && $row->getOrCreateTaGradedGradeable()->isComplete($this->core->getUser())) {
                     $info["graded_groups"][] = 4;
                 }
                 elseif (($component->isPeerComponent() && $graded_component != null)) {
@@ -703,7 +703,7 @@ HTML;
                     //peer submitted but not graded
                     $info["graded_groups"][] = "peer-null";
                 }
-                elseif ($component->isPeerComponent() && !$row->getOrCreateTaGradedGradeable()->isComplete()) {
+                elseif ($component->isPeerComponent() && !$row->getOrCreateTaGradedGradeable()->isComplete($this->core->getUser())) {
                     //peer not submitted
                     $info["graded_groups"][] = "peer-no-submission";
                 }

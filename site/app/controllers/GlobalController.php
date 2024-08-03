@@ -569,7 +569,13 @@ class GlobalController extends AbstractController {
                 break;
             case 4:
                 //April (Flowers)
-                $duck_img = 'moorthy_duck/04-april.svg';
+                if ($day === 5) {
+                    $duck_img = 'moorthy_duck/quantum-duck-light.svg';
+                }
+                else {
+                    //April (Flowers)
+                    $duck_img = 'moorthy_duck/04-april.svg';
+                }
                 break;
             case 3:
                 //Saint Patrick's Day (Shamrock)
