@@ -65,6 +65,23 @@ function ClampPercent(el) {
     $(`#config-percent-${ExtractBucketName(el.id, 1)}`).text(`${el.value}%`);
 }
 
+// Forces sum of Per Gradeable Percents in a bucket to be below 100.0
+function ClampPerGradeablePercents(el, bucket) {
+    const percentsInputsInBucket = $(`div[id^="gradeable-percents-div-${bucket}"]`);
+    let sum = 0.0;
+
+    percentsInputsInBucket.each((index, percentInput) => {
+        const textbox = $(percentInput).children().first();
+        sum += parseFloat(textbox.val());
+    });
+
+    if (sum > 100.0) {
+        const excess = sum - 100.0;
+        el.value = el.value - excess;
+        displayErrorMessage(`The sum of percents in bucket ${bucket} may not exceed 100.`);
+    }
+}
+
 // Resets Per Gradeable Percents in a given bucket to an even split
 function ResetPerGradeablePercents(bucket) {
     const percentsInputsInBucket = $(`div[id^="gradeable-percents-div-${bucket}"]`);

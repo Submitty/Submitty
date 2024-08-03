@@ -234,7 +234,7 @@
                                                            placeholder="{{ default_percent }}"
                                                            value="{{ gradeable["override_percent"] ? gradeable["percent"] : default_percent }}"
                                                            id="percents-{{ gradeable["id"] }}"
-                                                           onblur="ClampPercents(this);">
+                                                           onblur="ClampPercents(this); ClampPerGradeablePercents(this, '{{ bucket }}')">
                                                     <span>%</span>
                                                 </div>
                                                 <div class="gradeable-li-right-of-input">
