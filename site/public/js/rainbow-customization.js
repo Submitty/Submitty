@@ -1,4 +1,4 @@
-/* exported addToTable, deleteRow resetPerGradeablePercents */
+/* exported addToTable, deleteRow ResetPerGradeablePercents */
 /* global buildCourseUrl csrfToken displayErrorMessage displaySuccessMessage */
 
 const benchmarks_with_input_fields = ['lowest_a-', 'lowest_b-', 'lowest_c-', 'lowest_d'];
@@ -66,7 +66,7 @@ function ClampPercent(el) {
 }
 
 // Resets Per Gradeable Percents in a given bucket to an even split
-function resetPerGradeablePercents(bucket) {
+function ResetPerGradeablePercents(bucket) {
     const percentsInputsInBucket = $(`div[id^="gradeable-percents-div-${bucket}"]`);
 
     percentsInputsInBucket.each((index, percentInput) => {
