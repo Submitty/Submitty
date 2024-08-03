@@ -2407,3 +2407,36 @@ End of slider switch
 .notebook-cell {
     padding: 0 0.5em;
 }
+
+#file-container.inner-container.open {
+    display: flex;
+    flex-direction: column;
+}
+
+/* File viewer and folder styles */
+.file-viewer, .div-viewer {
+    display: flex;
+    align-items: center;
+}
+
+.file-viewer a, .div-viewer a {
+    font-size: 20px;
+    display:flex;
+    align-items: center;
+}
+
+.file-icons {
+    display: flex;
+    align-items: center;
+    margin-left: 5px;
+}
+
+.subfile-container {
+    display: flex;
+    flex-direction: column;
+}
+
+.directory-container {
+    display: flex;
+    flex-direction: column;
+}
