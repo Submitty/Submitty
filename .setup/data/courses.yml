@@ -29,8 +29,9 @@
 #
 #   gradeables: a list of gradeables to be used for this course. Each gradeable is defined as:
 #
-#     g_id: what is the id for this gradeable. This is optional for electronic gradeables and will default to the
-#         filename of the gradeable_config, otherwise this is required to be defined.
+#     g_id: what is the id for this gradeable. This is optional for electronic gradeables that use gradeable_config
+#         and will default to the filename of the config from Tutorial or more_autograding_examples, and
+#         required otherwise.
 #
 #     g_title: [optional] what is the title for this gradeable. Defaults to a capitalized version of g_id with
 #         underscores converted to spaces.
@@ -67,6 +68,8 @@
 #     g_min_grading_group: [optional] integer for what groups (and above) are allowed to submit grades. Defaults to 3.
 #
 # These next fields are only if the gradeable is of type 0 (electronic gradeable) and can be ignored otherwise):
+#
+#     eg_config_path: Path to gradeable config. Do not use with gradeable_config.
 #
 #     eg_submission_open_date: Timestamp on when does the gradeable open to students for submission. Should be before
 #         grading start date and submission due date, but after the TA view date.
@@ -112,14 +115,26 @@
 #     components: this is a list of dictionaries for each component to be added for the gradeable. Each entry uses:
 #
 #       gc_title: string for component title.
+#
+#       gc_max_value: numeric for max value allowed for this component without extra credit included. If for g_type 1,
+#             can be omitted (and will always be 1).
+#
+#       gc_lower_clamp: the maximum number of points this component can contribute to the total score. May be greater
+#             than max. May be omitted for g_type 1.
+#
+#       gc_upper_clamp: the minimum points this component can contribute to the score. May be negative. May be omitted
+#             for g_type 1.
+#
+#       gc_default: the number of points this component is worth with no marks assigned.
+#
 #       gc_ta_comment: [optional] string for comment to be given to TA on grading. Only for electronic gradeables.
+#
 #       gc_student_comment: [optional] string for comment to be given to student on grade report. Only for electronic
 #             gradeables.
-#       gc_max_value: numeric for max value allowed for this component. If for g_type 1, can be omitted (and will
-#             always be 1).
-#       gc_is_text: [optional] boolean for if this is a text field or not. Only needed if gradeabe is of type
-#             Numeric/Text. Defaults to FALSE. If this is true, then you do not need gc_max_value or gc_is_extra_credit.
-#       gc_is_extra_credit: [optional] boolean for if this is extra credit or not. Defaults to FALSE.
+#
+#       gc_is_text: [optional] boolean for if this is a text field or not. Only applicable if gradeable is of type
+#             Numeric/Text. Defaults to FALSE. If this is true, then you do not need gc_max_value, gc_lower_clamp,
+#             or gc_upper_clamp.
 #
 # Any field that uses a timestamp allows for strings in four formats (if the time is omitted, it defaults to 23:59:59).
 #   - YEAR-MONTH-DAY                      (Ex: 2016-10-13)
