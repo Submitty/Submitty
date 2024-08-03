@@ -14,8 +14,8 @@ describe('Test cases for TA grading page', () => {
         cy.get('[data-testid="component-64"]').click();
         cy.get('[data-testid="component-64"]')
             .should('contain', 'Full Credit')
-            .should('contain', 'Minor errors in Read Me')
-            .should('contain', 'Major errors in Read Me or Read Me missing');
+            .and('contain', 'Minor errors in Read Me')
+            .and('contain', 'Major errors in Read Me or Read Me missing');
         cy.get('body').type('{0}');
         cy.get('[data-testid="grading-total"]').eq(0).should('contain', '2 / 2');
         cy.get('[data-testid="save-tools-save"]').should('contain', 'Save');
@@ -24,9 +24,9 @@ describe('Test cases for TA grading page', () => {
         cy.get('[data-testid="component-65"]').click();
         cy.get('[data-testid="component-65"]')
             .should('contain', 'Full Credit')
-            .should('contain', 'Code is unreadable')
-            .should('contain', 'Code is very difficult to understand')
-            .should('contain', 'Code is difficult to understand');
+            .and('contain', 'Code is unreadable')
+            .and('contain', 'Code is very difficult to understand')
+            .and('contain', 'Code is difficult to understand');
         cy.get('body').type('{3}');
         cy.get('[data-testid="grading-total"]').eq(1).should('contain', '4 / 5');
         cy.get('[data-testid="save-tools-save"]').should('contain', 'Save');
@@ -35,9 +35,9 @@ describe('Test cases for TA grading page', () => {
         cy.get('[data-testid="component-66"]').click();
         cy.get('[data-testid="component-66"]')
             .should('contain', 'Full Credit')
-            .should('contain', 'No documentation')
-            .should('contain', 'Very little documentation or documentation makes no sense')
-            .should('contain', 'Way too much documentation and/or documentation makes no sense');
+            .and('contain', 'No documentation')
+            .and('contain', 'Very little documentation or documentation makes no sense')
+            .and('contain', 'Way too much documentation and/or documentation makes no sense');
         cy.get('body').type('{2}');
         cy.get('[data-testid="grading-total"]').eq(2).should('contain', '2 / 5');
         cy.get('[data-testid="save-tools-save"]').should('contain', 'Save');
@@ -46,8 +46,8 @@ describe('Test cases for TA grading page', () => {
         cy.get('[data-testid="component-67"]').click();
         cy.get('[data-testid="component-67"]')
             .should('contain', 'Full Credit')
-            .should('contain', 'Extra credit done poorly')
-            .should('contain', 'Extra credit is acceptable');
+            .and('contain', 'Extra credit done poorly')
+            .and('contain', 'Extra credit is acceptable');
         cy.get('body').type('{0}');
         cy.get('[data-testid="grading-total"]').eq(3).should('contain', '0 / 0');
         cy.get('[data-testid="save-tools-save"]').should('contain', 'Save');
