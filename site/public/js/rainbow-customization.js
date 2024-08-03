@@ -1,4 +1,4 @@
-/* exported addToTable, deleteRow */
+/* exported addToTable, deleteRow resetPerGradeablePercents */
 /* global buildCourseUrl csrfToken displayErrorMessage displaySuccessMessage */
 
 const benchmarks_with_input_fields = ['lowest_a-', 'lowest_b-', 'lowest_c-', 'lowest_d'];
@@ -65,6 +65,16 @@ function ClampPercent(el) {
     $(`#config-percent-${ExtractBucketName(el.id, 1)}`).text(`${el.value}%`);
 }
 
+// Resets Per Gradeable Percents in a given bucket to an even split
+function resetPerGradeablePercents(bucket) {
+    const percentsInputsInBucket = $(`div[id^="gradeable-percents-div-${bucket}"]`);
+
+    percentsInputsInBucket.each((index, percentInput) => {
+        const textbox = $(percentInput).children().first();
+        textbox.val('').blur(); // If the textbox is empty, it resets to an even split onblur
+    });
+}
+
 // Updates the sum of percentage points accounted for by the buckets being used
 function UpdateUsedPercentage() {
     let val = 0.0;
@@ -104,7 +114,6 @@ function UpdateVisibilityBuckets() {
     used_buckets.each(function () {
         // Extract the bucket name
         const bucket = ExtractBucketName($(this).attr('id'), 1);
-        console.log(`prev_bucket: ${prev_bucket} bucket: ${bucket}`);
         if (bucket !== prev_bucket) {
             $(`#config-${bucket}`).css('display', 'block');
             $(`#config-${prev_bucket}`).after($(`#config-${bucket}`));
@@ -967,10 +976,14 @@ $(document).ready(() => {
         const perGradeablePercentsCheckbox = $(perGradeablePercentsCheckboxDOMElement);
         const bucket = perGradeablePercentsCheckbox[0].id.match(/^per-gradeable-percents-checkbox-(.+)$/)[1];
         const percentsInputsInBucket = $(`div[id^="gradeable-percents-div-${bucket}"]`);
+        const resetButtonInBucket = $(`button[id^="per-gradeable-percents-reset-${bucket}"]`);
 
         const isChecked = perGradeablePercentsCheckbox.is(':checked');
         percentsInputsInBucket.each((index, percentInput) => {
             $(percentInput).toggle(isChecked);
+        });
+        resetButtonInBucket.each((index, resetButton) => {
+            $(resetButton).toggle(isChecked);
         });
 
         perGradeablePercentsCheckbox.change(function (event) {
@@ -978,6 +991,9 @@ $(document).ready(() => {
             const isChecked = $(this).is(':checked');
             percentsInputsInBucket.each((index, percentInput) => {
                 $(percentInput).toggle(isChecked);
+            });
+            resetButtonInBucket.each((index, resetButton) => {
+                $(resetButton).toggle(isChecked);
             });
         });
     });
