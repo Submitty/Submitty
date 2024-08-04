@@ -1,4 +1,43 @@
-<div class="notebook" id="notebook-main-view">
+<div class="content" id="notebook-preview">
     <h1>Notebook Preview</h1>
-</div>
 
+    {% for cell in notebook %}
+    <div>
+        {% if cell.type == "markdown" %}
+
+            {# Render markdown #}
+            <b>{% include "misc/Markdown.twig" with {
+                    "content" : cell.markdown_string
+                } only %}</b>
+
+            {# Handle if cell is multiple choice #}
+        {% elseif cell.type == "multiple_choice" %}
+            {% if cell.allow_multiple | default(false)  %}
+                {% for choice in cell.choices %}
+                    <label class="markdown">
+                        <input type="checkbox" tabindex="0"
+                               value="{{ choice.value }}"
+                        />
+                        {{ choice.value }}
+                    </label>
+                    <br>
+                {% endfor %}
+            {% else %}
+                {% for choice in cell.choices %}
+                    <label class="markdown">
+                        <input type="radio" tabindex="0"
+                               value="{{ choice.value }}"
+                        />
+                        {{ choice.value }}
+                    </label>
+                    <br>
+                {% endfor %}
+            {% endif %}
+        {% endif %}
+
+        {% endfor %}
+
+    </div>
+
+
+</div>

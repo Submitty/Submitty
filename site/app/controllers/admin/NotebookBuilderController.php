@@ -3,6 +3,7 @@
 namespace app\controllers\admin;
 
 use app\controllers\AbstractController;
+use app\entities\course\CourseMaterial;
 use app\libraries\CodeMirrorUtils;
 use app\libraries\FileUtils;
 use app\libraries\response\JsonResponse;
@@ -11,6 +12,8 @@ use app\libraries\Utils;
 use app\models\gradeable\Gradeable;
 use app\libraries\routers\AccessControl;
 use Symfony\Component\Routing\Annotation\Route;
+use app\libraries\NotebookUtils;
+
 
 class NotebookBuilderController extends AbstractController {
     /** @var string The username of the linux user who should own notebook builder files */
@@ -33,7 +36,21 @@ class NotebookBuilderController extends AbstractController {
      */
     #[Route("/courses/{_semester}/{_course}/notebook_builder/{g_id}/notebook_preview", methods: ["GET"])]
     public function preview(string $g_id) {
-        $this->core->getOutput()->renderTwigOutput('notebook/NotebookPreview.twig');
+        $gradeable = $this->core->getQueries()->getGradeableConfig($g_id);
+        $file_path = $gradeable->getAutogradingConfigPath() . '/config.json';
+        $filedata = FileUtils::readJsonFile($file_path);
+
+        $this->core->getOutput()->addInternalCss('notebook-preview.css');
+
+        $this->core->getOutput()->renderString(
+            $this->core->getOutput()->renderTwigTemplate(
+                "notebook/NotebookPreview.twig",
+                [
+                    'notebook' => $filedata
+                ]
+            )
+        );
+
     }
 
     /**
@@ -313,5 +330,90 @@ class NotebookBuilderController extends AbstractController {
         }
 
         return $errors;
+    }
+
+    /** Convert the JSON file in notebook render format
+     * @param string $filepath The path of the notebook JSON data.
+     */
+    private function renderNotebookPreview(string $filepath){
+        $filedata = FileUtils::readJsonFile($filepath);
+
+        if ($filedata === false) {
+            $filedata = [];
+        }
+
+        $cells = [];
+        foreach ($filedata['notebook'] as $cell) {
+            switch ($cell['type']) {
+                case 'markdown':
+                    $cells[] = [
+                        'type' => 'markdown',
+                        'markdown_data' => $cell['markdown_string'],
+                    ];
+                    break;
+                case 'code':
+                    $cells[] = [
+                        'type' => 'short_answer',
+                        'label' => '',
+                        'programming_language' => $filedata['metadata']['language_info']['name'] ?? 'python',
+                        'initial_value' => $cell['source'],
+                        'rows' => count($cell['source']),
+                        'filename' => $cell['id'] ?? 'notebook-cell-' . rand(),
+                        'recent_submission' => '',
+                        'version_submission' => '',
+                        'codemirror_mode' => $filedata['language_info']['codemirror_mode']['name'] ?? 'ipython',
+                    ];
+
+                    foreach ($cell['outputs'] ?? [] as $output) {
+                        if (($output['output_type'] ?? '') === 'stream') {
+                            $cells[] = [
+                                'type' => 'output',
+                                'output_text' => implode($output['text'] ?? []),
+                            ];
+                        }
+                        elseif (($output['output_type'] ?? '') === 'display_data' && isset($output['data'])) {
+                            // Note: SVG files are not supported due to XSS risks
+                            $mime_types = [
+                                'image/png',
+                                'image/jpeg',
+                                'image/gif',
+                                'image/bmp',
+                                'text/plain', // Fall back to text/plain if it is available.
+                            ];
+
+                            $output_type = null;
+                            foreach ($mime_types as $mime_type) {
+                                if (isset($output['data'][$mime_type])) {
+                                    $output_type = $mime_type;
+                                    break;
+                                }
+                            }
+
+                            if ($output_type === 'text/plain') {
+                                // Display output text if we don't know how to render the content otherwise
+                                $cells[] = [
+                                    'type' => 'output',
+                                    'output_text' => $output['data']['text/plain'],
+                                ];
+                            }
+                            elseif ($output_type !== null) {
+                                $cells[] = [
+                                    'type' => 'image',
+                                    'image' => 'data:' . $output_type . ';base64, ' . $output['data'][$output_type],
+                                    'width' => 0,
+                                    'height' => 0,
+                                    'alt_text' => $output['data']['text/plain'] ?? '',
+                                ];
+                            }
+                        }
+                    }
+
+                    break;
+                default:
+                    break;
+            }
+        }
+
+        return $cells;
     }
 }
