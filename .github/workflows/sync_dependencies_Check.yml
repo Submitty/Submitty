@@ -1,0 +1,31 @@
+name: Sync Dependencies Check
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  check-sync:
+    runs-on: ubuntu-20.04
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Use Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '20.x'
+
+      - name: Install dependencies
+        run: npm install
+        working-directory: ./site
+
+      - name: Check for differences
+        run: |
+          git diff --exit-code package-lock.json || (echo "package-lock.json is out of sync with package.json" && exit 1)
+        working-directory: ./site
