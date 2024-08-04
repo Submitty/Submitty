@@ -22,10 +22,5 @@ jobs:
           node-version: '20.x'
 
       - name: Install dependencies
-        run: npm install
-        working-directory: ./site
-
-      - name: Check for differences
-        run: |
-          git diff --exit-code package-lock.json || (echo "package-lock.json is out of sync with package.json" && exit 1)
+        run: npm ci
         working-directory: ./site
