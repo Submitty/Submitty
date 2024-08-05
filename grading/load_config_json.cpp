@@ -12,6 +12,7 @@
 #include "load_config_json.h"
 #include "execute.h"
 
+#define SUBMITTY_INSTALL_DIRECTORY  std::string("__INSTALL__FILLIN__SUBMITTY_INSTALL_DIR__")
 extern const char *GLOBAL_config_json_string;  // defined in json_generated.cpp
 
 template <typename T>
@@ -243,6 +244,40 @@ void AddGlobalDefaults(nlohmann::json &whole_config) {
   nlohmann::json::iterator in_notebook_cells = whole_config.find("notebook");
   if (parts == whole_config.end() && in_notebook_cells != whole_config.end()) {
     whole_config["part_names"] =  nlohmann::json::array();
+  }
+}
+
+// Use the autograding_workers.json file, which contains a list of the capabilities that exist
+// on all the workers, to make sure at build-time that the job is runnable on a machine.
+// Throw an error and stop building if the required capability doesn't exist.
+void ConfirmCapabilityExists(nlohmann::json &whole_config) {
+  // Get the config file
+  std::string workers_file = SUBMITTY_INSTALL_DIRECTORY + "/config/autograding_workers.json";
+  std::ifstream wfs(workers_file);
+  nlohmann::json workers_json;
+  if (wfs.is_open()) {
+    wfs >> workers_json;
+  }
+
+  // Get the required capability and list of capabilities
+  std::string required_capability = whole_config["required_capabilities"];
+  nlohmann::json capabilities_list = workers_json["primary"]["capabilities"];
+
+  // Confirm the required capability is in the list of capabilities
+  if (std::find(capabilities_list.begin(), capabilities_list.end(), required_capability) == capabilities_list.end())
+  {
+    std::string message = "ERROR: The required capability '" + required_capability + "' does not exist.\n"
+      + "  The following capabilities exist in this network:\n";
+    
+    // Print out all available capabilities if the requested required capability does not exist
+    for (typename nlohmann::json::iterator capability = capabilities_list.begin(); capability != capabilities_list.end(); capability++)
+    {
+      std::string capability_str = capability.value();
+      message.append("    " + capability_str + "\n");
+    }
+    std::cout << message << std::endl;
+    std::cerr << message << std::endl;
+    exit(1);
   }
 }
 
@@ -1134,6 +1169,7 @@ nlohmann::json LoadAndCustomizeConfigJson(const std::string &student_id) {
 nlohmann::json FillInConfigDefaults(nlohmann::json& config_json, const std::string& assignment_id) {
 
   AddGlobalDefaults(config_json);
+  ConfirmCapabilityExists(config_json);
   int testcase_id = 0;
   /**
   * Validate/complete-ify the global testcases array.

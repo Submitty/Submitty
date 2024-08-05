@@ -188,6 +188,7 @@ function build_homework {
         exit 1
     fi
 
+    # Call configure.out (which has its main in /grading/main_configure.cpp)
     "${SUBMITTY_INSTALL_DIR}/bin/configure.out" complete_config.json "${course_dir}/config/build/build_${assignment}.json" "$assignment"
     configure_res="$?"
 
