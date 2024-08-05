@@ -207,6 +207,7 @@ function build_homework {
     # Remove the intermediate config
     rm complete_config.json
 
+
     # build the configuration, compilation, runner, and validation executables
     # configure cmake, specifying the clang compiler
     CXX=/usr/bin/clang++ cmake . > "$hw_build_path/log_cmake_output.txt" 2>&1

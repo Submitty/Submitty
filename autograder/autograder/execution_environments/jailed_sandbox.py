@@ -66,6 +66,7 @@ class JailedSandbox(secure_execution_environment.SecureExecutionEnvironment):
         working directory, execute the script with the arguments as the user
         in the directory.
         """
+
         if cwd is None:
             cwd = self.directory
 
