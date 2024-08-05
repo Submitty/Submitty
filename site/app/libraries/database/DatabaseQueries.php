@@ -7845,10 +7845,9 @@ AND gc_id IN (
      * array
      * @return array<mixed>
      */
-    public function getFullEmailList(): array {
-        $parameters = [];
-        $this->submitty_db->query('SELECT user_id, user_email FROM users', $parameters);
-
+    public function getUserIdEmailExists(string $email, string $user_id): array {
+        $parameters = [$email, $user_id];
+        $this->submitty_db->query('SELECT user_id, user_email FROM users where user_email=? or user_id=?', $parameters);
         return $this->submitty_db->rows();
     }
 

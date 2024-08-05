@@ -319,7 +319,11 @@ class AuthenticationController extends AbstractController {
         if ($this->logged_in) {
             return new RedirectResponse($this->core->buildUrl(['home']));
         }
-        return new WebResponse('Authentication', 'signupForm', ['email' => $this->getAcceptedEmails(), 'user_id' => $this->getUserIdRequirements()]);
+        if (!$this->core->getConfig()->isUserCreateAccount()) {
+            $this->core->addErrorMessage('Users cannot create their own account, Please have your system administrator add you.');
+            return new RedirectResponse($this->core->buildUrl(['authentication', 'login']));
+        }
+        return new WebResponse('Authentication', 'signupForm', ['email' => $this->core->getConfig()->getAcceptedEmails(), 'user_id' => $this->core->getConfig()->getUserIdRequirements()]);
     }
 
     /**
@@ -334,31 +338,11 @@ class AuthenticationController extends AbstractController {
     }
 
     /**
-     * @return  array<mixed>
-     */
-    public function getUserIdRequirements(): array {
-        // Change to /usr/local/submitty/.setup 
-        $json = file_get_contents('/usr/local/submitty/site/user_id_requirements.json');
-        // Check if the file was read successfully
-        if ($json === false) {
-            return ['all' => true, 'length' => -1];
-        }
-
-        $requirements = json_decode($json, true);
-
-        if ($requirements === null) {
-            return ['all' => true, 'length' => -1];
-        }
-
-        return $requirements;
-    }
-
-    /**
      * Check if the user ID is valid
      */
     public function isAcceptedUserId(string $user_id, string $given_name, string $family_name, string $email): bool {
         
-        $requirements = $this->getUserIdRequirements();
+        $requirements = $this->core->getConfig()->getUserIdRequirements();
 
          // If length is -1, allow any length
         if ($requirements['length'] !== -1 && strlen($user_id) > $requirements['length']) {
@@ -397,38 +381,41 @@ class AuthenticationController extends AbstractController {
     }
 
     /**
-     * @return array<string>
-     */
-    public function getAcceptedEmails(): array {
-        $json = file_get_contents('/usr/local/submitty/site/accepted_emails.json');
-        if ($json === false) {
-            return ['' => true];
-        }
-
-        // Decode the JSON file
-        $json_data = json_decode($json, true);
-
-        // Check if the JSON was decoded successfully
-        if ($json_data === null) {
-            return ['' => true];
-        }
-        return $json_data;  
-    }
-
-    /**
      * Checks if the email extension is in the accepted emails JSON file
      */
     public function isAcceptedEmail(string $email): bool {
-        $json_data = $this->getAcceptedEmails();
+        $emails = $this->core->getConfig()->getAcceptedEmails();
         // Check if the file was read successfully
         try {
-            $email_extension = explode('@', $email)[1];
+            $split_email = explode('@', $email);
+            $email_extension = $split_email[sizeof($split_email)-1];
         }
         catch (\Error $error) {
             return false;
         }
-        return in_array($email_extension, array_keys($json_data), true);
+        return in_array($email_extension, array_keys($emails), true);
     }
+
+    // public function verifyEmail(string $email) {
+    //     $user = $this->core->getUser();
+    //     $user_id = $user->getId();
+
+    //     $course = $this->core->getConfig()->getCourse();
+    //     $term = $this->core->getConfig()->getTerm();
+
+    //     $subject = "Submitty Verification for $user_id";
+    //     $body = <<<EMAIL
+    //         Testing
+    //     EMAIL;
+
+        
+    //     $details = ["subject" => $subject, "body" => $body, "email_address" => $email];
+    //     $email = new Email($this->core, $details);
+    //     $emails[] = $email;
+
+    //     $this->core->getNotificationFactory()->sendEmails($emails);
+    // }
+     
 
     /**
      * Handles the submission of the new account creation form
@@ -451,7 +438,7 @@ class AuthenticationController extends AbstractController {
         $password = $_POST['password'];
         $confirm_password = $_POST['confirm_password'];
 
-        $queried_list = $this->core->getQueries()->getFullEmailList();
+        $queried_list = $this->core->getQueries()->getUserIdEmailExists($email, $user_id);
 
         if (in_array($email, array_column($queried_list, 'user_email'), true)) {
             $this->core->addErrorMessage('Email already exists');
@@ -463,15 +450,15 @@ class AuthenticationController extends AbstractController {
             return new RedirectResponse($this->core->buildUrl(['authentication', 'create_account']));
         }
 
-        if (!$this->isGoodPassword($password)) {
-            $this->core->addErrorMessage('Password does not meet the requirements.');
-            return new RedirectResponse($this->core->buildUrl(['authentication', 'create_account']));
-        }
+       if (!$this->isGoodPassword($password)) {
+           $this->core->addErrorMessage('Password does not meet the requirements.');
+           return new RedirectResponse($this->core->buildUrl(['authentication', 'create_account']));
+       }
 
-        if ($password !== $confirm_password) {
-            $this->core->addErrorMessage('Passwords did not match.');
-            return new RedirectResponse($this->core->buildUrl(['authentication', 'create_account']));
-        }
+       if ($password !== $confirm_password) {
+           $this->core->addErrorMessage('Passwords did not match.');
+           return new RedirectResponse($this->core->buildUrl(['authentication', 'create_account']));
+       }
 
         if (!$this->isAcceptedEmail($email)) {
             $this->core->addErrorMessage('This email is not accepted.');
