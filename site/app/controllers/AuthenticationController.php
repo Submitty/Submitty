@@ -102,6 +102,18 @@ class AuthenticationController extends AbstractController {
         if (isset($old)) {
             $old = urldecode($old);
         }
+        if ($this->core->getConfig()->isUserCreateAccount()) {
+            if (!$this->core->getQueries()->getUserVerificationValues($_POST['user_id'])['is_verified']) {
+                $msg = 'You must verify your email before logging in';
+
+                $this->core->addErrorMessage($msg);
+                return new MultiResponse(
+                    JsonResponse::getFailResponse($msg),
+                    null,
+                    new RedirectResponse($old)
+                );
+            }
+        }
         if ($this->logged_in) {
             return MultiResponse::RedirectOnlyResponse(
                 new RedirectResponse($old)
@@ -313,7 +325,7 @@ class AuthenticationController extends AbstractController {
     /**
      * Display the form for creating a new account
      */
-    #[Route("/authentication/create_account")]
+    #[Route("/authentication/create_account", methods: ['GET'])]
     public function signupForm(): ResponseInterface {
         // Check if the user is already logged in, if yes, redirect to home or another appropriate page
         if ($this->logged_in) {
@@ -324,6 +336,41 @@ class AuthenticationController extends AbstractController {
             return new RedirectResponse($this->core->buildUrl(['authentication', 'login']));
         }
         return new WebResponse('Authentication', 'signupForm', ['email' => $this->core->getConfig()->getAcceptedEmails(), 'user_id' => $this->core->getConfig()->getUserIdRequirements()]);
+    }
+
+     /**
+     * Display the form for creating a new account
+     */
+    #[Route("/authentication/verify_email", methods: ['GET'])]
+    public function showVerifyEmailForm(): ResponseInterface {
+        // Check if the user is already logged in, if yes, redirect to home or another appropriate page
+        if ($this->logged_in) {
+            return new RedirectResponse($this->core->buildUrl(['home']));
+        }
+
+        if (!$this->core->getConfig()->isUserCreateAccount()) {
+            $this->core->addErrorMessage('Users cannot create their own account, Please have your system administrator add you.');
+            return new RedirectResponse($this->core->buildUrl(['authentication', 'login']));
+        }
+        return new WebResponse('Authentication', 'verificationForm');
+    }
+
+    #[Route("/authentication/verify_email", methods: ['POST'])]
+    public function verifyEmail(): ResponseInterface| null {
+        // Check if the user is already logged in, if yes, redirect to home or another appropriate page
+        if ($this->logged_in) {
+            return new RedirectResponse($this->core->buildUrl(['home']));
+        }
+
+        if (!$this->core->getConfig()->isUserCreateAccount()) {
+            $this->core->addErrorMessage('Users cannot create their own account, Please have your system administrator add you.');
+            return new RedirectResponse($this->core->buildUrl(['authentication', 'login']));
+        }
+        if(!isset($_POST['verification_code'])) {
+            $this->core->addErrorMessage('You must input the verification code.');
+            return null;
+        }
+        return new WebResponse('Authentication', 'verificationForm');
     }
 
     /**
@@ -396,26 +443,21 @@ class AuthenticationController extends AbstractController {
         return in_array($email_extension, array_keys($emails), true);
     }
 
-    // public function verifyEmail(string $email) {
-    //     $user = $this->core->getUser();
-    //     $user_id = $user->getId();
+    public function sendVerificationEmail(string $email, string $user_id) {
+        $subject = "Submitty Verification for $user_id";
+        $body = <<<EMAIL
+            Testing
+        EMAIL;
 
-    //     $course = $this->core->getConfig()->getCourse();
-    //     $term = $this->core->getConfig()->getTerm();
+        $details = ["subject" => $subject, "body" => $body, "email_address" => $email];
+        $email = new Email($this->core, $details);
+        $emails[] = $email;
 
-    //     $subject = "Submitty Verification for $user_id";
-    //     $body = <<<EMAIL
-    //         Testing
-    //     EMAIL;
+        $this->core->getNotificationFactory()->sendEmails($emails);
+    }
+    
 
-        
-    //     $details = ["subject" => $subject, "body" => $body, "email_address" => $email];
-    //     $email = new Email($this->core, $details);
-    //     $emails[] = $email;
 
-    //     $this->core->getNotificationFactory()->sendEmails($emails);
-    // }
-     
 
     /**
      * Handles the submission of the new account creation form

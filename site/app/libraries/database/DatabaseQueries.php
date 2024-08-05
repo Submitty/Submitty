@@ -7851,6 +7851,17 @@ AND gc_id IN (
         return $this->submitty_db->rows();
     }
 
+     /**
+     * Gets a list of emails with user ids for all active particpants in Submitty
+     * array
+     */
+    public function getUserVerificationValues(string $user_id): array {
+        $parameters = [$user_id];
+        $this->submitty_db->query('SELECT is_verified, verification_code, verification_expiration FROM users where user_id=?', $parameters);
+        return $this->submitty_db->rows();
+    }
+
+
     /**
      * Gives true if thread is locked
      */
