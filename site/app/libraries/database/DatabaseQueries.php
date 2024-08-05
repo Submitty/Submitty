@@ -9512,7 +9512,7 @@ SQL;
      * @param string $user_id
      * @param string $gradeable_id
      * @param int $version
-     * @return array Array containing summed elapsed_time and max_rss_size for each testcase_id
+     * @return array{total_elapsed_time: float, total_max_rss_size: int}
      */
     public function getMetricSum(string $user_id, string $gradeable_id, int $version): array {
         $query = "

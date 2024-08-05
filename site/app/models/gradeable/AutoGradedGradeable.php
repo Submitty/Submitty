@@ -223,23 +223,24 @@ class AutoGradedGradeable extends AbstractModel {
         return $instance->getQueuePosition();
     }
 
-    public function getMetrics_Sum() {
+
+    /**
+     * Gets the autograding metrics for a specific version and testcase
+     * @return array{total_elapsed_time: float, total_max_rss_size: int}
+     */
+    public function getMetrics_Sum(): array {
         $instance = $this->getActiveVersionInstance();
         if ($instance === null) {
-            return NAN;
+            return [];
         }
         return $instance->getMetrics_Sum();
     }
 
-    /**
-     * @return float|string
-     */
-    public function getSubmitterId() {
+    public function getSubmitterId(): string {
         $instance = $this->getActiveVersionInstance();
         if ($instance === null) {
-            return NAN;
+            return '';
         }
         return $instance->getSubmitterId();
     }
-
 }
