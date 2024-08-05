@@ -46,6 +46,41 @@ class NotebookUtils {
                                 'output_text' => implode($output['text'] ?? []),
                             ];
                         }
+                        elseif (($output['output_type'] ?? '') === 'display_data' && isset($output['data'])) {
+                            // Note: SVG files are not supported due to XSS risks
+                            $mime_types = [
+                                'image/png',
+                                'image/jpeg',
+                                'image/gif',
+                                'image/bmp',
+                                'text/plain', // Fall back to text/plain if it is available.
+                            ];
+
+                            $output_type = null;
+                            foreach ($mime_types as $mime_type) {
+                                if (isset($output['data'][$mime_type])) {
+                                    $output_type = $mime_type;
+                                    break;
+                                }
+                            }
+
+                            if ($output_type === 'text/plain') {
+                                // Display output text if we don't know how to render the content otherwise
+                                $cells[] = [
+                                    'type' => 'output',
+                                    'output_text' => $output['data']['text/plain'],
+                                ];
+                            }
+                            elseif ($output_type !== null) {
+                                $cells[] = [
+                                    'type' => 'image',
+                                    'image' => 'data:' . $output_type . ';base64, ' . $output['data'][$output_type],
+                                    'width' => 0,
+                                    'height' => 0,
+                                    'alt_text' => $output['data']['text/plain'] ?? '',
+                                ];
+                            }
+                        }
                     }
 
                     break;
