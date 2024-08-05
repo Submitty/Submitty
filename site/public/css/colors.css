@@ -245,10 +245,11 @@
 
     /* autograding results */
     --diff-char: var(--default-black);
+    --diff-background-all: var(--default-white);
     --diff-background-actual: #fceae9;
     --diff-background-expected: #defae1;
     --diff-char-background-actual: #fbc1c0;
-    --diff-char-background-expected: #b5eebb;
+    --diff-char-background-expected: #74F2B6;
 }
 
 [data-black_mode="black"][data-theme="dark"] {
@@ -260,6 +261,13 @@
     /* poll histogram colors */
     --histogram-default: var(--standard-light-blue);
     --histogram-correct: var(--standard-medium-dark-lime-green);
+
+    /* autograding results */
+    --diff-background-all: var(--default-white);
+    --diff-background-actual: #2c1c21;
+    --diff-background-expected: #122816;
+    --diff-char-background-actual: #f26b6c;
+    --diff-char-background-expected: #47c73b;
 }
 
 [data-theme="dark"] {
@@ -371,6 +379,7 @@
 
     /* autograding results */
     --diff-char: var(--always-default-white);
+    --diff-background-all: #181c24;
     --diff-background-actual: #2e1b20;
     --diff-background-expected: #16261e;
     --diff-char-background-actual: #7a3133;

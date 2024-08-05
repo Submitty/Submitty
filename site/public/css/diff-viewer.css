@@ -9,7 +9,7 @@
 .diff-code {
     font-family: monospace;
     color: var(--diff-char);
-    background-color: var(--default-white);
+    background-color: var(--diff-background-all);
 }
 
 .diff-code .row {
@@ -32,12 +32,10 @@
 
 .highlight-char-actual {
     background-color: var(--diff-char-background-actual);
-    font-weight: 900;
 }
 
 .highlight-char-expected {
     background-color: var(--diff-char-background-expected);
-    font-weight: 900;
 }
 
 /* stylelint-disable-next-line selector-class-pattern */
