@@ -359,13 +359,9 @@ def prepare_directory_for_autograding(config, working_directory, user_id_of_runn
     tmp_logs = os.path.join(working_directory, "TMP_SUBMISSION", "tmp_logs")
     submission_path = os.path.join(tmp_submission, "submission")
     tmp_work_test_input = os.path.join(tmp_work, "test_input")
-#     tmp_work_test_output = os.path.join(tmp_work, "test_output")
-#     tmp_work_instructor_solution_executable = os.path.join(tmp_work, "instructor_solution_executable")
 
     os.mkdir(tmp_work)
     os.mkdir(tmp_work_test_input)
-#     os.mkdir(tmp_work_test_output)
-#     os.mkdir(tmp_work_instructor_executable)
 
     # Unzip the autograding and submission folders
     unzip_this_file(autograding_zip_file, tmp_autograding)
@@ -384,16 +380,11 @@ def prepare_directory_for_autograding(config, working_directory, user_id_of_runn
 
     # copy output files
     test_input_path = os.path.join(tmp_autograding, 'test_input')
-#     test_output_path = os.path.join(tmp_autograding, 'test_output')
-#     instructor_solution_executable_path = os.path.join(tmp_autograding, 'instructor_solution_executable')
     # Copy test input files into tmp_work_test_input.
     copy_contents_into(config, job_id, test_input_path, tmp_work_test_input, tmp_logs)
-#     copy_contents_into(config, job_id, test_output_path, tmp_work_test_output, tmp_logs)
-#     copy_contents_into(config, job_id, instructor_solution_executable_path, tmp_work_instructor_solution_executable, tmp_logs)
+
     # Lock down permissions on the unzipped folders/test input folder to stop untrusted users from gaining access.
     lock_down_folder_permissions(tmp_work_test_input)
-#     lock_down_folder_permissions(tmp_work_test_output)
-#     lock_down_folder_permissions(tmp_work_instructor_executable)
     lock_down_folder_permissions(tmp_autograding)
     lock_down_folder_permissions(tmp_submission)
 
