@@ -264,20 +264,70 @@ void ConfirmCapabilityExists(nlohmann::json &whole_config) {
   nlohmann::json capabilities_list = workers_json["primary"]["capabilities"];
 
   // Confirm the required capability is in the list of capabilities
-  if (std::find(capabilities_list.begin(), capabilities_list.end(), required_capability) == capabilities_list.end())
-  {
+  if (std::find(capabilities_list.begin(), capabilities_list.end(), required_capability) == capabilities_list.end()) {
     std::string message = "ERROR: The required capability '" + required_capability + "' does not exist.\n"
       + "  The following capabilities exist in this network:\n";
     
     // Print out all available capabilities if the requested required capability does not exist
-    for (typename nlohmann::json::iterator capability = capabilities_list.begin(); capability != capabilities_list.end(); capability++)
-    {
+    for (typename nlohmann::json::iterator capability = capabilities_list.begin(); capability != capabilities_list.end(); capability++) {
       std::string capability_str = capability.value();
       message.append("    " + capability_str + "\n");
     }
     std::cout << message << std::endl;
     std::cerr << message << std::endl;
     exit(1);
+  }
+}
+
+// Use the autograding_containers.json file, which contains the list of all images under each capability.
+// Scoop out all the images used in the config file (could be at both top-level and in testcases).
+// Throw an error and stop building if the required images aren't under the required capability.
+void ConfirmCapabilityHasImages(nlohmann::json &testcases, nlohmann::json &whole_config) {
+  // Get the config file
+  std::string containers_file = SUBMITTY_INSTALL_DIRECTORY + "/config/autograding_containers.json";
+  std::ifstream cfs(containers_file);
+  nlohmann::json containers_json;
+  if (cfs.is_open()) {
+    cfs >> containers_json;
+  }
+
+  // Get all images required
+  std::vector<std::string> images;
+  images.push_back(whole_config["container_options"]["container_image"]);
+  for (nlohmann::json::iterator tc = testcases.begin(); tc != testcases.end(); tc++) {
+    nlohmann::json testcase_containers = (*tc)["containers"];
+    for (nlohmann::json::iterator con = testcase_containers.begin(); con != testcase_containers.end(); con++) {
+      images.push_back((*con)["container_image"]);
+    }
+    if ((*tc).contains("solution_containers")){
+      nlohmann::json testcase_solution_containers = (*tc)["solution_containers"];
+      for (nlohmann::json::iterator con = testcase_solution_containers.begin(); con != testcase_solution_containers.end(); con++) {
+        images.push_back((*con)["container_image"]);
+      }
+    }
+  }
+
+  // Get all images under the capability
+  std::string required_capability = whole_config["required_capabilities"];
+  nlohmann::json capability_images = containers_json[required_capability];
+
+  // Confirm all the required images are under the capability
+  for (std::vector<std::string>::iterator s = images.begin(); s != images.end(); s++)
+  {
+    std::string str = *s;
+    if (std::find(capability_images.begin(), capability_images.end(), str) == capability_images.end()) {
+      std::string message = "ERROR: The required image '" + str + "' is not under capability '" + required_capability + "'." + "\n"
+      + "  The following images exist under this capability:\n";
+    
+      // Print out all available capabilities if the requested required capability does not exist
+      for (typename nlohmann::json::iterator image = capability_images.begin(); image != capability_images.end(); image++) {
+        std::string image_str = image.value();
+        message.append("    " + image_str + "\n");
+      }
+      std::cout << message << std::endl;
+      std::cerr << message << std::endl;
+      exit(1);
+    }
   }
 }
 
@@ -1181,6 +1231,7 @@ nlohmann::json FillInConfigDefaults(nlohmann::json& config_json, const std::stri
   }
 
   AddDockerConfiguration(*testcases, config_json);
+  ConfirmCapabilityHasImages(*testcases, config_json);
   FormatDispatcherActions(*testcases, config_json);
   formatPreActions(*testcases, config_json);
   FormatGraphicsActions(*testcases, config_json);
