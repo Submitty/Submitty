@@ -72,23 +72,23 @@ def main():
         exit(1)
     provider = os.path.basename(os.path.dirname(action_provision[0]))
 
-    with open(workerfile) as file:
-        existing_config = json.load(file)
+    if os.path.exists(workerfile):
+        with open(workerfile) as file:
+            existing_config = json.load(file, object_pairs_hook=OrderedDict)
 
-    version = 1
-    if 'version' in existing_config and type(existing_config['version']) == int:
-        version = existing_config['version']
+        version = 1
+        if 'version' in existing_config and type(existing_config['version']) == int:
+            version = existing_config['version']
 
-    for worker_name in (existing_config if version == 1 else existing_config['workers']):
-        if len(glob.glob(os.path.join(rootdir, '.vagrant', 'machines', worker_name, '*', 'action_provision'))):
-            if input("\033[93mWarning: There are existing worker machines that may conflict with new configuration.\n"
-                     "They can be removed safely with 'vagrant workers destroy'.\n"
-                     "Are you sure you would like to proceed without removing them? [y/N]\033[0m "
-                    ).lower().strip() != 'y':
-                return
-            break
+        for worker_name in (existing_config if version == 1 else existing_config['workers']):
+            if len(glob.glob(os.path.join(rootdir, '.vagrant', 'machines', worker_name, '*', 'action_provision'))):
+                if input("\033[93mWarning: There are existing worker machines that may conflict with new configuration.\n"
+                        "They can be removed safely with 'vagrant workers destroy'.\n"
+                        "Are you sure you would like to proceed without removing them? [y/N]\033[0m "
+                        ).lower().strip() != 'y':
+                    return
+                break
 
-    if os.path.isfile(workerfile):
         if input('Overwrite existing worker configuration? [y/N] ').lower().strip() != 'y':
             return
 
