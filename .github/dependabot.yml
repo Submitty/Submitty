@@ -20,7 +20,9 @@ updates:
       prefix: "[Dependency] "
       prefix-development: "[DevDependency] "
   - package-ecosystem: pip
-    directory: "/.setup/pip/"
+    directories:
+      - "/.setup/pip/"
+      - "/python_submitty_utils/"
     schedule:
       interval: "monthly"
     labels:
