@@ -596,13 +596,13 @@ class AutoGradedVersion extends AbstractModel {
         }
     }
 
-    public function getMetrics_Sum() {
+    public function getMetrics_Sum(): array {
         $who = $this->getGradedGradeable()->getSubmitter()->getId();
         $gradeable = $this->graded_gradeable->getGradeable();
         $version = $this->version;
 
         $metrics = $this->core->getQueries()->getMetricSum($who, $gradeable->getId(), $version);
-        if (!empty($metrics) && isset($metrics[0]['total_elapsed_time']) && isset($metrics[0]['total_max_rss_size'])) {
+        if (isset($metrics[0]['total_elapsed_time']) && isset($metrics[0]['total_max_rss_size'])) {
             return [
                 'runtime' => $metrics[0]['total_elapsed_time'],
                 'memory' => $metrics[0]['total_max_rss_size']
@@ -614,7 +614,7 @@ class AutoGradedVersion extends AbstractModel {
         ];
     }
 
-    public function getSubmitterId() {
+    public function getSubmitterId(): string {
         return $this->getGradedGradeable()->getSubmitter()->getId();
     }
 

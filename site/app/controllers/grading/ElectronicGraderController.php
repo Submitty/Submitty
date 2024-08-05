@@ -527,7 +527,7 @@ class ElectronicGraderController extends AbstractController {
 
         $gradeableUrl = $this->core->buildCourseUrl(['gradeable', $gradeable->getId(), 'grading', 'details']);
         $this->core->getOutput()->addBreadcrumb("{$gradeable->getTitle()} Grading", $gradeableUrl);
-        $this->core->getOutput()->addBreadcrumb("Grading Stats");
+        $this->core->getOutput()->addBreadcrumb("Statistics & Charts");
 
         $isPeerGradeable = false;
         if ($gradeable->hasPeerComponent() && ($this->core->getUser()->getGroup() < User::GROUP_STUDENT)) {

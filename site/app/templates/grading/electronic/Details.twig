@@ -59,7 +59,7 @@
         </div>
     </div>
     {% if not is_student %}
-        <a href="{{ stats_url }}" class="btn btn-primary" data-testid="grading-stats">Grading Stats</a>
+        <a href="{{ stats_url }}" class="btn btn-primary" data-testid="stats-and-charts">Statistics & Charts</a>
     {% endif %}
     {% if not is_instructor %}
         <button class="btn btn-default" onclick="showGradeableMessage()" data-testid="grader-responsibility">Responsibilities as a Grader</button>

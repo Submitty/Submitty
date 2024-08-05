@@ -226,7 +226,6 @@ class AutoGradedGradeable extends AbstractModel {
 
     /**
      * Gets the autograding metrics for a specific version and testcase
-     * @return array{total_elapsed_time: float, total_max_rss_size: int}
      */
     public function getMetrics_Sum(): array {
         $instance = $this->getActiveVersionInstance();
