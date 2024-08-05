@@ -9882,6 +9882,11 @@ parameters:
 			path: app/models/gradeable/AutoGradedGradeable.php
 
 		-
+			message: "#^Method app\\\\models\\\\gradeable\\\\AutoGradedGradeable\\:\\:getMetrics_Sum\\(\\) return type has no value type specified in iterable type array\\.$#"
+			count: 1
+			path: app/models/gradeable/AutoGradedGradeable.php
+
+		-
 			message: "#^Method app\\\\models\\\\gradeable\\\\AutoGradedGradeable\\:\\:setActiveVersion\\(\\) has no return type specified\\.$#"
 			count: 1
 			path: app/models/gradeable/AutoGradedGradeable.php
@@ -9903,7 +9908,7 @@ parameters:
 
 		-
 			message: "#^Strict comparison using \\=\\=\\= between app\\\\models\\\\gradeable\\\\AutoGradedVersion and null will always evaluate to false\\.$#"
-			count: 6
+			count: 8
 			path: app/models/gradeable/AutoGradedGradeable.php
 
 		-
@@ -9998,6 +10003,11 @@ parameters:
 
 		-
 			message: "#^Method app\\\\models\\\\gradeable\\\\AutoGradedVersion\\:\\:getMetaFiles\\(\\) return type has no value type specified in iterable type array\\.$#"
+			count: 1
+			path: app/models/gradeable/AutoGradedVersion.php
+
+		-
+			message: "#^Method app\\\\models\\\\gradeable\\\\AutoGradedVersion\\:\\:getMetrics_Sum\\(\\) return type has no value type specified in iterable type array\\.$#"
 			count: 1
 			path: app/models/gradeable/AutoGradedVersion.php
 
@@ -10142,6 +10152,11 @@ parameters:
 			path: app/models/gradeable/AutoGradedVersion.php
 
 		-
+			message: "#^Offset 0 on array\\{total_elapsed_time\\: float, total_max_rss_size\\: int\\} in isset\\(\\) does not exist\\.$#"
+			count: 1
+			path: app/models/gradeable/AutoGradedVersion.php
+
+		-
 			message: "#^Property app\\\\models\\\\gradeable\\\\AutoGradedVersion\\:\\:\\$files type has no value type specified in iterable type array\\.$#"
 			count: 1
 			path: app/models/gradeable/AutoGradedVersion.php
@@ -10153,6 +10168,11 @@ parameters:
 
 		-
 			message: "#^Property app\\\\models\\\\gradeable\\\\AutoGradedVersion\\:\\:\\$results_public_files type has no value type specified in iterable type array\\.$#"
+			count: 1
+			path: app/models/gradeable/AutoGradedVersion.php
+
+		-
+			message: "#^Result of && is always false\\.$#"
 			count: 1
 			path: app/models/gradeable/AutoGradedVersion.php
 
