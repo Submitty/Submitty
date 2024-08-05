@@ -2,30 +2,39 @@
     <div>
         <label for="x-axis-selector">Select X-Axis:</label>
         <select id="x-axis-selector">
-            <option value="runtime">Runtime</option>
-            <option value="memory">Memory</option>
-            <option value="scores">Scores</option>
+            <option value="runtime">Cumulative Autograding Runtime (seconds)</option>
+            <option value="memory">Maximum Autograding Memory (bytes)</option>
+            <option value="scores">Autograding Total Score</option>
         </select>
 
         <label for="y-axis-selector">Select Y-Axis:</label>
         <select id="y-axis-selector">
-            <option value="runtime">Runtime</option>
-            <option value="memory">Memory</option>
-            <option value="scores">Scores</option>
+            <option value="runtime">Cumulative Autograding Runtime (seconds)</option>
+            <option value="memory">Maximum Autograding Memory (bytes)</option>
+            <option value="scores">Autograding Total Score</option>
         </select>
     </div>
     <div id="myDiv4"></div>
     <script>
-        var runtime = [{{ histograms['runtime'] | join(',') }}].map(num => Math.floor(num * 1000) / 1000);
+        function truncateToThreeDecimals(num) {
+            return Math.floor(num * 1000) / 1000;
+        }
+
+        var runtime = [{{ histograms['runtime'] | join(',') }}].map(truncateToThreeDecimals);
         var memory = [{{ histograms['memory'] | join(',') }}];
         var scores = [{{ histograms['bAuto'] | join(',') }}];
-
 
         var submitters = [
             {% for submitter in histograms['submitters'] %}
             "{{ submitter }}"{% if not loop.last %},{% endif %}
             {% endfor %}
         ];
+
+        var labels = {
+            runtime: "Cumulative Autograding Runtime (seconds)",
+            memory: "Maximum Autograding Memory (byte)",
+            scores: "Autograding Total Score"
+        };
 
         function updatePlot(xData, yData, xLabel, yLabel) {
             var x1 = [], y1 = [], x2 = [], y2 = [], x3 = [], y3 = [];
@@ -111,7 +120,7 @@
                 xaxis: {
                     title: xLabel
                 },
-                yaxis:{
+                yaxis: {
                     title: yLabel
                 },
                 font: {
@@ -131,22 +140,23 @@
         document.getElementById('x-axis-selector').addEventListener('change', function() {
             var xValue = this.value;
             var yValue = document.getElementById('y-axis-selector').value;
-            updatePlot(getDataArray(xValue), getDataArray(yValue), xValue.charAt(0).toUpperCase() + xValue.slice(1), yValue.charAt(0).toUpperCase() + yValue.slice(1));
+            updatePlot(getDataArray(xValue), getDataArray(yValue), labels[xValue], labels[yValue]);
         });
 
         document.getElementById('y-axis-selector').addEventListener('change', function() {
             var xValue = document.getElementById('x-axis-selector').value;
             var yValue = this.value;
-            updatePlot(getDataArray(xValue), getDataArray(yValue), xValue.charAt(0).toUpperCase() + xValue.slice(1), yValue.charAt(0).toUpperCase() + yValue.slice(1));
+            updatePlot(getDataArray(xValue), getDataArray(yValue), labels[xValue], labels[yValue]);
         });
 
-        // Set default selected values for both selectors
+        // Initial plot
         document.getElementById('x-axis-selector').value = 'runtime';
         document.getElementById('y-axis-selector').value = 'scores';
-
-        // Initial plot
-        updatePlot(runtime, scores, 'Runtime', 'Scores');
+        var initialX = document.getElementById('x-axis-selector').value;
+        var initialY = document.getElementById('y-axis-selector').value;
+        updatePlot(getDataArray(initialX), getDataArray(initialY), labels[initialX], labels[initialY]);
     </script>
+
     <div id="mySmallDiv4">
         <script>
             function truncateToThreeDecimals(num) {
@@ -169,13 +179,13 @@
             var averageM = truncateToThreeDecimals(sumM / memory.length);
             var maxM = Math.max(...memory);
             var minM = Math.min(...memory);
-            document.write(`<b>Total Runtime (seconds): </b>` + "<br>" + `Maximum: ` + `${maxR}` + '&nbsp&nbsp&nbsp&nbsp' +
+            document.write(`<b>Cumulative Autograding Runtime (seconds): </b>` + "<br>" + `Maximum: ` + `${maxR}` + '&nbsp&nbsp&nbsp&nbsp' +
                 `Minimum: ` + `${minR}` + '&nbsp&nbsp&nbsp&nbsp' + 'Average: ' + `${averageR}`);
             document.write("<br>" + "<br>");
-            document.write(`<b>Peak Memory (bytes): </b>` + "<br>" + `Maximum: ` + `${maxM}` + '&nbsp&nbsp&nbsp&nbsp' +
+            document.write(`<b>Maximum Autograding Memory (bytes): </b>` + "<br>" + `Maximum: ` + `${maxM}` + '&nbsp&nbsp&nbsp&nbsp' +
                 `Minimum: ` + `${minM}` + '&nbsp&nbsp&nbsp&nbsp' + 'Average: ' + `${averageM}`);
             document.write("<br>" + "<br>");
-            document.write(`<b>Autograding Scores: </b>` + "<br>" + `Maximum possible: ` + {{ autograding_non_extra_credit }} +
+            document.write(`<b>Autograding Total Scores: </b>` + "<br>" + `Maximum possible: ` + {{ autograding_non_extra_credit }} +
                 '&nbsp&nbsp&nbsp&nbsp' + 'Average: ' + {{ autograded_average.getAverageScore() }});
         </script>
     </div>
