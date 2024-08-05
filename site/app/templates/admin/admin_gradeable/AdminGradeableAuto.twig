@@ -110,6 +110,19 @@
         </div>
     </div>
 
+    <div class="raw-config-info">
+        <div class="option-title">Or:</div>
+        <a class="btn btn-primary" tabindex="0" id="edit-gradeable" onclick="cancelGradeableConfigEdit(); openDiv('gradeable-config-structure'); ">Manually edit config</a>
+        <ul class="config-folder-view" id="gradeable-config-structure">
+            {{ _self.display_config_files(config_files, 1, gradeable.getId()) }}
+        </ul>
+        <div id="gradeable-config-edit-bar">
+            <textarea id="gradeable-config-edit" aria-label="Edit Gradeable Configuration"></textarea>
+            <a class="btn btn-primary" onclick="saveGradeableConfigEdit('{{ gradeable.getId() }}')">Save</a>
+            <a class="btn btn-default" onclick="cancelGradeableConfigEdit()">Cancel</a>
+        </div>
+    </div>
+
     <div class="btn-container" id="rebuild-gradeable-button">
         <a class="btn btn-primary key_to_click" tabindex="0" onclick="ajaxRebuildGradeableButton()">Rebuild Gradeable</a>
     </div>
@@ -227,3 +240,20 @@
         });
     });
 </script>
+
+{% macro display_config_files(files, indent, g_id) %}
+    {% for name, file in files %}
+        {% set id = file.path | trim('/', 'right') | replace({'/': '_', '.': '_'}) %}
+        <li style="margin-left:{{ indent * 15 }}px">
+            {% if file.files is defined %}
+                <span id="{{ id }}-span" class="fas fa-folder"></span><a class="key_to_click" tabindex="0" onclick="openDiv('{{ id }}');">{{ name }}</a>
+                <ul id="{{ id }}" class="config-folder-view">
+                    {{ _self.display_config_files(file.files, indent + 1, g_id) }}
+                </ul>
+            {% else %}
+                <span class="fas fa-file"></span>
+                <a class="key_to_click" onclick="loadGradeableEditor('{{ g_id }}', '{{ file.path }}')">{{ name }}</a>
+            {% endif %}
+        </li>
+    {% endfor %}
+{% endmacro %}
