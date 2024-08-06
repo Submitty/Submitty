@@ -50,7 +50,7 @@ runs:
       shell: bash
 
     - name: Cache pip
-      uses: actions/cache@v3
+      uses: actions/cache@v4
       with:
         path: ~/.cache/pip
         key: ${{ runner.os }}-${{ github.job }}-pip-${{ hashFiles('**/system_requirements.txt') }}
@@ -81,7 +81,7 @@ runs:
         echo "dir=$(composer config cache-files-dir)" >> $GITHUB_OUTPUT
       shell: bash
     - name: Install composer Cache
-      uses: actions/cache@v3
+      uses: actions/cache@v4
       with:
         path: ${{ steps.composer-cache.outputs.dir }}
         key: ${{ runner.os }}-php-composer-${{ hashFiles('**/composer.lock') }}
