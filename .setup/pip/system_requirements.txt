@@ -11,9 +11,6 @@
 # For QR bulk upload
 opencv-python-headless==4.10.0.84
 
-# jsonschema & jsonref & pytz & tzlocal
-pytz==2023.3.post1 # Submitty-util specific.
-
 # Docker gets broken with 2.32.0 current release (before a hotfix is applied)
 requests==2.32.3
 python-pam==2.0.2
