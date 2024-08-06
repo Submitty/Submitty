@@ -1,4 +1,4 @@
-/* exported addToTable, deleteRow */
+/* exported addToTable, deleteRow ResetPerGradeablePercents */
 /* global buildCourseUrl csrfToken displayErrorMessage displaySuccessMessage */
 
 const benchmarks_with_input_fields = ['lowest_a-', 'lowest_b-', 'lowest_c-', 'lowest_d'];
@@ -19,7 +19,6 @@ function ExtractBuckets() {
 }
 
 // Forces element's value to be non-negative
-// eslint-disable-next-line no-unused-vars
 function ClampPoints(el) {
     if (el.value === '') {
         el.value = el.placeholder;
@@ -28,7 +27,15 @@ function ClampPoints(el) {
     el.value = Math.max(0.0, el.value);
 }
 
-// eslint-disable-next-line no-unused-vars
+// Forces element's value to be non-negative and between 0.0 - 100.0
+// Distinct from ClampPercent(), this is for Per Gradeable Percents
+function ClampPercents(el) {
+    if (el.value === '') {
+        el.value = el.placeholder;
+    }
+    el.value = Math.min(Math.max(el.value, 0.0), 100.0);
+}
+
 function DetectMaxOverride(el) {
     if (el.value !== el.placeholder) {
         el.classList.add('override');
@@ -52,17 +59,43 @@ function ExtractBucketName(s, offset) {
 }
 
 // Forces element's value to be in range [0.0,100.0]
-// eslint-disable-next-line no-unused-vars
 function ClampPercent(el) {
     el.value = Math.min(Math.max(el.value, 0.0), 100.0);
     UpdateUsedPercentage();
     $(`#config-percent-${ExtractBucketName(el.id, 1)}`).text(`${el.value}%`);
 }
 
+// Forces sum of Per Gradeable Percents in a bucket to be below 100.0
+function ClampPerGradeablePercents(el, bucket) {
+    const percentsInputsInBucket = $(`div[id^="gradeable-percents-div-${bucket}"]`);
+    let sum = 0.0;
+
+    percentsInputsInBucket.each((index, percentInput) => {
+        const textbox = $(percentInput).children().first();
+        sum += parseFloat(textbox.val());
+    });
+
+    if (sum > 100.0) {
+        const excess = sum - 100.0;
+        el.value = el.value - excess;
+        displayErrorMessage(`The sum of percents in bucket ${bucket} may not exceed 100.`);
+    }
+}
+
+// Resets Per Gradeable Percents in a given bucket to an even split
+function ResetPerGradeablePercents(bucket) {
+    const percentsInputsInBucket = $(`div[id^="gradeable-percents-div-${bucket}"]`);
+
+    percentsInputsInBucket.each((index, percentInput) => {
+        const textbox = $(percentInput).children().first();
+        textbox.val('').blur(); // If the textbox is empty, it resets to an even split onblur
+    });
+}
+
 // Updates the sum of percentage points accounted for by the buckets being used
 function UpdateUsedPercentage() {
     let val = 0.0;
-    $("input[id^='percent']").filter(function () {
+    $("input[id^='percent-']").filter(function () {
         return $(this).parent().css('display') !== 'none';
     }).each(function () {
         val += parseFloat($(this).val());
@@ -98,7 +131,6 @@ function UpdateVisibilityBuckets() {
     used_buckets.each(function () {
         // Extract the bucket name
         const bucket = ExtractBucketName($(this).attr('id'), 1);
-        console.log(`prev_bucket: ${prev_bucket} bucket: ${bucket}`);
         if (bucket !== prev_bucket) {
             $(`#config-${bucket}`).css('display', 'block');
             $(`#config-${prev_bucket}`).after($(`#config-${bucket}`));
@@ -203,9 +235,19 @@ function getGradeableBuckets() {
                 const gradeable = {};
 
                 const children = $(this).children();
+                // children[0] represents <div id="gradeable-pts-div-*">
+                // children[1] represents <div id="gradeable-percents-div-*">
+                // replace divs with inputs
+                children[0] = children[0].children[0];
+                children[1] = children[1].children[0];
 
                 // Get max points
                 gradeable.max = parseFloat(children[0].value);
+
+                // Get gradeable final grade percent, but only if Per Gradeable Percents was selected
+                if ($(children[1]).is(':visible')) {
+                    gradeable.percent = parseFloat(children[1].value) / 100.0;
+                }
 
                 // Get gradeable release date
                 gradeable.release_date = children[0].dataset.gradeReleaseDate;
@@ -942,6 +984,34 @@ $(document).ready(() => {
 
         dropLowestDivs.each((index, dropLowestDiv) => {
             $(dropLowestDiv).css('display', isChecked ? 'block' : 'none');
+        });
+    });
+
+    // Control visibility of per gradeable percent input boxes
+    const perGradeablePercentsCheckboxes = $('input[id^="per-gradeable-percents-checkbox-"]');
+    perGradeablePercentsCheckboxes.each((index, perGradeablePercentsCheckboxDOMElement) => {
+        const perGradeablePercentsCheckbox = $(perGradeablePercentsCheckboxDOMElement);
+        const bucket = perGradeablePercentsCheckbox[0].id.match(/^per-gradeable-percents-checkbox-(.+)$/)[1];
+        const percentsInputsInBucket = $(`div[id^="gradeable-percents-div-${bucket}"]`);
+        const resetButtonInBucket = $(`button[id^="per-gradeable-percents-reset-${bucket}"]`);
+
+        const isChecked = perGradeablePercentsCheckbox.is(':checked');
+        percentsInputsInBucket.each((index, percentInput) => {
+            $(percentInput).toggle(isChecked);
+        });
+        resetButtonInBucket.each((index, resetButton) => {
+            $(resetButton).toggle(isChecked);
+        });
+
+        perGradeablePercentsCheckbox.change(function (event) {
+            event.stopPropagation();
+            const isChecked = $(this).is(':checked');
+            percentsInputsInBucket.each((index, percentInput) => {
+                $(percentInput).toggle(isChecked);
+            });
+            resetButtonInBucket.each((index, resetButton) => {
+                $(resetButton).toggle(isChecked);
+            });
         });
     });
 });
