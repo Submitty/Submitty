@@ -96,6 +96,16 @@ use app\controllers\admin\AdminGradeableController;
  * @method int getLimitedAccessBlind()
  * @method void setPeerBlind($peer_blind)
  * @method int getPeerBlind()
+ * @method void setPeerAutograding($peer_autograding)
+ * @method bool getPeerAutograding()
+ * @method void setPeerRubric($peer_rubric)
+ * @method bool getPeerRubric()
+ * @method void setPeerFiles($peer_files)
+ * @method bool getPeerFiles()
+ * @method void setPeerSolutions($peer_solutions)
+ * @method bool getPeerSolutions()
+ * @method void setPeerDiscussion($peer_discussion)
+ * @method bool getPeerDiscussion()
  * @method void setInstructorBlind($instructor_blind)
  * @method int getInstructorBlind()
  * @method bool getAllowCustomMarks()
@@ -320,6 +330,21 @@ class Gradeable extends AbstractModel {
      * @var bool will peer graders grade the gradeable blindly*/
     protected $peer_blind = 3;
     /** @prop
+     * @var bool will peer graders access the autograding panel*/
+    protected $peer_autograding = true;
+    /** @prop
+     * @var bool will peer graders access the rubric panel*/
+    protected $peer_rubric = true;
+    /** @prop
+     * @var bool will peer graders access the files panel*/
+    protected $peer_files = true;
+    /** @prop
+     * @var bool will peer graders access the solution/notes panel*/
+    protected $peer_solutions = true;
+    /** @prop
+     * @var bool will peer graders access the discussion panel*/
+    protected $peer_discussion = true;
+    /** @prop
      * @var bool will instructors have blind peer grading enabled*/
     protected $instructor_blind = 1;
 
@@ -351,6 +376,20 @@ class Gradeable extends AbstractModel {
 
         if (array_key_exists('peer_blind', $details)) {
             $this->setPeerBlind($details['peer_blind']);
+        }
+
+        $mapping = [
+            'autograding' => 'setPeerAutograding',
+            'rubric' => 'setPeerRubric',
+            'files' => 'setPeerFiles',
+            'solution_notes' => 'setPeerSolutions',
+            'discussion' => 'setPeerDiscussion'
+        ];
+
+        foreach ($mapping as $key => $method) {
+            if (array_key_exists($key, $details) && method_exists($this, $method)) {
+                call_user_func([$this, $method], $details[$key] ?? true);
+            }
         }
 
         if (array_key_exists('limited_access_blind', $details)) {

@@ -31,10 +31,14 @@ class RainbowCustomizationJSON extends AbstractModel {
      * @var object[]
      */
     private array $plagiarism = [];
+    /**
+     * @var object[]
+     */
+    private array $manual_grade = [];
 
     // The order of allowed_display and allowed_display_description has to match
     const allowed_display = ['grade_summary', 'grade_details', 'exam_seating', 'section',
-        'messages', 'warning', 'final_grade', 'manual_grade', 'final_cutoff', 'instructor_notes'];
+        'messages', 'warning', 'final_grade', 'final_cutoff', 'instructor_notes'];
 
     const allowed_display_description = [
         "Display a column(row) for each gradeable bucket on the syllabus.", //grade_summary
@@ -44,7 +48,6 @@ class RainbowCustomizationJSON extends AbstractModel {
         "Display the optional text message at the top of the page.", //messages
         "not used", //warning
         "Configure cutoffs and display the student's final term letter grade.", //final_grade
-        "not used", //manual_grade
         "Display the histogram of average overall grade and count of students with each final term letter grade.", //final_cutoff
         "Optional message for specific students that are only visible on the instructor gradebook, these messages are never displayed to students." //instructor_notes
     ];
@@ -82,6 +85,14 @@ class RainbowCustomizationJSON extends AbstractModel {
         return $this->plagiarism;
     }
 
+    /**
+     * Get array of manual grades
+     *
+     * @return array<object>
+     */
+    public function getManualGrades(): array {
+        return $this->manual_grade;
+    }
 
     /**
      * Gets an array of display benchmarks
@@ -138,14 +149,14 @@ class RainbowCustomizationJSON extends AbstractModel {
     }
 
     /**
-     * Determine the existence of a custom_customization.json inside the course rainbow_grades directory
+     * Determine the existence of a manual_customization.json inside the course rainbow_grades directory
      *
-     * @return bool Indicates if a custom_customization.json exists
+     * @return bool Indicates if a manual_customization.json exists
      */
-    public function doesCustomCustomizationExist() {
-        // Get path to custom_customization.json
+    public function doesManualCustomizationExist() {
+        // Get path to manual_customization.json
         $course_path = $this->core->getConfig()->getCoursePath();
-        $file_path = FileUtils::joinPaths($course_path, 'rainbow_grades', 'custom_customization.json');
+        $file_path = FileUtils::joinPaths($course_path, 'rainbow_grades', 'manual_customization.json');
 
         return file_exists($file_path);
     }
@@ -159,7 +170,7 @@ class RainbowCustomizationJSON extends AbstractModel {
     public function loadFromJsonFile() {
         // Get contents of file and decode
         $course_path = $this->core->getConfig()->getCoursePath();
-        $course_path = FileUtils::joinPaths($course_path, 'rainbow_grades', 'customization.json');
+        $course_path = FileUtils::joinPaths($course_path, 'rainbow_grades', 'gui_customization.json');
 
         if (!file_exists($course_path)) {
             throw new FileReadException('Unable to locate the file to read');
@@ -209,6 +220,10 @@ class RainbowCustomizationJSON extends AbstractModel {
 
         if (isset($json->plagiarism)) {
             $this->plagiarism = $json->plagiarism;
+        }
+
+        if (isset($json->manual_grade)) {
+            $this->manual_grade = $json->manual_grade;
         }
     }
 
@@ -346,6 +361,31 @@ class RainbowCustomizationJSON extends AbstractModel {
     }
 
 
+    /**
+     * Add a manual grade entry to existing array
+     *
+     * @param object{
+     *     "user": string,
+     *     "grade": string,
+     *     "note": string
+     * } $manualGradeEntry
+     */
+    public function addManualGradeEntry(object $manualGradeEntry): void {
+        $emptyArray = [
+            "user" => "",
+            "grade" => "",
+            "note" => ""
+        ];
+
+        $manualGradeArray = (array) $manualGradeEntry;
+
+        if ($manualGradeArray === $emptyArray) {
+            throw new BadArgumentException('Manual grading entry may not be empty.');
+        }
+
+        $this->manual_grade[] = $manualGradeEntry;
+    }
+
 
     /**
      * Save the contents in this objects properties to the customization.json for the current course
@@ -353,7 +393,7 @@ class RainbowCustomizationJSON extends AbstractModel {
     public function saveToJsonFile() {
         // Get path of where to save file
         $course_path = $this->core->getConfig()->getCoursePath();
-        $course_path = FileUtils::joinPaths($course_path, 'rainbow_grades', 'customization.json');
+        $course_path = FileUtils::joinPaths($course_path, 'rainbow_grades', 'gui_customization.json');
 
         // If display was empty then just add defaults
         if (empty($this->display)) {

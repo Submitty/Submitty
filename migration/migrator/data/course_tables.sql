@@ -716,7 +716,12 @@ CREATE TABLE public.course_materials (
     hidden_from_students boolean,
     priority double precision NOT NULL,
     url text,
-    title character varying(255)
+    title character varying(255),
+    uploaded_by character varying(255) DEFAULT NULL::character varying,
+    uploaded_date timestamp with time zone,
+    last_edit_by character varying(255) DEFAULT NULL::character varying,
+    last_edit_date timestamp with time zone,
+    CONSTRAINT check_dates CHECK (((uploaded_date IS NULL) OR (last_edit_date IS NULL) OR (uploaded_date <= last_edit_date)))
 );
 
 
@@ -1490,6 +1495,20 @@ CREATE TABLE public.peer_feedback (
 
 
 --
+-- Name: peer_grading_panel; Type: TABLE; Schema: public; Owner: -
+--
+
+CREATE TABLE public.peer_grading_panel (
+    g_id character varying(255) NOT NULL,
+    autograding boolean DEFAULT true NOT NULL,
+    rubric boolean DEFAULT true NOT NULL,
+    files boolean DEFAULT true NOT NULL,
+    solution_notes boolean DEFAULT true NOT NULL,
+    discussion boolean DEFAULT true NOT NULL
+);
+
+
+--
 -- Name: poll_options; Type: TABLE; Schema: public; Owner: -
 --
 
@@ -1498,7 +1517,8 @@ CREATE TABLE public.poll_options (
     poll_id integer,
     response text NOT NULL,
     correct boolean NOT NULL,
-    option_id integer NOT NULL
+    option_id integer NOT NULL,
+    author_id character varying(255) DEFAULT NULL::character varying
 );
 
 
@@ -1569,7 +1589,8 @@ CREATE TABLE public.polls (
     release_answer character varying(10) DEFAULT 'never'::character varying,
     duration integer DEFAULT 0,
     end_time timestamp with time zone,
-    is_visible boolean DEFAULT false NOT NULL
+    is_visible boolean DEFAULT false NOT NULL,
+    allows_custom boolean DEFAULT false NOT NULL
 );
 
 
@@ -2408,6 +2429,14 @@ ALTER TABLE ONLY public.peer_feedback
 
 
 --
+-- Name: peer_grading_panel peer_grading_panel_pkey; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.peer_grading_panel
+    ADD CONSTRAINT peer_grading_panel_pkey PRIMARY KEY (g_id);
+
+
+--
 -- Name: poll_options poll_options_pkey; Type: CONSTRAINT; Schema: public; Owner: -
 --
 
@@ -2688,6 +2717,22 @@ CREATE TRIGGER late_day_extension_change AFTER INSERT OR DELETE OR UPDATE ON pub
 --
 
 CREATE TRIGGER late_days_allowed_change AFTER INSERT OR DELETE OR UPDATE ON public.late_days FOR EACH ROW EXECUTE PROCEDURE public.late_days_allowed_change();
+
+
+--
+-- Name: course_materials course_materials_last_edit_by_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.course_materials
+    ADD CONSTRAINT course_materials_last_edit_by_fkey FOREIGN KEY (last_edit_by) REFERENCES public.users(user_id);
+
+
+--
+-- Name: course_materials course_materials_uploaded_by_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.course_materials
+    ADD CONSTRAINT course_materials_uploaded_by_fkey FOREIGN KEY (uploaded_by) REFERENCES public.users(user_id);
 
 
 --
@@ -3272,6 +3317,22 @@ ALTER TABLE ONLY public.peer_feedback
 
 ALTER TABLE ONLY public.peer_feedback
     ADD CONSTRAINT peer_feedback_user_id_fkey FOREIGN KEY (user_id) REFERENCES public.users(user_id) ON DELETE CASCADE;
+
+
+--
+-- Name: peer_grading_panel peer_grading_panel_g_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.peer_grading_panel
+    ADD CONSTRAINT peer_grading_panel_g_id_fkey FOREIGN KEY (g_id) REFERENCES public.electronic_gradeable(g_id);
+
+
+--
+-- Name: poll_options poll_options_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.poll_options
+    ADD CONSTRAINT poll_options_fkey FOREIGN KEY (author_id) REFERENCES public.users(user_id) ON UPDATE CASCADE;
 
 
 --
