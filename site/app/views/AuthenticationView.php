@@ -68,14 +68,14 @@ class AuthenticationView extends AbstractView {
         ]);
     }
 
-    public function verifyEmailForm(): string {
+    public function verificationForm(string $user_id): string {
         $this->core->getOutput()->addInternalCss("input.css");
         $this->core->getOutput()->addInternalCss("links.css");
         $this->core->getOutput()->addInternalCss("authentication.css");
         $this->core->getOutput()->enableMobileViewport();
 
         return $this->core->getOutput()->renderTwigTemplate("VerifyEmailForm.twig", [
-            "signup_url" => $this->core->buildUrl(['authentication', 'self_add_user'])
+            'user_id '=> $user_id
         ]);
     }
 }

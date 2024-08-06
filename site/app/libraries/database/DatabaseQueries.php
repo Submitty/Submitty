@@ -534,11 +534,13 @@ SQL;
                        $user->getLegalGivenName(), $user->getPreferredGivenName(),
                        $user->getLegalFamilyName(), $user->getPreferredFamilyName(), $user->getEmail(),
                        $this->submitty_db->convertBoolean($user->isUserUpdated()),
-                       $this->submitty_db->convertBoolean($user->isInstructorUpdated())];
-
+                       $this->submitty_db->convertBoolean($user->isInstructorUpdated()),
+                       $this->submitty_db->convertBoolean($user->isVerified()),
+                       $user->getVerificationExpiration(),
+                       $user->getVerificationCode()];
         $this->submitty_db->query(
-            "INSERT INTO users (user_id, user_password, user_numeric_id, user_givenname, user_preferred_givenname, user_familyname, user_preferred_familyname, user_email, user_updated, instructor_updated)
-                                   VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
+            "INSERT INTO users (user_id, user_password, user_numeric_id, user_givenname, user_preferred_givenname, user_familyname, user_preferred_familyname, user_email, user_updated, instructor_updated, is_verified, verification_expiration, verification_code)
+                                   VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
             $array
         );
     }
