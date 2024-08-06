@@ -20,7 +20,9 @@ updates:
       prefix: "[Dependency] "
       prefix-development: "[DevDependency] "
   - package-ecosystem: pip
-    directory: "/.setup/pip/"
+    directories:
+      - "/.setup/pip/"
+      - "/python_submitty_utils/"
     schedule:
       interval: "monthly"
     labels:
@@ -30,7 +32,7 @@ updates:
   - package-ecosystem: "github-actions"
     directories:
       - "/"
-      - "/actions/e2e-Setup-Composite"
+      - "/.github/actions/e2e-Setup-Composite"
     schedule:
       interval: "monthly"
     labels:
