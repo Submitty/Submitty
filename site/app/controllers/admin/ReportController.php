@@ -97,7 +97,7 @@ class ReportController extends AbstractController {
         $json_data = json_encode($data, JSON_PRETTY_PRINT);
 
         // Write the JSON string to the file
-        if (file_put_contents($url_base_path, $json_data) === false) {
+        if (!file_put_contents($url_base_path, $json_data)) {
             $this->core->addErrorMessage('Unable to write to base_url.json');
             $this->core->redirect($this->core->buildCourseUrl(['reports']));
         }
