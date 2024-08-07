@@ -64,6 +64,26 @@ const removeThread = (title) => {
     cy.get('[data-testid="thread-list-item"]').contains(title).should('not.exist');
 };
 
+describe('Visuals', () => {
+    it('should compare screenshot of the entire page', () => {
+        cy.viewport(1000, 920);
+        cy.login('instructor');
+        cy.visit(['sample', 'forum', 'threads', '9']);
+        cy.get('[data-testid="markdown-post-list"]').scrollTo('top');
+        cy.get('[data-testid="markdown-post-list"]').compareSnapshot('forum-threads-top', 0.02, {
+            capture: 'viewport',
+        });
+        cy.get('[data-testid="markdown-post-list"]').scrollTo('center');
+        cy.get('[data-testid="markdown-post-list"]').compareSnapshot('forum-threads-center', 0.02, {
+            capture: 'viewport',
+        });
+        cy.get('[data-testid="markdown-post-list"]').scrollTo('bottom');
+        cy.get('[data-testid="markdown-post-list"]').compareSnapshot('forum-threads-bottom', 0.02, {
+            capture: 'viewport',
+        });
+    });
+});
+
 const uploadAttachmentAndDelete = (title, attachment) => {
     cy.get('[data-testid="thread-list-item"]').contains(title).click();
     cy.get('[data-testid="create-post-head"]').should('contain', title);

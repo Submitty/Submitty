@@ -65,6 +65,7 @@
     "cypress": "^13.13.2",
     "cypress-browser-permissions": "^1.1.0",
     "cypress-file-upload": "^5.0.8",
+    "cypress-image-diff-js": "^2.1.4",
     "esbuild": "^0.21.1",
     "eslint": "^8.57.0",
     "eslint-plugin-cypress": "^3.3.0",

@@ -106,7 +106,7 @@
                     }
                 });
             </script>
-            <div id="posts_list" style="overflow-y: auto; height:100%;" class="col-9">
+            <div id="posts_list" data-testid="markdown-post-list" style="overflow-y: auto; height:100%;" class="col-9">
 
                 {% include "forum/GeneratePostList.twig" with {
                     "userGroup" : generate_post_content.userGroup,
