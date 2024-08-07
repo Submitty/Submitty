@@ -1,5 +1,10 @@
 /* exported addToTable, deleteRow */
+/* global buildCourseUrl csrfToken displayErrorMessage displaySuccessMessage */
+
 const benchmarks_with_input_fields = ['lowest_a-', 'lowest_b-', 'lowest_c-', 'lowest_d'];
+const allowed_grades = ['A', 'A-', 'B+', 'B', 'B-', 'C+', 'C', 'C-', 'D+', 'D', 'F'];
+const allowed_grades_excluding_f = ['A', 'A-', 'B+', 'B', 'B-', 'C+', 'C', 'C-', 'D+', 'D'];
+const tables = ['plagiarism', 'manualGrade'];
 
 // eslint-disable-next-line no-unused-vars
 function ExtractBuckets() {
@@ -123,7 +128,7 @@ function getSection() {
         const label = this.value;
 
         if (label === '') {
-            throw 'All sections MUST have a label before saving';
+            $('#save_status').text('All sections MUST have a label before saving');
         }
 
         // Add to sections
@@ -267,78 +272,143 @@ function getGradeableBuckets() {
     return gradeables;
 }
 
-function getPlagiarism() {
-    const plagiarismData = [];
+/**
+ * Gets data to add to the JSON for the plagiarism and manual grade tables
+ * @param {string} table
+ *      'plagiarism'
+ *      'manualGrade'
+ */
+function getTableData(table) {
+    if (!tables.includes(table)) {
+        return;
+    }
 
-    const tableBody = document.getElementById('table-body');
+    const data = [];
+
+    const tableMap = {
+        plagiarism: 'plagiarism-table-body',
+        manualGrade: 'manual-grading-table-body',
+    };
+    const tableBody = document.getElementById(tableMap[table]);
     const rows = tableBody.getElementsByTagName('tr');
 
     for (let i = 0; i < rows.length; i++) {
         const row = rows[i];
-        const user = row.cells[0].textContent;
-        const gradeable = row.cells[1].textContent;
-        const penalty = parseFloat(row.cells[2].textContent);
+        const firstInput = row.cells[0].textContent;
+        const secondInput = row.cells[1].textContent;
+        const thirdInput = row.cells[2].textContent;
 
-        plagiarismData.push({
-            user: user,
-            gradeable: gradeable,
-            penalty: penalty,
-        });
+        if (table === 'plagiarism') {
+            data.push({
+                user: firstInput,
+                gradeable: secondInput,
+                penalty: parseFloat(thirdInput),
+            });
+        }
+        else if (table === 'manualGrade') {
+            data.push({
+                user: firstInput,
+                grade: secondInput,
+                note: thirdInput,
+            });
+        }
     }
 
-    return plagiarismData;
+    return data;
 }
 
-function addToTable() {
-    const USERID = document.getElementById('user_id').value.trim();
-    const gradeable = document.getElementById('g_id').value.trim();
-    const penalty = document.getElementById('marks').value.trim();
-
-    // Check for empty fields
-    if (USERID === '' || gradeable === '' || penalty === '') {
-        alert('Please fill in all the fields.');
+/**
+ * Adds input data to plagiarism and manual grade tables
+ * @param {string} table
+ *     'plagiarism'
+ *     'manualGrade'
+ */
+function addToTable(table) {
+    if (!tables.includes(table)) {
         return;
     }
 
+    const tableMap = {
+        plagiarism: ['plagiarism-table-body', 'plagiarism-user-id', 'g_id', 'marks'],
+        manualGrade: ['manual-grading-table-body', 'manual-grading-user-id', 'manual-grading-grade', 'manual-grading-note'],
+    };
+
+    const firstInput = document.getElementById(tableMap[table][1]).value.trim();
+    const secondInput = document.getElementById(tableMap[table][2]).value.trim();
+    const thirdInput = document.getElementById(tableMap[table][3]).value.trim();
+
+    // Check whether input is allowed
     // eslint-disable-next-line no-undef
     const studentFullDataValues = studentFullData.map((item) => item.value);
-    if (!studentFullDataValues.includes(USERID)) {
-        alert('Invalid User ID. Please enter a valid one.');
-        return;
-    }
-
-    // Check for penalty
-    if (penalty > 1 || penalty < 0) {
-        alert('Penalty must be between 0 - 1');
-        return;
-    }
-
-    const tableBody = document.getElementById('table-body');
-
-    // Check for duplicate entries
+    const tableBody = document.getElementById(tableMap[table][0]);
     const rows = tableBody.getElementsByTagName('tr');
-    for (let i = 0; i < rows.length; i++) {
-        const row = rows[i];
-        const existingUSERID = row.cells[0].textContent.trim();
-        const existingGradeable = row.cells[1].textContent.trim();
+    switch (table) {
+        case 'plagiarism': {
+            if (firstInput === '' || secondInput === '' || thirdInput === '') {
+                alert('Please fill in all the fields.');
+                return;
+            }
+            if (!studentFullDataValues.includes(firstInput)) {
+                alert('Invalid User ID. Please enter a valid one.');
+                return;
+            }
+            if (thirdInput > 1 || thirdInput < 0) {
+                alert('Penalty must be between 0 - 1');
+                return;
+            }
 
-        if (USERID === existingUSERID && gradeable === existingGradeable) {
-            alert('Entry with the same Student ID and Gradeable already exists.');
-            return;
+            // Check for duplicate entries
+            for (let i = 0; i < rows.length; i++) {
+                const row = rows[i];
+                const existingFirstInput = row.cells[0].textContent.trim();
+                const existingSecondInput = row.cells[1].textContent.trim();
+
+                if (firstInput === existingFirstInput && secondInput === existingSecondInput) {
+                    alert('Entry with the same Student ID and Gradeable already exists.');
+                    return;
+                }
+            }
+            break;
+        }
+        case 'manualGrade': {
+            if (firstInput === '' || secondInput === '') {
+                alert('Please fill in both user ID and final grade.');
+                return;
+            }
+            if (!studentFullDataValues.includes(firstInput)) {
+                alert('Invalid User ID. Please enter a valid one.');
+                return;
+            }
+            if (!allowed_grades.includes(secondInput)) {
+                alert('Grade must be one of the following: ${allowed_grades.join(\', \')}');
+                return;
+            }
+
+            // Check for duplicate entries
+            for (let i = 0; i < rows.length; i++) {
+                const row = rows[i];
+                const existingFirstInput = row.cells[0].textContent.trim();
+
+                if (firstInput === existingFirstInput) {
+                    alert('Entry with the same Student ID already exists.');
+                    return;
+                }
+            }
+            break;
         }
     }
 
     // Create a new row and cells
     const newRow = tableBody.insertRow();
 
-    const cellUSERID = newRow.insertCell();
-    cellUSERID.textContent = USERID;
+    const cellFirstInput = newRow.insertCell();
+    cellFirstInput.textContent = firstInput;
 
-    const cellGradeable = newRow.insertCell();
-    cellGradeable.textContent = gradeable;
+    const cellSecondInput = newRow.insertCell();
+    cellSecondInput.textContent = secondInput;
 
-    const cellPenalty = newRow.insertCell();
-    cellPenalty.textContent = penalty;
+    const cellThirdInput = newRow.insertCell();
+    cellThirdInput.textContent = thirdInput;
 
     const cellDelete = newRow.insertCell();
     const deleteLink = document.createElement('a');
@@ -351,14 +421,16 @@ function addToTable() {
     cellDelete.appendChild(deleteLink);
 
     // Clear the form fields
-    document.getElementById('user_id').value = '';
-    document.getElementById('g_id').value = '';
-    document.getElementById('marks').value = '';
+    document.getElementById(tableMap[table][1]).value = '';
+    document.getElementById(tableMap[table][2]).value = '';
+    document.getElementById(tableMap[table][3]).value = '';
+    saveChanges();
 }
 
 function deleteRow(button) {
     const row = button.parentNode.parentNode;
     row.parentNode.removeChild(row);
+    saveChanges();
 }
 
 function getMessages() {
@@ -421,14 +493,13 @@ function getFinalCutoffPercent() {
 
     // Collect benchmark percents
     const final_cutoff = {};
-    const letter_grades = ['A', 'A-', 'B+', 'B', 'B-', 'C+', 'C', 'C-', 'D+', 'D'];
 
     $('.final_cutoff_input').each(function () {
         // Get data
         const letter_grade = this.getAttribute('data-benchmark').toString();
         const percent = this.value;
 
-        if (letter_grades.includes(letter_grade)) {
+        if (allowed_grades_excluding_f.includes(letter_grade)) {
             // Verify percent is not empty
             if (percent === '') {
                 throw 'All final cutoffs must have a value before saving.';
@@ -458,7 +529,8 @@ function buildJSON() {
         section: getSection(),
         gradeables: getGradeableBuckets(),
         messages: getMessages(),
-        plagiarism: getPlagiarism(),
+        plagiarism: getTableData('plagiarism'),
+        manual_grade: getTableData('manualGrade'),
     };
 
     ret = JSON.stringify(ret);
@@ -471,77 +543,201 @@ function showLogButton(responseData) {
     $('#save_status_log').append(`<pre>${responseData}</pre>`);
 }
 
-function checkAutoRGStatus() {
-    // Send request
-    $.getJSON({
+function sendSelectedValue() {
+    return new Promise((resolve, reject) => {
+        const selected_value = $("input[name='customization']:checked").val();
+        // eslint-disable-next-line no-undef
+        const url = buildCourseUrl(['reports', 'rainbow_grades_customization', 'manual_or_gui']);
+        const formData = new FormData();
+        // eslint-disable-next-line no-undef
+        formData.append('csrf_token', csrfToken);
+        formData.append('selected_value', selected_value);
+
+        $.ajax({
+            url: url,
+            type: 'POST',
+            data: formData,
+            processData: false,
+            contentType: false,
+            dataType: 'json',
+            success: function (data) {
+                console.log(data);
+                if (data['status'] === 'success') {
+                    resolve(data);
+                }
+                else {
+                    reject(data['message']);
+                }
+            },
+            error: function (jqXHR, textStatus, errorThrown) {
+                console.log('AJAX error:', jqXHR, textStatus, errorThrown);
+                let errorMsg = `An error occurred: Server response: ${jqXHR.status} ${jqXHR.statusText}`;
+                try {
+                    // Attempt to parse JSON, if there's HTML, this will fail
+                    const responseText = jqXHR.responseText;
+                    const jsonStartIndex = responseText.indexOf('{');
+                    if (jsonStartIndex !== -1) {
+                        const jsonResponse = JSON.parse(responseText.substring(jsonStartIndex));
+                        errorMsg = `${jsonResponse.message || jsonResponse.status}`;
+                    }
+                }
+                catch (e) {
+                    console.error('Failed to parse JSON response', e);
+                }
+                reject(errorMsg);
+            },
+        });
+    });
+}
+
+// eslint-disable-next-line no-unused-vars
+function runBuild() {
+    // eslint-disable-next-line no-undef
+    const url = buildCourseUrl(['reports', 'build_form']);
+
+    sendSelectedValue()
+        .then(() => {
+            $.ajax({
+                type: 'POST',
+                url: url,
+                data: { csrf_token: csrfToken },
+                dataType: 'json',
+                success: function (response) {
+                    console.log(response);
+                    if (response.status === 'success') {
+                        $('#save_status').text('Generating rainbow grades, please wait...');
+                        checkBuildStatus();
+                    }
+                    else {
+                        $('#save_status').text('An error occurred while building');
+                    }
+                },
+                error: function (jqXHR, textStatus, errorThrown) {
+                    console.log('AJAX error:', jqXHR, textStatus, errorThrown);
+                    $('#save_status').text('An error occurred while making the request');
+                },
+            });
+        })
+        .catch((error) => {
+            console.error('Caught error:', error);
+            $('#save_status').text(`An error occurred: ${error}`);
+        });
+}
+
+function checkBuildStatus() {
+    $.ajax({
         type: 'POST',
-        // eslint-disable-next-line no-undef
         url: buildCourseUrl(['reports', 'rainbow_grades_status']),
-        // eslint-disable-next-line no-undef
         data: { csrf_token: csrfToken },
+        dataType: 'json',
         success: function (response) {
+            console.log(response);
             if (response.status === 'success') {
-                $('#save_status').html('Rainbow grades successfully generated!');
+                $('#save_status').text('Rainbow grades successfully generated!');
                 showLogButton(response.data);
             }
             else if (response.status === 'fail') {
-                $('#save_status').html('A failure occurred generating rainbow grades');
+                $('#save_status').text('A failure occurred generating rainbow grades');
                 showLogButton(response.message);
             }
             else {
-                $('#save_status').html('Internal Server Error');
+                $('#save_status').text('Internal Server Error');
                 console.log(response);
             }
         },
-        error: function (response) {
-            console.error(`Failed to parse response from server: ${response}`);
+        error: function (xhr, status, error) {
+            console.error(`Failed to parse response from server: ${xhr.responseText}`);
         },
     });
 }
 
-// This function attempts to create a new customization.json server-side based on form input
-// eslint-disable-next-line no-unused-vars
-function ajaxUpdateJSON(successCallback, errorCallback) {
-    try {
-        $('#save_status').html('Saving...');
+$(document).ready(() => {
+    $("input[name*='display']").change(() => {
+        saveChanges();
+    });
+    // Register change handlers to update the status message when form inputs change
+    $("input[name*='display_benchmarks']").change(() => {
+        saveChanges();
+    });
+    $('#cust_messages_textarea').on('change keyup paste focusout', () => {
+        saveChanges();
+    });
+    $('.sections_and_labels').on('change keyup paste', () => {
+        saveChanges();
+    });
+    // Attach a focusout event handler to all input and textarea elements within #gradeables after user finishes typing
+    $('#gradeables').find('input, textarea').on('focusout', () => {
+        saveChanges();
+    });
 
-        // eslint-disable-next-line no-undef
-        const url = buildCourseUrl(['reports', 'rainbow_grades_customization']);
-        $.getJSON({
-            type: 'POST',
-            url: url,
-            // eslint-disable-next-line no-undef
-            data: { json_string: buildJSON(), csrf_token: csrfToken },
-            success: function (response) {
-                if (response.status === 'success') {
-                    $('#save_status').html('Generating rainbow grades, please wait...');
+    // https://stackoverflow.com/questions/15657686/jquery-event-detect-changes-to-the-html-text-of-a-div
+    // More Details https://developer.mozilla.org/en-US/docs/Web/API/MutationObserver
+    // select the target node
+    const target = document.querySelector('#buckets_used_list');
+    // create an observer instance
+    // eslint-disable-next-line no-unused-vars
+    const observer = new MutationObserver((mutations) => {
+        saveChanges();
+    });
+    // configuration of the observer:
+    const config = { attributes: true, childList: true, characterData: true };
+    // pass in the target node, as well as the observer options
+    observer.observe(target, config);
+});
 
-                    // Call the server to see if auto_rainbow_grades has completed
-                    checkAutoRGStatus();
-                    // successCallback(response.data);
+function saveChanges() {
+    $('#save_status').text('Change detected Saving ...');
+    const url = buildCourseUrl(['reports', 'rainbow_grades_customization_save']);
+    const formData = new FormData();
+    formData.append('csrf_token', csrfToken);
+    formData.append('json_string', buildJSON());
+
+    $.ajax({
+        url: url,
+        type: 'POST',
+        data: formData,
+        dataType: 'json',
+        processData: false,
+        contentType: false,
+        success: function (response) {
+            console.log(response);
+            if (response['status'] === 'success') {
+                $('#save_status').text('All changes saved');
+            }
+            else {
+                // lets keep the alert, because users may not notice it even if it fails
+                alert(`An error occurred: ${response.data}`);
+            }
+        },
+        // error: function (jqXHR, textStatus, errorThrown) {
+        //     console.error(`Error status: ${textStatus}`);
+        //     console.error(`Error thrown: ${errorThrown}`);
+        //     console.error(`Server response: ${jqXHR.status} ${jqXHR.statusText}`);
+        // },
+        error: function (jqXHR, textStatus, errorThrown) {
+            console.log('AJAX error:', jqXHR, textStatus, errorThrown);
+            let errorMsg = `An error occurred: Server response: ${jqXHR.status} ${jqXHR.statusText}`;
+            try {
+                // Attempt to parse JSON, if there's HTML, this will fail
+                const responseText = jqXHR.responseText;
+                const jsonStartIndex = responseText.indexOf('{');
+                if (jsonStartIndex !== -1) {
+                    const jsonResponse = JSON.parse(responseText.substring(jsonStartIndex));
+                    errorMsg = `${jsonResponse.message || jsonResponse.status}`;
                 }
-                else if (response.status === 'fail') {
-                    $('#save_status').html('A failure occurred saving customization data');
-                    // errorCallback(response.message, response.data);
-                }
-                else {
-                    $('#save_status').html('Internal Server Error');
-                    console.error(response.message);
-                }
-            },
-            error: function (response) {
-                console.error(`Failed to parse response from server: ${response}`);
-            },
-        });
-    }
-    catch (err) {
-        $('#save_status').html(err);
-    }
+            }
+            catch (e) {
+                console.error('Failed to parse JSON response', e);
+            }
+        },
+    });
 }
 
-function displayChangeDetectedMessage() {
-    $('#save_status').text('Changes detected, press "Save Changes" to save them.');
-}
+$(document).ready(() => {
+    $("input[name='customization']").change(() => {
+        $('#save_status').text('Switched customization, need to rebuild');
+    });
+});
 
 /**
  * Sets the visibility for 'benchmark percent' input boxes and also per-gradeable curve input boxes
@@ -590,11 +786,11 @@ function setCustomizationItemVisibility(elem) {
     const cust_item_id = checkbox_to_cust_item[checkbox_name];
     const is_checked = elem.checked;
 
-    if (is_checked) {
-        $(cust_item_id).show();
-    }
-    else {
-        $(cust_item_id).hide();
+    $(cust_item_id).toggle(is_checked);
+
+    // manual grading is dependent on final grade cutoffs
+    if (checkbox_name === 'final_grade') {
+        $('#manual-grading').toggle(is_checked);
     }
 }
 
@@ -656,45 +852,6 @@ $(document).ready(() => {
         }
     });
 
-    $("input[name*='display']").change(() => {
-        displayChangeDetectedMessage();
-    });
-
-    // Register change handlers to update the status message when form inputs change
-    $("input[name*='display_benchmarks']").change(() => {
-        displayChangeDetectedMessage();
-    });
-
-    $("input[name*='final_grade_cutoffs']").change(() => {
-        displayChangeDetectedMessage();
-    });
-
-    $('#cust_messages_textarea').on('change keyup paste', () => {
-        displayChangeDetectedMessage();
-    });
-
-    $('.sections_and_labels').on('change keyup paste', () => {
-        displayChangeDetectedMessage();
-    });
-    // plagiarism option-input
-    $('.option-input').on('change keyup paste', () => {
-        displayChangeDetectedMessage();
-    });
-
-    // https://stackoverflow.com/questions/15657686/jquery-event-detect-changes-to-the-html-text-of-a-div
-    // More Details https://developer.mozilla.org/en-US/docs/Web/API/MutationObserver
-    // select the target node
-    const target = document.querySelector('#buckets_used_list');
-    // create an observer instance
-    // eslint-disable-next-line no-unused-vars
-    const observer = new MutationObserver((mutations) => {
-        displayChangeDetectedMessage();
-    });
-    // configuration of the observer:
-    const config = { attributes: true, childList: true, characterData: true };
-    // pass in the target node, as well as the observer options
-    observer.observe(target, config);
-
     // Display auto rainbow grades log on button click
     $('#show_log_button').click(() => {
         $('#save_status_log').toggle();
@@ -704,6 +861,67 @@ $(document).ready(() => {
     $(document).ready(() => {
         $('#rg_web_ui_loading').hide();
         $('#rg_web_ui').show();
+    });
+});
+
+$(document).ready(() => {
+    // Button click event
+    $('#btn-upload-customization').click(() => {
+        $('#config-upload').click();
+    });
+
+    // File input change event
+    $('#config-upload').on('change', function () {
+        const selected_file = $(this)[0].files[0];
+        console.log('Selected File: ', selected_file);
+
+        // eslint-disable-next-line no-undef
+        const url = buildCourseUrl(['reports', 'rainbow_grades_customization', 'upload']);
+        console.log('URL: ', url);
+
+        const formData = new FormData();
+        formData.append('csrf_token', csrfToken);
+        formData.append('config_upload', selected_file);
+
+        $.ajax({
+            url: url,
+            type: 'POST',
+            data: formData,
+            processData: false,
+            contentType: false,
+            success: function (jsonData) {
+                const data = JSON.parse(jsonData);
+                console.log(`Data: ${JSON.stringify(data)}`);
+
+                // Check if server reports that file exists
+                const manual_customization_exists = data['data']['manual_customization_exists'];
+                console.log(`manual_customization_exists: ${manual_customization_exists}`);
+
+                if (data['status'] === 'fail') {
+                    displayErrorMessage(data['message']);
+                    $('#config-upload').focus();
+                }
+                else {
+                    displaySuccessMessage('Manual Customization uploaded successfully');
+                    if (manual_customization_exists) {
+                        $('#ask_which_customization').show();
+                        $('#manual_customization').prop('checked', true);
+                        $('#gui_customization').prop('checked', false);
+                    }
+                    else {
+                        $('#ask_which_customization').hide();
+                        $('#manual_customization').prop('checked', false);
+                        $('#gui_customization').prop('checked', true);
+                    }
+                }
+            },
+            error: function (jqXHR, textStatus, errorThrown) {
+                console.log(`Error status: ${textStatus}`);
+                console.log(`Error thrown: ${errorThrown}`);
+                console.log(`Server response: ${jqXHR.status} ${jqXHR.statusText}`);
+            },
+        });
+        $(this).val('');
     });
 });
 

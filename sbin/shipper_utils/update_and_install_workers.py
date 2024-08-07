@@ -94,8 +94,8 @@ def update_docker_images(user, host, worker, autograding_workers, autograding_co
                 repo, tag = image.split(':')
                 client.images.pull(repository=repo, tag=tag)
             except Exception as e:
-                print(f"ERROR: Could not pull {image}: {e}", file=sys.stderr)
-                traceback.print_exc(file=sys.stderr)
+              print(f"ERROR: Could not pull {image}: {e}", file=sys.stderr)
+              traceback.print_exc(file=sys.stderr)
 
               # check for machine
               if platform.machine() == "aarch64":
