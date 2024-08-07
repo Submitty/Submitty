@@ -84,7 +84,7 @@ class ReportController extends AbstractController {
         $base_url = $this->core->getConfig()->getBaseUrl();
         $term = $this->core->getConfig()->getTerm();
         $course = $this->core->getConfig()->getCourse();
-        
+
         // Encode $base_url as a json string
         $data = [
             'base_url' => $base_url,
