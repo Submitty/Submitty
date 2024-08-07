@@ -8,6 +8,9 @@ use app\libraries\response\RedirectResponse;
 use app\libraries\response\WebResponse;
 use app\libraries\response\ResponseInterface;
 use Symfony\Component\Routing\Annotation\Route;
+use Symfony\Component\HttpFoundation\Response;
+
+
 
 class LeaderboardController extends AbstractController {
     #[Route("/courses/{_semester}/{_course}/gradeable/{gradeable_id}/leaderboard")]
@@ -118,4 +121,5 @@ class LeaderboardController extends AbstractController {
         $this->core->getQueries()->setUserAnonymousForGradeableLeaderboard($user_id, $gradeable_id, $state);
         return JsonResponse::getSuccessResponse($state);
     }
+
 }

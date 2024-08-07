@@ -9,7 +9,31 @@
 
     "required_capabilities" : "cpp",
 
-    "testcases" : [
+    "autograding": {
+      "submission_to_runner": [
+        "**/*.py",
+        "**/*.pdf",
+        "**/*.cpp"
+      ],
+      "work_to_details": [
+        "**/.slocdata/**/*.sloc"
+      ]
+    },
+
+    "resource_limits" : {
+      "RLIMIT_NPROC" : 200
+    },
+    "display_testcase_runtime_memory" : true,
+
+  "sloccounts": [
+    {
+      "title": "SLOCC vs Autograding Score",
+      "description":"SLOC measures your significant code lines, excluding comments and lines with only whitespace, this scatterplot measures how elegantly you have solved this gradeable."
+    }
+  ],
+
+
+  "testcases" : [
 
         // ------------------------------------
         // COMPILATION
@@ -19,6 +43,21 @@
             "command" : "clang++ -Wall -o a.out *.cpp",
             "executable_name" : "a.out",
             "points" : 2
+        },
+        {
+          "title" : "SLOCC",
+          "command" : [
+            "sloccount *"
+          ],
+          "points" : 0,
+          "validation" : [
+            {
+              "actual_file" : "STDOUT.txt",
+              "method": "fileExists",
+              "show_actual": "always",
+              "show_message": "always"
+            }
+          ]
         },
 
         // ------------------------------------

@@ -473,6 +473,31 @@
         },
         "minItems" : 1
       },
+      "sloccounts": {
+        "description" : "Configuration to enable a student sloccount scatterplot",
+        "type":"array",
+        "items":{
+          "description" : "Information about the specific  sloccount scatterplot",
+          "type":"object",
+          "items":{
+            "required" : ["title"],
+            "items":{
+              "additionalProperties" : false,
+              "properties":{
+                "title":{
+                  "description" : "A human readable title for the sloccount",
+                  "type" : "string"
+                },
+                "description":{
+                  "description": "A short description of what sloccount covers, displayed to students",
+                  "type": "string"
+                }
+              }
+            }
+          }
+        },
+        "minItems" : 1
+      },
       "notebook" : {
         "description" : "The definition of a notebook consisting of messages and inputs.",
         "type" : "array",

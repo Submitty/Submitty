@@ -477,6 +477,102 @@ class AutoGradedVersion extends AbstractModel {
     }
 
     /**
+     * Gets the number of physical source lines of code
+     * @return int number of total lines of code using sloccount
+     */
+    public function getSloc() {
+        $results_files = $this->getResultsFiles();
+        // Look for the target file path within the results files
+        $target_file = 'details/test02/.slocdata/TMP_WORK/all-physical.sloc';
+        $file_path = null;
+
+        if (isset($results_files[$target_file])) {
+            $file_path_info = $results_files[$target_file];  // Store the array
+            $file_path = $file_path_info['path'];           // Extract the path string
+            // Proceed with file_get_contents($file_path) var_dump($file_path);
+        } else {
+            return 0;
+        }
+
+        $file_contents = file_get_contents($file_path);
+
+        // Process the file contents (same logic as before)
+        $lines = explode("\n", $file_contents);
+        $total_line_count = 0;
+
+        foreach ($lines as $line) {
+            $parts = explode("\t", $line);
+            if (count($parts) === 2) {
+                $line_count = intval($parts[1]);
+                $total_line_count += $line_count;
+            }
+        }
+
+        return $total_line_count;
+    }
+
+    public function getSubmitterId() {
+        return $this->getGradedGradeable()->getSubmitter()->getId();
+    }
+
+//    public function getMetrics() {
+//        $who = $this->getGradedGradeable()->getSubmitter()->getId();
+//        $gradeable = $this->graded_gradeable->getGradeable();
+//        $version = $this->version;
+//
+//        $metrics = $this->core->getQueries()->getMetricsss($who, $gradeable->getId(), $version);
+//        if (($metrics['elapsed_time'] ?? null) && ($metrics['max_rss_size'] ?? null)) {
+//            return $metrics;
+//        }
+//    }
+
+    public function getMetrics_runtime() {
+        $who = $this->getGradedGradeable()->getSubmitter()->getId();
+        $gradeable = $this->graded_gradeable->getGradeable();
+        $version = $this->version;
+
+        $metrics = $this->core->getQueries()->getMetricsss($who, $gradeable->getId(), $version);
+//        var_dump($who, $metrics);
+//        var_dump($who, $metrics['total_elapsed_time']);
+        if (!empty($metrics) && isset($metrics[0]['total_elapsed_time'])) {
+            return $metrics[0]['total_elapsed_time'];
+        }
+
+        return null;
+    }
+
+    public function getMetrics_memory() {
+        $who = $this->getGradedGradeable()->getSubmitter()->getId();
+        $gradeable = $this->graded_gradeable->getGradeable();
+        $version = $this->version;
+
+        $metrics = $this->core->getQueries()->getMetricsss($who, $gradeable->getId(), $version);
+        if (!empty($metrics) && isset($metrics[0]['total_max_rss_size'])) {
+            return $metrics[0]['total_max_rss_size'];
+        }
+
+        return null;
+    }
+
+
+
+    /**
+     * Gets the autograding metrics for a testcase
+     *
+     * @param string $user_id
+     * @param string $gradeable_id
+     * @param string $testcase_id
+     * @param int $version the submission version that is currently being looked at
+     */
+//$autogradingConfig = $gradeable->getAutogradingConfig();
+//if (!is_null($autogradingConfig) && $autogradingConfig->getDisplayTestcaseRuntimeMemory()) {
+//$metrics = $this->core->getQueries()->getMetrics($who, $gradeable->getId(), sprintf('test%02d', $testcase->getTestcase()->getIndex() + 1), $version->getVersion());
+//$check["metrics"] = [
+//"elapsed_time" => $metrics['elapsed_time'] ?? null,
+//"max_rss_size" => $metrics['max_rss_size'] ?? null
+//];
+//}
+    /**
      * Gets the number of days late this version is
      * @return int result clamped to be >= 0
      */

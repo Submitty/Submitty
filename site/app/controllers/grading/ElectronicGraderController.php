@@ -53,7 +53,7 @@ class ElectronicGraderController extends AbstractController {
     }
 
     /**
-     * Gnenerates histogram data needed for the TA stats page
+     * Generates histogram data needed for the TA stats page
      * @param GradedGradeable[] $overall_scores
      * @return array of histogram data
      */
@@ -62,6 +62,10 @@ class ElectronicGraderController extends AbstractController {
             "bTA" => [],
             "tTA" => [],
             "bAuto" => [],
+            "memory" => [],
+            "runtime" => [],
+            "sloc" => [],
+            "submitters" => [],
             "VerConf" => 0,
             "noSub" => 0,
             "noActive" => 0,
@@ -82,6 +86,14 @@ class ElectronicGraderController extends AbstractController {
                     if ($ov->getGradeable()->getAutogradingConfig()->getTotalNonExtraCredit() != 0) {
                         if ($ov->getAutoGradedGradeable()->getTotalPoints() >= 0 || $ov->getAutoGradedGradeable()->getTotalPoints() < 0) {
                             $histogram["bAuto"] = array_merge($histogram["bAuto"], [$ov->getAutoGradedGradeable()->getTotalPoints()]);
+                            $histogram["submitters"] = array_merge($histogram["submitters"], [$ov->getAutoGradedGradeable()->getSubmitterId()]);
+                            // add line count for autograded gradeables
+
+                            $histogram["sloc"] = array_merge($histogram["sloc"], [$ov->getAutoGradedGradeable()->getSloc()]);
+                            $histogram["runtime"] = array_merge($histogram["runtime"], [$ov->getAutoGradedGradeable()->getMetrics_runtime()]);
+//                            var_dump($histogram["runtime"]);
+//                            var_dump([$ov->getAutoGradedGradeable()->getMetrics_runtime()]);
+                            $histogram["memory"] = array_merge($histogram["memory"], [$ov->getAutoGradedGradeable()->getMetrics_memory()]);
                         }
                         else {
                             $histogram["cancelledSub"] += 1;
@@ -686,7 +698,6 @@ class ElectronicGraderController extends AbstractController {
             $autograded_average = $this->core->getQueries()->getAverageAutogradedScores($gradeable_id, $section_key, $gradeable->isTeamAssignment(), $bad_submissions_cookie, $null_section_cookie);
             $overall_average = $this->core->getQueries()->getAverageForGradeable($gradeable_id, $section_key, $gradeable->isTeamAssignment(), $override_cookie, $bad_submissions_cookie, $null_section_cookie);
             $order = new GradingOrder($this->core, $gradeable, $this->core->getUser(), true);
-            $overall_scores = [];
             $overall_scores = $order->getSortedGradedGradeables();
             $num_components = count($gradeable->getNonPeerComponents());
             $viewed_grade = $this->core->getQueries()->getNumUsersWhoViewedGradeBySections($gradeable, $sections, $null_section_cookie);
