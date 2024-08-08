@@ -6,17 +6,22 @@
         </a> </h1>
     </div>
 
-    <form method="post" id="verify-email">
-        Enter Verification Code
-        <input type="text" name="verification_code" required />
-        <input type="hidden" name="user_id" value="test" />
-        <input type="submit" name="submit" value="Submit" class="btn btn-primary" />
-    </form>
-    <br/>
-    <form method="post" id="resend-email">
-        Resend Verification Code 
-        <input type="submit" name="submit" value="Resend" class="btn btn-primary" />
-    </form>
+    {% if use_code %}
+        <form method="GET" id="verify-email" action="{{ verify_email_url }}" >
+            Enter Verification Code
+            <input type="text" name="verification_code" required />
+            <input type="hidden" name="user_id" value="{{ user_id }}" />
+            <input type="submit" name="submit" value="Submit" class="btn btn-primary" />
+        </form>
+        <br/>
+        <form id="resend-email">
+            Resend Verification Code 
+            <input type="hidden" name="user_id" value="{{ user_id }}" />
+            <input type="submit" name="submit" value="Resend" class="btn btn-primary" />
+        </form>
+    {% else %}
+        CLICK LINK
+    {% endif %}
 
 </div>
 

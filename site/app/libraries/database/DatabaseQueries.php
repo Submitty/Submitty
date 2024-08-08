@@ -158,6 +158,28 @@ class DatabaseQueries {
     }
 
     /**
+     * Gets a user from the database given a user_id.
+     *
+     * @param string $user_id
+     * @return User|null
+     */
+    public function getUnverifiedUserById(string $user_id): ?User {
+        $this->submitty_db->query("SELECT * FROM unverified_users WHERE user_id=?", [$user_id]);
+        return new User($this->core, $this->submitty_db->rows()[0]);
+    }
+
+    /**
+     * Gets a user from the database given a user_id.
+     *
+     * @param string $user_id
+     * @return User|null
+     */
+    public function removeUnverifiedUserById(string $user_id): ?User {
+        $this->submitty_db->query("DELETE FROM unverified_users WHERE user_id=?", [$user_id]);
+        return new User($this->core, $this->submitty_db->rows()[0]);
+    }
+
+    /**
      * Gets a user from the database given a numeric user_id.
      *
      * @param int $numeric_id
@@ -534,13 +556,26 @@ SQL;
                        $user->getLegalGivenName(), $user->getPreferredGivenName(),
                        $user->getLegalFamilyName(), $user->getPreferredFamilyName(), $user->getEmail(),
                        $this->submitty_db->convertBoolean($user->isUserUpdated()),
-                       $this->submitty_db->convertBoolean($user->isInstructorUpdated()),
-                       $this->submitty_db->convertBoolean($user->isVerified()),
+                       $this->submitty_db->convertBoolean($user->isInstructorUpdated())];
+        $this->submitty_db->query(
+            "INSERT INTO users (user_id, user_password, user_numeric_id, user_givenname, user_preferred_givenname, user_familyname, user_preferred_familyname, user_email, user_updated, instructor_updated)
+                                   VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
+            $array
+        );
+    }
+
+    /**
+     * @param User $user
+     */
+    public function insertUnverifiedSubmittyUser(User $user) {
+        $array = [$user->getId(), $user->getPassword(), $user->getNumericId(),
+                       $user->getLegalGivenName(), $user->getPreferredGivenName(),
+                       $user->getLegalFamilyName(), $user->getPreferredFamilyName(), $user->getEmail(),
                        $user->getVerificationExpiration(),
                        $user->getVerificationCode()];
         $this->submitty_db->query(
-            "INSERT INTO users (user_id, user_password, user_numeric_id, user_givenname, user_preferred_givenname, user_familyname, user_preferred_familyname, user_email, user_updated, instructor_updated, is_verified, verification_expiration, verification_code)
-                                   VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
+            "INSERT INTO unverified_users (user_id, user_password, user_numeric_id, user_givenname, user_preferred_givenname, user_familyname, user_preferred_familyname, user_email, verification_expiration, verification_code)
+                                   VALUES (?, ?, ?, ?, ?, ?, ?, ?, to_timestamp(?), ?)",
             $array
         );
     }
@@ -7853,15 +7888,33 @@ AND gc_id IN (
         return $this->submitty_db->rows();
     }
 
+    /**
+     * Gets a list of emails with user ids for all active particpants in Submitty
+     * array
+     * @return array<mixed>
+     */
+    public function getUnverifiedUserIdEmailExists(string $email, string $user_id): array {
+        $parameters = [$email, $user_id];
+        $this->submitty_db->query('SELECT user_id, user_email FROM unverified_users where user_email=? or user_id=?', $parameters);
+        return $this->submitty_db->rows();
+    }
+
      /**
      * Gets a list of emails with user ids for all active particpants in Submitty
      * array
      */
     public function getUserVerificationValues(string $user_id): array {
         $parameters = [$user_id];
-        $this->submitty_db->query('SELECT is_verified, verification_code, verification_expiration FROM users where user_id=?', $parameters);
+        $this->submitty_db->query('SELECT verification_code, verification_expiration FROM unverified_users where user_id=?', $parameters);
         return $this->submitty_db->rows();
     }
+
+    public function updateUserVerificationValues(string $user_id, string $code, int $timestamp): array {
+        $parameters = [$code, $timestamp, $user_id];
+        $this->submitty_db->query('UPDATE unverified_users SET verification_code=?, verification_expiration=to_timestamp(?) where user_id=?', $parameters);
+        return $this->submitty_db->rows();
+    }
+
 
 
     /**
