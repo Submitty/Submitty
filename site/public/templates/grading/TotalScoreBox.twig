@@ -21,7 +21,7 @@ l
     {% endif %}
     {% if ta_grading_earned is defined %}
         <div class="box-title badge-container">
-            <strong id="grading_total" class="badge {{ functions.getBadgeStyle(ta_grading_earned, ta_grading_total) }}">
+            <strong id="grading_total" class="badge {{ functions.getBadgeStyle(ta_grading_earned, ta_grading_total) }}" data-testid="grading-total">
                 {{ ta_grading_earned is defined ? ta_grading_earned|round(decimal_precision) : '&minus;' }} / {{ ta_grading_total|round(decimal_precision) }}
             </strong>
             {% if peer_gradeable == true %}
