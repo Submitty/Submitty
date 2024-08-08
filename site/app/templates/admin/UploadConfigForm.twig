@@ -27,7 +27,7 @@
 
     <form action="{{ upload_url }}" method="POST" enctype="multipart/form-data">
         <input type="hidden" name="csrf_token" value="{{ csrf_token }}" />
-        <label>Upload Config: <input type="file" name="config_upload" /><br /></label>
+        <label>Upload Config: <input type="file" name="config_upload" id="config-upload" /><br /></label>
         <input type="submit" value="Upload" /><br />
         <button type='reset'>Cancel Upload</button>
     </form>
@@ -38,6 +38,25 @@
         <a data-testid="back-to-autograding" class="btn btn-primary" style="margin-top: 6px" href={{ back_url }}>Go Back To Autograding Page</a>
     {% endif %}
 </div>
+
+<script>
+    document.getElementById('upload-form').addEventListener('submit', function(event) {
+        event.preventDefault();
+        if (confirm('Are you sure you want to upload this file?')) {
+            this.submit();
+            alert('File uploaded successfully.');
+        }
+    });
+    document.getElementById('back-to-autograding').addEventListener('click', function(event) {
+        const fileInput = document.getElementById('config-upload');
+        if (!fileInput.value) {
+            event.preventDefault();
+            if (confirm('You haven\'t uploaded a config file. Are you sure you want to go back?')) {
+                window.location.href = this.href;
+            }
+        }
+    });
+</script>
 
 {% if all_files|length > 0 %}
 <div class="content">
