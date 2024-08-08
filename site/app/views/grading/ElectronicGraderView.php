@@ -25,6 +25,7 @@ class ElectronicGraderView extends AbstractView {
      * @param Gradeable $gradeable
      * @param array[] $sections
      * @param SimpleStat[] $component_averages
+     * @param SimpleStat|null $manual_average
      * @param SimpleStat|null $autograded_average
      * @param SimpleStat|null $overall_average
      * @param int $total_submissions
@@ -42,6 +43,7 @@ class ElectronicGraderView extends AbstractView {
         Gradeable $gradeable,
         array $sections,
         array $component_averages,
+        $manual_average,
         $autograded_average,
         $overall_scores,
         $overall_average,
@@ -273,6 +275,7 @@ class ElectronicGraderView extends AbstractView {
             if (count($component_averages) !== 0) {
                 foreach ($component_averages as $comp) {
                     /* @var SimpleStat $comp */
+                    $manual_average += $comp->getAverageScore();
                     $component_overall_score += $comp->getAverageScore();
                     $component_overall_max += $comp->getMaxValue();
                     $percentage = 0;
@@ -348,6 +351,7 @@ class ElectronicGraderView extends AbstractView {
             "overall_percentage" => $overall_percentage,
             "autograded_percentage" => $autograded_percentage,
             "autograded_average" => $autograded_average,
+            "manual_average" => $manual_average,
             "component_averages" => $component_averages,
             "component_percentages" => $component_percentages,
             "component_overall_score" => $component_overall_score,
