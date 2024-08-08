@@ -47,10 +47,13 @@ function updateHomeworkExtension() {
 }
 
 function deleteHomeworkExtension(user) {
-    $('#user_id').val(user);
-    $('#late-days').val(0);
-    $('#reason-for-exception').val('');
-    updateHomeworkExtension();
+    const confirm = window.confirm('Are you sure you would like to delete this entry?');
+    if (confirm) {
+        $('#user_id').val(user);
+        $('#late-days').val(0);
+        $('#reason-for-exception').val('');
+        updateHomeworkExtension();
+    }
 }
 
 function clearDate() {
@@ -67,16 +70,16 @@ function setLateDays() {
 }
 
 function confirmExtension(option) {
-    $('.popup-form').css('display', 'none');
+    $('.popup-form').hide();
     $('input[name="option"]').val(option);
     updateHomeworkExtension();
     $('input[name="option"]').val(-1);
 }
 
 function extensionPopup(json) {
-    $('.popup-form').css('display', 'none');
-    const form = $('#more_extension_popup');
+    $('.popup-form').hide();
+    const form = $('#extension_team_popup');
     form[0].outerHTML = json['data']['popup'];
-    $('#more_extension_popup').css('display', 'block');
+    $('#extension_team_popup').css('display', 'block');
     $('#team-extension-cancel').focus();
 }
