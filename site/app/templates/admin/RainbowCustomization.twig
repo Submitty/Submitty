@@ -184,6 +184,7 @@
                                         aria-label="{{ bucket|capitalize }} config count"
                                         value="{{ bucket_counts[bucket] }}"
                                         id="config-count-{{ bucket }}"
+                                        onblur="ClampGradeablesInBucket(this, {{ gradeables|length }});"
                                     >
                                     items
                                     <span style="margin-left: 100px;"></span>
