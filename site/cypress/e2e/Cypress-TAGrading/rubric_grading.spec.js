@@ -1,7 +1,7 @@
 describe('Test cases for TA grading page', () => {
     it('Grader should be able to add and remove overall comments', () => {
         cy.login('instructor');
-        cy.visit(['sample', 'gradeable', 'grading_homework', 'grading', 'grade?who_id=jKjodWaRdEV9pBb&sort=id&direction=ASC']);
+        cy.visit(['sample', 'gradeable', 'grading_homework', 'grading', 'grade?who_id=apfzuObm3E7o2vy&sort=id&direction=ASC']);
         cy.get('body').type('{A}');
         cy.get('body').type('{G}');
         cy.get('[data-testid="grading-rubric"]').should('contain', 'Grading Rubric');
@@ -56,6 +56,6 @@ describe('Test cases for TA grading page', () => {
         cy.get('[data-testid="grading-total"]').eq(1).should('contain', '4 / 5');
         cy.get('[data-testid="grading-total"]').eq(2).should('contain', '2 / 5');
         cy.get('[data-testid="grading-total"]').eq(3).should('contain', '0 / 0');
-        cy.get('[data-testid="grading-total"]').eq(4).should('contain', '6 / 12');
+        cy.get('[data-testid="grading-total"]').eq(4).should('contain', '8 / 12');
     });
 });
