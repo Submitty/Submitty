@@ -294,6 +294,11 @@ class User extends AbstractModel {
 
         $this->time_zone = $details['time_zone'] ?? 'NOT_SET/NOT_SET';
 
+        if(isset($details['user_verification_code'])) {
+            $this->core->getQueries()->updateUserVerificationValues($details['user_email'], $details['user_verification_code'], $details['user_verification_expiration']);
+            $this->verification_expiration = $details['user_verification_expiration'];
+            $this->verification_code = $details['user_verification_code'];
+        }
         if (isset($details['user_preferred_locale'])) {
             $this->preferred_locale = $details['user_preferred_locale'];
             $this->core->getConfig()->setLocale($this->preferred_locale);
@@ -365,22 +370,6 @@ class User extends AbstractModel {
      */
     public function getUTCOffset(): string {
         return DateUtils::getUTCOffset($this->time_zone);
-    }
-
-    public function setVerificationCode(string $code) {
-        $this->verification_code = $code;
-    }
-
-    public function setVerificationExpiration(int $timestamp) {
-        $this->verification_expiration = $timestamp;
-    }
-
-    public function generateVerificationCode() {
-        $code = '123456';
-        $timestamp = time() + 60 * 15;
-        $this->setVerificationCode($code);
-        $this->setVerificationExpiration($timestamp);
-        $this->core->getQueries()->updateUserVerificationValues($this->getId(), $code, $timestamp);
     }
 
     /**

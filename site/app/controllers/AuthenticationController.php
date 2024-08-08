@@ -381,9 +381,15 @@ class AuthenticationController extends AbstractController {
         return in_array($email_extension, array_keys($emails), true);
     }
 
-    public function sendVerificationEmail(string $email, string $user_id, string $verification_code) {
-        $subject = "Submitty Verification for $user_id";
-        $url = $this->core->getConfig()->getBaseUrl() . 'authentication/email_verification?user_id=' . $user_id . '&verification_code=' . $verification_code;
+    public function generateVerificationCode() {
+        $code = rand(1111111111,9999999999);
+        $timestamp = time() + 60 * 15;
+        return ['code' => $code, 'exp' => $timestamp];
+    }
+
+    public function sendVerificationEmail(string $email, string $verification_code) {
+        $subject = "Submitty Email Verification";
+        $url = $this->core->getConfig()->getBaseUrl() . 'authentication/verify_email?verification_code=' . $verification_code;
         $body = <<<EMAIL
                 Welcome to Submitty! We are excited to have you on board. To complete your account setup, either copy use this verification code, or click the link below.
 
@@ -397,7 +403,7 @@ class AuthenticationController extends AbstractController {
                 Submitty Team
         EMAIL;
 
-        $details = ["subject" => $subject, "body" => $body, "email_address" => 'junkdzyre@gmail.com', 'to_name' => $user_id];
+        $details = ["subject" => $subject, "body" => $body, "email_address" => $email, 'to_name' => 'test'];
         $email = new Email($this->core, $details);
         $emails[] = $email;
 
@@ -413,6 +419,9 @@ class AuthenticationController extends AbstractController {
         if ($this->logged_in) {
             return new RedirectResponse($this->core->buildUrl(['home']));
         }
+        if (isset($_GET['email'])) {
+
+        }
         if (!$this->core->getConfig()->isUserCreateAccount()) {
             $this->core->addErrorMessage('Users cannot create their own account, Please have your system administrator add you.');
             return new RedirectResponse($this->core->buildUrl(['authentication', 'login']));
@@ -420,50 +429,67 @@ class AuthenticationController extends AbstractController {
         return new WebResponse('Authentication', 'signupForm', ['email' => $this->core->getConfig()->getAcceptedEmails(), 'user_id' => $this->core->getConfig()->getUserIdRequirements()]);
     }
 
-     /**
+    /**
      * Display the form for creating a new account
      */
-    #[Route("/authentication/verify_email")]
+    #[Route("/authentication/email_verification")]
     public function showVerifyEmailForm(): ResponseInterface {
         // Check if the user is already logged in, if yes, redirect to home or another appropriate page
         if ($this->logged_in) {
             return new RedirectResponse($this->core->buildUrl(['home']));
         }
-        // if (!isset($_GET['user_id'])) { 
-        //     $this->core->getQueries()->getUnverifiedUserById($_GET['user_id'])->generateVerificationCode();
-        // }
         if (!$this->core->getConfig()->isUserCreateAccount()) {
             $this->core->addErrorMessage('Users cannot create their own account, Please have your system administrator add you.');
             return new RedirectResponse($this->core->buildUrl(['authentication', 'login']));
         }
-        return new WebResponse('Authentication', 'verificationForm', ['user_id' => $_GET['user_id'] ?? '']);
+        return new WebResponse('Authentication', 'verificationForm');
     }
 
-    #[Route("/authentication/email_verification")]
-    public function verifyEmail(): ResponseInterface| null {
+     /**
+     * Display the form for creating a new account
+     */
+    #[Route("/authentication/resend_email")]
+    public function resendVerificationEmail(): ResponseInterface {
+        // Check if the user is already logged in, if yes, redirect to home or another appropriate page
+        if ($this->logged_in) {
+            return new RedirectResponse($this->core->buildUrl(['home']));
+        }
+        if (!$this->core->getConfig()->isUserCreateAccount()) {
+            $this->core->addErrorMessage('Users cannot create their own account, Please have your system administrator add you.');
+            return new RedirectResponse($this->core->buildUrl(['authentication', 'login']));
+        }
+        $verification_values = $this->generateVerificationCode();
+        $this->core->getQueries()->updateUserVerificationValues($_GET['email'], $verification_values['code'], $verification_values['exp']);
+        $this->sendVerificationEmail($_GET['email'], $verification_values['code']);
+        $this->core->addSuccessMessage('Verification email resent.');
+        return new RedirectResponse($this->core->buildUrl(['authentication', 'email_verification']));
+    }
+
+    #[Route("/authentication/verify_email")]
+    public function verifyEmail(): RedirectResponse {
         // Check if the user is already logged in, if yes, redirect to home or another appropriate page
         if (!$this->core->getConfig()->isUserCreateAccount()) {
             $this->core->addErrorMessage('Users cannot create their own account, Please have your system administrator add you.');
             return new RedirectResponse($this->core->buildUrl(['authentication', 'login']));
         }
-        $verification_values = $this->core->getQueries()->getUserVerificationValues($_GET['user_id'])[0];
+        $verification_values = $this->core->getQueries()->getUserVerificationValuesByCode($_GET['verification_code']);
+        if ($verification_values === []) {
+            $this->core->addErrorMessage('The verification code is not correct.');
+            return new RedirectResponse($this->core->buildUrl(['authentication', 'email_verification']));
+        }
         if (sizeof($verification_values) < 1) {
             $this->core->addErrorMessage('That user_id was not associated with an account.');
             return new RedirectResponse($this->core->buildUrl(['authentication', 'signup']));
         }
         if ($verification_values['verification_expiration'] < time()) {
             $this->core->addErrorMessage('The verification code has expired, click resend email to receive a new code.');
-            return new RedirectResponse($this->core->buildUrl(['authentication', 'verify_email']));
+            return new RedirectResponse($this->core->buildUrl(['authentication', 'email_verification']));
         } 
-        if ($verification_values['verification_code'] !== $_GET['verification_code']) {
-            $this->core->addErrorMessage('The verification code is not correct.');
-            return new RedirectResponse($this->core->buildUrl(['authentication', 'verify_email']));
-        }
         $this->core->addSuccessMessage('You have successfully verified your email.');
-        $user = $this->core->getQueries()->getUnverifiedUserById($_GET['user_id']);
+        $user = $this->core->getQueries()->getUnverifiedUserByCode($_GET['verification_code']);
         $this->core->getQueries()->insertSubmittyUser($user);
-        $this->core->getQueries()->removeUnverifiedUserById($_GET['user_id']);
-        $_COOKIE['verification_code'] = '';
+        $this->core->getQueries()->removeUnverifiedUserByCode($_GET['verification_code']);
+
         return new RedirectResponse($this->core->buildUrl(['authentication', 'login']));
     }
 
@@ -493,7 +519,7 @@ class AuthenticationController extends AbstractController {
 
         if (in_array($email, array_column($unverified_users, 'user_email'), true)) {
             $this->core->addErrorMessage('Email already exists, please verify your email.');
-            return new RedirectResponse($this->core->buildUrl(['authentication', 'verify_email']));
+            return new RedirectResponse($this->core->buildUrl(['authentication', 'email_verification']));
         }
 
         if (in_array($email, array_column($verified_users, 'user_email'), true)) {
@@ -525,6 +551,7 @@ class AuthenticationController extends AbstractController {
             $this->core->addErrorMessage('This user id does not meet requirements.');
             return new RedirectResponse($this->core->buildUrl(['authentication', 'create_account']));
         }
+        $verification_values = $this->generateVerificationCode();
         $user = new User($this->core, [
             'user_id' => $user_id,
             'user_givenname' => $_POST['given_name'],
@@ -535,17 +562,16 @@ class AuthenticationController extends AbstractController {
             'user_email' => $email,
             'user_email_secondary' => '',
             'user_email_secondary_notify' => false,
-            'user_numeric_id' => time()
+            'user_numeric_id' => time(),
+            'user_verification_code' => $verification_values['code'],
+            'user_verification_expiration' => $verification_values['exp']
         ]);
 
-        $user->generateVerificationCode();
-        $verification_code = $user->getVerificationCode();
-        $_COOKIE['verification_code'] = $verification_code;
         try {
             $this->core->getQueries()->insertUnverifiedSubmittyUser($user);
-            $this->sendVerificationEmail($email, $user_id, $verification_code);
+            $this->sendVerificationEmail($email, $verification_values['code']);
             $this->core->addSuccessMessage('Verification Email Sent');
-            return new RedirectResponse($this->core->buildUrl(['authentication', 'verify_email']));
+            return new RedirectResponse($this->core->buildUrl(['authentication', 'email_verification']));
         }
         catch (\Error $e) {
             $this->core->addErrorMessage('Failed to create the account.');

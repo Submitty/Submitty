@@ -163,9 +163,9 @@ class DatabaseQueries {
      * @param string $user_id
      * @return User|null
      */
-    public function getUnverifiedUserById(string $user_id): ?User {
-        $this->submitty_db->query("SELECT * FROM unverified_users WHERE user_id=?", [$user_id]);
-        return new User($this->core, $this->submitty_db->rows()[0]);
+    public function getUnverifiedUserByCode(string $code): ?User {
+        $this->submitty_db->query("SELECT * FROM unverified_users WHERE verification_code=?", [$code]);
+        return new User($this->core, $this->submitty_db->row());
     }
 
     /**
@@ -174,9 +174,8 @@ class DatabaseQueries {
      * @param string $user_id
      * @return User|null
      */
-    public function removeUnverifiedUserById(string $user_id): ?User {
-        $this->submitty_db->query("DELETE FROM unverified_users WHERE user_id=?", [$user_id]);
-        return new User($this->core, $this->submitty_db->rows()[0]);
+    public function removeUnverifiedUserByCode(string $code)  {
+        $this->submitty_db->query("DELETE FROM unverified_users WHERE verification_code=?", [$code]);
     }
 
     /**
@@ -7903,19 +7902,17 @@ AND gc_id IN (
      * Gets a list of emails with user ids for all active particpants in Submitty
      * array
      */
-    public function getUserVerificationValues(string $user_id): array {
-        $parameters = [$user_id];
-        $this->submitty_db->query('SELECT verification_code, verification_expiration FROM unverified_users where user_id=?', $parameters);
-        return $this->submitty_db->rows();
+    public function getUserVerificationValuesByCode(string $code): array {
+        $parameters = [$code];
+        $this->submitty_db->query('SELECT verification_code, verification_expiration FROM unverified_users where verification_code=?', $parameters);
+        return $this->submitty_db->row();
     }
 
-    public function updateUserVerificationValues(string $user_id, string $code, int $timestamp): array {
-        $parameters = [$code, $timestamp, $user_id];
-        $this->submitty_db->query('UPDATE unverified_users SET verification_code=?, verification_expiration=to_timestamp(?) where user_id=?', $parameters);
+    public function updateUserVerificationValues(string $email, string $code, int $timestamp): array {
+        $parameters = [$code, $timestamp, $email];
+        $this->submitty_db->query('UPDATE unverified_users SET verification_code=?, verification_expiration=to_timestamp(?) where user_email=?', $parameters);
         return $this->submitty_db->rows();
     }
-
-
 
     /**
      * Gives true if thread is locked
