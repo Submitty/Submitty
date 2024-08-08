@@ -58,11 +58,11 @@ en_US
 http://localhost
 
 
+y
 sysadmin@example.com
 https://example.com
 1
-
-
+submitty-admin
 y
 
 

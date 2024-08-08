@@ -54,6 +54,7 @@ use Egulias\EmailValidator\Validation\RFCValidation;
  * @method bool isInstructorUpdated()
  * @method array getGradingRegistrationSections()
  * @method bool isLoaded()
+ * @method bool isVerified()
  */
 class User extends AbstractModel {
     /**
@@ -151,6 +152,9 @@ class User extends AbstractModel {
     /** @prop
      * @var bool Should the user only have one active session at a time? */
     protected bool $enforce_single_session;
+    /** @prop
+     * @var bool Has the user verified their email (if self account creation)? */
+    protected bool $verified = false;
     /** @prop
      * @var string What is the registration section that the user was assigned to for the course */
     protected $registration_section = null;
@@ -361,6 +365,22 @@ class User extends AbstractModel {
      */
     public function getUTCOffset(): string {
         return DateUtils::getUTCOffset($this->time_zone);
+    }
+
+    public function setVerificationCode(string $code) {
+        $this->verification_code = $code;
+    }
+
+    public function setVerificationExpiration(int $timestamp) {
+        $this->verification_expiration = $timestamp;
+    }
+
+    public function generateVerificationCode() {
+        $code = '123456';
+        $timestamp = time() + 60 * 15;
+        $this->setVerificationCode($code);
+        $this->setVerificationExpiration($timestamp);
+        $this->core->getQueries()->updateUserVerificationValues($this->getId(), $code, $timestamp);
     }
 
     /**

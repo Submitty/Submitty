@@ -13,6 +13,8 @@ use app\libraries\Utils;
 use app\libraries\Logger;
 use app\libraries\response\MultiResponse;
 use app\views\AuthenticationView;
+use app\models\User;
+use app\models\Email;
 use app\repositories\VcsAuthTokenRepository;
 use Symfony\Component\Routing\Annotation\Route;
 
@@ -94,7 +96,7 @@ class AuthenticationController extends AbstractController {
      */
     #[Route("/authentication/check_login")]
     public function checkLogin($old = null) {
-        $is_saml_auth = $this->core->getAuthentication() instanceof SamlAuthentication;
+            $is_saml_auth = $this->core->getAuthentication() instanceof SamlAuthentication;
         if (!is_null($old) && !str_starts_with(urldecode($old), $this->core->getConfig()->getBaseUrl())) {
             $old = null;
         }
@@ -307,5 +309,247 @@ class AuthenticationController extends AbstractController {
         $users = $this->core->getQueries()->getUsersByIds($authorized_users);
 
         return new WebResponse(AuthenticationView::class, 'userSelection', $users);
+    }
+
+     /**
+     * Check if password has at least one of the following, Upper case letter, Lower case letter, Special character, and number
+     */
+    public function checkChars(string $password): bool {
+        $upperCase = preg_match('/[A-Z]/', $password);
+        $lowerCase = preg_match('/[a-z]/', $password);
+        $specialChar = preg_match('/[^A-Za-z0-9]/', $password);
+        $numericVal = preg_match('/[0-9]/', $password);
+        return $upperCase >= 1 && $lowerCase >= 1 && $specialChar >= 1 && $numericVal >= 1;
+    }
+
+    /**
+     * Check if the user ID is valid
+     */
+    public function isAcceptedUserId(string $user_id, string $given_name, string $family_name, string $email): bool {
+        
+        $requirements = $this->core->getConfig()->getUserIdRequirements();
+
+         // If length is -1, allow any length
+        if ($requirements['length'] !== -1 && strlen($user_id) > $requirements['length']) {
+            return false;
+        }
+
+        if ($requirements['all'] === true) {
+            return true;
+        }
+        elseif ($requirements['require_name'] === true) {
+            $name_requirements = $requirements['name_requirements'];
+            $given_first = $name_requirements['given_first'] === 'true';
+
+            $id_given_name = substr($user_id, ($given_first ? 0 : $name_requirements['family_name']), ($given_first ? $name_requirements['given_name'] : strlen($user_id)));
+            $id_family_name = substr($user_id, ($given_first ? $name_requirements['given_name'] : 0), ($given_first ? strlen($user_id) : $name_requirements['family_name']));
+            $is_given_name = (strtolower($id_given_name) === substr(strtolower($given_name), 0, $name_requirements['given_name']));
+            $is_family_name = (strtolower($id_family_name) === substr(strtolower($family_name), 0, $name_requirements['family_name']));
+            if ($is_family_name && $is_given_name) {
+                return true;
+            }
+            return false;
+        }
+        elseif ($requirements['require_email'] === true) {
+            return true;
+        }
+        else {
+            return false;
+        }
+    }
+
+    /**
+     * Returns true if the password is greater than or equal to 12 characters, and has the required characters
+     */
+    public function isGoodPassword(string $password): bool {
+        return strlen($password) >= 12 && $this->checkChars($password);
+    }
+
+    /**
+     * Checks if the email extension is in the accepted emails JSON file
+     */
+    public function isAcceptedEmail(string $email): bool {
+        $emails = $this->core->getConfig()->getAcceptedEmails();
+        // Check if the file was read successfully
+        try {
+            $split_email = explode('@', $email);
+            $email_extension = $split_email[sizeof($split_email)-1];
+        }
+        catch (\Error $error) {
+            return false;
+        }
+        return in_array($email_extension, array_keys($emails), true);
+    }
+
+    public function sendVerificationEmail(string $email, string $user_id, string $verification_code) {
+        $subject = "Submitty Verification for $user_id";
+        $url = $this->core->getConfig()->getBaseUrl() . 'authentication/email_verification?user_id=' . $user_id . '&verification_code=' . $verification_code;
+        $body = <<<EMAIL
+                Welcome to Submitty! We are excited to have you on board. To complete your account setup, either copy use this verification code, or click the link below.
+
+                Verification Code: $verification_code
+
+                Verification Link: $url
+
+                If you didn't sign up for Submitty, you can ignore this email.
+
+                Welcome,
+                Submitty Team
+        EMAIL;
+
+        $details = ["subject" => $subject, "body" => $body, "email_address" => 'junkdzyre@gmail.com', 'to_name' => $user_id];
+        $email = new Email($this->core, $details);
+        $emails[] = $email;
+
+        $this->core->getNotificationFactory()->sendEmails($emails);
+    }
+
+    /**
+     * Display the form for creating a new account
+     */
+    #[Route("/authentication/create_account", methods: ['GET'])]
+    public function signupForm(): ResponseInterface {
+        // Check if the user is already logged in, if yes, redirect to home or another appropriate page
+        if ($this->logged_in) {
+            return new RedirectResponse($this->core->buildUrl(['home']));
+        }
+        if (!$this->core->getConfig()->isUserCreateAccount()) {
+            $this->core->addErrorMessage('Users cannot create their own account, Please have your system administrator add you.');
+            return new RedirectResponse($this->core->buildUrl(['authentication', 'login']));
+        }
+        return new WebResponse('Authentication', 'signupForm', ['email' => $this->core->getConfig()->getAcceptedEmails(), 'user_id' => $this->core->getConfig()->getUserIdRequirements()]);
+    }
+
+     /**
+     * Display the form for creating a new account
+     */
+    #[Route("/authentication/verify_email")]
+    public function showVerifyEmailForm(): ResponseInterface {
+        // Check if the user is already logged in, if yes, redirect to home or another appropriate page
+        if ($this->logged_in) {
+            return new RedirectResponse($this->core->buildUrl(['home']));
+        }
+        // if (!isset($_GET['user_id'])) { 
+        //     $this->core->getQueries()->getUnverifiedUserById($_GET['user_id'])->generateVerificationCode();
+        // }
+        if (!$this->core->getConfig()->isUserCreateAccount()) {
+            $this->core->addErrorMessage('Users cannot create their own account, Please have your system administrator add you.');
+            return new RedirectResponse($this->core->buildUrl(['authentication', 'login']));
+        }
+        return new WebResponse('Authentication', 'verificationForm', ['user_id' => $_GET['user_id'] ?? '']);
+    }
+
+    #[Route("/authentication/email_verification")]
+    public function verifyEmail(): ResponseInterface| null {
+        // Check if the user is already logged in, if yes, redirect to home or another appropriate page
+        if (!$this->core->getConfig()->isUserCreateAccount()) {
+            $this->core->addErrorMessage('Users cannot create their own account, Please have your system administrator add you.');
+            return new RedirectResponse($this->core->buildUrl(['authentication', 'login']));
+        }
+        $verification_values = $this->core->getQueries()->getUserVerificationValues($_GET['user_id'])[0];
+        if (sizeof($verification_values) < 1) {
+            $this->core->addErrorMessage('That user_id was not associated with an account.');
+            return new RedirectResponse($this->core->buildUrl(['authentication', 'signup']));
+        }
+        if ($verification_values['verification_expiration'] < time()) {
+            $this->core->addErrorMessage('The verification code has expired, click resend email to receive a new code.');
+            return new RedirectResponse($this->core->buildUrl(['authentication', 'verify_email']));
+        } 
+        if ($verification_values['verification_code'] !== $_GET['verification_code']) {
+            $this->core->addErrorMessage('The verification code is not correct.');
+            return new RedirectResponse($this->core->buildUrl(['authentication', 'verify_email']));
+        }
+        $this->core->addSuccessMessage('You have successfully verified your email.');
+        $user = $this->core->getQueries()->getUnverifiedUserById($_GET['user_id']);
+        $this->core->getQueries()->insertSubmittyUser($user);
+        $this->core->getQueries()->removeUnverifiedUserById($_GET['user_id']);
+        $_COOKIE['verification_code'] = '';
+        return new RedirectResponse($this->core->buildUrl(['authentication', 'login']));
+    }
+
+    /**
+     * Handles the submission of the new account creation form
+     */
+    #[Route("/authentication/self_add_user")]
+    public function addNewUser(): RedirectResponse {
+        // Check if the user is already logged in, if yes, redirect to home or another appropriate page
+        if ($this->logged_in) {
+            return new RedirectResponse($this->core->buildUrl(['home']));
+        }
+
+        // Should never happen, however they can visit this URL manually, so this is to prevent unwanted account creation.
+        if (!$this->core->getConfig()->isUserCreateAccount()) {
+            $this->core->addErrorMessage('Users cannot create their own account, Please have your system administrator add you.');
+            return new RedirectResponse($this->core->buildUrl(['authentication', 'login']));
+        }
+
+        $user_id = $_POST['user_id'];
+        $email = $_POST['email'];
+        $password = $_POST['password'];
+        $confirm_password = $_POST['confirm_password'];
+
+        $verified_users = $this->core->getQueries()->getUserIdEmailExists($email, $user_id);
+        $unverified_users = $this->core->getQueries()->getUnverifiedUserIdEmailExists($email, $user_id);
+
+        if (in_array($email, array_column($unverified_users, 'user_email'), true)) {
+            $this->core->addErrorMessage('Email already exists, please verify your email.');
+            return new RedirectResponse($this->core->buildUrl(['authentication', 'verify_email']));
+        }
+
+        if (in_array($email, array_column($verified_users, 'user_email'), true)) {
+            $this->core->addErrorMessage('Email already exists');
+            return new RedirectResponse($this->core->buildUrl(['authentication', 'create_account']));
+        }
+        
+        if (in_array($user_id, array_column($verified_users, 'user_id'), true)) {
+            $this->core->addErrorMessage('User ID already exists');
+            return new RedirectResponse($this->core->buildUrl(['authentication', 'create_account']));
+        }
+
+        if (!$this->isGoodPassword($password)) {
+           $this->core->addErrorMessage('Password does not meet the requirements.');
+           return new RedirectResponse($this->core->buildUrl(['authentication', 'create_account']));
+        }
+
+        if ($password !== $confirm_password) {
+           $this->core->addErrorMessage('Passwords did not match.');
+           return new RedirectResponse($this->core->buildUrl(['authentication', 'create_account']));
+        }
+
+        if (!$this->isAcceptedEmail($email)) {
+            $this->core->addErrorMessage('This email is not accepted.');
+            return new RedirectResponse($this->core->buildUrl(['authentication', 'create_account']));
+        }
+
+        if (!$this->isAcceptedUserId($user_id, $_POST['given_name'], $_POST['family_name'], $email)) {
+            $this->core->addErrorMessage('This user id does not meet requirements.');
+            return new RedirectResponse($this->core->buildUrl(['authentication', 'create_account']));
+        }
+        $user = new User($this->core, [
+            'user_id' => $user_id,
+            'user_givenname' => $_POST['given_name'],
+            'user_familyname' => $_POST['family_name'],
+            'user_password' => $password,
+            'user_pronouns' => '',
+            'display_pronouns' => false,
+            'user_email' => $email,
+            'user_email_secondary' => '',
+            'user_email_secondary_notify' => false,
+            'user_numeric_id' => time()
+        ]);
+
+        $user->generateVerificationCode();
+        $verification_code = $user->getVerificationCode();
+        $_COOKIE['verification_code'] = $verification_code;
+        try {
+            $this->core->getQueries()->insertUnverifiedSubmittyUser($user);
+            $this->sendVerificationEmail($email, $user_id, $verification_code);
+            $this->core->addSuccessMessage('Verification Email Sent');
+            return new RedirectResponse($this->core->buildUrl(['authentication', 'verify_email']));
+        }
+        catch (\Error $e) {
+            $this->core->addErrorMessage('Failed to create the account.');
+            return new RedirectResponse($this->core->buildUrl(['authentication', 'create_account']));
+        }
     }
 }
