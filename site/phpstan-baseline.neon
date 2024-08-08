@@ -1441,12 +1441,12 @@ parameters:
 
 		-
 			message: "#^Construct empty\\(\\) is not allowed\\. Use more strict comparison\\.$#"
-			count: 2
+			count: 1
 			path: app/controllers/admin/ReportController.php
 
 		-
 			message: "#^Loose comparison via \"\\=\\=\" is not allowed\\.$#"
-			count: 2
+			count: 1
 			path: app/controllers/admin/ReportController.php
 
 		-
@@ -12498,7 +12498,7 @@ parameters:
 
 		-
 			message: "#^Loose comparison via \"\\=\\=\" is not allowed\\.$#"
-			count: 20
+			count: 21
 			path: app/views/NavigationView.php
 
 		-
