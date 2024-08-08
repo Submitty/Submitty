@@ -38,6 +38,11 @@
             attachment_div.innerHTML = '';
             window.notebook_builder = new RootBuilder(attachment_div);
         });
+
+        function redirectToNotebook(){
+            const url = buildCourseUrl(['notebook_builder/{{ gradeable.getId() }}/notebook_preview']);
+            window.location.href = url;
+        }
     </script>
 
     <h2>{{ gradeable.getTitle() }} Notebook Builder</h2>
@@ -45,5 +50,6 @@
         <p>Loading...</p>
     </div>
     <button class="btn btn-nav btn-nav-grade btn-default" onclick="javascript:document.getElementById('holder').innerHTML=JSON.stringify(notebook_builder.getJSON(), null, 2)">Show JSON</button>
+    <button class="btn btn-nav btn-nav-grade btn-default" onclick="redirectToNotebook()">Preview Notebook</button>
     <pre id="holder"></pre>
 </div>
