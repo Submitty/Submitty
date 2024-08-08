@@ -48,6 +48,7 @@ class ConfigurationController extends AbstractController {
             'private_repository'             => $this->core->getConfig()->getPrivateRepository(),
             'room_seating_gradeable_id'      => $this->core->getConfig()->getRoomSeatingGradeableId(),
             'seating_only_for_instructor'    => $this->core->getConfig()->isSeatingOnlyForInstructor(),
+            'self_registration_allowed'      => $this->core->getQueries()->isSelfRegistrationAllowed($this->core->getConfig()->getCourse()) ?? false,
             'auto_rainbow_grades'            => $this->core->getConfig()->getAutoRainbowGrades(),
             'queue_enabled'                  => $this->core->getConfig()->isQueueEnabled(),
             'queue_message'                  => $this->core->getConfig()->getQueueMessage(),
@@ -184,6 +185,9 @@ class ConfigurationController extends AbstractController {
             $entry = $entry === "true";
         }
 
+        if($name === 'self_registration'){
+            $this->core->getQueries()->setSelfRegistrationAllowed($this->core->getConfig()->getCourse(), $entry === 'true' ? 1 : 0);
+        }
         if ($name === 'forum_enabled' && $entry == 1) {
             // Only create default categories when there is no existing categories (only happens when first enabled)
             if (empty($this->core->getQueries()->getCategories())) {
@@ -196,9 +200,11 @@ class ConfigurationController extends AbstractController {
 
         $config_json = $this->core->getConfig()->getCourseJson();
         if (!isset($config_json['course_details'][$name])) {
-            return MultiResponse::JsonOnlyResponse(
-                JsonResponse::getFailResponse('Not a valid config name')
-            );
+            if($name !== 'self_registration'){
+                return MultiResponse::JsonOnlyResponse(
+                    JsonResponse::getFailResponse('Not a valid config name')
+                );
+            }
         }
         $config_json['course_details'][$name] = $entry;
 

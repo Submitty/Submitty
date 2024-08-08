@@ -5148,7 +5148,7 @@ SELECT t.name AS term_name, u.term, u.course, u.user_group, u.registration_secti
 FROM courses_users u
 INNER JOIN courses c ON u.course=c.course AND u.term=c.term
 INNER JOIN terms t ON u.term=t.term_id
-WHERE u.user_id=? ${include_archived} AND ${force_nonnull} (u.registration_section IS NOT NULL OR u.user_group<>4)
+WHERE u.user_id=? ${include_archived} AND ${force_nonnull} (u.registration_section IS NOT NULL OR u.user_group<>5)
 ORDER BY u.user_group ASC, t.start_date DESC, u.course ASC
 SQL;
         $this->submitty_db->query($query, [$user_id]);
@@ -5169,6 +5169,42 @@ SQL;
     public function getInstructorLevelAccessCourse(string $user_id): array {
         $this->submitty_db->query("SELECT term, course FROM courses_users WHERE user_id=? AND user_group=1", [$user_id]);
         return $this->submitty_db->rows();
+    }
+
+    public function getSelfRegisterCourses($user_id): array {
+        $query = <<<SQL
+Select *, t.name as term_name from courses c, terms t where (c.self_registration_allowed=1 or c.self_registration_allowed=2) and c.course not in (
+    select course from courses_users where user_id = ?
+)
+SQL;
+        $this->submitty_db->query($query, [$user_id]);
+        $return = [];
+        foreach ($this->submitty_db->rows() as $row) {
+            $course = new Course($this->core, $row);
+            $course->loadDisplayName();
+            $return[] = $course;
+        }
+        return $return;
+    }
+
+    public function isSelfRegistrationAllowed($course) {
+        $this->submitty_db->query("SELECT self_registration_allowed FROM courses WHERE course=?", [$course]);
+        return $this->submitty_db->row()['self_registration_allowed'];
+    }
+    
+    public function setSelfRegistrationAllowed($course, $self_registration_allowed) {
+        $this->submitty_db->query("UPDATE courses set self_registration_allowed=? WHERE course=?", [$self_registration_allowed, $course]);
+        return $this->submitty_db->row();
+    }
+    
+    public function getSelfRegistrationDefaultCourse() {
+        $this->course_db->query("SELECT sections_registration_id FROM sections_registration WHERE default_course=t", [$course]);
+        return $this->course_db->row()['sections_registration_id'];
+    }
+
+    public function setSelfRegistrationDefaultCourse($course, $value) {
+        $this->course_db->query("UPDATE sections_registration set default_course=? WHERE course=?", [$value, $course]);
+        return $this->course_db->row();
     }
 
     /**
