@@ -10,7 +10,6 @@
     font-family: monospace;
     color: var(--diff-char);
     background-color: var(--diff-background-all);
-    line-height: 1.8;
 }
 
 .diff-code .row {
