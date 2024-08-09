@@ -5,9 +5,6 @@ module.exports = {
         '<rootDir>/ts/**/*.ts',
     ],
     coverageDirectory: '<rootDir>/tests/report/jest',
-    setupFilesAfterEnv: [
-        '<rootDir>/tests/ts/setupTests.js',
-    ],
     testEnvironment: 'jsdom',
     testMatch: [
         '<rootDir>/tests/ts/**/*.spec.js',
