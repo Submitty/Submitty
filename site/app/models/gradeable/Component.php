@@ -30,6 +30,8 @@ use app\libraries\NumberUtils;
  * @method void setText($is_text)
  * @method bool isPeerComponent()
  * @method void setPeerComponent($is_peer_component)
+ * @method bool isCurveComponent()
+ * @method void setCurveComponent($is_curve_component)
  * @method int getOrder()
  * @method void setOrder($order)
  * @method int getPage()
@@ -72,6 +74,9 @@ class Component extends AbstractModel {
     /** @prop
      * @var bool If this is a peer grading component */
     protected $peer_component = false;
+    /** @prop
+     * @var bool If this is a curve grading component */
+    protected $curve_component = false;
     /** @prop
      * @var int The order of this component in the gradeable */
     protected $order = -1;
@@ -121,6 +126,7 @@ class Component extends AbstractModel {
         $this->setPoints($details);
         $this->setText($details['text']);
         $this->setPeerComponent($details['peer_component'] ?? false);
+        $this->setCurveComponent($details['curve_component'] ?? false);
         $this->setOrder($details['order']);
         $this->setPage($details['page']);
         $this->setIsItempoolLinked($details['is_itempool_linked'] ?? false);
