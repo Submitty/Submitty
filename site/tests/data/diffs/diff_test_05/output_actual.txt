@@ -1,25 +1,25 @@
 <div class='diff-container'><div class='diff-code'>
 	<div><span class='line_number'>&nbsp;1</span><span class='line_code'>FOUND CONSTELLATION Ursa_Major</span></div>
 	<div class='highlight' id='id_actual_0'>
-	<div class='bad'><span class='line_number'>&nbsp;2</span><span class='line_code'>assigning  STAR_00001  <span class='highlight-char'>&upsilon;</span><span class='line_code_inner'>_UMa</span></span></div>
-	<div class='bad'><span class='line_number'>&nbsp;3</span><span class='line_code'>assigning  STAR_00002  <span class='highlight-char'>&chi;</span><span class='line_code_inner'>_UMa</span></span></div>
-	<div class='bad'><span class='line_number'>&nbsp;4</span><span class='line_code'>assigning  STAR_00003  <span class='highlight-char'>23</span><span class='line_code_inner'>_UMa</span></span></div>
-	<div class='bad'><span class='line_number'>&nbsp;5</span><span class='line_code'>assigning  STAR_00004  <span class='highlight-char'>&gamma;</span><span class='line_code_inner'>_UMa</span></span></div>
-	<div class='bad'><span class='line_number'>&nbsp;6</span><span class='line_code'>assigning  STAR_00006  <span class='highlight-char'>&epsilon;</span><span class='line_code_inner'>_UMa</span></span></div>
-	<div class='bad'><span class='line_number'>&nbsp;7</span><span class='line_code'>assigning  STAR_00007  M<span class='highlight-char'>iz</span>a<span class='highlight-char'>r</span><span class='line_code_inner'></span></span></div>
-	<div class='bad'><span class='line_number'>&nbsp;8</span><span class='line_code'>assigning  STAR_00009  <span class='highlight-char'>&beta;</span><span class='line_code_inner'>_UMa</span></span></div>
-	<div class='bad'><span class='line_number'>&nbsp;9</span><span class='line_code'>assigning  STAR_00011  <span class='highlight-char'>&theta;</span><span class='line_code_inner'>_UMa</span></span></div>
-	<div class='bad'><span class='line_number'>10</span><span class='line_code'>assigning  STAR_00013  <span class='highlight-char'>&xi;</span>_UMa<span class='highlight-char'>_A</span><span class='line_code_inner'></span></span></div>
-	<div class='bad'><span class='line_number'>11</span><span class='line_code'>assigning  STAR_00016  <span class='highlight-char'>&alpha;</span><span class='line_code_inner'>_UMa</span></span></div>
-	<div class='bad'><span class='line_number'>12</span><span class='line_code'>assigning  STAR_00017  <span class='highlight-char'>&iota;</span><span class='line_code_inner'>_UMa</span></span></div>
-	<div class='bad'><span class='line_number'>13</span><span class='line_code'>assigning  STAR_00019  <span class='highlight-char'>&mu;</span><span class='line_code_inner'>_UMa</span></span></div>
-	<div class='bad'><span class='line_number'>14</span><span class='line_code'>assigning  STAR_00021  <span class='highlight-char'>&nu;</span><span class='line_code_inner'>_UMa</span></span></div>
-	<div class='bad'><span class='line_number'>15</span><span class='line_code'>assigning  STAR_00023  <span class='highlight-char'>&omicron;</span><span class='line_code_inner'>_UMa</span></span></div>
-	<div class='bad'><span class='line_number'>16</span><span class='line_code'>assigning  STAR_00025  <span class='highlight-char'>&psi;</span><span class='line_code_inner'>_UMa</span></span></div>
-	<div class='bad'><span class='line_number'>17</span><span class='line_code'>assigning  STAR_00026  <span class='highlight-char'>&lambda;</span><span class='line_code_inner'>_UMa</span></span></div>
-	<div class='bad'><span class='line_number'>18</span><span class='line_code'>assigning  STAR_00027  <span class='highlight-char'>&delta;</span><span class='line_code_inner'>_UMa</span></span></div>
-	<div class='bad'><span class='line_number'>19</span><span class='line_code'>assigning  STAR_00030  <span class='highlight-char'>&eta;_U</span><span class='line_code_inner'>Ma</span></span></div>
-	<div class='bad'><span class='line_number'>20</span><span class='line_code'>assigning  STAR_00032  <span class='highlight-char'>&kappa;</span><span class='line_code_inner'>_UMa</span></span></div>
+	<div class='bad-actual'><span class='line_number'>&nbsp;2</span><span class='line_code'>assigning  STAR_00001  <span class='highlight-char-actual'>&upsilon;</span><span class='line_code_inner'>_UMa</span></span></div>
+	<div class='bad-actual'><span class='line_number'>&nbsp;3</span><span class='line_code'>assigning  STAR_00002  <span class='highlight-char-actual'>&chi;</span><span class='line_code_inner'>_UMa</span></span></div>
+	<div class='bad-actual'><span class='line_number'>&nbsp;4</span><span class='line_code'>assigning  STAR_00003  <span class='highlight-char-actual'>23</span><span class='line_code_inner'>_UMa</span></span></div>
+	<div class='bad-actual'><span class='line_number'>&nbsp;5</span><span class='line_code'>assigning  STAR_00004  <span class='highlight-char-actual'>&gamma;</span><span class='line_code_inner'>_UMa</span></span></div>
+	<div class='bad-actual'><span class='line_number'>&nbsp;6</span><span class='line_code'>assigning  STAR_00006  <span class='highlight-char-actual'>&epsilon;</span><span class='line_code_inner'>_UMa</span></span></div>
+	<div class='bad-actual'><span class='line_number'>&nbsp;7</span><span class='line_code'>assigning  STAR_00007  M<span class='highlight-char-actual'>iz</span>a<span class='highlight-char-actual'>r</span><span class='line_code_inner'></span></span></div>
+	<div class='bad-actual'><span class='line_number'>&nbsp;8</span><span class='line_code'>assigning  STAR_00009  <span class='highlight-char-actual'>&beta;</span><span class='line_code_inner'>_UMa</span></span></div>
+	<div class='bad-actual'><span class='line_number'>&nbsp;9</span><span class='line_code'>assigning  STAR_00011  <span class='highlight-char-actual'>&theta;</span><span class='line_code_inner'>_UMa</span></span></div>
+	<div class='bad-actual'><span class='line_number'>10</span><span class='line_code'>assigning  STAR_00013  <span class='highlight-char-actual'>&xi;</span>_UMa<span class='highlight-char-actual'>_A</span><span class='line_code_inner'></span></span></div>
+	<div class='bad-actual'><span class='line_number'>11</span><span class='line_code'>assigning  STAR_00016  <span class='highlight-char-actual'>&alpha;</span><span class='line_code_inner'>_UMa</span></span></div>
+	<div class='bad-actual'><span class='line_number'>12</span><span class='line_code'>assigning  STAR_00017  <span class='highlight-char-actual'>&iota;</span><span class='line_code_inner'>_UMa</span></span></div>
+	<div class='bad-actual'><span class='line_number'>13</span><span class='line_code'>assigning  STAR_00019  <span class='highlight-char-actual'>&mu;</span><span class='line_code_inner'>_UMa</span></span></div>
+	<div class='bad-actual'><span class='line_number'>14</span><span class='line_code'>assigning  STAR_00021  <span class='highlight-char-actual'>&nu;</span><span class='line_code_inner'>_UMa</span></span></div>
+	<div class='bad-actual'><span class='line_number'>15</span><span class='line_code'>assigning  STAR_00023  <span class='highlight-char-actual'>&omicron;</span><span class='line_code_inner'>_UMa</span></span></div>
+	<div class='bad-actual'><span class='line_number'>16</span><span class='line_code'>assigning  STAR_00025  <span class='highlight-char-actual'>&psi;</span><span class='line_code_inner'>_UMa</span></span></div>
+	<div class='bad-actual'><span class='line_number'>17</span><span class='line_code'>assigning  STAR_00026  <span class='highlight-char-actual'>&lambda;</span><span class='line_code_inner'>_UMa</span></span></div>
+	<div class='bad-actual'><span class='line_number'>18</span><span class='line_code'>assigning  STAR_00027  <span class='highlight-char-actual'>&delta;</span><span class='line_code_inner'>_UMa</span></span></div>
+	<div class='bad-actual'><span class='line_number'>19</span><span class='line_code'>assigning  STAR_00030  <span class='highlight-char-actual'>&eta;_U</span><span class='line_code_inner'>Ma</span></span></div>
+	<div class='bad-actual'><span class='line_number'>20</span><span class='line_code'>assigning  STAR_00032  <span class='highlight-char-actual'>&kappa;</span><span class='line_code_inner'>_UMa</span></span></div>
 	</div>
 	<div><span class='line_number'>21</span><span class='line_code'></span></div>
 </div></div>

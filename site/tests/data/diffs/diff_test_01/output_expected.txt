@@ -5,7 +5,7 @@
 	<div><span class='line_number'>&nbsp;4</span><span class='line_code'>adjective ==&gt; silly</span></div>
 	<div><span class='line_number'>&nbsp;5</span><span class='line_code'>noun ==&gt; mouse</span></div>
 	<div class='highlight' id='id_expected_0'>
-	<div class='bad'><span class='line_number'>&nbsp;6</span><span class='line_code'>adjective ==&gt; <span class='highlight-char'>hungr</span><span class='line_code_inner'>y</span></span></div>
+	<div class='bad-expected'><span class='line_number'>&nbsp;6</span><span class='line_code'>adjective ==&gt; <span class='highlight-char-expected'>hungr</span><span class='line_code_inner'>y</span></span></div>
 	</div>
 	<div><span class='line_number'>&nbsp;7</span><span class='line_code'>noun ==&gt; computer</span></div>
 	<div><span class='line_number'>&nbsp;8</span><span class='line_code'>adjective ==&gt; cute</span></div>
