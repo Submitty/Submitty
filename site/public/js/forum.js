@@ -1265,19 +1265,21 @@ function modifyThreadList(currentThreadId, currentCategoriesId, course, loadFirs
     });
 }
 
-function toggleLike(post_id, current_user) {
+function toggleLike(post_id, current_user, isLiked) {
+
     // eslint-disable-next-line no-undef
-    const url = buildCourseUrl(['posts', 'likes']);
+    const url = buildCourseUrl(['post', 'likes']);
     $.ajax({
         url: url,
         type: 'POST',
         data: {
             post_id: post_id,
             current_user: current_user,
+            isLiked: isLiked, //this is a bool for if the button is liked or not
             // eslint-disable-next-line no-undef
             csrf_token: csrfToken,
         },
-        success: function (data) {
+        success: function(data) {
             let json;
             try {
                 json = JSON.parse(data);
@@ -1304,37 +1306,58 @@ function toggleLike(post_id, current_user) {
             const likeIconSrc = document.getElementById(`likeIcon_${post_id}`);
             let likeIconSrcElement = likeIconSrc.src;
 
-            if (liked === 'unlike') {
-                likeIconSrcElement = likeIconSrcElement.replace('on-duck-button.svg', 'light-mode-off-duck.svg');
-
-                if (staffLiked > 0) {
-                    $(`#likedByInstructor_${post_id}`).show();
+            const theme = localStorage.getItem('theme');
+            if (localStorage.getItem('theme')) {
+                console.log(localStorage.getItem('theme'));
+            }
+            
+            if (likeIconSrcElement.endsWith('/img/on-duck-button.svg')) {
+                if (liked === 'unlike') {
+                    likeIconSrcElement = likeIconSrcElement.replace('on-duck-button.svg', 'light-mode-off-duck.svg');
+                    
+                    if (staffLiked > 0) {
+                        $(`#likedByInstructor_${post_id}`).show();
+                    } else {
+                        $(`#likedByInstructor_${post_id}`).hide();
+                    }
+                    
+                    likeCounter = likes; // set to the SQL like value
+                } else {
+                    if (theme === 'light') {
+                        likeIconSrcElement = likeIconSrcElement.replace('on-duck-button.svg', 'light-mode-off-duck.svg');
+                    } else {
+                        likeIconSrcElement = likeIconSrcElement.replace('on-duck-button.svg', 'light-mode-off-duck.svg');
+                    }
+                    likeCounter = likeCounter - 1;
                 }
-                else {
-                    $(`#likedByInstructor_${post_id}`).hide();
-                }
-
-                likeCounter = likes;// set to the sql like value
-
+                
                 likeIconSrc.src = likeIconSrcElement; // Update the state
                 likeCounterElement.innerText = likeCounter;
-            }
-            else if (liked === 'like') {
-                likeIconSrcElement = likeIconSrcElement.replace('light-mode-off-duck.svg', 'on-duck-button.svg');
-                if (staffLiked > 0) {
-                    $(`#likedByInstructor_${post_id}`).show();
+            } else {
+                if (liked === 'like') {
+                    likeIconSrcElement = likeIconSrcElement.replace('light-mode-off-duck.svg', 'on-duck-button.svg');
+                    if (staffLiked > 0) {
+                        $(`#likedByInstructor_${post_id}`).show();
+                    } else {
+                        $(`#likedByInstructor_${post_id}`).hide();
+                    }
+                    likeCounter = likes;
+                } else {
+                    if (theme === 'light') {
+                        likeIconSrcElement = likeIconSrcElement.replace('light-mode-off-duck.svg', 'on-duck-button.svg');
+                    } else {
+                        likeIconSrcElement = likeIconSrcElement.replace('light-mode-off-duck.svg', 'on-duck-button.svg');
+                    }
+                    likeCounter = likeCounter + 1;
                 }
-                else {
-                    $(`#likedByInstructor_${post_id}`).hide();
-                }
-                likeCounter = likes;
+                
                 likeIconSrc.src = likeIconSrcElement; // Update the state
                 likeCounterElement.innerText = likeCounter;
             }
         },
         error: function (err) {
             console.log(err);
-        },
+        }
     });
 }
 

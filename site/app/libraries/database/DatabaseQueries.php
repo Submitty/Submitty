@@ -217,6 +217,10 @@ class DatabaseQueries {
         (SELECT distinct on (user_id) user_id, timestamp
         FROM course_materials_access
         ORDER BY user_id, timestamp desc)
+        I AS
+        //add a sql code to get the upducks recived by using post_id in forum_upducks and get that user
+        J AS
+        //get the upducks given by each user
         SELECT
         A.registration_section, A.user_id, A.user_givenname, user_familyname,
         B.timestamp as gradeable_access,
@@ -226,6 +230,8 @@ class DatabaseQueries {
         F.count as num_poll_responses,
         G.time_in as office_hours_queue,
         H.timestamp as course_materials_access
+        I.upducks_recived as upducks_recived
+        J.upducks_given as upducks_given
         FROM
         A
         left join B on A.user_id=B.user_id
@@ -235,6 +241,8 @@ class DatabaseQueries {
         left join F on A.user_id=F.student_id
         left join G on A.user_id=G.user_id
         left join H on A.user_id=H.user_id
+        left join G on A.user_id=I.user_id
+        left join H on A.user_id=J.user_id
         ORDER BY length(A.registration_section), A.registration_section, A.user_familyname, A.user_givenname, A.user_id;
         ");
         return $this->course_db->rows();
@@ -280,7 +288,7 @@ class DatabaseQueries {
                     (SELECT timestamp, user_id
                     FROM course_materials_access where user_id = (table Input)
                     ORDER BY timestamp desc
-                    LIMIT 1)
+                    LIMIT 1)            
             SELECT
                 Gradeable_Access.timestamp as gradeable_access,
                 Gradeable_Submission.submission_time as gradeable_submission,
@@ -723,50 +731,66 @@ SQL;
     }
 
     /**
-     * toggles a like from upduck to off or off to upduck
+     * Toggles a like from upduck to off or off to upduck.
      *
      * @param int $post_id The ID of the post.
      * @param string $current_user The ID of the current user.
+     * @param bool $intendToLike Whether the user intends to like the post.
      * @return array{ status: string, likesCount: int, likesFromStaff: int}
      * 'status' indicating 'like' or 'unlike',
      * 'likesCount' indicating the total number of likes,
      * 'likesFromStaff' indicating the number of likes from staff members.
      */
-    public function toggleLikes(int $post_id, string $current_user): array {
+    public function toggleLikes(int $post_id, string $current_user, bool $intendToLike): array {
         try {
             $this->course_db->query("SELECT * FROM forum_upducks WHERE post_id = ? AND user_id = ?", [$post_id, $current_user]);
-            $inDatabase = isset($this->course_db->rows()[0]);
+            $alreadyLiked = isset($this->course_db->rows()[0]);
 
             $sqlFilteredCount = "SELECT COUNT(*) AS filtered_likes_count
-                             FROM forum_upducks f
-                             JOIN users u ON f.user_id = u.user_id
-                             WHERE f.post_id = ?
-                             AND u.user_group <= 3";
-            if ($inDatabase) {
-                $this->course_db->query("DELETE FROM forum_upducks WHERE post_id = ? AND user_id = ?", [$post_id, $current_user]);
-                $action = "unlike";
+                                FROM forum_upducks f
+                                JOIN users u ON f.user_id = u.user_id
+                                WHERE f.post_id = ?
+                                AND u.user_group <= 3";
+
+            if ($intendToLike) {
+                if ($alreadyLiked) {
+                    // needed or else if you spam like button the count will get high
+                    $this->course_db->query("DELETE FROM forum_upducks WHERE post_id = ? AND user_id = ?", [$post_id, $current_user]);
+                    $action = "already_liked";
+                } else {
+                    $this->course_db->query("INSERT INTO forum_upducks (post_id, user_id) VALUES (?, ?)", [$post_id, $current_user]);
+                    $action = "like";
+                }
+            } else {
+                if (!$alreadyLiked) {
+                    $this->course_db->query("INSERT INTO forum_upducks (post_id, user_id) VALUES (?, ?)", [$post_id, $current_user]);
+                    $action = "not_liked";
+                } else {
+                    $this->course_db->query("DELETE FROM forum_upducks WHERE post_id = ? AND user_id = ?", [$post_id, $current_user]);
+                    $action = "unlike";
+                }
             }
-            else {
-                $this->course_db->query("INSERT INTO forum_upducks (post_id, user_id) VALUES (?, ?)", [$post_id, $current_user]);
-                $action = "like";
-            }
+
             $this->course_db->query("SELECT COUNT(*) AS likes_count FROM forum_upducks WHERE post_id = ?", [$post_id]);
             $likesCount = intval($this->course_db->row()['likes_count']);
             $this->course_db->query($sqlFilteredCount, [$post_id]);
             $filteredLikesCount = intval($this->course_db->row()['filtered_likes_count']);
+
             return [
                 'status' => $action, // 'like' or 'unlike'
                 'likesCount' => $likesCount, // Total likes count
                 'likesFromStaff' => $filteredLikesCount // Likes from staff
             ];
-        }
-        catch (DatabaseException $dbException) {
-            if ($this->course_db->inTransaction()) {
-                $this->course_db->rollback();
-            }
-            return ['status' => "false", 'likesCount' => 0, 'likesFromStaff' => 0];
+        } catch (Exception $e) {
+            // Handle exception
+            return [
+                'status' => 'error',
+                'likesCount' => 0,
+                'likesFromStaff' => 0
+            ];
         }
     }
+
 
     /**
      * get what posts should be loaded in with "staff upduck" upduck

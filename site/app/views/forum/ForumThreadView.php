@@ -527,6 +527,7 @@ class ForumThreadView extends AbstractView {
 
                         $post["author_user_group"] = $author_user_groups_map[$post["author_user_id"]];
 
+                        $boolLiked = true;
                         $boolLiked = in_array($post["id"], $userLiked, true);
 
                         $boolStaffLiked = in_array($post["id"], $staffLiked, true);
@@ -1174,6 +1175,24 @@ class ForumThreadView extends AbstractView {
         $post_user_info = [];
 
         $merged_thread = $is_merged_thread && $userAccessFullGrading;
+
+        if ($userAccessFullGrading) {
+            $info_name = $given_name . " " . $family_name . " (" . $post['author_user_id'] . ")";
+            $visible_user_json = json_encode($visible_username);
+            $pronouns = trim($author_info["pronouns"]);
+            $display_pronouns = $author_info["display_pronouns"];
+            $info_name = json_encode($info_name);
+            $jscriptAnonFix = $post['anonymous'] ? 'true' : 'false';
+            $jscriptAnonFix = json_encode($jscriptAnonFix);
+
+            $post_user_info = [
+                "info_name" => $info_name,
+                "visible_user_json" => $visible_user_json,
+                "jscriptAnonFix" => $jscriptAnonFix,
+                "pronouns" => $pronouns,
+                "display_pronouns" => $display_pronouns
+            ];
+        }
 
         $post_button = [];
 
