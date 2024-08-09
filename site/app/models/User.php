@@ -31,6 +31,8 @@ use Egulias\EmailValidator\Validation\RFCValidation;
  * @method int getLastInitialFormat()
  * @method string getDisplayNameOrder()
  * @method void setDisplayNameOrder()
+ * @method string getVerificationCode()
+ * @method int getVerificationExpiration()
  * @method string getEmail()
  * @method void setEmail(string $email)
  * @method string getSecondaryEmail()
@@ -54,7 +56,6 @@ use Egulias\EmailValidator\Validation\RFCValidation;
  * @method bool isInstructorUpdated()
  * @method array getGradingRegistrationSections()
  * @method bool isLoaded()
- * @method bool isVerified()
  */
 class User extends AbstractModel {
     /**
@@ -141,6 +142,12 @@ class User extends AbstractModel {
      * @var string The secondary email of the user */
     protected $secondary_email;
     /** @prop
+     * @var string Email verification code */
+    protected $verification_code;
+    /** @prop
+     * @var int Timestamp of the expiration of the verification code */
+    protected $verification_expiration;
+    /** @prop
      * @var string Determines whether or not user chose to receive emails to secondary email */
     protected $email_both;
     /** @prop
@@ -152,9 +159,6 @@ class User extends AbstractModel {
     /** @prop
      * @var bool Should the user only have one active session at a time? */
     protected bool $enforce_single_session;
-    /** @prop
-     * @var bool Has the user verified their email (if self account creation)? */
-    protected bool $verified = false;
     /** @prop
      * @var string What is the registration section that the user was assigned to for the course */
     protected $registration_section = null;

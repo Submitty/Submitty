@@ -28,8 +28,6 @@ def up(config, database):
             verification_expiration timestamp DEFAULT current_timestamp
         )
     ''')
-    pass
-
 
 def down(config, database):
     """

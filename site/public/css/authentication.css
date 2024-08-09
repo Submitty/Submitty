@@ -53,15 +53,15 @@
 
 .hidden-helper {
     display: none;
-    padding: 10px 10px 10px 10px;
+    padding: 10px;
     font-size: small;
 }
 
 .display-box input {
     display: block;
     width: 100%;
-    color:red;  
 }
+
 .requirements-button {
     display: inline-block;
     font-weight: 400;
@@ -70,13 +70,12 @@
     vertical-align: middle;
     background-color: transparent;
     border: 1px solid;
-    padding: 0.3rem 0.3rem;
-    /* margin-bottom: 5px; */
+    padding: 0.3rem;
     font-size: x-small;
     line-height: 1;
     border-radius: 0.25rem;
     transition: color 0.15s ease-in-out, background-color 0.15s ease-in-out, border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
-  }
+}
   
 
 @media (prefers-color-scheme: dark) {

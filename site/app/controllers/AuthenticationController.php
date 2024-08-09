@@ -96,7 +96,7 @@ class AuthenticationController extends AbstractController {
      */
     #[Route("/authentication/check_login")]
     public function checkLogin($old = null) {
-            $is_saml_auth = $this->core->getAuthentication() instanceof SamlAuthentication;
+        $is_saml_auth = $this->core->getAuthentication() instanceof SamlAuthentication;
         if (!is_null($old) && !str_starts_with(urldecode($old), $this->core->getConfig()->getBaseUrl())) {
             $old = null;
         }
@@ -323,7 +323,7 @@ class AuthenticationController extends AbstractController {
     }
 
     /**
-     * Check if the user ID is valid
+     * Check if the user ID meets requirements
      */
     public function isAcceptedUserId(string $user_id, string $given_name, string $family_name, string $email): bool {
         
@@ -351,7 +351,15 @@ class AuthenticationController extends AbstractController {
             return false;
         }
         elseif ($requirements['require_email'] === true) {
-            return true;
+            if ($requirements['email_requirements']['whole_email']) {
+                return $user_id === $email;
+            } else if ($requirements['email_requirements']['whole_prefix']){
+                $split_email = explode('@', $email);
+                $email_extension = array_pop($split_email);
+                return $user_id === implode('', $split_email);
+            } else {
+                return substr($user_id, 0, $requirements['email_requirements']['prefix_count']) === substr($email, 0, $requirements['email_requirements']['prefix_count']);
+            }
         }
         else {
             return false;
@@ -366,7 +374,7 @@ class AuthenticationController extends AbstractController {
     }
 
     /**
-     * Checks if the email extension is in the accepted emails JSON file
+     * Checks if the email extension is in the accepted emails part of the Submitty config file
      */
     public function isAcceptedEmail(string $email): bool {
         $emails = $this->core->getConfig()->getAcceptedEmails();
