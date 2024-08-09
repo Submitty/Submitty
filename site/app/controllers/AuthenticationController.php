@@ -311,7 +311,7 @@ class AuthenticationController extends AbstractController {
         return new WebResponse(AuthenticationView::class, 'userSelection', $users);
     }
 
-     /**
+    /**
      * Check if password has at least one of the following, Upper case letter, Lower case letter, Special character, and number
      */
     public function checkChars(string $password): bool {
@@ -326,7 +326,6 @@ class AuthenticationController extends AbstractController {
      * Check if the user ID meets requirements
      */
     public function isAcceptedUserId(string $user_id, string $given_name, string $family_name, string $email): bool {
-        
         $requirements = $this->core->getConfig()->getUserIdRequirements();
 
          // If length is -1, allow any length
@@ -353,11 +352,13 @@ class AuthenticationController extends AbstractController {
         elseif ($requirements['require_email'] === true) {
             if ($requirements['email_requirements']['whole_email']) {
                 return $user_id === $email;
-            } else if ($requirements['email_requirements']['whole_prefix']){
+            }
+            elseif ($requirements['email_requirements']['whole_prefix']) {
                 $split_email = explode('@', $email);
                 $email_extension = array_pop($split_email);
                 return $user_id === implode('', $split_email);
-            } else {
+            }
+            else {
                 return substr($user_id, 0, $requirements['email_requirements']['prefix_count']) === substr($email, 0, $requirements['email_requirements']['prefix_count']);
             }
         }
@@ -381,7 +382,7 @@ class AuthenticationController extends AbstractController {
         // Check if the file was read successfully
         try {
             $split_email = explode('@', $email);
-            $email_extension = $split_email[sizeof($split_email)-1];
+            $email_extension = $split_email[count($split_email) - 1];
         }
         catch (\Error $error) {
             return false;
@@ -389,13 +390,16 @@ class AuthenticationController extends AbstractController {
         return in_array($email_extension, array_keys($emails), true);
     }
 
-    public function generateVerificationCode() {
-        $code = rand(1111111111,9999999999);
+    /**
+     * @return array<mixed>
+     */
+    public function generateVerificationCode(): array {
+        $code = rand(1111111111, 9999999999);
         $timestamp = time() + 60 * 15;
-        return ['code' => $code, 'exp' => $timestamp];
+        return ['code' => strval($code), 'exp' => $timestamp];
     }
 
-    public function sendVerificationEmail(string $email, string $verification_code) {
+    public function sendVerificationEmail(string $email, string $verification_code): void {
         $subject = "Submitty Email Verification";
         $url = $this->core->getConfig()->getBaseUrl() . 'authentication/verify_email?verification_code=' . $verification_code;
         $body = <<<EMAIL
@@ -413,8 +417,7 @@ class AuthenticationController extends AbstractController {
 
         $details = ["subject" => $subject, "body" => $body, "email_address" => $email, 'to_name' => 'test'];
         $email = new Email($this->core, $details);
-        $emails[] = $email;
-
+        $emails = array($email);
         $this->core->getNotificationFactory()->sendEmails($emails);
     }
 
@@ -426,9 +429,6 @@ class AuthenticationController extends AbstractController {
         // Check if the user is already logged in, if yes, redirect to home or another appropriate page
         if ($this->logged_in) {
             return new RedirectResponse($this->core->buildUrl(['home']));
-        }
-        if (isset($_GET['email'])) {
-
         }
         if (!$this->core->getConfig()->isUserCreateAccount()) {
             $this->core->addErrorMessage('Users cannot create their own account, Please have your system administrator add you.');
@@ -485,19 +485,18 @@ class AuthenticationController extends AbstractController {
             $this->core->addErrorMessage('The verification code is not correct.');
             return new RedirectResponse($this->core->buildUrl(['authentication', 'email_verification']));
         }
-        if (sizeof($verification_values) < 1) {
+        if (count($verification_values) < 2) {
             $this->core->addErrorMessage('That user_id was not associated with an account.');
             return new RedirectResponse($this->core->buildUrl(['authentication', 'signup']));
         }
         if ($verification_values['verification_expiration'] < time()) {
             $this->core->addErrorMessage('The verification code has expired, click resend email to receive a new code.');
             return new RedirectResponse($this->core->buildUrl(['authentication', 'email_verification']));
-        } 
+        }
         $this->core->addSuccessMessage('You have successfully verified your email.');
         $user = $this->core->getQueries()->getUnverifiedUserByCode($_GET['verification_code']);
         $this->core->getQueries()->insertSubmittyUser($user);
         $this->core->getQueries()->removeUnverifiedUserByCode($_GET['verification_code']);
-
         return new RedirectResponse($this->core->buildUrl(['authentication', 'login']));
     }
 
@@ -534,20 +533,20 @@ class AuthenticationController extends AbstractController {
             $this->core->addErrorMessage('Email already exists');
             return new RedirectResponse($this->core->buildUrl(['authentication', 'create_account']));
         }
-        
+
         if (in_array($user_id, array_column($verified_users, 'user_id'), true)) {
             $this->core->addErrorMessage('User ID already exists');
             return new RedirectResponse($this->core->buildUrl(['authentication', 'create_account']));
         }
 
         if (!$this->isGoodPassword($password)) {
-           $this->core->addErrorMessage('Password does not meet the requirements.');
-           return new RedirectResponse($this->core->buildUrl(['authentication', 'create_account']));
+            $this->core->addErrorMessage('Password does not meet the requirements.');
+            return new RedirectResponse($this->core->buildUrl(['authentication', 'create_account']));
         }
 
         if ($password !== $confirm_password) {
-           $this->core->addErrorMessage('Passwords did not match.');
-           return new RedirectResponse($this->core->buildUrl(['authentication', 'create_account']));
+            $this->core->addErrorMessage('Passwords did not match.');
+            return new RedirectResponse($this->core->buildUrl(['authentication', 'create_account']));
         }
 
         if (!$this->isAcceptedEmail($email)) {

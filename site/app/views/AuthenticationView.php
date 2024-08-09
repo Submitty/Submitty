@@ -50,7 +50,10 @@ class AuthenticationView extends AbstractView {
         ]);
     }
 
-    public function signupForm($content): string {
+    /**
+     * @param array<mixed> $content
+     */
+    public function signupForm(array $content): string {
         $this->core->getOutput()->addInternalCss("input.css");
         $this->core->getOutput()->addInternalCss("links.css");
         $this->core->getOutput()->addInternalCss("authentication.css");

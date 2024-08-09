@@ -298,7 +298,7 @@ class User extends AbstractModel {
 
         $this->time_zone = $details['time_zone'] ?? 'NOT_SET/NOT_SET';
 
-        if(isset($details['user_verification_code'])) {
+        if (isset($details['user_verification_code'])) {
             $this->core->getQueries()->updateUserVerificationValues($details['user_email'], $details['user_verification_code'], $details['user_verification_expiration']);
             $this->verification_expiration = $details['user_verification_expiration'];
             $this->verification_code = $details['user_verification_code'];

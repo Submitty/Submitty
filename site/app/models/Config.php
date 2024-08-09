@@ -113,11 +113,11 @@ class Config extends AbstractModel {
     protected $course_json = [];
 
     /** @prop
-     * @var array */
+     * @var array<mixed> */
     protected $user_id_requirements = [];
 
     /** @prop
-     * @var array */
+     * @var array<mixed> */
     protected $accepted_emails = [];
 
     /**
