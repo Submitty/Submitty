@@ -3,6 +3,7 @@
 namespace app\views\admin;
 
 use app\libraries\Utils;
+use app\models\User;
 use app\libraries\FileUtils;
 use app\views\AbstractView;
 use ParseError;
@@ -24,7 +25,6 @@ class DockerView extends AbstractView {
                 $images[] = $image;
             }
         }
-
         $images = array_unique($images);
 
         $capabilities = [];
@@ -300,7 +300,10 @@ class DockerView extends AbstractView {
                 "machine_system_details" => $machine_system_details,
                 "aliases" => $aliases,
                 "fail_images" => $fail_images ?? [],
-                "error_logs" => $error_logs
+                "error_logs" => $error_logs,
+                "user_id" => $this->core->getUser()->getId(),
+                "docker_image_owners" => $docker_data["image_owners"],
+                "superuser" => $this->core->getUser()->getAccessLevel() === User::LEVEL_SUPERUSER,
             ]
         );
     }
