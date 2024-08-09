@@ -392,7 +392,8 @@ class NavigationView extends AbstractView {
             "date" => $date_time,
             "href" => $core->buildCourseUrl(['gradeable', $gradeable->getId(), 'team']),
             "class" => "btn {$team_button_type} btn-nav",
-            "name" => "team-btn"
+            "name" => "team-btn",
+            "testid" => "team-btn"
         ]);
     }
 
@@ -620,7 +621,8 @@ class NavigationView extends AbstractView {
             "disabled" => $disabled,
             "class" => "btn {$class} btn-nav btn-nav-submit",
             "name" => "submit-btn",
-            "prerequisite" => $prerequisite
+            "prerequisite" => $prerequisite,
+            "testid" => "submit-btn"
         ]);
     }
 
@@ -669,7 +671,8 @@ class NavigationView extends AbstractView {
                 return new Button($this->core, [
                     "title" => "REGRADE",
                     "class" => "btn btn-danger btn-nav btn-nav-grade",
-                    "href" => $href
+                    "href" => $href,
+                    "testid" => "grade-btn"
                 ]);
             }
 
@@ -697,7 +700,8 @@ class NavigationView extends AbstractView {
                 $array = [
                     "title" => $title,
                     "class" => "btn btn-nav btn-nav-grade btn-default",
-                    "href" => $href
+                    "href" => $href,
+                    "testid" => "grade-btn"
                 ];
                 if ($gradeable->isTaGrading()) {
                     $array["progress"] = 100 * $progress_bar;
@@ -788,7 +792,8 @@ class NavigationView extends AbstractView {
             "href" => $href,
             "progress" => $progress,
             "class" => "btn btn-nav btn-nav-grade {$class}",
-            "name" => "grade-btn"
+            "name" => "grade-btn",
+            "testid" => "grade-btn"
         ]);
     }
 
@@ -837,7 +842,8 @@ class NavigationView extends AbstractView {
                     "href" => $this->core->buildCourseUrl(['gradeable', $gradeable->getId(), 'quick_link']) . '?'
                         . http_build_query(['action' => 'release_grades_now']),
                     "class" => "btn btn-primary btn-nav btn-nav-open",
-                    "name" => "quick-link-btn"
+                    "name" => "quick-link-btn",
+                    "testid" => "quick-link-btn"
                 ]);
             }
         }
@@ -847,7 +853,8 @@ class NavigationView extends AbstractView {
                 "href" => $this->core->buildCourseUrl(['gradeable', $gradeable->getId(), 'quick_link']) . '?'
                     . http_build_query(['action' => 'open_ta_now']),
                 "class" => "btn btn-primary btn-nav btn-nav-open",
-                "name" => "quick-link-btn"
+                "name" => "quick-link-btn",
+                "testid" => "quick-link-btn"
             ]);
         }
         elseif ($list_section === GradeableList::BETA) {
@@ -857,7 +864,8 @@ class NavigationView extends AbstractView {
                     "href" => $this->core->buildCourseUrl(['gradeable', $gradeable->getId(), 'quick_link']) . '?'
                         . http_build_query(['action' => 'open_students_now']),
                     "class" => "btn btn-primary btn-nav btn-nav-open",
-                    "name" => "quick-link-btn"
+                    "name" => "quick-link-btn",
+                    "testid" => "quick-link-btn"
                 ]);
             }
             else {
@@ -866,7 +874,8 @@ class NavigationView extends AbstractView {
                     "href" => $this->core->buildCourseUrl(['gradeable', $gradeable->getId(), 'quick_link']) . '?'
                         . http_build_query(['action' => 'open_grading_now']),
                     "class" => "btn btn-primary btn-nav btn-nav-open",
-                    "name" => "quick-link-btn"
+                    "name" => "quick-link-btn",
+                    "testid" => "quick-link-btn"
                 ]);
             }
         }
@@ -877,7 +886,8 @@ class NavigationView extends AbstractView {
                     "href" => $this->core->buildCourseUrl(['gradeable', $gradeable->getId(), 'quick_link']) . '?'
                         . http_build_query(['action' => 'open_grading_now']),
                     "class" => "btn btn-primary btn-nav btn-nav-open",
-                    "name" => "quick-link-btn"
+                    "name" => "quick-link-btn",
+                    "testid" => "quick-link-btn"
                 ]);
             }
             else {
@@ -887,7 +897,8 @@ class NavigationView extends AbstractView {
                         "href" => $this->core->buildCourseUrl(['gradeable', $gradeable->getId(), 'quick_link']) . '?'
                             . http_build_query(['action' => 'release_grades_now']),
                         "class" => "btn btn-primary btn-nav btn-nav-open",
-                        "name" => "quick-link-btn"
+                        "name" => "quick-link-btn",
+                        "testid" => "quick-link-btn"
                     ]);
                 }
             }
@@ -900,7 +911,8 @@ class NavigationView extends AbstractView {
                 "subtitle" => "CLOSE SUBMISSIONS NOW",
                 "onclick" => "displayCloseSubmissionsWarning(\"" . $url . "\",\"" . $gradeable->getTitle() . "\");",
                 "class" => "btn btn-default btn-nav btn-nav-open",
-                "name" => "quick-link-btn"
+                "name" => "quick-link-btn",
+                "testid" => "quick-link-btn"
             ]);
         }
 
