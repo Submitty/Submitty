@@ -10,7 +10,7 @@ env:
   PROJECT_ID: "PVT_kwDOAKRRkc4AfZil"
   STATUS_FIELD_ID: "PVTSSF_lADOAKRRkc4AfZilzgUwVMs"
   WIP_ID: "26e8e6b2"
-  SEEKING_REVIWER_ID: "67583d20"
+  SEEKING_REVIEWER_ID: "67583d20"
   PR_ID: ${{ github.event.pull_request.number }}
 
 jobs:
