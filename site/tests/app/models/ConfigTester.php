@@ -114,8 +114,8 @@ class ConfigTester extends \PHPUnit\Framework\TestCase {
                 ]
             ],
             "accepted_emails" => [
-                "gmail.com"=> true,
-                "rpi.edu"=> true
+                "gmail.com" => true,
+                "rpi.edu" => true
             ]
         ];
         $config = array_replace($config, $extra);
@@ -369,8 +369,8 @@ class ConfigTester extends \PHPUnit\Framework\TestCase {
                 ]
             ],
             "accepted_emails" => [
-                "gmail.com"=> true,
-                "rpi.edu"=> true
+                "gmail.com" => true,
+                "rpi.edu" => true
             ],
             'secret_session' => 'LIW0RT5XAxOn2xjVY6rrLTcb6iacl4IDNRyPw58M0Kn0haQbHtNvPfK18xpvpD93',
             'email_enabled' => true,

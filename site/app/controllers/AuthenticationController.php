@@ -417,7 +417,7 @@ class AuthenticationController extends AbstractController {
 
         $details = ["subject" => $subject, "body" => $body, "email_address" => $email, 'to_name' => 'test'];
         $email = new Email($this->core, $details);
-        $emails = array($email);
+        $emails = [$email];
         $this->core->getNotificationFactory()->sendEmails($emails);
     }
 
@@ -443,9 +443,9 @@ class AuthenticationController extends AbstractController {
     #[Route("/authentication/email_verification")]
     public function showVerifyEmailForm(): ResponseInterface {
         // Check if the user is already logged in, if yes, redirect to home or another appropriate page
-        if ($this->logged_in) {
-            return new RedirectResponse($this->core->buildUrl(['home']));
-        }
+        // if ($this->logged_in) {
+        //     return new RedirectResponse($this->core->buildUrl(['home']));
+        // }
         if (!$this->core->getConfig()->isUserCreateAccount()) {
             $this->core->addErrorMessage('Users cannot create their own account, Please have your system administrator add you.');
             return new RedirectResponse($this->core->buildUrl(['authentication', 'login']));
