@@ -15,6 +15,7 @@
             "title" : "Double H Gate Probabilities - Histogram Diff",
             "command" : "python3 *.py",
             "points" : 5,
+            "partial_credit": false,
             "validation" : [
                 {
                     "actual_file": "histogram.png",
@@ -23,7 +24,7 @@
                     "acceptable_threshold": ".1",
                     "show_difference_image" : "always",
                     "show_actual": "always",
-                    "show_expected":"always"
+                    "show_expected": "always"
                 },
                 {
                     "method": "fileExists",

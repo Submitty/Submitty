@@ -10,16 +10,13 @@ env:
   PROJECT_ID: "PVT_kwDOAKRRkc4AfZil"
   STATUS_FIELD_ID: "PVTSSF_lADOAKRRkc4AfZilzgUwVMs"
   WIP_ID: "26e8e6b2"
-  SEEKING_REVIWER_ID: "67583d20"
+  SEEKING_REVIEWER_ID: "67583d20"
   PR_ID: ${{ github.event.pull_request.number }}
 
 jobs:
-  get-token-and-pr-id:
-    name: Get token and pull request ID
+  sort-drafts:
+    name: Move drafts to WIP and un-drafts to seeking reviewer
     runs-on: ubuntu-latest
-    outputs:
-      token: ${{ steps.generate-token.outputs.token }}
-      pr-project-id: ${{ steps.get-pr-id.outputs.id }}
     steps:
       - name: Generate token
         id: generate-token
@@ -33,23 +30,21 @@ jobs:
         env:
           GH_TOKEN: ${{ steps.generate-token.outputs.token }}
         run: |
-          PR_PROJECT_ID="$(gh project item-list --owner Submitty 1 --format json --jq "[.items[] | {id, labels, status, title: .content.title, repo: .content.repository, number: .content.number}] | .[] | select(.number == "$PR_ID").id")"
-          echo "id=$PR_PROJECT_ID" >> "$GITHUB_OUTPUT"
+          PR_PROJECT_ID="$(gh project item-list -L 9999 --owner Submitty 1 --format json --jq "[.items[] | {id, labels, status, title: .content.title, repo: .content.repository, number: .content.number}] | .[] | select(.number == "$PR_ID").id")"
+          echo "pr-project-id="${PR_PROJECT_ID:?}"" >> "$GITHUB_OUTPUT"
 
-  handle-drafts:
-    name: Move drafts to Work-in-Progress and non-drafts to Seeking Reviewer
-    needs: get-token-and-pr-id
-    env:
-      GITHUB_TOKEN: ${{ needs.get-token-and-pr-id.outputs.token }}
-      PR_PROJECT_ID: ${{ needs.get-token-and-pr-id.outputs.pr-project-id }}
-    runs-on: ubuntu-latest
-    steps:
       - name: Move draft to Work in Progress
         if: ${{ (github.event.action == 'converted_to_draft') || ((github.event.action == 'opened') && (github.event.pull_request.draft == true)) }}
+        env:
+          PR_PROJECT_ID: ${{ steps.get-pr-id.outputs.pr-project-id }}
+          GH_TOKEN: ${{ steps.generate-token.outputs.token }}
         run: |
           gh project item-edit --project-id "$PROJECT_ID" --id "$PR_PROJECT_ID" --field-id "$STATUS_FIELD_ID" --single-select-option-id "$WIP_ID"
 
       - name: Move ready for review to Seeking Reviewer
         if: ${{ github.event.action == 'ready_for_review' }}
+        env:
+          PR_PROJECT_ID: ${{ steps.get-pr-id.outputs.pr-project-id }}
+          GH_TOKEN: ${{ steps.generate-token.outputs.token }}
         run: |
           gh project item-edit --project-id "$PROJECT_ID" --id "$PR_PROJECT_ID" --field-id "$STATUS_FIELD_ID" --single-select-option-id "$SEEKING_REVIEWER_ID"
