@@ -75,10 +75,14 @@ function ClampPerGradeablePercents(el, bucket) {
         sum += parseFloat(textbox.val());
     });
 
+    const warningIcon = $(`#per-gradeable-percents-warning-${bucket}`);
     if (sum > 100.0) {
         const excess = sum - 100.0;
-        el.value = el.value - excess;
-        displayErrorMessage(`The sum of percents in bucket ${bucket} may not exceed 100.`);
+        warningIcon.show();
+        $(warningIcon.children()[0]).text(`WARNING: Per Gradeable Percents exceeds 100 by ${excess}. Do not be alarmed if this is due to Extra Credit`);
+    }
+    else {
+        warningIcon.hide();
     }
 }
 
@@ -1035,9 +1039,11 @@ $(document).ready(() => {
         const bucket = perGradeablePercentsCheckbox[0].id.match(/^per-gradeable-percents-checkbox-(.+)$/)[1];
         const percentsInputsInBucket = $(`div[id^="gradeable-percents-div-${bucket}"]`);
         const resetButtonInBucket = $(`button[id^="per-gradeable-percents-reset-${bucket}"]`);
+        ClampPerGradeablePercents(percentsInputsInBucket.children()[0], bucket);
 
         const isChecked = perGradeablePercentsCheckbox.is(':checked');
         percentsInputsInBucket.each((index, percentInput) => {
+            //ClampPerGradeablePercents(percentInput, bucket);
             $(percentInput).toggle(isChecked);
         });
         resetButtonInBucket.each((index, resetButton) => {

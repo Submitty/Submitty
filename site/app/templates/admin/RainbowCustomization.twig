@@ -194,6 +194,9 @@
                                             {% set per_gradeable_percents_checked = true %}
                                         {% endif %}
                                     {% endfor %}
+                                    <i id="per-gradeable-percents-warning-{{ bucket }}" class="fas fa-exclamation-triangle fa-rb tooltip">
+                                        <span class="tooltiptext tooltipbottom">{# Message composed in JavaScript #}</span>
+                                    </i>
                                     <input id="per-gradeable-percents-checkbox-{{ bucket }}" type="checkbox" name="per-gradeable-percents-{{ bucket }}" {{ per_gradeable_percents_checked ? 'checked' : '' }}>
                                     <label id="per-gradeable-percents-label-{{ bucket }}" for="per-gradeable-percents-checkbox-{{ bucket }}">Per Gradeable Percents</label>
                                     <span style="margin-left: 10px;"></span>
