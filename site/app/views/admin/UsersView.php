@@ -139,7 +139,6 @@ class UsersView extends AbstractView {
         }
 
         $this->core->getOutput()->addInternalCss('rotatingsectionsform.css');
-        $this->core->getOutput()->addInternalJs('registration-sections.js');
         return $this->core->getOutput()->renderTwigTemplate("admin/users/RotatingSectionsForm.twig", [
             "students" => $students,
             "reg_sections" => $reg_sections,
