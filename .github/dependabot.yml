@@ -32,7 +32,7 @@ updates:
   - package-ecosystem: "github-actions"
     directories:
       - "/"
-      - "/actions/e2e-Setup-Composite"
+      - "/.github/actions/e2e-Setup-Composite"
     schedule:
       interval: "monthly"
     labels:
