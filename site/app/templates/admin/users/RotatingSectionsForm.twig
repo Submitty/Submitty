@@ -52,7 +52,7 @@
                             <th>Course ID</th>
                             <th>Count</th>
                             {% if is_self_register_course %}
-                            <th>Default Course</th>
+                            <th>Default Section</th>
                             {% endif %}
                         </tr>
                     </thead>
@@ -66,7 +66,7 @@
                                 <td> {{ section['course_section_id'] }} </td>
                                 <td> {{ reg_sections_count[section['sections_registration_id']] }} </td>
                                 {% if is_self_register_course %}
-                                    <td><input type="checkbox" name="{{ section }}" {{ section['default_section'] == 't' ? 'checked' : '' }}/></td>
+                                    <td><input type="radio" name="default_section" value="{{ section['sections_registration_id'] }}" {{ section['default_section'] == 't' ? 'checked' : '' }}/></td>
                                 {% endif %}
                             </tr>
                             {% else %}
@@ -75,7 +75,7 @@
                                 <td> {{ section['course_section_id'] }} </td>
                                 <td>0</td>
                                 {% if is_self_register_course %}
-                                    <td><input type="checkbox" name="{{ section }}"{{ section['default_section'] == 't' ? 'checked' : '' }} name="/></td>
+                                    <td><input type="radio" name="default_section" value="{{ section['sections_registration_id'] }}" {{ section['default_section'] == 't' ? 'checked' : '' }} /></td>
                                 {% endif %}
                             </tr>
                             {% endif %}
@@ -86,14 +86,16 @@
                             <td>Section NULL</td>
                             <td>NULL</td>
                             <td>{{ reg_sections_count['NULL'] }}</td>
-                            <td><input type="checkbox" disabled/></td>
+                            {% if is_self_register_course %}
+                                    <td></td>
+                            {% endif %}
                         </tr>
                         {% else %}
                         <tr>
                             <td>Section NULL</td>
                             <td>0</td>
                             <td>0</td>
-                            <td><input type="checkbox" disabled/></td>
+                            <td></td>
                         </tr>
                         {% endif %}
                     </tbody>

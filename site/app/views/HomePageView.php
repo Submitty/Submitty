@@ -10,6 +10,7 @@ class HomePageView extends AbstractView {
      * @param array $unarchived_courses
      * @param array<array<string, string>> $dropped_courses
      * @param array $archived_courses
+     * @param array<mixed> $self_registration_courses
      */
     public function showHomePage(
         User $user,

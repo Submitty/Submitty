@@ -1742,7 +1742,8 @@ ALTER SEQUENCE public.queue_settings_id_seq OWNED BY public.queue_settings.id;
 
 CREATE TABLE public.sections_registration (
     sections_registration_id character varying(255) NOT NULL,
-    course_section_id character varying(255) DEFAULT ''::character varying
+    course_section_id character varying(255) DEFAULT ''::character varying,
+    default_section boolean DEFAULT false
 );
 
 

@@ -3332,6 +3332,30 @@ ORDER BY g.sections_rotating_id, g.user_id",
     }
 
     /**
+     * Gets the default registration section from the sections_registration table
+     * @return array<mixed>
+     */
+    public function getDefaultRegistrationSection(): array {
+        $this->course_db->query("SELECT * FROM sections_registration where default_section=true");
+        return $this->course_db->row();
+    }
+
+    /**
+     * Updates the default registration section for self register courses.
+     *
+     */
+    public function setDefaultRegistrationSection(string $section_id): bool {
+        $this->unsetDefaultRegistrationSection();
+        $this->course_db->query("UPDATE sections_registration set default_section = true where sections_registration_id=?", [$section_id]);
+        return true;
+    }
+
+    public function unsetDefaultRegistrationSection(): bool {
+        $this->course_db->query("UPDATE sections_registration SET default_section = false");
+        return true;
+    }
+
+    /**
      * Gets all rotating sections from the sections_rotating table
      *
      * @return array
@@ -5171,7 +5195,10 @@ SQL;
         return $this->submitty_db->rows();
     }
 
-    public function getSelfRegisterCourses($user_id): array {
+    /**
+     * @return array<Course>
+     */
+    public function getSelfRegisterCourses(string $user_id): array {
         $query = <<<SQL
 Select *, t.name as term_name from courses c, terms t where (c.self_registration_allowed=1 or c.self_registration_allowed=2) and c.course not in (
     select course from courses_users where user_id = ?
@@ -5187,24 +5214,14 @@ SQL;
         return $return;
     }
 
-    public function isSelfRegistrationAllowed($course) {
+    public function isSelfRegistrationAllowed(string $course): bool {
         $this->submitty_db->query("SELECT self_registration_allowed FROM courses WHERE course=?", [$course]);
         return $this->submitty_db->row()['self_registration_allowed'];
     }
-    
-    public function setSelfRegistrationAllowed($course, $self_registration_allowed) {
-        $this->submitty_db->query("UPDATE courses set self_registration_allowed=? WHERE course=?", [$self_registration_allowed, $course]);
-        return $this->submitty_db->row();
-    }
-    
-    public function getSelfRegistrationDefaultCourse() {
-        $this->course_db->query("SELECT sections_registration_id FROM sections_registration WHERE default_course=t", [$course]);
-        return $this->course_db->row()['sections_registration_id'];
-    }
 
-    public function setSelfRegistrationDefaultCourse($course, $value) {
-        $this->course_db->query("UPDATE sections_registration set default_course=? WHERE course=?", [$value, $course]);
-        return $this->course_db->row();
+    public function setSelfRegistrationAllowed(string $course, int $self_registration_allowed): bool {
+        $this->submitty_db->query("UPDATE courses set self_registration_allowed=? WHERE course=?", [$self_registration_allowed, $course]);
+        return true;
     }
 
     /**
