@@ -1,4 +1,4 @@
-name: 'Submitty PR Title Check'
+name: 'Documentation'
 on:
   pull_request:
     # check when PR
@@ -9,6 +9,7 @@ on:
 
 jobs:
   title-check:
+    name: Title Check
     runs-on: ubuntu-latest
     steps:
       #

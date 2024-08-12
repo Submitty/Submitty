@@ -5,6 +5,7 @@ namespace app\models;
 use app\libraries\Core;
 use app\libraries\database\DatabaseQueries;
 use app\libraries\DateUtils;
+use app\libraries\FileUtils;
 
 /**
  * Class RainbowCustomization
@@ -611,31 +612,6 @@ class RainbowCustomization extends AbstractModel {
 
         // Write to customization file
         $this->RCJSON->saveToJsonFile();
-
-        // Configure json to go into jobs queue
-        $job_json = (object) [];
-        $job_json->job = 'RunAutoRainbowGrades';
-        $job_json->semester = $this->core->getConfig()->getTerm();
-        $job_json->course = $this->core->getConfig()->getCourse();
-
-        // Encode
-        $job_json = json_encode($job_json, JSON_PRETTY_PRINT);
-
-        // Create path to new jobs queue json
-        $path = '/var/local/submitty/daemon_job_queue/auto_rainbow_' .
-            $this->core->getConfig()->getTerm() .
-            '_' .
-            $this->core->getConfig()->getCourse() .
-            '.json';
-
-        // Place in queue
-        file_put_contents($path, $job_json);
-
-//        $this->has_error = "true";
-//        foreach($_POST as $field => $value){
-//            $this->error_messages[] = "$field: $value";
-//        }
-//        throw new ValidationException('Debug Rainbow Grades error', $this->error_messages);
     }
 
     public function error() {
@@ -644,5 +620,16 @@ class RainbowCustomization extends AbstractModel {
 
     public function getErrorMessages() {
         return $this->error_messages;
+    }
+
+    public function doesManualCustomizationExist(): bool {
+        // using RCJSON will have issue because constructor will call loadFromJsonFile
+        // which will return null if gui_customization is not found.
+        // return $this->RCJSON->doesManualCustomizationExist();
+        return file_exists(FileUtils::joinPaths(
+            $this->core->getConfig()->getCoursePath(),
+            'rainbow_grades',
+            'manual_customization.json'
+        ));
     }
 }
