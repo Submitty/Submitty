@@ -76,6 +76,7 @@ class Course(
         self.no_registration_students: int = 10
         self.no_rotating_students: int = 10
         self.unregistered_students: int = 10
+        self.self_registration_allowed: int = 0
         if "registration_sections" in course:
             self.registration_sections = course["registration_sections"]
         if "rotating_sections" in course:
@@ -90,3 +91,6 @@ class Course(
             self.unregistered_students = course["unregistered_students"]
         if "make_customization" in course:
             self.make_customization = course["make_customization"]
+        if "self_registration_allowed" in course:
+            self.self_registration_allowed = course["self_registration_allowed"]
+    

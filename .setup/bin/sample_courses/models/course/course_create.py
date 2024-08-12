@@ -43,6 +43,7 @@ class Course_create:
     no_registration_sections: int
     no_rotating_students: int
     unregistered_students: int
+    self_registration_allowed: int
 
     def __init__(self) -> None:
         pass
@@ -107,6 +108,7 @@ class Course_create:
                 term=self.semester,
                 course=self.code,
                 registration_section_id=str(section),
+                self_registration_allowed=self.self_registration_allowed
             )
 
         print("Creating rotating sections ", end="")
