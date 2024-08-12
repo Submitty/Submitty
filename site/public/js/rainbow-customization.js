@@ -1008,7 +1008,9 @@ $(document).ready(() => {
         $(label).toggle(isChecked);
     });
     perGradeablePercentsReset.each((index, button) => {
-        $(button).toggle(isChecked);
+        if (isChecked === false) { // Only hide, otherwise element will be out of place
+            $(button).hide();
+        }
     });
     enablePerGradeablePercents.change(function (event) {
         event.stopPropagation();
@@ -1020,7 +1022,9 @@ $(document).ready(() => {
             $(label).toggle(isChecked);
         });
         perGradeablePercentsReset.each((index, button) => {
-            $(button).toggle(isChecked);
+            if (isChecked === false) { // Only hide, otherwise element will be out of place
+                $(button).hide();
+            }
         });
 
     });
