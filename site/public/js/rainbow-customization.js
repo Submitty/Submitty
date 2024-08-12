@@ -1003,7 +1003,7 @@ $(document).ready(() => {
 
     // Control visibility of per gradeable percent checkboxes
     const perGradeablePercentsLabels = $('label[id^="per-gradeable-percents-label-"]');
-    const perGradeablePercentsReset= $('button[id^="per-gradeable-percents-reset-"]');
+    const perGradeablePercentsReset = $('button[id^="per-gradeable-percents-reset-"]');
     const isChecked = enablePerGradeablePercents.is(':checked');
     perGradeablePercentsCheckboxes.each((index, checkbox) => {
         $(checkbox).toggle(isChecked);
@@ -1030,7 +1030,6 @@ $(document).ready(() => {
                 $(button).hide();
             }
         });
-
     });
 
     // Control visibility of per gradeable percent input boxes
@@ -1043,7 +1042,6 @@ $(document).ready(() => {
 
         const isChecked = perGradeablePercentsCheckbox.is(':checked');
         percentsInputsInBucket.each((index, percentInput) => {
-            //ClampPerGradeablePercents(percentInput, bucket);
             $(percentInput).toggle(isChecked);
         });
         resetButtonInBucket.each((index, resetButton) => {
