@@ -4,7 +4,7 @@
 const benchmarks_with_input_fields = ['lowest_a-', 'lowest_b-', 'lowest_c-', 'lowest_d'];
 const allowed_grades = ['A', 'A-', 'B+', 'B', 'B-', 'C+', 'C', 'C-', 'D+', 'D', 'F'];
 const allowed_grades_excluding_f = ['A', 'A-', 'B+', 'B', 'B-', 'C+', 'C', 'C-', 'D+', 'D'];
-const tables = ['plagiarism', 'manualGrade'];
+const tables = ['plagiarism', 'manualGrade', 'performanceWarnings'];
 
 // eslint-disable-next-line no-unused-vars
 function ExtractBuckets() {
@@ -286,6 +286,7 @@ function getGradeableBuckets() {
  * @param {string} table
  *      'plagiarism'
  *      'manualGrade'
+ *      'performanceWarnings'
  */
 function getTableData(table) {
     if (!tables.includes(table)) {
@@ -297,6 +298,7 @@ function getTableData(table) {
     const tableMap = {
         plagiarism: 'plagiarism-table-body',
         manualGrade: 'manual-grading-table-body',
+        performanceWarnings: 'performance-warnings-table-body',
     };
     const tableBody = document.getElementById(tableMap[table]);
     const rows = tableBody.getElementsByTagName('tr');
@@ -321,6 +323,13 @@ function getTableData(table) {
                 note: thirdInput,
             });
         }
+        else if (table === 'performanceWarnings') {
+            data.push({
+                msg: firstInput,
+                ids: secondInput, // TODO: figure out how to do this array
+                value: parseFloat(thirdInput),
+            });
+        }
     }
 
     return data;
@@ -331,6 +340,7 @@ function getTableData(table) {
  * @param {string} table
  *     'plagiarism'
  *     'manualGrade'
+ *     'performanceWarnings'
  */
 function addToTable(table) {
     if (!tables.includes(table)) {
@@ -340,6 +350,7 @@ function addToTable(table) {
     const tableMap = {
         plagiarism: ['plagiarism-table-body', 'plagiarism-user-id', 'g_id', 'marks'],
         manualGrade: ['manual-grading-table-body', 'manual-grading-user-id', 'manual-grading-grade', 'manual-grading-note'],
+        performanceWarnings: ['performance-warnings-table-body', 'performance-warnings-message', 'performance-warnings-gradeables', 'performance-warnings-score'],
     };
 
     const firstInput = document.getElementById(tableMap[table][1]).value.trim();
@@ -403,6 +414,18 @@ function addToTable(table) {
                     return;
                 }
             }
+            break;
+        }
+        case 'performanceWarnings': {
+            if (firstInput === '' || secondInput === '' || thirdInput === '') {
+                alert('Please fill in all fields.');
+                return;
+            }
+            if (parseFloat(thirdInput) <= 0) {
+                alert('Score must be a number greater than 0');
+                return;
+            }
+            // TODO: finish this
             break;
         }
     }
@@ -540,6 +563,7 @@ function buildJSON() {
         messages: getMessages(),
         plagiarism: getTableData('plagiarism'),
         manual_grade: getTableData('manualGrade'),
+        warning: getTableData('performanceWarnings'),
     };
 
     ret = JSON.stringify(ret);
@@ -790,6 +814,7 @@ function setCustomizationItemVisibility(elem) {
         final_grade: '#final_grade_cutoffs',
         messages: '#cust_messages',
         section: '#section_labels',
+        warning: '#performance-warnings',
     };
     const checkbox_name = elem.value;
     const cust_item_id = checkbox_to_cust_item[checkbox_name];
@@ -848,7 +873,7 @@ $(document).ready(() => {
      * Configure visibility handler for all customization items other than benchmark percents
      * Visibility is controlled by whether the corresponding boxes are selected in the display area
      */
-    const dropdown_checkboxes = ['final_grade', 'messages', 'section'];
+    const dropdown_checkboxes = ['final_grade', 'messages', 'section', 'warning'];
     $('#display input').each(function () {
         if (dropdown_checkboxes.includes(this.value)) {
             // Set the initial visibility on load
