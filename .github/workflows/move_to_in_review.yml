@@ -5,9 +5,6 @@ on:
       - review_requested
 
 env:
-  PROJECT_ID: "PVT_kwDOAKRRkc4AfZil"
-  STATUS_FIELD_ID: "PVTSSF_lADOAKRRkc4AfZilzgUwVMs"
-  IN_REVIEW_ID: "618f8b62"
   PR_ID: ${{ github.event.pull_request.number }}
 
 jobs:
@@ -36,4 +33,5 @@ jobs:
           PR_PROJECT_ID: ${{ steps.get-pr-id.outputs.pr-project-id }}
           GH_TOKEN: ${{ steps.generate-token.outputs.token }}
         run: |
+          source .github/bin/board_automation_helper.sh
           gh project item-edit --project-id "$PROJECT_ID" --id "$PR_PROJECT_ID" --field-id "$STATUS_FIELD_ID" --single-select-option-id "$IN_REVIEW_ID"
