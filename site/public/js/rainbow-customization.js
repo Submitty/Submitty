@@ -987,8 +987,45 @@ $(document).ready(() => {
         });
     });
 
-    // Control visibility of per gradeable percent input boxes
+    // Per Gradeable Percents checked on-ready if at least one Per Gradeable Percents is checked
+    const enablePerGradeablePercents = $('#enable-per-gradeable-percents');
     const perGradeablePercentsCheckboxes = $('input[id^="per-gradeable-percents-checkbox-"]');
+    perGradeablePercentsCheckboxes.each((index, perGradeablePercentsCheckboxDOMElement) => {
+        if ($(perGradeablePercentsCheckboxDOMElement).is(':checked')) {
+            enablePerGradeablePercents.prop('checked', true);
+            return false; // Break loop
+        }
+    });
+
+    // Control visibility of per gradeable percent checkboxes
+    const perGradeablePercentsLabels = $('label[id^="per-gradeable-percents-label-"]');
+    const perGradeablePercentsReset= $('button[id^="per-gradeable-percents-reset-"]');
+    const isChecked = enablePerGradeablePercents.is(':checked');
+    perGradeablePercentsCheckboxes.each((index, checkbox) => {
+        $(checkbox).toggle(isChecked);
+    });
+    perGradeablePercentsLabels.each((index, label) => {
+        $(label).toggle(isChecked);
+    });
+    perGradeablePercentsReset.each((index, button) => {
+        $(button).toggle(isChecked);
+    });
+    enablePerGradeablePercents.change(function (event) {
+        event.stopPropagation();
+        const isChecked = $(this).is(':checked');
+        perGradeablePercentsCheckboxes.each((index, checkbox) => {
+            $(checkbox).toggle(isChecked);
+        });
+        perGradeablePercentsLabels.each((index, label) => {
+            $(label).toggle(isChecked);
+        });
+        perGradeablePercentsReset.each((index, button) => {
+            $(button).toggle(isChecked);
+        });
+
+    });
+
+    // Control visibility of per gradeable percent input boxes
     perGradeablePercentsCheckboxes.each((index, perGradeablePercentsCheckboxDOMElement) => {
         const perGradeablePercentsCheckbox = $(perGradeablePercentsCheckboxDOMElement);
         const bucket = perGradeablePercentsCheckbox[0].id.match(/^per-gradeable-percents-checkbox-(.+)$/)[1];

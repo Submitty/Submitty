@@ -168,6 +168,10 @@
 
                         <input id="drop_lowest_checkbox" type="checkbox" name="drop_lowest">
                         <label for="drop_lowest_checkbox">Remove lowest</label><br>
+
+                        <input id="enable-per-gradeable-percents" type="checkbox" name="enable-per-gradeable-percents">
+                        <label for="enable-per-gradeable-percents">Enable/Edit Per Gradeable Percents:</label>
+                        <i>For each bucket, you may grade by percent instead of by points.</i><br>
                     </div>
                     <div id="config-wrapper">
                         {% for bucket, gradeables in customization_data %}
@@ -191,7 +195,7 @@
                                         {% endif %}
                                     {% endfor %}
                                     <input id="per-gradeable-percents-checkbox-{{ bucket }}" type="checkbox" name="per-gradeable-percents-{{ bucket }}" {{ per_gradeable_percents_checked ? 'checked' : '' }}>
-                                    <label for="per-gradeable-percents-checkbox-{{ bucket }}">Per Gradeable Percents</label>
+                                    <label id="per-gradeable-percents-label-{{ bucket }}" for="per-gradeable-percents-checkbox-{{ bucket }}">Per Gradeable Percents</label>
                                     <span style="margin-left: 10px;"></span>
                                     <button class="btn" id="per-gradeable-percents-reset-{{ bucket }}" type="button" onclick="ResetPerGradeablePercents('{{ bucket }}');">Even Split</button>
                                     <span style="margin-left: 100px;"></span>
