@@ -32,14 +32,14 @@
     "maennchen/zipstream-php": "3.1.0",
     "onelogin/php-saml": "4.1.0",
     "php-ds/php-ds": "1.5.0",
-    "ramsey/uuid": "4.7.4",
+    "ramsey/uuid": "4.7.6",
     "symfony/cache": "6.4.7",
     "symfony/config": "6.4.4",
     "symfony/http-foundation": "6.3.2",
-    "symfony/polyfill-php80": "1.27.0",
+    "symfony/polyfill-php80": "1.30.0",
     "symfony/routing": "6.1.11",
     "textalk/websocket": "1.6.3",
-    "twig/twig": "3.7.0"
+    "twig/twig": "3.10.3"
   },
   "require-dev": {
     "dealerdirect/phpcodesniffer-composer-installer": "0.7.2",
