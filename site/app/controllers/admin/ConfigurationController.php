@@ -167,8 +167,8 @@ class ConfigurationController extends AbstractController {
             // Get a new customization json object
             $customization_json = new RainbowCustomizationJSON($this->core);
 
-            // If a custom_customization.json does not exist, then check for the presence of a regular one
-            if (!$customization_json->doesCustomCustomizationExist()) {
+            // If a manual_customization.json does not exist, then check for the presence of a regular one
+            if (!$customization_json->doesManualCustomizationExist()) {
                 // Attempt to populate it from the customization.json in the course rainbow_grades directory
                 // If no file exists do not allow user to enable this check mark until one is supplied
                 try {
