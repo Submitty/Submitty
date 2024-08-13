@@ -62,6 +62,9 @@ class ElectronicGraderController extends AbstractController {
             "bTA" => [],
             "tTA" => [],
             "bAuto" => [],
+            "runtime" => [],
+            "memory" => [],
+            "submitters" => [],
             "VerConf" => 0,
             "noSub" => 0,
             "noActive" => 0,
@@ -82,6 +85,10 @@ class ElectronicGraderController extends AbstractController {
                     if ($ov->getGradeable()->getAutogradingConfig()->getTotalNonExtraCredit() != 0) {
                         if ($ov->getAutoGradedGradeable()->getTotalPoints() >= 0 || $ov->getAutoGradedGradeable()->getTotalPoints() < 0) {
                             $histogram["bAuto"] = array_merge($histogram["bAuto"], [$ov->getAutoGradedGradeable()->getTotalPoints()]);
+                            $metrics = $ov->getAutoGradedGradeable()->getMetrics_Sum();
+                            $histogram["runtime"] = array_merge($histogram["runtime"], [$metrics['runtime']]);
+                            $histogram["memory"] = array_merge($histogram["memory"], [$metrics['memory']]);
+                            $histogram["submitters"] = array_merge($histogram["submitters"], [$ov->getAutoGradedGradeable()->getSubmitterId()]);
                         }
                         else {
                             $histogram["cancelledSub"] += 1;
@@ -520,7 +527,7 @@ class ElectronicGraderController extends AbstractController {
 
         $gradeableUrl = $this->core->buildCourseUrl(['gradeable', $gradeable->getId(), 'grading', 'details']);
         $this->core->getOutput()->addBreadcrumb("{$gradeable->getTitle()} Grading", $gradeableUrl);
-        $this->core->getOutput()->addBreadcrumb("Grading Stats");
+        $this->core->getOutput()->addBreadcrumb("Statistics & Charts");
 
         $isPeerGradeable = false;
         if ($gradeable->hasPeerComponent() && ($this->core->getUser()->getGroup() < User::GROUP_STUDENT)) {
