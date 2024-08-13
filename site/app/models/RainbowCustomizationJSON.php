@@ -411,7 +411,7 @@ class RainbowCustomizationJSON extends AbstractModel {
      *     "msg": string,
      *     "ids": string,
      *     "value": float
-     * } $manualGradeEntry
+     * } $performanceWarningEntry
      */
     public function addPerformanceWarningEntry(object $performanceWarningEntry): void {
         $emptyArray = [
