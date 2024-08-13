@@ -990,7 +990,8 @@ $(document).ready(() => {
     });
     $('#performance-warnings-gradeables').select2({
         theme: 'bootstrap-5',
-        placeholder: " -- select an option -- ",
+        placeholder: ' -- select an option -- ',
         multiple: true,
+        allowClear: true,
     });
 });
