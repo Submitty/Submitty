@@ -452,6 +452,14 @@ function setRandomGraders(gradeable_id, p_values, successCallback, errorCallback
             if (res.data === 'Clear Peer Matrix') {
                 $('#save_status').html('Peer Matrix Cleared');
             }
+            else {
+                for (let i = 0; i < res.data.length; i++) {
+                    if (res.data[i][1].length !== number_to_grade) {
+                        confirm('Few of the graders haven\'t been assigned to the given number of students, please manually edit them.');
+                        break;
+                    }
+                }
+            }
             setGradeableUpdateComplete();
             $('#peer_loader').addClass('hide');
             location.reload();
