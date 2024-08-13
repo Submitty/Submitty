@@ -380,7 +380,7 @@ To remove a curve simply blank all boxes."></i>
             </div>
             <div id="performance-warnings" class="customization_item">
                 <h2>Academic Performance Warnings</h2>
-                <p class="rg_info_message">Automatically generate Academic Performance Warnings for each student that fails to obtain a target score on a given list of gradeables. You may use Ctrl+click or Cmd+click to select multiple.</p>
+                <p class="rg_info_message">Automatically generate Academic Performance Warnings for each student that fails to obtain a target score on a given list of gradeables.</p>
                 <input type="hidden" name="csrf_token" value="{{ csrfToken }}" />
                 <input type="hidden" name="option" value="-1" />
                 <div class="option">
@@ -390,8 +390,7 @@ To remove a curve simply blank all boxes."></i>
                     </label>
                     <label for="performance-warnings-gradeables">
                         <span>Gradeables:</span>
-                        <select multiple size="20" name="performance-warnings-gradeables" id="performance-warnings-gradeables">
-                            <option disabled selected value> -- select an option -- </option> {# TODO: figure out how to do multiple. Use this plugin probably: https://harvesthq.github.io/chosen/ #}
+                        <select name="performance-warnings-gradeables[]" id="performance-warnings-gradeables">
                             {% for index, value in gradeables %}
                                 <option value="{{ value['g_id'] }}">{{ value['g_title'] }}</option>
                             {% endfor %}

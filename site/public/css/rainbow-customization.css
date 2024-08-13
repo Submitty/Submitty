@@ -233,6 +233,11 @@ hr {
     text-align: left;
 }
 
+.select2 {
+    display: inline-block !important;
+    width: 38% !important;
+}
+
 #gradeables .gradeable-custom-item-input {
     width: 3em;
 }

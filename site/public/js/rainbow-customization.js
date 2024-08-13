@@ -324,9 +324,10 @@ function getTableData(table) {
             });
         }
         else if (table === 'performanceWarnings') {
+            const secondInputArray = secondInput.split(', ');
             data.push({
                 msg: firstInput,
-                ids: secondInput, // TODO: figure out how to do this array
+                ids: secondInputArray,
                 value: parseFloat(thirdInput),
             });
         }
@@ -354,7 +355,17 @@ function addToTable(table) {
     };
 
     const firstInput = document.getElementById(tableMap[table][1]).value.trim();
-    const secondInput = document.getElementById(tableMap[table][2]).value.trim();
+    let secondInput;
+    if (table === 'performanceWarnings') { // Performance Warnings gets an object[] for the second input
+        let secondInputArray = [];
+        $('#performance-warnings-gradeables').select2('data').forEach((element) => {
+            secondInputArray.push(element.id);
+        });
+        secondInput = secondInputArray.join(', ');
+    }
+    else {
+        secondInput = document.getElementById(tableMap[table][2]).value.trim();
+    }
     const thirdInput = document.getElementById(tableMap[table][3]).value.trim();
 
     // Check whether input is allowed
@@ -425,7 +436,6 @@ function addToTable(table) {
                 alert('Score must be a number greater than 0');
                 return;
             }
-            // TODO: finish this
             break;
         }
     }
@@ -977,5 +987,10 @@ $(document).ready(() => {
         dropLowestDivs.each((index, dropLowestDiv) => {
             $(dropLowestDiv).css('display', isChecked ? 'block' : 'none');
         });
+    });
+    $("#performance-warnings-gradeables").select2({
+        theme: 'bootstrap-5',
+        placeholder: " -- select an option -- ",
+        multiple: true,
     });
 });
