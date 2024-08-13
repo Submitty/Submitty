@@ -1,0 +1,53 @@
+name: Manage DO NOT MERGE PRs
+
+on:
+  pull_request:
+    types: [labeled, unlabeled]
+  schedule:
+    - cron: '*/5 * * * *'  # Runs every 5 minutes
+
+jobs:
+  manage_do_not_merge_prs:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Manage PRs with DO NOT MERGE label
+        uses: actions/github-script@v6
+        with:
+          github-token: ${{secrets.GITHUB_TOKEN}}
+          script: |
+            const DO_NOT_MERGE_REGEX = /do not merge/i;
+            
+            const managePR = async (pr) => {
+              const projectId = 1; // Replace with actual project ID
+              const columns = await github.rest.projects.listColumns({ project_id: projectId });
+              
+              const wipColumn = columns.data.find(col => col.name === "Work in Progress");
+              if (!wipColumn) {
+                console.log("Work in Progress column not found");
+                return;
+              }
+              
+              if (pr.labels.some(label => DO_NOT_MERGE_REGEX.test(label.name))) {
+                // Move to Work in Progress
+                await github.rest.projects.createCard({
+                  column_id: wipColumn.id,
+                  content_id: pr.id,
+                  content_type: 'PullRequest'
+                });
+                console.log(`Moved PR #${pr.number} to Work in Progress`);
+              }
+            };
+
+            if (github.event_name === 'pull_request') {
+              await managePR(github.context.payload.pull_request);
+            } else if (github.event_name === 'schedule') {
+              const prs = await github.rest.pulls.list({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                state: 'open'
+              });
+              
+              for (const pr of prs.data) {
+                await managePR(pr);
+              }
+            }

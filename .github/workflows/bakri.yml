@@ -1,0 +1,53 @@
+name: Manage DO NOT MERGE Issues
+
+on:
+  issues:
+    types: [labeled, unlabeled]
+  schedule:
+    - cron: '*/5 * * * *'  # Runs every 5 minutes
+
+jobs:
+  manage_do_not_merge_issues:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Manage Issues with DO NOT MERGE label
+        uses: actions/github-script@v6
+        with:
+          github-token: ${{secrets.GITHUB_TOKEN}}
+          script: |
+            const DO_NOT_MERGE_REGEX = /do not merge/i;
+            
+            const manageIssue = async (issue) => {
+              const projectId = 1; // Replace with actual project ID
+              const columns = await github.rest.projects.listColumns({ project_id: projectId });
+              
+              const wipColumn = columns.data.find(col => col.name === "Work in Progress");
+              if (!wipColumn) {
+                console.log("Work in Progress column not found");
+                return;
+              }
+              
+              if (issue.labels.some(label => DO_NOT_MERGE_REGEX.test(label.name))) {
+                // Move to Work in Progress
+                await github.rest.projects.createCard({
+                  column_id: wipColumn.id,
+                  content_id: issue.id,
+                  content_type: 'Issue'
+                });
+                console.log(`Moved Issue #${issue.number} to Work in Progress`);
+              }
+            };
+
+            if (github.event_name === 'issues') {
+              await manageIssue(github.context.payload.issue);
+            } else if (github.event_name === 'schedule') {
+              const issues = await github.rest.issues.listForRepo({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                state: 'open'
+              });
+              
+              for (const issue of issues.data) {
+                await manageIssue(issue);
+              }
+            }
