@@ -357,7 +357,7 @@ function addToTable(table) {
     const firstInput = document.getElementById(tableMap[table][1]).value.trim();
     let secondInput;
     if (table === 'performanceWarnings') { // Performance Warnings gets an object[] for the second input
-        let secondInputArray = [];
+        const secondInputArray = [];
         $('#performance-warnings-gradeables').select2('data').forEach((element) => {
             secondInputArray.push(element.id);
         });
@@ -988,7 +988,7 @@ $(document).ready(() => {
             $(dropLowestDiv).css('display', isChecked ? 'block' : 'none');
         });
     });
-    $("#performance-warnings-gradeables").select2({
+    $('#performance-warnings-gradeables').select2({
         theme: 'bootstrap-5',
         placeholder: " -- select an option -- ",
         multiple: true,
