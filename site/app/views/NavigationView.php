@@ -468,8 +468,11 @@ class NavigationView extends AbstractView {
             }
 
             // TA grading enabled, the gradeable is fully graded, and the user hasn't viewed it
+            // and there are no version conflicts
             $grade_ready_for_view = $gradeable->isTaGrading()
                 && $graded_gradeable->isTaGradingComplete()
+                && $graded_gradeable->getAutoGradedGradeable()->getActiveVersion() !== 0
+                && !$ta_graded_gradeable->hasVersionConflict()
                 && $list_section === GradeableList::GRADED;
 
             if ($gradeable->isTeamAssignment()) {
@@ -585,7 +588,7 @@ class NavigationView extends AbstractView {
             }
             elseif (
                 $gradeable->isTaGrading()
-                    && $gradeable->isTaGradeReleased() || !$gradeable->hasReleaseDate()
+                    && ($gradeable->isTaGradeReleased() || !$gradeable->hasReleaseDate())
                     && $graded_gradeable->isTaGradingComplete()
                     && $ta_graded_gradeable->hasVersionConflict()
                     && $list_section == GradeableList::GRADED
