@@ -19,6 +19,11 @@ result = subprocess.check_output(command).splitlines()
 if (len(result)):
     # last line of the output contains the comment lines count
     out = (result[-1].decode("utf-8")).split(",")
+    # blank line count (BLOC)
+    print(out[2])
+    # comment line count (CLOC)
     print(out[3])
+    # code line count (SLOC)
+    print(out[4])
 else:
     print(0)
