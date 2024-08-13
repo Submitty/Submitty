@@ -93,4 +93,3 @@ class Course(
             self.make_customization = course["make_customization"]
         if "self_registration_allowed" in course:
             self.self_registration_allowed = course["self_registration_allowed"]
-    
