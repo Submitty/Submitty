@@ -414,11 +414,11 @@ To remove a curve simply blank all boxes."></i>
                         </tr>
                         </thead>
                         <tbody id="performance-warnings-table-body">
-                        {% for entry in manual_grade %} {# TODO: finish this once I'm done with the PHP #}
+                        {% for entry in warning %}
                             <tr>
-                                <td>{{ entry.user }}</td>
-                                <td>{{ entry.grade }}</td>
-                                <td>{{ entry.note }}</td>
+                                <td>{{ entry.msg }}</td>
+                                <td>{{ entry.ids|join(', ') }}</td>
+                                <td>{{ entry.value }}</td>
                                 <td><a onclick="deleteRow(this)"><i class="fas fa-trash"></i></a></td>
                             </tr>
                         {% endfor %}
