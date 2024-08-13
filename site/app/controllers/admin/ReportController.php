@@ -691,6 +691,7 @@ class ReportController extends AbstractController {
                 'messages' => $customization->getMessages(),
                 'plagiarism' => $customization->getPlagiarism(),
                 'manual_grade' => $customization->getManualGrades(),
+                'warning' => $customization->getPerformanceWarnings(),
                 "gradeables" => $gradeables,
                 "student_full" => $student_full,
                 'per_gradeable_curves' => $customization->getPerGradeableCurves(),
