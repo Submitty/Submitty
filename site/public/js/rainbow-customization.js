@@ -432,6 +432,16 @@ function addToTable(table) {
                 alert('Please fill in all fields.');
                 return;
             }
+            const inputGradeables = secondInput.split(', ');
+            let entryGradeables;
+            $('#performance-warnings-table-body tr').each(function() {
+                entryGradeables = $(this).find('td:nth-child(2)').text().split(', ');
+            });
+            const overlappingGradeables = inputGradeables.filter(inputGradeable => entryGradeables.includes(inputGradeable));
+            if (overlappingGradeables.length > 0) {
+                alert(`Entry with Gradeable(s) '${overlappingGradeables.join(', ')}' already exists`);
+                return;
+            }
             if (parseFloat(thirdInput) <= 0) {
                 alert('Score must be a number greater than 0');
                 return;
