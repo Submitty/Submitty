@@ -5214,7 +5214,7 @@ SQL;
         return $return;
     }
 
-    public function isSelfRegistrationAllowed(string $course): bool {
+    public function isSelfRegistrationAllowed(string $course): int {
         $this->submitty_db->query("SELECT self_registration_allowed FROM courses WHERE course=?", [$course]);
         return $this->submitty_db->row()['self_registration_allowed'];
     }

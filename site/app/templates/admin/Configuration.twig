@@ -308,7 +308,8 @@
         <h2> Danger Zone</h2>
         <hr>
         <div class="config-row checkbox-row">
-            <input type="checkbox" name="self_registration" id="self-registration" value="true" {{ fields['self_registration_allowed'] ? 'checked' : '' }} onclick="return confirm('Are you sure you want to allow for self course registration? This allows for ALL users (even those manually removed from the course) to register for courses.');"/>
+            <input type="checkbox" name="self_registration" id="self-registration" value="true" {{ fields['self_registration_allowed'] == 1 ? 'checked' : '' }}
+            onclick="return confirm('Are you sure you want to allow self registration to courses? This allows for ALL users (even those manually removed from the course) to register for courses.');"/>
             <label for="self-registration">
                 <span class="option-title">Enable Self Registration</span>
                 <br/>
