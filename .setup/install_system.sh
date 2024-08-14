@@ -182,7 +182,6 @@ alias migrator='python3 ${SUBMITTY_REPOSITORY}/migration/run_migrator.py -c ${SU
 alias vagrant_info='cat /etc/motd'
 alias ntp_sync='service ntp stop && ntpd -gq && service ntp start'
 alias recreate_sample_courses='sudo bash /usr/local/submitty/GIT_CHECKOUT/Submitty/.setup/bin/recreate_sample_courses.sh'
-alias refresh_vagrant_workers='python3 /usr/local/submitty/GIT_CHECKOUT/Submitty/.setup/bin/refresh_vagrant_workers.py'
 systemctl start submitty_autograding_shipper
 systemctl start submitty_autograding_worker
 systemctl start submitty_daemon_jobs_handler
