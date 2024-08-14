@@ -21,14 +21,14 @@ $( document ).ready(function() {
 {% else %}
     <div class="sub">
         {% if not active_same_as_graded %}
-            <h3>A
+            <h3 data-testid="version-conflict-ta">A
             <a href="https://submitty.org/student/submission/submission_version_conflict" target="_blank"> Version Conflict <i class="fa-question-circle" style="font-style:normal;"></i></a>
             has been detected in your submission. A grade of zero will be recorded in the gradebook. Please resolve as necessary.</h3>
             <br>
         {% endif %}
         {% if ta_components | length > 0 %}
             {# TA/Instructor Manual total #}
-            <div class="box submission-page-total-header">
+            <div class="box submission-page-total-header" data-testid="ta-total-score">
                 <div class="box-title-total key_to_click" tabindex="0">
 
                     {{ Badge.render(ta_score, ta_max, false, active_same_as_graded) }}
