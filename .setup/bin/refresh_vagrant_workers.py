@@ -64,8 +64,10 @@ shutil.rmtree("/tmp/worker_keys", True)
 print()
 
 print("Updating SSH configuration...")
-with open(os.path.join(DAEMON_HOME, b'.ssh', b'config'), 'w') as file:
+ssh_config_path = os.path.join(DAEMON_HOME, b'.ssh', b'config')
+with open(ssh_config_path, 'w') as file:
   file.write(ssh_config)
+os.chown(ssh_config_path, daemon_stat.pw_uid, daemon_stat.pw_gid)
 print("Successfully updated")
 
 print("Writing new autograding configuration...")
