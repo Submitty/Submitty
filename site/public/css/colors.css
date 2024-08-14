@@ -249,7 +249,7 @@
     --diff-background-actual: #fceae9;
     --diff-background-expected: #defae1;
     --diff-char-background-actual: #fbc1c0;
-    --diff-char-background-expected: #74F2B6;
+    --diff-char-background-expected: #aff0b7;
 }
 
 [data-black_mode="black"][data-theme="dark"] {
