@@ -11,7 +11,7 @@
 
 {% block components_block %}
     {% for component in gradeable.components %}
-        <div class="component-container">
+        <div class="component-container" data-testid="component-container">
             {% set graded_component = graded_gradeable.graded_components[component.id] %}
             {% include "GradingComponent.twig" with {
                 'precision': gradeable.precision,
