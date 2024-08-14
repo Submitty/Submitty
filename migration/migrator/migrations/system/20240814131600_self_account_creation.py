@@ -1,4 +1,5 @@
-"""Migration for the Submitty master database."""
+"""Migration for the Submitty system."""
+import json
 user_id_requirements = {
     "all": True,
     "require_name": False,
@@ -21,33 +22,29 @@ accepted_emails = {
     "rpi.edu": True
 }
 
-
-import json
-def up(config, database):
+def up(config):
     """
     Run up migration.
 
     :param config: Object holding configuration details about Submitty
     :type config: migrator.config.Config
-    :param database: Object for interacting with given database for environment
-    :type database: migrator.db.Database
     """
-    # if 'user_create_account' not in config.submitty:
-    submitty_config = config.submitty
-    submitty_config['user_create_account'] = False
-    submitty_config['user_id_requirements'] = user_id_requirements
-    submitty_config['accepted_emails'] = accepted_emails
+    edited_config = config.submitty
+    if ('user_create_account' not in edited_config):
+        edited_config['user_create_account'] = False
+    if ('user_id_requirements' not in edited_config):
+        edited_config['user_id_requirements'] = user_id_requirements
+    if ('accepted_emails' not in edited_config):
+        edited_config['accepted_emails'] = accepted_emails
     
-    dump = open(config.config_path / 'submitty.json', 'w')
-    json.dump(submitty_config, dump, indent=4)
+    with open(config.config_path / 'submitty.json', 'w') as file_path:
+        json.dump(edited_config, file_path, indent=4)
 
-def down(config, database):
+def down(config):
     """
     Run down migration (rollback).
 
     :param config: Object holding configuration details about Submitty
     :type config: migrator.config.Config
-    :param database: Object for interacting with given database for environment
-    :type database: migrator.db.Database
     """
     pass

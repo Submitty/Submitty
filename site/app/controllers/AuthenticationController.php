@@ -466,6 +466,14 @@ class AuthenticationController extends AbstractController {
             $this->core->addErrorMessage('Users cannot create their own account, Please have your system administrator add you.');
             return new RedirectResponse($this->core->buildUrl(['authentication', 'login']));
         }
+        if (!isset($_GET['email'])) {
+            $this->core->addErrorMessage('You must specify an email to send the verification to.');
+            return new RedirectResponse($this->core->buildUrl(['authentication', 'email_verification']));
+        }
+        if (count($this->core->getQueries()->getUnverifiedUserIdEmailExists($_GET['email'], '')) > 0) {
+            $this->core->addErrorMessage('That email is not associated with an account.');
+            return new RedirectResponse($this->core->buildUrl(['authentication', 'email_verification']));
+        }
         $verification_values = $this->generateVerificationCode();
         $this->core->getQueries()->updateUserVerificationValues($_GET['email'], $verification_values['code'], $verification_values['exp']);
         $this->sendVerificationEmail($_GET['email'], $verification_values['code']);
