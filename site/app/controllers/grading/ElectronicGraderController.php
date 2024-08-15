@@ -2765,7 +2765,7 @@ class ElectronicGraderController extends AbstractController {
             $page = $gradeable->isPdfUpload() ? ($gradeable->isStudentPdfUpload() ? Component::PDF_PAGE_STUDENT : 1) : Component::PDF_PAGE_NONE;
 
             // set the title based on whether it is peer or curve component
-            $title = $curve ? 'Curved Score' : 'Problem ' . strval(count($gradeable->getComponents()) + 1);
+            $title = $curve ? 'Curved Score ' : 'Problem ' . strval(count($gradeable->getComponents()) + 1);
 
             // Once we've parsed the inputs and checked permissions, perform the operation
             $component = $gradeable->addComponent(
