@@ -159,82 +159,82 @@
     }
 
     {% if user_admin or poll.isHistogramAvailable() %}
-    window.onload = function () {
-        const data = [{
-            type: "bar",
-            x: [],
-            y: [],
-            marker: {
-                color: [],
-            },
-        }];
-        // Store the index of each x-coordinate (option) for constant time access during websocket updates
-        const data_index = {};
-        let index = 0;
-        const [correctColor, defaultColor] =
-        [window.getComputedStyle(document.body).getPropertyValue('--standard-deep-dark-green'),
-            window.getComputedStyle(document.body).getPropertyValue('--standard-vibrant-dark-blue')];
-        {% for option in poll.getOptions() %}
-        data_index["{{ option.getResponse()|replace({"\n": " ", "\r": " ", "\t": " "}) }}"] = index++;
-        data[0].x.push("{{ option.getResponse()|replace({"\n": " ", "\r": " ", "\t": " "}) }}");
-        data[0].y.push({{ response_counts[option.getId()] }});
-        data[0].marker.color.push(
-            {{ option.isCorrect() and poll.isReleaseAnswer() ? 'correctColor': 'defaultColor' }}
-        );
-        {% endfor %}
-        const title_text = new DOMParser().parseFromString("{{ poll.getName() }}", "text/html");
-        const width = get_new_chart_width();
-        const layout = {
-            title: title_text.documentElement.textContent,
-            paper_bgcolor: $("body").css("--default-white"),
-            plot_bgcolor: $("body").css("--default-white"),
-            font: {
-                color: $("body").css("--text-black")
-            },
-            width: width
-        }
-        Plotly.newPlot("chartContainer", data, layout);
-        window.addEventListener('resize', function() {
+        window.onload = function () {
+            const data = [{
+                type: "bar",
+                x: [],
+                y: [],
+                marker: {
+                    color: [],
+                },
+            }];
+            // Store the index of each x-coordinate (option) for constant time access during websocket updates
+            const data_index = {};
+            let index = 0;
+            const [correctColor, defaultColor] =
+            [window.getComputedStyle(document.body).getPropertyValue('--standard-deep-dark-green'),
+                window.getComputedStyle(document.body).getPropertyValue('--standard-vibrant-dark-blue')];
+            {% for option in poll.getOptions() %}
+            data_index["{{ option.getResponse()|replace({"\n": " ", "\r": " ", "\t": " "}) }}"] = index++;
+            data[0].x.push("{{ option.getResponse()|replace({"\n": " ", "\r": " ", "\t": " "}) }}");
+            data[0].y.push({{ response_counts[option.getId()] }});
+            data[0].marker.color.push(
+                {{ option.isCorrect() and poll.isReleaseAnswer() ? 'correctColor': 'defaultColor' }}
+            );
+            {% endfor %}
+            const title_text = new DOMParser().parseFromString("{{ poll.getName() }}", "text/html");
             const width = get_new_chart_width();
-            const container = document.getElementById('chartContainer');
-            const update = {
+            const layout = {
+                title: title_text.documentElement.textContent,
+                paper_bgcolor: $("body").css("--default-white"),
+                plot_bgcolor: $("body").css("--default-white"),
+                font: {
+                    color: $("body").css("--text-black")
+                },
                 width: width
             }
-            Plotly.relayout(container, update);
-        });
-
-        {% if user_admin and poll.isOpen() %}
-        let graph_data = data;
-
-        function initInstructorSocketClient() {
-            window.socketClient = new WebSocketClient();
-            window.socketClient.onmessage = (msg) => {
-                switch (msg.type) {
-                    case "update_histogram":
-                        updateHistogram(msg.updates);
-                        break;
-                    default:
-                        console.log("Unknown message received.");
-                        break;
+            Plotly.newPlot("chartContainer", data, layout);
+            window.addEventListener('resize', function() {
+                const width = get_new_chart_width();
+                const container = document.getElementById('chartContainer');
+                const update = {
+                    width: width
                 }
-            };
-            window.socketClient.open('polls-{{ poll.getId() }}-instructor');
-        }
+                Plotly.relayout(container, update);
+            });
 
-        function updateHistogram(updates) {
-            const container = document.getElementById('chartContainer');
-            for (option of Object.keys(updates)) {
-                // Update the y-coordinate for each updated option given the latest response counts
-                graph_data[0].y[data_index[option]] = updates[option];
-            }
-            const update = {
-                y: [graph_data[0].y]
-            }
-            Plotly.restyle(container, update);
-        }
+            {% if user_admin and poll.isOpen() %}
+            let graph_data = data;
 
-        initInstructorSocketClient();
-        {% endif %}
-    }
+            function initInstructorSocketClient() {
+                window.socketClient = new WebSocketClient();
+                window.socketClient.onmessage = (msg) => {
+                    switch (msg.type) {
+                        case "update_histogram":
+                            updateHistogram(msg.updates);
+                            break;
+                        default:
+                            console.log("Unknown message received.");
+                            break;
+                    }
+                };
+                window.socketClient.open('polls-{{ poll.getId() }}-instructor');
+            }
+
+            function updateHistogram(updates) {
+                const container = document.getElementById('chartContainer');
+                for (option of Object.keys(updates)) {
+                    // Update the y-coordinate for each updated option given the latest response counts
+                    graph_data[0].y[data_index[option]] = updates[option];
+                }
+                const update = {
+                    y: [graph_data[0].y]
+                }
+                Plotly.restyle(container, update);
+            }
+
+            initInstructorSocketClient();
+            {% endif %}
+        }
     {% endif %}
 </script>
