@@ -27,7 +27,7 @@ class RainbowCustomization extends AbstractModel {
     private $error_messages;
     private $used_buckets = [];
     private $available_buckets;
-    private $RCJSON;                           // This is the customization.json php object, or null if it wasn't found
+    private object $RCJSON;                           // This is the customization.json php object, or null if it wasn't found
     private $sections;                         // Contains section ids mapped to labels
 
     /*XXX: This is duplicated from AdminGradeableController.php, we really shouldn't have multiple copies lying around.
@@ -66,7 +66,7 @@ class RainbowCustomization extends AbstractModel {
         }
     }
 
-    public function buildCustomization() {
+    public function buildCustomization(): void {
 
         //This function should examine the DB(?) / a file(?) and if customization settings already exist, use them. Otherwise, populate with defaults.
         foreach (self::syllabus_buckets as $bucket) {
@@ -78,7 +78,7 @@ class RainbowCustomization extends AbstractModel {
         $gradeables = $this->core->getQueries()->getGradeableConfigs(null);
         foreach ($gradeables as $gradeable) {
             //XXX: 'none (for practice only)' we want to truncate to just 'none', otherwise use full bucket name
-            $bucket = $gradeable->getSyllabusBucket() == "none (for practice only)" ? "none" : $gradeable->getSyllabusBucket();
+            $bucket = $gradeable->getSyllabusBucket() === "none (for practice only)" ? "none" : $gradeable->getSyllabusBucket();
             /*if(!isset($this->customization_data[$bucket])){
                 $this->customization_data[$bucket] = [];
             }*/
@@ -133,7 +133,7 @@ class RainbowCustomization extends AbstractModel {
 
         //Now that the buckets are ordered and the customization has been initialized, we can
         //loop through to find differences between the max_values from the database vs the customization JSON
-        if (!is_null($this->RCJSON) && count($this->RCJSON->getGradeables())) {
+        if (!is_null($this->RCJSON) && count($this->RCJSON->getGradeables()) > 0) {
             $json_buckets = $this->RCJSON->getGradeables();
             //we have to keep track of the customization bucket and the JSON bucket separately, since the customization
             //has all buckets (even empty ones) while the JSON only has buckets with content in it.
@@ -210,14 +210,12 @@ class RainbowCustomization extends AbstractModel {
         }, []);
 
         // Then, add gradeables to $new_gradeables based on JSON ordering
-        if (!is_null($json_bucket_ids)) {
-            foreach ($json_bucket_ids as $json_gradeable) {
-                if (property_exists($json_gradeable, 'id')) {
-                    $id = $json_gradeable->id;
-                    if (array_key_exists($id, $gradeables_by_id)) {
-                        $new_gradeables[] = $gradeables_by_id[$id];
-                        unset($gradeables_by_id[$id]);
-                    }
+        foreach ($json_bucket_ids as $json_gradeable) {
+            if (property_exists($json_gradeable, 'id')) {
+                $id = $json_gradeable->id;
+                if (array_key_exists($id, $gradeables_by_id)) {
+                    $new_gradeables[] = $gradeables_by_id[$id];
+                    unset($gradeables_by_id[$id]);
                 }
             }
         }
@@ -279,7 +277,7 @@ class RainbowCustomization extends AbstractModel {
                         $retArray[$json_bucket->type][$json_gradeable->id] = [];
 
                         foreach ($benchmarks_with_input_fields as $benchmark) {
-                            if (in_array($benchmark, $selected_benchmarks)) {
+                            if (in_array($benchmark, $selected_benchmarks, true)) {
                                 $val = $curve_data[$curve_data_pos];
                                 $curve_data_pos++;
                             }
@@ -308,7 +306,7 @@ class RainbowCustomization extends AbstractModel {
      *     'lab' => 25
      *     'homework' => 25
      *
-     * @return array
+     * @return array<string,int>
      */
     public function getBucketPercentages() {
         $retArray = [];
@@ -356,6 +354,9 @@ class RainbowCustomization extends AbstractModel {
         return $this->used_buckets;
     }
 
+    /**
+     * @return string[]
+     */
     public function getMessages() {
         return !is_null($this->RCJSON) ? $this->RCJSON->getMessages() : [];
     }
@@ -375,7 +376,7 @@ class RainbowCustomization extends AbstractModel {
         $usedBenchmarks = $this->RCJSON?->getDisplayBenchmarks() ?? [];
         $benchmarksData = [];
         foreach ($allowedBenchmarks as $benchmark) {
-            $benchmarkUsed = in_array($benchmark, $usedBenchmarks);
+            $benchmarkUsed = in_array($benchmark, $usedBenchmarks, true);
             $benchmarksData[] = ['id' => $benchmark, 'isUsed' => $benchmarkUsed];
         }
         return $benchmarksData;
@@ -392,7 +393,7 @@ class RainbowCustomization extends AbstractModel {
             $percent_obj = $this->RCJSON->getBenchmarkPercent();
 
             // If the RCJSON was found and it contains the benchmark percent fields then return it
-            if ($percent_obj != (object) []) {
+            if ($percent_obj !== (object) []) {
                 return $percent_obj;
             }
         }
@@ -454,7 +455,7 @@ class RainbowCustomization extends AbstractModel {
         foreach ($allowed_display_options as $option_id) {
             $display_options[] = [
                 'id' => $option_id,
-                'isUsed' => in_array($option_id, $used_display_options)
+                'isUsed' => in_array($option_id, $used_display_options, true)
             ];
         }
 
