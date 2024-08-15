@@ -103,7 +103,8 @@ class RainbowCustomization extends AbstractModel {
                 "max_score" => $max_score,
                 "grade_release_date" => $gradeable->hasReleaseDate() ? DateUtils::dateTimeToString($gradeable->getGradeReleasedDate()) : DateUtils::dateTimeToString($gradeable->getSubmissionOpenDate()),
                 "override" => false,
-                "override_max" => $max_score
+                "override_max" => $max_score,
+                "override_percent" => false
             ];
         }
 
@@ -154,6 +155,10 @@ class RainbowCustomization extends AbstractModel {
                     elseif ($c_gradeable['max_score'] !== (float) $json_bucket->ids[$j_index]->max) {
                         $c_gradeable['override'] = true;
                         $c_gradeable['override_max'] = $json_bucket->ids[$j_index]->max;
+                    }
+                    if (property_exists($json_bucket->ids[$j_index], 'percent')) {
+                        $c_gradeable['override_percent'] = true;
+                        $c_gradeable['percent'] = ($json_bucket->ids[$j_index]->percent) * 100;
                     }
                     $j_index++;
                 }
