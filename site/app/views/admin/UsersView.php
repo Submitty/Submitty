@@ -147,6 +147,7 @@ class UsersView extends AbstractView {
             "null_counts" => $null_counts,
             "max_section" => $max_section,
             "is_self_register_course" => $this->core->getQueries()->isSelfRegistrationAllowed($this->core->getConfig()->getCourse()) > 0,
+            "default_section" => $this->core->getQueries()->getDefaultRegistrationSection($this->core->getConfig()->getTerm(), $this->core->getConfig()->getCourse()),
             "update_registration_sections_url" => $this->core->buildCourseUrl(['sections', 'registration']),
             "update_rotating_sections_url" => $this->core->buildCourseUrl(['sections', 'rotating']),
             "csrf_token" => $this->core->getCsrfToken()

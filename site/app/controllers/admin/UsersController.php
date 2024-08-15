@@ -536,7 +536,9 @@ class UsersController extends AbstractController {
         $return_url = $this->core->buildCourseUrl(['sections']);
 
         if (isset($_POST['default_section'])) {
-            $this->core->getQueries()->setDefaultRegistrationSection($_POST['default_section']);
+            $term = $this->core->getConfig()->getTerm();
+            $course = $this->core->getConfig()->getCourse();
+            $this->core->getQueries()->setDefaultRegistrationSection($term, $course, $_POST['default_section']);
         }
 
         if (isset($_POST['add_reg_section']) && $_POST['add_reg_section'] !== "") {

@@ -12,7 +12,11 @@ def up(config, database):
     :param course: Code of course being migrated
     :type course: str
     """
-    database.execute("ALTER TABLE courses ADD COLUMN IF NOT EXISTS self_registration_allowed smallint default 0")
+    # Self Registration Types: 0 == None, 1 == All users auto join when registering, 2 == Users request to join when registering (added later)
+    database.execute("""
+                     ALTER TABLE courses ADD COLUMN IF NOT EXISTS self_registration_type smallint default 0,
+                     ADD COLUMN IF NOT EXISTS default_section_id VARCHAR(255);
+                     """)
 
 def down(config, database):
     """

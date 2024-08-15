@@ -3332,27 +3332,18 @@ ORDER BY g.sections_rotating_id, g.user_id",
     }
 
     /**
-     * Gets the default registration section from the sections_registration table
-     * @return array<mixed>
+     * Gets the default registration section for a given course and term from the courses table
      */
-    public function getDefaultRegistrationSection(): array {
-        $this->course_db->query("SELECT * FROM sections_registration where default_section=true");
-        return $this->course_db->row();
+    public function getDefaultRegistrationSection(string $term, string $course): string {
+        $this->submitty_db->query("SELECT default_section_id FROM courses where term=? and course=?", [$term, $course]);
+        return $this->submitty_db->row()['default_section_id'];
     }
 
     /**
      * Updates the default registration section for self register courses.
-     *
      */
-    public function setDefaultRegistrationSection(string $section_id): bool {
-        $this->unsetDefaultRegistrationSection();
-        $this->course_db->query("UPDATE sections_registration set default_section = true where sections_registration_id=?", [$section_id]);
-        return true;
-    }
-
-    public function unsetDefaultRegistrationSection(): bool {
-        $this->course_db->query("UPDATE sections_registration SET default_section = false");
-        return true;
+    public function setDefaultRegistrationSection(string $term, string $course, string $section_id): void {
+        $this->submitty_db->query("UPDATE courses set default_section_id = $section_id where term=? and course=?", [$term, $course]);
     }
 
     /**
@@ -5172,7 +5163,7 @@ SELECT t.name AS term_name, u.term, u.course, u.user_group, u.registration_secti
 FROM courses_users u
 INNER JOIN courses c ON u.course=c.course AND u.term=c.term
 INNER JOIN terms t ON u.term=t.term_id
-WHERE u.user_id=? ${include_archived} AND ${force_nonnull} (u.registration_section IS NOT NULL OR u.user_group<>5)
+WHERE u.user_id=? ${include_archived} AND ${force_nonnull} (u.registration_section IS NOT NULL OR u.user_group<>4)
 ORDER BY u.user_group ASC, t.start_date DESC, u.course ASC
 SQL;
         $this->submitty_db->query($query, [$user_id]);
@@ -5200,7 +5191,7 @@ SQL;
      */
     public function getSelfRegisterCourses(string $user_id): array {
         $query = <<<SQL
-Select *, t.name as term_name from courses c, terms t where (c.self_registration_allowed=1 or c.self_registration_allowed=2) and c.course not in (
+Select *, t.name as term_name from courses c, terms t where not c.self_registration_type = 0 and c.course not in (
     select course from courses_users where user_id = ?
 )
 SQL;
@@ -5215,13 +5206,12 @@ SQL;
     }
 
     public function isSelfRegistrationAllowed(string $course): int {
-        $this->submitty_db->query("SELECT self_registration_allowed FROM courses WHERE course=?", [$course]);
-        return $this->submitty_db->row()['self_registration_allowed'];
+        $this->submitty_db->query("SELECT self_registration_type FROM courses WHERE course=?", [$course]);
+        return $this->submitty_db->row()['self_registration_type'];
     }
 
-    public function setSelfRegistrationAllowed(string $course, int $self_registration_allowed): bool {
-        $this->submitty_db->query("UPDATE courses set self_registration_allowed=? WHERE course=?", [$self_registration_allowed, $course]);
-        return true;
+    public function setSelfRegistrationAllowed(string $course, int $self_registration_type): void {
+        $this->submitty_db->query("UPDATE courses set self_registration_type=? WHERE course=?", [$self_registration_type, $course]);
     }
 
     /**

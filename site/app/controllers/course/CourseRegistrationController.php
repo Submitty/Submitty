@@ -11,16 +11,19 @@ class CourseRegistrationController extends AbstractController {
     /**
      * @param array<string> $instructors
      */
-    public function notifyInstructors(string $user, string $term, string $course, array $instructors): void {
+    private function notifyInstructors(string $user, string $term, string $course, array $instructors): void {
         $subject = "User $user has joined course $course";
-        $body = <<<EMAIL
-                $user has joined the course $course for term $term.
-        EMAIL;
+        $body = "$user has joined the course $course for term $term.";
         $emails = [];
         foreach ($instructors as $instructor) {
-            $details = ["subject" => $subject, "body" => $body, "to_user_id" => $instructor];
-            $email = new Email($this->core, $details);
-            $emails[] = $email;
+            $emails[] = new Email(
+                $this->core,
+                [
+                    "subject" => $subject,
+                    "body" => $body,
+                    "to_user_id" => $instructor
+                ]
+            );
         }
 
         $this->core->getNotificationFactory()->sendEmails($emails);
@@ -34,8 +37,8 @@ class CourseRegistrationController extends AbstractController {
             $this->core->addErrorMessage('Self registration is not allowed.');
             return new RedirectResponse($this->core->buildUrl(['home']));
         }
-        $default_section = $this->core->getQueries()->getDefaultRegistrationSection();
-        $this->core->getUser()->setRegistrationSection($default_section['sections_registration_id']);
+        $default_section = $this->core->getQueries()->getDefaultRegistrationSection($term, $course);
+        $this->core->getUser()->setRegistrationSection($default_section);
         $this->core->getQueries()->insertCourseUser($this->core->getUser(), $term, $course);
         $instructor_ids = $this->core->getQueries()->getActiveUserIds(true, false, false, false, false);
         $this->notifyInstructors($this->core->getUser()->getId(), $term, $course, $instructor_ids);
