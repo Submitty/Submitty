@@ -844,9 +844,8 @@ class PollController extends AbstractController {
 
     /**
      * This method opens a WebSocket client and sends a message containing corresponding poll updates
-     * @param array $msg_array
      */
-    private function sendSocketMessage(array $msg_array): void {
+    private function sendSocketMessage(mixed $msg_array): void {
         $msg_array['user_id'] = $this->core->getUser()->getId();
         $msg_array['page'] = $this->core->getConfig()->getTerm() . '-' . $this->core->getConfig()->getCourse() . "-polls-" .  $msg_array['poll_id'] . '-' . $msg_array['socket'];
 
