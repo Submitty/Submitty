@@ -419,7 +419,7 @@ To remove a curve simply blank all boxes."></i>
                     <label for="performance-warnings-gradeables">
                         <span>Gradeables:</span>
                         <select name="performance-warnings-gradeables[]" id="performance-warnings-gradeables">
-                            <option></option>{# Browser automatically selects first option. This option will be removed after page loads #}
+                            <option> -- select an option -- </option>{# Browser automatically selects first option. This option will be removed after page loads #}
                             {% for index, value in gradeables %}
                                 <option value="{{ value['g_id'] }}">{{ value['g_title'] }}</option>
                             {% endfor %}
