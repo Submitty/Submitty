@@ -4,7 +4,8 @@
 {% endif %}
 <div class="{{ classes|join(" ") }}" id="{{ post_id }}" style="margin-left:{{ offset }}px;" data-reply_level="{{ reply_level }}" data-parent_id="{{ parent_id }}" data-registration = "{{ registration_section }}" data-rotating = "{{ rotating_section }}">
     {% if first == true %}
-        <h2 class="create-post-head">
+
+        <h2 class="create-post-head" data-testid="create-post-head">
 
             {% if userGroup <= 2 and activeThreadAnnouncement %}
 
@@ -38,7 +39,7 @@
 
     {% endif %}
 
-    <div class='pre-forum'><span class="post_content">{% include "forum/RenderPost.twig" with { "post_content": post_content, "render_markdown": render_markdown } only %}</span></div>
+    <div class='pre-forum'><div class='post_content'>{% include "forum/RenderPost.twig" with { "post_content": post_content, "render_markdown": render_markdown } only %}</div></div>
 
     <hr style="margin-bottom: 3px;">
 
@@ -52,9 +53,6 @@
             <a class="btn btn-default btn-sm post_button_color text-decoration-none key_to_click" tabindex = "0" onClick="$('html, #posts_list').animate({ scrollTop: document.getElementById('posts_list').scrollHeight }, 'slow');"> Reply</a>
         {% endif %}
         {% if userGroup <= 3 %}
-            {% if has_history %}
-                <a class="btn btn-default btn-sm post_button_color text-decoration-none key_to_click" tabindex = "0" onClick="showHistory({{ post.id }})">Show History</a>
-            {% endif %}
             {% if (isThreadLocked != 1 or userAccessFullGrading) and first != 1 %}
                 <a class="btn btn-default btn-sm post_button_color text-decoration-none" tabindex = "0" onClick="showSplit({{ post.id }})">
                     {% if thread_previously_merged %}
@@ -64,9 +62,12 @@
                     {% endif %}
                 </a>
             {% endif %}
-        {% endif %}
+        {% endif %} 
 
+    {% endif %}
 
+    {% if userGroup <= 3 and has_history %}
+        <a class="btn btn-default btn-sm post_button_color text-decoration-none key_to_click" tabindex = "0" onClick="showHistory({{ post.id }})">Show History</a>
     {% endif %}
 
     {% if includeReply and (userGroup <= 3 or post.author_user_id == current_user) and first and thread_resolve_state == -1 %}
@@ -76,6 +77,18 @@
     {% if post.author_user_id == current_user and first and not thread_announced and date() < date(post_date)|date_modify("+1hour") and userGroup <= 2 %}
         <a class="btn btn-primary btn-sm pin-and-email-message text-decoration-none key_to_click" onclick="sendAnnouncement({{activeThread.id }});"> Pin &amp; email this thread </a>
     {% endif %}
+
+    <span class="upduck-container">
+        <button data-testid="upduck-button" class="upduck-button text-decoration-none" tabindex="0" onClick="toggleLike({{post.id}}, '{{current_user}}')" title="Like the post">
+            <img id="likeIcon_{{post.id}}" src="{{ post_up_duck.upduck_user_liked ? '/img/on-duck-button.svg' : '/img/light-mode-off-duck.svg' }}" alt="Like" width="30" height="30">
+        </button>
+        <span data-testid="like-count" id="likeCounter_{{post.id}}" class="like-counter">{{ post_up_duck.upduck_count }}</span>
+        <span data-testid="instructor-like" id="likedByInstructor_{{post.id}}" class="liked-by-instructor" style = "{{ post_up_duck.taTrue ? '' : 'display: none;' }}">
+            liked by teaching staff
+        </span>
+    </span>
+    
+
     <span class="post-action-container">
 
         {% if userGroup <= 2 and post.author_user_id != current_user %}
@@ -87,17 +100,12 @@
             <a class="post-user-info key_to_click" tabindex = "0" onClick='changeName(this.parentNode, {{ post_user_info.info_name }}, {{ post_user_info.visible_user_json}}, {{ post_user_info.jscriptAnonFix}})' title="Show full user information" aria-label="Show full user information"><i class="fas fa-eye"></i></a>
         {% endif %}
 
-        {% if userGroup <= 3 or post.author_user_id == current_user %}
-            {% if not (isThreadLocked != 1 or userAccessFullGrading == true) %}
-                {#pass#}
-            {% else %}
-                <a class="post_button delete-post-button key_to_click" tabindex = "0" onClick="deletePostToggle({{ post_buttons.delete.ud_toggle_status }}, {{ post.thread_id }}, {{ post.id }}, '{{ post.author_user_id }}', '{{ post_date }}', '{{ csrf_token }}' )" title="{{ post_buttons.delete.ud_button_title }}" aria-label="{{ post_buttons.delete.ud_button_title }}"><i class="fa {{ post_buttons.delete.ud_button_icon }}"></i></a>
-                <a class="post_button edit-post-button key_to_click" tabindex = "0" onClick="showEditPostForm({{ post.id }}, {{ post.thread_id }}, {{ post_buttons.edit.shouldEditThread }}, {{ render_markdown?1:0 }}, '{{ csrf_token }}')" title="{{ post_buttons.edit.edit_button_title }}" aria-label="{{ post_buttons.edit.edit_button_title }}"><i class="fas fa-edit"></i></a>
-            {% endif %}
-        {% endif %}
-
         <span class="last-edit">
-			<strong class="post_user_id">{{ visible_username }}</strong>
+            {% if post_user_info.is_OP == true and first == false %}
+			    <strong class="post_user_id" title="Original Poster">{{ visible_username }} <span style="color: var(--standard-medium-vibrant-blue);"><strong>OP</strong></span></strong>
+            {% else %}
+                <strong class="post_user_id">{{ visible_username }}</strong>
+            {% endif %}
             {% if post_user_info.pronouns and post_user_info.display_pronouns and visible_username !="Anonymous" %}
                 <strong class="post_user_pronouns">({{post_user_info.pronouns}})</strong>
             {% endif %}
@@ -106,6 +114,22 @@
                 (<i>Last edit at {{ edit_date }}</i>)
             {% endif %}
         </span>
+
+        <a class="pinned-thread key_to_click" tabindex="0" data-testid="thread-dropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" title="Options">
+            <i class="fas fa-ellipsis-v"></i>
+        </a>
+        <div class="dropdown-menu custom-dropdown-menu" aria-labelledby="dropdownMenuButton">
+            <a class="dropdown-item key_to_click" tabindex="0" onClick="markPostUnread('{{activeThread.id}}', '{{post_id}}', '{{post_date}}');" title="Mark Post Unread" aria-label="Mark Post Unread">Mark Unread</a>
+            {% if userGroup <= 3 or post.author_user_id == current_user %}
+                {% if not (isThreadLocked != 1 or userAccessFullGrading == true) %}
+                    {#pass#}
+                {% else %}
+                    <a class="dropdown-item key_to_click" tabindex = "1" data-testid="delete-post-button" onClick="deletePostToggle({{ post_buttons.delete.ud_toggle_status }}, {{ post.thread_id }}, {{ post.id }}, '{{ post.author_user_id }}', '{{ post_date }}', '{{ csrf_token }}' ); return false;" title="{{ post_buttons.delete.ud_button_title }}" aria-label="{{ post_buttons.delete.ud_button_title }}">Delete</a>
+                    <a class="dropdown-item key_to_click" tabindex = "2" data-testid="edit-post-button" onClick="showEditPostForm({{ post.id }}, {{ post.thread_id }}, {{ post_buttons.edit.shouldEditThread }}, {{ render_markdown?1:0 }}, '{{ csrf_token }}')" title="{{ post_buttons.edit.edit_button_title }}" aria-label="{{ post_buttons.edit.edit_button_title }}">Edit</a>
+                {% endif %}
+            {% endif %}
+        </div>
+
     </span>
 
     {% if post_attachment.exist == true %}
@@ -117,6 +141,8 @@
         <div id="{{ post_attachment.params.well_id }}" class="attachment-well well well-lg"></div>
 
     {% endif %}
+
+
 
     {% set offset = offset + 30 %}
 </div>
@@ -142,6 +168,7 @@
             "show_unresolve": show_unresolve,
             "visible_username" : visible_username,
             "submit_label" : "Submit Reply to " ~ visible_username,
+            "data_testid" : "forum-submit-reply-user"
         } %}
 
     </form>

@@ -6,6 +6,7 @@ use app\libraries\FileUtils;
 use app\models\Button;
 use app\models\NavButton;
 use app\models\User;
+use app\entities\banner\BannerImage;
 
 class GlobalController extends AbstractController {
     public function header() {
@@ -19,9 +20,9 @@ class GlobalController extends AbstractController {
                 'csrf_token' => $this->core->getCsrfToken()
             ]);
         }, $wrapper_files);
-
         $breadcrumbs = $this->core->getOutput()->getBreadcrumbs();
         $page_name = $this->core->getOutput()->getPageName();
+        $audio = $this->core->getOutput()->getAudio();
         $css = $this->core->getOutput()->getCss();
         $js = $this->core->getOutput()->getJs();
         $content_only = $this->core->getOutput()->isContentOnly();
@@ -60,8 +61,24 @@ class GlobalController extends AbstractController {
 
         $now = $this->core->getDateTimeNow();
         $duck_img = $this->getDuckImage($now);
+        $repo = $this->core->getSubmittyEntityManager()->getRepository(BannerImage::class);
+        $bannerImages = $repo->getValidBannerImages();
 
-        return $this->core->getOutput()->renderTemplate('Global', 'header', $breadcrumbs, $wrapper_urls, $sidebar_buttons, $unread_notifications_count, $css->toArray(), $js->toArray(), $duck_img, $page_name, $content_only);
+        return $this->core->getOutput()->renderTemplate(
+            'Global',
+            'header',
+            $breadcrumbs,
+            $wrapper_urls,
+            $sidebar_buttons,
+            $unread_notifications_count,
+            $audio->toArray(),
+            $css->toArray(),
+            $js->toArray(),
+            $duck_img,
+            $page_name,
+            $content_only,
+            $bannerImages
+        );
     }
 
     // ==========================================================================================
@@ -419,6 +436,12 @@ class GlobalController extends AbstractController {
         // SUPERUSERS ONLY
         if ($this->core->getUser()->getAccessLevel() === User::LEVEL_SUPERUSER) {
             $sidebar_buttons[] = new NavButton($this->core, [
+                "href" => $this->core->buildUrl(['community_events']),
+                "title" => "Community Events",
+                "icon" => "fa-paper-plane"
+            ]);
+
+            $sidebar_buttons[] = new NavButton($this->core, [
                 "href" => $this->core->buildUrl(['superuser', 'gradeables']),
                 "title" => "Pending Gradeables",
                 "id" => "nav-sidebar-submitty",
@@ -467,22 +490,16 @@ class GlobalController extends AbstractController {
     }
 
 
-//    public function calculateHanukkahDate(int $year): string {
-//        $gregorianDate = gregoriantojd(12, 25, $year);
-//        $dayOfWeek = jddayofweek($gregorianDate);
-//        $daysToAdd = 7 - $dayOfWeek + 1;
-//        $hanukkahDate = $gregorianDate + $daysToAdd;
-//        return jdtogregorian($hanukkahDate);
-//    }
+    public function calculateHanukkahDate(int $year): \DateTime {
+        // This is the Hanukkah in civil year
+        $startdate = jewishtojd(3, 24, $year + 3761);
+        $gregorianDate = \DateTime::createFromFormat('m/d/Y', jdtogregorian($startdate));
 
-//    public function calculateHanukkahDate(int $year): \DateTime {
-//        $gregorianDate = gregoriantojd(12, 25, $year);
-//        $dayOfWeek = jddayofweek($gregorianDate);
-//        $daysToAdd = 7 - $dayOfWeek + 1;
-//        $hanukkahDate = $gregorianDate + $daysToAdd;
-//        return \DateTime::createFromFormat('m/d/Y', jdtogregorian($hanukkahDate));
-//    }
+        // Set the time to 4:00 PM for approx sunfall
+        $gregorianDate->setTime(16, 0, 0);
 
+        return $gregorianDate;
+    }
 
 
 
@@ -493,20 +510,21 @@ class GlobalController extends AbstractController {
         $month = (int) $now->format('n');
         $year = $now->format('Y');
         $yearint = (int) $now->format('Y');
-
+        $hour = (int) $now->format('G');
+        $minute = (int) $now->format('i');
+        $second = (int) $now->format('s');
         switch ($month) {
             case 12:
                 //December (Christmas, Hanukkah)
-//                $hanukkahDateTime = $this->calculateHanukkahDate($yearint);
-//                $dayOfHanukkah = $day - (int) $hanukkahDateTime->format('j') + 1;
-//                var_dump($yearint);
-//                var_dump($hanukkahDateTime);
-//                var_dump($dayOfHanukkah);
+                $hanukkahStartDateTime = $this->calculateHanukkahDate($yearint);
+                $hanukkahEndDateTime = $this->calculateHanukkahDate($yearint);
+                $hanukkahEndDateTime->modify('+8 days');
 
-//                if ($dayOfHanukkah >= 1 && $dayOfHanukkah <= 8) {
-                if ($day >= 7 && $day <= 15) {
+                if ($now >= $hanukkahStartDateTime && $now <= $hanukkahEndDateTime) {
                     // Select the menorah duck image based on the day of Hanukkah
-                    $datecounter = $day - 6;
+                    $datecounter = (int) $now->diff($hanukkahStartDateTime)->format('%a') + 1;
+                    // Ensure datecounter is between 1 and 8
+                    $datecounter = max(1, min(8, $datecounter));
                     $menorah_duck = 'moorthy_duck/menorah-duck/' . $datecounter . '.svg';
                     $decemberImages = ['moorthy_duck/12-December.svg', $menorah_duck];
                 }
@@ -551,7 +569,13 @@ class GlobalController extends AbstractController {
                 break;
             case 4:
                 //April (Flowers)
-                $duck_img = 'moorthy_duck/04-april.svg';
+                if ($day === 5) {
+                    $duck_img = 'moorthy_duck/quantum-duck-light.svg';
+                }
+                else {
+                    //April (Flowers)
+                    $duck_img = 'moorthy_duck/04-april.svg';
+                }
                 break;
             case 3:
                 //Saint Patrick's Day (Shamrock)
@@ -560,14 +584,23 @@ class GlobalController extends AbstractController {
                 }
                 break;
             case 2:
+                $februaryImages = ['moorthy_duck/black-history-duck.svg'];
+                if ($day <= 3) {
+                    $februaryImages[] = 'moorthy_duck/party-duck/party-duck-10th.svg';
+                }
                 //Valentines (Hearts)
                 if ($day >= 11 && $day <= 17) {
-                    $duck_img = 'moorthy_duck/02-february.svg';
+                    $februaryImages[] = 'moorthy_duck/02-february.svg';
                 }
+                $duck_img = $februaryImages[array_rand($februaryImages)];
                 break;
             case 1:
                 //January (Snowflakes)
                 $duck_img = 'moorthy_duck/01-january.svg';
+
+                if ($day >= 28) {
+                    $duck_img = 'moorthy_duck/party-duck/party-duck-10th.svg';
+                }
                 break;
             default:
                 break;
