@@ -28,7 +28,7 @@ class CourseMaterialsView extends AbstractView {
         $folder_ids = [];
         $links = [];
         $base_view_url = $this->core->buildCourseUrl(['course_material']);
-        $begining_of_time_date = DateUtils::BEGINING_OF_TIME;
+        $beginning_of_time_date = DateUtils::BEGINNING_OF_TIME;
         /** @var CourseMaterial $course_material */
         foreach ($course_materials_db as $course_material) {
             $rel_path = substr($course_material->getPath(), strlen($base_course_material_path) + 1);
@@ -159,7 +159,7 @@ class CourseMaterialsView extends AbstractView {
             "folder_ids" => $folder_ids,
             "links" => $links,
             "folder_paths" => $folder_paths,
-            "begining_of_time_date" => $begining_of_time_date
+            "beginning_of_time_date" => $beginning_of_time_date
         ]);
     }
 

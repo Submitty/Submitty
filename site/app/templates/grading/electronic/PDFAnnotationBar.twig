@@ -40,8 +40,8 @@
         </div>
         <a title="Change Size" value="size" id="size_selector" class="fas fa-expand-arrows-alt toolbar-action"></a>
         <div id="pdf-buttons">
-            <button id="save-pdf-btn" aria-label="Save" value="save" class="btn btn-primary toolbar-action">Save <i class="fas fa-save"></i></button>
-            <button id="clear-pdf-btn" aria-label="Clear" value="clear" class="btn btn-default toolbar-action">Clear <i class="fas fa-trash-alt"></i></button>
+            <button id="save-pdf-btn" aria-label="Save" value="save" class="btn btn-primary toolbar-action" data-testid="save-pdf-btn">Save <i class="fas fa-save"></i></button>
+            <button id="clear-pdf-btn" aria-label="Clear" value="clear" class="btn btn-default toolbar-action" data-testid="clear-pdf-btn">Clear <i class="fas fa-trash-alt"></i></button>
         </div>
     </div>
     <div id="size_selector_menu" class="selection-menu">
@@ -67,19 +67,19 @@
         renderPDFToolbar();
     });
     //TODO: move to js file
-    let colorEvent;
-    if(document.createEvent){
-        colorEvent = document.createEvent("HTMLEvents");
-        colorEvent.initEvent('colorchange', true, true);
-    }
-    else {
-        colorEvent = document.createEventObject();
-        colorEvent.eventType = "colorchange";
-    }
-
-    colorEvent.eventName = "colorchange";
-
     function emitEvent(elem){
+        let colorEvent;
+        if(document.createEvent){
+            colorEvent = document.createEvent("HTMLEvents");
+            colorEvent.initEvent('colorchange', true, true);
+        }
+        else {
+            colorEvent = document.createEventObject();
+            colorEvent.eventType = "colorchange";
+        }
+
+        colorEvent.eventName = "colorchange";
+
         if(document.createEvent){
             elem.dispatchEvent(colorEvent);
         }

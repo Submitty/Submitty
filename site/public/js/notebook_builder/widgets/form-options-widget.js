@@ -1,4 +1,4 @@
-/* global Widget, notebook_builder, csrfToken, builder_data, buildCourseUrl, uploadFiles, getBadItemNames */
+/* global Widget, notebook_builder, csrfToken, builder_data, buildCourseUrl, uploadFiles, getBadItemNames, getBadImageInputs, getBadMarkdownContents */
 /* exported FormOptionsWidget */
 
 class FormOptionsWidget extends Widget {
@@ -37,7 +37,7 @@ class FormOptionsWidget extends Widget {
     getFormOptionsTemplate() {
         return `
         <div class="buttons">
-            <input type="button" class="save-button" value="Save">
+            <input type="button" class="save-button btn btn-primary btn-nav btn-nav-submit" value="Save" data-testid="notebook-save">
         </div>
         <div class="status"></div>`;
     }
@@ -56,7 +56,7 @@ class FormOptionsWidget extends Widget {
             return;
         }
 
-        const config_json_file = new File([JSON.stringify(notebook_builder.getJSON(), null, 2)], 'config.json', {type: 'text/plain'});
+        const config_json_file = new File([JSON.stringify(notebook_builder.getJSON(), null, 2)], 'config.json', { type: 'text/plain' });
         const url = buildCourseUrl(['notebook_builder', 'save']);
 
         const form_data = new FormData();
@@ -72,7 +72,7 @@ class FormOptionsWidget extends Widget {
             const file_selectors = document.querySelectorAll('input[type=file]');
             await uploadFiles(file_selectors, builder_data.g_id, 'test_input');
 
-            const response = await fetch(url, {method: 'POST', body: form_data});
+            const response = await fetch(url, { method: 'POST', body: form_data });
             const result = await response.json();
 
             this.clearStatusMessages();
@@ -88,12 +88,12 @@ class FormOptionsWidget extends Widget {
                 this.appendStatusMessage(result.message);
 
                 if (result.data && Array.isArray(result.data)) {
-                    result.data.forEach(msg => this.appendStatusMessage(msg));
+                    result.data.forEach((msg) => this.appendStatusMessage(msg));
                 }
             }
         };
 
-        makeRequest().catch(err => console.error(err));
+        makeRequest().catch((err) => console.error(err));
     }
 
     /**
@@ -102,7 +102,7 @@ class FormOptionsWidget extends Widget {
      * @returns {boolean}
      */
     validate() {
-        return this.validateFileNames() && this.validateItemNames();
+        return this.validateFileNames() && this.validateItemNames() && this.validateImageWidgets() && this.validateMarkdownWidgets();
     }
 
     /**
@@ -129,7 +129,10 @@ class FormOptionsWidget extends Widget {
      * Reset the all input boxes to have a white background
      */
     resetInputColors() {
-        document.querySelectorAll('input').forEach(elem => {
+        document.querySelectorAll('input').forEach((elem) => {
+            elem.style.backgroundColor = '';
+        });
+        document.querySelectorAll('.markdown-input').forEach((elem) => {
             elem.style.backgroundColor = '';
         });
     }
@@ -142,7 +145,7 @@ class FormOptionsWidget extends Widget {
      */
     validateItemNames() {
         const bad_item_names = getBadItemNames();
-        bad_item_names.forEach(bad_item_name => {
+        bad_item_names.forEach((bad_item_name) => {
             if (bad_item_name === '') {
                 this.appendStatusMessage('An itempool item name was found to be blank.  Ensure all item names are non-blank.');
             }
@@ -165,11 +168,11 @@ class FormOptionsWidget extends Widget {
      */
     validateFileNames() {
         const filename_inputs = Array.from(document.querySelectorAll('.filename-input'));
-        const filenames = filename_inputs.map(input => input.value);
+        const filenames = filename_inputs.map((input) => input.value);
 
         // Duplicated filename check
         const duplicated_filenames = this.getDuplicatedFileNames(filenames);
-        duplicated_filenames.forEach(filename => {
+        duplicated_filenames.forEach((filename) => {
             this.appendStatusMessage(`Filename: '${filename}' was found to be duplicated.  All filenames must be unique.`);
         });
 
@@ -181,7 +184,7 @@ class FormOptionsWidget extends Widget {
         };
 
         const illegal_filenames = this.getFileNamesWithIllegalSubstrings(filenames, Object.keys(illegal_substrings));
-        illegal_filenames.forEach(filename => {
+        illegal_filenames.forEach((filename) => {
             this.appendStatusMessage(`Filename: '${filename}' was found to contain illegal substrings. Filenames may not contain ${Object.values(illegal_substrings).join(' or ')}.`);
         });
 
@@ -191,13 +194,46 @@ class FormOptionsWidget extends Widget {
     }
 
     /**
+     * Validates to see if all image widgets contain an actual image. If validation error occurs, then error messages are added to the status div.
+     * An error indicator will be added later.
+     *
+     * @returns {Boolean}
+     */
+
+    validateImageWidgets() {
+        const image_inputs = getBadImageInputs();
+        if (!(image_inputs.length === 0)) {
+            this.appendStatusMessage('An image widget was found to be blank. Please ensure all the images are not blank.');
+        }
+
+        return image_inputs.length === 0;
+    }
+
+    /**
+     * Validates to see if all markdown widgets contain any text. If validation error occurs, then error messages are added to the status div.
+     * An error indicator will be added later.
+     *
+     * @returns {Boolean}
+     */
+
+    validateMarkdownWidgets() {
+        const bad_markdown_conents = getBadMarkdownContents();
+        if (!(bad_markdown_conents.length === 0)) {
+            this.appendStatusMessage('A markdown input was found to be blank. Please ensure all markdown inputs are not blank.');
+        }
+        this.colorFailedInputs([''], '.markdown-textarea');
+
+        return bad_markdown_conents.length === 0;
+    }
+
+    /**
      * Color the selected input boxes red to indicate they failed validation.
      *
      * @param {String[]} failed_values The set of values that were found to have failed validation.
      * @param {String} selector_string A CSS selector string used to select the inputs.
      */
     colorFailedInputs(failed_values, selector_string) {
-        document.querySelectorAll(selector_string).forEach(elem => {
+        document.querySelectorAll(selector_string).forEach((elem) => {
             if (failed_values.includes(elem.value)) {
                 elem.style.backgroundColor = this.failed_validation_color;
             }
@@ -214,8 +250,8 @@ class FormOptionsWidget extends Widget {
     getFileNamesWithIllegalSubstrings(filenames, illegal_substrings) {
         const illegal_filenames = new Set();
 
-        filenames.forEach(filename => {
-            illegal_substrings.forEach(substring => {
+        filenames.forEach((filename) => {
+            illegal_substrings.forEach((substring) => {
                 if (filename.includes(substring)) {
                     illegal_filenames.add(filename);
                 }
@@ -235,7 +271,7 @@ class FormOptionsWidget extends Widget {
         const used_filenames = new Set();
         const duplicated_filenames = new Set();
 
-        filenames.forEach(filename => {
+        filenames.forEach((filename) => {
             !used_filenames.has(filename) ? used_filenames.add(filename) : duplicated_filenames.add(filename);
         });
 

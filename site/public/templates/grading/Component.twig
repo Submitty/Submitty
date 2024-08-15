@@ -13,7 +13,7 @@ Required Input:
 <div id="peer-component-{{ component.id }}"
      class="box peer-score">
 {% else %}
-<div id="component-{{ component.id }}"
+<div id="component-{{ component.id }}" data-testid="component-{{ component.id }}"
     {% if peer_component %}
         class="box peer-component component peer-border"
     {% else %}
@@ -53,7 +53,7 @@ Required Input:
         {% endblock %}
         {% if edit_marks_enabled %}
             <div class="add-new-mark-container">
-                <input type="button" class="btn btn-primary add-new-mark key_to_click" tabindex="0" value="Add New Mark" onclick="onAddNewMark(this)"/>
+                <input type="button" class="btn btn-primary add-new-mark key_to_click" data-testid="add-new-mark-button" tabindex="0" value="Add New Mark" onclick="onAddNewMark(this)"/>
             </div>
         {% endif %}
         {% block extra_mark_rows %}

@@ -41,6 +41,7 @@
     "/courses/{}/{}/config": [],
     "/courses/{}/{}/theme": [],
     "/courses/{}/{}/office_hours_queue": [
+        "Attribute “unselectable” not allowed on element “ul” at this point.",
         "Element “style” not allowed as child of element “div” in this context. (Suppressing further errors from this subtree.)",
         "Attribute “help_time” not allowed on element “td” at this point."
     ],
@@ -87,6 +88,9 @@
         "Attribute “name” not allowed on element “span” at this point."
     ],
     "/courses/{}/{}/reports": [],
+    "/courses/{}/{}/reports/rainbow_grades_customization": [
+        "Attribute “unselectable” not allowed on element “ul” at this point."
+    ],
     "/courses/{}/{}/late_table": [],
     "/courses/{}/{}/grades": []
 }

@@ -10,8 +10,9 @@
                         {% block title_tag %}
                             <h1>{% block title %}Untitled Form{% endblock %}</h1>
                             <button
+                                data-testid="close-button"
                                 onclick="{{ block('close_click_action') }}"
-                                class="btn btn-default close-button key_to_click"
+                                class="btn btn-default close-button"
                                 tabindex="-1" type="button"
                             >Close</button>
                         {% endblock %}
@@ -54,9 +55,3 @@
         </div>
     {% endblock %}
 </div>
-
-<script>
-    function closePopup(id) {
-        $('#' + id).hide();
-    }
-</script>

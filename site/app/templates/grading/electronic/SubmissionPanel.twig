@@ -1,4 +1,4 @@
-<div id="submission_browser"  class="rubric_panel" data-gradeable-id="{{gradeable_id}}" data-anon-submitter-id="{{anon_submitter_id}}">
+<div id="submission_browser"  class="rubric_panel" data-gradeable-id="{{gradeable_id}}" data-anon-submitter-id="{{anon_submitter_id}}" data-testid="submission-browser">
     <div >
         <div id="directory_view">
             <span style="line-height: 40px;">
@@ -36,7 +36,8 @@
                         $('#' + currentCodeStyleRadio).prop('checked', true);
                     });
                 </script>
-                <button class="btn btn-default key_to_click" tabindex="0" onclick="downloadSubmissionZip('{{  gradeable_id }}','{{ anon_submitter_id }}', {{ active_version }}, null, true)">Download Zip File</button>
+
+                <button class="btn btn-default" tabindex="0" onclick="downloadSubmissionZip('{{  gradeable_id }}','{{ anon_submitter_id }}', {{ active_version }}, null, true)" data-testid="download-zip-file">Download Zip File</button>
 
                 <span style="padding-right: 10px; white-space: nowrap;"> <input aria-label="Auto open" type="checkbox" id="autoscroll_id" onclick="updateCookies();" class="key_to_click" tabindex="0"> <label for="autoscroll_id">Auto open</label> </span>
             </span>
@@ -50,6 +51,9 @@
                 {% if not student_grader %}
                     {{ _self.display_files(results, "r", 0, "results", blind_grader) }}
                     {{ _self.display_files(results_public, "rp", 0, "results_public") }}
+                {% endif %}
+                {% if not anon_mode and not blind_grader %}
+                    {{ _self.display_file("user_assignment_settings.json", user_assignment_settings_path, "u", 0, "user_assignment_settings.json", blind_grader) }}
                 {% endif %}
             </div>
             {# /Files #}
@@ -88,7 +92,10 @@
                 {{ dir }}</a> &nbsp;
             <a id = 'open_file_{{ dir|url_encode }}' onclick='popOutSubmittedFile("{{ dir|url_encode }}", "{{ path|url_encode }}")' aria-label="Pop up the file in a new window" class="key_to_click" tabindex="0"><i class="fas fa-window-restore" title="Pop up the file in a new window"></i></a>
             <a onclick='viewFileFullPanel("{{ dir|url_encode|e('js') }}", "{{ path|url_encode|e('js') }}")' aria-label="Show file in full panel" class="key_to_click" tabindex="0"><i class="fas fa-share" title="Show file in full panel"></i></a>
-            <a onclick='downloadFile("{{ path|url_encode }}", "{{ title }}")' aria-label="Download the file" class="key_to_click" tabindex="0"><i class="fas fa-download" title="Download the file"></i></a>
+            <a onclick='downloadFile("{{ path|url_encode }}", "{{ dir == "user_assignment_settings.json" ? "submission_versions" : title }}")' aria-label="Download the file" class="key_to_click" tabindex="0">
+    <i class="fas fa-download" title="Download the file"></i>
+</a>
+
         </div>
         <div id="file_viewer_{{ id }}" style="margin-left:{{ indent * -15 }}px" data-file_name="{{ dir }}" data-file_url="{{ path }}"></div>
     </div>

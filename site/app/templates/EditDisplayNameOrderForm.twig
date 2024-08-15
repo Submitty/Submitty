@@ -1,0 +1,26 @@
+{% extends 'generic/Popup.twig' %}
+{% block popup_id %}edit-display-name-order-form{% endblock %}
+{% block title %}Edit Display Name Order{% endblock %}
+{% block body %}
+    <p class="std-margin">{{ "You can edit the order in which your name is displayed here!" }}</p>
+    <div class="flex-col" id="user_settings_modal">
+        <input id="display-name-order-csrf" type="hidden" name="csrf_token" value="{{ csrf_token }}" />
+        <h2>Name Order</h2>
+        <div class="edit_user_row ui-front">
+    <select name="display-name-order-change" id="display-name-order-change">
+        <option value="GIVEN_F" {% if user.getDisplayNameOrder() == "GIVEN_F" %} selected {% endif %}>Given Name First</option>
+        <option value="FAMILY_F" {% if user.getDisplayNameOrder() == "FAMILY_F" %} selected {% endif %}>Family Name First</option>
+    </select>
+        </div>
+        <br>
+    </div>
+{% endblock %}
+{% block form %}
+    <form method="post" onsubmit="return updateDisplayNameOrder(event)">
+        {{ parent() }}
+    </form>
+{% endblock %}
+{% block buttons %}
+    {{ block('close_button') }}
+    <input class="btn btn-primary" type="submit" value="Submit" id="edit-display-name-order-submit" />
+{% endblock %}

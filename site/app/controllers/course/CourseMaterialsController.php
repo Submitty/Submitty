@@ -24,9 +24,7 @@ use app\libraries\routers\AccessControl;
 const DIR = 2;
 
 class CourseMaterialsController extends AbstractController {
-    /**
-     * @Route("/courses/{_semester}/{_course}/course_materials")
-     */
+    #[Route("/courses/{_semester}/{_course}/course_materials")]
     public function viewCourseMaterialsPage(): WebResponse {
         $repo = $this->core->getCourseEntityManager()->getRepository(CourseMaterial::class);
         /** @var CourseMaterialRepository $repo */
@@ -38,9 +36,7 @@ class CourseMaterialsController extends AbstractController {
         );
     }
 
-    /**
-     * @Route("/courses/{_semester}/{_course}/course_material/{path}", requirements={"path"=".+"})
-     */
+    #[Route("/courses/{_semester}/{_course}/course_material/{path}", requirements: ["path" => ".+"])]
     public function viewCourseMaterial(string $path) {
         $full_path = $this->core->getConfig()->getCoursePath() . "/uploads/course_materials/" . $path;
         $cm = $this->core->getCourseEntityManager()->getRepository(CourseMaterial::class)
@@ -86,9 +82,7 @@ class CourseMaterialsController extends AbstractController {
         }
     }
 
-    /**
-     * @Route("/courses/{_semester}/{_course}/course_materials/view", methods={"POST"})
-     */
+    #[Route("/courses/{_semester}/{_course}/course_materials/view", methods: ["POST"])]
     public function markViewed(): JsonResponse {
         $ids = $_POST['ids'];
         if (!is_array($ids)) {
@@ -104,9 +98,7 @@ class CourseMaterialsController extends AbstractController {
         return JsonResponse::getSuccessResponse();
     }
 
-    /**
-     * @Route("/courses/{_semester}/{_course}/course_materials/viewAll", methods={"POST"})
-     */
+    #[Route("/courses/{_semester}/{_course}/course_materials/viewAll", methods: ["POST"])]
     public function setAllViewed(): JsonResponse {
         $cms = $this->core->getCourseEntityManager()->getRepository(CourseMaterial::class)
             ->findAll();
@@ -122,9 +114,9 @@ class CourseMaterialsController extends AbstractController {
     }
 
     /**
-     * @Route("/courses/{_semester}/{_course}/course_materials/delete")
      * @AccessControl(role="INSTRUCTOR")
      */
+    #[Route("/courses/{_semester}/{_course}/course_materials/delete")]
     public function deleteCourseMaterial($id) {
         $cm = $this->core->getCourseEntityManager()->getRepository(CourseMaterial::class)
             ->findOneBy(['id' => $id]);
@@ -198,9 +190,7 @@ class CourseMaterialsController extends AbstractController {
         return new RedirectResponse($this->core->buildCourseUrl(['course_materials']));
     }
 
-    /**
-     * @Route("/courses/{_semester}/{_course}/course_materials/download_zip")
-     */
+    #[Route("/courses/{_semester}/{_course}/course_materials/download_zip")]
     public function downloadCourseMaterialZip($course_material_id) {
         $cm = $this->core->getCourseEntityManager()->getRepository(CourseMaterial::class)
             ->findOneBy(['id' => $course_material_id]);
@@ -272,10 +262,10 @@ class CourseMaterialsController extends AbstractController {
     }
 
     /**
-     * @Route("/courses/{_semester}/{_course}/course_materials/release_all")
      * @AccessControl(role="INSTRUCTOR")
      * @return JsonResponse
      */
+    #[Route("/courses/{_semester}/{_course}/course_materials/release_all")]
     public function setReleaseAll(): JsonResponse {
         $newdatetime = $_POST['newdatatime'];
         $newdatetime = htmlspecialchars($newdatetime);
@@ -306,9 +296,9 @@ class CourseMaterialsController extends AbstractController {
     }
 
     /**
-     * @Route("/courses/{_semester}/{_course}/course_materials/modify_timestamp")
      * @AccessControl(role="INSTRUCTOR")
      */
+    #[Route("/courses/{_semester}/{_course}/course_materials/modify_timestamp")]
     public function modifyCourseMaterialsFileTimeStamp($newdatatime): JsonResponse {
         if (!isset($_POST['id'])) {
             return JsonResponse::getErrorResponse("You must specify an ID");
@@ -368,9 +358,9 @@ class CourseMaterialsController extends AbstractController {
     }
 
     /**
-     * @Route("/courses/{_semester}/{_course}/course_materials/edit", methods={"POST"})
      * @AccessControl(role="INSTRUCTOR")
      */
+    #[Route("/courses/{_semester}/{_course}/course_materials/edit", methods: ["POST"])]
     public function ajaxEditCourseMaterialsFiles(bool $flush = true): JsonResponse {
         $id = $_POST['id'] ?? '';
         if ($id === '') {
@@ -456,7 +446,8 @@ class CourseMaterialsController extends AbstractController {
             $course_material->setPriority($_POST['sort_priority']);
         }
 
-
+        $course_material->setLastEditBy($this->core->getUser()->getId());
+        $course_material->setLastEditDate(DateUtils::parseDateTime($this->core->getDateTimeNow(), $this->core->getDateTimeNow()->getTimezone()));
 
         if (isset($_POST['file_path']) || isset($_POST['title'])) {
             $path = $course_material->getPath();
@@ -514,6 +505,10 @@ class CourseMaterialsController extends AbstractController {
                                     $course_material->isHiddenFromStudents(),
                                     $course_material->getPriority(),
                                     null,
+                                    null,
+                                    $course_material->getUploadedBy(),
+                                    $course_material->getUploadedDate(),
+                                    null,
                                     null
                                 );
                                 $this->core->getCourseEntityManager()->persist($course_material_dir);
@@ -570,9 +565,9 @@ class CourseMaterialsController extends AbstractController {
     }
 
     /**
-     * @Route("/courses/{_semester}/{_course}/course_materials/upload", methods={"POST"})
      * @AccessControl(role="INSTRUCTOR")
      */
+    #[Route("/courses/{_semester}/{_course}/course_materials/upload", methods: ["POST"])]
     public function ajaxUploadCourseMaterialsFiles(): JsonResponse {
         $details = [];
         $expand_zip = "";
@@ -875,7 +870,11 @@ class CourseMaterialsController extends AbstractController {
                 $details['hidden_from_students'],
                 $details['priority'],
                 $value === CourseMaterial::LINK ? $url_url : null,
-                $value === CourseMaterial::LINK ? $title_name : null
+                $value === CourseMaterial::LINK ? $title_name : null,
+                uploaded_by: $this->core->getUser()->getId(),
+                uploaded_date: DateUtils::parseDateTime($this->core->getDateTimeNow(), $this->core->getDateTimeNow()->getTimezone()),
+                last_edit_by: null,
+                last_edit_date: null
             );
             $this->core->getCourseEntityManager()->persist($course_material);
             if ($details['section_lock']) {
