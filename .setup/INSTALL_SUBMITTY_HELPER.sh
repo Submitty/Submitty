@@ -24,13 +24,12 @@ fi
 # CONFIGURE_SUBMITTY.py.  That helper script initializes dozens of
 # variables that are used in the code below.
 
-# NEW NOTE: We are now ignoring most of the variables set in the
-# INSTALL_SUBMITTY.sh script, and instead re-reading them from the
-# config.json files when needed.  We wait to read most variables until
-# the repos are updated and the necessary migrations are run.
+# TODO: REMOVE HARDCODE of /usr/local/submitty below.
+#   Probably should pass this one variable in as a command line argument
+#   when this script is first called from
+#   ${SUBMITTY_INSTALL_DIR}/.setup/INSTALL_SUBMITTY.sh
+# NOTE: May need to do a SYSADMIN action for this since migrations are run afterwards...
 
-# TODO: Un-hardcode this. Did not do this earlier because of messiness
-# with migrations.
 SUBMITTY_INSTALL_DIR="/usr/local/submitty"
 SUBMITTY_REPOSITORY=$(jq -r '.submitty_repository' "${SUBMITTY_INSTALL_DIR}/config/submitty.json")
 
