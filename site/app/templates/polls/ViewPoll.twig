@@ -175,12 +175,12 @@
             [window.getComputedStyle(document.body).getPropertyValue('--standard-deep-dark-green'),
                 window.getComputedStyle(document.body).getPropertyValue('--standard-vibrant-dark-blue')];
             {% for option in poll.getOptions() %}
-            data_index["{{ option.getResponse()|replace({"\n": " ", "\r": " ", "\t": " "}) }}"] = index++;
-            data[0].x.push("{{ option.getResponse()|replace({"\n": " ", "\r": " ", "\t": " "}) }}");
-            data[0].y.push({{ response_counts[option.getId()] }});
-            data[0].marker.color.push(
-                {{ option.isCorrect() and poll.isReleaseAnswer() ? 'correctColor': 'defaultColor' }}
-            );
+                data_index["{{ option.getResponse()|replace({"\n": " ", "\r": " ", "\t": " "}) }}"] = index++;
+                data[0].x.push("{{ option.getResponse()|replace({"\n": " ", "\r": " ", "\t": " "}) }}");
+                data[0].y.push({{ response_counts[option.getId()] }});
+                data[0].marker.color.push(
+                    {{ option.isCorrect() and poll.isReleaseAnswer() ? 'correctColor': 'defaultColor' }}
+                );
             {% endfor %}
             const title_text = new DOMParser().parseFromString("{{ poll.getName() }}", "text/html");
             const width = get_new_chart_width();
