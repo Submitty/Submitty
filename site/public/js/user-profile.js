@@ -1,17 +1,18 @@
 /* exported updateUserPronouns, showUpdatePrefNameForm, showUpdateLastInitialFormatForm,
-showUpdatePronounsForm, showUpdatePasswordForm, showUpdateProfilePhotoForm, showUpdateSecondaryEmailForm,
-updateUserPreferredNames, updateUserLastInitialFormat, updateUserProfilePhoto, updateUserSecondaryEmail,
+showUpdatePronounsForm, showDisplayNameOrderForm, showUpdatePasswordForm, showUpdateProfilePhotoForm, showUpdateSecondaryEmailForm,
+updateUserPreferredNames, updateUserLastInitialFormat, updateUserProfilePhoto, updateUserSecondaryEmail, updateDisplayNameOrder,
 changeSecondaryEmail, previewUserLastInitialFormat, clearPronounsBox
  */
-/* global displaySuccessMessage, displayErrorMessage, buildUrl */
+/* global displaySuccessMessage, displayErrorMessage, buildUrl, showPopup */
 
-//This variable is to store changes to the pronouns form that have not been submitted
+// This variable is to store changes to the pronouns form that have not been submitted
 let pronounsLastVal = null;
+let displayNameOrderLast = 'GIVEN_F';
 
 function showUpdatePrefNameForm() {
     $('.popup-form').css('display', 'none');
     const form = $('#edit-username-form');
-    form.css('display', 'block');
+    showPopup('#edit-username-form');
     form.find('.form-body').scrollTop(0);
     $('[name="user_name_change"]', form).val('');
     $('#user-givenname-change').focus();
@@ -20,7 +21,7 @@ function showUpdatePrefNameForm() {
 function showUpdateLastInitialFormatForm() {
     $('.popup-form').css('display', 'none');
     const form = $('#edit-last-initial-format-form');
-    form.css('display', 'block');
+    showPopup('#edit-last-initial-format-form');
     form.find('.form-body').scrollTop(0);
     const dropdown = $('#user-last-initial-format-change');
     dropdown.val(dropdown.data().default || 0);
@@ -29,17 +30,27 @@ function showUpdateLastInitialFormatForm() {
 function showUpdatePronounsForm() {
     $('.popup-form').css('display', 'none');
     const form = $('#edit-pronouns-form');
-    form.css('display', 'block');
+    showPopup('#edit-pronouns-form');
     form.find('.form-body').scrollTop(0);
     if (pronounsLastVal !== null && document.getElementById('user-pronouns-change').value === '') {
         document.getElementById('user-pronouns-change').value = pronounsLastVal;
     }
 }
 
+function showDisplayNameOrderForm() {
+    $('.popup-form').css('display', 'none');
+    const form = $('#edit-display-name-order-form');
+    form.css('display', 'block');
+    form.find('.form-body').scrollTop(0);
+    if (displayNameOrderLast !== null && document.getElementById('display-name-order-change').value === '') {
+        document.getElementById('display-name-order-change').value = displayNameOrderLast;
+    }
+}
+
 function showUpdatePasswordForm() {
     $('.popup-form').css('display', 'none');
     const form = $('#change-password-form');
-    form.css('display', 'block');
+    showPopup('#change-password-form');
     form.find('.form-body').scrollTop(0);
     $('[name="new_password"]', form).val('');
     $('[name="confirm_new_password"]', form).val('');
@@ -49,14 +60,14 @@ function showUpdatePasswordForm() {
 function showUpdateProfilePhotoForm() {
     $('.popup-form').css('display', 'none');
     const form = $('#edit-profile-photo-form');
-    form.css('display', 'block');
+    showPopup('#edit-profile-photo-form');
     form.find('.form-body').scrollTop(0);
 }
 
 function showUpdateSecondaryEmailForm() {
     $('.popup-form').css('display', 'none');
     const form = $('#edit-secondary-email-form');
-    form.css('display', 'block');
+    showPopup('#edit-secondary-email-form');
     form.find('.form-body').scrollTop(0);
 }
 
@@ -91,9 +102,9 @@ function clearPronounsBox() {
     pronounsInput.value = '';
 }
 
-//update user pronouns and display pronouns option
+// update user pronouns and display pronouns option
 function updateUserPronouns(e) {
-    //update user pronouns
+    // update user pronouns
     e.preventDefault();
     const pronouns = $('#user-pronouns-change');
     const forumDisplay = $('#pronouns-forum-display');
@@ -118,11 +129,11 @@ function updateUserPronouns(e) {
             data,
             processData: false,
             contentType: false,
-            success: function(res) {
+            success: function (res) {
                 console.log(res);
                 const response = JSON.parse(res);
                 if (response.status === 'success') {
-                    const {data} = response;
+                    const { data } = response;
                     // eslint-disable-next-line no-undef
                     displaySuccessMessage(data.message);
                     const icon = '<i class="fas fa-pencil-alt"></i>';
@@ -141,16 +152,60 @@ function updateUserPronouns(e) {
                     displayErrorMessage(response.message);
                 }
             },
-            error: function() {
+            error: function () {
                 // eslint-disable-next-line no-undef
                 displayErrorMessage('Some went wrong while updating pronouns!');
             },
         });
     }
-
 }
 
-function updateUserPreferredNames () {
+// update user name order and display name order option
+function updateDisplayNameOrder(e) {
+    // update user name order
+    e.preventDefault();
+    const displayNameOrder = $('#display-name-order-change');
+    displayNameOrderLast = displayNameOrder.val();
+
+    const data = new FormData();
+    // eslint-disable-next-line no-undef
+    data.append('csrf_token', csrfToken);
+    data.append('display-name-order', displayNameOrder.val());
+    const url = buildUrl(['user_profile', 'change_display_name_order']);
+    $.ajax({
+        url: url,
+        type: 'POST',
+        data: data,
+        processData: false,
+        contentType: false,
+        success: function (res) {
+            const response = JSON.parse(res);
+            if (response.status === 'success') {
+                const { data } = response;
+                displaySuccessMessage(data.message);
+                const icon = '<i class="fas fa-pencil-alt"></i>';
+                if (data['display-name-order'] === 'GIVEN_F') {
+                    $('#display_name_order_val').html(`${icon} Given Name First`);
+                }
+                else {
+                    $('#display_name_order_val').html(`${icon} Family Name First`);
+                }
+
+                // update the data attributes
+                displayNameOrder.data('current-display-name-order', data['display-name-order']);
+                $('#edit-display-name-order-form').hide();
+            }
+            else {
+                displayErrorMessage(response.message);
+            }
+        },
+        error: function () {
+            displayErrorMessage('Some went wrong while updating name order!');
+        },
+    });
+}
+
+function updateUserPreferredNames() {
     const given_name_field = $('#user-givenname-change');
     const family_name_field = $('#user-familyname-change');
     // If the names are not updated just display an error message and return without making any API call
@@ -172,17 +227,17 @@ function updateUserPreferredNames () {
             data,
             processData: false,
             contentType: false,
-            success: function(res) {
+            success: function (res) {
                 const response = JSON.parse(res);
                 if (response.status === 'success') {
-                    const {data} = response;
+                    const { data } = response;
                     // eslint-disable-next-line no-undef
                     displaySuccessMessage(data.message);
-                    //update the preferred names
+                    // update the preferred names
                     const icon = '<i class="fas fa-pencil-alt"></i>';
                     $('#givenname-row .icon').html(`${icon} ${data.given_name}`);
                     $('#familyname-row .icon').html(`${icon} ${data.family_name}`);
-                    //update the data attributes
+                    // update the data attributes
                     given_name_field.data('current-name', data.given_name);
                     family_name_field.data('current-name', data.family_name);
                 }
@@ -191,7 +246,7 @@ function updateUserPreferredNames () {
                     displayErrorMessage(response.message);
                 }
             },
-            error: function() {
+            error: function () {
                 // display error message
                 // eslint-disable-next-line no-undef
                 displayErrorMessage('Some went wrong while updating preferred names!');
@@ -218,7 +273,7 @@ function updateUserLastInitialFormat() {
         data,
         processData: false,
         contentType: false,
-        success: function(res) {
+        success: function (res) {
             const response = JSON.parse(res);
             if (response.status === 'success') {
                 const { data } = response;
@@ -231,7 +286,7 @@ function updateUserLastInitialFormat() {
                 displayErrorMessage(response.message);
             }
         },
-        error: function() {
+        error: function () {
             displayErrorMessage('Something went wrong!');
         },
     });
@@ -240,7 +295,7 @@ function updateUserLastInitialFormat() {
     return false;
 }
 
-function updateUserProfilePhoto () {
+function updateUserProfilePhoto() {
     const data = new FormData();
     data.append('csrf_token', $('#user-profile-photo-csrf').val());
     data.append('user_image', $('#user-image-button').prop('files')[0]);
@@ -253,8 +308,8 @@ function updateUserProfilePhoto () {
         data,
         processData: false,
         contentType: false,
-        success: function(res) {
-            //display success message
+        success: function (res) {
+            // display success message
             const response = JSON.parse(res);
 
             if (response.status === 'success') {
@@ -267,8 +322,8 @@ function updateUserProfilePhoto () {
                     updated_element = `<img src="data:${data.image_mime_type};base64,${data.image_data}" alt="${data.image_alt_data}"/>`;
                 }
                 // check whether the image flag status is updated
-                data.image_flagged_state === 'flagged' ?
-                    $('#flagged-message').addClass('show')
+                data.image_flagged_state === 'flagged'
+                    ? $('#flagged-message').addClass('show')
                     : $('#flagged-message').removeClass('show');
                 $('.user-img-cont').html(updated_element);
             }
@@ -277,7 +332,7 @@ function updateUserProfilePhoto () {
                 displayErrorMessage(response.message);
             }
         },
-        error: function() {
+        error: function () {
             // display error message
             // eslint-disable-next-line no-undef
             displayErrorMessage('Some went wrong while updating profile photo!');
@@ -289,7 +344,7 @@ function updateUserProfilePhoto () {
     return false;
 }
 
-function updateUserSecondaryEmail () {
+function updateUserSecondaryEmail() {
     const second_email = $('#user-secondary-email-change');
     const second_email_notify = $('#user-secondary-email-notify-change');
     if (second_email.data('current-second-email') === second_email.val() && second_email_notify.get(0).checked === (second_email_notify.data('current-second-email-notify') === 1)) {
@@ -315,7 +370,7 @@ function updateUserSecondaryEmail () {
                 data,
                 processData: false,
                 contentType: false,
-                success: function(res) {
+                success: function (res) {
                     const response = JSON.parse(res);
                     if (response.status === 'success') {
                         const { data } = response;
@@ -332,7 +387,7 @@ function updateUserSecondaryEmail () {
                         displayErrorMessage(response.message);
                     }
                 },
-                error: function() {
+                error: function () {
                     // display error message
                     // eslint-disable-next-line no-undef
                     displayErrorMessage('Something went wrong while updating secondary email address!');
@@ -365,7 +420,6 @@ function previewUserLastInitialFormat() {
 }
 
 $(document).ready(() => {
-
     $('#desktop_sidebar_preference').change(() => {
         // eslint-disable-next-line no-undef
         updateSidebarPreference();
@@ -402,13 +456,16 @@ $(document).ready(() => {
         $('#flagged-message').addClass('show');
     }
 
+    /* adding select2 to the time_zone_drop_down element */
+    $('#time_zone_drop_down').select2({ theme: 'bootstrap-5' });
+
     // Populate the time zone selector box with options
     const availableTimeZones = getAvailableTimeZones();
     availableTimeZones.forEach((elem) => {
         $('#time_zone_drop_down').append(`<option value="${elem}">${elem}</option>`);
     });
 
-    $('#time_zone_drop_down').change(function() {
+    $('#time_zone_drop_down').change(function () {
         const timeZoneWithOffset = $(this).children('option:selected').val();
         // extract out the time_zone from the timezone with utc offset
         const time_zone = timeZoneWithOffset === 'NOT_SET/NOT_SET' ? timeZoneWithOffset : timeZoneWithOffset.split(') ')[1];
@@ -452,19 +509,18 @@ $(document).ready(() => {
         });
     });
 
-    $('#user-image-button').bind('change', function() {
-        if ((this.files[0].size/1048576)>5.0) {
+    $('#user-image-button').bind('change', function () {
+        if ((this.files[0].size / 1048576) > 5.0) {
             alert("Selected file's size exceeds 5 MB");
             $('#user-image-button').val('');
         }
     });
 
     // Set time zone drop down boxes to the user's time zone (only after other JS has finished loading)
-    const user_time_zone =  $('#time_zone_selector_label').data('user_time_zone');
+    const user_time_zone = $('#time_zone_selector_label').data('user_time_zone');
     $(`[value="${user_time_zone}"]`).prop('selected', true);
 
-
-    $('#pref_locale_select').on('change', function() {
+    $('#pref_locale_select').on('change', function () {
         $.getJSON({
             type: 'POST',
             url: buildUrl(['user_profile', 'set_pref_locale']),
@@ -473,7 +529,7 @@ $(document).ready(() => {
                 csrf_token: csrfToken,
                 locale: $(this).val(),
             },
-            success: function(response) {
+            success: function (response) {
                 if (response.status === 'success') {
                     displaySuccessMessage('User locale updated successfully!');
                     location.reload();
@@ -483,11 +539,18 @@ $(document).ready(() => {
                     displayErrorMessage('Failed to update user locale!');
                 }
             },
-            error: function(response) {
+            error: function (response) {
                 console.error('Failed to parse response from server!');
                 displayErrorMessage('Failed to parse response from server!');
                 console.log(response);
             },
         });
+    });
+    document.addEventListener('scroll', () => {
+        const dropdown = document.querySelector('.select2-container--open .select2-dropdown');
+        if (dropdown) {
+            // Close the dropdown menu
+            $('#time_zone_drop_down').select2('close');
+        }
     });
 });

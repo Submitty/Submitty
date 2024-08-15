@@ -7,6 +7,7 @@ use app\views\AbstractView;
 use app\libraries\FileUtils;
 use app\libraries\ForumUtils;
 use app\models\User;
+use app\controllers\forum\ForumController;
 
 class ForumThreadView extends AbstractView {
     private function getSavedForumCategories($current_course, $categories) {
@@ -446,6 +447,8 @@ class ForumThreadView extends AbstractView {
         }
         $first_post = $this->core->getQueries()->getFirstPostForThread($thread_id);
         $first_post_id = $first_post["id"];
+        $first_post_author_id = $first_post['author_user_id'];
+        $first_post_anonymous = ($first_post['anonymous'] === true);
 
         $first = true;
 
@@ -474,32 +477,15 @@ class ForumThreadView extends AbstractView {
         $merged_threads = $this->core->getQueries()->getMergedThreadIds($post_ids);
         $post_attachments = $this->core->getQueries()->getForumAttachments($post_ids);
 
+        $current_user = $this->core->getUser()->getId();
+        $upDuckCounter_map = [];
+        $upDuckCounter_map = $this->core->getQueries()->getUpduckInfoForPosts($post_ids);
+        $userLiked = $this->core->getQueries()->getUserLikesForPosts($post_ids, $current_user);
+        $staffLiked = $this->core->getQueries()->getInstructorUpduck($post_ids);
         if ($display_option == "tree") {
-            $order_array = [];
-            $reply_level_array = [];
-            foreach ($posts as $post) {
-                if ($thread_id == -1) {
-                    $thread_id = $post["thread_id"];
-                }
-                if ($first) {
-                    $first = false;
-                    $first_post_id = $post["id"];
-                }
-                if ($post["parent_id"] > $first_post_id) {
-                    $place = array_search($post["parent_id"], $order_array);
-                    $tmp_array = [$post["id"]];
-                    $parent_reply_level = $reply_level_array[$place];
-                    while ($place !== false && $place + 1 < count($reply_level_array) && $reply_level_array[$place + 1] > $parent_reply_level) {
-                        $place++;
-                    }
-                    array_splice($order_array, $place + 1, 0, $tmp_array);
-                    array_splice($reply_level_array, $place + 1, 0, $parent_reply_level + 1);
-                }
-                else {
-                    array_push($order_array, $post["id"]);
-                    array_push($reply_level_array, 1);
-                }
-            }
+            $order_reply_level_array = ForumController::getPostsOrderAndReplies($posts, $thread_id);
+            $order_array = $order_reply_level_array[0];
+            $reply_level_array = $order_reply_level_array[1];
             $i = 0;
             $first = true;
 
@@ -515,13 +501,22 @@ class ForumThreadView extends AbstractView {
 
                         $post["author_user_group"] = $author_user_groups_map[$post["author_user_id"]];
 
+                        $boolLiked = in_array($post["id"], $userLiked, true);
+
+                        $boolStaffLiked = in_array($post["id"], $staffLiked, true);
+
                         $post_data[] = $this->createPost(
+                            $first_post_author_id,
+                            $first_post_anonymous,
                             $activeThread,
                             $post,
                             $unviewed_posts,
                             $first,
                             $reply_level,
                             $display_option,
+                            $upDuckCounter_map[$post["id"]],
+                            $boolLiked,
+                            $boolStaffLiked,
                             $includeReply,
                             $authors_display_info[$post['author_user_id']],
                             $post_attachments[$post["id"]][0],
@@ -544,14 +539,20 @@ class ForumThreadView extends AbstractView {
         else {
             foreach ($posts as $post) {
                 $post["author_user_group"] = $author_user_groups_map[$post["author_user_id"]];
-
+                $boolLiked = in_array($post["id"], $userLiked, true);
+                $boolStaffLiked = in_array($post["id"], $staffLiked, true);
                 $post_data[] = $this->createPost(
+                    $first_post_author_id,
+                    $first_post_anonymous,
                     $activeThread,
                     $post,
                     $unviewed_posts,
                     $first,
                     1,
                     $display_option,
+                    $upDuckCounter_map[$post["id"]],
+                    $boolLiked,
+                    $boolStaffLiked,
                     $includeReply,
                     $authors_display_info[$post['author_user_id']],
                     $post_attachments[$post["id"]][0],
@@ -571,12 +572,12 @@ class ForumThreadView extends AbstractView {
         $isThreadLocked = $this->core->getQueries()->isThreadLocked($thread_id);
         $accessFullGrading = $this->core->getUser()->accessFullGrading();
 
-        $post_box_id = 0;
+        $post_box_id = 1;
 
         $form_action_link = $this->core->buildCourseUrl(['forum', 'posts', 'new']);
 
         if (($isThreadLocked != 1 || $accessFullGrading ) && $includeReply) {
-            $GLOBALS['post_box_id'] = $post_box_id = isset($GLOBALS['post_box_id']) ? $GLOBALS['post_box_id'] + 1 : 1;
+            $GLOBALS['post_box_id'] = $post_box_id = isset($GLOBALS['post_box_id']) ? $GLOBALS['post_box_id'] + 1 : 2;
         }
 
         $merge_thread_content = [];
@@ -709,6 +710,7 @@ class ForumThreadView extends AbstractView {
         $this->core->getOutput()->addInternalJs('autosave-utils.js');
         $this->core->getOutput()->addVendorJs('flatpickr/flatpickr.js');
         $this->core->getOutput()->addInternalJs('websocket.js');
+        $this->core->getOutput()->addInternalJs('drag-and-drop.js');
         $this->core->getOutput()->addVendorJs(FileUtils::joinPaths('flatpickr', 'plugins', 'shortcutButtons', 'shortcut-buttons-flatpickr.min.js'));
         $this->core->getOutput()->addVendorJs('jquery.are-you-sure/jquery.are-you-sure.js');
         $this->core->getOutput()->addVendorCss('flatpickr/flatpickr.min.css');
@@ -907,7 +909,6 @@ class ForumThreadView extends AbstractView {
             if (!is_null($date)) {
                 $date_content["formatted"] = $date;
             }
-
             $thread_info = [
                 'thread_id' => $thread['id'],
                 "title" => $titleDisplay,
@@ -1060,8 +1061,7 @@ class ForumThreadView extends AbstractView {
      * } $author_info
      * @param string[] $post_attachments
      */
-    public function createPost(array $thread, array $post, $unviewed_posts, $first, $reply_level, $display_option, $includeReply, array $author_info, array $post_attachments, bool $has_history, bool $is_merged_thread, bool $render = false, bool $thread_announced = false, bool $isCurrentFavorite = false) {
-
+    public function createPost(string $first_post_author_id, bool $first_post_anonymous, array $thread, array $post, $unviewed_posts, $first, $reply_level, $display_option, int $counter, bool $isLiked, bool $taTrue, $includeReply, array $author_info, array $post_attachments, bool $has_history, bool $is_merged_thread, bool $render = false, bool $thread_announced = false, bool $isCurrentFavorite = false) {
         $current_user = $this->core->getUser()->getId();
         $thread_id = $thread["id"];
         $post_id = $post["id"];
@@ -1098,6 +1098,7 @@ class ForumThreadView extends AbstractView {
         if ($post["anonymous"]) {
             $visible_username = "Anonymous";
         }
+
         $classes = ["post_box"];
         if ($first && $display_option != 'alpha') {
             $classes[] = "first_post";
@@ -1108,12 +1109,21 @@ class ForumThreadView extends AbstractView {
                 $classes[] = "new_post";
                 $isNewPost = true;
             }
+            elseif ($current_user === $post["author_user_id"]) {
+                $classes[] = "new_post";
+                $isNewPost = true;
+            }
         }
         else {
             $classes[] = "viewed_post";
         }
         if ($author_info['is_staff']) {
-            $classes[] = "important";
+            if (in_array($post_id, $unviewed_posts, true)) {
+                $classes[] = "important new_post important-new";
+            }
+            else {
+                $classes[] = "important";
+            }
         }
         if ($post["deleted"]) {
             $classes[] = "deleted";
@@ -1138,31 +1148,14 @@ class ForumThreadView extends AbstractView {
         $post_user_info = [];
 
         $merged_thread = $is_merged_thread && $userAccessFullGrading;
-        if ($userAccessFullGrading) {
-            $info_name = $given_name . " " . $family_name . " (" . $post['author_user_id'] . ")";
-            $visible_user_json = json_encode($visible_username);
-            $pronouns = trim($author_info["pronouns"]);
-            $display_pronouns = $author_info["display_pronouns"];
-            $info_name = json_encode($info_name);
-            $jscriptAnonFix = $post['anonymous'] ? 'true' : 'false';
-            $jscriptAnonFix = json_encode($jscriptAnonFix);
-
-            $post_user_info = [
-                "info_name" => $info_name,
-                "visible_user_json" => $visible_user_json,
-                "jscriptAnonFix" => $jscriptAnonFix,
-                "pronouns" => $pronouns,
-                "display_pronouns" => $display_pronouns
-            ];
-        }
 
         $post_button = [];
 
-        if ($userGroup <= 3 || $post['author_user_id'] === $current_user) {
+        if ($userGroup <= User::GROUP_LIMITED_ACCESS_GRADER || $post['author_user_id'] === $current_user) {
             if ($isThreadLocked && !$userAccessFullGrading) {
             }
             else {
-                if ($deleted && $this->core->getUser()->getGroup() <= 3) {
+                if ($deleted && $userGroup <= User::GROUP_LIMITED_ACCESS_GRADER) {
                     $ud_toggle_status = "false";
                     $ud_button_title = "Undelete post";
                     $ud_button_icon = "fa-undo";
@@ -1199,7 +1192,13 @@ class ForumThreadView extends AbstractView {
             }
         }
 
-        if ($this->core->getUser()->getGroup() == 4) {
+        $post_up_duck = [
+            "upduck_count" => $counter,
+            "upduck_user_liked" => $isLiked,
+            "taTrue" => $taTrue
+        ];
+
+        if ($userGroup <= User::GROUP_STUDENT) {
             $info_name = $given_name . " " . $family_name . " (" . $post['author_user_id'] . ")";
             $visible_user_json = json_encode($visible_username);
             $pronouns = trim($author_info["pronouns"]);
@@ -1217,6 +1216,8 @@ class ForumThreadView extends AbstractView {
             ];
         }
 
+        $post_user_info["is_OP"] = ($post["author_user_id"] === $first_post_author_id) && ($first_post_anonymous === $post["anonymous"]);
+
         $post_attachment = ForumUtils::getForumAttachments(
             $post_id,
             $thread_id,
@@ -1227,7 +1228,7 @@ class ForumThreadView extends AbstractView {
 
         $post_box_id = 1;
         if (!$isThreadLocked || $this->core->getUser()->accessFullGrading()) {
-            $GLOBALS['post_box_id'] = $post_box_id = isset($GLOBALS['post_box_id']) ? $GLOBALS['post_box_id'] + 1 : 1;
+            $GLOBALS['post_box_id'] = $post_box_id = isset($GLOBALS['post_box_id']) ? $GLOBALS['post_box_id'] + 1 : 2;
         }
 
         $created_post = [
@@ -1248,6 +1249,7 @@ class ForumThreadView extends AbstractView {
             "current_user" => $current_user,
             "author_email" => $author_email,
             "post_user_info" => $post_user_info,
+            "post_up_duck" => $post_up_duck,
             "post_date" => $date,
             "edit_date" => $edit_date,
             "post_buttons" => $post_button,
@@ -1260,7 +1262,7 @@ class ForumThreadView extends AbstractView {
             "render_markdown" => $markdown,
             "has_history" => $has_history,
             "thread_previously_merged" => $merged_thread,
-            "thread_announced" => $thread_announced
+            "thread_announced" => $thread_announced,
         ];
 
         if ($render) {
@@ -1271,8 +1273,8 @@ class ForumThreadView extends AbstractView {
                 $created_post['activeThreadTitle'] = $activeThreadTitle;
                 $activeThreadAnnouncement = $thread['pinned_expiration'] > date("Y-m-d H:i:s");
                 $created_post['activeThreadAnnouncement'] = $activeThreadAnnouncement;
-                $created_post['activeThread'] = $thread;
             }
+            $created_post['activeThread'] = $thread;
             $created_post['isCurrentFavorite'] = $isCurrentFavorite;
             $created_post['csrf_token'] = $this->core->getCsrfToken();
             return $this->core->getOutput()->renderTwigTemplate("forum/CreatePost.twig", $created_post);
@@ -1432,6 +1434,7 @@ class ForumThreadView extends AbstractView {
             $thread_ids = json_encode($details["thread_id"]);
             $thread_titles = json_encode($details["thread_title"]);
             $num_deleted = ($details["num_deleted_posts"]);
+            $total_upducks = ($details["total_upducks"]);
 
             $userData[] = [
                 "family_name" => $family_name,
@@ -1443,7 +1446,8 @@ class ForumThreadView extends AbstractView {
                 "ids" => $ids,
                 "timestamps" => $timestamps,
                 "thread_ids" => $thread_ids,
-                "thread_titles" => $thread_titles
+                "thread_titles" => $thread_titles,
+                "total_upducks" => $total_upducks
             ];
         }
 

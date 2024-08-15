@@ -25,10 +25,10 @@ class ConfigurationController extends AbstractController {
     'Reports tab.  You may also manually create the file and upload it to your course\'s rainbow_grades directory.';
 
     /**
-     * @Route("/api/courses/{_semester}/{_course}/config", methods={"GET"})
-     * @Route("/courses/{_semester}/{_course}/config", methods={"GET"})
      * @return MultiResponse
      */
+    #[Route("/api/courses/{_semester}/{_course}/config", methods: ["GET"])]
+    #[Route("/courses/{_semester}/{_course}/config", methods: ["GET"])]
     public function viewConfiguration(): MultiResponse {
         $fields = [
             'course_name'                    => $this->core->getConfig()->getCourseName(),
@@ -94,10 +94,10 @@ class ConfigurationController extends AbstractController {
     }
 
     /**
-     * @Route("/api/courses/{_semester}/{_course}/config", methods={"POST"})
-     * @Route("/courses/{_semester}/{_course}/config", methods={"POST"})
      * @return MultiResponse
      */
+    #[Route("/api/courses/{_semester}/{_course}/config", methods: ["POST"])]
+    #[Route("/courses/{_semester}/{_course}/config", methods: ["POST"])]
     public function updateConfiguration(): MultiResponse {
         if (!isset($_POST['name'])) {
             return MultiResponse::JsonOnlyResponse(
@@ -167,8 +167,8 @@ class ConfigurationController extends AbstractController {
             // Get a new customization json object
             $customization_json = new RainbowCustomizationJSON($this->core);
 
-            // If a custom_customization.json does not exist, then check for the presence of a regular one
-            if (!$customization_json->doesCustomCustomizationExist()) {
+            // If a manual_customization.json does not exist, then check for the presence of a regular one
+            if (!$customization_json->doesManualCustomizationExist()) {
                 // Attempt to populate it from the customization.json in the course rainbow_grades directory
                 // If no file exists do not allow user to enable this check mark until one is supplied
                 try {

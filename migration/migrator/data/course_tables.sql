@@ -631,9 +631,11 @@ CREATE TABLE public.autograding_metrics (
     points integer NOT NULL,
     passed boolean NOT NULL,
     hidden boolean NOT NULL,
+    source_lines_of_code integer,
     CONSTRAINT elapsed_time_nonnegative CHECK ((elapsed_time >= (0)::double precision)),
     CONSTRAINT max_rss_size_nonnegative CHECK ((max_rss_size >= 0)),
-    CONSTRAINT metrics_user_team_id_check CHECK (((user_id IS NOT NULL) OR (team_id IS NOT NULL)))
+    CONSTRAINT metrics_user_team_id_check CHECK (((user_id IS NOT NULL) OR (team_id IS NOT NULL))),
+    CONSTRAINT sloc_non_negative CHECK ((source_lines_of_code >= 0))
 );
 
 
@@ -714,7 +716,12 @@ CREATE TABLE public.course_materials (
     hidden_from_students boolean,
     priority double precision NOT NULL,
     url text,
-    title character varying(255)
+    title character varying(255),
+    uploaded_by character varying(255) DEFAULT NULL::character varying,
+    uploaded_date timestamp with time zone,
+    last_edit_by character varying(255) DEFAULT NULL::character varying,
+    last_edit_date timestamp with time zone,
+    CONSTRAINT check_dates CHECK (((uploaded_date IS NULL) OR (last_edit_date IS NULL) OR (uploaded_date <= last_edit_date)))
 );
 
 
@@ -776,8 +783,29 @@ ALTER SEQUENCE public.course_materials_id_seq OWNED BY public.course_materials.i
 
 CREATE TABLE public.course_materials_sections (
     course_material_id integer NOT NULL,
-    section_id character varying(255) NOT NULL
+    section_id character varying(255) NOT NULL,
+    id integer NOT NULL
 );
+
+
+--
+-- Name: course_materials_sections_id_seq; Type: SEQUENCE; Schema: public; Owner: -
+--
+
+CREATE SEQUENCE public.course_materials_sections_id_seq
+    AS integer
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+--
+-- Name: course_materials_sections_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: -
+--
+
+ALTER SEQUENCE public.course_materials_sections_id_seq OWNED BY public.course_materials_sections.id;
 
 
 --
@@ -884,6 +912,16 @@ CREATE TABLE public.forum_posts_history (
     edit_timestamp timestamp(0) with time zone NOT NULL,
     has_attachment boolean DEFAULT false,
     version_id integer
+);
+
+
+--
+-- Name: forum_upducks; Type: TABLE; Schema: public; Owner: -
+--
+
+CREATE TABLE public.forum_upducks (
+    post_id integer NOT NULL,
+    user_id character varying(255) NOT NULL
 );
 
 
@@ -1456,6 +1494,20 @@ CREATE TABLE public.peer_feedback (
 
 
 --
+-- Name: peer_grading_panel; Type: TABLE; Schema: public; Owner: -
+--
+
+CREATE TABLE public.peer_grading_panel (
+    g_id character varying(255) NOT NULL,
+    autograding boolean DEFAULT true NOT NULL,
+    rubric boolean DEFAULT true NOT NULL,
+    files boolean DEFAULT true NOT NULL,
+    solution_notes boolean DEFAULT true NOT NULL,
+    discussion boolean DEFAULT true NOT NULL
+);
+
+
+--
 -- Name: poll_options; Type: TABLE; Schema: public; Owner: -
 --
 
@@ -1464,7 +1516,8 @@ CREATE TABLE public.poll_options (
     poll_id integer,
     response text NOT NULL,
     correct boolean NOT NULL,
-    option_id integer NOT NULL
+    option_id integer NOT NULL,
+    author_id character varying(255) DEFAULT NULL::character varying
 );
 
 
@@ -1528,12 +1581,15 @@ CREATE TABLE public.polls (
     poll_id integer NOT NULL,
     name text NOT NULL,
     question text NOT NULL,
-    status text NOT NULL,
     release_date date NOT NULL,
     image_path text,
     question_type character varying(35) DEFAULT 'single-response-multiple-correct'::character varying,
     release_histogram character varying(10) DEFAULT 'never'::character varying,
-    release_answer character varying(10) DEFAULT 'never'::character varying
+    release_answer character varying(10) DEFAULT 'never'::character varying,
+    duration integer DEFAULT 0,
+    end_time timestamp with time zone,
+    is_visible boolean DEFAULT false NOT NULL,
+    allows_custom boolean DEFAULT false NOT NULL
 );
 
 
@@ -1895,6 +1951,13 @@ ALTER TABLE ONLY public.course_materials_access ALTER COLUMN id SET DEFAULT next
 
 
 --
+-- Name: course_materials_sections id; Type: DEFAULT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.course_materials_sections ALTER COLUMN id SET DEFAULT nextval('public.course_materials_sections_id_seq'::regclass);
+
+
+--
 -- Name: grade_inquiries id; Type: DEFAULT; Schema: public; Owner: -
 --
 
@@ -2069,6 +2132,14 @@ ALTER TABLE ONLY public.course_materials
 
 
 --
+-- Name: course_materials_sections course_materials_sections_pkey; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.course_materials_sections
+    ADD CONSTRAINT course_materials_sections_pkey PRIMARY KEY (id);
+
+
+--
 -- Name: electronic_gradeable_data egd_g_user_team_id_unique; Type: CONSTRAINT; Schema: public; Owner: -
 --
 
@@ -2090,6 +2161,14 @@ ALTER TABLE ONLY public.electronic_gradeable_version
 
 ALTER TABLE ONLY public.electronic_gradeable
     ADD CONSTRAINT electronic_gradeable_g_id_pkey PRIMARY KEY (g_id);
+
+
+--
+-- Name: forum_upducks forum_upducks_user_id_post_id_key; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.forum_upducks
+    ADD CONSTRAINT forum_upducks_user_id_post_id_key UNIQUE (user_id, post_id);
 
 
 --
@@ -2349,11 +2428,11 @@ ALTER TABLE ONLY public.peer_feedback
 
 
 --
--- Name: course_materials_sections pk_course_material_section; Type: CONSTRAINT; Schema: public; Owner: -
+-- Name: peer_grading_panel peer_grading_panel_pkey; Type: CONSTRAINT; Schema: public; Owner: -
 --
 
-ALTER TABLE ONLY public.course_materials_sections
-    ADD CONSTRAINT pk_course_material_section PRIMARY KEY (course_material_id, section_id);
+ALTER TABLE ONLY public.peer_grading_panel
+    ADD CONSTRAINT peer_grading_panel_pkey PRIMARY KEY (g_id);
 
 
 --
@@ -2458,6 +2537,14 @@ ALTER TABLE ONLY public.thread_categories
 
 ALTER TABLE ONLY public.threads
     ADD CONSTRAINT threads_pk PRIMARY KEY (id);
+
+
+--
+-- Name: course_materials_sections unique_course_material_section; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.course_materials_sections
+    ADD CONSTRAINT unique_course_material_section UNIQUE (course_material_id, section_id);
 
 
 --
@@ -2632,6 +2719,22 @@ CREATE TRIGGER late_days_allowed_change AFTER INSERT OR DELETE OR UPDATE ON publ
 
 
 --
+-- Name: course_materials course_materials_last_edit_by_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.course_materials
+    ADD CONSTRAINT course_materials_last_edit_by_fkey FOREIGN KEY (last_edit_by) REFERENCES public.users(user_id);
+
+
+--
+-- Name: course_materials course_materials_uploaded_by_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.course_materials
+    ADD CONSTRAINT course_materials_uploaded_by_fkey FOREIGN KEY (uploaded_by) REFERENCES public.users(user_id);
+
+
+--
 -- Name: electronic_gradeable_data electronic_gradeable_data_gid; Type: FK CONSTRAINT; Schema: public; Owner: -
 --
 
@@ -2773,6 +2876,22 @@ ALTER TABLE ONLY public.forum_posts_history
 
 ALTER TABLE ONLY public.forum_posts_history
     ADD CONSTRAINT forum_posts_history_post_id_fk FOREIGN KEY (post_id) REFERENCES public.posts(id);
+
+
+--
+-- Name: forum_upducks forum_upducks_post_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.forum_upducks
+    ADD CONSTRAINT forum_upducks_post_id_fkey FOREIGN KEY (post_id) REFERENCES public.posts(id) ON UPDATE CASCADE ON DELETE CASCADE;
+
+
+--
+-- Name: forum_upducks forum_upducks_user_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.forum_upducks
+    ADD CONSTRAINT forum_upducks_user_id_fkey FOREIGN KEY (user_id) REFERENCES public.users(user_id) ON UPDATE CASCADE ON DELETE CASCADE;
 
 
 --
@@ -3197,6 +3316,22 @@ ALTER TABLE ONLY public.peer_feedback
 
 ALTER TABLE ONLY public.peer_feedback
     ADD CONSTRAINT peer_feedback_user_id_fkey FOREIGN KEY (user_id) REFERENCES public.users(user_id) ON DELETE CASCADE;
+
+
+--
+-- Name: peer_grading_panel peer_grading_panel_g_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.peer_grading_panel
+    ADD CONSTRAINT peer_grading_panel_g_id_fkey FOREIGN KEY (g_id) REFERENCES public.electronic_gradeable(g_id);
+
+
+--
+-- Name: poll_options poll_options_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.poll_options
+    ADD CONSTRAINT poll_options_fkey FOREIGN KEY (author_id) REFERENCES public.users(user_id) ON UPDATE CASCADE;
 
 
 --

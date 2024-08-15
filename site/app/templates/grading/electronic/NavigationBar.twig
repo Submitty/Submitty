@@ -1,9 +1,9 @@
 <div id="bar_wrapper" class="ta-nav-wrapper">
-    <div id="grading-panel-student-name">
+    <div id="grading-panel-student-name" data-testid="grading-panel-student-name">
         <b>{% if not isBlind and not anon_mode and (peer_blind_grading is same as('unblind') or peer_blind_grading is same as('single')) %}
                 {% if team_assignment %}
                     {% set team_members = submitter.getTeam().getMemberUsers() %}
-                    Team {% if submitter.getTeam().getTeamName() is not null %} {{ submitter.getTeam().getTeamName() }}{% endif %}({{ team_members|length }}): <span id="grading-scroll-message">{{ team_members|length > 3 ? "Scroll for more" : "" }}</span><br/>
+                    Team {% if submitter.getTeam().getTeamName() is not null %} {{ submitter.getTeam().getTeamName() }}{% endif %}({{ team_members|length }}): <span id="grading-scroll-message" data-testid="grading-scroll-message">{{ team_members|length > 3 ? "Scroll for more" : "" }}</span><br/>
                     {% for team_member in team_members %}
                         &emsp;{{ team_member.getDisplayedGivenName() }} {{ team_member.getDisplayedFamilyName() }} ({{ team_member.getId() }})<br/>
                     {% endfor %}
@@ -30,7 +30,7 @@
             </span>
 
             {# Nav buttons (Prev + Next)#}
-            <span class="ta-navlink-cont" id="prev-student-navlink">
+            <span class="ta-navlink-cont" id="prev-student-navlink" data-testid="prev-student-navlink">
                 <a href="javascript:gotoPrevStudent();"
                    class="btn-block"
                    data-href="{{ prev_student_url }}"
@@ -40,7 +40,7 @@
                     <i title="Previous student" class="fas fa-caret-left icon-header icon-streched"></i>
                 </a>
             </span>
-            <span class="ta-navlink-cont" id="next-student-navlink">
+            <span class="ta-navlink-cont" id="next-student-navlink" data-testid="next-student-navlink">
                 <a href="javascript:gotoNextStudent();"
                    class="btn-block"
                    data-href="{{ next_student_url }}"
@@ -52,7 +52,7 @@
             </span>
             <span class="ta-navlink-cont" id="fullscreen-btn-cont">
                 <button title="Toggle the full screen mode"
-                        class="invisible-btn key_to_click"
+                        class="invisible-btn"
                         tabindex="0"
                         onclick="toggleFullScreenMode();"
                 >
@@ -62,7 +62,7 @@
             </span>
             <span class="ta-navlink-cont" id="two-panel-mode-btn">
                 <button title="Toggle the two panel mode"
-                        class="invisible-btn key_to_click"
+                        class="invisible-btn"
                         tabindex="0"
                         onclick="togglePanelSelectorModal(true);"
                 >
@@ -71,7 +71,7 @@
             </span>
             <span class="ta-navlink-cont" id="two-panel-exchange-btn">
                 <button title="Exchange the panel positions"
-                        class="invisible-btn key_to_click"
+                        class="invisible-btn"
                         tabindex="0"
                         onclick="exchangeTwoPanels();"
                 >
@@ -79,9 +79,9 @@
                     </button>
             </span>
 
-            <span class="ta-navlink-cont" id="grading-setting-btn">
+            <span class="ta-navlink-cont" id="grading-setting-btn"  data-testid="grading-setting-btn">
                 <button title="Show Grading Settings"
-                        class="invisible-btn key_to_click"
+                        class="invisible-btn"
                         tabindex="0"
                         onclick="showSettings();"
                 >

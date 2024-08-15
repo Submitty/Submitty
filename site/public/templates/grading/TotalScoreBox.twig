@@ -13,7 +13,7 @@ l
     {% set show_total = true %}
     {% if auto_grading_total is defined %}
         <div class="box-title badge-container">
-            <strong id="autograding_total" class="badge {{ functions.getBadgeStyle(auto_grading_earned, auto_grading_total, auto_grading_complete) }}">
+            <strong id="autograding_total" class="badge {{ functions.getBadgeStyle(auto_grading_earned, auto_grading_total) }}">
                 {{ auto_grading_earned is defined ? auto_grading_earned|round(decimal_precision) : '&minus;' }} / {{ auto_grading_total|round(decimal_precision) }}
             </strong>
             <strong>Autograding Total</strong>
@@ -21,7 +21,7 @@ l
     {% endif %}
     {% if ta_grading_earned is defined %}
         <div class="box-title badge-container">
-            <strong id="grading_total" class="badge {{ functions.getBadgeStyle(ta_grading_earned, ta_grading_total, ta_grading_complete) }}">
+            <strong id="grading_total" class="badge {{ functions.getBadgeStyle(ta_grading_earned, ta_grading_total) }}" data-testid="grading-total">
                 {{ ta_grading_earned is defined ? ta_grading_earned|round(decimal_precision) : '&minus;' }} / {{ ta_grading_total|round(decimal_precision) }}
             </strong>
             {% if peer_gradeable == true %}
@@ -33,13 +33,13 @@ l
     {% endif %}
     {% if peer_grade_earned is defined %}
         <div class="box-title badge-container">
-            <strong id="score_total" class="badge {{ functions.getBadgeStyle(peer_grade_earned, peer_total, peer_total) }}">
+            <strong id="score_total" class="badge {{ functions.getBadgeStyle(peer_grade_earned, peer_total) }}">
                 {{ peer_grade_earned is defined ? peer_grade_earned|round(decimal_precision) : '&minus;' }} / {{ peer_total|round(decimal_precision) }}
             </strong>
             <strong>Individual Peer Grading Total</strong>
         </div>
         <div class="box-title badge-container">
-            <strong id="score_total" class="badge {{ functions.getBadgeStyle(combined_peer_score, peer_total, peer_total) }}">
+            <strong id="score_total" class="badge {{ functions.getBadgeStyle(combined_peer_score, peer_total) }}">
                 {{ combined_peer_score is defined ? combined_peer_score|round(decimal_precision) : '&minus;' }} / {{ peer_total|round(decimal_precision) }}
             </strong>
             <strong>Combined Peer Grading Total</strong>
@@ -61,7 +61,7 @@ l
             {% endif %}
         {% endif %}
         <div class="box-title badge-container">
-            <strong id="score_total" class="badge {{ functions.getBadgeStyle(total_earned, max_total, max_total) }}">
+            <strong id="score_total" class="badge {{ functions.getBadgeStyle(total_earned, max_total) }}">
                 {{ total_earned is defined ? total_earned|round(decimal_precision) : '&minus;' }} / {{ (max_total)|round(decimal_precision) }}
             </strong>
             <strong>Total</strong>
@@ -71,7 +71,7 @@ l
 
 {% if user_group == 4 %}
     <div class="box-title badge-container">
-        <strong id="score_total" class="badge {{ functions.getBadgeStyle(peer_grade_earned, peer_total, peer_total) }}">
+        <strong id="score_total" class="badge {{ functions.getBadgeStyle(peer_grade_earned, peer_total) }}">
             {{ peer_grade_earned is defined ? peer_grade_earned|round(decimal_precision) : '&minus;' }} / {{ peer_total|round(decimal_precision) }}
         </strong>
         <strong>My Peer Grading Total</strong>

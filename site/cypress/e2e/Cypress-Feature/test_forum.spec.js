@@ -23,7 +23,7 @@ const createThread = (title, content, category) => {
 const replyToThread = (title, reply) => {
     cy.get('.thread-left-cont > .thread-list-item').contains(title).click();
     cy.get('.create-post-head').should('contain', title);
-    cy.get('#reply_box_2').type(reply);
+    cy.get('#reply_box_3').type(reply);
     cy.get('[value="Submit Reply to All"]').click();
     cy.get('#posts_list').should('contain', reply);
 };
@@ -33,7 +33,6 @@ const mergeThreads = (fromThread, toThread, mergedContent) => {
     cy.get('.thread-left-cont > .thread-list-item').contains(fromThread).click({ force: true });
     cy.get('[title="Merge Thread Into Another Thread"]').click();
     cy.get('.chosen-single > span').click();
-    cy.wait(500);
     cy.get('.active-result').contains(toThread).click({ force: true });
     cy.get('[value="Merge Thread"]').click({ force: true });
     cy.get('.pre-forum > .post_content').should('contain', mergedContent);
@@ -41,12 +40,11 @@ const mergeThreads = (fromThread, toThread, mergedContent) => {
 
 const removeThread = (title) => {
     cy.get('.thread-left-cont > .thread-list-item').contains(title).click();
-    cy.get('.first_post > .post-action-container > .delete-post-button').click();
+    cy.get('.first_post > .post-action-container > .dropdown-menu ').find(':contains("Delete")').click({ force: true });
     cy.get('.thread-left-cont > .thread-list-item').contains(title).should('not.exist');
 };
 
 describe('Test cases revolving around creating, replying to, merging, and removing discussion forum threads', () => {
-
     beforeEach(() => {
         cy.login('instructor');
         cy.visit(['sample']);
@@ -55,18 +53,12 @@ describe('Test cases revolving around creating, replying to, merging, and removi
     });
 
     it('Create, reply to, merge, and delete threads', () => {
-        // Comment
         createThread(title1, content1, 'Comment');
-        // Question
         createThread(title2, content2, 'Question');
-        // Tutorials
         createThread(title3, content3, 'Tutorials');
 
-        // Comment
         replyToThread(title1, reply1);
-        // Question
         replyToThread(title2, reply2);
-        // Tutorial
         replyToThread(title3, reply3);
 
         // Tutorial into Questions

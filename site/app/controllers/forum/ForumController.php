@@ -13,6 +13,8 @@ use app\libraries\routers\AccessControl;
 use app\libraries\routers\Enabled;
 use app\libraries\response\JsonResponse;
 use Symfony\Component\Routing\Annotation\Route;
+use app\libraries\socket\Client;
+use WebSocket;
 
 /**
  * Class ForumHomeController
@@ -82,14 +84,51 @@ class ForumController extends AbstractController {
     }
 
     /**
-     * @Route("/courses/{_semester}/{_course}/forum/threads/status", methods={"POST"})
+     * @param mixed[] $posts
+     * @return mixed[]
      */
+    public static function getPostsOrderAndReplies(array $posts, string $thread_id): array {
+        $first = true;
+        $first_post_id = 1;
+        $order_array = [];
+        $reply_level_array = [];
+        foreach ($posts as $post_) {
+            if (((int) $thread_id) === -1) {
+                $thread_id = $post_["thread_id"];
+            }
+            if ($first) {
+                $first = false;
+                $first_post_id = $post_["id"];
+            }
+            if ($post_["parent_id"] > $first_post_id) {
+                $place = array_search($post_["parent_id"], $order_array, true);
+                $tmp_array = [$post_["id"]];
+                $parent_reply_level = $reply_level_array[$place];
+                if ($place !== false) {
+                    while (array_key_exists($place + 1, $reply_level_array) && $reply_level_array[$place + 1] > $parent_reply_level) {
+                        $place++;
+                    }
+                }
+                array_splice($order_array, $place + 1, 0, $tmp_array);
+                array_splice($reply_level_array, $place + 1, 0, $parent_reply_level + 1);
+            }
+            else {
+                array_push($order_array, $post_["id"]);
+                array_push($reply_level_array, 1);
+            }
+        }
+
+        return [$order_array, $reply_level_array];
+    }
+
+    #[Route("/courses/{_semester}/{_course}/forum/threads/status", methods: ["POST"])]
     public function changeThreadStatus($status, $thread_id = null) {
         if (is_null($thread_id)) {
             $thread_id = $_POST['thread_id'];
         }
         if ($this->core->getQueries()->getAuthorOfThread($thread_id) === $this->core->getUser()->getId() || $this->core->getUser()->accessGrading()) {
             if ($this->core->getQueries()->updateResolveState($thread_id, $status)) {
+                $this->sendSocketMessage(['type' => 'resolve_thread', 'thread_id' => $thread_id]);
                 return $this->core->getOutput()->renderJsonSuccess();
             }
             else {
@@ -166,9 +205,9 @@ class ForumController extends AbstractController {
     }
 
     /**
-     * @Route("/courses/{_semester}/{_course}/forum/categories/new", methods={"POST"})
      * @AccessControl(permission="forum.modify_category")
      */
+    #[Route("/courses/{_semester}/{_course}/forum/categories/new", methods: ["POST"])]
     public function addNewCategory($category = []) {
         $result = [];
         if (!empty($_POST["newCategory"])) {
@@ -208,9 +247,9 @@ class ForumController extends AbstractController {
     }
 
     /**
-     * @Route("/courses/{_semester}/{_course}/forum/categories/delete", methods={"POST"})
      * @AccessControl(permission="forum.modify_category")
      */
+    #[Route("/courses/{_semester}/{_course}/forum/categories/delete", methods: ["POST"])]
     public function deleteCategory() {
         if (!empty($_POST["deleteCategory"])) {
             $category = (int) $_POST["deleteCategory"];
@@ -235,9 +274,9 @@ class ForumController extends AbstractController {
     }
 
     /**
-     * @Route("/courses/{_semester}/{_course}/forum/categories/edit", methods={"POST"})
      * @AccessControl(permission="forum.modify_category")
      */
+    #[Route("/courses/{_semester}/{_course}/forum/categories/edit", methods: ["POST"])]
     public function editCategory() {
         $category_id = $_POST["category_id"];
         $category_desc = null;
@@ -277,9 +316,9 @@ class ForumController extends AbstractController {
     }
 
     /**
-     * @Route("/courses/{_semester}/{_course}/forum/categories/reorder", methods={"POST"})
      * @AccessControl(permission="forum.modify_category")
      */
+    #[Route("/courses/{_semester}/{_course}/forum/categories/reorder", methods: ["POST"])]
     public function reorderCategories() {
         $rows = $this->core->getQueries()->getCategories();
 
@@ -304,9 +343,9 @@ class ForumController extends AbstractController {
     //CODE WILL BE CONSOLIDATED IN FUTURE
 
     /**
-     * @Route("/courses/{_semester}/{_course}/forum/threads/new", methods={"POST"})
      * @AccessControl(permission="forum.publish")
      */
+    #[Route("/courses/{_semester}/{_course}/forum/threads/new", methods: ["POST"])]
     public function publishThread() {
         $markdown = !empty($_POST['markdown_status']);
         $current_user_id = $this->core->getUser()->getId();
@@ -414,15 +453,16 @@ class ForumController extends AbstractController {
                 }
 
                 $result['next_page'] = $this->core->buildCourseUrl(['forum', 'threads', $thread_id]);
+                 $this->sendSocketMessage(['type' => 'new_thread', 'thread_id' => $thread_id]);
             }
         }
         return $this->core->getOutput()->renderJsonSuccess($result);
     }
 
     /**
-     * @Route("/courses/{_semester}/{_course}/forum/make_announcement", methods={"POST"})
      * @AccessControl(permission="forum.modify_announcement")
      */
+    #[Route("/courses/{_semester}/{_course}/forum/make_announcement", methods: ["POST"])]
     public function makeAnnouncement(): JsonResponse {
         if (!isset($_POST['id'])) {
             $this->core->addErrorMessage("thread_id not provided");
@@ -458,18 +498,16 @@ class ForumController extends AbstractController {
         return JsonResponse::getSuccessResponse("Announcement successfully queued for sending");
     }
 
-    /**
-     * @Route("/courses/{_semester}/{_course}/forum/search", methods={"POST"})
-     */
+    #[Route("/courses/{_semester}/{_course}/forum/search", methods: ["POST"])]
     public function search() {
         $results = $this->core->getQueries()->searchThreads($_POST['search_content']);
         $this->core->getOutput()->renderOutput('forum\ForumThread', 'searchResult', $results);
     }
 
     /**
-     * @Route("/courses/{_semester}/{_course}/forum/posts/new", methods={"POST"})
      * @AccessControl(permission="forum.publish")
      */
+    #[Route("/courses/{_semester}/{_course}/forum/posts/new", methods: ["POST"])]
     public function publishPost() {
         $current_user_id = $this->core->getUser()->getId();
         $result = [];
@@ -490,15 +528,9 @@ class ForumController extends AbstractController {
 
         $markdown = !empty($_POST['markdown_status']);
 
-        setcookie("markdown_enabled", strval($markdown ? 1 : 0), time() + (86400 * 30), "/");
-
         $display_option = (!empty($_POST["display_option"])) ? htmlentities($_POST["display_option"], ENT_QUOTES | ENT_HTML5, 'UTF-8') : "tree";
         $anon = (isset($_POST["Anon"]) && $_POST["Anon"] == "Anon") ? 1 : 0;
-        if (strlen($post_content) === 0 || strlen($thread_id) === 0) {
-            $this->core->addErrorMessage("There was an error submitting your post. Please re-submit your post.");
-            $result['next_page'] = $this->core->buildCourseUrl(['forum', 'threads']);
-        }
-        elseif (!$this->core->getQueries()->existsThread($thread_id)) {
+        if (!$this->core->getQueries()->existsThread($thread_id)) {
             $this->core->addErrorMessage("There was an error submitting your post. Thread doesn't exist.");
             $result['next_page'] = $this->core->buildCourseUrl(['forum', 'threads']);
         }
@@ -517,7 +549,12 @@ class ForumController extends AbstractController {
             }
             else {
                 $attachment_name = [];
-                if ($hasGoodAttachment[0] === 1) {
+
+                if ($hasGoodAttachment[0] !== 1 && (strlen($post_content) === 0 || strlen($thread_id) === 0)) {
+                    $this->core->addErrorMessage("There was an error submitting your post. Please re-submit your post.");
+                    $result['next_page'] = $this->core->buildCourseUrl(['forum', 'threads']);
+                }
+                elseif ($hasGoodAttachment[0] === 1) {
                     for ($i = 0; $i < count($_FILES[$file_post]["name"]); $i++) {
                         $attachment_name[] = basename($_FILES[$file_post]["name"][$i]);
                     }
@@ -565,14 +602,35 @@ class ForumController extends AbstractController {
                 $result['next_page'] = $this->core->buildCourseUrl(['forum', 'threads', $thread_id]) . '?' . http_build_query(['option' => $display_option]);
                 $result['post_id'] = $post_id;
                 $result['thread_id'] = $thread_id;
+
+                $posts = $this->core->getQueries()->getPostsInThreads([$thread_id]);
+                $order_array = [];
+                $reply_level_array = [];
+                if ($display_option !== 'tree') {
+                    $reply_level = 1;
+                }
+                else {
+                    $order_and_replies = self::getPostsOrderAndReplies($posts, $thread_id);
+                    $order_array = $order_and_replies[0];
+                    $reply_level_array = $order_and_replies[1];
+                }
+
+                $place = array_search($post_id, $order_array, true);
+                $reply_level = $reply_level_array[$place];
+                $max_post_box_id = count($posts);
+                $this->sendSocketMessage([
+                    'type' => 'new_post',
+                    'thread_id' => $thread_id,
+                    'post_id' => $post_id,
+                    'reply_level' => $reply_level,
+                    'post_box_id' => $max_post_box_id
+                ]);
             }
         }
         return $this->core->getOutput()->renderJsonSuccess($result);
     }
 
-    /**
-     * @Route("/courses/{_semester}/{_course}/forum/posts/single", methods={"POST"})
-     */
+    #[Route("/courses/{_semester}/{_course}/forum/posts/single", methods: ["POST"])]
     public function getSinglePost() {
         $post_id = $_POST['post_id'];
         $reply_level = $_POST['reply_level'];
@@ -583,6 +641,16 @@ class ForumController extends AbstractController {
         }
         $thread_id = $post['thread_id'];
         $thread = $this->core->getQueries()->getThread($thread_id);
+        $first_post = $this->core->getQueries()->getFirstPostForThread($thread_id);
+        $first_post_author_id = $first_post['author_user_id'];
+        $first_post_anonymous = ($first_post['anonymous'] === true);
+        $upduck_count = $this->core->getQueries()->getUpduckInfoForPosts([$post_id])[$post_id];
+        $upduck_liked_by_user = array_key_exists($post_id, $this->core->getQueries()->getUserLikesForPosts(
+            [$post_id],
+            $this->core->getUser()->getId()
+        ));
+        $staffLiked = $this->core->getQueries()->getInstructorUpduck([$post_id]);
+        $boolStaffLiked = in_array($post["id"], $staffLiked, true);
         $GLOBALS['totalAttachments'] = 0;
         $GLOBALS['post_box_id'] = $_POST['post_box_id'];
         $unviewed_posts = [$post_id];
@@ -593,12 +661,17 @@ class ForumController extends AbstractController {
         $result = $this->core->getOutput()->renderTemplate(
             'forum\ForumThread',
             'createPost',
+            $first_post_author_id,
+            $first_post_anonymous,
             $thread,
             $post,
             $unviewed_posts,
             $first,
             $reply_level,
             'tree',
+            $upduck_count,
+            $upduck_liked_by_user,
+            $boolStaffLiked,
             true,
             $author_info[$post["author_user_id"]],
             $post_attachments[$post["id"]][0],
@@ -611,19 +684,21 @@ class ForumController extends AbstractController {
     }
 
     /**
-     * @Route("/courses/{_semester}/{_course}/forum/announcements", methods={"POST"})
      * @AccessControl(permission="forum.modify_announcement")
      */
+    #[Route("/courses/{_semester}/{_course}/forum/announcements", methods: ["POST"])]
     public function alterAnnouncement(bool $type) {
         $thread_id = $_POST["thread_id"];
+        $this->sendSocketMessage([
+            'type' => $type ? 'announce_thread' : 'unpin_thread',
+            'thread_id' => $thread_id,
+        ]);
         $this->core->getQueries()->setAnnouncement($thread_id, $type);
-
         //TODO: notify on edited announcement
     }
 
-    /**
-     * @Route("/courses/{_semester}/{_course}/forum/threads/bookmark", methods={"POST"})
-     */
+
+    #[Route("/courses/{_semester}/{_course}/forum/threads/bookmark", methods: ["POST"])]
     public function bookmarkThread(bool $type) {
         $thread_id = $_POST["thread_id"];
         $current_user = $this->core->getUser()->getId();
@@ -632,15 +707,35 @@ class ForumController extends AbstractController {
         return $this->core->getOutput()->renderJsonSuccess($response);
     }
 
+    #[Route("/courses/{_semester}/{_course}/forum/threads/unread", methods: ["POST"])]
+    public function markThreadUnread(): JsonResponse {
+        $thread_id = $_POST["thread_id"];
+        $current_user = $this->core->getUser()->getId();
+        $this->core->getQueries()->unreadThread($current_user, $thread_id);
+        $response = ['user' => $current_user, 'thread' => $thread_id];
+        return JsonResponse::getSuccessResponse($response);
+    }
+
+    #[Route("/courses/{_semester}/{_course}/forum/posts/unread", methods: ["POST"])]
+    public function markPostUnread(): JsonResponse {
+        $thread_id = $_POST["thread_id"];
+        $last_viewed_timestamp = $_POST["last_viewed_timestamp"];
+        // format the last viewed timestamp to be in the same format as the database
+        $last_viewed_timestamp = DateUtils::parseDateTime($last_viewed_timestamp, $this->core->getUser()->getUsableTimeZone())->format("Y-m-d H:i:sO");
+        $current_user = $this->core->getUser()->getId();
+        $this->core->getQueries()->visitThread($current_user, $thread_id, $last_viewed_timestamp);
+        $response = ['user' => $current_user, 'last_viewed_timestamp' => $last_viewed_timestamp];
+        return JsonResponse::getSuccessResponse($response);
+    }
+
     /**
      * Alter content/delete/undelete post of a thread
      *
      * If applied on the first post of a thread, same action will be reflected on the corresponding thread
      *
      * @param int $modify_type (0/1/2) 0 => delete, 1 => edit content, 2 => undelete
-     *
-     * @Route("/courses/{_semester}/{_course}/forum/posts/modify", methods={"POST"})
      */
+    #[Route("/courses/{_semester}/{_course}/forum/posts/modify", methods: ["POST"])]
     public function alterPost($modify_type) {
         $full_course_name = $this->core->getFullCourseName();
         $post_id = $_POST["post_id"] ?? $_POST["edit_post_id"];
@@ -680,8 +775,14 @@ class ForumController extends AbstractController {
             $content = "In " . $full_course_name . "\n\nThread: " . $thread_title . "\n\nPost:\n" . $post["content"] . " was deleted.";
             $event = [ 'component' => 'forum', 'metadata' => $metadata, 'content' => $content, 'subject' => $subject, 'recipient' => $post_author_id, 'preference' => 'all_modifications_forum'];
             $this->core->getNotificationFactory()->onPostModified($event);
-
             $this->core->getQueries()->removeNotificationsPost($post_id);
+
+            $post_id = $_POST["post_id"];
+            $this->sendSocketMessage(array_merge(
+                ['type' => 'delete_post', 'thread_id' => $thread_id],
+                $type === "post" ? ['post_id' => $post_id] : []
+            ));
+
             return $this->core->getOutput()->renderJsonSuccess(['type' => $type]);
         }
         elseif ($modify_type == 2) { //undelete post or thread
@@ -774,14 +875,41 @@ class ForumController extends AbstractController {
             if ($isError) {
                 return $this->core->getOutput()->renderJsonFail($messageString);
             }
+            if ($type === 'Post') {
+                $posts = $this->core->getQueries()->getPostsInThreads([$thread_id]);
+                $order_and_replies = self::getPostsOrderAndReplies($posts, $thread_id);
+                $order_array = $order_and_replies[0];
+                $reply_level_array = $order_and_replies[1];
+
+                $place = array_search($post["id"], $order_array, true);
+                $reply_level = $reply_level_array[$place];
+                $post_box_id = 1;
+
+                $this->sendSocketMessage([
+                    'type' => 'edit_post',
+                    'thread_id' => $thread_id,
+                    'post_id' => $post_id,
+                    'reply_level' => $reply_level,
+                    'post_box_id' => $post_box_id,
+                ]);
+            }
+            elseif ($type === 'Thread and Post') {
+                $this->sendSocketMessage([
+                    'type' => 'edit_thread',
+                    'thread_id' => $thread_id,
+                    'post_id' => $post_id,
+                    'reply_level' => 1,
+                    'post_box_id' => 1,
+                ]);
+            }
             return $this->core->getOutput()->renderJsonSuccess(['type' => $type]);
         }
     }
 
     /**
-     * @Route("/courses/{_semester}/{_course}/forum/threads/merge", methods={"POST"})
      * @AccessControl(permission="forum.merge_thread")
      */
+    #[Route("/courses/{_semester}/{_course}/forum/threads/merge", methods: ["POST"])]
     public function mergeThread() {
         $current_user_id = $this->core->getUser()->getId();
         $parent_thread_id = $_POST["merge_thread_parent"];
@@ -826,9 +954,9 @@ class ForumController extends AbstractController {
     }
 
     /**
-     * @Route("/courses/{_semester}/{_course}/forum/posts/split", methods={"POST"})
      * @AccessControl(permission="forum.merge_thread")
      */
+    #[Route("/courses/{_semester}/{_course}/forum/posts/split", methods: ["POST"])]
     public function splitThread() {
         $title = $_POST["split_post_input"];
         $post_id = $_POST["split_post_id"];
@@ -878,6 +1006,7 @@ class ForumController extends AbstractController {
                 $result['next'] = $this->core->buildCourseUrl(['forum', 'threads', $thread_id]);
                 $result['new_thread_id'] = $thread_id;
                 $result['old_thread_id'] = $thread_ids[0];
+                $this->sendSocketMessage(['type' => 'split_post', 'new_thread_id' =>  $result['new_thread_id'], 'thread_id' => $result['old_thread_id'], 'post_id' => $post_id]);
                 return $this->core->getOutput()->renderJsonSuccess($result);
             }
             else {
@@ -938,6 +1067,47 @@ class ForumController extends AbstractController {
 
             $markdown = !empty($_POST['markdown_status']);
 
+            $file_post = 'file_input';
+            $thread_id = $original_post["thread_id"];
+            $hasGoodAttachment = $this->checkGoodAttachment(false, $thread_id, $file_post);
+            if ($hasGoodAttachment[0] === -1) {
+                return null;
+            }
+
+            $attachment_name = [];
+            if ($hasGoodAttachment[0] === 1) {
+                $thread_dir = FileUtils::joinPaths($this->core->getConfig()->getCoursePath(), "forum_attachments", $thread_id);
+                $post_dir = FileUtils::joinPaths($thread_dir, $post_id);
+
+                if (!is_dir($thread_dir)) {
+                    FileUtils::createDir($thread_dir);
+                }
+                if (!is_dir($post_dir)) {
+                    FileUtils::createDir($post_dir);
+                }
+
+                $existing_attachments = array_column(FileUtils::getAllFiles($post_dir), "name");
+                //compile list of attachment names
+                for ($i = 0; $i < count($_FILES[$file_post]["name"]); $i++) {
+                    //check for files with same name
+                    $file_name = basename($_FILES[$file_post]["name"][$i]);
+                    if (in_array($file_name, $existing_attachments, true)) {
+                        // add unique prefix if file with this name already exists on this post
+                        $tmp = 1;
+                        while (in_array("(" . $tmp . ")" . $file_name, $existing_attachments, true)) {
+                            $tmp++;
+                        }
+                        $file_name = "(" . $tmp . ")" . $file_name;
+                    }
+                    $attachment_name[] = $file_name;
+                }
+
+                for ($i = 0; $i < count($_FILES[$file_post]["name"]); $i++) {
+                    $target_file = $post_dir . "/" . $attachment_name[$i];
+                    move_uploaded_file($_FILES[$file_post]["tmp_name"][$i], $target_file);
+                }
+            }
+
             return $this->core->getQueries()->editPost(
                 $original_creator,
                 $current_user,
@@ -945,7 +1115,8 @@ class ForumController extends AbstractController {
                 $new_post_content,
                 $anon,
                 $markdown,
-                json_decode($_POST['deleted_attachments'])
+                json_decode($_POST['deleted_attachments']),
+                $attachment_name,
             );
         }
         return null;
@@ -975,9 +1146,7 @@ class ForumController extends AbstractController {
         return $ordered_threads;
     }
 
-    /**
-     * @Route("/courses/{_semester}/{_course}/forum/threads", methods={"POST"})
-     */
+    #[Route("/courses/{_semester}/{_course}/forum/threads", methods: ["POST"])]
     public function getThreads($page_number = null) {
         $pageNumber = !empty($page_number) && is_numeric($page_number) ? (int) $page_number : 1;
         $show_deleted = $this->showDeleted();
@@ -1004,9 +1173,7 @@ class ForumController extends AbstractController {
             ]);
     }
 
-    /**
-     * @Route("/courses/{_semester}/{_course}/forum/threads/single", methods={"POST"})
-     */
+    #[Route("/courses/{_semester}/{_course}/forum/threads/single", methods: ["POST"])]
     public function getSingleThread() {
         $thread_id = $_POST['thread_id'];
         // Checks if thread id is empty. If so, render "fail" json response case informing that thread id is empty.
@@ -1032,9 +1199,7 @@ class ForumController extends AbstractController {
         return $this->core->getOutput()->renderJsonSuccess($result);
     }
 
-    /**
-     * @Route("/courses/{_semester}/{_course}/forum", methods={"GET"})
-     */
+    #[Route("/courses/{_semester}/{_course}/forum", methods: ["GET"])]
     public function showFullThreads() {
         // preparing the params for threads
         $currentCourse = $this->core->getConfig()->getCourse();
@@ -1055,10 +1220,8 @@ class ForumController extends AbstractController {
         return $this->core->getOutput()->renderOutput('forum\ForumThread', 'showFullThreadsPage', $threads, $category_ids, $show_deleted, $show_merged_thread, $pageNumber);
     }
 
-    /**
-     * @Route("/courses/{_semester}/{_course}/forum/threads", methods={"GET"})
-     * @Route("/courses/{_semester}/{_course}/forum/threads/{thread_id}", methods={"GET", "POST"}, requirements={"thread_id": "\d+"})
-     */
+    #[Route("/courses/{_semester}/{_course}/forum/threads", methods: ["GET"])]
+    #[Route("/courses/{_semester}/{_course}/forum/threads/{thread_id}", methods: ["GET","POST"], requirements: ["thread_id" => "\d+"])]
     public function showThreads($thread_id = null, $option = 'tree') {
         $user = $this->core->getUser()->getId();
         $currentCourse = $this->core->getConfig()->getCourse();
@@ -1159,9 +1322,7 @@ class ForumController extends AbstractController {
         return $colors;
     }
 
-    /**
-     * @Route("/courses/{_semester}/{_course}/forum/threads/new", methods={"GET"})
-     */
+    #[Route("/courses/{_semester}/{_course}/forum/threads/new", methods: ["GET"])]
     public function showCreateThread() {
         if (empty($this->core->getQueries()->getCategories())) {
             $this->core->redirect($this->core->buildCourseUrl(['forum', 'threads']));
@@ -1171,17 +1332,17 @@ class ForumController extends AbstractController {
     }
 
     /**
-     * @Route("/courses/{_semester}/{_course}/forum/categories", methods={"GET"})
      * @AccessControl(permission="forum.view_modify_category")
      */
+    #[Route("/courses/{_semester}/{_course}/forum/categories", methods: ["GET"])]
     public function showCategories() {
         $this->core->getOutput()->renderOutput('forum\ForumThread', 'showCategories', $this->getAllowedCategoryColor());
     }
 
     /**
-     * @Route("/courses/{_semester}/{_course}/forum/posts/splitinfo",methods={"POST"})
      * @AccessControl(permission="forum.merge_thread")
      */
+    #[Route("/courses/{_semester}/{_course}/forum/posts/splitinfo", methods: ["POST"])]
     public function getSplitPostInfo() {
         $post_id = $_POST["post_id"];
         $result = $this->core->getQueries()->getPostOldThread($post_id);
@@ -1198,9 +1359,9 @@ class ForumController extends AbstractController {
     }
 
     /**
-     * @Route("/courses/{_semester}/{_course}/forum/posts/history", methods={"POST"})
      * @AccessControl(role="LIMITED_ACCESS_GRADER")
      */
+    #[Route("/courses/{_semester}/{_course}/forum/posts/history", methods: ["POST"])]
     public function getHistory() {
         $post_id = $_POST["post_id"];
         $output = [];
@@ -1261,9 +1422,7 @@ class ForumController extends AbstractController {
         return $this->core->getUser()->accessFullGrading() || $this->core->getUser()->getId() === $author;
     }
 
-    /**
-     * @Route("/courses/{_semester}/{_course}/forum/posts/get", methods={"POST"})
-     */
+    #[Route("/courses/{_semester}/{_course}/forum/posts/get", methods: ["POST"])]
     public function getEditPostContent() {
         $post_id = $_POST["post_id"];
         if (!empty($post_id)) {
@@ -1310,12 +1469,12 @@ class ForumController extends AbstractController {
         $output['expiration'] = $result["pinned_expiration"];
     }
 
-    /**
-     * @Route("/courses/{_semester}/{_course}/forum/stats")
-     */
+    #[Route("/courses/{_semester}/{_course}/forum/stats")]
     public function showStats() {
         $posts = $this->core->getQueries()->getPosts();
         $num_posts = count($posts);
+        $upducks = $this->core->getQueries()->getUpDucks();
+        $num_users_with_upducks = count($upducks);
         $users = [];
         for ($i = 0; $i < $num_posts; $i++) {
             $user = $posts[$i]["author_user_id"];
@@ -1330,6 +1489,7 @@ class ForumController extends AbstractController {
                 $users[$user]["timestamps"] = [];
                 $users[$user]["total_threads"] = 0;
                 $users[$user]["num_deleted_posts"] = count($this->core->getQueries()->getDeletedPostsByUser($user));
+                $users[$user]["total_upducks"] = 0;
             }
             if ($posts[$i]["parent_id"] == -1) {
                 $users[$user]["total_threads"]++;
@@ -1340,7 +1500,56 @@ class ForumController extends AbstractController {
             $users[$user]["thread_id"][] = $posts[$i]["thread_id"];
             $users[$user]["thread_title"][] = $this->core->getQueries()->getThreadTitle($posts[$i]["thread_id"]);
         }
+        for ($i = 0; $i < $num_users_with_upducks; $i++) {
+            $user = $upducks[$i]["author_user_id"];
+            $users[$user]["total_upducks"] = $upducks[$i]["upducks"];
+        }
         ksort($users);
         $this->core->getOutput()->renderOutput('forum\ForumThread', 'statPage', $users);
+    }
+
+    #[Route("/courses/{_semester}/{_course}/posts/likes", methods: ["POST"])]
+    public function toggleLike(): JsonResponse {
+        $requiredKeys = ['post_id', 'current_user'];
+        foreach ($requiredKeys as $key) {
+            if (!isset($_POST[$key])) {
+                return JsonResponse::getErrorResponse('Missing required key in POST data: ' . $key);
+            }
+        }
+        $output = $this->core->getQueries()->toggleLikes($_POST['post_id'], $this->core->getUser()->getId());
+
+        if ($output['status'] === "false") {
+            return JsonResponse::getErrorResponse('Catch Fail in Query');
+        }
+
+        $this->sendSocketMessage([
+            'type' => 'edit_likes',
+            'post_id' => $_POST['post_id'],
+            'status' => $output['status'],
+            'likesCount' => $output['likesCount'],
+            'likesFromStaff' => $output['likesFromStaff']
+        ]);
+
+        return JsonResponse::getSuccessResponse([
+            'status' => $output['status'], // 'like' or 'unlike'
+            'likesCount' => $output['likesCount'], // Total likes count
+            'likesFromStaff' => $output['likesFromStaff'] // Likes from staff
+        ]);
+    }
+
+    /**
+     * this function opens a WebSocket client and sends a message with the corresponding update
+     * @param array<mixed> $msg_array
+     */
+    private function sendSocketMessage(array $msg_array): void {
+        $msg_array['user_id'] = $this->core->getUser()->getId();
+        $msg_array['page'] = $this->core->getConfig()->getTerm() . '-' . $this->core->getConfig()->getCourse() . "-discussion_forum";
+        try {
+            $client = new Client($this->core);
+            $client->json_send($msg_array);
+        }
+        catch (WebSocket\ConnectionException $e) {
+            $this->core->addNoticeMessage("WebSocket Server is down, page won't load dynamically.");
+        }
     }
 }

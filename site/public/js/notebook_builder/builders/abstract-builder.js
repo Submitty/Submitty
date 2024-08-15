@@ -1,4 +1,4 @@
-/* global MultipleChoiceWidget, MarkdownWidget, ShortAnswerWidget, ImageWidget, ItempoolWidget, ItemWidget, getBadItemNames */
+/* global MultipleChoiceWidget, MarkdownWidget, ShortAnswerWidget, ImageWidget, ItempoolWidget, ItemWidget, getBadItemNames, displayErrorMessage */
 /* exported AbstractBuilder */
 
 class AbstractBuilder {
@@ -11,10 +11,10 @@ class AbstractBuilder {
         this.reorderable_widgets_div = document.createElement('div');
         this.itempool_div = document.createElement('div');
 
-        this.selector_options = ['Multiple Choice', 'Markdown', 'Short Answer', 'Image'];
+        this.selector_options = ['Markdown', 'Multiple Choice', 'Short Answer', 'Image'];
 
         // Handle many of the different button clicks that might occur within the notebook builder
-        this.attachment_div.onclick = event => {
+        this.attachment_div.onclick = (event) => {
             if (event.target.getAttribute('type') === 'button') {
                 switch (event.target.value) {
                     case 'Multiple Choice':
@@ -53,61 +53,66 @@ class AbstractBuilder {
         };
 
         // Handle updating notebook item widgets when itempool item widgets might have changed
-        this.attachment_div.addEventListener('focusout', event => {
+        this.attachment_div.addEventListener('focusout', (event) => {
             if (event.target.classList.contains('item-name-input')) {
                 this.itempoolItemChangeAction();
             }
         });
     }
 
-    getJSON()  {
+    getJSON() {
         throw 'Implement this method in the child class.';
     }
 
     load(data) {
         if (data.item_pool) {
-            data.item_pool.forEach(item => {
+            data.item_pool.forEach((item) => {
                 const widget = new ItempoolWidget();
                 widget.load(item);
                 this.widgetAdd(widget);
             });
         }
 
-        data.notebook.forEach(cell => {
-            let widget;
+        if (data.notebook) {
+            data.notebook.forEach((cell) => {
+                let widget;
 
-            switch (cell.type) {
-                case 'multiple_choice':
-                    widget = new MultipleChoiceWidget();
-                    break;
-                case 'markdown':
-                    widget = new MarkdownWidget();
-                    break;
-                case 'short_answer':
-                    widget = new ShortAnswerWidget();
-                    break;
-                case 'image':
-                    widget = new ImageWidget();
-                    break;
-                case 'item':
-                    widget = new ItemWidget();
-                    break;
-                default:
-                    break;
-            }
+                switch (cell.type) {
+                    case 'multiple_choice':
+                        widget = new MultipleChoiceWidget();
+                        break;
+                    case 'markdown':
+                        widget = new MarkdownWidget();
+                        break;
+                    case 'short_answer':
+                        widget = new ShortAnswerWidget();
+                        break;
+                    case 'image':
+                        widget = new ImageWidget();
+                        break;
+                    case 'item':
+                        widget = new ItemWidget();
+                        break;
+                    default:
+                        break;
+                }
 
-            if (widget) {
-                widget.load(cell);
-                this.widgetAdd(widget);
-            }
-        });
+                if (widget) {
+                    widget.load(cell);
+                    this.widgetAdd(widget);
+                }
+            });
+        }
+        else {
+            displayErrorMessage('The current configuration is missing the required "notebook" object. Please include a "notebook" object in your configuration');
+        }
     }
 
     /**
      * Find all ItemWidgets in the form and tell them to either 'update' or 'block' appropriately.
      */
     itempoolItemChangeAction() {
-        this.reorderable_widgets.forEach(widget => {
+        this.reorderable_widgets.forEach((widget) => {
             if (widget.constructor.name === 'ItemWidget') {
                 if (getBadItemNames().length === 0 && this.itempool_widgets.length > 0) {
                     const interactive_area = widget.dom_pointer.querySelector('.interactive-container');
@@ -127,7 +132,7 @@ class AbstractBuilder {
      * @param {Object[]} valid_jsons An array which will be filled and data returned by reference.
      */
     collectValidJsons(widgets, valid_jsons) {
-        widgets.forEach(widget => {
+        widgets.forEach((widget) => {
             const widget_json = widget.getJSON();
 
             if (Object.keys(widget_json).length > 0) {
@@ -228,7 +233,7 @@ class AbstractBuilder {
         const index = widgets_array.indexOf(widget);
 
         // If widget is already at the end of the form then do nothing
-        if (index === widgets_array - 1) {
+        if (index === widgets_array.length - 1) {
             return;
         }
 

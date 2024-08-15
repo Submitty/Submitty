@@ -39,6 +39,12 @@
     cursor: pointer;
 }
 
+.timer {
+    margin-bottom: 20px;
+    margin-left: auto;
+    font-size: 2em;
+}
+
 .option-btn {
     vertical-align: middle;
 }
@@ -52,6 +58,9 @@
 }
 
 .option-text {
+    display: flex;
+    align-items: center;
+    gap: 15px;
     padding-top: 0.5em;
     padding-bottom: 0.5em;
     padding-left: 0.25em;
@@ -116,10 +125,45 @@ form {
     margin-left: 0.5em;
 }
 
+#timer-inputs {
+    display: inline-block;
+}
+
+.poll-timer {
+    display: inline-block;
+    text-align: center;
+    width: 4em !important;
+}
+
+.poll-input {
+    display: inline-block;
+    text-align: center;
+    margin-right: 0.5em;
+    margin-bottom: 1em;
+    font-size: 0.8em;
+    width: 4em !important;
+}
+
+.response-container .poll-response {
+    resize: none;
+    min-height: 50px;
+    max-height: 300px;
+    height: 50px;
+    width: calc(100% - 200px)
+}
+
+.response-container .poll-response-custom {
+    background-color: var(--standard-light-blue-gray);
+}
+
 .correct-tag-background {
     color: var(--standard-dark-green);
 }
 
 .correct-tag-checkmark {
     color: var(--text-white);
+}
+
+.break-above {
+    margin-top: 1.5em;
 }
