@@ -1,4 +1,4 @@
-/* exported addToTable, deleteRow ResetPerGradeablePercents */
+/* exported addToTable, deleteRow manageWarningsGradeables ResetPerGradeablePercents */
 /* global buildCourseUrl csrfToken displayErrorMessage displaySuccessMessage */
 
 const benchmarks_with_input_fields = ['lowest_a-', 'lowest_b-', 'lowest_c-', 'lowest_d'];
@@ -515,6 +515,9 @@ function addToTable(table) {
     deleteLink.appendChild(deleteIcon);
     deleteLink.onclick = function () {
         deleteRow(this);
+        if (table === 'performanceWarnings') {
+            manageWarningsGradeables('delete');
+        }
     };
     cellDelete.appendChild(deleteLink);
 
@@ -529,6 +532,32 @@ function deleteRow(button) {
     const row = button.parentNode.parentNode;
     row.parentNode.removeChild(row);
     saveChanges();
+}
+
+/**
+ * Enables or disables gradeable options in the performance warnings table
+ *
+ * @param submitOrDelete 'submit' or 'delete'
+ */
+function manageWarningsGradeables(submitOrDelete) {
+    let entryGradeables = [];
+    $('#performance-warnings-table-body tr').each(function () {
+        entryGradeables = entryGradeables.concat($(this).find('td:nth-child(2)').text().split(', '));
+    });
+    if (submitOrDelete === 'submit') {
+        $('#performance-warnings-gradeables option').each(function () {
+            if (entryGradeables.includes($(this).val())) {
+                $(this).attr('disabled', 'disabled');
+            }
+        });
+    }
+    else if (submitOrDelete === 'delete') {
+        $('#performance-warnings-gradeables option').each(function () {
+            if (!entryGradeables.includes($(this).val())) {
+                $(this).removeAttr('disabled');
+            }
+        });
+    }
 }
 
 function getMessages() {
@@ -1044,13 +1073,29 @@ $(document).ready(() => {
             $(dropLowestDiv).css('display', isChecked ? 'block' : 'none');
         });
     });
-    $('#performance-warnings-gradeables').select2({
-        theme: 'bootstrap-5',
-        placeholder: ' -- select an option -- ',
-        multiple: true,
-        allowClear: true,
-    });
-    $('#performance-warnings-gradeables option')[0].remove(); // Remove empty option to trick browser
+
+    { // Manage performance warnings table
+        $('#performance-warnings-gradeables').select2({
+            theme: 'bootstrap-5',
+            placeholder: ' -- select an option -- ',
+            multiple: true,
+            allowClear: true,
+        });
+        const gradeablesDropdownOptions = $('#performance-warnings-gradeables option');
+        // Remove empty option to trick browser
+        gradeablesDropdownOptions[0].remove();
+        // Hide selected gradeables
+        let entryGradeables = [];
+        $('#performance-warnings-table-body tr').each(function () {
+            entryGradeables = entryGradeables.concat($(this).find('td:nth-child(2)').text().split(', '));
+        });
+        gradeablesDropdownOptions.each(function () {
+            const gradeableID = $(this).val();
+            if (entryGradeables.includes(gradeableID)) {
+                $(this).attr('disabled', 'disabled');
+            }
+        });
+    }
 
     // Per Gradeable Percents checked on-ready if at least one Per Gradeable Percents is checked
     const enablePerGradeablePercents = $('#enable-per-gradeable-percents');

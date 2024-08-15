@@ -429,7 +429,7 @@ To remove a curve simply blank all boxes."></i>
                         <span>Target Score:</span>
                         <input class="option-input" type="number" name="performance-warnings-score" id="performance-warnings-score">
                     </label>
-                    <button type="submit" class="btn btn-primary" onclick="addToTable('performanceWarnings')" aria-label="submit">
+                    <button type="submit" class="btn btn-primary" onclick="addToTable('performanceWarnings'); manageWarningsGradeables('submit');" aria-label="submit">
                         <i class="fas fa-plus"></i>
                     </button>
                     {# This is a data table #}
@@ -448,7 +448,7 @@ To remove a curve simply blank all boxes."></i>
                                 <td>{{ entry.msg }}</td>
                                 <td>{{ entry.ids|join(', ') }}</td>
                                 <td>{{ entry.value }}</td>
-                                <td><a onclick="deleteRow(this)"><i class="fas fa-trash"></i></a></td>
+                                <td><a onclick="deleteRow(this); manageWarningsGradeables('delete');"><i class="fas fa-trash"></i></a></td>
                             </tr>
                         {% endfor %}
                         </tbody>
