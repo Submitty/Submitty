@@ -564,14 +564,25 @@ SQL;
      * @param User $user
      */
     public function insertUnverifiedSubmittyUser(User $user): void {
-        $array = [$user->getId(), $user->getPassword(), $user->getNumericId(),
-                       $user->getLegalGivenName(), $user->getPreferredGivenName(),
-                       $user->getLegalFamilyName(), $user->getPreferredFamilyName(), $user->getEmail(),
-                       $user->getVerificationExpiration(),
-                       $user->getVerificationCode()];
+        $array = [
+                    $user->getId(),
+                    $user->getPassword(),
+                    $user->getLegalGivenName(),
+                    $user->getLegalFamilyName(),
+                    $user->getEmail(),
+                    $user->getVerificationExpiration(),
+                    $user->getVerificationCode()
+                ];
         $this->submitty_db->query(
-            "INSERT INTO unverified_users (user_id, user_password, user_numeric_id, user_givenname, user_preferred_givenname, user_familyname, user_preferred_familyname, user_email, verification_expiration, verification_code)
-                                   VALUES (?, ?, ?, ?, ?, ?, ?, ?, to_timestamp(?), ?)",
+            "INSERT INTO unverified_users (
+                user_id,
+                user_password,
+                user_givenname,
+                user_familyname,
+                user_email,
+                verification_expiration,
+                verification_code
+                ) VALUES (?, ?, ?, ?, ?, to_timestamp(?), ?)",
             $array
         );
     }

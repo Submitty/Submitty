@@ -652,15 +652,9 @@ CREATE TABLE public.terms (
 
 CREATE TABLE public.unverified_users (
     user_id character varying NOT NULL,
-    user_numeric_id character varying,
     user_givenname character varying NOT NULL,
-    user_preferred_givenname character varying,
     user_password character varying,
     user_familyname character varying NOT NULL,
-    user_email_secondary character varying(255) DEFAULT ''::character varying NOT NULL,
-    user_email_secondary_notify boolean DEFAULT false,
-    user_pronouns character varying(255) DEFAULT ''::character varying,
-    user_preferred_familyname character varying,
     user_email character varying NOT NULL,
     verification_code character varying(50) DEFAULT 'none'::character varying NOT NULL,
     verification_expiration timestamp without time zone DEFAULT CURRENT_TIMESTAMP
