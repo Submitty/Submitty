@@ -231,21 +231,6 @@ function publishFormWithAttachments(form, test_category, error_message, is_threa
             cancelDeferredSave(autosaveKeyFor(form));
             clearReplyBoxAutosave(form);
 
-            const thread_id = json['data']['thread_id'];
-            if (is_thread) {
-                window.socketClient.send({ type: 'new_thread', thread_id: thread_id });
-            }
-            else {
-                const post_id = json['data']['post_id'];
-                let reply_level = form[0].hasAttribute('id') ? parseInt(form.prev().attr('data-reply_level')) : 0;
-                reply_level = reply_level < 7 ? reply_level + 1 : reply_level;
-                const post_box_ids = $('.post_reply_form .thread-post-form').map(function () {
-                    return $(this).data('post_box_id');
-                }).get();
-                const max_post_box_id = Math.max.apply(Math, post_box_ids);
-                window.socketClient.send({ type: 'new_post', thread_id: thread_id, post_id: post_id, reply_level: reply_level, post_box_id: max_post_box_id });
-            }
-
             window.location.href = json['data']['next_page'];
         },
         error: function () {
@@ -318,11 +303,13 @@ function socketNewOrEditPostHandler(post_id, reply_level, post_box_id = null, ed
                             });
                             if (parent_sibling_posts.length !== 0) {
                                 $(new_post).insertBefore(parent_sibling_posts.first()).hide().fadeIn();
-                                displaySuccessMessage('Refresh for correct ordering');
+                            }
+                            else {
+                                $(new_post).insertAfter(parent_sibling_posts.prevObject.last()).hide().fadeIn();
                             }
                         }
                         else {
-                            $(new_post).insertAfter(parent_post.next()).hide().fadeIn();
+                            $(new_post).insertAfter(parent_post).hide().fadeIn();
                         }
                     }
                 }
@@ -409,7 +396,6 @@ function socketNewOrEditThreadHandler(thread_id, edit = false) {
                 else {
                     const original_thread = $(`[data-thread_id="${thread_id}"]`);
                     $(new_thread).insertBefore(original_thread);
-                    original_thread.next().remove();
                     original_thread.remove();
                 }
                 // eslint-disable-next-line eqeqeq
@@ -725,6 +711,13 @@ function initSocketClient() {
                 }
                 socketNewOrEditThreadHandler(msg.new_thread_id, false);
                 break;
+            case 'edit_likes':
+                updateLikesDisplay(msg.post_id, {
+                    likesCount: msg.likesCount,
+                    likesFromStaff: msg.likesFromStaff,
+                    status: msg.status,
+                });
+                break;
             default:
                 console.log('Undefined message received.');
         }
@@ -758,7 +751,6 @@ function changeThreadStatus(thread_id) {
                 return;
             }
 
-            window.socketClient.send({ type: 'resolve_thread', thread_id: thread_id });
             window.location.reload();
             displaySuccessMessage('Thread marked as resolved.');
         },
@@ -806,21 +798,10 @@ function modifyOrSplitPost(e) {
 
             // modify
             if (form.attr('id') === 'thread_form') {
-                const thread_id = form.find('#edit_thread_id').val();
-                const post_id = form.find('#edit_post_id').val();
-                const reply_level = $(`#${post_id}`).attr('data-reply_level');
-                const post_box_id = $(`#${post_id}-reply .thread-post-form`).data('post_box_id') - 1;
-                const msg_type = json['data']['type'] === 'Post' ? 'edit_post' : 'edit_thread';
-                window.socketClient.send({ type: msg_type, thread_id: thread_id, post_id: post_id, reply_level: reply_level, post_box_id: post_box_id });
                 window.location.reload();
             }
             // split
             else {
-                // eslint-disable-next-line no-var, no-redeclare
-                var post_id = form.find('#split_post_id').val();
-                const new_thread_id = json['data']['new_thread_id'];
-                const old_thread_id = json['data']['old_thread_id'];
-                window.socketClient.send({ type: 'split_post', new_thread_id: new_thread_id, thread_id: old_thread_id, post_id: post_id });
                 window.location.replace(json['data']['next']);
             }
         },
@@ -1292,50 +1273,45 @@ function toggleLike(post_id, current_user) {
                 displayErrorMessage(json['message']);
                 return;
             }
-            json = json['data'];
-            const likes = json['likesCount'];
-            const liked = json['status'];
-            const staffLiked = json['likesFromStaff'];
-
-            const likeCounterElement = document.getElementById(`likeCounter_${post_id}`);
-            let likeCounter = parseInt(likeCounterElement.innerText);
-
-            // eslint-disable-next-line no-useless-concat
-            const likeIconSrc = document.getElementById(`likeIcon_${post_id}`);
-            let likeIconSrcElement = likeIconSrc.src;
-
-            if (liked === 'unlike') {
-                likeIconSrcElement = likeIconSrcElement.replace('on-duck-button.svg', 'light-mode-off-duck.svg');
-
-                if (staffLiked > 0) {
-                    $(`#likedByInstructor_${post_id}`).show();
-                }
-                else {
-                    $(`#likedByInstructor_${post_id}`).hide();
-                }
-
-                likeCounter = likes;// set to the sql like value
-
-                likeIconSrc.src = likeIconSrcElement; // Update the state
-                likeCounterElement.innerText = likeCounter;
-            }
-            else if (liked === 'like') {
-                likeIconSrcElement = likeIconSrcElement.replace('light-mode-off-duck.svg', 'on-duck-button.svg');
-                if (staffLiked > 0) {
-                    $(`#likedByInstructor_${post_id}`).show();
-                }
-                else {
-                    $(`#likedByInstructor_${post_id}`).hide();
-                }
-                likeCounter = likes;
-                likeIconSrc.src = likeIconSrcElement; // Update the state
-                likeCounterElement.innerText = likeCounter;
+            else {
+                updateLikesDisplay(post_id, json.data);
             }
         },
         error: function (err) {
             console.log(err);
         },
     });
+}
+
+function updateLikesDisplay(post_id, data) {
+    const likes = data['likesCount'];
+    const liked = data['status'];
+    const staffLiked = data['likesFromStaff'];
+
+    const likeCounterElement = document.getElementById(`likeCounter_${post_id}`);
+    let likeCounter = parseInt(likeCounterElement.innerText);
+
+    // eslint-disable-next-line no-useless-concat
+    const likeIconSrc = document.getElementById(`likeIcon_${post_id}`);
+    let likeIconSrcElement = likeIconSrc.src;
+
+    if (liked === 'unlike') {
+        likeIconSrcElement = likeIconSrcElement.replace('on-duck-button.svg', 'light-mode-off-duck.svg');
+    }
+    else if (liked === 'like') {
+        likeIconSrcElement = likeIconSrcElement.replace('light-mode-off-duck.svg', 'on-duck-button.svg');
+    }
+
+    if (staffLiked > 0) {
+        $(`#likedByInstructor_${post_id}`).show();
+    }
+    else {
+        $(`#likedByInstructor_${post_id}`).hide();
+    }
+
+    likeCounter = likes;
+    likeIconSrc.src = likeIconSrcElement; // Update the state
+    likeCounterElement.innerText = likeCounter;
 }
 
 function displayHistoryAttachment(edit_id) {
@@ -1850,11 +1826,9 @@ function deletePostToggle(isDeletion, thread_id, post_id, author, time, csrf_tok
                 let new_url = '';
                 switch (json['data']['type']) {
                     case 'thread':
-                        window.socketClient.send({ type: 'delete_thread', thread_id: thread_id });
                         new_url = buildCourseUrl(['forum']);
                         break;
                     case 'post':
-                        window.socketClient.send({ type: 'delete_post', thread_id: thread_id, post_id: post_id });
                         new_url = buildCourseUrl(['forum', 'threads', thread_id]);
                         break;
                     default:
@@ -1885,12 +1859,6 @@ function alterAnnouncement(thread_id, confirmString, type, csrf_token) {
             },
             // eslint-disable-next-line no-unused-vars
             success: function (data) {
-                if (type) {
-                    window.socketClient.send({ type: 'announce_thread', thread_id: thread_id });
-                }
-                else {
-                    window.socketClient.send({ type: 'unpin_thread', thread_id: thread_id });
-                }
                 window.location.reload();
             },
             error: function () {
@@ -2680,12 +2648,6 @@ function pinAnnouncement(thread_id, type, csrf_token) {
             },
             // eslint-disable-next-line no-unused-vars
             success: function (data) {
-                if (type) {
-                    window.socketClient.send({ type: 'announce_thread', thread_id: thread_id });
-                }
-                else {
-                    window.socketClient.send({ type: 'unpin_thread', thread_id: thread_id });
-                }
             },
             error: function () {
                 window.alert('Something went wrong while trying to remove announcement. Please try again.');
