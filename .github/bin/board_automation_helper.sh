@@ -1,0 +1,10 @@
+#!/usr/bin/env bash
+export PROJECT_ID="PVT_kwDOAKRRkc4AfZil"
+export STATUS_FIELD_ID="PVTSSF_lADOAKRRkc4AfZilzgUwVMs"
+
+export ABANDONED_ID="bd56a271"
+export WIP_ID="26e8e6b2"
+export SEEKING_REVIEWER_ID="67583d20"
+export IN_REVIEW_ID="618f8b62"
+export MAINTAINER_REVIEW_ID="01f268c2"
+export READY_TO_MERGE_ID="257693b8"

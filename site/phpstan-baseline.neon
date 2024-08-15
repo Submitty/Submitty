@@ -13087,11 +13087,6 @@ parameters:
 			path: app/views/email/EmailStatusView.php
 
 		-
-			message: "#^Call to function array_search\\(\\) requires parameter \\#3 to be set\\.$#"
-			count: 1
-			path: app/views/forum/ForumThreadView.php
-
-		-
 			message: "#^Call to function in_array\\(\\) requires parameter \\#3 to be set\\.$#"
 			count: 2
 			path: app/views/forum/ForumThreadView.php
@@ -13113,7 +13108,7 @@ parameters:
 
 		-
 			message: "#^Loose comparison via \"\\=\\=\" is not allowed\\.$#"
-			count: 16
+			count: 15
 			path: app/views/forum/ForumThreadView.php
 
 		-
@@ -13563,11 +13558,6 @@ parameters:
 
 		-
 			message: "#^Method app\\\\views\\\\forum\\\\ForumThreadView\\:\\:statPage\\(\\) has parameter \\$users with no type specified\\.$#"
-			count: 1
-			path: app/views/forum/ForumThreadView.php
-
-		-
-			message: "#^Offset int\\<1, max\\> does not exist on non\\-empty\\-array\\<0, \\(float\\|int\\)\\>\\.$#"
 			count: 1
 			path: app/views/forum/ForumThreadView.php
 
