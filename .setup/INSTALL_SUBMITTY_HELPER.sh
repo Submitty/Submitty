@@ -29,11 +29,10 @@ fi
 # config.json files when needed.  We wait to read most variables until
 # the repos are updated and the necessary migrations are run.
 
-
-# We assume a relative path from this repository to the installation
-# directory and configuration directory.
-THIS_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null && pwd )"
-SUBMITTY_REPOSITORY=$(jq -r '.submitty_repository' "${THIS_DIR}/../../../config/submitty.json")
+# TODO: Un-hardcode this. Did not do this earlier because of messiness
+# with migrations.
+SUBMITTY_INSTALL_DIR="/usr/local/submitty"
+SUBMITTY_REPOSITORY=$(jq -r '.submitty_repository' "${SUBMITTY_INSTALL_DIR}/config/submitty.json")
 
 source "${SUBMITTY_REPOSITORY}/.setup/install_submitty/get_globals.sh"
 
