@@ -3,9 +3,9 @@ skipOn(Cypress.env('run_area') === 'CI', () => {
     describe('Test Rainbow Grading', () => {
         beforeEach(() => {
             cy.login('instructor');
-            cy.visit(['sample', 'config']);
+            cy.visit(['testing', 'config']);
             checkCheckbox('[data-testid="display-rainbow-grades-summary"]');
-            cy.visit(['sample', 'reports', 'rainbow_grades_customization']);
+            cy.visit(['testing', 'reports', 'rainbow_grades_customization']);
             reset();
         });
         it('Web-Based Rainbow Grades Customization should work', () => {
@@ -163,7 +163,7 @@ skipOn(Cypress.env('run_area') === 'CI', () => {
             cy.get('[data-testid="display-benchmarks-perfect"]').check();
             cy.get('[data-testid="btn-build-customization"]').click();
             cy.get('[data-testid="save-status"]', { timeout: 15000 }).should('contain', 'Rainbow grades successfully generated!');
-            cy.visit(['sample', 'grades']);
+            cy.visit(['testing', 'grades']);
             ['USERNAME', 'NUMERIC ID', 'AVERAGE', 'STDDEV', 'PERFECT'].forEach((fields) => {
                 cy.get('[data-testid="rainbow-grades"]').should('contain', fields);
             });
@@ -171,7 +171,7 @@ skipOn(Cypress.env('run_area') === 'CI', () => {
             ['ta', 'student', 'grader', 'instructor'].forEach((username) => {
                 cy.logout();
                 cy.login(username);
-                cy.visit(['sample', 'grades']);
+                cy.visit(['testing', 'grades']);
                 cy.get('[data-testid="rainbow-grades"]').should('contain', `Lecture Participation Polls for: ${username}`);
                 if (username === 'instructor') {
                     checkRainbowGrades('instructor', 801516157, 'Quinn', 'Instructor');
