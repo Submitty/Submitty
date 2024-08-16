@@ -167,16 +167,16 @@
                         <i id="pencilIcon" class="fas fa-pencil-alt black-btn"></i>
                     </h2>
                     <div id="checkboxControls" style="display: none;">
-                        <label>Extra credit:
-                            <input id="extra_credit_checkbox" type="checkbox" name="extra_credit">
-                        </label><br>
+                        <input id="extra_credit_checkbox" type="checkbox" name="extra_credit">
+                        <label for="extra_credit_checkbox">Extra credit</label><br>
 
-                        <label>Remove lowest:
-                            <input id="drop_lowest_checkbox" type="checkbox" name="drop_lowest">
-                        </label>
+                        <input id="drop_lowest_checkbox" type="checkbox" name="drop_lowest">
+                        <label for="drop_lowest_checkbox">Remove lowest</label><br>
+
+                        <input id="enable-per-gradeable-percents" type="checkbox" name="enable-per-gradeable-percents">
+                        <label for="enable-per-gradeable-percents">Enable/Edit Per Gradeable Percents:</label>
+                        <i>For each bucket, you may grade by percent instead of by points.</i><br>
                     </div>
-
-
                     <div id="config-wrapper">
                         {% for bucket, gradeables in customization_data %}
                             <div id="config-{{ bucket }}" style="margin-top:25px;min-height:100px;display:none;" class="bucket_detail_div">
@@ -192,6 +192,22 @@
                                     >
                                     items
                                     <span style="margin-left: 100px;"></span>
+
+                                    {% set per_gradeable_percents_checked = false %}
+                                    {% for gradeable in gradeables %}
+                                        {% if gradeable["override_percent"] %}
+                                            {% set per_gradeable_percents_checked = true %}
+                                        {% endif %}
+                                    {% endfor %}
+                                    <i id="per-gradeable-percents-warning-{{ bucket }}" class="fas fa-exclamation-triangle fa-rb tooltip">
+                                        <span class="tooltiptext tooltipbottom">{# Message composed in JavaScript #}</span>
+                                    </i>
+                                    <input id="per-gradeable-percents-checkbox-{{ bucket }}" type="checkbox" name="per-gradeable-percents-{{ bucket }}" {{ per_gradeable_percents_checked ? 'checked' : '' }}>
+                                    <label id="per-gradeable-percents-label-{{ bucket }}" for="per-gradeable-percents-checkbox-{{ bucket }}">Per Gradeable Percents</label>
+                                    <span style="margin-left: 10px;"></span>
+                                    <button class="btn" id="per-gradeable-percents-reset-{{ bucket }}" type="button" onclick="ResetPerGradeablePercents('{{ bucket }}');">Even Split</button>
+                                    <span style="margin-left: 100px;"></span>
+
                                     <div id="dropLowestDiv-{{ bucket }}" style="display: none;">
                                         <label>
                                             Remove lowest:
@@ -210,17 +226,29 @@
                                     <ol style="list-style-type: none;" id="gradeables-list-{{ bucket }}">
                                         {% for gradeable in gradeables %}
                                             <li class="gradeable-li pt-1" style="border-top: 1px solid #FFFFFF;">
-                                                <input type="text"
-                                                       class="gradeable-custom-item-input"
-                                                       aria-label="{{gradeable["title"]}} max score"
-                                                       class="{{ gradeable["override"] ? "override" : "" }}"
-                                                       placeholder="{{ gradeable["max_score"] }}"
-                                                       value="{{ gradeable["override"] ? gradeable["override_max"] : gradeable["max_score"] }}"
-                                                       id="maxscore-{{ gradeable["id"] }}"
-                                                       data-grade-release-date="{{ gradeable["grade_release_date"] }}"
-                                                       style="margin-right: 10px;"
-                                                       onblur="ClampPoints(this);"
-                                                       onkeyup="DetectMaxOverride(this);">
+                                                <div id="gradeable-pts-div-{{ gradeable["id"] }}">
+                                                    <input type="text"
+                                                           class="gradeable-custom-item-input {{ gradeable["override"] ? "override" : "" }}"
+                                                           aria-label="{{gradeable["title"]}} max score"
+                                                           placeholder="{{ gradeable["max_score"] }}"
+                                                           value="{{ gradeable["override"] ? gradeable["override_max"] : gradeable["max_score"] }}"
+                                                           id="maxscore-{{ gradeable["id"] }}"
+                                                           data-grade-release-date="{{ gradeable["grade_release_date"] }}"
+                                                           onblur="ClampPoints(this);"
+                                                           onkeyup="DetectMaxOverride(this);">
+                                                    <span>pts</span>
+                                                </div>
+                                                <div id="gradeable-percents-div-{{ bucket }}-{{ gradeable["id"] }}">
+                                                    <input type="text"
+                                                           {% set default_percent = ((1 / gradeables|length) * 100)|round(1, 'floor') %}
+                                                           class="gradeable-custom-item-input"
+                                                           aria-label="{{gradeable["title"]}} percent"
+                                                           placeholder="{{ default_percent }}"
+                                                           value="{{ gradeable["override_percent"] ? gradeable["percent"] : default_percent }}"
+                                                           id="percents-{{ gradeable["id"] }}"
+                                                           onblur="ClampPercents(this); ClampPerGradeablePercents(this, '{{ bucket }}')">
+                                                    <span>%</span>
+                                                </div>
                                                 <div class="gradeable-li-right-of-input">
                                                     <div class="gradeable-li-info">
                                                         <i class="fas fa-exclamation-triangle fa-rb tooltip">
