@@ -854,12 +854,6 @@ for i in "${ALL_DAEMONS[@]}"; do
     fi
 done
 
-if [[ "${WORKER}" == 0 && "${VAGRANT}" == 1 ]]; then
-    # Update information on vagrant worker machines
-    echo "Refreshing vagrant workers..."
-    python3 "${SUBMITTY_REPOSITORY}/.setup/bin/refresh_vagrant_workers.py"
-fi
-
 if [ "${WORKER}" == 0 ]; then
     # Stop all workers on remote machines
     echo -e -n "Stopping all remote machine workers...\n"
