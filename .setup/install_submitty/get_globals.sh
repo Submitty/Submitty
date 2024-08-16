@@ -1,6 +1,8 @@
 #!/usr/bin/env bash
 set -ve
 
+# SUBMITTY_CONFIG_DIR should be set before this file is sourced.
+
 # First, we determine SUBMITTY_REPOSITORY from BASH_SOURCE, as this
 # script is run from within GIT_CHECKOUT/Submitty. We use readlink to
 # get an absolute path from a relative path here.
@@ -8,31 +10,9 @@ SUBMITTY_REPOSITORY="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null && pwd 
 SUBMITTY_REPOSITORY="$(readlink -ne "$SUBMITTY_REPOSITORY")"
 echo "SUBMITTY_REPOSITORY=${SUBMITTY_REPOSITORY}" >&2
 
-# Hardcoding this is undesirable but not avoidable without changing
-# how SUBMITTY_INSTALL.sh works; this script's content is hardcoded
-# in CONFIGURE_SUBMITTY.py.
-SUBMITTY_INSTALL_DIR="/usr/local/submitty"
-echo "SUBMITTY_INSTALL_DIR=${SUBMITTY_REPOSITORY}" >&2
-
 # Read config file and check for consistency
-JSON_SUBMITTY_INSTALL_DIR="$(jq -r '.submitty_install_dir' "${SUBMITTY_INSTALL_DIR}/config/submitty.json")"
-JSON_SUBMITTY_REPOSITORY="$(jq -r '.submitty_repository' "${SUBMITTY_INSTALL_DIR}/config/submitty.json")"
-
-# Check that install dir in submitty.json matches
-if [[ "$SUBMITTY_INSTALL_DIR" != "$JSON_SUBMITTY_INSTALL_DIR" ]]; then
-    echo "SUBMITTY_INSTALL_DIR does not match submitty.config!" >&2
-    echo "JSON_SUBMITTY_INSTALL_DIR=$JSON_SUBMITTY_INSTALL_DIR" >&2
-    echo "Exiting..." >&2
-    exit 1
-fi
-
-# Check that Submitty repo dir in submitty.json matches
-if [[ "$SUBMITTY_REPOSITORY" != "$JSON_SUBMITTY_REPOSITORY" ]]; then
-    echo "SUBMITTY_REPOSITORY does not match submitty.config!" >&2
-    echo "JSON_SUBMITTY_REPOSITORY=$JSON_SUBMITTY_REPOSITORY" >&2
-    echo "Exiting..." >&2
-    exit 1
-fi
+SUBMITTY_INSTALL_DIR="$(jq -r '.submitty_install_dir' "${SUBMITTY_CONFIG_DIR}/submitty.json")"
+SUBMITTY_REPOSITORY="$(jq -r '.submitty_repository' "${SUBMITTY_CONFIG_DIR}/submitty.json")"
 
 IS_WORKER="$([[ "$(jq -r '.worker' "${SUBMITTY_INSTALL_DIR}/config/submitty.json")" == "true" ]] && echo 1 || echo 0)"
 IS_VAGRANT="$([[ -d "${SUBMITTY_REPOSITORY}/.vagrant" ]] && echo 1 || echo 0)"
