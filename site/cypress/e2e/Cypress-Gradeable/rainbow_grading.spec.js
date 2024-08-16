@@ -4,7 +4,7 @@ skipOn(Cypress.env('run_area') === 'CI', () => {
         beforeEach(() => {
             cy.login('instructor');
             cy.visit(['testing', 'config']);
-            checkCheckbox('[data-testid="display-rainbow-grades-summary"]');
+            cy.get('[data-testid="display-rainbow-grades-summary"]').check();
             cy.visit(['testing', 'reports', 'rainbow_grades_customization']);
             reset();
         });
