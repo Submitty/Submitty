@@ -23,7 +23,9 @@ class ConfigurationController extends AbstractController {
     const FAIL_AUTO_RG_MSG = 'You may not enable automatic rainbow grades generation until you have supplied a ' .
     'customization.json file.  To have one generated for you, you may use the Web-Based Rainbow Grades Generation inside the Grade ' .
     'Reports tab.  You may also manually create the file and upload it to your course\'s rainbow_grades directory.';
-
+    const NO_SELF_REGISTER = 0; // Self registration disabled
+    const ALL_SELF_REGISTER = 1; // Self registration allowed, and all users who register are automatically added
+    const REQUEST_SELF_REGISTER = 2; // Self registration allowed, users request and instructors can approve
     /**
      * @return MultiResponse
      */
@@ -48,7 +50,7 @@ class ConfigurationController extends AbstractController {
             'private_repository'             => $this->core->getConfig()->getPrivateRepository(),
             'room_seating_gradeable_id'      => $this->core->getConfig()->getRoomSeatingGradeableId(),
             'seating_only_for_instructor'    => $this->core->getConfig()->isSeatingOnlyForInstructor(),
-            'self_registration_type'      => $this->core->getQueries()->isSelfRegistrationAllowed($this->core->getConfig()->getCourse()),
+            'self_registration_type'      => $this->core->getQueries()->isSelfRegistrationAllowed($this->core->getConfig()->getCourse()) !== NO_SELF_REGISTER,
             'auto_rainbow_grades'            => $this->core->getConfig()->getAutoRainbowGrades(),
             'queue_enabled'                  => $this->core->getConfig()->isQueueEnabled(),
             'queue_message'                  => $this->core->getConfig()->getQueueMessage(),
@@ -186,7 +188,7 @@ class ConfigurationController extends AbstractController {
         }
 
         if ($name === 'self_registration') {
-            $this->core->getQueries()->setSelfRegistrationAllowed($this->core->getConfig()->getCourse(), $entry === 'true' ? 1 : 0);
+            $this->core->getQueries()->setSelfRegistrationAllowed($this->core->getConfig()->getCourse(), $entry === 'true' ? ALL_SELF_REGISTER : NO_SELF_REGISTER);
         }
         if ($name === 'forum_enabled' && $entry == 1) {
             // Only create default categories when there is no existing categories (only happens when first enabled)
@@ -199,12 +201,10 @@ class ConfigurationController extends AbstractController {
         }
 
         $config_json = $this->core->getConfig()->getCourseJson();
-        if (!isset($config_json['course_details'][$name])) {
-            if ($name !== 'self_registration') {
-                return MultiResponse::JsonOnlyResponse(
-                    JsonResponse::getFailResponse('Not a valid config name')
-                );
-            }
+        if (!isset($config_json['course_details'][$name]) && $name !== 'self_registration') {
+            return MultiResponse::JsonOnlyResponse(
+                JsonResponse::getFailResponse('Not a valid config name')
+            );
         }
         $config_json['course_details'][$name] = $entry;
 

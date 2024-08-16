@@ -109,7 +109,7 @@ class ConfigurationControllerTester extends \PHPUnit\Framework\TestCase {
             'seek_message_enabled'           => false,
             'seek_message_instructions'      => '',
             'polls_enabled'                  => false,
-            'self_registration_type'      => 0
+            'self_registration_type'         => NO_SELF_REGISTER
         ];
 
         $gradeable_seating_options = [
@@ -192,7 +192,7 @@ class ConfigurationControllerTester extends \PHPUnit\Framework\TestCase {
             'seek_message_enabled'           => false,
             'seek_message_instructions'      => '',
             'polls_enabled'                  => false,
-            'self_registration_type'      => 0
+            'self_registration_type'         => NO_SELF_REGISTER
         ];
 
         $gradeable_seating_options = [
@@ -282,7 +282,7 @@ class ConfigurationControllerTester extends \PHPUnit\Framework\TestCase {
             'seek_message_enabled'           => false,
             'seek_message_instructions'      => '',
             'polls_enabled'                  => false,
-            'self_registration_type'      => 0
+            'self_registration_type'         => NO_SELF_REGISTER
         ];
 
         $gradeable_seating_options = [

@@ -1,4 +1,8 @@
 <div class="content">
+{{ set NO_SELF_REGISTER = 0 }}
+{{ set ALL_SELF_REGISTER = 1 }}
+{{ set REQUEST_SELF_REGISTER = 2 }}
+
     <header>
         <h1>Course Settings</h1>
         <div class="btn-wrapper">
@@ -305,19 +309,20 @@
             </label>
         </div>
         <div class="danger">
-        <h2> Danger Zone</h2>
-        <hr>
-        <div class="config-row checkbox-row">
-            <input type="checkbox" name="self_registration" id="self-registration" value="true" {{ fields['self_registration_type'] == 1 ? 'checked' : '' }}
-            onclick="return confirm('Are you sure you want to allow self registration to courses? This allows for ALL users (even those manually removed from the course) to register for courses.');"/>
-            <label for="self-registration">
-                <span class="option-title">Enable Self Registration</span>
-                <br/>
-                <span class="option-alt">Allow users to self register for this course</span>
-                <br/>
-                <span class="warning">WARNING: This allows for ANY user which has access to Submitty to register for this course</span>
-            </label>
-        </div>
+            <h2> Danger Zone</h2>
+            <hr>
+                <div class="config-row checkbox-row">
+                    <input type="checkbox" name="self_registration" id="self-registration" value="true" {{ fields['self_registration_type'] == ALL_SELF_REGISTER ? 'checked' : '' }}
+                    onclick="return confirm('Are you sure you want to enable self registration to this course? This allows ALL users (even those manually removed from the course) to register for this course.');"/>
+                    <label for="self-registration">
+                        <span class="option-title">Enable Self Registration</span>
+                        <br/>
+                        <span class="option-alt">Allow users to self register for this course</span>
+                        <br/>
+                        <span class="warning">WARNING: This allows ANY user who has access to Submitty to register for this course</span>
+                    </label>
+                </div>
+            </hr>
         </div>
     </div>
 </div>

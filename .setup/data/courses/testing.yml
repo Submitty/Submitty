@@ -3,7 +3,7 @@ instructor: instructor
 registration_sections: 10
 registered_students: 10
 make_customization: true
-self_registration_type: 1
+self_registration_type: 1 # All self registration allowed
 gradeables:
   - g_id: open_homework
     components:

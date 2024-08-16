@@ -6,6 +6,7 @@ use app\authentication\DatabaseAuthentication;
 use app\authentication\SamlAuthentication;
 use app\controllers\AbstractController;
 use app\controllers\admin\AdminGradeableController;
+use app\controllers\admin\ConfigurationController;
 use app\libraries\FileUtils;
 use app\libraries\response\JsonResponse;
 use app\libraries\response\MultiResponse;
@@ -498,8 +499,8 @@ class UsersController extends AbstractController {
         return new RedirectResponse($this->core->buildCourseUrl(['graders']));
     }
 
-    #[Route("/courses/{_semester}/{_course}/sections", methods: ["GET"])]
-    public function sectionsForm() {
+    #[Route("/courses/{semester}/{course}/sections", methods: ["GET"])]
+    public function sectionsForm(string $semester, string $course) {
         $students = $this->core->getQueries()->getAllUsers();
         $reg_sections = $this->core->getQueries()->getRegistrationSections();
         $non_null_counts = $this->core->getQueries()->getUsersCountByRotatingSections();
@@ -520,6 +521,8 @@ class UsersController extends AbstractController {
 
         $null_counts = $this->core->getQueries()->getCountNullUsersRotatingSections();
         $max_section = $this->core->getQueries()->getMaxRotatingSection();
+        $is_self_register =  $this->core->getQueries()->isSelfRegistrationAllowed($this->core->getConfig()->getCourse()) !== NO_SELF_REGISTER;
+        $default_section = $this->core->getQueries()->getDefaultRegistrationSection($term, $course);
         $this->core->getOutput()->renderOutput(
             ['admin', 'Users'],
             'sectionsForm',
@@ -527,7 +530,9 @@ class UsersController extends AbstractController {
             $reg_sections,
             $non_null_counts,
             $null_counts,
-            $max_section
+            $max_section,
+            $is_self_register,
+            $default_section
         );
     }
 

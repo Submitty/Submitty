@@ -3334,7 +3334,7 @@ ORDER BY g.sections_rotating_id, g.user_id",
     /**
      * Gets the default registration section for a given course and term from the courses table
      */
-    public function getDefaultRegistrationSection(string $term, string $course): string {
+    public function getDefaultRegistrationSection(string $term, string $course): string|null {
         $this->submitty_db->query("SELECT default_section_id FROM courses where term=? and course=?", [$term, $course]);
         return $this->submitty_db->row()['default_section_id'];
     }
@@ -5191,8 +5191,8 @@ SQL;
      */
     public function getSelfRegisterCourses(string $user_id): array {
         $query = <<<SQL
-Select *, t.name as term_name from courses c, terms t where not c.self_registration_type = 0 and c.course not in (
-    select course from courses_users where user_id = ?
+SELECT c.*, t.name AS term_name FROM courses c, terms t WHERE NOT c.self_registration_type = 0 AND c.course NOT IN (
+    SELECT course FROM courses_users WHERE user_id = ?
 )
 SQL;
         $this->submitty_db->query($query, [$user_id]);
