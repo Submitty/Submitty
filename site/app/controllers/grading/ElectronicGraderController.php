@@ -2312,9 +2312,9 @@ class ElectronicGraderController extends AbstractController {
         $logger_params = [
             "course_semester" => $this->core->getConfig()->getTerm(),
             "course_name" => $this->core->getDisplayedCourseName(),
-            "gradeable_id" => $gradeable->getId(),
-            "grader_id" => $grader->getId(),
-            "component_id" => $component->getId(),
+            "gradeable_id" => $gradeable_id,
+            "grader_id" => $this->core->getUser()->getId(),
+            "component_id" => $component_id,
             "action" => "SAVE_COMPONENT",
             "submitter_id" => $submitter_id
         ];

@@ -9,7 +9,9 @@
     {% for component in gradeable.components %}
         <div class="component-container edit-component-container
             {% if component.peer_component %} peer-component-container{% endif %}
-            {% if component.curve_component %} curve-component-container{% endif %}">
+            {% if component.curve_component %} curve-component-container{% endif %}"
+            {% if component.peer_component %} data-peer-testid="peer-component-container"{% endif %}
+            {% if component.curve_component %} data-curve-testid="curve-component-container"{% endif %}>
             {% include "EditComponent.twig" with {
                 'precision': gradeable.precision,
                 'show_mark_list': false,

@@ -30,4 +30,4 @@ def down(config, database, semester, course):
    :type semester: str
    :param course: Code of course being migrated
    """
-   database.execute("ALTER TABLE gradeable_component DROP COLUMN gc_is_curve")
+   pass
