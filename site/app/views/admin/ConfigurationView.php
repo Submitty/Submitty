@@ -10,7 +10,10 @@ class ConfigurationView extends AbstractView {
         $gradeable_seating_options,
         bool $email_enabled,
         array $submitty_admin_user,
-        string $csrf_token
+        string $csrf_token,
+        int $NO_SELF_REGISTER,
+        int $ALL_SELF_REGISTER,
+        int $REQUEST_SELF_REGISTER
     ) {
         $this->output->addInternalJs("configuration.js");
         $this->output->addInternalCss("configuration.css");
@@ -26,6 +29,9 @@ class ConfigurationView extends AbstractView {
             "email_room_seating_url" => $this->core->buildCourseUrl(['email_room_seating']),
             "manage_categories_url" => $this->core->buildCourseUrl(['forum', 'categories']),
             "csrf_token" => $csrf_token,
+            "NO_SELF_REGISTER" => $NO_SELF_REGISTER,
+            "ALL_SELF_REGISTER" => $ALL_SELF_REGISTER,
+            "REQUEST_SELF_REGISTER" => $REQUEST_SELF_REGISTER
         ]);
     }
 }

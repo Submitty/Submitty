@@ -5205,7 +5205,7 @@ SQL;
         return $return;
     }
 
-    public function isSelfRegistrationAllowed(string $course): int {
+    public function getSelfRegistrationType(string $course): int {
         $this->submitty_db->query("SELECT self_registration_type FROM courses WHERE course=?", [$course]);
         return $this->submitty_db->row()['self_registration_type'];
     }

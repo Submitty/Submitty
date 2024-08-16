@@ -51,7 +51,7 @@ class ConfigurationController extends AbstractController {
             'private_repository'             => $this->core->getConfig()->getPrivateRepository(),
             'room_seating_gradeable_id'      => $this->core->getConfig()->getRoomSeatingGradeableId(),
             'seating_only_for_instructor'    => $this->core->getConfig()->isSeatingOnlyForInstructor(),
-            'self_registration_type'      => $this->core->getQueries()->isSelfRegistrationAllowed($this->core->getConfig()->getCourse()) !== NO_SELF_REGISTER,
+            'self_registration_type'      => $this->core->getQueries()->getSelfRegistrationType($this->core->getConfig()->getCourse()) !== NO_SELF_REGISTER,
             'auto_rainbow_grades'            => $this->core->getConfig()->getAutoRainbowGrades(),
             'queue_enabled'                  => $this->core->getConfig()->isQueueEnabled(),
             'queue_message'                  => $this->core->getConfig()->getQueueMessage(),
@@ -92,7 +92,10 @@ class ConfigurationController extends AbstractController {
                     'verified' => $this->core->getConfig()->isSubmittyAdminUserVerified(),
                     'in_course' => $admin_in_course,
                 ],
-                $this->core->getCsrfToken()
+                $this->core->getCsrfToken(),
+                NO_SELF_REGISTER,
+                ALL_SELF_REGISTER,
+                REQUEST_SELF_REGISTER
             )
         );
     }

@@ -6,7 +6,6 @@ use app\authentication\DatabaseAuthentication;
 use app\authentication\SamlAuthentication;
 use app\controllers\AbstractController;
 use app\controllers\admin\AdminGradeableController;
-use app\controllers\admin\ConfigurationController;
 use app\libraries\FileUtils;
 use app\libraries\response\JsonResponse;
 use app\libraries\response\MultiResponse;
@@ -521,7 +520,7 @@ class UsersController extends AbstractController {
 
         $null_counts = $this->core->getQueries()->getCountNullUsersRotatingSections();
         $max_section = $this->core->getQueries()->getMaxRotatingSection();
-        $is_self_register =  $this->core->getQueries()->isSelfRegistrationAllowed($this->core->getConfig()->getCourse()) !== NO_SELF_REGISTER;
+        $is_self_register =  $this->core->getQueries()->getSelfRegistrationType($this->core->getConfig()->getCourse()) !== NO_SELF_REGISTER;
         $default_section = $this->core->getQueries()->getDefaultRegistrationSection($term, $course);
         $this->core->getOutput()->renderOutput(
             ['admin', 'Users'],

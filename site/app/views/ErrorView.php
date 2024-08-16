@@ -36,7 +36,7 @@ class ErrorView extends AbstractView {
      * @param string $readd_url URL to the rejoin course function.
      * @return string The Twig HTML for this page.
      */
-    public function noAccessCourse(bool $can_rejoin_course, string $readd_url): string {
+    public function noAccessCourse(bool $can_rejoin_course, string $readd_url, int $self_registration_type, int $NO_SELF_REGISTER, int $ALL_SELF_REGISTER, int $REQUEST_SELF_REGISTER): string {
         return $this->core->getOutput()->renderTwigTemplate("error/NoAccessCourse.twig", [
             "course_name" => $this->core->getDisplayedCourseName(),
             "semester" => $this->core->getFullSemester(),
@@ -46,7 +46,10 @@ class ErrorView extends AbstractView {
             "self_register_url" => $this->core->buildCourseUrl(['self_register']),
             "user" => $this->core->getUser(),
             "csrf_token" => $this->core->getCsrfToken(),
-            "self_registration_type" => $this->core->getQueries()->isSelfRegistrationAllowed($this->core->getConfig()->getCourse()),
+            "self_registration_type" => $self_registration_type,
+            "NO_SELF_REGISTER" => $NO_SELF_REGISTER,
+            "ALL_SELF_REGISTER" => $ALL_SELF_REGISTER,
+            "REQUEST_SELF_REGISTER" => $REQUEST_SELF_REGISTER
         ]);
     }
 

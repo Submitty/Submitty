@@ -15,11 +15,7 @@ def up(config, database):
     # Self Registration Types: 0 == None, 1 == All users auto join when registering, 2 == Users request to join when registering (added later)
     database.execute("""
                      ALTER TABLE courses ADD COLUMN IF NOT EXISTS self_registration_type smallint default 0,
-                     ADD COLUMN IF NOT EXISTS default_section_id VARCHAR(255);
-                     FOREIGN KEY(default_section_id)
-                        REFERENCES sections_registration(id)
-                        ON UPDATE CASCADE
-                        ON DELETE CASCADE,
+                     ADD COLUMN IF NOT EXISTS default_section_id VARCHAR(255)
                      """)
 
 def down(config, database):

@@ -9,6 +9,8 @@ use app\libraries\response\RedirectResponse;
 use app\models\Email;
 use app\models\User;
 
+use app\controllers\admin\ConfigurationController;
+
 class SelfRejoinController extends AbstractController {
     /**
      *
@@ -26,7 +28,10 @@ class SelfRejoinController extends AbstractController {
             'Error',
             'noAccessCourse',
             $this->canRejoinCourse($user_id, $course, $term),
-            $this->core->buildCourseUrl(["rejoin_course"])
+            $this->core->buildCourseUrl(["rejoin_course"]),
+            NO_SELF_REGISTER,
+            ALL_SELF_REGISTER,
+            REQUEST_SELF_REGISTER
         );
     }
 
