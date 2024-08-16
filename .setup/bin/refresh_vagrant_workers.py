@@ -5,10 +5,14 @@ import json
 import subprocess
 from collections import OrderedDict
 
-SUBMITTY_REPOSITORY = os.environ['SUBMITTY_REPOSITORY']
-SUBMITTY_INSTALL_DIR = os.environ['SUBMITTY_INSTALL_DIR']
-DAEMON_USER = os.environ['DAEMON_USER']
+SUBMITTY_REPOSITORY = '/usr/local/submitty/GIT_CHECKOUT/Submitty'
+SUBMITTY_INSTALL_DIR = '/usr/local/submitty'
+DAEMON_USER = 'submitty_daemon'
 SUPERVISOR_USER = 'submitty'
+
+if not os.path.isdir(os.path.join(SUBMITTY_REPOSITORY, '.vagrant')):
+  print("ERROR: This script may only be run on a development vagrant machine.")
+  exit(1)
 
 vagrant_workers_path = os.path.join(SUBMITTY_REPOSITORY, '.vagrant', 'workers.json')
 autograding_workers_path = os.path.join(SUBMITTY_INSTALL_DIR, 'config', 'autograding_workers.json')
@@ -28,6 +32,11 @@ else:
   exit(1)
 print("Done loading data")
 print()
+
+# This is an automated setup for generating SSH credentials to connect the
+# Submitty machine to one or more worker machines.
+# Manual instructions to do this on a production environment are located at:
+# https://submitty.org/sysadmin/installation/worker_installation
 
 print("Generating SSH credentials...")
 shutil.rmtree("/tmp/worker_keys", True)
@@ -92,5 +101,4 @@ with open(autograding_workers_path, 'w') as file:
 print(f"Configuration saved with {enabled}/{total} machines enabled")
 print()
 
-os.system('systemctl restart submitty_autograding_shipper && systemctl restart submitty_autograding_worker')
 print("DONE")
