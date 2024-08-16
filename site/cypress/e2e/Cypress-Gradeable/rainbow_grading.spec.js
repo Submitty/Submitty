@@ -115,7 +115,7 @@ skipOn(Cypress.env('run_area') === 'CI', () => {
             cy.get('[data-testid="plagiarism-submit"]').click();
             cy.get('[data-testid="plagiarism-table-body"] > tr > td').as('plagiarism-table-elements');
             cy.get('@plagiarism-table-elements').eq(0).should('contain', 'adamsg');
-            cy.get('@plagiarism-table-elements').eq(1).should('contain', 'grades_released_homework_autota');
+            cy.get('@plagiarism-table-elements').eq(1).should('contain', 'open_homework');
             cy.get('@plagiarism-table-elements').eq(2).should('contain', '1');
             cy.get('@plagiarism-table-elements').eq(3).find('a').click();
         });
@@ -190,10 +190,10 @@ skipOn(Cypress.env('run_area') === 'CI', () => {
                     checkRainbowGradesOption();
                 }
             });
-            cy.visit(['sample', 'config']);
+            cy.visit(['testing', 'config']);
             cy.get('[data-testid="display-rainbow-grades-summary"]').uncheck();
             cy.get('[data-testid="display-rainbow-grades-summary"]').should('not.be.checked');
-            cy.visit(['sample', 'grades']);
+            cy.visit(['testing', 'grades']);
             cy.get('[data-testid="rainbow-grades"]').should('contain', 'No grades are available...');
         });
     });
@@ -230,7 +230,7 @@ const checkRainbowGradesOption = () => {
     });
 };
 const reset = () => {
-    cy.get('[data-testid="display-grade-summary"]').uncheck();
+    cy.get('[data-testid="display-grade-summary"]').should('be.visible').uncheck();
     cy.get('[data-testid="display-grade-details"]').uncheck();
     cy.get('[data-testid="display-exam-seating"]').uncheck();
     cy.get('[data-testid="display-section"]').uncheck();
