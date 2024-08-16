@@ -17,18 +17,35 @@ use app\libraries\FileUtils;
 class RainbowCustomization extends AbstractModel {
     /**/
     protected $core;
-    private $bucket_counts = [];               // Keep track of how many items are in each bucket
     /**
-     * @var int[]
+     * @var array<string,int>
      */
-    private array $bucket_remove_lowest = [];               // get how many droplowest are in each bucket
-    private $customization_data = [];
-    private $has_error;
-    private $error_messages;
-    private $used_buckets = [];
-    private $available_buckets;
-    private ?object $RCJSON;                           // This is the customization.json php object, or null if it wasn't found
-    private $sections;                         // Contains section ids mapped to labels
+    private array $bucket_counts = [];                  // Keep track of how many items are in each bucket
+    /**
+     * @var array<string,int>
+     */
+    private array $bucket_remove_lowest = [];           // get how many droplowest are in each bucket
+    /**
+     * @var array<string,array<mixed>>
+     */
+    private array $customization_data = [];
+    /**
+     * @var string
+     */
+    private string $has_error;
+    /**
+     * @var string[]
+     */
+    private array $error_messages;
+    /**
+     * @var string[]
+     */
+    private array $used_buckets = [];
+    /**
+     * @var string[]
+     */
+    private array $available_buckets;
+    private ?object $RCJSON;                            // This is the customization.json php object, or null if it wasn't found
 
     /*XXX: This is duplicated from AdminGradeableController.php, we really shouldn't have multiple copies lying around.
      * On top of that, Rainbow Grades has its own enum internally. Since that's a separate repo it's probably
@@ -51,8 +68,6 @@ class RainbowCustomization extends AbstractModel {
         parent::__construct($main_core);
         $this->has_error = "false";
         $this->error_messages = [];
-
-        $this->sections = (object) [];
 
         // Attempt to load json from customization file
         // If it fails then set to null, will be used to load defaults later
@@ -196,9 +211,9 @@ class RainbowCustomization extends AbstractModel {
     /**
      * Returns $bucket_gradeables reordered to match order in $json_bucket_ids.
      * If a gradeable is not present in $json_bucket_ids, it will be added to the end of the array in order of grade release date.
-     * @param array $bucket_gradeables A gradeable bucket from $this->customization_data
-     * @param array $json_bucket_ids An "ids" array from a $this->RCSJSON bucket
-     * @return array
+     * @param array<mixed> $bucket_gradeables A gradeable bucket from $this->customization_data
+     * @param array<mixed> $json_bucket_ids An "ids" array from a $this->RCSJSON bucket
+     * @return array<mixed>
      */
     private function reorderBucket(array $bucket_gradeables, array $json_bucket_ids): array {
         $new_gradeables = [];
@@ -256,9 +271,9 @@ class RainbowCustomization extends AbstractModel {
      *
      * If no curve values were found for gradeable_id then gradeable_id will not be present in the return array
      *
-     * @return array
+     * @return array<string,array<string,array<float>>>
      */
-    public function getPerGradeableCurves() {
+    public function getPerGradeableCurves(): array {
         $retArray = [];
 
         if (!is_null($this->RCJSON)) {
@@ -308,7 +323,7 @@ class RainbowCustomization extends AbstractModel {
      *
      * @return array<string,int>
      */
-    public function getBucketPercentages() {
+    public function getBucketPercentages(): array {
         $retArray = [];
 
         if (!is_null($this->RCJSON)) {
@@ -331,33 +346,45 @@ class RainbowCustomization extends AbstractModel {
         return $retArray;
     }
 
-    public function getBucketCounts() {
+    /**
+     * @return array<string,int>
+     */
+    public function getBucketCounts(): array {
         return $this->bucket_counts;
     }
 
     /**
-     * @return int[]
+     * @return array<string,int>
      */
     public function getBucketRemoveLowest(): array {
         return $this->bucket_remove_lowest;
     }
 
-    public function getCustomizationData() {
+    /**
+     * @return array<string,array<mixed>>
+     */
+    public function getCustomizationData(): array {
         return $this->customization_data;
     }
 
-    public function getAvailableBuckets() {
+    /**
+     * @return string[]
+     */
+    public function getAvailableBuckets(): array {
         return $this->available_buckets;
     }
 
-    public function getUsedBuckets() {
+    /**
+     * @return string[]
+     */
+    public function getUsedBuckets(): array {
         return $this->used_buckets;
     }
 
     /**
      * @return string[]
      */
-    public function getMessages() {
+    public function getMessages(): array {
         return !is_null($this->RCJSON) ? $this->RCJSON->getMessages() : [];
     }
 
@@ -368,7 +395,7 @@ class RainbowCustomization extends AbstractModel {
      * Get a multidimensional array that contains not only a list of usable display benchmarks but also which ones
      * are in use (in the customization.json)
      *
-     * @return array multidimensional array of display benchmark data
+     * @return array<int,array<string,bool|string>> multidimensional array of display benchmark data
      */
     public function getDisplayBenchmarks(): array {
         $allowedBenchmarks = RainbowCustomizationJSON::allowed_display_benchmarks;
@@ -388,7 +415,7 @@ class RainbowCustomization extends AbstractModel {
      * @return object An object which maps benchmarks to the percentage (as a decimal) that is needed to obtain that
      *                letter grade
      */
-    public function getBenchmarkPercent() {
+    public function getBenchmarkPercent(): object {
         if (!is_null($this->RCJSON)) {
             $percent_obj = $this->RCJSON->getBenchmarkPercent();
 
@@ -413,7 +440,7 @@ class RainbowCustomization extends AbstractModel {
      * @return object An object which maps final grade cutoffs to the percentage (as a decimal) that is needed to
      *                obtain that letter grade
      */
-    public function getFinalCutoff() {
+    public function getFinalCutoff(): object {
         if (!is_null($this->RCJSON)) {
             $percent_obj = $this->RCJSON->getFinalCutoff();
 
@@ -444,7 +471,7 @@ class RainbowCustomization extends AbstractModel {
      * Get a multidimensional array that contains not only a list of usable display options but also which ones
      * are in use (in the customization.json)
      *
-     * @return array<int, array<string, bool|string>> multidimensional array of display option data
+     * @return array<int,array<string,bool|string>> multidimensional array of display option data
      */
     public function getDisplay(): array {
         $allowed_display_options = RainbowCustomizationJSON::allowed_display;
@@ -480,7 +507,7 @@ class RainbowCustomization extends AbstractModel {
      *
      * @return object The object mapping section ids to labels
      */
-    public function getSectionsAndLabels() {
+    public function getSectionsAndLabels(): object {
         // Get sections from db
         $db = new DatabaseQueries($this->core);
         $db_sections = $db->getRegistrationSections();
@@ -541,7 +568,7 @@ class RainbowCustomization extends AbstractModel {
      * @return array<object>  array of plagiarism JSON object
      */
     public function getPlagiarism(): array {
-        return !is_null($this->RCJSON) ? $this->RCJSON->getPlagiarism() : [];
+        return $this->RCJSON?->getPlagiarism() ?? [];
     }
 
     /**
@@ -554,7 +581,7 @@ class RainbowCustomization extends AbstractModel {
     }
 
     // This function handles processing the incoming post data
-    public function processForm() {
+    public function processForm(): void {
 
         // Get a new customization file
         $this->RCJSON = new RainbowCustomizationJSON($this->core);
@@ -620,11 +647,14 @@ class RainbowCustomization extends AbstractModel {
         $this->RCJSON->saveToJsonFile();
     }
 
-    public function error() {
+    public function error(): string {
         return $this->has_error;
     }
 
-    public function getErrorMessages() {
+    /**
+     * @return array<string>
+     */
+    public function getErrorMessages(): array {
         return $this->error_messages;
     }
 
