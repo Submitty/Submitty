@@ -27,7 +27,7 @@ class RainbowCustomization extends AbstractModel {
     private $error_messages;
     private $used_buckets = [];
     private $available_buckets;
-    private object $RCJSON;                           // This is the customization.json php object, or null if it wasn't found
+    private ?object $RCJSON;                           // This is the customization.json php object, or null if it wasn't found
     private $sections;                         // Contains section ids mapped to labels
 
     /*XXX: This is duplicated from AdminGradeableController.php, we really shouldn't have multiple copies lying around.
