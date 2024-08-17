@@ -17,16 +17,16 @@ use Symfony\Component\Routing\Annotation\Route;
  * @package app\controllers\admin
  * @AccessControl(role="INSTRUCTOR")
  */
-define('NO_SELF_REGISTER', 0); // Self registration disabled
-define('ALL_SELF_REGISTER', 1); // Self registration allowed, and all users who register are automatically added
-define('REQUEST_SELF_REGISTER', 2); // Self registration allowed, users request and instructors can approve
 class ConfigurationController extends AbstractController {
     // The message that should be returned to the user if they fail the required validation to enable the nightly
     // rainbow grades build checkbox
     const FAIL_AUTO_RG_MSG = 'You may not enable automatic rainbow grades generation until you have supplied a ' .
     'customization.json file.  To have one generated for you, you may use the Web-Based Rainbow Grades Generation inside the Grade ' .
     'Reports tab.  You may also manually create the file and upload it to your course\'s rainbow_grades directory.';
-    
+    const NO_SELF_REGISTER = 0; // Self registration disabled
+    const ALL_SELF_REGISTER = 1; // Self registration allowed, and all users who register are automatically added
+    const REQUEST_SELF_REGISTER = 2; // Self registration allowed, users request and instructors can approve
+
     /**
      * @return MultiResponse
      */
@@ -51,7 +51,7 @@ class ConfigurationController extends AbstractController {
             'private_repository'             => $this->core->getConfig()->getPrivateRepository(),
             'room_seating_gradeable_id'      => $this->core->getConfig()->getRoomSeatingGradeableId(),
             'seating_only_for_instructor'    => $this->core->getConfig()->isSeatingOnlyForInstructor(),
-            'self_registration_type'      => $this->core->getQueries()->getSelfRegistrationType($this->core->getConfig()->getCourse()) !== NO_SELF_REGISTER,
+            'self_registration_type'      => $this->core->getQueries()->getSelfRegistrationType($this->core->getConfig()->getCourse()) !== ConfigurationController::NO_SELF_REGISTER,
             'auto_rainbow_grades'            => $this->core->getConfig()->getAutoRainbowGrades(),
             'queue_enabled'                  => $this->core->getConfig()->isQueueEnabled(),
             'queue_message'                  => $this->core->getConfig()->getQueueMessage(),
@@ -93,9 +93,9 @@ class ConfigurationController extends AbstractController {
                     'in_course' => $admin_in_course,
                 ],
                 $this->core->getCsrfToken(),
-                NO_SELF_REGISTER,
-                ALL_SELF_REGISTER,
-                REQUEST_SELF_REGISTER
+                ConfigurationController::NO_SELF_REGISTER,
+                 ConfigurationController::ALL_SELF_REGISTER,
+                 ConfigurationController::REQUEST_SELF_REGISTER
             )
         );
     }
@@ -192,8 +192,9 @@ class ConfigurationController extends AbstractController {
         }
 
         if ($name === 'self_registration') {
-            $this->core->getQueries()->setSelfRegistrationAllowed($this->core->getConfig()->getCourse(), $entry === 'true' ? ALL_SELF_REGISTER : NO_SELF_REGISTER);
+            $this->core->getQueries()->setSelfRegistrationType($this->core->getConfig()->getCourse(), $entry === 'true' ?  ConfigurationController::ALL_SELF_REGISTER : ConfigurationController::NO_SELF_REGISTER);
         }
+
         if ($name === 'forum_enabled' && $entry == 1) {
             // Only create default categories when there is no existing categories (only happens when first enabled)
             if (empty($this->core->getQueries()->getCategories())) {

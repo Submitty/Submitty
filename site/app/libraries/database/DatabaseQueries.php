@@ -5210,7 +5210,7 @@ SQL;
         return $this->submitty_db->row()['self_registration_type'];
     }
 
-    public function setSelfRegistrationAllowed(string $course, int $self_registration_type): void {
+    public function setSelfRegistrationType(string $course, int $self_registration_type): void {
         $this->submitty_db->query("UPDATE courses set self_registration_type=? WHERE course=?", [$self_registration_type, $course]);
     }
 

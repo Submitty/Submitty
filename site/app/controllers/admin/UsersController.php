@@ -18,6 +18,7 @@ use Symfony\Component\Routing\Annotation\Route;
 use app\exceptions\ValidationException;
 use app\exceptions\DatabaseException;
 use app\controllers\SelfRejoinController;
+use app\controllers\admin\ConfigurationController;
 
 /**
  * Class UsersController
@@ -498,8 +499,10 @@ class UsersController extends AbstractController {
         return new RedirectResponse($this->core->buildCourseUrl(['graders']));
     }
 
-    #[Route("/courses/{semester}/{course}/sections", methods: ["GET"])]
-    public function sectionsForm(string $semester, string $course) {
+    #[Route("/courses/{_semester}/{_course}/sections", methods: ["GET"])]
+    public function sectionsForm() {
+        $course = $this->core->getConfig()->getCourse();
+        $term = $this->core->getConfig()->getTerm();
         $students = $this->core->getQueries()->getAllUsers();
         $reg_sections = $this->core->getQueries()->getRegistrationSections();
         $non_null_counts = $this->core->getQueries()->getUsersCountByRotatingSections();
@@ -520,7 +523,7 @@ class UsersController extends AbstractController {
 
         $null_counts = $this->core->getQueries()->getCountNullUsersRotatingSections();
         $max_section = $this->core->getQueries()->getMaxRotatingSection();
-        $is_self_register =  $this->core->getQueries()->getSelfRegistrationType($this->core->getConfig()->getCourse()) !== NO_SELF_REGISTER;
+        $is_self_register =  $this->core->getQueries()->getSelfRegistrationType($course) !== ConfigurationController::NO_SELF_REGISTER;
         $default_section = $this->core->getQueries()->getDefaultRegistrationSection($term, $course);
         $this->core->getOutput()->renderOutput(
             ['admin', 'Users'],

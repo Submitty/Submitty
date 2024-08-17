@@ -3,7 +3,7 @@
 namespace app\controllers\course;
 
 use app\controllers\AbstractController;
-use app\controllers\adminn\ConfigurationController;
+use app\controllers\admin\ConfigurationController;
 use app\libraries\response\RedirectResponse;
 use Symfony\Component\Routing\Annotation\Route;
 use app\models\Email;
@@ -34,7 +34,7 @@ class CourseRegistrationController extends AbstractController {
     public function selfRegister(string $term, string $course): RedirectResponse {
         $this->core->loadCourseConfig($term, $course);
         $this->core->loadCourseDatabase();
-        if ($this->core->getQueries()->getSelfRegistrationType($course) === NO_SELF_REGISTER) {
+        if ($this->core->getQueries()->getSelfRegistrationType($course) ===  ConfigurationController::NO_SELF_REGISTER) {
             $this->core->addErrorMessage('Self registration is not allowed.');
             return new RedirectResponse($this->core->buildUrl(['home']));
         }

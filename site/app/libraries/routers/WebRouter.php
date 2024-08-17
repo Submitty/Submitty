@@ -206,12 +206,12 @@ class WebRouter {
             }
 
             /** @noinspection PhpUnhandledExceptionInspection */
-            if (!$router->accessCheck()) {
-                return new MultiResponse(
-                    JsonResponse::getFailResponse("You don't have access to this endpoint."),
-                    new WebResponse("Error", "errorPage", "You don't have access to this page.")
-                );
-            }
+            // // if (!$router->accessCheck()) {
+            //     return new MultiResponse(
+            //         JsonResponse::getFailResponse("You don't have access to this endpoint."),
+            //         new WebResponse("Error", "errorPage", "You don't have access to this page.")
+            //     );
+            // }
 
             $enabled = $router->getEnabled();
             if ($enabled !== null && !$router->checkEnabled($enabled)) {

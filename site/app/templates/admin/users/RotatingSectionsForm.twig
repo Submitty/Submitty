@@ -51,7 +51,7 @@
                             <th>Section</th>
                             <th>Course ID</th>
                             <th>Count</th>
-                            {% if is_self_register_course %}
+                            {% if self_registration_type !== constant('app\\controllers\\admin\\ConfigurationController::NO_SELF_REGISTER') %}
                                 <th>Default Section</th>
                             {% endif %}
                         </tr>
@@ -65,7 +65,7 @@
                                 <td>Section {{ section['sections_registration_id'] }} </td>
                                 <td> {{ section['course_section_id'] }} </td>
                                 <td> {{ reg_sections_count[section['sections_registration_id']] }} </td>
-                                {% if is_self_register_course %}
+                                {% if self_registration_type !== constant('app\\controllers\\admin\\ConfigurationController::NO_SELF_REGISTER') %}
                                     <td><input type="radio" name="default_section" value="{{ section['sections_registration_id'] }}" {{ section['sections_registration_id'] == default_section ? 'checked' : '' }}/></td>
                                 {% endif %}
                             </tr>
@@ -74,7 +74,7 @@
                                 <td>Section {{ section['sections_registration_id'] }}</td>
                                 <td> {{ section['course_section_id'] }} </td>
                                 <td>0</td>
-                                {% if is_self_register_course %}
+                                {% if self_registration_type !== constant('app\\controllers\\admin\\ConfigurationController::NO_SELF_REGISTER') %}
                                     <td><input type="radio" name="default_section" value="{{ section['sections_registration_id'] }}" {{ section['sections_registration_id'] == default_section ? 'checked' : '' }} /></td>
                                 {% endif %}
                             </tr>
@@ -86,7 +86,7 @@
                             <td>Section NULL</td>
                             <td>NULL</td>
                             <td>{{ reg_sections_count['NULL'] }}</td>
-                            {% if is_self_register_course %}
+                            {% if self_registration_type !== constant('app\\controllers\\admin\\ConfigurationController::NO_SELF_REGISTER') %}
                                     <td></td>
                             {% endif %}
                         </tr>

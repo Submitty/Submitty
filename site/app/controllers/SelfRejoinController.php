@@ -29,9 +29,7 @@ class SelfRejoinController extends AbstractController {
             'noAccessCourse',
             $this->canRejoinCourse($user_id, $course, $term),
             $this->core->buildCourseUrl(["rejoin_course"]),
-            NO_SELF_REGISTER,
-            ALL_SELF_REGISTER,
-            REQUEST_SELF_REGISTER
+            $this->core->getQueries()->getSelfRegistrationType($course)
         );
     }
 
