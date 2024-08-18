@@ -523,8 +523,6 @@ class UsersController extends AbstractController {
 
         $null_counts = $this->core->getQueries()->getCountNullUsersRotatingSections();
         $max_section = $this->core->getQueries()->getMaxRotatingSection();
-        $is_self_register =  $this->core->getQueries()->getSelfRegistrationType($course) !== ConfigurationController::NO_SELF_REGISTER;
-        $default_section = $this->core->getQueries()->getDefaultRegistrationSection($term, $course);
         $this->core->getOutput()->renderOutput(
             ['admin', 'Users'],
             'sectionsForm',
@@ -532,9 +530,7 @@ class UsersController extends AbstractController {
             $reg_sections,
             $non_null_counts,
             $null_counts,
-            $max_section,
-            $is_self_register,
-            $default_section
+            $max_section
         );
     }
 

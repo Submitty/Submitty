@@ -51,7 +51,9 @@ class ConfigurationController extends AbstractController {
             'private_repository'             => $this->core->getConfig()->getPrivateRepository(),
             'room_seating_gradeable_id'      => $this->core->getConfig()->getRoomSeatingGradeableId(),
             'seating_only_for_instructor'    => $this->core->getConfig()->isSeatingOnlyForInstructor(),
-            'self_registration_type'      => $this->core->getQueries()->getSelfRegistrationType($this->core->getConfig()->getCourse()) !== ConfigurationController::NO_SELF_REGISTER,
+            'self_registration_type'         => $this->core->getQueries()->getSelfRegistrationType($this->core->getConfig()->getCourse()),
+            'registration_sections'          => $this->core->getQueries()->getRegistrationSections(),
+            'default_section'               => $this->core->getQueries()->getDefaultRegistrationSection($this->core->getConfig()->getTerm(), $this->core->getConfig()->getCourse()),
             'auto_rainbow_grades'            => $this->core->getConfig()->getAutoRainbowGrades(),
             'queue_enabled'                  => $this->core->getConfig()->isQueueEnabled(),
             'queue_message'                  => $this->core->getConfig()->getQueueMessage(),
@@ -195,6 +197,10 @@ class ConfigurationController extends AbstractController {
             $this->core->getQueries()->setSelfRegistrationType($this->core->getConfig()->getCourse(), $entry === 'true' ?  ConfigurationController::ALL_SELF_REGISTER : ConfigurationController::NO_SELF_REGISTER);
         }
 
+        if ($name === 'default_section_id') {
+            $this->core->getQueries()->setDefaultRegistrationSection($this->core->getConfig()->getTerm(), $this->core->getConfig()->getCourse(), $entry);
+        }
+
         if ($name === 'forum_enabled' && $entry == 1) {
             // Only create default categories when there is no existing categories (only happens when first enabled)
             if (empty($this->core->getQueries()->getCategories())) {
@@ -206,7 +212,7 @@ class ConfigurationController extends AbstractController {
         }
 
         $config_json = $this->core->getConfig()->getCourseJson();
-        if (!isset($config_json['course_details'][$name]) && $name !== 'self_registration') {
+        if (!isset($config_json['course_details'][$name]) && $name !== 'self_registration' && $name !== 'default_section_id') {
             return MultiResponse::JsonOnlyResponse(
                 JsonResponse::getFailResponse('Not a valid config name')
             );

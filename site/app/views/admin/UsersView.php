@@ -125,7 +125,7 @@ class UsersView extends AbstractView {
         ]);
     }
 
-    public function sectionsForm($students, $reg_sections, $not_null_counts, $null_counts, $max_section, int $self_registration_type, string $default_section) {
+    public function sectionsForm($students, $reg_sections, $not_null_counts, $null_counts, $max_section) {
         $this->core->getOutput()->addBreadcrumb('Manage Sections');
         $reg_sections_count = [];
         foreach ($students as $student) {
@@ -146,8 +146,6 @@ class UsersView extends AbstractView {
             "not_null_counts" => $not_null_counts,
             "null_counts" => $null_counts,
             "max_section" => $max_section,
-            "self_registration_type" => $self_registration_type,
-            "default_section" => $default_section,
             "update_registration_sections_url" => $this->core->buildCourseUrl(['sections', 'registration']),
             "update_rotating_sections_url" => $this->core->buildCourseUrl(['sections', 'rotating']),
             "csrf_token" => $this->core->getCsrfToken()
