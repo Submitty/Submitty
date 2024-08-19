@@ -103,21 +103,26 @@
     </script>
 
     <div id="mySmallHistogram{{ type == 'auto' ? '3' : (type == 'manual' ? '4' : '') }}">
+        <style>
+            .statistic-value {
+                margin-right: 20px;
+            }
+        </style>
+
         <script>
-            document.write('<b>Mean: </b>' +
+            document.write('<span class="statistic-value"><b>Mean: </b>' +
                 {{ type == 'total' ? overall_average.getAverageScore() 
                 : (type == 'auto' ? autograded_average.getAverageScore() 
                 : (type == 'manual' ? manual_average))
-                }} + '&nbsp;&nbsp;&nbsp;&nbsp;' +
-                '<b>Mode: </b>' + mode + '&nbsp;&nbsp;&nbsp;&nbsp;' +
-                '<b>Median: </b>' + median + '&nbsp;&nbsp;&nbsp;&nbsp;' +
-                '<b>Maximum: </b>' + max{{ type }} + '&nbsp;&nbsp;&nbsp;&nbsp;' +
-                '<b>Minimum: </b>' + min{{ type }} + '&nbsp;&nbsp;&nbsp;&nbsp;' +
-                '<b>Standard Deviation: </b>' +
+                }} + '</span>' +
+                '<span class="statistic-value"><b>Mode: </b>' + mode + '</span>' +
+                '<span class="statistic-value"><b>Median: </b>' + median + '</span>' +
+                '<span class="statistic-value"><b>Maximum: </b>' + max{{ type }} + '</span>' +
+                '<span class="statistic-value"><b>Minimum: </b>' + min{{ type }} + '</span>' +
+                '<span class="statistic-value"><b>Standard Deviation: </b>' +
                 {{ type == 'total' ? overall_average.getStandardDeviation()
                 : (type == 'auto' ? autograded_average.getStandardDeviation())
-                }} + '&nbsp;&nbsp;&nbsp;&nbsp;' +
-                '<b>Range: </b>' + range{{ type }});
+                }} + '</span>');
         </script>
     </div>
     <br />
