@@ -1,7 +1,6 @@
 <?php
 
 namespace app\views;
-use app\controllers\admin\ConfigurationController;
 
 class ErrorView extends AbstractView {
     public function exceptionPage($error_message) {

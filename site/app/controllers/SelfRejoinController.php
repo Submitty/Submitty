@@ -9,8 +9,6 @@ use app\libraries\response\RedirectResponse;
 use app\models\Email;
 use app\models\User;
 
-use app\controllers\admin\ConfigurationController;
-
 class SelfRejoinController extends AbstractController {
     /**
      *

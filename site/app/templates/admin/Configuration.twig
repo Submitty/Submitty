@@ -233,7 +233,7 @@
                     <a target=_blank href="https://submitty.org/instructor/course_settings/rainbow_grades/index">
                     You must configure rainbow grades first. <i style="font-style:normal;" class="fa-question-circle"></i></a>
                 </span>
-            </label>
+            </label> 
         </div>
 
         {# Only show the checkbox if the submitty-admin user is available and in the course as an instructor #}
@@ -309,13 +309,7 @@
             <hr>
                 <div class="config-row checkbox-row">
                     <input type="checkbox" name="self_registration" id="self-registration" value="true" {{ fields['self_registration_type'] == constant('app\\controllers\\admin\\ConfigurationController::ALL_SELF_REGISTER') ? 'checked' : '' }}
-                    onclick="
-                        if({{ fields['registration_sections'] == [] }}) {
-                            alert('You need to create at least one registration section first');
-                            return false;
-                        }
-                        return confirm('Are you sure you want to enable self registration to this course? This allows ALL users (even those manually removed from the course) to register for this course.');
-                    "/>
+                    onclick="return confirmSelfRegistration({{ fields['registration_sections'] == [] ? 'false' : 'true' }})" />
                     <label for="self-registration">
                         <span class="option-title">Enable Self Registration</span>
                         <br/>

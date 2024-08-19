@@ -1,4 +1,5 @@
 /* global csrfToken, buildCourseUrl */
+/* exported exported */
 
 $(document).ready(() => {
     $('input,textarea,select').on('change', function () {
@@ -70,8 +71,15 @@ $(document).ready(() => {
             hideEmailSeatingOption();
         }
     }
-
     updateEmailSeatingOption();
 
     $(document).on('change', '#room-seating-gradeable-id', updateEmailSeatingOption);
 });
+
+function confirmSelfRegistration(needs_reg_sections) {
+    if (needs_reg_sections) {
+        alert('You need to create at least one registration section first');
+        return false;
+    }
+    return confirm('Are you sure you want to enable self registration to this course? This allows ALL users (even those manually removed from the course) to register for this course.');
+}

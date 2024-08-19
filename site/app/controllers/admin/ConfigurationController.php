@@ -96,8 +96,8 @@ class ConfigurationController extends AbstractController {
                 ],
                 $this->core->getCsrfToken(),
                 ConfigurationController::NO_SELF_REGISTER,
-                 ConfigurationController::ALL_SELF_REGISTER,
-                 ConfigurationController::REQUEST_SELF_REGISTER
+                ConfigurationController::ALL_SELF_REGISTER,
+                ConfigurationController::REQUEST_SELF_REGISTER
             )
         );
     }

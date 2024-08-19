@@ -18,7 +18,6 @@ use Symfony\Component\Routing\Annotation\Route;
 use app\exceptions\ValidationException;
 use app\exceptions\DatabaseException;
 use app\controllers\SelfRejoinController;
-use app\controllers\admin\ConfigurationController;
 
 /**
  * Class UsersController
