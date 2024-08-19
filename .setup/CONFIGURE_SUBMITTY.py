@@ -627,7 +627,27 @@ if not args.worker:
 
 ##############################################################################
 # Write submitty json
+user_id_requirements = {
+    "all": True,
+    "require_name": False,
+    "length": 25,
+    "name_requirements": {
+        "given_first": False,
+        "given_name": 2,
+        "family_name": 4
+    },
+    "require_email": False,
+    "email_requirements": {
+        "whole_email": False,
+        "whole_prefix": False,
+        "prefix_count": 6
+    }
+}
 
+accepted_emails = {
+    "gmail.com": True,
+    "rpi.edu": True
+}
 config = submitty_config
 config['submitty_install_dir'] = SUBMITTY_INSTALL_DIR
 config['submitty_repository'] = SUBMITTY_REPOSITORY
@@ -650,6 +670,8 @@ if not args.worker:
     config['default_locale'] = DEFAULT_LOCALE
     config['duck_special_effects'] = False
     config['user_create_account'] = USER_CREATE_ACCOUNT
+    config['accepted_emails'] = accepted_emails
+    config['user_id_requirements'] = user_id_requirements
 
 config['worker'] = True if args.worker == 1 else False
 
