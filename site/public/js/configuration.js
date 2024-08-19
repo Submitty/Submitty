@@ -6,8 +6,14 @@ $(document).ready(() => {
         const formData = new FormData();
         formData.append('csrf_token', csrfToken);
         let entry;
+        let default_section;
         if (this.type === 'checkbox') {
             entry = $(elem).is(':checked');
+            if (this.id == 'self-registration') {
+                console.log('test');
+                default_section = document.getElementById('default-section-id').value;
+                formData.append('default_section', default_section);
+            }
         }
         else {
             entry = elem.value;

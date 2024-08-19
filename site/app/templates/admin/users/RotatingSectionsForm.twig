@@ -51,6 +51,9 @@
                             <th>Section</th>
                             <th>Course ID</th>
                             <th>Count</th>
+                            {% if is_self_register %}
+                                    <th>Default Section</td>
+                            {% endif %}
                         </tr>
                     </thead>
                     <tbody>
@@ -62,12 +65,18 @@
                                 <td>Section {{ section['sections_registration_id'] }} </td>
                                 <td> {{ section['course_section_id'] }} </td>
                                 <td>{{ reg_sections_count[section['sections_registration_id']] }}</td>
+                                {% if is_self_register %}
+                                    <td><input type="radio" name="default_section" value="{{ section['sections_registration_id'] }}" {{ section['sections_registration_id'] == default_section ? 'checked' : '' }}/></td>
+                                {% endif %}
                             </tr>
                             {% else %}
                             <tr>
                                 <td>Section {{ section['sections_registration_id'] }}</td>
                                 <td> {{ section['course_section_id'] }} </td>
                                 <td>0</td>
+                                {% if is_self_register %}
+                                    <td><input type="radio" name="default_section" value="{{ section['sections_registration_id'] }}" {{ section['sections_registration_id'] == default_section ? 'checked' : '' }}/></td>
+                                {% endif %}
                             </tr>
                             {% endif %}
                             {% endif %}
@@ -77,6 +86,9 @@
                             <td>Section NULL</td>
                             <td>NULL</td>
                             <td>{{ reg_sections_count['NULL'] }}</td>
+                            {% if is_self_register %}
+                                    <td></td>
+                            {% endif %}
                         </tr>
                         {% else %}
                         <tr>

@@ -14,7 +14,7 @@
             </form>
         {% else %}
             please contact your instructor to gain access. <br/>
-            Click <a href = "{{main_url}}"> here </a> to back to homepage and see your courses list.
+            Click <a href="{{main_url}}"> here </a> to back to homepage and see your courses list.
         {% endif %}
     {% else %}
         This course is open to self registration <br />
@@ -27,7 +27,6 @@
             <input type="hidden" name="csrf_token" value={{ csrf_token }}>
             <button type="submit" class="btn btn-primary">Register for the Course</button>
         </form>
-        
     {% endif %}
 
 </div>

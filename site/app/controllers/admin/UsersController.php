@@ -517,9 +517,13 @@ class UsersController extends AbstractController {
                 ]);
             }
         }
+        $term = $this->core->getConfig()->getTerm();
+        $course = $this->core->getConfig()->getCourse();
 
         $null_counts = $this->core->getQueries()->getCountNullUsersRotatingSections();
         $max_section = $this->core->getQueries()->getMaxRotatingSection();
+        $is_self_register =  $this->core->getQueries()->getSelfRegistrationType($course) !== ConfigurationController::NO_SELF_REGISTER;
+        $default_section = $this->core->getQueries()->getDefaultRegistrationSection($term, $course);
         $this->core->getOutput()->renderOutput(
             ['admin', 'Users'],
             'sectionsForm',
@@ -527,13 +531,21 @@ class UsersController extends AbstractController {
             $reg_sections,
             $non_null_counts,
             $null_counts,
-            $max_section
+            $max_section,
+            $default_section,
+            $is_self_register
         );
     }
 
     #[Route("/courses/{_semester}/{_course}/sections/registration", methods: ["POST"])]
     public function updateRegistrationSections() {
         $return_url = $this->core->buildCourseUrl(['sections']);
+
+        if (isset($_POST['default_section'])) {
+            $term = $this->core->getConfig()->getTerm();
+            $course = $this->core->getConfig()->getCourse();
+            $this->core->getQueries()->setDefaultRegistrationSection($term, $course, $_POST['default_section']);
+        }
 
         if (isset($_POST['add_reg_section']) && $_POST['add_reg_section'] !== "") {
             if (User::validateUserData('registration_section', $_POST['add_reg_section'])) {

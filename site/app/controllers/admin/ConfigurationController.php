@@ -24,8 +24,8 @@ class ConfigurationController extends AbstractController {
     'customization.json file.  To have one generated for you, you may use the Web-Based Rainbow Grades Generation inside the Grade ' .
     'Reports tab.  You may also manually create the file and upload it to your course\'s rainbow_grades directory.';
     const NO_SELF_REGISTER = 0; // Self registration disabled
-    const ALL_SELF_REGISTER = 1; // Self registration allowed, and all users who register are automatically added
-    const REQUEST_SELF_REGISTER = 2; // Self registration allowed, users request and instructors can approve
+    const REQUEST_SELF_REGISTER = 1; // Self registration allowed, users request and instructors can approve
+    const ALL_SELF_REGISTER = 2; // Self registration allowed, and all users who register are automatically added
 
     /**
      * @return MultiResponse
@@ -192,6 +192,7 @@ class ConfigurationController extends AbstractController {
 
         if ($name === 'self_registration') {
             $this->core->getQueries()->setSelfRegistrationType($this->core->getConfig()->getCourse(), $entry === 'true' ?  ConfigurationController::ALL_SELF_REGISTER : ConfigurationController::NO_SELF_REGISTER);
+            $this->core->getQueries()->setDefaultRegistrationSection($this->core->getConfig()->getTerm(), $this->core->getConfig()->getCourse(), $_POST['default_section']);
         }
 
         if ($name === 'default_section_id') {
