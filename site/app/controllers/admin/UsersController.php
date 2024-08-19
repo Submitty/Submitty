@@ -17,7 +17,7 @@ use Symfony\Component\Routing\Annotation\Route;
 //Enable us to throw, catch, and handle exceptions as needed.
 use app\exceptions\ValidationException;
 use app\exceptions\DatabaseException;
-use app\controllers\SelfRejoinController;
+use app\controllers\SelfRejoinController;   
 
 /**
  * Class UsersController
@@ -500,8 +500,6 @@ class UsersController extends AbstractController {
 
     #[Route("/courses/{_semester}/{_course}/sections", methods: ["GET"])]
     public function sectionsForm() {
-        $course = $this->core->getConfig()->getCourse();
-        $term = $this->core->getConfig()->getTerm();
         $students = $this->core->getQueries()->getAllUsers();
         $reg_sections = $this->core->getQueries()->getRegistrationSections();
         $non_null_counts = $this->core->getQueries()->getUsersCountByRotatingSections();
@@ -536,12 +534,6 @@ class UsersController extends AbstractController {
     #[Route("/courses/{_semester}/{_course}/sections/registration", methods: ["POST"])]
     public function updateRegistrationSections() {
         $return_url = $this->core->buildCourseUrl(['sections']);
-
-        if (isset($_POST['default_section'])) {
-            $term = $this->core->getConfig()->getTerm();
-            $course = $this->core->getConfig()->getCourse();
-            $this->core->getQueries()->setDefaultRegistrationSection($term, $course, $_POST['default_section']);
-        }
 
         if (isset($_POST['add_reg_section']) && $_POST['add_reg_section'] !== "") {
             if (User::validateUserData('registration_section', $_POST['add_reg_section'])) {

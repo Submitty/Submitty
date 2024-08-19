@@ -94,10 +94,7 @@ class ConfigurationController extends AbstractController {
                     'verified' => $this->core->getConfig()->isSubmittyAdminUserVerified(),
                     'in_course' => $admin_in_course,
                 ],
-                $this->core->getCsrfToken(),
-                ConfigurationController::NO_SELF_REGISTER,
-                ConfigurationController::ALL_SELF_REGISTER,
-                ConfigurationController::REQUEST_SELF_REGISTER
+                $this->core->getCsrfToken()
             )
         );
     }
