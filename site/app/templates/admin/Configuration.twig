@@ -233,7 +233,7 @@
                     <a target=_blank href="https://submitty.org/instructor/course_settings/rainbow_grades/index">
                     You must configure rainbow grades first. <i style="font-style:normal;" class="fa-question-circle"></i></a>
                 </span>
-            </label> 
+            </label>
         </div>
 
         {# Only show the checkbox if the submitty-admin user is available and in the course as an instructor #}
@@ -323,10 +323,10 @@
                         <br/>
                         <span class="option-title">Default Section</span>
                         <select name="default_section_id">
-                        {% for section in fields['registration_sections'] %}
-                            <option value="{{ section['sections_registration_id'] }}" {{ section['sections_registration_id'] == fields['default_section'] ? 'selected' : ''}}>Section: {{ section['sections_registration_id'] }}</option>
-                        {% endfor %}
-                    </select>
+                            {% for section in fields['registration_sections'] %}
+                                <option value="{{ section['sections_registration_id'] }}" {{ section['sections_registration_id'] == fields['default_section'] ? 'selected' : ''}}>Section: {{ section['sections_registration_id'] }}</option>
+                            {% endfor %}
+                        </select>
                     </label>
                     <br/>
                 </div>

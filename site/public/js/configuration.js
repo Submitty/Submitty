@@ -1,5 +1,4 @@
 /* global csrfToken, buildCourseUrl */
-/* exported exported */
 
 $(document).ready(() => {
     $('input,textarea,select').on('change', function () {
@@ -71,6 +70,7 @@ $(document).ready(() => {
             hideEmailSeatingOption();
         }
     }
+
     updateEmailSeatingOption();
 
     $(document).on('change', '#room-seating-gradeable-id', updateEmailSeatingOption);
