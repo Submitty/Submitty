@@ -540,10 +540,9 @@ class UsersController extends AbstractController {
     #[Route("/courses/{_semester}/{_course}/sections/registration", methods: ["POST"])]
     public function updateRegistrationSections() {
         $return_url = $this->core->buildCourseUrl(['sections']);
-
+        $term = $this->core->getConfig()->getTerm();
+        $course = $this->core->getConfig()->getCourse();
         if (isset($_POST['default_section'])) {
-            $term = $this->core->getConfig()->getTerm();
-            $course = $this->core->getConfig()->getCourse();
             $this->core->getQueries()->setDefaultRegistrationSection($term, $course, $_POST['default_section']);
         }
 
@@ -582,12 +581,19 @@ class UsersController extends AbstractController {
                         }
                     }
                 }
-                $num_del_sections = $this->core->getQueries()->deleteRegistrationSection($_POST['delete_reg_section']);
-                if ($num_del_sections === 0) {
-                    $this->core->addErrorMessage("Section {$_POST['delete_reg_section']} not removed.  Section must exist and be empty of all users/graders.");
+                $default_section = $this->core->getQueries()->getDefaultRegistrationSection($term, $course);
+                if ($default_section === $_POST['delete_reg_section']) {
+                        $this->core->addErrorMessage("Section {$_POST['delete_reg_section']} not removed.  Cannot delete the default registration section if self registration is enabled.");
                 }
                 else {
-                    $this->core->addSuccessMessage("Registration section {$_POST['delete_reg_section']} removed.");
+                    $num_del_sections = $this->core->getQueries()->deleteRegistrationSection($_POST['delete_reg_section']);
+
+                    if ($num_del_sections === 0) {
+                        $this->core->addErrorMessage("Section {$_POST['delete_reg_section']} not removed.  Section must exist and be empty of all users/graders.");
+                    }
+                    else {
+                        $this->core->addSuccessMessage("Registration section {$_POST['delete_reg_section']} removed.");
+                    }
                 }
             }
             else {
