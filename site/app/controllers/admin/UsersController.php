@@ -17,7 +17,7 @@ use Symfony\Component\Routing\Annotation\Route;
 //Enable us to throw, catch, and handle exceptions as needed.
 use app\exceptions\ValidationException;
 use app\exceptions\DatabaseException;
-use app\controllers\SelfRejoinController;   
+use app\controllers\SelfRejoinController;
 
 /**
  * Class UsersController

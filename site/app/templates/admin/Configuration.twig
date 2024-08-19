@@ -322,7 +322,7 @@
                         </span>
                         <br/>
                         <span class="option-title">Default Section</span>
-                        <select name="default_section_id">
+                        <select name="default_section_id" id="self-registration">
                             {% for section in fields['registration_sections'] %}
                                 <option value="{{ section['sections_registration_id'] }}" {{ section['sections_registration_id'] == fields['default_section'] ? 'selected' : ''}}>Section: {{ section['sections_registration_id'] }}</option>
                             {% endfor %}
