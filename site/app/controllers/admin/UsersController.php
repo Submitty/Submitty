@@ -582,7 +582,8 @@ class UsersController extends AbstractController {
                     }
                 }
                 $default_section = $this->core->getQueries()->getDefaultRegistrationSection($term, $course);
-                if ($default_section === $_POST['delete_reg_section']) {
+                $is_self_register =  $this->core->getQueries()->getSelfRegistrationType($course) !== ConfigurationController::NO_SELF_REGISTER;
+                if ($default_section === $_POST['delete_reg_section'] && $is_self_register) {
                         $this->core->addErrorMessage("Section {$_POST['delete_reg_section']} not removed.  Cannot delete the default registration section if self registration is enabled.");
                 }
                 else {

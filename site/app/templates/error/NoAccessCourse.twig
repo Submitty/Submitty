@@ -1,4 +1,4 @@
-<div class="content">
+<div class="content" data-testid="no-access-message">
     {% if self_registration_type != constant('app\\controllers\\admin\\ConfigurationController::ALL_SELF_REGISTER') %}
         You don't have access to this course. <br />
         This is <b>{{course_name}}</b> for <b>{{semester}}</b>. <br/>
@@ -23,9 +23,8 @@
         </br>
         </br>
         <form method="POST" action="{{ self_register_url }}">
-        
             <input type="hidden" name="csrf_token" value={{ csrf_token }}>
-            <button type="submit" class="btn btn-primary">Register for the Course</button>
+            <button type="submit" class="btn btn-primary" data-testid="register-button">Register for the Course</button>
         </form>
     {% endif %}
 
