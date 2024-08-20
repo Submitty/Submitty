@@ -23,10 +23,11 @@
  */
 const autosaveEnabled = (() => {
     try {
-        localStorage.setItem("TEST", "TEST");
-        localStorage.removeItem("TEST");
+        localStorage.setItem('TEST', 'TEST');
+        localStorage.removeItem('TEST');
         return true;
-    } catch (e) {
+    }
+    catch (e) {
         return false;
     }
 })();
@@ -60,7 +61,8 @@ function cleanupAutosaveHistory(suffix) {
                 if (msToDays(Date.now() - timestamp) > 30) {
                     toDelete.push(key);
                 }
-            } catch (e) {
+            }
+            catch (e) {
                 // This item has gotten corrupted somehow; let's delete it
                 // instead of letting it linger around and taking up space.
                 toDelete.push(key);
@@ -71,31 +73,31 @@ function cleanupAutosaveHistory(suffix) {
 }
 
 async function uploadSubmission(gradeableId, merge = null, clobber = null) {
-    const url = `/courses/f24/development/gradeable/${gradeableId}/upload`;
+    const url = `/courses/xyz/abc/gradeable/${gradeableId}/upload`;
 
     // Data to send to the server
     const data = {
-        merge: merge ? "true" : "false",
-        clobber: clobber ? "true" : "false",
+        merge: merge ? 'true' : 'false',
+        clobber: clobber ? 'true' : 'false'
     };
 
     try {
         const response = await fetch(url, {
-            method: "POST",
+            method: 'POST',
             headers: {
-                "Content-Type": "application/json",
+                'Content-Type': 'application/json'
             },
-            body: JSON.stringify(data),
+            body: JSON.stringify(data)
         });
 
         if (response.ok) {
             const result = await response.json();
-            console.log("Success:", result);
+            console.log('Success:', result);
         } else {
-            console.error("Error:", response.statusText);
+            console.error('Error:', response.statusText);
         }
     } catch (error) {
-        console.error("Error:", error);
+        console.error('Error:', error);
     }
 }
 
@@ -112,7 +114,7 @@ function saveAndWarnUnsubmitted(e) {
     // For Firefox
     e.preventDefault();
     // For Chrome
-    e.returnValue = "";
+    e.returnValue = '';
     return true;
 }
 
