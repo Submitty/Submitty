@@ -534,7 +534,7 @@ class AdminGradeableController extends AbstractController {
             'type_string' => $type_string,
             'gradeable_type_strings' => self::gradeable_type_strings,
             'show_edit_warning' => $gradeable->anyManualGrades(),
-            'isDiscussionPanel' => $gradeable->isDiscussionBased(),
+
             // Config selection data
             'all_config_paths' => array_merge($default_config_paths, $all_uploaded_config_paths, $all_repository_config_paths),
             'repository_error_messages' => $repository_error_messages,
@@ -1386,15 +1386,7 @@ class AdminGradeableController extends AbstractController {
             if (isset($details[$date_property])) {
                 $dates[$date_property] = $details[$date_property];
 
-                if ($date_property === 'late_days') {
-                    if (!is_numeric($dates[$date_property])) {
-                        $errors[$date_property] = 'Late days must be a number';
-                    }
-                    elseif (intval($dates[$date_property]) < 0) {
-                        $errors[$date_property] = 'Late days must be a positive number';
-                    }
-                }
-                elseif ($dates[$date_property] > DateUtils::MAX_TIME) {
+                if ($dates[$date_property] > DateUtils::MAX_TIME) {
                     $errors[$date_property] = Gradeable::date_display_names[$date_property] . ' Date is higher than the max allowed date! (' . DateUtils::MAX_TIME . ')';
                 }
 
@@ -1504,15 +1496,26 @@ class AdminGradeableController extends AbstractController {
 
         // Set the dates last just in case the request contained parameters that
         //  affect date validation
-        if ($date_set) {
-            try {
-                $gradeable->setDates($dates, $grade_inquiry_modified);
-                $updated_properties = $gradeable->getDateStrings(false);
+        try{
+            if ($date_set) {
+                try {
+                    $gradeable->setDates($dates, $grade_inquiry_modified);
+                    $updated_properties = $gradeable->getDateStrings(false);
+                }
+                catch (ValidationException $e) {
+                    $errors = array_merge($errors, $e->getDetails());
+                }
             }
-            catch (ValidationException $e) {
-                $errors = array_merge($errors, $e->getDetails());
+        } catch (ValidationException $e) {
+                // Log the exception details
+            error_log('Date validation failed: ' . $e->getMessage());
+
+                // Optionally, log the errors array for more details
+            if ($e->getErrors()) {
+            error_log('Validation errors: ' . print_r($e->getErrors(), true));
             }
-        }
+            echo 'There was an issue with date validation. Please check the dates and try again.';
+            }
 
         if ($trigger_rebuild) {
             $result = $this->enqueueBuild($gradeable);
