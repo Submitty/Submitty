@@ -21,7 +21,7 @@
         onclick="createNewBuckets(range{{type}},buckets,xValue,yValue,xBuckets,mode,modeCount,max{{ type }},min{{ type }})"
     />
 
-    <div id="myHistogram{{ type == 'auto' ? '3' : (type == 'manual' ? '4' : '') }}"><!-- Plotly chart will be drawn inside this DIV --></div>
+    <div id="Histogram{{ type == 'auto' ? '3' : (type == 'manual' ? '4' : '') }}"><!-- Plotly chart will be drawn inside this DIV --></div>
 
     <script>
         var buckets = new Map();
@@ -99,10 +99,10 @@
             }
         };
 
-        Plotly.newPlot('myHistogram' + ('{{ type }}' == 'auto' ? '3' : ('{{ type }}' == 'manual' ? '4' : '')), data, layout, {displayModeBar: false, displaylogo: false});
+        Plotly.newPlot('Histogram' + ('{{ type }}' == 'auto' ? '3' : ('{{ type }}' == 'manual' ? '4' : '')), data, layout, {displayModeBar: false, displaylogo: false});
     </script>
 
-    <div id="mySmallHistogram{{ type == 'auto' ? '3' : (type == 'manual' ? '4' : '') }}">
+    <div id="SmallHistogram{{ type == 'auto' ? '3' : (type == 'manual' ? '4' : '') }}">
         <style>
             .statistic-value {
                 margin-right: 20px;
