@@ -700,6 +700,17 @@ jobs:
           working-directory: ${{env.SUBMITTY_REPOSITORY}}/site
           browser: chrome
 
+      - name: Enable self account creation
+        run: sudo sed -ie "s/user_create_account: false/user_create_account: true/g" ${SUBMITTY_INSTALL_DIR}/config/authentication.json
+
+      - name: Run self-account-creation tests. 
+        uses: cypress-io/github-action@v6
+        with:
+          config: baseUrl=http://localhost
+          spec: cypress/e2e/Cypress-System/self-account-creation.spec.js
+          working-directory: ${{env.SUBMITTY_REPOSITORY}}/site
+          browser: chrome
+
       - name: Switch to LDAP auth
         run: sudo sed -ie "s/Database/Ldap/g" ${SUBMITTY_INSTALL_DIR}/config/authentication.json
 
