@@ -20,6 +20,15 @@ function checkButtons(courseID, buttonText, buttonColor) {
         if (buttonText[i]) {
             cy.get(`[data-testid="${courseID}"]`).find(`[data-testid="${buttonOrder[i]}"]`).contains(buttonText[i]);
             cy.get(`[data-testid="${courseID}"]`).find(`[data-testid="${buttonOrder[i]}"]`).should('have.css', 'background-color', buttonColor[i]);
+        } else {
+            // assert that either the courseID or the button does not exist
+            cy.get('body').then(($body) => {
+                if ($body.find(`[data-testid="${courseID}"]`).length > 0) {
+                  cy.get(`[data-testid="${courseID}"]`)
+                    .find(`[data-testid="${buttonOrder[i]}"]`)
+                    .should('not.exist');
+                }
+              });
         }
     }
 }
