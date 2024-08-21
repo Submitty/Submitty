@@ -55,7 +55,7 @@ echo -e "Copy the submission website"
 for cli_arg in "$@"
 do
     if [[ $cli_arg =~ ^config=.* ]]; then
-        SUBMITTY_CONFIG_DIR="$(readlink -f $(echo "$cli_arg" | cut -f2 -d=))"
+        SUBMITTY_CONFIG_DIR="$(readlink -f "$(echo "$cli_arg" | cut -f2 -d=)")"
     elif [ "$cli_arg" == "browscap" ]; then
         BROWSCAP=true
     fi
