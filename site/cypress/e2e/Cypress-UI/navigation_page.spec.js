@@ -16,19 +16,20 @@ const green = 'rgb(95, 183, 96)';
 const buttonOrder = ['team-btn', 'submit-btn', 'grade-btn', 'quick-link-btn'];
 
 function checkButtons(courseID, buttonText, buttonColor) {
-    for (let i = 0; i < buttonOrder.length; i++) {
-        if (buttonText[i]) {
-            cy.get(`[data-testid="${courseID}"]`).find(`[data-testid="${buttonOrder[i]}"]`).contains(buttonText[i]);
-            cy.get(`[data-testid="${courseID}"]`).find(`[data-testid="${buttonOrder[i]}"]`).should('have.css', 'background-color', buttonColor[i]);
-        } else {
-            // assert that either the courseID or the button does not exist
-            cy.get('body').then(($body) => {
-                if ($body.find(`[data-testid="${courseID}"]`).length > 0) {
-                  cy.get(`[data-testid="${courseID}"]`)
-                    .find(`[data-testid="${buttonOrder[i]}"]`)
-                    .should('not.exist');
-                }
-              });
+    // assert that the course does not exist
+    if (buttonText === null && buttonColor === null) {
+        cy.get(`[data-testid="${courseID}"]`).should('not.exist');
+    }
+    else {
+        for (let i = 0; i < buttonOrder.length; i++) {
+            if (buttonText[i]) {
+                cy.get(`[data-testid="${courseID}"]`).find(`[data-testid="${buttonOrder[i]}"]`).contains(buttonText[i]);
+                cy.get(`[data-testid="${courseID}"]`).find(`[data-testid="${buttonOrder[i]}"]`).should('have.css', 'background-color', buttonColor[i]);
+            }
+            else {
+                // assert that the button does not exist
+                cy.get(`[data-testid="${courseID}"]`).find(`[data-testid="${buttonOrder[i]}"]`).should('not.exist');
+            }
         }
     }
 }
@@ -62,7 +63,7 @@ describe('tests navigation buttons for each level of access', () => {
         cy.login('ta');
         cy.visit(`/courses/${getCurrentSemester()}/sample`);
 
-        checkButtons('future_no_tas_homework', [null, null, null, null], [null, null, null, null]);
+        checkButtons('future_no_tas_homework', null, null);
         checkButtons('future_tas_homework', [null, 'BETA SUBMIT', 'PREVIEW GRADING', null], [null, white, white, null]);
         checkButtons('open_homework', [null, 'SUBMIT', 'PREVIEW GRADING', null], [null, blue, white, null]);
         checkButtons('open_team_homework', ['CREATE TEAM', 'MUST BE ON A TEAM TO SUBMIT', 'PREVIEW GRADING', null], [blue, blue, white, null]);
@@ -79,17 +80,17 @@ describe('tests navigation buttons for each level of access', () => {
         cy.login('student');
         cy.visit(`/courses/${getCurrentSemester()}/sample`);
 
-        checkButtons('future_no_tas_homework', [null, null, null, null], [null, null, null, null]);
-        checkButtons('future_tas_homework', [null, null, null, null], [null, null, null, null]);
+        checkButtons('future_no_tas_homework', null, null);
+        checkButtons('future_tas_homework', null, null);
         checkButtons('open_homework', [null, 'SUBMIT', null, null], [null, blue, null, null]);
         checkButtons('open_team_homework', ['MANAGE TEAM', 'SUBMIT', null, null], [blue, blue, null, null]);
         checkButtons('closed_homework', [null, 'LATE SUBMIT', null, null], [null, red, white, null]);
         checkButtons('closed_team_homework', ['VIEW TEAM', 'LATE SUBMIT', null, null], [white, red, null, null]);
         checkButtons('grading_homework', [null, 'OVERDUE SUBMISSION', null, null], [null, red, null, null]);
-        checkButtons('grading_lab', [null, null, null, null], [null, null, null, null]);
+        checkButtons('grading_lab', null, null);
         checkButtons('grades_released_homework_autota', [null, 'OVERDUE SUBMISSION', null, null], [null, red, null, null]);
         checkButtons('grades_released_homework', [null, 'OVERDUE SUBMISSION', null, null], [null, red, null, null]);
-        checkButtons('grades_released_lab', [null, null, null, null], [null, null, null, null]);
+        checkButtons('grades_released_lab', null, null);
     });
 });
 
