@@ -13,9 +13,15 @@ if [[ "$UID" -ne "0" ]] ; then
     exit 1
 fi
 
-# get the repository name from the location of this script
-MY_PATH="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null && pwd )"
-SUBMITTY_REPOSITORY=${MY_PATH}/../..
+# Get arguments
+for cli_arg in "$@"
+do
+    if [[ $cli_arg =~ ^config=.* ]]; then
+        SUBMITTY_CONFIG_DIR="$(echo "$cli_arg" | cut -f2 -d=)"
+    fi
+done
+
+SUBMITTY_REPOSITORY="$(jq -r '.submitty_repository' "${SUBMITTY_CONFIG_DIR}/submitty.json")"
 
 ########################################################################
 
