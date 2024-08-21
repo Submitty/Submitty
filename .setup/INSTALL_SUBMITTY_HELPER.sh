@@ -30,10 +30,10 @@ fi
 #   ${SUBMITTY_INSTALL_DIR}/.setup/INSTALL_SUBMITTY.sh
 # NOTE: May need to do a SYSADMIN action for this since migrations are run afterwards...
 
-export SUBMITTY_CONFIG_DIR="/usr/local/submitty/config"
+SUBMITTY_CONFIG_DIR="/usr/local/submitty/config"
 SUBMITTY_REPOSITORY=$(jq -r '.submitty_repository' "${SUBMITTY_CONFIG_DIR}/submitty.json")
 
-source "${SUBMITTY_REPOSITORY}/.setup/install_submitty/get_globals.sh"
+source "${SUBMITTY_REPOSITORY}/.setup/install_submitty/get_globals.sh" "config=${SUBMITTY_CONFIG_DIR:?}"
 
 
 
@@ -74,7 +74,7 @@ fi
 # CLONE OR UPDATE THE HELPER SUBMITTY CODE REPOSITORIES
 
 set +e
-/bin/bash "${SUBMITTY_REPOSITORY}/.setup/bin/update_repos.sh"
+/bin/bash "${SUBMITTY_REPOSITORY}/.setup/bin/update_repos.sh" "config=${SUBMITTY_CONFIG_DIR:?}"
 
 if [ $? -eq 1 ]; then
     echo -e "\nERROR: FAILURE TO CLONE OR UPDATE SUBMITTY HELPER REPOSITORIES\n"
@@ -161,7 +161,7 @@ popd > /dev/null
 
 echo -e "\nBeginning installation of Submitty\n"
 
-/bin/bash "${SUBMITTY_REPOSITORY}/.setup/install_submitty/setup_directories.sh" "$@"
+/bin/bash "${SUBMITTY_REPOSITORY}/.setup/install_submitty/setup_directories.sh" "$@" "config=${SUBMITTY_CONFIG_DIR:?}"
 
 ########################################################################################################################
 ########################################################################################################################
@@ -353,7 +353,7 @@ popd > /dev/null
 ########################################################################################################################
 # COPY VARIOUS SCRIPTS USED BY INSTRUCTORS AND SYS ADMINS FOR COURSE ADMINISTRATION
 
-bash "${SUBMITTY_REPOSITORY}/.setup/install_submitty/install_bin.sh"
+bash "${SUBMITTY_REPOSITORY}/.setup/install_submitty/install_bin.sh" "config=${SUBMITTY_CONFIG_DIR:?}"
 
 # build the helper program for strace output and restrictions by system call categories
 g++ "${SUBMITTY_INSTALL_DIR}/src/grading/system_call_check.cpp" -o "${SUBMITTY_INSTALL_DIR}/bin/system_call_check.out"
@@ -446,7 +446,7 @@ popd > /dev/null
 ################################################################################################################
 # COPY THE 1.0 Grading Website if not in worker mode
 if [ "${IS_WORKER}" == 0 ]; then
-    bash "${SUBMITTY_REPOSITORY}/.setup/install_submitty/install_site.sh" browscap
+    bash "${SUBMITTY_REPOSITORY}/.setup/install_submitty/install_site.sh" browscap "config=${SUBMITTY_CONFIG_DIR:?}"
 fi
 
 ################################################################################################################
