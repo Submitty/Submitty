@@ -5192,7 +5192,7 @@ SQL;
     public function getSelfRegisterCourses(string $user_id): array {
         $query = <<<SQL
 SELECT c.*, t.name AS term_name FROM courses c, terms t
-WHERE NOT c.self_registration_type = 0 AND c.course NOT IN (
+WHERE NOT c.self_registration_type = 0 AND c.status = 1 and c.course NOT IN (
     SELECT course FROM courses_users WHERE user_id = ?
 ) AND c.term = t.term_id
 SQL;
