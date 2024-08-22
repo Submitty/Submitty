@@ -9,14 +9,14 @@ skipOn(Cypress.env('run_area') === 'CI', () => {
             reset();
         });
         it('Add grades to numeric gradeable', () => {
-            const gradesfile = 'cypress/fixtures/rainbowgrades_ci_numeric.csv'
+            const gradesfile = 'cypress/fixtures/rainbowgrades_ci_numeric.csv';
 
             cy.visit(['testing', 'gradeable', 'numeric', 'grading']);
             cy.get('#csvUpload').selectFile(gradesfile, { action: 'drag-drop' });
             cy.on('window:confirm', () => true);
 
-            cy.visit(['testing','gradeable','numeric','quick_link?action=open_grading_now']);
-            cy.visit(['testing','gradeable','numeric','quick_link?action=release_grades_now']);
+            cy.visit(['testing', 'gradeable', 'numeric', 'quick_link?action=open_grading_now']);
+            cy.visit(['testing', 'gradeable', 'numeric', 'quick_link?action=release_grades_now']);
         });
         it('Web-Based Rainbow Grades Customization should work', () => {
             // Ensure that elements requiring a manual_customization.json are only visible if file exists
