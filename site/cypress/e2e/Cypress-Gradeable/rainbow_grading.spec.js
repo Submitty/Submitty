@@ -171,6 +171,8 @@ skipOn(Cypress.env('run_area') === 'CI', () => {
             cy.get('[data-testid="display-benchmarks-average"]').check();
             cy.get('[data-testid="display-benchmarks-stddev"]').check();
             cy.get('[data-testid="display-benchmarks-perfect"]').check();
+            cy.visit(['testing', 'reports', 'summaries']);
+            cy.visit(['testing', 'reports', 'rainbow_grades_customization']);
             cy.get('[data-testid="btn-build-customization"]').click();
             cy.get('[data-testid="save-status"]', { timeout: 15000 }).should('contain', 'Rainbow grades successfully generated!');
             cy.visit(['testing', 'grades']);
