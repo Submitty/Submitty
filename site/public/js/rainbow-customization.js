@@ -720,6 +720,9 @@ $(document).ready(() => {
     $('.sections_and_labels').on('change keyup paste', () => {
         saveChanges();
     });
+    $('.final_cutoff_input').on('change keyup paste', () => {
+        saveChanges();
+    });
     // Attach a focusout event handler to all input and textarea elements within #gradeables after user finishes typing
     $('#gradeables').find('input, textarea').on('focusout', () => {
         saveChanges();
