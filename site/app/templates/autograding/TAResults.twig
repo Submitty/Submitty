@@ -21,7 +21,9 @@ $( document ).ready(function() {
 {% else %}
     <div class="sub">
         {% if not active_same_as_graded %}
-            <h3>The version you have selected to be graded above does not match the version graded by your TA/instructor, please contact TA/instructor if necessary to resolve the problem.</h3>
+            <h3>A
+            <a href="https://submitty.org/student/submission/submission_version_conflict" target="_blank"> Version Conflict <i class="fa-question-circle" style="font-style:normal;"></i></a>
+            has been detected in your submission. A grade of zero will be recorded in the gradebook. Please resolve as necessary.</h3>
             <br>
         {% endif %}
         {% if ta_components | length > 0 %}
