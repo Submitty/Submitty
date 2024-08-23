@@ -378,13 +378,13 @@ function setupCheckboxCells() {
     }
 
     // show all the relevant hidden grades when showGradersCheckbox is clicked
-    showGradersCheckbox.on('change', function () {
+    showGradersCheckbox.on('change', () => {
         updateVisibility();
         Cookies.set('show_grader', showGradersCheckbox.is(':checked'));
     });
 
     // show all the relevant hidden dates when showDatesGradedCheckbox is clicked
-    showDatesGradedCheckbox.on('change', function () {
+    showDatesGradedCheckbox.on('change', () => {
         updateVisibility();
         Cookies.set('show_dates', showDatesGradedCheckbox.is(':checked'));
     });
