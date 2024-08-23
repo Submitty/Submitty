@@ -35,6 +35,10 @@ class RainbowCustomizationJSON extends AbstractModel {
      * @var object[]
      */
     private array $manual_grade = [];
+    /**
+     * @var object[]
+     */
+    private array $warning = [];
 
     // The order of allowed_display and allowed_display_description has to match
     const allowed_display = ['grade_summary', 'grade_details', 'exam_seating', 'section',
@@ -46,7 +50,7 @@ class RainbowCustomizationJSON extends AbstractModel {
         "Used for assigned seating for exams, see also:  <a href='https://submitty.org/instructor/course_settings/rainbow_grades/exam_seating'>Exam Seating</a> ", //exam_seating
         "Display the students registration section.", //section
         "Display the optional text message at the top of the page.", //messages
-        "not used", //warning
+        "Generate Academic Performance Warnings for each student that fails to obtain a target score on a given list of gradeables.", //warning
         "Configure cutoffs and display the student's final term letter grade.", //final_grade
         "Display the histogram of average overall grade and count of students with each final term letter grade.", //final_cutoff
         "Optional message for specific students that are only visible on the instructor gradebook, these messages are never displayed to students." //instructor_notes
@@ -92,6 +96,15 @@ class RainbowCustomizationJSON extends AbstractModel {
      */
     public function getManualGrades(): array {
         return $this->manual_grade;
+    }
+
+    /**
+     * Get array of performance warnings
+     *
+     * @return array<object>
+     */
+    public function getPerformanceWarnings(): array {
+        return $this->warning;
     }
 
     /**
@@ -224,6 +237,10 @@ class RainbowCustomizationJSON extends AbstractModel {
 
         if (isset($json->manual_grade)) {
             $this->manual_grade = $json->manual_grade;
+        }
+
+        if (isset($json->warning)) {
+            $this->warning = $json->warning;
         }
     }
 
@@ -384,6 +401,32 @@ class RainbowCustomizationJSON extends AbstractModel {
         }
 
         $this->manual_grade[] = $manualGradeEntry;
+    }
+
+
+    /**
+     * Add a performance warning entry to existing array
+     *
+     * @param object{
+     *     "msg": string,
+     *     "ids": string,
+     *     "value": float
+     * } $performanceWarningEntry
+     */
+    public function addPerformanceWarningEntry(object $performanceWarningEntry): void {
+        $emptyArray = [
+            "user" => "",
+            "grade" => "",
+            "note" => ""
+        ];
+
+        $performanceWarningArray = (array) $performanceWarningEntry;
+
+        if ($performanceWarningArray === $emptyArray) {
+            throw new BadArgumentException('Performance Warning entry may not be empty.');
+        }
+
+        $this->warning[] = $performanceWarningEntry;
     }
 
 
