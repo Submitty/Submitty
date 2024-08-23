@@ -22,6 +22,9 @@ def up(config, database, semester, course):
     backup_file = course_dir / 'backup_customization.json'
     gui_custom_file = course_dir / 'gui_customization.json'
 
+    if not course_dir.exists():
+        return
+
     if customization_file.exists():
         # copy the file to backup_customization.json
         copy2(str(customization_file), str(backup_file))
