@@ -13,8 +13,8 @@ class CourseRegistrationController extends AbstractController {
      * @param array<string> $instructors
      */
     private function notifyInstructors(string $user, string $term, string $course, array $instructors): void {
-        $subject = "User $user has joined course $course";
-        $body = "$user has joined the course $course for term $term.";
+        $subject = "Self-registration of $user for course $course";
+        $body = "Student $user has self-registered for course $course for term $term.";
         $emails = [];
         foreach ($instructors as $instructor) {
             $emails[] = new Email(
