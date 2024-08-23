@@ -38,7 +38,9 @@
         From the "Graders" tab in the top menu, each grader may be assigned to grade zero, one, or multiple registration sections.<br>
         Assigning grading <em>by registration section</em> facilitates routine grading of the <em>same set of students</em> throughout the term.
     </p>
-    <br />
+    <p>
+    The 'default section' is assigned to students who have self-registered for this course.
+    </p>
     <form action="{{ update_registration_sections_url }}" method="POST">
         <input type="hidden" name="csrf_token" value="{{ csrf_token }}" />
         <div class="row">
