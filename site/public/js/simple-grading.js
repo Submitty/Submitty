@@ -4,17 +4,18 @@
 function updateVisibility() {
     const showGraders = $('#show-graders').is(':checked');
     const showDates = $('#show-dates').is(':checked');
-    $('.cell-grade').each(() => {
-        const graderElement = $(this).find('.simple-grade-grader');
-        const dateElement = $(this).find('.simple-grade-date');
-        if (showGraders && graderElement.text().trim() !== '') {
+    $('.cell-grade').each((idx, elem) => {
+        const graderElement = $(elem).find('.simple-grade-grader');
+        const dateElement = $(elem).find('.simple-grade-date');
+        const score = $(elem).attr('data-score');
+        if (showGraders && graderElement.text().trim() !== '' && score !== '0') {
             graderElement.show();
         }
         else {
             graderElement.hide();
         }
 
-        if (showDates && dateElement.text().trim() !== '') {
+        if (showDates && dateElement.text().trim() !== '' && score !== '0') {
             dateElement.show();
         }
         else {
@@ -376,25 +377,15 @@ function setupCheckboxCells() {
         showDatesGradedCheckbox.prop('checked', true);
     }
 
-    // show all the hidden grades when showGradersCheckbox is clicked
+    // show all the relevant hidden grades when showGradersCheckbox is clicked
     showGradersCheckbox.on('change', function () {
-        if ($(this).is(':checked')) {
-            $('.simple-grade-grader').css('display', 'block');
-        }
-        else {
-            $('.simple-grade-grader').css('display', 'none');
-        }
+        updateVisibility();
         Cookies.set('show_grader', showGradersCheckbox.is(':checked'));
     });
 
-    // show all the hidden dates when showDatesGradedCheckbox is clicked
+    // show all the relevant hidden dates when showDatesGradedCheckbox is clicked
     showDatesGradedCheckbox.on('change', function () {
-        if ($(this).is(':checked')) {
-            $('.simple-grade-date').css('display', 'block');
-        }
-        else {
-            $('.simple-grade-date').css('display', 'none');
-        }
+        updateVisibility();
         Cookies.set('show_dates', showDatesGradedCheckbox.is(':checked'));
     });
 }
