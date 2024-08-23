@@ -25,17 +25,15 @@ describe('Test revolving around the student side and whether or not they should 
         });
     });
 
-    it('Change Submission Version', () => {
+    it('Student should not have a version conflict after changing to correct submission version', () => {
         cy.login('student');
+
+        // change submission version
         cy.visit(['sample', 'gradeable', 'grades_released_homework_onlytaEC']);
         cy.get('#submission-version-select').select('2');
         cy.get('#version_change').click();
-    });
 
-    it('Student should not have a version conflict', () => {
-        cy.login('student');
         cy.visit(['sample', 'gradeable', 'grades_released_homework_onlytaEC']);
-
         cy.get('[data-testid="version-conflict-version-box"]').should('not.exist');
         cy.get('[data-testid="ta-results-box"').should('have.css', 'backgroundColor', 'rgb(255, 255, 255)');
 
@@ -45,10 +43,8 @@ describe('Test revolving around the student side and whether or not they should 
                 .should('have.css', 'backgroundColor')
                 .and('not.equal', 'rgb(136, 136, 136)');
         });
-    });
 
-    it('Change back Submission Version', () => {
-        cy.login('student');
+        // change back submission version
         cy.visit(['sample', 'gradeable', 'grades_released_homework_onlytaEC']);
         cy.get('#submission-version-select').select('1');
         cy.get('#version_change').click();
