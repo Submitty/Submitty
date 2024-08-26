@@ -4,7 +4,7 @@ const openMessage = `The course testing for ${getFullCurrentSemester()} is open 
 const selectMessage = 'You may select below to add yourself to the course.';
 const notifiedMessage = 'Your instructor will be notified and can then choose to keep you in the course.';
 
-const no_access_message = "You don't have access to this course."
+const no_access_message = "You don't have access to this course.";
 
 describe('Tests for self registering for courses', () => {
     before(() => {
