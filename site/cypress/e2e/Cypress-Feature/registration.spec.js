@@ -16,7 +16,7 @@ describe('Tests for self registering for courses', () => {
         cy.logout();
     });
     it('Should enable self registration, and allow user to register for courses.', () => {
-        cy.login('superuser');
+        cy.login('gutmal');
         cy.visit();
         cy.get('[data-testid="courses-list"').should('not.contain', 'Courses Available for Self Registration');
         cy.visit(['testing']);
@@ -28,7 +28,7 @@ describe('Tests for self registering for courses', () => {
         cy.get('[data-testid="enable-self-registration"]').should('be.checked');
         cy.get('[data-testid="default-section-id"]').select('5');
         cy.logout();
-        cy.login('superuser');
+        cy.login('gutmal');
         cy.visit();
         cy.get('[data-testid="courses-list"').should('contain', 'Courses Available for Self Registration');
         cy.get('[data-testid="testing-button"]').click();
