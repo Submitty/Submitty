@@ -551,7 +551,8 @@ class GlobalController extends AbstractController {
                 // First two weeks of September
                 if ($day <= 14) {
                     $duck_img = 'moorthy_duck/back_to_school_duck.svg';
-                } else {
+                }
+                else {
                     // Original case for September
                     $duck_img = 'moorthy_duck/09-september.svg';
                 }
