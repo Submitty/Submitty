@@ -552,6 +552,8 @@ class GlobalController extends AbstractController {
                 $duck_img = 'moorthy_duck/09-september.svg';
                 break;
             case 8:
+                //August (vacation)
+                $duck_img = 'moorthy_duck/08-august.svg';
                 break;
             case 7:
                 //July (Independence)
