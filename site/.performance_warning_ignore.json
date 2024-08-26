@@ -49,5 +49,5 @@
   "/courses/<term>/<course>/email_status_page",
   "/courses/<term>/<course>/users",
   "/courses/<term>/<course>/queue/student_search",
-  "/courses/<term>/<course>/self_register"
+  "/courses/<term>/<course>/register"
 ]
