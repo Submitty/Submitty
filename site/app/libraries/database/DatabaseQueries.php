@@ -2,6 +2,7 @@
 
 namespace app\libraries\database;
 
+use app\controllers\admin\ConfigurationController;
 use app\exceptions\DatabaseException;
 use app\exceptions\ValidationException;
 use app\exceptions\NotImplementedException;
@@ -3336,14 +3337,14 @@ ORDER BY g.sections_rotating_id, g.user_id",
      */
     public function getDefaultRegistrationSection(string $term, string $course): string|null {
         $this->submitty_db->query("SELECT default_section_id FROM courses where term=? and course=?", [$term, $course]);
-        return $this->submitty_db->row()['default_section_id'];
+        return $this->submitty_db->row()['default_section_id'] ?? null;
     }
 
     /**
      * Updates the default registration section for self register courses.
      */
     public function setDefaultRegistrationSection(string $term, string $course, string $section_id): void {
-        $this->submitty_db->query("UPDATE courses set default_section_id = $section_id where term=? and course=?", [$term, $course]);
+        $this->submitty_db->query("UPDATE courses set default_section_id=$section_id where term=? and course=?", [$term, $course]);
     }
 
     /**
@@ -5189,14 +5190,14 @@ SQL;
     /**
      * @return array<Course>
      */
-    public function getSelfRegisterCourses(string $user_id): array {
+    public function getSelfRegistrationCourses(string $user_id): array {
         $query = <<<SQL
 SELECT c.*, t.name AS term_name FROM courses c, terms t
-WHERE NOT c.self_registration_type = 0 AND c.status = 1 and c.course NOT IN (
+WHERE c.self_registration_type > ? AND c.status = 1 and c.course NOT IN (
     SELECT course FROM courses_users WHERE user_id = ?
 ) AND c.term = t.term_id
 SQL;
-        $this->submitty_db->query($query, [$user_id]);
+        $this->submitty_db->query($query, [ConfigurationController::NO_SELF_REGISTER, $user_id]);
         $return = [];
         foreach ($this->submitty_db->rows() as $row) {
             $course = new Course($this->core, $row);

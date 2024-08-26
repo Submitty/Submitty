@@ -39,7 +39,7 @@
         Assigning grading <em>by registration section</em> facilitates routine grading of the <em>same set of students</em> throughout the term.
     </p>
     <p>
-    The 'default section' is assigned to students who have self-registered for this course.
+        The 'default section' is assigned to students who have self-registered for this course.
     </p>
     <form action="{{ update_registration_sections_url }}" method="POST">
         <input type="hidden" name="csrf_token" value="{{ csrf_token }}" />
@@ -54,7 +54,7 @@
                             <th>Course ID</th>
                             <th>Count</th>
                             {% if is_self_register %}
-                                    <th>Default Section</td>
+                                <th>Default Section</td>
                             {% endif %}
                         </tr>
                     </thead>
@@ -68,7 +68,14 @@
                                 <td> {{ section['course_section_id'] }} </td>
                                 <td>{{ reg_sections_count[section['sections_registration_id']] }}</td>
                                 {% if is_self_register %}
-                                    <td><input type="radio" name="default_section" value="{{ section['sections_registration_id'] }}" {{ section['sections_registration_id'] == default_section ? 'checked' : '' }}/></td>
+                                    <td>
+                                        <input 
+                                            type="radio" 
+                                            name="default_section" 
+                                            value="{{ section['sections_registration_id'] }}" 
+                                            {{ section['sections_registration_id'] == default_section ? 'checked' : '' }}
+                                        />
+                                    </td>
                                 {% endif %}
                             </tr>
                             {% else %}
@@ -77,7 +84,14 @@
                                 <td> {{ section['course_section_id'] }} </td>
                                 <td>0</td>
                                 {% if is_self_register %}
-                                    <td><input type="radio" name="default_section" value="{{ section['sections_registration_id'] }}" {{ section['sections_registration_id'] == default_section ? 'checked' : '' }}/></td>
+                                    <td>
+                                        <input 
+                                            type="radio" 
+                                            name="default_section" 
+                                            value="{{ section['sections_registration_id'] }}" 
+                                            {{ section['sections_registration_id'] == default_section ? 'checked' : '' }}
+                                        />
+                                    </td>
                                 {% endif %}
                             </tr>
                             {% endif %}
@@ -89,7 +103,7 @@
                             <td>NULL</td>
                             <td>{{ reg_sections_count['NULL'] }}</td>
                             {% if is_self_register %}
-                                    <td></td>
+                                <td></td>
                             {% endif %}
                         </tr>
                         {% else %}

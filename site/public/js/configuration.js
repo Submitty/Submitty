@@ -10,8 +10,7 @@ $(document).ready(() => {
         if (this.type === 'checkbox') {
             entry = $(elem).is(':checked');
             if (this.id === 'self-registration') {
-                console.log('test');
-                default_section = document.getElementById('default-section-id').value;
+                default_section = $('#default-section-id').val();
                 formData.append('default_section', default_section);
             }
         }
@@ -31,7 +30,6 @@ $(document).ready(() => {
                     response = JSON.parse(response);
                 }
                 catch (exc) {
-                    console.log(response);
                     response = {
                         status: 'fail',
                         message: 'invalid response received from server',

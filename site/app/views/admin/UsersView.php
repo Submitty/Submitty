@@ -152,7 +152,6 @@ class UsersView extends AbstractView {
             "csrf_token" => $this->core->getCsrfToken(),
             "default_section" => $default_section,
             "is_self_register" => $is_self_register
-
         ]);
     }
 }

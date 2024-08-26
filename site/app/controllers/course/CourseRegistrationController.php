@@ -30,7 +30,7 @@ class CourseRegistrationController extends AbstractController {
         $this->core->getNotificationFactory()->sendEmails($emails);
     }
 
-    #[Route("/courses/{term}/{course}/self_register")]
+    #[Route("/courses/{term}/{course}/register")]
     public function selfRegister(string $term, string $course): RedirectResponse {
         $this->core->loadCourseConfig($term, $course);
         $this->core->loadCourseDatabase();
