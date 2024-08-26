@@ -406,6 +406,55 @@ To remove a curve simply blank all boxes."></i>
                     </table>
                 </div>
             </div>
+            <div id="performance-warnings" class="customization_item">
+                <h2>Academic Performance Warnings</h2>
+                <p class="rg_info_message">Automatically generate Academic Performance Warnings for each student that fails to obtain a target score on a given list of gradeables.</p>
+                <input type="hidden" name="csrf_token" value="{{ csrfToken }}" />
+                <input type="hidden" name="option" value="-1" />
+                <div class="option">
+                    <label for="performance-warnings-message">
+                        <span>Message:</span>
+                        <input class="option-input" type="text" name="performance-warnings-message" id="performance-warnings-message">
+                    </label>
+                    <label for="performance-warnings-gradeables">
+                        <span>Gradeables:</span>
+                        <select name="performance-warnings-gradeables[]" id="performance-warnings-gradeables">
+                            <option> -- select an option -- </option>{# Browser automatically selects first option. This option will be removed after page loads #}
+                            {% for index, value in gradeables %}
+                                <option value="{{ value['g_id'] }}">{{ value['g_title'] }}</option>
+                            {% endfor %}
+                        </select>
+                    </label>
+                    <label for="performance-warnings-score">
+                        <span>Target Score:</span>
+                        <input class="option-input" type="number" name="performance-warnings-score" id="performance-warnings-score">
+                    </label>
+                    <button type="submit" class="btn btn-primary" onclick="addToTable('performanceWarnings'); manageWarningsGradeables('submit');" aria-label="submit">
+                        <i class="fas fa-plus"></i>
+                    </button>
+                    {# This is a data table #}
+                    <table id="performance-warnings-table" class="table table-striped table-bordered persist-area mobile-table">
+                        <thead>
+                        <tr>
+                            <th>Message</th>
+                            <th>Gradeables</th>
+                            <th>Target Score</th>
+                            <th>Delete</th>
+                        </tr>
+                        </thead>
+                        <tbody id="performance-warnings-table-body">
+                        {% for entry in warning %}
+                            <tr>
+                                <td>{{ entry.msg }}</td>
+                                <td>{{ entry.ids|join(', ') }}</td>
+                                <td>{{ entry.value }}</td>
+                                <td><a onclick="deleteRow(this); manageWarningsGradeables('delete');"><i class="fas fa-trash"></i></a></td>
+                            </tr>
+                        {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
             <div id="plagiarism" data-testid="plagiarism" class="customization_item">
                 <h2>Penalties for Academic Dishonesty and Plagiarism</h2>
                 <p class="rg_info_message">All students will receive a zero for the specified gradeable.  Additionally if a non-zero penalty value is indicated they will receive an additional reduction on the semester grade.  Penalty = 1 is a full letter grade.  Penalty = 0.5 is a half letter grade.  Penalty = 0.33 is a one third letter grade.</p>
