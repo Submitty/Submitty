@@ -28,20 +28,6 @@
             </div>
         </div>
         <hr>
-        <div id="grade-report-csv" class="card">
-            <div class="title-cont">
-                Pushing this button will generate a CSV file (for download) with all student grades for all gradeables.
-            </div>
-            <div class="card-btn-cont">
-                <button onclick="location.href='{{ csv_url }}'"
-                        class="btn btn-primary"
-                        tabindex="0"
-                >
-                    Generate CSV Report
-                </button>
-            </div>
-        </div>
-        <hr>
         <div id="grade-report-rainbow" class="card">
             <div class="title-cont">
                 Web interface for creation and customization of Rainbow Grades for this course.
@@ -60,37 +46,6 @@
                     Web-Based Rainbow Grades Generation
                 </button>
             </div>
-        </div>
-        <hr>
-        <div>
-            <div id="grade-report-customization-upload" class="card">
-                <div class="title-cont">
-                    Upload a Rainbow Grades customization.json directly to Submitty
-                </div>
-                <div class="card-btn-cont">
-                    <form action="{{ customization_upload_url }}" method="POST" enctype="multipart/form-data">
-                        <input type="hidden" name="csrf_token" value="{{csrfToken}}">
-                        <input type="file" id="config-upload" name="config_upload" style="display:none">
-                    
-                            <button
-                                id="btn-upload-customization"
-                                class="btn btn-primary"
-                                tabindex="0"
-                                type="button"
-                            >
-                                Upload Customization
-                            </button>
-                    </form>
-                </div>
-            </div>
-            {% if json is not null %}
-                <button id="toggle-json">Show JSON</button>
-                <div id="customization-json" style="display:none;">
-                    {% include 'misc/Markdown.twig' with {
-                        content: '```json\n' ~ json ~ '\n```\n'
-                    } only %}
-                </div>
-            {% endif %}
         </div>
     </div>
 </div>
