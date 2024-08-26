@@ -20,6 +20,10 @@
         The course <b>{{ course_name != course_id ? 'course_name (course_id)' : course_name  }}</b> for <b>{{ semester }}</b> is open to self registration <br />
         You may select below to add yourself to the course. <br/>
         Your instructor will be notified and can then choose to keep you in the course.
+        {% if course_home_url != '' %}
+            </br>   
+            Click <a href="{{ course_home_url }}"> here </a> to visit the course home page.
+        {% endif %}
         </br>
         </br>
         <form method="POST" action="{{ self_register_url }}">
