@@ -1,6 +1,6 @@
-import { getFullCurrentSemester } from "../../support/utils";
+import { getFullCurrentSemester } from '../../support/utils';
 
-const openMessage = 'The course testing is open for ' + getFullCurrentSemester() + 'self registration';
+const openMessage = `The course testing is open for ${getFullCurrentSemester()} self registration`;
 const selectMessage = 'You may select below to add yourself to the course.';
 const notifiedMessage = 'Your instructor will be notified and can then choose to keep you in the course.';
 
