@@ -45,7 +45,7 @@ class ErrorView extends AbstractView {
             "course_home_url" => $this->core->getConfig()->getCourseHomeUrl(),
             "ability_to_readd" => $can_rejoin_course,
             "readd_url" => $readd_url,
-            "self_register_url" => $this->core->buildCourseUrl(['self_register']),
+            "register_url" => $this->core->buildCourseUrl(['register']),
             "user" => $this->core->getUser(),
             "csrf_token" => $this->core->getCsrfToken(),
             "self_registration_type" => $self_registration_type
