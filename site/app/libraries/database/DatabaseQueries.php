@@ -3344,7 +3344,7 @@ ORDER BY g.sections_rotating_id, g.user_id",
      * Updates the default registration section for self register courses.
      */
     public function setDefaultRegistrationSection(string $term, string $course, string $section_id): void {
-        $this->submitty_db->query("UPDATE courses set default_section_id=$section_id where term=? and course=?", [$term, $course]);
+        $this->submitty_db->query("UPDATE courses set default_section_id=? where term=? and course=?", [$section_id, $term, $course]);
     }
 
     /**
