@@ -7912,6 +7912,12 @@ AND gc_id IN (
     public function getUserVerificationValuesByCode(string $code): array {
         $parameters = [$code];
         $this->submitty_db->query('SELECT verification_code, verification_expiration FROM unverified_users where verification_code=?', $parameters);
+        if (is_null($this->submitty_db->row())) {
+            return [];
+        }
+        if ($this->submitty_db->row()['verification_expiration'] < time()) {
+            return [];
+        }
         return $this->submitty_db->row();
     }
 

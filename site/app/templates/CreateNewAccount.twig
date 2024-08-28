@@ -21,9 +21,18 @@
             <div class="hidden-helper" id="userid-helper">
                 UserID Requirements:<br/>
                 {% if requirements['user_id']['all'] == true %}
-                    All user ids of {{ requirements['user_id']['length'] == -1 ? 'any length' : "length:  requirements['user_id']['length']" }} are accepted
+                    All user ids of 
+                    {% if requirements['user_id']['length'] == -1 %}
+                        any length
+                    {% else %}
+                        length {{ requirements["user_id"]["length"] }}
+                    {% endif %}
+                    are accepted
                 {% elseif requirements['user_id']['require_name'] == true %}
-                    Must start with {{ requirements['user_id']['name_requirements']['givenname_first'] ? (requirements['user_id']['name_requirements']['given_name'] + 'characters of your given name') : (requirements['user_id']['name_requirements']['family_name'] + 'characters of your family name')}}
+                    Must start with 
+                    {{ requirements['user_id']['name_requirements']['givenname_first'] ? 
+                    (requirements['user_id']['name_requirements']['given_name'] + 'characters of your given name') : 
+                    (requirements['user_id']['name_requirements']['family_name'] + 'characters of your family name')}}
                 {% elseif requirements['user_id']['require_email'] == true %}
 
                 {% endif %}
