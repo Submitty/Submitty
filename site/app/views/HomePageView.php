@@ -23,8 +23,8 @@ class HomePageView extends AbstractView {
         $course_types = [
             "unarchived_courses" => $unarchived_courses,
             "dropped_courses" => $dropped_courses,
-            "archived_courses" => $archived_courses,
-            "self_registration_courses" => $self_registration_courses
+            "self_registration_courses" => $self_registration_courses,
+            "archived_courses" => $archived_courses
         ];
         $rank_titles = [
             User::GROUP_INSTRUCTOR              => "Instructor:",

@@ -14,9 +14,9 @@
                 {% set course_type_message = "Archived " %}
             {% endif %}
             {% if course_type == "self_registration_courses" %}
-                <h1>Courses Available for Self Registration</h1>
+                <h1 data-testid="courses-header">Courses Available for Self Registration</h1>
             {% else %}
-                <h1>My {{ course_type_message }}Courses</h1>
+                <h1 data-testid="courses-header">My {{ course_type_message }}Courses</h1>
             {% endif %}
             {% for rank in ranks %}
                 {% if course_type != "dropped_courses" and course_type != "self_registration_courses" %}

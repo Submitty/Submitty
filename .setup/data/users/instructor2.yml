@@ -6,4 +6,6 @@ user_familyname: Instructor
 user_access_level: 2
 user_numeric_id: 801516158
 user_pronouns: He/Him
-courses: []
+courses:
+  testing:
+    user_group: 1
