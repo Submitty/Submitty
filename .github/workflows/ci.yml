@@ -691,7 +691,7 @@ jobs:
 
       - name: Switch to database auth
         run: sudo sed -ie "s/Pam/Database/g" ${SUBMITTY_INSTALL_DIR}/config/authentication.json
-      
+
       - name: Switch to CI mode
         run: sudo sed -ie "s/is_ci:false/is_ci:true/g" ${SUBMITTY_INSTALL_DIR}/config/submitty.json
 
@@ -706,11 +706,11 @@ jobs:
       - name: Enable self account creation
         run: sudo sed -ie "s/user_create_account:false/user_create_account:true/g" ${SUBMITTY_INSTALL_DIR}/config/authentication.json
 
-      - name: Run self-account-creation tests. 
+      - name: Run self-account-creation tests.
         uses: cypress-io/github-action@v6
         with:
           config: baseUrl=http://localhost
-          spec: cypress/e2e/Cypress-System/self-account-creation.spec.js
+          spec: cypress/e2e/Cypress-System/self_account_creation.spec.js
           working-directory: ${{env.SUBMITTY_REPOSITORY}}/site
           browser: chrome
 

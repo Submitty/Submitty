@@ -390,6 +390,7 @@ class ConfigTester extends \PHPUnit\Framework\TestCase {
             'date_time_format' => ['modified' => false],
             "default_locale" => "default",
             "locale" => ['modified' => false],
+            "ci" => false,
         ];
         $actual = $config->toArray();
 

@@ -468,7 +468,7 @@ class AuthenticationController extends AbstractController {
             return new RedirectResponse($this->core->buildUrl(['authentication', 'email_verification']));
         }
         $unverified_users = $this->core->getQueries()->getUnverifiedUserIdEmailExists($_GET['email'], '');
-        if (count($unverified_users) == 0) {
+        if (count($unverified_users) === 0) {
             $this->core->addErrorMessage('Either you have already verified your email, or that email is not associated with an account.');
             return new RedirectResponse($this->core->buildUrl(['authentication', 'login']));
         }

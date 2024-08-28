@@ -7913,10 +7913,7 @@ AND gc_id IN (
         $parameters = [$code];
         $this->submitty_db->query('SELECT verification_code, verification_expiration FROM unverified_users where verification_code=?', $parameters);
         $values = $this->submitty_db->row();
-        if (is_null($values)) {
-            return [];
-        }
-        if ($values['verification_expiration'] < time()) {
+        if ($values === [] || $values['verification_expiration'] < time()) {
             return [];
         }
         return $values;

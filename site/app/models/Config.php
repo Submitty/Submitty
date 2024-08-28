@@ -442,7 +442,7 @@ class Config extends AbstractModel {
         $this->sys_admin_url = $submitty_json['sys_admin_url'] ?? '';
 
         $this->user_create_account = $submitty_json['user_create_account'] === true;
-        $this->ci = $submitty_json['is_ci'] ?? false === true;
+        $this->ci = ($submitty_json['is_ci'] ?? false) === true;
         $this->user_id_requirements = $submitty_json['user_id_requirements'];
         $this->accepted_emails = $submitty_json['accepted_emails'];
 
