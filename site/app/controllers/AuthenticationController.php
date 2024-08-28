@@ -394,7 +394,7 @@ class AuthenticationController extends AbstractController {
      * @return array<mixed>
      */
     public function generateVerificationCode(): array {
-        $code = Utils::generateRandomString();
+        $code = $this->core->getConfig()->isCi() ? '00000000' : Utils::generateRandomString();
         $timestamp = time() + 60 * 15; // 15 minutes from now, may eventually set this as a configurable value.
         return ['code' => strval($code), 'exp' => $timestamp];
     }

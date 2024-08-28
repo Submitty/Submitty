@@ -82,6 +82,7 @@ use app\libraries\FileUtils;
  * @method string getSubmittyInstallPath()
  * @method bool isDuckBannerEnabled()
  * @method string getPhpUser()
+ * @method bool isCi()
  */
 
 class Config extends AbstractModel {
@@ -93,6 +94,11 @@ class Config extends AbstractModel {
      * @var bool
      */
     protected $debug = false;
+
+    /**
+     * @prop
+     * @var bool Is this being run on CI? (Allows for mocking of certain 'random' functions).*/
+    protected $ci = false;
 
     /** @prop
      * @var string contains the term to use, generally from the $_REQUEST['semester'] global */
@@ -436,6 +442,7 @@ class Config extends AbstractModel {
         $this->sys_admin_url = $submitty_json['sys_admin_url'] ?? '';
 
         $this->user_create_account = $submitty_json['user_create_account'] === true;
+        $this->ci = $submitty_json['is_ci'] ?? false === true;
         $this->user_id_requirements = $submitty_json['user_id_requirements'];
         $this->accepted_emails = $submitty_json['accepted_emails'];
 
