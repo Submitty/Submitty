@@ -8,7 +8,7 @@ const no_access_message = "You don't have access to this course.";
 
 describe('Tests for self registering for courses', () => {
     before(() => {
-        // Testing course is on by default, but want to test unchecking and re-checking. 
+        // Testing course is on by default, but want to test unchecking and re-checking.
         cy.login('instructor2');
         cy.visit(['testing', 'config']);
         cy.get('[data-testid="enable-self-registration"]').uncheck();
@@ -18,9 +18,9 @@ describe('Tests for self registering for courses', () => {
     });
 
     it('Should enable self registration, and allow user to register for courses.', () => {
-        // This will fail if re-run on a local machine, must recreate sample courses or manually remove user from course first. 
+        // This will fail if re-run on a local machine, must recreate sample courses or manually remove user from course first.
         cy.login('gutmal');
-        cy.get('[data-testid="courses-list"').should('not.contain', 'Courses Available for Self Registration');
+        cy.get('[data-testid="courses-list"]').should('not.contain', 'Courses Available for Self Registration');
         cy.visit(['testing']);
         cy.get('[data-testid="no-access-message"]').should('contain', no_access_message);
         cy.logout();
