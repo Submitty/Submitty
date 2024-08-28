@@ -229,8 +229,14 @@ div:has(.override) ~ div.gradeable-li-right-of-input i.fa-exclamation-triangle {
     width: 32.5em;
 }
 
-#manual-grading-table {
+#manual-grading-table,
+#performance-warnings-table {
     text-align: left;
+}
+
+.select2 {
+    display: inline-block !important;
+    width: 38% !important;
 }
 
 #gradeables .gradeable-custom-item-input {
