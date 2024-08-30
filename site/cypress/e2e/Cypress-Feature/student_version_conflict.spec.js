@@ -1,5 +1,5 @@
-const scores = [];
 describe('Test revolving around the student side and whether or not they should see a version conflict', () => {
+    const scores = [];
     it('Student should have a version conflict', () => {
         cy.login('student');
         cy.visit(['sample', 'gradeable', 'grades_released_homework_onlytaEC']);
@@ -12,15 +12,12 @@ describe('Test revolving around the student side and whether or not they should 
 
         cy.get('[data-testid="ta-results-box"').should('have.css', 'backgroundColor', 'rgb(217, 83, 79)');
 
-        cy.get('[data-testid="score-pill-badge"]').each(($el, index) => {
-            cy.wrap($el)
-                .should('have.css', 'backgroundColor', 'rgb(136, 136, 136)')
-                .then(() => {
-                    scores.push($el.text());
-                });
+        cy.get('[data-testid="score-pill-badge"]').each(($el) => {
+            scores.push($el.text());
+            cy.wrap($el).should('have.css', 'backgroundColor', 'rgb(136, 136, 136)')
         });
 
-        cy.get('[data-testid="ta-grade-results"]').each(($el, index) => {
+        cy.get('[data-testid="ta-grade-results"]').each(($el) => {
             cy.wrap($el).should('contain', 'For Version #2');
         });
     });
@@ -40,8 +37,7 @@ describe('Test revolving around the student side and whether or not they should 
         cy.get('[data-testid="score-pill-badge"]').each(($el, index) => {
             cy.wrap($el)
                 .should('have.text', scores[index])
-                .should('have.css', 'backgroundColor')
-                .and('not.equal', 'rgb(136, 136, 136)');
+                .should('not.have.css', 'backgroundColor', 'rgb(136, 136, 136)')
         });
 
         // change back submission version
