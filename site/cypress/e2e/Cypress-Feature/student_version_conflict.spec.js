@@ -14,7 +14,7 @@ describe('Test revolving around the student side and whether or not they should 
 
         cy.get('[data-testid="score-pill-badge"]').each(($el) => {
             scores.push($el.text());
-            cy.wrap($el).should('have.css', 'backgroundColor', 'rgb(136, 136, 136)')
+            cy.wrap($el).should('have.css', 'backgroundColor', 'rgb(136, 136, 136)');
         });
 
         cy.get('[data-testid="ta-grade-results"]').each(($el) => {
@@ -37,7 +37,7 @@ describe('Test revolving around the student side and whether or not they should 
         cy.get('[data-testid="score-pill-badge"]').each(($el, index) => {
             cy.wrap($el)
                 .should('have.text', scores[index])
-                .should('not.have.css', 'backgroundColor', 'rgb(136, 136, 136)')
+                .should('not.have.css', 'backgroundColor', 'rgb(136, 136, 136)');
         });
 
         // change back submission version
