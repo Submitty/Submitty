@@ -552,6 +552,15 @@ class RainbowCustomization extends AbstractModel {
         return $this->RCJSON?->getManualGrades() ?? [];
     }
 
+    /**
+     * Get performance warnings from json file if there are any
+     *
+     * @return array<object>  array of performance warnings JSON object
+     */
+    public function getPerformanceWarnings(): array {
+        return $this->RCJSON?->getPerformanceWarnings() ?? [];
+    }
+
     // This function handles processing the incoming post data
     public function processForm() {
 
@@ -606,6 +615,12 @@ class RainbowCustomization extends AbstractModel {
         if (isset($form_json->manual_grade)) {
             foreach ($form_json->manual_grade as $manual_grade) {
                 $this->RCJSON->addManualGradeEntry($manual_grade);
+            }
+        }
+
+        if (isset($form_json->warning)) {
+            foreach ($form_json->warning as $warning) {
+                $this->RCJSON->addPerformanceWarningEntry($warning);
             }
         }
 
