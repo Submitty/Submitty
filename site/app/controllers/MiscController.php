@@ -94,7 +94,7 @@ class MiscController extends AbstractController {
     }
 
     #[Route("/courses/{_semester}/{_course}/display_file")]
-    public function displayFile($dir = null, $path = null, $gradeable_id = null, $user_id = null, $ta_grading = null, $course_material_id = null, $unprocessed = false) {
+    public function displayFile($dir = null, $path = null, $gradeable_id = null, $user_id = null, $ta_grading = null, $course_material_id = null) {
         $cm = null;
         //Is this per-gradeable?
         if ($course_material_id === null && ($dir !== null && $path !== null)) {
@@ -121,23 +121,6 @@ class MiscController extends AbstractController {
             }
         }
 
-        $processed_path = null;
-        if (!$unprocessed && $dir == 'submissions') {
-            $course_dir = $this->core->getConfig()->getCoursePath();
-            $submissions_dir = FileUtils::joinPaths($course_dir, 'submissions');
-            $submissions_processed_dir = FileUtils::joinPaths($course_dir, 'submissions_processed');
-            if (str_starts_with($path, $submissions_dir)) {
-                $subpath = substr($path, strlen($submissions_dir));
-                $subpath_parts = explode(DIRECTORY_SEPARATOR, $subpath, 5);
-                $final_part = array_pop($subpath_parts) . '.pdf';
-                $target = FileUtils::joinPaths($submissions_processed_dir, ...$subpath_parts);
-                $target = FileUtils::joinPaths($target, 'pdf', $final_part);
-                if (file_exists($target)) {
-                    $processed_path = $target;
-                }
-            }
-        }
-
         if (!is_null($gradeable_id) && !is_null($user_id)) {
             $gradeable = $this->tryGetGradeable($gradeable_id, false);
             if ($gradeable === false) {
@@ -147,26 +130,16 @@ class MiscController extends AbstractController {
             if ($graded_gradeable === false) {
                 return false;
             }
-            if ($processed_path == null || !$this->core->getAccess()->canI("path.read", ["dir" => 'submissions_processed', "path" => $processed_path, "gradeable" => $gradeable, "graded_gradeable" => $graded_gradeable])) {
-                if (!$this->core->getAccess()->canI("path.read", ["dir" => $dir, "path" => $path, "gradeable" => $gradeable, "graded_gradeable" => $graded_gradeable])) {
-                    $this->core->getOutput()->showError(self::GENERIC_NO_ACCESS_MSG);
-                    return false;
-                }
-            } else {
-                $dir = 'submissions_processed';
-                $path = $processed_path;
+            if (!$this->core->getAccess()->canI("path.read", ["dir" => $dir, "path" => $path, "gradeable" => $gradeable, "graded_gradeable" => $graded_gradeable])) {
+                $this->core->getOutput()->showError(self::GENERIC_NO_ACCESS_MSG);
+                return false;
             }
         }
         else {
             // Check access through Access library
-            if ($processed_path == null || !$this->core->getAccess()->canI("path.read", ["dir" => 'submissions_processed', "path" => $processed_path])) {
-                if (!$this->core->getAccess()->canI("path.read", ["dir" => $dir, "path" => $path])) {
-                    $this->core->getOutput()->showError(self::GENERIC_NO_ACCESS_MSG);
-                    return false;
-                }
-            } else {
-                $dir = 'submissions_processed';
-                $path = $processed_path;
+            if (!$this->core->getAccess()->canI("path.read", ["dir" => $dir, "path" => $path])) {
+                $this->core->getOutput()->showError(self::GENERIC_NO_ACCESS_MSG);
+                return false;
             }
 
             if ($dir == 'course_materials' && !$this->core->getUser()->accessGrading()) {
