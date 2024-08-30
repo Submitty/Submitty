@@ -100,8 +100,7 @@
                 </tr>
             </thead>
             <tbody>
-                {% for poll in future_polls %}
-                    {% if poll.getReleaseDate() | date("Y-m-d") == ('now'|date_modify("+1 day")|date('Y-m-d')) %}
+                {% for poll in tomorrow_polls %}
                     <tr>
                         <td>
                                 <a class="fas fa-pencil-alt black-btn" tabindex="0" href="{{base_url}}/editPoll/{{ poll.getId() }}" title="edit poll {{ poll.getName() }}" aria-label="edit poll {{ poll.getId() }}">
@@ -129,7 +128,6 @@
                             </a>
                         </td>
                     </tr>
-                    {% endif %}
                 {% endfor %}
             </tbody>
         </table>
