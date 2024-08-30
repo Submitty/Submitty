@@ -630,7 +630,8 @@ if not args.worker:
 user_id_requirements = {
     "all": True,
     "require_name": False,
-    "length": 25,
+    "min_length": 6,
+    "max_length": 25,
     "name_requirements": {
         "given_first": False,
         "given_name": 2,

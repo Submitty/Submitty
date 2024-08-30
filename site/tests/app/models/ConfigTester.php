@@ -100,7 +100,8 @@ class ConfigTester extends \PHPUnit\Framework\TestCase {
             "user_id_requirements" => [
                 "all" => true,
                 "require_name" => false,
-                "length" => 25,
+                "min_length" => 6,
+                "max_length" => 25,
                 "name_requirements" => [
                     "given_first" => false,
                     "given_name" => 2,
@@ -356,7 +357,8 @@ class ConfigTester extends \PHPUnit\Framework\TestCase {
             "user_id_requirements" => [
                 "all" => true,
                 "require_name" => false,
-                "length" => 25,
+                "min_length" => 6,
+                "max_length" => 25,
                 "name_requirements" => [
                     "given_first" => false,
                     "given_name" => 2,
