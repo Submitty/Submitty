@@ -8076,7 +8076,7 @@ AND gc_id IN (
         //first check if the queue has an access code
         $this->course_db->query("SELECT * FROM queue_settings WHERE UPPER(TRIM(code)) = UPPER(TRIM(?)) AND open = true", [$queue_code]);
         if ($this->course_db->getRowCount() > 0 && $this->course_db->rows()[0]['token'] == null) {
-            return $this->course_db->rows()[0]['code'];
+            return $this->course_db->row()['code'];
         }
         elseif ($token === null) {
             return false;
