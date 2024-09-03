@@ -7,7 +7,7 @@ date in the past with no notification sent to students.
 import json
 import os
 import datetime
-from sqlalchemy import create_engine # pylint: disable=import-error
+from sqlalchemy import create_engine  # pylint: disable=import-error
 import sys
 import getpass
 try:
@@ -27,7 +27,8 @@ try:
         DATABASE_CONFIG = json.load(open_file)
 except Exception as config_fail_error:
     print(
-        f"[{datetime.datetime.now()}] ERROR: CORE SUBMITTY CONFIGURATION ERROR {config_fail_error}"
+        f"[{datetime.datetime.now()}] ERROR: CORE SUBMITTY CONFIGURATION ERROR"
+        + {config_fail_error}
     )
     sys.exit(1)
 
@@ -47,23 +48,28 @@ try:
     DB_USER = DATABASE_CONFIG["database_user"]
     DB_PASSWORD = DATABASE_CONFIG["database_password"]
 except Exception as config_fail_error:
-    e = f"[{datetime.datetime.now()}] ERROR: Database Configuration Failed {config_fail_error}"
+    e = (f"[{datetime.datetime.now()}] ERROR: Database Configuration Failed "
+         f"{config_fail_error}")
     LOG_FILE.write(e + "\n")
     print(e)
     sys.exit(1)
+
+
 def connect_db(db_name):
     """Set up a connection with the specific database."""
     if os.path.isdir(DB_HOST):
-        conn_string = f"postgresql://{DB_USER}:{DB_PASSWORD}@/{db_name}?host={DB_HOST}"
+        connection = (f"postgresql://{DB_USER}:{DB_PASSWORD}@/{db_name}"
+                      f"?host={DB_HOST}")
     else:
-        conn_string = f"postgresql://{DB_USER}:{DB_PASSWORD}@{DB_HOST}/{db_name}"
+        connection = (f"postgresql://{DB_USER}:{DB_PASSWORD}@{DB_HOST}"
+                      f"/{db_name}")
 
-    engine = create_engine(conn_string)
+    engine = create_engine(connection)
     db = engine.connect()
     return db
 
 
-def notifyPendingGradeables():
+def notify_pending_gradeables():
     master_db = connect_db("submitty")
     course_query = "SELECT term, course FROM courses WHERE status = '1';"
     courses = master_db.execute(course_query)
@@ -88,7 +94,8 @@ def notifyPendingGradeables():
             timestamp = str(datetime.datetime.now())
 
             # Construct gradeable URL into valid JSON string
-            gradeable_url = f"{BASE_URL_PATH}/courses/{term}/{course}/gradeable/{gradeable['id']}"
+            gradeable_url = (f"{BASE_URL_PATH}/courses/{term}/{course}"
+                             f"/gradeable/{gradeable['id']}")
             metadata = json.dumps({"url": gradeable_url})
 
             # Send out notifications
@@ -108,7 +115,8 @@ def notifyPendingGradeables():
             )
             for recipient in notification_recipients:
                 user_id = recipient[0]
-                values = f"('grading','{metadata}','{notification_content}','{timestamp}','submitty-admin','{user_id}')"
+                values = (f"('grading','{metadata}','{notification_content}',"
+                          f"'{timestamp}','submitty-admin','{user_id}')")
                 notification_list.append(values)
             # Send notifications to all potential recipients
             if len(notification_list) > 0:
@@ -121,11 +129,12 @@ def notifyPendingGradeables():
 
             # Send out emails using both course and master database
             email_list = []
-            email_subject = f"[Submitty {course}] Grade Released: {gradeable['title']}"
+            email_subject = (f"[Submitty {course}] Grade Released: "
+                             f"{gradeable['title']}")
 
-            email_body = (f"An Instructor has released scores in:\n{course}\n\n"
-                          f"Scores have been released for {gradeable['title']}.\n\n"
-                          f"Author: System\n"
+            email_body = (f"An Instructor has released scores in:\n{course}"
+                          f"\n\nScores have been released for "
+                          f"{gradeable['title']}.\n\nAuthor: System\n"
                           f"Click here for more info: {gradeable_url}\n\n"
                           "--\n"
                           "NOTE: This is an automated email notification, "
@@ -146,7 +155,8 @@ def notifyPendingGradeables():
             for recipient in email_recipients:
                 user_id, user_email = recipient[0], recipient[1]
                 email_list.append(
-                    f"('{email_subject}', '{email_body}', '{timestamp}', '{user_id}', '{user_email}', '{term}', '{course}')"
+                    f"('{email_subject}', '{email_body}', '{timestamp}', "
+                    f"'{user_id}', '{user_email}', '{term}', '{course}')"
                 )
 
             if len(email_list) > 0:
@@ -172,13 +182,16 @@ def notifyPendingGradeables():
         course_db.close()
     return total_notified_gradeables
 
+
 def main():
     try:
-        total_notified_gradeables = notifyPendingGradeables()
-        e = f"[{datetime.datetime.now()}] Successfully released {total_notified_gradeables} gradeable notifications"
+        notified = notify_pending_gradeables()
+        e = (f"[{datetime.datetime.now()}] Successfully released {notified} "
+             f"gradeable notification{'s' if notified != 1 else ''}")
         LOG_FILE.write(e+"\n")
     except Exception as notification_send_error:
-        e = f"[{datetime.datetime.now()}] Error Sending Notification(s): {str(notification_send_error)}"
+        e = (f"[{datetime.datetime.now()}] Error Sending Notification(s): "
+             f"{str(notification_send_error)}")
         LOG_FILE.write(e + "\n")
         print(e)
 

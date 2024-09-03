@@ -19,7 +19,7 @@ def up(config, database, semester, course):
             ALTER TABLE notification_settings ADD COLUMN IF NOT EXISTS all_released_grades BOOLEAN DEFAULT true NOT NULL;
             ALTER TABLE notification_settings ADD COLUMN IF NOT EXISTS all_released_grades_email BOOLEAN DEFAULT true NOT NULL;
             ALTER TABLE gradeable ADD COLUMN IF NOT EXISTS g_notification_state BOOLEAN DEFAULT false NOT NULL;            
-            UPDATE gradeable SET g_notification_state = true WHERE g_grade_released_date < NOW(); 
+            UPDATE gradeable SET g_notification_state = true WHERE g_grade_released_date < NOW();
         """ 
     )
 
@@ -38,10 +38,3 @@ def down(config, database, semester, course):
     :param course: Code of course being migrated
     :type course: str
     """
-    database.execute(
-        """
-            ALTER TABLE notification_settings DROP COLUMN all_released_grades;
-            ALTER TABLE notification_settings DROP COLUMN all_released_grades_email;
-            ALTER TABLE gradeable DROP COLUMN g_notification_state;
-        """
-    )

@@ -7367,7 +7367,6 @@ AND gc_id IN (
                     $gradeable->getPeerSolutions(),
                     $gradeable->getPeerDiscussion()
                 ];
-              
                 // Update row if exists, else Insert row
                 $this->course_db->query(
                     "
