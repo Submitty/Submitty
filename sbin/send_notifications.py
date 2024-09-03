@@ -44,7 +44,7 @@ DATA_DIR_PATH = SUBMITTY_CONFIG["submitty_data_dir"]
 BASE_URL_PATH = SUBMITTY_CONFIG["submission_url"]
 NOTIFICATION_LOG_PATH = os.path.join(DATA_DIR_PATH, "logs", "notifications")
 TODAY = datetime.datetime.now()
-LOG_FILE = open(
+LOG_FILE = open(  # pylint: disable=consider-using-with
     os.path.join(
         NOTIFICATION_LOG_PATH,
         f"{TODAY.year:04d}{TODAY.month:02d}{TODAY.day:02d}.txt",
