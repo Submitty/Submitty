@@ -13,7 +13,7 @@
     <div class="leaderboard-tab-bar-wrapper">
         <div class="btn-group" role="group" aria-label="Switch leaderboards">
             {% for leaderboard in leaderboards %}
-                <button type="button" class="leaderboard-nav key_to_click btn btn-secondary" id="{{leaderboard.getTag}}_nav" onclick="onChangeLeaderboard('{{leaderboard.getTag}}');">{{leaderboard.getTitle}}</button>
+                <button type="button" class="leaderboard-nav btn btn-secondary" id="{{leaderboard.getTag}}_nav" onclick="onChangeLeaderboard('{{leaderboard.getTag}}');">{{leaderboard.getTitle}}</button>
             {% endfor %}
         </div>
     </div>

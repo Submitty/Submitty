@@ -109,7 +109,7 @@ function openMarkConflictPopup(component_id, conflictMarks) {
             // Setup the promise so that resolving the last mark will resolve the promise
             return new Promise((resolve) => {
                 // Function to tag a mark as resolved and move to the next mark
-                const resolveMark = function(mark_id) {
+                const resolveMark = function (mark_id) {
                     tagMarkConflictResolved(mark_id);
                     if (!anyUnresolvedConflicts()) {
                         popup.hide();
@@ -122,7 +122,7 @@ function openMarkConflictPopup(component_id, conflictMarks) {
 
                 // In order for the event handlers to have the power to resolve the promise,
                 //  they need to be established within the promise
-                popup.find('.mark-resolve-dom .btn').click(function() {
+                popup.find('.mark-resolve-dom .btn').click(function () {
                     const id = getConflictMarkIdFromDOMElement(this);
                     const mark = conflictMarks[id].domMark;
 
@@ -157,7 +157,7 @@ function openMarkConflictPopup(component_id, conflictMarks) {
                             alert(`Failed to resolve conflict! ${err.message}`);
                         });
                 });
-                popup.find('.mark-resolve-old-server .btn').click(function() {
+                popup.find('.mark-resolve-old-server .btn').click(function () {
                     const id = getConflictMarkIdFromDOMElement(this);
                     const mark = conflictMarks[id].oldServerMark;
                     ajaxSaveMark(gradeable_id, component_id, id, mark.title, mark.points, mark.publish)
@@ -169,7 +169,7 @@ function openMarkConflictPopup(component_id, conflictMarks) {
                             alert(`Failed to resolve conflict! ${err.message}`);
                         });
                 });
-                popup.find('.mark-resolve-server .btn').click(function() {
+                popup.find('.mark-resolve-server .btn').click(function () {
                     // If we choose the server mark, we don't do anything
                     resolveMark(getConflictMarkIdFromDOMElement(this));
                 });

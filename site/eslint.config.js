@@ -1,24 +1,26 @@
 // @ts-check
 
 const eslint = require('@eslint/js');
+const stylistic = require('@stylistic/eslint-plugin');
 const jest = require('eslint-plugin-jest');
 const globals = require('globals');
 const tseslint = require('typescript-eslint');
-// eslint-plugin-cypress/flat doesnt have ts definitions yet
+// eslint-pluging-cypress/flat doesnt have ts definitions yet
 // @ts-expect-error TS2307
 const cypress = require('eslint-plugin-cypress/flat');
+const vuelint = require('eslint-plugin-vue');
 
 module.exports = tseslint.config(
     {
         name: 'Files to include',
-        files: ['**/*.{js,ts}'],
+        files: ['**/*.{js,ts,mts}'],
     },
     {
-        // todo: actually fix these files instead of ignoring them
+        // name: 'Files to ignore', (this line can be uncommented with eslint >=9.0)
         ignores: [
-            'cypress/support/e2e.js',
-            'cypress/plugins/index.js',
-            'public/js/notebook_builder/widgets/widget.js',
+            'node_modules/**',
+            'public/mjs/**',
+            '**/vendor/**',
         ],
     },
     {
@@ -60,22 +62,22 @@ module.exports = tseslint.config(
     },
     {
         name: 'Style rules for all files',
+        extends: [
+            /** @type {import("typescript-eslint").Config} */
+            /** @type {unknown} */
+            (
+                stylistic.configs.customize({
+                    braceStyle: 'stroustrup',
+                    indent: 4,
+                    semi: true,
+                    arrowParens: true,
+                })
+            ),
+        ],
         rules: {
-            'arrow-spacing': ['error'],
-            'block-spacing': ['error'],
-            'brace-style': ['error', 'stroustrup'],
-            'comma-dangle': ['error', 'always-multiline'],
-            'comma-spacing': ['error', {'before': false, 'after': true}],
-            'eol-last': ['error'],
-            'indent': ['error', 4, {'SwitchCase': 1}],
-            'keyword-spacing': ['error', {'before': true, 'after': true}],
-            'space-before-blocks': ['error', 'always'],
-            'no-trailing-spaces': ['error'],
-            'semi': ['error', 'always'],
-            'template-curly-spacing': ['error', 'never'],
-            'linebreak-style': ['error', 'unix'],
-            'quotes': ['error', 'single', { avoidEscape: true }],
-            'semi-style': ['error'],
+            '@stylistic/linebreak-style': ['error', 'unix'],
+            '@stylistic/quotes': ['error', 'single', { avoidEscape: true }],
+            '@stylistic/semi-style': ['error'],
         },
     },
     {
@@ -94,34 +96,76 @@ module.exports = tseslint.config(
     {
         name: 'Options for typescript files in ts, which have their own tsconfig',
         files: ['ts/**/*.ts'],
-        // todo: replace with type checked rules, so we can take advantage of ts's types when linting
-        extends: [...tseslint.configs.recommended],
-        // extends: [...tseslint.configs.recommendedTypeChecked],
+        extends: [...tseslint.configs.recommendedTypeChecked],
         languageOptions: {
             parserOptions: {
                 project: true,
-                // @ts-expect-error
                 tsconfigRootDir: __dirname,
             },
         },
     },
     {
+        name: 'Options for Vue files',
+        files: ['vue/**/*.{js,ts,vue}'],
+        // @ts-expect-error vuelint doesnt have ts types yet
+        extends: [...(vuelint.configs['flat/recommended']), ...tseslint.configs.recommendedTypeChecked],
+        languageOptions: {
+            parser: require('vue-eslint-parser'),
+            globals: globals.browser,
+            parserOptions: {
+                parser: '@typescript-eslint/parser',
+                project: 'tsconfig.app.json',
+                extraFileExtensions: ['.vue'],
+                tsconfigRootDir: `${__dirname}/vue`,
+            },
+        },
+        rules: {
+            'vue/multi-word-component-names': ['off'],
+            'vue/block-lang': ['error', { script: { lang: 'ts' } }],
+            'vue/block-order': ['error', { order: ['script:not([setup])', 'script[setup]', 'template', 'style'] }],
+            'vue/component-api-style': ['error', ['script-setup']],
+            'vue/define-emits-declaration': ['error', 'type-literal'],
+            'vue/define-macros-order': ['error',
+                {
+                    order: ['defineOptions', 'defineModel', 'defineProps', 'defineEmits', 'defineSlots'],
+                    defineExposeLast: true,
+                },
+            ],
+            'vue/define-props-declaration': ['error', 'type-based'],
+            'vue/html-self-closing': ['error', { html: { void: 'any' } }],
+            'vue/no-boolean-default': ['error', 'no-default'],
+            'vue/no-ref-object-reactivity-loss': ['warn'],
+            'vue/no-required-prop-with-default': ['error', { autofix: true }],
+            'vue/no-useless-mustaches': ['error'],
+            'vue/prefer-separate-static-class': ['error'],
+            'vue/require-typed-object-prop': ['error'],
+            'vue/require-typed-ref': ['error'],
+            'vue/valid-define-options': ['error'],
+        },
+    },
+    {
         name: 'Options for cypress files',
         files: ['cypress/**/*.{js,ts}'],
-        extends: [cypress.configs.globals],
-        // todo: enable cypress lint rules at some point
-        // extends: [cypress.configs.recommended],
+        extends: [cypress.configs.recommended],
         languageOptions: {
             globals: globals.nodeBuiltin,
+        },
+        rules: {
+            'no-restricted-syntax': [
+                'error',
+                {
+                    selector: '[type=CallExpression][callee.object.name=cy][callee.property.name=waitAndReloadUntil]',
+                    message: 'Do not wait for arbitrary time periods',
+                },
+            ],
         },
     },
     {
         name: 'Options for jest files',
         files: ['tests/**/*.{js,ts}'],
-        // todo: enable jest lint rules at some point
-        // extends: [jest.configs['flat/recommended']],
+        extends: [jest.configs['flat/recommended']],
         languageOptions: {
-            globals: {...globals.nodeBuiltin, ...jest.environments.globals.globals},
+            globals: { ...globals.nodeBuiltin, ...jest.environments.globals.globals },
         },
     },
 );

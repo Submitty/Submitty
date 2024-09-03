@@ -5,6 +5,7 @@ namespace app\models;
 use app\libraries\Core;
 use app\libraries\database\DatabaseQueries;
 use app\libraries\DateUtils;
+use app\libraries\FileUtils;
 
 /**
  * Class RainbowCustomization
@@ -102,7 +103,8 @@ class RainbowCustomization extends AbstractModel {
                 "max_score" => $max_score,
                 "grade_release_date" => $gradeable->hasReleaseDate() ? DateUtils::dateTimeToString($gradeable->getGradeReleasedDate()) : DateUtils::dateTimeToString($gradeable->getSubmissionOpenDate()),
                 "override" => false,
-                "override_max" => $max_score
+                "override_max" => $max_score,
+                "override_percent" => false
             ];
         }
 
@@ -122,7 +124,7 @@ class RainbowCustomization extends AbstractModel {
                     $this->bucket_counts[$bucket] = $json_bucket->count;
                 }
 
-                $this->bucket_remove_lowest[$bucket] = $json_bucket->remove_lowest;
+                $this->bucket_remove_lowest[$bucket] = $json_bucket->remove_lowest ?? 0;
             }
         }
 
@@ -153,6 +155,10 @@ class RainbowCustomization extends AbstractModel {
                     elseif ($c_gradeable['max_score'] !== (float) $json_bucket->ids[$j_index]->max) {
                         $c_gradeable['override'] = true;
                         $c_gradeable['override_max'] = $json_bucket->ids[$j_index]->max;
+                    }
+                    if (property_exists($json_bucket->ids[$j_index], 'percent')) {
+                        $c_gradeable['override_percent'] = true;
+                        $c_gradeable['percent'] = ($json_bucket->ids[$j_index]->percent) * 100;
                     }
                     $j_index++;
                 }
@@ -537,6 +543,23 @@ class RainbowCustomization extends AbstractModel {
         return !is_null($this->RCJSON) ? $this->RCJSON->getPlagiarism() : [];
     }
 
+    /**
+     * Get manual grades from json file if there are any
+     *
+     * @return array<object>  array of manual grades JSON object
+     */
+    public function getManualGrades(): array {
+        return $this->RCJSON?->getManualGrades() ?? [];
+    }
+
+    /**
+     * Get performance warnings from json file if there are any
+     *
+     * @return array<object>  array of performance warnings JSON object
+     */
+    public function getPerformanceWarnings(): array {
+        return $this->RCJSON?->getPerformanceWarnings() ?? [];
+    }
 
     // This function handles processing the incoming post data
     public function processForm() {
@@ -589,6 +612,18 @@ class RainbowCustomization extends AbstractModel {
             }
         }
 
+        if (isset($form_json->manual_grade)) {
+            foreach ($form_json->manual_grade as $manual_grade) {
+                $this->RCJSON->addManualGradeEntry($manual_grade);
+            }
+        }
+
+        if (isset($form_json->warning)) {
+            foreach ($form_json->warning as $warning) {
+                $this->RCJSON->addPerformanceWarningEntry($warning);
+            }
+        }
+
         if (isset($form_json->display)) {
             foreach ($form_json->display as $display_option) {
                 $this->RCJSON->addDisplay($display_option);
@@ -597,31 +632,6 @@ class RainbowCustomization extends AbstractModel {
 
         // Write to customization file
         $this->RCJSON->saveToJsonFile();
-
-        // Configure json to go into jobs queue
-        $job_json = (object) [];
-        $job_json->job = 'RunAutoRainbowGrades';
-        $job_json->semester = $this->core->getConfig()->getTerm();
-        $job_json->course = $this->core->getConfig()->getCourse();
-
-        // Encode
-        $job_json = json_encode($job_json, JSON_PRETTY_PRINT);
-
-        // Create path to new jobs queue json
-        $path = '/var/local/submitty/daemon_job_queue/auto_rainbow_' .
-            $this->core->getConfig()->getTerm() .
-            '_' .
-            $this->core->getConfig()->getCourse() .
-            '.json';
-
-        // Place in queue
-        file_put_contents($path, $job_json);
-
-//        $this->has_error = "true";
-//        foreach($_POST as $field => $value){
-//            $this->error_messages[] = "$field: $value";
-//        }
-//        throw new ValidationException('Debug Rainbow Grades error', $this->error_messages);
     }
 
     public function error() {
@@ -630,5 +640,16 @@ class RainbowCustomization extends AbstractModel {
 
     public function getErrorMessages() {
         return $this->error_messages;
+    }
+
+    public function doesManualCustomizationExist(): bool {
+        // using RCJSON will have issue because constructor will call loadFromJsonFile
+        // which will return null if gui_customization is not found.
+        // return $this->RCJSON->doesManualCustomizationExist();
+        return file_exists(FileUtils::joinPaths(
+            $this->core->getConfig()->getCoursePath(),
+            'rainbow_grades',
+            'manual_customization.json'
+        ));
     }
 }

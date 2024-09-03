@@ -22,6 +22,7 @@ class GlobalController extends AbstractController {
         }, $wrapper_files);
         $breadcrumbs = $this->core->getOutput()->getBreadcrumbs();
         $page_name = $this->core->getOutput()->getPageName();
+        $audio = $this->core->getOutput()->getAudio();
         $css = $this->core->getOutput()->getCss();
         $js = $this->core->getOutput()->getJs();
         $content_only = $this->core->getOutput()->isContentOnly();
@@ -70,6 +71,7 @@ class GlobalController extends AbstractController {
             $wrapper_urls,
             $sidebar_buttons,
             $unread_notifications_count,
+            $audio->toArray(),
             $css->toArray(),
             $js->toArray(),
             $duck_img,
@@ -546,10 +548,24 @@ class GlobalController extends AbstractController {
                 }
                 break;
             case 9:
-                //September (leaf)
-                $duck_img = 'moorthy_duck/09-september.svg';
+                // First two weeks of September
+                if ($day <= 14) {
+                    $duck_img = 'moorthy_duck/back_to_school_duck.svg';
+                }
+                else {
+                    // Original case for September
+                    $duck_img = 'moorthy_duck/09-september.svg';
+                }
                 break;
             case 8:
+                // Last week of August
+                if ($day >= 25) {
+                    $duck_img = 'moorthy_duck/back_to_school_duck.svg';
+                }
+                else {
+                    //August (vacation)
+                    $duck_img = 'moorthy_duck/08-august.svg';
+                }
                 break;
             case 7:
                 //July (Independence)
@@ -567,7 +583,13 @@ class GlobalController extends AbstractController {
                 break;
             case 4:
                 //April (Flowers)
-                $duck_img = 'moorthy_duck/04-april.svg';
+                if ($day === 5) {
+                    $duck_img = 'moorthy_duck/quantum-duck-light.svg';
+                }
+                else {
+                    //April (Flowers)
+                    $duck_img = 'moorthy_duck/04-april.svg';
+                }
                 break;
             case 3:
                 //Saint Patrick's Day (Shamrock)

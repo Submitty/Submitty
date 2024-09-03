@@ -154,6 +154,7 @@ class UserTester extends \PHPUnit\Framework\TestCase {
             'email_both' => false,
             'legal_given_name' => 'User',
             'last_initial_format' => 0,
+            'display_name_order' => 'GIVEN_F',
             'grading_registration_sections' => [1,2],
             'group' => User::GROUP_INSTRUCTOR,
             'access_level' => User::LEVEL_FACULTY,

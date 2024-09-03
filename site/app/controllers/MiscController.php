@@ -3,9 +3,11 @@
 namespace app\controllers;
 
 use app\entities\course\CourseMaterial;
+use app\libraries\CodeMirrorUtils;
 use app\libraries\CourseMaterialsUtils;
 use app\libraries\DateUtils;
 use app\libraries\FileUtils;
+use app\libraries\NotebookUtils;
 use app\libraries\response\RedirectResponse;
 use app\libraries\response\WebResponse;
 use app\libraries\routers\AccessControl;
@@ -13,7 +15,6 @@ use app\libraries\response\MultiResponse;
 use app\libraries\response\JsonResponse;
 use app\views\MiscView;
 use Symfony\Component\Routing\Annotation\Route;
-use app\models\User;
 
 class MiscController extends AbstractController {
     const GENERIC_NO_ACCESS_MSG = 'You do not have access to this file';
@@ -65,7 +66,7 @@ class MiscController extends AbstractController {
         elseif (strpos($file_path, 'checkout') !== false) {
             $directory = 'checkout';
         }
-        $check_path = FileUtils::joinPaths($this->core->getConfig()->getCoursePath(), $directory, $gradeable_id, $id, $active_version);
+        $check_path = FileUtils::joinPaths($this->core->getConfig()->getCoursePath(), $directory, $gradeable_id, $id);
 
         if ($gradeable->isGradeByRegistration()) {
             $section = $submitter->getRegistrationSection();
@@ -170,6 +171,27 @@ class MiscController extends AbstractController {
             header('Content-Disposition: inline; filename="' . $file_name . '"');
             readfile($corrected_name);
             $this->core->getOutput()->renderString($path);
+        }
+        elseif (pathinfo($path, PATHINFO_EXTENSION) === 'ipynb') { // TODO: Do this "properly" by determining a better MIME type via FileUtils::getContentType()
+            $this->core->getOutput()->setContentOnly(true);
+            CodeMirrorUtils::loadDefaultDependencies($this->core);
+            $this->core->getOutput()->addInternalJs('gradeable-notebook.js');
+            $this->core->getOutput()->renderString(
+                $this->core->getOutput()->renderTwigTemplate(
+                    "notebook/Notebook.twig",
+                    [
+                        'notebook' => NotebookUtils::jupyterToSubmittyNotebook($path),
+                        'student_id' => $user_id,
+                        'is_timed' => false,
+                        'allowed_minutes' => 0,
+                        'old_files' => [],
+                        'is_grader_view' => true,
+                        'testcase_messages' => [],
+                        'viewing_inactive_version' => false,
+                        'highest_version' => 0,
+                    ]
+                )
+            );
         }
         else {
             $contents = file_get_contents($corrected_name);
@@ -390,12 +412,7 @@ class MiscController extends AbstractController {
 
         // TODO: Zip file anonymization is currently done based on access level (students==peers)
         // When single/double blind grading is merged, this will need to be updated.
-        if ($this->core->getUser()->getGroup() === User::GROUP_STUDENT) {
-            $zip_file_name = $gradeable_id . "_" . $anon_id . "_v" . $version . ".zip";
-        }
-        else {
-            $zip_file_name = $gradeable_id . "_" . $submitter_id . "_v" . $version . ".zip";
-        }
+        $zip_file_name = $gradeable_id . "_" . $anon_id . "_v" . $version . ".zip";
 
         // create a new zipstream object
         $zip_stream = new \ZipStream\ZipStream(

@@ -62,6 +62,9 @@ class ElectronicGraderController extends AbstractController {
             "bTA" => [],
             "tTA" => [],
             "bAuto" => [],
+            "runtime" => [],
+            "memory" => [],
+            "submitters" => [],
             "VerConf" => 0,
             "noSub" => 0,
             "noActive" => 0,
@@ -82,6 +85,10 @@ class ElectronicGraderController extends AbstractController {
                     if ($ov->getGradeable()->getAutogradingConfig()->getTotalNonExtraCredit() != 0) {
                         if ($ov->getAutoGradedGradeable()->getTotalPoints() >= 0 || $ov->getAutoGradedGradeable()->getTotalPoints() < 0) {
                             $histogram["bAuto"] = array_merge($histogram["bAuto"], [$ov->getAutoGradedGradeable()->getTotalPoints()]);
+                            $metrics = $ov->getAutoGradedGradeable()->getMetrics_Sum();
+                            $histogram["runtime"] = array_merge($histogram["runtime"], [$metrics['runtime']]);
+                            $histogram["memory"] = array_merge($histogram["memory"], [$metrics['memory']]);
+                            $histogram["submitters"] = array_merge($histogram["submitters"], [$ov->getAutoGradedGradeable()->getSubmitterId()]);
                         }
                         else {
                             $histogram["cancelledSub"] += 1;
@@ -124,7 +131,7 @@ class ElectronicGraderController extends AbstractController {
                         // otherwise add the overall grade to array and total score possible to array (possible future use)
                         if ($ov->getTaGradedGradeable() != null && $ov->getTaGradedGradeable()->getGradedGradeable()->getSubmitter()->getRegistrationSection() != null) {
                             $histogram["bTA"] = array_merge($histogram["bTA"], [$ov->getTaGradedGradeable()->getTotalScore() + $ov->getAutoGradedGradeable()->getTotalPoints()]);
-                            $histogram["tTA"] = array_merge($histogram["tTA"], [$ov->getGradeable()->getManualGradingPoints()]);
+                            $histogram["tTA"] = array_merge($histogram["tTA"], [$ov->getTaGradedGradeable()->getTotalScore()]);
                         }
                     }
                 }
@@ -520,7 +527,7 @@ class ElectronicGraderController extends AbstractController {
 
         $gradeableUrl = $this->core->buildCourseUrl(['gradeable', $gradeable->getId(), 'grading', 'details']);
         $this->core->getOutput()->addBreadcrumb("{$gradeable->getTitle()} Grading", $gradeableUrl);
-        $this->core->getOutput()->addBreadcrumb("Grading Stats");
+        $this->core->getOutput()->addBreadcrumb("Statistics & Charts");
 
         $isPeerGradeable = false;
         if ($gradeable->hasPeerComponent() && ($this->core->getUser()->getGroup() < User::GROUP_STUDENT)) {
@@ -567,6 +574,7 @@ class ElectronicGraderController extends AbstractController {
         $total_users = [];
         $component_averages = [];
         $histogram_data = [];
+        $manual_average = null;
         $autograded_average = null;
         $overall_average = null;
         $overall_scores = null;
@@ -582,6 +590,7 @@ class ElectronicGraderController extends AbstractController {
         $peer_components = 0;
         $total_users_who_submitted = [];
         $graders_of_inquiries = [];
+        $verified_components = [];
 
         // Assure late day cache is calculated
         $this->core->getQueries()->generateLateDayCacheForUsers();
@@ -617,6 +626,7 @@ class ElectronicGraderController extends AbstractController {
             $num_gradeables = count($this->core->getQueries()->getPeerGradingAssignmentsForGrader($this->core->getUser()->getId()));
             $my_grading = $this->core->getQueries()->getNumGradedPeerComponents($gradeable_id, $this->core->getUser()->getId());
             $component_averages = [];
+            $manual_average = null;
             $autograded_average = null;
             $overall_average = null;
             $overall_scores = null;
@@ -682,6 +692,7 @@ class ElectronicGraderController extends AbstractController {
             $late_components = $this->core->getQueries()->getBadGradedComponentsCountByGradingSections($gradeable_id, $sections, $section_key, $gradeable->isTeamAssignment());
             $ta_graded_components = $this->core->getQueries()->getGradedComponentsCountByGradingSections($gradeable_id, $sections, $section_key, $gradeable->isTeamAssignment());
             $component_averages = $this->core->getQueries()->getAverageComponentScores($gradeable_id, $section_key, $gradeable->isTeamAssignment(), $bad_submissions_cookie, $null_section_cookie);
+            $manual_average = array_sum($component_averages);
             $autograded_average = $this->core->getQueries()->getAverageAutogradedScores($gradeable_id, $section_key, $gradeable->isTeamAssignment(), $bad_submissions_cookie, $null_section_cookie);
             $overall_average = $this->core->getQueries()->getAverageForGradeable($gradeable_id, $section_key, $gradeable->isTeamAssignment(), $override_cookie, $bad_submissions_cookie, $null_section_cookie);
             $order = new GradingOrder($this->core, $gradeable, $this->core->getUser(), true);
@@ -690,6 +701,7 @@ class ElectronicGraderController extends AbstractController {
             $num_components = count($gradeable->getNonPeerComponents());
             $viewed_grade = $this->core->getQueries()->getNumUsersWhoViewedGradeBySections($gradeable, $sections, $null_section_cookie);
             $histogram_data = $this->generateHistogramData($overall_scores);
+            $verified_components = $this->core->getQueries()->getVerifiedComponentsCountByGradingSections($gradeable_id, $sections, $section_key, $gradeable->isTeamAssignment());
         }
         $sections = [];
         //Either # of teams or # of students (for non-team assignments). Either case
@@ -719,7 +731,9 @@ class ElectronicGraderController extends AbstractController {
                    'total_components' => count($gradeable->getPeerComponents()) * $total_who_submitted,
                    'non_late_total_components' => count($gradeable->getPeerComponents()) * $total_who_submitted,
                    'graded_components' => 0,
+                   'verified_components' => 0,
                    'non_late_graded_components' => 0,
+                   'non_late_verified_components' => 0,
                    'view_peer_graded_components' => $peer_graded_components,
                    'view_peer_components' => $peer_components,
                    'ta_graded_components' => 0,
@@ -736,7 +750,9 @@ class ElectronicGraderController extends AbstractController {
                        'total_components' => count($gradeable->getPeerComponents()), // Multiply it by number of teams assigned to grade
                        'non_late_total_components' => count($gradeable->getPeerComponents()),
                        'graded_components' => $my_grading,
+                       'verified_components' => $my_grading,
                        'non_late_graded_components' => $my_grading,
+                       'non_late_verified_components' => $my_grading,
                        'num_gradeables' => $num_gradeables,
                        'ta_graded_components' => 0,
                        'graders' => [],
@@ -745,8 +761,10 @@ class ElectronicGraderController extends AbstractController {
                     $sections['all'] = [
                        'total_components' => 0,
                        'graded_components' => 0,
+                       'verified_components' => 0,
                        'non_late_total_components' => 0,
                        'non_late_graded_components' => 0,
+                       'non_late_verified_components' => 0,
                        'graders' => [],
                        'valid_graders' => []
                     ];
@@ -756,11 +774,14 @@ class ElectronicGraderController extends AbstractController {
                         }
                         $sections['all']['total_components'] += $value * $num_components;
                         $sections['all']['graded_components'] += isset($graded_components[$key]) ? $graded_components[$key] : 0;
+                        $sections['all']['verified_components'] += $verified_components[$key] ?? 0;
                     }
                     $sections['all']['total_components'] -= $num_components;
                     $sections['all']['graded_components'] -= $my_grading;
+                    $sections['all']['verified_components'] -= $my_grading;
                     $sections['all']['non_late_total_components'] = $sections['all']['total_components'];
                     $sections['all']['non_late_graded_components'] = $sections['all']['graded_components'];
+                    $sections['all']['non_late_verified_components'] = $sections['all']['verified_components'];
                     $sections['stu_grad']['no_team'] = 0;
                     $sections['stu_grad']['team'] = 0;
                     $sections['all']['no_team'] = 0;
@@ -772,7 +793,9 @@ class ElectronicGraderController extends AbstractController {
                         'total_components' => $num_components * $peers_to_grade,
                         'non_late_total_components' => $num_components * $peers_to_grade,
                         'graded_components' => $my_grading,
+                        'verified_components' => $my_grading,
                         'non_late_graded_components' => $my_grading,
+                        'non_late_verified_components' => $my_grading,
                         'num_gradeables' => $num_gradeables,
                         'ta_graded_components' => 0,
                         'graders' => [],
@@ -781,8 +804,10 @@ class ElectronicGraderController extends AbstractController {
                     $sections['all'] = [
                         'total_components' => 0,
                         'graded_components' => 0,
+                        'verified_components' => 0,
                         'non_late_total_components' => 0,
                         'non_late_graded_components' => 0,
+                        'non_late_verified_components' => 0,
                         'graders' => [],
                         'valid_graders' => []
                     ];
@@ -792,11 +817,14 @@ class ElectronicGraderController extends AbstractController {
                         }
                         $sections['all']['total_components'] += $value * $num_components;
                         $sections['all']['graded_components'] += isset($graded_components[$key]) ? $graded_components[$key] : 0;
+                        $sections['all']['verified_components'] += $verified_components[$key] ?? 0;
                     }
                     $sections['all']['total_components'] -= $num_components;
                     $sections['all']['graded_components'] -= $my_grading;
+                    $sections['all']['verified_components'] -= $my_grading;
                     $sections['all']['non_late_total_components'] = $sections['all']['total_components'];
                     $sections['all']['non_late_graded_components'] = $sections['all']['graded_components'];
+                    $sections['all']['non_late_verified_components'] = $sections['all']['verified_components'];
                 }
             }
             else {
@@ -806,7 +834,9 @@ class ElectronicGraderController extends AbstractController {
                             'total_components' => $num_submitted[$key],
                             'non_late_total_components' => $num_submitted[$key] - (array_key_exists($key, $late_submitted) ? $late_submitted[$key] : 0),
                             'graded_components' => 0,
+                            'verified_components' => 0,
                             'non_late_graded_components' => 0,
+                            'non_late_verified_components' => 0,
                             'ta_graded_components' => 0,
                             'graders' => [],
                             'valid_graders' => []
@@ -816,8 +846,10 @@ class ElectronicGraderController extends AbstractController {
                         $sections[$key] = [
                             'total_components' => 0,
                             'graded_components' => 0,
+                            'verified_components' => 0,
                             'non_late_total_components' => 0,
                             'non_late_graded_components' => 0,
+                            'non_late_verified_components' => 0,
                             'graders' => [],
                             'valid_graders' => []
                         ];
@@ -831,6 +863,10 @@ class ElectronicGraderController extends AbstractController {
                         $sections[$key]['graded_components'] = $graded_components[$key];
                         $sections[$key]['non_late_graded_components'] = $graded_components[$key] - $late_components[$key];
                         $sections[$key]['ta_graded_components'] = min(intval($graded_components[$key]), $sections[$key]['total_components']);
+                    }
+                    if (isset($verified_components[$key])) {
+                        $sections[$key]['verified_components'] = $verified_components[$key];
+                        $sections[$key]['non_late_verified_components'] = $verified_components[$key];
                     }
                     if (isset($graders[$key])) {
                         $sections[$key]['graders'] = $graders[$key];
@@ -877,6 +913,7 @@ class ElectronicGraderController extends AbstractController {
             $gradeable,
             $sections,
             $component_averages,
+            $manual_average,
             $autograded_average,
             $overall_scores,
             $overall_average,
@@ -2336,6 +2373,78 @@ class ElectronicGraderController extends AbstractController {
         $submitter = $ta_graded_gradeable->getGradedGradeable()->getSubmitter();
         if ($submitter->isTeam()) {
             $this->core->getQueries()->clearTeamViewedTime($submitter->getId());
+        }
+    }
+
+    /**
+     * Route for saving the marks the submitter received for a component
+     */
+    #[Route("/courses/{_semester}/{_course}/gradeable/{gradeable_id}/grading/graded_gradeable/change_grade_version", methods: ["POST"])]
+    public function ajaxUpdateGradedVersionForStudent(string $gradeable_id): JsonResponse {
+        $anon_id = $_POST['anon_id'] ?? null;
+        $graded_version = intval($_POST['graded_version'] ?? null);
+        $component_ids = $_POST['component_ids'] ?? [];
+
+        if ($anon_id === null) {
+            return JsonResponse::getFailResponse('Missing anon_id parameter');
+        }
+        if ($graded_version < 1) {
+            return JsonResponse::getFailResponse('Invalid graded_version parameter');
+        }
+
+        if (count($component_ids) < 1) {
+            return JsonResponse::getFailResponse('Missing component_ids parameter');
+        }
+
+        // Get the gradeable
+        $gradeable = $this->tryGetGradeable($gradeable_id, false);
+        if ($gradeable === false) {
+            return JsonResponse::getFailResponse('Missing gradeable_id parameter');
+        }
+        // Get user id from the anon id
+        $submitter_id = $this->tryGetSubmitterIdFromAnonId($anon_id, $gradeable_id, false);
+        if ($submitter_id === false) {
+            return JsonResponse::getFailResponse('Missing anon_id parameter');
+        }
+
+        // Get the graded gradeable
+        $graded_gradeable = $this->tryGetGradedGradeable($gradeable, $submitter_id, false);
+        if ($graded_gradeable === false) {
+            return JsonResponse::getFailResponse('Missing gradeable_id parameter');
+        }
+
+
+        // check if all the components provided are real and the user has permission
+        foreach ($component_ids as $component_id) {
+            $component = $this->tryGetComponent($gradeable, $component_id);
+            if ($component === false) {
+                return JsonResponse::getFailResponse("Invalid component id \"$component_id\"");
+            }
+            elseif (!$this->core->getAccess()->canI("grading.electronic.save_graded_component", ["gradeable" => $gradeable, "graded_gradeable" => $graded_gradeable, "component" => $component])) {
+                return JsonResponse::getFailResponse("Insufficient permissions to change graded version of component $component_id");
+            }
+        }
+
+        $logger_params = [
+            "course_semester" => $this->core->getConfig()->getTerm(),
+            "course_name" => $this->core->getDisplayedCourseName(),
+            "gradeable_id" => $gradeable_id,
+            "grader_id" => $this->core->getUser()->getId(),
+            "component_ids" => implode(",", $component_ids),
+            "action" => "CHANGE_GRADEABLE_GRADED_VERSION",
+            "submitter_id" => $submitter_id
+        ];
+        Logger::logTAGrading($logger_params);
+
+        try {
+            $this->core->getQueries()->changeGradedVersionOfComponents($gradeable_id, $submitter_id, $graded_version, $component_ids);
+            return JsonResponse::getSuccessResponse();
+        }
+        catch (\InvalidArgumentException $e) {
+            return JsonResponse::getFailResponse($e->getMessage());
+        }
+        catch (\Exception $e) {
+            return JsonResponse::getErrorResponse($e->getMessage());
         }
     }
 
