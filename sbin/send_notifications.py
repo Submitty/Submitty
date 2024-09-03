@@ -7,25 +7,33 @@ date in the past with no notification sent to students.
 import json
 import os
 import datetime
-from sqlalchemy import create_engine  # pylint: disable=import-error
 import sys
 import getpass
+from sqlalchemy import create_engine  # pylint: disable=import-error
+
 try:
     CONFIG_PATH = os.path.join(
         os.path.dirname(os.path.realpath(__file__)), "..", "config"
     )
-    with open(os.path.join(CONFIG_PATH, "submitty_users.json"), "r") as file:
+    with open(os.path.join(CONFIG_PATH, "submitty_users.json"),
+              "r", encoding="utf-8") as file:
         USER_DATA = json.load(file)
 
         # Confirm that submitty_daemon user is running this script
         if USER_DATA["daemon_user"] != getpass.getuser():
-            raise Exception("- script must be run by the submitty_daemon user")
-    with open(os.path.join(CONFIG_PATH, "submitty.json")) as open_file:
+            raise RuntimeError("- script must be run by the daemon user")
+    with open(os.path.join(CONFIG_PATH, "submitty.json"),
+              encoding="utf-8") as open_file:
         SUBMITTY_CONFIG = json.load(open_file)
 
-    with open(os.path.join(CONFIG_PATH, "database.json")) as open_file:
+    with open(os.path.join(CONFIG_PATH, "database.json"),
+              encoding="utf-8") as open_file:
         DATABASE_CONFIG = json.load(open_file)
-except Exception as config_fail_error:
+
+    DB_HOST = DATABASE_CONFIG["database_host"]
+    DB_USER = DATABASE_CONFIG["database_user"]
+    DB_PASSWORD = DATABASE_CONFIG["database_password"]
+except Exception as config_fail_error:  # pylint: disable=broad-except
     print(
         f"[{datetime.datetime.now()}] ERROR: CORE SUBMITTY CONFIGURATION ERROR"
         + {config_fail_error}
@@ -42,17 +50,8 @@ LOG_FILE = open(
         f"{TODAY.year:04d}{TODAY.month:02d}{TODAY.day:02d}.txt",
     ),
     "a",
+    encoding="utf-8"
 )
-try:
-    DB_HOST = DATABASE_CONFIG["database_host"]
-    DB_USER = DATABASE_CONFIG["database_user"]
-    DB_PASSWORD = DATABASE_CONFIG["database_password"]
-except Exception as config_fail_error:
-    e = (f"[{datetime.datetime.now()}] ERROR: Database Configuration Failed "
-         f"{config_fail_error}")
-    LOG_FILE.write(e + "\n")
-    print(e)
-    sys.exit(1)
 
 
 def connect_db(db_name):
@@ -70,6 +69,7 @@ def connect_db(db_name):
 
 
 def notify_pending_gradeables():
+    """Send pending gradeable notifications, if any."""
     master_db = connect_db("submitty")
     course_query = "SELECT term, course FROM courses WHERE status = '1';"
     courses = master_db.execute(course_query)
@@ -184,16 +184,17 @@ def notify_pending_gradeables():
 
 
 def main():
+    """Driver method to release pending notifications for gradeables"""
     try:
         notified = notify_pending_gradeables()
-        e = (f"[{datetime.datetime.now()}] Successfully released {notified} "
+        m = (f"[{datetime.datetime.now()}] Successfully released {notified} "
              f"gradeable notification{'s' if notified != 1 else ''}")
-        LOG_FILE.write(e+"\n")
-    except Exception as notification_send_error:
-        e = (f"[{datetime.datetime.now()}] Error Sending Notification(s): "
-             f"{str(notification_send_error)}")
-        LOG_FILE.write(e + "\n")
-        print(e)
+        LOG_FILE.write(m+"\n")
+    except Exception as notification_error:  # pylint: disable=broad-except
+        m = (f"[{datetime.datetime.now()}] Error Sending Notification(s): "
+             f"{str(notification_error)}")
+        LOG_FILE.write(m + "\n")
+        print(m)
 
 
 if __name__ == "__main__":
