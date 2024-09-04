@@ -32,9 +32,9 @@ describe('Tests for self registering for courses', () => {
         cy.get('[data-testid="default-section-id"]').select('5');
         cy.logout();
         cy.login();
-        cy.get('[data-testid="courses-header"]').eq(1).should('have.text', 'My Courses');
-        cy.get('[data-testid="courses-header"]').eq(2).should('have.text', 'Courses Available for Self Registration');
-        cy.get('[data-testid="courses-header"]').eq(3).should('have.text', 'My Archived Courses');
+        cy.get('[data-testid="courses-header"]').eq(0).should('have.text', 'My Courses');
+        cy.get('[data-testid="courses-header"]').eq(1).should('have.text', 'Courses Available for Self Registration');
+        cy.get('[data-testid="courses-header"]').eq(2).should('have.text', 'My Archived Courses');
         cy.logout();
         cy.login('gutmal');
         cy.visit();
