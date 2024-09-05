@@ -1547,7 +1547,7 @@ class Gradeable extends AbstractModel {
                 // Instructor users can upload configs to this directory through the web UI
                 // and they can select and use these configs to autograding their assignments.
                 $config_upload_dir = FileUtils::joinPaths($this->core->getConfig()->getCoursePath(), "config_upload");
-                $is_in_config_upload_dir = str_starts_with($cur_path,$config_upload_dir);
+                $is_in_config_upload_dir = str_starts_with($cur_path, $config_upload_dir);
 
                 if (
                     !$is_config_upload_dir
