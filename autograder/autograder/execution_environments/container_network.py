@@ -822,7 +822,6 @@ class ContainerNetwork(secure_execution_environment.SecureExecutionEnvironment):
                 # Linter hates this line (return in a finally), but the workaround just adds noise
                 return -1  # noqa: B012
 
-
         random_str = ''
         valid_chars = string.ascii_letters + string.digits
         for _ in range(6):
