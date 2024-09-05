@@ -1542,20 +1542,22 @@ class Gradeable extends AbstractModel {
             foreach ($cur_paths as $cur_path) {
                 $is_dir = is_dir($cur_path);
 
-                $config_upload_dir = $this->core->getConfig()->getCoursePath()."/config_upload/";
+                $config_upload_dir = $this->core->getConfig()->getCoursePath() . "/config_upload/";
 
                 $is_in_config_upload_dir =
                   (strlen($config_upload_dir) < strlen($cur_path)) &&
-                  (substr($cur_path,0,strlen($config_upload_dir)) == $config_upload_dir);
+                  (substr($cur_path, 0, strlen($config_upload_dir)) == $config_upload_dir);
 
-                if (!$is_config_upload_dir &&
-                    !$this->checkValidPerms($cur_path, $group_map, $user_map, $is_dir)) {
-                    return "Invalid permissions on a file or directory within specified path:".$cur_path;
+                if (
+                    !$is_config_upload_dir
+                    && !$this->checkValidPerms($cur_path, $group_map, $user_map, $is_dir)
+                    ) {
+                    return "Invalid permissions on a file or directory within specified path:" . $cur_path;
                 }
                 if ($is_dir) {
                     $next_paths_tmp = @scandir($cur_path);
                     if (!is_array($next_paths_tmp)) {
-                        return "Invalid directory array: ".$next_paths_tmp;
+                        return "Invalid directory array: " . $next_paths_tmp;
                     }
                     foreach ($next_paths_tmp as $next_path) {
                         if ($next_path === "." || $next_path === "..") {
