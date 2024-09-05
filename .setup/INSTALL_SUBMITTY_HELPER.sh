@@ -963,6 +963,11 @@ fi
 
 #############################################################################
 
+# Restart docker
+echo -n "restarting docker..."
+systemctl restart docker
+echo "done"
+
 # Restart php-fpm and apache
 if [ "${WORKER}" == 0 ]; then
     if [[ "$#" == 0 || ("$#" == 1 && "$1" != "skip_web_restart") || ("$#" -ge 2  && ("$1" != "skip_web_restart" && "$2" != "skip_web_restart")) ]]; then
