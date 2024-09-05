@@ -1550,7 +1550,7 @@ class Gradeable extends AbstractModel {
                 $is_in_config_upload_dir = str_starts_with($cur_path, $config_upload_dir);
 
                 if (
-                    !$is_config_upload_dir
+                    !$is_in_config_upload_dir
                     && !$this->checkValidPerms($cur_path, $group_map, $user_map, $is_dir)
                 ) {
                     return "Invalid permissions on a file or directory within specified path:" . $cur_path;
