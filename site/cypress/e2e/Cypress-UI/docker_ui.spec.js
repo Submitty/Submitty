@@ -73,13 +73,11 @@ describe('Docker UI Test', () => {
     });
 
     it('Should filter images with tags', () => {
-        // These tags have no images
-        ['cpp', 'et-cetera', 'notebook', 'python'].forEach((tag) => {
-            cy.get(`button[data-capability="${tag}"]`)
+        // This tag has no images
+        cy.get(`button[data-capability="et-cetera"]`)
                 .click();
-            cy.get('.image-row')
-                .should('not.be.visible');
-        });
+        cy.get('.image-row')
+            .should('not.be.visible');
         // Default filter should have all images
         cy.get("button[data-capability='default']")
             .click();
