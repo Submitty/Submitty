@@ -581,9 +581,6 @@ if not args.worker:
                         ],
             "notebook": [
                           "submitty/autograding-default:latest",
-                        ],
-            "et-cetera":[
-                          "submitty/autograding-default:latest",
                         ]
         }
 

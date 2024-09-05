@@ -112,12 +112,12 @@ describe('Docker UI Test', () => {
     });
 
     it('Should link existed image to a new tag', () => {
-        // Check empty tag list, should have `cpp'
+        // Check empty tag list, should have `et-cetera'
         cy.get('#capabilities-list')
-            .contains('cpp');
+            .contains('et-cetera');
         // Check valid format and valid image
         cy.get('#capability-form')
-            .select('cpp');
+            .select('et-cetera');
         cy.get('#add-field')
             .clear();
         cy.get('#add-field')
@@ -136,13 +136,13 @@ describe('Docker UI Test', () => {
             return cy.get('#capabilities-list')
                 .invoke('text')
                 .then((text) => {
-                    return !text.includes('cpp');
+                    return !text.includes('et-cetera');
                 });
         }, 10000);
 
         // Check the empty tag list
         cy.get('#capabilities-list')
-            .should('not.contain.text', 'cpp');
+            .should('not.contain.text', 'et-cetera');
 
         // Try to add it again, should fail
         cy.get('#add-field')
@@ -155,7 +155,7 @@ describe('Docker UI Test', () => {
 
         cy.get('.alert-error')
             .should('have.text', 'submitty/autograding-default:latest '
-            + 'already exists in capability cpp');
+            + 'already exists in capability et-cetera');
     });
 
     it('Should add new image', () => {

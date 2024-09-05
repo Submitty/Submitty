@@ -1,5 +1,5 @@
 {
-	"required_capabilities": "et-cetera",
+	"required_capabilities": "default",
 
     "autograding" : {
         "submission_to_runner" : [ "*.txt", "*.png" ],
