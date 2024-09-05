@@ -555,16 +555,16 @@ class ContainerNetwork(secure_execution_environment.SecureExecutionEnvironment):
                     if container.name == 'router' and connected_container_name == 'router':
                         continue
                     elif container.name == connected_container_name:
-                        network_name = f"{container.full_name}_network"
+                        network_name = f"{container.full_name}_network_{random_str}"
                         ip_address = container.get_ip_address(network_name)
                     # If this node is not the router, we must inject the router
                     elif container.name != 'router':
                         # Get the router's ip on the container's network
-                        network_name = f"{container.full_name}_network"
+                        network_name = f"{container.full_name}_network_{random_str}"
                         ip_address = router.get_ip_address(network_name)
                     else:
                         # If we are the router, get the connected container's ip on its own network
-                        network_name = f"{self.untrusted_user}_{connected_container_name}_network"
+                        network_name = f"{self.untrusted_user}_{connected_container_name}_network_{random_str}"
                         ip_address = connected_container.get_ip_address(network_name)
                 else:
                     ip_address = connected_container.get_ip_address(
