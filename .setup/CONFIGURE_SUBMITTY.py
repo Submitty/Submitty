@@ -533,7 +533,7 @@ if not args.worker:
     if not os.path.isfile(WORKERS_JSON):
         capabilities = ["default"]
         if args.setup_for_sample_courses:
-            capabilities.extend(["cpp", "python", "et-cetera", "notebook"])
+            capabilities.extend(["cpp", "python", "et-cetera", "notebook", "high-performance"])
 
         worker_dict = {
             "primary": {
