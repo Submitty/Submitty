@@ -143,6 +143,8 @@ describe('Docker UI Test', () => {
             .should('not.contain.text', 'et-cetera');
 
         // Try to add it again, should fail
+        cy.get('#capability-form')
+            .select('et-cetera');
         cy.get('#add-field')
             .clear();
         cy.get('#add-field')
