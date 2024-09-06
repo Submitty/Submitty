@@ -328,8 +328,7 @@ class AuthenticationController extends AbstractController {
     public function isAcceptedUserId(string $user_id, string $given_name, string $family_name, string $email): bool {
         $requirements = $this->core->getConfig()->getUserIdRequirements();
 
-         // If length is -1, allow any length
-        if ($requirements['length'] !== -1 && strlen($user_id) > $requirements['length']) {
+        if ($requirements['max_length'] < strlen($user_id) || $requirements['min_length'] > strlen($user_id)) {
             return false;
         }
 
