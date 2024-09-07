@@ -2,6 +2,7 @@ import { isPermissionAllowed } from 'cypress-browser-permissions';
 
 const queueName = 'Cypress Office Hour Queue 1';
 const queueName_random = 'Cypress Office Hour Queue Random';
+const queueName_blank = 'Cypress Office Hour Queue Blank';
 const queueName1 = 'Cypress Office Hour Queue 2';
 const queueCode = 'cypress_test';
 const queueCode1 = 'cypress_test_fail';
@@ -30,24 +31,26 @@ const openNewQueue = (queueName, queueCode = '') => {
     cy.get('[data-testid="toggle-new-queue"]').click();
     cy.get('[data-testid="popup-window"]').should('exist');
     cy.get('[data-testid="new-queue-code"]').type(queueName);
-    if (queueCode.length > 0) {
-        cy.get('[data-testid="new-queue-token"]').type(queueCode);
+    if (queueCode === 'RANDOM') {
+        cy.get('[data-testid="new-queue-rand-token"]').click(); // random code
+        cy.get('[data-testid="new-queue-token"]').invoke('val').should('not.be.empty');
     }
-    else {
-        cy.get('[data-testid="new-queue-rand-token"]').click();
+    else if (queueCode !== '') {
+        cy.get('[data-testid="new-queue-token"]').type(queueCode);
     }
     cy.get('[data-testid="open-new-queue-btn"]').click();
 };
 
-const changeQueueCode = (queueName, queueCode = '') => {
+const changeQueueCode = (queueName, queueCode) => {
     cy.get('[data-testid="toggle-filter-settings"]').click();
     cy.get('[data-testid="popup-window"]').should('exist');
     cy.get('[data-testid="old-queue-code"]').select(queueName);
-    if (queueCode.length > 0) {
-        cy.get('[data-testid="old-queue-token"]').type(queueCode);
-    }
-    else {
+    if (queueCode === 'RANDOM') {
         cy.get('[data-testid="old-queue-rand-token"]').click(); // random code
+        cy.get('[data-testid="old-queue-token"]').invoke('val').should('not.be.empty');
+    }
+    else if (queueCode !== '') {
+        cy.get('[data-testid="old-queue-token"]').type(queueCode);
     }
     cy.get('[data-testid="change-code-btn"]').click(); // update it
 };
@@ -88,8 +91,12 @@ describe('test office hours queue', () => {
         openNewQueue(queueName, queueCode1); // same name but used different code
         cy.get('[data-testid="popup-message"]').should('contain', 'Unable to add queue. Make sure you have a unique queue name');
 
-        openNewQueue(queueName_random);
-        changeQueueCode(queueName_random);
+        openNewQueue(queueName_random, 'RANDOM');
+        changeQueueCode(queueName_random, 'RANDOM');
+        cy.get('[data-testid="popup-message"]').should('contain', 'Queue Access Code Changed');
+
+        openNewQueue(queueName_blank, '');
+        changeQueueCode(queueName_blank, '');
         cy.get('[data-testid="popup-message"]').should('contain', 'Queue Access Code Changed');
 
         changeQueueCode(queueName, newQueueCode);
