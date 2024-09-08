@@ -269,6 +269,7 @@ function getGradeableBuckets() {
                 const children = $(this).children();
                 // children[0] represents <div id="gradeable-pts-div-*">
                 // children[1] represents <div id="gradeable-percents-div-*">
+                // children[4] represents <select id="alternate-dropdown-*">
                 // replace divs with inputs
                 children[0] = children[0].children[0];
                 children[1] = children[1].children[0];
@@ -279,6 +280,12 @@ function getGradeableBuckets() {
                 // Get gradeable final grade percent, but only if Per Gradeable Percents was selected
                 if ($(children[1]).is(':visible')) {
                     gradeable.percent = parseFloat(children[1].value) / 100.0;
+                }
+
+                // Get alternate gradeable
+                const alternate_value = $(children[4]).find(':selected').val();
+                if ($(children[4]).is(':visible') && alternate_value !== '') {
+                    gradeable.alternate = alternate_value;
                 }
 
                 // Get gradeable release date
@@ -816,7 +823,7 @@ $(document).ready(() => {
         saveChanges();
     });
     // Attach a focusout event handler to all input and textarea elements within #gradeables after user finishes typing
-    $('#gradeables').find('input, textarea').on('focusout', () => {
+    $('#gradeables').find('input, textarea, select').on('focusout', () => {
         saveChanges();
     });
 
