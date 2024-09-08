@@ -11,7 +11,7 @@
         {
             "type": "Compilation",
             "title": "Compilation",
-            "command": "/usr/bin/rustc *.rs -o a.out",
+            "command": "/usr/local/cargo/bin/rustc *.rs -o a.out",
             "executable_name": "a.out",
             "points": 5
         },
