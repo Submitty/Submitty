@@ -56,7 +56,8 @@
 
 /* stylelint-disable-next-line selector-id-pattern */
 #save_status_container {
-    display: inline-block;
+    display: flex;
+    align-items: center;
     width: 100%;
     background-color: var(--standard-hover-light-gray);
     border: none;
@@ -76,7 +77,8 @@
 #save_status_buttons {
     display: flex;
     flex-direction: row;
-    margin-top: 10px;
+    margin-right: 10px;
+    border: none;
 }
 
 /* stylelint-disable-next-line selector-id-pattern */
@@ -125,7 +127,7 @@
     flex-direction: column;
 }
 
-.gradeable-li-right-of-input i.fa-exclamation-triangle {
+i.fa-exclamation-triangle {
     margin-right: 5px;
     padding-bottom: 2px;
     display: none;
@@ -134,12 +136,12 @@
     border-bottom: 1px dotted var(--standard-vibrant-yellow);
 }
 
-[data-theme="dark"] .gradeable-li-right-of-input i.fa-exclamation-triangle {
+[data-theme="dark"] i.fa-exclamation-triangle {
     color: var(--standard-light-yellow);
     border-bottom: 1px dotted var(--standard-light-yellow);
 }
 
-.gradeable-li-right-of-input i.fa-exclamation-triangle > .tooltiptext.tooltipbottom {
+i.fa-exclamation-triangle > .tooltiptext.tooltipbottom {
     margin-left: -110px;
     margin-top: 25px;
     font-family: "Source Sans Pro", sans-serif;
@@ -148,11 +150,11 @@
     padding: 5px;
 }
 
-[data-theme="dark"] .gradeable-li-right-of-input i.fa-exclamation-triangle > .tooltiptext.tooltipbottom {
+[data-theme="dark"] i.fa-exclamation-triangle > .tooltiptext.tooltipbottom {
     color: var(--text-black);
 }
 
-.gradeable-li-right-of-input i.fa-exclamation-triangle > .tooltiptext.tooltipbottom::after {
+i.fa-exclamation-triangle > .tooltiptext.tooltipbottom::after {
     content: "";
     position: absolute;
     top: -14%;
@@ -204,7 +206,7 @@ hr {
     color: var(--standard-vibrant-orange) !important;
 }
 
-.override + div.gradeable-li-right-of-input i.fa-exclamation-triangle {
+div:has(.override) ~ div.gradeable-li-right-of-input i.fa-exclamation-triangle {
     display: inline-block;
 }
 
@@ -227,10 +229,30 @@ hr {
     width: 32.5em;
 }
 
-#manual-grading-table {
+#manual-grading-table,
+#performance-warnings-table {
     text-align: left;
+}
+
+.select2 {
+    display: inline-block !important;
+    width: 38% !important;
 }
 
 #gradeables .gradeable-custom-item-input {
     width: 3em;
+}
+
+[id^="gradeable-pts-div-"],
+[id^="gradeable-percents-div-"] {
+    margin-right: 2em;
+}
+
+[id^="gradeable-percents-div-"] {
+    display: none;
+}
+
+#btn-build-customization {
+    border: none;
+    margin-right: 10px;
 }

@@ -8075,8 +8075,9 @@ AND gc_id IN (
     public function getValidatedCode(string $queue_code, string $token = null) {
         //first check if the queue has an access code
         $this->course_db->query("SELECT * FROM queue_settings WHERE UPPER(TRIM(code)) = UPPER(TRIM(?)) AND open = true", [$queue_code]);
-        if ($this->course_db->getRowCount() > 0 && $this->course_db->row()['token'] == null) {
-            return $this->course_db->row()['code'];
+        $row = $this->course_db->row();
+        if ($this->course_db->getRowCount() > 0 && $row['token'] == null) {
+            return $row['code'];
         }
         elseif ($token === null) {
             return false;
@@ -9587,6 +9588,27 @@ SQL;
                     AND g_version = cast(? AS int)
         ", [$user_id, $gradeable_id, $testcase_id, $version]);
         return $this->course_db->row();
+    }
+
+    /**
+     * Gets the autograding metrics for a specific version and testcase
+     *
+     * @param string $user_id
+     * @param string $gradeable_id
+     * @param int $version
+     * @return array{total_elapsed_time: float, total_max_rss_size: int}
+     */
+    public function getMetricSum(string $user_id, string $gradeable_id, int $version): array {
+        $query = "
+        SELECT SUM(elapsed_time) AS total_elapsed_time, MAX(max_rss_size) AS total_max_rss_size
+        FROM autograding_metrics
+        WHERE user_id = ?
+            AND g_id = ?
+            AND g_version = cast(? AS int)
+    ";
+
+        $this->course_db->query($query, [$user_id, $gradeable_id, $version]);
+        return $this->course_db->rows();
     }
 
     /**

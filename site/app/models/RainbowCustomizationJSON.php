@@ -35,10 +35,14 @@ class RainbowCustomizationJSON extends AbstractModel {
      * @var object[]
      */
     private array $manual_grade = [];
+    /**
+     * @var object[]
+     */
+    private array $warning = [];
 
     // The order of allowed_display and allowed_display_description has to match
     const allowed_display = ['grade_summary', 'grade_details', 'exam_seating', 'section',
-        'messages', 'warning', 'final_grade', 'final_cutoff', 'instructor_notes'];
+        'messages', 'warning', 'final_grade', 'final_cutoff', 'instructor_notes', 'display_rank_to_individual'];
 
     const allowed_display_description = [
         "Display a column(row) for each gradeable bucket on the syllabus.", //grade_summary
@@ -46,10 +50,11 @@ class RainbowCustomizationJSON extends AbstractModel {
         "Used for assigned seating for exams, see also:  <a href='https://submitty.org/instructor/course_settings/rainbow_grades/exam_seating'>Exam Seating</a> ", //exam_seating
         "Display the students registration section.", //section
         "Display the optional text message at the top of the page.", //messages
-        "not used", //warning
+        "Generate Academic Performance Warnings for each student that fails to obtain a target score on a given list of gradeables.", //warning
         "Configure cutoffs and display the student's final term letter grade.", //final_grade
         "Display the histogram of average overall grade and count of students with each final term letter grade.", //final_cutoff
-        "Optional message for specific students that are only visible on the instructor gradebook, these messages are never displayed to students." //instructor_notes
+        "Optional message for specific students that are only visible on the instructor gradebook, these messages are never displayed to students.", //instructor_notes
+        "Display each student's rank in the course to themselves." //display_rank_to_individual
     ];
 
 
@@ -92,6 +97,15 @@ class RainbowCustomizationJSON extends AbstractModel {
      */
     public function getManualGrades(): array {
         return $this->manual_grade;
+    }
+
+    /**
+     * Get array of performance warnings
+     *
+     * @return array<object>
+     */
+    public function getPerformanceWarnings(): array {
+        return $this->warning;
     }
 
     /**
@@ -149,14 +163,14 @@ class RainbowCustomizationJSON extends AbstractModel {
     }
 
     /**
-     * Determine the existence of a custom_customization.json inside the course rainbow_grades directory
+     * Determine the existence of a manual_customization.json inside the course rainbow_grades directory
      *
-     * @return bool Indicates if a custom_customization.json exists
+     * @return bool Indicates if a manual_customization.json exists
      */
-    public function doesCustomCustomizationExist() {
-        // Get path to custom_customization.json
+    public function doesManualCustomizationExist() {
+        // Get path to manual_customization.json
         $course_path = $this->core->getConfig()->getCoursePath();
-        $file_path = FileUtils::joinPaths($course_path, 'rainbow_grades', 'custom_customization.json');
+        $file_path = FileUtils::joinPaths($course_path, 'rainbow_grades', 'manual_customization.json');
 
         return file_exists($file_path);
     }
@@ -170,7 +184,7 @@ class RainbowCustomizationJSON extends AbstractModel {
     public function loadFromJsonFile() {
         // Get contents of file and decode
         $course_path = $this->core->getConfig()->getCoursePath();
-        $course_path = FileUtils::joinPaths($course_path, 'rainbow_grades', 'customization.json');
+        $course_path = FileUtils::joinPaths($course_path, 'rainbow_grades', 'gui_customization.json');
 
         if (!file_exists($course_path)) {
             throw new FileReadException('Unable to locate the file to read');
@@ -224,6 +238,10 @@ class RainbowCustomizationJSON extends AbstractModel {
 
         if (isset($json->manual_grade)) {
             $this->manual_grade = $json->manual_grade;
+        }
+
+        if (isset($json->warning)) {
+            $this->warning = $json->warning;
         }
     }
 
@@ -388,12 +406,38 @@ class RainbowCustomizationJSON extends AbstractModel {
 
 
     /**
+     * Add a performance warning entry to existing array
+     *
+     * @param object{
+     *     "msg": string,
+     *     "ids": string,
+     *     "value": float
+     * } $performanceWarningEntry
+     */
+    public function addPerformanceWarningEntry(object $performanceWarningEntry): void {
+        $emptyArray = [
+            "user" => "",
+            "grade" => "",
+            "note" => ""
+        ];
+
+        $performanceWarningArray = (array) $performanceWarningEntry;
+
+        if ($performanceWarningArray === $emptyArray) {
+            throw new BadArgumentException('Performance Warning entry may not be empty.');
+        }
+
+        $this->warning[] = $performanceWarningEntry;
+    }
+
+
+    /**
      * Save the contents in this objects properties to the customization.json for the current course
      */
     public function saveToJsonFile() {
         // Get path of where to save file
         $course_path = $this->core->getConfig()->getCoursePath();
-        $course_path = FileUtils::joinPaths($course_path, 'rainbow_grades', 'customization.json');
+        $course_path = FileUtils::joinPaths($course_path, 'rainbow_grades', 'gui_customization.json');
 
         // If display was empty then just add defaults
         if (empty($this->display)) {

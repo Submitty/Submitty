@@ -10,7 +10,7 @@ jobs:
     name: Dispatch Update
     runs-on: ubuntu-latest
     steps:
-      - uses: Submitty/peter-evans-repository-dispatch@v23.07.00
+      - uses: Submitty/peter-evans-repository-dispatch@v24.07.00
         with:
           event-type: version-up
           token: ${{ secrets.SUBMITTYBOT_DEPENDENCY_TOKEN }}
