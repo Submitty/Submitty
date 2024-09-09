@@ -82,6 +82,8 @@ const editAnnouncement = (text = '') => {
 
 describe('test office hours queue', () => {
     it('Testing queue as student', () => {
+        // Needed since the queue is redirected to after every change
+        Cypress.config('redirectionLimit', 24);
         cy.login();
         enableQueue();
         // deleting the Lab help and homework debugging
