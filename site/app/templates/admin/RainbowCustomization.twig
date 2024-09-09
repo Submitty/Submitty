@@ -300,7 +300,7 @@ To remove a curve simply blank all boxes."></i>
                                                     Alternate?
                                                     <input id="alternate-checkbox-{{ gradeable['id'] }}" type="checkbox" name="alternate-checkbox-{{ gradeable['id'] }}">
                                                 </label>
-                                                <select class="gradeable-li-info" name="alternate-dropdown-{{ gradeable['id'] }}" id="alternate-dropdown-{{ gradeable['id'] }}" onfocus="GetPotentialAlternates(this, {{ gradeables|json_encode() }});" aria-label="Assign Alternate Gradeable">
+                                                <select class="gradeable-li-info" name="alternate-dropdown-{{ gradeable['id'] }}" id="alternate-dropdown-{{ gradeable['id'] }}" onfocus="GetPotentialAlternates(this, {{ gradeables|json_encode() }});" data-gradeables="{{ gradeables|json_encode() }}" data-gradeable="{{ gradeable|json_encode() }}" aria-label="Assign Alternate Gradeable">
                                                     <option disabled selected value> -- select a gradeable -- </option>
                                                 </select>
                                             </li>

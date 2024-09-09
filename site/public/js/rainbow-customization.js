@@ -1,4 +1,4 @@
-/* exported addToTable, deleteRow manageWarningsGradeables ResetPerGradeablePercents GetPotentialAlternates */
+/* exported addToTable, deleteRow manageWarningsGradeables ResetPerGradeablePercents GetPotentialAlternates LoadAlternates */
 /* global buildCourseUrl csrfToken displayErrorMessage displaySuccessMessage */
 
 const benchmarks_with_input_fields = ['lowest_a-', 'lowest_b-', 'lowest_c-', 'lowest_d'];
@@ -122,6 +122,32 @@ function GetPotentialAlternates(el, gradeables) {
             el.appendChild(option);
         }
     });
+}
+
+// Load alternate gradeable when page is loaded
+function LoadAlternate(el, gradeables, dropdownGradeable) {
+    // If alternate is null, no alternate had been selected
+    if (typeof dropdownGradeable['alternate'] !== 'undefined') {
+        let title = '';
+        // Find the title of the alternate
+        gradeables.forEach((gradeable) => {
+            if (gradeable['id'] === dropdownGradeable['alternate']) {
+                title = gradeable['title'];
+            }
+        });
+
+        // Create option representing the alternate
+        const option = document.createElement('option');
+        option.value = dropdownGradeable['alternate'];
+        option.text = title;
+        el.appendChild(option);
+        // Select the option in the dropdown
+        $(el).val(dropdownGradeable['alternate']).change();
+
+        // Check the checkboxes to make the alternate dropdown visible
+        $('#enable-alternates').prop('checked', true);
+        $(`#alternate-checkbox-${dropdownGradeable['id']}`).prop('checked', true);
+    }
 }
 
 // Updates the sum of percentage points accounted for by the buckets being used
@@ -1195,6 +1221,13 @@ $(document).ready(() => {
         });
     });
 
+    // Load alternates from customization.json
+    const alternateDropdowns = $('select[id^="alternate-dropdown-"]');
+    alternateDropdowns.each((index, alternateDropdownDOMElement) => {
+        const alternateDropdown = $(alternateDropdownDOMElement);
+        LoadAlternate(alternateDropdownDOMElement, alternateDropdown.data('gradeables'), alternateDropdown.data('gradeable'));
+    });
+
     // Control visibility of gradeable alternate checkboxes
     const enableAlternatesCheckbox = $('#enable-alternates');
     const alternateCheckboxes = $('label[id^="alternate-checkbox-label-"]');
@@ -1210,7 +1243,6 @@ $(document).ready(() => {
     });
 
     // Control visibility of gradeable alternate dropdowns
-    const alternateDropdowns = $('select[id^="alternate-dropdown-"]');
     alternateDropdowns.each((index, alternateDropdown) => {
         const gradeableID = alternateDropdown.id.match(/^alternate-dropdown-(.+)$/)[1];
         const gradeableAlternate = $(`#alternate-checkbox-${gradeableID}`);
