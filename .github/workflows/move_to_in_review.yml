@@ -1,17 +1,15 @@
-name: Move drafts to WIP and un-drafts to seeking reviewer
+name: Move PR to In Review
 on:
   pull_request_target:
     types:
-      - opened
-      - converted_to_draft
-      - ready_for_review
+      - review_requested
 
 env:
   PR_ID: ${{ github.event.pull_request.number }}
 
 jobs:
-  sort-drafts:
-    name: Move drafts to WIP and un-drafts to seeking reviewer
+  move-to-in-review:
+    name: Move to In Review
     runs-on: ubuntu-latest
     steps:
       - name: Generate token
@@ -32,22 +30,11 @@ jobs:
       - name: Checkout the repo
         uses: actions/checkout@v4
 
-      - name: Move draft to Work in Progress
-        if: ${{ (github.event.action == 'converted_to_draft') || ((github.event.action == 'opened') && (github.event.pull_request.draft == true)) }}
+      - name: Move PR to In Review
+        if: ${{ ! github.event.pull_request.draft }}
         env:
           PR_PROJECT_ID: ${{ steps.get-pr-id.outputs.pr-project-id }}
           GH_TOKEN: ${{ steps.generate-token.outputs.token }}
         run: |
           source .github/bin/board_automation_helper.sh
-          gh project item-edit --project-id "$PROJECT_ID" --id "$PR_PROJECT_ID" --field-id "$STATUS_FIELD_ID" --single-select-option-id "$WIP_ID"
-        shell: bash
-
-      - name: Move ready for review to Seeking Reviewer
-        if: ${{ github.event.action == 'ready_for_review' }}
-        env:
-          PR_PROJECT_ID: ${{ steps.get-pr-id.outputs.pr-project-id }}
-          GH_TOKEN: ${{ steps.generate-token.outputs.token }}
-        run: |
-          source .github/bin/board_automation_helper.sh
-          gh project item-edit --project-id "$PROJECT_ID" --id "$PR_PROJECT_ID" --field-id "$STATUS_FIELD_ID" --single-select-option-id "$SEEKING_REVIEWER_ID"
-        shell: bash
+          gh project item-edit --project-id "$PROJECT_ID" --id "$PR_PROJECT_ID" --field-id "$STATUS_FIELD_ID" --single-select-option-id "$IN_REVIEW_ID"

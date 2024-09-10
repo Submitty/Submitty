@@ -103,7 +103,8 @@ class RainbowCustomization extends AbstractModel {
                 "max_score" => $max_score,
                 "grade_release_date" => $gradeable->hasReleaseDate() ? DateUtils::dateTimeToString($gradeable->getGradeReleasedDate()) : DateUtils::dateTimeToString($gradeable->getSubmissionOpenDate()),
                 "override" => false,
-                "override_max" => $max_score
+                "override_max" => $max_score,
+                "override_percent" => false
             ];
         }
 
@@ -154,6 +155,10 @@ class RainbowCustomization extends AbstractModel {
                     elseif ($c_gradeable['max_score'] !== (float) $json_bucket->ids[$j_index]->max) {
                         $c_gradeable['override'] = true;
                         $c_gradeable['override_max'] = $json_bucket->ids[$j_index]->max;
+                    }
+                    if (property_exists($json_bucket->ids[$j_index], 'percent')) {
+                        $c_gradeable['override_percent'] = true;
+                        $c_gradeable['percent'] = ($json_bucket->ids[$j_index]->percent) * 100;
                     }
                     $j_index++;
                 }
@@ -547,6 +552,15 @@ class RainbowCustomization extends AbstractModel {
         return $this->RCJSON?->getManualGrades() ?? [];
     }
 
+    /**
+     * Get performance warnings from json file if there are any
+     *
+     * @return array<object>  array of performance warnings JSON object
+     */
+    public function getPerformanceWarnings(): array {
+        return $this->RCJSON?->getPerformanceWarnings() ?? [];
+    }
+
     // This function handles processing the incoming post data
     public function processForm() {
 
@@ -601,6 +615,12 @@ class RainbowCustomization extends AbstractModel {
         if (isset($form_json->manual_grade)) {
             foreach ($form_json->manual_grade as $manual_grade) {
                 $this->RCJSON->addManualGradeEntry($manual_grade);
+            }
+        }
+
+        if (isset($form_json->warning)) {
+            foreach ($form_json->warning as $warning) {
+                $this->RCJSON->addPerformanceWarningEntry($warning);
             }
         }
 

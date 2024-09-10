@@ -82,11 +82,20 @@ class ReportController extends AbstractController {
 
         $url_base_path = FileUtils::joinPaths($this->core->getConfig()->getCoursePath(), 'reports', 'base_url.json');
         $base_url = $this->core->getConfig()->getBaseUrl();
+        $term = $this->core->getConfig()->getTerm();
+        $course = $this->core->getConfig()->getCourse();
 
         // Encode $base_url as a json string
-        $json_data = json_encode(['base_url' => $base_url]);
+        $data = [
+            'base_url' => $base_url,
+            'term' => $term,
+            'course' => $course
+        ];
 
-        // Write the json string to the file
+        // Encode the data as a JSON string
+        $json_data = json_encode($data, JSON_PRETTY_PRINT);
+
+        // Write the JSON string to the file
         if (!file_put_contents($url_base_path, $json_data)) {
             $this->core->addErrorMessage('Unable to write to base_url.json');
             $this->core->redirect($this->core->buildCourseUrl(['reports']));
@@ -653,6 +662,7 @@ class ReportController extends AbstractController {
             $this->core->getOutput()->addInternalJs('rainbow-customization.js');
             $this->core->getOutput()->addInternalCss('rainbow-customization.css');
             $this->core->getOutput()->addBreadcrumb('Rainbow Grades Customization');
+            $this->core->getOutput()->addSelect2WidgetCSSAndJs();
             $students = $this->core->getQueries()->getAllUsers();
             $student_full = Utils::getAutoFillData($students);
             $this->core->getOutput()->enableMobileViewport();
@@ -681,6 +691,7 @@ class ReportController extends AbstractController {
                 'messages' => $customization->getMessages(),
                 'plagiarism' => $customization->getPlagiarism(),
                 'manual_grade' => $customization->getManualGrades(),
+                'warning' => $customization->getPerformanceWarnings(),
                 "gradeables" => $gradeables,
                 "student_full" => $student_full,
                 'per_gradeable_curves' => $customization->getPerGradeableCurves(),

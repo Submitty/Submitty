@@ -458,7 +458,7 @@ function addLabel(filename, filesize, part, previous) {
 function handle_input_keypress(inactive_version) {
     empty_inputs = false;
     // eslint-disable-next-line no-undef
-    showPopup = true;
+    show_popup = true;
     if (!inactive_version) {
         setButtonStatus();
     }

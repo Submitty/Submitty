@@ -1,0 +1,198 @@
+<div id="scatterplot" class="page-content">
+    <div>
+        <label for="x-axis-selector">Select X-Axis:</label>
+        <select id="x-axis-selector">
+            <option value="runtime">Cumulative Autograding Runtime</option>
+            <option value="memory">Maximum Autograding Memory</option>
+            <option value="scores">Autograding Total Score</option>
+        </select>
+
+        <label for="y-axis-selector">Select Y-Axis:</label>
+        <select id="y-axis-selector">
+            <option value="runtime">Cumulative Autograding Runtime</option>
+            <option value="memory">Maximum Autograding Memory</option>
+            <option value="scores">Autograding Total Score</option>
+        </select>
+    </div>
+    <div id="Scatterplot5"></div>
+    <script>
+        function truncateToThreeDecimals(num) {
+            return Math.floor(num * 1000) / 1000;
+        }
+
+        var runtime = [{{ histograms['runtime'] | join(',') }}].map(truncateToThreeDecimals);
+        var memory = [{{ histograms['memory'] | join(',') }}];
+        var scores = [{{ histograms['bAuto'] | join(',') }}];
+
+        var submitters = [
+            {% for submitter in histograms['submitters'] %}
+            "{{ submitter }}"{% if not loop.last %},{% endif %}
+            {% endfor %}
+        ];
+
+        var labels = {
+            runtime: "Cumulative Autograding Runtime (seconds)",
+            memory: "Maximum Autograding Memory (byte)",
+            scores: "Autograding Total Score"
+        };
+
+        function updatePlot(xData, yData, xLabel, yLabel) {
+            var x1 = [], y1 = [], x2 = [], y2 = [], x3 = [], y3 = [];
+            var text1 = [], text2 = [], text3 = [];
+
+            for (let i = 0; i < submitters.length; i++) {
+                if (scores[i] >= {{ autograding_non_extra_credit }}) {
+                    x1.push(xData[i]);
+                    y1.push(yData[i]);
+                    text1.push(submitters[i]);
+                }
+                else if (scores[i] < 0.5 * {{ autograding_non_extra_credit }}) {
+                    x3.push(xData[i]);
+                    y3.push(yData[i]);
+                    text3.push(submitters[i]);
+                }
+                else {
+                    x2.push(xData[i]);
+                    y2.push(yData[i]);
+                    text2.push(submitters[i]);
+                }
+            }
+
+            var trace1 = {
+                x: x1,
+                y: y1,
+                name: '100% or higher (for EC)',
+                type: 'scatter',
+                mode: 'markers',
+                text: text1,
+                textposition: 'auto',
+                marker: {
+                    color: getComputedStyle(document.documentElement).getPropertyValue('--standard-deep-dark-green'),
+                    opacity: 1,
+                    line: {
+                        color: 'rgb(170,170,170)',
+                        width: 0.5
+                    }
+                }
+            }
+
+            var trace2 = {
+                x: x2,
+                y: y2,
+                name: '51-99%',
+                type: 'scatter',
+                mode: 'markers',
+                text: text2,
+                textposition: 'auto',
+                marker: {
+                    color: getComputedStyle(document.documentElement).getPropertyValue('--standard-light-yellow-brown'),
+                    opacity: 1,
+                    line: {
+                        color: 'rgb(170,170,170)',
+                        width: 0.5
+                    }
+                }
+            }
+
+            var trace3 = {
+                x: x3,
+                y: y3,
+                name: '0-50% or lower (for penalty)',
+                type: 'scatter',
+                mode: 'markers',
+                text: text3,
+                textposition: 'auto',
+                marker: {
+                    color: getComputedStyle(document.documentElement).getPropertyValue('--error-alert-dark-red'),
+                    opacity: 1,
+                    line: {
+                        color: 'rgb(170,170,170)',
+                        width: 0.5
+                    }
+                }
+            }
+
+            var data = [trace1, trace2, trace3];
+
+            var layout = {
+                title: `${xLabel} vs. ${yLabel}`,
+                barmode: 'overlay',
+                xaxis: {
+                    title: xLabel
+                },
+                yaxis: {
+                    title: yLabel
+                },
+                font: {
+                    family: '"Source Sans Pro", sans-serif',
+                }
+            };
+
+            Plotly.newPlot('Scatterplot5', data, layout, { displayModeBar: false, displaylogo: false });
+        }
+
+        function getDataArray(value) {
+            if (value === 'runtime') return runtime;
+            if (value === 'memory') return memory;
+            if (value === 'scores') return scores;
+        }
+
+        document.getElementById('x-axis-selector').addEventListener('change', function() {
+            var xValue = this.value;
+            var yValue = document.getElementById('y-axis-selector').value;
+            updatePlot(getDataArray(xValue), getDataArray(yValue), labels[xValue], labels[yValue]);
+        });
+
+        document.getElementById('y-axis-selector').addEventListener('change', function() {
+            var xValue = document.getElementById('x-axis-selector').value;
+            var yValue = this.value;
+            updatePlot(getDataArray(xValue), getDataArray(yValue), labels[xValue], labels[yValue]);
+        });
+
+        // Initial plot
+        document.getElementById('x-axis-selector').value = 'runtime';
+        document.getElementById('y-axis-selector').value = 'scores';
+        var initialX = document.getElementById('x-axis-selector').value;
+        var initialY = document.getElementById('y-axis-selector').value;
+        updatePlot(getDataArray(initialX), getDataArray(initialY), labels[initialX], labels[initialY]);
+    </script>
+
+    <div id="SmallScatterplot4">
+        <script>
+            function truncateToThreeDecimals(num) {
+                return Math.floor(num * 1000) / 1000;
+            }
+
+            var runtime = [{{ histograms['runtime'] | join(',') }}].map(truncateToThreeDecimals);
+            var memory = [{{ histograms['memory'] | join(',') }}].map(truncateToThreeDecimals);
+            var scores = [{{ histograms['bAuto'] | join(',') }}];
+
+            runtime = runtime.filter(n => n !== undefined);
+            memory = memory.filter(n => n !== undefined);
+            scores = scores.filter(n => n !== undefined);
+
+            var sumR = runtime.reduce((a, b) => a + b, 0);
+            var averageR = truncateToThreeDecimals(sumR / runtime.length);
+            var maxR = Math.max(...runtime);
+            var minR = Math.min(...runtime);
+            var sumM = memory.reduce((a, b) => a + b, 0);
+            var averageM = truncateToThreeDecimals(sumM / memory.length);
+            var maxM = Math.max(...memory);
+            var minM = Math.min(...memory);
+            document.write(`<b>Cumulative Autograding Runtime (seconds): </b>` + "<br>" + `Maximum: ` + `${maxR}` + '&nbsp&nbsp&nbsp&nbsp' +
+                `Minimum: ` + `${minR}` + '&nbsp&nbsp&nbsp&nbsp' + 'Average: ' + `${averageR}`);
+            document.write("<br>" + "<br>");
+            document.write(`<b>Maximum Autograding Memory (bytes): </b>` + "<br>" + `Maximum: ` + `${maxM}` + '&nbsp&nbsp&nbsp&nbsp' +
+                `Minimum: ` + `${minM}` + '&nbsp&nbsp&nbsp&nbsp' + 'Average: ' + `${averageM}`);
+            document.write("<br>" + "<br>");
+            document.write(`<b>Autograding Total Scores: </b>` + "<br>" + `Maximum possible: ` + {{ autograding_non_extra_credit }} +
+                '&nbsp&nbsp&nbsp&nbsp' + 'Average: ' + {{ autograded_average.getAverageScore() }});
+        </script>
+    </div>
+    <br/>
+    <br/>
+    Double-click on the chart to zoom out
+    <hr>
+</div>
+
+
