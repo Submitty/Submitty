@@ -76,6 +76,7 @@
     function createNewBuckets(range,buckets,xValue,yValue,xBuckets,mode,modeCount,max,min) {
         var bucketInputTotal = document.getElementById("bucket-size-total");
         var bucketInputAuto = document.getElementById("bucket-size-auto");
+        var bucketInputManual = document.getElementById("bucket-size-manual");
 
         xBuckets = [];
         yValue=[];
@@ -91,9 +92,9 @@
                 }
                 mode=fillBuckets(rangeT,bucketInputTotalValue,betterBuckets,xValueT,yValue,xBuckets,mode,modeCount,maxT,minT);
                 var dataTotal=tracing(xBuckets,yValue);
-                Plotly.newPlot('myDiv', dataTotal, layout, {displayModeBar: false,displaylogo: false});
+                Plotly.newPlot('Histogram', dataTotal, layout, {displayModeBar: false,displaylogo: false});
                 bucketInputTotal.value='';
-                document.getElementById("mySmallDiv").innerHTML='<b>Mean: </b>'+{{ overall_average.getAverageScore() }}+'&nbsp&nbsp&nbsp&nbsp'+'<b>Mode: </b>'
+                document.getElementById("SmallHistogram").innerHTML='<b>Mean: </b>'+{{ overall_average.getAverageScore() }}+'&nbsp&nbsp&nbsp&nbsp'+'<b>Mode: </b>'
                 +mode+'&nbsp&nbsp&nbsp&nbsp'+'<b>Median: </b>'+median+'&nbsp&nbsp&nbsp&nbsp'+ '<b>Maximum: </b>'+maxT+
                 '&nbsp&nbsp&nbsp&nbsp'+'<b>Minimum: </b>'+minT+'&nbsp&nbsp&nbsp&nbsp'+'<b>Standard Deviation: </b>'+
                 {{ overall_average.getStandardDeviation()  }}+'&nbsp&nbsp&nbsp&nbsp'+'<b>Range: </b>'+rangeT;
@@ -109,12 +110,29 @@
                 }
                 mode=fillBuckets(range,bucketInputAutoValue,betterBuckets,xValue,yValue,xBuckets,mode,modeCount,max,min);
                 var dataAuto = tracing(xBuckets,yValue);
-                Plotly.newPlot('myDiv3', dataAuto, layout, {displayModeBar: false,displaylogo: false});
+                Plotly.newPlot('Histogram3', dataAuto, layout, {displayModeBar: false,displaylogo: false});
                 bucketInputAuto.value='';
-                document.getElementById("mySmallDiv3").innerHTML='<b>Mean: </b>'+{{ autograded_average.getAverageScore() | default('0') }}+'&nbsp&nbsp&nbsp&nbsp'+'<b>Mode: </b>'
+                document.getElementById("SmallHistogram3").innerHTML='<b>Mean: </b>'+{{ autograded_average.getAverageScore() | default('0') }}+'&nbsp&nbsp&nbsp&nbsp'+'<b>Mode: </b>'
                 +mode+'&nbsp&nbsp&nbsp&nbsp'+'<b>Median: </b>'+median+'&nbsp&nbsp&nbsp&nbsp'+ '<b>Maximum: </b>'+max+
                 '&nbsp&nbsp&nbsp&nbsp'+'<b>Minimum: </b>'+min+'&nbsp&nbsp&nbsp&nbsp'+'<b>Standard Deviation: </b>'+
                 {{ autograded_average.getStandardDeviation()  }}+'&nbsp&nbsp&nbsp&nbsp'+'<b>Range: </b>'+range;
+                return mode;
+            }
+        {% endif %}
+        {% if component_averages|length != 0  %}
+            let bucketInputManualValue = parseFloat(bucketInputManual.value);
+            if(bucketInputManual.value!=''){
+                if (isNaN(bucketInputManualValue) || bucketInputManualValue === 0) {
+                    alert('Error: Invalid bucket size.');
+                    return ;
+                }
+                mode=fillBuckets(range,bucketInputManualValue,betterBuckets,xValue,yValue,xBuckets,mode,modeCount,max,min);
+                var dataAuto = tracing(xBuckets,yValue);
+                Plotly.newPlot('Histogram4', dataAuto, layout, {displayModeBar: false,displaylogo: false});
+                bucketInputManual.value='';
+                document.getElementById("SmallHistogram4").innerHTML='<b>Mode: </b>'
+                +mode+'&nbsp&nbsp&nbsp&nbsp'+'<b>Median: </b>'+median+'&nbsp&nbsp&nbsp&nbsp'+ '<b>Maximum: </b>'+max+
+                '&nbsp&nbsp&nbsp&nbsp'+'<b>Minimum: </b>'+min+'&nbsp&nbsp&nbsp&nbsp'+'<b>Range: </b>'+range;
                 return mode;
             }
         {% endif %}
@@ -177,9 +195,10 @@
         <div class="tab-bar-wrapper">
             <a class="nav-bar key_to_click" id="page_0_nav" onclick="onChangeNavTab(0);">Data</a>
             <a class="nav-bar key_to_click" id="page_1_nav" onclick="onChangeNavTab(1);">Manual Grading Component Averages</a>
-            <a class="nav-bar key_to_click" id="page_2_nav" onclick="onChangeNavTab(2);">Autograding Histogram</a>
-            <a class="nav-bar key_to_click" id="page_3_nav" onclick="onChangeNavTab(3);">Overall Histogram</a>
-            <a class="nav-bar key_to_click" id="page_4_nav" onclick="onChangeNavTab(4);">Scatterplot</a>
+            <a class="nav-bar key_to_click" id="page_2_nav" onclick="onChangeNavTab(2);">Manual Grading Histogram</a>
+            <a class="nav-bar key_to_click" id="page_3_nav" onclick="onChangeNavTab(3);">Autograding Histogram</a>
+            <a class="nav-bar key_to_click" id="page_4_nav" onclick="onChangeNavTab(4);">Overall Histogram</a>
+            <a class="nav-bar key_to_click" id="page_5_nav" onclick="onChangeNavTab(5);">Scatterplot</a>
         </div>
         <br/>
         <div class="modal-body">
@@ -190,15 +209,19 @@
                 <div class="page-content" id="page_1_content">{{ include('grading/electronic/ta_status/StatusComponentAverages.twig')   }}</div>
             {% endif %}
 
-            {% if autograded_average != null and autograded_average.getCount() != 0 and histograms['bAuto']|length != 0 %}
-                <div class="page-content" id="page_2_content">{{ include('grading/electronic/ta_status/StatusAutogradingHistogram.twig')  }}</div>
-                {% if histograms['runtime']|length != 0 and histograms['runtime'][0] != 0 %}
-                    <div class="page-content" id="page_4_content">{{ include('grading/electronic/ta_status/Scatterplot.twig') }}</div>
-                {% endif %}
+            {% if component_averages|length != 0 and histograms['tTA']|length != 0 %}
+                <div class="page-content" id="page_2_content">{{ include('grading/electronic/ta_status/GradingHistogram.twig', {'type': 'manual'})  }}</div>
             {% endif %}
 
+            {% if autograded_average != null and autograded_average.getCount() != 0 and histograms['bAuto']|length != 0 %}
+                <div class="page-content" id="page_3_content">{{ include('grading/electronic/ta_status/GradingHistogram.twig', {'type': 'auto'})  }}</div>
+                {% if histograms['runtime']|length != 0 and histograms['runtime'][0] != 0 %}
+                    <div class="page-content" id="page_5_content">{{ include('grading/electronic/ta_status/Scatterplot.twig') }}</div>
+                {% endif %}
+            {% endif %}   
+
             {% if (overall_average != null and overall_average.getCount() != 0) or component_averages|length != 0 %}
-                <div class="page-content" id="page_3_content">{{ include('grading/electronic/ta_status/StatusOverallHistogram.twig')  }}</div>
+                <div class="page-content" id="page_4_content">{{ include('grading/electronic/ta_status/GradingHistogram.twig', {'type': 'total'})  }}</div>
             {% endif %}
         </div>
         <br/>
@@ -291,7 +314,7 @@
     let adminGradeableNavTab = 0;
 
     function onChangeNavTab(tab) {
-        if (tab > 4 || tab < 0) {
+        if (tab > 5 || tab < 0) {
             alert('Invalid Navigation');
             return;
         }
@@ -302,7 +325,7 @@
 
         //$('.page-content').hide();
         
-        for (var i =0 ; i<5 ;i++) {
+        for (var i =0 ; i<6 ;i++) {
             $('#page_' + i + '_nav').removeClass('active-btn');
             $('#page_' + i + '_content').hide();
         }
