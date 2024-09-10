@@ -54,7 +54,6 @@ class PollController extends AbstractController {
             $future_polls = [];
             /** @var Poll $poll */
             foreach ($all_polls as $poll) {
-                $now = new \DateTime();
                 if ($poll->getReleaseDate()->format('Y-m-d') === $this->core->getDateTimeNow()->format('Y-m-d')) {
                     $todays_polls[] = $poll;
                 }
