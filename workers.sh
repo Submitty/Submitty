@@ -16,8 +16,8 @@ if [[ ! -f ".vagrant/workers.json" ]]; then
   exit 1
 fi
 
-VM_PROVIDER=$(python3 -c "import json;print(json.load(open('.vagrant/workers.json'))['provider'])")
-GATEWAY_IP=$(python3 -c "import json;print(json.load(open('.vagrant/workers.json'))['gateway'])")
+VM_PROVIDER=$(python3 -c "import json;print(json.load(open('.vagrant/workers.json'))['provider'])" &>/dev/null)
+GATEWAY_IP=$(python3 -c "import json;print(json.load(open('.vagrant/workers.json'))['gateway'])" &>/dev/null)
 
 if [[ -z $VM_PROVIDER ]]; then
   echo "Worker configuration is not valid, please run 'vagrant workers generate'."
