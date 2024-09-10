@@ -87,7 +87,7 @@ class RainbowCustomizationJSON extends AbstractModel {
     /**
      * Get gradeable buckets array
      *
-     * @return array<object>
+     * @return object[]
      */
     public function getGradeables() {
         return $this->gradeables;
@@ -96,7 +96,7 @@ class RainbowCustomizationJSON extends AbstractModel {
     /**
      * Get array of plagiarism
      *
-     * @return array<object>
+     * @return object[]
      */
     public function getPlagiarism(): array {
         return $this->plagiarism;
@@ -105,7 +105,7 @@ class RainbowCustomizationJSON extends AbstractModel {
     /**
      * Get array of manual grades
      *
-     * @return array<object>
+     * @return object[]
      */
     public function getManualGrades(): array {
         return $this->manual_grade;
@@ -123,7 +123,7 @@ class RainbowCustomizationJSON extends AbstractModel {
     /**
      * Gets an array of display benchmarks
      *
-     * @return array<string> The display benchmarks
+     * @return string[] The display benchmarks
      */
     public function getDisplayBenchmarks() {
         return $this->display_benchmark;
@@ -149,7 +149,7 @@ class RainbowCustomizationJSON extends AbstractModel {
 
     /**
      * Gets an array of display
-     * @return array<string> The display
+     * @return string[] The display
      */
     public function getDisplay(): array {
         return $this->display;
@@ -263,7 +263,7 @@ class RainbowCustomizationJSON extends AbstractModel {
      * @param string $display The item to add
      * @throws BadArgumentException The passed in argument is not allowed.
      */
-    public function addDisplay($display): void {
+    public function addDisplay(string $display): void {
         if (!in_array($display, self::allowed_display, true)) {
             throw new BadArgumentException('Passed in display not found in the list of allowed display items');
         }
@@ -280,7 +280,7 @@ class RainbowCustomizationJSON extends AbstractModel {
      * @param string $label The label you would like to assign to the sectionID
      * @throws BadArgumentException The passed in section label is empty
      */
-    public function addSection($sectionID, $label): void {
+    public function addSection(string $sectionID, string $label): void {
         if ($label === '') {
             throw new BadArgumentException('The section label may not be empty.');
         }
@@ -345,7 +345,7 @@ class RainbowCustomizationJSON extends AbstractModel {
     /**
      * Get messages
      *
-     * @return array<string>
+     * @return string[]
      */
     public function getMessages() {
         return $this->messages;
