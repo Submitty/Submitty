@@ -1,4 +1,4 @@
-import {isPermissionAllowed} from 'cypress-browser-permissions';
+import { isPermissionAllowed } from 'cypress-browser-permissions';
 
 const queueName = 'Cypress Office Hour Queue 1';
 const queueName_random = 'Cypress Office Hour Queue Random';
