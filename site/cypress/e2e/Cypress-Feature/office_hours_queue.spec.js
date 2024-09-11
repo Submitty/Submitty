@@ -1,4 +1,4 @@
-import { isPermissionAllowed } from 'cypress-browser-permissions';
+import {isPermissionAllowed} from 'cypress-browser-permissions';
 
 const queueName = 'Cypress Office Hour Queue 1';
 const queueName_random = 'Cypress Office Hour Queue Random';
@@ -84,7 +84,6 @@ const editAnnouncement = (text = '') => {
 
 describe('test office hours queue', () => {
     it('Creating queues and changing queue codes', () => {
-        // Needed since the queue is redirected to after every change
         cy.login();
         enableQueue();
         // deleting the Lab help and homework debugging
