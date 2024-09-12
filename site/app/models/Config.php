@@ -116,7 +116,6 @@ class Config extends AbstractModel {
      * @prop
      */
     protected $course_loaded = false;
-    
     /*** MASTER CONFIG ***/
     /** @prop
      * @var string */
