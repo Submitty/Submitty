@@ -76,6 +76,9 @@ class Course(
         self.no_registration_students: int = 10
         self.no_rotating_students: int = 10
         self.unregistered_students: int = 10
+        self.archived: bool = False
+        if "archived" in course:
+            self.archived = course["archived"]
         if "registration_sections" in course:
             self.registration_sections = course["registration_sections"]
         if "rotating_sections" in course:

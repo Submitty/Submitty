@@ -43,6 +43,7 @@ class Course_create:
     no_registration_sections: int
     no_rotating_students: int
     unregistered_students: int
+    archived: bool
 
     def __init__(self) -> None:
         pass
@@ -71,8 +72,9 @@ class Course_create:
         add_to_group(course_group, "submitty_php")
         add_to_group(course_group, "submitty_daemon")
         add_to_group(course_group, "submitty_cgi")
+        archive = ' --archive ' if self.archived else ''
         os.system(
-            f"{SUBMITTY_INSTALL_DIR}/sbin/create_course.sh {self.semester} {self.code}"
+            f"{SUBMITTY_INSTALL_DIR}/sbin/create_course.sh {archive} {self.semester} {self.code}"
             f" {self.instructor.id} {course_group}"
         )
 
@@ -106,7 +108,7 @@ class Course_create:
                 table.insert(),
                 term=self.semester,
                 course=self.code,
-                registration_section_id=str(section),
+                registration_section_id=str(section)
             )
 
         print("Creating rotating sections ", end="")
