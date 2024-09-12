@@ -108,7 +108,7 @@ describe('test office hours queue', () => {
     });
     it('Joining queues as student', () => {
         // switch to student to join queue
-        cy.login('student');
+        switchUser('student');
         cy.visit(['sample', 'office_hours_queue']);
         // cy.get('#leave_queue').click();
 
