@@ -638,6 +638,7 @@ if not args.worker:
     config['timezone'] = TIMEZONE
     config['default_locale'] = DEFAULT_LOCALE
     config['duck_special_effects'] = False
+    config['is_ci'] = False
 
 config['worker'] = True if args.worker == 1 else False
 

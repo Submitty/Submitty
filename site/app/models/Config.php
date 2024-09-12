@@ -79,6 +79,7 @@ use app\libraries\FileUtils;
  * @method string getSubmittyInstallPath()
  * @method bool isDuckBannerEnabled()
  * @method string getPhpUser()
+ * @method bool isCi()
  */
 
 class Config extends AbstractModel {
@@ -115,7 +116,7 @@ class Config extends AbstractModel {
      * @prop
      */
     protected $course_loaded = false;
-
+    
     /*** MASTER CONFIG ***/
     /** @prop
      * @var string */
@@ -167,6 +168,12 @@ class Config extends AbstractModel {
      * @var string */
     protected $cgi_tmp_path;
 
+    /**
+     * Indicates whether Submitty is running in CI (to mock certain 'random' functions)
+     * @var bool
+     * @prop
+     */
+    protected $is_ci = false;
     /** @prop
      * @var string */
     protected $database_driver = "pgsql";
@@ -471,6 +478,8 @@ class Config extends AbstractModel {
         $this->submitty_path = $submitty_json['submitty_data_dir'];
         $this->submitty_log_path = $submitty_json['site_log_path'];
         $this->submitty_install_path = $submitty_json['submitty_install_dir'];
+
+        $this->ci = $submitty_json['is_ci'] === true;
 
         $this->cgi_tmp_path = FileUtils::joinPaths($this->submitty_path, "tmp", "cgi");
 
