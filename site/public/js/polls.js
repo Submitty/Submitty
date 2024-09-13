@@ -1,5 +1,5 @@
-/* exported newDeletePollForm updatePollAcceptingAnswers updatePollVisible updateDropdownStates importPolls toggleTimerInputs togglePollFormOptions validateCustomResponse addCustomResponse removeCustomResponse toggle_section get_new_chart_width disableNoResponse clearResponses */
-/* global csrfToken displaySuccessMessage displayErrorMessage */
+/* exported newDeletePollForm updatePollAcceptingAnswers updatePollVisible updateDropdownStates importPolls toggleTimerInputs togglePollFormOptions changePollType addResponse submitErrorChecks setEventHandlers validateCustomResponse addCustomResponse removeCustomResponse toggle_section get_new_chart_width disableNoResponse clearResponses */
+/* global csrfToken displaySuccessMessage displayErrorMessage MAX_SIZE base_url poll_id */
 
 $(document).ready(() => {
     $('.dropdown-bar').on('click', function () {
@@ -7,6 +7,10 @@ $(document).ready(() => {
         $(this).find('i').toggleClass('down');
     });
 });
+
+/*
+ * Beginning of AllPollsPageInstructor.twig functions
+ */
 
 function newDeletePollForm(pollid, pollname, base_url) {
     if (confirm(`This will delete poll '${pollname}'. Are you sure?`)) {
@@ -106,6 +110,13 @@ function updateDropdownStates(curr_state, cookie_key) {
     Cookies.set(cookie_key, !curr_state, { expires: expiration_date, path: '/' });
 }
 
+/*
+ * End of AllPollsPageInstructor.twig functions
+ * Beginning of PollForm.twig functions
+ */
+
+let size_is_valid = true;
+
 function togglePollFormOptions() {
     const correct_options = $('.correct-box');
 
@@ -113,6 +124,224 @@ function togglePollFormOptions() {
         $(this).prop('checked', $('#toggle-all').prop('checked'));
     });
 }
+
+function changePollType() {
+    const count = $('.option_id').length;
+    for (let i = 0; i < count; i++) {
+        if ($('#poll-type-single-response-survey').is(':checked')
+            || $('#poll-type-multiple-response-survey').is(':checked')) {
+            const correct_box = $('.correct-box')[i];
+            $(correct_box).prop('checked', true);
+            $(correct_box).hide();
+            $('#toggle-all').hide();
+            $('#toggle-all-label').hide();
+        }
+        else {
+            $($('.correct-box')[i]).show();
+            $('#toggle-all').show();
+            $('#toggle-all-label').show();
+        }
+    }
+}
+
+function checkImageSize(uploadedFile) {
+    size_is_valid = uploadedFile.files[0].size <= MAX_SIZE;
+    submitErrorChecks();
+}
+
+function addResponse() {
+    const count = $('.option_id').length;
+    let curr_max_id = -1;
+    for (let i = 0; i < count; i++) {
+        const option_id = $($('.option_id')[i]).val();
+        curr_max_id = Math.max(parseInt(option_id === '' ? i : option_id, 10), curr_max_id);
+    }
+    const first_free_id = curr_max_id + 1;
+    let hidden_style = '';
+    let is_checked = '';
+    if ($('#poll-type-single-response-survey').is(':checked')
+        || $('#poll-type-multiple-response-survey').is(':checked')) {
+        hidden_style = "style='display:none'";
+        is_checked = 'checked';
+        $('#toggle-all').hide();
+        $('#toggle-all-label').hide();
+    }
+    $('#responses').append(`
+            <div class="response-container" id="response_${first_free_id}_wrapper" data-testid="response-${first_free_id}-wrapper">
+                <input type="hidden" class="order order-${count}" name="option[${first_free_id}][order]" value="${count}"/>
+                <input type="hidden" class="option_id" name="option[${first_free_id}][id]" value=""/>
+                <input aria-label="Is correct" class="correct-box" type="checkbox" name="option[${first_free_id}][is_correct]" ${hidden_style} ${is_checked}>
+                <textarea aria-label="Response text" data-testid="poll-response" class="poll-response" name="option[${first_free_id}][response]" placeholder="Enter response here..."
+                rows="10" cols="30"></textarea>
+                <div class="move-btn up-btn">
+                    <i class="fa fa-lg fa-chevron-up"></i>
+                </div>
+                <div class="move-btn down-btn">
+                    <i class="fa fa-lg fa-chevron-down"></i>
+                </div>
+                <div class="move-btn delete-btn" data-testid="response-delete-button">
+                    <i class="fa fa-lg fa-trash"></i>
+                </div>
+                <br/>
+            </div>
+        `);
+    setEventHandlers();
+}
+
+function submitErrorChecks() {
+    let empty_responses = false;
+    for (let i = 0; i < $('.poll-response').length; i++) {
+        if ($($('.poll-response')[i]).val() === '') {
+            empty_responses = true;
+        }
+    }
+
+    if ($('#poll-name').val().length === 0) {
+        $('#poll-form-submit').prop('disabled', true);
+        $('.polls-submit-error').hide();
+        $('#empty-name-error').show();
+    }
+    else if ($('#poll-question').val().length === 0) {
+        $('#poll-form-submit').prop('disabled', true);
+        $('.polls-submit-error').hide();
+        $('#empty-question-error').show();
+    }
+    else if (!$('#poll-type-single-response-single-correct').is(':checked')
+        && !$('#poll-type-single-response-multiple-correct').is(':checked')
+        && !$('#poll-type-single-response-survey').is(':checked')
+        && !$('#poll-type-multiple-response-exact').is(':checked')
+        && !$('#poll-type-multiple-response-flexible').is(':checked')
+        && !$('#poll-type-multiple-response-survey').is(':checked')) {
+        $('#poll-form-submit').prop('disabled', true);
+        $('.polls-submit-error').hide();
+        $('#question-type-error').show();
+    }
+    else if (!size_is_valid) {
+        $('#poll-form-submit').prop('disabled', true);
+        $('.polls-submit-error').hide();
+        $('#file-size-error').show();
+    }
+    else if ($('#poll-date').val().length === 0) {
+        $('#poll-form-submit').prop('disabled', true);
+        $('.polls-submit-error').hide();
+        $('#empty-date-error').show();
+    }
+    else if ($('.response-container').length === 0) {
+        $('#poll-form-submit').prop('disabled', true);
+        $('.polls-submit-error').hide();
+        $('#response-count-error').show();
+    }
+    else if ($('.correct-box:checked').length === 0) {
+        $('#poll-form-submit').prop('disabled', true);
+        $('.polls-submit-error').hide();
+        $('#correct-response-count-error').show();
+    }
+    else if ($('.correct-box:checked').length > 1
+        && $('#poll-type-single-response-single-correct').is(':checked')) {
+        $('#poll-form-submit').prop('disabled', true);
+        $('.polls-submit-error').hide();
+        $('#single-response-error').show();
+    }
+    else if (empty_responses) {
+        $('#poll-form-submit').prop('disabled', true);
+        $('.polls-submit-error').hide();
+        $('#empty-response-error').show();
+    }
+    else {
+        $('#poll-form-submit').prop('disabled', false);
+        $('.polls-submit-error').hide();
+    }
+}
+
+function setEventHandlers() {
+    const up_btn = $('.up-btn');
+    const down_btn = $('.down-btn');
+    const delete_btn = $('.delete-btn');
+    up_btn.off('click');
+    up_btn.on('click', function () {
+        const curr_pos = parseInt($($(this).siblings('.order')[0]).attr('value'));
+        if (curr_pos === 0) {
+            return;
+        }
+        const prev_response = $(`.order-${curr_pos - 1}`);
+        prev_response.parent().insertAfter($(this).parent());
+        prev_response.attr('value', curr_pos);
+        prev_response.addClass(`order-${curr_pos}`);
+        prev_response.removeClass(`order-${curr_pos - 1}`);
+        $($(this).siblings('.order')[0]).attr('value', curr_pos - 1);
+        $($(this).siblings('.order')[0]).addClass(`order-${curr_pos - 1}`);
+        $($(this).siblings('.order')[0]).removeClass(`order-${curr_pos}`);
+    });
+    down_btn.off('click');
+    down_btn.on('click', function () {
+        const curr_pos = parseInt($($(this).siblings('.order')[0]).attr('value'));
+        if (curr_pos === $('.poll-response').length - 1) {
+            return;
+        }
+        const next_response = $(`.order-${curr_pos + 1}`);
+        next_response.parent().insertBefore($(this).parent());
+        next_response.attr('value', curr_pos);
+        next_response.addClass(`order-${curr_pos}`);
+        next_response.removeClass(`order-${curr_pos + 1}`);
+        $($(this).siblings('.order')[0]).attr('value', curr_pos + 1);
+        $($(this).siblings('.order')[0]).addClass(`order-${curr_pos + 1}`);
+        $($(this).siblings('.order')[0]).removeClass(`order-${curr_pos}`);
+    });
+    delete_btn.off('click');
+    delete_btn.on('click', function () {
+        // first we check if the response option that is about to be deleted
+        // has responses by users, via an ajax request
+        const my_this = $(this);
+        const my_url = `${base_url}/hasAnswers`;
+        $.ajax({
+            url: my_url,
+            type: 'POST',
+            data: {
+                csrf_token: csrfToken,
+                poll_id: poll_id,
+                option_id: my_this.siblings('.option_id').attr('value'),
+            },
+            success: function (data) {
+                // the result is a boolean -- whether or not this options has responses
+                const parsed_result = JSON.parse(data);
+                if (parsed_result.data) {
+                    // we cannot delete. send an error to the instructor
+                    alert('Students and/or other staff users have already submitted this response as their answer. '
+                    + 'This response cannot be deleted unless they switch their answers to the poll.');
+                }
+                else {
+                    // delete the response
+                    const count = $('.poll-response').length;
+                    const curr_pos = parseInt($(my_this.siblings('.order')[0]).attr('value'));
+                    const wrapper_id = parseInt(my_this.parent().attr('id').match('response_(.*)?_wrapper')[1]);
+                    for (let i = curr_pos + 1; i < count; i++) {
+                        const response = $(`.order-${i}`);
+                        response.attr('value', i - 1);
+                        response.addClass(`order-${i - 1}`);
+                        response.removeClass(`order-${i}`);
+                    }
+                    for (let i = wrapper_id + 1; i < count; i++) {
+                        const response_wrapper = $(`#response_${i}_wrapper`);
+                        response_wrapper.children(`[name="is_correct_${i}"]`).attr('name', `is_correct_${i - 1}`);
+                        response_wrapper.children(`[name="order_${i}"]`).attr('name', `order_${i - 1}`);
+                        response_wrapper.children(`[name="response_${i}"]`).attr('name', `response_${i - 1}`);
+                        response_wrapper.children(`[name="option_id_${i}"]`).attr('name', `option_id_${i - 1}`);
+                        response_wrapper.attr('id', `response_${i - 1}_wrapper`);
+                    }
+                    my_this.parent().remove();
+                }
+            },
+            error: function (e) {
+                alert('Error occurred when requesting via ajax. Please refresh the page and try again.');
+            },
+        });
+    });
+}
+
+/*
+ * End of PollForm.twig functions
+ * Beginning of ViewPoll.twig functions
+ */
 
 function validateCustomResponse() {
     const custom_response = $('.custom-poll-response');
