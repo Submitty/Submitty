@@ -69,7 +69,8 @@ fieldset[disabled] .btn {
 
 a.btn.disabled,
 fieldset[disabled] a.btn {
-    pointer-events: none;
+    cursor: not-allowed;
+    opacity: 0.4;
 }
 
 .btn-default {
