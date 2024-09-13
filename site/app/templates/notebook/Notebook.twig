@@ -309,7 +309,7 @@
         if (user_deadline < curTime ) {
             localStorage.removeItem(notebookPopupSubmitKey());
         }
-        
+
         const time_taken = Math.floor((curTime - loadTime)/1000);
         const minutes_taken = Math.floor(time_taken / 60);
         if (minutes_taken >= interval ) {
@@ -425,7 +425,7 @@
             <h2 class="label" id="label{{index}}" {% if viewing_inactive_version %} style="color: #666666;" {% endif %}>
                 Drag your {{ label }} file(s) here or click to open file browser
             </h2>
-            <input type="file" name="files" id="input-file{{index}}" 
+            <input type="file" name="files" id="input-file{{index}}"
                    class="hide" onchange="addFilesFromInput({{index}})"
                    multiple aria-label="Select Files to upload"
                     {% if viewing_inactive_version %}
