@@ -96,6 +96,7 @@ class ConfigTester extends \PHPUnit\Framework\TestCase {
             'system_message' => "Some system message",
             "duck_special_effects" => false,
             "default_locale" => "default",
+            "is_ci" => false
         ];
         $config = array_replace($config, $extra);
         FileUtils::writeJsonFile(FileUtils::joinPaths($this->config_path, "submitty.json"), $config);
@@ -348,6 +349,7 @@ class ConfigTester extends \PHPUnit\Framework\TestCase {
             'date_time_format' => ['modified' => false],
             "default_locale" => "default",
             "locale" => ['modified' => false],
+            "is_ci" => false
         ];
         $actual = $config->toArray();
 
