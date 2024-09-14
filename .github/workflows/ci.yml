@@ -692,9 +692,6 @@ jobs:
       - name: Switch to database auth
         run: sudo sed -ie "s/Pam/Database/g" ${SUBMITTY_INSTALL_DIR}/config/authentication.json
 
-      - name: Switch to CI mode
-        run: sudo sed -ie "s/is_ci:\sfalse/is_ci:\strue/g" ${SUBMITTY_INSTALL_DIR}/config/submitty.json
-
       - name: Run cypress e2e login tests with database auth
         uses: cypress-io/github-action@v6
         with:
@@ -702,6 +699,9 @@ jobs:
           spec: cypress/e2e/Cypress-System/login.spec.js
           working-directory: ${{env.SUBMITTY_REPOSITORY}}/site
           browser: chrome
+      - name: Switch to CI mode
+        run: |
+          sudo sed -ie '/is_ci/c\ \"is_ci\" : true",' /usr/local/submitty/config/submitty.json
 
       - name: Run self-account-creation tests.
         uses: cypress-io/github-action@v6
