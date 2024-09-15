@@ -32,7 +32,7 @@ function cleanup_dead_networks() {
     fi
 
     # check for docker networks matching the worker name
-    networks=$(docker network ls | grep ${name} | awk '{print $2}')
+    networks=$(docker network ls | grep "${name}" | awk '{print $2}')
     if test -z "${networks}"; then
         #echo "${date_time} | ${name} has no zombie docker network" >> "${logfile_name}"
         if [ $# -eq 1 ]; then
@@ -55,7 +55,7 @@ function cleanup_dead_networks() {
     for network in ${networks}; do
         date_time=$(date "+%Y%m%d %H:%M:%S")
         echo "${date_time} | removing zombie docker network ${network}" >> "${logfile_name}"
-        docker network rm ${network}
+        docker network rm "${network}"
         if [ $# -eq 1 ]; then
             echo "killed zombie ${network}"
         fi
@@ -71,8 +71,8 @@ if [ $# -eq 0 ]; then
     date_time=$(date "+%Y%m%d %H:%M:%S")
     echo "${date_time} | docker_cleanup.sh started" >> "${logfile_name}"
     for dir in /var/local/submitty/autograding_tmp/*; do
-        name=$(basename ${dir})
-        cleanup_dead_networks ${name}
+        name=$(basename "${dir}")
+        cleanup_dead_networks "${name}"
     done
     date_time=$(date "+%Y%m%d %H:%M:%S")
     echo "${date_time} | docker_cleanup.sh finished" >> "${logfile_name}"
@@ -80,7 +80,7 @@ elif [ $# -eq 1 ]; then
     # only cleanup one worker
     date_time=$(date "+%Y%m%d %H:%M:%S")
     echo "${date_time} | docker_cleanup.sh $1 started" >> "${logfile_name}"
-    cleanup_dead_networks $1  
+    cleanup_dead_networks "${1}" 
     date_time=$(date "+%Y%m%d %H:%M:%S")
     echo "${date_time} | docker_cleanup.sh $1 finished" >> "${logfile_name}"
 else
