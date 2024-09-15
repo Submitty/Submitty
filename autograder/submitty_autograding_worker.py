@@ -73,6 +73,10 @@ def worker_process(
 
     while True:
         if os.path.exists(todo_queue_file):
+
+            # force cleanup docker networks at the start of autograding
+            docker_cleanup_output = os.popen("sudo /usr/local/submitty/sbin/docker_cleanup.sh "+which_untrusted).read()
+
             try:
                 # Attempt to grade the submission. Get back the location of the results.
                 results_zip_tmp = grade_item.grade_from_zip(
