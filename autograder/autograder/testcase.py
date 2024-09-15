@@ -109,7 +109,6 @@ class Testcase():
         docker_cleanup_output = os.popen("sudo /usr/local/submitty/sbin/docker_cleanup.sh "+self.untrusted_user).read()
         self.secure_environment.log_container("docker_cleanup: "+docker_cleanup_output.strip())
 
-
     def _run_execution(self):
         """ Execute this testcase as an execution testcase. """
 
