@@ -963,6 +963,13 @@ fi
 
 #############################################################################
 
+# Restart docker if not in CI
+if [[ "$CI" -ne "0" ]] ; then
+    echo -n "restarting docker..."
+    systemctl restart docker
+    echo "done"
+fi
+
 # Restart php-fpm and apache
 if [ "${WORKER}" == 0 ]; then
     if [[ "$#" == 0 || ("$#" == 1 && "$1" != "skip_web_restart") || ("$#" -ge 2  && ("$1" != "skip_web_restart" && "$2" != "skip_web_restart")) ]]; then
