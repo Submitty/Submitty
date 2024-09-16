@@ -258,6 +258,11 @@ void ConfirmCapabilityExists(nlohmann::json &whole_config) {
   if (wfs.is_open()) {
     wfs >> workers_json;
   }
+  else {
+    std::cout << "ERROR: autograding_workers.json does not exist!" << std::endl;
+    std::cerr << "ERROR: autograding_workers.json does not exist!" << std::endl;
+    exit(1);
+  }
 
   // Get the required capability and list of capabilities
   std::string required_capability = whole_config["required_capabilities"];
@@ -290,6 +295,12 @@ void ConfirmCapabilityHasImages(nlohmann::json &testcases, nlohmann::json &whole
   if (cfs.is_open()) {
     cfs >> containers_json;
   }
+  else {
+    std::cout << "ERROR: autograding_containers.json does not exist!" << std::endl;
+    std::cerr << "ERROR: autograding_containers.json does not exist!" << std::endl;
+    exit(1);
+  }
+
 
   // Get all images required
   std::vector<std::string> images;
