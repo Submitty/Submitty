@@ -41,7 +41,15 @@ class QueueItem extends AbstractModel {
         }
         $this->start_time = filectime($json_file);
         $this->elapsed_time = $epoch_time - $this->start_time;
-        $this->queue_obj = FileUtils::readJsonFile($json_file);
+
+        $json = FileUtils::readJsonFile($json_file);
+        // Queue or grading file does not exist or is not parseable
+        if ($json === false) {
+            $this->queue_obj = [];
+            return;
+        }
+
+        $this->queue_obj = $json;
         $this->regrade = array_key_exists("regrade", $this->queue_obj);
     }
 }
