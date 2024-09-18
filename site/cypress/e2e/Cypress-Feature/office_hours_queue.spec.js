@@ -44,11 +44,6 @@ const deleteQueue = () => {
     cy.get('[data-testid="delete-queue-btn"]').last().click();
 };
 
-const disableQueue = () => {
-    cy.visit(['sample', 'config']);
-    cy.get('[data-testid="queue-enabled"]').should('be.checked');
-    cy.get('[data-testid="queue-enabled"]').uncheck();
-};
 const openNewQueue = (queueName, queueCode = '') => {
     cy.get('#nav-sidebar-queue').click();
     cy.get('[data-testid="toggle-new-queue"]').click();
@@ -277,9 +272,6 @@ describe('test office hours queue', () => {
         checkRows(wisozaRows);
 
         cy.get('#times-helped-cell').should('contain', '0 times helped.');
-
-        // Disable and delete all queue
-        disableQueue();
     });
     it('Enabling push and sound notifications as Instructor', () => {
         // Ensure notifications are allowed
@@ -310,8 +302,6 @@ describe('test office hours queue', () => {
         cy.get('@sound-switch').click();
         cy.get('@push-enabled').should('equal', false);
         cy.get('@audio-enabled').should('equal', false);
-
-        disableQueue();
     });
     it('Cleaning up', () => {
         cy.login('instructor');
