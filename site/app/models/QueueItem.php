@@ -44,12 +44,10 @@ class QueueItem extends AbstractModel {
 
         $json = FileUtils::readJsonFile($json_file);
         // Queue or grading file does not exist or is not parseable
-        if ($json === false) {
-            $this->queue_obj = [];
-            return;
+        if ($json != false) {
+            $this->queue_obj = $json;
+            $this->regrade = array_key_exists("regrade", $this->queue_obj);
         }
 
-        $this->queue_obj = $json;
-        $this->regrade = array_key_exists("regrade", $this->queue_obj);
     }
 }
