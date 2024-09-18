@@ -48,6 +48,5 @@ class QueueItem extends AbstractModel {
             $this->queue_obj = $json;
             $this->regrade = array_key_exists("regrade", $this->queue_obj);
         }
-
     }
 }
