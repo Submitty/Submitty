@@ -172,7 +172,7 @@ class Config extends AbstractModel {
      * @var bool
      * @prop
      */
-    protected $is_ci = false;
+    protected $ci = false;
     /** @prop
      * @var string */
     protected $database_driver = "pgsql";
