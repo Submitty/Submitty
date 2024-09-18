@@ -523,7 +523,8 @@ class GlobalController extends AbstractController {
         if (array_key_exists($year, $LunarNewYearDates)) {
             $dateString = $LunarNewYearDates[$year] . '/' . $year;
             $LunarNewYear = \DateTime::createFromFormat('m/d/Y', $dateString);
-        } else {
+        }
+        else {
             // If the year is not in the table, return a default date or handle the error
             throw new \Exception('Lunar New Year date for year ' . $year . ' is not available.');
         }
@@ -563,7 +564,7 @@ class GlobalController extends AbstractController {
         $second = (int) $now->format('s');
 
         // Check if the current date falls within Lunar New Year (+/- 3 days)
-        $LunarNewYearStart = $this->calculateLunarNewYearDate($year);
+        $LunarNewYearStart = $this->calculateLunarNewYearDate($yearint);
 
         // Create a period from 3 days before to 3 days after the Lunar New Year
         $LunarNewYearPeriodStart = clone $LunarNewYearStart;
@@ -663,7 +664,8 @@ class GlobalController extends AbstractController {
                         'moorthy_duck/lunar_newyear_duck_02.svg',
                         'moorthy_duck/black-history-duck.svg'
                     ];
-                } else {
+                }
+                else {
                     $februaryImages = ['moorthy_duck/black-history-duck.svg'];
                 }
 
@@ -684,7 +686,8 @@ class GlobalController extends AbstractController {
                         'moorthy_duck/lunar_newyear_duck_02.svg',
                         'moorthy_duck/01-january.svg'
                     ];
-                } else {
+                }
+                else {
                     //January (Snowflakes)
                     $januaryImages = ['moorthy_duck/01-january.svg'];
                 }
