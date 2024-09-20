@@ -2572,7 +2572,7 @@ class Gradeable extends AbstractModel {
         if ($this->depends_on !== null && $this->depends_on_points !== null) {
             $dependent_gradeable = $this->core->getQueries()->getGradeableConfig($this->depends_on);
             $dependent_gradeable_points = strval($this->depends_on_points);
-            return ($dependent_gradeable->getTitle() . " first. " . $dependent_gradeable_points . " point(s) required.");
+            return ($dependent_gradeable->getTitle() . " first with a score of " . $dependent_gradeable_points . " point(s)");
         }
         else {
             return '';

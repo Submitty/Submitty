@@ -101,12 +101,12 @@
             {% if button.isDisabled() %}
                 {% if core.getUser().accessFullGrading() %}
                     {% set str1 = 'Students are expected to satisfactorily complete ' %}
-                    {% set str2 = ' before they may access this gradeable.  Click OK to bypass this requirement.'%}
+                    {% set str2 = ' before they may access this gradeable. Click OK to bypass this requirement.'%}
                     onclick="confirmBypass('{{ str1 ~ button.getPrerequisite() ~ str2 }}', '{{ button.getHref() }}' );"
-                    title='Please complete {{ button.getPrerequisite()}}'
+                    title='Please complete {{ button.getPrerequisite()}}.'
                 {% else %}
-                    onclick="alert('Please complete {{ button.getPrerequisite()}}' )"
-                    title='Please complete {{ button.getPrerequisite()}}' 
+                    onclick="alert('Please complete {{ button.getPrerequisite()}}.' )"
+                    title='Please complete {{ button.getPrerequisite()}}.' 
                 {% endif %}
             {% else %}
                 {# assigns the href unless button has onclick affect #}
