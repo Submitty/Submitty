@@ -285,6 +285,10 @@ describe('Test cases revolving around polls functionality', () => {
 
         cy.reload(); // Will not need this after websockets.
         cy.contains('Poll Cypress Test').siblings(':nth-child(6)').children().should('not.be.checked');
+        cy.contains('Poll Cypress Test').siblings(':nth-child(8)').click();
+        cy.get('[data-testid="timer"]').contains('Poll Ended');
+        cy.go('back');
+
         // Removing duration to continue testing
         // Editing the poll to remove timer
         cy.contains('Poll Cypress Test').siblings(':nth-child(1)').children().click();
@@ -422,6 +426,9 @@ describe('Test cases revolving around polls functionality', () => {
         cy.reload();
         // Validate that the poll is closed.
         cy.contains('Poll Cypress Test').siblings(':nth-child(6)').children().should('not.be.checked');
+        cy.contains('Poll Cypress Test').siblings(':nth-child(8)').click();
+        cy.get('[data-testid="timer"]').contains('Poll Ended');
+        cy.go('back');
 
         // log into student, now we can see the histogram on closed poll
         cy.logout();

@@ -8075,8 +8075,9 @@ AND gc_id IN (
     public function getValidatedCode(string $queue_code, string $token = null) {
         //first check if the queue has an access code
         $this->course_db->query("SELECT * FROM queue_settings WHERE UPPER(TRIM(code)) = UPPER(TRIM(?)) AND open = true", [$queue_code]);
-        if ($this->course_db->getRowCount() > 0 && $this->course_db->row()['token'] == null) {
-            return $this->course_db->row()['code'];
+        $row = $this->course_db->row();
+        if ($this->course_db->getRowCount() > 0 && $row['token'] == null) {
+            return $row['code'];
         }
         elseif ($token === null) {
             return false;
