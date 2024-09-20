@@ -1067,11 +1067,10 @@ SQL;
         }
     }
 
-    public function getThreadsumDucks($thread_id) {
+    public function getThreadsumDucks(int $thread_id): int {
         // Fetch all posts in the thread
         $this->course_db->query("SELECT id FROM posts WHERE thread_id = ? AND deleted = false", [$thread_id]);
         $posts = $this->course_db->rows();
-        # can thread has 0 post? is thread itself a post in posts table?
         $totalDucks = 0;
         foreach ($posts as $post) {
             $post_id = $post['id'];
@@ -1081,7 +1080,6 @@ SQL;
 
             $totalDucks += $likesCount;
         }
-
         return $totalDucks;
     }
 
