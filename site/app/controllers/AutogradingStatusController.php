@@ -19,7 +19,7 @@ class AutogradingStatusController extends AbstractController {
      */
     #[Route("/autograding_status", methods: ["GET"])]
     public function getGradingDonePage(): ResponseInterface {
-        if (empty($this->core->getQueries()->getInstructorLevelAccessCourse($this->core->getUser()->getId())) && $this->core->getUser()->getAccessLevel() !== User::LEVEL_SUPERUSER) {
+        if (empty($this->core->getQueries()->getInstructorLevelAccessCourse($this->core->getUser()->getId())) && !$this->core->getUser()->isSuperUser()) {
             return new MultiResponse(
                 JsonResponse::getFailResponse("You don't have access to this endpoint."),
                 new WebResponse(ErrorView::class, "errorPage", "You don't have access to this page.")
@@ -39,7 +39,7 @@ class AutogradingStatusController extends AbstractController {
      */
     #[Route("/autograding_status/get_update", methods: ["GET"])]
     public function getProgress(): JsonResponse {
-        if (empty($this->core->getQueries()->getInstructorLevelAccessCourse($this->core->getUser()->getId())) && $this->core->getUser()->getAccessLevel() !== User::LEVEL_SUPERUSER) {
+        if (empty($this->core->getQueries()->getInstructorLevelAccessCourse($this->core->getUser()->getId())) && !$this->core->getUser()->isSuperUser()) {
             return JsonResponse::getFailResponse("You do not have access to this endpoint.");
         }
         $info = $this->getAutogradingInfo();
@@ -52,7 +52,7 @@ class AutogradingStatusController extends AbstractController {
      */
     #[Route("/autograding_status/get_stack", methods: ["GET"])]
     public function getErrorStackTrace(): JsonResponse {
-        if (empty($this->core->getQueries()->getInstructorLevelAccessCourse($this->core->getUser()->getId())) && $this->core->getUser()->getAccessLevel() !== User::LEVEL_SUPERUSER) {
+        if (empty($this->core->getQueries()->getInstructorLevelAccessCourse($this->core->getUser()->getId())) && !$this->core->getUser()->isSuperUser()) {
             return JsonResponse::getFailResponse("You do not have access to this endpoint.");
         }
         $stack_trace_path = FileUtils::joinPaths($this->core->getConfig()->getSubmittyPath(), "logs", "autograding_stack_traces");
