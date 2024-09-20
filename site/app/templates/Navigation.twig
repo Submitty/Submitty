@@ -97,8 +97,9 @@
     {% if button is null %}
         <div class="button-placeholder"></div>
     {% else %}
-        <a class="{{ button.getClass() }}{{ (button.getTitle() == 'Edit' or button.getTitle() == 'Delete') and has_build_error ? 'edit-build-error' : '' }} {% if button.hasOnclick() %} key_to_click {% endif %}{% if button.isDisabled() %} disabled{% endif %}" tabindex="0" style="pointer-events: auto;"
+        <a class="{{ button.getClass() }}{{ (button.getTitle() == 'Edit' or button.getTitle() == 'Delete') and has_build_error ? 'edit-build-error' : '' }} {% if button.hasOnclick() %} key_to_click {% endif %}{% if button.isDisabled() %} disabled{% endif %}" tabindex="0"
             {% if button.isDisabled() %}
+                style="pointer-events: auto;"
                 onclick="alert('Please complete {{ button.getPrerequisite()}}.' )"
                 title='Please complete {{ button.getPrerequisite()}}.' 
             {% else %}
