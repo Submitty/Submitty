@@ -1078,10 +1078,10 @@ SQL;
             // Fetch the number of likes for this post
             $this->course_db->query("SELECT COUNT(*) AS likes_count FROM forum_upducks WHERE post_id = ?", [$post_id]);
             $likesCount = intval($this->course_db->row()['likes_count']);
-            
+
             $totalDucks += $likesCount;
         }
-        
+
         return $totalDucks;
     }
 
