@@ -2413,7 +2413,22 @@ End of slider switch
     width: 100%;
 }
 
-.hotkeys-title-buttons{
+.ta-grading-setting-list tr {
+    border: 1px solid var(--standard-light-gray);
+    border-left: none;
+    border-right: none;
+}
+
+.ta-grading-setting-list td{
+    padding: 4px;
+}
+
+.ta-grading-setting-list td.button-cell {
+    display: flex;
+    justify-content: center;
+}
+
+.hotkeys-title-buttons {
     display: flex;
     align-items: center;
     justify-content: space-between;

@@ -812,11 +812,11 @@ function setupSimpleGrading(action) {
     });
 
     // register empty function locked event handlers for "enter" so they show up in the hotkeys menu
-    registerKeyHandler({ name: 'Search', code: 'Enter'}, () => {});
-    registerKeyHandler({ name: 'Move Right', code: 'ArrowRight'}, () => {});
-    registerKeyHandler({ name: 'Move Left', code: 'ArrowLeft'}, () => {});
-    registerKeyHandler({ name: 'Move Up', code: 'ArrowUp'}, () => {});
-    registerKeyHandler({ name: 'Move Down', code: 'ArrowDown'}, () => {});
+    registerKeyHandler({ name: 'Search', code: 'Enter' }, () => {});
+    registerKeyHandler({ name: 'Move Right', code: 'ArrowRight' }, () => {});
+    registerKeyHandler({ name: 'Move Left', code: 'ArrowLeft' }, () => {});
+    registerKeyHandler({ name: 'Move Up', code: 'ArrowUp' }, () => {});
+    registerKeyHandler({ name: 'Move Down', code: 'ArrowDown' }, () => {});
 
     // check if a cell is focused, then update value
     function keySetCurrentCell(event, options) {
