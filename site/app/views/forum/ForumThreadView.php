@@ -797,13 +797,13 @@ class ForumThreadView extends AbstractView {
         $viewed_threads = $this->core->getQueries()->getViewedThreads($current_user, $thread_ids);
         $authors = $this->core->getQueries()->getUsersById($author_user_ids);
         $authors_info = $this->core->getQueries()->getDisplayUserInfoFromUserIds($author_user_ids);
-
         foreach ($threads as $thread) {
             // Checks if thread ID is empty. If so, skip this threads.
             if (empty($thread["id"])) {
                 continue;
             }
             $first_post = $first_posts[$thread['id']] ?? null;
+            $sum_ducks = $this->core->getQueries()->getThreadsumDucks($thread['id']);
             if (is_null($first_post)) {
                 // Thread without any posts(eg. Merged Thread)
                 $first_post = ['content' => "", 'render_markdown' => 0];
@@ -958,7 +958,8 @@ class ForumThreadView extends AbstractView {
                     "is_anon" => $first_post["anonymous"],
                     "render_markdown" => $first_post["render_markdown"],
                     "author_info" => $author_info,
-                    "deleted" => $first_post['deleted']
+                    "deleted" => $first_post['deleted'],
+                    "sum_ducks" => $sum_ducks
                 ]);
             }
 

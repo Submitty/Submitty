@@ -1067,6 +1067,24 @@ SQL;
         }
     }
 
+    public function getThreadsumDucks($thread_id) {
+        // Fetch all posts in the thread
+        $this->course_db->query("SELECT id FROM posts WHERE thread_id = ? AND deleted = false", [$thread_id]);
+        $posts = $this->course_db->rows();
+        # can thread has 0 post? is thread itself a post in posts table?
+        $totalDucks = 0;
+        foreach ($posts as $post) {
+            $post_id = $post['id'];
+            // Fetch the number of likes for this post
+            $this->course_db->query("SELECT COUNT(*) AS likes_count FROM forum_upducks WHERE post_id = ?", [$post_id]);
+            $likesCount = intval($this->course_db->row()['likes_count']);
+            
+            $totalDucks += $likesCount;
+        }
+        
+        return $totalDucks;
+    }
+
     /**
      * @param int[] $post_ids
      * @return int[] threads that have been merged

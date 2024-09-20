@@ -53,6 +53,13 @@
                             <strong class="post_user_pronouns">({{thread.author_info.pronouns}})</strong>
                         {% endif %}
                     </span>
+                    <span>
+                        <button data-testid="upduck-button" class="upduck-button text-decoration-none" tabindex="0" title="Total upduck">
+                            <img id="likeIcon_" src="{{'/img/on-duck-button.svg'}}" width="30" height="30">
+                        </button>
+                        <span data-testid="total-like-count" id="total_likeCounter" class="like-counter">{{thread.sum_ducks}}</span>
+                    </span>
+
                 </div>
             {% endif %}
         </div>
