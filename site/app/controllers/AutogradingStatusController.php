@@ -7,7 +7,6 @@ use app\libraries\response\ResponseInterface;
 use app\libraries\response\WebResponse;
 use app\libraries\response\JsonResponse;
 use app\libraries\GradingQueue;
-use app\models\User;
 use app\views\AutogradingStatusView;
 use app\views\ErrorView;
 use app\libraries\FileUtils;
