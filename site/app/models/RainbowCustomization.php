@@ -156,7 +156,7 @@ class RainbowCustomization extends AbstractModel {
                         $c_gradeable['override'] = true;
                         $c_gradeable['override_max'] = $json_bucket->ids[$j_index]->max;
                     }
-                    if (property_exists($json_bucket->ids[$j_index], 'percent')) {
+                    if (isset($json_bucket->ids[$j_index]) && property_exists($json_bucket->ids[$j_index], 'percent')) {
                         $c_gradeable['override_percent'] = true;
                         $c_gradeable['percent'] = ($json_bucket->ids[$j_index]->percent) * 100;
                     }
