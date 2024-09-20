@@ -1,5 +1,6 @@
 #!/usr/bin/env bash
 
+
 ################################################################################################
 ### SITE INSTALLER
 #
@@ -14,30 +15,30 @@
 #
 ################################################################################################
 
-set_permissions() {
+set_permissions () {
     local fullpath=$1
     filename=$(basename -- "$fullpath")
     extension="${filename##*.}"
     # filename="${filename%.*}"
     case "${extension}" in
-    css | otf | jpg | png | mp3 | ico | txt | twig | map)
-        chmod 444 ${fullpath}
-        ;;
-    bcmap | ttf | eot | svg | woff | woff2 | js | mjs | cgi)
-        chmod 445 ${fullpath}
-        ;;
-    html)
-        if [ ${fullpath} != ${SUBMITTY_INSTALL_DIR}/site/public/index.html ]; then
+        css|otf|jpg|png|mp3|ico|txt|twig|map)
+            chmod 444 ${fullpath}
+            ;;
+        bcmap|ttf|eot|svg|woff|woff2|js|mjs|cgi)
+            chmod 445 ${fullpath}
+            ;;
+        html)
+            if [ ${fullpath} != ${SUBMITTY_INSTALL_DIR}/site/public/index.html ]; then
+                chmod 440 ${fullpath}
+            fi
+            ;;
+        *)
             chmod 440 ${fullpath}
-        fi
-        ;;
-    *)
-        chmod 440 ${fullpath}
-        ;;
+            ;;
     esac
 }
 
-set_mjs_permission() {
+set_mjs_permission () {
     for file in $1/*; do
         if [ -d "$file" ]; then
             chmod 551 $file
@@ -50,11 +51,11 @@ set_mjs_permission() {
 
 echo -e "Copy the submission website"
 
-THIS_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" >/dev/null && pwd)"
+THIS_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null && pwd )"
 source ${THIS_DIR}/../bin/versions.sh
 
 # This is run under /usr/local/submitty/GIT_CHECKOUT/Submitty/.setup/bin/
-CONF_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"/../../../../config
+CONF_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"/../../../../config
 SUBMITTY_REPOSITORY=$(jq -r '.submitty_repository' ${CONF_DIR}/submitty.json)
 SUBMITTY_INSTALL_DIR=$(jq -r '.submitty_install_dir' ${CONF_DIR}/submitty.json)
 SUBMITTY_DATA_DIR=$(jq -r '.submitty_data_dir' ${SUBMITTY_INSTALL_DIR}/config/submitty.json)
@@ -63,7 +64,8 @@ PHP_GROUP=${PHP_USER}
 CGI_USER=$(jq -r '.cgi_user' ${CONF_DIR}/submitty_users.json)
 CGI_GROUP=${CGI_USER}
 
-for arg in "$@"; do
+for arg in "$@"
+do
     if [ "$arg" == "browscap" ]; then
         BROWSCAP=true
     fi
@@ -71,17 +73,17 @@ done
 
 mkdir -p ${SUBMITTY_INSTALL_DIR}/site/public
 
-pushd /tmp >/dev/null
+pushd /tmp > /dev/null
 # Make a temporary directory that root will own so there is no risk of
 # index.html existing before hand and causing issues
 TMP_DIR=$(mktemp -d)
 
-echo "Submitty is being updated. Please try again in 2 minutes." >${TMP_DIR}/index.html
+echo "Submitty is being updated. Please try again in 2 minutes." > ${TMP_DIR}/index.html
 chmod 644 ${TMP_DIR}/index.html
 chown ${CGI_USER}:${CGI_GROUP} ${TMP_DIR}/index.html
 mv ${TMP_DIR}/index.html ${SUBMITTY_INSTALL_DIR}/site/public
 
-popd >/dev/null
+popd > /dev/null
 rm -rf ${TMP_DIR}
 
 if [ ! -d "${SUBMITTY_DATA_DIR}/run/websocket" ]; then
@@ -119,7 +121,7 @@ if [ ! -d ${SUBMITTY_INSTALL_DIR}/site/node_modules ]; then
     result=$(echo -e "${result}\n>f+++++++++ site/package.json")
 fi
 
-readarray -t result_array <<<"${result}"
+readarray -t result_array <<< "${result}"
 
 # clear old twig cache
 if [ -d "${SUBMITTY_INSTALL_DIR}/site/cache/twig" ]; then
@@ -212,9 +214,6 @@ if echo "${result}" | grep -E -q "composer\.(json|lock)"; then
     chown -R ${PHP_USER}:${PHP_USER} ${SUBMITTY_INSTALL_DIR}/site/vendor
     find ${SUBMITTY_INSTALL_DIR}/site/vendor -type d -exec chmod 551 {} \;
     find ${SUBMITTY_INSTALL_DIR}/site/vendor -type f -exec chmod 440 {} \;
-else
-    su - ${PHP_USER} -c "composer dump-autoload -d \"${SUBMITTY_INSTALL_DIR}/site\" --optimize --no-dev"
-    chown -R ${PHP_USER}:${PHP_USER} ${SUBMITTY_INSTALL_DIR}/site/vendor/composer
 fi
 
 # create doctrine proxy classes
