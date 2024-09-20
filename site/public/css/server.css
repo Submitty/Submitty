@@ -2413,6 +2413,7 @@ End of slider switch
     width: 100%;
 }
 
+/* csslint-disable no-descending-specificity */
 .ta-grading-setting-list tr {
     border: 1px solid var(--standard-light-gray);
     border-left: none;
@@ -2422,6 +2423,7 @@ End of slider switch
 .ta-grading-setting-list td{
     padding: 4px;
 }
+/* csslint-enable no-descending-specificity */
 
 .ta-grading-setting-list td.button-cell {
     display: flex;
@@ -2439,8 +2441,4 @@ End of slider switch
 .hotkeys-buttons {
     display: flex;
     gap: 10px;
-}
-
-.hotkeys-title-buttons h2 {
-    margin: 0;
 }
