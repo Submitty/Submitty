@@ -1226,6 +1226,7 @@ body.no-scroll {
 .popup-form .form-body {
     flex-grow: 1;
     overflow-y: auto;
+    display: contents;
 }
 
 .popup-form .form-buttons {
@@ -2406,4 +2407,25 @@ End of slider switch
 
 .notebook-cell {
     padding: 0 0.5em;
+}
+
+.ta-grading-setting-list {
+    width: 100%;
+}
+
+.hotkeys-title-buttons{
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-top: 10px;
+    margin-bottom: 10px;
+}
+
+.hotkeys-buttons {
+    display: flex;
+    gap: 10px;
+}
+
+.hotkeys-title-buttons h2 {
+    margin: 0;
 }
