@@ -337,10 +337,13 @@ class HomeworkView extends AbstractView {
             ]];
         }
 
+        $late_days_url = $this->core->buildCourseUrl(['late_table']);
+
         return $this->core->getOutput()->renderTwigTemplate('submission/homework/LateDayMessage.twig', [
             'messages' => $messages,
             'error' => $error,
-            'daylight' => $daylight_message_required
+            'daylight' => $daylight_message_required,
+            'late_days_url' => $late_days_url
         ]);
     }
 
