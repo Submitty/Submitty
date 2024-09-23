@@ -8,20 +8,51 @@
 [![Submitty CI](https://github.com/Submitty/Submitty/actions/workflows/submitty_ci.yml/badge.svg?event=push)](https://github.com/Submitty/Submitty/actions/workflows/submitty_ci.yml)
 [![Vagrant Up](https://github.com/Submitty/Submitty/actions/workflows/vagrant_up.yaml/badge.svg)](https://github.com/Submitty/Submitty/actions/workflows/vagrant_up.yaml)
 
-# Usage
+# Table of Contents
+- [Overview](#overview)
+  - [Key Features](#key-features)
+- [Getting Started](#getting-started)
+  - [Installation](#installation)
+  - [Contributing](#contributing)
+- [Contact Us](#contact-us)
+- [Licensing](#licensing)
 
-System instructions located at [https://submitty.org/](https://submitty.org/)
-
-# Background
-
+# Overview
 [Submitty](https://submitty.org) is an open source course management, assignment submission, exam and grading system
 from the [Rensselaer Center for Open Source Software (RCOS)](https://rcos.io/),
 [Department of Computer Science](https://science.rpi.edu/computer-science) at
 [Rensselaer Polytechnic Institute](https://www.rpi.edu/).
 
+## Key Features:
+**Assignment Submission**: easy submissions and tracking of assignments
+**Exam Management**: has tools for creating, administrating and grading exams
+**Course Management**: features which allow organizing course materials, grades and communication between students and instructors
+**User Management**: role based access for students, instructors, and TAs.
+
+
 The Submitty project is hosted on [GitHub](https://github.com/Submitty).
 
-Our key features are described here: [https://submitty.org/index/features](https://submitty.org/index/features)
+
+
+# Getting Started
+## Installation
+
+
+To install Submitty, follow the following steps:
+1. Install Ubuntu 22.04 server edition
+2. Run bootstrap script
+bash -c "$(curl -s https://raw.githubusercontent.com/Submitty/Submitty/master/.setup/bootstrap.sh)"
+OR
+clone the repository and run the installer
+3. Run installations specific to your school
+4. Edit the PHP settings
+5. Setup Apache
+6. Configure NGINX
+7. Test apache configuration with:
+apache2ctl -t
+
+
+Detailed system instructions located at [https://submitty.org/](https://submitty.org/)
 
 
 ## Contributing
