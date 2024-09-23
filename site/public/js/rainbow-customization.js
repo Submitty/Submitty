@@ -124,6 +124,47 @@ function GetPotentialAlternates(el, gradeables) {
     });
 }
 
+// Links the points and percentages of an alternate gradeable to the selected primary gradeable
+function LinkAlternateToPrimary(el) {
+    const select = $(el);
+    const alternateID = select.data('gradeable').id;
+    const primaryID = select.data('gradeable').alternate; // 'alternate' in 'this' gradeable refers to the primary gradeable
+
+    // Replace alternate values with the primary values, then make alternate values immutable
+    const primaryPoints = $($(`div[id^="gradeable-pts-div-${primaryID}"]`).children()[0]);
+    const primaryPercents = $($(`div[id^="gradeable-percents-div-test-${primaryID}"]`).children()[0]);
+    const alternatePoints = $($(`div[id^="gradeable-pts-div-${alternateID}"]`).children()[0]);
+    const alternatePercents = $($(`div[id^="gradeable-percents-div-test-${alternateID}"]`).children()[0]);
+    alternatePoints.val(primaryPoints.val());
+    alternatePercents.val(primaryPercents.val());
+    alternatePoints.attr('readonly', 'readonly');
+    alternatePercents.attr('readonly', 'readonly');
+}
+
+// Updates the values of all detected alternates of a given gradeables points or percents input
+function UpdateAlternates(el, input, primaryID) {
+    const alternateDropdowns = $('select[id^="alternate-dropdown-"]');
+    alternateDropdowns.each((index, alternateDropdown) => {
+        const gradeableID = alternateDropdown.id.match(/^alternate-dropdown-(.+)$/)[1];
+        const gradeableAlternateChecked = $(`#alternate-checkbox-${gradeableID}`).is(':checked');
+        if (gradeableAlternateChecked) {
+            const gradeablePrimaryID = $(alternateDropdown).data('gradeable').alternate;
+            // If value matches, set the new point/percent value in the alternate
+            if (gradeablePrimaryID === primaryID) {
+                const val = el.value;
+                if (input === 'points') {
+                    const alternatePoints = $($(`div[id^="gradeable-pts-div-${gradeableID}"]`).children()[0]);
+                    alternatePoints.val(val);
+                }
+                else if (input === 'percent') {
+                    const alternatePercents = $($(`div[id^="gradeable-percents-div-test-${gradeableID}"]`).children()[0]);
+                    alternatePercents.val(val);
+                }
+            }
+        }
+    });
+}
+
 // Load alternate gradeable when page is loaded
 function LoadAlternate(el, gradeables, dropdownGradeable) {
     // If alternate is null, no alternate had been selected
@@ -1248,9 +1289,22 @@ $(document).ready(() => {
         const gradeableAlternate = $(`#alternate-checkbox-${gradeableID}`);
         const gradeableAlternateChecked = gradeableAlternate.is(':checked');
         $(alternateDropdown).toggle(gradeableAlternateChecked);
+        if (gradeableAlternateChecked) { // Ensure all alternates are linked to primaries on page load
+            LinkAlternateToPrimary(alternateDropdown);
+        }
         gradeableAlternate.change((event) => {
             const gradeableAlternateChecked = gradeableAlternate.is(':checked');
             $(alternateDropdown).toggle(gradeableAlternateChecked);
+            // TODO: value is never ' -- select a gradeable -- '
+            if (gradeableAlternateChecked && $(alternateDropdown).data('gradeable').alternate !== ' -- select a gradeable -- ') { // Ensure all alternates are linked to primaries on check - edge case
+                LinkAlternateToPrimary(alternateDropdown);
+            }
+            else if (!gradeableAlternateChecked) { // Unlink alternate from primary when checkbox is unchecked
+                const alternatePoints = $($(`div[id^="gradeable-pts-div-${gradeableID}"]`).children()[0]);
+                const alternatePercents = $($(`div[id^="gradeable-percents-div-test-${gradeableID}"]`).children()[0]);
+                alternatePoints.removeAttr('readonly');
+                alternatePercents.removeAttr('readonly');
+            }
         });
     });
 });

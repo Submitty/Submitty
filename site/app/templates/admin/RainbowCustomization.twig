@@ -238,7 +238,8 @@
                                                            value="{{ gradeable["override"] ? gradeable["override_max"] : gradeable["max_score"] }}"
                                                            id="maxscore-{{ gradeable["id"] }}"
                                                            data-grade-release-date="{{ gradeable["grade_release_date"] }}"
-                                                           onblur="ClampPoints(this);"
+                                                           onblur="ClampPoints(this);
+                                                                UpdateAlternates(this, 'points', '{{ gradeable["id"] }}');"
                                                            onkeyup="DetectMaxOverride(this);">
                                                     <span>pts</span>
                                                 </div>
@@ -250,7 +251,9 @@
                                                            placeholder="{{ default_percent }}"
                                                            value="{{ gradeable["override_percent"] ? gradeable["percent"] : default_percent }}"
                                                            id="percents-{{ gradeable["id"] }}"
-                                                           onblur="ClampPercents(this); ClampPerGradeablePercents(this, '{{ bucket }}')">
+                                                           onblur="ClampPercents(this);
+                                                                ClampPerGradeablePercents(this, '{{ bucket }}');
+                                                                UpdateAlternates(this, 'percent', '{{ gradeable["id"] }}');">
                                                     <span>%</span>
                                                 </div>
                                                 <div class="gradeable-li-right-of-input">
@@ -298,9 +301,18 @@ To remove a curve simply blank all boxes."></i>
                                                 </div>
                                                 <label class="gradeable-li-info" id="alternate-checkbox-label-{{ gradeable['id'] }}">
                                                     Alternate?
-                                                    <input id="alternate-checkbox-{{ gradeable['id'] }}" type="checkbox" name="alternate-checkbox-{{ gradeable['id'] }}">
+                                                    <input id="alternate-checkbox-{{ gradeable['id'] }}"
+                                                           type="checkbox"
+                                                           name="alternate-checkbox-{{ gradeable['id'] }}">
                                                 </label>
-                                                <select class="gradeable-li-info" name="alternate-dropdown-{{ gradeable['id'] }}" id="alternate-dropdown-{{ gradeable['id'] }}" onfocus="GetPotentialAlternates(this, {{ gradeables|json_encode() }});" data-gradeables="{{ gradeables|json_encode() }}" data-gradeable="{{ gradeable|json_encode() }}" aria-label="Assign Alternate Gradeable">
+                                                <select class="gradeable-li-info"
+                                                        name="alternate-dropdown-{{ gradeable['id'] }}"
+                                                        id="alternate-dropdown-{{ gradeable['id'] }}"
+                                                        onfocus="GetPotentialAlternates(this, {{ gradeables|json_encode() }});"
+                                                        onblur="LinkAlternateToPrimary(this);"
+                                                        data-gradeables="{{ gradeables|json_encode() }}"
+                                                        data-gradeable="{{ gradeable|json_encode() }}"
+                                                        aria-label="Assign Alternate Gradeable">
                                                     <option disabled selected value> -- select a gradeable -- </option>
                                                 </select>
                                             </li>
