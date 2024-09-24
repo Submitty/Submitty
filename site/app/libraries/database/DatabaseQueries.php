@@ -1067,21 +1067,49 @@ SQL;
         }
     }
 
-    public function getThreadsumDucks(int $thread_id): int {
-        // Fetch all posts in the thread
-        $this->course_db->query("SELECT id FROM posts WHERE thread_id = ? AND deleted = false", [$thread_id]);
-        $posts = $this->course_db->rows();
-        $totalDucks = 0;
+    public function getPostLikes(): array {
+        // Query to retrieve post IDs and their like counts from forum_upducks
+        $this->course_db->query(
+            "SELECT post_id, COUNT(*) AS likes_count
+             FROM forum_upducks
+             GROUP BY post_id"
+        );
+    
+        // Fetch the result set
+        $likesData = $this->course_db->rows();
+        $postLikes = [];
+        foreach ($likesData as $row) {
+            $postLikes[$row['post_id']] = intval($row['likes_count']);
+        }
+        return $postLikes;  // Return array with post_id as key and likes_count as value
+    }
+    
+    public function getThreadLikesSum(): array {
+        $this->course_db->query(
+            "SELECT id, thread_id 
+             FROM posts
+             WHERE deleted = false"
+        );
+
+        $posts = $this->course_db->rows();        
+        $postLikes = $this->getPostLikes();
+        $threadLikes = [];
+
         foreach ($posts as $post) {
             $post_id = $post['id'];
-            // Fetch the number of likes for this post
-            $this->course_db->query("SELECT COUNT(*) AS likes_count FROM forum_upducks WHERE post_id = ?", [$post_id]);
-            $likesCount = intval($this->course_db->row()['likes_count']);
+            $thread_id = $post['thread_id'];
 
-            $totalDucks += $likesCount;
+            $likes = isset($postLikes[$post_id]) ? $postLikes[$post_id] : 0;
+
+            if (!isset($threadLikes[$thread_id])) {
+                $threadLikes[$thread_id] = 0;
+            }
+    
+            $threadLikes[$thread_id] += $likes;
         }
-        return $totalDucks;
+        return $threadLikes;
     }
+    
 
     /**
      * @param int[] $post_ids
