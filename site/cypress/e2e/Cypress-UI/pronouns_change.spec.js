@@ -77,7 +77,6 @@ describe('Tests cases abut changing user pronouns', () => {
         // verify pronouns is shown in overall forum page
         cy.get('#nav-sidebar-forum').click();
         cy.get('.thread-list-item').should('contain', 'Test pronouns display');
-        
         cy.get('.thread_box.thread-box-full').contains('Test pronouns display').parent().find('.post_user_pronouns').should('contain', 'They/Them');
         cy.get('.thread_box.thread-box-full').contains('Test pronouns display').parent().find('.post_user_pronouns').click();
 
