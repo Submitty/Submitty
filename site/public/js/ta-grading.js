@@ -777,6 +777,7 @@ function gotoNextStudent() {
             window_location += `&component_id=${getFirstOpenComponentId()}`;
             break;
     }
+    
     if (!navigate_assigned_students_only) {
         window_location += '&navigate_assigned_students_only=false';
     }
