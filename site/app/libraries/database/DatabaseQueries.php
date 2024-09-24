@@ -1067,6 +1067,10 @@ SQL;
         }
     }
 
+    /**
+     * Get likes count for each post.
+     * @return array<int, int>  array with post_id as key and likes_count as value.
+     */
     public function getPostLikes(): array {
         $this->course_db->query(
             "SELECT post_id, COUNT(*) AS likes_count
@@ -1082,6 +1086,11 @@ SQL;
         return $postLikes;  // Return array with post_id as key and likes_count as value
     }
 
+
+    /**
+     * Get total likes count for each thread.
+     * @return array<int, int>  array with thread_id as key and total likes_count as value.
+     */
     public function getThreadLikesSum(): array {
         $this->course_db->query(
             "SELECT id, thread_id 
