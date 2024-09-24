@@ -1,15 +1,13 @@
 <?php
 
-declare(strict_types = 1);
+declare(strict_types=1);
 
 namespace app\repositories\forum;
 
 use app\entities\forum\Post;
 use Doctrine\ORM\EntityRepository;
-use Doctrine\ORM\Query\Expr\Join;
 
 class PostRepository extends EntityRepository {
-
     public function getPostHistory(int $post_id): ?Post {
         $qb = $this->_em->createQueryBuilder();
         $qb->select('p')

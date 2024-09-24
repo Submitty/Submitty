@@ -44,7 +44,7 @@ class PostHistory {
      * @return Collection<PostAttachment>
      */
     public function getAttachments(): Collection {
-        return $this->post->getAttachments()->filter(function($x) {
+        return $this->post->getAttachments()->filter(function ($x) {
             return $x->getVersionAdded() <= $this->version_id && ($x->isCurrent() || $this->version_id < $x->getVersionDeleted());
         });
     }

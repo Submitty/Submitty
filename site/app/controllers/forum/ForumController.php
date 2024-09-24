@@ -1368,10 +1368,12 @@ class ForumController extends AbstractController {
         $post_id = $_POST["post_id"];
         $output = [];
         $post = $repo->getPostHistory($post_id);
-        $edit_author_ids = $post->getHistory()->map(function($x) {return $x->getEditAuthor();})->toArray();
+        $edit_author_ids = $post->getHistory()->map(function ($x) {
+            return $x->getEditAuthor();
+        })->toArray();
         $edit_authors = $this->core->getQueries()->getUsersByIds($edit_author_ids);
         $edit_authors_display = $this->core->getQueries()->getDisplayUserInfoFromUserIds($edit_author_ids);
-        
+
         $GLOBALS['totalAttachments'] = 0;
         $edit_id = 0;
         foreach ($post->getHistory() as $version) {
@@ -1383,13 +1385,15 @@ class ForumController extends AbstractController {
                 "post_attachment" => ForumUtils::getForumAttachments(
                     $post_id,
                     $post->getThread()->getId(),
-                    $version->getAttachments()->map(function($x) {return $x->getFileName();})->toArray(),
+                    $version->getAttachments()->map(function ($x) {
+                        return $x->getFileName();
+                    })->toArray(),
                     $this->core->getConfig()->getCoursePath(),
                     $this->core->buildCourseUrl(['display_file'])
                 ),
                 "edit_id" => $post_id . "-" . $edit_id,
             ]);
-            $emptyAuthor = empty($tmp['user']);
+            $emptyAuthor = $tmp['user'] === '';
             $tmp['user_info'] = $emptyAuthor ? ['given_name' => 'Anonymous', 'family_name' => '', 'email' => '', 'pronouns' => '', 'display_pronouns' => false ] : $edit_authors_display[$tmp['user']];
             $tmp['is_staff_post'] = !$emptyAuthor && $edit_authors[$version->getEditAuthor()]->accessFullGrading();
             $tmp['post_time'] = DateUtils::parseDateTime($version->getEditTimestamp(), $this->core->getConfig()->getTimezone())->format("n/j g:i A");
@@ -1406,13 +1410,17 @@ class ForumController extends AbstractController {
                 "post_attachment" => ForumUtils::getForumAttachments(
                     $post_id,
                     $post->getThread()->getId(),
-                    $post->getAttachments()->filter(function($x) {return $x->isCurrent();})->map(function($x) {return $x->getFileName();})->toArray(),
+                    $post->getAttachments()->filter(function ($x) {
+                        return $x->isCurrent();
+                    })->map(function ($x) {
+                        return $x->getFileName();
+                    })->toArray(),
                     $this->core->getConfig()->getCoursePath(),
                     $this->core->buildCourseUrl(['display_file'])
                 ),
                 "edit_id" => $post_id . "-" . $edit_id,
             ]);
-            $emptyAuthor = empty($tmp['user']);
+            $emptyAuthor = $tmp['user'] === '';
             $tmp['user_info'] = $emptyAuthor ? ['given_name' => 'Anonymous', 'family_name' => '', 'email' => '', 'pronouns' => '', 'display_pronouns' => false ] : $this->core->getQueries()->getDisplayUserInfoFromUserId($tmp['user']);
             $tmp['is_staff_post'] = !$emptyAuthor && $this->core->getQueries()->getUserById($post->getAuthorUserId())?->accessFullGrading();
             $tmp['post_time'] = DateUtils::parseDateTime($post->getTimestamp(), $this->core->getConfig()->getTimezone())->format("n/j g:i A");
