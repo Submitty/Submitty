@@ -14,6 +14,7 @@ use app\libraries\routers\Enabled;
 use app\libraries\response\JsonResponse;
 use Symfony\Component\Routing\Annotation\Route;
 use app\libraries\socket\Client;
+use app\entities\forum\Post;
 use WebSocket;
 
 /**
@@ -1363,51 +1364,49 @@ class ForumController extends AbstractController {
      */
     #[Route("/courses/{_semester}/{_course}/forum/posts/history", methods: ["POST"])]
     public function getHistory() {
+        $repo = $this->core->getCourseEntityManager()->getRepository(Post::class);
         $post_id = $_POST["post_id"];
         $output = [];
-        $_post = [];
-        $older_posts = $this->core->getQueries()->getPostHistory($post_id);
-        $current_post = $this->core->getQueries()->getPost($post_id);
-        $post_attachments = $this->core->getQueries()->getForumAttachments([$post_id], true);
-        $oc = $current_post["author_user_id"];
-        $anon = $current_post["anonymous"];
+        $post = $repo->getPostHistory($post_id);
         $GLOBALS['totalAttachments'] = 0;
         $edit_id = 0;
-        foreach ($older_posts as $post) {
-            $_post['user'] = !$this->modifyAnonymous($oc) && $oc == $post["edit_author"] && $anon ? '' : $post["edit_author"];
-            $_post['content'] = $this->core->getOutput()->renderTwigTemplate("forum/RenderPost.twig", [
-                "post_content" => $post["content"],
+        foreach ($post->getHistory() as $version) {
+            $tmp = [];
+            $tmp['user'] = (!$this->modifyAnonymous($post->getAuthorUserId()) && $post->getAuthorUserId() == $version->getEditAuthor() && $post->getAnonymous()) ? '' : $version->getEditAuthor();
+            $tmp['content'] = $this->core->getOutput()->renderTwigTemplate("forum/RenderPost.twig", [
+                "post_content" => $version->getContent(),
                 "render_markdown" => false,
                 "post_attachment" => ForumUtils::getForumAttachments(
                     $post_id,
-                    $current_post['thread_id'],
-                    $post_attachments[$post_id][$post['version_id']],
+                    $post->getThread()->getId(),
+                    $version->getAttachments()->map(function($x) {return $x->getFileName();})->toArray(),
                     $this->core->getConfig()->getCoursePath(),
                     $this->core->buildCourseUrl(['display_file'])
                 ),
                 "edit_id" => $post_id . "-" . $edit_id,
             ]);
-            $_post['post_time'] = DateUtils::parseDateTime($post['edit_timestamp'], $this->core->getConfig()->getTimezone())->format("n/j g:i A");
-            $output[] = $_post;
+            $tmp['post_time'] = DateUtils::parseDateTime($version->getEditTimestamp(), $this->core->getConfig()->getTimezone())->format("n/j g:i A");
+            $output[] = $tmp;
             $edit_id++;
         }
         if (count($output) == 0) {
-            // Current post
-            $_post['user'] = !$this->modifyAnonymous($oc) && $anon ? '' : $oc;
-            $_post['content'] = $this->core->getOutput()->renderTwigTemplate("forum/RenderPost.twig", [
-                "post_content" => $current_post["content"],
+            // No history, get current post
+            $tmp = [];
+            $tmp['user'] = (!$this->modifyAnonymous($post->getAuthorUserId()) && $post->getAnonymous()) ? '' : $post->getAuthorUserId();
+            $tmp['content'] = $this->core->getOutput()->renderTwigTemplate("forum/RenderPost.twig", [
+                "post_content" => $post->getContent(),
                 "render_markdown" => false,
                 "post_attachment" => ForumUtils::getForumAttachments(
                     $post_id,
-                    $current_post['thread_id'],
-                    array_values($post_attachments[$post_id])[0],
+                    $post->getThread()->getId(),
+                    $post->getAttachments()->filter(function($x) {return $x->isCurrent();})->map(function($x) {return $x->getFileName();})->toArray(),
                     $this->core->getConfig()->getCoursePath(),
                     $this->core->buildCourseUrl(['display_file'])
                 ),
                 "edit_id" => $post_id . "-" . $edit_id,
             ]);
-            $_post['post_time'] = DateUtils::parseDateTime($current_post['timestamp'], $this->core->getConfig()->getTimezone())->format("n/j g:i A");
-            $output[] = $_post;
+            $tmp['post_time'] = DateUtils::parseDateTime($post->getTimestamp(), $this->core->getConfig()->getTimezone())->format("n/j g:i A");
+            $output[] = $tmp;
         }
         // Fetch additional information
         foreach ($output as &$_post) {
