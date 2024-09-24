@@ -77,8 +77,9 @@ describe('Tests cases abut changing user pronouns', () => {
         // verify pronouns is shown in overall forum page
         cy.get('#nav-sidebar-forum').click();
         cy.get('.thread-list-item').should('contain', 'Test pronouns display');
-        cy.contains('Test pronouns display').find('.post_user_pronouns').should('contain', 'They/Them');
-        cy.contains('Test pronouns display').find('.post_user_pronouns').click();
+        
+        cy.get('.thread_box.thread-box-full').contains('Test pronouns display').parent().find('.post_user_pronouns').should('contain', 'They/Them');
+        cy.get('.thread_box.thread-box-full').contains('Test pronouns display').parent().find('.post_user_pronouns').click();
 
         // comment on the thread, verify pronouns is shown
         cy.get('.create-post-head').should('contain', 'Test pronouns display');
@@ -101,9 +102,9 @@ describe('Tests cases abut changing user pronouns', () => {
         // verify pronouns is not shown in overall forum page
         cy.get('#nav-sidebar-forum').click();
         cy.get('.thread-list-item').should('contain', 'Test Anonymous thread, should not show pronouns');
-        cy.contains('Test Anonymous thread, should not show pronouns').find('.post_user_id').should('contain', 'Anonymous');
-        cy.contains('Test Anonymous thread, should not show pronouns').find('.post_user_pronouns').should('not.exist');
-        cy.contains('Test Anonymous thread, should not show pronouns').find('.post_user_id').click();
+        cy.get('.thread_box.thread-box-full').contains('Test Anonymous thread, should not show pronouns').parent().find('.post_user_id').should('contain', 'Anonymous');
+        cy.get('.thread_box.thread-box-full').contains('Test Anonymous thread, should not show pronouns').parent().find('.post_user_pronouns').should('not.exist');
+        cy.get('.thread_box.thread-box-full').contains('Test Anonymous thread, should not show pronouns').parent().find('.post_user_id').click();
 
         // comment on the thread anonymously, verify pronouns is not shown
         cy.get('.create-post-head').should('contain', 'Test Anonymous thread, should not show pronouns');
@@ -120,16 +121,16 @@ describe('Tests cases abut changing user pronouns', () => {
         cy.login('instructor');
 
         // verify pronouns exist and remove thread
-        cy.contains('Test pronouns display').find('.post_user_pronouns').should('contain', 'They/Them');
-        cy.contains('Test pronouns display').find('.post_user_pronouns').click();
+        cy.get('.thread_box.thread-box-full').contains('Test pronouns display').parent().find('.post_user_pronouns').should('contain', 'They/Them');
+        cy.get('.thread_box.thread-box-full').contains('Test pronouns display').parent().find('.post_user_pronouns').click();
         cy.get('.post_user_pronouns').should('contain', 'They/Them');
         cy.get('.first_post > .post-action-container > .dropdown-menu ').find(':contains("Delete")').click({ force: true });
         cy.contains('Test pronouns display').should('not.exist');
 
         // verify pronouns do not exist (post thread Anonymously) and remove thread
-        cy.contains('Test Anonymous thread, should not show pronouns').find('.post_user_id').should('contain', 'Anonymous');
-        cy.contains('Test Anonymous thread, should not show pronouns').find('.post_user_pronouns').should('not.exist');
-        cy.contains('Test Anonymous thread, should not show pronouns').find('.post_user_id').click();
+        cy.get('.thread_box.thread-box-full').contains('Test Anonymous thread, should not show pronouns').parent().find('.post_user_id').should('contain', 'Anonymous');
+        cy.get('.thread_box.thread-box-full').contains('Test Anonymous thread, should not show pronouns').parent().find('.post_user_pronouns').should('not.exist');
+        cy.get('.thread_box.thread-box-full').contains('Test Anonymous thread, should not show pronouns').parent().find('.post_user_id').click();
         cy.get('.post_user_id').should('contain', 'Anonymous');
         cy.get('.post_user_pronouns').should('not.exist');
         cy.get('.first_post > .post-action-container > .dropdown-menu ').find(':contains("Delete")').click({ force: true });
