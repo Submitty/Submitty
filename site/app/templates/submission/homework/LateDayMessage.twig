@@ -40,7 +40,7 @@
                 {% if message.info.remaining == 0 %}
                     You have no late days remaining for future assignments.
                 {% else %}
-                    You have {{ message.info.remaining }} remaining late {{ self.day_or_days(message.info.remaining) }} for this assignment.
+                    You have {{ message.info.remaining }} remaining late {{ self.day_or_days(message.info.remaining) }} for future assignments.
                 {% endif %}
             {% elseif message.type == 'getting_zero' %}
                 {{ self.line_breaks(loop.index0 > 0 ? 1 : 0) }}
