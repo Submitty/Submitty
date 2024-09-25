@@ -17,6 +17,9 @@ class Post {
     #[ORM\Column(type: Types::INTEGER)]
     protected int $id;
 
+    public function getId(): int {
+        return $this->id;
+    }
     /**
      * @var Collection<Thread>
      */
@@ -34,6 +37,10 @@ class Post {
     #[ORM\ManyToOne(targetEntity: Post::class, inversedBy: "children")]
     #[ORM\JoinColumn(name: "parent_id", referencedColumnName: "id")]
     protected ?Post $parent;
+    
+    public function getParent(): ?Post {
+        return $this->parent;
+    }
 
     /**
      * @var Collection<Post>
@@ -65,12 +72,16 @@ class Post {
     #[ORM\Column(type: Types::BOOLEAN)]
     protected bool $anonymous;
 
-    public function getAnonymous(): bool {
+    public function isAnonymous(): bool {
         return $this->anonymous;
     }
 
     #[ORM\Column(type: Types::BOOLEAN)]
     protected bool $deleted;
+
+    public function isDeleted(): bool {
+        return $this->deleted;
+    }
 
     #[ORM\Column(type: Types::STRING)]
     protected string $endorsed_by;
@@ -83,6 +94,10 @@ class Post {
 
     #[ORM\Column(type: Types::BOOLEAN)]
     protected bool $render_markdown;
+
+    public function isRenderMarkdown(): bool {
+        return $this->render_markdown;
+    }
 
     /**
      * @var Collection<PostHistory>
@@ -108,5 +123,14 @@ class Post {
      */
     public function getAttachments(): Collection {
         return $this->attachments;
+    }
+
+    /**
+     * Doctrine ORM does not use constructors, instead filling properties from database.
+     */ 
+    
+    public function __construct() {
+        $this->content = '';
+        $this->render_markdown = false;
     }
 }

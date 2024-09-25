@@ -1221,7 +1221,6 @@ class ForumController extends AbstractController {
         $repo = $this->core->getCourseEntityManager()->getRepository(Thread::class);
         $threads = $repo->getAllThreads($category_ids, $show_deleted, $show_merged_thread, 0, $this->core->getUser()->getId());
         //$threads = $this->getSortedThreads($category_ids, $max_threads, $show_deleted, $show_merged_thread, $thread_status, $unread_threads, $pageNumber, $thread_id);
-
         return $this->core->getOutput()->renderOutput('forum\ForumThread', 'showFullThreadsPage', $threads, $category_ids, $show_deleted, $show_merged_thread, $pageNumber);
     }
 
@@ -1382,7 +1381,7 @@ class ForumController extends AbstractController {
         $edit_id = 0;
         foreach ($post->getHistory() as $version) {
             $tmp = [];
-            $tmp['user'] = (!$this->modifyAnonymous($post->getAuthorUserId()) && $post->getAuthorUserId() == $version->getEditAuthor() && $post->getAnonymous()) ? '' : $version->getEditAuthor();
+            $tmp['user'] = (!$this->modifyAnonymous($post->getAuthorUserId()) && $post->getAuthorUserId() == $version->getEditAuthor() && $post->isAnonymous()) ? '' : $version->getEditAuthor();
             $tmp['content'] = $this->core->getOutput()->renderTwigTemplate("forum/RenderPost.twig", [
                 "post_content" => $version->getContent(),
                 "render_markdown" => false,
@@ -1407,7 +1406,7 @@ class ForumController extends AbstractController {
         if (count($output) == 0) {
             // No history, get current post
             $tmp = [];
-            $tmp['user'] = (!$this->modifyAnonymous($post->getAuthorUserId()) && $post->getAnonymous()) ? '' : $post->getAuthorUserId();
+            $tmp['user'] = (!$this->modifyAnonymous($post->getAuthorUserId()) && $post->isAnonymous()) ? '' : $post->getAuthorUserId();
             $tmp['content'] = $this->core->getOutput()->renderTwigTemplate("forum/RenderPost.twig", [
                 "post_content" => $post->getContent(),
                 "render_markdown" => false,

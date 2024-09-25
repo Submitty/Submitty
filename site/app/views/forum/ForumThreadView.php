@@ -690,7 +690,7 @@ class ForumThreadView extends AbstractView {
         $activeThreadTitle = "";
         $activeThread = [];
         $GLOBALS['totalAttachments'] = 0;
-        $thread_content =  $this->displayThreadList($threads, false, $activeThreadAnnouncements, $activeThreadTitle, $activeThread, null, $category_ids, false, true);
+        $thread_content =  $this->displayThreadList($threads, $activeThreadAnnouncements, $activeThreadTitle, $activeThread, null, $category_ids, false, true);
         $categories = $this->core->getQueries()->getCategories();
         $current_course = $this->core->getConfig()->getCourse();
         $cookieSelectedCategories = $this->getSavedForumCategories($current_course, $categories);
@@ -751,8 +751,8 @@ class ForumThreadView extends AbstractView {
         ]);
     }
 
-    public function sizeTitle($titleDisplay, $title, $titleLength, $length = 40) {
-        $titleDisplay = substr($titleDisplay, 0, ($titleLength < $length) ? $titleLength : strrpos(substr($titleDisplay, 0, $length), " "));
+    public function sizeTitle(string $title, int $titleLength, $length = 40) {
+        $titleDisplay = substr($title, 0, ($titleLength < $length) ? $titleLength : strrpos(substr($title, 0, $length), " "));
 
         if ($titleLength > $length) {
             //Fix ... appearing
@@ -772,7 +772,7 @@ class ForumThreadView extends AbstractView {
         return $contentDisplay;
     }
 
-    public function displayThreadList($threads, $filtering, &$activeThreadAnnouncement, &$activeThreadTitle, &$activeThread, $thread_id_p, $current_categories_ids, $render, $is_full_page = false) {
+    public function displayThreadList($threads, &$activeThreadAnnouncement, &$activeThreadTitle, &$activeThread, $thread_id_p, $current_categories_ids, $render, $is_full_page = false) {
         $used_active = false; //used for the first one if there is not thread_id set
         $current_user = $this->core->getUser()->getId();
 
@@ -782,76 +782,63 @@ class ForumThreadView extends AbstractView {
 
         $thread_content = [];
 
-        $is_instructor_full_access = [];
         $author_user_ids = array_map(function ($thread) {
-            return $thread["created_by"];
+            return $thread->getCreatedBy();
         }, $threads);
-        $author_user_groups = $this->core->getQueries()->getAuthorUserGroups($author_user_ids);
 
-        foreach ($author_user_groups as $author) {
-            $is_instructor_full_access[$author["user_id"]] = $author["user_group"] <= User::GROUP_FULL_ACCESS_GRADER;
-        }
-
-        $thread_ids = array_column($threads, 'id');
-        $first_posts = $this->core->getQueries()->getFirstPostForThreads($thread_ids);
-        $viewed_threads = $this->core->getQueries()->getViewedThreads($current_user, $thread_ids);
-        $authors = $this->core->getQueries()->getUsersById($author_user_ids);
+        $authors = $this->core->getQueries()->getusersByIds($author_user_ids);
         $authors_info = $this->core->getQueries()->getDisplayUserInfoFromUserIds($author_user_ids);
 
         foreach ($threads as $thread) {
-            // Checks if thread ID is empty. If so, skip this threads.
-            if (empty($thread["id"])) {
-                continue;
-            }
-            $first_post = $first_posts[$thread['id']] ?? null;
-            if (is_null($first_post)) {
+            $first_post = $thread->getFirstPost();
+            if ($first_post === false) {
                 // Thread without any posts(eg. Merged Thread)
-                $first_post = ['content' => "", 'render_markdown' => 0];
+                $first_post = new Post();
                 $date = null;
             }
             else {
-                $date = DateUtils::convertTimeStamp($this->core->getUser(), $first_post['timestamp'], $this->core->getConfig()->getDateTimeFormat()->getFormat('forum'));
+                $date = DateUtils::convertTimeStamp($this->core->getUser(), DateUtils::dateTimeToString($first_post->getTimestamp()), $this->core->getConfig()->getDateTimeFormat()->getFormat('forum'));
             }
-            if ($thread['merged_thread_id'] != -1) {
+            if (!is_null($thread->getMergedThread())) {
                 // For the merged threads
-                $thread['status'] = 0;
+                $thread->setStatus(0);
             }
 
             $class = $is_full_page ? "thread_box thread-box-full" : "thread_box";
             // $current_categories_ids should be subset of $thread["categories_ids"]
-            $issubset = (count(array_intersect($current_categories_ids, $thread["categories_ids"])) == count($current_categories_ids));
-            if (((isset($_REQUEST["thread_id"]) && $_REQUEST["thread_id"] == $thread["id"]) || $thread_id_p == $thread["id"] || $thread_id_p == -1) && !$used_active && $issubset) {
+            $issubset = (count(array_intersect($current_categories_ids, $thread->getCategories()->map(function ($x) {
+                return $x->getId();
+            })->toArray())) == count($current_categories_ids));
+            
+            if (((isset($_REQUEST["thread_id"]) && $_REQUEST["thread_id"] == $thread->getId()) || $thread_id_p == $thread->getId() || $thread_id_p == -1) && !$used_active && $issubset) {
                 $class .= " active";
                 $used_active = true;
-                $activeThreadTitle = "({$thread['id']}) " . $thread["title"];
+                $activeThreadTitle = "({$thread->getId()}) " . $thread->getTitle();
                 $activeThread = $thread;
-                if ($thread["pinned_expiration"] > date("Y-m-d H:i:s")) {
+                if ($thread->getPinnedExpiration() > date("Y-m-d H:i:s")) {
                     $activeThreadAnnouncement = true;
                 }
                 if ($thread_id_p == -1) {
-                    $thread_id_p = $thread["id"];
+                    $thread_id_p = $thread->getId();
                 }
             }
-            $isNewThread = !in_array($thread['id'], $viewed_threads, true);
+            $isNewThread = $thread->isUnread($current_user);
             if ($isNewThread) {
                 $class .= " new_thread";
             }
-            if ($thread["deleted"]) {
+            if ($thread->isDeleted()) {
                 if ($isNewThread) {
                     $class .= " deleted-unviewed";
                 }
                 $class .= " deleted";
             }
 
-            if ($authors[$thread['created_by']]->accessGrading()) {
+            if ($authors[$thread->getCreatedBy()]->accessGrading()) {
                 $class .= " important";
             }
 
-            //fix legacy code
-            $titleDisplay = $thread['title'];
-
             //replace tags from displaying in sidebar
-            $first_post_content = str_replace("`", "", strip_tags($first_post["content"]));
+            $first_post_content = str_replace("`", "", strip_tags($first_post->getContent()));
             $first_post_content = str_replace("#", "", $first_post_content);
             $temp_first_post_content = preg_replace('#\[(.*?)\]\((.*?)\)#', '$2', $first_post_content);
 
@@ -859,37 +846,25 @@ class ForumThreadView extends AbstractView {
                 $first_post_content = $temp_first_post_content;
             }
 
-            if ($first_post['render_markdown'] == 1) {
+            if ($first_post->isRenderMarkdown()) {
                 $first_post_content = $this->contentMarkdownToPlain($first_post_content);
             }
 
-            $sizeOfContent = strlen($first_post_content);
-            $titleLength = strlen($thread['title']);
+            $titleDisplay = $this->sizeTitle($thread->getTitle(), strlen($thread->getTitle()), $is_full_page ? 140 : 40);
+            $contentDisplay = $this->sizeContent(strlen($first_post_content), $first_post_content, $is_full_page ? 500 : 80);
 
-            if ($is_full_page) {
-                $titleDisplay = $this->sizeTitle($titleDisplay, $thread['title'], $titleLength, 140);
-                $contentDisplay = $this->sizeContent($sizeOfContent, $first_post_content, 500);
-            }
-            else {
-                $titleDisplay = $this->sizeTitle($titleDisplay, $thread['title'], $titleLength);
-                $contentDisplay = $this->sizeContent($sizeOfContent, $first_post_content);
-            }
+            $titleDisplay = "({$thread->getId()}) " . $titleDisplay;
 
-            $titleDisplay = "({$thread['id']}) " . $titleDisplay;
+            $link = $this->core->buildCourseUrl(['forum', 'threads', $thread->getId()]);
 
-            $link = $this->core->buildCourseUrl(['forum', 'threads', $thread['id']]);
-
-            $favorite = isset($thread['favorite']) && $thread['favorite'];
+            $favorite = $thread->isFavorite($current_user);
 
             $fa_icon = "fa-question";
             $fa_class = "thread-unresolved";
             $tooltip = "Thread Unresolved";
 
-            if (!isset($thread['status'])) {
-                $thread['status'] = 0;
-            }
-            if ($thread['status'] != 0) {
-                if ($thread['status'] == 1) {
+            if ($thread->getStatus() != 0) {
+                if ($thread->getStatus() == 1) {
                     $fa_icon = "fa-check";
                     $fa_class = "thread-resolved";
                     $tooltip = "Thread Resolved";
@@ -897,11 +872,9 @@ class ForumThreadView extends AbstractView {
             }
 
             $categories_content = [];
-            foreach ($thread["categories_desc"] as $category_desc) {
-                $categories_content[] = [$category_desc];
-            }
-            for ($i = 0; $i < count($thread["categories_color"]); $i += 1) {
-                $categories_content[$i][] = $thread["categories_color"][$i];
+            foreach ($thread->getCategories() as $category) {
+                $categories_content[] = [$category->getDescription(), $category->getColor()];
+
             }
 
             $date_content = ["not_null" => !is_null($date)];
@@ -910,27 +883,27 @@ class ForumThreadView extends AbstractView {
                 $date_content["formatted"] = $date;
             }
             $thread_info = [
-                'thread_id' => $thread['id'],
+                'thread_id' => $thread->getId(),
                 "title" => $titleDisplay,
                 "content" => $contentDisplay,
                 "categories" => $categories_content,
                 "link" => $link,
                 "class" => $class,
-                "pinned" => $thread["pinned_expiration"] > date("Y-m-d H:i:s"),
-                "expiring" => $thread["pinned_expiration"] <= date("Y-m-d H:i:s", strtotime("+7 day")),
+                "pinned" => $thread->getPinnedExpiration() > date("Y-m-d H:i:s"),
+                "expiring" => $thread->getPinnedExpiration() <= date("Y-m-d H:i:s", strtotime("+7 day")),
                 "favorite" => $favorite,
-                "merged_thread_id" => $thread['merged_thread_id'],
-                "status" => $thread["status"],
+                "merged_thread_id" => $thread->getMergedThread()->getId(),
+                "status" => $thread->getStatus(),
                 "fa_icon" => $fa_icon,
                 "fa_class" => $fa_class,
                 "tooltip" => $tooltip,
-                "is_locked" => isset($thread['lock_thread_date']) && $thread['lock_thread_date'] < date("Y-m-d H:i:S"),
+                "is_locked" => is_null($thread->getLockDate()) ? false : $thread->getLockDate() < date("Y-m-d H:i:S"),
                 "date" => $date_content,
-                "current_user_posted" => $thread["current_user_posted"]
+                "current_user_posted" => $thread->getCreatedBy() === $current_user,
             ];
 
             if ($is_full_page) {
-                $user_info = $authors_info[$first_post["author_user_id"]];
+                $user_info = $authors_info[$first_post->getAuthorUserId()];
                 $email = trim($user_info["user_email"]);
                 $given_name = trim($user_info["given_name"]);
                 $family_name = trim($user_info["family_name"]);
@@ -938,27 +911,27 @@ class ForumThreadView extends AbstractView {
                 $pronouns = trim($user_info["pronouns"]);
                 $display_pronouns = $user_info["display_pronouns"];
 
-                if ($is_instructor_full_access[$first_post["author_user_id"]]) {
+                if ($authors[$first_post->getAuthorUserId()]?->accessFullGrading()) {
                     $visible_username = $given_name . " " . $family_name;
                 }
 
                 $author_info = [
-                    "user_id" => $first_post['author_user_id'],
-                    "name" => $first_post['anonymous'] ? "Anonymous" : $visible_username,
+                    "user_id" => $first_post->getAuthorUserId(),
+                    "name" => $first_post->isAnonymous() ? "Anonymous" : $visible_username,
                     "email" => $email,
-                    "full_name" => $given_name . " " . $family_name . " (" . $first_post['author_user_id'] . ")",
+                    "full_name" => $given_name . " " . $family_name . " (" . $first_post->getAuthorUserId() . ")",
                     "pronouns" => $pronouns,
                     "display_pronouns" => $display_pronouns
                 ];
                 $thread_info = array_merge($thread_info, [
-                    "post_id" => $first_post["id"],
-                    "is_thread_locked" => isset($thread['lock_thread_date']) && $thread['lock_thread_date'] < date("Y-m-d H:i:S"),
-                    "thread_resolve_state" => $thread['status'],
+                    "post_id" => $first_post->getId(),
+                    "is_thread_locked" => is_null($thread->getLockDate()) ? false : $thread->getLockDate() < date("Y-m-d H:i:S"),
+                    "thread_resolve_state" => $thread->getStatus(),
                     "show_unresolve" => false,
-                    "is_anon" => $first_post["anonymous"],
-                    "render_markdown" => $first_post["render_markdown"],
+                    "is_anon" => $first_post->isAnonymous(),
+                    "render_markdown" => $first_post->isRenderMarkdown(),
                     "author_info" => $author_info,
-                    "deleted" => $first_post['deleted']
+                    "deleted" => $first_post->isDeleted()
                 ]);
             }
 

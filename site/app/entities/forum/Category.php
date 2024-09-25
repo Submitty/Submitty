@@ -13,14 +13,26 @@ class Category {
     #[ORM\Column(type: Types::INTEGER)]
     protected int $category_id;
 
+    public function getId(): int {
+        return $this->category_id;
+    }
+
     #[ORM\Column(type: Types::STRING)]
     protected string $category_desc;
+
+    public function getDescription(): string {
+        return $this->category_desc;
+    }
 
     #[ORM\Column(type: Types::INTEGER)]
     protected int $rank;
 
     #[ORM\Column(type: Types::STRING)]
     protected string $color;
+
+    public function getColor(): string {
+        return $this->color;
+    }
 
     /**
      * @var Collection<Thread>

@@ -20,9 +20,9 @@ class ThreadRepository extends EntityRepository {
         $qb->select('t')
             ->from(Thread::class, 't')
             ->join('t.categories', 'c')
-            ->join('t.viewers', 'v')
-            ->join('t.posts', 'p')
-            ->join('p.history', 'ph')
+            ->leftJoin('t.viewers', 'v')
+            ->leftJoin('t.posts', 'p')
+            ->leftJoin('p.history', 'ph')
             ->leftJoin('t.favorers', 'sf', Expr\Join::WITH, 'sf.user_id = :user_id')
             ->setParameter(':user_id', $user_id);
         if (count($category_ids) > 0) {
@@ -33,7 +33,7 @@ class ThreadRepository extends EntityRepository {
             $qb->andWhere('t.deleted = false');
         }
         if (!$get_merged_threads) {
-            $qb->andWhere('t.merged_thread IS NULL');
+            $qb->andWhere('t.merged_thread = -1');
         }
         $qb->addOrderBy('CASE WHEN t.pinned_expiration > CURRENT_TIMESTAMP() THEN 1 ELSE 0 END', 'DESC')
             ->addOrderBy('CASE WHEN sf.user_id IS NULL THEN 1 ELSE 0 END', 'DESC')
@@ -41,6 +41,6 @@ class ThreadRepository extends EntityRepository {
             ->setMaxResults($block_size)
             ->setFirstResult($block_size * $block_number);
 
-        return $qb->getQuery()->getArrayResult();
+        return $qb->getQuery()->getResult();
     } 
 }
