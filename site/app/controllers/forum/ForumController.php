@@ -15,6 +15,7 @@ use app\libraries\response\JsonResponse;
 use Symfony\Component\Routing\Annotation\Route;
 use app\libraries\socket\Client;
 use app\entities\forum\Post;
+use app\entities\forum\Thread;
 use WebSocket;
 
 /**
@@ -1216,7 +1217,10 @@ class ForumController extends AbstractController {
         $thread_id = -1;
         $pageNumber = 0;
         $this->core->getOutput()->addBreadcrumb("Discussion Forum");
-        $threads = $this->getSortedThreads($category_ids, $max_threads, $show_deleted, $show_merged_thread, $thread_status, $unread_threads, $pageNumber, $thread_id);
+
+        $repo = $this->core->getCourseEntityManager()->getRepository(Thread::class);
+        $threads = $repo->getAllThreads($category_ids, $show_deleted, $show_merged_thread, 0, $this->core->getUser()->getId());
+        //$threads = $this->getSortedThreads($category_ids, $max_threads, $show_deleted, $show_merged_thread, $thread_status, $unread_threads, $pageNumber, $thread_id);
 
         return $this->core->getOutput()->renderOutput('forum\ForumThread', 'showFullThreadsPage', $threads, $category_ids, $show_deleted, $show_merged_thread, $pageNumber);
     }

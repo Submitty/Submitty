@@ -8,8 +8,9 @@ use DateTime;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
+use app\repositories\forum\ThreadRepository;
 
-#[ORM\Entity]
+#[ORM\Entity(repositoryClass: ThreadRepository::class)]
 #[ORM\Table(name: "threads")]
 class Thread {
     #[ORM\Id]
@@ -25,6 +26,10 @@ class Thread {
 
     #[ORM\Column(type: Types::STRING)]
     protected string $created_by;
+
+    public function getCreatedBy() {
+        return $created_by;
+    }
 
     #[ORM\Column(type: Types::BOOLEAN)]
     protected bool $pinned;
@@ -81,4 +86,29 @@ class Thread {
      */
     #[ORM\OneToMany(mappedBy: "thread", targetEntity: ThreadAccess::class)]
     protected Collection $viewers;
+
+    /**
+     * @var Collection<StudentFavorite>
+     */
+    #[ORM\OneToMany(mappedBy: "thread", targetEntity: StudentFavorite::class)]
+    protected Collection $favorers;
+
+    public function is_unread(string $user_id): bool {
+        $last_viewed = $this->viewers->findFirst(function ($x) {
+            return $user_id === $x->getUserId();
+        })?->getTimestamp();
+        if (is_null($last_viewed)) {
+            return true;
+        }
+        return $last_viewed > max(array_merge(
+            $this->posts->select(function ($x) {
+                return $x->getTimestamp();
+            })->toArray(),
+            $this->posts->select(function ($x) {
+                return $x->getHistory();
+            })->select(function ($x) {
+                return $x->getEditTimestamp();
+            })->toArray()
+        ));
+    }
 }

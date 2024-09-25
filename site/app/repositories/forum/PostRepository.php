@@ -16,7 +16,7 @@ class PostRepository extends EntityRepository {
             ->leftJoin('p.attachments', 'a')
             ->where('p.id = :post_id')
             ->setParameter('post_id', $post_id);
-        $result = $qb->getQuery()->execute();
-        return (count($result) === 0) ? null : $result[0];
+        
+        return $qb->getQuery()->getSingleResult();
     }
 }
