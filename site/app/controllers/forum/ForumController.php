@@ -1150,7 +1150,7 @@ class ForumController extends AbstractController {
 
     #[Route("/courses/{_semester}/{_course}/forum/threads", methods: ["POST"])]
     public function getThreads($page_number = null) {
-        $pageNumber = !empty($page_number) && is_numeric($page_number) ? (int) $page_number : 1;
+        $pageNumber = !empty($page_number) && is_numeric($page_number) ? (int) $page_number : 0;
         $show_deleted = $this->showDeleted();
         $currentCourse = $this->core->getConfig()->getCourse();
         $show_merged_thread = $this->showMergedThreads($currentCourse);
@@ -1161,8 +1161,8 @@ class ForumController extends AbstractController {
         $categories_ids = $this->getSavedCategoryIds($currentCourse, $categories_ids);
         $thread_status = $this->getSavedThreadStatus($thread_status);
 
-        $max_thread = 0;
-        $threads = $this->getSortedThreads($categories_ids, $max_thread, $show_deleted, $show_merged_thread, $thread_status, $unread_threads, $pageNumber, -1);
+        $repo = $this->core->getCourseEntityManager()->getRepository(Thread::class);
+        $threads = $repo->getAllThreads($categories_ids, $show_deleted, $show_merged_thread, $pageNumber);
         $currentCategoriesIds = (!empty($_POST['currentCategoriesId'])) ? explode("|", $_POST["currentCategoriesId"]) : [];
         $currentThreadId = array_key_exists('currentThreadId', $_POST) && !empty($_POST["currentThreadId"]) && is_numeric($_POST["currentThreadId"]) ? (int) $_POST["currentThreadId"] : -1;
         $this->core->getOutput()->renderOutput('forum\ForumThread', 'showAlteredDisplayList', $threads, true, $currentThreadId, $currentCategoriesIds);
