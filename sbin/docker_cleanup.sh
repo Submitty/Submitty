@@ -24,7 +24,7 @@ function cleanup_dead_networks() {
     if [ $# -eq 0 ]; then
         # if the autograding_tmp directory is non-empty,
         # there is active autograding for that worker
-        if test -n "$(ls /var/local/submitty/autograding_tmp/${name})"; then
+        if test -n "$(ls /var/local/submitty/autograding_tmp/"${name}")"; then
             date_time=$(date "+%Y%m%d %H:%M:%S")
             echo "${date_time} | ${name} has grading in progress" >> "${logfile_name}"
             return
