@@ -2,6 +2,7 @@ import { isPermissionAllowed } from 'cypress-browser-permissions';
 
 const queueName = 'Cypress Office Hour Queue 1';
 const queueName_random = 'Cypress Office Hour Queue Random';
+const queueName_blank = 'Cypress Office Hour Queue Blank';
 const queueName1 = 'Cypress Office Hour Queue 2';
 const queueCode = 'cypress_test';
 const queueCode1 = 'cypress_test_fail';
@@ -30,24 +31,26 @@ const openNewQueue = (queueName, queueCode = '') => {
     cy.get('[data-testid="toggle-new-queue"]').click();
     cy.get('[data-testid="popup-window"]').should('exist');
     cy.get('[data-testid="new-queue-code"]').type(queueName);
-    if (queueCode.length > 0) {
-        cy.get('[data-testid="new-queue-token"]').type(queueCode);
+    if (queueCode === 'RANDOM') {
+        cy.get('[data-testid="new-queue-rand-token"]').click(); // random code
+        cy.get('[data-testid="new-queue-token"]').invoke('val').should('not.be.empty');
     }
-    else {
-        cy.get('[data-testid="new-queue-rand-token"]').click();
+    else if (queueCode !== '') {
+        cy.get('[data-testid="new-queue-token"]').type(queueCode);
     }
     cy.get('[data-testid="open-new-queue-btn"]').click();
 };
 
-const changeQueueCode = (queueName, queueCode = '') => {
+const changeQueueCode = (queueName, queueCode) => {
     cy.get('[data-testid="toggle-filter-settings"]').click();
     cy.get('[data-testid="popup-window"]').should('exist');
     cy.get('[data-testid="old-queue-code"]').select(queueName);
-    if (queueCode.length > 0) {
-        cy.get('[data-testid="old-queue-token"]').type(queueCode);
-    }
-    else {
+    if (queueCode === 'RANDOM') {
         cy.get('[data-testid="old-queue-rand-token"]').click(); // random code
+        cy.get('[data-testid="old-queue-token"]').invoke('val').should('not.be.empty');
+    }
+    else if (queueCode !== '') {
+        cy.get('[data-testid="old-queue-token"]').type(queueCode);
     }
     cy.get('[data-testid="change-code-btn"]').click(); // update it
 };
@@ -62,7 +65,9 @@ const studentJoinQueue = (queueName, queueCode) => {
     cy.get('[data-testid="queue-code"]').select(queueName);
     cy.get('[data-testid="queue-code"]').invoke('val'); // in which queue you want to join
     cy.get('[data-testid="queue-code"]').should('contain', queueName);
-    cy.get('#token-box').type(queueCode);
+    if (queueCode !== '') {
+        cy.get('#token-box').type(queueCode);
+    }
     cy.get('[data-testid="join-queue-btn"]').click();
 };
 const editAnnouncement = (text = '') => {
@@ -78,7 +83,7 @@ const editAnnouncement = (text = '') => {
 };
 
 describe('test office hours queue', () => {
-    it('Testing queue as student', () => {
+    it('Creating queues and changing queue codes', () => {
         cy.login();
         enableQueue();
         // deleting the Lab help and homework debugging
@@ -88,17 +93,23 @@ describe('test office hours queue', () => {
         openNewQueue(queueName, queueCode1); // same name but used different code
         cy.get('[data-testid="popup-message"]').should('contain', 'Unable to add queue. Make sure you have a unique queue name');
 
-        openNewQueue(queueName_random);
-        changeQueueCode(queueName_random);
+        openNewQueue(queueName_random, 'RANDOM');
+        changeQueueCode(queueName_random, 'RANDOM');
+        cy.get('[data-testid="popup-message"]').should('contain', 'Queue Access Code Changed');
+
+        openNewQueue(queueName_blank, '');
+        changeQueueCode(queueName_blank, '');
         cy.get('[data-testid="popup-message"]').should('contain', 'Queue Access Code Changed');
 
         changeQueueCode(queueName, newQueueCode);
         cy.get('[data-testid="popup-message"]').should('contain', 'Queue Access Code Changed');
 
         openNewQueue(queueName1, queueCode1);
-
+    });
+    it('Joining queues as student', () => {
         // switch to student to join queue
         switchUser('student');
+        cy.visit(['sample', 'office_hours_queue']);
         // cy.get('#leave_queue').click();
 
         studentJoinQueue(queueName, newQueueCode);
@@ -106,9 +117,15 @@ describe('test office hours queue', () => {
         cy.get('[data-testid="leave-queue"]').click(); // studentRemoveSelfFromQueue
         cy.get('[data-testid="popup-message"]').should('contain', 'Removed from queue');
 
+        studentJoinQueue(queueName_blank, '');
+        cy.get('[data-testid="popup-message"]').should('contain', 'Added to queue');
+        cy.get('[data-testid="leave-queue"]').click(); // studentRemoveSelfFromQueue
+        cy.get('[data-testid="popup-message"]').should('contain', 'Removed from queue');
+
         studentJoinQueue(queueName, newQueueCode);
         cy.get('[data-testid="popup-message"]').should('contain', 'Added to queue');
-
+    });
+    it('Helping student', () => {
         // switch to instructor to help first student
         switchUser('instructor');
         cy.get('.help_btn').first().click(); // helpFirstStudent
@@ -193,22 +210,32 @@ describe('test office hours queue', () => {
         cy.get('[data-testid="student-row-4"]').first().as('row-4');
         cy.get('@row-4').find('[data-testid="row-label"]').should('contain', '4');
         cy.get('@row-4').find('[data-testid="current-state"]').should('contain', 'done');
-        cy.get('@row-4').find('[data-testid="queue"]').should('contain', queueName);
+        cy.get('@row-4').find('[data-testid="queue"]').should('contain', queueName_blank);
         cy.get('@row-4').find('[data-testid="time-entered"]').invoke('text').should('match', /\d{4}-\d\d-\d\d \d\d:\d\d:\d\d.*/);
         cy.get('@row-4').find('[data-testid="time-removed"]').invoke('text').should('match', /\d{4}-\d\d-\d\d \d\d:\d\d:\d\d.*/);
-        cy.get('@row-4').find('[data-testid="helped-by"]').should('contain', 'instructor');
+        cy.get('@row-4').find('[data-testid="helped-by"]').should('contain', '-');
         cy.get('@row-4').find('[data-testid="removed-by"]').should('contain', 'student');
-        cy.get('@row-4').find('[data-testid="removal-method"]').should('contain', 'self_helped');
+        cy.get('@row-4').find('[data-testid="removal-method"]').should('contain', 'self');
 
         cy.get('[data-testid="student-row-5"]').first().as('row-5');
         cy.get('@row-5').find('[data-testid="row-label"]').should('contain', '5');
-        cy.get('@row-5').find('[data-testid="current-state"]').should('contain', 'waiting');
-        cy.get('@row-5').find('[data-testid="queue"]').should('contain', queueName1);
+        cy.get('@row-5').find('[data-testid="current-state"]').should('contain', 'done');
+        cy.get('@row-5').find('[data-testid="queue"]').should('contain', queueName);
         cy.get('@row-5').find('[data-testid="time-entered"]').invoke('text').should('match', /\d{4}-\d\d-\d\d \d\d:\d\d:\d\d.*/);
-        cy.get('@row-5').find('[data-testid="time-removed"]').should('contain', '-');
-        cy.get('@row-5').find('[data-testid="helped-by"]').should('contain', '-');
-        cy.get('@row-5').find('[data-testid="removed-by"]').should('contain', '-');
-        cy.get('@row-5').find('[data-testid="removal-method"]').should('contain', '-');
+        cy.get('@row-5').find('[data-testid="time-removed"]').invoke('text').should('match', /\d{4}-\d\d-\d\d \d\d:\d\d:\d\d.*/);
+        cy.get('@row-5').find('[data-testid="helped-by"]').should('contain', 'instructor');
+        cy.get('@row-5').find('[data-testid="removed-by"]').should('contain', 'student');
+        cy.get('@row-5').find('[data-testid="removal-method"]').should('contain', 'self_helped');
+
+        cy.get('[data-testid="student-row-6"]').first().as('row-6');
+        cy.get('@row-6').find('[data-testid="row-label"]').should('contain', '6');
+        cy.get('@row-6').find('[data-testid="current-state"]').should('contain', 'waiting');
+        cy.get('@row-6').find('[data-testid="queue"]').should('contain', queueName1);
+        cy.get('@row-6').find('[data-testid="time-entered"]').invoke('text').should('match', /\d{4}-\d\d-\d\d \d\d:\d\d:\d\d.*/);
+        cy.get('@row-6').find('[data-testid="time-removed"]').should('contain', '-');
+        cy.get('@row-6').find('[data-testid="helped-by"]').should('contain', '-');
+        cy.get('@row-6').find('[data-testid="removed-by"]').should('contain', '-');
+        cy.get('@row-6').find('[data-testid="removal-method"]').should('contain', '-');
 
         cy.get('#times-helped-cell').should('contain', '1 times helped.');
 
