@@ -992,7 +992,7 @@ function readThreadStatusValues() {
 
 function dynamicScrollLoadPage(element, atEnd) {
     const load_page = $(element).data(atEnd ? 'next_page' : 'prev_page');
-    if (load_page === 0) {
+    if (load_page === -1) {
         return false;
     }
     if ($(element).data('dynamic_lock_load')) {
@@ -1014,7 +1014,7 @@ function dynamicScrollLoadPage(element, atEnd) {
             // eslint-disable-next-line eqeqeq
             if (count == 0) {
                 // Stop further loads
-                $(element).data('next_page', 0);
+                $(element).data('next_page', -1);
             }
             else {
                 $(element).data('next_page', parseInt(load_page) + 1);
@@ -1035,12 +1035,12 @@ function dynamicScrollLoadPage(element, atEnd) {
             arrow_up.after(content);
             if (count === 0) {
                 // Stop further loads
-                $(element).data('prev_page', 0);
+                $(element).data('prev_page', -1);
             }
             else {
                 const prev_page = parseInt(load_page) - 1;
                 $(element).data('prev_page', prev_page);
-                if (prev_page >= 1) {
+                if (prev_page >= 0) {
                     arrow_up.show();
                 }
             }
@@ -1119,7 +1119,7 @@ function dynamicScrollContentOnDemand(jElement, urlPattern, currentThreadId, cur
         const isTop = element.scrollTop < sensitivity;
         const isBottom = (element.scrollHeight - element.offsetHeight - element.scrollTop) < sensitivity;
         if (isTop) {
-            if ($(element).data('prev_page') !== 0) {
+            if ($(element).data('prev_page') !== -1) {
                 element.scrollTop = sensitivity;
             }
             dynamicScrollLoadPage(element, false);
