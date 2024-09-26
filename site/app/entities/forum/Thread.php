@@ -146,7 +146,7 @@ class Thread {
         if (count($this->posts) === 0) {
             return false;
         }
-        return $last_viewed->getTimestamp() > max(
+        return $last_viewed->getTimestamp() < max(
             $this->posts->map(function ($x) {
                 if ($x->getHistory()->isEmpty()) {
                     return $x->getTimestamp();
