@@ -14,17 +14,22 @@ class ThreadRepository extends EntityRepository {
      * @param int[] $category_ids
      * @return Thread[]
      */
-    public function getAllThreads(array $category_ids, bool $get_deleted, bool $get_merged_threads, int $block_number, string $user_id): array {
+    public function getAllThreads(array $category_ids, bool $get_deleted, bool $get_merged_threads, int $block_number): array {
         $block_size = 30;
         $qb = $this->_em->createQueryBuilder();
         $qb->select('t')
             ->from(Thread::class, 't')
+        // AddSelect allows us to join server-side, reducing the number of database queries.
+            ->addSelect('c')
+            ->addSelect('v')
+            ->addSelect('p')
+            ->addSelect('ph')
+            ->addSelect('sf')
             ->join('t.categories', 'c')
             ->leftJoin('t.viewers', 'v')
             ->leftJoin('t.posts', 'p')
             ->leftJoin('p.history', 'ph')
-            ->leftJoin('t.favorers', 'sf', Expr\Join::WITH, 'sf.user_id = :user_id')
-            ->setParameter(':user_id', $user_id);
+            ->leftJoin('t.favorers', 'sf');
         if (count($category_ids) > 0) {
             $qb->andWhere('c.category_id IN (:category_ids)')
                 ->setParameter(':category_ids', $category_ids);

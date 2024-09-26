@@ -1219,7 +1219,7 @@ class ForumController extends AbstractController {
         $this->core->getOutput()->addBreadcrumb("Discussion Forum");
 
         $repo = $this->core->getCourseEntityManager()->getRepository(Thread::class);
-        $threads = $repo->getAllThreads($category_ids, $show_deleted, $show_merged_thread, 0, $this->core->getUser()->getId());
+        $threads = $repo->getAllThreads($category_ids, $show_deleted, $show_merged_thread, 0);
         //$threads = $this->getSortedThreads($category_ids, $max_threads, $show_deleted, $show_merged_thread, $thread_status, $unread_threads, $pageNumber, $thread_id);
         return $this->core->getOutput()->renderOutput('forum\ForumThread', 'showFullThreadsPage', $threads, $category_ids, $show_deleted, $show_merged_thread, $pageNumber);
     }
