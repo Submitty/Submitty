@@ -133,7 +133,7 @@
             <option value="always" {{ poll is not null and poll.getReleaseHistogram() == 'always' ? "selected" : "" }}>Always</option>
         </select>
         <br><br>
-        <div {{is_survey ? "style='display:none'" : "style='display:inline-block'"}}>
+        <div id="show-answer-release">
             <label for="student-answer-release-setting" class="option-title">
                 Show correct response to students:
             </label>
@@ -217,8 +217,25 @@
         }
     });
 
+    function initializePollType() {
+        if ($("#poll-type-single-response-survey").is(":checked")
+            || $("#poll-type-multiple-response-survey").is(":checked")) {
+            $("#show-answer-release").hide();
+        } else {
+            $("#show-answer-release").show();
+        }
+    }
+
     function changePollType() {
         let count = $(".option_id").length;
+        if ($("#poll-type-single-response-survey").is(":checked")
+                || $("#poll-type-multiple-response-survey").is(":checked")) {
+            $("#show-answer-release").hide();
+
+        } else {
+            $("#show-answer-release").show();
+
+        }
         for (let i = 0; i < count; i++) {
             if ($("#poll-type-single-response-survey").is(":checked")
                 || $("#poll-type-multiple-response-survey").is(":checked")) {
@@ -418,7 +435,7 @@
     $(document).ready(function() {
         setEventHandlers();
         $("#new-poll-form").on("change click", submitErrorChecks);
-
+        initializePollType();
         let submit_form = false;
         $("#new-poll-form").submit(function(event) {
             if (!submit_form && {{ poll is not null ? "true" : "false" }} && !$(`#poll-type-${ poll_type }`).is(':checked')) {
