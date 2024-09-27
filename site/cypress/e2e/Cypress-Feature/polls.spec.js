@@ -204,6 +204,11 @@ describe('Test cases revolving around polls functionality', () => {
         cy.get('#enable-timer').check();
         cy.get('#timer-inputs').should('be.visible');
         cy.get('#enable-timer').should('be.checked');
+        // Testing 'Show Answers' disappearing after poll becomes survey
+        cy.get('#show-answer-release').should('be.visible');
+        cy.get('#poll-type-single-response-survey').check();
+        cy.get('#show-answer-release').should('not.be.visible');
+        cy.get('#poll-type-single-response-multiple-correct').check();
         // Add 5 seconds to timer
         cy.get('#timer-inputs').within(() => {
             cy.get('#poll-hours').clear();
