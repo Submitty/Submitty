@@ -48,16 +48,16 @@
             {% if is_full_page is defined and is_full_page %}
                 <div class="post-action-container">
                     <span>
-                    <strong class="post_user_id">{{ thread.author_info.name}}</strong>
+                    <strong class="post_user_id">{{thread.author_info.name}}</strong>
                         {% if thread.author_info.pronouns and thread.author_info.display_pronouns and thread.author_info.name != "Anonymous" %}
                             <strong class="post_user_pronouns">({{thread.author_info.pronouns}})</strong>
                         {% endif %}
                     </span>
                     <span>
                         <a data-testid="upduck-button" class="upduck-button text-decoration-none" tabindex="0" title="Total upduck">
-                            <img id="sumDucksIcon" src="{{'/img/on-duck-button.svg'}}" width="30" height="30">
+                            <img id="ThreadsumDucksIcon_{{thread.thread_id}}" src="{{'/img/on-duck-button.svg'}}" alt="sum_like" width="30" height="30">
                         </a>
-                        <span data-testid="total-like-count" id="total_likeCounter" class="like-counter">{{thread.sum_ducks}}</span>
+                        <span data-testid="Thread-like-count" id="Thread_likeCounter_{{thread.thread_id}}" class="like-counter">{{thread.sum_ducks}}</span>
                     </span>
 
                 </div>

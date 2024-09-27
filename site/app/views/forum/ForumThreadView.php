@@ -962,7 +962,6 @@ class ForumThreadView extends AbstractView {
                     "sum_ducks" => $thread_duck_list[$thread['id']]
                 ]);
             }
-
             $thread_content[] = $thread_info;
         }
 
