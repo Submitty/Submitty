@@ -117,8 +117,7 @@ class ConfigTester extends \PHPUnit\Framework\TestCase {
             "accepted_emails" => [
                 "gmail.com" => true,
                 "rpi.edu" => true
-            ],
-            "is_ci" => false
+            ]
         ];
         $config = array_replace($config, $extra);
         FileUtils::writeJsonFile(FileUtils::joinPaths($this->config_path, "submitty.json"), $config);
@@ -161,7 +160,6 @@ class ConfigTester extends \PHPUnit\Framework\TestCase {
                 'polls_enabled'                  => false
             ],
             'feature_flags' => [
-
             ]
         ];
 

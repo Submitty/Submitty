@@ -699,9 +699,9 @@ jobs:
           spec: cypress/e2e/Cypress-System/login.spec.js
           working-directory: ${{env.SUBMITTY_REPOSITORY}}/site
           browser: chrome
-      - name: Switch to CI mode
+      - name: Switch to Debyg mode
         run: |
-          sudo sed -ie '/is_ci/c\ \"is_ci\" : true",' /usr/local/submitty/config/submitty.json
+          sudo sed -ie '/debugging_enabled/c\ \"debugging_enabled\" : true",' /usr/local/submitty/config/submitty.json
 
       - name: Run self-account-creation tests.
         uses: cypress-io/github-action@v6
