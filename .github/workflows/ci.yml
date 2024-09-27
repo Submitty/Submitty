@@ -699,7 +699,7 @@ jobs:
           spec: cypress/e2e/Cypress-System/login.spec.js
           working-directory: ${{env.SUBMITTY_REPOSITORY}}/site
           browser: chrome
-      - name: Switch to Debyg mode
+      - name: Switch to debug mode
         run: |
           sudo sed -ie '/debugging_enabled/c\ \"debugging_enabled\": true",' /usr/local/submitty/config/submitty.json
 
