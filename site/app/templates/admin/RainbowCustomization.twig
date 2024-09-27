@@ -121,7 +121,7 @@
                             <input type="checkbox" id="display_{{ display_option.id }}" name="display" value="{{ display_option.id }}" data-testid="display-{{ display_option.id|replace({'_': '-'}) }}"
                                    {% if display_option.isUsed == true %}checked{% endif %}
                             >
-                            <label style="display: table-cell; width: 150px;" for="display_{{ display_option.id }}">{{ display_option.id }}</label>
+                            <label style="display: table-cell; width: 200px;" for="display_{{ display_option.id }}">{{ display_option.id }}</label>
                             <span style=" display: table-cell;"><em>{{ description | raw }}</em></span>
                         </div>
                         {% set counter = counter + 1 %}

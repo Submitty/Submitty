@@ -476,7 +476,7 @@ class GlobalController extends AbstractController {
 
         // --------------------------------------------------------------------------
         // INSTRUCTOR IN ANY COURSE
-        if ($is_instructor) {
+        if ($is_instructor || $this->core->getUser()->isSuperUser()) {
             $sidebar_buttons[] = new NavButton($this->core, [
                 "href" => $this->core->buildUrl(['autograding_status']),
                 "title" => "Autograding Status",
