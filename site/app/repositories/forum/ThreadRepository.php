@@ -12,9 +12,10 @@ use Doctrine\ORM\EntityRepository;
 class ThreadRepository extends EntityRepository {
     /**
      * @param int[] $category_ids
+     * @param int[] $status
      * @return Thread[]
      */
-    public function getAllThreads(array $category_ids, bool $get_deleted, bool $get_merged_threads, int $block_number): array {
+    public function getAllThreads(array $category_ids, array $status, bool $get_deleted, bool $get_merged_threads, bool $filter_unread, string $user_id, int $block_number): array {
         $block_size = 30;
         $qb = $this->_em->createQueryBuilder();
         $qb->select('t')
@@ -34,7 +35,11 @@ class ThreadRepository extends EntityRepository {
             ->join('t.author', 'u');
         if (count($category_ids) > 0) {
             $qb->andWhere('c.category_id IN (:category_ids)')
-                ->setParameter(':category_ids', $category_ids);
+                ->setParameter('category_ids', $category_ids);
+        }
+        if (count($status) > 0) {
+            $qb->andWhere('t.status IN (:status)')
+                ->setParameter('status', $status);
         }
         if (!$get_deleted) {
             $qb->andWhere('t.deleted = false');
@@ -48,7 +53,14 @@ class ThreadRepository extends EntityRepository {
             ->setMaxResults($block_size)
             ->setFirstResult($block_size * $block_number);
 
-        return $qb->getQuery()->getResult();
+        $result = $qb->getQuery()->getResult();
+
+        if ($filter_unread) {
+            $result = array_filter($result, function ($x) use ($user_id) {
+                return $x->isUnread($user_id);
+            });
+        }
+        return $result;
     }
 
     

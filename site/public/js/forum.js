@@ -1195,7 +1195,7 @@ function modifyThreadList(currentThreadId, currentCategoriesId, course, loadFirs
     Cookies.set(`${course}_forum_categories`, categories_value, { path: '/' });
     Cookies.set('forum_thread_status', thread_status_value, { path: '/' });
     Cookies.set('unread_select_value', unread_select_value, { path: '/' });
-    const url = `${buildCourseUrl(['forum', 'threads'])} ? page_number=${(loadFirstPage ? '1' : '-1')}`;
+    const url = `${buildCourseUrl(['forum', 'threads'])}?page_number=${(loadFirstPage ? '0' : '-1')}`;
     $.ajax({
         url: url,
         type: 'POST',
