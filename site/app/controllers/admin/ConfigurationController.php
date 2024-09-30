@@ -190,9 +190,11 @@ class ConfigurationController extends AbstractController {
             $entry = $entry === "true";
         }
 
-        if ($name === 'self_registration') {
+        if ($name === 'all_self_registration') {
             $this->core->getQueries()->setSelfRegistrationType($this->core->getConfig()->getCourse(), $entry === 'true' ?  ConfigurationController::ALL_SELF_REGISTER : ConfigurationController::NO_SELF_REGISTER);
             $this->core->getQueries()->setDefaultRegistrationSection($this->core->getConfig()->getTerm(), $this->core->getConfig()->getCourse(), $_POST['default_section']);
+            $name = 'self_registration_type';
+            $entry = $entry === 'true' ? ConfigurationController::ALL_SELF_REGISTER : ConfigurationController::NO_SELF_REGISTER;
         }
 
         if ($name === 'default_section_id') {

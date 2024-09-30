@@ -311,7 +311,7 @@
             <h2> Danger Zone</h2>
             <hr>
                 <div class="config-row checkbox-row">
-                    <input type="checkbox" name="self_registration" id="self-registration" data-testid="enable-self-registration" value="true" {{ fields['self_registration_type'] == constant('app\\controllers\\admin\\ConfigurationController::ALL_SELF_REGISTER') ? 'checked' : '' }}
+                    <input type="checkbox" name="all_self_registration" id="all-self-registration" data-testid="all-self-registration" value="true" {{ fields['self_registration_type'] == constant('app\\controllers\\admin\\ConfigurationController::ALL_SELF_REGISTER') ? 'checked' : '' }}
                     onclick="return confirmSelfRegistration(this, {{ fields['registration_sections'] is empty ? 'true' : 'false' }})" />
                     <div>
                         <label for="self-registration">

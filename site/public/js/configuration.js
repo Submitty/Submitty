@@ -9,7 +9,7 @@ $(document).ready(() => {
         let default_section;
         if (this.type === 'checkbox') {
             entry = $(elem).is(':checked');
-            if (this.id === 'self-registration') {
+            if (this.id === 'all-self-registration') {
                 default_section = $('#default-section-id').val();
                 formData.append('default_section', default_section);
             }
