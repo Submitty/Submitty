@@ -1242,7 +1242,9 @@ nlohmann::json FillInConfigDefaults(nlohmann::json& config_json, const std::stri
   }
 
   AddDockerConfiguration(*testcases, config_json);
-  ConfirmCapabilityHasImages(*testcases, config_json);
+  if (config_json["autograding_method"] == "docker") {
+    ConfirmCapabilityHasImages(*testcases, config_json);
+  }
   FormatDispatcherActions(*testcases, config_json);
   formatPreActions(*testcases, config_json);
   FormatGraphicsActions(*testcases, config_json);
