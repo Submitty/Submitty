@@ -6,6 +6,8 @@ namespace app\entities\forum;
 
 use DateTime;
 use Doctrine\Common\Collections\Collection;
+use Doctrine\Common\Collections\Order;
+use app\entities\UserEntity;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
 use app\repositories\forum\ThreadRepository;
@@ -28,11 +30,12 @@ class Thread {
         return $this->title;
     }
 
-    #[ORM\Column(type: Types::STRING)]
-    protected string $created_by;
+    #[ORM\ManyToOne(targetEntity: UserEntity::class, inversedBy: "threads")]
+    #[ORM\JoinColumn(name: "created_by", referencedColumnName: "user_id")]
+    protected UserEntity $author;
 
-    public function getCreatedBy(): string {
-        return $this->created_by;
+    public function getAuthor(): UserEntity {
+        return $this->author;
     }
 
     #[ORM\Column(type: Types::BOOLEAN)]
@@ -136,26 +139,23 @@ class Thread {
     protected Collection $favorers;
 
     public function isUnread(string $user_id): bool {
-        $last_viewed = $this->viewers->filter(function ($x) use ($user_id) {
+        return !$this->getNewPosts($user_id)->isEmpty();
+    }
+
+    /**
+     * @return Collection<Post>
+     */
+    public function getNewPosts(string $user_id): Collection {
+        $last_view = $this->viewers->filter(function ($x) use ($user_id) {
             return $user_id === $x->getUserId();
         })->first();
-        if ($last_viewed === false) {
-            return true;
+
+        if ($last_view === false) {
+            return $this->posts;
         }
-        // thread has no posts, call it read.
-        if (count($this->posts) === 0) {
-            return false;
-        }
-        return $last_viewed->getTimestamp() < max(
-            $this->posts->map(function ($x) {
-                if ($x->getHistory()->isEmpty()) {
-                    return $x->getTimestamp();
-                }
-                return max($x->getHistory()->map(function ($x) {
-                    return $x->getEditTimestamp();
-                })->toArray());
-            })->toArray()
-        );
+        return $this->posts->filter(function ($x) use ($last_view) {
+            return $x->isUnread($last_view);
+        });
     }
 
     public function isFavorite(string $user_id): bool {
@@ -168,5 +168,9 @@ class Thread {
         return $this->posts->filter(function ($x) {
             return $x->getParent()->getId() == -1;
         })->first();
+    }
+
+    public function reOrderPosts(string $order): void {
+
     }
 }

@@ -782,13 +782,6 @@ class ForumThreadView extends AbstractView {
 
         $thread_content = [];
 
-        $author_user_ids = array_map(function ($thread) {
-            return $thread->getCreatedBy();
-        }, $threads);
-
-        $authors = $this->core->getQueries()->getusersByIds($author_user_ids);
-        $authors_info = $this->core->getQueries()->getDisplayUserInfoFromUserIds($author_user_ids);
-
         foreach ($threads as $thread) {
             $first_post = $thread->getFirstPost();
             if ($first_post === false) {
@@ -810,7 +803,7 @@ class ForumThreadView extends AbstractView {
                 return $x->getId();
             })->toArray())) == count($current_categories_ids));
             
-            if (((isset($_REQUEST["thread_id"]) && $_REQUEST["thread_id"] == $thread->getId()) || $thread_id_p == $thread->getId() || $thread_id_p == -1) && !$used_active && $issubset) {
+            if ((($_REQUEST["thread_id"] ?? -1 == $thread->getId()) || $thread_id_p == $thread->getId() || $thread_id_p == -1) && !$used_active && $issubset) {
                 $class .= " active";
                 $used_active = true;
                 $activeThreadTitle = "({$thread->getId()}) " . $thread->getTitle();
@@ -833,7 +826,7 @@ class ForumThreadView extends AbstractView {
                 $class .= " deleted";
             }
 
-            if ($authors[$thread->getCreatedBy()]->accessGrading()) {
+            if ($thread->getAuthor()->accessGrading()) {
                 $class .= " important";
             }
 
@@ -899,11 +892,11 @@ class ForumThreadView extends AbstractView {
                 "tooltip" => $tooltip,
                 "is_locked" => is_null($thread->getLockDate()) ? false : $thread->getLockDate() < date("Y-m-d H:i:S"),
                 "date" => $date_content,
-                "current_user_posted" => $thread->getCreatedBy() === $current_user,
+                "current_user_posted" => $thread->getAuthor()->getId() === $current_user,
             ];
 
             if ($is_full_page) {
-                $user_info = $authors_info[$first_post->getAuthorUserId()];
+                $user_info = $first_post->getAuthor()->getDisplayInfo();
                 $email = trim($user_info["user_email"]);
                 $given_name = trim($user_info["given_name"]);
                 $family_name = trim($user_info["family_name"]);
@@ -911,15 +904,15 @@ class ForumThreadView extends AbstractView {
                 $pronouns = trim($user_info["pronouns"]);
                 $display_pronouns = $user_info["display_pronouns"];
 
-                if ($authors[$first_post->getAuthorUserId()]?->accessFullGrading()) {
+                if ($first_post->getAuthor()->accessFullGrading()) {
                     $visible_username = $given_name . " " . $family_name;
                 }
 
                 $author_info = [
-                    "user_id" => $first_post->getAuthorUserId(),
+                    "user_id" => $first_post->getAuthor()->getId(),
                     "name" => $first_post->isAnonymous() ? "Anonymous" : $visible_username,
                     "email" => $email,
-                    "full_name" => $given_name . " " . $family_name . " (" . $first_post->getAuthorUserId() . ")",
+                    "full_name" => $given_name . " " . $family_name . " (" . $first_post->getAuthor()->getId() . ")",
                     "pronouns" => $pronouns,
                     "display_pronouns" => $display_pronouns
                 ];

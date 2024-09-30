@@ -25,11 +25,13 @@ class ThreadRepository extends EntityRepository {
             ->addSelect('p')
             ->addSelect('ph')
             ->addSelect('sf')
+            ->addSelect('u')
             ->join('t.categories', 'c')
             ->leftJoin('t.viewers', 'v')
             ->leftJoin('t.posts', 'p')
             ->leftJoin('p.history', 'ph')
-            ->leftJoin('t.favorers', 'sf');
+            ->leftJoin('t.favorers', 'sf')
+            ->join('t.author', 'u');
         if (count($category_ids) > 0) {
             $qb->andWhere('c.category_id IN (:category_ids)')
                 ->setParameter(':category_ids', $category_ids);
@@ -47,5 +49,24 @@ class ThreadRepository extends EntityRepository {
             ->setFirstResult($block_size * $block_number);
 
         return $qb->getQuery()->getResult();
-    } 
+    }
+
+    
+    public function getThreadDetail(int $thread_id): Thread {
+        $qb = $this->_em->createQueryBuilder();
+        $qb->select('t')
+            ->from(Thread::class, 't')
+            ->addSelect('p')
+            ->addSelect('pa')
+            ->addSelect('ph')
+            ->addSelect('u')
+            ->join('t.posts', 'p')
+            ->join('p.attachments', 'pa')
+            ->join('p.history', 'ph')
+            ->join('t.categories', 'c')
+            ->join('t.author', 'u')
+            ->andWhere('t.id = :thread_id')
+            ->setParameter('thread_id', $thread_id);
+        return $qb->getQuery()->getSingleResult();
+    }
 }

@@ -9,6 +9,7 @@ use Doctrine\Common\Collections\Collection;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
 use app\repositories\forum\PostRepository;
+use app\entities\UserEntity;
 
 #[ORM\Entity(repositoryClass: PostRepository::class)]
 #[ORM\Table(name: "posts")]
@@ -48,11 +49,12 @@ class Post {
     #[ORM\OneToMany(mappedBy: "parent", targetEntity: Post::class)]
     protected Collection $children;
 
-    #[ORM\Column(type: Types::STRING)]
-    protected string $author_user_id;
+    #[ORM\ManyToOne(targetEntity: UserEntity::class, inversedBy: "posts")]
+    #[ORM\JoinColumn(name: "author_user_id", referencedColumnName: "user_id")]
+    protected UserEntity $author;
 
-    public function getAuthorUserId(): string {
-        return $this->author_user_id;
+    public function getAuthor(): UserEntity {
+        return $this->author;
     }
 
     #[ORM\Column(type: Types::TEXT)]
@@ -127,10 +129,20 @@ class Post {
 
     /**
      * Doctrine ORM does not use constructors, instead filling properties from database.
+     * We are free to make constructors for "empty" or "junk" posts.
      */ 
     
     public function __construct() {
         $this->content = '';
         $this->render_markdown = false;
+    }
+
+    public function isUnread(ThreadAccess $view): bool {
+        if ($this->history->isEmpty()) {
+            return $view->getTimestamp() < $this->getTimestamp();
+        }
+        return $view->getTimestamp() < max($this->history->map(function ($x) {
+            return $x->getEditTimestamp();
+        })->toArray());
     }
 }

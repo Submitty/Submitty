@@ -14,6 +14,7 @@ class PostRepository extends EntityRepository {
             ->from(Post::class, 'p')
             ->leftJoin('p.history', 'h')
             ->leftJoin('p.attachments', 'a')
+            ->leftJoin('p.author', 'u')
             ->where('p.id = :post_id')
             ->setParameter('post_id', $post_id);
         

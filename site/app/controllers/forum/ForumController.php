@@ -1249,24 +1249,21 @@ class ForumController extends AbstractController {
             $option = $_COOKIE['forum_display_option'];
         }
         $option = ($this->core->getUser()->accessGrading() || $option != 'alpha') ? $option : 'tree';
-        if (!empty($thread_id)) {
+        if (!is_null($thread_id)) {
             $thread_id = (int) $thread_id;
-            $thread = $this->core->getQueries()->getThread($thread_id);
-            $thread_resolve_state = $thread['status'];
+            $repo = $this->core->getCourseEntityManager()->getRepository(Thread::class);
+            $thread = $repo->getThreadDetail($thread_id);
             $this->core->getQueries()->markNotificationAsSeen($user, -2, (string) $thread_id);
-            $unread_p = $this->core->getQueries()->getUnviewedPosts($thread_id, $current_user);
-            foreach ($unread_p as $up) {
-                $new_posts[] = $up["id"];
-            }
+            $new_posts = $thread->getNewPosts($user);
             $thread_announced = $this->core->getQueries()->existsAnnouncementsId($thread_id);
-            if (!empty($thread)) {
-                if ($thread['merged_thread_id'] != -1) {
+            if (!is_null($thread)) {
+                if (!is_null($thread->getMergedThread())) {
                     // Redirect merged thread to parent
                     $this->core->addSuccessMessage("Requested thread is merged into current thread.");
                     if (!empty($_REQUEST["ajax"])) {
                         return $this->core->getOutput()->renderJsonSuccess(['merged' => true, 'destination' => $this->core->buildCourseUrl(['forum', 'threads', $thread['merged_thread_id']])]);
                     }
-                    $this->core->redirect($this->core->buildCourseUrl(['forum', 'threads', $thread['merged_thread_id']]));
+                    $this->core->redirect($this->core->buildCourseUrl(['forum', 'threads', $thread->getMergedThread()->getId()]));
                     return;
                 }
                 if ($option == "alpha") {
@@ -1381,7 +1378,7 @@ class ForumController extends AbstractController {
         $edit_id = 0;
         foreach ($post->getHistory() as $version) {
             $tmp = [];
-            $tmp['user'] = (!$this->modifyAnonymous($post->getAuthorUserId()) && $post->getAuthorUserId() == $version->getEditAuthor() && $post->isAnonymous()) ? '' : $version->getEditAuthor();
+            $tmp['user'] = (!$this->modifyAnonymous($post->getAuthor()->getId()) && $post->getAuthor()->getId() == $version->getEditAuthor() && $post->isAnonymous()) ? '' : $version->getEditAuthor();
             $tmp['content'] = $this->core->getOutput()->renderTwigTemplate("forum/RenderPost.twig", [
                 "post_content" => $version->getContent(),
                 "render_markdown" => false,
@@ -1406,7 +1403,7 @@ class ForumController extends AbstractController {
         if (count($output) == 0) {
             // No history, get current post
             $tmp = [];
-            $tmp['user'] = (!$this->modifyAnonymous($post->getAuthorUserId()) && $post->isAnonymous()) ? '' : $post->getAuthorUserId();
+            $tmp['user'] = (!$this->modifyAnonymous($post->getAuthor()->getId()) && $post->isAnonymous()) ? '' : $post->getAuthor()->getId();
             $tmp['content'] = $this->core->getOutput()->renderTwigTemplate("forum/RenderPost.twig", [
                 "post_content" => $post->getContent(),
                 "render_markdown" => false,
@@ -1425,7 +1422,7 @@ class ForumController extends AbstractController {
             ]);
             $emptyAuthor = $tmp['user'] === '';
             $tmp['user_info'] = $emptyAuthor ? ['given_name' => 'Anonymous', 'family_name' => '', 'email' => '', 'pronouns' => '', 'display_pronouns' => false ] : $this->core->getQueries()->getDisplayUserInfoFromUserId($tmp['user']);
-            $tmp['is_staff_post'] = !$emptyAuthor && $this->core->getQueries()->getUserById($post->getAuthorUserId())?->accessFullGrading();
+            $tmp['is_staff_post'] = !$emptyAuthor && $post->getAuthor()->accessFullGrading();
             $tmp['post_time'] = DateUtils::parseDateTime($post->getTimestamp(), $this->core->getConfig()->getTimezone())->format("n/j g:i A");
             $output[] = $tmp;
         }
