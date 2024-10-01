@@ -3142,17 +3142,13 @@ function gradedComponentsEqual(gcDOM, gcOLD) {
     }
 }
 
-function saveComponent(component_id) {
+async function saveComponent(component_id) {
     // We are saving changes...
     if (isEditModeEnabled()) {
         // We're in edit mode, so save the component and fetch the up-to-date grade / rubric data
-        return saveMarkList(component_id)
-            .then(() => {
-                return ajaxGetComponentRubric(getGradeableId(), component_id);
-            }).then((component) => {
-                COMPONENT_RUBRIC_LIST[component_id] = component;
-                return Promise.resolve();
-            });
+        await saveMarkList(component_id);
+        const component = await ajaxGetComponentRubric(getGradeableId(), component_id);
+        COMPONENT_RUBRIC_LIST[component_id] = component;
     }
     else {
         // The grader unchecked the custom mark, but didn't delete the text.  This shouldn't happen too often,
@@ -3161,24 +3157,22 @@ function saveComponent(component_id) {
         // only show error if custom marks are allowed
         if (gradedComponent.custom_mark_enabled && gradedComponent.comment !== '' && !gradedComponent.custom_mark_selected && getAllowCustomMarks()) {
             if (!confirm('Are you sure you want to delete the custom mark?')) {
-                return Promise.reject();
+                throw new Error();
             }
         }
         // We're in grade mode, so save the graded component
         // The grader didn't change the grade at all, so don't save (don't put our name on a grade we didn't contribute to)
         if (!gradedComponentsEqual(gradedComponent, OLD_GRADED_COMPONENT_LIST[component_id])) {
-            saveGradedComponent(component_id);
+            await saveGradedComponent(component_id);
             if (!isSilentEditModeEnabled()) {
                 GRADED_COMPONENTS_LIST[component_id].grader_id = getGraderId();
             }
             GRADED_COMPONENTS_LIST[component_id].verifier_id = '';
         }
         else if (gradedComponent.graded_version !== getDisplayVersion()) {
-            ajaxChangeGradedVersion(getGradeableId(), getAnonId(), getDisplayVersion(), [component_id]).then(async () => {
-                await reloadGradingComponent(component_id, false, false);
-            });
+            await ajaxChangeGradedVersion(getGradeableId(), getAnonId(), getDisplayVersion(), [component_id]);
+            await reloadGradingComponent(component_id, false, false);
         }
-        return Promise.resolve();
     }
 }
 
