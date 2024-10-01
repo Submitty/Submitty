@@ -1821,7 +1821,7 @@ function onRestoreMark(me) {
  * Called when a component is deleted
  * @param me DOM Element of the delete button
  */
-function onDeleteComponent(me) {
+async function onDeleteComponent(me) {
     const componentCount = $('.component-container').length;
     if (componentCount === 1) {
         displayErrorMessage('Cannot delete the only component.');
@@ -1831,18 +1831,19 @@ function onDeleteComponent(me) {
     if (!confirm('Are you sure you want to delete this component?')) {
         return;
     }
-
-    deleteComponent(getComponentIdFromDOMElement(me))
-        .catch((err) => {
-            console.error(err);
-            alert(`Failed to delete component! ${err.message}`);
-        })
-        .then(() => {
-            return reloadInstructorEditRubric(getGradeableId(), isItempoolAvailable(), getItempoolOptions());
-        })
-        .catch((err) => {
-            alert(`Failed to reload rubric! ${err.message}`);
-        });
+    try {
+        await deleteComponent(getComponentIdFromDOMElement(me));
+    }
+    catch (err) {
+        console.error(err);
+        alert(`Failed to delete component! ${err.message}`);
+    }
+    try {
+        await reloadInstructorEditRubric(getGradeableId(), isItempoolAvailable(), getItempoolOptions());
+    }
+    catch (err) {
+        alert(`Failed to reload rubric! ${err.message}`);
+    }
 }
 
 /**
