@@ -432,12 +432,7 @@ class ForumThreadView extends AbstractView {
         })->toArray();
 
         $user = $this->core->getUser();
-        $upDuckCounter_map = [];
-        $upDuckCounter_map = $this->core->getQueries()->getUpduckInfoForPosts($post_ids);
-        $userLiked = $this->core->getQueries()->getUserLikesForPosts($post_ids, $user->getId());
-        $staffLiked = $this->core->getQueries()->getInstructorUpduck($post_ids);
         $first_post = $thread->getFirstPost();
-        
         $posts = [];
         if ($display_option == "tree") {
             $posts = $this->BuildReplyHeirarchy($first_post);
@@ -448,17 +443,12 @@ class ForumThreadView extends AbstractView {
         }
         $post_box_id = 2;
         foreach ($posts as $post) {
-            $boolLiked = in_array($post->getId(), $userLiked, true);
-            $boolStaffLiked = in_array($post->getId(), $staffLiked, true);
             $post_data[] = $this->createPost(
                 $first_post,
                 $thread,
                 $post,
                 $first,
                 $display_option,
-                $upDuckCounter_map[$post->getId()],
-                $boolLiked,
-                $boolStaffLiked,
                 $includeReply,
                 $post_box_id,
                 false,
@@ -872,7 +862,7 @@ class ForumThreadView extends AbstractView {
 
     /**
      */
-    public function createPost(Post $first_post, Thread $thread, Post $post, bool $first, string $display_option, int $counter, bool $isLiked, bool $taTrue, bool $includeReply, int $post_box_id, bool $render = false, bool $thread_announced = false, bool $isCurrentFavorite = false) {
+    public function createPost(Post $first_post, Thread $thread, Post $post, bool $first, string $display_option, bool $includeReply, int $post_box_id, bool $render = false, bool $thread_announced = false, bool $isCurrentFavorite = false) {
         $user = $this->core->getUser();
         $thread_dir = FileUtils::joinPaths(FileUtils::joinPaths($this->core->getConfig()->getCoursePath(), "forum_attachments"), $thread->getId());
         // Get formatted time stamps
@@ -927,7 +917,7 @@ class ForumThreadView extends AbstractView {
 
         $post_user_info = [];
 
-        $merged_thread = $thread->isMergedThread() && $userAccessFullGrading;
+        $merged_thread = $thread->isMergedThread() && $user->accessFullGrading();
 
         $post_button = [];
 
@@ -967,9 +957,13 @@ class ForumThreadView extends AbstractView {
         }
 
         $post_up_duck = [
-            "upduck_count" => $counter,
-            "upduck_user_liked" => $isLiked,
-            "taTrue" => $taTrue
+            "upduck_count" => count($post->getUpduckers()),
+            "upduck_user_liked" => $post->getUpduckers()->map(function ($x) {
+                return $x->getId();
+            })->contains($user->getId()),
+            "taTrue" => !$post->getUpduckers()->filter(function ($x) {
+                return $x->accessFullGrading();
+            })->isEmpty(),
         ];
 
         $author_display_info = $post->getAuthor()->getDisplayInfo();

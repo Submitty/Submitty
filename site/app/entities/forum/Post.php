@@ -134,6 +134,22 @@ class Post {
         return $this->attachments;
     }
 
+    /**
+     * @var Collection<UserEntity>
+     */
+    #[ORM\ManyToMany(targetEntity: UserEntity::class, inversedBy: "upducks")]
+    #[ORM\JoinTable(name: "forum_upducks")]
+    #[ORM\JoinColumn(name: "post_id", referencedColumnName:"id")]
+    #[ORM\InverseJoinColumn(name:"user_id", referencedColumnName:"user_id")]
+    protected Collection $upduckers;
+
+    /**
+     * @return Collection<UserEntity>
+     */
+    public function getUpduckers(): Collection {
+        return $this->upduckers;
+    }
+
     protected int $reply_level = 1;
     public function getReplyLevel(): int {
         return $this->reply_level;
@@ -151,7 +167,6 @@ class Post {
         $this->render_markdown = false;
         $this->author = $merged_thread->getAuthor();
         $this->thread = $merged_thread;
-        $this->parent = null;
         $this->deleted = false;
         $this->anonymous = true;
         $this->id = -1;

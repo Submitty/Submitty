@@ -115,6 +115,12 @@ class UserEntity {
     #[ORM\OneToMany(mappedBy: "author", targetEntity: Thread::class)]
     protected Collection $threads;
 
+    /**
+     * @var Collection<Post>
+     */
+    #[ORM\ManyToMany(mappedBy: "upduckers", targetEntity: Post::class)]
+    protected Collection $upducks;
+
     public function accessFullGrading(): bool {
         return $this->user_group < 3;
     }

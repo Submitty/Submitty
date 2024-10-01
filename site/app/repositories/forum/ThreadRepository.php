@@ -73,12 +73,14 @@ class ThreadRepository extends EntityRepository {
             ->addSelect('ph')
             ->addSelect('u')
             ->addSelect('pu')
+            ->addSelect('ud')
             ->leftJoin('t.posts', 'p')
             ->leftJoin('p.attachments', 'pa')
             ->leftJoin('p.history', 'ph')
             ->join('t.categories', 'c')
             ->join('t.author', 'u')
             ->leftJoin('p.author', 'pu')
+            ->leftJoin('p.upduckers', 'ud')
             ->andWhere('t.id = :thread_id')
             ->setParameter('thread_id', $thread_id);
         
@@ -90,12 +92,12 @@ class ThreadRepository extends EntityRepository {
                 break;
             case 'alpha_by_registration':
                 $qb->addOrderBy('pu.registration_section', 'ASC')
-                    ->addSelect('COALESCE(pu.user_preferred_familyname, pu.user_familyname) as user_familyname_order')
+                    ->addSelect('COALESCE(pu.user_preferred_familyname, pu.user_familyname) AS HIDDEN user_familyname_order')
                     ->addOrderBy('user_familyname_order', 'ASC');
                 break;
-            case 'alpha_by_registration':
+            case 'alpha_by_':
                 $qb->addOrderBy('pu.rotating_section', 'ASC')
-                    ->addSelect('COALESCE(pu.user_preferred_familyname, pu.user_familyname) as user_familyname_order')
+                    ->addSelect('COALESCE(pu.user_preferred_familyname, pu.user_familyname) AS HIDDEN user_familyname_order')
                     ->addOrderBy('user_familyname_order', 'ASC');
                 break;
             case 'reverse-time':

@@ -6,7 +6,6 @@ namespace app\entities\forum;
 
 use DateTime;
 use Doctrine\Common\Collections\Collection;
-use Doctrine\Common\Collections\Order;
 use app\entities\UserEntity;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
@@ -57,7 +56,6 @@ class Thread {
     }
 
     public function isMergedThread(): bool {
-        //print_r($this->merged_thread?->getId());
         return ($this->merged_thread?->getId() ?? -1) !== -1; 
     }
 
