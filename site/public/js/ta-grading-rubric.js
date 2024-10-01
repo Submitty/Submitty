@@ -257,33 +257,34 @@ async function ajaxGetGradedGradeable(gradeable_id, anon_id, all_peers) {
  * @param {string} gradeable_id
  * @param {int} component_id
  * @param {string} anon_id
- * @return {Promise} Rejects except when the response returns status 'success'
+ * @async
+ * @throws {Error} Throws except when the response returns status 'success'
+ * @return {Object}
  */
-function ajaxGetGradedComponent(gradeable_id, component_id, anon_id) {
-    return new Promise((resolve, reject) => {
-        $.getJSON({
+async function ajaxGetGradedComponent(gradeable_id, component_id, anon_id) {
+    let response;
+    try {
+        response = await $.getJSON({
             type: 'GET',
             async: AJAX_USE_ASYNC,
             url: `${buildCourseUrl(['gradeable', gradeable_id, 'grading', 'graded_gradeable', 'graded_component'])}?anon_id=${anon_id}&component_id=${component_id}`,
-            success: function (response) {
-                if (response.status !== 'success') {
-                    console.error(`Something went wrong fetching the component grade: ${response.message}`);
-                    reject(new Error(response.message));
-                }
-                else {
-                    // null is not the same as undefined, so we need to make that conversion before resolving
-                    if (response.data === null) {
-                        response.data = undefined;
-                    }
-                    resolve(response.data);
-                }
-            },
-            error: function (err) {
-                displayAjaxError(err);
-                reject(err);
-            },
         });
-    });
+    }
+    catch (err) {
+        displayAjaxError(err);
+        throw err;
+    }
+    if (response.status !== 'success') {
+        console.error(`Something went wrong fetching the component grade: ${response.message}`);
+        throw new Error(response.message);
+    }
+    else {
+        // null is not the same as undefined, so we need to make that conversion before resolving
+        if (response.data === null) {
+            response.data = undefined;
+        }
+        return response.data;
+    }
 }
 
 /**
