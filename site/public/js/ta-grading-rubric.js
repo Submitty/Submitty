@@ -2039,12 +2039,14 @@ async function onComponentOrderChange() {
  * Called when a mark is clicked in grade mode
  * @param me DOM Element of the mark div
  */
-function onToggleMark(me) {
-    toggleCommonMark(getComponentIdFromDOMElement(me), getMarkIdFromDOMElement(me))
-        .catch((err) => {
-            console.error(err);
-            alert(`Error toggling mark! ${err.message}`);
-        });
+async function onToggleMark(me) {
+    try {
+        await toggleCommonMark(getComponentIdFromDOMElement(me), getMarkIdFromDOMElement(me));
+    }
+    catch (err) {
+        console.error(err);
+        alert(`Error toggling mark! ${err.message}`);
+    }
 }
 
 /**
