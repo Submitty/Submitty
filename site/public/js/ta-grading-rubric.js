@@ -2070,7 +2070,7 @@ async function onCustomMarkChange(me) {
  *  the DOM if the user toggles this again.
  * @param me
  */
-function onToggleCustomMark(me) {
+async function onToggleCustomMark(me) {
     const component_id = getComponentIdFromDOMElement(me);
     const graded_component = getGradedComponentFromDOM(component_id);
     if (graded_component.comment === '') {
@@ -2078,11 +2078,13 @@ function onToggleCustomMark(me) {
         return;
     }
     toggleDOMCustomMark(component_id);
-    toggleCustomMark(component_id)
-        .catch((err) => {
-            console.error(err);
-            alert(`Error toggling custom mark! ${err.message}`);
-        });
+    try {
+        await toggleCustomMark(component_id);
+    }
+    catch (err) {
+        console.error(err);
+        alert(`Error toggling custom mark! ${err.message}`);
+    }
 }
 
 /**
