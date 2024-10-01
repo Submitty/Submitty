@@ -2468,27 +2468,27 @@ async function reloadPeerRubric(gradeable_id, anon_id) {
  * @param {string} gradeable_id
  * @param {bool} itempool_available
  * @param {array} itempool_options
- * @return {Promise}
+ * @async
+ * @return {void}
  */
-function reloadInstructorEditRubric(gradeable_id, itempool_available, itempool_options) {
-    return ajaxGetGradeableRubric(gradeable_id)
-        .catch((err) => {
-            alert(`Could not fetch gradeable rubric: ${err.message}`);
-        })
-        .then((gradeable) => {
-            return renderInstructorEditGradeable(gradeable, itempool_available, itempool_options);
-        })
-        .then((elements) => {
-            setRubricDOMElements(elements);
-            return refreshRubricTotalBox();
-        })
-        .then(() => {
-            return openCookieComponent();
-        })
-        .catch((err) => {
-            alert(`Could not render gradeable: ${err.message}`);
-            console.error(err);
-        });
+async function reloadInstructorEditRubric(gradeable_id, itempool_available, itempool_options) {
+    let gradeable;
+    try {
+        gradeable = await ajaxGetGradeableRubric(gradeable_id);
+    }
+    catch (err) {
+        alert(`Could not fetch gradeable rubric: ${err.message}`);
+    }
+    try {
+        const elements = await renderInstructorEditGradeable(gradeable, itempool_available, itempool_options);
+        setRubricDOMElements(elements);
+        await refreshRubricTotalBox();
+        await openCookieComponent();
+    }
+    catch (err) {
+        alert(`Could not render gradeable: ${err.message}`);
+        console.error(err);
+    }
 }
 
 /**
