@@ -3360,16 +3360,13 @@ async function injectGradingComponent(component, graded_component, editable, sho
  * @param {Object} component
  * @param {Object} graded_component
  * @param {boolean} showMarkList Whether to style the header like the mark list is open
- * @return {Promise}
+ * @async
+ * @return {void}
  */
-function injectGradingComponentHeader(component, graded_component, showMarkList) {
-    return renderGradingComponentHeader(getGraderId(), component, graded_component, isGradingDisabled(), canVerifyGraders(), showMarkList, getComponentVersionConflict(graded_component))
-        .then((elements) => {
-            setComponentHeaderContents(component.id, elements);
-        })
-        .then(() => {
-            return refreshTotalScoreBox();
-        });
+async function injectGradingComponentHeader(component, graded_component, showMarkList) {
+    const elements = await renderGradingComponentHeader(getGraderId(), component, graded_component, isGradingDisabled(), canVerifyGraders(), showMarkList, getComponentVersionConflict(graded_component));
+    setComponentHeaderContents(component.id, elements);
+    await refreshTotalScoreBox();
 }
 
 /**
