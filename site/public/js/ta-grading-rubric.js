@@ -2549,29 +2549,21 @@ async function closeAllComponents(save_changes, edit_mode = false) {
  * @param {int} component_id the component's id
  * @param {boolean} saveChanges
  * @param {edit_mode} editing from ta grading page or instructor edit gradeable page
- * @return {Promise}
+ * @async
+ * @return {void}
  */
-function toggleComponent(component_id, saveChanges, edit_mode = false) {
-    let action = Promise.resolve();
+async function toggleComponent(component_id, saveChanges, edit_mode = false) {
     // Component is open, so close it
     if (isComponentOpen(component_id)) {
-        action = action.then(() => {
-            return closeComponent(component_id, saveChanges, edit_mode);
-        });
+        await closeComponent(component_id, saveChanges, edit_mode);
     }
     else {
-        action = action.then(() => {
-            return closeAllComponents(saveChanges, edit_mode)
-                .then(() => {
-                    return (openComponent(component_id));
-                });
-        });
+        await closeAllComponents(saveChanges, edit_mode);
+        await openComponent(component_id);
     }
 
     // Save the open component in the cookie
-    return action.then(() => {
-        updateCookieComponent();
-    });
+    updateCookieComponent();
 }
 
 function open_overall_comment_tab(user) {
