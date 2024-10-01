@@ -2117,7 +2117,7 @@ async function onVerifyAll() {
 /**
  * Callback for the 'edit mode' checkbox changing states
  */
-function onToggleEditMode() {
+async function onToggleEditMode() {
     // Get the open components so we know which one to open once they're all saved
     const open_component_ids = getOpenComponentIds();
     let reopen_component_id = NO_COMPONENT_ID;
@@ -2135,30 +2135,25 @@ function onToggleEditMode() {
     }
 
     setComponentInProgress(reopen_component_id);
-
-    // Build a sequence to save open component
-    let sequence = Promise.resolve();
-    sequence = sequence.then(() => {
-        return saveComponent(reopen_component_id);
-    });
-    // Once components are saved, reload the component in edit mode
-    sequence.catch((err) => {
+    try {
+        await saveComponent(reopen_component_id);
+    }
+    catch (err) {
         console.error(err);
         alert(`Error saving component! ${err.message}`);
-    })
-        .then(() => {
-            updateEditModeEnabled();
-            if (reopen_component_id !== NO_COMPONENT_ID) {
-                return reloadGradingComponent(reopen_component_id, isEditModeEnabled(), true);
-            }
-        })
-        .catch((err) => {
-            console.error(err);
-            alert(`Error reloading component! ${err.message}`);
-        })
-        .then(() => {
-            disableEditModeBox(false);
-        });
+    }
+    try {
+    // Once components are saved, reload the component in edit mode
+        updateEditModeEnabled();
+        if (reopen_component_id !== NO_COMPONENT_ID) {
+            await reloadGradingComponent(reopen_component_id, isEditModeEnabled(), true);
+        }
+    }
+    catch (err) {
+        console.error(err);
+        alert(`Error reloading component! ${err.message}`);
+    }
+    disableEditModeBox(false);
 }
 
 /**
