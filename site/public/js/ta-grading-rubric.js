@@ -2810,49 +2810,38 @@ function scrollToComponent(component_id) {
  * NOTE: don't call this function on its own.  Call 'closeComponent' Instead
  * @param {int} component_id
  * @param {boolean} saveChanges If the changes to the component should be saved or discarded
- * @return {Promise}
+ * @async
+ * @return {void}
  */
-function closeComponentInstructorEdit(component_id, saveChanges) {
-    let sequence = Promise.resolve();
+async function closeComponentInstructorEdit(component_id, saveChanges) {
     const component = getComponentFromDOM(component_id);
     const countUp = getCountDirection(component_id) !== COUNT_DIRECTION_DOWN;
     if (saveChanges) {
-        sequence = sequence
-            .then(() => {
-                // eslint-disable-next-line eqeqeq
-                if (component.max_value == 0 && component.upper_clamp == 0 && component.lower_clamp < 0) {
-                    const mark_title = 'No Penalty Points';
-                    component.marks[0].title = mark_title;
-                    $(`#mark-${component.marks[0].id.toString()}`).find(':input')[1].value = 'No Penalty Points';
-                }
-                // eslint-disable-next-line eqeqeq
-                else if (component.max_value == 0 && component.upper_clamp > 0 && component.lower_clamp == 0) {
-                    const mark_title = 'No Extra Credit Awarded';
-                    component.marks[0].title = mark_title;
-                    $(`#mark-${component.marks[0].id.toString()}`).find(':input')[1].value = 'No Extra Credit Awarded';
-                }
-                else if (countUp) {
-                    const mark_title = 'No Credit';
-                    component.marks[0].title = mark_title;
-                    $(`#mark-${component.marks[0].id.toString()}`).find(':input')[1].value = 'No Credit';
-                }
-                return saveMarkList(component_id);
-            })
-            .then(() => {
-                // Save the component title and comments
-                return ajaxSaveComponent(getGradeableId(), component_id, component.title, component.ta_comment,
-                    component.student_comment, component.page, component.lower_clamp,
-                    component.default, component.max_value, component.upper_clamp, component.is_itempool_linked, component.itempool_option);
-            });
+        // eslint-disable-next-line eqeqeq
+        if (component.max_value == 0 && component.upper_clamp == 0 && component.lower_clamp < 0) {
+            const mark_title = 'No Penalty Points';
+            component.marks[0].title = mark_title;
+            $(`#mark-${component.marks[0].id.toString()}`).find(':input')[1].value = 'No Penalty Points';
+        }
+        // eslint-disable-next-line eqeqeq
+        else if (component.max_value == 0 && component.upper_clamp > 0 && component.lower_clamp == 0) {
+            const mark_title = 'No Extra Credit Awarded';
+            component.marks[0].title = mark_title;
+            $(`#mark-${component.marks[0].id.toString()}`).find(':input')[1].value = 'No Extra Credit Awarded';
+        }
+        else if (countUp) {
+            const mark_title = 'No Credit';
+            component.marks[0].title = mark_title;
+            $(`#mark-${component.marks[0].id.toString()}`).find(':input')[1].value = 'No Credit';
+        }
+        await saveMarkList(component_id);
+        // Save the component title and comments
+        await ajaxSaveComponent(getGradeableId(), component_id, component.title, component.ta_comment,
+            component.student_comment, component.page, component.lower_clamp,
+            component.default, component.max_value, component.upper_clamp, component.is_itempool_linked, component.itempool_option);
     }
-    return sequence
-        .then(() => {
-            return ajaxGetComponentRubric(getGradeableId(), component_id);
-        })
-        .then((component) => {
-            // Render the component with a hidden mark list
-            return injectInstructorEditComponent(component, false);
-        });
+    const component_rubric = await ajaxGetComponentRubric(getGradeableId(), component_id);
+    await injectInstructorEditComponent(component_rubric, false);
 }
 
 /**
