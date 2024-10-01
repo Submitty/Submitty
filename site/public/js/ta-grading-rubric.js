@@ -560,11 +560,14 @@ async function ajaxGetMarkStats(gradeable_id, component_id, mark_id) {
  * @param {string} gradeable_id
  * @param {int} component_id
  * @param {*} order format: { <mark0-id> : <order0>, <mark1-id> : <order1>, ... }
- * @return {Promise} Rejects except when the response returns status 'success'
+ * @async
+ * @throws {Error} Throws except when the response returns status 'success'
+ * @return {Object}
  */
-function ajaxSaveMarkOrder(gradeable_id, component_id, order) {
-    return new Promise((resolve, reject) => {
-        $.getJSON({
+async function ajaxSaveMarkOrder(gradeable_id, component_id, order) {
+    let response;
+    try {
+        response = $.getJSON({
             type: 'POST',
             async: AJAX_USE_ASYNC,
             url: buildCourseUrl(['gradeable', gradeable_id, 'components', 'marks', 'save_order']),
@@ -573,21 +576,19 @@ function ajaxSaveMarkOrder(gradeable_id, component_id, order) {
                 component_id: component_id,
                 order: JSON.stringify(order),
             },
-            success: function (response) {
-                if (response.status !== 'success') {
-                    console.error(`Something went wrong saving the mark order: ${response.message}`);
-                    reject(new Error(response.message));
-                }
-                else {
-                    resolve(response.data);
-                }
-            },
-            error: function (err) {
-                displayAjaxError(err);
-                reject(err);
-            },
         });
-    });
+    }
+    catch (err) {
+        displayAjaxError(err);
+        throw err;
+    }
+    if (response.status !== 'success') {
+        console.error(`Something went wrong saving the mark order: ${response.message}`);
+        throw new Error(response.message);
+    }
+    else {
+        return response.data;
+    }
 }
 
 /**
