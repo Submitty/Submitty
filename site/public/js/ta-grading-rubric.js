@@ -3346,14 +3346,13 @@ async function injectInstructorEditComponentHeader(component, showMarkList) {
  * @param {Object} graded_component
  * @param {boolean} editable Whether the component should appear in edit or grade mode
  * @param {boolean} showMarkList Whether to show the mark list or not
- * @return {Promise}
+ * @async
+ * @return {void}
  */
-function injectGradingComponent(component, graded_component, editable, showMarkList) {
+async function injectGradingComponent(component, graded_component, editable, showMarkList) {
     const student_grader = $('#student-grader').attr('is-student-grader');
-    return renderGradingComponent(getGraderId(), component, graded_component, isGradingDisabled(), canVerifyGraders(), getPointPrecision(), editable, showMarkList, getComponentVersionConflict(graded_component), student_grader, TA_GRADING_PEER, getAllowCustomMarks())
-        .then((elements) => {
-            setComponentContents(component.id, elements);
-        });
+    const elements = await renderGradingComponent(getGraderId(), component, graded_component, isGradingDisabled(), canVerifyGraders(), getPointPrecision(), editable, showMarkList, getComponentVersionConflict(graded_component), student_grader, TA_GRADING_PEER, getAllowCustomMarks());
+    setComponentContents(component.id, elements);
 }
 
 /**
