@@ -2272,17 +2272,14 @@ function onMarkPublishChange(me) {
 /**
  * Verifies a component with the grader and reloads the component
  * @param {int} component_id
- * @returns {Promise}
+ * @async
+ * @returns {void}
  */
-function verifyComponent(component_id) {
+async function verifyComponent(component_id) {
     const gradeable_id = getGradeableId();
-    return ajaxVerifyComponent(gradeable_id, component_id, getAnonId())
-        .then(() => {
-            return reloadGradingComponent(component_id);
-        })
-        .then(() => {
-            updateVerifyAllButton();
-        });
+    await ajaxVerifyComponent(gradeable_id, component_id, getAnonId());
+    await reloadGradingComponent(component_id);
+    updateVerifyAllButton();
 }
 
 /**
