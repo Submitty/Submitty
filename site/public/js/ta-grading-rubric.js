@@ -1963,31 +1963,34 @@ async function onClickComponent(me, edit_mode = false) {
  * Called when the 'cancel' button is pressed on an open component
  * @param me DOM Element of the cancel button
  */
-function onCancelComponent(me) {
+async function onCancelComponent(me) {
     const component_id = getComponentIdFromDOMElement(me);
     const gradeable_id = getGradeableId();
     const anon_id = getAnonId();
-    ajaxGetGradedComponent(gradeable_id, component_id, anon_id).then((component) => {
-        const customMarkNote = $(`#component-${component_id}`).find('.mark-note-custom').val();
-        // If there is any changes made in comment of a component , prompt the TA
-        if ((component && component.comment !== customMarkNote) || (!component && customMarkNote !== '')) {
-            if (confirm('Are you sure you want to discard all changes to the student message?')) {
-                toggleComponent(component_id, false)
-                    .catch((err) => {
-                        console.error(err);
-                        alert(`Error closing component! ${err.message}`);
-                    });
+    const component = await ajaxGetGradedComponent(gradeable_id, component_id, anon_id);
+    const customMarkNote = $(`#component-${component_id}`).find('.mark-note-custom').val();
+    // If there is any changes made in comment of a component , prompt the TA
+    if ((component && component.comment !== customMarkNote) || (!component && customMarkNote !== '')) {
+        if (confirm('Are you sure you want to discard all changes to the student message?')) {
+            try {
+                await toggleComponent(component_id, false);
+            }
+            catch (err) {
+                console.error(err);
+                alert(`Error closing component! ${err.message}`);
             }
         }
-        // There is no change in comment, i.e it is same as the saved comment (before)
-        else {
-            toggleComponent(component_id, false)
-                .catch((err) => {
-                    console.error(err);
-                    alert(`Error closing component! ${err.message}`);
-                });
+    }
+    // There is no change in comment, i.e it is same as the saved comment (before)
+    else {
+        try {
+            await toggleComponent(component_id, false);
         }
-    });
+        catch (err) {
+            console.error(err);
+            alert(`Error closing component! ${err.message}`);
+        }
+    }
 }
 
 function onCancelEditRubricComponent(me) {
