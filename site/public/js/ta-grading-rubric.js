@@ -1927,19 +1927,19 @@ async function onMarkPointsChange(me) {
  * Called when the mark stats button is pressed
  * @param me DOM Element of the mark stats button
  */
-function onGetMarkStats(me) {
+async function onGetMarkStats(me) {
     const component_id = getComponentIdFromDOMElement(me);
     const mark_id = getMarkIdFromDOMElement(me);
-    ajaxGetMarkStats(getGradeableId(), component_id, mark_id)
-        .then((stats) => {
-            const component_title = getComponentFromDOM(component_id).title;
-            const mark_title = getMarkFromDOM(mark_id).title;
+    try {
+        const stats = await ajaxGetMarkStats(getGradeableId(), component_id, mark_id);
+        const component_title = getComponentFromDOM(component_id).title;
+        const mark_title = getMarkFromDOM(mark_id).title;
 
-            openMarkStatsPopup(component_title, mark_title, stats);
-        })
-        .catch((err) => {
-            alert(`Failed to get stats for mark: ${err.message}`);
-        });
+        openMarkStatsPopup(component_title, mark_title, stats);
+    }
+    catch (err) {
+        alert(`Failed to get stats for mark: ${err.message}`);
+    }
 }
 
 /**
